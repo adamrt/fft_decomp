@@ -15,8 +15,7 @@
 #include "psx/types.h"
 
 /* selected and comparison units */
-/* The unit a status panel shows (g_unit_panel_selected_unit; DEBUGCHR's and ATTACK's
- * g_unit_panel_selected_unit_data), saved and restored whole by unit_panel_copy_billboard_out and
+/* The unit a status panel shows, saved and restored whole by unit_panel_copy_billboard_out and
  * unit_panel_copy_billboard_in. unit_panel_load_selected fills job_id..zodiac for the unit named by battle_id; the
  * overlays' status panels keep a second record for the comparison unit (g_unit_panel_comparison_unit_data).
  * Provisional. */
@@ -65,7 +64,8 @@ typedef char unit_panel_summary_size_must_be_34[(sizeof(unit_panel_summary_t) ==
 extern s32 g_unit_panel_hide_numeric_values; /* non-zero: draw digits as blanks (0x48, 0x10) */
 
 /* The selected panel unit can differ from the unit whose turn is active. Its record, status summary and
- * equipment and ability rows come first, then the comparison unit's. */
+ * equipment and ability rows come first, then the comparison unit's. BATTLE, WORLD,
+ * ATTACK, DEBUGCHR and REQUIRE define their own records. */
 extern unit_panel_unit_t g_unit_panel_selected_unit;
 extern unit_panel_summary_t g_unit_panel_selected_unit_status;
 extern unit_panel_record_t g_unit_panel_selected_unit_fields;
@@ -79,11 +79,8 @@ extern unit_panel_summary_t g_unit_panel_comparison_unit_status;
 /* Target preview copies only generic_monster and the reaction ability here. */
 extern unit_panel_record_t g_unit_panel_comparison_unit_fields;
 
-/* The selected-unit panel record; the comparison panel's record follows 0x10
- * bytes later. */
-extern unit_panel_unit_t g_unit_panel_selected_unit_data;
-
-/* The selected unit's names, as unit_panel_load_selected copies them for the panels. */
+/* The selected unit's names, as unit_panel_load_selected copies them for the panels.
+ * BATTLE, WORLD, DEBUGCHR and REQUIRE define all four; ATTACK defines the skillset windows. */
 extern u8 g_unit_panel_billboard_unit_name[];               /* name text window */
 extern u8 g_unit_panel_billboard_job_name[];                /* job name text window */
 extern u8 g_unit_panel_billboard_skillset_name[];           /* primary skillset name text window */
@@ -246,7 +243,6 @@ extern u8 g_unit_panel_text_image_a[];
 extern u8 g_unit_panel_text_image_b[];
 extern RECT g_unit_panel_text_upload_rect_a;
 extern RECT g_unit_panel_text_upload_rect_b;
-extern unit_panel_summary_t g_unit_panel_selected_billboard;
 extern menu_status_panel_packet_t g_unit_panel_selected_packets[2];
 extern menu_status_panel_editor_packet_t g_unit_panel_selected_editor_packets[2];
 extern menu_number_entry_t g_unit_panel_selected_numeric_entries[];
@@ -254,7 +250,6 @@ extern u8 g_unit_panel_selected_name_image[];
 extern u8 g_unit_panel_selected_number_image[];
 extern u8 g_unit_panel_selected_small_number_image[];
 extern RECT g_unit_panel_selected_portrait_rect;
-extern unit_panel_summary_t g_unit_panel_comparison_billboard;
 extern menu_status_panel_packet_t g_unit_panel_comparison_packets[2];
 extern menu_status_panel_editor_packet_t g_unit_panel_comparison_editor_packets[2];
 extern menu_number_entry_t g_unit_panel_comparison_numeric_entries[];
@@ -303,8 +298,6 @@ extern RECT g_unit_panel_editor_numeric_entries_f;
 extern menu_unit_stat_number_images_t g_unit_panel_editor_numeric_text_a;
 extern menu_unit_stat_number_images_t g_unit_panel_editor_numeric_text_b;
 extern struct unit_stats g_unit_panel_editor_party_unit_stats;
-extern u8 g_unit_panel_editor_primary_skillset_name[];
-extern u8 g_unit_panel_editor_secondary_skillset_name[];
 
 /* Five name ids and five ability/skillset ids of the unit loaded into the
  * editor (g_unit_panel_selected_unit_fields + 0x24). The target walks them from this

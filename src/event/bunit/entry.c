@@ -394,8 +394,8 @@ static void unit_list_update_browser(void) {
             g_unit_panel_comparison_display_flags = UNIT_LIST_REQUEST_FLAGS;
             UNIT_LIST_REQUEST_FLAGS = 0;
             if (g_unit_list_status_banner_at_bottom_latch != g_unit_list_status_banner_at_bottom) {
-                bcopy(g_unit_list_pointers[g_unit_list_comparison_index], &g_unit_panel_comparison_billboard,
-                    sizeof(g_unit_panel_comparison_billboard));
+                bcopy(g_unit_list_pointers[g_unit_list_comparison_index], &g_unit_panel_comparison_unit_status,
+                    sizeof(g_unit_panel_comparison_unit_status));
                 bcopy(&g_unit_list_pointers[g_unit_list_comparison_index]->name_index,
                     &g_unit_panel_panel_comparison_unit_data, sizeof(g_unit_panel_panel_comparison_unit_data));
                 unit_panel_toggle_comparison_thread(1);
@@ -476,7 +476,7 @@ static void unit_list_copy_selected(void) {
 
     g_unit_list_comparison_index = g_unit_selected_index;
     comparison = g_unit_list_pointers[g_unit_list_comparison_index];
-    bcopy(comparison, &g_unit_panel_selected_billboard, sizeof(g_unit_panel_selected_billboard));
+    bcopy(comparison, &g_unit_panel_selected_unit_status, sizeof(g_unit_panel_selected_unit_status));
     bcopy(&g_unit_list_pointers[g_unit_selected_index]->name_index, &g_unit_panel_panel_selected_unit_data,
         sizeof(g_unit_panel_panel_selected_unit_data));
     bcopy(&g_unit_list_pointers[g_unit_selected_index]->move, &g_unit_panel_selected_unit_fields,

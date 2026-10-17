@@ -383,7 +383,7 @@ void deploy_build_strings(void) {
                 APPEND_TEXT_ID(g_unit_panel_editor_item_and_ability_ids[j + 5], HELP_TEXT_ID_ABILITY_BASE);
             }
         }
-        APPEND_TEXT(g_unit_panel_selected_unit_data.job_id + HELP_TEXT_ID_JOB_BASE);
+        APPEND_TEXT(g_unit_panel_selected_unit.job_id + HELP_TEXT_ID_JOB_BASE);
     }
     g_deploy_unit_text_section = g_scenario_table;
     g_deploy_help_text_section = g_scenario_event_condition_blocks;

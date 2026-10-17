@@ -290,7 +290,16 @@ void script_noop_9(void);
 void script_noop_10(void);
 s32 script_return_zero_1(void);
 
-/* BATTLE event state */
+/* event requests */
+/* BATTLE and WORLD each define these input and request records. WORLD stores the
+ * map/object requests but has no pending-request consumer. */
+extern u32 g_event_saved_input;      /* event input held while a script runs */
+extern u16 g_event_map_reload_state; /* 1 starts, 2 polls, >=3 is reset by the outer update */
+extern u16 g_event_map_append_state;
+extern u16 g_event_3d_object_use_request;
+extern u16 g_event_field_object_use_request;
+
+/* battle event state */
 typedef struct script_weather_environment {
     u8 environment_id;
     u8 _unused_01;
@@ -300,7 +309,6 @@ typedef char script_weather_environment_size_must_be_2[(sizeof(script_weather_en
 extern s32 g_event_frame_counter; /* counts the frames the event interpreter runs */
 extern u16 g_event_scenario_music_1_id;
 extern u16 g_event_scenario_music_2_id;
-extern u32 g_event_saved_input; /* the event input held while a script runs */
 extern u16 g_event_effect_target_runtime_id;
 extern script_weather_environment_t g_event_weather_commands[];
 
@@ -309,10 +317,8 @@ extern script_weather_environment_t g_event_weather_commands[];
  * and battle_map_texture_start_animation, and the matching wait instructions poll until
  * the object is done. Provisional: the operands' value domains. The consumer reads the u16
  * requests and operands with lhu; every other access is a store. */
-extern u16 g_event_3d_object_use_request;
 extern u16 g_event_3d_object_id;
 extern u16 g_event_3d_object_state;
-extern u16 g_event_field_object_use_request;
 extern u16 g_event_map_command_83_arg1; /* the field object's texture animation id */
 extern u16 g_event_map_command_83_arg2;
 
@@ -321,7 +327,7 @@ extern u16 g_event_map_command_83_arg2;
 extern u16 g_event_music_switch_fade;   /* the consumer multiplies it by 4 */
 extern u16 g_event_music_switch_volume; /* scaled 0..96 to 0..127 */
 
-/* WORLD event state */
+/* world event state */
 /* Operand pairs that one WORLD script_execute_event opcode stores together;
  * each second 16-bit value sits off a 32-bit alignment boundary in WORLD bss, so each pair is
  * one object. */
@@ -339,13 +345,10 @@ extern s16 g_script_effect_target_runtime_id;
 extern script_command_args_t g_script_map_command_80_args;
 extern script_command_args_t g_script_map_command_83_args;
 extern script_music_switch_t g_script_music_switch;
-extern s16 g_script_field_object_use_request;
-extern s16 g_script_3d_object_use_request;
 extern u32 g_script_current_input;
 extern u32 g_script_previous_input;
 extern u32 g_script_initial_repeat_counter;
 extern u32 g_script_repeat_counter;
 extern u32 g_script_secondary_repeat_counter;
-extern s32 g_script_saved_event_input;
 
 #endif

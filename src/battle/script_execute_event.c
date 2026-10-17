@@ -559,15 +559,15 @@ restart_script:
             thread_wait_frames(2);
             battle_map_wait_for_refresh();
         } else if (opcode == EVENT_OPCODE_RELOAD_MAP_STATE) {
-            g_battle_map_reload_state = 1;
+            g_event_map_reload_state = 1;
             do {
                 thread_yield();
-            } while (g_battle_map_reload_state != 0);
+            } while (g_event_map_reload_state != 0);
         } else if (opcode == EVENT_OPCODE_APPEND_MAP_STATE) {
-            g_battle_map_append_state = 1;
+            g_event_map_append_state = 1;
             do {
                 thread_yield();
-            } while (g_battle_map_append_state != 0);
+            } while (g_event_map_append_state != 0);
         } else if (opcode == EVENT_OPCODE_PAUSE) {
             script_opcode_16_pause();
         } else if (opcode == EVENT_OPCODE_RESUME_WAITING_DIALOG) {

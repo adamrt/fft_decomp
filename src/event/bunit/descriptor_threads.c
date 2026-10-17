@@ -127,7 +127,7 @@ void unit_list_update_help_cursor(s16 mode) {
             node_index = g_unit_list_help_nodes[node_index].destination[3];
         }
         /* Off the player's team, node 6 is skipped: 2 and 7 lead to each other. */
-        if (g_unit_panel_selected_billboard.team_kind != 0) {
+        if (g_unit_panel_selected_unit_status.team_kind != 0) {
             if (g_unit_list_help_node_index == 2 && node_index == 6) {
                 node_index = 7;
             }

@@ -1184,10 +1184,10 @@ data:
   - {addr: 0x801532bc, name: g_screen_sound_current_music_track_index}
   - {addr: 0x801532be, name: g_script_attack_entry_mode}
   - {addr: 0x801532c0, name: g_camera_position_locked}
-  - {addr: 0x801532c2, name: g_world_map_reload_state}
-  - {addr: 0x801532c4, name: g_world_map_append_state}
-  - {addr: 0x801532c6, name: g_script_3d_object_use_request}
-  - {addr: 0x801532c8, name: g_script_field_object_use_request}
+  - {addr: 0x801532c2, name: g_event_map_reload_state}
+  - {addr: 0x801532c4, name: g_event_map_append_state}
+  - {addr: 0x801532c6, name: g_event_3d_object_use_request}
+  - {addr: 0x801532c8, name: g_event_field_object_use_request}
   - {addr: 0x801532cc, name: g_script_unit_slots}
   - {addr: 0x801532d4, name: g_camera_shake_z_offset}
   - {addr: 0x801532d6, name: g_gfx_draw_primitives_immediately}
@@ -1943,7 +1943,7 @@ data:
   - {addr: 0x8019a210, name: g_script_event_repeat_counter}
   - {addr: 0x8019a214, name: g_script_event_secondary_repeat_counter}
   - {addr: 0x8019a218, name: g_script_unfiltered_controller_input}
-  - {addr: 0x8019a21c, name: g_script_saved_event_input}
+  - {addr: 0x8019a21c, name: g_event_saved_input}
   - {addr: 0x8019a220, name: g_event_map_jump_in_request}
   - {addr: 0x8019a224, name: g_script_threads_idle}
   - {addr: 0x8019a228, name: g_overlay_companion_overlay_primitives}

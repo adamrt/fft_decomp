@@ -49,15 +49,15 @@ static void debug_unit_editor_apply_values(s32 unit_id) {
     unit->hp = g_unit_editor_values[0];
     unit->mp = g_unit_editor_values[3];
     unit->ct = g_unit_editor_values[6];
-    unit->level = g_unit_panel_selected_billboard.level;
-    unit->experience = g_unit_panel_selected_billboard.experience;
+    unit->level = g_unit_panel_selected_unit_status.level;
+    unit->experience = g_unit_panel_selected_unit_status.experience;
     /* 16-bit objects (the loader stores sh); this function reads only the
      * low byte, and the lvalue form emits the target's bare lbu. */
-    unit->brave = g_unit_panel_selected_unit_data.brave;
-    unit->faith = g_unit_panel_selected_unit_data.faith;
+    unit->brave = g_unit_panel_selected_unit.brave;
+    unit->faith = g_unit_panel_selected_unit.faith;
     /* Named bitfield assignment narrows the signed 16-bit zodiac load
      * and reorders these stores. */
-    zodiac = g_unit_panel_selected_unit_data.zodiac << 12;
+    zodiac = g_unit_panel_selected_unit.zodiac << 12;
     unit_flags = *(u16*)&unit->birthday & 0x0fff;
     *(u16*)&unit->birthday = unit_flags | zodiac;
     unit->move = g_unit_editor_move;
@@ -121,9 +121,9 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         comparison_id = unit_ids[0];
         type_id = unit_ids[0];
         unit_ids[1] = partner_id & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
-        g_unit_panel_selected_unit_data.battle_id = selected_id;
-        g_unit_panel_selected_unit_data.name_id = comparison_id;
-        g_unit_panel_selected_billboard.unit_index = type_id;
+        g_unit_panel_selected_unit.battle_id = selected_id;
+        g_unit_panel_selected_unit.name_id = comparison_id;
+        g_unit_panel_selected_unit_status.unit_index = type_id;
     }
     unit_panel_load_selected();
     g_unit_editor_selected_unit_slot = 0;
@@ -168,7 +168,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     animation = g_unit_panel_panel_status_animation;
     animation_second = animation + 1;
     animation_third = animation + 2;
-    selected_unit = &g_unit_panel_selected_unit_data.battle_id;
+    selected_unit = &g_unit_panel_selected_unit.battle_id;
     g_menu_modal_open = 0;
 
     for (;; frame++) {
@@ -219,7 +219,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             }
 
             if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
-                && (unit_has_any_current_status(g_unit_panel_selected_unit_data.battle_id) != 0
+                && (unit_has_any_current_status(g_unit_panel_selected_unit.battle_id) != 0
                     || g_unit_panel_selected_unit_fields.state.generic_monster == 0)) {
                 g_unit_editor_status_display_thread_params.style = one;
                 g_unit_panel_numbers_thread_params.style = one;
@@ -270,11 +270,11 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             *selected_unit = *chosen_unit;
             unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_id));
             unit_data->name_id = *chosen_unit;
-            unit_type_ptr = &g_unit_panel_selected_billboard.unit_index;
+            unit_type_ptr = &g_unit_panel_selected_unit_status.unit_index;
             *unit_type_ptr = *chosen_unit;
             unit_panel_load_selected();
             unit_panel_copy_billboard_in(
-                &g_unit_panel_selected_billboard, unit_data, &g_unit_panel_selected_unit_fields);
+                &g_unit_panel_selected_unit_status, unit_data, &g_unit_panel_selected_unit_fields);
 
             /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_unit_editor_status_display_thread_params.redraw_request = one;
@@ -297,11 +297,11 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             *selected_unit = *chosen_unit;
             unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_id));
             unit_data->name_id = *chosen_unit;
-            unit_type_ptr = &g_unit_panel_selected_billboard.unit_index;
+            unit_type_ptr = &g_unit_panel_selected_unit_status.unit_index;
             *unit_type_ptr = *chosen_unit;
             unit_panel_load_selected();
             unit_panel_copy_billboard_in(
-                &g_unit_panel_selected_billboard, unit_data, &g_unit_panel_selected_unit_fields);
+                &g_unit_panel_selected_unit_status, unit_data, &g_unit_panel_selected_unit_fields);
 
             /* 2 runs the portrait wipe in the opposite direction from R1's. */
             g_unit_editor_status_display_thread_params.redraw_request = 2;
@@ -316,8 +316,8 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         s16* comparison_ptr;
         s16* unit_type_id_ptr;
 
-        selected_unit_ptr = &g_unit_panel_selected_unit_data.battle_id;
-        unit_type_id_ptr = &g_unit_panel_selected_billboard.unit_index;
+        selected_unit_ptr = &g_unit_panel_selected_unit.battle_id;
+        unit_type_id_ptr = &g_unit_panel_selected_unit_status.unit_index;
         selected_unit_ptr[0] = g_unit_editor_unit_ids[0];
         /* A register address keeps cse from folding this store to a direct
          * global address. */
@@ -328,7 +328,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         *unit_type_id_ptr = g_unit_editor_unit_ids[0];
         unit_panel_load_selected();
         unit_panel_copy_billboard_in(
-            &g_unit_panel_selected_billboard, &g_unit_panel_selected_unit_data, &g_unit_panel_selected_unit_fields);
+            &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
     }
 }
 
@@ -415,9 +415,9 @@ void debugchr_editor_entrypoint(void) {
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         if (g_unit_editor_unit_ids[i] != 0) {
-            g_unit_panel_selected_unit_data.battle_id = i;
-            g_unit_panel_selected_unit_data.name_id = i;
-            g_unit_panel_selected_billboard.unit_index = i;
+            g_unit_panel_selected_unit.battle_id = i;
+            g_unit_panel_selected_unit.name_id = i;
+            g_unit_panel_selected_unit_status.unit_index = i;
             unit_panel_load_selected();
             g_unit_editor_selected_unit_slot = i;
             break;
@@ -452,7 +452,7 @@ void debugchr_editor_entrypoint(void) {
 loop_outer:
     i = 0;
     /* name_id is five 16-bit values before battle_id; record access changes the store displacements. */
-    selected_battle_id = &g_unit_panel_selected_unit_data.battle_id;
+    selected_battle_id = &g_unit_panel_selected_unit.battle_id;
     for (;;) {
         mark = 0xE;
         /* Removing the tied use changes the marker and menu-pointer allocation. */
@@ -488,7 +488,7 @@ loop_outer:
             unit_index = g_unit_editor_selected_unit_slot;
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
-            g_unit_panel_selected_billboard.unit_index = unit_index;
+            g_unit_panel_selected_unit_status.unit_index = unit_index;
             unit_panel_load_selected();
             if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_special, 0xA8);
@@ -517,7 +517,7 @@ loop_outer:
             unit_index = g_unit_editor_selected_unit_slot;
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
-            g_unit_panel_selected_billboard.unit_index = unit_index;
+            g_unit_panel_selected_unit_status.unit_index = unit_index;
             unit_panel_load_selected();
             if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_special, 0xA8);

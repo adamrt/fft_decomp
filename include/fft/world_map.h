@@ -594,8 +594,6 @@ extern s16 g_world_map_brave_story_request_state; /* world_map_request_state_e *
 extern s16 g_world_map_tutorial_request_state;    /* world_map_request_state_e */
 extern s16 g_world_map_debug_variable_list_request_state;
 extern s16 g_world_map_fixed_number_panel_request_state;
-extern u16 g_world_map_append_state;
-extern u16 g_world_map_reload_state;
 
 void world_map_confirm_destination(void);
 void world_map_menu_text_window_thread(void);

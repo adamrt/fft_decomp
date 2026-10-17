@@ -1268,7 +1268,7 @@ void script_filter_controller_input(u32* input) {
 
 /* Run one event frame around the thread scheduler, returning a script_event_frame_result_e.
  * BATTLE clears queued sound requests; WORLD also polls its tutorial slot and snapshots event input before yielding.
- * Each program keeps its own fade, input, map-request and frame-counter backing records. */
+ * Same-role state binds to each program's own records; their frame counters have distinct names. */
 s32 script_run_event_frame(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
@@ -1344,30 +1344,16 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         g_script_unfiltered_controller_input = g_script_event_input;
         script_apply_input_overrides(&g_script_event_input);
-#ifdef FFT_BATTLE
         g_event_saved_input = g_script_event_input;
-#else
-        g_script_saved_event_input = g_script_event_input;
-#endif
         script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
     }
-#ifdef FFT_BATTLE
-    if (g_battle_map_reload_state >= 3) {
-        g_battle_map_reload_state = 0;
+    if (g_event_map_reload_state >= 3) {
+        g_event_map_reload_state = 0;
     }
-    if (g_battle_map_append_state >= 3) {
-        g_battle_map_append_state = 0;
+    if (g_event_map_append_state >= 3) {
+        g_event_map_append_state = 0;
         g_battle_map_destruction_wait_state = 1;
     }
-#else
-    if (g_world_map_reload_state >= 3) {
-        g_world_map_reload_state = 0;
-    }
-    if (g_world_map_append_state >= 3) {
-        g_world_map_append_state = 0;
-        g_battle_map_destruction_wait_state = 1;
-    }
-#endif
 
     /* Clear last frame's requests; script commands raise them again while the threads run. */
     g_event_pending_map_jump_out_id = -1;
@@ -1389,13 +1375,8 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     g_sound_music_unload_slot_request = -1;
 #endif
     g_event_map_jump_in_request = 0;
-#ifdef FFT_BATTLE
     g_event_3d_object_use_request = 0;
     g_event_field_object_use_request = 0;
-#else
-    g_script_3d_object_use_request = 0;
-    g_script_field_object_use_request = 0;
-#endif
 
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
         ordering_table = jobstts_entrypoint(g_unit_panel_selected_unit.battle_id, 0);
@@ -1574,24 +1555,24 @@ static void script_process_pending_requests(void) {
     }
     /* Map reload and append step through states: 1 starts the load, 2 polls it, and 3 (done)
      * is cleared at the start of the next frame. */
-    reload_state = g_battle_map_reload_state;
+    reload_state = g_event_map_reload_state;
     if (reload_state == 1) {
         if (battle_map_load_start() == 0) {
-            g_battle_map_reload_state = g_battle_map_reload_state + 1;
+            g_event_map_reload_state = g_event_map_reload_state + 1;
         }
     } else if (reload_state == 2) {
         if (battle_map_load_poll() == 0) {
-            g_battle_map_reload_state = g_battle_map_reload_state + 1;
+            g_event_map_reload_state = g_event_map_reload_state + 1;
         }
     }
-    append_state = g_battle_map_append_state;
+    append_state = g_event_map_append_state;
     if ((append_state == 1) && (g_battle_map_destruction_wait_state == 0)) {
         battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), BATTLE_MAP_LOAD_COMMAND_START_HELD);
-        g_battle_map_append_state = g_battle_map_append_state + 1;
+        g_event_map_append_state = g_event_map_append_state + 1;
     } else if ((append_state == 2)
         && (battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), BATTLE_MAP_LOAD_COMMAND_POLL_HELD)
             == BATTLE_MAP_LOAD_RESULT_HELD)) {
-        g_battle_map_append_state = g_battle_map_append_state + 1;
+        g_event_map_append_state = g_event_map_append_state + 1;
     }
     /* State 2 (set once a script or effect reports the map destroyed) releases the held map data;
      * 3 polls the load until it ends. */

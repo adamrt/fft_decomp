@@ -109,14 +109,14 @@ data:
   - {addr: 0x801ca05c, name: g_menu_indicator_brightness}
   - {addr: 0x801ca064, name: g_menu_indicator_fade_work}
   - {addr: 0x801ca06c, name: g_menu_indicator_state}
-  - {addr: 0x801ca080, name: g_unit_panel_selected_billboard}
-  - {addr: 0x801ca0a4, name: g_unit_panel_comparison_billboard}
-  - {addr: 0x801ca0c8, name: g_unit_panel_selected_unit_data}
+  - {addr: 0x801ca080, name: g_unit_panel_selected_unit_status}
+  - {addr: 0x801ca0a4, name: g_unit_panel_comparison_unit_status}
+  - {addr: 0x801ca0c8, name: g_unit_panel_selected_unit}
   - {addr: 0x801ca0d8, name: g_unit_panel_comparison_unit_data}
   - {addr: 0x801ca0e8, name: g_unit_panel_selected_unit_fields}
   - {addr: 0x801ca10c, name: g_unit_panel_editor_item_and_ability_ids}
-  - {addr: 0x801ca168, name: g_unit_panel_editor_primary_skillset_name}
-  - {addr: 0x801ca17c, name: g_unit_panel_editor_secondary_skillset_name}
+  - {addr: 0x801ca168, name: g_unit_panel_billboard_skillset_name}
+  - {addr: 0x801ca17c, name: g_unit_panel_billboard_secondary_skillset_name}
   - {addr: 0x801ca1b8, name: g_unit_panel_editor_numeric_geometry}
   - {addr: 0x801ca1be, name: g_unit_panel_slide_up_y}
   - {addr: 0x801ca1c0, name: g_unit_panel_item_icon_texture}
@@ -517,8 +517,8 @@ data:
   - {addr: 0x801ce8d8, name: g_menu_indicator_brightness}
   - {addr: 0x801ce8e0, name: g_menu_indicator_fade_work}
   - {addr: 0x801ce8e8, name: g_menu_indicator_state}
-  - {addr: 0x801ce8fc, name: g_unit_panel_selected_billboard}
-  - {addr: 0x801ce920, name: g_unit_panel_comparison_billboard}
+  - {addr: 0x801ce8fc, name: g_unit_panel_selected_unit_status}
+  - {addr: 0x801ce920, name: g_unit_panel_comparison_unit_status}
   - {addr: 0x801ce944, name: g_unit_panel_panel_selected_unit_data}
   - {addr: 0x801ce954, name: g_unit_panel_panel_comparison_unit_data}
   - {addr: 0x801ce964, name: g_unit_panel_selected_unit_fields}
@@ -1211,22 +1211,22 @@ data:
   - {addr: 0x801c52b8, name: g_menu_indicator_brightness}
   - {addr: 0x801c52c0, name: g_menu_indicator_fade_work}
   - {addr: 0x801c52c8, name: g_menu_indicator_state}
-  - {addr: 0x801c52dc, name: g_unit_panel_selected_billboard}
+  - {addr: 0x801c52dc, name: g_unit_panel_selected_unit_status}
   - {addr: 0x801c52e8, name: g_unit_editor_values}
   - {addr: 0x801c52ec, name: g_unit_editor_hp_max}
   - {addr: 0x801c52f2, name: g_unit_editor_mp_max}
   - {addr: 0x801c52f8, name: g_unit_editor_ct_max}
-  - {addr: 0x801c5300, name: g_unit_panel_comparison_billboard}
-  - {addr: 0x801c5324, name: g_unit_panel_selected_unit_data}
+  - {addr: 0x801c5300, name: g_unit_panel_comparison_unit_status}
+  - {addr: 0x801c5324, name: g_unit_panel_selected_unit}
   - {addr: 0x801c5334, name: g_unit_panel_comparison_unit_data}
   - {addr: 0x801c5344, name: g_unit_editor_move}
   - {addr: 0x801c5344, name: g_unit_panel_selected_unit_fields}
   - {addr: 0x801c5346, name: g_unit_editor_speed}
   - {addr: 0x801c5348, name: g_unit_editor_jump}
-  - {addr: 0x801c53c4, name: g_unit_panel_editor_primary_skillset_name}
-  - {addr: 0x801c53d8, name: g_unit_panel_editor_secondary_skillset_name}
-  - {addr: 0x801c53ec, name: g_unit_editor_unit_name}
-  - {addr: 0x801c5400, name: g_unit_editor_job_name}
+  - {addr: 0x801c53c4, name: g_unit_panel_billboard_skillset_name}
+  - {addr: 0x801c53d8, name: g_unit_panel_billboard_secondary_skillset_name}
+  - {addr: 0x801c53ec, name: g_unit_panel_billboard_unit_name}
+  - {addr: 0x801c5400, name: g_unit_panel_billboard_job_name}
   - {addr: 0x801c5414, name: g_unit_panel_editor_numeric_geometry}
   - {addr: 0x801c5414, name: g_unit_panel_panel_status_texture}
   - {addr: 0x801c541a, name: g_unit_panel_slide_up_y}
@@ -1562,7 +1562,7 @@ data:
   - {addr: 0x801ce40c, name: g_equipment_indicator_state}
   - {addr: 0x801ce414, name: g_equipment_item_numeric_thread_enabled}
   - {addr: 0x801ce424, name: g_unit_panel_selected_unit_stat_summary}
-  - {addr: 0x801ce448, name: g_unit_panel_comparison_billboard}
+  - {addr: 0x801ce448, name: g_unit_panel_comparison_unit_status}
   - {addr: 0x801ce46c, name: g_equipment_selected_unit_data}
   - {addr: 0x801ce47c, name: g_equipment_comparison_unit_data}
   - {addr: 0x801ce48c, name: g_unit_panel_selected_unit_fields}

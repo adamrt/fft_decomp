@@ -11,8 +11,6 @@
 
 extern s32 g_debug_unit_editor_active;
 extern u8 g_unit_editor_unit_ids[];
-extern u8 g_unit_editor_unit_name[];
-extern u8 g_unit_editor_job_name[];
 extern help_navigation_record_t g_unit_editor_fields[];
 extern s32 g_unit_editor_field_edit_active;
 extern u8 g_unit_editor_move;
@@ -25,7 +23,7 @@ extern ranges32_t g_unit_editor_template[21];
 extern u8 g_unit_editor_template_normal[];
 extern u8 g_unit_editor_template_special[];
 
-/* Views of g_unit_panel_selected_billboard.gauges[i].value (values[3 * i])
+/* Views of g_unit_panel_selected_unit_status.gauges[i].value (values[3 * i])
  * and gauges[i].max (the *_max 16-bit values): debug_unit_editor_apply_values
  * reaches the values from their own base register and the limits by absolute
  * address, which the member spelling does not reproduce. */

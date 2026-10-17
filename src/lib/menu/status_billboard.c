@@ -9,7 +9,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_editor.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
@@ -91,7 +90,6 @@ static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* 
 }
 
 /* Fill the comparison and selected-unit billboards, stats, equipment and ability rows.
- * DEBUGCHR uses its local billboard and name buffers; the other programs use the event-library records.
  * Empty secondary skillsets mark byte 1 of the name buffer before the names are copied. */
 void unit_panel_load_selected(void) {
     unit_stats_t* unit = unit_get_stats(g_unit_panel_comparison_unit_data.battle_id);
@@ -106,41 +104,19 @@ void unit_panel_load_selected(void) {
     s16 list_value;
 
     if (unit != 0) {
-#ifdef FFT_EVENT_DEBUGCHR
-        unit_panel_fill_billboard(unit, &g_unit_panel_comparison_billboard);
-#else
         unit_panel_fill_billboard(unit, &g_unit_panel_comparison_unit_status);
-#endif
     }
 
-#ifdef FFT_EVENT_DEBUGCHR
-    unit = unit_get_stats(g_unit_panel_selected_unit_data.battle_id);
-#else
     unit = unit_get_stats(g_unit_panel_selected_unit.battle_id);
-#endif
     if (unit == 0)
         return;
-#ifdef FFT_EVENT_DEBUGCHR
-    unit_panel_fill_billboard(unit, &g_unit_panel_selected_billboard);
-#else
     unit_panel_fill_billboard(unit, &g_unit_panel_selected_unit_status);
-#endif
 
-#ifdef FFT_EVENT_DEBUGCHR
-    g_unit_panel_selected_unit_data.job_id = unit->job_id;
-    g_unit_panel_selected_unit_data.brave = unit->brave;
-    g_unit_panel_selected_unit_data.faith = unit->faith;
-#else
     g_unit_panel_selected_unit.job_id = unit->job_id;
     g_unit_panel_selected_unit.brave = unit->brave;
     g_unit_panel_selected_unit.faith = unit->faith;
-#endif
     /* The zodiac sign is the top nibble of the 16-bit birthday value. */
-#ifdef FFT_EVENT_DEBUGCHR
-    g_unit_panel_selected_unit_data.zodiac = unit->birthday.zodiac;
-#else
     g_unit_panel_selected_unit.zodiac = unit->birthday.zodiac;
-#endif
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -216,19 +192,11 @@ void unit_panel_load_selected(void) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-#ifdef FFT_EVENT_DEBUGCHR
-            g_unit_panel_editor_primary_skillset_name[0] = 0xfe;
-#else
             g_unit_panel_billboard_skillset_name[0] = 0xfe;
-#endif
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-#ifdef FFT_EVENT_DEBUGCHR
-            g_unit_panel_editor_secondary_skillset_name[1] = 0xfe;
-#else
             g_unit_panel_billboard_secondary_skillset_name[1] = 0xfe;
-#endif
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -262,28 +230,14 @@ void unit_panel_load_selected(void) {
         }
     }
 
-#ifdef FFT_EVENT_DEBUGCHR
-    text_fill_field_with_terminators(g_unit_editor_unit_name);
-    text_fill_field_with_terminators(g_unit_editor_job_name);
-    text_fill_field_with_terminators(g_unit_panel_editor_primary_skillset_name);
-    text_fill_field_with_terminators(g_unit_panel_editor_secondary_skillset_name);
-#else
     text_fill_field_with_terminators(g_unit_panel_billboard_unit_name);
     text_fill_field_with_terminators(g_unit_panel_billboard_job_name);
     text_fill_field_with_terminators(g_unit_panel_billboard_skillset_name);
     text_fill_field_with_terminators(g_unit_panel_billboard_secondary_skillset_name);
-#endif
-    /* The editor uses 16-byte windows at each text destination, including
+    /* Each panel uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
-#ifdef FFT_EVENT_DEBUGCHR
-    mem_copy_bytes_nonempty(g_unit_editor_unit_name, unit->name, 0x10);
-    mem_copy_bytes_nonempty(g_unit_editor_job_name, unit->job_name, 0x10);
-    mem_copy_bytes_nonempty(g_unit_panel_editor_primary_skillset_name, unit->primary_skillset_name, 0x10);
-    mem_copy_bytes_nonempty(g_unit_panel_editor_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
-#else
     mem_copy_bytes_nonempty(g_unit_panel_billboard_unit_name, unit->name, 0x10);
     mem_copy_bytes_nonempty(g_unit_panel_billboard_job_name, unit->job_name, 0x10);
     mem_copy_bytes_nonempty(g_unit_panel_billboard_skillset_name, unit->primary_skillset_name, 0x10);
     mem_copy_bytes_nonempty(g_unit_panel_billboard_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
-#endif
 }

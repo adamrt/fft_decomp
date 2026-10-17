@@ -456,7 +456,7 @@ restart_script:
         }
         /* ---- Map objects ---- */
         else if (opcode == EVENT_OPCODE_USE_3D_OBJECT) {
-            g_script_3d_object_use_request = 1;
+            g_event_3d_object_use_request = 1;
             g_script_map_command_80_args.arg1 = operand_1;
             g_script_map_command_80_args.arg2 = operand_2;
             thread_yield();
@@ -466,7 +466,7 @@ restart_script:
                 thread_yield();
             } while (g_3d_object_wait_status != 0);
         } else if (opcode == EVENT_OPCODE_USE_FIELD_OBJECT) {
-            g_script_field_object_use_request = 1;
+            g_event_field_object_use_request = 1;
             g_script_map_command_83_args.arg1 = operand_1;
             g_script_map_command_83_args.arg2 = operand_2;
             thread_yield();
@@ -517,15 +517,15 @@ restart_script:
             thread_wait_frames(2);
             battle_map_wait_for_refresh();
         } else if (opcode == EVENT_OPCODE_RELOAD_MAP_STATE) {
-            g_world_map_reload_state = 1;
+            g_event_map_reload_state = 1;
             do {
                 thread_yield();
-            } while (g_world_map_reload_state != 0);
+            } while (g_event_map_reload_state != 0);
         } else if (opcode == EVENT_OPCODE_APPEND_MAP_STATE) {
-            g_world_map_append_state = 1;
+            g_event_map_append_state = 1;
             do {
                 thread_yield();
-            } while (g_world_map_append_state != 0);
+            } while (g_event_map_append_state != 0);
         } else if (opcode == EVENT_OPCODE_PAUSE) {
             script_opcode_16_pause();
         } else if (opcode == EVENT_OPCODE_RESUME_WAITING_DIALOG) {

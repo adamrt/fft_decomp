@@ -251,8 +251,6 @@ extern RECT g_battle_map_vram_load_rect;
 extern s32 g_battle_map_resource_load_state; /* battle_map_resource_load_state_e */
 extern s32 g_battle_map_gns_load_phase;      /* battle_map_gns_load_phase_e */
 extern s32 g_battle_map_mesh_load_state;
-extern u16 g_battle_map_append_state;
-extern u16 g_battle_map_reload_state; /* 1 starts, 2 polls, >=3 is reset to zero by the outer update */
 extern s32 g_battle_map_deep_dungeon_load_in_progress;
 
 s32 battle_map_load_data(s32 map_id, s32 command);

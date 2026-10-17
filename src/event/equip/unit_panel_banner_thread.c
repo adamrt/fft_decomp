@@ -103,7 +103,7 @@ void unit_panel_banner_thread(void) {
         value_pixels = g_unit_panel_comparison_small_number_image;
         name_image = g_unit_panel_comparison_name_image;
         number_entries = g_unit_panel_comparison_numeric_entries;
-        state = &g_unit_panel_comparison_billboard;
+        state = &g_unit_panel_comparison_unit_status;
         unit_data = &g_equipment_comparison_unit_data;
         transition = &g_unit_panel_comparison_portrait_rect;
         panel_base = panel;
