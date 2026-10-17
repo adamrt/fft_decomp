@@ -688,15 +688,17 @@ func (p project) unitCheckCommand(args []string) error {
 	if len(instances) == 0 {
 		return fmt.Errorf("%s: no instance selected", spec.name)
 	}
-	symbols := instances[0].symbols()
-	for _, unit := range instances[1:] {
-		if strings.Join(unit.symbols(), " ") != strings.Join(symbols, " ") {
-			return fmt.Errorf("%s: instances define different symbols: %s has %v, %s has %v",
-				spec.name, instances[0].module.ID, symbols, unit.module.ID, unit.symbols())
-		}
-	}
 	sourcePath := filepath.Join(p.root, filepath.FromSlash(spec.source))
 	if *merge {
+		// Automatic concatenation cannot invent program-specific bodies. An
+		// explicitly supplied source may have different members in each view.
+		symbols := instances[0].symbols()
+		for _, unit := range instances[1:] {
+			if strings.Join(unit.symbols(), " ") != strings.Join(symbols, " ") {
+				return fmt.Errorf("%s: --merge requires identical members: %s has %v, %s has %v; supply a common source instead",
+					spec.name, instances[0].module.ID, symbols, unit.module.ID, unit.symbols())
+			}
+		}
 		var sources []string
 		for _, f := range instances[0].members {
 			sources = append(sources, instances[0].module.sourceOf(f))
@@ -714,6 +716,11 @@ func (p project) unitCheckCommand(args []string) error {
 		if err != nil {
 			return err
 		}
+		for _, unit := range instances {
+			if err := validateUnitSourceDataFor(unit.module, spec.source, merged, unit.symbols()); err != nil {
+				return err
+			}
+		}
 		if err := os.MkdirAll(filepath.Dir(sourcePath), 0o755); err != nil {
 			return err
 		}
@@ -721,9 +728,12 @@ func (p project) unitCheckCommand(args []string) error {
 			return err
 		}
 		fmt.Fprintf(p.stdout(), "unit-check: wrote %s from %d sources\n", spec.source, len(sources))
-	}
-	if err := validateUnitSource(p.root, spec.source, symbols); err != nil {
-		return err
+	} else {
+		for _, unit := range instances {
+			if err := validateUnitSourceFor(p.root, unit.module, spec.source, unit.symbols()); err != nil {
+				return err
+			}
+		}
 	}
 	resolver := newSymbolResolver(config)
 	workDir := filepath.Join(p.root, "build", "units", "work", spec.name)
