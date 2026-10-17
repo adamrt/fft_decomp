@@ -514,7 +514,7 @@ next:
         g_audio_queue.count--;
         break;
     case AUDIO_COMMAND_PLAY_MUSIC:
-        if (g_file_still_loading != 0) {
+        if (g_file_cd_state.state != 0) {
             return;
         }
         slot = (g_audio_queue.current_value & 0xF00) >> 8;
@@ -566,7 +566,7 @@ next:
         g_audio_queue.current_command = AUDIO_COMMAND_NONE;
         break;
     case AUDIO_COMMAND_WAIT_LOAD:
-        if (g_file_still_loading == 0) {
+        if (g_file_cd_state.state == 0) {
             goto clear_command;
         }
         return;

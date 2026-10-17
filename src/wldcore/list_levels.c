@@ -120,7 +120,7 @@ void brave_story_handle_propositions_input(menu_stack_window_level_t* level) {
         return;
     }
 
-    if ((buttons & PSX_PAD_CROSS) != 0 && g_file_still_loading == 0) {
+    if ((buttons & PSX_PAD_CROSS) != 0 && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
         g_brave_story_propositions_saved_cursor[0] = 0;
         g_window_record_count -= 1;
@@ -131,7 +131,7 @@ void brave_story_handle_propositions_input(menu_stack_window_level_t* level) {
         return;
     }
 
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0 && g_file_still_loading == 0) {
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0 && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         g_brave_story_propositions_saved_cursor[0] = level->selected_entry;
         entry = level->entries[level->selected_entry];

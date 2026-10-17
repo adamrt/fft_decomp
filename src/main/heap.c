@@ -210,7 +210,7 @@ s32 file_request_read_bytes(s32 sector, u32 size, void* destination) {
 /* Return the shared CD descriptor's load state: nonzero while a read through g_file_cd_state
  * is in progress. */
 int file_is_still_loading(void) {
-    return g_file_still_loading;
+    return g_file_cd_state.state;
 }
 
 /* Blocking read of a sound file into a new block of the music heap. size is in
@@ -229,13 +229,13 @@ suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_still_loading != 0) {
+    if (g_file_cd_state.state != 0) {
         header = &g_file_cd_state;
         do {
             VSync(0);
             system_frame_stub();
             file_poll_load(header);
-        } while (g_file_still_loading != 0);
+        } while (g_file_cd_state.state != 0);
     }
     return buffer;
 }
@@ -255,13 +255,13 @@ static void* file_load_to_heap(s32 sector, u32 size) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_still_loading != 0) {
+    if (g_file_cd_state.state != 0) {
         header = &g_file_cd_state;
         do {
             VSync(0);
             system_frame_stub();
             file_poll_load(header);
-        } while (g_file_still_loading != 0);
+        } while (g_file_cd_state.state != 0);
     }
     return destination;
 }
@@ -278,13 +278,13 @@ void* file_load_to_address(int sector, unsigned int size, void* destination) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_still_loading != 0) {
+    if (g_file_cd_state.state != 0) {
         header = &g_file_cd_state;
         do {
             VSync(0);
             system_frame_stub();
             file_poll_load(header);
-        } while (g_file_still_loading != 0);
+        } while (g_file_cd_state.state != 0);
     }
     return destination;
 }

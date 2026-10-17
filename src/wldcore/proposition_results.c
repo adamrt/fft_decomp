@@ -1857,11 +1857,11 @@ void brave_story_handle_unexplored_land_list_input(menu_stack_panel_level_t* lev
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0
-        && g_file_still_loading == 0) {
+        && g_file_cd_state.state == 0) {
         brave_story_block_unexplored_land_list_buttons(level);
         menu_stack_push_message_level(0x1058, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_file_still_loading == 0) {
+        && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -1980,7 +1980,7 @@ void brave_story_step_unexplored_land_level(brave_story_detail_level_t* level) {
         }
         break;
     case BRAVE_STORY_DETAIL_PHASE_BUILD:
-        if (g_file_still_loading != 0) {
+        if (g_file_cd_state.state != 0) {
             break;
         }
         GsGetTimInfo(g_picture_buffer + 1, &image);
@@ -2111,7 +2111,7 @@ void brave_story_handle_treasure_list_input(menu_stack_panel_level_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_still_loading == 0) {
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -2120,7 +2120,7 @@ void brave_story_handle_treasure_list_input(menu_stack_panel_level_t* level) {
         brave_story_block_unexplored_land_list_buttons(level);
         menu_stack_push_message_level(0x101F, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
-        && g_file_still_loading == 0) {
+        && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -2246,7 +2246,7 @@ void brave_story_step_treasure_level(brave_story_detail_level_t* level) {
         }
         break;
     case BRAVE_STORY_DETAIL_PHASE_BUILD:
-        if (g_file_still_loading != 0) {
+        if (g_file_cd_state.state != 0) {
             break;
         }
         GsGetTimInfo(g_picture_buffer + 1, &image);

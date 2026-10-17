@@ -105,10 +105,6 @@ typedef char file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t)
 
 extern file_load_descriptor_t g_file_cd_state;
 
-/* g_file_cd_state.state under a second name: nonzero (not
- * FILE_LOAD_STATE_IDLE) while a load is in progress. */
-extern u32 g_file_still_loading;
-
 int file_request_read(
     file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
 

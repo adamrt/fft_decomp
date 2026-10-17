@@ -1228,7 +1228,7 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         return;
 
     case PROPOSITION_REPORT_LOAD_PICTURE:
-        if (g_file_still_loading != 0) {
+        if (g_file_cd_state.state != 0) {
             return;
         }
         kind = &g_proposition_report.reward_type;
@@ -1374,7 +1374,7 @@ void proposition_step_report_level(proposition_report_level_t* level) {
 
     case 14:
         /* Wait for the picture set the load phase requested. */
-        if (g_file_still_loading != 0) {
+        if (g_file_cd_state.state != 0) {
             return;
         }
 

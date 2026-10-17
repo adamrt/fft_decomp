@@ -273,7 +273,7 @@ static void movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callb
 
     header = &g_file_cd_state;
     file_request_read_quiet(header, sector, 1, 0);
-    while (g_file_still_loading != 0) {
+    while (g_file_cd_state.state != 0) {
         file_poll_load(header);
         VSync(0);
     }

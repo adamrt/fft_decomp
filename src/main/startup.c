@@ -36,7 +36,7 @@ static void file_reset_cdrom_cpu_ram(void) {
     CdInit();
     CdSetDebug(0);
     file_reset_pause_cdrom(&g_file_cd_state);
-    g_file_still_loading = 0;
+    g_file_cd_state.state = 0;
 }
 
 /* BATTLE/ZODIAC.BIN is a headerless image, not an executable overlay.
