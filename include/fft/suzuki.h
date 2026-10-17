@@ -5,6 +5,7 @@
 
 #include "psx/libcd.h"
 #include "psx/libspu.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 typedef struct suzuki_smd_header suzuki_smd_header_t;
@@ -236,8 +237,8 @@ typedef struct suzuki_music_channel {
     suzuki_modulator_t modulators[SUZUKI_MODULATOR_COUNT]; /* 0xe0 */
 } suzuki_music_channel_t;
 typedef char suzuki_music_channel_size_must_be_352[(sizeof(suzuki_music_channel_t) == 352) ? 1 : -1];
-typedef char suzuki_channel_voice_attr_must_be_at_offset_0x34
-    [((unsigned long)&((suzuki_music_channel_t*)0)->voice_attr == 0x34) ? 1 : -1];
+typedef char
+    suzuki_channel_voice_attr_must_be_at_offset_0x34[(offsetof(suzuki_music_channel_t, voice_attr) == 0x34) ? 1 : -1];
 typedef char suzuki_channel_voice_attr_size_must_be_64[(sizeof(SpuVoiceAttr) == 64) ? 1 : -1];
 
 /* suzuki_music_channel_t.flags. */
