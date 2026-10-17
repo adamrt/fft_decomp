@@ -28,10 +28,10 @@ static u16 g_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
 
 static s32 job_get_random_unlocked(const unit_stats_t* unit);
 static void unit_apply_equipment_move_jump_and_name(unit_stats_t* unit);
-static void unit_calculate_encounter_abilities(unit_stats_t* unit, entd_unit_t* entd);
+static void unit_calculate_encounter_abilities(unit_stats_t* unit, const entd_unit_t* entd);
 static void unit_calculate_actual_stats(unit_stats_t* unit, s32 mode);
-static s32 unit_calculate_encounter_data(unit_stats_t* unit, entd_unit_t* entd);
-static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* entd);
+static s32 unit_calculate_encounter_data(unit_stats_t* unit, const entd_unit_t* entd);
+static void unit_calculate_encounter_equipment(unit_stats_t* unit, const entd_unit_t* entd);
 static void unit_calculate_encounter_jobs_and_skillsets(unit_stats_t* unit, const entd_unit_t* entd);
 static void unit_copy_job_data(unit_stats_t* unit);
 static void unit_generate_base_raw_stats(
@@ -39,7 +39,7 @@ static void unit_generate_base_raw_stats(
 static void unit_generate_party_record(party_unit_t* party, unit_generation_type_e unit_type);
 static void unit_generate_party_base_raw_stats(party_unit_t* party, unit_generation_type_e unit_type);
 static void unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party);
-static s32 unit_init_from_encounter_party_member(unit_stats_t* unit, entd_unit_t* entd_unit);
+static s32 unit_init_from_encounter_party_member(unit_stats_t* unit, const entd_unit_t* entd_unit);
 static void unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id);
 static void unit_store_names(unit_stats_t* unit);
 static void unit_store_ramza_name_birthday_zodiac(unit_stats_t* unit);
@@ -690,7 +690,7 @@ s32 unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text) 
  * setup. A temporary formation index enables level growth for generated units.
  * UNIT_ENTD_INIT_TRANSFORM is the transformed-monster recalculation path
  * and preserves the existing runtime/ENTD-derived state. */
-s32 unit_init_from_encounter(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind) {
+s32 unit_init_from_encounter(unit_stats_t* unit, const entd_unit_t* entd, u32 use_world_text, s32 kind) {
     g_unit_name_uses_world_text = use_world_text;
     if (kind != UNIT_ENTD_INIT_TRANSFORM) {
         unit_reset_battle_state(unit);
@@ -778,7 +778,7 @@ static void unit_store_ramza_name_birthday_zodiac(unit_stats_t* unit) {
  * birthday whose month is outside 1..12 or day outside 1..31 becomes a random
  * day of the year. Brave and Faith above 100 are rolled in 45..74, and
  * experience of 100 or more in 0..99. */
-static s32 unit_calculate_encounter_data(unit_stats_t* unit, entd_unit_t* entd) {
+static s32 unit_calculate_encounter_data(unit_stats_t* unit, const entd_unit_t* entd) {
     const job_data_t* ramza_jobs;
     party_unit_t* party_unit;
     s32 party_slot;
@@ -911,7 +911,7 @@ static s32 unit_calculate_encounter_data(unit_stats_t* unit, entd_unit_t* entd) 
  *
  * Preserve the party unit's kind flags while taking the ENTD persistence
  * controls and team assignment. Returns -1 when no matching party slot exists. */
-static s32 unit_init_from_encounter_party_member(unit_stats_t* unit, entd_unit_t* entd_unit) {
+static s32 unit_init_from_encounter_party_member(unit_stats_t* unit, const entd_unit_t* entd_unit) {
     s32 slot = party_find_slot_by_sprite_set(entd_unit->sprite_set);
 
     if (slot != -1) {
@@ -1303,7 +1303,7 @@ static void unit_calculate_actual_stats(unit_stats_t* unit, s32 mode) {
  * Random JP for a job level: g_job_jp_requirements_by_level[level] (the
  * JP needed to reach it; 0x80066182, entry 0 is 0) plus rand(0..99), or
  * 100 + rand(0..99) for level 0. */
-static void unit_calculate_encounter_abilities(unit_stats_t* unit, entd_unit_t* entd) {
+static void unit_calculate_encounter_abilities(unit_stats_t* unit, const entd_unit_t* entd) {
     u8 job_id = unit->job_id;
     u8 gender = unit->unit_flags;
     u8 byte;
@@ -1400,7 +1400,7 @@ static void unit_store_monster_equipment(unit_stats_t* unit, const entd_unit_t* 
  * that finds nothing leaves the slot empty, and item 0 is stored as ITEM_ID_NONE.
  *
  * The body-armor preference tests Equip Shield, not Equip Armor. */
-static void unit_calculate_encounter_equipment(unit_stats_t* unit, entd_unit_t* entd) {
+static void unit_calculate_encounter_equipment(unit_stats_t* unit, const entd_unit_t* entd) {
     u8 item;
     u8 flags;
     s32 i;

@@ -92,7 +92,7 @@ s32 item_get_total_quantity(u8 item_id, s32 include_battle) {
 
 /* Copy the ENTD unit's map X and Y, elevation, facing and spell-quote bits, war trophy and bonus
  * money into the battle unit. */
-void unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd) {
+void unit_init_position_and_rewards(unit_stats_t* unit, const entd_unit_t* entd) {
     unit->x = entd->x;
     unit->position.y = entd->position.y;
     unit->position.higher_elevation = entd->position.higher_elevation;
@@ -171,7 +171,7 @@ void mem_zero(void* destination, s32 count) {
 
 /* Count a KO in the script variables: a unit that started on the blue team adds to
  * EVENT_SCRIPT_VAR_CASUALTIES, any other unit to EVENT_SCRIPT_VAR_INJURED; both stop at 9999. */
-void unit_increase_casualty_counters(unit_stats_t* unit) {
+void unit_increase_casualty_counters(const unit_stats_t* unit) {
     s32 id;
     s32 count;
 

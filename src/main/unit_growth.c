@@ -37,7 +37,8 @@ void mem_copy_bytes_source_first(const void* source, void* destination, int coun
  * its level, optionally limited to one item type and to weapons with a flag in weapon_flag_mask.
  * Returns ENTD_VALUE_RANDOM when nothing fits. The candidate list restarts only when an item with
  * a higher required level appears, so items scanned after it with a lower level still join it. */
-s32 unit_calculate_random_equipment(unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
+s32 unit_calculate_random_equipment(
+    const unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
     u8 candidates[128];
     s32 first;
     s32 last;
@@ -199,7 +200,7 @@ void unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_unit_t*
 /* Picks a random reaction/support/movement ability (selected by `flags` from
  * rsm_ability_filter_e) from the abilities the unit has learned
  * across its unlocked jobs, or returns `ability_id` when it is not random. */
-u16 unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, entd_unit_t* entd) {
+u16 unit_calculate_rsm(const unit_stats_t* unit, u16 ability_id, s32 flags, const entd_unit_t* entd) {
     u16 candidates[RSM_CANDIDATE_COUNT];
     u16 innate[4];
     u8 known;

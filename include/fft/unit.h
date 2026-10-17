@@ -716,11 +716,11 @@ typedef enum unit_entd_init_kind {
     UNIT_ENTD_INIT_TRANSFORM = 0x82
 } unit_entd_init_kind_e;
 
-s32 unit_init_from_encounter(unit_stats_t* unit, struct entd_unit* entd, u32 use_world_text, s32 kind);
+s32 unit_init_from_encounter(unit_stats_t* unit, const struct entd_unit* entd, u32 use_world_text, s32 kind);
 s32 unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text);
 void unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels);
 void unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards);
-void unit_init_position_and_rewards(unit_stats_t* unit, struct entd_unit* entd);
+void unit_init_position_and_rewards(unit_stats_t* unit, const struct entd_unit* entd);
 void unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const struct entd_unit* entd);
 void unit_reset_battle_state(unit_stats_t* unit);
 void unit_refresh_stats_and_statuses(unit_stats_t* unit);
@@ -728,15 +728,16 @@ void unit_update_formation_stats(unit_stats_t* unit);
 void unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check);
 void unit_set_equipment_stats(unit_stats_t* unit);
 void unit_set_equippable_items(unit_stats_t* unit);
-s32 unit_calculate_random_equipment(unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
+s32 unit_calculate_random_equipment(
+    const unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
 void unit_calculate_move_jump(unit_stats_t* unit, s32 keep_hp_mp);
 u8 unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette);
-u16 unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, struct entd_unit* entd);
+u16 unit_calculate_rsm(const unit_stats_t* unit, u16 ability_id, s32 flags, const struct entd_unit* entd);
 void unit_enable_rsm_flags(unit_stats_t* unit);
 void unit_copy_last_ability_ct(unit_stats_t* unit);
 s32 unit_check_level_up(unit_stats_t* unit);
 void unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
-void unit_increase_casualty_counters(unit_stats_t* unit);
+void unit_increase_casualty_counters(const unit_stats_t* unit);
 
 /* menus and panels */
 
