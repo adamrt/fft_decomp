@@ -22,24 +22,6 @@ void menu_set_vsync_mode_and_event_speed(s32 speed);
 s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* menu arena */
-/* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of
- * VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD); menu_alloc_memory yields until a run of
- * free pages and a free slot exist. */
-enum { MENU_BUFFER_ALLOCATION_COUNT = 16, MENU_BUFFER_PAGE_SIZE = 256 };
-
-/* One allocation: its first page, or -1 when the slot is free, and the length of the run in pages. */
-typedef struct menu_allocation {
-    u8* buffer;     /* 0x00 */
-    s32 page_count; /* 0x04 */
-} menu_allocation_t;
-typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
-
-extern u8 g_menu_buffer_arena[][MENU_BUFFER_PAGE_SIZE];
-extern menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
-
-/* Nonzero for each arena page in use. */
-extern u8 g_menu_buffer_allocation_map[];
-
 void* menu_alloc_memory(s32 size);
 void menu_free_memory(void* buffer);
 void menu_init_buffer_allocator(void);

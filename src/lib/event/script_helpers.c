@@ -35,6 +35,25 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of
+ * VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD); menu_alloc_memory yields until a run of
+ * free pages and a free slot exist. */
+enum { MENU_BUFFER_ALLOCATION_COUNT = 16, MENU_BUFFER_PAGE_SIZE = 256 };
+
+/* One allocation: its first-page pointer (-1 for a free slot) and allocated page count. */
+typedef struct menu_allocation {
+    u8* buffer;     /* 0x00 */
+    s32 page_count; /* 0x04 */
+} menu_allocation_t;
+typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
+
+extern u8 g_menu_buffer_arena[VARIANT_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
+extern menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
+
+/* Nonzero for each arena page in use. */
+extern u8 g_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT];
+
+/* Texture allocator scratch rectangles, in pixels and allocation cells. */
 extern s32 g_gfx_free_rect_pixels[4];
 extern s32 g_gfx_free_rect_cells[4];
 
