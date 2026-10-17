@@ -34,15 +34,14 @@ static void unit_list_copy_selected(void);
  * (0x100, 0) and derives four palette rows at y 0xfe from the CLUT rows at
  * (0x3c0, 0x1f0) and (0x3c0, 0x1f4): each row is copied with entry 4 made
  * transparent, and its entries 4..15 are copied again as a 12-color row.
- * The 16-entry row is read into buf1, which holds four entries; the other
- * twelve land in buf2, which follows it on the stack. The 0x200-byte menu
- * palette image is copied to the stack before it is uploaded to
+ * The complete 16-entry row is read into palette; entry four is then made
+ * transparent, and the 12-entry suffix is uploaded independently. The
+ * 0x200-byte menu palette image is copied to the stack before it is uploaded to
  * (0x100, 0xfa).
  */
 static void unit_list_init_vram_and_fade(void) {
     RECT rect;
-    u16 buf1[4];
-    u16 buf2[12];
+    u16 palette[16];
     clut_t block;
 
     memcpy(block, g_unit_list_clut, sizeof(block));
@@ -59,34 +58,34 @@ static void unit_list_init_vram_and_fade(void) {
     rect.y = 0x1F0;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_store_image_and_wait(&rect, buf1);
-    buf2[0] = 0;
+    gfx_store_image_and_wait(&rect, palette);
+    palette[4] = 0;
     rect.x = 0x120;
     rect.y = 0xFE;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf1);
+    gfx_load_image_and_wait(&rect, palette);
     rect.x = 0x100;
     rect.y = 0xFE;
     rect.w = 0xC;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf2);
+    gfx_load_image_and_wait(&rect, palette + 4);
     rect.x = 0x3C0;
     rect.y = 0x1F4;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_store_image_and_wait(&rect, buf1);
-    buf2[0] = 0;
+    gfx_store_image_and_wait(&rect, palette);
+    palette[4] = 0;
     rect.x = 0x130;
     rect.y = 0xFE;
     rect.w = 0x10;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf1);
+    gfx_load_image_and_wait(&rect, palette);
     rect.x = 0x110;
     rect.y = 0xFE;
     rect.w = 0xC;
     rect.h = 1;
-    gfx_load_image_and_wait(&rect, buf2);
+    gfx_load_image_and_wait(&rect, palette + 4);
     rect.x = 0x100;
     rect.y = 0xFA;
     rect.w = 0x40;

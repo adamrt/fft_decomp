@@ -114,7 +114,7 @@ void gfx_ramp_screen_overlay_intensity_to_zero(void);
 /* The menu library's fades, which BUNIT and CARD run. */
 extern u8 g_gfx_increasing_fade_active;
 extern s16 g_gfx_fade_intensity;
-extern RECT g_gfx_fade_rect[];
+extern RECT g_gfx_fade_rect;
 extern rgb24_t g_gfx_fade_color;
 extern u8 g_gfx_decreasing_fade_active;
 

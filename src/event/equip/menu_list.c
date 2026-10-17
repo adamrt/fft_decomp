@@ -373,7 +373,7 @@ void menu_init_and_draw_scrollable_list_simple(
 menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
-    RECT marker;
+    point16_t marker;
     u8 pad1[0x8];
     u16 ot_index;
     u16 previous_selected;

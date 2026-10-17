@@ -505,9 +505,9 @@ s32 battle_map_texture_start_animation(s32 value_a, s32 value_b);
 /* map title */
 /* The title card of the battle map. The BATTLE and WORLD event interpreters
  * (script_execute_event) also load and show it. */
-extern s32 g_battle_map_title_image_rect;
+extern RECT g_battle_map_title_image_rect;
 extern s32 g_battle_map_title_palette_data;
-extern s32 g_battle_map_title_palette_rect;
+extern RECT g_battle_map_title_palette_rect;
 extern s32 g_battle_map_title_closing_past_midpoint;
 
 /* Two buffers of the four shaded title-panel strips. */

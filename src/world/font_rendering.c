@@ -14,14 +14,14 @@ static u8 g_screen_text_row_image_buffer[2048] = { 0 };
  * `destination`, uploading one line at a time through the scratch image at
  * g_screen_text_row_image_buffer. */
 void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 palette) {
-    RECT scratch_rect;
+    text_image_bounds_t bounds;
     RECT destination_row;
     s16 row_text_ids[4];
 
-    scratch_rect.x = 0;
-    scratch_rect.y = 0;
-    scratch_rect.w = destination->w;
-    scratch_rect.h = 0x10;
+    bounds.x = 0;
+    bounds.y = 0;
+    bounds.row_stride = destination->w;
+    bounds.line_height = 0x10;
     destination_row.x = destination->x;
     destination_row.y = destination->y;
     destination_row.w = destination->w;
@@ -31,7 +31,7 @@ void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 pal
         row_text_ids[1] = -1;
         memset(g_screen_text_row_image_buffer, 0, 0x800);
         menu_text_render_encoded_ids_to_image(
-            g_screen_text_row_image_buffer, &scratch_rect, 0xa, 0x64, font, row_text_ids, 0x64, 0xe7, palette);
+            g_screen_text_row_image_buffer, &bounds, 0xa, 0x64, font, row_text_ids, 0x64, 0xe7, palette);
         gfx_load_image_and_wait(&destination_row, g_screen_text_row_image_buffer);
         destination_row.y += 0x10;
     }
