@@ -596,7 +596,7 @@ void proposition_push_detail_level(s32 value) {
         g_text_substitution_values[0] = value + TEXT_ID_PROPOSITION_NAME_BASE;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITION_ABOUT, 0);
     }
-    proposition_unpack_row(g_proposition_selected_row, value);
+    proposition_unpack_row(&g_proposition_selected_row, value);
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].window_render.render_index = index;
     bounds.y = 0x60;
@@ -648,7 +648,7 @@ void proposition_handle_accept_input(window_render_pair_t* owner) {
         proposition_open_available_list();
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        total = g_proposition_selected_row[0].fee_a + g_proposition_selected_row[0].fee_b;
+        total = g_proposition_selected_row.fee_a + g_proposition_selected_row.fee_b;
         g_proposition_gil_amount = total;
         if (total != 0) {
             g_text_substitution_values[0] = total;
@@ -827,8 +827,8 @@ void proposition_handle_accept_confirm_input(proposition_confirm_level_t* level)
 void proposition_push_days_level(void) {
     point32_t origin;
     s32 record_index;
-    s32 min_days = g_proposition_selected_row[0].min_days;
-    s32 max_days = g_proposition_selected_row[0].max_days;
+    s32 min_days = g_proposition_selected_row.min_days;
+    s32 max_days = g_proposition_selected_row.max_days;
 
     g_text_substitution_values[0] = min_days;
     g_text_substitution_values[1] = max_days;

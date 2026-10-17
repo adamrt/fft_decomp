@@ -458,7 +458,7 @@ static void brave_story_push_participant_list_level(s32 proposition) {
     s32 depth;
     s32 window;
 
-    proposition_unpack_row(g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
+    proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
     g_menu_stack_records[g_menu_stack_depth].participant_list.proposition = proposition;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_render.window_index].flags
         |= DISPLAY_OBJECT_HIDDEN;

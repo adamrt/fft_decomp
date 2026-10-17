@@ -132,7 +132,7 @@ typedef struct proposition_fields {
 typedef char proposition_fields_size_must_be_46[sizeof(proposition_fields_t) == 46 ? 1 : -1];
 
 extern s32* g_proposition_data; /* the loaded proposition data file */
-extern proposition_fields_t g_proposition_selected_row[];
+extern proposition_fields_t g_proposition_selected_row;
 
 void proposition_unpack_row(proposition_fields_t* out, s32 index);
 s32 proposition_is_available_at(s32 index, s32 location);

@@ -104,7 +104,7 @@ void proposition_push_dispatch_confirm_level(void) {
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_menu_stack_records[g_menu_stack_depth].choice_panel.row = index;
-    location = &g_proposition_selected_row[0].name_text;
+    location = &g_proposition_selected_row.name_text;
     text_measure_pixels(&size[0], &size[1], text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     bounds.y = 0x60;
     bounds.w = 0xF4;
@@ -196,11 +196,11 @@ void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* leve
             script_set_variable(
                 EVENT_SCRIPT_VAR_WAR_FUNDS, script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) - g_proposition_gil_amount);
             g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-            script_set_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
-                script_get_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
+            script_set_variable(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
+                script_get_variable(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
                     | PROPOSITION_VARIABLE_ATTEMPTED);
             g_proposition_active[g_proposition_count].flags = PROPOSITION_PROGRESS_DISPATCHED;
-            g_proposition_active[g_proposition_count].proposition_id = g_proposition_selected_row[0].id - 1;
+            g_proposition_active[g_proposition_count].proposition_id = g_proposition_selected_row.id - 1;
             g_proposition_active[g_proposition_count].elapsed_days = 0;
             g_proposition_active[g_proposition_count].assigned_days = g_proposition_dispatch_days;
             g_proposition_active[g_proposition_count].location = g_world_map_projection_state.marker.kind;
@@ -210,8 +210,8 @@ void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* leve
                 g_proposition_active[g_proposition_count].participant_indices[i] = g_proposition_send_units[i];
             }
             g_proposition_count++;
-            script_set_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
-                script_get_variable(g_proposition_selected_row[0].id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
+            script_set_variable(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
+                script_get_variable(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1))
                     | PROPOSITION_VARIABLE_IN_PROGRESS);
         }
         goto block_tail;
@@ -840,7 +840,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
             g_menu_blocked_buttons = 0;
             g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
-            proposition_push_detail_level(g_proposition_selected_row[0].id - 1);
+            proposition_push_detail_level(g_proposition_selected_row.id - 1);
             proposition_suspend_detail_level(&level->list_frame);
             proposition_push_days_level();
         }
@@ -1552,7 +1552,7 @@ static void proposition_push_result_level(s32 proposition) {
     }
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    panel_text = &g_proposition_selected_row[0].name_text;
+    panel_text = &g_proposition_selected_row.name_text;
     g_menu_stack_records[g_menu_stack_depth].proposition_result.render_index = index;
     text_measure_pixels(
         &text_width, &text_rows, text_find_entry(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
@@ -1780,7 +1780,7 @@ void proposition_step_result_level(proposition_result_level_t* level) {
  * row, pick the unit who reports, decide the result and work out the JP and
  * gil, the bonus reward and the extra-days multiplier. */
 static void proposition_prepare_report(s32 proposition_index) {
-    proposition_unpack_row(g_proposition_selected_row, g_proposition_active[proposition_index].proposition_id);
+    proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition_index].proposition_id);
     g_proposition_report.proposition_index = proposition_index;
     g_proposition_report.excluded_party_index = proposition_select_report_speaker(proposition_index);
     proposition_determine_success();
@@ -1803,13 +1803,13 @@ static s32 proposition_select_report_speaker(s32 index) {
     if (g_proposition_active[index].participant_count == 1) {
         return g_proposition_active[index].participant_indices[0];
     }
-    best = (g_proposition_selected_row[0].speaker_mode == PROPOSITION_SPEAKER_HIGHEST_BRAVERY
-               || g_proposition_selected_row[0].speaker_mode == PROPOSITION_SPEAKER_HIGHEST_FAITH)
+    best = (g_proposition_selected_row.speaker_mode == PROPOSITION_SPEAKER_HIGHEST_BRAVERY
+               || g_proposition_selected_row.speaker_mode == PROPOSITION_SPEAKER_HIGHEST_FAITH)
         ? -1
         : 99999;
     for (i = 0; i < g_proposition_active[index].participant_count; i++) {
         unit = party_get_roster_unit(g_proposition_active[index].participant_indices[i]);
-        switch (g_proposition_selected_row[0].speaker_mode) {
+        switch (g_proposition_selected_row.speaker_mode) {
         case PROPOSITION_SPEAKER_HIGHEST_BRAVERY:
             if (best < unit->bravery) {
                 goto take_bravery;

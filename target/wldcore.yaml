@@ -533,7 +533,6 @@ data:
   - {addr: 0x8009f2b0, name: g_hud_value_position}
   - {addr: 0x8009f2b8, name: g_world_map_dot_pulse_direction}
   - {addr: 0x8009f2bc, name: g_world_map_dot_pulse_phase}
-  - {addr: 0x8009f2c0, name: g_world_map_projection_origin}
   - {addr: 0x8009f2c0, name: g_world_map_projection_view}
   - {addr: 0x8009f2d0, name: g_world_map_projection_scale}
   - {addr: 0x8009f2e0, name: g_world_map_projection_rotation}

@@ -223,7 +223,6 @@ typedef struct world_map_zoom {
 typedef char world_map_zoom_size_must_be_28[sizeof(world_map_zoom_t) == 28 ? 1 : -1];
 
 extern world_map_projection_view_t g_world_map_projection_view;
-extern VECTOR g_world_map_projection_origin;
 extern world_map_pan_t g_world_map_pan;
 
 /* Provisional: flags bit 0 runs the zoom, bit 1 selects the zoomed-out direction. */
@@ -356,8 +355,9 @@ typedef struct world_map_path_animation {
     s16 segment_frames[16]; /* 0x08; frames each segment takes to unroll */
     s16 frame_timer;        /* 0x28 */
     s16 point_count;        /* 0x2a */
-    s16 coords[1];          /* 0x2c; packed (x, y) pairs */
+    s16 coords[48];         /* 0x2c; up to 24 x/y pairs in the reserved tail */
 } world_map_path_animation_t;
+typedef char world_map_path_animation_size_must_be_140[sizeof(world_map_path_animation_t) == 140 ? 1 : -1];
 
 extern world_map_path_animation_t g_world_map_path_animation;
 

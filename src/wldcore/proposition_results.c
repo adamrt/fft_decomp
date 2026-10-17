@@ -178,11 +178,10 @@ void proposition_determine_success(void) {
         unit = party_get_roster_unit(
             g_proposition_active[g_proposition_report.proposition_index].participant_indices[i]);
 
-        g_proposition_report.participant_scores[i] = job_table_a[(g_proposition_selected_row[0].category_index - 1) * 22
+        g_proposition_report.participant_scores[i] = job_table_a[(g_proposition_selected_row.category_index - 1) * 22
             + proposition_get_job_category(unit->job_id)];
-        g_proposition_report.participant_scores[i]
-            += job_table_b[(g_proposition_selected_row[0].job_list_index - 1) * 22
-                + proposition_get_job_category(unit->job_id)];
+        g_proposition_report.participant_scores[i] += job_table_b[(g_proposition_selected_row.job_list_index - 1) * 22
+            + proposition_get_job_category(unit->job_id)];
 
         value = unit->bravery;
         if (value != 0) {
@@ -191,7 +190,7 @@ void proposition_determine_success(void) {
             tier = 0;
         }
         g_proposition_report.participant_scores[i]
-            += tier_table_a[(g_proposition_selected_row[0].job_list_index - 1) * 5 + tier];
+            += tier_table_a[(g_proposition_selected_row.job_list_index - 1) * 5 + tier];
 
         value = unit->faith;
         if (value != 0) {
@@ -200,7 +199,7 @@ void proposition_determine_success(void) {
             tier = 0;
         }
         g_proposition_report.participant_scores[i]
-            += tier_table_b[(g_proposition_selected_row[0].job_list_index - 1) * 5 + tier];
+            += tier_table_b[(g_proposition_selected_row.job_list_index - 1) * 5 + tier];
 
         value = unit->level;
         if (value != 0) {
@@ -209,7 +208,7 @@ void proposition_determine_success(void) {
             tier = 0;
         }
         score = g_proposition_report.participant_scores[i]
-            + tier_table_a[(g_proposition_selected_row[0].job_list_index - 1) * 10 + tier];
+            + tier_table_a[(g_proposition_selected_row.job_list_index - 1) * 10 + tier];
         total += score;
         g_proposition_report.participant_scores[i] = score;
     }
@@ -224,7 +223,7 @@ void proposition_determine_success(void) {
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         return;
     }
-    if (g_proposition_selected_row[0].preferred_job == 0) {
+    if (g_proposition_selected_row.preferred_job == 0) {
         return;
     }
 
@@ -233,7 +232,7 @@ void proposition_determine_success(void) {
      * stale slot instead of each participant's job. */
     unit = party_get_roster_unit(g_proposition_active[g_proposition_report.proposition_index].participant_indices[i]);
     for (i = 0; i < participant_count; i++) {
-        if (g_proposition_selected_row[0].preferred_job - 1 == proposition_get_job_category(unit->job_id)) {
+        if (g_proposition_selected_row.preferred_job - 1 == proposition_get_job_category(unit->job_id)) {
             if (((rand() * 100) >> 15) < 0x3D) {
                 g_proposition_report.result = PROPOSITION_RESULT_SUCCESS;
                 return;
@@ -260,7 +259,7 @@ void proposition_calculate_jp_and_gil(void) {
         value = 0;
 
         for (i = 0; i < count; i++) {
-            value = jp_rewards[g_proposition_selected_row[0].jp_reward - 1];
+            value = jp_rewards[g_proposition_selected_row.jp_reward - 1];
             if (g_proposition_report.result == PROPOSITION_RESULT_FAILURE) {
                 value = value / 10;
             }
@@ -272,7 +271,7 @@ void proposition_calculate_jp_and_gil(void) {
         }
 
         for (i = 0; i < count; i++) {
-            value = gil_rewards[g_proposition_selected_row[0].gil_reward - 1];
+            value = gil_rewards[g_proposition_selected_row.gil_reward - 1];
             if (g_proposition_report.result == PROPOSITION_RESULT_FAILURE) {
                 value = value / 5;
             }
@@ -318,7 +317,7 @@ void proposition_roll_bonus_reward(void) {
         return;
     }
 
-    discovery_kind = g_proposition_selected_row[0].discovery_kind;
+    discovery_kind = g_proposition_selected_row.discovery_kind;
     if (discovery_kind == PROPOSITION_REWARD_TREASURE) {
         g_proposition_report.reward_type = PROPOSITION_REWARD_TREASURE;
         count = 0;
@@ -351,7 +350,7 @@ void proposition_roll_bonus_reward(void) {
     }
 
     participant_count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
-    index = (g_proposition_selected_row[0].category_index - 1) * 2;
+    index = (g_proposition_selected_row.category_index - 1) * 2;
     for (i = 0; i < participant_count; i++) {
         bonus = bonus_table[location_pairs[index + 1] - 1];
         g_proposition_report.participant_jp[i] += bonus;
@@ -361,7 +360,7 @@ void proposition_roll_bonus_reward(void) {
     return;
 
 random_reward:
-    if (g_proposition_selected_row[0].random_bonus != 1) {
+    if (g_proposition_selected_row.random_bonus != 1) {
         return;
     }
 
@@ -377,7 +376,7 @@ random_reward:
         index = 0;
     }
 
-    index += (g_proposition_selected_row[0].category_index - 1) * 3;
+    index += (g_proposition_selected_row.category_index - 1) * 3;
     g_proposition_report.reward_index = index;
     participant_count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
     for (i = 0; i < participant_count; i++) {
@@ -406,7 +405,7 @@ void proposition_apply_extra_days(void) {
     reward_scale = proposition_get_data(PROPOSITION_DATA_EXTRA_DAY_JP_SCALES);
     bonus_scale = proposition_get_data(PROPOSITION_DATA_EXTRA_DAY_GIL_SCALES);
     record = g_proposition_report.proposition_index;
-    day = g_proposition_active[record].elapsed_days - g_proposition_selected_row[0].min_days;
+    day = g_proposition_active[record].elapsed_days - g_proposition_selected_row.min_days;
     count = g_proposition_active[record].participant_count;
     if (day < 0) {
         return;
@@ -456,11 +455,11 @@ s32 proposition_find_preferred_job_unit(void) {
     jobs = proposition_get_data(PROPOSITION_DATA_JOB_LISTS);
     count = 0;
 
-    if (g_proposition_selected_row[0].preferred_job != 0) {
+    if (g_proposition_selected_row.preferred_job != 0) {
         for (i = 0; i < participant_count; i++) {
             party_index = g_proposition_active[g_proposition_report.proposition_index].participant_indices[i];
             unit = party_get_roster_unit(party_index);
-            if (g_proposition_selected_row[0].preferred_job - 1 == proposition_get_job_category(unit->job_id)) {
+            if (g_proposition_selected_row.preferred_job - 1 == proposition_get_job_category(unit->job_id)) {
                 candidates[count] = party_index;
                 count++;
             }
@@ -476,7 +475,7 @@ s32 proposition_find_preferred_job_unit(void) {
         return candidates[0] + 1;
     }
 
-    base = (g_proposition_selected_row[0].job_list_index - 1) * 9;
+    base = (g_proposition_selected_row.job_list_index - 1) * 9;
     for (i = 0; i < participant_count; i++) {
         party_index = g_proposition_active[g_proposition_report.proposition_index].participant_indices[i];
         if (party_index != g_proposition_report.excluded_party_index) {
@@ -785,7 +784,7 @@ static void proposition_push_recall_level(s32 proposition) {
     s32 depth;
     point32_t* base;
 
-    proposition_unpack_row(g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
+    proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.proposition = proposition;
     g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
@@ -863,7 +862,7 @@ void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition,
     u16* panel_text;
     point32_t* base;
 
-    panel_text = &g_proposition_selected_row[0].name_text;
+    panel_text = &g_proposition_selected_row.name_text;
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     level->proposition_detail_panel.render_index = index;
     text_measure_pixels(

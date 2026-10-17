@@ -925,7 +925,7 @@ s32 world_map_start_pan_if_outside(const point32_t* point, const SVECTOR* coordi
 
     world_map_negate_and_clamp(coordinates, &g_world_map_pan.target);
     g_world_map_pan.flags |= WORLD_MAP_PAN_ACTIVE;
-    g_world_map_pan.origin = g_world_map_projection_origin;
+    g_world_map_pan.origin = g_world_map_projection_view.origin;
 
     dx = g_world_map_pan.target.vx - g_world_map_pan.origin.vx;
     dy = g_world_map_pan.target.vy - g_world_map_pan.origin.vy;
@@ -938,12 +938,12 @@ s32 world_map_start_pan_if_outside(const point32_t* point, const SVECTOR* coordi
  * edge while the projection origin still has more than 0x20 of scroll room
  * toward it. Nothing wraps; at the scroll limit the point counts as inside. */
 s32 world_map_is_outside_pan_bounds(const point32_t* point) {
-    if ((point->x < -0x40 && 0x80 - g_world_map_projection_origin.vx >= 0x21)
-        || (point->x >= 0x49 && g_world_map_projection_origin.vx + 0x74 >= 0x21)) {
+    if ((point->x < -0x40 && 0x80 - g_world_map_projection_view.origin.vx >= 0x21)
+        || (point->x >= 0x49 && g_world_map_projection_view.origin.vx + 0x74 >= 0x21)) {
         return 1;
     }
-    if ((point->y < -0x40 && 0x50 - g_world_map_projection_origin.vy >= 0x21)
-        || (point->y >= 0x41 && g_world_map_projection_origin.vy + 0x40 >= 0x21)) {
+    if ((point->y < -0x40 && 0x50 - g_world_map_projection_view.origin.vy >= 0x21)
+        || (point->y >= 0x41 && g_world_map_projection_view.origin.vy + 0x40 >= 0x21)) {
         return 1;
     }
     return 0;
@@ -998,11 +998,11 @@ s32 world_map_step_pan(void) {
     distance = g_world_map_pan.distance;
     target_x = (target_x - origin_x) * progress;
     delta_x = target_x / distance;
-    g_world_map_projection_origin.vx = origin_x + delta_x;
+    g_world_map_projection_view.origin.vx = origin_x + delta_x;
     origin_y = g_world_map_pan.origin.vy;
-    g_world_map_projection_origin.vy = origin_y + (g_world_map_pan.target.vy - origin_y) * progress / distance;
+    g_world_map_projection_view.origin.vy = origin_y + (g_world_map_pan.target.vy - origin_y) * progress / distance;
     if (progress >= distance) {
-        g_world_map_projection_origin = g_world_map_pan.target;
+        g_world_map_projection_view.origin = g_world_map_pan.target;
         g_world_map_pan.flags ^= WORLD_MAP_PAN_ACTIVE;
         return 0;
     }
@@ -1015,17 +1015,17 @@ s32 world_map_step_pan(void) {
  * sets SYSTEM_FLAG_DRAW_MAP if the origin's x or y changed. */
 static void world_map_scroll_if_near_edge(point32_t* delta) {
     point32_t position;
-    VECTOR saved = g_world_map_projection_origin;
+    VECTOR saved = g_world_map_projection_view.origin;
 
     position.x = g_world_map_projection_state.marker.render.position.x + delta->x;
     position.y = g_world_map_projection_state.marker.render.position.y + delta->y;
     if ((delta->x < 0 && position.x < -0x40) || (delta->x > 0 && position.x >= 0x49)) {
-        world_map_apply_clamped_horizontal_scroll(&delta->x, &g_world_map_projection_origin.vx);
+        world_map_apply_clamped_horizontal_scroll(&delta->x, &g_world_map_projection_view.origin.vx);
     }
     if ((delta->y < 0 && position.y < -0x40) || (delta->y > 0 && position.y >= 0x41)) {
-        world_map_apply_clamped_vertical_scroll(delta, &g_world_map_projection_origin);
+        world_map_apply_clamped_vertical_scroll(delta, &g_world_map_projection_view.origin);
     }
-    if (saved.vx != g_world_map_projection_origin.vx || saved.vy != g_world_map_projection_origin.vy) {
+    if (saved.vx != g_world_map_projection_view.origin.vx || saved.vy != g_world_map_projection_view.origin.vy) {
         g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
     }
 }
@@ -1160,7 +1160,7 @@ void world_map_init_marker_and_camera(void) {
         g_world_map_projection_state.marker.render.palette = 3;
     }
     marker->position = g_world_map_dots[marker->kind].position;
-    world_map_negate_and_clamp(&g_world_map_projection_state.marker.position, &g_world_map_projection_origin);
+    world_map_negate_and_clamp(&g_world_map_projection_state.marker.position, &g_world_map_projection_view.origin);
     world_map_project_tiles();
     world_map_update_camera();
 }

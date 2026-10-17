@@ -128,7 +128,7 @@ void world_map_toggle_captured_frame(s32 capture) {
  *
  * Layout:
  *  - Origin, scale and rotation form g_world_map_projection_view. Their
- *    aliases retain this initializer's absolute stores;
+ *    scale and rotation retain their initialized-data definitions;
  *    the projection routine anchors its shared record view at rotation.
  *  - The 24-byte tile source table is reached through the pointer cell
  *    g_world_map_tile_descriptors. The target indexes it by 32-bit value
@@ -174,17 +174,17 @@ void world_map_init_tile_atlas(void) {
     s32 y;
     s32 width;
     s32 height;
-    s32 clut_x;
-    s32 clut_y;
+    s32 u;
+    s32 v;
     s32 tpage_x;
     s32 tpage_y;
 
     g_world_map_projection_scale.vx = ONE;
     g_world_map_projection_scale.vy = ONE;
     g_world_map_projection_scale.vz = ONE;
-    g_world_map_projection_origin.vx = 0;
-    g_world_map_projection_origin.vy = 0;
-    g_world_map_projection_origin.vz = 0;
+    g_world_map_projection_view.origin.vx = 0;
+    g_world_map_projection_view.origin.vy = 0;
+    g_world_map_projection_view.origin.vz = 0;
     g_world_map_projection_rotation.vx = 0;
     g_world_map_projection_rotation.vy = 0;
     g_world_map_projection_rotation.vz = 0;
@@ -200,8 +200,8 @@ void world_map_init_tile_atlas(void) {
             for (col = 0; col < WORLD_MAP_ROW_STRIDE; col++) {
                 tpage_x = descriptor[k];
                 tpage_y = descriptor[k + 1];
-                clut_x = descriptor[k + 2];
-                clut_y = descriptor[k + 3];
+                u = descriptor[k + 2];
+                v = descriptor[k + 3];
                 width = descriptor[k + 4];
                 height = descriptor[k + 5];
                 pos[i * 6] = x;
@@ -209,7 +209,7 @@ void world_map_init_tile_atlas(void) {
                 if (width != 0 && height != 0) {
                     g_world_map_projected_tiles[i].flags = GetTPage(1, 0, tpage_x, tpage_y) & 0xff;
                     g_world_map_projected_tiles[i].texture
-                        = (clut_x << 24) | ((clut_y & 0xff) << 16) | ((width & 0xff) << 8) | (height & 0xff);
+                        = (u << 24) | ((v & 0xff) << 16) | ((width & 0xff) << 8) | (height & 0xff);
                 } else {
                     g_world_map_projected_tiles[i].flags = WORLD_MAP_TILE_EMPTY;
                 }
