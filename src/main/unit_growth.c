@@ -122,8 +122,8 @@ s32 unit_calculate_random_equipment(
  * job_id 0x4a (Squire) stands for the unit's base job.  With an ENTD primary
  * skillset of 0 every ability of the unit's own job is learned; otherwise
  * each ability is rolled against its learn chance and bought with job JP.
- * The original reuses two scratch variables: `i` doubles as the unlocked-job
- * mask and `scratch` holds both the unlocked-job bits and the learn chance;
+ * Two scratch locals preserve the native register reuse: `i` doubles as the
+ * unlocked-job mask and `scratch` holds both those bits and the learn chance;
  * separate locals change the register allocation. */
 void unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_unit_t* entd) {
     s32 job_index = job_id - JOB_ID_SQUIRE;

@@ -23,8 +23,10 @@ extern u8 g_suzuki_sound_heap_memory[SUZUKI_SOUND_HEAP_BYTE_COUNT]; /* the CPU h
 /* Allocation records and one trailing free-range record. */
 extern psyq_spu_heap_record_t g_suzuki_sound_spu_malloc_table[SUZUKI_SOUND_SPU_ALLOC_RECORD_COUNT];
 typedef char suzuki_spu_allocator_storage_size_must_be_56[sizeof(g_suzuki_sound_spu_malloc_table) == 56 ? 1 : -1];
-extern u32 g_suzuki_unknown_80032a34; /* only ever stored */
-extern s16 g_suzuki_unknown_80032a58; /* only ever stored */
+
+/* Cleared during driver initialization; their purposes are unknown. */
+extern u32 g_suzuki_unknown_80032a34;
+extern s16 g_suzuki_unknown_80032a58;
 
 /* Output mixing and transfer state. */
 extern CdlATV g_suzuki_sound_cd_mix;           /* 0x80032a3c; written by Put Sound Type */

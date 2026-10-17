@@ -40,7 +40,7 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
-/* One 12x24 burst tile: a double-buffered flat quad plus its motion state. */
+/* One cell of the 12-row, 24-column burst grid: two flat quads and its motion state. */
 typedef struct conditions_burst_tile {
     POLY_F4 poly[2];   /* 0x00 */
     s32 delay;         /* 0x30 */

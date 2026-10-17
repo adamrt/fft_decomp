@@ -212,8 +212,8 @@ void brave_story_handle_propositions_input(menu_stack_record_t* level) {
  * in g_brave_story_advancing_saved_cursor is clamped, the four windows are positioned relative to the
  * render record's origin, and the level is committed at depth + 1.
  *
- * The 0xb8 frame carries 0x50 bytes of locals the original never reads;
- * `dead_locals` reproduces them.
+ * `dead_locals` reserves 0x50 bytes to reproduce the target's 0xb8-byte frame;
+ * the original local declarations are unknown.
  *
  * The seeding loop's entry test is spelled `i < count` (the target's signed
  * `blez`) around a do-while that re-reads the u8 count, which gives the
@@ -1329,8 +1329,8 @@ void screen_transition_step_level(menu_stack_record_t* level) {
  * record's origin. With `reset` set it also clears the two 32-bit tutorial
  * progress masks at g_tutorial_progress_masks.
  *
- * The 40 bytes of `dead_locals` reproduce the target's 0x50 frame: the
- * original declares locals it never reads, and GCC still reserves their slots.
+ * The 40 bytes of `dead_locals` reproduce the target's 0x50-byte frame;
+ * the original local declarations are unknown.
  * The `- -(...)` in the cursor-row Y expression only flips the commutative
  * operand order of the final `addu`; it is arithmetically identical. */
 static void tutorial_push_menu_level(s32 selected_entry, s32 reset) {

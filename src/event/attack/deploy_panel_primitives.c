@@ -18,8 +18,8 @@
  *   above 0x40   fading in, two steps a frame, at brightness 0xc0 minus the value until
  *                it reaches 0x40 and becomes lit.
  *
- * The panel uses the unsigned low half of each signed word offset. Taking its address
- * before the halfword read preserves the retail load scheduling. */
+ * The panel narrows each signed word offset to its unsigned low half before the GPU
+ * coordinate arithmetic. */
 void unit_panel_build_status_groups(POLY_FT4* poly) {
     s32 group;
     s32 cell;

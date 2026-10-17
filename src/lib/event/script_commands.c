@@ -520,7 +520,6 @@ void script_wait_for_unit_ready(s32 runtime_id) {
 void text_init_section_pointers(void) {
     s32* source;
     u8** destination;
-    /* These two assignments fill the target load delay before the loop. */
     s32* text;
 #ifdef FFT_BATTLE
     s32 menu_input_mode;
@@ -533,6 +532,7 @@ void text_init_section_pointers(void) {
 #ifdef FFT_BATTLE
     menu_input_mode = g_menu_input_mode;
 #endif
+    /* These two assignments fill the target load delay before the loop. */
     text = source + TEXT_SECTION_COUNT;
     destination = g_text_section_pointers;
     do {
@@ -541,6 +541,7 @@ void text_init_section_pointers(void) {
 #endif
         {
             offset = *source;
+            /* Integer addition retains the native addu operand order. */
             offset += (s32)text;
             *destination = (u8*)offset;
         }

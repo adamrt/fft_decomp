@@ -16,7 +16,7 @@
 extern int g_system_graphics_error;
 extern const game_options_t g_game_options_defaults;
 
-/* Set with the input repeat timings; never read. */
+/* Set with the input repeat timings; no reader has been identified. */
 extern u8 g_menu_scroll_unread_setting;
 
 /* Empty report hook. Callers pass a source number (0 from system_handle_error, 1 the effect
