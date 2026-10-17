@@ -345,7 +345,7 @@ functions:
   - {addr: 0x800791e8, size: 176, name: sprite_palette_load_fixed_cluts, hash: cc67b40e2f684161, unit: unit_lookup}
   - {addr: 0x80079298, size: 8, name: deploy_frame_stub, hash: 6d64edf91449c1b1, unit: unit_lookup}
   - {addr: 0x800792a0, size: 2040, name: state_run_map_load, hash: 02138be28fa8c8d8, unit: unit_lookup, rodata: [{addr: 0x800676a0, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80079a98, size: 1852, name: state_run_game_loop, hash: 8ada54ca495c6cab, unit: unit_lookup, rodata: [{addr: 0x800676a8, size: 240, hash: 2a2fabd4845aafe2}]}
+  - {addr: 0x80079a98, size: 1852, name: battle_entrypoint, hash: 8ada54ca495c6cab, unit: unit_lookup, rodata: [{addr: 0x800676a8, size: 240, hash: 2a2fabd4845aafe2}]}
   - {addr: 0x8007a1d4, size: 68, name: unit_get_casting, hash: 96b268eb8bbafc81, unit: unit_lookup}
   - {addr: 0x8007a218, size: 68, name: unit_get_source, hash: 4de3b8253524c764, unit: unit_lookup}
   - {addr: 0x8007a25c, size: 92, name: unit_find_runtime_at_tile, hash: f06d6b691a46e200, unit: unit_lookup}
@@ -2949,28 +2949,28 @@ data:
   - {addr: 0x801cc074, name: g_menu_scratch_buffer}
 
 imports:
-  - {addr: 0x801bf3b8, name: save_run_menu}
-  - {addr: 0x801bf7e0, name: equipment_update}
-  - {addr: 0x801c05d4, name: fullscreen_graphic_thread}
-  - {addr: 0x801c1a3c, name: option_dispatch}
+  - {addr: 0x801bf3b8, name: card_entrypoint}
+  - {addr: 0x801bf7e0, name: equip_entrypoint}
+  - {addr: 0x801c05d4, name: etc_entrypoint}
+  - {addr: 0x801c1a3c, name: option_entrypoint}
   - {addr: 0x801c3078, name: deploy_find_fieldable_units}
-  - {addr: 0x801c3190, name: unit_list_run}
+  - {addr: 0x801c3190, name: bunit_entrypoint}
   - {addr: 0x801c34b4, name: scenario_load_conditionals}
   - {addr: 0x801c3b00, name: scenario_restore_music_and_darkness}
-  - {addr: 0x801c3d84, name: status_screen_mounted_unit_thread}
-  - {addr: 0x801c3f44, name: deploy_run}
-  - {addr: 0x801c438c, name: debug_unit_editor_run}
+  - {addr: 0x801c3d84, name: debugchr_mounted_unit_entrypoint}
+  - {addr: 0x801c3f44, name: attack_deployment_entrypoint}
+  - {addr: 0x801c438c, name: debugchr_editor_entrypoint}
   - {addr: 0x801c5a50, name: deploy_get_coordinate_slots}
   - {addr: 0x801c7fe4, name: formation_build_sprites}
   - {addr: 0x801c8004, name: portrait_load_party}
   - {addr: 0x801c9488, name: deploy_build_strings}
-  - {addr: 0x801c9d68, name: battle_map_title_thread}
+  - {addr: 0x801c9d68, name: attack_map_title_entrypoint}
   - {addr: 0x801c9ec0, name: battle_map_title_load_graphic}
-  - {addr: 0x801ca664, name: conditions_animate_banner_burst}
-  - {addr: 0x801cafd4, name: conditions_dispatch}
-  - {addr: 0x801d7000, name: text_init_name_sections}
-  - {addr: 0x801df050, name: help_run_battle}
-  - {addr: 0x801df198, name: status_screen_update}
+  - {addr: 0x801ca664, name: require_dark_screen_entrypoint}
+  - {addr: 0x801cafd4, name: require_conditions_entrypoint}
+  - {addr: 0x801d7000, name: small_entrypoint}
+  - {addr: 0x801df050, name: helpmenu_battle_entrypoint}
+  - {addr: 0x801df198, name: jobstts_entrypoint}
 
 overrides:
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80165ecc}

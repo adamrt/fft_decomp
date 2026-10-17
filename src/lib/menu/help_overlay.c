@@ -40,7 +40,7 @@ static void help_close(void) {
  * help cursor over the navigation table for that menu or the unit view.
  *
  * Every help text opens through message_dialog_thread with HELP_DIALOG_TYPE_CENTERED. */
-void help_run_battle(void) {
+void helpmenu_battle_entrypoint(void) {
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
     help_navigation_record_t* navigation;
@@ -476,10 +476,10 @@ static s32 thread_find_first_running_menu_thread(void) {
     return thread_id;
 }
 
-/* The help cursor over the REQUIRE screen: like the unit-view half of help_run_battle, it
+/* The help cursor over the REQUIRE screen: like the unit-view half of helpmenu_battle_entrypoint, it
  * moves over the shared navigation table (adjusted for this screen) with the d-pad, opens the
  * Help box of the node under the cursor on Circle and closes on Cross. */
-void help_run_after_battle(void) {
+void helpmenu_after_battle_entrypoint(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shadow[2];
     thread_t* self;

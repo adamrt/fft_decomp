@@ -482,7 +482,7 @@ void script_noop_1(void) {
  * thread parameters. */
 void script_execute_display_conditions_instruction(void) {
     g_unit_panel_hide_numeric_values = 0;
-    conditions_dispatch();
+    require_conditions_entrypoint();
 }
 
 /* The thread EVENT_OPCODE_DARK_SCREEN starts: it takes the task id, and in
@@ -492,7 +492,7 @@ void script_dark_screen_thread(void) {
     thread_set_current_task_id(THREAD_TASK_DARK_SCREEN);
 #ifdef FFT_BATTLE
     overlay_request_companion(COMPANION_OVERLAY_REQUIRE);
-    conditions_animate_banner_burst();
+    require_dark_screen_entrypoint();
 #endif
 }
 
@@ -554,14 +554,14 @@ void announcement_spell_quote_thread(void) {
 void option_open(void) {
     menu_set_modal_open();
     overlay_request_companion(COMPANION_OVERLAY_OPTION);
-    option_dispatch(MENU_OPTION_TYPE_GAME_OPTIONS);
+    option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Thread entry of menu entry 0x1d: load OPTION.OUT and open its AT list. */
 void at_list_open(void) {
     menu_set_modal_open();
     overlay_request_companion(COMPANION_OVERLAY_OPTION);
-    option_dispatch(MENU_OPTION_TYPE_AT_LIST);
+    option_entrypoint(MENU_OPTION_TYPE_AT_LIST);
 }
 
 /* Thread started for system function 0x1f (crystal or treasure): load OPTION.OUT
@@ -569,7 +569,7 @@ void at_list_open(void) {
 void crystal_open_pickup_panel(void) {
     menu_set_modal_open();
     overlay_request_companion(COMPANION_OVERLAY_OPTION);
-    option_dispatch(MENU_OPTION_TYPE_CRYSTAL_PICKUP);
+    option_entrypoint(MENU_OPTION_TYPE_CRYSTAL_PICKUP);
 }
 
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */
@@ -658,7 +658,7 @@ static void help_menu_thread(void) {
     }
     overlay_reserve_high(MENU_HIGH_OVERLAY_SIZE);
     overlay_request_companion(COMPANION_OVERLAY_HELPMENU);
-    help_run_battle();
+    helpmenu_battle_entrypoint();
 }
 
 /* Run the job-status overlay while its state is nonzero. */
@@ -752,7 +752,7 @@ void status_screen_open_mounted_unit(void) {
         unit_view_wait_for_panels();
         command_record_unit_selection();
         menu_enter_status_screen_selection();
-        status_screen_mounted_unit_thread(*unit_index);
+        debugchr_mounted_unit_entrypoint(*unit_index);
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;
@@ -775,7 +775,7 @@ void debug_unit_editor_open(void) {
     unit_view_wait_for_panels();
     thread_yield();
     thread_yield();
-    debug_unit_editor_run();
+    debugchr_editor_entrypoint();
     g_menu_overlay_state = 0;
     g_sound_suppressed = 0;
     g_script_event_input = 0;
@@ -787,7 +787,7 @@ void debug_unit_editor_open(void) {
 void script_show_graphic(void) {
     thread_set_current_task_id(THREAD_TASK_SHOW_GRAPHIC);
     overlay_request_companion(COMPANION_OVERLAY_ETC);
-    fullscreen_graphic_thread();
+    etc_entrypoint();
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between script_show_graphic and
@@ -1157,7 +1157,7 @@ s32 overlay_poll_small(void) {
     if (g_overlay_companion_executable_request_index != 0) {
         return 1;
     }
-    text_init_name_sections();
+    small_entrypoint();
     return 0;
 }
 

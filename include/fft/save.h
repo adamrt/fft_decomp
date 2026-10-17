@@ -181,7 +181,7 @@ extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x50];
 void save_build_image(s32 slot);
 
 /* CARD save menu */
-/* g_save_menu_state, the state save_run_menu dispatches on. Only
+/* g_save_menu_state, the state card_entrypoint dispatches on. Only
  * the states whose roles the matching handlers establish are named. */
 typedef enum save_menu_state {
     SAVE_MENU_INITIAL_PROMPT = 0,
@@ -206,7 +206,8 @@ extern s32 g_save_menu_script_callback;
 extern s16 g_save_menu_selection_index;
 extern s8 g_save_completed;
 
-void save_run_menu(s32 unused);
+/* Run CARD's save-menu loop until it closes. */
+void card_entrypoint(s32 unused);
 void save_backdrop_thread(void);
 
 /* CARD prompts */

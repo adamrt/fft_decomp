@@ -193,7 +193,7 @@ done:
  * renders the map, runs the handler of the current game state, updates the camera,
  * map animations and music, and presents the frame. Entering CloseBattle ends the
  * loop; it starts over with deployment while the game flow is still battle. */
-void state_run_game_loop(void) {
+void battle_entrypoint(void) {
     sprite_evtchr_slot_t* timer_field;
     SVECTOR* camera_integer;
     VECTOR* camera_fixed;

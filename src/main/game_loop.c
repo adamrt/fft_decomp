@@ -44,7 +44,7 @@ static void overlay_call_legacy_stub(void) {
 /* Load BATTLE.BIN (sector 1000) into the whole low overlay area, which ends at
  * the high overlay address, and call system_zero_padding. That is not BATTLE
  * code but MAIN's 4 KB of zero words ending in `jr ra`; BATTLE runs when the
- * caller then calls state_run_game_loop. */
+ * caller then calls battle_entrypoint. */
 static void overlay_exec_battle(void) {
     file_load_checked_to_address(DISC_SECTOR_BATTLE_BIN,
         g_heap_high_overlay_load_address - g_heap_low_overlay_load_address, g_heap_low_overlay_load_address);
@@ -95,7 +95,7 @@ static void system_run_game_loop(void) {
             }
 
             overlay_exec_battle();
-            state_run_game_loop();
+            battle_entrypoint();
             sound_stop_weather_music();
             g_system_go_straight_to_battle = 0;
 
@@ -113,7 +113,7 @@ static void system_run_game_loop(void) {
             overlay_exec_open_ending();
             overlay_exec_battle();
             zodiac_load_frame();
-            state_run_game_loop();
+            battle_entrypoint();
             system_stop_display_and_audio();
         }
     }

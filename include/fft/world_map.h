@@ -16,7 +16,7 @@
 #include "psx/types.h"
 
 /* entry */
-/* g_system_frontend_world_result: why world_map_run returned, which tells BATTLE.BIN what
+/* g_system_frontend_world_result: why wldcore_entrypoint returned, which tells BATTLE.BIN what
  * to run next. */
 typedef enum world_map_result {
     WORLD_MAP_RESULT_NONE = 0, /* no special case: the current scenario's event or battle */
@@ -36,7 +36,8 @@ typedef enum world_map_thread_slot {
 /* g_system_flags as world_map_update_backdrop last saw it (system_flags_e). */
 extern u32 g_world_map_previous_system_flags;
 
-s32 world_map_run(void);
+/* Run WLDCORE's world-map loop and return a world_map_result_e. */
+s32 wldcore_entrypoint(void);
 void world_map_switch_to_stack(void*);
 void world_map_restore_previous_stack(void);
 void world_map_init_menus_and_date(void);

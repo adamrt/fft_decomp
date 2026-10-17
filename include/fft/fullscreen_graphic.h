@@ -39,6 +39,7 @@ extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_b[2][4];
 extern RECT g_fullscreen_graphic_game_over_palette_rect;
 extern const char g_fullscreen_graphic_allocation_wait_message[];
 
-void fullscreen_graphic_thread(void);
+/* Run ETC's chapter-title or Game Over graphic selected by the current thread's parameters. */
+void etc_entrypoint(void);
 
 #endif

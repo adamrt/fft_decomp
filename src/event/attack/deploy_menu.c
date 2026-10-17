@@ -507,7 +507,7 @@ static void battle_map_title_build_strips(POLY_GT4* polys, s32 width, s32 shade,
 /* Thread body that animates the map-title panel strip with double-buffered
  * primitives: widen it by the thread's step, hold it, then sweep it again
  * with `reverse` set. The hold phase reuses `width` as its frame counter. */
-void battle_map_title_thread(void) {
+void attack_map_title_entrypoint(void) {
     s32 step = thread_get_current_parameter_3();
     s32 buffer = 0;
     s32 width;

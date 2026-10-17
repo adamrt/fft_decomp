@@ -98,12 +98,12 @@ extern s32 g_help_open;
 /* Opens the help menu on the menu-building thread slot unless input is held off or another screen is busy. */
 void help_start_menu_thread(void);
 
-/* Opens help for the running menu's pending request, or runs the help cursor over the navigation table of that
- * menu or the unit view. */
-void help_run_battle(void);
+/* HELPMENU's menu/unit-view help loop; WORLD also links this body. Opens a pending
+ * request or runs the help cursor over the menu or unit-view navigation table. */
+void helpmenu_battle_entrypoint(void);
 
-/* The help menu over the REQUIRE screen. */
-void help_run_after_battle(void);
+/* HELPMENU's help loop over REQUIRE; WORLD also links an uncalled copy. */
+void helpmenu_after_battle_entrypoint(void);
 
 /* Starts the help text thread for the pending help message: binds the help text and locks the menu input. */
 void menu_text_start_help_thread(s32 thread_data);

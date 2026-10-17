@@ -51,7 +51,7 @@ static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
  * frame polls the CD read, clears the ordering table and queues the overlay fade,
  * steps the movie, runs the WORLD menu frame while it is on and then the current
  * controller, draws the render records, reads the pad and flips the buffers. */
-s32 title_run_main_loop(s32 skip_movie) {
+s32 open_title_entrypoint(s32 skip_movie) {
     u32* otag_0;
     u32* otag_1;
 
@@ -101,7 +101,7 @@ s32 title_run_main_loop(s32 skip_movie) {
  * background movie_present_frame has just put into the new draw buffer. On
  * exit the VRAM page saved by ending_init is restored, the
  * display is blanked and the CD audio returns to mix level 0xc0. */
-void ending_run(void) {
+void open_ending_entrypoint(void) {
     u32* otag_0;
     u32* otag_1;
 

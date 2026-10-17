@@ -82,9 +82,9 @@ extern s16 g_unit_panel_status_right_text_ids[20];
 void status_screen_build_status_list(void);
 
 /* overlay screens */
-void status_screen_jobs_thread(void);                /* runs JOBSTTS while its state is nonzero */
-void status_screen_open_mounted_unit(void);          /* DEBUGCHR's view of a selected rider or mount */
-void status_screen_mounted_unit_thread(s32 unit_id); /* DEBUGCHR's entry */
+void status_screen_jobs_thread(void);               /* runs JOBSTTS while its state is nonzero */
+void status_screen_open_mounted_unit(void);         /* DEBUGCHR's view of a selected rider or mount */
+void debugchr_mounted_unit_entrypoint(s32 unit_id); /* DEBUGCHR's read-only rider/mount Status loop */
 
 /* job pages (JOBSTTS) */
 /* Job and ability data copied into JOBSTTS.OUT for the selected unit. */
@@ -107,7 +107,8 @@ extern status_screen_unit_jobs_t* g_status_screen_unit_data[];
  * three data bytes ahead of the first function. */
 extern const char g_status_screen_text_decimal_format[];
 
-u32* status_screen_update(s32 unit, void* unused_otag);
+/* Advance JOBSTTS one frame; return its ordering table while open, or zero on close. */
+u32* jobstts_entrypoint(s32 unit, void* unused_otag);
 void status_screen_init_unit_jobs(s32 unit_id);
 
 /* menu display (JOBSTTS) */

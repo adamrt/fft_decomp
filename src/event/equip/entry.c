@@ -109,7 +109,7 @@ void equipment_show_message(s32 message_id, s32 sound_id) {
 /* Run one frame of the equipment screen. Returns the frame's ordering table
  * while the screen is open, then whether the unit's equipment changed once it
  * closes. */
-s32 equipment_update(s32 unit, u32* otag) {
+s32 equip_entrypoint(s32 unit, u32* otag) {
     s32 result;
     s32 i;
     u8 restore_text;

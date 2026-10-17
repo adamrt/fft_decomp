@@ -17,12 +17,12 @@
  * + EQUIP: Equip, Remove and the item list are rows 0, 2 and 3 (row 1 is
  * refused). */
 typedef enum equipment_state {
-    EQUIPMENT_STATE_INIT = 0, /* equipment_update builds the screen */
+    EQUIPMENT_STATE_INIT = 0, /* equip_entrypoint builds the screen */
     EQUIPMENT_STATE_COMMAND_MENU = 1,
     EQUIPMENT_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
     EQUIPMENT_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
     EQUIPMENT_STATE_ITEM_LIST = 5, /* equipment_update_menu */
-    EQUIPMENT_STATE_CLOSED = 0xff, /* equipment_update returns its result */
+    EQUIPMENT_STATE_CLOSED = 0xff, /* equip_entrypoint returns its result */
 } equipment_state_e;
 
 extern u8 g_equipment_screen_state; /* equipment_state_e */
@@ -41,7 +41,9 @@ extern clut_t g_equipment_palette_image;
 extern menu_entry_t g_equipment_command_menu;
 
 void equipment_thread(void);
-s32 equipment_update(s32 unit, u32* otag);
+
+/* Advance EQUIP one frame; return its ordering table while open, then the equipment-change result. */
+s32 equip_entrypoint(s32 unit, u32* otag);
 void equipment_init(s32 battle_id);
 void equipment_reset_selection(void);
 

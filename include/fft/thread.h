@@ -108,7 +108,7 @@ typedef enum thread_screen_slot {
  * thread is not running. */
 typedef enum thread_borrowed_slot {
     THREAD_BORROWED_SLOT_CARD_BACKDROP = 2, /* the memory card screen's zooming backdrop */
-    THREAD_BORROWED_SLOT_DEPLOYMENT = 6,    /* deploy_run, or the map-data-load-complete thread
+    THREAD_BORROWED_SLOT_DEPLOYMENT = 6,    /* attack_deployment_entrypoint, or the map-data-load-complete thread
                                              * when a battle has no deployment */
     /* The AT list of the crystal pickup menu, once the unit view's panels have stopped. */
     THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD = 9, /* a wait-forever thread while the AT list's child runs */

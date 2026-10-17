@@ -440,7 +440,7 @@ static void game_over_show(s32 graphic_id) {
 
 /* Thread body: load ETC graphic parameter 1 and run its show routine, the
  * chapter title for texture mode 0 or the game-over screen for mode 1. */
-void fullscreen_graphic_thread(void) {
+void etc_entrypoint(void) {
     s32 graphic_id = thread_get_current_parameter_1();
     s32 graphic_type;
 

@@ -110,7 +110,7 @@ s32 deploy_open(void) {
         music_play_tracks(MUSIC_DEPLOYMENT, MUSIC_NONE);
         deploy_build_strings();
         battle_map_title_load_graphic();
-        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, deploy_run);
+        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, attack_deployment_entrypoint);
         return_value = 0;
     }
     return return_value;

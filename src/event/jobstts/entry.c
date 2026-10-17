@@ -85,7 +85,7 @@ static void status_screen_load_images(void) {
  * the unit's job data. Every call then swaps contexts, updates input (SELECT opens the
  * help text, and the text section pointers come back once a message ends) and runs the
  * active page: the job page, closed by CROSS, or the ability page. */
-u32* status_screen_update(s32 unit, void* unused_otag) {
+u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     u32* result;
 
     if (g_status_screen_initialized == 0) {

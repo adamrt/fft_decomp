@@ -143,7 +143,7 @@ static void save_init_graphics(void) {
  * and shoulder buttons are passed on only while a text, child-menu or
  * slot-14 thread runs. The save-file directory buffer also lives on this frame.
  */
-void save_run_menu(s32 unused) {
+void card_entrypoint(s32 unused) {
     TILE tile_storage[20];
     u32 otag_storage[0x80];
     save_gfx_context_t context_storage[2];

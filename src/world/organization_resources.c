@@ -608,9 +608,9 @@ void world_map_menu_text_window_thread(void) {
     thread_exit_current();
 }
 
-/* Thread body that opens the game options screen through option_dispatch. */
+/* Thread body that opens the game options screen through option_entrypoint. */
 static void option_open_game_options_thread(void) {
-    option_dispatch(MENU_OPTION_TYPE_GAME_OPTIONS);
+    option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Runs the game options thread in the slot below the current thread,

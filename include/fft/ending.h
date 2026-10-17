@@ -9,7 +9,8 @@
 #include "psx/types.h"
 
 /* ending sequence */
-void ending_run(void);
+/* Run OPEN's ending movie and script, then restore graphics state. */
+void open_ending_entrypoint(void);
 void ending_init(void);
 void ending_load_movie_graphics(void);
 

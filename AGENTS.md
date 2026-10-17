@@ -114,17 +114,23 @@ instead of including the record's header.
   (`script_`, `thread_`, `text_`, `menu_`, `screen_`, `window_`, `gfx_`,
   `memcard_`, `bits_`, `system_`, `file_`, `heap_`, `overlay_`, `input_`,
   `render_`, `controller_`). A sub-topic leads when the player picks it as a
-  mode (`shop_buy_`, `formation_job_`). Names carry no program token; the
-  folder says which program a body belongs to. One role takes one name in
-  every program, so bodies that differ by program share it (CARD's and
-  WORLD's `save_build_image`); different roles take different names, and
-  every name is unique across programs except same-role bodies, which never
-  share a link.
+  mode (`shop_buy_`, `formation_job_`). Except for program entrypoints below,
+  names carry no program token; the folder says which program a body belongs
+  to. One role takes one name in every program, so bodies that differ by
+  program share it (CARD's and WORLD's `save_build_image`); different roles
+  take different names, and every name is unique across programs except
+  same-role bodies, which never share a link.
 - Name execution roles consistently: `_init` sets up state or resources,
   `_run` completes a loop or operation, `_update` advances one step,
   `_start` launches scheduled work, and `_dispatch` selects a behavior.
-  Being an overlay export alone does not make a function an initializer or
-  require an `_entrypoint` name.
+- Program entrypoints are the naming exception: use `<program>_entrypoint`,
+  or `<program>_<role>_entrypoint` for independent entrances to one overlay
+  (`small_entrypoint`, `open_title_entrypoint`, `open_ending_entrypoint`).
+  Identify them from the callers that enter the loaded program, not function
+  order or export status. Comments describe whether the entry runs a loop,
+  advances a frame or initializes resources. Same-role resident copies keep
+  the entrypoint name. Preserve `main` and established runtime/library names;
+  ordinary exported helpers and effect callbacks keep behavior names.
 - A bytecode machine's handler for one opcode is named
   `<machine>_opcode_<nn>_<instruction>` with the opcode in two hex digits:
   `script_opcode_28_walk_to` (event scripts), `sound_novel_opcode_*`,

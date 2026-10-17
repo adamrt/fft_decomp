@@ -1001,7 +1001,7 @@ restart_script:
             operand_4 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
             overlay_request_companion(COMPANION_OVERLAY_ATTACK);
             battle_map_title_load_graphic();
-            thread_start(operand_4, battle_map_title_thread);
+            thread_start(operand_4, attack_map_title_entrypoint);
             thread_set_parameters(operand_4, (s8)operand_1, (s8)operand_2, (s8)operand_3);
             thread_wait_until_inactive(operand_4);
         } else if (opcode == EVENT_OPCODE_SET_DATE_ADVANCE) {

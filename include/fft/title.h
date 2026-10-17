@@ -11,7 +11,8 @@
 union controller_record;
 
 /* title screen */
-s32 title_run_main_loop(s32 skip_movie);
+/* Run OPEN's title/movie loop and return the next game route; nonzero skips the opening movie. */
+s32 open_title_entrypoint(s32 skip_movie);
 void title_init_sequence(s32 skip_movie);
 void title_start_logo_movie_or_menu(s32 use_alternate);
 void title_load_menu_graphics(void);

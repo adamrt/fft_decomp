@@ -25,8 +25,8 @@ libraries:
   - {id: libpress, addr: 0x8007348c, end: 0x80073f10, kind: psyq, library: LIBPRESS}
 
 functions:
-  - {addr: 0x800670f0, size: 284, name: title_run_main_loop, hash: 1b6e181d0ae942f3, unit: movies}
-  - {addr: 0x8006720c, size: 276, name: ending_run, hash: 8adfe0f21b2d14df, unit: movies}
+  - {addr: 0x800670f0, size: 284, name: open_title_entrypoint, hash: 1b6e181d0ae942f3, unit: movies}
+  - {addr: 0x8006720c, size: 276, name: open_ending_entrypoint, hash: 8adfe0f21b2d14df, unit: movies}
   - {addr: 0x80067320, size: 356, name: movie_start_stream, hash: 46a47ddfcafcaf06, unit: movies}
   - {addr: 0x80067484, size: 312, name: movie_update_stream_frame, hash: d4c1277fea3cb7f7, unit: movies}
   - {addr: 0x800675bc, size: 100, name: movie_stop_stream, hash: 52aa88826dc56983, unit: movies}

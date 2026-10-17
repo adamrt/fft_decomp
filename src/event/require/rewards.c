@@ -2002,7 +2002,7 @@ void thread_exit_current_wrapper(void) {
  * target keeps, and the extra insns keep it from hoisting the row offset and
  * the RotMatrix/vector addresses out of the column loop.
  */
-void conditions_animate_banner_burst(void) {
+void require_dark_screen_entrypoint(void) {
     s32 phase;
     s32 max_delay;
     u32 divisor;
@@ -2244,7 +2244,7 @@ void conditions_animate_banner_burst(void) {
  * trophies, the permanent Brave/Faith changes and the low-Brave/high-Faith
  * desertions. The post-battle unit changes run inline.
  */
-void conditions_dispatch(void) {
+void require_conditions_entrypoint(void) {
     s32 condition;
     s32 parameter;
     s32 thread;
@@ -2294,7 +2294,7 @@ void conditions_dispatch(void) {
 
 /* Thread body that runs the HELPMENU overlay from the REQUIRE screen: waits
  * until 0x10000 bytes can be reserved at the high overlay address, loads the
- * overlay and runs help_run_after_battle in the first idle slot,
+ * overlay and runs helpmenu_after_battle_entrypoint in the first idle slot,
  * with the panel's two animation flags set while it runs. */
 static void help_open_after_battle(void) {
     s32 thread_id;
@@ -2308,7 +2308,7 @@ static void help_open_after_battle(void) {
     }
     overlay_request_companion(COMPANION_OVERLAY_HELPMENU);
     thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-    thread_start(thread_id, help_run_after_battle);
+    thread_start(thread_id, helpmenu_after_battle_entrypoint);
     thread_wait_until_inactive(thread_id);
     g_unit_panel_panel_status_animation[0] = 0;
     g_unit_panel_panel_status_animation[1] = 0;

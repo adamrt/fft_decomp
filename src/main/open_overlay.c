@@ -108,11 +108,11 @@ void memcard_init_events(void) {
  * Returns OPEN.BIN's result, 0 meaning go straight into BATTLE.BIN. */
 int overlay_exec_open_title(int mode) {
     file_load_checked_to_address(DISC_SECTOR_OPEN_OPEN_BIN, 0x36800, g_heap_low_overlay_load_address);
-    return title_run_main_loop(mode);
+    return open_title_entrypoint(mode);
 }
 
 /* Load OPEN.BIN into the low overlay area and play its ending cutscene. */
 void overlay_exec_open_ending(void) {
     file_load_checked_to_address(DISC_SECTOR_OPEN_OPEN_BIN, 0x36800, g_heap_low_overlay_load_address);
-    ending_run();
+    open_ending_entrypoint();
 }

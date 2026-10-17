@@ -81,7 +81,7 @@ static void debug_unit_editor_apply_values(s32 unit_id) {
  * `sound_latched` is read before anything assigns it when the menu-building
  * thread is already running on the first frame.
  */
-void status_screen_mounted_unit_thread(s32 unit_id) {
+void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     s32 frame;
     s32 one;
     u8* animation;
@@ -345,7 +345,7 @@ void status_screen_mounted_unit_thread(s32 unit_id) {
  * (by 10 while L1 is held) within the field template's range, TRIANGLE zeroes rows 9 to
  * 13, and every change is written back to the battle unit. Each level step (row 0) also
  * applies one level's stat growth or its reversal. */
-void debug_unit_editor_run(void) {
+void debugchr_editor_entrypoint(void) {
     s32 battle_id;
     help_navigation_record_t* field;
     u32* input;

@@ -9,7 +9,7 @@
 
 /* game state */
 /*
- * Values dispatched by state_run_game_loop, verified against the
+ * Values dispatched by battle_entrypoint, verified against the
  * target's switch table.  The target has no explicit handler for value 50.
  */
 typedef enum game_state {
@@ -78,7 +78,7 @@ extern s32 g_game_state;
 extern s32 g_game_state_previous;
 extern s32 g_state_map_init_step;
 
-/* What MAIN does once state_run_game_loop returns: a system_game_flow_e. */
+/* What MAIN does once battle_entrypoint returns: a system_game_flow_e. */
 extern u32 g_game_flow_state;
 
 /* Nonzero while the action's effect is pending: 1 while its file loads, 2 while it plays, with
@@ -86,7 +86,8 @@ extern u32 g_game_flow_state;
  * script_play_effect_and_wait wait on it. */
 extern s32 g_state_animation_continue_check;
 
-void state_run_game_loop(void);
+/* Run BATTLE's deployment and game-state loop until control returns to MAIN. */
+void battle_entrypoint(void);
 s32 state_sync_frame(u32* ordering_table);
 s32 state_update_controller_input(void);
 void state_update_units(void);

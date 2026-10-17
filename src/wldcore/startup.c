@@ -42,7 +42,7 @@ static void world_map_update_backdrop(void);
 /* WLDCORE's main loop: set up, fade in and run world-map frames until a menu level
  * stops it, then return why as a world_map_result_e. A card-menu restart loops
  * instead. */
-s32 world_map_run(void) {
+s32 wldcore_entrypoint(void) {
     s32 buffer_index;
 
     for (;;) {
@@ -532,7 +532,7 @@ static void world_map_restore_entry_level(void) {
     }
 }
 
-/* Called at the top of world_map_run's loop. A nonzero
+/* Called at the top of wldcore_entrypoint's loop. A nonzero
  * EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT clears SYSTEM_FLAG_RESTART,
  * restores WORLD's formation menu and makes the entrypoint return 0. */
 static s32 world_map_handle_exit_request(void) {

@@ -7,7 +7,7 @@
 /* SMALL.OUT's entry point, run once the overlay is loaded: point the roster-name and
  * job-name text sections at its own name data, copy the skillset-names pointer and
  * clear the deployment unit limit. */
-void text_init_name_sections(void) {
+void small_entrypoint(void) {
     u8* string_data = g_text_name_data;
 
     g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES] = string_data + g_text_name_section_offsets.unit_names;

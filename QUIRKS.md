@@ -150,7 +150,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   type 0; `formation_ability_set_menu` indexes the entry ids with
   `cursor` when the list is empty; `world_map_destination_list_thread` uses
   `selected` when no entry matches the current item; both copies of
-  `help_run_battle` read `node`, `x` and `y` in the cursor loop when the
+  `helpmenu_battle_entrypoint` read `node`, `x` and `y` in the cursor loop when the
   text thread is already running on the first frame, and `navigation` when the
   unit view mode is not 1-4; `menu_init_system_function` passes `ptr` on unset
   for SCENARIO_CHECK and CLOSE; `sprite_display_init_numeric`
@@ -169,7 +169,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `weather_stop_sfx` returns an unset `result` no caller reads.
 - `save_read_file_chunked` sets `result` to -1 when the last read was
   short and then returns `total`; the test has no effect.
-- Both copies of `help_run_after_battle` reach
+- Both copies of `helpmenu_after_battle_entrypoint` reach
   the shadow quads by indexing past the end of the local `cursor[2]`
   (`quad[2]`, `quads[buffer + 2]`), relying on `shadow[2]` following it on
   the stack; one four-entry array does not reproduce the two stack addresses.
@@ -241,7 +241,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   tested and never set.
 - `thread_resolve_id` searches slots 1-16 where BATTLE searches 1-15;
   WORLD's slot 16 (tutorial text) lies beyond the sixteen the reset clears.
-- `save_run_menu` and `save_run_screen` end with
+- `card_entrypoint` and `save_run_screen` end with
   `thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, -1, 0)`: the
   backdrop thread exits only when its third parameter is set, so that call
   does not stop it. CARD also tests and stops slot 14 and suspends slot 15,
@@ -283,7 +283,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `party_update_after_battle` searches the formation sprite groups
   for the unit's row, remaps 0x49 to 0 and 0x47 to 0x48, and never uses the
   result.
-- Both copies of `help_run_battle`: the
+- Both copies of `helpmenu_battle_entrypoint`: the
   `UNIT_VIEW_MODE_HOVERED_UNIT` arm and its navigation table cannot be reached
   (the first arm, which closes the help, takes modes 1 and 2); request
   kinds 4, 0x11, 0x12 and 0x17 call the close routine for an empty id and
@@ -492,7 +492,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Frog's XA of 1 against Defense Up or Protect) stays 0, and the hit deals 0
   damage where any other sign pair deals 1 * YA.
 - DEBUGCHR also serves the normal mounted-unit Status screen. That path keeps `g_debug_unit_editor_active` clear; the editor sets it. The editor is registered as battle menu entry 44 (`MENU_COMMAND_ID_DEBUG_UNIT_EDITOR`), but no C caller or retail menu-row action selects that entry. The mode flag does not enable access to it, and `g_debug_display_enabled` controls diagnostics separately.
-- DEBUGCHR's unit editor (`debug_unit_editor_run`) lets the job, the five
+- DEBUGCHR's unit editor (`debugchr_editor_entrypoint`) lets the job, the five
   equipment slots (Triangle empties one) and the five skillset and ability
   slots be changed, but `debug_unit_editor_apply_values` writes
   back only HP, MP, CT, level, EXP, Brave, Faith, zodiac sign, Move, Speed and
@@ -1066,7 +1066,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `effect_particle_alloc_work_record`, with its free chain empty, calls the empty
   report stub and then reads the next link through NULL.
 - `status_screen_thread` hands a unit with mount info (a
-  rider or a mount) to DEBUGCHR.OUT's `status_screen_mounted_unit_thread`
+  rider or a mount) to DEBUGCHR.OUT's `debugchr_mounted_unit_entrypoint`
   (`status_screen_open_mounted_unit`); any other unit gets BATTLE's own
   panel.
 - The camera's L2/R2 input uses `camera_zoom_toggle` and `camera_tilt_toggle`,
@@ -1080,7 +1080,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `GAME_STATE_EFFECT`; neither has a caller, so
   `state_handle_effect` never runs.
 - WORLD's `screen_fit_parent_entry_to_digits` and
-  `help_run_after_battle` have no callers; their quirks above do not
+  `helpmenu_after_battle_entrypoint` have no callers; their quirks above do not
   execute in retail WORLD.
 - `memcard_wait_for_hardware_event` is OPEN's only caller of
   `memcard_poll_hardware_event_result`, and nothing calls the wait routine.
@@ -1092,7 +1092,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   reaches after loading BATTLE.BIN, is not BATTLE code: it is the 4 KB of zero
   words after MAIN's C start-up, run as 1,024 no-ops up to the `jr ra` at
   0x80011ba8. BATTLE runs when `system_run_game_loop` then calls
-  `state_run_game_loop`.
+  `battle_entrypoint`.
 - `boot_run_startup` installs the empty `file_handle_cd_ready`
   and `file_handle_cd_read`; the `CdInit` it runs next replaces
   them with LIBCD's `def_cbready` and `def_cbread`, so neither ever runs.

@@ -514,7 +514,9 @@ extern s32 g_battle_map_title_closing_past_midpoint;
 extern POLY_GT4 g_battle_map_title_sprites[2][4];
 
 void battle_map_title_load_graphic(void);
-void battle_map_title_thread(void);
+
+/* ATTACK's map-title thread, also used by its deployment screen. */
+void attack_map_title_entrypoint(void);
 
 /* event state */
 /* Map-destruction handshake between the event interpreter and the frame loop. */

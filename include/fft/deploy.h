@@ -91,7 +91,8 @@ extern s16 g_deploy_confirm_result;
  * in ATTACK reads it. */
 extern s32 g_deploy_cleared_word;
 
-void deploy_run(void);
+/* Run ATTACK's deployment screen on the calling thread. */
+void attack_deployment_entrypoint(void);
 void deploy_find_fieldable_units(void);
 void deploy_find_deployable_units(void);
 s32 deploy_is_roster_unit_deployed(s32 roster_id);
@@ -102,7 +103,7 @@ unit_deployment_coordinates_t* deploy_get_coordinate_slots(void);
 /* g_deploy_menu_state: what the deployment cursor is over. It selects
  * the button hint deploy_build_button_hint draws. */
 typedef enum deploy_menu_state {
-    DEPLOY_MENU_CLOSED = -1,       /* deploy_run is done */
+    DEPLOY_MENU_CLOSED = -1,       /* attack_deployment_entrypoint is done */
     DEPLOY_MENU_EMPTY_TILE = 0,    /* a unit can be placed here */
     DEPLOY_MENU_BLOCKED_TILE = 1,  /* not a deployment tile, or the squad is full */
     DEPLOY_MENU_SELECTED_UNIT = 2, /* the tile of the selected roster unit */

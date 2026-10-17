@@ -34,9 +34,10 @@ extern s16 g_unit_editor_hp_max;
 extern s16 g_unit_editor_mp_max;
 extern s16 g_unit_editor_ct_max;
 
-void debug_unit_editor_run(void);
+/* Run DEBUGCHR's developer unit editor; the normal rider/mount Status entrance is separate. */
+void debugchr_editor_entrypoint(void);
 
-/* The event library's menu thread: closes the unit view panels, loads DEBUGCHR and runs debug_unit_editor_run. */
+/* The event library's menu thread: closes the unit view panels, loads DEBUGCHR and runs debugchr_editor_entrypoint. */
 void debug_unit_editor_open(void);
 
 #endif

@@ -305,7 +305,7 @@ typedef enum event_call_function {
 } event_call_function_e;
 
 /* Display selected by the first EVENT_OPCODE_DISPLAY_CONDITIONS operand and
- * run by conditions_dispatch. Values from GENERAL_FIRST up show bonus
+ * run by require_conditions_entrypoint. Values from GENERAL_FIRST up show bonus
  * image (value - GENERAL_FIRST) as a banner. */
 typedef enum event_display_condition {
     EVENT_DISPLAY_CONDITION_SPECIAL_CASES = 0x00,

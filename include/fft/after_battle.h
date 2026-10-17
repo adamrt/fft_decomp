@@ -43,8 +43,8 @@ void conditions_show_ready_bugged(void);
 void conditions_special_thread(void);
 void victory_congratulations_thread(void);
 
-/* Called by the event library in both BATTLE and WORLD. */
-void conditions_dispatch(void);
+/* REQUIRE's condition/reward dispatcher, called by the event library in BATTLE and WORLD. */
+void require_conditions_entrypoint(void);
 
 /* banner bursts */
 /* BONUS.BIN stores a 256x200 4bpp image, followed by eight 16-color palette slots. */
@@ -85,7 +85,9 @@ extern VECTOR g_conditions_burst_offset;
 extern VECTOR g_conditions_burst_rotated_offset;
 
 void conditions_load_banner_image(s32 image_id);
-void conditions_animate_banner_burst(void);
+
+/* REQUIRE's banner-burst thread, entered by DarkScreen after the overlay loads. */
+void require_dark_screen_entrypoint(void);
 
 /* war trophies */
 /* g_war_trophy_entry_types[]: what a war trophy entry's

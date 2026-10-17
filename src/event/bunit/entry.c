@@ -148,11 +148,11 @@ extern u16 g_unit_list_gfx_line_g3_capacity;
  * closes. Returns the chosen battle unit.
  *
  * The capacity stores follow the shared overlay gfx-init order (compare
- * status_screen_update): 0x1e is first stored just before the 0x3c store, which
+ * jobstts_entrypoint): 0x1e is first stored just before the 0x3c store, which
  * puts its single-set `li` between the 0x1f4 `li` and its store, in $v1. The
  * globals must not be volatile here: sched2 hoists the 0x40/0x1f4/0x3c stores
  * above the zero stores, as in the target. */
-s32 unit_list_run(s32 unused_unit, void* unused_otag) {
+s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     POLY_FT4 textured_quads[1000];
     POLY_G4 gouraud_quads[60];
     POLY_GT4 gouraud_textured_quads[120];

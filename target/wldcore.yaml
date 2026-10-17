@@ -28,7 +28,7 @@ units:
   - {name: window_text_records, source: src/wldcore/window_text_records.c}
 
 functions:
-  - {addr: 0x800672f8, size: 396, name: world_map_run, hash: be43a4c70a891d0f, unit: startup}
+  - {addr: 0x800672f8, size: 396, name: wldcore_entrypoint, hash: be43a4c70a891d0f, unit: startup}
   - {addr: 0x80067484, size: 92, name: world_map_update_backdrop, hash: 25a5e00be7ab4f2a, unit: startup}
   - {addr: 0x800674e0, size: 708, name: world_map_capture_backdrop, hash: bae131b88dafa102, unit: startup}
   - {addr: 0x800677a4, size: 724, name: world_map_draw_frame_with_map, hash: 6167ee0d206570fd, unit: startup}

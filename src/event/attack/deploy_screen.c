@@ -129,7 +129,7 @@ static void deploy_reset_tables(void) {
  * grid address back into its only use. `tiles` then stays a movable that
  * joins the squad loop's other grid-address loads, which yields the target's
  * hoisted register order and its `move a0,s7` row-pointer start. */
-void deploy_run(void) {
+void attack_deployment_entrypoint(void) {
     s32 transition;
     s32 first_pass = 1;
     s32 i;
@@ -795,7 +795,7 @@ ramza_placed:
 
     deploy_mark_finished();
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
-    thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, battle_map_title_thread);
+    thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_title_entrypoint);
     thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
     thread_wait_until_inactive(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS);
 

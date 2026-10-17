@@ -1383,10 +1383,10 @@ data:
   - {addr: 0x8006628e, name: g_crystal_treasure_item_id}
   - {addr: 0x800662d0, name: g_status_check_sets}
   - {addr: 0x80066308, name: g_party_highest_level}
-  - {addr: 0x800670f0, name: title_run_main_loop}
-  - {addr: 0x8006720c, name: ending_run}
-  - {addr: 0x800672f8, name: world_map_run}
-  - {addr: 0x80079a98, name: state_run_game_loop}
+  - {addr: 0x800670f0, name: open_title_entrypoint}
+  - {addr: 0x8006720c, name: open_ending_entrypoint}
+  - {addr: 0x800672f8, name: wldcore_entrypoint}
+  - {addr: 0x80079a98, name: battle_entrypoint}
   - {addr: 0x80093170, name: battle_map_color_field}
   - {addr: 0x800a778c, name: g_game_flow_state}
   - {addr: 0x800d0bbc, name: g_sound_novel_script}
