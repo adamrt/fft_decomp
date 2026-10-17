@@ -138,14 +138,8 @@ typedef enum battle_map_light_back_color_command {
     BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE = 11,
     BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
 } battle_map_light_back_color_command_e;
-extern s32 g_battle_map_back_color_red;
-extern s32 g_battle_map_back_color_green;
-extern s32 g_battle_map_back_color_blue;
 extern u8 g_battle_map_back_color_disabled;
 extern CVECTOR g_battle_map_cached_back_color;
-extern s32 g_battle_map_saved_back_color_red;
-extern s32 g_battle_map_saved_back_color_green;
-extern s32 g_battle_map_saved_back_color_blue;
 extern rgb24_t g_battle_map_light_back_color_backup;
 
 void battle_map_light_copy_back_color(void);

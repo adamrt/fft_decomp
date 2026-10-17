@@ -21,6 +21,16 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Current and saved GTE background colors are three adjacent 32-bit channels. */
+typedef struct battle_map_back_color {
+    s32 red;
+    s32 green;
+    s32 blue;
+} battle_map_back_color_t;
+typedef char battle_map_back_color_size_must_be_12[sizeof(battle_map_back_color_t) == 12 ? 1 : -1];
+extern battle_map_back_color_t g_battle_map_back_color;
+extern battle_map_back_color_t g_battle_map_saved_back_color;
+
 /* Write-only: zeroed with the map render state and never read anywhere on
  * the disc. The 150 x 14-byte shape suggests per-instruction parameter
  * storage (an event opcode takes at most 14 parameters), but no code proves
@@ -154,22 +164,22 @@ s32* battle_map_light_control_back_color(s32 command, s32 value_1, s32 value_2, 
         if (g_battle_map_back_color_disabled == 1) {
             return 0;
         }
-        stored_values = &g_battle_map_back_color_red;
+        stored_values = &g_battle_map_back_color.red;
         *stored_values = value_1;
-        g_battle_map_back_color_green = value_2;
-        g_battle_map_back_color_blue = value_3;
+        g_battle_map_back_color.green = value_2;
+        g_battle_map_back_color.blue = value_3;
         SetBackColor(value_1, value_2, value_3);
         return stored_values;
     }
     case BATTLE_MAP_LIGHT_BACK_COLOR_GET:
-        result = &g_battle_map_back_color_red;
+        result = &g_battle_map_back_color.red;
         break;
     case BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE:
         SetBackColor(0, 0, 0);
         g_battle_map_back_color_disabled = 1;
         return result;
     case BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE:
-        SetBackColor(g_battle_map_back_color_red, g_battle_map_back_color_green, g_battle_map_back_color_blue);
+        SetBackColor(g_battle_map_back_color.red, g_battle_map_back_color.green, g_battle_map_back_color.blue);
         g_battle_map_back_color_disabled = 0;
         return result;
     }
@@ -320,27 +330,27 @@ void* battle_map_light_state_command(battle_map_light_command_e command, void* d
             = g_battle_map_saved_background_gradient_second;
         break;
     case BATTLE_MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR:
-        g_battle_map_back_color_red = ((CVECTOR*)data)->r;
-        g_battle_map_back_color_green = ((CVECTOR*)data)->g;
-        g_battle_map_back_color_blue = ((CVECTOR*)data)->b;
-        SetBackColor(g_battle_map_back_color_red, g_battle_map_back_color_green, g_battle_map_back_color_blue);
+        g_battle_map_back_color.red = ((CVECTOR*)data)->r;
+        g_battle_map_back_color.green = ((CVECTOR*)data)->g;
+        g_battle_map_back_color.blue = ((CVECTOR*)data)->b;
+        SetBackColor(g_battle_map_back_color.red, g_battle_map_back_color.green, g_battle_map_back_color.blue);
         break;
     case BATTLE_MAP_LIGHT_COMMAND_SAVE_AMBIENT_COLOR:
-        g_battle_map_saved_back_color_red = g_battle_map_back_color_red;
-        g_battle_map_saved_back_color_green = g_battle_map_back_color_green;
-        g_battle_map_saved_back_color_blue = g_battle_map_back_color_blue;
+        g_battle_map_saved_back_color.red = g_battle_map_back_color.red;
+        g_battle_map_saved_back_color.green = g_battle_map_back_color.green;
+        g_battle_map_saved_back_color.blue = g_battle_map_back_color.blue;
         break;
     case BATTLE_MAP_LIGHT_COMMAND_RESTORE_AMBIENT_COLOR:
-        g_battle_map_back_color_red = g_battle_map_saved_back_color_red;
-        g_battle_map_back_color_green = g_battle_map_saved_back_color_green;
-        g_battle_map_back_color_blue = g_battle_map_saved_back_color_blue;
+        g_battle_map_back_color.red = g_battle_map_saved_back_color.red;
+        g_battle_map_back_color.green = g_battle_map_saved_back_color.green;
+        g_battle_map_back_color.blue = g_battle_map_saved_back_color.blue;
         break;
     case BATTLE_MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR: {
         CVECTOR* color = &g_battle_map_cached_back_color;
 
-        color->r = g_battle_map_back_color_red;
-        g_battle_map_cached_back_color.g = g_battle_map_back_color_green;
-        g_battle_map_cached_back_color.b = g_battle_map_back_color_blue;
+        color->r = g_battle_map_back_color.red;
+        g_battle_map_cached_back_color.g = g_battle_map_back_color.green;
+        g_battle_map_cached_back_color.b = g_battle_map_back_color.blue;
         result = color;
         break;
     }
@@ -496,7 +506,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
         }
         if (g_weather_lightning_state.timer == 0x39 || g_weather_lightning_state.timer == 0x33) {
             SetColorMatrix(&g_weather_lightning_state.color_matrices[0]);
-            SetBackColor(g_battle_map_back_color_red, g_battle_map_back_color_green, g_battle_map_back_color_blue);
+            SetBackColor(g_battle_map_back_color.red, g_battle_map_back_color.green, g_battle_map_back_color.blue);
         }
     }
 
@@ -1964,7 +1974,7 @@ void weather_run_command(weather_command_e command) {
     case BATTLE_MAP_WEATHER_COMMAND_RESTORE_LIGHTING:
         battle_map_light_state_command(BATTLE_MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
         SetColorMatrix(g_weather_lightning_state.color_matrices);
-        SetBackColor(g_battle_map_back_color_red, g_battle_map_back_color_green, g_battle_map_back_color_blue);
+        SetBackColor(g_battle_map_back_color.red, g_battle_map_back_color.green, g_battle_map_back_color.blue);
         break;
     case BATTLE_MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER:
         weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);

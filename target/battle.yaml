@@ -2184,12 +2184,8 @@ data:
   - {addr: 0x800f5af4, name: g_battle_map_light_color_matrix}
   - {addr: 0x800f5b14, name: g_battle_map_light_matrix}
   - {addr: 0x800f5b34, name: g_battle_map_light_rotation}
-  - {addr: 0x800f5b40, name: g_battle_map_back_color_red}
-  - {addr: 0x800f5b44, name: g_battle_map_back_color_green}
-  - {addr: 0x800f5b48, name: g_battle_map_back_color_blue}
-  - {addr: 0x800f5b4c, name: g_battle_map_saved_back_color_red}
-  - {addr: 0x800f5b50, name: g_battle_map_saved_back_color_green}
-  - {addr: 0x800f5b54, name: g_battle_map_saved_back_color_blue}
+  - {addr: 0x800f5b40, name: g_battle_map_back_color}
+  - {addr: 0x800f5b4c, name: g_battle_map_saved_back_color}
   - {addr: 0x800f5b58, name: g_battle_map_current_darkness_color}
   - {addr: 0x800f5b5c, name: g_battle_map_ambient_restored_buffer}
   - {addr: 0x800f5b60, name: g_weather_effect_mode}
