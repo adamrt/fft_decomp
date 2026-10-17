@@ -142,8 +142,8 @@ void world_map_toggle_captured_frame(s32 capture) {
  *    and occupies physical type slot 0.
  *
  * Shapes the bytes depend on:
- *  - `.map_x`/`.map_y` are written through one loop-invariant s32* to element
- *    0's `.map_x`, as pos[i * 6] / pos[i * 6 + 1]. That makes the address a
+ *  - `.map.x`/`.map.y` are written through one loop-invariant s32* to element
+ *    0's `.map.x`, as pos[i * 6] / pos[i * 6 + 1]. That makes the address a
  *    strength_reduce giv, initialized at the row head with the target's
  *    lui/addiu/addu triple and carried with += 24. Two array-form stores each
  *    pay a full lui/addiu/addu/sw site; a source-level induction variable
@@ -198,7 +198,7 @@ void world_map_init_tile_atlas(void) {
         y = -192;
         k = 0;
         i = 0;
-        pos = &g_world_map_projected_tiles[0].map_x;
+        pos = &g_world_map_projected_tiles[0].map.x;
         for (row = 0; row < WORLD_MAP_TILE_ROWS + 1; row++) {
             x = -256;
             for (col = 0; col < WORLD_MAP_ROW_STRIDE; col++) {
@@ -279,14 +279,14 @@ void world_map_project_tiles(void) {
     i = 0;
     entry = g_world_map_projected_tiles;
     for (; i < WORLD_MAP_CORNER_COUNT; i++) {
-        coordinate = g_world_map_projected_tiles[i].map_x;
+        coordinate = g_world_map_projected_tiles[i].map.x;
         position.vx = coordinate;
-        coordinate = g_world_map_projected_tiles[i].map_y;
+        coordinate = g_world_map_projected_tiles[i].map.y;
         position.vz = 0;
         position.vy = coordinate;
         RotTrans(&position, &projected, &flag);
-        g_world_map_projected_tiles[i].screen_x = projected.vx;
-        g_world_map_projected_tiles[i].screen_y = projected.vy;
+        g_world_map_projected_tiles[i].screen.x = projected.vx;
+        g_world_map_projected_tiles[i].screen.y = projected.vy;
         flags = entry->flags;
         if (!(flags & WORLD_MAP_TILE_EMPTY)) {
             if (projected.vx < -0xa0 || projected.vx > 0x80 || projected.vy < -0x98 || projected.vy > 0x78) {
@@ -310,7 +310,7 @@ void world_map_project_tiles(void) {
  *
  * Needs aspsx 2.21: four sites that reach the typed global array keep their
  * `addiu at,at,<offset>` under 2.21 and lose it under 2.34. Each tile reads
- * its own entry and the next one's .screen_x, so the accesses are written
+ * its own entry and the next one's .screen.x, so the accesses are written
  * against `index` and `index + 1`. */
 void world_map_draw_tiles(GsOT* ot) {
     POLY_FT4 poly;
@@ -330,8 +330,8 @@ void world_map_draw_tiles(GsOT* ot) {
     for (row = 0; row < WORLD_MAP_TILE_ROWS; row++) {
         index = row * WORLD_MAP_ROW_STRIDE;
 
-        poly.y0 = poly.y1 = g_world_map_projected_tiles[index].screen_y;
-        poly.y2 = poly.y3 = g_world_map_projected_tiles[index + WORLD_MAP_ROW_STRIDE].screen_y;
+        poly.y0 = poly.y1 = g_world_map_projected_tiles[index].screen.y;
+        poly.y2 = poly.y3 = g_world_map_projected_tiles[index + WORLD_MAP_ROW_STRIDE].screen.y;
 
         for (column = 0; column < WORLD_MAP_TILE_COLUMNS; column++, index++) {
             s32 flags = g_world_map_projected_tiles[index].flags;
@@ -345,8 +345,8 @@ void world_map_draw_tiles(GsOT* ot) {
                 continue;
             }
             poly.tpage = flags & WORLD_MAP_TILE_TPAGE_MASK;
-            poly.x0 = poly.x2 = g_world_map_projected_tiles[index].screen_x;
-            poly.x1 = poly.x3 = g_world_map_projected_tiles[index + 1].screen_x;
+            poly.x0 = poly.x2 = g_world_map_projected_tiles[index].screen.x;
+            poly.x1 = poly.x3 = g_world_map_projected_tiles[index + 1].screen.x;
 
             texture = g_world_map_projected_tiles[index].texture;
             u = (texture & 0xff000000) >> 24;

@@ -1898,7 +1898,7 @@ void brave_story_handle_unexplored_land_list_input(menu_stack_record_t* level) {
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
  * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_y keeps its absolute address while the
+ * split around it, which is why image_position.y keeps its absolute address while the
  * later stores go through the text_id base register. That only happens when
  * the live case is the last one.
  *
@@ -1930,12 +1930,12 @@ static void brave_story_push_unexplored_land_level(s32 value) {
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x60;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x60;
         break;
     case 1:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x70;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x70;
         break;
     }
 
@@ -2166,7 +2166,7 @@ void brave_story_handle_treasure_list_input(menu_stack_record_t* level) {
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
  * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_y keeps its absolute address while the
+ * split around it, which is why image_position.y keeps its absolute address while the
  * later stores go through the text_id base register. That only happens when
  * the live case is the last one.
  *
@@ -2187,12 +2187,12 @@ void brave_story_push_treasure_level(s32 value) {
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x60;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x60;
         break;
     case 1:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x70;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x70;
         break;
     }
 

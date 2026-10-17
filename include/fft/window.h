@@ -117,17 +117,16 @@ enum { WINDOW_GPU_RECORD_CAPACITY = 16 };
 /* OPEN emits GPU packets from full VRAM coordinates. image_page_offset selects
  * 64-halfword pages relative to x=0x180; color depth comes from the flags. */
 typedef struct window_gpu_image_record {
-    u32 flags;             /* 0x00; display_object_flag_e */
-    s32 vram_x;            /* 0x04 */
-    s32 vram_y;            /* 0x08 */
-    s32 ot_layer;          /* 0x0c */
-    s32 image_page_offset; /* 0x10 */
-    s32 pop_in_step;       /* 0x14 */
-    s32 palette;           /* 0x18; nonzero selects CLUT x + (palette - 1) * 16 */
-    point32_t position;    /* 0x1c; centered screen position */
-    point32_t clut;        /* 0x24 */
-    RECT bounds;           /* 0x2c; texel position and image dimensions */
-    CVECTOR color;         /* 0x34 */
+    u32 flags;               /* 0x00; display_object_flag_e */
+    point32_t vram_position; /* 0x04; texture-page origin used by GetTPage */
+    s32 ot_layer;            /* 0x0c */
+    s32 image_page_offset;   /* 0x10 */
+    s32 pop_in_step;         /* 0x14 */
+    s32 palette;             /* 0x18; nonzero selects CLUT x + (palette - 1) * 16 */
+    point32_t position;      /* 0x1c; centered screen position */
+    point32_t clut;          /* 0x24 */
+    RECT bounds;             /* 0x2c; texel position and image dimensions */
+    CVECTOR color;           /* 0x34 */
 } window_gpu_image_record_t;
 typedef char window_gpu_image_record_size_must_be_56[sizeof(window_gpu_image_record_t) == 56 ? 1 : -1];
 
@@ -250,8 +249,7 @@ typedef enum text_window_scroll {
 
 /* A paged text window and its four decorative window records. */
 typedef struct text_window {
-    s32 image_x; /* 0x00; text image position.x for window_build_render_record_image; cleared by the setups */
-    s32 image_y; /* 0x04; text image position.y; 0x70 or 0x60 from the setups */
+    point32_t image_position; /* 0x00; image origin passed to window_build_render_record_image */
     point32_t base;
     s32 text_width;
     s32 rows_per_page;

@@ -834,7 +834,7 @@ void brave_story_handle_event_list_input(menu_stack_record_t* level) {
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
  * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_y keeps its absolute address while the
+ * split around it, which is why image_position.y keeps its absolute address while the
  * later stores go through the text_id base register. That only happens when
  * the live case is the last one.
  *
@@ -852,12 +852,12 @@ void brave_story_push_event_level(s32 value) {
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x60;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x60;
         break;
     case 1:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x70;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x70;
         break;
     }
     g_text_window.base.x = -122;
@@ -1132,13 +1132,13 @@ void brave_story_step_person_level(menu_stack_record_t* level) {
         }
         script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, 0xFF);
         entry = level->detail.value;
-        g_text_window.image_y = 0x70;
+        g_text_window.image_position.y = 0x70;
         g_text_window.base.x = -0x7A;
         g_text_window.base.y = -0x28;
         g_text_window.text_width = 0xDC;
         g_text_window.rows_per_page = 8;
         g_text_window.priority = 9;
-        g_text_window.image_x = 0;
+        g_text_window.image_position.x = 0;
         g_text_window.image_coordinate_mode = 1;
         character = entry >> 4;
         g_text_window.text_id = (entry & 0xFF) | TEXT_ID_WORLD_MESSAGE_BASE;
@@ -1311,7 +1311,7 @@ void tutorial_handle_topic_list_input(menu_stack_record_t* level) {
  * The coordinate mode is a constant local, yet retail still switched on it to
  * choose the text image origin: (0, 0x60) for mode 0, (0, 0x70) for mode 1.
  * The compiler folds the switch in its first CSE pass, after the stores were
- * split around it, which is why image_y keeps its absolute address while the
+ * split around it, which is why image_position.y keeps its absolute address while the
  * later stores go through the text_id base register. That only happens when
  * the live case is the last one.
  *
@@ -1326,12 +1326,12 @@ static void tutorial_push_topic_level(s32 topic) {
     g_text_window.text_id = topic + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x60;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x60;
         break;
     case 1:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x70;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x70;
         break;
     }
     g_text_window.base.x = -122;

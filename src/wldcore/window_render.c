@@ -383,8 +383,8 @@ static void text_window_render_page(text_window_t* state, s32 row) {
 
     g_menu_text_first_line = row;
     g_menu_text_line_limit = row + state->rows_per_page;
-    bounds.x = state->image_x;
-    bounds.y = state->image_y;
+    bounds.x = state->image_position.x;
+    bounds.y = state->image_position.y;
     bounds.w = (state->text_width + 0x18) & 0xFFFC;
     bounds.h = state->rows_per_page * 16 + 16;
     window_build_render_record_image(

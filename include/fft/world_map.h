@@ -157,12 +157,10 @@ typedef enum world_map_tile_flag {
 /* Provisional: an entry of the projected-tile table (g_world_map_projected_tiles), filled by
  * world_map_init_tile_atlas and projected by the RotTrans pass of world_map_project_tiles. */
 typedef struct world_map_projected_tile {
-    s32 flags;    /* 0x00; world_map_tile_flag_e */
-    s32 texture;  /* 0x04; texture rectangle packed u << 24 | v << 16 | w << 8 | h, unpacked into the poly UVs */
-    s32 map_x;    /* 0x08; tile x (-256 + widths), RotTrans vx */
-    s32 map_y;    /* 0x0c; tile y (-192 + heights), RotTrans vy */
-    s32 screen_x; /* 0x10; projected x, culled against the 0x121 screen span */
-    s32 screen_y; /* 0x14; projected y, culled against 0x111 */
+    s32 flags;        /* 0x00; world_map_tile_flag_e */
+    s32 texture;      /* 0x04; packed texture rectangle: u << 24 | v << 16 | w << 8 | h */
+    point32_t map;    /* 0x08; tile corner before projection, copied to RotTrans vx/vy */
+    point32_t screen; /* 0x10; projected position, culled before conversion to GPU coordinates */
 } world_map_projected_tile_t;
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 

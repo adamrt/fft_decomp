@@ -137,8 +137,8 @@ void window_init_vram_record(
               & ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN))
         | flags;
     g_window_gpu_image_records[record_index].clut = clut_position;
-    g_window_gpu_image_records[record_index].vram_x = vram_position.x;
-    g_window_gpu_image_records[record_index].vram_y = vram_position.y;
+    g_window_gpu_image_records[record_index].vram_position.x = vram_position.x;
+    g_window_gpu_image_records[record_index].vram_position.y = vram_position.y;
     /* Direct quad indexing changes the original record and column base selection. */
     quad_base = &g_window_gpu_image_records[0].bounds;
     quad = quad_base + record_index * (sizeof(window_gpu_image_record_t) / sizeof(RECT));

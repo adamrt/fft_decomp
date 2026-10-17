@@ -1245,8 +1245,8 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     window = &g_text_window;
 
     *text_id = text;
-    window->image_x = 0;
-    g_text_window.image_y = 0xC0;
+    window->image_position.x = 0;
+    g_text_window.image_position.y = 0xC0;
     box.x = (dims[0] + 24) & 0xFFFC;
     box.y = (dims[1] << 4) + 16;
     g_text_window.base.x = -(box.x / 2);
@@ -2194,8 +2194,8 @@ void menu_stack_push_scrollable_text_level(s32 text) {
         g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
 
         g_text_window.text_id = text;
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x60;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x60;
         g_text_window.base.x = -(((width + 24) & 0xFFFC) >> 1);
         g_text_window.base.y = -((rows << 3) + 8);
         g_text_window.text_width = width;

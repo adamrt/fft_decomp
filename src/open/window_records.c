@@ -225,7 +225,7 @@ static void window_draw_gpu_image_record(window_gpu_image_record_t* record, u32*
     /* The shift before the boolean test preserves the target's mask-and-test sequence. */
     SetDrawMode(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].mode, 1, 0,
         GetTPage(((record->flags & DISPLAY_OBJECT_8BIT_CLUT) >> 2) != 0,
-            (record->flags & DISPLAY_OBJECT_BLEND_RATE_MASK) >> 6, record->vram_x, record->vram_y),
+            (record->flags & DISPLAY_OBJECT_BLEND_RATE_MASK) >> 6, record->vram_position.x, record->vram_position.y),
         0);
 
     if (record->flags & DISPLAY_OBJECT_SEMI_TRANSPARENT) {

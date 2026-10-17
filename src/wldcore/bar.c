@@ -348,12 +348,12 @@ static void rumor_push_detail_level(s32 value) {
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 1:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x70;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x70;
         break;
     case 0:
-        g_text_window.image_x = 0;
-        g_text_window.image_y = 0x60;
+        g_text_window.image_position.x = 0;
+        g_text_window.image_position.y = 0x60;
         break;
     }
     g_text_window.base.x = -122;

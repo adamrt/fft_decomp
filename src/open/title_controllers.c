@@ -1244,8 +1244,8 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
     g_window_gpu_image_records[index].bounds = quad;
     half = quad.x / 4;
     scaled = image_page_offset * 64 + 0x180;
-    g_window_gpu_image_records[index].vram_x = half + scaled;
-    g_window_gpu_image_records[index].vram_y = quad.y;
+    g_window_gpu_image_records[index].vram_position.x = half + scaled;
+    g_window_gpu_image_records[index].vram_position.y = quad.y;
     color = &g_window_gpu_image_records[index].color;
     color->b = color->g = color->r = 0x80;
     g_window_gpu_image_records[index].pop_in_step = 0;
