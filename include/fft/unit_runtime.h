@@ -32,7 +32,7 @@ typedef union unit_command_state {
 typedef char unit_command_state_size_must_be_24[sizeof(unit_command_state_t) == 24 ? 1 : -1];
 
 /* Live on-map units own movement, animation, commands and displays.
- * runtime_id indexes g_units; stats optionally links combat stats. */
+ * runtime_id indexes the allocation slots; stats optionally links combat stats. */
 struct unit {
     struct unit* previous;    /* 0x000; previous unit in the runtime list */
     u8 runtime_id;            /* 0x004; runtime slot ID */
@@ -196,9 +196,8 @@ struct unit {
     sprite_single_part_display_t numeric_sprite_displays[3];   /* 0x3ce */
     sprite_single_part_display_t status_bubble_sprite_display; /* 0x410 */
     sprite_single_part_display_t item_sprite_display;          /* 0x426 */
-    u8 _unused_43c[4]; /* 0x43c; the next slot's in-use 32-bit value (g_unit_slot_states) */
 };
-typedef char unit_size_must_be_1088[(sizeof(unit_t) == 1088) ? 1 : -1];
+typedef char unit_size_must_be_1084[(sizeof(unit_t) == 1084) ? 1 : -1];
 
 /* unit_t.fade_out_phase: the fade-out removal's progress. */
 typedef enum unit_fade_out_phase {
@@ -281,11 +280,10 @@ typedef enum unit_status_flags_5_6 {
 } unit_status_flags_5_6_e;
 
 /* unit slots and lookups */
-/* The in-use 32-bit values of g_unit_slot_states, stride 0x440: each sits four bytes ahead
- * of its g_units record, in the previous record's last four bytes. */
+/* Each allocation slot holds an in-use flag followed by its runtime unit. */
 typedef struct unit_slot_state {
     s32 in_use;
-    u8 _unused_004[0x43c];
+    unit_t unit;
 } unit_slot_state_t;
 typedef char unit_slot_state_size_must_be_1088[(sizeof(unit_slot_state_t) == 1088) ? 1 : -1];
 
@@ -300,9 +298,8 @@ typedef enum unit_character_slot {
 
 /* The live units, chained through unit_t.previous. */
 extern unit_t* g_unit_list_head;
-extern unit_t g_units[UNIT_RUNTIME_SLOT_COUNT];    /* the live units, indexed by runtime id */
 extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT]; /* indexed by battle id (unit_stats_t.battle_id) */
-extern unit_slot_state_t g_unit_slot_states[];
+extern unit_slot_state_t g_unit_slot_states[UNIT_RUNTIME_SLOT_COUNT];
 extern s32 g_unit_source_runtime_id; /* the acting unit, which unit_get_source finds; 0xff for none */
 
 unit_t* unit_get_by_runtime_id(u16 runtime_id);

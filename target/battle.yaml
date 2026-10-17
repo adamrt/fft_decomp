@@ -2142,7 +2142,6 @@ data:
   - {addr: 0x800b72dc, name: g_fade_draw_modes}
   - {addr: 0x800b72f4, name: g_camera_real_coords_delta}
   - {addr: 0x800b7304, name: g_unit_slot_states}
-  - {addr: 0x800b7308, name: g_units}
   - {addr: 0x800bdf04, name: g_sprite_prim_frame_start_index}
   - {addr: 0x800bdf08, name: g_sprite_prim_index}
   - {addr: 0x800bdf0c, name: g_sprite_weapon_graphics}

@@ -34,6 +34,7 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 static SVECTOR g_sprite_gte_rtpt_vxy0 = { 0 };
@@ -911,15 +912,17 @@ static void sprite_init_render_state(void) {
     g_sprite_prim_frame_start_index = 0;
     g_sprite_unread_2 = 0;
     g_sprite_unread_1 = 0;
-    /* The in-use 32-bit value just past the last g_units record. */
-    g_sprite_prim_pool = (POLY_FT4*)&g_unit_slot_states[UNIT_RUNTIME_SLOT_COUNT].in_use;
+    /* The primitive pool begins immediately after the allocation slots. */
+    g_sprite_prim_pool = (POLY_FT4*)(g_unit_slot_states + UNIT_RUNTIME_SLOT_COUNT);
 }
 
 /* Reset a unit's own sprite display: neutral color, no flags on its eight
- * parts and none of them in use. */
+ * parts and none of them in use. The display initializers derive addresses from
+ * slot bases because direct nested member addresses add instructions. */
 sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
     s32 body_part;
-    sprite_display_t* display = &g_units[runtime_id].unit_sprite_display.header;
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[runtime_id]
+        + offsetof(unit_slot_state_t, unit.unit_sprite_display.header));
 
     display->color.b = 0x80;
     display->color.g = 0x80;
@@ -935,7 +938,9 @@ sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
  * no flags on its three parts and none of them in use. */
 sprite_display_t* sprite_display_init_weapon(s32 unit_index, s32 display_type) {
     s32 weapon_part;
-    sprite_display_t* display = &g_units[unit_index].weapon_sprite_displays[display_type].header;
+    sprite_display_t* display = &((sprite_weapon_display_t*)((u8*)&g_unit_slot_states[unit_index]
+        + offsetof(unit_slot_state_t, unit.weapon_sprite_displays)))[display_type]
+                                     .header;
 
     display->color.b = 0x80;
     display->color.g = 0x80;
@@ -956,13 +961,13 @@ sprite_display_t* sprite_display_init_numeric(s32 unit_index, s32 display_sectio
 
     switch (display_section) {
     case 0:
-        display = &g_units[unit_index].numeric_sprite_displays[0].header;
+        display = &g_unit_slot_states[unit_index].unit.numeric_sprite_displays[0].header;
         break;
     case 1:
-        display = &g_units[unit_index].numeric_sprite_displays[1].header;
+        display = &g_unit_slot_states[unit_index].unit.numeric_sprite_displays[1].header;
         break;
     case 2:
-        display = &g_units[unit_index].numeric_sprite_displays[2].header;
+        display = &g_unit_slot_states[unit_index].unit.numeric_sprite_displays[2].header;
         break;
     }
 
@@ -978,7 +983,8 @@ sprite_display_t* sprite_display_init_numeric(s32 unit_index, s32 display_sectio
 /* Resets a unit's status bubble display to one 14 x 12 part at (0, 0xb0) of the
  * FRAME.BIN page with CLUT 7 of the sprite row, neutral color and scale ONE. */
 sprite_display_t* sprite_display_init_status_bubble(s32 unit_index) {
-    sprite_display_t* display = &g_units[unit_index].status_bubble_sprite_display.header;
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[unit_index]
+        + offsetof(unit_slot_state_t, unit.status_bubble_sprite_display.header));
     s32 i;
 
     display->color.b = 0x80;
@@ -1005,7 +1011,8 @@ sprite_display_t* sprite_display_init_status_bubble(s32 unit_index) {
 /* Resets a unit's item sprite display to one 16 x 16 part of the ITEM.BIN page
  * with CLUT 7 of the sprite row, neutral color and scale ONE. */
 sprite_display_t* sprite_display_init_item(s32 runtime_id) {
-    sprite_display_t* display = &g_units[runtime_id].item_sprite_display.header;
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[runtime_id]
+        + offsetof(unit_slot_state_t, unit.item_sprite_display.header));
     s32 i;
 
     display->color.b = 0x80;
@@ -1028,7 +1035,7 @@ sprite_display_t* sprite_display_init_item(s32 runtime_id) {
 }
 
 /* Empty. unit_remove passes the removed unit's sprite display, a member of its
- * g_units record that sprite_display_init_unit handed out. */
+ * unit payload that sprite_display_init_unit handed out. */
 void sprite_display_release_unit_stub(sprite_display_t* unused_display) {
 }
 

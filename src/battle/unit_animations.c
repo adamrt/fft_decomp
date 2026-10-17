@@ -968,7 +968,7 @@ static unit_t* unit_claim_slot(s16 requested_runtime_id) {
 
     if (requested_runtime_id < UNIT_RUNTIME_SLOT_COUNT) {
         for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
-            if (g_unit_slot_states[i].in_use != 0 && g_units[i].runtime_id == requested_runtime_id) {
+            if (g_unit_slot_states[i].in_use != 0 && g_unit_slot_states[i].unit.runtime_id == requested_runtime_id) {
                 break;
             }
         }
@@ -979,14 +979,14 @@ static unit_t* unit_claim_slot(s16 requested_runtime_id) {
             return 0;
         }
         g_unit_slot_states[requested_runtime_id].in_use = 1;
-        g_units[requested_runtime_id].runtime_id = requested_runtime_id;
-        return &g_units[requested_runtime_id];
+        g_unit_slot_states[requested_runtime_id].unit.runtime_id = requested_runtime_id;
+        return &g_unit_slot_states[requested_runtime_id].unit;
     }
     for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
         if (g_unit_slot_states[i].in_use == 0) {
             g_unit_slot_states[i].in_use = 1;
-            g_units[i].runtime_id = i;
-            return &g_units[i];
+            g_unit_slot_states[i].unit.runtime_id = i;
+            return &g_unit_slot_states[i].unit;
         }
     }
     system_handle_error(SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT);
