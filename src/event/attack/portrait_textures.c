@@ -24,9 +24,8 @@ static u8 g_formation_sprite_staging[1152] = { 0 };
  * plus slot 20, the scenario's special portrait (g_portrait_special_wldface_id). With
  * no entry mode set the sheets are read back from VRAM instead of the disc.
  *
- * Port of portrait_prepare_party_textures. Here `value` is the party
- * index passed to party_get_unit, so the pixel-row counter is a
- * separate variable `j`. The never-taken `j <= 0` test after the row loop only
+ * Here `value` temporarily holds the party index passed to party_get_unit,
+ * so the pixel-row counter is a separate variable `j`. The never-taken `j <= 0` test after the row loop only
  * adds one reference to `j`, raising its global-allocation priority above the
  * source pointer's so the counter gets $a3 as in the target. */
 void portrait_prepare_party_textures(void) {
@@ -173,12 +172,11 @@ void portrait_prepare_party_textures(void) {
     heap_call_free(file);
 }
 
-/* Loads EVENT/UNIT.BIN (0x10000 bytes) via the entry-mode load paths, uploads its
- * second half, then for the 16 formation slots derives each unit's portrait
- * (inlined formation_get_unit_palette_index logic), copies a 0x18x0x30 cell into
- * the g_formation_sprite_staging staging buffer, uploads it to g_portrait_upload_rect and uploads the
- * 16x1 CLUT to g_portrait_palette_upload_rect; g_formation_sprite_tall_cell[slot] records the cell
- * layout.
+/* Loads EVENT/UNIT.BIN (0x10000 bytes) via the entry-mode load paths and uploads its
+ * second half. For each of the 16 formation slots, stages the unit's sprite in a
+ * 48x48 cell and uploads that cell and its 16-color palette. Small 24x40 sprites
+ * are centered and bottom-aligned; g_formation_sprite_tall_cell records which
+ * slots use the larger layout.
  *
  * Load-bearing shapes: the nested else routes the remainder<8 and (code-8)/5
  * arms through `product` and a trailing `row = product` copy, so jump2 sees
@@ -186,7 +184,7 @@ void portrait_prepare_party_textures(void) {
  * of cross-jumping them. `palette_base` (a multi-block variable) holds the
  * source offset sum so it is not tied to the dying `>> 1` temporary, and
  * `y` is initialized between that sum and `source`. `code` is one variable
- * reused for sheet, code, remainder and the final portrait code; the clear
+ * reused for sheet, code, remainder and the final palette code; the clear
  * loop counter reuses `x`; `source` is an integer so `x + source` keeps its
  * order. The palette offset's `/ 2` of an even sum compiles to the target's
  * plain `sra` and its allocation order; it also adds an 8-byte compiler
@@ -199,7 +197,7 @@ void formation_prepare_sprites(void) {
     s32 base;
     s32 code;
     u8* pixel;
-    s32 portrait;
+    s32 palette_code;
     s32 quotient;
     s32 row;
     s32 cell_row;
@@ -276,16 +274,16 @@ void formation_prepare_sprites(void) {
         code &= 0xFF;
 
         if (code == 0x18) {
-            portrait = -1;
+            palette_code = -1;
             code = 0x4C;
         } else if (code >= 0x3F) {
             code = g_formation_monster_sprite_table[code - 0x3F];
-            portrait = code;
+            palette_code = code;
         } else {
-            portrait = code;
+            palette_code = code;
             if (party->sprite_set & CHARACTER_IDENTITY_HIGH_BIT_MASK) {
                 code--;
-                portrait = code;
+                palette_code = code;
             }
         }
 
@@ -349,9 +347,9 @@ void formation_prepare_sprites(void) {
             g_formation_sprite_tall_cell[i] = 0;
         }
 
-        /* The file's CLUTs start at 0xF000, four 16-color palettes per line; each monster portrait has
+        /* The file's CLUTs start at 0xF000, four 16-color palettes per line; each monster sprite has
          * three, picked by the job's palette index. */
-        code = portrait;
+        code = palette_code;
         if (code == -1) {
             code = 0x7A;
         } else if (code >= 0x3E) {
