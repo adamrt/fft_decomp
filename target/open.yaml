@@ -183,8 +183,8 @@ data:
   - {addr: 0x80067080, name: g_psyq_press_timeout_dma_format}
   - {addr: 0x800670a8, name: g_psyq_press_timeout_fifo_format}
   - {addr: 0x800670e0, name: g_psyq_press_timeout_format}
-  - {addr: 0x800707f8, name: g_window_record_36_animations}
-  - {addr: 0x800707fc, name: g_window_record_36_sprites}
+  - {addr: 0x800707f8, name: g_window_anim_sequences}
+  - {addr: 0x800707fc, name: g_window_anim_cels}
   - {addr: 0x80070cb4, name: g_prologue_entries}
   - {addr: 0x80070d84, name: g_ending_script_font_metrics}
   - {addr: 0x80070d88, name: g_ending_script_initial_data_base}
@@ -217,9 +217,9 @@ data:
   - {addr: 0x800849bc, name: g_psyq_press_ac_secondary_table}
   - {addr: 0x800851bc, name: g_input_current_buttons}
   - {addr: 0x800851c0, name: g_gfx_screen_environments}
-  - {addr: 0x800852a0, name: g_window_next_render_record_36}
+  - {addr: 0x800852a0, name: g_window_record_count}
   - {addr: 0x800852a4, name: g_gfx_opntex_data}
-  - {addr: 0x800852a8, name: g_window_next_render_record_56}
+  - {addr: 0x800852a8, name: g_window_render_record_count}
   - {addr: 0x800852ac, name: g_input_previous_buttons}
   - {addr: 0x800852b0, name: g_movie_mdec_stream_state}
   - {addr: 0x800852c0, name: g_controller_records}
@@ -245,9 +245,9 @@ data:
   - {addr: 0x800856f8, name: g_prologue_line_primitives}
   - {addr: 0x80085ca8, name: g_file_current_openbk_image_id}
   - {addr: 0x80085cac, name: g_gfx_overlay_fade}
-  - {addr: 0x80085d04, name: g_window_render_records_36}
-  - {addr: 0x80085f44, name: g_window_render_record_pointers}
-  - {addr: 0x80085fc4, name: g_window_render_record_pointer_count}
+  - {addr: 0x80085d04, name: g_window_records}
+  - {addr: 0x80085f44, name: g_window_render_object_queue}
+  - {addr: 0x80085fc4, name: g_window_render_object_count}
   - {addr: 0x80085fc8, name: g_ending_fade_primitives}
   - {addr: 0x80086018, name: g_gfx_otags}
   - {addr: 0x80086098, name: g_window_render_records}

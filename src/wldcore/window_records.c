@@ -54,14 +54,14 @@ void window_init_record_pools(void) {
     CVECTOR* color;
 
     g_window_primitive_count = 0;
-    g_window_next_render_record_56 = 0;
-    g_window_next_render_record_36 = 0;
-    g_window_render_record_pointer_count = 0;
+    g_window_render_record_count = 0;
+    g_window_record_count = 0;
+    g_window_render_object_count = 0;
 
     for (i = 0; i < WINDOW_RECORD_CAPACITY; i++) {
-        g_window_render_records_36[i].flags = DISPLAY_OBJECT_ANIMATED;
-        g_window_render_records_36[i].priority = 8;
-        color = &g_window_render_records_36[i].color;
+        g_window_records[i].flags = DISPLAY_OBJECT_ANIMATED;
+        g_window_records[i].priority = 8;
+        color = &g_window_records[i].color;
         color->b = color->g = color->r = 0x80;
     }
 
@@ -396,8 +396,8 @@ static void window_draw_image_record(window_render_record_t* object, GsOT* ot) {
  * and v0/v1 allocation. Separate assignments change those registers.
  */
 static void window_draw_animated_record_56(display_object_animated_t* actor, u32* ot) {
-    display_object_cel_header_t** sprites = g_window_record_36_sprites;
-    display_object_sequence_t* anim = g_window_record_36_animations[actor->sequence];
+    display_object_cel_header_t** sprites = g_window_anim_cels;
+    display_object_sequence_t* anim = g_window_anim_sequences[actor->sequence];
     display_object_cel_header_t* cel;
     u32* sprite;
     s32 value;
@@ -596,16 +596,16 @@ s32 window_append_animated_record(void** queue, s32* count) {
 /* Appends the next free 36-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_animated_record(void** list, s32* count) {
-    list[*count] = &g_window_render_records_36[g_window_next_render_record_36];
-    g_window_render_records_36[g_window_next_render_record_36].flags
+    list[*count] = &g_window_records[g_window_record_count];
+    g_window_records[g_window_record_count].flags
         &= ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
-    g_window_render_records_36[g_window_next_render_record_36].palette = 0;
+    g_window_records[g_window_record_count].palette = 0;
     /* Direct color members change the shared base and add four instructions. */
-    (&g_window_render_records_36[g_window_next_render_record_36].color)->r = 0x80;
-    (&g_window_render_records_36[g_window_next_render_record_36].color)->g = 0x80;
-    (&g_window_render_records_36[g_window_next_render_record_36].color)->b = 0x80;
+    (&g_window_records[g_window_record_count].color)->r = 0x80;
+    (&g_window_records[g_window_record_count].color)->g = 0x80;
+    (&g_window_records[g_window_record_count].color)->b = 0x80;
     (*count)++;
-    return g_window_next_render_record_36++;
+    return g_window_record_count++;
 }
 #endif
 
@@ -636,17 +636,17 @@ s32 window_append_record(void** queue, s32* count) {
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
 s32 window_append_record(void** list, s32* count) {
-    list[*count] = &g_window_render_records[g_window_next_render_record_56];
-    g_window_render_records[g_window_next_render_record_56].flags
+    list[*count] = &g_window_render_records[g_window_render_record_count];
+    g_window_render_records[g_window_render_record_count].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
-    g_window_render_records[g_window_next_render_record_56].palette = 0;
+    g_window_render_records[g_window_render_record_count].palette = 0;
     /* Direct color members change the shared base and add four instructions. */
-    (&g_window_render_records[g_window_next_render_record_56].color)->r = 0x80;
-    (&g_window_render_records[g_window_next_render_record_56].color)->g = 0x80;
-    (&g_window_render_records[g_window_next_render_record_56].color)->b = 0x80;
-    g_window_render_records[g_window_next_render_record_56].pop_in_step = 0;
+    (&g_window_render_records[g_window_render_record_count].color)->r = 0x80;
+    (&g_window_render_records[g_window_render_record_count].color)->g = 0x80;
+    (&g_window_render_records[g_window_render_record_count].color)->b = 0x80;
+    g_window_render_records[g_window_render_record_count].pop_in_step = 0;
     (*count)++;
-    return g_window_next_render_record_56++;
+    return g_window_render_record_count++;
 }
 #endif
 

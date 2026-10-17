@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 /* Window render records, the display objects OPEN and WLDCORE build their windows and text from (each program
- * links its own revision: 56-byte image records in OPEN, 52-byte in WLDCORE), and WLDCORE's window animations,
+ * links its own revision: 56-byte image records in OPEN, 52-byte in WLDCORE), their window animations,
  * display-object queues, paged text window and panels. */
 
 #include "fft/gfx.h"
@@ -53,6 +53,10 @@ typedef struct display_object_part {
     u8 u;
 } display_object_part_t;
 typedef char display_object_part_size_must_be_8[sizeof(display_object_part_t) == 8 ? 1 : -1];
+
+/* OPEN and WLDCORE each define these tables with their own sequence catalog. */
+extern display_object_sequence_t** g_window_anim_sequences;
+extern display_object_cel_header_t** g_window_anim_cels;
 
 /* display objects */
 /* 32-bit flags that lead every display object: the WLDCORE window and render
@@ -167,9 +171,9 @@ typedef struct window_render_record {
 typedef char window_render_record_size_must_be_52[sizeof(window_render_record_t) == 52 ? 1 : -1];
 #endif
 
-/* x/y view of the 56-byte render records, based at records_56[0].x; the
+/* x/y view of OPEN's image records, based at g_window_render_records[0].x; the
  * retail code addresses that pair through its own base register, loaded
- * before the index is scaled, which &records_56[i].x does not reproduce. */
+ * before the index is scaled, which &g_window_render_records[i].x does not reproduce. */
 typedef struct window_record_56_position {
     /* 0x00 */ s32 x; /* == g_window_render_records[i].x */
     /* 0x04 */ s32 y;
@@ -183,14 +187,7 @@ typedef struct window_sprite_prim {
 } window_sprite_prim_t;
 typedef char window_sprite_prim_size_must_be_32[(sizeof(window_sprite_prim_t) == 32) ? 1 : -1];
 
-extern display_object_animated_t g_window_render_records_36[WINDOW_RECORD_CAPACITY];
 extern window_record_56_position_t g_window_record_translation[WINDOW_RECORD_CAPACITY];
-extern s32 g_window_next_render_record_36;
-extern s32 g_window_next_render_record_56;
-extern void* g_window_render_record_pointers[]; /* the queue both pools publish to */
-extern s32 g_window_render_record_pointer_count;
-extern display_object_sequence_t** g_window_record_36_animations;
-extern display_object_cel_header_t** g_window_record_36_sprites;
 extern window_sprite_prim_t g_window_sprite_primitive_pool[2][32];
 extern s32 g_window_primitive_count;
 
@@ -246,31 +243,30 @@ typedef enum window_anim_sequence {
     WINDOW_ANIM_BRAVE_STORY_MARKER = 121, /* the brave-story list's two completion markers */
 } window_anim_sequence_e;
 
-/* The animation tables of the display objects: sequences by window_anim_sequence_e, and the cels they draw. */
-extern display_object_sequence_t** g_window_anim_sequences;
-extern display_object_cel_header_t** g_window_anim_cels;
-
 /* window and render records */
-/* OPEN and WLDCORE each define this image-record pool, with their own layout and capacity. */
+/* OPEN and WLDCORE each define animated and image pools with separate allocation counts.
+ * The image layout and both pool capacities differ by program. */
+extern display_object_animated_t g_window_records[WINDOW_RECORD_CAPACITY];
 extern window_render_record_t g_window_render_records[WINDOW_RECORD_CAPACITY];
 extern s32 g_window_record_count;
 extern s32 g_window_render_record_count;
 extern u32 g_window_image_buffer[];
 
-/* The animated window records; g_window_record_positions views their x/y columns. */
-extern display_object_animated_t g_window_records[WINDOW_RECORD_CAPACITY];
+/* WLDCORE's x/y column view of the animated records. */
 extern window_xy_t g_window_record_positions[];
 
 void window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags);
 void window_draw_centered_text(s32 window_index, s32 text_id);
 
 /* display object queues */
-/* The display objects window_dispatch_record_list draws each frame. Every entry points at the leading flags of a
+/* OPEN and WLDCORE each publish their display objects to this queue. Every entry points at the leading flags of a
  * window record, render record or map dot, and the flags select the routine: DISPLAY_OBJECT_ANIMATED for a
  * display_object_animated_t, DISPLAY_OBJECT_IMAGE for a window_render_record_t.
  * window_set_render_objects_visible toggles DISPLAY_OBJECT_BLANK through them. */
 extern void* g_window_render_object_queue[];
 extern s32 g_window_render_object_count;
+
+/* WLDCORE's separate auxiliary queue. */
 extern void* g_window_aux_render_object_queue[];
 extern s32 g_window_aux_render_object_count;
 

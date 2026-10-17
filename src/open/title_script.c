@@ -377,11 +377,11 @@ void title_select_new_game(void) {
     }
 
     gfx_start_overlay_fade_out(0x10);
-    record = window_append_animated_record(g_window_render_record_pointers, &g_window_render_record_pointer_count);
-    g_window_render_records_36[record].sequence = 0x12;
-    g_window_render_records_36[record].anim_counter = 0;
-    g_window_render_records_36[record].frame_index = 0;
-    position = &g_window_render_records_36[record].position;
+    record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_window_records[record].sequence = 0x12;
+    g_window_records[record].anim_counter = 0;
+    g_window_records[record].frame_index = 0;
+    position = &g_window_records[record].position;
     controller = g_controller_current_index;
     position->x = -4;
     position->y = -16;
@@ -406,8 +406,8 @@ void title_update_card_warning(controller_record_t* record) {
     }
 
     if (record->title_exit.state != TITLE_EXIT_INPUT) {
-        g_window_next_render_record_36 -= 1;
-        g_window_render_record_pointer_count -= 1;
+        g_window_record_count -= 1;
+        g_window_render_object_count -= 1;
         g_controller_current_index -= 1;
         state = record->title_exit.state;
         if (state == TITLE_EXIT_CANCEL) {
