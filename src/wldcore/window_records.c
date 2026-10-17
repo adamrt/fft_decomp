@@ -78,26 +78,32 @@ void window_init_record_pools(void) {
 /* Clear the active buffer's 16-entry ordering table and release the frame's
  * sprite primitives. */
 void gfx_clear_current_otag(void) {
+    /* Removing this unused array shrinks the original 32-byte frame to 24. */
     u32 stack_padding[2];
 
-    ClearOTagR(g_gfx_otags[g_gfx_active_buffer_index], 0x10);
+    ClearOTagR(g_gfx_otags[g_gfx_active_buffer_index], 16);
     g_window_primitive_count = 0;
 }
 #endif
 
-#ifdef FFT_WLDCORE
-/* Draw the listed display objects into the ordering table: ANIMATED objects
- * through their animation sequence, IMAGE objects as one sprite. Objects with
- * BLANK or HIDDEN set are skipped, and nothing is drawn while
- * SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS is set. */
+/* Draw visible records according to their leading kind flags. WLDCORE sorts
+ * libgs sprites; OPEN emits raw GPU packets. Each program has its own hide flag. */
 void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
     void* object;
-    s32* flags;
+    u32* flags;
     s32 i;
 
+#ifdef FFT_WLDCORE
     if (g_system_flags & SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
         return;
     }
+#endif
+#ifdef FFT_OPEN
+    /* OPEN never sets its runtime hide flag. */
+    if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN) {
+        return;
+    }
+#endif
     for (i = 0; i < count; i++) {
         object = list[i];
         flags = object;
@@ -106,48 +112,24 @@ void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
         }
         if (*flags & DISPLAY_OBJECT_ANIMATED) {
             display_object_animated_t* animated = object;
+#ifdef FFT_WLDCORE
             window_draw_animated_record(animated, otag);
+#endif
+#ifdef FFT_OPEN
+            window_draw_animated_record_56(animated, (u32*)otag);
+#endif
         } else if (*flags & DISPLAY_OBJECT_IMAGE) {
+#ifdef FFT_WLDCORE
             window_render_record_t* image = object;
             window_draw_image_record(image, otag);
-        }
-    }
-}
 #endif
-
 #ifdef FFT_OPEN
-/* Draw the listed render records into the ordering table. A record with BLANK or
- * HIDDEN set is skipped; ANIMATED selects the 36-byte layout and IMAGE the
- * 56-byte one. Nothing is drawn while
- * SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN is set, which no code in
- * OPEN.BIN does. */
-void window_dispatch_record_list(GsOT* otag, void** list, s32 count) {
-    s32 i;
-    void* object;
-    u32* flags_word;
-    u32 flags;
-
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN) != 0) {
-        return;
-    }
-
-    for (i = 0; i < count; i++) {
-        object = list[i];
-        flags_word = object;
-        flags = *flags_word;
-        /* Both layouts start with the 32-bit flags. */
-        if ((flags & (DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) == 0) {
-            if ((flags & DISPLAY_OBJECT_ANIMATED) != 0) {
-                display_object_animated_t* animated = object;
-                window_draw_animated_record_56(animated, otag);
-            } else if ((flags & DISPLAY_OBJECT_IMAGE) != 0) {
-                window_record_56_t* window = object;
-                window_draw_image_record_56(window, otag);
-            }
+            window_record_56_t* image = object;
+            window_draw_image_record_56(image, (u32*)otag);
+#endif
         }
     }
 }
-#endif
 
 #ifdef FFT_WLDCORE
 /* Draw one animated display object: advance its sequence, then convert every
@@ -216,16 +198,17 @@ void window_draw_animated_record(display_object_animated_t* object, GsOT* ot) {
     sprite.g = color.g;
     sprite.b = color.b;
     if ((object->flags & DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED) || !(g_system_flags & SYSTEM_FLAG_FREEZE_ANIMATION)) {
-        object->anim_counter = object->anim_counter + 1;
+        object->anim_counter++;
     }
 
     /* A goto loop: as a for/while loop, GCC's loop pass hoists the 0xffff
-     * constant into a register, which the target does not. */
+     * constant into a register, which the target does not. Pointer addition on
+     * frames keeps the index-first address sum; array indexing reverses it. */
 step_frame:
     index = (sequence->frames + object->frame_index)->duration;
     if (index == object->anim_counter && index != 0xffff) {
         object->anim_counter = 0;
-        object->frame_index = object->frame_index + 1;
+        object->frame_index++;
         index = sequence->frame_count;
         if (index == object->frame_index) {
             object->frame_index = 0;
@@ -275,10 +258,10 @@ step_frame:
         }
         sprite.cy = clut_y;
         if (sprite.attribute & 0x800000) {
-            sprite.u = sprite.u + 1;
+            sprite.u++;
         }
         if (sprite.attribute & 0x400000) {
-            sprite.v = sprite.v + 1;
+            sprite.v++;
         }
         GsSortFlipSprite(&sprite, ot, object->priority);
     }
@@ -365,7 +348,7 @@ static void window_draw_image_record(window_render_record_t* object, GsOT* ot) {
             object->anim_counter = 0;
             object->flags ^= DISPLAY_OBJECT_POP_IN;
         } else {
-            object->anim_counter = object->anim_counter + 1;
+            object->anim_counter++;
         }
     } else {
         s32 sx;
@@ -389,6 +372,7 @@ static void window_draw_image_record(window_render_record_t* object, GsOT* ot) {
 #endif
 
 #ifdef FFT_OPEN
+/* A stored part pointer changes register allocation and address calculation. */
 #    define PART(index) ((display_object_part_t*)&sprite[index])
 
 /* Advances one OPEN sprite actor's animation and emits its parts into an
@@ -408,7 +392,8 @@ static void window_draw_image_record(window_render_record_t* object, GsOT* ot) {
  * that constant for the second and leaves its dead AND result as a USE-only
  * pseudo. That pseudo and the part loop's folded entry test each get an
  * unreferenced 8-byte reload slot (0x38 and 0x40). Reading x and y into their
- * own locals keeps the target's x + byte operand order and v0/v1 allocation.
+ * own locals within the assignments keeps the target's x + byte operand order
+ * and v0/v1 allocation. Separate assignments change those registers.
  */
 static void window_draw_animated_record_56(display_object_animated_t* actor, u32* ot) {
     display_object_cel_header_t** sprites = g_window_record_36_sprites;
@@ -427,7 +412,8 @@ static void window_draw_animated_record_56(display_object_animated_t* actor, u32
 
     actor->anim_counter++;
     /* A goto loop: as a for/while loop, GCC's loop pass hoists the 0xffff
-     * constant into a register, which the target does not. */
+     * constant into a register, which the target does not. Pointer addition on
+     * frames keeps the index-first address sum; array indexing reverses it. */
 loop:
     value = (anim->frames + actor->frame_index)->duration;
     if (value == actor->anim_counter && value != 0xffff) {
@@ -451,7 +437,7 @@ loop:
     clut_y = (cel->packed_clut_origin & 0xffff0000) >> 16;
 
     for (i = 0; i < part_count; i++) {
-        if (g_window_primitive_count >= 0x20) {
+        if (g_window_primitive_count >= 32) {
             return;
         }
         setRGB0((&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt),
@@ -477,7 +463,7 @@ loop:
         /* A byte-field palette read shortens the native 32-bit flags load. */
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.clut = GetClut(clut_x
                 + ((actor->palette == 0 || (PART(value)->use_part_palette)) ? ((sprite[value] >> 12) & 0xf0)
-                                                                            : ((actor->palette - 1) * 0x10)),
+                                                                            : ((actor->palette - 1) * 16)),
             clut_y);
         AddPrim(&ot[actor->priority],
             &g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt);
@@ -500,8 +486,9 @@ loop:
  *
  * The retail code loads record fields at their declared width before
  * truncating them into the primitive (as if built with -fforce-mem); the
- * otherwise unused px/py/qx/qy/cx/qu/qv copies reproduce that. The SPRT casts
- * on the color stores keep their index order and the 0x50-byte frame.
+ * px/py/qx/qy/cx/qu/qv locals preserve those load widths before the stores.
+ * Sharing the position locals across the pop-in and full-size arms changes
+ * load scheduling and register allocation.
  */
 static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
     point32_t clut;
@@ -515,13 +502,14 @@ static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
     u16 qu;
     u16 qv;
 
-    if (g_window_primitive_count >= 0x20) {
+    if (g_window_primitive_count >= 32) {
         return;
     }
     SetSprt(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt);
 
     if (record->palette != 0) {
-        clut.x = (cx = record->tail.clut.x) + (record->palette - 1) * 0x10;
+        cx = record->tail.clut.x;
+        clut.x = cx + (record->palette - 1) * 16;
         clut.y = record->tail.clut.y;
     } else {
         clut = record->tail.clut;
@@ -531,6 +519,7 @@ static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
     setRGB0((&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt),
         record->color.r, record->color.g, record->color.b);
 
+    /* The shift before the boolean test preserves the target's mask-and-test sequence. */
     SetDrawMode(&g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].mode, 1, 0,
         GetTPage(((record->flags & DISPLAY_OBJECT_8BIT_CLUT) >> 2) != 0,
             (record->flags & DISPLAY_OBJECT_BLEND_RATE_MASK) >> 6, record->vram_x, record->vram_y),
@@ -544,10 +533,10 @@ static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
 
     if (record->flags & DISPLAY_OBJECT_POP_IN) {
         gfx_calculate_scaled_rectangle(record->pop_in_step / 2, &record->tail.quad, &scaled);
-        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0
-            = scaled.x + (px = record->x);
-        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0
-            = scaled.y + (py = record->y);
+        px = record->x;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = scaled.x + px;
+        py = record->y;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0 = scaled.y + py;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0
             = record->tail.quad.x + scaled.x;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.v0
@@ -562,12 +551,14 @@ static void window_draw_image_record_56(window_record_56_t* record, u32* ot) {
             record->pop_in_step = step + 1;
         }
     } else {
-        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = qx = record->x;
-        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0 = qy = record->y;
-        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0 = qu
-            = record->tail.quad.x;
-        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.v0 = qv
-            = record->tail.quad.y;
+        qx = record->x;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = qx;
+        qy = record->y;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0 = qy;
+        qu = record->tail.quad.x;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0 = qu;
+        qv = record->tail.quad.y;
+        g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.v0 = qv;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.w
             = record->tail.quad.w;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.h
@@ -596,7 +587,7 @@ s32 window_append_animated_record(void** queue, s32* count) {
     ((CVECTOR*)((u8*)color + g_window_record_count * sizeof(g_window_records[0])))->r = 0x80;
     ((CVECTOR*)((u8*)color + g_window_record_count * sizeof(g_window_records[0])))->g = 0x80;
     ((CVECTOR*)((u8*)color + g_window_record_count * sizeof(g_window_records[0])))->b = 0x80;
-    *count += 1;
+    (*count)++;
     return g_window_record_count++;
 }
 #endif
@@ -636,7 +627,7 @@ s32 window_append_record(void** queue, s32* count) {
     ((CVECTOR*)((u8*)color + g_window_render_record_count * sizeof(g_window_render_records[0])))->b = 0x80;
     g_window_render_records[g_window_render_record_count].palette = 0;
     g_window_render_records[g_window_render_record_count].anim_counter = 0;
-    *count += 1;
+    (*count)++;
     return g_window_render_record_count++;
 }
 #endif
