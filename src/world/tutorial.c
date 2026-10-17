@@ -143,7 +143,7 @@ static s32 tutorial_opcode_17_end(void) {
             save_restore_image(1);
             formation_build_roster_names();
             heap_call_free(g_save_work_buffer);
-            formation_build_record_list(0, (formation_unit_t**)&g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
+            formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
             return 0;
         }
     } else {

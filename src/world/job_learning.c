@@ -22,8 +22,6 @@
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_learn_job_list_script[217];
 
-/* The JP the last looked-up job needs for its next level, as a row callback. */
-
 /* JP needed for the next level of the job whose level
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
@@ -40,8 +38,6 @@ s32 job_list_calculate_next_level_jp(s32 index) {
     }
     return g_job_list_job_next_level_jp_requirement;
 }
-
-/* Whether a listed job's skillset has no ability left to learn for the selected unit, cached for row callbacks. */
 
 /* Caches and returns whether the `index`th job's skillset has nothing left
  * for the selected unit to learn (no unlearned ability counted). */

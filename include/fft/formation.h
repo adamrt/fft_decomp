@@ -39,8 +39,7 @@ enum {
 
 /* The WORLD menus' record of a unit (g_formation_unit_records), compacted after roster and menu-specific filtering;
  * roster_slot keeps its roster identity. The builder and sorter produce the ordered g_formation_unit_pointers list, not
- * a roster-indexed array. The byte fields from 0x70 on mirror the party_unit_t layout. Magical shield and accessory
- * evade are provisionally placed at 0x50/0x52, after the physical fields, to follow the 16-bit sequence. */
+ * a roster-indexed array. The byte fields from 0x70 on mirror the party_unit_t layout. */
 typedef struct formation_unit {
     unit_panel_summary_t status;          /* 0x000; copied whole to the status banner */
     menu_unit_status_identity_t identity; /* 0x022 */

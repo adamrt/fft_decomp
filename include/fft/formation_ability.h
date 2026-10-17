@@ -88,7 +88,7 @@ extern s8 g_formation_ability_view_list_initialized;
 /* set ability */
 extern s8 g_formation_ability_set_initialized;
 extern u8 g_formation_ability_set_unit_index;
-extern s8 g_formation_ability_set_slot; /* ability slot under the cursor: 0..4 */
+extern s8 g_formation_ability_set_slot; /* -1 before the first cursor update, then ability slot 1..4 */
 extern u8 g_formation_ability_set_cursor;
 extern u16 g_formation_ability_set_cursor_anim;
 extern point16_t g_formation_ability_set_cursor_point;

@@ -408,6 +408,7 @@ static s32 formation_ability_set_menu(void) {
     }
 
     if (g_formation_ability_set_list_open == 0) {
+        /* Retail reads slot -1 on the first pass, reaching the preceding accessory item ID. */
         slot = g_formation_ability_set_slot;
         current = g_formation_unit_pointers[g_unit_selected_index]->abilities.slots[slot];
         g_formation_unit_cycle_mode = 2;

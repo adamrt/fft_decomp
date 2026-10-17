@@ -20,7 +20,7 @@
  * the yield suppresses script input for 5 frames.
  *
  * WORLD's body; publishes the state twice.
- * The six g_world_input_frame_* values are laid out as a menu_input_state_t
+ * The six g_screen_input_frame_* values are laid out as a menu_input_state_t
  * (g_screen_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
