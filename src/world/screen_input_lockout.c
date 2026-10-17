@@ -1,4 +1,4 @@
-/* The idle countdown and the input lockout timer. */
+/* Input lockout while the Formation status panels move or compare units. */
 
 #include "fft/menu.h"
 #include "fft/menu_input.h"

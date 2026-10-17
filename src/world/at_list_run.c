@@ -30,10 +30,9 @@
  * scroll arrows and thumb while rows are hidden. Two page records alternate by frame. When the
  * menu closes, the frame thread is stopped and the scroll position is kept in the entry.
  *
- * The target's lone dead `lw t1,0xe0(sp)` (reload of the spilled `layout`)
- * at +0x4d4 comes from a conditional on `layout` whose body is a dead store: flow deletes
- * the store, the now-empty branch survives until after reload, and the post-reload jump
- * pass deletes the branch but not its operand reload. */
+ * The dead-store conditional on `layout` retains the target's lone unused
+ * reload at +0x4d4. This reconstruction does not establish the original
+ * conditional or local declarations. */
 void at_list_run(void) {
     image_layout_t image_parameters;
     RECT image_rect;

@@ -29,7 +29,7 @@
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row
  * scroll whose new row is drawn into the image ring at row `ring * 16`;
- * screen_redraw_text_page_on_scroll_in_rect handles page scrolling, and
+ * menu_redraw_text_page_on_scroll_in_rect handles page scrolling, and
  * the scroll-bar thumb tracks entry->selected_index. Right/Left toggle the
  * third column's text when the first two columns are text. Parameter 2 keeps
  * the thread alive after the list closes.

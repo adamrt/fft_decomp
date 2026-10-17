@@ -293,9 +293,7 @@ extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else c
 /* Set while the selected unit is in the upper rows of the grid: the unit banner
  * then sits at the bottom of the screen and the stat bar at the top (BUNIT's
  * g_unit_list_status_banner_at_bottom). The latch is the value the banner was last
- * placed for. Majority spelling: five readers sign-extend as u8. Two files
- * (formation_init_selection_cursor, formation_step_grid_transition)
- * need s8 to match and keep their own local extern. */
+ * placed for. Both bytes use the shared unsigned declaration in every reader. */
 extern u8 g_formation_unit_banner_at_bottom;
 extern u8 g_formation_unit_banner_at_bottom_latch;
 

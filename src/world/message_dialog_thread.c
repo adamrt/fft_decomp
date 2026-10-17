@@ -124,7 +124,7 @@ void message_dialog_thread(void) {
     rec.x_offset = thread->task_words[DIALOG_THREAD_WORD_X_OFFSET];
     rec.y_offset = thread->task_words[DIALOG_THREAD_WORD_Y_OFFSET];
 
-    /* Help text is read through OPEN's text sections; the saved pointers come back at `end`. */
+    /* Help text is read through WORLD's text sections; the saved pointers come back at `end`. */
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && rec.options == 0xC) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_screen_text_section_offsets);

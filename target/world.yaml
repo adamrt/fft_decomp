@@ -39,7 +39,6 @@ units:
   - {name: formation_display_init, source: src/world/formation_display_init.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018bb50, size: 1408, hash: d277279fc1b0c76a}, {addr: 0x8018c0d0, size: 8, hash: e2d93ece070c6ba5}]}
   - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: formation_icon_list, source: src/world/formation_icon_list.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
-  - {name: formation_idle_countdown, source: src/world/formation_idle_countdown.c}
   - {name: formation_item_menu, source: src/world/formation_item_menu.c}
   - {name: formation_screen, source: src/world/formation_screen.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: formation_view, source: src/world/formation_view.c, data: [{addr: 0x8018a144, size: 36, hash: d3211fb13a06ff86}, {addr: 0x8018a168, size: 424, hash: 2cea75c50162ef58}]}
@@ -74,6 +73,7 @@ units:
   - {name: roster_changes, source: src/world/roster_changes.c}
   - {name: roster_sorting, source: src/world/roster_sorting.c, data: [{addr: 0x8018d7cc, size: 12, hash: 28a6a05d27d888a6}]}
   - {name: screen_fades, source: src/world/screen_fades.c, data: [{addr: 0x8018e494, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e495, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e496, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e498, size: 8, hash: 311ffc6bfd5bdbb3}]}
+  - {name: screen_input_lockout, source: src/world/screen_input_lockout.c}
   - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801bfda4, size: 616, hash: f9d54bbe3ccaf085}]}
   - {name: script_commands, source: src/lib/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8013a454, size: 244, hash: 5f50d72e0e4d2a62}]}
   - {name: script_helpers, source: src/lib/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
@@ -669,8 +669,8 @@ functions:
   - {addr: 0x80113478, size: 112, name: screen_is_busy, hash: 09c2bf94c7f79101, unit: formation_display_init}
   - {addr: 0x801134e8, size: 88, name: message_box_show_with_sound, hash: f4355019c7b2ad8b, unit: formation_display_init}
   - {addr: 0x80113540, size: 64, name: formation_show_unit_message, hash: faa146ebb4a3f05f, unit: formation_display_init}
-  - {addr: 0x80113580, size: 136, name: screen_input_update_lockout, hash: 389745ef47daebf8, unit: formation_idle_countdown}
-  - {addr: 0x80113608, size: 16, name: screen_input_get_lockout, hash: 6a0b74a2f27fae10, unit: formation_idle_countdown}
+  - {addr: 0x80113580, size: 136, name: screen_input_update_lockout, hash: 389745ef47daebf8, unit: screen_input_lockout}
+  - {addr: 0x80113608, size: 16, name: screen_input_get_lockout, hash: 6a0b74a2f27fae10, unit: screen_input_lockout}
   - {addr: 0x80113618, size: 200, name: screen_input_filter, hash: c935cacdebe4befb, unit: formation_screen}
   - {addr: 0x801136e0, size: 104, name: formation_step_selection_slide, hash: 59374152ce46afa8, unit: formation_screen}
   - {addr: 0x80113748, size: 1676, name: formation_run_screen, hash: 59c8ead0459b32db, unit: formation_screen}
