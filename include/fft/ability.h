@@ -719,17 +719,7 @@ extern const u8 g_ability_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABI
 ability_type_e ability_get_data_and_type(
     s32 id, const ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
 
-/* skillset rows */
-typedef struct ability_human_skillset {
-    u8 high_id_bits[3];
-    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
-} ability_human_skillset_t;
-
-typedef struct ability_monster_skillset {
-    u8 high_id_bits;
-    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
-} ability_monster_skillset_t;
-
+/* skillset lookup */
 /* The random R/S/M selector uses a different legacy bit assignment from the
  * skillset-list filter: support and movement are reversed. */
 typedef enum rsm_ability_filter {
@@ -737,9 +727,6 @@ typedef enum rsm_ability_filter {
     RSM_ABILITY_FILTER_SUPPORT = 0x04,
     RSM_ABILITY_FILTER_MOVEMENT = 0x08
 } rsm_ability_filter_e;
-
-extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
-extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
 
 s32 ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* ability_store_skillset_abilities(s32 skillset, s32 flags);

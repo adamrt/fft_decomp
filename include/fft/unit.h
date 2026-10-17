@@ -685,9 +685,7 @@ typedef char unit_graphics_load_queue_size_must_be_324[(sizeof(unit_graphics_loa
 extern unit_graphics_load_queue_t g_unit_graphics_load_queue;
 
 /* unit generation */
-/* Selects the rows of g_unit_generation_base_data and
- * g_unit_generation_raw_stat_variance; these are not job ids or gender
- * bit flags. */
+/* Base-stat and equipment generation profiles; these are not job ids or gender flags. */
 typedef enum unit_generation_type {
     UNIT_TYPE_MALE = 0,
     UNIT_TYPE_FEMALE = 1,
@@ -695,17 +693,6 @@ typedef enum unit_generation_type {
     UNIT_TYPE_MONSTER = 3,
     UNIT_TYPE_COUNT = 4
 } unit_generation_type_e;
-
-/* One row of g_unit_generation_base_data, selected by
- * unit_generation_type_e. */
-typedef struct unit_generation_base_data {
-    u8 raw_stat_seeds[UNIT_RAW_STAT_COUNT];
-    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];
-} unit_generation_base_data_t;
-typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_base_data_t) == 12) ? 1 : -1];
-
-extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_TYPE_COUNT];
-extern u8 g_unit_generation_raw_stat_variance[UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
 
 /* stat building and growth */
 /* unit_init_from_encounter kinds. */

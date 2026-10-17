@@ -21,6 +21,31 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* One row of g_unit_generation_base_data, selected by
+ * unit_generation_type_e. */
+typedef struct unit_generation_base_data {
+    u8 raw_stat_seeds[UNIT_RAW_STAT_COUNT];
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];
+} unit_generation_base_data_t;
+typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_base_data_t) == 12) ? 1 : -1];
+
+extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_TYPE_COUNT];
+extern u8 g_unit_generation_raw_stat_variance[UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
+
+/* Packed skillset rows decoded by ability_get_id_from_skillset. */
+typedef struct ability_human_skillset {
+    u8 high_id_bits[3];
+    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
+} ability_human_skillset_t;
+
+typedef struct ability_monster_skillset {
+    u8 high_id_bits;
+    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
+} ability_monster_skillset_t;
+
+extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
+extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
+
 static u32 g_unit_name_uses_world_text = 0;
 
 /* Scratch list filled by ability_store_skillset_abilities. */
