@@ -27,7 +27,7 @@
  * record pointer; reading both through item_data_t folds them onto one base
  * register and misses the byte-exact match. */
 extern u8 g_item_secondary_data_ids[];
-extern job_data_t g_job_data[];
+extern job_data_t g_job_data[JOB_ID_COUNT];
 extern u8 g_party_highest_level;
 extern u16 g_calendar_month_start_day_offsets[13];
 

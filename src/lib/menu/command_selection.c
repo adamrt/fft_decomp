@@ -48,7 +48,7 @@ typedef struct menu_selection_remap {
 } menu_selection_remap_t;
 typedef char menu_selection_remap_size_must_be_5[sizeof(menu_selection_remap_t) == 5 ? 1 : -1];
 
-extern menu_unit_selection_record_t g_menu_unit_selection_records[];
+extern menu_unit_selection_record_t g_menu_unit_selection_records[UNIT_SLOT_COUNT];
 extern menu_selection_remap_t g_menu_selection_remaps[8];
 
 /* Provisional: one 5-byte row of a menu text entry as rewritten by command_build_act_menu: the style byte at +1 is 4
