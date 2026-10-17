@@ -1,4 +1,7 @@
+/* Memory copy and clear helpers, and Suzuki SPU allocation. */
+
 #include "fft/suzuki.h"
+#include "psx/libspu.h"
 
 /* Copies size bytes: 16-byte blocks, then 32-bit values, then bytes. */
 void suzuki_sound_copy_memory(void* destination, const void* source, s32 size) {
@@ -32,4 +35,38 @@ void suzuki_sound_copy_memory(void* destination, const void* source, s32 size) {
     for (count = size & 3; count != 0; count--) {
         *dst++ = *src++;
     }
+}
+
+/* Zeroes size bytes: 16-byte blocks, then 32-bit values, then bytes. */
+void suzuki_sound_clear_memory(void* destination, s32 size) {
+    u32* words = destination;
+    u8* bytes;
+    s32 count;
+
+    for (count = size >> 4; count != 0; count--) {
+        words[0] = words[1] = words[2] = words[3] = 0;
+        words += 4;
+    }
+    for (count = (size >> 2) & 3; count != 0; count--) {
+        *words++ = 0;
+    }
+    bytes = (u8*)words;
+    for (count = size & 3; count != 0; count--) {
+        *bytes++ = 0;
+    }
+}
+
+/* Empty. suzuki_sound_init calls it after setting up the driver heap. */
+void suzuki_sound_init_stub(void) {
+}
+
+/* Reserve SPU RAM through the SDK allocator. */
+s32 suzuki_sound_alloc_spu_ram(s32 size) {
+    return SpuMalloc(size);
+}
+
+/* Release SPU RAM and report success. */
+s32 suzuki_sound_free_spu_ram(u32 addr) {
+    SpuFree(addr);
+    return 0;
 }

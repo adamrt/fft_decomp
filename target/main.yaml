@@ -22,6 +22,7 @@ units:
   - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
   - {name: suzuki_driver, source: src/lib/suzuki/driver.c}
   - {name: suzuki_heap, source: src/lib/suzuki/heap.c, profile: gcc-2.6.3_O2_G8_aspsx-2.34}
+  - {name: suzuki_memory, source: src/lib/suzuki/memory.c}
   - {name: suzuki_sfx, source: src/lib/suzuki/sfx.c}
   - {name: suzuki_smd_channel_commands, source: src/lib/suzuki/smd_channel_commands.c}
   - {name: suzuki_smd_controls, source: src/lib/suzuki/smd_controls.c}
@@ -129,11 +130,11 @@ functions:
   - {addr: 0x80014278, size: 224, name: suzuki_sound_alloc, hash: ce530b24cb2e1a41, unit: suzuki_heap}
   - {addr: 0x80014358, size: 84, name: suzuki_sound_free, hash: 11a2caca3233143e, unit: suzuki_heap}
   - {addr: 0x800143ac, size: 128, name: suzuki_sound_get_largest_free_block, hash: ec544aa2d787d18d, unit: suzuki_heap}
-  - {addr: 0x8001442c, size: 164, name: suzuki_sound_copy_memory, hash: bcf044e1d17f66f5, source: src/lib/suzuki/suzuki_sound_copy_memory.c}
-  - {addr: 0x800144d0, size: 116, name: suzuki_sound_clear_memory, hash: 4ba829a78b79d216, source: src/lib/suzuki/suzuki_sound_clear_memory.c}
-  - {addr: 0x80014544, size: 8, name: suzuki_sound_init_stub, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_init_stub.c}
-  - {addr: 0x8001454c, size: 32, name: suzuki_sound_alloc_spu_ram, hash: b321a6f7ac0e83d6, source: src/lib/suzuki/suzuki_sound_alloc_spu_ram.c}
-  - {addr: 0x8001456c, size: 36, name: suzuki_sound_free_spu_ram, hash: c270971f843e72ec, source: src/lib/suzuki/suzuki_sound_free_spu_ram.c}
+  - {addr: 0x8001442c, size: 164, name: suzuki_sound_copy_memory, hash: bcf044e1d17f66f5, unit: suzuki_memory}
+  - {addr: 0x800144d0, size: 116, name: suzuki_sound_clear_memory, hash: 4ba829a78b79d216, unit: suzuki_memory}
+  - {addr: 0x80014544, size: 8, name: suzuki_sound_init_stub, hash: 6d64edf91449c1b1, unit: suzuki_memory}
+  - {addr: 0x8001454c, size: 32, name: suzuki_sound_alloc_spu_ram, hash: b321a6f7ac0e83d6, unit: suzuki_memory}
+  - {addr: 0x8001456c, size: 36, name: suzuki_sound_free_spu_ram, hash: c270971f843e72ec, unit: suzuki_memory}
   - {addr: 0x80014590, size: 648, name: suzuki_sound_update_voice_attrs, hash: 8c3ed88a730f8d9d, unit: suzuki_tick}
   - {addr: 0x80014818, size: 156, name: suzuki_sound_flush_key_on, hash: aa0d39db05f052b6, unit: suzuki_tick}
   - {addr: 0x800148b4, size: 296, name: suzuki_sound_flush_key_off, hash: d66573d642595546, unit: suzuki_tick}
