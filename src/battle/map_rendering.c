@@ -1963,10 +1963,10 @@ void camera_update_matrices(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* sc
  * weather sounds and restores the lighting. The weather local is an s8: compares on
  * the promoted value copy it into a scratch register for the 3 and 4 tests,
  * as the target does. */
-void weather_run_command(weather_command_e command) {
+void weather_run_command(u8 command) {
     s8 weather;
 
-    switch (command & 0xff) {
+    switch (command) {
     case BATTLE_MAP_WEATHER_COMMAND_RESTORE_LIGHTING:
         battle_map_light_state_command(BATTLE_MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
         SetColorMatrix(g_weather_lightning_state.color_matrices);

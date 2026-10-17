@@ -61,6 +61,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Five rain and five snow commands; the dispatcher consumes each halfword's low byte. */
+extern u16 g_event_weather_commands[10];
+
 /* One row of g_menu_system_function_table (menu_run_system_function_thread,
  * menu_dispatch_system_function). Provisional. */
 typedef struct menu_system_function {
@@ -1709,7 +1712,7 @@ static void script_process_pending_requests(void) {
             if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_SNOW) {
                 g_event_weather_request = weather_id + 5;
             }
-            weather_run_command(g_event_weather_commands[g_event_weather_request].environment_id);
+            weather_run_command(g_event_weather_commands[g_event_weather_request]);
         }
     }
 

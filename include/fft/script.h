@@ -299,16 +299,9 @@ extern u16 g_event_3d_object_use_request;
 extern u16 g_event_field_object_use_request;
 
 /* battle event state */
-typedef struct script_weather_environment {
-    u8 environment_id;
-    u8 _unused_01;
-} script_weather_environment_t;
-typedef char script_weather_environment_size_must_be_2[(sizeof(script_weather_environment_t) == 2) ? 1 : -1];
-
 extern s32 g_event_frame_counter; /* counts the frames the event interpreter runs */
 extern u16 g_event_scenario_music_1_id;
 extern u16 g_event_scenario_music_2_id;
-extern script_weather_environment_t g_event_weather_commands[];
 
 /* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
  * operands; script_process_pending_requests passes them to battle_map_set_3d_object_state

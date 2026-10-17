@@ -65,7 +65,8 @@ extern s32 g_weather_flags;
 extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
 
 s32 weather_get_effective(void);
-void weather_run_command(weather_command_e command);
+/* A byte-valued weather_command_e, also read from the event command table. */
+void weather_run_command(u8 command);
 
 /* particles */
 /* Weather particles of g_weather_particles: snow
