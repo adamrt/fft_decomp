@@ -459,28 +459,24 @@ u32 world_map_update_input_repeat(u32 buttons) {
     return 0;
 }
 
-/* Each queued record starts with the shared 32-bit display flags. */
-static inline s32* wldcore_display_object_flags(void* object) {
-    return object;
-}
-
-/* Clear (nonzero argument) or set the blank flag on both display-object queues. */
+/* Clear (nonzero argument) or set the blank flag on both display-object queues.
+ * Both record types start with the same signed 32-bit flags field. */
 void window_set_render_objects_visible(s32 clear) {
     s32 i;
 
     if (clear) {
         for (i = 0; i < g_window_aux_render_object_count; i++) {
-            *wldcore_display_object_flags(g_window_aux_render_object_queue[i]) &= ~DISPLAY_OBJECT_BLANK;
+            *(s32*)g_window_aux_render_object_queue[i] &= ~DISPLAY_OBJECT_BLANK;
         }
         for (i = 0; i < g_window_render_object_count; i++) {
-            *wldcore_display_object_flags(g_window_render_object_queue[i]) &= ~DISPLAY_OBJECT_BLANK;
+            *(s32*)g_window_render_object_queue[i] &= ~DISPLAY_OBJECT_BLANK;
         }
     } else {
         for (i = 0; i < g_window_aux_render_object_count; i++) {
-            *wldcore_display_object_flags(g_window_aux_render_object_queue[i]) |= DISPLAY_OBJECT_BLANK;
+            *(s32*)g_window_aux_render_object_queue[i] |= DISPLAY_OBJECT_BLANK;
         }
         for (i = 0; i < g_window_render_object_count; i++) {
-            *wldcore_display_object_flags(g_window_render_object_queue[i]) |= DISPLAY_OBJECT_BLANK;
+            *(s32*)g_window_render_object_queue[i] |= DISPLAY_OBJECT_BLANK;
         }
     }
 }
