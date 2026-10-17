@@ -1130,7 +1130,7 @@ void camera_pan_disable(void) {
  * tiles (0x70000) outside the map on every side: -0x70000 up to
  * g_battle_map_terrain_width or g_battle_map_terrain_depth tiles of 0x1c000 plus 0x70000. */
 void camera_pan_update(void) {
-    long* coord;
+    s32* coord;
     s32 limit;
 
     if (g_camera_pan_enabled != 0) {
@@ -1152,32 +1152,32 @@ void camera_pan_update(void) {
             *coord += 4 * ONE;
             break;
         case UNIT_FACING_NORTH_EAST: {
-            long* y = &g_camera_real_coords.vz;
+            s32* y = &g_camera_real_coords.vz;
             *y += 4 * ONE;
             g_camera_real_coords.vx += 4 * ONE;
             break;
         }
         case UNIT_FACING_NORTH_WEST: {
-            long* y = &g_camera_real_coords.vz;
+            s32* y = &g_camera_real_coords.vz;
             *y += 4 * ONE;
             g_camera_real_coords.vx -= 4 * ONE;
             break;
         }
         case UNIT_FACING_SOUTH_EAST: {
-            long* y = &g_camera_real_coords.vz;
+            s32* y = &g_camera_real_coords.vz;
             *y -= 4 * ONE;
             g_camera_real_coords.vx += 4 * ONE;
             break;
         }
         case UNIT_FACING_SOUTH_WEST: {
-            long* y = &g_camera_real_coords.vz;
+            s32* y = &g_camera_real_coords.vz;
             *y -= 4 * ONE;
             g_camera_real_coords.vx -= 4 * ONE;
             break;
         }
         }
         {
-            long* x = &g_camera_real_coords.vx;
+            s32* x = &g_camera_real_coords.vx;
             limit = (g_battle_map_terrain_width * (BATTLE_MAP_TILE_SIZE * ONE)) + 4 * BATTLE_MAP_TILE_SIZE * ONE;
             if (limit < *x)
                 *x = limit;
@@ -1382,7 +1382,7 @@ void camera_zoom_handle_input(void) {
  * each frame until it reaches 0x300. The zoom ends on the target. */
 void camera_zoom_update(void) {
     s32 increment;
-    long* zoom_ptr;
+    s32* zoom_ptr;
 
     if (g_camera_zoom_action == CAMERA_STEP_INCREASE && g_camera_zoom_target == BATTLE_MAP_ZOOM_IN) {
         s32 zoom;
@@ -1622,7 +1622,7 @@ static s32 camera_scale_cursor_tile_vector(void) {
  * register allocation. */
 #define CAMERA_STEP_TOWARD(component, step, limit)                                                                     \
     if (step < 0) {                                                                                                    \
-        long* position = component;                                                                                    \
+        s32* position = component;                                                                                     \
         s32 whole = *position / ONE;                                                                                   \
         s32 bound = limit;                                                                                             \
         if (whole > bound) {                                                                                           \
@@ -1632,7 +1632,7 @@ static s32 camera_scale_cursor_tile_vector(void) {
             }                                                                                                          \
         }                                                                                                              \
     } else {                                                                                                           \
-        long* position = component;                                                                                    \
+        s32* position = component;                                                                                     \
         s32 whole = *position / ONE;                                                                                   \
         s32 bound = limit;                                                                                             \
         if (whole < bound) {                                                                                           \

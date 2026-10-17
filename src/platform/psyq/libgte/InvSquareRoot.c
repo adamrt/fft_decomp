@@ -4,7 +4,7 @@
 #include "psx/cpu_return_abi.h"
 
 /* main 0x8001bfc8–0x8001c054: inverse-root mantissa/exponent table lookup. */
-void InvSquareRoot(long value, long* mantissa_out, long* exponent_out) {
+void InvSquareRoot(s32 value, s32* mantissa_out, s32* exponent_out) {
     register s32 odd __asm__("$8");
     register s32 exponent __asm__("$9");
     register s32 even_leading __asm__("$10");

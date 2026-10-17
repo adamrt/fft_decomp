@@ -2,7 +2,7 @@
 #include "psx/libgte.h"
 
 /* main 0x8001c068–0x8001c094: normalize a wide vector through the register-ABI worker. */
-long VectorNormal(VECTOR* input, VECTOR* output) {
+s32 VectorNormal(VECTOR* input, VECTOR* output) {
     /* The private worker fixes t0-t2/v0 and saves RA in a3. */
     register s32 x __asm__("$8");
     register s32 y __asm__("$9");

@@ -2445,7 +2445,7 @@ void sprite_project_all_units(void) {
     VECTOR transformed;
     SVECTOR screen;
     SVECTOR adjusted;
-    long gte_flag;
+    s32 gte_flag;
     unit_t* unit;
     battle_map_tile_t* tile;
     move_effective_flags_e movement_flags;

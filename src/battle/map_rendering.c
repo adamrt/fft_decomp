@@ -424,8 +424,8 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     VECTOR screen;
     CVECTOR unused;
     s32 i;
-    long flag;
-    long effect_flag;
+    s32 flag;
+    s32 effect_flag;
     s32 part;
     SVECTOR* rotation;
     MATRIX* matrix;
@@ -1936,7 +1936,7 @@ void battle_map_mesh_reset_render_state(void) {
  * g_battle_map_camera_zoom, and the light rotation matrix is rebuilt. The GTE is
  * left with the scaled rotation and the bare screen offset as its translation. */
 void camera_update_matrices(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom) {
-    long result;
+    s32 result;
 
     g_battle_map_camera_zoom = *camera_zoom;
     memcpy(&g_battle_map_camera_rotation, rotation, sizeof(g_battle_map_camera_rotation));

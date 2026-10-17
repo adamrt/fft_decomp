@@ -168,6 +168,9 @@ instead of including the record's header.
   Add `const` only for genuinely read-only inputs and verify all callers
   under their historical compiler profiles.
 - Use American spelling.
+- Prefer `s8`/`u8`, `s16`/`u16` and `s32`/`u32` for explicit-width values.
+  PS1 SDK `long` values are 32-bit; express them as `s32`/`u32` consistently
+  in declarations, definitions and callers instead of adding pointer casts.
 - Keep comments factual. Say what a function or block does when the code
   does not make it obvious, and why a non-obvious step is there (a game
   rule, a retail quirk, a byte-matching constraint). Skip comments that

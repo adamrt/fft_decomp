@@ -4,6 +4,8 @@
 #include "psx/gte_regs.h"
 #include "psx/types.h"
 
+/* PsyQ long values are 32-bit on PS1; these interfaces use explicit-width types. */
+
 #define ONE 4096 /* 1.0 in GTE fixed point (1.3.12 / 20.12); one full turn for rsin/rcos */
 
 typedef struct {
@@ -14,10 +16,10 @@ typedef struct {
 } SVECTOR;
 
 typedef struct {
-    long vx;
-    long vy;
-    long vz;
-    long pad;
+    s32 vx;
+    s32 vy;
+    s32 vz;
+    s32 pad;
 } VECTOR;
 
 typedef struct {
@@ -75,8 +77,8 @@ MATRIX* TransMatrix(MATRIX* camera_matrix, VECTOR* offset_screen_coords);
 /* projection */
 VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* in, VECTOR* out);
 /* Sign of the screen-space winding of three packed XY points. */
-long NormalClip(long sxy0, long sxy1, long sxy2);
-extern void RotTrans(SVECTOR* input, VECTOR* output, long* flag);
+s32 NormalClip(s32 sxy0, s32 sxy1, s32 sxy2);
+extern void RotTrans(SVECTOR* input, VECTOR* output, s32* flag);
 s32 RotTransPers(SVECTOR* v0, s32* sxy0, s32* p, s32* flag);
 s32 RotTransPers3(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, s32* sxy0, s32* sxy1, s32* sxy2, s32* p, s32* flag);
 s32 RotTransPers4(
@@ -105,19 +107,19 @@ VECTOR* SquareSL0(SVECTOR* input, VECTOR* output);
 VECTOR* SquareSL12(SVECTOR* input, VECTOR* output);
 SVECTOR* SquareSS0(SVECTOR* input, SVECTOR* output);
 SVECTOR* SquareSS12(SVECTOR* input, SVECTOR* output);
-long VectorNormal(VECTOR* input, VECTOR* output);
-long VectorNormalS(VECTOR* input, SVECTOR* output);
-long VectorNormalSS(SVECTOR* input, SVECTOR* output);
+s32 VectorNormal(VECTOR* input, VECTOR* output);
+s32 VectorNormalS(VECTOR* input, SVECTOR* output);
+s32 VectorNormalSS(SVECTOR* input, SVECTOR* output);
 
 /* scalar math */
 s32 AverageZ3(s32 z0, s32 z1, s32 z2);
 s32 AverageZ4(s32 z0, s32 z1, s32 z2, s32 z3);
-void InvSquareRoot(long value, long* mantissa_out, long* exponent_out);
+void InvSquareRoot(s32 value, s32* mantissa_out, s32* exponent_out);
 s32 Lzc(s32 value);
-extern long SquareRoot0(long value);
+extern s32 SquareRoot0(s32 value);
 s32 SquareRoot12(s32 value);
-extern long csqrt(long value);
-extern long ratan2(long y, long x);
+extern s32 csqrt(s32 value);
+extern s32 ratan2(s32 y, s32 x);
 extern s32 rcos(s32 angle);
 extern s32 rsin(s32 angle);
 

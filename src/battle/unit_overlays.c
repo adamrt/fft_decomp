@@ -494,7 +494,7 @@ void sprite_shadow_draw(unit_t* unit, u32* ot) {
     SVECTOR position;
     SVECTOR offset;
     SVECTOR unused;
-    long flag;
+    s32 flag;
     POLY_FT4* prim;
     battle_map_tile_t* tile;
     SVECTOR* corners;
@@ -613,7 +613,7 @@ void sprite_shadow_draw(unit_t* unit, u32* ot) {
 void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
     VECTOR screen;
     MATRIX unused_matrix; /* unreferenced; reserves the target frame's 0x20-byte gap at sp+0x20 */
-    long flag;
+    s32 flag;
     POLY_FT4* quad;
     POLY_FT4* quad_glow;
     POLY_FT3* tri_a;
@@ -822,7 +822,7 @@ void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
     SVECTOR screen;
     s32 bob[8] = { 0, 1, 2, 3, 5, 3, 2, 1 };
     s32 duration[8] = { 16, 8, 2, 2, 6, 4, 4, 10 };
-    long flag;
+    s32 flag;
     POLY_FT4* prim;
     unit_t* unit;
     s32 height;
@@ -899,7 +899,7 @@ void unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
     VECTOR transformed;
     s32 dx[4] = { 0, -14, 0, 14 };
     s32 dz[4] = { -14, 0, 14, 0 };
-    long flag;
+    s32 flag;
     unit_t* unit;
     POLY_FT4* prim;
     /* Signed 16-bit value: the target's division emits the `bgez`/`addiu 0x3ff`
@@ -1171,7 +1171,7 @@ void status_bubble_draw(unit_t* unit, const DVECTOR* unused_screen_coords) {
     VECTOR transformed;
     SVECTOR base;
     SVECTOR raised;
-    long flag;
+    s32 flag;
     sprite_display_t* display;
     s32 bubble_id;
     /* One local for both digit indices: the status-CT arm reuses the dying
@@ -1292,7 +1292,7 @@ void sprite_afterimage_draw(unit_t* unit) {
     SVECTOR position;
     SVECTOR zoom;
     VECTOR transformed;
-    long flag;
+    s32 flag;
     sprite_display_t* display;
     s32 depth;
     s32 i;

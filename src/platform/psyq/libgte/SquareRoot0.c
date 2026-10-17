@@ -5,7 +5,7 @@
 #include "psx/cpu_return_zero_inline.h"
 
 /* main 0x8001bf38–0x8001bfbc: table approximation with signed normalization. */
-long SquareRoot0(long value) {
+s32 SquareRoot0(s32 value) {
     register s32 odd __asm__("$8");
     register s32 exponent __asm__("$9");
     register s32 even_leading __asm__("$10");

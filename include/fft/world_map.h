@@ -241,7 +241,7 @@ typedef struct world_map_scroll_axis {
 
 void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction);
 void world_map_apply_clamped_scroll(point32_t* amount, VECTOR* position);
-void world_map_apply_clamped_horizontal_scroll(s32* amount, long* position);
+void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position);
 void world_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position);
 
 /* map dots */

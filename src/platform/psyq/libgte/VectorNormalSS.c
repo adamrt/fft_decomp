@@ -2,7 +2,7 @@
 #include "psx/libgte.h"
 
 /* main 0x8001c094–0x8001c0c4: normalize short input into short output. */
-long VectorNormalSS(SVECTOR* input, SVECTOR* output) {
+s32 VectorNormalSS(SVECTOR* input, SVECTOR* output) {
     /* The private worker fixes t0-t2/v0 and saves RA in a3. */
     register s32 x __asm__("$8");
     register s32 y __asm__("$9");

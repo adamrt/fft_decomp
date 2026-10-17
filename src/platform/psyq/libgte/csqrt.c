@@ -1,11 +1,11 @@
 #include "psx/libgte.h"
 
 /* main 0x8001be1c–0x8001beb8. */
-long csqrt(long value) {
-    long result;
-    long difference;
-    long scale;
-    long normalized;
+s32 csqrt(s32 value) {
+    s32 result;
+    s32 difference;
+    s32 scale;
+    s32 normalized;
     if (value == 0)
         result = 0;
     else {

@@ -2,7 +2,7 @@
 #include "psx/gte_inline.h"
 #include "psx/libgte.h"
 /* main 0x8001c054–0x8001c068: wide-input entry to the shared short-output tail. */
-long VectorNormalS(VECTOR* input, SVECTOR* output) {
+s32 VectorNormalS(VECTOR* input, SVECTOR* output) {
     /* The continuation receives wide components in the private t0-t2 ABI. */
     register s32 x __asm__("$8");
     register s32 y __asm__("$9");

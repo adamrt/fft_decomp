@@ -1364,7 +1364,7 @@ void effect_interpolate_svector_linear(
 }
 
 /* The 32-bit counterpart of effect_interpolate_s16: t runs from 0 at from to 2 * ONE at to. */
-static void effect_lerp_component_q13(s32 from, s32 to, s32 t, long* out) {
+static void effect_lerp_component_q13(s32 from, s32 to, s32 t, s32* out) {
     *out = from + (to - from) * t / (2 * ONE);
 }
 
@@ -1404,7 +1404,7 @@ s32 effect_lerp_q8(s32 start, s32 end, s32 factor) {
 
 /* Store and return the interpolation with an eight-bit fractional factor.
  * The arithmetic right shift rounds negative products down. */
-static s32 effect_lerp_q8_and_store(s32 start, s32 end, s32 factor, long* out) {
+static s32 effect_lerp_q8_and_store(s32 start, s32 end, s32 factor, s32* out) {
     s32 result = ((end - start) * factor >> 8) + start;
 
     *out = result;

@@ -30,7 +30,7 @@
  * point. It first cycles the tile glow palettes. */
 void cursor_project_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
     battle_map_tile_t* tile;
-    long flag;
+    s32 flag;
 
     cursor_cycle_tile_glow_palettes();
     SetRotMatrix(&g_camera_matrix);
@@ -86,7 +86,7 @@ void unit_facing_draw_wait_direction(void) {
     SVECTOR base;
     SVECTOR raised;
     VECTOR transformed;
-    long flag;
+    s32 flag;
     unit_t* unit;
     s32 depth;
     u32* ot;

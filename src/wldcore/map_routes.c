@@ -116,7 +116,7 @@ void world_map_init_dots(void) {
  * [-128, 128] and y in [-116, 120]. */
 void world_map_project_dots(void) {
     VECTOR position;
-    long flag;
+    s32 flag;
     s32 i;
 
     for (i = 0; i < g_world_map_dot_count; i++) {
@@ -1195,7 +1195,7 @@ void world_map_init_marker_and_camera(void) {
 void world_map_update_marker(void) {
     VECTOR output;
     world_map_marker_state_t* state = &g_world_map_marker_state;
-    long transform_flag;
+    s32 transform_flag;
     s32 angle_direction;
     s32 direction;
     s32 flags;

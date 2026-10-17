@@ -1,10 +1,10 @@
 #include "psx/libgte.h"
 
 /* main 0x8001d8e8–0x8001da68. */
-long ratan2(long y, long x) {
-    long negative_x = 0;
-    long negative_y = 0;
-    long result;
+s32 ratan2(s32 y, s32 x) {
+    s32 negative_x = 0;
+    s32 negative_y = 0;
+    s32 result;
     if (x < 0) {
         negative_x = 1;
         x = -x;
