@@ -554,7 +554,7 @@ void effect_particle_free_work_record(s16 record_index, effect_work_record_t* wo
  * screen heading stored on the node. Color-curve records take each channel
  * from its animation curve at the record's curve frame; others use neutral
  * 0x80. */
-void effect_particle_update_node_from_work(s16 record_index, effect_work_record_t* work) {
+s32 effect_particle_update_node_from_work(effect_record_t* unused_record, effect_work_record_t* work) {
     SVECTOR direction;
     VECTOR rotated;
 
