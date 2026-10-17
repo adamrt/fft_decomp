@@ -7,34 +7,6 @@
 #include "psx/types.h"
 
 /* per-unit selections */
-/* The selected row and scroll position of an ability list. */
-typedef struct menu_list_selection {
-    u8 selected_index;
-    u8 scroll_offset;
-} menu_list_selection_t;
-typedef char menu_list_selection_size_must_be_2[sizeof(menu_list_selection_t) == 2 ? 1 : -1];
-
-/* One remembered command/skillset selection per unit, followed by seven
- * ability-list positions. Arithmeticks uses list positions 4, 5 and 6. */
-typedef struct menu_unit_selection_record {
-    u8 command_index;               /* 0x00 */
-    u8 _unknown_01;                 /* 0x01; reset to 0xff */
-    u8 skillset_index;              /* 0x02 */
-    menu_list_selection_t lists[7]; /* 0x03 */
-} menu_unit_selection_record_t;
-typedef char menu_unit_selection_record_size_must_be_17[(sizeof(menu_unit_selection_record_t) == 17) ? 1 : -1];
-
-/* Remap three remembered selections to one replacement for a menu. */
-typedef struct menu_selection_remap {
-    u8 menu_id;
-    u8 replacement;
-    u8 matches[3];
-} menu_selection_remap_t;
-typedef char menu_selection_remap_size_must_be_5[sizeof(menu_selection_remap_t) == 5 ? 1 : -1];
-
-extern menu_unit_selection_record_t g_menu_unit_selection_records[];
-extern menu_selection_remap_t g_menu_selection_remaps[8];
-
 /* When the idle action menu opens again for g_command_restore_unit_id with a restore pending, it reopens the
  * skillset list and the ability list down to g_menu_restore_depth. */
 extern u8 g_menu_restore_pending;

@@ -48,14 +48,6 @@ extern u32 g_input_previous_copy_2;
 extern u32 g_input_previous_copy_3;
 extern u32 g_input_stable_frames;
 
-/* OPEN directional repeat */
-extern s32 g_input_directional_repeat_initial_delay;
-extern s32 g_input_directional_repeat_period;
-extern s32 g_input_up_repeat_counter;
-extern s32 g_input_down_repeat_counter;
-extern s32 g_input_left_repeat_counter;
-extern s32 g_input_right_repeat_counter;
-
 /* Volatile: title_update_sound_type_menu reloads it (lui/lw) for every
  * test; readers that test it twice from one load take a local copy. */
 extern volatile u32 g_input_new_button_presses;

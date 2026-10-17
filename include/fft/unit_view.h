@@ -24,16 +24,6 @@ typedef enum unit_view_mode {
     UNIT_VIEW_MODE_ATTACK_PREVIEW = 5, /* attack caster and attack target stats */
 } unit_view_mode_e;
 
-/* One row of g_unit_view_thread_sets, indexed by the view mode. Each of the four slots names a thread
- * entry (or -1), the scheduler slot it runs in, and the task id it must carry. Provisional. */
-typedef struct unit_view_thread_set {
-    void (*entries[4])(void); /* 0x00 */
-    s32 thread_ids[4];        /* 0x10 */
-    s32 task_ids[4];          /* 0x20 */
-} unit_view_thread_set_t;
-typedef char unit_view_thread_set_size_must_be_48[(sizeof(unit_view_thread_set_t) == 48) ? 1 : -1];
-
-extern unit_view_thread_set_t g_unit_view_thread_sets[];
 extern s32 g_unit_view_mode;
 extern u16 g_unit_view_cached_battle_id;
 extern u16 g_unit_view_cached_comparison_id;
@@ -45,33 +35,6 @@ void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
 void unit_view_wait_for_panels(void);
 
 /* unit stats panels */
-/* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
-typedef struct menu_unit_status_offsets {
-    menu_status_panel_draw_offset_t a; /* 0x00 */
-    menu_status_panel_draw_offset_t b; /* 0x10 */
-} menu_unit_status_offsets_t;
-
-/* The mode argument of unit_view_stats_panel_thread, the one thread body of the four unit stats panels: which panel
- * the thread draws; each value has one caller. The panel slides in, redraws each frame and slides out on the stop
- * request. */
-typedef enum unit_stats_panel {
-    UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_refresh_hovered_stats */
-    UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_preview_caster_stats */
-    UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_preview_target_stats; shows the reaction ability name */
-    UNIT_STATS_PANEL_RIGHT_UNIT = 3,    /* unit_view_refresh_right_stats */
-} unit_stats_panel_e;
-
-/* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
- * comes from g_unit_view_stats_first_page_by_mode). Provisional. */
-typedef struct unit_view_stats_page {
-    POLY_G4 bars[3];                   /* 0x000: HP/MP/CT gauges */
-    DR_MODE draw_mode_1;               /* 0x06c */
-    DR_MODE draw_mode_0;               /* 0x078 */
-    menu_palette_primitives_t palette; /* 0x084 */
-    POLY_FT4 quads[5];                 /* 0x170 */
-    SPRT sprites[7];                   /* 0x238 */
-    POLY_FT4 portrait;                 /* 0x2c4 */
-} unit_view_stats_page_t;
 
 /* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
 extern RECT g_menu_sprite_page_texture_windows[5];
@@ -96,7 +59,6 @@ extern RECT g_unit_view_attack_target_stats_rect;
 extern menu_number_entry_t g_unit_view_attack_target_stats_setup[8];
 extern struct action_data* g_unit_view_preview_target_action;
 extern u16 g_unit_view_hovered_stats_frame_count;
-extern unit_view_stats_page_t g_unit_view_stats_panel_pages[];
 extern u8 g_unit_view_stats_first_page_by_mode[];
 extern u16 g_unit_view_stats_bounce_step;
 extern u16 g_unit_view_stats_bounce_offsets[];
@@ -114,18 +76,6 @@ void unit_view_preview_caster_stats(void);
 void unit_view_preview_target_stats(void);
 
 /* unit summary */
-/* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
-typedef struct unit_view_summary_frame {
-    SPRT sprites[7];                    /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
-    DR_MODE draw_mode_0;                /* 0x8c */
-    DR_MODE draw_mode_1;                /* 0x98 */
-    menu_palette_primitives_t* palette; /* 0xa4 */
-    DR_OFFSET draw_offset_a;            /* 0xa8 */
-    DR_OFFSET draw_offset_b;            /* 0xb4 */
-    point16_t offset_a;                 /* 0xc0 */
-    point16_t offset_b;                 /* 0xc4 */
-    POLY_FT4 portrait;                  /* 0xc8 */
-} unit_view_summary_frame_t;
 
 extern RECT g_unit_view_summary_panel_rect;
 extern menu_unit_number_images_t g_unit_view_summary_digit_images;
@@ -137,40 +87,9 @@ void unit_view_summary_thread(void);
 
 /* selected-tile display */
 /* The panel describing the tile under the cursor. */
-/* 12-byte textured-quad piece (g_unit_view_quad_pieces) that unit_view_build_height_pieces turns into a POLY_GT4:
- * texture origin, size and screen position relative to g_unit_view_quad_origin. Provisional. */
-typedef struct menu_quad_piece {
-    u8 u; /* 0x00 */
-    u8 _unused_01;
-    s8 v;           /* 0x02: texture v + 0x78 */
-    u8 _padding_03; /* aligns w */
-    s16 w;          /* 0x04 */
-    s16 h;          /* 0x06 */
-    s16 x;          /* 0x08 */
-    s16 y;          /* 0x0a */
-} menu_quad_piece_t;
 
-/* The four vertex colors unit_view_build_height_pieces applies (g_unit_view_quad_colors); the leading 32-bit value is
- * untyped. Provisional. */
-typedef struct menu_quad_colors {
-    u32 _unused_00;
-    CVECTOR vertex[4]; /* 0x04; one color per POLY_GT4 corner */
-} menu_quad_colors_t;
-
-/* One of the two 0x144-byte packet pages of the display (g_unit_view_height_display_pages): five Gouraud textured
- * quads, two sprites and the two draw-mode packets that select their texture windows. Provisional. */
-typedef struct menu_quad_page {
-    POLY_GT4 quads[5]; /* 0x000 */
-    SPRT sprites[2];   /* 0x104 */
-    DR_MODE modes[2];  /* 0x12c */
-} menu_quad_page_t;
-typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
-
-extern menu_quad_colors_t g_unit_view_quad_colors;
 extern u8 g_unit_view_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_unit_view_quad_origin;
-extern menu_quad_piece_t g_unit_view_quad_pieces[];
-extern menu_quad_page_t g_unit_view_height_display_pages[2];
 extern RECT g_unit_view_tile_info_image_location;
 extern image_load_parameters_t g_unit_view_tile_info_image_params[2];
 extern u16 g_unit_view_depth_display_suppressed; /* nonzero while effects hide the tile's depth number */

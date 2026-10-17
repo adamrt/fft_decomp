@@ -48,6 +48,81 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
+typedef struct menu_unit_status_offsets {
+    menu_status_panel_draw_offset_t a; /* 0x00 */
+    menu_status_panel_draw_offset_t b; /* 0x10 */
+} menu_unit_status_offsets_t;
+
+/* The mode argument of unit_view_stats_panel_thread, the one thread body of the four unit stats panels: which panel
+ * the thread draws; each value has one caller. The panel slides in, redraws each frame and slides out on the stop
+ * request. */
+typedef enum unit_stats_panel {
+    UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_refresh_hovered_stats */
+    UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_preview_caster_stats */
+    UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_preview_target_stats; shows the reaction ability name */
+    UNIT_STATS_PANEL_RIGHT_UNIT = 3,    /* unit_view_refresh_right_stats */
+} unit_stats_panel_e;
+
+/* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
+ * comes from g_unit_view_stats_first_page_by_mode). Provisional. */
+typedef struct unit_view_stats_page {
+    POLY_G4 bars[3];                   /* 0x000: HP/MP/CT gauges */
+    DR_MODE draw_mode_1;               /* 0x06c */
+    DR_MODE draw_mode_0;               /* 0x078 */
+    menu_palette_primitives_t palette; /* 0x084 */
+    POLY_FT4 quads[5];                 /* 0x170 */
+    SPRT sprites[7];                   /* 0x238 */
+    POLY_FT4 portrait;                 /* 0x2c4 */
+} unit_view_stats_page_t;
+
+/* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
+typedef struct unit_view_summary_frame {
+    SPRT sprites[7];                    /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
+    DR_MODE draw_mode_0;                /* 0x8c */
+    DR_MODE draw_mode_1;                /* 0x98 */
+    menu_palette_primitives_t* palette; /* 0xa4 */
+    DR_OFFSET draw_offset_a;            /* 0xa8 */
+    DR_OFFSET draw_offset_b;            /* 0xb4 */
+    point16_t offset_a;                 /* 0xc0 */
+    point16_t offset_b;                 /* 0xc4 */
+    POLY_FT4 portrait;                  /* 0xc8 */
+} unit_view_summary_frame_t;
+
+/* 12-byte textured-quad piece (g_unit_view_quad_pieces) that unit_view_build_height_pieces turns into a POLY_GT4:
+ * texture origin, size and screen position relative to g_unit_view_quad_origin. Provisional. */
+typedef struct menu_quad_piece {
+    u8 u; /* 0x00 */
+    u8 _unused_01;
+    s8 v;           /* 0x02: texture v + 0x78 */
+    u8 _padding_03; /* aligns w */
+    s16 w;          /* 0x04 */
+    s16 h;          /* 0x06 */
+    s16 x;          /* 0x08 */
+    s16 y;          /* 0x0a */
+} menu_quad_piece_t;
+
+/* The four vertex colors unit_view_build_height_pieces applies (g_unit_view_quad_colors); the leading 32-bit value is
+ * untyped. Provisional. */
+typedef struct menu_quad_colors {
+    u32 _unused_00;
+    CVECTOR vertex[4]; /* 0x04; one color per POLY_GT4 corner */
+} menu_quad_colors_t;
+
+/* One of the two 0x144-byte packet pages of the display (g_unit_view_height_display_pages): five Gouraud textured
+ * quads, two sprites and the two draw-mode packets that select their texture windows. Provisional. */
+typedef struct menu_quad_page {
+    POLY_GT4 quads[5]; /* 0x000 */
+    SPRT sprites[2];   /* 0x104 */
+    DR_MODE modes[2];  /* 0x12c */
+} menu_quad_page_t;
+typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
+
+extern unit_view_stats_page_t g_unit_view_stats_panel_pages[];
+extern menu_quad_colors_t g_unit_view_quad_colors;
+extern menu_quad_piece_t g_unit_view_quad_pieces[];
+extern menu_quad_page_t g_unit_view_height_display_pages[2];
+
 static u8 g_status_screen_line_colors[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
     123, 90, 32, 32, 32, 140, 1, 140, 90, 16, 16, 16, 141, 1, 141, 90 };

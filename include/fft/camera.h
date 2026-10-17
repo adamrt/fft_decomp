@@ -166,30 +166,6 @@ enum {
     CAMERA_FUSION_HOLD_SENTINEL = 0x2710,
 };
 
-/* Provisional camera interpolation key: frame time and target value. */
-typedef struct camera_key {
-    s32 time;  /* 0x00; cumulative frame of this key */
-    s32 value; /* 0x04 */
-    u8 _unused_08[8];
-} camera_key_t;
-typedef char camera_key_size_must_be_16[sizeof(camera_key_t) == 16 ? 1 : -1];
-
-/* Provisional per-component camera fusion track (0xa4 bytes), seeded by
- * camera_fusion_thread and advanced by its camera_step_track. */
-typedef struct camera_track {
-    camera_key_t keys[8]; /* 0x00 */
-    s32 key_count;        /* 0x80 */
-    s32 segment;          /* 0x84; first key of the active segment */
-    s32 frame;            /* 0x88; frames since the track started */
-    s32 segment_frame;    /* 0x8c; frames into the active segment */
-    s32 prev_time;        /* 0x90; Q12 */
-    s32 prev_value;       /* 0x94; Q12 */
-    s32 start_value;      /* 0x98; Q12 */
-    s32 segment_duration; /* 0x9c */
-    s32 finished;         /* 0xa0 */
-} camera_track_t;
-typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
-
 void camera_fusion_thread(void);
 
 /* fixed-point math */

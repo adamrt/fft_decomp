@@ -61,6 +61,25 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* One row of g_menu_system_function_table (menu_run_system_function_thread,
+ * menu_dispatch_system_function). Provisional. */
+typedef struct menu_system_function {
+    s16 menu_id;                /* 0x00; copied to g_command_current_id */
+    u16 text_id;                /* 0x02; menu entry text id */
+    s16 menu_entry_index;       /* 0x04; g_menu_thread_menu_data index */
+    u16 row_action;             /* 0x06; copied to g_menu_system_function_row_actions */
+    u16 thread_count;           /* 0x08; menu entry thread_count */
+    u8 _padding_0a[2];          /* aligns thread_entry */
+    void (*thread_entry)(void); /* 0x0c; started as thread 8 */
+    s16 alternate_id;           /* 0x10; replaces the id when navigation messages are not On */
+    u8 _padding_12[2];          /* tail padding to 4-byte alignment */
+} menu_system_function_t;
+typedef char menu_system_function_size_must_be_20[(sizeof(menu_system_function_t) == 20) ? 1 : -1];
+
+/* Array view: as a scalar, GCC hoists the menu-index reload above its store
+ * in menu_run_system_function_thread. */
+extern menu_system_function_t g_menu_system_function_table[];
+
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);
 static void script_route_event_input(void);

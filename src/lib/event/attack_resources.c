@@ -54,6 +54,79 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Provisional camera interpolation key: frame time and target value. */
+typedef struct camera_key {
+    s32 time;  /* 0x00; cumulative frame of this key */
+    s32 value; /* 0x04 */
+    u8 _unused_08[8];
+} camera_key_t;
+typedef char camera_key_size_must_be_16[sizeof(camera_key_t) == 16 ? 1 : -1];
+
+/* Provisional per-component camera fusion track (0xa4 bytes), seeded by
+ * camera_fusion_thread and advanced by its camera_step_track. */
+typedef struct camera_track {
+    camera_key_t keys[8]; /* 0x00 */
+    s32 key_count;        /* 0x80 */
+    s32 segment;          /* 0x84; first key of the active segment */
+    s32 frame;            /* 0x88; frames since the track started */
+    s32 segment_frame;    /* 0x8c; frames into the active segment */
+    s32 prev_time;        /* 0x90; Q12 */
+    s32 prev_value;       /* 0x94; Q12 */
+    s32 start_value;      /* 0x98; Q12 */
+    s32 segment_duration; /* 0x9c */
+    s32 finished;         /* 0xa0 */
+} camera_track_t;
+typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
+
+/* One row of g_unit_view_thread_sets, indexed by the view mode. Each of the four slots names a thread
+ * entry (or -1), the scheduler slot it runs in, and the task id it must carry. Provisional. */
+typedef struct unit_view_thread_set {
+    void (*entries[4])(void); /* 0x00 */
+    s32 thread_ids[4];        /* 0x10 */
+    s32 task_ids[4];          /* 0x20 */
+} unit_view_thread_set_t;
+typedef char unit_view_thread_set_size_must_be_48[(sizeof(unit_view_thread_set_t) == 48) ? 1 : -1];
+
+extern unit_view_thread_set_t g_unit_view_thread_sets[];
+
+/* The selected row and scroll position of an ability list. */
+typedef struct menu_list_selection {
+    u8 selected_index;
+    u8 scroll_offset;
+} menu_list_selection_t;
+typedef char menu_list_selection_size_must_be_2[sizeof(menu_list_selection_t) == 2 ? 1 : -1];
+
+/* One remembered command/skillset selection per unit, followed by seven
+ * ability-list positions. Arithmeticks uses list positions 4, 5 and 6. */
+typedef struct menu_unit_selection_record {
+    u8 command_index;               /* 0x00 */
+    u8 _unknown_01;                 /* 0x01; reset to 0xff */
+    u8 skillset_index;              /* 0x02 */
+    menu_list_selection_t lists[7]; /* 0x03 */
+} menu_unit_selection_record_t;
+typedef char menu_unit_selection_record_size_must_be_17[(sizeof(menu_unit_selection_record_t) == 17) ? 1 : -1];
+
+/* Remap three remembered selections to one replacement for a menu. */
+typedef struct menu_selection_remap {
+    u8 menu_id;
+    u8 replacement;
+    u8 matches[3];
+} menu_selection_remap_t;
+typedef char menu_selection_remap_size_must_be_5[sizeof(menu_selection_remap_t) == 5 ? 1 : -1];
+
+extern menu_unit_selection_record_t g_menu_unit_selection_records[];
+extern menu_selection_remap_t g_menu_selection_remaps[8];
+
+/* Provisional: one 5-byte row of a menu text entry as rewritten by command_build_act_menu: the style byte at +1 is 4
+ * for a grayed row, the byte at +3 is the row separator (0xfa) or the list terminator (0xff). */
+typedef struct menu_text_row {
+    u8 _unused_00;
+    u8 style; /* 0x01 */
+    u8 _unused_02;
+    u8 terminator; /* 0x03: 0xfa continues, 0xff ends */
+    u8 _unused_04;
+} menu_text_row_t;
+
 static u8 g_menu_cleared_entry_indices[11] = { 7, 24, 25, 26, 27, 37, 38, 40, 41, 42, 45 };
 
 static s32 camera_step_track(camera_track_t* track, s32 component);
