@@ -23,10 +23,10 @@ void save_init_data_tables(void) {
 
     for (i = 0; i < 5; i++) {
         record = &g_sound_novel_saved_readings[i];
-        record->text_history_3 = -1;
-        record->text_history_2 = -1;
-        record->text_history_1 = -1;
-        record->text_history_0 = -1;
+        record->text_history[3] = -1;
+        record->text_history[2] = -1;
+        record->text_history[1] = -1;
+        record->text_history[0] = -1;
         record->picture_id = -1;
         g_sound_novel_saved_readings[i].background_set = -1;
         record->sound_mode = 0;

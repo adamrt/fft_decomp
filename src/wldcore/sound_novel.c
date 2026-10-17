@@ -158,10 +158,10 @@ void sound_novel_reset_selected_reading(s32 unused) {
 /* Reset a sound-novel record to the start of a reading: no text history, no
  * picture or background, no sound, section 0 and brightness 0x30. */
 static void sound_novel_reset_reading(sound_novel_reading_t* record) {
-    record->text_history_3 = -1;
-    record->text_history_2 = -1;
-    record->text_history_1 = -1;
-    record->text_history_0 = -1;
+    record->text_history[3] = -1;
+    record->text_history[2] = -1;
+    record->text_history[1] = -1;
+    record->text_history[0] = -1;
     record->picture_id = -1;
     record->background_set = -1;
     record->sound_mode = 0;
@@ -427,7 +427,7 @@ void sound_novel_opcode_02_nop(void) {
 /* Sound-novel opcode 0x03: show message byte 1 of the novel's text
  * (TEXT_ID_WORLD_MESSAGE_BASE | byte 1) in the message box, as
  * sound_novel_opcode_0d_start_text_thread does, then push it onto the four-entry
- * history g_sound_novel_reading.text_history_0..3. */
+ * history g_sound_novel_reading.text_history[0..3]. */
 void sound_novel_opcode_03_start_text_thread_and_push_history(void) {
     u16 history_1;
     u16 history_2;
@@ -437,15 +437,15 @@ void sound_novel_opcode_03_start_text_thread_and_push_history(void) {
 
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_dialog_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
-    history_1 = g_sound_novel_reading.text_history_1;
-    history_2 = g_sound_novel_reading.text_history_2;
-    history_3 = g_sound_novel_reading.text_history_3;
+    history_1 = g_sound_novel_reading.text_history[1];
+    history_2 = g_sound_novel_reading.text_history[2];
+    history_3 = g_sound_novel_reading.text_history[3];
     flags = g_sound_novel_reading.state_flags;
     g_sound_novel_reading.text_id = operand;
-    g_sound_novel_reading.text_history_3 = operand;
-    g_sound_novel_reading.text_history_0 = history_1;
-    g_sound_novel_reading.text_history_1 = history_2;
-    g_sound_novel_reading.text_history_2 = history_3;
+    g_sound_novel_reading.text_history[3] = operand;
+    g_sound_novel_reading.text_history[0] = history_1;
+    g_sound_novel_reading.text_history[1] = history_2;
+    g_sound_novel_reading.text_history[2] = history_3;
     g_sound_novel_reading.state_flags = flags | SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -1167,18 +1167,18 @@ void sound_novel_opcode_34_wait_for_fade(void) {
 }
 
 /* Sound-novel opcode: shift the four-entry history
- * g_sound_novel_history_0..3 down one slot and push byte 1 at
+ * g_sound_novel_reading.text_history down one slot and push byte 1 at
  * the end (same shape as sound_novel_opcode_03_start_text_thread_and_push_history). */
 void sound_novel_opcode_35_push_operand_history(void) {
     u16 history_1 = g_sound_novel_history_1;
     u8 new_entry = (g_sound_novel_reading.instruction & 0xff00) >> 8;
-    u16 history_2 = g_sound_novel_history_2;
-    u16 history_3 = g_sound_novel_history_3;
+    u16 history_2 = (u16)g_sound_novel_reading.text_history[2];
+    u16 history_3 = (u16)g_sound_novel_reading.text_history[3];
 
-    g_sound_novel_history_0 = history_1;
+    g_sound_novel_reading.text_history[0] = history_1;
     g_sound_novel_history_1 = history_2;
-    g_sound_novel_history_2 = history_3;
-    g_sound_novel_history_3 = new_entry;
+    g_sound_novel_reading.text_history[2] = history_3;
+    g_sound_novel_reading.text_history[3] = new_entry;
     g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 

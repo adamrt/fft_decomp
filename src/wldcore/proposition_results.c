@@ -36,6 +36,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Scalar history views retained for the Quit shuffle: direct member accesses
+ * change its original loads and store scheduling. */
+extern s16 g_sound_novel_history_0;
+extern u16 g_sound_novel_history_2;
+
 static u8 g_picture_dissolve_band_progress[16] = { 0 };
 
 static void hud_show_play_time(void);
@@ -1207,7 +1212,7 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             }
             if ((g_input_current_buttons & PSX_PAD_SQUARE)
                 && (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
-                && g_sound_novel_reading.text_history_3 != -1) {
+                && g_sound_novel_reading.text_history[3] != -1) {
                 g_window_records[level->sound_novel.history_prompt_window].sequence
                     = WINDOW_ANIM_SOUND_NOVEL_SQUARE_BUTTON_PRESS;
                 window = level->sound_novel.history_prompt_window;
@@ -1430,7 +1435,7 @@ void sound_novel_step_quit_level(menu_stack_record_t* level) {
         g_menu_blocked_buttons = 0;
         g_sound_novel_countdown_frames = 0;
         g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
-        g_sound_novel_history_3 = g_sound_novel_history_2;
+        g_sound_novel_reading.text_history[3] = g_sound_novel_history_2;
         g_sound_novel_history_2 = g_sound_novel_history_1;
         g_sound_novel_history_1 = first;
         hud_show_play_time();
@@ -1515,7 +1520,7 @@ static void hud_show_play_time(void) {
  *
  * Suspends the message box, appends the upper and lower scroll indicators
  * (the lower one hidden) and the 0xf8 x 0xb0 text panel, draws the newest
- * history entry (TEXT_ID_WORLD_MESSAGE_BASE + text_history_3) centered in it,
+ * history entry (TEXT_ID_WORLD_MESSAGE_BASE + text_history[3]) centered in it,
  * and copies the four history entries (newest first) into the level. It also
  * grays the novel's Start button window, sets the picture to full brightness
  * and shows the black fade box for the dim. The upper indicator is hidden
@@ -1576,7 +1581,7 @@ static void sound_novel_push_history_level(void) {
     bounds.y = 0;
     window_build_render_record_image(index, bounds, 1, g_window_image_buffer);
     position = &g_window_gs_image_records[index].base;
-    newest = &g_sound_novel_reading.text_history_3;
+    newest = &g_sound_novel_reading.text_history[3];
     g_window_gs_image_records[index].priority = g_menu_stack_ot_offset;
     position->x = -0x80;
     position->y = -0x64;

@@ -638,7 +638,6 @@ data:
   - {addr: 0x800d4860, name: g_sound_novel_history_0}
   - {addr: 0x800d4862, name: g_sound_novel_history_1}
   - {addr: 0x800d4864, name: g_sound_novel_history_2}
-  - {addr: 0x800d4866, name: g_sound_novel_history_3}
   - {addr: 0x800d4878, name: g_world_map_window_index}
   - {addr: 0x800d487c, name: g_world_map_ot_tags}
   - {addr: 0x800d48fc, name: g_sound_novel_wait_frames}

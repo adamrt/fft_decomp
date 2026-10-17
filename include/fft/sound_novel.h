@@ -34,10 +34,7 @@ typedef struct sound_novel_reading {
     s16 background_set;       /* 0x1a */
     s16 picture_render_index; /* 0x1c */
     s16 picture_id;           /* 0x1e */
-    s16 text_history_0;       /* 0x20; four-entry text history, newest last */
-    s16 text_history_1;       /* 0x22 */
-    s16 text_history_2;       /* 0x24 */
-    s16 text_history_3;       /* 0x26 */
+    s16 text_history[4];      /* 0x20; oldest to newest */
     s16 value_display_mode;   /* 0x28 */
     s16 music_selection;      /* 0x2a */
     s16 sound_mode;           /* 0x2c; 0 plays pending sounds only, 1 also switches the music track */
@@ -122,13 +119,9 @@ void sound_novel_opcode_1c_start_pending_value_transition(void);
 void sound_novel_opcode_1e_apply_counter_delta(void);
 
 /* text history */
-/* Views of g_sound_novel_reading.text_history_0..3 for the history shifters.
- * The first stays signed for its -1 sentinel; the other three are loaded
- * unsigned. The record keeps s16 for sound_novel_reset_reading. */
-extern s16 g_sound_novel_history_0;
+/* Unsigned scalar view of text_history[1] used by both history shifters.
+ * Direct member access changes their original instruction scheduling. */
 extern u16 g_sound_novel_history_1;
-extern u16 g_sound_novel_history_2;
-extern u16 g_sound_novel_history_3;
 
 /* sounds, waits and the countdown */
 extern struct suzuki_sound_resource* g_sound_novel_sound_resource;
