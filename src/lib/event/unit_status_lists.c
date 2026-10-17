@@ -65,7 +65,8 @@ typedef enum unit_stats_panel {
 } unit_stats_panel_e;
 
 /* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
- * comes from g_unit_view_stats_first_page_by_mode). Provisional. */
+ * comes from g_unit_view_stats_first_page_by_mode). Status-screen primitives reuse
+ * portions of this storage while the attack-preview and right-unit views are inactive. */
 typedef struct unit_view_stats_page {
     POLY_G4 bars[3];                   /* 0x000: HP/MP/CT gauges */
     DR_MODE draw_mode_1;               /* 0x06c */
@@ -75,6 +76,7 @@ typedef struct unit_view_stats_page {
     SPRT sprites[7];                   /* 0x238 */
     POLY_FT4 portrait;                 /* 0x2c4 */
 } unit_view_stats_page_t;
+typedef char unit_view_stats_page_size_must_be_748[sizeof(unit_view_stats_page_t) == 748 ? 1 : -1];
 
 /* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
 typedef struct unit_view_summary_frame {
@@ -88,6 +90,34 @@ typedef struct unit_view_summary_frame {
     point16_t offset_b;                 /* 0xc4 */
     POLY_FT4 portrait;                  /* 0xc8 */
 } unit_view_summary_frame_t;
+
+/* Double-buffered 0x2d0-byte frame of the Status screen panel (g_status_screen_frames). The first 0x2a4
+ * bytes are laid out as unit_panel_buffer_t (draw modes, sprites, tiles and lines),
+ * and the trailing draw-area pair follows menu_panel_frame_t. */
+typedef struct status_screen_frame {
+    DR_MODE frame_draw_mode;            /* 0x000; MENU_TEXTURE_PAGE_FRAME */
+    DR_MODE text_draw_mode;             /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
+    DR_MODE image_draw_mode;            /* 0x018; MENU_TEXTURE_PAGE_ITEM_ICONS */
+    SPRT sprites[24];                   /* 0x024: 19 panel sprites, then 5 item icons */
+    TILE tiles[2];                      /* 0x204 */
+    LINE_F2 lines[8];                   /* 0x224 */
+    menu_palette_primitives_t* palette; /* 0x2a4 */
+    scaled_draw_area_pair_t draw_areas; /* 0x2a8 */
+} status_screen_frame_t;
+typedef char status_screen_frame_size_must_be_720[sizeof(status_screen_frame_t) == 720 ? 1 : -1];
+
+/* The Status screen's numeric side panel draws its fifteen numbers into three images once, then the frame and
+ * eighteen sprites every frame. This is its double-buffered 0x1ac-byte record
+ * (g_status_screen_numbers_panel_records). */
+typedef struct status_screen_numbers_record {
+    DR_MODE mode0; /* 0x000 */
+    DR_MODE mode1; /* 0x00c */
+    /* 0x018; menu_init_scaled_draw_area_packets */
+    scaled_draw_area_pair_t draw_areas;
+    SPRT sprites[18];                   /* 0x040 */
+    menu_palette_primitives_t* palette; /* 0x1a8 */
+} status_screen_numbers_record_t;
+typedef char status_screen_numbers_record_size_must_be_428[sizeof(status_screen_numbers_record_t) == 428 ? 1 : -1];
 
 /* The four vertex colors unit_view_build_height_pieces applies (g_unit_view_quad_colors); the leading 32-bit value is
  * untyped. Provisional. */
@@ -105,12 +135,89 @@ typedef struct menu_quad_page {
 } menu_quad_page_t;
 typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
 
-extern unit_view_stats_page_t g_unit_view_stats_panel_pages[];
+extern unit_view_stats_page_t g_unit_view_stats_panel_pages[8];
 extern menu_quad_colors_t g_unit_view_quad_colors;
+
 /* Height readout pieces: source rectangles and offsets from the display origin. */
 extern image_layout_t g_unit_view_quad_pieces[204];
 extern u8 g_unit_view_quad_group_starts[65];
 extern menu_quad_page_t g_unit_view_height_display_pages[2];
+
+/* Status uses two alternate views of the stats-page storage: its numeric
+ * records begin at page 2, and its frame records begin at page 5. */
+extern status_screen_frame_t g_status_screen_frames[2];
+extern RECT g_status_screen_panel_rect;  /* panel box */
+extern RECT g_status_screen_cursor_rect; /* cursor source */
+extern menu_palette_primitives_t g_status_screen_palette;
+extern RECT g_status_screen_text_rect_a; /* first text image */
+extern RECT g_status_screen_text_rect_b; /* second text image */
+extern image_layout_t g_status_screen_row_image_params_a[4];
+extern image_layout_t g_status_screen_row_image_params_b[4];
+extern image_layout_t g_status_screen_sprite_image_params_a[19];
+extern image_layout_t g_status_screen_sprite_image_params_b[19];
+extern image_layout_t g_status_screen_item_icon_image_params[5];
+
+extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
+extern menu_number_entry_t g_status_screen_numbers_entries[15];
+extern RECT g_status_screen_numbers_frame_rect;
+extern image_layout_t g_status_screen_numbers_image_params[18];
+extern menu_palette_slot_t g_status_screen_numbers_palettes[];
+extern RECT g_status_screen_numbers_text_rect_a;
+extern RECT g_status_screen_numbers_text_rect_b;
+extern RECT g_status_screen_numbers_text_rect_c;
+extern RECT g_status_screen_numbers_panel_texture_window;
+
+/* current-status list */
+extern u16 g_status_screen_status_list_row_actions[8];
+
+/* Text ids of the unit's current statuses in the status panel's two columns, filled by
+ * status_screen_build_status_list. */
+extern s16 g_unit_panel_status_left_text_ids[20];
+extern s16 g_unit_panel_status_right_text_ids[20];
+
+/* unit stats panels */
+/* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
+extern RECT g_menu_sprite_page_texture_windows[5];
+extern image_layout_t g_menu_sprite_page_image_params[5];
+
+/* Default placement for all five reaction-name sprite pieces. */
+extern image_layout_t g_menu_sprite_page_image_param_bases[5];
+
+/* Live caster-panel image parameters followed by their defaults. */
+extern image_layout_t g_menu_attack_caster_quad_image_params[2][5];
+
+/* Attack-target labels and their reset values are separate three-piece layouts. */
+extern image_layout_t g_unit_view_target_quad_image_params[3];
+extern image_layout_t g_unit_view_target_quad_default_image_params[3];
+extern menu_number_entry_t g_unit_view_hovered_stats_setup[10];
+extern menu_number_entry_t g_unit_view_right_stats_setup[10];
+extern menu_number_entry_t g_unit_view_attack_caster_stats_setup[8];
+extern menu_number_entry_t g_unit_view_attack_target_stats_setup[8];
+extern struct action_data* g_unit_view_preview_target_action;
+extern u16 g_unit_view_hovered_stats_frame_count;
+extern u8 g_unit_view_stats_first_page_by_mode[4];
+extern u16 g_unit_view_stats_bounce_step;
+extern u16 g_unit_view_stats_bounce_offsets[];
+extern CVECTOR g_unit_view_stats_gauge_colors[];
+extern image_layout_t g_unit_view_stats_icon_image_params[];
+extern u16 g_unit_view_stats_quad_clut_pairs[][2];
+extern image_layout_t* g_unit_view_stats_quad_image_params_by_mode[];
+extern u16 g_unit_view_stats_sprite_clut_pairs[][2];
+extern image_layout_t* g_unit_view_stats_sprite_image_params_by_mode[];
+
+/* unit summary */
+extern RECT g_unit_view_summary_panel_rect;
+extern menu_unit_number_images_t g_unit_view_summary_digit_images;
+extern menu_palette_slot_t g_unit_view_summary_palettes[];
+extern image_layout_t g_unit_view_summary_sprite_image_params[];
+extern image_layout_t g_unit_view_summary_portrait_image_params;
+
+/* selected-tile display */
+/* The panel describing the tile under the cursor. */
+extern point16_t g_unit_view_quad_origin;
+extern RECT g_unit_view_tile_info_image_location;
+extern image_layout_t g_unit_view_tile_info_image_params[2];
+extern u16 g_unit_view_depth_display_suppressed; /* nonzero while effects hide the tile's depth number */
 
 /* Seven-byte panel-line layouts: color followed by endpoint offsets. */
 typedef enum menu_status_screen_line_layout_offset {

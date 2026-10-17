@@ -12,57 +12,9 @@
 #include "psx/types.h"
 
 /* status panel */
-/* Double-buffered 0x2d0-byte frame of the Status screen panel (g_status_screen_frames). The first 0x2a4
- * bytes are laid out as unit_panel_buffer_t (draw modes, sprites, tiles and lines),
- * and the trailing draw-area pair follows menu_panel_frame_t. Provisional. */
-typedef struct status_screen_frame {
-    DR_MODE frame_draw_mode;            /* 0x000; MENU_TEXTURE_PAGE_FRAME */
-    DR_MODE text_draw_mode;             /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
-    DR_MODE image_draw_mode;            /* 0x018; MENU_TEXTURE_PAGE_ITEM_ICONS */
-    SPRT sprites[24];                   /* 0x024: 19 panel sprites, then 5 item icons */
-    TILE tiles[2];                      /* 0x204 */
-    LINE_F2 lines[8];                   /* 0x224 */
-    menu_palette_primitives_t* palette; /* 0x2a4 */
-    scaled_draw_area_pair_t draw_areas; /* 0x2a8 */
-} status_screen_frame_t;
-typedef char status_screen_frame_size_must_be_720[sizeof(status_screen_frame_t) == 720 ? 1 : -1];
-
-extern status_screen_frame_t g_status_screen_frames[2];
-extern RECT g_status_screen_panel_rect;  /* panel box */
-extern RECT g_status_screen_cursor_rect; /* cursor source */
-extern menu_palette_primitives_t g_status_screen_palette;
-extern RECT g_status_screen_text_rect_a; /* first text image */
-extern RECT g_status_screen_text_rect_b; /* second text image */
-extern image_layout_t g_status_screen_row_image_params_a[4];
-extern image_layout_t g_status_screen_row_image_params_b[4];
-extern image_layout_t g_status_screen_sprite_image_params_a[19];
-extern image_layout_t g_status_screen_sprite_image_params_b[19];
-extern image_layout_t g_status_screen_item_icon_image_params[5];
-
 void status_screen_thread(void);
 
 /* numbers panel */
-/* The Status screen's numeric side panel draws its fifteen numbers into three images once, then the frame and
- * eighteen sprites every frame. This is its double-buffered 0x1ac-byte record
- * (g_status_screen_numbers_panel_records). Provisional. */
-typedef struct status_screen_numbers_record {
-    DR_MODE mode0; /* 0x000 */
-    DR_MODE mode1; /* 0x00c */
-    /* 0x018; menu_init_scaled_draw_area_packets */
-    scaled_draw_area_pair_t draw_areas;
-    SPRT sprites[18];                   /* 0x040 */
-    menu_palette_primitives_t* palette; /* 0x1a8 */
-} status_screen_numbers_record_t;
-
-extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
-extern menu_number_entry_t g_status_screen_numbers_entries[15];
-extern RECT g_status_screen_numbers_frame_rect;
-extern image_layout_t g_status_screen_numbers_image_params[18];
-extern menu_palette_slot_t g_status_screen_numbers_palettes[];
-extern RECT g_status_screen_numbers_text_rect_a;
-extern RECT g_status_screen_numbers_text_rect_b;
-extern RECT g_status_screen_numbers_text_rect_c;
-extern RECT g_status_screen_numbers_panel_texture_window;
 extern RECT g_status_screen_numbers_texture_window; /* texture window for the menu page */
 
 void status_screen_init_numbers_frame(RECT* bounds, menu_palette_primitives_t* menu);
@@ -72,12 +24,6 @@ void status_screen_numbers_thread(void);
 /* status list */
 /* The status panel's list of the unit's current statuses, in two columns. */
 extern menu_scroll_text_layout_t g_status_screen_status_list_layout;
-extern u16 g_status_screen_status_list_row_actions[8];
-
-/* Text ids of the unit's current statuses in the status panel's two columns, filled by
- * status_screen_build_status_list. */
-extern s16 g_unit_panel_status_left_text_ids[20];
-extern s16 g_unit_panel_status_right_text_ids[20];
 
 void status_screen_build_status_list(void);
 
