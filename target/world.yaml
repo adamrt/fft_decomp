@@ -13,10 +13,11 @@ units:
   - {name: ability_checks, source: src/world/ability_checks.c}
   - {name: ability_lists, source: src/world/ability_lists.c}
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
-  - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
+  - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}]}
+  - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a348, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019a35c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
@@ -355,22 +356,22 @@ functions:
   - {addr: 0x800f2d70, size: 40, name: deploy_run_frame_and_check, hash: 0c31ced998da1feb, unit: attack_resources}
   - {addr: 0x800f2d98, size: 328, name: menu_update_menus_and_event_speed, hash: 2a50df3b6a1b8d8e, unit: attack_resources}
   - {addr: 0x800f2ee0, size: 260, name: battle_map_store_selected_tile_data, hash: adad582c51dee948, unit: attack_resources}
-  - {addr: 0x800f2fe4, size: 64, name: menu_clear_entry_selections, hash: 25e5397d31b98e28, unit: attack_resources}
-  - {addr: 0x800f3024, size: 8, name: menu_noop_7, hash: 6d64edf91449c1b1, unit: attack_resources}
-  - {addr: 0x800f302c, size: 256, name: command_restore_unit_selection, hash: e03923895aa02ebd, unit: attack_resources}
-  - {addr: 0x800f312c, size: 76, name: command_reset_unit_records, hash: 91497616f5362267, unit: attack_resources}
-  - {addr: 0x800f3178, size: 120, name: command_reset_unit_record, hash: 320fd7dcc963f1c3, unit: attack_resources}
-  - {addr: 0x800f31f0, size: 16, name: command_get_selected, hash: f87818707628ad97, unit: attack_resources}
-  - {addr: 0x800f3200, size: 60, name: mini_menu_cancel_delay_thread, hash: 1126457f8432f56a, unit: attack_resources}
-  - {addr: 0x800f323c, size: 60, name: mini_menu_confirm_delay_thread, hash: f840d996f9d12147, unit: attack_resources}
-  - {addr: 0x800f3278, size: 56, name: menu_copy_u8_to_u16_terminated, hash: 28e77c325ea414b4, unit: attack_resources}
-  - {addr: 0x800f32b0, size: 52, name: menu_copy_u8_to_u16, hash: 13d704f494f4f2e9, unit: attack_resources}
-  - {addr: 0x800f32e4, size: 1980, name: command_build_ability_list, hash: 3c2abc1fea8e3c9c, unit: attack_resources}
-  - {addr: 0x800f3aa0, size: 676, name: command_ability_list_thread, hash: f8f5c64ec1b3af4c, unit: attack_resources}
-  - {addr: 0x800f3d44, size: 608, name: command_build_act_menu, hash: 94131cbbb78792ba, unit: attack_resources}
-  - {addr: 0x800f3fa4, size: 352, name: command_act_menu_thread, hash: 39f4d2e5aa1934c7, unit: attack_resources}
-  - {addr: 0x800f4104, size: 124, name: command_record_unit_selection, hash: d5e1f7fe303d084c, unit: attack_resources}
-  - {addr: 0x800f4180, size: 120, name: command_turn_menu_thread, hash: 8c0005b9d4465929, unit: attack_resources}
+  - {addr: 0x800f2fe4, size: 64, name: menu_clear_entry_selections, hash: 25e5397d31b98e28, unit: command_selection}
+  - {addr: 0x800f3024, size: 8, name: menu_noop_7, hash: 6d64edf91449c1b1, unit: command_selection}
+  - {addr: 0x800f302c, size: 256, name: command_restore_unit_selection, hash: e03923895aa02ebd, unit: command_selection}
+  - {addr: 0x800f312c, size: 76, name: command_reset_unit_records, hash: 91497616f5362267, unit: command_selection}
+  - {addr: 0x800f3178, size: 120, name: command_reset_unit_record, hash: 320fd7dcc963f1c3, unit: command_selection}
+  - {addr: 0x800f31f0, size: 16, name: command_get_selected, hash: f87818707628ad97, unit: command_selection}
+  - {addr: 0x800f3200, size: 60, name: mini_menu_cancel_delay_thread, hash: 1126457f8432f56a, unit: command_selection}
+  - {addr: 0x800f323c, size: 60, name: mini_menu_confirm_delay_thread, hash: f840d996f9d12147, unit: command_selection}
+  - {addr: 0x800f3278, size: 56, name: menu_copy_u8_to_u16_terminated, hash: 28e77c325ea414b4, unit: command_selection}
+  - {addr: 0x800f32b0, size: 52, name: menu_copy_u8_to_u16, hash: 13d704f494f4f2e9, unit: command_selection}
+  - {addr: 0x800f32e4, size: 1980, name: command_build_ability_list, hash: 3c2abc1fea8e3c9c, unit: command_selection}
+  - {addr: 0x800f3aa0, size: 676, name: command_ability_list_thread, hash: f8f5c64ec1b3af4c, unit: command_selection}
+  - {addr: 0x800f3d44, size: 608, name: command_build_act_menu, hash: 94131cbbb78792ba, unit: command_selection}
+  - {addr: 0x800f3fa4, size: 352, name: command_act_menu_thread, hash: 39f4d2e5aa1934c7, unit: command_selection}
+  - {addr: 0x800f4104, size: 124, name: command_record_unit_selection, hash: d5e1f7fe303d084c, unit: command_selection}
+  - {addr: 0x800f4180, size: 120, name: command_turn_menu_thread, hash: 8c0005b9d4465929, unit: command_selection}
   - {addr: 0x800f41f8, size: 36, name: sound_queue_sfx_confirm_unless_restoring, hash: e5915fc070be8986, unit: command_menus}
   - {addr: 0x800f421c, size: 72, name: menu_confirm_action_silently, hash: 26759444d4dbb39f, unit: command_menus}
   - {addr: 0x800f4264, size: 68, name: command_wait_thread, hash: 8cabc12cfd63cfb0, unit: command_menus}

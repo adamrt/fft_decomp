@@ -12,9 +12,8 @@
 #include "psx/types.h"
 
 /* view modes */
-/* First argument of unit_view_start and value of g_unit_view_mode: the row of
- * g_unit_view_thread_sets the supervisor keeps running. Each mode from 1 up runs the selected-tile
- * display plus the panels named. */
+/* First argument of unit_view_start and value of g_unit_view_mode. Modes 1 through 5 include
+ * selected-tile information; the retained numeric/summary configuration does not. */
 typedef enum unit_view_mode {
     UNIT_VIEW_MODE_NONE = 0,           /* no panel */
     UNIT_VIEW_MODE_TILE_INFO = 1,      /* the tile info panel alone */
@@ -22,6 +21,8 @@ typedef enum unit_view_mode {
     UNIT_VIEW_MODE_UNIT_SUMMARY = 3,   /* unit summary panel and hovered-unit stats */
     UNIT_VIEW_MODE_RIGHT_UNIT = 4,     /* right-side unit stats */
     UNIT_VIEW_MODE_ATTACK_PREVIEW = 5, /* attack caster and attack target stats */
+    /* Provisional: retained numeric, summary and hovered-unit configuration; no normal producer is known. */
+    UNIT_VIEW_MODE_NUMERIC_SUMMARY = 6,
 } unit_view_mode_e;
 
 extern s32 g_unit_view_mode;
