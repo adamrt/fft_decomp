@@ -1185,7 +1185,7 @@ void unit_view_preview_caster_stats(void) {
     unit_stats_t* attacker = menu_get_selected_unit_stats();
     unit_stats_t* target = unit_get_stats(g_unit_panel_comparison_unit_data.battle_id);
     action_command_t* action;
-    ability_data_t* ability_data;
+    const ability_data_t* ability_data;
     ability_secondary_pointer_t secondary;
     s16* selected;
 

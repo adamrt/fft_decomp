@@ -633,7 +633,7 @@ void auto_battle_store_target(s32 target_id, s32 battle_id) {
  * ability's type flags ask for its name (names on) or it is an Item or Throw, else with enabled
  * cleared. */
 void announcement_select(action_command_t* action, s32 unit_id, s32 enabled) {
-    ability_data_t* ability;
+    const ability_data_t* ability;
     ability_secondary_pointer_t secondary;
     unit_stats_t* unit;
     s32 known;

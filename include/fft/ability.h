@@ -693,12 +693,12 @@ typedef struct ability_charge_record {
 
 /* Pointer returned for ability_type_e: the record extent depends on the type. */
 typedef union ability_secondary_pointer {
-    ability_secondary_data_t* range;
-    u8* item_id;
-    u8* throw_item_type;
-    ability_jump_record_t* jump;
-    ability_charge_record_t* charge;
-    u8* math_rsm;
+    const ability_secondary_data_t* range;
+    const u8* item_id;
+    const u8* throw_item_type;
+    const ability_jump_record_t* jump;
+    const ability_charge_record_t* charge;
+    const u8* math_rsm;
 } ability_secondary_pointer_t;
 typedef char ability_secondary_pointer_size_must_be_4[(sizeof(ability_secondary_pointer_t) == 4) ? 1 : -1];
 
@@ -716,8 +716,8 @@ extern u8 g_ability_math_rsm_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST];
 /* Indexed by reaction ability id - ABILITY_ID_REACTION_FIRST. */
 extern const u8 g_ability_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABILITY_ID_REACTION_FIRST];
 
-s32 ability_get_data_and_type(
-    s32 id, ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
+ability_type_e ability_get_data_and_type(
+    s32 id, const ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
 
 /* skillset rows */
 typedef struct ability_human_skillset {

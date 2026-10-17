@@ -601,8 +601,8 @@ u16* ability_store_skillset_abilities(s32 skillset_id, s32 filters) {
  * ability, the item id of an Item ability, the item type of a Throw ability, the
  * Jump or Charge record, or the one-byte record shared by Math, reaction, support
  * and movement abilities. The result is the matching ability_type_e. */
-s32 ability_get_data_and_type(
-    s32 ability_id, ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data) {
+ability_type_e ability_get_data_and_type(
+    s32 ability_id, const ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data) {
     ability_id &= ABILITY_ID_MASK;
     /* 0x8005ebf0: Ability Data 1, 8 bytes each. */
     *out_ability_data = &g_ability_data[ability_id];
