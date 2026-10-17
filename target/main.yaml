@@ -20,6 +20,7 @@ units:
   - {name: party, source: src/main/party.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}, {addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
   - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}]}
   - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
+  - {name: suzuki_driver, source: src/lib/suzuki/driver.c}
   - {name: suzuki_heap, source: src/lib/suzuki/heap.c, profile: gcc-2.6.3_O2_G8_aspsx-2.34}
   - {name: suzuki_sfx, source: src/lib/suzuki/sfx.c}
   - {name: suzuki_smd_channel_commands, source: src/lib/suzuki/smd_channel_commands.c}
@@ -254,31 +255,31 @@ functions:
   - {addr: 0x80017878, size: 108, name: suzuki_smd_modulator_step_random_bipolar, hash: 378214ca0aec5089, unit: suzuki_smd_voices}
   - {addr: 0x800178e4, size: 16, name: suzuki_smd_seed_random, hash: f310c66f2d04a668, unit: suzuki_smd_voices}
   - {addr: 0x800178f4, size: 44, name: suzuki_smd_random, hash: 8e23bdb8c352dd6b, unit: suzuki_smd_voices}
-  - {addr: 0x80017920, size: 556, name: suzuki_sound_init, hash: e50bdc8181740b9f, source: src/lib/suzuki/suzuki_sound_init.c}
-  - {addr: 0x80017b4c, size: 172, name: suzuki_sound_quit, hash: b256f8b6ca7af0e8, source: src/lib/suzuki/suzuki_sound_quit.c}
-  - {addr: 0x80017bf8, size: 68, name: suzuki_sound_enable_root_counter_2_event, hash: 832b69c76d62d651, source: src/lib/suzuki/suzuki_sound_enable_root_counter_2_event.c}
-  - {addr: 0x80017c3c, size: 80, name: suzuki_sound_disable_root_counter_2_event, hash: b39d2a95ea976bba, source: src/lib/suzuki/suzuki_sound_disable_root_counter_2_event.c}
-  - {addr: 0x80017c8c, size: 192, name: suzuki_sound_load_waveset, hash: a0a4db48892861f5, source: src/lib/suzuki/suzuki_sound_load_waveset.c}
-  - {addr: 0x80017d4c, size: 88, name: suzuki_sound_free_wavesets, hash: f002aa524f175928, source: src/lib/suzuki/suzuki_sound_free_wavesets.c}
-  - {addr: 0x80017da4, size: 148, name: suzuki_sound_free_waveset, hash: b3ba84c55877cd71, source: src/lib/suzuki/suzuki_sound_free_waveset.c}
-  - {addr: 0x80017e38, size: 68, name: suzuki_sound_find_waveset, hash: 277683cb44308ef3, source: src/lib/suzuki/suzuki_sound_find_waveset.c}
-  - {addr: 0x80017e7c, size: 60, name: suzuki_sound_append_resource, hash: fc2b2e7d73fb44f3, source: src/lib/suzuki/suzuki_sound_append_resource.c}
-  - {addr: 0x80017eb8, size: 140, name: suzuki_sound_remove_resource, hash: f9d84725dc182413, source: src/lib/suzuki/suzuki_sound_remove_resource.c}
-  - {addr: 0x80017f44, size: 40, name: suzuki_sound_stop_all, hash: 1ba2ff1b5e93365e, source: src/lib/suzuki/suzuki_sound_stop_all.c}
-  - {addr: 0x80017f6c, size: 236, name: suzuki_sound_set_type, hash: 074d8da09aa75cf8, source: src/lib/suzuki/suzuki_sound_set_type.c}
-  - {addr: 0x80018058, size: 56, name: suzuki_sound_get_type, hash: c5e713ad06d97854, source: src/lib/suzuki/suzuki_sound_get_type.c}
-  - {addr: 0x80018090, size: 176, name: suzuki_sound_put_type, hash: a8c009daeba5ffab, source: src/lib/suzuki/suzuki_sound_put_type.c}
-  - {addr: 0x80018140, size: 256, name: suzuki_sound_set_reverb_mode, hash: 4a2630406ef45a75, source: src/lib/suzuki/suzuki_sound_set_reverb_mode.c}
-  - {addr: 0x80018240, size: 192, name: suzuki_sound_set_master_volume, hash: f99897444539e791, source: src/lib/suzuki/suzuki_sound_set_master_volume.c}
-  - {addr: 0x80018300, size: 192, name: suzuki_sound_set_cd_volume, hash: f9c27ff184389b5a, source: src/lib/suzuki/suzuki_sound_set_cd_volume.c}
-  - {addr: 0x800183c0, size: 64, name: suzuki_sound_set_cd_reverb, hash: 3920c543eba03b70, source: src/lib/suzuki/suzuki_sound_set_cd_reverb.c}
-  - {addr: 0x80018400, size: 140, name: suzuki_sound_commit_volume_change, hash: 9664c665c65eb230, source: src/lib/suzuki/suzuki_sound_commit_volume_change.c}
-  - {addr: 0x8001848c, size: 84, name: suzuki_sound_set_vol_balance, hash: 690d749cb3ddab10, source: src/lib/suzuki/suzuki_sound_set_vol_balance.c}
-  - {addr: 0x800184e0, size: 16, name: suzuki_sound_set_unread_value, hash: d753dba51b973163, source: src/lib/suzuki/suzuki_sound_set_unread_value.c}
-  - {addr: 0x800184f0, size: 32, name: suzuki_sound_spu_transfer_callback, hash: c1b2b4bd9f3d6f10, source: src/lib/suzuki/suzuki_sound_spu_transfer_callback.c}
-  - {addr: 0x80018510, size: 8, name: suzuki_sound_spu_event_handler, hash: 207819bf4ebe3078, source: src/lib/suzuki/suzuki_sound_spu_event_handler.c}
-  - {addr: 0x80018518, size: 316, name: suzuki_sound_transfer_spu_data, hash: 05f8d8da327ae08d, source: src/lib/suzuki/suzuki_sound_transfer_spu_data.c, rodata: [{addr: 0x80010030, size: 20, hash: 70cca047fa34bab7}]}
-  - {addr: 0x80018654, size: 8, name: suzuki_sound_noop_1, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_noop_1.c}
+  - {addr: 0x80017920, size: 556, name: suzuki_sound_init, hash: e50bdc8181740b9f, unit: suzuki_driver}
+  - {addr: 0x80017b4c, size: 172, name: suzuki_sound_quit, hash: b256f8b6ca7af0e8, unit: suzuki_driver}
+  - {addr: 0x80017bf8, size: 68, name: suzuki_sound_enable_root_counter_2_event, hash: 832b69c76d62d651, unit: suzuki_driver}
+  - {addr: 0x80017c3c, size: 80, name: suzuki_sound_disable_root_counter_2_event, hash: b39d2a95ea976bba, unit: suzuki_driver}
+  - {addr: 0x80017c8c, size: 192, name: suzuki_sound_load_waveset, hash: a0a4db48892861f5, unit: suzuki_driver}
+  - {addr: 0x80017d4c, size: 88, name: suzuki_sound_free_wavesets, hash: f002aa524f175928, unit: suzuki_driver}
+  - {addr: 0x80017da4, size: 148, name: suzuki_sound_free_waveset, hash: b3ba84c55877cd71, unit: suzuki_driver}
+  - {addr: 0x80017e38, size: 68, name: suzuki_sound_find_waveset, hash: 277683cb44308ef3, unit: suzuki_driver}
+  - {addr: 0x80017e7c, size: 60, name: suzuki_sound_append_resource, hash: fc2b2e7d73fb44f3, unit: suzuki_driver}
+  - {addr: 0x80017eb8, size: 140, name: suzuki_sound_remove_resource, hash: f9d84725dc182413, unit: suzuki_driver}
+  - {addr: 0x80017f44, size: 40, name: suzuki_sound_stop_all, hash: 1ba2ff1b5e93365e, unit: suzuki_driver}
+  - {addr: 0x80017f6c, size: 236, name: suzuki_sound_set_type, hash: 074d8da09aa75cf8, unit: suzuki_driver}
+  - {addr: 0x80018058, size: 56, name: suzuki_sound_get_type, hash: c5e713ad06d97854, unit: suzuki_driver}
+  - {addr: 0x80018090, size: 176, name: suzuki_sound_put_type, hash: a8c009daeba5ffab, unit: suzuki_driver}
+  - {addr: 0x80018140, size: 256, name: suzuki_sound_set_reverb_mode, hash: 4a2630406ef45a75, unit: suzuki_driver}
+  - {addr: 0x80018240, size: 192, name: suzuki_sound_set_master_volume, hash: f99897444539e791, unit: suzuki_driver}
+  - {addr: 0x80018300, size: 192, name: suzuki_sound_set_cd_volume, hash: f9c27ff184389b5a, unit: suzuki_driver}
+  - {addr: 0x800183c0, size: 64, name: suzuki_sound_set_cd_reverb, hash: 3920c543eba03b70, unit: suzuki_driver}
+  - {addr: 0x80018400, size: 140, name: suzuki_sound_commit_volume_change, hash: 9664c665c65eb230, unit: suzuki_driver}
+  - {addr: 0x8001848c, size: 84, name: suzuki_sound_set_vol_balance, hash: 690d749cb3ddab10, unit: suzuki_driver}
+  - {addr: 0x800184e0, size: 16, name: suzuki_sound_set_unread_value, hash: d753dba51b973163, unit: suzuki_driver}
+  - {addr: 0x800184f0, size: 32, name: suzuki_sound_spu_transfer_callback, hash: c1b2b4bd9f3d6f10, unit: suzuki_driver}
+  - {addr: 0x80018510, size: 8, name: suzuki_sound_spu_event_handler, hash: 207819bf4ebe3078, unit: suzuki_driver}
+  - {addr: 0x80018518, size: 316, name: suzuki_sound_transfer_spu_data, hash: 05f8d8da327ae08d, unit: suzuki_driver, rodata: [{addr: 0x80010030, size: 20, hash: 70cca047fa34bab7}]}
+  - {addr: 0x80018654, size: 8, name: suzuki_sound_noop_1, hash: 6d64edf91449c1b1, unit: suzuki_driver}
   - {addr: 0x8001865c, size: 96, name: suzuki_sound_wait_for_spu_transfer, hash: 30625f6e920b4684, source: src/lib/suzuki/suzuki_sound_wait_for_spu_transfer.c}
   - {addr: 0x800186bc, size: 8, name: suzuki_sound_noop_2, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_noop_2.c}
   - {addr: 0x800186c4, size: 32, name: SpuInit, hash: 88a4657274163f46, source: src/platform/psyq/libspu/SpuInit.c}
