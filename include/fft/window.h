@@ -19,11 +19,11 @@ typedef struct display_object_frame {
     u16 duration; /* 0x02 */
 } display_object_frame_t;
 
-/* An animation: a frame count followed by its frames. */
-typedef struct display_object_sequence {
-    s32 frame_count;                  /* 0x00 */
-    display_object_frame_t frames[0]; /* 0x04; frame_count serialized entries */
-} display_object_sequence_t;
+/* Serialized animation header, followed immediately by frame_count four-byte frame records. */
+typedef struct display_object_sequence_header {
+    s32 frame_count; /* 0x00 */
+} display_object_sequence_header_t;
+typedef char display_object_sequence_header_size_must_be_4[sizeof(display_object_sequence_header_t) == 4 ? 1 : -1];
 
 /* Serialized cel header, followed by part_count eight-byte sprite parts.
  * Origins pack the x coordinate in the low half and y in the high half. */
@@ -53,7 +53,7 @@ typedef struct display_object_part {
 typedef char display_object_part_size_must_be_8[sizeof(display_object_part_t) == 8 ? 1 : -1];
 
 /* OPEN and WLDCORE each define these tables with their own sequence catalog. */
-extern display_object_sequence_t** g_window_anim_sequences;
+extern display_object_sequence_header_t** g_window_anim_sequences;
 extern display_object_cel_header_t** g_window_anim_cels;
 
 /* display objects */

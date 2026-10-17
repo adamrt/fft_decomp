@@ -99,7 +99,7 @@ void window_dispatch_gs_record_list(GsOT* otag, void** list, s32 count) {
 void window_draw_gs_animated_record(display_object_animated_t* object, GsOT* ot) {
     GsSPRITE sprite;
     CVECTOR color;
-    display_object_sequence_t* sequence;
+    display_object_sequence_header_t* sequence;
     display_object_part_t* part;
     display_object_cel_header_t** cels;
     display_object_cel_header_t* cel;
@@ -136,10 +136,10 @@ void window_draw_gs_animated_record(display_object_animated_t* object, GsOT* ot)
     }
 
     /* A goto loop: as a for/while loop, GCC's loop pass hoists the 0xffff
-     * constant into a register, which the target does not. Pointer addition on
-     * frames keeps the index-first address sum; array indexing reverses it. */
+     * constant into a register, which the target does not. Frame records follow the serialized header. Pointer addition
+     * keeps the index-first address sum; array indexing reverses it. */
 step_frame:
-    index = (sequence->frames + object->frame_index)->duration;
+    index = ((display_object_frame_t*)(sequence + 1) + object->frame_index)->duration;
     if (index == object->anim_counter && index != 0xffff) {
         object->anim_counter = 0;
         object->frame_index++;
@@ -150,7 +150,7 @@ step_frame:
         goto step_frame;
     }
 
-    index = (sequence->frames + object->frame_index)->cel;
+    index = ((display_object_frame_t*)(sequence + 1) + object->frame_index)->cel;
     cel = cels[index];
     /* Preserve the reverse 32-bit cursor; a part array changes address computation. */
     words = (u32*)cel;

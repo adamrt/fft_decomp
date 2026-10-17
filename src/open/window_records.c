@@ -99,7 +99,7 @@ void window_dispatch_gpu_record_list(u32* otag, void** list, s32 count) {
  */
 static void window_draw_gpu_animated_record(display_object_animated_t* actor, u32* ot) {
     display_object_cel_header_t** sprites = g_window_anim_cels;
-    display_object_sequence_t* anim = g_window_anim_sequences[actor->sequence];
+    display_object_sequence_header_t* anim = g_window_anim_sequences[actor->sequence];
     display_object_cel_header_t* cel;
     u32* sprite;
     s32 value;
@@ -114,10 +114,10 @@ static void window_draw_gpu_animated_record(display_object_animated_t* actor, u3
 
     actor->anim_counter++;
     /* A goto loop: as a for/while loop, GCC's loop pass hoists the 0xffff
-     * constant into a register, which the target does not. Pointer addition on
-     * frames keeps the index-first address sum; array indexing reverses it. */
+     * constant into a register, which the target does not. Frame records follow the serialized header. Pointer addition
+     * keeps the index-first address sum; array indexing reverses it. */
 loop:
-    value = (anim->frames + actor->frame_index)->duration;
+    value = ((display_object_frame_t*)(anim + 1) + actor->frame_index)->duration;
     if (value == actor->anim_counter && value != 0xffff) {
         actor->anim_counter = 0;
         actor->frame_index++;
@@ -128,7 +128,7 @@ loop:
         goto loop;
     }
 
-    value = (anim->frames + actor->frame_index)->cel;
+    value = ((display_object_frame_t*)(anim + 1) + actor->frame_index)->cel;
     cel = sprites[value];
     /* Preserve the reverse 32-bit cursor; a part array changes address computation. */
     sprite = (u32*)cel;
