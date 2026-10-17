@@ -21,6 +21,14 @@ typedef char suzuki_spu_allocator_storage_size_must_be_56[sizeof(g_suzuki_sound_
 extern u32 g_suzuki_unknown_80032a34; /* only ever stored */
 extern s16 g_suzuki_unknown_80032a58; /* only ever stored */
 
+/* Output mixing and transfer state. */
+extern CdlATV g_suzuki_sound_cd_mix;           /* 0x80032a3c; written by Put Sound Type */
+extern s16 g_suzuki_sound_decoded_data_result; /* last decoded-data read result */
+extern s32 g_suzuki_sound_spu_event;           /* OpenEvent handle of suzuki_sound_spu_event_handler */
+
+/* Provisional: retained driver value in main RAM; no reader or SPU transfer of it has been identified. */
+extern u16 g_suzuki_sound_unread_value;
+
 /* Starts the Suzuki driver once (status bit 15 marks it initialized).
  *
  * flags seeds the 16-bit status. Sets up SPU RAM allocation and the driver
@@ -298,8 +306,6 @@ suzuki_sound_type_e suzuki_sound_get_type(void) {
     return result;
 }
 
-extern CdlATV g_suzuki_sound_cd_mix; /* 0x80032a3c; written by Put Sound Type */
-
 /* Sets the CD audio attenuation for the current sound type;
  * level is 0xc0 at start-up.
  *
@@ -476,8 +482,6 @@ void suzuki_sound_spu_transfer_callback(void) {
 s32 suzuki_sound_spu_event_handler(void) {
     return 0;
 }
-
-extern s16 g_suzuki_sound_decoded_data_result; /* last decoded-data read result */
 
 /* Starts an SPU RAM transfer at spu_address once the previous one is done.
  *

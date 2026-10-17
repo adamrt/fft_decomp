@@ -666,9 +666,8 @@ extern s16 g_suzuki_sound_sfx_instrument;     /* instrument every started SFX ch
 extern u32 g_suzuki_sound_sfx_key_off_voices; /* SFX voices pending key-off */
 extern u32 g_suzuki_sound_tick_count;         /* root-counter tick count; odd ticks step the ramps */
 
-extern suzuki_waveset_t* g_suzuki_sound_waveset_list; /* 0x80032a44 */
-extern s32 g_suzuki_sound_spu_event;             /* 0x80032a48; OpenEvent handle of suzuki_sound_spu_event_handler */
-extern u16 g_suzuki_sound_voice_update_requests; /* suzuki_voice_mask_request_e */
+extern suzuki_waveset_t* g_suzuki_sound_waveset_list;    /* 0x80032a44 */
+extern u16 g_suzuki_sound_voice_update_requests;         /* suzuki_voice_mask_request_e */
 extern suzuki_music_t* g_suzuki_sound_active_music_list; /* 0x80032a50 */
 
 /* Driver status (suzuki_sound_driver_flag_e). */
@@ -678,9 +677,6 @@ extern s32
 extern suzuki_music_t* g_suzuki_sound_sfx_music;    /* 0x80032a60; eight channels on SPU voices 16-23 */
 extern SpuReverbAttr g_suzuki_sound_reverb_attr;    /* 0x80037008 */
 extern suzuki_spu_state_t g_suzuki_sound_spu_state; /* 0x80037020 */
-
-/* Provisional: retained driver value in main RAM; no reader or SPU transfer of it has been identified. */
-extern u16 g_suzuki_sound_unread_value;
 
 /* Suzuki driver entry points. The music handle passed by the game wrappers
  * is the suzuki_music_t* that suzuki_smd_create_music returns. */
