@@ -67,7 +67,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
     RECT clear;
     s32 changed;
     s32 offset;
-    u8* buffer;
+    void* buffer;
 
     pressed = script_get_controller_input_pointer(0);
     held = script_get_controller_input_pointer(1);
