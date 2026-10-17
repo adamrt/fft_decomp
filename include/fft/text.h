@@ -299,7 +299,7 @@ void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 sepa
 void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
 
 /* numbers */
-/* The sign flags of a number format (menu_number_entry_t::format). */
+/* Sign flags read by the decimal formatter and large-glyph renderer. */
 typedef enum menu_decimal_sign_flag {
     MENU_DECIMAL_SIGN_PLUS = 0x0400,
     MENU_DECIMAL_SIGN_MINUS = 0x0800
@@ -320,6 +320,28 @@ enum {
     MENU_DECIMAL_SIGN_MASK = 0x0c00,
     MENU_DECIMAL_SIGN_CLEAR_MASK = 0xf3ff,
     MENU_DECIMAL_ZERO_PLACEHOLDER_FLAGS = 0x0804
+};
+
+/* Small-glyph number formats use a digit count in the low byte and these flags in the high byte.
+ * Both small-glyph renderers ignore bit 0x4000. */
+typedef enum small_number_format_flag {
+    SMALL_NUMBER_DOTS_PREFIX = 0x0100,
+    SMALL_NUMBER_WIDEN_FOR_100 = 0x0200,
+    SMALL_NUMBER_ALIGN_TWO_DIGITS = 0x0400, /* values other than 100: two digits, shifted six pixels right */
+    SMALL_NUMBER_DASH = 0x0800,             /* BATTLE: dash prefix; WORLD: replace each digit with a dash */
+    SMALL_NUMBER_SLASH_PREFIX = 0x1000,
+    SMALL_NUMBER_PERCENT_SUFFIX = 0x2000,
+    SMALL_NUMBER_SLASH_PREFIX_LEFT = 0x8000 /* slash two pixels left of the normal prefix */
+} small_number_format_flag_e;
+
+/* These complete high-byte modes replace the number with three placeholders.
+ * Their low byte is not a digit count; bit 0 adds a slash prefix. */
+enum {
+    SMALL_NUMBER_PLACEHOLDER_DASHES = 0x0c00,
+    SMALL_NUMBER_PLACEHOLDER_QUESTIONS = 0x0e00,
+    SMALL_NUMBER_PLACEHOLDER_SLASH = 0x01,
+    SMALL_NUMBER_DIGIT_COUNT_MASK = 0x00ff,
+    SMALL_NUMBER_FORMAT_MASK = 0xff00
 };
 
 /* Destination rectangle and source cell for a decimal digit. */

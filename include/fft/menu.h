@@ -140,16 +140,14 @@ typedef struct menu_icon_source {
 } menu_icon_source_t;
 typedef char menu_icon_source_size_must_be_12[sizeof(menu_icon_source_t) == 12 ? 1 : -1];
 
-/* One positioned number: a text position, a pointer to the live value and the decimal format.
- * menu_draw_numeric_display_entries draws tables of them (kind 0 and 1 select the plain and colored number
- * renderers), as do the status panels' menu_text_render_decimal_entry_list and
- * menu_text_render_signed_decimal_entries, which leave kind unset. */
+/* One positioned number: a text position, a pointer to the live value and its format.
+ * menu_draw_numeric_display_entries selects small glyphs for kind 0 and large glyphs for kind 1.
+ * The status panels' decimal entry renderers ignore kind and interpret format separately. */
 typedef struct menu_number_entry {
     u16 x;      /* 0x00 */
     u16 y;      /* 0x02 */
     s16* value; /* 0x04 */
-    s16 format; /* 0x08; low byte digit count, high byte sign/marker flags
-                   (0x400/0x800/0x1000; 0xc00/0xe00 draw dashes) */
+    s16 format; /* 0x08; count and flags of the selected renderer (fft/text.h) */
     s16 kind;   /* 0x0a */
 } menu_number_entry_t;
 typedef char menu_number_entry_size_must_be_12[(sizeof(menu_number_entry_t) == 12) ? 1 : -1];
