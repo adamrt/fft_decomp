@@ -31,6 +31,16 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Decoded selection modes; the encoded group IDs are translated by script_prepare_unit_filter. */
+typedef enum script_unit_filter {
+    SCRIPT_UNIT_FILTER_SINGLE = 0,
+    SCRIPT_UNIT_FILTER_EXISTING = 1,
+    SCRIPT_UNIT_FILTER_BLUE = 2,
+    SCRIPT_UNIT_FILTER_BLUE_STATUS_FILTERED = 3,
+    SCRIPT_UNIT_FILTER_NON_BLUE = 4,
+    SCRIPT_UNIT_FILTER_NON_BLUE_STATUS_FILTERED = 5
+} script_unit_filter_e;
+
 /* Rows of the private status-removal mask table below. */
 typedef enum unit_status_staging_mask {
     UNIT_STATUS_STAGING_MASK_BATTLE_STARTED = 0,
@@ -922,28 +932,21 @@ static s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
 
     if (id != 0 && id < EVENT_UNIT_GROUP_FIRST) {
         *unit_id = script_resolve_runtime_id(id);
-        *filter_mode = 0;
+        *filter_mode = SCRIPT_UNIT_FILTER_SINGLE;
         if (*unit_id == EVENT_RUNTIME_ID_NONE) {
             return 0;
         }
     } else {
-        *filter_mode = id != 0 ? id - 0xfe : 1;
+        *filter_mode = id != 0 ? id - 0xfe : SCRIPT_UNIT_FILTER_EXISTING;
     }
     return 1;
 }
 
-/* Answer one of six unit queries about the runtime id in `in_id`, copying it to
- * `out_id` first.  `mode` selects the query:
- *
- *   0  always accepted, and out_id keeps the single unit already resolved
- *   1  the unit exists
- *   2  the unit is on the blue team
- *   3  blue team and free of the check-set 8 statuses
- *   4  the unit is on a non-blue team
- *   5  non-blue team and free of the check-set 8 statuses, ignoring Undead
- *
- * Unsupported modes fall off the end without a defined return value.
- */
+/* Test the decoded unit selector. SINGLE keeps the previously resolved id;
+ * other modes copy in_id first. Status-filtered modes reject the script filter's
+ * excluded statuses; filtered NON_BLUE ignores Undead. Ghost units without a battle slot
+ * pass both BLUE modes and fail both NON_BLUE modes.
+ * Unsupported modes fall off the end without a defined return value. */
 static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
     unit_stats_t* unit;
     s32 index;
@@ -952,7 +955,7 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
     s32 query;
     u8 first;
 
-    if (*mode == 0) {
+    if (*mode == SCRIPT_UNIT_FILTER_SINGLE) {
         return 1;
     }
     *out_id = *in_id;
@@ -962,20 +965,20 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
             unit = unit_get_stats(index);
         }
     }
-    if (*mode == 1) {
+    if (*mode == SCRIPT_UNIT_FILTER_EXISTING) {
         return unit_has_runtime_id(*out_id);
     }
     if (unit_has_runtime_id(*out_id) == 0) {
         return 0;
     }
     query = *mode;
-    if (query == 2) {
+    if (query == SCRIPT_UNIT_FILTER_BLUE) {
         if (index == -1) {
             return 1;
         }
         return (unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE;
     }
-    if (query == 3) {
+    if (query == SCRIPT_UNIT_FILTER_BLUE_STATUS_FILTERED) {
         if (index == -1) {
             return 1;
         }
@@ -989,13 +992,13 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
         }
         return 0;
     }
-    if (query == 4) {
+    if (query == SCRIPT_UNIT_FILTER_NON_BLUE) {
         if (index == -1) {
             return 0;
         }
         return (unit->team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE;
     }
-    if (query == 5) {
+    if (query == SCRIPT_UNIT_FILTER_NON_BLUE_STATUS_FILTERED) {
         if (index == -1) {
             return 0;
         }
@@ -1250,7 +1253,7 @@ void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, 
                     state->step_counter = 0;
                     state->rotating = 1;
                     state->delay = parameters->delay * order++ / 4;
-                    if (filter_mode == 0) {
+                    if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                         break;
                     }
                 }
@@ -1303,7 +1306,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
                     saved_filter_mode = filter_mode;
                     /* Keep the restore arm's stack reload before its loop exit. */
                     __asm__("" : "=r"(saved_filter_mode) : "0"(saved_filter_mode));
-                    if (saved_filter_mode == 0) {
+                    if (saved_filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                         return;
                     }
                     continue;
@@ -1315,7 +1318,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
                 state->step_counter = 0;
                 state->rotating = 1;
                 state->delay = parameters->delay * order++ / 4;
-                if (filter_mode == 0) {
+                if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                     return;
                 }
             }
@@ -1554,7 +1557,7 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore) {
                         }
                     }
                 }
-                if (filter_mode == 0) {
+                if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                     break;
                 }
             }
@@ -1719,7 +1722,7 @@ void script_opcode_83_change_stats(const event_change_stats_parameters_t* parame
                         }
                     }
                 }
-                if (filter_mode == 0) {
+                if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                     break;
                 }
             }
@@ -1755,7 +1758,7 @@ void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters) 
             if (animation >= ANIMATION_BOW_HIGH && animation <= ANIMATION_BOW_LOW) {
                 script_play_effect_and_wait();
             }
-            if (filter_mode == 0) {
+            if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                 return;
             }
         }
@@ -1779,7 +1782,7 @@ void script_opcode_80_march(const event_march_parameters_t* parameters) {
         if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
             animation_set_status_by_runtime_id(unit_id);
             thread_wait_frames(parameters->wait_frames);
-            if (filter_mode == 0) {
+            if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                 return;
             }
         }
@@ -1804,7 +1807,7 @@ void script_opcode_81_set_unit_movement_effect_suppression(const event_movement_
                 } else {
                     unit_clear_movement_effect_suppression(unit_id);
                 }
-                if (filter_mode == 0) {
+                if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                     break;
                 }
             }
@@ -1831,7 +1834,7 @@ void script_opcode_32_color_unit(const event_color_unit_parameters_t* parameters
             if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &filter_mode) != 0) {
                 sprite_palette_apply_modulation_to_units(
                     color->mode, color->duration, unit_id, color->rgb.r, color->rgb.g, color->rgb.b);
-                if (filter_mode == 0) {
+                if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                     return;
                 }
             }
@@ -1858,7 +1861,7 @@ void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) 
                 } else {
                     unit_set_palette_update_suppression(unit_id);
                 }
-                if (filter_mode == 0) {
+                if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                     return;
                 }
             }
@@ -1922,7 +1925,7 @@ void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) 
             rotation_state->step_counter = 0;
             rotation_state->rotating = 1;
             rotation_state->delay = (parameters->delay * order++) / 4;
-            if (filter_mode == 0) {
+            if (filter_mode == SCRIPT_UNIT_FILTER_SINGLE) {
                 return;
             }
         }
