@@ -17,7 +17,7 @@ units:
   - {name: open_overlay, source: src/main/open_overlay.c}
   - {name: overlay_loading, source: src/main/overlay_loading.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
   - {name: party, source: src/main/party.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}, {addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
-  - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 360, hash: 4b67b8471487e3ae}, {addr: 0x800471e8, size: 40, hash: 4af6be044dc4669c}]}
+  - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}]}
   - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
   - {name: system_handlers, source: src/main/system_handlers.c}
   - {name: unit_growth, source: src/main/unit_growth.c}
@@ -1244,8 +1244,7 @@ data:
   - {addr: 0x800459dc, name: g_encounter_selection_mode}
   - {addr: 0x800459e0, name: g_loading_palette}
   - {addr: 0x80045a00, name: g_boot_squaresoft_logo_image_words}
-  - {addr: 0x80047080, name: g_music_scenario_smd_files}
-  - {addr: 0x800471e8, name: g_music_permanent_smd_files}
+  - {addr: 0x80047080, name: g_music_files}
   - {addr: 0x800473a0, name: g_system_go_straight_to_battle}
   - {addr: 0x800473a1, name: g_input_repeat_initial_delay}
   - {addr: 0x800473a2, name: g_input_repeat_period}

@@ -15,16 +15,141 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-file_extent_t g_music_scenario_smd_files[45] = { { 85249, 10240 }, { 85254, 10240 }, { 85259, 6144 }, { 85262, 6144 },
-    { 85265, 6144 }, { 85268, 6144 }, { 85271, 6144 }, { 85274, 10240 }, { 85279, 6144 }, { 85282, 4096 },
-    { 85284, 6144 }, { 85287, 10240 }, { 85292, 10240 }, { 85297, 8192 }, { 85301, 14336 }, { 85308, 8192 },
-    { 85312, 4096 }, { 85314, 8192 }, { 85318, 18432 }, { 85327, 16384 }, { 85335, 2048 }, { 85336, 2048 },
-    { 85337, 2048 }, { 85338, 2048 }, { 85339, 2048 }, { 85340, 4096 }, { 85342, 6144 }, { 85345, 2048 },
-    { 85346, 4096 }, { 85348, 4096 }, { 85350, 2048 }, { 85351, 4096 }, { 85353, 2048 }, { 85354, 2048 },
-    { 85355, 4096 }, { 85357, 2048 }, { 85358, 4096 }, { 85360, 10240 }, { 85365, 8192 }, { 85369, 6144 },
-    { 85372, 2048 }, { 85373, 2048 }, { 85374, 4096 }, { 85376, 2048 }, { 85377, 2048 } };
-static file_extent_t g_music_permanent_smd_files[5]
-    = { { 85378, 2048 }, { 85379, 2048 }, { 85380, 2048 }, { 85381, 2048 }, { 85382, 2048 } };
+/* Scenario-music playback state. current_music is the Suzuki music record of
+ * the playing scenario music: music_stop hands it straight
+ * to suzuki_smd_stop_music, which takes a suzuki_music_t*. */
+typedef struct music_state {
+    s32 current_slot;                 /* 0x00: slot of the playing scenario music */
+    suzuki_music_t* current_music;    /* 0x04 */
+    suzuki_smd_header_t* current_smd; /* 0x08: SMD data of the playing music */
+    s32 volume;                       /* 0x0c */
+} music_state_t;
+typedef char music_state_size_must_be_16[sizeof(music_state_t) == 16 ? 1 : -1];
+
+/* Music slots 1..2 hold scenario music; slots 3..7 hold the five permanent
+ * tunes. Both arrays store slot n at index n - 1. */
+typedef struct music_slots {
+    s32 tune;                    /* 0x00: pending tune (id | 0x80) or playing tune id */
+    s32 loading_slot;            /* 0x04: slot whose SMD load is in flight, or zero */
+    suzuki_music_t* music[7];    /* 0x08: music records returned by suzuki_smd_create_music */
+    suzuki_smd_header_t* smd[7]; /* 0x24: loaded SMD data */
+} music_slots_t;
+typedef char music_slots_size_must_be_64[sizeof(music_slots_t) == 64 ? 1 : -1];
+
+/* The music state and slot table are one object: sound_open_generic_sfx
+ * derives the slot pointers from the &state.current_smd base register, and the
+ * tune/slot helpers reach across tune, handles and smd from single bases. */
+typedef struct music {
+    music_state_t state; /* 0x00 */
+    music_slots_t slots; /* 0x10 */
+} music_t;
+typedef char music_size_must_be_80[sizeof(music_t) == 80 ? 1 : -1];
+
+extern music_t g_music;
+
+/* MUSIC_00.SMD through MUSIC_99.SMD; entries 45..49 are the resident tunes. */
+static file_extent_t g_music_files[MUSIC_COUNT] = {
+    { 85249, 10240 },
+    { 85254, 10240 },
+    { 85259, 6144 },
+    { 85262, 6144 },
+    { 85265, 6144 },
+    { 85268, 6144 },
+    { 85271, 6144 },
+    { 85274, 10240 },
+    { 85279, 6144 },
+    { 85282, 4096 },
+    { 85284, 6144 },
+    { 85287, 10240 },
+    { 85292, 10240 },
+    { 85297, 8192 },
+    { 85301, 14336 },
+    { 85308, 8192 },
+    { 85312, 4096 },
+    { 85314, 8192 },
+    { 85318, 18432 },
+    { 85327, 16384 },
+    { 85335, 2048 },
+    { 85336, 2048 },
+    { 85337, 2048 },
+    { 85338, 2048 },
+    { 85339, 2048 },
+    { 85340, 4096 },
+    { 85342, 6144 },
+    { 85345, 2048 },
+    { 85346, 4096 },
+    { 85348, 4096 },
+    { 85350, 2048 },
+    { 85351, 4096 },
+    { 85353, 2048 },
+    { 85354, 2048 },
+    { 85355, 4096 },
+    { 85357, 2048 },
+    { 85358, 4096 },
+    { 85360, 10240 },
+    { 85365, 8192 },
+    { 85369, 6144 },
+    { 85372, 2048 },
+    { 85373, 2048 },
+    { 85374, 4096 },
+    { 85376, 2048 },
+    { 85377, 2048 },
+    { 85378, 2048 },
+    { 85379, 2048 },
+    { 85380, 2048 },
+    { 85381, 2048 },
+    { 85382, 2048 },
+    { 85383, 2048 },
+    { 85384, 2048 },
+    { 85385, 4096 },
+    { 85387, 4096 },
+    { 85389, 4096 },
+    { 85391, 2048 },
+    { 85392, 4096 },
+    { 85394, 4096 },
+    { 85396, 4096 },
+    { 85398, 2048 },
+    { 85399, 4096 },
+    { 85401, 4096 },
+    { 85403, 6144 },
+    { 85406, 2048 },
+    { 85407, 4096 },
+    { 85409, 8192 },
+    { 85413, 6144 },
+    { 85416, 4096 },
+    { 85418, 4096 },
+    { 85420, 4096 },
+    { 85422, 4096 },
+    { 85424, 6144 },
+    { 85427, 6144 },
+    { 85430, 2048 },
+    { 85431, 4096 },
+    { 85433, 4096 },
+    { 85435, 10240 },
+    { 85440, 10240 },
+    { 85445, 6144 },
+    { 85448, 2048 },
+    { 85449, 6144 },
+    { 85452, 14336 },
+    { 85459, 10240 },
+    { 85464, 6144 },
+    { 85467, 8192 },
+    { 85471, 4096 },
+    { 85473, 6144 },
+    { 85476, 4096 },
+    { 85478, 4096 },
+    { 85480, 4096 },
+    { 85482, 6144 },
+    { 85485, 12288 },
+    { 85491, 2048 },
+    { 85492, 6144 },
+    { 85495, 4096 },
+    { 85497, 10240 },
+    { 85502, 4096 },
+    { 85504, 4096 },
+    { 85506, 4096 },
+    { 85508, 20480 },
+};
 
 /* A second copy of gfx_set_display_draw in the original, for the Orbonne
  * caption fades. Set up double-buffered drawing at width x height without
@@ -232,7 +357,7 @@ s32 music_load_into_slot(s32 music_id, s32 slot) {
     suzuki_smd_header_t* smd;
 
     if (g_music.slots.smd[slot - 1] == 0) {
-        smd = file_load_smd(g_music_scenario_smd_files[music_id].sector, g_music_scenario_smd_files[music_id].size);
+        smd = file_load_smd(g_music_files[music_id].sector, g_music_files[music_id].size);
         g_music.slots.smd[slot - 1] = smd;
         g_music.slots.music[slot - 1] = suzuki_smd_create_music(smd);
         return slot;
@@ -248,7 +373,7 @@ int music_open_into_free_slot(int music_id) {
 
     for (i = 0; i < 2; i++) {
         if (g_music.slots.smd[i] == 0) {
-            smd = file_load_smd(g_music_scenario_smd_files[music_id].sector, g_music_scenario_smd_files[music_id].size);
+            smd = file_load_smd(g_music_files[music_id].sector, g_music_files[music_id].size);
             g_music.slots.smd[i] = smd;
             g_music.slots.music[i] = suzuki_smd_create_music(smd);
             return i + 1;
@@ -278,12 +403,10 @@ int music_is_loading_stub(void) {
  * the SMD block stays allocated and is never freed. */
 s32 music_open_into_slot(s32 music_id, s32 slot) {
     if (g_music.slots.smd[slot - 1] == 0) {
-        suzuki_smd_header_t* data = heap_alloc_smd(g_music_scenario_smd_files[music_id].size);
+        suzuki_smd_header_t* data = heap_alloc_smd(g_music_files[music_id].size);
 
         if (data != 0
-            && file_request_read_bytes(
-                   g_music_scenario_smd_files[music_id].sector, g_music_scenario_smd_files[music_id].size, data)
-                == 0) {
+            && file_request_read_bytes(g_music_files[music_id].sector, g_music_files[music_id].size, data) == 0) {
             g_music.slots.smd[slot - 1] = data;
             set_opened_music_slot(slot);
             return slot;
@@ -306,10 +429,9 @@ int music_start_load_into_free_slot(int music_id) {
 
     for (i = 0; i < 2; i++) {
         if (g_music.slots.smd[i] == 0) {
-            buffer = heap_alloc_smd(g_music_scenario_smd_files[music_id].size);
+            buffer = heap_alloc_smd(g_music_files[music_id].size);
             if (buffer != 0) {
-                if (file_request_read_bytes(
-                        g_music_scenario_smd_files[music_id].sector, g_music_scenario_smd_files[music_id].size, buffer)
+                if (file_request_read_bytes(g_music_files[music_id].sector, g_music_files[music_id].size, buffer)
                     == 0) {
                     g_music.slots.smd[i] = buffer;
                     g_music.slots.loading_slot = i + 1;
@@ -654,7 +776,7 @@ void sound_stop_weather(void) {
 /* Start the sound driver and load the resident sound data: WAVESET.WD is read to
  * the low overlay address and uploaded to SPU RAM, SYSTEM.SED and ENV.SED are
  * appended to the driver's sound resources, the music slots are cleared, and the
- * five files of g_music_permanent_smd_files are read into SMD slots 3..7. */
+ * five resident tunes (music files 45..49) are read into SMD slots 3..7. */
 void sound_open_generic_sfx(void) {
     s32 i;
 
@@ -674,9 +796,9 @@ void sound_open_generic_sfx(void) {
     }
 
     g_sound_weather_sfx_id = 0;
-    g_music.slots.smd[2] = file_load_smd(g_music_permanent_smd_files[0].sector, g_music_permanent_smd_files[0].size);
-    g_music.slots.smd[3] = file_load_smd(g_music_permanent_smd_files[1].sector, g_music_permanent_smd_files[1].size);
-    g_music.slots.smd[4] = file_load_smd(g_music_permanent_smd_files[2].sector, g_music_permanent_smd_files[2].size);
-    g_music.slots.smd[5] = file_load_smd(g_music_permanent_smd_files[3].sector, g_music_permanent_smd_files[3].size);
-    g_music.slots.smd[6] = file_load_smd(g_music_permanent_smd_files[4].sector, g_music_permanent_smd_files[4].size);
+    g_music.slots.smd[2] = file_load_smd(g_music_files[45].sector, g_music_files[45].size);
+    g_music.slots.smd[3] = file_load_smd(g_music_files[46].sector, g_music_files[46].size);
+    g_music.slots.smd[4] = file_load_smd(g_music_files[47].sector, g_music_files[47].size);
+    g_music.slots.smd[5] = file_load_smd(g_music_files[48].sector, g_music_files[48].size);
+    g_music.slots.smd[6] = file_load_smd(g_music_files[49].sector, g_music_files[49].size);
 }

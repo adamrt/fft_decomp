@@ -4,13 +4,11 @@
 /* Music: MAIN's scenario music slots, playback and tunes over the Suzuki sound driver, and the track requests BATTLE,
  * WORLD and the overlays make through the main stack. */
 
-#include "fft/file.h"
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
-/* music slots */
-/* Music ids: the index of a MUSIC_NN.SMD file in
- * g_music_scenario_smd_files (MUSIC_COUNT entries). Only the ids
+/* music ids */
+/* Music ids select MUSIC_NN.SMD from the 100-entry file table. Only the ids
  * the code passes by number are named, after the screen that plays them;
  * event scripts and scenario data choose the others. The music test offers
  * ids 1-96 (g_music_test_music_ids). */
@@ -35,36 +33,6 @@ typedef enum music_id {
     MUSIC_GAME_OVER = 50,                    /* game_over_show */
     MUSIC_COUNT = 100,
 } music_id_e;
-
-/* Scenario-music playback state. current_music is the Suzuki music record of
- * the playing scenario music: music_stop hands it straight
- * to suzuki_smd_stop_music, which takes a suzuki_music_t*. */
-typedef struct music_state {
-    s32 current_slot;                 /* 0x00: slot of the playing scenario music */
-    suzuki_music_t* current_music;    /* 0x04 */
-    suzuki_smd_header_t* current_smd; /* 0x08: SMD data of the playing music */
-    s32 volume;                       /* 0x0c */
-} music_state_t;
-
-/* Music slots 1..2 hold scenario music; slots 3..7 hold the five permanent
- * tunes. Both arrays store slot n at index n - 1. */
-typedef struct music_slots {
-    s32 tune;                    /* 0x00: pending tune (id | 0x80) or playing tune id */
-    s32 loading_slot;            /* 0x04: slot whose SMD load is in flight, or zero */
-    suzuki_music_t* music[7];    /* 0x08: music records returned by suzuki_smd_create_music */
-    suzuki_smd_header_t* smd[7]; /* 0x24: loaded SMD data */
-} music_slots_t;
-
-/* The music state and slot table are one object: sound_open_generic_sfx
- * derives the slot pointers from the &state.current_smd base register, and the
- * tune/slot helpers reach across tune, handles and smd from single bases. */
-typedef struct music {
-    music_state_t state; /* 0x00 */
-    music_slots_t slots; /* 0x10 */
-} music_t;
-
-extern music_t g_music;
-extern file_extent_t g_music_scenario_smd_files[];
 
 /* loading */
 s32 music_load_into_slot(s32 music_id, s32 slot);
