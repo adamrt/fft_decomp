@@ -33,13 +33,13 @@ void menu_draw_thread_status_indicators(void) {
     if (menu_thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) != 0) {
         if (g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             display = (unit_panel_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].function_parameter_1;
-            active = (-(display->x == 0)) & 13;
+            active = (-(display->position.x == 0)) & 13;
         }
     }
     if (menu_thread_is_running(EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS) != 0) {
         if (g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             descriptor = (unit_panel_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].function_parameter_1;
-            if (descriptor->x == 0) {
+            if (descriptor->position.x == 0) {
                 active = 14;
                 display = descriptor;
             }
@@ -48,11 +48,11 @@ void menu_draw_thread_status_indicators(void) {
     /* Both requests jump past the fade-out updates; the target shares one
      * state[1] store between them and the fall-through path. */
     if (active != 0) {
-        if ((display->y == 0x90) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
+        if ((display->position.y == 0x90) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
             g_equipment_indicator_state[0] = MENU_INDICATOR_STATE_FADING_OUT;
             g_equipment_indicator_state[1] = MENU_INDICATOR_STATE_FADING_IN;
             goto draw_panels;
-        } else if ((display->y == 0) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
+        } else if ((display->position.y == 0) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
             g_equipment_indicator_state[0] = MENU_INDICATOR_STATE_FADING_IN;
             g_equipment_indicator_state[1] = MENU_INDICATOR_STATE_FADING_OUT;
             goto draw_panels;

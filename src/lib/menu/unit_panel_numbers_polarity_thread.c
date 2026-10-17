@@ -127,9 +127,9 @@ void unit_panel_numbers_polarity_thread(void) {
         use_offset = field_y != 0xF0;
         g_gfx_draw_offset_y = -use_offset & 0xF0;
         menu_build_scaled_draw_area_packets(
-            &buffer->portrait, &g_unit_panel_editor_numeric_table.draw_area_rect, frame, field_y, thread);
-        buffer->draw_offsets[0].position.x = thread->x - 0x80;
-        buffer->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
+            &buffer->portrait, &g_unit_panel_editor_numeric_table.draw_area_rect, frame, field_y, &thread->position);
+        buffer->draw_offsets[0].position.x = thread->position.x - 0x80;
+        buffer->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[0].packet, (u16*)&buffer->draw_offsets[0].position);
         buffer->draw_offsets[1].position.x = -0x80;
         buffer->draw_offsets[1].position.y = g_gfx_draw_offset_y;

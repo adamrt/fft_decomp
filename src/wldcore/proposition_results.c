@@ -2598,7 +2598,7 @@ void event_transition_push_level(s32 mode) {
         g_system_flags |= SYSTEM_FLAG_DRAW_MAP | SYSTEM_FLAG_HIDE_MAP_DOTS | SYSTEM_FLAG_HIDE_MAP_ROUTES
             | SYSTEM_FLAG_NO_BACKGROUND_IMAGE | SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE
             | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-        g_world_map_projection_state.marker.render.flags |= DISPLAY_OBJECT_HIDDEN;
+        g_world_map_marker_state.marker.render.flags |= DISPLAY_OBJECT_HIDDEN;
         MoveImage(&rect, 0x200, 0x100);
         DrawSync(0);
         rect.x = 0x100;

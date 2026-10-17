@@ -233,9 +233,9 @@ static void window_draw_gpu_image_record(window_gpu_image_record_t* record, u32*
 
     if (record->flags & DISPLAY_OBJECT_POP_IN) {
         gfx_calculate_scaled_rectangle(record->pop_in_step / 2, &record->bounds, &scaled);
-        px = record->x;
+        px = record->position.x;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = scaled.x + px;
-        py = record->y;
+        py = record->position.y;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0 = scaled.y + py;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0
             = record->bounds.x + scaled.x;
@@ -251,9 +251,9 @@ static void window_draw_gpu_image_record(window_gpu_image_record_t* record, u32*
             record->pop_in_step = step + 1;
         }
     } else {
-        qx = record->x;
+        qx = record->position.x;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = qx;
-        qy = record->y;
+        qy = record->position.y;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.y0 = qy;
         qu = record->bounds.x;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.u0 = qu;

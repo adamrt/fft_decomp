@@ -113,7 +113,7 @@ void proposition_push_dispatch_confirm_level(void) {
     bounds.h = (g_proposition_send_unit_count - -row) * 0x10 + 0x10;
     g_text_substitution_values[1] = g_proposition_dispatch_days;
     g_text_substitution_values[0] = g_proposition_dispatch_days;
-    g_text_substitution_values[2] = g_world_map_projection_state.marker.kind + TEXT_ID_LOCATION_NAME_BASE;
+    g_text_substitution_values[2] = g_world_map_marker_state.marker.location_id + TEXT_ID_LOCATION_NAME_BASE;
     window_build_render_record_image(index, bounds, 0, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = size[1] * 0x10 + 8;
@@ -203,7 +203,7 @@ void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level) {
             g_proposition_active[g_proposition_count].proposition_id = g_proposition_selected_row.id - 1;
             g_proposition_active[g_proposition_count].elapsed_days = 0;
             g_proposition_active[g_proposition_count].assigned_days = g_proposition_dispatch_days;
-            g_proposition_active[g_proposition_count].location = g_world_map_projection_state.marker.kind;
+            g_proposition_active[g_proposition_count].location = g_world_map_marker_state.marker.location_id;
             g_proposition_active[g_proposition_count].participant_count = g_proposition_send_unit_count;
             for (i = 0; i < g_proposition_send_unit_count; i++) {
                 party_get_roster_unit(g_proposition_send_units[i])->proposition_status = 1;
@@ -643,10 +643,10 @@ static void unit_panel_start_threads(s32 party_index) {
 
     unit_panel_build_unit_data(party_index);
     thread8 = &g_unit_panel_banner_params;
-    g_unit_panel_numbers_params.y = 0;
-    g_unit_panel_panel_params.y = 0;
-    g_unit_panel_banner_params.y = 0;
-    thread8->x = 0;
+    g_unit_panel_numbers_params.position.y = 0;
+    g_unit_panel_panel_params.position.y = 0;
+    g_unit_panel_banner_params.position.y = 0;
+    thread8->position.x = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
@@ -995,7 +995,7 @@ void proposition_open_returned_list(void) {
     count = 0;
     loaded_count = g_proposition_count;
     if ((i = 0, loaded_count) > 0) {
-        location = &g_world_map_projection_state.marker.kind;
+        location = &g_world_map_marker_state.marker.location_id;
         entry_value_base = TEXT_ID_PROPOSITION_NAME_BASE;
         total = loaded_count;
         do {

@@ -441,9 +441,9 @@ void menu_stack_reset(void) {
     g_menu_stack_depth = 0;
     world_map_push_cursor_level();
     g_window_records[g_menu_stack_records[0].window_index].position.x
-        = g_world_map_projection_state.marker.render.position.x;
+        = g_world_map_marker_state.marker.render.position.x;
     g_window_records[g_menu_stack_records[0].window_index].position.y
-        = g_world_map_projection_state.marker.render.position.y - 4;
+        = g_world_map_marker_state.marker.render.position.y - 4;
 }
 
 /* Run the per-frame handler of the menu level on top of the stack, passing its level record. */
@@ -525,7 +525,7 @@ static void world_map_push_cursor_level(void) {
     g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     level = g_menu_stack_depth;
     g_menu_stack_records[level].map_cursor.wide_view = 0;
-    g_menu_stack_records[level].map_cursor.snap_hit = g_world_map_projection_state.marker.kind + 1;
+    g_menu_stack_records[level].map_cursor.snap_hit = g_world_map_marker_state.marker.location_id + 1;
     g_menu_stack_records[level].map_cursor.pending_mode = 0;
     g_menu_stack_depth = level + 1;
     g_menu_stack_types[level] = MENU_STACK_LEVEL_WORLD_MAP;
@@ -560,7 +560,7 @@ void world_map_suspend_cursor_level(menu_stack_record_t* level) {
  *
  * The flag tests are signed `> 0` comparisons; `!= 0` folds to srl/andi. */
 void location_script_dispatch_requests(void) {
-    s32* location = &g_world_map_projection_state.marker.kind;
+    s32* location = &g_world_map_marker_state.marker.location_id;
     s32* flags;
     s32 id;
 
@@ -659,8 +659,8 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
                     hit--;
 
                     /* A dot other than the marker's walks the marker there; the marker's own dot opens its menu. */
-                    if (hit != g_world_map_projection_state.marker.kind) {
-                        travel_start(g_world_map_projection_state.marker.kind, hit);
+                    if (hit != g_world_map_marker_state.marker.location_id) {
+                        travel_start(g_world_map_marker_state.marker.location_id, hit);
                         return;
                     }
                     g_menu_stack_records[g_menu_stack_depth].panel.entry_count
@@ -672,7 +672,7 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
                     }
                 } else {
                     g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-                    world_map_push_focus_level(g_world_map_projection_state.marker.kind);
+                    world_map_push_focus_level(g_world_map_marker_state.marker.location_id);
                     return;
                 }
             }
@@ -753,7 +753,7 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
         }
 
         g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
-        g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+        g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
         goto finish;
     }
 
@@ -826,7 +826,7 @@ scroll:
             if (saved.vx != g_world_map_projection_view.origin.vx
                 || saved.vy != g_world_map_projection_view.origin.vy) {
                 g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
-                g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+                g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
             }
         }
 
@@ -868,7 +868,7 @@ scroll:
             if (saved.vx != g_world_map_projection_view.origin.vx
                 || saved.vy != g_world_map_projection_view.origin.vy) {
                 g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
-                g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+                g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
             }
         }
     }
@@ -907,13 +907,13 @@ static void world_map_push_focus_level(s32 dot_index) {
  * scalar g_system_flags store, which GCC only allows for an in-struct
  * access. */
 void world_map_step_focus_level(menu_stack_record_t* entry) {
-    world_map_projection_state_t* state;
+    world_map_marker_state_t* state;
     s32 level;
 
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
         world_map_step_pan();
-        state = &g_world_map_projection_state;
-        state->flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+        state = &g_world_map_marker_state;
+        state->flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
         g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
         return;
     }
@@ -1147,8 +1147,8 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
         location = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
         world_map_capture_backdrop();
         menu_stack_dispatch_resume();
-        if (g_world_map_projection_state.marker.kind != location) {
-            travel_start(g_world_map_projection_state.marker.kind, location);
+        if (g_world_map_marker_state.marker.location_id != location) {
+            travel_start(g_world_map_marker_state.marker.location_id, location);
         }
         return;
     }
@@ -1792,8 +1792,8 @@ void location_push_menu_level(s32 menu) {
     window_xy_t* position;
 
     /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
-    g_world_map_projection_state.marker.sub_kind = location_load_picture(g_world_map_projection_state.marker.kind);
-    if (g_world_map_projection_state.marker.sub_kind != 0) {
+    g_world_map_marker_state.marker.picture_id = location_load_picture(g_world_map_marker_state.marker.location_id);
+    if (g_world_map_marker_state.marker.picture_id != 0) {
         menu += 0x37;
     } else {
         menu += 0x37;
@@ -1826,7 +1826,7 @@ void location_push_menu_level(s32 menu) {
     g_menu_stack_records[g_menu_stack_depth].location_list.mode = 8;
 
     /* With a picture: upload the frame and picture TIMs, then add the picture and its border window. */
-    if (g_world_map_projection_state.marker.sub_kind != 0) {
+    if (g_world_map_marker_state.marker.picture_id != 0) {
         GsGetTimInfo(g_location_picture_frame_tim + 1, &image);
         LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
         LoadClut(image.clut, image.cx, image.cy);
@@ -1889,7 +1889,7 @@ void location_push_menu_level(s32 menu) {
     layout.text_width = widest;
     layout.visible_rows = i;
     origin.x = 0x80 - (((layout.text_width + 0x18) & 0xFFFC) >> 1);
-    if (g_world_map_projection_state.marker.sub_kind != 0) {
+    if (g_world_map_marker_state.marker.picture_id != 0) {
         origin.y = 0x80;
     } else {
         origin.y = 0x70 - i * 8;
@@ -1900,7 +1900,7 @@ void location_push_menu_level(s32 menu) {
     g_window_panel_render_state.header_id = 0;
     g_window_panel_render_state.vram_origin.y = 0x100;
 
-    if (g_world_map_projection_state.marker.sub_kind != 0) {
+    if (g_world_map_marker_state.marker.picture_id != 0) {
         s32 unused[6]; /* frame padding: the target frame is 0xb8 */
 
         g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
@@ -2022,7 +2022,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
                         value - (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK));
                     menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
                     if (location_script_run(
-                            g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
+                            g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
                         != 0) {
                         /* rand() is 15 bits: pick one of the battle's eight ENTDs and an exit below args[2]. */
                         offset = g_location_script_state.args[0] * sizeof(deep_dungeon_battle_t);
@@ -2142,7 +2142,7 @@ static void location_run_shop(s32 shop_id) {
     shop_run_screen(shop_id);
     g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
-    selected = &g_world_map_projection_state.marker.kind;
+    selected = &g_world_map_marker_state.marker.location_id;
     g_menu_stack_records[g_menu_stack_depth].panel.entry_count
         = location_build_menu_entries(*selected, g_menu_stack_records[g_menu_stack_depth].panel.entries);
     location_push_menu_level(*selected);
@@ -2364,7 +2364,7 @@ void bar_build_rows(menu_stack_window_level_t* level) {
         level->entry_count++;
     }
 
-    if (proposition_count_returned(g_world_map_projection_state.marker.kind) != 0) {
+    if (proposition_count_returned(g_world_map_marker_state.marker.location_id) != 0) {
         level->entries[level->entry_count] = BAR_ROW_RETURNED;
         level->entry_count++;
     }

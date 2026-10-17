@@ -378,7 +378,7 @@ void location_script_opcode_24_focus_location(void) {
     entry = data[ip];
     g_location_script_state.args[0] = entry;
     if (entry == 0xff) {
-        index = g_world_map_projection_state.marker.kind;
+        index = g_world_map_marker_state.marker.location_id;
         g_location_selected = index + 1;
     } else {
         index = entry;

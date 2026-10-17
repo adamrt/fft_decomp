@@ -154,7 +154,7 @@ void world_map_capture_backdrop(void) {
     DrawSync(0);
     g_picture_background_loaded_set = -1;
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_update_camera();
+    world_map_update_marker();
     world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -184,7 +184,7 @@ static void world_map_draw_frame_with_map(void) {
     world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_draw_path_animation(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    world_map_update_camera();
+    world_map_update_marker();
     world_map_restore_previous_stack();
     world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
@@ -467,7 +467,7 @@ static void world_map_init_screen(void) {
     s32 buffer_index;
 
     SetDispMask(0);
-    g_world_map_projection_state.marker.sub_kind = location_load_picture(g_world_map_projection_state.marker.kind);
+    g_world_map_marker_state.marker.picture_id = location_load_picture(g_world_map_marker_state.marker.location_id);
     file_wait_for_pending();
     buffer_index = GsGetActiveBuff();
     g_gfx_active_buffer_index = buffer_index;
@@ -504,7 +504,7 @@ static void world_map_restore_entry_level(void) {
             & (SYSTEM_FLAG_STORY_EVENT_REPLAY | SYSTEM_FLAG_TITLE_TUTORIAL | SYSTEM_FLAG_TUTORIAL_EVENT
                 | SYSTEM_FLAG_TITLE_BRAVE_STORY))
         == 0) {
-        if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_TEXT) != 0) {
+        if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_TEXT) != 0) {
             world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
             menu_stack_push_scrollable_text_level(g_location_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
         } else {

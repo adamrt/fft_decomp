@@ -115,8 +115,7 @@ void unit_panel_build_unit_data(s32 party_index);
  * draw-area offset; the 16-bit reads that feed the s16 draw-offset stores
  * are the compiler narrowing those loads. */
 typedef struct unit_panel_thread {
-    s32 x;              /* 0x00 */
-    s32 y;              /* 0x04 */
+    point32_t position; /* 0x00 */
     s32 flags;          /* 0x08: menu_status_panel_flags_e in the status display record */
     s32 redraw_request; /* 0x0c: set to 1 elsewhere to request a text/portrait rebuild; the status
                            display record also keeps the selection-slide direction here */

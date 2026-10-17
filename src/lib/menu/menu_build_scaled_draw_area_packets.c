@@ -18,8 +18,8 @@
  * rectangle is the frame buffer's own area. With `lower_half` zero both are
  * placed in the buffer at y 0xF0.
  */
-void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
-    s32 lower_half, const unit_panel_thread_t* thread) {
+void menu_build_scaled_draw_area_packets(
+    scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index, s32 lower_half, const point32_t* position) {
     s32 percent;
     s32 w;
     s32 h;
@@ -36,8 +36,8 @@ void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const 
     w = packet->rects[0].w;
     h = packet->rects[0].h;
     packet->rects[0].x -= 0x80;
-    packet->rects[0].x += thread->x;
-    packet->rects[0].y += thread->y;
+    packet->rects[0].x += position->x;
+    packet->rects[0].y += position->y;
     scaled = (w * percent) / 200;
     packet->rects[0].x = w / 2 + packet->rects[0].x - scaled;
     scaled = (h * percent) / 200;

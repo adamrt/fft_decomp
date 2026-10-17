@@ -150,15 +150,15 @@ void unit_panel_equipment_thread(void) {
         screen->sprites[12].u0 = u;
         screen->sprites[13].u0 = u;
 
-        screen->draw_offsets[0].position.x = thread->x - 0x80;
+        screen->draw_offsets[0].position.x = thread->position.x - 0x80;
         g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
-        screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
+        screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_frame_arg, thread);
+            &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_frame_arg, &thread->position);
         unit_panel_set_colors(screen, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
@@ -206,7 +206,7 @@ void unit_panel_equipment_thread(void) {
  * frame layout and callee sequence). Runs until parameter 3 is set.
  */
 void unit_panel_ability_thread(void) {
-    s32 offset[2];
+    point32_t offset;
     /* Never referenced: the target frame has these 16 bytes between the
      * offset pair and the spill slots of u/base/upload. */
     s32 unused[4];
@@ -318,17 +318,17 @@ void unit_panel_ability_thread(void) {
         screen->sprites[12].u0 = u;
         screen->sprites[13].u0 = u;
 
-        screen->draw_offsets[0].position.x = thread->x - 0xf3;
+        screen->draw_offsets[0].position.x = thread->position.x - 0xf3;
         g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
-        screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
+        screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
-        offset[0] = thread->x - 0x73;
-        offset[1] = thread->y;
+        offset.x = thread->position.x - 0x73;
+        offset.y = thread->position.y;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_frame_arg, offset);
+            &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_frame_arg, &offset);
         unit_panel_set_colors(screen, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 

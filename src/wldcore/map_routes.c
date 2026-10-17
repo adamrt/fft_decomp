@@ -313,7 +313,7 @@ static s32 location_collect_choices(s32 location_id, s32* out) {
     if (script_get_variable(location_id + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
         return 0;
     }
-    if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_CHOICE) == 0) {
+    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_CHOICE) == 0) {
         return 0;
     }
     available = 0;
@@ -746,7 +746,7 @@ static void travel_find_best_path(s32 from, s32 to) {
 s32 travel_start(s32 from_location, s32 to_location) {
     s32 depth;
 
-    if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
+    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_travel_next_map_id[0] = 0;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
@@ -754,7 +754,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 0;
     } else {
-        if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
+        if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
             script_set_variable(g_location_script_state.args[0], g_location_script_state.args[1]);
         }
         g_travel_search_cost = 0;
@@ -771,17 +771,17 @@ s32 travel_start(s32 from_location, s32 to_location) {
         }
         g_travel.segment_count = travel_begin_segment(&g_travel, g_travel.route_path.routes[0], 0);
         g_travel.segment_index = 0;
-        g_world_map_projection_state.angle = g_travel.heading;
+        g_world_map_marker_state.angle = g_travel.heading;
         depth = g_menu_stack_depth - 1;
         g_travel.menu_level = depth;
         g_window_records[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         if (world_map_start_pan_if_outside(
-                &g_world_map_projection_state.marker.render.position, &g_world_map_projection_state.marker.position)
+                &g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
             == 0) {
-            g_world_map_projection_state.flags
-                |= WORLD_MAP_PROJECTION_UPDATE_DIRECTION | WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
+            g_world_map_marker_state.flags
+                |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
         }
-        g_world_map_projection_state.marker.sub_kind = location_load_picture(to_location);
+        g_world_map_marker_state.marker.picture_id = location_load_picture(to_location);
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 1;
     }
@@ -812,34 +812,35 @@ void travel_step(void) {
 
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
         if (world_map_step_pan() == 0) {
-            g_world_map_projection_state.flags
-                |= WORLD_MAP_PROJECTION_UPDATE_DIRECTION | WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
+            g_world_map_marker_state.flags
+                |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
         }
-        g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+        g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
         return;
     }
 
     if (g_travel.segment_frame >= g_travel.segment_frames) {
         if (++g_travel.segment_index >= g_travel.segment_count) {
             calendar_advance_day();
-            g_world_map_projection_state.marker.position = g_travel.target_position;
-            g_world_map_projection_state.flags
-                |= WORLD_MAP_PROJECTION_UPDATE_POSITION | WORLD_MAP_PROJECTION_UPDATE_DIRECTION;
-            g_world_map_projection_state.marker.kind = g_travel.leg_end_location;
+            g_world_map_marker_state.marker.position = g_travel.target_position;
+            g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION | WORLD_MAP_MARKER_UPDATE_DIRECTION;
+            g_world_map_marker_state.marker.location_id = g_travel.leg_end_location;
             script_set_variable(EVENT_SCRIPT_VAR_LOCATION, g_travel.leg_end_location);
             g_travel.route_index++;
-            if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
+            if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT)
+                != 0) {
                 g_travel_next_map_id[0] = 0;
                 script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
                 event_transition_push_level(g_location_script_state.args[1]);
-                g_world_map_projection_state.angle = 0;
-                g_world_map_projection_state.flags &= ~WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
+                g_world_map_marker_state.angle = 0;
+                g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
                 g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
                 g_menu_stack_records[g_travel.menu_level].location_transition.location_id
-                    = g_world_map_projection_state.marker.kind;
+                    = g_world_map_marker_state.marker.location_id;
                 return;
             }
-            if (location_script_run(g_world_map_projection_state.marker.kind, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
+            if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2)
+                != 0) {
                 script_set_variable(g_location_script_state.args[0], g_location_script_state.args[1]);
             }
             if (random_battle_roll(g_travel.leg_end_location,
@@ -852,11 +853,11 @@ void travel_step(void) {
                 script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_random_battle_squad_id);
                 script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
                 event_transition_push_level(EVENT_TRANSITION_MODE_SPIN);
-                g_world_map_projection_state.angle = 0;
-                g_world_map_projection_state.flags &= ~WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
+                g_world_map_marker_state.angle = 0;
+                g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
                 g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
                 g_menu_stack_records[g_travel.menu_level].location_transition.location_id
-                    = g_world_map_projection_state.marker.kind;
+                    = g_world_map_marker_state.marker.location_id;
                 return;
             }
             sound_play_effect(SOUND_SFX_WORLD_MAP_ARRIVE);
@@ -865,35 +866,35 @@ void travel_step(void) {
                 g_travel.segment_count
                     = travel_begin_segment(&g_travel, g_travel.route_path.routes[g_travel.route_index], 0);
                 g_travel.segment_index = 0;
-                g_world_map_projection_state.angle = g_travel.heading;
+                g_world_map_marker_state.angle = g_travel.heading;
                 return;
             }
             g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].flags
                 ^= DISPLAY_OBJECT_HIDDEN;
             g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.x
-                = g_world_map_projection_state.marker.render.position.x;
+                = g_world_map_marker_state.marker.render.position.x;
             g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.y
-                = g_world_map_projection_state.marker.render.position.y - 4;
+                = g_world_map_marker_state.marker.render.position.y - 4;
             g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-            g_travel.arrival_location = g_world_map_projection_state.marker.kind + 1;
+            g_travel.arrival_location = g_world_map_marker_state.marker.location_id + 1;
             file_wait_for_pending();
-            g_world_map_projection_state.angle = 0;
-            g_world_map_projection_state.flags &= ~WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET;
+            g_world_map_marker_state.angle = 0;
+            g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
             g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
             g_menu_stack_records[g_travel.menu_level].location_transition.location_id
-                = g_world_map_projection_state.marker.kind;
-            result = location_collect_choices(g_world_map_projection_state.marker.kind,
+                = g_world_map_marker_state.marker.location_id;
+            result = location_collect_choices(g_world_map_marker_state.marker.location_id,
                 g_menu_stack_records[g_menu_stack_depth].location_transition.choice_text_ids);
             if (result != -1 && result > 0) {
                 g_menu_stack_records[g_menu_stack_depth].location_transition.pending_result = result;
                 menu_stack_dispatch_suspend();
-                location_push_menu_level(g_world_map_projection_state.marker.kind);
+                location_push_menu_level(g_world_map_marker_state.marker.location_id);
             }
             return;
         } else {
             travel_begin_segment(&g_travel, g_travel.route_id, g_travel.segment_index);
-            g_world_map_projection_state.angle = g_travel.heading;
-            g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_DIRECTION;
+            g_world_map_marker_state.angle = g_travel.heading;
+            g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_DIRECTION;
         }
     } else {
         g_travel.segment_frame++;
@@ -901,15 +902,15 @@ void travel_step(void) {
 
     dx = (g_travel.target_position.vx - g_travel.position.vx) * g_travel.segment_frame / g_travel.segment_frames;
     dy = (g_travel.target_position.vy - g_travel.position.vy) * g_travel.segment_frame / g_travel.segment_frames;
-    previous = g_world_map_projection_state.marker.position;
+    previous = g_world_map_marker_state.marker.position;
     delta.x = g_travel.previous_position.vx + dx;
-    g_world_map_projection_state.marker.position.vx = delta.x;
+    g_world_map_marker_state.marker.position.vx = delta.x;
     delta.y = g_travel.previous_position.vy + dy;
-    g_world_map_projection_state.marker.position.vy = delta.y;
+    g_world_map_marker_state.marker.position.vy = delta.y;
     delta.x -= previous.vx;
     delta.y -= previous.vy;
     world_map_scroll_if_near_edge(&delta);
-    g_world_map_projection_state.flags |= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+    g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
 }
 
 /* Start a projection move (a camera pan) toward a point outside the camera bounds.
@@ -1018,8 +1019,8 @@ static void world_map_scroll_if_near_edge(point32_t* delta) {
     point32_t position;
     VECTOR saved = g_world_map_projection_view.origin;
 
-    position.x = g_world_map_projection_state.marker.render.position.x + delta->x;
-    position.y = g_world_map_projection_state.marker.render.position.y + delta->y;
+    position.x = g_world_map_marker_state.marker.render.position.x + delta->x;
+    position.y = g_world_map_marker_state.marker.render.position.y + delta->y;
     if ((delta->x < 0 && position.x < -0x40) || (delta->x > 0 && position.x >= 0x49)) {
         world_map_apply_clamped_horizontal_scroll(&delta->x, &g_world_map_projection_view.origin.vx);
     }
@@ -1128,63 +1129,63 @@ static s32 random_battle_roll(s32 location, s32 route) {
  * target's unaligned lwl/lwr 32-bit transfers. */
 void world_map_init_marker_and_camera(void) {
     VECTOR unused; /* unreferenced; reproduces the target's 0x38-byte frame */
-    world_map_dot_t* marker;
+    world_map_marker_t* marker;
     SVECTOR* position;
     s32 index = script_get_variable(EVENT_SCRIPT_VAR_LOCATION);
     s32 count;
     s32 value;
 
-    /* Only the kind, position and flags go through the pointer, as in the
+    /* Only the location ID, position and flags go through the pointer, as in the
      * target; the other fields are addressed through the symbol. */
-    marker = &g_world_map_projection_state.marker;
-    marker->kind = index;
+    marker = &g_world_map_marker_state.marker;
+    marker->location_id = index;
     position = &g_world_map_dots[index].position;
     marker->position = *position;
-    g_world_map_projection_state.angle = 0;
-    g_world_map_projection_state.flags = WORLD_MAP_PROJECTION_UPDATE_POSITION | WORLD_MAP_PROJECTION_UPDATE_DIRECTION;
+    g_world_map_marker_state.angle = 0;
+    g_world_map_marker_state.flags = WORLD_MAP_MARKER_UPDATE_POSITION | WORLD_MAP_MARKER_UPDATE_DIRECTION;
     count = g_window_render_object_count;
     g_window_render_object_queue[count++] = &marker->render;
     marker->render.flags = DISPLAY_OBJECT_ANIMATED;
-    g_world_map_projection_state.marker.render.priority = 0xE;
+    g_world_map_marker_state.marker.render.priority = 0xE;
     g_window_render_object_count = count;
-    g_world_map_projection_state.marker.render.anim_counter = 0;
-    g_world_map_projection_state.marker.render.frame_index = 0;
-    g_world_map_projection_state.marker.render.color.r = 0x80;
-    g_world_map_projection_state.marker.render.color.g = 0x80;
-    g_world_map_projection_state.marker.render.color.b = 0x80;
+    g_world_map_marker_state.marker.render.anim_counter = 0;
+    g_world_map_marker_state.marker.render.frame_index = 0;
+    g_world_map_marker_state.marker.render.color.r = 0x80;
+    g_world_map_marker_state.marker.render.color.g = 0x80;
+    g_world_map_marker_state.marker.render.color.b = 0x80;
     value = script_get_variable(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
-    g_world_map_projection_state.marker.render.palette = 0;
+    g_world_map_marker_state.marker.render.palette = 0;
     if (value == 1) {
-        g_world_map_projection_state.marker.render.palette = 2;
+        g_world_map_marker_state.marker.render.palette = 2;
     }
     if (value == 2) {
-        g_world_map_projection_state.marker.render.palette = 3;
+        g_world_map_marker_state.marker.render.palette = 3;
     }
-    marker->position = g_world_map_dots[marker->kind].position;
-    world_map_negate_and_clamp(&g_world_map_projection_state.marker.position, &g_world_map_projection_view.origin);
+    marker->position = g_world_map_dots[marker->location_id].position;
+    world_map_negate_and_clamp(&g_world_map_marker_state.marker.position, &g_world_map_projection_view.origin);
     world_map_project_tiles();
-    world_map_update_camera();
+    world_map_update_marker();
 }
 
-/* Apply pending direction and GTE projection updates to the camera state.
+/* Apply pending direction and GTE projection updates to the player marker.
  *
  * The 32-bit direction value is the player marker's sequence: the facing octant picks
  * one of eight marker sequences from WINDOW_ANIM_MARKER_FIRST, or from
  * WINDOW_ANIM_MARKER_ALTERNATE_FIRST for the alternate set. The
  * marker's position is projected with RotTrans into its render position. */
-void world_map_update_camera(void) {
+void world_map_update_marker(void) {
     VECTOR output;
-    world_map_projection_state_t* state = &g_world_map_projection_state;
+    world_map_marker_state_t* state = &g_world_map_marker_state;
     long transform_flag;
     s32 angle_direction;
     s32 direction;
     s32 flags;
 
     flags = state->flags;
-    if (flags & WORLD_MAP_PROJECTION_UPDATE_DIRECTION) {
+    if (flags & WORLD_MAP_MARKER_UPDATE_DIRECTION) {
         angle_direction = ((state->angle + 0x100) >> 9) & 7;
         direction = angle_direction + WINDOW_ANIM_MARKER_FIRST;
-        if (flags & WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET) {
+        if (flags & WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET) {
             direction = angle_direction + WINDOW_ANIM_MARKER_ALTERNATE_FIRST;
         }
         if (state->marker.render.sequence != direction) {
@@ -1192,14 +1193,14 @@ void world_map_update_camera(void) {
             state->marker.render.anim_counter = 0;
             state->marker.render.frame_index = 0;
         }
-        state->flags = flags ^ WORLD_MAP_PROJECTION_UPDATE_DIRECTION;
+        state->flags = flags ^ WORLD_MAP_MARKER_UPDATE_DIRECTION;
     }
 
-    if (g_world_map_projection_state.flags & WORLD_MAP_PROJECTION_UPDATE_POSITION) {
-        RotTrans(&g_world_map_projection_state.marker.position, &output, &transform_flag);
-        g_world_map_projection_state.marker.render.position.x = output.vx;
-        g_world_map_projection_state.marker.render.position.y = output.vy;
-        g_world_map_projection_state.flags ^= WORLD_MAP_PROJECTION_UPDATE_POSITION;
+    if (g_world_map_marker_state.flags & WORLD_MAP_MARKER_UPDATE_POSITION) {
+        RotTrans(&g_world_map_marker_state.marker.position, &output, &transform_flag);
+        g_world_map_marker_state.marker.render.position.x = output.vx;
+        g_world_map_marker_state.marker.render.position.y = output.vy;
+        g_world_map_marker_state.flags ^= WORLD_MAP_MARKER_UPDATE_POSITION;
     }
 }
 

@@ -54,7 +54,7 @@ void bar_suspend_level(menu_stack_record_t* level) {
 /* Leave the bar: pop its level, show the date and location label again, rebuild and push the
  * location menu for the current location, fade the map back in and clear the scratch buffer. */
 static void bar_leave(menu_stack_window_level_t* unused_level) {
-    s32* selected = &g_world_map_projection_state.marker.kind;
+    s32* selected = &g_world_map_marker_state.marker.location_id;
     s32 i;
 
     window_set_render_objects_visible(1);
@@ -215,7 +215,7 @@ static void rumor_open_list(void) {
     values = g_menu_stack_entry_values;
     locations = g_rumor_location_masks;
     /* The masks hold one bit per town, location 0 in bit 14. */
-    mask = 0x4000 >> g_world_map_projection_state.marker.kind;
+    mask = 0x4000 >> g_world_map_marker_state.marker.location_id;
     for (; i < EVENT_SCRIPT_VAR_RUMOR_COUNT; i++, locations++) {
         /* A register operand keeps the loaded 32-bit value first in the `and`;
          * testing *locations directly lets expand_binop swap them. */
@@ -447,7 +447,7 @@ void proposition_open_available_list(void) {
         if (!(script_get_variable(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
                 & (PROPOSITION_VARIABLE_IN_PROGRESS | PROPOSITION_VARIABLE_COMPLETED))
             && !(g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK)
-            && proposition_is_available_at(i, g_world_map_projection_state.marker.kind + 1) != 0) {
+            && proposition_is_available_at(i, g_world_map_marker_state.marker.location_id + 1) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_PROPOSITION_NAME_BASE;
             g_menu_stack_row_flags[count] = 0;
             count++;

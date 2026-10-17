@@ -309,7 +309,7 @@ void formation_init_menu_state(void) {
     g_formation_order_open = 0;
     /* Through the records rather than the member scalars (offset_y, flags,
      * highlight): the target addresses these stores from one base each. */
-    g_unit_panel_status_display_thread_params.y = 0x90;
+    g_unit_panel_status_display_thread_params.position.y = 0x90;
     g_unit_panel_status_display_thread_params.flags = 0;
     g_unit_panel_status_display_thread_params.style = 0;
     g_unit_panel_comparison_display_thread_params.style = 0;
@@ -319,7 +319,7 @@ void formation_init_menu_state(void) {
     g_formation_equipment_panel_thread_params.style = 0;
     g_unit_panel_numeric_panel_params.style = 0;
     g_unit_panel_preview_stats_thread_params.style = 0;
-    g_unit_panel_preview_stats_thread_params.y = 2;
+    g_unit_panel_preview_stats_thread_params.position.y = 2;
     g_formation_triangle_menu.selected_index = 0;
     g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
     g_unit_selected_index = 0;
@@ -538,9 +538,9 @@ void formation_update_selection(void) {
             }
         } else {
             if ((g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom) != 0) {
-                g_unit_panel_status_display_thread_params.y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 0x90;
             } else {
-                g_unit_panel_status_display_thread_params.y = 0;
+                g_unit_panel_status_display_thread_params.position.y = 0;
             }
         }
         previous = g_formation_selected_unit_index_latch;
@@ -564,9 +564,9 @@ void formation_update_selection(void) {
                 *flags |= MENU_STATUS_PANEL_SLIDE_UP;
             }
         } else if (g_formation_unit_banner_at_bottom != 0) {
-            g_unit_panel_status_display_thread_params.y = 0x90;
+            g_unit_panel_status_display_thread_params.position.y = 0x90;
         } else {
-            g_unit_panel_status_display_thread_params.y = 0;
+            g_unit_panel_status_display_thread_params.position.y = 0;
         }
     }
     if (g_formation_current_menu != FORMATION_MENU_ABILITY_LEAVE
@@ -582,16 +582,16 @@ void formation_update_selection(void) {
     }
     unit_panel_toggle_banner_thread(g_formation_unit_banner_enabled != 0 || g_formation_unit_browse_enabled != 0);
     if (g_formation_banner_slide_step < 0) {
-        g_unit_panel_status_display_thread_params.y = g_formation_banner_slide_step * 8 + 0x108;
-        g_unit_panel_comparison_display_thread_params.y = g_formation_banner_slide_step * 8;
+        g_unit_panel_status_display_thread_params.position.y = g_formation_banner_slide_step * 8 + 0x108;
+        g_unit_panel_comparison_display_thread_params.position.y = g_formation_banner_slide_step * 8;
         g_formation_banner_slide_step--;
         if (g_formation_banner_slide_step < -0xf) {
             g_formation_banner_slide_step = 0;
             menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     } else if (g_formation_banner_slide_step > 0) {
-        g_unit_panel_status_display_thread_params.y = g_formation_banner_slide_step * 8 - 0x78;
-        g_unit_panel_comparison_display_thread_params.y = g_formation_banner_slide_step * 8 + 0x90;
+        g_unit_panel_status_display_thread_params.position.y = g_formation_banner_slide_step * 8 - 0x78;
+        g_unit_panel_comparison_display_thread_params.position.y = g_formation_banner_slide_step * 8 + 0x90;
         g_formation_banner_slide_step++;
         if (g_formation_banner_slide_step >= 0x10) {
             g_formation_banner_slide_step = 0;
@@ -645,8 +645,8 @@ void formation_stage_selected_unit(void) {
  * formation_stage_selected_unit's copies) and g_unit_panel_status_display_thread_params.redraw_request records the
  * direction: 1 for Right or R1 or a forward move, 2 otherwise. g_formation_banner_slide_step counts the
  * 16-frame banner slide in either direction, driving the banner y positions in
- * g_unit_panel_status_display_thread_params.y/g_unit_panel_comparison_display_thread_params.y. Compiled at -O1; the
- * flag update goes through a pointer so each branch materializes the address like the target.
+ * g_unit_panel_status_display_thread_params.position.y/g_unit_panel_comparison_display_thread_params.position.y.
+ * Compiled at -O1; the flag update goes through a pointer so each branch materializes the address like the target.
  */
 void formation_restage_on_selection_change(void) {
     s32 previous;
@@ -673,9 +673,9 @@ void formation_restage_on_selection_change(void) {
             }
         } else {
             if ((g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom) != 0) {
-                g_unit_panel_status_display_thread_params.y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 0x90;
             } else {
-                g_unit_panel_status_display_thread_params.y = 0;
+                g_unit_panel_status_display_thread_params.position.y = 0;
             }
         }
         previous = g_formation_selected_unit_index_latch;
@@ -705,9 +705,9 @@ void formation_restage_on_selection_change(void) {
                     *flags |= MENU_STATUS_PANEL_SLIDE_UP;
                 }
             } else if (g_formation_unit_banner_at_bottom != 0) {
-                g_unit_panel_status_display_thread_params.y = 0x90;
+                g_unit_panel_status_display_thread_params.position.y = 0x90;
             } else {
-                g_unit_panel_status_display_thread_params.y = 0;
+                g_unit_panel_status_display_thread_params.position.y = 0;
             }
         }
     }
@@ -718,16 +718,16 @@ void formation_restage_on_selection_change(void) {
     }
     unit_panel_toggle_banner_thread(g_formation_unit_banner_enabled != 0 || g_formation_unit_browse_enabled != 0);
     if (g_formation_banner_slide_step < 0) {
-        g_unit_panel_status_display_thread_params.y = g_formation_banner_slide_step * 8 + 0x108;
-        g_unit_panel_comparison_display_thread_params.y = g_formation_banner_slide_step * 8;
+        g_unit_panel_status_display_thread_params.position.y = g_formation_banner_slide_step * 8 + 0x108;
+        g_unit_panel_comparison_display_thread_params.position.y = g_formation_banner_slide_step * 8;
         g_formation_banner_slide_step--;
         if (g_formation_banner_slide_step < -15) {
             g_formation_banner_slide_step = 0;
             menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     } else if (g_formation_banner_slide_step > 0) {
-        g_unit_panel_status_display_thread_params.y = g_formation_banner_slide_step * 8 - 0x78;
-        g_unit_panel_comparison_display_thread_params.y = g_formation_banner_slide_step * 8 + 0x90;
+        g_unit_panel_status_display_thread_params.position.y = g_formation_banner_slide_step * 8 - 0x78;
+        g_unit_panel_comparison_display_thread_params.position.y = g_formation_banner_slide_step * 8 + 0x90;
         g_formation_banner_slide_step++;
         if (g_formation_banner_slide_step >= 16) {
             g_formation_banner_slide_step = 0;

@@ -389,7 +389,7 @@ functions:
   - {addr: 0x8008ef3c, size: 336, name: world_map_scroll_if_near_edge, hash: 1cb30f8dbe68fea1, unit: map_routes}
   - {addr: 0x8008f08c, size: 504, name: random_battle_roll, hash: 00cd3871e2ff7e81, unit: map_routes}
   - {addr: 0x8008f284, size: 432, name: world_map_init_marker_and_camera, hash: 2f51d47e4f36de8d, unit: map_routes}
-  - {addr: 0x8008f434, size: 224, name: world_map_update_camera, hash: bed7c40ebe97aaf4, unit: map_routes}
+  - {addr: 0x8008f434, size: 224, name: world_map_update_marker, hash: bed7c40ebe97aaf4, unit: map_routes}
   - {addr: 0x8008f514, size: 388, name: window_build_render_record_image, hash: 5119c811a5da11ed, unit: map_routes}
   - {addr: 0x8008f698, size: 148, name: window_get_image_vram_position, hash: b712870430e662cb, unit: map_routes}
   - {addr: 0x8008f72c, size: 252, name: window_load_render_record_image, hash: 415234420b5b877b, unit: map_routes}
@@ -527,7 +527,7 @@ data:
   - {addr: 0x8009f1ec, name: g_proposition_report}
   - {addr: 0x8009f244, name: g_window_render_record_count}
   - {addr: 0x8009f248, name: g_random_battle_squad_id}
-  - {addr: 0x8009f24c, name: g_world_map_projection_state}
+  - {addr: 0x8009f24c, name: g_world_map_marker_state}
   - {addr: 0x8009f288, name: g_event_transition_sprite}
   - {addr: 0x8009f2ac, name: g_hud_color}
   - {addr: 0x8009f2b0, name: g_hud_value_position}

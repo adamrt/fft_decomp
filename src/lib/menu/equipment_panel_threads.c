@@ -174,7 +174,7 @@ void unit_panel_equipment_ability_thread(void) {
          * into the upper half. */
         g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, g_frame_arg, thread);
+            &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, g_frame_arg, &thread->position);
 #else
         /* The other overlays derive the field offset from screen polarity. */
         field_y = g_gfx_screen_polarity * 0xf0;
@@ -182,10 +182,10 @@ void unit_panel_equipment_ability_thread(void) {
         mask = -(mask != 0);
         g_gfx_draw_offset_y = mask & 0xf0;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, field_y, thread);
+            &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, field_y, &thread->position);
 #endif
-        screen->draw_offsets[0].position.x = thread->x - 0x80;
-        screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
+        screen->draw_offsets[0].position.x = thread->position.x - 0x80;
+        screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;

@@ -15,8 +15,8 @@ static s32 g_menu_indicator_state[2] = { 0 };
 /* Build and submit the two translucent letterbox panels of the event dialogue
  * overlay.
  *
- * Banner tasks in slots 8 and 7 request a panel when display->x is zero;
- * display->y selects which of the two opens. Each panel fades its
+ * Banner tasks in slots 8 and 7 request a panel when display->position.x is zero;
+ * display->position.y selects which of the two opens. Each panel fades its
  * gradient in by 0xc per frame up to 0x78 and back out again, alternating
  * between two primitive buffers so the previous frame stays queued. The
  * EQUIP twin watches threads 13 and 14.
@@ -35,13 +35,13 @@ void menu_draw_thread_status_indicators(void) {
     if (menu_thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) != 0) {
         if (g_threads[THREAD_SCREEN_SLOT_UNIT_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             display = (unit_panel_thread_t*)g_threads[THREAD_SCREEN_SLOT_UNIT_STATUS].function_parameter_1;
-            active = (display->x == 0) * 8;
+            active = (display->position.x == 0) * 8;
         }
     }
     if (menu_thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
         if (g_threads[THREAD_SCREEN_SLOT_COMPARISON_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             descriptor = (unit_panel_thread_t*)g_threads[THREAD_SCREEN_SLOT_COMPARISON_STATUS].function_parameter_1;
-            if (descriptor->x == 0) {
+            if (descriptor->position.x == 0) {
                 active = 7;
                 display = descriptor;
             }
@@ -49,11 +49,11 @@ void menu_draw_thread_status_indicators(void) {
     }
     /* Both requests jump past the fade-out updates; an if/else-if/else form adds two instructions. */
     if (active != 0) {
-        if ((display->y == 0x90) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
+        if ((display->position.y == 0x90) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
             g_menu_indicator_state[0] = MENU_INDICATOR_STATE_FADING_OUT;
             g_menu_indicator_state[1] = MENU_INDICATOR_STATE_FADING_IN;
             goto draw_panels;
-        } else if ((display->y == 0) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
+        } else if ((display->position.y == 0) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
             g_menu_indicator_state[0] = MENU_INDICATOR_STATE_FADING_IN;
             g_menu_indicator_state[1] = MENU_INDICATOR_STATE_FADING_OUT;
             goto draw_panels;

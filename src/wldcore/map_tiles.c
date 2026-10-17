@@ -82,7 +82,7 @@ void world_map_toggle_captured_frame(s32 capture) {
     world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    world_map_update_camera();
+    world_map_update_marker();
     hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);

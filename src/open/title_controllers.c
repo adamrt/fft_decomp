@@ -875,7 +875,7 @@ static void birthday_push_date_menu(void) {
     quad.w = 0x80;
     quad.h = 0x40;
     window_init_text_record(record, quad, 0, 0xB800, g_birthday_title_image);
-    position = (point32_t*)&g_window_gpu_image_records[0].x;
+    position = &g_window_gpu_image_records[0].position;
     position = (point32_t*)((u8*)position + record * sizeof(window_gpu_image_record_t));
     half_width = quad.w / 2;
     position->y = -0x60;
@@ -889,10 +889,10 @@ static void birthday_push_date_menu(void) {
     g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].flags
         |= DISPLAY_OBJECT_POP_IN;
     g_window_records[g_controller_records[controller].birthday_date.cursor_record].position.x
-        = g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].x + 0x46;
+        = g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].position.x + 0x46;
     g_controller_depth = controller + 1;
     g_window_records[g_controller_records[controller].birthday_date.cursor_record].position.y
-        = g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].y + 0x18;
+        = g_window_gpu_image_records[g_controller_records[controller].birthday_date.window_image].position.y + 0x18;
     g_controller_records[controller].birthday_date.selecting_month = 0;
     g_controller_handler_indices[controller] = CONTROLLER_BIRTHDAY_DATE;
 }
@@ -936,7 +936,7 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
 
     window_load_render_record_image(index, (u32*)g_birthday_window_image);
 
-    translation = (point32_t*)&g_window_gpu_image_records[0].x;
+    translation = &g_window_gpu_image_records[0].position;
     translation = (point32_t*)((u8*)translation + index * sizeof(window_gpu_image_record_t));
     translation->x = -(quad.w / 2);
     translation->y = -0x10;
@@ -1125,21 +1125,21 @@ static void birthday_push_confirmation(void) {
     quad.h = 0x30;
     window_init_text_record(record, quad, 0, 0xB80F, g_birthday_title_image);
     controller = g_controller_depth;
-    position = (point32_t*)&g_window_gpu_image_records[0].x;
+    position = &g_window_gpu_image_records[0].position;
     position = (point32_t*)((u8*)position + record * sizeof(window_gpu_image_record_t));
     position->x = 0x3C;
     position->y = 0x28;
     g_window_gpu_image_records[record].ot_layer = 3;
 
     g_window_records[g_controller_records[controller].birthday_confirmation.cursor_record].position.x
-        = g_window_gpu_image_records[record].x + 4;
+        = g_window_gpu_image_records[record].position.x + 4;
     g_window_records[g_controller_records[controller].birthday_confirmation.cursor_record].position.y
-        = g_window_gpu_image_records[record].y + 0xC;
+        = g_window_gpu_image_records[record].position.y + 0xC;
     g_window_records[g_controller_records[controller].birthday_confirmation.label_record].position.x
-        = g_window_gpu_image_records[record].x + 2;
+        = g_window_gpu_image_records[record].position.x + 2;
     g_controller_depth = controller + 1;
     g_window_records[g_controller_records[controller].birthday_confirmation.label_record].position.y
-        = g_window_gpu_image_records[record].y - 2;
+        = g_window_gpu_image_records[record].position.y - 2;
     g_controller_records[controller].birthday_confirmation.selected_option = 0;
     g_controller_handler_indices[controller] = CONTROLLER_BIRTHDAY_CONFIRMATION;
 }
@@ -1217,7 +1217,7 @@ void birthday_update_confirmation(controller_record_t* record) {
         menu->selected_option ^= 1;
         /* Adding 12 before the option offset keeps the target's (option * 16 + 12) + y evaluation. */
         g_window_records[menu->cursor_record].position.y
-            = g_window_gpu_image_records[menu->menu_image].y + 12 + menu->selected_option * 16;
+            = g_window_gpu_image_records[menu->menu_image].position.y + 12 + menu->selected_option * 16;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
@@ -1232,8 +1232,8 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
 
     g_window_gpu_image_records[index].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
-    g_window_gpu_image_records[index].x = quad.x - 0x80;
-    g_window_gpu_image_records[index].y = quad.y - 0x78;
+    g_window_gpu_image_records[index].position.x = quad.x - 0x80;
+    g_window_gpu_image_records[index].position.y = quad.y - 0x78;
     g_window_gpu_image_records[index].image_page_offset = image_page_offset;
     clut = &g_window_gpu_image_records[index].clut;
     clut->y = 0x1E0;

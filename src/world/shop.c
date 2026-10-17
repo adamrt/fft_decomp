@@ -2139,7 +2139,7 @@ void soldier_office_menu_step(void) {
         g_soldier_office_hire_fee_confirm_menu.selected_index = 0;
         g_soldier_office_hire_result_shown = 0;
         g_soldier_office_hire_menu_initialized = 1;
-        g_unit_panel_status_display_thread_params.y = 0;
+        g_unit_panel_status_display_thread_params.position.y = 0;
         g_soldier_office_hire_unread_flag_1 = 0;
         g_soldier_office_hire_unread_flag_2 = 0;
         g_formation_unit_banner_enabled = 0;
@@ -2223,7 +2223,7 @@ void soldier_office_hire_preview_step(void) {
             g_formation_unit_browse_enabled = 1;
             g_formation_unit_banner_enabled = 1;
             g_formation_unit_banner_at_bottom = 0;
-            g_unit_panel_status_display_thread_params.y = 0;
+            g_unit_panel_status_display_thread_params.position.y = 0;
             g_help_message_text_id = MENU_GRID_HELP_RECRUIT_PREVIEW;
             g_soldier_office_hire_preview_initialized = 1;
         }

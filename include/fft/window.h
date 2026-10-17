@@ -124,8 +124,7 @@ typedef struct window_gpu_image_record {
     s32 image_page_offset; /* 0x10 */
     s32 pop_in_step;       /* 0x14 */
     s32 palette;           /* 0x18; nonzero selects CLUT x + (palette - 1) * 16 */
-    s32 x;                 /* 0x1c; centered screen position */
-    s32 y;                 /* 0x20 */
+    point32_t position;    /* 0x1c; centered screen position */
     point32_t clut;        /* 0x24 */
     RECT bounds;           /* 0x2c; texel position and image dimensions */
     CVECTOR color;         /* 0x34 */

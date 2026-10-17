@@ -400,9 +400,9 @@ void formation_init_grid_cursor(s32 formation_index) {
     g_formation_stat_display_mode = MENU_UNIT_READOUT_HP;
     g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
     if (g_formation_unit_banner_at_bottom != 0) {
-        g_unit_panel_status_display_thread_params.y = 0x90;
+        g_unit_panel_status_display_thread_params.position.y = 0x90;
     } else {
-        g_unit_panel_status_display_thread_params.y = 0;
+        g_unit_panel_status_display_thread_params.position.y = 0;
     }
     g_formation_unit_banner_enabled = 1;
     g_formation_saved_banner_enabled = 1;

@@ -49,8 +49,8 @@ s32 equipment_update_menu(void) {
         menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_formation_item_menu_mode = MENU_ITEM_LIST_STATE_BROWSE;
         g_formation_unit_banner_enabled = 0;
-        g_unit_panel_preview_stats_thread_params.x = 0;
-        g_unit_panel_preview_stats_thread_params.y = -0x49;
+        g_unit_panel_preview_stats_thread_params.position.x = 0;
+        g_unit_panel_preview_stats_thread_params.position.y = -0x49;
     }
     g_formation_cursor_ot_override = 9;
     if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_CLOSE) {
@@ -59,8 +59,8 @@ s32 equipment_update_menu(void) {
         g_formation_item_submenu_initialized = 0;
         g_formation_unit_banner_enabled = 1;
         thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
-        g_unit_panel_preview_stats_thread_params.x = 2;
-        g_unit_panel_preview_stats_thread_params.y = 2;
+        g_unit_panel_preview_stats_thread_params.position.x = 2;
+        g_unit_panel_preview_stats_thread_params.position.y = 2;
         g_formation_unit_cycle_mode = 2;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return 0;

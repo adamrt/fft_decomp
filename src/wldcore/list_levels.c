@@ -629,10 +629,10 @@ static void brave_story_push_participant_level(s32 proposition, s32 participant)
 
     unit_panel_build_unit_data(g_proposition_active[proposition].participant_indices[participant]);
 
-    g_unit_panel_banner_params.x = 0;
-    g_unit_panel_banner_params.y = 0;
-    g_unit_panel_panel_params.y = 0;
-    g_unit_panel_numbers_params.y = 0;
+    g_unit_panel_banner_params.position.x = 0;
+    g_unit_panel_banner_params.position.y = 0;
+    g_unit_panel_panel_params.position.y = 0;
+    g_unit_panel_numbers_params.position.y = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_unit_panel_banner_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);

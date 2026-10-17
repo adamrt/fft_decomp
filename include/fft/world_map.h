@@ -228,7 +228,7 @@ extern world_map_pan_t g_world_map_pan;
 /* Provisional: flags bit 0 runs the zoom, bit 1 selects the zoomed-out direction. */
 extern world_map_zoom_t g_world_map_zoom;
 
-void world_map_update_camera(void);
+void world_map_update_marker(void);
 s32 world_map_step_pan(void);
 void world_map_step_focus_level(menu_stack_record_t* entry);
 s32 world_map_start_pan_if_outside(const point32_t* point, const SVECTOR* coordinates);
@@ -265,13 +265,12 @@ void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position);
 void world_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position);
 
 /* map dots */
-/* A world map dot (g_world_map_dots); the player's marker is one too (world_map_projection_state_t.marker). */
+/* Static location dots select their appearance by category and subtype. */
 typedef struct world_map_dot {
     s32 kind;
     s32 sub_kind;
     SVECTOR position; /* 0x08; world-map position, RotTrans input */
-    /* 0x10; enqueued whole for the animated display-object renderer. Its palette
-     * is 0, 2 or 3 for the player's marker, from EVENT_SCRIPT_VAR_TOWN_BACKGROUND. */
+    /* 0x10; enqueued whole for the animated display-object renderer. */
     display_object_animated_t render;
 } world_map_dot_t;
 typedef char world_map_dot_size_must_be_52[sizeof(world_map_dot_t) == 52 ? 1 : -1];
@@ -284,28 +283,35 @@ typedef struct world_map_dot_source {
 } world_map_dot_source_t;
 typedef char world_map_dot_source_size_must_be_8[sizeof(world_map_dot_source_t) == 8 ? 1 : -1];
 
-/* world_map_projection_state_t.flags: work pending for
- * world_map_update_camera, and the marker's sprite set. */
-typedef enum world_map_projection_flag {
-    WORLD_MAP_PROJECTION_UPDATE_POSITION = 0x01,
-    WORLD_MAP_PROJECTION_UPDATE_DIRECTION = 0x02,
-    WORLD_MAP_PROJECTION_ALTERNATE_DIRECTION_SET = 0x04, /* set while the marker travels a route */
-} world_map_projection_flag_e;
+/* world_map_marker_state_t.flags: work pending for
+ * world_map_update_marker, and the marker's sprite set. */
+typedef enum world_map_marker_flag {
+    WORLD_MAP_MARKER_UPDATE_POSITION = 0x01,
+    WORLD_MAP_MARKER_UPDATE_DIRECTION = 0x02,
+    WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET = 0x04, /* set while the marker travels a route */
+} world_map_marker_flag_e;
 
-/* The world map camera state (g_world_map_projection_state): two control fields followed by the player's own map
- * dot. The marker at +8 makes the views of this object agree field for field: the camera update writes the dot's
- * render sequence and screen position, and the marker init writes its kind, position and flags. For the player's
- * marker, kind is the current location id and sub_kind the location picture id. */
-typedef struct world_map_projection_state {
-    s32 flags; /* 0x00; world_map_projection_flag_e */
+/* The player marker stores location and picture IDs, unlike static dot categories.
+ * Its palette is 0, 2 or 3, selected by EVENT_SCRIPT_VAR_TOWN_BACKGROUND. */
+typedef struct world_map_marker {
+    s32 location_id;
+    s32 picture_id;
+    SVECTOR position;
+    display_object_animated_t render;
+} world_map_marker_t;
+typedef char world_map_marker_size_must_be_52[sizeof(world_map_marker_t) == 52 ? 1 : -1];
+
+/* Pending projection/direction changes, heading and the player marker. */
+typedef struct world_map_marker_state {
+    s32 flags; /* 0x00; world_map_marker_flag_e */
     s32 angle;
-    world_map_dot_t marker;
-} world_map_projection_state_t;
+    world_map_marker_t marker;
+} world_map_marker_state_t;
 
 extern world_map_dot_source_t* g_world_map_dot_sources;
 extern s32 g_world_map_dot_count;
 extern world_map_dot_t g_world_map_dots[];
-extern world_map_projection_state_t g_world_map_projection_state;
+extern world_map_marker_state_t g_world_map_marker_state;
 extern u8 g_world_map_dot_pulse_direction;
 extern u8 g_world_map_dot_pulse_phase;
 
