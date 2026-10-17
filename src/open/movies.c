@@ -59,13 +59,18 @@ extern u32 g_movie_current_frame;
 extern u32 g_movie_end_frame;
 extern s32 g_movie_video_end_frame; /* -1: none */
 
-/* OPEN directional repeat */
-extern s32 g_input_directional_repeat_initial_delay;
-extern s32 g_input_directional_repeat_period;
-extern s32 g_input_up_repeat_counter;
-extern s32 g_input_down_repeat_counter;
-extern s32 g_input_left_repeat_counter;
-extern s32 g_input_right_repeat_counter;
+/* Directional repeat timing and counters. Left and Right are cleared only. */
+typedef struct input_directional_repeat {
+    s32 initial_delay;
+    s32 period;
+    s32 counter_up;
+    s32 counter_down;
+    s32 counter_left;
+    s32 counter_right;
+} input_directional_repeat_t;
+typedef char input_directional_repeat_size_must_be_24[sizeof(input_directional_repeat_t) == 24 ? 1 : -1];
+
+extern input_directional_repeat_t g_input_directional_repeat;
 
 static void input_update_with_soft_reset(void);
 static void music_test_run_world_menu_frame(void);
@@ -623,20 +628,20 @@ void input_init_directional_state(void) {
     s32 first_limit = g_input_repeat_initial_delay;
     s32 second_limit = g_input_repeat_period;
 
-    g_input_right_repeat_counter = 0;
-    g_input_left_repeat_counter = 0;
-    g_input_down_repeat_counter = 0;
-    g_input_up_repeat_counter = 0;
-    g_input_directional_repeat_initial_delay = first_limit;
-    g_input_directional_repeat_period = second_limit;
+    g_input_directional_repeat.counter_right = 0;
+    g_input_directional_repeat.counter_left = 0;
+    g_input_directional_repeat.counter_down = 0;
+    g_input_directional_repeat.counter_up = 0;
+    g_input_directional_repeat.initial_delay = first_limit;
+    g_input_directional_repeat.period = second_limit;
 }
 
 /* Return the newly pressed buttons in `buttons`, or else Up or Down when that
  * held direction's auto-repeat fires, or 0.
  *
  * A new press clears the four direction counters. A held direction counts once
- * per call; past g_input_directional_repeat_initial_delay it fires and steps
- * back by g_input_directional_repeat_period. Unlike the WLDCORE twin only Up
+ * per call; after the initial delay it fires and subtracts the repeat period.
+ * Unlike WLDCORE, only Up
  * and Down repeat: the other two counters are cleared and never counted. */
 u32 input_update_repeat(u32 buttons) {
     s32 next;
@@ -644,42 +649,42 @@ u32 input_update_repeat(u32 buttons) {
 
     pressed &= buttons;
     if (pressed != 0) {
-        g_input_right_repeat_counter = 0;
-        g_input_left_repeat_counter = 0;
-        g_input_down_repeat_counter = 0;
-        g_input_up_repeat_counter = 0;
+        g_input_directional_repeat.counter_right = 0;
+        g_input_directional_repeat.counter_left = 0;
+        g_input_directional_repeat.counter_down = 0;
+        g_input_directional_repeat.counter_up = 0;
         return pressed;
     }
 
     if ((buttons & PSX_PAD_UP) != 0) {
         if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
-            s32* up_counter = &g_input_up_repeat_counter;
+            s32* up_counter = &g_input_directional_repeat.counter_up;
 
-            if (g_input_directional_repeat_initial_delay < (*up_counter = next = *up_counter + 1)) {
-                *up_counter = next - g_input_directional_repeat_period;
+            if (g_input_directional_repeat.initial_delay < (*up_counter = next = *up_counter + 1)) {
+                *up_counter = next - g_input_directional_repeat.period;
                 return PSX_PAD_UP;
             }
         } else {
-            g_input_up_repeat_counter = 0;
+            g_input_directional_repeat.counter_up = 0;
         }
     }
 
     if ((buttons & PSX_PAD_DOWN) != 0) {
         if ((g_input_current_buttons & PSX_PAD_DOWN) != 0) {
-            s32* down_counter = &g_input_down_repeat_counter;
+            s32* down_counter = &g_input_directional_repeat.counter_down;
             s32 old_counter;
             s32 down_next;
 
             /* Spelled apart from the Up branch: separate old and next values give
              * this branch the retail register assignment. */
             old_counter = *down_counter;
-            if (g_input_directional_repeat_initial_delay < (*down_counter = down_next = old_counter + 1)) {
-                old_counter = down_next - g_input_directional_repeat_period;
+            if (g_input_directional_repeat.initial_delay < (*down_counter = down_next = old_counter + 1)) {
+                old_counter = down_next - g_input_directional_repeat.period;
                 *down_counter = old_counter;
                 return PSX_PAD_DOWN;
             }
         } else {
-            g_input_down_repeat_counter = 0;
+            g_input_directional_repeat.counter_down = 0;
         }
     }
 

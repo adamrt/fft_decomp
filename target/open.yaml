@@ -246,12 +246,7 @@ data:
   - {addr: 0x80085fc8, name: g_ending_fade_primitives}
   - {addr: 0x80086018, name: g_gfx_otags}
   - {addr: 0x80086098, name: g_window_gpu_image_records}
-  - {addr: 0x80086418, name: g_input_directional_repeat_initial_delay}
-  - {addr: 0x8008641c, name: g_input_directional_repeat_period}
-  - {addr: 0x80086420, name: g_input_up_repeat_counter}
-  - {addr: 0x80086424, name: g_input_down_repeat_counter}
-  - {addr: 0x80086428, name: g_input_left_repeat_counter}
-  - {addr: 0x8008642c, name: g_input_right_repeat_counter}
+  - {addr: 0x80086418, name: g_input_directional_repeat}
   - {addr: 0x80086430, name: g_birthday_title_image}
   - {addr: 0x80087030, name: g_birthday_window_image}
   - {addr: 0x8008e430, name: g_menu_blocked_buttons}
