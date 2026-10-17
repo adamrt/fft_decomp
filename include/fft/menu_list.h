@@ -27,7 +27,6 @@ void menu_stop_managed_thread(s32 thread_id);
 /* Requests a stop and runs input-update frames until the thread has ended. */
 void menu_stop_thread_and_wait(s32 thread_id);
 void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
-s32 menu_thread_is_running(s32 thread_id);
 void menu_wait_selection_threads(void);
 
 /* Empty; menu_init_subsystems calls it between the palette and text setup and the subsystem reset. */

@@ -5,7 +5,7 @@
  * WORLD and the overlays make through the main stack. */
 
 #include "fft/file.h"
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* music slots */

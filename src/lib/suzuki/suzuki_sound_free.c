@@ -1,5 +1,5 @@
 /* SCUS_942.21 0x80014358..0x800143ab. */
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Unlink the heap block that owns payload from the driver's block list; its space becomes a gap
  * for suzuki_sound_alloc. The block must be in the list. */

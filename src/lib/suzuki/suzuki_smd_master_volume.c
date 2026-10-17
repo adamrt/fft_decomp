@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xA6 "Master Volume": sets the MUS master volume and marks

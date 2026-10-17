@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Copies a saved snapshot over a MUS record and its channels, keeping the
  * record's own queue link and snapshot chain. */

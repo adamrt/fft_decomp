@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Sets the music's tempo scale (0x100 = 1.0; 0 means 0x100), immediately

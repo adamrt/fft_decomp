@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xA1 "Accelerando": adds a signed tempo delta and

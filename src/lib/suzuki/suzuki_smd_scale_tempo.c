@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xFD "Scale Tempo": multiplies the tempo by its byte. A zero

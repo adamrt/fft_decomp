@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Unlinks resource from the loaded VFX sound list after stopping the SFX
  * channels that play its sounds.

@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Seed the xorshift state that suzuki_smd_random steps (suzuki_sound_init seeds 0x12345678).

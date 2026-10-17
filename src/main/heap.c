@@ -2,9 +2,9 @@
 
 #include "fft/file.h"
 #include "fft/memory.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "psx/libetc.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static u8 g_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT] = { 0 };

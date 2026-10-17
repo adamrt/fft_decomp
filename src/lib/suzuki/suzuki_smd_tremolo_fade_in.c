@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xE3 "Tremolo Fade In": modulator 1 fade_level and its reset

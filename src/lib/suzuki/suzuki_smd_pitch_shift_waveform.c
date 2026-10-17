@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xD9 "Vibrato Waveform": like Vibrato (0xD8), but the third

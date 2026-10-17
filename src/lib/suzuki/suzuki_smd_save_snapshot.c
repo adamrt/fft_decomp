@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Copies the MUS record and its channels into the record's snapshot block,

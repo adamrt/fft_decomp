@@ -1,5 +1,5 @@
 /* SCUS_942.21 0x8001423c..0x80014277. */
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Set up the driver's CPU heap over arena: size is rounded down to 16 bytes, and an empty
  * SUZUKI_HEAP_BLOCK_HEAD block at the arena start begins the block list. */

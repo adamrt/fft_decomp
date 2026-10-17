@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xFF "End Track": when the envelope of the channel's SPU voice

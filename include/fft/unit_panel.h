@@ -282,7 +282,7 @@ extern image_load_parameters_t g_unit_panel_equipment_sprite_params_1[19];
 extern image_load_parameters_t g_unit_panel_equipment_sprite_params_2[19];
 extern image_load_parameters_t g_unit_panel_equipment_sprite_params_3[19];
 
-/* EQUIP, the menu library and WORLD each build their own bodies of these. */
+/* ATTACK, BUNIT, DEBUGCHR and REQUIRE share yield-and-exit stubs; EQUIP and WORLD each build panel bodies. */
 void unit_panel_ability_thread(void);
 void unit_panel_equipment_thread(void);
 
@@ -314,7 +314,7 @@ extern s16 g_unit_panel_editor_item_and_ability_ids[10];
 
 void unit_panel_numbers_polarity_thread(void);
 
-/* EQUIP builds its own body. */
+/* BUNIT and WORLD share a source; DEBUGCHR and EQUIP each build their own body. */
 void unit_panel_numbers_thread(void);
 
 /* cell layouts */

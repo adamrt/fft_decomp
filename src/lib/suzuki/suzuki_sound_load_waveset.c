@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Uploads a loaded WAVESET.WD to SPU RAM and appends a heap copy of its

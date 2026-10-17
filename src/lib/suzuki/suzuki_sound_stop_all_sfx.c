@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Silences the eight channels of the SFX MUS record and queues their voices

@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Selects the output sound type and reapplies the volumes, reverb and CD mix

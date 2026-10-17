@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Pauses a music handle: clears the playing bit, sets the pause bit that
  * suzuki_smd_resume_music clears again, and queues the voices of its active

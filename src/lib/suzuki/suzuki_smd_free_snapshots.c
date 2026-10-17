@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Detaches the snapshot chain of a MUS record and frees every block in it.
  *

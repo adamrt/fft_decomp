@@ -16,13 +16,13 @@
 #include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Unpacks the configured options into the options-menu value table, then runs one Options screen:

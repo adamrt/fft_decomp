@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Enable the root-counter-2 event that drives the driver tick, unless
  * SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT says it already is. Nothing in the tree calls it. */

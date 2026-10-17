@@ -10,6 +10,7 @@
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/state.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/world_map.h"
 #include "fft/zodiac.h"
@@ -17,7 +18,6 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Let the GPU finish, blank the display and shut down the sound driver and the SPU. */

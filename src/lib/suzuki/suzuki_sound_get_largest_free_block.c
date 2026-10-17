@@ -1,5 +1,5 @@
 /* SCUS_942.21 0x800143ac..0x8001442b. */
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Reports the aligned gap, including space required for the next allocation record. */
 s32 suzuki_sound_get_largest_free_block(void) {

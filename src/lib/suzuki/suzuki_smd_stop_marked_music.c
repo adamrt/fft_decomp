@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Stops every queued record that plays SMD music (not the SFX record),
  * queueing the voices of its active channels for key-off. */

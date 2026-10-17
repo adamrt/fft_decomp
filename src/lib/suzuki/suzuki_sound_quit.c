@@ -1,6 +1,6 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Shuts the driver down: closes its events, releases every voice with

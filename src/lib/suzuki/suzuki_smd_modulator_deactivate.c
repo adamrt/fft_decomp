@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Deactivates a modulator. */
 void suzuki_smd_modulator_deactivate(suzuki_modulator_t* modulator) {

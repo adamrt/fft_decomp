@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xD3 "Shift Pitch Offset (16-bit)": adds a signed 16-bit delta in

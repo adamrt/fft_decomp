@@ -12,13 +12,13 @@
 #include "fft/render.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/target.h"
 #include "fft/weather.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Write-only: zeroed with the map render state and never read anywhere on

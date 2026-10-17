@@ -19,10 +19,10 @@
 #include "fft/menu_input.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
+#include "fft/suzuki.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Option-menu value picker thread for one game option.

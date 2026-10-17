@@ -46,14 +46,20 @@ preserving every original byte.
   program's own code as feature files of a few to a few dozen functions,
   named after what they hold. A file's leading comment briefly describes
   what the file holds.
-- `src/event/`: the event library (script interpreter, threads, dialog and
-  text, windows, sound queue) compiled into BATTLE and WORLD. `src/event/menu/`:
-  the menu library compiled into WORLD and the EVENT overlays, as the small
-  objects the overlays link in two different orders. `src/event/<overlay>/`:
-  each overlay's own code. `src/effect/`: the 26 routines the effect
-  overlays link. `src/lib/psyq/<library>/` and `src/lib/suzuki/`:
-  reconstructed linked libraries; keep established public names, signatures
-  and original module bindings.
+- `src/lib/`: shared game components, grouped by concept. `event/` holds
+  the script interpreter, dialog and related BATTLE/WORLD services; `menu/`
+  holds shared in-game menus, windows, text and drawing support, retaining
+  the small objects that programs link in different orders. `thread/`,
+  `sound/` and `file/` hold their standalone shared units; related functions
+  inside mixed original units stay with those units. `memcard.c` holds the
+  shared memory-card unit. `suzuki/` is the linked sound engine; keep its
+  established names, signatures and original module bindings.
+- `src/event/<overlay>/`: each EVENT overlay's own code. `src/effect/`:
+  the native callbacks linked into EFFECT overlays; the resident effect
+  runtime stays in BATTLE. `src/platform/psyq/<library>/`: reconstructed
+  PS1 SDK and runtime libraries, preserving their public interfaces and
+  module bindings. Analysis tools exclude platform code and target-declared
+  library ranges, not the shared game components under `src/lib/`.
 - Sharing is recorded in `target/*.yaml` (which modules compile a file),
   never by folder. A shared file keeps its per-program differences under
   program macros; a standalone function with a separate body per program
@@ -67,8 +73,9 @@ preserving every original byte.
   each declaring one part of the game for every program that uses it. A
   large concept splits by sub-topic (`unit.h` and `unit_runtime.h`,
   `effect.h` and `effect_geometry.h`); add folders only when size calls for
-  them. `include/psx/`: library and PS1 hardware interfaces. Library code
-  never includes game headers.
+  them. Suzuki's interface belongs here too, separate from game sound and
+  music services. `include/psx/`: PsyQ and PS1 hardware interfaces. Platform
+  library code never includes game headers.
 - `tools/`: Go build/check tooling. `tools/target.go` owns the original disc size
   and hash. `QUIRKS.md` records unusual behavior worth preserving.
 
@@ -113,6 +120,11 @@ instead of including the record's header.
   WORLD's `save_build_image`); different roles take different names, and
   every name is unique across programs except same-role bodies, which never
   share a link.
+- Name execution roles consistently: `_init` sets up state or resources,
+  `_run` completes a loop or operation, `_update` advances one step,
+  `_start` launches scheduled work, and `_dispatch` selects a behavior.
+  Being an overlay export alone does not make a function an initializer or
+  require an `_entrypoint` name.
 - A bytecode machine's handler for one opcode is named
   `<machine>_opcode_<nn>_<instruction>` with the opcode in two hex digits:
   `script_opcode_28_walk_to` (event scripts), `sound_novel_opcode_*`,

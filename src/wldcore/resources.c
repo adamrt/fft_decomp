@@ -17,6 +17,7 @@
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/text.h"
 #include "fft/unit_party.h"
@@ -28,7 +29,6 @@
 #include "psx/libgs.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static s32 g_world_map_input_repeat_initial_delay = 0;

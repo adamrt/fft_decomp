@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* ORs a mask of suzuki_channel_flag_e bits into the flags of every channel

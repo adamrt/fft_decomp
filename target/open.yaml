@@ -12,9 +12,9 @@ links: [world]
 
 units:
   - {name: card_checks, source: src/open/card_checks.c}
-  - {name: file_wait, source: src/wldcore/file_wait.c}
+  - {name: file_wait, source: src/lib/file/file_wait.c}
   - {name: init, source: src/open/init.c}
-  - {name: memcard, source: src/event/menu/memcard.c}
+  - {name: memcard, source: src/lib/memcard.c}
   - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: title_controllers, source: src/open/title_controllers.c}
   - {name: title_script, source: src/open/title_script.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}]}
@@ -157,24 +157,24 @@ functions:
   - {addr: 0x8007062c, size: 188, name: memcard_poll_operation_result, hash: f6ce5450918332a3, unit: card_checks}
   - {addr: 0x800706e8, size: 148, name: memcard_poll_info_until_stable, hash: 7d39d6dc3dffb0b6, unit: card_checks}
   - {addr: 0x8007077c, size: 124, name: title_check_card_slots, hash: b46039f85ab0f00d, unit: card_checks}
-  - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/lib/psyq/libpress/DecDCTReset.c}
-  - {addr: 0x800734c4, size: 140, name: DecDCTGetEnv, hash: f9ac0843b00c34ec, source: src/lib/psyq/libpress/DecDCTGetEnv.c}
-  - {addr: 0x80073550, size: 156, name: DecDCTPutEnv, hash: 110217b2c66870d3, source: src/lib/psyq/libpress/DecDCTPutEnv.c}
-  - {addr: 0x800735ec, size: 12, name: DecDCTBufSize, hash: 6e858a1dcb7a2a22, source: src/lib/psyq/libpress/DecDCTBufSize.c}
-  - {addr: 0x800735f8, size: 124, name: DecDCTin, hash: b0929bd48e0b1873, source: src/lib/psyq/libpress/DecDCTin.c}
-  - {addr: 0x80073674, size: 32, name: DecDCTout, hash: 69752e650a86d37c, source: src/lib/psyq/libpress/DecDCTout.c}
-  - {addr: 0x80073694, size: 32, name: DecDCTinSync, hash: c6aebfdbc7b4a7ae, source: src/lib/psyq/libpress/DecDCTinSync.c}
-  - {addr: 0x800736b4, size: 32, name: DecDCToutSync, hash: 48c13c5409710abe, source: src/lib/psyq/libpress/DecDCToutSync.c}
-  - {addr: 0x800736d4, size: 36, name: DecDCTinCallback, hash: 9c14c3b6cc46cf39, source: src/lib/psyq/libpress/DecDCTinCallback.c}
-  - {addr: 0x800736f8, size: 36, name: DecDCToutCallback, hash: 37c93bc1746717c5, source: src/lib/psyq/libpress/DecDCToutCallback.c}
-  - {addr: 0x8007371c, size: 252, name: MDEC_reset, hash: d1743d9f91162388, source: src/lib/psyq/libpress/MDEC_reset.c}
-  - {addr: 0x80073818, size: 148, name: MDEC_in, hash: 01a4c9128818c744, source: src/lib/psyq/libpress/MDEC_in.c}
-  - {addr: 0x800738ac, size: 144, name: MDEC_out, hash: d931fbf5397a3806, source: src/lib/psyq/libpress/MDEC_out.c}
-  - {addr: 0x8007393c, size: 152, name: MDEC_in_sync, hash: 855ba4b219e3e4ae, source: src/lib/psyq/libpress/MDEC_in_sync.c}
-  - {addr: 0x800739d4, size: 152, name: MDEC_out_sync, hash: 3ba7c2e453a1ded1, source: src/lib/psyq/libpress/MDEC_out_sync.c}
-  - {addr: 0x80073a6c, size: 304, name: timeout, hash: 7a6be33875e51769, source: src/lib/psyq/libpress/timeout.c}
-  - {addr: 0x80073ba0, size: 48, name: DecDCTvlcSize, hash: 2663bd671b465d7e, source: src/lib/psyq/libpress/DecDCTvlcSize.c}
-  - {addr: 0x80073bd0, size: 832, name: DecDCTvlc, hash: 7a6cb5dc58da8ec9, source: src/lib/psyq/libpress/DecDCTvlc.c}
+  - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/platform/psyq/libpress/DecDCTReset.c}
+  - {addr: 0x800734c4, size: 140, name: DecDCTGetEnv, hash: f9ac0843b00c34ec, source: src/platform/psyq/libpress/DecDCTGetEnv.c}
+  - {addr: 0x80073550, size: 156, name: DecDCTPutEnv, hash: 110217b2c66870d3, source: src/platform/psyq/libpress/DecDCTPutEnv.c}
+  - {addr: 0x800735ec, size: 12, name: DecDCTBufSize, hash: 6e858a1dcb7a2a22, source: src/platform/psyq/libpress/DecDCTBufSize.c}
+  - {addr: 0x800735f8, size: 124, name: DecDCTin, hash: b0929bd48e0b1873, source: src/platform/psyq/libpress/DecDCTin.c}
+  - {addr: 0x80073674, size: 32, name: DecDCTout, hash: 69752e650a86d37c, source: src/platform/psyq/libpress/DecDCTout.c}
+  - {addr: 0x80073694, size: 32, name: DecDCTinSync, hash: c6aebfdbc7b4a7ae, source: src/platform/psyq/libpress/DecDCTinSync.c}
+  - {addr: 0x800736b4, size: 32, name: DecDCToutSync, hash: 48c13c5409710abe, source: src/platform/psyq/libpress/DecDCToutSync.c}
+  - {addr: 0x800736d4, size: 36, name: DecDCTinCallback, hash: 9c14c3b6cc46cf39, source: src/platform/psyq/libpress/DecDCTinCallback.c}
+  - {addr: 0x800736f8, size: 36, name: DecDCToutCallback, hash: 37c93bc1746717c5, source: src/platform/psyq/libpress/DecDCToutCallback.c}
+  - {addr: 0x8007371c, size: 252, name: MDEC_reset, hash: d1743d9f91162388, source: src/platform/psyq/libpress/MDEC_reset.c}
+  - {addr: 0x80073818, size: 148, name: MDEC_in, hash: 01a4c9128818c744, source: src/platform/psyq/libpress/MDEC_in.c}
+  - {addr: 0x800738ac, size: 144, name: MDEC_out, hash: d931fbf5397a3806, source: src/platform/psyq/libpress/MDEC_out.c}
+  - {addr: 0x8007393c, size: 152, name: MDEC_in_sync, hash: 855ba4b219e3e4ae, source: src/platform/psyq/libpress/MDEC_in_sync.c}
+  - {addr: 0x800739d4, size: 152, name: MDEC_out_sync, hash: 3ba7c2e453a1ded1, source: src/platform/psyq/libpress/MDEC_out_sync.c}
+  - {addr: 0x80073a6c, size: 304, name: timeout, hash: 7a6be33875e51769, source: src/platform/psyq/libpress/timeout.c}
+  - {addr: 0x80073ba0, size: 48, name: DecDCTvlcSize, hash: 2663bd671b465d7e, source: src/platform/psyq/libpress/DecDCTvlcSize.c}
+  - {addr: 0x80073bd0, size: 832, name: DecDCTvlc, hash: 7a6cb5dc58da8ec9, source: src/platform/psyq/libpress/DecDCTvlc.c}
 
 data:
   - {addr: 0x80067044, name: g_psyq_press_reset_bad_option_format}

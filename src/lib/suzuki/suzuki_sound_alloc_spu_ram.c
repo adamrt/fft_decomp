@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 
 /* "SpuMalloc with extra steps": the sound code always reserves SPU RAM
  * through this wrapper, which now only forwards to the library. */

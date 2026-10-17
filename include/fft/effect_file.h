@@ -4,8 +4,8 @@
 /* Ability effect files (EFFECT/E###.BIN): ids, section layouts and the pointers bound to the loaded sections. */
 
 #include "fft/gfx.h"
+#include "fft/suzuki.h"
 #include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* file ids */

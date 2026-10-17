@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Handler of the 37 unassigned SMD opcode slots: consumes nothing. */

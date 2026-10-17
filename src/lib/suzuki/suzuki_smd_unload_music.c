@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Stops a music handle if it is playing, unlinks it from the queue and,
  * when it was queued, frees its snapshots and the record itself. */

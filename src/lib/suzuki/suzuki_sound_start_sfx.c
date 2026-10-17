@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Starts SFX sound_id (a SUZUKI_SOUND_ID) on g_suzuki_sound_sfx_channel_count

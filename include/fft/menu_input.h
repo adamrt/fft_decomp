@@ -17,7 +17,8 @@ typedef enum menu_input_mode {
 
 extern u16 g_menu_input_mode; /* menu_input_mode_e */
 
-/* Modal/message ownership suppresses menu input and dims palettes. */
+/* Modal/message ownership suppresses menu input and dims palettes. BATTLE and WORLD each define this mode;
+ * EVENT overlays use the resident BATTLE binding. */
 extern s32 g_menu_input_lock_mode;
 
 /* Nonzero while a modal selection, panel or companion overlay owns the input; the companion overlay openers
@@ -76,6 +77,8 @@ extern s32 g_menu_blocked_buttons;
 
 void menu_input_update_controller(void);
 void menu_input_clear_state(void);
+
+/* EQUIP, JOBSTTS and WORLD each build a separate body. */
 void menu_input_update_with_message_state(void);
 
 /* repeat timing */

@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* The sound output setting as SUZUKI_SOUND_TYPE_MONO, _STEREO or _WIDE, read from
  * the driver flags. The opposite-phase wide mode is reported as _WIDE. */

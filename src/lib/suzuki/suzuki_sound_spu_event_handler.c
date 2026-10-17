@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Handler of the HwSPU event suzuki_sound_init opens. It does nothing and
  * returns 0. */

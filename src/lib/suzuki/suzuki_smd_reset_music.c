@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Restarts a music handle from the top of its sequence: re-reads the SMD

@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Unlinks a loaded waveset and frees its SPU RAM and heap header; does
  * nothing if it is not in g_suzuki_sound_waveset_list. */

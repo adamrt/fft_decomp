@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Stops a music record: clears its playing bit and queues the voices of its
  * channels for key-off. The record stays queued and loaded. */

@@ -11,6 +11,7 @@
 #include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -21,7 +22,6 @@
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void sound_novel_branch_if_dialog_option(s32 branch_if_equal);

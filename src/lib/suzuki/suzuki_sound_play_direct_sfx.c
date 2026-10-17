@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Plays a sound on SFX channels 6-7 at the default volume (0x60) and center

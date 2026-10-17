@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Per-tick channel pass run before the SMD interpreter. Steps the MUS tempo

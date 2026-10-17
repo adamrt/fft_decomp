@@ -1,4 +1,4 @@
-/* Menu close, battle/require help runners and the first running menu thread. */
+/* Menu close, battle and after-battle help runners and the first running menu thread. */
 
 #include "fft/ability.h"
 #include "fft/battle_map.h"

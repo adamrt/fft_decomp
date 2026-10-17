@@ -12,7 +12,7 @@ links: [world]
 units:
   - {name: bar, source: src/wldcore/bar.c}
   - {name: brave_story, source: src/wldcore/brave_story.c}
-  - {name: file_wait, source: src/wldcore/file_wait.c}
+  - {name: file_wait, source: src/lib/file/file_wait.c}
   - {name: list_levels, source: src/wldcore/list_levels.c}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c}
   - {name: map_routes, source: src/wldcore/map_routes.c}

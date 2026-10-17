@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 
 /* Disable the root-counter-2 tick event if SUZUKI_SOUND_DRIVER_ROOT_COUNTER_EVENT says it is
  * enabled, and clear that flag. Nothing in the tree calls it. */

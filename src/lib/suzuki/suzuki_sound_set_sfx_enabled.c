@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Sets or clears SUZUKI_SOUND_DRIVER_SFX_ENABLED; disabling also silences

@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Stores a 16-bit sound-driver value that the driver only ever writes. Nothing

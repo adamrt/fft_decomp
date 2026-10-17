@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 
 /* Pushes a MUS record onto the head of the active music list with the
  * root-counter event disabled. */

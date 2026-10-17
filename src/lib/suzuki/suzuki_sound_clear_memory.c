@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Zeroes size bytes: 16-byte blocks, then 32-bit values, then bytes. */
 void suzuki_sound_clear_memory(void* destination, s32 size) {

@@ -12,13 +12,13 @@
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static s32 script_get_rand16(void);

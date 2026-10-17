@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Removes stopped SFX channels from the SFX music's channel mask and their

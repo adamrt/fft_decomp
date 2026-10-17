@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xB5 "Increase Noise": adds its byte to the MUS

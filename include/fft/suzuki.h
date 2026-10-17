@@ -1,11 +1,12 @@
-#ifndef PSX_SUZUKI_H
-#define PSX_SUZUKI_H
+#ifndef SUZUKI_H
+#define SUZUKI_H
+
+/* Reconstructed Suzuki sound driver, linked into the resident executable. */
 
 #include "psx/libcd.h"
 #include "psx/libspu.h"
 #include "psx/types.h"
 
-/* Reconstructed Suzuki sound driver, linked into the resident executable. */
 typedef struct suzuki_smd_header suzuki_smd_header_t;
 
 /* sequence */

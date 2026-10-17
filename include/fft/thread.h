@@ -52,7 +52,8 @@ enum {
     THREAD_LAST_WORD_OFFSET = 0x3ffc,
 };
 
-/* Fixed backing array and the separate pointer used to access its slots. */
+/* BATTLE and WORLD each define the backing array, slot pointer and current id.
+ * EVENT overlays use the resident BATTLE scheduler. */
 extern thread_t g_thread_contexts[];
 extern thread_t* g_threads;
 extern s32 g_thread_current_id;
@@ -184,6 +185,9 @@ void thread_reset_scheduler(void);
 s32 thread_find_running_by_task(s32 task_id);
 s32 thread_resolve_id(s32 requested_thread_id);
 s32 thread_resolve_id_after_current(s32 requested_thread_id);
+
+/* The menu callers' running-flag accessor. WORLD links this separately from thread_is_running. */
+s32 menu_thread_is_running(s32 thread_id);
 
 /* REQUIRE's own call through to thread_exit_current. */
 void thread_exit_current_wrapper(void);

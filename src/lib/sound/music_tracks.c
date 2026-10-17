@@ -1,4 +1,4 @@
-/* The music wait stub and music track playback. */
+/* Waiting for music loads and playing scenario tracks. */
 
 #include "fft/music.h"
 #include "fft/thread.h"

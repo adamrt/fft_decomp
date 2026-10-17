@@ -22,6 +22,7 @@
 #include "fft/music.h"
 #include "fft/result.h"
 #include "fft/sprite.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
@@ -29,7 +30,6 @@
 #include "psx/gte_inline.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void effect_script_free_state_record(s16 record_index);

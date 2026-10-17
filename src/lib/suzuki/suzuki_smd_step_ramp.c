@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Linear ramp: value slides by step until count expires, then snaps to
  * target. */

@@ -19,7 +19,7 @@ extern s32 g_bits_reader_2_index;
 void bits_init_primary_reader(const u8* data);
 void bits_init_secondary_reader(const u8* data);
 
-/* The menu library's copy of bits_init_secondary_reader, which only EQUIP and WORLD define. */
+/* CARD and JOBSTTS share this body; EQUIP and WORLD each define bits_init_secondary_reader. */
 void menu_bits_init_secondary_reader(const u8* data);
 
 /* The first read or write after a reset starts at bit 7 of the current byte. */

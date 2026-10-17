@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 u32 suzuki_smd_is_music_playing(suzuki_music_t* music) {

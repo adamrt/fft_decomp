@@ -20,6 +20,7 @@
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
 #include "fft/status.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
@@ -28,7 +29,6 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* World position of a tile's center (x, layer, y in the SVECTOR): x and z are tile * 28 + 14 and y

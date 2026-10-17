@@ -1,5 +1,5 @@
+#include "fft/suzuki.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 
 /* Rebuilds the master, CD and reverb-depth volume pairs for the current
  * sound type and marks them for the next SpuSetCommonAttr and

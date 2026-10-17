@@ -9,12 +9,12 @@
 #include "fft/movie.h"
 #include "fft/music.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/title.h"
 #include "fft/window.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void system_init_runtime_state(void);

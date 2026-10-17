@@ -1,6 +1,6 @@
+#include "fft/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/libspu.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* Starts the Suzuki driver once (status bit 15 marks it initialized).

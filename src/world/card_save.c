@@ -28,6 +28,7 @@
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
+#include "fft/suzuki.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
@@ -38,7 +39,6 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* The memory card title's start in Shift-JIS: full-width "FFT FILE" and three spaces, the first

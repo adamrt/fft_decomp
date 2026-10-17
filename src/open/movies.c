@@ -14,6 +14,7 @@
 #include "fft/party.h"
 #include "fft/screen.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/title.h"
 #include "fft/unit.h"
@@ -23,7 +24,6 @@
 #include "psx/libgpu.h"
 #include "psx/libpress.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 static void input_update_with_soft_reset(void);

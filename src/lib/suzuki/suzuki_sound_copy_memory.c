@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Copies size bytes: 16-byte blocks, then 32-bit values, then bytes. */
 void suzuki_sound_copy_memory(void* destination, const void* source, s32 size) {

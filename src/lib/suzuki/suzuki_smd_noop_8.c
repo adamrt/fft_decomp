@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Empty routine between the SMD reader and the opcode handlers; no opcode
  * table slot or call references it. */

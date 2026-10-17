@@ -1,5 +1,5 @@
 /* SCUS_942.21 0x80014278..0x80014357. */
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* First fit in the driver heap: find the first gap after a block (before the next block or the
  * heap end) that holds a 16-byte header plus size rounded up to 16, link a new block there and

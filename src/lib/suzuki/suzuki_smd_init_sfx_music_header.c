@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Sets the SFX music record's fixed header (SUZUKI_MUSIC_STATUS_SFX, id
  * 0x7fff, eight channels, _unknown_01a 0x7f), then the common header

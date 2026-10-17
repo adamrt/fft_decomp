@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xED "Pan LFO Waveform": as Pan LFO (0xEC), but the low nibble

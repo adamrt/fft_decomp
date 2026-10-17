@@ -7,12 +7,12 @@
 #include "fft/music.h"
 #include "fft/save.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/system.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 file_extent_t g_music_scenario_smd_files[45] = { { 85249, 10240 }, { 85254, 10240 }, { 85259, 6144 }, { 85262, 6144 },

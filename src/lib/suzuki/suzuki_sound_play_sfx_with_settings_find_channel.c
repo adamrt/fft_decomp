@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* suzuki_sound_play_sfx with explicit volume and balance bytes; SMD

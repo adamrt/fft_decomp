@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Allocates a MUS record for an SMD sequence, reads its header and channels,
  * and queues it. The returned record is the caller's music handle. */

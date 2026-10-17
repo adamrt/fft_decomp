@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Drop a music record's saved snapshot without restoring it: clear SUZUKI_MUSIC_STATUS_SNAPSHOT

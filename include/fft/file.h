@@ -4,8 +4,8 @@
 /* Disc files and the CD loader: the files read at fixed sectors, MAIN's resident asynchronous loader, the loading
  * helpers the overlays, OPEN and WLDCORE build around it, and OPEN's title background requests. */
 
+#include "fft/suzuki.h"
 #include "psx/libcd.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /* disc files */

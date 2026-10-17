@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Sets the music's balance shift, immediately when time is 0, otherwise as a ramp

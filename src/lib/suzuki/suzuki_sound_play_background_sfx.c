@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Plays a sound on SFX channels 4-5, like suzuki_sound_play_direct_sfx on 6-7. */

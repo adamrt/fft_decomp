@@ -1,4 +1,4 @@
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 
 /* Sums every 32-bit value from the size field to the end of the resource. */
 s32 suzuki_sound_sum_resource_words(suzuki_resource_prefix_t* resource) {

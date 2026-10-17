@@ -13,11 +13,11 @@
 #include "fft/option.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/suzuki.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
-#include "psx/suzuki.h"
 #include "psx/types.h"
 
 /*

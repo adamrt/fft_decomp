@@ -5,7 +5,7 @@
  * handlers. */
 
 #include "fft/menu_stack.h"
-#include "psx/suzuki.h"
+#include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* readings */
