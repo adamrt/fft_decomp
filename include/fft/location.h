@@ -119,7 +119,7 @@ extern u8 g_location_choice_hidden_offsets[];
 
 s32 location_build_menu_entries(s32 location_id, s32* out);
 void location_push_menu_level(s32 menu);
-void location_suspend_menu_level(menu_stack_slot_set_t* slots);
+void location_suspend_menu_level(menu_stack_record_t* level);
 void location_resume_menu_level(menu_stack_record_t* level);
 
 /* travel */

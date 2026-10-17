@@ -26,13 +26,21 @@ extern s32 g_tutorial_battle_event_ids[];
 extern u32 g_tutorial_progress_masks[];
 
 void tutorial_open_topic_list(void);
-void tutorial_block_topic_list_buttons(menu_stack_panel_level_t* level);
-void tutorial_block_formation_list_buttons(menu_stack_panel_level_t* level);
-void tutorial_block_battle_list_buttons(menu_stack_panel_level_t* unused_level);
+void tutorial_handle_topic_list_input(menu_stack_record_t* level);
+void tutorial_restore_topic_list_buttons(menu_stack_record_t* level);
+void tutorial_wait_topic_then_pop(menu_stack_record_t* level);
+void tutorial_block_topic_list_buttons(menu_stack_record_t* unused_level);
+void tutorial_block_formation_list_buttons(menu_stack_record_t* unused_level);
+void tutorial_handle_formation_list_input(menu_stack_record_t* level);
+void tutorial_restore_formation_list_buttons(menu_stack_record_t* level);
+void tutorial_block_battle_list_buttons(menu_stack_record_t* level);
+void tutorial_handle_battle_list_input(menu_stack_record_t* level);
+void tutorial_restore_battle_list_buttons(menu_stack_record_t* level);
 void tutorial_resume_menu_level(menu_stack_record_t* level);
+void tutorial_handle_menu_input(menu_stack_record_t* level);
 
-/* Publish handler of the tutorial categories level; a second copy of the bar menu body. */
-void tutorial_suspend_menu_level(menu_stack_window_level_t* level);
+/* Suspend handler of the tutorial categories level; a second copy of the bar menu body. */
+void tutorial_suspend_menu_level(menu_stack_record_t* level);
 
 /* tutorial player */
 /* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by

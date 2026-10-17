@@ -21,9 +21,10 @@ extern u8 g_bar_row_help_text_ids[];
 
 void bar_build_rows(menu_stack_window_level_t* level);
 void bar_resume_level(menu_stack_record_t* level);
+void bar_handle_input(menu_stack_record_t* level);
 
-/* Publish handler of the bar menu level: dim its windows (palettes 10, 6, 2) and show the pressed cursor. */
-void bar_suspend_level(menu_stack_window_level_t* level);
+/* Suspend handler of the bar menu level: dim its windows (palettes 10, 6, 2) and show the pressed cursor. */
+void bar_suspend_level(menu_stack_record_t* level);
 
 /* rumors */
 /* The RUMOR_DETAIL level pushed by rumor_push_detail_level. Its close handler
@@ -38,8 +39,10 @@ typedef struct rumor_detail_level {
 
 extern s32* g_rumor_location_masks;
 
-/* Withhold every button (g_menu_blocked_buttons = -1) before a list level opens a message over itself. The list
- * steps hand each its level, which it does not read: the parameter is only what the target passes in $a0. */
-void rumor_block_list_buttons(menu_stack_panel_level_t* level);
+/* Withhold every button before a list level opens a message over itself. */
+void rumor_block_list_buttons(menu_stack_record_t* unused_level);
+void rumor_handle_list_input(menu_stack_record_t* level);
+void rumor_restore_list_prompt(menu_stack_record_t* level);
+void rumor_wait_detail_then_pop(menu_stack_record_t* level);
 
 #endif

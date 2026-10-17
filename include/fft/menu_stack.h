@@ -84,9 +84,6 @@ extern s32 g_menu_stack_ot_offset;
 /* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
  * (list levels withhold every button, window levels dim their windows); resume undoes that when the level above
  * closes. */
-extern void (*g_menu_stack_idle_handlers[])(menu_stack_record_t*);
-extern void (*g_menu_stack_suspend_handlers[])(menu_stack_record_t*);
-extern void (*g_menu_stack_resume_handlers[])(menu_stack_record_t*);
 void menu_stack_reset(void);
 void menu_stack_dispatch_idle(void);
 void menu_stack_dispatch_suspend(void);

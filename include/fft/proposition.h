@@ -142,12 +142,16 @@ void* proposition_get_data(proposition_data_record_e record);
 
 /* lists */
 void proposition_open_available_list(void);
-void proposition_block_available_list_buttons(menu_stack_panel_level_t* level);
+void proposition_handle_available_list_input(menu_stack_record_t* level);
+void proposition_restore_available_list_prompt(menu_stack_record_t* level);
+void proposition_block_available_list_buttons(menu_stack_record_t* unused_level);
 void proposition_open_active_list(void);
 void proposition_handle_active_list_input(menu_stack_record_t* level);
-void proposition_block_active_list_buttons(menu_stack_panel_level_t* level);
+void proposition_restore_active_list_prompt(menu_stack_record_t* level);
+void proposition_block_active_list_buttons(menu_stack_record_t* unused_level);
 void proposition_open_returned_list(void);
 void proposition_handle_returned_list_input(menu_stack_record_t* level);
+void proposition_restore_returned_list_prompt(menu_stack_record_t* level);
 void proposition_block_returned_list_buttons(menu_stack_record_t* unused_level);
 
 /* detail and recall */
@@ -177,7 +181,7 @@ extern u32 g_proposition_detail_image_buffer[];
 
 void proposition_push_detail_level(s32 value);
 void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition, s32 coordinate_mode);
-void proposition_suspend_detail_level(window_render_pair_t* pair);
+void proposition_suspend_detail_level(menu_stack_record_t* level);
 void proposition_resume_detail_level(menu_stack_record_t* level);
 void proposition_handle_recall_input(menu_stack_record_t* level);
 
@@ -241,10 +245,15 @@ extern s16 g_proposition_candidate_levels[];
 extern s32 g_proposition_dispatch_days;
 
 void proposition_push_send_unit_level(void);
-void proposition_suspend_send_unit_level(proposition_send_unit_level_t* level);
-void proposition_resume_send_unit_level(proposition_send_unit_level_t* level);
+void proposition_handle_accept_input(menu_stack_record_t* level);
+void proposition_handle_accept_confirm_input(menu_stack_record_t* level);
+void proposition_step_send_unit_level(menu_stack_record_t* level);
+void proposition_suspend_send_unit_level(menu_stack_record_t* level);
+void proposition_resume_send_unit_level(menu_stack_record_t* level);
 void proposition_push_days_level(void);
+void proposition_step_days_level(menu_stack_record_t* level);
 void proposition_push_dispatch_confirm_level(void);
+void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level);
 
 /* report */
 /* Outcome of a proposition (proposition_report_t.result), from the
@@ -336,7 +345,9 @@ typedef char proposition_report_size_must_be_88[sizeof(proposition_report_t) == 
 
 extern proposition_report_t g_proposition_report;
 
-void proposition_handle_report_confirm_input(proposition_report_confirm_level_t* level);
+void proposition_handle_report_confirm_input(menu_stack_record_t* level);
+void proposition_step_report_level(menu_stack_record_t* level);
+void proposition_step_result_level(menu_stack_record_t* level);
 void proposition_determine_success(void);
 s32 proposition_find_preferred_job_unit(void);
 s32 proposition_step_participant_message(proposition_report_level_t* state, s32 message, s32 speaker);
@@ -372,5 +383,6 @@ extern u8 g_proposition_unexplored_land_milestones[];
 
 s32 proposition_get_milestone_rank(void);
 void proposition_push_discovery_level(void);
+void proposition_step_discovery_level(menu_stack_record_t* level);
 
 #endif

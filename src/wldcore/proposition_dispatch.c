@@ -160,11 +160,11 @@ void proposition_push_dispatch_confirm_level(void) {
  * records it in the next g_proposition_active slot with its
  * participants (each marked busy), and closes the panel. Either way the
  * propositions list reopens. */
-void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* level) {
+void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level) {
     s32 row;
     s32 i;
 
-    if (g_window_gs_image_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->choice_panel.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -183,16 +183,16 @@ void proposition_handle_dispatch_confirm_input(proposition_confirm_level_t* leve
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0 || world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        row = level->row ^ 1;
-        level->row = row;
-        g_window_records[level->cursor_window].position.y
-            = g_window_gs_image_records[level->render_index].base.y - -(row * 0x10 + 0xE);
+        row = level->choice_panel.row ^ 1;
+        level->choice_panel.row = row;
+        g_window_records[level->choice_panel.cursor_window].position.y
+            = g_window_gs_image_records[level->choice_panel.render_index].base.y - -(row * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        if (level->row != 1) {
+        if (level->choice_panel.row != 1) {
             script_set_variable(
                 EVENT_SCRIPT_VAR_WAR_FUNDS, script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) - g_proposition_gil_amount);
             g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
@@ -768,35 +768,36 @@ static void proposition_step_send_unit_status(proposition_send_unit_level_t* lev
 
 /* Undo proposition_suspend_send_unit_level when a sub-level closes:
  * default palettes on the send-unit windows and a neutral preview portrait. */
-void proposition_resume_send_unit_level(proposition_send_unit_level_t* level) {
+void proposition_resume_send_unit_level(menu_stack_record_t* level) {
     CVECTOR* color;
 
-    g_window_records[level->list_frame.window_index].palette
-        = g_window_gs_image_records[level->list_frame.render_index].palette
-        = g_window_gs_image_records[level->list_render].palette = g_window_records[level->cursor_window].palette = 0;
+    g_window_records[level->send_unit.list_frame.window_index].palette
+        = g_window_gs_image_records[level->send_unit.list_frame.render_index].palette
+        = g_window_gs_image_records[level->send_unit.list_render].palette
+        = g_window_records[level->send_unit.cursor_window].palette = 0;
     /* Each channel store reloads the level's render index. */
-    color = &g_window_gs_image_records[level->preview_render].color;
+    color = &g_window_gs_image_records[level->send_unit.preview_render].color;
     color->r = 0x80;
-    color = &g_window_gs_image_records[level->preview_render].color;
+    color = &g_window_gs_image_records[level->send_unit.preview_render].color;
     color->g = 0x80;
-    color = &g_window_gs_image_records[level->preview_render].color;
+    color = &g_window_gs_image_records[level->send_unit.preview_render].color;
     color->b = 0x80;
-    g_window_records[level->left_arrow].palette = g_window_records[level->right_arrow].palette = 0;
+    g_window_records[level->send_unit.left_arrow].palette = g_window_records[level->send_unit.right_arrow].palette = 0;
 }
 
 /* Gray out the send-unit windows (palettes 6, 10 and 2) and tint the preview
  * portrait blue (0x40, 0x50, 0x70) while a sub-level runs over them; undone by
  * proposition_resume_send_unit_level. */
-void proposition_suspend_send_unit_level(proposition_send_unit_level_t* level) {
+void proposition_suspend_send_unit_level(menu_stack_record_t* level) {
     s32 pad[4];
 
-    g_window_records[level->list_frame.window_index].palette = 6;
-    g_window_gs_image_records[level->list_frame.render_index].palette = 2;
-    g_window_gs_image_records[level->list_render].palette = 2;
-    g_window_records[level->cursor_window].palette = 10;
-    g_window_gs_image_records[level->preview_render].color.r = 0x40;
-    g_window_gs_image_records[level->preview_render].color.g = 0x50;
-    g_window_gs_image_records[level->preview_render].color.b = 0x70;
+    g_window_records[level->send_unit.list_frame.window_index].palette = 6;
+    g_window_gs_image_records[level->send_unit.list_frame.render_index].palette = 2;
+    g_window_gs_image_records[level->send_unit.list_render].palette = 2;
+    g_window_records[level->send_unit.cursor_window].palette = 10;
+    g_window_gs_image_records[level->send_unit.preview_render].color.r = 0x40;
+    g_window_gs_image_records[level->send_unit.preview_render].color.g = 0x50;
+    g_window_gs_image_records[level->send_unit.preview_render].color.b = 0x70;
 }
 
 /* Top-level step of the proposition send-unit menu level, dispatching on the
@@ -819,13 +820,13 @@ void proposition_suspend_send_unit_level(proposition_send_unit_level_t* level) {
  * 16-byte array reproduces that frame. The removal and addition paths each
  * end in their own redraw calls, which jump2 cross-jumps from the count
  * store onward. */
-void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
+void proposition_step_send_unit_level(menu_stack_record_t* level) {
     s32 buttons;
     s32 value;
     s32 i;
     s32 unused[4];
 
-    if (level->mode == PROPOSITION_SEND_UNIT_MODE_CANCEL) {
+    if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_CANCEL) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
             g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
@@ -835,34 +836,35 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
         return;
     }
 
-    if (level->mode == PROPOSITION_SEND_UNIT_MODE_ACCEPT) {
+    if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_ACCEPT) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
             g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
             proposition_push_detail_level(g_proposition_selected_row.id - 1);
-            proposition_suspend_detail_level(&level->list_frame);
+            proposition_suspend_detail_level(level);
             proposition_push_days_level();
         }
         return;
     }
 
-    if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN || level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS
-        || level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE) {
-        proposition_step_send_unit_status(level);
+    if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN
+        || level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS
+        || level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE) {
+        proposition_step_send_unit_status(&level->send_unit);
         return;
     }
 
-    if (level->mode == PROPOSITION_SEND_UNIT_MODE_REPLACE) {
-        proposition_step_send_unit_slots(level);
+    if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_REPLACE) {
+        proposition_step_send_unit_slots(&level->send_unit);
         return;
     }
 
-    if (!(g_window_gs_image_records[level->list_frame.render_index].flags & DISPLAY_OBJECT_POP_IN)) {
+    if (!(g_window_gs_image_records[level->send_unit.list_frame.render_index].flags & DISPLAY_OBJECT_POP_IN)) {
         value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
-        if (value != level->shown_preview) {
-            level->shown_preview = value;
-            proposition_show_unit_portrait(level, value, level->preview_render);
+        if (value != level->send_unit.shown_preview) {
+            level->send_unit.shown_preview = value;
+            proposition_show_unit_portrait(&level->send_unit, value, level->send_unit.preview_render);
         }
     }
 
@@ -879,7 +881,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
             return;
         }
         sound_play_effect(SOUND_SFX_CONFIRM);
-        level->mode = PROPOSITION_SEND_UNIT_MODE_ACCEPT;
+        level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_ACCEPT;
         g_hud_value_mode = HUD_VALUE_COST_AND_FUNDS;
         g_hud_value_secondary = g_proposition_gil_amount;
         /* Shared tail: a duplicated copy is scheduled differently and
@@ -889,7 +891,7 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
 
     if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        level->mode = PROPOSITION_SEND_UNIT_MODE_CANCEL;
+        level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_CANCEL;
     suspend:
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_window_record_count -= 7;
@@ -902,14 +904,14 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
     if (buttons & PSX_PAD_SQUARE) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-        g_window_records[level->list_frame.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->list_frame.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->frame_window_a].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->frame_window_b].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->preview_render].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->list_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->send_unit.list_frame.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[level->send_unit.list_frame.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->send_unit.frame_window_a].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->send_unit.frame_window_b].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[level->send_unit.preview_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[level->send_unit.list_render].flags |= DISPLAY_OBJECT_HIDDEN;
         g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-        level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN;
+        level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN;
         return;
     }
 
@@ -925,35 +927,37 @@ void proposition_step_send_unit_level(proposition_send_unit_level_t* level) {
                 g_proposition_send_units[value - 1] = g_proposition_send_units[value];
             }
             g_proposition_send_unit_count--;
-            proposition_draw_send_unit_names(level);
-            proposition_load_send_unit_candidates(level);
+            proposition_draw_send_unit_names(&level->send_unit);
+            proposition_load_send_unit_candidates(&level->send_unit);
             screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
             return;
         }
     }
 
     if (g_proposition_send_unit_count == 3) {
-        g_window_records[level->frame_window_a].palette = g_window_records[level->frame_window_b].palette = 0xA;
-        g_window_gs_image_records[level->portrait_frame].flags |= DISPLAY_OBJECT_POP_IN;
-        g_window_gs_image_records[level->portrait_frame].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->send_unit.frame_window_a].palette
+            = g_window_records[level->send_unit.frame_window_b].palette = 0xA;
+        g_window_gs_image_records[level->send_unit.portrait_frame].flags |= DISPLAY_OBJECT_POP_IN;
+        g_window_gs_image_records[level->send_unit.portrait_frame].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_menu_blocked_buttons = -1;
-        g_window_records[level->portrait_window].flags ^= DISPLAY_OBJECT_HIDDEN;
-        level->shown_unit = -1;
-        level->mode = PROPOSITION_SEND_UNIT_MODE_REPLACE;
-        level->slot = 0;
-        g_window_records[level->cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->cursor_window].position.x
-            = g_window_gs_image_records[level->list_frame.render_index].base.x + 6;
-        g_window_records[level->cursor_window].position.y
-            = g_window_gs_image_records[level->list_frame.render_index].base.y + level->slot * 16 + 0xC;
+        g_window_records[level->send_unit.portrait_window].flags ^= DISPLAY_OBJECT_HIDDEN;
+        level->send_unit.shown_unit = -1;
+        level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_REPLACE;
+        level->send_unit.slot = 0;
+        g_window_records[level->send_unit.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->send_unit.cursor_window].position.x
+            = g_window_gs_image_records[level->send_unit.list_frame.render_index].base.x + 6;
+        g_window_records[level->send_unit.cursor_window].position.y
+            = g_window_gs_image_records[level->send_unit.list_frame.render_index].base.y + level->send_unit.slot * 16
+            + 0xC;
         return;
     }
 
     g_proposition_send_units[g_proposition_send_unit_count] = value;
     g_proposition_send_unit_count++;
 
-    proposition_draw_send_unit_names(level);
-    proposition_load_send_unit_candidates(level);
+    proposition_draw_send_unit_names(&level->send_unit);
+    proposition_load_send_unit_candidates(&level->send_unit);
     screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
 }
 
@@ -1034,7 +1038,7 @@ void proposition_open_returned_list(void) {
 
 /* Resume handler of the returned propositions list: block Circle, Cross and Select for the
  * levels underneath and show TEXT_ID_JOBS_RETURNED again. */
-void proposition_restore_returned_list_prompt(void) {
+void proposition_restore_returned_list_prompt(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_RETURNED, 0);
 }
@@ -1114,10 +1118,10 @@ void proposition_handle_returned_list_input(menu_stack_record_t* level) {
  * 0xE))` and `base_y - (0 - (0xE + selection * 0x10))` are byte-identical
  * spellings; `base_y - (-0xE - selection * 0x10)` is not (fold collapses it
  * back to a plus tree and the tie returns). */
-void proposition_handle_report_confirm_input(proposition_report_confirm_level_t* level) {
+void proposition_handle_report_confirm_input(menu_stack_record_t* level) {
     s32 selection;
 
-    if (g_window_gs_image_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->proposition_report_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
@@ -1131,16 +1135,17 @@ void proposition_handle_report_confirm_input(proposition_report_confirm_level_t*
         return;
     }
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0 || world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        selection = level->selection ^ 1;
-        level->selection = selection;
-        g_window_records[level->cursor_window].position.y
-            = g_window_gs_image_records[level->render_index].base.y - -(selection * 0x10 + 0xE);
+        selection = level->proposition_report_confirm.selection ^ 1;
+        level->proposition_report_confirm.selection = selection;
+        g_window_records[level->proposition_report_confirm.cursor_window].position.y
+            = g_window_gs_image_records[level->proposition_report_confirm.render_index].base.y
+            - -(selection * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        if (level->selection != 0) {
+        if (level->proposition_report_confirm.selection != 0) {
             /* Shared tail: a duplicated release path is cross-jumped into
              * this arm instead of the cancel arm the target keeps. */
             goto block_tail;
@@ -1150,7 +1155,7 @@ void proposition_handle_report_confirm_input(proposition_report_confirm_level_t*
             g_window_render_record_count -= 1;
             g_window_render_object_count -= 3;
             g_menu_stack_depth -= 2;
-            proposition_push_report_level(level->argument);
+            proposition_push_report_level(level->proposition_report_confirm.argument);
         }
     }
 }
@@ -1204,7 +1209,7 @@ static void proposition_push_report_level(s32 argument) {
  * share the wait arm of 18: -1 then continues at 0 and 99 goes straight to
  * the final step.
  */
-void proposition_step_report_level(proposition_report_level_t* level) {
+void proposition_step_report_level(menu_stack_record_t* level) {
     GsIMAGE image;
     RECT bounds;
     point32_t clut;
@@ -1216,15 +1221,15 @@ void proposition_step_report_level(proposition_report_level_t* level) {
     s32* picture;
 
     /* The message states below run only after the message block has finished loading. */
-    load_phase = level->load_phase;
+    load_phase = level->proposition_report.load_phase;
     switch (load_phase) {
     case PROPOSITION_REPORT_LOAD_MESSAGES:
         if (g_audio_queue.count != 0) {
             return;
         }
-        level->load_phase = PROPOSITION_REPORT_LOAD_PICTURE;
-        message_block_load_if_changed(
-            g_proposition_active[level->proposition].proposition_id + MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST);
+        level->proposition_report.load_phase = PROPOSITION_REPORT_LOAD_PICTURE;
+        message_block_load_if_changed(g_proposition_active[level->proposition_report.proposition].proposition_id
+            + MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST);
         return;
 
     case PROPOSITION_REPORT_LOAD_PICTURE:
@@ -1238,38 +1243,39 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         if (*kind == PROPOSITION_REWARD_UNEXPLORED_LAND) {
             picture_load_set(g_unexplored_land_picture_sets[g_proposition_report.reward_index]);
         }
-        level->load_phase = PROPOSITION_REPORT_LOAD_DONE;
+        level->proposition_report.load_phase = PROPOSITION_REPORT_LOAD_DONE;
         break;
     }
 
-    switch (level->state) {
+    switch (level->proposition_report.state) {
     case 0:
-        if (proposition_step_message(level, 0x36) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x36) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 1:
-        if (proposition_step_message(level, 0x3C) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x3C) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 2:
-        if (proposition_step_participant_message(level, g_proposition_report.result * 6, -1) == 0) {
+        if (proposition_step_participant_message(&level->proposition_report, g_proposition_report.result * 6, -1)
+            == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 3:
-        if (proposition_step_message(level, 0x42) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x42) == 0) {
             return;
         }
         if (g_proposition_report.result == PROPOSITION_RESULT_BAD_FAILURE) {
-            level->state = 9;
+            level->proposition_report.state = 9;
             return;
         }
 
@@ -1279,84 +1285,84 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         if (count != 0) {
             g_proposition_report.preferred_unit = count - 1;
             g_text_substitution_values[1] = party_get_roster_unit(count - 1)->job_id + TEXT_ID_JOB_NAME_BASE;
-            level->state = 4;
+            level->proposition_report.state = 4;
             return;
         }
-        level->state = 7;
+        level->proposition_report.state = 7;
         return;
 
     case 4:
-        if (proposition_step_message(level, 0x48) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x48) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 5:
-        if (proposition_step_message(level, 0x4E) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x4E) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 6:
         if (proposition_step_participant_message(
-                level, g_proposition_report.result * 6 + 0x12, g_proposition_report.preferred_unit)
+                &level->proposition_report, g_proposition_report.result * 6 + 0x12, g_proposition_report.preferred_unit)
             == 0) {
             return;
         }
-        level->state = 0xB;
+        level->proposition_report.state = 0xB;
         return;
 
     case 7:
-        if (proposition_step_message(level, 0x54) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x54) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 8:
-        if (proposition_step_message(level, 0x5A) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x5A) == 0) {
             return;
         }
-        level->state = 0xB;
+        level->proposition_report.state = 0xB;
         return;
 
     case 9:
-        if (proposition_step_message(level, 0x60) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x60) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 10:
-        if (proposition_step_message(level, 0x66) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x66) == 0) {
             return;
         }
-        level->state = 0x10;
+        level->proposition_report.state = 0x10;
         return;
 
     case 11:
-        if (proposition_step_message(level, 0x6C) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x6C) == 0) {
             return;
         }
         if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
-            level->state = 0xC;
+            level->proposition_report.state = 0xC;
             return;
         }
-        level->state = 0xF;
+        level->proposition_report.state = 0xF;
         return;
 
     case 12:
-        if (proposition_step_message(level, 0x72) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x72) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 13:
         /* Name a random participant as the finder; rand() is 15 bits, so the >> 15 gives a slot below count. */
-        if (level->phase == 0) {
+        if (level->proposition_report.phase == 0) {
             participant
                 = g_proposition_active[g_proposition_report.proposition_index].participant_indices
                       [(rand() * g_proposition_active[g_proposition_report.proposition_index].participant_count) >> 15];
@@ -1366,10 +1372,10 @@ void proposition_step_report_level(proposition_report_level_t* level) {
                 g_text_substitution_values[1] = participant + TEXT_ID_UNIT_NAME_BASE;
             }
         }
-        if (proposition_step_message(level, 0x78) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x78) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 14:
@@ -1379,11 +1385,11 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         }
 
         /* On the message's first call, add the picture and its caption window. */
-        if (level->phase == 0) {
+        if (level->proposition_report.phase == 0) {
             picture = &g_proposition_report.reward_type;
             if (*picture == PROPOSITION_REWARD_TREASURE) {
                 record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-                level->render_index = record;
+                level->proposition_report.render_index = record;
                 GsGetTimInfo(g_picture_buffer + 1, &image);
                 LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
                 LoadClut(image.clut, image.cx, image.cy);
@@ -1419,7 +1425,7 @@ void proposition_step_report_level(proposition_report_level_t* level) {
             }
             if (*picture == PROPOSITION_REWARD_UNEXPLORED_LAND) {
                 record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-                level->render_index = record;
+                level->proposition_report.render_index = record;
                 GsGetTimInfo(g_picture_buffer + 1, &image);
                 LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
                 LoadClut(image.clut, image.cx, image.cy);
@@ -1454,31 +1460,32 @@ void proposition_step_report_level(proposition_report_level_t* level) {
                 sound_play_effect(SOUND_SFX_COMPLETE);
             }
         }
-        if (proposition_step_message(level, 0x7E) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x7E) == 0) {
             return;
         }
-        level->state = 0x10;
+        level->proposition_report.state = 0x10;
         return;
 
     case 15:
-        if (proposition_step_message(level, 0x84) == 0) {
+        if (proposition_step_message(&level->proposition_report, 0x84) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 16:
-        if (proposition_step_message(level, g_proposition_report.result * 6 + 0x8A) == 0) {
+        if (proposition_step_message(&level->proposition_report, g_proposition_report.result * 6 + 0x8A) == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     case 17:
-        if (proposition_step_participant_message(level, g_proposition_report.result * 6 + 0x24, -1) == 0) {
+        if (proposition_step_participant_message(&level->proposition_report, g_proposition_report.result * 6 + 0x24, -1)
+            == 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
 
         /* Drop the picture and caption records that state 14 appended. */
         if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
@@ -1498,13 +1505,13 @@ void proposition_step_report_level(proposition_report_level_t* level) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
             return;
         }
-        level->state++;
+        level->proposition_report.state++;
         return;
 
     default:
         g_menu_stack_ot_offset = 1;
         g_menu_stack_depth--;
-        proposition_push_result_level(level->proposition);
+        proposition_push_result_level(level->proposition_report.proposition);
         return;
     }
 }
@@ -1653,8 +1660,8 @@ static void proposition_push_result_level(s32 proposition) {
  *
  * The proposition, result and share 32-bit fields are read as g_proposition_report
  * members: the target keeps that block's address in a register, which GCC
- * only does for an aggregate view, not for the scalar g_proposition_report.proposition_index names. */
-void proposition_step_result_level(proposition_result_level_t* level) {
+ * only does for this aggregate view, not for separately bound scalar globals. */
+void proposition_step_result_level(menu_stack_record_t* level) {
     calendar_date_t date;
     s32 proposition_flags;
     s32 war_funds;
@@ -1662,11 +1669,11 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     s32 month;
     s32 i;
 
-    if (g_window_gs_image_records[level->render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->proposition_result.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    if (level->phase == PROPOSITION_RESULT_PHASE_DONE) {
+    if (level->proposition_result.phase == PROPOSITION_RESULT_PHASE_DONE) {
         if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE) {
             g_menu_stack_depth = g_menu_stack_depth - 1;
             if (proposition_get_milestone_rank() != 0) {
@@ -1681,20 +1688,20 @@ void proposition_step_result_level(proposition_result_level_t* level) {
         return;
     }
 
-    if (level->phase == PROPOSITION_RESULT_PHASE_CLOSING) {
+    if (level->proposition_result.phase == PROPOSITION_RESULT_PHASE_CLOSING) {
         if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE
             && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
             if (proposition_get_milestone_rank() == 0 && g_proposition_report.recalled == 0) {
                 audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(2, MUSIC_BAR));
             }
-            level->phase = PROPOSITION_RESULT_PHASE_DONE;
+            level->proposition_result.phase = PROPOSITION_RESULT_PHASE_DONE;
         }
         return;
     }
 
-    if (level->delay != 0) {
-        level->delay = level->delay - 1;
-        if (level->delay == 0) {
+    if (level->proposition_result.delay != 0) {
+        level->proposition_result.delay = level->proposition_result.delay - 1;
+        if (level->proposition_result.delay == 0) {
             suzuki_sound_play_2_sfx(SOUND_SFX_PROPOSITION_SUCCESS_A, SOUND_SFX_PROPOSITION_SUCCESS_B);
         }
     }
@@ -1706,14 +1713,15 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     g_window_render_record_count = g_window_render_record_count - 1;
     g_window_render_object_count = g_window_render_object_count - 1;
     /* 0xFFFD clears PROPOSITION_VARIABLE_IN_PROGRESS from the 16-bit value. */
-    proposition_flags = script_get_variable(g_proposition_active[level->proposition].proposition_id
+    proposition_flags = script_get_variable(g_proposition_active[level->proposition_result.proposition].proposition_id
                             + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
         & 0xFFFD;
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         proposition_flags |= PROPOSITION_VARIABLE_COMPLETED;
     }
 
-    script_set_variable(g_proposition_active[level->proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
+    script_set_variable(
+        g_proposition_active[level->proposition_result.proposition].proposition_id + EVENT_SCRIPT_VAR_PROPOSITION_FIRST,
         proposition_flags);
     war_funds = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_proposition_gil_amount;
     if (war_funds > EVENT_WAR_FUNDS_MAX) {
@@ -1727,8 +1735,8 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     if (g_proposition_report.result == PROPOSITION_RESULT_SUCCESS) {
         date.day = day;
         date.month = month;
-        calendar_write_date(
-            g_proposition_last_attempt_date_bits, g_proposition_active[level->proposition].proposition_id, &date);
+        calendar_write_date(g_proposition_last_attempt_date_bits,
+            g_proposition_active[level->proposition_result.proposition].proposition_id, &date);
     }
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
@@ -1763,7 +1771,7 @@ void proposition_step_result_level(proposition_result_level_t* level) {
             = PROPOSITION_STATE_BAD_FAILURE | PROPOSITION_BAD_FAILURE_COOLDOWN_DAYS;
     }
 
-    for (i = level->proposition; i < g_proposition_count - 1; i++) {
+    for (i = level->proposition_result.proposition; i < g_proposition_count - 1; i++) {
         g_proposition_active[i] = g_proposition_active[i + 1];
     }
 
@@ -1773,7 +1781,7 @@ void proposition_step_result_level(proposition_result_level_t* level) {
     }
 
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-    level->phase = PROPOSITION_RESULT_PHASE_CLOSING;
+    level->proposition_result.phase = PROPOSITION_RESULT_PHASE_CLOSING;
 }
 
 /* Resolve finished proposition `proposition_index` before its report: unpack its data

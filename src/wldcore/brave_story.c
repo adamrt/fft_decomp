@@ -66,14 +66,14 @@ extern CVECTOR g_world_map_fade_color;
  * to 0x80 (FLASH), then whites out by 8 a frame (WHITE_OUT); at full white the
  * world loop ends and the picture at VRAM (0x200, 0x100) is moved to
  * (0x100, 0). */
-void event_transition_step_level(event_transition_level_t* level) {
+void event_transition_step_level(menu_stack_record_t* level) {
     RECT rect;
     s32 step;
     s32 shade;
     u8 red_sum;
     s32 angle;
 
-    if (level->mode == EVENT_TRANSITION_MODE_FADE) {
+    if (level->event_transition.mode == EVENT_TRANSITION_MODE_FADE) {
         if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
             g_system_flags = g_system_flags ^ SYSTEM_FLAG_RUNNING;
         }
@@ -81,7 +81,7 @@ void event_transition_step_level(event_transition_level_t* level) {
     }
 
     /* Capture the screen into VRAM at (0x100, 0) and hide the map and root windows. */
-    if (level->frame == 1) {
+    if (level->event_transition.frame == 1) {
         rect.w = 0xFF;
         rect.x = 0;
         rect.y = 0;
@@ -94,7 +94,7 @@ void event_transition_step_level(event_transition_level_t* level) {
 
     /* White-out: brighten the overlay by 8 a frame; at full white, toggle the running flag
      * and move the image at VRAM (0x200, 0x100) back to (0x100, 0). */
-    if (level->fade_phase == EVENT_TRANSITION_FADE_WHITE_OUT) {
+    if (level->event_transition.fade_phase == EVENT_TRANSITION_FADE_WHITE_OUT) {
         red_sum = g_world_map_fade_color.r + 8;
         g_world_map_fade_color.r = red_sum;
         g_world_map_fade_color.g = g_world_map_fade_color.g + 8;
@@ -115,7 +115,7 @@ void event_transition_step_level(event_transition_level_t* level) {
     }
 
     /* Flash: brighten by 0x10 a frame to 0x80, then cut to black and start the white-out. */
-    if (level->fade_phase == EVENT_TRANSITION_FADE_FLASH) {
+    if (level->event_transition.fade_phase == EVENT_TRANSITION_FADE_FLASH) {
         g_world_map_fade_color.r = g_world_map_fade_color.r + 0x10;
         g_world_map_fade_color.g = g_world_map_fade_color.g + 0x10;
         g_world_map_fade_color.b = g_world_map_fade_color.b + 0x10;
@@ -123,30 +123,30 @@ void event_transition_step_level(event_transition_level_t* level) {
             g_world_map_fade_color.r = 0;
             g_world_map_fade_color.g = 0;
             g_world_map_fade_color.b = 0;
-            level->fade_phase = EVENT_TRANSITION_FADE_WHITE_OUT;
+            level->event_transition.fade_phase = EVENT_TRANSITION_FADE_WHITE_OUT;
         }
     }
 
     /* The sprite drifts a pixel a frame on each axis; spin, scale and shade step every third frame. */
-    switch (level->phase) {
+    switch (level->event_transition.phase) {
     case EVENT_TRANSITION_PHASE_SPIN_IN:
-        if (level->drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
+        if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
             g_event_transition_sprite.x = g_event_transition_sprite.x + 1;
         } else {
             g_event_transition_sprite.x = g_event_transition_sprite.x - 1;
         }
-        if (level->drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
+        if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
             g_event_transition_sprite.y = g_event_transition_sprite.y + 1;
         } else {
             g_event_transition_sprite.y = g_event_transition_sprite.y - 1;
         }
 
-        if (level->frame == ((level->frame / 3) * 3)) {
-            step = level->anim_step + 2;
-            level->anim_step = step;
+        if (level->event_transition.frame == ((level->event_transition.frame / 3) * 3)) {
+            step = level->event_transition.anim_step + 2;
+            level->event_transition.anim_step = step;
             g_event_transition_sprite.scalex = 0x1100 - (step << 7);
-            g_event_transition_sprite.scaley = 0x1100 - (level->anim_step << 7);
-            if (level->spin_direction != 0) {
+            g_event_transition_sprite.scaley = 0x1100 - (level->event_transition.anim_step << 7);
+            if (level->event_transition.spin_direction != 0) {
                 angle = g_event_transition_sprite.rotate + 0x2000;
             } else {
                 angle = g_event_transition_sprite.rotate - 0x2000;
@@ -154,85 +154,85 @@ void event_transition_step_level(event_transition_level_t* level) {
             g_event_transition_sprite.rotate = angle;
 
             /* Stored as a byte, -0x80 - 4 * step darkens the sprite from 0x80. */
-            shade = -0x80 - (level->anim_step * 4);
+            shade = -0x80 - (level->event_transition.anim_step * 4);
             g_event_transition_sprite.b = shade;
             g_event_transition_sprite.g = shade;
             g_event_transition_sprite.r = shade;
 
-            if (level->mode == EVENT_TRANSITION_MODE_SPIN) {
-                if (level->anim_step == 4) {
+            if (level->event_transition.mode == EVENT_TRANSITION_MODE_SPIN) {
+                if (level->event_transition.anim_step == 4) {
                     sound_play_effect(SOUND_SFX_EVENT_TRANSITION_MODE_0);
                 }
 
                 /* Spin back out at full size, textured from the 16-bit page holding the capture. */
-                if (level->anim_step >= 0x20) {
-                    level->phase = EVENT_TRANSITION_PHASE_SPIN_OUT;
+                if (level->event_transition.anim_step >= 0x20) {
+                    level->event_transition.phase = EVENT_TRANSITION_PHASE_SPIN_OUT;
                     g_event_transition_sprite.attribute = 0x52000000;
                     g_event_transition_sprite.tpage = GetTPage(2, 1, 0x100, 0);
                     g_event_transition_sprite.scaley = ONE;
                     g_event_transition_sprite.scalex = ONE;
                 }
             } else {
-                if (level->anim_step == 4) {
+                if (level->event_transition.anim_step == 4) {
                     sound_play_effect(SOUND_SFX_EVENT_TRANSITION_MODE_1);
                 }
-                if (level->anim_step >= 0x20) {
-                    level->phase = EVENT_TRANSITION_PHASE_DONE;
+                if (level->event_transition.anim_step >= 0x20) {
+                    level->event_transition.phase = EVENT_TRANSITION_PHASE_DONE;
                 }
-                if (level->anim_step == 0x18) {
+                if (level->event_transition.anim_step == 0x18) {
                     g_world_map_fade_color.r = 0;
                     g_world_map_fade_color.g = 0;
                     g_world_map_fade_color.b = 0;
                     g_world_map_fade.flags[0] |= WORLD_MAP_FADE_BOX_VISIBLE;
-                    level->fade_phase = EVENT_TRANSITION_FADE_WHITE_OUT;
+                    level->event_transition.fade_phase = EVENT_TRANSITION_FADE_WHITE_OUT;
                 }
             }
         }
         break;
 
     case EVENT_TRANSITION_PHASE_SPIN_OUT:
-        if (level->drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
+        if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
             g_event_transition_sprite.x = g_event_transition_sprite.x - 1;
         } else {
             g_event_transition_sprite.x = g_event_transition_sprite.x + 1;
         }
-        if (level->drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
+        if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
             g_event_transition_sprite.y = g_event_transition_sprite.y - 1;
         } else {
             g_event_transition_sprite.y = g_event_transition_sprite.y + 1;
         }
 
-        if (level->frame == ((level->frame / 3) * 3)) {
-            step = level->anim_step + 4;
-            level->anim_step = step;
+        if (level->event_transition.frame == ((level->event_transition.frame / 3) * 3)) {
+            step = level->event_transition.anim_step + 4;
+            level->event_transition.anim_step = step;
             g_event_transition_sprite.scalex = 0x1100 - ((0x40 - step) << 7);
-            g_event_transition_sprite.scaley = 0x1100 - ((0x40 - level->anim_step) << 7);
-            g_event_transition_sprite.b = (level->anim_step - 0x20) * 4;
-            if (level->spin_direction != 0) {
+            g_event_transition_sprite.scaley = 0x1100 - ((0x40 - level->event_transition.anim_step) << 7);
+            g_event_transition_sprite.b = (level->event_transition.anim_step - 0x20) * 4;
+            if (level->event_transition.spin_direction != 0) {
                 angle = g_event_transition_sprite.rotate - 0x2000;
             } else {
                 angle = g_event_transition_sprite.rotate + 0x2000;
             }
             g_event_transition_sprite.rotate = angle;
 
-            if (level->anim_step >= 0x38) {
+            if (level->event_transition.anim_step >= 0x38) {
                 g_world_map_fade_color.r = 0;
                 g_world_map_fade_color.g = 0;
                 g_world_map_fade_color.b = 0;
                 g_world_map_fade.flags[0] |= WORLD_MAP_FADE_BOX_VISIBLE;
-                level->fade_phase = EVENT_TRANSITION_FADE_FLASH;
+                level->event_transition.fade_phase = EVENT_TRANSITION_FADE_FLASH;
             }
-            if (level->anim_step >= 0x50) {
+            if (level->event_transition.anim_step >= 0x50) {
                 g_event_transition_sprite.r = 0;
                 g_event_transition_sprite.g = 0;
                 g_event_transition_sprite.b = 0;
-                level->phase = EVENT_TRANSITION_PHASE_DONE;
+                level->event_transition.phase = EVENT_TRANSITION_PHASE_DONE;
             }
         }
         break;
     }
 
-    level->frame = level->frame + 1;
+    level->event_transition.frame = level->event_transition.frame + 1;
 }
 
 /* Pushes the Brave Story menu (MENU_STACK_LEVEL_BRAVE_STORY).
@@ -514,21 +514,22 @@ void brave_story_resume_level(menu_stack_record_t* level) {
  * it and the play-time display (SYSTEM_FLAG_HIDE_CONTEXT_VALUE).
  *
  * The chained store keeps one main-window index for both cleared fields. */
-void brave_story_suspend_level(menu_stack_window_level_t* state) {
-    g_window_records[state->main_window].palette = 10;
-    g_window_records[state->side_window].palette = 6;
-    g_window_gs_image_records[state->frame_render].palette = 2;
-    g_window_records[state->upper_window].palette = 5;
-    g_window_records[state->lower_window].palette = 5;
-    g_window_records[state->main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
-    g_window_records[state->main_window].frame_index = g_window_records[state->main_window].anim_counter = 0;
-    if (state->mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP) {
-        g_window_gs_image_records[state->content_render].palette = 2;
+void brave_story_suspend_level(menu_stack_record_t* state) {
+    g_window_records[state->list_window.main_window].palette = 10;
+    g_window_records[state->list_window.side_window].palette = 6;
+    g_window_gs_image_records[state->list_window.frame_render].palette = 2;
+    g_window_records[state->list_window.upper_window].palette = 5;
+    g_window_records[state->list_window.lower_window].palette = 5;
+    g_window_records[state->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+    g_window_records[state->list_window.main_window].frame_index
+        = g_window_records[state->list_window.main_window].anim_counter = 0;
+    if (state->list_window.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP) {
+        g_window_gs_image_records[state->list_window.content_render].palette = 2;
         return;
     }
-    if (state->entries[state->selected_entry] != BRAVE_STORY_ROW_PERSONS) {
+    if (state->list_window.entries[state->list_window.selected_entry] != BRAVE_STORY_ROW_PERSONS) {
         g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
-        g_window_gs_image_records[state->content_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[state->list_window.content_render].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }
 
@@ -552,7 +553,7 @@ void brave_story_suspend_level(menu_stack_window_level_t* state) {
  * accessed as an array element (a scalar store does not alias the level field). The wrap-to-bottom step is written `y
  * -= n * -16` to keep y as the first addu operand.
  */
-void brave_story_handle_input(menu_stack_window_level_t* level) {
+void brave_story_handle_input(menu_stack_record_t* level) {
     u32 flags;
     u32 buttons;
 
@@ -560,18 +561,18 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
     g_hud_value_secondary = g_save_play_time_minutes;
     g_hud_value_tertiary = g_save_play_time_seconds;
 
-    if (g_window_gs_image_records[level->content_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->list_window.content_render].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
     flags = g_system_flags;
     if (flags & SYSTEM_FLAG_INPUT_BLOCKED) {
-        if (level->mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP && !(flags & SYSTEM_FLAG_FADING)) {
-            level->mode = MENU_STACK_WINDOW_MODE_LEAVE_WAIT;
+        if (level->list_window.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP && !(flags & SYSTEM_FLAG_FADING)) {
+            level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_WAIT;
             g_system_flags = flags | SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
             world_map_clear_vram_and_scratch(1);
         }
-        if (level->mode != MENU_STACK_WINDOW_MODE_LEAVE_WAIT) {
+        if (level->list_window.mode != MENU_STACK_WINDOW_MODE_LEAVE_WAIT) {
             return;
         }
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
@@ -599,11 +600,11 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
         return;
     }
 
-    if (level->mode == MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE) {
+    if (level->list_window.mode == MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE) {
         if (!(g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS))) {
             return;
         }
-        level->mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
+        level->list_window.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
@@ -625,7 +626,7 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
     if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_GOODBYE, 0);
-        level->mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
+        level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
 
         /* Release the level's four windows and two render records: six queue entries. */
         g_window_record_count -= 4;
@@ -635,31 +636,32 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        level->mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
+        level->list_window.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
         brave_story_suspend_level(level);
-        menu_stack_push_message_level(g_brave_story_help_text_ids[level->entries[level->selected_entry]] | 0x1000, 1);
+        menu_stack_push_message_level(
+            g_brave_story_help_text_ids[level->list_window.entries[level->list_window.selected_entry]] | 0x1000, 1);
         return;
     }
 
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        g_brave_story_saved_cursor[0] = level->selected_entry;
-        switch (level->entries[level->selected_entry]) {
+        g_brave_story_saved_cursor[0] = level->list_window.selected_entry;
+        switch (level->list_window.entries[level->list_window.selected_entry]) {
         case BRAVE_STORY_ROW_FACTS:
             message_block_load_if_changed(MESSAGE_BLOCK_FACTS);
             brave_story_suspend_level(level);
-            g_window_records[level->main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_fact_list();
             return;
         case BRAVE_STORY_ROW_EVENTS:
             message_block_load_if_changed(MESSAGE_BLOCK_STORY_EVENTS);
             brave_story_suspend_level(level);
-            g_window_records[level->main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_event_list();
             return;
         case BRAVE_STORY_ROW_PERSONS:
             brave_story_suspend_level(level);
-            g_window_records[level->main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_person_list();
             return;
         case BRAVE_STORY_ROW_PROPOSITIONS:
@@ -670,19 +672,19 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
         case BRAVE_STORY_ROW_UNEXPLORED_LANDS:
             message_block_load_if_changed(MESSAGE_BLOCK_UNEXPLORED_LANDS);
             brave_story_suspend_level(level);
-            g_window_records[level->main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_unexplored_land_list();
             return;
         case BRAVE_STORY_ROW_TREASURES:
             message_block_load_if_changed(MESSAGE_BLOCK_TREASURES);
             brave_story_suspend_level(level);
-            g_window_records[level->main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
             brave_story_open_treasure_list();
             return;
         case BRAVE_STORY_ROW_LEAVE:
             /* The same goodbye and release as the cancel path above. */
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_GOODBYE, 0);
-            level->mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
+            level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
             g_window_record_count -= 4;
             g_window_render_record_count -= 2;
             g_window_render_object_count -= 6;
@@ -692,23 +694,23 @@ void brave_story_handle_input(menu_stack_window_level_t* level) {
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
-        if (level->selected_entry != 0) {
-            g_window_records[level->main_window].position.y -= 0x10;
-            level->selected_entry = level->selected_entry - 1;
+        if (level->list_window.selected_entry != 0) {
+            g_window_records[level->list_window.main_window].position.y -= 0x10;
+            level->list_window.selected_entry = level->list_window.selected_entry - 1;
         } else {
-            g_window_records[level->main_window].position.y -= (level->entry_count - 1) * -16;
-            level->selected_entry = level->entry_count - 1;
+            g_window_records[level->list_window.main_window].position.y -= (level->list_window.entry_count - 1) * -16;
+            level->list_window.selected_entry = level->list_window.entry_count - 1;
         }
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        if (level->selected_entry < level->entry_count - 1) {
-            g_window_records[level->main_window].position.y += 0x10;
-            level->selected_entry = level->selected_entry + 1;
+        if (level->list_window.selected_entry < level->list_window.entry_count - 1) {
+            g_window_records[level->list_window.main_window].position.y += 0x10;
+            level->list_window.selected_entry = level->list_window.selected_entry + 1;
         } else {
-            g_window_records[level->main_window].position.y -= (level->entry_count - 1) * 16;
-            level->selected_entry = 0;
+            g_window_records[level->list_window.main_window].position.y -= (level->list_window.entry_count - 1) * 16;
+            level->list_window.selected_entry = 0;
         }
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
@@ -765,27 +767,27 @@ static void brave_story_open_event_list(void) {
 
 /* Resume handler of the story events list: block Circle, Cross and Select for the
  * levels underneath and show TEXT_ID_BRAVE_STORY_INTRO again. */
-void brave_story_restore_event_list_prompt(void) {
+void brave_story_restore_event_list_prompt(menu_stack_record_t* unused_level) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void brave_story_block_event_list_buttons(menu_stack_panel_level_t* level) {
+void brave_story_block_event_list_buttons(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Input step of the story events list; twin of brave_story_handle_person_list_input with help
  * message 0x1055. Cancel and confirm wait for file loading to finish; a
  * confirmed entry's value is passed to brave_story_push_event_level. */
-void brave_story_handle_event_list_input(menu_stack_panel_level_t* level) {
+void brave_story_handle_event_list_input(menu_stack_record_t* level) {
     if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
-        if (level->result != 0) {
+        if (level->panel.result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_EVENTS);
             brave_story_push_event_level(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
@@ -799,16 +801,16 @@ void brave_story_handle_event_list_input(menu_stack_panel_level_t* level) {
     }
     if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        level->result = 0;
+        level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         brave_story_block_event_list_buttons(level);
         menu_stack_push_message_level(0x1055, 1);
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
         && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        level->result = 1;
+        level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
@@ -990,14 +992,14 @@ static void brave_story_open_person_list(void) {
 
 /* Resume handler of the persons list: block Circle, Cross and Select for the
  * levels underneath and show TEXT_ID_BRAVE_STORY_INTRO again. */
-void brave_story_restore_person_list_prompt(void) {
+void brave_story_restore_person_list_prompt(menu_stack_record_t* unused_level) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void brave_story_block_person_list_buttons(menu_stack_panel_level_t* level) {
+void brave_story_block_person_list_buttons(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
@@ -1005,13 +1007,13 @@ void brave_story_block_person_list_buttons(menu_stack_panel_level_t* level) {
  * brave_story_handle_unexplored_land_list_input with help message 0x1056.
  * Canceling pops the injured/casualties record back in; a confirmed entry's
  * value is passed to brave_story_push_person_level. */
-void brave_story_handle_person_list_input(menu_stack_panel_level_t* level) {
+void brave_story_handle_person_list_input(menu_stack_record_t* level) {
     if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
-        if (level->result != 0) {
+        if (level->panel.result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_PERSONS);
             brave_story_push_person_level(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
@@ -1025,15 +1027,15 @@ void brave_story_handle_person_list_input(menu_stack_panel_level_t* level) {
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        level->result = 0;
+        level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         brave_story_block_person_list_buttons(level);
         menu_stack_push_message_level(0x1056, 1);
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0) {
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        level->result = 1;
+        level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
@@ -1098,7 +1100,7 @@ static void brave_story_push_person_level(s32 value) {
  *
  * The unused RECT reserves the 8 bytes that put the descriptor
  * at sp+0x18, and page_x keeps the target's (column + 0x280) association. */
-void brave_story_step_person_level(brave_story_detail_level_t* level) {
+void brave_story_step_person_level(menu_stack_record_t* level) {
     RECT rect;
     POLY_FT4 portrait;
     s32 entry;
@@ -1111,20 +1113,20 @@ void brave_story_step_person_level(brave_story_detail_level_t* level) {
     CVECTOR* color;
     point32_t* base;
 
-    switch (level->phase) {
+    switch (level->detail.phase) {
     case BRAVE_STORY_DETAIL_PHASE_LOAD:
-        level->timer = level->timer + 1;
+        level->detail.timer = level->detail.timer + 1;
         if (g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
-            level->phase = level->phase + 1;
+            level->detail.phase = level->detail.phase + 1;
         }
         return;
     case BRAVE_STORY_DETAIL_PHASE_BUILD:
-        if (level->timer < 8 || screen_is_dialog_waiting() == 0) {
-            level->timer = level->timer + 1;
+        if (level->detail.timer < 8 || screen_is_dialog_waiting() == 0) {
+            level->detail.timer = level->detail.timer + 1;
             return;
         }
         script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, 0xFF);
-        entry = level->value;
+        entry = level->detail.value;
         g_text_window.image_y = 0x70;
         g_text_window.base.x = -0x7A;
         g_text_window.base.y = -0x28;
@@ -1146,7 +1148,7 @@ void brave_story_step_person_level(brave_story_detail_level_t* level) {
         text_window_open(&g_text_window);
         /* Rendering the text stores the portrait it names, if any, over the 0xff. */
         value = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
-        render_index = level->render_index;
+        render_index = level->detail.render_index;
         if (value != 0xFF) {
             portrait_build_unit_poly(&portrait, value);
             page_x = 0x280;
@@ -1174,12 +1176,12 @@ void brave_story_step_person_level(brave_story_detail_level_t* level) {
         } else {
             g_window_gs_image_records[render_index].flags |= DISPLAY_OBJECT_BLANK;
         }
-        level->phase = level->phase + 1;
+        level->detail.phase = level->detail.phase + 1;
         return;
     case BRAVE_STORY_DETAIL_PHASE_POP_IN:
         if (!(g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)) {
-            g_window_gs_image_records[level->render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            level->phase = BRAVE_STORY_DETAIL_PHASE_SHOWN;
+            g_window_gs_image_records[level->detail.render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            level->detail.phase = BRAVE_STORY_DETAIL_PHASE_SHOWN;
         }
         return;
     default:
@@ -1247,26 +1249,26 @@ void tutorial_open_topic_list(void) {
 
 /* Resume handler of the tutorial topics list: block Circle, Cross and Select from the WORLD menu
  * frame again. */
-void tutorial_restore_topic_list_buttons(void) {
+void tutorial_restore_topic_list_buttons(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void tutorial_block_topic_list_buttons(menu_stack_panel_level_t* level) {
+void tutorial_block_topic_list_buttons(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Input step of the tutorial topics list; twin of
  * brave_story_handle_treasure_list_input with help message 0x108d. A confirmed
  * topic's value is passed to tutorial_push_topic_level. */
-void tutorial_handle_topic_list_input(menu_stack_panel_level_t* level) {
+void tutorial_handle_topic_list_input(menu_stack_record_t* level) {
     if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
-        if (level->result != 0) {
+        if (level->panel.result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_TUTORIAL_TOPICS);
             tutorial_push_topic_level(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
@@ -1278,16 +1280,16 @@ void tutorial_handle_topic_list_input(menu_stack_panel_level_t* level) {
     }
     if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        level->result = 0;
+        level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         tutorial_block_topic_list_buttons(level);
         menu_stack_push_message_level(0x108D, 1);
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
         && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        level->result = 1;
+        level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
@@ -1348,7 +1350,7 @@ static void tutorial_push_topic_level(s32 topic) {
  * tutorial_push_topic_level: once the text window has
  * closed (text_window_step), pop the level, show the
  * tutorial menu's windows and frame again and reopen the topic list. */
-void tutorial_wait_topic_then_pop(void) {
+void tutorial_wait_topic_then_pop(menu_stack_record_t* unused_level) {
     s32 depth;
 
     if (!(g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)

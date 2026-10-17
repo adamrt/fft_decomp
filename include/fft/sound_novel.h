@@ -215,7 +215,12 @@ typedef struct sound_novel_restart_level {
 extern u8 g_sound_novel_quit_help_text_ids[];
 
 void sound_novel_resume_level(menu_stack_record_t* level);
+void sound_novel_step_level(menu_stack_record_t* level);
+void sound_novel_suspend_level(menu_stack_record_t* level);
 void sound_novel_resume_quit_level(menu_stack_record_t* level);
-void sound_novel_suspend_quit_level(sound_novel_quit_level_t* level);
+void sound_novel_suspend_quit_level(menu_stack_record_t* level);
+void sound_novel_step_quit_level(menu_stack_record_t* level);
+void sound_novel_step_history_level(menu_stack_record_t* level);
+void sound_novel_step_restart_level(menu_stack_record_t* level);
 
 #endif

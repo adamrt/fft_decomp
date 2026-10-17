@@ -555,26 +555,26 @@ void brave_story_open_fact_list(void) {
 
 /* Resume handler of the Facts list: block Circle, Cross and Select from the WORLD menu frame
  * again. */
-void brave_story_restore_fact_list_buttons(void) {
+void brave_story_restore_fact_list_buttons(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void brave_story_block_fact_list_buttons(menu_stack_panel_level_t* level) {
+void brave_story_block_fact_list_buttons(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Input step of the Facts list; twin of tutorial_handle_topic_list_input
  * with help message 0x108f, handing a confirmed entry's value to
  * brave_story_push_fact_level. */
-void brave_story_handle_fact_list_input(menu_stack_panel_level_t* level) {
+void brave_story_handle_fact_list_input(menu_stack_record_t* level) {
     if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
         g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
-        if (level->result != 0) {
+        if (level->panel.result != 0) {
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_FACTS);
             brave_story_push_fact_level(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
@@ -586,16 +586,16 @@ void brave_story_handle_fact_list_input(menu_stack_panel_level_t* level) {
     }
     if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        level->result = 0;
+        level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->entry_count != 0) {
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         brave_story_block_fact_list_buttons(level);
         menu_stack_push_message_level(0x108F, 1);
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->entry_count != 0
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
         && g_file_cd_state.state == 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        level->result = 1;
+        level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
@@ -662,7 +662,7 @@ static void brave_story_push_fact_level(s32 value) {
 /* Steps a fact's text window until text_window_step reports it
  * closed, then pops the level, shows the Brave Story menu's windows and
  * frame again and reopens the Facts list (brave_story_open_fact_list). */
-void brave_story_wait_fact_then_pop(void) {
+void brave_story_wait_fact_then_pop(menu_stack_record_t* unused_level) {
     s32 depth;
 
     if (!(g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)

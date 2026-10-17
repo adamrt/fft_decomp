@@ -25,6 +25,7 @@ extern s32 g_brave_story_saved_cursor[];
 extern u8 g_brave_story_help_text_ids[];
 
 void brave_story_push_level(void);
+void brave_story_handle_input(menu_stack_record_t* level);
 
 /* detail levels */
 /* brave_story_detail_level_t.phase, shared by the person,
@@ -61,17 +62,25 @@ extern menu_cursor_state_t g_brave_story_saved_list_cursor_state;
 extern s32 g_brave_story_saved_weather_variable;
 
 void brave_story_open_fact_list(void);
-void brave_story_block_fact_list_buttons(menu_stack_panel_level_t* level);
+void brave_story_block_fact_list_buttons(menu_stack_record_t* unused_level);
+void brave_story_handle_fact_list_input(menu_stack_record_t* level);
+void brave_story_restore_fact_list_buttons(menu_stack_record_t* level);
+void brave_story_wait_fact_then_pop(menu_stack_record_t* level);
 void brave_story_push_event_level(s32 value);
 void brave_story_handle_event_input(menu_stack_record_t* level);
-void brave_story_block_event_list_buttons(menu_stack_panel_level_t* level);
+void brave_story_block_event_list_buttons(menu_stack_record_t* unused_level);
+void brave_story_handle_event_list_input(menu_stack_record_t* level);
+void brave_story_restore_event_list_prompt(menu_stack_record_t* level);
 
 /* persons */
 extern u8 (*g_brave_story_birthdays)[2];
 extern u8* g_brave_story_ages_source;
 extern u8 g_brave_story_character_ages[0x40];
 
-void brave_story_block_person_list_buttons(menu_stack_panel_level_t* level);
+void brave_story_block_person_list_buttons(menu_stack_record_t* unused_level);
+void brave_story_handle_person_list_input(menu_stack_record_t* level);
+void brave_story_restore_person_list_prompt(menu_stack_record_t* level);
+void brave_story_step_person_level(menu_stack_record_t* level);
 
 /* unexplored lands and treasures */
 extern u8 g_unexplored_land_picture_sets[];
@@ -84,9 +93,16 @@ extern u32 g_brave_story_land_discovery_date_bits[5];
 extern u32 g_brave_story_treasure_acquisition_date_bits[14];
 
 void brave_story_open_unexplored_land_list(void);
-void brave_story_block_unexplored_land_list_buttons(menu_stack_panel_level_t* level);
+void brave_story_block_unexplored_land_list_buttons(menu_stack_record_t* unused_level);
+void brave_story_handle_unexplored_land_list_input(menu_stack_record_t* level);
+void brave_story_restore_unexplored_land_list_prompt(menu_stack_record_t* level);
+void brave_story_step_unexplored_land_level(menu_stack_record_t* level);
 void brave_story_open_treasure_list(void);
 void brave_story_push_treasure_level(s32 value);
+void brave_story_handle_treasure_list_input(menu_stack_record_t* level);
+void brave_story_block_treasure_list_buttons(menu_stack_record_t* level);
+void brave_story_restore_treasure_list_prompt(menu_stack_record_t* level);
+void brave_story_step_treasure_level(menu_stack_record_t* level);
 
 /* propositions */
 /* Row kinds of the Brave Story's proposition category list (brave_story_push_propositions_level). */
@@ -148,16 +164,23 @@ extern s32 g_brave_story_advancing_saved_cursor[];
 extern s32 g_brave_story_propositions_saved_cursor[];
 
 void brave_story_handle_participant_list_input(menu_stack_record_t* level);
+void brave_story_handle_propositions_input(menu_stack_record_t* level);
+void brave_story_handle_advancing_list_input(menu_stack_record_t* level);
+void brave_story_handle_participant_input(menu_stack_record_t* level);
+void brave_story_handle_work_history_input(menu_stack_record_t* level);
+void brave_story_wait_work_history_then_pop(menu_stack_record_t* level);
 
 /* level window state */
-/* Dim, tint or restore the windows of a menu level. The advancing-list and
- * participant resume handlers take the full stack record; the proposition
- * handlers take its window state. */
-void brave_story_suspend_level(menu_stack_window_level_t* state);
-void brave_story_resume_propositions_level(menu_stack_window_level_t* level);
-void brave_story_suspend_propositions_level(menu_stack_window_level_t* level);
+/* Dim, tint or restore the windows owned by the current menu level. */
+void brave_story_suspend_level(menu_stack_record_t* level);
+void brave_story_resume_level(menu_stack_record_t* level);
+void brave_story_resume_propositions_level(menu_stack_record_t* level);
+void brave_story_suspend_propositions_level(menu_stack_record_t* level);
 void brave_story_resume_advancing_list(menu_stack_record_t* level);
-void brave_story_suspend_advancing_list(brave_story_advancing_level_t* level);
+void brave_story_suspend_advancing_list(menu_stack_record_t* level);
 void brave_story_resume_participant_level(menu_stack_record_t* level);
+void brave_story_suspend_participant_level(menu_stack_record_t* level);
+void brave_story_suspend_work_history(menu_stack_record_t* level);
+void brave_story_resume_work_history(menu_stack_record_t* level);
 
 #endif

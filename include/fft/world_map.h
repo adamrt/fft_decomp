@@ -551,7 +551,9 @@ typedef struct event_transition_level {
 extern GsSPRITE g_event_transition_sprite;
 
 void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b);
+void screen_transition_step_level(menu_stack_record_t* level);
 void event_transition_push_level(s32 mode);
+void event_transition_step_level(menu_stack_record_t* level);
 void event_transition_draw_sprite(GsOT* ot);
 void event_transition_seek_battle_bin(void);
 
