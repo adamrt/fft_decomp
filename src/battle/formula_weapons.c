@@ -413,8 +413,8 @@ void formula_18_unused(void) {
 void formula_19_unused(void) {
 }
 
-/* Formula 0x1A: -PA, -MA or -Speed (X) by ability, hit F(MA+Y)%; magic evade. */
-void formula_magical_stat_reduction(void) {
+/* Formula 0x1A (Destroy Sword stat ruins): -PA, -MA or -Speed (X) by ability, hit F(MA+Y)%; magic evade. */
+void formula_destroy_sword_stat_ruin(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_store_ma_and_y();
         formula_element_apply_strengthen();
@@ -473,12 +473,12 @@ void formula_multihit_truth_magic(void) {
     }
 }
 
-/* Formula 0x1F: damage ((MA + Y) / 2 * MA) with element, scaled by (100 -
+/* Formula 0x1F (Un-truth): damage ((MA + Y) / 2 * MA) with element, scaled by (100 -
  * caster Faith) and (100 - target Faith) over 10000, the Faith status counting
  * as 0 and Innocent as 100, so Faith on either side keeps that side's full
  * factor and Innocent zeroes the damage; magic evade; 19% status. Strikes
  * rnd(1..X) times (action_init_strike_data). */
-void formula_unfaith_magical_damage(void) {
+void formula_un_truth(void) {
     action_data_t* action;
 
     if (formula_evade_calculate_magical() != 0) {
@@ -550,19 +550,19 @@ void formula_murasame(void) {
     formula_apply_undead_reversal();
 }
 
-/* Formula 0x24: damage ((PA + Y) / 2 * MA) with element; magic evade; 19%
+/* Formula 0x24 (Elemental): damage ((PA + Y) / 2 * MA) with element; magic evade; 19%
  * status. */
-void formula_ma_pa_half_damage(void) {
+void formula_elemental(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_store_ma_and_pa_plus_y_divided_by_two();
         formula_calculate_magical_damage_without_faith();
     }
 }
 
-/* Formula 0x25: break the equipment the ability names, hit (PA+WP+Y)%;
+/* Formula 0x25 (Battle Skill equipment breaks): break the equipment the ability names, hit (PA+WP+Y)%;
  * physical evade; Maintenance blocks it. With nothing in that slot the action
  * becomes a plain attack. */
-void formula_break_equipped_hit_pa_wp_y_percent(void) {
+void formula_battle_skill_equipment_break(void) {
     action_data_t* action;
 
     if (formula_select_targeted_equipment() != 0) {

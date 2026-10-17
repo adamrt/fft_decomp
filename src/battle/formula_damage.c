@@ -12,11 +12,11 @@
 #include "fft/unit_identity.h"
 #include "psx/types.h"
 
-/* Formula 0x2A: talk skill, hit (MA+X)%: gil (Level * SP), CT to 0, +/-Brave
+/* Formula 0x2A (Talk Skill), hit (MA+X)%: gil (Level * SP), CT to 0, +/-Brave
  * or Faith (Y), or status by ability (formula_apply_talk_skill). Misses
  * a sleeping target and, without Monster Talk, a monster; Finger Guard can
  * cancel it. */
-void formula_talk_skill_hit_ma_x_percent(void) {
+void formula_talk_skill(void) {
     formula_force_sleeping_target_miss();
     if ((g_action_target->unit_flags & UNIT_FLAG_MONSTER)
         && !(g_action_attacker->ability_flags.support[2] & UNIT_SUPPORT_SET_3_MONSTER_TALK)) {
@@ -36,9 +36,9 @@ void formula_talk_skill_hit_ma_x_percent(void) {
     }
 }
 
-/* Formula 0x2B: -PA, -MA or -Speed (X) by ability, hit (PA+Y)%; physical
+/* Formula 0x2B (Battle Skill stat breaks): -PA, -MA or -Speed (X) by ability, hit (PA+Y)%; physical
  * evade. */
-void formula_physical_stat_reduction(void) {
+void formula_battle_skill_stat_break(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_pa_and_y();
         if (formula_accuracy_calculate_physical() == 0) {
@@ -57,9 +57,9 @@ void formula_magic_break(void) {
     }
 }
 
-/* Formula 0x2D: damage (PA * (WP + Y)) with the weapon's element, 100% status;
+/* Formula 0x2D (Holy Sword): damage (PA * (WP + Y)) with the weapon's element, 100% status;
  * physical evade. */
-void formula_damage_pa_times_wp_plus_y_status(void) {
+void formula_holy_sword(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_pa_and_weapon_power_plus_y();
         formula_element_apply_weapon_strengthen();
@@ -72,10 +72,10 @@ void formula_damage_pa_times_wp_plus_y_status(void) {
     }
 }
 
-/* Formula 0x2E: break the equipment the ability names and damage (PA * WP)
+/* Formula 0x2E (Mighty Sword): break the equipment the ability names and damage (PA * WP)
  * with the weapon's element; physical evade. Fails with nothing in that slot
  * or against Maintenance. */
-void formula_break_equipped_damage_pa_times_wp(void) {
+void formula_mighty_sword(void) {
     action_data_t* action;
 
     if (formula_evade_calculate_physical() != 0) {
@@ -236,8 +236,8 @@ void formula_damage_target_hp_minus_one_always_hit(void) {
     formula_calculate_damage_leaving_one_hp();
 }
 
-/* Formula 0x3F: hit (SP+X)%. */
-void formula_hit_sp_x_percent(void) {
+/* Formula 0x3F (Snipe aim abilities): hit (SP+X)%. */
+void formula_snipe_aim(void) {
     formula_store_speed_and_x();
     formula_apply_physical_modifiers();
     formula_store_xa_plus_ya();
@@ -275,9 +275,9 @@ void formula_galaxy_stop(void) {
     }
 }
 
-/* Formula 0x42: damage (PA * Y); the caster takes (PA * Y / X), so the
+/* Formula 0x42 (Work): damage (PA * Y); the caster takes (PA * Y / X), so the
  * caster's action data is marked hit too. No evade. */
-void formula_damage_pa_times_y_damage_caster_pa_times_y_over_x(void) {
+void formula_work(void) {
     s16 damage;
     action_data_t* action;
 
