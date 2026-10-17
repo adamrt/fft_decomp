@@ -15,8 +15,8 @@ typedef struct target_panel {
     u8 remaining_range;
     /* Targeting frontier/targeted mark; pathing stores the step number here. */
     u8 mark;
-    /* Index 0..15 of the compact movement record on the tile (set by
-     * move_spread_set_frontier_flags), not a battle id. */
+    /* Move spreading stores the compact movement-record index 0..15 (0 is valid).
+     * Relocation search reuses this byte as 0 free, 1 occupied or reserved. */
     u8 unit_record_index;
     /* Remaining range after landing on a rideable unit (move_spread_check_occupied_tile_standing_height);
      * cleared on the acting tile by ai_move_propagate_from_target; pathing reuses it on 512+

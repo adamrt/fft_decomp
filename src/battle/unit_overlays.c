@@ -954,9 +954,9 @@ void unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
 /* Defining the samples after their reader retains the original memory copy. */
 static const s8 g_unit_float_bob_offsets[24];
 
-/* unit_height_calculate_from_world_coords is called as returning s16; the target's
- * handling of the result needs it, and a plain s32 call compiles differently. */
-typedef s16 (*battle_screen_z_halfword_fn_t)(unit_t* unit);
+/* This updater needs a signed 16-bit result view. Changing the public return type
+ * instead alters the arithmetic callers in unit_motion.c. */
+typedef s16 (*unit_height_s16_fn_t)(unit_t* unit);
 
 /* Raise a floating unit's height offset, or lower it back to the ground.
  *
@@ -990,14 +990,14 @@ static void unit_increment_or_decrement_height_mod(unit_t* unit) {
             if (unit->depth_height_offset < 0) {
                 unit->depth_height_offset = 0;
             }
-            ground_y = ((battle_screen_z_halfword_fn_t)unit_height_calculate_from_world_coords)(unit);
+            ground_y = ((unit_height_s16_fn_t)unit_height_calculate_from_world_coords)(unit);
             unit->world_coords.vy = ground_y;
             unit->real.vy = ground_y * ONE;
         } else {
             unit->float_bob_offset = 0;
         }
     }
-    ground_y = ((battle_screen_z_halfword_fn_t)unit_height_calculate_from_world_coords)(unit);
+    ground_y = ((unit_height_s16_fn_t)unit_height_calculate_from_world_coords)(unit);
     if (unit->world_coords.vy > ground_y) {
         unit->world_coords.vy = ground_y;
         unit->real.vy = ground_y * ONE;
