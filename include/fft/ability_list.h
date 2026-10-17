@@ -45,7 +45,7 @@ typedef enum menu_ability_category {
     MENU_ABILITY_CATEGORY_ALL = 15, /* the list builders take any other value as all */
 } menu_ability_category_e;
 
-/* What ability_list_build lists: every ability of the job, the learned
+/* BUNIT/WORLD ability_list_build modes: every ability of the job, the learned
  * ones, the learn menu's rows, or only a count of the unlearned ones. */
 typedef enum ability_list_mode {
     ABILITY_LIST_MODE_VIEW_ALL = 0,
@@ -64,7 +64,8 @@ extern menu_instruction_t g_ability_list_render_commands;
 
 s32 ability_list_update(void);
 
-/* BUNIT, JOBSTTS and WORLD each build their own body. */
+/* BUNIT and WORLD take ability_list_mode_e. JOBSTTS treats mode as a Boolean:
+ * zero lists all abilities; any nonzero value lists only unlearned abilities. */
 s32 ability_list_build(
     s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* ability_list, s32 mode);
 
