@@ -1087,8 +1087,10 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `memcard_poll_hardware_event_result`, and nothing calls the wait routine.
 - MAIN's Orbonne caption fades have no callers. `new_game_set_display_draw`
   is called only by `new_game_fade_in_orbonne_caption`, so it is unreachable too.
-- `suzuki_sound_set_unread_value` stores a 16-bit sound-driver value that `suzuki_sound_init`
-  and `suzuki_sound_quit` clear and nothing reads; nothing calls the setter.
+- `suzuki_sound_set_unread_value` stores a halfword in main RAM at `0x80032a28`;
+  initialization and shutdown clear it. Original-code references identify only
+  stores, and the traced SPU transfer paths do not send it to sound RAM. No reader
+  or caller of the setter has been identified; its original purpose remains unknown.
 - `system_zero_padding` (0x80010ba8), which `overlay_exec_battle`
   reaches after loading BATTLE.BIN, is not BATTLE code: it is the 4 KB of zero
   words after MAIN's C start-up, run as 1,024 no-ops up to the `jr ra` at

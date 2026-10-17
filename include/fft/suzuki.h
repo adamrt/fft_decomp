@@ -678,7 +678,9 @@ extern s32
 extern suzuki_music_t* g_suzuki_sound_sfx_music;    /* 0x80032a60; eight channels on SPU voices 16-23 */
 extern SpuReverbAttr g_suzuki_sound_reverb_attr;    /* 0x80037008 */
 extern suzuki_spu_state_t g_suzuki_sound_spu_state; /* 0x80037020 */
-extern u16 g_suzuki_sound_unread_value;             /* only ever stored */
+
+/* Provisional: retained driver value in main RAM; no reader or SPU transfer of it has been identified. */
+extern u16 g_suzuki_sound_unread_value;
 
 /* Suzuki driver entry points. The music handle passed by the game wrappers
  * is the suzuki_music_t* that suzuki_smd_create_music returns. */
@@ -907,7 +909,8 @@ s16 suzuki_sound_wait_for_spu_transfer(s32 flags);
 void suzuki_sound_init_stub(void);
 void suzuki_sound_enable_root_counter_2_event(void);
 void suzuki_sound_disable_root_counter_2_event(void);
-/* Provisional: store a driver value nothing reads; nothing calls it. */
+
+/* Provisional: store the retained driver value; no caller has been identified. */
 void suzuki_sound_set_unread_value(u16 value);
 
 #endif
