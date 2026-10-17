@@ -47,7 +47,6 @@ typedef enum shop_step {
     SHOP_STEP_RENAME_NAME_ENTRY = 27
 } shop_step_e;
 
-extern void (*g_shop_menu_step_handlers[])(void);
 extern s16 g_shop_menu_step; /* shop_step_e */
 extern menu_entry_t g_shop_main_menu_thread_data;
 extern u8 g_shop_main_menu_running;     /* menu open flag */
@@ -111,10 +110,6 @@ extern u16 g_shop_sell_item;          /* item being sold */
 extern u8 g_shop_sell_confirm_shown;  /* confirmation prompt shown */
 extern u16 g_shop_sell_quantity_item; /* item being sold */
 extern u8 g_shop_sell_total_shown;    /* confirmation prompt shown */
-
-void shop_buy_equip_step(void);
-void shop_sell_list_step(void);
-void shop_sell_confirm_step(void);
 
 /* fitting room */
 /* Result of shop_fitting_checkout_prompt. */

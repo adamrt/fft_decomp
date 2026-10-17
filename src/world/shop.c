@@ -49,6 +49,35 @@ extern u8 g_soldier_office_fee_script[34];
 /* The quantity menu passes this range to screen_labeled_number_entry_thread. */
 extern screen_number_range_t g_shop_quantity_range;
 
+static void shop_menu_step(void);
+static void shop_buy_list_step(void);
+static void shop_buy_confirm_step(void);
+static void shop_buy_equip_step(void);
+static void shop_sell_list_step(void);
+static void shop_sell_confirm_step(void);
+static void shop_fitting_menu_step(void);
+static void shop_fitting_equip_step(void);
+static void shop_fitting_best_fit_step(void);
+static void shop_fitting_remove_step(void);
+static void shop_fitting_sell_equipped_step(void);
+static void shop_fitting_sell_step(void);
+static void shop_fitting_checkout_step(void);
+static void shop_exit_step(void);
+static void fur_shop_menu_step(void);
+static void fur_shop_buy_list_step(void);
+static void fur_shop_buy_confirm_step(void);
+static void fur_shop_buy_equip_step(void);
+static void fur_shop_sell_list_step(void);
+static void fur_shop_sell_confirm_step(void);
+static void soldier_office_menu_step(void);
+static void soldier_office_hire_preview_step(void);
+static void soldier_office_hire_confirm_step(void);
+static void soldier_office_hire_name_step(void);
+static void soldier_office_hire_fee_step(void);
+static void soldier_office_reopen_step(void);
+static void soldier_office_rename_unit_step(void);
+static void soldier_office_rename_name_step(void);
+
 static void soldier_office_draw_unit_count(void);
 static void shop_fitting_undo(void);
 static void shop_fitting_buy(void);
@@ -62,6 +91,38 @@ static s32 shop_buy_quantity_prompt(void);
 static s32 shop_sell_quantity_prompt(void);
 static void shop_draw_gil(void);
 static void soldier_office_draw_fee(void);
+
+/* shop_step_e indexes the original 28-entry screen dispatcher. */
+static void (*g_shop_menu_step_handlers[])(void) = {
+    shop_menu_step,
+    shop_buy_list_step,
+    shop_buy_confirm_step,
+    shop_buy_equip_step,
+    shop_sell_list_step,
+    shop_sell_confirm_step,
+    shop_fitting_menu_step,
+    shop_fitting_equip_step,
+    shop_fitting_best_fit_step,
+    shop_fitting_remove_step,
+    shop_fitting_sell_equipped_step,
+    shop_fitting_sell_step,
+    shop_fitting_checkout_step,
+    shop_exit_step,
+    fur_shop_menu_step,
+    fur_shop_buy_list_step,
+    fur_shop_buy_confirm_step,
+    fur_shop_buy_equip_step,
+    fur_shop_sell_list_step,
+    fur_shop_sell_confirm_step,
+    soldier_office_menu_step,
+    soldier_office_hire_preview_step,
+    soldier_office_hire_confirm_step,
+    soldier_office_hire_name_step,
+    soldier_office_hire_fee_step,
+    soldier_office_reopen_step,
+    soldier_office_rename_unit_step,
+    soldier_office_rename_name_step,
+};
 
 /* Run a shop screen (item shop, Fur Shop or Soldier Office): set the primitive budgets,
  * load the town's backdrop and the shop music, then run frames through the step handlers
@@ -253,7 +314,7 @@ void shop_noop_callback(void) {
 /* Shop main menu step: runs the Buy / Sell / Fitting Room menu and, when it
  * closes, moves to the chosen step (rows 0..2; the fitting room also sets its
  * message), or to the exit fade with its message for anything else. */
-void shop_menu_step(void) {
+static void shop_menu_step(void) {
     u8 running;
 
     if (g_shop_main_menu_running == 0) {
@@ -285,7 +346,7 @@ void shop_menu_step(void) {
 /* Menu screen step: on the first frame reset the fade flag; once any of the
  * face buttons (0xf0) is pressed start the fade-out with a music fade, then
  * wait for the fade to complete before releasing the screen (g_shop_menu_step = -1). */
-void shop_exit_step(void) {
+static void shop_exit_step(void) {
     if (g_shop_exit_step_initialized == 0) {
         g_shop_exit_fade_started = 0;
         g_shop_exit_step_initialized = 1;
@@ -403,7 +464,7 @@ static void shop_switch_item_tab(s32 input) {
  * Triangle (except on the other-items tab, 4) opens the "who can equip" view of the highlighted
  * item once the message box has closed, and Circle starts buying it.
  */
-void shop_buy_list_step(void) {
+static void shop_buy_list_step(void) {
     s16 x;
     s16 y;
     s32 input;
@@ -484,7 +545,7 @@ void shop_buy_list_step(void) {
  * until any face button or d-pad press, which returns to the buy list. The
  * list, the Triangle button and the gil display are drawn every frame.
  */
-void shop_buy_confirm_step(void) {
+static void shop_buy_confirm_step(void) {
     s32 result = 1;
 
     if (g_shop_buy_message_wait != 0) {
@@ -611,7 +672,7 @@ static s32 shop_buy_get_equip_brightness(s32 unit_index) {
  * already holding the item are flagged in g_formation_selected_unit_stat_detail.state.equipment. Cancel returns to the
  * buy list.
  */
-void shop_buy_equip_step(void) {
+static void shop_buy_equip_step(void) {
     s32 unused[16];
     s32 input;
     u8 equipped;
@@ -712,7 +773,7 @@ static s32 shop_sell_get_price(s32 unused_row) {
  * column callbacks, then handles Cross (back to the main menu) and Circle
  * (sell the highlighted item).
  */
-void shop_sell_list_step(void) {
+static void shop_sell_list_step(void) {
     if (g_shop_sell_list_initialized == 0) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, formation_has_items(0) != 0 ? 0xF80C : 0xF80B, 0);
         g_shop_item_category = screen_init_cursor_position(SCREEN_CURSOR_SHOP_ITEM_TAB, 0);
@@ -754,7 +815,7 @@ void shop_sell_list_step(void) {
 /* Item sell confirmation step: pays half price times the quantity, removes the
  * items, prompts 0xF811 and rebuilds the list (0xF80A when nothing to sell).
  */
-void shop_sell_confirm_step(void) {
+static void shop_sell_confirm_step(void) {
     s32 result = 1;
 
     if (g_shop_sell_message_wait != 0) {
@@ -859,7 +920,7 @@ static s32 shop_fitting_get_unit_marker(s32 unused_unit_index) {
  * then either browse the formation (Circle or Triangle opens the fitting menu for the unit, Cross
  * goes to the checkout) or run the fitting menu thread and dispatch its selection to the next
  * shop step. */
-void shop_fitting_menu_step(void) {
+static void shop_fitting_menu_step(void) {
     s32 busy;
 
     if (g_shop_fitting_initialized == 0) {
@@ -950,7 +1011,7 @@ void shop_fitting_menu_step(void) {
  * unpaid), adds its price to the fitting-room cost and recalculates stats,
  * while moving the cursor previews the stat change. Cancel leaves the list,
  * or from the slot list goes back to the fitting room's unit grid. */
-void shop_fitting_equip_step(void) {
+static void shop_fitting_equip_step(void) {
     s16 x;
     s16 y;
     s32 prev;
@@ -1139,7 +1200,7 @@ static void shop_fitting_draw_cost(void) {
  * the store to g_shop_fitting_remove_previewed_unit_index consumes, while the compare keeps the load in $v1. A
  * one-argument prototype would pull the load pseudo into $a0 and push the copy into $v1; pins and launders cannot
  * compensate, because the target's copy sits in the beq's delay slot and a tied asm is never a delay-slot candidate. */
-void shop_fitting_remove_step(void) {
+static void shop_fitting_remove_step(void) {
     /* The target reserves 64 local bytes whose contents are not accessed;
      * saved registers sit at 0x60..0x70 under a -0x78 frame. */
     s32 unused[16];
@@ -1221,7 +1282,7 @@ void shop_fitting_remove_step(void) {
  * 0xf802); canceled shows message 0xf818 until any face button, which
  * returns to the fitting room with the unit's stats recalculated.
  */
-void shop_fitting_checkout_step(void) {
+static void shop_fitting_checkout_step(void) {
     s32 result;
 
     g_shop_background_visible = 1;
@@ -1419,7 +1480,7 @@ static void shop_fitting_undo(void) {
  * each time. Its address stays in one register across the calls and the last
  * read is scheduled ahead of the two byte stores that precede it in source.
  */
-void shop_fitting_best_fit_step(void) {
+static void shop_fitting_best_fit_step(void) {
     /* The target reserves vars the code never touches: args 16 + vars 88 +
      * 6 saves 24 = the frame of 128, while only the 8-byte staging buffer at
      * sp+80 is accessed. */
@@ -1519,7 +1580,7 @@ void shop_fitting_best_fit_step(void) {
  * for half the item's price and, on acceptance, credits the gil and clears
  * the slot. Cross returns to the fitting room's unit grid.
  */
-void shop_fitting_sell_equipped_step(void) {
+static void shop_fitting_sell_equipped_step(void) {
     s32 close = 0;
     u32 item;
     s32 text_id;
@@ -1615,7 +1676,7 @@ void shop_fitting_sell_equipped_step(void) {
  * the sub-step and the shop step put back to FITTING_ROOM_SELL, except that
  * leaving for the main menu returns to the fitting room's unit grid instead.
  */
-void shop_fitting_sell_step(void) {
+static void shop_fitting_sell_step(void) {
     if (g_shop_fitting_sell_initialized == 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
             return;
@@ -1726,7 +1787,7 @@ static void shop_fitting_buy(void) {
 /* Fur Shop main menu step: without a unit that has Secret Hunt the shop turns the party away;
  * otherwise Buy (only when poached stock exists), Sell (only when the party has items) or Leave,
  * with a message explaining a refusal. */
-void fur_shop_menu_step(void) {
+static void fur_shop_menu_step(void) {
     s32 i;
 
     if (g_fur_shop_opened == 0) {
@@ -1807,7 +1868,7 @@ static s32 fur_shop_get_stock(s32 unused_row) {
  * their stores; the target's emission order then follows. First-use order,
  * not store order, decides this.
  */
-void fur_shop_sell_list_step(void) {
+static void fur_shop_sell_list_step(void) {
     s32 message;
 
     if (g_fur_shop_sell_list_initialized == 0) {
@@ -1852,7 +1913,7 @@ void fur_shop_sell_list_step(void) {
 
 /* Fur shop: confirm a sale. The party receives half price, and the sold copies join the
  * poached stock. */
-void fur_shop_sell_confirm_step(void) {
+static void fur_shop_sell_confirm_step(void) {
     s32 result = 1;
 
     if (g_fur_shop_sale_message_wait != 0) {
@@ -1952,7 +2013,7 @@ static s32 fur_shop_buy_get_price(s32 entry_index) {
  *
  * Mirrors shop_buy_list_step with the half-price value and
  * the poached-stock quantity as callbacks. */
-void fur_shop_buy_list_step(void) {
+static void fur_shop_buy_list_step(void) {
     s16 x;
     s16 y;
     s32 input;
@@ -2026,7 +2087,7 @@ void fur_shop_buy_list_step(void) {
 
 /* Fur shop sibling of shop_buy_confirm_step: the party pays half
  * price and the poached stock is reduced. */
-void fur_shop_buy_confirm_step(void) {
+static void fur_shop_buy_confirm_step(void) {
     s32 result = 1;
 
     if (g_fur_shop_purchase_message_wait != 0) {
@@ -2135,7 +2196,7 @@ static s32 fur_shop_buy_quantity_prompt(void) {
 
 /* Fur Shop equip-on-purchase step: run the shared equip-candidate step and return to the Fur Shop
  * buy list instead of the normal one. */
-void fur_shop_buy_equip_step(void) {
+static void fur_shop_buy_equip_step(void) {
     shop_buy_equip_step();
     if (g_shop_menu_step == SHOP_STEP_BUY_LIST)
         g_shop_menu_step = SHOP_STEP_FUR_BUY_LIST;
@@ -2145,7 +2206,7 @@ void fur_shop_buy_equip_step(void) {
  * kind, whose fee is 1000 gil plus its starting equipment's price (when the party cannot pay,
  * the recruit is removed again); row 2 renames a monster; row 3 or a cancel leaves, after
  * cashing out inventory beyond 99 of an item. */
-void soldier_office_menu_step(void) {
+static void soldier_office_menu_step(void) {
     unit_stats_t unit;
     s32 i;
     s32 result;
@@ -2231,7 +2292,7 @@ void soldier_office_menu_step(void) {
  * face button closes the panels and moves on to the hire confirmation
  * (message 0xF826).
  */
-void soldier_office_hire_preview_step(void) {
+static void soldier_office_hire_preview_step(void) {
     if (g_soldier_office_hire_preview_initialized == 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
@@ -2267,7 +2328,7 @@ void soldier_office_hire_preview_step(void) {
  * selection 2 returns to the preview. Any other result shows a message and
  * waits for its thread before going on to the name entry.
  */
-void soldier_office_hire_confirm_step(void) {
+static void soldier_office_hire_confirm_step(void) {
     s16 selection;
 
     if (g_soldier_office_hire_confirm_message_wait != 0) {
@@ -2299,7 +2360,7 @@ void soldier_office_hire_confirm_step(void) {
 }
 
 /* Soldier office: the name entry keyboard for the recruit, then the fee prompt. */
-void soldier_office_hire_name_step(void) {
+static void soldier_office_hire_name_step(void) {
     if (g_soldier_office_hire_name_entry_initialized == 0) {
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_banner_thread(0);
@@ -2322,7 +2383,7 @@ void soldier_office_hire_name_step(void) {
  * Choice 0 pays the fee and stores the recruit's name; 1 or -1 removes the
  * recruit from the roster. Other choices return to the name entry.
  */
-void soldier_office_hire_fee_step(void) {
+static void soldier_office_hire_fee_step(void) {
     s16 choice;
 
     g_help_message_text_id = 0;
@@ -2356,7 +2417,7 @@ void soldier_office_hire_fee_step(void) {
 
 /* Return to the soldier office menu with message 0xf821, redrawing the gil,
  * fee and roster-count displays for this frame. */
-void soldier_office_reopen_step(void) {
+static void soldier_office_reopen_step(void) {
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf821, 0);
     g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_MENU;
     g_soldier_office_hire_menu_initialized = 0;
@@ -2377,7 +2438,7 @@ static s32 soldier_office_rename_get_unit_marker(s32 unused_unit_index) {
  * a box placed away from the unit banner); Cross returns to the Soldier
  * Office menu.
  */
-void soldier_office_rename_unit_step(void) {
+static void soldier_office_rename_unit_step(void) {
     s32 mode;
     s32 input;
     s32 text_id;
@@ -2446,7 +2507,7 @@ void soldier_office_rename_unit_step(void) {
 
 /* Soldier office: the name entry keyboard of the Rename service; sibling of
  * soldier_office_hire_name_step, which goes on to the fee prompt (0xF82A). */
-void soldier_office_rename_name_step(void) {
+static void soldier_office_rename_name_step(void) {
     if (g_soldier_office_rename_name_entry_initialized == 0) {
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_banner_thread(0);

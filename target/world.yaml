@@ -80,7 +80,7 @@ units:
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b8c, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80156b90, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80156ba8, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80156bb0, size: 48, hash: 5026ef5547d95034}, {addr: 0x80156be0, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: selection_records, source: src/lib/menu/selection_records.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: shop, source: src/world/shop.c}
+  - {name: shop, source: src/world/shop.c, data: [{addr: 0x8019523c, size: 112, hash: ce0c5fd435d95f05}]}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
   - {name: status_thread_toggles, source: src/lib/menu/status_thread_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: text_entries, source: src/lib/event/text_entries.c, data: [{addr: 0x80156c20, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x80156c30, size: 16, hash: 6ff8555916aa10e6}]}
