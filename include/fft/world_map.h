@@ -142,10 +142,6 @@ extern s32 g_hud_ot_priority;
 void hud_draw_value(GsOT* ot);
 
 /* pictures */
-/* Sector offsets of each picture set in WLDPIC.BIN and each background set in WLDBK.BIN. */
-extern s32 g_picture_sector_offsets[];
-extern s32 g_picture_background_sector_offsets[];
-
 /* Currently resident picture set, reset to -1 by world_map_init_state. */
 extern s32 g_picture_loaded_set;
 extern s32 g_picture_background_loaded_set;

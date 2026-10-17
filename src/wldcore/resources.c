@@ -31,6 +31,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* File-sector boundaries, including one terminal offset after the last payload. */
+extern s32 g_picture_sector_offsets[93];
+extern s32 g_picture_background_sector_offsets[132];
+extern s32 g_message_block_sector_offsets[113];
+extern s32 g_sound_novel_script_sector_offsets[7];
+extern s32 g_sound_novel_text_sector_offsets[7];
+
 static s32 g_world_map_input_repeat_initial_delay = 0;
 static s32 g_world_map_input_repeat_period = 0;
 static s32 g_world_map_input_secondary_repeat_period = 0;
@@ -126,7 +133,8 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
             return;
         }
         /* Each sector holds a rectangle count, then per rectangle a packed
-         * position, a packed size and the pixels. */
+         * position, a packed size and the pixels. Keep the original word cursor:
+         * a typed rectangle cursor folds address calculations and shortens the body. */
         word = (stream->sector_index & 1) * 512;
         rect_count = ((u32*)stream->destination)[(stream->sector_index & 1) * 512];
         word++;

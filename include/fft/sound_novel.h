@@ -66,10 +66,6 @@ typedef struct sound_novel_script_file {
 /* The loaded sound-novel script (sound_novel_load_files). */
 extern struct sound_novel_script_file g_sound_novel_script;
 
-/* Sector offsets of each sound novel's script in SNPLBIN.BIN and its text in SNPLMES.BIN. */
-extern s32 g_sound_novel_script_sector_offsets[];
-extern s32 g_sound_novel_text_sector_offsets[];
-
 void sound_novel_load_files(s32 chapter);
 
 /* interpreter */

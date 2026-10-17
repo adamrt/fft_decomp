@@ -40,6 +40,7 @@ typedef struct sound_novel_state {
 } sound_novel_state_t;
 
 extern sound_novel_state_t g_sound_novel_state;
+
 /* Scalar flag access retains the original bases in opcodes 2e and 33. */
 extern u16 g_sound_novel_state_flags;
 extern u32 g_sound_novel_local_flags[];
