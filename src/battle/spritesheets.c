@@ -451,7 +451,7 @@ void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 final_value) {
     /* Crystal, chicken, frog and treasure sheets tint fixed RAM palettes instead of the slot's. */
     switch (unit->spritesheet_id) {
     case SPRITE_SHEET_ID_CRYSTAL:
-        battle_map_palette_update_from_other(g_sprite_crystal_palettes[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
+        battle_map_palette_update_from_other(g_sprite_other_palettes.crystal[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
             clut_index, 0, red, green, blue, final_value);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
@@ -459,12 +459,12 @@ void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 final_value) {
             clut_index, 0, red, green, blue, final_value);
         break;
     case SPRITE_SHEET_ID_FROG:
-        battle_map_palette_update_from_other(g_sprite_frog_palettes[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
+        battle_map_palette_update_from_other(g_sprite_other_palettes.frog[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
             clut_index, 0, red, green, blue, final_value);
         break;
     case SPRITE_SHEET_ID_TREASURE:
-        battle_map_palette_update_from_other(g_sprite_treasure_palettes[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, final_value);
+        battle_map_palette_update_from_other(g_sprite_other_palettes.treasure[stored_palette],
+            BATTLE_MAP_CLUT_ROW_UNITS, clut_index, 0, red, green, blue, final_value);
         break;
     default:
         battle_map_palette_update_from_other(g_sprite_sheet_slots[slot].clut[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
@@ -491,20 +491,20 @@ static void sprite_palette_modify_unit(unit_t* unit, s32 mode, s32 clut_row, s32
     palette = unit->stored_palette;
     switch (sheet) {
     case SPRITE_SHEET_ID_CRYSTAL:
-        battle_map_palette_modify_from_other(
-            mode, g_sprite_crystal_palettes[palette], clut_row, clut_index, all_colors, red, green, blue, final_value);
+        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.crystal[palette], clut_row, clut_index,
+            all_colors, red, green, blue, final_value);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
         battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.chicken[palette], clut_row, clut_index,
             all_colors, red, green, blue, final_value);
         break;
     case SPRITE_SHEET_ID_FROG:
-        battle_map_palette_modify_from_other(
-            mode, g_sprite_frog_palettes[palette], clut_row, clut_index, all_colors, red, green, blue, final_value);
+        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.frog[palette], clut_row, clut_index,
+            all_colors, red, green, blue, final_value);
         break;
     case SPRITE_SHEET_ID_TREASURE:
-        battle_map_palette_modify_from_other(
-            mode, g_sprite_treasure_palettes[palette], clut_row, clut_index, all_colors, red, green, blue, final_value);
+        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.treasure[palette], clut_row, clut_index,
+            all_colors, red, green, blue, final_value);
         break;
     default:
         battle_map_palette_modify_from_other(mode, g_sprite_sheet_slots[slot].clut[palette], clut_row, clut_index,

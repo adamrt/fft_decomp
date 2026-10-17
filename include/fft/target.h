@@ -29,12 +29,8 @@ typedef struct target_panel {
 } target_panel_t;
 typedef char target_panel_size_must_be_5[(sizeof(target_panel_t) == 5) ? 1 : -1];
 
-extern target_panel_t g_target_panel_data[BATTLE_MAP_TILE_COUNT];
-
-/* Second name of g_target_panel_data. Pathfinding also uses the 16 auxiliary panels past
- * the 512 map panels (MOVE_PANEL_COUNT in all), all initialized by
- * move_spread_set_frontier_flags; both declarations cover only the map panels. */
-extern target_panel_t g_target_panels[BATTLE_MAP_TILE_COUNT];
+/* Map panels followed by 16 auxiliary movement panels, initialized together. */
+extern target_panel_t g_target_panels[BATTLE_MAP_TILE_COUNT + 16];
 
 void target_clear_panels(void);
 void target_clear_panel_spread_flags(void);

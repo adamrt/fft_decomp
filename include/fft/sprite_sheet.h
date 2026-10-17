@@ -478,9 +478,6 @@ typedef struct sprite_load_state {
 typedef char sprite_load_state_size_must_be_16[sizeof(sprite_load_state_t) == 16 ? 1 : -1];
 
 extern sprite_load_state_t g_sprite_load_state;
-extern file_extent_t g_sprite_sheet_files[];
-extern file_extent_t g_sprite_shp_files[];
-extern file_extent_t g_sprite_seq_files[];
 extern file_extent_t g_sprite_sp2_files[];
 extern file_extent_t g_sprite_worker8_sp2_files[];
 extern u32* g_sprite_sp2_data;

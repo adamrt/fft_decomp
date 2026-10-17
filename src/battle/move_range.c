@@ -2239,7 +2239,7 @@ static void target_area_check_moldball_virus_depth(s16 ability_id) {
     if (ability_id != ABILITY_ID_MONSTER_GREAT_MORBOL_MOLDBALL_VIRUS)
         return;
     i = 0;
-    panel = g_target_panel_data;
+    panel = g_target_panels;
     tile = g_battle_map_tile_data;
     do {
         if (tile->depth_half_height.depth) {
@@ -2256,7 +2256,7 @@ static void target_area_check_moldball_virus_depth(s16 ability_id) {
 static void target_range_clear_untargetable_panels(void) {
     s32 i = 0;
     battle_map_tile_t* src;
-    target_panel_t* dst = g_target_panel_data;
+    target_panel_t* dst = g_target_panels;
 
     src = g_battle_map_tile_data;
     for (; i < BATTLE_MAP_TILES_PER_LAYER; src++, i++, dst++) {
@@ -2293,7 +2293,7 @@ static void target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 sin
 
     for (i = 0; i < BATTLE_MAP_TILES_PER_LAYER; i++) {
         tile = &g_battle_map_tile_data[i];
-        lower_panel = &g_target_panel_data[i];
+        lower_panel = &g_target_panels[i];
         if (!tile->flags.blocked) {
             battle_map_tile_depth_t depth = tile->depth_half_height;
             lower = tile->height * 2 + depth.half_height + depth.depth * 2;
@@ -2304,7 +2304,7 @@ static void target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 sin
         }
         j = i + BATTLE_MAP_TILES_PER_LAYER;
         tile = &g_battle_map_tile_data[j];
-        upper_panel = &g_target_panel_data[j];
+        upper_panel = &g_target_panels[j];
         if (!tile->flags.blocked) {
             battle_map_tile_depth_t depth = tile->depth_half_height;
             upper = tile->height * 2 + depth.half_height + depth.depth * 2;
@@ -2372,9 +2372,9 @@ static void target_range_remove_close(s32 x, s32 y, s32 range) {
         for (j = 0; j < g_battle_map_max_x; j++) {
             dx = (x < j) ? (j - x) : (x - j);
             if (range >= (dy + dx)) {
-                g_target_panel_data[(i * g_battle_map_max_x) + j].remaining_range = 0;
+                g_target_panels[(i * g_battle_map_max_x) + j].remaining_range = 0;
                 k = j + BATTLE_MAP_TILES_PER_LAYER;
-                g_target_panel_data[(i * g_battle_map_max_x) + k].remaining_range = 0;
+                g_target_panels[(i * g_battle_map_max_x) + k].remaining_range = 0;
             }
         }
     }
@@ -2668,7 +2668,7 @@ static void target_range_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi) 
         do {
             idx = (level << 8) + (y * g_battle_map_max_x) + x;
             tile = &g_battle_map_tile_data[idx];
-            panel = &g_target_panel_data[idx];
+            panel = &g_target_panels[idx];
             flags = tile->depth_half_height;
             height = (tile->height * 2) + (flags.half_height) + ((flags.depth) * 2);
             level++;
@@ -2683,7 +2683,7 @@ static void target_range_mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi) 
  * untargetable. */
 static void target_range_clear_untargetable_tiles(void) {
     s32 i = 0;
-    target_panel_t* dst = g_target_panel_data;
+    target_panel_t* dst = g_target_panels;
     battle_map_tile_t* src = g_battle_map_tile_data;
     for (; i < BATTLE_MAP_TILE_COUNT; i++) {
         if (src->flags.untargetable)
@@ -2986,8 +2986,8 @@ static s32 target_range_set_for_weapon(const action_command_t* source) {
     {
         target_panel_t* panel;
         target_panel_t* upper_panel;
-        panel = &g_target_panel_data[idx];
-        upper_panel = &g_target_panel_data[idx + BATTLE_MAP_TILES_PER_LAYER];
+        panel = &g_target_panels[idx];
+        upper_panel = &g_target_panels[idx + BATTLE_MAP_TILES_PER_LAYER];
         panel->remaining_range = 0;
         upper_panel->remaining_range = 0;
         return target_range_set_flags();
@@ -3005,7 +3005,7 @@ static s32 target_range_set_flags(void) {
 
     for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
-        panel = &g_target_panel_data[i];
+        panel = &g_target_panels[i];
         if (panel->remaining_range != 0 && !(tile->flags.blocked)
             && (tile->surface.type) != BATTLE_MAP_SURFACE_CROSS_SECTION) {
             count++;
@@ -3033,7 +3033,7 @@ static s32 target_range_set_flags_from_marks(void) {
 
     for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++) {
         tile = &g_battle_map_tile_data[i];
-        panel = &g_target_panel_data[i];
+        panel = &g_target_panels[i];
         if (panel->mark != 0 && !(tile->flags.blocked) && (tile->surface.type) != BATTLE_MAP_SURFACE_CROSS_SECTION) {
             count++;
             tile->ceiling_depth_and_marks.ability_range = 1;
@@ -3063,7 +3063,7 @@ static void target_range_mark_unit_panels(const unit_stats_t* unit, s32 flags) {
         if (unit->entd_slot != UNIT_ENTD_SLOT_NONE) {
             team_diff = team ^ unit->initial_team_flags;
             team_diff_copy = team_diff;
-            panel = &g_target_panel_data[battle_map_tile_calculate_unit_index(unit)];
+            panel = &g_target_panels[battle_map_tile_calculate_unit_index(unit)];
             if (mark_allies != 0 && (team_diff & UNIT_TEAM_MASK) == 0) {
                 panel->mark = 1;
             }
@@ -3094,7 +3094,7 @@ static void target_range_apply_vertical_fixed(s32 x, s32 y) {
         vertical = y;
         for (i = -0x1F; i < 0x20; i++) {
             s32 mx;
-            target_panel_t* base = g_target_panel_data;
+            target_panel_t* base = g_target_panels;
             target_panel_t* upper_panels = base + BATTLE_MAP_TILES_PER_LAYER;
             shared = x + i;
             mx = g_battle_map_max_x;
@@ -3109,7 +3109,7 @@ static void target_range_apply_vertical_fixed(s32 x, s32 y) {
     {
         shared = x;
         for (i = -0x1F; i < 0x20; i++) {
-            target_panel_t* base = g_target_panel_data;
+            target_panel_t* base = g_target_panels;
             target_panel_t* upper_panels = base + BATTLE_MAP_TILES_PER_LAYER;
             vertical = y + i;
             tile_index = (vertical * g_battle_map_max_x) + shared;
@@ -4128,12 +4128,12 @@ static void target_area_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
             return;
         }
         dir = y * map_width + x;
-        panel = &g_target_panel_data[dir];
+        panel = &g_target_panels[dir];
         if (panel->remaining_range != 0) {
             panel->mark = 1;
         }
         dir += BATTLE_MAP_TILES_PER_LAYER;
-        panel = &g_target_panel_data[dir];
+        panel = &g_target_panels[dir];
         y += dy;
         if (panel->remaining_range != 0) {
             panel->mark = 1;

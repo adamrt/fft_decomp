@@ -23,6 +23,17 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Move-Find scratch and its existing scalar views are private to this unit.
+ * Separate aliases retain the original absolute load/store addressing. */
+extern move_found_item_t g_move_find_rare_item_result;
+extern move_find_result_data_t g_move_find_tile_result;
+extern u8 g_move_find_result_flags;
+extern u8 g_move_find_entry_index;
+extern u8 g_move_find_rare_item_id;
+extern u8 g_move_find_common_item_id;
+extern u8 g_move_find_trap_id;
+extern s8 g_move_find_occupying_unit_id;
+
 static s32 move_find_test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save);
 static command_menu_e menu_action_get_unit_menu_id(const unit_stats_t* unit);
 static s32 skillset_load(s32 unit_id, u8 skillset, u8 menu);

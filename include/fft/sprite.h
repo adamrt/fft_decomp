@@ -292,8 +292,7 @@ s32 sprite_shadow_hide_by_runtime_id(u32 runtime_id);
 s32 sprite_shadow_show_by_runtime_id(u32 runtime_id);
 
 /* palettes */
-/* First 21 OTHER.SPR palettes copied together; the other three groups also
- * retain their independently loaded symbol aliases. */
+/* First 21 OTHER.SPR palettes, copied together and selected by status sheet. */
 typedef struct sprite_other_palettes {
     palette_t chicken[5];  /* 0x000 */
     palette_t frog[5];     /* 0x0a0 */
@@ -303,9 +302,6 @@ typedef struct sprite_other_palettes {
 typedef char sprite_other_palettes_size_must_be_672[sizeof(sprite_other_palettes_t) == 672 ? 1 : -1];
 
 extern sprite_other_palettes_t g_sprite_other_palettes;
-extern palette_t g_sprite_frog_palettes[5];
-extern palette_t g_sprite_crystal_palettes[6];
-extern palette_t g_sprite_treasure_palettes[5];
 extern palette_t g_sprite_shadow_palette;
 extern clut_t g_sprite_weapon_clut; /* the first 0x200 bytes of WEP.SPR */
 extern clut_t g_sprite_trail_clut;

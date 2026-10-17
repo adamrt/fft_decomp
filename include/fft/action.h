@@ -268,9 +268,6 @@ extern u8 g_action_actor_y;
 extern u8 g_action_actor_elevation;
 extern s16 g_action_actor_used_ability_id;
 
-/* Separate link name for g_action_saved_command.ability_id. */
-extern s16 g_action_saved_ability_id;
-
 /* Golem barrier HP per team, shared by action resolution and AI snapshots. */
 extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
 

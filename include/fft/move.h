@@ -456,24 +456,10 @@ typedef struct move_find_result_data {
 typedef char move_find_result_data_size_must_be_6[(sizeof(move_find_result_data_t) == 6) ? 1 : -1];
 
 extern move_find_map_data_t g_move_find_map_data[BATTLE_MAP_ID_COUNT];
-extern move_found_item_t g_move_find_rare_item_result;
 extern move_found_item_t g_move_find_display_item;
 
 /* The current map's entries, copied from g_move_find_map_data when the map loads. */
 extern move_find_map_data_t g_move_find_current_map_data;
-
-/* The result bytes below as one record, at the address of g_move_find_result_flags; that scalar first-byte alias
- * retains the retail absolute read/write addresses. */
-extern move_find_result_data_t g_move_find_tile_result;
-
-/* Contiguous result bytes returned as move_find_result_data_t. Keep distinct symbols: the target reloads their
- * absolute addresses separately. */
-extern u8 g_move_find_result_flags;
-extern u8 g_move_find_entry_index;
-extern u8 g_move_find_rare_item_id;
-extern u8 g_move_find_common_item_id;
-extern u8 g_move_find_trap_id;
-extern s8 g_move_find_occupying_unit_id;
 
 void move_find_load_item_data(move_find_map_data_t* map_data);
 move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer);

@@ -647,7 +647,7 @@ s32 target_resolve_rotated_offset_layer(
     return 0;
 }
 
-/* Return g_action_saved_ability_id. Nothing in the game calls it. */
+/* Return the saved action's ability. Nothing in the game calls it. */
 s16 ability_load_last_used(void) {
-    return g_action_saved_ability_id;
+    return g_action_saved_command.ability_id;
 }

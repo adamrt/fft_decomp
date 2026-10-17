@@ -1203,7 +1203,7 @@ s32 unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
 /* Clear the range and the mark of all 512 targeting panels. */
 void target_clear_panels(void) {
     s32 i = 0;
-    target_panel_t* panel = g_target_panel_data;
+    target_panel_t* panel = g_target_panels;
 
     for (; i < BATTLE_MAP_TILE_COUNT; i++) {
         panel->remaining_range = 0;
