@@ -5,7 +5,6 @@
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/portrait.h"
@@ -26,10 +25,10 @@
  * the first numeric block is drawn as five separate entries, two of them signed; the third
  * large number is always the roster slot + 1 (DEBUGCHR's editor branch is absent).
  *
- * The packet, state and thread layouts are the shared fft/menu.h records: the editor packets
+ * The packet, state and thread layouts are the shared fft/unit_panel.h records: the editor packets
  * at g_unit_panel_selected_editor_packets / g_unit_panel_comparison_editor_packets, the status-panel
  * packets at g_unit_panel_selected_packets / g_unit_panel_comparison_packets, the editor states
- * g_unit_panel_selected_unit_stat_summary / g_unit_panel_comparison_billboard, and the per-thread display
+ * g_unit_panel_selected_unit_stat_summary / g_unit_panel_comparison_unit_status, and the per-thread display
  * record. g_unit_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar.
  */
 void unit_panel_banner_thread(void) {
@@ -456,11 +455,13 @@ void unit_panel_banner_thread(void) {
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(unit_data->brave, 0x202, value_pixels, text_position);
+            text_draw_small_number_glyphs(
+                unit_data->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_position);
             LoadImage(&rects[3], value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_small_number_glyphs(unit_data->faith, 0x202, value_pixels_b, text_position);
+            text_draw_small_number_glyphs(
+                unit_data->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_position);
             LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */

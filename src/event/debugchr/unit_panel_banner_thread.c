@@ -4,7 +4,6 @@
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/portrait.h"
@@ -26,7 +25,7 @@
  *
  * The overlay draws two alternating copies of the editor and status panels;
  * `frame & 1` picks one, and the copy stride fixes each packet's size. The
- * packet, state and thread layouts are the shared fft/menu.h records,
+ * packet, state and thread layouts are the shared fft/unit_panel.h records,
  * proven by this function's own accesses and the primitive strides it walks.
  */
 
@@ -444,11 +443,13 @@ void unit_panel_banner_thread(void) {
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
+            text_draw_small_number_glyphs(
+                unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_position);
             LoadImage(&rects[3], value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_small_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
+            text_draw_small_number_glyphs(
+                unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_position);
             LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */

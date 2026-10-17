@@ -1285,10 +1285,12 @@ void unit_view_summary_thread(void) {
     menu_clear_render_buffer(digits, sizeof(*digits));
     *stride = 0x10;
     menu_set_text_origin(0, 0);
-    text_draw_small_number_glyphs(g_unit_panel_selected_unit.brave, 0x202, digits->brave, origin);
+    text_draw_small_number_glyphs(
+        g_unit_panel_selected_unit.brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, digits->brave, origin);
     LoadImage(&rects[1], (u32*)digits->brave);
     menu_set_text_origin(0, 0);
-    text_draw_small_number_glyphs(g_unit_panel_selected_unit.faith, 0x202, digits->faith, origin);
+    text_draw_small_number_glyphs(
+        g_unit_panel_selected_unit.faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, digits->faith, origin);
     LoadImage(&rects[2], (u32*)digits->faith);
     menu_set_text_origin(0, 0);
     if (g_debug_display_enabled != 0) {

@@ -455,10 +455,12 @@ void unit_panel_banner_thread(void) {
             menu_clear_render_buffer(number_images, sizeof(*number_images));
             g_menu_window_text_pen.stride = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(identity->brave, 0x202, number_images->brave, &g_menu_window_text_pen);
+            text_draw_small_number_glyphs(
+                identity->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, number_images->brave, &g_menu_window_text_pen);
             LoadImage(&rects[3], (u32*)number_images->brave);
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(identity->faith, 0x202, number_images->faith, &g_menu_window_text_pen);
+            text_draw_small_number_glyphs(
+                identity->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, number_images->faith, &g_menu_window_text_pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
             /* The unit-join screen uploads the roster number image cleared. */
             if (g_menu_post_battle_unit_changes_active == 0) {
