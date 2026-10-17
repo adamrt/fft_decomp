@@ -11,7 +11,7 @@ preserving every original byte.
 - `target/*.yaml` owns each function's address, size, compiler profile, hash and
   source binding. Preserve these contracts; shared sources still compile at
   every original entrypoint with that entry's profile and bindings. A module's
-  `units:` list names merged sources (original translation units) compiled
+  `units:` list names merged sources (reconstructed translation units) compiled
   once per module; a member row carries `unit:` instead of `source:`, members
   follow one another in address order, and the file defines exactly those
   functions in that order, as that module sees the file. A module's
@@ -48,8 +48,8 @@ preserving every original byte.
   what the file holds.
 - `src/lib/`: shared game components, grouped by concept. `event/` holds
   the script interpreter, dialog and related BATTLE/WORLD services; `menu/`
-  holds shared in-game menus, windows, text and drawing support, retaining
-  the small objects that programs link in different orders. `thread/`,
+  holds shared in-game menus, windows, text and drawing support, grouped by
+  feature while preserving each program's function order and profiles. `thread/`,
   `sound/` and `file/` hold their standalone shared units; related functions
   inside mixed original units stay with those units. `memcard.c` holds the
   shared memory-card unit. `suzuki/` is the linked sound engine; keep its
@@ -68,6 +68,8 @@ preserving every original byte.
   objects, a change of compiler profile, jump-table alignment, read-only
   data that is not contiguous. Where the binary is silent, cut by topic to
   about 20 to 60 functions. A name prefix is never boundary evidence.
+  Existing single-function files are not evidence of original boundaries;
+  different function orders can reflect separate objects or edited source copies.
 - `include/fft/`: one flat folder of game headers named by concept
   (`unit.h`, `shop.h`, `proposition.h`, `battle_map_load.h`, `menu_stack.h`),
   each declaring one part of the game for every program that uses it. A

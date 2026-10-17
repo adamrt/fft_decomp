@@ -44,7 +44,7 @@ BATTLE's layout separates large regions for the battle core, map loading, event 
 Two shared collections are especially visible:
 
 - **Event code:** BATTLE and WORLD contain corresponding script, cooperative-thread, dialog, text, window and sound-queue routines in matching order. Some bodies differ by program settings or behavior; others are stubs where a feature is unused.
-- **Menu code:** WORLD and the EVENT overlays reuse scrolling lists, selection records, graphics, item helpers, text and memory-card routines. BUNIT/CARD/WORLD and EQUIP/JOBSTTS link these small objects in different orders, interleaving their own code. The objects cannot all have been one uninterrupted source file.
+- **Menu code:** WORLD and the EVENT overlays reuse scrolling lists, selection records, graphics, item helpers, text and memory-card routines. Related functions appear in different orders, interleaved with each program's own code. This rules out one unchanged source file compiled in the same order everywhere; separate objects and edited source copies remain possible.
 
 Reuse extends beyond those two collections. OPEN and WLDCORE share window-record and file helpers; OPEN also shares memory-card routines with WORLD and CARD. Shared code is compiled into each program, while calls to resident services use a single implementation already in memory.
 
@@ -66,6 +66,6 @@ There are also traces of imperfect integration. WORLD retains calls to BATTLE-on
 
 ## How much can be recovered
 
-Compiler-profile changes, intervening assembly or library objects, jump-table alignment and noncontiguous read-only data constrain original object boundaries. Different link orders provide another strong clue: objects that move independently were linked separately.
+Compiler-profile changes, intervening assembly or library objects, jump-table alignment and noncontiguous read-only data constrain original object boundaries. Different function orders are useful clues, but cannot alone distinguish separately linked objects from edited source copies.
 
 Matching bytes alone cannot recover a source-file boundary. Adjacent objects can sometimes be rebuilt as one file without changing their output. Conversely, identical instructions can operate on different record layouts. The evidence supports shared event/menu components and program-specific implementations, but not exact original filenames, directory names or every translation unit. Our source organization is a reconstruction of those constraints.
