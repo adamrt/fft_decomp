@@ -22,10 +22,23 @@
 /* Zodiac compatibility by the absolute difference of the two signs, 12 entries:
  * 3 and 9 apart are bad, 4 and 8 good, 6 (the opposite sign) depends on sex,
  * the rest neutral. Serpentarius returns before the table is read. */
-static u8 g_formula_zodiac_compatibility_modifiers[12] = { 0, 0, 0, 1, 2, 0, 3, 0, 2, 1, 0, 0 };
+static u8 g_formula_zodiac_compatibility_modifiers[12] = { ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_NEUTRAL,
+    ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_BAD, ZODIAC_COMPATIBILITY_GOOD, ZODIAC_COMPATIBILITY_NEUTRAL,
+    ZODIAC_COMPATIBILITY_GENDER_DEPENDENT, ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_GOOD,
+    ZODIAC_COMPATIBILITY_BAD, ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_NEUTRAL };
 
 /* The statuses a rider can be inflicted with, one mask per status byte. */
-static u8 g_status_rider_infliction_mask[STATUS_BYTE_COUNT] = { 239, 0, 49, 121, 226 };
+static u8 g_status_rider_infliction_mask[STATUS_BYTE_COUNT]
+    = { STATUS_BYTE_MASK(STATUS_ID_UNNAMED_00) | STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD)
+              | STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
+              | STATUS_BYTE_MASK(STATUS_ID_DEFENDING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING),
+          0,
+          STATUS_BYTE_MASK(STATUS_ID_RERAISE) | STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT)
+              | STATUS_BYTE_MASK(STATUS_ID_CRITICAL),
+          STATUS_BYTE_MASK(STATUS_ID_REGEN) | STATUS_BYTE_MASK(STATUS_ID_PROTECT) | STATUS_BYTE_MASK(STATUS_ID_SHELL)
+              | STATUS_BYTE_MASK(STATUS_ID_HASTE) | STATUS_BYTE_MASK(STATUS_ID_WALL),
+          STATUS_BYTE_MASK(STATUS_ID_FAITH) | STATUS_BYTE_MASK(STATUS_ID_INNOCENT) | STATUS_BYTE_MASK(STATUS_ID_CHARM)
+              | STATUS_BYTE_MASK(STATUS_ID_REFLECT) };
 
 /* Knockback directions: quarter-turn facings in the UNIT_FACING_* order, which differs from
  * move_direction_e. */

@@ -1250,18 +1250,11 @@ effect_script_result_e effect_script_opcode_25_update_all_particles(effect_recor
  * of the 16-bit instruction header, at the record's frame counter. */
 effect_script_result_e effect_script_opcode_26_spawn_emitter_particles(effect_record_t* record) {
     /* A 16-bit header cache preserves the address operands; a direct field read changes them. */
-    union {
-        u16 packed;
-        struct {
-            u16 : 10;
-            u16 emitter_index : 4;
-            u16 : 2;
-        } fields;
-    } header;
+    u16 header;
 
-    header.packed = effect_get_current_script_header(record);
+    header = effect_get_current_script_header(record);
 
-    effect_particle_spawn_from_emitter(record->record_index, record->frame_counter, header.fields.emitter_index, 0);
+    effect_particle_spawn_from_emitter(record->record_index, record->frame_counter, (header >> 10) & 0xf, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }

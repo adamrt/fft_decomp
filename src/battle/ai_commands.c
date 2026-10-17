@@ -856,8 +856,8 @@ static void ai_ability_set_considerations(s32 action_taken) {
  *
  * The 16-bit value update spans skillset and usage_flags so GCC emits the target's
  * single lhu/andi/sh sequence while clearing only the usable bit. A direct
- * status_infliction pointer folds +7 into its base; byte-stepping the typed AI
- * container retains the target's base pointer and named field access.
+ * status_infliction pointer folds +7 into its base; a workspace-relative byte
+ * cursor retains the target's base pointer.
  */
 static void ai_ability_disable_if_only_inflicts_status(ai_ability_entry_t* entry, s32 status_id) {
     ai_data_t* ai = &g_ai_data;
@@ -879,28 +879,29 @@ static void ai_ability_disable_if_only_inflicts_status(ai_ability_entry_t* entry
     {
         s32 status_set;
         s32 mask;
-        ai_data_t* cursor;
+        u8* cursor;
         s32 shift;
 
         status_set = 0;
         mask = 0x80;
-        cursor = &g_ai_data;
+        cursor = (u8*)&g_ai_data;
         shift = status_id;
         for (; status_set < STATUS_BYTE_COUNT; status_set++, shift -= 8) {
             if (status_set == status_id / 8) {
-                if ((cursor->considered_ability.parameters.fields.status_infliction[0] & ((mask >> shift) ^ 0xFF))
+                if ((cursor[offsetof(ai_data_t, considered_ability.parameters.fields.status_infliction)]
+                        & ((mask >> shift) ^ 0xFF))
                     != 0) {
                     return;
                 }
                 /* A separate increment per branch keeps the target's cursor
                  * base; one shared increment folds the field offset into it. */
-                cursor = (ai_data_t*)((u8*)cursor + 1);
+                cursor++;
                 continue;
             }
-            if (cursor->considered_ability.parameters.fields.status_infliction[0] != 0) {
+            if (cursor[offsetof(ai_data_t, considered_ability.parameters.fields.status_infliction)] != 0) {
                 return;
             }
-            cursor = (ai_data_t*)((u8*)cursor + 1);
+            cursor++;
         }
     }
     entry->usage.policy.usable = 0;
