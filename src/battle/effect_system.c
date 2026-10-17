@@ -1839,7 +1839,7 @@ static s32 projectile_arc_calculate_height_term(s32 distance) {
 
 /* Solve the two launch slopes of an arcing projectile toward the target.
  *
- * Lowers the target's aim height from half, to three quarters, to zero of its
+ * Tries aim offsets of half, three quarters, then zero of the target's
  * sprite height until both the arc apex and the target tile floor clear it,
  * storing the chosen height back into the target endpoint. Returns 0 when the
  * target is at zero distance or no height clears. */
@@ -2038,7 +2038,7 @@ static s32 projectile_test_position_for_obstacle(const projectile_obstacle_unit_
 
 /*
  * Step a lobbed projectile along a ballistic arc. The launch pitch comes from
- * ratan2(height, ONE) and is published in both the arc descriptor and
+ * ratan2(launch_slope_q12, ONE) and is published in both the arc descriptor and
  * g_projectile_arctan_angle_mod; the per-step advance is the horizontal
  * component of the gravity impulse. Each step rotates the local (progress,
  * -trajectory term) offset into world space through the yaw matrix and tests
@@ -2050,8 +2050,8 @@ static s32 projectile_test_position_for_obstacle(const projectile_obstacle_unit_
  * `hit` is deliberately left uninitialized: the target reads $s6 after a
  * zero-step loop without ever writing it.
  */
-static s32 projectile_arc_trace_path(const SVECTOR* origin, const s32* height, const s32* distance, SVECTOR* arc,
-    const projectile_obstacle_unit_list_t* obstacles) {
+static s32 projectile_arc_trace_path(const SVECTOR* origin, const s32* launch_slope_q12, const s32* distance,
+    SVECTOR* arc, const projectile_obstacle_unit_list_t* obstacles) {
     SVECTOR rotation;
     SVECTOR step;
     VECTOR position;
@@ -2066,7 +2066,7 @@ static s32 projectile_arc_trace_path(const SVECTOR* origin, const s32* height, c
     s32 hit;
     s32 i;
 
-    angle = ratan2(*height, ONE);
+    angle = ratan2(*launch_slope_q12, ONE);
     arc->vz = angle;
     g_projectile_arctan_angle_mod = angle;
     progress = 0;
@@ -2093,7 +2093,7 @@ static s32 projectile_arc_trace_path(const SVECTOR* origin, const s32* height, c
     for (; i < steps; i++) {
         previous = position;
         progress += advance;
-        term = projectile_arc_calculate_trajectory_term(*height, progress);
+        term = projectile_arc_calculate_trajectory_term(*launch_slope_q12, progress);
         step.vx = progress >> 12;
         step.vy = -term >> 12;
         RotTrans(&step, &position, &position.pad);
@@ -2153,13 +2153,13 @@ s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
  * Set up an arcing projectile from source_id toward target_id (or the tile at
  * tile_position when target_id is -1) and pick the arc to fly.
  *
- * Both candidate arcs from projectile_arc_calculate_trajectory are
- * traced, arc_b first; a clear arc returns target_id. Otherwise an arc blocked
- * by a unit of another team than the source wins (arc_b's first) and returns
+ * Trace arc_b first, then arc_a if it is blocked; a clear arc returns target_id.
+ * Otherwise an arc blocked by a unit of another team than the source wins
+ * (arc_b's first) and returns
  * that unit. Failing that, arc_a's trace is kept and its blocker (or -1) is
  * returned, except when only arc_a was blocked by a unit: then arc_b's
  * terrain-blocked result is restored and -1 returned. g_projectile_launch_slope_q12 receives the
- * chosen arc height. `unused` reserves the target's 16 otherwise unused frame bytes.
+ * chosen launch slope. `unused` reserves the target's 16 otherwise unused frame bytes.
  */
 s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
     s32 unused[4];
@@ -2184,7 +2184,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
     s32 second_other;
     s32 second_count;
     s32 result;
-    s32 height;
+    s32 launch_slope_q12;
 
     g_projectile_source_id = source_id;
     query.source.unit_id = source_id;
@@ -2226,7 +2226,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
         first_other = g_projectile_tile_flags;
     }
     if (hit != 0) {
-        height = arc_b;
+        launch_slope_q12 = arc_b;
         result = target_id;
     } else {
         second_hit = projectile_arc_trace_path(&g_projectile_origin, &arc_a, &query.delta.distance, &arc, obstacles);
@@ -2239,7 +2239,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
             second_other = g_projectile_tile_flags;
         }
         if (second_hit != 0) {
-            height = arc_a;
+            launch_slope_q12 = arc_a;
             result = target_id;
         } else {
             stats = unit_get_stats(source_id);
@@ -2248,25 +2248,25 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
                     (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 g_projectile_step = first_step;
                 g_projectile_position = first_position;
-                height = arc_b;
+                launch_slope_q12 = arc_b;
                 g_projectile_hit_unit_id = first_unit;
                 result = first_unit;
                 g_projectile_step_count = first_count;
             } else if (second_unit != -1
                 && (other = unit_get_stats(second_unit),
                     (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
-                height = arc_a;
+                launch_slope_q12 = arc_a;
                 g_projectile_step_count = second_count;
                 g_projectile_hit_unit_id = second_unit;
                 result = second_unit;
             } else if (second_unit == -1) {
-                height = arc_a;
+                launch_slope_q12 = arc_a;
                 g_projectile_step_count = second_count;
                 g_projectile_hit_unit_id = second_unit;
                 g_projectile_tile_flags = second_other;
                 result = -1;
             } else if (first_unit != -1) {
-                height = arc_a;
+                launch_slope_q12 = arc_a;
                 g_projectile_step_count = second_count;
                 g_projectile_tile_flags = second_other;
                 g_projectile_hit_unit_id = second_unit;
@@ -2274,7 +2274,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
             } else {
                 g_projectile_step = first_step;
                 g_projectile_position = first_position;
-                height = arc_b;
+                launch_slope_q12 = arc_b;
                 g_projectile_hit_unit_id = first_unit;
                 result = -1;
                 g_projectile_tile_flags = first_other;
@@ -2282,7 +2282,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
             }
         }
     }
-    g_projectile_launch_slope_q12 = height;
+    g_projectile_launch_slope_q12 = launch_slope_q12;
     return result;
 }
 
