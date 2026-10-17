@@ -14,6 +14,7 @@ units:
   - {name: file_requests, source: src/main/file_requests.c}
   - {name: game_loop, source: src/main/game_loop.c}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
+  - {name: new_game_caption, source: src/main/new_game_caption.c}
   - {name: open_overlay, source: src/main/open_overlay.c}
   - {name: overlay_loading, source: src/main/overlay_loading.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
   - {name: party, source: src/main/party.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}, {addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
@@ -28,6 +29,7 @@ units:
   - {name: suzuki_smd_modulation_commands, source: src/lib/suzuki/smd_modulation_commands.c}
   - {name: suzuki_smd_records, source: src/lib/suzuki/smd_records.c}
   - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c}
+  - {name: system_callbacks, source: src/main/system_callbacks.c}
   - {name: system_handlers, source: src/main/system_handlers.c}
   - {name: unit_growth, source: src/main/unit_growth.c}
   - {name: unit_status, source: src/main/unit_status.c}
@@ -703,14 +705,14 @@ functions:
   - {addr: 0x80042ab0, size: 108, name: party_init_new_game, hash: f14ad7433eefb74c, unit: startup}
   - {addr: 0x80042b1c, size: 16, name: vector_set_svector, hash: 694486283a46f5f8, unit: startup}
   - {addr: 0x80042b2c, size: 16, name: vector_set_vector, hash: 28901a8f332a5d7a, unit: startup}
-  - {addr: 0x80042b3c, size: 476, name: new_game_set_display_draw, hash: 8715c0b670c3f523, unit: sound_requests, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x80042d18, size: 188, name: new_game_present_caption_frame, hash: 18f2c8600c046389, unit: sound_requests}
-  - {addr: 0x80042dd4, size: 904, name: new_game_fade_in_orbonne_caption, hash: 1ce397677ccb4bb6, unit: sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x8004315c, size: 896, name: new_game_fade_out_orbonne_caption, hash: 588fa5761ae61f7b, unit: sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x800434dc, size: 208, name: system_handle_vsync, hash: a0172ee6d97c1bfd, unit: sound_requests}
-  - {addr: 0x800435ac, size: 8, name: system_handle_draw_sync, hash: 6d64edf91449c1b1, unit: sound_requests}
-  - {addr: 0x800435b4, size: 8, name: file_handle_cd_ready, hash: 6d64edf91449c1b1, unit: sound_requests}
-  - {addr: 0x800435bc, size: 8, name: file_handle_cd_read, hash: 6d64edf91449c1b1, unit: sound_requests}
+  - {addr: 0x80042b3c, size: 476, name: new_game_set_display_draw, hash: 8715c0b670c3f523, unit: new_game_caption, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x80042d18, size: 188, name: new_game_present_caption_frame, hash: 18f2c8600c046389, unit: new_game_caption}
+  - {addr: 0x80042dd4, size: 904, name: new_game_fade_in_orbonne_caption, hash: 1ce397677ccb4bb6, unit: new_game_caption, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x8004315c, size: 896, name: new_game_fade_out_orbonne_caption, hash: 588fa5761ae61f7b, unit: new_game_caption, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x800434dc, size: 208, name: system_handle_vsync, hash: a0172ee6d97c1bfd, unit: system_callbacks}
+  - {addr: 0x800435ac, size: 8, name: system_handle_draw_sync, hash: 6d64edf91449c1b1, unit: system_callbacks}
+  - {addr: 0x800435b4, size: 8, name: file_handle_cd_ready, hash: 6d64edf91449c1b1, unit: system_callbacks}
+  - {addr: 0x800435bc, size: 8, name: file_handle_cd_read, hash: 6d64edf91449c1b1, unit: system_callbacks}
   - {addr: 0x800435c4, size: 156, name: music_load_into_slot, hash: dc882519778a9dfe, unit: sound_requests}
   - {addr: 0x80043660, size: 168, name: music_load_into_free_slot, hash: 185c9e9bb1bb9c55, unit: sound_requests}
   - {addr: 0x80043708, size: 8, name: music_is_loading_stub, hash: 207819bf4ebe3078, unit: sound_requests}
