@@ -191,42 +191,14 @@ void formation_draw_background_tiles(s32 y, s32 unused_1);
 void formation_zodiac_backdrop_thread(void);
 
 /* unit grid */
-extern oriented_quad_t g_formation_cursor_sprite;
-extern oriented_quad_t g_formation_cursor_shadow_sprite;
-extern point16_t g_formation_cursor_position;
-extern point16_t g_formation_cursor_target;
 extern u8 g_formation_cursor_ot_override;
 extern s8 g_formation_selection_cursor_ready;
 extern s8 g_formation_scroll_position;
 extern s8 g_formation_scroll_velocity;
-extern s8 g_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
 extern u8 g_formation_unit_cycle_mode;
 extern u8 g_formation_unit_browse_enabled;
 extern s16 g_formation_selected_unit_index_latch;
-extern oriented_quad_t g_formation_unit_dot_sprite;
-extern s8 g_formation_dot_glow_timer;
-extern s8 g_formation_dot_glow_direction;
-extern rgb24_t g_formation_away_unit_color;
-extern rgb24_t g_formation_saved_sprite_color;
 extern rgb24_t g_formation_dimmed_sprite_color;
-extern rgb24_t g_formation_normal_sprite_color;
-extern oriented_quad_t g_formation_label_cant_equip;
-extern oriented_quad_t g_formation_label_equipping;
-extern oriented_quad_t g_formation_label_leaving;
-extern oriented_quad_t g_formation_label_missing;
-extern menu_sprite_cell_t g_formation_label_tiles[];
-extern menu_sprite_cell_t g_formation_label_tiles_bottom[];
-extern u8 g_formation_grid_transition_frame;
-extern u8 g_formation_grid_return_frame;
-extern u8 g_formation_grid_return_done;
-
-/* Cursor trail position history, reset by formation_reset_slots_and_frame_tpages; entry 7 is the newest and
- * x is -1 in an unused entry. */
-extern point16_t g_formation_cursor_trail[8];
-extern u8 g_formation_cursor_trail_brightness[8];
-
-/* Three consecutive 20-byte sprite records. */
-extern oriented_quad_t g_formation_shadow_egg_sprites[3];
 
 /* get_mode and get_shade take the unit slot index; NULL selects the default. */
 s32 formation_update_grid(s16 background_y, s16 toggle_banner, s16 allow_browse, s16 input, s16 locked,
@@ -250,7 +222,6 @@ extern texture_source_t g_formation_sprite_sources[];
 extern u8 g_formation_sprite_index_by_identity[];
 extern u8 g_formation_unit_slide_pending;
 extern volatile u8 g_formation_unit_slide_frame;
-extern u8 g_formation_sprite_slide_frame;
 
 void formation_prepare_sprites(void);
 void formation_build_sprites(void);
@@ -266,26 +237,6 @@ u8 formation_update_sprite_slide(void);
 extern u8 g_formation_unit_banner_enabled;
 extern u8 g_formation_saved_banner_enabled;
 extern s8 g_formation_banner_slide_step;
-extern u8 g_formation_stat_display_mode; /* menu_unit_readout_e, HP to BRAVE_FAITH */
-extern u8 g_formation_stat_bar_window_top[12];
-extern u8 g_formation_stat_bar_window_bottom[12];
-extern menu_draw_number_command_t g_formation_gauge_value_number;
-extern menu_draw_number_command_t g_formation_gauge_max_number;
-extern menu_draw_number_command_t g_formation_level_number;
-extern menu_draw_number_command_t g_formation_experience_number;
-extern menu_draw_number_command_t g_formation_brave_number;
-extern menu_draw_number_command_t g_formation_faith_number;
-extern menu_draw_number_command_t g_formation_brave_number_wide;
-extern menu_draw_number_command_t g_formation_faith_number_wide;
-extern rgb24_t g_formation_hp_gauge_colors[4];
-extern rgb24_t g_formation_mp_gauge_colors[4];
-extern rgb24_t g_formation_ct_gauge_colors[4];
-extern CVECTOR g_formation_panel_bar_colors[];
-extern image_layout_t g_formation_summary_label_sprite_params[];
-extern image_layout_t g_formation_summary_value_sprite_params[];
-extern RECT g_formation_status_panel_origin;
-extern image_layout_t g_formation_status_sprite_params[];
-extern image_layout_t g_formation_status_portrait_params;
 extern u8 g_formation_banner_active;
 extern menu_entry_t g_formation_banner_menu;
 extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else countdown */
@@ -304,31 +255,13 @@ s32 formation_banner_countdown(s32 message_id, s32 frames);
 extern menu_unit_status_identity_t g_formation_selected_unit_identity;
 extern struct unit_panel_record g_formation_selected_unit_stat_detail;
 extern menu_text_binding_t g_formation_selected_unit_text_binding;
-extern menu_number_entry_t g_formation_selected_unit_number_entries[];
 extern unit_panel_summary_t g_formation_comparison_unit_stat_summary;
 extern menu_unit_status_identity_t g_formation_comparison_unit_identity;
-extern menu_number_entry_t g_formation_comparison_unit_number_entries[];
 extern unit_panel_buffer_t g_formation_stat_preview_panel_frames[2];
 extern unit_panel_thread_t g_formation_stat_preview_panel_thread_params;
 extern s32 g_formation_preview_stats_window_active;
 extern unit_panel_thread_t g_formation_change_banner_thread_params;
 extern unit_panel_thread_t g_formation_equipment_panel_thread_params;
-
-/* Panel scratch aliases inside g_thread_contexts[0] and [14], at
- * +0x100 and +0x200 in each slot's stack. These stay separate symbols;
- * the palette areas hold one slot per page. */
-extern menu_status_panel_editor_packet_t g_formation_selected_unit_summary_packets[2];
-extern menu_status_panel_packet_t g_formation_selected_unit_status_packets[2];
-extern u8 g_formation_selected_unit_stat_text_image[];
-extern u8 g_formation_selected_unit_name_text_image[];
-extern menu_unit_number_images_t g_formation_selected_unit_number_text_images;
-extern palette_t g_formation_selected_unit_portrait_palettes[2];
-extern menu_status_panel_editor_packet_t g_formation_comparison_unit_summary_packets[2];
-extern menu_status_panel_packet_t g_formation_comparison_unit_status_packets[2];
-extern u8 g_formation_comparison_unit_stat_text_image[];
-extern u8 g_formation_comparison_unit_name_text_image[];
-extern menu_unit_number_images_t g_formation_comparison_unit_number_text_images;
-extern palette_t g_formation_comparison_unit_portrait_palettes[2];
 
 void formation_stage_selected_unit(void);
 void formation_restage_on_selection_change(void);

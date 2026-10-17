@@ -647,16 +647,6 @@ typedef struct menu_sort_orders {
 
 extern menu_sort_orders_t g_menu_sort_orders;
 
-/* Views of the individual menu sort orders for the WORLD save-image
- * copies (save_build_image, save_restore_image),
- * whose code the member spelling changes. */
-extern s8 g_formation_sort_order[8];
-extern u8 g_weapons_and_shields_sort_order[7];
-extern u8 g_headgear_sort_order[5];
-extern u8 g_body_armor_sort_order[5];
-extern u8 g_accessories_sort_order[7];
-extern u8 g_other_items_sort_order[5];
-
 /* Packed sort-key orders ending in -1. WORLD slot 0 points to Formation's
  * formation order (formation_sort_key_e); EQUIP slot 0 is null. Slots 1..5
  * in both programs point to the five item-category orders (item_sort_key_e).

@@ -65,13 +65,11 @@ extern u32 g_screen_input_frame_previous;
 extern u32 g_screen_input_frame_initial_repeat_counter;
 extern u32 g_screen_input_frame_repeat_counter;
 extern u32 g_screen_input_frame_secondary_repeat_counter;
-extern u16 g_screen_input_previous, g_screen_input_latched_button;
+extern u16 g_screen_input_latched_button;
 extern u32 g_screen_input_primary_repeat;
 extern s32 g_screen_input_primary_repeat_latched;
 extern s32 g_screen_input_secondary_repeat_latched;
-extern u8 g_screen_input_triangle_latch;
 extern u8 g_screen_input_triangle_latched;
-extern u8 g_screen_input_blocked_state;
 
 /* Countdown maintained by screen_input_update_lockout. Volatile:
  * that routine reloads it after the zero test and again before the running
@@ -174,10 +172,6 @@ extern u16 g_screen_disabled_number_clut_normal;
 extern u16 g_screen_disabled_number_clut_alt;
 extern u16 g_screen_active_clut_front;
 extern u16 g_screen_active_clut_back;
-extern u16 g_screen_hp_gauge_clut;
-extern u16 g_screen_mp_gauge_clut;
-extern u16 g_screen_ct_gauge_clut;
-extern u16 g_screen_background_clut;
 extern u8 g_screen_use_alternate_palette;
 extern s32 g_screen_color_red;
 extern s32 g_screen_color_green;
@@ -286,10 +280,6 @@ extern u8 g_screen_prompt_active;
 /* Result slot per menu (-1 while none); screen_reset_selection_results clears all 16. */
 extern s16 g_screen_selection_results[16];
 
-/* Per-piece 4.12 fixed-point x/y scale; a negative factor flips that axis. */
-extern menu_button_piece_t g_screen_button_pieces[];
-extern point16_t g_screen_button_piece_scales[];
-
 void screen_reset_selection_results(void);
 s16 screen_init_cursor_position(u8 index, s16 value);
 s32 screen_input_read(s32 unused_0);
@@ -350,8 +340,6 @@ typedef enum screen_text_section {
 } screen_text_section_e;
 
 extern s32 g_screen_text_section_offsets[];
-extern u8 g_screen_text_shop_menu_labels_data[];
-extern u8 g_screen_text_name_entry_keys_data[];
 
 u8* screen_text_get_resident(screen_text_data_e index);
 u8* screen_text_bind_section(u32 index);

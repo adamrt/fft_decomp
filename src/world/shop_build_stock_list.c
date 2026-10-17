@@ -8,6 +8,15 @@
 #include "fft/shop.h"
 #include "psx/types.h"
 
+/* Two-byte shop availability mask, stored most significant byte first: bit
+ * 0x8000 >> location id is set when that town's outfitter sells the item. */
+typedef struct shop_item_availability {
+    u8 high;
+    u8 low;
+} shop_item_availability_t;
+
+extern shop_item_availability_t g_shop_item_availability[];
+
 /* Build the -1 terminated item list offered by a normal shop or the Fur Shop
  * (poachers' den), sorted, and return its count.
  *

@@ -24,6 +24,60 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* grid and stat-bar graphics */
+extern oriented_quad_t g_formation_cursor_sprite;
+extern oriented_quad_t g_formation_cursor_shadow_sprite;
+extern point16_t g_formation_cursor_position;
+extern point16_t g_formation_cursor_target;
+extern s8 g_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
+extern oriented_quad_t g_formation_unit_dot_sprite;
+extern s8 g_formation_dot_glow_timer;
+extern s8 g_formation_dot_glow_direction;
+extern rgb24_t g_formation_away_unit_color;
+extern rgb24_t g_formation_saved_sprite_color;
+extern rgb24_t g_formation_normal_sprite_color;
+extern oriented_quad_t g_formation_label_cant_equip;
+extern oriented_quad_t g_formation_label_equipping;
+extern oriented_quad_t g_formation_label_leaving;
+extern oriented_quad_t g_formation_label_missing;
+extern menu_sprite_cell_t g_formation_label_tiles[];
+extern menu_sprite_cell_t g_formation_label_tiles_bottom[];
+extern u8 g_formation_grid_transition_frame;
+extern u8 g_formation_grid_return_frame;
+extern u8 g_formation_grid_return_done;
+
+/* Cursor trail position history, reset by formation_reset_slots_and_frame_tpages; entry 7 is the newest and
+ * x is -1 in an unused entry. */
+extern point16_t g_formation_cursor_trail[8];
+extern u8 g_formation_cursor_trail_brightness[8];
+
+/* Three consecutive 20-byte sprite records. */
+extern oriented_quad_t g_formation_shadow_egg_sprites[3];
+extern u8 g_formation_sprite_slide_frame;
+extern u8 g_formation_stat_display_mode; /* menu_unit_readout_e, HP to BRAVE_FAITH */
+extern u8 g_formation_stat_bar_window_top[12];
+extern u8 g_formation_stat_bar_window_bottom[12];
+extern menu_draw_number_command_t g_formation_gauge_value_number;
+extern menu_draw_number_command_t g_formation_gauge_max_number;
+extern menu_draw_number_command_t g_formation_level_number;
+extern menu_draw_number_command_t g_formation_experience_number;
+extern menu_draw_number_command_t g_formation_brave_number;
+extern menu_draw_number_command_t g_formation_faith_number;
+extern menu_draw_number_command_t g_formation_brave_number_wide;
+extern menu_draw_number_command_t g_formation_faith_number_wide;
+extern rgb24_t g_formation_hp_gauge_colors[4];
+extern rgb24_t g_formation_mp_gauge_colors[4];
+extern rgb24_t g_formation_ct_gauge_colors[4];
+extern u16 g_screen_hp_gauge_clut;
+extern u16 g_screen_mp_gauge_clut;
+extern u16 g_screen_ct_gauge_clut;
+extern u16 g_screen_background_clut;
+
+extern menu_button_piece_t g_screen_button_pieces[];
+
+/* Per-piece 4.12 fixed-point x/y scale; a negative factor flips that axis. */
+extern point16_t g_screen_button_piece_scales[];
+
 /* Screen x and texture u of one background tile; two alternating rows of four. */
 typedef struct formation_background_tile {
     u16 x;
