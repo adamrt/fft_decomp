@@ -207,13 +207,6 @@ typedef enum deploy_prompt_thread_slot {
 } deploy_prompt_thread_slot_e;
 
 /* text */
-/* Overlay text file: offsets are relative to the data following the header. */
-typedef struct deploy_text_file {
-    s32 section_offsets[32];
-    u8 section_data[0];
-} deploy_text_file_t;
-typedef char deploy_text_file_size_must_be_128[(sizeof(deploy_text_file_t) == 128) ? 1 : -1];
-
 /* g_scenario_event_condition_blocks help text, installed as TEXT_SECTION_OVERLAY_SCREEN */
 extern u8* g_deploy_help_text_section;
 

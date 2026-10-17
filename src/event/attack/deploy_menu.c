@@ -23,6 +23,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Overlay text-file header: offsets are relative to the data following the header. */
+typedef struct deploy_text_header {
+    s32 section_offsets[32];
+} deploy_text_header_t;
+typedef char deploy_text_header_size_must_be_128[(sizeof(deploy_text_header_t) == 128) ? 1 : -1];
+
 /* Run the deployment screen's field-help cursor: the D-pad moves a bobbing hand between the status
  * panel's fields, Circle opens the help text for the field under it in the parent thread's slot,
  * and Cross closes it. Input waits while that help text is open. */
@@ -294,14 +300,14 @@ void deploy_run_help_cursor(void) {
 /* Point the battle text sections at an overlay text file: 32 offsets
  * followed by the section data they are relative to. The event-message
  * section is left as it is. */
-static void text_init_battle_pointers_from_file(deploy_text_file_t* file) {
+static void text_init_battle_pointers_from_file(deploy_text_header_t* file) {
     s32* offsets = file->section_offsets;
     s32 i = 0;
     u8* data;
     u8** table;
 
     /* Section data follows the 32-entry offset header. */
-    data = file->section_data;
+    data = (u8*)(file + 1);
     table = g_text_section_pointers;
     do {
         if (i != TEXT_SECTION_EVENT_MESSAGES) {
@@ -348,7 +354,7 @@ static void text_init_battle_pointers_from_file(deploy_text_file_t* file) {
  */
 void deploy_build_strings(void) {
     u8* dst = g_scenario_table;
-    deploy_text_file_t* file = heap_alloc(0x18000);
+    deploy_text_header_t* file = heap_alloc(0x18000);
     s32 i;
     s32 j;
     u8* src;
