@@ -11,6 +11,7 @@ defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 112, VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y
 
 units:
   - {name: ability_checks, source: src/world/ability_checks.c}
+  - {name: ability_list_text, source: src/world/ability_list_text.c}
   - {name: ability_lists, source: src/world/ability_lists.c}
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
@@ -257,9 +258,9 @@ functions:
   - {addr: 0x800ecf20, size: 484, name: menu_run_icon_selection_loop, hash: 250b9e0de59e73e5, unit: icon_selection}
   - {addr: 0x800ed104, size: 1216, name: at_list_build_ability_preview, hash: 7287e112f97743bf, unit: icon_selection}
   - {addr: 0x800ed5c4, size: 48, name: at_list_ability_preview_thread, hash: e02dbd58ee62ae8e, unit: icon_selection}
-  - {addr: 0x800ed5f4, size: 488, name: menu_draw_text_columns_narrow, hash: e8638c05b3faf0ec, unit: icon_selection}
-  - {addr: 0x800ed7dc, size: 700, name: menu_redraw_text_page_on_scroll_in_rect, hash: 4ebf226b668e0eb2, unit: icon_selection}
-  - {addr: 0x800eda98, size: 16, name: script_get_event_initial_repeat_counter, hash: 7fd0b897319e3c44, unit: icon_selection}
+  - {addr: 0x800ed5f4, size: 488, name: menu_draw_text_columns_narrow, hash: e8638c05b3faf0ec, unit: ability_list_text}
+  - {addr: 0x800ed7dc, size: 700, name: menu_redraw_text_page_on_scroll_in_rect, hash: 4ebf226b668e0eb2, unit: ability_list_text}
+  - {addr: 0x800eda98, size: 16, name: script_get_event_initial_repeat_counter, hash: 7fd0b897319e3c44, unit: ability_list_text}
   - {addr: 0x800edaa8, size: 4172, name: ability_list_scrolling_thread, hash: ea266beac968435e, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x800eeaf4, size: 16, name: message_set_duration, hash: 131a42e0fb284d73, unit: event_resources}
   - {addr: 0x800eeb04, size: 288, name: menu_size_entry_to_text, hash: d7e0fc315bb97241, unit: event_resources}

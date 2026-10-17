@@ -9,6 +9,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 53, VARIANT_THREAD_TABLE_SLOT_COUNT: 16}
 
 units:
+  - {name: ability_list_text, source: src/battle/ability_list_text.c}
   - {name: action_effects, source: src/battle/action_effects.c, data: [{addr: 0x800943c4, size: 32, hash: 21037ee521333e56}]}
   - {name: action_menus, source: src/battle/action_menus.c, data: [{addr: 0x80096244, size: 4, hash: df3f619804a92fdb}, {addr: 0x80096248, size: 128, hash: 38723a2e5e8a17aa}]}
   - {name: action_outcomes, source: src/battle/action_outcomes.c, data: [{addr: 0x80193868, size: 16, hash: 374708fff7719dd5}]}
@@ -877,9 +878,9 @@ functions:
   - {addr: 0x80138ed8, size: 484, name: menu_run_icon_selection_loop, hash: 8cfe22df483b0535, unit: icon_selection}
   - {addr: 0x801390bc, size: 1216, name: at_list_build_ability_preview, hash: 6e702f32cf54faba, unit: icon_selection}
   - {addr: 0x8013957c, size: 48, name: at_list_ability_preview_thread, hash: a3d09a882786de18, unit: icon_selection}
-  - {addr: 0x801395ac, size: 848, name: menu_draw_text_columns_narrow, hash: d75e80a24787682e, unit: icon_selection}
-  - {addr: 0x801398fc, size: 736, name: menu_redraw_text_page_on_scroll_in_rect, hash: 5123e70a9f03a283, unit: icon_selection}
-  - {addr: 0x80139bdc, size: 16, name: script_get_event_initial_repeat_counter, hash: 1bc08cac58cdde01, unit: icon_selection}
+  - {addr: 0x801395ac, size: 848, name: menu_draw_text_columns_narrow, hash: d75e80a24787682e, unit: ability_list_text}
+  - {addr: 0x801398fc, size: 736, name: menu_redraw_text_page_on_scroll_in_rect, hash: 5123e70a9f03a283, unit: ability_list_text}
+  - {addr: 0x80139bdc, size: 16, name: script_get_event_initial_repeat_counter, hash: 1bc08cac58cdde01, unit: ability_list_text}
   - {addr: 0x80139bec, size: 4848, name: ability_list_scrolling_thread, hash: a4bba4000533dd46}
   - {addr: 0x8013aedc, size: 16, name: message_set_duration, hash: e02feb0de282649e, unit: event_resources}
   - {addr: 0x8013aeec, size: 288, name: menu_size_entry_to_text, hash: c07f6322a91d987d, unit: event_resources}
