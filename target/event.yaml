@@ -1371,7 +1371,7 @@ functions:
   - {addr: 0x801bfa18, size: 44, name: menu_clear_selection_records, hash: 8c01966bfacc9bba, unit: selection_records}
   - {addr: 0x801bfa44, size: 60, name: menu_clear_selection_record, hash: fdca62f04b6534e1, unit: selection_records}
   - {addr: 0x801bfa80, size: 76, name: menu_set_selection_record, hash: e1f2abd2a5f39602, source: src/lib/menu/menu_set_selection_record.c}
-  - {addr: 0x801bfacc, size: 252, name: menu_get_selection_record, hash: cc67bd98802fd36b}
+  - {addr: 0x801bfacc, size: 252, name: menu_get_selection_record, hash: cc67bd98802fd36b, source: src/lib/menu/menu_get_selection_record.c}
   - {addr: 0x801bfbc8, size: 464, name: menu_build_scaled_draw_area_packets, hash: a19dedeaac3d305d, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
   - {addr: 0x801bfd98, size: 52, name: menu_init_scaled_draw_area_packets, hash: d2f5c8f99a47b099, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
   - {addr: 0x801bfdcc, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
