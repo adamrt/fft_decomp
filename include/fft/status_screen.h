@@ -15,8 +15,6 @@
 void status_screen_thread(void);
 
 /* numbers panel */
-extern RECT g_status_screen_numbers_texture_window; /* texture window for the menu page */
-
 void status_screen_init_numbers_frame(RECT* bounds, menu_palette_primitives_t* menu);
 void status_screen_submit_numbers_frame(menu_palette_primitives_t* display);
 void status_screen_numbers_thread(void);
@@ -44,9 +42,6 @@ typedef struct status_screen_unit_jobs {
 } status_screen_unit_jobs_t;
 typedef char status_screen_unit_jobs_size_must_be_158[(sizeof(status_screen_unit_jobs_t) == 158) ? 1 : -1];
 
-extern s8 g_status_screen_active_page; /* menu_job_list_step_e; each page's function returns the next one */
-extern u8 g_status_screen_initialized;
-extern u8 g_status_screen_previous_event_mode;
 extern status_screen_unit_jobs_t* g_status_screen_unit_data[];
 
 /* Advance JOBSTTS one frame; return its ordering table while open, or zero on close. */
@@ -58,8 +53,6 @@ void status_screen_init_unit_jobs(s32 unit_id);
 enum { STATUS_SCREEN_SCRIPT_END = 0x16 };
 
 enum { STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6 };
-
-extern u8 g_status_screen_menu_palette_image[];
 
 /* Window right edge; WORLD's twin stores it to g_screen_window_right_x. */
 extern s16 g_status_screen_menu_window_right_x;
@@ -97,14 +90,8 @@ typedef struct status_screen_gfx_context {
 } status_screen_gfx_context_t;
 typedef char status_screen_gfx_context_size_must_be_244[(sizeof(status_screen_gfx_context_t) == 244) ? 1 : -1];
 
-extern status_screen_gfx_context_t* g_status_screen_gfx_context_base;
-extern status_screen_gfx_context_t g_status_screen_gfx_contexts[];
 extern u16 g_status_screen_gfx_draw_area_capacity;
 extern u16 g_status_screen_gfx_draw_move_capacity;
-extern s16 g_status_screen_gfx_line_f2_count;
-extern s16 g_status_screen_gfx_poly_f4_count;
-extern s16 g_status_screen_gfx_poly_g4_count;
-extern s16 g_status_screen_gfx_tile_count;
 extern u16 g_status_screen_gfx_background_texture_page;
 
 /* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in status_screen_gfx_init_contexts. */

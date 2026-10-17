@@ -332,13 +332,6 @@ typedef struct menu_palette_primitives {
 } menu_palette_primitives_t;
 typedef char menu_palette_primitives_size_must_be_236[(sizeof(menu_palette_primitives_t) == 236) ? 1 : -1];
 
-/* One 0x100-byte slot holding a panel's palette primitive set. */
-typedef struct menu_palette_slot {
-    menu_palette_primitives_t primitives; /* 0x00 */
-    u8 _padding_ec[0x14];                 /* preserves the 0x100-byte allocation stride */
-} menu_palette_slot_t;
-typedef char menu_palette_slot_size_must_be_256[(sizeof(menu_palette_slot_t) == 256) ? 1 : -1];
-
 /* Status-panel packet block (0x1d8 bytes), doubled the same way as the editor
  * block. sprites[6] doubles as the scroll cursor: the display threads write
  * its texture window from the scroll row/column. */

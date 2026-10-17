@@ -631,7 +631,6 @@ s32 suzuki_sound_get_largest_free_block(void);
 void suzuki_sound_clear_memory(void* destination, s32 size);
 
 /* driver */
-
 /* Driver state shared by multiple sound-engine features. */
 extern s16
     g_suzuki_sound_sfx_channel_count; /* channels suzuki_sound_start_sfx fills, one per stream of a sound: always 2 */

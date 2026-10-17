@@ -48,6 +48,24 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* One 0x100-byte slot holding a panel's palette primitive set. */
+typedef struct menu_palette_slot {
+    menu_palette_primitives_t primitives; /* 0x00 */
+    u8 _padding_ec[0x14];                 /* preserves the 0x100-byte allocation stride */
+} menu_palette_slot_t;
+typedef char menu_palette_slot_size_must_be_256[(sizeof(menu_palette_slot_t) == 256) ? 1 : -1];
+
+/* One cursor animation threshold and its signed screen offset. */
+typedef struct menu_cursor_bob_entry {
+    s8 threshold;
+    s8 offset;
+} menu_cursor_bob_entry_t;
+typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t) == 2 ? 1 : -1];
+
+/* The idle and active curves: (threshold, offset) pairs ending at threshold 0; entry 0 holds the modulus. */
+extern menu_cursor_bob_entry_t g_menu_cursor_bob_thresholds[];
+extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
+
 /* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
 typedef struct menu_unit_status_offsets {
     menu_status_panel_draw_offset_t a; /* 0x00 */

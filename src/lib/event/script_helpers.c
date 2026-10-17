@@ -35,6 +35,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern RECT g_status_screen_numbers_texture_window; /* texture window for the menu page */
+
 /* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of
  * VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD); menu_alloc_memory yields until a run of
  * free pages and a free slot exist. */

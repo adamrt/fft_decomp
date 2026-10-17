@@ -9,13 +9,6 @@
 #include "psx/types.h"
 
 /* bobbing cursor */
-/* One cursor animation threshold and its signed screen offset. */
-typedef struct menu_cursor_bob_entry {
-    s8 threshold;
-    s8 offset;
-} menu_cursor_bob_entry_t;
-typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t) == 2 ? 1 : -1];
-
 /* Task words of a thread that bobs a menu cursor: menu_get_cursor_bob_offset
  * reads the timer, which the thread advances by g_script_event_speed each
  * frame and resets whenever it sets or clears the active flag. */
@@ -23,10 +16,6 @@ enum {
     MENU_CURSOR_THREAD_WORD_BOB_TIMER = 0,
     MENU_CURSOR_THREAD_WORD_BOB_ACTIVE = 1 /* 2 after a press or while input is elsewhere: the active curve */
 };
-
-/* The idle and active curves: (threshold, offset) pairs ending at threshold 0; entry 0 holds the modulus. */
-extern menu_cursor_bob_entry_t g_menu_cursor_bob_thresholds[];
-extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
 
 /* The vertical offset of the current thread's cursor this frame. */
 s32 menu_get_cursor_bob_offset(s32 mode);
