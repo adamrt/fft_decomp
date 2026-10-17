@@ -117,13 +117,6 @@ typedef struct ranges16 {
 } ranges16_t;
 typedef char ranges16_size_must_be_4[sizeof(ranges16_t) == 4 ? 1 : -1];
 
-/* Signed 32-bit lower and upper bounds. */
-typedef struct ranges32 {
-    s32 min;
-    s32 max;
-} ranges32_t;
-typedef char ranges32_size_must_be_8[sizeof(ranges32_t) == 8 ? 1 : -1];
-
 /* textures */
 /* Eight-bit texture coordinates within a PS1 texture page. */
 typedef struct uv8 {

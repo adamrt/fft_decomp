@@ -1173,7 +1173,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: editor, source: src/event/debugchr/editor.c, data: [{addr: 0x801ce2e4, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801cec44, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cec94, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cece4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cece8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cecec, size: 4, hash: df3f619804a92fdb}]}
+  - {name: editor, source: src/event/debugchr/editor.c, rodata: [{addr: 0x801c5ee4, size: 352, hash: c3896812912ae940}], data: [{addr: 0x801ce2e4, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801cec44, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cec94, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cece4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cece8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cecec, size: 4, hash: df3f619804a92fdb}]}
   - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x801c52b0, size: 32, hash: 66687aadf862bd77}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
@@ -1285,9 +1285,9 @@ data:
   - {addr: 0x801c5c94, name: g_unit_panel_editor_numeric_descriptor_a}
   - {addr: 0x801c5d48, name: g_unit_panel_editor_numeric_descriptor_b}
   - {addr: 0x801c5e20, name: g_menu_decimal_glyph}
-  - {addr: 0x801c5e34, name: g_unit_editor_template}
-  - {addr: 0x801c5ee4, name: g_unit_editor_template_normal}
-  - {addr: 0x801c5f94, name: g_unit_editor_template_special}
+  - {addr: 0x801c5e34, name: g_unit_editor_field_ranges}
+  - {addr: 0x801c5ee4, name: g_unit_editor_nonmonster_field_ranges}
+  - {addr: 0x801c5f94, name: g_unit_editor_monster_field_ranges}
   - {addr: 0x801c6044, name: g_unit_editor_fields}
   - {addr: 0x801c6198, name: g_unit_panel_panel_status_uv_rects}
   - {addr: 0x801c6530, name: g_unit_panel_panel_status_scales}

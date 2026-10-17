@@ -24,6 +24,78 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+typedef struct unit_editor_field_range {
+    s32 min;
+    s32 max;
+} unit_editor_field_range_t;
+typedef char unit_editor_field_range_size_must_be_8[sizeof(unit_editor_field_range_t) == 8 ? 1 : -1];
+
+/* The 22nd field is CT. Retail copies only the first 21 ranges when changing
+ * unit type, leaving the CT row at its original 1..100 range. */
+extern unit_editor_field_range_t g_unit_editor_field_ranges[22];
+static const unit_editor_field_range_t g_unit_editor_nonmonster_field_ranges[22] = {
+    { 1, 99 },    /* level */
+    { 1, 99 },    /* experience */
+    { 1, 153 },   /* job */
+    { 0, 100 },   /* Brave */
+    { 0, 100 },   /* Faith */
+    { 0, 12 },    /* zodiac */
+    { 1, 9 },     /* Move */
+    { 1, 9 },     /* Jump */
+    { 1, 99 },    /* Speed */
+    { 1, 143 },   /* right hand */
+    { 1, 143 },   /* left hand */
+    { 144, 171 }, /* head */
+    { 172, 207 }, /* body */
+    { 208, 239 }, /* accessory */
+    { 1, 187 },   /* primary skillset */
+    { 1, 187 },   /* secondary skillset */
+    { 428, 453 }, /* reaction ability */
+    { 454, 485 }, /* support ability */
+    { 486, 509 }, /* movement ability */
+    { 1, 999 },   /* HP */
+    { 1, 999 },   /* MP */
+    { 1, 100 },   /* CT */
+};
+static const unit_editor_field_range_t g_unit_editor_monster_field_ranges[22] = {
+    { 1, 99 },    /* level */
+    { 1, 99 },    /* experience */
+    { 1, 153 },   /* job */
+    { 0, 100 },   /* Brave */
+    { 0, 100 },   /* Faith */
+    { 0, 12 },    /* zodiac */
+    { 1, 9 },     /* Move */
+    { 1, 9 },     /* Jump */
+    { 1, 99 },    /* Speed */
+    { 1, 143 },   /* right hand */
+    { 1, 143 },   /* left hand */
+    { 144, 171 }, /* head */
+    { 172, 207 }, /* body */
+    { 208, 239 }, /* accessory */
+    { 1, 356 },   /* primary skillset */
+    { 1, 356 },   /* secondary skillset */
+    { 1, 356 },   /* reaction ability */
+    { 1, 356 },   /* support ability */
+    { 1, 356 },   /* movement ability */
+    { 1, 999 },   /* HP */
+    { 1, 999 },   /* MP */
+    { 1, 100 },   /* CT */
+};
+
+extern u8 g_unit_editor_unit_ids[UNIT_SLOT_COUNT];
+extern help_navigation_record_t g_unit_editor_fields[22];
+extern s32 g_unit_editor_field_edit_active;
+extern unit_panel_thread_t g_unit_editor_status_display_thread_params;
+
+/* Views of g_unit_panel_selected_unit_status.gauges[i].value (values[3 * i])
+ * and gauges[i].max (the *_max 16-bit values): debug_unit_editor_apply_values
+ * reaches the values from their own base register and the limits by absolute
+ * address, which the member spelling does not reproduce. */
+extern s16 g_unit_editor_values[];
+extern s16 g_unit_editor_hp_max;
+extern s16 g_unit_editor_mp_max;
+extern s16 g_unit_editor_ct_max;
+
 static POLY_FT4 g_unit_editor_gfx_render_buffers[2][30] = { 0 };
 static POLY_FT4 g_unit_editor_cursor_polys[2] = { 0 };
 static POLY_FT4 g_unit_editor_cursor_shade_polys[2] = { 0 };
@@ -128,14 +200,16 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     unit_panel_load_selected();
     g_unit_editor_selected_unit_slot = 0;
 
-    /* The template store is repeated in both arms: jump2 cross-jumps the
+    /* The range copy is repeated in both arms: jump2 cross-jumps the
      * identical tails only after sched2, so the join keeps the store ahead of
      * the thread-setup constant loads. */
     if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
-        mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_special, 0xa8);
+        mem_copy_bytes_nonempty(
+            g_unit_editor_field_ranges, g_unit_editor_monster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
         g_unit_editor_fields[15].destination[0] = 0xe;
     } else {
-        mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_normal, 0xa8);
+        mem_copy_bytes_nonempty(
+            g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
         g_unit_editor_fields[15].destination[0] = 0xe;
     }
 
@@ -342,7 +416,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
  * field editor and CROSS closes the panels and returns. Field editor: the D-pad follows
  * each field's links to its neighbors, CIRCLE starts or commits an edit and CROSS commits
  * one or goes back to unit selection. While editing, RIGHT/UP and LEFT/DOWN step the value
- * (by 10 while L1 is held) within the field template's range, TRIANGLE zeroes rows 9 to
+ * (by 10 while L1 is held) within the field's range, TRIANGLE zeroes rows 9 to
  * 13, and every change is written back to the battle unit. Each level step (row 0) also
  * applies one level's stat growth or its reversal. */
 void debugchr_editor_entrypoint(void) {
@@ -429,10 +503,12 @@ void debugchr_editor_entrypoint(void) {
     unit_panel_load_selected();
     g_unit_editor_selected_unit_slot = 0;
     if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
-        mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_special, 0xA8);
+        mem_copy_bytes_nonempty(
+            g_unit_editor_field_ranges, g_unit_editor_monster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
         g_unit_editor_fields[15].destination[0] = 0xE;
     } else {
-        mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_normal, 0xA8);
+        mem_copy_bytes_nonempty(
+            g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges, 21 * sizeof(unit_editor_field_range_t));
         g_unit_editor_fields[15].destination[0] = 0xE;
     }
 
@@ -491,9 +567,11 @@ loop_outer:
             g_unit_panel_selected_unit_status.unit_index = unit_index;
             unit_panel_load_selected();
             if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
-                mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_special, 0xA8);
+                mem_copy_bytes_nonempty(g_unit_editor_field_ranges, g_unit_editor_monster_field_ranges,
+                    21 * sizeof(unit_editor_field_range_t));
             } else {
-                mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_normal, 0xA8);
+                mem_copy_bytes_nonempty(g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges,
+                    21 * sizeof(unit_editor_field_range_t));
             }
             g_unit_editor_fields[15].destination[0] = mark;
 
@@ -520,9 +598,11 @@ loop_outer:
             g_unit_panel_selected_unit_status.unit_index = unit_index;
             unit_panel_load_selected();
             if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
-                mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_special, 0xA8);
+                mem_copy_bytes_nonempty(g_unit_editor_field_ranges, g_unit_editor_monster_field_ranges,
+                    21 * sizeof(unit_editor_field_range_t));
             } else {
-                mem_copy_bytes_nonempty(g_unit_editor_template, g_unit_editor_template_normal, 0xA8);
+                mem_copy_bytes_nonempty(g_unit_editor_field_ranges, g_unit_editor_nonmonster_field_ranges,
+                    21 * sizeof(unit_editor_field_range_t));
             }
             g_unit_editor_fields[15].destination[0] = mark;
             /* Keeps the `li v0,2` for the redraw store below the byte store. */
@@ -616,14 +696,14 @@ editor:
                     value = g_unit_editor_current_field->value;
                     cur = *value;
                     /* Shared pointers or a combined range test change address materialization. */
-                    up_lo = &g_unit_editor_template[row].min;
+                    up_lo = &g_unit_editor_field_ranges[row].min;
                     if (cur < *up_lo) {
                         goto clamp_hi;
                     }
-                    up_hi = &g_unit_editor_template[row].max;
+                    up_hi = &g_unit_editor_field_ranges[row].max;
                     if (*up_hi < cur) {
                     clamp_hi:
-                        up_clamp = &g_unit_editor_template[row].max;
+                        up_clamp = &g_unit_editor_field_ranges[row].max;
                         *value = *up_clamp - 1;
                     }
 
@@ -636,7 +716,7 @@ editor:
 
                     /* `i` is also the frame counter, so each step resets the cursor's buffer index and bob phase. */
                     for (i = 0; i < steps; i++) {
-                        hi_limit = &g_unit_editor_template[row].max;
+                        hi_limit = &g_unit_editor_field_ranges[row].max;
                         span = row - 9;
                         clearable = span < 5U;
                         /* The native loop computes this range test without reading its result. */
@@ -661,11 +741,11 @@ editor:
                     /* Likewise a value outside its range snaps to one above the minimum. */
                     down_value = g_unit_editor_current_field->value;
                     cur = *down_value;
-                    dn_lo = &g_unit_editor_template[row].min;
+                    dn_lo = &g_unit_editor_field_ranges[row].min;
                     if (cur < *dn_lo) {
                         goto clamp_lo;
                     }
-                    dn_hi = &g_unit_editor_template[row].max;
+                    dn_hi = &g_unit_editor_field_ranges[row].max;
                     if (*dn_hi < cur) {
                     clamp_lo:
                         *down_value = *dn_lo + 1;
@@ -678,7 +758,7 @@ editor:
                     }
 
                     for (i = 0; i < steps; i++) {
-                        lo_limit = &g_unit_editor_template[row].min;
+                        lo_limit = &g_unit_editor_field_ranges[row].min;
                         span = row - 9;
                         clearable = span < 5U;
                         /* The native loop computes this range test without reading its result. */
