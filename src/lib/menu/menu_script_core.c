@@ -1,9 +1,21 @@
 /* Menu script execution and conditional command groups. */
 
+#include "fft/equipment.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
+#include "fft/screen.h"
+#include "fft/unit_list.h"
 #include "psx/types.h"
+
+/* Each interpreter stops at its own dialect's first non-instruction value. */
+#if defined(FFT_WORLD)
+enum { MENU_SCRIPT_END = SCREEN_SCRIPT_END };
+#elif defined(FFT_EVENT_BUNIT)
+enum { MENU_SCRIPT_END = UNIT_LIST_SCRIPT_END };
+#elif defined(FFT_EVENT_EQUIP)
+enum { MENU_SCRIPT_END = EQUIPMENT_SCRIPT_END };
+#endif
 
 /* Page setup fills the value, text, and icon callbacks used by menu commands. */
 menu_callback_t g_menu_row_callbacks[16] = { 0 };
@@ -12,17 +24,17 @@ menu_callback_t g_menu_row_callbacks[16] = { 0 };
 #ifndef FFT_EVENT_JOBSTTS
 /* Run a menu command stream: reset the ordering-table index, semi-transparency and lock, keep
  * `flags` as the stream's input, then dispatch each command through g_menu_opcode_handlers until
- * the program's end opcode (VARIANT_MENU_CMD_END_OPCODE: 0x1C in BUNIT and WORLD, 0x19 in
+ * the program's end opcode (MENU_SCRIPT_END: 0x1C in BUNIT and WORLD, 0x19 in
  * EQUIP). */
 void menu_script_run(menu_instruction_t* instruction, s32 flags) {
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;
     g_menu_script_input = flags;
     g_gfx_otag_index_locked = 0;
-    if (instruction->header.opcode != VARIANT_MENU_CMD_END_OPCODE) {
+    if (instruction->header.opcode != MENU_SCRIPT_END) {
         do {
             instruction = g_menu_opcode_handlers[instruction->header.opcode](instruction);
-        } while (instruction->header.opcode != VARIANT_MENU_CMD_END_OPCODE);
+        } while (instruction->header.opcode != MENU_SCRIPT_END);
     }
 }
 

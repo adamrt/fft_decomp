@@ -307,7 +307,7 @@ load: 0x801bf000
 source_dir: src/event/bunit
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_MENU_CMD_END_OPCODE: 28, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16, VARIANT_TEXT_ID_ROW_FORMAT: 231}
+defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16}
 
 units:
   - {name: ability_page, source: src/event/bunit/ability_page.c}
@@ -893,7 +893,6 @@ load: 0x801bf000
 source_dir: src/event/card
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 units:
   - {name: bit_streams, source: src/lib/bits.c}
@@ -1345,7 +1344,7 @@ load: 0x801bf000
 source_dir: src/event/equip
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_MENU_CMD_END_OPCODE: 25, VARIANT_MENU_ITEM_CURSOR_DEPTH: 31, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 4, VARIANT_TEXT_ID_ROW_FORMAT: 235}
+defines: {VARIANT_MENU_ITEM_CURSOR_DEPTH: 31, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 4}
 
 units:
   - {name: bit_streams, source: src/lib/bits.c}
@@ -1955,7 +1954,7 @@ load: 0x801df000
 source_dir: src/event/jobstts
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 8, VARIANT_TEXT_ID_ROW_FORMAT: 231}
+defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 8}
 
 units:
   - {name: ability_page, source: src/event/jobstts/ability_page.c}

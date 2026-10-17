@@ -85,6 +85,19 @@ extern help_navigation_record_t g_help_attack_preview_navigation[];
 extern s32 g_help_message_text_id;
 
 /* help menus */
+/* Special select_text_table selectors; other values index ordinary help tables. */
+typedef enum help_request_kind {
+    HELP_REQUEST_NONE = 0,
+    HELP_REQUEST_SKILLSET_ROW = 4,
+    HELP_REQUEST_ABILITY_ROW = 5,
+    HELP_REQUEST_NAVIGATION = 16,
+    HELP_REQUEST_ITEM_ROW = 17,
+    HELP_REQUEST_STATUS_COLUMNS = 18,
+    HELP_REQUEST_MIXED_SECOND_COLUMN = 19,
+    HELP_REQUEST_DRAW_OUT_ROW = 23,
+    HELP_REQUEST_RESULT_ABILITY = 256
+} help_request_kind_e;
+
 extern u32* g_help_controller_state_ptr;
 extern u8 g_help_data_base[];
 extern unit_panel_summary_t g_help_active_banner;

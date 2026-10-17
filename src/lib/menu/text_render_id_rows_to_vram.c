@@ -6,6 +6,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Flagged rows draw eight filler glyphs: bars in Unit List/Status, dots in Card/Equip. */
+#if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_JOBSTTS)
+enum { TEXT_ID_ROW_FILL_GLYPH = 0xe7 };
+#else
+enum { TEXT_ID_ROW_FILL_GLYPH = 0xeb };
+#endif
+
 /* Render each id of a -1 terminated text-id list as one 16-pixel row and
  * upload the rows to VRAM from the top of `destination` down. */
 void text_render_id_rows_to_vram(u8* text_table, s16* text_ids, RECT* destination, s32 flags) {
@@ -28,7 +35,7 @@ void text_render_id_rows_to_vram(u8* text_table, s16* text_ids, RECT* destinatio
         row_text_ids[1] = -1;
         memset(image, 0, 0x800);
         menu_text_render_encoded_ids_to_image(
-            image, &bounds, 0xA, 0x64, text_table, row_text_ids, 0x64, VARIANT_TEXT_ID_ROW_FORMAT, flags);
+            image, &bounds, 0xA, 0x64, text_table, row_text_ids, 0x64, TEXT_ID_ROW_FILL_GLYPH, flags);
         gfx_load_image_and_wait(&upload_rect, image);
         upload_rect.y += 0x10;
         text_ids++;

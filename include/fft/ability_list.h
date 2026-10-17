@@ -70,6 +70,26 @@ s32 ability_list_build(
     s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* ability_list, s32 mode);
 
 /* row callbacks */
+/* Row-callback indices used by the job ability-page display scripts. */
+typedef enum ability_page_row_callback {
+    ABILITY_PAGE_ROW_JOB_LEVEL = 0,
+    ABILITY_PAGE_ROW_TOTAL_JP = 1,
+    ABILITY_PAGE_ROW_NEXT_LEVEL_JP = 2,
+    ABILITY_PAGE_ROW_CURRENT_JP = 3,
+    ABILITY_PAGE_ROW_NON_ACTION_ENABLED = 4,
+    ABILITY_PAGE_ROW_JOB_MASTERED = 5,
+    ABILITY_PAGE_ROW_LEARNED = 6,
+    ABILITY_PAGE_ROW_MP_COST = 7,
+    ABILITY_PAGE_ROW_CHARGE_TIME = 8,
+    ABILITY_PAGE_ROW_JP_COST = 9,
+    ABILITY_PAGE_ROW_MOVEMENT_TAB = 10,
+    ABILITY_PAGE_ROW_SUPPORT_TAB = 11,
+    ABILITY_PAGE_ROW_REACTION_TAB = 12,
+    ABILITY_PAGE_ROW_ACTION_TAB = 13,
+    ABILITY_PAGE_ROW_NON_ACTION_DISABLED = 14,
+    ABILITY_PAGE_ROW_ACTION_ABILITY = 15
+} ability_page_row_callback_e;
+
 /* Row callbacks of the ability lists: predicates that pick a row's icon or color, and its displayed costs. The
  * lookups cache the listed ability's data for the panel. */
 extern s16 g_ability_list_ability_category;  /* menu_ability_category_e; BUNIT and JOBSTTS tab selection */

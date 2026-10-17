@@ -410,7 +410,7 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
     const menu_list_record_t* list;
 
     while (script->header.opcode != MENU_SCRIPT_OP_SCROLLABLE_LIST) {
-        if (script->header.opcode == VARIANT_MENU_CMD_END_OPCODE) {
+        if (script->header.opcode == UNIT_LIST_SCRIPT_END) {
             return;
         }
         script = menu_next_const_instruction(script);

@@ -144,8 +144,8 @@ void helpmenu_battle_entrypoint(void) {
             }
             /* A help text id holds its section in bits 11-15 above the entry (HELP_TEXT_ID_*_BASE). */
             request_kind = request->select_text_table;
-            if (request_kind != 0x10) {
-                if (request_kind == 0x100) {
+            if (request_kind != HELP_REQUEST_NAVIGATION) {
+                if (request_kind == HELP_REQUEST_RESULT_ABILITY) {
                     help_id = *menu_entry_result(request);
                     help_id &= 0x7FF;
                     help_id |= HELP_TEXT_ID_ABILITY_BASE;
@@ -155,7 +155,7 @@ void helpmenu_battle_entrypoint(void) {
                     *g_help_controller_state_ptr = 0;
                     thread_wait_frames(1);
                     help_close();
-                } else if (request_kind == 4) {
+                } else if (request_kind == HELP_REQUEST_SKILLSET_ROW) {
                     help_id = g_command_skillsets[request->selected_index];
                     /* No help for this entry: help_close ends the thread and does not return. */
                     if (help_id == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING) {
@@ -167,11 +167,11 @@ void helpmenu_battle_entrypoint(void) {
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
                     thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
-                } else if (request_kind == 0) {
+                } else if (request_kind == HELP_REQUEST_NONE) {
                     *g_help_controller_state_ptr = 0;
                     thread_wait_frames(1);
                     help_close();
-                } else if (request_kind == 5) {
+                } else if (request_kind == HELP_REQUEST_ABILITY_ROW) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
@@ -179,7 +179,7 @@ void helpmenu_battle_entrypoint(void) {
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
                     thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
-                } else if (request_kind == 0x11) {
+                } else if (request_kind == HELP_REQUEST_ITEM_ROW) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
@@ -192,7 +192,7 @@ void helpmenu_battle_entrypoint(void) {
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
                     thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
-                } else if (request_kind == 0x17) {
+                } else if (request_kind == HELP_REQUEST_DRAW_OUT_ROW) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
@@ -207,7 +207,7 @@ void helpmenu_battle_entrypoint(void) {
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
                     thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
-                } else if (request_kind == 0x12) {
+                } else if (request_kind == HELP_REQUEST_STATUS_COLUMNS) {
                     menu_text_layout_t* layout = request->context;
                     /* The list stores its column toggle in the third text pointer. */
                     help_id = *layout->text_ids[2];
@@ -226,7 +226,7 @@ void helpmenu_battle_entrypoint(void) {
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
                     thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
-                } else if (request_kind == 0x13) {
+                } else if (request_kind == HELP_REQUEST_MIXED_SECOND_COLUMN) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[1][request->selected_index];
                     /* Map a name text id to the help section of the same kind. */
