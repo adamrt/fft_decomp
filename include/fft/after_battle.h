@@ -105,11 +105,6 @@ typedef struct war_trophy_primitives {
 } war_trophy_primitives_t;
 typedef char war_trophy_primitives_size_must_be_672[sizeof(war_trophy_primitives_t) == 672 ? 1 : -1];
 
-extern s32 g_war_trophy_entry_count;
-extern s32 g_war_trophy_entry_types[];
-extern s32 g_war_trophy_entry_values[];
-extern u8 g_war_trophy_item_count;
-extern reward_war_result_t g_war_trophy_search_result;
 extern war_trophy_primitives_t g_war_trophy_primitives[2];
 extern RECT g_war_trophy_clear_rect;
 extern RECT g_war_trophy_screen_clip_rect_0;

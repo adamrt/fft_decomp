@@ -2320,7 +2320,7 @@ units:
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cbe60, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c}
   - {name: post_battle_party, source: src/event/require/post_battle_party.c, data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}]}
-  - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1024, hash: 5f70bf18a0860070}]}
+  - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1060, hash: d50e2d8474134908}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
