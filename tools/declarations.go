@@ -32,6 +32,13 @@ type declarationSite struct {
 	line       int
 	signature  []string
 	definition bool
+	conditions []declarationCondition // proven FFT conditions enclosing this site
+}
+
+type declarationCondition struct {
+	directive  string
+	expression string
+	value      bool
 }
 
 type declarationSpelling struct {
@@ -61,6 +68,136 @@ var declarationBaseWords = map[string]bool{
 
 var macroInvocationName = regexp.MustCompile(`^[A-Z][A-Z0-9_]*$`)
 var mipsArchitecturalRegisterName = regexp.MustCompile(`^\$([0-9]|[12][0-9]|3[01])$`)
+var declarationComments = regexp.MustCompile(`(?s)/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'`)
+
+// declarationProgramConditions records only conditions whose truth follows
+// from the program macros. Unknown conditions leave both branches possible,
+// including header guards; a known nested condition can still prove two sites
+// disjoint. Unsupported source forms fall back to the old unrestricted scan.
+func declarationProgramConditions(source string) map[int][]declarationCondition {
+	if !strings.Contains(source, moduleMacroPrefix) || strings.Contains(source, "\\\n") || strings.Contains(source, "\\\r\n") {
+		return nil
+	}
+	// Do not interpret directives quoted in comments or string literals.
+	source = declarationComments.ReplaceAllStringFunc(source, func(text string) string {
+		if !strings.HasPrefix(text, "/") {
+			return text
+		}
+		return strings.Map(func(r rune) rune {
+			if r == '\n' {
+				return r
+			}
+			return ' '
+		}, text)
+	})
+	type frame struct {
+		parent   []declarationCondition
+		excluded []declarationCondition
+		elseSeen bool
+	}
+	var stack []frame
+	var current []declarationCondition
+	lines := map[int][]declarationCondition{}
+	for index, line := range strings.Split(source, "\n") {
+		if len(current) != 0 {
+			lines[index+1] = current
+		}
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		word, rest := directiveWord(trimmed)
+		if word == "define" || word == "undef" {
+			fields := strings.Fields(rest)
+			if len(fields) != 0 && strings.HasPrefix(fields[0], moduleMacroPrefix) {
+				return nil
+			}
+		}
+		names := conditionalIdentifiers(trimmed)
+		known := len(names) != 0
+		for _, name := range names {
+			known = known && strings.HasPrefix(name, moduleMacroPrefix)
+		}
+		directive := word
+		if directive == "elif" {
+			directive = "if"
+		}
+		if known {
+			_, err := evaluateConditional(directive, rest, nil)
+			known = err == nil
+		}
+		condition := declarationCondition{directive, rest, true}
+		switch word {
+		case "if", "ifdef", "ifndef":
+			stack = append(stack, frame{parent: current})
+		case "elif", "else":
+			if len(stack) == 0 || stack[len(stack)-1].elseSeen {
+				return nil
+			}
+			top := &stack[len(stack)-1]
+			current = append(append([]declarationCondition{}, top.parent...), top.excluded...)
+			if word == "else" {
+				top.elseSeen = true
+				continue
+			}
+		case "endif":
+			if len(stack) == 0 {
+				return nil
+			}
+			current = stack[len(stack)-1].parent
+			stack = stack[:len(stack)-1]
+			continue
+		default:
+			continue
+		}
+		if known {
+			current = append(append([]declarationCondition{}, current...), condition)
+			condition.value = false
+			top := &stack[len(stack)-1]
+			top.excluded = append(top.excluded, condition)
+		}
+	}
+	if len(stack) != 0 {
+		return nil
+	}
+	return lines
+}
+
+// declarationSitesOverlap considers every distinct program mentioned by the
+// two sites, its family-only view, and an unmentioned program. A compile defines
+// one program macro and its family macro, as moduleSpec.macros specifies. No
+// source-directory or target-binding inference can hide a cross-file mismatch.
+func declarationSitesOverlap(a, b declarationSite) bool {
+	conditions := append(append([]declarationCondition{}, a.conditions...), b.conditions...)
+	views := map[string]map[string]string{"": {}}
+	for _, condition := range conditions {
+		for _, name := range conditionalIdentifiers("#" + condition.directive + " " + condition.expression) {
+			id := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, moduleMacroPrefix), "_", "-"))
+			module := &moduleSpec{ID: id}
+			views[id] = module.macros()
+			if family, _, ok := strings.Cut(id, "-"); ok {
+				views[family] = (&moduleSpec{ID: family}).macros()
+			}
+		}
+	}
+	for _, macros := range views {
+		possible := true
+		for _, condition := range conditions {
+			value, err := evaluateConditional(condition.directive, condition.expression, macros)
+			if err != nil {
+				return true
+			}
+			if value != condition.value {
+				possible = false
+				break
+			}
+		}
+		if possible {
+			return true
+		}
+	}
+	return false
+}
 
 // scanFileScopeDeclarations returns the declarations and function definitions
 // bound at file scope, plus "struct tag" -> alias mappings from typedefs.
@@ -664,7 +801,13 @@ func (group declarationGroup) conflicting() bool {
 	for left := range group.spellings {
 		for right := left + 1; right < len(group.spellings); right++ {
 			if !signaturesAgree(group.spellings[left].signature, group.spellings[right].signature) {
-				return true
+				for _, a := range group.spellings[left].sites {
+					for _, b := range group.spellings[right].sites {
+						if declarationSitesOverlap(a, b) {
+							return true
+						}
+					}
+				}
 			}
 		}
 	}
@@ -700,6 +843,7 @@ func collectDeclarationGroups(root string, dirs []string) ([]declarationGroup, e
 			for tag, alias := range fileTags {
 				tags[tag] = alias
 			}
+			conditions := declarationProgramConditions(string(data))
 			for _, declaration := range declarations {
 				if declaration.static {
 					continue
@@ -709,6 +853,7 @@ func collectDeclarationGroups(root string, dirs []string) ([]declarationGroup, e
 					line:       declaration.line,
 					signature:  declaration.signature,
 					definition: declaration.definition,
+					conditions: conditions[declaration.line],
 				})
 			}
 			return nil
@@ -802,6 +947,9 @@ func newDeclarationGroup(symbol string, sites []declarationSite) declarationGrou
 		}
 	}
 	group.minority = len(sites) - best
+	if !group.conflicting() {
+		group.minority = 0
+	}
 	return group
 }
 
