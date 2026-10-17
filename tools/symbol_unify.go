@@ -93,7 +93,7 @@ func (p project) unifySymbolsCommand(args []string) error {
 	}
 	dropped := 0
 	if !*dryRun {
-		if dropped, err = p.dropRedundantOverrides(); err != nil {
+		if dropped, err = p.dropRedundantOverrides(*newName); err != nil {
 			return err
 		}
 	}
@@ -110,9 +110,9 @@ func (p project) unifySymbolsCommand(args []string) error {
 	return nil
 }
 
-// dropRedundantOverrides removes override rows that bind a name to the
-// address the module resolves it to anyway.
-func (p project) dropRedundantOverrides() (int, error) {
+// dropRedundantOverrides removes rows for the unified name that bind it to
+// the address the module resolves it to anyway. Unrelated rows stay intact.
+func (p project) dropRedundantOverrides(name string) (int, error) {
 	dropped := 0
 	err := p.withTargetLock(func() error {
 		config, err := p.loadProjectConfig()
@@ -123,9 +123,11 @@ func (p project) dropRedundantOverrides() (int, error) {
 		for _, m := range config.Modules {
 			kept := m.Overrides[:0]
 			for _, override := range m.Overrides {
-				if addr, ok := resolver.resolve(m, override.Name); ok && addr == override.Addr {
-					dropped++
-					continue
+				if override.Name == name {
+					if addr, ok := resolver.resolve(m, name); ok && addr == override.Addr {
+						dropped++
+						continue
+					}
 				}
 				kept = append(kept, override)
 			}

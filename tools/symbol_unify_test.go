@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -97,6 +99,93 @@ func TestUnifyRenamesCopiesAcrossModulesAndKeepsOneDeclaration(t *testing.T) {
 	// A module holding both names is a real collision.
 	if err := p.symbolsCommand([]string{"unify", "--new", "main_second", "main_first"}); err == nil || !strings.Contains(err.Error(), "already exists") {
 		t.Fatalf("collision: %v", err)
+	}
+}
+
+func TestUnifyPrunesOnlyTheUnifiedNamesRedundantOverrides(t *testing.T) {
+	for _, test := range []struct {
+		name, newName, oldName string
+		olds                   []string
+		redundantAddr          uint32
+	}{
+		{"function", "menu_helper_variant", "battle_helper", []string{"battle_helper", "attack_entry"}, 0x801bf000},
+		{"data", "g_menu_value", "g_battle_value", []string{"g_battle_value"}, 0x80067100},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			p := unifyFixture(t)
+			config, err := p.loadProjectConfig()
+			if err != nil {
+				t.Fatal(err)
+			}
+			attack, _ := config.module("event-attack")
+			card, _ := config.module("event-card")
+			attack.Overrides = []overrideSpec{
+				{Function: "attack_entry", Name: test.oldName, Addr: test.redundantAddr},
+				{Function: "attack_entry", Name: "main_first", Addr: 0x80010000},
+				{Function: "attack_entry", Name: "g_main_value", Addr: 0x80020000},
+			}
+			card.Links = []string{"battle"}
+			card.Overrides = []overrideSpec{
+				{Function: "card_entry", Name: test.oldName, Addr: 0x80067004},
+				{Function: "card_entry", Name: "main_second", Addr: 0x80010008},
+			}
+			if _, err := p.writeProjectConfig(config); err != nil {
+				t.Fatal(err)
+			}
+
+			// A dry run must preserve even the override that will become redundant.
+			before := make(map[string]string)
+			for _, path := range []string{
+				"target/main.yaml", "target/battle.yaml", "target/event.yaml",
+				"src/battle/battle_helper.c", "src/event/attack_entry.c", "src/event/card_entry.c",
+				"include/fft/menu.h", "include/fft/battle_menu.h", "include/fft/event_attack.h",
+			} {
+				before[path] = readTestFile(t, p, path)
+			}
+			args := []string{"unify", "--new", test.newName, "--header", "fft/menu.h"}
+			dryArgs := append([]string{}, args...)
+			dryArgs = append(dryArgs, "--dry-run")
+			if err := p.symbolsCommand(append(dryArgs, test.olds...)); err != nil {
+				t.Fatal(err)
+			}
+			for path, text := range before {
+				if readTestFile(t, p, path) != text {
+					t.Fatalf("dry run changed %s", path)
+				}
+			}
+
+			if err := p.symbolsCommand(append(args, test.olds...)); err != nil {
+				t.Fatal(err)
+			}
+			config, err = p.loadProjectConfig()
+			if err != nil {
+				t.Fatal(err)
+			}
+			attack, _ = config.module("event-attack")
+			card, _ = config.module("event-card")
+			attackFunction := "attack_entry"
+			if test.name == "function" {
+				attackFunction = test.newName
+			}
+			for module, want := range map[*moduleSpec][]overrideSpec{
+				attack: {
+					{Function: attackFunction, Name: "main_first", Addr: 0x80010000},
+					{Function: attackFunction, Name: "g_main_value", Addr: 0x80020000},
+				},
+				card: {
+					{Function: "card_entry", Name: test.newName, Addr: 0x80067004},
+					{Function: "card_entry", Name: "main_second", Addr: 0x80010008},
+				},
+			} {
+				sort.Slice(want, func(i, j int) bool { return want[i].Name < want[j].Name })
+				if !reflect.DeepEqual(module.Overrides, want) {
+					t.Errorf("%s overrides = %+v, want %+v", module.ID, module.Overrides, want)
+				}
+			}
+			if err := p.validateProjectConfig(config); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 
