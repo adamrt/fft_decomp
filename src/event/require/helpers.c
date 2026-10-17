@@ -50,7 +50,8 @@ void party_set_class_variable(s32 unit_class, s32 value) {
  * follows them, and frees the buffer after one more frame.
  */
 void conditions_load_banner_image(s32 image_id) {
-    conditions_banner_file_t* allocation;
+    void* allocation;
+    conditions_banner_file_t* banner;
     s32 (*read_operation)(s32 sector, u32 size, void* destination);
 
     do {
@@ -62,8 +63,7 @@ void conditions_load_banner_image(s32 image_id) {
     do {
         thread_yield();
         g_thread_call_target = (void (*)(void))read_operation;
-    } while (
-        thread_call_on_main_stack(image_id * 13 + DISC_SECTOR_EVENT_BONUS_BIN, sizeof(*allocation), allocation) != 0);
+    } while (thread_call_on_main_stack(image_id * 13 + DISC_SECTOR_EVENT_BONUS_BIN, sizeof(*banner), allocation) != 0);
 
     {
         int (*poll_operation)(void) = file_is_still_loading;
@@ -73,9 +73,10 @@ void conditions_load_banner_image(s32 image_id) {
         } while (thread_call_on_main_stack() != 0);
     }
 
+    banner = allocation;
     /* The 256-row upload includes the reserved suffix beyond the 0x6800-byte file. */
-    LoadImage(&g_conditions_banner_rect, allocation->pixels[0]);
-    LoadImage(&g_conditions_banner_palette_rect, (u32*)allocation->palettes);
+    LoadImage(&g_conditions_banner_rect, banner->pixels[0]);
+    LoadImage(&g_conditions_banner_palette_rect, (u32*)banner->palettes);
     thread_yield();
     heap_free(allocation);
 }

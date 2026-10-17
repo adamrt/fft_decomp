@@ -126,7 +126,7 @@ void* heap_alloc(u32 size) {
 /* Reserve free heap pages at a fixed address, using the lowest unused tag.
  * Only the starting address is bounds-checked; the page range may extend
  * beyond the heap. Returns the page-aligned address, or 0 on failure. */
-u8* heap_reserve_at(u8* allocation, u32 size) {
+void* heap_reserve_at(void* allocation, u32 size) {
     u32 addr = (u32)allocation;
     u32 base = (u32)g_heap_high_overlay_load_address;
     s32 start;
@@ -135,7 +135,7 @@ u8* heap_reserve_at(u8* allocation, u32 size) {
     u32 i;
     u32 j;
 
-    start = (allocation - g_heap_high_overlay_load_address) / HEAP_PAGE_SIZE;
+    start = ((u8*)allocation - g_heap_high_overlay_load_address) / HEAP_PAGE_SIZE;
     nblocks = size >> HEAP_PAGE_SHIFT;
     if ((size & (HEAP_PAGE_SIZE - 1)) != 0) {
         nblocks += 1;
