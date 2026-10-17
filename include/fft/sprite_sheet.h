@@ -298,7 +298,7 @@ extern sprite_wep_eff_graphics_t g_sprite_weapon_graphics[2];
 extern sprite_wep_eff_graphics_t g_sprite_effect_graphics[1];
 
 /* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
-extern size32_t g_sprite_part_sizes[];
+extern size32_t g_sprite_part_sizes[16];
 
 sprite_unit_shp_frame_tables_t* sprite_sheet_get_unit_shp(u32 spritesheet_id);
 sprite_unit_seq_table_t* sprite_sheet_get_unit_seq(u32 spritesheet_id);

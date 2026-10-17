@@ -127,7 +127,7 @@ typedef char animation_state_size_must_be_48[sizeof(animation_state_t) == 48 ? 1
 
 /* The 24 orders in which sprite_draw_unit_layers queues a unit's
  * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
-extern s32 g_animation_layer_priorities[][4];
+extern s32 g_animation_layer_priorities[24][4];
 
 /* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
  * from behind and from the front. */

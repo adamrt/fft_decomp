@@ -86,7 +86,7 @@ typedef struct sprite_weapon_shp {
 typedef char sprite_weapon_shp_size_must_be_2112[sizeof(sprite_weapon_shp_t) == 2112 ? 1 : -1];
 
 /* The display rotations that the upper five bits of a frame's first byte select, ONE to the turn. */
-extern u16 g_sprite_y_rotations[];
+extern u16 g_sprite_y_rotations[32];
 
 /* sequence tables */
 /* Common header of an unpacked unit SEQ table. The pointer tail has 0x100
