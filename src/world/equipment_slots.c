@@ -17,8 +17,10 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static u8 g_formation_item_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { 5, 6, 2, 3, 4 };
-static u8 g_shop_fitting_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { 5, 6, 2, 3, 4 };
+static u8 g_formation_item_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER_WEAPON,
+    ITEM_LIST_FILTER_SHIELD, ITEM_LIST_FILTER_HEADGEAR, ITEM_LIST_FILTER_BODY_ARMOR, ITEM_LIST_FILTER_ACCESSORY };
+static u8 g_shop_fitting_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER_WEAPON,
+    ITEM_LIST_FILTER_SHIELD, ITEM_LIST_FILTER_HEADGEAR, ITEM_LIST_FILTER_BODY_ARMOR, ITEM_LIST_FILTER_ACCESSORY };
 
 /* Report whether the party has any items: mode 0 asks for inventory or equipped items, mode 1
  * for inventory only, other modes for equipped items only.
@@ -118,7 +120,7 @@ s32 fur_shop_adjust_stock(s16 item_id, s32 delta) {
  * compatible hand combinations and swapping hands when needed. Martial Arts clears both.
  *
  * Each slot's candidates are the equippable items in the inventory plus what the unit holds
- * there, sorted by the best-fit key list (7). Two Hands prefers a weapon that can be held
+ * there, sorted by the best-fit key list. Two Hands prefers a weapon that can be held
  * two-handed and then leaves the off hand empty; Two Swords (without Two Hands) fills the off
  * hand with a second weapon, the same one only when the unit has two copies.
  * shop_fitting_build_best_fit is the shop's sibling.
@@ -168,8 +170,8 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
         category = g_formation_item_best_fit_slot_categories[slot];
-        count = formation_item_build_list(unit_index, 7, g_formation_item_best_fit_slot_categories[slot], list,
-            ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY);
+        count = formation_item_build_list(unit_index, ITEM_SORT_ORDER_BEST_FIT,
+            g_formation_item_best_fit_slot_categories[slot], list, ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY);
         length = count;
         if (category == ITEM_LIST_FILTER_WEAPON) {
             if (held_weapon < ITEM_ID_THROWABLE_FIRST)
@@ -177,7 +179,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
             if (held_off_hand < ITEM_ID_THROWABLE_FIRST)
                 list[length++] = held_off_hand;
             list[length] = -1;
-            item_sort_id_list(7, list);
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             if (formation_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -229,12 +231,12 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
                 if (held_off_hand >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = held_off_hand;
                 list[length] = -1;
-                item_sort_id_list(7, list);
+                item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
             list[length++] = g_formation_unit_pointers[unit_index]->equipment[slot];
             list[length] = -1;
-            item_sort_id_list(7, list);
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
         }
         if (list[0] <= ITEM_ID_NOTHING)
             equipment[slot] = ITEM_ID_NOTHING;
@@ -347,7 +349,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                 list[length++] = (second < ITEM_ID_THROWABLE_FIRST) ? second : ITEM_ID_NOTHING;
             }
             list[length] = -1;
-            item_sort_id_list(7, list);
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             if (formation_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -387,12 +389,12 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                 if (second >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = second;
                 list[length] = -1;
-                item_sort_id_list(7, list);
+                item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
             list[length++] = g_formation_unit_pointers[unit_index]->equipment[slot] & ITEM_ENTRY_ID_MASK;
             list[length] = -1;
-            item_sort_id_list(7, list);
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
         }
 
         if (list[0] <= ITEM_ID_NOTHING)
@@ -414,9 +416,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
         || (!dual && left < ITEM_ID_THROWABLE_FIRST && left != ITEM_ID_NOTHING) || right >= ITEM_ID_THROWABLE_FIRST)
         i = 1;
     if (i) {
-        /* The target keeps the swap flag and the swap temporary in ONE
-         * register (a0), and gcc 2.6.3 never splits live ranges, so the two
-         * non-overlapping roles were one variable in the original source. */
+        /* Reusing the swap flag preserves the target's register assignment. */
         i = out[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
         out[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = out[MENU_EQUIPMENT_SLOT_LEFT_HAND];
         out[MENU_EQUIPMENT_SLOT_LEFT_HAND] = i;

@@ -626,6 +626,19 @@ typedef enum item_sort_key {
     ITEM_SORT_KEY_HELD_COUNT = 5 /* inventory plus equipped copies */
 } item_sort_key_e;
 
+/* Indices of g_item_type_order_lists, distinct from the keys within each list.
+ * WORLD alone has the fixed stock and best-fit orders; slot 0 is its Formation
+ * order and is null in EQUIP. */
+typedef enum item_sort_order {
+    ITEM_SORT_ORDER_WEAPONS_AND_SHIELDS = 1,
+    ITEM_SORT_ORDER_HEADGEAR = 2,
+    ITEM_SORT_ORDER_BODY_ARMOR = 3,
+    ITEM_SORT_ORDER_ACCESSORIES = 4,
+    ITEM_SORT_ORDER_OTHER_ITEMS = 5,
+    ITEM_SORT_ORDER_STOCK = 6,   /* type, price, ranking */
+    ITEM_SORT_ORDER_BEST_FIT = 7 /* ranking, type, price */
+} item_sort_order_e;
+
 /* Independent sort-key lists in their resident storage layout. Unit List and
  * Formation have their own key domains; the five item categories use item_sort_key_e.
  * Each list ends in -1. The item rows save only their live lengths. */
@@ -653,7 +666,8 @@ extern u8 g_other_items_sort_order[5];
 
 /* Packed sort-key orders ending in -1. WORLD slot 0 points to Formation's
  * formation order (formation_sort_key_e); EQUIP slot 0 is null. Slots 1..5
- * in both programs point to the five item-category orders (item_sort_key_e). */
+ * in both programs point to the five item-category orders (item_sort_key_e).
+ * WORLD adds the fixed stock and best-fit orders at slots 6 and 7. */
 extern s8* g_item_type_order_lists[];
 
 void item_init_order_tables(void);

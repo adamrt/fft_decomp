@@ -132,6 +132,6 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
     }
 
     entries[count] = -1;
-    item_sort_id_list(6, entries);
+    item_sort_id_list(ITEM_SORT_ORDER_STOCK, entries);
     return count;
 }
