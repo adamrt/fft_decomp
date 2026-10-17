@@ -20,7 +20,7 @@ void party_init_new_game(s32 mode);
 party_unit_t* party_get_unit(s32 party_index);
 s32 party_find_free_slot(s32 save_formation, u8* palette);
 s32 party_save_unit(unit_stats_t* unit, s32 allow_guest);
-s32 party_save_encounter_unit(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle);
+s32 party_save_encounter_unit(entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text);
 void party_remove_unit(u32 index);
 s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color);
 u32 party_level_unit_to_target(party_unit_t* party_unit, s32 level_delta);

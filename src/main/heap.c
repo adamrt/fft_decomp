@@ -54,7 +54,7 @@ void* heap_alloc_smd(u32 size) {
 
 /* Free the music-heap block that starts at ptr; the rules are heap_free's. */
 s32 heap_free_smd(void* ptr) {
-    u32 index = ((u32)ptr - (u32)g_heap_smd_base) >> HEAP_PAGE_SHIFT;
+    u32 index = (u32)((u8*)ptr - g_heap_smd_base) >> HEAP_PAGE_SHIFT;
     s32 tag = g_heap_smd_allocator_table[index];
     u8* entry;
 
