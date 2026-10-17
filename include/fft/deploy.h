@@ -82,9 +82,7 @@ extern s32 g_deploy_fieldable_unit_count;
 extern u8 g_deploy_unit_fieldable[PARTY_ROSTER_SLOT_COUNT];
 extern u8 g_deploy_roster_unit_deployable[PARTY_ROSTER_SLOT_COUNT];
 extern s32 g_deploy_selected_roster_index;
-extern s32 g_deploy_selected_unit_deployed;
 extern s32 g_deploy_pending_roster_index;
-extern s32 g_deploy_roster_navigation_direction;
 extern s16 g_deploy_confirm_result;
 
 /* Cleared with the deployed-unit count when the deploy screen opens; nothing
@@ -220,9 +218,6 @@ typedef enum deploy_prompt_thread_slot {
     DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU = 4,       /* the menu that sets g_deploy_confirm_result */
     DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER = 13,     /* a wait-forever thread while the unit detail panels are open */
 } deploy_prompt_thread_slot_e;
-
-extern s32 g_deploy_status_display_thread_params;
-extern s32 g_deploy_status_display_offset_y[];
 
 /* text */
 /* Overlay text file: offsets are relative to the data following the header. */

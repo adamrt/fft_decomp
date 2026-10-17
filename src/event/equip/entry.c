@@ -37,7 +37,7 @@ void unit_panel_toggle_item_numbers_thread(s32 enable) {
 /* Prime the four "menu section dirty" flags before the
  * next redraw pass. */
 static void equipment_reset_dirty_flags(void) {
-    g_unit_panel_unit_status_panel_params.work = 1;
+    g_unit_panel_unit_status_panel_params.redraw_request = 1;
     g_unit_panel_numeric_panel_params.redraw_request = 1;
     g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     g_equipment_panel_params.redraw_request = 1;

@@ -307,28 +307,12 @@ typedef enum menu_unit_readout {
 struct unit_stats* menu_get_selected_unit_stats(void);
 
 /* panel threads */
-/* Flags of a unit status panel (menu_status_panel_display_thread_t and
- * the WORLD status display's unit_panel_thread_t). */
+/* Flags of the unit status panel parameter records. */
 typedef enum menu_status_panel_flags {
     MENU_STATUS_PANEL_SLIDE_DOWN = 0x20, /* run the slide-down table once */
     MENU_STATUS_PANEL_SLIDE_UP = 0x40,   /* run the slide-up table once */
     MENU_STATUS_PANEL_HIDDEN = 0x80,     /* draw nothing; the only flag kept when a slide ends */
 } menu_status_panel_flags_e;
-
-/* Parameter block of the editor display threads, reached through the
- * 0x400-byte battle thread table. It has the shape of unit_panel_thread_t,
- * but these threads load x as a 16-bit value. The shake offset is sign-extended
- * from the s16 shake tables and narrowed to the draw-offset y. Only the members the display
- * threads use are named; the record's total size is not proven. */
-typedef struct menu_status_panel_display_thread {
-    u16 x;           /* 0x00 */
-    u16 _padding_02; /* aligns shake_y */
-    s32 shake_y;     /* 0x04; narrowed to a draw-offset 16-bit value when rendered */
-    s32 flags;       /* 0x08: menu_status_panel_flags_e */
-    s32 work;        /* 0x0c: redraw request flags, cleared once serviced */
-    s32 dimmed;      /* 0x10: nonzero forces the dimmed CLUTs and colors; bound as
-                           g_unit_panel_status_display_dimmed and the WORLD display globals */
-} menu_status_panel_display_thread_t;
 
 /* panel packets */
 /* Battle menu status and character-editor panel records. The EVENT overlays

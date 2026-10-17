@@ -60,7 +60,7 @@ static RECT g_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
  *
  * The unit status slot draws the selected unit's banner and any other slot the comparison
  * unit's; each has its own packets, text images and unit records. The thread's
- * first parameter is its menu_status_panel_display_thread_t. Both
+ * first parameter is its unit_panel_thread_t. Both
  * packet sets are built once and copied for the second frame buffer, then
  * every frame the thread:
  *  - dims the banner while a THREAD_TASK_STATUS_PANEL thread runs with a text
@@ -93,7 +93,7 @@ void unit_panel_banner_thread(void) {
     u8* name_image;                                 /* spA0 */
     menu_status_panel_packet_t* panel_base;         /* spA8 */
     menu_unit_status_identity_t* identity;          /* spB0 */
-    menu_status_panel_display_thread_t* thread;     /* spB8 */
+    unit_panel_thread_t* thread;                    /* spB8 */
     s32 frame;                                      /* spC0 */
     s32 shake;                                      /* spC8 */
     s32 dimmed;                                     /* spD0 */
@@ -115,7 +115,7 @@ void unit_panel_banner_thread(void) {
     input = script_get_controller_input_pointer(0);
     thread_id = g_thread_current_id;
     g_menu_input_controller = input + 1;
-    thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
+    thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
 
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
         panel = g_formation_selected_unit_status_packets;
@@ -236,7 +236,7 @@ void unit_panel_banner_thread(void) {
         if (thread_find_running_by_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
         }
-        if (thread->dimmed != 0) {
+        if (thread->style != 0) {
             dimmed = 1;
         }
         for (i = 0; i < 4; i++) {
@@ -299,7 +299,7 @@ void unit_panel_banner_thread(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                thread->shake_y = g_unit_panel_slide_down_y[shake];
+                thread->position.y = g_unit_panel_slide_down_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -308,7 +308,7 @@ void unit_panel_banner_thread(void) {
                     thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                thread->shake_y = g_unit_panel_slide_up_y[shake];
+                thread->position.y = g_unit_panel_slide_up_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -319,18 +319,18 @@ void unit_panel_banner_thread(void) {
             }
         }
 
-        draw_x = thread->x;
+        draw_x = (u16)thread->position.x;
         draw_y = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = draw_x - 0x80;
-        panel->draw_offset_a.position.y = thread->shake_y + draw_y;
+        panel->draw_offset_a.position.y = thread->position.y + draw_y;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel->draw_offset_b.position.x = -0x80;
         panel->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
-        draw_x = thread->x;
+        draw_x = (u16)thread->position.x;
         draw_y = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = draw_x - 0x80;
-        editor->draw_offset_a.position.y = thread->shake_y + draw_y;
+        editor->draw_offset_a.position.y = thread->position.y + draw_y;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
         editor->draw_offset_b.position.x = -0x80;
         editor->draw_offset_b.position.y = g_gfx_draw_offset_y;
@@ -343,15 +343,15 @@ void unit_panel_banner_thread(void) {
             prev_unit = cur_unit;
             suppress = thread->flags & MENU_STATUS_PANEL_HIDDEN;
         }
-        if (thread->work != 0) {
+        if (thread->redraw_request != 0) {
             if (anim_state == 0) {
                 prev_unit = cur_unit;
-                portrait_arg = thread->work;
+                portrait_arg = thread->redraw_request;
                 cur_unit = state->unit_index;
             } else {
                 anim_state = 2;
                 prev_unit = cur_unit;
-                portrait_arg = thread->work;
+                portrait_arg = thread->redraw_request;
                 cur_unit = state->unit_index;
             }
         }
@@ -414,7 +414,7 @@ void unit_panel_banner_thread(void) {
         panel->sprites[6].h = 0x14;
         panel->sprites[6].v0 = (cell / 7) * 0x14 + 0x2A;
 
-        if ((frame == 0) || (thread->work != 0)) {
+        if ((frame == 0) || (thread->redraw_request != 0)) {
             /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
             unit_panel_copy_billboard_in(&g_unit_panel_selected_unit_stat_summary,
                 (const unit_panel_unit_t*)&g_formation_selected_unit_identity, &g_formation_selected_unit_stat_detail);
@@ -441,7 +441,7 @@ void unit_panel_banner_thread(void) {
             g_menu_window_text_pen.stride = 0x60;
             menu_draw_numeric_display_entries(stat_image_upper, &number_entries[8], &g_menu_window_text_pen, 2);
             LoadImage(&rects[1], (u32*)stat_image_upper);
-            thread->work = 0;
+            thread->redraw_request = 0;
 
             /* Name and job, then the large Brave, Faith and roster numbers. */
             menu_clear_render_buffer(name_image, 0x580);

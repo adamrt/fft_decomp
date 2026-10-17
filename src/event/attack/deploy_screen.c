@@ -29,6 +29,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static unit_panel_thread_t g_deploy_status_display_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_character_status_frame_config = { 0 };
 
@@ -184,7 +185,7 @@ void attack_deployment_entrypoint(void) {
     g_deploy_selected_roster_index = 0;
     g_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
     g_deploy_active_cursor = 0;
-    g_deploy_status_display_offset_y[0] = -0x9c;
+    g_deploy_status_display_thread_params.position.y = -0x9c;
     /* Prompt icon states (see unit_panel_build_status_groups): 0xff hidden,
      * 0 lit, 1 dimmed; 7 shows a press then lights, 0x11 a press then dims, 0xc0 fades in. */
     for (i = 0; i < 5; i++) {
@@ -318,8 +319,8 @@ ramza_placed:
         if (first_pass != 0) {
             g_gfx_screen_fade = 0xff;
             while (1) {
-                if (g_deploy_status_display_offset_y[0] != 0) {
-                    g_deploy_status_display_offset_y[0] += 4;
+                if (g_deploy_status_display_thread_params.position.y != 0) {
+                    g_deploy_status_display_thread_params.position.y += 4;
                 }
                 if (g_gfx_screen_fade != 0) {
                     g_gfx_screen_fade -= 0x10;
@@ -328,7 +329,7 @@ ramza_placed:
                     }
                 }
                 /* Start the icon fade-in as the panel slide nears its end. */
-                if (g_deploy_status_display_offset_y[0] == -8) {
+                if (g_deploy_status_display_thread_params.position.y == -8) {
                     for (i = 0; i < 5; i++) {
                         g_unit_panel_status_animation[i] = 0xc0;
                     }
@@ -336,7 +337,8 @@ ramza_placed:
                 if (g_deploy_grid_slide_y != 0) {
                     g_deploy_grid_slide_y -= 4;
                 }
-                if (g_gfx_screen_fade == 0 && g_deploy_status_display_offset_y[0] == 0 && g_deploy_grid_slide_y == 0) {
+                if (g_gfx_screen_fade == 0 && g_deploy_status_display_thread_params.position.y == 0
+                    && g_deploy_grid_slide_y == 0) {
                     break;
                 }
                 thread_yield();
@@ -354,7 +356,8 @@ ramza_placed:
         /* Placement loop, one pass per frame, until START or CROSS leaves the squad. */
         while (1) {
             thread_yield();
-            g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
+            g_deploy_status_display_thread_params.style
+                = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
             input = script_get_controller_input_pointer(0);
             if (*input & PSX_PAD_SELECT) {
                 thread_start(DEPLOY_THREAD_SLOT_HELP_CURSOR, deploy_run_help_cursor);
@@ -477,7 +480,7 @@ ramza_placed:
                             thread_yield();
                         }
                     } else {
-                        s32* deployed = &g_deploy_selected_unit_deployed;
+                        s32* deployed = &g_deploy_status_display_thread_params.style;
 
                         /* Show the selected unit as deployed while the confirm menu is open; `cursor`
                          * holds the saved flag meanwhile. */
@@ -699,7 +702,7 @@ ramza_placed:
     thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
     thread_yield();
     for (i = 0; i < 0x100; i += 2) {
-        g_deploy_status_display_offset_y[0] = -i;
+        g_deploy_status_display_thread_params.position.y = -i;
         g_deploy_grid_slide_y = i;
         g_deploy_slot_offsets[0] = -i;
         g_deploy_slot_offsets[1] = -i;
@@ -888,7 +891,7 @@ static void deploy_select_first_deployable_unit(void) {
         }
         g_deploy_selected_roster_index++;
     }
-    g_deploy_status_display_thread_params = 0;
+    g_deploy_status_display_thread_params.position.x = 0;
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
 }
 
@@ -1079,11 +1082,11 @@ static void deploy_next_roster_unit_thread(void) {
         } while (g_deploy_roster_unit_deployable[g_deploy_selected_roster_index] == 0);
     }
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
-    g_deploy_roster_navigation_direction = 1;
-    g_deploy_status_display_thread_params = 0;
+    g_deploy_status_display_thread_params.redraw_request = 1;
+    g_deploy_status_display_thread_params.position.x = 0;
     g_deploy_numbers_thread_params.redraw_request = 1;
     g_deploy_character_status_frame_config.redraw_request = 1;
-    g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
+    g_deploy_status_display_thread_params.style = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_exit_current();
 }
@@ -1113,11 +1116,11 @@ static void deploy_previous_roster_unit_thread(void) {
         } while (g_deploy_roster_unit_deployable[g_deploy_selected_roster_index] == 0);
     }
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
-    g_deploy_roster_navigation_direction = 2;
-    g_deploy_status_display_thread_params = 0;
+    g_deploy_status_display_thread_params.redraw_request = 2;
+    g_deploy_status_display_thread_params.position.x = 0;
     g_deploy_numbers_thread_params.redraw_request = 1;
     g_deploy_character_status_frame_config.redraw_request = 1;
-    g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
+    g_deploy_status_display_thread_params.style = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_exit_current();
 }

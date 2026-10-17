@@ -112,14 +112,14 @@ void unit_panel_build_unit_data(s32 party_index);
  * panels and the overlays' character status and numeric panel threads): the
  * panel origin, a redraw request and the frame style read by
  * unit_panel_set_colors. The origin is read as whole 32-bit values (lw) for the
- * draw-area offset; the 16-bit reads that feed the s16 draw-offset stores
- * are the compiler narrowing those loads. */
+ * draw-area offset. Banner threads take the unsigned low half of x before
+ * the GPU coordinate arithmetic; the stored field is a full 32-bit value. */
 typedef struct unit_panel_thread {
     point32_t position; /* 0x00 */
     s32 flags;          /* 0x08: menu_status_panel_flags_e in the status display record */
     s32 redraw_request; /* 0x0c: set to 1 elsewhere to request a text/portrait rebuild; the status
                            display record also keeps the selection-slide direction here */
-    s32 style;          /* 0x10: 1 selects the dimmed menu colors */
+    s32 style;          /* 0x10: 1 dims equipment/numeric panels; any nonzero value dims the banner */
 } unit_panel_thread_t;
 typedef char unit_panel_thread_size_must_be_20[(sizeof(unit_panel_thread_t) == 20) ? 1 : -1];
 
@@ -332,7 +332,7 @@ void unit_panel_toggle_equipment_and_numbers(s32 enable);
 
 /* panel state (EQUIP) */
 extern unit_panel_buffer_t g_unit_panel_frames_b[];
-extern menu_status_panel_display_thread_t g_unit_panel_unit_status_panel_params;
+extern unit_panel_thread_t g_unit_panel_unit_status_panel_params;
 
 void unit_panel_toggle_equipment_threads(s32 enable);
 void unit_panel_toggle_item_numbers_thread(s32 enable);

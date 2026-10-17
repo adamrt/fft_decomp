@@ -50,7 +50,7 @@ void unit_panel_banner_thread(void) {
     u8* name_image;                                 /* spA0 */
     menu_status_panel_packet_t* panel_base;         /* spA8 */
     unit_panel_unit_t* unit_info;                   /* spB0 */
-    menu_status_panel_display_thread_t* thread;     /* spB8 */
+    unit_panel_thread_t* thread;                    /* spB8 */
     s32 shake;                                      /* spC0 */
     s32 dimmed;                                     /* spC8 */
     s32 suppress;                                   /* spD0 */
@@ -81,7 +81,7 @@ void unit_panel_banner_thread(void) {
     thread_set_current_task_id(THREAD_TASK_UNIT_STATUS_BANNER);
     g_menu_input_controller = script_get_controller_input_pointer(0) + 1;
     thread_id = g_thread_current_id;
-    thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
+    thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
 
     /* One body serves two thread slots: the status slot draws the selected unit, the other the comparison unit. */
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
@@ -205,7 +205,7 @@ void unit_panel_banner_thread(void) {
         if (thread_find_running_by_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
         }
-        if (thread->dimmed != 0) {
+        if (thread->style != 0) {
             dimmed = 1;
         }
 
@@ -272,7 +272,7 @@ void unit_panel_banner_thread(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                thread->shake_y = g_unit_panel_slide_down_y[shake];
+                thread->position.y = g_unit_panel_slide_down_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -281,7 +281,7 @@ void unit_panel_banner_thread(void) {
                     thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                thread->shake_y = g_unit_panel_slide_up_y[shake];
+                thread->position.y = g_unit_panel_slide_up_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -293,10 +293,10 @@ void unit_panel_banner_thread(void) {
         }
 
         /* Offset a moves each block to the thread's x and shake_y; offset b restores the plain offset after it. */
-        panel_x = thread->x;
+        panel_x = (u16)thread->position.x;
         panel_y_a = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = panel_x - 0x80;
-        panel_shake_y = (u16)thread->shake_y;
+        panel_shake_y = (u16)thread->position.y;
         panel->draw_offset_a.position.y = panel_shake_y + panel_y_a;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel_y_b = g_gfx_draw_offset_y;
@@ -304,10 +304,10 @@ void unit_panel_banner_thread(void) {
         panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
 
-        editor_x = thread->x;
+        editor_x = (u16)thread->position.x;
         editor_y_a = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = editor_x - 0x80;
-        editor_shake_y = (u16)thread->shake_y;
+        editor_shake_y = (u16)thread->position.y;
         editor->draw_offset_a.position.y = editor_shake_y + editor_y_a;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
         editor_y_b = g_gfx_draw_offset_y;
@@ -322,16 +322,17 @@ void unit_panel_banner_thread(void) {
             prev_unit = cur_unit;
             suppress = thread->flags & MENU_STATUS_PANEL_HIDDEN;
         }
-        /* thread->work is both the redraw request and the wipe direction; a request mid-wipe restarts it at step 2. */
-        if (thread->work != 0) {
+        /* thread->redraw_request is both the redraw request and the wipe direction; a request mid-wipe restarts it at
+         * step 2. */
+        if (thread->redraw_request != 0) {
             if (anim_state == 0) {
                 prev_unit = cur_unit;
-                portrait_arg = thread->work;
+                portrait_arg = thread->redraw_request;
                 cur_unit = state->unit_index;
             } else {
                 anim_state = 2;
                 prev_unit = cur_unit;
-                portrait_arg = thread->work;
+                portrait_arg = thread->redraw_request;
                 cur_unit = state->unit_index;
             }
         }
@@ -412,7 +413,7 @@ void unit_panel_banner_thread(void) {
         panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
 
         /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
-        if ((frame == 0) || (thread->work != 0)) {
+        if ((frame == 0) || (thread->redraw_request != 0)) {
             /* Units off the AT list (negative index) show dashes. */
             if (state->list_index < 0) {
                 number_entries[6].format = 0xC00;
@@ -431,7 +432,7 @@ void unit_panel_banner_thread(void) {
             *window_width = 0x60;
             menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);
             LoadImage(&rects[1], number_pixels_b);
-            thread->work = 0;
+            thread->redraw_request = 0;
 
             menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
