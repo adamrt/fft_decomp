@@ -23,7 +23,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern help_navigation_record_t g_deploy_help_cursor_nodes[];
+extern help_navigation_record_t g_deploy_help_cursor_nodes[31];
 
 /* text */
 /* g_scenario_event_condition_blocks help text, installed as TEXT_SECTION_OVERLAY_SCREEN */

@@ -64,9 +64,16 @@ typedef enum deploy_menu_state {
     DEPLOY_MENU_HIDDEN = 5         /* between squads and in tiles-only mode: no hint */
 } deploy_menu_state_e;
 
+typedef enum deploy_menu_entry {
+    DEPLOY_ENTRY_NOTICE = 2,
+    DEPLOY_ENTRY_CONFIRM_PROMPT = 3,
+    DEPLOY_ENTRY_CONFIRM_CHOICE = 4,
+    DEPLOY_ENTRY_COUNT = 5
+} deploy_menu_entry_e;
+
 extern s32 g_deploy_menu_state; /* deploy_menu_state_e */
-extern menu_entry_t g_deploy_menu_entries[];
-extern image_layout_t g_deploy_button_hint_cells[];
+extern menu_entry_t g_deploy_menu_entries[DEPLOY_ENTRY_COUNT];
+extern image_layout_t g_deploy_button_hint_cells[4];
 extern s32 g_deploy_active_cursor;
 extern s32 g_deploy_cursor_row[2];
 extern s32 g_deploy_cursor_column[2];
@@ -582,9 +589,10 @@ ramza_placed:
                 if (g_deploy_deployed_unit_count == 0) {
                     g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                     /* Notices reuse menu entry 2, retexted with each deployment message. */
-                    g_deploy_menu_entries[2].text_id = DEPLOY_NOTICE_NO_UNIT_PLACED;
+                    g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_NO_UNIT_PLACED;
                     thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
-                    thread_set_parameters(DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[2], 0, 0);
+                    thread_set_parameters(
+                        DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
                     thread_wait_until_inactive(DEPLOY_THREAD_SLOT_NOTICE);
                 } else {
                     g_sound_pending_sfx_id = SOUND_SFX_COMPLETE;
@@ -612,8 +620,8 @@ ramza_placed:
                         cursor = *deployed;
                         *deployed = 1;
                         thread_start(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU, menu_icon_linked_entry_thread);
-                        thread_set_parameters(
-                            DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU, (s32)&g_menu_thread_menu_data[3], 0, 0);
+                        thread_set_parameters(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU,
+                            (s32)&g_menu_thread_menu_data[DEPLOY_ENTRY_CONFIRM_PROMPT], 0, 0);
                         thread_wait_until_inactive(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU);
                         thread_wait_until_inactive(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU_CHILD);
                         *deployed = cursor;
@@ -677,9 +685,10 @@ ramza_placed:
                                 g_deploy_deployed_unit_count++;
                             } else {
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
-                                g_deploy_menu_entries[2].text_id = DEPLOY_NOTICE_SQUAD_FULL;
+                                g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_SQUAD_FULL;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
-                                thread_set_parameters(DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[2], 0, 0);
+                                thread_set_parameters(
+                                    DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
                                 thread_wait_until_inactive(DEPLOY_THREAD_SLOT_NOTICE);
                             }
                         } else {
@@ -707,9 +716,10 @@ ramza_placed:
                             if (g_deploy_roster_id_by_tile[row][column] == 0
                                 && script_get_variable(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
-                                g_deploy_menu_entries[2].text_id = DEPLOY_NOTICE_RAMZA_REQUIRED;
+                                g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_RAMZA_REQUIRED;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
-                                thread_set_parameters(DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[2], 0, 0);
+                                thread_set_parameters(
+                                    DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
                                 thread_wait_until_inactive(DEPLOY_THREAD_SLOT_NOTICE);
                                 g_deploy_active_cursor = 0;
                                 g_deploy_cursor_column[0] = g_deploy_cursor_column[1];
