@@ -3,6 +3,9 @@
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
+/* Ordinary driver-status view; the transfer wait keeps its measured volatile view. */
+extern s16 g_suzuki_sound_driver_flags;
+
 /* Loads instrument entry n of the channel's waveset into the channel:
  * sample and loop addresses, ADSR rates and modes, sustain level and
  * fine_tune. An SFX or immediate-instrument channel gets every voice

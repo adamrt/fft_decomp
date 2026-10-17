@@ -4,6 +4,9 @@
 #include "psx/libapi.h"
 #include "psx/types.h"
 
+/* Ordinary driver-status view; the transfer wait keeps its measured volatile view. */
+extern s16 g_suzuki_sound_driver_flags;
+
 /* Sets or clears SUZUKI_SOUND_DRIVER_SFX_ENABLED; disabling also silences
  * every SFX channel first. The Play Sound entry points test the flag. */
 void suzuki_sound_set_sfx_enabled(s32 enabled) {

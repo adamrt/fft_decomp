@@ -791,6 +791,13 @@ written that way.
 
 ## Declaration leads
 
+- Suzuki's driver-status word at `0x80032a54` retains different qualifier
+  views: `suzuki_sound_wait_for_spu_transfer.c` declares it volatile, while
+  `driver.c`, `sfx.c` and `smd_voices.c` use ordinary declarations. Uniform
+  qualification and local volatile-pointer rewrites change the original code.
+  Keeping these declarations in their source files avoids a contradictory
+  declaration inside the wait file; it does not resolve the cross-file type
+  disagreement or prove the original declarations.
 - The heads of `equipment_unit_preview_t` and `unit_list_record_t` overlap
   `unit_panel_summary_t`, but their fields at 0x1e and 0x20 differ.
 - BUNIT, EQUIP and WORLD use the 236-byte `menu_gfx_context_t`. JOBSTTS omits the draw-mode pool pointer at 0x60 and uses a

@@ -670,8 +670,6 @@ extern suzuki_waveset_t* g_suzuki_sound_waveset_list;    /* 0x80032a44 */
 extern u16 g_suzuki_sound_voice_update_requests;         /* suzuki_voice_mask_request_e */
 extern suzuki_music_t* g_suzuki_sound_active_music_list; /* 0x80032a50 */
 
-/* Driver status (suzuki_sound_driver_flag_e). */
-extern s16 g_suzuki_sound_driver_flags;
 extern s32
     g_suzuki_sound_root_counter_2_event; /* 0x80032a5c; OpenEvent handle of suzuki_sound_root_counter_2_handler */
 extern suzuki_music_t* g_suzuki_sound_sfx_music;    /* 0x80032a60; eight channels on SPU voices 16-23 */

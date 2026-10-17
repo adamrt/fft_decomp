@@ -6,6 +6,9 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+/* Ordinary driver-status view; the transfer wait keeps its measured volatile view. */
+extern s16 g_suzuki_sound_driver_flags;
+
 enum { SUZUKI_SOUND_HEAP_BYTE_COUNT = 32768 };
 
 enum {

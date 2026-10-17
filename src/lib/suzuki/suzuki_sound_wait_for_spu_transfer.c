@@ -1,3 +1,5 @@
+/* SPU transfer polling and the active transfer status. */
+
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
@@ -10,7 +12,9 @@ typedef struct suzuki_spu_transfer_status {
 extern u16 g_suzuki_sound_spu_transfer_status_index; /* index into g_suzuki_sound_spu_transfer_status_records */
 extern suzuki_spu_transfer_status_t* g_suzuki_sound_spu_transfer_status_records;
 
-/* Volatile view: the target re-reads the transfer flag on every poll. */
+/* The native wait polls this same driver-status word through a volatile view.
+ * driver.c, sfx.c and smd_voices.c retain ordinary views: uniform qualification
+ * changes their original code. Keep this measured declaration mismatch explicit. */
 extern volatile s16 g_suzuki_sound_driver_flags;
 
 /* With SUZUKI_SOUND_SPU_TRANSFER_WAIT in flags, spin until the SPU transfer
