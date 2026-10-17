@@ -174,7 +174,7 @@ s32 equipment_run_item_list(void) {
         }
         g_equipment_slot_item_browser_previewed_index = g_menu_list_selected_index;
         item_collect_stat_deltas(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
-        g_unit_panel_unit_status_panel_redraw = 1;
+        g_unit_panel_unit_status_panel_params.work = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
     return MENU_ITEM_LIST_STATE_BROWSE;

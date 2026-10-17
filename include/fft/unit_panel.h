@@ -332,9 +332,7 @@ void unit_panel_toggle_equipment_and_numbers(s32 enable);
 
 /* panel state (EQUIP) */
 extern unit_panel_buffer_t g_unit_panel_frames_b[];
-extern u8 g_unit_panel_unit_status_panel_params[];
-extern s32 g_unit_panel_unit_status_panel_flags;
-extern s32 g_unit_panel_unit_status_panel_redraw;
+extern menu_status_panel_display_thread_t g_unit_panel_unit_status_panel_params;
 
 void unit_panel_toggle_equipment_threads(s32 enable);
 void unit_panel_toggle_item_numbers_thread(s32 enable);

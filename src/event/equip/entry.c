@@ -31,16 +31,16 @@ void unit_panel_toggle_item_numbers_thread(s32 enable) {
         menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_ITEM_NUMERIC);
     }
     g_equipment_item_numeric_thread_enabled = enable;
-    g_equipment_numeric_panel_style = enable;
+    g_unit_panel_numeric_panel_params.style = enable;
 }
 
 /* Prime the four "menu section dirty" flags before the
  * next redraw pass. */
 static void equipment_reset_dirty_flags(void) {
-    g_unit_panel_unit_status_panel_redraw = 1;
-    g_equipment_numeric_panel_redraw = 1;
+    g_unit_panel_unit_status_panel_params.work = 1;
+    g_unit_panel_numeric_panel_params.redraw_request = 1;
     g_unit_panel_preview_stats_thread_params.redraw_request = 1;
-    g_equipment_panel_redraw = 1;
+    g_equipment_panel_params.redraw_request = 1;
 }
 
 /* Ask the unit status, equipment list, numeric panel and item numeric
@@ -51,7 +51,7 @@ void equipment_stop_threads(void) {
     menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     unit_panel_toggle_item_numbers_thread(0);
     g_unit_panel_preview_stats_thread_params.style = 0;
-    g_equipment_panel_style = 0;
+    g_equipment_panel_params.style = 0;
 }
 
 /* Load the selected unit into the EQUIP panels: clamp its HP and MP to their

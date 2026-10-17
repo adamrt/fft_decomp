@@ -113,7 +113,7 @@ void equipment_init(s32 battle_id) {
         g_gfx_draw_move_buffer, g_gfx_draw_area_buffer, g_equipment_gfx_draw_mode_buffer);
     equipment_load_unit(battle_id);
     equipment_load_images();
-    g_unit_panel_unit_status_panel_flags = battle_id;
+    g_unit_panel_unit_status_panel_params.flags = battle_id;
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_text_data;
     equipment_load_selected_unit();
     unit_panel_toggle_banner_thread(1);
@@ -128,7 +128,7 @@ void unit_panel_toggle_banner_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-            thread_set_parameters(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)g_unit_panel_unit_status_panel_params, 0, 0);
+            thread_set_parameters(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)&g_unit_panel_unit_status_panel_params, 0, 0);
         }
     } else {
         menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
@@ -141,7 +141,7 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, unit_panel_equipment_thread);
-            thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)g_equipment_panel_params, 0, 0);
+            thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)&g_equipment_panel_params, 0, 0);
         }
         unit_panel_toggle_numbers_thread(enable);
         return;

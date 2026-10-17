@@ -223,8 +223,6 @@ typedef enum deploy_prompt_thread_slot {
 
 extern s32 g_deploy_status_display_thread_params;
 extern s32 g_deploy_status_display_offset_y[];
-extern u8 g_deploy_character_status_frame_config[];
-extern u8 g_deploy_numbers_thread_params[];
 
 /* text */
 /* Overlay text file: offsets are relative to the data following the header. */

@@ -29,6 +29,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
+static unit_panel_thread_t g_deploy_character_status_frame_config = { 0 };
+
 /* Deployment messages, which ATTACK binds at text id 0x9000, that the notice entry (menu entry 2)
  * shows. */
 enum {
@@ -639,10 +642,10 @@ ramza_placed:
                     g_unit_panel_status_animation[4] = 1;
                 }
                 thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_polarity_thread);
-                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)g_deploy_numbers_thread_params, 0, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_deploy_numbers_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
                 thread_set_parameters(
-                    THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)g_deploy_character_status_frame_config, 0, 0);
+                    THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_deploy_character_status_frame_config, 0, 0);
                 thread_start(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER, thread_wait_forever);
                 do {
                     thread_yield();
@@ -1078,8 +1081,8 @@ static void deploy_next_roster_unit_thread(void) {
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
     g_deploy_roster_navigation_direction = 1;
     g_deploy_status_display_thread_params = 0;
-    g_unit_panel_numbers_redraw_request = 1;
-    g_unit_panel_character_status_redraw_request = 1;
+    g_deploy_numbers_thread_params.redraw_request = 1;
+    g_deploy_character_status_frame_config.redraw_request = 1;
     g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_exit_current();
@@ -1112,8 +1115,8 @@ static void deploy_previous_roster_unit_thread(void) {
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
     g_deploy_roster_navigation_direction = 2;
     g_deploy_status_display_thread_params = 0;
-    g_unit_panel_numbers_redraw_request = 1;
-    g_unit_panel_character_status_redraw_request = 1;
+    g_deploy_numbers_thread_params.redraw_request = 1;
+    g_deploy_character_status_frame_config.redraw_request = 1;
     g_deploy_selected_unit_deployed = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_exit_current();

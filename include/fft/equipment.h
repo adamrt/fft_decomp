@@ -208,11 +208,7 @@ s32 equipment_run_type_order_mode(void);
 /* unit panels */
 extern menu_unit_status_identity_t g_equipment_selected_unit_data;
 extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
-extern u8 g_equipment_panel_params[];
-extern s32 g_equipment_panel_style;
-extern s32 g_equipment_panel_redraw;
-extern s32 g_equipment_numeric_panel_style;
-extern s32 g_equipment_numeric_panel_redraw;
+extern unit_panel_thread_t g_equipment_panel_params;
 extern u8 g_equipment_status_label_image[];
 extern RECT g_equipment_status_label_image_rect;
 

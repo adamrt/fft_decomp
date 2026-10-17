@@ -11,7 +11,7 @@ links: [battle]
 units:
   - {name: deploy_menu, source: src/event/attack/deploy_menu.c}
   - {name: deploy_panel_primitives, source: src/event/attack/deploy_panel_primitives.c}
-  - {name: deploy_screen, source: src/event/attack/deploy_screen.c}
+  - {name: deploy_screen, source: src/event/attack/deploy_screen.c, data: [{addr: 0x801cd224, size: 40, hash: 2c34ce1df23b838c}]}
   - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b4, size: 4, hash: 67abdd721024f0ff}, {addr: 0x801cd2b8, size: 4, hash: e112d548bcb2311b}]}
   - {name: file_load_sync, source: src/lib/file/file_load_sync.c}
@@ -198,9 +198,7 @@ data:
   - {addr: 0x801cd21c, name: g_deploy_roster_navigation_direction}
   - {addr: 0x801cd220, name: g_deploy_selected_unit_deployed}
   - {addr: 0x801cd224, name: g_deploy_numbers_thread_params}
-  - {addr: 0x801cd230, name: g_unit_panel_numbers_redraw_request}
   - {addr: 0x801cd238, name: g_deploy_character_status_frame_config}
-  - {addr: 0x801cd244, name: g_unit_panel_character_status_redraw_request}
   - {addr: 0x801cd24c, name: g_deploy_cursor_column}
   - {addr: 0x801cd254, name: g_deploy_cursor_row}
   - {addr: 0x801cd25c, name: g_deploy_unit_fieldable}
@@ -1567,14 +1565,8 @@ data:
   - {addr: 0x801bf000, name: g_menu_text_decimal_format}
   - {addr: 0x801ce0e0, name: g_text_data}
   - {addr: 0x801ce178, name: g_unit_panel_unit_status_panel_params}
-  - {addr: 0x801ce180, name: g_unit_panel_unit_status_panel_flags}
-  - {addr: 0x801ce184, name: g_unit_panel_unit_status_panel_redraw}
   - {addr: 0x801ce18c, name: g_equipment_panel_params}
-  - {addr: 0x801ce198, name: g_equipment_panel_redraw}
-  - {addr: 0x801ce19c, name: g_equipment_panel_style}
   - {addr: 0x801ce1a0, name: g_unit_panel_numeric_panel_params}
-  - {addr: 0x801ce1ac, name: g_equipment_numeric_panel_redraw}
-  - {addr: 0x801ce1b0, name: g_equipment_numeric_panel_style}
   - {addr: 0x801ce1b4, name: g_unit_panel_preview_stats_thread_params}
   - {addr: 0x801ce1c8, name: g_sound_queued_effect_id}
   - {addr: 0x801ce1c9, name: g_equipment_sound_suppress_queued}
