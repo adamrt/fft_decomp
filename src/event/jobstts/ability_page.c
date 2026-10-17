@@ -1,5 +1,6 @@
-/* The selected job's ability list, tabbed by category, with the selected ability's description. */
+/* Status ability page and its row callbacks. */
 
+#include "fft/ability.h"
 #include "fft/ability_list.h"
 #include "fft/help.h"
 #include "fft/job_list.h"
@@ -15,7 +16,123 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* JOBSTTS ability page for the chosen job (g_job_list_selected_id): its abilities in four
+/* Row callback for ability lists: look up the listed ability (caching its data for the panel) and
+ * return 1 when it is not an action ability and its entry carries no disabled bits. */
+s32 ability_list_is_non_action_learned(s32 index) {
+    s16* entries = g_ability_list_ability_entries;
+    s16* entry = &entries[index];
+    s32 result;
+    u16 ability;
+
+    g_ability_list_ability_type = ability_get_data_and_type(*entry & ABILITY_LIST_ENTRY_ID_MASK,
+        &g_ability_list_selected_ability_data, &g_ability_list_selected_ability_secondary_data);
+    result = 0;
+    if (g_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {
+        ability = *entry;
+        result = (ability >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) == 0;
+    }
+    return result;
+}
+
+/* Returns 1 for an ability of any type other than ABILITY_TYPE_DEFAULT (by
+ * the type the "learned" callback cached) whose entry has bit 14 or 15 set;
+ * 0 otherwise. */
+s32 ability_list_is_non_action_unlearned(s32 index) {
+    s32 result = 0;
+
+    if (g_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {
+        result = (g_ability_list_ability_entries[index] >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) != 0;
+    }
+    return result;
+}
+
+/* Row callback: whether the ability the learned callback cached is an action ability
+ * (ABILITY_TYPE_DEFAULT); the row is ignored. */
+s32 ability_list_is_action(s32 unused_row) {
+    return g_ability_list_ability_type == ABILITY_TYPE_DEFAULT;
+}
+
+/* Returns the selected action ability's displayed MP cost, from the
+ * secondary record: dashes for an entry whose details are hidden, with the
+ * disabled flag added for a disabled entry. */
+s32 ability_list_get_mp_cost(s32 index) {
+    s32 entry = g_ability_list_ability_entries[index];
+    s32 result;
+
+    if (entry & ABILITY_LIST_ENTRY_HIDE_DETAILS) {
+        result = MENU_NUMBER_VALUE_DASHES;
+    } else {
+        result = g_ability_list_selected_ability_secondary_data.range->mp_cost;
+    }
+    if (entry >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
+        result |= MENU_NUMBER_VALUE_DISABLED;
+    }
+    return result;
+}
+
+/* Returns the selected action ability's displayed charge time:
+ * ceil(100 / the secondary record's CT speed), dashes for an entry whose
+ * details are hidden, with the disabled flag added for a disabled entry. */
+s32 ability_list_get_ct(s32 index) {
+    s32 entry = g_ability_list_ability_entries[index];
+    s32 result;
+
+    if (entry & ABILITY_LIST_ENTRY_HIDE_DETAILS) {
+        result = MENU_NUMBER_VALUE_DASHES;
+    } else {
+        result = g_ability_list_selected_ability_secondary_data.range->ct;
+        result = (100 / result) + ((100 % result) != 0);
+    }
+    if (entry >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
+        result |= MENU_NUMBER_VALUE_DISABLED;
+    }
+    return result;
+}
+
+/* Returns the displayed JP cost of an ability list entry: the ability's JP
+ * cost, dashes for an entry whose details are hidden, with the disabled flag
+ * added for a disabled entry. */
+s32 ability_list_get_jp_cost(s32 index) {
+    s32 entry = g_ability_list_ability_entries[index];
+    s32 result;
+
+    if (entry & ABILITY_LIST_ENTRY_HIDE_DETAILS) {
+        result = MENU_NUMBER_VALUE_DASHES;
+    } else {
+        result = g_ability_data[entry & ABILITY_LIST_ENTRY_ID_MASK].jp_cost;
+    }
+    if (entry >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
+        result |= MENU_NUMBER_VALUE_DISABLED;
+    }
+    return result;
+}
+
+/* Menu callback: 1 unless the entry's disabled bit (0x4000) is set. */
+s32 ability_list_is_learned(s32 index) {
+    return (g_ability_list_ability_entries[index] & ABILITY_LIST_ENTRY_DISABLED) == 0;
+}
+
+/* Row callback: return whether the ability list shows the action category; the row is ignored. */
+s32 ability_list_is_action_tab(s32 unused_row) {
+    return g_ability_list_ability_category == MENU_ABILITY_CATEGORY_ACTION;
+}
+
+/* Row callback: return whether the ability list shows the reaction category; the row is ignored. */
+s32 ability_list_is_reaction_tab(s32 unused_row) {
+    return g_ability_list_ability_category == MENU_ABILITY_CATEGORY_REACTION;
+}
+
+/* Row callback: return whether the ability list shows the support category; the row is ignored. */
+s32 ability_list_is_support_tab(s32 unused_row) {
+    return g_ability_list_ability_category == MENU_ABILITY_CATEGORY_SUPPORT;
+}
+
+/* Row callback: return whether the ability list shows the movement category; the row is ignored. */
+s32 ability_list_is_movement_tab(s32 unused_row) {
+    return g_ability_list_ability_category == MENU_ABILITY_CATEGORY_MOVEMENT;
+}
+
+/* Ability page for the chosen job (g_job_list_selected_id): its abilities in four
  * category tabs that LEFT and RIGHT cycle through, with the highlighted ability's
  * description as the help text. The first call installs the row callbacks the render
  * script reads, clears the four categories' saved cursors and renders the job name into

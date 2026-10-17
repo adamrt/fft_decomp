@@ -1,4 +1,4 @@
-/* Unit records built from stats, the data list, sorting by order keys and copying between order lists. */
+/* Unit List scrolling checks, unit records and their sort order. */
 
 #include "fft/ability.h"
 #include "fft/at_list.h"
@@ -17,12 +17,83 @@ static s16 g_unit_list_shown_unit_indices[22] = { 0 };
 static s16 g_unit_list_count = 0;
 static unit_list_record_t g_unit_list_records[21] = { 0 };
 
-/* Builds a BUNIT unit-data record from a battle unit: clamps level, HP/MP
+/* Returns 1 while the unit list is scrolling, or when the selected unit lies
+ * outside the three rows of four shown at the current page offset, so that
+ * the list has to scroll. */
+s32 unit_list_is_scroll_needed(void) {
+    s32 ret = 0;
+
+    if (g_unit_list_scroll_step == 0) {
+        switch (g_unit_list_page_offset) {
+        case -0x78:
+            if (g_unit_selected_index < 8) {
+                ret = 1;
+            }
+            break;
+        case -0x3C:
+            if (g_unit_selected_index >= 0x10) {
+                ret = 1;
+            } else if (g_unit_selected_index < 4) {
+                ret = 1;
+            }
+            break;
+        case 0:
+            if (g_unit_selected_index >= 0xC) {
+                ret = 1;
+            }
+            break;
+        }
+    } else {
+        ret = 1;
+    }
+    return ret;
+}
+
+/* Returns 1 when the unit holds a single weapon in two hands: exactly one of
+ * the two hand slots is occupied, its item is below the throwable range, and
+ * the weapon either forces two hands or allows them while `two_hands_support`
+ * (the Two Hands support ability) is set. */
+s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
+    s32 result = 0;
+    s32 item_id = 0;
+
+    if (slots[0] != 0) {
+        if (slots[1] == 0) {
+            item_id = slots[0] & 0x3FF;
+        }
+    } else if (slots[1] != 0) {
+        item_id = slots[1] & 0x3FF;
+    }
+    if (item_id != 0 && item_id < ITEM_ID_THROWABLE_FIRST) {
+        u8 flags = g_item_weapon_data[item_id].flags;
+        if (flags & WEAPON_FLAG_FORCED_TWO_HANDS) {
+            result = 1;
+        } else if (two_hands_support != 0 && (flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)) {
+            result = 1;
+        }
+    }
+    return result;
+}
+
+/* Returns 1 for a job id in either special-monster range: from
+ * JOB_ID_SPECIAL_MONSTER_1_FIRST up to the first generic job, or the
+ * block that starts at JOB_ID_SPECIAL_MONSTER_2_FIRST. */
+s32 job_is_special_monster(s32 job_id) {
+    s32 result = job_id >= JOB_ID_SPECIAL_MONSTER_1_FIRST && job_id < JOB_ID_GENERIC_FIRST;
+
+    if (job_id >= JOB_ID_SPECIAL_MONSTER_2_FIRST
+        && job_id < JOB_ID_SPECIAL_MONSTER_2_FIRST + JOB_ID_SPECIAL_MONSTER_2_COUNT) {
+        result = 1;
+    }
+    return result;
+}
+
+/* Build a Unit List record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
  * only when skillset_monster_count_supporters passes) or the equipment and
  * ability slots, and copies the job and ability tables with JP capped at 9999.
  *
- * BUNIT twin of formation_build_unit_record. `count` indexes the output
+ * `count` indexes the output
  * slot so loop.c strength-reduces it into the record pointer; with an explicit
  * pointer walk the smaller loop lets loop.c hoist the constant 3 into $s6. The
  * caller also passes its shown-list slot, which is not read. */
@@ -229,7 +300,7 @@ s32 unit_list_build_records(s32 mode, s32 unit_data, s32 sort_mode) {
  * reorder list edits, each key a record field picked through g_unit_list_sort_field_indices; a tie
  * moves on to the next key), then publish the sorted record pointers into
  * g_unit_list_pointers. Keys 1 and 4 and up sort in descending order. `sort_mode` is
- * not read. BUNIT twin of formation_sort_roster. */
+ * not read. */
 void unit_list_sort(s32 sort_mode) {
     s32 count;
     s32 j;
@@ -290,7 +361,7 @@ void unit_list_store_sort_order(s32 unused, const s16* entries) {
     }
 }
 
-/* Find the BUNIT record with a battle id, or return the active record count.
+/* Find the Unit List record with a battle id, or return the active record count.
  *
  * The not-found result doubles as the next/end index for both known callers. */
 s32 unit_list_find_by_battle_id(s16 battle_id) {

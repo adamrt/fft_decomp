@@ -306,14 +306,14 @@ links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 28, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16, VARIANT_TEXT_ID_ROW_FORMAT: 231}
 
 units:
+  - {name: ability_page, source: src/event/bunit/ability_page.c}
   - {name: cmd_clut_handlers, source: src/lib/menu/cmd_clut_handlers.c}
   - {name: cmd_group_handlers, source: src/lib/menu/cmd_group_handlers.c}
   - {name: descriptor_threads, source: src/event/bunit/descriptor_threads.c}
   - {name: entry, source: src/event/bunit/entry.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
+  - {name: job_abilities, source: src/event/bunit/job_abilities.c}
   - {name: job_list, source: src/event/bunit/job_list.c}
-  - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
-  - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
   - {name: menu_list, source: src/event/bunit/menu_list.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: packet_buffers, source: src/event/bunit/packet_buffers.c, data: [{addr: 0x801eca28, size: 2, hash: 96a296d224f285c6}]}
@@ -390,22 +390,22 @@ functions:
   - {addr: 0x801c65a8, size: 60, name: menu_clear_selection_record, hash: 971d949bbd11948f, unit: selection_records}
   - {addr: 0x801c65e4, size: 76, name: menu_set_selection_record, hash: 74a1e89561e6aadf, source: src/lib/menu/menu_set_selection_record.c}
   - {addr: 0x801c6630, size: 176, name: menu_get_selection_record, hash: 7536cd22e376eeb6, source: src/lib/menu/menu_get_selection_record.c}
-  - {addr: 0x801c66e0, size: 192, name: unit_list_is_scroll_needed, hash: 28f8eae91bb947ee}
-  - {addr: 0x801c67a0, size: 148, name: unit_is_two_handing_weapon, hash: 90d336abe9d84508, source: src/lib/menu/unit_is_two_handing_weapon.c}
-  - {addr: 0x801c6834, size: 32, name: job_is_special_monster, hash: f4362856b8ecd185, source: src/lib/menu/job_is_special_monster.c}
+  - {addr: 0x801c66e0, size: 192, name: unit_list_is_scroll_needed, hash: 28f8eae91bb947ee, unit: unit_records}
+  - {addr: 0x801c67a0, size: 148, name: unit_is_two_handing_weapon, hash: 90d336abe9d84508, unit: unit_records}
+  - {addr: 0x801c6834, size: 32, name: job_is_special_monster, hash: f4362856b8ecd185, unit: unit_records}
   - {addr: 0x801c6854, size: 1460, name: unit_list_build_record, hash: e893beb59f02bf6f, unit: unit_records}
   - {addr: 0x801c6e08, size: 320, name: unit_list_build_records, hash: 72f9d3d86b9a4098, unit: unit_records}
   - {addr: 0x801c6f48, size: 380, name: unit_list_sort, hash: d11b39851ebec6b1, unit: unit_records}
   - {addr: 0x801c70c4, size: 64, name: unit_list_load_sort_order, hash: cac2171590658656, unit: unit_records}
   - {addr: 0x801c7104, size: 68, name: unit_list_store_sort_order, hash: a6104db1a4999b63, unit: unit_records}
   - {addr: 0x801c7148, size: 96, name: unit_list_find_by_battle_id, hash: aeb870b2fb0d661f, unit: unit_records}
-  - {addr: 0x801c71a8, size: 44, name: job_get_generic_index, hash: 39c0e32433f9234e, source: src/lib/menu/job_get_generic_index.c}
-  - {addr: 0x801c71d4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, source: src/lib/menu/job_find_first_for_skillset.c}
-  - {addr: 0x801c722c, size: 76, name: job_list_get_base, hash: 0fb085973a10550b}
-  - {addr: 0x801c7278, size: 72, name: job_calculate_and_store_unlocks, hash: 79ecd32bffad7458, source: src/lib/menu/job_calculate_and_store_unlocks.c}
-  - {addr: 0x801c72c0, size: 352, name: unit_list_build_job_list, hash: 0372cf84313e0cb9}
-  - {addr: 0x801c7420, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, source: src/lib/menu/job_get_skillset.c}
-  - {addr: 0x801c7444, size: 648, name: ability_list_build, hash: 373b01e6f8a27498}
+  - {addr: 0x801c71a8, size: 44, name: job_get_generic_index, hash: 39c0e32433f9234e, unit: job_abilities}
+  - {addr: 0x801c71d4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, unit: job_abilities}
+  - {addr: 0x801c722c, size: 76, name: job_list_get_base, hash: 0fb085973a10550b, unit: job_abilities}
+  - {addr: 0x801c7278, size: 72, name: job_calculate_and_store_unlocks, hash: 79ecd32bffad7458, unit: job_abilities}
+  - {addr: 0x801c72c0, size: 352, name: unit_list_build_job_list, hash: 0372cf84313e0cb9, unit: job_abilities}
+  - {addr: 0x801c7420, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, unit: job_abilities}
+  - {addr: 0x801c7444, size: 648, name: ability_list_build, hash: 373b01e6f8a27498, unit: job_abilities}
   - {addr: 0x801c76cc, size: 444, name: unit_list_gfx_submit_frame, hash: 03562779b98bb33c, unit: packet_buffers}
   - {addr: 0x801c7888, size: 1560, name: unit_list_gfx_init_packet_pools, hash: 534a0c774b97dee2, unit: packet_buffers}
   - {addr: 0x801c7ea0, size: 1384, name: unit_list_gfx_init_buffers, hash: a4cfeb32963dd7b9, unit: packet_buffers}
@@ -480,19 +480,19 @@ functions:
   - {addr: 0x801ccc4c, size: 16, name: job_list_get_next_level_jp, hash: 4b002aa7d2cccbc4, unit: job_list}
   - {addr: 0x801ccc5c, size: 16, name: job_list_get_total_jp, hash: 5a5079be6a69dc2b, unit: job_list}
   - {addr: 0x801ccc6c, size: 16, name: job_list_is_mastered, hash: f3957e2ed0b4ceeb, unit: job_list}
-  - {addr: 0x801ccc7c, size: 112, name: ability_list_is_non_action_learned, hash: 70b6921fb12affba, unit: menu_ability_display_values}
-  - {addr: 0x801cccec, size: 56, name: ability_list_is_non_action_unlearned, hash: 3c68eaf342aa2992, unit: menu_ability_display_values}
-  - {addr: 0x801ccd24, size: 16, name: ability_list_is_action, hash: 360dd06bad7dc1c4, unit: menu_ability_display_values}
-  - {addr: 0x801ccd34, size: 76, name: ability_list_get_mp_cost, hash: 296933d7c300aa12, unit: menu_ability_display_values}
-  - {addr: 0x801ccd80, size: 100, name: ability_list_get_ct, hash: dce1900d85fce54f, unit: menu_ability_display_values}
-  - {addr: 0x801ccde4, size: 80, name: ability_list_get_jp_cost, hash: 9d0d45965a20a0a5, unit: menu_ability_display_values}
-  - {addr: 0x801cce34, size: 16, name: ability_list_is_action_tab, hash: 89dcb9502d0dc4b3, unit: menu_ability_tab_predicates}
-  - {addr: 0x801cce44, size: 24, name: ability_list_is_reaction_tab, hash: 3fd8b0a0c7bfb10e, unit: menu_ability_tab_predicates}
-  - {addr: 0x801cce5c, size: 24, name: ability_list_is_support_tab, hash: e1efb12822a39bf3, unit: menu_ability_tab_predicates}
-  - {addr: 0x801cce74, size: 24, name: ability_list_is_movement_tab, hash: 6d7998639c827ca2, unit: menu_ability_tab_predicates}
-  - {addr: 0x801cce8c, size: 36, name: ability_list_is_learned, hash: 42eb607a71b8516a, source: src/lib/menu/ability_list_is_learned.c}
-  - {addr: 0x801cceb0, size: 196, name: unit_list_update_job_page, hash: 3a1484828be00e47}
-  - {addr: 0x801ccf74, size: 976, name: ability_list_update, hash: 4b1c6e2d1806893f}
+  - {addr: 0x801ccc7c, size: 112, name: ability_list_is_non_action_learned, hash: 70b6921fb12affba, unit: ability_page}
+  - {addr: 0x801cccec, size: 56, name: ability_list_is_non_action_unlearned, hash: 3c68eaf342aa2992, unit: ability_page}
+  - {addr: 0x801ccd24, size: 16, name: ability_list_is_action, hash: 360dd06bad7dc1c4, unit: ability_page}
+  - {addr: 0x801ccd34, size: 76, name: ability_list_get_mp_cost, hash: 296933d7c300aa12, unit: ability_page}
+  - {addr: 0x801ccd80, size: 100, name: ability_list_get_ct, hash: dce1900d85fce54f, unit: ability_page}
+  - {addr: 0x801ccde4, size: 80, name: ability_list_get_jp_cost, hash: 9d0d45965a20a0a5, unit: ability_page}
+  - {addr: 0x801cce34, size: 16, name: ability_list_is_action_tab, hash: 89dcb9502d0dc4b3, unit: ability_page}
+  - {addr: 0x801cce44, size: 24, name: ability_list_is_reaction_tab, hash: 3fd8b0a0c7bfb10e, unit: ability_page}
+  - {addr: 0x801cce5c, size: 24, name: ability_list_is_support_tab, hash: e1efb12822a39bf3, unit: ability_page}
+  - {addr: 0x801cce74, size: 24, name: ability_list_is_movement_tab, hash: 6d7998639c827ca2, unit: ability_page}
+  - {addr: 0x801cce8c, size: 36, name: ability_list_is_learned, hash: 42eb607a71b8516a, unit: ability_page}
+  - {addr: 0x801cceb0, size: 196, name: unit_list_update_job_page, hash: 3a1484828be00e47, unit: ability_page}
+  - {addr: 0x801ccf74, size: 976, name: ability_list_update, hash: 4b1c6e2d1806893f, unit: ability_page}
   - {addr: 0x801cd344, size: 256, name: gfx_enqueue_tile, hash: 50c95427e7c5d200, source: src/lib/menu/gfx_enqueue_tile.c}
   - {addr: 0x801cd444, size: 460, name: gfx_enqueue_gouraud_quad, hash: 8f11049e7f2e617c, source: src/lib/menu/gfx_enqueue_gouraud_quad.c}
   - {addr: 0x801cd610, size: 632, name: menu_gfx_enqueue_textured_quad_list, hash: 89e1989b186692ef, unit: textured_quads}
@@ -1933,14 +1933,14 @@ links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 8, VARIANT_TEXT_ID_ROW_FORMAT: 231}
 
 units:
+  - {name: ability_page, source: src/event/jobstts/ability_page.c}
   - {name: cmd_clut_handlers, source: src/lib/menu/cmd_clut_handlers.c}
   - {name: cmd_group_handlers, source: src/lib/menu/cmd_group_handlers.c}
   - {name: entry, source: src/event/jobstts/entry.c}
   - {name: gfx_contexts, source: src/event/jobstts/gfx_contexts.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
+  - {name: job_abilities, source: src/event/jobstts/job_abilities.c, data: [{addr: 0x801fa5c8, size: 158, hash: 16c2ccb55f996c1f}]}
   - {name: job_list, source: src/event/jobstts/job_list.c}
-  - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
-  - {name: menu_ability_tab_predicates, source: src/lib/menu/menu_ability_tab_predicates.c}
   - {name: menu_list, source: src/event/jobstts/menu_list.c}
   - {name: menu_script, source: src/event/jobstts/menu_script.c}
   - {name: menu_window_commands, source: src/event/jobstts/menu_window_commands.c, data: [{addr: 0x801f0008, size: 16, hash: 488cf8e6977e8d53}]}
@@ -1948,7 +1948,6 @@ units:
   - {name: selection_records, source: src/lib/menu/selection_records.c}
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
-  - {name: unit_jobs, source: src/event/jobstts/unit_jobs.c, data: [{addr: 0x801fa5c8, size: 158, hash: 16c2ccb55f996c1f}]}
 
 functions:
   - {addr: 0x801df004, size: 404, name: status_screen_load_images, hash: e786b01b51200874, unit: entry}
@@ -1968,27 +1967,27 @@ functions:
   - {addr: 0x801df984, size: 16, name: job_list_get_next_level_jp, hash: 1db351534299a8c6, unit: job_list}
   - {addr: 0x801df994, size: 16, name: job_list_get_total_jp, hash: a9fc77f08f31ef8f, unit: job_list}
   - {addr: 0x801df9a4, size: 16, name: job_list_is_mastered, hash: d962cac7878808e2, unit: job_list}
-  - {addr: 0x801df9b4, size: 112, name: ability_list_is_non_action_learned, hash: 76a1cae15d554342, unit: menu_ability_display_values}
-  - {addr: 0x801dfa24, size: 56, name: ability_list_is_non_action_unlearned, hash: 47d28a7fb27637c9, unit: menu_ability_display_values}
-  - {addr: 0x801dfa5c, size: 16, name: ability_list_is_action, hash: 84baaf655025c0a7, unit: menu_ability_display_values}
-  - {addr: 0x801dfa6c, size: 76, name: ability_list_get_mp_cost, hash: 0efb5ccdbdb9aada, unit: menu_ability_display_values}
-  - {addr: 0x801dfab8, size: 100, name: ability_list_get_ct, hash: 893cc39d23f6ec05, unit: menu_ability_display_values}
-  - {addr: 0x801dfb1c, size: 80, name: ability_list_get_jp_cost, hash: c9f46c4abc533d3f, unit: menu_ability_display_values}
-  - {addr: 0x801dfb6c, size: 36, name: ability_list_is_learned, hash: 4e5603563e3371e6, source: src/lib/menu/ability_list_is_learned.c}
-  - {addr: 0x801dfb90, size: 16, name: ability_list_is_action_tab, hash: 3c478037dee6619c, unit: menu_ability_tab_predicates}
-  - {addr: 0x801dfba0, size: 24, name: ability_list_is_reaction_tab, hash: 9193e1ed081fc9db, unit: menu_ability_tab_predicates}
-  - {addr: 0x801dfbb8, size: 24, name: ability_list_is_support_tab, hash: 90d8dec8477e7386, unit: menu_ability_tab_predicates}
-  - {addr: 0x801dfbd0, size: 24, name: ability_list_is_movement_tab, hash: fea6a458f383390e, unit: menu_ability_tab_predicates}
-  - {addr: 0x801dfbe8, size: 952, name: ability_list_update, hash: f11f323916cdc7a9}
+  - {addr: 0x801df9b4, size: 112, name: ability_list_is_non_action_learned, hash: 76a1cae15d554342, unit: ability_page}
+  - {addr: 0x801dfa24, size: 56, name: ability_list_is_non_action_unlearned, hash: 47d28a7fb27637c9, unit: ability_page}
+  - {addr: 0x801dfa5c, size: 16, name: ability_list_is_action, hash: 84baaf655025c0a7, unit: ability_page}
+  - {addr: 0x801dfa6c, size: 76, name: ability_list_get_mp_cost, hash: 0efb5ccdbdb9aada, unit: ability_page}
+  - {addr: 0x801dfab8, size: 100, name: ability_list_get_ct, hash: 893cc39d23f6ec05, unit: ability_page}
+  - {addr: 0x801dfb1c, size: 80, name: ability_list_get_jp_cost, hash: c9f46c4abc533d3f, unit: ability_page}
+  - {addr: 0x801dfb6c, size: 36, name: ability_list_is_learned, hash: 4e5603563e3371e6, unit: ability_page}
+  - {addr: 0x801dfb90, size: 16, name: ability_list_is_action_tab, hash: 3c478037dee6619c, unit: ability_page}
+  - {addr: 0x801dfba0, size: 24, name: ability_list_is_reaction_tab, hash: 9193e1ed081fc9db, unit: ability_page}
+  - {addr: 0x801dfbb8, size: 24, name: ability_list_is_support_tab, hash: 90d8dec8477e7386, unit: ability_page}
+  - {addr: 0x801dfbd0, size: 24, name: ability_list_is_movement_tab, hash: fea6a458f383390e, unit: ability_page}
+  - {addr: 0x801dfbe8, size: 952, name: ability_list_update, hash: f11f323916cdc7a9, unit: ability_page}
   - {addr: 0x801dffa0, size: 32, name: job_is_special_monster, hash: f4362856b8ecd185, source: src/lib/menu/job_is_special_monster.c}
-  - {addr: 0x801dffc0, size: 360, name: status_screen_copy_unit_jobs, hash: 8549998d0529a4c8, unit: unit_jobs}
-  - {addr: 0x801e0128, size: 64, name: status_screen_init_unit_jobs, hash: 2f5b68b9627401dd, unit: unit_jobs}
-  - {addr: 0x801e0168, size: 76, name: job_list_get_base, hash: 56e2d800265d4c96, unit: unit_jobs}
-  - {addr: 0x801e01b4, size: 352, name: job_list_build, hash: 3883f26eb277dc3a, unit: unit_jobs}
-  - {addr: 0x801e0314, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, source: src/lib/menu/job_find_first_for_skillset.c}
-  - {addr: 0x801e036c, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, source: src/lib/menu/job_get_skillset.c}
-  - {addr: 0x801e0390, size: 44, name: job_get_generic_index, hash: 41e9cddd909306f7, source: src/lib/menu/job_get_generic_index.c}
-  - {addr: 0x801e03bc, size: 592, name: ability_list_build, hash: 765ef4759d963053}
+  - {addr: 0x801dffc0, size: 360, name: status_screen_copy_unit_jobs, hash: 8549998d0529a4c8, unit: job_abilities}
+  - {addr: 0x801e0128, size: 64, name: status_screen_init_unit_jobs, hash: 2f5b68b9627401dd, unit: job_abilities}
+  - {addr: 0x801e0168, size: 76, name: job_list_get_base, hash: 56e2d800265d4c96, unit: job_abilities}
+  - {addr: 0x801e01b4, size: 352, name: job_list_build, hash: 3883f26eb277dc3a, unit: job_abilities}
+  - {addr: 0x801e0314, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, unit: job_abilities}
+  - {addr: 0x801e036c, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, unit: job_abilities}
+  - {addr: 0x801e0390, size: 44, name: job_get_generic_index, hash: 41e9cddd909306f7, unit: job_abilities}
+  - {addr: 0x801e03bc, size: 592, name: ability_list_build, hash: 765ef4759d963053, unit: job_abilities}
   - {addr: 0x801e060c, size: 308, name: menu_text_render_glyph_to_4bpp_image, hash: 1cfc444d6d3209dc, source: src/lib/menu/menu_text_render_glyph_to_4bpp_image.c}
   - {addr: 0x801e0740, size: 92, name: menu_text_find_entry_by_index, hash: f16b98f4a6075cd8, unit: text_id_lists}
   - {addr: 0x801e079c, size: 648, name: menu_text_render_encoded_ids_to_image, hash: 8d74937185196c66, unit: text_id_lists}
