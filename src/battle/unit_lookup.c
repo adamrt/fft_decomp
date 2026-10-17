@@ -216,13 +216,12 @@ void battle_entrypoint(void) {
     sprite_init_render_state();
     effect_init_system();
 
-    /* Clear the spritesheet id (byte 1) of all nine 0x32d6-byte slot records, last
-     * first. It walks a byte offset: a reverse slot-index loop changes the reset's
-     * original bytes. */
-    init_offset = 0x196b0;
+    /* Clear the spritesheet id of each slot, last first. The byte offset preserves
+     * the original reset loop; typed pointer and reverse index walks change it. */
+    init_offset = (SPRITE_SHEET_SLOT_COUNT - 1) * sizeof(sprite_sheet_slot_t);
     do {
         g_sprite_sheet_ids_by_vram_slot[init_offset] = 0;
-        init_offset -= 0x32d6;
+        init_offset -= sizeof(sprite_sheet_slot_t);
     } while (init_offset >= 0);
 
     camera_integer = &g_camera_integer_coords;
