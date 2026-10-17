@@ -1390,8 +1390,8 @@ functions:
   - {addr: 0x80186d00, size: 44, name: formula_cheer_up, hash: 3433e4c5554e8f14, unit: formula_effects}
   - {addr: 0x80186d2c, size: 44, name: formula_yell, hash: 0ef381316ef5960a, unit: formula_effects}
   - {addr: 0x80186d58, size: 100, name: formula_add_brave_x_stats_y, hash: d7807c6c0a050c65, unit: formula_effects}
-  - {addr: 0x80186dbc, size: 108, name: formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths, hash: f60d009aa58905cc, unit: formula_effects}
-  - {addr: 0x80186e28, size: 44, name: formula_43_damage_caster_missing_hp, hash: 0d8d7af56fb384dd, unit: formula_effects}
+  - {addr: 0x80186dbc, size: 108, name: formula_sacrifice_hp_to_heal, hash: f60d009aa58905cc, unit: formula_effects}
+  - {addr: 0x80186e28, size: 44, name: formula_damage_caster_missing_hp, hash: 0d8d7af56fb384dd, unit: formula_effects}
   - {addr: 0x80186e54, size: 36, name: formula_difference, hash: aa2fee3cf991a0ba, unit: formula_effects}
   - {addr: 0x80186e78, size: 44, name: formula_climhazzard, hash: aeec8464c74ad5c3, unit: formula_effects}
   - {addr: 0x80186ea4, size: 44, name: formula_set_brave_loss_y, hash: c33db6df89772a17, unit: formula_effects}

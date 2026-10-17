@@ -377,7 +377,7 @@ void formula_goblin_punch(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_ma_and_x();
         if (formula_accuracy_calculate_physical_status() == 0) {
-            formula_43_damage_caster_missing_hp();
+            formula_damage_caster_missing_hp();
         }
     }
 }
@@ -564,7 +564,7 @@ void formula_dragon_tame(void) {
 void formula_dragon_care(void) {
     formula_check_dragon();
     if (g_action_target_data->hit != 0) {
-        formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths();
+        formula_sacrifice_hp_to_heal();
         formula_apply_status();
     }
 }

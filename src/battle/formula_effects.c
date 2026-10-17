@@ -71,7 +71,7 @@ void formula_add_brave_x_stats_y(void) {
 
 /* Formula 0x3C: damage the caster for a fifth of its max HP and heal the
  * target for twice the damage stored (read back as a 16-bit value). */
-void formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths(void) {
+void formula_sacrifice_hp_to_heal(void) {
     u16 amount = g_action_attacker->max_hp / 5;
     s32 dealt;
     action_data_t* action = g_action_attacker_data;
@@ -88,7 +88,7 @@ void formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths(void) {
 }
 
 /* Formula 0x43: damage equal to the caster's missing HP (max HP - HP). */
-void formula_43_damage_caster_missing_hp(void) {
+void formula_damage_caster_missing_hp(void) {
     unit_stats_t* unit = g_action_attacker;
     action_data_t* action = g_action_target_data;
     u16 max_hp = unit->max_hp;
