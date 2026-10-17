@@ -13,16 +13,6 @@
 /* The particle updater reserves -1 for animation-driven lifetime. */
 enum { EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN = -1 };
 
-extern MATRIX g_effect_emitter_matrix;
-extern MATRIX g_effect_particle_heading_matrix;
-
-/* Particle gravity and inertia threshold, and their saved copies: the secondary handlers save both while their slots
- * run under a gravity of (0, ONE, 0) and EFFECT_SECONDARY_INERTIA_THRESHOLD. */
-extern vec3s32_t g_effect_gravity;
-extern vec3s32_t g_effect_saved_gravity;
-extern s32 g_effect_inertia_threshold;
-extern s32 g_effect_saved_inertia_threshold;
-
 /* Vertex work allocated by Banish/Altima and filled by the map renderer. */
 extern VECTOR* g_effect_map_vertices;
 
@@ -48,22 +38,6 @@ void effect_particle_integrate_motion(effect_work_record_t* list);
 s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_index, effect_work_record_t* parent);
 
 /* particle pools */
-/* Effect work pool: g_effect_work_records is the 256-record allocation, g_effect_free_work_record_head
- * the free-chain head, g_effect_work_record_count the in-use count and g_effect_work_record_peak its
- * peak. */
-extern effect_work_record_t* g_effect_work_records;
-extern effect_work_record_t* g_effect_free_work_record_head;
-extern s32 g_effect_work_record_count;
-extern s32 g_effect_work_record_peak;
-extern s32 g_effect_work_records_unread; /* cleared when the effect work-record chain is built; nothing reads it */
-
-/* Sprite-node pool: the nodes (node 0 the sentinel), the active and free list heads, and the sprite parts held in
- * the nodes' sprite blocks with their peak. */
-extern effect_list_node_t g_effect_list_nodes[EFFECT_SPRITE_NODE_CAPACITY + 1];
-extern u16 g_effect_active_list_node_head;
-extern u16 g_effect_free_list_node_head;
-extern s32 g_effect_sprite_count;
-extern s32 g_effect_sprite_count_peak;
 
 effect_work_record_t* effect_particle_get_work_record(s16 record_index, s16 requested_index);
 void effect_particle_free_work_record(s16 record_index, effect_work_record_t* work);
@@ -92,11 +66,6 @@ enum { EFFECT_CORNER_Z_DEFAULT = 512 };
 
 extern MATRIX g_effect_matrix;
 extern u32* g_effect_otag;
-extern s32 g_effect_frame_parity;
-extern u8* g_effect_prim_buffer;
-extern s32 g_effect_prim_buffer_offset;
-extern s32 g_effect_frame_start_prim_buffer_offset;
-extern s32 g_effect_primitive_sizes[3];
 
 /* The four corners of a particle sprite quad. Four-byte alignment preserves the original 32-bit copies into x/y. */
 extern SVECTOR g_effect_corner_top_left __attribute__((aligned(4)));
@@ -104,11 +73,6 @@ extern SVECTOR g_effect_corner_top_right __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_left __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_right __attribute__((aligned(4)));
 
-/* Work-kind handlers, indexed by kind_flags >> 12. The int return type is
- * load-bearing even though the result is ignored: the value-returning call is
- * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end
- * of its block, and the pc update is allocated $3 as in the target. */
-extern s32 (*g_effect_particle_render_handlers[])(effect_record_t* record, effect_work_record_t* work);
 void effect_render_start_frame(void);
 void effect_render_reset_state(void);
 s32 effect_render_get_prim_buffer_offset(void);

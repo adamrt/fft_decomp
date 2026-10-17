@@ -33,6 +33,12 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Work-kind handlers, indexed by kind_flags >> 12. The int return type is
+ * load-bearing even though the result is ignored: the value-returning call is
+ * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end
+ * of its block, and the pc update is allocated $3 as in the target. */
+extern s32 (*g_effect_particle_render_handlers[])(effect_record_t* record, effect_work_record_t* work);
+
 static void effect_script_free_state_record(s16 record_index);
 static s32 effect_script_run_block(s16 index);
 static s16 effect_script_start_record(const u8* script, s16 start_pc, s16 parent_index);
