@@ -37,17 +37,20 @@ void unit_view_wait_for_panels(void);
 /* unit stats panels */
 /* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
 extern RECT g_menu_sprite_page_texture_windows[5];
-extern image_load_parameters_t g_menu_sprite_page_image_params[30];
+extern image_load_parameters_t g_menu_sprite_page_image_params[5];
 
-/* Entries 5..7 of g_menu_sprite_page_image_params; a separate alias preserves the original
- * template base. */
-extern image_load_parameters_t g_menu_sprite_page_image_param_bases[];
+/* Default placement for all five reaction-name sprite pieces. */
+extern image_load_parameters_t g_menu_sprite_page_image_param_bases[5];
 
 /* The final two entries of g_unit_view_attack_caster_stats_setup. */
 extern menu_number_entry_t g_menu_projected_value_panel[2];
 
 /* Live caster-panel image parameters followed by their defaults. */
 extern image_load_parameters_t g_menu_attack_caster_quad_image_params[2][5];
+
+/* Attack-target labels and their reset values are separate three-piece layouts. */
+extern image_load_parameters_t g_unit_view_target_quad_image_params[3];
+extern image_load_parameters_t g_unit_view_target_quad_default_image_params[3];
 extern RECT g_unit_view_hovered_stats_rect;
 extern menu_number_entry_t g_unit_view_hovered_stats_setup[10];
 extern RECT g_unit_view_right_stats_rect;

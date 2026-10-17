@@ -13,9 +13,6 @@ extern s32 g_debug_unit_editor_active;
 extern u8 g_unit_editor_unit_ids[];
 extern help_navigation_record_t g_unit_editor_fields[];
 extern s32 g_unit_editor_field_edit_active;
-extern u8 g_unit_editor_move;
-extern u8 g_unit_editor_jump;
-extern u8 g_unit_editor_speed;
 extern unit_panel_thread_t g_unit_editor_status_display_thread_params;
 
 /* Per-row value ranges, copied from the _normal or _special table. */

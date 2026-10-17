@@ -44,7 +44,7 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
             menu_init_default_poly_ft4(poly);
             index = first + count - cell;
             g_menu_draw_area_template.y += g_unit_panel_panel_status_y_offsets[group * 2];
-            gfx_set_scaled_poly_ft4_4bpp(poly, &g_unit_panel_panel_status_texture, &g_menu_draw_area_template,
+            gfx_set_scaled_poly_ft4_4bpp(poly, g_unit_panel_editor_numeric_geometry, &g_menu_draw_area_template,
                 &g_unit_panel_panel_status_uv_rects[index], &g_unit_panel_panel_status_scales[index],
                 &g_unit_panel_panel_status_offsets[group]);
             g_menu_draw_area_template.y -= g_unit_panel_panel_status_y_offsets[group * 2];

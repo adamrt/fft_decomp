@@ -881,10 +881,10 @@ static void unit_view_stats_panel_thread(
             if (extent_w > 0x100) {
                 extent_w = 0;
             }
-            g_menu_sprite_page_image_params[25].x_screen_offset
-                = g_menu_sprite_page_image_params[28].x_screen_offset + extent_w;
-            g_menu_sprite_page_image_params[26].x_screen_offset
-                = g_menu_sprite_page_image_params[29].x_screen_offset + extent_w;
+            g_unit_view_target_quad_image_params[1].x_screen_offset
+                = g_unit_view_target_quad_default_image_params[1].x_screen_offset + extent_w;
+            g_unit_view_target_quad_image_params[2].x_screen_offset
+                = g_unit_view_target_quad_default_image_params[2].x_screen_offset + extent_w;
             for (frame = 0; frame < 3; frame++) {
                 g_menu_sprite_page_image_params[frame].x_screen_offset
                     = g_menu_sprite_page_image_param_bases[frame].x_screen_offset + extent_w;
@@ -892,7 +892,7 @@ static void unit_view_stats_panel_thread(
                     = g_menu_sprite_page_image_param_bases[frame].width - extent_w;
             }
             g_menu_sprite_page_image_params[3].x_screen_offset
-                = g_menu_sprite_page_image_params[8].x_screen_offset + extent_w;
+                = g_menu_sprite_page_image_param_bases[3].x_screen_offset + extent_w;
         }
     }
     page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode]];

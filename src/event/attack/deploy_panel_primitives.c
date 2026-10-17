@@ -18,10 +18,8 @@
  *   above 0x40   fading in, two steps a frame, at brightness 0xc0 minus the value until
  *                it reaches 0x40 and becomes lit.
  *
- * The y bias is read as `*g_unit_panel_status_y_offsets[group]`: forming the row address first
- * makes the outer loop keep it as a spilled pointer induction variable
- * (0x30(sp), reloaded into $s4 per entry) as the target does; a plain
- * `g_unit_panel_status_y_offsets[group][0]` folds the table into each load instead. */
+ * The panel uses the unsigned low half of each signed word offset. Taking its address
+ * before the halfword read preserves the retail load scheduling. */
 void unit_panel_build_status_groups(POLY_FT4* poly) {
     s32 group;
     s32 cell;
@@ -53,11 +51,11 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
         for (cell = 0; cell < count; cell++) {
             menu_init_default_poly_ft4(poly);
             index = first + count - cell;
-            g_menu_draw_area_template.y += *g_unit_panel_status_y_offsets[group];
+            g_menu_draw_area_template.y += *(u16*)&g_deploy_slot_offsets[group];
             gfx_set_scaled_poly_ft4_4bpp(poly, g_unit_panel_editor_numeric_geometry, &g_menu_draw_area_template,
                 &g_unit_panel_status_uv_rects[index], &g_unit_panel_status_scales[index],
                 &g_unit_panel_status_offsets[group]);
-            g_menu_draw_area_template.y -= *g_unit_panel_status_y_offsets[group];
+            g_menu_draw_area_template.y -= *(u16*)&g_deploy_slot_offsets[group];
             if (g_unit_panel_status_animation[group] == 0x40) {
                 setRGB0(poly, 0x80, 0x80, 0x80);
                 g_unit_panel_status_animation[group] = 0;

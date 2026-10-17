@@ -60,9 +60,9 @@ static void debug_unit_editor_apply_values(s32 unit_id) {
     zodiac = g_unit_panel_selected_unit.zodiac << 12;
     unit_flags = *(u16*)&unit->birthday & 0x0fff;
     *(u16*)&unit->birthday = unit_flags | zodiac;
-    unit->move = g_unit_editor_move;
-    unit->attributes[UNIT_ATTRIBUTE_SPEED] = g_unit_editor_speed;
-    unit->jump = g_unit_editor_jump;
+    unit->move = g_unit_panel_selected_unit_fields.state.move;
+    unit->attributes[UNIT_ATTRIBUTE_SPEED] = g_unit_panel_selected_unit_fields.state.speed;
+    unit->jump = g_unit_panel_selected_unit_fields.state.jump;
 }
 
 /*

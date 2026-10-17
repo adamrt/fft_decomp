@@ -2485,6 +2485,8 @@ data:
   - {addr: 0x801683ac, name: g_menu_sprite_page_image_params}
   - {addr: 0x801683e8, name: g_menu_sprite_page_image_param_bases}
   - {addr: 0x80168454, name: g_menu_attack_caster_quad_image_params}
+  - {addr: 0x801684cc, name: g_unit_view_target_quad_image_params}
+  - {addr: 0x801684f0, name: g_unit_view_target_quad_default_image_params}
   - {addr: 0x80168544, name: g_unit_view_stats_quad_clut_pairs}
   - {addr: 0x801685fc, name: g_unit_view_stats_sprite_clut_pairs}
   - {addr: 0x80168618, name: g_unit_view_stats_icon_image_params}

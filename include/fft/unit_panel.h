@@ -204,7 +204,6 @@ extern u8 g_unit_panel_status_animation[];
 extern sprite_draw_offset_t g_unit_panel_status_offsets[];
 extern point16_t g_unit_panel_status_scales[];
 extern sprite_sheet_frame_t g_unit_panel_status_uv_rects[];
-extern u16 g_unit_panel_status_y_offsets[][2];
 
 /* The status groups the menu library's unit_panel_build_status_groups draws in DEBUGCHR and REQUIRE. Each animated
  * group has a countdown byte in g_unit_panel_panel_status_animation; 0xff marks an inactive group. */
@@ -214,7 +213,6 @@ extern u8 g_unit_panel_panel_status_group_ids[];
 extern u8 g_unit_panel_panel_status_group_bounds[];
 extern sprite_draw_offset_t g_unit_panel_panel_status_offsets[];
 extern point16_t g_unit_panel_panel_status_scales[];
-extern const point16_t g_unit_panel_panel_status_texture;
 extern sprite_sheet_frame_t g_unit_panel_panel_status_uv_rects[];
 extern const u16 g_unit_panel_panel_status_y_offsets[];
 

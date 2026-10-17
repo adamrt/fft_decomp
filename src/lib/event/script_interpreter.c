@@ -38,7 +38,10 @@ static u16 g_script_unit_face_slot_order[24]
     = { 0, 4, 8, 12, 16, 20, 1, 5, 9, 13, 17, 21, 2, 6, 10, 14, 18, 3, 7, 11, 15, 19, 0x302, 0x100 };
 
 /* Frames per facing step, indexed by the RotateUnit speed operand. */
-static u8 g_unit_rotation_speed_frames[8] = { 4, 2, 1, 0, 0, 3, 2, 1 };
+static u8 g_unit_rotation_speed_frames[4] = { 4, 2, 1, 0 };
+
+/* Camera-relative facings, indexed by camera quadrant. */
+static u8 g_unit_facing_by_camera_quadrant[4] = { 0, 3, 2, 1 };
 
 static u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8]
     = { 20, 176, 22, 12, 49, 0, 0, 0, 31, 188, 254, 255, 255, 0, 0, 0, 15, 188, 190, 255, 255, 0, 0, 0 };
@@ -1249,7 +1252,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
                     facing = unit_facing_get_sixteenth_by_runtime_id(unit_id) + facing * 4;
                     facing = facing & 0xF;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_CAMERA) {
-                    facing = g_unit_rotation_speed_frames[4 + ((camera_wrap_yaw_angle() & 0xC00) >> 10)] * 4;
+                    facing = g_unit_facing_by_camera_quadrant[(camera_wrap_yaw_angle() & 0xC00) >> 10] * 4;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_RESTORE) {
                     state = &g_unit_animation_states[unit_id];
                     if (state->initial_facing != 0xFF) {
