@@ -247,13 +247,14 @@ extern s16 g_save_list_top_row;
 extern u8 g_save_list_cursor_index;
 extern s16 g_save_list_scroll_anim_offset;
 extern s16 g_save_list_scroll_base_y;
-extern s16 g_save_slot_row_y;
 extern u16 g_save_slot_cursor_animation;
 extern point16_t g_save_slot_cursor_position;
 extern s16 g_save_slot_text_row_ids[];
 extern save_slot_number_command_t g_save_slot_number_commands[4];
 extern oriented_quad_t g_save_slot_quads[];
-extern menu_window_rect_source_t g_save_slot_window_rect_source[];
+
+/* CARD and WORLD each define the rectangle used for a save-slot row. */
+extern menu_window_rect_source_t g_save_slot_window;
 
 /* CARD graphics */
 /*
@@ -377,7 +378,6 @@ extern u8 g_save_write_unread_flag; /* cleared with g_save_write_failed when a s
  * immediately after the 15 save-file pointers at g_save_file_names. */
 extern u8 g_save_slot_text_table[];
 extern s16 g_save_slot_description_row_ids[];
-extern menu_window_rect_source_t g_save_slot_window;
 extern menu_draw_number_command_t g_save_slot_number_command;
 extern menu_draw_number_command_t g_save_playtime_hours_command;
 extern menu_draw_number_command_t g_save_playtime_minutes_command;

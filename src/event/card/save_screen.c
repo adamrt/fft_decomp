@@ -1072,7 +1072,7 @@ static void save_update_slot_list(u16 input) {
     }
 
     save_update_slot_scroll(g_save_list_cursor_index);
-    g_menu_window_rect_source = g_save_slot_window_rect_source;
+    g_menu_window_rect_source = &g_save_slot_window;
     scrolling = g_save_menu_state != SAVE_MENU_SELECT_SAVE;
     for (index = 0, row = 0; index < SAVE_SLOT_COUNT; index++, row++) {
         /* Unavailable slots are not listed. */
@@ -1086,8 +1086,8 @@ static void save_update_slot_list(u16 input) {
             break;
         }
 
-        g_save_slot_row_y = g_save_list_scroll_base_y + g_save_list_scroll_anim_offset + row * 48 + 12;
-        if (g_save_slot_row_y < -48 || g_save_slot_row_y >= 241) {
+        g_save_slot_window.rect.y = g_save_list_scroll_base_y + g_save_list_scroll_anim_offset + row * 48 + 12;
+        if (g_save_slot_window.rect.y < -48 || g_save_slot_window.rect.y >= 241) {
             continue;
         }
 
@@ -1097,7 +1097,7 @@ static void save_update_slot_list(u16 input) {
         menu_draw_window_frame(&g_save_slot_window_command);
 
         g_save_slot_quads[3].position.y = g_save_slot_quads[4].position.y = g_save_slot_quads[0].position.y
-            = g_save_slot_quads[1].position.y = g_save_slot_row_y - 14;
+            = g_save_slot_quads[1].position.y = g_save_slot_window.rect.y - 14;
         g_save_slot_quads[3].position.y = g_save_slot_quads[3].position.y + 1;
         g_save_slot_quads[4].position.y = g_save_slot_quads[4].position.y + 1;
         g_save_slot_quads[1].position.y++;
@@ -1135,12 +1135,12 @@ static void save_update_slot_list(u16 input) {
 
         if (g_save_slot_file_states[index] == SAVE_SLOT_AVAILABLE) {
             rect.x = 0x74;
-            rect.y = g_save_slot_row_y + 4;
+            rect.y = g_save_slot_window.rect.y + 4;
             rect.w = 0x28;
             rect.h = 0x10;
         } else {
             rect.x = 0x1c;
-            rect.y = g_save_slot_row_y - 4;
+            rect.y = g_save_slot_window.rect.y - 4;
             rect.w = 0xc8;
             rect.h = 0x1f;
         }

@@ -1025,8 +1025,7 @@ data:
   - {addr: 0x801c98ee, name: g_save_format_delay_counter}
   - {addr: 0x801c98ef, name: g_save_error_prompt_closing}
   - {addr: 0x801c98f0, name: g_save_slot_window_command}
-  - {addr: 0x801c98f8, name: g_save_slot_window_rect_source}
-  - {addr: 0x801c9900, name: g_save_slot_row_y}
+  - {addr: 0x801c98f8, name: g_save_slot_window}
   - {addr: 0x801c9908, name: g_save_slot_text_row_ids}
   - {addr: 0x801c9910, name: g_save_slot_number_commands}
   - {addr: 0x801c9940, name: g_save_slot_cursor_position}
