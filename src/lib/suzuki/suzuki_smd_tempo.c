@@ -15,5 +15,5 @@ u8* suzuki_smd_tempo(u8* data, suzuki_music_t* music, suzuki_music_channel_t* un
     tempo = note_data[0] & 0xff;
     music->tempo = tempo << 16;
     music->scaled_tempo = tempo * (music->tempo_scale.value >> 16);
-    return note_data + 1;
+    return data + 1;
 }
