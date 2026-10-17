@@ -11,7 +11,7 @@
  * WORLD's copy of menu_build_scaled_draw_area_packets, beside its copy of the OPTION.OUT list
  * code; nothing calls it.
  * Build a double-buffered draw-area pair whose rectangle is `source` moved
- * left 0x80, shifted by `offset` (x by offset->x, y by offset->w) and
+ * left 0x80, shifted by the panel's position and
  * cropped to a percentage of its size about its center. The percentage comes
  * from a 12-step zoom table indexed by `step` (doubled at event speed 2, the
  * last step held). `flag` set targets the upper frame buffer; clear, both
@@ -22,7 +22,7 @@
  * instructions early and rotates every temporary.
  */
 void option_build_scaled_draw_area_packets(
-    scaled_draw_area_pair_t* pair, const RECT* source, s32 step, s32 flag, const RECT* offset) {
+    scaled_draw_area_pair_t* pair, const RECT* source, s32 step, s32 flag, const point32_t* position) {
     s32 percent;
     s16 w;
     s16 h;
@@ -39,8 +39,8 @@ void option_build_scaled_draw_area_packets(
     w = pair->rects[0].w;
     h = pair->rects[0].h;
     pair->rects[0].x -= 0x80;
-    pair->rects[0].x += offset->x;
-    pair->rects[0].y += offset->w;
+    pair->rects[0].x += position->x;
+    pair->rects[0].y += position->y;
     crop = (w * percent) / 200;
     pair->rects[0].x = w / 2 + pair->rects[0].x - crop;
     crop = (h * percent) / 200;
