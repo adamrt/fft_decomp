@@ -215,10 +215,13 @@ void screen_number_entry_thread(void) {
     digits = text_count_decimal_digits(range->bounds.max);
 
     /* Start from the stored value, or from the minimum when it is out of range. */
-    original = *menu_entry_result(param);
-    value = original;
-    if (value < range->bounds.min || range->bounds.max < value) {
-        value = range->bounds.min;
+    {
+        s16* result = param->value;
+        original = *result;
+        value = original;
+        if (value < range->bounds.min || range->bounds.max < value) {
+            value = range->bounds.min;
+        }
     }
 
     menu_build_window_sprites(&rect, param, &records[0]);
@@ -266,7 +269,10 @@ void screen_number_entry_thread(void) {
 
     for (i = 0;; i++) {
         record = &records[i & 1].base;
-        *menu_entry_result(param) = value;
+        {
+            s16* result = param->value;
+            *result = value;
+        }
         thread_wait_frames(1);
         /* A redrawn image is freed a frame late, after its upload has run. */
         if (redraw == 1) {
@@ -283,12 +289,13 @@ void screen_number_entry_thread(void) {
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
         if (input != *g_screen_list_controller_input) {
-            if (*menu_entry_result(param) == -1) {
-                *menu_entry_result(param) = original;
+            s16* result = param->value;
+            if (*result == -1) {
+                *result = original;
             } else {
                 screen_number_range_t* current_range;
 
-                *menu_entry_result(param) = value;
+                *result = value;
                 current_range = param->context;
                 current_range->on_change();
             }
@@ -393,10 +400,13 @@ void screen_labeled_number_entry_thread(void) {
     digits = text_count_decimal_digits(range->bounds.max);
 
     /* Start from the stored value, or from the minimum when it is out of range. */
-    original = *menu_entry_result(param);
-    value = original;
-    if (value < range->bounds.min || range->bounds.max < value) {
-        value = range->bounds.min;
+    {
+        s16* result = param->value;
+        original = *result;
+        value = original;
+        if (value < range->bounds.min || range->bounds.max < value) {
+            value = range->bounds.min;
+        }
     }
 
     menu_build_window_sprites(&rect, param, &record);
@@ -446,7 +456,8 @@ void screen_labeled_number_entry_thread(void) {
 
     for (i = 0;; i++) {
         if (g_formation_screen_active != 0) {
-            *menu_entry_result(param) = value;
+            s16* result = param->value;
+            *result = value;
         }
         thread_wait_frames(1);
         /* A redrawn image is freed a frame late, after its upload has run. */
@@ -464,12 +475,13 @@ void screen_labeled_number_entry_thread(void) {
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
         if (input != *g_screen_list_controller_input) {
-            if (*menu_entry_result(param) == -1) {
-                *menu_entry_result(param) = original;
+            s16* result = param->value;
+            if (*result == -1) {
+                *result = original;
             } else {
                 screen_number_range_t* current_range;
 
-                *menu_entry_result(param) = value;
+                *result = value;
                 current_range = param->context;
                 current_range->on_change();
             }

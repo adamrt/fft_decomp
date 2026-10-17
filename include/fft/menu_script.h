@@ -334,7 +334,7 @@ typedef enum menu_vertical_scroll_direction {
 /* BUNIT, EQUIP and JOBSTTS each define this row id and -1 sentinel, and the cursor state. */
 extern s16 g_menu_list_row_text_ids[2];
 extern u16 g_menu_list_cursor_anim_state;
-extern s16* g_menu_list_entries;
+extern const s16* g_menu_list_entries;
 extern s16 g_menu_list_entry_count;
 extern u8* g_menu_list_text_table;
 extern s16 g_menu_list_selected_index;

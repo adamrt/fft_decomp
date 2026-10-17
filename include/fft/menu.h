@@ -134,11 +134,6 @@ typedef struct menu_entry {
 } menu_entry_t;
 typedef char menu_entry_size_must_be_60[(sizeof(menu_entry_t) == 60) ? 1 : -1];
 
-/* Numeric-entry and action-selection threads use value as a 16-bit result cell. */
-static inline s16* menu_entry_result(menu_entry_t* entry) {
-    return entry->value;
-}
-
 /* icons and numbers */
 /* Texture rectangle, CLUT and texture page of an icon, as the menu row callbacks return it. */
 typedef struct menu_icon_source {

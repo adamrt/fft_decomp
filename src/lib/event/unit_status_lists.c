@@ -549,7 +549,7 @@ static s32 unit_view_display_action_preview(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_layout_t* params) {
 #ifdef FFT_BATTLE
     menu_number_entry_t* panel;
-    u16* label_x;
+    s16* label_x;
     const action_display_image_rect_t* rect;
     s32 value;
     s32 image;
@@ -559,7 +559,7 @@ static s32 unit_view_display_action_preview(
     s32 x;
     u32 exp;
     u16* digits_x;
-    u16* extra_label_x;
+    s16* extra_label_x;
     action_data_t* action;
     u8 target_id;
 
@@ -693,7 +693,8 @@ static s32 unit_view_display_action_preview(
                 panel[0].kind = 2;
             }
             width = g_result_image_rects[image].width;
-            x = *label_x - width;
+            /* This label-placement path widens the stored offset unsigned. */
+            x = (u16)*label_x - width;
             value = 0;
             *label_x = x + 8;
             if (extra != 0) {
@@ -1933,6 +1934,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
     s32 thread_id;
     s32 menu_thread_id;
     s16* row_actions;
+    s16* result;
 
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL
         && ((script_get_variable(EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS) >> row_index) & 1)) {
@@ -1986,7 +1988,8 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
             }
         }
         g_script_event_input = 0;
-        *menu_entry_result(entry) = row_index;
+        result = entry->value;
+        *result = row_index;
         if (g_sound_suppressed == 0 && silent == 0) {
             sound_queue_sfx_confirm();
         }
@@ -2033,6 +2036,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     s32 j;
     s32 thread_id;
     s32 count;
+    s16* result;
 
     if (!(g_script_event_input & PSX_PAD_CROSS)) {
         return;
@@ -2058,7 +2062,8 @@ void menu_handle_cancel_input(menu_entry_t* context) {
         }
     }
     g_script_event_input = 0;
-    *menu_entry_result(context) = -1;
+    result = context->value;
+    *result = -1;
     sound_queue_sfx_cancel();
     g_script_input_suppression_frames = 5;
 }

@@ -56,6 +56,7 @@ void helpmenu_battle_entrypoint(void) {
     s32 shadow_offset;
     s32 help_id; /* also the request table mode flag and the pad direction index */
     s16 request_kind;
+    s16* result;
     s32 text_section;
     s32 view_mode;
     s32 input;
@@ -146,7 +147,8 @@ void helpmenu_battle_entrypoint(void) {
             request_kind = request->select_text_table;
             if (request_kind != HELP_REQUEST_NAVIGATION) {
                 if (request_kind == HELP_REQUEST_RESULT_ABILITY) {
-                    help_id = *menu_entry_result(request);
+                    result = request->value;
+                    help_id = *result;
                     help_id &= 0x7FF;
                     help_id |= HELP_TEXT_ID_ABILITY_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
