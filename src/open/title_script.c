@@ -1042,8 +1042,10 @@ void ending_draw_text_records(u32* otag, s32 graphics_buffer_index) {
             if (g_ending_script_state.records[i].flags & ENDING_SCRIPT_RECORD_ACTIVE) {
                 prim_index = i * 42;
                 for (j = 0; j < g_ending_script_state.records[i].glyph_count; j++, prim_index++) {
-                    x = g_ending_script_state.records[i].x + g_ending_script_state.records[i].glyphs[j].x - 256;
-                    y = g_ending_script_state.records[i].y + g_ending_script_state.records[i].glyphs[j].y - 120;
+                    x = g_ending_script_state.records[i].position.x + g_ending_script_state.records[i].glyphs[j].x
+                        - 256;
+                    y = g_ending_script_state.records[i].position.y + g_ending_script_state.records[i].glyphs[j].y
+                        - 120;
                     g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].x0
                         = x + g_ending_script_state.records[i].skew;
                     g_ending_script_glyph_primitives[graphics_buffer_index][prim_index].y0 = y;
@@ -1243,8 +1245,9 @@ static void ending_scroll_text(void) {
 
     for (index = 0; index < 16; index++) {
         if (g_ending_script_state.records[index].flags & ENDING_SCRIPT_RECORD_ACTIVE) {
-            g_ending_script_state.records[index].y += work;
-            if (g_ending_script_state.records[index].y < 0x10 || g_ending_script_state.records[index].y > 0x100) {
+            g_ending_script_state.records[index].position.y += work;
+            if (g_ending_script_state.records[index].position.y < 0x10
+                || g_ending_script_state.records[index].position.y > 0x100) {
                 g_ending_script_state.records[index].flags ^= ENDING_SCRIPT_RECORD_ACTIVE;
             }
         }
@@ -1672,8 +1675,8 @@ void ending_opcode_01_create_positioned_text_record(s16* command) {
             x = 0x100 - g_ending_script_state.records[index].glyphs[glyph].x
                 - g_ending_script_state.records[index].glyphs[glyph].w / 2;
         }
-        g_ending_script_state.records[index].x = x;
-        g_ending_script_state.records[index].y = y;
+        g_ending_script_state.records[index].position.x = x;
+        g_ending_script_state.records[index].position.y = y;
     }
     g_ending_script_state.dispatch.cursor.byte_offset += 8;
 }

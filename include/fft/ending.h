@@ -5,6 +5,7 @@
  * state, XA audio, OPNTEX picture sequence and opcode handlers. */
 
 #include "fft/controller.h"
+#include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -37,8 +38,7 @@ typedef struct ending_text_record {
     u32 flags; /* ending_text_record_flag_e */
     s32 glyph_count;
     s32 skew; /* 0x08: italic skew added to the top edge of each glyph quad */
-    s32 x;
-    s32 y;
+    point32_t position;
     RECT glyphs[42];
 } ending_text_record_t;
 typedef char ending_text_record_size_must_be_356[(sizeof(ending_text_record_t) == 356) ? 1 : -1];
