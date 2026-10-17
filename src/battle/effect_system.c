@@ -1263,7 +1263,7 @@ s32 effect_get_element_index(s32 elements) {
  * keeps the slot's animation. The parameter
  * is the element effect index for the weapon's element mask. Returns its id,
  * or 0 when the init record has no targets. */
-s32 effect_secondary_init_weapon_hit(s32 elements, effect_context_t* source, s32 unused_is_bow) {
+s32 effect_secondary_init_weapon_hit(s32 elements, const effect_context_t* source, s32 unused_is_bow) {
     u8 secondary_id;
 
     if (source->target_count != 0) {
@@ -1300,7 +1300,7 @@ s32 effect_secondary_init_weapon_hit(s32 elements, effect_context_t* source, s32
 /* Start the current effect target's fall-dust secondary effect at the
  * given position and return its id. Phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
-s32 effect_secondary_init_fall_dust(effect_context_t* source, VECTOR* position) {
+s32 effect_secondary_init_fall_dust(const effect_context_t* source, const VECTOR* position) {
     s32 secondary_id = effect_secondary_allocate_record();
 
     g_effect_secondary_data[secondary_id].timer = 0;

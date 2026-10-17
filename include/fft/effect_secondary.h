@@ -418,8 +418,8 @@ s32 effect_secondary_summon_charge_handler(void);
 
 /* starting secondary effects */
 s32 effect_secondary_init_projectile(s32 animation, const struct effect_context* source);
-s32 effect_secondary_init_weapon_hit(s32 elements, effect_context_t* source, s32 unused_is_bow);
-s32 effect_secondary_init_fall_dust(effect_context_t* source, VECTOR* position);
+s32 effect_secondary_init_weapon_hit(s32 elements, const effect_context_t* source, s32 unused_is_bow);
+s32 effect_secondary_init_fall_dust(const effect_context_t* source, const VECTOR* position);
 void effect_secondary_build_init(struct unit* unit, struct effect_context* effect);
 void effect_secondary_start_weapon_hit(struct unit* unit, s32 is_bow);
 void effect_secondary_start_projectile(unit_t* unit);
