@@ -11,6 +11,11 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+/* OPEN only uses the card-status helpers; WORLD and CARD also open save files. */
+#if defined(FFT_WORLD) || defined(FFT_EVENT_CARD)
+static s32 g_memcard_file_open_descriptor = -1;
+#endif
+
 static void memcard_consume_bios_events(void);
 static void memcard_consume_hardware_events(void);
 
@@ -328,7 +333,7 @@ s32 memcard_format_selected_slot(void) {
 /* Open `filename` on the selected memory card slot with the BIOS `mode`,
  * closing any file still held open first. Tries up to 40 times, waiting for
  * the card to be ready before each try. Returns the descriptor (also kept in
- * g_card_file_open_descriptor), -1 when every open failed, or -2 when the
+ * g_memcard_file_open_descriptor), -1 when every open failed, or -2 when the
  * previous file would not close or the card did not become ready. */
 s32 memcard_file_open_selected_with_retries(const char* filename, s32 mode) {
     s32 i;

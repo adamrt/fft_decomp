@@ -62,11 +62,11 @@ s32 formation_ability_learn_job_list(void) {
     if (g_formation_ability_learn_job_list_initialized == 0) {
         menu_set_vsync_mode_and_event_speed(2);
         job_list_build(g_unit_selected_index, g_job_list_job_ids, 0);
-        g_screen_script_callbacks[0].value = job_list_calculate_level;
-        g_screen_script_callbacks[2].value = formation_ability_learn_job_jp;
-        g_screen_script_callbacks[5].value = job_list_calculate_next_level_jp;
-        g_screen_script_callbacks[6].value = job_list_calculate_total_jp;
-        g_screen_script_callbacks[13].value = job_list_calculate_mastered;
+        g_menu_row_callbacks[0].value = job_list_calculate_level;
+        g_menu_row_callbacks[2].value = formation_ability_learn_job_jp;
+        g_menu_row_callbacks[5].value = job_list_calculate_next_level_jp;
+        g_menu_row_callbacks[6].value = job_list_calculate_total_jp;
+        g_menu_row_callbacks[13].value = job_list_calculate_mastered;
         menu_get_selection_record(9, &x, &y, g_job_list_job_ids);
         menu_init_scrollable_list(g_job_list_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_formation_ability_learn_job_list_initialized = 1;

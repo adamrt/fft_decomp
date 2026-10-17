@@ -16,7 +16,7 @@ units:
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
-  - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a348, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019a35c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
@@ -50,10 +50,11 @@ units:
   - {name: job_locks, source: src/world/job_locks.c}
   - {name: job_wheel, source: src/world/job_wheel.c}
   - {name: list_threads, source: src/world/list_threads.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}]}
-  - {name: memcard, source: src/lib/memcard.c}
+  - {name: memcard, source: src/lib/memcard.c, data: [{addr: 0x80194fd8, size: 4, hash: ad95131bc0b799c0}]}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
   - {name: menu_page_scroll_input, source: src/world/menu_page_scroll_input.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x8018aa68, size: 32, hash: 66687aadf862bd77}]}
+  - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x801cd794, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_script_opcodes, source: src/world/menu_script_opcodes.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018e034, size: 9, hash: b84f7d451d1a8f71}, {addr: 0x8018e040, size: 7, hash: 566b5911617a0e07}, {addr: 0x8018e048, size: 8, hash: 870550df4dc49692}, {addr: 0x8018e050, size: 20, hash: d7c4eba7f363ab22}, {addr: 0x8018e064, size: 12, hash: b7578635ff44fd32}, {addr: 0x8018e070, size: 12, hash: b935ba9af4787c03}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}, {addr: 0x8018aeb8, size: 48, hash: a7325a670181d088}, {addr: 0x8018aee8, size: 8, hash: 716d2b5fc41c7cf3}, {addr: 0x8018aef0, size: 8, hash: c0df20f9ed09ee15}]}
@@ -71,7 +72,7 @@ units:
   - {name: roster_sorting, source: src/world/roster_sorting.c, data: [{addr: 0x8018d7cc, size: 12, hash: 28a6a05d27d888a6}]}
   - {name: screen_fades, source: src/world/screen_fades.c, data: [{addr: 0x8018e494, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e495, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e496, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e498, size: 8, hash: 311ffc6bfd5bdbb3}]}
   - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801bfda4, size: 616, hash: f9d54bbe3ccaf085}]}
-  - {name: script_commands, source: src/lib/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: script_commands, source: src/lib/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8013a454, size: 244, hash: 5f50d72e0e4d2a62}]}
   - {name: script_helpers, source: src/lib/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b8c, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80156b90, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80156ba8, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80156bb0, size: 48, hash: 5026ef5547d95034}, {addr: 0x80156be0, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
@@ -658,7 +659,7 @@ functions:
   - {addr: 0x80112878, size: 104, name: item_build_icon_source, hash: 17be9f26676bdbf8, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801128e0, size: 908, name: menu_input_update_event_state, hash: af5af8099faa9908, unit: thread_state}
   - {addr: 0x80112c6c, size: 28, name: menu_thread_is_running, hash: 22d1fa2a224de3cd, unit: thread_state}
-  - {addr: 0x80112c88, size: 1236, name: menu_draw_thread_status_indicators, hash: 98480b1c862dca4f, source: src/lib/menu/menu_draw_thread_status_indicators.c}
+  - {addr: 0x80112c88, size: 1236, name: menu_draw_thread_status_indicators, hash: 98480b1c862dca4f, unit: menu_panel_backdrops}
   - {addr: 0x8011315c, size: 648, name: formation_init_display, hash: 03e723ed2bcd8184, unit: formation_display_init}
   - {addr: 0x801133e4, size: 148, name: formation_rebuild_unit_list, hash: 97da11e8f7fbbc2b, unit: formation_display_init}
   - {addr: 0x80113478, size: 112, name: screen_is_busy, hash: 09c2bf94c7f79101, unit: formation_display_init}
@@ -2370,7 +2371,7 @@ data:
   - {addr: 0x801cd788, name: g_formation_unit_count}
   - {addr: 0x801cd78c, name: g_thread_call_target}
   - {addr: 0x801cd790, name: g_event_pending_unit_vram_copy}
-  - {addr: 0x801cd794, name: g_screen_script_callbacks}
+  - {addr: 0x801cd794, name: g_menu_row_callbacks}
   - {addr: 0x801cd7d4, name: g_scenario_event_active}
   - {addr: 0x801cd7d8, name: g_event_pending_effect_id}
   - {addr: 0x801cd7dc, name: GsCLIP3far}

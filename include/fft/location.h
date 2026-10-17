@@ -286,8 +286,6 @@ typedef struct location_script_state {
 } location_script_state_t;
 typedef char location_script_state_size_must_be_48[sizeof(location_script_state_t) == 48 ? 1 : -1];
 
-extern void (*g_location_script_opcodes[])(void); /* by opcode */
-
 /* The loaded world map script: a 16-bit offset per location to its list of conditional blocks. */
 extern u16* g_location_script_default_base;
 extern u16* g_location_script_base;

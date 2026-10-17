@@ -152,11 +152,6 @@ typedef enum ending_opcode {
     ENDING_SCRIPT_OPCODE_START_OPNTEX_SEQUENCE = 0x0f,
 } ending_opcode_e;
 
-/* The ending-script dispatcher passes a serialized 16-bit cursor. */
-typedef void (*ending_opcode_handler_t)(s16* entry);
-
-extern ending_opcode_handler_t g_ending_opcode_handlers[16];
-
 void ending_opcode_00_end_script(s16* unused_entry);
 void ending_opcode_01_create_positioned_text_record(s16* command);
 void ending_opcode_02_set_scroll_speed(s16* entry);

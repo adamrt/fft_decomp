@@ -331,7 +331,8 @@ static s32 location_collect_choices(s32 location_id, s32* out) {
     written = 0;
     for (i = 0; i < available; i++) {
         entry = g_location_script_state.choice_vars[i];
-        if (script_get_variable(g_location_choice_hidden_offsets[entry] + EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST)
+        if (script_get_variable(
+                g_location_choice_hidden_offsets[entry - 1] + EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST)
             == 0) {
             out[written++] = entry + (TEXT_ID_MAP_NAME_BASE - 1);
             if (written == 5) {

@@ -55,8 +55,6 @@ s32 memcard_poll_operation_result(void);
 struct DIRENTRY;
 struct save_image;
 
-extern s32 g_memcard_file_open_descriptor;
-
 s32 memcard_file_enumerate_saves(struct DIRENTRY* entries, s32 all_files);
 s32 memcard_file_count_free_blocks(const struct DIRENTRY* entries, s32 entry_count);
 s32 memcard_file_open_selected_with_retries(const char* filename, s32 mode);

@@ -18,7 +18,7 @@ units:
   - {name: ai_origins, source: src/battle/ai_origins.c, rodata: [{addr: 0x80193dd4, size: 12, hash: a1dd1afa9d59d502}], data: [{addr: 0x8019f308, size: 80, hash: 296c781af2dde231}]}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: camera, source: src/battle/camera.c, data: [{addr: 0x800a1c5c, size: 16, hash: 374708fff7719dd5}, {addr: 0x800a1c6c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a1c74, size: 16, hash: 374708fff7719dd5}]}
-  - {name: command_menus, source: src/lib/event/command_menus.c}
+  - {name: command_menus, source: src/lib/event/command_menus.c, data: [{addr: 0x801692c0, size: 1020, hash: 7d824f0a060b15de}]}
   - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
@@ -42,7 +42,7 @@ units:
   - {name: move_range, source: src/battle/move_range.c}
   - {name: move_steps, source: src/battle/move_steps.c, data: [{addr: 0x80093c9c, size: 4, hash: 02d0e6c850c1f217}, {addr: 0x80093ca0, size: 4, hash: 0e3f601857911ecc}, {addr: 0x80093ca4, size: 4, hash: eae2ccfcdac29c2d}, {addr: 0x80093ca8, size: 4, hash: 2ef245921b9d3ae8}]}
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
-  - {name: script_commands, source: src/lib/event/script_commands.c}
+  - {name: script_commands, source: src/lib/event/script_commands.c, data: [{addr: 0x8014d170, size: 244, hash: 5f50d72e0e4d2a62}]}
   - {name: script_helpers, source: src/lib/event/script_helpers.c, data: [{addr: 0x80167838, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80167844, size: 96, hash: 54145c650f08eb0b}]}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, data: [{addr: 0x801696fc, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80169700, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80169718, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80169720, size: 48, hash: 5026ef5547d95034}, {addr: 0x80169750, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: skillset_menus, source: src/battle/skillset_menus.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}

@@ -22,15 +22,20 @@
 /* EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN): none of the item is left. */
 enum { EQUIPMENT_TEXT_ID_OUT_OF_STOCK = (TEXT_SECTION_OVERLAY_SCREEN << TEXT_ID_SECTION_SHIFT) + 9 };
 
+static void equipment_update_state(void);
 static s32 equipment_run_equip_mode(void);
 static s32 equipment_run_remove_mode(void);
 static s32 equipment_update_remove_all_prompt(void);
+
+/* State 0 initializes before dispatch; the five other slots share the frame updater. */
+void (*g_equipment_screen_state_handlers[6])(void) = { 0, equipment_update_state, equipment_update_state,
+    equipment_update_state, equipment_update_state, equipment_update_state };
 
 /* The g_equipment_screen_state_handlers entry of every state past INIT: keep the command
  * menu thread running, enter the mode its picked row names (row + EQUIPMENT_STATE_EQUIP;
  * row 1 would be state 3, which has no mode, and is refused), run that mode each frame and
  * return to the command menu when it ends. */
-void equipment_update_state(void) {
+static void equipment_update_state(void) {
     s32 result;
     s32 state;
     s32 mode;

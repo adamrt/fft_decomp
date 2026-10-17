@@ -16,8 +16,8 @@ units:
   - {name: init, source: src/open/init.c}
   - {name: memcard, source: src/lib/memcard.c}
   - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
-  - {name: title_controllers, source: src/open/title_controllers.c}
-  - {name: title_script, source: src/open/title_script.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}]}
+  - {name: title_controllers, source: src/open/title_controllers.c, data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
+  - {name: title_script, source: src/open/title_script.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}, {addr: 0x80073fd4, size: 96, hash: 9244268b09d6a718}, {addr: 0x80074034, size: 64, hash: afec11e3b0e0d793}]}
   - {name: window_records, source: src/open/window_records.c}
   - {name: window_text_records, source: src/open/window_text_records.c}
 

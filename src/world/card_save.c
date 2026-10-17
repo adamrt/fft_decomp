@@ -1219,7 +1219,7 @@ static s32 save_count_selectable_slots(void) {
     s32 count;
     s32 i;
 
-    g_screen_script_callbacks[0].value = 0;
+    g_menu_row_callbacks[0].value = 0;
     for (i = 0, count = 0; i < 15; i++) {
         if (i == g_save_last_used_slot) {
             g_save_active_slot = i;

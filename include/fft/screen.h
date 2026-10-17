@@ -269,7 +269,6 @@ typedef char LINE_F2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
 
 enum { SCREEN_SCRIPT_END = 0x1c };
 
-extern menu_callback_t g_screen_script_callbacks[16];
 extern RECT g_screen_window_rect;
 extern s16 g_screen_window_right_x;
 extern u16 g_screen_texture_page;

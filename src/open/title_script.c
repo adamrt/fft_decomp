@@ -31,6 +31,36 @@
 static s16 g_music_test_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 
+/* The 96 music-test rows select scenario music IDs 1 through 96. */
+#define MUSIC_TEST_TRACK_IDS_16(first)                                                                                 \
+    first, first + 1, first + 2, first + 3, first + 4, first + 5, first + 6, first + 7, first + 8, first + 9,          \
+        first + 10, first + 11, first + 12, first + 13, first + 14, first + 15
+static u8 g_music_test_music_ids[96]
+    = { MUSIC_TEST_TRACK_IDS_16(1), MUSIC_TEST_TRACK_IDS_16(17), MUSIC_TEST_TRACK_IDS_16(33),
+          MUSIC_TEST_TRACK_IDS_16(49), MUSIC_TEST_TRACK_IDS_16(65), MUSIC_TEST_TRACK_IDS_16(81) };
+#undef MUSIC_TEST_TRACK_IDS_16
+
+/* Ending bytecode opcodes 0x00 through 0x0f. */
+typedef void (*ending_opcode_handler_t)(s16* entry);
+static ending_opcode_handler_t g_ending_opcode_handlers[16] = {
+    ending_opcode_00_end_script,
+    ending_opcode_01_create_positioned_text_record,
+    ending_opcode_02_set_scroll_speed,
+    ending_opcode_03_start_overlay_fade_out,
+    ending_opcode_04_start_overlay_fade_in,
+    ending_opcode_05_wait_counted,
+    ending_opcode_06_wait_for_scroll,
+    ending_opcode_07_start_xa_audio,
+    ending_opcode_08_start_sound_fade_in,
+    ending_opcode_09_start_sound_fade_out,
+    ending_opcode_0a_stop_xa_audio,
+    ending_opcode_0b_load_opntex_frame,
+    ending_opcode_0c_start_fade_intensity_increase,
+    ending_opcode_0d_start_fade_intensity_decrease,
+    ending_opcode_0e_wait_for_xa_audio_idle,
+    ending_opcode_0f_start_opntex_sequence,
+};
+
 static void controller_start_text_message(s32 parameter, s32 use_world_text);
 static void prologue_prepare_crossfade(s32 file_index);
 static void prologue_draw_text_lines(s32 intensity);

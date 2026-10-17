@@ -138,14 +138,14 @@ s32 equipment_run_item_list(void) {
         menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        g_screen_script_callbacks[0].value = equipment_get_row_equipped_count;
-        g_screen_script_callbacks[1].value = equipment_get_row_item_count;
-        g_screen_script_callbacks[2].icon = item_build_type_icon_source;
-        g_screen_script_callbacks[3].icon = equipment_get_row_icon_source;
-        g_screen_script_callbacks[4].value = equipment_get_preview_hp_bonus_display;
-        g_screen_script_callbacks[5].value = equipment_get_preview_mp_bonus_display;
-        g_screen_script_callbacks[6].value = formation_item_get_hp_bonus;
-        g_screen_script_callbacks[7].value = formation_item_get_mp_bonus;
+        g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
+        g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+        g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+        g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
+        g_menu_row_callbacks[4].value = equipment_get_preview_hp_bonus_display;
+        g_menu_row_callbacks[5].value = equipment_get_preview_mp_bonus_display;
+        g_menu_row_callbacks[6].value = formation_item_get_hp_bonus;
+        g_menu_row_callbacks[7].value = formation_item_get_mp_bonus;
     }
     formation_toggle_preview_stats_window(1);
     if (g_menu_list_entry_count != 0) {

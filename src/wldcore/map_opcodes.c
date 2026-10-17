@@ -24,6 +24,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Opcode-indexed dispatch, defined after its handlers below. */
+static void (*g_location_script_opcodes[41])(void);
+
 static s32 party_find_ramza(void);
 static void brave_story_push_fact_level(s32 value);
 static void location_script_read_operand_pair(s32* out1, s32* out2);
@@ -680,3 +683,48 @@ void brave_story_wait_fact_then_pop(menu_stack_record_t* unused_level) {
         brave_story_open_fact_list();
     }
 }
+
+/* Original opcode table; repeated entries retain their shared skip handlers. */
+static void (*g_location_script_opcodes[41])(void) = {
+    location_script_opcode_00_nop,
+    location_script_opcode_01_check_var_equal,
+    location_script_opcode_02_check_var_at_least,
+    location_script_opcode_03_check_var_at_most,
+    location_script_opcode_04_check_roster_has_sprite_set,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_0c_skip_1_operand,
+    location_script_opcode_0d_skip_1_operand,
+    location_script_opcode_0e_check_war_funds_at_least,
+    location_script_opcode_0f_check_war_funds_at_most,
+    location_script_opcode_10_check_date_on_or_after,
+    location_script_opcode_11_check_date_on_or_before,
+    location_script_opcode_12_check_casualties_at_least,
+    location_script_opcode_13_check_casualties_at_most,
+    location_script_opcode_14_skip_1_operand,
+    location_script_opcode_14_skip_1_operand,
+    location_script_opcode_00_nop,
+    location_script_opcode_17_skip_3_operands,
+    location_script_opcode_18_skip_4_operands,
+    location_script_opcode_19_request_load_event,
+    location_script_opcode_1a_request_choice,
+    location_script_opcode_05_skip_2_operands,
+    location_script_opcode_1c_set_var,
+    location_script_opcode_1d_request_text,
+    location_script_opcode_1e_request_deep_dungeon_entry,
+    location_script_opcode_1f_request_set_var_2,
+    location_script_opcode_20_request_draw_path,
+    location_script_opcode_21_request_erase_path,
+    location_script_opcode_22_request_draw_location,
+    location_script_opcode_23_request_erase_location,
+    location_script_opcode_24_focus_location,
+    location_script_opcode_25_check_ramza_brave_at_least,
+    location_script_opcode_26_check_ramza_brave_at_most,
+    location_script_opcode_27_check_ramza_faith_at_least,
+    location_script_opcode_28_check_ramza_faith_at_most,
+};

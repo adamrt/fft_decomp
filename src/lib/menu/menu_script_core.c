@@ -5,6 +5,9 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
+/* Page setup fills the value, text, and icon callbacks used by menu commands. */
+menu_callback_t g_menu_row_callbacks[16] = { 0 };
+
 /* JOBSTTS advances its transition in a separate script runner. */
 #ifndef FFT_EVENT_JOBSTTS
 /* Run a menu command stream: reset the ordering-table index, semi-transparency and lock, keep

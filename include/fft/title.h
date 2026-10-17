@@ -157,7 +157,6 @@ extern menu_text_layout_t g_music_test_list_state;
 extern s16 g_music_test_list_entries[96];
 extern s16 g_music_test_list_entry_flags[96];
 extern s16 g_music_test_selected_option;
-extern u8 g_music_test_music_ids[];               /* music test entry -> scenario music id */
 extern suzuki_music_t* g_music_test_sound_handle; /* handle of the playing music test track */
 
 /* Entry of g_gfx_otags the WORLD menu frame draws into while

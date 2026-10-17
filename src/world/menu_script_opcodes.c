@@ -29,7 +29,7 @@ static s8 g_screen_cursor_bob_active_thresholds[12] = { 2, 0, 8, -2, 10, 1, 12, 
  * uses its scroll position. */
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
     menu_instruction_t* instruction = script;
-    s32 (*predicate)(s32) = g_screen_script_callbacks[instruction->conditional.predicate].value;
+    s32 (*predicate)(s32) = g_menu_row_callbacks[instruction->conditional.predicate].value;
     s32 count = instruction->conditional.count;
     s32 arg;
 
@@ -61,7 +61,7 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
 /* Execute the selected branch and skip the other by encoded instruction
  * lengths, using a literal predicate argument or the current scrolling row. */
 menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction) {
-    s32 (*predicate)(s32) = g_screen_script_callbacks[instruction->if_else.predicate].value;
+    s32 (*predicate)(s32) = g_menu_row_callbacks[instruction->if_else.predicate].value;
     s32 count_true = instruction->if_else.count_true;
     s32 count_false = instruction->if_else.count_false;
     s32 arg;
@@ -178,7 +178,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
     menu_icon_source_t* entry;
     s32 index;
 
-    handler = g_screen_script_callbacks[instruction->callback_sprite.callback_index].icon;
+    handler = g_menu_row_callbacks[instruction->callback_sprite.callback_index].icon;
     if (g_screen_use_scroll_position == 0) {
         index = instruction->callback_sprite.row;
     } else {
@@ -567,7 +567,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
     rgb24_t* color;
     u16 clut;
 
-    getter = g_screen_script_callbacks[command->number.getter].value;
+    getter = g_menu_row_callbacks[command->number.getter].value;
     if (g_screen_use_scroll_position == 0) {
         row = command->number.value;
         y = command->number.y;
@@ -695,8 +695,8 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
     s32 y;
     s32 i;
 
-    value = g_screen_script_callbacks[instruction->number.getter].value != 0
-        ? g_screen_script_callbacks[instruction->number.getter].value(instruction->number.value)
+    value = g_menu_row_callbacks[instruction->number.getter].value != 0
+        ? g_menu_row_callbacks[instruction->number.getter].value(instruction->number.value)
         : instruction->number.value;
     blanks = instruction->number.width - sprintf(text, "%d", value);
     value = instruction->number.width;

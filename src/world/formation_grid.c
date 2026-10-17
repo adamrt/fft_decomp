@@ -363,14 +363,14 @@ void formation_init_selection_cursor(s16 formation_index) {
     s16 x;
 
     menu_init_scrollable_list_core(0, 0, 0);
-    g_screen_script_callbacks[0].value = formation_get_unit_stat_by_mode;
-    g_screen_script_callbacks[1].value = formation_get_unit_stat_by_mode;
-    g_screen_script_callbacks[2].value = formation_get_egg_hatch_progress;
-    g_screen_script_callbacks[3].value = formation_get_egg_hatch_total;
-    g_screen_script_callbacks[4].value = formation_get_unit_level;
-    g_screen_script_callbacks[5].value = formation_get_unit_experience;
-    g_screen_script_callbacks[6].value = formation_get_unit_brave;
-    g_screen_script_callbacks[7].value = formation_get_unit_faith;
+    g_menu_row_callbacks[0].value = formation_get_unit_stat_by_mode;
+    g_menu_row_callbacks[1].value = formation_get_unit_stat_by_mode;
+    g_menu_row_callbacks[2].value = formation_get_egg_hatch_progress;
+    g_menu_row_callbacks[3].value = formation_get_egg_hatch_total;
+    g_menu_row_callbacks[4].value = formation_get_unit_level;
+    g_menu_row_callbacks[5].value = formation_get_unit_experience;
+    g_menu_row_callbacks[6].value = formation_get_unit_brave;
+    g_menu_row_callbacks[7].value = formation_get_unit_faith;
     g_formation_scroll_velocity = 0;
     g_formation_scroll_unread = 0;
     g_unit_selected_index = formation_index;

@@ -111,8 +111,8 @@ void formation_job_wheel_menu(void) {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         menu_init_scrollable_list_core(0, 0, 0);
-        g_screen_script_callbacks[0].value = formation_job_get_cursor_level;
-        g_screen_script_callbacks[1].value = formation_job_is_cursor_available;
+        g_menu_row_callbacks[0].value = formation_job_get_cursor_level;
+        g_menu_row_callbacks[1].value = formation_job_is_cursor_available;
         g_formation_job_wheel_job_selected = 0;
         g_formation_job_change_confirmed = 0;
         g_formation_job_wheel_initialized = 1;

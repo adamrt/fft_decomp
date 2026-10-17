@@ -76,9 +76,60 @@ typedef struct menu_system_function {
 } menu_system_function_t;
 typedef char menu_system_function_size_must_be_20[(sizeof(menu_system_function_t) == 20) ? 1 : -1];
 
-/* Array view: as a scalar, GCC hoists the menu-index reload above its store
- * in menu_run_system_function_thread. */
-extern menu_system_function_t g_menu_system_function_table[];
+/* System-menu requests: callbacks and their initial message/selection parameters. */
+menu_system_function_t g_menu_system_function_table[51] = {
+    { 25, 0x8004, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 0, { 0, 0 } },     /* 0 */
+    { 28, 0x800f, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 1 */
+    { 26, 0x5056, 26, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 2, { 0, 0 } },    /* 2 */
+    { 27, 0x5058, 27, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 3, { 0, 0 } },    /* 3 */
+    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 4 */
+    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 5 */
+    { 28, 0x800b, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 6 */
+    { 28, 0x8003, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 7 */
+    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 8 */
+    { 30, 0x5061, 30, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 9, { 0, 0 } },    /* 9 */
+    { 28, 0x5062, 31, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 10, { 0, 0 } },         /* 10 */
+    { 100, 0x8010, 28, 0x25, 1, { 0, 0 }, menu_icon_linked_entry_thread, 2, { 0, 0 } },    /* 11 */
+    { 101, 0x8011, 28, 0x26, 1, { 0, 0 }, menu_icon_linked_entry_thread, 3, { 0, 0 } },    /* 12 */
+    { 102, 0x8011, 28, 0x2d, 1, { 0, 0 }, menu_icon_linked_entry_thread, 9, { 0, 0 } },    /* 13 */
+    { -1, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 8, { 0, 0 } },   /* 14 */
+    { 99, 0x1004, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } },  /* 15 */
+    { 99, 0x8006, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 16 */
+    { 99, 0x8007, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 17 */
+    { 99, 0x8008, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 18 */
+    { 99, 0x8009, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 19 */
+    { 28, 0x1012, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 20, { 0, 0 } },  /* 20 */
+    { 28, 0x1015, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 21, { 0, 0 } },  /* 21 */
+    { 99, 0x1014, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 22, { 0, 0 } },  /* 22 */
+    { 99, 0x1016, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 23, { 0, 0 } },  /* 23 */
+    { 40, 0x506e, 40, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 8, { 0, 0 } },    /* 24 */
+    { 40, 0x506f, 40, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 8, { 0, 0 } },    /* 25 */
+    { 103, 0x800d, 28, 0x29, 1, { 0, 0 }, menu_icon_linked_entry_thread, 24, { 0, 0 } },   /* 26 */
+    { 104, 0x800e, 28, 0x2a, 1, { 0, 0 }, menu_icon_linked_entry_thread, 25, { 0, 0 } },   /* 27 */
+    { 25, 0x802e, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 28 */
+    { 28, 0x0, 43, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 29, { 0, 0 } },            /* 29 */
+    { 25, 0x1017, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 30 */
+    { 105, 0x505a, 28, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread, 31, { 0, 0 } }, /* 31 */
+    { 99, 0x1013, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } },  /* 32 */
+    { 25, 0x8006, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 33 */
+    { 28, 0x1830, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 34, { 0, 0 } },  /* 34 */
+    { 28, 0x1831, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 35, { 0, 0 } },  /* 35 */
+    { 28, 0x1832, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 36, { 0, 0 } },  /* 36 */
+    { 28, 0x1833, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 37, { 0, 0 } },  /* 37 */
+    { 28, 0x101d, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 38, { 0, 0 } },  /* 38 */
+    { 28, 0x101c, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 39, { 0, 0 } },  /* 39 */
+    { 28, 0x0, 28, 0xffff, 1, { 0, 0 }, menu_input_thread, 40, { 0, 0 } },                 /* 40 */
+    { 99, 0x100a, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 41, { 0, 0 } },  /* 41 */
+    { 106, 0x800c, 28, 0x2d, 1, { 0, 0 }, menu_icon_linked_entry_thread, 43, { 0, 0 } },   /* 42 */
+    { 98, 0x5061, 30, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 43, { 0, 0 } },   /* 43 */
+    { 28, 0x5089, 31, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 44, { 0, 0 } },         /* 44 */
+    { 101, 0x8012, 28, 0x26, 1, { 0, 0 }, menu_icon_linked_entry_thread, 3, { 0, 0 } },    /* 45 */
+    { 102, 0x8012, 28, 0x2d, 1, { 0, 0 }, menu_icon_linked_entry_thread, 9, { 0, 0 } },    /* 46 */
+    { 99, 0x100f, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },   /* 47 */
+    { 25, 0x8005, 28, 0x19, 1, { 0, 0 }, menu_icon_linked_entry_thread, 8, { 0, 0 } },     /* 48 */
+    { 99, 0x1025, 28, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 49, { 0, 0 } },  /* 49 */
+    { 28, 0x508c, 31, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread, 50, { 0, 0 } },         /* 50 */
+};
 
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);

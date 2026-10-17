@@ -220,10 +220,10 @@ static s32 formation_item_equip_menu(void) {
             }
             menu_get_selection_record(slot, &x, &y, g_item_list_entries);
             menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-            g_screen_script_callbacks[0].value = equipment_get_row_equipped_count;
-            g_screen_script_callbacks[1].value = equipment_get_row_item_count;
-            g_screen_script_callbacks[2].icon = item_build_type_icon_source;
-            g_screen_script_callbacks[3].icon = equipment_get_row_icon_source;
+            g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
+            g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+            g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+            g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             g_formation_item_previewed_cursor = -1;
         }

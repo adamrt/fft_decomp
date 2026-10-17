@@ -24,6 +24,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Opcode-indexed dispatch, defined after its handlers below. */
+static void (*g_sound_novel_opcode_handlers[54])(void);
+
 /* Sound IDs 1 through 56 select four-byte rows in the WLDCORE sound bank. */
 extern u8 g_sound_novel_sound_quads[56][4];
 
@@ -1178,3 +1181,61 @@ void sound_novel_opcode_35_push_operand_history(void) {
     g_sound_novel_history_3 = new_entry;
     g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
+
+/* Dispatch by the instruction's low-byte opcode. */
+static void (*g_sound_novel_opcode_handlers[54])(void) = {
+    sound_novel_opcode_00_end_script,
+    sound_novel_opcode_01_end_section,
+    sound_novel_opcode_02_nop,
+    sound_novel_opcode_03_start_text_thread_and_push_history,
+    sound_novel_opcode_04_wait_for_text_thread,
+    sound_novel_opcode_05_load_background_set,
+    sound_novel_opcode_06_branch_to_section,
+    sound_novel_opcode_07_branch_if_dialog_option_equal,
+    sound_novel_opcode_08_branch_if_dialog_option_not_equal,
+    sound_novel_opcode_09_wait_frames,
+    sound_novel_opcode_0a_load_picture,
+    sound_novel_opcode_0b_hide_picture,
+    sound_novel_opcode_0c_set_parent_windows_visible,
+    sound_novel_opcode_0d_start_text_thread,
+    sound_novel_opcode_0e_branch_to_random_section,
+    sound_novel_opcode_0f_branch_if_section_read,
+    sound_novel_opcode_10_branch_if_section_unread,
+    sound_novel_opcode_11_branch_if_saved_flag_set,
+    sound_novel_opcode_12_branch_if_saved_flag_clear,
+    sound_novel_opcode_13_branch_if_local_flag_set,
+    sound_novel_opcode_14_branch_if_local_flag_clear,
+    sound_novel_opcode_15_set_saved_flag,
+    sound_novel_opcode_16_clear_saved_flag,
+    sound_novel_opcode_17_set_local_flag,
+    sound_novel_opcode_18_clear_local_flag,
+    sound_novel_opcode_19_set_counter,
+    sound_novel_opcode_1a_add_counter_delta,
+    sound_novel_opcode_1b_subtract_counter_delta,
+    sound_novel_opcode_1c_start_pending_value_transition,
+    sound_novel_opcode_1d_hide_value_display,
+    sound_novel_opcode_1e_apply_counter_delta,
+    sound_novel_opcode_1f_play_sound,
+    sound_novel_opcode_20_play_music,
+    sound_novel_opcode_21_set_sound_mode,
+    sound_novel_opcode_22_branch_if_equal,
+    sound_novel_opcode_23_branch_if_not_equal,
+    sound_novel_opcode_24_branch_if_less,
+    sound_novel_opcode_25_branch_if_greater,
+    sound_novel_opcode_26_fade_out_music,
+    sound_novel_opcode_27_switch_music_track,
+    sound_novel_opcode_28_fade_screen_out,
+    sound_novel_opcode_29_fade_screen_in,
+    sound_novel_opcode_2a_set_white_screen_overlay,
+    sound_novel_opcode_2b_wait_for_circle_press,
+    sound_novel_opcode_2c_play_sound_effect_quad,
+    sound_novel_opcode_2d_stop_weather_sound,
+    sound_novel_opcode_2e_start_countdown_timer,
+    sound_novel_opcode_2f_play_background_sound,
+    sound_novel_opcode_30_set_master_volume,
+    sound_novel_opcode_31_stop_pending_music,
+    sound_novel_opcode_32_set_menu_brightness,
+    sound_novel_opcode_33_add_counter_delta_if_choice,
+    sound_novel_opcode_34_wait_for_fade,
+    sound_novel_opcode_35_push_operand_history,
+};

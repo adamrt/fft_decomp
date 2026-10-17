@@ -105,7 +105,6 @@ typedef struct sound_novel_state {
     s16 y; /* 0x28 */
 } sound_novel_state_t;
 
-extern void (*g_sound_novel_opcode_handlers[])(void); /* by the instruction's low byte */
 extern u32 g_sound_novel_local_flags[];
 extern sound_novel_state_t g_sound_novel_state;
 

@@ -32,7 +32,22 @@
 #include "psx/types.h"
 
 typedef void (*controller_handler_t)(controller_record_t* record);
-extern controller_handler_t g_controller_handlers[];
+/* One callback for each controller_handler_e value, 0 through 12. */
+static controller_handler_t g_controller_handlers[13] = {
+    movie_update_fftst,
+    movie_update_fftop,
+    title_update_menu,
+    title_update_sound_type_menu,
+    new_game_update,
+    birthday_update_date_menu,
+    birthday_update_confirmation,
+    music_test_update,
+    controller_wait_text_message,
+    movie_update_fftend,
+    ending_update_script,
+    movie_update_title_demo,
+    title_update_card_warning,
+};
 
 /* Seven OPNBK images use eight sector boundaries. */
 extern const s32 g_file_openbk_sector_offsets[8];

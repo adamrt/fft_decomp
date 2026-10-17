@@ -7,6 +7,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static s32 g_menu_indicator_packet_index[2] = { 0 };
+static s32 g_menu_indicator_brightness[2] = { 0 };
+static s32 g_menu_indicator_fade_work[2] = { 0 };
+static s32 g_menu_indicator_state[2] = { 0 };
+
 /* Build and submit the two translucent letterbox panels of the event dialogue
  * overlay.
  *
