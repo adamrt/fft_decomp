@@ -1040,7 +1040,7 @@ static void sound_novel_push_level(s32 argument) {
     origin.x = 0x20;
     origin.y = 0x1E8;
     window_init_vram_render_record(index, bounds, origin, 0);
-    pos3 = (point32_t*)((s32)render_pos + index * sizeof(window_gs_image_record_t));
+    pos3 = (point32_t*)((u8*)render_pos + index * sizeof(window_gs_image_record_t));
     pos3->x = 0x34;
     pos3->y = 0x55;
     g_window_gs_image_records[index].priority = 8;
@@ -2370,7 +2370,7 @@ static s32 picture_step_dissolve_upload(GsIMAGE* image, s32 step) {
         for (i = 15; i >= 0; i--) {
             *state-- = 0;
         }
-        return;
+        return (s32)state;
     }
 
     if (step >= 50) {

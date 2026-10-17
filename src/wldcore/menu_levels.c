@@ -2321,15 +2321,15 @@ static void bar_push_level(void) {
     g_system_flags |= SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
-    g_menu_stack_records[g_menu_stack_depth].window_pair_render.first_window
+    g_menu_stack_records[g_menu_stack_depth].bar.cursor_window
         = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].window_pair_render.second_window
+    g_menu_stack_records[g_menu_stack_depth].bar.label_window
         = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].window_pair_render.render_index
+    g_menu_stack_records[g_menu_stack_depth].bar.rows_image
         = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    bar_build_rows(&g_menu_stack_records[g_menu_stack_depth].list_window);
+    bar_build_rows(&g_menu_stack_records[g_menu_stack_depth].bar);
     record_index = g_menu_stack_depth;
-    g_menu_stack_records[record_index].window_pair_render.panel_rows = 0;
+    g_menu_stack_records[record_index].bar.restore_welcome = 0;
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_BAR;
     g_menu_stack_depth = record_index + 1;
 }
@@ -2337,7 +2337,7 @@ static void bar_push_level(void) {
 /* Fill the bar menu: Rumors always, Propositions once EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED is
  * set, the job report while jobs have returned to this town, the in-progress list while some
  * accepted job has not returned, then Leave; draw the rows into the frame window. */
-void bar_build_rows(menu_stack_window_level_t* level) {
+void bar_build_rows(bar_menu_level_t* level) {
     s32 index;
     point32_t point;
     RECT bounds;
@@ -2347,12 +2347,12 @@ void bar_build_rows(menu_stack_window_level_t* level) {
     window_gs_image_record_t* render;
     s32 i;
 
-    index = level->main_window;
+    index = level->cursor_window;
     g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
     g_window_records[index].priority = 0xA;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
-    index = level->side_window;
+    index = level->label_window;
     g_window_records[index].sequence = WINDOW_ANIM_LIST_SIDE_LABEL;
     g_window_records[index].priority = 0xA;
     g_window_records[index].anim_counter = 0;
@@ -2376,7 +2376,7 @@ void bar_build_rows(menu_stack_window_level_t* level) {
 
     level->entries[level->entry_count] = BAR_ROW_LEAVE;
     level->entry_count++;
-    index = level->frame_render;
+    index = level->rows_image;
     bounds.x = 0;
     bounds.y = 0;
     bounds.w = 0x48;
@@ -2400,14 +2400,14 @@ void bar_build_rows(menu_stack_window_level_t* level) {
         cursor->selected_index = 0;
     }
 
-    g_menu_stack_records[g_menu_stack_depth].list_window.selected_entry = cursor->selected_index;
-    g_menu_stack_records[g_menu_stack_depth].list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
+    g_menu_stack_records[g_menu_stack_depth].bar.selected_entry = cursor->selected_index;
+    g_menu_stack_records[g_menu_stack_depth].bar.mode = MENU_STACK_WINDOW_MODE_BROWSE;
     render = &g_window_gs_image_records[index];
-    g_window_records[level->main_window].position.x = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[level->main_window].position.y
+    g_window_records[level->cursor_window].position.x = g_window_gs_image_records[index].base.x + 6;
+    g_window_records[level->cursor_window].position.y
         = g_window_gs_image_records[index].base.y + cursor->selected_index * 0x10 + 0xE;
-    g_window_records[level->side_window].position.x = render->base.x + 3;
-    g_window_records[level->side_window].position.y = g_window_gs_image_records[index].base.y - 2;
+    g_window_records[level->label_window].position.x = render->base.x + 3;
+    g_window_records[level->label_window].position.y = g_window_gs_image_records[index].base.y - 2;
 }
 
 /* Restore the bar list's palettes and cursor animation, then show its welcome text. */
@@ -2418,14 +2418,14 @@ void bar_resume_level(menu_stack_record_t* level) {
     /* The original frame reserves eight unused bytes. */
     s32 pad[2];
 
-    main_window = level->list_window.main_window;
-    side_window = level->list_window.side_window;
-    g_window_gs_image_records[level->list_window.frame_render].palette = 0;
+    main_window = level->bar.cursor_window;
+    side_window = level->bar.label_window;
+    g_window_gs_image_records[level->bar.rows_image].palette = 0;
     g_window_records[side_window].palette = 0;
     g_window_records[main_window].palette = 0;
-    slot = level->list_window.main_window;
+    slot = level->bar.cursor_window;
     g_window_records[slot].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    slot = level->list_window.main_window;
+    slot = level->bar.cursor_window;
     g_window_records[slot].anim_counter = 0;
     g_window_records[slot].frame_index = 0;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);

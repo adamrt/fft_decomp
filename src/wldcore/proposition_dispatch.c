@@ -1025,7 +1025,7 @@ void proposition_open_returned_list(void) {
         window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count, &layout, &origin);
     } else {
-        bar_build_rows(&g_menu_stack_records[g_menu_stack_depth - 1].list_window);
+        bar_build_rows(&g_menu_stack_records[g_menu_stack_depth - 1].bar);
         menu_stack_dispatch_resume();
         return;
     }

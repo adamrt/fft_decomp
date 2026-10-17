@@ -32,6 +32,7 @@ union menu_stack_record {
     proposition_discovery_level_t discovery; /* pushed by proposition_push_discovery_level */
     rumor_detail_level_t rumor_detail;
     menu_stack_window_level_t list_window;
+    bar_menu_level_t bar;
     brave_story_advancing_level_t proposition_list;
     debug_variable_list_level_t variable_list;
     brave_story_participant_level_t participant;

@@ -142,7 +142,7 @@ typedef enum menu_stack_window_mode {
     MENU_STACK_WINDOW_MODE_LEAVE_WAIT = 3,    /* faded out; waits for thread 14 to end, then pops */
 } menu_stack_window_mode_e;
 
-/* Provisional: the list-window level of the bar, the Brave Story and the tutorials, beneath their flag-list panels.
+/* Provisional: the list-window level of Brave Story and the tutorials, beneath their flag-list panels.
  * brave_story_open_work_history and brave_story_open_person_list hide its content render record when they
  * push; brave_story_wait_fact_then_pop shows its upper and lower windows again when it pops back to it. */
 typedef struct menu_stack_window_level {
@@ -186,7 +186,6 @@ typedef struct window_pair_render_level {
     s32 first_window;
     s32 second_window; /* 0x04 */
     s32 render_index;  /* 0x08 */
-    s32 panel_rows;    /* 0x0c; cleared by bar_push_level */
 } window_pair_render_level_t;
 
 /* remembered cursors */

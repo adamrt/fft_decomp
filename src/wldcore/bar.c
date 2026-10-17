@@ -42,18 +42,18 @@ static void rumor_open_list(void);
 void bar_suspend_level(menu_stack_record_t* level) {
     s32 index;
 
-    g_window_records[level->list_window.main_window].palette = 10;
-    g_window_records[level->list_window.side_window].palette = 6;
-    g_window_gs_image_records[level->list_window.frame_render].palette = 2;
-    g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
-    index = level->list_window.main_window;
+    g_window_records[level->bar.cursor_window].palette = 10;
+    g_window_records[level->bar.label_window].palette = 6;
+    g_window_gs_image_records[level->bar.rows_image].palette = 2;
+    g_window_records[level->bar.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+    index = level->bar.cursor_window;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 }
 
 /* Leave the bar: pop its level, show the date and location label again, rebuild and push the
  * location menu for the current location, fade the map back in and clear the scratch buffer. */
-static void bar_leave(menu_stack_window_level_t* unused_level) {
+static void bar_leave(bar_menu_level_t* unused_level) {
     s32* selected = &g_world_map_marker_state.marker.location_id;
     s32 i;
 
@@ -80,7 +80,7 @@ void bar_handle_input(menu_stack_record_t* level) {
     u32 buttons;
     s32* selected_entry;
 
-    if (g_window_gs_image_records[level->list_window.frame_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->bar.rows_image].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -91,15 +91,15 @@ void bar_handle_input(menu_stack_record_t* level) {
 
     if ((flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
         g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
-        bar_leave(&level->list_window);
+        bar_leave(&level->bar);
         return;
     }
 
-    if (level->list_window.mode != MENU_STACK_WINDOW_MODE_BROWSE) {
+    if (level->bar.mode != MENU_STACK_WINDOW_MODE_BROWSE) {
         if (!(g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS))) {
             return;
         }
-        level->list_window.mode = MENU_STACK_WINDOW_MODE_BROWSE;
+        level->bar.mode = MENU_STACK_WINDOW_MODE_BROWSE;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
@@ -113,7 +113,7 @@ void bar_handle_input(menu_stack_record_t* level) {
         /* Same exit as the Leave row below; GCC cross-jumps the two copies. */
         g_bar_saved_cursor = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
-        level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
+        level->bar.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
         g_window_record_count -= 2;
         g_window_render_record_count -= 1;
         g_window_render_object_count -= 3;
@@ -123,18 +123,18 @@ void bar_handle_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_SELECT) {
         bar_suspend_level(level);
         menu_stack_push_message_level(
-            g_bar_row_help_text_ids[level->list_window.entries[level->list_window.selected_entry]] | 0x1000, 1);
+            g_bar_row_help_text_ids[level->bar.entries[level->bar.selected_entry]] | 0x1000, 1);
         return;
     }
 
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        selected_entry = &level->list_window.selected_entry;
+        selected_entry = &level->bar.selected_entry;
         g_bar_saved_cursor = *selected_entry;
-        if (level->list_window.entries[*selected_entry] != BAR_ROW_LEAVE) {
-            g_window_records[level->list_window.main_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+        if (level->bar.entries[*selected_entry] != BAR_ROW_LEAVE) {
+            g_window_records[level->bar.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
         }
-        switch (level->list_window.entries[level->list_window.selected_entry]) {
+        switch (level->bar.entries[level->bar.selected_entry]) {
         case BAR_ROW_RUMORS:
             message_block_load_if_changed(MESSAGE_BLOCK_RUMORS);
             bar_suspend_level(level);
@@ -156,7 +156,7 @@ void bar_handle_input(menu_stack_record_t* level) {
         case BAR_ROW_LEAVE:
             g_bar_saved_cursor = 0;
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
-            level->list_window.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
+            level->bar.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
             g_window_record_count -= 2;
             g_window_render_record_count -= 1;
             g_window_render_object_count -= 3;
@@ -166,29 +166,29 @@ void bar_handle_input(menu_stack_record_t* level) {
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
-        if (level->list_window.selected_entry != 0) {
-            g_window_records[level->list_window.main_window].position.y -= 0x10;
-            level->list_window.selected_entry--;
+        if (level->bar.selected_entry != 0) {
+            g_window_records[level->bar.cursor_window].position.y -= 0x10;
+            level->bar.selected_entry--;
         } else {
-            g_window_records[level->list_window.main_window].position.y += (level->list_window.entry_count - 1) * 0x10;
-            level->list_window.selected_entry = level->list_window.entry_count - 1;
+            g_window_records[level->bar.cursor_window].position.y += (level->bar.entry_count - 1) * 0x10;
+            level->bar.selected_entry = level->bar.entry_count - 1;
         }
     } else if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        if (level->list_window.selected_entry < level->list_window.entry_count - 1) {
-            g_window_records[level->list_window.main_window].position.y += 0x10;
-            level->list_window.selected_entry++;
+        if (level->bar.selected_entry < level->bar.entry_count - 1) {
+            g_window_records[level->bar.cursor_window].position.y += 0x10;
+            level->bar.selected_entry++;
         } else {
-            g_window_records[level->list_window.main_window].position.y -= (level->list_window.entry_count - 1) * 0x10;
-            level->list_window.selected_entry = 0;
+            g_window_records[level->bar.cursor_window].position.y -= (level->bar.entry_count - 1) * 0x10;
+            level->bar.selected_entry = 0;
         }
     } else {
         return;
     }
 
     sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-    if (level->list_window.content_render != 0) {
+    if (level->bar.restore_welcome != 0) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
-        level->list_window.content_render = 0;
+        level->bar.restore_welcome = 0;
     }
 }
 
@@ -246,17 +246,15 @@ static void rumor_open_list(void) {
         window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
     } else {
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].palette
-            = g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.second_window].palette
-            = g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.render_index]
-                  .palette = 0;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].sequence
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].palette
+            = g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.label_window].palette
+            = g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].palette = 0;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].sequence
             = WINDOW_ANIM_CURSOR_IDLE;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].frame_index
-            = g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window]
-                  .anim_counter = 0;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].frame_index
+            = g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].anim_counter = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_RUMORS, 0);
-        g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.panel_rows = 1;
+        g_menu_stack_records[g_menu_stack_depth - 1].bar.restore_welcome = 1;
         return;
     }
 
@@ -365,17 +363,13 @@ static void rumor_push_detail_level(s32 value) {
     g_text_window.text_substitutions[0] = -1;
     text_window_open(&g_text_window);
     depth = g_menu_stack_depth;
-    g_window_records[g_menu_stack_records[depth - 1].window_pair_render.first_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_menu_stack_records[depth].rumor_detail.first_window
-        = g_menu_stack_records[depth - 1].window_pair_render.first_window;
-    g_window_records[g_menu_stack_records[depth - 1].window_pair_render.second_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_menu_stack_records[depth].rumor_detail.second_window
-        = g_menu_stack_records[depth - 1].window_pair_render.second_window;
-    g_window_gs_image_records[g_menu_stack_records[depth - 1].window_pair_render.render_index].flags
-        |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_menu_stack_records[depth].rumor_detail.first_window = g_menu_stack_records[depth - 1].bar.cursor_window;
+    g_window_records[g_menu_stack_records[depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_menu_stack_records[depth].rumor_detail.second_window = g_menu_stack_records[depth - 1].bar.label_window;
+    g_window_gs_image_records[g_menu_stack_records[depth - 1].bar.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
-    g_menu_stack_records[depth].rumor_detail.render_index
-        = g_menu_stack_records[depth - 1].window_pair_render.render_index;
+    g_menu_stack_records[depth].rumor_detail.render_index = g_menu_stack_records[depth - 1].bar.rows_image;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_RUMOR_DETAIL;
 }
 
@@ -423,22 +417,21 @@ void proposition_open_available_list(void) {
     display_object_animated_t* record;
     s32 record_index;
 
-    if (g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
+    if (g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
         & DISPLAY_OBJECT_HIDDEN) {
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.main_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.side_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        bar_build_rows(&g_menu_stack_records[g_menu_stack_depth - 1].list_window);
+        bar_build_rows(&g_menu_stack_records[g_menu_stack_depth - 1].bar);
         bar_suspend_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
-        index = g_menu_stack_records[g_menu_stack_depth - 1].list_window.main_window;
+        index = g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window;
         record = &g_window_records[index];
         record->anim_counter = 0;
         record->frame_index = 0;
         g_window_records[index].sequence = WINDOW_ANIM_CURSOR_STILL;
-        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].list_window.frame_render].flags
+        g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
             |= DISPLAY_OBJECT_POP_IN;
     }
 
@@ -472,7 +465,7 @@ void proposition_open_available_list(void) {
     } else {
         menu_stack_dispatch_resume();
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_PROPOSITIONS, 0);
-        g_menu_stack_records[g_menu_stack_depth - 1].list_window.content_render = 1;
+        g_menu_stack_records[g_menu_stack_depth - 1].bar.restore_welcome = 1;
         return;
     }
 
@@ -557,12 +550,9 @@ void proposition_handle_available_list_input(menu_stack_record_t* level) {
                 + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
             & PROPOSITION_VARIABLE_ATTEMPTED) {
             depth = g_menu_stack_depth;
-            g_window_records[g_menu_stack_records[depth - 2].window_pair_render.first_window].flags
-                |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[g_menu_stack_records[depth - 2].window_pair_render.second_window].flags
-                |= DISPLAY_OBJECT_HIDDEN;
-            g_window_gs_image_records[g_menu_stack_records[depth - 2].window_pair_render.render_index].flags
-                |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[g_menu_stack_records[depth - 2].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[g_menu_stack_records[depth - 2].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[g_menu_stack_records[depth - 2].bar.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TOLD_BEFORE, 0);
             level->panel.result = 2;
             return;
@@ -609,10 +599,9 @@ void proposition_push_detail_level(s32 value) {
     depth = g_menu_stack_depth;
     base->x = -0x7A;
     base->y = -0x28;
-    g_window_records[g_menu_stack_records[depth - 1].window_pair_render.first_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].window_pair_render.second_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[depth - 1].window_pair_render.render_index].flags
-        |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[depth - 1].bar.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_PROPOSITION_DETAIL;
 }
