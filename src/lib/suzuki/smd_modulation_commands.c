@@ -4,6 +4,25 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+/* Vibrato, tremolo and pan-LFO operands with a start delay. */
+typedef struct suzuki_smd_modulator_parameters {
+    u8 speed;
+    s8 depth;
+    u8 delay;
+} suzuki_smd_modulator_parameters_t;
+typedef char suzuki_smd_modulator_parameters_size_must_be_3[sizeof(suzuki_smd_modulator_parameters_t) == 3 ? 1 : -1];
+
+/* Vibrato, tremolo and pan-LFO waveform operands. */
+typedef struct suzuki_smd_waveform_parameters {
+    u8 speed;
+    s8 depth;
+    u8 waveform_flags; /* low four bits: waveform; bit 4: no restart on key-on */
+} suzuki_smd_waveform_parameters_t;
+typedef char suzuki_smd_waveform_parameters_size_must_be_3[(sizeof(suzuki_smd_waveform_parameters_t) == 3) ? 1 : -1];
+
+/* Encoded waveform byte of the D9, E5, ED and F0 SMD opcodes. */
+enum { SUZUKI_MODULATOR_INPUT_WAVEFORM_MASK = 0x0f, SUZUKI_MODULATOR_INPUT_NO_KEY_ON_RESTART = 0x10 };
+
 /* SMD opcode 0xD0 "Pitch Offset": sets the channel pitch offset from a
  * signed byte in 1/8 semitone units. */
 u8* suzuki_smd_pitch_offset(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
