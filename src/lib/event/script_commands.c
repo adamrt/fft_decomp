@@ -79,7 +79,7 @@ void sound_background_thread(void) {
     if (volume == 0) {
         volume = 1;
     }
-    sound_set_sfx_echo(sound_id | resource, volume);
+    sound_set_sfx_volume(sound_id | resource, volume);
     sound_background_fade_thread();
 }
 
@@ -126,11 +126,11 @@ void sound_background_fade_thread(void) {
                 volume = 1;
             }
             scaled += delta;
-            sound_set_sfx_echo(sound_id + resource, volume);
+            sound_set_sfx_volume(sound_id + resource, volume);
             step++;
         } while (step < steps);
     }
-    sound_set_sfx_echo(sound_id | resource, volume_to);
+    sound_set_sfx_volume(sound_id | resource, volume_to);
     thread_exit_current();
 }
 

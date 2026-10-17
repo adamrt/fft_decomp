@@ -2265,7 +2265,7 @@ static void debug_push_party_number_level(void) {
 
 /* Step of the debug party number panel: Circle or Cross closes it, and once
  * the panel thread has ended a confirmed number below 0x200 is loaded with
- * encounter_init_event_units and the roster names are rebuilt.
+ * encounter_init_party and the roster names are rebuilt.
  *
  * The panel result is 0 while waiting, 1 on confirm and -1 on cancel. */
 void debug_step_party_number_level(menu_stack_record_t* level) {
@@ -2277,7 +2277,7 @@ void debug_step_party_number_level(menu_stack_record_t* level) {
         g_menu_stack_depth--;
         if (level->panel.result == 1) {
             if (g_window_panel_value < 0x200) {
-                encounter_init_event_units(g_window_panel_value);
+                encounter_init_party(g_window_panel_value);
                 formation_build_roster_names();
                 g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
             }

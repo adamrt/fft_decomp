@@ -1143,7 +1143,7 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             g_window_render_object_count -= 5;
             g_menu_stack_depth--;
             fade->flags[0] = (fade->flags[0] & ~WORLD_MAP_FADE_BOX_VISIBLE) | WORLD_MAP_FADE_OUT;
-            sound_stop_weather_music();
+            sound_stop_all_sfx();
             suzuki_sound_remove_resource(g_sound_novel_sound_resource);
             sound_novel_reset_selected_reading(g_sound_novel_selected);
             g_sound_novel_countdown_frames = 0;
@@ -1235,7 +1235,7 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
         }
         audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x20);
-        sound_stop_weather_music();
+        sound_stop_all_sfx();
         level->sound_novel.phase = SOUND_NOVEL_PHASE_END;
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         if (!(*state_flags & SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
@@ -1488,7 +1488,7 @@ void sound_novel_step_quit_level(menu_stack_record_t* level) {
                 screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
             }
             audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x20);
-            sound_stop_weather_music();
+            sound_stop_all_sfx();
             sound_play_effect(SOUND_SFX_CONFIRM);
             return;
         }

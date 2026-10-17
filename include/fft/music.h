@@ -49,11 +49,11 @@ void music_unload_scenario_and_tunes(void);
 /* playback */
 suzuki_music_t* music_get_handle(s32 slot);
 suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade);
-s32 music_get_current_scenario(void);
+s32 music_get_current_slot(void);
 void music_set_track(s32 music_id);
 s32 music_set_target(s32 volume, s32 time);
 s32 music_set_volume(s32 volume, s32 time);
-s32 music_set_volume_timed(s32 time);
+s32 music_restore_volume(s32 time);
 s32 music_set_balance_shift_timed(s32 value, s32 time);
 s32 music_set_pitch_shift_timed(s32 value, s32 time);
 s32 music_set_tempo_scale_timed(s32 value, s32 time);

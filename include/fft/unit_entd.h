@@ -8,13 +8,13 @@
 #include "psx/types.h"
 
 /* Each ENTD#.ENT file holds 128 encounters of 16 entries; an ENTD id at or
- * above ENTDn_FIRST_EVENT is in file n. */
+ * above ENTDn_FIRST_ENCOUNTER is in file n. */
 enum {
     ENTD_UNITS_PER_ENCOUNTER = 16,
     ENTD_ENCOUNTERS_PER_FILE = 128,
-    ENTD2_FIRST_EVENT = ENTD_ENCOUNTERS_PER_FILE,
-    ENTD3_FIRST_EVENT = 2 * ENTD_ENCOUNTERS_PER_FILE,
-    ENTD4_FIRST_EVENT = 3 * ENTD_ENCOUNTERS_PER_FILE,
+    ENTD2_FIRST_ENCOUNTER = ENTD_ENCOUNTERS_PER_FILE,
+    ENTD3_FIRST_ENCOUNTER = 2 * ENTD_ENCOUNTERS_PER_FILE,
+    ENTD4_FIRST_ENCOUNTER = 3 * ENTD_ENCOUNTERS_PER_FILE,
 };
 
 /* The ENTD slots precede the five deployed-party slots in battle storage. */

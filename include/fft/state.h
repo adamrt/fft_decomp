@@ -23,7 +23,7 @@ typedef enum game_state {
     GAME_STATE_DISPLAY_MOVE_AREA = 7,
     GAME_STATE_MINI_MENU = 8,
     GAME_STATE_MINI_MENU_HELP = 9,
-    GAME_STATE_ACTIVE_TURN = 10,
+    GAME_STATE_AT_LIST_INSPECTION = 10,
     GAME_STATE_STATUS_EXECUTE = 11,
     GAME_STATE_UNIT_MOVE = 12,
     GAME_STATE_SELECT_MOVE_TILE = 13,
@@ -106,7 +106,7 @@ void state_handle_action_help_menu(void);
 void state_handle_display_move_area(void);
 void state_handle_mini_menu(void);
 void state_handle_mini_menu_help(void);
-void state_handle_active_turn(void);
+void state_handle_at_list_inspection(void);
 void state_handle_status_execute(void);
 void state_handle_unit_move(void);
 void state_handle_select_move_tile(void);

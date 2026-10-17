@@ -503,7 +503,7 @@ static s32 effect_update_stage(void) {
             result = 1;
         } else {
             if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
-                music_set_volume_timed(0x78);
+                music_restore_volume(0x78);
             }
             if (g_effect_sound_section_ptr != 0) {
                 suzuki_sound_remove_resource(g_effect_sound_section_ptr);

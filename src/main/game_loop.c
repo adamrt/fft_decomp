@@ -96,7 +96,7 @@ static void system_run_game_loop(void) {
 
             overlay_exec_battle();
             battle_entrypoint();
-            sound_stop_weather_music();
+            sound_stop_all_sfx();
             g_system_go_straight_to_battle = 0;
 
             if (g_game_flow_state == SYSTEM_GAME_FLOW_RESET) {
@@ -106,7 +106,7 @@ static void system_run_game_loop(void) {
         } while (g_game_flow_state != SYSTEM_GAME_FLOW_ENDING);
 
         if (g_game_flow_state == SYSTEM_GAME_FLOW_ENDING) {
-            sound_stop_weather_music();
+            sound_stop_all_sfx();
             music_unload_scenario_and_tunes();
             script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_MALAK_REVIVED);

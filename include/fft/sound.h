@@ -178,11 +178,11 @@ extern s32 g_sound_weather_sfx_id; /* the background sound sound_play_background
 void sound_open_generic_sfx(void);
 void sound_play_sfx(s32 sound_id);
 void sound_play_sfx_on_free_channel(s32 sound_id);
-void sound_set_sfx_echo(int sound_id, int volume);
+void sound_set_sfx_volume(int sound_id, int volume);
 void sound_play_background(s32 sound_id);
 void sound_replay_background(void);
 void sound_stop_weather(void);
-void sound_stop_weather_music(void);
+void sound_stop_all_sfx(void);
 
 /* battle_map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
 void sound_stop_sfx(int sound_id);

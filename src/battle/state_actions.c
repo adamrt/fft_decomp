@@ -1200,9 +1200,9 @@ void state_handle_mini_menu_help(void) {
     menu_update_menus_and_event_speed(gfx_get_battle_otag(), g_input_current_buttons);
 }
 
-/* ActiveTurn game-state handler, the view of a unit picked from the AT list:
- * circle or cross returns to the mini menu. */
-void state_handle_active_turn(void) {
+/* Inspect the unit or charged action selected from the AT List.
+ * Circle or Cross returns to the mini menu. */
+void state_handle_at_list_inspection(void) {
     s32 controller_input = g_input_pressed_buttons;
 
     if ((controller_input & PSX_PAD_CIRCLE) || (controller_input & PSX_PAD_CROSS)) {

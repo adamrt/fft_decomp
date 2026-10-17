@@ -133,26 +133,26 @@ void boot_reset_game_state(void) {
     g_boot_startup2_has_run = 1;
 }
 
-/* Start loading the ENTD file that holds g_encounter_current_event_id into a new
- * 0x14000-byte heap block (g_encounter_set). The four files cover 128 events
+/* Start loading the ENTD file that holds g_encounter_current_id into a new
+ * 0x14000-byte heap block (g_encounter_set). The four files cover 128 encounters
  * each.
  *
- * Returns 1 once the read is queued, and also for event 0, which loads nothing.
+ * Returns 1 once the read is queued, and also for encounter 0, which loads nothing.
  * Returns 0 with the block freed when the loader is busy; the caller retries. */
 int encounter_open_file(void) {
     int lba;
     entd_file_t* entd_set;
 
-    if (g_encounter_current_event_id != 0) {
-        if (g_encounter_current_event_id < ENTD2_FIRST_EVENT) {
+    if (g_encounter_current_id != 0) {
+        if (g_encounter_current_id < ENTD2_FIRST_ENCOUNTER) {
             entd_set = heap_alloc(sizeof(entd_file_t));
             g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD1_ENT;
-        } else if (g_encounter_current_event_id < ENTD3_FIRST_EVENT) {
+        } else if (g_encounter_current_id < ENTD3_FIRST_ENCOUNTER) {
             entd_set = heap_alloc(sizeof(entd_file_t));
             g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD2_ENT;
-        } else if (g_encounter_current_event_id < ENTD4_FIRST_EVENT) {
+        } else if (g_encounter_current_id < ENTD4_FIRST_ENCOUNTER) {
             entd_set = heap_alloc(sizeof(entd_file_t));
             g_encounter_set = entd_set;
             lba = DISC_SECTOR_BATTLE_ENTD3_ENT;
@@ -170,37 +170,37 @@ int encounter_open_file(void) {
     return 1;
 }
 
-/* Return the current event's encounter in the loaded ENTD file: -1 when there
- * is no current event, NULL while the file is still loading. Event ids 0-127
+/* Return the selected encounter in the loaded ENTD file: -1 when there
+ * is no selected encounter, NULL while the file is still loading. Encounter ids 0-127
  * index the file directly; each further range of 128 ids (the last one
  * open-ended) indexes it from its own base. */
 entd_encounter_t* encounter_get_current(void) {
-    int* event_id = &g_encounter_current_event_id;
+    int* encounter_id = &g_encounter_current_id;
     int id;
 
-    if (*event_id == 0) {
+    if (*encounter_id == 0) {
         return (entd_encounter_t*)-1;
     }
     if (file_is_still_loading() == 0) {
-        id = *event_id;
-        if (id < ENTD2_FIRST_EVENT) {
+        id = *encounter_id;
+        if (id < ENTD2_FIRST_ENCOUNTER) {
             return &g_encounter_set->encounters[id];
         }
-        return &g_encounter_set->encounters[id < ENTD3_FIRST_EVENT ? id - ENTD2_FIRST_EVENT
-                : id < ENTD4_FIRST_EVENT                           ? id - ENTD3_FIRST_EVENT
-                                                                   : id - ENTD4_FIRST_EVENT];
+        return &g_encounter_set->encounters[id < ENTD3_FIRST_ENCOUNTER ? id - ENTD2_FIRST_ENCOUNTER
+                : id < ENTD4_FIRST_ENCOUNTER                           ? id - ENTD3_FIRST_ENCOUNTER
+                                                                       : id - ENTD4_FIRST_ENCOUNTER];
     }
     return 0;
 }
 
-/* Rebuild the party roster from an event's ENTD: load the ENTD file that holds
- * event_id (blocking), empty the roster, save each of the encounter's 16 unit
- * slots into it through party_save_encounter_unit, and free the file. */
-void encounter_init_event_units(int event_id) {
+/* Rebuild the party roster from an ENTD encounter: load its file (blocking),
+ * empty the roster, save its 16 unit slots through party_save_encounter_unit,
+ * and free the file. */
+void encounter_init_party(int encounter_id) {
     entd_encounter_t* entd;
     int unit_id;
 
-    g_encounter_current_event_id = event_id;
+    g_encounter_current_id = encounter_id;
     while (encounter_open_file() == 0) {
         VSync(0);
         file_poll_load(&g_file_cd_state);
@@ -253,13 +253,13 @@ void item_init_new_game_inventory(void) {
 
 enum {
     NEW_GAME_GENERATE_DEFAULT_UNIT = 0,
-    NEW_GAME_LOAD_EVENT_PARTY = 2,
-    STARTING_EVENT_ID = 254,
+    NEW_GAME_LOAD_ENCOUNTER_PARTY = 2,
+    STARTING_ENCOUNTER_ID = 254,
     STARTING_WAR_FUNDS = 2000,
 };
 
 /* Start a new roster: empty it, then generate Ramza alone (mode 0) or load the
- * party of event 254 from its ENTD (mode 2); any other mode leaves it empty. The
+ * party from ENTD encounter 254 (mode 2); any other mode leaves it empty. The
  * inventory is reset to the new-game stock and the war funds to 2000. */
 void party_init_new_game(int mode) {
     screen_init_with_world_text();
@@ -267,8 +267,8 @@ void party_init_new_game(int mode) {
 
     if (mode == NEW_GAME_GENERATE_DEFAULT_UNIT) {
         party_generate_unit(UNIT_TYPE_RAMZA);
-    } else if (mode == NEW_GAME_LOAD_EVENT_PARTY) {
-        encounter_init_event_units(STARTING_EVENT_ID);
+    } else if (mode == NEW_GAME_LOAD_ENCOUNTER_PARTY) {
+        encounter_init_party(STARTING_ENCOUNTER_ID);
     }
 
     item_init_new_game_inventory();

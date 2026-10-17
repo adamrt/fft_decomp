@@ -286,7 +286,7 @@ functions:
   - {addr: 0x80075690, size: 140, name: state_handle_display_move_area, hash: f23319301f4fc90a, unit: state_actions}
   - {addr: 0x8007571c, size: 168, name: state_handle_mini_menu, hash: c609e2316c1453b3, unit: state_actions}
   - {addr: 0x800757c4, size: 92, name: state_handle_mini_menu_help, hash: 6ccdad3da1b4b90e, unit: state_actions}
-  - {addr: 0x80075820, size: 92, name: state_handle_active_turn, hash: 8b2af7961766c4bb, unit: state_actions}
+  - {addr: 0x80075820, size: 92, name: state_handle_at_list_inspection, hash: 8b2af7961766c4bb, unit: state_actions}
   - {addr: 0x8007587c, size: 148, name: state_handle_unit_move, hash: ce9bf1ca8ddbfe03, unit: state_actions}
   - {addr: 0x80075910, size: 804, name: state_handle_select_move_tile, hash: 9a4e3078a30522c3, unit: state_actions}
   - {addr: 0x80075c34, size: 108, name: state_handle_move_range_exception, hash: 5d714643c1509bb6, unit: state_actions}

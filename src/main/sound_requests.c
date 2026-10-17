@@ -526,7 +526,7 @@ suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade) {
 
 /* Returns the slot of the current music (g_music.state.current_slot),
  * not a music id. */
-int music_get_current_scenario(void) {
+int music_get_current_slot(void) {
     return g_music.state.current_slot;
 }
 
@@ -541,7 +541,7 @@ int music_set_volume(int volume, int time) {
 }
 
 /* Fades the current music back to the remembered volume over time ticks. */
-int music_set_volume_timed(int time) {
+int music_restore_volume(int time) {
     if (g_music.state.current_music != 0) {
         suzuki_smd_set_music_volume(g_music.state.current_music, g_music.state.volume, time);
         return 1;
@@ -550,7 +550,7 @@ int music_set_volume_timed(int time) {
 }
 
 /* Fades the current music to volume over time ticks and remembers the
- * volume for music_set_volume_timed. */
+ * volume for music_restore_volume. */
 int music_set_target(int volume, int time) {
     if (g_music.state.current_music != 0) {
         g_music.state.volume = volume;
@@ -735,7 +735,7 @@ void sound_replay_background(void) {
 /* Sets the volume of the SFX channels playing sound_id: volume is the new
  * channel velocity, and 0 stops them (and forgets a remembered background
  * sound). */
-void sound_set_sfx_echo(int sound_id, int volume) {
+void sound_set_sfx_volume(int sound_id, int volume) {
     if (g_sound_weather_sfx_id == sound_id && volume == 0) {
         g_sound_weather_sfx_id = 0;
     }
@@ -744,7 +744,7 @@ void sound_set_sfx_echo(int sound_id, int volume) {
 
 /* Forgets the remembered background sound and silences every SFX channel.
  * It leaves the music alone. */
-void sound_stop_weather_music(void) {
+void sound_stop_all_sfx(void) {
     g_sound_weather_sfx_id = 0;
     suzuki_sound_stop_all_sfx();
 }

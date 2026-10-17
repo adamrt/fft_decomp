@@ -924,7 +924,7 @@ restart_script:
                 thread_yield();
             } while (!(first_operand & g_script_unfiltered_controller_input));
         } else if (opcode == EVENT_OPCODE_END_SOUND) {
-            sound_stop_weather_music();
+            sound_stop_all_sfx();
         }
         /* ---- Miscellaneous unit and display commands ---- */
         else if (opcode == EVENT_OPCODE_UNIT_SHADOW) {

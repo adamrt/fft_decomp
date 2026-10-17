@@ -548,7 +548,7 @@ void at_list_show_entry(s32 at_index) {
     unit_t* unit;
 
     camera_pan_disable();
-    g_game_state = GAME_STATE_ACTIVE_TURN;
+    g_game_state = GAME_STATE_AT_LIST_INSPECTION;
     id = at_list_get_entry_unit_id(at_index);
     if (id >= 0) {
         unit = unit_get_by_battle_id(id & AT_LIST_ENTRY_BATTLE_ID_MASK);

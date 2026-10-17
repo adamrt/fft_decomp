@@ -334,7 +334,7 @@ enum {
     SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(SOUND_RESOURCE_SOUND_NOVEL, 0),
 };
 
-/* Stops the weather sound and plays the row for sound_id from
+/* Stops all sound effects and plays the row for sound_id from
  * g_sound_novel_sound_quads: four sounds of the sound novel's
  * resource, one on each SFX channel pair. A zero byte selects that
  * resource's empty sound 0, which only stops its channel pair. */
@@ -342,17 +342,17 @@ static void sound_novel_play_sound_quad(s32 sound_id) {
     s32 values[SOUND_QUAD_COMMAND_COUNT];
     s32 i;
 
-    sound_stop_weather_music();
+    sound_stop_all_sfx();
     for (i = 0; i < SOUND_QUAD_COMMAND_COUNT; i++) {
         values[i] = g_sound_novel_sound_quads[sound_id - 1][i] + SOUND_QUAD_COMMAND_BASE;
     }
     suzuki_sound_play_4_sfx(values[0], values[1], values[2], values[3]);
 }
 
-/* Stop the weather sound and play environment sound `sound_id` as the
+/* Stop all sound effects and play environment sound `sound_id` as the
  * background sound. */
 static void sound_novel_play_background_sound(s32 sound_id) {
-    sound_stop_weather_music();
+    sound_stop_all_sfx();
     sound_play_background(sound_id + SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0));
 }
 
@@ -1043,7 +1043,7 @@ void sound_novel_opcode_2b_wait_for_circle_press(void) {
     }
 }
 
-/* Sound-novel opcode: stop the weather sound and play sound quad byte 1. A
+/* Sound-novel opcode: stop all sound effects and play sound quad byte 1. A
  * nonzero byte 2 also records the sound so a restored reading replays it. */
 void sound_novel_opcode_2c_play_sound_effect_quad(void) {
     char unused[8];
@@ -1057,9 +1057,9 @@ void sound_novel_opcode_2c_play_sound_effect_quad(void) {
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: stop the weather sound and clear the recorded sound. */
-void sound_novel_opcode_2d_stop_weather_sound(void) {
-    sound_stop_weather_music();
+/* Sound-novel opcode: stop all sound effects and clear the recorded sound. */
+void sound_novel_opcode_2d_stop_sound_effects(void) {
+    sound_stop_all_sfx();
     g_sound_novel_reading.sound_id = 0;
     g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -1077,7 +1077,7 @@ void sound_novel_opcode_2e_start_countdown_timer(void) {
     g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
-/* Sound-novel opcode: stop the weather sound and play environment sound
+/* Sound-novel opcode: stop all sound effects and play environment sound
  * operand 0 as the background sound. A nonzero operand 1 also records the
  * sound, flagged 0x4000, so a restored reading replays it. */
 void sound_novel_opcode_2f_play_background_sound(void) {
@@ -1229,7 +1229,7 @@ static void (*g_sound_novel_opcode_handlers[54])(void) = {
     sound_novel_opcode_2a_set_white_screen_overlay,
     sound_novel_opcode_2b_wait_for_circle_press,
     sound_novel_opcode_2c_play_sound_effect_quad,
-    sound_novel_opcode_2d_stop_weather_sound,
+    sound_novel_opcode_2d_stop_sound_effects,
     sound_novel_opcode_2e_start_countdown_timer,
     sound_novel_opcode_2f_play_background_sound,
     sound_novel_opcode_30_set_master_volume,

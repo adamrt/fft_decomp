@@ -358,7 +358,7 @@ functions:
   - {addr: 0x8008c638, size: 296, name: sound_novel_opcode_2a_set_white_screen_overlay, hash: 17b4c8d72f648c79, unit: sound_novel}
   - {addr: 0x8008c760, size: 76, name: sound_novel_opcode_2b_wait_for_circle_press, hash: dca9f61e27799116, unit: sound_novel}
   - {addr: 0x8008c7ac, size: 92, name: sound_novel_opcode_2c_play_sound_effect_quad, hash: 4ea403ff52255127, unit: sound_novel}
-  - {addr: 0x8008c808, size: 60, name: sound_novel_opcode_2d_stop_weather_sound, hash: e8da89e16ef4faf7, unit: sound_novel}
+  - {addr: 0x8008c808, size: 60, name: sound_novel_opcode_2d_stop_sound_effects, hash: e8da89e16ef4faf7, unit: sound_novel}
   - {addr: 0x8008c844, size: 84, name: sound_novel_opcode_2e_start_countdown_timer, hash: 1301853f97b18d7f, unit: sound_novel}
   - {addr: 0x8008c898, size: 96, name: sound_novel_opcode_2f_play_background_sound, hash: 5a43066da8004887, unit: sound_novel}
   - {addr: 0x8008c8f8, size: 112, name: sound_novel_opcode_30_set_master_volume, hash: f09c779a64e008de, unit: sound_novel}

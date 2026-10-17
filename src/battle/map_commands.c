@@ -343,23 +343,23 @@ extern volatile s32 g_encounter_selection_mode;
  * g_encounter_selection_mode overrides it: 250, a random id 75..79, a random id
  * 1..59, or the map id when that is not 0. Returns encounter_open_file's result. */
 static s32 unit_entd_select_and_open(void) {
-    volatile s32* current_event_id;
-    s32 event_id;
+    volatile s32* current_encounter_id;
+    s32 encounter_id;
     s32 selection_mode;
 
-    event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD);
+    encounter_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD);
     selection_mode = g_encounter_selection_mode;
-    current_event_id = &g_encounter_current_event_id;
-    *current_event_id = event_id;
+    current_encounter_id = &g_encounter_current_id;
+    *current_encounter_id = encounter_id;
 
     if (selection_mode == UNIT_ENTD_SELECTION_ENTD_250) {
-        *current_event_id = 250;
+        *current_encounter_id = 250;
     } else if (selection_mode == UNIT_ENTD_SELECTION_RANDOM_75_TO_79) {
-        *current_event_id = (rand() * 5) / 0x8000 + 75;
+        *current_encounter_id = (rand() * 5) / 0x8000 + 75;
     } else if (selection_mode == UNIT_ENTD_SELECTION_RANDOM_1_TO_59) {
-        *current_event_id = (rand() * 59) / 0x8000 + 1;
+        *current_encounter_id = (rand() * 59) / 0x8000 + 1;
     } else if ((selection_mode == UNIT_ENTD_SELECTION_MAP_ID) && (g_battle_map_id != 0)) {
-        *current_event_id = g_battle_map_id;
+        *current_encounter_id = g_battle_map_id;
     }
 
     return encounter_open_file();

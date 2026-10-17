@@ -285,8 +285,8 @@ void battle_entrypoint(void) {
             case GAME_STATE_MINI_MENU_HELP:
                 state_handle_mini_menu_help();
                 break;
-            case GAME_STATE_ACTIVE_TURN:
-                state_handle_active_turn();
+            case GAME_STATE_AT_LIST_INSPECTION:
+                state_handle_at_list_inspection();
                 break;
             case GAME_STATE_AFTER_COMMAND:
                 state_handle_after_command();

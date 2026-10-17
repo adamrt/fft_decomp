@@ -173,7 +173,7 @@ typedef enum event_opcode {
     EVENT_OPCODE_MIRROR_SPRITE = 0x68,              /* 3: unit id (u16), flag (1 mirrors, else restores) */
     /* 8: unit group (u16), x, y, unread, rotate mode, speed index, delay */
     EVENT_OPCODE_FACE_TILE = 0x69,
-    /* The next two ramp sound_set_sfx_echo's value from the start level to the end level, one step a frame. */
+    /* The next two ramp the background sound volume from the start level to the end level, one step a frame. */
     EVENT_OPCODE_EDIT_BG_SOUND = 0x6a, /* 5: sound id, start level, end level, unread, frames */
     EVENT_OPCODE_BG_SOUND = 0x6b,      /* 5: sound id, start level, end level, find-channel flag, frames */
     EVENT_OPCODE_RESUME_UNIT_PALETTE_UPDATES = 0x6c,   /* 2: unit group (u16) */
