@@ -53,7 +53,7 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
             index = first + count - cell;
             g_menu_draw_area_template.y += *(u16*)&g_deploy_slot_offsets[group];
             gfx_set_scaled_poly_ft4_4bpp(poly, g_unit_panel_editor_numeric_geometry, &g_menu_draw_area_template,
-                &g_unit_panel_status_uv_rects[index], &g_unit_panel_status_scales[index],
+                &g_unit_panel_status_frames[index - 1], &g_unit_panel_status_frame_scales[index - 1],
                 &g_unit_panel_status_offsets[group]);
             g_menu_draw_area_template.y -= *(u16*)&g_deploy_slot_offsets[group];
             if (g_unit_panel_status_animation[group] == 0x40) {

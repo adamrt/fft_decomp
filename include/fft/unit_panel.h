@@ -193,6 +193,11 @@ void unit_panel_select_palette(menu_palette_primitives_t* primitives, const unit
 void unit_panel_set_colors(unit_panel_buffer_t* primitives, const unit_panel_thread_t* state);
 
 /* status icons */
+/* ATTACK, DEBUGCHR and REQUIRE each define 76 status cells.
+ * Group boundaries select spans drawn in reverse order. */
+extern sprite_sheet_frame_t g_unit_panel_status_frames[76];
+extern point16_t g_unit_panel_status_frame_scales[76];
+
 /* ATTACK's status groups, drawn by its own unit_panel_build_status_groups: per-sprite first/end cell indices
  * (interleaved pairs), the visible-entry count, each entry's sprite id and fade/blink state, and a 4-byte record per
  * entry whose first 16-bit value biases the draw point's y. */
@@ -201,8 +206,6 @@ extern u8 g_unit_panel_status_group_count;
 extern u8 g_unit_panel_status_group_ids[];
 extern u8 g_unit_panel_status_animation[];
 extern sprite_draw_offset_t g_unit_panel_status_offsets[];
-extern point16_t g_unit_panel_status_scales[];
-extern sprite_sheet_frame_t g_unit_panel_status_uv_rects[];
 
 /* The status groups the menu library's unit_panel_build_status_groups draws in DEBUGCHR and REQUIRE. Each animated
  * group has a countdown byte in g_unit_panel_panel_status_animation; 0xff marks an inactive group. */
@@ -211,8 +214,6 @@ extern u8 g_unit_panel_panel_status_group_count;
 extern u8 g_unit_panel_panel_status_group_ids[];
 extern u8 g_unit_panel_panel_status_group_bounds[];
 extern sprite_draw_offset_t g_unit_panel_panel_status_offsets[];
-extern point16_t g_unit_panel_panel_status_scales[];
-extern sprite_sheet_frame_t g_unit_panel_panel_status_uv_rects[];
 extern const u16 g_unit_panel_panel_status_y_offsets[];
 
 void unit_panel_build_status_groups(POLY_FT4* poly);

@@ -209,8 +209,8 @@ data:
   - {addr: 0x801cd2b4, name: g_deploy_text_roster_unit_names_offset}
   - {addr: 0x801cd2b8, name: g_deploy_text_job_names_offset}
   - {addr: 0x801cd330, name: g_text_data}
-  - {addr: 0x801cf10c, name: g_unit_panel_status_uv_rects}
-  - {addr: 0x801cf4a4, name: g_unit_panel_status_scales}
+  - {addr: 0x801cf118, name: g_unit_panel_status_frames}
+  - {addr: 0x801cf4a8, name: g_unit_panel_status_frame_scales}
   - {addr: 0x801cf5d8, name: g_unit_panel_status_group_bounds}
   - {addr: 0x801cf5e7, name: g_unit_panel_status_group_count}
   - {addr: 0x801cf5e8, name: g_unit_panel_status_group_ids}
@@ -1289,8 +1289,8 @@ data:
   - {addr: 0x801c5ee4, name: g_unit_editor_nonmonster_field_ranges}
   - {addr: 0x801c5f94, name: g_unit_editor_monster_field_ranges}
   - {addr: 0x801c6044, name: g_unit_editor_fields}
-  - {addr: 0x801c6198, name: g_unit_panel_panel_status_uv_rects}
-  - {addr: 0x801c6530, name: g_unit_panel_panel_status_scales}
+  - {addr: 0x801c61a4, name: g_unit_panel_status_frames}
+  - {addr: 0x801c6534, name: g_unit_panel_status_frame_scales}
   - {addr: 0x801c6664, name: g_unit_panel_panel_status_group_bounds}
   - {addr: 0x801c6673, name: g_unit_panel_panel_status_group_count}
   - {addr: 0x801c6674, name: g_unit_panel_panel_status_group_ids}
@@ -2508,8 +2508,8 @@ data:
   - {addr: 0x801d00b8, name: g_zodiac_texture_page_origin}
   - {addr: 0x801d00e0, name: g_after_battle_join_menu_descriptor}
   - {addr: 0x801d0158, name: g_party_removal_menus}
-  - {addr: 0x801d02f0, name: g_unit_panel_panel_status_uv_rects}
-  - {addr: 0x801d0688, name: g_unit_panel_panel_status_scales}
+  - {addr: 0x801d02fc, name: g_unit_panel_status_frames}
+  - {addr: 0x801d068c, name: g_unit_panel_status_frame_scales}
   - {addr: 0x801d07bc, name: g_unit_panel_panel_status_group_bounds}
   - {addr: 0x801d07cb, name: g_unit_panel_panel_status_group_count}
   - {addr: 0x801d07cc, name: g_unit_panel_panel_status_group_ids}
