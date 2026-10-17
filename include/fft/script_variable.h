@@ -8,7 +8,9 @@
 #include "psx/types.h"
 
 /* variables */
-/* Event-script variable ids shared by the BATTLE and WORLD interpreters.
+/* Logical ids shared by the BATTLE and WORLD interpreters: 0x000-0x07f
+ * address 32-bit values, 0x080-0x35f packed bits, and 0x360-0x3ff packed
+ * four-bit values. These are not uniform byte offsets into the backing bank.
  * The calendar and location ids are also serialized into the memory-card
  * slot description by save_build_image. */
 typedef enum event_script_variable_id {
@@ -251,7 +253,8 @@ extern s32* g_script_variables;
 /* Suppress recursive write filtering while getters use comparison variable 0. */
 extern u8 g_script_variable_write_guard;
 
-/* The script variables: 32-bit values first (event_script_variable_id_e), then the packed flags. */
+/* Resident 1,024-byte bank: 128 words, 736 packed bits and 160 packed nibbles
+ * occupy the first 684 bytes. Save images also preserve the remaining bytes. */
 extern s32 g_script_variable_storage[0x100];
 
 void script_set_variable(s32 variable_id, s32 value);

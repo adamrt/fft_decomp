@@ -170,10 +170,9 @@ extern s8 g_save_slot_scan_index;
 extern s8 g_save_format_delay_counter;
 extern u8 g_save_write_failed;
 
-/* Encoded description text per memory-card slot: CARD keeps two lines of 80
- * bytes for each slot, WORLD 140 bytes. */
+/* Encoded two-line description per save slot: CARD reserves 80 bytes, WORLD 140. */
 #ifdef FFT_WORLD
-extern u8 g_save_slot_descriptions[][0x8C];
+extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x8C];
 #else
 extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x50];
 #endif

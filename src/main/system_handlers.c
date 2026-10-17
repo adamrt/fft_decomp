@@ -82,10 +82,9 @@ void save_init_state_and_options(void) {
     g_game_options.value = value;
 }
 
-/* Return 0 either way: with script variable 0xff set it calls BATTLE.BIN's script_return_zero_1,
- * which also returns 0. Nothing calls it. */
+/* Uncalled return-zero wrapper; the resident bank's raw word 0xff gates the
+ * BATTLE call. This word is distinct from logical script variable 0xff. */
 int overlay_call_battle_return_zero(void) {
-    /* Script variable 0xff gates the BATTLE call. */
     if (g_script_variable_storage[0xff] == 0) {
         return 0;
     }
