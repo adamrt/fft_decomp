@@ -691,7 +691,7 @@ s32 effect_particle_spawn_from_emitter(
     SVECTOR tile_anchor;
     const effect_geometry_record_t* entry;
     effect_work_record_t* particle;
-    SVECTOR* unit_coords;
+    const SVECTOR* unit_coords;
     s32 time;
     s32 selector;
     u16 inertia_binding;

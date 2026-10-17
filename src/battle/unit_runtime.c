@@ -52,7 +52,7 @@ s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount) {
 
 /* The unit's event offset (moved by unit_add_event_offset_by_runtime_id). A missing unit
  * raises a pointer exception and returns 0. */
-SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id) {
+const SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {

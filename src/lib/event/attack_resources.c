@@ -792,7 +792,7 @@ void script_opcode_97_reset_palette(const event_unit_parameters_t* parameters) {
 void script_opcode_70_jump(const event_jump_parameters_t* parameters) {
     SVECTOR vec;
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
-    SVECTOR* coords;
+    const SVECTOR* coords;
     unit_stats_t* stats;
     u8 saved;
 

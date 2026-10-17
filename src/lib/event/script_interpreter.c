@@ -462,7 +462,7 @@ static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s3
     /* Indexed destination fields change allocation and shorten the target by four bytes. */
     const u8* parameters;
     s32 mode;
-    SVECTOR* coords;
+    const SVECTOR* coords;
     s32 runtime_id;
     s32 weight;
     s32 curve;

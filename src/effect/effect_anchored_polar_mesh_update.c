@@ -49,16 +49,16 @@ typedef struct effect_anchored_polar_mesh_scratch {
     u8 _unused_0b8[0x18];
     s32 target_index; /* 0xd0 */
     u8 _unused_0d4[0x14];
-    s32 radius;            /* 0xe8 */
-    s32 radius_step;       /* 0xec */
-    s32 radius_step_delta; /* 0xf0 */
-    s32 angle;             /* 0xf4 */
-    s32 angle_step;        /* 0xf8 */
-    s32 angle_step_delta;  /* 0xfc */
-    s32 ot_depth;          /* 0x100 */
-    SVECTOR position;      /* 0x104 */
-    SVECTOR* unit_coords;  /* 0x10c */
-    VECTOR screen;         /* 0x110; RotTrans stores flags in the unused fourth 32-bit value */
+    s32 radius;                 /* 0xe8 */
+    s32 radius_step;            /* 0xec */
+    s32 radius_step_delta;      /* 0xf0 */
+    s32 angle;                  /* 0xf4 */
+    s32 angle_step;             /* 0xf8 */
+    s32 angle_step_delta;       /* 0xfc */
+    s32 ot_depth;               /* 0x100 */
+    SVECTOR position;           /* 0x104 */
+    const SVECTOR* unit_coords; /* 0x10c */
+    VECTOR screen;              /* 0x110; RotTrans stores flags in the unused fourth 32-bit value */
     point16_t points[POLAR_MESH_RING_COUNT + 1][POLAR_MESH_SEGMENTS_PER_QUADRANT + 1]; /* 0x120 */
 } effect_anchored_polar_mesh_scratch_t;
 

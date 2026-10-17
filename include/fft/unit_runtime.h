@@ -446,7 +446,7 @@ s32 unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 map_z, u8 facin
 s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords);
 void unit_copy_draw_coords(SVECTOR* destination, const unit_t* runtime);
-SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
+const SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
 s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 
 /* encounters and deployment */
