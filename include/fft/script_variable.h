@@ -95,8 +95,8 @@ typedef enum event_script_variable_id {
     /* Scaled by 10 and added to the TEXT_SET_VARIABLE_BASE variable by
      * TEXT_STORE_VARIABLE, which then clears it. */
     EVENT_SCRIPT_VAR_TEXT_STORE_INDEX = 0x66,
-    /* Incremented each March 21 and by whole years of advanced days, capped
-     * at 99. */
+    /* Daily advance increments this on March 21, capped at 99. Multi-day
+     * advance adds whole years and year-end crossings without a cap. */
     EVENT_SCRIPT_VAR_UNKNOWN_67 = 0x67,
     EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT = 0x68,
     /* WLDCORE also uses this value to select the current-location marker's

@@ -13,7 +13,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Signed halfword indices into unit_list_record_t. The twelfth entry selects maximum CT,
+/* Signed byte indices into unit_list_record_t's halfwords. The twelfth entry selects maximum CT,
  * but the Reorder menu exposes only the first eleven. */
 extern s8 g_unit_list_sort_field_indices[12];
 
@@ -152,7 +152,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     record->gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
 
     record->formation_index = unit->formation_index;
-    /* The ENTD slot also serves as the record's name index and battle id. */
+    /* The active battle slot also serves as the record's name index and battle id. */
     record->name_index = unit->active_battle_id;
     record->job_id = unit->job_id;
     record->brave = unit->brave;
