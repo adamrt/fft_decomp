@@ -97,7 +97,6 @@ typedef struct equipment_unit_preview {
 } equipment_unit_preview_t;
 typedef char equipment_unit_preview_size_must_be_122[(sizeof(equipment_unit_preview_t) == 122) ? 1 : -1];
 
-extern equipment_unit_preview_t g_equipment_unit_records[];
 extern u8 g_equipment_unit_selected_index;
 extern s16 g_equipment_unit_initial_equipment[];
 extern s16 g_equipment_unit_saved_hp;
@@ -106,7 +105,7 @@ extern s8 g_equipment_unit_banner_enabled;
 
 /* Provisional: the 0x7A-byte preview records for the selected unit (index 0)
  * and its compare slot (index 1); several callers view one as raw bytes. */
-extern equipment_unit_preview_t* g_equipment_unit_data[];
+extern equipment_unit_preview_t* g_equipment_unit_data[2];
 
 void equipment_load_unit(s32 battle_id);
 void equipment_load_selected_unit(void);

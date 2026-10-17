@@ -68,10 +68,6 @@ void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
     ClearOTag(g_menu_gfx_context->otag + first_otag, g_gfx_otag_count - first_otag);
 }
 
-/* The double-buffer binder uses a volatile view of these two capacities. */
-extern u16 g_unit_list_gfx_line_g2_capacity;
-extern u16 g_unit_list_gfx_line_g3_capacity;
-
 /* Initializes every primitive pool of one frame buffer with its libgpu
  * constructor; polygons additionally get texture shading enabled.
  *
@@ -154,10 +150,6 @@ static void unit_list_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
         SetDrawMove(&buffer->draw_moves[i]);
     }
 }
-
-/* Plain reads of these two capacities change the load scheduling. */
-extern volatile u16 g_unit_list_gfx_line_g2_capacity;
-extern volatile u16 g_unit_list_gfx_line_g3_capacity;
 
 /* Bind both frame buffers' primitive pools, set up their draw/display
  * environments and present twice to establish the active pair.

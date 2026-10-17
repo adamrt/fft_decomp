@@ -35,6 +35,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Save-image prefix and the additional bytes cleared with its working storage. */
+enum { SAVE_WORK_BUFFER_BYTES = 0x1e80 };
+extern u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
+
 static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void save_build_slot_description(s32 mode, u8* destination);
 static void save_init_menu_state(void);
@@ -547,8 +551,8 @@ static void save_init_menu_state(void) {
     g_save_list_selected_slot = 0;
     g_save_list_cursor_index = 0;
     g_save_initial_prompt_timer = 0;
-    g_save_buffer_pointer = g_save_buffer;
-    memset(g_save_buffer_pointer, 0xff, 0x1e80);
+    g_save_buffer_pointer = (save_image_t*)g_save_buffer;
+    memset(g_save_buffer_pointer, 0xff, SAVE_WORK_BUFFER_BYTES);
 }
 
 /* Store save slot `slot`'s play time as hours (capped at 99), minutes and
@@ -760,7 +764,7 @@ static void save_update_scan(void) {
             status = status ? -1 : 0;
 
             if (status != -1) {
-                memset(g_save_buffer_pointer, 0xff, 0x1e80);
+                memset(g_save_buffer_pointer, 0xff, SAVE_WORK_BUFFER_BYTES);
                 descriptor = memcard_file_open_selected_with_retries(g_save_file_names[g_save_slot_scan_index], 1);
                 if (descriptor == -2) {
                     g_save_slot_scan_active = 0;

@@ -194,9 +194,6 @@ typedef enum save_menu_state {
     SAVE_MENU_CLOSING = 0xff /* fading out; no state handler runs */
 } save_menu_state_e;
 
-/* 0x1e80 bytes running to g_save_open_result: the 0x1e00-byte save image plus a 0x80-byte tail that
- * save_init_menu_state clears with it. */
-extern save_image_t g_save_buffer[];
 extern save_image_t* g_save_buffer_pointer;
 extern u8 g_save_menu_state; /* save_menu_state_e */
 extern DIRENTRY* g_save_menu_work_buffer;

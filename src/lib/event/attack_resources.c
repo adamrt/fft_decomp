@@ -344,7 +344,7 @@ static void unit_view_supervisor_thread(void) {
                 }
                 states[set->thread_ids[i]] = MENU_UNIT_VIEW_SLOT_RESTART;
                 thread_set_parameters(set->thread_ids[i], 0, 0, 1);
-            } else if (set->entries[i] != (void*)-1) {
+            } else if (set->entries[i] != (void (*)(void))-1) {
                 thread_start(set->thread_ids[i], set->entries[i]);
                 thread_set_parameters(set->thread_ids[i], 0, 0, 0);
                 thread->task_id = set->task_ids[i];
@@ -366,7 +366,7 @@ static void unit_view_supervisor_thread(void) {
             thread_wait_frames(1);
         }
         for (i = 0; i < 4; i++) {
-            if (states[set->thread_ids[i]] == MENU_UNIT_VIEW_SLOT_RESTART && set->entries[i] != (void*)-1) {
+            if (states[set->thread_ids[i]] == MENU_UNIT_VIEW_SLOT_RESTART && set->entries[i] != (void (*)(void))-1) {
                 thread_start(set->thread_ids[i], set->entries[i]);
                 thread_set_parameters(set->thread_ids[i], 0, 0, 0);
                 g_thread_contexts[set->thread_ids[i]].task_id = set->task_ids[i];
@@ -1062,7 +1062,7 @@ void menu_init_subsystem_pointers(void) {
     g_threads = g_thread_contexts;
     g_text_glyph_bitmap_data = g_text_glyph_bitmaps;
     g_menu_glyph_sheet = &g_menu_glyph_image_data;
-    g_script_event_block = g_script_event_block_buffer;
+    g_script_event_block = &g_script_event_block_buffer;
     g_script_variables = g_script_variable_storage;
     g_menu_thread_menu_data = g_command_idle_action_entries;
     g_help_active_text_id_tables = (u16* const*)-1;

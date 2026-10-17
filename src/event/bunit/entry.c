@@ -138,10 +138,6 @@ static s32 unit_list_read_pad(void) {
     return input;
 }
 
-/* The double-buffer binder uses a volatile view of these two capacities. */
-extern u16 g_unit_list_gfx_line_g2_capacity;
-extern u16 g_unit_list_gfx_line_g3_capacity;
-
 /* BUNIT.OUT entry: set up stack-allocated primitive pools and double packet buffers, then run the
  * unit list (or job menu) frame by frame, playing the queued menu sound each frame, until the list
  * closes. Returns the chosen battle unit.

@@ -891,7 +891,7 @@ void script_load_event(s32 id) {
         thread_yield();
         g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(
-                 id * EVENT_BLOCK_SECTORS + DISC_SECTOR_EVENT_TEST_EVT, EVENT_BLOCK_BYTES, g_script_event_block_buffer)
+                 id * EVENT_BLOCK_SECTORS + DISC_SECTOR_EVENT_TEST_EVT, EVENT_BLOCK_BYTES, &g_script_event_block_buffer)
         != 0);
 
     do {

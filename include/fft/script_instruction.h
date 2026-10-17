@@ -427,14 +427,6 @@ typedef struct event_change_dialog_instruction {
 } event_change_dialog_instruction_t;
 typedef char event_change_dialog_instruction_size_must_be_6[sizeof(event_change_dialog_instruction_t) == 6 ? 1 : -1];
 
-static inline event_display_message_instruction_t* event_display_message_at(u8* base, s32 byte_offset) {
-    return (event_display_message_instruction_t*)(base + byte_offset);
-}
-
-static inline event_change_dialog_instruction_t* event_change_dialog_at(u8* base, s32 byte_offset) {
-    return (event_change_dialog_instruction_t*)(base + byte_offset);
-}
-
 /* unit operands */
 /* Operand records start after the opcode byte. 16-bit values stay in
  * little-endian byte arrays because the interpreter may address them at any

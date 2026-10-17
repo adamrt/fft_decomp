@@ -133,7 +133,6 @@ menu_system_function_t g_menu_system_function_table[51] = {
 
 static void camera_load_state_from_script_variables(void);
 static void script_process_pending_requests(void);
-static void script_route_event_input(void);
 
 static s32 menu_dispatch_system_function(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
@@ -1239,7 +1238,7 @@ static void script_apply_input_overrides(u32* state) {
 
 #ifdef FFT_BATTLE
 /* Route controller input to the running battle event thread. */
-static void script_route_event_input(void) {
+void script_route_event_input(void) {
     s32 thread;
 
     if (g_menu_input_mode != MENU_INPUT_TUTORIAL) {
@@ -1264,7 +1263,7 @@ static void script_route_event_input(void) {
 /* WORLD twin of script_update_event_input_state: while the event thread
  * (0x10) is current, latch the pad state and derive the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. */
-static void script_route_event_input(void) {
+void script_route_event_input(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;

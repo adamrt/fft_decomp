@@ -25,6 +25,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Typed views for this scanner; each expansion re-reads the event-block base. */
+#define DISPLAY_MESSAGE_INSTRUCTION_AT(base, offset) ((event_display_message_instruction_t*)((base) + (offset)))
+#define CHANGE_DIALOG_INSTRUCTION_AT(base, offset)   ((event_change_dialog_instruction_t*)((base) + (offset)))
+
 /* Unreferenced word preceding the glyph pen; no consumer establishes a pointer meaning. */
 static u32 g_message_typewriter_prefix_word = 0;
 static glyph_blit_t g_message_typewriter_pen = { 0 };
@@ -53,24 +57,27 @@ void message_build_display(s32 offset, s32 flags, s32* out_width) {
     if (flags & DIALOG_TYPE_KEEP_OPEN) {
         flags &= DIALOG_TYPE_POSITION_MASK;
         text_measure_pixels(&width, &height,
-            text_find_entry(((event_display_message_at((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
-                                + event_display_message_at((u8*)g_script_event_block, offset)->text_id_le[0])
+            text_find_entry(((DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
+                                + DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0])
                 - 1));
         max_width = width;
         next = offset + 1;
         size = g_script_event_instruction_sizes[EVENT_OPCODE_DISPLAY_MESSAGE];
         offset = next + size;
         while ((offset = script_find_instruction_byte_offset(offset, EVENT_OPCODE_CHANGE_DIALOG)) != 0) {
-            if (event_change_dialog_at((u8*)g_script_event_block, offset)->opcode == EVENT_OPCODE_CHANGE_DIALOG) {
-                if (event_change_dialog_at((u8*)g_script_event_block, offset)->text_id_le[0] == 0xFF
-                    && event_change_dialog_at((u8*)g_script_event_block, offset)->text_id_le[1] == 0xFF
-                    && (event_change_dialog_at((u8*)g_script_event_block, offset)->window_selector & flags) == flags) {
+            if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->opcode == EVENT_OPCODE_CHANGE_DIALOG) {
+                if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0] == 0xFF
+                    && CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] == 0xFF
+                    && (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->window_selector & flags)
+                        == flags) {
                     break;
                 }
-                if ((event_change_dialog_at((u8*)g_script_event_block, offset)->window_selector & flags) == flags) {
+                if ((CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->window_selector & flags)
+                    == flags) {
                     text_measure_pixels(&width, &height,
-                        text_find_entry(((event_change_dialog_at((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
-                                            + event_change_dialog_at((u8*)g_script_event_block, offset)->text_id_le[0])
+                        text_find_entry(
+                            ((CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
+                                + CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0])
                             - 1));
                     if (max_width < width) {
                         max_width = width;

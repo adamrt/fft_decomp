@@ -241,6 +241,10 @@ extern u16 g_unit_list_gfx_background_tile_layout[2][8]; /* per row parity: four
 extern s16 g_unit_list_gfx_falloff_focus_x;
 extern s16 g_unit_list_gfx_falloff_focus_y;
 
+/* Volatile capacity reads preserve the original packet-binder load scheduling. */
+extern volatile u16 g_unit_list_gfx_line_g2_capacity;
+extern volatile u16 g_unit_list_gfx_line_g3_capacity;
+
 /* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
 extern menu_gfx_context_t* g_unit_list_gfx_context_base;
 

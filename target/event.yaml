@@ -1384,7 +1384,7 @@ units:
   - {name: texture_commands, source: src/lib/menu/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
   - {name: unit_comparison, source: src/event/equip/unit_comparison.c}
-  - {name: unit_loadout, source: src/event/equip/unit_loadout.c}
+  - {name: unit_loadout, source: src/event/equip/unit_loadout.c, data: [{addr: 0x801e8db4, size: 244, hash: b33e76357c515a25}]}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: window_state, source: src/lib/menu/window_state.c}
 

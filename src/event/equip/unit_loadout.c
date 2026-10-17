@@ -12,6 +12,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Selected unit and its editable comparison copy; published through g_equipment_unit_data. */
+static equipment_unit_preview_t g_equipment_unit_records[2] = { 0 };
+
 /* Returns 1 when the unit holds a single weapon in two hands: exactly one of
  * the two hand slots is occupied, its item is below the throwable range, and
  * the weapon either forces two hands or allows them while `two_hands_support`
