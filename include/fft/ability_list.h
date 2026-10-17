@@ -13,7 +13,6 @@
 /* The ability list's layout; its menu entry passes it as the context. */
 extern menu_scroll_text_layout_t g_ability_list_ability_layout;
 extern u16 g_ability_list_ability_display_flags[80];
-extern u16 g_ability_list_anything_ability_id;
 
 /* BATTLE and WORLD each build their own body. */
 void ability_list_scrolling_thread(void);

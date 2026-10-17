@@ -49,6 +49,25 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Overlay load bookkeeping and disc tables. */
+extern s32 g_overlay_companion_executable_loading;
+extern s32 g_overlay_companion_executable_lbas[];
+extern s32 g_overlay_companion_executable_sizes[];
+extern s32 g_overlay_companion_executable_offsets[];
+extern s32 g_overlay_companion_data_file_request_index;
+extern s32 g_overlay_companion_data_file_loading;
+extern s32 g_overlay_companion_data_file_lbas[];
+extern s32 g_overlay_companion_data_file_sizes[];
+extern u8* g_overlay_companion_data_file_buffer;
+
+/* Menu threads and panel rendering. */
+extern char g_menu_wait_for_file_allocation_message[];
+extern menu_gradient_panel_prims_t g_menu_panel_fade_frames[];
+extern s32 g_menu_building_thread_started;
+extern u16 g_message_duration_frames;
+extern u8 g_menu_idle_action_window_x[];
+extern u8 g_command_restore_unit_id;
+
 /* One EVTFACE.BIN block: pixels followed by eight 16-color palettes. */
 typedef struct portrait_image_file {
     u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */

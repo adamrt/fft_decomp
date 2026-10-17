@@ -69,10 +69,6 @@ extern u32* g_crystal_pickup_controller_input;
 extern s16 g_crystal_pickup_menu_result;
 extern s16 g_crystal_pickup_choice_result;
 
-/* Handed to the crystal pickup panel thread as its second parameter. Nothing stores to it and the thread
- * does not read the parameter. */
-extern s32 g_crystal_pickup_panel_parameter;
-
 /* The command the panel resolves to (4 for a treasure, 0 for nothing) and the treasure item. */
 extern s32 g_crystal_pickup_action;
 extern s32 g_crystal_pickup_item;

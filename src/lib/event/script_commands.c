@@ -21,6 +21,16 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern s32 g_script_rand16_state;
+
+/* Suppress recursive write filtering while getters use comparison variable 0. */
+extern u8 g_script_variable_write_guard;
+
+/* Text variables $7E/$7F: the rectangle text_set_substitution_values_7e_7f stores as four 16-bit values. It
+ * lies at g_text_substitution_values[0x7e]. */
+extern RECT g_text_substitution_rect;
+extern glyph_blit_t g_menu_large_number_glyph; /* source of the large 8x15 number and sign glyphs */
+
 /* Operand-byte counts for opcodes 0x00 through 0xf3. The opcode byte is additional. */
 /* clang-format off */
 u8 g_script_event_instruction_sizes[0xf4] = {

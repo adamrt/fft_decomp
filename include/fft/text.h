@@ -223,10 +223,6 @@ extern u8 g_text_player_name_buffer[20];
 /* Values $00-$1F; indexed substitutions can read past the named 32 entries. */
 extern s32 g_text_substitution_values[32];
 
-/* Text variables $7E/$7F: the rectangle text_set_substitution_values_7e_7f stores as four 16-bit values. It
- * lies at g_text_substitution_values[0x7e]. */
-extern RECT g_text_substitution_rect;
-
 void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
 
 /* The text id a substitution code (text_format_code_e) prints for value. */
@@ -356,7 +352,6 @@ typedef struct menu_digit_glyph {
 } menu_digit_glyph_t;
 typedef char menu_digit_glyph_size_must_be_16[sizeof(menu_digit_glyph_t) == 16 ? 1 : -1];
 
-extern glyph_blit_t g_menu_large_number_glyph; /* source of the large 8x15 number and sign glyphs */
 extern const char g_text_decimal_format[];
 extern u32 g_text_decimal_divisors[];
 

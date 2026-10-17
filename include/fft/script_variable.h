@@ -242,9 +242,6 @@ enum {
 /* Each scene points to the resident script-variable bank. */
 extern s32* g_script_variables;
 
-/* Suppress recursive write filtering while getters use comparison variable 0. */
-extern u8 g_script_variable_write_guard;
-
 /* Resident 1,024-byte bank: 128 words, 736 packed bits and 160 packed nibbles
  * occupy the first 684 bytes. Save images also preserve the remaining bytes. */
 extern s32 g_script_variable_storage[0x100];

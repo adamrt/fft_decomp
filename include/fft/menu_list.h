@@ -16,7 +16,6 @@ extern menu_entry_t* g_menu_thread_menu_data;
 
 /* Whether the thread a screen manages is still running, as menu_start_or_poll_thread last saw it. */
 extern s32 g_menu_managed_thread_state;
-extern s32 g_menu_building_thread_started;
 
 /* Starts thread_id on the entry's thread and returns 1 on the first call; later calls return whether the
  * thread still runs. */

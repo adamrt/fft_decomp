@@ -50,8 +50,6 @@ typedef struct unit_status_staging {
 } unit_status_staging_t;
 typedef char unit_status_staging_size_must_be_1010[sizeof(unit_status_staging_t) == 1010 ? 1 : -1];
 
-extern unit_status_staging_t* g_unit_status_staging_data;
-
 s32 unit_save_staged_status_data(s32 battle_id);
 void unit_clear_status_staging_data(void);
 void unit_update_staged_status_data(u16 unit_id, u16 restore);

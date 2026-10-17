@@ -31,6 +31,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Camera yaw selection and event status staging. */
+extern s32 g_camera_yaw_band;
+extern unit_status_staging_t* g_unit_status_staging_data;
+
 /* Decoded selection modes; the encoded group IDs are translated by script_prepare_unit_filter. */
 typedef enum script_unit_filter {
     SCRIPT_UNIT_FILTER_SINGLE = 0,

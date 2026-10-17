@@ -91,7 +91,6 @@ typedef enum command_menu {
     MENU_COMMAND_ID_CRYSTAL_PICKUP = 105          /* crystal or treasure options */
 } command_menu_e;
 
-extern u8 g_menu_idle_action_window_x[];
 extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
 
 void menu_action_dispatch(void);
@@ -101,8 +100,6 @@ void menu_action_open_non_active_unit(void);
 
 /* turn menu */
 extern s32 g_command_current_id; /* command_menu_e */
-extern s16 g_command_wait_row_actions[4];
-extern s16 g_command_confirm_stored_unit_row_actions;
 
 /* BATTLE and WORLD each define the 56 records for command_menu_e IDs 0 through 55. */
 extern menu_entry_t g_command_idle_action_entries[56];
@@ -200,7 +197,6 @@ extern s32 g_menu_scrolling_list_depth;
 extern RECT g_menu_ability_list_clut_rect;
 extern s16 g_command_action_slot_row_actions[6];
 extern s16 g_command_action_slot_selected_option;
-extern u8 g_command_restriction_message_ids[];
 
 /* Walks the stored unit's menu record slots from the top down to zero, presenting each and writing the chosen
  * entry back into the record. */
@@ -227,14 +223,7 @@ typedef struct menu_command_map {
 } menu_command_map_t;
 typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];
 
-extern s32 g_menu_active_menu; /* active menu */
-extern s16 g_menu_result;      /* menu result: -4 pending, -1 canceled */
-extern s16 g_menu_selected_option;
-extern s16 g_menu_set_auto_battle_row_actions;
 extern menu_command_map_t g_command_maps[31];
-extern s32 g_command_resolved_command;
-extern s32 g_command_used_skillset_id;
-extern s32 g_command_used_item_id;
 
 /* The selected command: its kind, then the action staged for at_list_preview. */
 extern ai_command_t g_command_selected_command;
@@ -245,7 +234,6 @@ ai_command_t* command_get_selected(void);
 s32 command_resolve_selection(void);
 
 /* unit records */
-extern u8 g_command_restore_unit_id;
 extern s16 g_command_pending_selection[4];
 
 void command_reset_unit_records(void);
@@ -356,9 +344,6 @@ typedef enum menu_system_function_id {
 } menu_system_function_id_e;
 
 extern s32 g_menu_system_function_thread_busy;
-extern s32 g_menu_system_function_command;
-extern s32 g_menu_system_function_option;
-extern u16 g_menu_system_function_row_actions[];
 
 /* Runs a system function (menu_system_command_e) for unit_id. */
 s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);

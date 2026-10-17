@@ -89,7 +89,6 @@ extern camera_rotation_action_e g_camera_rotation_action;
 extern SVECTOR g_camera_rotation_saved;
 extern u16 g_camera_rotation_countdown;
 extern s32 g_camera_rotation_increment;
-extern s32 g_camera_yaw_band;
 extern s32 g_camera_yaw_target;
 
 /* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;

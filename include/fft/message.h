@@ -30,14 +30,9 @@ void message_release_typewriter_slot(void);
 void message_draw_glyph_with_delay(s32 pen_x, s32 pen_y, s32 delay);
 
 /* timed messages */
-extern u16 g_message_duration_frames;
-
 void message_set_duration(u16 frames);
 
 /* announcements */
-extern s32 g_announcement_spell_quote_last_ability_id;
-extern u8 g_announcement_spell_quote_exception_skillsets[];
-
 void announcement_spell_quote_thread(void);
 
 /* Picks the spell quote or the plain ability-name announcement for an action. */

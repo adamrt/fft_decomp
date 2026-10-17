@@ -156,7 +156,6 @@ extern u8 g_menu_common_graphics_loaded;
 
 /* The debug line menu_alloc_memory prints while it waits for free pages. */
 extern char g_message_wait_for_allocation_message[];
-extern char g_menu_wait_for_file_allocation_message[];
 
 /* The field y (0 or 0xf0) handed to menu_input_update_event_state each frame; the panels draw into the other
  * frame-buffer half. */
@@ -453,7 +452,6 @@ typedef enum menu_panel_fade_mode {
 extern s32 g_menu_panel_fade_mode; /* menu_panel_fade_mode_e */
 extern s32 g_menu_panel_fade_intensity;
 extern u8 g_menu_panel_fade_modes[];
-extern menu_gradient_panel_prims_t g_menu_panel_fade_frames[];
 
 void menu_update_panel_fade(void);
 

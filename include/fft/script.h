@@ -40,7 +40,6 @@ extern event_file_block_t* g_script_event_block;
 /* Operand-byte counts per opcode, excluding the opcode byte; not per-operand
  * width schemas. The table ends after opcode 0xf3. */
 extern u8 g_script_event_instruction_sizes[0xf4];
-extern s32 g_script_next_event_id;
 
 void script_load_event(s32 id);
 s32 script_load_next_event(void);
@@ -143,8 +142,6 @@ s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 
 s16 script_read_s16(const void* source);
 
 /* values */
-extern s32 g_script_rand16_state;
-
 void script_seed_random_from_vsync(void);
 void script_clamp_s32_to_range(s32* value, s32 minimum, s32 maximum);
 s32 script_scale_music_volume(s32 volume);

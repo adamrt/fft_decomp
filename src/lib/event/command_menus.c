@@ -60,6 +60,33 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Command selection and remembered results. */
+extern u16 g_ability_list_anything_ability_id;
+extern s16 g_command_wait_row_actions[4];
+extern s16 g_command_confirm_stored_unit_row_actions;
+extern u8 g_command_restriction_message_ids[];
+extern s32 g_menu_active_menu; /* active menu */
+extern s16 g_menu_result;      /* menu result: -4 pending, -1 canceled */
+extern s16 g_menu_selected_option;
+extern s16 g_menu_set_auto_battle_row_actions;
+extern s32 g_command_resolved_command;
+extern s32 g_command_used_skillset_id;
+extern s32 g_command_used_item_id;
+
+/* Spell announcements and scenario handoff. */
+extern s32 g_script_next_event_id;
+extern s32 g_announcement_spell_quote_last_ability_id;
+extern u8 g_announcement_spell_quote_exception_skillsets[];
+
+/* Handed to the crystal pickup panel thread as its second parameter. Nothing stores to it and the thread
+ * does not read the parameter. */
+extern s32 g_crystal_pickup_panel_parameter;
+
+/* System-function selections. */
+extern s32 g_menu_system_function_command;
+extern s32 g_menu_system_function_option;
+extern u16 g_menu_system_function_row_actions[];
+
 /* One row of g_menu_system_function_table (menu_run_system_function_thread,
  * menu_dispatch_system_function). Provisional. */
 typedef struct menu_system_function {
