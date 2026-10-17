@@ -1211,8 +1211,8 @@ data:
   - {addr: 0x801532f8, name: g_menu_packet_buffer_index}
   - {addr: 0x801532fc, name: g_screen_scrolling_list_depth}
   - {addr: 0x80153300, name: g_overlay_companion_data_file_buffer}
-  - {addr: 0x80153304, name: g_menu_text_param_22}
-  - {addr: 0x80153308, name: g_menu_text_param_24}
+  - {addr: 0x80153304, name: g_menu_text_first_line}
+  - {addr: 0x80153308, name: g_menu_text_line_limit}
   - {addr: 0x8015330c, name: g_menu_input_lock_mode}
   - {addr: 0x80153310, name: g_help_open}
   - {addr: 0x80153314, name: g_formation_screen_active}

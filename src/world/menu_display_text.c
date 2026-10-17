@@ -100,9 +100,9 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                 } else if (state->command == TEXT_SPACE) {
                     g_menu_text_pen.rect.x += 4;
                 } else if (state->command == TEXT_NEWLINE) {
-                    /* Lines before g_menu_text_param_22 are skipped, so only drawn lines move the pen down. */
+                    /* Lines before g_menu_text_first_line are skipped, so only drawn lines move the pen down. */
                     g_menu_text_pen.rect.x = origin->rect.x;
-                    if (line >= g_menu_text_param_22) {
+                    if (line >= g_menu_text_first_line) {
                         g_text_glyph_first_row = 0;
                         g_menu_text_pen.rect.y += 0x10;
                     }
@@ -133,11 +133,11 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                             state->command = state->value / g_text_decimal_divisors[i];
                             started = 1;
                             state->value = state->value - state->command * g_text_decimal_divisors[i];
-                            if (line >= g_menu_text_param_24) {
+                            if (line >= g_menu_text_line_limit) {
                                 /* Leaves the digit loop and the text loop. */
                                 goto done;
                             }
-                            if (line >= g_menu_text_param_22) {
+                            if (line >= g_menu_text_first_line) {
                                 text_render_glyph_to_4bpp_image(
                                     g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                                     &g_menu_text_pen, g_menu_text_palette_offset);
@@ -189,10 +189,10 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
 
         /* A glyph: draw it inside the visible lines, and stop at the window's right margin. */
         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-        if (line >= g_menu_text_param_24) {
+        if (line >= g_menu_text_line_limit) {
             break;
         }
-        if (line >= g_menu_text_param_22) {
+        if (line >= g_menu_text_first_line) {
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }
@@ -205,6 +205,6 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
     /* Reset the palette and the visible line range for the next caller. */
 done:
     g_menu_text_palette_offset = 0;
-    g_menu_text_param_22 = 0;
-    g_menu_text_param_24 = 0xFF;
+    g_menu_text_first_line = 0;
+    g_menu_text_line_limit = 0xFF;
 }

@@ -547,8 +547,8 @@ static void message_box_render_text_image(text_dialog_record_t* record) {
         g_menu_window_text_pen.stride = record->rect.w * 4;
         g_menu_window_text_pen.rect.x = 8;
         g_menu_window_text_pen.rect.y = 8;
-        g_menu_text_param_22 = record->first_line;
-        g_menu_text_param_24 = record->last_line;
+        g_menu_text_first_line = record->first_line;
+        g_menu_text_line_limit = record->last_line;
         menu_display_text_entry(record->text, record->buffer, &g_menu_window_text_pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();

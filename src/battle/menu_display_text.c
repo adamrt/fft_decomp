@@ -101,7 +101,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                 } else if (state->command == TEXT_NEWLINE) {
                     pen->rect.x = origin->rect.x;
                     /* The pen moves down only from the first shown line; earlier lines are not drawn. */
-                    if (line >= g_menu_text_param_22) {
+                    if (line >= g_menu_text_first_line) {
                         g_text_glyph_first_row = 0;
                         pen->rect.y += 16;
                     }
@@ -139,10 +139,10 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                                 state->command = state->value / *divisor;
                                 started = 1;
                                 state->value = state->value - state->command * *divisor;
-                                if (line >= g_menu_text_param_24) {
+                                if (line >= g_menu_text_line_limit) {
                                     goto done;
                                 }
-                                if (line >= g_menu_text_param_22) {
+                                if (line >= g_menu_text_first_line) {
                                     text_render_glyph_to_4bpp_image(
                                         g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                                         &g_menu_text_pen, g_menu_text_palette_offset);
@@ -198,10 +198,10 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
         }
 
         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-        if (line >= g_menu_text_param_24) {
+        if (line >= g_menu_text_line_limit) {
             break;
         }
-        if (line >= g_menu_text_param_22) {
+        if (line >= g_menu_text_first_line) {
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }
@@ -214,6 +214,6 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
 
 done:
     g_menu_text_palette_offset = 0;
-    g_menu_text_param_22 = 0;
-    g_menu_text_param_24 = 0xFF;
+    g_menu_text_first_line = 0;
+    g_menu_text_line_limit = 0xFF;
 }

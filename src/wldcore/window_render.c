@@ -381,8 +381,8 @@ static void text_window_render_page(text_window_t* state, s32 row) {
     s32 top;
     s32 limit;
 
-    g_menu_text_param_22 = row;
-    g_menu_text_param_24 = row + state->rows_per_page;
+    g_menu_text_first_line = row;
+    g_menu_text_line_limit = row + state->rows_per_page;
     bounds.x = state->image_x;
     bounds.y = state->image_y;
     bounds.w = (state->text_width + 0x18) & 0xFFFC;

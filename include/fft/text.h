@@ -263,8 +263,10 @@ typedef struct text_image_bounds {
 /* BATTLE and WORLD each define this menu-window pen, independently of the script-variable pointer before it. */
 extern glyph_blit_t g_menu_window_text_pen;
 extern glyph_blit_t g_menu_text_pen;
-extern s32 g_menu_text_param_22; /* line limits copied from the text record (+0x22, +0x24) */
-extern s32 g_menu_text_param_24;
+
+/* Visible line range [first_line, line_limit); BATTLE and WORLD each define these. */
+extern s32 g_menu_text_first_line;
+extern s32 g_menu_text_line_limit;
 extern s32 g_text_glyph_first_row;
 extern s32 g_text_glyph_row_limit;
 
