@@ -3,6 +3,7 @@
 
 #include "fft/after_battle.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu_input.h"
@@ -13,6 +14,14 @@
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+/* BONUS.BIN stores a 256x200 4bpp image, followed by eight 16-color palette slots. */
+typedef struct conditions_banner_file {
+    u32 pixels[200][32];   /* 0x0000; eight 4bpp pixels per 32-bit value */
+    palette_t palettes[8]; /* 0x6400; four palettes per uploaded VRAM row */
+    u8 _unused_6500[0x300];
+} conditions_banner_file_t;
+typedef char conditions_banner_file_size_must_be_26624[sizeof(conditions_banner_file_t) == 26624 ? 1 : -1];
 
 static RECT g_conditions_banner_rect = { 384, 0, 64, 256 };
 

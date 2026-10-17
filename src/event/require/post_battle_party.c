@@ -28,6 +28,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern char g_after_battle_text_wait_for_file_allocation_message[];
 extern POLY_FT4 g_unit_panel_transition_quads[2][30];
 
 static s32 g_party_affected_unit_message_args[50] = { 0 };
