@@ -430,8 +430,8 @@ void title_select_new_game(void) {
     controller = g_controller_depth;
     position->x = -4;
     position->y = -16;
-    g_controller_records[controller].title_exit.state = 0;
-    g_controller_handler_indices[controller] = CONTROLLER_TITLE_EXIT;
+    g_controller_records[controller].card_warning.state = 0;
+    g_controller_handler_indices[controller] = CONTROLLER_TITLE_CARD_WARNING;
     g_controller_depth = controller + 1;
 }
 
@@ -450,12 +450,12 @@ void title_update_card_warning(controller_record_t* record) {
         return;
     }
 
-    if (record->title_exit.state != TITLE_EXIT_INPUT) {
+    if (record->card_warning.state != TITLE_CARD_WARNING_INPUT) {
         g_window_record_count -= 1;
         g_window_render_object_count -= 1;
         g_controller_depth -= 1;
-        state = record->title_exit.state;
-        if (state == TITLE_EXIT_CANCEL) {
+        state = record->card_warning.state;
+        if (state == TITLE_CARD_WARNING_CANCEL) {
             s32* source;
             s32* destination;
             s32 index;
@@ -468,7 +468,7 @@ void title_update_card_warning(controller_record_t* record) {
                 destination[index] = source[index];
             }
             title_push_menu(0);
-        } else if (state == TITLE_EXIT_CONFIRM) {
+        } else if (state == TITLE_CARD_WARNING_CONFIRM) {
             prologue_start();
         }
         return;
@@ -478,11 +478,11 @@ void title_update_card_warning(controller_record_t* record) {
     if ((buttons & PSX_PAD_CROSS) != 0) {
         sound_play_sfx(SOUND_SFX_CANCEL);
         gfx_start_overlay_fade_in(0x20);
-        record->title_exit.state = TITLE_EXIT_CANCEL;
+        record->card_warning.state = TITLE_CARD_WARNING_CANCEL;
     } else if ((buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) != 0) {
         sound_play_sfx(SOUND_SFX_CONFIRM);
         gfx_start_overlay_fade_in(0x20);
-        record->title_exit.state = TITLE_EXIT_CONFIRM;
+        record->card_warning.state = TITLE_CARD_WARNING_CONFIRM;
     }
 }
 

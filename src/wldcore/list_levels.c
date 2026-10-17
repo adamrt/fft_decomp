@@ -1642,7 +1642,7 @@ void tutorial_handle_formation_list_input(menu_stack_record_t* level) {
 
             bits_set_value(g_tutorial_progress_masks, *selected, 1);
             screen_set_brightness(0x80, 0x80, 0x80);
-            formation_run_at_menu(*selected);
+            formation_run_tutorial(*selected);
             g_menu_stack_ot_offset = 1;
             g_menu_blocked_buttons = 0;
             g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED | SYSTEM_FLAG_DISPLAY_OFF;

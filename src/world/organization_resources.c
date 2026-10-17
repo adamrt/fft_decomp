@@ -768,11 +768,11 @@ static void world_map_step_formation_request(void) {
     }
 }
 
-/* Run the formation screen opened on the given menu (index + 1), with the menu context reset
- * before and after, then clear the screen request and restore the default menu entries. */
-void formation_run_at_menu(s32 menu_index) {
+/* Run formation tutorial index + 1, resetting the menu context before and after,
+ * then restore the default menu entries and clear the screen request. */
+void formation_run_tutorial(s32 tutorial_index) {
     screen_reset_context();
-    formation_run_screen(menu_index + 1, 0);
+    formation_run_screen(tutorial_index + 1, 0);
     screen_reset_context();
     g_world_map_screen_request = 0;
     g_menu_thread_menu_data = g_screen_default_entries;

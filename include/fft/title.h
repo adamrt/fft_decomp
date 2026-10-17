@@ -63,17 +63,17 @@ typedef struct title_sound_type_menu {
 } title_sound_type_menu_t;
 typedef char title_sound_type_menu_size_must_be_36[sizeof(title_sound_type_menu_t) == 36 ? 1 : -1];
 
-/* 32-bit state of the title-exit controller (title_update_card_warning). */
-typedef enum title_exit_step {
-    TITLE_EXIT_INPUT = 0,
-    TITLE_EXIT_CANCEL = 1,  /* cross: back to the title menu */
-    TITLE_EXIT_CONFIRM = 2, /* circle or start: the new-game prologue */
-} title_exit_step_e;
+/* 32-bit state of the no-memory-card warning controller (title_update_card_warning). */
+typedef enum title_card_warning_step {
+    TITLE_CARD_WARNING_INPUT = 0,
+    TITLE_CARD_WARNING_CANCEL = 1,  /* cross: back to the title menu */
+    TITLE_CARD_WARNING_CONFIRM = 2, /* circle or start: the new-game prologue */
+} title_card_warning_step_e;
 
-/* Title exit controller state (handler 12). */
-typedef struct title_exit_state {
-    s32 state; /* title_exit_step_e */
-} title_exit_state_t;
+/* No-memory-card warning controller state (handler 12). */
+typedef struct title_card_warning_state {
+    s32 state; /* title_card_warning_step_e */
+} title_card_warning_state_t;
 
 extern s32 g_title_demo_movie_index;
 
@@ -98,11 +98,11 @@ void new_game_init_party(s32 party_mode, s32 world_load_mode);
 /* birthday */
 /* Birthday date-selection controller state (handler 5), shared with its redraw routine. */
 typedef struct birthday_date_state {
-    s32 cursor_record; /* 0x00: cursor moved between month and day */
-    s32 label_record;
-    s32 title_image;  /* 0x08: birthday title image (0xb800); palette 2 on
-                             confirmation, 0 on restore */
-    s32 window_image; /* 0x0c: flags bit 8 blocks input */
+    s32 cursor_record;         /* 0x00: cursor moved between month and day */
+    s32 retained_title_record; /* 0x04: title-menu actor index; the date constructor does not set it */
+    s32 title_image;           /* 0x08: birthday title image (0xb800); palette 2 on
+                                      confirmation, 0 on restore */
+    s32 window_image;          /* 0x0c: flags bit 8 blocks input */
     s32 _unused_10[4];
     s32 month;           /* 0x20: 1..12 */
     s32 day;             /* 0x24 */

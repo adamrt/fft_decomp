@@ -23,7 +23,7 @@ typedef enum controller_handler {
     CONTROLLER_FFTEND_MOVIE = 9,          /* movie_update_fftend */
     CONTROLLER_SCRIPT = 10,               /* ending_update_script */
     CONTROLLER_TITLE_DEMO_MOVIE = 11,     /* movie_update_title_demo */
-    CONTROLLER_TITLE_EXIT = 12,           /* title_update_card_warning */
+    CONTROLLER_TITLE_CARD_WARNING = 12,   /* title_update_card_warning */
 } controller_handler_e;
 
 /* Text message controller state (handler 8). */
@@ -43,7 +43,7 @@ typedef union controller_record {
     birthday_confirmation_state_t birthday_confirmation;
     music_test_state_t music_test;
     controller_text_message_state_t text_message;
-    title_exit_state_t title_exit;
+    title_card_warning_state_t card_warning;
 } controller_record_t;
 typedef char controller_record_size_must_be_100[(sizeof(controller_record_t) == 100) ? 1 : -1];
 

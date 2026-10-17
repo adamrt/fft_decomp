@@ -323,11 +323,11 @@ typedef struct proposition_result_level {
 } proposition_result_level_t;
 
 /* Provisional: the outcome of a returned proposition (g_proposition_report), worked out while its report
- * runs. It is one object: proposition_find_preferred_job_unit reads excluded_party_index at -0xc from its
+ * runs. It is one object: proposition_find_preferred_job_unit reads reporter_party_index at -0xc from its
  * &proposition_index base, and proposition_calculate_jp_and_gil and proposition_step_result_level reach -0x10..+0x24
  * from single bases. */
 typedef struct proposition_report {
-    s32 excluded_party_index; /* 0x00 */
+    s32 reporter_party_index; /* 0x00 */
     s32 speaker_party_index;  /* 0x04; chosen and read back by proposition_step_participant_message */
     s32 preferred_unit;       /* 0x08; fixed speaker passed to proposition_step_participant_message */
     s32 proposition_index;    /* 0x0c; index into g_proposition_active */

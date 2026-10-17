@@ -59,7 +59,7 @@ static void world_map_push_cursor_level(void);
 static void debug_push_variable_list_level(void);
 static void debug_draw_variable_list(debug_variable_list_level_t* level);
 static void location_run_shop(s32 shop_id);
-static void world_map_push_location_visibility_level(s32 dot_index, s32 was_set);
+static void world_map_push_location_visibility_level(s32 dot_index, s32 erase);
 static void unit_panel_move_help_cursor(unit_panel_help_level_t* request);
 
 /* Draws the HUD numeric readout at the context-value display position, laid
@@ -936,8 +936,8 @@ static void world_map_push_path_level(s32 from, s32 to, s32 erase) {
 
     world_map_prepare_path_animation(from, to);
     depth = g_menu_stack_depth;
-    g_menu_stack_records[depth].path.path_id = from;
-    g_menu_stack_records[depth].path.path_id_hi = to;
+    g_menu_stack_records[depth].path.from_location = from;
+    g_menu_stack_records[depth].path.to_location = to;
     g_menu_stack_records[depth].path.erase = erase;
     g_menu_stack_records[depth].path.pending_sound = 1;
     g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
@@ -1012,12 +1012,12 @@ void world_map_step_path_level(menu_stack_record_t* level) {
 /* Start a delayed map-location visibility change and hide the parent window
  * until it finishes. Indexed stores keep their named globals to preserve
  * the original address sequences. */
-static void world_map_push_location_visibility_level(s32 dot_index, s32 was_set) {
+static void world_map_push_location_visibility_level(s32 dot_index, s32 erase) {
     s32 depth = g_menu_stack_depth;
     s32 window_index;
 
     g_menu_stack_records[depth].visibility.dot_index = dot_index;
-    g_menu_stack_records[depth].visibility.was_set = was_set;
+    g_menu_stack_records[depth].visibility.erase = erase;
     g_menu_stack_records[depth].visibility.delay = 0x10;
     g_menu_stack_records[depth].visibility.pending_sound = 1;
     g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
@@ -1042,7 +1042,7 @@ void world_map_step_location_visibility_level(menu_stack_record_t* level) {
         if (g_system_flags & SYSTEM_FLAG_FADING) {
             return;
         }
-        if (level->visibility.was_set != 0) {
+        if (level->visibility.erase != 0) {
             sound_play_effect(SOUND_SFX_CANCEL);
         } else {
             script_set_variable(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 1);
@@ -1055,7 +1055,7 @@ void world_map_step_location_visibility_level(menu_stack_record_t* level) {
         level->visibility.delay--;
         return;
     }
-    if (level->visibility.was_set != 0) {
+    if (level->visibility.erase != 0) {
         g_world_map_dots[level->visibility.dot_index].render.flags |= DISPLAY_OBJECT_HIDDEN;
         script_set_variable(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
     }

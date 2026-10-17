@@ -220,16 +220,16 @@ void text_window_open(text_window_t* state) {
     s32 last_page_row;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    state->left_window_index = index;
+    state->page_prompt_record = index;
     window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_PAGE_PROMPT);
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    state->middle_window_index = index;
+    state->up_arrow_record = index;
     window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_UP);
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    state->right_window_index = index;
+    state->down_arrow_record = index;
     window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_DOWN);
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    state->lower_window_index = index;
+    state->scroll_thumb_record = index;
     window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_THUMB);
     render_index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     state->render_record_index = render_index;
@@ -245,17 +245,17 @@ void text_window_open(text_window_t* state) {
     } else {
         window_x -= 12;
     }
-    g_window_records[state->left_window_index].position.x = window_x - 14;
-    g_window_records[state->left_window_index].position.y = window_y - 22;
+    g_window_records[state->page_prompt_record].position.x = window_x - 14;
+    g_window_records[state->page_prompt_record].position.y = window_y - 22;
     lower_y = window_y - 26;
-    g_window_records[state->middle_window_index].position.x = window_x;
+    g_window_records[state->up_arrow_record].position.x = window_x;
     do {
-        g_window_records[state->middle_window_index].position.y = state->base.y + 8;
+        g_window_records[state->up_arrow_record].position.y = state->base.y + 8;
     } while (0);
-    g_window_records[state->right_window_index].position.x = window_x;
-    g_window_records[state->right_window_index].position.y = lower_y;
-    g_window_records[state->lower_window_index].position.x = window_x;
-    g_window_records[state->lower_window_index].position.y = lower_y;
+    g_window_records[state->down_arrow_record].position.x = window_x;
+    g_window_records[state->down_arrow_record].position.y = lower_y;
+    g_window_records[state->scroll_thumb_record].position.x = window_x;
+    g_window_records[state->scroll_thumb_record].position.y = lower_y;
 
     text_measure(&text_metrics[0], &text_metrics[1], text_find_entry(state->text_id));
     rows = text_metrics[1];
@@ -316,9 +316,9 @@ s32 text_window_step(text_window_t* state) {
         if ((g_input_current_buttons & PSX_PAD_SQUARE) == 0) {
             state->scroll_state = TEXT_WINDOW_SCROLL_RETURN;
             state->scroll_timer = 0;
-            g_window_records[state->middle_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[state->right_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[state->lower_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
         if ((world_map_update_input_repeat(PSX_PAD_UP) != 0) && (state->scroll_row != 0)) {
@@ -356,7 +356,7 @@ s32 text_window_step(text_window_t* state) {
             state->scroll_state = TEXT_WINDOW_SCROLL_MANUAL;
             state->scroll_row = state->page_start_row;
             text_window_update_scroll_indicators(state);
-            g_window_records[state->left_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
         text_window_update_page_prompt(state);
@@ -420,9 +420,9 @@ static void text_window_render_page(text_window_t* state, s32 row) {
 /* Show the text-page prompt while more pages remain. */
 static void text_window_update_page_prompt(text_window_t* state) {
     if (state->page_start_row < state->last_page_row) {
-        g_window_records[state->left_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->page_prompt_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_window_records[state->left_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }
 
@@ -435,26 +435,26 @@ static void text_window_update_scroll_indicators(text_window_t* state) {
     s32 bottom;
 
     if (state->page_start_row == 0) {
-        g_window_records[state->middle_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[state->right_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[state->lower_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
         return;
     }
 
-    top = g_window_records[state->right_window_index].position.y;
-    bottom = g_window_records[state->middle_window_index].position.y;
-    g_window_records[state->lower_window_index].position.y
+    top = g_window_records[state->down_arrow_record].position.y;
+    bottom = g_window_records[state->up_arrow_record].position.y;
+    g_window_records[state->scroll_thumb_record].position.y
         = bottom + (top - bottom - 0x12) * state->scroll_row / state->page_start_row + 0x12;
-    g_window_records[state->lower_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[state->scroll_thumb_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     if (state->scroll_row != 0) {
-        g_window_records[state->middle_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->up_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_window_records[state->middle_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
     }
     if (state->scroll_row != state->page_start_row) {
-        g_window_records[state->right_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->down_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_window_records[state->right_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }
 

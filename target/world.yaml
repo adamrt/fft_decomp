@@ -583,7 +583,7 @@ functions:
   - {addr: 0x80107194, size: 24, name: world_map_restore, hash: 9be1c49521feb7b2, unit: organization_resources}
   - {addr: 0x801071ac, size: 140, name: debug_battle_setup_thread, hash: d1d91b2f46b34a9c, unit: organization_resources}
   - {addr: 0x80107238, size: 492, name: world_map_step_formation_request, hash: 683d8fb47046d775, unit: organization_resources}
-  - {addr: 0x80107424, size: 84, name: formation_run_at_menu, hash: 4353fba0e44a929c, unit: organization_resources}
+  - {addr: 0x80107424, size: 84, name: formation_run_tutorial, hash: 4353fba0e44a929c, unit: organization_resources}
   - {addr: 0x80107478, size: 212, name: world_map_step_tutorial_request, hash: 3157af30a36f1166, unit: organization_resources}
   - {addr: 0x8010754c, size: 112, name: world_map_step_debug_variable_list_request, hash: 26d37c4bed94e7eb, unit: organization_resources}
   - {addr: 0x801075bc, size: 168, name: world_map_step_fixed_number_panel_request, hash: cf5b9621fee98ca3, unit: organization_resources}
@@ -606,7 +606,7 @@ functions:
   - {addr: 0x80108ce8, size: 692, name: zodiac_build_primitives, hash: 49ec660645c9bf7d, unit: zodiac_primitives}
   - {addr: 0x80108f9c, size: 300, name: formation_zodiac_backdrop_thread, hash: deadf06fec1c0bd0, unit: formation_view}
   - {addr: 0x801090c8, size: 384, name: formation_get_unit_palette_index, hash: 340716a4d002e911, unit: formation_view}
-  - {addr: 0x80109248, size: 272, name: formation_get_party_unit_sprite, hash: d3e3b468e663ce32, unit: formation_view}
+  - {addr: 0x80109248, size: 272, name: portrait_get_party_unit_code, hash: d3e3b468e663ce32, unit: formation_view}
   - {addr: 0x80109358, size: 28, name: screen_thread_request_redraw, hash: 3d1c564d078f3477, unit: formation_view}
   - {addr: 0x80109374, size: 480, name: screen_draw_text_columns, hash: 6aa494fcc042d443, source: src/lib/menu/menu_draw_text_columns.c, source_symbol: menu_draw_text_columns}
   - {addr: 0x80109554, size: 648, name: screen_redraw_text_page_on_scroll, hash: c3e620bbb56ea16d, unit: screen_text_pages}
@@ -1445,7 +1445,7 @@ data:
   - {addr: 0x8018a0cc, name: g_zodiac_sprite_scales}
   - {addr: 0x8018a141, name: g_zodiac_sprite_count}
   - {addr: 0x8018a144, name: g_formation_view}
-  - {addr: 0x8018a168, name: g_formation_sprite_by_portrait}
+  - {addr: 0x8018a168, name: g_formation_portrait_by_sprite_sheet}
   - {addr: 0x8018a310, name: g_formation_monster_sprite_table}
   - {addr: 0x8018a330, name: g_screen_thin_panel_texture_windows}
   - {addr: 0x8018a368, name: g_screen_panel_texture_windows}

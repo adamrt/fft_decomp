@@ -269,11 +269,11 @@ typedef struct text_window {
     RECT extra_bounds;    /* 0x28 */
     s32 scroll_state;     /* 0x30; text_window_scroll_e */
     s32 text_id;
-    s32 left_window_index;
-    s32 middle_window_index;
-    s32 right_window_index;
+    s32 page_prompt_record;
+    s32 up_arrow_record;
+    s32 down_arrow_record;
     s32 render_record_index;
-    s32 lower_window_index;
+    s32 scroll_thumb_record;
     s32 priority; /* 0x4c; OT priority of the text window's records (window_init_animated_record) */
     s32 last_page_row;
     s32 page_start_row;

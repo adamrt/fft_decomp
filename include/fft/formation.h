@@ -191,7 +191,7 @@ extern menu_entry_t g_formation_egg_submenu;
 extern s32 g_formation_screen_active;
 
 void formation_run_screen(s32 tutorial, s32 unused);
-void formation_run_at_menu(s32 menu_index);
+void formation_run_tutorial(s32 tutorial_index);
 void formation_init_menu_state(void);
 void formation_init_display(void);
 void formation_reopen_after_world_map(void);
@@ -262,7 +262,6 @@ extern u8 g_formation_portrait_slide_frame;
 
 void formation_prepare_sprites(void);
 void formation_build_sprites(void);
-s32 formation_get_party_unit_sprite(s32 party_index);
 s32 formation_get_unit_palette_index(s32 roster_slot);
 void formation_build_unit_graphic(s16 formation_index, texture_source_t* destination, s32 unused);
 void formation_get_generic_human_graphic(s32 job_id, s16 is_female, texture_source_t* destination);

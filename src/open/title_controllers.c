@@ -961,9 +961,9 @@ static void birthday_restore_date_menu(birthday_date_state_t* menu) {
     g_window_records[cursor].anim_counter = 0;
     g_window_records[cursor].frame_index = 0;
 
-    g_window_records[menu->label_record].color.r = 0x80;
-    g_window_records[menu->label_record].color.g = 0x80;
-    g_window_records[menu->label_record].color.b = 0x80;
+    g_window_records[menu->retained_title_record].color.r = 0x80;
+    g_window_records[menu->retained_title_record].color.g = 0x80;
+    g_window_records[menu->retained_title_record].color.b = 0x80;
 
     window = &images[menu->window_image];
     cursor_last = menu->cursor_record;
@@ -974,22 +974,21 @@ static void birthday_restore_date_menu(birthday_date_state_t* menu) {
 }
 
 /* Recolor the birthday menu's render records for the confirmation prompt:
- * the date cursor takes sequence 10 and palette 7, the label is grayed, and
+ * the date cursor takes sequence 10 and palette 7, the retained title actor is grayed, and
  * the title and date windows take palette 2 (the CLUT 16 entries right of
- * tail.clut).
+ * clut).
  *
  * The target reserves a 24-byte frame it never touches (the stack adjustment
- * is even scheduled into the last load-delay slot), so the original body
- * declared an unused aggregate local of 17..24 bytes. */
+ * is even scheduled into the last load-delay slot), retained here as an unused local. */
 static void birthday_build_confirmation_menu(birthday_date_state_t* state) {
     s32 unused_scratch[6];
 
     g_window_records[state->cursor_record].sequence = 10;
     g_window_records[state->cursor_record].frame_index = g_window_records[state->cursor_record].anim_counter = 0;
 
-    g_window_records[state->label_record].color.r = 0x40;
-    g_window_records[state->label_record].color.g = 0x40;
-    g_window_records[state->label_record].color.b = 0x40;
+    g_window_records[state->retained_title_record].color.r = 0x40;
+    g_window_records[state->retained_title_record].color.g = 0x40;
+    g_window_records[state->retained_title_record].color.b = 0x40;
 
     g_window_records[state->cursor_record].palette = 7;
 

@@ -48,6 +48,9 @@ extern u8 g_portrait_special_unit_id;
  * battle; BATTLE never reads it. */
 extern u8 g_portrait_special_wldface_id;
 
+/* WORLD resolves the party record to a WLDFACE portrait code with palette bits. */
+s32 portrait_get_party_unit_code(s32 party_index);
+
 void portrait_load_party(void);
 void portrait_prepare_party_textures(void);
 

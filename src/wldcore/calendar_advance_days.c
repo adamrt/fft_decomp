@@ -20,9 +20,9 @@
  *
  * Every active proposition not yet returned returns when its elapsed days plus
  * the advanced days reach its assigned days (elapsed becomes the assigned
- * count); a recalled one returns with one more elapsed day; the rest keep
- * counting. Each proposition's days until it is offered again drop by the
- * advanced days, floored at 0, keeping its failure bits.
+ * count); a recalled one returns with one more elapsed day. The unfinished
+ * branch leaves elapsed days unchanged. Offer countdowns drop by the remaining
+ * days modulo 365, floored at 0, keeping their failure bits.
  *
  * The birthday table's element type must not be const: a const element makes
  * the reads unchanging, and the scheduler then hoists the second table read

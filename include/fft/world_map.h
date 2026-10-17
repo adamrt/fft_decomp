@@ -400,7 +400,7 @@ typedef struct world_map_cursor_level {
  * world_map_step_location_visibility_level; only the first four fields are known. */
 typedef struct world_map_visibility_level {
     s32 dot_index;     /* 0x00; map dot, and script variable 0x200 + dot_index */
-    s32 was_set;       /* 0x04; whether the variable was already set */
+    s32 erase;         /* 0x04; nonzero clears visibility instead of revealing the dot */
     s32 delay;         /* 0x08; frames the step handler waits, 0x10 here */
     s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
     u8 _unused_10[0x4c];
@@ -412,8 +412,8 @@ typedef char world_map_visibility_level_size_must_be_92[sizeof(world_map_visibil
  * path arguments, which location_script_dispatch_requests passes from g_location_script_state.args. Only
  * the first four fields of the slot are known. */
 typedef struct world_map_path_level {
-    s32 path_id;       /* 0x00; g_location_script_state.args[0] */
-    s32 path_id_hi;    /* 0x04; g_location_script_state.args[1] */
+    s32 from_location; /* 0x00; g_location_script_state.args[0] */
+    s32 to_location;   /* 0x04; g_location_script_state.args[1] */
     s32 erase;         /* 0x08; step handler walks the path backwards when set */
     s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
     u8 _unused_10[0x4c];

@@ -15,6 +15,7 @@
 #include "fft/message_box.h"
 #include "fft/music.h"
 #include "fft/party.h"
+#include "fft/portrait.h"
 #include "fft/proposition.h"
 #include "fft/save.h"
 #include "fft/screen.h"
@@ -72,7 +73,7 @@ s32 proposition_step_participant_message(proposition_report_level_t* state, s32 
                 do {
                     s32 participant
                         = g_proposition_active[g_proposition_report.proposition_index].participant_indices[i];
-                    if (participant != g_proposition_report.excluded_party_index)
+                    if (participant != g_proposition_report.reporter_party_index)
                         candidates[count++] = participant;
                     i++;
                 } while (i < g_proposition_active[g_proposition_report.proposition_index].participant_count);
@@ -91,8 +92,8 @@ s32 proposition_step_participant_message(proposition_report_level_t* state, s32 
     case 2:
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         g_text_substitution_values[0] = g_proposition_report.speaker_party_index + TEXT_ID_UNIT_NAME_BASE;
-        script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT,
-            formation_get_party_unit_sprite(g_proposition_report.speaker_party_index));
+        script_set_variable(
+            EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(g_proposition_report.speaker_party_index));
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
             proposition_adjust_message(message, g_proposition_report.speaker_party_index) + TEXT_ID_WORLD_MESSAGE_BASE,
             0);
@@ -425,13 +426,13 @@ void proposition_apply_extra_days(void) {
 
 /* Return 1 + the party index of the participant the job report praises, or 0
  * for none. A participant whose job falls in the proposition's preferred job
- * category wins, preferring one other than excluded_party_index. Otherwise,
+ * category wins, preferring one other than reporter_party_index. Otherwise,
  * among the other participants whose job is in the proposition's nine-job
  * list, the one whose job comes earliest wins, but only when one or two
  * match; three matches name nobody.
  *
  * The target keeps &g_proposition_report.proposition_index in s5 and
- * reaches excluded_party_index, 12 bytes below, off the same base, which is
+ * reaches reporter_party_index, 12 bytes below, off the same base, which is
  * why it saves one more callee-saved register than a per-field access would.
  *
  * `base` stays an explicit local so the job-list offset is computed once in
@@ -468,7 +469,7 @@ s32 proposition_find_preferred_job_unit(void) {
 
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            if (candidates[i] != g_proposition_report.excluded_party_index) {
+            if (candidates[i] != g_proposition_report.reporter_party_index) {
                 return candidates[i] + 1;
             }
         }
@@ -478,7 +479,7 @@ s32 proposition_find_preferred_job_unit(void) {
     base = (g_proposition_selected_row.job_list_index - 1) * 9;
     for (i = 0; i < participant_count; i++) {
         party_index = g_proposition_active[g_proposition_report.proposition_index].participant_indices[i];
-        if (party_index != g_proposition_report.excluded_party_index) {
+        if (party_index != g_proposition_report.reporter_party_index) {
             unit = party_get_roster_unit(party_index);
             for (k = 0; k < 9; k++) {
                 if (jobs[base + k] == unit->job_id) {

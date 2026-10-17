@@ -546,7 +546,7 @@ static void proposition_show_unit_portrait(proposition_send_unit_level_t* unused
     CVECTOR* color;
     RECT* bounds;
 
-    code = formation_get_party_unit_sprite(party_index);
+    code = portrait_get_party_unit_code(party_index);
     cell = code;
     portrait_build_unit_poly(&poly, code);
     g_window_gs_image_records[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
@@ -1366,7 +1366,7 @@ void proposition_step_report_level(menu_stack_record_t* level) {
             participant
                 = g_proposition_active[g_proposition_report.proposition_index].participant_indices
                       [(rand() * g_proposition_active[g_proposition_report.proposition_index].participant_count) >> 15];
-            if (participant == g_proposition_report.excluded_party_index) {
+            if (participant == g_proposition_report.reporter_party_index) {
                 g_text_substitution_values[1] = proposition_adjust_message(0xE5, participant) + TEXT_ID_WORLD_MENU_BASE;
             } else {
                 g_text_substitution_values[1] = participant + TEXT_ID_UNIT_NAME_BASE;
@@ -1609,10 +1609,10 @@ static void proposition_push_result_level(s32 proposition) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     }
 
-    party = &g_proposition_report.excluded_party_index;
+    party = &g_proposition_report.reporter_party_index;
     g_text_substitution_values[0] = *party + TEXT_ID_UNIT_NAME_BASE;
     message = 0x9C;
-    script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, formation_get_party_unit_sprite(*party));
+    script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(*party));
     if (g_proposition_report.recalled != 0) {
         message = 0xA2;
     }
@@ -1790,7 +1790,7 @@ void proposition_step_result_level(menu_stack_record_t* level) {
 static void proposition_prepare_report(s32 proposition_index) {
     proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition_index].proposition_id);
     g_proposition_report.proposition_index = proposition_index;
-    g_proposition_report.excluded_party_index = proposition_select_report_speaker(proposition_index);
+    g_proposition_report.reporter_party_index = proposition_select_report_speaker(proposition_index);
     proposition_determine_success();
     proposition_calculate_jp_and_gil();
     proposition_roll_bonus_reward();
@@ -1895,9 +1895,9 @@ static s32 proposition_step_message(proposition_report_level_t* state, s32 messa
         state->phase = 1;
         if (!thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE))
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-        party_index = &g_proposition_report.excluded_party_index;
+        party_index = &g_proposition_report.reporter_party_index;
         g_text_substitution_values[0] = *party_index + TEXT_ID_UNIT_NAME_BASE;
-        script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, formation_get_party_unit_sprite(*party_index));
+        script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(*party_index));
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
             proposition_adjust_message(message, *party_index) + TEXT_ID_WORLD_MESSAGE_BASE, 0);
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
