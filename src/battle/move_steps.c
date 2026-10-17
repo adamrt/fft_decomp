@@ -1473,7 +1473,7 @@ void move_step_update_jump_landing(unit_t* unit) {
 /* Whether a walking unit has reached the near edge of its movement destination
  * tile in the given direction.  Tiles are 28 world units wide and the test
  * keeps a 7-unit margin. */
-s32 move_step_has_reached_entry_edge(s32 direction, unit_t* unit) {
+s32 move_step_has_reached_entry_edge(s32 direction, const unit_t* unit) {
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
         return unit->world_coords.vz >= ((unit->movement.destination_y * BATTLE_MAP_TILE_SIZE) + 7);
@@ -1607,7 +1607,7 @@ void move_step_update_jump_ascent(unit_t* unit) {
  * along the given facing.  Tile centers are 28 world units apart with a
  * half-tile offset of 14.
  */
-s32 move_step_has_reached_center(s32 direction, unit_t* unit) {
+s32 move_step_has_reached_center(s32 direction, const unit_t* unit) {
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
         return unit->world_coords.vz
@@ -1720,7 +1720,7 @@ void move_step_update_walk_to_center(unit_t* unit) {
 
 /* Whether a moving unit has come within 7 units of the far edge of the tile it occupies in
  * direction (move_direction_e). */
-s32 move_step_has_reached_exit_edge(s32 direction, unit_t* unit) {
+s32 move_step_has_reached_exit_edge(s32 direction, const unit_t* unit) {
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
         return unit->world_coords.vz >= (((unit->map_y + 1) * BATTLE_MAP_TILE_SIZE) - 7);

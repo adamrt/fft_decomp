@@ -21,7 +21,8 @@
  * the keyframe's emitter record, which the handler reads through its own view of effect_geometry.h, and frame counts
  * from the start of the keyframe. The slot's phase (effect_record_t.callback_phase, effect_callback_phase_e) starts
  * at INIT, where the handler allocates its work block into work_slots; it then stays at UPDATE until the channel
- * sets DESTROY two frames before the keyframe ends. */
+ * sets DESTROY two frames before the keyframe ends. Results are ignored; the s32
+ * callback contract preserves instruction scheduling in several handlers. */
 typedef s32 (*effect_callback_t)(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* Resident catalog entries used by effect script opcodes 06 and 07. */

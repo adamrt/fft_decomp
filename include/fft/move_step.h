@@ -127,9 +127,12 @@ void move_step_update_float_to_center(unit_t* unit);
 void move_step_update_jump_ascent(unit_t* unit);
 void move_step_update_jump_flight(unit_t* unit);
 void move_step_update_jump_landing(unit_t* unit);
-s32 move_step_has_reached_exit_edge(s32 direction, unit_t* unit);
-s32 move_step_has_reached_center(s32 direction, unit_t* unit);
-s32 move_step_has_reached_entry_edge(s32 direction, unit_t* unit);
+
+/* Directions come from move_step_get_direction; other values leave the result unset.
+ * The signed parameter preserves the original dispatch. */
+s32 move_step_has_reached_exit_edge(s32 direction, const unit_t* unit);
+s32 move_step_has_reached_center(s32 direction, const unit_t* unit);
+s32 move_step_has_reached_entry_edge(s32 direction, const unit_t* unit);
 void move_step_snap_axis_to_exit_edge(s32 direction, unit_t* unit);
 void move_step_snap_axis_to_center(s32 direction, unit_t* unit);
 void move_step_displace_unit_at_destination_tile(unit_t* unit, s32 direction);

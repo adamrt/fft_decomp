@@ -446,8 +446,9 @@ u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
  *
  * A monster lists its first three skills, and the fourth too when a Monster
  * Skill supporter stands next to it. A Frog lists Frog Attack first and then
- * only the Frog spell. The function has no return statement and writes no
- * terminator after a list; its one caller ignores the result.
+ * only the Frog spell. A completed list has no terminator and leaves the
+ * result unset; early failures return 0. Its one caller ignores the result.
+ * Keeping the s32 return preserves the original failure-path code.
  *
  * The target keeps two live copies of the ability id: `id` in $a0 feeds both
  * sign extensions and the `addiu -1` range check, while `ability` in $a1
