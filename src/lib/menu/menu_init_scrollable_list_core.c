@@ -37,6 +37,12 @@ void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* 
     g_menu_list_scroll_offset = 0;
     g_menu_list_redraw_pending = 1;
     g_gfx_transition_frame = 0;
+#ifndef FFT_EVENT_JOBSTTS
+    /* BUNIT and EQUIP reset the ordering-table lock; JOBSTTS leaves it alone. */
     g_gfx_otag_index_locked = 0;
+#endif
+#ifdef FFT_EVENT_BUNIT
+    /* Only BUNIT resets the page-scroll input gate here. */
     g_input_page_scroll_disabled = 0;
+#endif
 }

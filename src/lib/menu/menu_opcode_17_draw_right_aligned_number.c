@@ -1,5 +1,6 @@
 /* The menu command that draws a row callback's value right-aligned in eight-pixel cells. */
 
+#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_cursor.h"
@@ -21,14 +22,28 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
     s16 blanks;
     s16 i;
     s32 j;
+#ifdef FFT_EVENT_BUNIT
     s32 x;
     s32 y;
+#else
+    /* EQUIP keeps the running x coordinate at 16 bits and y at 8 bits. */
+    s16 x;
+    u8 y;
+#endif
 
     count = g_menu_row_callbacks[cmd->number.getter].value(cmd->number.value);
+#ifdef FFT_EVENT_BUNIT
     count = sprintf(digits, g_unit_list_text_decimal_format, count);
     x = cmd->number.x;
     y = cmd->number.y;
     blanks = cmd->number.width - count;
+#else
+    /* EQUIP computes the padding before loading the narrow coordinates. */
+    count = sprintf(digits, g_equipment_text_decimal_format, count);
+    blanks = cmd->number.width - count;
+    x = cmd->number.x;
+    y = cmd->number.y;
+#endif
     count = cmd->number.width - blanks;
     g_gfx_blank_cell_rect.position.y = y + 4;
     for (i = blanks - 1; i != -1; i--) {
@@ -42,8 +57,14 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
     glyph_rect.w = 8;
     glyph_rect.h = 0x10;
     for (j = 0; j < count; j++) {
+#ifdef FFT_EVENT_BUNIT
         menu_gfx_enqueue_textured_quad(&glyph_rect, (digits[j] - '0') * 8 + 0xA8, 0x30, 0, 0,
             g_menu_cursor_texture_page, 0x3ED3, g_menu_gfx_otag_index);
+#else
+        /* EQUIP obtains the CLUT from the menu palette state. */
+        menu_gfx_enqueue_textured_quad(&glyph_rect, (digits[j] - '0') * 8 + 0xA8, 0x30, 0, 0,
+            g_menu_cursor_texture_page, g_menu_text_clut_1_mode0, g_menu_gfx_otag_index);
+#endif
         glyph_rect.x += 8;
     }
     return menu_next_instruction(cmd);

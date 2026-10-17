@@ -25,7 +25,7 @@ functions:
   - {addr: 0x801bf004, size: 464, name: menu_build_scaled_draw_area_packets, hash: 89323ef0080a45f6, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
   - {addr: 0x801bf1d4, size: 52, name: menu_init_scaled_draw_area_packets, hash: 8568902b86f9d430, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
   - {addr: 0x801bf208, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bf234, size: 88, name: portrait_build_poly, hash: a8a2d7a5b553b63f}
+  - {addr: 0x801bf234, size: 88, name: portrait_build_poly, hash: a8a2d7a5b553b63f, source: src/lib/menu/portrait_build_poly.c}
   - {addr: 0x801bf28c, size: 100, name: portrait_clip_from_right, hash: 8b8f88a21b561ac0, unit: portrait_transitions}
   - {addr: 0x801bf2f0, size: 100, name: portrait_clip_from_left, hash: 0e59600fae531215, unit: portrait_transitions}
   - {addr: 0x801bf354, size: 1064, name: portrait_build_transition, hash: 9632d1e8775d742c, unit: portrait_transitions}
@@ -409,7 +409,7 @@ functions:
   - {addr: 0x801c7ea0, size: 1384, name: unit_list_gfx_init_buffers, hash: a4cfeb32963dd7b9, unit: packet_buffers}
   - {addr: 0x801c8408, size: 52, name: menu_set_vsync_mode_and_event_speed, hash: 33b6a2c8c1908b56, source: src/lib/menu/menu_set_vsync_mode_and_event_speed.c}
   - {addr: 0x801c843c, size: 32, name: menu_get_event_speed, hash: d1c5682dc9e305b3, source: src/lib/menu/menu_get_event_speed.c}
-  - {addr: 0x801c845c, size: 212, name: menu_init_scrollable_list_core, hash: c2663ee9beede6f5}
+  - {addr: 0x801c845c, size: 212, name: menu_init_scrollable_list_core, hash: c2663ee9beede6f5, source: src/lib/menu/menu_init_scrollable_list_core.c}
   - {addr: 0x801c8530, size: 52, name: menu_init_scrollable_list, hash: 2e929bd3e1d1a802, source: src/lib/menu/menu_init_scrollable_list.c}
   - {addr: 0x801c8564, size: 148, name: menu_script_run, hash: 596b0013f79e045b, source: src/lib/menu/menu_script_run.c}
   - {addr: 0x801c85f8, size: 80, name: menu_run_script_with_palette_mode, hash: 3eea69c59c091978, source: src/lib/menu/menu_run_script_with_palette_mode.c}
@@ -428,7 +428,7 @@ functions:
   - {addr: 0x801c9698, size: 104, name: menu_opcode_0b_set_draw_color, hash: f8e9ecc48cf193a2, source: src/lib/menu/menu_opcode_0b_set_draw_color.c}
   - {addr: 0x801c9700, size: 24, name: menu_opcode_0f_set_draw_priority, hash: e3a66bb32067285c, source: src/lib/menu/menu_opcode_0f_set_draw_priority.c}
   - {addr: 0x801c9718, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: a52fa763ae07e832}
-  - {addr: 0x801c9b4c, size: 424, name: menu_opcode_17_draw_right_aligned_number, hash: fbd03bb0cdf31870}
+  - {addr: 0x801c9b4c, size: 424, name: menu_opcode_17_draw_right_aligned_number, hash: fbd03bb0cdf31870, source: src/lib/menu/menu_opcode_17_draw_right_aligned_number.c}
   - {addr: 0x801c9cf4, size: 652, name: menu_update_and_draw_sliding_cursor, hash: 48df7a46e058abc1, source: src/lib/menu/menu_update_and_draw_sliding_cursor.c}
   - {addr: 0x801c9f80, size: 864, name: menu_update_and_draw_bouncing_cursor, hash: 8fec6593004c6ff0}
   - {addr: 0x801ca2e0, size: 108, name: menu_script_skip_group, hash: a7fc8159f10402de, source: src/lib/menu/menu_script_skip_group.c}
@@ -436,7 +436,7 @@ functions:
   - {addr: 0x801ca5ec, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d, source: src/lib/menu/menu_init_and_draw_scrollable_list_simple.c}
   - {addr: 0x801ca61c, size: 52, name: menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d, source: src/lib/menu/menu_init_and_draw_scrollable_list.c}
   - {addr: 0x801ca650, size: 2500, name: menu_opcode_10_draw_scrollable_list, hash: 358544f0b74bb783}
-  - {addr: 0x801cb014, size: 52, name: gfx_set_draw_color, hash: febb234714c08dd5}
+  - {addr: 0x801cb014, size: 52, name: gfx_set_draw_color, hash: febb234714c08dd5, source: src/lib/menu/gfx_set_draw_color.c}
   - {addr: 0x801cb048, size: 16, name: gfx_set_otag_index, hash: b8570cd4076e6ca3, source: src/lib/menu/gfx_set_otag_index.c}
   - {addr: 0x801cb058, size: 220, name: menu_set_palette_mode, hash: 097927c9311af253, source: src/lib/menu/menu_set_palette_mode.c}
   - {addr: 0x801cb134, size: 100, name: menu_opcode_13_clear_temporary_draw_area, hash: 5762755fa4395bb7, source: src/lib/menu/menu_opcode_13_clear_temporary_draw_area.c}
@@ -1487,7 +1487,7 @@ functions:
   - {addr: 0x801ca804, size: 48, name: gfx_load_image_and_wait, hash: be3db739ba4a6ec6, unit: gfx_image_transfer_wait}
   - {addr: 0x801ca834, size: 48, name: gfx_store_image_and_wait, hash: 42b445a1713fca16, unit: gfx_image_transfer_wait}
   - {addr: 0x801ca864, size: 60, name: gfx_move_image_and_wait, hash: 2dee44c691484772, source: src/lib/menu/gfx_move_image_and_wait.c}
-  - {addr: 0x801ca8a0, size: 204, name: menu_init_scrollable_list_core, hash: 4741aa86b1c1513e}
+  - {addr: 0x801ca8a0, size: 204, name: menu_init_scrollable_list_core, hash: 4741aa86b1c1513e, source: src/lib/menu/menu_init_scrollable_list_core.c}
   - {addr: 0x801ca96c, size: 52, name: menu_init_scrollable_list, hash: 6a3f45c6b9c7fd8c, source: src/lib/menu/menu_init_scrollable_list.c}
   - {addr: 0x801ca9a0, size: 52, name: menu_init_and_draw_scrollable_list, hash: 503e07ba5c988426, source: src/lib/menu/menu_init_and_draw_scrollable_list.c}
   - {addr: 0x801ca9d4, size: 148, name: menu_script_run, hash: 796e6e240ffcc397, source: src/lib/menu/menu_script_run.c}
@@ -1509,7 +1509,7 @@ functions:
   - {addr: 0x801cbcc8, size: 104, name: menu_opcode_0b_set_draw_color, hash: ead031d84ebc84e9, source: src/lib/menu/menu_opcode_0b_set_draw_color.c}
   - {addr: 0x801cbd30, size: 24, name: menu_opcode_0f_set_draw_priority, hash: 0d38c979b93736fb, source: src/lib/menu/menu_opcode_0f_set_draw_priority.c}
   - {addr: 0x801cbd48, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: 66875582960ce0d8}
-  - {addr: 0x801cc17c, size: 428, name: menu_opcode_17_draw_right_aligned_number, hash: 325db0fd2794a02d}
+  - {addr: 0x801cc17c, size: 428, name: menu_opcode_17_draw_right_aligned_number, hash: 325db0fd2794a02d, source: src/lib/menu/menu_opcode_17_draw_right_aligned_number.c}
   - {addr: 0x801cc328, size: 660, name: menu_update_and_draw_animated_cursor, hash: 3938e60d49f17206, source: src/lib/menu/menu_update_and_draw_animated_cursor.c}
   - {addr: 0x801cc5bc, size: 108, name: menu_script_skip_group, hash: e3dba406e3887731, source: src/lib/menu/menu_script_skip_group.c}
   - {addr: 0x801cc628, size: 672, name: menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef, source: src/lib/menu/menu_draw_scrollable_list.c}
@@ -2002,7 +2002,7 @@ functions:
   - {addr: 0x801e1f0c, size: 228, name: menu_gfx_enqueue_draw_area, hash: 5384ef4ee1f792f8, source: src/lib/menu/menu_gfx_enqueue_draw_area.c}
   - {addr: 0x801e1ff0, size: 48, name: gfx_load_image_and_wait, hash: be3db739ba4a6ec6, unit: gfx_image_transfer_wait}
   - {addr: 0x801e2020, size: 48, name: gfx_store_image_and_wait, hash: 42b445a1713fca16, unit: gfx_image_transfer_wait}
-  - {addr: 0x801e2050, size: 196, name: menu_init_scrollable_list_core, hash: cbed765f1b648634}
+  - {addr: 0x801e2050, size: 196, name: menu_init_scrollable_list_core, hash: cbed765f1b648634, source: src/lib/menu/menu_init_scrollable_list_core.c}
   - {addr: 0x801e2114, size: 52, name: menu_init_scrollable_list, hash: 486b8503d50e4e8e, source: src/lib/menu/menu_init_scrollable_list.c}
   - {addr: 0x801e2148, size: 52, name: menu_init_and_draw_scrollable_list, hash: 5f113e345c0f0da5, source: src/lib/menu/menu_init_and_draw_scrollable_list.c}
   - {addr: 0x801e217c, size: 188, name: menu_script_run, hash: 276770c4066d6467, unit: stream_runner}
@@ -2314,7 +2314,7 @@ functions:
   - {addr: 0x801bf01c, size: 472, name: menu_build_scaled_draw_area_packets, hash: 79a90437bb46609d, source: src/event/require/gfx_build_scaled_draw_area_packets.c}
   - {addr: 0x801bf1f4, size: 52, name: menu_init_scaled_draw_area_packets, hash: 9f34b6fd6a40f6d7, source: src/lib/menu/menu_init_scaled_draw_area_packets.c}
   - {addr: 0x801bf228, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
-  - {addr: 0x801bf254, size: 88, name: portrait_build_poly, hash: 5531851d002cce17}
+  - {addr: 0x801bf254, size: 88, name: portrait_build_poly, hash: 5531851d002cce17, source: src/lib/menu/portrait_build_poly.c}
   - {addr: 0x801bf2ac, size: 100, name: portrait_clip_from_right, hash: f06c2f5b8900d3fa, unit: portrait_transitions}
   - {addr: 0x801bf310, size: 100, name: portrait_clip_from_left, hash: ca2ed33a312f5e93, unit: portrait_transitions}
   - {addr: 0x801bf374, size: 1064, name: portrait_build_transition, hash: 5d4cdd324a80f71e, unit: portrait_transitions}
