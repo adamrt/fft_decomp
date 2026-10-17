@@ -142,11 +142,11 @@ void formula_damage_pa_plus_y_half_times_pa(void) {
     }
 }
 
-/* Formula 0x32: damage ((PA + (PA + Y) / 2) * rnd(1..X)); physical evade. The
+/* Formula 0x32 (Repeating Fist): damage ((PA + (PA + Y) / 2) * rnd(1..X)); physical evade. The
  * sum comes from formula_store_xa_plus_ya, so zodiac compatibility
  * scales only its (PA + Y) / 2 part. The random factor is kept in
  * random_damage_factor. */
-void formula_damage_random_x_times_pa_sum(void) {
+void formula_repeating_fist(void) {
     action_data_t* action;
     u8* factor;
     s32 rnd;
@@ -180,8 +180,8 @@ void formula_hit_pa_x_percent(void) {
     }
 }
 
-/* Formula 0x34: heal (PA*Y) HP and (PA*Y/2) MP. */
-void formula_heal_pa_times_y_and_mp(void) {
+/* Formula 0x34 (Chakra): heal (PA*Y) HP and (PA*Y/2) MP. */
+void formula_chakra(void) {
     action_data_t* action;
     u16 amount;
 
@@ -405,10 +405,10 @@ void formula_hit_ma_x_percent_no_evade(void) {
     }
 }
 
-/* Formula 0x52: damage equal to the caster's missing HP (max HP - HP), with
+/* Formula 0x52 (Self-Destruct): damage equal to the caster's missing HP (max HP - HP), with
  * 100% status; the caster itself, when caught in the area, takes its own
  * current HP as damage and no status. */
-void formula_damage_caster_missing_hp_self_sacrifice(void) {
+void formula_self_destruct(void) {
     if (g_action_target != g_action_attacker) {
         unit_stats_t* caster = g_action_attacker;
         action_data_t* action = g_action_target_data;
@@ -468,10 +468,10 @@ void formula_lower_ma_y(void) {
     g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
-/* Formula 0x57: +1 level (a miss at level 99) and the ability's status on the
+/* Formula 0x57 (Please Eat): +1 level (a miss at level 99) and the ability's status on the
  * caster. A full HP and MP heal is stored first, but its action type is then
  * overwritten by the level change's. */
-void formula_raise_level_by_one_add_status_on_caster(void) {
+void formula_please_eat(void) {
     action_data_t* action;
     unit_stats_t* saved_unit;
     action_data_t* saved_action;
@@ -551,17 +551,17 @@ void formula_lower_level_by_one(void) {
     }
 }
 
-/* Formula 0x5A: status, 100%; dragons only (formula_check_dragon). */
-void formula_dragon_hit_100(void) {
+/* Formula 0x5A (Dragon Tame): status, 100%; dragons only (formula_check_dragon). */
+void formula_dragon_tame(void) {
     formula_check_dragon();
     if (g_action_target_data->hit != 0) {
         formula_apply_status_to_action();
     }
 }
 
-/* Formula 0x5B: dragons only; the caster loses MaxHP/5 and the target gains
+/* Formula 0x5B (Dragon Care): dragons only; the caster loses MaxHP/5 and the target gains
  * twice that (formula 0x3C), then 100% status. Y is not read. */
-void formula_dragon_transfer_caster_hp_add_status(void) {
+void formula_dragon_care(void) {
     formula_check_dragon();
     if (g_action_target_data->hit != 0) {
         formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths();
@@ -569,16 +569,16 @@ void formula_dragon_transfer_caster_hp_add_status(void) {
     }
 }
 
-/* Formula 0x5C: +Brave (X), +PA/MA/Speed (Y); dragons only. */
-void formula_dragon_brave_x_stats_y(void) {
+/* Formula 0x5C (Dragon PowerUp): +Brave (X), +PA/MA/Speed (Y); dragons only. */
+void formula_dragon_power_up(void) {
     formula_check_dragon();
     if (g_action_target_data->hit != 0) {
         formula_add_brave_x_stats_y();
     }
 }
 
-/* Formula 0x5D: Quick; dragons only. */
-void formula_dragon_set_quick(void) {
+/* Formula 0x5D (Dragon LevelUp): Quick; dragons only. */
+void formula_dragon_level_up(void) {
     formula_check_dragon();
     if (g_action_target_data->hit != 0) {
         formula_apply_quick_effect();
