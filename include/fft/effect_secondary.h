@@ -160,10 +160,11 @@ typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_HOLY = 5,
     EFFECT_ELEMENT_INDEX_DARK = 6,
     EFFECT_ELEMENT_INDEX_ICE = 7,
-    EFFECT_ELEMENT_INDEX_LIGHTNING = 8
+    EFFECT_ELEMENT_INDEX_LIGHTNING = 8,
+    EFFECT_ELEMENT_INDEX_COUNT = 9
 } effect_element_index_e;
 
-extern u8 g_effect_element_masks[];
+extern u8 g_effect_element_masks[EFFECT_ELEMENT_INDEX_COUNT];
 
 s32 effect_get_element_index(s32 elements);
 

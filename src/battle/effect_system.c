@@ -106,7 +106,7 @@ typedef struct effect_reflect_buffer {
     POLY_GT3 prims[2][24];
 } effect_reflect_buffer_t;
 
-extern const psyq_tmd_header_t* g_effect_model_files[];
+extern const psyq_tmd_header_t* g_effect_model_files[EFFECT_MODEL_COUNT];
 
 /* Secondary handler work state. */
 /* Per-secondary-slot spawn state for the two-particle death poof. */
@@ -206,7 +206,9 @@ extern effect_charge_params_t g_effect_charge_line_params[2];
 /* Interleaved x/y offsets for eight direction sectors, then the first pair again. */
 extern s16 g_effect_charge_line_direction_offsets[18];
 extern u8 g_effect_charge_line_fade_levels[];
-extern rgb24_t g_effect_charge_trail_colors[]; /* spell-charge trail color of each effect_element_index_e */
+
+/* Spell-charge trail color of each effect_element_index_e. */
+extern rgb24_t g_effect_charge_trail_colors[EFFECT_ELEMENT_INDEX_COUNT];
 
 /* Brightness (out of 128) of each of a summon-charge ring's ten slots, newest point first. */
 extern u8 g_effect_summon_ring_brightness[];
@@ -1428,7 +1430,7 @@ s32 effect_get_element_index(s32 elements) {
     s32 i;
 
     if (elements != 0) {
-        for (i = 0; i < 9; i++) {
+        for (i = 0; i < EFFECT_ELEMENT_INDEX_COUNT; i++) {
             if ((elements & g_effect_element_masks[i]) != 0) {
                 break;
             }

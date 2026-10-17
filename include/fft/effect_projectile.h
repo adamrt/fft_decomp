@@ -17,7 +17,8 @@ typedef enum effect_model {
     EFFECT_MODEL_ARROW = 0,
     EFFECT_MODEL_STONE = 1,
     EFFECT_MODEL_REFLECT = 2,
-    EFFECT_MODEL_SHURIKEN = 3 /* drawn for the thrown items of ITEM_TYPE_SHURIKEN */
+    EFFECT_MODEL_SHURIKEN = 3, /* drawn for the thrown items of ITEM_TYPE_SHURIKEN */
+    EFFECT_MODEL_COUNT = 4
 } effect_model_e;
 
 /* Top-byte TMD commands decoded for the effect models. Bit 1 selects semitransparency;
