@@ -1775,8 +1775,8 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
  * The identical `menu += 0x37` arms split the block for the scheduler (jump2
  * cross-jumps them back together), keeping the add after the picture call so
  * reorg puts it in the wait call's delay slot. The label window's position is
- * stored through a stride-36 view based at &records->x, as the target forms
- * (records + 0x18) + index * 36. The unused array reproduces the 0xb8 frame.
+ * stored through a stride-36 view based at &records->position, as the target forms
+ * (records + 0x18) + index * 36.
  */
 void location_push_menu_level(s32 menu) {
     GsIMAGE image;
@@ -1809,16 +1809,16 @@ void location_push_menu_level(s32 menu) {
     file_wait_for_pending();
 
     flags = g_system_flags | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    level = &g_menu_stack_records[g_menu_stack_depth].location_list;
-    level->extra_render = -1;
-    level->label_window = -1;
-    level->frame_render = -1;
-    g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window = -1;
-    g_menu_stack_records[g_menu_stack_depth].location_list.mode = 0;
+    level = &g_menu_stack_records[g_menu_stack_depth].location_menu;
+    level->slots.render_b = -1;
+    level->slots.window_b = -1;
+    level->slots.render_a = -1;
+    g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a = -1;
+    g_menu_stack_records[g_menu_stack_depth].location_menu.fade = 0;
     g_system_flags = flags;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window = index;
+    g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a = index;
     records = g_window_records;
     /* Direct record.color access changes the column base and instruction scheduling. */
     color = &records->color;
@@ -1831,7 +1831,7 @@ void location_push_menu_level(s32 menu) {
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;
-    g_menu_stack_records[g_menu_stack_depth].location_list.mode = 8;
+    g_menu_stack_records[g_menu_stack_depth].location_menu.fade = 8;
 
     /* With a picture: upload the frame and picture TIMs, then add the picture and its border window. */
     if (g_world_map_marker_state.marker.picture_id != 0) {
@@ -1843,7 +1843,7 @@ void location_push_menu_level(s32 menu) {
         LoadClut(image.clut, image.cx, image.cy);
 
         index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_menu_stack_records[g_menu_stack_depth].location_list.frame_render = index;
+        g_menu_stack_records[g_menu_stack_depth].location_menu.slots.render_a = index;
         bounds.x = image.px;
         bounds.y = image.py;
         bounds.w = image.pw;
@@ -1858,7 +1858,7 @@ void location_push_menu_level(s32 menu) {
         g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
 
         index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_menu_stack_records[g_menu_stack_depth].location_list.label_window = index;
+        g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_b = index;
         g_window_records[index].sequence = WINDOW_ANIM_LOCATION_PICTURE_BORDER;
         g_window_records[index].priority = 0xB;
         records[index].anim_counter = 0;
@@ -1873,10 +1873,10 @@ void location_push_menu_level(s32 menu) {
 
     /* Size the panel to the widest entry plus an 8-pixel margin. */
     widest = 0;
-    count = g_menu_stack_records[g_menu_stack_depth].location_list.entry_count;
+    count = g_menu_stack_records[g_menu_stack_depth].location_menu.entry_count;
     for (i = 0; i < count; i++) {
         text_measure_pixels(&text_width, &text_rows,
-            text_find_entry(g_menu_stack_records[g_menu_stack_depth].location_list.entries[i]));
+            text_find_entry(g_menu_stack_records[g_menu_stack_depth].location_menu.entries[i]));
         if (widest < text_width) {
             widest = text_width;
         }
@@ -1884,7 +1884,7 @@ void location_push_menu_level(s32 menu) {
     widest += 8;
 
     for (i = 0; i < count; i++) {
-        value = g_menu_stack_records[g_menu_stack_depth].location_list.entries[i];
+        value = g_menu_stack_records[g_menu_stack_depth].location_menu.entries[i];
         g_menu_stack_entry_values[i] = value;
         g_menu_stack_row_flags[i] = 0;
     }
@@ -1903,7 +1903,7 @@ void location_push_menu_level(s32 menu) {
         origin.y = 0x70 - i * 8;
     }
     menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_LOCATION, count, i);
-    window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].location_list.entry_count, &layout, &origin);
+    window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].location_menu.entry_count, &layout, &origin);
     g_window_panel_render_state.vram_origin.x = 0x240;
     g_window_panel_render_state.header_id = 0;
     g_window_panel_render_state.vram_origin.y = 0x100;
@@ -1911,18 +1911,18 @@ void location_push_menu_level(s32 menu) {
     if (g_world_map_marker_state.marker.picture_id != 0) {
         s32 unused[6]; /* frame padding: the target frame is 0xb8 */
 
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.y = 0;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.x = -4;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.y = 0;
     } else {
         /* Here `index` is still the cursor window's record index, yet it reads the render record pool (retail). */
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.x = -4;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_list.cursor_window].position.y
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.x = -4;
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.y
             = g_window_gs_image_records[index].base.y - 8;
     }
 
     depth = g_menu_stack_depth;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    g_menu_stack_records[depth].location_list.delay = 8;
+    g_menu_stack_records[depth].location_menu.delay = 8;
     g_system_flags |= SYSTEM_FLAG_FREEZE_ANIMATION;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_LOCATION;
     g_menu_stack_depth = depth + 1;
@@ -1930,8 +1930,8 @@ void location_push_menu_level(s32 menu) {
 
 /* Restore the location list's optional renderer palette. */
 void location_resume_menu_level(menu_stack_record_t* level) {
-    if (level->location_list.extra_render != -1) {
-        g_window_gs_image_records[level->location_list.extra_render].palette = 0;
+    if (level->location_menu.slots.render_b != -1) {
+        g_window_gs_image_records[level->location_menu.slots.render_b].palette = 0;
     }
 }
 

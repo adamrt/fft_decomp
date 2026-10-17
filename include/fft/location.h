@@ -86,31 +86,16 @@ s32 location_load_picture(s32 index);
 void location_draw_label(GsOT* ot);
 
 /* location menu */
-/* Provisional: the location menu level as its step handler
- * location_step_menu_level sees it. */
-typedef struct location_menu_state {
-    menu_stack_slot_set_t slots; /* 0x00; slots.result is the confirmed choice */
-    s32 delay;                   /* 0x14 */
-    s32 fade;                    /* 0x18 */
+/* The LOCATION level's cursor and picture records, fade, and choice list. */
+typedef struct location_menu_level {
+    menu_stack_slot_set_t slots; /* 0x00; slots.result is 1 on confirm, 0 on cancel */
+    s32 delay;                   /* 0x14; 8 at push, counted down before input */
+    s32 fade;                    /* 0x18; starts at 8, increases to 128, then clears */
     u8 _unused_1c[0x14];
     s32 entry_count; /* 0x30 */
-} location_menu_state_t;
-
-/* Provisional: the LOCATION level as location_push_menu_level fills it (the step handler's view
- * is location_menu_state_t). */
-typedef struct location_menu_level {
-    s32 window_index;  /* 0x00 */
-    s32 cursor_window; /* 0x04; -1 until the cursor record is appended */
-    s32 frame_render;  /* 0x08; -1 when there is no picture */
-    s32 label_window;  /* 0x0c; -1 when there is no picture */
-    s32 extra_render;  /* 0x10; -1 at push; released on close when set (menu_stack_slot_set_t.render_b) */
-    s32 delay;         /* 0x14; 8 at push, counted down by the location step (location_menu_state_t.delay) */
-    s32 mode;          /* 0x18; 0 then 8 */
-    s32 selected_entry;
-    u8 _unused_20[0x10];
-    s32 entry_count; /* 0x30 */
-    s32 entries[10]; /* 0x34 */
+    s32 entries[10]; /* 0x34; choice text ids populated before the level opens */
 } location_menu_level_t;
+typedef char location_menu_level_size_must_be_92[sizeof(location_menu_level_t) == 92 ? 1 : -1];
 
 s32 location_build_menu_entries(s32 location_id, s32* out);
 void location_push_menu_level(s32 menu);
@@ -126,7 +111,7 @@ typedef struct travel_level {
     s32 location_id; /* 0x0c */
     u8 _unused_10[0x20];
     s32 pending_result;      /* 0x30 */
-    s32 choice_text_ids[10]; /* 0x34; retained as location_list.entries after arrival */
+    s32 choice_text_ids[10]; /* 0x34; retained as location_menu.entries after arrival */
 } travel_level_t;
 typedef char travel_level_size_must_be_92[sizeof(travel_level_t) == 92 ? 1 : -1];
 

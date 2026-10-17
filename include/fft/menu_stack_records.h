@@ -56,8 +56,7 @@ union menu_stack_record {
     world_map_cursor_level_t map_cursor;
     world_map_visibility_level_t visibility;
     world_map_path_level_t path;
-    location_menu_state_t location_menu;
-    location_menu_level_t location_list;
+    location_menu_level_t location_menu;
     proposition_report_level_t proposition_report;
     sound_novel_level_t sound_novel;
     proposition_result_level_t proposition_result;
