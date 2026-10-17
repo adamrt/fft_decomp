@@ -385,6 +385,9 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 	if err != nil {
 		return "", err
 	}
+	if err := validateUnitOwnedOriginal(m, want); err != nil {
+		return "", err
+	}
 	results, err := p.compileModule(config, resolver, m, nil)
 	if err != nil {
 		return "", err
@@ -464,6 +467,30 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 	}
 	fmt.Fprintf(p.stdout(), "byte-exact: %s (%d bytes)\n", filepath.ToSlash(relative), len(got))
 	return output, nil
+}
+
+// validateUnitOwnedOriginal checks unit data contracts against the verified
+// original image. compileUnit verifies the emitted bytes against those hashes,
+// but its per-function results omit the unit-owned sections; buildModule would
+// otherwise leave original passthrough data even if the configured hash changed.
+func validateUnitOwnedOriginal(m *moduleSpec, image []byte) error {
+	for _, unit := range m.Units {
+		for _, section := range []struct {
+			name  string
+			spans []rodataSpec
+		}{{".data", unit.Data}, {".rodata", unit.Rodata}} {
+			for _, span := range section.spans {
+				if span.Size <= 0 || !m.contains(span.Addr, span.Size) {
+					return fmt.Errorf("%s: unit %s owned %s at 0x%08x lies outside the module image", m.ID, unit.Name, section.name, span.Addr)
+				}
+				start := m.offset(span.Addr)
+				if shortHash(image[start:start+span.Size]) != span.Hash {
+					return fmt.Errorf("%s: unit %s owned %s at 0x%08x hash does not match the original bytes; run `make checksums`", m.ID, unit.Name, section.name, span.Addr)
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // loadCheckedConfig loads the configuration and runs check-config's checks.

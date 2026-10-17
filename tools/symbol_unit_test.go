@@ -102,6 +102,53 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 	}
 }
 
+func TestSplitSymbolsCommandPreservesOwnedData(t *testing.T) {
+	p := unitsTestProject(t)
+	if err := p.unitSymbolsCommand([]string{"--name", "menu_b", "--source", "src/battle/menu_b.c", "battle:menu_b1", "battle:menu_b2"}); err != nil {
+		t.Fatal(err)
+	}
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	battle := config.byID["battle"]
+	battle.unit("menu_b").Data = []rodataSpec{{Addr: 0x80067204, Size: 4, Hash: shortHash([]byte{7, 0, 0, 0})}}
+	for path, data := range renderConfigFiles(config) {
+		writeTestFile(t, filepath.Join(p.root, path), data)
+	}
+	sourcePath := filepath.Join(p.root, "src/battle/menu_b.c")
+	source, err := os.ReadFile(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source = []byte(strings.Replace(string(source), "extern int g_b_scalar;", "int g_b_scalar = 7;", 1))
+	writeTestFile(t, sourcePath, source)
+	if _, err := p.loadCheckedConfig(); err != nil {
+		t.Fatal(err)
+	}
+	targetPath := filepath.Join(p.root, "target/battle.yaml")
+	target, err := os.ReadFile(targetPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{{"--unit", "menu_b", "--dry-run"}, {"--unit", "menu_b"}} {
+		if err := p.splitSymbolsCommand(args); err == nil || !strings.Contains(err.Error(), "owns initialized data") {
+			t.Fatalf("split guard error = %v", err)
+		}
+	}
+	for path, before := range map[string][]byte{sourcePath: source, targetPath: target} {
+		after, err := os.ReadFile(path)
+		if err != nil || string(after) != string(before) {
+			t.Fatalf("refused split changed %s: %v", path, err)
+		}
+	}
+	for _, name := range []string{"menu_b1", "menu_b2"} {
+		if _, err := os.Stat(filepath.Join(p.root, "src/battle", name+".c")); !os.IsNotExist(err) {
+			t.Fatalf("refused split created %s.c: %v", name, err)
+		}
+	}
+}
+
 func TestUnitSymbolsCommandAbsorbsUnitsAndWrapsModuleBodies(t *testing.T) {
 	p := unitsTestProject(t)
 	// A shared two-function unit in both modules first.
