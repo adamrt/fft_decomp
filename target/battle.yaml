@@ -24,7 +24,7 @@ units:
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, data: [{addr: 0x8016dae4, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8016daf8, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
-  - {name: effect_renderer, source: src/battle/effect_renderer.c}
+  - {name: effect_renderer, source: src/battle/effect_renderer.c, data: [{addr: 0x801b69b0, size: 12, hash: 87026771f70658d8}]}
   - {name: effect_script, source: src/battle/effect_script.c}
   - {name: effect_system, source: src/battle/effect_system.c}
   - {name: event_resources, source: src/lib/event/event_resources.c}

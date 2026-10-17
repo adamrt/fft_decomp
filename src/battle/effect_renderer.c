@@ -56,7 +56,9 @@ extern s32 g_effect_frame_parity;
 extern u8* g_effect_prim_buffer;
 extern s32 g_effect_prim_buffer_offset;
 extern s32 g_effect_frame_start_prim_buffer_offset;
-extern s32 g_effect_primitive_sizes[3];
+
+/* The third 32-byte primitive kind has no named caller. */
+static s32 g_effect_primitive_sizes[3] = { sizeof(POLY_FT4), sizeof(DR_MODE), 32 };
 
 /* Private cursor state for the resident model decoder. */
 extern psyq_tmd_object_t* g_effect_model_object;
