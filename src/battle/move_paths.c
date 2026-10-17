@@ -93,18 +93,18 @@ static void move_step_update_fly_to_center(unit_t* unit) {
     if (move_step_has_reached_center(direction, unit) != 0) {
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
-        g_move_step_target_screen_z = unit_height_calculate_from_world_coords(unit);
+        g_move_step_target_world_y = unit_height_calculate_from_world_coords(unit);
         if (unit->movement_path_offset == unit->path.count && (unit->path.pending_mount & MOVE_PENDING_MOUNT_SET)) {
             mount = unit_get_by_battle_id(unit->path.pending_mount & MOVE_PENDING_MOUNT_ID_MASK);
             if (mount != 0) {
-                g_move_step_target_screen_z = unit_height_calculate_from_world_coords(mount) - 10;
+                g_move_step_target_world_y = unit_height_calculate_from_world_coords(mount) - 10;
             }
         }
         if (unit->velocity.vy > 0) {
-            if (unit->world_coords.vy >= g_move_step_target_screen_z) {
+            if (unit->world_coords.vy >= g_move_step_target_world_y) {
                 done = 1;
             }
-        } else if (unit->world_coords.vy <= g_move_step_target_screen_z) {
+        } else if (unit->world_coords.vy <= g_move_step_target_world_y) {
             done = 1;
         }
         if (unit->movement_path_offset != unit->path.count) {
@@ -115,7 +115,7 @@ static void move_step_update_fly_to_center(unit_t* unit) {
             move_step_snap_axis_to_center(direction, unit);
             unit->velocity.vz = 0;
             unit->velocity.vx = 0;
-            g_move_step_target_screen_z = unit_height_calculate_from_world_coords(unit);
+            g_move_step_target_world_y = unit_height_calculate_from_world_coords(unit);
             unit->step_phase = MOVE_STEP_PHASE_NONE;
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
@@ -1472,8 +1472,7 @@ void camera_tilt_start(s32 mode) {
 }
 
 /* Toggle the tilt target between low and high, starting the tilt at increment 1
- * with its sound. Targets 3 and 4 form a second pair that nothing else sets, so
- * those branches never run. */
+ * with its sound. Dormant targets 3 and 4 advance 3 -> 4 -> LOW; no named writer selects 3. */
 static void camera_tilt_toggle(void) {
     s32 target = g_camera_tilt_target;
 

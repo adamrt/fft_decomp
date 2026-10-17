@@ -59,7 +59,7 @@ void camera_real_coords_set_delta_from_values(const VECTOR* values, s32 frame_co
 }
 
 /* Advances the camera-position move by one frame while its countdown runs. Only
- * the uncalled battle_camera_set_real_coord_delta_* routines start the countdown,
+ * the uncalled camera_real_coords_set_delta_* routines start the countdown,
  * so nothing moves in retail. */
 void camera_real_coords_update_animation(void) {
     if (g_camera_real_coords_countdown != 0) {
@@ -197,7 +197,7 @@ void camera_zoom_set_delta_from_values(const VECTOR* values, s32 frame_count) {
 }
 
 /* Advances the zoom change by one frame while its countdown runs. Only the
- * uncalled battle_camera_set_zoom_delta_* routines start the countdown, so the
+ * uncalled camera_zoom_set_delta_* routines start the countdown, so the
  * zoom never animates here in retail. The body repeats
  * camera_real_coords_update_animation with the zoom globals. */
 void camera_zoom_update_animation(void) {
@@ -255,7 +255,7 @@ void camera_rotation_set_delta_from_values(const s16* values, s32 frame_count) {
 }
 
 /* Advances the camera-angle move by one frame while its countdown runs. Only the
- * uncalled battle_camera_set_rotation_delta_* routines start the countdown, so
+ * uncalled camera_rotation_set_delta_* routines start the countdown, so
  * nothing moves in retail. */
 void camera_rotation_update_animation(void) {
     if (g_camera_rotation_countdown != 0) {

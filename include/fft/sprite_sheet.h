@@ -392,7 +392,7 @@ typedef struct sprite_evtchr_slot {
     RECT image_rect;         /* 0x000c */
     sprite_evtchr_seq_t seq; /* 0x0014 */
     sprite_evtchr_shp_t shp; /* 0x051c */
-    clut_t clut;             /* 0x0f64; filled by sprite_evtchr_set_palette_by_runtime_id */
+    clut_t clut;             /* 0x0f64; filled by sprite_evtchr_unpack_to_slot */
     u8 image_data[0x6400];   /* 0x1164 */
 } sprite_evtchr_slot_t;
 typedef char sprite_evtchr_slot_size_must_be_30052[(sizeof(sprite_evtchr_slot_t) == 30052) ? 1 : -1];

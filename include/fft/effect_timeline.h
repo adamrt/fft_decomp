@@ -16,7 +16,7 @@ enum {
 
 /* particle channels */
 /* One 0x80-byte particle channel of an effect timeline. Keyframe k lasts
- * from frame_start[k] to frame_start[k + 1]. Entering it runs its 16-bit action value
+ * from frame_start[k - 1] to frame_start[k]. Entering it runs action[k]
  * (unit reactions, and binding a native handler to a callback slot); on each
  * of its frames it spawns its emitter, through the handler of the action's
  * callback slot when that is set. Keyframe 0 is passed over without spawning;

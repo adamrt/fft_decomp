@@ -2057,7 +2057,7 @@ void battle_map_color_field(s32 mode, s32 amount, s16 red, s16 green, s16 blue) 
  * tile with depth, at or below the tile's surface, and the negated offsets
  * otherwise. An absent unit is skipped. */
 static void sprite_palette_apply_unit_modulation(s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue) {
-    SVECTOR screen_coordinates;
+    SVECTOR world_coordinates;
     unit_t* unit;
     battle_map_tile_t* tile;
 
@@ -2066,9 +2066,9 @@ static void sprite_palette_apply_unit_modulation(s32 mode, s32 amount, s32 runti
         return;
     }
 
-    unit_copy_draw_coords(&screen_coordinates, unit);
+    unit_copy_draw_coords(&world_coordinates, unit);
     tile = battle_map_tile_get_pointer(
-        screen_coordinates.vx / BATTLE_MAP_TILE_SIZE, screen_coordinates.vz / BATTLE_MAP_TILE_SIZE, unit->map_z);
+        world_coordinates.vx / BATTLE_MAP_TILE_SIZE, world_coordinates.vz / BATTLE_MAP_TILE_SIZE, unit->map_z);
 
     battle_map_palette_modify(mode, amount, BATTLE_MAP_CLUT_ROW_UNITS, runtime_id, 0, red, green, blue);
 

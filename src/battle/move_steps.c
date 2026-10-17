@@ -1251,7 +1251,7 @@ void unit_mount_onto_pending(unit_t* unit) {
  * are left where they are. */
 static void move_step_displace_unit_along_direction(unit_t* unit, s32 x, s32 y, s32 delta) {
     s16 axis;
-    s16 screen_z;
+    s16 standing_world_y;
 
     if ((unit->status_flags_1_4 & UNIT_STATUS_DEAD) != 0) {
         return;
@@ -1281,9 +1281,9 @@ static void move_step_displace_unit_along_direction(unit_t* unit, s32 x, s32 y, 
         unit->real.vx = axis * ONE;
         break;
     }
-    screen_z = unit_height_calculate_from_world_coords(unit);
-    unit->world_coords.vy = screen_z;
-    unit->real.vy = screen_z * ONE;
+    standing_world_y = unit_height_calculate_from_world_coords(unit);
+    unit->world_coords.vy = standing_world_y;
+    unit->real.vy = standing_world_y * ONE;
     unit->shadow_dirty |= 1;
 }
 
@@ -1500,7 +1500,7 @@ s32 move_step_has_reached_entry_edge(s32 direction, unit_t* unit) {
  */
 void move_step_update_jump_flight(unit_t* unit) {
     s32 direction;
-    s16 target_z;
+    s16 target_world_y;
     battle_map_tile_t* tile;
 
     sprite_frame_load_unit(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
@@ -1514,9 +1514,9 @@ void move_step_update_jump_flight(unit_t* unit) {
     }
     unit->velocity.vz = 0;
     unit->velocity.vx = 0;
-    target_z = unit_height_calculate_from_world_coords(unit);
-    g_move_step_target_screen_z = target_z;
-    if (unit->world_coords.vy < target_z) {
+    target_world_y = unit_height_calculate_from_world_coords(unit);
+    g_move_step_target_world_y = target_world_y;
+    if (unit->world_coords.vy < target_world_y) {
         return;
     }
     /* ANIMATION_HOP or ANIMATION_HOP_ALTERNATE. */
@@ -1696,7 +1696,7 @@ void move_step_snap_axis_to_center(s32 direction, unit_t* unit) {
  * there, it takes the destination tile as its map position and the step ends. */
 void move_step_update_walk_to_center(unit_t* unit) {
     s32 direction = move_step_get_direction(unit);
-    s16 screen_z;
+    s16 standing_world_y;
 
     move_step_apply_velocity(unit);
     if (g_game_state != GAME_STATE_EVENT) {
@@ -1706,13 +1706,13 @@ void move_step_update_walk_to_center(unit_t* unit) {
         move_step_snap_axis_to_center(direction, unit);
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
-        screen_z = unit_height_calculate_from_world_coords(unit);
-        g_move_step_target_screen_z = screen_z;
-        if (unit->world_coords.vy >= screen_z) {
+        standing_world_y = unit_height_calculate_from_world_coords(unit);
+        g_move_step_target_world_y = standing_world_y;
+        if (unit->world_coords.vy >= standing_world_y) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
             unit->velocity.vy = 0;
-            unit->real.vy = g_move_step_target_screen_z * ONE;
+            unit->real.vy = g_move_step_target_world_y * ONE;
             unit->world_coords.vy = unit->real.vy / ONE;
             unit->step_phase = MOVE_STEP_PHASE_NONE;
             unit->shadow_dirty |= 1;
@@ -1871,7 +1871,7 @@ void move_step_update_float_to_edge(unit_t* unit) {
  * the destination tile as its map position and the step ends. */
 void move_step_update_float_to_center(unit_t* unit) {
     s32 direction = move_step_get_direction(unit);
-    s16 screen_z;
+    s16 standing_world_y;
 
     move_step_apply_velocity(unit);
     if (g_game_state != GAME_STATE_EVENT) {
@@ -1881,13 +1881,13 @@ void move_step_update_float_to_center(unit_t* unit) {
         move_step_snap_axis_to_center(direction, unit);
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
-        screen_z = unit_height_calculate_from_world_coords(unit);
-        g_move_step_target_screen_z = screen_z;
-        if (unit->world_coords.vy >= screen_z) {
+        standing_world_y = unit_height_calculate_from_world_coords(unit);
+        g_move_step_target_world_y = standing_world_y;
+        if (unit->world_coords.vy >= standing_world_y) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
             unit->velocity.vy = 0;
-            unit->real.vy = g_move_step_target_screen_z * ONE;
+            unit->real.vy = g_move_step_target_world_y * ONE;
             unit->world_coords.vy = unit->real.vy / ONE;
             unit->step_phase = MOVE_STEP_PHASE_NONE;
             unit->shadow_dirty |= 1;

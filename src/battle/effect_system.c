@@ -142,7 +142,7 @@ static void effect_camera_store_map_center_coordinates(VECTOR* destination) {
  * Mode bits 0x1e0 pick the source: the best unblocked view of a target's or
  * the caster's tile (0x0, 0x140) or of the cursor tile (0x1c0), the given
  * angles with the yaw wrapped to the nearest turn (0x40), the current
- * rotation (0xc0), the current rotation plus the given offsets (0x20), the
+ * rotation (0xc0), the given pitch with offsets added to current yaw/roll (0x20), the
  * saved pitch with the current yaw/roll (0x60) or the saved angles with the yaw
  * wrapped against g_effect_camera_rotation_current (0x100). Most modes then add `angles` when
  * present. Bits 0x1e00 are kept in g_effect_camera_rotation_mode; other modes return untouched.

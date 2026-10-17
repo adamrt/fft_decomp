@@ -2071,8 +2071,8 @@ effect_script_result_e effect_script_opcode_2d_nop(effect_record_t* record) {
 }
 
 /* Run record `index`'s script from its pc, one opcode handler after another,
- * until a handler yields (returns 1: the record runs on next frame) or ends it
- * (returns 0: the caller frees the record). */
+ * until a handler returns YIELD or ABORT. This runner returns 1 on YIELD
+ * (resume next frame) and 0 on ABORT (the caller frees the record). */
 static s32 effect_script_run_block(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */

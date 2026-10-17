@@ -863,8 +863,8 @@ restart_script:
             }
         } else if (opcode == EVENT_OPCODE_ADD_GHOST_UNIT) {
             ghost_parameters = instruction_offset + ((u8*)g_script_event_block) + 3;
-            /* An empty four-pass countdown precedes the search for a free
-             * runtime slot. */
+            /* The search scans IDs 0..20 although runtime slots are 0..15.
+             * With all slots occupied it queues ID 16, whose later allocation fails. */
             ghost_runtime_id = 3;
             do {
                 ghost_runtime_id -= 1;
@@ -880,8 +880,8 @@ restart_script:
                     ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]], ghost_parameters[5]);
                 g_unit_graphics_load_pending = 1U;
             } else {
-                /* No free runtime slot: the instruction is retried at once,
-                 * with no yield in between. */
+                /* All 21 IDs found: retry without yielding. Ordinary allocation
+                 * cannot populate IDs 16..20, so slot exhaustion takes the queue path. */
                 continue;
             }
         } else if (opcode == EVENT_OPCODE_UNKNOWN_75) {

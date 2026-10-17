@@ -603,7 +603,7 @@ void unit_mount_dismount_rider_and_update_display(unit_t* rider) {
     }
 }
 
-/* Clearance above a tile for move_clamp_z_to_tile_headroom, in half-height
+/* Clearance above a tile for move_step_clamp_z_to_headroom, in half-height
  * units.
  *
  * When the position's other layer is not blocked and its surface is higher, the

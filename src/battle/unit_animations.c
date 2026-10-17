@@ -204,7 +204,7 @@ void animation_select_weapon_attack(unit_t* attacker, unit_t* target) {
                 }
             }
         }
-        /* The target loads the attacker's screen_z zero-extended (lhu). */
+        /* The target loads the attacker's world_coords.vy zero-extended (lhu). */
         attacker_center
             = sprite_get_unit_spritesheet_height_by_runtime_id(attacker->runtime_id) / 2 - attacker->world_coords.vy;
         target_center

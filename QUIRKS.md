@@ -199,9 +199,11 @@ and mark code that a cleanup must not "fix". Details live in the named file.
     0xe4) have operand lengths in the size table and no handler; the
     scanners step over them and the interpreter ends the script on them. No
     retail script uses them.
-  - AddGhostUnit runs an empty four-pass countdown before its free-slot
-    search; with no free runtime slot it `continue`s without advancing or
-    yielding, so the script thread spins.
+  - In BATTLE, AddGhostUnit scans IDs 0..20 although the runtime allocator has
+    16 slots. With all slots occupied, it queues absent ID 16; installation
+    later fails without a retry. The immediate `continue` requires all 21 IDs
+    to exist, which ordinary allocation cannot produce. The empty four-pass
+    countdown before the search remains.
   - BlockStart, AddUnitStart or CameraFusionStart with no matching End gets
     offset 0 from the finder and the script resumes at byte 1.
   - FocusSpeed and RelativeCamera patch the next instruction's operands

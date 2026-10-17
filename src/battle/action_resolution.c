@@ -701,8 +701,8 @@ static void action_clear_status_changes(action_data_t* action) {
  * Returns -1 for an invalid or absent unit, or when a rider ends the action
  * dead or crystallized; otherwise 0.
  *
- * The HP/MP damage and healing fields are read signed (lh), hence the s16
- * casts on the u16 header fields. The KO test's three status-bit checks fold
+ * The HP/MP damage and healing fields are signed 16-bit values. The KO
+ * test's three status-bit checks fold
  * into the target's single 16-bit load of current[0..1] & 0x160. */
 s32 action_apply_target_result(s32 battle_id) {
     s32 outcome;
@@ -1287,7 +1287,7 @@ static void reaction_try_blade_grasp(void) {
         return;
     target = g_action_target;
     action = g_action_target_data;
-    /* 16-bit store covers attack_accuracy and the pad byte after it. */
+    /* The original writes the signed 16-bit accuracy field. */
     action->attack_accuracy = 100 - target->brave;
     if (reaction_fails_brave_roll(target) != 0)
         return;

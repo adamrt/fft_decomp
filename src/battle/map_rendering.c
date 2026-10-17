@@ -31,16 +31,12 @@ typedef char battle_map_back_color_size_must_be_12[sizeof(battle_map_back_color_
 extern battle_map_back_color_t g_battle_map_back_color;
 extern battle_map_back_color_t g_battle_map_saved_back_color;
 
-/* Write-only: zeroed with the map render state and never read anywhere on
- * the disc. The 150 x 14-byte shape suggests per-instruction parameter
- * storage (an event opcode takes at most 14 parameters), but no code proves
- * it, so the names stay provisional. */
 static u8 g_battle_map_saved_texture_animation_modes[72] = { 0 };
 static MATRIX g_battle_map_camera_matrix = { 0 };
 static DR_MOVE g_battle_map_texture_animation_moves[BATTLE_MAP_TEXTURE_ANIMATION_COUNT] = { 0 };
 
+/* Provisional: these two GNS work arrays are cleared but have no identified reader. */
 static u8 g_battle_map_unread_gns_load_infos[150][14] = { 0 };
-
 static u8 g_battle_map_unread_gns_record_flags[150] = { 0 };
 
 static void weather_init_particles(weather_command_e command);

@@ -427,7 +427,7 @@ static s32 animation_distortion_calculate_jump_arc_velocity(const SVECTOR* from,
 }
 
 /* Distortion animation 0x06: jump along an arc toward the first target's sprite
- * center (its screen position raised by half its spritesheet height), or to the
+ * center (its world position raised by half its spritesheet height), or to the
  * action target tile when the unit has no targets.
  *
  * Phase 0 builds the target point and asks

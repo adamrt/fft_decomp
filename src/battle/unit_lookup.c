@@ -1240,7 +1240,7 @@ void camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output) {
 }
 
 /*
- * Snap a screen-space point to the 28-unit tile grid for the current camera
+ * Snap an integer world-space point to the 28-unit tile grid for the current camera
  * yaw, writing the result to output.
  *
  * Same shape as camera_get_step_depth_point: each of the x and z
@@ -1289,14 +1289,14 @@ static void camera_get_tile_depth_point(const SVECTOR* input, SVECTOR* output, s
 
 /* camera_get_tile_depth_point with offset 1: the depth point of a standing unit,
  * a cursor or a bubble on a tile without BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination) {
-    camera_get_tile_depth_point(screen, destination, 1);
+void camera_get_tile_depth_point_unbiased(const SVECTOR* world, SVECTOR* destination) {
+    camera_get_tile_depth_point(world, destination, 1);
 }
 
 /* camera_get_tile_depth_point with offset 5: the depth point on a tile with
  * BATTLE_MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination) {
-    camera_get_tile_depth_point(screen, destination, 5);
+void camera_get_tile_depth_point_biased(const SVECTOR* world, SVECTOR* destination) {
+    camera_get_tile_depth_point(world, destination, 5);
 }
 
 /* The unit's draw position: its world coordinates plus its event and SEQ offsets, with the float

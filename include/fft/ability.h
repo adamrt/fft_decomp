@@ -608,7 +608,7 @@ typedef enum ability_secondary_flags_2 {
     ABILITY_SECONDARY_FLAG_2_LINEAR_ATTACK = 0x04,
     ABILITY_SECONDARY_FLAG_2_RANDOM_FIRE = 0x08,
     ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET = 0x10, /* tile targeting without the follow-unit choice */
-    ABILITY_SECONDARY_FLAG_2_TOP_DOWN = 0x20,         /* only the upper terrain layer is targeted; no ability has it */
+    ABILITY_SECONDARY_FLAG_2_TOP_DOWN = 0x20,         /* keeps the higher surface at each tile; no ability has it */
     ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES = 0x40,
     ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES = 0x80,
 } ability_secondary_flags_2_e;

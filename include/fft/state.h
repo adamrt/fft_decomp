@@ -94,8 +94,7 @@ void state_update_units(void);
 s32 state_get_animation_continue_check(void);
 
 /* state handlers */
-/* The per-frame handler of each game_state_e, in state order. ACTION_EXECUTE and EVENT run
- * an update function instead. */
+/* Per-frame handlers of game_state_e, in state order. */
 void state_handle_free_cursor(void);
 void state_handle_free_cursor_help(void);
 void state_handle_highlight_units(void);

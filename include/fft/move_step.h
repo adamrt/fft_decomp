@@ -89,7 +89,7 @@ typedef enum move_step_phase {
 extern move_step_t g_move_step_value;
 extern u8 g_move_step_current_edge_height;
 extern u8 g_move_step_destination_edge_height;
-extern s16 g_move_step_target_screen_z;
+extern s16 g_move_step_target_world_y;
 extern unit_t* g_move_step_tile_occupant;
 
 /* Height scratch record that unit_calculate_height_data fills in place. */

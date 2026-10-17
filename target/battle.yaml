@@ -2085,7 +2085,7 @@ data:
   - {addr: 0x8009621c, name: g_move_step_value}
   - {addr: 0x80096220, name: g_move_step_current_tile}
   - {addr: 0x80096224, name: g_move_step_destination_tile}
-  - {addr: 0x80096228, name: g_move_step_target_screen_z}
+  - {addr: 0x80096228, name: g_move_step_target_world_y}
   - {addr: 0x8009622c, name: g_move_step_destination_edge_height}
   - {addr: 0x80096230, name: g_move_step_current_edge_height}
   - {addr: 0x80096234, name: g_move_step_tile_occupant}

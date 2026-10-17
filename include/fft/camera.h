@@ -26,8 +26,8 @@ s32 camera_is_active(void);
 void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
 void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation);
 void camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords);
-void camera_get_tile_depth_point_unbiased(const SVECTOR* screen, SVECTOR* destination);
-void camera_get_tile_depth_point_biased(const SVECTOR* screen, SVECTOR* destination);
+void camera_get_tile_depth_point_unbiased(const SVECTOR* world, SVECTOR* destination);
+void camera_get_tile_depth_point_biased(const SVECTOR* world, SVECTOR* destination);
 void camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output);
 void camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output);
 

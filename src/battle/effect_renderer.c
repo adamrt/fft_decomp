@@ -246,10 +246,8 @@ static void effect_render_free_sprite_block(effect_sprite_block_t* block) {
     effect_heap_free_block(block);
 }
 
-/* Begin one effect-rendering frame.
- *
- * The renderer alternates packet storage and remembers the arena offset so
- * the frame's transient primitives can be reclaimed together. */
+/* Reset the projection center and store frame parity and the arena's current offset.
+ * The two stored values have no identified reader; allocation wraps the arena independently. */
 void effect_render_start_frame(void) {
     SetGeomOffset(0, 0);
     g_effect_frame_parity = 1 - g_effect_frame_parity;
@@ -1074,7 +1072,7 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
 /* Spawns one particle's motion block from the interpolated emitter values and
  * returns its random lifetime.
  *
- * Position is the emitter offset plus a random point in the spread box, both
+ * Position is the emitter offset plus a random point on its spread ellipsoid, both
  * optionally rotated to the caster's facing or the caster-to-target line
  * (motion_flags VELOCITY_CASTER_FACING or VELOCITY_TOWARD_TARGET) and anchored
  * at the caster or target (anchor_flags ORIGIN_CASTER or ORIGIN_TARGET).
@@ -1082,8 +1080,8 @@ s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_
  * position for VELOCITY_INWARD. The caller stores the result as the
  * particle lifetime.
  *
- * The caster and target blocks go through a secondary-init record, as in the
- * secondary initializers; resolve_target_render_coords reads the same layout. */
+ * The caster and target blocks use an effect context record, as in the
+ * secondary initializers; effect_resolve_target_world_coords reads the same layout. */
 s32 effect_slot_spawn_motion(effect_emitter_values_t* values, effect_motion_t* motion) {
     MATRIX anchor_matrix;
     MATRIX rotation;
@@ -1831,9 +1829,9 @@ static void effect_slot_step_motion(effect_motion_t* motion) {
  * with a strength adds delta + (step - delta) * s / 127 instead, where delta
  * is the unit vector to its homing target scaled by the strength and s is
  * its homing curve's factor less 0x80: a factor of 0xff adds the step alone,
- * 0x80 the target vector alone, and 0, or no curve, twice the target vector
- * less the step. The list parameter doubles as the next-node cursor: that
- * keeps both loop tests on it. */
+ * 0x80 the target vector alone, and 0, or no curve, uses -128/127 for the
+ * blend weight (approximately twice the target vector less the step). The list parameter doubles as the next-node
+ * cursor: that keeps both loop tests on it. */
 void effect_particle_integrate_motion(effect_work_record_t* list) {
     effect_work_record_t* node;
     effect_motion_t* motion;
@@ -2221,7 +2219,7 @@ s32 effect_slot_update(s32 id) {
     return result;
 }
 
-/* Four effect-pool/state initializers, called at effect setup and teardown. */
+/* Initialize fresh render, script, work-record and sprite-node pools at setup/restart. */
 void effect_reset_subsystems(void) {
     effect_render_init_state();
     effect_script_init_state_records();

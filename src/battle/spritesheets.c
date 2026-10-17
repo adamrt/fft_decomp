@@ -312,7 +312,7 @@ void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 update_current_colors
     s32 blue;
     s32 green;
     s32 red;
-    s16 screen_z;
+    s16 standing_world_y;
 
     stored_palette = unit->stored_palette;
     clut_index = unit->runtime_id;
@@ -441,8 +441,9 @@ void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 update_current_colors
     }
 
     /* y grows downward: a unit more than 0x30 above the ground at its position stays untinted. */
-    screen_z = unit_height_calculate_from_world_coords(unit);
-    if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) && screen_z - 0x30 > unit->world_coords.vy) {
+    standing_world_y = unit_height_calculate_from_world_coords(unit);
+    if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)
+        && standing_world_y - 0x30 > unit->world_coords.vy) {
         blue = 0;
         green = 0;
         red = 0;
