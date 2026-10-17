@@ -1105,7 +1105,7 @@ data:
   - {addr: 0x801cc80c, name: g_save_menu_state}
   - {addr: 0x801cc810, name: g_save_menu_work_buffer}
   - {addr: 0x801cc814, name: g_save_listed_slot_count}
-  - {addr: 0x801cc818, name: g_gfx_poly_ft4_buffers}
+  - {addr: 0x801cc818, name: g_save_gfx_textured_quads}
   - {addr: 0x801d8398, name: g_save_slot_descriptions}
   - {addr: 0x801d8848, name: g_input_event}
   - {addr: 0x801d884c, name: g_input_controller}
@@ -2582,7 +2582,7 @@ data:
   - {addr: 0x801d71f8, name: g_party_affected_unit_message_args}
   - {addr: 0x801d72c0, name: g_party_affected_unit_message_ids}
   - {addr: 0x801d7388, name: g_party_affected_battle_unit_indices}
-  - {addr: 0x801d7450, name: g_gfx_poly_ft4_buffers}
+  - {addr: 0x801d7450, name: g_unit_panel_transition_quads}
   - {addr: 0x801d7db0, name: g_formation_job_data}
   - {addr: 0x801d7db4, name: g_portrait_cell_rect}
   - {addr: 0x801d7dbc, name: g_portrait_palette_rect}

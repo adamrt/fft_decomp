@@ -70,7 +70,6 @@ extern s16 g_gfx_sprite_count;
 extern s16 g_gfx_sprite_8_count;
 extern s16 g_gfx_sprite_16_count;
 extern POLY_FT4 g_gfx_poly_ft4_buffer[];
-extern POLY_FT4 g_gfx_poly_ft4_buffers[2][30];
 extern DR_AREA g_gfx_draw_area_buffer[];
 extern DR_MOVE g_gfx_draw_move_buffer[];
 

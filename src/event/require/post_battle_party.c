@@ -28,6 +28,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern POLY_FT4 g_unit_panel_transition_quads[2][30];
+
 static s32 g_party_affected_unit_message_args[50] = { 0 };
 static s32 g_party_affected_unit_message_ids[50] = { 0 };
 
@@ -678,7 +680,7 @@ void unit_panel_transition_thread(void) {
     while (1) {
         s32 buffer = frame & 1;
         gfx_build_gradient_grid_primitives(g_gfx_poly_gt4_buffers[buffer]);
-        unit_panel_build_status_groups(g_gfx_poly_ft4_buffers[buffer]);
+        unit_panel_build_status_groups(g_unit_panel_transition_quads[buffer]);
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;

@@ -39,6 +39,10 @@
 enum { SAVE_WORK_BUFFER_BYTES = 0x1e80 };
 extern u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
 
+/* The context binder divides this flat pool into two equal frame buffers. */
+enum { SAVE_TEXTURED_QUADS_PER_BUFFER = 600 };
+extern POLY_FT4 g_save_gfx_textured_quads[2 * SAVE_TEXTURED_QUADS_PER_BUFFER];
+
 static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void save_build_slot_description(s32 mode, u8* destination);
 static void save_init_menu_state(void);
@@ -163,10 +167,10 @@ void card_entrypoint(s32 unused) {
     DIRENTRY save_buffer[15];
 
     g_gfx_otag_count = 0x40;
-    g_gfx_poly_ft4_capacity = 0x258;
+    g_gfx_poly_ft4_capacity = SAVE_TEXTURED_QUADS_PER_BUFFER;
     g_gfx_tile_capacity = 10;
-    save_gfx_init_contexts(context_storage, otag_storage, 0, 0, 0, g_gfx_poly_ft4_buffers, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        tile_storage, 0, 0, 0, 0, 0, 0, 0, 0);
+    save_gfx_init_contexts(context_storage, otag_storage, 0, 0, 0, g_save_gfx_textured_quads, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, tile_storage, 0, 0, 0, 0, 0, 0, 0, 0);
     save_init_graphics();
     music_slot = music_load_into_free_slot(MUSIC_SAVE);
     while (music_is_loading_stub() != 0) { }
