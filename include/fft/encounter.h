@@ -19,7 +19,14 @@ typedef enum unit_entd_selection {
 extern s32 g_encounter_current_id;
 extern entd_file_t* g_encounter_set;
 extern entd_unit_t* g_encounter_current_unit;
-extern s32 g_encounter_selection_mode; /* unit_entd_selection_e */
+
+/* unit_entd_selection_e. BATTLE's load ordering requires the qualified declaration;
+ * a local volatile pointer access changes the original instructions. */
+#ifdef FFT_BATTLE
+extern volatile s32 g_encounter_selection_mode;
+#else
+extern s32 g_encounter_selection_mode;
+#endif
 
 int encounter_open_file(void);
 void encounter_init_party(int encounter_id);

@@ -333,10 +333,6 @@ s32 unit_return_zero_1(void) {
     return 0;
 }
 
-/* A volatile view of encounter.h's global: with the plain
- * declaration unit_entd_select_and_open compiles differently. */
-extern volatile s32 g_encounter_selection_mode;
-
 /* Chooses the encounter's ENTD id and starts reading its ENTD file.
  *
  * The id is script variable EVENT_SCRIPT_VAR_CURRENT_ENTD unless
