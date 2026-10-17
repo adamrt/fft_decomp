@@ -29,6 +29,7 @@ units:
   - {name: suzuki_smd_modulation_commands, source: src/lib/suzuki/smd_modulation_commands.c}
   - {name: suzuki_smd_records, source: src/lib/suzuki/smd_records.c}
   - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c}
+  - {name: suzuki_tick, source: src/lib/suzuki/tick.c}
   - {name: system_callbacks, source: src/main/system_callbacks.c}
   - {name: system_handlers, source: src/main/system_handlers.c}
   - {name: unit_growth, source: src/main/unit_growth.c}
@@ -132,15 +133,15 @@ functions:
   - {addr: 0x80014544, size: 8, name: suzuki_sound_init_stub, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_init_stub.c}
   - {addr: 0x8001454c, size: 32, name: suzuki_sound_alloc_spu_ram, hash: b321a6f7ac0e83d6, source: src/lib/suzuki/suzuki_sound_alloc_spu_ram.c}
   - {addr: 0x8001456c, size: 36, name: suzuki_sound_free_spu_ram, hash: c270971f843e72ec, source: src/lib/suzuki/suzuki_sound_free_spu_ram.c}
-  - {addr: 0x80014590, size: 648, name: suzuki_sound_update_voice_attrs, hash: 8c3ed88a730f8d9d, source: src/lib/suzuki/suzuki_sound_update_voice_attrs.c}
-  - {addr: 0x80014818, size: 156, name: suzuki_sound_flush_key_on, hash: aa0d39db05f052b6, source: src/lib/suzuki/suzuki_sound_flush_key_on.c}
-  - {addr: 0x800148b4, size: 296, name: suzuki_sound_flush_key_off, hash: d66573d642595546, source: src/lib/suzuki/suzuki_sound_flush_key_off.c}
-  - {addr: 0x800149dc, size: 1340, name: suzuki_sound_root_counter_2_handler, hash: 47914f50ab68d8bf, source: src/lib/suzuki/suzuki_sound_root_counter_2_handler.c}
-  - {addr: 0x80014f18, size: 64, name: suzuki_smd_step_ramp, hash: 94045984a934b2b3, source: src/lib/suzuki/suzuki_smd_step_ramp.c}
-  - {addr: 0x80014f58, size: 160, name: suzuki_sound_calculate_pitch_lfo_voices, hash: 76cbd32b888b14d7, source: src/lib/suzuki/suzuki_sound_calculate_pitch_lfo_voices.c}
-  - {addr: 0x80014ff8, size: 160, name: suzuki_sound_calculate_noise_voices, hash: 0bb49015ff19a65d, source: src/lib/suzuki/suzuki_sound_calculate_noise_voices.c}
-  - {addr: 0x80015098, size: 160, name: suzuki_sound_calculate_reverb_voices, hash: 691289f02cdb84f7, source: src/lib/suzuki/suzuki_sound_calculate_reverb_voices.c}
-  - {addr: 0x80015138, size: 492, name: suzuki_smd_update_channel_ramps, hash: d0c73c6718ada2ce, source: src/lib/suzuki/suzuki_smd_update_channel_ramps.c}
+  - {addr: 0x80014590, size: 648, name: suzuki_sound_update_voice_attrs, hash: 8c3ed88a730f8d9d, unit: suzuki_tick}
+  - {addr: 0x80014818, size: 156, name: suzuki_sound_flush_key_on, hash: aa0d39db05f052b6, unit: suzuki_tick}
+  - {addr: 0x800148b4, size: 296, name: suzuki_sound_flush_key_off, hash: d66573d642595546, unit: suzuki_tick}
+  - {addr: 0x800149dc, size: 1340, name: suzuki_sound_root_counter_2_handler, hash: 47914f50ab68d8bf, unit: suzuki_tick}
+  - {addr: 0x80014f18, size: 64, name: suzuki_smd_step_ramp, hash: 94045984a934b2b3, unit: suzuki_tick}
+  - {addr: 0x80014f58, size: 160, name: suzuki_sound_calculate_pitch_lfo_voices, hash: 76cbd32b888b14d7, unit: suzuki_tick}
+  - {addr: 0x80014ff8, size: 160, name: suzuki_sound_calculate_noise_voices, hash: 0bb49015ff19a65d, unit: suzuki_tick}
+  - {addr: 0x80015098, size: 160, name: suzuki_sound_calculate_reverb_voices, hash: 691289f02cdb84f7, unit: suzuki_tick}
+  - {addr: 0x80015138, size: 492, name: suzuki_smd_update_channel_ramps, hash: d0c73c6718ada2ce, unit: suzuki_tick}
   - {addr: 0x80015324, size: 1344, name: suzuki_smd_read_instructions, hash: 8eb6628213d126e4, unit: suzuki_smd_interpreter}
   - {addr: 0x80015864, size: 8, name: suzuki_smd_noop_8, hash: 6d64edf91449c1b1, unit: suzuki_smd_interpreter}
   - {addr: 0x8001586c, size: 8, name: suzuki_smd_no_instruction, hash: cc2f57dc1c5c5ee3, unit: suzuki_smd_interpreter}
