@@ -440,8 +440,6 @@ enum {
 enum { MENU_PORTRAIT_CLUT_SUPPRESS_MASK = 0x300 };
 
 extern RECT g_menu_portrait_origin;
-extern RECT g_menu_portrait_pixel_rect;
-extern RECT g_menu_portrait_palette_rect;
 
 /* panel fades */
 /* g_menu_panel_fade_mode: what menu_update_panel_fade does to the panel's

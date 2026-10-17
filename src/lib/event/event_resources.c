@@ -49,6 +49,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* One EVTFACE.BIN block: pixels followed by eight 16-color palettes. */
+typedef struct portrait_image_file {
+    u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */
+    palette_t palettes[8]; /* 0x1800; four palettes per uploaded VRAM row */
+    u8 _unused_1900[0x700];
+} portrait_image_file_t;
+typedef char portrait_image_file_size_must_be_8192[sizeof(portrait_image_file_t) == 8192 ? 1 : -1];
+
+extern RECT g_menu_portrait_pixel_rect;
+extern RECT g_menu_portrait_palette_rect;
+
 /* What every caller reserves at the high overlay address: room for the second half of BUNIT or
  * EQUIP, or for HELPMENU or JOBSTTS. */
 enum { MENU_HIGH_OVERLAY_SIZE = 0x20000 };
@@ -796,7 +807,7 @@ void script_show_graphic(void) {
 void script_noop_3(void) {
 }
 
-/* Load portrait sector 0x164b + 4 * portrait_id straight into VRAM. */
+/* Upload one EVTFACE.BIN block as a single image, followed by its palette rows. */
 void portrait_load_image(s32 portrait_id) {
     portrait_image_file_t* buffer;
 

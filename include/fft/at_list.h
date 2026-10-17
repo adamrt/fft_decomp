@@ -58,23 +58,6 @@ void at_list_show_entry(s32 at_index);
 void at_list_show_next_entry(void);
 
 /* list window */
-/* Provisional: the AT-list work area at_list_build_ability_preview
- * fills, reached through g_heap_companion_overlay_load_address. The five
- * parallel 16-bit columns become the layout's text_ids/text_colors tables,
- * `text` is published through g_text_section_pointers[TEXT_SECTION_AT_LIST].
- * The main-stack preview fills all 40 AT entries; the menu displays entries
- * 1 through 39. */
-typedef struct at_list_work {
-    s16 primary_values[AT_LIST_CAPACITY];   /* 0x000: turn-value column */
-    s16 secondary_values[AT_LIST_CAPACITY]; /* 0x050: unit-name column */
-    s16 entry_numbers[AT_LIST_CAPACITY];    /* 0x0a0: ordinal column */
-    s16 primary_colors[AT_LIST_CAPACITY];   /* 0x0f0 */
-    s16 secondary_colors[AT_LIST_CAPACITY]; /* 0x140 */
-    u8 text[0x4f0];                         /* 0x190: packed 0xfe-terminated names */
-    at_entry_t entries[AT_LIST_CAPACITY];   /* 0x680; entry 0 is omitted from the menu */
-} at_list_work_t;
-typedef char at_list_work_size_must_be_1824[(sizeof(at_list_work_t) == 1824) ? 1 : -1];
-
 extern at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
 extern menu_entry_t g_at_list_state;
 extern menu_scroll_text_layout_t g_at_list_layout;

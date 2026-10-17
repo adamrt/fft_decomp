@@ -9,14 +9,6 @@
 #include "psx/types.h"
 
 /* portrait files */
-/* One EVTFACE.BIN block: pixels followed by eight 16-color palettes. */
-typedef struct portrait_image_file {
-    u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */
-    palette_t palettes[8]; /* 0x1800; four palettes per uploaded VRAM row */
-    u8 _unused_1900[0x700];
-} portrait_image_file_t;
-typedef char portrait_image_file_size_must_be_8192[sizeof(portrait_image_file_t) == 8192 ? 1 : -1];
-
 /* EVENT/WLDFACE.BIN is four of these sheets: forty 32x48 portraits at 4 bits
  * per pixel, eight across and five down, then sixteen rows of four palettes.
  * Palette n is portrait n's; rows 10-15 hold the other palettes of the monster
@@ -27,7 +19,7 @@ typedef struct portrait_sheet {
 } portrait_sheet_t;
 typedef char portrait_sheet_size_must_be_32768[(sizeof(portrait_sheet_t) == 32768) ? 1 : -1];
 
-/* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
+/* Unreferenced in both programs: uploads one EVTFACE.BIN block and its palettes. */
 void portrait_load_image(s32 portrait_id);
 
 /* party portraits */
