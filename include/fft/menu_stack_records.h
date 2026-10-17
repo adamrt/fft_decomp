@@ -28,9 +28,6 @@ union menu_stack_record {
     menu_stack_message_level_t message;
     world_map_menu_level_t return_level;
     menu_stack_panel_level_t panel;
-    window_render_pair_t window_render;
-    window_pair_level_t window_pair;
-    window_pair_render_level_t window_pair_render;
     proposition_discovery_level_t discovery; /* pushed by proposition_push_discovery_level */
     rumor_detail_level_t rumor_detail;
     menu_stack_window_level_t list_window;
@@ -52,7 +49,9 @@ union menu_stack_record {
     sound_novel_history_level_t sound_novel_history;
     travel_level_t location_transition;
     proposition_send_unit_level_t send_unit;
-    proposition_confirm_level_t choice_panel;
+    proposition_accept_confirm_level_t accept_confirm;
+    proposition_dispatch_confirm_level_t dispatch_confirm;
+    proposition_detail_level_t proposition_detail;
     proposition_report_confirm_level_t proposition_report_confirm;
     world_map_cursor_level_t map_cursor;
     world_map_visibility_level_t visibility;

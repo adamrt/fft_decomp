@@ -588,7 +588,7 @@ void proposition_push_detail_level(s32 value) {
     }
     proposition_unpack_row(&g_proposition_selected_row, value);
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].window_render.render_index = index;
+    g_menu_stack_records[g_menu_stack_depth].proposition_detail.render_index = index;
     bounds.y = 0x60;
     bounds.w = 0xF4;
     bounds.h = 0x80;
@@ -608,12 +608,12 @@ void proposition_push_detail_level(s32 value) {
 
 /* Restore the proposition detail renderer's palette. */
 void proposition_resume_detail_level(menu_stack_record_t* level) {
-    g_window_gs_image_records[level->window_render.render_index].palette = 0;
+    g_window_gs_image_records[level->proposition_detail.render_index].palette = 0;
 }
 
 /* Select palette 2 for the window's render record. */
 void proposition_suspend_detail_level(menu_stack_record_t* pair) {
-    g_window_gs_image_records[pair->window_render.render_index].palette = 2;
+    g_window_gs_image_records[pair->proposition_detail.render_index].palette = 2;
 }
 
 /* Input step of the proposition detail level. Cross closes it and reopens the
@@ -626,7 +626,7 @@ void proposition_handle_accept_input(menu_stack_record_t* owner) {
     s32 total;
     point32_t origin;
 
-    if (g_window_gs_image_records[owner->window_render.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[owner->proposition_detail.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
@@ -663,21 +663,21 @@ void window_build_yes_no_panel(point32_t origin) {
     s32 depth;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].choice_panel.cursor_window = index;
+    g_menu_stack_records[g_menu_stack_depth].accept_confirm.cursor_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
     g_window_records[index].priority = 8;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].choice_panel.header_window = index;
+    g_menu_stack_records[g_menu_stack_depth].accept_confirm.header_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
     g_window_records[index].priority = 8;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].choice_panel.render_index = index;
+    g_menu_stack_records[g_menu_stack_depth].accept_confirm.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
@@ -687,15 +687,15 @@ void window_build_yes_no_panel(point32_t origin) {
     g_window_gs_image_records[index].base = origin;
 
     depth = g_menu_stack_depth;
-    g_menu_stack_records[depth].choice_panel.row = 0;
-    g_menu_stack_records[depth].choice_panel.mode = PROPOSITION_ACCEPT_MODE_CHOOSE;
-    g_window_records[g_menu_stack_records[depth].choice_panel.cursor_window].position.x
+    g_menu_stack_records[depth].accept_confirm.row = 0;
+    g_menu_stack_records[depth].accept_confirm.mode = PROPOSITION_ACCEPT_MODE_CHOOSE;
+    g_window_records[g_menu_stack_records[depth].accept_confirm.cursor_window].position.x
         = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[g_menu_stack_records[depth].choice_panel.cursor_window].position.y
-        = g_window_gs_image_records[index].base.y - -(g_menu_stack_records[depth].choice_panel.row * 0x10 + 0xE);
-    g_window_records[g_menu_stack_records[depth].choice_panel.header_window].position.x
+    g_window_records[g_menu_stack_records[depth].accept_confirm.cursor_window].position.y
+        = g_window_gs_image_records[index].base.y - -(g_menu_stack_records[depth].accept_confirm.row * 0x10 + 0xE);
+    g_window_records[g_menu_stack_records[depth].accept_confirm.header_window].position.x
         = g_window_gs_image_records[index].base.x + 3;
-    g_window_records[g_menu_stack_records[depth].choice_panel.header_window].position.y
+    g_window_records[g_menu_stack_records[depth].accept_confirm.header_window].position.y
         = g_window_gs_image_records[index].base.y - 2;
 }
 
@@ -722,21 +722,21 @@ void proposition_handle_accept_confirm_input(menu_stack_record_t* level) {
     s32 row;
     party_unit_t* unit;
 
-    if (g_window_gs_image_records[level->choice_panel.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->accept_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    if (level->choice_panel.mode == PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE) {
+    if (level->accept_confirm.mode == PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE) {
         if (!(g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS))) {
             return;
         }
         goto close;
     }
 
-    if (level->choice_panel.mode == PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE) {
+    if (level->accept_confirm.mode == PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE) {
         if (g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_HUMAN_UNIT, 0);
-            level->choice_panel.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
+            level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
         }
         return;
     }
@@ -756,10 +756,10 @@ void proposition_handle_accept_confirm_input(menu_stack_record_t* level) {
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0 || world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        row = level->choice_panel.row ^ 1;
-        level->choice_panel.row = row;
-        g_window_records[level->choice_panel.cursor_window].position.y
-            = g_window_gs_image_records[level->choice_panel.render_index].base.y - -(row * 0x10 + 0xE);
+        row = level->accept_confirm.row ^ 1;
+        level->accept_confirm.row = row;
+        g_window_records[level->accept_confirm.cursor_window].position.y
+            = g_window_gs_image_records[level->accept_confirm.render_index].base.y - -(row * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
@@ -767,7 +767,7 @@ void proposition_handle_accept_confirm_input(menu_stack_record_t* level) {
         return;
     }
 
-    if (level->choice_panel.row == 1) {
+    if (level->accept_confirm.row == 1) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         goto dismiss;
     }
@@ -783,13 +783,13 @@ void proposition_handle_accept_confirm_input(menu_stack_record_t* level) {
 
     if (available == 0) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_MORE_UNITS, 0);
-        level->choice_panel.mode = PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE;
+        level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE;
         goto fail;
     }
 
     if (script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) < g_proposition_gil_amount) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NOT_ENOUGH_GIL, 0);
-        level->choice_panel.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
+        level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
     fail:
         sound_play_effect(SOUND_SFX_INVALID);
         g_window_record_count -= 2;

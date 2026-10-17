@@ -170,20 +170,6 @@ typedef struct window_render_pair {
     s32 render_index;
 } window_render_pair_t;
 
-/* A level owning two window records; sound_novel_opcode_0c_set_parent_windows_visible toggles both records'
- * DISPLAY_OBJECT_HIDDEN. */
-typedef struct window_pair_level {
-    s32 first_window;
-    s32 second_window; /* 0x04 */
-} window_pair_level_t;
-
-/* A level owning two window records and a render record. */
-typedef struct window_pair_render_level {
-    s32 first_window;
-    s32 second_window; /* 0x04 */
-    s32 render_index;  /* 0x08 */
-} window_pair_render_level_t;
-
 /* remembered cursors */
 /* Slots of g_menu_stack_cursor_states: the remembered row of each list. */
 typedef enum menu_stack_cursor_slot {

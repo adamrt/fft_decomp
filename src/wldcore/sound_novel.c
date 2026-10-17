@@ -112,9 +112,9 @@ void sound_novel_restore_reading(s32 render_record) {
 
     state_flags = &g_sound_novel_reading.state_flags;
     if (*state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].window_pair.first_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].sound_novel.quit_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].window_pair.second_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth].sound_novel.history_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
     }
 
@@ -580,15 +580,15 @@ void sound_novel_opcode_0b_hide_picture(void) {
 void sound_novel_opcode_0c_set_parent_windows_visible(void) {
     if ((u8)(g_sound_novel_state.instruction >> 8) != 0) {
         g_sound_novel_state.state_flags |= SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair.first_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair.second_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
         g_sound_novel_state.state_flags &= ~SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair.first_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].flags
             |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair.second_window].flags
+        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window].flags
             |= DISPLAY_OBJECT_HIDDEN;
     }
     g_sound_novel_state.state_flags |= SOUND_NOVEL_STATE_FETCH;

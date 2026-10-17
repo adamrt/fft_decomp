@@ -468,9 +468,9 @@ static void brave_story_push_participant_list_level(s32 proposition) {
 
     proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
     g_menu_stack_records[g_menu_stack_depth].participant_list.proposition = proposition;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_render.window_index].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].window_render.render_index].flags
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.rows_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
     window = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].participant_list.cursor_window = window;

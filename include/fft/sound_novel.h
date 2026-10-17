@@ -153,12 +153,12 @@ typedef enum sound_novel_phase {
  * sound_novel_step_level while the script runs: the Start and Square button prompts, and the
  * brightness bar with its overlay, shown for a while after L1 or R1 changes the brightness. */
 typedef struct sound_novel_level {
-    s32 left_window;    /* 0x00; the Start button prompt (the Quit/Continue menu) */
-    s32 right_window;   /* 0x04; the Square button prompt (the text history) */
-    s32 render_index;   /* 0x08; the brightness bar, a VRAM strip render record */
-    s32 overlay_window; /* 0x0c; the brightness bar's overlay */
+    s32 quit_prompt_window;        /* 0x00; the Start button prompt (the Quit/Continue menu) */
+    s32 history_prompt_window;     /* 0x04; the Square button prompt (the text history) */
+    s32 brightness_image;          /* 0x08; the brightness bar, a VRAM strip render record */
+    s32 brightness_overlay_window; /* 0x0c; the brightness bar's overlay */
     u8 _unused_10[0xc];
-    s32 message;     /* 0x1c; the treasure detail reopened when the novel ends */
+    s32 treasure_id; /* 0x1c; the treasure detail reopened when the novel ends */
     s32 _unknown_20; /* 0x20; set to 1 at push */
     s32 countdown;   /* 0x24; frames before the text history opens (9999 at push) */
     s32 phase;       /* 0x28; sound_novel_phase_e */

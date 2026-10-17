@@ -689,20 +689,14 @@ void proposition_open_active_list(void) {
     previous = g_menu_stack_depth - 1;
     g_menu_stack_ot_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    if ((g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
-            & DISPLAY_OBJECT_HIDDEN)
-        != 0) {
-        g_window_records[g_menu_stack_records[previous].window_pair_render.first_window].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[previous].window_pair_render.second_window].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
-            |= DISPLAY_OBJECT_POP_IN;
+    if ((g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN) != 0) {
+        g_window_records[g_menu_stack_records[previous].bar.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
     }
 
-    g_menu_stack_records[g_menu_stack_depth].window_pair_render.first_window = 0;
+    g_menu_stack_records[g_menu_stack_depth].panel.result = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST;
     g_menu_stack_depth = g_menu_stack_depth + 1;
 }
@@ -787,11 +781,9 @@ static void proposition_push_recall_level(s32 proposition) {
 
     proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.proposition = proposition;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].flags
-        |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.second_window].flags
-        |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.render_index].flags
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_PROMPT, 0);
 
@@ -1001,12 +993,12 @@ static void sound_novel_push_level(s32 argument) {
     g_hud_saved_value_position = g_hud_value_position;
     g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
     world_map_clear_vram_and_scratch(1);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel.message = argument;
+    g_menu_stack_records[g_menu_stack_depth].sound_novel.treasure_id = argument;
 
     bar_render = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel.left_window = index;
+    g_menu_stack_records[g_menu_stack_depth].sound_novel.quit_prompt_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_START_BUTTON;
     window1 = &g_window_records[index];
     window1->priority = 0xA;
@@ -1019,7 +1011,7 @@ static void sound_novel_push_level(s32 argument) {
     g_window_records[index].palette = 0xA;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel.right_window = index;
+    g_menu_stack_records[g_menu_stack_depth].sound_novel.history_prompt_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_SQUARE_BUTTON;
     g_window_records[index].priority = 0xA;
     g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -1032,7 +1024,7 @@ static void sound_novel_push_level(s32 argument) {
     g_window_records[index].palette = 0xA;
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel.render_index = index;
+    g_menu_stack_records[g_menu_stack_depth].sound_novel.brightness_image = index;
     bounds.x = 0x1E4;
     bounds.y = 0x1E8;
     bounds.w = 0x20;
@@ -1047,7 +1039,7 @@ static void sound_novel_push_level(s32 argument) {
     g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel.overlay_window = index;
+    g_menu_stack_records[g_menu_stack_depth].sound_novel.brightness_overlay_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_OVERLAY;
     g_window_records[index].priority = 8;
     g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
@@ -1085,8 +1077,8 @@ void sound_novel_resume_level(menu_stack_record_t* level) {
     }
     g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_BLANK;
     if (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
-        g_window_records[level->sound_novel.left_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->sound_novel.right_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->sound_novel.quit_prompt_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[level->sound_novel.history_prompt_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
     }
     thread_resume(WORLD_MAP_THREAD_SLOT_MESSAGE);
 }
@@ -1148,7 +1140,7 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             suzuki_sound_remove_resource(g_sound_novel_sound_resource);
             sound_novel_reset_selected_reading(g_sound_novel_selected);
             g_sound_novel_countdown_frames = 0;
-            screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, level->sound_novel.message, 0);
+            screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, level->sound_novel.treasure_id, 0);
             return;
         }
     }
@@ -1179,14 +1171,14 @@ void sound_novel_step_level(menu_stack_record_t* level) {
         }
 
         if (level->sound_novel.fade_timer != 0) {
-            g_window_gs_image_records[level->sound_novel.render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            g_window_records[level->sound_novel.overlay_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[level->sound_novel.brightness_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_window_records[level->sound_novel.brightness_overlay_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
             width = 0x100 - g_sound_novel_reading.brightness;
-            g_window_gs_image_records[level->sound_novel.render_index].bounds.w = width / 4;
+            g_window_gs_image_records[level->sound_novel.brightness_image].bounds.w = width / 4;
             level->sound_novel.fade_timer--;
         } else {
-            g_window_gs_image_records[level->sound_novel.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[level->sound_novel.overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_gs_image_records[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_window_records[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
         }
 
         if (screen_is_dialog_waiting() != 0) {
@@ -1194,8 +1186,8 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             if (buttons & PSX_PAD_CIRCLE) {
                 return;
             }
-            g_window_records[level->sound_novel.left_window].palette
-                = g_window_records[level->sound_novel.right_window].palette = 0;
+            g_window_records[level->sound_novel.quit_prompt_window].palette
+                = g_window_records[level->sound_novel.history_prompt_window].palette = 0;
             if (buttons & PSX_PAD_SELECT) {
                 menu_stack_push_message_level(0x1036, 1);
                 return;
@@ -1203,33 +1195,34 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             if ((buttons & PSX_PAD_START)
                 && (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
                 && !(g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
-                g_window_records[level->sound_novel.left_window].sequence = WINDOW_ANIM_SOUND_NOVEL_START_BUTTON_PRESS;
-                g_window_records[level->sound_novel.left_window].frame_index
-                    = g_window_records[level->sound_novel.left_window].anim_counter = 0;
+                g_window_records[level->sound_novel.quit_prompt_window].sequence
+                    = WINDOW_ANIM_SOUND_NOVEL_START_BUTTON_PRESS;
+                g_window_records[level->sound_novel.quit_prompt_window].frame_index
+                    = g_window_records[level->sound_novel.quit_prompt_window].anim_counter = 0;
                 level->sound_novel.fade_timer = 0;
-                g_window_gs_image_records[level->sound_novel.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-                g_window_records[level->sound_novel.overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_window_gs_image_records[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_window_records[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
                 sound_novel_push_quit_level();
                 return;
             }
             if ((g_input_current_buttons & PSX_PAD_SQUARE)
                 && (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
                 && g_sound_novel_reading.text_history_3 != -1) {
-                g_window_records[level->sound_novel.right_window].sequence
+                g_window_records[level->sound_novel.history_prompt_window].sequence
                     = WINDOW_ANIM_SOUND_NOVEL_SQUARE_BUTTON_PRESS;
-                window = level->sound_novel.right_window;
+                window = level->sound_novel.history_prompt_window;
                 g_window_records[window].anim_counter = 0;
                 g_window_records[window].frame_index = 0;
                 level->sound_novel.fade_timer = 0;
-                g_window_gs_image_records[level->sound_novel.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-                g_window_records[level->sound_novel.overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_window_gs_image_records[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_window_records[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
                 g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
                 level->sound_novel.phase = SOUND_NOVEL_PHASE_OPEN_HISTORY;
                 level->sound_novel.countdown = 8;
             }
         } else {
-            g_window_records[level->sound_novel.left_window].palette
-                = g_window_records[level->sound_novel.right_window].palette = 0xA;
+            g_window_records[level->sound_novel.quit_prompt_window].palette
+                = g_window_records[level->sound_novel.history_prompt_window].palette = 0xA;
         }
     } else {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
@@ -1448,8 +1441,8 @@ void sound_novel_step_quit_level(menu_stack_record_t* level) {
         g_window_render_object_count -= 5;
         g_menu_stack_depth -= 2;
         suzuki_sound_remove_resource(g_sound_novel_sound_resource);
-        screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY_TREASURE,
-            g_menu_stack_records[g_menu_stack_depth].list_window.selected_entry, 0);
+        screen_transition_push_level(
+            MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, g_menu_stack_records[g_menu_stack_depth].sound_novel.treasure_id, 0);
         return;
     }
 
@@ -1591,7 +1584,7 @@ static void sound_novel_push_history_level(void) {
     g_window_gs_image_records[index].clut.y = 0x1F2;
     window_draw_centered_text(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
 
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_pair_render.first_window].palette = 0xA;
+    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].palette = 0xA;
     /* Direct record.color access changes the column base and instruction scheduling. */
     colors = &g_window_gs_image_records->color;
     ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->r
@@ -1734,7 +1727,7 @@ void sound_novel_step_history_level(menu_stack_record_t* level) {
             g_window_render_record_count--;
             g_window_render_object_count -= 3;
             g_menu_stack_depth = depth - 1;
-            g_window_records[g_menu_stack_records[depth - 2].window_pair_render.first_window].palette = 0;
+            g_window_records[g_menu_stack_records[depth - 2].sound_novel.quit_prompt_window].palette = 0;
             thread_resume(WORLD_MAP_THREAD_SLOT_MESSAGE);
             break;
         }

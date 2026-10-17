@@ -491,7 +491,7 @@ static void world_map_push_cursor_level(void) {
     records = g_window_records;
 
     depth = g_menu_stack_depth;
-    g_menu_stack_records[depth].window_pair.first_window = window_index;
+    g_menu_stack_records[depth].map_cursor.window_index = window_index;
     g_window_records[window_index].sequence = WINDOW_ANIM_CURSOR_STILL;
     g_window_records[window_index].priority = 12;
     xy[window_index].x = 0;
@@ -502,7 +502,7 @@ static void world_map_push_cursor_level(void) {
     window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     depth = g_menu_stack_depth;
     g_hud_value_mode = HUD_VALUE_FUNDS;
-    g_menu_stack_records[depth].window_pair.second_window = window_index;
+    g_menu_stack_records[depth].map_cursor.alt_window_index = window_index;
     g_window_records[window_index].sequence = WINDOW_ANIM_MAP_EDGE_ARROWS;
     g_window_records[window_index].priority = 12;
     g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -1586,9 +1586,9 @@ void debug_step_variable_edit_level(menu_stack_record_t* level) {
             debug_draw_variable_list(&g_menu_stack_records[depth - 1].variable_list);
         }
         parent = g_menu_stack_depth - 1;
-        g_window_records[g_menu_stack_records[parent].window_render.window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-        slot = g_menu_stack_records[parent].window_render.window_index;
-        g_window_gs_image_records[g_menu_stack_records[parent].window_render.render_index].palette = 0;
+        g_window_records[g_menu_stack_records[parent].variable_list.window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
+        slot = g_menu_stack_records[parent].variable_list.window_index;
+        g_window_gs_image_records[g_menu_stack_records[parent].variable_list.render_index].palette = 0;
         record = &g_window_records[slot];
         record->palette = 0;
         record->frame_index = 0;

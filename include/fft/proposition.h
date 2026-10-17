@@ -155,6 +155,14 @@ void proposition_restore_returned_list_prompt(menu_stack_record_t* level);
 void proposition_block_returned_list_buttons(menu_stack_record_t* unused_level);
 
 /* detail and recall */
+/* The offered proposition's description image. The leading word belongs to
+ * the previous level at this depth and is not used by the detail level. */
+typedef struct proposition_detail_level {
+    u8 _unused_00[4];
+    s32 render_index;
+} proposition_detail_level_t;
+typedef char proposition_detail_level_size_must_be_8[sizeof(proposition_detail_level_t) == 8 ? 1 : -1];
+
 /* The proposition detail panel's outputs, at the same offsets in the PROPOSITION_RECALL and
  * BRAVE_STORY_PARTICIPANTS levels (proposition_build_detail_panel). */
 typedef struct proposition_detail_panel {
@@ -186,22 +194,36 @@ void proposition_resume_detail_level(menu_stack_record_t* level);
 void proposition_handle_recall_input(menu_stack_record_t* level);
 
 /* accepting and sending units */
-/* proposition_confirm_level_t.mode as proposition_handle_accept_confirm_input steps it. */
+/* proposition_accept_confirm_level_t.mode as proposition_handle_accept_confirm_input steps it. */
 typedef enum proposition_accept_mode {
     PROPOSITION_ACCEPT_MODE_CHOOSE = 0,
     PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE = 1, /* nobody can go: a press shows the second message */
     PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE = 3,   /* a refusal message is up: a press closes the panel */
 } proposition_accept_mode_e;
 
-/* The yes/no panel built by window_build_yes_no_panel and stepped by
- * proposition_handle_accept_confirm_input and proposition_handle_dispatch_confirm_input. */
-typedef struct proposition_confirm_level {
+/* The accept-proposition prompt, including its no-unit/refusal message modes. */
+typedef struct proposition_accept_confirm_level {
     s32 cursor_window; /* 0x00 */
     s32 render_index;  /* 0x04 */
     s32 row;           /* 0x08; 0 = yes, 1 = no */
     s32 mode;          /* 0x0c; proposition_accept_mode_e */
     s32 header_window; /* 0x10 */
-} proposition_confirm_level_t;
+} proposition_accept_confirm_level_t;
+typedef char
+    proposition_accept_confirm_level_size_must_be_20[sizeof(proposition_accept_confirm_level_t) == 20 ? 1 : -1];
+
+/* The dispatch confirmation has a different header-window slot and no
+ * accept-prompt message mode. Its row briefly holds the summary image during
+ * construction, then is cleared before input handling starts. */
+typedef struct proposition_dispatch_confirm_level {
+    s32 cursor_window;
+    s32 render_index; /* 0x04 */
+    s32 row;          /* 0x08 */
+    u8 _unused_0c[0x14];
+    s32 header_window; /* 0x20 */
+} proposition_dispatch_confirm_level_t;
+typedef char
+    proposition_dispatch_confirm_level_size_must_be_36[sizeof(proposition_dispatch_confirm_level_t) == 36 ? 1 : -1];
 
 /* Values of proposition_send_unit_level_t.mode. */
 typedef enum proposition_send_unit_mode {

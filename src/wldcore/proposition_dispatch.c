@@ -76,21 +76,21 @@ void proposition_push_dispatch_confirm_level(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CONFIRM_CONDITIONS, 0);
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].choice_panel.cursor_window = index;
+    g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.cursor_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
     g_window_records[index].priority = 8;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].list_window.upper_window = index;
+    g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.header_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
     g_window_records[index].priority = 8;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].choice_panel.render_index = index;
+    g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
@@ -103,7 +103,7 @@ void proposition_push_dispatch_confirm_level(void) {
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
-    g_menu_stack_records[g_menu_stack_depth].choice_panel.row = index;
+    g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.row = index;
     location = &g_proposition_selected_row.name_text;
     text_measure_pixels(&size[0], &size[1], text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     bounds.y = 0x60;
@@ -140,16 +140,16 @@ void proposition_push_dispatch_confirm_level(void) {
     base->y = -0x28;
 
     depth = g_menu_stack_depth;
-    index = g_menu_stack_records[depth].choice_panel.render_index;
-    g_menu_stack_records[depth].choice_panel.row = 0;
-    g_window_records[g_menu_stack_records[depth].choice_panel.cursor_window].position.x
+    index = g_menu_stack_records[depth].dispatch_confirm.render_index;
+    g_menu_stack_records[depth].dispatch_confirm.row = 0;
+    g_window_records[g_menu_stack_records[depth].dispatch_confirm.cursor_window].position.x
         = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[g_menu_stack_records[depth].choice_panel.cursor_window].position.y
-        = g_window_gs_image_records[index].base.y - -(g_menu_stack_records[depth].choice_panel.row * 0x10 + 0xE);
-    g_window_records[g_menu_stack_records[depth].list_window.upper_window].position.x
+    g_window_records[g_menu_stack_records[depth].dispatch_confirm.cursor_window].position.y
+        = g_window_gs_image_records[index].base.y - -(g_menu_stack_records[depth].dispatch_confirm.row * 0x10 + 0xE);
+    g_window_records[g_menu_stack_records[depth].dispatch_confirm.header_window].position.x
         = g_window_gs_image_records[index].base.x + 3;
     g_menu_stack_depth = depth + 1;
-    g_window_records[g_menu_stack_records[depth].list_window.upper_window].position.y
+    g_window_records[g_menu_stack_records[depth].dispatch_confirm.header_window].position.y
         = g_window_gs_image_records[index].base.y - 2;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM;
 }
@@ -164,7 +164,7 @@ void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level) {
     s32 row;
     s32 i;
 
-    if (g_window_gs_image_records[level->choice_panel.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[level->dispatch_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -183,16 +183,16 @@ void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level) {
     }
 
     if (world_map_update_input_repeat(PSX_PAD_UP) != 0 || world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
-        row = level->choice_panel.row ^ 1;
-        level->choice_panel.row = row;
-        g_window_records[level->choice_panel.cursor_window].position.y
-            = g_window_gs_image_records[level->choice_panel.render_index].base.y - -(row * 0x10 + 0xE);
+        row = level->dispatch_confirm.row ^ 1;
+        level->dispatch_confirm.row = row;
+        g_window_records[level->dispatch_confirm.cursor_window].position.y
+            = g_window_gs_image_records[level->dispatch_confirm.render_index].base.y - -(row * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        if (level->choice_panel.row != 1) {
+        if (level->dispatch_confirm.row != 1) {
             script_set_variable(
                 EVENT_SCRIPT_VAR_WAR_FUNDS, script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) - g_proposition_gil_amount);
             g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
@@ -975,16 +975,11 @@ void proposition_open_returned_list(void) {
     s32* location;
     s32 entry_value_base;
 
-    if (g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
-        & DISPLAY_OBJECT_HIDDEN) {
-        g_window_records[g_menu_stack_records[previous].window_pair_render.first_window].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[previous].window_pair_render.second_window].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].window_pair_render.render_index].flags
-            |= DISPLAY_OBJECT_POP_IN;
+    if (g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN) {
+        g_window_records[g_menu_stack_records[previous].bar.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_records[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
     }
 
     if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
@@ -1003,7 +998,7 @@ void proposition_open_returned_list(void) {
                 && g_proposition_active[i].location == *location) {
                 g_menu_stack_entry_values[count] = g_proposition_active[i].proposition_id + entry_value_base;
                 g_menu_stack_row_flags[count] = 0;
-                g_menu_stack_records[g_menu_stack_depth].proposition_list.entries[count] = i;
+                g_menu_stack_records[g_menu_stack_depth].panel.entries[count] = i;
                 count++;
             }
             i++;
@@ -1011,7 +1006,7 @@ void proposition_open_returned_list(void) {
     }
 
     if (count != 0) {
-        g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count = count;
+        g_menu_stack_records[g_menu_stack_depth].panel.entry_count = count;
         if (count < 6) {
             i = count;
         } else {
@@ -1023,7 +1018,7 @@ void proposition_open_returned_list(void) {
         origin.y = 0x50;
         menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_RETURNED, count, i);
         window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
-            g_menu_stack_records[g_menu_stack_depth].proposition_list.entry_count, &layout, &origin);
+            g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
     } else {
         bar_build_rows(&g_menu_stack_records[g_menu_stack_depth - 1].bar);
         menu_stack_dispatch_resume();
@@ -1082,7 +1077,7 @@ void proposition_handle_returned_list_input(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         proposition_block_returned_list_buttons(level);
-        proposition_prepare_report(level->proposition_list.entries[g_window_panel_render_state.selected_index]);
+        proposition_prepare_report(level->panel.entries[g_window_panel_render_state.selected_index]);
         menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RETURNED);
         g_text_substitution_values[0] = g_menu_stack_entry_values[g_window_panel_render_state.selected_index];
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_HEAR_ABOUT_JOB, 0);
@@ -1093,7 +1088,7 @@ void proposition_handle_returned_list_input(menu_stack_record_t* level) {
         g_menu_stack_types[depth] = MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM;
         g_menu_stack_depth = depth + 1;
         g_menu_stack_records[depth].proposition_report_confirm.argument
-            = level->proposition_list.entries[g_window_panel_render_state.selected_index];
+            = level->panel.entries[g_window_panel_render_state.selected_index];
     }
 }
 
@@ -1167,10 +1162,9 @@ void proposition_handle_report_confirm_input(menu_stack_record_t* level) {
 static void proposition_push_report_level(s32 argument) {
     s32 depth = g_menu_stack_depth;
 
-    g_window_records[g_menu_stack_records[depth - 1].window_pair_render.first_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].window_pair_render.second_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[depth - 1].window_pair_render.render_index].flags
-        |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[depth - 1].bar.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_records[depth].proposition_report.state = -1;
     g_menu_stack_records[depth].proposition_report.proposition = argument;
     g_menu_stack_records[depth].proposition_report.phase = 0;
