@@ -23,26 +23,10 @@ void gfx_set_clut_rect_from_id(RECT* rect, u16 clut_id);
 /* scene texture allocation */
 /* Independent 15-row, 16-column grids for BATTLE and WORLD. */
 extern u8 g_gfx_texture_allocation_grid[15][16];
-extern s32 g_gfx_free_rect_pixels[4];
-extern s32 g_gfx_free_rect_cells[4];
 
 void gfx_alloc_texture_rect(RECT* rect, void* primitive, u32* image);
 void gfx_free_texture_rect(RECT* rect);
 void gfx_clear_texture_allocation_grid(void);
-
-/* Round x, y, width and height from texture pixels to 16-pixel cells. */
-static inline void texture_rect_pixels_to_cells(const s32 pixels[4], s32 cells[4]) {
-    s32 i;
-    s32 value;
-
-    for (i = 0; i < 4; i++) {
-        value = pixels[i] >> 4;
-        cells[i] = value;
-        if (pixels[i] & 0xf) {
-            cells[i] = value + 1;
-        }
-    }
-}
 
 /* item icons */
 extern point16_t g_gfx_item_icon_image_location;

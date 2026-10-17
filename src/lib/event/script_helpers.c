@@ -35,6 +35,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s32 g_gfx_free_rect_pixels[4];
+extern s32 g_gfx_free_rect_cells[4];
+
 /* Menu palette color of each of the numeric display frame's twelve lines. */
 static u8 g_status_screen_numbers_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
 
@@ -795,12 +798,20 @@ void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
 void gfx_free_texture_rect(RECT* rect) {
     s32 x;
     s32 y;
+    s32 i;
+    s32 value;
     if (rect->x != -1 && rect != (void*)-1) {
         g_gfx_free_rect_pixels[0] = (rect->x - 0x1c0) * 4;
         g_gfx_free_rect_pixels[1] = rect->y & 0xff;
         g_gfx_free_rect_pixels[2] = rect->w * 4;
         g_gfx_free_rect_pixels[3] = rect->h;
-        texture_rect_pixels_to_cells(g_gfx_free_rect_pixels, g_gfx_free_rect_cells);
+        for (i = 0; i < 4; i++) {
+            value = g_gfx_free_rect_pixels[i] >> 4;
+            g_gfx_free_rect_cells[i] = value;
+            if (g_gfx_free_rect_pixels[i] & 0xf) {
+                g_gfx_free_rect_cells[i] = value + 1;
+            }
+        }
         for (y = g_gfx_free_rect_cells[1]; y < g_gfx_free_rect_cells[1] + g_gfx_free_rect_cells[3]; y++) {
             for (x = g_gfx_free_rect_cells[0]; x < g_gfx_free_rect_cells[0] + g_gfx_free_rect_cells[2]; x++) {
                 if (x >= 16 || y >= 15) {
