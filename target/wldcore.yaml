@@ -15,7 +15,7 @@ units:
   - {name: file_wait, source: src/lib/file/file_wait.c}
   - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}]}
-  - {name: map_routes, source: src/wldcore/map_routes.c}
+  - {name: map_routes, source: src/wldcore/map_routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}]}
   - {name: map_tiles, source: src/wldcore/map_tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}]}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}

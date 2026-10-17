@@ -29,7 +29,6 @@ extern s32 g_travel_search_cost;
 extern travel_path_t g_travel_search_path;
 extern random_battle_road_t (*g_random_battle_roads)[3];
 extern s32 g_random_battle_map_id;
-extern world_map_dot_source_t* g_world_map_dot_sources;
 extern s32 g_world_map_dot_count;
 extern u8 g_world_map_dot_pulse_direction;
 extern u8 g_world_map_dot_pulse_phase;
@@ -41,13 +40,111 @@ extern world_map_route_t** g_world_map_routes;
  * (x, y) pairs. */
 extern u16** g_world_map_route_polylines;
 
+static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT];
+static location_record_t g_location_record_data[LOCATION_COUNT];
+static world_map_dot_source_t* g_world_map_dot_sources = g_world_map_dot_source_data;
+location_record_t* g_location_records = g_location_record_data;
+
+/* Packed map positions and dot categories, in location_id_e order. */
+static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT] = {
+    { 0x0000fffa, 0x0000ffba },
+    { 0x0000ffac, 0x0000ff95 },
+    { 0x0000ff44, 0x0000ffc3 },
+    { 0x00000004, 0x0000005a },
+    { 0x0000005c, 0x00000024 },
+    { 0x00000072, 0x0000ffb5 },
+    { 0x0101ff7c, 0x0000fff4 },
+    { 0x0101ffda, 0x0000ff83 },
+    { 0x0101fff4, 0x0000ffd8 },
+    { 0x0101ffcd, 0x0000fffd },
+    { 0x0101fff7, 0x0000002f },
+    { 0x0101ff9a, 0x00000061 },
+    { 0x01010034, 0x00000081 },
+    { 0x01010031, 0x0000ffc8 },
+    { 0x01010098, 0x0000ffce },
+    { 0x0202ff6d, 0x0000ffbc },
+    { 0x0200ff80, 0x00000025 },
+    { 0x0202ff59, 0x0000000e },
+    { 0x0202ffe3, 0x0000000e },
+    { 0x0202fffd, 0x00000077 },
+    { 0x02020081, 0x00000047 },
+    { 0x02010021, 0x0000000a },
+    { 0x02020082, 0x0000006a },
+    { 0x02020059, 0x0000ff88 },
+    { 0x0202ff52, 0x0000ffe9 },
+    { 0x0202ff88, 0x0000ffa4 },
+    { 0x0202ffaa, 0x0000ffe7 },
+    { 0x0202ffba, 0x0000ffb9 },
+    { 0x0202ffd2, 0x0000ffdc },
+    { 0x0202ff90, 0x0000ffcc },
+    { 0x0202ffd3, 0x0000004d },
+    { 0x0202ffb8, 0x0000ff7b },
+    { 0x0202ffee, 0x0000fff5 },
+    { 0x0202fff0, 0x0000ff9d },
+    { 0x0202002e, 0x0000ffed },
+    { 0x02020006, 0x00000005 },
+    { 0x02020045, 0x0000000f },
+    { 0x02020010, 0x0000003d },
+    { 0x02020018, 0x0000ffad },
+    { 0x02020024, 0x00000061 },
+    { 0x0202005e, 0x0000ffcf },
+    { 0x02020071, 0x00000007 },
+    { 0x0202008e, 0x0000ffee },
+};
+
+static location_record_t g_location_record_data[LOCATION_COUNT] = {
+    { { 0, 0 }, 1, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 2, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 3, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 4, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 5, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 6, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 7, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 8, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 9, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 10, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 11, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 12, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 13, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 14, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 15, LOCATION_MENU_TOWN },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 16, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 91, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 17, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 90, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+    { { 0, 0 }, 0, LOCATION_MENU_OTHER },
+};
+
 static void world_map_negate_and_clamp(const SVECTOR* input, VECTOR* output);
 static s32 random_battle_roll(s32 location, s32 route);
 static void world_map_scroll_if_near_edge(point32_t* delta);
 static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output);
 
 /* Build the world-map location dots from their packed source rows and queue them for
- * drawing. Castles use the next dot sequence, a set color variable selects the town or
+ * drawing. Kind-2 locations use the next dot sequence; a set color variable selects the town or
  * field palette, and a clear visibility variable hides the dot. */
 void world_map_init_dots(void) {
     world_map_dot_source_t* src;
@@ -56,7 +153,7 @@ void world_map_init_dots(void) {
     s32* flags_base;
     CVECTOR* color;
     s32 y;
-    s32 is_castle;
+    s32 alternate_dot;
     s32 queue_index;
     s32 i;
 
@@ -82,8 +179,8 @@ void world_map_init_dots(void) {
         color->r = 0x80;
         color->g = 0x80;
         color->b = 0x80;
-        is_castle = g_world_map_dots[i].kind == 2;
-        g_world_map_dots[i].render.sequence = is_castle + WINDOW_ANIM_MAP_DOT;
+        alternate_dot = g_world_map_dots[i].kind == 2;
+        g_world_map_dots[i].render.sequence = alternate_dot + WINDOW_ANIM_MAP_DOT;
         if (script_get_variable(i + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
             if (i < LOCATION_FIELD_FIRST) {
                 g_world_map_dots[i].render.palette = 0xc;
@@ -302,7 +399,7 @@ s32 location_build_menu_entries(s32 location_id, s32* out) {
     }
 
     count = 0;
-    if (g_location_records[location_id].is_town == 1) {
+    if (g_location_records[location_id].menu_kind == LOCATION_MENU_TOWN) {
         count = 3;
         out[0] = TEXT_ID_BAR;
         out[1] = TEXT_ID_SHOP;

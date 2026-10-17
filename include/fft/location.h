@@ -69,12 +69,16 @@ enum {
     LOCATION_COUNT = 43
 };
 
-/* Provisional: four-byte per-location records reached through g_location_records. */
+/* Native menu categories; Deep Dungeon builds its floor list separately. */
+typedef enum location_menu_kind { LOCATION_MENU_TOWN = 1, LOCATION_MENU_OTHER = 2 } location_menu_kind_e;
+
+/* Per-location picture selection and menu category. */
 typedef struct location_record {
     u8 _unused_00[2];
-    u8 picture; /* 0x02; location picture set + 1, 0 for none */
-    u8 is_town; /* 0x03; 1 offers the town entries TEXT_ID_BAR to _SOLDIER_OFFICE in the location menu */
+    u8 picture;   /* 0x02; location picture set + 1, 0 for none */
+    u8 menu_kind; /* 0x03; location_menu_kind_e */
 } location_record_t;
+typedef char location_record_size_must_be_4[sizeof(location_record_t) == 4 ? 1 : -1];
 
 extern location_record_t* g_location_records;
 extern s32 g_location_label_shade;
