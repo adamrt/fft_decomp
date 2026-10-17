@@ -586,8 +586,8 @@ void formula_dragon_level_up(void) {
 }
 
 /* Formula 0x5E: damage ((MA + Y) / 2 * MA) with element, 19% status; magic
- * evade. */
-void formula_5e_damage_ma_plus_y_half_times_ma(void) {
+ * evade. action_init_strike_data runs X+1 strikes; this handler calculates one. */
+void formula_fixed_multihit_magic(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_calculate_truth_damage();
     }

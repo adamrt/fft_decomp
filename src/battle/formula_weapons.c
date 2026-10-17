@@ -643,10 +643,10 @@ void formula_steal_exp(void) {
     }
 }
 
-/* Formula 0x29: opposite sex only, hit (MA+X)%. A target whose sex and monster
+/* Formula 0x29: Charm, hit (MA+X)%. A target whose sex and monster
  * flags all equal the caster's is a forced miss, so a monster target of a
  * human caster can be hit. */
-void formula_opposite_sex_hit_ma_x_percent(void) {
+void formula_charm(void) {
     formula_store_ma_and_x();
     formula_apply_zodiac_compatibility();
     formula_store_xa_plus_ya();

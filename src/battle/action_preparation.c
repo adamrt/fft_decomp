@@ -835,7 +835,7 @@ static void action_finalize_draw_out_katana(unit_stats_t* attacker, action_strik
  * context, and latch the two hands (the left moves up when the right is empty).
  * Throw only records the thrown item. ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC and
  * ABILITY_FORMULA_UN_TRUTH strike a random 1..X times while
- * executing (once in a preview) and ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA
+ * executing (once in a preview) and ABILITY_FORMULA_FIXED_MULTIHIT_MAGIC
  * strikes X+1 times; Attack, Charge and ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE
  * abilities strike twice with Two Swords when both hands hold weapons or both
  * are empty (Frog and monsters count as empty).
@@ -899,7 +899,7 @@ static void action_init_strike_data(unit_stats_t* unit) {
                 return;
             }
         }
-        if (formula == ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA) {
+        if (formula == ABILITY_FORMULA_FIXED_MULTIHIT_MAGIC) {
             g_action_current_ability.strike_count = x + 1;
             return;
         }

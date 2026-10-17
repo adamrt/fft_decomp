@@ -1486,7 +1486,7 @@ functions:
   - {addr: 0x80189794, size: 148, name: formula_steal_equipment, hash: 495f466453133c22, unit: formula_weapons}
   - {addr: 0x80189828, size: 72, name: formula_steal_gil, hash: 7562ecdc4ae00a45, unit: formula_weapons}
   - {addr: 0x80189870, size: 160, name: formula_steal_exp, hash: e12062f412c50b37, unit: formula_weapons}
-  - {addr: 0x80189910, size: 148, name: formula_opposite_sex_hit_ma_x_percent, hash: 8c25bec110dc3e13, unit: formula_weapons}
+  - {addr: 0x80189910, size: 148, name: formula_charm, hash: 8c25bec110dc3e13, unit: formula_weapons}
   - {addr: 0x801899a4, size: 236, name: formula_talk_skill, hash: 75acbbbc278b8022, unit: formula_damage}
   - {addr: 0x80189a90, size: 72, name: formula_battle_skill_stat_break, hash: 1970f8954ca50f6e, unit: formula_damage}
   - {addr: 0x80189ad8, size: 72, name: formula_magic_break, hash: 01e6a7a9d35e8a3b, unit: formula_damage}
@@ -1530,7 +1530,7 @@ functions:
   - {addr: 0x8018a9c4, size: 76, name: formula_dragon_care, hash: 94e68ee9ca063221, unit: formula_damage}
   - {addr: 0x8018aa10, size: 68, name: formula_dragon_power_up, hash: 4aeb0f400363cd0b, unit: formula_damage}
   - {addr: 0x8018aa54, size: 68, name: formula_dragon_level_up, hash: e3f95f8dfb07f544, unit: formula_damage}
-  - {addr: 0x8018aa98, size: 48, name: formula_5e_damage_ma_plus_y_half_times_ma, hash: cd23e5d4ae3deda3, unit: formula_damage}
+  - {addr: 0x8018aa98, size: 48, name: formula_fixed_multihit_magic, hash: cd23e5d4ae3deda3, unit: formula_damage}
   - {addr: 0x8018aac8, size: 48, name: formula_nanoflare, hash: cd23e5d4ae3deda3, unit: formula_damage}
   - {addr: 0x8018aaf8, size: 32, name: formula_damage_ma_plus_y_half_times_ma_status, hash: 745ea22d2495e99e, unit: formula_damage}
   - {addr: 0x8018ab18, size: 64, name: formula_lower_brave_y, hash: 9615711393abaae9, unit: formula_damage}
