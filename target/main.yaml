@@ -24,6 +24,7 @@ units:
   - {name: suzuki_smd_controls, source: src/lib/suzuki/smd_controls.c}
   - {name: suzuki_smd_lifecycle, source: src/lib/suzuki/smd_lifecycle.c}
   - {name: suzuki_smd_records, source: src/lib/suzuki/smd_records.c}
+  - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c}
   - {name: system_handlers, source: src/main/system_handlers.c}
   - {name: unit_growth, source: src/main/unit_growth.c}
   - {name: unit_status, source: src/main/unit_status.c}
@@ -231,22 +232,22 @@ functions:
   - {addr: 0x80016e14, size: 52, name: suzuki_smd_scale_tempo, hash: cf26f3112abca15b, source: src/lib/suzuki/suzuki_smd_scale_tempo.c}
   - {addr: 0x80016e48, size: 92, name: suzuki_smd_select_sound_font, hash: 3066f90fbf19f301, source: src/lib/suzuki/suzuki_smd_select_sound_font.c}
   - {addr: 0x80016ea4, size: 272, name: suzuki_smd_end_track, hash: 71c987f5ac945c0a, source: src/lib/suzuki/suzuki_smd_end_track.c}
-  - {addr: 0x80016fb4, size: 228, name: suzuki_smd_set_instrument, hash: c2dd507b0db162ae, source: src/lib/suzuki/suzuki_smd_set_instrument.c}
-  - {addr: 0x80017098, size: 64, name: suzuki_smd_set_voice_update_flags_all_channels, hash: df50549d20d331a3, source: src/lib/suzuki/suzuki_smd_set_voice_update_flags_all_channels.c}
-  - {addr: 0x800170d8, size: 64, name: suzuki_smd_set_voice_attr_flags_all_channels, hash: e708dfed3be27cc0, source: src/lib/suzuki/suzuki_smd_set_voice_attr_flags_all_channels.c}
-  - {addr: 0x80017118, size: 780, name: suzuki_smd_update_voices, hash: 989993e81a871f34, source: src/lib/suzuki/suzuki_smd_update_voices.c}
-  - {addr: 0x80017424, size: 120, name: suzuki_smd_calculate_pitch, hash: 806ed29df5e89daf, source: src/lib/suzuki/suzuki_smd_calculate_pitch.c}
-  - {addr: 0x8001749c, size: 408, name: suzuki_smd_update_modulators, hash: 5243ca116d6992eb, source: src/lib/suzuki/suzuki_smd_update_modulators.c}
-  - {addr: 0x80017634, size: 20, name: suzuki_smd_modulator_deactivate, hash: 139344288a534a1c, source: src/lib/suzuki/suzuki_smd_modulator_deactivate.c}
-  - {addr: 0x80017648, size: 72, name: suzuki_smd_modulator_step_square, hash: 5a2a7ead6df1414d, source: src/lib/suzuki/suzuki_smd_modulator_step_square.c}
-  - {addr: 0x80017690, size: 84, name: suzuki_smd_modulator_step_alternating, hash: aaeac0ad00ae9bbe, source: src/lib/suzuki/suzuki_smd_modulator_step_alternating.c}
-  - {addr: 0x800176e4, size: 96, name: suzuki_smd_modulator_step_triangle, hash: 10f3878a95b20711, source: src/lib/suzuki/suzuki_smd_modulator_step_triangle.c}
-  - {addr: 0x80017744, size: 124, name: suzuki_smd_modulator_step_triangle_centered, hash: a3af77d0acffed47, source: src/lib/suzuki/suzuki_smd_modulator_step_triangle_centered.c}
-  - {addr: 0x800177c0, size: 76, name: suzuki_smd_modulator_step_sawtooth, hash: 9656f27b21af84fc, source: src/lib/suzuki/suzuki_smd_modulator_step_sawtooth.c}
-  - {addr: 0x8001780c, size: 108, name: suzuki_smd_modulator_step_random, hash: ed231063cf34a031, source: src/lib/suzuki/suzuki_smd_modulator_step_random.c}
-  - {addr: 0x80017878, size: 108, name: suzuki_smd_modulator_step_random_bipolar, hash: 378214ca0aec5089, source: src/lib/suzuki/suzuki_smd_modulator_step_random_bipolar.c}
-  - {addr: 0x800178e4, size: 16, name: suzuki_smd_seed_random, hash: f310c66f2d04a668, source: src/lib/suzuki/suzuki_smd_seed_random.c}
-  - {addr: 0x800178f4, size: 44, name: suzuki_smd_random, hash: 8e23bdb8c352dd6b, source: src/lib/suzuki/suzuki_smd_random.c}
+  - {addr: 0x80016fb4, size: 228, name: suzuki_smd_set_instrument, hash: c2dd507b0db162ae, unit: suzuki_smd_voices}
+  - {addr: 0x80017098, size: 64, name: suzuki_smd_set_voice_update_flags_all_channels, hash: df50549d20d331a3, unit: suzuki_smd_voices}
+  - {addr: 0x800170d8, size: 64, name: suzuki_smd_set_voice_attr_flags_all_channels, hash: e708dfed3be27cc0, unit: suzuki_smd_voices}
+  - {addr: 0x80017118, size: 780, name: suzuki_smd_update_voices, hash: 989993e81a871f34, unit: suzuki_smd_voices}
+  - {addr: 0x80017424, size: 120, name: suzuki_smd_calculate_pitch, hash: 806ed29df5e89daf, unit: suzuki_smd_voices}
+  - {addr: 0x8001749c, size: 408, name: suzuki_smd_update_modulators, hash: 5243ca116d6992eb, unit: suzuki_smd_voices}
+  - {addr: 0x80017634, size: 20, name: suzuki_smd_modulator_deactivate, hash: 139344288a534a1c, unit: suzuki_smd_voices}
+  - {addr: 0x80017648, size: 72, name: suzuki_smd_modulator_step_square, hash: 5a2a7ead6df1414d, unit: suzuki_smd_voices}
+  - {addr: 0x80017690, size: 84, name: suzuki_smd_modulator_step_alternating, hash: aaeac0ad00ae9bbe, unit: suzuki_smd_voices}
+  - {addr: 0x800176e4, size: 96, name: suzuki_smd_modulator_step_triangle, hash: 10f3878a95b20711, unit: suzuki_smd_voices}
+  - {addr: 0x80017744, size: 124, name: suzuki_smd_modulator_step_triangle_centered, hash: a3af77d0acffed47, unit: suzuki_smd_voices}
+  - {addr: 0x800177c0, size: 76, name: suzuki_smd_modulator_step_sawtooth, hash: 9656f27b21af84fc, unit: suzuki_smd_voices}
+  - {addr: 0x8001780c, size: 108, name: suzuki_smd_modulator_step_random, hash: ed231063cf34a031, unit: suzuki_smd_voices}
+  - {addr: 0x80017878, size: 108, name: suzuki_smd_modulator_step_random_bipolar, hash: 378214ca0aec5089, unit: suzuki_smd_voices}
+  - {addr: 0x800178e4, size: 16, name: suzuki_smd_seed_random, hash: f310c66f2d04a668, unit: suzuki_smd_voices}
+  - {addr: 0x800178f4, size: 44, name: suzuki_smd_random, hash: 8e23bdb8c352dd6b, unit: suzuki_smd_voices}
   - {addr: 0x80017920, size: 556, name: suzuki_sound_init, hash: e50bdc8181740b9f, source: src/lib/suzuki/suzuki_sound_init.c}
   - {addr: 0x80017b4c, size: 172, name: suzuki_sound_quit, hash: b256f8b6ca7af0e8, source: src/lib/suzuki/suzuki_sound_quit.c}
   - {addr: 0x80017bf8, size: 68, name: suzuki_sound_enable_root_counter_2_event, hash: 832b69c76d62d651, source: src/lib/suzuki/suzuki_sound_enable_root_counter_2_event.c}
