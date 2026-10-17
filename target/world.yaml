@@ -1201,9 +1201,8 @@ data:
   - {addr: 0x801532d6, name: g_gfx_draw_primitives_immediately}
   - {addr: 0x801532d8, name: g_script_debug_paused}
   - {addr: 0x801532da, name: g_menu_input_mode}
-  - {addr: 0x801532dc, name: g_script_effect_target_runtime_id}
-  - {addr: 0x801532e0, name: g_event_effect_target_x}
-  - {addr: 0x801532e2, name: g_event_effect_target_y}
+  - {addr: 0x801532dc, name: g_event_effect_target_runtime_id}
+  - {addr: 0x801532e0, name: g_event_effect_target_position}
   - {addr: 0x801532e4, name: g_event_effect_target_mode}
   - {addr: 0x801532e8, name: g_overlay_companion_executable_request_index}
   - {addr: 0x801532ec, name: g_overlay_companion_data_file_request_index}

@@ -203,10 +203,12 @@ void script_set_specialized_map_destroyed(void);
 void script_dark_screen_thread(void);
 
 /* effects and graphics */
+/* BATTLE and WORLD each define these request cells. The Effect instruction stores the tile coordinates,
+ * but the request handoff uses only the runtime ID and mode. */
 extern s16 g_event_pending_effect_id;
+extern u16 g_event_effect_target_runtime_id;
 extern s16 g_event_effect_target_mode;
-extern s16 g_event_effect_target_x;
-extern s16 g_event_effect_target_y;
+extern point16_t g_event_effect_target_position;
 extern u16 g_3d_object_wait_status;
 extern u16 g_field_object_wait_status;
 
@@ -306,7 +308,6 @@ typedef char script_weather_environment_size_must_be_2[(sizeof(script_weather_en
 extern s32 g_event_frame_counter; /* counts the frames the event interpreter runs */
 extern u16 g_event_scenario_music_1_id;
 extern u16 g_event_scenario_music_2_id;
-extern u16 g_event_effect_target_runtime_id;
 extern script_weather_environment_t g_event_weather_commands[];
 
 /* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
@@ -338,7 +339,6 @@ typedef struct script_music_switch {
     s16 fade;
 } script_music_switch_t;
 
-extern s16 g_script_effect_target_runtime_id;
 extern script_command_args_t g_script_map_command_80_args;
 extern script_command_args_t g_script_map_command_83_args;
 extern script_music_switch_t g_script_music_switch;

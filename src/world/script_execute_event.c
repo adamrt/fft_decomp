@@ -543,12 +543,12 @@ restart_script:
         /* ---- Effects ---- */
         else if (opcode == EVENT_OPCODE_EFFECT) {
             g_event_pending_effect_id = first_operand;
-            g_script_effect_target_runtime_id
+            g_event_effect_target_runtime_id
                 = script_resolve_runtime_id(((((u8*)g_script_event_block) + instruction_offset))[3]);
             effect_instruction = (u8*)g_script_event_block;
             effect_instruction += instruction_offset;
-            g_event_effect_target_x = effect_instruction[4];
-            g_event_effect_target_y = effect_instruction[5];
+            g_event_effect_target_position.x = effect_instruction[4];
+            g_event_effect_target_position.y = effect_instruction[5];
             g_event_effect_target_mode = effect_instruction[6];
             script_set_variable(EVENT_SCRIPT_VAR_CAMERA_ROLL, 0);
             thread_wait_frames(2);
