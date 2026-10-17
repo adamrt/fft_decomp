@@ -98,8 +98,9 @@ extern effect_context_t g_effect_context;
 
 void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void effect_get_world_coords_by_battle_id(
-    s32 adjust_for_tile_height, u32 battle_id, effect_context_t* effect_coordinates, SVECTOR* destination);
-void effect_resolve_target_world_coords(s32 add_depth, s32 target_index, effect_context_t* coord_data, SVECTOR* out);
+    s32 adjust_for_tile_height, u32 battle_id, const effect_context_t* effect_coordinates, SVECTOR* destination);
+void effect_resolve_target_world_coords(
+    s32 add_depth, s32 target_index, const effect_context_t* coord_data, SVECTOR* out);
 
 /* particles */
 /* Motion state of an effect slot (effect_slot_t +0x98) and of a

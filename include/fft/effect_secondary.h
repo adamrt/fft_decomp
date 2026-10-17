@@ -80,7 +80,7 @@ extern u8 g_effect_secondary_charge_id; /* id of the charge secondary effect sta
 extern u32* g_effect_polygon_depth_data;
 extern s32 g_effect_buffer_index;
 
-s32 effect_secondary_init(s32 animation_id, s32 parameter, struct effect_context* source);
+s32 effect_secondary_init(s32 animation_id, s32 parameter, const struct effect_context* source);
 s32 effect_secondary_update(void);
 effect_secondary_phase_e effect_secondary_get_phase(u8 secondary_id);
 void effect_secondary_finalize(u8 secondary_id);
@@ -414,7 +414,7 @@ s32 effect_secondary_equip_break_handler(void);
 s32 effect_secondary_summon_charge_handler(void);
 
 /* starting secondary effects */
-s32 effect_secondary_init_projectile(s32 animation, struct effect_context* source);
+s32 effect_secondary_init_projectile(s32 animation, const struct effect_context* source);
 s32 effect_secondary_init_weapon_hit(s32 elements, effect_context_t* source, s32 unused_is_bow);
 s32 effect_secondary_init_fall_dust(effect_context_t* source, VECTOR* position);
 void effect_secondary_build_init(struct unit* unit, struct effect_context* effect);

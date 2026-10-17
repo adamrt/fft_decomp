@@ -338,7 +338,7 @@ s32 effect_file_update_load(void) {
  * animations for the equipment-break and Charge ability ranges are started,
  * and nothing is retained.
  */
-void effect_set_ability_animation(u32 packed, s32 ability, effect_context_t* source) {
+void effect_set_ability_animation(u32 packed, s32 ability, const effect_context_t* source) {
     g_effect_load_state = EFFECT_LOAD_START;
     if (ability < ABILITY_ID_COUNT) {
         if (ability == ABILITY_ID_THROW_BALL) {

@@ -1204,7 +1204,7 @@ static void effect_slot_free(u8 id) {
 /* Start secondary effect animation_id for the caster and first target of the
  * init record and return its id. parameter is the animation's own: an
  * element mask, a sprite palette or a duration. */
-s32 effect_secondary_init(s32 animation_id, s32 parameter, effect_context_t* source) {
+s32 effect_secondary_init(s32 animation_id, s32 parameter, const effect_context_t* source) {
     s32 secondary_id = effect_secondary_allocate_record();
 
     g_effect_secondary_data[secondary_id].animation_id = animation_id;
@@ -1223,7 +1223,7 @@ s32 effect_secondary_init(s32 animation_id, s32 parameter, effect_context_t* sou
  * animation selects the animation id (and its function id), the high half is
  * stored alongside it. Returns its id; phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
-s32 effect_secondary_init_projectile(s32 animation, effect_context_t* source) {
+s32 effect_secondary_init_projectile(s32 animation, const effect_context_t* source) {
     u8 secondary_id = effect_secondary_allocate_record();
 
     g_effect_secondary_data[secondary_id].animation_id = animation;

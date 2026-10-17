@@ -671,7 +671,8 @@ effect_work_record_t* effect_particle_get_work_record(s16 record_index, s16 requ
  *
  * Positions have 12 fractional bits; initial speed values scale into velocity by eight.
  * The lerps of the pair at 0x4c and the target's facing quadrant are discarded. */
-s32 effect_particle_spawn_from_emitter(s16 record_index, s32 frame, s32 emitter_index, effect_work_record_t* parent) {
+s32 effect_particle_spawn_from_emitter(
+    s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent) {
     SVECTOR rotation;
     VECTOR out;
     SVECTOR caster;
@@ -1566,7 +1567,8 @@ void effect_model_decode_next_command(effect_decoded_model_command_t* out) {
  * onto it (y grows downward). A tile target uses the tile center
  * (x * 28 + 14, y * 28 + 14) and takes its height from the tile record,
  * adding the depth when add_depth is set. */
-void effect_resolve_target_world_coords(s32 add_depth, s32 target_index, effect_context_t* coord_data, SVECTOR* out) {
+void effect_resolve_target_world_coords(
+    s32 add_depth, s32 target_index, const effect_context_t* coord_data, SVECTOR* out) {
     battle_map_tile_t* tile;
 
     if (target_index == EFFECT_TARGET_INDEX_CASTER) {
@@ -1626,7 +1628,7 @@ void effect_resolve_target_world_coords(s32 add_depth, s32 target_index, effect_
  * runtime id where effect_resolve_target_world_coords expects an index
  * into the effect's target list. Nothing in the game calls it. */
 void effect_get_world_coords_by_battle_id(
-    s32 adjust_for_tile_height, u32 battle_id, effect_context_t* effect_coordinates, SVECTOR* destination) {
+    s32 adjust_for_tile_height, u32 battle_id, const effect_context_t* effect_coordinates, SVECTOR* destination) {
     effect_resolve_target_world_coords(
         adjust_for_tile_height, unit_get_runtime_id_by_battle_id(battle_id), effect_coordinates, destination);
 }
