@@ -51,7 +51,7 @@ static void deploy_previous_roster_unit_thread(void);
 static void deploy_select_first_deployable_unit(void);
 static void deploy_update_cursors(s32 frame, deploy_render_buffer_t* buffer);
 static void deploy_text_graphics_thread(void);
-static void deploy_init_frame_quads(void);
+static void deploy_init_portrait_quads(void);
 
 /* Return 1 when the roster unit stands on one of the current squad's 5x5 deployment tiles.
  * ATTACK also links this body as deploy_is_roster_unit_deployed before the shared thread wait helper. */
@@ -1128,38 +1128,38 @@ static void deploy_previous_roster_unit_thread(void) {
 /* Build the textured deployment banner and its two arrowhead triangles.
  * The banner fields are written in libgpu setRGB0/setXY4/setUV4 order. */
 static void deploy_build_banner_arrow(void) {
-    SetPolyFT4(&g_deploy_screen_arrow.poly);
-    SetSemiTrans(&g_deploy_screen_arrow.poly, 1);
-    SetShadeTex(&g_deploy_screen_arrow.poly, 0);
-    setRGB0(&g_deploy_screen_arrow.poly, 0x80, 0x80, 0x80);
-    setXY4(&g_deploy_screen_arrow.poly, 0xAF, 0xB6, 0xEF, 0xB6, 0xAF, 0xDE, 0xEF, 0xDE);
-    setUV4(&g_deploy_screen_arrow.poly, 0x58, 0xB8, 0x98, 0xB8, 0x58, 0xE0, 0x98, 0xE0);
-    g_deploy_screen_arrow.poly.tpage = GetTPage(0, 1, 0x100, 0);
-    g_deploy_screen_arrow.poly.clut = GetClut(g_deploy_arrow_clut_rect.x, g_deploy_arrow_clut_rect.y);
+    SetPolyFT4(&g_deploy_render_buffers[0].screen_arrow.poly);
+    SetSemiTrans(&g_deploy_render_buffers[0].screen_arrow.poly, 1);
+    SetShadeTex(&g_deploy_render_buffers[0].screen_arrow.poly, 0);
+    setRGB0(&g_deploy_render_buffers[0].screen_arrow.poly, 0x80, 0x80, 0x80);
+    setXY4(&g_deploy_render_buffers[0].screen_arrow.poly, 0xAF, 0xB6, 0xEF, 0xB6, 0xAF, 0xDE, 0xEF, 0xDE);
+    setUV4(&g_deploy_render_buffers[0].screen_arrow.poly, 0x58, 0xB8, 0x98, 0xB8, 0x58, 0xE0, 0x98, 0xE0);
+    g_deploy_render_buffers[0].screen_arrow.poly.tpage = GetTPage(0, 1, 0x100, 0);
+    g_deploy_render_buffers[0].screen_arrow.poly.clut = GetClut(g_deploy_arrow_clut_rect.x, g_deploy_arrow_clut_rect.y);
 
-    SetPolyF3(&g_deploy_screen_arrow.tri[0]);
-    SetSemiTrans(&g_deploy_screen_arrow.tri[0], 0);
-    SetShadeTex(&g_deploy_screen_arrow.tri[0], 1);
-    setRGB0(&g_deploy_screen_arrow.tri[0], 0xFF, 0xFF, 0xFF);
+    SetPolyF3(&g_deploy_render_buffers[0].screen_arrow.tri[0]);
+    SetSemiTrans(&g_deploy_render_buffers[0].screen_arrow.tri[0], 0);
+    SetShadeTex(&g_deploy_render_buffers[0].screen_arrow.tri[0], 1);
+    setRGB0(&g_deploy_render_buffers[0].screen_arrow.tri[0], 0xFF, 0xFF, 0xFF);
     if (g_deploy_tiles_only_mode != 0) {
-        g_deploy_screen_arrow.tri[0].x0 = 0x99;
-        g_deploy_screen_arrow.tri[0].x1 = 0xC0;
-        g_deploy_screen_arrow.tri[0].x2 = 0xA2;
-        g_deploy_screen_arrow.tri[0].y0 = 0x9E;
-        g_deploy_screen_arrow.tri[0].y1 = 0xB1;
-        g_deploy_screen_arrow.tri[0].y2 = 0xB0;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x0 = 0x99;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x1 = 0xC0;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x2 = 0xA2;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y0 = 0x9E;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y1 = 0xB1;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y2 = 0xB0;
     } else {
-        g_deploy_screen_arrow.tri[0].x0 = 0xB9;
-        g_deploy_screen_arrow.tri[0].x1 = 0xE0;
-        g_deploy_screen_arrow.tri[0].x2 = 0xC2;
-        g_deploy_screen_arrow.tri[0].y0 = 0xBE;
-        g_deploy_screen_arrow.tri[0].y1 = 0xD1;
-        g_deploy_screen_arrow.tri[0].y2 = 0xD0;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x0 = 0xB9;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x1 = 0xE0;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].x2 = 0xC2;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y0 = 0xBE;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y1 = 0xD1;
+        g_deploy_render_buffers[0].screen_arrow.tri[0].y2 = 0xD0;
     }
 
-    SetPolyF3(&g_deploy_screen_arrow.tri[1]);
-    SetSemiTrans(&g_deploy_screen_arrow.tri[1], 0);
-    SetShadeTex(&g_deploy_screen_arrow.tri[1], 1);
+    SetPolyF3(&g_deploy_render_buffers[0].screen_arrow.tri[1]);
+    SetSemiTrans(&g_deploy_render_buffers[0].screen_arrow.tri[1], 0);
+    SetShadeTex(&g_deploy_render_buffers[0].screen_arrow.tri[1], 1);
 }
 
 /* Build and submit the button hint for the cursor tile's menu state `mode`: hint 0 on an
@@ -1274,7 +1274,7 @@ static void deploy_render_thread(void) {
 
     deploy_init_cursors();
     deploy_build_banner_arrow();
-    deploy_init_frame_quads();
+    deploy_init_portrait_quads();
     menu_init_sprite_array(g_deploy_render_buffers[0].tiles[0], 0x19, 0x7ebc);
 
     LoadImage(&g_deploy_tile_clut_rect, (u32*)g_deploy_tile_clut_data);
@@ -1617,18 +1617,18 @@ static void deploy_update_cursors(s32 frame, deploy_render_buffer_t* buffer) {
     }
 }
 
-/* Initialize the five pairs of frame quads: an opaque quad on the texture
+/* Initialize the five portrait/marker pairs: an opaque quad on the texture
  * page at (0x140, 0) and a semi-transparent one on the page at
  * (0x3c0, 0x100). */
-static void deploy_init_frame_quads(void) {
+static void deploy_init_portrait_quads(void) {
     s32 i;
 
     for (i = 0; i < 10; i += 2) {
-        menu_init_default_poly_ft4(&g_deploy_gfx_frame_ft4[i]);
-        menu_init_default_poly_ft4(&g_deploy_gfx_frame_ft4[i + 1]);
-        g_deploy_gfx_frame_ft4[i].tpage = GetTPage(0, 0, 0x140, 0);
-        g_deploy_gfx_frame_ft4[i + 1].tpage = GetTPage(0, 2, 0x3c0, 0x100);
-        SetSemiTrans(&g_deploy_gfx_frame_ft4[i + 1], 1);
+        menu_init_default_poly_ft4(&g_deploy_render_buffers[0].portraits[i]);
+        menu_init_default_poly_ft4(&g_deploy_render_buffers[0].portraits[i + 1]);
+        g_deploy_render_buffers[0].portraits[i].tpage = GetTPage(0, 0, 0x140, 0);
+        g_deploy_render_buffers[0].portraits[i + 1].tpage = GetTPage(0, 2, 0x3c0, 0x100);
+        SetSemiTrans(&g_deploy_render_buffers[0].portraits[i + 1], 1);
     }
 }
 

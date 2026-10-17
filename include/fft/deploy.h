@@ -181,11 +181,7 @@ extern POLY_FT4 g_deploy_text_polys[2][9];
 extern s32 g_deploy_text_reveal_heights[9];
 extern s32 g_deploy_text_reveal_steps[9];
 extern RECT g_deploy_text_screen_origin;
-extern POLY_FT4 g_deploy_gfx_frame_ft4[];
 extern zodiac_draw_context_t g_deploy_zodiac_draw_context;
-
-/* Alias of render_buffers[0].screen_arrow, addressed separately by the constructor. */
-extern deploy_arrow_gfx_t g_deploy_screen_arrow;
 
 /* The brightness byte of g_deploy_zodiac_draw_context (+4) as its own s32 symbol: the fade decrements the whole
  * 32-bit value (lw/addiu/sw), which a u8 member access would not reproduce. The array form lets GCC hoist its address

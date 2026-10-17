@@ -89,7 +89,7 @@ functions:
   - {addr: 0x801c7288, size: 724, name: deploy_prepare_valid_tiles, hash: 3a3158a171e2a4d4, unit: deploy_screen}
   - {addr: 0x801c755c, size: 452, name: deploy_init_cursors, hash: af62587e4847a1d1, unit: deploy_screen}
   - {addr: 0x801c7720, size: 548, name: deploy_update_cursors, hash: a6767c2bfaa72829, unit: deploy_screen}
-  - {addr: 0x801c7944, size: 196, name: deploy_init_frame_quads, hash: 6daf1a8edc856725, unit: deploy_screen}
+  - {addr: 0x801c7944, size: 196, name: deploy_init_portrait_quads, hash: 6daf1a8edc856725, unit: deploy_screen}
   - {addr: 0x801c7a08, size: 484, name: deploy_build_portrait_quads, hash: 708d00bef4ce213d, unit: deploy_screen}
   - {addr: 0x801c7bec, size: 1016, name: deploy_text_graphics_thread, hash: 9c795189d3d0df1f, unit: deploy_screen}
   - {addr: 0x801c7fe4, size: 32, name: formation_build_sprites, hash: e919c44d2f3f3208, unit: deploy_screen}
@@ -264,8 +264,6 @@ data:
   - {addr: 0x801db648, name: g_deploy_cursor_1_poly}
   - {addr: 0x801db64c, name: g_deploy_cursor_0_poly}
   - {addr: 0x801db650, name: g_deploy_render_buffers}
-  - {addr: 0x801db844, name: g_deploy_gfx_frame_ft4}
-  - {addr: 0x801dbe84, name: g_deploy_screen_arrow}
   - {addr: 0x801dcaa8, name: g_formation_job_data}
   - {addr: 0x801dcaac, name: g_deploy_unit_map_coordinates}
   - {addr: 0x801dcadc, name: g_deploy_cursor_palette_cycle}
