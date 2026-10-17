@@ -14,6 +14,7 @@ units:
   - {name: ability_lists, source: src/world/ability_lists.c}
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
+  - {name: bit_streams, source: src/lib/bits.c}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
@@ -43,6 +44,7 @@ units:
   - {name: help_overlay, source: src/lib/menu/help_overlay.c, data: [{addr: 0x801577e0, size: 128, hash: 37edf2b26225cbea}]}
   - {name: icon_selection, source: src/lib/event/icon_selection.c, data: [{addr: 0x80153d08, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: item_actions, source: src/world/item_actions.c}
+  - {name: item_order, source: src/lib/menu/item_order.c}
   - {name: job_learning, source: src/world/job_learning.c}
   - {name: job_locks, source: src/world/job_locks.c}
   - {name: job_wheel, source: src/world/job_wheel.c}
@@ -714,7 +716,7 @@ functions:
   - {addr: 0x80118244, size: 2296, name: formation_draw_unit_readout, hash: 92fe28a4904b632c, unit: formation_grid}
   - {addr: 0x80118b3c, size: 44, name: menu_clear_selection_records, hash: a3845868058abc9f, unit: selection_records}
   - {addr: 0x80118b68, size: 60, name: menu_clear_selection_record, hash: 865d628c2d8e7551, unit: selection_records}
-  - {addr: 0x80118ba4, size: 76, name: menu_set_selection_record, hash: 5c90bb339e17a1fd, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_set_selection_record.c}
+  - {addr: 0x80118ba4, size: 76, name: menu_set_selection_record, hash: 5c90bb339e17a1fd, unit: selection_records}
   - {addr: 0x80118bf0, size: 276, name: menu_get_selection_record, hash: a14c583bfbf3490a, unit: selected_unit}
   - {addr: 0x80118d04, size: 280, name: formation_cycle_selected_unit, hash: 5680ffb0879b7bc2, unit: selected_unit}
   - {addr: 0x80118e1c, size: 120, name: formation_job_get_cursor_level, hash: 7b0c663e5e7f0ae3, unit: job_wheel}
@@ -808,14 +810,14 @@ functions:
   - {addr: 0x80121568, size: 236, name: item_get_ranking_value, hash: c162face50932c06, source: src/lib/menu/item_get_ranking_value.c}
   - {addr: 0x80121654, size: 1548, name: item_sort_id_list, hash: cadb2570fbcc2eab, unit: roster_sorting}
   - {addr: 0x80121c60, size: 872, name: formation_sort_roster, hash: 81bb011ed79bb2fb, unit: roster_sorting}
-  - {addr: 0x80121fc8, size: 88, name: item_load_type_order, hash: e9c6e09b68b8a95e, source: src/lib/menu/item_load_type_order.c}
-  - {addr: 0x80122020, size: 96, name: item_store_type_order, hash: baa6b7f2ddd835f6, source: src/lib/menu/item_store_type_order.c}
-  - {addr: 0x80122080, size: 88, name: item_store_category_list, hash: 7e29c4bdf54ddbc0, source: src/lib/menu/item_store_category_list.c}
-  - {addr: 0x801220d8, size: 256, name: item_sort_list_by_category_order, hash: 60fe16b10affd01f, source: src/lib/menu/item_sort_list_by_category_order.c}
-  - {addr: 0x801221d8, size: 164, name: item_rebuild_category_list, hash: e7115832aed677ed, source: src/lib/menu/item_rebuild_category_list.c}
-  - {addr: 0x8012227c, size: 84, name: item_is_in_category_list, hash: dff56971e7ed3167, source: src/lib/menu/item_is_in_category_list.c}
-  - {addr: 0x801222d0, size: 104, name: item_prepend_to_category_list, hash: 64a6e8e35edbd02f, source: src/lib/menu/item_prepend_to_category_list.c}
-  - {addr: 0x80122338, size: 128, name: item_remove_from_category_list, hash: cf7b4cbe138b1209, source: src/lib/menu/item_remove_from_category_list.c}
+  - {addr: 0x80121fc8, size: 88, name: item_load_type_order, hash: e9c6e09b68b8a95e, unit: item_order}
+  - {addr: 0x80122020, size: 96, name: item_store_type_order, hash: baa6b7f2ddd835f6, unit: item_order}
+  - {addr: 0x80122080, size: 88, name: item_store_category_list, hash: 7e29c4bdf54ddbc0, unit: item_order}
+  - {addr: 0x801220d8, size: 256, name: item_sort_list_by_category_order, hash: 60fe16b10affd01f, unit: item_order}
+  - {addr: 0x801221d8, size: 164, name: item_rebuild_category_list, hash: e7115832aed677ed, unit: item_order}
+  - {addr: 0x8012227c, size: 84, name: item_is_in_category_list, hash: dff56971e7ed3167, unit: item_order}
+  - {addr: 0x801222d0, size: 104, name: item_prepend_to_category_list, hash: 64a6e8e35edbd02f, unit: item_order}
+  - {addr: 0x80122338, size: 128, name: item_remove_from_category_list, hash: cf7b4cbe138b1209, unit: item_order}
   - {addr: 0x801223b8, size: 44, name: job_get_generic_index, hash: d755c5f488ff21d3, source: src/lib/menu/job_get_generic_index.c}
   - {addr: 0x801223e4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, source: src/lib/menu/job_find_first_for_skillset.c}
   - {addr: 0x8012243c, size: 76, name: job_list_get_base, hash: bbbf49580c82511f, unit: job_locks}
@@ -935,9 +937,9 @@ functions:
   - {addr: 0x8012b0e8, size: 204, name: formation_banner_countdown, hash: a4f6e9078373ee6e, unit: grid_cursor}
   - {addr: 0x8012b1b4, size: 28, name: bits_init_primary_reader, hash: 47c41004c3c859b3, unit: grid_cursor}
   - {addr: 0x8012b1d0, size: 28, name: bits_init_secondary_reader, hash: f032b63d0063db67, unit: grid_cursor}
-  - {addr: 0x8012b1ec, size: 172, name: bits_read_primary, hash: aa7a04f7053f31c6, source: src/lib/menu/bits_read_primary.c}
-  - {addr: 0x8012b298, size: 188, name: bits_write_primary, hash: 46f2bee6e5c99547, source: src/lib/menu/bits_write_primary.c}
-  - {addr: 0x8012b354, size: 172, name: bits_read_secondary, hash: 96a5a9defe62f763, source: src/lib/menu/bits_read_secondary.c}
+  - {addr: 0x8012b1ec, size: 172, name: bits_read_primary, hash: aa7a04f7053f31c6, unit: bit_streams}
+  - {addr: 0x8012b298, size: 188, name: bits_write_primary, hash: 46f2bee6e5c99547, unit: bit_streams}
+  - {addr: 0x8012b354, size: 172, name: bits_read_secondary, hash: 96a5a9defe62f763, unit: bit_streams}
   - {addr: 0x8012b400, size: 992, name: tutorial_update_input, hash: 36114f630c967b10, unit: tutorial_controller_input}
   - {addr: 0x8012b7e0, size: 300, name: menu_input_update_with_message_state, hash: f8908535d9022aea, unit: tutorial_controller_input}
   - {addr: 0x8012b90c, size: 36, name: menu_clear_selection_values, hash: 89bec4665c8b1d67, source: src/lib/menu/menu_clear_selection_values.c}

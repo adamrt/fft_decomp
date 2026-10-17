@@ -398,8 +398,8 @@ functions:
   - {addr: 0x801c63a8, size: 468, name: unit_list_run_sort_menu, hash: 814b235b2017a455, unit: unit_list}
   - {addr: 0x801c657c, size: 44, name: menu_clear_selection_records, hash: 98148178dd779b39, unit: selection_records}
   - {addr: 0x801c65a8, size: 60, name: menu_clear_selection_record, hash: 971d949bbd11948f, unit: selection_records}
-  - {addr: 0x801c65e4, size: 76, name: menu_set_selection_record, hash: 74a1e89561e6aadf, source: src/lib/menu/menu_set_selection_record.c}
-  - {addr: 0x801c6630, size: 176, name: menu_get_selection_record, hash: 7536cd22e376eeb6, source: src/lib/menu/menu_get_selection_record.c}
+  - {addr: 0x801c65e4, size: 76, name: menu_set_selection_record, hash: 74a1e89561e6aadf, unit: selection_records}
+  - {addr: 0x801c6630, size: 176, name: menu_get_selection_record, hash: 7536cd22e376eeb6, unit: selection_records}
   - {addr: 0x801c66e0, size: 192, name: unit_list_is_scroll_needed, hash: 28f8eae91bb947ee, unit: unit_records}
   - {addr: 0x801c67a0, size: 148, name: unit_is_two_handing_weapon, hash: 90d336abe9d84508, unit: unit_records}
   - {addr: 0x801c6834, size: 32, name: job_is_special_monster, hash: f4362856b8ecd185, unit: unit_records}
@@ -894,6 +894,7 @@ links: [battle]
 defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 units:
+  - {name: bit_streams, source: src/lib/bits.c}
   - {name: draw_state, source: src/lib/menu/draw_state.c}
   - {name: drawing_commands, source: src/event/card/drawing_commands.c, data: [{addr: 0x801d91e4, size: 2, hash: 96a296d224f285c6}]}
   - {name: gfx_contexts, source: src/event/card/gfx_contexts.c}
@@ -983,11 +984,11 @@ functions:
   - {addr: 0x801c71dc, size: 92, name: menu_stop_thread_and_wait, hash: e30c6fb66d27c973, source: src/lib/menu/menu_stop_thread_and_wait.c}
   - {addr: 0x801c7238, size: 156, name: menu_start_managed_thread, hash: c61eda6b69ac7d32, source: src/lib/menu/menu_start_managed_thread.c}
   - {addr: 0x801c72d4, size: 176, name: menu_start_or_poll_thread, hash: 52993ac90ae34196, source: src/lib/menu/menu_start_or_poll_thread.c}
-  - {addr: 0x801c7384, size: 28, name: bits_init_primary_reader, hash: 54e0a4bece7b2596, source: src/lib/menu/bits_init_primary_reader.c}
-  - {addr: 0x801c73a0, size: 28, name: menu_bits_init_secondary_reader, hash: fe997547c3c389ab, source: src/lib/menu/menu_bits_init_secondary_reader.c}
-  - {addr: 0x801c73bc, size: 172, name: bits_read_primary, hash: f39395a59ee56a46, source: src/lib/menu/bits_read_primary.c}
-  - {addr: 0x801c7468, size: 188, name: bits_write_primary, hash: b5df968a63ba61b1, source: src/lib/menu/bits_write_primary.c}
-  - {addr: 0x801c7524, size: 172, name: bits_read_secondary, hash: b76504149dc8bdb7, source: src/lib/menu/bits_read_secondary.c}
+  - {addr: 0x801c7384, size: 28, name: bits_init_primary_reader, hash: 54e0a4bece7b2596, unit: bit_streams}
+  - {addr: 0x801c73a0, size: 28, name: bits_init_secondary_reader, hash: fe997547c3c389ab, unit: bit_streams}
+  - {addr: 0x801c73bc, size: 172, name: bits_read_primary, hash: f39395a59ee56a46, unit: bit_streams}
+  - {addr: 0x801c7468, size: 188, name: bits_write_primary, hash: b5df968a63ba61b1, unit: bit_streams}
+  - {addr: 0x801c7524, size: 172, name: bits_read_secondary, hash: b76504149dc8bdb7, unit: bit_streams}
   - {addr: 0x801c75d0, size: 852, name: save_input_update_controller, hash: 7396270625cbf48d, unit: input}
   - {addr: 0x801c7924, size: 72, name: save_update_input, hash: 19864c090aa0c1dd, unit: input}
   - {addr: 0x801c796c, size: 32, name: menu_input_clear_state, hash: 0dfe393e053ade05, source: src/lib/menu/menu_input_clear_state.c}
@@ -1348,6 +1349,7 @@ links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 25, VARIANT_MENU_ITEM_CURSOR_DEPTH: 31, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 4, VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 units:
+  - {name: bit_streams, source: src/lib/bits.c}
   - {name: draw_commands, source: src/lib/menu/draw_commands.c}
   - {name: draw_state, source: src/lib/menu/draw_state.c}
   - {name: entry, source: src/event/equip/entry.c}
@@ -1362,6 +1364,7 @@ units:
   - {name: inventory_totals, source: src/event/equip/inventory_totals.c}
   - {name: item_actions, source: src/event/equip/item_actions.c}
   - {name: item_menu, source: src/event/equip/item_menu.c}
+  - {name: item_order, source: src/lib/menu/item_order.c}
   - {name: menu_input, source: src/event/equip/menu_input.c}
   - {name: menu_list, source: src/event/equip/menu_list.c}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c}
@@ -1395,8 +1398,8 @@ functions:
   - {addr: 0x801bf7e0, size: 568, name: equip_entrypoint, hash: 8be433f53088ee38, unit: entry}
   - {addr: 0x801bfa18, size: 44, name: menu_clear_selection_records, hash: 8c01966bfacc9bba, unit: selection_records}
   - {addr: 0x801bfa44, size: 60, name: menu_clear_selection_record, hash: fdca62f04b6534e1, unit: selection_records}
-  - {addr: 0x801bfa80, size: 76, name: menu_set_selection_record, hash: e1f2abd2a5f39602, source: src/lib/menu/menu_set_selection_record.c}
-  - {addr: 0x801bfacc, size: 252, name: menu_get_selection_record, hash: cc67bd98802fd36b, source: src/lib/menu/menu_get_selection_record.c}
+  - {addr: 0x801bfa80, size: 76, name: menu_set_selection_record, hash: e1f2abd2a5f39602, unit: selection_records}
+  - {addr: 0x801bfacc, size: 252, name: menu_get_selection_record, hash: cc67bd98802fd36b, unit: selection_records}
   - {addr: 0x801bfbc8, size: 464, name: menu_build_scaled_draw_area_packets, hash: a19dedeaac3d305d, unit: scaled_draw_area}
   - {addr: 0x801bfd98, size: 52, name: menu_init_scaled_draw_area_packets, hash: d2f5c8f99a47b099, unit: scaled_draw_area}
   - {addr: 0x801bfdcc, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
@@ -1453,14 +1456,14 @@ functions:
   - {addr: 0x801c6db4, size: 600, name: equipment_commit_loadout, hash: 83c2cd7ae34a8020, unit: unit_loadout}
   - {addr: 0x801c700c, size: 236, name: item_get_ranking_value, hash: 182f2f01a7256fdd, source: src/lib/menu/item_get_ranking_value.c}
   - {addr: 0x801c70f8, size: 1492, name: item_sort_id_list, hash: 34f1458a5685682d}
-  - {addr: 0x801c76cc, size: 88, name: item_load_type_order, hash: 680fa5ae6e9a89b3, source: src/lib/menu/item_load_type_order.c}
-  - {addr: 0x801c7724, size: 96, name: item_store_type_order, hash: 8b8d7d3c8a2297aa, source: src/lib/menu/item_store_type_order.c}
-  - {addr: 0x801c7784, size: 88, name: item_store_category_list, hash: 48c40016f726fb75, source: src/lib/menu/item_store_category_list.c}
-  - {addr: 0x801c77dc, size: 256, name: item_sort_list_by_category_order, hash: 87be8d27e2bd73e0, source: src/lib/menu/item_sort_list_by_category_order.c}
-  - {addr: 0x801c78dc, size: 164, name: item_rebuild_category_list, hash: ffa5da735754970a, source: src/lib/menu/item_rebuild_category_list.c}
-  - {addr: 0x801c7980, size: 84, name: item_is_in_category_list, hash: 51620ec7a2e5446b, source: src/lib/menu/item_is_in_category_list.c}
-  - {addr: 0x801c79d4, size: 104, name: item_prepend_to_category_list, hash: ea719a53cf244b40, source: src/lib/menu/item_prepend_to_category_list.c}
-  - {addr: 0x801c7a3c, size: 128, name: item_remove_from_category_list, hash: 71937d05d6e62d46, source: src/lib/menu/item_remove_from_category_list.c}
+  - {addr: 0x801c76cc, size: 88, name: item_load_type_order, hash: 680fa5ae6e9a89b3, unit: item_order}
+  - {addr: 0x801c7724, size: 96, name: item_store_type_order, hash: 8b8d7d3c8a2297aa, unit: item_order}
+  - {addr: 0x801c7784, size: 88, name: item_store_category_list, hash: 48c40016f726fb75, unit: item_order}
+  - {addr: 0x801c77dc, size: 256, name: item_sort_list_by_category_order, hash: 87be8d27e2bd73e0, unit: item_order}
+  - {addr: 0x801c78dc, size: 164, name: item_rebuild_category_list, hash: ffa5da735754970a, unit: item_order}
+  - {addr: 0x801c7980, size: 84, name: item_is_in_category_list, hash: 51620ec7a2e5446b, unit: item_order}
+  - {addr: 0x801c79d4, size: 104, name: item_prepend_to_category_list, hash: ea719a53cf244b40, unit: item_order}
+  - {addr: 0x801c7a3c, size: 128, name: item_remove_from_category_list, hash: 71937d05d6e62d46, unit: item_order}
   - {addr: 0x801c7abc, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, source: src/lib/menu/equipment_clear_stat_preview.c}
   - {addr: 0x801c7b04, size: 552, name: item_collect_stat_deltas, hash: 0ac56f16113047c1}
   - {addr: 0x801c7d2c, size: 188, name: equipment_calculate_swap_stat_delta, hash: b8cc1a11e7a4d8e7, unit: equipment_stat_deltas}
@@ -1556,10 +1559,10 @@ functions:
   - {addr: 0x801cd8f8, size: 392, name: equipment_gfx_init_primitive_buffers, hash: 90b842a4cb363e79, unit: gfx_contexts}
   - {addr: 0x801cda80, size: 1200, name: equipment_gfx_init_contexts, hash: bac1f313f8df9614, unit: gfx_contexts}
   - {addr: 0x801cdf30, size: 32, name: menu_get_event_speed, hash: a526ea8bfeed34fc, source: src/lib/menu/menu_get_event_speed.c}
-  - {addr: 0x801cdf50, size: 28, name: bits_init_primary_reader, hash: d22f691fd1460cc9, source: src/lib/menu/bits_init_primary_reader.c}
-  - {addr: 0x801cdf6c, size: 28, name: bits_init_secondary_reader, hash: 6f6ac58cb1eff727}
-  - {addr: 0x801cdf88, size: 172, name: bits_read_primary, hash: df689577297f7bb1, source: src/lib/menu/bits_read_primary.c}
-  - {addr: 0x801ce034, size: 172, name: bits_read_secondary, hash: 0e449e9dc2d2660e, source: src/lib/menu/bits_read_secondary.c}
+  - {addr: 0x801cdf50, size: 28, name: bits_init_primary_reader, hash: d22f691fd1460cc9, unit: bit_streams}
+  - {addr: 0x801cdf6c, size: 28, name: bits_init_secondary_reader, hash: 6f6ac58cb1eff727, unit: bit_streams}
+  - {addr: 0x801cdf88, size: 172, name: bits_read_primary, hash: df689577297f7bb1, unit: bit_streams}
+  - {addr: 0x801ce034, size: 172, name: bits_read_secondary, hash: 0e449e9dc2d2660e, unit: bit_streams}
 
 data:
   - {addr: 0x801bf000, name: g_menu_text_decimal_format}
@@ -1956,6 +1959,7 @@ defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 
 
 units:
   - {name: ability_page, source: src/event/jobstts/ability_page.c}
+  - {name: bit_streams, source: src/lib/bits.c}
   - {name: draw_commands, source: src/lib/menu/draw_commands.c}
   - {name: draw_state, source: src/lib/menu/draw_state.c}
   - {name: entry, source: src/event/jobstts/entry.c}
@@ -1979,8 +1983,8 @@ functions:
   - {addr: 0x801df198, size: 736, name: jobstts_entrypoint, hash: a58961af30913d26, unit: entry}
   - {addr: 0x801df478, size: 44, name: menu_clear_selection_records, hash: c8ef83eb24f7123c, unit: selection_records}
   - {addr: 0x801df4a4, size: 60, name: menu_clear_selection_record, hash: 2bb5b087e1621ebe, unit: selection_records}
-  - {addr: 0x801df4e0, size: 76, name: menu_set_selection_record, hash: 21d529d3737f9365, source: src/lib/menu/menu_set_selection_record.c}
-  - {addr: 0x801df52c, size: 176, name: menu_get_selection_record, hash: 0db7da1324171bf7, source: src/lib/menu/menu_get_selection_record.c}
+  - {addr: 0x801df4e0, size: 76, name: menu_set_selection_record, hash: 21d529d3737f9365, unit: selection_records}
+  - {addr: 0x801df52c, size: 176, name: menu_get_selection_record, hash: 0db7da1324171bf7, unit: selection_records}
   - {addr: 0x801df5dc, size: 108, name: job_list_calculate_level, hash: b5f033f5213a365d, unit: job_list}
   - {addr: 0x801df648, size: 76, name: job_list_calculate_jp, hash: 7a7626e0618d8ab0, unit: job_list}
   - {addr: 0x801df694, size: 76, name: job_list_calculate_total_jp, hash: 0df03e32871d265e, unit: job_list}
@@ -2065,10 +2069,10 @@ functions:
   - {addr: 0x801e48f4, size: 252, name: status_screen_gfx_init_primitive_buffers, hash: 50311096d96fa683, unit: gfx_contexts}
   - {addr: 0x801e49f0, size: 1160, name: status_screen_gfx_init_contexts, hash: 16d845f28fbb8c54, unit: gfx_contexts}
   - {addr: 0x801e4e78, size: 32, name: menu_get_event_speed, hash: 2e67f0497311e3fc, source: src/lib/menu/menu_get_event_speed.c}
-  - {addr: 0x801e4e98, size: 28, name: bits_init_primary_reader, hash: 0f08e6a0c31b76ac, source: src/lib/menu/bits_init_primary_reader.c}
-  - {addr: 0x801e4eb4, size: 28, name: menu_bits_init_secondary_reader, hash: 1d271e05aa18deee, source: src/lib/menu/menu_bits_init_secondary_reader.c}
-  - {addr: 0x801e4ed0, size: 172, name: bits_read_primary, hash: ae4e54d1a49f2fd0, source: src/lib/menu/bits_read_primary.c}
-  - {addr: 0x801e4f7c, size: 172, name: bits_read_secondary, hash: 7101073a60f65554, source: src/lib/menu/bits_read_secondary.c}
+  - {addr: 0x801e4e98, size: 28, name: bits_init_primary_reader, hash: 0f08e6a0c31b76ac, unit: bit_streams}
+  - {addr: 0x801e4eb4, size: 28, name: bits_init_secondary_reader, hash: 1d271e05aa18deee, unit: bit_streams}
+  - {addr: 0x801e4ed0, size: 172, name: bits_read_primary, hash: ae4e54d1a49f2fd0, unit: bit_streams}
+  - {addr: 0x801e4f7c, size: 172, name: bits_read_secondary, hash: 7101073a60f65554, unit: bit_streams}
 
 data:
   - {addr: 0x801df000, name: g_menu_text_decimal_format}

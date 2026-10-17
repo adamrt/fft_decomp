@@ -529,7 +529,7 @@ void save_build_image(s32 slot) {
     block = (u8*)g_save_buffer_pointer;
     for (i = 0; (u32)i < SAVE_PARITY_BLOCK_COUNT; i++) {
         parity = 0;
-        menu_bits_init_secondary_reader(block);
+        bits_init_secondary_reader(block);
         for (j = 0; j < SAVE_PARITY_BITS_PER_BLOCK; j++) {
             parity += bits_read_secondary(1);
         }

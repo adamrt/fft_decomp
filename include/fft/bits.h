@@ -12,15 +12,12 @@ extern u8* g_bits_primary_cursor;
 extern s32 g_bits_reader_1_index;
 extern s32 g_bits_writer_1_index;
 extern u8 g_bits_reader_2_reset;
-extern u8* g_bits_reader_2_stream;
+extern const u8* g_bits_reader_2_stream;
 extern s32 g_bits_reader_2_index;
 
 /* WORLD builds its own bodies of these two. */
 void bits_init_primary_reader(const u8* data);
 void bits_init_secondary_reader(const u8* data);
-
-/* CARD and JOBSTTS share this body; EQUIP and WORLD each define bits_init_secondary_reader. */
-void menu_bits_init_secondary_reader(const u8* data);
 
 /* The first read or write after a reset starts at bit 7 of the current byte. */
 u32 bits_read_primary(s32 count);

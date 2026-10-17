@@ -620,9 +620,6 @@ item_menu_category_e item_get_menu_category(s16 item_id);
 
 /* Reconciles a category list with what the party owns: newly owned items go first. */
 void item_rebuild_category_list(s32 category);
-s32 item_is_in_category_list(s32 item_id, s32 category_index);
-void item_prepend_to_category_list(s32 item_id, s32 category_index);
-void item_remove_from_category_list(s32 item_id, s32 category_index);
 s32 item_sort_list_by_category_order(s32 category_index, s16* list);
 
 /* Packs a -1 terminated s16 item list into the category's byte list. */
