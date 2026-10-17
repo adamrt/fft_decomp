@@ -50,6 +50,33 @@ extern s32 g_war_trophy_entry_types[16];
 extern s32 g_war_trophy_entry_values[16];
 extern s32 g_war_trophy_entry_count;
 
+/* One color record per display-condition quad; the fourth byte of each
+ * CVECTOR is not consumed by the banner renderer. */
+typedef struct conditions_colors {
+    u8 _unused_00[4];    /* 0x00 */
+    CVECTOR vertices[4]; /* 0x04 */
+} conditions_colors_t;
+typedef char conditions_colors_size_must_be_20[sizeof(conditions_colors_t) == 20 ? 1 : -1];
+
+typedef struct conditions_tpage {
+    u8 _unused_00;
+    u8 _unused_01;
+    u8 page; /* Bits 5 and 6 encode the semi-transparency mode. */
+    u8 _unused_03;
+} conditions_tpage_t;
+
+extern u8 g_conditions_general_quad_ranges[2];
+extern sprite_sheet_frame_t g_conditions_general_quads[6];
+extern conditions_tpage_t g_conditions_general_tpages[6];
+extern conditions_colors_t g_conditions_general_vertex_colors[6];
+extern sprite_sheet_frame_t g_conditions_special_quads[81];
+
+/* Per-condition first-quad indices; entry n+1 bounds entry n. */
+extern u8 g_conditions_special_quad_ranges[12];
+
+/* 0x14-byte vertex-color records, one per quad. */
+extern conditions_colors_t g_conditions_special_vertex_colors[81];
+
 static thread_t g_after_battle_saved_thread = { 0 };
 static reward_war_result_t g_war_trophy_search_result = { 0 };
 
@@ -899,10 +926,10 @@ static void party_apply_post_battle_changes(void) {
                 thread_wait_until_inactive(AFTER_BATTLE_THREAD_SLOT_MENU);
             }
 
-            /* Show special condition 10 for 60 frames or until skipped; a third parameter of 2 fades it out. */
+            /* Show Join Up for 60 frames or until skipped; a third parameter of 2 fades it out. */
             thread_wait_frames(20);
             thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, conditions_special_thread);
-            thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, 10, 0, 0);
+            thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, CONDITIONS_BANNER_JOIN_UP, 0, 0);
             input_wait_frames_or_skip(60);
             thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, 0, 0, 2);
             thread_wait_until_inactive(AFTER_BATTLE_THREAD_SLOT_MENU);
@@ -1113,7 +1140,7 @@ static void war_trophy_list_thread(void) {
     thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     last = 0;
     thread_start(thread, conditions_special_thread);
-    thread_set_parameters(thread, 4, 0, 0);
+    thread_set_parameters(thread, CONDITIONS_BANNER_WAR_TROPHIES, 0, 0);
 
     for (start = 0; start < g_war_trophy_entry_count; start += 8) {
         row = 0;
@@ -1282,7 +1309,7 @@ static void war_trophy_run_gil_ticker(void) {
 
     thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, conditions_special_thread);
-    thread_set_parameters(thread_id, 2, 0, 0);
+    thread_set_parameters(thread_id, CONDITIONS_BANNER_BONUS_MONEY, 0, 0);
     g_menu_input_controller = script_get_controller_input_pointer(0);
 
     /* `i = 0` here (not before the script calls) lets sched1 keep
@@ -1866,7 +1893,7 @@ void conditions_noop_1(void) {
  * g_gfx_poly_gt4_array_32: sharing that base lets the hoisted
  * small-array address derive from the copy source, which keeps it live in s0. */
 void conditions_special_thread(void) {
-    s32 parameter_index;
+    s32 banner_id;
     s32 use_small_array;
     s32 quad_count;
     s32 buffer;
@@ -1876,10 +1903,10 @@ void conditions_special_thread(void) {
     u8* table = g_conditions_special_quad_ranges;
     conditions_colors_t* color_table = g_conditions_special_vertex_colors;
 
-    parameter_index = thread_get_current_parameter_1();
+    banner_id = thread_get_current_parameter_1();
     use_small_array = thread_get_current_parameter_2();
     {
-        u8* parameters = &g_conditions_special_quad_ranges[parameter_index];
+        u8* parameters = &g_conditions_special_quad_ranges[banner_id];
 
         quads = g_conditions_special_quads;
         quad_count = parameters[1] - parameters[0];
@@ -1891,7 +1918,7 @@ void conditions_special_thread(void) {
     }
 
     for (quad_index = 0; quad_index < quad_count; quad_index++) {
-        u8* parameters = &table[parameter_index];
+        u8* parameters = &table[banner_id];
         POLY_GT4* poly = &(use_small_array == 0 ? g_gfx_poly_gt4_array_32 : &g_gfx_poly_gt4_buffers[0][32])[quad_index];
 
         setUV4(poly, QUAD.source.x, QUAD.source.y, QUAD.source.x + QUAD.source.w, QUAD.source.y, QUAD.source.x,
@@ -1918,7 +1945,7 @@ void conditions_special_thread(void) {
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
             POLY_GT4* polys = &g_gfx_poly_gt4_buffers[buffer][32];
-            u8* parameters = &table[parameter_index];
+            u8* parameters = &table[banner_id];
             const conditions_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
@@ -1948,7 +1975,7 @@ void conditions_special_thread(void) {
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
             POLY_GT4* polys = &g_gfx_poly_gt4_buffers[buffer][32];
-            u8* parameters = &table[parameter_index];
+            u8* parameters = &table[banner_id];
             const conditions_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
@@ -1974,7 +2001,7 @@ fade_out:
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
             POLY_GT4* polys = &g_gfx_poly_gt4_buffers[buffer][32];
-            u8* parameters = &table[parameter_index];
+            u8* parameters = &table[banner_id];
             const conditions_colors_t* vertex_colors = VERTEX_COLORS;
 
             if (use_small_array == 0) {
@@ -2274,7 +2301,7 @@ void require_conditions_entrypoint(void) {
 
     if (condition == EVENT_DISPLAY_CONDITION_SPECIAL_CASES) {
         thread_start(thread, conditions_special_thread);
-        thread_set_parameters(thread, 0, 0, 0);
+        thread_set_parameters(thread, CONDITIONS_BANNER_READY, 0, 0);
         input_wait_frames_or_skip(parameter);
         thread_set_parameters(thread, 0, 0, 2);
         thread_wait_until_inactive(thread);

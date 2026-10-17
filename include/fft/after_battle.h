@@ -12,32 +12,21 @@
 #include "psx/types.h"
 
 /* conditions */
-/* One color record per display-condition quad; the fourth byte of each
- * CVECTOR is not consumed by the banner renderer. */
-typedef struct conditions_colors {
-    u8 _unused_00[4];    /* 0x00 */
-    CVECTOR vertices[4]; /* 0x04 */
-} conditions_colors_t;
-typedef char conditions_colors_size_must_be_20[sizeof(conditions_colors_t) == 20 ? 1 : -1];
-
-typedef struct conditions_tpage {
-    u8 _unused_00;
-    u8 _unused_01;
-    u8 page; /* Bits 5 and 6 select the texture page. */
-    u8 _unused_03;
-} conditions_tpage_t;
-
-extern u8 g_conditions_general_quad_ranges[];
-extern sprite_sheet_frame_t g_conditions_general_quads[];
-extern conditions_tpage_t g_conditions_general_tpages[];
-extern conditions_colors_t g_conditions_general_vertex_colors[];
-extern sprite_sheet_frame_t g_conditions_special_quads[];
-
-/* Per-condition first-quad indices; entry n+1 bounds entry n. */
-extern u8 g_conditions_special_quad_ranges[];
-
-/* 0x14-byte vertex-color records, one per quad. */
-extern conditions_colors_t g_conditions_special_vertex_colors[];
+/* The BONUS.BIN banner selected by conditions_special_thread's first parameter.
+ * These labels are separate from the event instruction's display-condition operations. */
+typedef enum conditions_banner {
+    CONDITIONS_BANNER_READY = 0,
+    CONDITIONS_BANNER_CONGRATULATIONS = 1,
+    CONDITIONS_BANNER_BONUS_MONEY = 2,
+    CONDITIONS_BANNER_GIL_AMOUNT = 3,
+    CONDITIONS_BANNER_WAR_TROPHIES = 4,
+    CONDITIONS_BANNER_WARNING = 5,
+    CONDITIONS_BANNER_PARTING_SHOT = 6,
+    CONDITIONS_BANNER_BATTLE_COMPLETE = 7,
+    CONDITIONS_BANNER_HE_LEFT_COMPANY = 8,
+    CONDITIONS_BANNER_SHE_LEFT_COMPANY = 9,
+    CONDITIONS_BANNER_JOIN_UP = 10
+} conditions_banner_e;
 
 void conditions_show_ready_bugged(void);
 void conditions_special_thread(void);

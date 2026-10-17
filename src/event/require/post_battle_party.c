@@ -36,8 +36,8 @@ static s32 g_party_affected_unit_message_ids[50] = { 0 };
 /*
  * Thread body of the "Congratulations!" battle-complete display.
  *
- * Swaps the scenario music for the victory track, shows banner 1 and, half a
- * second later, banner 7, holds them, then fades both out and waits for
+ * Swaps the scenario music for the victory track, shows Congratulations and, half a
+ * second later, the battle-complete banner, holds them, then fades both out and waits for
  * their threads. During event 0x145 a different track plays, the waits
  * cannot be skipped and the hold is 300 frames in place of 180.
  */
@@ -60,7 +60,7 @@ void victory_congratulations_thread(void) {
 
     thread_a = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_a, conditions_special_thread);
-    thread_set_parameters(thread_a, 1, 0, 0);
+    thread_set_parameters(thread_a, CONDITIONS_BANNER_CONGRATULATIONS, 0, 0);
     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
         input_wait_frames_or_skip(0x1e);
     else
@@ -68,7 +68,7 @@ void victory_congratulations_thread(void) {
 
     thread_b = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_b, conditions_special_thread);
-    thread_set_parameters(thread_b, 7, 1, 0);
+    thread_set_parameters(thread_b, CONDITIONS_BANNER_BATTLE_COMPLETE, 1, 0);
     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
         input_wait_frames_or_skip(0xb4);
     else
@@ -480,7 +480,7 @@ s32 party_update_after_battle(void) {
  *
  * Exits at once in the world debug battle style, or when
  * party_update_brave_faith reports
- * nobody. Otherwise it binds the Brave/Faith text sections, shows banner 5
+ * nobody. Otherwise it binds the Brave/Faith text sections, shows Warning
  * and plays each affected unit's warning line in turn before fading the
  * banner out.
  */
@@ -498,7 +498,7 @@ void party_brave_faith_report_thread(void) {
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_text_data + g_text_section_offsets[4];
     main_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, conditions_special_thread);
-    thread_set_parameters(main_thread, 5, 0, 0);
+    thread_set_parameters(main_thread, CONDITIONS_BANNER_WARNING, 0, 0);
     gfx_fade_rgb_31_frames(0xd, 0xd, 2);
     for (i = 0; i < g_party_affected_unit_count; i++) {
         s32 unit_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
@@ -536,7 +536,7 @@ void party_departures_thread(void) {
     thread_yield();
     main_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, conditions_special_thread);
-    thread_set_parameters(main_thread, 6, 0, 0);
+    thread_set_parameters(main_thread, CONDITIONS_BANNER_PARTING_SHOT, 0, 0);
     gfx_fade_rgb_31_frames(0xd, 5, 2);
     thread_yield();
     for (i = 0; i < g_party_affected_unit_count; i++) {
@@ -551,9 +551,9 @@ void party_departures_thread(void) {
         message_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         thread_start(message_thread, conditions_special_thread);
         if (unit->unit_flags & UNIT_FLAG_FEMALE) {
-            thread_set_parameters(message_thread, 9, 1, 0);
+            thread_set_parameters(message_thread, CONDITIONS_BANNER_SHE_LEFT_COMPANY, 1, 0);
         } else {
-            thread_set_parameters(message_thread, 8, 1, 0);
+            thread_set_parameters(message_thread, CONDITIONS_BANNER_HE_LEFT_COMPANY, 1, 0);
         }
         thread_wait_until_inactive(unit_thread);
         thread_set_parameters(message_thread, 0, 0, 2);
@@ -561,7 +561,7 @@ void party_departures_thread(void) {
         thread_wait_frames(0x1e);
         party_remove_unit(unit->formation_index);
     }
-    thread_set_parameters(main_thread, 6, 0, 2);
+    thread_set_parameters(main_thread, CONDITIONS_BANNER_PARTING_SHOT, 0, 2);
     thread_wait_until_inactive(main_thread);
     gfx_fade_rgb_31_frames(6, 5, 2);
     thread_exit_current();
