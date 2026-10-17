@@ -45,9 +45,9 @@ void unit_panel_equipment_thread(void) {
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
         text = g_unit_panel_text_image_a;
-        screen = g_unit_panel_frames_a;
+        screen = g_unit_panel_equipment_frames;
         state = &g_unit_panel_selected_unit_fields.state;
-        base = g_unit_panel_frames_a;
+        base = g_unit_panel_equipment_frames;
         upload = &g_unit_panel_text_upload_rect_a;
         u = 0;
     } else {
@@ -59,7 +59,7 @@ void unit_panel_equipment_thread(void) {
         u = 0x50;
     }
 
-    area = g_unit_panel_origin_offsets;
+    area = g_unit_panel_equipment_origins;
     status_screen_init_numbers_frame(area, &screen->numeric_frame);
     unit_panel_init_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
@@ -89,19 +89,19 @@ void unit_panel_equipment_thread(void) {
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, g_unit_panel_label_layouts_mode0 + i);
+                    g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode0 + i);
             }
             if (mode == 1) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, g_unit_panel_label_layouts_mode1 + i);
+                    g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode1 + i);
             }
             if (mode == 2) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, g_unit_panel_label_layouts_mode2 + i);
+                    g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode2 + i);
             }
             if (mode == 3) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, g_unit_panel_label_layouts_mode3 + i);
+                    g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode3 + i);
             }
         }
 
@@ -128,7 +128,7 @@ void unit_panel_equipment_thread(void) {
         menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
         for (i = 0; i < 5; i++) {
             gfx_init_image_loading(&screen->sprites[19 + i], g_unit_panel_item_icon_texture,
-                g_unit_panel_origin_offsets, g_unit_panel_item_icon_layouts + i);
+                g_unit_panel_equipment_origins, g_unit_panel_item_icon_layouts + i);
             /* Read unsigned: the target extends the id only where it is passed on. */
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
@@ -150,7 +150,7 @@ void unit_panel_equipment_thread(void) {
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_unit_panel_status_panel_frame_rect[1], frame, g_gfx_screen_polarity * 0xf0, thread);
+            &screen->portrait, &g_unit_panel_equipment_frame_rects[1], frame, g_gfx_screen_polarity * 0xf0, thread);
         unit_panel_set_colors(screen, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
@@ -212,9 +212,9 @@ void unit_panel_ability_thread(void) {
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
         text = g_unit_panel_text_image_a;
-        screen = g_unit_panel_frames_a;
+        screen = g_unit_panel_equipment_frames;
         state = &g_unit_panel_selected_unit_fields.state;
-        base = g_unit_panel_frames_a;
+        base = g_unit_panel_equipment_frames;
         upload = &g_unit_panel_text_upload_rect_a;
         u = 0;
     } else {
@@ -229,16 +229,16 @@ void unit_panel_ability_thread(void) {
     status_screen_init_numbers_frame(&g_equipment_right_panel_frame_rect, &screen->numeric_frame);
     unit_panel_init_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
-    /* The tile/line fixups must read g_unit_panel_origin_offsets as an array
+    /* The tile/line fixups must read g_unit_panel_equipment_origins as an array
      * element: a cast of a u8[] view folds the loop's y reads to absolute
      * addresses instead of the target's pointer-relative loads. */
-    screen->tiles[1].x0 += g_unit_panel_origin_offsets[0].x;
-    screen->tiles[1].y0 += g_unit_panel_origin_offsets[0].y;
+    screen->tiles[1].x0 += g_unit_panel_equipment_origins[0].x;
+    screen->tiles[1].y0 += g_unit_panel_equipment_origins[0].y;
     for (i = 4; i < 8; i++) {
-        screen->lines[i].x0 += g_unit_panel_origin_offsets[0].x;
-        screen->lines[i].y0 += g_unit_panel_origin_offsets[0].y;
-        screen->lines[i].x1 += g_unit_panel_origin_offsets[0].x;
-        screen->lines[i].y1 += g_unit_panel_origin_offsets[0].y;
+        screen->lines[i].x0 += g_unit_panel_equipment_origins[0].x;
+        screen->lines[i].y0 += g_unit_panel_equipment_origins[0].y;
+        screen->lines[i].x1 += g_unit_panel_equipment_origins[0].x;
+        screen->lines[i].y1 += g_unit_panel_equipment_origins[0].y;
     }
 
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
@@ -254,12 +254,12 @@ void unit_panel_ability_thread(void) {
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, g_unit_panel_label_layouts_mode0 + i);
+                    g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode0 + i);
             }
         } else {
             for (i = 0; i < 19; i++) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, g_unit_panel_label_layouts_mode1 + i);
+                    g_unit_panel_equipment_origins, g_unit_panel_label_layouts_mode1 + i);
             }
         }
 
@@ -315,7 +315,7 @@ void unit_panel_ability_thread(void) {
         offset.x = thread->x - 0x73;
         offset.y = thread->y;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_unit_panel_status_panel_frame_rect[2], frame, g_gfx_screen_polarity * 0xf0, &offset);
+            &screen->portrait, &g_unit_panel_equipment_frame_rects[2], frame, g_gfx_screen_polarity * 0xf0, &offset);
         unit_panel_set_colors(screen, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 

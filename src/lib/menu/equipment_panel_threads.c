@@ -29,11 +29,11 @@ void unit_panel_ability_thread(void) {
 }
 #endif
 
-/* BUNIT and WORLD keep the combined body that uses the field-y value and their equipment buffers. */
-#if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_DEBUGCHR) || defined(FFT_EVENT_EQUIP) || defined(FFT_EVENT_REQUIRE)
-/* The selected unit's equipment and ability panel as unit_panel_equipment_ability_thread
- * draws it, from this program's own buffers and label layouts, with the draw offset following
- * the screen polarity. Runs until a stop request. */
+/* Thread body (task THREAD_TASK_STATUS_PANEL) of the selected unit's combined equipment and
+ * ability panel: item icons, the five equipment names and the five ability names, laid out by
+ * whether the unit is two-handed or a monster. Parameter 1 is the panel's unit_panel_thread_t
+ * record, whose position places the panel and whose redraw request uploads the names again.
+ * The panel zooms open over its first 13 frames and runs until a stop request. */
 void unit_panel_equipment_ability_thread(void) {
     unit_panel_thread_t* thread;
     unit_panel_buffer_t* screen;
@@ -42,36 +42,32 @@ void unit_panel_equipment_ability_thread(void) {
     s32 frame;
     s32 mode;
     s32 i;
+#if !defined(FFT_WORLD) && !defined(FFT_EVENT_BUNIT)
     s32 field_y;
     s32 mask;
-    RECT* rect;
-    RECT* offsets;
+#endif
 
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
 
-    screen = g_unit_panel_frames_a;
-    base = g_unit_panel_frames_a;
+    screen = g_unit_panel_equipment_frames;
+    base = g_unit_panel_equipment_frames;
     state = &g_unit_panel_selected_unit_fields.state;
-    rect = g_unit_panel_status_panel_frame_rect;
-    status_screen_init_numbers_frame(rect, &screen->numeric_frame);
+    status_screen_init_numbers_frame(&g_unit_panel_equipment_frame_rects[0], &screen->numeric_frame);
     unit_panel_init_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
 
     /* Move the tiles and lines from panel-relative to screen coordinates. */
     for (i = 0; i < 2; i++) {
-        screen->tiles[i].x0 += rect->x;
-        screen->tiles[i].y0 += rect->y;
+        screen->tiles[i].x0 += g_unit_panel_equipment_frame_rects[0].x;
+        screen->tiles[i].y0 += g_unit_panel_equipment_frame_rects[0].y;
     }
-    i = 0;
-    /* The line pass reloads the origin address instead of reusing `rect`. */
-    offsets = g_unit_panel_status_panel_frame_rect;
-    for (; i < 8; i++) {
-        screen->lines[i].x0 += offsets->x;
-        screen->lines[i].y0 += offsets->y;
-        screen->lines[i].x1 += offsets->x;
-        screen->lines[i].y1 += offsets->y;
+    for (i = 0; i < 8; i++) {
+        screen->lines[i].x0 += g_unit_panel_equipment_frame_rects[0].x;
+        screen->lines[i].y0 += g_unit_panel_equipment_frame_rects[0].y;
+        screen->lines[i].x1 += g_unit_panel_equipment_frame_rects[0].x;
+        screen->lines[i].y1 += g_unit_panel_equipment_frame_rects[0].y;
     }
 
     menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
@@ -93,19 +89,19 @@ void unit_panel_equipment_ability_thread(void) {
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, &g_unit_panel_label_layouts_mode0[i]);
+                    &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode0[i]);
             }
             if (mode == 1) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, &g_unit_panel_label_layouts_mode1[i]);
+                    &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode1[i]);
             }
             if (mode == 2) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, &g_unit_panel_label_layouts_mode2[i]);
+                    &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode2[i]);
             }
             if (mode == 3) {
                 gfx_init_image_loading(&screen->sprites[i], g_unit_panel_editor_numeric_geometry,
-                    g_unit_panel_origin_offsets, &g_unit_panel_label_layouts_mode3[i]);
+                    &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode3[i]);
             }
         }
 
@@ -163,7 +159,7 @@ void unit_panel_equipment_ability_thread(void) {
 
         for (i = 0; i < 5; i++) {
             gfx_init_image_loading(&screen->sprites[19 + i], g_unit_panel_item_icon_texture,
-                g_unit_panel_status_panel_frame_rect, &g_unit_panel_item_icon_layouts[i]);
+                &g_unit_panel_equipment_frame_rects[0], &g_unit_panel_item_icon_layouts[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);
             } else {
@@ -173,14 +169,21 @@ void unit_panel_equipment_ability_thread(void) {
             }
         }
 
-        /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the
-         * upper half. */
+#if defined(FFT_WORLD) || defined(FFT_EVENT_BUNIT)
+        /* A g_frame_arg (field y) of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0
+         * into the upper half. */
+        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
+        menu_build_scaled_draw_area_packets(
+            &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, g_frame_arg, thread);
+#else
+        /* The other overlays derive the field offset from screen polarity. */
         field_y = g_gfx_screen_polarity * 0xf0;
         mask = field_y ^ 0xf0;
         mask = -(mask != 0);
         g_gfx_draw_offset_y = mask & 0xf0;
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, field_y, thread);
+#endif
         screen->draw_offsets[0].position.x = thread->x - 0x80;
         screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
@@ -234,4 +237,3 @@ void unit_panel_equipment_ability_thread(void) {
     thread_yield();
     thread_exit_current();
 }
-#endif

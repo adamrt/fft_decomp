@@ -23,6 +23,7 @@ units:
   - {name: draw_areas, source: src/world/draw_areas.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: draw_state, source: src/lib/menu/draw_state.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: equipment_menus, source: src/world/equipment_menus.c}
+  - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: equipment_rows, source: src/lib/menu/equipment_rows.c, data: [{addr: 0x801c8458, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801c8464, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: equipment_slots, source: src/world/equipment_slots.c, data: [{addr: 0x8018d7ec, size: 5, hash: 2b02997e9b337299}, {addr: 0x8018d7f4, size: 5, hash: 2b02997e9b337299}]}
   - {name: equipment_stat_changes, source: src/world/equipment_stat_changes.c}
@@ -644,7 +645,7 @@ functions:
   - {addr: 0x80110260, size: 544, name: unit_panel_init_primitives, hash: 2bdc8929b9ed31ea, unit: unit_panel_primitives}
   - {addr: 0x80110480, size: 1588, name: unit_panel_equipment_thread, hash: a00168623e174937, unit: list_threads}
   - {addr: 0x80110ab4, size: 1468, name: unit_panel_ability_thread, hash: 8a0b24b1c44d851a, unit: list_threads}
-  - {addr: 0x80111070, size: 1920, name: unit_panel_equipment_ability_thread, hash: 13121306aa5d00d2, source: src/lib/menu/unit_panel_equipment_ability_thread.c}
+  - {addr: 0x80111070, size: 1920, name: unit_panel_equipment_ability_thread, hash: 13121306aa5d00d2, unit: equipment_panel_threads}
   - {addr: 0x801117f0, size: 380, name: unit_panel_set_colors, hash: 388b0fac742b4997, unit: panel_text}
   - {addr: 0x8011196c, size: 84, name: unit_panel_select_palette, hash: 98f3a5d0ed4e9088, unit: panel_text}
   - {addr: 0x801119c0, size: 268, name: menu_text_render_signed_decimal_entries, hash: 77d870766dabc4f4, unit: panel_text}
@@ -1486,19 +1487,19 @@ data:
   - {addr: 0x8018af44, name: g_message_box_glyph_delay}
   - {addr: 0x8018af48, name: g_message_box_slot_carry_offset}
   - {addr: 0x8018af4c, name: g_message_box_slot_prev_width}
-  - {addr: 0x8018af50, name: g_unit_panel_equipment_origin}
+  - {addr: 0x8018af50, name: g_unit_panel_equipment_origins}
   - {addr: 0x8018af58, name: g_formation_ability_panel_origin}
-  - {addr: 0x8018af60, name: g_unit_panel_equipment_frame_rect}
+  - {addr: 0x8018af60, name: g_unit_panel_equipment_frame_rects}
   - {addr: 0x8018af68, name: g_formation_equipment_panel_draw_area}
   - {addr: 0x8018af70, name: g_formation_ability_panel_draw_area}
   - {addr: 0x8018af78, name: g_unit_panel_character_status_draw_area_rect}
-  - {addr: 0x8018af80, name: g_unit_panel_equipment_item_text_rect}
-  - {addr: 0x8018af88, name: g_unit_panel_equipment_ability_text_rect}
-  - {addr: 0x8018af90, name: g_unit_panel_equipment_sprite_params_0}
-  - {addr: 0x8018b074, name: g_unit_panel_equipment_sprite_params_1}
-  - {addr: 0x8018b158, name: g_unit_panel_equipment_sprite_params_2}
-  - {addr: 0x8018b23c, name: g_unit_panel_equipment_sprite_params_3}
-  - {addr: 0x8018b380, name: g_unit_panel_equipment_icon_params}
+  - {addr: 0x8018af80, name: g_unit_panel_text_upload_rect_a}
+  - {addr: 0x8018af88, name: g_unit_panel_text_upload_rect_b}
+  - {addr: 0x8018af90, name: g_unit_panel_label_layouts_mode0}
+  - {addr: 0x8018b074, name: g_unit_panel_label_layouts_mode1}
+  - {addr: 0x8018b158, name: g_unit_panel_label_layouts_mode2}
+  - {addr: 0x8018b23c, name: g_unit_panel_label_layouts_mode3}
+  - {addr: 0x8018b380, name: g_unit_panel_item_icon_layouts}
   - {addr: 0x8018b3bc, name: g_unit_panel_editor_numeric_table}
   - {addr: 0x8018b3cc, name: g_unit_panel_editor_numeric_entries_a}
   - {addr: 0x8018b3d4, name: g_unit_panel_editor_numeric_entries_b}
@@ -2072,8 +2073,8 @@ data:
   - {addr: 0x801c3d7c, name: g_message_box_column_scratch}
   - {addr: 0x801c3d8c, name: g_unit_panel_equipment_frames}
   - {addr: 0x801c453c, name: g_formation_stat_preview_panel_frames}
-  - {addr: 0x801c4cec, name: g_unit_panel_equipment_item_text_image}
-  - {addr: 0x801c596c, name: g_unit_panel_equipment_ability_text_image}
+  - {addr: 0x801c4cec, name: g_unit_panel_text_image_a}
+  - {addr: 0x801c596c, name: g_unit_panel_text_image_b}
   - {addr: 0x801c65ec, name: g_unit_panel_editor_numeric_state_a}
   - {addr: 0x801c6b6c, name: g_unit_panel_editor_numeric_state_b}
   - {addr: 0x801c70ec, name: g_unit_panel_editor_numeric_text_a}

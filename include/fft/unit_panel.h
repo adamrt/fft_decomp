@@ -230,19 +230,12 @@ extern u8 g_unit_panel_portrait_transition_offsets[];
  * and portrait. */
 extern s32 g_unit_panel_character_status_redraw_request;
 extern RECT g_unit_panel_character_status_draw_area_rect;
-extern RECT g_unit_panel_status_panel_frame_rect[];
 extern RECT g_unit_panel_frame_rect;
-extern unit_panel_buffer_t g_unit_panel_frames_a[];
-extern RECT g_unit_panel_origin_offsets[];
 extern s16 g_unit_panel_slide_down_y[];
 extern s16 g_unit_panel_slide_up_y[];
 extern CVECTOR g_unit_panel_gauge_bar_colors[];
 extern u16 g_unit_panel_editor_label_cluts[][2];
 extern u16 g_unit_panel_editor_value_cluts[][2];
-extern u8 g_unit_panel_text_image_a[];
-extern u8 g_unit_panel_text_image_b[];
-extern RECT g_unit_panel_text_upload_rect_a;
-extern RECT g_unit_panel_text_upload_rect_b;
 extern menu_status_panel_packet_t g_unit_panel_selected_packets[2];
 extern menu_status_panel_editor_packet_t g_unit_panel_selected_editor_packets[2];
 extern menu_number_entry_t g_unit_panel_selected_numeric_entries[];
@@ -258,24 +251,26 @@ extern u8 g_unit_panel_comparison_number_image[];
 extern u8 g_unit_panel_comparison_small_number_image[];
 extern RECT g_unit_panel_comparison_portrait_rect;
 
-/* The selected unit's equipment and ability panel. ATTACK, DEBUGCHR, EQUIP and REQUIRE link the body that draws from
- * g_unit_panel_frames_a, BUNIT and WORLD the one that draws from g_unit_panel_equipment_frames. */
-void unit_panel_equipment_ability_thread(void);
-
 /* equipment panel */
 /* The selected unit's equipment and abilities, and the remove-equipment preview. */
-extern RECT g_unit_panel_equipment_origin;
-extern RECT g_unit_panel_equipment_frame_rect;
+/* WORLD, ATTACK, BUNIT, DEBUGCHR, EQUIP and REQUIRE each link these panel resources. */
 extern unit_panel_buffer_t g_unit_panel_equipment_frames[2];
-extern image_load_parameters_t g_unit_panel_equipment_icon_params[MENU_EQUIPMENT_SLOT_COUNT];
-extern u8 g_unit_panel_equipment_item_text_image[];
-extern RECT g_unit_panel_equipment_item_text_rect;
-extern u8 g_unit_panel_equipment_ability_text_image[];
-extern RECT g_unit_panel_equipment_ability_text_rect;
-extern image_load_parameters_t g_unit_panel_equipment_sprite_params_0[19];
-extern image_load_parameters_t g_unit_panel_equipment_sprite_params_1[19];
-extern image_load_parameters_t g_unit_panel_equipment_sprite_params_2[19];
-extern image_load_parameters_t g_unit_panel_equipment_sprite_params_3[19];
+extern RECT g_unit_panel_equipment_frame_rects[];
+extern RECT g_unit_panel_equipment_origins[];
+extern const image_load_parameters_t g_unit_panel_label_layouts_mode0[19];
+extern const image_load_parameters_t g_unit_panel_label_layouts_mode1[19];
+extern const image_load_parameters_t g_unit_panel_label_layouts_mode2[19];
+extern const image_load_parameters_t g_unit_panel_label_layouts_mode3[19];
+extern const image_load_parameters_t g_unit_panel_item_icon_layouts[MENU_EQUIPMENT_SLOT_COUNT];
+
+/* The combined panel uses A for equipment and B for abilities; the separate panels reuse them for selected-unit
+ * and item-preview text respectively. */
+extern u8 g_unit_panel_text_image_a[3200];
+extern u8 g_unit_panel_text_image_b[3200];
+extern RECT g_unit_panel_text_upload_rect_a;
+extern RECT g_unit_panel_text_upload_rect_b;
+
+void unit_panel_equipment_ability_thread(void);
 
 /* ATTACK, BUNIT, DEBUGCHR and REQUIRE share yield-and-exit stubs; EQUIP and WORLD each build panel bodies. */
 void unit_panel_ability_thread(void);
@@ -315,12 +310,7 @@ extern image_load_parameters_t g_unit_panel_editor_label_cells[];
 extern image_load_parameters_t g_unit_panel_editor_mode_cell[];
 extern image_load_parameters_t g_unit_panel_editor_mode_cells[];
 extern image_load_parameters_t g_unit_panel_editor_value_cells[];
-extern image_load_parameters_t g_unit_panel_item_icon_layouts[];
 extern point16_t g_unit_panel_item_icon_texture[];
-extern image_load_parameters_t g_unit_panel_label_layouts_mode0[];
-extern image_load_parameters_t g_unit_panel_label_layouts_mode1[];
-extern image_load_parameters_t g_unit_panel_label_layouts_mode2[];
-extern image_load_parameters_t g_unit_panel_label_layouts_mode3[];
 extern image_load_parameters_t g_unit_panel_portrait_cell[];
 extern image_load_parameters_t g_unit_panel_sprite_cells[];
 extern point16_t g_unit_panel_editor_numeric_geometry[];

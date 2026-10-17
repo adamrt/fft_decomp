@@ -217,7 +217,7 @@ extern s32 g_equipment_numeric_panel_redraw;
 extern u8 g_equipment_status_label_image[];
 extern RECT g_equipment_status_label_image_rect;
 
-/* RECT[1] (right panel) of g_unit_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
+/* RECT[1] (right panel) of g_unit_panel_equipment_origins. Kept as its own symbol: spelling it as an element lets
  * GCC derive the table base from this address and changes unit_panel_ability_thread. */
 extern RECT g_equipment_right_panel_frame_rect;
 
