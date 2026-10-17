@@ -79,7 +79,7 @@ typedef struct location_record {
 extern location_record_t* g_location_records;
 extern s32 g_location_label_shade;
 
-/* The location whose name label is drawn over its map dot. */
+/* The location whose name label is drawn over its map dot: location id + 1, or zero for none. */
 extern s32 g_location_selected;
 
 s32 location_load_picture(s32 index);
@@ -155,9 +155,8 @@ typedef struct travel {
     SVECTOR previous_position; /* 0x78 */
     SVECTOR position;          /* 0x80 */
     SVECTOR target_position;   /* 0x88 */
-    s32 arrival_location;      /* 0x90; arrival location id + 1 */
 } travel_t;
-typedef char travel_size_must_be_148[sizeof(travel_t) == 148 ? 1 : -1];
+typedef char travel_size_must_be_144[sizeof(travel_t) == 144 ? 1 : -1];
 
 extern travel_t g_travel;
 

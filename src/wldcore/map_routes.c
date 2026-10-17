@@ -896,7 +896,7 @@ void travel_step(void) {
             g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.y
                 = g_world_map_marker_state.marker.render.position.y - 4;
             g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-            g_travel.arrival_location = g_world_map_marker_state.marker.location_id + 1;
+            g_location_selected = g_world_map_marker_state.marker.location_id + 1;
             file_wait_for_pending();
             g_world_map_marker_state.angle = 0;
             g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
