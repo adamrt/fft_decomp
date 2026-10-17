@@ -1404,7 +1404,7 @@ s32 ai_simulate_action_and_score(void) {
     unit_stats_t* unit;
     ai_unit_decision_t* decision;
     action_command_t* action;
-    ai_data_t* clear_cursor;
+    u32 clear_address;
     u8* decision_base;
     s32 unit_index;
     s32 status;
@@ -1431,10 +1431,11 @@ s32 ai_simulate_action_and_score(void) {
     /* Every exit below restores this baseline, undoing the simulation. */
     ai_simulate_save_unit_state(AI_SNAPSHOT_BASELINE);
     ai->ability_processing_done = 0;
-    /* Direct array iteration changes the bytes; retain a workspace-relative cursor. */
-    for (unit_index = UNIT_SLOT_COUNT - 1, clear_cursor = (ai_data_t*)((u8*)ai + (UNIT_SLOT_COUNT - 1));
-        unit_index >= 0; unit_index--, clear_cursor = (ai_data_t*)((u8*)clear_cursor - 1)) {
-        clear_cursor->unit_had_move_opportunity[0] = 0;
+    /* Integer addresses retain the original base/displacement order without forming
+     * a pointer before the workspace at the end of the reverse walk. */
+    for (unit_index = UNIT_SLOT_COUNT - 1, clear_address = (u32)ai + (UNIT_SLOT_COUNT - 1); unit_index >= 0;
+        unit_index--, clear_address--) {
+        *(u8*)(clear_address + offsetof(ai_data_t, unit_had_move_opportunity)) = 0;
     }
     ai->current_action.rank.priority = 0;
     ai->current_action.rank.base_hit_percent = 0xff;

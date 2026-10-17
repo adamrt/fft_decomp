@@ -744,18 +744,17 @@ s32 unit_count_crystals(void) {
  * first. Returns 1 when moved, 0 when no record has the runtime id. */
 s32 unit_move_to_head(u32 runtime_id) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id);
-    unit_t* iterator;
-    unit_t* head;
+    unit_t** link;
+    unit_t** head;
 
     if (unit != 0) {
-        /* The 32-bit list-head pointer serves as a sentinel record: its previous field
-         * (0x000) is the head link. */
-        for (iterator = (unit_t*)&g_unit_list_head; iterator != 0; iterator = iterator->previous) {
-            if (iterator->previous == unit) {
-                iterator->previous = unit->previous;
-                head = (unit_t*)&g_unit_list_head;
-                unit->previous = head->previous;
-                head->previous = unit;
+        /* Walk link addresses so the list head needs no fictitious unit record. */
+        for (link = &g_unit_list_head; link != 0; link = *link != 0 ? &(*link)->previous : 0) {
+            if (*link == unit) {
+                *link = unit->previous;
+                head = &g_unit_list_head;
+                unit->previous = *head;
+                *head = unit;
                 return 1;
             }
         }

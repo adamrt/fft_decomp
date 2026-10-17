@@ -19,6 +19,7 @@
 #include "fft/unit_runtime.h"
 #include "fft/weather.h"
 #include "psx/libc.h"
+#include "psx/stddef.h"
 #include "psx/types.h"
 
 static u8 g_action_ability_target_list[UNIT_RUNTIME_SLOT_COUNT] = { 0 };
@@ -61,8 +62,7 @@ s32 weather_get_effective(void) {
 enum {
     ABILITY_LEARN_ON_HIT_ROLL_MAXIMUM = 100,
     ABILITY_LEARN_ON_HIT_ROW_BYTES = 3,
-    ABILITY_LEARN_ON_HIT_ABILITY_COUNT = 0x18,
-    UNIT_LEARNED_ABILITIES_OFFSET = 0x99
+    ABILITY_LEARN_ON_HIT_ABILITY_COUNT = 24
 };
 
 /* Find a unit that learns the ability it was just hit with.
@@ -120,7 +120,8 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                      * with the row and demonstrably breaks the byte-exact
                      * address calculation. Preserve the target's row-offset,
                      * unit-base, then field-offset order. */
-                    src = (u8*)((row * ABILITY_LEARN_ON_HIT_ROW_BYTES) + (u32)unit + UNIT_LEARNED_ABILITIES_OFFSET);
+                    src = (u8*)((row * ABILITY_LEARN_ON_HIT_ROW_BYTES) + (u32)unit
+                        + offsetof(unit_stats_t, career.learned_abilities));
                     for (k = 0; k < ABILITY_LEARN_ON_HIT_ROW_BYTES; k++) {
                         scratch[k] = src[k];
                     }
@@ -148,9 +149,6 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     } while (i < UNIT_SLOT_COUNT);
     return -1;
 }
-
-/* Integer address arithmetic preserves the retail instruction order here. */
-#define LEARNED_ABILITIES_OFFSET ((u32) & ((unit_stats_t*)0)->career.learned_abilities)
 
 /* Learn-on-hit: mark the acting unit's used ability as learned in the unit's
  * current job.
@@ -180,14 +178,14 @@ void ability_learn_used(unit_stats_t* unit) {
     }
     /* Three learned-ability bytes per job, from learned_abilities (0x99). */
     dst = learned;
-    src = (u8*)(((job * 3) + (s32)unit) + LEARNED_ABILITIES_OFFSET);
+    src = (u8*)(((job * 3) + (s32)unit) + offsetof(unit_stats_t, career.learned_abilities));
     do {
         *dst = *src;
         dst += 1;
         src += 1;
     } while ((s32)dst < (s32)&learned[3]);
     i = 0;
-    base = (u8*)(((job * 3) + (s32)unit) + LEARNED_ABILITIES_OFFSET);
+    base = (u8*)(((job * 3) + (s32)unit) + offsetof(unit_stats_t, career.learned_abilities));
     do {
         byte_index = i / 8;
         mask = 0x80 >> (i - (byte_index * 8));
