@@ -3558,10 +3558,10 @@ void ai_init_unit_abilities(s32 unit_id) {
     decision->evade_mod = ai_calculate_ratio_times_4(ability_count, evade_count);
     /* The five ENTD AI bytes become flags, main target, both targeting flag bytes and
      * the enemy flag; the stay-near tile's level is the top bit of the first. */
-    ai_mem_copy_bytes(&decision->flags, &unit->ai_flags, 5);
-    decision->target.fields.x = unit->ai_target_x;
-    decision->target.fields.y = unit->ai_target_y;
-    decision->target.fields.elevation = unit->ai_flags >> 7;
+    ai_mem_copy_bytes(&decision->flags, &unit->ai.fields.flags, 5);
+    decision->target.fields.x = unit->ai.fields.target_x;
+    decision->target.fields.y = unit->ai.fields.target_y;
+    decision->target.fields.elevation = unit->ai.fields.flags >> 7;
     decision->target.fields.zero = 0;
     if (!(decision->flags & AI_DECISION_SPECIAL_BEHAVIOR)) {
         return;

@@ -536,6 +536,22 @@ enum {
     UNIT_ENTD_SLOT_NONE = 0xff,
 };
 
+/* Seven encounter AI bytes copied together into the unit record. */
+enum { UNIT_AI_SETUP_BYTE_COUNT = 7 };
+typedef union unit_ai_setup {
+    struct {
+        u8 target_x;           /* 0x00 */
+        u8 target_y;           /* 0x01 */
+        u8 flags;              /* 0x02; ai_decision_flags_e; high bit is the stay-near tile elevation */
+        u8 target_unit_id;     /* 0x03 */
+        u8 targeting_flags_1;  /* 0x04; initial ai_unit_decision_t targeting flags */
+        u8 targeting_flags_2;  /* 0x05; ai_targeting_flags_2_e */
+        u8 initial_enemy_flag; /* 0x06 */
+    } fields;
+    u8 bytes[UNIT_AI_SETUP_BYTE_COUNT];
+} unit_ai_setup_t;
+typedef char unit_ai_setup_size_must_be_7[(sizeof(unit_ai_setup_t) == UNIT_AI_SETUP_BYTE_COUNT) ? 1 : -1];
+
 /* Current and calculated unit attributes, also built for WORLD menus. BATTLE
  * keeps UNIT_SLOT_COUNT of them in g_unit_stats; a live
  * unit_t points to its stats through the member at 0x134. */
@@ -602,13 +618,7 @@ typedef struct unit_stats {
     u8 base_job_skillset;            /* 0x162 */
     u8 war_trophy;                   /* 0x163 */
     u8 bonus_money_modifier;         /* 0x164 */
-    u8 ai_target_x;                  /* 0x165 */
-    u8 ai_target_y;                  /* 0x166 */
-    u8 ai_flags;                     /* 0x167; ai_decision_flags_e */
-    u8 prioritized_target;           /* 0x168 */
-    u8 ai_targeting_flags_1;         /* 0x169; copied to ai_unit_decision_t +0x06 */
-    u8 ai_targeting_flags_2;         /* 0x16a; ai_targeting_flags_2_e */
-    u8 ai_initial_enemy_flag;        /* 0x16b; ENTD 0x27 */
+    unit_ai_setup_t ai;              /* 0x165 */
     unit_name_id_t quote_name_id;    /* 0x16c */
     action_command_t action_command; /* 0x16e..0x181 */
     u8 mount_info;                   /* 0x182 */

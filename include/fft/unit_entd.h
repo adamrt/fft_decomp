@@ -87,14 +87,7 @@ typedef struct entd_unit {
     u8 war_trophy;                           /* 0x1e; copied to unit_stats_t.war_trophy */
     u8 bonus_money_modifier;                 /* 0x1f; copied to unit_stats_t.bonus_money_modifier */
     u8 unit_id;                              /* 0x20 */
-    /* 0x21-0x27 are copied as seven bytes to unit_stats_t ai_target_x onward
-     * by a loop that indexes ai_target_xy, so nothing names the members after it. */
-    u8 ai_target_xy[2];       /* 0x21; AI "stay near" X, Y */
-    u8 ai_flags;              /* 0x23; ai_decision_flags_e; 0x80 = upper level of the stay-near tile */
-    u8 ai_target_unit_id;     /* 0x24; unit_stats_t prioritized_target */
-    u8 ai_targeting_flags_1;  /* 0x25; copied to ai_unit_decision_t +0x06 */
-    u8 ai_targeting_flags_2;  /* 0x26; ai_targeting_flags_2_e */
-    u8 ai_initial_enemy_flag; /* 0x27 */
+    unit_ai_setup_t ai;                      /* 0x21 */
 } entd_unit_t;
 typedef char entd_unit_size_must_be_40[(sizeof(entd_unit_t) == 40) ? 1 : -1];
 

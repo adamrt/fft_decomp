@@ -837,11 +837,8 @@ static s32 unit_calculate_encounter_data(unit_stats_t* unit, entd_unit_t* entd) 
         }
     }
 
-    /* Copies entd 0x21..0x27 into unit 0x165..0x16b (ai_target_x through
-     * ai_initial_enemy_flag).  The byte-shifted struct view reproduces the
-     * target's `addu unit,i` operand order; (&unit->ai_target_x)[i] swaps it. */
-    for (i = 0; i < 7; i++) {
-        ((unit_stats_t*)((u8*)unit + i))->ai_target_x = g_encounter_current_unit->ai_target_xy[i];
+    for (i = 0; i < UNIT_AI_SETUP_BYTE_COUNT; i++) {
+        unit->ai.bytes[i] = g_encounter_current_unit->ai.bytes[i];
     }
     if (value & UNIT_FLAG_LOAD_FORMATION) {
         return party_slot;
@@ -979,7 +976,7 @@ static void unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party
         &party->career.job_points, &unit->career.job_points, sizeof(unit->career.job_points));
     mem_copy_byte_data_source_first(party->name, unit->name, sizeof(unit->name));
     unit->quote_name_id.value = party->name_id.fields.index + (party->name_id.fields.name_class << 8);
-    mem_zero(&unit->ai_target_x, 7);
+    mem_zero(&unit->ai, sizeof(unit->ai));
 }
 
 /* Set an ENTD unit's job levels, unlocked jobs, job record and skillsets.
