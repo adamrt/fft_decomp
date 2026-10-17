@@ -16,6 +16,7 @@
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
 #include "fft/portrait.h"
+#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
@@ -33,9 +34,6 @@
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-#ifdef FFT_WORLD
-#    include "fft/screen.h"
-#endif
 
 /* Menu palette color of each of the numeric display frame's twelve lines. */
 static u8 g_status_screen_numbers_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };

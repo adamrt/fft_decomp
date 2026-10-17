@@ -87,7 +87,7 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 
 /* Shared with the per-program event interpreter and dialog thread. */
-u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
+u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
 
 /* list pages */
 /* One of the two 0x134-byte packet pages a scrolling text list alternates between frames

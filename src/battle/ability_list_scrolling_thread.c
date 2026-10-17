@@ -390,7 +390,7 @@ void ability_list_scrolling_thread(void) {
         }
 
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
-            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, (s32)&cursor, &window.rect);
+            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }

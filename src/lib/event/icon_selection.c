@@ -12,6 +12,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
+#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/target.h"
@@ -24,9 +25,6 @@
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-#ifdef FFT_WORLD
-#    include "fft/screen.h"
-#endif
 
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
 static s16 g_auto_battle_row_actions[8] = { 1000, 2, 2, 2, 2, 0, -3, -3 };
@@ -520,21 +518,10 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
     }
 }
 
-#ifdef FFT_BATTLE
-/*
- * WORLD twin:
- * menu_redraw_text_page_on_scroll_in_rect, plus the mode-2 buffer
- * placement after the event overlay.
- */
-
-/* Scrolls the row window of a three-column menu page on Square+Up/Down (or
- * on the running thread's redraw request), redraws the page into an image
- * buffer and uploads it to the caller-supplied rectangle (x and w in
- * framebuffer pixels, divided by four; the image row is fixed at y = 0x80).
- * At g_menu_scrolling_list_depth 2 the buffer is placed 0x2000 bytes past the companion
- * overlay load address instead of being allocated. Returns that buffer when the page was
- * redrawn, else 0. */
-u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area) {
+/* Redraw a scrolled three-column page in the supplied VRAM rectangle. BATTLE uses
+ * the companion overlay buffer at depth 2; WORLD always allocates an image. */
+u8* menu_redraw_text_page_on_scroll_in_rect(
+    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* pressed;
     u32* held;
@@ -576,9 +563,12 @@ u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset
             g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 0;
         }
         if (changed != 0) {
+#ifdef FFT_BATTLE
             if (g_menu_scrolling_list_depth == 2) {
                 buffer = g_heap_companion_overlay_load_address + 0x2000;
-            } else {
+            } else
+#endif
+            {
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
@@ -597,79 +587,6 @@ u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset
     }
     return 0;
 }
-#endif
-
-#ifdef FFT_WORLD
-/* Sibling of screen_redraw_text_page_on_scroll that draws through
- * menu_draw_text_columns_narrow and takes the image rectangle from a caller-supplied
- * RECT (x and w in framebuffer pixels, divided by four; the image row is
- * fixed at y = 0x80). Pages the row window on Square+Up/Down (or on the running
- * thread's redraw request), redraws the page into a freshly allocated image
- * buffer and uploads it. Returns that buffer when the page was redrawn, else 0. */
-u8* screen_redraw_text_page_on_scroll_in_rect(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
-    menu_text_layout_t* layout = entry->context;
-    u32* pressed;
-    u32* held;
-    RECT rect;
-    RECT clear;
-    s32 changed;
-    s32 offset;
-    u8* buffer;
-
-    pressed = script_get_controller_input_pointer(0);
-    held = script_get_controller_input_pointer(1);
-    rect.x = (area->x / 4) + entry->vram_origin.x;
-    rect.y = 0x80;
-    rect.w = area->w / 4;
-    rect.h = area->h;
-    changed = 0;
-    if (g_menu_input_mode != MENU_INPUT_PLAYER) {
-        return 0;
-    }
-    if (!(*held & PSX_PAD_SQUARE)
-        && g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] == 0) {
-        return 0;
-    }
-    /* Page up or down by one screen of rows, clamped to the list. */
-    if ((*pressed & PSX_PAD_UP) && *row_offset != 0) {
-        offset = *row_offset - layout->row_count;
-        *row_offset = offset;
-        if (offset < 0) {
-            *row_offset = 0;
-        }
-        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
-        changed = 1;
-    } else if ((*pressed & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
-        offset = layout->row_count + *row_offset;
-        *row_offset = offset;
-        if (layout->hidden_rows < offset) {
-            *row_offset = layout->hidden_rows;
-        }
-        g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
-        changed = 1;
-    } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0) {
-        changed = 1;
-        g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 0;
-    }
-    if (changed == 0) {
-        return 0;
-    }
-    buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
-    menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-    menu_draw_text_columns_narrow(entry, row_offset, buffer);
-    *redraw = 0;
-    LoadImage(&rect, buffer);
-    /* Clear the two VRAM rows above the image, wrapping within its 256-row page. */
-    mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
-    clear.h = 2;
-    clear.x = rect.x;
-    clear.y = ((rect.y - 2) & 0xFF) + (rect.y & 0xFF00);
-    clear.w = rect.w;
-    ClearImage(&clear, 0, 0, 0);
-    return buffer;
-}
-#endif
 
 /* Frames the current repeatable buttons have been held unchanged (0 after a change);
  * the scrolling lists pace and repeat their scrolling by it. */

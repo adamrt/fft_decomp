@@ -303,10 +303,6 @@ void screen_scroll_list_page(menu_vertical_scroll_direction_e direction, const m
 void screen_draw_item_tabs(s32 wide, s32 row, s32 mode);
 void screen_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 
-/* Also used by the event library's icon selection and the scrolling ability list thread. */
-u8* screen_redraw_text_page_on_scroll_in_rect(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
-
 /* cursors, selections and input */
 /* Result slots the shop menus share. */
 enum {

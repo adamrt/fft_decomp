@@ -306,7 +306,7 @@ void ability_list_scrolling_thread(void) {
             redraw_pending = 0;
         }
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
-            buffer = screen_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
+            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
             /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
