@@ -140,26 +140,6 @@ void battle_map_update_color_animations(void);
 void battle_map_clut_upload_rows(void);
 
 /* CLUT cycles */
-/* Eight runtime slots rotate a range of colors of a CLUT row for map texture animations.
- * They are separate from the 32 serialized 0x14-byte animation instructions
- * a map's mesh file carries. */
-enum { BATTLE_MAP_CLUT_CYCLE_SLOT_COUNT = 8 };
-
-/* One slot of g_battle_map_clut_cycle_states: the CLUT row and the range of its colors it
- * rotates, and its frame timing. */
-typedef struct battle_map_clut_cycle_state {
-    u8 active;
-    u8 elapsed_frames;
-    u8 frame_duration;
-    u8 _padding_03;  /* aligns clut_row */
-    u16 clut_row;    /* 0x04; battle_map_clut_row_e */
-    u16 first_color; /* 0x06; color index in the row: the colors first..last rotate one place */
-    u16 last_color;  /* 0x08; every frame_duration frames, towards last */
-} battle_map_clut_cycle_state_t;
-typedef char battle_map_clut_cycle_state_size_must_be_10[(sizeof(battle_map_clut_cycle_state_t) == 10) ? 1 : -1];
-
-extern battle_map_clut_cycle_state_t g_battle_map_clut_cycle_states[BATTLE_MAP_CLUT_CYCLE_SLOT_COUNT];
-
 s32 battle_map_clut_start_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color);
 s32 battle_map_clut_stop_cycle(s32 handle);
 

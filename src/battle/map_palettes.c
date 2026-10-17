@@ -24,6 +24,71 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Runtime color fades stepped by battle_map_update_color_animations:
+ * g_battle_map_background_transition, g_battle_map_ambient_transition and
+ * g_battle_map_darkness_transition. Channels are 16.16 fixed point;
+ * the byte fields follow the updater's use. */
+typedef struct battle_map_color_transition_channels {
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 red_step;
+    s32 green_step;
+    s32 blue_step;
+} battle_map_color_transition_channels_t;
+typedef char battle_map_color_transition_channels_size_must_be_24[(sizeof(battle_map_color_transition_channels_t) == 24)
+        ? 1
+        : -1];
+
+typedef struct battle_map_color_transition {
+    u8 active;
+    u8 phase;
+    u8 tick; /* 0x02; frame counter, reset when it reaches period >> 2 */
+    u8 period;
+    u8 repeat;            /* 0x04; battle_map_color_repeat_e */
+    rgb24_t repeat_color; /* 0x05 */
+    battle_map_color_transition_channels_t channels;
+} battle_map_color_transition_t;
+typedef char battle_map_color_transition_size_must_be_32[(sizeof(battle_map_color_transition_t) == 32) ? 1 : -1];
+
+/* The background gradient fade: one channel set per gradient color. colors[]
+ * at 0x38 is the base pair used by the BASE and RESTORE modes. */
+typedef struct battle_map_gradient_transition {
+    u8 active;
+    u8 phase;
+    u8 tick; /* 0x02; frame counter, reset when it reaches period >> 2 */
+    u8 period;
+    u8 repeat;            /* 0x04; battle_map_color_repeat_e */
+    rgb24_t repeat_color; /* 0x05 */
+    battle_map_color_transition_channels_t channels[2];
+    CVECTOR colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT];
+} battle_map_gradient_transition_t;
+typedef char battle_map_gradient_transition_size_must_be_64[(sizeof(battle_map_gradient_transition_t) == 64) ? 1 : -1];
+
+extern battle_map_gradient_transition_t g_battle_map_background_transition;
+extern battle_map_color_transition_t g_battle_map_ambient_transition;
+extern battle_map_color_transition_t g_battle_map_darkness_transition;
+
+/* Eight runtime slots rotate a range of colors of a CLUT row for map texture animations.
+ * They are separate from the 32 serialized 0x14-byte animation instructions
+ * a map's mesh file carries. */
+enum { BATTLE_MAP_CLUT_CYCLE_SLOT_COUNT = 8 };
+
+/* One slot of g_battle_map_clut_cycle_states: the CLUT row and the range of its colors it
+ * rotates, and its frame timing. */
+typedef struct battle_map_clut_cycle_state {
+    u8 active;
+    u8 elapsed_frames;
+    u8 frame_duration;
+    u8 _padding_03;  /* aligns clut_row */
+    u16 clut_row;    /* 0x04; battle_map_clut_row_e */
+    u16 first_color; /* 0x06; color index in the row: the colors first..last rotate one place */
+    u16 last_color;  /* 0x08; every frame_duration frames, towards last */
+} battle_map_clut_cycle_state_t;
+typedef char battle_map_clut_cycle_state_size_must_be_10[(sizeof(battle_map_clut_cycle_state_t) == 10) ? 1 : -1];
+
+extern battle_map_clut_cycle_state_t g_battle_map_clut_cycle_states[BATTLE_MAP_CLUT_CYCLE_SLOT_COUNT];
+
 /* A palette blend moves each five-bit channel by its change (-31..31) over 32 frames, or over 8
  * for the fast blend, adding one table entry per frame. PALETTE_BLEND_POSITION is how far the
  * channel has moved after `step` of `count` frames: the change times the elapsed fraction, rounded
