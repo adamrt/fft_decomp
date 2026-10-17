@@ -5,9 +5,9 @@
  * birthday, music test). */
 
 #include "fft/menu.h"
-#include "fft/suzuki.h"
 #include "psx/types.h"
 
+struct suzuki_music;
 union controller_record;
 
 /* title screen */
@@ -157,7 +157,7 @@ extern menu_text_layout_t g_music_test_list_state;
 extern s16 g_music_test_list_entries[96];
 extern s16 g_music_test_list_entry_flags[96];
 extern s16 g_music_test_selected_option;
-extern suzuki_music_t* g_music_test_sound_handle; /* handle of the playing music test track */
+extern struct suzuki_music* g_music_test_sound_handle; /* handle of the playing music test track */
 
 /* Entry of g_gfx_otags the WORLD menu frame draws into while
  * SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set. */

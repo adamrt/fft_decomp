@@ -4,8 +4,9 @@
 /* Music: MAIN's scenario music slots, playback and tunes over the Suzuki sound driver, and the track requests BATTLE,
  * WORLD and the overlays make through the main stack. */
 
-#include "fft/suzuki.h"
 #include "psx/types.h"
+
+struct suzuki_music;
 
 /* music ids */
 /* Music ids select MUSIC_NN.SMD from the 100-entry file table. Only the ids
@@ -47,8 +48,8 @@ s32 music_unload_scenario_slot(s32 slot);
 void music_unload_scenario_and_tunes(void);
 
 /* playback */
-suzuki_music_t* music_get_handle(s32 slot);
-suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade);
+struct suzuki_music* music_get_handle(s32 slot);
+struct suzuki_music* music_switch_track(s32 slot, s32 volume, s32 fade);
 s32 music_get_current_slot(void);
 void music_set_track(s32 music_id);
 s32 music_set_target(s32 volume, s32 time);

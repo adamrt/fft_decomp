@@ -8,6 +8,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+struct unit;
+
 /* state and projection */
 enum {
     CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178,

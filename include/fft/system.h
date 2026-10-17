@@ -89,6 +89,8 @@ extern s32 g_system_frontend_world_result; /* world_map_result_e */
 extern u32 g_system_game_loop_stack_pointer;
 extern u8 g_system_go_straight_to_battle;
 
+/* Also entered by the native stack-restoring reset routine. */
+void system_run_game_loop(void);
 void system_reset_game(void);
 void system_store_stack_pointer(u32* destination);
 void system_restore_game_loop_stack_pointer(u32* source);

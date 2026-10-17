@@ -4,9 +4,10 @@
 /* Disc files and the CD loader: the files read at fixed sectors, MAIN's resident asynchronous loader, the loading
  * helpers the overlays, OPEN and WLDCORE build around it, and OPEN's title background requests. */
 
-#include "fft/suzuki.h"
 #include "psx/libcd.h"
 #include "psx/types.h"
+
+struct suzuki_smd_header;
 
 /* disc files */
 /* Sector and byte length of a resource read through the resident file loader. */
@@ -120,7 +121,7 @@ void file_handle_cd_ready(u8 event, u8* result);
 void* file_load_to_address(int sector, u32 size, void* destination);
 void* file_load_checked_to_address(int sector, int size, void* destination);
 void* file_load_checked_to_heap(int sector, int size);
-suzuki_smd_header_t* file_load_smd(int sector, u32 size);
+struct suzuki_smd_header* file_load_smd(int sector, u32 size);
 
 /* loading helpers */
 void file_load_sync(s32 lba, s32 size, void* destination);

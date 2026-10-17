@@ -63,7 +63,7 @@ static void overlay_exec_battle(void) {
  * then alternate until g_game_flow_state asks for a reset or the
  * ending. The ending sets event 0x12a, plays OPEN.BIN's ending cutscene and runs
  * BATTLE.BIN once more. */
-static void system_run_game_loop(void) {
+void system_run_game_loop(void) {
     int open_mode;
 
     g_system_frontend_world_result = WORLD_MAP_RESULT_NONE;

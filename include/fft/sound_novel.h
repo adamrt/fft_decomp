@@ -5,8 +5,9 @@
  * handlers. */
 
 #include "fft/menu_stack.h"
-#include "fft/suzuki.h"
 #include "psx/types.h"
+
+struct suzuki_sound_resource;
 
 /* readings */
 struct sound_novel_script_file;
