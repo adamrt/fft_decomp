@@ -69,8 +69,9 @@ void equipment_calculate_total_swap_delta(unit_panel_record_t* detail_total, uni
     }
 }
 
-/* Sum the stat bonuses of the five equipped items listed in `equipment`. */
-void equipment_sum_stat_details(unit_panel_record_t* total, const u16* equipment) {
+/* Sum weapon power and weapon, shield and accessory evade from the five equipped items.
+ * Other fields in total are unchanged. */
+void equipment_sum_weapon_and_evade_bonuses(unit_panel_record_t* total, const u16* equipment) {
     unit_panel_summary_t summary;
     unit_panel_record_t detail;
     unit_panel_record_t unused; /* unreferenced in the target; needed for the frame size */

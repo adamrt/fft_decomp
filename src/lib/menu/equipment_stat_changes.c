@@ -30,7 +30,9 @@ void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_reco
     detail->state.magical_accessory_evade = 0;
 }
 
-/*
+#ifdef FFT_WORLD
+/* WORLD also previews movement-ability bonuses.
+ *
  * Populate the Move and Jump bonuses granted by a movement ability.
  *
  * IDs 0x1E6-0x1E8 grant Move +1/+2/+3; 0x1E9-0x1EB grant Jump +1/+2/+3.
@@ -66,6 +68,7 @@ void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 o
     stat_diff->state.move = new_stats.state.move - old_stats.state.move;
     stat_diff->state.jump = new_stats.state.jump - old_stats.state.jump;
 }
+#endif
 
 /*
  * Extract an item's equipment stats and attribute bonuses for comparison.
@@ -74,18 +77,24 @@ void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 o
  * power and evade (into the left-weapon fields when `alternate` is nonzero,
  * else the right-weapon fields), a shield's or accessory's physical and magic
  * evade, or headgear and armor's HP and MP bonus. Every item then adds its
- * attribute set's Move, Jump, Speed, PA and MA bonuses. Invalid item IDs
- * leave the cleared preview unchanged.
+ * attribute set's Move, Jump, Speed, PA and MA bonuses. WORLD requires an
+ * item ID in the item table; EQUIP accepts every positive low-ten-bit ID.
  */
-void item_collect_stat_deltas(s16 item_id, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
+void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
+    s32 item_id;
     s32 attribute;
     s32 secondary;
-    u8 power;
-    u8 evade;
+    s32 power;
+    s32 evade;
 
     equipment_clear_stat_preview(summary, detail);
-    item_id &= ITEM_ENTRY_ID_MASK;
-    if (item_id >= 1 && item_id <= ITEM_ID_END - 1) {
+    item_id = raw_item & ITEM_ENTRY_ID_MASK;
+    if (item_id > 0
+#ifdef FFT_WORLD
+        /* EQUIP omits this upper-bound check. */
+        && item_id <= ITEM_ID_END - 1
+#endif
+    ) {
         attribute = g_item_primary_data[item_id].attributes;
         if (item_id < ITEM_ID_SHIELD_FIRST) {
             secondary = g_item_primary_data[item_id].secondary_data_id;

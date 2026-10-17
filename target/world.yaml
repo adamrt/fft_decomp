@@ -26,7 +26,7 @@ units:
   - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
   - {name: equipment_rows, source: src/lib/menu/equipment_rows.c, data: [{addr: 0x801c8458, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801c8464, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: equipment_slots, source: src/world/equipment_slots.c, data: [{addr: 0x8018d7ec, size: 5, hash: 2b02997e9b337299}, {addr: 0x8018d7f4, size: 5, hash: 2b02997e9b337299}]}
-  - {name: equipment_stat_changes, source: src/world/equipment_stat_changes.c}
+  - {name: equipment_stat_changes, source: src/lib/menu/equipment_stat_changes.c}
   - {name: equipment_stat_deltas, source: src/lib/menu/equipment_stat_deltas.c}
   - {name: event_resources, source: src/lib/event/event_resources.c}
   - {name: event_unit_lookup, source: src/lib/event/event_unit_lookup.c}
@@ -840,7 +840,7 @@ functions:
   - {addr: 0x801231cc, size: 188, name: equipment_calculate_swap_stat_delta, hash: 9c961874f326897c, unit: equipment_stat_deltas}
   - {addr: 0x80123288, size: 424, name: equipment_subtract_scaled_stat_preview, hash: 7621477fabb93d49, unit: equipment_stat_deltas}
   - {addr: 0x80123430, size: 216, name: equipment_calculate_total_swap_delta, hash: 8ea97edaf0f06225, unit: equipment_stat_deltas}
-  - {addr: 0x80123508, size: 288, name: equipment_sum_stat_details, hash: d8d37dd10e923a90, unit: equipment_stat_deltas}
+  - {addr: 0x80123508, size: 288, name: equipment_sum_weapon_and_evade_bonuses, hash: d8d37dd10e923a90, unit: equipment_stat_deltas}
   - {addr: 0x80123628, size: 224, name: formation_has_items, hash: c12a4e942063fca4, unit: equipment_slots}
   - {addr: 0x80123708, size: 36, name: shop_get_item_price, hash: d638a4de767c7e25, unit: equipment_slots}
   - {addr: 0x8012372c, size: 56, name: shop_get_item_half_price, hash: fa0710de572b7403, unit: equipment_slots}

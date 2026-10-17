@@ -152,8 +152,8 @@ s32 equipment_get_preview_mp_bonus_display(s32 unused_row);
 /* Clears the HP and MP preview bonuses and the equipment-detail stats. */
 void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail);
 
-/* Sums the stat bonuses of the five equipped items. */
-void equipment_sum_stat_details(unit_panel_record_t* total, const u16* equipment);
+/* Sums weapon power and equipment evade from five items; other detail fields are unchanged. */
+void equipment_sum_weapon_and_evade_bonuses(unit_panel_record_t* total, const u16* equipment);
 
 /* The stat changes of swapping item_before for item_after in a slot: the HP and MP bonus differences into delta
  * and the equipment-detail differences into output. */

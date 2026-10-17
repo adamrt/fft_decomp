@@ -1,4 +1,4 @@
-/* Learned tests and MP/CT/JP display values. */
+/* Ability-list row callbacks: cached ability type, learned tests and MP/CT/JP display values. */
 
 #include "fft/ability.h"
 #include "fft/ability_list.h"

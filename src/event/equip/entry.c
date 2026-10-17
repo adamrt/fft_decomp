@@ -78,7 +78,7 @@ void equipment_load_selected_unit(void) {
         sizeof(menu_unit_status_identity_t));
     bcopy(&g_equipment_unit_data[g_equipment_unit_selected_index]->move, &g_unit_panel_selected_unit_fields,
         sizeof(g_unit_panel_selected_unit_fields));
-    equipment_sum_stat_details(
+    equipment_sum_weapon_and_evade_bonuses(
         &g_unit_panel_selected_unit_fields, g_equipment_unit_data[g_equipment_unit_selected_index]->equipment);
     equipment_copy_unit_to_comparison(g_equipment_unit_selected_index, 1);
     equipment_reset_dirty_flags();

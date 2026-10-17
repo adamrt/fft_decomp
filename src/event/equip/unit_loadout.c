@@ -255,7 +255,7 @@ void equipment_commit_loadout(void) {
     stats->hp = hp;
     max = stats->max_mp;
     stats->mp = mp > max ? max : mp;
-    equipment_sum_stat_details(&bonuses, g_equipment_unit_data[0]->equipment);
+    equipment_sum_weapon_and_evade_bonuses(&bonuses, g_equipment_unit_data[0]->equipment);
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = bonuses.state.right_weapon_power;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;

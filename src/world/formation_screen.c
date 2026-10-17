@@ -797,7 +797,7 @@ void formation_recalculate_selected_stats(void) {
     bcopy(&record.status, &g_unit_panel_selected_unit_stat_summary, sizeof(unit_panel_summary_t));
     bcopy(&record.identity, &g_formation_selected_unit_identity, sizeof(menu_unit_status_identity_t));
     bcopy(&record.move, &g_formation_selected_unit_stat_detail, 0x40);
-    equipment_sum_stat_details(
+    equipment_sum_weapon_and_evade_bonuses(
         &g_formation_selected_unit_stat_detail, g_formation_unit_pointers[g_unit_selected_index]->equipment);
     formation_copy_unit_to_temp(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
     formation_redraw_panels();
