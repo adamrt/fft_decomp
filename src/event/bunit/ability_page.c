@@ -155,8 +155,7 @@ s32 ability_list_update(void) {
             g_ability_list_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(10);
     }
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(g_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x2D;

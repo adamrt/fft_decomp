@@ -168,8 +168,7 @@ void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override) {
     oriented_quad_t* secondary;
     s32 secondary_x;
 
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_equipment_slot_marker_window, EQUIPMENT_SLOT_MARKER_WINDOW_STATE, override);
+    menu_run_script_with_palette_mode(g_equipment_slot_marker_window, EQUIPMENT_SLOT_MARKER_WINDOW_STATE, override);
     marker = &g_equipment_slot_marker_rects[slot];
     marker->position.x = x;
     marker->position.y = width - (slot == 0);

@@ -213,7 +213,7 @@ s32 formation_ability_learn_list(void) {
     if (g_menu_input_lock_mode != 0 || running != 0) {
         mode = 1;
     }
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_ability_list_script, input, mode);
+    menu_run_script_with_palette_mode(g_formation_ability_list_script, input, mode);
     rect.x = 0x26;
     rect.y = 0x2d;
     rect.w = 0x50;
@@ -338,7 +338,7 @@ static s32 formation_ability_view_list(void) {
         menu_set_window_scale_step(10);
     }
     menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_formation_ability_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+        g_formation_ability_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     rect.x = 0x26;
     rect.y = 0x2d;
     rect.w = 0x50;

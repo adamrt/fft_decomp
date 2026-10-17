@@ -224,7 +224,7 @@ static s32 equipment_run_equip_mode(void) {
                 g_unit_panel_unit_status_panel_params.redraw_request = 1;
             }
         }
-        menu_script_run((menu_instruction_t*)g_equipment_item_menu_script, g_menu_input_primary_repeat);
+        menu_script_run(g_equipment_item_menu_script, g_menu_input_primary_repeat);
     }
     if (g_equipment_item_list_refresh != 0) {
         g_equipment_panel_params.style = 0;

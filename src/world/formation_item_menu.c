@@ -279,7 +279,7 @@ static s32 formation_item_equip_menu(void) {
             }
             g_unit_panel_status_display_thread_params.redraw_request = 1;
         }
-        menu_script_run((menu_instruction_t*)g_formation_item_menu_script, g_menu_input_primary_repeat);
+        menu_script_run(g_formation_item_menu_script, g_menu_input_primary_repeat);
     }
 
     if (g_formation_item_list_refresh != 0) {

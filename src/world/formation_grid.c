@@ -453,7 +453,7 @@ s32 formation_update_grid(s16 background_y, s16 toggle_banner, s16 allow_browse,
     s16 mode;
     u8 rgb_value;
     menu_sprite_cell_t* cells;
-    menu_instruction_t* window;
+    u8* window;
     rgb24_t* color;
     formation_unit_t* unit;
 
@@ -521,11 +521,11 @@ s32 formation_update_grid(s16 background_y, s16 toggle_banner, s16 allow_browse,
         && g_formation_selection_cursor_ready != 0 && g_formation_current_menu != FORMATION_MENU_DISMISS_UNIT) {
         value = 0xf;
         if (g_formation_unit_banner_at_bottom != 0) {
-            window = (menu_instruction_t*)g_formation_stat_bar_window_top;
+            window = g_formation_stat_bar_window_top;
             cells = g_formation_label_tiles;
         } else {
             value = 0xdb;
-            window = (menu_instruction_t*)g_formation_stat_bar_window_bottom;
+            window = g_formation_stat_bar_window_bottom;
             cells = g_formation_label_tiles_bottom;
         }
         row = 0;

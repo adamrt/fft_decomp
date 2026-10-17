@@ -339,7 +339,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     rgb24_t saved_color;
     s32 row;
     s32 col;
-    menu_instruction_t* menu;
+    u8* menu;
     menu_sprite_cell_t* quads;
     s16 y;
     s32 unit;
@@ -446,11 +446,11 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
         && show_stat_panel != 0 && g_unit_list_status_banner_enabled != 0 && g_unit_list_browse_enabled == 0) {
         top = 0xF;
         if (g_unit_list_status_banner_at_bottom != 0) {
-            menu = (menu_instruction_t*)g_unit_list_grid_stat_bar_script_top;
+            menu = g_unit_list_grid_stat_bar_script_top;
             quads = g_unit_list_grid_label_tiles;
         } else {
             top = 0xDB;
-            menu = (menu_instruction_t*)g_unit_list_grid_stat_bar_script_bottom;
+            menu = g_unit_list_grid_stat_bar_script_bottom;
             quads = g_unit_list_grid_label_tiles_bottom;
         }
         unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,

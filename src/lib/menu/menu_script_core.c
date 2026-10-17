@@ -26,7 +26,9 @@ menu_callback_t g_menu_row_callbacks[16] = { 0 };
  * `flags` as the stream's input, then dispatch each command through g_menu_opcode_handlers until
  * the program's end opcode (MENU_SCRIPT_END: 0x1C in BUNIT and WORLD, 0x19 in
  * EQUIP). */
-void menu_script_run(menu_instruction_t* instruction, s32 flags) {
+void menu_script_run(void* script, s32 flags) {
+    menu_instruction_t* instruction = script;
+
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;
     g_menu_script_input = flags;
@@ -40,7 +42,7 @@ void menu_script_run(menu_instruction_t* instruction, s32 flags) {
 
 /* Run a menu display script with palette mode `mode` (nonzero dims it); a dimmed script also gets
  * no input. */
-void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 input, s32 mode) {
+void menu_run_script_with_palette_mode(void* script, s32 input, s32 mode) {
     s32 value = input;
 
     if (mode != 0) {

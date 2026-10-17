@@ -95,8 +95,8 @@ s32 formation_ability_learn_job_list(void) {
         }
         message_box_show_with_sound(0xC007, SOUND_SFX_ERROR_MESSAGE);
     }
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_ability_learn_job_list_script,
-        g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(
+        g_formation_ability_learn_job_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }
 

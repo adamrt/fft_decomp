@@ -388,7 +388,7 @@ static void shop_draw_gil(void) {
     callback_slot = g_menu_row_callbacks;
     previous_callback = callback_slot->value;
     callback_slot->value = shop_adjust_gil;
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_shop_war_funds_script, 0, 0);
+    menu_run_script_with_palette_mode(g_shop_war_funds_script, 0, 0);
     callback_slot->value = previous_callback;
 }
 
@@ -535,8 +535,7 @@ static void shop_buy_list_step(void) {
     }
     disabled = 0;
     shop_switch_item_tab(g_menu_input_secondary_repeat);
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_shop_buy_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(g_shop_buy_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     if (screen_is_busy() != 0 || g_menu_list_entry_count == 0 || g_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
@@ -585,7 +584,7 @@ static void shop_buy_confirm_step(void) {
         g_shop_buy_message_wait = 1;
     }
     shop_switch_item_tab(0);
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_shop_buy_menu_script, 0, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(g_shop_buy_menu_script, 0, g_menu_input_lock_mode);
     menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, SOUND_SFX_CONFIRM);
     shop_draw_gil();
 }
@@ -818,7 +817,7 @@ static void shop_sell_list_step(void) {
     }
     shop_switch_item_tab(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_shop_sell_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+        g_shop_sell_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     shop_draw_gil();
 }
 
@@ -861,8 +860,7 @@ static void shop_sell_confirm_step(void) {
         g_shop_sell_message_wait = 1;
     }
     shop_switch_item_tab(0);
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_shop_sell_list_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
+    menu_run_script_with_palette_mode(g_shop_sell_list_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     shop_draw_gil();
 }
 
@@ -1135,7 +1133,7 @@ static void shop_fitting_equip_step(void) {
         }
 
         menu_run_script_with_palette_mode(
-            (menu_instruction_t*)g_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, screen_is_busy());
+            g_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, screen_is_busy());
         g_help_message_text_id = g_menu_list_entry_count != 0
             ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
@@ -1197,7 +1195,7 @@ static void shop_fitting_draw_cost(void) {
     g_menu_row_callbacks[1].value = shop_fitting_add_cost;
     g_menu_row_callbacks[2].value = shop_fitting_get_gil_left;
     menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_shop_fitting_cost_menu_script, g_menu_input_primary_repeat, shop_is_menu_busy(0));
+        g_shop_fitting_cost_menu_script, g_menu_input_primary_repeat, shop_is_menu_busy(0));
 }
 
 /* Fitting-room counterpart of formation_item_remove_menu: takes one equipment
@@ -1916,8 +1914,7 @@ static void fur_shop_sell_list_step(void) {
         }
     }
     shop_switch_item_tab(g_menu_input_newly_pressed);
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_shop_sell_confirm_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(g_shop_sell_confirm_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     shop_draw_gil();
 }
 
@@ -1961,8 +1958,7 @@ static void fur_shop_sell_confirm_step(void) {
         g_fur_shop_sale_message_wait = 1;
     }
     shop_switch_item_tab(0);
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_shop_sell_confirm_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
+    menu_run_script_with_palette_mode(g_shop_sell_confirm_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     shop_draw_gil();
 }
 
@@ -2086,7 +2082,7 @@ static void fur_shop_buy_list_step(void) {
     disabled = 0;
     shop_switch_item_tab(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_fur_shop_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+        g_fur_shop_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     if (screen_is_busy() != 0 || g_menu_list_entry_count == 0 || g_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
@@ -2135,8 +2131,7 @@ static void fur_shop_buy_confirm_step(void) {
         g_fur_shop_purchase_message_wait = 1;
     }
     shop_switch_item_tab(0);
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_fur_shop_purchase_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
+    menu_run_script_with_palette_mode(g_fur_shop_purchase_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, SOUND_SFX_CONFIRM);
     shop_draw_gil();
 }
@@ -2558,7 +2553,7 @@ static void soldier_office_draw_fee(void) {
     callback_slot = g_menu_row_callbacks;
     previous_callback = callback_slot->value;
     callback_slot->value = soldier_office_get_fee;
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_soldier_office_fee_script, 0, 0);
+    menu_run_script_with_palette_mode(g_soldier_office_fee_script, 0, 0);
     callback_slot->value = previous_callback;
 }
 
@@ -2569,7 +2564,6 @@ static void soldier_office_draw_unit_count(void) {
     previous_callback = g_menu_row_callbacks[0].value;
     g_menu_row_callbacks[0].value = 0;
     g_soldier_office_unit_count_script.unit_count.value = g_soldier_office_unit_count;
-    /* The serialized script prefix shares the bytecode interpreter's instruction view. */
-    menu_run_script_with_palette_mode((menu_instruction_t*)&g_soldier_office_unit_count_script, 0, 0);
+    menu_run_script_with_palette_mode(&g_soldier_office_unit_count_script, 0, 0);
     g_menu_row_callbacks[0].value = previous_callback;
 }

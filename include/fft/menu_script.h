@@ -267,9 +267,10 @@ extern menu_opcode_handler_t g_menu_opcode_handlers[];
 /* Input the stream's instructions see; a dimmed palette or a zooming window withholds it. */
 extern u32 g_menu_script_input;
 
-/* JOBSTTS builds its own body. */
-void menu_script_run(menu_instruction_t* instruction, s32 flags);
-void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
+/* Scripts contain variable-length encoded commands; each runner creates its instruction cursor.
+ * JOBSTTS builds its own body. */
+void menu_script_run(void* script, s32 flags);
+void menu_run_script_with_palette_mode(void* script, s32 flags, s32 event_mode);
 menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
 static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);

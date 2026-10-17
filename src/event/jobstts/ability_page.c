@@ -136,7 +136,7 @@ s32 ability_list_update(void) {
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
     menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+        g_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x27;

@@ -120,8 +120,7 @@ s32 job_list_run(void) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;
     }
-    menu_run_script_with_palette_mode(
-        (menu_instruction_t*)g_job_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(g_job_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }
 

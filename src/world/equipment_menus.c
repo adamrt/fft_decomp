@@ -103,7 +103,7 @@ s32 equipment_update_menu(void) {
     if (menu_input_get_lock_mode(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
         busy = 1;
     }
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_item_list_window_script, input, busy);
+    menu_run_script_with_palette_mode(g_formation_item_list_window_script, input, busy);
     screen_draw_item_tabs(0, g_menu_selected_slot, busy);
     if (g_menu_list_entry_count != 0) {
         if (g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_THROWABLE_FIRST) {
@@ -111,7 +111,7 @@ s32 equipment_update_menu(void) {
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_ACCESSORY_FIRST) {
-            menu_run_script_with_palette_mode((menu_instruction_t*)g_formation_item_hp_mp_bonus_window_script, 0, 0);
+            menu_run_script_with_palette_mode(g_formation_item_hp_mp_bonus_window_script, 0, 0);
         }
         item_draw_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }

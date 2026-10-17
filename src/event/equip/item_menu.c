@@ -84,7 +84,7 @@ s32 equipment_update_menu(void) {
     if (g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
         override = 1;
     }
-    menu_run_script_with_palette_mode((menu_instruction_t*)g_equipment_render_commands, input, override);
+    menu_run_script_with_palette_mode(g_equipment_render_commands, input, override);
     equipment_draw_slot_marker(0, g_menu_selected_slot, g_menu_input_lock_mode);
     /* Details of the highlighted item: hand icons for a weapon, the HP/MP bonus for armor
      * and headgear, and its status list. */
@@ -95,7 +95,7 @@ s32 equipment_update_menu(void) {
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
-            menu_run_script_with_palette_mode((menu_instruction_t*)g_equipment_armor_bonus_render_commands, 0, 0);
+            menu_run_script_with_palette_mode(g_equipment_armor_bonus_render_commands, 0, 0);
         }
         item_draw_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
