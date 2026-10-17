@@ -89,8 +89,8 @@ functions:
   - {addr: 0x801c7288, size: 724, name: deploy_prepare_valid_tiles, hash: 3a3158a171e2a4d4, unit: deploy_screen}
   - {addr: 0x801c755c, size: 452, name: deploy_init_cursors, hash: af62587e4847a1d1, unit: deploy_screen}
   - {addr: 0x801c7720, size: 548, name: deploy_update_cursors, hash: a6767c2bfaa72829, unit: deploy_screen}
-  - {addr: 0x801c7944, size: 196, name: deploy_init_portrait_quads, hash: 6daf1a8edc856725, unit: deploy_screen}
-  - {addr: 0x801c7a08, size: 484, name: deploy_build_portrait_quads, hash: 708d00bef4ce213d, unit: deploy_screen}
+  - {addr: 0x801c7944, size: 196, name: deploy_init_unit_quads, hash: 6daf1a8edc856725, unit: deploy_screen}
+  - {addr: 0x801c7a08, size: 484, name: deploy_build_unit_quads, hash: 708d00bef4ce213d, unit: deploy_screen}
   - {addr: 0x801c7bec, size: 1016, name: deploy_text_graphics_thread, hash: 9c795189d3d0df1f, unit: deploy_screen}
   - {addr: 0x801c7fe4, size: 32, name: formation_build_sprites, hash: e919c44d2f3f3208, unit: deploy_screen}
   - {addr: 0x801c8004, size: 32, name: portrait_load_party, hash: bf7288775e5e6cac, unit: deploy_screen}
@@ -182,9 +182,9 @@ data:
   - {addr: 0x801cd080, name: g_deploy_tiles_only_mode}
   - {addr: 0x801cd08c, name: g_deploy_cursor_clut_rect}
   - {addr: 0x801cd094, name: g_deploy_arrow_clut_rect}
-  - {addr: 0x801cd09c, name: g_deploy_portrait_marker_clut_source_rect}
+  - {addr: 0x801cd09c, name: g_deploy_unit_marker_clut_source_rect}
   - {addr: 0x801cd0a4, name: g_deploy_cursor_texture_rect}
-  - {addr: 0x801cd0ac, name: g_deploy_portrait_marker_clut_rect}
+  - {addr: 0x801cd0ac, name: g_deploy_unit_marker_clut_rect}
   - {addr: 0x801cd0b4, name: g_zodiac_texture_page_origin}
   - {addr: 0x801cd0c4, name: g_deploy_tile_clut_rect}
   - {addr: 0x801cd0cc, name: g_deploy_semitrans_tile_clut_rect}
@@ -214,9 +214,8 @@ data:
   - {addr: 0x801cf819, name: g_zodiac_sprite_count}
   - {addr: 0x801cf938, name: g_scenario_table}
   - {addr: 0x801d3938, name: g_scenario_event_condition_blocks}
-  - {addr: 0x801d5af4, name: g_deploy_vram_copy_rect}
-  - {addr: 0x801d5afc, name: g_deploy_vram_copy_x}
-  - {addr: 0x801d5afe, name: g_deploy_vram_copy_y}
+  - {addr: 0x801d5af4, name: g_deploy_sprite_copy_source_rect}
+  - {addr: 0x801d5afc, name: g_deploy_sprite_copy_destination}
   - {addr: 0x801d5b04, name: g_deploy_second_pass}
   - {addr: 0x801d5b0c, name: g_deploy_button_hint_cells}
   - {addr: 0x801d5b3c, name: g_deploy_text_graphic_params}
@@ -266,7 +265,7 @@ data:
   - {addr: 0x801dcadc, name: g_deploy_cursor_palette_cycle}
   - {addr: 0x801dcb1c, name: g_deploy_cursor_clut}
   - {addr: 0x801dcb3c, name: g_deploy_tile_clut_buffer}
-  - {addr: 0x801dcb9c, name: g_deploy_portrait_marker_clut_buffer}
+  - {addr: 0x801dcb9c, name: g_deploy_unit_marker_clut_buffer}
   - {addr: 0x801dcbc4, name: g_deploy_confirm_result}
   - {addr: 0x801dcbc8, name: g_deploy_valid_tiles}
   - {addr: 0x801dcbe4, name: g_deploy_roster_id_by_tile}

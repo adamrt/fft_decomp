@@ -96,7 +96,7 @@ typedef char deploy_arrow_gfx_size_must_be_80[sizeof(deploy_arrow_gfx_t) == 80 ?
  * g_deploy_cursor_row/column[n]. */
 typedef struct deploy_render_buffer {
     SPRT tiles[5][5];                /* 0x000 */
-    POLY_FT4 portraits[10];          /* 0x1f4 */
+    POLY_FT4 unit_quads[10];         /* 0x1f4 */
     POLY_FT4 status[30];             /* 0x384 */
     deploy_arrow_gfx_t screen_arrow; /* 0x834 */
     POLY_FT4 button_hints[4];        /* 0x884 */
@@ -123,9 +123,8 @@ extern s32 g_deploy_grid_slide_y;
 extern rgba5551_t g_deploy_tile_clut_buffer[48];
 extern const palette_t g_deploy_tile_clut_data[3];
 extern RECT g_deploy_tile_clut_rect;
-extern RECT g_deploy_vram_copy_rect;
-extern s16 g_deploy_vram_copy_x;
-extern s16 g_deploy_vram_copy_y;
+extern RECT g_deploy_sprite_copy_source_rect;
+extern point16_t g_deploy_sprite_copy_destination;
 extern image_layout_t g_deploy_text_graphic_params[9];
 extern POLY_FT4 g_deploy_text_polys[2][9];
 extern s32 g_deploy_text_reveal_heights[9];
@@ -133,9 +132,9 @@ extern s32 g_deploy_text_reveal_steps[9];
 extern RECT g_deploy_text_screen_origin;
 extern zodiac_draw_context_t g_deploy_zodiac_draw_context;
 extern point16_t g_deploy_texture_origin;
-extern palette_t g_deploy_portrait_marker_clut_buffer;
-extern RECT g_deploy_portrait_marker_clut_source_rect;
-extern RECT g_deploy_portrait_marker_clut_rect;
+extern palette_t g_deploy_unit_marker_clut_buffer;
+extern RECT g_deploy_unit_marker_clut_source_rect;
+extern RECT g_deploy_unit_marker_clut_rect;
 extern RECT g_deploy_semitrans_tile_clut_rect;
 
 /* threads and panels */
@@ -170,7 +169,7 @@ enum {
     DEPLOY_NOTICE_RAMZA_REQUIRED = 0x900d
 };
 
-static void deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
+static void deploy_build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
 static void deploy_handle_roster_input(void);
 static void deploy_init_cursors(void);
 static void deploy_prepare_valid_tiles(SPRT* sprites);
@@ -180,7 +179,7 @@ static void deploy_previous_roster_unit_thread(void);
 static void deploy_select_first_deployable_unit(void);
 static void deploy_update_cursors(s32 frame, deploy_render_buffer_t* buffer);
 static void deploy_text_graphics_thread(void);
-static void deploy_init_portrait_quads(void);
+static void deploy_init_unit_quads(void);
 
 /* Return 1 when the roster unit stands on one of the current squad's 5x5 deployment tiles.
  * ATTACK also links this body as deploy_is_roster_unit_deployed before the shared thread wait helper. */
@@ -293,7 +292,8 @@ void attack_deployment_entrypoint(void) {
     u8 cursor_unit;
 
     g_menu_thread_menu_data = g_deploy_menu_entries;
-    MoveImage(&g_deploy_vram_copy_rect, g_deploy_vram_copy_x, g_deploy_vram_copy_y);
+    MoveImage(
+        &g_deploy_sprite_copy_source_rect, g_deploy_sprite_copy_destination.x, g_deploy_sprite_copy_destination.y);
     LoadImage(&g_deploy_arrow_clut_rect, g_deploy_arrow_clut_data);
     thread_yield();
 
@@ -1381,7 +1381,7 @@ void deploy_enter_tiles_view(void) {
 }
 
 /* Deployment-screen render thread: builds the double-buffered primitive block,
- * then each frame draws the arrow, portraits, cursors and tile grid until the
+ * then each frame draws the arrow, unit sprites, cursors and tile grid until the
  * thread's third parameter is set.
  *
  * Both arms of the arrow test end with the same tile call and screen-offset
@@ -1399,12 +1399,12 @@ static void deploy_render_thread(void) {
 
     deploy_init_cursors();
     deploy_build_banner_arrow();
-    deploy_init_portrait_quads();
+    deploy_init_unit_quads();
     menu_init_sprite_array(g_deploy_render_buffers[0].tiles[0], 0x19, 0x7ebc);
 
     LoadImage(&g_deploy_tile_clut_rect, (u32*)g_deploy_tile_clut_data);
     StoreImage(&g_deploy_tile_clut_rect, (u32*)g_deploy_tile_clut_buffer);
-    StoreImage(&g_deploy_portrait_marker_clut_source_rect, (u32*)g_deploy_portrait_marker_clut_buffer);
+    StoreImage(&g_deploy_unit_marker_clut_source_rect, (u32*)g_deploy_unit_marker_clut_buffer);
     /* Let the readbacks finish, then upload semi-transparent copies of both CLUTs:
      * every color but entry 0 gets the STP bit, and entry 0 becomes transparent black. */
     thread_wait_frames(1);
@@ -1415,11 +1415,11 @@ static void deploy_render_thread(void) {
         = g_deploy_tile_clut_buffer[0].semi_transparent = 0;
     LoadImage(&g_deploy_semitrans_tile_clut_rect, (u32*)g_deploy_tile_clut_buffer);
     for (i = 1; i < 16; i++) {
-        g_deploy_portrait_marker_clut_buffer[i].semi_transparent = 1;
+        g_deploy_unit_marker_clut_buffer[i].semi_transparent = 1;
     }
-    g_deploy_portrait_marker_clut_buffer[0].red = g_deploy_portrait_marker_clut_buffer[0].green
-        = g_deploy_portrait_marker_clut_buffer[0].blue = g_deploy_portrait_marker_clut_buffer[0].semi_transparent = 0;
-    LoadImage(&g_deploy_portrait_marker_clut_rect, (u32*)g_deploy_portrait_marker_clut_buffer);
+    g_deploy_unit_marker_clut_buffer[0].red = g_deploy_unit_marker_clut_buffer[0].green
+        = g_deploy_unit_marker_clut_buffer[0].blue = g_deploy_unit_marker_clut_buffer[0].semi_transparent = 0;
+    LoadImage(&g_deploy_unit_marker_clut_rect, (u32*)g_deploy_unit_marker_clut_buffer);
 
     SetDrawMode(&g_deploy_render_buffers[0].draw_mode_9c4, 0, 0, GetTPage(0, 1, 0x100, 0), &g_menu_draw_area_template);
     SetDrawMode(&g_deploy_render_buffers[0].draw_mode_9d0, 0, 0, GetTPage(0, 1, 0x100, 0), &g_menu_draw_area_template);
@@ -1512,15 +1512,15 @@ static void deploy_render_thread(void) {
         g_deploy_cursor_0_submitted = 1;
         gfx_draw_or_append_gpu_primitive(g_deploy_cursor_0_poly);
 
-        /* Each placed unit takes two quads: its portrait and the marker under it. */
+        /* Each placed unit takes two quads: its sprite and the marker under it. */
         for (y = 0; y < 5; y++) {
             for (x = 0; x < 5; x++) {
                 if (g_deploy_tiles_only_mode == 0 && g_deploy_roster_id_by_tile[y][x] != DEPLOY_ROSTER_ID_NONE) {
-                    deploy_build_portrait_quads(
-                        x, y, g_deploy_roster_id_by_tile[y][x], &g_deploy_render_buffers[frame & 1].portraits[count]);
-                    gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].portraits[count]);
+                    deploy_build_unit_quads(
+                        x, y, g_deploy_roster_id_by_tile[y][x], &g_deploy_render_buffers[frame & 1].unit_quads[count]);
+                    gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].unit_quads[count]);
                     count++;
-                    gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].portraits[count]);
+                    gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].unit_quads[count]);
                     count++;
                 }
             }
@@ -1742,22 +1742,22 @@ static void deploy_update_cursors(s32 frame, deploy_render_buffer_t* buffer) {
     }
 }
 
-/* Initialize the five portrait/marker pairs: an opaque quad on the texture
+/* Initialize the five unit-sprite/marker pairs: an opaque quad on the texture
  * page at (0x140, 0) and a semi-transparent one on the page at
  * (0x3c0, 0x100). */
-static void deploy_init_portrait_quads(void) {
+static void deploy_init_unit_quads(void) {
     s32 i;
 
     for (i = 0; i < 10; i += 2) {
-        menu_init_default_poly_ft4(&g_deploy_render_buffers[0].portraits[i]);
-        menu_init_default_poly_ft4(&g_deploy_render_buffers[0].portraits[i + 1]);
-        g_deploy_render_buffers[0].portraits[i].tpage = GetTPage(0, 0, 0x140, 0);
-        g_deploy_render_buffers[0].portraits[i + 1].tpage = GetTPage(0, 2, 0x3c0, 0x100);
-        SetSemiTrans(&g_deploy_render_buffers[0].portraits[i + 1], 1);
+        menu_init_default_poly_ft4(&g_deploy_render_buffers[0].unit_quads[i]);
+        menu_init_default_poly_ft4(&g_deploy_render_buffers[0].unit_quads[i + 1]);
+        g_deploy_render_buffers[0].unit_quads[i].tpage = GetTPage(0, 0, 0x140, 0);
+        g_deploy_render_buffers[0].unit_quads[i + 1].tpage = GetTPage(0, 2, 0x3c0, 0x100);
+        SetSemiTrans(&g_deploy_render_buffers[0].unit_quads[i + 1], 1);
     }
 }
 
-/* Build the two POLY_FT4 quads for one deployment roster portrait.
+/* Build the two POLY_FT4 quads for one deployed unit sprite.
  *
  * The first quad is a 48x48 cell of the formation sprite sheet (five cells per
  * row, CLUT selected by index % 4 and index / 4) placed over the isometric tile
@@ -1767,7 +1767,7 @@ static void deploy_init_portrait_quads(void) {
  * second quad squeezes the 20x20 texel cell at (0x90, 0x40) into a 20x10
  * marker under it. Each quad is written in libgpu setXYWH/setUVWH field order,
  * which the target's store order and constant offsets follow. */
-static void deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
+static void deploy_build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
     s32 u = (index % 5) * 0x30;
     s32 v = (index / 5) * 0x30;
     s32 x;
