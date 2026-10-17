@@ -89,9 +89,9 @@ extern RECT g_war_trophy_clear_rect;
 extern RECT g_war_trophy_screen_clip_rect_0;
 extern RECT g_war_trophy_screen_clip_rect_1;
 extern s32 g_war_trophy_money_digit_targets[6];
-extern u32 g_war_trophy_money_digit_positions[6];
-extern u32 g_war_trophy_money_digit_speeds[6];
-extern u32 g_war_trophy_money_digit_initial_speeds[6];
+extern u32 g_war_trophy_money_digit_positions_q8[6];
+extern u32 g_war_trophy_money_digit_speeds_q8[6];
+extern u32 g_war_trophy_money_digit_initial_speeds_q8[6];
 extern s32 g_war_trophy_money_digit_settling[6];
 extern POLY_FT4 g_war_trophy_money_digit_polys[2][6];
 extern POLY_FT4 g_war_trophy_money_next_digit_polys[2][6];
@@ -1340,9 +1340,10 @@ static void war_trophy_list_thread(void) {
 /*
  * Post-battle gil ticker: adds the war-result money to the war funds (EVENT_SCRIPT_VAR_WAR_FUNDS),
  * starts the display-condition thread, splits the amount into up to six
- * digits and rolls each digit's odometer strip (13-pixel cells, counter << 13
- * fixed point, slowing by 0x44 per step once the target digit comes round)
- * before holding for 60 frames and fading out.
+ * digits and rolls their odometer strips through 32-pixel vertical slots.
+ * Positions and speeds are q8 pixels; each 13-pixel-wide digit slows by 0x44
+ * per step once its target comes round, before the display holds for 60 frames
+ * and fades out. The initial-speed table leaves the sixth strip stationary.
  *
  * The polygon pointers are formed as `(s32)array + offset` byte offsets, which
  * keeps the target's separate base and offset; `&g_war_trophy_money_digit_polys[buffer][j]` is reduced
@@ -1379,7 +1380,7 @@ static void war_trophy_run_gil_ticker(void) {
     /* `i = 0` here (not before the script calls) lets sched1 keep
      * `li a0,0x2c` above the money load. */
     for (i = 0; i < 6; i++) {
-        g_war_trophy_money_digit_speeds[i] = g_war_trophy_money_digit_initial_speeds[i];
+        g_war_trophy_money_digit_speeds_q8[i] = g_war_trophy_money_digit_initial_speeds_q8[i];
         g_war_trophy_money_digit_settling[i] = 0;
     }
 
@@ -1396,7 +1397,7 @@ static void war_trophy_run_gil_ticker(void) {
     for (i = 0; i < digits; i++) {
         g_war_trophy_money_digit_targets[i] = j % 10;
         j /= 10;
-        g_war_trophy_money_digit_positions[i] = g_war_trophy_money_digit_targets[i] << 13;
+        g_war_trophy_money_digit_positions_q8[i] = g_war_trophy_money_digit_targets[i] << 13;
     }
 
     g_sound_pending_sfx_id = SOUND_SFX_GIL_TICKER;
@@ -1477,18 +1478,18 @@ static void war_trophy_run_gil_ticker(void) {
                 POLY_FT4* pd;
                 POLY_FT4* pn;
 
-                g_war_trophy_money_digit_positions[j] += g_war_trophy_money_digit_speeds[j];
+                g_war_trophy_money_digit_positions_q8[j] += g_war_trophy_money_digit_speeds_q8[j];
                 off = j * 0x28 + buffer * 0xf0;
                 x = g_war_trophy_money_digit_polys[buffer][j].x0;
                 pd = (POLY_FT4*)((s32)g_war_trophy_money_digit_polys + off);
-                setXY4(pd, x, ((g_war_trophy_money_digit_positions[j] >> 8) & 0x1f) + 0x80, x + 13,
-                    ((g_war_trophy_money_digit_positions[j] >> 8) & 0x1f) + 0x80, x,
-                    ((g_war_trophy_money_digit_positions[j] >> 8) & 0x1f) + 0x97, x + 13,
-                    ((g_war_trophy_money_digit_positions[j] >> 8) & 0x1f) + 0x97);
-                setUV4(pd, (g_war_trophy_money_digit_positions[j] >> 13) % 10 * 13, 0x32,
-                    (g_war_trophy_money_digit_positions[j] >> 13) % 10 * 13 + 13, 0x32,
-                    (g_war_trophy_money_digit_positions[j] >> 13) % 10 * 13, 0x49,
-                    (g_war_trophy_money_digit_positions[j] >> 13) % 10 * 13 + 13, 0x49);
+                setXY4(pd, x, ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x80, x + 13,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x80, x,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x97, x + 13,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x97);
+                setUV4(pd, (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 0x32,
+                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 0x32,
+                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 0x49,
+                    (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 0x49);
                 x = g_war_trophy_money_next_digit_polys[buffer][j].x0;
                 off = j * 0x28 + buffer * 0xf0;
                 pn = (POLY_FT4*)((s32)g_war_trophy_money_next_digit_polys + off);
@@ -1496,26 +1497,26 @@ static void war_trophy_run_gil_ticker(void) {
                     g_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x,
                     g_war_trophy_money_digit_polys[buffer][j].y0 - 9, x + 13,
                     g_war_trophy_money_digit_polys[buffer][j].y0 - 9);
-                setUV4(pn, ((g_war_trophy_money_digit_positions[j] >> 13) + 1) % 10 * 13, 0x32,
-                    ((g_war_trophy_money_digit_positions[j] >> 13) + 1) % 10 * 13 + 13, 0x32,
-                    ((g_war_trophy_money_digit_positions[j] >> 13) + 1) % 10 * 13, 0x49,
-                    ((g_war_trophy_money_digit_positions[j] >> 13) + 1) % 10 * 13 + 13, 0x49);
+                setUV4(pn, ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 0x32,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 0x32,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 0x49,
+                    ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 0x49);
                 /* Once its turn comes (higher digits later), a digit slows from six short of its
                  * target and stops on it when its cell is exactly aligned. */
                 if (j * 32 + (digits - 1) * 16 < tick) {
-                    if (((g_war_trophy_money_digit_positions[j] >> 13) + 6) % 10
+                    if (((g_war_trophy_money_digit_positions_q8[j] >> 13) + 6) % 10
                         == g_war_trophy_money_digit_targets[j]) {
                         g_war_trophy_money_digit_settling[j] = 1;
                     }
                     if (g_war_trophy_money_digit_settling[j] == 1) {
-                        if (g_war_trophy_money_digit_speeds[j] > 0x100) {
-                            g_war_trophy_money_digit_speeds[j] -= 0x44;
+                        if (g_war_trophy_money_digit_speeds_q8[j] > 0x100) {
+                            g_war_trophy_money_digit_speeds_q8[j] -= 0x44;
                         } else {
-                            g_war_trophy_money_digit_speeds[j] = 0x100;
-                            if ((g_war_trophy_money_digit_positions[j] >> 13) % 10
+                            g_war_trophy_money_digit_speeds_q8[j] = 0x100;
+                            if ((g_war_trophy_money_digit_positions_q8[j] >> 13) % 10
                                     == g_war_trophy_money_digit_targets[j]
-                                && ((g_war_trophy_money_digit_positions[j] >> 8) & 0x1f) == 0) {
-                                g_war_trophy_money_digit_speeds[j] = 0;
+                                && ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) == 0) {
+                                g_war_trophy_money_digit_speeds_q8[j] = 0;
                                 if (j == digits - 1) {
                                     /* The last digit settled: leave all three loops. */
                                     goto finished;

@@ -2508,9 +2508,9 @@ data:
   - {addr: 0x801d0d64, name: g_war_trophy_money_clip_rect_1}
   - {addr: 0x801d0d6c, name: g_war_trophy_screen_clip_rect_0}
   - {addr: 0x801d0d74, name: g_war_trophy_screen_clip_rect_1}
-  - {addr: 0x801d0d7c, name: g_war_trophy_money_digit_positions}
-  - {addr: 0x801d0d94, name: g_war_trophy_money_digit_speeds}
-  - {addr: 0x801d0dac, name: g_war_trophy_money_digit_initial_speeds}
+  - {addr: 0x801d0d7c, name: g_war_trophy_money_digit_positions_q8}
+  - {addr: 0x801d0d94, name: g_war_trophy_money_digit_speeds_q8}
+  - {addr: 0x801d0dac, name: g_war_trophy_money_digit_initial_speeds_q8}
   - {addr: 0x801d0dc4, name: g_war_trophy_money_digit_targets}
   - {addr: 0x801d0ddc, name: g_war_trophy_money_digit_settling}
   - {addr: 0x801d0df4, name: g_conditions_general_quads}
