@@ -43,10 +43,10 @@ void screen_icon_list_thread(void) {
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-    g_menu_text_state.pen.stride = param->inner_width;
+    g_menu_window_text_pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
 
     /* The sprite records alternate by frame, since the GPU may still be

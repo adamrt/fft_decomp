@@ -577,8 +577,8 @@ void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height) {
 
 /* Set the screen origin used by menu text glyphs. */
 void menu_set_text_origin(s32 x, s32 y) {
-    g_menu_text_state.pen.rect.x = x;
-    g_menu_text_state.pen.rect.y = y;
+    g_menu_window_text_pen.rect.x = x;
+    g_menu_window_text_pen.rect.y = y;
 }
 
 /* Set a draw mode whose texture page is the VRAM area of the given menu texture page

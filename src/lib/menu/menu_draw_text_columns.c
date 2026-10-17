@@ -13,7 +13,7 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     s32 index;
 
     for (row = 0; row < layout->row_count; row++) {
-        g_menu_text_state.pen.stride = entry->inner_width;
+        g_menu_window_text_pen.stride = entry->inner_width;
         for (column = 0; column < 3; column++) {
             index = row + *row_offset;
             if (layout->mode[column] == MENU_TEXT_COLUMN_HIDDEN) {
@@ -28,19 +28,19 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             }
             /* A row drawn in palette 4 (the highlighted row) also gets a background of
              * color index 4 in every pixel nibble. */
-            g_menu_text_state.pen.color = 0;
+            g_menu_window_text_pen.color = 0;
             if (g_menu_text_palette_offset == 4) {
-                g_menu_text_state.pen.color = 0x44444444;
+                g_menu_window_text_pen.color = 0x44444444;
             }
             if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
+                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
             }
             g_menu_text_palette_offset = 0;
-            g_menu_text_state.pen.color = 0;
+            g_menu_window_text_pen.color = 0;
         }
     }
 }

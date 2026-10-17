@@ -296,7 +296,7 @@ void ability_list_scrolling_thread(void) {
                 row_buffer_live = 1;
                 buffer = menu_alloc_memory(window.rect.w * 8);
                 menu_clear_render_buffer(buffer, window.rect.w * 8);
-                g_menu_text_state.pen.stride = window.rect.w;
+                g_menu_window_text_pen.stride = window.rect.w;
 
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;
@@ -304,39 +304,39 @@ void ability_list_scrolling_thread(void) {
                     if (layout->columns.mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                     }
-                    g_menu_text_state.pen.color = 0;
+                    g_menu_window_text_pen.color = 0;
                     if (g_menu_text_palette_offset == 4) {
-                        g_menu_text_state.pen.color = 0x44444444;
+                        g_menu_window_text_pen.color = 0x44444444;
                     }
                     if (layout->columns.mode[column] == MENU_TEXT_COLUMN_TEXT) {
                         menu_display_text_entry(
-                            layout->columns.text_ids[column][index], buffer, &g_menu_text_state.pen);
+                            layout->columns.text_ids[column][index], buffer, &g_menu_window_text_pen);
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
                             && (g_ai_workspace_ptr->ability_list.flags[index] & 1)) {
                             menu_set_text_origin(layout->columns.x[column] + 0x50, 0);
-                            menu_display_text_entry(0x5088, buffer, &g_menu_text_state.pen);
+                            menu_display_text_entry(0x5088, buffer, &g_menu_window_text_pen);
                         }
                     } else if (layout->columns.mode[column] == MENU_TEXT_COLUMN_NUMBER) {
                         menu_display_number_entry(
-                            layout->columns.text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                            layout->columns.text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     } else if (layout->columns.mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
                         if ((column == 2 || (column == 1 && layout->columns.mode[2] == MENU_TEXT_COLUMN_HIDDEN))
                             && layout->columns.text_ids[column][index] >= 0
                             && layout->columns.text_ids[column][index] < 2
                             && (g_ai_workspace_ptr->ability_list.skill_ct[index] == 0xFF
                                 || g_ai_workspace_ptr->ability_list.skill_ct[index] == 0)) {
-                            g_menu_text_state.pen.rect.y += 2;
-                            menu_draw_stacked_glyph_pair(buffer, &g_menu_text_state.pen);
+                            g_menu_window_text_pen.rect.y += 2;
+                            menu_draw_stacked_glyph_pair(buffer, &g_menu_window_text_pen);
                         } else {
                             value = layout->columns.text_ids[column][index];
                             if (value & 0x7FF) {
                                 if ((value & 0x7FF) >= 100) {
                                     g_menu_text_palette_offset = 0;
-                                    g_menu_text_state.pen.rect.x += 3;
-                                    menu_display_text_entry(0x509D, buffer, &g_menu_text_state.pen);
+                                    g_menu_window_text_pen.rect.x += 3;
+                                    menu_display_text_entry(0x509D, buffer, &g_menu_window_text_pen);
                                 } else {
-                                    menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_text_state.pen);
+                                    menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
                                 }
                             }
                         }
@@ -344,7 +344,7 @@ void ability_list_scrolling_thread(void) {
                 }
 
                 g_menu_text_palette_offset = 0;
-                g_menu_text_state.pen.color = 0;
+                g_menu_window_text_pen.color = 0;
                 LoadImage(&image_rect, (u32*)buffer);
 
                 clear.h = 2;

@@ -384,9 +384,9 @@ void unit_view_tile_info_thread(void) {
         }
         if (g_battle_map_selected_tile_data.depth != 0) {
             menu_clear_render_buffer(buffer, 0x100);
-            g_menu_text_state.pen.stride = 0x18;
+            g_menu_window_text_pen.stride = 0x18;
             menu_set_text_origin(0x10, 0);
-            menu_draw_large_number_glyphs(g_battle_map_selected_tile_data.depth, 1, buffer, &g_menu_text_state.pen);
+            menu_draw_large_number_glyphs(g_battle_map_selected_tile_data.depth, 1, buffer, &g_menu_window_text_pen);
             if (g_unit_view_depth_display_suppressed == 0) {
                 LoadImage(&rect, buffer);
                 page->sprites[0].clut = 0x7CBC;
@@ -983,8 +983,8 @@ static void unit_view_stats_panel_thread(
         if (frame == 0) {
             buffer = menu_alloc_buffer(0x700);
             menu_clear_render_buffer(buffer, 0x700);
-            stride = &g_menu_text_state.pen.stride;
-            origin = &g_menu_text_state.pen;
+            stride = &g_menu_window_text_pen.stride;
+            origin = &g_menu_window_text_pen;
             *stride = 0x28;
             menu_draw_numeric_display_entries(buffer, entries, origin, 6);
             LoadImage(&rects[0], (u32*)buffer);
@@ -1196,8 +1196,8 @@ void unit_view_summary_thread(void) {
 
     buffer = menu_alloc_buffer(0x580);
     menu_clear_render_buffer(buffer, 0x580);
-    stride = &g_menu_text_state.pen.stride;
-    origin = &g_menu_text_state.pen;
+    stride = &g_menu_window_text_pen.stride;
+    origin = &g_menu_window_text_pen;
     *stride = 0x58;
     menu_set_text_origin(0, 0);
     menu_display_text_string(buffer, origin, g_unit_panel_billboard_unit_name);
@@ -1471,18 +1471,18 @@ void status_screen_numbers_thread(void) {
     menu_init_scaled_draw_area_packets(&record->draw_areas);
     number_images = menu_alloc_memory(sizeof(*number_images));
     menu_clear_render_buffer(number_images, sizeof(*number_images));
-    g_menu_text_state.pen.stride = 0x14;
+    g_menu_window_text_pen.stride = 0x14;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(
-        number_images->mobility, g_status_screen_numbers_entries, &g_menu_text_state.pen, 3);
-    g_menu_text_state.pen.stride = 0x40;
+        number_images->mobility, g_status_screen_numbers_entries, &g_menu_window_text_pen, 3);
+    g_menu_window_text_pen.stride = 0x40;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(
-        number_images->weapons, &g_status_screen_numbers_entries[3], &g_menu_text_state.pen, 4);
-    g_menu_text_state.pen.stride = 0x64;
+        number_images->weapons, &g_status_screen_numbers_entries[3], &g_menu_window_text_pen, 4);
+    g_menu_window_text_pen.stride = 0x64;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(
-        number_images->combat, &g_status_screen_numbers_entries[7], &g_menu_text_state.pen, 8);
+        number_images->combat, &g_status_screen_numbers_entries[7], &g_menu_window_text_pen, 8);
     LoadImage(&g_status_screen_numbers_text_rect_a, (u32*)number_images->mobility);
     LoadImage(&g_status_screen_numbers_text_rect_b, (u32*)number_images->weapons);
     LoadImage(&g_status_screen_numbers_text_rect_c, (u32*)number_images->combat);
@@ -1656,15 +1656,15 @@ void status_screen_thread(void) {
 
     buffer = menu_alloc_buffer(0xC80);
     menu_clear_render_buffer(buffer, 0xC80);
-    g_menu_text_state.pen.stride = 0x50;
+    g_menu_window_text_pen.stride = 0x50;
     menu_set_text_origin(0, 0);
     for (i = 0; i < 5; i++) {
         value = g_unit_panel_selected_unit_fields.state.equipment[i] + TEXT_ID_ITEM_NAME_BASE;
         if ((u16)g_unit_panel_selected_unit_fields.state.equipment[i] == 0xFFFF) {
-            g_menu_text_state.pen.rect.y += 0x10;
+            g_menu_window_text_pen.rect.y += 0x10;
         } else {
-            menu_display_text_entry(value, buffer, &g_menu_text_state.pen);
-            g_menu_text_state.pen.rect.y += 0x10;
+            menu_display_text_entry(value, buffer, &g_menu_window_text_pen);
+            g_menu_window_text_pen.rect.y += 0x10;
         }
     }
     LoadImage(&g_status_screen_text_rect_a, (u32*)buffer);
@@ -1672,7 +1672,7 @@ void status_screen_thread(void) {
     thread_yield();
 
     menu_clear_render_buffer(buffer, 0xC80);
-    g_menu_text_state.pen.stride = 0x50;
+    g_menu_window_text_pen.stride = 0x50;
     menu_set_text_origin(0, 0);
     for (i = 0; i < 2; i++) {
         value = g_unit_panel_selected_unit_fields.state.ability_ids[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
@@ -1680,19 +1680,19 @@ void status_screen_thread(void) {
             value = g_unit_panel_selected_unit_fields.state.ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
         }
         if ((u16)g_unit_panel_selected_unit_fields.state.ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
-            g_menu_text_state.pen.rect.y += 0x10;
+            g_menu_window_text_pen.rect.y += 0x10;
         } else {
-            menu_display_text_entry(value, buffer, &g_menu_text_state.pen);
-            g_menu_text_state.pen.rect.y += 0x10;
+            menu_display_text_entry(value, buffer, &g_menu_window_text_pen);
+            g_menu_window_text_pen.rect.y += 0x10;
         }
     }
     for (i = 2; i < 5; i++) {
         value = g_unit_panel_selected_unit_fields.state.ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
         if ((u16)g_unit_panel_selected_unit_fields.state.ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
-            g_menu_text_state.pen.rect.y += 0x10;
+            g_menu_window_text_pen.rect.y += 0x10;
         } else {
-            menu_display_text_entry(value, buffer, &g_menu_text_state.pen);
-            g_menu_text_state.pen.rect.y += 0x10;
+            menu_display_text_entry(value, buffer, &g_menu_window_text_pen);
+            g_menu_window_text_pen.rect.y += 0x10;
         }
     }
 

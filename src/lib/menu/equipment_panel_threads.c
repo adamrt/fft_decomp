@@ -118,19 +118,19 @@ void unit_panel_equipment_ability_thread(void) {
         /* Redraw and upload the equipment and ability names on the first frame or on request. */
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(g_unit_panel_text_image_a, 0xc80);
-            g_menu_text_state.pen.stride = 0x50;
+            g_menu_window_text_pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 5; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                     menu_display_text_entry(state->equipment[i] + TEXT_ID_ITEM_NAME_BASE, g_unit_panel_text_image_a,
-                        &g_menu_text_state.pen);
+                        &g_menu_window_text_pen);
                 }
-                g_menu_text_state.pen.rect.y += 0x10;
+                g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(&g_unit_panel_text_upload_rect_a, (u32*)g_unit_panel_text_image_a);
 
             menu_clear_render_buffer(g_unit_panel_text_image_b, 0xc80);
-            g_menu_text_state.pen.stride = 0x50;
+            g_menu_window_text_pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 2; i++) {
                 /* `mode` is reused as the text id: the first two rows name skillsets, or abilities
@@ -140,18 +140,18 @@ void unit_panel_equipment_ability_thread(void) {
                     mode = state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
                 }
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
-                    g_menu_text_state.pen.rect.y += 0x10;
+                    g_menu_window_text_pen.rect.y += 0x10;
                 } else {
-                    menu_display_text_entry(mode, g_unit_panel_text_image_b, &g_menu_text_state.pen);
-                    g_menu_text_state.pen.rect.y += 0x10;
+                    menu_display_text_entry(mode, g_unit_panel_text_image_b, &g_menu_window_text_pen);
+                    g_menu_window_text_pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if (state->ability_ids[i] != -1) {
                     menu_display_text_entry(state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE,
-                        g_unit_panel_text_image_b, &g_menu_text_state.pen);
+                        g_unit_panel_text_image_b, &g_menu_window_text_pen);
                 }
-                g_menu_text_state.pen.rect.y += 0x10;
+                g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(&g_unit_panel_text_upload_rect_b, (u32*)g_unit_panel_text_image_b);
             thread->redraw_request = 0;

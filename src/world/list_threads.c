@@ -117,16 +117,16 @@ void unit_panel_equipment_thread(void) {
 
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
-            g_menu_text_state.pen.stride = 0x50;
+            g_menu_window_text_pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                     color_bits = state->equipment[i] & FORMATION_PALETTE_MASK;
                     g_menu_text_palette_offset = color_bits >> 12;
                     menu_display_text_entry(
-                        (state->equipment[i] & ITEM_ID_MASK) | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_text_state.pen);
+                        (state->equipment[i] & ITEM_ID_MASK) | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_window_text_pen);
                 }
-                g_menu_text_state.pen.rect.y += 0x10;
+                g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(upload, (u32*)text);
             thread->redraw_request = 0;
@@ -289,7 +289,7 @@ void unit_panel_ability_thread(void) {
          * explicit one lengthens i's live range enough to lose it $s1. */
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
-            g_menu_text_state.pen.stride = 0x50;
+            g_menu_window_text_pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             /* Rows 0-1 name skillsets (abilities for a generic monster); rows 2-4 name abilities. */
             for (i = 0; i < 2; i++) {
@@ -298,18 +298,18 @@ void unit_panel_ability_thread(void) {
                     id = state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
                 }
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
-                    g_menu_text_state.pen.rect.y += 0x10;
+                    g_menu_window_text_pen.rect.y += 0x10;
                 } else {
-                    menu_display_text_entry(id, text, &g_menu_text_state.pen);
-                    g_menu_text_state.pen.rect.y += 0x10;
+                    menu_display_text_entry(id, text, &g_menu_window_text_pen);
+                    g_menu_window_text_pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if ((u16)state->ability_ids[i] != MENU_STATUS_PANEL_LABEL_NONE) {
                     menu_display_text_entry(
-                        state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE, text, &g_menu_text_state.pen);
+                        state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE, text, &g_menu_window_text_pen);
                 }
-                g_menu_text_state.pen.rect.y += 0x10;
+                g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(upload, (u32*)text);
             thread->redraw_request = 0;

@@ -128,9 +128,9 @@ void auto_battle_settings_thread(void) {
             }
             for (j = 0; j < 5; j++) {
                 g_menu_text_palette_offset = color[j];
-                g_menu_text_state.pen.stride = param->inner_width;
+                g_menu_window_text_pen.stride = param->inner_width;
                 menu_set_text_origin(8, j * 16 + 9);
-                menu_display_text_entry(j + 0x5009, buffer, &g_menu_text_state.pen);
+                menu_display_text_entry(j + 0x5009, buffer, &g_menu_window_text_pen);
             }
             LoadImage(&rect, (u32*)buffer);
             fresh = 1;
@@ -174,10 +174,10 @@ void menu_run_icon_selection_loop(void) {
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-    g_menu_text_state.pen.stride = param->inner_width;
+    g_menu_window_text_pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
         thread_yield();
@@ -446,12 +446,12 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
     s16 value;
 #else
     /* WORLD's build reaches the stride through a pointer cell. */
-    s32* stride_cell = &g_menu_text_state.pen.stride;
+    s32* stride_cell = &g_menu_window_text_pen.stride;
 #endif
 
     for (row = 0; row < layout->row_count; row++) {
 #ifdef FFT_BATTLE
-        g_menu_text_state.pen.stride = entry->inner_width - 8;
+        g_menu_window_text_pen.stride = entry->inner_width - 8;
 #else
         *stride_cell = entry->inner_width - 8;
 #endif
@@ -471,49 +471,49 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
             }
             /* A row drawn in palette 4 (the highlighted row) also gets a background of
              * color index 4 in every pixel nibble. */
-            g_menu_text_state.pen.color = 0;
+            g_menu_window_text_pen.color = 0;
             if (g_menu_text_palette_offset == 4) {
-                g_menu_text_state.pen.color = 0x44444444;
+                g_menu_window_text_pen.color = 0x44444444;
             }
             if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
+                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
 #ifdef FFT_BATTLE
                 if (g_threads[g_thread_current_id].function_parameter_4 != 0
                     && (g_ai_workspace_ptr->ability_list.flags[index] & 1)) {
                     g_menu_text_palette_offset = layout->text_colors[column][index];
                     /* 32-bit x and y, as above. */
                     menu_set_text_origin(layout->x[column] + 0x50, row * 0x10);
-                    menu_display_text_entry(0x5088, buffer, &g_menu_text_state.pen);
+                    menu_display_text_entry(0x5088, buffer, &g_menu_window_text_pen);
                 }
 #endif
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
 #ifdef FFT_BATTLE
                 if ((column == 2 || (column == 1 && layout->mode[2] == MENU_TEXT_COLUMN_HIDDEN))
                     && layout->text_ids[column][index] >= 0 && layout->text_ids[column][index] < 2
                     && (g_ai_workspace_ptr->ability_list.skill_ct[index] == 0xFF
                         || g_ai_workspace_ptr->ability_list.skill_ct[index] == 0)) {
-                    g_menu_text_state.pen.rect.y += 2;
-                    menu_draw_stacked_glyph_pair(buffer, &g_menu_text_state.pen);
+                    g_menu_window_text_pen.rect.y += 2;
+                    menu_draw_stacked_glyph_pair(buffer, &g_menu_window_text_pen);
                 } else {
                     value = layout->text_ids[column][index];
                     if (value & 0x7FF) {
                         if ((value & 0x7FF) >= 100) {
                             g_menu_text_palette_offset = 0;
-                            g_menu_text_state.pen.rect.x += 3;
-                            menu_display_text_entry(0x509D, buffer, &g_menu_text_state.pen);
+                            g_menu_window_text_pen.rect.x += 3;
+                            menu_display_text_entry(0x509D, buffer, &g_menu_window_text_pen);
                         } else {
-                            menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_text_state.pen);
+                            menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
                         }
                     }
                 }
 #else
-                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
 #endif
             }
             g_menu_text_palette_offset = 0;
-            g_menu_text_state.pen.color = 0;
+            g_menu_window_text_pen.color = 0;
         }
     }
 }

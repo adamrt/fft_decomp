@@ -1177,8 +1177,8 @@ data:
   - {addr: 0x80153274, name: g_text_glyph_first_row}
   - {addr: 0x80153278, name: g_text_glyph_row_limit}
   - {addr: 0x8015327c, name: g_threads}
-  - {addr: 0x80153280, name: g_menu_text_state}
   - {addr: 0x80153280, name: g_script_variables}
+  - {addr: 0x80153284, name: g_menu_window_text_pen}
   - {addr: 0x80153294, name: g_script_opcode_dc_value}
   - {addr: 0x80153298, name: g_sound_pending_sfx_id}
   - {addr: 0x801532a0, name: g_sound_suppressed}
@@ -1960,7 +1960,7 @@ data:
   - {addr: 0x8019a2fc, name: g_unit_was_moving_latch}
   - {addr: 0x8019a328, name: g_event_thread_status_snapshot}
   - {addr: 0x8019a338, name: g_message_typewriter_glyph}
-  - {addr: 0x8019a348, name: g_message_typewriter_state}
+  - {addr: 0x8019a348, name: g_message_typewriter_prefix_word}
   - {addr: 0x8019a35c, name: g_message_typewriter_vram_rect}
   - {addr: 0x8019a364, name: g_message_typewriter_glyph_images}
   - {addr: 0x8019ab44, name: g_message_typewriter_previous_images}

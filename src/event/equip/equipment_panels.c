@@ -107,7 +107,7 @@ void unit_panel_equipment_thread(void) {
 
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
-            g_menu_text_state.pen.stride = 0x50;
+            g_menu_window_text_pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 5; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
@@ -115,9 +115,9 @@ void unit_panel_equipment_thread(void) {
                     color_bits = state->equipment[i] & 0xc000;
                     g_menu_text_palette_offset = color_bits >> 12;
                     item_id = state->equipment[i] & ITEM_ID_MASK;
-                    menu_display_text_entry(item_id | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_text_state.pen);
+                    menu_display_text_entry(item_id | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_window_text_pen);
                 }
-                g_menu_text_state.pen.rect.y += 0x10;
+                g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(upload, (u32*)text);
             thread->redraw_request = 0;
@@ -277,7 +277,7 @@ void unit_panel_ability_thread(void) {
         i = 0;
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
-            g_menu_text_state.pen.stride = 0x50;
+            g_menu_window_text_pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 2; i++) {
                 id = state->ability_ids[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
@@ -285,18 +285,18 @@ void unit_panel_ability_thread(void) {
                     id = state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
                 }
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
-                    g_menu_text_state.pen.rect.y += 0x10;
+                    g_menu_window_text_pen.rect.y += 0x10;
                 } else {
-                    menu_display_text_entry(id, text, &g_menu_text_state.pen);
-                    g_menu_text_state.pen.rect.y += 0x10;
+                    menu_display_text_entry(id, text, &g_menu_window_text_pen);
+                    g_menu_window_text_pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if ((u16)state->ability_ids[i] != MENU_STATUS_PANEL_LABEL_NONE) {
                     menu_display_text_entry(
-                        state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE, text, &g_menu_text_state.pen);
+                        state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE, text, &g_menu_window_text_pen);
                 }
-                g_menu_text_state.pen.rect.y += 0x10;
+                g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(upload, (u32*)text);
             thread->redraw_request = 0;

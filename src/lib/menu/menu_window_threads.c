@@ -46,10 +46,10 @@ void menu_icon_list_thread(void) {
             buffer = menu_build_and_upload_window_frame_image(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             fresh = 1;
-            g_menu_text_state.pen.stride = state->inner_width;
+            g_menu_window_text_pen.stride = state->inner_width;
             menu_set_text_origin(8, 9);
             g_menu_text_palette_offset = 0;
-            menu_display_text_entry(state->text_id, buffer, &g_menu_text_state.pen);
+            menu_display_text_entry(state->text_id, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, (u32*)buffer);
         }
         record = &records[i & 1];
@@ -134,8 +134,8 @@ void menu_icon_strip_thread(void) {
             buffer = menu_build_and_upload_window_frame_image(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             menu_set_text_origin(8, 9);
-            g_menu_text_state.pen.stride = state->inner_width;
-            menu_display_text_entry(state->text_id, buffer, &g_menu_text_state.pen);
+            g_menu_window_text_pen.stride = state->inner_width;
+            menu_display_text_entry(state->text_id, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, (u32*)buffer);
         }
         thread_yield();

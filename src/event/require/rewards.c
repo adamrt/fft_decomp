@@ -1139,16 +1139,16 @@ static void war_trophy_list_thread(void) {
                 image = menu_build_and_upload_window_frame_image(
                     0x50, 0x10, &g_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
                 menu_clear_render_buffer(image, 0x280);
-                g_menu_text_state.pen.stride = 0x50;
+                g_menu_window_text_pen.stride = 0x50;
                 timer = 0;
                 if (g_war_trophy_entry_types[last] == WAR_TROPHY_ENTRY_ITEM) {
                     menu_set_text_origin(0, 0);
                     menu_display_text_entry(
-                        g_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image, &g_menu_text_state.pen);
+                        g_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image, &g_menu_window_text_pen);
                 } else {
                     menu_set_text_origin(0, 0);
                     menu_draw_large_number_glyphs(g_war_trophy_entry_values[last],
-                        text_count_decimal_digits(g_war_trophy_entry_values[last]), image, &g_menu_text_state.pen);
+                        text_count_decimal_digits(g_war_trophy_entry_values[last]), image, &g_menu_window_text_pen);
                 }
 
                 /* Text lines go into the texture the banner sprite draws, where texture x + 0x80

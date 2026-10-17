@@ -96,10 +96,10 @@ void screen_clamped_icon_list_thread(void) {
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-    g_menu_text_state.pen.stride = param->inner_width;
+    g_menu_window_text_pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
     for (i = 0;; i++) {
         record = &records[i & 1];
@@ -207,7 +207,7 @@ void screen_number_entry_thread(void) {
 
     g_screen_list_controller_input = script_get_controller_input_pointer(0);
     /* A direct pen pointer folds both member-address adjustments and changes scheduling. */
-    stride = &g_menu_text_state.pen.stride;
+    stride = &g_menu_window_text_pen.stride;
     thread = &g_threads[g_thread_current_id];
     parameter = &thread->function_parameter_1;
     param = (menu_entry_t*)*parameter;
@@ -434,13 +434,13 @@ void screen_labeled_number_entry_thread(void) {
     digit = 0;
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-    g_menu_text_state.pen.stride = param->inner_width;
+    g_menu_window_text_pen.stride = param->inner_width;
     text_measure_pixels(&label_size[0], &label_size[1], text_find_entry(param->text_id));
     menu_set_text_origin(8, 9);
-    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     menu_set_text_origin((u16)label_size[0] + 8, 9);
     menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-    screen_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
+    screen_draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
     redraw = 1;
 
@@ -506,13 +506,13 @@ void screen_labeled_number_entry_thread(void) {
         if (redraw == 1) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            g_menu_text_state.pen.stride = param->inner_width;
+            g_menu_window_text_pen.stride = param->inner_width;
             text_measure(&label_size[0], &label_size[1], text_find_entry(param->text_id));
             menu_set_text_origin(8, 9);
-            menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+            menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
             menu_set_text_origin((u16)label_size[0] * 6 + 8, 9);
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-            screen_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
+            screen_draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, buffer);
         }
 

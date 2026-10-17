@@ -421,7 +421,7 @@ void unit_panel_banner_thread(void) {
             {
                 s32* stride;
                 glyph_blit_t* position;
-                stride = &g_menu_text_state.pen.stride;
+                stride = &g_menu_window_text_pen.stride;
                 *stride = 0x38;
                 if (g_equipment_item_numeric_thread_enabled == 0) {
                     menu_draw_numeric_display_entries(number_pixels, number_entries, (glyph_blit_t*)(stride - 2), 6);
@@ -436,7 +436,7 @@ void unit_panel_banner_thread(void) {
             }
             LoadImage(&rects[0], number_pixels);
 
-            window_width = &g_menu_text_state.pen.stride;
+            window_width = &g_menu_window_text_pen.stride;
             /* The pen record begins two words before its stride member. */
             text_position = (glyph_blit_t*)(window_width - 2);
             number_pixels_b = number_pixels + 0x400;

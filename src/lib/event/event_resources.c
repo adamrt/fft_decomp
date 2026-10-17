@@ -123,9 +123,9 @@ void menu_icon_timed_thread(void) {
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(menu_icon_record_t));
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
-    g_menu_text_state.pen.stride = width;
+    g_menu_window_text_pen.stride = width;
     menu_set_text_origin(pad + 8, 9);
-    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (;; i++) {
         thread_yield();
@@ -197,9 +197,9 @@ void menu_icon_linked_entry_thread(void) {
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[linked_index], 0, 0);
     }
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
-    g_menu_text_state.pen.stride = width;
+    g_menu_window_text_pen.stride = width;
     menu_set_text_origin(8, 9);
-    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
         thread_yield();

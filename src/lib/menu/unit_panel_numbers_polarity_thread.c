@@ -92,28 +92,29 @@ void unit_panel_numbers_polarity_thread(void) {
         if (frame == 0 || thread->redraw_request != 0) {
             menu_clear_render_buffer(number_images, sizeof(*number_images));
             /* Each pen stride is its image's width in 4-bit pixels (four per 16-bit VRAM unit). */
-            g_menu_text_state.pen.stride = 0x14;
+            g_menu_window_text_pen.stride = 0x14;
             menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
-                menu_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
+                menu_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_window_text_pen, 3);
             } else {
-                menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
+                menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_window_text_pen, 3);
             }
 
-            g_menu_text_state.pen.stride = 0x40;
+            g_menu_window_text_pen.stride = 0x40;
             menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
-                menu_text_render_signed_decimal_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
+                menu_text_render_signed_decimal_entries(
+                    number_images->weapons, entries + 3, &g_menu_window_text_pen, 4);
             } else {
-                menu_draw_numeric_display_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
+                menu_draw_numeric_display_entries(number_images->weapons, entries + 3, &g_menu_window_text_pen, 4);
             }
 
-            g_menu_text_state.pen.stride = 0x64;
+            g_menu_window_text_pen.stride = 0x64;
             menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
-                menu_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
+                menu_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_window_text_pen, 8);
             } else {
-                menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
+                menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_window_text_pen, 8);
             }
 
             LoadImage(upload_a, (u32*)number_images->mobility);

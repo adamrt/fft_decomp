@@ -25,7 +25,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static menu_text_state_t g_message_typewriter_state = { 0 };
+/* Unreferenced word preceding the glyph pen; no consumer establishes a pointer meaning. */
+static u32 g_message_typewriter_prefix_word = 0;
+static glyph_blit_t g_message_typewriter_pen = { 0 };
 static RECT g_message_typewriter_vram_rect = { 0 };
 
 static u8 g_message_typewriter_glyph_images[3][8][0x54] = { 0 };
@@ -309,13 +311,13 @@ void message_draw_glyph_with_delay(s32 pen_x, s32 pen_y, s32 delay) {
         }
 
         if (request->glyph != TEXT_SPACE) {
-            g_message_typewriter_state.pen.rect.x = phase;
-            g_message_typewriter_state.pen.rect.y = 0;
-            g_message_typewriter_state.pen.stride = pitch;
+            g_message_typewriter_pen.rect.x = phase;
+            g_message_typewriter_pen.rect.y = 0;
+            g_message_typewriter_pen.stride = pitch;
             script_set_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT,
                 script_get_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->glyph * TEXT_GLYPH_BYTES, image,
-                &g_message_typewriter_state.pen, request->palette);
+                &g_message_typewriter_pen, request->palette);
             g_message_typewriter_vram_rect.x
                 = (pen_x >> 2) + (s16)(script_get_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);
             g_message_typewriter_vram_rect.y = pen_y;
@@ -636,12 +638,12 @@ void message_render_record_image(text_dialog_record_t* record) {
             record->buffer = menu_build_and_upload_window_frame_image(
                 record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
-        g_menu_text_state.pen.rect.x = record->origin_x;
-        g_menu_text_state.pen.rect.y = record->origin_y;
-        g_menu_text_state.pen.stride = record->rect.w * 4;
+        g_menu_window_text_pen.rect.x = record->origin_x;
+        g_menu_window_text_pen.rect.y = record->origin_y;
+        g_menu_window_text_pen.stride = record->rect.w * 4;
         g_menu_text_param_22 = record->first_line;
         g_menu_text_param_24 = record->last_line;
-        menu_display_text_entry(record->text, record->buffer, &g_menu_text_state.pen);
+        menu_display_text_entry(record->text, record->buffer, &g_menu_window_text_pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();
         menu_free_memory(record->buffer);

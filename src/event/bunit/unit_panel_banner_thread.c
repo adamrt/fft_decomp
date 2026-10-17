@@ -408,7 +408,7 @@ void unit_panel_banner_thread(void) {
                 number_entries[6].format = 2;
             }
             menu_clear_render_buffer(number_pixels, 0x700);
-            window_width = &g_menu_text_state.pen.stride;
+            window_width = &g_menu_window_text_pen.stride;
             /* The pen record begins two words before its stride member. */
             text_position = (glyph_blit_t*)(window_width - 2);
             *window_width = 0x38;

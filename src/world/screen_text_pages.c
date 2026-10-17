@@ -214,7 +214,7 @@ void screen_text_list_thread(void) {
     cursor = entry->selected_index - row_offset;
     screen_draw_text_columns(entry, &row_offset, buffer);
     ring = 0;
-    image_rect.w = g_menu_text_state.pen.stride >> 2;
+    image_rect.w = g_menu_window_text_pen.stride >> 2;
     LoadImage(&image_rect, (u32*)buffer);
 
     /* The window sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
@@ -295,7 +295,7 @@ void screen_text_list_thread(void) {
                 image_rect.h = 0x10;
                 buffer = menu_alloc_memory(0x800);
                 menu_clear_render_buffer(buffer, 0x800);
-                g_menu_text_state.pen.stride = entry->inner_width;
+                g_menu_window_text_pen.stride = entry->inner_width;
 
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + delta;
@@ -304,19 +304,19 @@ void screen_text_list_thread(void) {
                         g_menu_text_palette_offset = layout->text_colors[column][index];
                     }
                     if (g_menu_text_palette_offset == 4) {
-                        g_menu_text_state.pen.color = 0x44444444;
+                        g_menu_window_text_pen.color = 0x44444444;
                     }
                     if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                        menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
+                        menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
                     } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                        menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                        menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
                         menu_draw_large_number_glyphs(
-                            layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                            layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     }
                 }
 
-                g_menu_text_state.pen.color = 0;
+                g_menu_window_text_pen.color = 0;
                 g_menu_text_palette_offset = 0;
                 LoadImage(&image_rect, (u32*)buffer);
                 clear.h = 2;

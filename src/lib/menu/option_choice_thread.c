@@ -65,13 +65,13 @@ void option_choice_thread(void) {
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     thread_wait_frames(1);
 
-    g_menu_text_state.pen.stride = width;
+    g_menu_window_text_pen.stride = width;
     for (i = 0; i < g_option_choice_counts[kind]; i++) {
         menu_set_text_origin(8, i * 16 + 8);
         if (i == g_option_values[kind]) {
             g_menu_text_palette_offset = 8;
         }
-        menu_display_text_entry(i + g_option_value_text_id_bases[kind], buffer, &g_menu_text_state.pen);
+        menu_display_text_entry(i + g_option_value_text_id_bases[kind], buffer, &g_menu_window_text_pen);
         g_menu_text_palette_offset = 0;
     }
 

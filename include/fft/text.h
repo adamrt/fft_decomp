@@ -245,17 +245,6 @@ void text_measure(s16* columns, s16* rows, const u8* text);
 void text_measure_pixels(s16* width, s16* rows, const u8* text);
 
 /* text images */
-/* The scene's menu text state (g_menu_text_state): the script-variable pointer, then the pen the glyph
- * renderers receive. */
-typedef struct menu_text_state {
-    s32* script_variables; /* 0x00; also bound as g_script_variables in each scene */
-    /* 0x04: rect.x/rect.y are the text origin (menu_set_text_origin) and
-     * the rect's size is not used; stride (0x0c) is the rect width * 4
-     * (the inner window width); color (0x10) is the glyph blit fill,
-     * 0x44444444 while text color 4 is drawn (menu_draw_text_columns). */
-    glyph_blit_t pen;
-} menu_text_state_t;
-
 /* Pen of menu_text_render_glyph_to_4bpp_image: x in pixels (two per byte), y in rows, and the image's row stride in
  * 16-bit values. */
 typedef struct text_image_position {
@@ -273,7 +262,8 @@ typedef struct text_image_bounds {
     s16 line_height;
 } text_image_bounds_t;
 
-extern menu_text_state_t g_menu_text_state;
+/* BATTLE and WORLD each define this menu-window pen, independently of the script-variable pointer before it. */
+extern glyph_blit_t g_menu_window_text_pen;
 extern glyph_blit_t g_menu_text_pen;
 extern s32 g_menu_text_param_22; /* line limits copied from the text record (+0x22, +0x24) */
 extern s32 g_menu_text_param_24;

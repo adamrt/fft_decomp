@@ -411,46 +411,46 @@ void unit_panel_banner_thread(void) {
             }
             menu_clear_render_buffer(number_pixels, 0x700);
             {
-                g_menu_text_state.pen.stride = 0x38;
+                g_menu_window_text_pen.stride = 0x38;
                 if (g_formation_preview_stats_window_active == 0) {
-                    menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_text_state.pen, 6);
+                    menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
                 } else {
-                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], &g_menu_text_state.pen, 1);
-                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], &g_menu_text_state.pen, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[11], &g_menu_text_state.pen, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[13], &g_menu_text_state.pen, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[4], &g_menu_text_state.pen, 2);
+                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], &g_menu_window_text_pen, 1);
+                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], &g_menu_window_text_pen, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[11], &g_menu_window_text_pen, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[13], &g_menu_window_text_pen, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[4], &g_menu_window_text_pen, 2);
                 }
             }
             LoadImage(&rects[0], (u32*)number_pixels);
             stat_image_upper = number_pixels + 0x400;
-            g_menu_text_state.pen.stride = 0x60;
-            menu_draw_numeric_display_entries(stat_image_upper, &number_entries[8], &g_menu_text_state.pen, 2);
+            g_menu_window_text_pen.stride = 0x60;
+            menu_draw_numeric_display_entries(stat_image_upper, &number_entries[8], &g_menu_window_text_pen, 2);
             LoadImage(&rects[1], (u32*)stat_image_upper);
             thread->work = 0;
 
             /* Name and job, then the large Brave, Faith and roster numbers. */
             menu_clear_render_buffer(name_image, 0x580);
-            g_menu_text_state.pen.stride = 0x58;
+            g_menu_window_text_pen.stride = 0x58;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_text_state.pen);
+            menu_display_text_entry(identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_window_text_pen);
             menu_set_text_origin(0, 0x10);
-            menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_text_state.pen);
+            menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_window_text_pen);
             LoadImage(&rects[2], (u32*)name_image);
 
             menu_clear_render_buffer(number_images, sizeof(*number_images));
-            g_menu_text_state.pen.stride = 0x10;
+            g_menu_window_text_pen.stride = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(identity->brave, 0x202, number_images->brave, &g_menu_text_state.pen);
+            text_draw_small_number_glyphs(identity->brave, 0x202, number_images->brave, &g_menu_window_text_pen);
             LoadImage(&rects[3], (u32*)number_images->brave);
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
+            text_draw_small_number_glyphs(identity->faith, 0x202, number_images->faith, &g_menu_window_text_pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
             /* The unit-join screen uploads the roster number image cleared. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 text_draw_small_number_glyphs(
-                    identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_text_state.pen);
+                    identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_window_text_pen);
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
             } else {
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
@@ -528,12 +528,12 @@ static void message_box_render_text_image(text_dialog_record_t* record) {
             record->buffer = menu_build_and_upload_window_frame_image(
                 record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
-        g_menu_text_state.pen.stride = record->rect.w * 4;
-        g_menu_text_state.pen.rect.x = 8;
-        g_menu_text_state.pen.rect.y = 8;
+        g_menu_window_text_pen.stride = record->rect.w * 4;
+        g_menu_window_text_pen.rect.x = 8;
+        g_menu_window_text_pen.rect.y = 8;
         g_menu_text_param_22 = record->first_line;
         g_menu_text_param_24 = record->last_line;
-        menu_display_text_entry(record->text, record->buffer, &g_menu_text_state.pen);
+        menu_display_text_entry(record->text, record->buffer, &g_menu_window_text_pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();
         menu_free_memory(record->buffer);
