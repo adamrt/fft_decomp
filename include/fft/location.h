@@ -247,14 +247,14 @@ typedef enum location_script_request_flags {
 
 /* The interpreter's state; the opcode handlers read ip and data here. It is one object through the choice and
  * argument values: location_script_opcode_1a_request_choice reaches ip at -4 and the arguments at +0x10 from its
- * &choice_vars base. */
+ * &choice_map_ids base. */
 typedef struct location_script_state {
-    s32 flags;          /* 0x00; location_script_result_flags_e | location_script_action_flags_e */
-    u16* list;          /* 0x04; script list for the current location */
-    u16* data;          /* 0x08 */
-    u16 ip;             /* 0x0c */
-    s32 choice_vars[4]; /* 0x10; staged Choice variables */
-    /* 0x20: script request arguments; the staged Choice values share them. */
+    s32 flags;             /* 0x00; location_script_result_flags_e | location_script_action_flags_e */
+    u16* list;             /* 0x04; script list for the current location */
+    u16* data;             /* 0x08 */
+    u16 ip;                /* 0x0c */
+    s32 choice_map_ids[4]; /* 0x10; battle map IDs for Choice; 0 ends the list */
+    /* 0x20; script request arguments; Choice uses all four as event IDs. */
     s32 args[4];
 } location_script_state_t;
 typedef char location_script_state_size_must_be_48[sizeof(location_script_state_t) == 48 ? 1 : -1];

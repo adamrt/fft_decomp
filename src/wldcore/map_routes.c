@@ -417,7 +417,7 @@ s32 location_build_menu_entries(s32 location_id, s32* out) {
 
 /* Fill `out` with the map-name text ids of the current location's Choice destinations and return
  * how many: -1 at Murond Death City, 0 when the location's color variable is set or no Choice
- * applies; a single destination is taken as is, otherwise up to five whose hidden flag is clear. */
+ * applies; a single destination is taken as is, otherwise list those whose hidden flag is clear. */
 static s32 location_collect_choices(s32 location_id, s32* out) {
     s32 available;
     s32 i;
@@ -435,19 +435,19 @@ static s32 location_collect_choices(s32 location_id, s32* out) {
     }
     available = 0;
     for (i = 0; i < 4; i++) {
-        if (g_location_script_state.choice_vars[i] == 0) {
+        if (g_location_script_state.choice_map_ids[i] == 0) {
             break;
         }
         available++;
     }
     if (available == 1) {
-        entry = g_location_script_state.choice_vars[0];
+        entry = g_location_script_state.choice_map_ids[0];
         *out = entry + (TEXT_ID_MAP_NAME_BASE - 1);
         return 1;
     }
     written = 0;
     for (i = 0; i < available; i++) {
-        entry = g_location_script_state.choice_vars[i];
+        entry = g_location_script_state.choice_map_ids[i];
         if (script_get_variable(
                 g_location_choice_hidden_offsets[entry - 1] + EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST)
             == 0) {

@@ -280,12 +280,12 @@ void location_script_opcode_19_request_load_event(void) {
     g_location_script_state.flags |= LOCATION_SCRIPT_REQUEST_LOAD_EVENT;
 }
 
-/* Stage four variable/value pairs for a deferred Choice request. */
+/* Stage four battle-map/event pairs for a deferred Choice request. */
 void location_script_opcode_1a_request_choice(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        g_location_script_state.choice_vars[i] = g_location_script_state.data[g_location_script_state.ip];
+        g_location_script_state.choice_map_ids[i] = g_location_script_state.data[g_location_script_state.ip];
         g_location_script_state.args[i] = g_location_script_state.data[++g_location_script_state.ip];
         g_location_script_state.ip++;
     }
