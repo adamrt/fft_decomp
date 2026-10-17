@@ -26,8 +26,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Decoder state and input repeat counters are owned by this unit.
- * They retain their original absolute storage bindings. */
+/* Decoder state and input repeat counters are used only by this unit. */
 /* g_movie_stream_status, set as each frame header arrives. */
 typedef enum movie_stream_status {
     MOVIE_STREAM_PLAYING = 0,

@@ -35,7 +35,6 @@ void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
 void unit_view_wait_for_panels(void);
 
 /* unit stats panels */
-
 /* The sprite page the stats panels draw their labels with (menu_sprite_page_t). */
 extern RECT g_menu_sprite_page_texture_windows[5];
 extern image_load_parameters_t g_menu_sprite_page_image_params[30];
@@ -76,7 +75,6 @@ void unit_view_preview_caster_stats(void);
 void unit_view_preview_target_stats(void);
 
 /* unit summary */
-
 extern RECT g_unit_view_summary_panel_rect;
 extern menu_unit_number_images_t g_unit_view_summary_digit_images;
 extern menu_palette_slot_t g_unit_view_summary_palettes[];
@@ -87,7 +85,6 @@ void unit_view_summary_thread(void);
 
 /* selected-tile display */
 /* The panel describing the tile under the cursor. */
-
 extern u8 g_unit_view_quad_group_starts[]; /* [group + 1] ends each group */
 extern point16_t g_unit_view_quad_origin;
 extern RECT g_unit_view_tile_info_image_location;

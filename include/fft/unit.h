@@ -542,7 +542,7 @@ typedef union unit_ai_setup {
     struct {
         u8 target_x;           /* 0x00 */
         u8 target_y;           /* 0x01 */
-        u8 flags;              /* 0x02; ai_decision_flags_e; high bit is the stay-near tile elevation */
+        u8 flags;              /* 0x02; ai_decision_flags_e; high bit selects the stay-near tile's upper level */
         u8 target_unit_id;     /* 0x03 */
         u8 targeting_flags_1;  /* 0x04; initial ai_unit_decision_t targeting flags */
         u8 targeting_flags_2;  /* 0x05; ai_targeting_flags_2_e */
