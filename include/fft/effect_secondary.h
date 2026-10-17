@@ -73,7 +73,6 @@ typedef char effect_secondary_data_size_must_be_84[(sizeof(effect_secondary_data
 typedef s32 (*effect_secondary_callback_t)(void);
 
 extern struct effect_secondary_data* g_effect_secondary_current;
-extern u8 g_effect_secondary_charge_id; /* id of the charge secondary effect started with the ability; 0 none */
 
 /* Set by effect_secondary_update each frame: the ordering table the secondary effects add their primitives to, and
  * the display buffer (0 or 1) whose primitives they fill. */
@@ -133,19 +132,9 @@ typedef struct effect_secondary_animation {
     s16 parameter;
 } effect_secondary_animation_t;
 
-extern effect_secondary_animation_t g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_COUNT];
-
-/* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
- * caller's packed argument. */
-extern u8 g_effect_secondary_by_charge_animation[];
-
 /* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
  * crossbows, NONE for the rest. */
 extern u8 g_effect_weapon_projectile_animations[];
-
-/* CLUT of the zodiac poof's particles, an index in the weapons row, for each
- * sprite palette (the secondary effect's parameter). */
-extern u8 g_effect_zodiac_poof_animations[];
 
 /* elements */
 /* What effect_get_element_index makes of an element mask: the position of its first element in
@@ -163,8 +152,6 @@ typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_LIGHTNING = 8,
     EFFECT_ELEMENT_INDEX_COUNT = 9
 } effect_element_index_e;
-
-extern u8 g_effect_element_masks[EFFECT_ELEMENT_INDEX_COUNT];
 
 s32 effect_get_element_index(s32 elements);
 
@@ -223,13 +210,6 @@ typedef char effect_emitter_values_size_must_be_46[(sizeof(effect_emitter_values
  * (0, ONE, 0); an effect file's script sets its own pair (opcode 27). */
 enum { EFFECT_SECONDARY_INERTIA_THRESHOLD = 560 };
 
-/* Per-group resident particle emitter records (stride 0x2e). The secondary-effect
- * handlers spawn while spawn_start_frame <= timer < spawn_end_frame and finish
- * once timer passes spawn_start_frame with no live slots;
- * effect_secondary_update_active_slots walks count active slots. The level-up
- * handler seeds group 5's position.y with -8, then lowers it by 3 per frame. */
-extern effect_emitter_values_t g_effect_secondary_particle_configs[17];
-
 s32 effect_slot_spawn_motion(const effect_emitter_values_t* values, effect_motion_t* motion);
 
 /* effect slots */
@@ -273,16 +253,6 @@ typedef char effect_slot_size_must_be_204[sizeof(effect_slot_t) == 204 ? 1 : -1]
 
 extern effect_slot_t g_effect_slots[EFFECT_SLOT_RECORD_COUNT];
 extern effect_sprite_section_t g_effect_secondary_particle_frame_data;
-extern effect_sprite_section_t* g_effect_secondary_particle_frame_data_ptr;
-
-/* Self-relative animation script table: each 16-bit value is a byte offset from
- * the table's own base to a effect_anim_script_t. Declared as bytes
- * because both uses are byte-based -- the stored pointer is the table's own
- * base plus a byte offset -- and the 16-bit entries are read through a cast
- * at the use site. Declaring it `u16[]` and casting the symbol to `u8*` for
- * the address instead reserves an unused 8-byte frame in
- * effect_slot_init_secondary_animation. */
-extern u8 g_effect_secondary_particle_animation_data[];
 
 s32 effect_slot_update(s32 id);
 

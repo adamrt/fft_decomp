@@ -9,6 +9,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Three entries, though effect_altima_transformation_map_vertex_particles_update bounds the vertex
+ * group by 12 like the Banish handler: groups 4 to 12 would read past the table. */
+extern effect_map_vertex_location_t g_effect_altima_transformation_vertex_locations[3];
+
 /* Altima transformation particle handler. INIT allocates the map-vertex cache
  * (four vertices of each of map mesh parts 1-8, which the map renderer keeps
  * current while g_effect_map_vertices is set) and sets map 3D objects

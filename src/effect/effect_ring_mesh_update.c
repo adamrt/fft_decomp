@@ -15,6 +15,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
+ * the row, the lattice row (0-2) the column. */
+extern u32 g_effect_ring_mesh_brightness_table[][3];
+
 /* Scratchpad (0x1f800000) layout while the ring is rebuilt. points[row][0..8]
  * sweep one quadrant in 0x80 steps; the rotating add helpers reuse them for
  * the other three quadrants. */

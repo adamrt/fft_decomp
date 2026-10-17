@@ -95,9 +95,6 @@ extern s32 g_camera_yaw_target;
  * nothing reads it. */
 extern s32 g_camera_previous_yaw;
 
-/* Maps a camera quadrant index to its map-tile camera-block direction. */
-extern u8 g_camera_quadrant_block_directions[4];
-
 SVECTOR* camera_rotation_get(void);
 void camera_rotation_set(const SVECTOR* rotation);
 void camera_rotation_save(void);

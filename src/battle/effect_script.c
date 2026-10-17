@@ -33,6 +33,46 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Loaded effect sections and their saved starting positions. */
+extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
+extern s32 g_effect_sound_data_base;
+extern u8 g_effect_sound_call_counts[]; /* per-channel call counts */
+extern effect_palette_section_t* g_effect_palette_ptr;
+extern const u8* g_effect_script;
+extern u8* g_effect_frame_data_start;
+extern u8* g_effect_animation_sequences_start;
+extern const effect_timing_curves_t* g_effect_timing_curves;
+
+extern u8 g_effect_secondary_charge_id; /* id of the charge secondary effect started with the ability; 0 none */
+
+/* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
+ * caller's packed argument. */
+extern u8 g_effect_secondary_by_charge_animation[];
+
+/* Ability effect loading and playback. */
+extern u32 g_heap_battle_end_address;
+extern s16 g_effect_id;              /* file id (EFFECT/E###.BIN) of the requested effect */
+extern s32 g_effect_request_unread;  /* cleared when an ability effect is requested; nothing reads it */
+extern s16 g_effect_ability_files[]; /* action/reaction ability ids index directly; event ids map after those rows */
+extern file_extent_t g_effect_file_disc_entries[EFFECT_FILE_ID_COUNT];
+extern effect_file_header_t* g_effect_file_data_ptrs[EFFECT_FILE_ID_COUNT];
+extern u8 g_effect_load_state; /* effect_load_state_e */
+extern s16 g_effect_load_countdown;
+extern s32 g_effect_playback_phase; /* effect_playback_phase_e */
+
+/* State-record selection and dispatch. */
+extern s16 g_effect_current_record_index;
+extern s16 g_effect_root_record_index;
+
+/* Heads of the allocated and available record lists, chained through effect_record_t.next_index.
+ * The available head is unsigned; the allocated head matches retail only when declared s16. */
+extern s16 g_effect_allocated_record_head;
+extern u16 g_effect_available_record_head;
+extern effect_script_result_e (*g_effect_script_instructions[120])(effect_record_t*);
+extern effect_callback_t g_effect_native_callbacks[EFFECT_NATIVE_CALLBACK_COUNT];
+extern effect_callback_t g_effect_callback_slots[];
+extern u16 g_effect_script_opcode_05_value; /* written by effect-script opcode 05; no game source reads it */
+
 static void effect_script_free_state_record(s16 record_index);
 static s32 effect_script_run_block(s16 index);
 static s16 effect_script_start_record(const u8* script, s16 start_pc, s16 parent_index);

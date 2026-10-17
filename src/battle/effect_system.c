@@ -32,6 +32,34 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Maps a camera quadrant index to its map-tile camera-block direction. */
+extern u8 g_camera_quadrant_block_directions[4];
+
+/* Secondary animation parameters and particle resources. */
+extern effect_secondary_animation_t g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_COUNT];
+
+/* CLUT of the zodiac poof's particles, an index in the weapons row, for each
+ * sprite palette (the secondary effect's parameter). */
+extern u8 g_effect_zodiac_poof_animations[];
+extern u8 g_effect_element_masks[EFFECT_ELEMENT_INDEX_COUNT];
+
+/* Per-group resident particle emitter records (stride 0x2e). The secondary-effect
+ * handlers spawn while spawn_start_frame <= timer < spawn_end_frame and finish
+ * once timer passes spawn_start_frame with no live slots;
+ * effect_secondary_update_active_slots walks count active slots. The level-up
+ * handler seeds group 5's position.y with -8, then lowers it by 3 per frame. */
+extern effect_emitter_values_t g_effect_secondary_particle_configs[17];
+extern effect_sprite_section_t* g_effect_secondary_particle_frame_data_ptr;
+
+/* Self-relative animation script table: each 16-bit value is a byte offset from
+ * the table's own base to a effect_anim_script_t. Declared as bytes
+ * because both uses are byte-based -- the stored pointer is the table's own
+ * base plus a byte offset -- and the 16-bit entries are read through a cast
+ * at the use site. Declaring it `u16[]` and casting the symbol to `u8*` for
+ * the address instead reserves an unused 8-byte frame in
+ * effect_slot_init_secondary_animation. */
+extern u8 g_effect_secondary_particle_animation_data[];
+
 /* Projectile trajectory queries and work state. */
 /* Arc endpoint handed to the per-arc obstacle test: the unit's raised tile position followed by its id and height
  * allowance. */

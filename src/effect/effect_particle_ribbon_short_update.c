@@ -17,6 +17,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
+
 /* One short ribbon: a particle and the double-buffered quad strip drawn along
  * its recent path, one quad per pair of adjacent trail points. */
 typedef struct effect_particle_ribbon_short {

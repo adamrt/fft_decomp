@@ -15,6 +15,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
+ * the row, the lattice row (0-8) the column. */
+extern u32 g_effect_dome_mesh_brightness_table[][9];
+
 /* Work block: two POLY_GT4 buffers of 8 rows x 16 columns. */
 typedef struct effect_dome_mesh_work {
     s32 buffer;                              /* 0x0000: 0 or 1, flipped after each update */

@@ -302,9 +302,6 @@ enum {
     EFFECT_PARTICLE_RIBBON_LONG_POINTS = 17
 };
 
-extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
-extern u32 g_effect_particle_ribbon_long_brightness_table[][EFFECT_PARTICLE_RIBBON_LONG_POINTS];
-
 s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
@@ -334,19 +331,10 @@ typedef struct effect_polar_mesh_work {
 } effect_polar_mesh_work_t;
 typedef char effect_polar_mesh_work_size_must_be_8444[sizeof(effect_polar_mesh_work_t) == 8444 ? 1 : -1];
 
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects the row, the ring (0-5) the column. */
-extern u32 g_effect_polar_mesh_brightness_table[][6];
-extern u32 g_effect_anchored_polar_mesh_brightness_table[][6];
-
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* textured quad grids */
-/* E230 links a second, 4x4 quad grid after its 8x8 one: vertex brightness rows (12-bit fixed) of that copy,
- * indexed by brightness setting and quad row edge. The shared renderer declares its own table, whose width
- * follows the build's grid size. */
-extern u32 g_effect_textured_quad_grid_4x4_brightness_table[][5];
-
 s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* ring and tube meshes */
@@ -371,25 +359,6 @@ typedef struct effect_radial_mesh_work {
 } effect_radial_mesh_work_t;
 typedef char effect_radial_mesh_work_size_must_be_6684[sizeof(effect_radial_mesh_work_t) == 6684 ? 1 : -1];
 
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the lattice row (0-2) the column. */
-extern u32 g_effect_ring_mesh_brightness_table[][3];
-
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the lattice row (0-8) the column. */
-extern u32 g_effect_ring_stack_mesh_brightness_table[][9];
-
-/* Overlay-local vertex brightness rows (12-bit fixed). */
-extern u32 g_effect_single_ring_mesh_brightness_table[][2];
-
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the lattice row (0-8) the column. */
-extern u32 g_effect_tube_mesh_brightness_table[][9];
-
-/* Overlay-local ring scale per lattice row pair (12-bit fixed): row 4 - i and
- * row 4 + i share g_effect_tube_mesh_ring_scales[i]. */
-extern s32 g_effect_tube_mesh_ring_scales[5];
-
 s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
@@ -405,10 +374,6 @@ enum {
     DOME_MESH_LATTICE_POINT_BYTES = sizeof(vec3s16_t),
     DOME_MESH_LATTICE_ROW_BYTES = (DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_POINT_BYTES
 };
-
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the lattice row (0-8) the column. */
-extern u32 g_effect_dome_mesh_brightness_table[][9];
 
 s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
@@ -426,29 +391,15 @@ enum {
     EFFECT_MAP_VERTEX_WORK_BYTES = EFFECT_MAP_VERTEX_PART_COUNT * EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(VECTOR)
 };
 
-extern effect_map_vertex_location_t g_effect_banish_vertex_locations[12];
-
-/* Three entries, though effect_altima_transformation_map_vertex_particles_update bounds the vertex
- * group by 12 like the Banish handler: groups 4 to 12 would read past the table. */
-extern effect_map_vertex_location_t g_effect_altima_transformation_vertex_locations[3];
-
 s32 effect_banish_map_vertex_particles_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
 s32 effect_altima_transformation_map_vertex_particles_update(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
 
 /* tentacle mesh */
-
-extern u32 g_effect_tentacle_mesh_brightness_table[][9];
-
 s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* wave mesh */
-
-/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
- * the row, the quad row (0-8) the column. */
-extern u32 g_effect_wave_mesh_brightness_table[][9];
-
 s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 #endif

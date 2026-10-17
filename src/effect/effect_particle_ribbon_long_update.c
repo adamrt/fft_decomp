@@ -17,6 +17,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern u32 g_effect_particle_ribbon_long_brightness_table[][EFFECT_PARTICLE_RIBBON_LONG_POINTS];
+
 /* One long ribbon: the short layout with 16 quads per buffer and a 17-point
  * trail. */
 typedef struct effect_particle_ribbon_long {

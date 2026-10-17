@@ -15,6 +15,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
+ * the row, the lattice row (0-8) the column. */
+extern u32 g_effect_ring_stack_mesh_brightness_table[][9];
+
 enum {
     RING_STACK_RING_COUNT = 8,
     RING_STACK_SEGMENT_COUNT = 8,

@@ -18,6 +18,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern u32 g_effect_tentacle_mesh_brightness_table[][9];
+
 /* The tentacle renderer draws textured strips; the related particle-trail
  * renderer tracks points without drawing the strips. Both use the same emitter view. */
 typedef struct effect_tentacle_mesh_segment {

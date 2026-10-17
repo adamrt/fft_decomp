@@ -13,6 +13,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* E230 links a second, 4x4 quad grid after its 8x8 one: vertex brightness rows (12-bit fixed) of that copy,
+ * indexed by brightness setting and quad row edge. The shared renderer declares its own table, whose width
+ * follows the build's grid size. */
+extern u32 g_effect_textured_quad_grid_4x4_brightness_table[][5];
+
 /* The grid is QUAD_GRID_SIZE quads on a side, each QUAD_GRID_CELL pixels of the 256x256 field; like the shared
  * renderer's 4x4 builds, this copy clamps the ordering-table depth at 1. */
 enum { QUAD_GRID_SIZE = 4, QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE, QUAD_GRID_DEPTH_MIN = 1 };

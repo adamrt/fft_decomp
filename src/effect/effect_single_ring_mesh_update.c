@@ -16,6 +16,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Overlay-local vertex brightness rows (12-bit fixed). */
+extern u32 g_effect_single_ring_mesh_brightness_table[][2];
+
 /* Work block of the single-ring variant: two POLY_GT4 buffers of 32 quads. */
 typedef struct effect_single_ring_mesh_work {
     s32 buffer;                            /* 0x000: 0 or 1, flipped after each update */

@@ -30,7 +30,6 @@ enum {
     HEAP_SMD_PAGE_COUNT = 16
 };
 
-extern u32 g_heap_battle_end_address;
 extern u8* g_heap_high_overlay_load_address;
 extern u8* g_heap_low_overlay_load_address;
 extern u8* g_heap_companion_overlay_load_address;

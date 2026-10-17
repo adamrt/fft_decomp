@@ -13,6 +13,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects the row, the ring (0-5) the column. */
+extern u32 g_effect_polar_mesh_brightness_table[][6];
+
 /* Scratchpad (0x1f800000) layout used while one polar mesh is rebuilt.
  * Each row sweeps one quadrant in four steps; its last point closes the
  * quadrant by rotating the first point a quarter turn. The renderer never

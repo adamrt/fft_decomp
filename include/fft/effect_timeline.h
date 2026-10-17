@@ -219,7 +219,6 @@ typedef char effect_timing_curves_size_must_be_600[sizeof(effect_timing_curves_t
 
 extern effect_timeline_t* g_effect_timeline;
 extern effect_child_timeline_t* g_effect_child_timeline;
-extern const effect_timing_curves_t* g_effect_timing_curves;
 
 /* timeline state */
 /* Steppers use the named tracks; resets clear each complete slot array.
@@ -331,10 +330,6 @@ void effect_camera_init(void);
 void effect_camera_seed_tracks(void);
 
 /* camera playback */
-/* Cleared with the effect camera modes; nothing reads them. */
-extern s32 g_effect_camera_unread_1;
-extern s32 g_effect_camera_unread_2;
-
 void effect_camera_start_parent_keyframe_moves(s16 frame);
 void effect_camera_start_child_keyframe_moves(s16 frame);
 void effect_camera_update_tracks(void);

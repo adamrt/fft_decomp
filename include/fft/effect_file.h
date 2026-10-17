@@ -7,8 +7,6 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-struct suzuki_sound_resource;
-
 /* file ids */
 /* An ability-to-file entry: file ID bits and the Item flag, negative for none.
  * Event effects follow the action/reaction rows and use the script ID remapping. */
@@ -84,9 +82,6 @@ enum {
 };
 
 extern const effect_flags_section_t* g_effect_flags_section;
-extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
-extern s32 g_effect_sound_data_base;
-extern u8 g_effect_sound_call_counts[]; /* per-channel call counts */
 
 /* palette and image */
 /* Two palette rows, then a 24-bit image size, width flag and pixel tail. */
@@ -98,8 +93,6 @@ typedef struct effect_palette_section {
     u32 pixels[0];         /* 0x404; packed 32-bit GPU image-transfer values */
 } effect_palette_section_t;
 typedef char effect_palette_section_size_must_be_1028[sizeof(effect_palette_section_t) == 1028 ? 1 : -1];
-
-extern effect_palette_section_t* g_effect_palette_ptr;
 
 /* script */
 /* An effect script instruction starts with a 16-bit header, its opcode in the low nine bits
@@ -169,8 +162,6 @@ typedef union effect_script_instruction {
 } effect_script_instruction_t;
 typedef char effect_script_instruction_size_must_be_8[sizeof(effect_script_instruction_t) == 8 ? 1 : -1];
 
-extern const u8* g_effect_script;
-
 /* sprite frames */
 /* Byte offset to a group's frame-offset table, relative to the group-table base. */
 typedef struct effect_sprite_group {
@@ -215,7 +206,6 @@ typedef struct effect_sprite_frameset {
 } effect_sprite_frameset_t;
 typedef char effect_sprite_frameset_size_must_be_4[sizeof(effect_sprite_frameset_t) == 4 ? 1 : -1];
 
-extern u8* g_effect_frame_data_start;
 extern u8* g_effect_frame_data;
 
 /* sprite sequences */
@@ -264,7 +254,6 @@ typedef union effect_sequence_instruction {
 } effect_sequence_instruction_t;
 typedef char effect_sequence_instruction_size_must_be_5[sizeof(effect_sequence_instruction_t) == 5 ? 1 : -1];
 
-extern u8* g_effect_animation_sequences_start;
 extern u8* g_effect_animation_sequences;
 
 /* animation curves */
