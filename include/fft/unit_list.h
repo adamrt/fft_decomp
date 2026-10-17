@@ -128,7 +128,7 @@ typedef char unit_list_record_size_must_be_268[(sizeof(unit_list_record_t) == 26
 
 extern unit_list_record_t* g_unit_list_pointers[];
 
-s32 unit_list_build_records(s32 unused_mode, unit_list_record_t** unused_records, s32 sort_mode);
+s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32 sort_mode);
 s32 unit_list_find_by_battle_id(s16 battle_id);
 void unit_list_sort(s32 sort_mode);
 

@@ -265,9 +265,11 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
 
 /* Copy every battle unit that is not an egg, crystal or treasure into the next
  * Unit List record, store the shown-plus-egg unit count in each record and
- * sort the shown list. Returns the number of shown units; the first two
- * parameters are retained but not read. */
-s32 unit_list_build_records(s32 unused_mode, unit_list_record_t** unused_records, s32 sort_mode) {
+ * sort the shown list. Returns the number of shown units.
+ * The native caller supplies -1 and g_unit_list_pointers in the first two
+ * argument slots, which this body never reads. The third argument is forwarded
+ * to unit_list_sort, which also ignores it; retain the original call sequence. */
+s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32 sort_mode) {
     unit_stats_t* unit;
     s32 i;
     s32 shown = 0;
