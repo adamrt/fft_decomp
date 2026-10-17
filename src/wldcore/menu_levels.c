@@ -477,7 +477,7 @@ void menu_stack_dispatch_suspend(void) {
  * The level record is re-read into its own local after the script call; reusing
  * the window-level depth local changes the register allocation. */
 static void world_map_push_cursor_level(void) {
-    window_xy_t* xy;
+    point32_t* xy;
     display_object_animated_t* records;
     s32 window_index;
     s32 depth;
@@ -485,17 +485,16 @@ static void world_map_push_cursor_level(void) {
 
     window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
 
-    /* Taken from the record array: naming g_window_record_positions here changes the
-     * target's address form. */
-    xy = (window_xy_t*)&g_window_records[0].position.x;
+    /* Keep the position-column base separate from the record base. */
+    xy = &g_window_records[0].position;
     records = g_window_records;
 
     depth = g_menu_stack_depth;
     g_menu_stack_records[depth].map_cursor.window_index = window_index;
     g_window_records[window_index].sequence = WINDOW_ANIM_CURSOR_STILL;
     g_window_records[window_index].priority = 12;
-    xy[window_index].x = 0;
-    xy[window_index].y = 0;
+    ((point32_t*)((u8*)xy + window_index * sizeof(display_object_animated_t)))->x = 0;
+    ((point32_t*)((u8*)xy + window_index * sizeof(display_object_animated_t)))->y = 0;
     records[window_index].anim_counter = 0;
     g_window_records[window_index].frame_index = 0;
 
@@ -506,8 +505,8 @@ static void world_map_push_cursor_level(void) {
     g_window_records[window_index].sequence = WINDOW_ANIM_MAP_EDGE_ARROWS;
     g_window_records[window_index].priority = 12;
     g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-    xy[window_index].x = 0;
-    xy[window_index].y = 0;
+    ((point32_t*)((u8*)xy + window_index * sizeof(display_object_animated_t)))->x = 0;
+    ((point32_t*)((u8*)xy + window_index * sizeof(display_object_animated_t)))->y = 0;
     records[window_index].anim_counter = 0;
     g_window_records[window_index].frame_index = 0;
 
@@ -1638,16 +1637,17 @@ void unit_panel_push_help_level(void) {
  * row's kind differs from the last one.
  *
  * Routing both stores through one base variable (rather than
- * `&g_window_record_positions[index]`) is what reproduces the target's separate base register
- * held in $a0 across the whole function. */
+ * direct record indexing) preserves the separate position-column base. */
 static void unit_panel_move_help_cursor(unit_panel_help_level_t* request) {
-    window_xy_t* xy = g_window_record_positions;
+    point32_t* xy = &g_window_records[0].position;
+    point32_t* position;
     s32 index = request->window_index;
     s32 layout = request->layout;
     s32 kind;
 
-    xy[index].x = g_unit_panel_help_rows[layout].x + 14;
-    xy[index].y = g_unit_panel_help_rows[layout].y + 12;
+    position = (point32_t*)((u8*)xy + index * sizeof(display_object_animated_t));
+    position->x = g_unit_panel_help_rows[layout].x + 14;
+    position->y = g_unit_panel_help_rows[layout].y + 12;
     kind = g_unit_panel_help_rows[layout].kind;
     if (kind != request->cached_layout_kind) {
         request->cached_layout_kind = kind;
@@ -1789,7 +1789,7 @@ void location_push_menu_level(s32 menu) {
     display_object_animated_t* records;
     location_menu_level_t* level;
     point32_t* base;
-    window_xy_t* position;
+    point32_t* position;
 
     /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
     g_world_map_marker_state.marker.picture_id = location_load_picture(g_world_map_marker_state.marker.location_id);
@@ -1855,9 +1855,9 @@ void location_push_menu_level(s32 menu) {
         g_window_records[index].priority = 0xB;
         records[index].anim_counter = 0;
         g_window_records[index].frame_index = 0;
-        position = (window_xy_t*)&records->position.x;
-        position[index].x = -8;
-        position[index].y = 0x10;
+        position = &records->position;
+        ((point32_t*)((u8*)position + index * sizeof(display_object_animated_t)))->x = -8;
+        ((point32_t*)((u8*)position + index * sizeof(display_object_animated_t)))->y = 0x10;
         ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
         ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
         ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;

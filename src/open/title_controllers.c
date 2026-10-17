@@ -299,11 +299,11 @@ void title_push_menu(s32 argument) {
     s32 record;
     s32 y;
     s32 controller;
-    window_xy_t* positions;
+    point32_t* positions;
     point32_t* position;
     display_object_animated_t* records;
     display_object_animated_t* entry;
-    s32* field;
+    void* field;
 
     g_system_runtime_flags = (g_system_runtime_flags & ~SYSTEM_RUNTIME_FLAG_RGB24) | SYSTEM_RUNTIME_FLAG_WIDE_SCREEN;
     gfx_init_screen_environments(0);
@@ -320,15 +320,15 @@ void title_push_menu(s32 argument) {
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     entry = g_window_records;
     records = entry;
-    field = &records->position.x;
-    positions = (window_xy_t*)field;
+    field = &records->position;
+    positions = field;
     g_controller_records[g_controller_depth].title.records_36[0] = record;
     g_window_records[record].sequence = 0x11;
     g_window_records[record].priority = 4;
     g_window_records[record].anim_counter = 0;
     g_window_records[record].frame_index = 0;
-    positions[record].x = 0;
-    positions[record].y = 0x64;
+    ((point32_t*)((u8*)positions + record * sizeof(display_object_animated_t)))->x = 0;
+    ((point32_t*)((u8*)positions + record * sizeof(display_object_animated_t)))->y = 0x64;
 
     for (i = 0, y = 0x1e; i < 4; i++) {
         record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
@@ -337,9 +337,9 @@ void title_push_menu(s32 argument) {
         g_window_records[record].priority = 4;
         records[record].anim_counter = 0;
         g_window_records[record].frame_index = 0;
-        positions[record].y = y;
+        ((point32_t*)((u8*)positions + record * sizeof(display_object_animated_t)))->y = y;
         y += 0xc;
-        positions[record].x = -0x18;
+        ((point32_t*)((u8*)positions + record * sizeof(display_object_animated_t)))->x = -0x18;
     }
 
     record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
@@ -368,7 +368,7 @@ void title_push_menu(s32 argument) {
     g_controller_depth = controller + 1;
     g_window_records[record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
     field = &g_controller_handler_indices[controller];
-    *field = CONTROLLER_TITLE_MENU;
+    *(s32*)field = CONTROLLER_TITLE_MENU;
 }
 
 /* Show the four title menu entries. */

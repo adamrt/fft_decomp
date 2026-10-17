@@ -90,16 +90,6 @@ typedef struct display_object_animated {
 } display_object_animated_t;
 typedef char display_object_animated_size_must_be_36[sizeof(display_object_animated_t) == 36 ? 1 : -1];
 
-/* Provisional: the column view of the 36-byte WLDCORE window records and OPEN
- * render records, rebased on their x/y pair (+0x18) and keeping the 0x24-byte
- * stride. */
-typedef struct window_xy {
-    s32 x;
-    s32 y;
-    u8 _unused_08[0x1c];
-} window_xy_t;
-typedef char window_xy_size_must_be_36[sizeof(window_xy_t) == 36 ? 1 : -1];
-
 /* record lists */
 s32 window_append_animated_record(void** list, s32* count);
 s32 window_append_record(void** list, s32* count);
@@ -225,9 +215,6 @@ extern display_object_animated_t g_window_records[];
 extern s32 g_window_record_count;
 extern s32 g_window_render_record_count;
 extern u32 g_window_image_buffer[];
-
-/* WLDCORE's x/y column view of the animated records. */
-extern window_xy_t g_window_record_positions[];
 
 void window_draw_centered_text(s32 window_index, s32 text_id);
 

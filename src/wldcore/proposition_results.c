@@ -1537,7 +1537,7 @@ static void sound_novel_push_history_level(void) {
     RECT bounds;
     u8 unused[8];
     display_object_animated_t* windows;
-    window_xy_t* positions;
+    point32_t* positions;
     point32_t* position;
     CVECTOR* colors;
     s16* newest;
@@ -1548,15 +1548,15 @@ static void sound_novel_push_history_level(void) {
     thread_suspend(WORLD_MAP_THREAD_SLOT_MESSAGE);
 
     windows = g_window_records;
-    positions = (window_xy_t*)&windows->position.x;
+    positions = &windows->position;
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.upper_window = index;
     g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_HISTORY_UPPER;
     g_window_records[index].priority = 9;
     g_window_records[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
-    positions[index].x = 0;
-    positions[index].y = -0x6A;
+    ((point32_t*)((u8*)positions + index * sizeof(display_object_animated_t)))->x = 0;
+    ((point32_t*)((u8*)positions + index * sizeof(display_object_animated_t)))->y = -0x6A;
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.lower_window = index;
@@ -1565,8 +1565,8 @@ static void sound_novel_push_history_level(void) {
     windows[index].anim_counter = 0;
     g_window_records[index].frame_index = 0;
     g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
-    positions[index].x = 0;
-    positions[index].y = 0x5E;
+    ((point32_t*)((u8*)positions + index * sizeof(display_object_animated_t)))->x = 0;
+    ((point32_t*)((u8*)positions + index * sizeof(display_object_animated_t)))->y = 0x5E;
 
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.render_index = index;
