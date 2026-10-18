@@ -92,13 +92,6 @@ extern u8 g_save_write_phase;
 extern u8 g_save_unread_flag; /* cleared with g_save_write_failed when a save starts; never read */
 
 /* slot list */
-/* Ten-byte number command in a 12-byte save-menu slot. */
-typedef struct save_slot_number_command {
-    menu_draw_number_command_t number;
-    u8 _unused_0a[2];
-} save_slot_number_command_t;
-typedef char save_slot_number_command_size_must_be_12[sizeof(save_slot_number_command_t) == 12 ? 1 : -1];
-
 extern s16 g_save_slot_index;
 extern s16 g_save_list_selected_slot;
 extern s16 g_save_list_top_row;
@@ -108,7 +101,10 @@ extern s16 g_save_list_scroll_base_y;
 extern u16 g_save_slot_cursor_animation;
 extern point16_t g_save_slot_cursor_position;
 extern s16 g_save_slot_text_row_ids[];
-extern save_slot_number_command_t g_save_slot_number_commands[4];
+static menu_draw_number_command_t g_save_slot_number_command = { 0x12, 10, 0, 0, 2, 5, 2, 47, 0, 0 };
+static menu_draw_number_command_t g_save_playtime_hours_command = { 0x12, 10, 0, 0, 2, 5, 2, 89, 0, 0 };
+static menu_draw_number_command_t g_save_playtime_minutes_command = { 0x12, 10, 0, 0, 2, 5, 2, 104, 0, 0 };
+static menu_draw_number_command_t g_save_playtime_seconds_command = { 0x12, 10, 0, 0, 2, 5, 2, 119, 0, 0 };
 extern oriented_quad_t g_save_slot_quads[];
 
 /* fade and queued sound */
@@ -1196,26 +1192,26 @@ static void save_update_slot_list(u16 input) {
             menu_gfx_enqueue_oriented_textured_quad(
                 &g_save_slot_quads[4], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             gfx_set_otag_index(11);
-            g_save_slot_number_commands[0].number.y = g_save_slot_quads[0].position.y;
-            g_save_slot_number_commands[0].number.value = index + 1;
-            menu_draw_decimal_number(&g_save_slot_number_commands[0].number);
+            g_save_slot_number_command.y = g_save_slot_quads[0].position.y;
+            g_save_slot_number_command.value = index + 1;
+            menu_draw_decimal_number(&g_save_slot_number_command);
         }
 
         g_save_slot_quads[2].position.y = g_save_slot_quads[0].position.y;
         if (g_save_slot_quads[2].position.y >= 0 && g_save_slot_quads[2].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
                 &g_save_slot_quads[2], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            g_save_slot_number_commands[3].number.y = g_save_slot_number_commands[2].number.y
-                = g_save_slot_number_commands[1].number.y = g_save_slot_quads[0].position.y;
-            g_save_slot_number_commands[3].number.value = g_save_slot_playtimes[index].seconds;
-            g_save_slot_number_commands[2].number.value = g_save_slot_playtimes[index].minutes;
-            g_save_slot_number_commands[1].number.value = g_save_slot_playtimes[index].hours;
-            if (g_save_slot_number_commands[1].number.value >= 100) {
-                g_save_slot_number_commands[1].number.value = 99;
+            g_save_playtime_seconds_command.y = g_save_playtime_minutes_command.y = g_save_playtime_hours_command.y
+                = g_save_slot_quads[0].position.y;
+            g_save_playtime_seconds_command.value = g_save_slot_playtimes[index].seconds;
+            g_save_playtime_minutes_command.value = g_save_slot_playtimes[index].minutes;
+            g_save_playtime_hours_command.value = g_save_slot_playtimes[index].hours;
+            if (g_save_playtime_hours_command.value >= 100) {
+                g_save_playtime_hours_command.value = 99;
             }
-            menu_draw_decimal_number(&g_save_slot_number_commands[1].number);
-            menu_draw_decimal_number(&g_save_slot_number_commands[2].number);
-            menu_draw_decimal_number(&g_save_slot_number_commands[3].number);
+            menu_draw_decimal_number(&g_save_playtime_hours_command);
+            menu_draw_decimal_number(&g_save_playtime_minutes_command);
+            menu_draw_decimal_number(&g_save_playtime_seconds_command);
         }
 
         if (g_save_slot_file_states[index] == SAVE_SLOT_AVAILABLE) {

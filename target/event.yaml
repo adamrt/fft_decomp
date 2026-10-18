@@ -884,7 +884,7 @@ units:
   - {name: graphic_thread, source: src/event/card/graphic_thread.c, data: [{addr: 0x801d8874, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801d91d4, size: 4, hash: df3f619804a92fdb}]}
   - {name: input, source: src/event/card/input.c}
   - {name: memcard, source: src/lib/memcard.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801ca888, size: 4, hash: ad95131bc0b799c0}]}
-  - {name: save_screen, source: src/event/card/save_screen.c, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {name: save_screen, source: src/event/card/save_screen.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801c9910, size: 46, hash: 072f2816247853a7}]}
   - {name: screen_fade, source: src/lib/menu/screen_fade.c}
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
@@ -1028,7 +1028,10 @@ data:
   - {addr: 0x801c98f0, name: g_save_slot_window_command}
   - {addr: 0x801c98f8, name: g_save_slot_window}
   - {addr: 0x801c9908, name: g_save_slot_text_row_ids}
-  - {addr: 0x801c9910, name: g_save_slot_number_commands}
+  - {addr: 0x801c9910, name: g_save_slot_number_command}
+  - {addr: 0x801c991c, name: g_save_playtime_hours_command}
+  - {addr: 0x801c9928, name: g_save_playtime_minutes_command}
+  - {addr: 0x801c9934, name: g_save_playtime_seconds_command}
   - {addr: 0x801c9940, name: g_save_slot_cursor_position}
   - {addr: 0x801c9944, name: g_save_slot_cursor_animation}
   - {addr: 0x801c9946, name: g_save_list_input_armed}
