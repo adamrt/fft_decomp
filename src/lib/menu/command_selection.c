@@ -23,6 +23,14 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
+/* The mode argument of command_build_ability_list: which list an Arithmeticks
+ * (Math Skill) menu shows. Any other menu type builds its ability list. */
+typedef enum menu_arithmeticks_list {
+    MENU_ARITHMETICKS_LIST_ABILITIES = 0, /* skillset_math_collect_calculator_abilities */
+    MENU_ARITHMETICKS_LIST_MULTIPLES = 1, /* skillset_math_load_multiples */
+    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2 /* skillset_math_load_attributes */
+} menu_arithmeticks_list_e;
+
 extern s16 g_command_skillset_row_actions[];
 extern u8 g_command_skillset_disabled_flags[]; /* per-row grayed flag */
 extern s16 g_command_action_slot_selected_option;

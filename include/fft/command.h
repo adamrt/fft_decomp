@@ -180,14 +180,6 @@ typedef struct menu_ability_list {
     u8 skill_ct[82]; /* 0x334 */
 } menu_ability_list_t;
 
-/* The mode argument of command_build_ability_list: which list an Arithmeticks
- * (Math Skill) menu shows. Any other menu type builds its ability list. */
-typedef enum menu_arithmeticks_list {
-    MENU_ARITHMETICKS_LIST_ABILITIES = 0, /* skillset_math_collect_calculator_abilities */
-    MENU_ARITHMETICKS_LIST_MULTIPLES = 1, /* skillset_math_load_multiples */
-    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2 /* skillset_math_load_attributes */
-} menu_arithmeticks_list_e;
-
 extern s32 g_menu_scrolling_list_depth;
 
 extern s16 g_command_action_slot_row_actions[6];
