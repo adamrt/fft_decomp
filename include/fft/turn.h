@@ -60,13 +60,13 @@ typedef enum turn_action_flags { TURN_ACTION_MOVED = 0x01, TURN_ACTION_ACTED = 0
  * the result is capped at 60. */
 enum { TURN_UNUSED_CT_REFUND = 20, TURN_END_CT_MAX = 60 };
 
-extern s32 g_turn_clock_state;
-extern s32 g_turn_clock_resume_state;
+extern turn_clock_state_e g_turn_clock_state;
+extern turn_clock_state_e g_turn_clock_resume_state;
 extern s32 g_turn_unit_id;
 extern s32 g_turn_event_type; /* turn_event_e */
 
 s32 turn_run_clock(turn_clock_mode_e mode);
-s32 turn_calculate_status_flags(const unit_stats_t* unit);
+turn_status_flags_e turn_calculate_status_flags(const unit_stats_t* unit);
 void turn_start_next_event(void);
 void turn_set_move_taken(s32 unit_id);
 void turn_set_act_taken(s32 unit_id);

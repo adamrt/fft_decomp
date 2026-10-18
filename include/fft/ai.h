@@ -8,6 +8,7 @@
 #include "fft/battle_map.h"
 #include "fft/script.h"
 #include "fft/status.h"
+#include "fft/turn.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
@@ -436,12 +437,12 @@ typedef struct ai_data {
     u8 math_type_index;       /* 0x0ede; 0..3 */
     u8 math_multiplier_index; /* 0x0edf; 4..7 */
     /* Turn-controller globals saved and restored around the action simulation. */
-    s32 saved_between_turn_state;        /* 0x0ee0; g_turn_clock_state during the simulation */
-    s32 saved_between_turn_resume_state; /* 0x0ee4; g_turn_clock_resume_state */
-    s32 saved_turn_unit_id;              /* 0x0ee8; g_turn_unit_id */
-    u16 simulated_turn_events;           /* 0x0eec; interturn loop stops at 256 */
-    u8 action_simulation_phase;          /* 0x0eee; ai_simulation_phase_e */
-    u8 _padding_0eef;                    /* aligns ability_lists */
+    turn_clock_state_e saved_between_turn_state;        /* 0x0ee0; g_turn_clock_state during the simulation */
+    turn_clock_state_e saved_between_turn_resume_state; /* 0x0ee4; g_turn_clock_resume_state */
+    s32 saved_turn_unit_id;                             /* 0x0ee8; g_turn_unit_id */
+    u16 simulated_turn_events;                          /* 0x0eec; interturn loop stops at 256 */
+    u8 action_simulation_phase;                         /* 0x0eee; ai_simulation_phase_e */
+    u8 _padding_0eef;                                   /* aligns ability_lists */
     ai_ability_entry_t ability_lists[AI_COMPACT_UNIT_COUNT][AI_ABILITY_LIST_COUNT]; /* 0x0ef0; 0x88 bytes per unit */
     /* Blood Suck/Frog IDs start without unit bits; ai_select_status_imposed ORs the
      * acting physical slot into bits 10..15 before loading the entry. */

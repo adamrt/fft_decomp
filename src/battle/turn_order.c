@@ -26,7 +26,9 @@ static s32 at_list_is_unit_excluded(const unit_stats_t* unit);
  * returns 0xd000 | the first unit not Dead, Crystal, Jumping, Petrified or Treasure (0xdf00 if
  * none). Otherwise it steps the between-turn states (CT gain, the 100-CT pick, charge and status
  * countdowns, poison and regen, mimes) until one yields a turn_event_e | unit id, giving up
- * with TURN_EVENT_NONE after 1201 steps. */
+ * with TURN_EVENT_NONE after 1201 steps.
+ * Keep the four phase stores on their loop-closing lines: splitting those lines
+ * changes GCC 2.6.3's loop-exit code. */
 s32 turn_run_clock(turn_clock_mode_e mode) {
     unit_stats_t* unit;
     s32 result = 0;
@@ -34,7 +36,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
     s32 i;
     s32 best;
     s32 ret;
-    s32 flags;
+    turn_status_flags_e flags;
     u16 max_ct;
     u16 speed;
     u16 ct;
@@ -275,7 +277,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
             for (i = 0; i < UNIT_SLOT_COUNT; i++) {
                 unit = &g_unit_stats[i];
                 if (unit->has_turn != 0) {
-                    s32 unit_status;
+                    turn_status_flags_e unit_status;
                     s32 end_turn;
 
                     unit_status = turn_calculate_status_flags(unit);
@@ -473,11 +475,11 @@ static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
  * a ridden mount; INCAPACITATED | DEAD for a dead unit; otherwise INCAPACITATED |
  * SLEEP for Sleep plus the HASTE and SLOW bits. The retail status data puts Sleep
  * in the freeze-CT set, which leaves the SLEEP result unreachable. */
-s32 turn_calculate_status_flags(const unit_stats_t* unit) {
+turn_status_flags_e turn_calculate_status_flags(const unit_stats_t* unit) {
     s32 status1;
     s32 status4;
     s32 status5;
-    s32 flags;
+    turn_status_flags_e flags;
 
     if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
         return TURN_STATUS_CT_FROZEN;
