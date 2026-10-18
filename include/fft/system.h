@@ -59,8 +59,8 @@ typedef enum system_flags {
     SYSTEM_FLAG_UNLOCK_ALL = 0x00400000,
     /* Set by world_map_step_debug_variable_list_request: the return level opens the variable list. */
     SYSTEM_FLAG_REQUEST_VARIABLE_LIST = 0x00800000,
-    /* Set by world_map_step_fixed_number_panel_request: the return level opens the fixed number panel. */
-    SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL = 0x01000000,
+    /* Set by world_map_step_debug_party_number_request: opens the debug Party number panel. */
+    SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER = 0x01000000,
     /* The location menu chose a deep-dungeon battle: wldcore_entrypoint returns 4. */
     SYSTEM_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,
     /* Set by world_map_clear_screen_and_set_clip_rect; the return level then recaptures the world frame. */

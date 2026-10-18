@@ -1,5 +1,8 @@
-/* Location lists, destination confirmation, submenu text pages, common graphics and text loading, thread results and
- * control, palettes, the main menu threads, the card menu, and the formation open requests and screen dispatch. */
+/* Formation, shops and the world-map menu share WORLD's menu graphics, text
+ * buffer and thread context; OPEN also uses them for name entry and the music
+ * test. The menu frame handles input and screen requests: Formation and Save
+ * return here, while Tutorial and Brave Story continue through WLDCORE's menu
+ * stack. */
 
 #include "fft/ability_list.h"
 #include "fft/command.h"
@@ -48,9 +51,9 @@ typedef struct screen_unit_graphics {
 } screen_unit_graphics_t;
 typedef char screen_unit_graphics_size_must_be_65536[sizeof(screen_unit_graphics_t) == 65536 ? 1 : -1];
 
-/* State of a screen request raised from the world map menu (the
- * *_request_state globals stepped by screen_menu_frame):
- * fade out, run the screen, fade back in. States 4 to 7 only count frames. */
+/* World-map menu requests share the fade-out states. Formation and Save
+ * then run locally, wait four dark frames (states 4 to 7), and fade back in;
+ * Tutorial and Brave Story hand off to WLDCORE at state 3. */
 typedef enum world_map_request_state {
     WORLD_MAP_REQUEST_IDLE = 0,
     WORLD_MAP_REQUEST_START_FADE_OUT = 1,
@@ -60,10 +63,10 @@ typedef enum world_map_request_state {
     WORLD_MAP_REQUEST_WAIT_FADE_IN = 9
 } world_map_request_state_e;
 
-/* A 0x24-byte menu thread group (g_world_map_menu_groups, by request index 0-3): up to three menu threads the
- * main menu starts together. */
+/* Requested text-window group for thread slots 9, 10 and 11. The four rows
+ * select no windows, the first two, all three, or only the second window. */
 typedef struct world_map_menu_group {
-    void (*function[3])(void); /* 0x00; -1 when unused */
+    void (*function[3])(void); /* 0x00; -1 means do not start a replacement */
     s32 thread_id[3];          /* 0x0c; member thread slots */
     s32 task_id[3];            /* 0x18 */
 } world_map_menu_group_t;
@@ -86,7 +89,7 @@ extern menu_scroll_text_layout_t g_world_map_destination_list_layout;
 extern s16 g_world_map_brave_story_request_state; /* world_map_request_state_e */
 extern s16 g_world_map_tutorial_request_state;    /* world_map_request_state_e */
 extern s16 g_world_map_debug_variable_list_request_state;
-extern s16 g_world_map_fixed_number_panel_request_state;
+extern s16 g_world_map_debug_party_number_request_state;
 extern s16 g_formation_open_request_state; /* world_map_request_state_e */
 extern s16 g_save_menu_request_state;      /* world_map_request_state_e */
 
@@ -730,10 +733,10 @@ void world_map_open_tutorial(void) {
     thread_exit_current();
 }
 
-/* Menu action: request the fixed number panel from the world map, hand the formation input
- * state to the event input and exit the thread. */
-void world_map_open_fixed_number_panel(void) {
-    g_world_map_fixed_number_panel_request_state = 1;
+/* Request the debug Party number panel, which replaces the roster from
+ * an ENTD encounter, then hand input back to the event state and exit. */
+void world_map_open_debug_party_number(void) {
+    g_world_map_debug_party_number_request_state = 1;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
     thread_exit_current();
@@ -776,7 +779,7 @@ static void world_map_hide(void) {
         | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
 }
 
-/* Restore the system flags saved before the formation screen opened. */
+/* Restore the world-map flags saved around Formation or Save. */
 static void world_map_restore(void) {
     g_system_flags = g_formation_saved_system_flags;
 }
@@ -907,11 +910,10 @@ static void world_map_step_debug_variable_list_request(void) {
     }
 }
 
-/* Serve a pending request to open the fixed number panel from the world
- * map: reset the menu context, reload and relocate the menu text file and
- * raise SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL. */
-static void world_map_step_fixed_number_panel_request(void) {
-    s32 state = g_world_map_fixed_number_panel_request_state;
+/* Reload the WORLD menu text and hand the debug Party number request to
+ * WLDCORE, which opens the encounter-number editor. */
+static void world_map_step_debug_party_number_request(void) {
+    s32 state = g_world_map_debug_party_number_request_state;
 
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
@@ -920,12 +922,13 @@ static void world_map_step_fixed_number_panel_request(void) {
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, g_screen_text_file_buffer);
         text_relocate_pointer_table(g_screen_text_file_buffer);
         screen_set_brightness(0x80, 0x80, 0x80);
-        g_world_map_fixed_number_panel_request_state = 0;
-        g_system_flags |= SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL;
+        g_world_map_debug_party_number_request_state = 0;
+        g_system_flags |= SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
     }
 }
 
-/* Sibling of world_map_step_tutorial_request driven by g_save_menu_request_state. */
+/* Run Save and restore the world map through the same dark-frame and fade-in
+ * sequence as Formation, unless Save requests a restart. */
 static void world_map_step_save_request(void) {
     s16 state = g_save_menu_request_state;
     s32 result;
@@ -1035,9 +1038,9 @@ static void world_map_menu_start_group(s32 parameter, s32 location_id, s32 windo
 
 /* Menu thread-group dispatcher thread. Each request in parameter 1 selects a
  * group: running members with the expected task are signaled to continue,
- * others are signaled to finish (state 1) and awaited, then every finished
- * or idle member is restarted with its function, the matching menu entry, and
- * its task id. The thread exits once no further request is pending. */
+ * others are signaled to finish (state 1) and awaited. Finished or idle members
+ * with callbacks are started with the matching menu entry and task id; a -1
+ * callback starts no replacement. The thread exits once no request is pending. */
 static void world_map_menu_group_thread(void) {
     s32 state[16];
     world_map_menu_group_t* group;
@@ -1162,8 +1165,8 @@ extern u32 g_screen_current_input, g_screen_previous_input, g_screen_initial_rep
 /* Per-frame WORLD menu step: loads the input timing profile selected by
  * the finger cursor repeat speed option, derives the edge/auto-repeat 32-bit input mask
  * (masked by the allowed-button mask and cleared while any of the six
- * g_formation_open_request_state.. flags is set), runs the formation/memory-card request
- * updates, publishes the input, yields once while tracking thread status
+ * screen-request flags is set), advances the pending world-map screen
+ * requests, publishes the input, yields once while tracking thread status
  * changes and returns the menu result slot g_command_pending_selection[0] (-2 while pending).
  * WORLD's sibling of menu_input_update_event_state. */
 s16 screen_menu_frame(u32* otag, u32 input) {
@@ -1247,7 +1250,7 @@ s16 screen_menu_frame(u32* otag, u32 input) {
     if (g_world_map_brave_story_request_state != WORLD_MAP_REQUEST_IDLE) {
         g_screen_new_buttons = 0;
     }
-    if (g_world_map_fixed_number_panel_request_state != 0) {
+    if (g_world_map_debug_party_number_request_state != 0) {
         g_screen_new_buttons = 0;
     }
     g_formation_screen_active = 1;
@@ -1256,7 +1259,7 @@ s16 screen_menu_frame(u32* otag, u32 input) {
     world_map_step_save_request();
     world_map_step_tutorial_request();
     world_map_step_debug_variable_list_request();
-    world_map_step_fixed_number_panel_request();
+    world_map_step_debug_party_number_request();
     g_command_pending_selection[0] = -2;
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;

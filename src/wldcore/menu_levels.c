@@ -1178,7 +1178,7 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
         return;
     }
 
-    if (flags & SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL) {
+    if (flags & SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER) {
         debug_push_party_number_level();
         return;
     }
@@ -2255,7 +2255,7 @@ void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
     }
 }
 
-/* Push the debug "Party number" panel (SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL):
+/* Push the debug "Party number" panel (SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER):
  * a number from 0 to 999, starting at 0. Sibling of
  * debug_push_variable_edit_level. */
 static void debug_push_party_number_level(void) {

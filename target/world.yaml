@@ -587,7 +587,7 @@ functions:
   - {addr: 0x80106f64, size: 116, name: option_open_game_options_in_previous_thread, hash: a0a70cdda35087d4, unit: organization_resources}
   - {addr: 0x80106fd8, size: 68, name: world_map_open_save, hash: ec01d2a5fda2cbe4, unit: organization_resources}
   - {addr: 0x8010701c, size: 68, name: world_map_open_tutorial, hash: bdb3ac15aae59c65, unit: organization_resources}
-  - {addr: 0x80107060, size: 68, name: world_map_open_fixed_number_panel, hash: 3dc45701a8b5d353, unit: organization_resources}
+  - {addr: 0x80107060, size: 68, name: world_map_open_debug_party_number, hash: 3dc45701a8b5d353, unit: organization_resources}
   - {addr: 0x801070a4, size: 68, name: world_map_open_debug_variable_list, hash: 26aa3068120ab41f, unit: organization_resources}
   - {addr: 0x801070e8, size: 68, name: world_map_open_formation, hash: 115d4168d000d39b, unit: organization_resources}
   - {addr: 0x8010712c, size: 68, name: world_map_open_brave_story, hash: ddd76c18e7dea66a, unit: organization_resources}
@@ -598,7 +598,7 @@ functions:
   - {addr: 0x80107424, size: 84, name: formation_run_tutorial, hash: 4353fba0e44a929c, unit: organization_resources}
   - {addr: 0x80107478, size: 212, name: world_map_step_tutorial_request, hash: 3157af30a36f1166, unit: organization_resources}
   - {addr: 0x8010754c, size: 112, name: world_map_step_debug_variable_list_request, hash: 26d37c4bed94e7eb, unit: organization_resources}
-  - {addr: 0x801075bc, size: 168, name: world_map_step_fixed_number_panel_request, hash: cf5b9621fee98ca3, unit: organization_resources}
+  - {addr: 0x801075bc, size: 168, name: world_map_step_debug_party_number_request, hash: cf5b9621fee98ca3, unit: organization_resources}
   - {addr: 0x80107664, size: 544, name: world_map_step_save_request, hash: d35303cd533e2136, unit: organization_resources}
   - {addr: 0x80107884, size: 200, name: world_map_step_brave_story_request, hash: bf71d1d187a767ae, unit: organization_resources}
   - {addr: 0x8010794c, size: 200, name: world_map_menu_start_group, hash: ff82ed2342dd1d6a, unit: organization_resources}
@@ -1410,7 +1410,7 @@ data:
   - {addr: 0x8016e460, name: g_save_menu_request_state}
   - {addr: 0x8016e462, name: g_world_map_brave_story_request_state}
   - {addr: 0x8016e464, name: g_world_map_debug_variable_list_request_state}
-  - {addr: 0x8016e466, name: g_world_map_fixed_number_panel_request_state}
+  - {addr: 0x8016e466, name: g_world_map_debug_party_number_request_state}
   - {addr: 0x8016e468, name: g_world_map_menu_group_parameter}
   - {addr: 0x8016e46c, name: g_world_map_destination_id}
   - {addr: 0x8016e470, name: g_world_map_destination_position}
