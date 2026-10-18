@@ -45,8 +45,11 @@ preserving every original byte.
 
 - `src/<program>/` (`main`, `battle`, `world`, `wldcore`, `open`): each
   program's own code as feature files of a few to a few dozen functions,
-  named after what they hold. A file's leading comment briefly describes
-  what the file holds.
+  named after what they hold. A file's leading comment explains its role in
+  the game for a programmer familiar with FFT. Use a short paragraph when
+  useful to describe the feature, its state or its relationship to other
+  systems; there is no one-line limit. Avoid generic summaries, function
+  inventories and text added only to fill space.
 - `src/lib/`: shared game components, grouped by concept. `event/` holds
   the script interpreter, dialog and related BATTLE/WORLD services; `menu/`
   holds shared in-game menus, windows, text and drawing support, grouped by
@@ -106,6 +109,10 @@ instead of including the record's header.
 - Trace casts, shifts, masks and unions through readers and writers before
   changing types. Keep genuine encoded data and format-dispatch boundaries;
   avoid invented overlays or splitting records without evidence.
+  Prefer concrete records and named fields over raw union views when the
+  accesses support them. Retain genuine alternate layouts and indexed data;
+  removing a union must not move the same uncertainty into casts or byte
+  arithmetic.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
