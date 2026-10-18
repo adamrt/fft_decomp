@@ -11,7 +11,7 @@ links: [world]
 
 units:
   - {name: bar, source: src/wldcore/bar.c}
-  - {name: brave_story, source: src/wldcore/brave_story.c}
+  - {name: brave_story, source: src/wldcore/brave_story.c, data: [{addr: 0x800971b0, size: 128, hash: 6fb86c0f90df7048}]}
   - {name: brave_story_collections, source: src/wldcore/brave_story_collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
   - {name: calendar_advance_days, source: src/wldcore/calendar_advance_days.c, data: [{addr: 0x80096a48, size: 4, hash: b687ec89faf1bf8a}]}
   - {name: event_transition, source: src/wldcore/event_transition.c, data: [{addr: 0x8009f288, size: 36, hash: 6db65fd59fd356f6}]}
@@ -491,6 +491,7 @@ data:
   - {addr: 0x80096a5c, name: g_world_map_tile_descriptors}
   - {addr: 0x80096a60, name: g_picture_dissolve_band_order}
   - {addr: 0x80097028, name: g_brave_story_birthday_table}
+  - {addr: 0x800971b0, name: g_brave_story_replay_event_table}
   - {addr: 0x8009d340, name: g_proposition_data}
   - {addr: 0x8009e0ec, name: g_picture_sector_offsets}
   - {addr: 0x8009e260, name: g_picture_background_sector_offsets}
