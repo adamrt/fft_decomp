@@ -411,16 +411,16 @@ static effect_work_record_t* effect_particle_alloc_work_record(s16 record_index,
     g_effect_free_work_record_head = work->next;
     switch (kind & EFFECT_WORK_KIND_MASK) {
     case EFFECT_WORK_KIND_SPRITE_WORLD:
-        work->data = effect_particle_alloc_list_node(EFFECT_LIST_NODE_WORLD);
+        work->data.sprite = effect_particle_alloc_list_node(EFFECT_LIST_NODE_WORLD);
         break;
     case EFFECT_WORK_KIND_SPRITE_SCREEN_OFFSET:
-        work->data = effect_particle_alloc_list_node(EFFECT_LIST_NODE_SCREEN_OFFSET);
+        work->data.sprite = effect_particle_alloc_list_node(EFFECT_LIST_NODE_SCREEN_OFFSET);
         break;
     case EFFECT_WORK_KIND_SPRITE_WORLD_UNSCALED:
-        work->data = effect_particle_alloc_list_node(EFFECT_LIST_NODE_WORLD_UNSCALED);
+        work->data.sprite = effect_particle_alloc_list_node(EFFECT_LIST_NODE_WORLD_UNSCALED);
         break;
     case EFFECT_WORK_KIND_SPRITE_SCREEN:
-        work->data = effect_particle_alloc_list_node(EFFECT_LIST_NODE_SCREEN);
+        work->data.sprite = effect_particle_alloc_list_node(EFFECT_LIST_NODE_SCREEN);
         break;
     }
     work->prev = 0;
@@ -452,10 +452,10 @@ void effect_particle_free_work_record(s16 record_index, effect_work_record_t* wo
     case EFFECT_WORK_KIND_SPRITE_SCREEN_OFFSET:
     case EFFECT_WORK_KIND_SPRITE_WORLD_UNSCALED:
     case EFFECT_WORK_KIND_SPRITE_SCREEN:
-        effect_particle_free_list_node(work->data);
+        effect_particle_free_list_node(work->data.sprite);
         break;
     case EFFECT_WORK_KIND_HEAP_BLOCK:
-        effect_heap_free_block(work->data);
+        effect_heap_free_block(work->data.heap);
         break;
     }
     work->next = g_effect_free_work_record_head;
@@ -473,9 +473,9 @@ static s32 effect_particle_update_node_from_work(effect_record_t* unused_record,
     SVECTOR direction;
     VECTOR rotated;
 
-    work->data->x = work->motion.position.x >> 12;
-    work->data->y = work->motion.position.y >> 12;
-    work->data->z = work->motion.position.z >> 12;
+    work->data.sprite->x = work->motion.position.x >> 12;
+    work->data.sprite->y = work->motion.position.y >> 12;
+    work->data.sprite->z = work->motion.position.z >> 12;
     if (work->kind_flags & EFFECT_EMITTER_ORIENT_TO_VELOCITY) {
         SetRotMatrix(&g_camera_matrix);
         SetTransMatrix(&g_effect_particle_heading_matrix);
@@ -483,15 +483,15 @@ static s32 effect_particle_update_node_from_work(effect_record_t* unused_record,
         /* The 32-bit flag value lands in the output vector's 32-bit pad field; the target frame
          * has no separate flag slot. */
         RotTrans(&direction, &rotated, &rotated.pad);
-        work->data->screen_rotation_angle = ratan2(rotated.vy, rotated.vx);
+        work->data.sprite->screen_rotation_angle = ratan2(rotated.vy, rotated.vx);
     }
     if (work->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-        effect_particle_render_sprite(work->data,
+        effect_particle_render_sprite(work->data.sprite,
             g_effect_animation_curve_data->curves[work->color_curves.r][work->curve_frame],
             g_effect_animation_curve_data->curves[work->color_curves.g][work->curve_frame],
             g_effect_animation_curve_data->curves[work->color_curves.b][work->curve_frame]);
     } else {
-        effect_particle_render_sprite(work->data, 0x80, 0x80, 0x80);
+        effect_particle_render_sprite(work->data.sprite, 0x80, 0x80, 0x80);
     }
 }
 
@@ -640,7 +640,7 @@ s32 effect_particle_spawn_from_emitter(
         particle->flags = behavior_flags;
         particle->curve_frame = 0;
         effect_particle_init_animation_sequence(
-            particle->data, entry->emitter.animation_frame_group, entry->emitter.animation_index);
+            particle->data.sprite, entry->emitter.animation_frame_group, entry->emitter.animation_index);
     }
     /* Each record is pushed at the head of the owner's list, so the last one
      * allocated leads the batch and `next` walks the rest of it. */
