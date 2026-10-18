@@ -21,6 +21,53 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Weather particles of g_weather_particles: snow
+ * (BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain
+ * (BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES) fills two sets of 32. */
+typedef struct weather_particle {
+    s16 x;
+    s16 y;
+    s16 z;
+    /* g_weather_fall_speed, plus the sprite index for 0x8f; rain
+     * reuses it as splash state (0/1/2) and the splash set as a countdown. */
+    s16 fall_speed;
+} weather_particle_t;
+
+/* Lightning flash state (g_weather_lightning_state).
+ * battle_map_light_set_matrices fills color_matrices[0] and [2]; the lightning weather commands
+ * clear the rotation part of color_matrices[1] and start the 60-frame flash timer. */
+typedef struct weather_lightning_state {
+    u32 timer;                                                       /* 0x00 */
+    MATRIX color_matrices[3];                                        /* 0x04 */
+    u8 _unused_64[0x20];                                             /* 0x64 */
+    CVECTOR base_colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT]; /* 0x84 */
+    CVECTOR colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT];      /* 0x8c */
+} weather_lightning_state_t;
+typedef char weather_lightning_state_size_must_be_148[(sizeof(weather_lightning_state_t) == 148) ? 1 : -1];
+
+/* Values of g_weather_lightning_mode. */
+typedef enum weather_lightning_mode {
+    BATTLE_MAP_LIGHTNING_OFF = 0,
+    BATTLE_MAP_LIGHTNING_RANDOM = 1,
+    BATTLE_MAP_LIGHTNING_ONCE = 2 /* back to OFF when the flash ends */
+} weather_lightning_mode_e;
+
+/* One instruction from a mesh animation record of type 2. A duration of
+ * 0 stops the part's animation when it is reached. */
+typedef struct battle_map_mesh_instruction {
+    u8 keyframe;  /* 1-based keyframe id */
+    u8 next;      /* index of the following instruction */
+    u16 duration; /* frames */
+} battle_map_mesh_instruction_t;
+
+/* A mesh part's 8 animation states of 17 instructions (index 0 unused).
+ * States are loaded state-major; row 0 is also the running copy that event
+ * command 0x80 overwrites with the selected state. */
+typedef struct battle_map_mesh_instructions {
+    battle_map_mesh_instruction_t states[8][17];
+} battle_map_mesh_instructions_t;
+typedef char battle_map_mesh_instructions_size_must_be_544[(sizeof(battle_map_mesh_instructions_t) == 544) ? 1 : -1];
+
 /* Terrain lookup and tile-mark state. */
 extern s32 g_battle_map_lowest_surface_y;
 extern battle_map_tile_t* g_battle_map_tile_data_ptr;

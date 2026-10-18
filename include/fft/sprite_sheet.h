@@ -304,13 +304,6 @@ u8** sprite_sheet_get_weapon_seq(u32 spritesheet_id);
 sprite_weapon_shp_t* sprite_sheet_get_effect_shp(u32 unused_spritesheet_id);
 u8** sprite_sheet_get_effect_seq(u32 unused_spritesheet_id);
 
-/* item graphics */
-/* Where a weapon or item graphic sits in WEP.SPR, per item graphic id. */
-typedef struct sprite_item_graphic {
-    u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for BATTLE_MAP_CLUT_ROW_ITEM_A, low for _B */
-    u8 texture_row; /* 0x01; top of the graphic on its texture page, in steps of 8 pixels */
-} sprite_item_graphic_t;
-
 /* VRAM slots */
 /* Texture pages stored in a sprite display record's tpage. */
 enum {

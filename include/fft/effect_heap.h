@@ -7,8 +7,6 @@
 #include "psx/types.h"
 
 /* allocator */
-enum { EFFECT_HEAP_OWNER_COUNT = 17 };
-
 /* Battle heap block header: blocks are counted in 8-byte units and linked
  * either on the circular free list (g_effect_heap_rover) or on an owner list.
  * Owner 0 holds shared pools; owners 1 through 16 hold effect-script records. */
@@ -17,11 +15,6 @@ typedef struct effect_heap_node {
     u16 size; /* in 8-byte blocks */
     s16 owner;
 } effect_heap_node_t;
-
-typedef struct effect_heap_owner_list {
-    effect_heap_node_t* head;
-    s32 _unused_04;
-} effect_heap_owner_list_t;
 
 void effect_heap_init(effect_heap_node_t* buffer, u32 buffer_size);
 void* effect_heap_alloc_block(u32 size, s32 owner);

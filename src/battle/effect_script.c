@@ -33,6 +33,15 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* g_effect_load_state: the steps of effect_file_update_load, which loads the ability's effect file
+ * while its charge secondary effect plays. */
+typedef enum effect_load_state {
+    EFFECT_LOAD_START = 0,           /* start reading the file */
+    EFFECT_LOAD_READING = 1,         /* wait for the read */
+    EFFECT_LOAD_COUNTDOWN = 2,       /* wait out the 60 frames given to a charge secondary effect */
+    EFFECT_LOAD_ENDING_SECONDARY = 3 /* wait for the charge secondary effect to end */
+} effect_load_state_e;
+
 /* Loaded effect sections and their saved starting positions. */
 extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
 extern s32 g_effect_sound_data_base;

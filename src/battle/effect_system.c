@@ -32,6 +32,19 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+enum { EFFECT_SECONDARY_ANIMATION_COUNT = 22 };
+
+/* Four-byte records of g_effect_secondary_animations, indexed by animation id
+ * (effect_secondary_animation_id_e); byte 0 selects the
+ * g_effect_secondary_handlers handler. */
+typedef struct effect_secondary_animation {
+    u8 function_id; /* 0x00 */
+    u8 _padding_01; /* 0x01; aligns parameter */
+    /* 0x02; the projectile handlers: effect_model_e in the low byte, or
+     * EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC; the charge handler: its parameter row */
+    s16 parameter;
+} effect_secondary_animation_t;
+
 /* Maps a camera quadrant index to its map-tile camera-block direction. */
 extern u8 g_camera_quadrant_block_directions[4];
 

@@ -157,22 +157,6 @@ typedef enum battle_map_mesh_tween_flags {
     BATTLE_MAP_MESH_TWEEN_RAISED_SINE = 0x10 /* delta * (sin + 1) */
 } battle_map_mesh_tween_flags_e;
 
-/* One instruction from a mesh animation record of type 2. A duration of
- * 0 stops the part's animation when it is reached. */
-typedef struct battle_map_mesh_instruction {
-    u8 keyframe;  /* 1-based keyframe id */
-    u8 next;      /* index of the following instruction */
-    u16 duration; /* frames */
-} battle_map_mesh_instruction_t;
-
-/* A mesh part's 8 animation states of 17 instructions (index 0 unused).
- * States are loaded state-major; row 0 is also the running copy that event
- * command 0x80 overwrites with the selected state. */
-typedef struct battle_map_mesh_instructions {
-    battle_map_mesh_instruction_t states[8][17];
-} battle_map_mesh_instructions_t;
-typedef char battle_map_mesh_instructions_size_must_be_544[(sizeof(battle_map_mesh_instructions_t) == 544) ? 1 : -1];
-
 extern battle_map_mesh_part_t g_battle_map_mesh_parts[9];
 extern const battle_map_mesh_geometry_t* g_battle_map_mesh_part_geometry[9];
 

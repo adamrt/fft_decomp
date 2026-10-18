@@ -33,6 +33,12 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Where a weapon or item graphic sits in WEP.SPR, per item graphic id. */
+typedef struct sprite_item_graphic {
+    u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for BATTLE_MAP_CLUT_ROW_ITEM_A, low for _B */
+    u8 texture_row; /* 0x01; top of the graphic on its texture page, in steps of 8 pixels */
+} sprite_item_graphic_t;
+
 /* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
 extern size32_t g_sprite_part_sizes[16];
 extern sprite_item_graphic_t g_sprite_item_graphic_data[0x92];

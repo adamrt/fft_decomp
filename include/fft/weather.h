@@ -69,39 +69,6 @@ s32 weather_get_effective(void);
 /* A byte-valued weather_command_e, also read from the event command table. */
 void weather_run_command(u8 command);
 
-/* particles */
-/* Weather particles of g_weather_particles: snow
- * (BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain
- * (BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES) fills two sets of 32. */
-typedef struct weather_particle {
-    s16 x;
-    s16 y;
-    s16 z;
-    /* g_weather_fall_speed, plus the sprite index for 0x8f; rain
-     * reuses it as splash state (0/1/2) and the splash set as a countdown. */
-    s16 fall_speed;
-} weather_particle_t;
-
-/* lightning */
-/* Values of g_weather_lightning_mode. */
-typedef enum weather_lightning_mode {
-    BATTLE_MAP_LIGHTNING_OFF = 0,
-    BATTLE_MAP_LIGHTNING_RANDOM = 1,
-    BATTLE_MAP_LIGHTNING_ONCE = 2 /* back to OFF when the flash ends */
-} weather_lightning_mode_e;
-
-/* Lightning flash state (g_weather_lightning_state).
- * battle_map_light_set_matrices fills color_matrices[0] and [2]; the lightning weather commands
- * clear the rotation part of color_matrices[1] and start the 60-frame flash timer. */
-typedef struct weather_lightning_state {
-    u32 timer;                                                       /* 0x00 */
-    MATRIX color_matrices[3];                                        /* 0x04 */
-    u8 _unused_64[0x20];                                             /* 0x64 */
-    CVECTOR base_colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT]; /* 0x84 */
-    CVECTOR colors[BATTLE_MAP_BACKGROUND_GRADIENT_COLOR_COUNT];      /* 0x8c */
-} weather_lightning_state_t;
-typedef char weather_lightning_state_size_must_be_148[(sizeof(weather_lightning_state_t) == 148) ? 1 : -1];
-
 /* timed particle transform */
 /* Frame, duration and rotation of E458's timed particle transform
  * (BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */

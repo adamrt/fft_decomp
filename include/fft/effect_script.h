@@ -10,15 +10,6 @@
 #include "psx/types.h"
 
 /* loading and playback */
-/* g_effect_load_state: the steps of effect_file_update_load, which loads the ability's effect file
- * while its charge secondary effect plays. */
-typedef enum effect_load_state {
-    EFFECT_LOAD_START = 0,           /* start reading the file */
-    EFFECT_LOAD_READING = 1,         /* wait for the read */
-    EFFECT_LOAD_COUNTDOWN = 2,       /* wait out the 60 frames given to a charge secondary effect */
-    EFFECT_LOAD_ENDING_SECONDARY = 3 /* wait for the charge secondary effect to end */
-} effect_load_state_e;
-
 /* The stages of effect_update_stage, kept in g_effect_playback_phase. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,

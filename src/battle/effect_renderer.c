@@ -23,6 +23,16 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+enum { EFFECT_HEAP_OWNER_COUNT = 17 };
+
+typedef struct effect_heap_owner_list {
+    effect_heap_node_t* head;
+    s32 _unused_04;
+} effect_heap_owner_list_t;
+
+/* primitive_type of effect_render_alloc_primitive: an index into g_effect_primitive_sizes. */
+typedef enum effect_primitive_type { EFFECT_PRIMITIVE_FT4 = 0, EFFECT_PRIMITIVE_DR_MODE = 1 } effect_primitive_type_e;
+
 /* Heap block lists and allocation bounds. */
 extern effect_heap_node_t* g_effect_heap_base;
 extern s16 g_effect_heap_block_count;
