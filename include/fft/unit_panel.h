@@ -177,7 +177,7 @@ typedef char unit_panel_frame_size_must_be_676[sizeof(unit_panel_frame_t) == 676
 typedef struct unit_panel_buffer {
     unit_panel_frame_t frame;                        /* 0x000 */
     menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x2a4 */
-    menu_palette_primitives_t numeric_frame;         /* 0x2c4 */
+    menu_numeric_frame_t numeric_frame;              /* 0x2c4 */
     scaled_draw_area_pair_t portrait;                /* 0x3b0 */
 } unit_panel_buffer_t;
 typedef char unit_panel_buffer_size_must_be_984[(sizeof(unit_panel_buffer_t) == 984) ? 1 : -1];
@@ -185,7 +185,7 @@ typedef char unit_panel_buffer_size_must_be_984[(sizeof(unit_panel_buffer_t) == 
 void unit_panel_init_primitives(unit_panel_frame_t* menu);
 
 /* The dimmed frame colors for style 1 or while the input lock mode is 1, otherwise the normal ones. */
-void unit_panel_select_palette(menu_palette_primitives_t* primitives, const unit_panel_thread_t* thread);
+void unit_panel_select_palette(menu_numeric_frame_t* primitives, const unit_panel_thread_t* thread);
 
 /* The panel's sprite CLUTs and the tint of its last five sprites: dimmed and blue for style 1 or while the input
  * lock mode is 1, otherwise normal. */

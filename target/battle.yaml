@@ -2585,9 +2585,9 @@ data:
   - {addr: 0x80169840, name: g_command_skillset_build_result}
   - {addr: 0x8016986c, name: g_thread_contexts}
   - {addr: 0x8016996c, name: g_unit_view_summary_digit_images}
-  - {addr: 0x80169a6c, name: g_status_screen_numbers_palettes}
-  - {addr: 0x8016d16c, name: g_status_screen_palette}
-  - {addr: 0x8016d26c, name: g_unit_view_summary_palettes}
+  - {addr: 0x80169a6c, name: g_status_screen_numbers_frames}
+  - {addr: 0x8016d16c, name: g_status_screen_numeric_frame}
+  - {addr: 0x8016d26c, name: g_unit_view_summary_numeric_frames}
   - {addr: 0x8016d86c, name: g_gfx_texture_allocation_grid}
   - {addr: 0x8016d95c, name: g_menu_palette_colors}
   - {addr: 0x8016d99c, name: g_game_options_saved}

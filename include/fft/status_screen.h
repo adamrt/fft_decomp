@@ -15,8 +15,8 @@
 void status_screen_thread(void);
 
 /* numbers panel */
-void status_screen_init_numbers_frame(RECT* bounds, menu_palette_primitives_t* menu);
-void status_screen_submit_numbers_frame(menu_palette_primitives_t* display);
+void status_screen_init_numbers_frame(RECT* bounds, menu_numeric_frame_t* menu);
+void status_screen_submit_numbers_frame(menu_numeric_frame_t* display);
 void status_screen_numbers_thread(void);
 
 /* status list */

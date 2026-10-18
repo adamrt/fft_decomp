@@ -36,7 +36,7 @@ static s8 g_status_screen_numbers_frame_layout[12 * MENU_LINE_LAYOUT_SIZE]
 /* Build the numeric display frame around box: twelve lines placed by
  * g_status_screen_numbers_frame_layout relative to the box's corners and colored from
  * the normal menu palette, the two draw modes and a sprite covering the box. */
-void status_screen_init_numbers_frame(RECT* box, menu_palette_primitives_t* menu) {
+void status_screen_init_numbers_frame(RECT* box, menu_numeric_frame_t* menu) {
     LINE_F2* line = menu->lines;
     s32 i;
     s32 offset;
@@ -78,7 +78,7 @@ void status_screen_init_numbers_frame(RECT* box, menu_palette_primitives_t* menu
 }
 
 /* Submit the frame's twelve lines, sprite and draw modes. */
-void status_screen_submit_numbers_frame(menu_palette_primitives_t* display) {
+void status_screen_submit_numbers_frame(menu_numeric_frame_t* display) {
     s32 index;
 
     for (index = 0; index < 12; index++) {
@@ -91,7 +91,7 @@ void status_screen_submit_numbers_frame(menu_palette_primitives_t* display) {
 
 /* Give the twelve frame lines the colors of the normal menu palette (the first
  * sixteen of the menu palette colors) and the sprite the normal menu CLUT, GetClut(0x3c0, 0x1f0). */
-void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu) {
+void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu) {
     s32 index;
     s32 palette_index;
     LINE_F2* line;
@@ -107,7 +107,7 @@ void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu) {
 
 /* Give the twelve frame lines the colors of the dimmed menu palette (the second
  * sixteen of the menu palette colors) and the sprite the dimmed menu CLUT, GetClut(0x3c0, 0x1f4). */
-void menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu) {
+void menu_init_primitive_colors_dimmed(menu_numeric_frame_t* menu) {
     s32 index;
     s32 palette_index;
     LINE_F2* line;

@@ -316,19 +316,19 @@ typedef char menu_gradient_panel_prims_size_must_be_316[(sizeof(menu_gradient_pa
 /* The numeric display frame, built by status_screen_init_numbers_frame: two DR_MODE
  * packets, twelve LINE_F2 packets and one covering SPRT whose CLUT
  * menu_init_primitive_colors_normal and _dimmed set. */
-typedef struct menu_palette_primitives {
+typedef struct menu_numeric_frame {
     DR_MODE draw_mode;      /* 0x00: texture window g_gfx_texture_window */
     DR_MODE draw_mode_menu; /* 0x0c: texture window g_status_screen_numbers_texture_window */
     LINE_F2 lines[12];      /* 0x18 */
     SPRT sprite;            /* 0xd8 */
-} menu_palette_primitives_t;
-typedef char menu_palette_primitives_size_must_be_236[(sizeof(menu_palette_primitives_t) == 236) ? 1 : -1];
+} menu_numeric_frame_t;
+typedef char menu_numeric_frame_size_must_be_236[(sizeof(menu_numeric_frame_t) == 236) ? 1 : -1];
 
 /* Status-panel packet block (0x1d8 bytes), doubled the same way as the editor
  * block. sprites[6] doubles as the scroll cursor: the display threads write
  * its texture window from the scroll row/column. */
 typedef struct menu_status_panel_packet {
-    menu_palette_primitives_t numeric_frame;       /* 0x000 */
+    menu_numeric_frame_t numeric_frame;            /* 0x000 */
     SPRT sprites[7];                               /* 0x0ec */
     DR_MODE draw_mode_a;                           /* 0x178 */
     DR_MODE draw_mode_b;                           /* 0x184 */
@@ -344,7 +344,7 @@ typedef char menu_status_panel_packet_size_must_be_472[(sizeof(menu_status_panel
  * strides come from the walks that configure and submit them, and the
  * draw-offset packets from the SetDrawOffset pairs. */
 typedef struct menu_status_panel_editor_packet {
-    menu_palette_primitives_t numeric_frame;       /* 0x000 */
+    menu_numeric_frame_t numeric_frame;            /* 0x000 */
     DR_MODE draw_mode_a;                           /* 0x0ec */
     DR_MODE draw_mode_b;                           /* 0x0f8 */
     SPRT value_sprites[4];                         /* 0x104 */
@@ -358,8 +358,8 @@ typedef char
     menu_status_panel_editor_packet_size_must_be_780[(sizeof(menu_status_panel_editor_packet_t) == 780) ? 1 : -1];
 
 /* The frame lines in the normal or dimmed menu colors and the covering sprite in the matching CLUT. */
-void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu);
-void menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu);
+void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu);
+void menu_init_primitive_colors_dimmed(menu_numeric_frame_t* menu);
 
 /* number images */
 /* Three 16x10 packed 4bpp images for the numbers below a unit's name:
@@ -397,7 +397,7 @@ typedef struct menu_status_panel_numeric_buffer {
     DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
     DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
     SPRT sprites[18];                                /* 0x024 */
-    menu_palette_primitives_t numeric_frame;         /* 0x18c */
+    menu_numeric_frame_t numeric_frame;              /* 0x18c */
     menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x278 */
     scaled_draw_area_pair_t portrait;                /* 0x298 */
 } menu_status_panel_numeric_buffer_t;

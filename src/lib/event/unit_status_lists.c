@@ -58,12 +58,12 @@ extern s32 g_text_section_backup_active;
 /* Target preview copies only generic_monster and the reaction ability here. */
 extern unit_panel_record_t g_unit_panel_comparison_unit_fields;
 
-/* One 0x100-byte slot holding a panel's palette primitive set. */
-typedef struct menu_palette_slot {
-    menu_palette_primitives_t primitives; /* 0x00 */
-    u8 _padding_ec[0x14];                 /* preserves the 0x100-byte allocation stride */
-} menu_palette_slot_t;
-typedef char menu_palette_slot_size_must_be_256[(sizeof(menu_palette_slot_t) == 256) ? 1 : -1];
+/* One 0x100-byte slot holding a panel's numeric frame. */
+typedef struct menu_numeric_frame_slot {
+    menu_numeric_frame_t primitives; /* 0x00 */
+    u8 _padding_ec[0x14];            /* preserves the 0x100-byte allocation stride */
+} menu_numeric_frame_slot_t;
+typedef char menu_numeric_frame_slot_size_must_be_256[(sizeof(menu_numeric_frame_slot_t) == 256) ? 1 : -1];
 
 /* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
 typedef struct menu_unit_status_offsets {
@@ -85,36 +85,36 @@ typedef enum unit_stats_panel {
  * comes from g_unit_view_stats_first_page_by_mode). Status-screen primitives reuse
  * portions of this storage while the attack-preview and right-unit views are inactive. */
 typedef struct unit_view_stats_page {
-    POLY_G4 bars[3];                   /* 0x000: HP/MP/CT gauges */
-    DR_MODE draw_mode_1;               /* 0x06c */
-    DR_MODE draw_mode_0;               /* 0x078 */
-    menu_palette_primitives_t palette; /* 0x084 */
-    POLY_FT4 quads[5];                 /* 0x170 */
-    SPRT sprites[7];                   /* 0x238 */
-    POLY_FT4 portrait;                 /* 0x2c4 */
+    POLY_G4 bars[3];                    /* 0x000: HP/MP/CT gauges */
+    DR_MODE draw_mode_1;                /* 0x06c */
+    DR_MODE draw_mode_0;                /* 0x078 */
+    menu_numeric_frame_t numeric_frame; /* 0x084 */
+    POLY_FT4 quads[5];                  /* 0x170 */
+    SPRT sprites[7];                    /* 0x238 */
+    POLY_FT4 portrait;                  /* 0x2c4 */
 } unit_view_stats_page_t;
 typedef char unit_view_stats_page_size_must_be_748[sizeof(unit_view_stats_page_t) == 748 ? 1 : -1];
 
 /* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
 typedef struct unit_view_summary_frame {
-    SPRT sprites[7];                    /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
-    DR_MODE draw_mode_0;                /* 0x8c */
-    DR_MODE draw_mode_1;                /* 0x98 */
-    menu_palette_primitives_t* palette; /* 0xa4 */
-    DR_OFFSET draw_offset_a;            /* 0xa8 */
-    DR_OFFSET draw_offset_b;            /* 0xb4 */
-    point16_t offset_a;                 /* 0xc0 */
-    point16_t offset_b;                 /* 0xc4 */
-    POLY_FT4 portrait;                  /* 0xc8 */
+    SPRT sprites[7];                     /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
+    DR_MODE draw_mode_0;                 /* 0x8c */
+    DR_MODE draw_mode_1;                 /* 0x98 */
+    menu_numeric_frame_t* numeric_frame; /* 0xa4 */
+    DR_OFFSET draw_offset_a;             /* 0xa8 */
+    DR_OFFSET draw_offset_b;             /* 0xb4 */
+    point16_t offset_a;                  /* 0xc0 */
+    point16_t offset_b;                  /* 0xc4 */
+    POLY_FT4 portrait;                   /* 0xc8 */
 } unit_view_summary_frame_t;
 
 /* Double-buffered 0x2d0-byte frame of the Status screen panel (g_status_screen_frames). The first 0x2a4
  * bytes hold the common unit_panel_frame_t (draw modes, sprites, tiles and lines),
  * and the trailing draw-area pair follows menu_panel_frame_t. */
 typedef struct status_screen_frame {
-    unit_panel_frame_t frame;           /* 0x000 */
-    menu_palette_primitives_t* palette; /* 0x2a4 */
-    scaled_draw_area_pair_t draw_areas; /* 0x2a8 */
+    unit_panel_frame_t frame;            /* 0x000 */
+    menu_numeric_frame_t* numeric_frame; /* 0x2a4 */
+    scaled_draw_area_pair_t draw_areas;  /* 0x2a8 */
 } status_screen_frame_t;
 typedef char status_screen_frame_size_must_be_720[sizeof(status_screen_frame_t) == 720 ? 1 : -1];
 
@@ -126,8 +126,8 @@ typedef struct status_screen_numbers_record {
     DR_MODE mode1; /* 0x00c */
     /* 0x018; menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
-    SPRT sprites[18];                   /* 0x040 */
-    menu_palette_primitives_t* palette; /* 0x1a8 */
+    SPRT sprites[18];                    /* 0x040 */
+    menu_numeric_frame_t* numeric_frame; /* 0x1a8 */
 } status_screen_numbers_record_t;
 typedef char status_screen_numbers_record_size_must_be_428[sizeof(status_screen_numbers_record_t) == 428 ? 1 : -1];
 
@@ -158,10 +158,10 @@ extern menu_quad_page_t g_unit_view_height_display_pages[2];
 /* Status uses two alternate views of the stats-page storage: its numeric
  * records begin at page 2, and its frame records begin at page 5. */
 extern status_screen_frame_t g_status_screen_frames[2];
-extern menu_palette_primitives_t g_status_screen_palette;
+extern menu_numeric_frame_t g_status_screen_numeric_frame;
 extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
 extern RECT g_status_screen_numbers_frame_rect;
-extern menu_palette_slot_t g_status_screen_numbers_palettes[];
+extern menu_numeric_frame_slot_t g_status_screen_numbers_frames[];
 extern RECT g_status_screen_numbers_text_rect_a;
 extern RECT g_status_screen_numbers_text_rect_b;
 extern RECT g_status_screen_numbers_text_rect_c;
@@ -208,7 +208,7 @@ extern image_layout_t* g_unit_view_stats_sprite_image_params_by_mode[];
 /* unit summary */
 extern RECT g_unit_view_summary_panel_rect;
 extern menu_unit_number_images_t g_unit_view_summary_digit_images;
-extern menu_palette_slot_t g_unit_view_summary_palettes[];
+extern menu_numeric_frame_slot_t g_unit_view_summary_numeric_frames[];
 extern image_layout_t g_unit_view_summary_sprite_image_params[];
 extern image_layout_t g_unit_view_summary_portrait_image_params;
 
@@ -1090,7 +1090,7 @@ static void unit_view_stats_panel_thread(
         }
     }
     page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode]];
-    status_screen_init_numbers_frame(frame_rect, &page->palette);
+    status_screen_init_numbers_frame(frame_rect, &page->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(page->sprites, 7, 0x7CBC);
@@ -1321,11 +1321,11 @@ static void unit_view_stats_panel_thread(
         gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
         gfx_draw_or_append_gpu_primitive(&page->portrait);
         if (running != 0) {
-            menu_init_primitive_colors_dimmed(&page->palette);
+            menu_init_primitive_colors_dimmed(&page->numeric_frame);
         } else {
-            menu_init_primitive_colors_normal(&page->palette);
+            menu_init_primitive_colors_normal(&page->numeric_frame);
         }
-        status_screen_submit_numbers_frame(&page->palette);
+        status_screen_submit_numbers_frame(&page->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&offs->a);
         thread_yield();
         g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
@@ -1510,10 +1510,10 @@ void unit_view_summary_thread(void) {
     frames[0].sprites[6].v0 = zodiac / 7 * 0x14 + 0x2A;
 
     mem_copy_bytes_nonempty(&frames[1], &frames[0], sizeof(unit_view_summary_frame_t));
-    frames[0].palette = &g_unit_view_summary_palettes[0].primitives;
-    frames[1].palette = &g_unit_view_summary_palettes[1].primitives;
-    status_screen_init_numbers_frame(&g_unit_view_summary_panel_rect, frames[0].palette);
-    status_screen_init_numbers_frame(&g_unit_view_summary_panel_rect, frames[1].palette);
+    frames[0].numeric_frame = &g_unit_view_summary_numeric_frames[0].primitives;
+    frames[1].numeric_frame = &g_unit_view_summary_numeric_frames[1].primitives;
+    status_screen_init_numbers_frame(&g_unit_view_summary_panel_rect, frames[0].numeric_frame);
+    status_screen_init_numbers_frame(&g_unit_view_summary_panel_rect, frames[1].numeric_frame);
 
     for (frame = 0;; frame++) {
         thread_yield();
@@ -1612,11 +1612,11 @@ void unit_view_summary_thread(void) {
 
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
-            menu_init_primitive_colors_dimmed(frame_record->palette);
+            menu_init_primitive_colors_dimmed(frame_record->numeric_frame);
         } else {
-            menu_init_primitive_colors_normal(frame_record->palette);
+            menu_init_primitive_colors_normal(frame_record->numeric_frame);
         }
-        status_screen_submit_numbers_frame(frame_record->palette);
+        status_screen_submit_numbers_frame(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_a);
     }
 exit:
@@ -1770,10 +1770,10 @@ void status_screen_numbers_thread(void) {
             &g_status_screen_numbers_image_params[i]);
     }
     mem_copy_bytes_nonempty(&record[1], record, sizeof(*record));
-    record[0].palette = &g_status_screen_numbers_palettes[0].primitives;
-    record[1].palette = &g_status_screen_numbers_palettes[1].primitives;
-    status_screen_init_numbers_frame(&g_status_screen_numbers_frame_rect, record[0].palette);
-    status_screen_init_numbers_frame(&g_status_screen_numbers_frame_rect, record[1].palette);
+    record[0].numeric_frame = &g_status_screen_numbers_frames[0].primitives;
+    record[1].numeric_frame = &g_status_screen_numbers_frames[1].primitives;
+    status_screen_init_numbers_frame(&g_status_screen_numbers_frame_rect, record[0].numeric_frame);
+    status_screen_init_numbers_frame(&g_status_screen_numbers_frame_rect, record[1].numeric_frame);
     for (frame = 0;; frame++) {
         thread_yield();
         record = &records[frame & 1];
@@ -1787,7 +1787,7 @@ void status_screen_numbers_thread(void) {
                 record->sprites[i].clut = MENU_CLUT_DIMMED;
             }
             record->sprites[10].clut = 0x7EBC;
-            menu_init_primitive_colors_dimmed(record->palette);
+            menu_init_primitive_colors_dimmed(record->numeric_frame);
         } else {
             for (i = 17; i >= 0; i--) {
                 record->sprites[i].clut = MENU_CLUT_NORMAL;
@@ -1796,7 +1796,7 @@ void status_screen_numbers_thread(void) {
             record->sprites[14].clut = 0x7FFC;
             record->sprites[15].clut = 0x7FFC;
             record->sprites[16].clut = 0x7FFC;
-            menu_init_primitive_colors_normal(record->palette);
+            menu_init_primitive_colors_normal(record->numeric_frame);
         }
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[1]);
         for (i = 0; i < 14; i++) {
@@ -1808,7 +1808,7 @@ void status_screen_numbers_thread(void) {
             gfx_draw_or_append_gpu_primitive(&record->sprites[i]);
         }
         gfx_draw_or_append_gpu_primitive(&record->mode1);
-        status_screen_submit_numbers_frame(record->palette);
+        status_screen_submit_numbers_frame(record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[0]);
     }
     thread_yield();
@@ -1823,8 +1823,8 @@ void status_screen_numbers_thread(void) {
  * is rebuilt. */
 void status_screen_thread(void) {
     /* The frame reserves 0x100 bytes for the first copy's line-box
-     * primitives, the stride of the palette records (WORLD 0x80195ed0). */
-    menu_palette_slot_t palette;
+     * primitives, the stride of the numeric-frame slots (WORLD 0x80195ed0). */
+    menu_numeric_frame_slot_t numeric_frame;
     status_screen_frame_t* records;
     status_screen_frame_t* frame_record;
     LINE_F2* line;
@@ -1987,10 +1987,10 @@ void status_screen_thread(void) {
     menu_free_memory(buffer);
 
     mem_copy_bytes_nonempty(&records[1], frame_record, sizeof(status_screen_frame_t));
-    records[0].palette = &palette.primitives;
-    records[1].palette = &g_status_screen_palette;
-    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[0].palette);
-    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[1].palette);
+    records[0].numeric_frame = &numeric_frame.primitives;
+    records[1].numeric_frame = &g_status_screen_numeric_frame;
+    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[0].numeric_frame);
+    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[1].numeric_frame);
 
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, status_screen_numbers_thread);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
@@ -2025,9 +2025,9 @@ void status_screen_thread(void) {
             }
         }
         if (value == 0) {
-            menu_init_primitive_colors_normal(frame_record->palette);
+            menu_init_primitive_colors_normal(frame_record->numeric_frame);
         } else {
-            menu_init_primitive_colors_dimmed(frame_record->palette);
+            menu_init_primitive_colors_dimmed(frame_record->numeric_frame);
         }
 
         if (menu_can_accept_input() != 0) {
@@ -2068,7 +2068,7 @@ void status_screen_thread(void) {
             gfx_draw_or_append_gpu_primitive(&frame_record->frame.lines[i]);
         }
         frame++;
-        status_screen_submit_numbers_frame(frame_record->palette);
+        status_screen_submit_numbers_frame(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_areas.areas[0]);
     }
 
