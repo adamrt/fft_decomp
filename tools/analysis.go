@@ -32,16 +32,26 @@ type mipsModuleReport struct {
 	ConfiguredRanges  int                  `json:"configured_ranges"`
 	ConfiguredBytes   int                  `json:"configured_bytes"`
 	UncoveredBytes    int                  `json:"uncovered_bytes"`
-	CallTargets       []mipsCandidate      `json:"call_targets,omitempty"`
+	ReferenceScope    string               `json:"reference_scope"`
+	JumpTargets       []mipsCandidate      `json:"jump_targets,omitempty"`
 	BranchTargets     []mipsCandidate      `json:"branch_targets,omitempty"`
 	FunctionDiscovery *mipsDiscoveryReport `json:"function_discovery,omitempty"`
 	Status            string               `json:"status"`
 }
 
 type mipsCandidate struct {
-	Address    string `json:"address"`
-	References int    `json:"references"`
-	Confidence string `json:"confidence"`
+	Address              string          `json:"address"`
+	References           int             `json:"references"`
+	ConfiguredReferences int             `json:"configured_function_references"`
+	Sites                []mipsReference `json:"sites"`
+}
+
+// A reference records an encoding, not proof that the word is executed.
+// Function ownership is taken from target contracts; other sites may be data.
+type mipsReference struct {
+	Address            string `json:"address"`
+	Word               string `json:"word"`
+	ConfiguredFunction string `json:"configured_function,omitempty"`
 }
 
 type mipsDiscoveryReport struct {
@@ -92,7 +102,7 @@ func (p project) buildAnalysis() error {
 	}
 	exclusions := discoveryExclusionsFromConfig(config)
 	report := mipsInventory{
-		SchemaVersion: 1, TargetID: targetID,
+		SchemaVersion: 2, TargetID: targetID,
 		Source: "build/extracted/inventory.json", CandidatePool: "build/analysis/inventory/candidates.tsv",
 	}
 	var poolCandidates []discoveryPoolCandidate
@@ -126,10 +136,11 @@ func (p project) buildAnalysis() error {
 	}
 	var summary strings.Builder
 	fmt.Fprintf(&summary, "FFT MIPS analysis inventory\nmodules: %d\nfunction candidates: %d\ncandidate pool: %s\n\n", len(report.Modules), len(poolCandidates), report.CandidatePool)
+	summary.WriteString("Jump/branch references scan raw image words, including data. Sites identify configured function owners when present; counts are frequency, not confidence or proof of execution. Uncovered bytes are outside configured functions, not a missing-code total.\n\n")
 	for _, item := range report.Modules {
 		fmt.Fprintf(&summary, "%s %s: %s", item.Module, item.Path, item.Status)
 		if item.ScanStart != "" {
-			fmt.Fprintf(&summary, ", scan %s-%s, configured %d ranges/%d bytes, uncovered %d bytes, call candidates %d, branch candidates %d", item.ScanStart, item.ScanEnd, item.ConfiguredRanges, item.ConfiguredBytes, item.UncoveredBytes, len(item.CallTargets), len(item.BranchTargets))
+			fmt.Fprintf(&summary, ", scan %s-%s, configured %d ranges/%d bytes, uncovered %d bytes, jump targets %d, branch targets %d", item.ScanStart, item.ScanEnd, item.ConfiguredRanges, item.ConfiguredBytes, item.UncoveredBytes, len(item.JumpTargets), len(item.BranchTargets))
 			if discovery := item.FunctionDiscovery; discovery != nil {
 				fmt.Fprintf(&summary, ", functions %d, rediscovered %d/%d, pool %d", discovery.Detected, discovery.Rediscovered, discovery.Known, len(discovery.Candidates))
 			}
@@ -162,7 +173,7 @@ func (p project) loadInventory() (map[string]inventoryRecord, error) {
 }
 
 // moduleScan is one module image and the address model to read it by: the
-// PS-X EXE header is skipped and only its text is scanned.
+// PS-X EXE header is skipped. Its loaded payload includes code and data.
 type moduleScan struct {
 	data       []byte
 	load       uint64 // runtime address of data[start]
@@ -198,6 +209,7 @@ func analyzeModule(p project, m *moduleSpec, record inventoryRecord, exclusions 
 	data, load, start, end := scan.data, scan.load, scan.start, scan.end
 	item.ScanStart = fmt.Sprintf("0x%08x", load)
 	item.ScanEnd = fmt.Sprintf("0x%08x", load+uint64(end-start))
+	item.ReferenceScope = "raw_image_words"
 	known := exclusions.knownForModule(m.ID)
 	knownStarts := make([]uint64, 0, len(known))
 	for address := range known {
@@ -240,6 +252,7 @@ func analyzeModule(p project, m *moduleSpec, record inventoryRecord, exclusions 
 	}
 	item.FunctionDiscovery = discoveryReport
 	covered := make([]bool, end-start)
+	functionWords := make(map[uint64]string)
 	for _, f := range m.Functions {
 		markedBytes := markAnalysisCoverage(covered, int(uint64(f.Addr)-load), f.Size)
 		if markedBytes == 0 {
@@ -247,6 +260,9 @@ func analyzeModule(p project, m *moduleSpec, record inventoryRecord, exclusions 
 		}
 		item.ConfiguredRanges++
 		item.ConfiguredBytes += markedBytes
+		for address := uint64(f.Addr); address+4 <= uint64(f.Addr)+uint64(f.Size); address += 4 {
+			functionWords[address] = f.Name
+		}
 	}
 	configured := make(map[uint64]bool)
 	for _, f := range m.Functions {
@@ -260,15 +276,19 @@ func analyzeModule(p project, m *moduleSpec, record inventoryRecord, exclusions 
 			item.UncoveredBytes++
 		}
 	}
-	callRefs, branchRefs := make(map[uint64]int), make(map[uint64]int)
+	jumpRefs, branchRefs := make(map[uint64][]mipsReference), make(map[uint64][]mipsReference)
 	for offset := start; offset+4 <= end; offset += 4 {
 		word := binary.LittleEndian.Uint32(data[offset : offset+4])
 		pc := load + uint64(offset-start)
+		site := mipsReference{
+			Address: fmt.Sprintf("0x%08x", pc), Word: fmt.Sprintf("0x%08x", word),
+			ConfiguredFunction: functionWords[pc],
+		}
 		op := word >> 26
 		if op == 2 || op == 3 {
 			target := (pc+4)&0xf0000000 | uint64(word&0x03ffffff)<<2
 			if target >= load && target < load+uint64(end-start) {
-				callRefs[target]++
+				jumpRefs[target] = append(jumpRefs[target], site)
 			}
 			continue
 		}
@@ -276,11 +296,11 @@ func analyzeModule(p project, m *moduleSpec, record inventoryRecord, exclusions 
 			delta := int64(int16(word&0xffff)) << 2
 			target := uint64(int64(pc+4) + delta)
 			if target >= load && target < load+uint64(end-start) {
-				branchRefs[target]++
+				branchRefs[target] = append(branchRefs[target], site)
 			}
 		}
 	}
-	item.CallTargets = candidates(callRefs, configured)
+	item.JumpTargets = candidates(jumpRefs, configured)
 	item.BranchTargets = candidates(branchRefs, configured)
 	item.Status = "scanned"
 	return item, pool.Candidates, nil
@@ -304,17 +324,17 @@ func analysisDiscoveryExtent(known map[uint64]int) (*discoveredFunction, string)
 
 // markAnalysisCoverage marks size bytes at scan offset start as covered.
 func markAnalysisCoverage(covered []bool, start, size int) int {
-	end := start + size
-	if start < 0 || end > len(covered) {
+	if start < 0 || start > len(covered) || size <= 0 || size > len(covered)-start {
 		return 0
 	}
+	end := start + size
 	for index := start; index < end; index++ {
 		covered[index] = true
 	}
 	return size
 }
 
-func candidates(refs map[uint64]int, configured map[uint64]bool) []mipsCandidate {
+func candidates(refs map[uint64][]mipsReference, configured map[uint64]bool) []mipsCandidate {
 	addresses := make([]uint64, 0, len(refs))
 	for address := range refs {
 		if configured[address] {
@@ -325,13 +345,16 @@ func candidates(refs map[uint64]int, configured map[uint64]bool) []mipsCandidate
 	sort.Slice(addresses, func(i, j int) bool { return addresses[i] < addresses[j] })
 	result := make([]mipsCandidate, 0, len(addresses))
 	for _, address := range addresses {
-		confidence := "low"
-		if refs[address] >= 3 {
-			confidence = "high"
-		} else if refs[address] == 2 {
-			confidence = "medium"
+		configuredReferences := 0
+		for _, site := range refs[address] {
+			if site.ConfiguredFunction != "" {
+				configuredReferences++
+			}
 		}
-		result = append(result, mipsCandidate{Address: fmt.Sprintf("0x%08x", address), References: refs[address], Confidence: confidence})
+		result = append(result, mipsCandidate{
+			Address: fmt.Sprintf("0x%08x", address), References: len(refs[address]),
+			ConfiguredReferences: configuredReferences, Sites: refs[address],
+		})
 	}
 	return result
 }

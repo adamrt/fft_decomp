@@ -84,12 +84,16 @@ func TestMismatch(t *testing.T) {
 }
 
 func TestCandidatesSortAndExcludeConfigured(t *testing.T) {
-	got := candidates(map[uint64]int{0x80010020: 3, 0x80010010: 1, 0x80010000: 2}, map[uint64]bool{0x80010020: true})
+	got := candidates(map[uint64][]mipsReference{
+		0x80010020: {{}, {}, {}},
+		0x80010010: {{}},
+		0x80010000: {{ConfiguredFunction: "entrypoint"}, {}},
+	}, map[uint64]bool{0x80010020: true})
 	if len(got) != 2 || got[0].Address != "0x80010000" || got[1].Address != "0x80010010" {
 		t.Fatalf("candidates() = %+v", got)
 	}
-	if got[0].Confidence != "medium" || got[1].Confidence != "low" {
-		t.Fatalf("unexpected confidence levels: %+v", got)
+	if got[0].References != 2 || got[0].ConfiguredReferences != 1 || got[1].References != 1 || got[1].ConfiguredReferences != 0 {
+		t.Fatalf("unexpected reference counts: %+v", got)
 	}
 }
 
