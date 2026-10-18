@@ -1,4 +1,5 @@
-/* Unit records built from the party, the record list and saving records back to the party. */
+/* The Formation workspace presents party records to the menus and writes edited jobs, abilities and equipment
+ * back to the roster. Its extra record holds job and equipment previews without committing them. */
 
 #include "fft/ability.h"
 #include "fft/formation.h"
@@ -13,6 +14,9 @@
 #include "fft/unit_party.h"
 #include "psx/libc.h"
 #include "psx/types.h"
+
+/* Sorting binds the final record to the shared preview pointer. */
+formation_unit_t g_formation_unit_records[FORMATION_UNIT_RECORD_COUNT] = { 0 };
 
 /*
  * Fills one WORLD formation record from a unit's battle stats and party data.

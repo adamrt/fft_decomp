@@ -73,7 +73,7 @@ units:
   - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801aed74, size: 24, hash: 9d908ecfb6b256de}, {addr: 0x801aed8c, size: 66048, hash: cf1cc8dd4cd12e47}, {addr: 0x801bef8c, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x801bf00c, size: 4, hash: df3f619804a92fdb}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x8018b660, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: panel_toggles, source: src/world/panel_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: party_records, source: src/world/party_records.c}
+  - {name: party_records, source: src/world/party_records.c, data: [{addr: 0x801c8638, size: 6216, hash: 3acab0298adf59e4}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x8018aef8, size: 16, hash: ed44f3f59883c72d}]}
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
   - {name: roster_changes, source: src/world/roster_changes.c}
