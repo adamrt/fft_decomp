@@ -10,6 +10,7 @@ profile: gcc-2.7.2_O2_aspsx-2.21_divcheck
 links: [world]
 
 units:
+  - {name: audio_queue, source: src/wldcore/audio_queue.c}
   - {name: bar, source: src/wldcore/bar.c}
   - {name: brave_story, source: src/wldcore/brave_story.c}
   - {name: file_wait, source: src/lib/file/file_wait.c}
@@ -25,7 +26,6 @@ units:
   - {name: startup, source: src/wldcore/startup.c}
   - {name: window_records, source: src/wldcore/window_records.c}
   - {name: window_render, source: src/wldcore/window_render.c, data: [{addr: 0x8009ee30, size: 32, hash: 0ba27e297a0422ae}]}
-  - {name: window_text_records, source: src/wldcore/window_text_records.c}
 
 functions:
   - {addr: 0x800672f8, size: 396, name: wldcore_entrypoint, hash: be43a4c70a891d0f, unit: startup}
@@ -390,12 +390,12 @@ functions:
   - {addr: 0x8008f08c, size: 504, name: random_battle_roll, hash: 00cd3871e2ff7e81, unit: map_routes}
   - {addr: 0x8008f284, size: 432, name: world_map_init_marker_and_camera, hash: 2f51d47e4f36de8d, unit: map_routes}
   - {addr: 0x8008f434, size: 224, name: world_map_update_marker, hash: bed7c40ebe97aaf4, unit: map_routes}
-  - {addr: 0x8008f514, size: 388, name: window_build_render_record_image, hash: 5119c811a5da11ed, unit: map_routes}
-  - {addr: 0x8008f698, size: 148, name: window_get_image_vram_position, hash: b712870430e662cb, unit: map_routes}
-  - {addr: 0x8008f72c, size: 252, name: window_load_render_record_image, hash: 415234420b5b877b, unit: map_routes}
-  - {addr: 0x8008f828, size: 96, name: window_display_text_entry, hash: 534645d5cf3aaa4a, unit: window_text_records}
-  - {addr: 0x8008f888, size: 88, name: window_measure_text_image, hash: 789af18accb6a0dc, unit: window_text_records}
-  - {addr: 0x8008f8e0, size: 220, name: window_init_text_record, hash: 0e61d19ad6e8bbb6, unit: window_text_records}
+  - {addr: 0x8008f514, size: 388, name: window_build_render_record_image, hash: 5119c811a5da11ed, unit: window_render}
+  - {addr: 0x8008f698, size: 148, name: window_get_image_vram_position, hash: b712870430e662cb, unit: window_render}
+  - {addr: 0x8008f72c, size: 252, name: window_load_render_record_image, hash: 415234420b5b877b, unit: window_render}
+  - {addr: 0x8008f828, size: 96, name: window_display_text_entry, hash: 534645d5cf3aaa4a, unit: window_render}
+  - {addr: 0x8008f888, size: 88, name: window_measure_text_image, hash: 789af18accb6a0dc, unit: window_render}
+  - {addr: 0x8008f8e0, size: 220, name: window_init_text_record, hash: 0e61d19ad6e8bbb6, unit: window_render}
   - {addr: 0x8008f9bc, size: 284, name: window_init_vram_render_record, hash: 33e805bd9e9a05f8, unit: window_render}
   - {addr: 0x8008fad8, size: 80, name: window_start_panel_thread, hash: f4a9effe6dc74c0a, unit: window_render}
   - {addr: 0x8008fb28, size: 352, name: window_init_panel_state, hash: ef26f45135e74ef5, unit: window_render}
@@ -410,11 +410,11 @@ functions:
   - {addr: 0x800906c0, size: 872, name: text_window_render_page, hash: 0a6626b97c286fca, unit: window_render}
   - {addr: 0x80090a28, size: 140, name: text_window_update_page_prompt, hash: 65507cce57e00cfe, unit: window_render}
   - {addr: 0x80090ab4, size: 636, name: text_window_update_scroll_indicators, hash: 8edf02f6f19c040c, unit: window_render}
-  - {addr: 0x80090d30, size: 32, name: sound_play_effect, hash: cbcbcaac21c3c09d, unit: window_render}
-  - {addr: 0x80090d50, size: 208, name: audio_queue_add, hash: 6b10a0879bd17fe8, unit: window_render}
-  - {addr: 0x80090e20, size: 852, name: audio_queue_process, hash: 419da1927cab9858, unit: window_render, rodata: [{addr: 0x800672ac, size: 76, hash: 2d0472f03d8de22e}]}
-  - {addr: 0x80091174, size: 88, name: audio_queue_start_music, hash: 3c92ed5553c06ccd, unit: window_render}
-  - {addr: 0x800911cc, size: 108, name: audio_queue_wait_until_empty, hash: 8b6a1a20afb1383a, unit: window_render}
+  - {addr: 0x80090d30, size: 32, name: sound_play_effect, hash: cbcbcaac21c3c09d, unit: audio_queue}
+  - {addr: 0x80090d50, size: 208, name: audio_queue_add, hash: 6b10a0879bd17fe8, unit: audio_queue}
+  - {addr: 0x80090e20, size: 852, name: audio_queue_process, hash: 419da1927cab9858, unit: audio_queue, rodata: [{addr: 0x800672ac, size: 76, hash: 2d0472f03d8de22e}]}
+  - {addr: 0x80091174, size: 88, name: audio_queue_start_music, hash: 3c92ed5553c06ccd, unit: audio_queue}
+  - {addr: 0x800911cc, size: 108, name: audio_queue_wait_until_empty, hash: 8b6a1a20afb1383a, unit: audio_queue}
   - {addr: 0x80091238, size: 328, name: location_script_run, hash: 3595ca7b3a29bb9a, unit: map_opcodes}
   - {addr: 0x80091380, size: 8, name: location_script_opcode_00_nop, hash: 6d64edf91449c1b1, unit: map_opcodes}
   - {addr: 0x80091388, size: 28, name: location_script_opcode_14_skip_1_operand, hash: 768b510ec89c7449, unit: map_opcodes}

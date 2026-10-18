@@ -1,5 +1,4 @@
-/* Map dots, location menus, routes and path animation, route travel, projection motion and scrolling, random
- * encounters, the location marker and camera, and render record images. */
+/* Map dots, location menus, routes and path animation, travel, scrolling, random encounters and the player marker. */
 
 #include "fft/calendar.h"
 #include "fft/file.h"
@@ -7,7 +6,6 @@
 #include "fft/location.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/system.h"
@@ -184,7 +182,6 @@ static location_record_t g_location_record_data[LOCATION_COUNT] = {
 static void world_map_negate_and_clamp(const SVECTOR* input, VECTOR* output);
 static s32 random_battle_roll(s32 location, s32 route);
 static void world_map_scroll_if_near_edge(point32_t* delta);
-static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output);
 
 /* Build the world-map location dots from their packed source rows and queue them for
  * drawing. Kind-2 locations use the next dot sequence; a set color variable selects the town or
@@ -1360,67 +1357,4 @@ void world_map_update_marker(void) {
         g_world_map_marker_state.marker.render.position.y = output.vy;
         g_world_map_marker_state.flags ^= WORLD_MAP_MARKER_UPDATE_POSITION;
     }
-}
-
-/* Set up render record `index` for a window image of `bounds`: unhide it, place it at bounds.x -
- * 0x80, bounds.y - 0x78, give it the window CLUT at (0, 0x1E1) and the texture page of the mode's
- * VRAM area, then draw the empty window frame into `image`. */
-void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image) {
-    point32_t* clut;
-    CVECTOR* color;
-    point32_t transformed;
-
-    g_window_gs_image_records[index].flags
-        &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
-    g_window_gs_image_records[index].base.x = bounds.x - 0x80;
-    g_window_gs_image_records[index].base.y = bounds.y - 0x78;
-    g_window_gs_image_records[index].coordinate_mode = coordinate_mode;
-    /* Struct view of clut_x/clut_y: as plain s32 stores they could alias the
-     * stacked image argument, whose load the target schedules after them. */
-    clut = &g_window_gs_image_records[index].clut;
-    clut->y = 0x1E1;
-    clut->x = 0;
-    g_window_gs_image_records[index].bounds = bounds;
-    window_get_image_vram_position(coordinate_mode, bounds, &transformed);
-    g_window_gs_image_records[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
-    color = &g_window_gs_image_records[index].color;
-    color->b = color->g = color->r = 0x80;
-    g_window_gs_image_records[index].anim_counter = 0;
-    screen_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
-}
-
-/* The VRAM position of a window image at `bounds` in coordinate mode `mode`.
- * Images are 4-bit, four texels to a VRAM halfword: modes 0 and 1 put them in
- * the texture pages at x 0x180 and 0x1c0, mode 2 in the page at (0x240, 0x100).
- *
- * The callee receives the adjacent position and dimensions registers as one
- * eight-byte aggregate. Dimensions are preserved by the ABI but unused here.
- */
-static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output) {
-    switch (mode) {
-    case 0:
-    case 1:
-        output->x = bounds.x / 4 + 0x180 + mode * 64;
-        output->y = bounds.y;
-        break;
-    case 2:
-        output->x = (bounds.x / 4) + 0x240;
-        output->y = bounds.y + 0x100;
-        break;
-    }
-}
-
-/* Upload a render record's window image at the VRAM position its coordinate
- * mode selects. The record's bounds are passed to the transform by value. */
-void window_load_render_record_image(s32 index, u32* image) {
-    point32_t transformed;
-    RECT rect;
-
-    window_get_image_vram_position(
-        g_window_gs_image_records[index].coordinate_mode, g_window_gs_image_records[index].bounds, &transformed);
-    rect.x = transformed.x;
-    rect.y = transformed.y;
-    rect.w = g_window_gs_image_records[index].bounds.w / 4;
-    rect.h = g_window_gs_image_records[index].bounds.h;
-    LoadImage(&rect, image);
 }

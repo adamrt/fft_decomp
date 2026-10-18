@@ -1,18 +1,15 @@
-/* VRAM render records, panel render threads, list cursor state, scrollable text windows and the sound queue. */
+/* Window images and text, panel render threads, saved list cursors and scrollable text windows. */
 
-#include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_stack.h"
-#include "fft/music.h"
 #include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/window.h"
 #include "fft/world_map.h"
-#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
@@ -23,11 +20,113 @@ extern struct screen_number_range g_window_panel_number_state;
 static s16 g_window_panel_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 
+static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output);
 static void text_window_render_page(text_window_t* state, s32 row);
 static void text_window_update_page_prompt(text_window_t* state);
 static void text_window_update_scroll_indicators(text_window_t* state);
 static void window_init_animated_record(s32 index, s32 priority, s32 sequence);
 static void window_number_panel_noop(void);
+
+/* Set up render record `index` for a window image of `bounds`: unhide it, place it at bounds.x -
+ * 0x80, bounds.y - 0x78, give it the window CLUT at (0, 0x1E1) and the texture page of the mode's
+ * VRAM area, then draw the empty window frame into `image`. */
+void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image) {
+    point32_t* clut;
+    CVECTOR* color;
+    point32_t transformed;
+
+    g_window_gs_image_records[index].flags
+        &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
+    g_window_gs_image_records[index].base.x = bounds.x - 0x80;
+    g_window_gs_image_records[index].base.y = bounds.y - 0x78;
+    g_window_gs_image_records[index].coordinate_mode = coordinate_mode;
+    /* Struct view of clut_x/clut_y: as plain s32 stores they could alias the
+     * stacked image argument, whose load the target schedules after them. */
+    clut = &g_window_gs_image_records[index].clut;
+    clut->y = 0x1E1;
+    clut->x = 0;
+    g_window_gs_image_records[index].bounds = bounds;
+    window_get_image_vram_position(coordinate_mode, bounds, &transformed);
+    g_window_gs_image_records[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
+    color = &g_window_gs_image_records[index].color;
+    color->b = color->g = color->r = 0x80;
+    g_window_gs_image_records[index].anim_counter = 0;
+    screen_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
+}
+
+/* The VRAM position of a window image at `bounds` in coordinate mode `mode`.
+ * Images are 4-bit, four texels to a VRAM halfword: modes 0 and 1 put them in
+ * the texture pages at x 0x180 and 0x1c0, mode 2 in the page at (0x240, 0x100).
+ *
+ * The callee receives the adjacent position and dimensions registers as one
+ * eight-byte aggregate. Dimensions are preserved by the ABI but unused here.
+ */
+static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output) {
+    switch (mode) {
+    case 0:
+    case 1:
+        output->x = bounds.x / 4 + 0x180 + mode * 64;
+        output->y = bounds.y;
+        break;
+    case 2:
+        output->x = (bounds.x / 4) + 0x240;
+        output->y = bounds.y + 0x100;
+        break;
+    }
+}
+
+/* Upload a render record's window image at the VRAM position its coordinate
+ * mode selects. The record's bounds are passed to the transform by value. */
+void window_load_render_record_image(s32 index, u32* image) {
+    point32_t transformed;
+    RECT rect;
+
+    window_get_image_vram_position(
+        g_window_gs_image_records[index].coordinate_mode, g_window_gs_image_records[index].bounds, &transformed);
+    rect.x = transformed.x;
+    rect.y = transformed.y;
+    rect.w = g_window_gs_image_records[index].bounds.w / 4;
+    rect.h = g_window_gs_image_records[index].bounds.h;
+    LoadImage(&rect, image);
+}
+
+/* Draw a text entry into the window image, using its record's width as the stride.
+ * `point` is passed by value: GCC spills the two 32-bit register values to their
+ * home slots before narrowing them into the origin record. */
+void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u32* buffer) {
+    glyph_blit_t origin;
+
+    origin.rect.x = point.x;
+    origin.rect.y = point.y;
+    origin.stride = g_window_gs_image_records[record_index].bounds.w;
+    menu_display_text_entry(text_id, (u8*)buffer, &origin);
+}
+
+/* Padded image size using proportional pixel widths. No retail caller. */
+void window_measure_text_image(s32 text_id, size32_t* output) {
+    s16 measured_width;
+    s16 rows;
+
+    text_measure_pixels(&measured_width, &rows, text_find_entry(text_id));
+    output->width = (measured_width + 24) & 0xfffc;
+    output->height = rows * 16 + 16;
+}
+
+/* Build and upload a window image, draw the entry at (8, 8) unless its id is zero,
+ * and start the record's pop-in animation. */
+void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image) {
+    /* The pair is stack-resident because it is passed by value. */
+    point32_t text_origin;
+
+    window_build_render_record_image(record_index, bounds, coordinate_mode, image);
+    text_origin.x = 8;
+    text_origin.y = 8;
+    if (text_id != 0) {
+        window_display_text_entry(record_index, text_id, text_origin, image);
+    }
+    window_load_render_record_image(record_index, image);
+    g_window_gs_image_records[record_index].flags |= DISPLAY_OBJECT_POP_IN;
+}
 
 /* Point image render record `index` at a VRAM rectangle given in halfwords: its
  * texture page, page-relative bounds in 8-bit texels, CLUT and a neutral 0x80 tint.
@@ -457,158 +556,5 @@ static void text_window_update_scroll_indicators(text_window_t* state) {
         g_window_records[state->down_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
         g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
-    }
-}
-
-/* Play sound effect `sound_id` (WLDCORE's wrapper for sound_play_sfx). */
-void sound_play_effect(s32 sound_id) {
-    sound_play_sfx(sound_id);
-}
-
-/* Queue an audio command, servicing frame work while the queue is full.
- *
- * Accessing the count as a g_audio_queue member is what makes GCC reload it
- * after each array store. */
-void audio_queue_add(audio_command_e command, s32 value) {
-    while (g_audio_queue.count >= AUDIO_QUEUE_CAPACITY) {
-        file_poll_load(&g_file_cd_state);
-        audio_queue_process();
-        VSync(0);
-    }
-
-    g_audio_queue.commands[g_audio_queue.count] = command;
-    g_audio_queue.values[g_audio_queue.count] = value;
-    g_audio_queue.count++;
-}
-
-/* Services the audio command FIFO: dequeues the next command when idle and
- * runs the current one until it has to wait for loading or a fade.
- *
- * PLAY_MUSIC loads track `value & 0xff` into slot `value >> 8`, or just
- * switches to it when the slot already holds that track. FADE_OUT fades the
- * music out when it is playing, FADE_IN switches to the current slot and
- * fades in to `volume`, and UNLOAD releases a slot (0: the current one); the
- * WAIT commands wait for the load or count down the fade. The dispatch loop is a
- * backward goto: a `for (;;)` loop lets loop.c hoist the queue addresses
- * into saved registers, which the target never does. The if/else in case 4
- * keeps CSE from carrying the value's address across the join. Cases 2,
- * 0x10 and 0x11 jump into the default arm's reset as the target does; a
- * duplicated reset is cross-jumped into the last copy instead. */
-void audio_queue_process(void) {
-    s32 i;
-    s32 value;
-    s32 slot;
-    s32 track;
-    s32* slot_track;
-
-next:
-    switch (g_audio_queue.current_command) {
-    case AUDIO_COMMAND_NONE:
-        if (g_audio_queue.count == 0) {
-            return;
-        }
-        g_audio_queue.current_command = g_audio_queue.commands[0];
-        g_audio_queue.current_value = g_audio_queue.values[0];
-        for (i = 0; i < g_audio_queue.count - 1; i++) {
-            g_audio_queue.commands[i] = g_audio_queue.commands[i + 1];
-            g_audio_queue.values[i] = g_audio_queue.values[i + 1];
-        }
-        g_audio_queue.count--;
-        break;
-    case AUDIO_COMMAND_PLAY_MUSIC:
-        if (g_file_cd_state.state != 0) {
-            return;
-        }
-        slot = (g_audio_queue.current_value & 0xF00) >> 8;
-        track = g_audio_queue.current_value & 0xFF;
-        slot_track = &g_audio_queue.music.tracks[slot - 1];
-        if (*slot_track == track) {
-            g_audio_queue.current_slot = slot;
-            g_audio_queue.current_command = AUDIO_COMMAND_NONE;
-            music_switch_track(slot, 0, 0);
-            return;
-        }
-        if (*slot_track != 0) {
-            music_unload_scenario_slot(slot);
-        }
-        if (music_load_into_slot(track, slot) != 0) {
-            g_audio_queue.current_command = AUDIO_COMMAND_WAIT_LOAD;
-            g_audio_queue.current_slot = slot;
-            *slot_track = track;
-            return;
-        }
-        g_audio_queue.current_command = AUDIO_COMMAND_NONE;
-        return;
-    case AUDIO_COMMAND_FADE_OUT:
-        if ((g_audio_queue.music.flags & AUDIO_MUSIC_PLAYING) == 0) {
-            goto clear_command;
-        }
-        music_set_target(0, g_audio_queue.current_value << 2);
-        g_audio_queue.current_command = AUDIO_COMMAND_WAIT_FADE_OUT;
-        return;
-    case AUDIO_COMMAND_FADE_IN:
-        music_switch_track(g_audio_queue.current_slot, 0, 0);
-        music_set_target(g_audio_queue.volume, g_audio_queue.current_value << 2);
-        g_audio_queue.current_command = AUDIO_COMMAND_WAIT_FADE_IN;
-        return;
-    case AUDIO_COMMAND_UNLOAD:
-        value = g_audio_queue.current_value;
-        if (value != 0) {
-            slot = value;
-        } else {
-            slot = g_audio_queue.current_slot;
-        }
-        music_unload_scenario_slot(slot);
-        if (slot == g_audio_queue.current_slot) {
-            g_audio_queue.music.flags &= ~AUDIO_MUSIC_PLAYING;
-        }
-        g_audio_queue.music.tracks[slot - 1] = 0;
-    default:
-    clear_command:
-        g_audio_queue.current_command = AUDIO_COMMAND_NONE;
-        break;
-    case AUDIO_COMMAND_WAIT_LOAD:
-        if (g_file_cd_state.state == 0) {
-            goto clear_command;
-        }
-        return;
-    case AUDIO_COMMAND_WAIT_FADE_OUT:
-        if (--g_audio_queue.current_value != 0) {
-            return;
-        }
-        g_audio_queue.music.flags &= ~AUDIO_MUSIC_PLAYING;
-        music_stop();
-        goto clear_command;
-    case AUDIO_COMMAND_WAIT_FADE_IN:
-        if (--g_audio_queue.current_value != 0) {
-            return;
-        }
-        g_audio_queue.current_command = AUDIO_COMMAND_NONE;
-        g_audio_queue.music.flags |= AUDIO_MUSIC_PLAYING;
-        break;
-    }
-
-    goto next;
-}
-
-/* Queue a music change: fade out what is playing, start `value` (a packed
- * slot and music id) and fade it in over 0x10 steps. */
-void audio_queue_start_music(s32 value) {
-    if (g_audio_queue.music.flags & AUDIO_MUSIC_PLAYING) {
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
-    }
-    audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, value);
-    audio_queue_add(AUDIO_COMMAND_FADE_IN, 0x10);
-}
-
-/* Twin of file_wait_for_pending with the audio queue as the wait condition:
- * run frames until no command is queued or running. The two 32-bit busy
- * fields are read as g_audio_queue members rather than as separate
- * scalars. */
-void audio_queue_wait_until_empty(void) {
-    while (g_audio_queue.count != 0 || g_audio_queue.current_command != AUDIO_COMMAND_NONE) {
-        file_poll_load(&g_file_cd_state);
-        audio_queue_process();
-        VSync(0);
     }
 }
