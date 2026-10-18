@@ -156,7 +156,8 @@ void world_map_project_tiles(void);
 void world_map_draw_tiles(GsOT* ot);
 
 /* camera */
-/* Map camera block: translation, scale and rotation are passed together. */
+/* Map camera view over adjacent origin, scale and rotation vectors. Projection
+ * addresses origin and scale from rotation; pan and zoom update the VECTOR fields. */
 typedef struct world_map_projection_view {
     VECTOR origin;    /* 0x00 */
     VECTOR scale;     /* 0x10 */
