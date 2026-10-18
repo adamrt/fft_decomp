@@ -25,6 +25,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Dimensions selected by the four-bit size code in an SHP frame part. */
+typedef struct unit_list_sprite_size {
+    u8 width;
+    u8 height;
+} unit_list_sprite_size_t;
+typedef char unit_list_sprite_size_must_be_2[sizeof(unit_list_sprite_size_t) == 2 ? 1 : -1];
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_unit_list_grid_stat_bar_script_top[12];
 extern u8 g_unit_list_grid_stat_bar_script_bottom[12];
@@ -58,10 +65,10 @@ extern oriented_quad_t g_unit_list_shadow_sprite;
 extern s8 g_unit_list_dot_glow_direction;
 extern s8 g_unit_list_dot_glow_timer;
 extern menu_button_piece_t g_unit_list_slot_sprite_entries[];
-extern u8 g_unit_list_sprite_cell_sizes[][2];
+extern unit_list_sprite_size_t g_unit_list_sprite_cell_sizes[16];
 
 /* Signed 4.12 x/y scale pair per sprite entry; a negative scale flips the quad. */
-extern s16 g_unit_list_button_piece_scales[][2];
+extern point16_t g_unit_list_button_piece_scales[];
 
 /* reorder list */
 extern u8 g_unit_list_reorder_list_initialized;
@@ -312,14 +319,14 @@ static void unit_list_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed,
             menu_button_piece_t* sprite = &g_unit_list_slot_sprite_entries[entry];
             desc.position.x = x + sprite->x_offset;
             desc.position.y = y + sprite->y_offset;
-            desc.w = abs(g_unit_list_button_piece_scales[entry][0] * sprite->w) >> 12;
-            desc.h = abs(g_unit_list_button_piece_scales[entry][1] * sprite->h) >> 12;
+            desc.w = abs(g_unit_list_button_piece_scales[entry].x * sprite->w) >> 12;
+            desc.h = abs(g_unit_list_button_piece_scales[entry].y * sprite->h) >> 12;
             desc.source.u = sprite->u;
             desc.source.v = sprite->v;
             desc.source.w = sprite->w;
             desc.source.h = sprite->h;
-            scale_x = g_unit_list_button_piece_scales[entry][0];
-            scale_y = g_unit_list_button_piece_scales[entry][1];
+            scale_x = g_unit_list_button_piece_scales[entry].x;
+            scale_y = g_unit_list_button_piece_scales[entry].y;
             orientation = scale_x < 0;
             if (scale_y < 0) {
                 orientation += 2;
@@ -941,8 +948,8 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     cells = frame->parts;
     for (i = 0; i <= frame->part_count_and_rotation; i++) {
         size = (cells[i].attributes >> 10) & (SPRITE_SHP_PART_SIZE_MASK >> 10);
-        quad.uw = quad.w = g_unit_list_sprite_cell_sizes[size][0];
-        quad.vh = quad.h = g_unit_list_sprite_cell_sizes[size][1];
+        quad.uw = quad.w = g_unit_list_sprite_cell_sizes[size].width;
+        quad.vh = quad.h = g_unit_list_sprite_cell_sizes[size].height;
         value = unit_facing_get_camera_quadrant_by_battle_id(g_unit_list_pointers[unit]->battle_id);
         dx = cells[i].x_shift;
         orientation = TEXTURE_UV_FLIP_NONE;
