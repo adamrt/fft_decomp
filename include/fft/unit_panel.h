@@ -143,6 +143,19 @@ void unit_panel_toggle_numbers_thread(s32 enable);
 void unit_panel_banner_thread(void);
 
 /* panel packets */
+/* Draw modes, sprites and border packets shared by the equipment and Status frames.
+ * The initializer and color helper use this prefix; draw offsets, numeric frames and
+ * draw areas belong to their complete frame records. */
+typedef struct unit_panel_frame {
+    DR_MODE frame_draw_mode; /* 0x000; MENU_TEXTURE_PAGE_FRAME */
+    DR_MODE text_draw_mode;  /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
+    DR_MODE image_draw_mode; /* 0x018; item icons or allocated images */
+    SPRT sprites[24];        /* 0x024 */
+    TILE tiles[2];           /* 0x204 */
+    LINE_F2 lines[8];        /* 0x224 */
+} unit_panel_frame_t;
+typedef char unit_panel_frame_size_must_be_676[sizeof(unit_panel_frame_t) == 676 ? 1 : -1];
+
 /* Per-frame character status buffer (0x3d8 bytes), double buffered by both bodies of
  * unit_panel_equipment_ability_thread and the overlay list threads, which copy the first buffer
  * to the second (base + 0x3d8) before the render loop starts. Evidence:
@@ -162,26 +175,21 @@ void unit_panel_banner_thread(void);
  *    menu_init_scaled_draw_area_packets / menu_build_scaled_draw_area_packets
  *    pair. */
 typedef struct unit_panel_buffer {
-    DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
-    DR_MODE text_draw_mode;                          /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
-    DR_MODE image_draw_mode;                         /* 0x018; item icons or allocated images */
-    SPRT sprites[24];                                /* 0x024 */
-    TILE tiles[2];                                   /* 0x204 */
-    LINE_F2 lines[8];                                /* 0x224 */
+    unit_panel_frame_t frame;                        /* 0x000 */
     menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x2a4 */
     menu_palette_primitives_t numeric_frame;         /* 0x2c4 */
     scaled_draw_area_pair_t portrait;                /* 0x3b0 */
 } unit_panel_buffer_t;
 typedef char unit_panel_buffer_size_must_be_984[(sizeof(unit_panel_buffer_t) == 984) ? 1 : -1];
 
-void unit_panel_init_primitives(unit_panel_buffer_t* menu);
+void unit_panel_init_primitives(unit_panel_frame_t* menu);
 
 /* The dimmed frame colors for style 1 or while the input lock mode is 1, otherwise the normal ones. */
 void unit_panel_select_palette(menu_palette_primitives_t* primitives, const unit_panel_thread_t* thread);
 
 /* The panel's sprite CLUTs and the tint of its last five sprites: dimmed and blue for style 1 or while the input
  * lock mode is 1, otherwise normal. */
-void unit_panel_set_colors(unit_panel_buffer_t* primitives, const unit_panel_thread_t* state);
+void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thread_t* state);
 
 /* status icons */
 /* ATTACK, DEBUGCHR and REQUIRE each define 76 status cells.

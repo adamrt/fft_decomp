@@ -13,7 +13,7 @@ void menu_noop_8(void) {
 #endif
 
 /* Build the two-column status-panel frame and its texture draw modes. */
-void unit_panel_init_primitives(unit_panel_buffer_t* menu) {
+void unit_panel_init_primitives(unit_panel_frame_t* menu) {
     s32 i;
 
     SetTile(&menu->tiles[0]);

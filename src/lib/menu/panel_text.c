@@ -16,7 +16,7 @@ static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, gly
 /* Set the status panel's sprite CLUTs and the tint of its last five sprites: the dimmed
  * set with a blue tint for style 1 or while menu input lock mode 1 is on, otherwise the
  * normal set with a neutral 0x80 tint. */
-void unit_panel_set_colors(unit_panel_buffer_t* primitives, const unit_panel_thread_t* state) {
+void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thread_t* state) {
     s32 i;
     s32 clut;
 

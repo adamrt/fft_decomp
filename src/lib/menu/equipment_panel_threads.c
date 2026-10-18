@@ -57,26 +57,26 @@ void unit_panel_equipment_ability_thread(void) {
     base = g_unit_panel_equipment_frames;
     state = &g_unit_panel_selected_unit_fields.state;
     status_screen_init_numbers_frame(&g_unit_panel_equipment_frame_rects[0], &screen->numeric_frame);
-    unit_panel_init_primitives(screen);
+    unit_panel_init_primitives(&screen->frame);
     menu_init_scaled_draw_area_packets(&screen->portrait);
 
     /* Move the tiles and lines from panel-relative to screen coordinates. */
     for (i = 0; i < 2; i++) {
-        screen->tiles[i].x0 += g_unit_panel_equipment_frame_rects[0].x;
-        screen->tiles[i].y0 += g_unit_panel_equipment_frame_rects[0].y;
+        screen->frame.tiles[i].x0 += g_unit_panel_equipment_frame_rects[0].x;
+        screen->frame.tiles[i].y0 += g_unit_panel_equipment_frame_rects[0].y;
     }
     for (i = 0; i < 8; i++) {
-        screen->lines[i].x0 += g_unit_panel_equipment_frame_rects[0].x;
-        screen->lines[i].y0 += g_unit_panel_equipment_frame_rects[0].y;
-        screen->lines[i].x1 += g_unit_panel_equipment_frame_rects[0].x;
-        screen->lines[i].y1 += g_unit_panel_equipment_frame_rects[0].y;
+        screen->frame.lines[i].x0 += g_unit_panel_equipment_frame_rects[0].x;
+        screen->frame.lines[i].y0 += g_unit_panel_equipment_frame_rects[0].y;
+        screen->frame.lines[i].x1 += g_unit_panel_equipment_frame_rects[0].x;
+        screen->frame.lines[i].y1 += g_unit_panel_equipment_frame_rects[0].y;
     }
 
-    menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
-    menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
-    menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
-    screen->sprites[0].clut = 0x7cbc;
-    screen->sprites[1].clut = 0x7cbc;
+    menu_init_sprite_array(&screen->frame.sprites[19], 5, 0x7cfc);
+    menu_init_sprite_array(&screen->frame.sprites[0], 12, 0x7d7c);
+    menu_init_sprite_array(&screen->frame.sprites[12], 7, MENU_CLUT_NORMAL);
+    screen->frame.sprites[0].clut = 0x7cbc;
+    screen->frame.sprites[1].clut = 0x7cbc;
     mem_copy_bytes_nonempty(&screen[1], screen, sizeof(unit_panel_buffer_t));
 
     frame = 0;
@@ -90,19 +90,19 @@ void unit_panel_equipment_ability_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode0[i]);
             }
             if (mode == 1) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode1[i]);
             }
             if (mode == 2) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode2[i]);
             }
             if (mode == 3) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode3[i]);
             }
         }
@@ -112,7 +112,7 @@ void unit_panel_equipment_ability_thread(void) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
                 if (ability == MENU_STATUS_PANEL_LABEL_NONE || ability == 0) {
-                    screen->sprites[7 + i].x0 -= 0x200;
+                    screen->frame.sprites[7 + i].x0 -= 0x200;
                 }
             }
         }
@@ -160,14 +160,14 @@ void unit_panel_equipment_ability_thread(void) {
         }
 
         for (i = 0; i < 5; i++) {
-            gfx_set_image_primitive_layout(&screen->sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
+            gfx_set_image_primitive_layout(&screen->frame.sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
                 &g_unit_panel_equipment_frame_rects[0], &g_unit_panel_item_icon_layouts[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);
+                gfx_set_item_icon_sprite(&screen->frame.sprites[19 + i], state->equipment[i]);
             } else {
                 /* The target indexes the five icon sprites from their own base (i * 0x14 + 0x1a8), as a
                  * separate array after the 19 label sprites would. */
-                (screen->sprites + i)[19].x0 = -0x200;
+                (screen->frame.sprites + i)[19].x0 = -0x200;
             }
         }
 
@@ -193,7 +193,7 @@ void unit_panel_equipment_ability_thread(void) {
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
 
-        unit_panel_set_colors(screen, thread);
+        unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
         /* Primitives link in at the head of the ordering-table entry, so they draw in reverse:
@@ -203,23 +203,23 @@ void unit_panel_equipment_ability_thread(void) {
         }
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
         for (i = 0; i < 12; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[i]);
         }
         for (i = 14; i < 19; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->frame_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&screen->sprites[12]);
-        gfx_draw_or_append_gpu_primitive(&screen->sprites[13]);
-        gfx_draw_or_append_gpu_primitive(&screen->text_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.frame_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[12]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[13]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.text_draw_mode);
         for (i = 0; i < 5; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[19 + i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[19 + i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->image_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&screen->tiles[0]);
-        gfx_draw_or_append_gpu_primitive(&screen->tiles[1]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.image_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.tiles[0]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.tiles[1]);
         for (i = 0; i < 8; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->lines[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
         status_screen_submit_numbers_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);

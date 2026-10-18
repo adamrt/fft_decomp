@@ -75,21 +75,21 @@ void unit_panel_equipment_thread(void) {
     }
 
     status_screen_init_numbers_frame(&g_unit_panel_equipment_origins[0], &screen->numeric_frame);
-    unit_panel_init_primitives(screen);
+    unit_panel_init_primitives(&screen->frame);
     screen_panel_init_scaled_draw_area_packets(&screen->portrait);
-    screen->tiles[0].x0 += g_unit_panel_equipment_origins[0].x;
-    screen->tiles[0].y0 += g_unit_panel_equipment_origins[0].y;
+    screen->frame.tiles[0].x0 += g_unit_panel_equipment_origins[0].x;
+    screen->frame.tiles[0].y0 += g_unit_panel_equipment_origins[0].y;
     for (i = 0; i < 4; i++) {
-        screen->lines[i].x0 += g_unit_panel_equipment_origins[0].x;
-        screen->lines[i].y0 += g_unit_panel_equipment_origins[0].y;
-        screen->lines[i].x1 += g_unit_panel_equipment_origins[0].x;
-        screen->lines[i].y1 += g_unit_panel_equipment_origins[0].y;
+        screen->frame.lines[i].x0 += g_unit_panel_equipment_origins[0].x;
+        screen->frame.lines[i].y0 += g_unit_panel_equipment_origins[0].y;
+        screen->frame.lines[i].x1 += g_unit_panel_equipment_origins[0].x;
+        screen->frame.lines[i].y1 += g_unit_panel_equipment_origins[0].y;
     }
 
-    menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
-    menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
-    screen->sprites[0].clut = 0x7cbc;
-    screen->sprites[1].clut = 0x7cbc;
+    menu_init_sprite_array(&screen->frame.sprites[0], 12, 0x7d7c);
+    menu_init_sprite_array(&screen->frame.sprites[12], 7, MENU_CLUT_NORMAL);
+    screen->frame.sprites[0].clut = 0x7cbc;
+    screen->frame.sprites[1].clut = 0x7cbc;
     mem_copy_bytes_nonempty(&screen[1], screen, sizeof(unit_panel_buffer_t));
 
     frame = 0;
@@ -102,19 +102,19 @@ void unit_panel_equipment_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode0[i]);
             }
             if (mode == 1) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode1[i]);
             }
             if (mode == 2) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode2[i]);
             }
             if (mode == 3) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode3[i]);
             }
         }
@@ -136,23 +136,23 @@ void unit_panel_equipment_thread(void) {
             thread->redraw_request = 0;
         }
 
-        screen->sprites[12].u0 = u;
-        screen->sprites[13].u0 = u;
-        menu_init_sprite_array(&screen->sprites[19], MENU_EQUIPMENT_SLOT_COUNT, 0x7cfc);
+        screen->frame.sprites[12].u0 = u;
+        screen->frame.sprites[13].u0 = u;
+        menu_init_sprite_array(&screen->frame.sprites[19], MENU_EQUIPMENT_SLOT_COUNT, 0x7cfc);
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            gfx_set_image_primitive_layout(&screen->sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
+            gfx_set_image_primitive_layout(&screen->frame.sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
                 &g_unit_panel_equipment_origins[0], &g_unit_panel_item_icon_layouts[i]);
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
+                gfx_set_item_icon_sprite(&screen->frame.sprites[19 + i], id);
             } else {
-                (&screen->sprites[i])[19].x0 = 0;
+                (&screen->frame.sprites[i])[19].x0 = 0;
             }
         }
 
         /* Repeats the two stores above; nothing in between touches sprites 12 and 13. */
-        screen->sprites[12].u0 = u;
-        screen->sprites[13].u0 = u;
+        screen->frame.sprites[12].u0 = u;
+        screen->frame.sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->position.x - 0x80;
         g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
@@ -163,28 +163,28 @@ void unit_panel_equipment_thread(void) {
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_frame_arg, &thread->position);
-        unit_panel_set_colors(screen, thread);
+        unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
-        gfx_draw_or_append_gpu_primitive(&screen->sprites[0]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[0]);
         for (i = 2; i < 7; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[i]);
         }
         for (i = 14; i < 19; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->frame_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&screen->sprites[12]);
-        gfx_draw_or_append_gpu_primitive(&screen->text_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.frame_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[12]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.text_draw_mode);
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[19 + i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[19 + i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->image_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&screen->tiles[0]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.image_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.tiles[0]);
         for (i = 0; i < 4; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->lines[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
         status_screen_submit_numbers_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
@@ -245,21 +245,21 @@ void unit_panel_ability_thread(void) {
     }
 
     status_screen_init_numbers_frame(&g_formation_ability_panel_origin, &screen->numeric_frame);
-    unit_panel_init_primitives(screen);
+    unit_panel_init_primitives(&screen->frame);
     screen_panel_init_scaled_draw_area_packets(&screen->portrait);
-    screen->tiles[1].x0 += g_unit_panel_equipment_origins[0].x;
-    screen->tiles[1].y0 += g_unit_panel_equipment_origins[0].y;
+    screen->frame.tiles[1].x0 += g_unit_panel_equipment_origins[0].x;
+    screen->frame.tiles[1].y0 += g_unit_panel_equipment_origins[0].y;
     for (i = 4; i < 8; i++) {
-        screen->lines[i].x0 += g_unit_panel_equipment_origins[0].x;
-        screen->lines[i].y0 += g_unit_panel_equipment_origins[0].y;
-        screen->lines[i].x1 += g_unit_panel_equipment_origins[0].x;
-        screen->lines[i].y1 += g_unit_panel_equipment_origins[0].y;
+        screen->frame.lines[i].x0 += g_unit_panel_equipment_origins[0].x;
+        screen->frame.lines[i].y0 += g_unit_panel_equipment_origins[0].y;
+        screen->frame.lines[i].x1 += g_unit_panel_equipment_origins[0].x;
+        screen->frame.lines[i].y1 += g_unit_panel_equipment_origins[0].y;
     }
 
-    menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
-    menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
-    screen->sprites[0].clut = 0x7cbc;
-    screen->sprites[1].clut = 0x7cbc;
+    menu_init_sprite_array(&screen->frame.sprites[0], 12, 0x7d7c);
+    menu_init_sprite_array(&screen->frame.sprites[12], 7, MENU_CLUT_NORMAL);
+    screen->frame.sprites[0].clut = 0x7cbc;
+    screen->frame.sprites[1].clut = 0x7cbc;
     mem_copy_bytes_nonempty(&screen[1], screen, sizeof(unit_panel_buffer_t));
 
     frame = 0;
@@ -268,12 +268,12 @@ void unit_panel_ability_thread(void) {
 
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode0[i]);
             }
         } else {
             for (i = 0; i < 19; i++) {
-                gfx_set_image_primitive_layout(&screen->sprites[i], &g_unit_panel_texture_origin,
+                gfx_set_image_primitive_layout(&screen->frame.sprites[i], &g_unit_panel_texture_origin,
                     &g_unit_panel_equipment_origins[0], &g_unit_panel_label_layouts_mode1[i]);
             }
         }
@@ -283,7 +283,7 @@ void unit_panel_ability_thread(void) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
                 if (ability == MENU_STATUS_PANEL_LABEL_NONE || ability == 0) {
-                    screen->sprites[7 + i].x0 -= 0x200;
+                    screen->frame.sprites[7 + i].x0 -= 0x200;
                 }
             }
         }
@@ -319,8 +319,8 @@ void unit_panel_ability_thread(void) {
             thread->redraw_request = 0;
         }
 
-        screen->sprites[12].u0 = u;
-        screen->sprites[13].u0 = u;
+        screen->frame.sprites[12].u0 = u;
+        screen->frame.sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->position.x - 0xf3;
         g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
@@ -333,21 +333,21 @@ void unit_panel_ability_thread(void) {
         offset.y = thread->position.y;
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_frame_arg, &offset);
-        unit_panel_set_colors(screen, thread);
+        unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
-        gfx_draw_or_append_gpu_primitive(&screen->sprites[1]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[1]);
         for (i = 7; i < 12; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&screen->frame_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&screen->sprites[13]);
-        gfx_draw_or_append_gpu_primitive(&screen->text_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&screen->tiles[1]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.frame_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.sprites[13]);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.text_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&screen->frame.tiles[1]);
         for (i = 4; i < 8; i++) {
-            gfx_draw_or_append_gpu_primitive(&screen->lines[i]);
+            gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
         status_screen_submit_numbers_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);

@@ -109,15 +109,10 @@ typedef struct unit_view_summary_frame {
 } unit_view_summary_frame_t;
 
 /* Double-buffered 0x2d0-byte frame of the Status screen panel (g_status_screen_frames). The first 0x2a4
- * bytes are laid out as unit_panel_buffer_t (draw modes, sprites, tiles and lines),
+ * bytes hold the common unit_panel_frame_t (draw modes, sprites, tiles and lines),
  * and the trailing draw-area pair follows menu_panel_frame_t. */
 typedef struct status_screen_frame {
-    DR_MODE frame_draw_mode;            /* 0x000; MENU_TEXTURE_PAGE_FRAME */
-    DR_MODE text_draw_mode;             /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
-    DR_MODE image_draw_mode;            /* 0x018; MENU_TEXTURE_PAGE_ITEM_ICONS */
-    SPRT sprites[24];                   /* 0x024: 19 panel sprites, then 5 item icons */
-    TILE tiles[2];                      /* 0x204 */
-    LINE_F2 lines[8];                   /* 0x224 */
+    unit_panel_frame_t frame;           /* 0x000 */
     menu_palette_primitives_t* palette; /* 0x2a4 */
     scaled_draw_area_pair_t draw_areas; /* 0x2a8 */
 } status_screen_frame_t;
@@ -1861,22 +1856,22 @@ void status_screen_thread(void) {
     /* Move the hovered-unit and summary panels to the top while the editor shows. */
     g_unit_view_hovered_stats_rect.y = 0x1A;
     g_unit_view_summary_panel_rect.y = 0x1A;
-    gfx_set_draw_mode_for_texture_page(&frame_record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
-    gfx_set_draw_mode_for_texture_page(&frame_record->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    gfx_set_draw_mode_for_texture_page(&frame_record->image_draw_mode, MENU_TEXTURE_PAGE_ITEM_ICONS);
+    gfx_set_draw_mode_for_texture_page(&frame_record->frame.frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&frame_record->frame.text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&frame_record->frame.image_draw_mode, MENU_TEXTURE_PAGE_ITEM_ICONS);
 
-    SetTile(&frame_record->tiles[0]);
-    SetSemiTrans(&frame_record->tiles[0], 1);
-    setRGB0(&frame_record->tiles[0], 0x30, 0x30, 0x30);
-    frame_record->tiles[0].w = 0x10;
-    frame_record->tiles[0].h = 0x5A;
-    frame_record->tiles[0].x0 = s_status_screen_panel_rect.x;
-    frame_record->tiles[0].y0 = s_status_screen_panel_rect.y + 1;
-    mem_copy_bytes_nonempty(&frame_record->tiles[1], &frame_record->tiles[0], sizeof(TILE));
-    frame_record->tiles[0].x0 += 0x12;
-    frame_record->tiles[1].x0 += 0x7C;
+    SetTile(&frame_record->frame.tiles[0]);
+    SetSemiTrans(&frame_record->frame.tiles[0], 1);
+    setRGB0(&frame_record->frame.tiles[0], 0x30, 0x30, 0x30);
+    frame_record->frame.tiles[0].w = 0x10;
+    frame_record->frame.tiles[0].h = 0x5A;
+    frame_record->frame.tiles[0].x0 = s_status_screen_panel_rect.x;
+    frame_record->frame.tiles[0].y0 = s_status_screen_panel_rect.y + 1;
+    mem_copy_bytes_nonempty(&frame_record->frame.tiles[1], &frame_record->frame.tiles[0], sizeof(TILE));
+    frame_record->frame.tiles[0].x0 += 0x12;
+    frame_record->frame.tiles[1].x0 += 0x7C;
 
-    line = frame_record->lines;
+    line = frame_record->frame.lines;
     for (i = 0; i < 8 * MENU_STATUS_SCREEN_LINE_SIZE; i += MENU_STATUS_SCREEN_LINE_SIZE) {
         SetLineF2(line);
         SetSemiTrans(line, 1);
@@ -1890,8 +1885,8 @@ void status_screen_thread(void) {
         line++;
     }
 
-    menu_init_sprite_array(&frame_record->sprites[0], 0xC, 0x7D7C);
-    menu_init_sprite_array(&frame_record->sprites[12], 7, MENU_CLUT_NORMAL);
+    menu_init_sprite_array(&frame_record->frame.sprites[0], 0xC, 0x7D7C);
+    menu_init_sprite_array(&frame_record->frame.sprites[12], 7, MENU_CLUT_NORMAL);
 
     /* Each arm copies all four rows itself; the compiler cross-jumps the
      * common tails, leaving only the first call's table loads in the arms. */
@@ -1918,21 +1913,22 @@ void status_screen_thread(void) {
     /* These sprite and rectangle records share the fields read by the image loader. */
     if (g_unit_panel_selected_unit_fields.state.generic_monster == 0) {
         for (i = 0; i < 19; i++) {
-            gfx_set_image_primitive_layout(&frame_record->sprites[i], &g_menu_texture_origin,
+            gfx_set_image_primitive_layout(&frame_record->frame.sprites[i], &g_menu_texture_origin,
                 &s_status_screen_panel_rect, &s_status_screen_skillset_sprite_layouts[i]);
         }
     } else {
         for (i = 0; i < 19; i++) {
-            gfx_set_image_primitive_layout(&frame_record->sprites[i], &g_menu_texture_origin,
+            gfx_set_image_primitive_layout(&frame_record->frame.sprites[i], &g_menu_texture_origin,
                 &s_status_screen_panel_rect, &s_status_screen_monster_sprite_layouts[i]);
         }
     }
 
-    menu_init_sprite_array(&frame_record->sprites[19], 5, 0x7CFC);
+    menu_init_sprite_array(&frame_record->frame.sprites[19], 5, 0x7CFC);
     for (i = 0; i < 5; i++) {
-        gfx_set_image_primitive_layout(&frame_record->sprites[19 + i], &g_gfx_item_icon_image_location,
+        gfx_set_image_primitive_layout(&frame_record->frame.sprites[19 + i], &g_gfx_item_icon_image_location,
             &s_status_screen_panel_rect, &s_status_screen_item_icon_layouts[i]);
-        gfx_set_item_icon_sprite(&frame_record->sprites[19 + i], g_unit_panel_selected_unit_fields.state.equipment[i]);
+        gfx_set_item_icon_sprite(
+            &frame_record->frame.sprites[19 + i], g_unit_panel_selected_unit_fields.state.equipment[i]);
     }
 
     buffer = menu_alloc_buffer(0xC80);
@@ -1981,7 +1977,7 @@ void status_screen_thread(void) {
     if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
         for (i = 0; i < 5; i++) {
             if ((u16)g_unit_panel_selected_unit_fields.state.ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
-                frame_record->sprites[7 + i].x0 -= 0x200;
+                frame_record->frame.sprites[7 + i].x0 -= 0x200;
             }
         }
     }
@@ -2013,19 +2009,19 @@ void status_screen_thread(void) {
         /* Dim while the status list started below runs in the slot before this thread. */
         value = thread_is_running_asm(g_thread_current_id - 1);
         for (i = 0; i < 19; i++) {
-            frame_record->sprites[i].clut = g_status_screen_sprite_clut_pairs[i][value];
+            frame_record->frame.sprites[i].clut = g_status_screen_sprite_clut_pairs[i][value];
         }
         for (i = 0; i < 5; i++) {
             if (value != 0) {
-                SetShadeTex(&frame_record->sprites[19 + i], 0);
+                SetShadeTex(&frame_record->frame.sprites[19 + i], 0);
                 /* Spelled from sprites[i]: the target's store pointer walks
                  * frame_record + i * 0x14 with the item-icon bias in the
                  * displacement; sprites[19 + i] adds the base per store. */
-                (&frame_record->sprites[i])[19].r0 = 0x40;
-                (&frame_record->sprites[i])[19].g0 = 0x40;
-                (&frame_record->sprites[i])[19].b0 = 0x80;
+                (&frame_record->frame.sprites[i])[19].r0 = 0x40;
+                (&frame_record->frame.sprites[i])[19].g0 = 0x40;
+                (&frame_record->frame.sprites[i])[19].b0 = 0x80;
             } else {
-                SetShadeTex(&frame_record->sprites[19 + i], 1);
+                SetShadeTex(&frame_record->frame.sprites[19 + i], 1);
             }
         }
         if (value == 0) {
@@ -2051,25 +2047,25 @@ void status_screen_thread(void) {
 
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_areas.areas[1]);
         for (i = 0; i < 12; i++) {
-            gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&frame_record->frame.sprites[i]);
         }
         for (i = 14; i < 19; i++) {
-            gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
+            gfx_draw_or_append_gpu_primitive(&frame_record->frame.sprites[i]);
         }
-        gfx_draw_or_append_gpu_primitive(&frame_record->frame_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&frame_record->sprites[12]);
-        gfx_draw_or_append_gpu_primitive(&frame_record->sprites[13]);
-        gfx_draw_or_append_gpu_primitive(&frame_record->text_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.frame_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.sprites[12]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.sprites[13]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.text_draw_mode);
         for (i = 0; i < 5; i++) {
             if ((u16)g_unit_panel_selected_unit_fields.state.equipment[i] != 0xFFFF) {
-                gfx_draw_or_append_gpu_primitive(&frame_record->sprites[19 + i]);
+                gfx_draw_or_append_gpu_primitive(&frame_record->frame.sprites[19 + i]);
             }
         }
-        gfx_draw_or_append_gpu_primitive(&frame_record->image_draw_mode);
-        gfx_draw_or_append_gpu_primitive(&frame_record->tiles[0]);
-        gfx_draw_or_append_gpu_primitive(&frame_record->tiles[1]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.image_draw_mode);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.tiles[0]);
+        gfx_draw_or_append_gpu_primitive(&frame_record->frame.tiles[1]);
         for (i = 0; i < 8; i++) {
-            gfx_draw_or_append_gpu_primitive(&frame_record->lines[i]);
+            gfx_draw_or_append_gpu_primitive(&frame_record->frame.lines[i]);
         }
         frame++;
         status_screen_submit_numbers_frame(frame_record->palette);
