@@ -128,7 +128,7 @@ static void window_draw_gpu_animated_record(display_object_animated_t* actor, u3
      * constant into a register, which the target does not. Frame records follow the serialized header. Pointer addition
      * keeps the index-first address sum; array indexing reverses it. */
 loop:
-    value = ((display_object_frame_t*)(anim + 1) + actor->frame_index)->duration;
+    value = (anim->frames + actor->frame_index)->duration;
     if (value == actor->anim_counter && value != 0xffff) {
         actor->anim_counter = 0;
         actor->frame_index++;
@@ -139,7 +139,7 @@ loop:
         goto loop;
     }
 
-    value = ((display_object_frame_t*)(anim + 1) + actor->frame_index)->cel;
+    value = (anim->frames + actor->frame_index)->cel;
     cel = sprites[value];
     /* Preserve the reverse 32-bit cursor; a part array changes address computation. */
     sprite = (u32*)cel;

@@ -18,10 +18,12 @@ typedef struct display_object_frame {
     u16 cel;      /* 0x00 */
     u16 duration; /* 0x02 */
 } display_object_frame_t;
+typedef char display_object_frame_size_must_be_4[sizeof(display_object_frame_t) == 4 ? 1 : -1];
 
 /* Serialized animation header, followed immediately by frame_count four-byte frame records. */
 typedef struct display_object_sequence_header {
-    s32 frame_count; /* 0x00 */
+    s32 frame_count;                  /* 0x00 */
+    display_object_frame_t frames[0]; /* variable-length serialized frame records */
 } display_object_sequence_header_t;
 typedef char display_object_sequence_header_size_must_be_4[sizeof(display_object_sequence_header_t) == 4 ? 1 : -1];
 

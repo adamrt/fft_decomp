@@ -147,7 +147,7 @@ void window_draw_gs_animated_record(display_object_animated_t* object, GsOT* ot)
      * constant into a register, which the target does not. Frame records follow the serialized header. Pointer addition
      * keeps the index-first address sum; array indexing reverses it. */
 step_frame:
-    index = ((display_object_frame_t*)(sequence + 1) + object->frame_index)->duration;
+    index = (sequence->frames + object->frame_index)->duration;
     if (index == object->anim_counter && index != 0xffff) {
         object->anim_counter = 0;
         object->frame_index++;
@@ -158,7 +158,7 @@ step_frame:
         goto step_frame;
     }
 
-    index = ((display_object_frame_t*)(sequence + 1) + object->frame_index)->cel;
+    index = (sequence->frames + object->frame_index)->cel;
     cel = cels[index];
     /* Preserve the reverse 32-bit cursor; a part array changes address computation. */
     words = (u32*)cel;
