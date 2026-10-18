@@ -81,8 +81,6 @@ extern render_buffer_t* g_battle_map_tile_mark_color_buffer;
 /* Weather particles and their transforms. */
 extern weather_particle_t g_weather_particles[64];
 extern weather_particle_t g_weather_rain_splash_particles[32];
-extern RECT g_weather_drop_uv_rects[3];
-extern RECT g_weather_splash_uv_rects[4];
 extern u8 g_weather_primary_speed;
 extern u8 g_weather_fall_speed;
 extern u8 g_weather_rain_secondary_fall_speed;
@@ -152,7 +150,6 @@ extern s32 g_battle_map_part_untextured_triangle_count;
 /* Map projection state. */
 extern VECTOR g_battle_map_camera_zoom;
 extern SVECTOR g_battle_map_camera_rotation;
-extern CVECTOR g_battle_map_white_cvector;
 
 /* Untextured map polygons go to OT slot (otz & mask) | fixed index: {0, 4}
  * normally, {-1, 0} while map effect data is active (command 0x88), so a
@@ -160,9 +157,9 @@ extern CVECTOR g_battle_map_white_cvector;
 extern s32 g_battle_map_untextured_fixed_ot_index;
 extern s32 g_battle_map_untextured_otz_mask;
 
-/* Default vectors shared with battle_map_gns_apply_command, which emits them. */
-extern SVECTOR g_battle_map_zero_svector;
-extern VECTOR g_battle_map_unit_scale_vector;
+/* Default rotation and scale copied when mesh parts or map resources are initialized. */
+static const SVECTOR g_battle_map_zero_svector;
+static const VECTOR g_battle_map_unit_scale_vector;
 extern u32 g_gfx_battle_otags[2][0x180];
 
 /* The first rain endpoint reuses fall_speed as its splash phase. */
@@ -518,37 +515,6 @@ void* battle_map_light_state_command(battle_map_light_command_e command, void* d
     return result;
 }
 
-/* g_weather_splash_uv_rects: read-only table of this object (32 bytes at 0x800e6b30), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_map_weather_splash_uv_rects_rodata[8] = {
-    0x00a00040,
-    0x000f000f,
-    0x00a00030,
-    0x000f000f,
-    0x00a00020,
-    0x000f000f,
-    0x00a00010,
-    0x000f000f,
-};
-
-/* g_weather_drop_uv_rects: read-only table of this object (24 bytes at 0x800e6b50), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_map_weather_drop_uv_rects_rodata[6] = {
-    0x00a00010,
-    0x000f000f,
-    0x00a00020,
-    0x000f000f,
-    0x00a00030,
-    0x000f000f,
-};
-
-/* g_battle_map_white_cvector: read-only table of this object (8 bytes at 0x800e6b68), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_map_white_cvector_rodata[2] = {
-    0x00ffffff,
-    0x00000000,
-};
-
 #define GT3(i)       (g_render_current_buffer->gt3[i])
 #define GT4(i)       (g_render_current_buffer->gt4[i])
 #define SAVED_GT3(i) (g_battle_map_tile_mark_color_buffer->gt3[i])
@@ -568,12 +534,12 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     MATRIX light_rotation;
     MATRIX light_matrix;
     MATRIX effect_matrix;
-    RECT splash_uv[4];
-    RECT drop_uv[3];
+    RECT splash_uv[4] = { { 64, 160, 15, 15 }, { 48, 160, 15, 15 }, { 32, 160, 15, 15 }, { 16, 160, 15, 15 } };
+    RECT drop_uv[3] = { { 16, 160, 15, 15 }, { 32, 160, 15, 15 }, { 48, 160, 15, 15 } };
     VECTOR effect_translation;
     VECTOR unused_vector;
     VECTOR screen;
-    CVECTOR unused;
+    CVECTOR unused = { 255, 255, 255, 0 };
     s32 i;
     s32 flag;
     s32 effect_flag;
@@ -593,10 +559,6 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     s16 tile;
     u16 frame;
     battle_map_tile_t* ground_tile;
-
-    memcpy(splash_uv, g_weather_splash_uv_rects, sizeof(splash_uv));
-    memcpy(drop_uv, g_weather_drop_uv_rects, sizeof(drop_uv));
-    unused = g_battle_map_white_cvector;
 
     /* The backdrop gradient and its draw modes go in ordering-table slot 0x17F, the first drawn. */
     AddPrim(g_render_current_buffer->otag + 0x17F, &g_render_current_buffer->overlay_modes[1]);
@@ -1897,22 +1859,9 @@ void target_set_tile_mark_colors(s32 mode, s32 unused) {
     }
 }
 
-/* g_battle_map_zero_svector: read-only table of this object (8 bytes at 0x800e6b94), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_map_zero_svector_rodata[2] = {
-    0x00000000,
-    0x00000000,
-};
+static const SVECTOR g_battle_map_zero_svector = { 0, 0, 0, 0 };
 
-/* g_battle_map_unit_scale_vector: read-only table of this object (20 bytes at 0x800e6b9c), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_map_unit_scale_vector_rodata[5] = {
-    0x00001000,
-    0x00001000,
-    0x00001000,
-    0x00000000,
-    0x00000000,
-};
+static const VECTOR g_battle_map_unit_scale_vector = { ONE, ONE, ONE, 0 };
 
 /* Initializes both battle render buffers: every primitive in each pool gets its
  * GPU command code, the full-screen Gouraud overlay gets its corners and two
@@ -2256,7 +2205,7 @@ void weather_run_command(u8 command) {
  * buffer/primitive offset it already keeps for the field stores to the pool
  * base instead of reusing the SetSemiTrans argument. */
 static void weather_init_particles(weather_command_e command) {
-    RECT rects[3];
+    RECT rects[3] = { { 16, 160, 15, 15 }, { 32, 160, 15, 15 }, { 48, 160, 15, 15 } };
     s16 sprite;
     s16 tile;
     u32 i;
@@ -2264,7 +2213,6 @@ static void weather_init_particles(weather_command_e command) {
     s16 surface_y;
     POLY_FT3* prim;
 
-    memcpy(rects, g_weather_drop_uv_rects, sizeof(rects));
     switch (command & 0xff) {
     case BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES:
         g_weather_effect_mode = BATTLE_MAP_WEATHER_EFFECT_SNOW;
