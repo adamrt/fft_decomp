@@ -89,6 +89,7 @@ units:
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: selection_records, source: src/lib/menu/selection_records.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x801c8364, size: 84, hash: 4fea5e6a3ec5f547}]}
   - {name: shop, source: src/world/shop.c, data: [{addr: 0x8019523c, size: 112, hash: ce0c5fd435d95f05}, {addr: 0x801952ac, size: 43, hash: d479a0b4eb31609f}]}
+  - {name: shop_build_stock_list, source: src/world/shop_build_stock_list.c, data: [{addr: 0x8018d844, size: 512, hash: 523503ae3bbd2005}]}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
   - {name: status_thread_toggles, source: src/lib/menu/status_thread_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: text_entries, source: src/lib/event/text_entries.c, data: [{addr: 0x80156c20, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x80156c30, size: 16, hash: 6ff8555916aa10e6}]}
@@ -872,7 +873,7 @@ functions:
   - {addr: 0x80124f14, size: 188, name: formation_item_select_slot, hash: 6b569c10e8467857, unit: equipment_slots}
   - {addr: 0x80124fd0, size: 36, name: item_get_type, hash: 0d110fc92f07954c, source: src/lib/menu/item_get_type.c}
   - {addr: 0x80124ff4, size: 56, name: item_get_type_icon_rect, hash: 9ef0f46a205c2a75, source: src/lib/menu/item_get_type_icon_rect.c}
-  - {addr: 0x8012502c, size: 840, name: shop_build_stock_list, hash: 3c7eed74a2651422}
+  - {addr: 0x8012502c, size: 840, name: shop_build_stock_list, hash: 3c7eed74a2651422, unit: shop_build_stock_list}
   - {addr: 0x80125374, size: 96, name: item_get_menu_category, hash: 391fa191bda064e6, source: src/lib/menu/item_get_menu_category.c}
   - {addr: 0x801253d4, size: 364, name: formation_ability_set_slot, hash: fc8aca691a77add1, unit: formation_units}
   - {addr: 0x80125540, size: 164, name: formation_get_unit_lock, hash: e3d4764d538820cd, unit: formation_units}
