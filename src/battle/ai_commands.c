@@ -1095,6 +1095,13 @@ copy_status:
         sizeof(ai->considered_ability.parameters.fields.status_infliction));
 }
 
+/* Movement-scenario branch decisions survive a suspended tile-scoring pass. */
+static s32 g_ai_move_target_in_reach = 0; /* range reaches the target, or a reflected action is charging */
+static s32 g_ai_move_target_reach = 0;    /* reach, possibly halved before destination selection */
+static s32 g_ai_move_unit_index = 0;      /* unit/row scan index or Stay Near occupant id */
+static s32 g_ai_move_target_distance = 0;
+static s32 g_ai_move_stay_near_destination_fixed = 0;
+
 static s32 g_ai_protect_allies_status_retry = 0; /* skip status pass after one failed attempt */
 static s32 g_ai_protect_allies_status_index = 0; /* status-list cursor preserved for resume */
 /* Cancellation-search accounting survives suspension. */
@@ -1365,13 +1372,6 @@ static void ai_rank_seed_baseline(void) {
     row = coords->fields.y * AI_TILE_ROW_BYTE_STRIDE + (u32)level_row;
     g_ai_data.move_baseline_action.rank.priority = -*(u16*)(coords->fields.x * 2 + row);
 }
-
-/* Workspace aliases preserve the target's separate entry address loads. */
-extern s32 g_ai_move_target_in_reach; /* 1 for range >= distance or charging; 0 otherwise. */
-extern s32 g_ai_move_target_reach;    /* ai_move_get_target_reach's reach, possibly halved before tile selection. */
-extern s32 g_ai_move_unit_index;      /* Reused unit/row loop index or Stay Near occupant ID. */
-extern s32 g_ai_move_target_distance; /* Target-distance byte at the acting unit's tile. */
-extern s32 g_ai_move_stay_near_destination_fixed; /* 1 after a reachable Stay Near destination is fixed. */
 
 /* Prepare the general search's three movement scenarios and their candidate
  * destinations.
