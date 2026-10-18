@@ -25,6 +25,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+s32 g_text_slot_owner_thread_ids[3];
+s32 g_text_slot_glyph_counts[3];
+
 extern s32 g_text_glyphs_per_wait;
 extern u8 g_text_slot_source_columns[];
 extern u8 g_text_slot_row_pitches[];

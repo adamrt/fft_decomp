@@ -470,7 +470,7 @@ typedef struct text_glyph_state {
 } text_glyph_state_t;
 typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16) ? 1 : -1];
 
-/* The three per-thread staging slots the typewriter draws glyphs through. */
+/* BATTLE and WORLD each keep three per-thread typewriter staging slots. */
 extern s32 g_text_slot_owner_thread_ids[3];
 extern s32 g_text_slot_glyph_counts[3];
 
