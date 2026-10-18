@@ -640,13 +640,13 @@ static void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
 void battle_map_light_thread(void) {
     /* The instruction stores rotation XYZ followed by color scale RGB. */
     enum {
-        LIGHT_ROTATION_X,
-        LIGHT_ROTATION_Y,
-        LIGHT_ROTATION_Z,
-        LIGHT_COLOR_R,
-        LIGHT_COLOR_G,
-        LIGHT_COLOR_B,
-        LIGHT_COMPONENT_COUNT
+        LIGHT_ROTATION_X = 0,
+        LIGHT_ROTATION_Y = 1,
+        LIGHT_ROTATION_Z = 2,
+        LIGHT_COLOR_R = 3,
+        LIGHT_COLOR_G = 4,
+        LIGHT_COLOR_B = 5,
+        LIGHT_COMPONENT_COUNT = 6
     };
     s32 start[LIGHT_COMPONENT_COUNT];
     s32 target[LIGHT_COMPONENT_COUNT];
