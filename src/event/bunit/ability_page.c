@@ -17,6 +17,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u8 g_ability_list_ready;
+extern s8 g_ability_list_confirm_prompt_state;
+extern s8 g_job_list_menu_active;
+extern s8 g_job_list_menu_phase; /* menu_job_list_step_e */
+
 /* The title is one mutable job ID followed by the text-row terminator. */
 static s16 g_ability_list_job_name_ids[2] = { 0, -1 };
 

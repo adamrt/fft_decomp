@@ -9,6 +9,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u16 g_save_input_latched_button;
+extern u16 g_save_input_previous;
+
 /*
  * Read pad 0 and publish the newly pressed buttons and two repeat rates for
  * the CARD menus.

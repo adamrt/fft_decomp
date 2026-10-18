@@ -16,12 +16,6 @@ typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_ABILITIES = 1
 } menu_job_list_step_e;
 
-extern u8 g_job_list_initialized;
-extern s32 g_job_list_menu_initialized;
-extern s8 g_job_list_menu_active;
-extern s8 g_job_list_menu_phase; /* menu_job_list_step_e */
-extern s16 g_job_list_selected_generic_index;
-
 /* The job highlighted in the job list. */
 extern s16 g_job_list_selected_id;
 

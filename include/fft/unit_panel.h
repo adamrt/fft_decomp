@@ -299,9 +299,7 @@ extern image_layout_t g_unit_panel_editor_numeric_texture[];
 
 /* panel state (BUNIT) */
 extern unit_panel_unit_t g_unit_panel_panel_selected_unit_data;
-extern palette_t g_unit_panel_panel_selected_portrait_palettes[2];
 extern unit_panel_unit_t g_unit_panel_panel_comparison_unit_data;
-extern palette_t g_unit_panel_panel_comparison_portrait_palettes[2];
 
 void unit_panel_toggle_equipment_and_numbers(s32 enable);
 

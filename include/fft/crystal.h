@@ -51,24 +51,6 @@ s32 crystal_apply_choice(unit_stats_t* unit, s32 flags);
 s32 crystal_resolve_pickup(s32 battle_id);
 
 /* pickup panel */
-/* Seven menu entries form the crystal/treasure result panel. The AT-list
- * and confirmation groups each contain a message entry followed by a choice. */
-typedef enum crystal_pickup_entry {
-    MENU_CRYSTAL_PICKUP_LIST = 0,
-    MENU_CRYSTAL_PICKUP_AT_LIST = 1,
-    MENU_CRYSTAL_PICKUP_CONFIRM = 3,
-    MENU_CRYSTAL_PICKUP_MESSAGE = 5,
-    MENU_CRYSTAL_PICKUP_CHOICE = 6,
-    MENU_CRYSTAL_PICKUP_ENTRY_COUNT = 7
-} crystal_pickup_entry_e;
-
-extern menu_entry_t g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];
-extern menu_text_layout_t g_crystal_pickup_list_layout;
-extern s16 g_crystal_pickup_row_colors[];
-extern u32* g_crystal_pickup_controller_input;
-extern s16 g_crystal_pickup_menu_result;
-extern s16 g_crystal_pickup_choice_result;
-
 /* The command the panel resolves to (4 for a treasure, 0 for nothing) and the treasure item. */
 extern s32 g_crystal_pickup_action;
 extern s32 g_crystal_pickup_item;

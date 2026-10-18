@@ -16,6 +16,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
+
 /* Dispatch slots before this program's end opcode; zero entries stay unhandled. */
 menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
     menu_opcode_00_draw_window_frame,         /* 0x00 */

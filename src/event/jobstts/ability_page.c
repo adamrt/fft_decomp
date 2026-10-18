@@ -16,6 +16,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u8 g_ability_list_initialized;
+
 /* The title is one mutable job ID followed by the text-row terminator. */
 static s16 g_ability_list_job_name_ids[2] = { 0, -1 };
 

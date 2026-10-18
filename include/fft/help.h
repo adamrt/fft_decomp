@@ -42,8 +42,6 @@ enum {
 };
 
 extern u16* const* g_help_active_text_id_tables;
-extern u16* const g_help_menu_text_id_tables[23];
-extern u16* g_help_topic_text_ids;
 
 /* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
 extern u32 g_help_text_table[];
@@ -75,11 +73,6 @@ typedef enum help_grid_id {
     MENU_GRID_HELP_RECRUIT_PREVIEW = 0x20003 /* WORLD: the cursor skips cell 7 */
 } help_grid_id_e;
 
-extern help_navigation_record_t g_help_after_battle_navigation[];
-extern help_navigation_record_t g_help_terrain_navigation[];
-extern help_navigation_record_t g_help_unit_box_navigation[];
-extern help_navigation_record_t g_help_attack_preview_navigation[];
-
 /* The pending help message, or a help_grid_id_e. */
 extern s32 g_help_message_text_id;
 
@@ -96,13 +89,6 @@ typedef enum help_request_kind {
     HELP_REQUEST_DRAW_OUT_ROW = 23,
     HELP_REQUEST_RESULT_ABILITY = 256
 } help_request_kind_e;
-
-extern u32* g_help_controller_state_ptr;
-extern u8 g_help_data_base[];
-extern unit_panel_summary_t g_help_active_banner;
-extern unit_panel_unit_t g_help_active_unit_data;
-extern unit_panel_record_t g_help_billboard;
-extern battle_map_selected_tile_t g_help_menu_cursor_tile;
 
 /* Set while a help window is open; menu input is suppressed meanwhile. */
 extern s32 g_help_open;

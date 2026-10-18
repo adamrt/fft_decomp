@@ -11,6 +11,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern u16 g_save_gfx_texture_page;
+extern u16 g_save_gfx_draw_clut;
+
 static s16 g_save_menu_window_right_x = 0;
 
 /* Stream command: draw a textured quad of size (command[5], command[6]) at

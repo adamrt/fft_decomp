@@ -15,6 +15,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u8 g_job_list_initialized;
+extern s16 g_job_list_selected_generic_index;
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_job_list_menu_script[217];
 

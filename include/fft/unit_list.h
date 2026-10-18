@@ -25,12 +25,6 @@ typedef enum unit_list_menu {
 enum { UNIT_LIST_SELECTION_RECORD_COUNT = 14 };
 
 extern s32 g_unit_list_current_menu; /* unit_list_menu_e */
-extern s16 g_unit_list_primary_result;
-extern s8 g_unit_list_selected_battle_id;
-extern s16 g_unit_list_comparison_index;
-extern u8 g_unit_list_saved_status_banner_enabled;
-extern u8 g_unit_list_saved_unit_browse_enabled;
-extern clut_t g_unit_list_clut;
 
 /* Run BUNIT's Unit List loop until it closes and return the chosen battle unit. */
 s32 bunit_entrypoint(s32 unused_unit, void* unused_otag);
@@ -131,14 +125,11 @@ s32 unit_list_find_by_battle_id(s16 battle_id);
 void unit_list_sort(s32 sort_mode);
 
 /* unit list */
-extern u8 g_unit_list_initialized;
 extern u8 g_unit_list_visible_count;
 extern u8 g_unit_list_index_map[];
 extern s8 g_unit_list_page_offset;
 extern s8 g_unit_list_scroll_step;
 extern u8 g_unit_list_browse_enabled;
-extern menu_entry_t g_unit_list_triangle_menu;
-extern u8 g_unit_list_triangle_menu_open;
 
 void unit_list_init(s32 unused_selected_index);
 void unit_list_build_index_map(void);
@@ -174,20 +165,13 @@ extern s32 g_unit_list_help_screen_id; /* help_grid_id_e */
 
 void unit_list_update_help_cursor(s16 mode);
 
-/* cursors */
-extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
-
 /* graphics */
 extern u16 g_unit_list_gfx_draw_area_capacity;
 extern u16 g_unit_list_gfx_draw_move_capacity;
-extern s16 g_unit_list_gfx_line_f2_count;
 
 /* Volatile capacity reads preserve the original packet-binder load scheduling. */
 extern volatile u16 g_unit_list_gfx_line_g2_capacity;
 extern volatile u16 g_unit_list_gfx_line_g3_capacity;
-
-/* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
-extern menu_gfx_context_t* g_unit_list_gfx_context_base;
 
 void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
@@ -200,9 +184,6 @@ void unit_list_draw_shaded_rows(s32 y);
 
 /* input */
 extern u32 g_unit_list_input_secondary_repeat;
-
-/* Named fields hoist the address; keep the 32-bit event-input alias for scalar accesses. */
-extern menu_input_state_t g_unit_list_input_event_state;
 
 s32 unit_list_get_input_lock(void);
 void unit_list_update_input(void);

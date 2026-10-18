@@ -23,6 +23,16 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s16 g_unit_list_primary_result;
+extern s8 g_unit_list_selected_battle_id;
+extern s16 g_unit_list_comparison_index;
+extern u8 g_unit_list_saved_status_banner_enabled;
+extern u8 g_unit_list_saved_unit_browse_enabled;
+extern clut_t g_unit_list_clut;
+extern u8 g_unit_list_initialized;
+extern menu_entry_t g_unit_list_triangle_menu;
+extern u8 g_unit_list_triangle_menu_open;
+
 static s32 unit_list_run_frame(void);
 static void unit_list_update_browser(void);
 static void unit_list_copy_selected(void);

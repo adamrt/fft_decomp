@@ -13,6 +13,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Named fields hoist the address; keep the 32-bit event-input alias for scalar accesses. */
+extern menu_input_state_t g_unit_list_input_event_state;
+
 /* Per-frame event input update: derives the edge/auto-repeat input 32-bit value,
  * publishes it, and yields once while tracking thread status changes.
  *

@@ -18,6 +18,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern palette_t g_unit_panel_panel_selected_portrait_palettes[2];
+extern palette_t g_unit_panel_panel_comparison_portrait_palettes[2];
+
 /* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. BUNIT's body
  * (DEBUGCHR and ATTACK have their own): the gauge bars scale by value / limit, and the third large
  * number is the unit's formation slot + 1 for battle ids from 0x10. */

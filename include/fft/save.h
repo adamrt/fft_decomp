@@ -208,11 +208,8 @@ typedef struct save_gfx_context {
 } save_gfx_context_t;
 typedef char save_gfx_context_size_must_be_244[(sizeof(save_gfx_context_t) == 244) ? 1 : -1];
 
-extern save_gfx_context_t* g_save_gfx_context_base;
 extern save_gfx_context_t* g_save_gfx_context;
 extern u16 g_save_gfx_drawenv_y;
-extern u16 g_save_gfx_texture_page;
-extern u16 g_save_gfx_draw_clut;
 
 void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
@@ -222,10 +219,6 @@ void save_gfx_set_render_otag(u32* otag);
 void save_gfx_submit_frame(s32 first_otag, s32 draw_otag);
 
 /* CARD input, text and sound */
-extern zodiac_draw_context_t g_save_input_display_state;
-extern u16 g_save_input_latched_button;
-extern u16 g_save_input_previous;
-
 void save_update_input(void);
 
 /* WORLD memory card screen */

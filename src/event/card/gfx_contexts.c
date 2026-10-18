@@ -9,6 +9,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern save_gfx_context_t* g_save_gfx_context_base;
+
 /*
  * Submit the finished CARD frame and swap to the other graphics context.
  *

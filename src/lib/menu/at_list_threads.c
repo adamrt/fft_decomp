@@ -17,6 +17,37 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* crystal result menu */
+/* Seven menu entries form the crystal/treasure result panel. The AT-list
+ * and confirmation groups each contain a message entry followed by a choice. */
+typedef enum crystal_pickup_entry {
+    MENU_CRYSTAL_PICKUP_LIST = 0,
+    MENU_CRYSTAL_PICKUP_AT_LIST = 1,
+    MENU_CRYSTAL_PICKUP_CONFIRM = 3,
+    MENU_CRYSTAL_PICKUP_MESSAGE = 5,
+    MENU_CRYSTAL_PICKUP_CHOICE = 6,
+    MENU_CRYSTAL_PICKUP_ENTRY_COUNT = 7
+} crystal_pickup_entry_e;
+
+extern menu_entry_t g_crystal_pickup_menu[MENU_CRYSTAL_PICKUP_ENTRY_COUNT];
+extern menu_text_layout_t g_crystal_pickup_list_layout;
+extern s16 g_crystal_pickup_row_colors[];
+extern u32* g_crystal_pickup_controller_input;
+extern s16 g_crystal_pickup_menu_result;
+extern s16 g_crystal_pickup_choice_result;
+
+/* AT list menu */
+extern at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
+extern menu_entry_t g_at_list_state;
+
+/* WORLD and OPTION each define one column layout for the AT List menu. */
+extern menu_text_layout_t g_at_list_entry_table;
+extern u8 g_at_list_text[];
+extern s16 g_at_list_indices[];
+extern s16 g_at_list_primary_values[];
+extern s16 g_at_list_secondary_values[];
+extern s16 g_at_list_flags[];
+
 /* Give other event work one turn before terminating this thread. */
 void thread_stop_after_yield(void) {
     thread_yield();

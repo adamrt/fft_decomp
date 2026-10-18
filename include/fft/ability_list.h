@@ -49,10 +49,6 @@ typedef enum ability_list_mode {
     ABILITY_LIST_MODE_COUNT_UNLEARNED = 3
 } ability_list_mode_e;
 
-extern u8 g_ability_list_ready;
-extern u8 g_ability_list_initialized;
-extern s8 g_ability_list_confirm_prompt_state;
-
 s32 ability_list_update(void);
 
 /* BUNIT and WORLD take ability_list_mode_e. JOBSTTS treats mode as a Boolean:

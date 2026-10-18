@@ -58,16 +58,6 @@ void at_list_show_entry(s32 at_index);
 void at_list_show_next_entry(void);
 
 /* list window */
-extern at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
-extern menu_entry_t g_at_list_state;
-
-/* WORLD and OPTION each define one column layout for the AT List menu. */
-extern menu_text_layout_t g_at_list_entry_table;
-extern u8 g_at_list_text[];
-extern s16 g_at_list_indices[];
-extern s16 g_at_list_primary_values[];
-extern s16 g_at_list_secondary_values[];
-extern s16 g_at_list_flags[];
 extern menu_list_page_t g_at_list_pages[2];
 
 /* Releases at_list_select_unit_thread once a unit picked from the list has been viewed. */

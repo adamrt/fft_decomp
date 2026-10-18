@@ -10,6 +10,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern s16 g_unit_list_gfx_line_f2_count;
+
+/* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
+extern menu_gfx_context_t* g_unit_list_gfx_context_base;
+
 static s16 g_unit_list_gfx_poly_f4_count = 0;
 
 /*

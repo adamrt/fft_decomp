@@ -182,7 +182,6 @@ typedef enum text_section {
 
 extern s32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
 extern u8* g_text_section_pointers[TEXT_SECTION_COUNT];
-extern u8* g_text_saved_pointers[32];
 
 /* The text file an overlay loaded. */
 extern u8 g_text_data[];

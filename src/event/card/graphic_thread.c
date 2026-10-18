@@ -9,6 +9,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern zodiac_draw_context_t g_save_input_display_state;
+
 /* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
 static POLY_FT4 g_save_gfx_scaled_sprite_primitive_buffers[2][30] = { 0 };
 static u32* g_save_gfx_render_otag = 0;
