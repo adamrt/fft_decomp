@@ -6,8 +6,8 @@
 #include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
+#include "fft/effect_model.h"
 #include "fft/effect_particle.h"
-#include "fft/effect_projectile.h"
 #include "fft/effect_script.h"
 #include "fft/effect_secondary.h"
 #include "fft/effect_timeline.h"
@@ -133,7 +133,7 @@ typedef struct effect_arrow_buffer {
 typedef char effect_arrow_buffer_size_must_be_3208[(sizeof(effect_arrow_buffer_t) == 3208) ? 1 : -1];
 
 /* Double-buffered polygons initialized by the secondary handler and drawn by
- * effect_model_draw_projectile. */
+ * effect_model_draw. */
 typedef struct effect_stone_buffer {
     POLY_G3 g3[2][12];
 } effect_stone_buffer_t;
@@ -1562,8 +1562,8 @@ static s32 effect_secondary_end_on_current_unit(void) {
 
 #define PT(k) (*(VECTOR*)((u8*)scratch + (command.vertices.indices[k] << 4)))
 
-/* Draw one of the projectile models resident in BATTLE.BIN for the current
- * secondary effect: the low byte of parameter is a effect_model_e.
+/* Draw one of the models resident in BATTLE.BIN for the current
+ * secondary effect: the low byte of parameter is an effect_model_e.
  *
  * The model's vertices go through three transforms in the scratchpad: the spin
  * rotation, then the angles rotation with scale and position, then the camera
@@ -1581,8 +1581,7 @@ static s32 effect_secondary_end_on_current_unit(void) {
  *
  * A polygon whose depth is not between 1 and EFFECT_OT_DEPTH_MAX - 1 is built but
  * not drawn. */
-static void effect_model_draw_projectile(
-    SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter) {
+static void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter) {
     effect_decoded_model_command_t command;
     s32 unused[2];
     MATRIX matrix;
@@ -2615,7 +2614,7 @@ void effect_noop_4(void) {
  * Phase 1 derives the arrow's heading, launch pitch and per-step gravity from
  * the trajectory origin/destination, builds its rotation matrix and allocates
  * the polygon work buffer. Phase 2 advances one step along the arc, orients
- * the arrow along the local slope and draws it with effect_model_draw_projectile; the last
+ * the arrow along the local slope and draws it with effect_model_draw; the last
  * step or a positive height ends the flight. Phase 3 returns 0. An unknown
  * phase returns `result` uninitialized, as the target returns $s6 unwritten.
  */
@@ -2703,7 +2702,7 @@ s32 effect_secondary_arrow_arc_handler(void) {
         spin.vz = 0;
         spin.vy = 0;
         spin.vx = 0;
-        effect_model_draw_projectile(&spin, &position, &angles, &scale, parameter);
+        effect_model_draw(&spin, &position, &angles, &scale, parameter);
         if (g_effect_projectile_step_count == 2 && g_projectile_hit_unit_id != -1
             && g_effect_secondary_current->target_count != 0) {
             action_start_projectile_hit_response_by_runtime_id(g_effect_secondary_current->caster.data.unit.runtime_id,
@@ -3790,7 +3789,7 @@ s32 effect_secondary_zodiac_poof_handler(void) {
  * Phase 1 allocates and initializes the work buffer; phase 2 advances a
  * two-entry CLUT wipe near the end of the effect, uploads the CLUT, aims the
  * shield from the target's center toward the caster and hands the transform
- * to effect_model_draw_projectile; phase 3 finishes. The wipe indices are assigned inside the
+ * to effect_model_draw; phase 3 finishes. The wipe indices are assigned inside the
  * subscript, each to its own variable: a separate statement or a folded
  * `timer - 1 - span` changes the order and association of the index
  * arithmetic. spin_timer keeps the timer load at full width (lh). */
@@ -3889,7 +3888,7 @@ s32 effect_secondary_reflect_handler(void) {
         spin.vx = 0;
         spin_timer = g_effect_secondary_current->timer;
         spin.vz = spin_timer << 7;
-        effect_model_draw_projectile(&spin, &position, &angles, &scale, parameter);
+        effect_model_draw(&spin, &position, &angles, &scale, parameter);
         effect = g_effect_secondary_current;
         effect->timer++;
         if (span + 4 < effect->timer) {
@@ -4102,7 +4101,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
                 scale.vx = 0xc0;
                 setVector(&spin, 0, g_effect_projectile_spin_passes * 256, g_effect_projectile_spin_passes * 128);
             }
-            effect_model_draw_projectile(&spin, &position, &angles, &scale, parameter);
+            effect_model_draw(&spin, &position, &angles, &scale, parameter);
         } else {
             item = g_effect_secondary_current->used_weapon_id;
             if (item >= ITEM_ID_SHURIKEN && item <= ITEM_ID_YAGYU_DARKNESS) {
@@ -4112,7 +4111,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
                 spin.vy = 0;
                 spin.vx = 0;
                 spin.vz = -(g_effect_projectile_spin_passes * 256);
-                effect_model_draw_projectile(&spin, &position, &angles, &scale, EFFECT_MODEL_SHURIKEN);
+                effect_model_draw(&spin, &position, &angles, &scale, EFFECT_MODEL_SHURIKEN);
             } else {
                 effect_draw_thrown_item_sprite(&position, item, 0);
             }

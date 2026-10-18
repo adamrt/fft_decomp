@@ -9,7 +9,7 @@
 #include "psx/types.h"
 
 /* The debug line menu_alloc_memory prints while it waits for free pages. */
-extern char g_message_wait_for_allocation_message[];
+extern char g_menu_buffer_wait_message[];
 
 /* A first-fit allocator over 256-byte pages with sixteen allocation slots. Each program has its own arena of
  * VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD); menu_alloc_memory yields until a run of
@@ -105,13 +105,13 @@ void* menu_alloc_memory(s32 size) {
         }
     fail:
         if (g_debug_font_print_enabled != 0) {
-            FntPrint(g_message_wait_for_allocation_message, g_thread_current_id, size);
+            FntPrint(g_menu_buffer_wait_message, g_thread_current_id, size);
         }
         thread_yield();
     }
 }
 
-/* Thin public entry point for the BATTLE menu-buffer allocator. */
+/* Public wrapper for the menu-buffer allocator. */
 void* menu_alloc_buffer(s32 bytes) {
     return menu_alloc_memory(bytes);
 }

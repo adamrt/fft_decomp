@@ -28,13 +28,13 @@ typedef enum menu_line_layout_offset {
     MENU_LINE_LAYOUT_SIZE = 8
 } menu_line_layout_offset_e;
 
-static s8 g_status_screen_numbers_frame_offsets[12 * MENU_LINE_LAYOUT_SIZE]
+static s8 g_status_screen_numbers_frame_layout[12 * MENU_LINE_LAYOUT_SIZE]
     = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
           0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
           1, 1, 1, 2, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, -1, 1, 0, 1, 1 };
 
 /* Build the numeric display frame around box: twelve lines placed by
- * g_status_screen_numbers_frame_offsets relative to the box's corners and colored from
+ * g_status_screen_numbers_frame_layout relative to the box's corners and colored from
  * the normal menu palette, the two draw modes and a sprite covering the box. */
 void status_screen_init_numbers_frame(RECT* box, menu_palette_primitives_t* menu) {
     LINE_F2* line = menu->lines;
@@ -49,20 +49,20 @@ void status_screen_init_numbers_frame(RECT* box, menu_palette_primitives_t* menu
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
-        line->x0 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_X0] + box->x;
-        line->y0 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_Y0] + box->y;
-        line->x1 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_X1] + box->x;
-        line->y1 = g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_Y1] + box->y;
-        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
+        line->x0 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_X0] + box->x;
+        line->y0 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_Y0] + box->y;
+        line->x1 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_X1] + box->x;
+        line->y1 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_Y1] + box->y;
+        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
             line->x0 += box->w;
         }
-        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
+        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
             line->y0 += box->h;
         }
-        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
+        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
             line->x1 += box->w;
         }
-        if (g_status_screen_numbers_frame_offsets[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
+        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
             line->y1 += box->h;
         }
         offset += MENU_LINE_LAYOUT_SIZE;

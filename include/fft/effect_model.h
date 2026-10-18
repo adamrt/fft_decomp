@@ -1,7 +1,7 @@
-#ifndef EFFECT_PROJECTILE_H
-#define EFFECT_PROJECTILE_H
+#ifndef EFFECT_MODEL_H
+#define EFFECT_MODEL_H
 
-/* Projectile model decoding and shared flight transform. */
+/* Resident effect-model decoding and the shared projectile transform. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -12,7 +12,7 @@
 extern MATRIX g_effect_projectile_matrix;
 
 /* models */
-/* The projectile models of g_effect_model_files. */
+/* Resident models of g_effect_model_files: three projectiles and the Reflect shield. */
 typedef enum effect_model {
     EFFECT_MODEL_ARROW = 0,
     EFFECT_MODEL_STONE = 1,
@@ -30,7 +30,7 @@ enum {
     EFFECT_MODEL_COMMAND_G4 = 0x39
 };
 
-/* Shared output of the model-command decoder and input of the projectile renderer. */
+/* Shared output of the model-command decoder and input of the effect-model renderer. */
 typedef struct effect_decoded_model_command {
     struct {
         u8 _unused_00;

@@ -217,7 +217,7 @@ functions:
   - {addr: 0x8007cca8, size: 208, name: sound_novel_resume_quit_level, hash: b5918d30a7aa2ca2, unit: brave_story_collections}
   - {addr: 0x8007cd78, size: 224, name: sound_novel_suspend_quit_level, hash: 7b292ddd6e01673f, unit: brave_story_collections}
   - {addr: 0x8007ce58, size: 1332, name: sound_novel_step_quit_level, hash: fd7f34ad68cc922f, unit: brave_story_collections}
-  - {addr: 0x8007d38c, size: 132, name: hud_show_play_time, hash: 133f43f6ea4a69d0, unit: brave_story_collections}
+  - {addr: 0x8007d38c, size: 132, name: sound_novel_restore_hud, hash: 133f43f6ea4a69d0, unit: brave_story_collections}
   - {addr: 0x8007d410, size: 1336, name: sound_novel_push_history_level, hash: e6d72d860bf58c21, unit: brave_story_collections}
   - {addr: 0x8007d948, size: 1596, name: sound_novel_step_history_level, hash: 67c60f0dcfe436af, unit: brave_story_collections}
   - {addr: 0x8007df84, size: 72, name: sound_novel_draw_history_entry, hash: 4045135c6ffd37ae, unit: brave_story_collections}

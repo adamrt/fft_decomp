@@ -42,7 +42,7 @@ extern u16 g_sound_novel_history_2;
 
 static u8 g_picture_dissolve_band_progress[16] = { 0 };
 
-static void hud_show_play_time(void);
+static void sound_novel_restore_hud(void);
 static s32 picture_step_dissolve_upload(GsIMAGE* image, s32 step);
 static void sound_novel_push_history_level(void);
 static void sound_novel_push_quit_level(void);
@@ -217,7 +217,7 @@ void sound_novel_step_level(menu_stack_record_t* level) {
             }
             g_menu_blocked_buttons = 0;
             g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
-            hud_show_play_time();
+            sound_novel_restore_hud();
             fade = &g_world_map_fade;
             g_world_map_fade.priorities[0] = 0xF;
             g_world_map_fade.flags[1] = 0;
@@ -523,7 +523,7 @@ void sound_novel_step_quit_level(menu_stack_record_t* level) {
         g_sound_novel_reading.text_history[3] = g_sound_novel_history_2;
         g_sound_novel_history_2 = g_sound_novel_history_1;
         g_sound_novel_history_1 = first;
-        hud_show_play_time();
+        sound_novel_restore_hud();
         g_world_map_fade.priorities[0] = 0xF;
         g_world_map_fade.flags[1] = 0;
         g_window_record_count -= 3;
@@ -580,9 +580,9 @@ void sound_novel_step_quit_level(menu_stack_record_t* level) {
     }
 }
 
-/* Restore the HUD position and display the current play time.
+/* Restore the saved HUD position and play-time fields, leaving the display hidden.
  * Cache the flags and time before publishing the display fields. */
-static void hud_show_play_time(void) {
+static void sound_novel_restore_hud(void) {
     u32 flags;
     s32 hours;
     s32 minutes;

@@ -1935,7 +1935,7 @@ functions:
   - {addr: 0x801adfec, size: 444, name: effect_secondary_init_weapon_hit, hash: cc6580faec91e3af, unit: effect_system, rodata: [{addr: 0x801a0e60, size: 32, hash: 9c3b3543911ab26c}]}
   - {addr: 0x801ae1a8, size: 288, name: effect_secondary_init_fall_dust, hash: 114a15e567004ef5, unit: effect_system}
   - {addr: 0x801ae2c8, size: 120, name: effect_secondary_end_on_current_unit, hash: 0dedbedd0bc4e8f6, unit: effect_system}
-  - {addr: 0x801ae340, size: 3528, name: effect_model_draw_projectile, hash: f7978e0ecda14db0, unit: effect_system}
+  - {addr: 0x801ae340, size: 3528, name: effect_model_draw, hash: f7978e0ecda14db0, unit: effect_system}
   - {addr: 0x801af108, size: 668, name: effect_draw_thrown_item_sprite, hash: edf5e494239a5b7a, unit: effect_system}
   - {addr: 0x801af3a4, size: 56, name: projectile_arc_calculate_height_term, hash: 8d9ccdb11876e1b0, unit: effect_system}
   - {addr: 0x801af3dc, size: 448, name: projectile_arc_calculate_trajectory, hash: 3b39b2876c0feb69, unit: effect_system}
@@ -2326,7 +2326,7 @@ data:
   - {addr: 0x8012cf44, name: battle_map_queue_textured_quads}
   - {addr: 0x8012d2b4, name: battle_map_queue_untextured_triangles}
   - {addr: 0x8012d568, name: battle_map_queue_untextured_quads}
-  - {addr: 0x8012d87c, name: g_message_wait_for_allocation_message}
+  - {addr: 0x8012d87c, name: g_menu_buffer_wait_message}
   - {addr: 0x8012d8a0, name: g_text_decimal_format}
   - {addr: 0x8012d8a4, name: g_menu_wait_for_file_allocation_message}
   - {addr: 0x8012d8c0, name: g_script_pause_message}
@@ -2477,7 +2477,7 @@ data:
   - {addr: 0x80166b10, name: g_command_idle_action_entries}
   - {addr: 0x80167830, name: g_status_screen_numbers_texture_window}
   - {addr: 0x80167838, name: g_status_screen_numbers_palette_indices}
-  - {addr: 0x80167844, name: g_status_screen_numbers_frame_offsets}
+  - {addr: 0x80167844, name: g_status_screen_numbers_frame_layout}
   - {addr: 0x801678a4, name: g_text_current_line}
   - {addr: 0x801678ac, name: g_menu_window_tween_small_overshoot}
   - {addr: 0x801678c0, name: g_menu_window_tween_large_overshoot}

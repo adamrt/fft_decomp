@@ -65,12 +65,12 @@ extern u8 g_menu_idle_action_window_x[];
 extern u8 g_command_restore_unit_id;
 
 /* One EVTFACE.BIN block: pixels followed by eight 16-color palettes. */
-typedef struct portrait_image_file {
+typedef struct portrait_image_block {
     u32 pixels[8][48][4];  /* 0x0000; eight 32x48 4bpp portraits */
     palette_t palettes[8]; /* 0x1800; four palettes per uploaded VRAM row */
     u8 _unused_1900[0x700];
-} portrait_image_file_t;
-typedef char portrait_image_file_size_must_be_8192[sizeof(portrait_image_file_t) == 8192 ? 1 : -1];
+} portrait_image_block_t;
+typedef char portrait_image_block_size_must_be_8192[sizeof(portrait_image_block_t) == 8192 ? 1 : -1];
 
 /* The two programs reserve different menu image columns for EVTFACE. */
 #ifdef FFT_BATTLE
@@ -470,7 +470,7 @@ void script_noop_3(void) {
 
 /* Upload one EVTFACE.BIN block as a single image, followed by its palette rows. */
 void portrait_load_image(s32 portrait_id) {
-    portrait_image_file_t* buffer;
+    portrait_image_block_t* buffer;
 
     buffer = menu_alloc_memory(sizeof(*buffer));
     g_thread_call_target = (void (*)(void))file_load_checked_to_address;
@@ -514,7 +514,7 @@ void gfx_load_evtchr_thread(void) {
  * from g_menu_portrait_pixel_rect. */
 void script_opcode_50_portrait_col(s32 portrait_id) {
     RECT rect;
-    portrait_image_file_t* buffer;
+    portrait_image_block_t* buffer;
     u32(*pixels)[48][4];
     s32 i;
     palette_t* palette;

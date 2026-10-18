@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 /* Eight-byte glyph metrics record addressed by OPEN script text. */
-typedef struct ending_font_metrics {
+typedef struct ending_glyph_metrics {
     u8 u;
     u8 v;
     u8 flags;
@@ -23,7 +23,7 @@ typedef struct ending_font_metrics {
     u8 width;
     u8 descender;
     u8 advance;
-} ending_font_metrics_t;
+} ending_glyph_metrics_t;
 
 /* Serialized ending-script opcodes, in the order of g_ending_opcode_handlers. */
 typedef enum ending_opcode {
@@ -62,7 +62,7 @@ static void ending_opcode_0d_start_fade_intensity_decrease(s16* command);
 static void ending_opcode_0e_wait_for_xa_audio_idle(s16* unused_entry);
 static void ending_opcode_0f_start_opntex_sequence(s16* command);
 
-extern ending_font_metrics_t* g_ending_script_font_metrics;
+extern ending_glyph_metrics_t* g_ending_script_font_metrics;
 extern POLY_FT4 g_ending_script_glyph_primitives[2][672];
 
 /* Two horizontal bands, one at the top and one at the bottom of the screen. */
@@ -307,9 +307,9 @@ static s32 ending_build_text_record(u8* text) {
     s32 pen;
     s32 width;
     s32 height;
-    ending_font_metrics_t* font = g_ending_script_font_metrics;
-    ending_font_metrics_t* mt;
-    ending_font_metrics_t* mt2;
+    ending_glyph_metrics_t* font = g_ending_script_font_metrics;
+    ending_glyph_metrics_t* mt;
+    ending_glyph_metrics_t* mt2;
     s32 value;
     s32 slot;
     POLY_FT4* back;
@@ -377,7 +377,7 @@ static s32 ending_build_text_record(u8* text) {
         } else {
             value = (ch - 0x20) * 8 + g_ending_script_state.dispatch.font_index * 0x380;
             /* Typed pointer addition reverses this retail addu's operands. */
-            mt = (ending_font_metrics_t*)(value + (s32)font);
+            mt = (ending_glyph_metrics_t*)(value + (s32)font);
             if (mt->flags & 1) {
                 text++;
                 i--;
