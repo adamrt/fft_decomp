@@ -13,7 +13,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern menu_window_buffer_t* g_menu_window_buffer_slots[6];
+menu_window_buffer_t g_menu_window_buffers[6];
+static menu_window_buffer_t* g_menu_window_buffer_slots[6];
 
 static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 

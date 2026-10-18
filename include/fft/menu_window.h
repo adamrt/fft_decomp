@@ -77,6 +77,7 @@ typedef struct menu_window_buffer {
 } menu_window_buffer_t;
 typedef char menu_window_buffer_size_must_be_280[(sizeof(menu_window_buffer_t) == 280) ? 1 : -1];
 
+/* BATTLE and WORLD each define this pool. */
 extern menu_window_buffer_t g_menu_window_buffers[6];
 
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void);
