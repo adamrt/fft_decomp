@@ -586,7 +586,7 @@ static void brave_story_push_participant_list_level(s32 proposition) {
     g_window_records[window].priority = 8;
     g_window_records[window].anim_counter = 0;
     g_window_records[window].frame_index = 0;
-    proposition_build_detail_panel(&g_menu_stack_records[g_menu_stack_depth], proposition, 1);
+    proposition_build_detail_panel(&g_menu_stack_records[g_menu_stack_depth].proposition_detail_panel, proposition, 1);
     g_text_substitution_values[0] = g_proposition_active[proposition].proposition_id | TEXT_ID_PROPOSITION_NAME_BASE;
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
     depth = g_menu_stack_depth;

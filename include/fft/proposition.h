@@ -183,7 +183,7 @@ typedef struct proposition_recall_level {
 } proposition_recall_level_t;
 
 void proposition_push_detail_level(s32 value);
-void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition, s32 coordinate_mode);
+void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode);
 void proposition_suspend_detail_level(menu_stack_record_t* level);
 void proposition_resume_detail_level(menu_stack_record_t* level);
 void proposition_handle_recall_input(menu_stack_record_t* level);

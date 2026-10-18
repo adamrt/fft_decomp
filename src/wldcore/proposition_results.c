@@ -27,10 +27,9 @@
 
 extern u32 g_proposition_detail_image_buffer[];
 
-/* The collection counts that earn a milestone message (proposition_get_milestone_rank): eight each,
- * 1/4/8/12/16/20/24/31 treasures and 1/3/6/8/10/12/14/16 unexplored lands. */
-extern u8 g_proposition_treasure_milestones[];
-extern u8 g_proposition_unexplored_land_milestones[];
+/* Collection counts that earn a milestone message. */
+static u8 g_proposition_treasure_milestones[8] = { 1, 4, 8, 12, 16, 20, 24, 31 };
+static u8 g_proposition_unexplored_land_milestones[8] = { 1, 3, 6, 8, 10, 12, 14, 16 };
 
 static void proposition_show_next_milestone_message(proposition_discovery_level_t* discovery);
 static void proposition_push_recall_level(s32 proposition);
@@ -808,7 +807,7 @@ static void proposition_push_recall_level(s32 proposition) {
         = g_window_gs_image_records[index].base.x + 3;
     g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.y
         = g_window_gs_image_records[index].base.y - 2;
-    proposition_build_detail_panel(&g_menu_stack_records[depth], proposition, 0);
+    proposition_build_detail_panel(&g_menu_stack_records[depth].proposition_detail_panel, proposition, 0);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice = 0;
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.confirmed = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_RECALL;
@@ -831,7 +830,7 @@ static void proposition_push_recall_level(s32 proposition) {
  * `panel_text` keeps the text-id source's address in a saved register across
  * both reads, as the target does. Assigning bounds.x before
  * position.y is what puts the two by-value halves in the target's registers. */
-void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition, s32 coordinate_mode) {
+void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode) {
     RECT bounds;
     point32_t point;
     s16 text_width;
@@ -844,11 +843,11 @@ void proposition_build_detail_panel(menu_stack_record_t* level, s32 proposition,
 
     panel_text = &g_proposition_selected_row.name_text;
     index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    level->proposition_detail_panel.render_index = index;
+    panel->render_index = index;
     text_measure_pixels(
         &text_width, &text_rows, text_find_entry(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     rows = text_rows + 2;
-    level->proposition_detail_panel.panel_rows = rows;
+    panel->panel_rows = rows;
     g_text_substitution_values[0] = g_proposition_active[proposition].elapsed_days;
     g_text_substitution_values[1] = g_proposition_active[proposition].assigned_days;
     g_text_substitution_values[2] = g_proposition_active[proposition].location | TEXT_ID_LOCATION_NAME_BASE;
