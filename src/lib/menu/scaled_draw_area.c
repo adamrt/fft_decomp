@@ -51,7 +51,7 @@ void menu_build_scaled_draw_area_packets(
         packet->rects[0].y += 0xF0;
     }
 #ifdef FFT_EVENT_REQUIRE
-    /* REQUIRE anchors both rectangles at the left edge; other overlays keep the horizontal crop. */
+    /* REQUIRE anchors both rectangles at the left edge; WORLD and the other overlays keep the horizontal crop. */
     packet->rects[0].x = 0;
     packet->rects[1].x = 0;
 #endif
@@ -59,9 +59,12 @@ void menu_build_scaled_draw_area_packets(
     SetDrawArea(&packet->areas[1], &packet->rects[1]);
 }
 
+/* WORLD compiles its three initializer copies separately. */
+#ifndef FFT_WORLD
 /* Clear the first draw area's width and install the default second draw area. */
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data) {
     data->rects[0].w = 0;
     data->rects[1].h = 0;
     mem_copy_bytes_nonempty(&data->rects[1], &g_menu_draw_area_template, sizeof(RECT));
 }
+#endif

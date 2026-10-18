@@ -638,7 +638,7 @@ functions:
   - {addr: 0x8010c5b4, size: 184, name: screen_start_entry_chain, hash: 2e3f7b3226b63cd7, unit: number_entry}
   - {addr: 0x8010c66c, size: 300, name: screen_text_entry_thread, hash: d126827f044e77cf, unit: number_entry}
   - {addr: 0x8010c798, size: 176, name: screen_fit_parent_entry_to_digits, hash: d3d94161cd285e00, unit: number_entry}
-  - {addr: 0x8010c848, size: 464, name: menu_build_scaled_draw_area_packets, hash: 991860e7d6f1cc9b, source: src/lib/menu/menu_build_scaled_draw_area_packets.c}
+  - {addr: 0x8010c848, size: 464, name: menu_build_scaled_draw_area_packets, hash: 991860e7d6f1cc9b, source: src/lib/menu/scaled_draw_area.c}
   - {addr: 0x8010ca18, size: 52, name: screen_panel_init_scaled_draw_area_packets, hash: 5aba7638515ec763, source: src/lib/menu/menu_init_scaled_draw_area_packets.c, source_symbol: menu_init_scaled_draw_area_packets}
   - {addr: 0x8010ca4c, size: 56, name: formation_get_selected_unit_name_id, hash: 670faa307ba2388a}
   - {addr: 0x8010ca84, size: 44, name: gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276, source: src/lib/menu/gfx_set_clut_rect_from_id.c}
