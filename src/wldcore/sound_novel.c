@@ -189,7 +189,7 @@ static void sound_novel_reset_reading(sound_novel_reading_t* record) {
     record->text_history[0] = -1;
     record->picture_id = -1;
     record->background_set = -1;
-    record->sound_mode = 0;
+    record->sound_mode = SOUND_NOVEL_SOUND_MODE_EFFECTS_ONLY;
     record->music_selection = 0;
     record->sound_id = 0;
     record->state_flags = 0;
@@ -310,12 +310,9 @@ void window_draw_centered_text(s32 window_index, s32 text_id) {
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
 }
 
-/* Script opcode: play the requested sound, weather quad and music track, then
- * clear the three sound script variables.
- *
- * The switch tests the separately cataloged neighbor
- * g_sound_novel_reading.sound_mode, not part of g_sound_novel_reading.music_selection.
- * The selection byte read goes through *(u8*) so it stays an lbu as in the target. */
+/* Consume the three pending audio script variables according to the reading's
+ * sound mode, then clear them. The interpreter calls this before dispatching
+ * each instruction, including repeated calls to a yielding handler. */
 static void sound_novel_play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
     s32* music_flags;
 
@@ -323,7 +320,7 @@ static void sound_novel_play_pending_sounds(s32 sound_id, s32 weather_sound_id, 
         return;
     }
     switch (g_sound_novel_reading.sound_mode) {
-    case 0:
+    case SOUND_NOVEL_SOUND_MODE_EFFECTS_ONLY:
         if (sound_id != SOUND_SFX_NONE) {
             sound_play_effect(sound_id);
         }
@@ -331,7 +328,7 @@ static void sound_novel_play_pending_sounds(s32 sound_id, s32 weather_sound_id, 
             sound_novel_play_sound_quad(weather_sound_id);
         }
         break;
-    case 1:
+    case SOUND_NOVEL_SOUND_MODE_EFFECTS_AND_MUSIC:
         if (sound_id != SOUND_SFX_NONE) {
             sound_play_effect(sound_id);
         }

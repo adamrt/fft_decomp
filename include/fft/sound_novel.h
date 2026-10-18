@@ -10,6 +10,13 @@
 struct suzuki_sound_resource;
 
 /* readings */
+/* Opcode 0x21 selects which pending script sounds a reading consumes.
+ * Other byte values play nothing; the pending variables are still cleared. */
+typedef enum sound_novel_sound_mode {
+    SOUND_NOVEL_SOUND_MODE_EFFECTS_ONLY = 0,
+    SOUND_NOVEL_SOUND_MODE_EFFECTS_AND_MUSIC = 1
+} sound_novel_sound_mode_e;
+
 struct sound_novel_script_file;
 
 /* A saved sound-novel reading state (g_sound_novel_saved_readings, 0x38 bytes each).
@@ -36,7 +43,7 @@ typedef struct sound_novel_reading {
     s16 text_history[4];      /* 0x20; oldest to newest */
     s16 value_display_mode;   /* 0x28 */
     s16 music_selection;      /* 0x2a */
-    s16 sound_mode;           /* 0x2c; 0 plays pending sounds only, 1 also switches the music track */
+    s16 sound_mode;           /* 0x2c; sound_novel_sound_mode_e */
     s16 picture_x;            /* 0x2e */
     s16 picture_y;            /* 0x30 */
     s16 sound_id;             /* 0x32 */
