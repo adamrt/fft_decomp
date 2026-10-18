@@ -35,7 +35,7 @@ The exceptions help distinguish separately compiled objects. Parts of WORLD's fo
 
 Division traps are another object-level fingerprint. Shared event/menu routines can contain checked division sequences in WORLD or an EVENT overlay and unchecked sequences in BATTLE. This is an assembler expansion setting, not necessarily a source change. Likewise, some apparently different menu implementations become identical when compiled at the other program's optimization level.
 
-Some apparent global tables are compiler-generated pools for local initializers. The six action-result digit zoom curves reproduce the original stack copies when written as ordinary local arrays. Compiling the surrounding unit-presentation routines together also reproduces the following switch table's alignment; the earlier split placed that table four bytes too early. This constrains the reconstructed grouping without identifying an original filename.
+GCC can reproduce some apparent global tables as constant pools for local initializers. The six action-result digit zoom curves reproduce the original stack copies when written as ordinary local arrays. Compiling the surrounding unit-presentation routines together also reproduces the following switch table's alignment; the initializer version built with the earlier file split placed that table four bytes too early. This constrains the reconstructed grouping without identifying an original filename.
 
 OPEN and WLDCORE share both their toolchain profile and related window/file code. That supports a common build lineage; it does not identify a particular development machine or recover the original makefiles.
 
