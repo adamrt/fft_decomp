@@ -20,11 +20,13 @@ typedef struct menu_allocation {
 } menu_allocation_t;
 typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
 
-extern u8 g_menu_buffer_arena[VARIANT_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
-extern menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
+static menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
+
+/* WORLD's g_ai_workspace pointer cell aliases bytes inside this arena. */
+static u8 g_menu_buffer_arena[VARIANT_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
 
 /* Nonzero for each arena page in use. */
-extern u8 g_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT];
+static u8 g_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT];
 
 /* Reset the menu arena allocator: every allocation slot unused (-1), every arena page free, and
  * the three typewriter glyph slots unowned. */

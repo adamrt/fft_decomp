@@ -19,7 +19,7 @@ units:
   - {name: ai_origins, source: src/battle/ai_origins.c, data: [{addr: 0x8019f2f8, size: 16, hash: 8a352b5f0c84f16a}, {addr: 0x8019f308, size: 80, hash: 296c781af2dde231}, {addr: 0x8019f358, size: 8, hash: f331c25044999bf9}]}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, rodata: [{addr: 0x8012d8c0, size: 34, hash: dbebc117ae93fad8}], data: [{addr: 0x80169040, size: 336, hash: 2fa2faff14b7708a}]}
   - {name: battle_scene, source: src/battle/battle_scene.c, data: [{addr: 0x800a778c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800a7790, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a7798, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a0, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a8, size: 8, hash: af5570f5a1810b7a}]}
-  - {name: buffer_allocator, source: src/lib/menu/buffer_allocator.c, rodata: [{addr: 0x8012d87c, size: 35, hash: 71ab64b86f9f515c}]}
+  - {name: buffer_allocator, source: src/lib/menu/buffer_allocator.c, rodata: [{addr: 0x8012d87c, size: 35, hash: 71ab64b86f9f515c}], bss: [{addr: 0x8016eb04, size: 13749, hash: aa19c9a1a99f3138}]}
   - {name: camera, source: src/battle/camera.c, data: [{addr: 0x800a1c5c, size: 16, hash: 374708fff7719dd5}, {addr: 0x800a1c6c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a1c74, size: 16, hash: 374708fff7719dd5}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, data: [{addr: 0x801692c0, size: 1020, hash: 7d824f0a060b15de}, {addr: 0x801696bc, size: 38, hash: 5cf20e3c3f45bdbf}]}
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}, {addr: 0x8016923c, size: 40, hash: 1e7bcfe6e02d777b}]}
