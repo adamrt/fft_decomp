@@ -737,7 +737,7 @@ func (p project) compileHistoricalResult(sourcePath, linkPath, buildDir string, 
 	if os.Getenv("TOOLS_CACHE") != "0" {
 		if data, err := os.ReadFile(cachePath); err == nil {
 			var result historicalResult
-			if json.Unmarshal(data, &result) == nil && result.Sections[".text"] != nil && result.Definitions != nil {
+			if json.Unmarshal(data, &result) == nil && result.validateMetadata() == nil {
 				return &result, nil
 			}
 		}
@@ -792,6 +792,9 @@ func (p project) compileHistoricalResult(sourcePath, linkPath, buildDir string, 
 	if err := runInDir(p.root, "mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O1", fmt.Sprintf("-G%d", profile.smallDataLimit), "-o", object, translated); err != nil {
 		return nil, err
 	}
+	if err := rejectHistoricalCommon(object); err != nil {
+		return nil, fmt.Errorf("read historical object: %w", err)
+	}
 	if err := linkHistoricalObject(p.root, linkPath, object, linkedPath); err != nil {
 		return nil, err
 	}
@@ -802,14 +805,23 @@ func (p project) compileHistoricalResult(sourcePath, linkPath, buildDir string, 
 	if err != nil {
 		return nil, err
 	}
-	sections := map[string][]byte{".text": text}
+	sections := map[string][]byte{}
 	linked, err := elf.Open(linkedPath)
 	if err != nil {
 		return nil, err
 	}
 	defer linked.Close()
+	allocations := map[string]historicalAllocation{}
 	for _, section := range linked.Sections {
-		if section.Size == 0 || section.Flags&elf.SHF_ALLOC == 0 || section.Name == ".text" || section.Name == ".MIPS.abiflags" {
+		if (section.Size == 0 && section.Name != ".text") || section.Flags&elf.SHF_ALLOC == 0 || section.Name == ".MIPS.abiflags" {
+			continue
+		}
+		if _, exists := allocations[section.Name]; exists {
+			return nil, fmt.Errorf("duplicate linked allocatable section %s", section.Name)
+		}
+		allocations[section.Name] = historicalAllocation{Address: section.Addr, Size: section.Size, Type: section.Type, Flags: section.Flags}
+		if section.Name == ".text" {
+			sections[".text"] = text
 			continue
 		}
 		if section.Type == elf.SHT_NOBITS {
@@ -826,7 +838,10 @@ func (p project) compileHistoricalResult(sourcePath, linkPath, buildDir string, 
 	if err != nil {
 		return nil, fmt.Errorf("read linked definitions: %w", err)
 	}
-	result := &historicalResult{Sections: sections, Definitions: definitions}
+	result := &historicalResult{Sections: sections, Definitions: definitions, Allocations: allocations, NoCommon: true}
+	if err := result.validateMetadata(); err != nil {
+		return nil, err
+	}
 	if os.Getenv("TOOLS_CACHE") != "0" {
 		if err := os.MkdirAll(filepath.Dir(cachePath), 0o755); err != nil {
 			return nil, err
@@ -905,8 +920,8 @@ func compilationCacheKey(preprocessed, linkPath string, profile compilerProfile,
 	if language == "asm" {
 		hash.Write([]byte("standalone-asm-v1\x00"))
 	}
-	// v3 retains named ELF definitions; older entries contain section bytes only.
-	hash.Write([]byte("tools-historical-pipeline-v3\x00" + profile.name + "\x00" + profile.optimization + "\x00" + profile.aspsxVersion + "\x00"))
+	// v4 retains real allocation metadata and affirmative absence of COMMON.
+	hash.Write([]byte("tools-historical-pipeline-v4\x00" + profile.name + "\x00" + profile.optimization + "\x00" + profile.aspsxVersion + "\x00"))
 	if profile.expandDiv {
 		hash.Write([]byte("expand-div-v1\x00"))
 	}

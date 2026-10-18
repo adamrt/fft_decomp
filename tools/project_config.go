@@ -78,6 +78,7 @@ type unitDef struct {
 	Profile string       // empty: each member's own profile; else the profile every member compiles with
 	Rodata  []rodataSpec // read-only tables the unit defines between its functions' literals
 	Data    []rodataSpec // initialized tables the unit defines, placed as its .data
+	Bss     []rodataSpec // explicitly owned zero-backed allocations, emitted as .bss
 }
 
 type rodataSpec struct {
@@ -431,6 +432,7 @@ type unitYAML struct {
 	Profile string       `yaml:"profile"`
 	Rodata  []rodataYAML `yaml:"rodata"`
 	Data    []rodataYAML `yaml:"data"`
+	Bss     []rodataYAML `yaml:"bss"`
 }
 
 type rodataYAML struct {
@@ -490,6 +492,10 @@ func parseModuleConfig(data []byte) (*moduleSpec, error) {
 			unit.Data = append(unit.Data, rodataSpec(data))
 		}
 		sort.SliceStable(unit.Data, func(i, j int) bool { return unit.Data[i].Addr < unit.Data[j].Addr })
+		for _, bss := range item.Bss {
+			unit.Bss = append(unit.Bss, rodataSpec(bss))
+		}
+		sort.SliceStable(unit.Bss, func(i, j int) bool { return unit.Bss[i].Addr < unit.Bss[j].Addr })
 		module.Units = append(module.Units, unit)
 	}
 	for _, item := range file.Libraries {
@@ -627,6 +633,9 @@ func renderModuleConfig(m *moduleSpec) []byte {
 		}
 		if len(item.Data) > 0 {
 			text += ", data: [" + renderRodataRanges(item.Data) + "]"
+		}
+		if len(item.Bss) > 0 {
+			text += ", bss: [" + renderRodataRanges(item.Bss) + "]"
 		}
 		return text
 	})
@@ -948,6 +957,16 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 				}
 				if m.dataAt(data.Addr) == nil {
 					fail("%s: owned data 0x%08x names no data row of the module", where, data.Addr)
+				}
+			}
+			for _, bss := range unit.Bss {
+				if bss.Size <= 0 || !m.contains(bss.Addr, bss.Size) {
+					fail("%s: owned bss 0x%08x lies outside the module image", where, bss.Addr)
+				} else if !validHash(bss.Hash) || bss.Hash != shortHash(make([]byte, bss.Size)) {
+					fail("%s: owned bss 0x%08x requires its original zero hash; run `make checksums`", where, bss.Addr)
+				}
+				if m.dataAt(bss.Addr) == nil {
+					fail("%s: owned bss 0x%08x names no data row of the module", where, bss.Addr)
 				}
 			}
 			if _, err := projectPath(p.root, unit.Source, "unit source"); err != nil {

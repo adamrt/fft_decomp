@@ -14,28 +14,47 @@ type unitTrialRangeYAML struct {
 	Size int    `yaml:"size"`
 }
 
-func (p project) addUnitTrialRanges(unit *unitInstance, data, rodata []unitTrialRangeYAML) error {
+func (p project) addUnitTrialRanges(unit *unitInstance, data, rodata []unitTrialRangeYAML, bss ...[]unitTrialRangeYAML) error {
 	image, err := p.readModuleImage(unit.module)
 	if err != nil {
 		return err
 	}
-	return extendUnitTrialRanges(unit, data, rodata, image)
+	return extendUnitTrialRanges(unit, data, rodata, image, bss...)
 }
 
-func extendUnitTrialRanges(unit *unitInstance, data, rodata []unitTrialRangeYAML, image []byte) error {
+func extendUnitTrialRanges(unit *unitInstance, data, rodata []unitTrialRangeYAML, image []byte, bss ...[]unitTrialRangeYAML) error {
 	if len(image) != unit.module.Size {
 		return fmt.Errorf("%s: trial range image has an unexpected size", unit.module.ID)
 	}
-	newData, err := extendUnitTrialSection(unit, "data", unit.data, unit.rodata, data, image)
+	newData, err := extendUnitTrialSection(unit, "data", unit.data, append(append([]rodataSpec(nil), unit.rodata...), unit.bss...), data, image)
 	if err != nil {
 		return err
 	}
-	newRodata, err := extendUnitTrialSection(unit, "rodata", unit.rodata, newData, rodata, image)
+	newRodata, err := extendUnitTrialSection(unit, "rodata", unit.rodata, append(append([]rodataSpec(nil), newData...), unit.bss...), rodata, image)
 	if err != nil {
 		return err
 	}
 	// Neither section changes if a later range or the other section is invalid.
-	unit.data, unit.rodata = newData, newRodata
+	var additions []unitTrialRangeYAML
+	for _, ranges := range bss {
+		additions = append(additions, ranges...)
+	}
+	newBss, err := extendUnitTrialSection(unit, "bss", unit.bss, append(append([]rodataSpec(nil), newData...), newRodata...), additions, image)
+	if err != nil {
+		return err
+	}
+	if err := validateBSSOriginal(unit.module, newBss, image, true); err != nil {
+		return err
+	}
+	if err := validateBSSLabels(unit.module, newBss); err != nil {
+		return err
+	}
+	next := *unit
+	next.data, next.rodata, next.bss = newData, newRodata, newBss
+	if err := validateTrialBSSEnvelope(&next); err != nil {
+		return err
+	}
+	unit.data, unit.rodata, unit.bss = newData, newRodata, newBss
 	return nil
 }
 
@@ -60,6 +79,13 @@ func extendUnitTrialSection(unit *unitInstance, section string, existing, other 
 			}
 		}
 		for _, owner := range m.Units {
+			bssAddr, bssSize, err := bssEnvelope(m, owner.Bss)
+			if err != nil {
+				return nil, err
+			}
+			if bssSize > 0 && overlaps(bssAddr, bssSize) {
+				return nil, fmt.Errorf("%s: trial %s overlaps bss envelope of unit %s", m.ID, section, owner.Name)
+			}
 			for _, spans := range [][]rodataSpec{owner.Data, owner.Rodata} {
 				for _, span := range spans {
 					if overlaps(span.Addr, span.Size) {

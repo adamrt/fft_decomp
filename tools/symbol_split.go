@@ -44,6 +44,9 @@ func (p project) splitSymbolsCommand(args []string) error {
 			}
 			source = unit.Source
 			owners = append(owners, m)
+			if len(unit.Bss) > 0 {
+				return fmt.Errorf("unit %s owns bss; split it by hand with its allocation contracts", *name)
+			}
 			if len(unit.Rodata) > 0 {
 				return fmt.Errorf("unit %s owns read-only tables; split it by hand", *name)
 			}

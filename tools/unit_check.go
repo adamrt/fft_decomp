@@ -33,6 +33,7 @@ type unitInstanceYAML struct {
 	OriginalUnit string               `yaml:"original_unit"` // exact member list; inherit this unit's target-owned data and profile
 	Data         []unitTrialRangeYAML `yaml:"data"`          // additional ranges, checked against the original extracted image
 	Rodata       []unitTrialRangeYAML `yaml:"rodata"`        // likewise; does not replace inherited tables
+	Bss          []unitTrialRangeYAML `yaml:"bss"`
 }
 
 // unitSpec names a merged source and the original entries, in file order,
@@ -126,6 +127,7 @@ type unitInstance struct {
 	size    int
 	rodata  []rodataSpec
 	data    []rodataSpec // initialized tables the unit defines, its .data
+	bss     []rodataSpec // zero-backed allocations, separate from initialized data
 }
 
 // symbols lists the definitions the unit source must hold, one per member
@@ -256,6 +258,10 @@ func (m *moduleSpec) unitInstance(config *projectConfig, name string) (*unitInst
 		return nil, err
 	}
 	instance.data = append([]rodataSpec(nil), unit.Data...)
+	instance.bss = append([]rodataSpec(nil), unit.Bss...)
+	if _, _, err := bssEnvelope(m, instance.bss); err != nil {
+		return nil, err
+	}
 	for i := 1; i < len(instance.data); i++ {
 		previous := instance.data[i-1]
 		end := previous.Addr + uint32(previous.Size)
@@ -375,6 +381,11 @@ func unitLinkerScriptSkipping(unit *unitInstance, bindings map[string]uint32, as
 	if len(unit.data) > 0 {
 		fmt.Fprintf(&script, "  .data 0x%x : SUBALIGN(4) { *(.data) }\n", unit.data[0].Addr)
 	}
+	if len(unit.bss) > 0 {
+		// Use the existing four-byte placement policy: GAS gives ordinary
+		// word storage section alignment 16 even without a 16-byte directive.
+		fmt.Fprintf(&script, "  .bss 0x%x : SUBALIGN(4) { *(.bss) }\n", unit.bss[0].Addr)
+	}
 	fmt.Fprintf(&script, "  .text 0x%x : SUBALIGN(4) { *(.text) }\n", unit.addr)
 	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) *(.MIPS.abiflags) }\n}\n")
 	if assert {
@@ -420,6 +431,14 @@ func unitStaticMembers(unit *unitInstance, source string) (map[string]bool, erro
 // compileUnitInstance runs the historical pipeline on the merged source for
 // one module instance under workDir/<module>.
 func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance, source, workDir string) (map[string][]byte, error) {
+	if len(unit.bss) > 0 {
+		if err := validateBSSLabels(unit.module, unit.bss); err != nil {
+			return nil, err
+		}
+		if err := validateTrialBSSEnvelope(unit); err != nil {
+			return nil, err
+		}
+	}
 	used, err := sourceIdentifiers(source)
 	if err != nil {
 		return nil, err
@@ -441,7 +460,7 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 	defines := unit.module.defineFlags()
 	result, err := p.compileHistoricalResult(source, linker, buildDir, unit.profile, defines...)
 	if err == nil {
-		return result.checkedSections(unit.module, unit.spec.name)
+		return result.checkedUnitSections(unit)
 	}
 	// Header macros can name symbols the source scan misses; bind the
 	// object's actual undefined symbols once, as compileFunction does.
@@ -454,7 +473,7 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 			if rescript := unitLinkerScriptSkipping(unit, expanded, true, static); rescript != script {
 				if _, writeErr := writeLinkerScript(workDir, unit.module.ID, rescript); writeErr == nil {
 					if result, retryErr := p.compileHistoricalResult(source, linker, buildDir, unit.profile, defines...); retryErr == nil {
-						return result.checkedSections(unit.module, unit.spec.name)
+						return result.checkedUnitSections(unit)
 					}
 				}
 			}
@@ -541,13 +560,14 @@ func compareUnitSections(unit *unitInstance, sections map[string][]byte) ([]unit
 	}
 	problems = append(problems, compareUnitRanges(".rodata", unit.rodata, sections[".rodata"])...)
 	problems = append(problems, compareUnitRanges(".data", unit.data, sections[".data"])...)
+	problems = append(problems, compareUnitRanges(".bss", unit.bss, sections[".bss"])...)
 	names := make([]string, 0, len(sections))
 	for name := range sections {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		if name != ".text" && (name != ".rodata" || len(unit.rodata) == 0) && (name != ".data" || len(unit.data) == 0) {
+		if name != ".text" && (name != ".rodata" || len(unit.rodata) == 0) && (name != ".data" || len(unit.data) == 0) && (name != ".bss" || len(unit.bss) == 0) {
 			problems = append(problems, fmt.Sprintf("emitted undeclared allocatable section %s", name))
 		}
 	}
@@ -685,8 +705,18 @@ func (p project) unitCheckCommand(args []string) error {
 		if selected != nil && !selected[unit.module.ID] {
 			continue
 		}
-		if len(instanceSpec.Data) != 0 || len(instanceSpec.Rodata) != 0 {
-			if err := p.addUnitTrialRanges(unit, instanceSpec.Data, instanceSpec.Rodata); err != nil {
+		if len(instanceSpec.Data) != 0 || len(instanceSpec.Rodata) != 0 || len(instanceSpec.Bss) != 0 {
+			if err := p.addUnitTrialRanges(unit, instanceSpec.Data, instanceSpec.Rodata, instanceSpec.Bss); err != nil {
+				return err
+			}
+		} else if len(unit.bss) > 0 {
+			// Scratch trials repeat original proof even when every allocation
+			// was inherited; configured check remains input-independent.
+			image, err := p.readModuleImage(unit.module)
+			if err != nil {
+				return err
+			}
+			if err := validateBSSOriginal(unit.module, unit.bss, image, true); err != nil {
 				return err
 			}
 		}

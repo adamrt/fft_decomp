@@ -474,7 +474,11 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 			return "", err
 		}
 		for _, span := range results.unitData[index] {
-			fmt.Fprintf(p.stdout(), "matching C data: unit %s %s 0x%08x (%d bytes)\n", unit.Name, span.section, span.addr, len(span.data))
+			if span.section == ".bss" {
+				fmt.Fprintf(p.stdout(), "matching C zero allocation: unit %s .bss 0x%08x (%d generated zero bytes)\n", unit.Name, span.addr, len(span.data))
+			} else {
+				fmt.Fprintf(p.stdout(), "matching C data: unit %s %s 0x%08x (%d bytes)\n", unit.Name, span.section, span.addr, len(span.data))
+			}
 		}
 	}
 	output := moduleBuildOutput(p.root, m)
@@ -504,10 +508,13 @@ func validateUnitOwnedOriginal(m *moduleSpec, image []byte) error {
 		return err
 	}
 	for _, unit := range m.Units {
+		if err := validateBSSOriginal(m, unit.Bss, image, true); err != nil {
+			return err
+		}
 		for _, section := range []struct {
 			name  string
 			spans []rodataSpec
-		}{{".data", unit.Data}, {".rodata", unit.Rodata}} {
+		}{{".data", unit.Data}, {".rodata", unit.Rodata}, {".bss", unit.Bss}} {
 			for _, span := range section.spans {
 				if span.Size <= 0 || !m.contains(span.Addr, span.Size) {
 					return fmt.Errorf("%s: unit %s owned %s at 0x%08x lies outside the module image", m.ID, unit.Name, section.name, span.Addr)
@@ -811,6 +818,15 @@ func (p project) checksumsCommand(args []string) error {
 			}
 			for index := range m.Units {
 				unit := &m.Units[index]
+				if err := validateBSSOriginal(m, unit.Bss, image, false); err != nil {
+					return err
+				}
+				for rangeIndex := range unit.Bss {
+					span := &unit.Bss[rangeIndex]
+					if err := record(span.Addr, span.Size, &span.Hash); err != nil {
+						return err
+					}
+				}
 				for rangeIndex := range unit.Rodata {
 					span := &unit.Rodata[rangeIndex]
 					if err := record(span.Addr, span.Size, &span.Hash); err != nil {

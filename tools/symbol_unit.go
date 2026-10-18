@@ -137,6 +137,9 @@ func (p project) unitSymbolsCommand(args []string) error {
 				}
 				seen[f.Unit] = true
 				original := m.unit(f.Unit)
+				if len(original.Bss) > 0 {
+					return fmt.Errorf("%s: unit %s owns bss; regroup it by hand with its allocation contracts", m.ID, original.Name)
+				}
 				merged.Data = append(merged.Data, original.Data...)
 				merged.Rodata = append(merged.Rodata, original.Rodata...)
 			}

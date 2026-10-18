@@ -18,7 +18,7 @@ func sliceUnitOwnedData(unit *unitInstance, sections map[string][]byte) []compil
 		name  string
 		owned []rodataSpec
 		all   []rodataSpec
-	}{{".data", unit.data, unit.data}, {".rodata", unit.spec.rodata, unit.rodata}} {
+	}{{".data", unit.data, unit.data}, {".rodata", unit.spec.rodata, unit.rodata}, {".bss", unit.bss, unit.bss}} {
 		for _, span := range section.owned {
 			start := int(span.Addr - section.all[0].Addr)
 			result = append(result, compiledDataSpan{section.name, span.Addr, sections[section.name][start : start+span.Size]})
@@ -33,14 +33,17 @@ func writeUnitOwnedData(m *moduleSpec, unit *unitDef, compiled []compiledDataSpa
 	if len(original) != m.Size || len(output) != m.Size {
 		return fmt.Errorf("%s: unit %s data output requires complete module images", m.ID, unit.Name)
 	}
-	if len(compiled) != len(unit.Data)+len(unit.Rodata) {
-		return fmt.Errorf("%s: unit %s emitted %d owned data spans, expected %d", m.ID, unit.Name, len(compiled), len(unit.Data)+len(unit.Rodata))
+	if len(compiled) != len(unit.Data)+len(unit.Rodata)+len(unit.Bss) {
+		return fmt.Errorf("%s: unit %s emitted %d owned data spans, expected %d", m.ID, unit.Name, len(compiled), len(unit.Data)+len(unit.Rodata)+len(unit.Bss))
+	}
+	if err := validateBSSOriginal(m, unit.Bss, original, true); err != nil {
+		return err
 	}
 	index := 0
 	for _, section := range []struct {
 		name  string
 		spans []rodataSpec
-	}{{".data", unit.Data}, {".rodata", unit.Rodata}} {
+	}{{".data", unit.Data}, {".rodata", unit.Rodata}, {".bss", unit.Bss}} {
 		for _, span := range section.spans {
 			if span.Size <= 0 || !m.contains(span.Addr, span.Size) {
 				return fmt.Errorf("%s: unit %s owned %s at 0x%08x lies outside the module image", m.ID, unit.Name, section.name, span.Addr)
@@ -82,8 +85,16 @@ func validateUnitOwnedLayout(m *moduleSpec) error {
 		for _, section := range []struct {
 			name  string
 			spans []rodataSpec
-		}{{".data", unit.Data}, {".rodata", unit.Rodata}} {
-			for _, span := range section.spans {
+		}{{".data", unit.Data}, {".rodata", unit.Rodata}, {".bss", unit.Bss}} {
+			spans := section.spans
+			if section.name == ".bss" && len(spans) > 0 {
+				addr, size, err := bssEnvelope(m, spans)
+				if err != nil {
+					return err
+				}
+				spans = []rodataSpec{{Addr: addr, Size: size}}
+			}
+			for _, span := range spans {
 				owner := fmt.Sprintf("unit %s owned %s at 0x%08x", unit.Name, section.name, span.Addr)
 				if span.Size <= 0 || !m.contains(span.Addr, span.Size) {
 					return fmt.Errorf("%s: %s lies outside the module image", m.ID, owner)
@@ -98,7 +109,7 @@ func validateUnitOwnedLayout(m *moduleSpec) error {
 					if start < uint64(f.Addr)+uint64(f.Size) && uint64(f.Addr) < end {
 						return fmt.Errorf("%s: %s overlaps function %s", m.ID, owner, f.Name)
 					}
-					if section.name == ".data" {
+					if section.name != ".rodata" {
 						for _, literal := range f.Rodata {
 							if start < uint64(literal.Addr)+uint64(literal.Size) && uint64(literal.Addr) < end {
 								return fmt.Errorf("%s: %s overlaps function %s rodata", m.ID, owner, f.Name)
