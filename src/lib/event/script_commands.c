@@ -528,14 +528,14 @@ void script_wait_for_unit_ready(s32 runtime_id) {
  * input is disabled, keeps section 0 bound to the event or tutorial text
  * already in use. */
 void text_init_section_pointers(void) {
-    s32* source;
+    u32* source;
     u8** destination;
-    s32* text;
+    u32* text;
 #ifdef FFT_BATTLE
     s32 menu_input_mode;
 #endif
     s32 index;
-    s32 offset;
+    u32 offset;
 
     source = g_text_section_offsets;
     index = 0;
@@ -552,7 +552,7 @@ void text_init_section_pointers(void) {
         {
             offset = *source;
             /* Integer addition retains the native addu operand order. */
-            offset += (s32)text;
+            offset += (u32)text;
             *destination = (u8*)offset;
         }
         source++;

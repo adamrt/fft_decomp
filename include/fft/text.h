@@ -180,7 +180,7 @@ typedef enum text_section {
     TEXT_SECTION_AT_LIST = 31               /* the AT list's text, built when the list opens */
 } text_section_e;
 
-extern s32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
+extern u32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
 extern u8* g_text_section_pointers[TEXT_SECTION_COUNT];
 
 /* The text file an overlay loaded. */
