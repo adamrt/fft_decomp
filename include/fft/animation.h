@@ -193,7 +193,7 @@ typedef enum animation {
     ANIMATION_GUN_HIGH = 80,
     ANIMATION_GUN_LEVEL = 81,
     ANIMATION_GUN_LOW = 82,
-    ANIMATION_BOW_HIGH = 83, /* a bow shot takes its row from projectile_get_bow_shot_angle */
+    ANIMATION_BOW_HIGH = 83, /* selected through projectile_get_bow_animation_column */
     ANIMATION_BOW_LEVEL = 84,
     ANIMATION_BOW_LOW = 85,
     ANIMATION_BOOK = 86,

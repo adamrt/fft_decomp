@@ -78,7 +78,7 @@ extern u8 g_animation_targeted_frame_front[];
  * the one held while the unit charges or performs; 0 for none. */
 extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
 
-/* animation_e of each item type's attack at a higher, a level and a lower target. */
+/* Three animation_e variants per item_type_e; animation_select_weapon_attack chooses the column. */
 extern u8 g_animation_weapon_attacks[][3];
 
 /* Palette cycling for the cursor tile glow. */
@@ -217,11 +217,10 @@ static u8 animation_get_water_mode(unit_t* unit) {
     return tile->depth_half_height.depth;
 }
 
-/* Choose the attacker's weapon attack animation from the target's height.
+/* Choose the attacker's weapon attack animation.
  *
- * g_animation_weapon_attacks has three animations for each item type:
- * at a higher target, a level one and a lower one. A bow indexes its row by
- * projectile_get_bow_shot_angle. Other weapons compare the vertical
+ * Each item type has three animation variants. Bows select their table
+ * column from the last trajectory test. Other weapons compare the vertical
  * centers of the two sprites: a target 12 or more above the attacker takes
  * the first animation and one 12 or more below the third. A Golem or Blade
  * Grasp guard always takes the first, and the sheets from the crystal up
@@ -241,8 +240,8 @@ void animation_select_weapon_attack(unit_t* attacker, unit_t* target) {
             return;
         }
         if (attacker->equipped_weapon_type == ITEM_TYPE_BOW) {
-            animation_force_facing(
-                g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_shot_angle()], attacker->facing, attacker);
+            animation_force_facing(g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_animation_column()],
+                attacker->facing, attacker);
             return;
         }
         miss_type = target->stats->action.miss_type;

@@ -1947,7 +1947,7 @@ functions:
   - {addr: 0x801afb38, size: 600, name: projectile_arc_trace_path, hash: 7c04de64d8c0eac3, unit: effect_system}
   - {addr: 0x801afd90, size: 392, name: projectile_arc_check_between_units, hash: 1fe11ac94f9660f3, unit: effect_system}
   - {addr: 0x801aff18, size: 1352, name: projectile_arc_set_and_validate, hash: 50a9a4a17f186dad, unit: effect_system}
-  - {addr: 0x801b0460, size: 124, name: projectile_get_bow_shot_angle, hash: 013c7cead268a896, unit: effect_system}
+  - {addr: 0x801b0460, size: 124, name: projectile_get_bow_animation_column, hash: 013c7cead268a896, unit: effect_system}
   - {addr: 0x801b04dc, size: 500, name: projectile_direct_trace_path, hash: b488a8a564a6c285, unit: effect_system}
   - {addr: 0x801b06d0, size: 328, name: projectile_direct_check_between_units, hash: 00074ecc7438b34c, unit: effect_system}
   - {addr: 0x801b0818, size: 632, name: projectile_direct_check_to_target, hash: ea05f8f36d0b34dd, unit: effect_system}

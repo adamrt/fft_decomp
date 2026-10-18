@@ -2326,12 +2326,11 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
     return result;
 }
 
-/* Wrap the vertical shot angle the last trajectory test stored
- * (g_projectile_arctan_angle_mod) into [-0x800, 0x800] and bucket it at
- * 0x2aa (60 degrees): 0 below -0x2aa, 1 from -0x2aa to 0x2aa, 2 above.
- * animation_select_weapon_attack uses it as the bow's column of
- * g_animation_weapon_attacks. */
-s32 projectile_get_bow_shot_angle(void) {
+/* Choose the bow animation column from the last trajectory test's angle.
+ * Wrap g_projectile_arctan_angle_mod into [-0x800, 0x800]: return column 0
+ * below -0x2aa, column 1 through 0x2aa, or column 2 above it. Arc selection
+ * can restore an earlier path without restoring this angle. */
+s32 projectile_get_bow_animation_column(void) {
     s16 angle = g_projectile_arctan_angle_mod;
     if (angle >= 0x801) {
         g_projectile_arctan_angle_mod = angle - ONE;
