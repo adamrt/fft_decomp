@@ -57,7 +57,6 @@ units:
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, data: [{addr: 0x801696fc, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80169700, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80169718, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80169720, size: 48, hash: 5026ef5547d95034}, {addr: 0x80169750, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: script_variables, source: src/lib/event/script_variables.c}
   - {name: skillset_menus, source: src/battle/skillset_menus.c}
-  - {name: spritesheets, source: src/battle/spritesheets.c}
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
@@ -73,7 +72,7 @@ units:
   - {name: unit_lookup, source: src/battle/unit_lookup.c, data: [{addr: 0x800a7790, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a7798, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a0, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a8, size: 8, hash: af5570f5a1810b7a}]}
   - {name: unit_motion, source: src/battle/unit_motion.c}
   - {name: unit_name_list, source: src/lib/event/unit_name_list.c}
-  - {name: unit_overlays, source: src/battle/unit_overlays.c, rodata: [{addr: 0x800677f8, size: 24, hash: eb05bd6b6bfe587c}, {addr: 0x80067830, size: 8, hash: cc7419b17cc27ab3}], data: [{addr: 0x800949dc, size: 24, hash: 2af3cad2dfddc130}, {addr: 0x800949f4, size: 24, hash: 65d77a45a2612b88}, {addr: 0x80094a0c, size: 24, hash: ca780de6daf75aec}, {addr: 0x80094a24, size: 24, hash: e4e8dec7578128c7}]}
+  - {name: unit_render, source: src/battle/unit_render.c, rodata: [{addr: 0x800677f8, size: 24, hash: eb05bd6b6bfe587c}, {addr: 0x80067830, size: 8, hash: cc7419b17cc27ab3}, {addr: 0x80067bac, size: 42, hash: 3810203f710237ef}, {addr: 0x80067bd8, size: 42, hash: 188477a5cd324d3e}, {addr: 0x80067c04, size: 42, hash: deb3dea1cb290d56}, {addr: 0x80067c30, size: 42, hash: 3b746de063f99ad5}, {addr: 0x80067c5c, size: 42, hash: 9c44ec23658ca641}, {addr: 0x80067c88, size: 42, hash: 77a31697c519e931}], data: [{addr: 0x800949dc, size: 24, hash: 2af3cad2dfddc130}, {addr: 0x800949f4, size: 24, hash: 65d77a45a2612b88}, {addr: 0x80094a0c, size: 24, hash: ca780de6daf75aec}, {addr: 0x80094a24, size: 24, hash: e4e8dec7578128c7}]}
   - {name: unit_runtime, source: src/battle/unit_runtime.c}
   - {name: unit_status_lists, source: src/lib/event/unit_status_lists.c, data: [{addr: 0x801688fc, size: 216, hash: 00d6533341ea134b}, {addr: 0x801689d4, size: 180, hash: 69a939a348d358c5}, {addr: 0x80168a88, size: 8, hash: 518da1a815a13e6c}, {addr: 0x80168a90, size: 8, hash: 090c0aecca1f3371}, {addr: 0x80168a98, size: 8, hash: 4ddd89146e4fcb5e}, {addr: 0x80168aa0, size: 8, hash: 8d30ba6149f0ce72}, {addr: 0x80168aa8, size: 228, hash: ed7de49a1d853db8}, {addr: 0x80168b8c, size: 228, hash: d960aeccf45c220f}, {addr: 0x80168c70, size: 48, hash: 7875e0ef62b55857}, {addr: 0x80168ca0, size: 48, hash: 3f2c3f62b90e598a}, {addr: 0x80168cd0, size: 60, hash: 55b67051bc25b258}, {addr: 0x80168d0c, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x80168d44, size: 76, hash: ec0d1125a0b03828}]}
   - {name: window_buffers, source: src/lib/menu/window_buffers.c}
@@ -397,55 +396,55 @@ functions:
   - {addr: 0x8007b94c, size: 32, name: camera_get_tile_depth_point_biased, hash: ae52a4c0b67848fb, unit: unit_lookup}
   - {addr: 0x8007b96c, size: 100, name: unit_copy_draw_coords, hash: f430112bc691272a, unit: unit_lookup}
   - {addr: 0x8007b9d0, size: 2676, name: sprite_shadow_build_quad, hash: 3475e2d67a51ce4a, unit: unit_lookup}
-  - {addr: 0x8007c444, size: 968, name: cursor_calculate_tile_polygon, hash: bc44eec17053cffa, unit: unit_overlays}
-  - {addr: 0x8007c80c, size: 2028, name: battle_map_calculate_slope_height, hash: 7f1884b516395823, unit: unit_overlays}
-  - {addr: 0x8007cff8, size: 168, name: move_get_water_standing_offset, hash: c398ca9d4e529fe6, unit: unit_overlays}
-  - {addr: 0x8007d0a0, size: 52, name: unit_get_mount, hash: 4fc2e5238f65613f, unit: unit_overlays}
-  - {addr: 0x8007d0d4, size: 520, name: unit_height_calculate_from_coords, hash: e56faab820b8cd61, unit: unit_overlays}
-  - {addr: 0x8007d2dc, size: 116, name: unit_height_calculate_with_caller_coords, hash: d51b5c3e99b7faa7, unit: unit_overlays}
-  - {addr: 0x8007d350, size: 164, name: unit_height_calculate_from_move_destination, hash: 9ff774e585d561f5, unit: unit_overlays}
-  - {addr: 0x8007d3f4, size: 132, name: unit_height_calculate_from_world_coords, hash: e165af55edc54ebd, unit: unit_overlays}
-  - {addr: 0x8007d478, size: 164, name: unit_height_calculate_from_tile, hash: 2193e38f5bd1d29e, unit: unit_overlays}
-  - {addr: 0x8007d51c, size: 180, name: unit_height_calculate_from_battle_tile, hash: ce9ff15ac7123c68, unit: unit_overlays}
-  - {addr: 0x8007d5d0, size: 1356, name: sprite_shadow_draw, hash: 544f930669012f2c, unit: unit_overlays}
-  - {addr: 0x8007db1c, size: 2024, name: cursor_build_tile_glow, hash: d36d3d10d74e8691, unit: unit_overlays}
-  - {addr: 0x8007e304, size: 1064, name: cursor_draw_map_selection, hash: 4034d1e9c16b8fa0, unit: unit_overlays, rodata: [{addr: 0x80067798, size: 64, hash: 0d415124715dec0c}]}
-  - {addr: 0x8007e72c, size: 636, name: unit_facing_draw_wait_arrows, hash: 77d9b7f21c361ce0, unit: unit_overlays, rodata: [{addr: 0x800677d8, size: 32, hash: 6848f39b8b10f495}]}
-  - {addr: 0x8007e9a8, size: 484, name: unit_increment_or_decrement_height_mod, hash: 96b86101ded896f3, unit: unit_overlays}
-  - {addr: 0x8007eb8c, size: 820, name: status_bubble_determine_parameters, hash: 8bfc26d6145db3c7, unit: unit_overlays, rodata: [{addr: 0x80067810, size: 32, hash: ad2214d99b338656}]}
-  - {addr: 0x8007eec0, size: 788, name: status_bubble_draw, hash: cdfdf07e5db4ed12, unit: unit_overlays}
-  - {addr: 0x8007f1d4, size: 108, name: unit_update_float_height_and_status_bubble, hash: c0eec83698c25e63, unit: unit_overlays}
-  - {addr: 0x8007f240, size: 108, name: sprite_afterimage_init, hash: e2f2880ec8d81f30, unit: unit_overlays}
-  - {addr: 0x8007f2ac, size: 340, name: sprite_afterimage_draw, hash: 026967f572294b7e, unit: unit_overlays}
-  - {addr: 0x8007f400, size: 92, name: sprite_afterimage_shift_and_fill, hash: 8bb1133d61cd9a55, unit: unit_overlays}
-  - {addr: 0x8007f45c, size: 176, name: sprite_display_store_item, hash: 5a99ee1e12aea6a6, unit: unit_overlays}
-  - {addr: 0x8007f50c, size: 236, name: sprite_draw_item_display, hash: 5d4302c9c4c3284c, unit: unit_overlays}
-  - {addr: 0x8007f5f8, size: 3564, name: result_build_next_display, hash: eb0e390861d3bf97, unit: unit_overlays, rodata: [{addr: 0x80067838, size: 884, hash: ec9dc128f5d4bf7b}]}
-  - {addr: 0x800803e4, size: 1236, name: result_prepare_display, hash: 71e3a74e2047ec31, unit: unit_overlays}
-  - {addr: 0x800808b8, size: 1676, name: result_build_next_special_display, hash: f84b03f33a1ae7db, unit: unit_overlays}
-  - {addr: 0x80080f44, size: 168, name: result_init_earned_exp_jp_display, hash: 2256e8aaac92d311, unit: unit_overlays}
-  - {addr: 0x80080fec, size: 184, name: result_queue_charge_failure_message, hash: 0fc2063c1e230384, unit: unit_overlays}
-  - {addr: 0x800810a4, size: 2260, name: result_animate_text, hash: 3cb19c84f990dd00, unit: spritesheets, rodata: [{addr: 0x80067cb8, size: 324, hash: 0b8eb1c97eef6547}]}
-  - {addr: 0x80081978, size: 16, name: animation_store_facing, hash: a57d7d5a8db7da37, unit: spritesheets}
-  - {addr: 0x80081988, size: 32, name: animation_force_facing, hash: 10a5bebe446c30ea, unit: spritesheets}
-  - {addr: 0x800819a8, size: 96, name: sprite_sheet_get_unit_shp, hash: 0bc67a5e0a00141d, unit: spritesheets}
-  - {addr: 0x80081a08, size: 80, name: sprite_sheet_get_unit_seq, hash: b59fa5a74eacfabe, unit: spritesheets}
-  - {addr: 0x80081a58, size: 60, name: sprite_sheet_get_weapon_shp, hash: 8315c4e28d56ce23, unit: spritesheets}
-  - {addr: 0x80081a94, size: 60, name: sprite_sheet_get_weapon_seq, hash: 8036ea457f08261d, unit: spritesheets}
-  - {addr: 0x80081ad0, size: 16, name: sprite_sheet_get_effect_shp, hash: 8397fdd5c7f61d85, unit: spritesheets}
-  - {addr: 0x80081ae0, size: 16, name: sprite_sheet_get_effect_seq, hash: cbddd39cd666d6c9, unit: spritesheets}
-  - {addr: 0x80081af0, size: 28, name: sprite_sheet_get_flying_flag, hash: 2df78c259613ca35, unit: spritesheets}
-  - {addr: 0x80081b0c, size: 124, name: unit_set_move_and_world_coords, hash: d9d1e81d43422381, unit: spritesheets}
-  - {addr: 0x80081b88, size: 148, name: unit_dismount_dead_rider, hash: 05016104e1c28b23, unit: spritesheets}
-  - {addr: 0x80081c1c, size: 68, name: sprite_sheet_is_loaded, hash: aa489e10824df594, unit: spritesheets}
-  - {addr: 0x80081c60, size: 244, name: sprite_sheet_claim_slot, hash: 0441f983a951ca62, unit: spritesheets}
-  - {addr: 0x80081d54, size: 956, name: sprite_palette_tint_unit, hash: ddcee335cd1f0c8c, unit: spritesheets, rodata: [{addr: 0x80067e00, size: 92, hash: ed149fdad13bd852}]}
-  - {addr: 0x80082110, size: 428, name: sprite_palette_modify_unit, hash: 66ad0e1e4663f614, unit: spritesheets}
-  - {addr: 0x800822bc, size: 428, name: sprite_palette_update_unit_status, hash: ce9969f0807cf7f3, unit: spritesheets}
-  - {addr: 0x80082468, size: 160, name: sprite_palette_check_tile_status_mod, hash: b280713ab1d453da, unit: spritesheets}
-  - {addr: 0x80082508, size: 72, name: status_bubble_update_active, hash: 1c11a4663f86f576, unit: spritesheets}
-  - {addr: 0x80082550, size: 60, name: sprite_update_transparency_flag, hash: a8f89982a732364e, unit: spritesheets}
-  - {addr: 0x8008258c, size: 148, name: unit_update_float_and_jump_height, hash: f05be917e6b96262, unit: spritesheets}
+  - {addr: 0x8007c444, size: 968, name: cursor_calculate_tile_polygon, hash: bc44eec17053cffa, unit: unit_render}
+  - {addr: 0x8007c80c, size: 2028, name: battle_map_calculate_slope_height, hash: 7f1884b516395823, unit: unit_render}
+  - {addr: 0x8007cff8, size: 168, name: move_get_water_standing_offset, hash: c398ca9d4e529fe6, unit: unit_render}
+  - {addr: 0x8007d0a0, size: 52, name: unit_get_mount, hash: 4fc2e5238f65613f, unit: unit_render}
+  - {addr: 0x8007d0d4, size: 520, name: unit_height_calculate_from_coords, hash: e56faab820b8cd61, unit: unit_render}
+  - {addr: 0x8007d2dc, size: 116, name: unit_height_calculate_with_caller_coords, hash: d51b5c3e99b7faa7, unit: unit_render}
+  - {addr: 0x8007d350, size: 164, name: unit_height_calculate_from_move_destination, hash: 9ff774e585d561f5, unit: unit_render}
+  - {addr: 0x8007d3f4, size: 132, name: unit_height_calculate_from_world_coords, hash: e165af55edc54ebd, unit: unit_render}
+  - {addr: 0x8007d478, size: 164, name: unit_height_calculate_from_tile, hash: 2193e38f5bd1d29e, unit: unit_render}
+  - {addr: 0x8007d51c, size: 180, name: unit_height_calculate_from_battle_tile, hash: ce9ff15ac7123c68, unit: unit_render}
+  - {addr: 0x8007d5d0, size: 1356, name: sprite_shadow_draw, hash: 544f930669012f2c, unit: unit_render}
+  - {addr: 0x8007db1c, size: 2024, name: cursor_build_tile_glow, hash: d36d3d10d74e8691, unit: unit_render}
+  - {addr: 0x8007e304, size: 1064, name: cursor_draw_map_selection, hash: 4034d1e9c16b8fa0, unit: unit_render, rodata: [{addr: 0x80067798, size: 64, hash: 0d415124715dec0c}]}
+  - {addr: 0x8007e72c, size: 636, name: unit_facing_draw_wait_arrows, hash: 77d9b7f21c361ce0, unit: unit_render, rodata: [{addr: 0x800677d8, size: 32, hash: 6848f39b8b10f495}]}
+  - {addr: 0x8007e9a8, size: 484, name: unit_increment_or_decrement_height_mod, hash: 96b86101ded896f3, unit: unit_render}
+  - {addr: 0x8007eb8c, size: 820, name: status_bubble_determine_parameters, hash: 8bfc26d6145db3c7, unit: unit_render, rodata: [{addr: 0x80067810, size: 32, hash: ad2214d99b338656}]}
+  - {addr: 0x8007eec0, size: 788, name: status_bubble_draw, hash: cdfdf07e5db4ed12, unit: unit_render}
+  - {addr: 0x8007f1d4, size: 108, name: unit_update_float_height_and_status_bubble, hash: c0eec83698c25e63, unit: unit_render}
+  - {addr: 0x8007f240, size: 108, name: sprite_afterimage_init, hash: e2f2880ec8d81f30, unit: unit_render}
+  - {addr: 0x8007f2ac, size: 340, name: sprite_afterimage_draw, hash: 026967f572294b7e, unit: unit_render}
+  - {addr: 0x8007f400, size: 92, name: sprite_afterimage_shift_and_fill, hash: 8bb1133d61cd9a55, unit: unit_render}
+  - {addr: 0x8007f45c, size: 176, name: sprite_display_store_item, hash: 5a99ee1e12aea6a6, unit: unit_render}
+  - {addr: 0x8007f50c, size: 236, name: sprite_draw_item_display, hash: 5d4302c9c4c3284c, unit: unit_render}
+  - {addr: 0x8007f5f8, size: 3564, name: result_build_next_display, hash: eb0e390861d3bf97, unit: unit_render, rodata: [{addr: 0x80067838, size: 884, hash: ec9dc128f5d4bf7b}]}
+  - {addr: 0x800803e4, size: 1236, name: result_prepare_display, hash: 71e3a74e2047ec31, unit: unit_render}
+  - {addr: 0x800808b8, size: 1676, name: result_build_next_special_display, hash: f84b03f33a1ae7db, unit: unit_render}
+  - {addr: 0x80080f44, size: 168, name: result_init_earned_exp_jp_display, hash: 2256e8aaac92d311, unit: unit_render}
+  - {addr: 0x80080fec, size: 184, name: result_queue_charge_failure_message, hash: 0fc2063c1e230384, unit: unit_render}
+  - {addr: 0x800810a4, size: 2260, name: result_animate_text, hash: 3cb19c84f990dd00, unit: unit_render, rodata: [{addr: 0x80067cb8, size: 324, hash: 0b8eb1c97eef6547}]}
+  - {addr: 0x80081978, size: 16, name: animation_store_facing, hash: a57d7d5a8db7da37, unit: unit_render}
+  - {addr: 0x80081988, size: 32, name: animation_force_facing, hash: 10a5bebe446c30ea, unit: unit_render}
+  - {addr: 0x800819a8, size: 96, name: sprite_sheet_get_unit_shp, hash: 0bc67a5e0a00141d, unit: unit_render}
+  - {addr: 0x80081a08, size: 80, name: sprite_sheet_get_unit_seq, hash: b59fa5a74eacfabe, unit: unit_render}
+  - {addr: 0x80081a58, size: 60, name: sprite_sheet_get_weapon_shp, hash: 8315c4e28d56ce23, unit: unit_render}
+  - {addr: 0x80081a94, size: 60, name: sprite_sheet_get_weapon_seq, hash: 8036ea457f08261d, unit: unit_render}
+  - {addr: 0x80081ad0, size: 16, name: sprite_sheet_get_effect_shp, hash: 8397fdd5c7f61d85, unit: unit_render}
+  - {addr: 0x80081ae0, size: 16, name: sprite_sheet_get_effect_seq, hash: cbddd39cd666d6c9, unit: unit_render}
+  - {addr: 0x80081af0, size: 28, name: sprite_sheet_get_flying_flag, hash: 2df78c259613ca35, unit: unit_render}
+  - {addr: 0x80081b0c, size: 124, name: unit_set_move_and_world_coords, hash: d9d1e81d43422381, unit: unit_render}
+  - {addr: 0x80081b88, size: 148, name: unit_dismount_dead_rider, hash: 05016104e1c28b23, unit: unit_render}
+  - {addr: 0x80081c1c, size: 68, name: sprite_sheet_is_loaded, hash: aa489e10824df594, unit: unit_render}
+  - {addr: 0x80081c60, size: 244, name: sprite_sheet_claim_slot, hash: 0441f983a951ca62, unit: unit_render}
+  - {addr: 0x80081d54, size: 956, name: sprite_palette_tint_unit, hash: ddcee335cd1f0c8c, unit: unit_render, rodata: [{addr: 0x80067e00, size: 92, hash: ed149fdad13bd852}]}
+  - {addr: 0x80082110, size: 428, name: sprite_palette_modify_unit, hash: 66ad0e1e4663f614, unit: unit_render}
+  - {addr: 0x800822bc, size: 428, name: sprite_palette_update_unit_status, hash: ce9969f0807cf7f3, unit: unit_render}
+  - {addr: 0x80082468, size: 160, name: sprite_palette_check_tile_status_mod, hash: b280713ab1d453da, unit: unit_render}
+  - {addr: 0x80082508, size: 72, name: status_bubble_update_active, hash: 1c11a4663f86f576, unit: unit_render}
+  - {addr: 0x80082550, size: 60, name: sprite_update_transparency_flag, hash: a8f89982a732364e, unit: unit_render}
+  - {addr: 0x8008258c, size: 148, name: unit_update_float_and_jump_height, hash: f05be917e6b96262, unit: unit_render}
   - {addr: 0x80082620, size: 364, name: action_play_weapon_sfx, hash: cf66671c0bc307f1, unit: unit_animations, rodata: [{addr: 0x80067e60, size: 52, hash: d3464a1da9a6f832}]}
   - {addr: 0x8008278c, size: 256, name: animation_get_water_mode, hash: 709c9eb1dc6a2866, unit: unit_animations}
   - {addr: 0x8008288c, size: 440, name: animation_select_weapon_attack, hash: 1029a6d78051fa69, unit: unit_animations}

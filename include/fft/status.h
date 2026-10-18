@@ -256,8 +256,6 @@ typedef enum status_bubble {
     STATUS_BUBBLE_COUNT = 22
 } status_bubble_e;
 
-extern const SVECTOR g_status_bubble_zoom;
-
 void status_bubble_update_active(struct unit* unit);
 void status_bubble_draw(struct unit* unit, const DVECTOR* unused_screen_coords);
 
