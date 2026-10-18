@@ -312,7 +312,6 @@ extern DISPENV g_gfx_display_envs[2];
 extern DRAWENV g_gfx_draw_envs[2];
 extern s32 g_gfx_active_buffer_index;
 extern s32 g_gfx_screen_polarity;
-extern u32 g_gfx_battle_otags[2][0x180];
 
 u32* gfx_get_battle_otag(void);
 void gfx_swap_and_clear_battle_otag(void);

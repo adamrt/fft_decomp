@@ -258,14 +258,7 @@ typedef enum status_bubble {
     STATUS_BUBBLE_COUNT = 22
 } status_bubble_e;
 
-extern s32 g_status_bubble_delay;
-extern palette_t g_status_bubble_palette;
 extern SVECTOR g_status_bubble_zoom;
-
-/* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
- * tested separately by status_bubble_determine_parameters; bubbles 8 and 11 hold 0 too,
- * so they never show. */
-extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
 
 void status_bubble_update_active(struct unit* unit);
 void status_bubble_draw(struct unit* unit, const DVECTOR* unused_screen_coords);

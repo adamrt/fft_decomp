@@ -37,6 +37,22 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern s32 g_sprite_unit_graphics_load_complete;
+
+/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
+ * one at rand() / 0x2000. */
+extern u8 g_battle_map_random_battle_music_tracks[];
+extern palette_t g_weather_particle_palette;
+
+/* Color-tint fade state. */
+extern rgb24_t g_fade_tint;
+extern rgb24_t g_fade_tint_backup;
+extern rgb24_t g_fade_tint_target;
+extern u16 g_fade_tint_value[3];
+extern u16 g_fade_tint_step[3];
+extern u16 g_fade_tint_fade_frames;
+extern RECT g_fade_tint_tex_window;
+
 /* Return g_state_animation_continue_check, nonzero while the action's effect is still
  * loading or playing; script_play_effect_and_wait polls it on the main stack. */
 s32 state_get_animation_continue_check(void) {

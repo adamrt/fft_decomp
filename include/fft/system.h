@@ -104,7 +104,6 @@ extern s32 g_system_saved_vsync_interval;
 extern s32 g_system_frame_pacing_suppressed;
 extern s32 g_system_frame_pacing_timer;
 extern s32 g_system_battle_frame_hsync_count;
-extern s32 g_system_battle_frame_hsync_count_max;
 
 void system_handle_draw_sync(void);
 void system_handle_vsync(void);

@@ -51,8 +51,6 @@ void camera_zoom_handle_input(void);
 /* position */
 extern VECTOR g_camera_real_coords;
 extern SVECTOR g_camera_integer_coords;
-extern u16 g_camera_real_coords_countdown;
-extern VECTOR g_camera_real_coords_delta;
 extern VECTOR g_camera_step_vector;
 
 VECTOR* camera_real_coords_get(void);
@@ -65,9 +63,7 @@ void camera_update_vector_from_game_state(void);
 
 /* screen offset */
 extern VECTOR g_camera_screen_offset;
-extern VECTOR g_camera_screen_offset_saved;
 extern u16 g_camera_screen_offset_countdown;
-extern VECTOR g_camera_screen_offset_fixed;
 
 VECTOR* camera_screen_offset_get(void);
 void camera_screen_offset_set(const VECTOR* coords);
@@ -86,7 +82,6 @@ typedef enum camera_rotation_action {
 } camera_rotation_action_e;
 
 extern camera_rotation_action_e g_camera_rotation_action;
-extern SVECTOR g_camera_rotation_saved;
 extern u16 g_camera_rotation_countdown;
 extern s32 g_camera_rotation_increment;
 extern s32 g_camera_yaw_target;
@@ -123,7 +118,6 @@ void camera_tilt_update(void);
 extern s32 g_camera_zoom_target;
 extern VECTOR g_camera_zoom;
 extern camera_step_action_e g_camera_zoom_action;
-extern VECTOR g_camera_zoom_saved;
 extern u16 g_camera_zoom_countdown;
 extern s32 g_camera_zoom_increment;
 

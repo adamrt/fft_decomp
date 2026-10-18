@@ -38,12 +38,7 @@ extern s32 g_input_pressed_buttons;
 extern u32 g_input_released_buttons;
 extern u32 g_input_pressed_copy_0;
 extern u32 g_input_pressed_copy_1;
-extern u32 g_input_pressed_copy_2;
-extern u32 g_input_pressed_copy_3;
 extern u32 g_input_previous_copy_0;
-extern u32 g_input_previous_copy_1;
-extern u32 g_input_previous_copy_2;
-extern u32 g_input_previous_copy_3;
 extern u32 g_input_stable_frames;
 
 /* Volatile: title_update_sound_type_menu reloads it (lui/lw) for every

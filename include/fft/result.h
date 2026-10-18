@@ -171,19 +171,7 @@ typedef enum result_display_selector {
 /* Encoding in action_result_display_t.selector. */
 enum { RESULT_DISPLAY_SELECTOR_MASK = 0x1ff, RESULT_DISPLAY_MODIFIER_CRITICAL = 0x200 };
 
-extern const u8 g_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
-extern u16 g_result_display_values[ACTION_DISPLAY_VALUE_COUNT];
 extern action_display_image_rect_t g_result_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
-extern const palette_t g_result_palette;
-extern s16 g_result_digit_0_zoom_curve[21];
-extern s16 g_result_digit_0_critical_zoom_curve[21];
-extern s16 g_result_digit_1_zoom_curve[21];
-extern s16 g_result_digit_1_critical_zoom_curve[21];
-extern s16 g_result_digit_2_zoom_curve[21];
-extern s16 g_result_digit_2_critical_zoom_curve[21];
-
-/* Eight per status_changes mask byte, indexed from the byte's high bit. */
-extern u8 g_result_status_image_ids[STATUS_BYTE_COUNT][8];
 
 void result_prepare_display(unit_t* unit);
 s32 result_prepare_display_by_runtime_id(s32 runtime_id);

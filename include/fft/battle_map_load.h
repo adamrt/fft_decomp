@@ -243,14 +243,7 @@ typedef enum battle_map_gns_load_phase {
 } battle_map_gns_load_phase_e;
 
 extern s32 g_battle_map_loaded_id;
-extern char g_battle_map_directory_path[];
-extern u32 g_battle_map_gns_lba[BATTLE_MAP_ID_COUNT]; /* 0 where the map id has no file */
 extern battle_map_resource_t* g_battle_map_data_load_buffer;
-extern battle_map_resource_t* g_battle_map_mesh_load_buffer;
-extern RECT g_battle_map_vram_load_rect;
-extern s32 g_battle_map_resource_load_state; /* battle_map_resource_load_state_e */
-extern s32 g_battle_map_gns_load_phase;      /* battle_map_gns_load_phase_e */
-extern s32 g_battle_map_mesh_load_state;
 extern s32 g_battle_map_deep_dungeon_load_in_progress;
 
 s32 battle_map_load_data(s32 map_id, s32 command);
@@ -266,7 +259,6 @@ s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deploymen
 /* GNS dispatch */
 extern battle_map_gns_record_t g_battle_map_gns_records[150];
 extern u32 g_battle_map_gns_record_cursor;
-extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
 
 /* GNS records selected for loading and the ones currently loaded, indexed by
  * resource type. */

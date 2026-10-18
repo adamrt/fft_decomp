@@ -33,6 +33,53 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
+extern size32_t g_sprite_part_sizes[16];
+extern sprite_item_graphic_t g_sprite_item_graphic_data[0x92];
+
+/* Loaded and fallback SHP/SEQ data. */
+extern u8 g_sprite_shp_frame_data_buffer[];
+extern u8 g_sprite_seq_data_buffer[];
+extern u8 g_sprite_fallback_shp_frame_data[];
+extern u8 g_sprite_fallback_seq_data[];
+
+/* The SHP/SEQ loaders advance these allocation cursors by byte counts. */
+extern u8* g_sprite_shp_frame_data_cursor;
+extern u8* g_sprite_seq_data_cursor;
+
+/* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
+ * hit, and the hit a shield or Golem stops (action_play_weapon_sfx). */
+extern u8 g_action_weapon_swing_sfx_ids[];
+extern u8 g_action_weapon_hit_sfx_ids[];
+extern u8 g_action_shield_deflect_sfx_ids[];
+extern s32 g_status_bubble_delay;
+
+/* The display rotations that the upper five bits of a frame's first byte select, ONE to the turn. */
+extern u16 g_sprite_y_rotations[32];
+extern clut_t g_sprite_weapon_clut; /* the first 0x200 bytes of WEP.SPR */
+extern clut_t g_sprite_trail_clut;
+
+/* The 24 orders in which sprite_draw_unit_layers queues a unit's
+ * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
+extern s32 g_animation_layer_priorities[24][4];
+
+/* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
+ * from behind and from the front. */
+extern u8 g_animation_targeted_frame_back[];
+extern u8 g_animation_targeted_frame_front[];
+
+/* Two animation_e for each set: the one that starts a charge and
+ * the one held while the unit charges or performs; 0 for none. */
+extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
+
+/* animation_e of each item type's attack at a higher, a level and a lower target. */
+extern u8 g_animation_weapon_attacks[][3];
+
+/* Palette cycling for the cursor tile glow. */
+extern palette_t g_cursor_tile_glow_cycled_palettes[2];
+extern s32 g_cursor_tile_glow_cycle_offset;
+extern s32 g_cursor_tile_glow_cycle_timer;
+
 /* Set before allocation and read acceptance: a failed request can be skipped
  * on the next step because its ID already matches. */
 extern s32 g_sprite_last_requested_shp_id;

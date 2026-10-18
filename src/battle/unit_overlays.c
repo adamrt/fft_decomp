@@ -27,6 +27,27 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
+ * tested separately by status_bubble_determine_parameters; bubbles 8 and 11 hold 0 too,
+ * so they never show. */
+extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
+
+/* Frame counter and frame index of the selection cursor's bob animation. */
+extern s32 g_cursor_selection_bob_timer;
+extern s32 g_cursor_selection_bob_frame;
+
+/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
+ * the highlighted arrow. */
+extern u32 g_unit_facing_wait_arrow_blink_timer;
+
+/* Post-action numeric and status displays. */
+extern const u8 g_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
+extern u16 g_result_display_values[ACTION_DISPLAY_VALUE_COUNT];
+extern const palette_t g_result_palette;
+
+/* Eight per status_changes mask byte, indexed from the byte's high bit. */
+extern u8 g_result_status_image_ids[STATUS_BYTE_COUNT][8];
+
 /* Texture coordinates for the status bubble graphics, indexed by status bubble
  * id (0x800949dc/0x800949f4) and by a counter digit (0x80094a0c/0x80094a24).
  * Each table holds 24 bytes; the pairs are read together as one u/v. */

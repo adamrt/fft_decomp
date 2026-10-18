@@ -16,6 +16,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern rgb24_t g_battle_map_light_back_color_backup;
+
 static rgb24_t g_battle_map_light_back_color = { 128, 128, 128 };
 
 /* Save the map's ambient (GTE back) color for battle_map_light_restore_back_color. */

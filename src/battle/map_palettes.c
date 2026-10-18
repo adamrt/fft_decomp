@@ -24,6 +24,21 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u16 g_battle_map_palette_modified_colors[][BATTLE_MAP_CLUT_ROW_COLOR_COUNT]; /* [battle_map_clut_row_e][color] */
+
+/* Input snapshots written by the controller poll; these copies have no identified reader. */
+extern u32 g_input_pressed_copy_2;
+extern u32 g_input_pressed_copy_3;
+extern u32 g_input_previous_copy_1;
+extern u32 g_input_previous_copy_2;
+extern u32 g_input_previous_copy_3;
+
+extern const RECT g_deploy_clear_rect;
+
+/* Base colors saved by the ambient and darkness animation commands. */
+extern CVECTOR g_battle_map_ambient_base_color;
+extern CVECTOR g_battle_map_darkness_base_color;
+
 /* Runtime color fades stepped by battle_map_update_color_animations:
  * g_battle_map_background_transition, g_battle_map_ambient_transition and
  * g_battle_map_darkness_transition. Channels are 16.16 fixed point;

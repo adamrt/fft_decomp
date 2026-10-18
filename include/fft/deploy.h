@@ -11,7 +11,6 @@
 /* BATTLE's side */
 extern s32 g_deploy_skipped;
 extern s32 g_deploy_finished;
-extern const RECT g_deploy_clear_rect;
 extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
 
 s32 deploy_run_frame_and_check(u32* ot, u32 buttons);

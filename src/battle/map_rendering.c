@@ -21,6 +21,103 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Terrain lookup and tile-mark state. */
+extern s32 g_battle_map_lowest_surface_y;
+extern battle_map_tile_t* g_battle_map_tile_data_ptr;
+extern u8 g_battle_map_tile_depth;
+extern u8 g_battle_map_tile_width;
+extern u16 g_battle_map_tile_mark_x;
+extern s16 g_battle_map_tile_mark_y;
+extern s16 g_battle_map_tile_mark_modes[3]; /* battle_map_tile_mark_mode_e, one per tile mark */
+extern render_buffer_t* g_battle_map_tile_mark_color_buffer;
+
+/* Weather particles and their transforms. */
+extern weather_particle_t g_weather_particles[64];
+extern weather_particle_t g_weather_rain_splash_particles[32];
+extern RECT g_weather_drop_uv_rects[3];
+extern RECT g_weather_splash_uv_rects[4];
+extern u8 g_weather_primary_speed;
+extern u8 g_weather_fall_speed;
+extern u8 g_weather_rain_secondary_fall_speed;
+extern MATRIX g_weather_matrix;
+extern SVECTOR g_weather_rotation;
+extern VECTOR g_weather_scale;
+extern s32 g_weather_sprite_scale;
+extern VECTOR g_weather_translation;
+extern s32 g_weather_lightning_mode;
+extern weather_lightning_state_t g_weather_lightning_state;
+extern SVECTOR g_weather_timed_transform_rotation;
+
+/* Palette animation upload state. */
+extern clut_t g_battle_map_palette_animation_frames;
+extern RECT g_battle_map_vram_load_rect;
+
+/* Working, saved and interpolated lighting matrices. */
+extern MATRIX g_battle_map_light_color_matrix;
+extern MATRIX g_battle_map_light_matrix;
+extern SVECTOR g_battle_map_light_rotation;
+extern MATRIX g_battle_map_light_rotation_matrix;
+extern MATRIX g_battle_map_local_light_matrix;
+extern MATRIX g_battle_map_saved_light_color_matrix;            /* saved color matrix (command 0x5f/0x60) */
+extern MATRIX g_battle_map_saved_light_matrix;                  /* saved light matrix (command 0x5f/0x60) */
+extern u16 g_battle_map_light_transition_command;               /* pending per-frame light command, 0 when idle */
+extern u16 g_battle_map_light_transition_duration;              /* transition duration in frames */
+extern u16 g_battle_map_light_transition_frame;                 /* transition frame counter */
+extern MATRIX g_battle_map_light_transition_start_color_matrix; /* transition start color matrix */
+extern MATRIX g_battle_map_light_transition_start_light_matrix; /* transition start light matrix */
+
+/* The transition's target (command 0x66) or delta (0x68) color and light matrices. */
+extern MATRIX g_battle_map_light_transition_target_color_matrix;
+extern MATRIX g_battle_map_light_transition_target_light_matrix;
+
+/* The applied background gradient pair. The copies in battle_map_light_state_command
+ * move each color as an independent unaligned 32-bit value (lwl/lwr + swl/swr). */
+extern battle_map_background_gradient_colors_t g_battle_map_background_gradient_colors;
+extern CVECTOR g_battle_map_saved_background_gradient_first;
+extern CVECTOR g_battle_map_saved_background_gradient_second;
+extern rgb24_t g_battle_map_ambient_polygon_color;
+extern render_buffer_t* g_battle_map_ambient_restored_buffer;
+extern CVECTOR g_battle_map_current_darkness_color;
+extern u8 g_battle_map_back_color_disabled;
+extern CVECTOR g_battle_map_cached_back_color;
+extern u8 g_battle_map_polygon_flag_clear_countdown;
+
+/* Mesh animation streams and the currently selected part. */
+extern battle_map_mesh_keyframe_t g_battle_map_mesh_animation_keyframes[];
+extern battle_map_mesh_instructions_t g_battle_map_mesh_animation_instructions[9];
+extern s32 g_battle_map_mesh_part_animation_states[];
+extern battle_map_texture_animation_t g_battle_map_texture_animations[BATTLE_MAP_TEXTURE_ANIMATION_COUNT];
+extern s32 g_battle_map_primary_textured_quad_count;
+extern s32 g_battle_map_primary_textured_triangle_count;
+extern s32 g_battle_map_primary_untextured_quad_count;
+extern s32 g_battle_map_primary_untextured_triangle_count;
+extern battle_map_mesh_triangle_positions_t* g_battle_map_part_textured_triangle_positions;
+extern battle_map_mesh_quad_positions_t* g_battle_map_part_textured_quad_positions;
+extern battle_map_mesh_triangle_positions_t* g_battle_map_part_untextured_triangle_positions;
+extern battle_map_mesh_quad_positions_t* g_battle_map_part_untextured_quad_positions;
+extern battle_map_mesh_triangle_normals_t* g_battle_map_part_textured_triangle_normals;
+extern battle_map_mesh_quad_normals_t* g_battle_map_part_textured_quad_normals;
+extern s32 g_battle_map_part_textured_quad_count;
+extern s32 g_battle_map_part_textured_triangle_count;
+extern s32 g_battle_map_part_untextured_quad_count;
+extern s32 g_battle_map_part_untextured_triangle_count;
+
+/* Map projection state. */
+extern VECTOR g_battle_map_camera_zoom;
+extern SVECTOR g_battle_map_camera_rotation;
+extern CVECTOR g_battle_map_white_cvector;
+
+/* Untextured map polygons go to OT slot (otz & mask) | fixed index: {0, 4}
+ * normally, {-1, 0} while map effect data is active (command 0x88), so a
+ * non-zero mask also marks that state. */
+extern s32 g_battle_map_untextured_fixed_ot_index;
+extern s32 g_battle_map_untextured_otz_mask;
+
+/* Default vectors shared with battle_map_gns_apply_command, which emits them. */
+extern SVECTOR g_battle_map_zero_svector;
+extern VECTOR g_battle_map_unit_scale_vector;
+extern u32 g_gfx_battle_otags[2][0x180];
+
 /* The first rain endpoint reuses fall_speed as its splash phase. */
 typedef enum weather_rain_phase {
     WEATHER_RAIN_FALLING = 0,

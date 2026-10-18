@@ -7,6 +7,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Interpolation state and saved values for camera restore commands. */
+extern u16 g_camera_real_coords_countdown;
+extern VECTOR g_camera_real_coords_delta;
+extern VECTOR g_camera_screen_offset_saved;
+extern VECTOR g_camera_screen_offset_fixed;
+extern SVECTOR g_camera_rotation_saved;
+extern VECTOR g_camera_zoom_saved;
+
 static VECTOR g_camera_real_coords_saved = { 0 };
 static SVECTOR g_camera_rotation_delta = { 0 };
 static VECTOR g_camera_zoom_delta = { 0 };

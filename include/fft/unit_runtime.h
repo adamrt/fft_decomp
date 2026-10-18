@@ -420,7 +420,6 @@ s32 unit_facing_set_sixteenth_by_runtime_id(u32 runtime_id, s32 facing_nibble);
 void unit_facing_snap_all_to_quadrants(void);
 
 /* animation and display */
-
 void unit_update_and_animate_all(void);
 void unit_update_target_displays(unit_t* unit);
 void unit_update_display_by_runtime_id(s32 runtime_id);
@@ -450,7 +449,6 @@ const SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
 s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 
 /* encounters and deployment */
-
 extern s16 g_unit_entd_spritesheet_ids[];
 extern s32 g_unit_entd_spritesheet_count;
 
@@ -468,12 +466,6 @@ void unit_apply_poach_morbol_transformation(unit_t* unit);
 void unit_transform_into_morbol(unit_stats_t* unit);
 
 /* visibility and facing arrows */
-extern palette_t g_unit_facing_wait_arrow_palette;
-
-/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
- * the highlighted arrow. */
-extern u32 g_unit_facing_wait_arrow_blink_timer;
-
 void unit_hide_all_jumping(void);
 s32 unit_hide_by_runtime_id(u32 runtime_id);
 void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);

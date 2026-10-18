@@ -25,6 +25,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern animation_distortion_handler_t g_animation_distortion_handlers[ANIMATION_DISTORTION_COUNT];
+
 /* Project the center of the cursor tile, at its surface height less any water depth, to the screen
  * and store the cursor's screen x and y. `position` receives the tile point and `raised` its depth
  * point. It first cycles the tile glow palettes. */

@@ -17,14 +17,6 @@ extern DR_MODE g_fade_draw_modes[];
 extern fade_overlay_t g_fade_overlays[2];
 
 /* color tint */
-extern rgb24_t g_fade_tint;
-extern rgb24_t g_fade_tint_backup;
-extern rgb24_t g_fade_tint_target;
-extern u16 g_fade_tint_value[3];
-extern u16 g_fade_tint_step[3];
-extern u16 g_fade_tint_fade_frames;
-extern RECT g_fade_tint_tex_window;
-
 /* Overlay draw-mode primitives, one per screen polarity. */
 extern DR_MODE g_fade_tint_draw_modes[2];
 extern POLY_F4 g_fade_tint_polygons[2];

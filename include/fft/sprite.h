@@ -85,9 +85,6 @@ typedef struct sprite_weapon_shp {
 } sprite_weapon_shp_t;
 typedef char sprite_weapon_shp_size_must_be_2112[sizeof(sprite_weapon_shp_t) == 2112 ? 1 : -1];
 
-/* The display rotations that the upper five bits of a frame's first byte select, ONE to the turn. */
-extern u16 g_sprite_y_rotations[32];
-
 /* sequence tables */
 /* Common header of an unpacked unit SEQ table. The pointer tail has 0x100
  * entries in a native table and 0x40 in an EVTCHR slot. */
@@ -195,17 +192,9 @@ typedef struct sprite_single_part_display {
 } sprite_single_part_display_t;
 typedef char sprite_single_part_display_size_must_be_22[sizeof(sprite_single_part_display_t) == 22 ? 1 : -1];
 
-extern MATRIX g_sprite_display_matrix;
-
 /* g_sprite_prim_pool is a ring of 256 POLY_FT4; g_sprite_prim_index is the index of the last one taken, and
  * g_sprite_prim_frame_start_index its value when the frame began. */
 extern POLY_FT4* g_sprite_prim_pool;
-extern s16 g_sprite_prim_index;
-extern s16 g_sprite_prim_frame_start_index;
-
-/* Cleared with the sprite counters at render init; nothing reads them. */
-extern s16 g_sprite_unread_1;
-extern s16 g_sprite_unread_2;
 
 s16 sprite_take_prim(void);
 void sprite_display_construct_polygon_data(
@@ -301,8 +290,6 @@ typedef char sprite_other_palettes_size_must_be_672[sizeof(sprite_other_palettes
 
 extern sprite_other_palettes_t g_sprite_other_palettes;
 extern palette_t g_sprite_shadow_palette;
-extern clut_t g_sprite_weapon_clut; /* the first 0x200 bytes of WEP.SPR */
-extern clut_t g_sprite_trail_clut;
 
 void sprite_palette_reset_by_runtime_id(u32 runtime_id);
 void sprite_palette_restore_all(void);

@@ -20,6 +20,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Per-digit scale curves for ordinary and critical action results. */
+extern s16 g_result_digit_0_zoom_curve[21];
+extern s16 g_result_digit_0_critical_zoom_curve[21];
+extern s16 g_result_digit_1_zoom_curve[21];
+extern s16 g_result_digit_1_critical_zoom_curve[21];
+extern s16 g_result_digit_2_zoom_curve[21];
+extern s16 g_result_digit_2_critical_zoom_curve[21];
+
 /* Animate and queue the three numeric post-action display sprites.
  *
  * Over the first 21 frames each digit sprite scales by its own zoom curve (the

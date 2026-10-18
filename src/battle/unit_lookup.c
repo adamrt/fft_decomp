@@ -38,6 +38,23 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Sprite loading and rendering state. */
+extern u8 g_sprite_sheet_ids_by_vram_slot[];
+extern file_extent_t g_sprite_sp2_files[];
+extern file_extent_t g_sprite_worker8_sp2_files[];
+extern palette_t g_status_bubble_palette;
+extern MATRIX g_sprite_display_matrix;
+extern s16 g_sprite_prim_index;
+extern s16 g_sprite_prim_frame_start_index;
+
+/* Cleared with the sprite counters at render init; nothing reads them. */
+extern s16 g_sprite_unread_1;
+extern s16 g_sprite_unread_2;
+
+extern s32 g_system_battle_frame_hsync_count_max;
+extern palette_t g_cursor_map_selection_palette;
+extern palette_t g_unit_facing_wait_arrow_palette;
+
 /* Private cursor state for the SP2 nibble decoder. */
 extern const u8* g_sprite_compressed_data;
 extern s32 g_sprite_compressed_nibble_phase;

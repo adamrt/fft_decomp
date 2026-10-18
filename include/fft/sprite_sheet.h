@@ -297,9 +297,6 @@ extern sprite_native_unit_seq_table_t g_sprite_boss_seq_tables;
 extern sprite_wep_eff_graphics_t g_sprite_weapon_graphics[2];
 extern sprite_wep_eff_graphics_t g_sprite_effect_graphics[1];
 
-/* Sprite part width/height in 8-pixel tiles, indexed by SHP size bits. */
-extern size32_t g_sprite_part_sizes[16];
-
 sprite_unit_shp_frame_tables_t* sprite_sheet_get_unit_shp(u32 spritesheet_id);
 sprite_unit_seq_table_t* sprite_sheet_get_unit_seq(u32 spritesheet_id);
 sprite_weapon_shp_t* sprite_sheet_get_weapon_shp(u32 spritesheet_id);
@@ -313,8 +310,6 @@ typedef struct sprite_item_graphic {
     u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for BATTLE_MAP_CLUT_ROW_ITEM_A, low for _B */
     u8 texture_row; /* 0x01; top of the graphic on its texture page, in steps of 8 pixels */
 } sprite_item_graphic_t;
-
-extern sprite_item_graphic_t g_sprite_item_graphic_data[0x92];
 
 /* VRAM slots */
 /* Texture pages stored in a sprite display record's tpage. */
@@ -356,7 +351,6 @@ enum {
 };
 
 extern sprite_sheet_slot_t g_sprite_sheet_slots[SPRITE_SHEET_SLOT_COUNT];
-extern u8 g_sprite_sheet_ids_by_vram_slot[];
 
 s32 sprite_sheet_claim_slot(s16 spritesheet_id);
 s32 sprite_sheet_get_slot_by_battle_id(u32 battle_id);
@@ -480,18 +474,7 @@ typedef struct sprite_load_state {
 typedef char sprite_load_state_size_must_be_16[sizeof(sprite_load_state_t) == 16 ? 1 : -1];
 
 extern sprite_load_state_t g_sprite_load_state;
-extern file_extent_t g_sprite_sp2_files[];
-extern file_extent_t g_sprite_worker8_sp2_files[];
 extern u32* g_sprite_sp2_data;
-extern u8 g_sprite_shp_frame_data_buffer[];
-extern u8 g_sprite_seq_data_buffer[];
-extern u8 g_sprite_fallback_shp_frame_data[];
-extern u8 g_sprite_fallback_seq_data[];
-
-/* Byte-granular bump-allocation cursors: the consuming files do raw byte arithmetic on these, so the element type
- * must stay u8. */
-extern u8* g_sprite_shp_frame_data_cursor;
-extern u8* g_sprite_seq_data_cursor;
 
 void sprite_load_reset_state(void);
 void sprite_load_clear_state(s32 unused_map_id);
@@ -509,7 +492,5 @@ s32 sprite_load_step_queued(void);
 s32 sprite_open_sp2_file(unit_t* unit, u32* destination);
 void sprite_decompress_attack_image(const u8* source, u8* destination);
 s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot);
-
-extern s32 g_sprite_unit_graphics_load_complete;
 
 #endif

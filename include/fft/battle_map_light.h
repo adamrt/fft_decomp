@@ -25,23 +25,6 @@ typedef enum battle_map_light_matrix_command {
     BATTLE_MAP_LIGHT_MATRIX_COMMAND_STEP_DELTA = 0x69
 } battle_map_light_matrix_command_e;
 
-extern MATRIX g_battle_map_light_color_matrix;
-extern MATRIX g_battle_map_light_matrix;
-extern SVECTOR g_battle_map_light_rotation;
-extern MATRIX g_battle_map_light_rotation_matrix;
-extern MATRIX g_battle_map_local_light_matrix;
-extern MATRIX g_battle_map_saved_light_color_matrix;            /* saved color matrix (command 0x5f/0x60) */
-extern MATRIX g_battle_map_saved_light_matrix;                  /* saved light matrix (command 0x5f/0x60) */
-extern u16 g_battle_map_light_transition_command;               /* pending per-frame light command, 0 when idle */
-extern u16 g_battle_map_light_transition_duration;              /* transition duration in frames */
-extern u16 g_battle_map_light_transition_frame;                 /* transition frame counter */
-extern MATRIX g_battle_map_light_transition_start_color_matrix; /* transition start color matrix */
-extern MATRIX g_battle_map_light_transition_start_light_matrix; /* transition start light matrix */
-
-/* The transition's target (command 0x66) or delta (0x68) color and light matrices. */
-extern MATRIX g_battle_map_light_transition_target_color_matrix;
-extern MATRIX g_battle_map_light_transition_target_light_matrix;
-
 MATRIX* battle_map_light_matrix_command(
     battle_map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration);
 
@@ -60,17 +43,6 @@ typedef enum battle_map_light_command {
     BATTLE_MAP_LIGHT_COMMAND_RESET_DARKNESS_COLOR = 0x64,
     BATTLE_MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR = 0x65
 } battle_map_light_command_e;
-
-/* The applied background gradient pair. The copies in battle_map_light_state_command
- * move each color as an independent unaligned 32-bit value (lwl/lwr + swl/swr). */
-extern battle_map_background_gradient_colors_t g_battle_map_background_gradient_colors;
-extern CVECTOR g_battle_map_saved_background_gradient_first;
-extern CVECTOR g_battle_map_saved_background_gradient_second;
-extern CVECTOR g_battle_map_ambient_base_color;
-extern rgb24_t g_battle_map_ambient_polygon_color;
-extern render_buffer_t* g_battle_map_ambient_restored_buffer;
-extern CVECTOR g_battle_map_darkness_base_color;
-extern CVECTOR g_battle_map_current_darkness_color;
 
 void* battle_map_light_state_command(battle_map_light_command_e command, void* data);
 void battle_map_background_init(void);
@@ -93,9 +65,6 @@ typedef enum battle_map_light_back_color_command {
     BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE = 11,
     BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
 } battle_map_light_back_color_command_e;
-extern u8 g_battle_map_back_color_disabled;
-extern CVECTOR g_battle_map_cached_back_color;
-extern rgb24_t g_battle_map_light_back_color_backup;
 
 void battle_map_light_copy_back_color(void);
 void battle_map_light_restore_back_color(void);

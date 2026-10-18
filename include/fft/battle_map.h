@@ -161,10 +161,6 @@ typedef enum battle_map_id {
 
 extern s32 g_battle_map_id;
 
-/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
- * one at rand() / 0x2000. */
-extern u8 g_battle_map_random_battle_music_tracks[];
-
 void battle_map_stop_animations(void);
 s32 battle_map_stop_clut_cycles_and_weather_sfx(void);
 
@@ -366,10 +362,6 @@ extern u8 g_battle_map_terrain_depth;
  * (layer * 256 + y * width + x). Callers that walk it with raw byte offsets
  * cast to u8*; the record shape is battle_map_tile_t. */
 extern battle_map_tile_t g_battle_map_tile_data[BATTLE_MAP_TILE_COUNT];
-extern s32 g_battle_map_lowest_surface_y;
-extern battle_map_tile_t* g_battle_map_tile_data_ptr;
-extern u8 g_battle_map_tile_depth;
-extern u8 g_battle_map_tile_width;
 
 battle_map_tile_t* battle_map_tile_get_pointer(s32 x, s32 y, u32 layer);
 s32 battle_map_tile_get_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
@@ -448,11 +440,6 @@ typedef enum battle_map_tile_mark_mode {
     BATTLE_MAP_TILE_MARK_RANGE_SHOWN = 11,
     BATTLE_MAP_TILE_MARK_TARGETS_SHOWN = 12
 } battle_map_tile_mark_mode_e;
-
-extern u16 g_battle_map_tile_mark_x;
-extern s16 g_battle_map_tile_mark_y;
-extern s16 g_battle_map_tile_mark_modes[3]; /* battle_map_tile_mark_mode_e, one per tile mark */
-extern render_buffer_t* g_battle_map_tile_mark_color_buffer;
 
 /* background */
 /* Map backgrounds use two four-byte runtime color slots. The fourth byte

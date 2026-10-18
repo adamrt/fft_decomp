@@ -82,20 +82,6 @@ typedef struct weather_particle {
     s16 fall_speed;
 } weather_particle_t;
 
-extern weather_particle_t g_weather_particles[64];
-extern weather_particle_t g_weather_rain_splash_particles[32];
-extern palette_t g_weather_particle_palette;
-extern RECT g_weather_drop_uv_rects[3];
-extern RECT g_weather_splash_uv_rects[4];
-extern u8 g_weather_primary_speed;
-extern u8 g_weather_fall_speed;
-extern u8 g_weather_rain_secondary_fall_speed;
-extern MATRIX g_weather_matrix;
-extern SVECTOR g_weather_rotation;
-extern VECTOR g_weather_scale;
-extern s32 g_weather_sprite_scale;
-extern VECTOR g_weather_translation;
-
 /* lightning */
 /* Values of g_weather_lightning_mode. */
 typedef enum weather_lightning_mode {
@@ -116,16 +102,11 @@ typedef struct weather_lightning_state {
 } weather_lightning_state_t;
 typedef char weather_lightning_state_size_must_be_148[(sizeof(weather_lightning_state_t) == 148) ? 1 : -1];
 
-extern s32 g_weather_lightning_mode;
-extern weather_lightning_state_t g_weather_lightning_state;
-
 /* timed particle transform */
 /* Frame, duration and rotation of E458's timed particle transform
  * (BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
 extern s32 g_weather_timed_transform_frame;
 extern s32 g_weather_timed_transform_duration;
-extern SVECTOR g_weather_timed_transform_rotation;
-extern s32 g_weather_timed_transform_unread; /* weather_set_timed_transform_duration stores 0x95; nothing reads it */
 
 void weather_set_timed_transform_duration(s32 id, s32 value);
 

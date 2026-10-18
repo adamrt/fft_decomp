@@ -118,8 +118,6 @@ typedef struct battle_map_palette_state {
 typedef char battle_map_palette_state_size_must_be_34084[(sizeof(battle_map_palette_state_t) == 34084) ? 1 : -1];
 
 extern battle_map_palette_state_t g_battle_map_palette_state;
-extern u16 g_battle_map_palette_modified_colors[][BATTLE_MAP_CLUT_ROW_COLOR_COUNT]; /* [battle_map_clut_row_e][color] */
-extern clut_t g_battle_map_palette_animation_frames;
 
 void battle_map_palette_init_state(void);
 void battle_map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);

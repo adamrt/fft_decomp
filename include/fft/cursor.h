@@ -40,14 +40,6 @@ void cursor_project_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR
 
 /* drawing */
 extern palette_t g_cursor_tile_glow_palettes[2];
-extern palette_t g_cursor_tile_glow_cycled_palettes[2];
-extern s32 g_cursor_tile_glow_cycle_offset;
-extern s32 g_cursor_tile_glow_cycle_timer;
-extern palette_t g_cursor_map_selection_palette;
-
-/* Frame counter and frame index of the selection cursor's bob animation. */
-extern s32 g_cursor_selection_bob_timer;
-extern s32 g_cursor_selection_bob_frame;
 
 void cursor_draw_with_tile_glow(void);
 s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad);

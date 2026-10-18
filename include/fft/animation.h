@@ -125,15 +125,6 @@ typedef struct animation_state {
 } animation_state_t;
 typedef char animation_state_size_must_be_48[sizeof(animation_state_t) == 48 ? 1 : -1];
 
-/* The 24 orders in which sprite_draw_unit_layers queues a unit's
- * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
-extern s32 g_animation_layer_priorities[24][4];
-
-/* By sprite_shp_type_e: the frame a unit is left on when its sequence ends or its attack image is taken away, seen
- * from behind and from the front. */
-extern u8 g_animation_targeted_frame_back[];
-extern u8 g_animation_targeted_frame_front[];
-
 /* unit animations */
 /* Unit animation ids: the ones the code and the two animation tables of
  * BATTLE.BIN select by number. Animation n is sequences 2n (seen from the
@@ -257,13 +248,6 @@ enum { ANIMATION_ABILITY_COUNT = 454, ANIMATION_CHARGE_SET_COUNT = 20, ANIMATION
 /* Selectors in attack_animation; other values are animation_e IDs. */
 enum { ANIMATION_ATTACK_USE_WEAPON = 0, ANIMATION_ATTACK_USE_ITEM = 1 };
 
-/* Two animation_e for each set: the one that starts a charge and
- * the one held while the unit charges or performs; 0 for none. */
-extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
-
-/* animation_e of each item type's attack at a higher, a level and a lower target. */
-extern u8 g_animation_weapon_attacks[][3];
-
 void animation_start_ability_charge(unit_t* unit);
 void animation_start_ability_charge_hold(unit_t* unit);
 void animation_select_attack_for_ability(unit_t* attacker, unit_t* target);
@@ -302,8 +286,6 @@ enum {
 /* The dispatcher ignores the result and the handlers supply no value. The s32
  * callback shape preserves the pulse and teleport handlers' instruction scheduling. */
 typedef s32 (*animation_distortion_handler_t)(unit_t* unit);
-
-extern animation_distortion_handler_t g_animation_distortion_handlers[ANIMATION_DISTORTION_COUNT];
 
 void animation_distortion_dispatch(unit_t* unit);
 s32 animation_distortion_scale_pulse(unit_t* unit);

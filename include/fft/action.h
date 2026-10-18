@@ -333,12 +333,6 @@ void action_message_show_for_caster(void);
 s32 action_message_show_next(void);
 
 /* weapon sounds */
-/* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
- * hit, and the hit a shield or Golem stops (action_play_weapon_sfx). */
-extern u8 g_action_weapon_swing_sfx_ids[];
-extern u8 g_action_weapon_hit_sfx_ids[];
-extern u8 g_action_shield_deflect_sfx_ids[];
-
 void action_play_weapon_sfx(struct unit* unit, s32 hit);
 
 #endif

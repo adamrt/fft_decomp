@@ -14,6 +14,16 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+extern s32 g_weather_timed_transform_unread; /* weather_set_timed_transform_duration stores 0x95; nothing reads it */
+
+/* Pending map resources and the loader phases. */
+extern char g_battle_map_directory_path[];
+extern battle_map_resource_t* g_battle_map_mesh_load_buffer;
+extern s32 g_battle_map_resource_load_state; /* battle_map_resource_load_state_e */
+extern s32 g_battle_map_gns_load_phase;      /* battle_map_gns_load_phase_e */
+extern s32 g_battle_map_mesh_load_state;
+extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
+
 static render_buffer_t* g_battle_map_mesh_last_render_buffer = 0;
 static s32 g_battle_map_textured_triangle_render_record_count = 0;
 static s32 g_battle_map_textured_quad_render_record_count = 0;
