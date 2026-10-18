@@ -59,7 +59,6 @@ extern s32 g_overlay_companion_data_file_sizes[];
 extern u8* g_overlay_companion_data_file_buffer;
 
 /* Menu threads and panel rendering. */
-extern char g_menu_wait_for_file_allocation_message[];
 extern s32 g_menu_building_thread_started;
 extern u8 g_menu_idle_action_window_x[];
 extern u8 g_command_restore_unit_id;
@@ -95,7 +94,7 @@ static void overlay_reserve_high(u32 size) {
         }
         thread_yield();
         if (g_debug_font_print_enabled != 0) {
-            FntPrint(g_menu_wait_for_file_allocation_message);
+            FntPrint("WAIT FOR FILEALLOCATION\n");
         }
     }
 }

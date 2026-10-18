@@ -69,7 +69,6 @@ extern u16 g_menu_vsync_interval_forced;
 extern u16 g_menu_saved_vsync_interval;
 extern u8 g_menu_panel_fade_modes[];
 extern u8 g_text_glyph_bitmaps[];
-extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
 
 /* Provisional camera interpolation key: frame time and target value. */
 typedef struct camera_key {
@@ -1041,7 +1040,7 @@ void script_opcode_49_add_unit_start_thread(void) {
                     break;
                 }
                 if (g_debug_display_enabled != 0) {
-                    FntPrint(g_text_reading_character_message, slot);
+                    FntPrint("reading charactor%d \n", slot);
                 }
             }
         }
