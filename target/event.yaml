@@ -948,7 +948,7 @@ functions:
   - {addr: 0x801c6510, size: 84, name: menu_set_texture_page, hash: c033f758528baa4e, unit: drawing_commands}
   - {addr: 0x801c6564, size: 24, name: menu_set_draw_priority, hash: 866b1fe58b80beba, unit: drawing_commands}
   - {addr: 0x801c657c, size: 400, name: menu_draw_decimal_number, hash: 86de3729d1341209, unit: drawing_commands}
-  - {addr: 0x801c670c, size: 652, name: menu_update_and_draw_sliding_cursor, hash: d2bf3388d465f9d3, source: src/lib/menu/menu_update_and_draw_sliding_cursor.c}
+  - {addr: 0x801c670c, size: 652, name: menu_update_and_draw_sliding_cursor, hash: d2bf3388d465f9d3, unit: drawing_commands}
   - {addr: 0x801c6998, size: 44, name: gfx_set_draw_color, hash: 56f9f1312189e13e, unit: draw_state}
   - {addr: 0x801c69c4, size: 16, name: gfx_set_otag_index, hash: e32615753d53f066, unit: draw_state}
   - {addr: 0x801c69d4, size: 220, name: menu_set_palette_mode, hash: 54dc2b565735014d, unit: draw_state}
