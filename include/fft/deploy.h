@@ -10,6 +10,9 @@
 
 /* BATTLE's side */
 extern s32 g_deploy_skipped;
+
+/* Coordinates are ready, or deployment was skipped: releases map-init step 8.
+ * The deployment thread can still be displaying its title and fading out. */
 extern s32 g_deploy_finished;
 extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
 
@@ -24,7 +27,8 @@ s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index);
 void deploy_init_units_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1);
 
 /* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
- * starts the map-load thread when deployment is skipped (returns 1). */
+ * starts the thread that releases the deployment gate when skipped (returns 1).
+ * The battle loop drives map loading in either case. */
 s32 deploy_open(void);
 
 /* squads and roster */

@@ -251,9 +251,9 @@ s32 effect_secondary_set_teleport_by_runtime_id(u32 runtime_id) {
     return 0;
 }
 
-/* Release step 8 of battle_map_step_deployment_init_sequence, which waits for this flag
- * before setting up deployment graphics. The deployment screen sets it after placing units, and
- * battle_map_skip_deployment_thread when deployment is skipped. */
+/* Release step 8 of battle_map_step_deployment_init_sequence to build the deployed units
+ * and queue their graphics. The deployment screen sets this after choosing coordinates,
+ * before its title and fade finish; battle_map_skip_deployment_thread sets it when skipped. */
 void deploy_mark_finished(void) {
     g_deploy_finished = 1;
 }

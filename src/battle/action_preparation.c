@@ -2072,12 +2072,12 @@ s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index) {
 /* Initialize deployed units from map coordinates and return a failure bitmask.
  *
  * Normal deployment fills slots 0x10..0x14; red team debug deployment fills
- * slots 0..4 and clears the remaining ENTD slots. Bit i of the result is set
- * when deployment row i names no party member. A unit whose identity is not a
- * Ramza (1..3) gets a generated unit id, from 0x78 upward (from 0xfe downward
- * in the debug mode). Load failures report the PARTY_UNIT_LOAD and
- * PARTY_PLACEMENT battle load exceptions plus the slot. The target reloads each row from g_unit_deployed_coords
- * at its distinct uses.
+ * slots 0..4 and clears the remaining ENTD slots. Bit i marks a load or
+ * placement failure for row i; an empty row leaves its bit clear. A unit whose
+ * identity is not a Ramza (1..3) gets a generated unit id, from 0x78 upward
+ * (from 0xfe downward in debug mode). The two failure paths report
+ * PARTY_UNIT_LOAD or PARTY_PLACEMENT plus the slot. The target reloads each
+ * row from g_unit_deployed_coords at its distinct uses.
  */
 static s32 deploy_init_units(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
     s32 failures = 0;

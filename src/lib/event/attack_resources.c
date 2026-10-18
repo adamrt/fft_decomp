@@ -145,7 +145,8 @@ static void unit_reset_animation_states(void);
 
 /* Load ATTACK.OUT (unless preloaded) with its scenario conditions and graphics, reset menu
  * and unit state and, for a tutorial, fix the game options. Then start the deployment
- * screen and return 0, or start the map-load thread and return 1 when deployment is skipped. */
+ * screen and return 0, or start the thread that releases the deployment gate and return 1
+ * when deployment is skipped. The battle loop drives map loading in either case. */
 s32 deploy_open(void) {
     s32 result;
     s32 return_value;
