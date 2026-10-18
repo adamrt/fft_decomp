@@ -645,8 +645,9 @@ extern menu_sort_orders_t g_menu_sort_orders;
 /* Packed sort-key orders ending in -1. WORLD slot 0 points to Formation's
  * formation order (formation_sort_key_e); EQUIP slot 0 is null. Slots 1..5
  * in both programs point to the five item-category orders (item_sort_key_e).
- * WORLD adds the fixed stock and best-fit orders at slots 6 and 7. */
-extern s8* g_item_type_order_lists[];
+ * WORLD adds the fixed stock and best-fit orders at slots 6 and 7. The directory
+ * is fixed; item_store_type_order edits the lists it selects. */
+extern s8* const g_item_type_order_lists[];
 
 void item_init_order_tables(void);
 s32 item_get_ranking_value(s32 item_id);

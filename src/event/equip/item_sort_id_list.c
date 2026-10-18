@@ -3,6 +3,17 @@
 #include "fft/item.h"
 #include "psx/types.h"
 
+/* EQUIP uses the five editable item-category orders in resident MAIN storage.
+ * Slot 0 is unused; WORLD has a separate directory with Formation and fixed orders. */
+s8* const g_item_type_order_lists[6] = {
+    0,
+    g_menu_sort_orders.weapons_and_shields,
+    g_menu_sort_orders.headgear,
+    g_menu_sort_orders.body_armor,
+    g_menu_sort_orders.accessories,
+    g_menu_sort_orders.other_items,
+};
+
 /* Sort a -1 terminated item list in place (EQUIP's body).
  *
  * Entries whose id (low 10 bits) is 0 or >= ITEM_ID_END are removed, then the

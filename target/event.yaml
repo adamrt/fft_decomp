@@ -1346,6 +1346,7 @@ units:
   - {name: item_actions, source: src/event/equip/item_actions.c}
   - {name: item_menu, source: src/event/equip/item_menu.c}
   - {name: item_order, source: src/lib/menu/item_order.c}
+  - {name: item_sort_id_list, source: src/event/equip/item_sort_id_list.c, rodata: [{addr: 0x801cfb44, size: 24, hash: a787439a26721345}]}
   - {name: menu_input, source: src/event/equip/menu_input.c}
   - {name: menu_list, source: src/event/equip/menu_list.c, data: [{addr: 0x801d8700, size: 100, hash: fb40569aa0008599}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801e930c, size: 64, hash: f5a5fd42d16a2030}]}
@@ -1436,7 +1437,7 @@ functions:
   - {addr: 0x801c6ca0, size: 276, name: equipment_load_unit, hash: e23d868f93ea3956, unit: unit_loadout}
   - {addr: 0x801c6db4, size: 600, name: equipment_commit_loadout, hash: 83c2cd7ae34a8020, unit: unit_loadout}
   - {addr: 0x801c700c, size: 236, name: item_get_ranking_value, hash: 182f2f01a7256fdd, source: src/lib/menu/item_get_ranking_value.c}
-  - {addr: 0x801c70f8, size: 1492, name: item_sort_id_list, hash: 34f1458a5685682d}
+  - {addr: 0x801c70f8, size: 1492, name: item_sort_id_list, hash: 34f1458a5685682d, unit: item_sort_id_list}
   - {addr: 0x801c76cc, size: 88, name: item_load_type_order, hash: 680fa5ae6e9a89b3, unit: item_order}
   - {addr: 0x801c7724, size: 96, name: item_store_type_order, hash: 8b8d7d3c8a2297aa, unit: item_order}
   - {addr: 0x801c7784, size: 88, name: item_store_category_list, hash: 48c40016f726fb75, unit: item_order}
