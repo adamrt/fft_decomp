@@ -15,8 +15,8 @@ units:
   - {name: action_outcomes, source: src/battle/action_outcomes.c, data: [{addr: 0x80193868, size: 16, hash: 374708fff7719dd5}]}
   - {name: action_preparation, source: src/battle/action_preparation.c}
   - {name: action_resolution, source: src/battle/action_resolution.c, data: [{addr: 0x8018f614, size: 400, hash: c0407e5e2ef637ad}]}
-  - {name: ai_commands, source: src/battle/ai_commands.c, rodata: [{addr: 0x80193d70, size: 8, hash: 14bca7e1bfd5b8a9}], data: [{addr: 0x8019f37c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f380, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f384, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f388, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f38c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f390, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f394, size: 4, hash: df3f619804a92fdb}]}
-  - {name: ai_origins, source: src/battle/ai_origins.c, rodata: [{addr: 0x80193dd4, size: 12, hash: a1dd1afa9d59d502}], data: [{addr: 0x8019f308, size: 80, hash: 296c781af2dde231}]}
+  - {name: ai_commands, source: src/battle/ai_commands.c, data: [{addr: 0x8019f37c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f380, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f384, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f388, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f38c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f390, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f394, size: 4, hash: df3f619804a92fdb}]}
+  - {name: ai_origins, source: src/battle/ai_origins.c, data: [{addr: 0x8019f308, size: 80, hash: 296c781af2dde231}]}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x80169040, size: 336, hash: 2fa2faff14b7708a}]}
   - {name: buffer_allocator, source: src/lib/menu/buffer_allocator.c}
   - {name: camera, source: src/battle/camera.c, data: [{addr: 0x800a1c5c, size: 16, hash: 374708fff7719dd5}, {addr: 0x800a1c6c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a1c74, size: 16, hash: 374708fff7719dd5}]}
@@ -1664,7 +1664,7 @@ functions:
   - {addr: 0x80197f14, size: 224, name: ai_select_autobattle, hash: 1b787e2aabf6f112, unit: ai_commands}
   - {addr: 0x80197ff4, size: 740, name: ai_select_fight_for_life, hash: 5efd952843a1ed9d, unit: ai_commands}
   - {addr: 0x801982d8, size: 532, name: ai_move_build_targeted, hash: 11514b19ca676f6f, unit: ai_commands}
-  - {addr: 0x801984ec, size: 816, name: ai_select_protect_allies, hash: 3abfe68bf5f52864, unit: ai_commands, rodata: [{addr: 0x80193d78, size: 32, hash: f02144ac62822b6a}]}
+  - {addr: 0x801984ec, size: 816, name: ai_select_protect_allies, hash: 3abfe68bf5f52864, unit: ai_commands, rodata: [{addr: 0x80193d70, size: 40, hash: dd5f883baac73329}]}
   - {addr: 0x8019881c, size: 744, name: ai_status_evaluate_cancellation, hash: e61912ee894643b8, unit: ai_commands}
   - {addr: 0x80198b04, size: 636, name: ai_target_select_in_peril, hash: 7557cdfd5f6cd148, unit: ai_commands}
   - {addr: 0x80198d80, size: 112, name: ai_status_can_cancel_current, hash: 3867525bcba2fffb, unit: ai_commands}
@@ -1703,7 +1703,7 @@ functions:
   - {addr: 0x8019b754, size: 100, name: ai_origin_can_use_elemental, hash: e60c20b40acae19a, unit: ai_origins}
   - {addr: 0x8019b7b8, size: 872, name: ai_origin_evaluate_reflected, hash: fdc930fa98af6e86, unit: ai_origins}
   - {addr: 0x8019bb20, size: 156, name: ai_update_tile_pickup, hash: 50d76cc59e51cd64, unit: ai_origins}
-  - {addr: 0x8019bbbc, size: 880, name: ai_math_evaluate_targets, hash: 8689a189a4a77c50, unit: ai_origins}
+  - {addr: 0x8019bbbc, size: 880, name: ai_math_evaluate_targets, hash: 8689a189a4a77c50, unit: ai_origins, rodata: [{addr: 0x80193dd4, size: 12, hash: a1dd1afa9d59d502}]}
   - {addr: 0x8019bf2c, size: 736, name: ai_origin_evaluate_reachable, hash: bcbfefa0160f251c, unit: ai_origins}
   - {addr: 0x8019c20c, size: 116, name: ai_origin_finalize_destination, hash: 6e3db359eeeddbd7, unit: ai_origins}
   - {addr: 0x8019c280, size: 340, name: ai_origin_take_next, hash: 73020a4fc24dfbde, unit: ai_origins}
@@ -2754,8 +2754,6 @@ data:
   - {addr: 0x80193924, name: g_ai_unit_snapshot_storage}
   - {addr: 0x80193d24, name: g_ai_mimic_attacker_backup}
   - {addr: 0x80193d44, name: g_action_actor_used_ability_id}
-  - {addr: 0x80193d70, name: g_ai_protect_allies_status_ids}
-  - {addr: 0x80193dd4, name: g_ai_math_extra_known_ability_ids}
   - {addr: 0x8019f2f8, name: g_ai_origin_range_row_masks}
   - {addr: 0x8019f308, name: g_ai_status_priority_weights}
   - {addr: 0x8019f358, name: g_ai_facing_tile_offsets}

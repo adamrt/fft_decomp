@@ -1,4 +1,4 @@
-/* AI command building and action selection, with the recovery status table. */
+/* AI command building and action selection. */
 
 #include "fft/ability.h"
 #include "fft/ai.h"
@@ -34,7 +34,6 @@ typedef enum ai_destination_order {
 
 typedef enum ai_rank_order { AI_RANK_BELOW = 0, AI_RANK_EQUAL = 1, AI_RANK_ABOVE = 2 } ai_rank_order_e;
 
-extern u8 g_ai_protect_allies_status_ids[AI_PROTECT_ALLIES_STATUS_COUNT];
 extern ai_command_t g_ai_command_history[2]; /* the last two commands built, newest last */
 
 static s32 ai_ability_add_usable_from_skillset(s32 unit_id, s32 skillset, s32 count);
@@ -1096,12 +1095,6 @@ copy_status:
         sizeof(ai->considered_ability.parameters.fields.status_infliction));
 }
 
-/* g_ai_protect_allies_status_ids: read-only table of this object (8 bytes at 0x80193d70), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_ai_protect_allies_status_ids_rodata[2] = {
-    0x000d0802,
-    0x00000000,
-};
 static s32 g_ai_protect_allies_status_retry = 0; /* skip status pass after one failed attempt */
 static s32 g_ai_protect_allies_status_index = 0; /* status-list cursor preserved for resume */
 /* Cancellation-search accounting survives suspension. */
@@ -2561,12 +2554,11 @@ static s32 ai_move_build_targeted(void) {
 static s32 ai_select_protect_allies(void) {
     ai_data_t* ai = &g_ai_data;
     unit_stats_t* acting = g_ai_data.acting_unit;
-    u8 statuses[AI_PROTECT_ALLIES_STATUS_COUNT];
+    u8 statuses[AI_PROTECT_ALLIES_STATUS_COUNT] = { STATUS_ID_DEAD, STATUS_ID_PETRIFY, STATUS_ID_BLOOD_SUCK };
     s32 target;
     u32 status;
     s32 result;
 
-    memcpy(statuses, g_ai_protect_allies_status_ids, sizeof(statuses));
     target = acting->auto_battle_target;
     if (g_ai_data.resume_pending) {
         /* Resume: each phase re-enters the step that suspended. */

@@ -1,4 +1,4 @@
-/* AI cast origins and aim tiles, target evaluation and action simulation, with the math ability table. */
+/* AI cast origins and aim tiles, target evaluation and action simulation. */
 
 #include "fft/ability.h"
 #include "fft/action.h"
@@ -42,7 +42,6 @@ extern u16 g_ai_origin_range_row_masks[];
 extern s32 g_ai_origin_self_target_stage;
 extern s32 g_ai_math_ability_index;
 extern u16* g_ai_math_ability_list; /* borrowed from main's temporary skillset list */
-extern u8 g_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
 extern s32 g_ai_math_skillset_id;
 extern s32 g_ai_math_skillset_index;
 extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets;
@@ -439,14 +438,6 @@ s32 ai_ability_evaluate_outcome(void) {
     return 0;
 }
 
-/* g_ai_math_extra_known_ability_ids: read-only table of this object (12 bytes at 0x80193dd4), kept byte for byte
- * until it is written as its typed definition. */
-static const u32 g_ai_math_extra_known_ability_ids_rodata[3] = {
-    0x10050201,
-    0x18151411,
-    0x00002a19,
-};
-
 /*
  * Evaluate self-target alternatives from the actor and candidate coordinates.
  *
@@ -732,12 +723,14 @@ void ai_update_tile_pickup(void) {
  * indices resume a suspended priority check; -1 suspends and 0 ends this pass.
  */
 static s32 ai_math_evaluate_targets(void) {
-    u8 special_abilities[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
+    u8 special_abilities[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT] = { ABILITY_ID_WHITE_MAGIC_CURE,
+        ABILITY_ID_WHITE_MAGIC_CURE_2, ABILITY_ID_WHITE_MAGIC_RAISE, ABILITY_ID_BLACK_MAGIC_FIRE,
+        ABILITY_ID_BLACK_MAGIC_FIRE_2, ABILITY_ID_BLACK_MAGIC_BOLT, ABILITY_ID_BLACK_MAGIC_BOLT_2,
+        ABILITY_ID_BLACK_MAGIC_ICE, ABILITY_ID_BLACK_MAGIC_ICE_2, ABILITY_ID_TIME_MAGIC_DEMI };
     ai_data_t* ai = &g_ai_data;
     s32 i;
     s32 unit;
 
-    memcpy(special_abilities, g_ai_math_extra_known_ability_ids, sizeof(special_abilities));
     if (g_ai_data.resume_pending)
         goto evaluate_priority; /* resume inside the multiplier loop */
     if (!ai_origin_is_allowed(&ai->acting_unit_coords))
