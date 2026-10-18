@@ -26,11 +26,11 @@ units:
   - {name: suzuki_sfx, source: src/lib/suzuki/sfx.c}
   - {name: suzuki_smd_channel_commands, source: src/lib/suzuki/smd_channel_commands.c}
   - {name: suzuki_smd_controls, source: src/lib/suzuki/smd_controls.c}
-  - {name: suzuki_smd_interpreter, source: src/lib/suzuki/smd_interpreter.c}
+  - {name: suzuki_smd_interpreter, source: src/lib/suzuki/smd_interpreter.c, data: [{addr: 0x80028b0c, size: 512, hash: 0c5df638b3c3dc59}, {addr: 0x80028d0c, size: 128, hash: 80655c8c168e28ca}, {addr: 0x80028d8c, size: 228, hash: 6e8fc6334088202d}, {addr: 0x80028e70, size: 228, hash: ecbd552b54c02ff6}]}
   - {name: suzuki_smd_lifecycle, source: src/lib/suzuki/smd_lifecycle.c}
-  - {name: suzuki_smd_modulation_commands, source: src/lib/suzuki/smd_modulation_commands.c}
+  - {name: suzuki_smd_modulation_commands, source: src/lib/suzuki/smd_modulation_commands.c, data: [{addr: 0x80028f54, size: 64, hash: def4d0f65924066c}]}
   - {name: suzuki_smd_records, source: src/lib/suzuki/smd_records.c}
-  - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c}
+  - {name: suzuki_smd_voices, source: src/lib/suzuki/smd_voices.c, data: [{addr: 0x80028fe8, size: 120, hash: b76b6c92808b2147}, {addr: 0x80029060, size: 120, hash: 30da9f7074541cf1}, {addr: 0x800290d8, size: 6144, hash: d3f07a5746f7a2fb}]}
   - {name: suzuki_tick, source: src/lib/suzuki/tick.c}
   - {name: system_callbacks, source: src/main/system_callbacks.c}
   - {name: system_handlers, source: src/main/system_handlers.c}

@@ -1,15 +1,164 @@
-/* SMD instruction dispatch, note timing, repeats and sound-effect commands. */
+/* Decode music and sound-effect sequences a channel at a time. Notes select a
+ * semitone and one of nineteen durations; commands set voice attributes, repeat
+ * sections or trigger other sounds. Look-ahead follows repeats without changing
+ * playback state so the current note can be tied to the next one. */
 
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
-/* 0x80028d8c; ticks per note byte. Each of the twelve semitones has the same
- * 19 lengths: 0 (a length byte follows), then 192 (a whole note), 144, 96,
- * 72, 64, 48, 36, 32, 24, 18, 16, 12, 9, 8, 6, 4, 3 and 2. */
-extern u8 g_suzuki_smd_note_durations[228];
-extern u8 g_suzuki_smd_note_semitones[228];                     /* 0x80028e70; note byte / 19 */
-extern suzuki_smd_handler_t g_suzuki_smd_opcode_handlers[0x80]; /* 0x80028b0c; opcodes 0x80-0xff */
-extern u8 g_suzuki_smd_opcode_lengths[0x80];                    /* 0x80028d0c; opcode plus parameters */
+/* Opcodes 0x80 through 0xff. */
+static suzuki_smd_handler_t g_suzuki_smd_opcode_handlers[128] = {
+    suzuki_smd_rest,                    /* 0x80 */
+    suzuki_smd_fermata,                 /* 0x81 */
+    suzuki_smd_no_instruction,          /* 0x82 */
+    suzuki_smd_no_instruction,          /* 0x83 */
+    suzuki_smd_no_instruction,          /* 0x84 */
+    suzuki_smd_no_instruction,          /* 0x85 */
+    suzuki_smd_no_instruction,          /* 0x86 */
+    suzuki_smd_no_instruction,          /* 0x87 */
+    suzuki_smd_no_instruction,          /* 0x88 */
+    suzuki_smd_no_instruction,          /* 0x89 */
+    suzuki_smd_opcode_8a,               /* 0x8a */
+    suzuki_smd_no_instruction,          /* 0x8b */
+    suzuki_smd_no_instruction,          /* 0x8c */
+    suzuki_smd_loop_point_if_selected,  /* 0x8d */
+    suzuki_smd_opcode_8e,               /* 0x8e */
+    suzuki_smd_opcode_8f,               /* 0x8f */
+    suzuki_smd_end_bar,                 /* 0x90 */
+    suzuki_smd_loop,                    /* 0x91 */
+    suzuki_smd_no_instruction,          /* 0x92 */
+    suzuki_smd_no_instruction,          /* 0x93 */
+    suzuki_smd_octave,                  /* 0x94 */
+    suzuki_smd_raise_octave,            /* 0x95 */
+    suzuki_smd_lower_octave,            /* 0x96 */
+    suzuki_smd_time_signature,          /* 0x97 */
+    suzuki_smd_repeat,                  /* 0x98 */
+    suzuki_smd_coda,                    /* 0x99 */
+    suzuki_smd_to_coda,                 /* 0x9a */
+    suzuki_smd_no_instruction,          /* 0x9b */
+    suzuki_smd_play_sfx,                /* 0x9c */
+    suzuki_smd_stop_sfx,                /* 0x9d */
+    suzuki_smd_play_vfx,                /* 0x9e */
+    suzuki_smd_no_instruction,          /* 0x9f */
+    suzuki_smd_tempo,                   /* 0xa0 */
+    suzuki_smd_accelerando,             /* 0xa1 */
+    suzuki_smd_tempo_ramp,              /* 0xa2 */
+    suzuki_smd_no_instruction,          /* 0xa3 */
+    suzuki_smd_opcode_a4,               /* 0xa4 */
+    suzuki_smd_opcode_a5,               /* 0xa5 */
+    suzuki_smd_master_volume,           /* 0xa6 */
+    suzuki_smd_master_volume_ramp,      /* 0xa7 */
+    suzuki_smd_no_instruction,          /* 0xa8 */
+    suzuki_smd_gate_time,               /* 0xa9 */
+    suzuki_smd_set_voice,               /* 0xaa */
+    suzuki_smd_no_instruction,          /* 0xab */
+    suzuki_smd_instrument,              /* 0xac */
+    suzuki_smd_length_adjust,           /* 0xad */
+    suzuki_smd_opcode_ae,               /* 0xae */
+    suzuki_smd_opcode_af,               /* 0xaf */
+    suzuki_smd_slur_on,                 /* 0xb0 */
+    suzuki_smd_slur_off,                /* 0xb1 */
+    suzuki_smd_enable_lfo,              /* 0xb2 */
+    suzuki_smd_disable_lfo,             /* 0xb3 */
+    suzuki_smd_enable_noise,            /* 0xb4 */
+    suzuki_smd_increase_noise,          /* 0xb5 */
+    suzuki_smd_turn_on_noise,           /* 0xb6 */
+    suzuki_smd_disable_noise,           /* 0xb7 */
+    suzuki_smd_acoustics,               /* 0xb8 */
+    suzuki_smd_no_instruction,          /* 0xb9 */
+    suzuki_smd_enable_reverb,           /* 0xba */
+    suzuki_smd_disable_reverb,          /* 0xbb */
+    suzuki_smd_no_instruction,          /* 0xbc */
+    suzuki_smd_no_instruction,          /* 0xbd */
+    suzuki_smd_no_instruction,          /* 0xbe */
+    suzuki_smd_no_instruction,          /* 0xbf */
+    suzuki_smd_naturale,                /* 0xc0 */
+    suzuki_smd_envelope_shape,          /* 0xc1 */
+    suzuki_smd_attack_time,             /* 0xc2 */
+    suzuki_smd_decay_time,              /* 0xc3 */
+    suzuki_smd_sustain_time,            /* 0xc4 */
+    suzuki_smd_release,                 /* 0xc5 */
+    suzuki_smd_sustain_level,           /* 0xc6 */
+    suzuki_smd_envelope_tail,           /* 0xc7 */
+    suzuki_smd_attack_mode,             /* 0xc8 */
+    suzuki_smd_sustain_mode,            /* 0xc9 */
+    suzuki_smd_release_mode,            /* 0xca */
+    suzuki_smd_no_instruction,          /* 0xcb */
+    suzuki_smd_no_instruction,          /* 0xcc */
+    suzuki_smd_no_instruction,          /* 0xcd */
+    suzuki_smd_no_instruction,          /* 0xce */
+    suzuki_smd_no_instruction,          /* 0xcf */
+    suzuki_smd_pitch_offset,            /* 0xd0 */
+    suzuki_smd_add_pitch_offset_coarse, /* 0xd1 */
+    suzuki_smd_add_pitch_offset_fine,   /* 0xd2 */
+    suzuki_smd_add_pitch_offset_wide,   /* 0xd3 */
+    suzuki_smd_pitch_slide,             /* 0xd4 */
+    suzuki_smd_toggle_pitch_slide_hold, /* 0xd5 */
+    suzuki_smd_portamento,              /* 0xd6 */
+    suzuki_smd_pitch_shift_fade_in,     /* 0xd7 */
+    suzuki_smd_pitch_shift,             /* 0xd8 */
+    suzuki_smd_pitch_shift_waveform,    /* 0xd9 */
+    suzuki_smd_pitch_shift_on,          /* 0xda */
+    suzuki_smd_pitch_shift_off,         /* 0xdb */
+    suzuki_smd_pitch_slide_off,         /* 0xdc */
+    suzuki_smd_no_instruction,          /* 0xdd */
+    suzuki_smd_no_instruction,          /* 0xde */
+    suzuki_smd_no_instruction,          /* 0xdf */
+    suzuki_smd_dynamic,                 /* 0xe0 */
+    suzuki_smd_crescendo,               /* 0xe1 */
+    suzuki_smd_fermata_ramp,            /* 0xe2 */
+    suzuki_smd_tremolo_fade_in,         /* 0xe3 */
+    suzuki_smd_tremolo,                 /* 0xe4 */
+    suzuki_smd_tremolo_waveform,        /* 0xe5 */
+    suzuki_smd_tremolo_on,              /* 0xe6 */
+    suzuki_smd_tremolo_off,             /* 0xe7 */
+    suzuki_smd_balance,                 /* 0xe8 */
+    suzuki_smd_shift_balance,           /* 0xe9 */
+    suzuki_smd_balance_ramp,            /* 0xea */
+    suzuki_smd_pan_lfo_fade_in,         /* 0xeb */
+    suzuki_smd_pan_lfo,                 /* 0xec */
+    suzuki_smd_pan_lfo_waveform,        /* 0xed */
+    suzuki_smd_pan_lfo_on,              /* 0xee */
+    suzuki_smd_pan_lfo_off,             /* 0xef */
+    suzuki_smd_modulator_select,        /* 0xf0 */
+    suzuki_smd_modulator_set_depth,     /* 0xf1 */
+    suzuki_smd_modulator_set_fade_in,   /* 0xf2 */
+    suzuki_smd_no_instruction,          /* 0xf3 */
+    suzuki_smd_no_instruction,          /* 0xf4 */
+    suzuki_smd_modulator_enable_mask,   /* 0xf5 */
+    suzuki_smd_modulator_enable,        /* 0xf6 */
+    suzuki_smd_modulator_disable,       /* 0xf7 */
+    suzuki_smd_no_instruction,          /* 0xf8 */
+    suzuki_smd_no_instruction,          /* 0xf9 */
+    suzuki_smd_no_instruction,          /* 0xfa */
+    suzuki_smd_no_instruction,          /* 0xfb */
+    suzuki_smd_no_instruction,          /* 0xfc */
+    suzuki_smd_scale_tempo,             /* 0xfd */
+    suzuki_smd_select_sound_font,       /* 0xfe */
+    suzuki_smd_end_track,               /* 0xff */
+};
+
+/* Bytes skipped by look-ahead, including the opcode. Stop SFX retains the
+ * original extra parameter byte; its handler consumes only two. */
+static u8 g_suzuki_smd_opcode_lengths[128] = { 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 4, 1, 1, 1, 0, 0, 2, 1, 1, 3,
+    2, 1, 1, 0, 4, 4, 4, 0, 2, 2, 3, 0, 2, 2, 2, 3, 0, 2, 2, 0, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 4, 0, 1, 1, 0, 0, 0,
+    0, 1, 4, 2, 2, 2, 2, 2, 3, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 1, 2, 2, 4, 4, 1, 1, 1, 0, 0, 0, 2, 2, 3, 2, 4, 4,
+    1, 1, 2, 2, 3, 2, 4, 4, 1, 1, 4, 4, 3, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 1 };
+
+/* The nineteen note lengths repeat for each semitone. Zero reads an explicit
+ * duration from the stream; 192 ticks is a whole note. */
+#define NOTE_DURATIONS 0, 192, 144, 96, 72, 64, 48, 36, 32, 24, 18, 16, 12, 9, 8, 6, 4, 3, 2
+static u8 g_suzuki_smd_note_durations[228]
+    = { NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS,
+          NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS };
+#undef NOTE_DURATIONS
+
+/* Each run of nineteen note bytes names the same semitone. */
+#define NOTE_SEMITONE(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
+static u8 g_suzuki_smd_note_semitones[228] = { NOTE_SEMITONE(0), NOTE_SEMITONE(1), NOTE_SEMITONE(2), NOTE_SEMITONE(3),
+    NOTE_SEMITONE(4), NOTE_SEMITONE(5), NOTE_SEMITONE(6), NOTE_SEMITONE(7), NOTE_SEMITONE(8), NOTE_SEMITONE(9),
+    NOTE_SEMITONE(10), NOTE_SEMITONE(11) };
+#undef NOTE_SEMITONE
 
 /* Reads the SMD events of channel_count consecutive channels, called once
  * per tick.

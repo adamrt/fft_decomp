@@ -1,10 +1,30 @@
-/* Sequencer instrument setup, voice updates, pitch conversion and modulation waveforms. */
+/* Apply sequencer channels to SPU voices: instrument attributes, stereo volume,
+ * note pitch and key-on/off masks. The waveform routines drive vibrato, tremolo
+ * and pan modulation for both music and sound effects. */
 
 #include "fft/suzuki.h"
 #include "psx/types.h"
 
 /* Ordinary driver-status view; the transfer wait keeps its measured volatile view. */
 extern s16 g_suzuki_sound_driver_flags;
+
+/* Key / 12 and key % 12 for keys 0 through 116. Both original 120-byte table
+ * views end in three zero bytes; they do not continue either formula. */
+#define KEY_OCTAVE(n) n, n, n, n, n, n, n, n, n, n, n, n
+static u8 g_suzuki_smd_key_octaves[120] = { KEY_OCTAVE(0), KEY_OCTAVE(1), KEY_OCTAVE(2), KEY_OCTAVE(3), KEY_OCTAVE(4),
+    KEY_OCTAVE(5), KEY_OCTAVE(6), KEY_OCTAVE(7), KEY_OCTAVE(8), 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 0 };
+#undef KEY_OCTAVE
+
+#define KEY_SEMITONES 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+static u8 g_suzuki_smd_key_semitones[120] = { KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES,
+    KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0 };
+#undef KEY_SEMITONES
+
+/* Octave-six SPU pitch at 1/256-semitone intervals. The build generates
+ * round(8192 * 2^(i / 3072)); the original runtime only indexes this table. */
+static u16 g_suzuki_smd_pitch_table[12 * 256] = {
+#include "suzuki_pitch.inc"
+};
 
 /* Loads instrument entry n of the channel's waveset into the channel:
  * sample and loop addresses, ADSR rates and modes, sustain level and
@@ -155,13 +175,6 @@ void suzuki_smd_update_voices(suzuki_music_t* music, suzuki_music_channel_t* cha
     music->key_on_mask |= key_on & allowed;
     music->key_off_mask |= key_off & allowed;
 }
-
-extern u8 g_suzuki_smd_key_octaves[120];   /* 0x80028fe8; key / 12 */
-extern u8 g_suzuki_smd_key_semitones[120]; /* 0x80029060; key % 12 */
-
-/* 0x800290d8: SPU pitch for semitone s and fine step f at index (s << 8) + f
- * (octave 6 reference); suzuki_smd_calculate_pitch indexes it flat. */
-extern u16 g_suzuki_smd_pitch_table[12 * 256];
 
 /* Converts a key in 1/256 semitones (key number << 8 | fine step) to an SPU
  * pitch: the octave-6 table value for the semitone and fine step, shifted by

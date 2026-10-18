@@ -6,7 +6,25 @@
 
 typedef s32 (*suzuki_modulator_step_t)(suzuki_modulator_t* modulator);
 
-extern suzuki_modulator_step_t g_suzuki_smd_modulator_waveforms[16]; /* 0x80028f54 */
+/* Waveform selector in the low four bits of an SMD modulation operand. */
+static suzuki_modulator_step_t g_suzuki_smd_modulator_waveforms[16] = {
+    suzuki_smd_modulator_step_square,            /* 0x0 */
+    suzuki_smd_modulator_step_alternating,       /* 0x1 */
+    suzuki_smd_modulator_step_triangle,          /* 0x2 */
+    suzuki_smd_modulator_step_triangle_centered, /* 0x3 */
+    suzuki_smd_modulator_step_sawtooth,          /* 0x4 */
+    suzuki_smd_modulator_step_sawtooth,          /* 0x5 */
+    suzuki_smd_modulator_step_random,            /* 0x6 */
+    suzuki_smd_modulator_step_random_bipolar,    /* 0x7 */
+    suzuki_smd_modulator_deactivate,             /* 0x8 */
+    suzuki_smd_modulator_deactivate,             /* 0x9 */
+    suzuki_smd_modulator_deactivate,             /* 0xa */
+    suzuki_smd_modulator_deactivate,             /* 0xb */
+    suzuki_smd_modulator_deactivate,             /* 0xc */
+    suzuki_smd_modulator_deactivate,             /* 0xd */
+    suzuki_smd_modulator_deactivate,             /* 0xe */
+    suzuki_smd_modulator_deactivate,             /* 0xf */
+};
 
 /* Vibrato, tremolo and pan-LFO operands with a start delay. */
 typedef struct suzuki_smd_modulator_parameters {
