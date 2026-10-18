@@ -29,7 +29,7 @@ units:
   - {name: effect_heap, source: src/battle/effect_heap.c}
   - {name: effect_renderer, source: src/battle/effect_renderer.c, data: [{addr: 0x801b69b0, size: 12, hash: 87026771f70658d8}, {addr: 0x801b69bc, size: 16, hash: d9c265329e338700}]}
   - {name: effect_script, source: src/battle/effect_script.c, data: [{addr: 0x801b53e8, size: 4096, hash: c0ef3379bda21409}]}
-  - {name: effect_system, source: src/battle/effect_system.c}
+  - {name: effect_system, source: src/battle/effect_system.c, data: [{addr: 0x801b8564, size: 782, hash: 16fe36168f4498dd}]}
   - {name: event_frame, source: src/battle/event_frame.c, data: [{addr: 0x801696e4, size: 20, hash: 34d5f02d6411f13b}]}
   - {name: event_resources, source: src/lib/event/event_resources.c, data: [{addr: 0x80165ebc, size: 16, hash: 6176d19a13b8eb27}]}
   - {name: event_unit_lookup, source: src/lib/event/event_unit_lookup.c}
