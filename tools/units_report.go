@@ -1,5 +1,5 @@
-// units_report.go renders the translation-unit reconstruction as YAML (one
-// document per module) and a Markdown summary.
+// units_report.go renders translation-unit candidates as YAML (one document
+// per module) and a Markdown summary.
 package main
 
 import (
@@ -253,7 +253,7 @@ func unitsModuleReport(an *unitModuleAnalysis, options unitsOptions) unitsReport
 
 func renderUnitsYAML(report unitsReport) ([]byte, error) {
 	var out bytes.Buffer
-	out.WriteString("# Reconstructed translation units: candidates for review, derived from link order.\n")
+	out.WriteString("# Translation-unit candidates: inferred from configured layout and current source references.\n")
 	encoder := yaml.NewEncoder(&out)
 	encoder.SetIndent(2)
 	if err := encoder.Encode(report); err != nil {
@@ -268,14 +268,20 @@ func renderUnitsYAML(report unitsReport) ([]byte, error) {
 // renderUnitsMarkdown summarizes the selected modules for reading.
 func renderUnitsMarkdown(reports []unitsReport) []byte {
 	var out strings.Builder
-	out.WriteString("# Reconstructed translation units\n\n")
-	out.WriteString("Candidates only. Each original source file became a contiguous run of functions and a\n")
-	out.WriteString("contiguous chunk of each data section, so boundaries are inferred from where the\n")
-	out.WriteString("BATTLE/WORLD/overlay object sequences diverge, from compiler-profile changes, from data\n")
-	out.WriteString("referenced by neighboring functions only. Name prefixes describe the candidates, but\n")
-	out.WriteString("are not boundary evidence. Confidence is the\n")
-	out.WriteString("weaker of a unit's two edges; `certain` edges are hand-written assembly, library code\n")
-	out.WriteString("and group boundaries. Review the evidence before treating any unit as an original file.\n\n")
+	out.WriteString("# Translation-unit candidates\n\n")
+	out.WriteString("Candidates only. The analysis models units as contiguous function runs and data ranges.\n")
+	out.WriteString("It uses configured layout and compiler profiles, cross-module alignment by current\n")
+	out.WriteString("source paths, hashes and names, and references in the current function bodies. Unmatched\n")
+	out.WriteString("runs and data-distance changes can also come from source edits, conditional membership,\n")
+	out.WriteString("resized tables or alignment. They do not prove original source-file boundaries.\n\n")
+	out.WriteString("Confidence describes the weaker candidate edge, with group edges rated high. Required\n")
+	out.WriteString("cuts (`certain` internally) follow configured library/assembly transitions, profile\n")
+	out.WriteString("changes or jump-table alignment constraints; strong mode also takes alignment and\n")
+	out.WriteString("data-distance signals. An unsplit span is not proof that its functions shared one file.\n\n")
+	out.WriteString("Data section labels are estimates from address ranges and spacing; nearby references\n")
+	out.WriteString("do not establish static linkage. Function-reference counts include callbacks. Name\n")
+	out.WriteString("prefixes describe candidates but do not affect boundary scores. Review each candidate\n")
+	out.WriteString("against its original-byte contracts before reorganizing source.\n\n")
 	for _, report := range reports {
 		fmt.Fprintf(&out, "## %s (%s)\n\n", report.Module, report.File)
 		fmt.Fprintf(&out, "%d functions, %d data rows, %d groups, %d units (high %d, medium %d, low %d).\n\n",

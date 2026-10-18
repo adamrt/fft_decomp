@@ -6,10 +6,10 @@ import (
 	"sort"
 )
 
-// Jump tables are emitted with `.align 3`, so within one object every jump
-// table sits at the same address modulo 8; the linker places objects'
-// read-only sections at 4-byte alignment, so two tables at different
-// residues came from different objects. That is a visible file boundary.
+// With compiler-emitted `.align 3` jump tables, one read-only section
+// contribution gives every table the same linked address modulo 8. Different
+// residues conflict with that single-contribution model; they do not identify
+// the original source files.
 
 // jumpTableAlignment returns addr mod 8 of the function's first read-only
 // range whose every word is an address inside the function, or -1.
@@ -34,9 +34,9 @@ func jumpTableAlignment(image []byte, m *moduleSpec, f *functionSpec) int {
 	return -1
 }
 
-// rodataAlignmentEvidence adds boundary evidence between consecutive
-// jump-table-bearing functions whose tables differ in alignment: a certain
-// object boundary when they are adjacent, otherwise +2 on every cut between.
+// rodataAlignmentEvidence applies the jump-table alignment constraint to
+// consecutive table-bearing functions: a required cut when adjacent,
+// otherwise +2 on every cut between them.
 func (an *unitModuleAnalysis) rodataAlignmentEvidence(group *unitGroup) {
 	previous := -1
 	for i := group.first; i <= group.last; i++ {
@@ -45,7 +45,7 @@ func (an *unitModuleAnalysis) rodataAlignmentEvidence(group *unitGroup) {
 			continue
 		}
 		if previous >= 0 && an.functions[previous].jumpAlign != fn.jumpAlign {
-			detail := fmt.Sprintf("jump tables of %s (addr mod 8 = %d) and %s (%d) lie in different objects",
+			detail := fmt.Sprintf("jump tables of %s (addr mod 8 = %d) and %s (%d) require different read-only alignment bases",
 				an.functions[previous].f.Name, an.functions[previous].jumpAlign, fn.f.Name, fn.jumpAlign)
 			if i == previous+1 {
 				an.evidence[previous] = append(an.evidence[previous], unitEvidence{"rodata_object", 6, detail})
@@ -59,8 +59,8 @@ func (an *unitModuleAnalysis) rodataAlignmentEvidence(group *unitGroup) {
 	}
 }
 
-// unitJumpTableConflict names two members whose jump tables could not have
-// shared one object, or returns "".
+// unitJumpTableConflict names two members incompatible with one read-only
+// alignment base for 8-byte-aligned jump tables, or returns "".
 func unitJumpTableConflict(image []byte, m *moduleSpec, members []*functionSpec) string {
 	type aligned struct {
 		name  string
@@ -75,7 +75,7 @@ func unitJumpTableConflict(image []byte, m *moduleSpec, members []*functionSpec)
 	sort.SliceStable(seen, func(i, j int) bool { return false })
 	for _, item := range seen[min(1, len(seen)):] {
 		if item.align != seen[0].align {
-			return fmt.Sprintf("jump tables of %s (addr mod 8 = %d) and %s (%d) were separate objects", seen[0].name, seen[0].align, item.name, item.align)
+			return fmt.Sprintf("jump tables of %s (addr mod 8 = %d) and %s (%d) cannot share one read-only alignment base", seen[0].name, seen[0].align, item.name, item.align)
 		}
 	}
 	return ""

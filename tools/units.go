@@ -1,11 +1,8 @@
-// units.go reconstructs the original translation units from link order. GCC
-// 2.6 emitted the functions of a source file in source order and Psylink
-// concatenated objects per section, so every original file is a contiguous run
-// of functions and a contiguous chunk of each data section. The command scores
-// candidate boundaries from where other modules carry a different object
-// sequence, from compiler-profile changes, from data that only neighboring
-// functions reference. It is analysis only: it writes
-// reports under build/ and never touches target/ or src/.
+// units.go proposes translation-unit boundaries using contiguous function runs
+// and data ranges as a model. It scores cross-module sequence differences,
+// configured compiler profiles and references in the current sources. These
+// signals do not uniquely identify original files. The command writes reports
+// under build/ and never touches target/ or src/.
 package main
 
 import (
@@ -22,14 +19,14 @@ import (
 type unitsOptions struct {
 	minConfidence string
 	minScore      int    // when set, a cut needs at least this score (or certainty) to split
-	evidence      string // when set, only "required" (certain) or "strong" (certain plus exact cross-module and data-shift) cuts split
+	evidence      string // when set, only required cuts, or required plus alignment/data-shift signals, split
 	maxOwners     int
 	outDir        string
 }
 
-// strongCutKinds are the boundary signals with an exact position that the
-// binary itself provides, beyond the certain ones: an object one linked
-// program carries and another lacks, a reorder, and a data-distance shift.
+// strongCutKinds adds unmatched or reordered alignment runs and data-distance
+// shifts to the cuts required by the analysis. Each identifies a candidate cut,
+// but source edits and changed data sizes can produce the same signals.
 var strongCutKinds = map[string]bool{"alignment_divergence": true, "alignment_reorder": true, "data_shift": true}
 
 // evidenceEligible reports whether a cut qualifies under an evidence mode.
@@ -129,7 +126,7 @@ type unitCut struct {
 	after      int // boundary between functions after and after+1
 	score      int
 	confidence string
-	certain    bool
+	certain    bool // forced by the analysis, not proof of a historical source-file boundary
 	evidence   []unitEvidence
 }
 
@@ -191,7 +188,7 @@ func (p project) unitsCommand(args []string) error {
 	minConfidence := flags.String("min-confidence", "low", "lowest boundary confidence eligible to split units: low, medium or high")
 	maxOwners := flags.Int("max-owners", 3, "data referenced by more functions than this is widely shared")
 	minScore := flags.Int("min-score", 0, "when set, a cut needs at least this score (or certainty) to split a unit")
-	evidence := flags.String("evidence", "", "when set, only required (certain) or strong (certain plus exact cross-module and data-shift) cuts split units")
+	evidence := flags.String("evidence", "", "when set, split only at required cuts, or at required plus alignment/data-shift signals (strong)")
 	out := flags.String("out", "build/analysis/units", "report directory under build/")
 	if err := flags.Parse(args); err != nil {
 		return err
@@ -397,10 +394,9 @@ func gapCoverage(covers []unitCover, start, end uint32) (bool, map[string]bool) 
 	return at >= end, kinds
 }
 
-// unitGroups splits the address-ordered functions where code stops being
-// contiguous: a gap holding data starts a new linker group, while a gap that
-// is only hand-written code or library code stays inside the group and marks
-// a certain object boundary.
+// unitGroups splits address-ordered functions at gaps not covered by configured
+// regions. Covered gaps stay in the group; declared hand-written or library
+// regions add required cuts. An uncovered gap need not be data.
 func unitGroups(m *moduleSpec, functions []unitFunction, evidence map[int][]unitEvidence) []unitGroup {
 	covers := coveringIntervals(m)
 	var groups []unitGroup
@@ -427,10 +423,10 @@ func unitGroups(m *moduleSpec, functions []unitFunction, evidence map[int][]unit
 		}
 		if same {
 			if functions[i-1].library != functions[i].library {
-				evidence[i-1] = append(evidence[i-1], unitEvidence{"library", 5, "library code meets game code"})
+				evidence[i-1] = append(evidence[i-1], unitEvidence{"library", 5, "configured library code meets non-library code"})
 			}
 			if functions[i-1].asm != functions[i].asm {
-				evidence[i-1] = append(evidence[i-1], unitEvidence{"language_change", 5, "assembly source meets C source"})
+				evidence[i-1] = append(evidence[i-1], unitEvidence{"language_change", 5, "current assembly source meets C source"})
 			}
 			groups[len(groups)-1].last = i
 			continue
@@ -546,9 +542,9 @@ func ownersOf(an *unitModuleAnalysis, resolver symbolResolver, maxOwners int) {
 	}
 }
 
-// inferSections partitions a group's data rows: read-only tables, hand-written
-// blocks, initialized data, small data and bss, splitting the data class
-// where the spacing between rows changes between tables and scalars.
+// inferSections estimates data sections from configured addresses and row
+// spacing. The small-data class is a spacing heuristic, not evidence of
+// gp-relative access or an original section declaration.
 func inferSections(an *unitModuleAnalysis, group *unitGroup) {
 	byKind := map[string][]int{}
 	for _, rowIndex := range group.rows {
@@ -655,8 +651,8 @@ func (an *unitModuleAnalysis) profileEvidence(group *unitGroup) {
 					kind, weight = kind+"_interval", 1
 					detail += fmt.Sprintf(" (somewhere across %d cuts)", cuts)
 				} else if prior.base != fn.base {
-					// Adjacent functions built with different optimization,
-					// assembler or small-data settings were different compiles.
+					// Different configured optimization, assembler or small-data
+					// settings require separate compiles under the current contracts.
 					kind, weight = "profile_object", 6
 				}
 				for cut := previous; cut < i; cut++ {
@@ -783,8 +779,9 @@ func (an *unitModuleAnalysis) ownershipEvidence(group *unitGroup, after int) []u
 	return evidence
 }
 
-// callEvidence scores one cut by the calls around it: calls on each side but
-// none across the cut suggest two files; several across it suggest one.
+// callEvidence scores nearby references to function names, including callback
+// references. References confined to each side support a cut; crossing
+// references oppose it. Neither pattern establishes an original file.
 func (an *unitModuleAnalysis) callEvidence(group *unitGroup, after int) []unitEvidence {
 	const window = 20
 	crossing, left, right := 0, 0, 0
@@ -815,9 +812,9 @@ func (an *unitModuleAnalysis) callEvidence(group *unitGroup, after int) []unitEv
 	}
 	switch {
 	case crossing >= 3:
-		return []unitEvidence{{"call_crossing", -2, fmt.Sprintf("%d nearby calls cross the cut", crossing)}}
+		return []unitEvidence{{"call_crossing", -2, fmt.Sprintf("%d nearby references to function names cross the cut", crossing)}}
 	case crossing == 0 && left >= 2 && right >= 2:
-		return []unitEvidence{{"call_locality", 1, fmt.Sprintf("%d nearby calls stay before the cut and %d after it, none cross", left, right)}}
+		return []unitEvidence{{"call_locality", 1, fmt.Sprintf("%d nearby references to function names stay before the cut and %d after it, none cross", left, right)}}
 	}
 	return nil
 }
@@ -855,8 +852,8 @@ func (an *unitModuleAnalysis) formUnits(group *unitGroup, options unitsOptions) 
 		forced[k] = cut.certain
 		eligible[k] = cut.certain || (cut.score > 0 && unitConfidenceRank[cut.confidence] >= minimum && cut.score >= options.minScore)
 		if options.evidence != "" {
-			// Evidence mode: every qualifying cut is taken and nothing
-			// else splits, so units are the maximal spans the binary allows.
+			// Evidence mode takes every qualifying cut and no others;
+			// each unit spans the remaining interval under that policy.
 			forced[k] = cut.evidenceEligible(options.evidence)
 			eligible[k] = forced[k]
 		}

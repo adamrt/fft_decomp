@@ -224,10 +224,9 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	for i := 1; i < len(unit.rodata); i++ {
 		previous := unit.rodata[i-1]
 		end := previous.Addr + uint32(previous.Size)
-		// A hole shorter than 8 bytes is the compiler's own padding (a jump
-		// table aligns to 8 within its object; a literal may leave a
-		// 4-byte hole): the compile must reproduce it, which the section
-		// comparison verifies by total length and per-range hashes.
+		// Permit short alignment gaps between declared spans. Section length
+		// and per-range hashes check their placement, not the gap bytes;
+		// the build preserves those bytes from the original image.
 		padding := unit.rodata[i].Addr >= end && unit.rodata[i].Addr-end < 8
 		if unit.rodata[i].Addr != end && !padding {
 			return nil, fmt.Errorf("%s: rodata ranges are not contiguous at 0x%08x", spec.name, unit.rodata[i].Addr)
@@ -238,7 +237,8 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 
 // unitInstance resolves one of the module's configured units: its members
 // are the rows naming it, in address order, and they must follow one
-// another, share a profile class and declare contiguous read-only data.
+// another, share a profile class and declare read-only data with at most
+// short alignment gaps between its spans.
 func (m *moduleSpec) unitInstance(config *projectConfig, name string) (*unitInstance, error) {
 	unit := m.unit(name)
 	if unit == nil {
@@ -778,8 +778,9 @@ func (p project) unitCheckCommand(args []string) error {
 }
 
 // compareUnitRanges checks a compiled section against the ranges the unit
-// declares for it: the section spans exactly from the first range to the end
-// of the last, and every range hashes to its original bytes.
+// declares for it. Every range must hash to its original bytes; interior gap
+// bytes are not compared. The section spans the first range through the last,
+// allowing a short zero-filled alignment tail for .data.
 func compareUnitRanges(section string, ranges []rodataSpec, data []byte) []string {
 	if len(ranges) == 0 {
 		return nil

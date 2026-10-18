@@ -69,8 +69,8 @@ type functionSpec struct {
 	Rodata       []rodataSpec
 }
 
-// unitDef is one original translation unit: a merged source, compiled once
-// per module, whose public functions are the member rows naming it, in
+// unitDef is one reconstructed translation unit: a merged source, compiled once
+// per module, whose configured functions are the member rows naming it, in
 // address order.
 type unitDef struct {
 	Name    string

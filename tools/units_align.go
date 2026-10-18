@@ -1,9 +1,7 @@
-// units_align.go lines up the function sequences of two modules to find the
-// objects they share and where their object sequences diverge. Shared source
-// files, identical code and equal names anchor the alignment; the longest
-// chain of anchors in the same order on both sides is the shared object
-// sequence, and the functions one module carries between two anchors that
-// the other lacks are an object of its own.
+// units_align.go compares the function sequences of two modules. Unique
+// current source paths, code hashes and names anchor an order-preserving
+// alignment. Unmatched and reordered runs suggest candidate boundaries, but
+// can also reflect edits or conditional function membership within one source.
 package main
 
 import (
@@ -92,17 +90,17 @@ func alignModulePair(an, bn *unitModuleAnalysis) {
 		alignment.Runs++
 		switch {
 		case gb == 0:
-			an.addAlignmentEvidence(previous.a, 3, fmt.Sprintf("%s has no counterpart for the next %d functions", bn.m.ID, ga))
-			an.addAlignmentEvidence(pair.a-1, 3, fmt.Sprintf("%s matches again after %d functions without counterpart", bn.m.ID, ga))
-			bn.addAlignmentEvidence(previous.b, 2, fmt.Sprintf("%s carries %d extra functions here", an.m.ID, ga))
+			an.addAlignmentEvidence(previous.a, 3, fmt.Sprintf("%s's matched functions are adjacent; %d functions intervene here", bn.m.ID, ga))
+			an.addAlignmentEvidence(pair.a-1, 3, fmt.Sprintf("%s matches again after %d intervening functions", bn.m.ID, ga))
+			bn.addAlignmentEvidence(previous.b, 2, fmt.Sprintf("%s has %d intervening functions between these matches", an.m.ID, ga))
 			alignment.Divergences = append(alignment.Divergences, unitsReportDivergence{Kind: "insertion", Module: an.m.ID,
 				Start: hexAddr(an.functions[previous.a+1].f.Addr), End: hexAddr(an.functionEnd(pair.a - 1)),
 				Functions: an.functionNames(previous.a+1, pair.a-1),
 				Partner:   []string{bn.functions[previous.b].f.Name, bn.functions[pair.b].f.Name}})
 		case ga == 0:
-			bn.addAlignmentEvidence(previous.b, 3, fmt.Sprintf("%s has no counterpart for the next %d functions", an.m.ID, gb))
-			bn.addAlignmentEvidence(pair.b-1, 3, fmt.Sprintf("%s matches again after %d functions without counterpart", an.m.ID, gb))
-			an.addAlignmentEvidence(previous.a, 2, fmt.Sprintf("%s carries %d extra functions here", bn.m.ID, gb))
+			bn.addAlignmentEvidence(previous.b, 3, fmt.Sprintf("%s's matched functions are adjacent; %d functions intervene here", an.m.ID, gb))
+			bn.addAlignmentEvidence(pair.b-1, 3, fmt.Sprintf("%s matches again after %d intervening functions", an.m.ID, gb))
+			an.addAlignmentEvidence(previous.a, 2, fmt.Sprintf("%s has %d intervening functions between these matches", bn.m.ID, gb))
 			alignment.Divergences = append(alignment.Divergences, unitsReportDivergence{Kind: "insertion", Module: bn.m.ID,
 				Start: hexAddr(bn.functions[previous.b+1].f.Addr), End: hexAddr(bn.functionEnd(pair.b - 1)),
 				Functions: bn.functionNames(previous.b+1, pair.b-1),
@@ -126,8 +124,8 @@ func alignModulePair(an, bn *unitModuleAnalysis) {
 			end++
 		}
 		first, last := reordered[start], reordered[end]
-		an.addReorderEvidence(first.a, last.a, fmt.Sprintf("%s links %d matching functions at a different position", bn.m.ID, end-start+1))
-		bn.addReorderEvidence(first.b, last.b, fmt.Sprintf("%s links %d matching functions at a different position", an.m.ID, end-start+1))
+		an.addReorderEvidence(first.a, last.a, fmt.Sprintf("%s places %d matched functions elsewhere in its sequence", bn.m.ID, end-start+1))
+		bn.addReorderEvidence(first.b, last.b, fmt.Sprintf("%s places %d matched functions elsewhere in its sequence", an.m.ID, end-start+1))
 		alignment.Divergences = append(alignment.Divergences, unitsReportDivergence{Kind: "reorder", Module: "both",
 			Start: hexAddr(an.functions[first.a].f.Addr), End: hexAddr(an.functionEnd(last.a)),
 			Functions: an.functionNames(first.a, last.a), Partner: bn.functionNames(first.b, last.b)})
@@ -197,10 +195,9 @@ func (an *unitModuleAnalysis) addReorderEvidence(first, last int, detail string)
 	}
 }
 
-// alignDataRows lines up the data rows both modules name identically. The
-// address difference between consecutive twins stays constant while the
-// objects between them are the same size on both sides, so a change marks a
-// differing object, and therefore an object boundary, between their owners.
+// alignDataRows matches data rows by current name and finds changes in the
+// distance between consecutive matches. These can arise from resized tables,
+// alignment or different object layouts; they do not prove object boundaries.
 func alignDataRows(an, bn *unitModuleAnalysis, alignment *unitsReportAlign) {
 	byNameB := map[string]int{}
 	for i := range bn.rows {
@@ -230,14 +227,14 @@ func alignDataRows(an, bn *unitModuleAnalysis, alignment *unitsReportAlign) {
 		}
 		alignment.DataShifts++
 		an.addDataShiftEvidence(&an.rows[previous.a], &an.rows[pair.a],
-			fmt.Sprintf("the data between %s and %s differs in size from %s's", an.rows[previous.a].names[0], an.rows[pair.a].names[0], bn.m.ID))
+			fmt.Sprintf("the distance between %s and %s differs from %s's", an.rows[previous.a].names[0], an.rows[pair.a].names[0], bn.m.ID))
 		bn.addDataShiftEvidence(&bn.rows[previous.b], &bn.rows[pair.b],
-			fmt.Sprintf("the data between %s and %s differs in size from %s's", bn.rows[previous.b].names[0], bn.rows[pair.b].names[0], an.m.ID))
+			fmt.Sprintf("the distance between %s and %s differs from %s's", bn.rows[previous.b].names[0], bn.rows[pair.b].names[0], an.m.ID))
 	}
 }
 
-// addDataShiftEvidence places a data-side object boundary between the last
-// user of one row and the first user of the next, when those are close.
+// addDataShiftEvidence projects a data-distance change onto candidate cuts
+// between nearby users of the two rows. Shared data can produce the same pattern.
 func (an *unitModuleAnalysis) addDataShiftEvidence(before, after *unitDataRow, detail string) {
 	if before.wide || after.wide || len(before.owners) == 0 || len(after.owners) == 0 {
 		return

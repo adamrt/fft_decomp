@@ -118,7 +118,7 @@ share-audit: image ## Report shared C implementation candidates as JSON (MODULE=
 	@$(TOOLS) share-audit $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: units
-units: image ## Reconstruct original translation units into build/analysis/units (MODULE=x, ARGS="--evidence=required|strong ...")
+units: image ## Report translation-unit candidates in build/analysis/units (MODULE=x, ARGS="--evidence=required|strong ...")
 	@$(TOOLS) units $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: unit-check
