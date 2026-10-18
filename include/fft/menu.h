@@ -418,19 +418,6 @@ void menu_build_scaled_draw_area_packets(
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
 /* portraits */
-enum {
-    MENU_WLDFACE_SHEET_COUNT = 4,
-    MENU_WLDFACE_SHEET_SIZE = 32768,
-    MENU_WLDFACE_FILE_SIZE = MENU_WLDFACE_SHEET_COUNT * MENU_WLDFACE_SHEET_SIZE,
-    MENU_WLDFACE_PORTRAITS_PER_SHEET = 40,
-    MENU_WLDFACE_FIRST_MONSTER_PORTRAIT = 63,
-    MENU_WLDFACE_MONSTER_PALETTE_ROW = 10, /* first row of the monsters' other palettes */
-    MENU_WLDFACE_MONSTER_PALETTE_ROW_COUNT = 6
-};
-
-/* Portrait code bits 8-9: either set means the code is not a unit portrait, so no portrait CLUT is built. */
-enum { MENU_PORTRAIT_CLUT_SUPPRESS_MASK = 0x300 };
-
 extern RECT g_menu_portrait_origin;
 
 /* panel fades */

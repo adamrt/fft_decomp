@@ -231,7 +231,7 @@ static void screen_load_wldface_portraits(void) {
     portrait_sheet_t* sheets;
 
     g_thread_call_target = file_load_checked_to_heap;
-    sheets = (portrait_sheet_t*)thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE);
+    sheets = (portrait_sheet_t*)thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE);
     LoadImage(&g_screen_wldface_vram_rects, (u32*)sheets[0].pixels);
     LoadImage(&g_screen_wldface_vram_rect_1, (u32*)sheets[1].pixels);
     LoadImage(&g_screen_wldface_vram_rect_2, (u32*)sheets[2].pixels);

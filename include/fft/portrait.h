@@ -9,6 +9,16 @@
 #include "psx/types.h"
 
 /* portrait files */
+enum {
+    WLDFACE_SHEET_COUNT = 4,
+    WLDFACE_SHEET_SIZE = 32768,
+    WLDFACE_FILE_SIZE = WLDFACE_SHEET_COUNT * WLDFACE_SHEET_SIZE,
+    WLDFACE_PORTRAITS_PER_SHEET = 40,
+    WLDFACE_FIRST_MONSTER_PORTRAIT = 63,
+    WLDFACE_MONSTER_PALETTE_ROW = 10, /* first row of the monsters' other palettes */
+    WLDFACE_MONSTER_PALETTE_ROW_COUNT = 6
+};
+
 /* EVENT/WLDFACE.BIN is four of these sheets: forty 32x48 portraits at 4 bits
  * per pixel, eight across and five down, then sixteen rows of four palettes.
  * Palette n is portrait n's; rows 10-15 hold the other palettes of the monster
@@ -44,6 +54,9 @@ void portrait_load_party(void);
 void portrait_prepare_party_textures(void);
 
 /* portrait quads */
+/* Either bit skips the unit portrait; ATTACK and REQUIRE may draw a Formation icon instead. */
+enum { PORTRAIT_CODE_SUPPRESS_MASK = 0x300 };
+
 void portrait_build_transition(const RECT* texture_rect, s32* transition, const s32* first_portrait,
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
 

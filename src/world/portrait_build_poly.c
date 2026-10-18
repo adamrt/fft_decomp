@@ -10,7 +10,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u16 g_screen_portrait_clut_by_sheet_id[]; /* packed portrait code per sprite-sheet id */
+extern u16 g_portrait_code_by_sprite_sheet_id[]; /* packed portrait code per sprite-sheet id */
 
 /*
  * Resolves a roster slot's sprite sheet to its 16-bit portrait code and,
@@ -56,14 +56,14 @@ void portrait_build_poly(s32 roster_slot, POLY_FT4* poly) {
             sprite = JOB_SHEET_DANCER;
         }
     }
-    sprite = g_screen_portrait_clut_by_sheet_id[sprite];
+    sprite = g_portrait_code_by_sprite_sheet_id[sprite];
     if (party->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
         sprite = 0;
     }
     if (party->sprite_set == CHARACTER_IDENTITY_MONSTER) {
         sprite |= job->job_portrait_palette << 10;
     }
-    if ((sprite & MENU_PORTRAIT_CLUT_SUPPRESS_MASK) == 0) {
+    if ((sprite & PORTRAIT_CODE_SUPPRESS_MASK) == 0) {
         portrait_build_wldface_poly(poly, sprite);
     }
 }

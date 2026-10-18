@@ -121,8 +121,8 @@ s32 formation_get_unit_palette_index(s32 party_index) {
     if (portrait == 0x18) {
         return 0x7A;
     }
-    if (portrait >= MENU_WLDFACE_FIRST_MONSTER_PORTRAIT) {
-        portrait = g_formation_monster_sprite_table[portrait - MENU_WLDFACE_FIRST_MONSTER_PORTRAIT];
+    if (portrait >= WLDFACE_FIRST_MONSTER_PORTRAIT) {
+        portrait = g_formation_monster_sprite_table[portrait - WLDFACE_FIRST_MONSTER_PORTRAIT];
     } else if (unit->sprite_set & CHARACTER_IDENTITY_HIGH_BIT_MASK) {
         portrait -= 1;
     }

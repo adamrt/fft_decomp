@@ -1467,7 +1467,7 @@ data:
   - {addr: 0x8018a3b4, name: g_screen_zoom_percentages}
   - {addr: 0x8018a494, name: g_screen_entry_text_id_tables}
   - {addr: 0x8018a894, name: g_screen_number_entry_digit_steps}
-  - {addr: 0x8018a8b8, name: g_screen_portrait_clut_by_sheet_id}
+  - {addr: 0x8018a8b8, name: g_portrait_code_by_sprite_sheet_id}
   - {addr: 0x8018aa68, name: g_menu_indicator_packet_index}
   - {addr: 0x8018aa70, name: g_menu_indicator_brightness}
   - {addr: 0x8018aa78, name: g_menu_indicator_fade_work}
