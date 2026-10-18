@@ -2226,6 +2226,7 @@ defines: {VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 256, VARIANT_MENU_CHOICE_VRAM_X: 44
 
 units:
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
+  - {name: option_choice_thread, source: src/lib/menu/option_choice_thread.c, data: [{addr: 0x801c3994, size: 56, hash: 363145519a4b87be}, {addr: 0x801c39cc, size: 56, hash: 968d38035e40a07d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
 
 functions:
@@ -2246,7 +2247,7 @@ functions:
   - {addr: 0x801c195c, size: 224, name: at_list_start_thread, hash: 5bf5050f008c2b98, unit: at_list_threads}
   - {addr: 0x801c1a3c, size: 640, name: option_entrypoint, hash: 8f7b254e0391baa2, source: src/event/option/entry.c}
   - {addr: 0x801c1cbc, size: 4384, name: option_game_options_thread, hash: 3180807fdb0707d1, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x801c2ddc, size: 1652, name: option_choice_thread, hash: d496c0741c324433, source: src/lib/menu/option_choice_thread.c}
+  - {addr: 0x801c2ddc, size: 1652, name: option_choice_thread, hash: d496c0741c324433, unit: option_choice_thread}
 
 data:
   - {addr: 0x801c3450, name: g_option_input_repeat_timings}

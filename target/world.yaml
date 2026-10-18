@@ -67,6 +67,7 @@ units:
   - {name: name_entry, source: src/world/name_entry.c, data: [{addr: 0x801cd144, size: 17, hash: 0a88111852095cae}]}
   - {name: number_entry, source: src/world/number_entry.c}
   - {name: numbers_frame, source: src/lib/menu/numbers_frame.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
+  - {name: option_choice_thread, source: src/lib/menu/option_choice_thread.c, data: [{addr: 0x801571a4, size: 56, hash: 363145519a4b87be}, {addr: 0x801571dc, size: 56, hash: 968d38035e40a07d}]}
   - {name: options, source: src/world/options.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801aed74, size: 24, hash: 9d908ecfb6b256de}, {addr: 0x801aed8c, size: 66048, hash: cf1cc8dd4cd12e47}, {addr: 0x801bef8c, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x801bf00c, size: 4, hash: df3f619804a92fdb}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x8018b660, size: 16, hash: 3a4a58bab2c48f5e}]}
@@ -550,7 +551,7 @@ functions:
   - {addr: 0x80102d98, size: 224, name: at_list_start_thread, hash: c8919ff036b5a45b, unit: at_list_threads}
   - {addr: 0x80102e78, size: 520, name: option_entrypoint, hash: c6870290bae10381, unit: options}
   - {addr: 0x80103080, size: 4408, name: option_game_options_thread, hash: cc716f3bf7078b8c, unit: options}
-  - {addr: 0x801041b8, size: 1652, name: option_choice_thread, hash: c92a8d3ef7a62251, source: src/lib/menu/option_choice_thread.c}
+  - {addr: 0x801041b8, size: 1652, name: option_choice_thread, hash: c92a8d3ef7a62251, unit: option_choice_thread}
   - {addr: 0x8010482c, size: 80, name: help_close, hash: 6d0bc77451aa653a, unit: help_overlay}
   - {addr: 0x8010487c, size: 3460, name: helpmenu_battle_entrypoint, hash: 19f312de2ac42e56, unit: help_overlay}
   - {addr: 0x80105600, size: 60, name: thread_find_first_running_menu_thread, hash: 93208e88bcfad087, unit: help_overlay}
