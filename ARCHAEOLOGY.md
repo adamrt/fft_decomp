@@ -60,7 +60,7 @@ Some text resources also survive as complete embedded files: `SAMPLE.LZW` in BAT
 
 The credits distinguish **Taku Murata — Main Program**, **Hiroshi Ono — World Map Program**, **Masaaki Kubo — Shop & Organization Program**, and **Hidenori Suzuki — Sound Programmer**. Those named responsibilities fit the broad program split. The binaries do not establish who wrote every renderer, interpreter or shared object, so finer ownership remains uncertain. The credit blocks begin at file offsets `0xae65` and `0xb3fc` in `OPEN/OPEN.BIN`.
 
-Some low-level routines are hand-written assembly: cooperative context switches, stack-changing trampolines and several small accessors and copy loops. Register use, delay slots and trapping arithmetic distinguish them from the surrounding compiler output. They are part of the game's original implementation, rather than gaps to fill with new C behavior.
+Some low-level routines have strong assembly fingerprints: cooperative context switches, stack-changing trampolines and several small accessors and copy loops. Register conventions, delay slots and trapping arithmetic distinguish them from the surrounding compiler output. These clues concern how the code was built; GTE or scratchpad use alone does not establish Sony library ownership.
 
 There are also traces of imperfect integration. WORLD retains calls to BATTLE-only addresses even though the world programs replace that memory. DEBUGCHR contains both ordinary mounted-unit Status and a developer editor; its filename does not mean all its code was hidden from players. Details and other preserved behavior are recorded in [QUIRKS.md](QUIRKS.md).
 
