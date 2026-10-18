@@ -25,8 +25,6 @@
 #include "psx/types.h"
 
 extern crystal_pickup_result_t g_crystal_pickup_result;
-extern u8 g_crystal_learnable_abilities[];
-extern u8 g_crystal_treasure_item_id;
 
 /* Move-Find scratch is private to this unit. The first-byte flags alias retains
  * the target's independent address load; accessing every byte through the record
@@ -281,10 +279,10 @@ crystal_pickup_result_t* crystal_build_pickup_result(unit_stats_t* mover) {
  * (CRYSTAL_* flags).
  *
  * The result starts as a canceled miss. TAKE_TREASURE adds
- * g_crystal_treasure_item_id to the inventory and returns that call's
+ * the result's treasure item to the inventory and returns that call's
  * result, ignoring the other flags. RESTORE_HP_MP turns the result into a hit
  * that heals the missing HP and MP. LEARN_ABILITIES ORs
- * g_crystal_learnable_abilities into the unit's learned-ability bits. These
+ * the result's per-job learned bits into the unit's learned-ability bits. These
  * return 0. */
 s32 crystal_apply_choice(unit_stats_t* unit, s32 flags) {
     s32 i;
@@ -298,7 +296,7 @@ s32 crystal_apply_choice(unit_stats_t* unit, s32 flags) {
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
     if (flags & CRYSTAL_TAKE_TREASURE) {
-        return item_give(unit, g_crystal_treasure_item_id);
+        return item_give(unit, g_crystal_pickup_result.treasure_item);
     }
     if (flags & CRYSTAL_RESTORE_HP_MP) {
         unit->action.hit = 1;
@@ -311,7 +309,7 @@ s32 crystal_apply_choice(unit_stats_t* unit, s32 flags) {
         /* OR the crystal's ability bits into learned_abilities, three bytes
          * per job for 19 jobs; walked as raw bytes to keep the biased pointers. */
         i = 0;
-        src = g_crystal_learnable_abilities;
+        src = g_crystal_pickup_result.learned[0];
         dst = (u8*)unit;
         do {
             learned = dst + offsetof(unit_stats_t, career.learned_abilities);

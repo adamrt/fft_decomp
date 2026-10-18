@@ -79,7 +79,6 @@ extern point16_t g_unit_list_button_piece_scales[];
 extern u8 g_unit_list_reorder_list_initialized;
 extern menu_entry_t g_unit_list_reorder_list_desc[];
 extern s16 g_unit_list_reorder_list_entries[];
-extern s16 g_unit_list_reorder_list_index;
 extern s16 g_unit_list_reorder_list_redraw_request;
 extern u8 g_unit_list_reorderable_indices[];
 
@@ -1069,7 +1068,7 @@ void unit_list_run_sort_menu(void) {
     s32 keep;
 
     if (g_unit_list_reorder_list_initialized == 0) {
-        g_unit_list_reorder_list_index = 0;
+        g_unit_list_reorder_list_desc[0].selected_index = 0;
         unit_list_load_sort_order(1, g_unit_list_reorder_list_entries);
         /* The rows show text entry key + 1 of the menu section, in priority order. */
         i = 0;
@@ -1092,7 +1091,7 @@ void unit_list_run_sort_menu(void) {
     }
 
     /* Each key's help text, from entry 2 of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
-    g_text_selection_id = g_unit_list_reorder_list_entries[g_unit_list_reorder_list_index] + 0x1002;
+    g_text_selection_id = g_unit_list_reorder_list_entries[g_unit_list_reorder_list_desc[0].selected_index] + 0x1002;
     result = g_unit_list_reorder_result;
     if (result != -1) {
         sel = result;
