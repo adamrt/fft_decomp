@@ -14,7 +14,7 @@ units:
   - {name: brave_story, source: src/wldcore/brave_story.c}
   - {name: brave_story_collections, source: src/wldcore/brave_story_collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
   - {name: calendar_advance_days, source: src/wldcore/calendar_advance_days.c, data: [{addr: 0x80096a48, size: 4, hash: b687ec89faf1bf8a}]}
-  - {name: event_transition, source: src/wldcore/event_transition.c}
+  - {name: event_transition, source: src/wldcore/event_transition.c, data: [{addr: 0x8009f288, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: file_wait, source: src/lib/file/file_wait.c}
   - {name: input, source: src/wldcore/input.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}

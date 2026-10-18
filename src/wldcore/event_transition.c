@@ -15,7 +15,7 @@
 
 /* The event transition's spinning screen-capture sprite, sorted with GsSortSprite by
  * event_transition_draw_sprite. */
-extern GsSPRITE g_event_transition_sprite;
+static GsSPRITE g_event_transition_sprite = { 0 };
 
 /* The byte color triple of the screen-wide fade overlay. It
  * overlaps g_world_map_fade.boxes[0].r, but the target addresses
