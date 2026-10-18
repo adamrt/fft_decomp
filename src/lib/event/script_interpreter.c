@@ -638,16 +638,18 @@ static void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
  * commits the final values back to the live light state.
  */
 void battle_map_light_thread(void) {
-    /* One keyframe: three rotation angles and three color scale factors.
-     * The original reads all six operands in one loop, so the target also
-     * needs a six-word view; stores through the named fields do not match. */
-    union {
-        struct {
-            s32 angles[3];
-            s32 scale[3];
-        } light;
-        s32 values[6];
-    } start, target;
+    /* The instruction stores rotation XYZ followed by color scale RGB. */
+    enum {
+        LIGHT_ROTATION_X,
+        LIGHT_ROTATION_Y,
+        LIGHT_ROTATION_Z,
+        LIGHT_COLOR_R,
+        LIGHT_COLOR_G,
+        LIGHT_COLOR_B,
+        LIGHT_COMPONENT_COUNT
+    };
+    s32 start[LIGHT_COMPONENT_COUNT];
+    s32 target[LIGHT_COMPONENT_COUNT];
     SVECTOR angles;
     MATRIX direction;
     MATRIX color;
@@ -660,29 +662,29 @@ void battle_map_light_thread(void) {
     step = 0;
     script = (const u8*)thread_get_current_parameter_1();
     do {
-        target.values[step] = script_read_s16(script);
+        target[step] = script_read_s16(script);
         script += 2;
         step++;
-    } while (step < 6);
+    } while (step < LIGHT_COMPONENT_COUNT);
     /* The six-target scan leaves the cursor at duration_le. */
     frames = script_read_s16(script);
     step = 0;
-    start.light.angles[0] = g_script_light_angles.vx;
-    start.light.angles[1] = g_script_light_angles.vy;
-    start.light.angles[2] = g_script_light_angles.vz;
-    start.light.scale[0] = g_script_light_scale.vx;
-    start.light.scale[1] = g_script_light_scale.vy;
-    start.light.scale[2] = g_script_light_scale.vz;
+    start[LIGHT_ROTATION_X] = g_script_light_angles.vx;
+    start[LIGHT_ROTATION_Y] = g_script_light_angles.vy;
+    start[LIGHT_ROTATION_Z] = g_script_light_angles.vz;
+    start[LIGHT_COLOR_R] = g_script_light_scale.vx;
+    start[LIGHT_COLOR_G] = g_script_light_scale.vy;
+    start[LIGHT_COLOR_B] = g_script_light_scale.vz;
     for (; step <= frames; step++) {
-        angles.vx = (target.light.angles[0] - start.light.angles[0]) * step / frames + start.light.angles[0];
-        angles.vy = (target.light.angles[1] - start.light.angles[1]) * step / frames + start.light.angles[1];
-        angles.vz = (target.light.angles[2] - start.light.angles[2]) * step / frames + start.light.angles[2];
+        angles.vx = (target[LIGHT_ROTATION_X] - start[LIGHT_ROTATION_X]) * step / frames + start[LIGHT_ROTATION_X];
+        angles.vy = (target[LIGHT_ROTATION_Y] - start[LIGHT_ROTATION_Y]) * step / frames + start[LIGHT_ROTATION_Y];
+        angles.vz = (target[LIGHT_ROTATION_Z] - start[LIGHT_ROTATION_Z]) * step / frames + start[LIGHT_ROTATION_Z];
         RotMatrix(&angles, &direction);
         MulMatrix(&direction, &g_script_light_base_direction_matrix);
         script_copy_matrix(&color, &g_script_light_base_color_matrix);
-        scale.vx = (target.light.scale[0] - start.light.scale[0]) * step / frames + start.light.scale[0];
-        scale.vy = (target.light.scale[1] - start.light.scale[1]) * step / frames + start.light.scale[1];
-        scale.vz = (target.light.scale[2] - start.light.scale[2]) * step / frames + start.light.scale[2];
+        scale.vx = (target[LIGHT_COLOR_R] - start[LIGHT_COLOR_R]) * step / frames + start[LIGHT_COLOR_R];
+        scale.vy = (target[LIGHT_COLOR_G] - start[LIGHT_COLOR_G]) * step / frames + start[LIGHT_COLOR_G];
+        scale.vz = (target[LIGHT_COLOR_B] - start[LIGHT_COLOR_B]) * step / frames + start[LIGHT_COLOR_B];
         ScaleMatrixL(&color, &scale);
         battle_map_light_matrix_command(BATTLE_MAP_LIGHT_MATRIX_COMMAND_SET, &color, &direction, 0);
         thread_wait_frames(1);
@@ -1096,7 +1098,7 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
     s32 runtime_id;
     s32 battle_index;
     unit_stats_t* unit;
-    s32 found_battle_id[2];
+    s32 found_battle_id;
 
     for (runtime_id = 0; runtime_id < UNIT_SLOT_COUNT; runtime_id++) {
         if (unit_has_runtime_id(runtime_id) == 0) {
@@ -1106,11 +1108,11 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
         if (battle_index == -1) {
             continue;
         }
-        unit = unit_entd_find_stats(unit_get_stats(battle_index)->unit_id, found_battle_id);
+        unit = unit_entd_find_stats(unit_get_stats(battle_index)->unit_id, &found_battle_id);
         if ((unit->team_flags & UNIT_TEAM_MASK) == UNIT_TEAM_BLUE) {
             continue;
         }
-        if (found_battle_id[0] == -2) {
+        if (found_battle_id == -2) {
             continue;
         }
         if (unit->unit_id != unit_id) {
