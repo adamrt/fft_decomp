@@ -1308,7 +1308,7 @@ functions:
   - {addr: 0x80181ef0, size: 36, name: skillset_math_load_attributes, hash: 7ae4e9a823edfc8d, unit: skillset_menus}
   - {addr: 0x80181f14, size: 36, name: skillset_math_load_multiples, hash: 7df44d8a42239c40, unit: skillset_menus}
   - {addr: 0x80181f38, size: 304, name: skillset_math_collect_by_flags, hash: 073050aa8c46c68d, unit: skillset_menus}
-  - {addr: 0x80182068, size: 356, name: skillset_math_collect_calculator_abilities, hash: 2f87dd95239506c6, unit: skillset_menus}
+  - {addr: 0x80182068, size: 356, name: skillset_math_collect_calculator_abilities, hash: 2f87dd95239506c6, unit: skillset_menus, rodata: [{addr: 0x80174170, size: 4, hash: 03207bbe4a3ef1e9}]}
   - {addr: 0x801821cc, size: 256, name: skillset_get_elemental_ability, hash: c20b7381e82c5ccd, unit: skillset_menus}
   - {addr: 0x801822cc, size: 356, name: skillset_monster_collect_abilities, hash: b9024147942f8e11, unit: skillset_menus}
   - {addr: 0x80182430, size: 216, name: skillset_monster_count_supporters, hash: ee43027afa5e6087, unit: skillset_menus}
@@ -2685,7 +2685,6 @@ data:
   - {addr: 0x8017405a, name: g_event_map_command_83_arg2}
   - {addr: 0x8017405c, name: g_event_pending_map_jump_out_2_id}
   - {addr: 0x80174060, name: g_command_skillsets}
-  - {addr: 0x80174170, name: g_skillset_math_sources}
   - {addr: 0x8018f4d8, name: g_move_height_offsets}
   - {addr: 0x8018f4e0, name: g_move_config_ptr}
   - {addr: 0x8018f4e4, name: g_move_scratch_pad_ptr}

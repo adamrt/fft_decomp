@@ -12,10 +12,7 @@
 #include "fft/status.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
-#include "psx/libc.h"
 #include "psx/types.h"
-
-extern u8 g_skillset_math_sources[4];
 
 static s32 skillset_math_collect_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
 static s32 skillset_monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
@@ -348,9 +345,9 @@ static s32 skillset_math_collect_by_flags(s32 unit_id, u8 skillset, s16* out, u8
 }
 
 /*
- * Collect the unit's Calculator-eligible abilities from the four skillsets
- * in g_skillset_math_sources into out, -1-terminated, and return the
- * count. Only a request for the Math Skill skillset collects anything.
+ * Collect the unit's Calculator-eligible White Magic, Black Magic, Time Magic
+ * and Yin Yang Magic into out, -1-terminated, and return the count. Only a
+ * request for Math Skill collects anything.
  *
  * The record pointer must be taken inside the inner loop: hoisting the table
  * base into a local before the loop swaps the two preheader address setups.
@@ -361,16 +358,15 @@ s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* ou
     u8 charge_times[0x18];
     u8 ability_flags[0x18];
     u8 turn_counts[0x18];
-    u8 skillsets[4];
-    s32 count;
+    s32 count = 0;
+    u8 skillsets[4]
+        = { SKILLSET_ID_WHITE_MAGIC, SKILLSET_ID_BLACK_MAGIC, SKILLSET_ID_TIME_MAGIC, SKILLSET_ID_YIN_YANG_MAGIC };
     s32 ability_count;
     s32 i;
     s32 j;
     s16 ability;
     ability_secondary_data_t* secondary;
 
-    count = 0;
-    memcpy(skillsets, g_skillset_math_sources, sizeof(skillsets));
     if (unit_get_present_stats(unit_id) == 0) {
         return 0;
     }
