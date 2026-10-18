@@ -60,6 +60,7 @@ units:
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
+  - {name: target_panels, source: src/battle/target_panels.c}
   - {name: text_entries, source: src/lib/event/text_entries.c, data: [{addr: 0x80169790, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x801697a0, size: 16, hash: 6ff8555916aa10e6}]}
   - {name: text_skip_to_entry, source: src/lib/event/text_skip_to_entry.c}
   - {name: texture_allocator, source: src/lib/menu/texture_allocator.c}
@@ -1191,40 +1192,40 @@ functions:
   - {addr: 0x801780ec, size: 80, name: move_path_calculate_walk_to, hash: bbd0407c9488dc4d, unit: move_range}
   - {addr: 0x8017813c, size: 2920, name: move_path_calculate, hash: b57294c5371c8afd, unit: move_range}
   - {addr: 0x80178ca4, size: 1376, name: ai_move_propagate_from_target, hash: 95b8b94f05e86f62, unit: move_range}
-  - {addr: 0x80179204, size: 88, name: target_area_check_moldball_virus_depth, hash: d1f9e1e16e2a80fa, unit: move_range}
-  - {addr: 0x8017925c, size: 72, name: target_range_clear_untargetable_panels, hash: 8ad22dbb944b5563, unit: move_range}
-  - {addr: 0x801792a4, size: 348, name: target_apply_vertical_tolerance, hash: 433c416f26afb0ec, unit: move_range}
-  - {addr: 0x80179400, size: 36, name: target_clear_panel_spread_flags, hash: ba04bd61201befae, unit: move_range}
-  - {addr: 0x80179424, size: 244, name: target_range_remove_close, hash: ebf92dba03f9fccb, unit: move_range}
-  - {addr: 0x80179518, size: 292, name: target_spread_panels, hash: a8587fc919dbfd89, unit: move_range}
-  - {addr: 0x8017963c, size: 376, name: target_spread_panel_to_neighbors, hash: 887b3df33c150045, unit: move_range}
-  - {addr: 0x801797b4, size: 252, name: unit_get_effective_height, hash: 3a9bfc3907f28a18, unit: move_range}
-  - {addr: 0x801798b0, size: 368, name: target_range_calculate_arc, hash: 794bbecb31a179c9, unit: move_range}
-  - {addr: 0x80179a20, size: 312, name: target_range_calculate_weapon, hash: 066252ab8bf0434c, unit: move_range}
-  - {addr: 0x80179b58, size: 324, name: target_range_calculate_strike_lunge, hash: f072f738c94b8da9, unit: move_range}
-  - {addr: 0x80179c9c, size: 232, name: target_range_mark_tile_in_height_band, hash: 2bd42e1e6e1caa98, unit: move_range}
-  - {addr: 0x80179d84, size: 68, name: target_range_clear_untargetable_tiles, hash: 143609e1b46f6ab4, unit: move_range}
-  - {addr: 0x80179dc8, size: 932, name: target_range_set_for_jump, hash: 834c084c386014ca, unit: move_range}
-  - {addr: 0x8017a16c, size: 292, name: target_range_spread_from_unit, hash: 4ba31a5020dbe4f4, unit: move_range}
-  - {addr: 0x8017a290, size: 648, name: target_range_set_for_ability, hash: 62c7e4d40cddffc6, unit: move_range}
-  - {addr: 0x8017a518, size: 164, name: target_range_set_for_weapon, hash: 818f3c2def37c17f, unit: move_range}
-  - {addr: 0x8017a5bc, size: 144, name: target_range_set_flags, hash: 30426947dd905db4, unit: move_range}
-  - {addr: 0x8017a64c, size: 144, name: target_range_set_flags_from_marks, hash: b733ede22d10ac56, unit: move_range}
-  - {addr: 0x8017a6dc, size: 224, name: target_range_mark_unit_panels, hash: 4d3b878ddd5a7b8d, unit: move_range}
-  - {addr: 0x8017a7bc, size: 260, name: target_range_mark_cardinal_lines, hash: 480a94345e5a3d7d, unit: move_range}
-  - {addr: 0x8017a8c0, size: 568, name: target_range_set_for_action, hash: 8c2a01a98afe26e7, unit: move_range, rodata: [{addr: 0x80174068, size: 64, hash: 17bfbd63ef0f495b}]}
-  - {addr: 0x8017aaf8, size: 408, name: target_area_set_for_action, hash: 49f41904a00fb2cd, unit: move_range, rodata: [{addr: 0x801740a8, size: 64, hash: 0bcd95e581c9ccaa}]}
-  - {addr: 0x8017ac90, size: 816, name: target_validate_for_weapon, hash: f96070bff016413a, unit: move_range}
-  - {addr: 0x8017afc0, size: 1076, name: target_validate_lunge, hash: 105f59d3b7823e8e, unit: move_range}
-  - {addr: 0x8017b3f4, size: 172, name: target_validate_height_overlap, hash: 0ba912083b215ea7, unit: move_range}
-  - {addr: 0x8017b4a0, size: 48, name: target_area_clear_flags, hash: 6de873936bf604e4, unit: move_range}
-  - {addr: 0x8017b4d0, size: 740, name: target_area_run_calculator, hash: 475edc2ecdb73cc4, unit: move_range}
-  - {addr: 0x8017b7b4, size: 192, name: target_area_keep_only_target_tile, hash: 3b185ce3aa844834, unit: move_range}
-  - {addr: 0x8017b874, size: 1028, name: target_area_set_for_ability, hash: b163e54cf4f8e625, unit: move_range}
-  - {addr: 0x8017bc78, size: 344, name: target_area_apply_unit_team_eligibility, hash: 705a87135b538194, unit: move_range}
-  - {addr: 0x8017bdd0, size: 152, name: target_is_unit_untargetable_and_store_tile, hash: 9cad497440300886, unit: move_range}
-  - {addr: 0x8017be68, size: 476, name: target_area_build_directional_attack_panels, hash: 1eabc763cac1a429, unit: move_range}
-  - {addr: 0x8017c044, size: 276, name: target_area_calculate_linear_attack_tiles, hash: 387f232af75d6041, unit: move_range}
+  - {addr: 0x80179204, size: 88, name: target_area_check_moldball_virus_depth, hash: d1f9e1e16e2a80fa, unit: target_panels}
+  - {addr: 0x8017925c, size: 72, name: target_range_clear_untargetable_panels, hash: 8ad22dbb944b5563, unit: target_panels}
+  - {addr: 0x801792a4, size: 348, name: target_apply_vertical_tolerance, hash: 433c416f26afb0ec, unit: target_panels}
+  - {addr: 0x80179400, size: 36, name: target_clear_panel_spread_flags, hash: ba04bd61201befae, unit: target_panels}
+  - {addr: 0x80179424, size: 244, name: target_range_remove_close, hash: ebf92dba03f9fccb, unit: target_panels}
+  - {addr: 0x80179518, size: 292, name: target_spread_panels, hash: a8587fc919dbfd89, unit: target_panels}
+  - {addr: 0x8017963c, size: 376, name: target_spread_panel_to_neighbors, hash: 887b3df33c150045, unit: target_panels}
+  - {addr: 0x801797b4, size: 252, name: unit_get_effective_height, hash: 3a9bfc3907f28a18, unit: target_panels}
+  - {addr: 0x801798b0, size: 368, name: target_range_calculate_arc, hash: 794bbecb31a179c9, unit: target_panels}
+  - {addr: 0x80179a20, size: 312, name: target_range_calculate_weapon, hash: 066252ab8bf0434c, unit: target_panels}
+  - {addr: 0x80179b58, size: 324, name: target_range_calculate_strike_lunge, hash: f072f738c94b8da9, unit: target_panels}
+  - {addr: 0x80179c9c, size: 232, name: target_range_mark_tile_in_height_band, hash: 2bd42e1e6e1caa98, unit: target_panels}
+  - {addr: 0x80179d84, size: 68, name: target_range_clear_untargetable_tiles, hash: 143609e1b46f6ab4, unit: target_panels}
+  - {addr: 0x80179dc8, size: 932, name: target_range_set_for_jump, hash: 834c084c386014ca, unit: target_panels}
+  - {addr: 0x8017a16c, size: 292, name: target_range_spread_from_unit, hash: 4ba31a5020dbe4f4, unit: target_panels}
+  - {addr: 0x8017a290, size: 648, name: target_range_set_for_ability, hash: 62c7e4d40cddffc6, unit: target_panels}
+  - {addr: 0x8017a518, size: 164, name: target_range_set_for_weapon, hash: 818f3c2def37c17f, unit: target_panels}
+  - {addr: 0x8017a5bc, size: 144, name: target_range_set_flags, hash: 30426947dd905db4, unit: target_panels}
+  - {addr: 0x8017a64c, size: 144, name: target_range_set_flags_from_marks, hash: b733ede22d10ac56, unit: target_panels}
+  - {addr: 0x8017a6dc, size: 224, name: target_range_mark_unit_panels, hash: 4d3b878ddd5a7b8d, unit: target_panels}
+  - {addr: 0x8017a7bc, size: 260, name: target_range_mark_cardinal_lines, hash: 480a94345e5a3d7d, unit: target_panels}
+  - {addr: 0x8017a8c0, size: 568, name: target_range_set_for_action, hash: 8c2a01a98afe26e7, unit: target_panels, rodata: [{addr: 0x80174068, size: 64, hash: 17bfbd63ef0f495b}]}
+  - {addr: 0x8017aaf8, size: 408, name: target_area_set_for_action, hash: 49f41904a00fb2cd, unit: target_panels, rodata: [{addr: 0x801740a8, size: 64, hash: 0bcd95e581c9ccaa}]}
+  - {addr: 0x8017ac90, size: 816, name: target_validate_for_weapon, hash: f96070bff016413a, unit: target_panels}
+  - {addr: 0x8017afc0, size: 1076, name: target_validate_lunge, hash: 105f59d3b7823e8e, unit: target_panels}
+  - {addr: 0x8017b3f4, size: 172, name: target_validate_height_overlap, hash: 0ba912083b215ea7, unit: target_panels}
+  - {addr: 0x8017b4a0, size: 48, name: target_area_clear_flags, hash: 6de873936bf604e4, unit: target_panels}
+  - {addr: 0x8017b4d0, size: 740, name: target_area_run_calculator, hash: 475edc2ecdb73cc4, unit: target_panels}
+  - {addr: 0x8017b7b4, size: 192, name: target_area_keep_only_target_tile, hash: 3b185ce3aa844834, unit: target_panels}
+  - {addr: 0x8017b874, size: 1028, name: target_area_set_for_ability, hash: b163e54cf4f8e625, unit: target_panels}
+  - {addr: 0x8017bc78, size: 344, name: target_area_apply_unit_team_eligibility, hash: 705a87135b538194, unit: target_panels}
+  - {addr: 0x8017bdd0, size: 152, name: target_is_unit_untargetable_and_store_tile, hash: 9cad497440300886, unit: target_panels}
+  - {addr: 0x8017be68, size: 476, name: target_area_build_directional_attack_panels, hash: 1eabc763cac1a429, unit: target_panels}
+  - {addr: 0x8017c044, size: 276, name: target_area_calculate_linear_attack_tiles, hash: 387f232af75d6041, unit: target_panels}
   - {addr: 0x8017c158, size: 608, name: unit_calculate_height_data, hash: 78d17797a6fa5f29, unit: action_preparation}
   - {addr: 0x8017c3b8, size: 36, name: action_prepare_in_place, hash: d28c76d0668b4ea6, unit: action_preparation}
   - {addr: 0x8017c3dc, size: 128, name: action_commit_preparation, hash: b1bb562d9467a48d, unit: action_preparation}
