@@ -802,13 +802,17 @@ static void party_apply_post_battle_changes(void) {
         &g_after_battle_saved_thread, &g_threads[THREAD_SLOT_EVENT], sizeof(g_after_battle_saved_thread));
 
     text_data = g_text_data;
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = text_data + g_text_section_offsets[1];
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES] = text_data + g_text_section_offsets[2];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS]
+        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
+        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES];
     saved_menu_descriptor = g_menu_thread_menu_data;
     menu_base = g_after_battle_menu_entries;
     g_menu_thread_menu_data = menu_base;
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES] = text_data + g_text_section_offsets[3];
-    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = text_data + g_text_section_offsets[4];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES]
+        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES];
+    g_text_section_pointers[TEXT_SECTION_JOB_NAMES]
+        = text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_JOB_NAMES];
 
     affected_index = 0;
     text_build_battle_unit_names();

@@ -491,10 +491,14 @@ void party_brave_faith_report_thread(void) {
         thread_exit_current();
     if (party_update_brave_faith() == 0)
         thread_exit_current();
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = g_text_data + g_text_section_offsets[1];
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES] = g_text_data + g_text_section_offsets[2];
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES] = g_text_data + g_text_section_offsets[3];
-    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_text_data + g_text_section_offsets[4];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES];
+    g_text_section_pointers[TEXT_SECTION_JOB_NAMES]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_JOB_NAMES];
     main_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, conditions_special_thread);
     thread_set_parameters(main_thread, CONDITIONS_BANNER_WARNING, 0, 0);
@@ -528,10 +532,14 @@ void party_departures_thread(void) {
 
     if (party_find_departures() == 0)
         thread_exit_current();
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = g_text_data + g_text_section_offsets[1];
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES] = g_text_data + g_text_section_offsets[2];
-    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES] = g_text_data + g_text_section_offsets[3];
-    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_text_data + g_text_section_offsets[4];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES];
+    g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES];
+    g_text_section_pointers[TEXT_SECTION_JOB_NAMES]
+        = g_text_data + g_text_section_offsets[AFTER_BATTLE_TEXT_SECTION_JOB_NAMES];
     thread_yield();
     main_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, conditions_special_thread);

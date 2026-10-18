@@ -49,14 +49,14 @@ void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
 /* Character identities grouped by their warning, departure and dismissal text. */
 enum { PARTY_MESSAGE_IDENTITY_GROUP_COUNT = 73, PARTY_MESSAGE_IDENTITIES_PER_GROUP = 3 };
 
-/* Sections of REQUIRE's text file, whose offset table sits 0x80 bytes before
- * g_text_data with offsets relative to it. The after-battle routines bind
- * them over the resident sections, and the file's job names as
- * TEXT_SECTION_JOB_NAMES. */
+/* REQUIRE's text-file directory, with offsets relative to g_text_data. The first
+ * three named sections retain these indices at runtime; job names bind to
+ * TEXT_SECTION_JOB_NAMES instead. */
 typedef enum after_battle_text_section {
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS = 1,   /* a unit's Brave is low or its Faith high */
     AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES = 2, /* the unit leaves the party for it */
-    AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3    /* what a unit turned away or dismissed says */
+    AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3,   /* what a unit turned away or dismissed says */
+    AFTER_BATTLE_TEXT_SECTION_JOB_NAMES = 4
 } after_battle_text_section_e;
 
 extern u8 g_party_message_identity_groups[PARTY_MESSAGE_IDENTITY_GROUP_COUNT][PARTY_MESSAGE_IDENTITIES_PER_GROUP];
