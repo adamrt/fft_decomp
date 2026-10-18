@@ -2312,7 +2312,7 @@ units:
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x801cbe60, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801cb71c, size: 16, hash: ed44f3f59883c72d}]}
-  - {name: post_battle_party, source: src/event/require/post_battle_party.c, data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}]}
+  - {name: post_battle_party, source: src/event/require/post_battle_party.c, rodata: [{addr: 0x801bf000, size: 25, hash: f71a695df31c3f94}], data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}]}
   - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1060, hash: d50e2d8474134908}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}

@@ -28,7 +28,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern char g_after_battle_text_wait_for_file_allocation_message[];
 extern POLY_FT4 g_unit_panel_transition_quads[2][30];
 
 static s32 g_party_affected_unit_message_args[50] = { 0 };
@@ -636,7 +635,7 @@ static void status_screen_open_after_battle(void) {
         }
         thread_yield();
         if (g_debug_font_print_enabled != 0) {
-            FntPrint(g_after_battle_text_wait_for_file_allocation_message);
+            FntPrint("WAIT FOR FILEALLOCATION\n");
         }
     }
     overlay_request_companion(COMPANION_OVERLAY_JOBSTTS);
