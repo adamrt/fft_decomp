@@ -501,7 +501,7 @@ void formation_grid_menu(void) {
 
                 if (g_formation_unit_browse_enabled == 0 && (input & PSX_PAD_CROSS) && g_tutorial_id == 0) {
                     screen_fade_start_increasing();
-                    music_set_target(0, 0xF0);
+                    music_set_volume_target(0, 0xF0);
                     g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                 }
             }

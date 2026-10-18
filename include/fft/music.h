@@ -52,7 +52,10 @@ struct suzuki_music* music_get_handle(s32 slot);
 struct suzuki_music* music_switch_track(s32 slot, s32 volume, s32 fade);
 s32 music_get_current_slot(void);
 void music_set_track(s32 music_id);
-s32 music_set_target(s32 volume, s32 time);
+
+/* set_volume fades temporarily; set_volume_target also remembers the volume
+ * that restore_volume returns to. */
+s32 music_set_volume_target(s32 volume, s32 time);
 s32 music_set_volume(s32 volume, s32 time);
 s32 music_restore_volume(s32 time);
 s32 music_set_balance_shift_timed(s32 value, s32 time);
@@ -77,7 +80,9 @@ typedef enum music_tune {
 enum { MUSIC_TUNE_ID_MASK = 0x3f, MUSIC_TUNE_PLAYING_MASK = 0x7f, MUSIC_TUNE_PENDING = 0x80 };
 
 s32 music_play_tune(s32 tune);
-s32 music_set_tune_volume(s32 time);
+
+/* Cancel a pending tune, or fade a playing tune to silence (time 0: immediate). */
+s32 music_fade_out_tune(s32 time);
 s32 music_update_tunes(void);
 
 /* track requests */

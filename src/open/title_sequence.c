@@ -281,14 +281,14 @@ void music_test_update(controller_record_t* record) {
             g_menu_blocked_buttons |= PSX_PAD_UP | PSX_PAD_DOWN;
             if (state->music_id != 0) {
                 state->delay = 0x20;
-                music_set_target(0, 0x78);
+                music_set_volume_target(0, 0x78);
             } else {
                 state->delay = 1;
             }
             state->music_id = g_music_test_music_ids[g_music_test_list_params.selected_index];
         } else if (buttons & PSX_PAD_CROSS) {
             if (state->music_id != 0) {
-                music_set_target(0, 0x78);
+                music_set_volume_target(0, 0x78);
                 state->music_id = 0;
                 state->delay = 0x20;
             } else {

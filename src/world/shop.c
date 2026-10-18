@@ -509,7 +509,7 @@ static void shop_exit_step(void) {
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
         screen_fade_start_increasing();
-        music_set_target(0, 0xF0);
+        music_set_volume_target(0, 0xF0);
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_shop_exit_fade_started = 1;
     }

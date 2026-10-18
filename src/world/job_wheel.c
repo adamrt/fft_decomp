@@ -578,7 +578,7 @@ static s32 formation_job_step_change(s32 job) {
     if (g_formation_job_change_skip_requested != 0) {
         if (g_formation_job_change_frame >= 40 && g_formation_job_change_frame <= 220) {
             g_formation_job_change_frame = 220;
-            music_set_tune_volume(0x46);
+            music_fade_out_tune(0x46);
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
         g_formation_job_change_skip_requested = 1;

@@ -20,7 +20,7 @@ typedef struct music_state {
     s32 current_slot;                 /* 0x00: slot of the playing scenario music */
     suzuki_music_t* current_music;    /* 0x04 */
     suzuki_smd_header_t* current_smd; /* 0x08: SMD data of the playing music */
-    s32 volume;                       /* 0x0c */
+    s32 target_volume;                /* 0x0c: volume restored after a temporary fade */
 } music_state_t;
 typedef char music_state_size_must_be_16[sizeof(music_state_t) == 16 ? 1 : -1];
 
@@ -314,7 +314,7 @@ suzuki_music_t* music_switch_track(s32 slot, s32 volume, s32 fade) {
             g_music.state.current_slot = slot;
             g_music.state.current_smd = g_music.slots.smd[slot - 1];
             g_music.state.current_music = g_music.slots.music[slot - 1];
-            g_music.state.volume = volume;
+            g_music.state.target_volume = volume;
             suzuki_smd_reset_music(g_music.state.current_music, volume, fade);
         }
         return g_music.state.current_music;
@@ -341,7 +341,7 @@ int music_set_volume(int volume, int time) {
 /* Fades the current music back to the remembered volume over time ticks. */
 int music_restore_volume(int time) {
     if (g_music.state.current_music != 0) {
-        suzuki_smd_set_music_volume(g_music.state.current_music, g_music.state.volume, time);
+        suzuki_smd_set_music_volume(g_music.state.current_music, g_music.state.target_volume, time);
         return 1;
     }
     return 0;
@@ -349,9 +349,9 @@ int music_restore_volume(int time) {
 
 /* Fades the current music to volume over time ticks and remembers the
  * volume for music_restore_volume. */
-int music_set_target(int volume, int time) {
+int music_set_volume_target(int volume, int time) {
     if (g_music.state.current_music != 0) {
-        g_music.state.volume = volume;
+        g_music.state.target_volume = volume;
         suzuki_smd_set_music_volume(g_music.state.current_music, volume, time);
         return 1;
     }
@@ -394,7 +394,7 @@ int music_set_balance_shift_timed(int value, int time) {
 int music_play_tune(int tune) {
     if (tune != 0) {
         if (g_music.slots.tune == 0) {
-            music_set_target(0, 120);
+            music_set_volume_target(0, 120);
             g_music.slots.tune = tune | MUSIC_TUNE_PENDING;
         }
     }
@@ -403,7 +403,7 @@ int music_play_tune(int tune) {
 
 /* Cancels a pending tune, or fades a playing one out to volume 0 over time
  * ticks (0: at once). */
-int music_set_tune_volume(int time) {
+int music_fade_out_tune(int time) {
     int tune = g_music.slots.tune;
 
     if (tune != 0) {
@@ -458,7 +458,7 @@ s32 music_update_tunes(void) {
         }
         *handle = 0;
         g_music.slots.tune = 0;
-        return music_set_target(0x7f, 0x78);
+        return music_set_volume_target(0x7f, 0x78);
     }
     return 0;
 }
@@ -469,7 +469,7 @@ void music_unload_scenario_and_tunes(void) {
     music_stop();
     music_unload_scenario_slot(1);
     music_unload_scenario_slot(2);
-    music_set_tune_volume(0);
+    music_fade_out_tune(0);
 }
 
 /* Return the music record loaded in slot (slots count from 1; an unloaded slot holds 0). */

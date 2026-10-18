@@ -293,7 +293,7 @@ void card_entrypoint(s32 unused) {
         } else if (g_save_menu_state == SAVE_MENU_WRITING) {
             save_update_write(g_save_list_selected_slot);
         } else if (g_save_menu_state == SAVE_MENU_LEAVE || g_save_menu_state == SAVE_MENU_LEAVE_ALT) {
-            music_set_target(0, 0xf0);
+            music_set_volume_target(0, 0xf0);
             while (memcard_poll_operation_result() == MEMCARD_RESULT_PENDING) { }
             gfx_start_increasing_fade();
             g_save_menu_state = SAVE_MENU_CLOSING;

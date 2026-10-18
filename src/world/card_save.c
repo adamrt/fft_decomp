@@ -414,7 +414,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
         } else if (step == SAVE_STEP_SAVING) {
             save_write_step(g_save_active_slot);
         } else if (step == SAVE_STEP_LEAVE) {
-            music_set_target(0, 0xf0);
+            music_set_volume_target(0, 0xf0);
             while (memcard_poll_operation_result() == MEMCARD_RESULT_PENDING) { }
             screen_fade_start_increasing();
             g_save_menu_step = SAVE_STEP_LEFT;

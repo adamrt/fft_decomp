@@ -1192,7 +1192,7 @@ void birthday_update_confirmation(controller_record_t* record) {
             member->birthday_day = value;
             member->zodiac
                 = ((value & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) | ((month - 1) << PARTY_ZODIAC_SHIFT);
-            music_set_target(0, 0x60);
+            music_set_volume_target(0, 0x60);
             gfx_start_overlay_fade_in(0x20);
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;

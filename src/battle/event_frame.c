@@ -511,7 +511,7 @@ static void script_process_pending_requests(void) {
         /* Low half: target volume; high half: fade time, passed times four like the switch fade. */
         volume_transition = g_sound_music_volume_transition_request;
         if (volume_transition != -1U) {
-            music_set_target(volume_transition & 0xFFFF, (volume_transition >> 0xE) & 0x3FFC);
+            music_set_volume_target(volume_transition & 0xFFFF, (volume_transition >> 0xE) & 0x3FFC);
         }
     }
 }

@@ -92,12 +92,12 @@ next:
         if ((g_music_queue.music.flags & MUSIC_QUEUE_PLAYING) == 0) {
             goto clear_command;
         }
-        music_set_target(0, g_music_queue.current_value << 2);
+        music_set_volume_target(0, g_music_queue.current_value << 2);
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_FADE_OUT;
         return;
     case MUSIC_QUEUE_COMMAND_FADE_IN:
         music_switch_track(g_music_queue.current_slot, 0, 0);
-        music_set_target(g_music_queue.volume, g_music_queue.current_value << 2);
+        music_set_volume_target(g_music_queue.volume, g_music_queue.current_value << 2);
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_FADE_IN;
         return;
     case MUSIC_QUEUE_COMMAND_UNLOAD:

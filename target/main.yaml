@@ -729,12 +729,12 @@ functions:
   - {addr: 0x80043b44, size: 16, name: music_get_current_slot, hash: ed983cc491943ec8, unit: sound_requests}
   - {addr: 0x80043b54, size: 76, name: music_set_volume, hash: a1d1ea2b032eb3a5, unit: sound_requests}
   - {addr: 0x80043ba0, size: 72, name: music_restore_volume, hash: 12aee3665cc12e32, unit: sound_requests}
-  - {addr: 0x80043be8, size: 84, name: music_set_target, hash: 1f57d764fcc9219d, unit: sound_requests}
+  - {addr: 0x80043be8, size: 84, name: music_set_volume_target, hash: 1f57d764fcc9219d, unit: sound_requests}
   - {addr: 0x80043c3c, size: 76, name: music_set_tempo_scale_timed, hash: 12d3ddf3f76e80af, unit: sound_requests}
   - {addr: 0x80043c88, size: 76, name: music_set_pitch_shift_timed, hash: 0997b09f98b20f70, unit: sound_requests}
   - {addr: 0x80043cd4, size: 76, name: music_set_balance_shift_timed, hash: e8a9fa6318c8a42b, unit: sound_requests}
   - {addr: 0x80043d20, size: 96, name: music_play_tune, hash: 66e21780561ddd1d, unit: sound_requests}
-  - {addr: 0x80043d80, size: 96, name: music_set_tune_volume, hash: bb2b40daa06f22bf, unit: sound_requests}
+  - {addr: 0x80043d80, size: 96, name: music_fade_out_tune, hash: bb2b40daa06f22bf, unit: sound_requests}
   - {addr: 0x80043de0, size: 288, name: music_update_tunes, hash: 46f151791fb86bc2, unit: sound_requests}
   - {addr: 0x80043f00, size: 56, name: music_unload_scenario_and_tunes, hash: 8a55c4911959dc2e, unit: sound_requests}
   - {addr: 0x80043f38, size: 24, name: music_get_handle, hash: 006705ceb0b16735, unit: sound_requests}

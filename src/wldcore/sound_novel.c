@@ -344,7 +344,7 @@ static void sound_novel_play_pending_sounds(s32 sound_id, s32 weather_sound_id, 
                 music_flags = &g_music_queue.music.flags;
                 *music_flags |= MUSIC_QUEUE_PLAYING;
                 music_switch_track(g_sound_novel_reading.music_selection >> 8, 0, 0);
-                music_set_target(g_music_queue.volume, 0x28);
+                music_set_volume_target(g_music_queue.volume, 0x28);
             }
         }
         break;
@@ -964,7 +964,7 @@ void sound_novel_opcode_26_fade_out_music(void) {
 
     *state &= ~MUSIC_QUEUE_PLAYING;
     operand = (u8)(g_sound_novel_reading.instruction >> 8);
-    music_set_target(0, operand * 3);
+    music_set_volume_target(0, operand * 3);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
     g_sound_novel_reading.music_selection &= 0xFF00;
 }
@@ -981,7 +981,7 @@ void sound_novel_opcode_27_switch_music_track(void) {
         *state |= MUSIC_QUEUE_PLAYING;
         operand = (u8)(g_sound_novel_reading.instruction >> 8);
         music_switch_track(track >> 8, 0, 0);
-        music_set_target(g_music_queue.volume, operand * 3);
+        music_set_volume_target(g_music_queue.volume, operand * 3);
     }
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
