@@ -70,7 +70,7 @@ units:
   - {name: turn_order, source: src/battle/turn_order.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: unit_animations, source: src/battle/unit_animations.c, data: [{addr: 0x80094c04, size: 72, hash: cab01352aee9f525}, {addr: 0x80094c4c, size: 72, hash: 05a1775a42db17c8}, {addr: 0x80094c94, size: 16, hash: e8877e5cf3d312c9}, {addr: 0x80094ca4, size: 16, hash: 4b74bb45f0b85a11}, {addr: 0x80094cb4, size: 16, hash: 682ea28f475f1fe5}, {addr: 0x80094cc4, size: 16, hash: 5cf971573bd3ea07}, {addr: 0x80094cd4, size: 1272, hash: ed600454c88e8d7b}]}
   - {name: unit_control, source: src/battle/unit_control.c, data: [{addr: 0x800961ac, size: 3, hash: 8ae40a3583aef669}]}
-  - {name: unit_motion, source: src/battle/unit_motion.c}
+  - {name: unit_motion, source: src/battle/unit_motion.c, data: [{addr: 0x80093da0, size: 72, hash: 057c680566c774db}]}
   - {name: unit_name_list, source: src/lib/event/unit_name_list.c}
   - {name: unit_render, source: src/battle/unit_render.c, rodata: [{addr: 0x800677f8, size: 24, hash: eb05bd6b6bfe587c}, {addr: 0x80067830, size: 8, hash: cc7419b17cc27ab3}, {addr: 0x80067bac, size: 42, hash: 3810203f710237ef}, {addr: 0x80067bd8, size: 42, hash: 188477a5cd324d3e}, {addr: 0x80067c04, size: 42, hash: deb3dea1cb290d56}, {addr: 0x80067c30, size: 42, hash: 3b746de063f99ad5}, {addr: 0x80067c5c, size: 42, hash: 9c44ec23658ca641}, {addr: 0x80067c88, size: 42, hash: 77a31697c519e931}], data: [{addr: 0x800949dc, size: 24, hash: 2af3cad2dfddc130}, {addr: 0x800949f4, size: 24, hash: 65d77a45a2612b88}, {addr: 0x80094a0c, size: 24, hash: ca780de6daf75aec}, {addr: 0x80094a24, size: 24, hash: e4e8dec7578128c7}]}
   - {name: unit_runtime, source: src/battle/unit_runtime.c}

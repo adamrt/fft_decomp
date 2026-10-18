@@ -25,7 +25,54 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern animation_distortion_handler_t g_animation_distortion_handlers[ANIMATION_DISTORTION_COUNT];
+enum {
+    ANIMATION_DISTORTION_COUNT = 18 /* the handlers of g_animation_distortion_handlers */
+};
+
+/* The dispatcher ignores the result and the handlers supply no value. The s32
+ * callback shape preserves the pulse and teleport handlers' instruction scheduling. */
+typedef s32 (*animation_distortion_handler_t)(unit_t* unit);
+
+static s32 animation_distortion_none(unit_t* unit);
+static s32 animation_distortion_scale_pulse(unit_t* unit);
+static s32 animation_distortion_rise(unit_t* unit);
+static s32 animation_distortion_settle(unit_t* unit);
+static s32 animation_distortion_move_to_target(unit_t* unit);
+static s32 animation_distortion_move_to_own_tile(unit_t* unit);
+static s32 animation_distortion_jump_to_target(unit_t* unit);
+static s32 animation_distortion_jump_to_own_tile(unit_t* unit);
+static s32 animation_distortion_move_to_target_level(unit_t* unit);
+static s32 animation_distortion_move_to_own_tile_level(unit_t* unit);
+static s32 animation_distortion_clear(unit_t* unit);
+static s32 animation_distortion_clear_2(unit_t* unit);
+static s32 animation_distortion_jump_start(unit_t* unit);
+static s32 animation_distortion_fall_to_target(unit_t* unit);
+static s32 animation_distortion_teleport(unit_t* unit);
+static s32 animation_distortion_back_away(unit_t* unit);
+static s32 animation_distortion_jump_to_own_tile_faded(unit_t* unit);
+static s32 animation_distortion_jump_rise(unit_t* unit);
+
+/* One handler for each distortion id; id 0 is skipped by the dispatcher. */
+static animation_distortion_handler_t g_animation_distortion_handlers[ANIMATION_DISTORTION_COUNT] = {
+    animation_distortion_none,
+    animation_distortion_scale_pulse,
+    animation_distortion_rise,
+    animation_distortion_settle,
+    animation_distortion_move_to_target,
+    animation_distortion_move_to_own_tile,
+    animation_distortion_jump_to_target,
+    animation_distortion_jump_to_own_tile,
+    animation_distortion_move_to_target_level,
+    animation_distortion_move_to_own_tile_level,
+    animation_distortion_clear,
+    animation_distortion_clear_2,
+    animation_distortion_jump_start,
+    animation_distortion_fall_to_target,
+    animation_distortion_teleport,
+    animation_distortion_back_away,
+    animation_distortion_jump_to_own_tile_faded,
+    animation_distortion_jump_rise,
+};
 
 /* Project the center of the cursor tile, at its surface height less any water depth, to the screen
  * and store the cursor's screen x and y. `position` receives the tile point and `raised` its depth
@@ -165,7 +212,7 @@ static void unit_set_real_coords_from_map_coords(unit_t* unit) {
 
 /* Entry 0 of g_animation_distortion_handlers. Never called: id 0 means no distortion
  * animation and animation_distortion_dispatch skips it. */
-s32 animation_distortion_none(unit_t* unused_unit) {
+static s32 animation_distortion_none(unit_t* unused_unit) {
 }
 
 /* Distortion animation 1 (ANIMATION_DISTORTION_SCALE_PULSE; nothing starts it, and the
@@ -175,7 +222,7 @@ s32 animation_distortion_none(unit_t* unused_unit) {
  *
  * An ignored s32 result keeps $v0 live at the exit and the dispatch branch's delay
  * slot empty. This callback supplies no return value. */
-s32 animation_distortion_scale_pulse(unit_t* unit) {
+static s32 animation_distortion_scale_pulse(unit_t* unit) {
     s32 angle;
     s32 stretch;
 
@@ -210,7 +257,7 @@ s32 animation_distortion_scale_pulse(unit_t* unit) {
  * Phase 0 replaces the frame count in distortion_timer with the per-frame step
  * and stores the destination height in distortion_target; phase 1 steps until the
  * unit reaches it, then snaps and ends the animation. */
-s32 animation_distortion_rise(unit_t* unit) {
+static s32 animation_distortion_rise(unit_t* unit) {
     s32 step = unit->distortion_timer;
     s32 target = unit->distortion_target;
     s32 height;
@@ -242,7 +289,7 @@ s32 animation_distortion_rise(unit_t* unit) {
  * frame count in distortion_timer with the per-frame step; phase 1 steps while
  * the unit is above the ground, then snaps and ends the animation. A unit that
  * starts at or below the ground snaps on the first frame. */
-s32 animation_distortion_settle(unit_t* unit) {
+static s32 animation_distortion_settle(unit_t* unit) {
     s32 step = unit->distortion_timer;
     s32 ground = unit->distortion_target;
     s32 height;
@@ -380,25 +427,25 @@ static void animation_distortion_step_to_own_tile(unit_t* unit, s32 allow_height
 
 /* Distortion animation 0x04: move toward the action target in equal steps,
  * height included (animation_distortion_step_toward_target). */
-s32 animation_distortion_move_to_target(unit_t* unit) {
+static s32 animation_distortion_move_to_target(unit_t* unit) {
     animation_distortion_step_toward_target(unit, 1);
 }
 
 /* Distortion animation 0x05: move to the center of the unit's map tile in equal
  * steps, height included (animation_distortion_step_to_own_tile). */
-s32 animation_distortion_move_to_own_tile(unit_t* unit) {
+static s32 animation_distortion_move_to_own_tile(unit_t* unit) {
     animation_distortion_step_to_own_tile(unit, 1);
 }
 
 /* Distortion animation 0x08: move toward the action target in equal steps without
  * changing height (animation_distortion_step_toward_target). */
-s32 animation_distortion_move_to_target_level(unit_t* unit) {
+static s32 animation_distortion_move_to_target_level(unit_t* unit) {
     animation_distortion_step_toward_target(unit, 0);
 }
 
 /* Distortion animation 0x09: move to the center of the unit's map tile without
  * changing height. */
-s32 animation_distortion_move_to_own_tile_level(unit_t* unit) {
+static s32 animation_distortion_move_to_own_tile_level(unit_t* unit) {
     animation_distortion_step_to_own_tile(unit, 0);
 }
 
@@ -438,7 +485,7 @@ static s32 animation_distortion_calculate_jump_arc_velocity(const SVECTOR* from,
  * velocity to all three real coordinates for that many frames, the height speed
  * gaining g_move_jump_gravity each frame, and ends the animation where the
  * arc leaves the unit. */
-s32 animation_distortion_jump_to_target(unit_t* unit) {
+static s32 animation_distortion_jump_to_target(unit_t* unit) {
     SVECTOR target;
     /* The retail frame reserves eight bytes beyond the target vector. */
     u8 unused_target_tail[8];
@@ -495,7 +542,7 @@ s32 animation_distortion_jump_to_target(unit_t* unit) {
  * g_move_jump_gravity each frame, then stops the horizontal motion. Phase
  * 2 keeps falling until the unit reaches the ground under it, snaps it to the
  * tile and ends the animation. */
-s32 animation_distortion_jump_to_own_tile(unit_t* unit) {
+static s32 animation_distortion_jump_to_own_tile(unit_t* unit) {
     /* Unreferenced 8-byte frame slot below the target point, like the one in
      * animation_distortion_jump_start; it puts `target` at sp+0x18. */
     SVECTOR unused_10;
@@ -545,12 +592,12 @@ s32 animation_distortion_jump_to_own_tile(unit_t* unit) {
 
 /* Distortion animation 10 of g_animation_distortion_handlers: ends at once. Animation 11
  * is a second copy of this routine. */
-s32 animation_distortion_clear(unit_t* unit) {
+static s32 animation_distortion_clear(unit_t* unit) {
     unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
 }
 
 /* Distortion animation 11: ends at once. The same routine as animation 10, compiled twice. */
-s32 animation_distortion_clear_2(unit_t* unit) {
+static s32 animation_distortion_clear_2(unit_t* unit) {
     unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
 }
 
@@ -566,7 +613,7 @@ s32 animation_distortion_clear_2(unit_t* unit) {
  * unit starts. `unused_10` reproduces an unreferenced 16-byte frame slot below
  * the velocity copy.
  */
-s32 animation_distortion_jump_start(unit_t* unit) {
+static s32 animation_distortion_jump_start(unit_t* unit) {
     VECTOR unused_10;
     VECTOR velocity;
     s32 timer = unit->distortion_timer;
@@ -618,7 +665,7 @@ s32 animation_distortion_jump_start(unit_t* unit) {
  * During an event the unit is also centered on its tile, but retail writes the
  * depth coordinate into real.vy instead of real.vz. The height then sits below
  * the ground on the next frame, so an event fall ends on its second frame. */
-s32 animation_distortion_fall_to_target(unit_t* unit) {
+static s32 animation_distortion_fall_to_target(unit_t* unit) {
     SVECTOR coords;
     /* Unreferenced 8-byte frame slot above `coords`; it puts `velocity` at
      * sp+0x20, matching the sibling distortion handlers. */
@@ -782,7 +829,7 @@ static void animation_teleport_start_fade_out(unit_t* unit) {
  *
  * An ignored s32 result keeps $v0 live at the epilogue and the switch range
  * check's delay slot empty. This callback supplies no return value. */
-s32 animation_distortion_teleport(unit_t* unit) {
+static s32 animation_distortion_teleport(unit_t* unit) {
     unit->distortion_timer++;
     switch (unit->distortion_phase) {
     case 0:
@@ -855,7 +902,7 @@ s32 animation_distortion_teleport(unit_t* unit) {
  * velocity.vy in each branch keeps its division, which GCC folds away when the
  * zero is stored once after the branches. `unused_10` reproduces an
  * unreferenced 8-byte frame slot below the velocity copy. */
-s32 animation_distortion_back_away(unit_t* unit) {
+static s32 animation_distortion_back_away(unit_t* unit) {
     s32 unused_10[2];
     VECTOR velocity;
     unit_t* target;
@@ -920,7 +967,7 @@ s32 animation_distortion_back_away(unit_t* unit) {
  * Phase 3 falls to the ground, snaps the unit to the tile, shows the shadow,
  * clears UNIT_STATUS_JUMP_HEIGHT_ACTIVE and the semi-transparency bit, and
  * ends the animation. */
-s32 animation_distortion_jump_to_own_tile_faded(unit_t* unit) {
+static s32 animation_distortion_jump_to_own_tile_faded(unit_t* unit) {
     /* Unreferenced 8-byte frame slot below the target point, like the one in
      * animation_distortion_jump_to_own_tile; it puts `target` at sp+0x20. */
     SVECTOR unused_18;
@@ -999,7 +1046,7 @@ s32 animation_distortion_jump_to_own_tile_faded(unit_t* unit) {
  * plays the jump sound, and ends the animation at once when the unit is already
  * at or above 0x120 over the ground; the end of phase 1 only clears the animation id.
  */
-s32 animation_distortion_jump_rise(unit_t* unit) {
+static s32 animation_distortion_jump_rise(unit_t* unit) {
     VECTOR unused_10;
     VECTOR velocity;
     s32 timer = unit->distortion_timer;

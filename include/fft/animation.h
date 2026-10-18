@@ -279,21 +279,6 @@ typedef enum animation_distortion {
     ANIMATION_DISTORTION_JUMP_RISE = 17               /* 12 with the jump sound, unless the unit is that high already */
 } animation_distortion_e;
 
-enum {
-    ANIMATION_DISTORTION_COUNT = 18 /* the handlers of g_animation_distortion_handlers */
-};
-
-/* The dispatcher ignores the result and the handlers supply no value. The s32
- * callback shape preserves the pulse and teleport handlers' instruction scheduling. */
-typedef s32 (*animation_distortion_handler_t)(unit_t* unit);
-
 void animation_distortion_dispatch(unit_t* unit);
-s32 animation_distortion_scale_pulse(unit_t* unit);
-s32 animation_distortion_move_to_target(unit_t* unit);
-s32 animation_distortion_move_to_target_level(unit_t* unit);
-s32 animation_distortion_move_to_own_tile(unit_t* unit);
-s32 animation_distortion_move_to_own_tile_level(unit_t* unit);
-s32 animation_distortion_clear(unit_t* unit);
-s32 animation_distortion_clear_2(unit_t* unit);
 
 #endif
