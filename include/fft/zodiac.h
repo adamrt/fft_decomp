@@ -21,16 +21,6 @@ typedef enum zodiac_compatibility {
     ZODIAC_COMPATIBILITY_BEST = 5
 } zodiac_compatibility_e;
 
-/* One inclusive date limit and its zodiac ID. The 13-entry WORLD table has
- * Capricorn at both calendar ends and does not contain Serpentarius. */
-typedef struct zodiac_date_limit {
-    calendar_date_t date;
-    u8 zodiac;
-} zodiac_date_limit_t;
-typedef char zodiac_date_limit_size_must_be_3[(sizeof(zodiac_date_limit_t) == 3) ? 1 : -1];
-
-enum { ZODIAC_DATE_LIMIT_COUNT = 13 };
-
 s32 zodiac_calculate_sign(u16 birthday);
 
 /* zodiac pictures */

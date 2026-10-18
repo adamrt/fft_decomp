@@ -283,27 +283,6 @@ extern s8 g_formation_order_open;
 void formation_order_menu(void);
 
 /* monster breeding */
-typedef enum breeding_rarity {
-    BREEDING_RARITY_NONE = 0,
-    BREEDING_RARITY_COMMON = 1,
-    BREEDING_RARITY_UNCOMMON = 2,
-    BREEDING_RARITY_RARE = 3
-} breeding_rarity_e;
-
-enum {
-    BREEDING_RARITY_COUNT = 3,
-    BREEDING_MONTH_COUNT = 13,
-    BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1
-};
-
-/* Provisional: the breeding entry of a monster job (JOB_ID_CHOCOBO on): the hatch-day range and the three offspring
- * jobs by rarity class (breeding_update). */
-typedef struct breeding_entry {
-    u8 hatch_range;                                    /* 0x00: rand() % hatch_range + 1 (at least 2) egg days */
-    u8 offspring_job_by_rarity[BREEDING_RARITY_COUNT]; /* 0x01; common through rare */
-} breeding_entry_t;
-typedef char breeding_entry_size_must_be_4[(sizeof(breeding_entry_t) == 4) ? 1 : -1];
-
 void breeding_update(s32 unused);
 
 #endif

@@ -44,6 +44,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* WORLD map-command operand pairs; each instruction stores both halfwords together. */
+typedef struct script_command_args {
+    s16 arg1;
+    s16 arg2;
+} script_command_args_t;
+
+typedef struct script_music_switch {
+    s16 volume;
+    s16 fade;
+} script_music_switch_t;
+
 /* map-command and music state */
 extern script_command_args_t g_script_map_command_80_args;
 extern script_command_args_t g_script_map_command_83_args;

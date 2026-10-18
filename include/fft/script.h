@@ -310,18 +310,4 @@ extern u16 g_event_map_command_83_arg2;
 extern u16 g_event_music_switch_fade;   /* the consumer multiplies it by 4 */
 extern u16 g_event_music_switch_volume; /* scaled 0..96 to 0..127 */
 
-/* world event state */
-/* Operand pairs that one WORLD script_execute_event opcode stores together;
- * each second 16-bit value sits off a 32-bit alignment boundary in WORLD bss, so each pair is
- * one object. */
-typedef struct script_command_args {
-    s16 arg1;
-    s16 arg2;
-} script_command_args_t;
-
-typedef struct script_music_switch {
-    s16 volume;
-    s16 fade;
-} script_music_switch_t;
-
 #endif

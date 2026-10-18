@@ -29,6 +29,37 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* One inclusive date limit and its zodiac ID. The 13-entry WORLD table has
+ * Capricorn at both calendar ends and does not contain Serpentarius. */
+typedef struct zodiac_date_limit {
+    calendar_date_t date;
+    u8 zodiac;
+} zodiac_date_limit_t;
+typedef char zodiac_date_limit_size_must_be_3[(sizeof(zodiac_date_limit_t) == 3) ? 1 : -1];
+
+enum { ZODIAC_DATE_LIMIT_COUNT = 13 };
+
+typedef enum breeding_rarity {
+    BREEDING_RARITY_NONE = 0,
+    BREEDING_RARITY_COMMON = 1,
+    BREEDING_RARITY_UNCOMMON = 2,
+    BREEDING_RARITY_RARE = 3
+} breeding_rarity_e;
+
+enum {
+    BREEDING_RARITY_COUNT = 3,
+    BREEDING_MONTH_COUNT = 13,
+    BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1
+};
+
+/* Provisional: the breeding entry of a monster job (JOB_ID_CHOCOBO on): the hatch-day range and the three offspring
+ * jobs by rarity class (breeding_update). */
+typedef struct breeding_entry {
+    u8 hatch_range;                                    /* 0x00: rand() % hatch_range + 1 (at least 2) egg days */
+    u8 offspring_job_by_rarity[BREEDING_RARITY_COUNT]; /* 0x01; common through rare */
+} breeding_entry_t;
+typedef char breeding_entry_size_must_be_4[(sizeof(breeding_entry_t) == 4) ? 1 : -1];
+
 /* sprite sources, zodiac dates and breeding tables */
 extern const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT];
 extern texture_source_t g_formation_sprite_sources[];
