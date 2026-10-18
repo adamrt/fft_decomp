@@ -162,8 +162,9 @@ typedef struct projectile_obstacle_unit_list {
 } projectile_obstacle_unit_list_t;
 typedef char projectile_obstacle_unit_list_size_must_be_280[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
 
-extern s32 g_projectile_gravity_modifier;
-extern s32 g_projectile_gravity_scale;
+/* Resident trajectory parameters shared by arc solving, tracing and arrow flight. */
+static s32 g_projectile_gravity_scale = 0x53a;
+static s32 g_projectile_gravity_modifier = 0xa8000;
 extern s32 g_projectile_launch_slope_q12;
 extern s16 g_projectile_arctan_angle_mod;
 extern s32 g_projectile_source_id;
