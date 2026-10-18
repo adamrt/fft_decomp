@@ -21,7 +21,7 @@ units:
   - {name: buffer_allocator, source: src/lib/menu/buffer_allocator.c}
   - {name: camera, source: src/battle/camera.c, data: [{addr: 0x800a1c5c, size: 16, hash: 374708fff7719dd5}, {addr: 0x800a1c6c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a1c74, size: 16, hash: 374708fff7719dd5}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, data: [{addr: 0x801692c0, size: 1020, hash: 7d824f0a060b15de}, {addr: 0x801696bc, size: 38, hash: 5cf20e3c3f45bdbf}]}
-  - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}]}
+  - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}, {addr: 0x8016923c, size: 40, hash: 1e7bcfe6e02d777b}]}
   - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x801678ac, size: 112, hash: 7913c92a7308b758}]}
@@ -45,7 +45,7 @@ units:
   - {name: map_loading, source: src/battle/map_loading.c, data: [{addr: 0x800f7980, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7984, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7988, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f798c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7990, size: 4, hash: df3f619804a92fdb}]}
   - {name: map_palettes, source: src/battle/map_palettes.c, data: [{addr: 0x800956e4, size: 2016, hash: 0cd1d40758dc1bed}, {addr: 0x80095ec4, size: 504, hash: 40a6fe7cfd29ed44}]}
   - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}]}
-  - {name: menu_entries, source: src/lib/menu/menu_entries.c}
+  - {name: menu_entries, source: src/lib/menu/menu_entries.c, rodata: [{addr: 0x801660d4, size: 24, hash: e63f757dcd06f8bb}], data: [{addr: 0x80168d94, size: 240, hash: d7bc04a05b00901b}, {addr: 0x80168e84, size: 60, hash: 65d0190d17e9d8b3}, {addr: 0x80168ec0, size: 16, hash: d97b0fbadb184c5a}, {addr: 0x80168ed0, size: 26, hash: 96f2a0178f0106e0}]}
   - {name: message_threads, source: src/lib/menu/message_threads.c}
   - {name: move_paths, source: src/battle/move_paths.c, data: [{addr: 0x800e4e90, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: move_range, source: src/battle/move_range.c}
@@ -2457,7 +2457,7 @@ data:
   - {addr: 0x801660a4, name: g_event_scenario_music_1_id}
   - {addr: 0x801660a6, name: g_event_scenario_music_2_id}
   - {addr: 0x801660a8, name: g_text_decimal_divisors}
-  - {addr: 0x801660d4, name: g_menu_cursor_zoom_percentages}
+  - {addr: 0x801660d4, name: s_menu_cursor_zoom_percentages}
   - {addr: 0x801660ec, name: g_text_substitution_rect}
   - {addr: 0x801660fc, name: g_text_glyph_widths}
   - {addr: 0x80166994, name: g_ability_list_ability_layout}
@@ -2538,10 +2538,10 @@ data:
   - {addr: 0x80168cd0, name: g_status_screen_item_icon_image_params}
   - {addr: 0x80168d0c, name: g_status_screen_line_colors}
   - {addr: 0x80168d44, name: g_status_screen_sprite_clut_pairs}
-  - {addr: 0x80168d94, name: g_menu_icon_strip_image_params}
-  - {addr: 0x80168e84, name: g_menu_single_icon_image_params}
-  - {addr: 0x80168ec0, name: g_menu_cursor_bob_thresholds}
-  - {addr: 0x80168ed0, name: g_menu_cursor_bob_active_thresholds}
+  - {addr: 0x80168d94, name: s_menu_icon_strip_image_params}
+  - {addr: 0x80168e84, name: s_menu_single_icon_image_params}
+  - {addr: 0x80168ec0, name: s_menu_cursor_bob_thresholds}
+  - {addr: 0x80168ed0, name: s_menu_cursor_bob_active_thresholds}
   - {addr: 0x80168eec, name: g_menu_ability_list_clut_rect}
   - {addr: 0x80168ef4, name: g_message_duration_frames}
   - {addr: 0x80168ef8, name: g_overlay_companion_executable_lbas}
@@ -2558,7 +2558,7 @@ data:
   - {addr: 0x80169228, name: g_menu_saved_vsync_interval}
   - {addr: 0x8016922a, name: g_menu_vsync_interval_forced}
   - {addr: 0x80169230, name: g_menu_cleared_entry_indices}
-  - {addr: 0x8016923c, name: g_menu_selection_remaps}
+  - {addr: 0x8016923c, name: s_menu_selection_remaps}
   - {addr: 0x80169264, name: g_command_action_type_modes}
   - {addr: 0x801692a4, name: g_command_restriction_message_ids}
   - {addr: 0x801692b8, name: g_announcement_spell_quote_exception_skillsets}

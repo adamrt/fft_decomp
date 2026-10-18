@@ -19,7 +19,7 @@ units:
   - {name: buffer_allocator, source: src/lib/menu/buffer_allocator.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}, {addr: 0x80156b4c, size: 38, hash: 5cf20e3c3f45bdbf}]}
-  - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
+  - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}, {addr: 0x801566cc, size: 40, hash: 1e7bcfe6e02d777b}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x80154d38, size: 112, hash: d25818f8775b3f28}]}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a348, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019a35c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
@@ -56,7 +56,7 @@ units:
   - {name: list_threads, source: src/world/list_threads.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}]}
   - {name: memcard, source: src/lib/memcard.c, data: [{addr: 0x80194fd8, size: 4, hash: ad95131bc0b799c0}]}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
-  - {name: menu_entries, source: src/lib/menu/menu_entries.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: menu_entries, source: src/lib/menu/menu_entries.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, rodata: [{addr: 0x801533b8, size: 24, hash: e63f757dcd06f8bb}], data: [{addr: 0x80156224, size: 240, hash: d7bc04a05b00901b}, {addr: 0x80156314, size: 60, hash: 65d0190d17e9d8b3}, {addr: 0x80156350, size: 16, hash: d97b0fbadb184c5a}, {addr: 0x80156360, size: 26, hash: 96f2a0178f0106e0}]}
   - {name: menu_page_scroll_input, source: src/world/menu_page_scroll_input.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x8018aa68, size: 32, hash: 66687aadf862bd77}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x801cd794, size: 64, hash: f5a5fd42d16a2030}]}
@@ -1256,7 +1256,7 @@ data:
   - {addr: 0x80153384, name: g_text_slot_row_pitches}
   - {addr: 0x80153387, name: g_script_variable_write_guard}
   - {addr: 0x8015338c, name: g_text_decimal_divisors}
-  - {addr: 0x801533b8, name: g_menu_cursor_zoom_percentages}
+  - {addr: 0x801533b8, name: s_menu_cursor_zoom_percentages}
   - {addr: 0x801533d0, name: g_text_substitution_rect}
   - {addr: 0x801533e0, name: g_text_glyph_widths}
   - {addr: 0x80153c78, name: g_ability_list_ability_layout}
@@ -1336,10 +1336,10 @@ data:
   - {addr: 0x8015615c, name: g_status_screen_item_icon_image_params}
   - {addr: 0x80156198, name: g_status_screen_line_colors}
   - {addr: 0x801561d0, name: g_status_screen_sprite_clut_pairs}
-  - {addr: 0x80156224, name: g_menu_icon_strip_image_params}
-  - {addr: 0x80156314, name: g_menu_single_icon_image_params}
-  - {addr: 0x80156350, name: g_menu_cursor_bob_thresholds}
-  - {addr: 0x80156360, name: g_menu_cursor_bob_active_thresholds}
+  - {addr: 0x80156224, name: s_menu_icon_strip_image_params}
+  - {addr: 0x80156314, name: s_menu_single_icon_image_params}
+  - {addr: 0x80156350, name: s_menu_cursor_bob_thresholds}
+  - {addr: 0x80156360, name: s_menu_cursor_bob_active_thresholds}
   - {addr: 0x80156384, name: g_message_duration_frames}
   - {addr: 0x80156388, name: g_overlay_companion_executable_lbas}
   - {addr: 0x801563c8, name: g_overlay_companion_executable_sizes}
@@ -1354,7 +1354,7 @@ data:
   - {addr: 0x801566b8, name: g_menu_saved_vsync_interval}
   - {addr: 0x801566ba, name: g_menu_vsync_interval_forced}
   - {addr: 0x801566c0, name: g_menu_cleared_entry_indices}
-  - {addr: 0x801566cc, name: g_menu_selection_remaps}
+  - {addr: 0x801566cc, name: s_menu_selection_remaps}
   - {addr: 0x801566f4, name: g_command_action_type_modes}
   - {addr: 0x80156734, name: g_command_restriction_message_ids}
   - {addr: 0x80156748, name: g_announcement_spell_quote_exception_skillsets}

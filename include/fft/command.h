@@ -230,7 +230,7 @@ void command_reset_unit_record(s32 battle_id);
 /* Calls command_reset_unit_records; nothing calls it. */
 void command_reset_unit_records_wrapper(void);
 
-/* Restores the selected unit's command row, applying g_menu_selection_remaps. */
+/* Restores the selected unit's command row after Move or Act changes the available choices. */
 void command_restore_unit_selection(s32 menu_id);
 
 /* Auto-Battle */

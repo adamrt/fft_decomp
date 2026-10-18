@@ -61,7 +61,6 @@ typedef struct menu_selection_remap {
 typedef char menu_selection_remap_size_must_be_5[sizeof(menu_selection_remap_t) == 5 ? 1 : -1];
 
 extern menu_unit_selection_record_t g_menu_unit_selection_records[UNIT_SLOT_COUNT];
-extern menu_selection_remap_t g_menu_selection_remaps[8];
 
 /* Provisional: one 5-byte row of a menu text entry as rewritten by command_build_act_menu: the style byte at +1 is 4
  * for a grayed row, the byte at +3 is the row separator (0xfa) or the list terminator (0xff). */
@@ -77,6 +76,12 @@ static u8 g_menu_cleared_entry_indices[11] = { MENU_COMMAND_ID_WAIT_YES_NO, MENU
     MENU_COMMAND_ID_MESSAGE_YES_NO, MENU_COMMAND_ID_TARGET_KIND, MENU_COMMAND_ID_PANEL_EXECUTE,
     MENU_COMMAND_ID_MESSAGE_TARGET_KIND, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, MENU_COMMAND_ID_AUTO_BATTLE_UNIT,
     MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, MENU_COMMAND_ID_MESSAGE_EXECUTE };
+
+static menu_selection_remap_t s_menu_selection_remaps[8] = { { MENU_COMMAND_ID_TURN_MOVED, 1, { 0, 0, 0 } },
+    { MENU_COMMAND_ID_TURN_ACTED, 0, { 1, 1, 1 } }, { MENU_COMMAND_ID_TURN_MOVED_ACTED, 2, { 0, 1, 1 } },
+    { MENU_COMMAND_ID_TURN_NO_ACT_MOVED, 1, { 0, 0, 0 } }, { MENU_COMMAND_ID_RIDER_TURN_MOVED, 2, { 0, 1, 1 } },
+    { MENU_COMMAND_ID_RIDER_TURN_ACTED, 0, { 2, 2, 2 } }, { MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED, 3, { 0, 1, 2 } },
+    { MENU_COMMAND_ID_RIDER_TURN_NO_ACT_MOVED, 2, { 0, 1, 1 } } };
 
 /* Reset the cursor row of the 11 menu entries listed in g_menu_cleared_entry_indices. */
 void menu_clear_entry_selections(void) {
@@ -111,12 +116,12 @@ void command_restore_unit_selection(s32 menu_id) {
         return;
     }
     record = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_id];
-    for (row = 0, remap = g_menu_selection_remaps; row < 8; remap++, row++) {
-        if (menu_id == g_menu_selection_remaps[row].menu_id) {
+    for (row = 0, remap = s_menu_selection_remaps; row < 8; remap++, row++) {
+        if (menu_id == s_menu_selection_remaps[row].menu_id) {
             /* Keep the signed byte-table index used by the target. */
             for (candidate = 2; candidate < 5; candidate++) {
                 if (record->command_index == remap->matches[candidate - 2]) {
-                    record->command_index = g_menu_selection_remaps[row].replacement;
+                    record->command_index = s_menu_selection_remaps[row].replacement;
                     break;
                 }
             }

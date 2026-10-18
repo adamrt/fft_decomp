@@ -21,13 +21,21 @@
 #include "psx/types.h"
 
 /* Twelve crop percentages, indexed by step. */
-extern u16 g_menu_cursor_zoom_percentages[];
+static const u16 s_menu_cursor_zoom_percentages[12] = { 10, 10, 60, 60, 90, 90, 95, 95, 100, 100, 100, 100 };
 
-/* Image placements passed to gfx_set_image_primitive_layout for the icon strips of the event library. The panel and
- * numeric-panel cells of the menu library, which each menu program defines for itself, are in unit_panel.h. */
-/* Four pieces for each header from MENU_ICON_HEADER_ABILITY_TURN_REFLECT through MENU_ICON_HEADER_ABILITY. */
-extern image_layout_t g_menu_icon_strip_image_params[20];
-extern image_layout_t g_menu_single_icon_image_params[5];
+/* Four pieces for each header from MENU_ICON_HEADER_ABILITY_TURN_REFLECT through
+ * MENU_ICON_HEADER_ABILITY, followed by the five single-icon header layouts. */
+static image_layout_t s_menu_icon_strip_image_params[20]
+    = { { { 0, 32, 26, 10 }, 12, -1 }, { { 156, 176, 22, 8 }, 107, -1 }, { { 184, 32, 16, 10 }, -415, -1 },
+          { { 178, 176, 18, 8 }, 88, -1 }, { { 0, 32, 26, 10 }, 13, -1 }, { { 184, 32, 16, 10 }, 107, -1 },
+          { { 156, 176, 22, 8 }, 123, -1 }, { { 178, 176, 18, 8 }, 86, -1 }, { { 0, 32, 26, 10 }, -512, -1 },
+          { { 0, 152, 24, 8 }, 106, -1 }, { { 156, 176, 22, 8 }, 132, -1 }, { { 178, 176, 18, 8 }, 89, -1 },
+          { { 0, 32, 26, 10 }, -512, -1 }, { { 156, 176, 22, 8 }, 107, -1 }, { { 184, 32, 16, 10 }, -415, -1 },
+          { { 178, 176, 18, 8 }, 88, -1 }, { { 0, 32, 26, 10 }, 12, -1 }, { { 156, 176, 22, 8 }, 512, -1 },
+          { { 184, 32, 16, 10 }, 512, -1 }, { { 178, 176, 18, 8 }, 512, -1 } };
+static image_layout_t s_menu_single_icon_image_params[5]
+    = { { { 0, 32, 26, 10 }, -512, -1 }, { { 120, 120, 24, 8 }, 3, -1 }, { { 64, 120, 26, 8 }, 3, -1 },
+          { { 92, 120, 28, 8 }, 3, -1 }, { { 156, 176, 22, 8 }, 3, -1 } };
 
 /* One cursor animation threshold and its signed screen offset. */
 typedef struct menu_cursor_bob_entry {
@@ -36,9 +44,12 @@ typedef struct menu_cursor_bob_entry {
 } menu_cursor_bob_entry_t;
 typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t) == 2 ? 1 : -1];
 
-/* The idle and active curves: (threshold, offset) pairs ending at threshold 0; entry 0 holds the modulus. */
-extern menu_cursor_bob_entry_t g_menu_cursor_bob_thresholds[];
-extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
+/* Idle and active cursor curves end at threshold 0. The idle curve uses entry 0
+ * as its modulus; the active curve skips its first entry. */
+static menu_cursor_bob_entry_t s_menu_cursor_bob_thresholds[8]
+    = { { 46, 0 }, { 16, 0 }, { 18, 1 }, { 22, 2 }, { 28, 3 }, { 36, 2 }, { 46, 1 }, { 0, 0 } };
+static menu_cursor_bob_entry_t s_menu_cursor_bob_active_thresholds[13] = { { 38, 0 }, { 2, 0 }, { 8, -2 }, { 10, 1 },
+    { 12, 3 }, { 14, 5 }, { 16, 4 }, { 18, 3 }, { 24, 2 }, { 34, 1 }, { 36, 0 }, { 38, 0 }, { 0, 0 } };
 
 static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
 
@@ -307,12 +318,12 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
         record->icons[0]->x0 = image_params->source.h + param->window.x + 7;
         record->icons[0]->y0 = param->window.y - 1;
         gfx_set_image_primitive_layout(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-            &g_menu_single_icon_image_params[MENU_ICON_HEADER_MENU]);
+            &s_menu_single_icon_image_params[MENU_ICON_HEADER_MENU]);
     } else
 #endif
         if (kind < 5) {
         gfx_set_image_primitive_layout(
-            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[kind]);
+            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &s_menu_single_icon_image_params[kind]);
     } else {
         /* The native test also accepts 10 through 15, beyond the five header groups. */
         if (index >= 5 && index < 0x10) {
@@ -324,13 +335,13 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
              * instruction short; `(kind << 2) + n` selects the target's 4-op form. */
             kind -= 5;
             gfx_set_image_primitive_layout(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-                &g_menu_icon_strip_image_params[(kind << 2)]);
+                &s_menu_icon_strip_image_params[(kind << 2)]);
             gfx_set_image_primitive_layout(record->icons[0], &g_menu_texture_origin, &param->window,
-                &g_menu_icon_strip_image_params[(kind << 2) + 1]);
+                &s_menu_icon_strip_image_params[(kind << 2) + 1]);
             gfx_set_image_primitive_layout(record->icons[1], &g_menu_texture_origin, &param->window,
-                &g_menu_icon_strip_image_params[(kind << 2) + 2]);
+                &s_menu_icon_strip_image_params[(kind << 2) + 2]);
             gfx_set_image_primitive_layout(record->icons[2], &g_menu_texture_origin, &param->window,
-                &g_menu_icon_strip_image_params[(kind << 2) + 3]);
+                &s_menu_icon_strip_image_params[(kind << 2) + 3]);
         } else {
             record->icons[0] = 0;
             record->icons[1] = 0;
@@ -393,10 +404,10 @@ s32 menu_get_cursor_bob_offset(s32 mode) {
     s32 threshold;
 
     if (mode == 0) {
-        entry = g_menu_cursor_bob_thresholds;
+        entry = s_menu_cursor_bob_thresholds;
         counter %= entry->threshold;
     } else if (mode == 1) {
-        entry = g_menu_cursor_bob_active_thresholds;
+        entry = s_menu_cursor_bob_active_thresholds;
     }
 
     /* Any other mode leaves entry unset. The first threshold is tested here
@@ -477,7 +488,7 @@ void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step) {
     s32 scale;
     s32 offset;
     if (step < 12) {
-        scale = g_menu_cursor_zoom_percentages[step];
+        scale = s_menu_cursor_zoom_percentages[step];
         offset = sprite->w * scale / 200;
         sprite->x0 = (sprite->w / 2) + sprite->x0 - offset;
         sprite->u0 = (sprite->w / 2) + sprite->u0 - offset;
@@ -513,7 +524,7 @@ void gfx_build_scaled_draw_area_pair_swapped(
     if (step >= 12) {
         step = 11;
     }
-    percent = g_menu_cursor_zoom_percentages[step];
+    percent = s_menu_cursor_zoom_percentages[step];
     mem_copy_bytes_nonempty(&packets->rects[0], geometry, sizeof(*geometry));
     if (packets->rects[0].x < 0x80) {
         packets->rects[0].x += 0x80;
