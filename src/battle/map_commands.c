@@ -127,7 +127,7 @@ s32 system_set_vsync_interval(s32 speed) {
 
 /* Write the cursor tile to `destination` as (x, map level, y). */
 void battle_map_store_selected_tile_coordinates(SVECTOR* destination) {
-    vector_set_svector(destination, g_cursor_x, g_cursor_z, g_cursor_y);
+    vector_set_svector(destination, g_cursor_x, g_cursor_layer, g_cursor_y);
 }
 
 /* Write the map's width and depth in tiles to `destination` as (x, 0, z). */
@@ -286,7 +286,7 @@ void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rota
 
     vector_set_vector(&g_camera_real_coords, -coords->vx * ONE, -coords->vy * ONE, -coords->vz * ONE);
     vector_set_svector(&g_camera_render_state, rotation->vx & 0x1fff, rotation->vy & 0x1fff, rotation->vz & 0x1fff);
-    g_cursor_z = 0;
+    g_cursor_layer = 0;
     tile_x = g_camera_real_coords.vx / (BATTLE_MAP_TILE_SIZE * ONE);
     g_cursor_x = tile_x;
     tile_y = g_camera_real_coords.vz / (BATTLE_MAP_TILE_SIZE * ONE);
@@ -307,7 +307,7 @@ static void camera_init_defaults(void) {
     g_unit_casting_runtime_id = 0xFF;
     g_unit_source_runtime_id = 0xFF;
     g_cursor_y = 0;
-    g_cursor_z = 0;
+    g_cursor_layer = 0;
     g_cursor_x = 0;
     g_camera_rotation_action = CAMERA_ROTATION_NONE;
     g_camera_zoom_action = CAMERA_STEP_NONE;

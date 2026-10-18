@@ -862,7 +862,7 @@ void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
             }
         }
     }
-    unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (unit != 0) {
         height = g_sprite_sheet_data[unit->spritesheet_id].graphic_height * g_camera_zoom.vy / ONE + 0x18;
     } else {

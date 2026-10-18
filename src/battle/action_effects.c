@@ -51,7 +51,7 @@ void cursor_move_to_unit(const unit_t* unit) {
     if (unit != 0) {
         g_cursor_x = unit->map_x;
         g_cursor_y = unit->map_y;
-        g_cursor_z = unit->map_z;
+        g_cursor_layer = unit->map_z;
     }
 }
 
@@ -63,7 +63,7 @@ void cursor_move_to_action_target(const unit_t* unit) {
     if (stats->action_command.targeting_type == TARGET_TYPE_TILE) {
         /* The retail code reloads unit->stats for the elevation and y reads. */
         g_cursor_x = stats->action_command.target_position.vx;
-        g_cursor_z = unit->stats->action_command.target_position.vy;
+        g_cursor_layer = unit->stats->action_command.target_position.vy;
         g_cursor_y = unit->stats->action_command.target_position.vz;
         return;
     }
@@ -250,7 +250,7 @@ static void effect_secondary_build_init_from_action(unit_t* unit, effect_context
     } else {
         init->targets[0].target_type = EFFECT_TARGET_TYPE_TILE;
         init->targets[0].data.tile.vx = g_cursor_x;
-        init->targets[0].data.tile.vy = g_cursor_z;
+        init->targets[0].data.tile.vy = g_cursor_layer;
         init->targets[0].data.tile.vz = g_cursor_y;
     }
 }

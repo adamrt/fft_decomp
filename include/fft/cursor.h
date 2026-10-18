@@ -18,10 +18,13 @@ typedef enum cursor_input_mode {
     CURSOR_INPUT_FREE_CURSOR = 2
 } cursor_input_mode_e;
 
+/* Map column, row and terrain layer; the layer is not a world-space height. */
 extern s32 g_cursor_x;
 extern s32 g_cursor_y;
-extern s32 g_cursor_z;
-extern u16 g_cursor_screen_x;
+extern s32 g_cursor_layer;
+
+/* Signed projected coordinates, stored in separate four-byte slots. */
+extern s16 g_cursor_screen_x;
 extern s16 g_cursor_screen_y;
 extern s32 g_cursor_visible;
 extern s32 g_cursor_input_mode;

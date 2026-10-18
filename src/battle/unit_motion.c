@@ -39,9 +39,9 @@ void cursor_project_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR
     SetTransMatrix(&g_camera_matrix);
     vector_set_svector(position, g_cursor_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2), 0,
         g_cursor_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2));
-    position->vy = battle_map_calculate_slope_height(position, (u8)g_cursor_z);
+    position->vy = battle_map_calculate_slope_height(position, (u8)g_cursor_layer);
     tile = battle_map_tile_get_pointer(
-        (position->vx / BATTLE_MAP_TILE_SIZE), (position->vz / BATTLE_MAP_TILE_SIZE), g_cursor_z);
+        (position->vx / BATTLE_MAP_TILE_SIZE), (position->vz / BATTLE_MAP_TILE_SIZE), g_cursor_layer);
     position->vy -= tile->depth_half_height.depth * 12;
     if (tile->surface.depth_bias) {
         camera_get_tile_depth_point_biased(position, raised);
@@ -73,9 +73,9 @@ void cursor_draw_with_tile_glow(void) {
     depth = projected.vz / 4;
     cursor_draw_map_selection(&position, gfx_get_battle_otag());
     /* The polygon routine reads the same three 16-bit values in renderer x, z, y order. */
-    shape = cursor_calculate_tile_polygon(&position, g_cursor_z, &corner0);
+    shape = cursor_calculate_tile_polygon(&position, g_cursor_layer, &corner0);
     tile = battle_map_tile_get_pointer(
-        position.vx / BATTLE_MAP_TILE_SIZE, position.vz / BATTLE_MAP_TILE_SIZE, g_cursor_z);
+        position.vx / BATTLE_MAP_TILE_SIZE, position.vz / BATTLE_MAP_TILE_SIZE, g_cursor_layer);
     cursor_build_tile_glow(
         tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, gfx_get_battle_otag() + depth);
 }

@@ -47,7 +47,7 @@ units:
   - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}]}
   - {name: menu_entries, source: src/lib/menu/menu_entries.c}
   - {name: message_threads, source: src/lib/menu/message_threads.c}
-  - {name: move_paths, source: src/battle/move_paths.c, data: [{addr: 0x800e4e90, size: 4, hash: df3f619804a92fdb}, {addr: 0x800e4e94, size: 4, hash: df3f619804a92fdb}, {addr: 0x800e4e98, size: 4, hash: df3f619804a92fdb}]}
+  - {name: move_paths, source: src/battle/move_paths.c, data: [{addr: 0x800e4e90, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: move_range, source: src/battle/move_range.c}
   - {name: move_steps, source: src/battle/move_steps.c, data: [{addr: 0x80093c9c, size: 4, hash: 02d0e6c850c1f217}, {addr: 0x80093ca0, size: 4, hash: 0e3f601857911ecc}, {addr: 0x80093ca4, size: 4, hash: eae2ccfcdac29c2d}, {addr: 0x80093ca8, size: 4, hash: 2ef245921b9d3ae8}]}
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
@@ -2075,7 +2075,7 @@ data:
   - {addr: 0x800961ac, name: g_battle_map_light_back_color}
   - {addr: 0x800961b0, name: g_fade_intensity}
   - {addr: 0x800961b4, name: g_cursor_x}
-  - {addr: 0x800961b8, name: g_cursor_z}
+  - {addr: 0x800961b8, name: g_cursor_layer}
   - {addr: 0x800961bc, name: g_cursor_y}
   - {addr: 0x800961c0, name: g_cursor_repeat_counter}
   - {addr: 0x800961c4, name: g_fade_tint_target}
@@ -2180,9 +2180,7 @@ data:
   - {addr: 0x800e4e84, name: g_camera_tilt_increment}
   - {addr: 0x800e4e88, name: g_camera_rotation_increment}
   - {addr: 0x800e4e8c, name: g_menu_status_enabled}
-  - {addr: 0x800e4e90, name: g_cursor_previous_x}
-  - {addr: 0x800e4e94, name: g_cursor_previous_z}
-  - {addr: 0x800e4e98, name: g_cursor_previous_y}
+  - {addr: 0x800e4e90, name: g_cursor_previous_tile}
   - {addr: 0x800e4e9c, name: g_battle_map_terrain_width}
   - {addr: 0x800e4ea0, name: g_battle_map_terrain_depth}
   - {addr: 0x800e4ea4, name: g_battle_map_palette_modified_colors}

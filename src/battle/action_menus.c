@@ -443,7 +443,7 @@ void menu_action_open_active_unit(void) {
  * acting unit, or while the status menu is open; there the player and other
  * unit menus switch to their inspect variants. An empty tile does nothing. */
 void menu_action_open_non_active_unit(void) {
-    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     unit_stats_t* stats;
     s32 menu_id;
 
@@ -472,7 +472,7 @@ void menu_action_open_non_active_unit(void) {
  * player controls it and otherwise restarts the AI-command state. Any
  * other unit gets the non-active-unit menu. An empty tile does nothing. */
 void menu_action_dispatch(void) {
-    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
 
     if (unit == 0) {
         return;
@@ -660,7 +660,7 @@ void state_enter_unit_moving_setup(void) {
             source->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED);
         return;
     }
-    at_tile = unit_get_crystal_or_treasure_at_map_coords(g_cursor_x, g_cursor_y, g_cursor_z);
+    at_tile = unit_get_crystal_or_treasure_at_map_coords(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (at_tile != 0) {
         if (at_tile->status_flags_5_6 & UNIT_STATUS_CRYSTAL) {
             menu_init_system_function(MENU_SYSTEM_COMMAND_MOVE_FEEDBACK, MENU_MOVE_FEEDBACK_CRYSTAL,

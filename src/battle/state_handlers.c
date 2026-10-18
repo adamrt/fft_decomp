@@ -413,7 +413,8 @@ void state_handle_targeting_range(void) {
             return;
         }
         if ((g_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
-            if ((battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z)->ceiling_depth_and_marks.ability_range)
+            if ((battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer)
+                        ->ceiling_depth_and_marks.ability_range)
                 != 0) {
                 target_select_tile();
                 return;
@@ -543,19 +544,19 @@ void state_handle_confirm_action(void) {
         switch (selected_command) {
         case TARGET_TYPE_TILE:
             unit->command_state.ai.data.action.targeting_type = selected_command_address->kind;
-            vector_set_svector(&unit->command_state.cursor.target_panel, g_cursor_x, g_cursor_z, g_cursor_y);
+            vector_set_svector(&unit->command_state.cursor.target_panel, g_cursor_x, g_cursor_layer, g_cursor_y);
             state_enter_pre_attack_animation();
             return;
         case TARGET_TYPE_UNIT:
         case AI_COMMAND_PROMPT_YES:
-            target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+            target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
             if (target != 0) {
                 unit->command_state.ai.data.action.targeting_type = selected_command_address->kind;
                 unit->command_state.ai.data.action.target_id = target->stats->battle_id;
             } else {
                 unit->command_state.ai.data.action.targeting_type = TARGET_TYPE_TILE;
             }
-            vector_set_svector(&unit->command_state.cursor.target_panel, g_cursor_x, g_cursor_z, g_cursor_y);
+            vector_set_svector(&unit->command_state.cursor.target_panel, g_cursor_x, g_cursor_layer, g_cursor_y);
             state_enter_pre_attack_animation();
             return;
         case AI_COMMAND_PROMPT_NO:
@@ -1063,7 +1064,7 @@ void state_handle_target_select(void) {
     menu_update_menus_and_event_speed(gfx_get_battle_otag(), g_input_current_buttons);
     if (g_input_pressed_buttons & PSX_PAD_CIRCLE) {
         caster = unit_get_casting();
-        target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+        target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         /* The targeted choice requires an enemy, the recovery choice an ally. */
         if (target == 0) {
             state_enter_target_select_denied();
@@ -1116,7 +1117,7 @@ void state_handle_target_select_confirm(void) {
     switch ((s32)command_get_selected()->kind) {
     case AI_COMMAND_PROMPT_YES:
         caster = unit_get_casting();
-        target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+        target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         auto_battle_store_target(target->stats->battle_id, caster->stats->battle_id);
         cursor_move_to_unit(caster);
         state_enter_open_action_menus();

@@ -467,7 +467,7 @@ void target_select_tile(void) {
         vector_set_svector(&unit->command_state.ai.data.action.target_position, unit->map_x, unit->map_z, unit->map_y);
         unit->command_state.ai.data.action.targeting_type = TARGET_TYPE_TILE;
     } else if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
-        vector_set_svector(&unit->command_state.ai.data.action.target_position, g_cursor_x, g_cursor_z, g_cursor_y);
+        vector_set_svector(&unit->command_state.ai.data.action.target_position, g_cursor_x, g_cursor_layer, g_cursor_y);
         unit->command_state.ai.data.action.targeting_type = TARGET_TYPE_TILE;
     }
     result = target_area_set_for_action(&unit->command_state.ai.data.action);
@@ -560,7 +560,7 @@ void state_enter_confirm_action(void) {
     camera_pan_disable();
     g_game_state = GAME_STATE_CONFIRM_ACTION;
     unit = unit_get_source();
-    target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     switch (unit->ability_preview_phase) {
     case TARGET_PANELS_UNIT_OR_TILE:
         if (target != 0) {
@@ -671,7 +671,7 @@ void state_enter_target_select_denied(void) {
 
     camera_pan_disable();
     g_game_state = GAME_STATE_TARGET_SELECT_DENIED;
-    occupant = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    occupant = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (occupant != 0) {
         stats = occupant->stats;
         if (stats != 0) {
@@ -701,7 +701,7 @@ void state_enter_target_select_confirm(void) {
 
     camera_pan_disable();
     g_game_state = GAME_STATE_TARGET_SELECT_CONFIRM;
-    unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (unit != 0) {
         stats = unit->stats;
         if (stats != 0) {
@@ -828,7 +828,7 @@ void state_handle_free_cursor(void) {
     } else if (input & PSX_PAD_CIRCLE) {
         target_set_tile_mark_colors(BATTLE_MAP_TILE_MARK_NONE, 0);
         sound_play_sfx(SOUND_SFX_CONFIRM);
-        if (unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z) != 0) {
+        if (unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer) != 0) {
             menu_action_dispatch();
         } else {
             unit = unit_get_source();
@@ -839,7 +839,7 @@ void state_handle_free_cursor(void) {
         }
     } else if (input & PSX_PAD_CROSS) {
         at_list_reset_cursor();
-        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         if (unit != 0) {
             g_unit_casting_runtime_id = unit->runtime_id;
             state_enter_display_move_area();
@@ -1261,7 +1261,7 @@ void state_handle_select_move_tile(void) {
         camera_tilt_handle_input();
         buttons = g_input_pressed_buttons;
         if (buttons & PSX_PAD_CIRCLE) {
-            path = move_path_build_to_tile(casting->stats->battle_id, g_cursor_x, g_cursor_y, g_cursor_z);
+            path = move_path_build_to_tile(casting->stats->battle_id, g_cursor_x, g_cursor_y, g_cursor_layer);
             if (path != 0) {
                 casting->path = *path;
                 casting->walk_speed = 0x2000;
@@ -1298,7 +1298,7 @@ void state_handle_select_move_tile(void) {
         elevation = source->command_state.ai.data.move.layer;
         y = source->command_state.ai.data.move.y;
         g_cursor_x = x;
-        g_cursor_z = elevation;
+        g_cursor_layer = elevation;
         g_cursor_y = y;
         casting->path = *path;
         casting->walk_speed = 0x2000;

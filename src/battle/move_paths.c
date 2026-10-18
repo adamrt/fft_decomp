@@ -25,6 +25,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* The selected tile before a cursor step, in map column/layer/row order. */
+typedef struct cursor_tile_position {
+    s32 x;
+    s32 layer;
+    s32 y;
+} cursor_tile_position_t;
+typedef char cursor_tile_position_size_must_be_12[sizeof(cursor_tile_position_t) == 12 ? 1 : -1];
+
 /* Camera step rates and cursor repeat state. */
 extern s32 g_camera_rotation_increment;
 extern s32 g_camera_yaw_target;
@@ -36,9 +44,7 @@ extern s32 g_camera_tilt_increment;
 extern s32 g_camera_zoom_increment;
 extern u32 g_cursor_repeat_counter; /* free-cursor repeat counter */
 
-static s32 g_cursor_previous_x = 0; /* cursor X before this step */
-static s32 g_cursor_previous_z = 0; /* cursor level before this step */
-static s32 g_cursor_previous_y = 0; /* cursor Y before this step */
+static cursor_tile_position_t g_cursor_previous_tile = { 0 };
 
 /* Step handler of the FLOAT_JUMP phases: carry a floating unit to the entry edge of its
  * destination tile, where its horizontal motion stops; once it has come down to the tile's height,
@@ -861,7 +867,7 @@ s32 camera_get_input_direction(s32 source) {
 /* Start the hovered-unit stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
 void cursor_show_hovered_unit_panel(void) {
-    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     s32 mode;
     s32 unit_id;
 
@@ -878,7 +884,7 @@ void cursor_show_hovered_unit_panel(void) {
 /* Start the right-side stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
 void cursor_show_right_unit_panel(void) {
-    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
 
     /* Retail looks up the source unit here and ignores it. */
     unit_get_source();
@@ -893,7 +899,7 @@ void cursor_show_right_unit_panel(void) {
  * source unit against the unit on the cursor tile, or the source unit's own stats
  * when the tile is empty. */
 void cursor_show_attack_preview_panel(void) {
-    unit_t* target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+    unit_t* target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     unit_t* source = unit_get_source();
 
     if (target != 0) {
@@ -911,17 +917,17 @@ void cursor_show_attack_preview_panel(void) {
  * target-select states, the preview target's panel in the targeting-range state. */
 void cursor_move_to_selection(const unit_t* unit, const unit_t* selected_unit) {
     s32 old_x = g_cursor_x;
-    s32 old_z = g_cursor_z;
+    s32 old_layer = g_cursor_layer;
     s32 old_y = g_cursor_y;
 
     if (selected_unit != 0) {
         cursor_move_to_unit(selected_unit);
     } else {
         g_cursor_x = unit->command_state.cursor.target_panel.vx;
-        g_cursor_z = unit->command_state.cursor.target_panel.vy;
+        g_cursor_layer = unit->command_state.cursor.target_panel.vy;
         g_cursor_y = unit->command_state.cursor.target_panel.vz;
     }
-    if (((g_cursor_x != old_x) | (g_cursor_z != old_z) | (g_cursor_y != old_y)) != 0) {
+    if (((g_cursor_x != old_x) | (g_cursor_layer != old_layer) | (g_cursor_y != old_y)) != 0) {
         switch (g_game_state) {
         case GAME_STATE_FREE_CURSOR:
         case GAME_STATE_SELECT_MOVE_TILE:
@@ -977,29 +983,29 @@ s32 cursor_move_by_input(void) {
     } while (0);
 
     direction = 0;
-    current = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z);
+    current = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (g_game_options.fields.multi_height_cursor_speed == GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP) {
         if (g_input_pressed_buttons & PSX_PAD_START) {
-            other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z ^ 1);
+            other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
             if (!other_level->flags.blocked) {
                 direction = 1;
-                g_cursor_z ^= 1;
+                g_cursor_layer ^= 1;
             }
         }
     } else if (g_cursor_repeat_counter > delay) {
         g_cursor_repeat_counter = 0;
-        other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z ^ 1);
+        other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
         if (!other_level->flags.blocked) {
             direction = 1;
-            g_cursor_z ^= 1;
+            g_cursor_layer ^= 1;
         }
     }
 
     if (direction == 0) {
         g_cursor_repeat_counter++;
-        g_cursor_previous_x = g_cursor_x;
-        g_cursor_previous_z = g_cursor_z;
-        g_cursor_previous_y = g_cursor_y;
+        g_cursor_previous_tile.x = g_cursor_x;
+        g_cursor_previous_tile.layer = g_cursor_layer;
+        g_cursor_previous_tile.y = g_cursor_y;
 
         direction = camera_get_input_direction(CAMERA_INPUT_PRESSED);
         switch (direction) {
@@ -1048,8 +1054,8 @@ s32 cursor_move_by_input(void) {
         }
 
         /* The tile stepped onto at the cursor's level and the tile on the other level. */
-        stepped = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z);
-        opposite = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z ^ 1);
+        stepped = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer);
+        opposite = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
         if (stepped->flags.blocked) {
             if (opposite->flags.blocked) {
                 switch (direction) {
@@ -1083,7 +1089,7 @@ s32 cursor_move_by_input(void) {
                     break;
                 }
             } else {
-                g_cursor_z ^= 1;
+                g_cursor_layer ^= 1;
             }
         } else if (!opposite->flags.blocked) {
             stepped_rise = stepped->height - current->height;
@@ -1095,13 +1101,13 @@ s32 cursor_move_by_input(void) {
                 opposite_rise = -opposite_rise;
             }
             if (opposite_rise < stepped_rise) {
-                g_cursor_z ^= 1;
+                g_cursor_layer ^= 1;
             }
         }
     }
 
-    if (((g_cursor_x != g_cursor_previous_x) | (g_cursor_z != g_cursor_previous_z)
-            | (g_cursor_y != g_cursor_previous_y))
+    if (((g_cursor_x != g_cursor_previous_tile.x) | (g_cursor_layer != g_cursor_previous_tile.layer)
+            | (g_cursor_y != g_cursor_previous_tile.y))
         != 0) {
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
         g_cursor_repeat_counter = 0;
@@ -1590,14 +1596,14 @@ static void camera_shift_acting_unit_vector(void) {
  * offset is normalized by VectorNormal into g_camera_step_vector and
  * tripled. Returns the negated tile height. */
 static s32 camera_calculate_cursor_tile_vector_normal(void) {
-    battle_map_tile_t* tile = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z);
+    battle_map_tile_t* tile = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer);
     SVECTOR tile_position;
     VECTOR delta;
     s32 height;
     battle_map_tile_depth_t depth;
 
     /* Retail also looks up the tile on the other level and ignores it. */
-    battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_z ^ 1);
+    battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
     depth = tile->depth_half_height;
     height
         = -((tile->height + depth.depth) * BATTLE_MAP_HEIGHT_STEP + depth.half_height * (BATTLE_MAP_HEIGHT_STEP / 2));
@@ -1745,7 +1751,7 @@ void camera_update_vector_from_game_state(void) {
     s32 height;
 
     if (g_game_state == GAME_STATE_POST_MOVE_EVENTS) {
-        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         height = 0;
         if (unit != 0) {
             height = (g_sprite_sheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
@@ -1783,7 +1789,7 @@ void camera_update_vector_from_game_state(void) {
     }
     if (g_camera_zoom_action == CAMERA_STEP_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
         && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_camera_pan_enabled == 0) {
-        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         height = 0;
         if (unit != 0) {
             height = (g_sprite_sheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
@@ -1820,7 +1826,7 @@ void camera_update_cursor_tile_vector(void) {
 
     if (g_camera_zoom_action == CAMERA_STEP_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
         && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_camera_pan_enabled == 0) {
-        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_z);
+        unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         height = 0;
         if (unit != 0) {
             height = (g_sprite_sheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
