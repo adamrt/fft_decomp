@@ -165,9 +165,7 @@ extern menu_quad_page_t g_unit_view_height_display_pages[2];
 extern status_screen_frame_t g_status_screen_frames[2];
 extern menu_palette_primitives_t g_status_screen_palette;
 extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
-extern menu_number_entry_t g_status_screen_numbers_entries[15];
 extern RECT g_status_screen_numbers_frame_rect;
-extern image_layout_t g_status_screen_numbers_image_params[18];
 extern menu_palette_slot_t g_status_screen_numbers_palettes[];
 extern RECT g_status_screen_numbers_text_rect_a;
 extern RECT g_status_screen_numbers_text_rect_b;
@@ -237,6 +235,53 @@ typedef enum menu_status_screen_line_layout_offset {
     MENU_STATUS_SCREEN_LINE_Y1 = 6,
     MENU_STATUS_SCREEN_LINE_SIZE = 7
 } menu_status_screen_line_layout_offset_e;
+
+/* Numeric-side-panel image pieces and the live values drawn into its three text images. */
+static image_layout_t g_status_screen_numbers_image_params[18] = {
+    { { 0, 0, 24, 8 }, 10, 6 },
+    { { 0, 8, 24, 8 }, 10, 18 },
+    { { 176, 144, 26, 10 }, 5, 29 },
+    { { 0, 24, 48, 8 }, 60, 6 },
+    { { 120, 24, 8, 8 }, 56, 18 },
+    { { 128, 24, 8, 8 }, 56, 30 },
+    { { 48, 24, 14, 8 }, 135, 6 },
+    { { 100, 24, 16, 8 }, 161, 6 },
+    { { 100, 24, 16, 8 }, 186, 6 },
+    { { 100, 24, 16, 8 }, 212, 6 },
+    { { 64, 0, 12, 24 }, 118, 15 },
+    { { 64, 24, 12, 8 }, 152, 6 },
+    { { 76, 24, 12, 8 }, 178, 6 },
+    { { 88, 24, 12, 8 }, 203, 6 },
+    { { 216, 0, 20, 36 }, 32, 5 },
+    { { 0, 144, 64, 24 }, 64, 17 },
+    { { 136, 80, 94, 24 }, 130, 17 },
+    { { 80, 0, 12, 24 }, 118, 15 },
+};
+static menu_number_entry_t g_status_screen_numbers_entries[15] = {
+    { 0, 0, &g_unit_panel_selected_unit_fields.state.move, SMALL_NUMBER_DOTS_PREFIX | 1, 0 },
+    { 0, 12, &g_unit_panel_selected_unit_fields.state.jump, SMALL_NUMBER_DOTS_PREFIX | 1, 0 },
+    { 0, 24, &g_unit_panel_selected_unit_fields.state.speed, SMALL_NUMBER_DOTS_PREFIX | 2, 0 },
+    { 0, 0, &g_unit_panel_selected_unit_fields.state.right_weapon_power, SMALL_NUMBER_DOTS_PREFIX | 3, 0 },
+    { 0, 12, &g_unit_panel_selected_unit_fields.state.left_weapon_power, SMALL_NUMBER_DOTS_PREFIX | 3, 0 },
+    { 26, 0, &g_unit_panel_selected_unit_fields.state.right_weapon_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 26, 12, &g_unit_panel_selected_unit_fields.state.left_weapon_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 6, 0, &g_unit_panel_selected_unit_fields.state.physical_attack, 2, 0 },
+    { 6, 12, &g_unit_panel_selected_unit_fields.state.magical_attack, 2, 0 },
+    { 20, 0, &g_unit_panel_selected_unit_fields.state.physical_class_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 20, 12, &g_unit_panel_selected_unit_fields.state.magical_class_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 45, 0, &g_unit_panel_selected_unit_fields.state.physical_shield_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 45, 12, &g_unit_panel_selected_unit_fields.state.magical_shield_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 71, 0, &g_unit_panel_selected_unit_fields.state.physical_accessory_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+    { 71, 12, &g_unit_panel_selected_unit_fields.state.magical_accessory_evade,
+        SMALL_NUMBER_SLASH_PREFIX_LEFT | SMALL_NUMBER_PERCENT_SUFFIX | SMALL_NUMBER_WIDEN_FOR_100 | 2, 0 },
+};
 
 /* Status-screen geometry. The sprite layouts differ in their ability-column
  * labels: two skillsets plus Reaction/Support/Movement, or monster abilities.
