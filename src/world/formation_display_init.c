@@ -137,7 +137,7 @@ void formation_init_display(void) {
  * humans in the other shops. Also reconciles the five item category lists
  * and resets the cursor and scroll. */
 void formation_rebuild_unit_list(void) {
-    s32 mode;
+    formation_record_list_mode_e mode;
 
     if (g_screen_context_id == SCREEN_CONTEXT_FORMATION) {
         mode = FORMATION_RECORD_LIST_ALL;

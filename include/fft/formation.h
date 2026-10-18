@@ -114,7 +114,7 @@ extern struct formation_unit* g_formation_temp_unit;
  * does not itself refresh this byte. */
 extern u8 g_formation_unit_count;
 
-s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, s32 mode);
+s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode);
 void formation_build_unit_record(
     const struct unit_stats* unit, struct formation_unit* record, const struct party_unit* party);
 void formation_rebuild_unit_list(void);

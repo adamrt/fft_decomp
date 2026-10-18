@@ -40,6 +40,7 @@ units:
   - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018c704, size: 60, hash: c095164e74c2ecf1}, {addr: 0x8018c740, size: 4, hash: c379451c75a2813d}, {addr: 0x8018c744, size: 12, hash: 1d20c89ea5a44018}, {addr: 0x8018c750, size: 12, hash: 5861b9bcdd5acbd6}, {addr: 0x8018c75c, size: 12, hash: 2ff0fd78112d9482}, {addr: 0x8018c768, size: 20, hash: ba872646a4176ce7}, {addr: 0x8018c77c, size: 20, hash: 135cdf93c7edfc76}]}
   - {name: formation_icon_list, source: src/world/formation_icon_list.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
   - {name: formation_item_menu, source: src/world/formation_item_menu.c}
+  - {name: formation_records, source: src/world/formation_records.c, data: [{addr: 0x801c8638, size: 6216, hash: 3acab0298adf59e4}]}
   - {name: formation_screen, source: src/world/formation_screen.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: formation_units, source: src/world/formation_units.c, rodata: [{addr: 0x8018de84, size: 39, hash: 9b19539c4007dec5}, {addr: 0x8018deac, size: 13, hash: 3f791b83fe642490}, {addr: 0x8018debc, size: 192, hash: 89e1da6fa721ba35}]}
   - {name: formation_view, source: src/world/formation_view.c, data: [{addr: 0x8018a144, size: 36, hash: d3211fb13a06ff86}, {addr: 0x8018a168, size: 424, hash: 2cea75c50162ef58}]}
@@ -73,7 +74,6 @@ units:
   - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801aed74, size: 24, hash: 9d908ecfb6b256de}, {addr: 0x801aed8c, size: 66048, hash: cf1cc8dd4cd12e47}, {addr: 0x801bef8c, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x801bf00c, size: 4, hash: df3f619804a92fdb}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x8018b660, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: panel_toggles, source: src/world/panel_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: party_records, source: src/world/party_records.c, data: [{addr: 0x801c8638, size: 6216, hash: 3acab0298adf59e4}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x8018aef8, size: 16, hash: ed44f3f59883c72d}]}
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
   - {name: roster_changes, source: src/world/roster_changes.c}
@@ -820,9 +820,9 @@ functions:
   - {addr: 0x80120a64, size: 152, name: formation_set_unit_name, hash: 7171309b3c28f0a5, unit: roster_changes}
   - {addr: 0x80120afc, size: 148, name: unit_is_two_handing_weapon, hash: 3c38bd0637eadb53, source: src/lib/menu/unit_is_two_handing_weapon.c}
   - {addr: 0x80120b90, size: 32, name: job_is_special_monster, hash: f4362856b8ecd185, source: src/lib/menu/job_is_special_monster.c}
-  - {addr: 0x80120bb0, size: 1336, name: formation_build_unit_record, hash: e6808d20c381f45c, unit: party_records}
-  - {addr: 0x801210e8, size: 464, name: formation_build_record_list, hash: 93fb6fa91f4fa5c9, unit: party_records}
-  - {addr: 0x801212b8, size: 688, name: formation_save_records, hash: c0932d02a682df31, unit: party_records}
+  - {addr: 0x80120bb0, size: 1336, name: formation_build_unit_record, hash: e6808d20c381f45c, unit: formation_records}
+  - {addr: 0x801210e8, size: 464, name: formation_build_record_list, hash: 93fb6fa91f4fa5c9, unit: formation_records}
+  - {addr: 0x801212b8, size: 688, name: formation_save_records, hash: c0932d02a682df31, unit: formation_records}
   - {addr: 0x80121568, size: 236, name: item_get_ranking_value, hash: c162face50932c06, source: src/lib/menu/item_get_ranking_value.c}
   - {addr: 0x80121654, size: 1548, name: item_sort_id_list, hash: cadb2570fbcc2eab, unit: roster_sorting}
   - {addr: 0x80121c60, size: 872, name: formation_sort_roster, hash: 81bb011ed79bb2fb, unit: roster_sorting}

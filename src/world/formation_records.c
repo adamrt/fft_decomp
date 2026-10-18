@@ -171,7 +171,7 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
  * record count. The list argument is unused here;
  * formation_sort_roster fills g_formation_unit_pointers.
  */
-s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, s32 mode) {
+s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode) {
     unit_stats_t unit;
     s32 slot = 0;
     s32 count = 0;
