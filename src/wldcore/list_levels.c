@@ -1195,10 +1195,10 @@ void brave_story_wait_work_history_then_pop(menu_stack_record_t* unused_level) {
     brave_story_open_work_history();
 }
 
-/* Push a screen transition into `screen` (a menu level type): clear the map, hide date, location label and
+/* Push a screen transition into `destination_level` (a menu level type): clear the map, hide date, location label and
  * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
  * and start the zoom thread; param_a and param_b are kept for the new screen. */
-void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
+void screen_transition_push_level(menu_stack_level_e destination_level, s32 param_a, s32 param_b) {
     u32* clear;
     s32 count;
     s32 i;
@@ -1207,7 +1207,7 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
     world_map_clear_screen_and_set_clip_rect(1);
     g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     world_map_fade_start(0, 0x10);
-    switch (screen) {
+    switch (destination_level) {
     case MENU_STACK_LEVEL_BRAVE_STORY:
         window_set_render_objects_visible(0);
         music_queue_wait_until_empty();
@@ -1272,7 +1272,7 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
     i = WORLD_MAP_BACKDROP_WORDS - 1;
     clear = &g_world_map_scratch_buffer[WORLD_MAP_BACKDROP_WORDS - 1];
     depth = g_menu_stack_depth;
-    g_menu_stack_records[depth].screen_transition.screen = screen;
+    g_menu_stack_records[depth].screen_transition.destination_level = destination_level;
     g_menu_stack_records[depth].screen_transition.param_a = param_a;
     g_menu_stack_records[depth].screen_transition.param_b = param_b;
     for (; i >= 0; i--) {
@@ -1340,7 +1340,7 @@ static void menu_stack_close_parent_list_frame(void) {
  * background set. Once that thread has ended it pops itself, restarts the
  * message box (TEXT_ID_BRAVE_STORY_INTRO, or
  * TEXT_ID_TUTORIAL_WELCOME for the tutorial lists) and pushes the
- * level named by `screen`: Brave Story, a story event text, the tutorial
+ * level named by `destination_level`: Brave Story, a story event text, the tutorial
  * categories, the formation tutorials, the battle tutorials or a
  * treasure detail. The two tutorial entry lists first un-hide the parent
  * list's windows and frame.
@@ -1367,7 +1367,7 @@ void screen_transition_step_level(menu_stack_record_t* level) {
             return;
         }
         g_menu_stack_depth--;
-        switch (level->screen_transition.screen) {
+        switch (level->screen_transition.destination_level) {
         case MENU_STACK_LEVEL_BRAVE_STORY:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);

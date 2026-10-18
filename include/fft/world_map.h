@@ -426,13 +426,14 @@ void world_map_suspend_cursor_level(menu_stack_record_t* level);
 /* Provisional: the SCREEN_TRANSITION level pushed by screen_transition_push_level and stepped by
  * screen_transition_step_level. */
 typedef struct screen_transition_level {
-    s32 screen;     /* 0x00; menu_stack_level_e of the level to open */
-    s32 param_a;    /* 0x04 */
-    s32 param_b;    /* 0x08 */
-    s32 _unused_0c; /* 0x0c */
-    s32 delay;      /* 0x10; 0x14 at push */
-    s32 phase;      /* 0x14; cleared at push */
+    menu_stack_level_e destination_level; /* 0x00; destination selector, using menu-stack level IDs */
+    s32 param_a;                          /* 0x04 */
+    s32 param_b;                          /* 0x08 */
+    s32 _unused_0c;                       /* 0x0c */
+    s32 delay;                            /* 0x10; 0x14 at push */
+    s32 phase;                            /* 0x14; cleared at push */
 } screen_transition_level_t;
+typedef char screen_transition_level_size_must_be_24[sizeof(screen_transition_level_t) == 24 ? 1 : -1];
 
 /* event_transition_level_t.mode, the argument of
  * event_transition_push_level and the second operand of the
@@ -480,7 +481,7 @@ typedef struct event_transition_level {
     s32 mode; /* 0x20; event_transition_mode_e; argument of the push */
 } event_transition_level_t;
 
-void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b);
+void screen_transition_push_level(menu_stack_level_e destination_level, s32 param_a, s32 param_b);
 void screen_transition_step_level(menu_stack_record_t* level);
 void event_transition_push_level(s32 mode);
 void event_transition_step_level(menu_stack_record_t* level);
