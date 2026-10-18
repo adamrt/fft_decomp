@@ -247,11 +247,10 @@ func (p project) unitsCommand(args []string) error {
 // scores boundaries and forms units.
 func (p project) reconstructUnits(config *projectConfig, options unitsOptions) (map[string]*unitModuleAnalysis, error) {
 	resolver := newSymbolResolver(config)
-	identCache := map[string]map[string]struct{}{}
-	divisionCache := map[string]bool{}
+	sourceCache := unitSourceCache{}
 	analyses := map[string]*unitModuleAnalysis{}
 	for _, m := range config.Modules {
-		analyses[m.ID] = p.analyzeModuleLayout(m, resolver, identCache, divisionCache, options)
+		analyses[m.ID] = p.analyzeModuleLayout(m, resolver, sourceCache, options)
 	}
 	alignAllModules(config, analyses)
 	for _, m := range config.Modules {
@@ -263,10 +262,9 @@ func (p project) reconstructUnits(config *projectConfig, options unitsOptions) (
 	return analyses, nil
 }
 
-func (p project) analyzeModuleLayout(m *moduleSpec, resolver symbolResolver, identCache map[string]map[string]struct{},
-	divisionCache map[string]bool, options unitsOptions) *unitModuleAnalysis {
+func (p project) analyzeModuleLayout(m *moduleSpec, resolver symbolResolver, sourceCache unitSourceCache, options unitsOptions) *unitModuleAnalysis {
 	an := &unitModuleAnalysis{m: m, byName: map[string]int{}, evidence: map[int][]unitEvidence{}}
-	an.functions = p.loadUnitFunctions(m, identCache, divisionCache, &an.diagnostics)
+	an.functions = p.loadUnitFunctions(m, sourceCache, &an.diagnostics)
 	if image, err := p.readModuleImage(m); err == nil {
 		for i := range an.functions {
 			an.functions[i].jumpAlign = jumpTableAlignment(image, m, an.functions[i].f)
@@ -303,8 +301,7 @@ func (p project) analyzeModuleLayout(m *moduleSpec, resolver symbolResolver, ide
 	return an
 }
 
-func (p project) loadUnitFunctions(m *moduleSpec, identCache map[string]map[string]struct{}, divisionCache map[string]bool,
-	diagnostics *unitsReportDiagnostic) []unitFunction {
+func (p project) loadUnitFunctions(m *moduleSpec, sourceCache unitSourceCache, diagnostics *unitsReportDiagnostic) []unitFunction {
 	order := make([]*functionSpec, len(m.Functions))
 	for i := range m.Functions {
 		order[i] = &m.Functions[i]
@@ -326,42 +323,26 @@ func (p project) loadUnitFunctions(m *moduleSpec, identCache map[string]map[stri
 		} else {
 			fn.base = fn.profile
 		}
-		idents, seen := identCache[source]
-		if !seen {
-			path := filepath.Join(p.root, filepath.FromSlash(source))
+		if fn.asm {
 			var err error
-			if idents, err = sourceIdentifiers(path); err != nil {
-				idents = nil
-				diagnostics.UnreadableSources = append(diagnostics.UnreadableSources, source)
+			fn.idents, err = sourceIdentifiers(filepath.Join(p.root, filepath.FromSlash(source)))
+			if err != nil {
+				diagnostics.UnreadableSources = append(diagnostics.UnreadableSources, source+": "+err.Error())
 			}
-			identCache[source] = idents
-			divisionCache[source] = !fn.asm && idents != nil && sourceHasDivision(path)
+		} else {
+			view := p.unitSourceFunctions(m, source, sourceCache)
+			if view.err != nil {
+				diagnostics.UnreadableSources = append(diagnostics.UnreadableSources, source+": "+view.err.Error())
+			} else if facts, ok := view.functions[f.sourceSymbol()]; ok {
+				fn.idents, fn.hasDivision = facts.idents, facts.hasDivision
+			} else {
+				diagnostics.UnreadableSources = append(diagnostics.UnreadableSources, source+": no active definition of "+f.sourceSymbol())
+			}
 		}
-		fn.idents = idents
-		fn.hasDivision = divisionCache[source]
 		fn.neutral = f.Size <= unitNeutralSize
 		functions[i] = fn
 	}
 	return functions
-}
-
-// sourceHasDivision reports whether the source divides anywhere: only such
-// functions reveal whether their object was built with division checks.
-func sourceHasDivision(path string) bool {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return false
-	}
-	tokens, err := tokenizeC(string(data))
-	if err != nil {
-		return false
-	}
-	for _, token := range tokens {
-		if token.kind == cPunct && (strings.HasPrefix(token.text, "/") || strings.HasPrefix(token.text, "%")) {
-			return true
-		}
-	}
-	return false
 }
 
 // unitPrefix is the subsystem token of a name with any module token removed.

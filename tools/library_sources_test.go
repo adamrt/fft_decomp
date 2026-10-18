@@ -46,7 +46,7 @@ func TestAnalysesDistinguishGameLibrariesFromPlatformAndMetadataLibraries(t *tes
 			}
 
 			var diagnostics unitsReportDiagnostic
-			functions := p.loadUnitFunctions(world, map[string]map[string]struct{}{}, map[string]bool{}, &diagnostics)
+			functions := p.loadUnitFunctions(world, unitSourceCache{}, &diagnostics)
 			if len(functions) != 1 || functions[0].library != test.library || len(diagnostics.UnreadableSources) != 0 {
 				t.Fatalf("unit classification = %+v, diagnostics = %+v", functions, diagnostics)
 			}

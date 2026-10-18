@@ -400,7 +400,7 @@ func TestUnitBoundariesDoNotFollowNamePrefixes(t *testing.T) {
 	m, _ := config.module("battle")
 	cuts := func(differentPrefixes bool) []unitCut {
 		options := unitsOptions{minConfidence: "low", maxOwners: 3}
-		an := p.analyzeModuleLayout(m, newSymbolResolver(config), map[string]map[string]struct{}{}, map[string]bool{}, options)
+		an := p.analyzeModuleLayout(m, newSymbolResolver(config), unitSourceCache{}, options)
 		for i := range an.functions {
 			an.functions[i].prefix = "same"
 			if differentPrefixes {

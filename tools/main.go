@@ -652,7 +652,7 @@ func cc1Command(compilerPath string) []string {
 func (p project) repreprocess(sourcePath, preprocessed string, defines []string) error {
 	staging := preprocessed + ".staging"
 	cppDir, cppSource := p.preprocessInput(sourcePath)
-	cpp := []string{"mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude"}
+	cpp := append([]string{"mipsel-linux-gnu-cpp"}, p.cppFlags()...)
 	cpp = append(cpp, defines...)
 	cpp = append(cpp, cppSource, "-o", staging)
 	if err := runInDir(cppDir, cpp...); err != nil {
@@ -702,7 +702,7 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 		// this file, so no reader may see a partial write.
 		staging := preprocessed + ".staging"
 		cppDir, cppSource := p.preprocessInput(sourcePath)
-		cpp := []string{"mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude"}
+		cpp := append([]string{"mipsel-linux-gnu-cpp"}, p.cppFlags()...)
 		cpp = append(cpp, defines...)
 		cpp = append(cpp, cppSource, "-o", staging)
 		if err := runInDir(cppDir, cpp...); err != nil {

@@ -264,7 +264,10 @@ func (p project) permuteCommand(args []string) error {
 			return err
 		}
 	}
-	if err := runInDir(p.root, "mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude", source, "-o", filepath.Join(workspace, "base.c")); err != nil {
+	cppArgs := append([]string{"mipsel-linux-gnu-cpp"}, p.cppFlags()...)
+	cppArgs = append(cppArgs, m.defineFlags()...)
+	cppArgs = append(cppArgs, source, "-o", filepath.Join(workspace, "base.c"))
+	if err := runInDir(p.root, cppArgs...); err != nil {
 		return err
 	}
 	if err := runInDir(workspace, "mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O1", "-G0", "-o", "target-raw.o", "target.s"); err != nil {

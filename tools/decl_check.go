@@ -94,7 +94,7 @@ func (p project) declCheckCommand() error {
 			preprocessed := filepath.Join(workDir, fmt.Sprintf("view-%d.i", worker))
 			for view := range queue {
 				cppDir, cppSource := p.preprocessInput(filepath.Join(p.root, view.source))
-				cpp := []string{"mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude"}
+				cpp := append([]string{"mipsel-linux-gnu-cpp"}, p.cppFlags()...)
 				cpp = append(cpp, view.defines...)
 				cpp = append(cpp, cppSource, "-o", preprocessed)
 				command := exec.Command(cpp[0], cpp[1:]...)
