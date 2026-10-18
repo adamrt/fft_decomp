@@ -70,22 +70,22 @@ extern u16 g_menu_saved_vsync_interval;
 extern u8 g_menu_panel_fade_modes[];
 extern u8 g_text_glyph_bitmaps[];
 
-/* Provisional camera interpolation key: frame time and target value. */
+/* CameraFusion key: cumulative Camera duration and component value. */
 typedef struct camera_key {
-    s32 time;  /* 0x00; cumulative frame of this key */
+    s32 time;  /* 0x00; sum of Camera durations through this key */
     s32 value; /* 0x04 */
     u8 _unused_08[8];
 } camera_key_t;
 typedef char camera_key_size_must_be_16[sizeof(camera_key_t) == 16 ? 1 : -1];
 
-/* Provisional per-component camera fusion track (0xa4 bytes), seeded by
- * camera_fusion_thread and advanced by its camera_step_track. */
+/* One CameraFusion component track. Key 0 holds the starting camera value;
+ * each interpolation segment reads three neighboring keys. */
 typedef struct camera_track {
     camera_key_t keys[8]; /* 0x00 */
     s32 key_count;        /* 0x80 */
     s32 segment;          /* 0x84; first key of the active segment */
-    s32 frame;            /* 0x88; frames since the track started */
-    s32 segment_frame;    /* 0x8c; frames into the active segment */
+    s32 frame;            /* 0x88; completed updates of this track */
+    s32 segment_frame;    /* 0x8c; updates into the active segment */
     s32 prev_time;        /* 0x90; Q12 */
     s32 prev_value;       /* 0x94; Q12 */
     s32 start_value;      /* 0x98; Q12 */
