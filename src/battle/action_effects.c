@@ -30,7 +30,7 @@ extern s32 g_at_list_cursor;
 
 /* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
  * crossbows, NONE for the rest. */
-u8 g_effect_weapon_projectile_animations[32]
+static u8 g_effect_weapon_projectile_animations[32]
     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /* Show the map cursor and its tile glow again; the counterpart of

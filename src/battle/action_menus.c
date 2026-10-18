@@ -41,7 +41,7 @@
 extern move_found_item_t g_move_find_display_item;
 
 static s32 g_action_message_count = 0;
-action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY] = { 0 };
+static action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY] = { 0 };
 
 /* Effect message texts (MENU_SYSTEM_COMMAND_EFFECT_MESSAGE). An ability's message is the base plus
  * the text_display entry of its animation data; the others have fixed ids. */
