@@ -1427,8 +1427,8 @@ void brave_story_step_treasure_level(menu_stack_record_t* level) {
  * Later steps return 0 once step reaches 50, otherwise 1.
  */
 static s32 picture_step_dissolve_upload(GsIMAGE* image, s32 step) {
-    u8* pixels = (u8*)image->pixel;
-    u16* order = g_picture_dissolve_band_order;
+    const u8* pixels = (const u8*)image->pixel;
+    const u16* order = g_picture_dissolve_band_order;
     u8* buffer = DISSOLVE_STAGING_BUFFER;
     s32 i;
     s32 j;
