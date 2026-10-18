@@ -315,9 +315,9 @@ func (p project) compileFunctionDefines(resolver symbolResolver, m *moduleSpec, 
 	if !ok {
 		return nil, fmt.Errorf("unknown compiler profile %q", m.profileOf(f))
 	}
-	sections, err := p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
+	result, err := p.compileHistoricalResult(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
 	if err == nil {
-		return sections, nil
+		return result.checkedSections(m, f.Name)
 	}
 	// Header macros can introduce names absent from the source scan. Bind only
 	// actual undefined object symbols that resolve in this module's context;
@@ -335,7 +335,11 @@ func (p project) compileFunctionDefines(resolver symbolResolver, m *moduleSpec, 
 			}
 			if expanded, scriptErr := linkerScript(f, bindings); scriptErr == nil && expanded != script {
 				if _, writeErr := writeLinkerScript(workDir, f.Name, expanded); writeErr == nil {
-					return p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
+					result, err := p.compileHistoricalResult(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
+					if err != nil {
+						return nil, err
+					}
+					return result.checkedSections(m, f.Name)
 				}
 			}
 		}
@@ -344,7 +348,11 @@ func (p project) compileFunctionDefines(resolver symbolResolver, m *moduleSpec, 
 	// its bindings; when a fresh read differs, relink with that once.
 	if _, fresh, freshErr := p.functionLinker(resolver, m, f); freshErr == nil && fresh != script {
 		if _, writeErr := writeLinkerScript(workDir, f.Name, fresh); writeErr == nil {
-			return p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
+			result, err := p.compileHistoricalResult(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
+			if err != nil {
+				return nil, err
+			}
+			return result.checkedSections(m, f.Name)
 		}
 	}
 	return nil, err

@@ -437,9 +437,9 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 	}
 	buildDir := filepath.Join(workDir, unit.module.ID)
 	defines := unit.module.defineFlags()
-	sections, err := p.compileHistoricalSections(source, linker, buildDir, unit.profile, defines...)
+	result, err := p.compileHistoricalResult(source, linker, buildDir, unit.profile, defines...)
 	if err == nil {
-		return sections, nil
+		return result.checkedSections(unit.module, unit.spec.name)
 	}
 	// Header macros can name symbols the source scan misses; bind the
 	// object's actual undefined symbols once, as compileFunction does.
@@ -451,8 +451,8 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 		if expanded, bindErr := unitLinkerBindings(resolver, unit, undefined); bindErr == nil {
 			if rescript := unitLinkerScriptSkipping(unit, expanded, true, static); rescript != script {
 				if _, writeErr := writeLinkerScript(workDir, unit.module.ID, rescript); writeErr == nil {
-					if sections, retryErr := p.compileHistoricalSections(source, linker, buildDir, unit.profile, defines...); retryErr == nil {
-						return sections, nil
+					if result, retryErr := p.compileHistoricalResult(source, linker, buildDir, unit.profile, defines...); retryErr == nil {
+						return result.checkedSections(unit.module, unit.spec.name)
 					}
 				}
 			}

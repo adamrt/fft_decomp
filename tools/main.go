@@ -672,6 +672,17 @@ func (p project) repreprocess(sourcePath, preprocessed string, defines []string)
 // allocatable sections. Defines reach the cache key through the preprocessed
 // text, so a source that never uses them keeps its cache entry.
 func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string, profile compilerProfile, defines ...string) (map[string][]byte, error) {
+	result, err := p.compileHistoricalResult(sourcePath, linkPath, buildDir, profile, defines...)
+	if err != nil {
+		return nil, err
+	}
+	return result.Sections, nil
+}
+
+// compileHistoricalResult retains named ELF definitions for callers that
+// validate source ownership. Both cold and cached compiles return the same
+// evidence; acceptance against current target contracts belongs to callers.
+func (p project) compileHistoricalResult(sourcePath, linkPath, buildDir string, profile compilerProfile, defines ...string) (*historicalResult, error) {
 	if err := os.MkdirAll(buildDir, 0o755); err != nil {
 		return nil, err
 	}
@@ -725,9 +736,9 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 	cachePath := filepath.Join(p.root, "build", "cache", "tools", cacheKey+".json")
 	if os.Getenv("TOOLS_CACHE") != "0" {
 		if data, err := os.ReadFile(cachePath); err == nil {
-			var sections map[string][]byte
-			if json.Unmarshal(data, &sections) == nil && sections[".text"] != nil {
-				return sections, nil
+			var result historicalResult
+			if json.Unmarshal(data, &result) == nil && result.Sections[".text"] != nil && result.Definitions != nil {
+				return &result, nil
 			}
 		}
 	}
@@ -811,11 +822,16 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 		}
 		sections[section.Name] = data
 	}
+	definitions, err := historicalDefinitions(linked)
+	if err != nil {
+		return nil, fmt.Errorf("read linked definitions: %w", err)
+	}
+	result := &historicalResult{Sections: sections, Definitions: definitions}
 	if os.Getenv("TOOLS_CACHE") != "0" {
 		if err := os.MkdirAll(filepath.Dir(cachePath), 0o755); err != nil {
 			return nil, err
 		}
-		data, err := json.Marshal(sections)
+		data, err := json.Marshal(result)
 		if err != nil {
 			return nil, err
 		}
@@ -839,7 +855,7 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 			return nil, err
 		}
 	}
-	return sections, nil
+	return result, nil
 }
 
 var toolDigestCache sync.Map
@@ -889,8 +905,8 @@ func compilationCacheKey(preprocessed, linkPath string, profile compilerProfile,
 	if language == "asm" {
 		hash.Write([]byte("standalone-asm-v1\x00"))
 	}
-	// v2 invalidates entries stored under pre-retry input by the old pipeline.
-	hash.Write([]byte("tools-historical-pipeline-v2\x00" + profile.name + "\x00" + profile.optimization + "\x00" + profile.aspsxVersion + "\x00"))
+	// v3 retains named ELF definitions; older entries contain section bytes only.
+	hash.Write([]byte("tools-historical-pipeline-v3\x00" + profile.name + "\x00" + profile.optimization + "\x00" + profile.aspsxVersion + "\x00"))
 	if profile.expandDiv {
 		hash.Write([]byte("expand-div-v1\x00"))
 	}
