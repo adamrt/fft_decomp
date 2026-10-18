@@ -239,18 +239,11 @@ typedef union effect_child_track_counters {
     } tracks;
 } effect_child_track_counters_t;
 
-typedef union effect_child_track_steps {
-    s16 reset_slots[EFFECT_CHILD_TRACK_RESET_SLOT_COUNT];
-    struct {
-        u16 particle[EFFECT_PARTICLE_CHANNEL_COUNT]; /* loaded unsigned by opcode 28 */
-        u8 _unused_0a[0x10];                         /* remaining slots are reset but not stepped */
-    } tracks;
-} effect_child_track_steps_t;
-
 typedef struct effect_child_timeline_state {
     effect_child_track_counters_t keyframe;  /* 0x00; record +0x2a */
     effect_child_track_counters_t remaining; /* 0x1a; record +0x44 */
-    effect_child_track_steps_t step;         /* 0x34; record +0x5e */
+    /* 0x34; record +0x5e. Only the first five particle steps are read; all thirteen are reset. */
+    u16 step[EFFECT_CHILD_TRACK_RESET_SLOT_COUNT];
 } effect_child_timeline_state_t;
 typedef char effect_child_timeline_state_size_must_be_78[sizeof(effect_child_timeline_state_t) == 78 ? 1 : -1];
 

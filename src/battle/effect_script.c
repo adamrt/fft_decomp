@@ -699,7 +699,7 @@ static void effect_timeline_reset_child(effect_record_t* record, s16 target_inde
     s32 index;
 
     for (index = 0; index < EFFECT_CHILD_TRACK_RESET_SLOT_COUNT; index++) {
-        record->timeline.state.child.step.reset_slots[index] = 0;
+        record->timeline.state.child.step[index] = 0;
         record->timeline.state.child.remaining.reset_slots[index] = 0;
         record->timeline.state.child.keyframe.reset_slots[index] = 0;
     }
@@ -1438,7 +1438,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                 /* Keyframe 0 is the start: enter keyframe 1 and run its actions. */
                 if (timeline->state.child.keyframe.tracks.particle[i] == 0) {
                     timeline->state.child.remaining.tracks.particle[i] = table->frame_start[1] - table->frame_start[0];
-                    timeline->state.child.step.tracks.particle[i] = 0;
+                    timeline->state.child.step[i] = 0;
                     timeline->state.child.keyframe.tracks.particle[i]++;
                     effect_timeline_run_keyframe_actions(table->action[1], target, record);
                 }
@@ -1448,7 +1448,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     timeline->state.child.keyframe.tracks.particle[i] = k + 1;
                     timeline->state.child.remaining.tracks.particle[i]
                         = table->frame_start[k + 1] - table->frame_start[k];
-                    timeline->state.child.step.tracks.particle[i] = 0;
+                    timeline->state.child.step[i] = 0;
                     effect_timeline_run_keyframe_actions(table->action[k + 1], target, record);
                 }
             }
@@ -1456,7 +1456,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
             /* emitter holds the emitter index plus one; 0 means the keyframe spawns nothing. */
             index = table->emitter[timeline->state.child.keyframe.tracks.particle[i] - 1];
             if (index != 0) {
-                step = timeline->state.child.step.tracks.particle[i]++;
+                step = timeline->state.child.step[i]++;
                 actions = table->action;
                 sel = actions[timeline->state.child.keyframe.tracks.particle[i]] & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK;
                 if (sel != 0) {
