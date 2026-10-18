@@ -1,4 +1,4 @@
-/* The per-frame event input update, with edge and auto-repeat input, a yield and the thread status indicators. */
+/* The per-frame event input update, with edge and auto-repeat input, a yield and the status-panel backdrops. */
 
 #include "fft/gfx_primitive.h"
 #include "fft/input.h"
@@ -19,9 +19,9 @@ extern menu_input_state_t g_unit_list_input_event_state;
 /* Per-frame event input update: derives the edge/auto-repeat input 32-bit value,
  * publishes it, and yields once while tracking thread status changes.
  *
- * Twin of menu_input_update_event_state; BUNIT additionally latches
- * `frame_arg`, clears g_unit_panel_hide_numeric_values, and calls menu_draw_status_panel_backdrops after the
- * yield. Needs the _divcheck profile for the three repeat-period divisions.
+ * Latches `frame_arg`, clears g_unit_panel_hide_numeric_values, and draws the
+ * status-panel backdrops after the yield. Needs the _divcheck profile for the
+ * three repeat-period divisions.
  */
 void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     u32 filtered_input;

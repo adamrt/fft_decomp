@@ -85,7 +85,7 @@ void crystal_start_pickup_threads(void) {
     value_count = 0;
     for (byte_index = 0; byte_index < 0x40; byte_index++) {
         s32 mask = 1;
-        /* A pointer local, not `context->flags[byte_index]` in the test: the
+        /* A pointer local, not `context->learned_abilities[byte_index]` in the test: the
          * indexed form folds 0x53 into the load displacement, while the
          * target biases the index and loads at 0(reg). */
         u8* flag_byte = &context->learned_abilities[byte_index];

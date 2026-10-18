@@ -16,7 +16,7 @@
  * publishes it, and yields once while tracking thread status changes.
  *
  * CARD's body, without the other bodies' frame_arg latch,
- * the numeric-value flag and the thread status indicators; CARD instead sets
+ * the numeric-value flag and the status-panel backdrops; CARD instead sets
  * g_gfx_screen_polarity when `count_frame` is nonzero. A held direction
  * or L1/R1 repeats after g_input_repeat_initial_delay frames and then
  * every repeat period (directions) or secondary repeat period (L1/R1), all
