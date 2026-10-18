@@ -86,9 +86,9 @@ void option_choice_thread(void) {
         cursor = 0;
     }
 
-    /* Window placement and VRAM staging origin differ per program: OPTION
-     * (over the battle screen) uses 368/160 and 448/256, WORLD 116/40 and
-     * 1536/1792. */
+    /* Window placement and raw VRAM origins differ per program. WORLD's default
+     * upload at (0x600, 0x700 - height) wraps to (0x200, 0x100 - height) with
+     * retail 1 MiB addressing. The draw mode retains the upper texture-page Y bit. */
     param->window.x = VARIANT_MENU_CHOICE_WINDOW_RIGHT_X - width;
     param->window.y = VARIANT_MENU_CHOICE_WINDOW_CENTER_Y - (height >> 1);
     param->inner_width = param->window.w = param->text_image.source.w = width;
