@@ -32,6 +32,7 @@ units:
   - {name: event_frame, source: src/battle/event_frame.c, data: [{addr: 0x801696e4, size: 20, hash: 34d5f02d6411f13b}]}
   - {name: event_resources, source: src/lib/event/event_resources.c, data: [{addr: 0x80165ebc, size: 16, hash: 6176d19a13b8eb27}]}
   - {name: event_unit_lookup, source: src/lib/event/event_unit_lookup.c}
+  - {name: fade_primitives, source: src/lib/menu/fade_primitives.c}
   - {name: formula_core, source: src/battle/formula_core.c, data: [{addr: 0x8018f600, size: 12, hash: 9b134ab1d56154c2}, {addr: 0x8018f60c, size: 5, hash: d7f2b411424619e0}]}
   - {name: formula_damage, source: src/battle/formula_damage.c}
   - {name: formula_effects, source: src/battle/formula_effects.c}
@@ -42,6 +43,7 @@ units:
   - {name: map_loading, source: src/battle/map_loading.c, data: [{addr: 0x800f7980, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7984, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7988, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f798c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7990, size: 4, hash: df3f619804a92fdb}]}
   - {name: map_palettes, source: src/battle/map_palettes.c, data: [{addr: 0x800956e4, size: 2016, hash: 0cd1d40758dc1bed}, {addr: 0x80095ec4, size: 504, hash: 40a6fe7cfd29ed44}]}
   - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}]}
+  - {name: message_threads, source: src/lib/menu/message_threads.c}
   - {name: move_paths, source: src/battle/move_paths.c, data: [{addr: 0x800e4e90, size: 4, hash: df3f619804a92fdb}, {addr: 0x800e4e94, size: 4, hash: df3f619804a92fdb}, {addr: 0x800e4e98, size: 4, hash: df3f619804a92fdb}]}
   - {name: move_range, source: src/battle/move_range.c}
   - {name: move_steps, source: src/battle/move_steps.c, data: [{addr: 0x80093c9c, size: 4, hash: 02d0e6c850c1f217}, {addr: 0x80093ca0, size: 4, hash: 0e3f601857911ecc}, {addr: 0x80093ca4, size: 4, hash: eae2ccfcdac29c2d}, {addr: 0x80093ca8, size: 4, hash: 2ef245921b9d3ae8}]}
@@ -49,6 +51,7 @@ units:
   - {name: script_commands, source: src/lib/event/script_commands.c, data: [{addr: 0x8014d170, size: 244, hash: 5f50d72e0e4d2a62}]}
   - {name: script_helpers, source: src/lib/event/script_helpers.c, data: [{addr: 0x80167838, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80167844, size: 96, hash: 54145c650f08eb0b}]}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, data: [{addr: 0x801696fc, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80169700, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80169718, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80169720, size: 48, hash: 5026ef5547d95034}, {addr: 0x80169750, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
+  - {name: script_variables, source: src/lib/event/script_variables.c}
   - {name: skillset_menus, source: src/battle/skillset_menus.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: spritesheets, source: src/battle/spritesheets.c}
   - {name: state_actions, source: src/battle/state_actions.c}
@@ -883,16 +886,16 @@ functions:
   - {addr: 0x801398fc, size: 736, name: menu_redraw_text_page_on_scroll_in_rect, hash: 5123e70a9f03a283, unit: ability_list_text}
   - {addr: 0x80139bdc, size: 16, name: script_get_event_initial_repeat_counter, hash: 1bc08cac58cdde01, unit: ability_list_text}
   - {addr: 0x80139bec, size: 4848, name: ability_list_scrolling_thread, hash: a4bba4000533dd46}
-  - {addr: 0x8013aedc, size: 16, name: message_set_duration, hash: e02feb0de282649e, unit: event_resources}
-  - {addr: 0x8013aeec, size: 288, name: menu_size_entry_to_text, hash: c07f6322a91d987d, unit: event_resources}
-  - {addr: 0x8013b00c, size: 628, name: menu_icon_timed_thread, hash: 5f240ea74b70ce9e, unit: event_resources}
-  - {addr: 0x8013b280, size: 636, name: menu_icon_linked_entry_thread, hash: 17aa3c9f1ea9e5dd, unit: event_resources}
-  - {addr: 0x8013b4fc, size: 148, name: menu_input_thread, hash: 8feb91a2148b9b37, unit: event_resources}
-  - {addr: 0x8013b590, size: 180, name: script_get_variable, hash: 92bfa64b3cd0e089, unit: event_resources}
-  - {addr: 0x8013b644, size: 160, name: script_set_variable, hash: 6bab3d74cae51aa6, unit: event_resources}
-  - {addr: 0x8013b6e4, size: 436, name: menu_init_panel_fade_tiles, hash: 200e43d514e6d844, unit: event_resources}
-  - {addr: 0x8013b898, size: 464, name: menu_update_panel_fade, hash: d9c44f2307947857, unit: event_resources}
-  - {addr: 0x8013ba68, size: 264, name: gfx_submit_screen_fade_overlay, hash: 7b6fd4b19da8c27e, unit: event_resources}
+  - {addr: 0x8013aedc, size: 16, name: message_set_duration, hash: e02feb0de282649e, unit: message_threads}
+  - {addr: 0x8013aeec, size: 288, name: menu_size_entry_to_text, hash: c07f6322a91d987d, unit: message_threads}
+  - {addr: 0x8013b00c, size: 628, name: menu_icon_timed_thread, hash: 5f240ea74b70ce9e, unit: message_threads}
+  - {addr: 0x8013b280, size: 636, name: menu_icon_linked_entry_thread, hash: 17aa3c9f1ea9e5dd, unit: message_threads}
+  - {addr: 0x8013b4fc, size: 148, name: menu_input_thread, hash: 8feb91a2148b9b37, unit: message_threads}
+  - {addr: 0x8013b590, size: 180, name: script_get_variable, hash: 92bfa64b3cd0e089, unit: script_variables}
+  - {addr: 0x8013b644, size: 160, name: script_set_variable, hash: 6bab3d74cae51aa6, unit: script_variables}
+  - {addr: 0x8013b6e4, size: 436, name: menu_init_panel_fade_tiles, hash: 200e43d514e6d844, unit: fade_primitives}
+  - {addr: 0x8013b898, size: 464, name: menu_update_panel_fade, hash: d9c44f2307947857, unit: fade_primitives}
+  - {addr: 0x8013ba68, size: 264, name: gfx_submit_screen_fade_overlay, hash: 7b6fd4b19da8c27e, unit: fade_primitives}
   - {addr: 0x8013bb70, size: 124, name: overlay_reserve_high, hash: d31169643dab2d00, unit: event_resources}
   - {addr: 0x8013bbec, size: 40, name: overlay_free_high, hash: e8db9a4dc85accdd, unit: event_resources}
   - {addr: 0x8013bc14, size: 168, name: overlay_request_companion, hash: 503e6335682fee08, unit: event_resources}
