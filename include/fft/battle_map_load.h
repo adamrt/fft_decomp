@@ -221,33 +221,14 @@ typedef enum battle_map_load_command {
     BATTLE_MAP_LOAD_COMMAND_POLL_HELD = 0x9c
 } battle_map_load_command_e;
 
-/* g_battle_map_resource_load_state; these are not the loader's normal return values. */
-typedef enum battle_map_resource_load_state {
-    BATTLE_MAP_LOAD_STATE_IDLE = 0x00,
-    BATTLE_MAP_LOAD_STATE_GNS_FILE = 0x74, /* also accepted as a no-op input command */
-    BATTLE_MAP_LOAD_STATE_DONE = 0x77,
-    BATTLE_MAP_LOAD_STATE_RESOURCE_FILE = 0x78,
-    BATTLE_MAP_LOAD_STATE_MESH_RECORDS = 0x79, /* rebuild render records once per buffer */
-    BATTLE_MAP_LOAD_STATE_MESH_RECORDS_SECOND = 0x91,
-    BATTLE_MAP_LOAD_STATE_APPLY_LIGHTING = 0x92,
-    BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE = 0x93
-} battle_map_resource_load_state_e;
-
-/* The loader otherwise returns g_battle_map_gns_load_phase. */
+/* Other returns are the GNS phase: 0 idle, 1 loading resources, 15 starting. */
 enum { BATTLE_MAP_LOAD_RESULT_HELD = 0x9b };
-
-/* g_battle_map_gns_load_phase and the normal return of battle_map_load_data. */
-typedef enum battle_map_gns_load_phase {
-    BATTLE_MAP_GNS_LOAD_PHASE_IDLE = 0,
-    BATTLE_MAP_GNS_LOAD_PHASE_RESOURCES = 1, /* loading the pending resource files one by one */
-    BATTLE_MAP_GNS_LOAD_PHASE_START = 15     /* choose the resources once the GNS is in */
-} battle_map_gns_load_phase_e;
 
 extern s32 g_battle_map_loaded_id;
 extern battle_map_resource_t* g_battle_map_data_load_buffer;
 extern s32 g_battle_map_deep_dungeon_load_in_progress;
 
-s32 battle_map_load_data(s32 map_id, s32 command);
+s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command);
 s32 battle_map_load_start(void);
 s32 battle_map_load_poll(void);
 void* battle_map_load_start_file(const char* unused_directory_path, const battle_map_gns_load_info_t* load_info,
@@ -274,7 +255,7 @@ s16 battle_map_gns_is_record_matching_state(s32 comparison, s16 record_state, s1
 /* pending resources */
 /* Resources read but not yet applied: the palette and lighting data wait for BATTLE_MAP_RESOURCE_APPLY_PALETTES and
  * BATTLE_MAP_RESOURCE_APPLY_LIGHTING, and the texture flags mark the whole texture or the quarters read into the
- * load buffer, uploaded at BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE. */
+ * load buffer, uploaded after the texture read completes. */
 extern u8 g_battle_map_palette_pending;
 extern u8 g_battle_map_pending_palette_data[0x200];
 extern u8 g_battle_map_lighting_pending;

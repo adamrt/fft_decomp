@@ -16,12 +16,36 @@
 
 extern s32 g_weather_timed_transform_unread; /* weather_set_timed_transform_duration stores 0x95; nothing reads it */
 
+/* g_battle_map_resource_load_state; these are not the loader's normal return values. */
+typedef enum battle_map_resource_load_state {
+    BATTLE_MAP_LOAD_STATE_IDLE = 0x00,
+    BATTLE_MAP_LOAD_STATE_GNS_FILE = 0x74, /* also accepted as a no-op input command */
+    BATTLE_MAP_LOAD_STATE_DONE = 0x77,
+    BATTLE_MAP_LOAD_STATE_RESOURCE_FILE = 0x78,
+    BATTLE_MAP_LOAD_STATE_MESH_RECORDS = 0x79, /* rebuild render records once per buffer */
+    BATTLE_MAP_LOAD_STATE_MESH_RECORDS_SECOND = 0x91,
+    BATTLE_MAP_LOAD_STATE_APPLY_LIGHTING = 0x92,
+    BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE = 0x93
+} battle_map_resource_load_state_e;
+
+/* g_battle_map_gns_load_phase and the normal return of battle_map_load_data. */
+typedef enum battle_map_gns_load_phase {
+    BATTLE_MAP_GNS_LOAD_PHASE_IDLE = 0,
+    BATTLE_MAP_GNS_LOAD_PHASE_RESOURCES = 1, /* loading the pending resource files one by one */
+    BATTLE_MAP_GNS_LOAD_PHASE_START = 15     /* choose the resources once the GNS is in */
+} battle_map_gns_load_phase_e;
+
+typedef enum battle_map_mesh_load_state {
+    BATTLE_MAP_MESH_LOAD_IDLE = 0,
+    BATTLE_MAP_MESH_LOAD_WAITING = 0x8d
+} battle_map_mesh_load_state_e;
+
 /* Pending map resources and the loader phases. */
 extern char g_battle_map_directory_path[];
 extern battle_map_resource_t* g_battle_map_mesh_load_buffer;
-extern s32 g_battle_map_resource_load_state; /* battle_map_resource_load_state_e */
-extern s32 g_battle_map_gns_load_phase;      /* battle_map_gns_load_phase_e */
-extern s32 g_battle_map_mesh_load_state;
+extern battle_map_resource_load_state_e g_battle_map_resource_load_state;
+extern battle_map_gns_load_phase_e g_battle_map_gns_load_phase;
+extern battle_map_mesh_load_state_e g_battle_map_mesh_load_state;
 extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
 
 static render_buffer_t* g_battle_map_mesh_last_render_buffer = 0;
@@ -73,7 +97,7 @@ static void battle_map_mesh_init_render_records(const battle_map_mesh_geometry_t
  * of the two 49-entry tables. Quarter n loads at buffer + 0x8000 * (n + 1), one
  * quarter above where the dispatcher uploads it from, and quarter 3 lies past the
  * end of the buffer; retail GNS files hold no quarter rows. */
-s32 battle_map_load_data(s32 map_id, s32 command) {
+s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
     s32 i;
     s32 r;
     s32 j;
@@ -477,8 +501,6 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
     }
     return g_battle_map_gns_load_phase;
 }
-
-enum { BATTLE_MAP_MESH_LOAD_IDLE = 0, BATTLE_MAP_MESH_LOAD_WAITING = 0x8d };
 
 /* Selects the last primary-mesh record, then substitutes an alternate whose
  * layout/weather/time comparison matches, and loads the selected record's
