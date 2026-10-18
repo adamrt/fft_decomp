@@ -27,6 +27,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Battle slots populated from party and ENTD records by the deployment routines below. */
+unit_stats_t g_unit_stats[UNIT_SLOT_COUNT] = { 0 };
+
 /* Deployment placement, the acting tile and strike relocation reservations. */
 extern unit_deployment_coordinates_t* g_unit_deployed_coords;
 extern u8 g_action_loaded_ability_flags_1;

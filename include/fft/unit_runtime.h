@@ -297,9 +297,11 @@ typedef enum unit_character_slot {
     UNIT_CHARACTER_SLOT_ABSENT = -5
 } unit_character_slot_e;
 
+/* BATTLE defines these slots; resident MAIN accesses the same storage. Indexed by battle id. */
+extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT];
+
 /* The live units, chained through unit_t.previous. */
 extern unit_t* g_unit_list_head;
-extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT]; /* indexed by battle id (unit_stats_t.battle_id) */
 extern unit_slot_state_t g_unit_slot_states[UNIT_RUNTIME_SLOT_COUNT];
 extern s32 g_unit_source_runtime_id; /* the acting unit, which unit_get_source finds; 0xff for none */
 
