@@ -755,6 +755,13 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 			if compileErr != nil {
 				return nil, compileErr
 			}
+			// A retry may compile different preprocessed text. Never store
+			// its successful output under the input that failed to compile.
+			cacheKey, err = compilationCacheKey(preprocessed, linkPath, profile, language)
+			if err != nil {
+				return nil, err
+			}
+			cachePath = filepath.Join(p.root, "build", "cache", "tools", cacheKey+".json")
 		}
 	}
 	maspsx := []string{"python3", "/opt/maspsx/maspsx.py", "--aspsx-version=" + profile.aspsxVersion}
@@ -883,7 +890,8 @@ func compilationCacheKey(preprocessed, linkPath string, profile compilerProfile,
 	if language == "asm" {
 		hash.Write([]byte("standalone-asm-v1\x00"))
 	}
-	hash.Write([]byte("tools-historical-pipeline-v1\x00" + profile.name + "\x00" + profile.optimization + "\x00" + profile.aspsxVersion + "\x00"))
+	// v2 invalidates entries stored under pre-retry input by the old pipeline.
+	hash.Write([]byte("tools-historical-pipeline-v2\x00" + profile.name + "\x00" + profile.optimization + "\x00" + profile.aspsxVersion + "\x00"))
 	if profile.expandDiv {
 		hash.Write([]byte("expand-div-v1\x00"))
 	}
