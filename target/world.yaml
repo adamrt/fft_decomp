@@ -85,7 +85,7 @@ units:
   - {name: script_commands, source: src/lib/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8013a454, size: 244, hash: 5f50d72e0e4d2a62}]}
   - {name: script_helpers, source: src/lib/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b8c, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80156b90, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80156ba8, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80156bb0, size: 48, hash: 5026ef5547d95034}, {addr: 0x80156be0, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
-  - {name: script_variables, source: src/lib/event/script_variables.c}
+  - {name: script_variables, source: src/lib/event/script_variables.c, data: [{addr: 0x80153280, size: 4, hash: 3d46b9b2a473a124}]}
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: selection_records, source: src/lib/menu/selection_records.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x801c8364, size: 84, hash: 4fea5e6a3ec5f547}]}
   - {name: shop, source: src/world/shop.c, data: [{addr: 0x8019523c, size: 112, hash: ce0c5fd435d95f05}, {addr: 0x801952ac, size: 43, hash: d479a0b4eb31609f}]}

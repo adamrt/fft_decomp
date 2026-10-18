@@ -5,6 +5,9 @@
 #include "fft/script_variable.h"
 #include "psx/types.h"
 
+/* Each scene binds its interpreter to MAIN's resident save-variable bank. */
+s32* g_script_variables = g_script_variable_storage;
+
 /* Read a script variable from any of the 32-bit variable, flag and nibble ranges by adding
  * it into 32-bit script variable 0 with the variable commands. Variable 0 (the comparison
  * result) is restored before returning.

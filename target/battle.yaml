@@ -56,7 +56,7 @@ units:
   - {name: script_commands, source: src/lib/event/script_commands.c, data: [{addr: 0x8014d170, size: 244, hash: 5f50d72e0e4d2a62}]}
   - {name: script_helpers, source: src/lib/event/script_helpers.c}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, data: [{addr: 0x801696fc, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80169700, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80169718, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80169720, size: 48, hash: 5026ef5547d95034}, {addr: 0x80169750, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
-  - {name: script_variables, source: src/lib/event/script_variables.c}
+  - {name: script_variables, source: src/lib/event/script_variables.c, data: [{addr: 0x80165f9c, size: 4, hash: 3d46b9b2a473a124}]}
   - {name: skillset_menus, source: src/battle/skillset_menus.c}
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}
