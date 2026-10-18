@@ -6,6 +6,11 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+s32 g_save_play_time_frames;
+s32 g_save_play_time_seconds;
+s32 g_save_play_time_minutes;
+s32 g_save_play_time_hours;
+
 /* VSync callback. Draws one rand() per frame, advances the play-time clock at 60
  * frames a second (the hours stop at 1000) and counts
  * g_system_wait_frames. */

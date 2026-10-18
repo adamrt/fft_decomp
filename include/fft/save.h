@@ -21,9 +21,9 @@
 
 /* play time */
 extern s32 g_save_play_time_frames;
-extern s32 g_save_play_time_hours;
-extern s32 g_save_play_time_minutes;
 extern s32 g_save_play_time_seconds;
+extern s32 g_save_play_time_minutes;
+extern s32 g_save_play_time_hours;
 
 /* save image */
 /* PlayStation memory-card save-file header block (256 bytes), as built by save_build_file_header, which CARD and
