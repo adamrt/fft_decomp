@@ -129,7 +129,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - Unchecked divisions whose divisor can be zero; the R3000 `div` does not trap
   and leaves quotient -1 (1 for a negative dividend) and the dividend as the
   remainder: `100 / ct` in both copies of `ability_list_get_ct` (CT 0 displays -1 + 1 = 0);
-  `0x20000 / battle_lerp_fixed8(...)` for the wave steps in
+  `0x20000 / effect_lerp_q8(...)` for the wave steps in
   `effect_wave_mesh_update` (E033, E035, E073, E079, E080, E230, E453, E456);
   and the direction-times-spread products over `scale` in
   `effect_slot_spawn_motion`.
@@ -194,10 +194,6 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `action_init_strike_data` tests
   `ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST`, which is always
   true.
-- `unit_calculate_encounter_data` copies ENTD bytes 0x21-0x27 with one
-  seven-byte loop over the two-byte `ai_target_xy`, reading on through the AI
-  flags, the target unit, the two AI targeting flags and
-  `ai_initial_enemy_flag`.
 - EQUIP never fills the physical accessory evade slot of `equipment_unit_preview_t`
   (0x48); it stores the accessory's magic evade to 0x52.
 - Event script, both interpreters:
@@ -266,7 +262,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `overlay_call_battle_return_zero`, which itself has no caller.
 - Formation menu states 22 and 23 have entries in
   `g_formation_menu_handlers` and code paths, and no code stores them,
-  so `formation_step_portrait_slide` never runs. Menu input mode 1
+  so `formation_update_sprite_slide` never runs. Menu input mode 1
   is tested in four places and never stored.
 - Both copies of `command_wait_thread` store -2 over the
   Wait entry's row action (7, `MENU_COMMAND_ID_WAIT_YES_NO`) before confirming,
@@ -360,11 +356,11 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   test (a WalkTo with terrain costs disabled) compares the cost-table index,
   not the cost, with 0xff, so blocked surfaces cost 1 too.
   `move_spread_store_unit_to_scratchpad` copies 64 and keeps 0xff.
-- `formula_weapon_heal` (formula 0x07, the Healing Staff) applies
+- `formula_healing_staff` (formula 0x07, the Healing Staff) applies
   zodiac compatibility twice, once itself and once inside
   `formula_apply_physical_modifiers`, whose Defense
   Up and Protect steps also cut the healing to two thirds.
-- `formula_raise_level_by_one_add_status_on_caster` (formula 0x57,
+- `formula_please_eat` (formula 0x57,
   Please Eat) stores a full HP and MP heal (max-HP damage for an undead
   target) and then overwrites `attack_type` with the level change's:
   `action_apply_target_result` still applies the
@@ -413,7 +409,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `effect_secondary_reflect_handler` leaves the shield spin's Y angle unset.
   It clears X and Z, then writes the frame angle to Z again before the model
   renderer passes the vector to `RotMatrix`, which reads all three angles.
-- `effect_model_draw_projectile`, the Reflect shield: the depth is
+- `effect_model_draw`, the Reflect shield: the depth is
   assigned from each corner in turn where the other models sum them, so only
   the last corner counts, and every triangle is linked at ordering-table entry
   0 whatever its depth.
@@ -445,7 +441,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `sprite_shadow_draw` sets bit 0 of `shadow_dirty` before testing it,
   so the shadow quad is recalculated on every call and the dirty bit the
   movement code sets gates nothing.
-- `formula_damage_pa_times_wp_plus_y_status` (formula 0x2D, Holy Sword)
+- `formula_holy_sword` (formula 0x2D, Holy Sword)
   runs Strengthen and the target's affinities on the weapon's elements only
   (`formula_element_apply_weapon_strengthen`,
   `formula_element_modify_weapon_damage`): the Holy element in the range data
@@ -744,7 +740,7 @@ written that way.
   for the acting unit reads `acting_unit`, which is NULL during the AI
   workspace setup at battle start (`acting_unit_id` is 0), so slot 0's Jump
   divides kernel-RAM bytes.
-- `unit_list_entrypoint` passes a second argument, 0, to the
+- `bunit_entrypoint` passes a second argument, 0, to the
   one-parameter `unit_list_draw_shaded_rows`; its other caller passes
   one.
 - `menu_init_system_function` returns `$v0` as the void
@@ -828,10 +824,6 @@ written that way.
   the sound rows, which begin at `0x8009ec1c` for sound id 1: its row 0 is the
   eighth 32-bit entry of `g_tutorial_battle_event_ids`, whose eight entries
   `tutorial_handle_battle_list_input` indexes.
-- `g_effect_secondary_ending_function_id` (`0x801b8530`) is
-  `g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_ENDING].function_id`
-  under a second name; the table's own symbol covers the 21 records before
-  it.
 
 ## Duplicated code
 
@@ -863,7 +855,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 
 - `save_restore_image` skips a saved Unit List order if any of its first 11 keys is 11, and skips a saved Formation order if any of its first seven keys is 11. It preserves the live order, writes its final -1 terminator, and continues loading the save. Formation key 11 would read the fixed 100 CT maximum; the Order Unit menu exposes only keys 0, 1, 2, 4, 5, 7 and 9.
 - `weather_run_command` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
-- `move_start_next_post_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `state_handle_crystal_learn` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
+- `move_start_next_post_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `state_handle_post_move_events` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
 - `animation_set_for_status` retains two branches selecting animation 0x21 when bit 0 of `status_flags_1_4` is set. Normal status updates never set that bit. Crystal's mask 1 belongs to the separate `status_flags_5_6` word; this does not rule out animation requests from other paths.
 - `formation_get_unit_palette_index` treats every portrait index of 63 or more as an index into its 20-byte monster remap. A party record with `sprite_set` 5 selects portrait 120 and reads remap byte 57 in the following window data. Other special identities also overread the remap; their normal-game reachability in Formation is unverified.
 - `debug_load_efc_font`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
@@ -871,7 +863,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `psyq_gte_apply_rotation_ir`: writes saturated IR1–IR3 32-bit output values and returns its unchanged third argument.
 - `sprintf`: unsupported conversions terminate output, `%#p` prefixes `0p`, hexadecimal alternate form prefixes zero, and `%#.0o` with zero emits no digit.
 - JOBSTTS.OUT offset `0x0` and BUNIT.OUT offset `0x200` hold the literal `"%d"`
-  (`g_status_screen_text_decimal_format`, `g_unit_list_text_decimal_format`) used by `menu_opcode_0d_draw_formatted_number` and
+  used by `menu_opcode_0d_draw_formatted_number` and
   `menu_opcode_17_draw_right_aligned_number`.
 - The 32-bit game-options value (`game_options_t`) packs its last five fields
   out of array order.
@@ -1114,7 +1106,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   initialization and shutdown clear it. Original-code references identify only
   stores, and the traced SPU transfer paths do not send it to sound RAM. No reader
   or caller of the setter has been identified; its original purpose remains unknown.
-- `system_zero_padding` (0x80010ba8), which `overlay_exec_battle`
+- `system_zero_padding` (0x80010ba8), which `overlay_load_battle`
   reaches after loading BATTLE.BIN, is not BATTLE code: it is the 4 KB of zero
   words after MAIN's C start-up, run as 1,024 no-ops up to the `jr ra` at
   0x80011ba8. BATTLE runs when `system_run_game_loop` then calls
@@ -1149,7 +1141,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   reads `unit->stats` before the null test that guards the second.
 - `effect_secondary_start_projectile` tests Throw Shuriken (382)
   on its own before the Item/Throw range 368-393, which already contains it.
-- `formula_steal_exp_hit_sp_x_percent` (formula 0x28) calls
+- `formula_steal_exp` (formula 0x28) calls
   `formula_set_exp_stolen` after a failed hit test whenever the action
   is not executing; outside execution only a 0% chance misses, so the preview
   shows 0% with an EXP amount. Formula 0x27 (steal gil) fills nothing then.
