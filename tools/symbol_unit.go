@@ -251,7 +251,10 @@ func (p project) unitSymbolsCommand(args []string) error {
 				}
 			}
 		}
-		text, conditional := renderUnitSource(order, merged, bodies, bodyModules, fillers)
+		text, conditional, err := renderUnitSource(order, merged, bodies, bodyModules, fillers)
+		if err != nil {
+			return err
+		}
 		if *comment != "" {
 			if strings.Contains(*comment, "*/") {
 				return errors.New("--comment must not contain */")
@@ -414,7 +417,7 @@ func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]un
 		if err != nil {
 			return nil, err
 		}
-		text := regexp.MustCompile(`\b`+regexp.QuoteMeta(f.SourceSymbol)+`\b`).ReplaceAllString(body.text, f.Name)
+		replacements := map[string]string{f.SourceSymbol: f.Name}
 		// The alias entry's override rows rebind names to other symbols; the
 		// duplicate names those symbols directly, so one object needs no
 		// per-member binding.
@@ -423,9 +426,7 @@ func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]un
 				continue
 			}
 			replacement := ""
-			if row := m.dataAt(override.Addr); row != nil {
-				replacement = row.Name
-			} else {
+			if m.function(override.Name) != nil {
 				for index := range m.Functions {
 					if m.Functions[index].Addr == override.Addr {
 						replacement = m.Functions[index].Name
@@ -434,12 +435,24 @@ func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]un
 				}
 			}
 			if replacement == "" {
-				return nil, fmt.Errorf("%s: alias %s binds %s to 0x%08x, which names no symbol of the module", m.ID, f.Name, override.Name, override.Addr)
+				return nil, fmt.Errorf("%s: alias %s override %s is not between named module functions; materialize reviewed source manually", m.ID, f.Name, override.Name)
 			}
-			text = regexp.MustCompile(`\b`+regexp.QuoteMeta(override.Name)+`\b`).ReplaceAllString(text, replacement)
+			if previous, exists := replacements[override.Name]; exists && previous != replacement {
+				return nil, fmt.Errorf("%s: alias %s has conflicting replacements for %s; materialize reviewed source manually", m.ID, f.Name, override.Name)
+			}
+			replacements[override.Name] = replacement
+		}
+		if len(body.includes) > 0 {
+			if err := rejectAliasMacros(root, m, target, body.text, replacements); err != nil {
+				return nil, fmt.Errorf("%s: alias %s: %w", m.ID, f.Name, err)
+			}
+		}
+		text, err := materializeFunctionAlias(body.text, f.SourceSymbol, replacements, m)
+		if err != nil {
+			return nil, fmt.Errorf("%s: alias %s: %w", m.ID, f.Name, err)
 		}
 		text = fmt.Sprintf("/* The original wrote the body of %s a second time as %s. */\n", f.SourceSymbol, f.Name) + text
-		return &unitMemberBody{key: body.key + "@" + f.Name, includes: body.includes, text: text}, nil
+		return &unitMemberBody{key: body.key + "@" + f.Name + "#" + shortHash([]byte(text)), includes: body.includes, text: text}, nil
 	}
 	if f.Unit != "" {
 		unit := m.unit(f.Unit)
@@ -523,7 +536,7 @@ func mergeMemberOrders(lists [][]string) ([]string, error) {
 // in those modules' program macros; a member with several bodies gets one
 // wrapped block per body, in module order. Returns the text and how many
 // members sit under conditionals.
-func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]map[string]*unitMemberBody, bodyModules map[string]map[string][]*moduleSpec, fillers map[string]string) ([]byte, int) {
+func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]map[string]*unitMemberBody, bodyModules map[string]map[string][]*moduleSpec, fillers map[string]string) ([]byte, int, error) {
 	moduleIndex := map[*moduleSpec]int{}
 	for index, m := range order {
 		moduleIndex[m] = index
@@ -540,7 +553,7 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 	}
 	var blocks []string
 	conditional := 0
-	seenConstant := map[string]bool{}
+	seenConstant := map[string]map[string]bool{}
 	for _, name := range merged {
 		keys := make([]string, 0, len(bodies[name]))
 		for key := range bodies[name] {
@@ -553,7 +566,10 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 			body := bodies[name][key]
 			addIncludes(body.includes)
 			modules := bodyModules[name][key]
-			text := dropRepeatedConstants(body.text, seenConstant)
+			text, err := dropRepeatedConstants(body.text, seenConstant, modules)
+			if err != nil {
+				return nil, 0, fmt.Errorf("%s (%s): %w", name, key, err)
+			}
 			if len(keys) == 1 && len(modules) == len(order) {
 				blocks = append(blocks, text)
 				continue
@@ -577,7 +593,7 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 	if len(includes) > 0 {
 		text = strings.Join(includes, "\n") + "\n\n" + text
 	}
-	return []byte(text), conditional
+	return []byte(text), conditional, nil
 }
 
 // ownedRodataTables finds the module's data rows that lie among the members'
@@ -709,18 +725,73 @@ func renderRodataFiller(name string, addr uint32, bytes []byte) string {
 	return out.String()
 }
 
-// dropRepeatedConstants removes file-scope `#define` lines and `enum {...};`
-// statements whose text already appeared in an earlier member: several
-// per-function files carried the same local constant, which one object
-// defines once.
-func dropRepeatedConstants(text string, seen map[string]bool) string {
-	pattern := regexp.MustCompile(`(?ms)^(?:#define[^\n]*|enum\s*\{[^}]*\}\s*;)[ \t]*\n?`)
-	return pattern.ReplaceAllStringFunc(text, func(statement string) string {
-		key := strings.TrimSpace(statement)
-		if seen[key] {
-			return ""
+// A repeated constant may be omitted only when every program compiling this
+// body already sees it. Partial overlap needs a hand-written declaration guard.
+func dropRepeatedConstants(text string, seen map[string]map[string]bool, modules []*moduleSpec) (string, error) {
+	code := declarationComments.ReplaceAllStringFunc(text, func(part string) string {
+		if !strings.HasPrefix(part, "/") {
+			return part
 		}
-		seen[key] = true
-		return statement
+		masked := []byte(part)
+		for index := range masked {
+			if masked[index] != '\n' {
+				masked[index] = ' '
+			}
+		}
+		return string(masked)
 	})
+	pattern := regexp.MustCompile(`(?ms)^[ \t]*(?:#[ \t]*define\b[^\n]*|enum\s*\{[^}]*\}\s*;)[ \t]*\n?`)
+	matches := pattern.FindAllStringIndex(code, -1)
+	if len(matches) == 0 {
+		return text, nil
+	}
+	if regexp.MustCompile(`(?m)^[ \t]*#[ \t]*(?:if|ifdef|ifndef|elif|else|endif|undef)\b`).MatchString(code) {
+		return "", errors.New("constants with source conditionals or #undef need a hand-written merge")
+	}
+	tokens, err := tokenizeC(text)
+	if err != nil {
+		return "", err
+	}
+	var output strings.Builder
+	cursor, tokenIndex, depth := 0, 0, 0
+	for _, match := range matches {
+		statement := text[match[0]:match[1]]
+		for tokenIndex < len(tokens) && tokens[tokenIndex].start < match[0] {
+			switch tokens[tokenIndex].text {
+			case "{":
+				depth++
+			case "}":
+				depth--
+			}
+			tokenIndex++
+		}
+		if depth != 0 || strings.HasSuffix(strings.TrimSpace(statement), "\\") {
+			return "", errors.New("local constants or continued macros need a hand-written merge")
+		}
+		key := strings.TrimSpace(statement)
+		visible := seen[key]
+		count := 0
+		for _, module := range modules {
+			if visible[module.ID] {
+				count++
+			}
+		}
+		if count != 0 && count != len(modules) {
+			return "", errors.New("constant visibility overlaps only some programs; merge its declaration by hand")
+		}
+		output.WriteString(text[cursor:match[0]])
+		if count == 0 {
+			output.WriteString(statement)
+			if visible == nil {
+				visible = map[string]bool{}
+				seen[key] = visible
+			}
+			for _, module := range modules {
+				visible[module.ID] = true
+			}
+		}
+		cursor = match[1]
+	}
+	output.WriteString(text[cursor:])
+	return output.String(), nil
 }
