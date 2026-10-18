@@ -16,7 +16,8 @@ static RECT g_gfx_frame_image_rect = { 960, 256, 64, 256 };
 static RECT g_gfx_frame_palette_rect = { 960, 496, 16, 16 };
 static RECT g_gfx_frame_palette_tail_rect = { 976, 506, 16, 6 };
 
-static void file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
+static void file_load_data_from_disc(
+    int sector, int sectors, void* destination, file_loading_display_mode_e loading_display_mode);
 
 /* Call MAIN's own zodiac_build_primitives; ATTACK.OUT's deployment screen draws its
  * zodiac sprites through this wrapper rather than its own copy. */
@@ -58,7 +59,8 @@ void overlay_open_world(s32 mode) {
  * last argument is file_request_read's loading display mode: 0 blanks the
  * screen and sets up the "Now Loading" message, 1 leaves the display state alone,
  * and -1 turns the message off. */
-static void file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {
+static void file_load_data_from_disc(
+    int sector, int sectors, void* destination, file_loading_display_mode_e loading_display_mode) {
     file_load_descriptor_t* descriptor = &g_file_cd_state;
 
     file_request_read(descriptor, sector, sectors, destination, loading_display_mode);

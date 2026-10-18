@@ -25,8 +25,8 @@ s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sect
  * (OFF, -1, keeps the message hidden). INIT also blanks the display, builds
  * the message, clears both 256x240 buffers of VRAM and sets up a plain
  * double-buffered 256x240 display for it. */
-s32 file_request_read(
-    file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination, s32 loading_display_mode) {
+s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination,
+    file_loading_display_mode_e loading_display_mode) {
     RECT rect;
 
     if (header->state != FILE_LOAD_STATE_IDLE) {

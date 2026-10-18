@@ -92,7 +92,7 @@ typedef enum file_load_state {
 /* Asynchronous CD read state advanced by file_poll_load. */
 typedef struct file_load_descriptor {
     s32 _unknown_00;
-    s32 state; /* file_load_state_e */
+    file_load_state_e state;
     s32 error_count;
     s32 wait_frames;
     s32 sector_count;
@@ -105,8 +105,8 @@ typedef char file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t)
 
 extern file_load_descriptor_t g_file_cd_state;
 
-s32 file_request_read(
-    file_load_descriptor_t* state, s32 lba, s32 sector_count, void* destination, s32 loading_display_mode);
+s32 file_request_read(file_load_descriptor_t* state, s32 lba, s32 sector_count, void* destination,
+    file_loading_display_mode_e loading_display_mode);
 
 /* Forwards file_request_read's result. */
 s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
