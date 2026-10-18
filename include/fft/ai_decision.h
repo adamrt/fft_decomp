@@ -67,14 +67,6 @@ typedef enum ai_retreat_stage {
 enum { AI_PROTECT_ALLIES_STATUS_COUNT = 3 };
 
 /* target selection */
-typedef enum ai_unit_filter {
-    AI_UNIT_FILTER_ANY = 0,
-    AI_UNIT_FILTER_ENEMIES = 1,
-    AI_UNIT_FILTER_ALLIES = 2,
-    AI_UNIT_FILTER_SPECIFIC = 3,
-    AI_UNIT_FILTER_STATUS = 4
-} ai_unit_filter_e;
-
 typedef enum ai_nearest_target_mode {
     AI_NEAREST_WITHOUT_BLOOD_SUCK = 0,
     AI_NEAREST_IMMINENT_ENEMY = 1,
@@ -113,23 +105,11 @@ typedef enum ai_move_retreat_stage {
     AI_MOVE_RETREAT_TARGET_DISTANCE = 1
 } ai_move_retreat_stage_e;
 
-typedef enum ai_destination_order {
-    AI_DESTINATION_PRIORITY_FIRST = 0,
-    AI_DESTINATION_DISTANCE_FIRST = 1
-} ai_destination_order_e;
-
 s32 ai_move_propagate_from_target(
     s32 unit_id, s32 target_x, s32 target_y, s32 target_elevation, s32 initialize, s32* suspended, s32 check_budget);
 void ai_record_triggered_trap_coords(s32 x, s32 y, s32 level);
 
 /* target geometry */
-typedef enum ai_tile_mask_mode {
-    AI_TILE_MASK_RANGE = 0,
-    AI_TILE_MASK_AOE = 1,
-    AI_TILE_MASK_RANGE_PLUS_AOE = 2,
-    AI_TILE_MASK_EXPLICIT = 3
-} ai_tile_mask_mode_e;
-
 void ai_origin_build_cast_and_aim_tiles(void);
 s32 ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
 s32 ai_calculate_height_difference(const ai_coords_t* coords, const unit_stats_t* unit);
@@ -177,8 +157,6 @@ enum { AI_MATH_SOURCE_SKILLSET_COUNT = 4, AI_MATH_EXTRA_KNOWN_ABILITY_COUNT = 10
 extern u8 g_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
 
 /* action ranking */
-typedef enum ai_rank_order { AI_RANK_BELOW = 0, AI_RANK_EQUAL = 1, AI_RANK_ABOVE = 2 } ai_rank_order_e;
-
 void ai_init_selected_action(void);
 void ai_rank_insert_best(void);
 s32 ai_rank_is_higher(const ai_action_data_t* a, const ai_action_data_t* b);
@@ -187,9 +165,6 @@ void ai_rank_reset_action(ai_action_data_t* action);
 /* simulation */
 /* Turn-event iteration limit for one simulated action. */
 enum { AI_SIMULATED_TURN_LIMIT = 256 };
-
-/* Baseline records include action/equipment data; simulated status uses the compact records. */
-typedef enum ai_snapshot_mode { AI_SNAPSHOT_BASELINE = 0, AI_SNAPSHOT_SIMULATED_STATUS = 1 } ai_snapshot_mode_e;
 
 typedef enum ai_simulation_phase {
     AI_SIMULATION_PREPARE_ACTION = 0,
@@ -247,9 +222,6 @@ s32 ai_simulate_action_and_score(void);
 void ai_update_tile_pickup(void);
 
 /* facing */
-/* Only the four cardinal hints index the tile-delta table. */
-enum { AI_CARDINAL_DIRECTION_COUNT = 4 };
-
 typedef enum ai_direction {
     AI_DIRECTION_SOUTH = 0,
     AI_DIRECTION_WEST = 1,
@@ -258,11 +230,6 @@ typedef enum ai_direction {
     AI_DIRECTION_OVERLAP = 4,
     AI_DIRECTION_CHOOSE_AT_WAIT = 5
 } ai_direction_e;
-
-/* Cardinal map-tile deltas stored as wrapping unsigned bytes. */
-typedef struct ai_facing_tile_offsets {
-    u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
-} ai_facing_tile_offsets_t;
 
 s32 ai_facing_choose_for_wait(void);
 ai_direction_e ai_facing_find_target_direction(const ai_coords_t* target, const ai_coords_t* origin);

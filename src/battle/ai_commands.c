@@ -19,6 +19,21 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+typedef enum ai_unit_filter {
+    AI_UNIT_FILTER_ANY = 0,
+    AI_UNIT_FILTER_ENEMIES = 1,
+    AI_UNIT_FILTER_ALLIES = 2,
+    AI_UNIT_FILTER_SPECIFIC = 3,
+    AI_UNIT_FILTER_STATUS = 4
+} ai_unit_filter_e;
+
+typedef enum ai_destination_order {
+    AI_DESTINATION_PRIORITY_FIRST = 0,
+    AI_DESTINATION_DISTANCE_FIRST = 1
+} ai_destination_order_e;
+
+typedef enum ai_rank_order { AI_RANK_BELOW = 0, AI_RANK_EQUAL = 1, AI_RANK_ABOVE = 2 } ai_rank_order_e;
+
 extern u8 g_ai_protect_allies_status_ids[AI_PROTECT_ALLIES_STATUS_COUNT];
 extern ai_command_t g_ai_command_history[2]; /* the last two commands built, newest last */
 

@@ -19,6 +19,24 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+typedef enum ai_tile_mask_mode {
+    AI_TILE_MASK_RANGE = 0,
+    AI_TILE_MASK_AOE = 1,
+    AI_TILE_MASK_RANGE_PLUS_AOE = 2,
+    AI_TILE_MASK_EXPLICIT = 3
+} ai_tile_mask_mode_e;
+
+/* Baseline records include action/equipment data; simulated status uses the compact records. */
+typedef enum ai_snapshot_mode { AI_SNAPSHOT_BASELINE = 0, AI_SNAPSHOT_SIMULATED_STATUS = 1 } ai_snapshot_mode_e;
+
+/* Only the four cardinal hints index the tile-delta table. */
+enum { AI_CARDINAL_DIRECTION_COUNT = 4 };
+
+/* Cardinal map-tile deltas stored as wrapping unsigned bytes. */
+typedef struct ai_facing_tile_offsets {
+    u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
+} ai_facing_tile_offsets_t;
+
 /* Origin masks, Math Skill iteration and facing offsets. */
 extern u16 g_ai_origin_range_row_masks[];
 extern s32 g_ai_origin_self_target_stage;
