@@ -562,7 +562,7 @@ void save_build_image(s32 slot) {
     }
 
     bcopy(unit->name, g_save_buffer_pointer->summary.name, sizeof(unit->name));
-    g_save_buffer_pointer->summary.name_terminator = 0xfe;
+    g_save_buffer_pointer->summary.name[UNIT_NAME_SIZE] = 0xfe;
     g_save_buffer_pointer->summary.job_id = unit->job_id;
     g_save_buffer_pointer->summary.level = unit->level;
 

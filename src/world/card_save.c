@@ -726,9 +726,9 @@ void save_build_image(s32 slot) {
         i = 0;
     }
 
-    bcopy(
-        g_formation_unit_pointers[i]->name, g_save_work_buffer->summary.name, sizeof(g_save_work_buffer->summary.name));
-    g_save_work_buffer->summary.name_terminator = 0xfe;
+    bcopy(g_formation_unit_pointers[i]->name, g_save_work_buffer->summary.name,
+        sizeof(g_formation_unit_pointers[i]->name));
+    g_save_work_buffer->summary.name[UNIT_NAME_SIZE] = 0xfe;
     g_save_work_buffer->summary.job_id = g_formation_unit_pointers[i]->identity.job_id;
     g_save_work_buffer->summary.level = g_formation_unit_pointers[i]->status.level;
 
