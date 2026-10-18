@@ -88,7 +88,8 @@ func TestDiffSummaryRetargetsShiftedBranchesAndSplitsRuns(t *testing.T) {
 	}
 	summary := formatDiffSummary(testWords(base...), testWords(mine...))
 	for _, want := range []string{
-		"diff summary: target 8 insns, compiled 9 insns (+1), score 110\n",
+		"diff summary: target 8 insns, compiled 9 insns (+1), normalized score 110\n",
+		"raw bytes: target 32, compiled 36; first difference at 0x9\n",
 		"  2 runs (extra 1, reg 1); rows r2 >1\n",
 		"0x008-0x00c     0x008-0x00c        2  reg      r2             r move s0,a0 / move s1,a0\n",
 		"@0x018          0x018-0x018        1  extra    >1             > - / ori v0,v0,0x1\n",
@@ -97,7 +98,7 @@ func TestDiffSummaryRetargetsShiftedBranchesAndSplitsRuns(t *testing.T) {
 			t.Fatalf("summary missing %q:\n%s", want, summary)
 		}
 	}
-	if !strings.Contains(formatDiffSummary(testWords(base...), testWords(base...)), "no mismatching instructions") {
+	if !strings.Contains(formatDiffSummary(testWords(base...), testWords(base...)), "raw bytes: identical (32 bytes)") {
 		t.Fatal("identical summary did not say so")
 	}
 }
@@ -130,6 +131,36 @@ func TestDiffSummaryNamesReorderedRuns(t *testing.T) {
 		if run.kind != "reorder" {
 			t.Fatalf("moved load not a reorder: %+v", run)
 		}
+	}
+}
+
+func TestDiffSummarySeparatesRawBytesFromNormalizedInstructions(t *testing.T) {
+	code := testWords(diffTestMoveS0A0, diffTestJrRA, diffTestNop)
+	cases := []struct {
+		name             string
+		target, compiled []byte
+		want             string
+	}{
+		{"identical", code, code, "raw bytes: identical (12 bytes)"},
+		{"empty", nil, nil, "raw bytes: identical (0 bytes)"},
+		{"move encoding", code, testWords(0x00808025, diffTestJrRA, diffTestNop), "raw bytes: target 12, compiled 12; first difference at 0x0"},
+		{"trailing nop", code, testWords(diffTestMoveS0A0, diffTestJrRA, diffTestNop, diffTestNop), "raw bytes: target 12, compiled 16; first difference at 0xc"},
+		{"missing trailing nop", testWords(diffTestMoveS0A0, diffTestJrRA, diffTestNop, diffTestNop), code, "raw bytes: target 16, compiled 12; first difference at 0xc"},
+		{"partial instruction", code, append(append([]byte(nil), code...), 0x12, 0x34), "raw bytes: target 12, compiled 14; first difference at 0xc"},
+		{"different partial instruction", append(append([]byte(nil), code...), 0x12), append(append([]byte(nil), code...), 0x34), "raw bytes: target 13, compiled 13; first difference at 0xc"},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			if score := mipsScore(test.target, test.compiled); score != 0 {
+				t.Fatalf("normalized score = %d, want 0", score)
+			}
+			summary := formatDiffSummary(test.target, test.compiled)
+			for _, want := range []string{test.want, "normalized score 0", "no differences after instruction normalization"} {
+				if !strings.Contains(summary, want) {
+					t.Errorf("summary missing %q:\n%s", want, summary)
+				}
+			}
+		})
 	}
 }
 

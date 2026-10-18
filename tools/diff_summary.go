@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 )
@@ -227,14 +228,23 @@ func diffMarkerCounts(counts map[byte]int) string {
 	return strings.Join(parts, " ")
 }
 
-// formatDiffSummary renders the run table for target and compiled text.
+// formatDiffSummary reports raw byte equality separately from normalized runs.
 // Offsets are relative to the function start, like the asm-differ listing.
 func formatDiffSummary(target, compiled []byte) string {
 	base := trimTrailingNops(disassembleMIPS(target))
 	mine := trimTrailingNops(disassembleMIPS(compiled))
 	runs := summarizeMIPSDiff(base, mine)
 	var out strings.Builder
-	fmt.Fprintf(&out, "diff summary: target %d insns, compiled %d insns (%+d), score %d\n", len(base), len(mine), len(mine)-len(base), scoreMIPSLines(base, mine))
+	fmt.Fprintf(&out, "diff summary: target %d insns, compiled %d insns (%+d), normalized score %d\n", len(base), len(mine), len(mine)-len(base), scoreMIPSLines(base, mine))
+	if bytes.Equal(target, compiled) {
+		fmt.Fprintf(&out, "  raw bytes: identical (%d bytes)\n", len(target))
+	} else {
+		offset := 0
+		for offset < len(target) && offset < len(compiled) && target[offset] == compiled[offset] {
+			offset++
+		}
+		fmt.Fprintf(&out, "  raw bytes: target %d, compiled %d; first difference at 0x%x\n", len(target), len(compiled), offset)
+	}
 	rows := map[byte]int{}
 	kinds := map[string]int{}
 	for _, run := range runs {
@@ -250,7 +260,7 @@ func formatDiffSummary(target, compiled []byte) string {
 		}
 	}
 	if len(runs) == 0 {
-		out.WriteString("  no mismatching instructions\n")
+		out.WriteString("  no differences after instruction normalization\n")
 		return out.String()
 	}
 	fmt.Fprintf(&out, "  %d runs (%s); rows %s\n", len(runs), strings.Join(kindParts, ", "), diffMarkerCounts(rows))

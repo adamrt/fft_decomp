@@ -5,7 +5,8 @@
 // mnemonics (rapidfuzz tie-breaking), branch targets are compared through
 // that alignment, and penalties are 5 per differing field, 1 per stack-offset
 // unit, 100 per unmatched line and 60 per reordered line. Rare alignments can
-// still disagree with asm-differ; 0 always means byte-identical text.
+// still disagree with asm-differ. A zero score means the normalized instructions
+// agree, not that their encodings or trailing bytes are identical.
 package main
 
 import (
