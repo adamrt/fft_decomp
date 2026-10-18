@@ -804,7 +804,7 @@ s32 sprite_open_sp2_file(unit_t* unit, u32* destination) {
         if (lba == 0) {
             return -1;
         }
-        if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
+        if (animation_id >= unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_sprite_worker8_sp2_files[index].size;
             return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
@@ -813,7 +813,7 @@ s32 sprite_open_sp2_file(unit_t* unit, u32* destination) {
         if (lba == 0) {
             return -1;
         }
-        if (animation_id >= (u32)unit->animation.seq->first_sp2_sequence >> 1) {
+        if (animation_id >= unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_sprite_sp2_files[spritesheet_id].size;
             return file_request_read_bytes(lba, byte_length, destination) != 0;
         }

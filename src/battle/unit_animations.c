@@ -1242,7 +1242,7 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
             }
         }
-    } else if (frame < (u32)state->shp->first_attack_frame) {
+    } else if (frame < state->shp->first_attack_frame) {
         display->tpage = unit->tpage | (flags & SPRITE_DISPLAY_BLEND_MASK);
         display->clut = unit->clut;
         i = 0;
@@ -2139,8 +2139,8 @@ static void animation_update_unit_wep_eff(unit_t* unit_data) {
                 if (animation < ANIMATION_SEQUENCE_EVTCHR_SLOT_0) {
                     seq = unit->animation.seq;
                     index = animation * 2 + back_by_quadrant[quadrant];
-                    if (index < (u32)seq->first_sp2_sequence) {
-                        if (index >= (u32)seq->first_attack_sequence) {
+                    if (index < seq->first_sp2_sequence) {
+                        if (index >= seq->first_attack_sequence) {
                             /* Keep a slot the unit already owns; otherwise load into a free slot and a free
                              * image buffer. */
                             for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {

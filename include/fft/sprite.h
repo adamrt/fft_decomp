@@ -70,8 +70,8 @@ typedef struct sprite_frame {
  * (sprite_frame_select_unit_shp); it repeats the first when the file
  * carries a single frame set (header 8). */
 typedef struct sprite_unit_shp_frame_tables {
-    s32 first_attack_frame;                 /* 0x000; frames from here up are drawn from the sheet's attack image */
-    s32 first_sp2_frame;                    /* 0x004; set from the file and never read */
+    u32 first_attack_frame;                 /* 0x000; frames from here up are drawn from the sheet's attack image */
+    u32 first_sp2_frame;                    /* 0x004; set from the file and never read */
     sprite_frame_t* frames[0xd0];           /* 0x008 */
     sprite_frame_t* submerged_frames[0xd0]; /* 0x348 */
 } sprite_unit_shp_frame_tables_t;
@@ -89,8 +89,8 @@ typedef char sprite_weapon_shp_size_must_be_2112[sizeof(sprite_weapon_shp_t) == 
 /* Common header of an unpacked unit SEQ table. The pointer tail has 0x100
  * entries in a native table and 0x40 in an EVTCHR slot. */
 typedef struct sprite_unit_seq_table {
-    s32 first_attack_sequence; /* 0x00; sequences from here use the attack image */
-    s32 first_sp2_sequence;    /* 0x04; sequences from here use the SP2 file */
+    u32 first_attack_sequence; /* 0x00; sequences from here use the attack image */
+    u32 first_sp2_sequence;    /* 0x04; sequences from here use the SP2 file */
     u8* sequences[0];          /* 0x08; variable pointer tail */
 } sprite_unit_seq_table_t;
 typedef char sprite_unit_seq_table_size_must_be_8[sizeof(sprite_unit_seq_table_t) == 8 ? 1 : -1];
