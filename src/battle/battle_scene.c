@@ -1,5 +1,6 @@
-/* Deployment and game loop entry, unit lookups by tile, runtime id and battle id, SP2 spritesheet loading, sprite
- * display init, polygon construction and camera relative offsets. */
+/* Load a battle map, run deployment and drive the battle state loop. This unit
+ * also handles the live-unit queries and sprite loading/drawing used by that
+ * loop and the unit animation code. */
 
 #include "fft/ability.h"
 #include "fft/animation.h"
@@ -59,6 +60,9 @@ extern palette_t g_unit_facing_wait_arrow_palette;
 extern const u8* g_sprite_compressed_data;
 extern s32 g_sprite_compressed_nibble_phase;
 extern s32 g_sprite_compressed_offset;
+
+/* Loading BATTLE initializes the result; MAIN reads it when the battle loop returns. */
+u32 g_game_flow_state = SYSTEM_GAME_FLOW_BATTLE;
 
 static SVECTOR g_sprite_gte_rtpt_vxy0 = { 0 };
 static SVECTOR g_sprite_gte_rtpt_vxy1 = { 0 };

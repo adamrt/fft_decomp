@@ -22,6 +22,9 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+/* Resident title route flag, consumed and cleared during ATTACK's scenario setup. */
+u8 g_system_go_straight_to_battle = 1;
+
 extern u32 g_system_game_loop_stack_pointer;
 extern u32 g_boot_squaresoft_logo_image_words[];
 

@@ -12,7 +12,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
   - {name: file_requests, source: src/main/file_requests.c}
-  - {name: game_loop, source: src/main/game_loop.c}
+  - {name: game_loop, source: src/main/game_loop.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}]}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: new_game_caption, source: src/main/new_game_caption.c}
   - {name: open_overlay, source: src/main/open_overlay.c}

@@ -78,9 +78,6 @@ extern s32 g_game_state;
 extern s32 g_game_state_previous;
 extern s32 g_state_map_init_step;
 
-/* What MAIN does once battle_entrypoint returns: a system_game_flow_e. */
-extern u32 g_game_flow_state;
-
 /* Nonzero while the action's effect is pending: 1 while its file loads, 2 while it plays, with
  * the knockback targets' step phases ORed in. SEQ ops 0xd3 and 0xd6 and
  * script_play_effect_and_wait wait on it. */
