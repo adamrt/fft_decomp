@@ -44,6 +44,7 @@ extern u8* g_deploy_unit_text_section;
 /* Overlay text-file header: offsets are relative to the data following the header. */
 typedef struct deploy_text_header {
     s32 section_offsets[32];
+    u8 data[0]; /* 0x80; variable-length section data */
 } deploy_text_header_t;
 typedef char deploy_text_header_size_must_be_128[(sizeof(deploy_text_header_t) == 128) ? 1 : -1];
 
@@ -325,7 +326,7 @@ static void text_init_battle_pointers_from_file(deploy_text_header_t* file) {
     u8** table;
 
     /* Section data follows the 32-entry offset header. */
-    data = (u8*)(file + 1);
+    data = file->data;
     table = g_text_section_pointers;
     do {
         if (i != TEXT_SECTION_EVENT_MESSAGES) {
