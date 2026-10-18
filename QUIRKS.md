@@ -775,11 +775,13 @@ written that way.
   set no result, although `effect_secondary_update`
   ends an effect on a handler result of 0. No record of
   `g_effect_secondary_animations` names them.
-- `ability_list_is_non_action_learned` passes one 32-bit pointer slot (0x801f0050, named
+- JOBSTTS's `ability_list_is_non_action_learned` passes one 32-bit pointer slot (0x801f0050, named
   both `g_ability_list_selected_ability_data` and
   `g_ability_list_selected_ability_secondary_data`) for both outputs of
   `ability_get_data_and_type`, so the ability data pointer is
-  overwritten by the secondary data pointer.
+  overwritten by the secondary data pointer. The ability-list callbacks never read
+  the primary pointer: MP and CT use the surviving secondary pointer, and JP
+  reads `g_ability_data` directly.
 
 - `menu_input_update_event_state` passes six 32-bit values starting at `g_input_event`
   to the event input loader; CARD's controller pointer at +4 is copied as held
