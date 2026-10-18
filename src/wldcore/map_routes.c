@@ -76,11 +76,10 @@ extern s32 g_world_map_dot_count;
 extern u8 g_world_map_dot_pulse_direction;
 extern u8 g_world_map_dot_pulse_phase;
 
-/* The route records by route id: a pointer cell to the WORLD_MAP_ROUTE_COUNT record pointers. */
-extern world_map_route_header_t** g_world_map_routes;
-
-/* Polyline for each route: a 16-bit count followed by packed x/y pairs. */
-extern u16** g_world_map_route_polylines;
+/* Encoded route records and outlines, indexed by the same route ID.
+ * An outline begins with a 16-bit count followed by x/y halfword pairs. */
+extern world_map_route_header_t* g_world_map_route_table[WORLD_MAP_ROUTE_COUNT];
+extern u16* g_world_map_route_polyline_table[WORLD_MAP_ROUTE_COUNT];
 
 static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT];
 static location_record_t g_location_record_data[LOCATION_COUNT];
@@ -179,6 +178,9 @@ static location_record_t g_location_record_data[LOCATION_COUNT] = {
     { { 0, 0 }, 0, LOCATION_MENU_OTHER },
     { { 0, 0 }, 0, LOCATION_MENU_OTHER },
 };
+
+static world_map_route_header_t** g_world_map_routes = g_world_map_route_table;
+static u16** g_world_map_route_polylines = g_world_map_route_polyline_table;
 
 static void world_map_negate_and_clamp(const SVECTOR* input, VECTOR* output);
 static s32 random_battle_roll(s32 location, s32 route);

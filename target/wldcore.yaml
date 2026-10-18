@@ -19,7 +19,7 @@ units:
   - {name: input, source: src/wldcore/input.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}]}
-  - {name: map_routes, source: src/wldcore/map_routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}]}
+  - {name: map_routes, source: src/wldcore/map_routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}, {addr: 0x80095000, size: 8, hash: 5c609baa7c039742}]}
   - {name: map_tiles, source: src/wldcore/map_tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}]}
   - {name: music_queue, source: src/wldcore/music_queue.c, data: [{addr: 0x800d45a4, size: 160, hash: b393978842a0fa3d}]}
@@ -481,6 +481,8 @@ data:
   - {addr: 0x80094df8, name: g_location_records}
   - {addr: 0x80095000, name: g_world_map_routes}
   - {addr: 0x80095004, name: g_world_map_route_polylines}
+  - {addr: 0x80095008, name: g_world_map_route_table}
+  - {addr: 0x80095fb0, name: g_world_map_route_polyline_table}
   - {addr: 0x80096a40, name: g_random_battle_roads}
   - {addr: 0x80096a44, name: g_deep_dungeon_battles}
   - {addr: 0x80096a48, name: g_brave_story_birthdays}
