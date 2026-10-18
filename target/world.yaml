@@ -41,7 +41,7 @@ units:
   - {name: formation_icon_list, source: src/world/formation_icon_list.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
   - {name: formation_item_menu, source: src/world/formation_item_menu.c}
   - {name: formation_screen, source: src/world/formation_screen.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: formation_units, source: src/world/formation_units.c, rodata: [{addr: 0x8018debc, size: 192, hash: 89e1da6fa721ba35}]}
+  - {name: formation_units, source: src/world/formation_units.c, rodata: [{addr: 0x8018de84, size: 39, hash: 9b19539c4007dec5}, {addr: 0x8018deac, size: 13, hash: 3f791b83fe642490}, {addr: 0x8018debc, size: 192, hash: 89e1da6fa721ba35}]}
   - {name: formation_view, source: src/world/formation_view.c, data: [{addr: 0x8018a144, size: 36, hash: d3211fb13a06ff86}, {addr: 0x8018a168, size: 424, hash: 2cea75c50162ef58}]}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
   - {name: grid_cursor, source: src/world/grid_cursor.c}

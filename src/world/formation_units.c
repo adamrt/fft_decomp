@@ -50,8 +50,8 @@ enum {
     BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1
 };
 
-/* Provisional: the breeding entry of a monster job (JOB_ID_CHOCOBO on): the hatch-day range and the three offspring
- * jobs by rarity class (breeding_update). */
+/* Breeding data for one monster job: its hatch-day range and offspring jobs
+ * for the common, uncommon and rare rolls. */
 typedef struct breeding_entry {
     u8 hatch_range;                                    /* 0x00: rand() % hatch_range + 1 (at least 2) egg days */
     u8 offspring_job_by_rarity[BREEDING_RARITY_COUNT]; /* 0x01; common through rare */
@@ -59,11 +59,28 @@ typedef struct breeding_entry {
 typedef char breeding_entry_size_must_be_4[(sizeof(breeding_entry_t) == 4) ? 1 : -1];
 
 /* sprite sources, zodiac dates and breeding tables */
-extern const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT];
+static const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT] = {
+    { { 1, 19 }, ZODIAC_SIGN_CAPRICORN },
+    { { 2, 18 }, ZODIAC_SIGN_AQUARIUS },
+    { { 3, 20 }, ZODIAC_SIGN_PISCES },
+    { { 4, 19 }, ZODIAC_SIGN_ARIES },
+    { { 5, 20 }, ZODIAC_SIGN_TAURUS },
+    { { 6, 21 }, ZODIAC_SIGN_GEMINI },
+    { { 7, 22 }, ZODIAC_SIGN_CANCER },
+    { { 8, 22 }, ZODIAC_SIGN_LEO },
+    { { 9, 22 }, ZODIAC_SIGN_VIRGO },
+    { { 10, 23 }, ZODIAC_SIGN_LIBRA },
+    { { 11, 22 }, ZODIAC_SIGN_SCORPIO },
+    { { 12, 22 }, ZODIAC_SIGN_SAGITTARIUS },
+    { { 12, 31 }, ZODIAC_SIGN_CAPRICORN },
+};
 extern texture_source_t g_formation_sprite_sources[];
 
 /* Fixed character identities select sprite sources here; jobs below 0x35 use the same mapping. */
 extern u8 g_formation_sprite_index_by_identity[];
+
+/* Days per month, indexed from 1; the leading zero is outside the sum. */
+static const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 /* Each three-job monster family shares common/uncommon offspring. The first
  * job's rare result stays at that job; the other two use the third job. */
@@ -90,9 +107,6 @@ static const breeding_entry_t g_breeding_table[BREEDING_ENTRY_COUNT] = {
     BREEDING_FAMILY(JOB_ID_HYUDRA, 9, 9, 9),
 };
 #undef BREEDING_FAMILY
-
-/* Provisional: month lengths indexed by 1-based month, read by breeding_update. */
-extern const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT];
 
 /*
  * Change an ability slot and optionally replace incompatible equipment.
