@@ -56,7 +56,7 @@ units:
   - {name: script_helpers, source: src/lib/event/script_helpers.c}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, data: [{addr: 0x801696fc, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80169700, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80169718, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80169720, size: 48, hash: 5026ef5547d95034}, {addr: 0x80169750, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: script_variables, source: src/lib/event/script_variables.c}
-  - {name: skillset_menus, source: src/battle/skillset_menus.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
+  - {name: skillset_menus, source: src/battle/skillset_menus.c}
   - {name: spritesheets, source: src/battle/spritesheets.c}
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}
@@ -67,6 +67,7 @@ units:
   - {name: texture_allocator, source: src/lib/menu/texture_allocator.c}
   - {name: thread, source: src/lib/thread/thread.c}
   - {name: thread_accessors, source: src/lib/thread/thread_accessors.c}
+  - {name: turn_order, source: src/battle/turn_order.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: unit_animations, source: src/battle/unit_animations.c, data: [{addr: 0x80094c04, size: 72, hash: cab01352aee9f525}, {addr: 0x80094c4c, size: 72, hash: 05a1775a42db17c8}, {addr: 0x80094c94, size: 16, hash: e8877e5cf3d312c9}, {addr: 0x80094ca4, size: 16, hash: 4b74bb45f0b85a11}, {addr: 0x80094cb4, size: 16, hash: 682ea28f475f1fe5}, {addr: 0x80094cc4, size: 16, hash: 5cf971573bd3ea07}, {addr: 0x80094cd4, size: 1272, hash: ed600454c88e8d7b}]}
   - {name: unit_control, source: src/battle/unit_control.c, data: [{addr: 0x800961ac, size: 3, hash: 8ae40a3583aef669}]}
   - {name: unit_lookup, source: src/battle/unit_lookup.c, data: [{addr: 0x800a7790, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a7798, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a0, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a8, size: 8, hash: af5570f5a1810b7a}]}
@@ -1316,25 +1317,25 @@ functions:
   - {addr: 0x80182688, size: 256, name: skillset_collect_draw_out_katanas, hash: 422d53e8c6b19563, unit: skillset_menus}
   - {addr: 0x80182788, size: 44, name: skillset_load_charge_ability_ids, hash: 21e81a54367c3d7c, unit: skillset_menus}
   - {addr: 0x801827b4, size: 60, name: skillset_load_charge_abilities, hash: 1fc05549b35e9fbd, unit: skillset_menus}
-  - {addr: 0x801827f0, size: 2184, name: turn_run_clock, hash: eca1e8e1a1be2442, unit: skillset_menus, rodata: [{addr: 0x80174174, size: 80, hash: 5ec441ab22224a82}]}
-  - {addr: 0x80183078, size: 596, name: status_build_upkeep_action, hash: 2b39ea72993f160c, unit: skillset_menus}
-  - {addr: 0x801832cc, size: 168, name: turn_calculate_status_flags, hash: 698a9630926bf0a1, unit: skillset_menus}
-  - {addr: 0x80183374, size: 328, name: event_check_battle_outcome, hash: e089ef307f2b5b2c, unit: skillset_menus}
-  - {addr: 0x801834bc, size: 136, name: at_list_find_unit, hash: 458cc1f77decbd50, unit: skillset_menus}
-  - {addr: 0x80183544, size: 100, name: at_list_get_entry_unit_id, hash: 1c8bc8bcda750bbc, unit: skillset_menus}
-  - {addr: 0x801835a8, size: 80, name: at_list_is_unit_excluded, hash: 7f9bf09700201ba6, unit: skillset_menus}
-  - {addr: 0x801835f8, size: 276, name: at_list_preview, hash: 3b32f157117983c5, unit: skillset_menus}
-  - {addr: 0x8018370c, size: 960, name: at_list_build, hash: 798c2ba363fcf518, unit: skillset_menus}
-  - {addr: 0x80183acc, size: 220, name: at_list_insert_entry, hash: d319d044f1ea187d, unit: skillset_menus}
-  - {addr: 0x80183ba8, size: 36, name: turn_set_act_taken, hash: e3acd2f17a5d560a, unit: skillset_menus}
-  - {addr: 0x80183bcc, size: 36, name: turn_set_move_taken, hash: 3515b790d56f08d2, unit: skillset_menus}
-  - {addr: 0x80183bf0, size: 124, name: turn_set_move_act_taken, hash: 7a7379850d89a33d, unit: skillset_menus}
-  - {addr: 0x80183c6c, size: 164, name: turn_end, hash: 046d38c9f09aca39, unit: skillset_menus}
-  - {addr: 0x80183d10, size: 96, name: turn_should_end, hash: 9125c03679a7afe5, unit: skillset_menus}
-  - {addr: 0x80183d70, size: 112, name: turn_is_over, hash: efe334f1598ac023, unit: skillset_menus}
-  - {addr: 0x80183de0, size: 32, name: status_clear_action_state, hash: e0a0d57c93fe02c6, unit: skillset_menus}
-  - {addr: 0x80183e00, size: 60, name: status_inflict_defending, hash: d0e7c54fa7c5eaec, unit: skillset_menus}
-  - {addr: 0x80183e3c, size: 88, name: unit_mark_pending_removal, hash: 532560a45165d4c6, unit: skillset_menus}
+  - {addr: 0x801827f0, size: 2184, name: turn_run_clock, hash: eca1e8e1a1be2442, unit: turn_order, rodata: [{addr: 0x80174174, size: 80, hash: 5ec441ab22224a82}]}
+  - {addr: 0x80183078, size: 596, name: status_build_upkeep_action, hash: 2b39ea72993f160c, unit: turn_order}
+  - {addr: 0x801832cc, size: 168, name: turn_calculate_status_flags, hash: 698a9630926bf0a1, unit: turn_order}
+  - {addr: 0x80183374, size: 328, name: event_check_battle_outcome, hash: e089ef307f2b5b2c, unit: turn_order}
+  - {addr: 0x801834bc, size: 136, name: at_list_find_unit, hash: 458cc1f77decbd50, unit: turn_order}
+  - {addr: 0x80183544, size: 100, name: at_list_get_entry_unit_id, hash: 1c8bc8bcda750bbc, unit: turn_order}
+  - {addr: 0x801835a8, size: 80, name: at_list_is_unit_excluded, hash: 7f9bf09700201ba6, unit: turn_order}
+  - {addr: 0x801835f8, size: 276, name: at_list_preview, hash: 3b32f157117983c5, unit: turn_order}
+  - {addr: 0x8018370c, size: 960, name: at_list_build, hash: 798c2ba363fcf518, unit: turn_order}
+  - {addr: 0x80183acc, size: 220, name: at_list_insert_entry, hash: d319d044f1ea187d, unit: turn_order}
+  - {addr: 0x80183ba8, size: 36, name: turn_set_act_taken, hash: e3acd2f17a5d560a, unit: turn_order}
+  - {addr: 0x80183bcc, size: 36, name: turn_set_move_taken, hash: 3515b790d56f08d2, unit: turn_order}
+  - {addr: 0x80183bf0, size: 124, name: turn_set_move_act_taken, hash: 7a7379850d89a33d, unit: turn_order}
+  - {addr: 0x80183c6c, size: 164, name: turn_end, hash: 046d38c9f09aca39, unit: turn_order}
+  - {addr: 0x80183d10, size: 96, name: turn_should_end, hash: 9125c03679a7afe5, unit: turn_order}
+  - {addr: 0x80183d70, size: 112, name: turn_is_over, hash: efe334f1598ac023, unit: turn_order}
+  - {addr: 0x80183de0, size: 32, name: status_clear_action_state, hash: e0a0d57c93fe02c6, unit: turn_order}
+  - {addr: 0x80183e00, size: 60, name: status_inflict_defending, hash: d0e7c54fa7c5eaec, unit: turn_order}
+  - {addr: 0x80183e3c, size: 88, name: unit_mark_pending_removal, hash: 532560a45165d4c6, unit: turn_order}
   - {addr: 0x80183e94, size: 12, name: turn_activate_move_act, hash: 3a68b6987427585b, unit: formula_core}
   - {addr: 0x80183ea0, size: 192, name: battle_map_tile_copy_size_and_data, hash: 308fc7a7c1c0cadb, unit: formula_core}
   - {addr: 0x80183f60, size: 84, name: move_find_load_item_data, hash: 20df832db91fa4ca, unit: formula_core}
