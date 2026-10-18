@@ -97,7 +97,7 @@ static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
  * frame polls the CD read, clears the ordering table and queues the overlay fade,
  * steps the movie, runs the WORLD menu frame while it is on and then the current
  * controller, draws the render records, reads the pad and flips the buffers. */
-s32 open_title_entrypoint(s32 skip_movie) {
+title_result_e open_title_entrypoint(s32 skip_movie) {
     u32* otag_0;
     u32* otag_1;
 

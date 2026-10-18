@@ -110,11 +110,11 @@ void memcard_init_events(void) {
     g_memcard_bios_events_opened = 1;
 }
 
-/* Load OPEN.BIN into the low overlay area and run its main loop; mode 1 skips the opening movie.
+/* Load OPEN.BIN into the low overlay area and run its main loop; nonzero skip_movie skips the opening movie.
  * Returns OPEN.BIN's result, 0 meaning go straight into BATTLE.BIN. */
-int overlay_exec_open_title(int mode) {
+title_result_e overlay_exec_open_title(s32 skip_movie) {
     file_load_checked_to_address(DISC_SECTOR_OPEN_OPEN_BIN, 0x36800, g_heap_low_overlay_load_address);
-    return open_title_entrypoint(mode);
+    return open_title_entrypoint(skip_movie);
 }
 
 /* Load OPEN.BIN into the low overlay area and play its ending cutscene. */

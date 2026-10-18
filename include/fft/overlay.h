@@ -7,7 +7,6 @@
 #include "psx/types.h"
 
 /* programs */
-int overlay_exec_open_title(int mode);
 void overlay_exec_open_ending(void);
 void overlay_open_world(s32 mode);
 

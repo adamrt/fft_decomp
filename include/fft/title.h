@@ -18,10 +18,13 @@ typedef enum title_result {
     TITLE_RESULT_TUTORIAL = 2 /* the title's Tutorial choice; WORLD opens its tutorial menu */
 } title_result_e;
 
-extern s32 g_title_result; /* title_result_e */
+extern title_result_e g_title_result;
 
 /* Run OPEN's title/movie loop and return the next game route; nonzero skips the opening movie. */
-s32 open_title_entrypoint(s32 skip_movie);
+title_result_e open_title_entrypoint(s32 skip_movie);
+
+/* Load OPEN and return the title sequence's route to the resident game loop. */
+title_result_e overlay_exec_open_title(s32 skip_movie);
 void title_init_sequence(s32 skip_movie);
 void title_start_logo_movie_or_menu(s32 use_alternate);
 void title_load_menu_graphics(void);
