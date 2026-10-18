@@ -342,7 +342,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   0xb30-byte header of WAVESET.WD (176 instruments), and most music channels
   end with Instrument 0xFF before End Bar, so entry 255 is read 0x4f0 bytes
   past the copy.
-- Both copies, `item_sort_id_list` and `item_sort_id_list`: the evade
+- WORLD and EQUIP's copies of `item_sort_id_list`: the evade
   keys read `g_item_shield_data` for ids 0x7a-0x8f and
   `g_item_accessory_data` for 0x90-0xef by `secondary_data_id`, so thrown
   weapons (122-127) read far past the 16 shield records, and headgear and body
@@ -720,7 +720,7 @@ written that way.
   speaker who is not on the field; the portrait test then reads kernel RAM.
   `unit_panel_fill_billboard` (BATTLE and DEBUGCHR) does the same while
   counting units, for a runtime record with no battle unit (the final battle).
-- `item_sort_id_list` and `item_sort_id_list`: each counts a unit's five equipment ids into a
+- WORLD and EQUIP's copies of `item_sort_id_list` each count a unit's five equipment ids into a
   256-byte local array, but the ids are 16-bit values and an item tried on in the
   shop's fitting room carries flag bits above the low byte, so sorting the
   list then increments a byte far past the array.
@@ -926,7 +926,6 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `EFFECT/E223.BIN` through `E225.BIN` contain effect data but have zero resident load sizes; requesting those file IDs loads Cure instead. The ability-effect mapping does not reference them.
 - `screen_load_wldface_portraits`: the WLDFACE rectangles (`g_screen_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
 - `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initializer opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
-- `equipment_load_images` and `unit_list_init_vram_and_fade`: store 16-color CLUTs into the 4-entry `buf1`; they run on into `buf2`, which the frame places directly after it (the source reads as two arrays, the stack holds one).
 - `effect_script_opcode_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `effect_script_run_block` then tests the undefined return value.
 - EFFECT scripts never run seven state handlers: E000's script calls only `effect_noop` (opcode 07) and E314's names no file function, so native function ids 1 and 90 are bound by nothing; E134/E242 `effect_ring_stack_mesh_update`, E454/E455 `effect_map_set_3d_objects_state_2` and E456 `effect_map_freeze` sit in callback slots (script opcode 06) that no keyframe selector fires. E457.BIN, which has no code, binds native function 88 (0x801c2578, E259's `effect_dome_mesh_update`; data in its own image) to slot 0, and none of its keyframes names a slot.
 - `battle_map_draw_mesh_and_weather`: when map command 0x96 (E458) ends, `weather_run_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
