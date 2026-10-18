@@ -253,13 +253,18 @@ func (p project) runTrial(config *projectConfig, resolver symbolResolver, images
 	if expected != nil {
 		expected = expected[m.offset(f.Addr) : m.offset(f.Addr)+f.Size]
 	}
-	rodataMatch := true
-	for _, rodata := range f.Rodata {
+	compiledRodata, rodataErr := splitFunctionRodata(f, sections[".rodata"])
+	rodataMatch := rodataErr == nil
+	for index, rodata := range f.Rodata {
+		if rodataErr != nil {
+			break
+		}
+		got := compiledRodata[index]
 		if image := images[m.ID]; image != nil {
 			start := m.offset(rodata.Addr)
-			rodataMatch = rodataMatch && bytes.Equal(image[start:start+rodata.Size], sections[".rodata"])
+			rodataMatch = rodataMatch && bytes.Equal(image[start:start+rodata.Size], got)
 		} else {
-			rodataMatch = rodataMatch && len(sections[".rodata"]) == rodata.Size && shortHash(sections[".rodata"]) == rodata.Hash
+			rodataMatch = rodataMatch && shortHash(got) == rodata.Hash
 		}
 	}
 	textMatch := len(compiled) == f.Size && shortHash(compiled) == f.Hash

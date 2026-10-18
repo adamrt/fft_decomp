@@ -170,9 +170,16 @@ func (p project) diffCommand(args []string) error {
 		problems = append(problems, fmt.Sprintf(".text differs at +0x%x (%d target bytes, %d compiled)", offset, len(expected), len(compiled)))
 	}
 	rodataBytes := 0
-	for _, rodata := range f.Rodata {
+	compiledRodata, rodataErr := splitFunctionRodata(f, sections[".rodata"])
+	if rodataErr != nil {
+		problems = append(problems, rodataErr.Error())
+	}
+	for index, rodata := range f.Rodata {
+		if rodataErr != nil {
+			break
+		}
 		start := m.offset(rodata.Addr)
-		want, got := image[start:start+rodata.Size], sections[".rodata"]
+		want, got := image[start:start+rodata.Size], compiledRodata[index]
 		rodataBytes += len(want)
 		if offset, differs := mismatch(want, got); differs {
 			problems = append(problems, fmt.Sprintf(".rodata 0x%08x differs at +0x%x (%d target bytes, %d compiled; %s)",

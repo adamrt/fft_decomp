@@ -441,16 +441,17 @@ func (p project) buildModule(config *projectConfig, resolver symbolResolver, m *
 		languageCounts[language]++
 		languageBytes[language] += f.Size
 		fmt.Fprintf(p.stdout(), "matching %s: %s (%d bytes)\n", language, f.Name, f.Size)
-		for _, rodata := range f.Rodata {
+		compiledRodata, err := splitFunctionRodata(f, sections[".rodata"])
+		if err != nil {
+			return "", fmt.Errorf("%s: %w", f.Name, err)
+		}
+		for index, rodata := range f.Rodata {
 			rodataStart := m.offset(rodata.Addr)
 			expected := want[rodataStart : rodataStart+rodata.Size]
 			if shortHash(expected) != rodata.Hash {
 				return "", fmt.Errorf("%s: %s rodata 0x%08x hash does not match the original bytes; run `make checksums`", m.ID, f.Name, rodata.Addr)
 			}
-			compiled, ok := sections[".rodata"]
-			if !ok {
-				return "", fmt.Errorf("%s did not emit declared section .rodata", f.Name)
-			}
+			compiled := compiledRodata[index]
 			if offset, differs := mismatch(expected, compiled); differs {
 				return "", fmt.Errorf("%s .rodata mismatch at section offset 0x%x (file offset 0x%x)", f.Name, offset, rodataStart+offset)
 			}
@@ -746,10 +747,15 @@ func (p project) checkCommand(args []string) error {
 			if len(text) != f.Size || shortHash(text) != f.Hash {
 				problems = append(problems, fmt.Sprintf("%s: .text is %d bytes with hash %s, expected %d bytes with hash %s", where, len(text), shortHash(text), f.Size, f.Hash))
 			}
-			for _, rodata := range f.Rodata {
-				compiled := result.sections[".rodata"]
-				if len(compiled) != rodata.Size || shortHash(compiled) != rodata.Hash {
-					problems = append(problems, fmt.Sprintf("%s: .rodata 0x%08x is %d bytes with hash %s, expected %d bytes with hash %s", where, rodata.Addr, len(compiled), shortHash(compiled), rodata.Size, rodata.Hash))
+			compiledRodata, err := splitFunctionRodata(f, result.sections[".rodata"])
+			if err != nil {
+				problems = append(problems, fmt.Sprintf("%s: %v", where, err))
+			} else {
+				for index, rodata := range f.Rodata {
+					compiled := compiledRodata[index]
+					if shortHash(compiled) != rodata.Hash {
+						problems = append(problems, fmt.Sprintf("%s: .rodata 0x%08x is %d bytes with hash %s, expected %d bytes with hash %s", where, rodata.Addr, len(compiled), shortHash(compiled), rodata.Size, rodata.Hash))
+					}
 				}
 			}
 			if section := undeclaredSection(f, result.sections); section != "" {
