@@ -84,7 +84,7 @@ void window_dispatch_gs_record_list(GsOT* otag, void** list, s32 count) {
  * palette_index * 16 (OPEN's twin adds the origin after the shift).
  *
  * The parts are walked back to front as raw 32-bit element indices: the target spells the
- * subscript ((frame_count - i) * 2) | 1 into the cel's 32-bit array, which is the
+ * subscript ((part_count - i) * 2) | 1 into the cel's 32-bit array, which is the
  * part's first 32-bit value, and reaches the part itself from there. Indexing a part
  * array of records instead produces a different address computation, so
  * the 32-bit element index is retained.
@@ -94,7 +94,7 @@ void window_dispatch_gs_record_list(GsOT* otag, void** list, s32 count) {
  * 0xffff0000 constant between the two statements, so the first mask/shift
  * combine keeps that constant for the second and leaves its dead AND result
  * as a USE-only pseudo. That pseudo and the part loop's folded entry test
- * (combine turns it into `blez count`, keeps `i = 0`, and leaves the slt
+ * (combine turns it into `blez part_count`, keeps `i = 0`, and leaves the slt
  * pseudo only a USE) get the unreferenced reload slots at 0x50 and 0x58. */
 void window_draw_gs_animated_record(display_object_animated_t* object, GsOT* ot) {
     GsSPRITE sprite;
@@ -104,7 +104,7 @@ void window_draw_gs_animated_record(display_object_animated_t* object, GsOT* ot)
     display_object_cel_header_t** cels;
     display_object_cel_header_t* cel;
     u32* words;
-    s32 count;
+    s32 part_count;
     s32 i;
     s32 index;
     s32 mode;
@@ -157,10 +157,10 @@ step_frame:
     tpage_x = cel->packed_texture_page_origin & 0xffff;
     tpage_y = (cel->packed_texture_page_origin & 0xffff0000) >> 16;
     clut_x = cel->packed_clut_origin & 0xffff;
-    count = cel->part_count;
+    part_count = cel->part_count;
     clut_y = (cel->packed_clut_origin & 0xffff0000) >> 16;
-    for (i = 0; i < count; i++) {
-        index = ((count - i) * 2) | 1;
+    for (i = 0; i < part_count; i++) {
+        index = ((part_count - i) * 2) | 1;
         sprite.attribute = words[index] & 0x80000000;
         if (object->flags & DISPLAY_OBJECT_SEMI_TRANSPARENT) {
             sprite.attribute |= 0x40000000;
