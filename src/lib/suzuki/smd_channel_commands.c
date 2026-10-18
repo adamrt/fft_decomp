@@ -21,8 +21,8 @@ u8* suzuki_smd_tempo(u8* data, suzuki_music_t* music, suzuki_music_channel_t* un
     return data + 1;
 }
 
-/* SMD opcode 0xA1 "Accelerando": adds a signed tempo delta and
- * clears the scaled tempo so it is recomputed. */
+/* SMD opcode 0xA1 "Accelerando": adds a signed tempo delta but clears scaled_tempo.
+ * Zero is not a refresh request: only later tempo or tempo-scale updates recompute it. */
 u8* suzuki_smd_accelerando(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* unused_channel) {
     s32 tempo_delta;
     char unused[8]; /* the target keeps an 8-byte frame */
