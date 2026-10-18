@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -253,7 +254,7 @@ func (p project) placementCommand(args []string) error {
 	}
 	twinClass := map[string]string{}
 	if twins, err := p.findTwins(config, twinsOptions{minBytes: 8, maxNear: 6}); err != nil {
-		fmt.Fprintf(p.stdout(), "placement: twins unavailable (%v); families compare sources only\n", err)
+		fmt.Fprintf(p.stdout(), "placement: twins unavailable (%v); family bodies remain separate\n", err)
 	} else {
 		for _, group := range twins.Groups {
 			for _, member := range group.Members {
@@ -378,15 +379,17 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 
 // placementFamilies joins counterpart bodies across modules: functions the
 // object sequences align, rows that would take one name, and rows whose new
-// name an existing definition holds. Members with one source, or in one
-// twins group, are one body. A family with one body is a share; one with
-// several keeps the same role name with a body per folder.
+// name an existing definition holds. Only explicit twins-group members share
+// a body class; a filename can contain different functions and program views.
+// Positional chains remain visible but cannot propose one name for coexisting
+// entries without direct evidence that they duplicate a definition or bytes.
 func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAnalysis, reports map[string]*placementReport, twinClass map[string]string) []placementFamily {
 	type node struct {
 		module string
 		fn     *unitFunction
 	}
 	nodes := map[string]node{}
+	resolver := newSymbolResolver(config)
 	parent := map[string]string{}
 	var find func(string) string
 	find = func(key string) string {
@@ -466,27 +469,17 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 			continue
 		}
 		sort.Strings(keys)
-		// Body classes: one source, or one twins group, is one body.
+		// Twins compare actual functions. Without that evidence, retain each
+		// entry separately, even when two programs compile the same source.
 		class := map[string]string{}
 		classOf := func(key string) string {
-			item := nodes[key]
 			if group := twinClass[key]; group != "" {
 				return "twins:" + group
 			}
-			return "source:" + item.fn.source
+			return "entry:" + key
 		}
 		for _, key := range keys {
 			class[key] = classOf(key)
-		}
-		// A twins group and a plain source can name the same body.
-		for _, key := range keys {
-			if group := twinClass[key]; group != "" {
-				for _, other := range keys {
-					if twinClass[other] == "" && nodes[other].fn.source == nodes[key].fn.source {
-						class[other] = class[key]
-					}
-				}
-			}
 		}
 		bodies := map[string][]string{}
 		for _, key := range keys {
@@ -543,6 +536,24 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 		if family.Name == "" {
 			family.Name, family.Apply, family.Note = "?", false, "no name to propose"
 		}
+		for i, key := range keys {
+			a := nodes[key]
+			for _, other := range keys[i+1:] {
+				b := nodes[other]
+				if a.module != b.module {
+					continue
+				}
+				// Direct duplicate evidence is stronger than normalized twins,
+				// whose referenced symbols may differ. Neither proves a shared
+				// gameplay role or an original source-file boundary.
+				sameDefinition := placementSameBoundDefinition(resolver, analyses[a.module].m, a.fn, b.fn)
+				sameBytes := a.fn.f.Hash != "" && a.fn.f.Hash == b.fn.f.Hash && a.fn.f.Size > 0 && a.fn.f.Size == b.fn.f.Size
+				if !sameDefinition && !sameBytes {
+					family.Apply = false
+					family.Note = appendNote(family.Note, "coexisting functions in "+a.module+" lack matching bound definitions or original bytes")
+				}
+			}
+		}
 		shared := "src/" + family.Subsystem
 		bodyIDs := map[string]string{}
 		folderOf := map[string]string{}
@@ -581,7 +592,7 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 				Body: bodyIDs[id], Folder: folderOf[id]}
 			family.Members = append(family.Members, member)
 		}
-		if len(bodies) == 1 && len(keys) > 1 {
+		if family.Apply && len(bodies) == 1 && len(keys) > 1 {
 			single := true
 			for _, key := range keys {
 				if nodes[key].fn.source != nodes[keys[0]].fn.source {
@@ -596,11 +607,32 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 		for _, key := range keys {
 			if row := rowOf[key]; row != nil {
 				row.Family = family.ID
+				if !family.Apply {
+					row.Apply = false
+					row.Note = appendNote(row.Note, family.Note)
+				}
 				reports[nodes[key].module].Families = appendUnique(reports[nodes[key].module].Families, family.ID)
 			}
 		}
 	}
 	return families
+}
+
+// One C spelling can still bind different data or callees at each entry.
+// Compare the actual link inputs and effective profiles before treating it as
+// duplicate-body evidence. Each entry's own address is naturally different.
+func placementSameBoundDefinition(resolver symbolResolver, module *moduleSpec, a, b *unitFunction) bool {
+	if a.idents == nil || b.idents == nil {
+		return false
+	}
+	if a.source != b.source || a.f.sourceSymbol() != b.f.sourceSymbol() || module.profileOf(a.f) != module.profileOf(b.f) {
+		return false
+	}
+	aBindings := resolver.linkerBindings(module, a.f, a.idents)
+	bBindings := resolver.linkerBindings(module, b.f, b.idents)
+	delete(aBindings, a.f.sourceSymbol())
+	delete(bBindings, b.f.sourceSymbol())
+	return maps.Equal(aBindings, bBindings)
 }
 
 func appendNote(existing, note string) string {
@@ -663,11 +695,11 @@ func renderPlacementYAML(report placementReport) ([]byte, error) {
 func renderPlacementMarkdown(reports []placementReport, families []placementFamily) []byte {
 	var out strings.Builder
 	out.WriteString("# Subsystem placement\n\n")
-	out.WriteString("Candidates only. A function compiled between shared routines of one subsystem, inside a\n")
-	out.WriteString("unit that is mostly that subsystem, came from the same source file as they did even when\n")
-	out.WriteString("no other module links it. `move` rows have a shared address neighbor and a score of at\n")
-	out.WriteString("least the threshold; `review` rows have weaker evidence. `apply` is false when the new name\n")
-	out.WriteString("is taken, the destination exists or the body is a `_variant`.\n\n")
+	out.WriteString("Candidates only. Shared neighbors and call relationships suggest subsystem ownership;\n")
+	out.WriteString("they do not identify an original source-file boundary. `move` rows have a shared address\n")
+	out.WriteString("neighbor and at least the threshold score; `review` rows have weaker evidence.\n")
+	out.WriteString("`apply` is false when the new name\n")
+	out.WriteString("is taken, the destination exists, the body is a `_variant` or its family is unresolved.\n\n")
 	out.WriteString("| module | candidates | move | review | keep | moves by subsystem |\n|---|---:|---:|---:|---:|---|\n")
 	for _, report := range reports {
 		var parts []string
@@ -679,7 +711,8 @@ func renderPlacementMarkdown(reports []placementReport, families []placementFami
 	}
 	if len(families) > 0 {
 		out.WriteString("\n## Families\n\nCounterpart bodies the object sequences align or that would take one name. `share` families\n")
-		out.WriteString("are one body by the twins comparison; `variant` families take one `_variant` name with a body per folder.\n\n")
+		out.WriteString("are one body by the symbolic twins comparison; `variant` families retain separate bodies.\n")
+		out.WriteString("Both are candidates for review, not proof of identical gameplay roles or original source files.\n\n")
 		out.WriteString("| id | kind | name | members | apply | note |\n|---|---|---|---|---|---|\n")
 		for _, family := range families {
 			var members []string
