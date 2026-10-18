@@ -36,12 +36,12 @@ units:
   - {name: fade_primitives, source: src/lib/menu/fade_primitives.c}
   - {name: font_rendering, source: src/world/font_rendering.c, data: [{addr: 0x801c9ee8, size: 2048, hash: e5a00aa9991ac8a5}]}
   - {name: formation_ability_menu, source: src/world/formation_ability_menu.c, data: [{addr: 0x801c8528, size: 10, hash: 01d448afd9280654}]}
-  - {name: formation_ability_slots, source: src/world/formation_ability_slots.c, rodata: [{addr: 0x8018debc, size: 192, hash: 89e1da6fa721ba35}]}
   - {name: formation_display_init, source: src/world/formation_display_init.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018bb50, size: 1408, hash: d277279fc1b0c76a}, {addr: 0x8018c0d0, size: 8, hash: e2d93ece070c6ba5}]}
   - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: formation_icon_list, source: src/world/formation_icon_list.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
   - {name: formation_item_menu, source: src/world/formation_item_menu.c}
   - {name: formation_screen, source: src/world/formation_screen.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: formation_units, source: src/world/formation_units.c, rodata: [{addr: 0x8018debc, size: 192, hash: 89e1da6fa721ba35}]}
   - {name: formation_view, source: src/world/formation_view.c, data: [{addr: 0x8018a144, size: 36, hash: d3211fb13a06ff86}, {addr: 0x8018a168, size: 424, hash: 2cea75c50162ef58}]}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/gfx_image_transfer_wait.c}
   - {name: grid_cursor, source: src/world/grid_cursor.c}
@@ -872,15 +872,15 @@ functions:
   - {addr: 0x80124ff4, size: 56, name: item_get_type_icon_rect, hash: 9ef0f46a205c2a75, source: src/lib/menu/item_get_type_icon_rect.c}
   - {addr: 0x8012502c, size: 840, name: shop_build_stock_list, hash: 3c7eed74a2651422}
   - {addr: 0x80125374, size: 96, name: item_get_menu_category, hash: 391fa191bda064e6, source: src/lib/menu/item_get_menu_category.c}
-  - {addr: 0x801253d4, size: 364, name: formation_ability_set_slot, hash: fc8aca691a77add1, unit: formation_ability_slots}
-  - {addr: 0x80125540, size: 164, name: formation_get_unit_lock, hash: e3d4764d538820cd, unit: formation_ability_slots}
-  - {addr: 0x801255e4, size: 228, name: formation_ability_learn, hash: aa1a32a0af924d02, unit: formation_ability_slots}
-  - {addr: 0x801256c8, size: 380, name: formation_build_unit_sprite_source, hash: 40ab9d6e7a39b152, unit: formation_ability_slots}
-  - {addr: 0x80125844, size: 96, name: formation_find_by_roster_slot, hash: 0274b8b7a13644e3, unit: formation_ability_slots}
-  - {addr: 0x801258a4, size: 176, name: formation_build_job_sprite_source, hash: f781dae0ee428e01, unit: formation_ability_slots}
-  - {addr: 0x80125954, size: 60, name: formation_copy_unit_to_temp, hash: ef847502bf7e7faf, unit: formation_ability_slots}
-  - {addr: 0x80125990, size: 116, name: zodiac_get_for_date, hash: 372e527c3d55f8f4, unit: formation_ability_slots}
-  - {addr: 0x80125a04, size: 760, name: breeding_update, hash: c79a4f9e25086f3b, unit: formation_ability_slots}
+  - {addr: 0x801253d4, size: 364, name: formation_ability_set_slot, hash: fc8aca691a77add1, unit: formation_units}
+  - {addr: 0x80125540, size: 164, name: formation_get_unit_lock, hash: e3d4764d538820cd, unit: formation_units}
+  - {addr: 0x801255e4, size: 228, name: formation_ability_learn, hash: aa1a32a0af924d02, unit: formation_units}
+  - {addr: 0x801256c8, size: 380, name: formation_build_unit_sprite_source, hash: 40ab9d6e7a39b152, unit: formation_units}
+  - {addr: 0x80125844, size: 96, name: formation_find_by_roster_slot, hash: 0274b8b7a13644e3, unit: formation_units}
+  - {addr: 0x801258a4, size: 176, name: formation_build_job_sprite_source, hash: f781dae0ee428e01, unit: formation_units}
+  - {addr: 0x80125954, size: 60, name: formation_copy_unit_to_temp, hash: ef847502bf7e7faf, unit: formation_units}
+  - {addr: 0x80125990, size: 116, name: zodiac_get_for_date, hash: 372e527c3d55f8f4, unit: formation_units}
+  - {addr: 0x80125a04, size: 760, name: breeding_update, hash: c79a4f9e25086f3b, unit: formation_units}
   - {addr: 0x80125cfc, size: 324, name: screen_present_frame, hash: 424202a51ed5e48f, unit: screen_buffers}
   - {addr: 0x80125e40, size: 536, name: screen_init_packet_pools, hash: 8b137ab6455bab7c, unit: screen_buffers}
   - {addr: 0x80126058, size: 796, name: screen_init_packet_buffers, hash: c2e0738092bc06ee, unit: screen_buffers}
