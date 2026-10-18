@@ -67,7 +67,9 @@ void menu_init_buffer_allocator(void) {
  *
  * Scans the page occupancy map first-fit. When no run of free pages or no free slot
  * remains, it optionally prints a diagnostic, yields the thread, and rescans.
- * The arena holds VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD). */
+ * The arena holds VARIANT_MENU_BUFFER_PAGE_COUNT pages (53 in BATTLE, 112 in WORLD).
+ * Retail checks the arena end before accepting a run, so positive allocations never use the final page.
+ * If all slots are occupied, the newly marked run remains without an owner across retries. */
 void* menu_alloc_memory(s32 size) {
     s32 page;
     s32 pages;

@@ -202,9 +202,8 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit);
 typedef struct menu_command_map {
     u16 menu_id;
     u16 _padding_02; /* aligns map */
-    /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
-     * and map[n + 1] any other value; named by command_resolve_selection,
-     * its only reader. The other readers use menu_id alone. */
+    /* 0x04: indexed selections use map[n + 1]. map[0] is the retained 0xff fallback, bypassed by
+     * command_resolve_selection's outer 0xfe/0xff guard. Other directory readers use menu_id alone. */
     u8* map;
 } menu_command_map_t;
 typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];

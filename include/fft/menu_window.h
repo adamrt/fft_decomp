@@ -87,8 +87,8 @@ void menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 void menu_draw_active_window_frames(void);
 
 /* window scaling */
-/* Transition step of the windows that zoom open: menu script command 0x16 advances it up to 4, and the zoomed
- * draw-area command crops each window by it. */
+/* Opening-animation step. WORLD, BUNIT and EQUIP advance to 4 through opcode 0x16. JOBSTTS advances to 10
+ * in its script runner and uses height scales for steps 0..7. Callers set 10 to skip the opening animation. */
 extern s8 g_gfx_transition_frame;
 
 void menu_set_window_scale_step(s32 value);

@@ -130,7 +130,8 @@ extern s16 g_after_battle_message_menu_result;
 /* Member access reschedules a summary-field store in party_apply_post_battle_changes. */
 extern s32 g_unit_panel_character_status_redraw_request;
 
-/* Alias of the result's item_count; replacing the initial read with the member shortens the collector by 4 bytes. */
+/* Same byte as g_war_trophy_search_result.item_count (+0x15); member access here shortens
+ * war_trophy_collect by 4 bytes. */
 extern u8 g_war_trophy_item_count;
 
 /* The retail collector does not check these 16-entry capacities. */

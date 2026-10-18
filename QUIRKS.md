@@ -666,6 +666,11 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   it requests the read; when `file_request_read_bytes` refuses (loader
   busy) it reports `SYSTEM_ERROR_SMD_LOAD` and returns 0 without freeing
   the block. `music_start_load_into_slot` (no caller) does the same.
+- `menu_alloc_memory` checks the end of BATTLE's 53-page or WORLD's
+  112-page arena before accepting a free run, so no positive allocation
+  includes the last page. It marks pages before claiming one of 16 records;
+  when all records are occupied, retries leave marked pages without an
+  owner. Normal-game exhaustion of those records has not been established.
 
 ## Calls that disagree with the callee
 
