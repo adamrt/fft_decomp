@@ -31,8 +31,8 @@ extern s32 g_encounter_selection_mode;
 int encounter_open_file(void);
 void encounter_init_party(int encounter_id);
 
-/* Current encounter, NULL while loading, or (entd_encounter_t *)-1 when
+/* Current encounter, NULL while loading, or (const entd_encounter_t *)-1 when
  * no encounter is selected. */
-entd_encounter_t* encounter_get_current(void);
+const entd_encounter_t* encounter_get_current(void);
 
 #endif

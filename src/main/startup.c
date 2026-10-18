@@ -176,12 +176,12 @@ int encounter_open_file(void) {
  * is no selected encounter, NULL while the file is still loading. Encounter ids 0-127
  * index the file directly; each further range of 128 ids (the last one
  * open-ended) indexes it from its own base. */
-entd_encounter_t* encounter_get_current(void) {
+const entd_encounter_t* encounter_get_current(void) {
     int* encounter_id = &g_encounter_current_id;
     int id;
 
     if (*encounter_id == 0) {
-        return (entd_encounter_t*)-1;
+        return (const entd_encounter_t*)-1;
     }
     if (file_is_still_loading() == 0) {
         id = *encounter_id;
@@ -199,7 +199,7 @@ entd_encounter_t* encounter_get_current(void) {
  * empty the roster, save its 16 unit slots through party_save_encounter_unit,
  * and free the file. */
 void encounter_init_party(int encounter_id) {
-    entd_encounter_t* entd;
+    const entd_encounter_t* entd;
     int unit_id;
 
     g_encounter_current_id = encounter_id;
@@ -210,7 +210,7 @@ void encounter_init_party(int encounter_id) {
 
     for (;;) {
         entd = encounter_get_current();
-        if (entd == (entd_encounter_t*)-1) {
+        if (entd == (const entd_encounter_t*)-1) {
             break;
         }
         if (entd != 0) {

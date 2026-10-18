@@ -381,9 +381,9 @@ static s32 unit_entd_select_and_open(void) {
  * file. Returns 1 while the file is still loading, else 0 (also when there is no
  * current encounter). */
 static s32 unit_entd_poll_and_load_units(void) {
-    entd_encounter_t* entd_data = encounter_get_current();
+    const entd_encounter_t* entd_data = encounter_get_current();
 
-    if (entd_data != (entd_encounter_t*)-1) {
+    if (entd_data != (const entd_encounter_t*)-1) {
         if (entd_data == 0) {
             return 1;
         }

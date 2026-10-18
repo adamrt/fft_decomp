@@ -2247,7 +2247,7 @@ static s32 deploy_validate_placement(s32 unit_idx) {
  * `status` holds both the initialization result and the graphics descriptor's
  * not-deployed flag: sharing the one variable is what gives the flag enough
  * uses to win s1 ahead of battle_id. */
-void unit_entd_load(entd_encounter_t* entd_data, s32 mode) {
+void unit_entd_load(const entd_encounter_t* entd_data, s32 mode) {
     s32 battle_id;
     s32 enemy_count;
     s32 free_spritesheets;
@@ -2261,8 +2261,8 @@ void unit_entd_load(entd_encounter_t* entd_data, s32 mode) {
     s32 unit_id;
     u8 presence;
     unit_stats_t* unit;
-    entd_unit_t* entd;
-    entd_unit_t* entd_list = entd_data->units;
+    const entd_unit_t* entd;
+    const entd_unit_t* entd_list = entd_data->units;
 
     g_reward_player_unit_fallen = 0;
     g_reward_enemy_level_sum = 0;
