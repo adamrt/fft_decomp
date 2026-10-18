@@ -16,6 +16,7 @@ units:
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
   - {name: attack_resources, source: src/lib/event/attack_resources.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
   - {name: bit_streams, source: src/lib/bits.c}
+  - {name: buffer_allocator, source: src/lib/menu/buffer_allocator.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: card_save, source: src/world/card_save.c, data: [{addr: 0x800e01e8, size: 22, hash: 5a80a8357d9cccb0}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156750, size: 1020, hash: ae554078de04c2dc}, {addr: 0x80156b4c, size: 38, hash: 5cf20e3c3f45bdbf}]}
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x801566c0, size: 11, hash: 7b8d9e8d9b1cfad3}]}
@@ -65,6 +66,7 @@ units:
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
   - {name: name_entry, source: src/world/name_entry.c, data: [{addr: 0x801cd144, size: 17, hash: 0a88111852095cae}]}
   - {name: number_entry, source: src/world/number_entry.c}
+  - {name: numbers_frame, source: src/lib/menu/numbers_frame.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
   - {name: options, source: src/world/options.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801aed74, size: 24, hash: 9d908ecfb6b256de}, {addr: 0x801aed8c, size: 66048, hash: cf1cc8dd4cd12e47}, {addr: 0x801bef8c, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x801bf00c, size: 4, hash: df3f619804a92fdb}]}
   - {name: panel_text, source: src/lib/menu/panel_text.c, data: [{addr: 0x8018b660, size: 16, hash: 3a4a58bab2c48f5e}]}
@@ -78,7 +80,7 @@ units:
   - {name: screen_input_lockout, source: src/world/screen_input_lockout.c}
   - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801bfda4, size: 616, hash: f9d54bbe3ccaf085}]}
   - {name: script_commands, source: src/lib/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8013a454, size: 244, hash: 5f50d72e0e4d2a62}]}
-  - {name: script_helpers, source: src/lib/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
+  - {name: script_helpers, source: src/lib/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: script_interpreter, source: src/lib/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b8c, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80156b90, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80156ba8, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80156bb0, size: 48, hash: 5026ef5547d95034}, {addr: 0x80156be0, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: script_variables, source: src/lib/event/script_variables.c}
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
@@ -91,6 +93,7 @@ units:
   - {name: text_measuring, source: src/world/text_measuring.c}
   - {name: text_sections, source: src/world/text_sections.c, data: [{addr: 0x8018e4a0, size: 72, hash: 5dbea564adc6d4e5}, {addr: 0x8018e4e8, size: 1104, hash: 9256f8d8979e9be1}, {addr: 0x8018e938, size: 1412, hash: 3b2b560a253bf9bf}, {addr: 0x8018eebc, size: 4916, hash: 7dafabaa3f14ee02}, {addr: 0x801901f0, size: 904, hash: 01b27f946de974c3}, {addr: 0x80190578, size: 4056, hash: 69828a99fad310fe}, {addr: 0x80191550, size: 6720, hash: ac293b34688371e1}, {addr: 0x80192f90, size: 276, hash: 22574f5fcb166d09}, {addr: 0x801930a4, size: 2936, hash: 85e6064e51106423}, {addr: 0x80193c1c, size: 36, hash: 572e0aad19d04956}, {addr: 0x80193c40, size: 56, hash: 66b96bc9e2c2be37}, {addr: 0x80193c78, size: 56, hash: c8fe08c26cc2204a}]}
   - {name: text_skip_to_entry, source: src/lib/event/text_skip_to_entry.c}
+  - {name: texture_allocator, source: src/lib/menu/texture_allocator.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
   - {name: thread, source: src/lib/thread/thread.c}
   - {name: thread_accessors, source: src/lib/thread/thread_accessors.c}
@@ -101,6 +104,7 @@ units:
   - {name: unit_panel_banner, source: src/world/unit_panel_banner.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}, {addr: 0x8018aeb8, size: 48, hash: a7325a670181d088}, {addr: 0x8018aee8, size: 8, hash: 716d2b5fc41c7cf3}, {addr: 0x8018aef0, size: 8, hash: c0df20f9ed09ee15}]}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: unit_status_lists, source: src/lib/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156198, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x801561d0, size: 76, hash: ec0d1125a0b03828}]}
+  - {name: window_buffers, source: src/lib/menu/window_buffers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: window_images, source: src/lib/event/window_images.c, data: [{addr: 0x80156c40, size: 16, hash: 0e0f25166632e4a6}, {addr: 0x80156c50, size: 16, hash: e5c40d36a431f4b8}]}
   - {name: window_state, source: src/lib/menu/window_state.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: zodiac_primitives, source: src/lib/menu/zodiac_primitives.c}
@@ -155,27 +159,27 @@ functions:
   - {addr: 0x800e20d4, size: 40, name: menu_get_selected_unit_stats, hash: d8b03fa45f1ad5c5, unit: script_helpers}
   - {addr: 0x800e20fc, size: 48, name: script_clamp_s32_to_range, hash: a979e7abbcee5781, unit: script_helpers}
   - {addr: 0x800e212c, size: 612, name: script_update_event_input_state, hash: ec1118bb42efe382, unit: script_helpers}
-  - {addr: 0x800e2390, size: 8, name: menu_init_stub, hash: 6d64edf91449c1b1, unit: script_helpers}
-  - {addr: 0x800e2398, size: 172, name: menu_init_default_poly_ft4, hash: 2ae011af04ed842a, unit: script_helpers}
-  - {addr: 0x800e2444, size: 116, name: menu_init_sprt, hash: c767e8c38c70470e, unit: script_helpers}
-  - {addr: 0x800e24b8, size: 104, name: menu_init_sprite_array, hash: 0a887d3090fe4209, unit: script_helpers}
-  - {addr: 0x800e2520, size: 40, name: menu_reset_window_buffer_slots, hash: d92c790b951fcfcc, unit: script_helpers}
-  - {addr: 0x800e2548, size: 596, name: menu_alloc_window_buffer_pair, hash: 7530b6635c1378bc, unit: script_helpers}
-  - {addr: 0x800e279c, size: 88, name: menu_clear_window_buffer_pair_by_thread, hash: 6f631be1f0bacf0f, unit: script_helpers}
-  - {addr: 0x800e27f4, size: 168, name: menu_release_window_buffer_pair, hash: 7adceff6ea01ee47, unit: script_helpers}
-  - {addr: 0x800e289c, size: 16, name: gfx_set_primitive_brightness, hash: d98b50e73c8678b4, unit: script_helpers}
-  - {addr: 0x800e28ac, size: 864, name: menu_draw_active_window_frames, hash: c22a91f219963b1c, unit: script_helpers}
-  - {addr: 0x800e2c0c, size: 60, name: gfx_clear_texture_allocation_grid, hash: 8f9387f600727c55, unit: script_helpers}
-  - {addr: 0x800e2c48, size: 660, name: gfx_alloc_texture_rect, hash: 8059a333c7ee7aff, unit: script_helpers}
-  - {addr: 0x800e2edc, size: 428, name: gfx_free_texture_rect, hash: 645df343f174f8f0, unit: script_helpers}
-  - {addr: 0x800e3088, size: 116, name: menu_init_buffer_allocator, hash: 5f10e7e37ee4c4d8, unit: script_helpers}
-  - {addr: 0x800e30fc, size: 380, name: menu_alloc_memory, hash: ab779363522e02a2, unit: script_helpers}
-  - {addr: 0x800e3278, size: 32, name: menu_alloc_buffer, hash: c0b0162a45670bc4, unit: script_helpers}
-  - {addr: 0x800e3298, size: 192, name: menu_free_memory, hash: 38f2c6070f4c7dc3, unit: script_helpers}
-  - {addr: 0x800e3358, size: 596, name: status_screen_init_numbers_frame, hash: 6931206a75791ec9, unit: script_helpers}
-  - {addr: 0x800e35ac, size: 108, name: status_screen_submit_numbers_frame, hash: 052f8a7955660a7e, unit: script_helpers}
-  - {addr: 0x800e3618, size: 136, name: menu_init_primitive_colors_normal, hash: 0eafa6c1e9a53c86, unit: script_helpers}
-  - {addr: 0x800e36a0, size: 140, name: menu_init_primitive_colors_dimmed, hash: ed7ffbf13272f8dc, unit: script_helpers}
+  - {addr: 0x800e2390, size: 8, name: menu_init_stub, hash: 6d64edf91449c1b1, unit: window_buffers}
+  - {addr: 0x800e2398, size: 172, name: menu_init_default_poly_ft4, hash: 2ae011af04ed842a, unit: window_buffers}
+  - {addr: 0x800e2444, size: 116, name: menu_init_sprt, hash: c767e8c38c70470e, unit: window_buffers}
+  - {addr: 0x800e24b8, size: 104, name: menu_init_sprite_array, hash: 0a887d3090fe4209, unit: window_buffers}
+  - {addr: 0x800e2520, size: 40, name: menu_reset_window_buffer_slots, hash: d92c790b951fcfcc, unit: window_buffers}
+  - {addr: 0x800e2548, size: 596, name: menu_alloc_window_buffer_pair, hash: 7530b6635c1378bc, unit: window_buffers}
+  - {addr: 0x800e279c, size: 88, name: menu_clear_window_buffer_pair_by_thread, hash: 6f631be1f0bacf0f, unit: window_buffers}
+  - {addr: 0x800e27f4, size: 168, name: menu_release_window_buffer_pair, hash: 7adceff6ea01ee47, unit: window_buffers}
+  - {addr: 0x800e289c, size: 16, name: gfx_set_primitive_brightness, hash: d98b50e73c8678b4, unit: window_buffers}
+  - {addr: 0x800e28ac, size: 864, name: menu_draw_active_window_frames, hash: c22a91f219963b1c, unit: window_buffers}
+  - {addr: 0x800e2c0c, size: 60, name: gfx_clear_texture_allocation_grid, hash: 8f9387f600727c55, unit: texture_allocator}
+  - {addr: 0x800e2c48, size: 660, name: gfx_alloc_texture_rect, hash: 8059a333c7ee7aff, unit: texture_allocator}
+  - {addr: 0x800e2edc, size: 428, name: gfx_free_texture_rect, hash: 645df343f174f8f0, unit: texture_allocator}
+  - {addr: 0x800e3088, size: 116, name: menu_init_buffer_allocator, hash: 5f10e7e37ee4c4d8, unit: buffer_allocator}
+  - {addr: 0x800e30fc, size: 380, name: menu_alloc_memory, hash: ab779363522e02a2, unit: buffer_allocator}
+  - {addr: 0x800e3278, size: 32, name: menu_alloc_buffer, hash: c0b0162a45670bc4, unit: buffer_allocator}
+  - {addr: 0x800e3298, size: 192, name: menu_free_memory, hash: 38f2c6070f4c7dc3, unit: buffer_allocator}
+  - {addr: 0x800e3358, size: 596, name: status_screen_init_numbers_frame, hash: 6931206a75791ec9, unit: numbers_frame}
+  - {addr: 0x800e35ac, size: 108, name: status_screen_submit_numbers_frame, hash: 052f8a7955660a7e, unit: numbers_frame}
+  - {addr: 0x800e3618, size: 136, name: menu_init_primitive_colors_normal, hash: 0eafa6c1e9a53c86, unit: numbers_frame}
+  - {addr: 0x800e36a0, size: 140, name: menu_init_primitive_colors_dimmed, hash: ed7ffbf13272f8dc, unit: numbers_frame}
   - {addr: 0x800e372c, size: 380, name: message_build_display, hash: 340aa3e43d90fd1d, unit: dialog_messages}
   - {addr: 0x800e38a8, size: 656, name: screen_input_update_dialog_state, hash: 13af0965fdb71ad6, unit: dialog_messages}
   - {addr: 0x800e3b38, size: 84, name: message_release_typewriter_slot, hash: 83ddde4c1bebdfdd, unit: dialog_messages}
