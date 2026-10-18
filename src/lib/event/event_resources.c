@@ -484,10 +484,11 @@ void portrait_load_image(s32 portrait_id) {
  * and its polling run on the main stack. Parameter 1 is the EVTCHR slot and parameter 2
  * the block; each block occupies 15 sectors from 0x1d4c. The block is published through
  * g_script_pending_loaded_evtchr_slot and g_script_loaded_evtchr_buffer for one frame, during
- * which the per-frame event update unpacks it into the slot, and then freed.
+ * which BATTLE's per-frame event update unpacks it into the slot, and then freed.
+ * WORLD retains this loader, but its per-frame request hook is empty.
  */
 void gfx_load_evtchr_thread(void) {
-    s32 parameter = thread_get_current_parameter_1();
+    s32 slot = thread_get_current_parameter_1();
     s32 block = thread_get_current_parameter_2();
     evtchr_file_record_t* buffer;
 
@@ -501,7 +502,7 @@ void gfx_load_evtchr_thread(void) {
         thread_yield();
         g_thread_call_target = (void (*)(void))file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
-    g_script_pending_loaded_evtchr_slot = parameter;
+    g_script_pending_loaded_evtchr_slot = slot;
     g_script_loaded_evtchr_buffer = buffer;
     thread_yield();
     heap_free(buffer);

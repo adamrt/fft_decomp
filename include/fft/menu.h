@@ -18,7 +18,7 @@ void menu_set_vsync_mode_and_event_speed(s32 speed);
 s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* menu arena */
-void* menu_alloc_memory(s32 size);
+void* menu_alloc_memory(s32 bytes);
 void menu_free_memory(void* buffer);
 void menu_init_buffer_allocator(void);
 void* menu_alloc_buffer(s32 bytes);
