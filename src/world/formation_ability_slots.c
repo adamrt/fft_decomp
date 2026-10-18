@@ -64,7 +64,32 @@ extern texture_source_t g_formation_sprite_sources[];
 
 /* Fixed character identities select sprite sources here; jobs below 0x35 use the same mapping. */
 extern u8 g_formation_sprite_index_by_identity[];
-extern const breeding_entry_t g_breeding_table[BREEDING_ENTRY_COUNT];
+
+/* Each three-job monster family shares common/uncommon offspring. The first
+ * job's rare result stays at that job; the other two use the third job. */
+#define BREEDING_FAMILY(job, first_range, second_range, third_range)                                                   \
+    { first_range, { job, job + 1, job } }, { second_range, { job, job + 1, job + 2 } }, {                             \
+        third_range, { job, job + 1, job + 2 }                                                                         \
+    }
+static const breeding_entry_t g_breeding_table[BREEDING_ENTRY_COUNT] = {
+    BREEDING_FAMILY(JOB_ID_CHOCOBO, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_GOBLIN, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_BOMB, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_RED_PANTHER, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_PISCO_DEMON, 3, 4, 6),
+    BREEDING_FAMILY(JOB_ID_SKELETON, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_GHOUL, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_FLOTIBALL, 3, 5, 6),
+    BREEDING_FAMILY(JOB_ID_JURAVIS, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_URIBO, 3, 3, 3),
+    BREEDING_FAMILY(JOB_ID_WOODMAN, 3, 4, 5),
+    BREEDING_FAMILY(JOB_ID_BULL_DEMON, 4, 5, 6),
+    BREEDING_FAMILY(JOB_ID_MORBOL, 4, 5, 7),
+    BREEDING_FAMILY(JOB_ID_BEHEMOTH, 7, 8, 9),
+    BREEDING_FAMILY(JOB_ID_DRAGON, 7, 8, 9),
+    BREEDING_FAMILY(JOB_ID_HYUDRA, 9, 9, 9),
+};
+#undef BREEDING_FAMILY
 
 /* Provisional: month lengths indexed by 1-based month, read by breeding_update. */
 extern const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT];
