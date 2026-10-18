@@ -283,7 +283,7 @@ typedef enum screen_text_section {
     SCREEN_TEXT_SECTION_SHOP_DIALOGUE = 31 /* the shopkeeper's lines */
 } screen_text_section_e;
 
-extern s32 g_screen_text_section_offsets[];
+extern u32 g_screen_text_section_offsets[];
 
 u8* screen_text_get_resident(screen_text_data_e index);
 u8* screen_text_bind_section(u32 index);

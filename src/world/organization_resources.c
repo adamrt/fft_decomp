@@ -115,7 +115,7 @@ extern RECT g_screen_clear_rect;
 
 static u8 g_formation_thread_status_snapshot[16] = { 0 };
 static s16 g_screen_submenu_page_row_text_ids[12] = { 0 };
-static s32 g_screen_text_file_buffer[16512] = { 0 };
+static u32 g_screen_text_file_buffer[16512] = { 0 };
 /* 32-bit substitution values saved around the text calls. */
 static s32 g_screen_text_substitution_values_backup[32] = { 0 };
 static u32 g_formation_saved_system_flags = 0; /* g_system_flags as saved by world_map_hide (system_flags_e) */
@@ -327,7 +327,7 @@ void screen_init_with_world_text_and_faces(void) {
     s32 i;
     s32 value;
     u8* base;
-    s32* src;
+    u32* src;
     u8** dst;
 
     menu_init_subsystem_pointers();
@@ -368,7 +368,7 @@ void screen_init_with_world_text(void) {
     s32 i;
     s32 value;
     u8* base;
-    s32* src;
+    u32* src;
     u8** dst;
 
     g_thread_current_id = THREAD_SLOT_MAIN;

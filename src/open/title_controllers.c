@@ -909,7 +909,7 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
     RECT quad;
     point32_t position;
     s16 width;
-    u16 height;
+    s16 rows;
     s32 index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     s32 text_id;
     point32_t* translation;
@@ -925,7 +925,7 @@ static void birthday_build_menu_text(birthday_date_state_t* menu) {
     /* The month names are text entries 0xB803 (January) to 0xB80E. Entry 0xB801
      * prints the substituted month name and 0xB802 the substituted day. */
     text_id = menu->month + 0xB802;
-    text_measure_pixels(&width, &height, text_find_entry(text_id));
+    text_measure_pixels(&width, &rows, text_find_entry(text_id));
 
     position.x = 0x1C - width / 2;
     position.y = 8;
