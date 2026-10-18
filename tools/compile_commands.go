@@ -20,7 +20,7 @@ import (
 // historical target's ABI, no host headers and no host predefines.
 var editorBaseFlags = []string{
 	"-target", "mipsel-none-elf", "-march=mips1", "-mabi=32", "-msoft-float",
-	"-std=gnu89", "-fsyntax-only", "-undef", "-nostdinc", "-Iinclude", "-Ibuild/generated", "-Wno-everything",
+	"-std=gnu89", "-fsyntax-only", "-undef", "-nostdinc", "-Iinclude", "-Wno-everything",
 }
 
 type compileCommand struct {

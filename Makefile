@@ -76,10 +76,6 @@ build: extract ## Build and verify every module and the disc (MODULE=x for one m
 check: image ## Compile and compare with target/ hashes, no BIN needed (MODULE=x)
 	@$(TOOLS) check $(if $(strip $(MODULE)),--module="$(MODULE)")
 
-.PHONY: tables
-tables: image ## Generate mathematical lookup tables under build/ (automatic for check/build)
-	@$(TOOLS) tables
-
 # FUNC names a configured function; MODULE is needed only when it is ambiguous.
 function_args = $(if $(strip $(MODULE)),--module="$(MODULE)") "$(FUNC)"
 

@@ -20,8 +20,8 @@ static u8 g_suzuki_smd_key_semitones[120] = { KEY_SEMITONES, KEY_SEMITONES, KEY_
     KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0 };
 #undef KEY_SEMITONES
 
-/* Octave-six SPU pitch at 1/256-semitone intervals. The build generates
- * round(8192 * 2^(i / 3072)); the original runtime only indexes this table. */
+/* Octave-six SPU pitch at 1/256-semitone intervals:
+ * round(8192 * 2^(i / 3072)). The runtime only indexes this table. */
 static u16 g_suzuki_smd_pitch_table[12 * 256] = {
 #include "suzuki_pitch.inc"
 };
