@@ -495,6 +495,7 @@ static void name_entry_apply_key(s16 key) {
     }
     g_name_entry_text[j] = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 0; g_name_entry_text[i] != TEXT_END_WAIT_FOR_CONFIRM; i++) { }
+    /* Empty input also reads the byte before the buffer; retain the native backward scan. */
     for (i--; g_name_entry_text[i] == TEXT_SPACE; i--) { }
     g_name_entry_text[i + 1] = TEXT_END_WAIT_FOR_CONFIRM;
     screen_text_kern(g_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
