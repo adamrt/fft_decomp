@@ -117,6 +117,9 @@ extern RECT g_save_gfx_fullscreen_fade_rect;
 extern u8 g_save_list_input_armed;
 extern u8 g_save_sound_queued_effect_id; /* sound_sfx_e */
 
+/* CARD's title prefix; WORLD keeps its own private copy. */
+extern u8 g_save_title_template[0x16];
+
 /* Save-image prefix and the additional bytes cleared with its working storage. */
 enum { SAVE_WORK_BUFFER_BYTES = 0x1e80 };
 extern u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];

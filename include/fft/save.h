@@ -156,7 +156,6 @@ extern save_play_time_t g_save_slot_playtimes[SAVE_SLOT_COUNT];
 
 /* shared by CARD and WORLD */
 extern save_icon_t g_save_icon_records[15];
-extern u8 g_save_title_template[0x16];
 extern const char* g_save_file_names[15];
 extern menu_window_command_t g_save_slot_window_command;
 extern s8 g_save_free_block_count;

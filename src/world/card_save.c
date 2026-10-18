@@ -141,7 +141,7 @@ extern u8 g_screen_input_blocked_state;
 
 /* The memory card title's start in Shift-JIS: full-width "FFT FILE" and three spaces, the first
  * two of which take the save number (bytes 0x10..0x13); the play time follows. */
-u8 g_save_title_template[0x16]
+static u8 g_save_title_template[0x16]
     = { 130, 101, 130, 101, 130, 115, 129, 64, 130, 101, 130, 104, 130, 107, 130, 100, 129, 64, 129, 64, 129, 64 };
 
 static void save_build_file_header(s32 slot, s32 level, save_file_header_t* header);
