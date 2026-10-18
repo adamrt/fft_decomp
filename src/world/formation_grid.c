@@ -38,8 +38,6 @@ extern s8 g_formation_dot_glow_direction;
 extern rgb24_t g_formation_away_unit_color;
 extern rgb24_t g_formation_saved_sprite_color;
 extern rgb24_t g_formation_normal_sprite_color;
-extern oriented_quad_t g_formation_label_cant_equip;
-extern oriented_quad_t g_formation_label_equipping;
 extern oriented_quad_t g_formation_label_leaving;
 extern oriented_quad_t g_formation_label_missing;
 extern menu_sprite_cell_t g_formation_label_tiles[];
@@ -53,8 +51,6 @@ extern u8 g_formation_grid_return_done;
 extern point16_t g_formation_cursor_trail[8];
 extern u8 g_formation_cursor_trail_brightness[8];
 
-/* Three consecutive 20-byte sprite records. */
-extern oriented_quad_t g_formation_shadow_egg_sprites[3];
 extern u8 g_formation_sprite_slide_frame;
 extern u8 g_formation_stat_display_mode; /* menu_unit_readout_e, HP to BRAVE_FAITH */
 extern u8 g_formation_stat_bar_window_top[12];
@@ -95,6 +91,10 @@ typedef struct formation_gauge_offsets {
 } formation_gauge_offsets_t;
 typedef char formation_gauge_offsets_size_must_be_4[sizeof(formation_gauge_offsets_t) == 4 ? 1 : -1];
 
+/* Shadow and two egg layers. Drawing updates their positions and egg palettes. */
+static oriented_quad_t g_formation_shadow_egg_sprites[3] = { { { 0, 0 }, 20, 10, { 144, 64, 20, 20, 0x7ee4, 0x1f } },
+    { { 0, 0 }, 18, 24, { 233, 184, 18, 24, 0, 0x65 } }, { { 0, 0 }, 16, 16, { 216, 184, 16, 16, 0, 0x65 } } };
+
 static formation_gauge_offsets_t g_formation_gauge_bar_offsets = { 3, 1, 0, 4 };
 
 /* Gauge corner colors, in top-left, top-right, bottom-left, bottom-right order. */
@@ -104,6 +104,10 @@ static rgb24_t g_formation_mp_gauge_colors[4]
     = { { 128, 64, 56 }, { 224, 160, 80 }, { 128, 64, 56 }, { 224, 160, 80 } };
 static rgb24_t g_formation_ct_gauge_colors[4]
     = { { 80, 104, 64 }, { 176, 176, 64 }, { 80, 104, 64 }, { 176, 176, 64 } };
+
+/* Equipment labels; drawing supplies their positions and texture page. */
+static oriented_quad_t g_formation_label_cant_equip = { { 0, 0 }, 38, 10, { 48, 245, 38, 10, 0x7d7c, 0x65 } };
+static oriented_quad_t g_formation_label_equipping = { { 0, 0 }, 34, 10, { 88, 245, 34, 10, 0x7d7c, 0x65 } };
 
 static s32 formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor);
 static void formation_draw_cursor_trail(point16_t* cursor);
