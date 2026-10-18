@@ -67,11 +67,11 @@ extern s32 g_effect_frame_start_prim_buffer_offset;
 static s32 g_effect_primitive_sizes[3] = { sizeof(POLY_FT4), sizeof(DR_MODE), 32 };
 
 /* Private cursor state for the resident model decoder. */
-extern const psyq_tmd_object_t* g_effect_model_object;
-extern const SVECTOR* g_effect_model_vertices;
-extern const SVECTOR* g_effect_model_normals;
-extern const u32* g_effect_model_commands;
-extern s32 g_effect_model_command_word_offset;
+static const psyq_tmd_object_t* g_effect_model_object;
+static const SVECTOR* g_effect_model_vertices;
+static const SVECTOR* g_effect_model_normals;
+static const u32* g_effect_model_commands;
+static s32 g_effect_model_command_word_offset;
 
 static s32 effect_particle_update_node_from_work(effect_record_t* unused_record, effect_work_record_t* work);
 static void effect_vector_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
