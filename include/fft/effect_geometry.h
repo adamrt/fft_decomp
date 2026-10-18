@@ -291,7 +291,7 @@ typedef struct effect_textured_quad_geometry_view {
     u8 _unused_ac[0x18];
 } effect_textured_quad_geometry_view_t;
 typedef char
-    assert_effect_textured_quad_geometry_view_size[sizeof(effect_textured_quad_geometry_view_t) == 196 ? 1 : -1];
+    effect_textured_quad_geometry_view_size_must_be_196[sizeof(effect_textured_quad_geometry_view_t) == 196 ? 1 : -1];
 
 /* particle ribbon */
 /* The ribbon binds target spread at bit 4 of motion_curve_selectors, where the
@@ -350,8 +350,9 @@ typedef struct effect_particle_ribbon_geometry_view {
     u8 child_emitter_mid_life; /* 0xc1 */
     u8 _padding_c2[0x02];      /* tail padding to 4-byte alignment */
 } effect_particle_ribbon_geometry_view_t;
-typedef char
-    assert_effect_particle_ribbon_geometry_view_size[sizeof(effect_particle_ribbon_geometry_view_t) == 196 ? 1 : -1];
+typedef char effect_particle_ribbon_geometry_view_size_must_be_196[sizeof(effect_particle_ribbon_geometry_view_t) == 196
+        ? 1
+        : -1];
 
 /* polar mesh */
 /* Polar motion bindings use one-based curve selectors; zero keeps the starting value. */
@@ -583,7 +584,7 @@ typedef struct effect_tentacle_mesh_geometry_view {
     u8 _padding_c2[0x02];      /* tail padding to 4-byte alignment */
 } effect_tentacle_mesh_geometry_view_t;
 typedef char
-    assert_effect_tentacle_mesh_geometry_view_size[sizeof(effect_tentacle_mesh_geometry_view_t) == 196 ? 1 : -1];
+    effect_tentacle_mesh_geometry_view_size_must_be_196[sizeof(effect_tentacle_mesh_geometry_view_t) == 196 ? 1 : -1];
 
 /* map vertex particles */
 /* The E454 and E464 particle handlers use the renderer-specific meanings of
@@ -597,7 +598,7 @@ typedef struct effect_particle_vertex_emitter_view {
     u8 _unused_ac[0x18];
 } effect_particle_vertex_emitter_view_t;
 typedef char
-    assert_effect_particle_vertex_emitter_view_size[sizeof(effect_particle_vertex_emitter_view_t) == 196 ? 1 : -1];
+    effect_particle_vertex_emitter_view_size_must_be_196[sizeof(effect_particle_vertex_emitter_view_t) == 196 ? 1 : -1];
 
 /* particle-system section */
 /* One 0xc4-byte emitter record, read through the view of the renderer that owns it. The
