@@ -19,6 +19,7 @@ units:
   - {name: open_overlay, source: src/main/open_overlay.c, data: [{addr: 0x800596c0, size: 32, hash: 66687aadf862bd77}]}
   - {name: overlay_loading, source: src/main/overlay_loading.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
   - {name: party, source: src/main/party.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}, {addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
+  - {name: save_init_data_tables, source: src/main/save_init_data_tables.c, profile: gcc-2.6.3_O2_aspsx-2.21, data: [{addr: 0x80059594, size: 280, hash: 1f6c9de2e555d5d5}]}
   - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}]}
   - {name: startup, source: src/main/startup.c, data: [{addr: 0x8004d9b4, size: 4, hash: df3f619804a92fdb}]}
   - {name: suzuki_driver, source: src/lib/suzuki/driver.c}
@@ -780,7 +781,7 @@ functions:
   - {addr: 0x800451cc, size: 104, name: overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: overlay_loading}
   - {addr: 0x80045234, size: 52, name: overlay_open_world, hash: f0dc6ce1683e216e, unit: overlay_loading}
   - {addr: 0x80045268, size: 132, name: file_load_data_from_disc, hash: 061eb9238379898e, unit: overlay_loading}
-  - {addr: 0x800452ec, size: 480, name: save_init_data_tables, hash: 13bfa79a2bc689e1, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800452ec, size: 480, name: save_init_data_tables, hash: 13bfa79a2bc689e1, unit: save_init_data_tables}
   - {addr: 0x80045514, size: 524, name: item_init_order_tables, hash: d7bbcb00c4fad7e9, unit: open_overlay}
   - {addr: 0x80045720, size: 408, name: memcard_init_events, hash: c3df9151b2bf6647, unit: open_overlay}
   - {addr: 0x800458b8, size: 72, name: overlay_exec_open_title, hash: ec2d3c302ca9b1f1, unit: open_overlay}

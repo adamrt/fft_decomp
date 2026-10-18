@@ -8,6 +8,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+sound_novel_reading_t g_sound_novel_saved_readings[5] = { 0 };
+
 extern u8* g_brave_story_ages_source;
 
 /* Reset the save record fields and new-game data tables: the five saved
