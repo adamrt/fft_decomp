@@ -566,7 +566,8 @@ void sound_stop_background(void) {
     }
 }
 
-/* Byte budgets of the resident sound files. */
+/* Sector-rounded read counts. The final SYSTEM.SED and ENV.SED sectors each
+ * write 0x400 zero bytes into the following startup state. */
 #define WAVESET_WD_SIZE 0x79000
 #define SYSTEM_SED_SIZE 0x2800
 #define ENV_SED_SIZE    0x1000
