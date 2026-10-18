@@ -153,8 +153,8 @@ func linkerScript(f *functionSpec, bindings map[string]uint32) (string, error) {
 	var script strings.Builder
 	script.WriteString("OUTPUT_ARCH(mips)\n")
 	for _, name := range names {
-		// The mapped definition must come from the object, never PROVIDE.
-		if f.SourceSymbol != "" && name == f.sourceSymbol() {
+		// A C entry must come from its object definition, never PROVIDE.
+		if f.Asm == "" && name == f.sourceSymbol() {
 			continue
 		}
 		if name == "_gp" {
@@ -175,7 +175,7 @@ func linkerScript(f *functionSpec, bindings map[string]uint32) (string, error) {
 	}
 	fmt.Fprintf(&script, "  .text 0x%x : SUBALIGN(4) { *(.text) }\n", f.Addr)
 	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n")
-	if f.SourceSymbol != "" {
+	if f.Asm == "" {
 		fmt.Fprintf(&script, "ASSERT(%s == 0x%08x, \"source definition must begin at original entry\");\n", f.sourceSymbol(), f.Addr)
 	}
 	return script.String(), nil

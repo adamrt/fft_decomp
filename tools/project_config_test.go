@@ -315,7 +315,8 @@ func TestLinkerScriptPlacesSections(t *testing.T) {
 	want := "OUTPUT_ARCH(mips)\nPROVIDE(a = 0x80020000);\nPROVIDE(b = 0x80010000);\nSECTIONS {\n" +
 		"  .rodata 0x80067000 : SUBALIGN(4) { *(.rodata) *(.rdata) }\n" +
 		"  .text 0x80067010 : SUBALIGN(4) { *(.text) }\n" +
-		"  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n"
+		"  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n" +
+		"ASSERT(f == 0x80067010, \"source definition must begin at original entry\");\n"
 	if script != want {
 		t.Fatalf("script:\n%s", script)
 	}

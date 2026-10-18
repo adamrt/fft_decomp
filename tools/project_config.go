@@ -883,6 +883,11 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 			if f.SourceSymbol != "" && f.Asm != "" {
 				fail("%s: source_symbol requires a C source", where)
 			}
+			if f.Unit == "" && f.Asm == "" && sourceErr == nil {
+				if err := validateStandaloneSourceBinding(p.root, m, source, sourceSymbol); err != nil {
+					fail("%s: %v", where, err)
+				}
+			}
 			if f.Unit == "" && (f.SourceSymbol != "" || moduleSources[source] != "") && f.Asm == "" && sourceErr == nil && !checkedDefinitions[source] {
 				checkedDefinitions[source] = true
 				if err := validateSourceDefinition(p.root, source, sourceSymbol); err != nil {
