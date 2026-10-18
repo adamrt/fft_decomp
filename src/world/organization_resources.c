@@ -34,12 +34,19 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Partial image view used by screen_load_common_graphics. Upload rectangles determine the second page's size;
- * it begins at byte +0x8000 in both resource layouts. */
-typedef struct screen_image_pages {
-    u32 first_page[8192];
-    u32 second_page[1];
-} screen_image_pages_t;
+/* ITEM.BIN: one 256x256 4bpp image followed by sixteen palettes. The 0x8800-byte
+ * allocation rounds this 33,280-byte file up to a whole number of sectors. */
+typedef struct screen_item_graphics {
+    u32 image[8192];
+    clut_t palettes;
+} screen_item_graphics_t;
+typedef char screen_item_graphics_size_must_be_33280[sizeof(screen_item_graphics_t) == 33280 ? 1 : -1];
+
+/* UNIT.BIN: two complete upload pages containing Formation sprites and palettes. */
+typedef struct screen_unit_graphics {
+    u32 pages[2][8192];
+} screen_unit_graphics_t;
+typedef char screen_unit_graphics_size_must_be_65536[sizeof(screen_unit_graphics_t) == 65536 ? 1 : -1];
 
 /* State of a screen request raised from the world map menu (the
  * *_request_state globals stepped by screen_menu_frame):
@@ -248,15 +255,16 @@ static void screen_load_wldface_portraits(void) {
  */
 static void screen_load_common_graphics(s32 load_extra_pages) {
     void* resource;
-    screen_image_pages_t* pages;
+    screen_item_graphics_t* item;
+    screen_unit_graphics_t* units;
     gfx_frame_bin_t* frame;
 
     if (g_menu_common_graphics_loaded == 0) {
         g_thread_call_target = file_load_checked_to_heap;
         resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_ITEM_BIN, 0x8800);
-        pages = resource;
-        LoadImage(&g_screen_item_image_rect, pages->first_page);
-        LoadImage(&g_screen_item_palette_rect, pages->second_page);
+        item = resource;
+        LoadImage(&g_screen_item_image_rect, item->image);
+        LoadImage(&g_screen_item_palette_rect, (u32*)item->palettes);
         DrawSync(0);
         heap_call_free(resource);
         g_menu_common_graphics_loaded++;
@@ -276,9 +284,9 @@ static void screen_load_common_graphics(s32 load_extra_pages) {
     if (load_extra_pages != 0) {
         g_thread_call_target = file_load_checked_to_heap;
         resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000);
-        pages = resource;
-        LoadImage(&g_screen_unit_image_rect_a, pages->first_page);
-        LoadImage(&g_screen_unit_image_rect_b, pages->second_page);
+        units = resource;
+        LoadImage(&g_screen_unit_image_rect_a, units->pages[0]);
+        LoadImage(&g_screen_unit_image_rect_b, units->pages[1]);
         DrawSync(0);
         heap_call_free(resource);
     }
