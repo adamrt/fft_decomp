@@ -259,7 +259,7 @@ static s32 formation_get_egg_hatch_total(s32 unit_id) {
 /* Returns 1 when the selected unit is in the two upper visible rows of the grid at
  * `scroll_position` (after the scroll in progress), which puts the unit banner at the bottom
  * of the screen. Returns 0 while browsing a unit that is not an egg. */
-static s32 formation_is_selected_in_upper_rows(s32 scroll_position) {
+static s32 formation_is_selected_in_upper_rows(s8 scroll_position) {
     s32 result = 1;
 
     if (g_formation_unit_browse_enabled == 0
@@ -270,7 +270,7 @@ static s32 formation_is_selected_in_upper_rows(s32 scroll_position) {
         if (g_formation_scroll_velocity > 0) {
             scroll_position += 0x3c;
         }
-        switch ((s8)scroll_position) {
+        switch (scroll_position) {
         case -0x78:
             if (g_unit_selected_index >= 0x10) {
                 result = 0;
