@@ -10,11 +10,11 @@
 #include "psx/types.h"
 
 /* movement records */
-/* Destination bytes and motion flags share one 32-bit movement record. */
+/* Destination x/y/layer bytes and motion flags share one 32-bit movement record. */
 typedef struct move_destination {
     u8 destination_x;
     u8 destination_y;
-    u8 destination_z;
+    u8 destination_layer;
     u32 suppress_facing_update : 1;
     u32 suppress_sfx_and_landing_effects : 1;
     u32 suppress_palette_update : 1;
@@ -141,7 +141,7 @@ typedef enum move_frontier_mode {
 
 extern move_path_t g_move_path;
 
-s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z);
+s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_layer);
 void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
     s32 target_level, s32 initialize, s32* suspended);
 move_path_t* move_path_calculate_walk_to(

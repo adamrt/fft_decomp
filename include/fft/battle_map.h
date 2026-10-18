@@ -370,7 +370,7 @@ s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit);
 battle_map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
 battle_map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id);
 battle_map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
-s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z);
+s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 layer);
 void battle_map_store_dimensions(SVECTOR* destination);
 
 /* A typed terrain parameter loses the first retail byte-cursor increment. */

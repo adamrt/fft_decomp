@@ -86,12 +86,12 @@ struct unit {
     u16 special_graphic_y_offset;      /* 0x07a; added to the v of each part: a status sheet's rows in OTHER.SPR */
     u8 map_x;                          /* 0x07c */
     u8 map_y;                          /* 0x07d */
-    u8 map_z;                          /* 0x07e */
+    u8 map_layer;                      /* 0x07e */
     u8 step_phase;                     /* 0x07f; move_step_phase_e */
     move_destination_t movement;       /* 0x080 */
     u8 previous_map_x;                 /* 0x084 */
     u8 previous_map_y;                 /* 0x085 */
-    u8 previous_map_z;                 /* 0x086 */
+    u8 previous_map_layer;             /* 0x086 */
     u8 distortion_animation_id;        /* 0x087; animation_distortion_e */
     s32 distortion_phase;              /* 0x088; the handler's own step, 0 when the distortion animation starts */
     s32 distortion_timer;              /* 0x08c; frames left: the second operand of ANIMATION_SEQ_OP_START_DISTORTION */
@@ -140,7 +140,7 @@ struct unit {
     s32 pending_attack_result; /* 0x180: attack result code; -1 signals death */
     /* Death-by-dismount destination (unit runtime record 0x184/0x186/
      * 0x188); unit_dismount_dead_rider copies them to
-     * map_x/map_z/map_y.  action_apply_unit_result passes &dismount. */
+     * map_x/map_layer/map_y.  action_apply_unit_result passes &dismount. */
     battle_map_tile_coordinates_t dismount; /* 0x184 */
     u8 _unused_18a[2];
     action_strike_work_t strike; /* 0x18c..0x1b3; current action targets, result and rewards */
@@ -346,10 +346,10 @@ typedef enum unit_tile_filter {
 } unit_tile_filter_e;
 
 s32 unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
-unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 z);
-unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
-unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
-unit_t* unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
+unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 layer);
+unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 layer);
+unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 layer);
+unit_t* unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 layer);
 unit_height_data_t* unit_calculate_height_data(unit_height_data_t* out, s32 unit_id);
 s32 unit_height_calculate_from_battle_tile(struct unit* unit);
 s32 unit_height_calculate_from_tile(struct unit* unit);
@@ -441,7 +441,7 @@ SVECTOR* unit_get_world_coords_by_battle_id(u32 battle_id);
 void unit_set_real_coords_from_world_coords(struct unit* unit);
 void unit_set_world_coords_from_real_coords(struct unit* unit);
 void unit_set_move_and_world_coords(unit_t* unit);
-s32 unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 map_z, u8 facing);
+s32 unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 layer, u8 facing);
 s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords);
 void unit_copy_draw_coords(SVECTOR* destination, const unit_t* runtime);
@@ -458,7 +458,7 @@ void unit_store_team_flags(unit_t* unit);
 
 /* crystals, treasure and transformations */
 s32 unit_count_crystals(void);
-unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
+unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 layer);
 void unit_apply_poach_morbol_transformation(unit_t* unit);
 void unit_transform_into_morbol(unit_stats_t* unit);
 

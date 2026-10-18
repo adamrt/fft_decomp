@@ -568,7 +568,7 @@ static void move_spread_store_unit_to_scratchpad(s32 unit_id) {
  * The callers also pass map coordinates in a1-a3; the target callee does not
  * read them, but retaining the parameters preserves the original calls.
  */
-s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z) {
+s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_layer) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     u8* frontier = g_move_frontier_flags_ptr;

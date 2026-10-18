@@ -509,7 +509,7 @@ void state_enter_display_move_area(void) {
     g_game_state = GAME_STATE_DISPLAY_MOVE_AREA;
     unit = unit_get_casting();
     stats = unit->stats;
-    move_range_build(stats->battle_id, unit->map_x, unit->map_y, unit->map_z);
+    move_range_build(stats->battle_id, unit->map_x, unit->map_y, unit->map_layer);
     target_set_tile_mark_colors(BATTLE_MAP_TILE_MARK_SHOW_MOVE, 1);
     previous_mode = g_cursor_input_mode;
     g_cursor_input_mode = CURSOR_INPUT_FREE_CURSOR;
@@ -608,7 +608,7 @@ void state_enter_select_move_tile(void) {
         cursor_hide();
     }
 
-    if (move_range_build(casting->stats->battle_id, casting->map_x, casting->map_y, casting->map_z) > 0) {
+    if (move_range_build(casting->stats->battle_id, casting->map_x, casting->map_y, casting->map_layer) > 0) {
         target_set_tile_mark_colors(BATTLE_MAP_TILE_MARK_SHOW_MOVE, 1);
         g_game_state = GAME_STATE_SELECT_MOVE_TILE;
         casting->state_frame_counter = 0;
@@ -678,7 +678,7 @@ void state_enter_unit_moving_setup(void) {
 static void move_save_previous_state(unit_t* unit) {
     u8 x = unit->map_x;
     u8 y = unit->map_y;
-    u8 z = unit->map_z;
+    u8 layer = unit->map_layer;
     u16 facing = unit->facing;
     u8 mount_value = unit->mount_state;
     u8 mount_id = unit->mount_partner_runtime_id;
@@ -686,7 +686,7 @@ static void move_save_previous_state(unit_t* unit) {
 
     unit->previous_map_x = x;
     unit->previous_map_y = y;
-    unit->previous_map_z = z;
+    unit->previous_map_layer = layer;
     unit->previous_facing = facing;
     unit->previous_mount_state = mount_value;
     unit->previous_mount_partner_runtime_id = mount_id;
@@ -869,7 +869,7 @@ s32 move_start_next_post_event(void) {
     g_state_window_closed = 0;
     casting->state_frame_counter = 0;
     if (g_move_post_events & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
-        target = unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z);
+        target = unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_layer);
         /* -1 for a crystal, otherwise the treasure's item id. */
         item = crystal_resolve_pickup(source->stats->battle_id);
         if (item == -1) {
@@ -953,7 +953,7 @@ s32 move_start_next_post_event(void) {
         action_start_target_response(0, source);
         effect_secondary_set_trap(source);
         menu_init_system_function(MENU_SYSTEM_COMMAND_TRAP_RESULT, trap, source->stats->battle_id, 0, 1);
-        ai_record_triggered_trap_coords(casting->map_x, casting->map_z, casting->map_y);
+        ai_record_triggered_trap_coords(casting->map_x, casting->map_layer, casting->map_y);
         return 1;
     }
     if (g_move_post_events & MOVE_POST_EVENT_CHARGING_CANCEL) {
@@ -1029,7 +1029,7 @@ void state_enter_wait_direction(void) {
         if (mounted_unit != 0) {
             unit_facing_set_cardinal(unit, mounted_unit->facing);
             if (unit->stats != 0) {
-                unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z,
+                unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
                     (mounted_unit->facing / UNIT_FACING_QUARTER_TURN));
             }
         }
@@ -1168,11 +1168,11 @@ void unit_facing_turn_to_target(unit_t* unit, unit_t* target) {
     unit_facing_save_before_attack(unit);
     unit->facing = (ratan2(-delta.vz, delta.vx) - 0x200) & 0xc00;
     unit_set_tile_position(
-        unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / UNIT_FACING_QUARTER_TURN);
+        unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer, unit->facing / UNIT_FACING_QUARTER_TURN);
     if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
         unit_get_by_runtime_id(unit->mount_partner_runtime_id)->facing = unit->facing;
         unit_set_tile_position(
-            unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / UNIT_FACING_QUARTER_TURN);
+            unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer, unit->facing / UNIT_FACING_QUARTER_TURN);
     }
 }
 
@@ -1194,14 +1194,14 @@ static void unit_facing_restore_after_attack(unit_t* unit) {
             facing = unit->attack_facing;
             if (facing != -1) {
                 unit->facing = facing;
-                unit_set_tile_position(
-                    unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, facing / UNIT_FACING_QUARTER_TURN);
+                unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
+                    facing / UNIT_FACING_QUARTER_TURN);
                 /* Stored as a signed 16-bit value (li -1, not ori 0xffff). */
                 unit->attack_facing = -1;
                 if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
                     mount = unit_get_by_runtime_id(unit->mount_partner_runtime_id);
                     mount->facing = unit->facing;
-                    unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z,
+                    unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
                         unit->facing / UNIT_FACING_QUARTER_TURN);
                 }
             }

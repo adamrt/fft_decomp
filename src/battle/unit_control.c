@@ -372,7 +372,7 @@ void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* scree
     screen_coords->vy = transformed_coords.vy;
 }
 
-/* Writes a unit's tile as three 16-bit values in the order x, z, y and returns 1. A
+/* Writes a unit's tile as three 16-bit values in the order x, layer, y and returns 1. A
  * runtime id without a record raises a pointer exception and returns 0. */
 s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
     unit_t* unit = g_unit_list_head;
@@ -381,7 +381,7 @@ s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
         if (unit->runtime_id == (runtime_id & 0xffff)) {
             coords->vx = unit->map_x;
             coords->vz = unit->map_y;
-            coords->vy = unit->map_z;
+            coords->vy = unit->map_layer;
             return 1;
         }
     }
@@ -399,7 +399,7 @@ s32 move_start_walk_to(s32 runtime_id, battle_map_tile_coordinates_t* destinatio
 
     if (unit != 0) {
         path = move_path_calculate_walk_to(
-            flags, jump, unit->map_x, unit->map_y, unit->map_z, destination->x, destination->y, destination->layer);
+            flags, jump, unit->map_x, unit->map_y, unit->map_layer, destination->x, destination->y, destination->layer);
         if (path != 0) {
             unit->path = *path;
             unit->walk_speed = speed * 2;
@@ -434,7 +434,7 @@ s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length
         unit->path.data.steps[0].slow = 0;
         unit->path.data.steps[0].climb = 0;
         unit->path.data.steps[0].mount = 0;
-        unit->path.data.steps[0].higher = unit->map_z;
+        unit->path.data.steps[0].higher = unit->map_layer;
         unit->path.data.steps[0].direction = direction;
         unit->path.flags = 0;
         unit_mount_dismount_rider_and_update_display(unit);

@@ -51,7 +51,7 @@ void cursor_move_to_unit(const unit_t* unit) {
     if (unit != 0) {
         g_cursor_x = unit->map_x;
         g_cursor_y = unit->map_y;
-        g_cursor_layer = unit->map_z;
+        g_cursor_layer = unit->map_layer;
     }
 }
 
@@ -411,7 +411,7 @@ static void unit_update_display(unit_t* unit) {
     battle_map_tile_t* tile;
 
     if (unit != 0) {
-        tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z);
+        tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
         unit->status_flags_1_4 &= ~unit->statuses_to_remove_1_4;
         unit->status_flags_5_6 &= ~unit->statuses_to_remove_5_6;
         unit->status_flags_1_4 |= unit->statuses_to_add_1_4;
@@ -560,7 +560,7 @@ void unit_mount_seat_rider(unit_t* rider, unit_t* mount) {
     rider->real.vy -= 10 * ONE; /* the same raise in 20.12 fixed point */
     rider->map_x = mount->map_x;
     rider->map_y = mount->map_y;
-    rider->map_z = mount->map_z;
+    rider->map_layer = mount->map_layer;
     rider->status_flags_1_4 |= UNIT_STATUS_MOUNTED;
     animation_set_for_status(rider);
     rider->animation.script_pos = mount->animation.script_pos;
@@ -696,7 +696,7 @@ void move_step_set_velocity_clamped(unit_t* unit, const move_path_t* path, const
     s32 end_z;
     s16 code;
 
-    battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z); /* result unused */
+    battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer); /* result unused */
     x = unit->map_x;
     y = unit->map_y;
     index = unit->movement_path_offset - 1;
@@ -775,7 +775,7 @@ void move_step_set_velocity_with_final_height(unit_t* unit, const move_path_t* p
     battle_map_tile_depth_t depth;
     s16 code;
 
-    battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z); /* result unused */
+    battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer); /* result unused */
     x = unit->map_x;
     y = unit->map_y;
     index = unit->movement_path_offset - 1;

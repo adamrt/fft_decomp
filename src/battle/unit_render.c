@@ -174,7 +174,7 @@ s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad
  * along X, Z, or whichever of the two the corner type selects. x and z are
  * the offsets of the point inside its 28-unit tile.
  */
-s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
+s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 layer) {
     s16 tile_pos[2];
     battle_map_tile_t* tile;
     s32 half;
@@ -187,7 +187,7 @@ s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
 
     tile_pos[0] = coords->vx / BATTLE_MAP_TILE_SIZE;
     tile_pos[1] = coords->vz / BATTLE_MAP_TILE_SIZE;
-    tile = battle_map_tile_get_pointer(tile_pos[0], tile_pos[1], (u8)map_z);
+    tile = battle_map_tile_get_pointer(tile_pos[0], tile_pos[1], (u8)layer);
     base = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
     half = tile->depth_half_height.half_height;
     result = base;
@@ -422,7 +422,7 @@ s32 unit_height_calculate_from_move_destination(unit_t* unit) {
 
     coord.vx = mount->movement.destination_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
     coord.vz = mount->movement.destination_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    coord.vy = mount->movement.destination_z;
+    coord.vy = mount->movement.destination_layer;
     world_height = unit_height_calculate_from_coords(mount, &coord);
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
         adjusted_world_height = world_height - 10;
@@ -443,7 +443,7 @@ s32 unit_height_calculate_from_world_coords(unit_t* unit) {
     /* The target loads the s16 world coordinates unsigned (lhu). */
     coord.vx = mount->world_coords.vx;
     coord.vz = mount->world_coords.vz;
-    coord.vy = mount->map_z;
+    coord.vy = mount->map_layer;
     world_height = unit_height_calculate_from_coords(mount, &coord);
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
         adjusted_world_height = world_height - 10;
@@ -463,7 +463,7 @@ s32 unit_height_calculate_from_tile(unit_t* unit) {
 
     coord.vx = mount->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
     coord.vz = mount->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    coord.vy = mount->map_z;
+    coord.vy = mount->map_layer;
     world_height = unit_height_calculate_from_coords(mount, &coord);
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
         adjusted_world_height = world_height - 10;
@@ -487,7 +487,7 @@ s32 unit_height_calculate_from_battle_tile(unit_t* unit) {
     coord.vx = stats->x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
     stats = mount->stats;
     coord.vz = stats->position.y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    coord.vy = mount->map_z;
+    coord.vy = mount->map_layer;
     world_height = unit_height_calculate_from_coords(mount, &coord);
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
         adjusted_world_height = world_height - 10;
@@ -549,8 +549,8 @@ void sprite_shadow_draw(unit_t* unit, u32* ot) {
     prim->x3 = transformed.vx;
     prim->y3 = transformed.vy;
     prim->code |= 2;
-    tile = battle_map_tile_get_pointer(
-        (unit->world_coords.vx / BATTLE_MAP_TILE_SIZE), (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_z);
+    tile = battle_map_tile_get_pointer((unit->world_coords.vx / BATTLE_MAP_TILE_SIZE),
+        (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
     if (tile->depth_half_height.depth
         && -(tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP < unit->world_coords.vy) {
         unit->shadow_counter += g_system_vsync_interval;
@@ -595,12 +595,12 @@ void sprite_shadow_draw(unit_t* unit, u32* ot) {
     }
     vector_set_svector(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
         unit->world_coords.vz + unit->event_offset.vz + unit->seq_offset.vz);
-    position.vy = battle_map_calculate_slope_height(&position, unit->map_z);
+    position.vy = battle_map_calculate_slope_height(&position, unit->map_layer);
     if (unit->world_coords.vy >= position.vy) {
         packet = ot;
     } else {
         tile = battle_map_tile_get_pointer(
-            (position.vx / BATTLE_MAP_TILE_SIZE), (position.vz / BATTLE_MAP_TILE_SIZE), unit->map_z);
+            (position.vx / BATTLE_MAP_TILE_SIZE), (position.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
         position.vy -= tile->depth_half_height.depth * BATTLE_MAP_HEIGHT_STEP;
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if (tile->surface.depth_bias) {
@@ -1119,7 +1119,7 @@ static void status_bubble_determine_parameters(unit_t* unit) {
                 break;
             case SPRITE_SHP_TYPE1:
             case SPRITE_SHP_TYPE2:
-                if (battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z)->depth_half_height.depth) {
+                if (battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer)->depth_half_height.depth) {
                     switch (unit->animation.sequence_id >> 1) {
                     case ANIMATION_DEAD:
                     case ANIMATION_DEATH:
@@ -2236,7 +2236,7 @@ u32 sprite_sheet_get_flying_flag(u32 spritesheet_id) {
 void unit_set_move_and_world_coords(unit_t* unit) {
     unit->movement.destination_x = unit->map_x;
     unit->movement.destination_y = unit->map_y;
-    unit->movement.destination_z = unit->map_z;
+    unit->movement.destination_layer = unit->map_layer;
     unit->world_coords.vx = unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
     unit->world_coords.vz = unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
     unit->world_coords.vy = unit_height_calculate_from_world_coords(unit);
@@ -2253,10 +2253,10 @@ void unit_dismount_dead_rider(unit_t* unit) {
         unit_mount_dismount_rider_and_update_display(unit);
         unit->map_x = unit->dismount.x;
         unit->map_y = unit->dismount.y;
-        unit->map_z = unit->dismount.layer;
+        unit->map_layer = unit->dismount.layer;
         unit_set_move_and_world_coords(unit);
-        unit_set_tile_position(
-            unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, (unit->facing / UNIT_FACING_QUARTER_TURN));
+        unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
+            (unit->facing / UNIT_FACING_QUARTER_TURN));
         unit->pending_attack_result = 0;
     }
 }

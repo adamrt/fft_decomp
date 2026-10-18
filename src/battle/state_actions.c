@@ -282,8 +282,8 @@ void action_apply_strike_results(void) {
             if (target != 0) {
                 target->map_x = unit->strike.target_new_x;
                 target->map_y = unit->strike.target_new_y;
-                target->map_z = unit->strike.target_new_map_level;
-                unit_set_tile_position(target->stats->battle_id, target->map_x, target->map_y, target->map_z,
+                target->map_layer = unit->strike.target_new_map_level;
+                unit_set_tile_position(target->stats->battle_id, target->map_x, target->map_y, target->map_layer,
                     target->facing / UNIT_FACING_QUARTER_TURN);
                 unit_set_move_and_world_coords(target);
             }
@@ -464,7 +464,8 @@ void target_select_tile(void) {
 
     unit->state_frame_counter = 0;
     if (unit->ability_preview_phase == TARGET_PANELS_NO_TARGETING) {
-        vector_set_svector(&unit->command_state.ai.data.action.target_position, unit->map_x, unit->map_z, unit->map_y);
+        vector_set_svector(
+            &unit->command_state.ai.data.action.target_position, unit->map_x, unit->map_layer, unit->map_y);
         unit->command_state.ai.data.action.targeting_type = TARGET_TYPE_TILE;
     } else if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         vector_set_svector(&unit->command_state.ai.data.action.target_position, g_cursor_x, g_cursor_layer, g_cursor_y);

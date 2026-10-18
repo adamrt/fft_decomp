@@ -353,7 +353,7 @@ static void animation_distortion_step_to_own_tile(unit_t* unit, s32 allow_height
         velocity.vz = (unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2) - unit->world_coords.vz) * ONE;
         tile_center.vx = unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
         tile_center.vz = unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        velocity.vy = (battle_map_calculate_slope_height(&tile_center, unit->map_z) - unit->world_coords.vy) * ONE;
+        velocity.vy = (battle_map_calculate_slope_height(&tile_center, unit->map_layer) - unit->world_coords.vy) * ONE;
         velocity.vx /= timer;
         velocity.vy /= timer;
         velocity.vz /= timer;
@@ -650,14 +650,14 @@ s32 animation_distortion_fall_to_target(unit_t* unit) {
              * not real.vz. The first frame adds the fall speed to it and the
              * next one snaps the height to the ground. */
             unit->real.vy = y * ONE;
-            vector_set_svector(&coords, unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2), unit->map_z,
-                unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2));
+            vector_set_svector(&coords, unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2),
+                unit->map_layer, unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2));
             coords.vy = world_height_from_world_coords_passing_coords(unit, &coords);
         } else {
             if (unit->strike.target_count != 0) {
                 other = unit_get_by_battle_id(unit->strike.target_list[0]);
                 vector_set_svector(&coords, other->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2),
-                    other->map_z, other->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2));
+                    other->map_layer, other->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2));
             } else {
                 stats = unit->stats;
                 vector_set_svector(&coords,
@@ -768,7 +768,7 @@ static void animation_teleport_start_fade_out(unit_t* unit) {
         || unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
         effect_play();
     }
-    tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z);
+    tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
     sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
     sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, 0, unit->runtime_id, -31, -31, -31);
     unit->distortion_phase++;
@@ -808,7 +808,7 @@ s32 animation_distortion_teleport(unit_t* unit) {
         if (g_state_animation_continue_check == 0) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
-            unit->map_z = unit->movement.destination_z;
+            unit->map_layer = unit->movement.destination_layer;
             unit_set_real_coords_from_map_coords(unit);
             unit_set_world_coords_from_real_coords(unit);
             if (animation_teleport_start_arrival(unit) == 0) {

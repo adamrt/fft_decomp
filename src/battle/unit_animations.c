@@ -194,7 +194,7 @@ static u8 animation_get_water_mode(unit_t* unit) {
     u32 statuses;
 
     tile = battle_map_tile_get_pointer(
-        unit->world_coords.vx / BATTLE_MAP_TILE_SIZE, unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_z);
+        unit->world_coords.vx / BATTLE_MAP_TILE_SIZE, unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_layer);
     if (unit->stats != 0) {
         movement = move_get_effective_flags(unit->stats);
         if (movement & MOVE_EFFECTIVE_ON_WATER) {
@@ -730,7 +730,7 @@ void unit_apply_poach_morbol_transformation(unit_t* unit) {
     unit->animation.seq = sprite_sheet_get_unit_seq(SPRITE_SHEET_ID_MORBOL);
     unit->stored_palette = 0;
     unit->tpage = unit->spritesheet_vram_slot + SPRITE_TPAGE_SPRITESHEET_SLOT_0;
-    tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z);
+    tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
     sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
     animation_force_facing(ANIMATION_IDLE, unit->facing, unit);
     unit_transform_into_morbol(unit->stats);
@@ -1105,8 +1105,8 @@ static void sprite_frame_select_unit_shp(unit_t* unit, animation_state_t* state,
     s32 height;
     s32 z;
 
-    tile = battle_map_tile_get_pointer(
-        (unit->world_coords.vx / BATTLE_MAP_TILE_SIZE), (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_z);
+    tile = battle_map_tile_get_pointer((unit->world_coords.vx / BATTLE_MAP_TILE_SIZE),
+        (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
     if (frame < SPRITE_SHP_FRAME_EVTCHR_FIRST) {
         table = state->shp;
         if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
@@ -2521,8 +2521,8 @@ void sprite_project_all_units(void) {
             unit->camera_relative_y = transformed.vy + unit->screen_offset.vy;
         }
 
-        tile = battle_map_tile_get_pointer(
-            unit->world_coords.vx / BATTLE_MAP_TILE_SIZE, unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_z);
+        tile = battle_map_tile_get_pointer(unit->world_coords.vx / BATTLE_MAP_TILE_SIZE,
+            unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_layer);
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if ((tile->surface.depth_bias) != 0) {
                 camera_get_step_depth_point_biased(&screen, &adjusted);
@@ -2992,7 +2992,7 @@ static unit_t* unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 sp
     unit_t** head;
     u8 tile_x;
     u8 tile_y;
-    u8 tile_z;
+    u8 tile_layer;
 
     id = spritesheet_id;
     unit = unit_claim_slot(requested_runtime_id);
@@ -3065,14 +3065,14 @@ static unit_t* unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 sp
     tile_y = map_y;
     unit->map_y = tile_y;
     unit->movement.suppress_palette_update = 0;
-    tile_z = map_level;
-    unit->map_z = tile_z;
+    tile_layer = map_level;
+    unit->map_layer = tile_layer;
     unit->movement.alternate_short_hop = 0;
     unit->movement.floating = 0;
     unit->movement.force_animation_update = 0;
     unit->movement.destination_x = tile_x;
     unit->movement.destination_y = tile_y;
-    unit->movement.destination_z = tile_z;
+    unit->movement.destination_layer = tile_layer;
     unit_set_move_and_world_coords(unit);
 
     cursor.animation = &unit->animation;

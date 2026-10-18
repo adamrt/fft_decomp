@@ -2139,7 +2139,7 @@ static void sprite_palette_apply_unit_modulation(s32 mode, s32 amount, s32 runti
 
     unit_copy_draw_coords(&world_coordinates, unit);
     tile = battle_map_tile_get_pointer(
-        world_coordinates.vx / BATTLE_MAP_TILE_SIZE, world_coordinates.vz / BATTLE_MAP_TILE_SIZE, unit->map_z);
+        world_coordinates.vx / BATTLE_MAP_TILE_SIZE, world_coordinates.vz / BATTLE_MAP_TILE_SIZE, unit->map_layer);
 
     battle_map_palette_modify(mode, amount, BATTLE_MAP_CLUT_ROW_UNITS, runtime_id, 0, red, green, blue);
 

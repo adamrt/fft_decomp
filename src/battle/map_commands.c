@@ -141,7 +141,7 @@ void battle_map_store_dimensions(SVECTOR* destination) {
 battle_map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id & 0xffff);
 
-    return battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z);
+    return battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
 }
 
 /* The tile a unit stands on, by battle id. The runtime record lookup is not checked:
@@ -149,7 +149,7 @@ battle_map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id) {
 battle_map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id) {
     unit_t* unit = unit_get_by_battle_id(battle_id & 0xffff);
 
-    return battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z);
+    return battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
 }
 
 /* The tile under a unit's integer world position (28 units per tile) on its map layer. */
@@ -157,7 +157,7 @@ battle_map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id & 0xffff);
 
     return battle_map_tile_get_pointer(
-        unit->world_coords.vx / BATTLE_MAP_TILE_SIZE, unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_z);
+        unit->world_coords.vx / BATTLE_MAP_TILE_SIZE, unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_layer);
 }
 
 /* Ask the map loader to load what the current map state needs. 1 when the load
@@ -228,7 +228,7 @@ s32 effect_projectile_init_single_target(u32 attacker_id, u32 target_id) {
     SVECTOR target_position;
 
     if (target != 0) {
-        vector_set_svector(&target_position, target->map_x, target->map_y, target->map_z);
+        vector_set_svector(&target_position, target->map_x, target->map_y, target->map_layer);
         projectile_direct_check_to_target(attacker_id, &target_position, target_id);
         if (attacker != 0) {
             attacker->strike.target_count = 1;

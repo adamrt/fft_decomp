@@ -558,11 +558,11 @@ unit_t* unit_get_source(void) {
 
 /* The first record in the runtime unit list standing on a tile, whatever its state
  * (crystals, treasures and records without battle stats included), or 0. */
-unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z) {
+unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 layer) {
     unit_t* unit = g_unit_list_head;
 
     while (unit != 0) {
-        if (unit->map_x == map_x && unit->map_y == map_y && unit->map_z == map_z) {
+        if (unit->map_x == map_x && unit->map_y == map_y && unit->map_layer == layer) {
             return unit;
         }
         unit = unit->previous;
@@ -576,7 +576,7 @@ unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z) {
  * Among several, the source unit (g_unit_source_runtime_id) is preferred,
  * then a rider over its mount, then the first in list order. Returns 0 for none.
  * The candidate array holds 16 entries and is filled without a bound check. */
-unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z) {
+unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 layer) {
     unit_t* matches[UNIT_RUNTIME_SLOT_COUNT];
     unit_t* unit;
     s32 count;
@@ -585,7 +585,7 @@ unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z) {
     count = 0;
     unit = g_unit_list_head;
     while (unit != 0) {
-        if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_z == map_z) && (unit->stats != 0)
+        if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_layer == layer) && (unit->stats != 0)
             && (unit->stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)
             && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) == 0)) {
             matches[count++] = unit;
@@ -613,7 +613,7 @@ unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z) {
 /* The crystal or treasure lying on a tile, or 0. Among several, the source unit
  * (g_unit_source_runtime_id) is preferred, then the first in list order. The
  * candidate array holds 16 entries and is filled without a bound check. */
-unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z) {
+unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 layer) {
     unit_t* matches[UNIT_RUNTIME_SLOT_COUNT];
     unit_t* unit;
     s32 count;
@@ -622,7 +622,7 @@ unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map
     count = 0;
     unit = g_unit_list_head;
     while (unit != 0) {
-        if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_z == map_z) && (unit->stats != 0)
+        if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_layer == layer) && (unit->stats != 0)
             && (unit->stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)
             && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) != 0)) {
             matches[count++] = unit;
@@ -640,11 +640,11 @@ unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map
     return 0;
 }
 
-/* The first unit drawn with the chocobo sprite sheet on tile (x, y, z) that is
+/* The first unit drawn with the chocobo sprite sheet at (x, y) on the specified layer that is
  * neither the source nor the casting unit, or 0: the chocobo a unit arriving on
  * the tile mounts (unit_mount_onto_pending). The candidate array
  * holds 16 entries and is filled without a bound check. */
-unit_t* unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z) {
+unit_t* unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 layer) {
     unit_t* unit;
     unit_t** cursor;
     s32 count;
@@ -660,7 +660,8 @@ unit_t* unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z) {
         spritesheet_id = SPRITE_SHEET_ID_CHOCOBO;
         cursor = list;
         for (; unit != 0; unit = unit->previous) {
-            if (unit->map_x == x && unit->map_y == y && unit->map_z == z && unit->spritesheet_id == spritesheet_id) {
+            if (unit->map_x == x && unit->map_y == y && unit->map_layer == layer
+                && unit->spritesheet_id == spritesheet_id) {
                 *cursor = unit;
                 cursor += 1;
                 count += 1;
@@ -679,14 +680,14 @@ unit_t* unit_find_other_chocobo_at_map_coords(s32 x, s32 y, s32 z) {
     return 0;
 }
 
-/* Finds another unit standing on tile (x, y, z): one with battle stats in an
+/* Finds another unit standing at (x, y) on the specified layer: one with battle stats in an
  * occupied slot, other than self and, when self is mounted or ridden, other than
  * its mount partner.
  *
  * Among several, the source unit (g_unit_source_runtime_id) is preferred,
  * then the first in list order. Returns 0 for none. The candidate array holds 16
  * entries and is filled without a bound check. */
-unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 z) {
+unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 layer) {
     unit_t* list[UNIT_RUNTIME_SLOT_COUNT];
     unit_t* unit;
     unit_stats_t* stats;
@@ -695,7 +696,7 @@ unit_t* unit_find_overlapping_at_tile(unit_t* self, s32 x, s32 y, s32 z) {
 
     count = 0;
     for (unit = g_unit_list_head; unit != 0; unit = unit->previous) {
-        if (unit != self && unit->map_x == x && unit->map_y == y && unit->map_z == z) {
+        if (unit != self && unit->map_x == x && unit->map_y == y && unit->map_layer == layer) {
             stats = unit->stats;
             if (stats != 0 && stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
                 if (self->mount_state == UNIT_MOUNT_STATE_NONE || unit->runtime_id != self->mount_partner_runtime_id) {
@@ -1346,7 +1347,7 @@ void sprite_shadow_build_quad(unit_t* unit) {
     SVECTOR unused; /* unreferenced; keeps the 0x30-byte target frame */
     battle_map_tile_t* tile;
     SVECTOR* quad;
-    u8 layer = unit->map_z;
+    u8 layer = unit->map_layer;
     u8 height;
     battle_map_tile_depth_t depth;
     u8 slope_type;

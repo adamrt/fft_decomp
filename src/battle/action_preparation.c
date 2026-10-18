@@ -2446,7 +2446,7 @@ s32 unit_set_pending_removal(s32 unit_id) {
  * A unit that is not a mount drops its old link first; a mount carries its rider
  * along. Returns -1 without moving anything when the destination tile is blocked
  * or untargetable, 0 otherwise. */
-s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing) {
+s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 layer, u8 facing) {
     unit_stats_t* unit;
     unit_stats_t* partner;
     s32 occupant;
@@ -2456,13 +2456,13 @@ s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing) {
     battle_map_tile_flags_t tile_flags;
 
     unit = &g_unit_stats[battle_id];
-    occupant = unit_find_at_tile(x, y, level, UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO);
+    occupant = unit_find_at_tile(x, y, layer, UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO);
     if (occupant >= 0 && occupant != battle_id) {
         mount_id = occupant;
         has_mount = 1;
     }
 
-    tile_flags = g_battle_map_tile_data[(level << 8) + y * g_battle_map_terrain_width + x].flags;
+    tile_flags = g_battle_map_tile_data[(layer << 8) + y * g_battle_map_terrain_width + x].flags;
     if (tile_flags.blocked) {
         return -1;
     }
@@ -2485,14 +2485,14 @@ s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing) {
 
     unit->position.y = y;
     unit->x = x;
-    unit->position.higher_elevation = level;
+    unit->position.higher_elevation = layer;
     unit->position.facing = facing;
 
     if (mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
         partner = &g_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         partner->position.y = y;
         partner->x = x;
-        partner->position.higher_elevation = level;
+        partner->position.higher_elevation = layer;
         partner->position.facing = facing;
     }
     return 0;

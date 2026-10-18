@@ -452,7 +452,7 @@ static void move_knockback_init(unit_t* unit) {
     *path_word = state;
 
     knockback_state = state & ~0x2000;
-    knockback_state |= (unit->movement.destination_z & 1) << 13;
+    knockback_state |= (unit->movement.destination_layer & 1) << 13;
     *path_word = knockback_state;
     direction = move_step_get_direction(unit);
 
@@ -480,7 +480,7 @@ static void move_knockback_init(unit_t* unit) {
 void move_knockback_start(const unit_t* src, unit_t* dst) {
     dst->movement.destination_x = src->strike.target_new_x;
     dst->movement.destination_y = src->strike.target_new_y;
-    dst->movement.destination_z = src->strike.target_new_map_level;
+    dst->movement.destination_layer = src->strike.target_new_map_level;
     move_knockback_init(dst);
 }
 
@@ -1877,7 +1877,7 @@ void move_step_update_all_units(void) {
 void camera_rotate_when_unit_tile_not_visible(const unit_t* unit) {
     s32 direction;
     u8 flags;
-    battle_map_tile_t* tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_z);
+    battle_map_tile_t* tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
 
     direction = (0 - g_camera_render_state.vy) & 0xFFF;
     if (direction < 0) {

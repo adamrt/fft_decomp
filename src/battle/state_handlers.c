@@ -45,14 +45,14 @@
 static void move_restore_previous_state(unit_t* unit) {
     unit->map_x = unit->previous_map_x;
     unit->map_y = unit->previous_map_y;
-    unit->map_z = unit->previous_map_z;
+    unit->map_layer = unit->previous_map_layer;
     unit->facing = unit->previous_facing;
     unit->mount_state = unit->previous_mount_state;
     unit->mount_partner_runtime_id = unit->previous_mount_partner_runtime_id;
     unit->standing_on_battle_id_plus_one = unit->previous_standing_on_battle_id_plus_one;
     unit_set_move_and_world_coords(unit);
     unit_set_tile_position(
-        unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, (unit->facing / UNIT_FACING_QUARTER_TURN));
+        unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer, (unit->facing / UNIT_FACING_QUARTER_TURN));
     animation_force_facing(unit->animation.sequence_id >> 1, unit->facing, unit);
 }
 
@@ -99,19 +99,19 @@ static void move_confirm(unit_t* unit, unit_t* moved) {
     unit_t* rider;
 
     if (moved->stats != 0) {
-        unit_set_tile_position(moved->stats->battle_id, moved->map_x, moved->map_y, moved->map_z,
+        unit_set_tile_position(moved->stats->battle_id, moved->map_x, moved->map_y, moved->map_layer,
             (moved->facing / UNIT_FACING_QUARTER_TURN));
         if (moved->mount_state == UNIT_MOUNT_STATE_MOUNT) {
             rider = unit_get_by_runtime_id(moved->mount_partner_runtime_id);
             if (rider != 0) {
                 rider->map_x = rider->movement.destination_x = moved->map_x;
                 rider->map_y = rider->movement.destination_y = moved->map_y;
-                rider->map_z = rider->movement.destination_z = moved->map_z;
+                rider->map_layer = rider->movement.destination_layer = moved->map_layer;
                 rider->real = moved->real;
                 rider->world_coords = moved->world_coords;
                 rider->world_coords.vy -= 10;
                 rider->real.vy -= 0xa000;
-                unit_set_tile_position(rider->stats->battle_id, moved->map_x, moved->map_y, moved->map_z,
+                unit_set_tile_position(rider->stats->battle_id, moved->map_x, moved->map_y, moved->map_layer,
                     (moved->facing / UNIT_FACING_QUARTER_TURN));
             }
         }
@@ -187,7 +187,7 @@ static void unit_set_tile_position_with_partner(unit_t* unit) {
     unit_t* mounted_unit;
 
     unit_set_tile_position(
-        unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, (unit->facing / UNIT_FACING_QUARTER_TURN));
+        unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer, (unit->facing / UNIT_FACING_QUARTER_TURN));
 
     if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
         mounted_unit = unit_get_by_runtime_id(unit->mount_partner_runtime_id);
@@ -196,7 +196,7 @@ static void unit_set_tile_position_with_partner(unit_t* unit) {
             mounted_unit->camera_facing_quadrant = unit->camera_facing_quadrant;
             mounted_unit->camera_facing_sixteenth = unit->camera_facing_sixteenth;
 
-            unit_set_tile_position(mounted_unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z,
+            unit_set_tile_position(mounted_unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
                 (unit->facing / UNIT_FACING_QUARTER_TURN));
         }
     }
@@ -339,7 +339,7 @@ void state_handle_post_move_events(void) {
     }
 
     if (g_move_post_events & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
-        if (unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z) != 0) {
+        if (unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_layer) != 0) {
             return;
         }
         g_move_post_events &= ~MOVE_POST_EVENT_CRYSTAL_OR_TREASURE;
@@ -440,7 +440,7 @@ void state_handle_targeting_range(void) {
                 cursor_move_to_selection(unit, target);
                 frame = unit->state_frame_counter++;
                 if (frame >= 0x1f) {
-                    battle_map_tile_get_pointer(target->map_x, target->map_y, target->map_z);
+                    battle_map_tile_get_pointer(target->map_x, target->map_y, target->map_layer);
                     target_select_tile();
                 }
             } else {

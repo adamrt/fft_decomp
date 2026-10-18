@@ -185,11 +185,11 @@ void move_step_start_teleport_animation(unit_t* unit) {
     if (unit->path.count == MOVE_PATH_TELEPORT) {
         unit->movement.destination_x = unit->path.data.teleport.x;
         unit->movement.destination_y = unit->path.data.teleport.y;
-        unit->movement.destination_z = unit->path.data.teleport.elevation;
+        unit->movement.destination_layer = unit->path.data.teleport.elevation;
     } else {
         unit->movement.destination_x = unit->map_x;
         unit->movement.destination_y = unit->map_y;
-        unit->movement.destination_z = unit->map_z;
+        unit->movement.destination_layer = unit->map_layer;
     }
 }
 
@@ -249,7 +249,7 @@ void move_step_start_float(unit_t* unit, const battle_map_tile_t* from, const ba
     animation_set_walk(unit);
     move_step_set_float_delta_center_to_edge(unit, step, from, edge_height);
     move_step_scale_velocity(unit, unit->walk_speed);
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Start a flying unit's next step (the FLY_TO_EDGE phases) with
@@ -307,7 +307,7 @@ void move_step_start_fly(
     }
     move_step_set_velocity_clamped(unit, &unit->path, step);
     move_step_scale_velocity(unit, unit->walk_speed);
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Start a walking unit's next step (the WALK_TO_EDGE phases) from the current
@@ -360,7 +360,7 @@ void move_step_start_walk(unit_t* unit, const battle_map_tile_t* from, const bat
     }
     move_step_set_delta_center_to_edge(unit, step, from, edge_height);
     move_step_scale_velocity(unit, unit->walk_speed);
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Start the unit's next step at climb speed (the CLIMB_TO_EDGE phases) with
@@ -416,7 +416,7 @@ void move_step_start_climb(unit_t* unit, const battle_map_tile_t* from, const ba
     }
     move_step_set_delta_center_to_edge(unit, step, from, edge_height);
     move_step_scale_velocity(unit, unit->step_speed);
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Start a unit's jump step toward the next path tile.
@@ -487,7 +487,7 @@ static void move_step_start_jump(
         unit->velocity.vz = 3 * ONE;
         break;
     }
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Start a unit's jump across one or more tiles onto the destination tile.
@@ -560,7 +560,7 @@ static void move_step_start_climb_jump(unit_t* unit, const battle_map_tile_t* fr
         unit->velocity.vx = 0;
         break;
     }
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Starts a unit's hop up to a tile at most seven half-steps higher (called from
@@ -639,7 +639,7 @@ static void move_step_start_climb_hop(unit_t* unit, const battle_map_tile_t* fro
     }
     animation_store_facing(animation, unit->facing, unit);
     unit->movement.alternate_short_hop ^= 1;
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Start a unit's climb jump from its current tile onto the higher tile `to`.
@@ -713,7 +713,7 @@ static void move_step_start_float_jump(unit_t* unit, const battle_map_tile_t* fr
         unit->velocity.vz = (BATTLE_MAP_TILE_SIZE * ONE / 2) / frames;
         break;
     }
-    unit->movement.destination_z = step->higher;
+    unit->movement.destination_layer = step->higher;
 }
 
 /* Advance a moving unit by one frame of its step: add the per-frame velocity to
@@ -752,21 +752,21 @@ void move_step_apply_velocity(unit_t* unit) {
     tile[0] = (unit->real.vx + unit->velocity.vx) / (BATTLE_MAP_TILE_SIZE * ONE);
     tile[1] = (unit->real.vz + unit->velocity.vz) / (BATTLE_MAP_TILE_SIZE * ONE);
     /* Entering the destination tile switches the unit to the destination's layer. */
-    layer = unit->map_z;
+    layer = unit->map_layer;
     if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
-        && unit->map_z != unit->movement.destination_z) {
-        layer = unit->map_z = unit->movement.destination_z;
+        && unit->map_layer != unit->movement.destination_layer) {
+        layer = unit->map_layer = unit->movement.destination_layer;
     }
 
-    /* Never runs: the statement above has already made map_z equal destination_z here. */
+    /* Never runs: the statement above has already made map_layer equal destination_layer here. */
     switch (unit->step_phase) {
     case MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_WEST:
         if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
-            && unit->map_z != unit->movement.destination_z) {
-            layer = unit->map_z = unit->movement.destination_z;
+            && unit->map_layer != unit->movement.destination_layer) {
+            layer = unit->map_layer = unit->movement.destination_layer;
             map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
             move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
             move_step_scale_velocity(unit, unit->walk_speed);
@@ -777,8 +777,8 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST:
         if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
-            && unit->map_z != unit->movement.destination_z) {
-            layer = unit->map_z = unit->movement.destination_z;
+            && unit->map_layer != unit->movement.destination_layer) {
+            layer = unit->map_layer = unit->movement.destination_layer;
             map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
             move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
             move_step_scale_velocity(unit, unit->step_speed);
@@ -1031,7 +1031,7 @@ static void move_step_play_landing_sfx_by_surface_type(unit_t* unit) {
     if (unit->movement.suppress_sfx_and_landing_effects)
         return;
     tile = battle_map_tile_get_pointer(
-        unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+        unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
     if (tile == 0)
         return;
     surface = tile->surface.type;
@@ -1075,7 +1075,7 @@ static void move_step_set_landing_secondary_by_surface_type(unit_t* unit) {
     if (unit->movement.suppress_sfx_and_landing_effects)
         return;
     tile = battle_map_tile_get_pointer(
-        unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+        unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
     if (tile == 0)
         return;
     surface = tile->surface.type;
@@ -1137,7 +1137,7 @@ void move_step_get_current_and_destination_tiles(
 
     x = unit->map_x;
     y = unit->map_y;
-    layer = unit->map_z;
+    layer = unit->map_layer;
     /* The scalar snapshot preserves the direction switch and layer extraction registers. */
     movement = *(u8*)&unit->current_path_step;
     *out_current = battle_map_tile_get_pointer(x, y, layer);
@@ -1198,11 +1198,11 @@ void move_settle_on_tile(unit_t* unit) {
     if (stats != 0) {
         /* facing is read signed (lh) here. */
         unit_set_tile_position(
-            stats->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing / UNIT_FACING_QUARTER_TURN);
+            stats->battle_id, unit->map_x, unit->map_y, unit->map_layer, unit->facing / UNIT_FACING_QUARTER_TURN);
         if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
             partner = unit_get_by_runtime_id(unit->runtime_id);
             if (unit->stats != 0) {
-                unit_set_tile_position(partner->stats->battle_id, unit->map_x, unit->map_y, unit->map_z,
+                unit_set_tile_position(partner->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
                     unit->facing / UNIT_FACING_QUARTER_TURN);
             }
         }
@@ -1233,7 +1233,7 @@ void unit_mount_onto_pending(unit_t* unit) {
         return;
     }
 
-    other = unit_find_other_chocobo_at_map_coords(unit->map_x, unit->map_y, unit->map_z);
+    other = unit_find_other_chocobo_at_map_coords(unit->map_x, unit->map_y, unit->map_layer);
     if (other != 0) {
         if (other != unit) {
             unit_mount_seat_rider(unit, other);
@@ -1303,7 +1303,7 @@ static void move_step_displace_unit_along_direction(unit_t* unit, s32 x, s32 y, 
  * step before last was onto a unit (the step's mount bit). The case order and
  * per-case center temporaries reproduce the target's cross-jumped tails. */
 static void move_step_displace_overlapping_unit(unit_t* unit, s32 direction) {
-    unit_t* other = unit_find_overlapping_at_tile(unit, unit->map_x, unit->map_y, unit->map_z);
+    unit_t* other = unit_find_overlapping_at_tile(unit, unit->map_x, unit->map_y, unit->map_layer);
     s32 dist;
     s32 x;
     s32 y;
@@ -1367,7 +1367,7 @@ void move_step_displace_unit_at_destination_tile(unit_t* unit, s32 direction) {
         return;
     }
     other = unit_find_overlapping_at_tile(
-        unit, unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+        unit, unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
     if (unit->movement_path_offset == 0) {
         return;
     }
@@ -1540,7 +1540,7 @@ void move_step_update_jump_flight(unit_t* unit) {
                 break;
             }
             tile = battle_map_tile_get_pointer(
-                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
             if (tile->depth_half_height.depth == 0) {
                 return;
             }
@@ -1594,10 +1594,10 @@ void move_step_update_jump_ascent(unit_t* unit) {
     }
     if (unit->velocity.vy >= 0) {
         unit->step_phase = g_move_step_jump_descent_phases[direction];
-        unit->map_z = unit->movement.destination_z;
+        unit->map_layer = unit->movement.destination_layer;
         if (g_move_step_value.mount) {
             occupant = unit_find_runtime_at_tile(
-                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
             g_move_step_tile_occupant = occupant;
             if (occupant != 0) {
                 unit->standing_on_battle_id_plus_one = occupant->stats->battle_id + 1;
@@ -1783,7 +1783,7 @@ void move_step_update_walk_to_edge(unit_t* unit) {
 
         if (g_move_step_value.mount) {
             g_move_step_tile_occupant = unit_find_runtime_at_tile(
-                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_layer);
             unit->standing_on_battle_id_plus_one = g_move_step_tile_occupant->stats->battle_id + 1;
             unit_calculate_height_data(&g_move_step_tile_occupant_height, g_move_step_tile_occupant->stats->battle_id);
             if (g_move_step_tile_occupant_height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {

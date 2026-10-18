@@ -83,16 +83,16 @@ s32 unit_place_in_new_location(u32 runtime_id, battle_map_tile_coordinates_t* ti
         unit->screen_offset.vx = 0;
         unit->map_x = unit->movement.destination_x = tile->x;
         unit->map_y = unit->movement.destination_y = tile->y;
-        unit->map_z = unit->movement.destination_z = tile->layer;
+        unit->map_layer = unit->movement.destination_layer = tile->layer;
         unit->facing = facing << 10;
         unit->world_coords.vx = tile->x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
         unit->world_coords.vz = tile->y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        unit->world_coords.vy = battle_map_calculate_slope_height(&unit->world_coords, unit->map_z);
+        unit->world_coords.vy = battle_map_calculate_slope_height(&unit->world_coords, unit->map_layer);
         unit->real.vx = unit->world_coords.vx * ONE;
         unit->real.vz = unit->world_coords.vz * ONE;
         unit->real.vy = unit->world_coords.vy * ONE;
         if (unit->stats != 0) {
-            unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_z, unit->facing);
+            unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer, unit->facing);
         }
         return 1;
     }
