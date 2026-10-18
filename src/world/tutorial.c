@@ -21,6 +21,12 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* tutorial playback state */
+extern tutorial_state_t g_tutorial_state;
+extern s16 g_tutorial_wait_time_remaining;
+extern s16 g_tutorial_highlight_brightness;
+extern s16 g_tutorial_buttons;
+
 /* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by
  * their parameters: 0x10 message id (2) and y (1), 0x11 message id (2), 0x13 x, y, size, width mod and height mod
  * (1 each), 0x15 time (1). */

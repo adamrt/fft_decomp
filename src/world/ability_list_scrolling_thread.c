@@ -23,6 +23,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* scrolling-list state */
+extern menu_list_page_t g_formation_ability_list_pages[][2];
+extern s32 g_screen_scrolling_list_depth;
+
 /*
  * Scrolling three-column ability list thread (WORLD's body, reached from at_list_ability_preview_thread).
  *

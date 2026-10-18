@@ -10,6 +10,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern u16 g_screen_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
+
 /*
  * Resolves a roster slot's sprite sheet to its 16-bit portrait code and,
  * unless the code's suppress bits are set, textures `poly` with that portrait.

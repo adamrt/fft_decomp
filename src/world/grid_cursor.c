@@ -17,6 +17,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* banner menu state */
+extern menu_entry_t g_formation_banner_menu;
+extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else countdown */
+
 extern help_navigation_record_t g_screen_grid_default_cells[];
 extern help_navigation_record_t g_screen_grid_shop_cells[];
 extern help_navigation_record_t g_screen_grid_shop_scrolled_cells[];

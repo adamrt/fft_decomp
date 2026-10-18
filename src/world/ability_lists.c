@@ -31,6 +31,26 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* ability-list, dismissal and ordering state */
+extern menu_text_binding_t g_formation_selected_unit_text_binding;
+extern menu_entry_t g_formation_dismiss_prompt;
+extern menu_entry_t g_formation_dismiss_confirm_menu[4];
+extern menu_entry_t g_formation_dismiss_confirm_menu_scrolled[4];
+extern menu_entry_t* g_formation_dismiss_menu_data;
+extern u8 g_formation_dismiss_step;
+extern menu_entry_t g_formation_order_menu;
+extern u8 g_formation_order_saved_browse_enabled;
+extern s16 g_formation_order_entries[];
+extern s16 g_formation_ability_category; /* menu_ability_category_e */
+extern s16 g_formation_ability_learn_job_name_list[];
+extern menu_entry_t g_formation_ability_learn_confirm_menu[2];
+
+/* Nonzero while the learn-confirmation menu thread (thread 6) is running. */
+extern u8 g_formation_ability_learn_confirm_prompt_state;
+extern s8 g_formation_ability_view_step; /* menu_job_list_step_e */
+extern u8 g_formation_ability_view_confirm_prompt_state;
+extern s16 g_formation_ability_view_job_names[];
+
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];
 

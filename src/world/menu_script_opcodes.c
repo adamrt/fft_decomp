@@ -17,6 +17,24 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* display-script and scrolling state */
+extern u16 g_screen_clut;
+extern RECT g_screen_window_rect;
+extern s16 g_screen_window_right_x;
+extern u16 g_screen_texture_page;
+extern s16 g_screen_row_height;
+extern s32 g_screen_scroll_row_offset;
+extern textured_quad_source_t g_screen_vertical_cursor_quad;
+extern s16 g_screen_list_row_text_ids[];
+extern s16 g_screen_list_visible_rows;
+extern s16 g_screen_list_row_record_count;
+extern u16 g_screen_list_image_width;
+extern u8 g_screen_list_glyph_width;
+extern u8 g_screen_list_text_columns;
+extern s8 g_screen_list_scroll_direction;
+extern u16 g_screen_list_cursor_anim;
+extern u16 g_screen_scroll_repeat_timer;
+
 /* Dispatch slots before this program's end opcode; zero entries stay unhandled. */
 menu_opcode_handler_t g_menu_opcode_handlers[SCREEN_SCRIPT_END] = {
     menu_opcode_00_draw_window_frame,         /* 0x00 */

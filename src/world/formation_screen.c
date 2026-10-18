@@ -30,6 +30,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* screen dispatch state */
+extern void (*g_formation_menu_handlers[])(void);
+extern s8 g_formation_main_menu_initialized;
+extern menu_entry_t g_formation_egg_triangle_menu;
+
+/* Chained after the egg triangle menu; formation_grid_menu only resets it. */
+extern menu_entry_t g_formation_egg_submenu;
+extern s16 g_formation_selected_unit_index_latch;
+extern u8 g_formation_unit_slide_pending;
+extern volatile u8 g_formation_unit_slide_frame;
+
 /* Read the menu input (tutorial or pad) and filter it: nothing while the
  * item category change, the status banner or the lockout timer is busy, and
  * no Select or Start (mask 0xF0FF) while a help text is requested or

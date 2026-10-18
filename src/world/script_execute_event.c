@@ -44,6 +44,15 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* map-command and music state */
+extern script_command_args_t g_script_map_command_80_args;
+extern script_command_args_t g_script_map_command_83_args;
+extern script_music_switch_t g_script_music_switch;
+extern s16 g_screen_sound_current_music_track_index;
+extern s16 g_screen_sound_music_switch_request;
+extern s16 g_screen_sound_music_unload_slot_request;
+extern s32 g_screen_sound_music_volume_transition_request;
+
 /* WORLD scenario interpreter.
  *
  * One cooperative thread runs this loop: fetch the opcode and its first four

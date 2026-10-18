@@ -14,6 +14,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* One libgpu texture window per DR_MODE packet (the seven RECTs after
+ * g_screen_thin_panel_texture_windows). The static table holds each
+ * window's w/h; screen_window_frame_thread fills in the runtime x/y.
+ * Indexing the array reproduces the target's symbol-plus-byte-offset addressing. */
+extern RECT g_screen_panel_texture_windows[7];
+
 /* Thread that draws a text screen's window frame: build the frame pieces from the menu glyph sheet
  * into a small texture once, then draw the frame around the rectangle in parameter 1 each frame
  * until parameter 3 asks it to stop. Parameter 2, or locked menu input, dims the frame.

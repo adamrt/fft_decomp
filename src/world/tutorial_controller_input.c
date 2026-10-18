@@ -12,6 +12,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* tutorial input state */
+extern u16 g_tutorial_latched_button;
+extern u8 g_tutorial_activation_timer;
+extern u8 g_screen_input_triangle_latched;
+extern u8 g_screen_text_task_phase;
+
 static u32 g_tutorial_repeat_counters[16] = { 0 };
 static u16 g_tutorial_previous_input = 0;
 

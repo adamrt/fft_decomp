@@ -11,6 +11,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u16 g_screen_scroll_hold_counter;
+
 /* Return the sprite modulation color menus draw with (set by screen_set_palette_mode). */
 rgb24_t* screen_get_draw_color(void) {
     return &g_screen_sprite_color;

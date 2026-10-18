@@ -7,6 +7,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern const u16 g_screen_zoom_percentages[12]; /* twelve crop percentages, indexed by step */
+
 /*
  * The menu-screen library's copy of option_build_scaled_draw_area_packets; nothing calls it.
  * Build a double-buffered draw-area pair whose rectangle is `source` moved

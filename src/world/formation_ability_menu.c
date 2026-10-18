@@ -29,6 +29,31 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* ability-menu state */
+extern menu_entry_t g_formation_ability_menu;
+extern u8 g_formation_ability_menu_unit_index;
+extern u8 g_formation_ability_menu_slots_changed;
+extern u8 g_formation_ability_menu_saved_browse_enabled;
+extern u8 g_formation_ability_submenu_running;
+extern s8 g_formation_ability_learn_menu_step; /* menu_job_list_step_e */
+extern u8 g_formation_ability_set_unit_index;
+extern s8 g_formation_ability_set_slot; /* -1 before the first cursor update, then ability slot 1..4 */
+extern u8 g_formation_ability_set_cursor;
+extern u16 g_formation_ability_set_cursor_anim;
+extern point16_t g_formation_ability_set_cursor_point;
+extern s8 g_formation_ability_set_list_open;          /* ability list open */
+extern s8 g_formation_ability_set_entry_count;        /* ability list entry count */
+extern s8 g_formation_ability_set_list_close_pending; /* close the ability list this frame */
+extern s8 g_formation_ability_set_show_stat_preview;  /* show the stat preview window */
+extern s8 g_formation_ability_set_unread_flag;        /* cleared when Set Ability opens; never read */
+extern s8 g_formation_ability_remove_unit_index;
+extern s8 g_formation_ability_remove_cursor;
+extern u16 g_formation_ability_remove_cursor_anim;
+extern point16_t g_formation_ability_remove_cursor_point;
+extern s8 g_formation_ability_remove_all_prompt_active;
+extern volatile u16 g_formation_ability_remove_all_blink_counter;
+extern point16_t g_formation_ability_remove_all_cursor_point;
+
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_set_window_script[67];
 

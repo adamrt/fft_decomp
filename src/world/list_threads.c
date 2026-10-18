@@ -19,6 +19,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* panel drawing data */
+extern unit_panel_buffer_t g_formation_stat_preview_panel_frames[2];
+extern RECT g_formation_ability_panel_origin;
+
 static RECT g_formation_equipment_panel_draw_area = { 132, 126, 141, 108 };
 static RECT g_formation_ability_panel_draw_area = { 247, 126, 133, 108 };
 

@@ -58,23 +58,10 @@ s32 screen_is_busy(void);
 void screen_reset_game(void);
 
 /* controller input */
-extern menu_input_state_t g_screen_input_frame_state;
-extern u32 g_screen_input_frame_current;
-extern u32 g_screen_input_frame_new;
-extern u32 g_screen_input_frame_previous;
-extern u32 g_screen_input_frame_initial_repeat_counter;
-extern u32 g_screen_input_frame_repeat_counter;
-extern u32 g_screen_input_frame_secondary_repeat_counter;
 extern u16 g_screen_input_latched_button;
 extern u32 g_screen_input_primary_repeat;
 extern s32 g_screen_input_primary_repeat_latched;
 extern s32 g_screen_input_secondary_repeat_latched;
-extern u8 g_screen_input_triangle_latched;
-
-/* Countdown maintained by screen_input_update_lockout. Volatile:
- * that routine reloads it after the zero test and again before the running
- * check instead of reusing the first load. */
-extern volatile u8 g_screen_input_lockout_timer;
 
 s32 screen_input_filter(void);
 s32 screen_input_get_lockout(void);
@@ -113,8 +100,6 @@ void screen_add_draw_area(RECT* rect, s32 otag_index);
 
 /* draw areas and blits */
 extern RECT g_screen_temporary_draw_area;
-extern u16 g_screen_draw_area_scale_percent[];
-extern glyph_blit_t g_screen_image_blit_source;
 
 /* A full-screen texture window (x=0, y=0, w=0x100, h=0x100), copied verbatim into a menu record's DR_MODE by
  * screen_init_scaled_draw_area_packets; the formation view reads the same bytes as a zero screen point.
@@ -153,25 +138,13 @@ enum {
     SCREEN_TPAGE7_GRID_OCCUPIED = 0xff
 };
 
-extern u16 g_screen_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
-extern u16 g_screen_help_portrait_clut_by_sheet_id[];
-
 /* palettes and colors */
-extern u16 g_screen_clut;
 extern u16 g_screen_window_tpage;
 extern u16 g_screen_window_clut;
-extern u16 g_screen_window_clut_normal;
-extern u16 g_screen_window_clut_alt;
 extern u16 g_screen_palette_clut_normal;
-extern u16 g_screen_palette_clut_alt;
 extern u16 g_screen_alternate_number_clut;
 extern u16 g_screen_alternate_number_clut_normal;
-extern u16 g_screen_alternate_number_clut_alt;
 extern u16 g_screen_disabled_number_clut;
-extern u16 g_screen_disabled_number_clut_normal;
-extern u16 g_screen_disabled_number_clut_alt;
-extern u16 g_screen_active_clut_front;
-extern u16 g_screen_active_clut_back;
 extern u8 g_screen_use_alternate_palette;
 extern s32 g_screen_color_red;
 extern s32 g_screen_color_green;
@@ -184,14 +157,7 @@ rgb24_t* screen_get_draw_color(void);
 void screen_set_brightness(s32 red, s32 green, s32 blue);
 
 /* window frames */
-extern const u16 g_screen_zoom_percentages[12]; /* twelve crop percentages, indexed by step */
 extern RECT g_screen_thin_panel_texture_windows[7];
-
-/* One libgpu texture window per DR_MODE packet (the seven RECTs after
- * g_screen_thin_panel_texture_windows). The static table holds each
- * window's w/h; screen_window_frame_thread fills in the runtime x/y.
- * Indexing the array reproduces the target's symbol-plus-byte-offset addressing. */
-extern RECT g_screen_panel_texture_windows[7];
 
 s32 screen_build_window_frame_image(s32 width, s32 height, u16* destination);
 void screen_build_window_image_row(const u16* source, u16* dest, s32 count, s32 offset);
@@ -223,29 +189,11 @@ typedef char LINE_F2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
 
 enum { SCREEN_SCRIPT_END = 0x1c };
 
-extern RECT g_screen_window_rect;
-extern s16 g_screen_window_right_x;
-extern u16 g_screen_texture_page;
-extern s16 g_screen_row_height;
-extern s32 g_screen_scroll_row_offset;
-extern textured_quad_source_t g_screen_vertical_cursor_quad;
-
 /* scrollable lists */
 extern const s16* g_screen_list_entry_ids;
 extern u8* g_screen_list_text_table;
-extern s16 g_screen_list_row_text_ids[];
-extern s16 g_screen_list_visible_rows;
-extern s16 g_screen_list_row_record_count;
 extern s8 g_screen_list_layout_pending;
-extern u16 g_screen_list_image_width;
-extern u8 g_screen_list_glyph_width;
-extern u8 g_screen_list_text_columns;
-extern s8 g_screen_list_scroll_direction;
-extern u16 g_screen_list_cursor_anim;
 extern s16 g_screen_use_scroll_position;
-extern u16 g_screen_scroll_hold_counter;
-extern u16 g_screen_scroll_repeat_timer;
-extern s32 g_screen_scrolling_list_depth;
 extern s16 g_screen_text_redraw_request;
 
 void screen_init_list(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
@@ -301,10 +249,6 @@ typedef struct screen_number_range {
     void (*on_change)(void); /* 0x08 */
 } screen_number_range_t;
 
-extern s16* g_screen_entry_text_id_tables[]; /* 16-bit tables selected by entry select_text_table */
-extern s32 g_screen_number_entry_digit_steps[];
-extern u32* g_screen_list_controller_input;
-
 void screen_number_entry_thread(void);
 void screen_labeled_number_entry_thread(void);
 void screen_help_text_thread(void);
@@ -355,17 +299,10 @@ void screen_text_kern(u8* text, s16* name, RECT* rect, s32 palette);
 s32 screen_text_measure_width(const u8* entry);
 
 /* message box */
-extern u8 g_screen_text_task_phase;
-extern SVECTOR g_screen_text_partner_coords;
-
 s32 screen_text_is_printing(s32 thread_id);
 void screen_text_resume_printing(s32 thread_id);
 
 /* music and sound effects */
-extern s16 g_screen_sound_current_music_track_index;
-extern s16 g_screen_sound_music_switch_request;
-extern s16 g_screen_sound_music_unload_slot_request;
-extern s32 g_screen_sound_music_volume_transition_request;
 extern u8 g_screen_sound_release_held_loop;
 
 void screen_sound_dispatch_effect(void);

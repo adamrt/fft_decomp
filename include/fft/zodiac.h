@@ -31,8 +31,6 @@ typedef char zodiac_date_limit_size_must_be_3[(sizeof(zodiac_date_limit_t) == 3)
 
 enum { ZODIAC_DATE_LIMIT_COUNT = 13 };
 
-extern const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT];
-
 s32 zodiac_calculate_sign(u16 birthday);
 
 /* zodiac pictures */

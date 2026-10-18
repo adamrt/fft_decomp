@@ -64,14 +64,8 @@ typedef struct tutorial_state {
 } tutorial_state_t;
 typedef char tutorial_state_size_must_be_7688[sizeof(tutorial_state_t) == 7688 ? 1 : -1];
 
-extern tutorial_state_t g_tutorial_state;
 extern u8 g_tutorial_id;
 extern u16 g_tutorial_pressed_button;
-extern s16 g_tutorial_wait_time_remaining;
-extern s16 g_tutorial_highlight_brightness;
-extern s16 g_tutorial_buttons;
-extern u16 g_tutorial_latched_button;
-extern u8 g_tutorial_activation_timer;
 
 void tutorial_start(s32 index);
 void tutorial_load_files(s32 index, tutorial_state_t* record);

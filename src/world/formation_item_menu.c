@@ -25,6 +25,30 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* item-menu state */
+extern menu_entry_t g_formation_item_icon_menu;
+extern u8 g_formation_item_menu_unit_index;
+extern u8 g_formation_item_menu_saved_browse_enabled;
+extern u8 g_formation_item_submenu_exit_pending;
+extern u16 g_formation_item_equip_item_cursor_anim;
+extern point16_t g_formation_item_equip_item_cursor_point;
+extern menu_entry_t g_formation_item_best_fit_confirm_menu;
+extern s8 g_formation_item_remove_unit_index;
+extern u16 g_formation_item_remove_cursor_anim;
+extern point16_t g_formation_item_remove_cursor_point;
+extern s16 g_formation_item_remove_saved_primary_input;
+extern s16 g_formation_item_remove_saved_secondary_input;
+extern u16 g_formation_item_remove_saved_newly_pressed;
+extern point16_t g_formation_item_remove_all_cursor_point;
+extern volatile u16 g_formation_item_remove_all_blink_counter;
+
+/* The formation item menu's copy of the EQUIP screen's item-list state. */
+extern s8 g_formation_item_list_open;
+extern s8 g_formation_item_list_refresh;
+extern s8 g_formation_item_preview_active;
+extern s16 g_formation_item_previewed_cursor;
+extern s8 g_formation_item_slot;
+
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_item_menu_script[198];
 

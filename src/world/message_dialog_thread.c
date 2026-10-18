@@ -23,6 +23,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* dialog drawing data */
+extern u16 g_screen_help_portrait_clut_by_sheet_id[];
+extern SVECTOR g_screen_text_partner_coords;
+
 #define WINDOW_AT(index) ((menu_window_buffer_t*)((index) * sizeof(menu_window_buffer_t) + (s32)win))
 
 #define NEXT() text = text_advance_cursor_with_separate_backreference_state(&repeat, text, &saved)

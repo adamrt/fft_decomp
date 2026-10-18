@@ -19,6 +19,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern clut_t g_formation_menu_palettes;
+
 static u32 g_formation_status_label_image[352] = { 0x111, 0, 0x111, 0x11111110, 0, 0x10000000, 0x111110, 0x11100000, 0,
     0x10000000, 17, 0x111111, 0x11100000, 0x10000000, 17, 0, 0x11100011, 1, 0x111, 0, 0x11100, 0x111110, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0x121, 0, 0x121, 0x12222210, 0, 0, 0x152251, 0x12100000, 17, 0x10000000, 18, 0x122221, 0x12100000,

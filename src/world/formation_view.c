@@ -16,6 +16,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern POLY_FT4 g_formation_view_quads[2][30];
+
 static zodiac_draw_context_t g_formation_view
     = { 0, 128, 1, 8192, 8192, { 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 1, 128, 0, 0, 1, 0, 1 }, { 0, 0 } } };
 /* Portrait index per resolved sprite sheet. */

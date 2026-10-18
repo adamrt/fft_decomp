@@ -29,6 +29,17 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* sprite sources, zodiac dates and breeding tables */
+extern const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT];
+extern texture_source_t g_formation_sprite_sources[];
+
+/* Fixed character identities select sprite sources here; jobs below 0x35 use the same mapping. */
+extern u8 g_formation_sprite_index_by_identity[];
+extern const breeding_entry_t g_breeding_table[BREEDING_ENTRY_COUNT];
+
+/* Provisional: month lengths indexed by 1-based month, read by breeding_update. */
+extern const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT];
+
 /*
  * Change an ability slot and optionally replace incompatible equipment.
  *

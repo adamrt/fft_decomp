@@ -160,21 +160,13 @@ typedef enum formation_menu {
 } formation_menu_e;
 
 extern s32 g_formation_current_menu; /* formation_menu_e */
-extern void (*g_formation_menu_handlers[])(void);
 extern u8 g_formation_screen_running;
-extern s8 g_formation_main_menu_initialized;
 extern u32* g_formation_ordering_table;
-extern POLY_FT4 g_formation_view_quads[2][30];
 extern u8 g_formation_menu_text_table[];
 extern u8 g_formation_menu_text_buffer[];
-extern clut_t g_formation_menu_palettes;
 extern menu_entry_t g_formation_triangle_menu;
 extern u8 g_formation_triangle_menu_open;
 extern u8 g_formation_triangle_menu_running;
-extern menu_entry_t g_formation_egg_triangle_menu;
-
-/* Chained after the egg triangle menu; formation_grid_menu only resets it. */
-extern menu_entry_t g_formation_egg_submenu;
 
 /* Set by WORLD's formation screen each frame and cleared by the menu input update; WORLD's dialog thread
  * treats Help boxes differently while it is set. */
@@ -197,7 +189,6 @@ extern s8 g_formation_scroll_position;
 extern s8 g_formation_scroll_velocity;
 extern u8 g_formation_unit_cycle_mode;
 extern u8 g_formation_unit_browse_enabled;
-extern s16 g_formation_selected_unit_index_latch;
 extern rgb24_t g_formation_dimmed_sprite_color;
 
 /* get_mode and get_shade take the unit slot index; NULL selects the default. */
@@ -216,12 +207,6 @@ extern u8 g_formation_monster_sprite_table[20]; /* indexed by sprite code - 0x3f
 extern RECT g_formation_sheet_rect;
 extern RECT g_formation_sheet_source_rect;
 extern u8 g_formation_sprite_tall_cell[];
-extern texture_source_t g_formation_sprite_sources[];
-
-/* Fixed character identities select sprite sources here; jobs below 0x35 use the same mapping. */
-extern u8 g_formation_sprite_index_by_identity[];
-extern u8 g_formation_unit_slide_pending;
-extern volatile u8 g_formation_unit_slide_frame;
 
 void formation_prepare_sprites(void);
 void formation_build_sprites(void);
@@ -238,8 +223,6 @@ extern u8 g_formation_unit_banner_enabled;
 extern u8 g_formation_saved_banner_enabled;
 extern s8 g_formation_banner_slide_step;
 extern u8 g_formation_banner_active;
-extern menu_entry_t g_formation_banner_menu;
-extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else countdown */
 
 /* Set while the selected unit is in the upper rows of the grid: the unit banner
  * then sits at the bottom of the screen and the stat bar at the top (BUNIT's
@@ -254,10 +237,8 @@ s32 formation_banner_countdown(s32 message_id, s32 frames);
 /* The status panels of the selected unit and of the unit it is compared with, and the stat preview panel. */
 extern menu_unit_status_identity_t g_formation_selected_unit_identity;
 extern struct unit_panel_record g_formation_selected_unit_stat_detail;
-extern menu_text_binding_t g_formation_selected_unit_text_binding;
 extern unit_panel_summary_t g_formation_comparison_unit_stat_summary;
 extern menu_unit_status_identity_t g_formation_comparison_unit_identity;
-extern unit_panel_buffer_t g_formation_stat_preview_panel_frames[2];
 extern unit_panel_thread_t g_formation_stat_preview_panel_thread_params;
 extern s32 g_formation_preview_stats_window_active;
 extern unit_panel_thread_t g_formation_change_banner_thread_params;
@@ -276,11 +257,6 @@ void formation_toggle_ability_panel(s32 enable);
 void formation_open_equipment_panel(s32 enabled);
 
 /* dismissal */
-extern menu_entry_t g_formation_dismiss_prompt;
-extern menu_entry_t g_formation_dismiss_confirm_menu[4];
-extern menu_entry_t g_formation_dismiss_confirm_menu_scrolled[4];
-extern menu_entry_t* g_formation_dismiss_menu_data;
-extern u8 g_formation_dismiss_step;
 extern s16 g_formation_dismiss_anim_timer;
 extern s8 g_formation_dismiss_prompt_running;
 
@@ -304,10 +280,7 @@ typedef enum formation_sort_key {
 
 enum { FORMATION_SORT_KEY_COUNT = 7 };
 
-extern menu_entry_t g_formation_order_menu;
-extern u8 g_formation_order_saved_browse_enabled;
 extern s8 g_formation_order_open;
-extern s16 g_formation_order_entries[];
 
 void formation_order_menu(void);
 
@@ -332,11 +305,6 @@ typedef struct breeding_entry {
     u8 offspring_job_by_rarity[BREEDING_RARITY_COUNT]; /* 0x01; common through rare */
 } breeding_entry_t;
 typedef char breeding_entry_size_must_be_4[(sizeof(breeding_entry_t) == 4) ? 1 : -1];
-
-extern const breeding_entry_t g_breeding_table[BREEDING_ENTRY_COUNT];
-
-/* Provisional: month lengths indexed by 1-based month, read by breeding_update. */
-extern const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT];
 
 void breeding_update(s32 unused);
 

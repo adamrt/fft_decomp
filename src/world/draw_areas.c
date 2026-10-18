@@ -9,6 +9,16 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* palette selections */
+extern u16 g_screen_window_clut_normal;
+extern u16 g_screen_window_clut_alt;
+extern u16 g_screen_palette_clut_alt;
+extern u16 g_screen_alternate_number_clut_alt;
+extern u16 g_screen_disabled_number_clut_normal;
+extern u16 g_screen_disabled_number_clut_alt;
+extern u16 g_screen_active_clut_front;
+extern u16 g_screen_active_clut_back;
+
 /*
  * Select the normal or alternate menu-render palette.
  *

@@ -326,13 +326,4 @@ typedef struct script_music_switch {
     s16 fade;
 } script_music_switch_t;
 
-extern script_command_args_t g_script_map_command_80_args;
-extern script_command_args_t g_script_map_command_83_args;
-extern script_music_switch_t g_script_music_switch;
-extern u32 g_script_current_input;
-extern u32 g_script_previous_input;
-extern u32 g_script_initial_repeat_counter;
-extern u32 g_script_repeat_counter;
-extern u32 g_script_secondary_repeat_counter;
-
 #endif
