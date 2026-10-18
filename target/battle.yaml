@@ -23,7 +23,7 @@ units:
   - {name: camera, source: src/battle/camera.c, data: [{addr: 0x800a1c5c, size: 16, hash: 374708fff7719dd5}, {addr: 0x800a1c6c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a1c74, size: 16, hash: 374708fff7719dd5}]}
   - {name: command_menus, source: src/lib/event/command_menus.c, data: [{addr: 0x801692c0, size: 1020, hash: 7d824f0a060b15de}, {addr: 0x801696bc, size: 38, hash: 5cf20e3c3f45bdbf}]}
   - {name: command_selection, source: src/lib/menu/command_selection.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}, {addr: 0x8016923c, size: 40, hash: 1e7bcfe6e02d777b}]}
-  - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
+  - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c, data: [{addr: 0x8018f8a0, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c, rodata: [{addr: 0x8012d8a0, size: 3, hash: 0b782fc3030dbdf3}]}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x801678ac, size: 112, hash: 7913c92a7308b758}]}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, data: [{addr: 0x8016dae4, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8016daf8, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}

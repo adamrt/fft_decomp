@@ -30,8 +30,8 @@ extern crystal_pickup_result_t g_crystal_pickup_result;
 /* Move-Find scratch is private to this unit. The first-byte flags alias retains
  * the target's independent address load; accessing every byte through the record
  * instead merges that load with the returned record address. */
-extern move_found_item_t g_move_find_rare_item_result;
-extern move_find_result_data_t g_move_find_tile_result;
+static move_found_item_t g_move_find_rare_item_result = { 0 };
+static move_find_result_data_t g_move_find_tile_result = { 0 };
 extern u8 g_move_find_result_flags;
 
 static s32 move_find_test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save);
