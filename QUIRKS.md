@@ -762,8 +762,8 @@ written that way.
 - `ai_calculate_clockticks_until_death_counter_expires` is defined
   with three parameters and both callers pass one; the other two are scratch
   it assigns before reading.
-- `battle_map_calculate_slope_height` masks its level to a byte; two callers
-  pass the 16-bit `action_command.target_elevation` unmasked.
+- `battle_map_calculate_slope_height` masks its terrain layer to a byte; two callers
+  pass the 16-bit `action_command.target_position.vy` unmasked.
 - WLDCORE passes its 8-byte records by value:
   `RECT` to the three render-record builders and
   `point32_t` to `window_build_yes_no_panel`.
