@@ -27,10 +27,11 @@ type unitSpecYAML struct {
 }
 
 type unitInstanceYAML struct {
-	Module       string   `yaml:"module"`
-	Functions    []string `yaml:"functions"`
-	Profile      string   `yaml:"profile"`
-	OriginalUnit string   `yaml:"original_unit"` // exact member list; inherit this unit's target-owned data and profile
+	Module       string              `yaml:"module"`
+	Functions    []string            `yaml:"functions"`
+	Profile      string              `yaml:"profile"`
+	OriginalUnit string              `yaml:"original_unit"` // exact member list; inherit this unit's target-owned data and profile
+	Data         []unitTrialDataYAML `yaml:"data"`          // additional ranges, checked against the original extracted image
 }
 
 // unitSpec names a merged source and the original entries, in file order,
@@ -682,6 +683,11 @@ func (p project) unitCheckCommand(args []string) error {
 		}
 		if selected != nil && !selected[unit.module.ID] {
 			continue
+		}
+		if len(instanceSpec.Data) != 0 {
+			if err := p.addUnitTrialData(unit, instanceSpec.Data); err != nil {
+				return err
+			}
 		}
 		instances = append(instances, unit)
 	}
