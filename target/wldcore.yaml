@@ -13,6 +13,7 @@ units:
   - {name: bar, source: src/wldcore/bar.c}
   - {name: brave_story, source: src/wldcore/brave_story.c}
   - {name: brave_story_collections, source: src/wldcore/brave_story_collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
+  - {name: calendar_advance_days, source: src/wldcore/calendar_advance_days.c, data: [{addr: 0x80096a48, size: 4, hash: b687ec89faf1bf8a}]}
   - {name: event_transition, source: src/wldcore/event_transition.c}
   - {name: file_wait, source: src/lib/file/file_wait.c}
   - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
@@ -27,7 +28,7 @@ units:
   - {name: sound_novel, source: src/wldcore/sound_novel.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
   - {name: startup, source: src/wldcore/startup.c}
   - {name: tutorial_topics, source: src/wldcore/tutorial_topics.c}
-  - {name: window_records, source: src/wldcore/window_records.c}
+  - {name: window_records, source: src/wldcore/window_records.c, data: [{addr: 0x80092b2c, size: 8, hash: fc559ae5b7c6c78d}]}
   - {name: window_render, source: src/wldcore/window_render.c, data: [{addr: 0x8009ee30, size: 32, hash: 0ba27e297a0422ae}]}
 
 functions:
@@ -463,7 +464,7 @@ functions:
   - {addr: 0x80092434, size: 484, name: brave_story_handle_fact_list_input, hash: 3f569f76520bc273, unit: map_opcodes}
   - {addr: 0x80092618, size: 660, name: brave_story_push_fact_level, hash: 611be9a64cdbcc3a, unit: map_opcodes}
   - {addr: 0x800928ac, size: 600, name: brave_story_wait_fact_then_pop, hash: f5c8d454f1752f2f, unit: map_opcodes}
-  - {addr: 0x8009de1c, size: 720, name: calendar_advance_days, hash: 3ddb67c3d1ca1de9}
+  - {addr: 0x8009de1c, size: 720, name: calendar_advance_days, hash: 3ddb67c3d1ca1de9, unit: calendar_advance_days}
 
 data:
   - {addr: 0x8008c0ac, name: unit_facing_get_sixteenth_by_runtime_id}
@@ -472,6 +473,8 @@ data:
   - {addr: 0x80092b2c, name: g_window_anim_sequences}
   - {addr: 0x80092b30, name: g_window_anim_cels}
   - {addr: 0x80092b34, name: g_location_picture_frame_tim}
+  - {addr: 0x80092b38, name: g_window_anim_sequence_table}
+  - {addr: 0x8009324c, name: g_window_anim_cel_table}
   - {addr: 0x80094df4, name: g_world_map_dot_sources}
   - {addr: 0x80094df8, name: g_location_records}
   - {addr: 0x80095000, name: g_world_map_routes}

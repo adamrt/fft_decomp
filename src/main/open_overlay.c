@@ -16,6 +16,9 @@
 
 extern u8 g_memcard_bios_events_opened;
 
+/* MAIN keeps these BIOS event handles for the card pollers in OPEN, WORLD and CARD. */
+s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT] = { 0 };
+
 /* Reset the Unit List, Formation and five item sort orders to their default -1-terminated
  * sequences, empty the weapon, helmet, armor, accessory and item page orders, and zero the
  * poached item counts. */

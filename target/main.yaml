@@ -14,8 +14,9 @@ units:
   - {name: file_requests, source: src/main/file_requests.c}
   - {name: game_loop, source: src/main/game_loop.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}]}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
+  - {name: loading_draw_message, source: src/main/loading_draw_message.c, data: [{addr: 0x80032a68, size: 16, hash: 374708fff7719dd5}]}
   - {name: new_game_caption, source: src/main/new_game_caption.c}
-  - {name: open_overlay, source: src/main/open_overlay.c}
+  - {name: open_overlay, source: src/main/open_overlay.c, data: [{addr: 0x800596c0, size: 32, hash: 66687aadf862bd77}]}
   - {name: overlay_loading, source: src/main/overlay_loading.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
   - {name: party, source: src/main/party.c, data: [{addr: 0x80066200, size: 4, hash: df3f619804a92fdb}, {addr: 0x80066204, size: 48, hash: 17b0761f87b081d5}]}
   - {name: sound_requests, source: src/main/sound_requests.c, data: [{addr: 0x80047080, size: 800, hash: 9ac66e2befd1621a}]}
@@ -60,7 +61,7 @@ functions:
   - {addr: 0x80011dd8, size: 64, name: file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: file_requests}
   - {addr: 0x80011e18, size: 32, name: file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: file_requests}
   - {addr: 0x80011e38, size: 488, name: file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: loading_draw_message, hash: dd193b96065424a5}
+  - {addr: 0x80012020, size: 212, name: loading_draw_message, hash: dd193b96065424a5, unit: loading_draw_message}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, unit: suzuki_smd_lifecycle}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, unit: suzuki_smd_lifecycle}
   - {addr: 0x800121cc, size: 8, name: suzuki_smd_noop_1, hash: 6d64edf91449c1b1, unit: suzuki_smd_lifecycle}

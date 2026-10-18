@@ -6,6 +6,10 @@
 #include "fft/script_variable.h"
 #include "psx/types.h"
 
+extern calendar_date_t g_brave_story_birthday_table[];
+
+calendar_date_t* g_brave_story_birthdays = g_brave_story_birthday_table;
+
 /*
  * Advance the calendar by a script-requested number of days.
  *

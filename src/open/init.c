@@ -17,6 +17,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Draw/display environments rebuilt for title and ending screen modes. */
+gfx_screen_environment_t g_gfx_screen_environments[2] = { 0 };
+
 static void system_init_runtime_state(void);
 
 /* Fades the CD audio (movie streams and XA) in or out over duration ticks.

@@ -9,6 +9,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Asset directories stay in the original image; these pointer cells select
+ * this program's animation catalog. */
+extern display_object_sequence_header_t* g_window_anim_sequence_table[];
+extern display_object_cel_header_t* g_window_anim_cel_table[];
+
+static display_object_sequence_header_t** g_window_anim_sequences = g_window_anim_sequence_table;
+static display_object_cel_header_t** g_window_anim_cels = g_window_anim_cel_table;
+
 static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void window_draw_gs_image_record(window_gs_image_record_t* object, GsOT* ot);
 

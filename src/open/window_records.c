@@ -8,6 +8,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Asset directories stay in the original image; these pointer cells select
+ * this program's animation catalog. */
+extern display_object_sequence_header_t* g_window_anim_sequence_table[];
+extern display_object_cel_header_t* g_window_anim_cel_table[];
+
+static display_object_sequence_header_t** g_window_anim_sequences = g_window_anim_sequence_table;
+static display_object_cel_header_t** g_window_anim_cels = g_window_anim_cel_table;
+
 extern window_sprite_prim_t g_window_sprite_primitive_pool[2][32];
 extern s32 g_window_primitive_count;
 

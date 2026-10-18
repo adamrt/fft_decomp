@@ -14,12 +14,12 @@ units:
   - {name: card_checks, source: src/open/card_checks.c}
   - {name: ending, source: src/open/ending.c, data: [{addr: 0x80074034, size: 64, hash: afec11e3b0e0d793}]}
   - {name: file_wait, source: src/lib/file/file_wait.c}
-  - {name: init, source: src/open/init.c}
+  - {name: init, source: src/open/init.c, data: [{addr: 0x800851c0, size: 224, hash: 6eb69e26de2a26ed}]}
   - {name: memcard, source: src/lib/memcard.c}
   - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: title_controllers, source: src/open/title_controllers.c, rodata: [{addr: 0x80073f58, size: 32, hash: f203b21866f47f5b}], data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
   - {name: title_sequence, source: src/open/title_sequence.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}, {addr: 0x80073fd4, size: 96, hash: 9244268b09d6a718}]}
-  - {name: window_records, source: src/open/window_records.c}
+  - {name: window_records, source: src/open/window_records.c, data: [{addr: 0x800707f8, size: 8, hash: 16ca3f8a47677229}]}
   - {name: window_render, source: src/open/window_render.c}
 
 libraries:
@@ -186,6 +186,8 @@ data:
   - {addr: 0x800670e0, name: g_psyq_press_timeout_format}
   - {addr: 0x800707f8, name: g_window_anim_sequences}
   - {addr: 0x800707fc, name: g_window_anim_cels}
+  - {addr: 0x80070800, name: g_window_anim_sequence_table}
+  - {addr: 0x8007096c, name: g_window_anim_cel_table}
   - {addr: 0x80070cb4, name: g_prologue_entries}
   - {addr: 0x80070d84, name: g_ending_script_font_metrics}
   - {addr: 0x80070d88, name: g_ending_script_initial_data_base}

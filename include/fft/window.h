@@ -52,10 +52,6 @@ typedef struct display_object_part {
 } display_object_part_t;
 typedef char display_object_part_size_must_be_8[sizeof(display_object_part_t) == 8 ? 1 : -1];
 
-/* OPEN and WLDCORE each define these tables with their own sequence catalog. */
-extern display_object_sequence_header_t** g_window_anim_sequences;
-extern display_object_cel_header_t** g_window_anim_cels;
-
 /* display objects */
 /* 32-bit flags that lead every display object: the WLDCORE window and render
  * records and the OPEN render records. The two kind bits select the draw

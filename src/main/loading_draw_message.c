@@ -6,7 +6,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u32 g_loading_otags[2][2];
+static u32 g_loading_otags[2][2] = { 0 };
 
 /* Called by file_poll_load on every poll of an unfinished read. Unless the
  * counter is -1 (message off), the 64th call unmasks the display and from then on
