@@ -53,14 +53,14 @@ u32* gfx_get_battle_otag(void) {
 /* Make the other of BATTLE's two render buffers the current one and clear its
  * 0x180-entry ordering table. */
 void gfx_swap_and_clear_battle_otag(void) {
-    render_buffer_t* stats = g_render_buffers;
+    render_buffer_t* buffer = g_render_buffers;
     u32* otag;
 
-    if (g_render_current_buffer == stats) {
-        stats++;
+    if (g_render_current_buffer == buffer) {
+        buffer++;
     }
-    otag = stats->otag;
-    g_render_current_buffer = stats;
+    otag = buffer->otag;
+    g_render_current_buffer = buffer;
     ClearOTagR(otag, 0x180);
 }
 

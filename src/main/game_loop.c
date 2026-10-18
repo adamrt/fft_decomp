@@ -1,5 +1,6 @@
-/* Game reset, BATTLE loading and the resident return stub, the main game loop, main, the Now Loading message, the
- * display setter, the Squaresoft and SCE boot logos and the display reset. */
+/* The resident loop alternates the title sequence, world map and battles;
+ * soft reset restores its saved stack and starts it again. Boot-logo fades,
+ * display setup and the Now Loading graphics support those transitions. */
 
 #include "fft/file.h"
 #include "fft/gfx.h"
@@ -46,8 +47,8 @@ void system_reset_game(void) {
     system_restore_game_loop_stack_pointer(&g_system_game_loop_stack_pointer);
 }
 
-/* Call system_zero_padding, which only returns (see overlay_exec_battle). */
-static void overlay_call_legacy_stub(void) {
+/* Run MAIN's no-op region and return to the BATTLE loader. */
+static void overlay_call_zero_padding(void) {
     system_zero_padding();
 }
 
@@ -55,10 +56,10 @@ static void overlay_call_legacy_stub(void) {
  * the high overlay address, and call system_zero_padding. That is not BATTLE
  * code but MAIN's 4 KB of zero words ending in `jr ra`; BATTLE runs when the
  * caller then calls battle_entrypoint. */
-static void overlay_exec_battle(void) {
+static void overlay_load_battle(void) {
     file_load_checked_to_address(DISC_SECTOR_BATTLE_BIN,
         g_heap_high_overlay_load_address - g_heap_low_overlay_load_address, g_heap_low_overlay_load_address);
-    overlay_call_legacy_stub();
+    overlay_call_zero_padding();
 }
 
 /* The top-level loop of the game: opening, then world map and battles until a
@@ -104,7 +105,7 @@ void system_run_game_loop(void) {
                 break;
             }
 
-            overlay_exec_battle();
+            overlay_load_battle();
             battle_entrypoint();
             sound_stop_all_sfx();
             g_system_go_straight_to_battle = 0;
@@ -121,7 +122,7 @@ void system_run_game_loop(void) {
             script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_MALAK_REVIVED);
             overlay_exec_open_ending();
-            overlay_exec_battle();
+            overlay_load_battle();
             zodiac_load_frame();
             battle_entrypoint();
             system_stop_display_and_audio();

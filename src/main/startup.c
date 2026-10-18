@@ -1,5 +1,6 @@
-/* CD-ROM and CPU RAM reset, the zodiac frame, startup and game state reset, ENTD files and encounters, new game
- * inventory and party, and SVECTOR setting. */
+/* Power-on and fresh-session setup. The first boot starts the hardware and
+ * shows both logos; later session resets reload the shared resources under
+ * the Squaresoft logo. New-game routines seed the inventory and party. */
 
 #include "fft/encounter.h"
 #include "fft/file.h"
