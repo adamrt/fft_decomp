@@ -50,8 +50,10 @@ void portrait_build_transition(const RECT* texture_rect, s32* transition, const 
 /* ATTACK, REQUIRE, WORLD and the EVENT library each build their own body. */
 void portrait_build_poly(s32 portrait_id, POLY_FT4* poly);
 
-/* BATTLE's body takes a battle id and textures the quad from the unit's spritesheet page; WORLD's takes a
- * portrait code into the WLDFACE.BIN sheets. */
-void portrait_build_unit_poly(POLY_FT4* poly, s32 id);
+/* Texture a battle unit's portrait from its loaded sprite sheet. */
+void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_id);
+
+/* Texture a WLDFACE.BIN portrait: low byte is the portrait index, bits 10-11 the monster palette. */
+void portrait_build_wldface_poly(POLY_FT4* poly, s32 code);
 
 #endif

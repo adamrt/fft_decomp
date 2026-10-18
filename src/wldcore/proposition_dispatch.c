@@ -551,7 +551,7 @@ static void proposition_show_unit_portrait(proposition_send_unit_level_t* unused
 
     code = portrait_get_party_unit_code(party_index);
     cell = code;
-    portrait_build_unit_poly(&poly, code);
+    portrait_build_wldface_poly(&poly, code);
     g_window_gs_image_records[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
     g_window_gs_image_records[index].clut.y = cell % 40 / 4 + 0x1F0;
     g_window_gs_image_records[index].tpage = poly.tpage;

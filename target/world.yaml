@@ -244,7 +244,7 @@ functions:
   - {addr: 0x800ea1a4, size: 184, name: unit_view_preview_target_stats, hash: da40410ec79137a7, unit: unit_status_lists}
   - {addr: 0x800ea25c, size: 1844, name: unit_view_summary_thread, hash: d5f5a0ffa8af680f, unit: unit_status_lists}
   - {addr: 0x800ea990, size: 192, name: gfx_set_item_icon_sprite, hash: a86b16621ce2b2a6, unit: unit_status_lists}
-  - {addr: 0x800eaa50, size: 380, name: portrait_build_unit_poly, hash: 4d55644e1fbf1fa9, unit: unit_status_lists}
+  - {addr: 0x800eaa50, size: 380, name: portrait_build_wldface_poly, hash: 4d55644e1fbf1fa9, unit: unit_status_lists}
   - {addr: 0x800eabcc, size: 880, name: status_screen_numbers_thread, hash: 6dd4808fb23cfe5d, unit: unit_status_lists}
   - {addr: 0x800eaf3c, size: 2796, name: status_screen_thread, hash: 7b16dd310ca9b69b, unit: unit_status_lists}
   - {addr: 0x800eba28, size: 8, name: menu_noop_3, hash: 6d64edf91449c1b1, unit: unit_status_lists}

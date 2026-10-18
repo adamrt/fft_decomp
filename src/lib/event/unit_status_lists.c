@@ -1095,7 +1095,12 @@ static void unit_view_stats_panel_thread(
             running = 0;
         }
         page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode] + (frame & 1)];
+#ifdef FFT_BATTLE
         portrait_build_unit_poly(&page->portrait, unit_id);
+#else
+        /* WORLD retains this unused battle-panel path, passing the unit index as a portrait code. */
+        portrait_build_wldface_poly(&page->portrait, unit_id);
+#endif
         if (running != 0) {
             setRGB0(&page->portrait, 0x40, 0x50, 0x70);
         } else {
@@ -1624,7 +1629,7 @@ void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_id) {
  *
  * `code` is reused for the cell number that selects the CLUT.
  */
-void portrait_build_unit_poly(POLY_FT4* poly, s32 code) {
+void portrait_build_wldface_poly(POLY_FT4* poly, s32 code) {
     s32 index = code & 0xFF;
     s32 palette = (code & 0xC00) >> 10;
     s32 page = index / 40;

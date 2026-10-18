@@ -300,7 +300,7 @@ void menu_draw_active_window_frames(void) {
             window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
             window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
 #else
-            portrait_build_unit_poly(&window->quads[1], window->portrait_code);
+            portrait_build_wldface_poly(&window->quads[1], window->portrait_code);
 #endif
         }
 #ifdef FFT_BATTLE

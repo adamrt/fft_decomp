@@ -1,4 +1,4 @@
-/* Texturing a quad with a roster unit's portrait, its CLUT found from the unit's sprite sheet. */
+/* Resolve a roster unit's sprite sheet to a WLDFACE portrait and texture its quad. */
 
 #include "fft/job.h"
 #include "fft/menu.h"
@@ -10,7 +10,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u16 g_screen_portrait_clut_by_sheet_id[]; /* 16-bit CLUT value per sprite-sheet id */
+extern u16 g_screen_portrait_clut_by_sheet_id[]; /* packed portrait code per sprite-sheet id */
 
 /*
  * Resolves a roster slot's sprite sheet to its 16-bit portrait code and,
@@ -64,6 +64,6 @@ void portrait_build_poly(s32 roster_slot, POLY_FT4* poly) {
         sprite |= job->job_portrait_palette << 10;
     }
     if ((sprite & MENU_PORTRAIT_CLUT_SUPPRESS_MASK) == 0) {
-        portrait_build_unit_poly(poly, sprite);
+        portrait_build_wldface_poly(poly, sprite);
     }
 }
