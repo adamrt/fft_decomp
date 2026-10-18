@@ -520,7 +520,7 @@ void state_enter_illegal_range(void) {
  * range tiles shown and the cursor unit as preview target. An action without
  * targeting selects its tile at once. With no valid panels the idle action menu
  * reopens. */
-s32 target_begin_tile_selection(void) {
+target_panels_e target_begin_tile_selection(void) {
     unit_t* unit = unit_get_source();
 
     unit->state_frame_counter = 0;

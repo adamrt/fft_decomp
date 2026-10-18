@@ -649,7 +649,7 @@ typedef enum unit_motion_flags {
 } unit_motion_flags_e;
 
 /* action state (BATTLE) */
-/* Tile coordinates stored in teleport paths and relocation reservations. */
+/* Three-byte tile coordinates for paths, relocation and action targets. */
 typedef struct move_tile_coordinates {
     u8 x;
     u8 y;

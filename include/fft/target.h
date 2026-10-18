@@ -62,7 +62,7 @@ typedef enum target_line_direction {
     TARGET_LINE_NORTH = 6  /* +y */
 } target_line_direction_e;
 
-s32 target_range_set_for_action(const action_command_t* action);
+target_panels_e target_range_set_for_action(const action_command_t* action);
 s32 target_area_set_for_action(const action_command_t* source);
 s32 target_resolve_rotated_offset_layer(unit_stats_t*, s32, s32, s32, s32*, s32*, s32*);
 
@@ -74,7 +74,7 @@ s32 target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index);
 s32 target_validate_for_weapon(const action_command_t* source);
 
 /* tile selection */
-s32 target_begin_tile_selection(void);
+target_panels_e target_begin_tile_selection(void);
 void target_select_tile(void);
 void target_set_tile_mark_colors(s32 mode, s32 unused);
 

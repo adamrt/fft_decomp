@@ -12,6 +12,7 @@
 #include "fft/move.h"
 #include "fft/result.h"
 #include "fft/sprite.h"
+#include "fft/target.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "psx/libgte.h"
@@ -126,18 +127,18 @@ struct unit {
     u32 status_flags_5_6;                 /* 0x144; unit_status_flags_5_6_e */
     /* 0x148..0x157: statuses to add/remove;
      * unit_update_float_and_jump_height tests the pending removal of Jump. */
-    u32 statuses_to_add_1_4;            /* 0x148 */
-    u32 statuses_to_add_5_6;            /* 0x14c */
-    u32 statuses_to_remove_1_4;         /* 0x150 */
-    u32 statuses_to_remove_5_6;         /* 0x154 */
-    unit_command_state_t command_state; /* 0x158..0x16f */
-    s32 sp2_ability_id;                 /* 0x170: ability whose SP2 file sprite_open_sp2_file loads */
-    s32 ability_preview_phase;          /* 0x174: target_panels_e */
+    u32 statuses_to_add_1_4;               /* 0x148 */
+    u32 statuses_to_add_5_6;               /* 0x14c */
+    u32 statuses_to_remove_1_4;            /* 0x150 */
+    u32 statuses_to_remove_5_6;            /* 0x154 */
+    unit_command_state_t command_state;    /* 0x158..0x16f */
+    s32 sp2_ability_id;                    /* 0x170: ability whose SP2 file sprite_open_sp2_file loads */
+    target_panels_e ability_preview_phase; /* 0x174 */
     /* 0x178; target_area_set_for_action result stored by
      * target_select_tile: 0/1 preview, 2 stop, -1 back to the menu. */
     s32 target_select_result;
-    s32 attack_phase_state;    /* 0x17c: action_preparation_e */
-    s32 pending_attack_result; /* 0x180: attack result code; -1 signals death */
+    action_preparation_e attack_phase_state; /* 0x17c */
+    s32 pending_attack_result;               /* 0x180: attack result code; -1 signals death */
     /* Death-by-dismount destination (unit runtime record 0x184/0x186/
      * 0x188); unit_dismount_dead_rider copies them to
      * map_x/map_layer/map_y.  action_apply_unit_result passes &dismount. */

@@ -953,7 +953,7 @@ static void target_range_mark_cardinal_lines(s32 x, s32 y) {
  * weapon's range; NONE when no tile is marked; TILE_ONLY when the action cannot
  * follow a unit (always for Item, Throw, Attack, Charge and Jump); otherwise
  * UNIT_OR_TILE. */
-s32 target_range_set_for_action(const action_command_t* source) {
+target_panels_e target_range_set_for_action(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     ability_secondary_data_t* ability;
