@@ -608,7 +608,8 @@ void save_build_image(s32 slot) {
     bcopy(g_proposition_last_attempt_date_bits, g_save_buffer_pointer->proposition_last_attempt_date_bits, 0x6c);
     bcopy(g_proposition_states, g_save_buffer_pointer->proposition_states,
         sizeof(g_save_buffer_pointer->proposition_states));
-    bcopy(g_sound_novel_saved_readings, g_save_buffer_pointer->sound_novel_saved_records, 0x118);
+    bcopy(g_sound_novel_saved_readings, g_save_buffer_pointer->sound_novel_saved_records,
+        sizeof(g_save_buffer_pointer->sound_novel_saved_records));
     bcopy(g_sound_novel_read_section_bits, g_save_buffer_pointer->sound_novel_read_section_bits,
         sizeof(g_sound_novel_read_section_bits));
     bcopy(g_sound_novel_saved_flags, g_save_buffer_pointer->sound_novel_saved_flags,

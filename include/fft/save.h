@@ -11,6 +11,8 @@
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
+#include "fft/proposition.h"
+#include "fft/sound_novel.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
 #include "psx/kernel.h"
@@ -74,13 +76,14 @@ typedef struct save_image {
     u8 proposition_last_attempt_date_bits[0x6c]; /* 0x16b; packed 9-bit dates */
     u8 proposition_states[0x60];                 /* 0x1d7; low 6 bits are a remaining-day counter */
     u8 _unused_0237[1];                          /* 0x237; serialized and parity-covered */
-    u8 sound_novel_saved_records[5][0x38];       /* 0x238; sound_novel_reading_t: one sound-novel reading state each */
-    u32 sound_novel_read_section_bits[40];       /* 0x350 */
-    u32 sound_novel_saved_flags[2];              /* 0x3f0 */
-    u8 brave_story_character_ages[0x40];         /* 0x3f8 */
-    u8 proposition_count;                        /* 0x438 */
-    u8 active_propositions[8][9];                /* 0x439 */
-    u8 _unused_0481[3];                          /* 0x481; serialized and parity-covered */
+    /* 0x238; complete reading states, including their serialized pointer words. */
+    sound_novel_reading_t sound_novel_saved_records[5];
+    u32 sound_novel_read_section_bits[40];           /* 0x350 */
+    u32 sound_novel_saved_flags[2];                  /* 0x3f0 */
+    u8 brave_story_character_ages[0x40];             /* 0x3f8 */
+    u8 proposition_count;                            /* 0x438 */
+    proposition_progress_t active_propositions[8];   /* 0x439 */
+    u8 _unused_0481[3];                              /* 0x481; serialized and parity-covered */
     u8 party_records[PARTY_ROSTER_SLOT_COUNT][0xe0]; /* 0x484; party_unit_t records truncated to 0xe0 bytes */
     u8 item_quantities[ITEM_ID_COUNT];               /* 0x1604; g_item_quantities */
     u8 poached_item_quantities[ITEM_ID_COUNT];       /* 0x1704; g_item_poached_quantities */
