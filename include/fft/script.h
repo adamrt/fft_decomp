@@ -270,7 +270,7 @@ extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothi
 
 void script_print_debug_message(void);
 
-/* unreferenced stubs */
+/* stubs */
 void script_noop_1(void);
 void script_noop_2(void);
 void script_noop_3(void);
@@ -281,6 +281,8 @@ void script_noop_7(void);
 void script_noop_8(void);
 void script_noop_9(void);
 void script_noop_10(void);
+
+/* MAIN's overlay_call_battle_return_zero wrapper calls BATTLE's copy. */
 s32 script_return_zero_1(void);
 
 /* event requests */
