@@ -2226,6 +2226,7 @@ defines: {VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 256, VARIANT_MENU_CHOICE_VRAM_X: 44
 
 units:
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
+  - {name: menu_window_frame_thread, source: src/lib/menu/menu_window_frame_thread.c, data: [{addr: 0x801c34c8, size: 56, hash: 5ecfc8aa956f1209}]}
   - {name: option_choice_thread, source: src/lib/menu/option_choice_thread.c, data: [{addr: 0x801c3994, size: 56, hash: 363145519a4b87be}, {addr: 0x801c39cc, size: 56, hash: 968d38035e40a07d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
 
@@ -2237,7 +2238,7 @@ functions:
   - {addr: 0x801c00e8, size: 24, name: text_set_blit_destination, hash: 957437a4742bb43c, source: src/lib/menu/text_set_blit_destination.c}
   - {addr: 0x801c0100, size: 464, name: menu_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996, unit: scaled_draw_area}
   - {addr: 0x801c02d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 21b5509e73189129, unit: scaled_draw_area}
-  - {addr: 0x801c0304, size: 1424, name: menu_window_frame_thread, hash: 445eed2f2625ac87, source: src/lib/menu/menu_window_frame_thread.c}
+  - {addr: 0x801c0304, size: 1424, name: menu_window_frame_thread, hash: 445eed2f2625ac87, unit: menu_window_frame_thread}
   - {addr: 0x801c0894, size: 1436, name: menu_thin_window_frame_thread, hash: 43c0e695459c989f, source: src/lib/menu/menu_thin_window_frame_thread.c}
   - {addr: 0x801c0e30, size: 40, name: thread_wait_forever, hash: 19480d7e83b49e1f, source: src/lib/thread/thread_wait_forever.c}
   - {addr: 0x801c0e58, size: 40, name: thread_stop_after_yield, hash: fbcd24ded43d67df, unit: at_list_threads}

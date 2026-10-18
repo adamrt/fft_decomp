@@ -60,6 +60,7 @@ units:
   - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x8018aa68, size: 32, hash: 66687aadf862bd77}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x801cd794, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_script_opcodes, source: src/world/menu_script_opcodes.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018dfb8, size: 112, hash: 6d55d7cf7238de1d}, {addr: 0x8018e028, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e02c, size: 8, hash: 311ffc6bfd5bdbb3}, {addr: 0x8018e034, size: 9, hash: b84f7d451d1a8f71}, {addr: 0x8018e040, size: 7, hash: 566b5911617a0e07}, {addr: 0x8018e048, size: 8, hash: 870550df4dc49692}, {addr: 0x8018e050, size: 20, hash: d7c4eba7f363ab22}, {addr: 0x8018e064, size: 12, hash: b7578635ff44fd32}, {addr: 0x8018e070, size: 12, hash: b935ba9af4787c03}]}
+  - {name: menu_window_frame_thread, source: src/lib/menu/menu_window_frame_thread.c, data: [{addr: 0x80156cd8, size: 56, hash: 5ecfc8aa956f1209}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018af08, size: 71, hash: 67f2dae03395c2d5}]}
   - {name: message_threads, source: src/lib/menu/message_threads.c}
@@ -541,7 +542,7 @@ functions:
   - {addr: 0x80101524, size: 24, name: text_set_blit_destination, hash: f57d9a174ce12b8e, source: src/lib/menu/text_set_blit_destination.c}
   - {addr: 0x8010153c, size: 464, name: option_build_scaled_draw_area_packets, hash: c493e8c86806a8b3}
   - {addr: 0x8010170c, size: 52, name: option_init_scaled_draw_area_packets, hash: babbe0634130c090, source: src/lib/menu/menu_init_scaled_draw_area_packets.c, source_symbol: menu_init_scaled_draw_area_packets}
-  - {addr: 0x80101740, size: 1424, name: menu_window_frame_thread, hash: 2f0fa75a8ad2ccd3, source: src/lib/menu/menu_window_frame_thread.c}
+  - {addr: 0x80101740, size: 1424, name: menu_window_frame_thread, hash: 2f0fa75a8ad2ccd3, unit: menu_window_frame_thread}
   - {addr: 0x80101cd0, size: 1436, name: menu_thin_window_frame_thread, hash: 96f16acf0efe9d12, source: src/lib/menu/menu_thin_window_frame_thread.c}
   - {addr: 0x8010226c, size: 40, name: screen_thread_yield_forever, hash: ea714444aa8272b8}
   - {addr: 0x80102294, size: 40, name: thread_stop_after_yield, hash: f772d01efefb807c, unit: at_list_threads}

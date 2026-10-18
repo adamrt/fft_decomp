@@ -17,7 +17,8 @@
 extern u8 g_menu_window_frame_image[];
 
 /* Texture windows of the frame pieces this thread uploads. */
-extern RECT g_menu_panel_texture_windows[7];
+static RECT g_menu_panel_texture_windows[7] = { { 0, 0, 16, 16 }, { 0, 0, 16, 16 }, { 0, 0, 8, 16 }, { 0, 0, 16, 16 },
+    { 0, 0, 16, 16 }, { 0, 0, 256, 256 }, { 0, 0, 256, 256 } };
 
 /* Thread body of a window frame drawn with nine sprites until a stop request; parameter 1 is
  * the window rectangle (urect16_t). The border pieces are copied from the menu glyph sheet into
@@ -26,7 +27,7 @@ extern RECT g_menu_panel_texture_windows[7];
  * area and dims while parameter 2 is set or menu input is locked.
  *
  * One libgpu texture window per DR_MODE packet: the static table already holds each window's
- * w/h (16x16, 8x16, 16x8 and two full 256x256 windows); this function only fills in the runtime
+ * w/h (16x16, 8x16 and two full 256x256 windows); this function only fills in the runtime
  * x/y. Indexing the array is also what reproduces the target's symbol-plus-byte-offset
  * addressing. */
 void menu_window_frame_thread(void) {
