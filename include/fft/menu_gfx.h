@@ -89,6 +89,9 @@ typedef enum menu_texture_page {
     MENU_TEXTURE_PAGE_ITEM_ICONS = 4        /* VRAM (896, 256): ITEM.BIN; the code passes y = 288 */
 } menu_texture_page_e;
 
+/* VRAM origin shared by the event status panels and menu-entry icon strips in BATTLE and WORLD. */
+extern point16_t g_menu_texture_origin;
+
 /* Texture page and CLUT of the menu script's textured quads, set by its CLUT and texture-page commands and by
  * icon row callbacks. */
 extern u16 g_menu_gfx_texture_page;
