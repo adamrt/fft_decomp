@@ -219,6 +219,14 @@ s32 text_resolve_format_string_id(s32 format_code, s32 value);
 void text_build_unit_name_list(void);
 
 /* measuring */
+/* Width and line count returned by text measurement. Width is in pixels for
+ * text_measure_pixels and character columns for text_measure. */
+typedef struct text_dimensions {
+    s16 width;
+    s16 rows;
+} text_dimensions_t;
+typedef char text_dimensions_size_must_be_4[sizeof(text_dimensions_t) == 4 ? 1 : -1];
+
 /* Pixel width of each line from the last text_measure_pixels call. */
 extern s32 g_text_line_widths[];
 

@@ -65,7 +65,7 @@ static s32 proposition_step_message(proposition_report_level_t* state, s32 messa
 void proposition_push_dispatch_confirm_level(void) {
     RECT bounds;
     point32_t point;
-    s16 size[2];
+    text_dimensions_t size;
     s32 unused[8];
     point32_t* position;
     point32_t* base;
@@ -108,18 +108,19 @@ void proposition_push_dispatch_confirm_level(void) {
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.row = index;
     location = &g_proposition_selected_row.name_text;
-    text_measure_pixels(&size[0], &size[1], text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
+    text_measure_pixels(
+        &size.width, &size.rows, text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     bounds.y = 0x60;
     bounds.w = 0xF4;
     bounds.x = 0;
-    row = size[1] + 2;
+    row = size.rows + 2;
     bounds.h = (g_proposition_send_unit_count - -row) * 0x10 + 0x10;
     g_text_substitution_values[1] = g_proposition_dispatch_days;
     g_text_substitution_values[0] = g_proposition_dispatch_days;
     g_text_substitution_values[2] = g_world_map_marker_state.marker.location_id + TEXT_ID_LOCATION_NAME_BASE;
     window_build_render_record_image(index, bounds, 0, &g_window_image_buffer[0x200]);
     point.x = 8;
-    point.y = size[1] * 0x10 + 8;
+    point.y = size.rows * 0x10 + 8;
     window_display_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = 8;
@@ -131,7 +132,7 @@ void proposition_push_dispatch_confirm_level(void) {
     for (i = 0; i < g_proposition_send_unit_count; i++) {
         point.x = 0x3C;
         line = i + 2;
-        point.y = (size[1] + line) * 0x10 + 8;
+        point.y = (size.rows + line) * 0x10 + 8;
         window_display_text_entry(
             index, g_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, &g_window_image_buffer[0x200]);
     }

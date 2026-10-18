@@ -383,7 +383,7 @@ void screen_labeled_number_entry_thread(void) {
     menu_icon_record_t record;
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
-    s16 label_size[2];
+    text_dimensions_t label_size;
     screen_number_range_t* range;
     u8* buffer;
     s16 original;
@@ -452,10 +452,10 @@ void screen_labeled_number_entry_thread(void) {
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
-    text_measure_pixels(&label_size[0], &label_size[1], text_find_entry(param->text_id));
+    text_measure_pixels(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
     menu_set_text_origin(8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
-    menu_set_text_origin((u16)label_size[0] + 8, 9);
+    menu_set_text_origin((u16)label_size.width + 8, 9);
     menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
     screen_draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
@@ -526,10 +526,10 @@ void screen_labeled_number_entry_thread(void) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_window_text_pen.stride = param->inner_width;
-            text_measure(&label_size[0], &label_size[1], text_find_entry(param->text_id));
+            text_measure(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
             menu_set_text_origin(8, 9);
             menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
-            menu_set_text_origin((u16)label_size[0] * 6 + 8, 9);
+            menu_set_text_origin((u16)label_size.width * 6 + 8, 9);
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
             screen_draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, buffer);

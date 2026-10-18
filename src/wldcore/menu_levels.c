@@ -1212,7 +1212,7 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
  * priority over `text` in global allocation (s1/s2 as in the target). The
  * combined-away address pseudo of that store keeps a reload stack slot, part
  * of the target's 40-byte locals area. `box` is an aggregate so its 32-bit values stay
- * in memory across text_window_open; `dims` is an array so
+ * in memory across text_window_open; `dims` is an aggregate so
  * it is laid out in declaration order at 32(sp). `unused_point` and `unused`
  * are sized from the target frame only; their original types are unknown. */
 void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
@@ -1224,7 +1224,7 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     s32 index;
     point32_t box;
     point32_t unused_point;
-    s16 dims[2];
+    text_dimensions_t dims;
     s32 unused[2];
     u8* entry;
 
@@ -1243,9 +1243,9 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     records[index].frame_index = 0;
 
     entry = text_find_entry(text);
-    text_measure_pixels(&dims[0], &dims[1], entry);
-    if (dims[1] > 3) {
-        dims[1] = 3;
+    text_measure_pixels(&dims.width, &dims.rows, entry);
+    if (dims.rows > 3) {
+        dims.rows = 3;
     }
 
     text_id = &g_text_window.text_id;
@@ -1254,12 +1254,12 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     *text_id = text;
     window->image_position.x = 0;
     g_text_window.image_position.y = 0xC0;
-    box.x = (dims[0] + 24) & 0xFFFC;
-    box.y = (dims[1] << 4) + 16;
+    box.x = (dims.width + 24) & 0xFFFC;
+    box.y = (dims.rows << 4) + 16;
     g_text_window.base.x = -(box.x / 2);
     g_text_window.base.y = -(box.y >> 1);
-    g_text_window.text_width = dims[0];
-    g_text_window.rows_per_page = dims[1];
+    g_text_window.text_width = dims.width;
+    g_text_window.rows_per_page = dims.rows;
     g_text_window.priority = 1;
     g_text_window.image_coordinate_mode = 0;
     g_text_window.extra_render_index = -1;
