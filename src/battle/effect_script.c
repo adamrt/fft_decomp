@@ -33,6 +33,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+effect_context_t g_effect_context;
+
 /* g_effect_load_state: the steps of effect_file_update_load, which loads the ability's effect file
  * while its charge secondary effect plays. */
 typedef enum effect_load_state {

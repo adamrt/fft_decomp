@@ -29,7 +29,7 @@ units:
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, data: [{addr: 0x8016dae4, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8016daf8, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: effect_heap, source: src/battle/effect_heap.c, rodata: [{addr: 0x801a0df8, size: 60, hash: bd310980baa06c2e}], data: [{addr: 0x801b8968, size: 136, hash: b707241545a34626}, {addr: 0x801b89f0, size: 6, hash: b0f66adc83641586}], bss: [{addr: 0x801b69a8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801b69ac, size: 4, hash: df3f619804a92fdb}]}
   - {name: effect_renderer, source: src/battle/effect_renderer.c, data: [{addr: 0x801b69b0, size: 12, hash: 87026771f70658d8}, {addr: 0x801b69bc, size: 16, hash: d9c265329e338700}]}
-  - {name: effect_script, source: src/battle/effect_script.c, data: [{addr: 0x801b53e8, size: 4096, hash: c0ef3379bda21409}]}
+  - {name: effect_script, source: src/battle/effect_script.c, data: [{addr: 0x801b53e8, size: 4096, hash: c0ef3379bda21409}], bss: [{addr: 0x801bad0c, size: 200, hash: 6d9c54dee5660c46}]}
   - {name: effect_system, source: src/battle/effect_system.c, data: [{addr: 0x801b8564, size: 782, hash: 16fe36168f4498dd}, {addr: 0x801b8874, size: 8, hash: eba59b7f825300a4}]}
   - {name: event_frame, source: src/battle/event_frame.c, data: [{addr: 0x801696e4, size: 20, hash: 34d5f02d6411f13b}]}
   - {name: event_resources, source: src/lib/event/event_resources.c, rodata: [{addr: 0x8012d8a4, size: 25, hash: f71a695df31c3f94}], data: [{addr: 0x80165ebc, size: 16, hash: 6176d19a13b8eb27}]}

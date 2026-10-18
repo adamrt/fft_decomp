@@ -44,13 +44,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Build the secondary-effect init record for an ability and hand it to the
- * effect selector.
+/* Build the ability-effect context and hand it to the effect selector.
  *
  * Each of the acting unit's targets contributes a target block carrying its
- * unit id and a result animation; with no targets the first block instead
- * holds the post-action destination tile. Every other living unit that is not
- * already a target is appended to spectator_ids. The packed
+ * runtime id and a result animation. With no targets and empty-tile effects
+ * enabled, the first block holds the post-action destination tile. Every other
+ * unit with stats that is neither the caster nor a target is appended to
+ * spectator_ids. The packed
  * argument combines the ability's charge animation set with the element used
  * as the effect's sprite palette, and stays 0 while the action has no attack
  * to animate. The failed-condition path is written as its own `packed = 0`
