@@ -12,6 +12,7 @@
 #include "fft/job.h"
 #include "fft/memory.h"
 #include "fft/move.h"
+#include "fft/random.h"
 #include "fft/reaction.h"
 #include "fft/reward.h"
 #include "fft/skillset.h"

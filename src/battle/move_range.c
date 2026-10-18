@@ -10,6 +10,7 @@
 #include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/projectile.h"
+#include "fft/random.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/target.h"

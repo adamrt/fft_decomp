@@ -20,6 +20,7 @@
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
+#include "fft/vector.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"

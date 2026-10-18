@@ -1,10 +1,8 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-/* Memory utilities: MAIN's byte copies and page heaps, the event library's forward copy, ATTACK's unaligned load, and
- * MAIN's random-roll and vector setters. */
+/* Byte copies, unaligned reads and the page heaps for game and music data. */
 
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* byte copies */
@@ -42,15 +40,5 @@ void heap_clear_game_table(void);
 void* heap_alloc_smd(u32 size);
 s32 heap_free_smd(void* allocation);
 void heap_clear_smd_table(void);
-
-/* random values and vectors */
-/* A random value between `min` and `max`, in either order. Spelled with rand()
- * first, unlike RAND_BETWEEN; both spellings occur in the target. */
-#define RANDOM_BETWEEN(min, max)                                                                                       \
-    ((min) == (max) ? (min) : (max) < (min) ? rand() % ((min) - (max)) + (max) : rand() % ((max) - (min)) + (min))
-
-s32 random_roll_pass_fail(s32 maximum, s32 threshold);
-void vector_set_svector(SVECTOR* vector, s32 x, s32 y, s32 z);
-void vector_set_vector(VECTOR* vector, s32 x, s32 y, s32 z);
 
 #endif

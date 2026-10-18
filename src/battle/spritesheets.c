@@ -15,6 +15,7 @@
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
+#include "fft/vector.h"
 #include "fft/weather.h"
 #include "psx/libc.h"
 #include "psx/libgte.h"

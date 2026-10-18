@@ -11,6 +11,7 @@
 #include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/party.h"
+#include "fft/random.h"
 #include "fft/reward.h"
 #include "fft/script_variable.h"
 #include "fft/skillset.h"

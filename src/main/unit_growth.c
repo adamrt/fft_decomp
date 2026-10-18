@@ -8,6 +8,7 @@
 #include "fft/job.h"
 #include "fft/memory.h"
 #include "fft/party.h"
+#include "fft/random.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/unit.h"

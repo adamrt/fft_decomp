@@ -17,6 +17,7 @@
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
+#include "fft/vector.h"
 #include "fft/zodiac.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"

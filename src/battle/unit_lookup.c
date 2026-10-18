@@ -29,6 +29,7 @@
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
+#include "fft/vector.h"
 #include "psx/gte_inline.h"
 #include "psx/gte_inline_split.h"
 #include "psx/libc.h"

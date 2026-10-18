@@ -8,6 +8,7 @@
 #include "fft/item.h"
 #include "fft/memory.h"
 #include "fft/move.h"
+#include "fft/random.h"
 #include "fft/script_variable.h"
 #include "fft/status.h"
 #include "fft/system.h"

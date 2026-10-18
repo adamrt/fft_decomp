@@ -30,6 +30,7 @@
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "fft/unit_runtime.h"
+#include "fft/vector.h"
 #include "fft/weather.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"

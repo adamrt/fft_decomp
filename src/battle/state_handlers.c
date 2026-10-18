@@ -34,6 +34,7 @@
 #include "fft/turn.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
+#include "fft/vector.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
