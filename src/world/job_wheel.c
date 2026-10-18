@@ -40,19 +40,13 @@ extern s16 g_formation_job_wheel_cursor_index;
 extern u8 g_formation_job_wheel_job_selected;
 extern u8 g_formation_job_wheel_saved_browse_enabled;
 extern u8 g_formation_job_wheel_script[54];
-extern s16 g_formation_job_wheel_name_text;
 extern RECT g_formation_job_wheel_name_rect;
-extern oriented_quad_t g_formation_job_wheel_mastered_icon_sprite;
 extern point16_t g_formation_job_wheel_unit_sprite_position;
 extern u8 g_formation_job_wheel_center_x;
 extern u8 g_formation_job_wheel_center_y;
 extern u8 g_formation_job_wheel_animation_counter;
 extern s8 g_formation_job_wheel_spin_progress;
 extern s8 g_formation_job_wheel_spin_direction;
-extern u8 g_formation_job_wheel_opening;
-extern u8 g_formation_job_wheel_open_frame;
-extern u8 g_formation_job_wheel_closing;
-extern u8 g_formation_job_wheel_close_frame;
 
 /* The current and new job sprites use separate texture sources. */
 extern textured_rect_source_t g_formation_job_wheel_sprite_quad;
@@ -67,19 +61,29 @@ typedef enum formation_job_change_anim {
     FORMATION_JOB_CHANGE_ANIM_CLOSING = 2 /* the last 20 frames */
 } formation_job_change_anim_e;
 
-extern u8 g_formation_job_change_active;
 extern s8 g_formation_job_change_anim_state; /* formation_job_change_anim_e */
 extern u8 g_formation_job_change_confirmed;
 extern s16 g_formation_job_change_skip_requested;
-extern s16 g_formation_job_change_frame;
-extern rgb24_t g_formation_job_change_wave_colors[3];
 extern rgb24_t g_formation_job_change_flash_colors[4];
 extern s16* g_formation_job_change_dissolve_order;
-extern RECT g_formation_job_change_old_sprite_rect;
-extern RECT g_formation_job_change_new_sprite_rect;
 extern u8* g_formation_job_change_old_sprite_image;
 extern u8* g_formation_job_change_new_sprite_image;
 extern u8* g_formation_job_change_new_sprite_source;
+
+static RECT g_formation_job_change_old_sprite_rect = { 576, 304, 6, 40 };
+static RECT g_formation_job_change_new_sprite_rect = { 582, 304, 6, 40 };
+static u8 g_formation_job_change_active = 0;
+static s16 g_formation_job_change_frame = 0;
+static rgb24_t g_formation_job_change_wave_colors[3] = { { 0, 0, 0 }, { 255, 0, 255 }, { 0, 0, 0 } };
+static u8 g_formation_job_wheel_close_frame = 255;
+static u8 g_formation_job_wheel_open_frame = 255;
+static u8 g_formation_job_wheel_closing = 0;
+static u8 g_formation_job_wheel_opening = 0;
+
+/* One row for screen_text_render_rows, followed by its -1 terminator. */
+static s16 g_formation_job_wheel_name_text[2] = { 0, -1 };
+static oriented_quad_t g_formation_job_wheel_mastered_icon_sprite
+    = { { 0, 0 }, 10, 10, { 36, 200, 10, 10, 0x7ee7, 31 } };
 
 static void formation_job_build_wheel_availability(void);
 static void formation_job_build_wheel_name(void);
@@ -752,12 +756,12 @@ static void formation_job_build_wheel_name(void) {
 
     if (g_formation_job_wheel_job_count < 2) {
         font = g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN];
-        g_formation_job_wheel_name_text = 0x1B;
+        g_formation_job_wheel_name_text[0] = 0x1B;
     } else {
         font = g_text_section_pointers[TEXT_SECTION_JOB_NAMES];
-        g_formation_job_wheel_name_text = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
+        g_formation_job_wheel_name_text[0] = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
     }
-    name = &g_formation_job_wheel_name_text;
+    name = g_formation_job_wheel_name_text;
     destination_rect.x = 0x24C;
     destination_rect.y = 0x130;
     destination_rect.w = 0x14;

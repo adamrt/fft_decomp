@@ -51,7 +51,7 @@ units:
   - {name: item_order, source: src/lib/menu/item_order.c}
   - {name: job_abilities, source: src/world/job_abilities.c}
   - {name: job_learning, source: src/world/job_learning.c}
-  - {name: job_wheel, source: src/world/job_wheel.c}
+  - {name: job_wheel, source: src/world/job_wheel.c, data: [{addr: 0x8018c91c, size: 60, hash: c99fca10dd48a58a}]}
   - {name: list_threads, source: src/world/list_threads.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}]}
   - {name: memcard, source: src/lib/memcard.c, data: [{addr: 0x80194fd8, size: 4, hash: ad95131bc0b799c0}]}
   - {name: menu_ability_display_values, source: src/lib/menu/menu_ability_display_values.c}
