@@ -10,7 +10,6 @@
 #include "fft/cursor.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
-#include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/move_step.h"
 #include "fft/option.h"

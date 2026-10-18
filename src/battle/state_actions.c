@@ -19,7 +19,6 @@
 #include "fft/help.h"
 #include "fft/input.h"
 #include "fft/item.h"
-#include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/message.h"
 #include "fft/move.h"

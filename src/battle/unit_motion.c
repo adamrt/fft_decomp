@@ -12,7 +12,6 @@
 #include "fft/effect_script.h"
 #include "fft/effect_secondary.h"
 #include "fft/gfx.h"
-#include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/sound.h"
 #include "fft/sprite.h"

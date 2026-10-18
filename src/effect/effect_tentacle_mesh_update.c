@@ -10,7 +10,6 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
-#include "fft/memory.h"
 #include "fft/random.h"
 #include "fft/unit_runtime.h"
 #include "psx/gte_inline.h"

@@ -16,7 +16,6 @@
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
-#include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/music.h"
 #include "fft/option.h"

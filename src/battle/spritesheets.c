@@ -5,7 +5,6 @@
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"
 #include "fft/gfx.h"
-#include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/result.h"
 #include "fft/script_variable.h"
