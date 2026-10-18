@@ -18,6 +18,12 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - EFFECT native renderers: `effect_timeline_step_emitter` sets phase 3 when a callback's keyframe window has two frames left, even if init never ran; the destroy path then reads its latch through the null work slot (kernel RAM).
 - `camera_store_state_to_script_variables`: all three zoom
   components are stored to 32-bit script variable `0x20`, so the first two are lost.
+- `mul_div_s64` increments the dividend's low word when negating a negative
+  divisor; a carry while negating a negative product increments the division
+  remainder instead of the product's high word. For `(6264, -400920, -2359)`
+  it returns 1065039 rather than signed division's 1064587. Its range flag
+  only checks negative-result high words; `fixed_cross_product_q12` checks
+  `high >> 12` for 0 or -1. Neither test covers every signed 32-bit overflow.
 - `script_focus_speed` accumulates into an uninitialized `$s6`: the event
   dispatcher leaves `operand_3` there, while camera fusion leaves its key count.
   Those caller values affect the camera duration.

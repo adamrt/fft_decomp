@@ -2397,7 +2397,7 @@ data:
   - {addr: 0x801cd820, name: g_event_pending_saved_evtchr_clear_slot}
   - {addr: 0x801cd824, name: g_menu_list_entry_count}
   - {addr: 0x801cd828, name: g_script_music_switch}
-  - {addr: 0x801cd82c, name: g_camera_cross_product_overflow}
+  - {addr: 0x801cd82c, name: g_camera_arithmetic_overflow}
   - {addr: 0x801cd830, name: g_menu_glyph_sheet}
   - {addr: 0x801cd838, name: g_menu_input_newly_pressed}
   - {addr: 0x801cd83c, name: GsLIGHT_MODE}

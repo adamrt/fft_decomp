@@ -2664,7 +2664,7 @@ data:
   - {addr: 0x80173f50, name: g_event_pending_saved_evtchr_clear_slot}
   - {addr: 0x80173f54, name: g_event_music_switch_volume}
   - {addr: 0x80173f56, name: g_event_music_switch_fade}
-  - {addr: 0x80173f58, name: g_camera_cross_product_overflow}
+  - {addr: 0x80173f58, name: g_camera_arithmetic_overflow}
   - {addr: 0x80173f5c, name: g_menu_glyph_sheet}
   - {addr: 0x80173f60, name: g_help_active_text_id_tables}
   - {addr: 0x80173f64, name: g_event_pending_map_state}

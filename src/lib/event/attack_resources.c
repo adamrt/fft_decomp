@@ -57,7 +57,9 @@
 
 /* Two bytes per battle_map_surface_type_e; all 64 pairs are 0x19, 0x19. */
 extern u8 g_terrain_tile_info_pairs[64][2];
-extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on overflow */
+
+/* Set by the retail range tests in mul_div_s64 and fixed_cross_product_q12. */
+extern s32 g_camera_arithmetic_overflow;
 extern const char g_script_pause_message[];
 extern s16 g_script_debug_paused;
 extern u16 g_unit_view_cached_battle_id;
@@ -582,10 +584,10 @@ void camera_fusion_thread(void) {
  * Called once for each component by the scene's camera-fusion thread.
  *
  * Each call samples the two tangent lines of the active key segment at this
- * frame and the next, intersects them (fixed_cross_product_q12 is a Q12 cross product
- * that sets g_camera_cross_product_overflow on overflow) and moves the value along the resulting
- * control point. The locals span, frame and lead are reused across the
- * stages, as the target's register map requires. */
+ * frame and the next, intersects them with Q12 cross products and multiply/divide
+ * operations, and moves the value along the resulting control point. Both helpers
+ * can set the shared arithmetic flag. The locals span, frame and lead are reused
+ * across the stages, as the target's register map requires. */
 static s32 camera_step_track(camera_track_t* track, s32 component) {
     s32 time[4];  /* line 0: time[0]->time[1]; line 1: time[2]->time[3] */
     s32 value[4]; /* matching values for the two sampled lines */
@@ -683,7 +685,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
         }
 
         flag = 0;
-        g_camera_cross_product_overflow = 0;
+        g_camera_arithmetic_overflow = 0;
         value1 = value[1];
         value0 = value[0];
         time3 = time[3];
@@ -715,9 +717,9 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
             flag = 1;
         }
 
-        /* Parallel lines, a crossing at the previous time or an overflow keep the previous value. */
+        /* A zero divisor or a helper range flag selects the track's stored value. */
 
-        if (g_camera_cross_product_overflow != 0 || flag != 0) {
+        if (g_camera_arithmetic_overflow != 0 || flag != 0) {
             result = track->prev_value;
         }
     }
