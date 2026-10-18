@@ -296,32 +296,32 @@ s32 script_find_instruction_byte_offset(s32 offset, s32 opcode) {
  * 1), using <=, >=, ==, !=, < and > in opcode order. Any other opcode changes
  * nothing. */
 void script_run_condition(event_opcode_e opcode) {
-    if (opcode == EVENT_CONDITION_SECOND_GTE_FIRST) {
+    if (opcode == EVENT_OPCODE_COMPARE_LESS_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             <= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_CONDITION_FIRST_GTE_SECOND) {
+    if (opcode == EVENT_OPCODE_COMPARE_GREATER_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             >= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_CONDITION_EQUAL) {
+    if (opcode == EVENT_OPCODE_COMPARE_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             == g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_CONDITION_NOT_EQUAL) {
+    if (opcode == EVENT_OPCODE_COMPARE_NOT_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             != g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_CONDITION_FIRST_LT_SECOND) {
+    if (opcode == EVENT_OPCODE_COMPARE_LESS) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             < g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;
     }
-    if (opcode == EVENT_CONDITION_SECOND_LT_FIRST) {
+    if (opcode == EVENT_OPCODE_COMPARE_GREATER) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             > g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
         return;

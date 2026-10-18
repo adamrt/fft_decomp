@@ -228,13 +228,13 @@ typedef enum event_opcode {
     EVENT_OPCODE_TELEPORT_IN = 0x98,                 /* 2: unit id (u16) */
     EVENT_OPCODE_BLUE_REMOVE_UNIT = 0x99,            /* 2: ENTD unit id (u16) */
 
-    /* Compare script operands 0 and 1; write the boolean to operand 0. */
-    EVENT_CONDITION_SECOND_GTE_FIRST = 0xa0, /* 0 */
-    EVENT_CONDITION_FIRST_GTE_SECOND = 0xa1, /* 0 */
-    EVENT_CONDITION_EQUAL = 0xa2,            /* 0 */
-    EVENT_CONDITION_NOT_EQUAL = 0xa3,        /* 0 */
-    EVENT_CONDITION_FIRST_LT_SECOND = 0xa4,  /* 0 */
-    EVENT_CONDITION_SECOND_LT_FIRST = 0xa5,  /* 0 */
+    /* Compare script variable 0 against variable 1; write the boolean to variable 0. */
+    EVENT_OPCODE_COMPARE_LESS_EQUAL = 0xa0,    /* 0 */
+    EVENT_OPCODE_COMPARE_GREATER_EQUAL = 0xa1, /* 0 */
+    EVENT_OPCODE_COMPARE_EQUAL = 0xa2,         /* 0 */
+    EVENT_OPCODE_COMPARE_NOT_EQUAL = 0xa3,     /* 0 */
+    EVENT_OPCODE_COMPARE_LESS = 0xa4,          /* 0 */
+    EVENT_OPCODE_COMPARE_GREATER = 0xa5,       /* 0 */
 
     /* Update a destination variable using an immediate or variable value.
      * ZERO_VARIABLE only encodes the destination. */

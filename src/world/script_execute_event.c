@@ -178,7 +178,7 @@ restart_script:
         /* ---- Control: NOPs, conditions, and script variable arithmetic ---- */
         if (opcode == EVENT_OPCODE_CAMERA_DISABLED) {
         } else if (opcode == EVENT_OPCODE_NOP) {
-        } else if ((opcode - EVENT_CONDITION_SECOND_GTE_FIRST) < 6U) {
+        } else if ((opcode - EVENT_OPCODE_COMPARE_LESS_EQUAL) < 6U) {
             script_run_condition(opcode);
         } else if ((opcode - EVENT_OPCODE_ADD_IMMEDIATE) < 0xFU) {
             operand_1 = (u16)first_operand;
