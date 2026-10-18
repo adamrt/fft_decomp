@@ -66,8 +66,6 @@ typedef enum ai_retreat_stage {
 
 enum { AI_PROTECT_ALLIES_STATUS_COUNT = 3 };
 
-extern u8 g_ai_protect_allies_status_ids[AI_PROTECT_ALLIES_STATUS_COUNT];
-
 /* target selection */
 typedef enum ai_unit_filter {
     AI_UNIT_FILTER_ANY = 0,
@@ -120,8 +118,6 @@ typedef enum ai_destination_order {
     AI_DESTINATION_DISTANCE_FIRST = 1
 } ai_destination_order_e;
 
-extern s32 g_ai_move_propagation_resume_pass;
-
 s32 ai_move_propagate_from_target(
     s32 unit_id, s32 target_x, s32 target_y, s32 target_elevation, s32 initialize, s32* suspended, s32 check_budget);
 void ai_record_triggered_trap_coords(s32 x, s32 y, s32 level);
@@ -133,8 +129,6 @@ typedef enum ai_tile_mask_mode {
     AI_TILE_MASK_RANGE_PLUS_AOE = 2,
     AI_TILE_MASK_EXPLICIT = 3
 } ai_tile_mask_mode_e;
-
-extern u16 g_ai_origin_range_row_masks[];
 
 void ai_origin_build_cast_and_aim_tiles(void);
 s32 ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
@@ -173,8 +167,6 @@ typedef enum ai_charging_stage {
     AI_CHARGING_WITHOUT_CHARGE = 2
 } ai_charging_stage_e;
 
-extern s32 g_ai_origin_self_target_stage;
-
 s32 ai_ability_evaluate_outcome(void);
 s32 ai_origin_evaluate_before_and_after_move(void);
 s32 ai_evaluate_current_action(void);
@@ -182,11 +174,6 @@ s32 ai_evaluate_current_action(void);
 /* math skill */
 enum { AI_MATH_SOURCE_SKILLSET_COUNT = 4, AI_MATH_EXTRA_KNOWN_ABILITY_COUNT = 10 };
 
-extern s32 g_ai_math_ability_index;
-extern u16* g_ai_math_ability_list; /* borrowed from main's temporary skillset list */
-extern u8 g_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
-extern s32 g_ai_math_skillset_id;
-extern s32 g_ai_math_skillset_index;
 extern u8 g_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
 
 /* action ranking */
@@ -276,8 +263,6 @@ typedef enum ai_direction {
 typedef struct ai_facing_tile_offsets {
     u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
 } ai_facing_tile_offsets_t;
-
-extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets;
 
 s32 ai_facing_choose_for_wait(void);
 ai_direction_e ai_facing_find_target_direction(const ai_coords_t* target, const ai_coords_t* origin);

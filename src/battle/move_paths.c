@@ -25,6 +25,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Camera step rates and cursor repeat state. */
+extern s32 g_camera_rotation_increment;
+extern s32 g_camera_yaw_target;
+
+/* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;
+ * nothing reads it. */
+extern s32 g_camera_previous_yaw;
+extern s32 g_camera_tilt_increment;
+extern s32 g_camera_zoom_increment;
+extern u32 g_cursor_repeat_counter; /* free-cursor repeat counter */
+
 static s32 g_cursor_previous_x = 0; /* cursor X before this step */
 static s32 g_cursor_previous_z = 0; /* cursor level before this step */
 static s32 g_cursor_previous_y = 0; /* cursor Y before this step */

@@ -107,10 +107,6 @@ typedef enum move_effective_flags {
     MOVE_EFFECTIVE_FLY = 0x80
 } move_effective_flags_e;
 
-extern u8* g_move_terrain_costs_ptr;
-extern u8 g_move_terrain_cost;
-extern u8 g_move_weather_terrain_cost;
-
 move_effective_flags_e move_get_effective_flags(const unit_stats_t* unit);
 s32 move_get_ability_events(const unit_stats_t* unit);
 s32 move_get_water_standing_offset(unit_t* unit, battle_map_tile_t* tile);
@@ -318,32 +314,7 @@ typedef struct move_record {
 } move_record_t;
 typedef char move_record_size_must_be_7[(sizeof(move_record_t) == 7) ? 1 : -1];
 
-extern s32 g_move_range_valid;
-extern s32 g_move_range_unit_id;
 extern move_path_t g_move_path;
-extern u8 g_move_path_scratch;
-extern move_pathfind_scratch_t* g_move_config_ptr;
-extern move_spread_state_t* g_move_scratch_pad_ptr;
-extern move_record_t* g_move_records_ptr;
-extern u8* g_move_frontier_flags_ptr;
-extern u8* g_move_path_frontier;
-extern s32 g_move_path_resume_pass;
-extern s32 g_move_path_tile_index;
-extern void (*g_move_spread_preset_table[])(void);
-
-/* Provisional: always 0; copied into the move config byte 0x1a, which nothing reads. */
-extern u8 g_move_config_unknown_1a_value;
-
-/* Seven proven half-height offsets; the following byte is not
- * established as another element. Extended callers select indices 0..6. */
-extern u8 g_move_height_offsets[7];
-
-/* Zeroed by move_path_calculate and never read. That pass keeps in statics what
- * move_spread_store_unit_to_scratchpad keeps in locals; these three stand where it sets
- * its team, ignore_terrain and count locals (the generic unit has no team, terrain rule or units). */
-extern u8 g_move_path_team;
-extern u8 g_move_path_ignore_terrain;
-extern s32 g_move_path_unit_record_count;
 
 s32 move_range_build(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_z);
 void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
@@ -370,8 +341,6 @@ typedef enum move_knockback_kind {
 
 /* Encoding of the kind and pending marker in the same byte. */
 enum { MOVE_KNOCKBACK_KIND_MASK = 0x7f, MOVE_KNOCKBACK_PENDING = 0x80 };
-
-extern s32 g_move_displacement_direction;
 
 void move_knockback_start(const unit_t* src, unit_t* dst);
 void move_knockback_update(unit_t* unit);

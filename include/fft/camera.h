@@ -83,12 +83,6 @@ typedef enum camera_rotation_action {
 
 extern camera_rotation_action_e g_camera_rotation_action;
 extern u16 g_camera_rotation_countdown;
-extern s32 g_camera_rotation_increment;
-extern s32 g_camera_yaw_target;
-
-/* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;
- * nothing reads it. */
-extern s32 g_camera_previous_yaw;
 
 SVECTOR* camera_rotation_get(void);
 void camera_rotation_set(const SVECTOR* rotation);
@@ -110,7 +104,6 @@ typedef enum camera_step_action {
 
 extern s32 g_camera_tilt_target;
 extern camera_step_action_e g_camera_tilt_action;
-extern s32 g_camera_tilt_increment;
 
 void camera_tilt_update(void);
 
@@ -119,7 +112,6 @@ extern s32 g_camera_zoom_target;
 extern VECTOR g_camera_zoom;
 extern camera_step_action_e g_camera_zoom_action;
 extern u16 g_camera_zoom_countdown;
-extern s32 g_camera_zoom_increment;
 
 VECTOR* camera_zoom_get(void);
 void camera_zoom_set(const VECTOR* zoom);

@@ -52,8 +52,6 @@ typedef enum ai_command_build_stage {
     AI_COMMAND_BUILD_CHOOSE_ACTION = 2
 } ai_command_build_stage_e;
 
-extern ai_command_t g_ai_command_history[2]; /* the last two commands built, newest last */
-
 /* Returns -1 while the decision is still running (it resumes on the next call), else 0 with
  * command filled. */
 s32 ai_command_build(s32 unit_id, ai_command_t* command);

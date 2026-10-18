@@ -759,8 +759,6 @@ enum {
     CALCULATOR_PRIME_COUNT = 54
 };
 
-extern u8 g_ability_calculator_primes[CALCULATOR_PRIME_COUNT];
-
 /* elements */
 /* Element bits shared by abilities, equipment, jobs and unit affinity sets. */
 typedef enum element_flags {

@@ -19,6 +19,16 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Origin masks, Math Skill iteration and facing offsets. */
+extern u16 g_ai_origin_range_row_masks[];
+extern s32 g_ai_origin_self_target_stage;
+extern s32 g_ai_math_ability_index;
+extern u16* g_ai_math_ability_list; /* borrowed from main's temporary skillset list */
+extern u8 g_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
+extern s32 g_ai_math_skillset_id;
+extern s32 g_ai_math_skillset_index;
+extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets;
+
 /* Signed scoring weights, indexed by status ID. */
 static s16 g_ai_status_priority_weights[STATUS_COUNT]
     = { 0, -192, -192, -39, 0, 0, 0, 0, -116, -231, -64, -64, -90, -116, 0, -192, -7, 12, 51, 38, -39, -26, -52, -32,

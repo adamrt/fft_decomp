@@ -19,6 +19,9 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+extern u8 g_ai_protect_allies_status_ids[AI_PROTECT_ALLIES_STATUS_COUNT];
+extern ai_command_t g_ai_command_history[2]; /* the last two commands built, newest last */
+
 static s32 ai_ability_add_usable_from_skillset(s32 unit_id, s32 skillset, s32 count);
 static s32 ai_move_build_scenarios(void);
 static s32 ai_move_build_targeted(void);

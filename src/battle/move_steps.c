@@ -17,6 +17,12 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern unit_t* g_move_step_tile_occupant;
+
+/* Height scratch record that unit_calculate_height_data fills in place. */
+extern unit_height_data_t g_move_step_tile_occupant_height;
+extern s32 g_move_displacement_direction;
+
 static u8 g_move_step_walk_to_center_phases[4] = { MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH,
     MOVE_STEP_PHASE_WALK_TO_CENTER_EAST, MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH, MOVE_STEP_PHASE_WALK_TO_CENTER_WEST };
 static u8 g_move_step_climb_to_center_phases[4] = { MOVE_STEP_PHASE_CLIMB_TO_CENTER_SOUTH,

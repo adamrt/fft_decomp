@@ -24,7 +24,6 @@ extern s32 g_cursor_z;
 extern u16 g_cursor_screen_x;
 extern s16 g_cursor_screen_y;
 extern s32 g_cursor_visible;
-extern u32 g_cursor_repeat_counter; /* free-cursor repeat counter */
 extern s32 g_cursor_input_mode;
 extern s32 g_cursor_input_mode_saved;
 

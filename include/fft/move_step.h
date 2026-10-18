@@ -90,10 +90,6 @@ extern move_step_t g_move_step_value;
 extern u8 g_move_step_current_edge_height;
 extern u8 g_move_step_destination_edge_height;
 extern s16 g_move_step_target_world_y;
-extern unit_t* g_move_step_tile_occupant;
-
-/* Height scratch record that unit_calculate_height_data fills in place. */
-extern unit_height_data_t g_move_step_tile_occupant_height;
 
 /* move_step_phase_e by step direction: the phase each kind of step enters. */
 extern u8 g_move_step_float_to_center_phases[];
