@@ -120,7 +120,7 @@ typedef struct save_icon {
 
 /* Serialized at save-image offset 0x1c88 and restored by full loads and tutorial swaps.
  * Its purpose is unknown; the original MAIN and tutorial images contain 0xc5. */
-extern u8 g_save_unread_byte;
+extern u8 g_save_unknown_byte;
 
 void save_init_data_tables(void);
 void save_init_state_and_options(void);

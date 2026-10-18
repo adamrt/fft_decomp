@@ -589,7 +589,7 @@ void save_build_image(s32 slot) {
         sizeof(g_save_buffer_pointer->poached_item_quantities));
     bcopy(g_item_location_flags, g_save_buffer_pointer->item_location_flags,
         sizeof(g_save_buffer_pointer->item_location_flags));
-    g_save_buffer_pointer->_unknown_1c88 = g_save_unread_byte;
+    g_save_buffer_pointer->_unknown_1c88 = g_save_unknown_byte;
     bcopy(g_script_variable_storage, g_save_buffer_pointer->script_variables, sizeof(g_script_variable_storage));
     bcopy(&g_game_options, &g_save_buffer_pointer->options, 4);
     bcopy(g_menu_sort_orders.unit_list, g_save_buffer_pointer->unit_list_sort_order, 0xc);

@@ -1315,7 +1315,7 @@ data:
   - {addr: 0x80056b18, name: g_gfx_battle_otags}
   - {addr: 0x80057718, name: g_system_wait_frames}
   - {addr: 0x8005771c, name: g_script_variable_storage}
-  - {addr: 0x80057b1c, name: g_save_unread_byte}
+  - {addr: 0x80057b1c, name: g_save_unknown_byte}
   - {addr: 0x80057b20, name: g_menu_sort_orders}
   - {addr: 0x80057b2c, name: g_formation_sort_order}
   - {addr: 0x80057b34, name: g_weapons_and_shields_sort_order}
