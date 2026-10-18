@@ -9,7 +9,6 @@
 
 /* job change */
 s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment);
-s32 formation_job_is_locked_for_all(s16 job_id);
 
 /* job wheel */
 /* An entry of the job list job_list_build writes. */

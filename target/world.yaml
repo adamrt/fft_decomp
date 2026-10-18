@@ -10,7 +10,6 @@ links: [wldcore, battle]
 defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 112, VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 1792, VARIANT_MENU_CHOICE_VRAM_X: 1536, VARIANT_MENU_CHOICE_WINDOW_CENTER_Y: 40, VARIANT_MENU_CHOICE_WINDOW_RIGHT_X: 116, VARIANT_MENU_ITEM_CURSOR_DEPTH: 20, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16, VARIANT_THREAD_TABLE_SLOT_COUNT: 17}
 
 units:
-  - {name: ability_checks, source: src/world/ability_checks.c}
   - {name: ability_list_text, source: src/world/ability_list_text.c}
   - {name: ability_lists, source: src/world/ability_lists.c, data: [{addr: 0x8018d76c, size: 56, hash: d2c131ff23d4c1fe}]}
   - {name: at_list_threads, source: src/lib/menu/at_list_threads.c}
@@ -50,8 +49,8 @@ units:
   - {name: icon_selection, source: src/lib/event/icon_selection.c, data: [{addr: 0x80153d08, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: item_actions, source: src/world/item_actions.c}
   - {name: item_order, source: src/lib/menu/item_order.c}
+  - {name: job_abilities, source: src/world/job_abilities.c}
   - {name: job_learning, source: src/world/job_learning.c}
-  - {name: job_locks, source: src/world/job_locks.c}
   - {name: job_wheel, source: src/world/job_wheel.c}
   - {name: list_threads, source: src/world/list_threads.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}]}
   - {name: memcard, source: src/lib/memcard.c, data: [{addr: 0x80194fd8, size: 4, hash: ad95131bc0b799c0}]}
@@ -833,19 +832,19 @@ functions:
   - {addr: 0x8012227c, size: 84, name: item_is_in_category_list, hash: dff56971e7ed3167, unit: item_order}
   - {addr: 0x801222d0, size: 104, name: item_prepend_to_category_list, hash: 64a6e8e35edbd02f, unit: item_order}
   - {addr: 0x80122338, size: 128, name: item_remove_from_category_list, hash: cf7b4cbe138b1209, unit: item_order}
-  - {addr: 0x801223b8, size: 44, name: job_get_generic_index, hash: d755c5f488ff21d3, source: src/lib/menu/job_get_generic_index.c}
-  - {addr: 0x801223e4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, source: src/lib/menu/job_find_first_for_skillset.c}
-  - {addr: 0x8012243c, size: 76, name: job_list_get_base, hash: bbbf49580c82511f, unit: job_locks}
-  - {addr: 0x80122488, size: 172, name: formation_job_is_locked_for_all, hash: 8a0681496946a34a, unit: job_locks}
-  - {addr: 0x80122534, size: 72, name: job_calculate_and_store_unlocks, hash: 79ecd32bffad7458, source: src/lib/menu/job_calculate_and_store_unlocks.c}
-  - {addr: 0x8012257c, size: 496, name: job_list_build, hash: 22283f9c0f9acef1}
-  - {addr: 0x8012276c, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, source: src/lib/menu/job_get_skillset.c}
-  - {addr: 0x80122790, size: 244, name: formation_ability_list_secondary_skillsets, hash: 3c4a2800ccd29d50, unit: ability_checks}
-  - {addr: 0x80122884, size: 36, name: ability_has_two_swords, hash: 687480293e517645, unit: ability_checks}
-  - {addr: 0x801228a8, size: 36, name: formation_ability_has_two_hands, hash: e69e52f39cf991c8, unit: ability_checks}
-  - {addr: 0x801228cc, size: 36, name: formation_ability_has_secret_hunt, hash: d2861f612ae1e6a8, unit: ability_checks}
-  - {addr: 0x801228f0, size: 816, name: ability_list_build, hash: 67540f592c51f8f1, unit: ability_checks}
-  - {addr: 0x80122c20, size: 544, name: formation_ability_build_rsm_list, hash: e568d793cd50e453, unit: ability_checks}
+  - {addr: 0x801223b8, size: 44, name: job_get_generic_index, hash: d755c5f488ff21d3, unit: job_abilities}
+  - {addr: 0x801223e4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, unit: job_abilities}
+  - {addr: 0x8012243c, size: 76, name: job_list_get_base, hash: bbbf49580c82511f, unit: job_abilities}
+  - {addr: 0x80122488, size: 172, name: formation_job_is_locked_for_all, hash: 8a0681496946a34a, unit: job_abilities}
+  - {addr: 0x80122534, size: 72, name: job_calculate_and_store_unlocks, hash: 79ecd32bffad7458, unit: job_abilities}
+  - {addr: 0x8012257c, size: 496, name: job_list_build, hash: 22283f9c0f9acef1, unit: job_abilities}
+  - {addr: 0x8012276c, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, unit: job_abilities}
+  - {addr: 0x80122790, size: 244, name: formation_ability_list_secondary_skillsets, hash: 3c4a2800ccd29d50, unit: job_abilities}
+  - {addr: 0x80122884, size: 36, name: ability_has_two_swords, hash: 687480293e517645, unit: job_abilities}
+  - {addr: 0x801228a8, size: 36, name: formation_ability_has_two_hands, hash: e69e52f39cf991c8, unit: job_abilities}
+  - {addr: 0x801228cc, size: 36, name: formation_ability_has_secret_hunt, hash: d2861f612ae1e6a8, unit: job_abilities}
+  - {addr: 0x801228f0, size: 816, name: ability_list_build, hash: 67540f592c51f8f1, unit: job_abilities}
+  - {addr: 0x80122c20, size: 544, name: formation_ability_build_rsm_list, hash: e568d793cd50e453, unit: job_abilities}
   - {addr: 0x80122e40, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, unit: equipment_stat_changes}
   - {addr: 0x80122e88, size: 132, name: formation_ability_get_move_jump_bonus, hash: 15a592818d5c12ca, unit: equipment_stat_changes}
   - {addr: 0x80122f0c, size: 144, name: formation_ability_diff_movement_stats, hash: 1f6bb186e388a569, unit: equipment_stat_changes}

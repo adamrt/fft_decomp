@@ -1,16 +1,146 @@
-/* Secondary skillset listing, the Two Swords, Two Hands and Secret Hunt checks, and the ability and equippable RSM
- * lists. */
+/* Formation's job and ability choices: unlocked jobs, secondary skillsets,
+ * JP-learning lists and the Reaction, Support and Movement abilities a unit
+ * can equip. The support-ability checks also serve equipment and shop menus. */
 
 #include "fft/ability.h"
 #include "fft/ability_list.h"
 #include "fft/bits.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
+#include "fft/formation_job.h"
 #include "fft/job.h"
 #include "fft/job_list.h"
 #include "fft/skillset.h"
 #include "fft/unit.h"
+#include "fft/unit_identity.h"
+#include "fft/unit_party.h"
 #include "psx/types.h"
+
+/* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */
+s32 job_get_generic_index(s32 job_id) {
+    u16 id = job_id;
+    s16 result;
+
+    if (id >= JOB_ID_SQUIRE && id <= JOB_ID_MIME) {
+        result = id;
+        result -= JOB_ID_SQUIRE;
+    } else {
+        result = 0;
+    }
+    return result;
+}
+
+/* Return the lowest job ID with this skillset, or -1. */
+s32 job_find_first_for_skillset(s32 skillset) {
+    s32 i;
+
+    for (i = 0; i < JOB_ID_COUNT; i++) {
+        if (job_get_data(i)->skillset == skillset) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* The job that heads a unit's job list: a monster's own job, Squire for a
+ * generic human identity, and for a special character the identity value
+ * itself, which is that character's job id. */
+s32 job_list_get_base(s16 unit_id) {
+    formation_unit_t* unit = g_formation_unit_pointers[unit_id];
+    u32 job = unit->sprite_set;
+
+    if (job == CHARACTER_IDENTITY_MONSTER) {
+        job = unit->identity.job_id;
+    } else if (job >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
+        job = JOB_ID_SQUIRE;
+    }
+    return job;
+}
+
+/* Returns 1 when no formation unit (special monsters aside) has generic job
+ * `job_id` unlocked. */
+static s32 formation_job_is_locked_for_all(s16 job_id) {
+    s32 i;
+
+    for (i = 0; i < g_formation_unit_count; i++) {
+        if (job_is_special_monster(g_formation_unit_pointers[i]->identity.job_id) == 0) {
+            /* One bit per generic job, Squire first: skip to this job's bit. */
+            bits_init_secondary_reader(g_formation_unit_pointers[i]->unlocked_jobs);
+            bits_read_secondary(job_id - JOB_ID_SQUIRE);
+            if (bits_read_secondary(1) != 0) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+/* Store generic-job unlocks in the party record's big-endian byte order. */
+void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]) {
+    s32 jobs
+        = job_calculate_unlocked(party->career.job_levels, party->gender_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
+    unlocked_jobs[0] = jobs >> 16;
+    unlocked_jobs[1] = jobs >> 8;
+    unlocked_jobs[2] = jobs;
+}
+
+/*
+ * Writes a formation unit's selectable jobs to a -1-terminated list and
+ * returns their count.
+ *
+ * The base job comes first, followed by the generic jobs whose unlocked bit
+ * is set (Bard excluded for female units, Dancer for male units); special
+ * monsters and units using monster skillsets get only the base job. Mode 2
+ * marks the current job and also lists jobs another unit has unlocked, with
+ * the 0x4000 entry flag.
+ */
+s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
+    s32 count = 0;
+    s32 job;
+    s32 i;
+    s32 unlocked;
+
+    bits_init_primary_reader(g_formation_unit_pointers[unit_index]->unlocked_jobs);
+    /* job_list_get_base is declared s32: the target uses its result without the
+     * re-extension an s16 return would make GCC emit (the callee already extends). */
+    job = job_list_get_base(unit_index);
+    if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
+        && job == g_formation_unit_pointers[unit_index]->identity.job_id) {
+        job |= FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
+    }
+    jobs[count++] = job;
+    if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) == 0
+        && g_formation_unit_pointers[unit_index]->uses_monster_skillset == 0) {
+        /* Skip Squire's bit: the base job above takes Squire's place. */
+        bits_read_primary(1);
+        for (i = 1; i < JOB_ID_GENERIC_COUNT; i++) {
+            job = i + JOB_ID_SQUIRE;
+            unlocked = bits_read_primary(1);
+            if (job == JOB_ID_BARD && (g_formation_unit_pointers[unit_index]->gender_flags & UNIT_FLAG_FEMALE)) {
+                continue;
+            }
+            if (job == JOB_ID_DANCER && (g_formation_unit_pointers[unit_index]->gender_flags & UNIT_FLAG_MALE)) {
+                continue;
+            }
+            if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
+                && job == g_formation_unit_pointers[unit_index]->identity.job_id) {
+                jobs[count++] = job | FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
+            } else if (unlocked != 0) {
+                jobs[count++] = job;
+            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
+                && formation_job_is_locked_for_all(job) == 0) {
+                jobs[count++] = job + FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
+            }
+        }
+    }
+    jobs[count] = -1;
+    return count;
+}
+
+/* Return the skillset of a job from the job data table. */
+s32 job_get_skillset(s32 job_id) {
+    return job_get_data(job_id)->skillset;
+}
 
 /* List the skillsets a formation unit can set as its secondary: those of its unlocked jobs other
  * than its own job and Mime. The list ends with -1; return the count. */
