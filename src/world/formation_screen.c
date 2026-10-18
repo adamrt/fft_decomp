@@ -39,7 +39,7 @@ extern menu_entry_t g_formation_egg_triangle_menu;
 extern menu_entry_t g_formation_egg_submenu;
 extern s16 g_formation_selected_unit_index_latch;
 extern u8 g_formation_unit_slide_pending;
-extern volatile u8 g_formation_unit_slide_frame;
+extern u8 g_formation_unit_slide_frame;
 
 /* Read the menu input (tutorial or pad) and filter it: nothing while the
  * item category change, the status banner or the lockout timer is busy, and
