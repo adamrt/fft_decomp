@@ -10,7 +10,8 @@
 struct suzuki_smd_header;
 
 /* disc files */
-/* Sector and byte length of a resource read through the resident file loader. */
+/* Sector and byte count requested through the resident file loader.
+ * The count includes any sector rounding needed by the resource. */
 typedef struct file_extent {
     s32 sector;
     s32 size;
@@ -109,6 +110,8 @@ int file_request_read(
 
 /* Forwards file_request_read's result. */
 s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
+
+/* Byte-count reads transfer size >> 11 whole sectors, without rounding up. */
 s32 file_request_read_bytes(s32 sector, u32 size, void* destination);
 void file_poll_load(file_load_descriptor_t* state);
 int file_is_still_loading(void);
@@ -116,6 +119,9 @@ void file_reset_pause_cdrom(file_load_descriptor_t* state);
 void file_reset_cd_subsystems(void);
 void file_handle_cd_read(u8 event, u8* result);
 void file_handle_cd_ready(u8 event, u8* result);
+
+/* Blocking byte-count loads use the same whole-sector rule. Heap loads allocate
+ * size bytes, even when a partial final sector would remain unread. */
 void* file_load_to_address(int sector, u32 size, void* destination);
 void* file_load_checked_to_address(int sector, int size, void* destination);
 void* file_load_checked_to_heap(int sector, int size);

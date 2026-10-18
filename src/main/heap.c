@@ -204,6 +204,7 @@ void heap_clear_game_table(void) {
  * Start an asynchronous disc read through the shared file header.
  *
  * Overlay callers pass a byte count; the lower-level builder takes sectors.
+ * Discard any partial sector rather than rounding the request up.
  */
 s32 file_request_read_bytes(s32 sector, u32 size, void* destination) {
     return file_request_read_quiet(&g_file_cd_state, sector, size >> 11, destination);
@@ -242,9 +243,10 @@ suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
     return buffer;
 }
 
-/* Allocates a game-heap buffer for a file of `size` bytes at disc `sector`,
- * queues the read and blocks until the file has landed.  Twin of
- * file_load_smd, which draws from the SMD allocator instead. */
+/* Allocate size bytes from the game heap and read size >> 11 whole sectors,
+ * blocking until the read ends. The caller must include sector rounding in
+ * size; a partial final sector is not read. file_load_smd uses the same read
+ * loop with the separate music heap. */
 static void* file_load_to_heap(s32 sector, u32 size) {
     void* destination = heap_alloc(size);
     file_load_descriptor_t* header;
