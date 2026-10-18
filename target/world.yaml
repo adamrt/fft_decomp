@@ -77,6 +77,7 @@ units:
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
   - {name: roster_changes, source: src/world/roster_changes.c}
   - {name: roster_sorting, source: src/world/roster_sorting.c, data: [{addr: 0x8018d7cc, size: 12, hash: 28a6a05d27d888a6}]}
+  - {name: screen_buffers, source: src/world/screen_buffers.c}
   - {name: screen_fades, source: src/world/screen_fades.c, data: [{addr: 0x8018e494, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e495, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e496, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e498, size: 8, hash: 311ffc6bfd5bdbb3}]}
   - {name: screen_input_lockout, source: src/world/screen_input_lockout.c}
   - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801bfda4, size: 616, hash: f9d54bbe3ccaf085}]}
@@ -881,9 +882,9 @@ functions:
   - {addr: 0x80125954, size: 60, name: formation_copy_unit_to_temp, hash: ef847502bf7e7faf, unit: formation_ability_slots}
   - {addr: 0x80125990, size: 116, name: zodiac_get_for_date, hash: 372e527c3d55f8f4, unit: formation_ability_slots}
   - {addr: 0x80125a04, size: 760, name: breeding_update, hash: c79a4f9e25086f3b, unit: formation_ability_slots}
-  - {addr: 0x80125cfc, size: 324, name: screen_present_frame, hash: 424202a51ed5e48f, unit: formation_ability_slots}
-  - {addr: 0x80125e40, size: 536, name: screen_init_packet_pools, hash: 8b137ab6455bab7c, unit: formation_ability_slots}
-  - {addr: 0x80126058, size: 796, name: screen_init_packet_buffers, hash: c2e0738092bc06ee, unit: formation_ability_slots}
+  - {addr: 0x80125cfc, size: 324, name: screen_present_frame, hash: 424202a51ed5e48f, unit: screen_buffers}
+  - {addr: 0x80125e40, size: 536, name: screen_init_packet_pools, hash: 8b137ab6455bab7c, unit: screen_buffers}
+  - {addr: 0x80126058, size: 796, name: screen_init_packet_buffers, hash: c2e0738092bc06ee, unit: screen_buffers}
   - {addr: 0x80126374, size: 52, name: menu_set_vsync_mode_and_event_speed, hash: 5e5e9e13e61eff91, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_set_vsync_mode_and_event_speed.c}
   - {addr: 0x801263a8, size: 32, name: menu_get_event_speed, hash: f20eb093659c8a8c, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/lib/menu/menu_get_event_speed.c}
   - {addr: 0x801263c8, size: 224, name: menu_init_scrollable_list_core, hash: 6a1458a19bfa2633, profile: gcc-2.6.3_O1_aspsx-2.34}

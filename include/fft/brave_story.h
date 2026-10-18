@@ -200,6 +200,7 @@ void brave_story_wait_work_history_then_pop(menu_stack_record_t* level);
 /* Dim, tint or restore the windows owned by the current menu level. */
 void brave_story_suspend_level(menu_stack_record_t* level);
 void brave_story_resume_level(menu_stack_record_t* level);
+void brave_story_push_propositions_level(void);
 void brave_story_resume_propositions_level(menu_stack_record_t* level);
 void brave_story_suspend_propositions_level(menu_stack_record_t* level);
 void brave_story_resume_advancing_list(menu_stack_record_t* level);

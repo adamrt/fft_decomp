@@ -20,7 +20,7 @@ units:
   - {name: title_controllers, source: src/open/title_controllers.c, data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
   - {name: title_sequence, source: src/open/title_sequence.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}, {addr: 0x80073fd4, size: 96, hash: 9244268b09d6a718}]}
   - {name: window_records, source: src/open/window_records.c}
-  - {name: window_text_records, source: src/open/window_text_records.c}
+  - {name: window_render, source: src/open/window_render.c}
 
 libraries:
   - {id: libpress, addr: 0x8007348c, end: 0x80073f10, kind: psyq, library: LIBPRESS}
@@ -94,12 +94,12 @@ functions:
   - {addr: 0x8006bde0, size: 752, name: birthday_update_date_menu, hash: 4fcabd119932ad53, unit: title_controllers}
   - {addr: 0x8006c0d0, size: 916, name: birthday_push_confirmation, hash: 16fd129a48959bf2, unit: title_controllers}
   - {addr: 0x8006c464, size: 748, name: birthday_update_confirmation, hash: f574d10bdce9561d, unit: title_controllers}
-  - {addr: 0x8006c750, size: 344, name: window_build_render_record_image, hash: 9fddadbd2cffc53b, unit: title_controllers}
-  - {addr: 0x8006c8a8, size: 196, name: window_load_render_record_image, hash: bdab620f029fd3c1, unit: title_controllers}
-  - {addr: 0x8006c96c, size: 88, name: window_display_text_entry, hash: 5dccdaeb10297930, unit: window_text_records}
-  - {addr: 0x8006c9c4, size: 104, name: window_measure_text_image, hash: 1dee4681dccf0eb6, unit: window_text_records}
-  - {addr: 0x8006ca2c, size: 212, name: window_init_text_record, hash: 5f2251260b376d41, unit: window_text_records}
-  - {addr: 0x8006cb00, size: 248, name: window_init_vram_record, hash: e55c249f3c899201, unit: title_sequence}
+  - {addr: 0x8006c750, size: 344, name: window_build_render_record_image, hash: 9fddadbd2cffc53b, unit: window_render}
+  - {addr: 0x8006c8a8, size: 196, name: window_load_render_record_image, hash: bdab620f029fd3c1, unit: window_render}
+  - {addr: 0x8006c96c, size: 88, name: window_display_text_entry, hash: 5dccdaeb10297930, unit: window_render}
+  - {addr: 0x8006c9c4, size: 104, name: window_measure_text_image, hash: 1dee4681dccf0eb6, unit: window_render}
+  - {addr: 0x8006ca2c, size: 212, name: window_init_text_record, hash: 5f2251260b376d41, unit: window_render}
+  - {addr: 0x8006cb00, size: 248, name: window_init_vram_record, hash: e55c249f3c899201, unit: window_render}
   - {addr: 0x8006cbf8, size: 444, name: music_test_start_list_thread, hash: a1bb85931a6abb8e, unit: title_sequence}
   - {addr: 0x8006cdb4, size: 316, name: music_test_open, hash: 45eaf45a7a3b75ee, unit: title_sequence}
   - {addr: 0x8006cef0, size: 876, name: music_test_update, hash: c7076123a75c7032, unit: title_sequence}

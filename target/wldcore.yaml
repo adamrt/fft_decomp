@@ -26,6 +26,7 @@ units:
   - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: sound_novel, source: src/wldcore/sound_novel.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
   - {name: startup, source: src/wldcore/startup.c}
+  - {name: tutorial_topics, source: src/wldcore/tutorial_topics.c}
   - {name: window_records, source: src/wldcore/window_records.c}
   - {name: window_render, source: src/wldcore/window_render.c, data: [{addr: 0x8009ee30, size: 32, hash: 0ba27e297a0422ae}]}
 
@@ -256,13 +257,13 @@ functions:
   - {addr: 0x8008368c, size: 528, name: brave_story_handle_person_list_input, hash: 484d14b345a99210, unit: brave_story}
   - {addr: 0x8008389c, size: 808, name: brave_story_push_person_level, hash: d3a3f0e072dc202d, unit: brave_story}
   - {addr: 0x80083bc4, size: 1644, name: brave_story_step_person_level, hash: 4e228c7ab54b932c, unit: brave_story}
-  - {addr: 0x80084230, size: 316, name: tutorial_open_topic_list, hash: d524d48690bf9b58, unit: brave_story}
-  - {addr: 0x8008436c, size: 20, name: tutorial_restore_topic_list_buttons, hash: 7e9ed99f23ab0769, unit: brave_story}
-  - {addr: 0x80084380, size: 20, name: tutorial_block_topic_list_buttons, hash: 11034aa27eaa3095, unit: brave_story}
-  - {addr: 0x80084394, size: 484, name: tutorial_handle_topic_list_input, hash: 41e87af5616e63b2, unit: brave_story}
-  - {addr: 0x80084578, size: 464, name: tutorial_push_topic_level, hash: d3eb739109f36a71, unit: brave_story}
-  - {addr: 0x80084748, size: 464, name: tutorial_wait_topic_then_pop, hash: ab93bfbf8a70025c, unit: brave_story}
-  - {addr: 0x80084918, size: 1632, name: brave_story_push_propositions_level, hash: 294521be6d51b514, unit: brave_story}
+  - {addr: 0x80084230, size: 316, name: tutorial_open_topic_list, hash: d524d48690bf9b58, unit: tutorial_topics}
+  - {addr: 0x8008436c, size: 20, name: tutorial_restore_topic_list_buttons, hash: 7e9ed99f23ab0769, unit: tutorial_topics}
+  - {addr: 0x80084380, size: 20, name: tutorial_block_topic_list_buttons, hash: 11034aa27eaa3095, unit: tutorial_topics}
+  - {addr: 0x80084394, size: 484, name: tutorial_handle_topic_list_input, hash: 41e87af5616e63b2, unit: tutorial_topics}
+  - {addr: 0x80084578, size: 464, name: tutorial_push_topic_level, hash: d3eb739109f36a71, unit: tutorial_topics}
+  - {addr: 0x80084748, size: 464, name: tutorial_wait_topic_then_pop, hash: ab93bfbf8a70025c, unit: tutorial_topics}
+  - {addr: 0x80084918, size: 1632, name: brave_story_push_propositions_level, hash: 294521be6d51b514, unit: list_levels}
   - {addr: 0x80084f78, size: 436, name: brave_story_resume_propositions_level, hash: aeb697ee4118713d, unit: list_levels}
   - {addr: 0x8008512c, size: 312, name: brave_story_suspend_propositions_level, hash: 9aa7ea7a95f05506, unit: list_levels}
   - {addr: 0x80085264, size: 1276, name: brave_story_handle_propositions_input, hash: 5f451f04dd3940e9, unit: list_levels}

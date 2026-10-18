@@ -63,6 +63,101 @@ static void brave_story_push_work_history_level(s32 value);
 static void menu_stack_close_parent_list_windows(void);
 static void menu_stack_close_parent_list_frame(void);
 
+/* Push the Brave Story's job category menu (MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS).
+ *
+ * The active-jobs row is listed while any proposition is dispatched and the
+ * completed-jobs row once any proposition is completed; each draws
+ * TEXT_ID_PROPOSITION_CATEGORY_ROW_FIRST + row. The Brave Story menu
+ * is hidden underneath. The cursor is restored from
+ * g_brave_story_propositions_saved_cursor (reset when out of range).
+ *
+ * `value` holds the cursor and then the reloaded main-window index: as one
+ * multi-set variable it is left to global allocation, which gives the
+ * target's v1/v0 assignment in the tail. `unused` reproduces the 0x58 frame.
+ */
+void brave_story_push_propositions_level(void) {
+    point32_t point;
+    RECT bounds;
+    s32 unused[4];
+    point32_t* base;
+    s32 index;
+    s32 i;
+    s32 completed;
+    s32 depth;
+    s32 value;
+
+    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.cursor_window = index;
+    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
+    g_window_records[index].priority = 9;
+    g_window_records[index].anim_counter = 0;
+    g_window_records[index].frame_index = 0;
+    g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count = 0;
+    completed = g_proposition_count;
+    if (completed != 0) {
+        g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entries[0]
+            = BRAVE_STORY_PROPOSITION_ROW_ADVANCING;
+        g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count++;
+    }
+    completed = 0;
+    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        if (script_get_variable(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
+            completed++;
+        }
+    }
+    if (completed != 0) {
+        g_menu_stack_records[g_menu_stack_depth]
+            .brave_story_propositions
+            .entries[g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count]
+            = BRAVE_STORY_PROPOSITION_ROW_WORK_HISTORY;
+        g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count++;
+    }
+
+    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.rows_image = index;
+    bounds.x = 0x80;
+    bounds.y = 0x80;
+    bounds.w = 0x4C;
+    bounds.h = g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count * 0x10 + 0x10;
+    window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
+    g_window_gs_image_records[index].priority = 9;
+    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_window_gs_image_records[index].base;
+    base->x = -0x78;
+    base->y = -0x28;
+    point.x = 8;
+    point.y = 8;
+    for (i = 0; i < g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count; i++) {
+        window_display_text_entry(index,
+            g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entries[i]
+                + TEXT_ID_PROPOSITION_CATEGORY_ROW_FIRST,
+            point, g_window_image_buffer);
+        point.y += 0x10;
+    }
+    window_load_render_record_image(index, g_window_image_buffer);
+
+    depth = g_menu_stack_depth;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_gs_image_records[g_menu_stack_records[depth - 1].brave_story.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.land_completion_star].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[g_menu_stack_records[depth - 1].brave_story.treasure_completion_star].flags
+        |= DISPLAY_OBJECT_HIDDEN;
+    if (g_menu_stack_records[depth].brave_story_propositions.entry_count
+        < g_brave_story_propositions_saved_cursor[0] + 1) {
+        g_brave_story_propositions_saved_cursor[0] = 0;
+    }
+    value = g_brave_story_propositions_saved_cursor[0];
+    g_menu_stack_records[depth].brave_story_propositions.selected_entry = value;
+    g_window_records[g_menu_stack_records[depth].brave_story_propositions.cursor_window].position.x
+        = g_window_gs_image_records[index].base.x + 6;
+    g_menu_stack_depth = depth + 1;
+    value = g_menu_stack_records[depth].brave_story_propositions.cursor_window;
+    g_window_records[value].position.y
+        = g_window_gs_image_records[index].base.y - -(g_brave_story_propositions_saved_cursor[0] * 0x10) + 0xE;
+    g_menu_stack_types[depth] = MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS;
+}
+
 /* The proposition-category level's resume handler, undoing
  * brave_story_suspend_propositions_level: default palettes, the idle cursor, and the
  * list content record shown again (popping in) if the transition hid it. */

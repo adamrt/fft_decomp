@@ -118,34 +118,6 @@ extern u16* volatile g_prologue_crossfade_new_picture;
 /* A 256x240 16-bit frame image in 32-bit words. */
 #define PROLOGUE_FRAME_IMAGE_WORDS (256 * 240 / 2)
 
-/* OPEN twin of window_init_vram_render_record for the 56-byte records: it keeps
- * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
- * Nothing in OPEN.BIN calls it. */
-void window_init_vram_record(
-    s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
-    RECT* quad_base;
-    RECT* quad;
-    CVECTOR* color;
-
-    g_window_gpu_image_records[record_index].flags
-        = (g_window_gpu_image_records[record_index].flags
-              & ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN))
-        | flags;
-    g_window_gpu_image_records[record_index].clut = clut_position;
-    g_window_gpu_image_records[record_index].vram_position.x = vram_position.x;
-    g_window_gpu_image_records[record_index].vram_position.y = vram_position.y;
-    /* Direct quad indexing changes the original record and column base selection. */
-    quad_base = &g_window_gpu_image_records[0].bounds;
-    quad = quad_base + record_index * (sizeof(window_gpu_image_record_t) / sizeof(RECT));
-    quad->x = (vram_position.x & 0x3f) * 2;
-    quad->y = vram_position.y & 0xFF;
-    quad->w = image_size.x * 2;
-    quad->h = image_size.y;
-    color = &g_window_gpu_image_records[record_index].color;
-    color->b = color->g = color->r = 0x80;
-    g_window_gpu_image_records[record_index].pop_in_step = 0;
-}
-
 /* Fills the music-test list's column layout and menu entry, then starts the
  * AT list thread on them. The window is the extent's width plus a 24-pixel
  * margin, rounded down to a multiple of four; its height fields start at 0. */
