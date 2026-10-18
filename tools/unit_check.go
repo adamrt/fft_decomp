@@ -27,11 +27,12 @@ type unitSpecYAML struct {
 }
 
 type unitInstanceYAML struct {
-	Module       string              `yaml:"module"`
-	Functions    []string            `yaml:"functions"`
-	Profile      string              `yaml:"profile"`
-	OriginalUnit string              `yaml:"original_unit"` // exact member list; inherit this unit's target-owned data and profile
-	Data         []unitTrialDataYAML `yaml:"data"`          // additional ranges, checked against the original extracted image
+	Module       string               `yaml:"module"`
+	Functions    []string             `yaml:"functions"`
+	Profile      string               `yaml:"profile"`
+	OriginalUnit string               `yaml:"original_unit"` // exact member list; inherit this unit's target-owned data and profile
+	Data         []unitTrialRangeYAML `yaml:"data"`          // additional ranges, checked against the original extracted image
+	Rodata       []unitTrialRangeYAML `yaml:"rodata"`        // likewise; does not replace inherited tables
 }
 
 // unitSpec names a merged source and the original entries, in file order,
@@ -155,7 +156,7 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	}
 	if instance.OriginalUnit != "" {
 		if len(spec.rodata) != 0 {
-			return nil, fmt.Errorf("%s: instance %s cannot combine original_unit with scratch rodata; its tables come from target", spec.name, m.ID)
+			return nil, fmt.Errorf("%s: instance %s cannot combine original_unit with top-level scratch rodata; use per-instance rodata for additions", spec.name, m.ID)
 		}
 		original, err := m.unitInstance(config, instance.OriginalUnit)
 		if err != nil {
@@ -684,8 +685,8 @@ func (p project) unitCheckCommand(args []string) error {
 		if selected != nil && !selected[unit.module.ID] {
 			continue
 		}
-		if len(instanceSpec.Data) != 0 {
-			if err := p.addUnitTrialData(unit, instanceSpec.Data); err != nil {
+		if len(instanceSpec.Data) != 0 || len(instanceSpec.Rodata) != 0 {
+			if err := p.addUnitTrialRanges(unit, instanceSpec.Data, instanceSpec.Rodata); err != nil {
 				return err
 			}
 		}

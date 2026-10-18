@@ -1,6 +1,6 @@
 package main
 
-// Scratch data additions let ownership trials retain the existing unit without
+// Scratch data/rodata additions let ownership trials retain the existing unit without
 // editing target metadata or copying the project. Expected hashes come only
 // from the verified original image; acceptance still requires make checksums.
 
@@ -9,39 +9,53 @@ import (
 	"sort"
 )
 
-type unitTrialDataYAML struct {
+type unitTrialRangeYAML struct {
 	Addr uint32 `yaml:"addr"`
 	Size int    `yaml:"size"`
 }
 
-func (p project) addUnitTrialData(unit *unitInstance, additions []unitTrialDataYAML) error {
+func (p project) addUnitTrialRanges(unit *unitInstance, data, rodata []unitTrialRangeYAML) error {
 	image, err := p.readModuleImage(unit.module)
 	if err != nil {
 		return err
 	}
-	return extendUnitTrialData(unit, additions, image)
+	return extendUnitTrialRanges(unit, data, rodata, image)
 }
 
-func extendUnitTrialData(unit *unitInstance, additions []unitTrialDataYAML, image []byte) error {
-	m := unit.module
-	if len(image) != m.Size {
-		return fmt.Errorf("%s: trial data image has an unexpected size", m.ID)
+func extendUnitTrialRanges(unit *unitInstance, data, rodata []unitTrialRangeYAML, image []byte) error {
+	if len(image) != unit.module.Size {
+		return fmt.Errorf("%s: trial range image has an unexpected size", unit.module.ID)
 	}
-	combined := append([]rodataSpec(nil), unit.data...)
+	newData, err := extendUnitTrialSection(unit, "data", unit.data, unit.rodata, data, image)
+	if err != nil {
+		return err
+	}
+	newRodata, err := extendUnitTrialSection(unit, "rodata", unit.rodata, newData, rodata, image)
+	if err != nil {
+		return err
+	}
+	// Neither section changes if a later range or the other section is invalid.
+	unit.data, unit.rodata = newData, newRodata
+	return nil
+}
+
+func extendUnitTrialSection(unit *unitInstance, section string, existing, other []rodataSpec, additions []unitTrialRangeYAML, image []byte) ([]rodataSpec, error) {
+	m := unit.module
+	combined := append([]rodataSpec(nil), existing...)
 	for _, addition := range additions {
 		if addition.Size <= 0 || !m.contains(addition.Addr, addition.Size) {
-			return fmt.Errorf("%s: trial data range at 0x%08x is invalid or outside the module", m.ID, addition.Addr)
+			return nil, fmt.Errorf("%s: trial %s range at 0x%08x is invalid or outside the module", m.ID, section, addition.Addr)
 		}
 		overlaps := func(addr uint32, size int) bool {
 			return uint64(addition.Addr) < uint64(addr)+uint64(size) && uint64(addr) < uint64(addition.Addr)+uint64(addition.Size)
 		}
 		for _, function := range m.Functions {
 			if overlaps(function.Addr, function.Size) {
-				return fmt.Errorf("%s: trial data overlaps original function %s", m.ID, function.Name)
+				return nil, fmt.Errorf("%s: trial %s overlaps original function %s", m.ID, section, function.Name)
 			}
 			for _, span := range function.Rodata {
 				if overlaps(span.Addr, span.Size) {
-					return fmt.Errorf("%s: trial data overlaps original rodata of %s", m.ID, function.Name)
+					return nil, fmt.Errorf("%s: trial %s overlaps original rodata of %s", m.ID, section, function.Name)
 				}
 			}
 		}
@@ -49,17 +63,17 @@ func extendUnitTrialData(unit *unitInstance, additions []unitTrialDataYAML, imag
 			for _, spans := range [][]rodataSpec{owner.Data, owner.Rodata} {
 				for _, span := range spans {
 					if overlaps(span.Addr, span.Size) {
-						return fmt.Errorf("%s: trial data overlaps original data/rodata of unit %s", m.ID, owner.Name)
+						return nil, fmt.Errorf("%s: trial %s overlaps original data/rodata of unit %s", m.ID, section, owner.Name)
 					}
 				}
 			}
 		}
-		// This also covers scratch rodata and earlier additions, which are not
+		// This also covers the other scratch section and earlier additions, which are not
 		// necessarily present in the original configuration.
-		for _, spans := range [][]rodataSpec{unit.rodata, combined} {
+		for _, spans := range [][]rodataSpec{other, combined} {
 			for _, span := range spans {
 				if overlaps(span.Addr, span.Size) {
-					return fmt.Errorf("%s: trial data ranges overlap at 0x%08x", m.ID, addition.Addr)
+					return nil, fmt.Errorf("%s: trial %s ranges overlap at 0x%08x", m.ID, section, addition.Addr)
 				}
 			}
 		}
@@ -70,9 +84,8 @@ func extendUnitTrialData(unit *unitInstance, additions []unitTrialDataYAML, imag
 	for i := 1; i < len(combined); i++ {
 		end := uint64(combined[i-1].Addr) + uint64(combined[i-1].Size)
 		if uint64(combined[i].Addr) < end || uint64(combined[i].Addr)-end >= 8 {
-			return fmt.Errorf("%s: trial data ranges are not contiguous at 0x%08x", m.ID, combined[i].Addr)
+			return nil, fmt.Errorf("%s: trial %s ranges are not contiguous at 0x%08x", m.ID, section, combined[i].Addr)
 		}
 	}
-	unit.data = combined
-	return nil
+	return combined, nil
 }

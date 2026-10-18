@@ -28,8 +28,8 @@ func TestUnitTrialDataRetainsOriginalContractsAndRejectsChangedBytes(t *testing.
 	original := unit.data[0]
 	originalFunction := unit.module.Functions[0]
 	// Input order need not be address order; the existing span stays intact.
-	additions := []unitTrialDataYAML{{Addr: unit.module.Load + 136, Size: 4}, {Addr: unit.module.Load + 124, Size: 4}}
-	if err := extendUnitTrialData(unit, additions, image); err != nil {
+	additions := []unitTrialRangeYAML{{Addr: unit.module.Load + 136, Size: 4}, {Addr: unit.module.Load + 124, Size: 4}}
+	if err := extendUnitTrialRanges(unit, additions, nil, image); err != nil {
 		t.Fatal(err)
 	}
 	if len(unit.data) != 3 || unit.data[1] != original || unit.module.Units[0].Data[0] != original || !reflect.DeepEqual(unit.module.Functions[0], originalFunction) {
@@ -55,27 +55,27 @@ func TestUnitTrialDataRejectsInvalidOverlappingOrRemoteRanges(t *testing.T) {
 	const base = uint32(0x80000000)
 	tests := []struct {
 		name string
-		data []unitTrialDataYAML
+		data []unitTrialRangeYAML
 		want string
 	}{
-		{"zero size", []unitTrialDataYAML{{Addr: base + 124}}, "invalid"},
-		{"negative size", []unitTrialDataYAML{{Addr: base + 124, Size: -1}}, "invalid"},
-		{"large size", []unitTrialDataYAML{{Addr: base + 124, Size: int(^uint(0) >> 1)}}, "invalid"},
-		{"below module", []unitTrialDataYAML{{Addr: base - 1, Size: 1}}, "outside"},
-		{"past module", []unitTrialDataYAML{{Addr: base + 255, Size: 2}}, "outside"},
-		{"text", []unitTrialDataYAML{{Addr: base + 92, Size: 8}}, "function"},
-		{"function rodata", []unitTrialDataYAML{{Addr: base + 16, Size: 4}}, "rodata"},
-		{"unit rodata", []unitTrialDataYAML{{Addr: base + 24, Size: 4}}, "unit owner"},
-		{"existing data", []unitTrialDataYAML{{Addr: base + 128, Size: 4}}, "unit owner"},
-		{"duplicate", []unitTrialDataYAML{{Addr: base + 124, Size: 4}, {Addr: base + 124, Size: 4}}, "overlap"},
-		{"partial overlap", []unitTrialDataYAML{{Addr: base + 120, Size: 8}, {Addr: base + 124, Size: 4}}, "overlap"},
-		{"remote data", []unitTrialDataYAML{{Addr: base + 144, Size: 4}}, "not contiguous"},
+		{"zero size", []unitTrialRangeYAML{{Addr: base + 124}}, "invalid"},
+		{"negative size", []unitTrialRangeYAML{{Addr: base + 124, Size: -1}}, "invalid"},
+		{"large size", []unitTrialRangeYAML{{Addr: base + 124, Size: int(^uint(0) >> 1)}}, "invalid"},
+		{"below module", []unitTrialRangeYAML{{Addr: base - 1, Size: 1}}, "outside"},
+		{"past module", []unitTrialRangeYAML{{Addr: base + 255, Size: 2}}, "outside"},
+		{"text", []unitTrialRangeYAML{{Addr: base + 92, Size: 8}}, "function"},
+		{"function rodata", []unitTrialRangeYAML{{Addr: base + 16, Size: 4}}, "rodata"},
+		{"unit rodata", []unitTrialRangeYAML{{Addr: base + 24, Size: 4}}, "unit owner"},
+		{"existing data", []unitTrialRangeYAML{{Addr: base + 128, Size: 4}}, "unit owner"},
+		{"duplicate", []unitTrialRangeYAML{{Addr: base + 124, Size: 4}, {Addr: base + 124, Size: 4}}, "overlap"},
+		{"partial overlap", []unitTrialRangeYAML{{Addr: base + 120, Size: 8}, {Addr: base + 124, Size: 4}}, "overlap"},
+		{"remote data", []unitTrialRangeYAML{{Addr: base + 144, Size: 4}}, "not contiguous"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			unit, image := unitTrialDataFixture()
 			before := append([]rodataSpec(nil), unit.data...)
-			if err := extendUnitTrialData(unit, tt.data, image); err == nil || !strings.Contains(err.Error(), tt.want) {
+			if err := extendUnitTrialRanges(unit, tt.data, nil, image); err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("error=%v, want%q", err, tt.want)
 			}
 			if !reflect.DeepEqual(unit.data, before) {
@@ -92,8 +92,8 @@ func TestUnitTrialDataUsesVerifiedExtractedImage(t *testing.T) {
 	if err := os.WriteFile(path, image, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	addition := []unitTrialDataYAML{{Addr: unit.module.Load + 124, Size: 4}}
-	if err := p.addUnitTrialData(unit, addition); err != nil {
+	addition := []unitTrialRangeYAML{{Addr: unit.module.Load + 124, Size: 4}}
+	if err := p.addUnitTrialRanges(unit, addition, nil); err != nil {
 		t.Fatal(err)
 	}
 	unit, image = unitTrialDataFixture()
@@ -101,7 +101,7 @@ func TestUnitTrialDataUsesVerifiedExtractedImage(t *testing.T) {
 	if err := os.WriteFile(path, image, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := p.addUnitTrialData(unit, addition); err == nil || !strings.Contains(err.Error(), "sha256") {
+	if err := p.addUnitTrialRanges(unit, addition, nil); err == nil || !strings.Contains(err.Error(), "sha256") {
 		t.Fatalf("accepted corrupt extracted image: %v", err)
 	}
 	if len(unit.data) != 1 {
