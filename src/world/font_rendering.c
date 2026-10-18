@@ -13,7 +13,7 @@ static u8 g_screen_text_row_image_buffer[2048] = { 0 };
 /* Renders each text id of a -1 terminated list into its own 16 pixel line of
  * `destination`, uploading one line at a time through the scratch image at
  * g_screen_text_row_image_buffer. */
-void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 palette) {
+void screen_text_render_rows(const u8* text_table, const s16* text_ids, const RECT* destination, s32 palette) {
     text_image_bounds_t bounds;
     RECT destination_row;
     s16 row_text_ids[4];
@@ -31,7 +31,7 @@ void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 pal
         row_text_ids[1] = -1;
         memset(g_screen_text_row_image_buffer, 0, 0x800);
         menu_text_render_encoded_ids_to_image(
-            g_screen_text_row_image_buffer, &bounds, 0xa, 0x64, font, row_text_ids, 0x64, 0xe7, palette);
+            g_screen_text_row_image_buffer, &bounds, 0xa, 0x64, text_table, row_text_ids, 0x64, 0xe7, palette);
         gfx_load_image_and_wait(&destination_row, g_screen_text_row_image_buffer);
         destination_row.y += 0x10;
     }
@@ -44,8 +44,8 @@ void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 pal
  * width (2: two pixels before and after, 3: one before and two after, 4: one
  * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
  * as the text table for screen_text_render_rows, with the
- * caller's text ids (`name`), rect and palette passed through unchanged. */
-void screen_text_kern(u8* text, s16* name, RECT* rect, s32 palette) {
+ * caller's text ids, destination and palette passed through unchanged. */
+void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 palette) {
     u8 buf[0x78];
     u8* out;
     s32 len;
@@ -110,7 +110,7 @@ void screen_text_kern(u8* text, s16* name, RECT* rect, s32 palette) {
         } while (glyph != TEXT_END_WAIT_FOR_CONFIRM);
     }
     buf[len] = TEXT_END_WAIT_FOR_CONFIRM;
-    screen_text_render_rows(buf, name, rect, palette);
+    screen_text_render_rows(buf, text_ids, destination, palette);
 }
 
 /* Renders one encoded glyph (either a direct id or a 0xD?-prefixed

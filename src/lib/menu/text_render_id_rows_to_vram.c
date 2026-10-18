@@ -15,7 +15,7 @@ enum { TEXT_ID_ROW_FILL_GLYPH = 0xeb };
 
 /* Render each id of a -1 terminated text-id list as one 16-pixel row and
  * upload the rows to VRAM from the top of `destination` down. */
-void text_render_id_rows_to_vram(u8* text_table, s16* text_ids, RECT* destination, s32 flags) {
+void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags) {
     u8 image[0x800];
     text_image_bounds_t bounds;
     RECT upload_rect;

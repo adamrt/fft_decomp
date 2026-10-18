@@ -295,8 +295,8 @@ s16 screen_text_get_char_at(const u8* table, s16 index, s32 position);
 u8* world_text_find_entry(u32 text_id);
 
 /* text images */
-void screen_text_render_rows(u8* font, s16* text_ids, RECT* destination, s32 palette);
-void screen_text_kern(u8* text, s16* name, RECT* rect, s32 palette);
+void screen_text_render_rows(const u8* text_table, const s16* text_ids, const RECT* destination, s32 palette);
+void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 palette);
 s32 screen_text_measure_width(const u8* entry);
 
 /* message box */

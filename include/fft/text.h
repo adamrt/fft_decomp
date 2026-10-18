@@ -283,10 +283,10 @@ void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text);
 void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
-void menu_text_render_encoded_ids_to_image(u8* image, text_image_bounds_t* rect, s32 unused, s32 max_chars, u8* font,
-    s16* ids, s32 count, s16 glyph, s32 unused_flags);
-void text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
-void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
+void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t* bounds, s32 unused, s32 max_chars,
+    const u8* text_table, const s16* text_ids, s32 count, s16 glyph, s32 unused_flags);
+void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags);
+void text_concatenate_entries(const u8* text_table, u8* out, const s16* text_ids, s32 separate);
 
 /* Allocates text image VRAM for the sprite or quad and gives it the normal menu CLUT plus clut_offset rows. */
 void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);

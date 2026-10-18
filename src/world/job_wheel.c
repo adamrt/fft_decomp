@@ -750,24 +750,24 @@ static void formation_job_prepare_selected_sprite(void) {
  * jobs are listed). */
 static void formation_job_build_wheel_name(void) {
     RECT destination_rect;
-    u8* font;
-    s16* name;
+    const u8* text_table;
+    const s16* text_ids;
     s8 pixel_width;
 
     if (g_formation_job_wheel_job_count < 2) {
-        font = g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN];
+        text_table = g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN];
         g_formation_job_wheel_name_text[0] = 0x1B;
     } else {
-        font = g_text_section_pointers[TEXT_SECTION_JOB_NAMES];
+        text_table = g_text_section_pointers[TEXT_SECTION_JOB_NAMES];
         g_formation_job_wheel_name_text[0] = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
     }
-    name = g_formation_job_wheel_name_text;
+    text_ids = g_formation_job_wheel_name_text;
     destination_rect.x = 0x24C;
     destination_rect.y = 0x130;
     destination_rect.w = 0x14;
     destination_rect.h = 0x10;
-    screen_text_render_rows(font, name, &destination_rect, 0);
-    pixel_width = screen_text_measure_width(menu_text_find_entry_by_index(font, *name & 0x3FF, 2));
+    screen_text_render_rows(text_table, text_ids, &destination_rect, 0);
+    pixel_width = screen_text_measure_width(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
     g_formation_job_wheel_name_rect.x = ((0x50 - pixel_width) >> 1) + 0x58;
     g_formation_job_wheel_name_rect.y = 0xD7;
     g_formation_job_wheel_name_rect.w = pixel_width;
