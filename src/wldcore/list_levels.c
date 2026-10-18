@@ -1210,15 +1210,15 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
     switch (screen) {
     case MENU_STACK_LEVEL_BRAVE_STORY:
         window_set_render_objects_visible(0);
-        audio_queue_wait_until_empty();
-        audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_BRAVE_STORY));
+        music_queue_wait_until_empty();
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_EVENTS:
         window_set_render_objects_visible(0);
         screen_set_entry_4_cursor(2);
         count = 0;
-        audio_queue_wait_until_empty();
-        audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_BRAVE_STORY));
+        music_queue_wait_until_empty();
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         if (script_get_variable(EVENT_SCRIPT_VAR_FACTS_ENABLED) != 0) {
             for (i = 0; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
@@ -1241,8 +1241,8 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
         break;
     case MENU_STACK_LEVEL_TUTORIAL:
         window_set_render_objects_visible(0);
-        audio_queue_wait_until_empty();
-        audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_TUTORIAL));
+        music_queue_wait_until_empty();
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_TUTORIAL));
         break;
     case MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST:
         tutorial_build_menu_panel(&g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu);
@@ -1260,9 +1260,9 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
         menu_stack_close_parent_list_windows();
         message_block_load_if_changed(MESSAGE_BLOCK_TREASURES);
         file_wait_for_pending();
-        audio_queue_wait_until_empty();
+        music_queue_wait_until_empty();
         suzuki_sound_set_master_volume(0x3FFF, 1);
-        audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_BRAVE_STORY));
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
         break;
     default:
         break;
@@ -1566,7 +1566,7 @@ void tutorial_handle_menu_input(menu_stack_record_t* level) {
         }
         if (level->tutorial_menu.mode == MENU_STACK_WINDOW_MODE_LEAVE_WAIT
             && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
-            if ((g_system_flags & SYSTEM_FLAG_TITLE_TUTORIAL) == 0 || g_audio_queue.count == 0) {
+            if ((g_system_flags & SYSTEM_FLAG_TITLE_TUTORIAL) == 0 || g_music_queue.count == 0) {
                 g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
                 window_set_render_objects_visible(1);
                 g_menu_stack_depth = g_menu_stack_depth - 1;
@@ -1593,17 +1593,17 @@ void tutorial_handle_menu_input(menu_stack_record_t* level) {
             g_system_flags = g_system_flags | SYSTEM_FLAG_INPUT_BLOCKED;
             world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
             if (g_system_flags & SYSTEM_FLAG_TITLE_TUTORIAL) {
-                audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
-                audio_queue_add(AUDIO_COMMAND_UNLOAD, 0);
+                music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
+                music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 0);
             } else {
-                audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
+                music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
             }
             g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_TUTORIAL].selected_index = 0;
         }
         return;
     }
 
-    if (g_audio_queue.count != 0) {
+    if (g_music_queue.count != 0) {
         return;
     }
 

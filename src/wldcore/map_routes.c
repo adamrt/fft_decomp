@@ -6,6 +6,7 @@
 #include "fft/location.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
+#include "fft/music.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/system.h"
@@ -823,7 +824,7 @@ static void travel_find_best_path(s32 from, s32 to) {
     for (route = 0; route < WORLD_MAP_ROUTE_COUNT; route++) {
         if (VSync(1) > 200) {
             file_poll_load(&g_file_cd_state);
-            audio_queue_process();
+            music_queue_process();
             world_map_pulse_dots();
             world_map_draw_frame();
             buffer_index = GsGetActiveBuff();

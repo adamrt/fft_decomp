@@ -10,7 +10,6 @@ profile: gcc-2.7.2_O2_aspsx-2.21_divcheck
 links: [world]
 
 units:
-  - {name: audio_queue, source: src/wldcore/audio_queue.c}
   - {name: bar, source: src/wldcore/bar.c}
   - {name: brave_story, source: src/wldcore/brave_story.c}
   - {name: brave_story_collections, source: src/wldcore/brave_story_collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
@@ -21,6 +20,7 @@ units:
   - {name: map_routes, source: src/wldcore/map_routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}]}
   - {name: map_tiles, source: src/wldcore/map_tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}]}
+  - {name: music_queue, source: src/wldcore/music_queue.c}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: proposition_results, source: src/wldcore/proposition_results.c}
   - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
@@ -413,11 +413,11 @@ functions:
   - {addr: 0x800906c0, size: 872, name: text_window_render_page, hash: 0a6626b97c286fca, unit: window_render}
   - {addr: 0x80090a28, size: 140, name: text_window_update_page_prompt, hash: 65507cce57e00cfe, unit: window_render}
   - {addr: 0x80090ab4, size: 636, name: text_window_update_scroll_indicators, hash: 8edf02f6f19c040c, unit: window_render}
-  - {addr: 0x80090d30, size: 32, name: sound_play_effect, hash: cbcbcaac21c3c09d, unit: audio_queue}
-  - {addr: 0x80090d50, size: 208, name: audio_queue_add, hash: 6b10a0879bd17fe8, unit: audio_queue}
-  - {addr: 0x80090e20, size: 852, name: audio_queue_process, hash: 419da1927cab9858, unit: audio_queue, rodata: [{addr: 0x800672ac, size: 76, hash: 2d0472f03d8de22e}]}
-  - {addr: 0x80091174, size: 88, name: audio_queue_start_music, hash: 3c92ed5553c06ccd, unit: audio_queue}
-  - {addr: 0x800911cc, size: 108, name: audio_queue_wait_until_empty, hash: 8b6a1a20afb1383a, unit: audio_queue}
+  - {addr: 0x80090d30, size: 32, name: sound_play_effect, hash: cbcbcaac21c3c09d, unit: music_queue}
+  - {addr: 0x80090d50, size: 208, name: music_queue_add, hash: 6b10a0879bd17fe8, unit: music_queue}
+  - {addr: 0x80090e20, size: 852, name: music_queue_process, hash: 419da1927cab9858, unit: music_queue, rodata: [{addr: 0x800672ac, size: 76, hash: 2d0472f03d8de22e}]}
+  - {addr: 0x80091174, size: 88, name: music_queue_start_track, hash: 3c92ed5553c06ccd, unit: music_queue}
+  - {addr: 0x800911cc, size: 108, name: music_queue_wait_until_empty, hash: 8b6a1a20afb1383a, unit: music_queue}
   - {addr: 0x80091238, size: 328, name: location_script_run, hash: 3595ca7b3a29bb9a, unit: map_opcodes}
   - {addr: 0x80091380, size: 8, name: location_script_opcode_00_nop, hash: 6d64edf91449c1b1, unit: map_opcodes}
   - {addr: 0x80091388, size: 28, name: location_script_opcode_14_skip_1_operand, hash: 768b510ec89c7449, unit: map_opcodes}
@@ -612,7 +612,7 @@ data:
   - {addr: 0x800d457c, name: g_proposition_send_unit_count}
   - {addr: 0x800d4580, name: g_world_map_cursor_window}
   - {addr: 0x800d4584, name: g_menu_stack_types}
-  - {addr: 0x800d45a4, name: g_audio_queue}
+  - {addr: 0x800d45a4, name: g_music_queue}
   - {addr: 0x800d4644, name: g_location_script_flags}
   - {addr: 0x800d4644, name: g_location_script_state}
   - {addr: 0x800d4674, name: g_location_script_base}

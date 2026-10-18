@@ -81,7 +81,7 @@ void boot_run_startup(void) {
     boot_show_sceap_logo();
     boot_fade_in_squaresoft_logo();
     memcard_init_events();
-    sound_open_generic_sfx();
+    sound_init();
     zodiac_load_frame();
     srand(1);
     boot_fade_out_squaresoft_logo();
@@ -114,7 +114,7 @@ void boot_reset_game_state(void) {
         file_reset_cdrom_cpu_ram();
         gfx_reset_display(256, 240, 512, 0, 0, 0);
         boot_fade_in_squaresoft_logo();
-        sound_open_generic_sfx();
+        sound_init();
         zodiac_load_frame();
     }
 

@@ -2,7 +2,7 @@
 #define MUSIC_H
 
 /* Music: MAIN's scenario music slots, playback and tunes over the Suzuki sound driver, and the track requests BATTLE,
- * WORLD and the overlays make through the main stack. */
+ * WORLD and the overlays make through the main stack, plus WLDCORE's music queue. */
 
 #include "psx/types.h"
 
@@ -14,7 +14,7 @@ struct suzuki_music;
  * event scripts and scenario data choose the others. The music test offers
  * ids 1-96 (g_music_test_music_ids). */
 typedef enum music_id {
-    MUSIC_NONE = 0,       /* music_play_tracks and the WLDCORE audio queue skip it */
+    MUSIC_NONE = 0,       /* music_play_tracks and the WLDCORE music queue skip it */
     MUSIC_ALTIMA = 19,    /* EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC */
     MUSIC_MILESTONE = 20, /* proposition_step_discovery_level, in the bar */
     MUSIC_TUTORIAL = 26,  /* the world menu's tutorial screen */
@@ -85,5 +85,60 @@ void music_play_tracks(s32 slot_1_music_id, s32 slot_2_music_id);
 
 /* Wait while the music loads, checking on the main stack; the check always answers done. */
 void music_wait_for_load(void);
+
+/* world-map music queue */
+/* Flags of music_queue_slots_t. */
+typedef enum music_queue_flag {
+    MUSIC_QUEUE_PLAYING = 0x01 /* the current slot's music is audible: a new start fades it out first */
+} music_queue_flag_e;
+
+/* Playback flags followed by the loaded music IDs for slots 1 and 2. */
+typedef struct music_queue_slots {
+    s32 flags; /* music_queue_flag_e */
+    s32 tracks[2];
+} music_queue_slots_t;
+
+/* Value of MUSIC_QUEUE_COMMAND_PLAY_TRACK and of
+ * music_queue_start_track: a music slot (1 or 2) and the
+ * music_id_e id to load into it. */
+#define MUSIC_QUEUE_TRACK(slot, music_id) (((slot) << 8) | (music_id))
+
+/* Commands of the music queue (music_queue_add), and the
+ * wait states music_queue_process moves the current command
+ * through. */
+typedef enum music_queue_command {
+    MUSIC_QUEUE_COMMAND_NONE = 0,       /* idle: takes the next queued command */
+    MUSIC_QUEUE_COMMAND_PLAY_TRACK = 1, /* value: MUSIC_QUEUE_TRACK(slot, music id) */
+    MUSIC_QUEUE_COMMAND_FADE_OUT = 2,   /* value << 2: fade time */
+    MUSIC_QUEUE_COMMAND_FADE_IN = 3,    /* the current slot, to the stored volume over value << 2 */
+    MUSIC_QUEUE_COMMAND_UNLOAD = 4,     /* value: slot, 0 for the current one */
+    MUSIC_QUEUE_COMMAND_WAIT_LOAD = 16,
+    MUSIC_QUEUE_COMMAND_WAIT_FADE_OUT = 17,
+    MUSIC_QUEUE_COMMAND_WAIT_FADE_IN = 18
+} music_queue_command_e;
+
+enum { MUSIC_QUEUE_CAPACITY = 16 };
+
+/* The music command FIFO, filled by music_queue_add and serviced each frame by
+ * music_queue_process, followed by the music state that consumer owns. current_command and count are
+ * the busy fields music_queue_wait_until_empty and the level steps test. */
+typedef struct music_queue {
+    music_queue_command_e commands[MUSIC_QUEUE_CAPACITY];
+    s32 values[MUSIC_QUEUE_CAPACITY];
+    music_queue_command_e current_command; /* 0x80 */
+    s32 current_value;                     /* 0x84 */
+    s32 count;                             /* 0x88 */
+    music_queue_slots_t music;             /* 0x8c */
+    s32 current_slot;                      /* 0x98 */
+    s32 volume;                            /* 0x9c */
+} music_queue_t;
+typedef char music_queue_size_must_be_160[sizeof(music_queue_t) == 160 ? 1 : -1];
+
+extern music_queue_t g_music_queue;
+
+void music_queue_add(music_queue_command_e command, s32 value);
+void music_queue_start_track(s32 value);
+void music_queue_process(void);
+void music_queue_wait_until_empty(void);
 
 #endif

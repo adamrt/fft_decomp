@@ -339,7 +339,7 @@ void brave_story_suspend_level(menu_stack_record_t* state) {
  *
  * Copies the play time into the displayed numeric values, then:
  *  - while input is blocked: once the fade out ends, wait for the message
- *    thread (and, when opened from the title, the audio queue), pop the level
+ *    thread (and, when opened from the title, the music queue), pop the level
  *    and either return to the title or fade the map back in and push the
  *    entry window level;
  *  - after the goodbye message: Circle or Cross starts the fade out and the
@@ -380,7 +380,7 @@ void brave_story_handle_input(menu_stack_record_t* level) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
             return;
         }
-        if ((g_system_flags & SYSTEM_FLAG_TITLE_BRAVE_STORY) && g_audio_queue.count != 0) {
+        if ((g_system_flags & SYSTEM_FLAG_TITLE_BRAVE_STORY) && g_music_queue.count != 0) {
             return;
         }
 
@@ -411,16 +411,16 @@ void brave_story_handle_input(menu_stack_record_t* level) {
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
         if (g_system_flags & SYSTEM_FLAG_TITLE_BRAVE_STORY) {
-            audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
-            audio_queue_add(AUDIO_COMMAND_UNLOAD, 0);
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
+            music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 0);
         } else {
-            audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
+            music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
         }
         g_brave_story_saved_cursor[0] = 0;
         return;
     }
 
-    if (g_audio_queue.count != 0) {
+    if (g_music_queue.count != 0) {
         return;
     }
 
@@ -714,7 +714,7 @@ void brave_story_handle_event_input(menu_stack_record_t* level) {
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         sound_play_effect(SOUND_SFX_CONFIRM);
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
         return;
     }
 

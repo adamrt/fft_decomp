@@ -82,7 +82,7 @@ typedef enum world_map_fade_flag {
     WORLD_MAP_FADE_REDRAW_MAP = 0x04,  /* every fade step sets SYSTEM_FLAG_DRAW_MAP */
     WORLD_MAP_FADE_BOX_VISIBLE = 0x08, /* the fill box is drawn without a running fade */
     WORLD_MAP_FADE_STOP_MUSIC = 0x10,  /* also fades the music out and unloads it */
-    WORLD_MAP_FADE_START_MUSIC = 0x20  /* also loads AUDIO_MUSIC(1, MUSIC_WORLD_MAP), fading it in */
+    WORLD_MAP_FADE_START_MUSIC = 0x20  /* also loads MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP), fading it in */
 } world_map_fade_flag_e;
 
 /* The screen fade and its two full-screen fill boxes. The parallel arrays share one object, which is why the

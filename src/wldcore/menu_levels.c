@@ -664,7 +664,7 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
             /* Skips the zoom handling and the wide-view toggle below. */
             goto scroll;
         }
-        if (!(g_world_map_zoom.flags & (WORLD_MAP_PAN_ACTIVE | WORLD_MAP_PAN_ZOOMED_OUT)) && g_audio_queue.count == 0) {
+        if (!(g_world_map_zoom.flags & (WORLD_MAP_PAN_ACTIVE | WORLD_MAP_PAN_ZOOMED_OUT)) && g_music_queue.count == 0) {
             if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
                 /* The hit test returns a one-based dot index, 0 for no dot. */
                 hit = world_map_find_dot_at(g_window_records[level->map_cursor.window_index].position);
@@ -2014,7 +2014,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
                 switch (value) {
                 case TEXT_ID_BAR& TEXT_ID_ENTRY_MASK:
                     menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
-                    audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_BAR));
+                    music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
                     bar_push_level();
                     return;
                 case TEXT_ID_SHOP& TEXT_ID_ENTRY_MASK:
@@ -2052,7 +2052,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
                         g_system_flags = (g_system_flags | SYSTEM_FLAG_DEEP_DUNGEON_BATTLE) ^ SYSTEM_FLAG_RUNNING;
                     } else {
                         world_map_fade_start(0, 0x10);
-                        audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
+                        music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
                     }
                     return;
                 }
@@ -2099,8 +2099,8 @@ void location_step_menu_level(menu_stack_record_t* level) {
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->location_menu.entry_count != 0
         && g_file_cd_state.state == 0) {
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
-        audio_queue_add(AUDIO_COMMAND_UNLOAD, 2);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
+        music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 2);
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->location_menu.slots.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -2150,7 +2150,7 @@ static void location_run_shop(s32 shop_id) {
     s32 i;
 
     screen_set_brightness(0x80, 0x80, 0x80);
-    audio_queue_wait_until_empty();
+    music_queue_wait_until_empty();
     shop_run_screen(shop_id);
     g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
@@ -2167,7 +2167,7 @@ static void location_run_shop(s32 shop_id) {
         *clear = 0;
         clear--;
     }
-    audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
+    music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
 }
 
 /* Pushes g_text_window on message `text` as

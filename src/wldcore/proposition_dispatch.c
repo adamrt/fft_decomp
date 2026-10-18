@@ -1177,7 +1177,7 @@ static void proposition_push_report_level(s32 argument) {
     if (g_proposition_report.recalled != 0) {
         g_menu_stack_records[depth].proposition_report.state = 0x63;
     } else {
-        audio_queue_start_music(AUDIO_MUSIC(2, MUSIC_PROPOSITION_REPORT));
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_PROPOSITION_REPORT));
     }
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_REPORT;
@@ -1221,7 +1221,7 @@ void proposition_step_report_level(menu_stack_record_t* level) {
     load_phase = level->proposition_report.load_phase;
     switch (load_phase) {
     case PROPOSITION_REPORT_LOAD_MESSAGES:
-        if (g_audio_queue.count != 0) {
+        if (g_music_queue.count != 0) {
             return;
         }
         level->proposition_report.load_phase = PROPOSITION_REPORT_LOAD_PICTURE;
@@ -1671,14 +1671,14 @@ void proposition_step_result_level(menu_stack_record_t* level) {
     }
 
     if (level->proposition_result.phase == PROPOSITION_RESULT_PHASE_DONE) {
-        if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE) {
+        if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE) {
             g_menu_stack_depth = g_menu_stack_depth - 1;
             if (proposition_get_milestone_rank() != 0) {
                 proposition_push_discovery_level();
                 return;
             }
             if (g_proposition_report.recalled == 0) {
-                audio_queue_add(AUDIO_COMMAND_FADE_IN, 0x10);
+                music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
             }
             proposition_open_returned_list();
         }
@@ -1686,10 +1686,10 @@ void proposition_step_result_level(menu_stack_record_t* level) {
     }
 
     if (level->proposition_result.phase == PROPOSITION_RESULT_PHASE_CLOSING) {
-        if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE
+        if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
             && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
             if (proposition_get_milestone_rank() == 0 && g_proposition_report.recalled == 0) {
-                audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(2, MUSIC_BAR));
+                music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
             }
             level->proposition_result.phase = PROPOSITION_RESULT_PHASE_DONE;
         }
@@ -1774,7 +1774,7 @@ void proposition_step_result_level(menu_stack_record_t* level) {
 
     g_proposition_count--;
     if (proposition_get_milestone_rank() == 0 && g_proposition_report.recalled == 0) {
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
     }
 
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);

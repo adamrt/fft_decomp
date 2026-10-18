@@ -491,12 +491,12 @@ void world_map_fade_start(s32 flags, s32 duration) {
         g_world_map_fade.duration = duration;
         g_system_flags |= SYSTEM_FLAG_FADING;
         if (flags & WORLD_MAP_FADE_START_MUSIC) {
-            audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
-            audio_queue_add(AUDIO_COMMAND_FADE_IN, 0x10);
+            music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
         }
         if (flags & WORLD_MAP_FADE_STOP_MUSIC) {
-            audio_queue_add(AUDIO_COMMAND_FADE_OUT, 4);
-            audio_queue_add(AUDIO_COMMAND_UNLOAD, 2);
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 4);
+            music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 2);
         }
     }
 }
@@ -517,7 +517,7 @@ s32 world_map_fade_step(void) {
         } else {
             if (g_world_map_fade.elapsed + 1 == g_world_map_fade.duration) {
                 g_system_flags &= ~SYSTEM_FLAG_FADING;
-                audio_queue_wait_until_empty();
+                music_queue_wait_until_empty();
             }
             if (g_world_map_fade.flags[0] & WORLD_MAP_FADE_OUT) {
                 elapsed = g_world_map_fade.elapsed;

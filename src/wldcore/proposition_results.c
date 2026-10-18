@@ -524,7 +524,7 @@ static void proposition_show_next_milestone_message(proposition_discovery_level_
     discovery->current++;
     discovery->remaining--;
     if (discovery->remaining == 0) {
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 4);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 4);
         discovery->phase = PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE;
         discovery->timer = 0;
     } else {
@@ -591,29 +591,29 @@ s32 proposition_get_milestone_rank(void) {
  * last one (LAST_MESSAGE) it waits for the message box and plays the milestone
  * music, JINGLE waits at least 180 frames and switches back to the bar music,
  * and CLOSE pops the level into proposition_open_returned_list once
- * the audio queue is idle. The 32-bit busy fields
- * are read as g_audio_queue members, not scalars, which keeps the timer store
+ * the music queue is idle. The 32-bit busy fields
+ * are read as g_music_queue members, not scalars, which keeps the timer store
  * ahead of their loads as in the target. */
 void proposition_step_discovery_level(menu_stack_record_t* discovery) {
     if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_CLOSE) {
-        if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE) {
+        if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE) {
             g_menu_stack_depth--;
             proposition_open_returned_list();
         }
     } else if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_JINGLE) {
         discovery->discovery.timer++;
-        if (g_audio_queue.count == 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE
+        if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
             && discovery->discovery.timer >= 180) {
             discovery->discovery.phase = PROPOSITION_DISCOVERY_PHASE_CLOSE;
-            audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
-            audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(2, MUSIC_BAR));
-            audio_queue_add(AUDIO_COMMAND_FADE_IN, 0x10);
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
+            music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
         }
     } else if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE) {
-        if (screen_is_dialog_waiting() != 0 && g_audio_queue.current_command == AUDIO_COMMAND_NONE
-            && g_audio_queue.count == 0) {
-            audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(2, MUSIC_MILESTONE));
-            audio_queue_add(AUDIO_COMMAND_FADE_IN, 0x10);
+        if (screen_is_dialog_waiting() != 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
+            && g_music_queue.count == 0) {
+            music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(2, MUSIC_MILESTONE));
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
             discovery->discovery.phase = PROPOSITION_DISCOVERY_PHASE_JINGLE;
         }
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {

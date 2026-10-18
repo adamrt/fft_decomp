@@ -106,7 +106,7 @@ void bar_handle_input(menu_stack_record_t* level) {
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
-        audio_queue_start_music(AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
+        music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
         return;
     }
 

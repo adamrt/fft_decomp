@@ -1,7 +1,7 @@
 /* Waiting for file loads, shared by the opening and the world map; the world map adds a blocking scratch load. */
 
 #include "fft/file.h"
-#include "fft/sound.h"
+#include "fft/music.h"
 #include "fft/system.h"
 #include "fft/world_map.h"
 #include "psx/libetc.h"
@@ -35,13 +35,13 @@ void world_map_load_texture(void) {
 }
 #endif
 
-/* Poll the pending CD load to completion, a frame at a time. WLDCORE also services its audio queue; OPEN has no queue
+/* Poll the pending CD load to completion, a frame at a time. WLDCORE also services its music queue; OPEN has no queue
  * here. */
 void file_wait_for_pending(void) {
     while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         file_poll_load(&g_file_cd_state);
 #ifdef FFT_WLDCORE
-        audio_queue_process();
+        music_queue_process();
 #endif
         VSync(0);
     }

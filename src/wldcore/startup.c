@@ -63,7 +63,7 @@ s32 wldcore_entrypoint(void) {
                 break;
             }
             file_poll_load(&g_file_cd_state);
-            audio_queue_process();
+            music_queue_process();
             /* Each display buffer has its own 0xE000-byte GS packet area. */
             buffer_index = GsGetActiveBuff();
             g_gfx_active_buffer_index = buffer_index;
@@ -389,15 +389,15 @@ static void world_map_init_state(void) {
         music_unload_scenario_and_tunes();
     }
 
-    g_audio_queue.volume = 0x7f;
+    g_music_queue.volume = 0x7f;
     g_hud_value_position.x = 0x30;
     g_hud_value_position.y = 0x54;
     g_hud_ot_priority = 4;
-    g_audio_queue.count = 0;
-    g_audio_queue.music.flags = 0;
-    g_audio_queue.music.tracks[1] = 0;
-    g_audio_queue.music.tracks[0] = 0;
-    g_audio_queue.current_command = AUDIO_COMMAND_NONE;
+    g_music_queue.count = 0;
+    g_music_queue.music.flags = 0;
+    g_music_queue.music.tracks[1] = 0;
+    g_music_queue.music.tracks[0] = 0;
+    g_music_queue.current_command = MUSIC_QUEUE_COMMAND_NONE;
     g_sound_novel_countdown_frames = 0;
     g_travel.flags = 0;
 
@@ -459,7 +459,7 @@ static void world_map_finalize_loop(void) {
     DrawSync(0);
     VSync(0);
     SetDispMask(0);
-    audio_queue_wait_until_empty();
+    music_queue_wait_until_empty();
     if ((g_system_flags & SYSTEM_FLAG_TUTORIAL_EVENT) == 0) {
         music_unload_scenario_and_tunes();
     }
@@ -517,8 +517,8 @@ static void world_map_restore_entry_level(void) {
         } else {
             location_script_dispatch_requests();
         }
-        audio_queue_add(AUDIO_COMMAND_PLAY_MUSIC, AUDIO_MUSIC(1, MUSIC_WORLD_MAP));
-        audio_queue_add(AUDIO_COMMAND_FADE_IN, 4);
+        music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 4);
         return;
     }
     if (flags & SYSTEM_FLAG_STORY_EVENT_REPLAY) {
@@ -528,9 +528,9 @@ static void world_map_restore_entry_level(void) {
     } else if (flags & SYSTEM_FLAG_TUTORIAL_EVENT) {
         g_system_flags = flags ^ SYSTEM_FLAG_TUTORIAL_EVENT;
         script_set_variable(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
-        g_audio_queue.music.tracks[0] = 0x1B;
-        g_audio_queue.music.tracks[1] = 0x1A;
-        g_audio_queue.current_slot = 2;
+        g_music_queue.music.tracks[0] = 0x1B;
+        g_music_queue.music.tracks[1] = 0x1A;
+        g_music_queue.current_slot = 2;
         screen_transition_push_level(MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST, 1, 0);
     } else if (flags & SYSTEM_FLAG_TITLE_TUTORIAL) {
         screen_transition_push_level(MENU_STACK_LEVEL_TUTORIAL, 0, 1);

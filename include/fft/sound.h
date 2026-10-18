@@ -1,11 +1,12 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-/* Sound: the event scripts' music requests and the scenario's music tracks, the sound-effect ids and MAIN's effect and
- * background-sound wrappers, the event library's queued menu effects and background sound threads, OPEN's CD audio fade
- * and WLDCORE's audio queue. */
+/* Game sound initialization, effects and background sounds, with event requests and CD mixing. */
 
 #include "psx/types.h"
+
+/* initialization */
+void sound_init(void);
 
 /* music requests */
 /* Left by the event script's music instructions for script_process_pending_requests, which
@@ -170,8 +171,8 @@ typedef enum sound_env_sfx {
     SOUND_ENV_SFX_THUNDER_B = 14
 } sound_env_sfx_e;
 
-void sound_open_generic_sfx(void);
 void sound_play_sfx(s32 sound_id);
+void sound_play_effect(s32 sound_id);
 void sound_play_sfx_on_free_channel(s32 sound_id);
 void sound_set_sfx_volume(int sound_id, int volume);
 void sound_play_background(s32 sound_id);
@@ -199,61 +200,5 @@ void sound_background_thread(void);
 /* CD audio */
 /* Fades the CD audio in at the given mix level (suzuki_sound_put_type), or out when it is 0. */
 void sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration);
-
-/* audio queue */
-/* Flags of audio_music_slots_t. */
-typedef enum audio_music_flag {
-    AUDIO_MUSIC_PLAYING = 0x01 /* the current slot's music is audible: a new start fades it out first */
-} audio_music_flag_e;
-
-/* Playback flags followed by the loaded music IDs for slots 1 and 2. */
-typedef struct audio_music_slots {
-    s32 flags; /* audio_music_flag_e */
-    s32 tracks[2];
-} audio_music_slots_t;
-
-/* Value of AUDIO_COMMAND_PLAY_MUSIC and of
- * audio_queue_start_music: a music slot (1 or 2) and the
- * music_id_e id to load into it. */
-#define AUDIO_MUSIC(slot, music_id) (((slot) << 8) | (music_id))
-
-/* Commands of the audio queue (audio_queue_add), and the
- * wait states audio_queue_process moves the current command
- * through. */
-typedef enum audio_command {
-    AUDIO_COMMAND_NONE = 0,       /* idle: takes the next queued command */
-    AUDIO_COMMAND_PLAY_MUSIC = 1, /* value: AUDIO_MUSIC(slot, music id) */
-    AUDIO_COMMAND_FADE_OUT = 2,   /* value << 2: fade time */
-    AUDIO_COMMAND_FADE_IN = 3,    /* the current slot, to the stored volume over value << 2 */
-    AUDIO_COMMAND_UNLOAD = 4,     /* value: slot, 0 for the current one */
-    AUDIO_COMMAND_WAIT_LOAD = 16,
-    AUDIO_COMMAND_WAIT_FADE_OUT = 17,
-    AUDIO_COMMAND_WAIT_FADE_IN = 18
-} audio_command_e;
-
-enum { AUDIO_QUEUE_CAPACITY = 16 };
-
-/* The audio command FIFO, filled by audio_queue_add and serviced each frame by
- * audio_queue_process, followed by the music state that consumer owns. current_command and count are
- * the busy fields audio_queue_wait_until_empty and the level steps test. */
-typedef struct audio_queue {
-    audio_command_e commands[AUDIO_QUEUE_CAPACITY];
-    s32 values[AUDIO_QUEUE_CAPACITY];
-    audio_command_e current_command; /* 0x80 */
-    s32 current_value;               /* 0x84 */
-    s32 count;                       /* 0x88 */
-    audio_music_slots_t music;       /* 0x8c */
-    s32 current_slot;                /* 0x98 */
-    s32 volume;                      /* 0x9c */
-} audio_queue_t;
-typedef char audio_queue_size_must_be_160[sizeof(audio_queue_t) == 160 ? 1 : -1];
-
-extern audio_queue_t g_audio_queue;
-
-void audio_queue_add(audio_command_e command, s32 value);
-void audio_queue_start_music(s32 value);
-void audio_queue_process(void);
-void audio_queue_wait_until_empty(void);
-void sound_play_effect(s32 sound_id);
 
 #endif

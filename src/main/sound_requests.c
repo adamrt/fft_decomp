@@ -34,7 +34,7 @@ typedef struct music_slots {
 } music_slots_t;
 typedef char music_slots_size_must_be_64[sizeof(music_slots_t) == 64 ? 1 : -1];
 
-/* The music state and slot table are one object: sound_open_generic_sfx
+/* The music state and slot table are one object: sound_init
  * derives the slot pointers from the &state.current_smd base register, and the
  * tune/slot helpers reach across tune, handles and smd from single bases. */
 typedef struct music {
@@ -575,7 +575,7 @@ void sound_stop_background(void) {
  * the low overlay address and uploaded to SPU RAM, SYSTEM.SED and ENV.SED are
  * appended to the driver's sound resources, the music slots are cleared, and the
  * five resident tunes (music files 45..49) are read into SMD slots 3..7. */
-void sound_open_generic_sfx(void) {
+void sound_init(void) {
     s32 i;
 
     suzuki_sound_init(0);

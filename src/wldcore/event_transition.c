@@ -2,6 +2,7 @@
 
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
+#include "fft/music.h"
 #include "fft/sound.h"
 #include "fft/system.h"
 #include "fft/window.h"
@@ -71,7 +72,7 @@ void event_transition_push_level(s32 mode) {
         g_event_transition_sprite.r = 0x80;
         g_event_transition_sprite.g = 0x80;
         g_event_transition_sprite.b = 0x80;
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
         g_menu_stack_records[g_menu_stack_depth].event_transition.frame = 0;
         g_menu_stack_records[g_menu_stack_depth].event_transition.anim_step = 0;
         g_menu_stack_records[g_menu_stack_depth].event_transition.drift_direction = (rand() * 4) >> 15;

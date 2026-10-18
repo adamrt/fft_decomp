@@ -117,10 +117,10 @@ void sound_novel_restore_reading(s32 render_record) {
     }
 
     if (g_sound_novel_reading.music_selection & 0xFF) {
-        audio_queue_start_music(g_sound_novel_reading.music_selection);
+        music_queue_start_track(g_sound_novel_reading.music_selection);
     } else {
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x10);
-        audio_queue_add(AUDIO_COMMAND_UNLOAD, 2);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
+        music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 2);
         g_sound_novel_reading.music_selection = 0;
     }
 
@@ -157,7 +157,7 @@ void sound_novel_restore_reading(s32 render_record) {
     g_world_map_fade.boxes[1].g = tint;
     g_world_map_fade.boxes[1].b = tint;
     g_world_map_fade.priorities[1] = 0xB;
-    audio_queue_wait_until_empty();
+    music_queue_wait_until_empty();
     sound_novel_load_files(g_sound_novel_selected);
     file_wait_for_pending();
     section = g_sound_novel_reading.section;
@@ -341,10 +341,10 @@ static void sound_novel_play_pending_sounds(s32 sound_id, s32 weather_sound_id, 
         if (track != 0) {
             if ((g_sound_novel_reading.music_selection & 0xFF) != track) {
                 sound_novel_change_music(track);
-                music_flags = &g_audio_queue.music.flags;
-                *music_flags |= AUDIO_MUSIC_PLAYING;
+                music_flags = &g_music_queue.music.flags;
+                *music_flags |= MUSIC_QUEUE_PLAYING;
                 music_switch_track(g_sound_novel_reading.music_selection >> 8, 0, 0);
-                music_set_target(g_audio_queue.volume, 0x28);
+                music_set_target(g_music_queue.volume, 0x28);
             }
         }
         break;
@@ -853,8 +853,8 @@ static void sound_novel_change_music(s32 music_id) {
     while (music_is_loading_stub() != 0) {
         VSync(0);
     }
-    g_audio_queue.music.tracks[slot - 1] = music_id;
-    g_audio_queue.current_slot = slot;
+    g_music_queue.music.tracks[slot - 1] = music_id;
+    g_music_queue.current_slot = slot;
 }
 
 /* Sound-novel opcode 0x21: set the record's sound mode to byte 1; in mode 1 the pending-music
@@ -959,10 +959,10 @@ void sound_novel_opcode_25_branch_if_greater(void) {
 /* Sound-novel opcode: fade the music to silence over operand 0 * 3 steps and
  * clear the playing flag and the selected music id (the slot is kept). */
 void sound_novel_opcode_26_fade_out_music(void) {
-    s32* state = &g_audio_queue.music.flags;
+    s32* state = &g_music_queue.music.flags;
     s32 operand;
 
-    *state &= ~AUDIO_MUSIC_PLAYING;
+    *state &= ~MUSIC_QUEUE_PLAYING;
     operand = (u8)(g_sound_novel_reading.instruction >> 8);
     music_set_target(0, operand * 3);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
@@ -977,11 +977,11 @@ void sound_novel_opcode_27_switch_music_track(void) {
     s32 operand;
 
     if (track != 0) {
-        state = &g_audio_queue.music.flags;
-        *state |= AUDIO_MUSIC_PLAYING;
+        state = &g_music_queue.music.flags;
+        *state |= MUSIC_QUEUE_PLAYING;
         operand = (u8)(g_sound_novel_reading.instruction >> 8);
         music_switch_track(track >> 8, 0, 0);
-        music_set_target(g_audio_queue.volume, operand * 3);
+        music_set_target(g_music_queue.volume, operand * 3);
     }
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -1136,19 +1136,19 @@ void sound_novel_opcode_30_set_master_volume(void) {
  * the opcode complete. */
 void sound_novel_opcode_31_stop_pending_music(void) {
     s16* music = &g_sound_novel_reading.music_selection;
-    audio_music_slots_t* state;
+    music_queue_slots_t* state;
     s32* tracks;
 
     if (*music != 0) {
-        state = &g_audio_queue.music;
-        state->flags &= ~AUDIO_MUSIC_PLAYING;
+        state = &g_music_queue.music;
+        state->flags &= ~MUSIC_QUEUE_PLAYING;
         music_stop();
         music_unload_scenario_slot(*music >> 8);
         /* Retail bug: sound_novel_change_music records the track at
          * tracks[slot - 1], but this clears tracks[slot], one entry past it. */
         tracks = state->tracks;
         tracks[*music >> 8] = 0;
-        g_audio_queue.current_slot = 0;
+        g_music_queue.current_slot = 0;
         *music = 0;
     }
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;

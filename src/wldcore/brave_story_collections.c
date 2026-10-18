@@ -11,6 +11,7 @@
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message_box.h"
+#include "fft/music.h"
 #include "fft/save.h"
 #include "fft/screen.h"
 #include "fft/script_variable.h"
@@ -318,7 +319,7 @@ void sound_novel_step_level(menu_stack_record_t* level) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
             screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
         }
-        audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x20);
+        music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
         sound_stop_all_sfx();
         level->sound_novel.phase = SOUND_NOVEL_PHASE_END;
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
@@ -571,7 +572,7 @@ void sound_novel_step_quit_level(menu_stack_record_t* level) {
             if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
                 screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
             }
-            audio_queue_add(AUDIO_COMMAND_FADE_OUT, 0x20);
+            music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
             sound_stop_all_sfx();
             sound_play_effect(SOUND_SFX_CONFIRM);
             return;
