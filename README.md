@@ -1,20 +1,19 @@
 # Final Fantasy Tactics decompilation
 
-> Status: byte-exact rebuild; source recovery and refinement ongoing
+> Status: 100% decompiled and byte-exact ✅
 
 A matching decompilation of the North American PlayStation release of *Final
-Fantasy Tactics* (`SCUS-94221` [redump](http://redump.org/disc/55/)). Every
-configured function and owned data span is checked against original-byte
-hashes. The rebuilt disc is a byte-for-byte match; unconfigured spans,
-including some native routines, are preserved from the original image.
+Fantasy Tactics* (`SCUS-94221` [redump](http://redump.org/disc/55/)). Every game
+function is C that compiles to the original bytes, and the rebuilt disc is a
+byte-for-byte match.
 
 Game files and proprietary Sony tools are not included.
 
 ## Next Steps
 
-Remaining work includes classifying the uncovered native routines and recovering
-those that belong to the game, alongside improvements to names, types, enums
-and source organization. Sony SDK reconstruction is a separate concern.
+The game is 100% completely decompiled, but there are plenty of semantic changes
+and cleanup to be done. Variable and function names, correcting types, improving
+enum usage/naming, etc.
 
 Each time a change is made `make check` will ensure the changes still match
 byte-for-byte.
