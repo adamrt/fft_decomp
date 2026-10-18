@@ -232,17 +232,17 @@ void menu_stack_clear_cursor(s32 index) {
     g_menu_stack_cursor_states[index].selected_index = 0;
 }
 
-/* Initialize and start a numeric panel renderer.
+/* Initialize and start a numeric entry panel.
  *
- * The packed 32-bit value supplies two displayed 16-bit values; their magnitude selects
- * a one- through four-digit panel width before the optional label is measured.
+ * The low and high halfwords supply the lower and upper bounds for one editable value.
+ * The bounds select a one- through four-digit panel width before the optional label is measured.
  * `width` holds the digit count first and the panel's pixel width after. */
-void window_start_number_panel_thread(s32 thread_id, u32 packed_values, s32 text_id, point32_t* origin) {
+void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text_id, point32_t* origin) {
     s16 text_width;
     s16 text_height;
     s32 width;
-    s32 min = packed_values & 0xffff;
-    s32 max = packed_values >> 16;
+    s32 min = packed_bounds & 0xffff;
+    s32 max = packed_bounds >> 16;
     s32 x;
     s32 y;
     s32 label_width;

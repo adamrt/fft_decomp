@@ -299,6 +299,6 @@ extern s16 g_window_panel_value;
 void window_build_yes_no_panel(point32_t origin);
 void window_init_panel_state(s32 unused, s32 extent, window_panel_layout_t* layout, point32_t* origin);
 void window_start_panel_thread(s32 thread_id, s32 extent, window_panel_layout_t* layout, point32_t* origin);
-void window_start_number_panel_thread(s32 thread_id, u32 packed_values, s32 text_id, point32_t* origin);
+void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text_id, point32_t* origin);
 
 #endif
