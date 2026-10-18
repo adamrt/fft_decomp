@@ -18,7 +18,7 @@ typedef struct thread {
     s32 function_parameter_1;   /* 0x00 */
     s32 function_parameter_2;   /* 0x04 */
     s32 function_parameter_3;   /* 0x08 */
-    s32 function_parameter_4;   /* 0x0c; set by WORLD's four-parameter helper */
+    s32 function_parameter_4;   /* 0x0c */
     u32 saved_s0;               /* 0x10 */
     u32 saved_s1;               /* 0x14 */
     u32 saved_s2;               /* 0x18 */

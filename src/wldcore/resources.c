@@ -37,7 +37,7 @@
 extern calendar_date_t g_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT];
 extern s32 g_file_battle_sector;
 extern u8 g_message_block_buffer[];
-extern s32* g_proposition_data; /* the loaded proposition data file */
+extern s32* g_proposition_data; /* byte-offset directory of the embedded proposition data */
 
 /* File-sector boundaries, including one terminal offset after the last payload. */
 extern s32 g_picture_sector_offsets[93];

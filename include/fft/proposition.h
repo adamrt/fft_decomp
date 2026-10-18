@@ -133,7 +133,8 @@ extern proposition_fields_t g_proposition_selected_row;
 void proposition_unpack_row(proposition_fields_t* out, s32 index);
 s32 proposition_is_available_at(s32 index, s32 location);
 
-/* File records have different layouts; the selected record determines the table type. */
+/* Embedded sections have different layouts; the selected record determines the table type.
+ * Callers only read them, but const table views change the original GCC 2.7.2 code. */
 void* proposition_get_data(proposition_data_record_e record);
 
 /* lists */
