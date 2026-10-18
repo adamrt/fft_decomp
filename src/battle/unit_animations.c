@@ -1053,8 +1053,8 @@ static unit_t* unit_claim_slot(s16 requested_runtime_id) {
 /* Fill a sprite display from SHP frame `src`: each part takes its shift, a texture position in
  * 8-pixel tiles, its size from g_sprite_part_sizes and its flip bits; the frame's blend bits
  * are merged into texture page `tpage`. */
-static void sprite_frame_load_parts(unit_t* unit, sprite_display_t* display, sprite_frame_t* src, s32 tpage) {
-    sprite_frame_part_t* part;
+static void sprite_frame_load_parts(unit_t* unit, sprite_display_t* display, const sprite_frame_t* src, s32 tpage) {
+    const sprite_frame_part_t* part;
     u32 i;
     u32 count;
     u8 flags;
@@ -1097,10 +1097,10 @@ static void sprite_frame_load_parts(unit_t* unit, sprite_display_t* display, spr
  * Higher frame ids index the SHP of an EVTCHR slot: slot 0 for the sequences
  * below 600 and slot 1 for the rest, the submerged table on a water tile. */
 static void sprite_frame_select_unit_shp(unit_t* unit, animation_state_t* state, u16 frame, u16 sequence_id,
-    sprite_unit_shp_frame_tables_t** out_table, sprite_frame_t** out_frame) {
+    const sprite_unit_shp_frame_tables_t** out_table, const sprite_frame_t** out_frame) {
     battle_map_tile_t* tile;
-    sprite_unit_shp_frame_tables_t* table;
-    sprite_frame_t* selected;
+    const sprite_unit_shp_frame_tables_t* table;
+    const sprite_frame_t* selected;
     s32 flags;
     s32 height;
     s32 z;
@@ -1188,10 +1188,10 @@ static void sprite_frame_select_unit_shp(unit_t* unit, animation_state_t* state,
  * 48x24 halves, the upper one flagged to draw nearer the camera. The two
  * Altima sheets keep theirs whole. */
 void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u16 sequence_id) {
-    sprite_unit_shp_frame_tables_t* frame_table;
-    sprite_frame_t* frame_data;
+    const sprite_unit_shp_frame_tables_t* frame_table;
+    const sprite_frame_t* frame_data;
     sprite_display_t* display;
-    sprite_frame_part_t* part;
+    const sprite_frame_part_t* part;
     u32 y_offset;
     u32 count;
     u16 i;
@@ -1207,7 +1207,7 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
     /* The unpackers never store the -1 tested here, and three bits
      * of part count cannot pass 8. */
     sprite_frame_select_unit_shp(unit, state, frame, sequence_id, &frame_table, &frame_data);
-    if (frame_data == (sprite_frame_t*)-1) {
+    if (frame_data == (const sprite_frame_t*)-1) {
         system_handle_error(SYSTEM_ERROR_SHP_FRAME);
     }
     display = state->display;
@@ -1743,7 +1743,7 @@ static void sprite_frame_load_casting_unit(void) {
  * block-local and `mode` is single-set, which gives the target's register
  * ties and schedule. */
 static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance) {
-    sprite_weapon_shp_t* shp;
+    const sprite_weapon_shp_t* shp;
     u8** seq;
     u8 op;
     u8* data;
@@ -1751,10 +1751,10 @@ static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprit
     s16 pos;
     u16 frame;
     u16 graphic_v;
-    sprite_frame_t* src;
+    const sprite_frame_t* src;
     sprite_display_t* display;
     sprite_block_t* block;
-    sprite_frame_part_t* part;
+    const sprite_frame_part_t* part;
     s16 offset;
     u16 value;
     u8 block_id;
@@ -1930,7 +1930,7 @@ static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprit
             if (frame > 0x200) {
                 system_handle_error(SYSTEM_ERROR_SHP_FRAME);
             }
-            if (src == (sprite_frame_t*)-1) {
+            if (src == (const sprite_frame_t*)-1) {
                 system_handle_error(SYSTEM_ERROR_SHP_FRAME);
             }
             display = sprite->display;

@@ -393,7 +393,8 @@ s32 unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
  * `flags` and `jump` go to the pathfinder; the unit's walk speed is twice `speed`. A riding unit
  * dismounts. Returns 1 when a path was found, 0 when none was; a missing unit raises
  * a pointer exception and returns 0. */
-s32 move_start_walk_to(s32 runtime_id, battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
+s32 move_start_walk_to(
+    s32 runtime_id, const battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id);
     move_path_t* path;
 

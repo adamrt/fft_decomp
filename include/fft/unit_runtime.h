@@ -452,7 +452,7 @@ s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id);
 void unit_entd_load(entd_encounter_t* entd_data, s32 mode);
 s32 unit_put_on_field(u32 battle_id);
-s32 unit_place_in_new_location(u32 runtime_id, battle_map_tile_coordinates_t* tile, s32 facing);
+s32 unit_place_in_new_location(u32 runtime_id, const battle_map_tile_coordinates_t* tile, s32 facing);
 s32 unit_find_relocation_tile(s32 unit_index, battle_map_tile_coordinates_t* destination);
 void unit_store_team_flags(unit_t* unit);
 

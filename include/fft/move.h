@@ -151,7 +151,8 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
 /* walks and jumps */
 extern s32 g_move_jump_gravity;
 
-s32 move_start_walk_to(s32 runtime_id, battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
+s32 move_start_walk_to(
+    s32 runtime_id, const battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
 s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length);
 s32 move_is_unit_moving_by_runtime_id(u32 runtime_id);
 void move_settle_on_tile(unit_t* unit);

@@ -68,7 +68,7 @@ const SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id) {
  * also re-registers its tile there; that call passes the 16-bit facing, whose low byte is always
  * 0, so the stats record facing 0 (south) whatever was asked. Returns 0 when no record has the
  * runtime id. */
-s32 unit_place_in_new_location(u32 runtime_id, battle_map_tile_coordinates_t* tile, s32 facing) {
+s32 unit_place_in_new_location(u32 runtime_id, const battle_map_tile_coordinates_t* tile, s32 facing) {
     unit_t* unit = unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
