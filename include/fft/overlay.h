@@ -9,7 +9,6 @@
 /* programs */
 int overlay_exec_open_title(int mode);
 void overlay_exec_open_ending(void);
-int overlay_open_world_and_wldcore(int load_world);
 void overlay_open_world(s32 mode);
 
 /* companion overlays */

@@ -50,7 +50,7 @@ static void world_map_update_backdrop(void);
  * world_map_result_e. A pending Formation return reopens WORLD's Formation screen
  * and returns before map initialization; a card-menu restart initializes the map
  * again instead of returning. */
-s32 wldcore_entrypoint(void) {
+world_map_result_e wldcore_entrypoint(void) {
     s32 buffer_index;
 
     for (;;) {
@@ -104,7 +104,7 @@ s32 wldcore_entrypoint(void) {
             /* Returning through a local keeps two separate WORLD_MAP_RESULT_EVENT
              * returns; a plain return here cross-jumps into the one above. */
             {
-                s32 result;
+                world_map_result_e result;
 
                 if (flags & SYSTEM_FLAG_STORY_EVENT_REPLAY) {
                     result = WORLD_MAP_RESULT_EVENT;

@@ -39,7 +39,7 @@ void gfx_load_frame_bin(void) {
 /* Load WLDCORE.BIN into the low overlay area with the Now Loading screen and, when load_world is
  * set, WORLD.BIN at the world overlay address, then run WLDCORE's entry point and return its
  * result. */
-s32 overlay_open_world_and_wldcore(s32 load_world) {
+world_map_result_e overlay_open_world_and_wldcore(s32 load_world) {
     file_load_data_from_disc(
         DISC_SECTOR_WORLD_WLDCORE_BIN, 0xDC, g_heap_low_overlay_load_address, FILE_LOADING_DISPLAY_INIT);
     if (load_world != 0) {

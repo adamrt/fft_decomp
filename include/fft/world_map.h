@@ -33,11 +33,17 @@ typedef enum world_map_thread_slot {
     WORLD_MAP_THREAD_SLOT_MESSAGE = 14       /* the message box and script text */
 } world_map_thread_slot_e;
 
+/* MAIN saves WLDCORE's return value here for BATTLE's setup. */
+extern world_map_result_e g_system_frontend_world_result;
+
 /* g_system_flags as world_map_update_backdrop last saw it (system_flags_e). */
 extern u32 g_world_map_previous_system_flags;
 
 /* Run WLDCORE's world-map loop and return a world_map_result_e. */
-s32 wldcore_entrypoint(void);
+world_map_result_e wldcore_entrypoint(void);
+
+/* MAIN loads WLDCORE and, when requested, WORLD, then enters the map. */
+world_map_result_e overlay_open_world_and_wldcore(s32 load_world);
 void world_map_switch_to_stack(void*);
 void world_map_restore_previous_stack(void);
 void world_map_init_menus_and_date(void);
