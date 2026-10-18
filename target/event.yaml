@@ -1862,7 +1862,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: fullscreen_graphics, source: src/event/etc/fullscreen_graphics.c}
+  - {name: fullscreen_graphics, source: src/event/etc/fullscreen_graphics.c, rodata: [{addr: 0x801bf000, size: 25, hash: f71a695df31c3f94}]}
 
 functions:
   - {addr: 0x801bf01c, size: 956, name: fullscreen_graphic_open, hash: 3557a41548363503, unit: fullscreen_graphics}

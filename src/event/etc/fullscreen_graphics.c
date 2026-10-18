@@ -42,7 +42,6 @@ extern fullscreen_graphic_t g_fullscreen_graphics[13];
 extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_a[2][4];
 extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_b[2][4];
 extern RECT g_fullscreen_graphic_game_over_palette_rect;
-extern const char g_fullscreen_graphic_allocation_wait_message[];
 
 /* Wait for the high overlay area, read graphic `graphic_id` into it and upload the image:
  * texture mode 0 (the 4-bit chapter titles) as is, mode 1 (the 8-bit game-over screen)
@@ -60,7 +59,7 @@ static void fullscreen_graphic_open(s32 graphic_id) {
         }
         thread_yield();
         if (g_debug_font_print_enabled != 0) {
-            FntPrint(g_fullscreen_graphic_allocation_wait_message);
+            FntPrint("WAIT FOR FILEALLOCATION\n");
         }
     }
 

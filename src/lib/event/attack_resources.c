@@ -60,7 +60,6 @@ extern u8 g_terrain_tile_info_pairs[64][2];
 
 /* Set by the retail range tests in mul_div_s64 and fixed_cross_product_q12. */
 extern s32 g_camera_arithmetic_overflow;
-extern const char g_script_pause_message[];
 extern s16 g_script_debug_paused;
 extern u16 g_unit_view_cached_battle_id;
 extern u16 g_unit_view_cached_comparison_id;
@@ -756,7 +755,7 @@ static s32 script_interpolate_range_q12(s32 start, s32 end, s32 fraction, s32 va
 /* DebugPause event instruction (0x72): print the pause message with the debug font, yield once and
  * set g_script_debug_paused, which nothing reads. */
 void script_print_debug_message(void) {
-    FntPrint(g_script_pause_message);
+    FntPrint("\n\nPAUSE\n\n");
     thread_yield();
     g_script_debug_paused = 1;
 }

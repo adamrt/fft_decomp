@@ -4,8 +4,6 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern const char g_text_decimal_format[];
-
 /* text_advance_cursor_with_backreferences with the remaining run length and return cursor passed
  * separately instead of in a text_reader_state_t. */
 const u8* text_advance_cursor_with_separate_backreference_state(
@@ -39,7 +37,7 @@ const u8* text_advance_cursor_with_separate_backreference_state(
 
 /* Append value and value + 1 to the active Psy-Q font stream. */
 void text_print_fnt_value_and_next(s32 value) {
-    FntPrint(g_text_decimal_format, value);
+    FntPrint("%d", value);
     value++;
-    FntPrint(g_text_decimal_format, value);
+    FntPrint("%d", value);
 }

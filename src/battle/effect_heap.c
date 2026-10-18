@@ -26,12 +26,6 @@ extern s32 g_effect_heap_debug_dp_words;
 /* Provisional: never written; added to the "DP" figure of effect_heap_print_stats. */
 extern s32 g_effect_heap_debug_dp_bytes;
 
-/* The formats effect_heap_print_stats prints. */
-extern const char g_effect_heap_remain_format[]; /* "HEAP REMAIN %x MAX %x\n" */
-extern const char g_effect_heap_min_format[];    /* "MIN HEAP %x " */
-extern const char g_effect_heap_dp_format[];     /* "DP %x\n" */
-extern const char g_effect_heap_task_format[];   /* "TASK %d %x\n" */
-
 /* Make `buffer` the battle heap: a single free block of buffer_size / 8 - 1 eight-byte
  * blocks that forms the free ring by itself, with owner lists 0 to 16 emptied. */
 void effect_heap_init(effect_heap_node_t* buffer, u32 buffer_size) {
@@ -154,19 +148,19 @@ void effect_heap_print_stats(void) {
         }
         free_node = free_node->next;
     }
-    FntPrint(g_effect_heap_remain_format, total * 8, largest * 8);
+    FntPrint("HEAP REMAIN %x MAX %x\n", total * 8, largest * 8);
     if (largest < g_effect_heap_min_largest_free) {
         g_effect_heap_min_largest_free = largest;
     }
-    FntPrint(g_effect_heap_min_format, g_effect_heap_min_largest_free * 8);
-    FntPrint(g_effect_heap_dp_format, g_effect_heap_debug_dp_words * 4 + g_effect_heap_debug_dp_bytes);
+    FntPrint("MIN HEAP %x ", g_effect_heap_min_largest_free * 8);
+    FntPrint("DP %x\n", g_effect_heap_debug_dp_words * 4 + g_effect_heap_debug_dp_bytes);
     for (owner = 0; owner < 16; owner++) {
         used = 0;
         for (node = g_effect_heap_owner_lists[owner].head; node != 0; node = node->next) {
             used += node->size;
         }
         if (used != 0) {
-            FntPrint(g_effect_heap_task_format, owner, used * 8);
+            FntPrint("TASK %d %x\n", owner, used * 8);
         }
     }
 }
