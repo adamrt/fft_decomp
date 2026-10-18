@@ -611,7 +611,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   so an absent unit (2000) zeroes the halfword 4000 bytes on, the `w` of
   `g_menu_window_buffers[5].sprites[3]` in BATTLE and WORLD. The interpreters'
   own WalkToAnim keeps the store inside the test.
-- `memcard_file_write_buffer` (CARD and WORLD) and
+- `save_write_file_chunked` (CARD and WORLD) and
   `save_read_file_chunked` seek before each of their 40 attempts by the
   bytes transferred so far from the current position (origin 1), not from the
   start: after a short first transfer of n bytes, the next attempt works at

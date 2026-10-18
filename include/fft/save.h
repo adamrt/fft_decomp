@@ -229,10 +229,13 @@ void save_init_screen(void);
 s32 save_run_screen(s32 mode_select_enabled);
 void save_close_stub(void);
 
+/* card file transfers */
+s32 save_read_file_chunked(const char* filename, u8* destination, u32 size);
+s32 save_write_file_chunked(const char* filename, const save_image_t* source, u32 size, s32 create_file);
+
 /* WORLD save image */
 extern save_image_t* g_save_work_buffer;
 
-s32 save_read_file_chunked(const char* filename, u8* destination, u32 size);
 s32 save_restore_image(s32 partial_load);
 
 #endif

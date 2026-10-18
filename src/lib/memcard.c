@@ -416,7 +416,7 @@ s32 memcard_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin) {
  * mode 2 opens for writing. Each attempt seeks by the bytes written so far from the current
  * position (origin 1) rather than to them, so after a short write the next attempt would skip
  * ahead (retail; a whole save normally goes in one write). */
-s32 memcard_file_write_buffer(const char* filename, const save_image_t* source, u32 size, s32 create_file) {
+s32 save_write_file_chunked(const char* filename, const save_image_t* source, u32 size, s32 create_file) {
     s32 error;
     s32 result;
     s32 retries;

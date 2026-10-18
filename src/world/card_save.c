@@ -657,7 +657,7 @@ static void save_write_step(s32 slot) {
             g_save_menu_step = SAVE_STEP_SCANNING;
         }
     } else {
-        bytes_written = memcard_file_write_buffer(
+        bytes_written = save_write_file_chunked(
             g_save_file_names[slot], g_save_work_buffer, 0x1E00, g_save_slot_file_states[slot]);
         header_written = 0;
         menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);

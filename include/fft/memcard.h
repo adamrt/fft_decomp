@@ -53,14 +53,12 @@ memcard_result_e memcard_poll_operation_result(void);
 
 /* files */
 struct DIRENTRY;
-struct save_image;
 
 s32 memcard_file_enumerate_saves(struct DIRENTRY* entries, s32 all_files);
 s32 memcard_file_count_free_blocks(const struct DIRENTRY* entries, s32 entry_count);
 s32 memcard_file_open_selected_with_retries(const char* filename, s32 mode);
 s32 memcard_file_close_with_retries(s32 descriptor);
 s32 memcard_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
-s32 memcard_file_write_buffer(const char* filename, const struct save_image* source, u32 size, s32 create_file);
 s32 memcard_file_delete_selected_with_retries(const char* filename);
 s32 memcard_file_read_with_retries(s32 descriptor, void* destination, s32 size);
 s32 memcard_file_write_with_retries(s32 descriptor, const void* source, s32 size);

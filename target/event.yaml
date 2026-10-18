@@ -934,7 +934,7 @@ functions:
   - {addr: 0x801c4c9c, size: 384, name: memcard_file_open_selected_with_retries, hash: 8ad8e65a7cc2f553, unit: memcard, rodata: [{addr: 0x801bf144, size: 14, hash: 1b58a377a03f3eaf}]}
   - {addr: 0x801c4e1c, size: 208, name: memcard_file_close_with_retries, hash: 3d4656824a2716d1, unit: memcard}
   - {addr: 0x801c4eec, size: 204, name: memcard_file_seek_with_retries, hash: 5513bda3c8478b59, unit: memcard}
-  - {addr: 0x801c4fb8, size: 684, name: memcard_file_write_buffer, hash: 66315f155df10733, unit: memcard}
+  - {addr: 0x801c4fb8, size: 684, name: save_write_file_chunked, hash: 66315f155df10733, unit: memcard}
   - {addr: 0x801c5264, size: 276, name: memcard_file_delete_selected_with_retries, hash: 98a020db69d65c10, unit: memcard, rodata: [{addr: 0x801bf144, size: 14, hash: 1b58a377a03f3eaf}]}
   - {addr: 0x801c5378, size: 336, name: memcard_file_read_with_retries, hash: f5e8826fc23a26c9, unit: memcard}
   - {addr: 0x801c54c8, size: 336, name: memcard_file_write_with_retries, hash: 26895f5b5e42b5a9, unit: memcard}

@@ -495,7 +495,7 @@ static void save_update_write(s32 slot) {
         return;
     }
 
-    write_result = memcard_file_write_buffer(
+    write_result = save_write_file_chunked(
         g_save_file_names[slot], g_save_buffer_pointer, 0x1e00, g_save_slot_file_states[slot]);
     menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
     header_result = 0;
