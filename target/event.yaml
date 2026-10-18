@@ -326,7 +326,7 @@ units:
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
   - {name: texture_commands, source: src/lib/menu/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
-  - {name: unit_list, source: src/event/bunit/unit_list.c}
+  - {name: unit_list, source: src/event/bunit/unit_list.c, data: [{addr: 0x801cf89c, size: 32, hash: 8f0e786721820ee8}]}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: unit_records, source: src/event/bunit/unit_records.c, data: [{addr: 0x801eb280, size: 44, hash: 85759b3811ff7dc4}, {addr: 0x801eb2ac, size: 2, hash: 96a296d224f285c6}, {addr: 0x801eb2b0, size: 5628, hash: 660b974630c79796}]}
   - {name: window_state, source: src/lib/menu/window_state.c}
@@ -623,7 +623,7 @@ data:
   - {addr: 0x801cf86c, name: g_unit_list_cursor_shadow_sprite}
   - {addr: 0x801cf880, name: g_unit_list_cursor_sprite}
   - {addr: 0x801cf894, name: g_unit_list_cursor_trail_brightness}
-  - {addr: 0x801cf89c, name: g_unit_list_sprite_cell_sizes}
+  - {addr: 0x801cf89c, name: s_unit_list_sprite_cell_sizes}
   - {addr: 0x801cf8bc, name: g_unit_list_shadow_sprite}
   - {addr: 0x801cf8d0, name: g_unit_list_dot_sprite}
   - {addr: 0x801cf8e4, name: g_unit_list_dot_glow_timer}

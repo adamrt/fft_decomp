@@ -65,7 +65,12 @@ extern oriented_quad_t g_unit_list_shadow_sprite;
 extern s8 g_unit_list_dot_glow_direction;
 extern s8 g_unit_list_dot_glow_timer;
 extern menu_button_piece_t g_unit_list_slot_sprite_entries[];
-extern unit_list_sprite_size_t g_unit_list_sprite_cell_sizes[16];
+
+/* SHP frame-part size codes, in their encoded order. Kept mutable because
+ * const changes the original load/store scheduling in the sprite builder. */
+static unit_list_sprite_size_t s_unit_list_sprite_cell_sizes[16]
+    = { { 8, 8 }, { 16, 8 }, { 16, 16 }, { 16, 24 }, { 24, 8 }, { 24, 16 }, { 24, 24 }, { 32, 8 }, { 32, 16 },
+          { 32, 24 }, { 32, 32 }, { 32, 40 }, { 40, 16 }, { 40, 32 }, { 48, 48 }, { 56, 56 } };
 
 /* Signed 4.12 x/y scale pair per sprite entry; a negative scale flips the quad. */
 extern point16_t g_unit_list_button_piece_scales[];
@@ -948,8 +953,8 @@ static void unit_list_draw_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     cells = frame->parts;
     for (i = 0; i <= frame->part_count_and_rotation; i++) {
         size = (cells[i].attributes >> 10) & (SPRITE_SHP_PART_SIZE_MASK >> 10);
-        quad.uw = quad.w = g_unit_list_sprite_cell_sizes[size].width;
-        quad.vh = quad.h = g_unit_list_sprite_cell_sizes[size].height;
+        quad.uw = quad.w = s_unit_list_sprite_cell_sizes[size].width;
+        quad.vh = quad.h = s_unit_list_sprite_cell_sizes[size].height;
         value = unit_facing_get_camera_quadrant_by_battle_id(g_unit_list_pointers[unit]->battle_id);
         dx = cells[i].x_shift;
         orientation = TEXTURE_UV_FLIP_NONE;
