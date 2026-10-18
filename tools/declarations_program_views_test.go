@@ -6,6 +6,12 @@ import (
 	"testing"
 )
 
+var declarationProgramTestModules = []*moduleSpec{
+	{ID: "main"}, {ID: "battle"}, {ID: "world"},
+	{ID: "event-card"}, {ID: "event-jobstts"}, {ID: "event-bunit"},
+	{ID: "effect-e000"}, {ID: "effect-e001"},
+}
+
 func TestDeclarationsSeparateProgramRepresentations(t *testing.T) {
 	root := t.TempDir()
 	header := `#ifndef CONTEXT_H
@@ -31,10 +37,10 @@ extern save_context_t* g_context;
 extern menu_context_t* g_context;
 #endif
 `))
-	if err := validateDeclarations(root); err != nil {
+	if err := validateDeclarations(root, declarationProgramTestModules...); err != nil {
 		t.Fatal(err)
 	}
-	groups, err := collectDeclarationGroups(root, declarationScanDirs)
+	groups, err := collectDeclarationGroups(root, declarationScanDirs, declarationProgramTestModules...)
 	if err != nil || len(groups) != 1 {
 		t.Fatalf("groups = %+v, err = %v", groups, err)
 	}
@@ -52,7 +58,7 @@ extern menu_context_t* g_context;
 extern menu_context_t* g_context;
 #endif
 `))
-	if err := validateDeclarations(root); err == nil || !strings.Contains(err.Error(), "g_context") {
+	if err := validateDeclarations(root, declarationProgramTestModules...); err == nil || !strings.Contains(err.Error(), "g_context") {
 		t.Fatalf("overlapping cross-file mismatch was hidden: %v", err)
 	}
 }
@@ -199,14 +205,14 @@ extern u16 g_value;
 		t.Run(test.name, func(t *testing.T) {
 			root := t.TempDir()
 			writeTestFile(t, filepath.Join(root, "include/fft/value.h"), []byte(test.source))
-			groups, err := collectDeclarationGroups(root, declarationScanDirs)
+			groups, err := collectDeclarationGroups(root, declarationScanDirs, declarationProgramTestModules...)
 			if err != nil || len(groups) != 1 {
 				t.Fatalf("groups = %+v, error = %v", groups, err)
 			}
 			if got := groups[0].conflicting(); got != test.conflict {
 				t.Fatalf("conflicting = %v, want %v; sites = %+v", got, test.conflict, groups[0].sites)
 			}
-			if err := validateDeclarations(root); (err != nil) != test.conflict {
+			if err := validateDeclarations(root, declarationProgramTestModules...); (err != nil) != test.conflict {
 				t.Fatalf("validateDeclarations error = %v, want conflict %v", err, test.conflict)
 			}
 		})

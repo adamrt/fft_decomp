@@ -1,6 +1,5 @@
-// declarations.go finds symbols whose file-scope declarations disagree across
-// translation units. Each function is its own translation unit, so the
-// compiler never compares them; this check does.
+// declarations.go compares file-scope declarations across sources and headers
+// that the compiler may not see together in one translation unit.
 package main
 
 import (
@@ -32,7 +31,7 @@ type declarationSite struct {
 	line       int
 	signature  []string
 	definition bool
-	conditions []declarationCondition // proven FFT conditions enclosing this site
+	conditions []declarationCondition // known build conditions enclosing this site
 }
 
 type declarationCondition struct {
@@ -51,6 +50,7 @@ type declarationGroup struct {
 	sites     []declarationSite
 	spellings []declarationSpelling // most common first
 	minority  int                   // declarations disagreeing with the best-supported spelling
+	views     []map[string]string   // actual program, family and VARIANT_ macro sets
 }
 
 // declarationQualifiers are dropped from rendered types: const and volatile
@@ -71,11 +71,12 @@ var mipsArchitecturalRegisterName = regexp.MustCompile(`^\$([0-9]|[12][0-9]|3[01
 var declarationComments = regexp.MustCompile(`(?s)/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'`)
 
 // declarationProgramConditions records only conditions whose truth follows
-// from the program macros. Unknown conditions leave both branches possible,
-// including header guards; a known nested condition can still prove two sites
-// disjoint. Unsupported source forms fall back to the old unrestricted scan.
-func declarationProgramConditions(source string) map[int][]declarationCondition {
-	if !strings.Contains(source, moduleMacroPrefix) || strings.Contains(source, "\\\n") || strings.Contains(source, "\\\r\n") {
+// from configured program macros and variant constants. Unknown conditions
+// leave both branches possible, including header guards; a known nested
+// condition can still prove two sites disjoint. Unsupported source forms fall
+// back to the unrestricted scan.
+func declarationProgramConditions(source string, knownMacros map[string]bool) map[int][]declarationCondition {
+	if (!strings.Contains(source, moduleMacroPrefix) && !strings.Contains(source, definePrefix)) || strings.Contains(source, "\\\n") || strings.Contains(source, "\\\r\n") {
 		return nil
 	}
 	// Do not interpret directives quoted in comments or string literals.
@@ -109,14 +110,14 @@ func declarationProgramConditions(source string) map[int][]declarationCondition 
 		word, rest := directiveWord(trimmed)
 		if word == "define" || word == "undef" {
 			fields := strings.Fields(rest)
-			if len(fields) != 0 && strings.HasPrefix(fields[0], moduleMacroPrefix) {
+			if len(fields) != 0 && (strings.HasPrefix(fields[0], moduleMacroPrefix) || strings.HasPrefix(fields[0], definePrefix)) {
 				return nil
 			}
 		}
 		names := conditionalIdentifiers(trimmed)
 		known := len(names) != 0
 		for _, name := range names {
-			known = known && strings.HasPrefix(name, moduleMacroPrefix)
+			known = known && knownMacros[name] && (strings.HasPrefix(name, moduleMacroPrefix) || strings.HasPrefix(name, definePrefix))
 		}
 		directive := word
 		if directive == "elif" {
@@ -163,23 +164,14 @@ func declarationProgramConditions(source string) map[int][]declarationCondition 
 	return lines
 }
 
-// declarationSitesOverlap considers every distinct program mentioned by the
-// two sites, its family-only view, and an unmentioned program. A compile defines
-// one program macro and its family macro, as moduleSpec.macros specifies. No
-// source-directory or target-binding inference can hide a cross-file mismatch.
-func declarationSitesOverlap(a, b declarationSite) bool {
-	conditions := append(append([]declarationCondition{}, a.conditions...), b.conditions...)
-	views := map[string]map[string]string{"": {}}
-	for _, condition := range conditions {
-		for _, name := range conditionalIdentifiers("#" + condition.directive + " " + condition.expression) {
-			id := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, moduleMacroPrefix), "_", "-"))
-			module := &moduleSpec{ID: id}
-			views[id] = module.macros()
-			if family, _, ok := strings.Cut(id, "-"); ok {
-				views[family] = (&moduleSpec{ID: family}).macros()
-			}
-		}
+// declarationSitesOverlap considers only configured compiler views. There is
+// no family-only or macro-free program. Without configuration, retain possible
+// conflicts; source paths and target bindings never hide a cross-file mismatch.
+func declarationSitesOverlap(a, b declarationSite, views []map[string]string) bool {
+	if len(views) == 0 {
+		return true
 	}
+	conditions := append(append([]declarationCondition{}, a.conditions...), b.conditions...)
 	for _, macros := range views {
 		possible := true
 		for _, condition := range conditions {
@@ -803,7 +795,7 @@ func (group declarationGroup) conflicting() bool {
 			if !signaturesAgree(group.spellings[left].signature, group.spellings[right].signature) {
 				for _, a := range group.spellings[left].sites {
 					for _, b := range group.spellings[right].sites {
-						if declarationSitesOverlap(a, b) {
+						if declarationSitesOverlap(a, b, group.views) {
 							return true
 						}
 					}
@@ -816,7 +808,16 @@ func (group declarationGroup) conflicting() bool {
 
 // collectDeclarationGroups scans dirs under root and groups every file-scope
 // declaration by symbol.
-func collectDeclarationGroups(root string, dirs []string) ([]declarationGroup, error) {
+func collectDeclarationGroups(root string, dirs []string, modules ...*moduleSpec) ([]declarationGroup, error) {
+	var views []map[string]string
+	knownMacros := map[string]bool{}
+	for _, module := range modules {
+		macros := module.macros()
+		views = append(views, macros)
+		for name := range macros {
+			knownMacros[name] = true
+		}
+	}
 	sitesBySymbol := map[string][]declarationSite{}
 	tags := map[string]string{}
 	for _, dir := range dirs {
@@ -843,7 +844,7 @@ func collectDeclarationGroups(root string, dirs []string) ([]declarationGroup, e
 			for tag, alias := range fileTags {
 				tags[tag] = alias
 			}
-			conditions := declarationProgramConditions(string(data))
+			conditions := declarationProgramConditions(string(data), knownMacros)
 			for _, declaration := range declarations {
 				if declaration.static {
 					continue
@@ -870,7 +871,7 @@ func collectDeclarationGroups(root string, dirs []string) ([]declarationGroup, e
 				sites[index].signature[segment] = replaceTag(sites[index].signature[segment])
 			}
 		}
-		groups = append(groups, newDeclarationGroup(symbol, sites))
+		groups = append(groups, newDeclarationGroup(symbol, sites, views))
 	}
 	sort.Slice(groups, func(i, j int) bool { return groups[i].symbol < groups[j].symbol })
 	return groups, nil
@@ -896,7 +897,7 @@ func tagReplacer(tags map[string]string) func(string) string {
 	}
 }
 
-func newDeclarationGroup(symbol string, sites []declarationSite) declarationGroup {
+func newDeclarationGroup(symbol string, sites []declarationSite, views []map[string]string) declarationGroup {
 	sort.SliceStable(sites, func(i, j int) bool {
 		if sites[i].definition != sites[j].definition {
 			return sites[i].definition
@@ -910,7 +911,7 @@ func newDeclarationGroup(symbol string, sites []declarationSite) declarationGrou
 		}
 		return sites[i].line < sites[j].line
 	})
-	group := declarationGroup{symbol: symbol, sites: sites}
+	group := declarationGroup{symbol: symbol, sites: sites, views: views}
 	index := map[string]int{}
 	for _, site := range sites {
 		key := strings.Join(site.signature, " ")
@@ -965,8 +966,8 @@ func conflictingDeclarationGroups(groups []declarationGroup) []declarationGroup 
 
 // validateDeclarations fails when any symbol has conflicting file-scope
 // declarations.
-func validateDeclarations(root string) error {
-	groups, err := collectDeclarationGroups(root, declarationScanDirs)
+func validateDeclarations(root string, modules ...*moduleSpec) error {
+	groups, err := collectDeclarationGroups(root, declarationScanDirs, modules...)
 	if err != nil {
 		return err
 	}
@@ -1024,7 +1025,11 @@ func (p project) declarationsCommand(args []string) error {
 	if flags.NArg() != 0 {
 		return errors.New("usage: tools declarations [--module=DIR] [--symbol=NAME] [--all-files]")
 	}
-	groups, err := collectDeclarationGroups(p.root, declarationScanDirs)
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		return err
+	}
+	groups, err := collectDeclarationGroups(p.root, declarationScanDirs, config.Modules...)
 	if err != nil {
 		return err
 	}

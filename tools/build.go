@@ -530,7 +530,7 @@ func (p project) loadCheckedConfig() (*projectConfig, error) {
 	if err := p.validateProjectConfig(config); err != nil {
 		return nil, err
 	}
-	if err := validateDeclarations(p.root); err != nil {
+	if err := validateDeclarations(p.root, config.Modules...); err != nil {
 		return nil, err
 	}
 	if err := validatePlaceholderMembers(p.root); err != nil {

@@ -122,7 +122,7 @@ func (p project) shareAuditCommand(args []string) error {
 }
 
 func newShareAuditScanner(p project, config *projectConfig) (*shareAuditScanner, error) {
-	groups, err := collectDeclarationGroups(p.root, declarationScanDirs)
+	groups, err := collectDeclarationGroups(p.root, declarationScanDirs, config.Modules...)
 	if err != nil {
 		return nil, err
 	}
