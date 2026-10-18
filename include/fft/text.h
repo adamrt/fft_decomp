@@ -196,8 +196,8 @@ u8* text_find_entry(u32 text_id);
 const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2);
 
-/* Points g_text_section_pointers at the sections of a text file that starts with its table of offsets. */
-void text_relocate_pointer_table(const u32* offsets);
+/* Bind writable sections of a text bank beginning with its offset table. */
+void text_relocate_pointer_table(u32* offsets);
 
 /* battle name text */
 /* SMALL.OUT's entrypoint: bind its battle name text and clear the deployment unit limit. */

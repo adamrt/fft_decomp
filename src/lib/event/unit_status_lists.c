@@ -428,14 +428,14 @@ void unit_panel_copy_billboard_in(
     mem_copy_bytes_nonempty(&g_unit_panel_selected_unit_fields, billboard, sizeof(g_unit_panel_selected_unit_fields));
 }
 
-/* Point g_text_section_pointers at the sections of a text file that starts with a table of
- * TEXT_SECTION_COUNT offsets, each measured from the end of that table. */
-void text_relocate_pointer_table(const u32* offsets) {
+/* Bind writable sections of a text bank; Formation rebuilds the roster-name section in place.
+ * The bank starts with TEXT_SECTION_COUNT offsets measured from the end of that table. */
+void text_relocate_pointer_table(u32* offsets) {
     s32 index = 0;
-    const u8* text_data = (const u8*)offsets + sizeof(u32) * TEXT_SECTION_COUNT;
+    u8* text_data = (u8*)offsets + sizeof(u32) * TEXT_SECTION_COUNT;
 
     do {
-        g_text_section_pointers[index] = (u8*)(text_data + offsets[index]);
+        g_text_section_pointers[index] = text_data + offsets[index];
         index++;
     } while (index < TEXT_SECTION_COUNT);
 }
