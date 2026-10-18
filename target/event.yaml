@@ -2598,5 +2598,5 @@ functions:
   - {addr: 0x801d7064, size: 8, name: overlay_return_zero, hash: 207819bf4ebe3078, unit: entry}
 
 data:
-  - {addr: 0x801d7070, name: g_text_name_section_offsets}
+  - {addr: 0x801d706c, name: g_text_name_section_offsets}
   - {addr: 0x801d70ec, name: g_text_name_data}
