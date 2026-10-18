@@ -707,10 +707,10 @@ void formula_evade_store_physical(void) {
         weapon_guard = unit_get_action_restriction(g_action_target) == UNIT_ACTION_RESTRICTION_NONE;
     }
     g_action_current_ability.base_hit = 100;
-    g_action_current_ability.accessory_evade = 0;
-    g_action_current_ability.right_hand_evade = 0;
-    g_action_current_ability.left_hand_evade = 0;
-    g_action_current_ability.class_evade = g_action_target->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
+    g_action_current_ability.evades.accessory = 0;
+    g_action_current_ability.evades.right_hand = 0;
+    g_action_current_ability.evades.left_hand = 0;
+    g_action_current_ability.evades.job = g_action_target->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
     if ((g_action_target->unit_flags & UNIT_FLAG_MONSTER) != 0) {
         return;
     }
@@ -718,7 +718,7 @@ void formula_evade_store_physical(void) {
     /* weapon_flags first holds the accessory's type flags. */
     weapon_flags = g_item_primary_data[g_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]].type_flags;
     if ((weapon_flags & ITEM_TYPE_FLAG_ACCESSORY) != 0) {
-        g_action_current_ability.accessory_evade
+        g_action_current_ability.evades.accessory
             = g_item_accessory_data[g_item_primary_data[g_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]]
                                         .secondary_data_id]
                   .physical_evade;
@@ -731,9 +731,9 @@ void formula_evade_store_physical(void) {
     shield_secondary
         = g_item_primary_data[g_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]].secondary_data_id;
     if ((weapon_flags & ITEM_TYPE_FLAG_WEAPON) != 0 && weapon_guard != 0) {
-        g_action_current_ability.right_hand_evade = g_item_weapon_data[weapon_secondary].evade;
+        g_action_current_ability.evades.right_hand = g_item_weapon_data[weapon_secondary].evade;
     } else if ((shield_flags & ITEM_TYPE_FLAG_SHIELD) != 0) {
-        g_action_current_ability.right_hand_evade = g_item_shield_data[shield_secondary].physical_evade;
+        g_action_current_ability.evades.right_hand = g_item_shield_data[shield_secondary].physical_evade;
     }
 
     weapon_secondary = g_item_primary_data[g_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]].type_flags;
@@ -745,9 +745,9 @@ void formula_evade_store_physical(void) {
     shield_secondary
         = g_item_primary_data[g_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]].secondary_data_id;
     if ((weapon_flags & ITEM_TYPE_FLAG_WEAPON) != 0 && weapon_guard != 0) {
-        g_action_current_ability.left_hand_evade = g_item_weapon_data[weapon_secondary].evade;
+        g_action_current_ability.evades.left_hand = g_item_weapon_data[weapon_secondary].evade;
     } else if ((shield_flags & ITEM_TYPE_FLAG_SHIELD) != 0) {
-        g_action_current_ability.left_hand_evade = g_item_shield_data[shield_secondary].physical_evade;
+        g_action_current_ability.evades.left_hand = g_item_shield_data[shield_secondary].physical_evade;
     }
 }
 
@@ -760,27 +760,27 @@ void formula_evade_store_magical(void) {
     s32 secondary;
 
     g_action_current_ability.base_hit = 100;
-    g_action_current_ability.accessory_evade = 0;
-    g_action_current_ability.right_hand_evade = 0;
-    g_action_current_ability.left_hand_evade = 0;
-    g_action_current_ability.class_evade = 0;
+    g_action_current_ability.evades.accessory = 0;
+    g_action_current_ability.evades.right_hand = 0;
+    g_action_current_ability.evades.left_hand = 0;
+    g_action_current_ability.evades.job = 0;
     if (target->unit_flags & UNIT_FLAG_MONSTER) {
         return;
     }
     items = g_item_primary_data;
     item = &items[target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]];
     if (item->type_flags & ITEM_TYPE_FLAG_ACCESSORY) {
-        g_action_current_ability.accessory_evade = g_item_accessory_data[item->secondary_data_id].magic_evade;
+        g_action_current_ability.evades.accessory = g_item_accessory_data[item->secondary_data_id].magic_evade;
     }
     item = &items[target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]];
     secondary = item->secondary_data_id;
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
-        g_action_current_ability.right_hand_evade = g_item_shield_data[secondary].magic_evade;
+        g_action_current_ability.evades.right_hand = g_item_shield_data[secondary].magic_evade;
     }
     item = &items[target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]];
     secondary = item->secondary_data_id;
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
-        g_action_current_ability.left_hand_evade = g_item_shield_data[secondary].magic_evade;
+        g_action_current_ability.evades.left_hand = g_item_shield_data[secondary].magic_evade;
     }
 }
 
@@ -788,7 +788,7 @@ void formula_evade_store_magical(void) {
  * and class, stored together) become 0. */
 void formula_evade_calculate_concentrate(void) {
     if (g_action_attacker->ability_flags.support[1] & UNIT_SUPPORT_SET_2_CONCENTRATE) {
-        mem_zero(&g_action_current_ability.accessory_evade, 4);
+        mem_zero(&g_action_current_ability.evades, sizeof(g_action_current_ability.evades));
     }
 }
 
@@ -838,7 +838,7 @@ void formula_evade_apply_target_statuses(void) {
         flag = 1;
     }
     if (flag) {
-        mem_zero(&g_action_current_ability.accessory_evade, 4);
+        mem_zero(&g_action_current_ability.evades, sizeof(g_action_current_ability.evades));
     }
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEFENDING)]
         & STATUS_BYTE_MASK(STATUS_ID_DEFENDING)) {
@@ -851,7 +851,7 @@ void formula_evade_apply_target_statuses(void) {
 void formula_evade_calculate_transparent(void) {
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
         & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT)) {
-        mem_zero(&g_action_current_ability.accessory_evade, 4);
+        mem_zero(&g_action_current_ability.evades, sizeof(g_action_current_ability.evades));
     }
 }
 
@@ -923,11 +923,11 @@ void formula_evade_calculate_facing(void) {
     result = &g_action_current_ability.facing_modifier;
     *result = direction;
     if (*result != FORMULA_FACING_FRONT) {
-        g_action_current_ability.class_evade = 0;
+        g_action_current_ability.evades.job = 0;
     }
     if (*result == FORMULA_FACING_BACK) {
-        g_action_current_ability.right_hand_evade = 0;
-        g_action_current_ability.left_hand_evade = 0;
+        g_action_current_ability.evades.right_hand = 0;
+        g_action_current_ability.evades.left_hand = 0;
     }
 }
 
@@ -977,10 +977,10 @@ void formula_evade_calculate_final_hit_percent(void) {
         return;
     }
     hit = g_action_current_ability.base_hit;
-    accessory = g_action_current_ability.accessory_evade;
-    if ((accessory >= hit) || ((right = g_action_current_ability.right_hand_evade) >= hit)
-        || ((left = g_action_current_ability.left_hand_evade) >= hit)
-        || ((evade = g_action_current_ability.class_evade) >= hit)) {
+    accessory = g_action_current_ability.evades.accessory;
+    if ((accessory >= hit) || ((right = g_action_current_ability.evades.right_hand) >= hit)
+        || ((left = g_action_current_ability.evades.left_hand) >= hit)
+        || ((evade = g_action_current_ability.evades.job) >= hit)) {
         g_action_target_data->hit = 0;
         g_action_target_data->attack_accuracy = 0;
     } else {
@@ -989,7 +989,7 @@ void formula_evade_calculate_final_hit_percent(void) {
                   * ((hit - evade) * 100 / hit) / 1000000)
             * g_action_target_data->attack_accuracy / 100;
     }
-    if (formula_evade_roll_source(g_action_current_ability.accessory_evade, hit, ACTION_MISS_TYPE_ACCESSORY_EVADE,
+    if (formula_evade_roll_source(g_action_current_ability.evades.accessory, hit, ACTION_MISS_TYPE_ACCESSORY_EVADE,
             g_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY])
         != 0) {
         return;
@@ -999,7 +999,7 @@ void formula_evade_calculate_final_hit_percent(void) {
         item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
     }
     if (formula_evade_roll_source(
-            g_action_current_ability.right_hand_evade, hit, ACTION_MISS_TYPE_RIGHT_HAND_EVADE, item)
+            g_action_current_ability.evades.right_hand, hit, ACTION_MISS_TYPE_RIGHT_HAND_EVADE, item)
         != 0) {
         return;
     }
@@ -1007,12 +1007,13 @@ void formula_evade_calculate_final_hit_percent(void) {
     if (item == ITEM_ID_NONE) {
         item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
     }
-    if (formula_evade_roll_source(g_action_current_ability.left_hand_evade, hit, ACTION_MISS_TYPE_LEFT_HAND_EVADE, item)
+    if (formula_evade_roll_source(
+            g_action_current_ability.evades.left_hand, hit, ACTION_MISS_TYPE_LEFT_HAND_EVADE, item)
         != 0) {
         return;
     }
     formula_evade_roll_source(
-        g_action_current_ability.class_evade, hit, ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD, ITEM_ID_NONE);
+        g_action_current_ability.evades.job, hit, ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD, ITEM_ID_NONE);
 }
 
 /* Set XA and YA from the current weapon's item type.

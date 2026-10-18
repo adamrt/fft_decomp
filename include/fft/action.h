@@ -138,6 +138,16 @@ typedef enum action_phase {
 
 enum { ACTION_PHASE_COUNT = 3 };
 
+/* The target's four evade chances, cleared together by statuses and supports.
+ * Each hand uses its shield, or Weapon Guard for a physical attack. */
+typedef struct action_evades {
+    u8 accessory;
+    u8 right_hand;
+    u8 left_hand;
+    u8 job; /* physical class evade; zero for magic */
+} action_evades_t;
+typedef char action_evades_size_must_be_4[sizeof(action_evades_t) == 4 ? 1 : -1];
+
 /* g_action_current_ability: the attacker/target pair, weapons, formula
  * inputs and results of the strike being resolved, with copies of the ability's
  * secondary data, the weapon's data and the status-infliction record that
@@ -166,10 +176,7 @@ typedef struct action_current_ability {
     u8 used_item_id;                            /* 0x1b */
     u8 base_hit;                                /* 0x1c */
     u8 _unused_1d;                              /* 0x1d */
-    u8 accessory_evade;                         /* 0x1e */
-    u8 right_hand_evade;                        /* 0x1f; shield, or weapon with Weapon Guard */
-    u8 left_hand_evade;                         /* 0x20 */
-    u8 class_evade;                             /* 0x21 */
+    action_evades_t evades;                     /* 0x1e */
     u8 facing_modifier;                         /* 0x22: 0 front, 1 side, 2 back */
     u8 _unused_23;                              /* 0x23 */
     u8 charge_power;                            /* 0x24 */
