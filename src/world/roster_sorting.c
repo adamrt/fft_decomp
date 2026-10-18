@@ -66,7 +66,7 @@ void item_sort_id_list(s32 mode, s16* list) {
     memset(counts, 0, sizeof(counts));
     for (j = 0; j < g_formation_record_count; j++) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            counts[g_formation_unit_pointers[j]->equipment[i]]++;
+            counts[g_formation_unit_pointers[j]->detail.equipment[i]]++;
         }
     }
 

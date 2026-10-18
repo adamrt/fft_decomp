@@ -39,7 +39,7 @@ s32 formation_has_items(s32 mode) {
     }
     for (i = 0; i < g_formation_record_count; i++) {
         for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
-            if (g_formation_unit_pointers[i]->equipment[slot]) {
+            if (g_formation_unit_pointers[i]->detail.equipment[slot]) {
                 has_equipment = 1;
                 break;
             }
@@ -83,7 +83,7 @@ s32 item_get_equipped_count(s32 item_id) {
     for (unit_index = 0; unit_index < g_formation_record_count; unit_index++) {
         unit = g_formation_unit_pointers[unit_index];
         for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
-            if (unit->equipment[slot] == item_id) {
+            if (unit->detail.equipment[slot] == item_id) {
                 count++;
             }
         }
@@ -141,8 +141,8 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
     s16 retry;
 
     two_swords = 0;
-    right_hand = g_formation_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
-    left_hand = g_formation_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+    right_hand = g_formation_unit_pointers[unit_index]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    left_hand = g_formation_unit_pointers[unit_index]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (ability_has_two_swords(unit_index)) {
         two_swords = formation_ability_has_two_hands(unit_index) == 0;
     }
@@ -234,7 +234,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
                 item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
-            list[length++] = g_formation_unit_pointers[unit_index]->equipment[slot];
+            list[length++] = g_formation_unit_pointers[unit_index]->detail.equipment[slot];
             list[length] = -1;
             item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
         }
@@ -292,13 +292,15 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
     if (reserved != ITEM_ID_NOTHING) {
         right = reserved;
     } else {
-        right = g_formation_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] & ITEM_ENTRY_ID_MASK;
+        right = g_formation_unit_pointers[unit_index]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
+            & ITEM_ENTRY_ID_MASK;
     }
     reserved = g_shop_fitting_items[unit_index][MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (reserved != ITEM_ID_NOTHING) {
         left = reserved;
     } else {
-        left = g_formation_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] & ITEM_ENTRY_ID_MASK;
+        left = g_formation_unit_pointers[unit_index]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
+            & ITEM_ENTRY_ID_MASK;
     }
 
     /* Two Hands takes precedence over Two Swords. */
@@ -392,7 +394,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                 item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
-            list[length++] = g_formation_unit_pointers[unit_index]->equipment[slot] & ITEM_ENTRY_ID_MASK;
+            list[length++] = g_formation_unit_pointers[unit_index]->detail.equipment[slot] & ITEM_ENTRY_ID_MASK;
             list[length] = -1;
             item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
         }
@@ -425,7 +427,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
     /* A pick the unit neither wears nor has reserved must come from the shop. */
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
         s16 item = out[slot];
-        if (item != g_formation_unit_pointers[unit_index]->equipment[slot]
+        if (item != g_formation_unit_pointers[unit_index]->detail.equipment[slot]
             && item != g_shop_fitting_items[unit_index][slot]) {
             out[slot] = item | SHOP_FITTING_ITEM;
         }
@@ -456,16 +458,16 @@ s32 formation_item_equip(s16 unit, s16 slot, s16 item_id) {
         return status;
     }
     if (unit != FORMATION_PREVIEW_UNIT_INDEX) {
-        item_adjust_inventory_count(g_formation_unit_pointers[unit]->equipment[slot], 1);
+        item_adjust_inventory_count(g_formation_unit_pointers[unit]->detail.equipment[slot], 1);
     }
     if (slot < 2 && status != 1) {
         other = slot == 0;
         if (unit != FORMATION_PREVIEW_UNIT_INDEX) {
-            item_adjust_inventory_count(g_formation_unit_pointers[unit]->equipment[other], 1);
+            item_adjust_inventory_count(g_formation_unit_pointers[unit]->detail.equipment[other], 1);
         }
-        g_formation_unit_pointers[unit]->equipment[other] = ITEM_ID_NOTHING;
+        g_formation_unit_pointers[unit]->detail.equipment[other] = ITEM_ID_NOTHING;
     }
-    g_formation_unit_pointers[unit]->equipment[slot] = item;
+    g_formation_unit_pointers[unit]->detail.equipment[slot] = item;
     if (unit != FORMATION_PREVIEW_UNIT_INDEX) {
         formation_save_records();
     }
@@ -546,7 +548,7 @@ s32 formation_item_can_equip_in_slot(s16 unit_index, s16 slot, s16 item_id) {
             two_swords = flags & WEAPON_FLAG_TWO_SWORDS_COMPATIBLE;
         }
         other_slot = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
-        other = g_formation_unit_pointers[unit_index]->equipment[other_slot] & ITEM_ENTRY_ID_MASK;
+        other = g_formation_unit_pointers[unit_index]->detail.equipment[other_slot] & ITEM_ENTRY_ID_MASK;
         other_is_nonstandard_weapon = other >= ITEM_ID_THROWABLE_FIRST;
         other_forced_two_hands = 0;
         if (other_is_nonstandard_weapon) {
@@ -594,9 +596,9 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
     if (job_id == JOB_ID_MIME) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
-                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->equipment[i], 1);
+                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
             }
-            g_formation_unit_pointers[unit_id]->equipment[i] = ITEM_ID_NOTHING;
+            g_formation_unit_pointers[unit_id]->detail.equipment[i] = ITEM_ID_NOTHING;
         }
     }
     formation_save_records();
@@ -606,10 +608,10 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
             if (g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
                 formation_item_build_best_fit(unit_id, equipment);
                 for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                    item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->equipment[i], 1);
+                    item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
                 }
                 for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                    g_formation_unit_pointers[unit_id]->equipment[i] = equipment[i];
+                    g_formation_unit_pointers[unit_id]->detail.equipment[i] = equipment[i];
                     item_adjust_inventory_count(equipment[i], -1);
                 }
                 formation_save_records();
@@ -636,50 +638,51 @@ void formation_remove_invalid_loadout(s16 unit_id) {
     s32 status;
 
     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-        status = formation_item_can_equip_in_slot(unit_id, i, g_formation_unit_pointers[unit_id]->equipment[i]);
+        status = formation_item_can_equip_in_slot(unit_id, i, g_formation_unit_pointers[unit_id]->detail.equipment[i]);
         if (status == -1 || status == 0 || status == FORMATION_UNIT_LOCK_MIME) {
             if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
-                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->equipment[i], 1);
+                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
             }
-            g_formation_unit_pointers[unit_id]->equipment[i] = ITEM_ID_NOTHING;
+            g_formation_unit_pointers[unit_id]->detail.equipment[i] = ITEM_ID_NOTHING;
         }
     }
-    i = g_formation_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
-    status = g_formation_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+    i = g_formation_unit_pointers[unit_id]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    status = g_formation_unit_pointers[unit_id]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (i < ITEM_ID_THROWABLE_FIRST && i != ITEM_ID_NOTHING && status < ITEM_ID_THROWABLE_FIRST
         && status != ITEM_ID_NOTHING && ability_has_two_swords(unit_id) == 0) {
         if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
             item_adjust_inventory_count(
-                g_formation_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND], 1);
+                g_formation_unit_pointers[unit_id]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND], 1);
         }
-        g_formation_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
+        g_formation_unit_pointers[unit_id]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME) {
-        memset(g_formation_unit_pointers[unit_id]->abilities, 0, sizeof(g_formation_unit_pointers[unit_id]->abilities));
+        memset(g_formation_unit_pointers[unit_id]->detail.abilities, 0,
+            sizeof(g_formation_unit_pointers[unit_id]->detail.abilities));
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_CHEMIST
-        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+        && g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT]
             == ABILITY_ID_SUPPORT_THROW_ITEM) {
-        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
+        g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MONK
-        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+        && g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT]
             == ABILITY_ID_SUPPORT_MARTIAL_ARTS) {
-        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
+        g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MEDIATOR
-        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+        && g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT]
             == ABILITY_ID_SUPPORT_MONSTER_TALK) {
-        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
+        g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_NINJA
-        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+        && g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT]
             == ABILITY_ID_SUPPORT_TWO_SWORDS) {
-        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
+        g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
-    if (g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET]
-        == g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET]) {
-        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET] = 0;
+    if (g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET]
+        == g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET]) {
+        g_formation_unit_pointers[unit_id]->detail.abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET] = 0;
     }
     if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
         formation_save_records();
@@ -793,8 +796,8 @@ menu_equipment_slot_e formation_item_select_slot(s16 unit_index, s32 item_id) {
     menu_equipment_slot_e slot;
 
     item_id &= ITEM_ENTRY_ID_MASK;
-    right_hand = unit->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
-    left_hand = unit->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
+    right_hand = unit->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
+    left_hand = unit->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (item_id < ITEM_ID_THROWABLE_FIRST) {
         if (left_hand < ITEM_ID_THROWABLE_FIRST) {
             if (right_hand >= ITEM_ID_THROWABLE_FIRST) {

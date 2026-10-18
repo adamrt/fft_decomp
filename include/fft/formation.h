@@ -31,34 +31,41 @@ enum {
     FORMATION_UNIT_RECORD_COUNT = FORMATION_PREVIEW_UNIT_INDEX + 1
 };
 
+/* The 64-byte equipment and ability detail copied to the Formation panels.
+ * Slot arrays retain unsigned storage; packed menu-list entries are a separate signed view. */
+typedef struct formation_unit_detail {
+    s16 move;                     /* 0x00 */
+    s16 speed;                    /* 0x02 */
+    s16 jump;                     /* 0x04 */
+    s16 right_weapon_power;       /* 0x06 */
+    s16 left_weapon_power;        /* 0x08 */
+    s16 right_weapon_evade;       /* 0x0a */
+    s16 left_weapon_evade;        /* 0x0c */
+    s16 uses_monster_skillset;    /* 0x0e; primary skillset is in the monster range 0xb0..0xdf */
+    s16 two_handed;               /* 0x10; unit_is_two_handing_weapon result */
+    s16 physical_attack;          /* 0x12 */
+    s16 physical_class_evade;     /* 0x14 */
+    s16 physical_shield_evade;    /* 0x16 */
+    s16 physical_accessory_evade; /* 0x18 */
+    u8 _unused_1a[2];
+    s16 magical_attack;                          /* 0x1c */
+    s16 magical_class_evade;                     /* 0x1e */
+    s16 magical_shield_evade;                    /* 0x20 */
+    s16 magical_accessory_evade;                 /* 0x22 */
+    u16 equipment[MENU_EQUIPMENT_SLOT_COUNT];    /* 0x24; right hand, left hand, head, body, accessory */
+    u16 abilities[FORMATION_ABILITY_SLOT_COUNT]; /* 0x2e */
+    u8 _unused_38[8];                            /* 0x38; spare tail of the stat-detail block */
+} formation_unit_detail_t;
+typedef char formation_unit_detail_size_must_be_64[sizeof(formation_unit_detail_t) == 64 ? 1 : -1];
+
 /* The WORLD menus' record of a unit (g_formation_unit_records), compacted after roster and menu-specific filtering;
  * roster_slot keeps its roster identity. The builder and sorter produce the ordered g_formation_unit_pointers list, not
  * a roster-indexed array. The byte fields from 0x70 on mirror the party_unit_t layout. */
 typedef struct formation_unit {
     unit_panel_summary_t status;          /* 0x000; copied whole to the status banner */
     menu_unit_status_identity_t identity; /* 0x022 */
-    s16 move;                             /* 0x030 */
-    s16 speed;                            /* 0x032 */
-    s16 jump;                             /* 0x034 */
-    s16 right_weapon_power;               /* 0x036 */
-    s16 left_weapon_power;                /* 0x038 */
-    s16 right_weapon_evade;               /* 0x03a */
-    s16 left_weapon_evade;                /* 0x03c */
-    s16 uses_monster_skillset;            /* 0x03e; primary skillset is in the monster range 0xb0..0xdf */
-    s16 two_handed;                       /* 0x040; unit_is_two_handing_weapon result */
-    s16 physical_attack;                  /* 0x042 */
-    s16 physical_class_evade;             /* 0x044 */
-    s16 physical_shield_evade;            /* 0x046 */
-    s16 physical_accessory_evade;         /* 0x048 */
-    u8 _unused_04a[2];
-    s16 magical_attack;                          /* 0x04c */
-    s16 magical_class_evade;                     /* 0x04e */
-    s16 magical_shield_evade;                    /* 0x050 */
-    s16 magical_accessory_evade;                 /* 0x052 */
-    u16 equipment[MENU_EQUIPMENT_SLOT_COUNT];    /* 0x054; right hand, left hand, head, body, accessory */
-    u16 abilities[FORMATION_ABILITY_SLOT_COUNT]; /* 0x05e */
-    u8 _unused_068[8];                           /* 0x068; spare tail of the stat-detail block */
-    u8 gender_flags;                             /* 0x070; unit_flags_e (fft/unit.h) */
+    formation_unit_detail_t detail;       /* 0x030 */
+    u8 gender_flags;                      /* 0x070; unit_flags_e (fft/unit.h) */
     u8 _unused_071;
     u8 sprite_set;               /* 0x072; "Sprite Set ID": party_unit_t.sprite_set / character identity */
     u8 equippable_item_types[4]; /* 0x073; bit per item type, read by equipment_can_equip_item */

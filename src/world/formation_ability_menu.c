@@ -222,7 +222,7 @@ static s32 formation_ability_remove_menu(void) {
         g_formation_ability_remove_unit_index = g_unit_selected_index;
     }
     if (g_formation_ability_remove_initialized == 0) {
-        bcopy(g_formation_unit_pointers[unit_index]->abilities, g_formation_ability_remove_slots,
+        bcopy(g_formation_unit_pointers[unit_index]->detail.abilities, g_formation_ability_remove_slots,
             sizeof(g_formation_ability_remove_slots));
         g_formation_ability_remove_cursor = -1;
         g_formation_unit_cycle_mode = 2;
@@ -252,7 +252,7 @@ static s32 formation_ability_remove_menu(void) {
         g_formation_ability_remove_all_prompt_active = formation_ability_remove_all_prompt();
         if (g_formation_ability_remove_all_prompt_active == 0) {
             g_formation_ability_remove_cursor = -1;
-            bcopy(g_formation_unit_pointers[g_unit_selected_index]->abilities, g_formation_ability_remove_slots,
+            bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.abilities, g_formation_ability_remove_slots,
                 sizeof(g_formation_ability_remove_slots));
             return 1;
         }
@@ -275,7 +275,7 @@ static s32 formation_ability_remove_menu(void) {
     screen_draw_sliding_cursor(
         &g_formation_ability_remove_cursor_point, &g_formation_ability_remove_cursor_anim, g_menu_input_lock_mode);
     /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
-    ability = g_formation_unit_pointers[g_unit_selected_index]->abilities[slot_index];
+    ability = g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[slot_index];
     g_help_message_text_id = ability;
     if (ability == 0) {
         g_help_message_text_id = -1;
@@ -293,7 +293,7 @@ static s32 formation_ability_remove_menu(void) {
         } else {
             formation_ability_set_slot(g_unit_selected_index, slot, 0,
                 formation_ability_is_equip_support_change(
-                    g_unit_selected_index, g_formation_unit_pointers[g_unit_selected_index]->abilities[slot]));
+                    g_unit_selected_index, g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[slot]));
             g_formation_ability_menu_slots_changed = 1;
             *saved_slot = 0;
             g_formation_ability_remove_cursor = -1;
@@ -346,10 +346,10 @@ static s32 formation_ability_remove_all_prompt(void) {
         changed = 0;
         for (i = 1; i < 5; i++) {
             unit = g_formation_unit_pointers[g_unit_selected_index];
-            if (unit->abilities[i] != 0) {
+            if (unit->detail.abilities[i] != 0) {
                 changed = 1;
                 formation_ability_set_slot(g_unit_selected_index, i, 0,
-                    formation_ability_is_equip_support_change(g_unit_selected_index, unit->abilities[i]));
+                    formation_ability_is_equip_support_change(g_unit_selected_index, unit->detail.abilities[i]));
             }
         }
         formation_stage_selected_unit();
@@ -435,7 +435,7 @@ static s32 formation_ability_set_menu(void) {
     if (g_formation_ability_set_list_open == 0) {
         /* Retail reads slot -1 on the first pass, reaching the preceding accessory item ID. */
         slot = g_formation_ability_set_slot;
-        current = g_formation_unit_pointers[g_unit_selected_index]->abilities[slot];
+        current = g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[slot];
         g_formation_unit_cycle_mode = 2;
         /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
         g_help_message_text_id = current;
@@ -490,7 +490,8 @@ static s32 formation_ability_set_menu(void) {
                 } else {
                     /* Revalidate equipment when either the new or the replaced ability is an equip support. */
                     value = formation_ability_is_equip_support_change(g_unit_selected_index, selected);
-                    current = g_formation_unit_pointers[g_unit_selected_index]->abilities[g_formation_ability_set_slot];
+                    current = g_formation_unit_pointers[g_unit_selected_index]
+                                  ->detail.abilities[g_formation_ability_set_slot];
                     formation_ability_set_slot(g_unit_selected_index, g_formation_ability_set_slot, selected,
                         value | formation_ability_is_equip_support_change(g_unit_selected_index, current));
                     g_sound_queued_effect_id = SOUND_SFX_EQUIP;
@@ -515,11 +516,12 @@ static s32 formation_ability_set_menu(void) {
             g_formation_ability_set_cursor = cursor;
             if ((g_item_list_entries[cursor] >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                     && g_item_list_entries[cursor] <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3)
-                || (u16)(g_formation_unit_pointers[g_unit_selected_index]->abilities[g_formation_ability_set_slot]
+                || (u16)(g_formation_unit_pointers[g_unit_selected_index]
+                             ->detail.abilities[g_formation_ability_set_slot]
                        - ABILITY_ID_MOVEMENT_MOVE_PLUS_1)
                     < 6) {
                 formation_ability_diff_movement_stats(&g_item_preview_stat_detail,
-                    g_formation_unit_pointers[g_unit_selected_index]->abilities[g_formation_ability_set_slot],
+                    g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[g_formation_ability_set_slot],
                     g_item_list_entries[g_menu_list_selected_index]);
                 g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 g_formation_ability_set_show_stat_preview = 1;

@@ -124,7 +124,7 @@ s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_eq
 
     if (formation_get_unit_lock(unit_id) == FORMATION_UNIT_UNLOCKED) {
         formation_unit_t* unit = g_formation_unit_pointers[unit_id];
-        unit->abilities[slot] = ability;
+        unit->detail.abilities[slot] = ability;
         formation_save_records();
         formation_remove_invalid_loadout(unit_id);
         if (update_equipment != 0) {
@@ -132,10 +132,10 @@ s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_eq
                 if (g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
                     formation_item_build_best_fit(unit_id, equipment);
                     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                        item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->equipment[i], 1);
+                        item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
                     }
                     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                        g_formation_unit_pointers[unit_id]->equipment[i] = equipment[i];
+                        g_formation_unit_pointers[unit_id]->detail.equipment[i] = equipment[i];
                         item_adjust_inventory_count(equipment[i], -1);
                     }
                     formation_save_records();
@@ -156,7 +156,7 @@ s32 formation_get_unit_lock(s32 unit_id) {
 
     if (unit->proposition_status != 0)
         return FORMATION_UNIT_LOCK_PROPOSITION;
-    if (unit->uses_monster_skillset != 0)
+    if (unit->detail.uses_monster_skillset != 0)
         return FORMATION_UNIT_LOCK_MONSTER;
     if (job_is_special_monster(unit->identity.job_id) != 0)
         return FORMATION_UNIT_LOCK_MONSTER;

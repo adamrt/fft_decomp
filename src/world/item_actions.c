@@ -177,7 +177,7 @@ s8 formation_item_action_menu(void) {
             if (g_screen_selection_results[5] == 0) {
                 for (i = 0; i < g_formation_unit_count; i++) {
                     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
-                        if (item == g_formation_unit_pointers[i]->equipment[slot]) {
+                        if (item == g_formation_unit_pointers[i]->detail.equipment[slot]) {
                             formation_item_equip(i, slot, ITEM_ID_NOTHING);
                         }
                     }

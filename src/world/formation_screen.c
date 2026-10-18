@@ -153,7 +153,8 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 screen_start_help_text(DIALOG_POSITION_CENTER);
             }
             if (g_screen_grid_id != MENU_GRID_HELP_NONE) {
-                screen_update_grid_cursor(g_formation_unit_pointers[g_unit_selected_index]->uses_monster_skillset);
+                screen_update_grid_cursor(
+                    g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
             }
             screen_set_palette_mode(g_menu_input_lock_mode);
 
@@ -490,7 +491,7 @@ void formation_grid_menu(void) {
                     }
                 } else if (input & PSX_PAD_CIRCLE) {
                     if (g_formation_unit_browse_enabled != 0) {
-                        if (g_formation_unit_pointers[g_unit_selected_index]->uses_monster_skillset != 0) {
+                        if (g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset != 0) {
                             g_sound_queued_effect_id = SOUND_SFX_INVALID;
                         } else {
                             g_formation_main_menu_initialized = 0;
@@ -634,7 +635,8 @@ void formation_stage_selected_unit(void) {
     bcopy(&units[index]->status, &g_unit_panel_selected_unit_stat_summary, sizeof(unit_panel_summary_t));
     bcopy(&units[g_unit_selected_index]->identity, &g_formation_selected_unit_identity,
         sizeof(menu_unit_status_identity_t));
-    bcopy(&units[g_unit_selected_index]->move, &g_formation_selected_unit_stat_detail, 0x40);
+    bcopy(
+        &units[g_unit_selected_index]->detail, &g_formation_selected_unit_stat_detail, sizeof(formation_unit_detail_t));
     formation_copy_unit_to_temp(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
     if (g_unit_panel_status_display_thread_params.flags == MENU_STATUS_PANEL_HIDDEN) {
         g_formation_unit_slide_pending = !(units[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG);
@@ -770,7 +772,7 @@ void formation_recalculate_selected_stats(void) {
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         unit.equipment[i] = ITEM_ID_NONE;
     }
-    item = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
+    item = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
         & ITEM_ENTRY_ID_MASK;
     if (item != ITEM_ID_NOTHING) {
         if (g_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
@@ -779,7 +781,7 @@ void formation_recalculate_selected_stats(void) {
             unit.equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
         }
     }
-    item = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
+    item = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]
         & ITEM_ENTRY_ID_MASK;
     if (item != ITEM_ID_NOTHING) {
         if (g_item_primary_data[item].type == ITEM_TYPE_SHIELD) {
@@ -789,11 +791,11 @@ void formation_recalculate_selected_stats(void) {
         }
     }
     unit.equipment[UNIT_EQUIPMENT_SLOT_HEAD]
-        = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_HEAD];
+        = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_HEAD];
     unit.equipment[UNIT_EQUIPMENT_SLOT_BODY]
-        = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_BODY];
+        = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_BODY];
     unit.equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]
-        = g_formation_unit_pointers[g_unit_selected_index]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
+        = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         item = unit.equipment[i];
         if (item == ITEM_ID_NOTHING || item >= ITEM_ID_END) {
@@ -802,14 +804,15 @@ void formation_recalculate_selected_stats(void) {
     }
     unit_update_formation_stats(&unit);
     formation_build_unit_record(&unit, &record, party_get_unit(roster_slot));
-    bcopy(g_formation_unit_pointers[g_unit_selected_index]->equipment, record.equipment, sizeof(record.equipment));
-    record.two_handed = unit_is_two_handing_weapon(
-        (s16*)record.equipment, record.support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
+    bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment, record.detail.equipment,
+        sizeof(record.detail.equipment));
+    record.detail.two_handed = unit_is_two_handing_weapon(
+        (s16*)record.detail.equipment, record.support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
     bcopy(&record.status, &g_unit_panel_selected_unit_stat_summary, sizeof(unit_panel_summary_t));
     bcopy(&record.identity, &g_formation_selected_unit_identity, sizeof(menu_unit_status_identity_t));
-    bcopy(&record.move, &g_formation_selected_unit_stat_detail, 0x40);
+    bcopy(&record.detail, &g_formation_selected_unit_stat_detail, sizeof(formation_unit_detail_t));
     equipment_sum_weapon_and_evade_bonuses(
-        &g_formation_selected_unit_stat_detail, g_formation_unit_pointers[g_unit_selected_index]->equipment);
+        &g_formation_selected_unit_stat_detail, g_formation_unit_pointers[g_unit_selected_index]->detail.equipment);
     formation_copy_unit_to_temp(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
     formation_redraw_panels();
 }

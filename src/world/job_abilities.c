@@ -110,7 +110,7 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
     }
     jobs[count++] = job;
     if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) == 0
-        && g_formation_unit_pointers[unit_index]->uses_monster_skillset == 0) {
+        && g_formation_unit_pointers[unit_index]->detail.uses_monster_skillset == 0) {
         /* Skip Squire's bit: the base job above takes Squire's place. */
         bits_read_primary(1);
         for (i = 1; i < JOB_ID_GENERIC_COUNT; i++) {
@@ -219,7 +219,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     generic = job_get_generic_index(job);
     /* A skillset no job owns (a special character's) falls back to the unit's primary skillset. */
     if (job_find_first_for_skillset(skillset) == -1) {
-        skillset = g_formation_unit_pointers[unit_index]->abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET];
+        skillset = g_formation_unit_pointers[unit_index]->detail.abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET];
     }
     abilities = (s16*)ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
@@ -249,7 +249,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) != 0) {
             learned = 1;
-        } else if (g_formation_unit_pointers[unit_index]->uses_monster_skillset != 0) {
+        } else if (g_formation_unit_pointers[unit_index]->detail.uses_monster_skillset != 0) {
             if (i >= 3) {
                 break;
             }
