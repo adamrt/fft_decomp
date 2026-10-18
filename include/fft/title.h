@@ -11,6 +11,15 @@ struct suzuki_music;
 union controller_record;
 
 /* title screen */
+/* Result returned to MAIN by open_title_entrypoint. */
+typedef enum title_result {
+    TITLE_RESULT_BATTLE = 0,  /* new game, or a loaded save whose next scenario runs first */
+    TITLE_RESULT_WORLD = 1,   /* a loaded save routed through WORLD, including a formation return */
+    TITLE_RESULT_TUTORIAL = 2 /* the title's Tutorial choice; WORLD opens its tutorial menu */
+} title_result_e;
+
+extern s32 g_title_result; /* title_result_e */
+
 /* Run OPEN's title/movie loop and return the next game route; nonzero skips the opening movie. */
 s32 open_title_entrypoint(s32 skip_movie);
 void title_init_sequence(s32 skip_movie);

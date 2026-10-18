@@ -13,7 +13,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern int g_system_graphics_error;
+/* Cleared by the two error hooks below; its original purpose and any reader are unknown. */
+extern s32 g_system_error_hook_word;
 extern const game_options_t g_game_options_defaults;
 
 /* Set with the input repeat timings; no reader has been identified. */
@@ -32,15 +33,15 @@ void system_report_error(s32 allocator_id, s32 error_code) {
 /* The error hook of the file loads, the heap, the SMD loads and the battle sprite code. */
 void system_handle_error(int error_code) {
     system_report_stub(0, error_code);
-    g_system_graphics_error = 0;
+    g_system_error_hook_word = 0;
 }
 
 /* Error hook BATTLE calls, mostly when a unit lookup by id fails: the code is
  * dropped (system_report_error is empty) and
- * g_system_graphics_error is cleared. */
+ * g_system_error_hook_word is cleared. */
 void system_handle_pointer_exception(int error_code) {
     system_report_error(0, error_code);
-    g_system_graphics_error = 0;
+    g_system_error_hook_word = 0;
 }
 
 /* Return the ordering table of BATTLE's current render buffer; the pointer is a BATTLE.BIN global,

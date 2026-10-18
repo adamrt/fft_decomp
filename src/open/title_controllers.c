@@ -274,7 +274,7 @@ void movie_update_fftop(controller_record_t* unused_record) {
         SetDispMask(0);
         flags = g_system_runtime_flags;
         controller = g_controller_depth;
-        g_system_result = 0;
+        g_title_result = TITLE_RESULT_BATTLE;
         flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         controller--;
         g_system_runtime_flags = flags;
@@ -556,15 +556,15 @@ void title_update_menu(controller_record_t* record) {
             g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
             if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
                 || script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
-                g_system_result = cursor;
+                g_title_result = cursor;
                 return;
             }
-            g_system_result = 0;
+            g_title_result = TITLE_RESULT_BATTLE;
             return;
 
         case TITLE_MENU_TUTORIAL:
             new_game_init_party(PARTY_NEW_GAME_RAMZA, 1);
-            g_system_result = 2;
+            g_title_result = TITLE_RESULT_TUTORIAL;
             g_window_record_count -= 6;
             g_window_render_object_count -= 6;
             g_controller_depth--;

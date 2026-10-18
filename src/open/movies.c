@@ -88,7 +88,7 @@ static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
 #define CONTROLLER_OTAG_BUFFER_BYTES 64
 
 /* Entry point of OPEN.BIN for the title sequence. Runs until a controller clears
- * SYSTEM_RUNTIME_FLAG_RUNNING and returns g_system_result: 0 for a new
+ * SYSTEM_RUNTIME_FLAG_RUNNING and returns g_title_result: 0 for a new
  * game, or a loaded save with a next scenario and no formation return event,
  * which system_run_game_loop takes straight into BATTLE; 1 for any other
  * loaded save and 2 for the tutorial, which go to WORLD.
@@ -133,7 +133,7 @@ s32 open_title_entrypoint(s32 skip_movie) {
 
     SetDispMask(0);
     sound_set_cd_mix_and_volume(0xc0, 0x78);
-    return g_system_result;
+    return g_title_result;
 }
 
 /* Entry point of OPEN.BIN for the ending: play FFTEND.STR, then run the ending

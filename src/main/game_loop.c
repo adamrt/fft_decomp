@@ -12,6 +12,7 @@
 #include "fft/state.h"
 #include "fft/suzuki.h"
 #include "fft/system.h"
+#include "fft/title.h"
 #include "fft/world_map.h"
 #include "fft/zodiac.h"
 #include "psx/libetc.h"
@@ -87,7 +88,7 @@ void system_run_game_loop(void) {
             open_mode = 0;
         }
 
-        if (overlay_exec_open_title(open_mode) == 0) {
+        if (overlay_exec_open_title(open_mode) == TITLE_RESULT_BATTLE) {
             g_system_go_straight_to_battle = 1;
             g_system_frontend_world_result = WORLD_MAP_RESULT_NONE;
         } else {

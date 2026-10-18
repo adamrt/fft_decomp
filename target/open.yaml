@@ -237,7 +237,7 @@ data:
   - {addr: 0x800855ec, name: g_music_test_world_menu_otag_index}
   - {addr: 0x800855f0, name: g_title_demo_movie_index}
   - {addr: 0x800855f4, name: g_music_test_list_entry_flags}
-  - {addr: 0x800856f4, name: g_system_result}
+  - {addr: 0x800856f4, name: g_title_result}
   - {addr: 0x800856f8, name: g_prologue_line_primitives}
   - {addr: 0x80085ca8, name: g_file_current_openbk_image_id}
   - {addr: 0x80085cac, name: g_gfx_overlay_fade}

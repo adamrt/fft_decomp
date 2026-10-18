@@ -220,7 +220,6 @@ typedef enum system_runtime_flag {
 } system_runtime_flag_e;
 
 extern u32 g_system_runtime_flags;
-extern s32 g_system_result;
 extern s32 g_system_vsync_mode;
 extern u8 g_system_work_buffer_0[];
 extern u8 g_system_work_buffer_1[];
