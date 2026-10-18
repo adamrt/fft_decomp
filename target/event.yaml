@@ -13,7 +13,7 @@ units:
   - {name: deploy_panel_primitives, source: src/event/attack/deploy_panel_primitives.c}
   - {name: deploy_screen, source: src/event/attack/deploy_screen.c, data: [{addr: 0x801cd0dc, size: 368, hash: 66f4ed506159f631}]}
   - {name: equipment_panel_threads, source: src/lib/menu/equipment_panel_threads.c}
-  - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b4, size: 4, hash: 67abdd721024f0ff}, {addr: 0x801cd2b8, size: 4, hash: e112d548bcb2311b}]}
+  - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b0, size: 128, hash: be9437aede4160e0}]}
   - {name: file_load_sync, source: src/lib/file/file_load_sync.c}
   - {name: gfx_set_formation_icon_uv, source: src/lib/menu/gfx_set_formation_icon_uv.c}
   - {name: menu_panel_backdrops, source: src/lib/menu/menu_draw_thread_status_indicators.c, data: [{addr: 0x801ca054, size: 32, hash: 66687aadf862bd77}]}
@@ -199,6 +199,7 @@ data:
   - {addr: 0x801cd25c, name: g_deploy_unit_fieldable}
   - {addr: 0x801cd270, name: g_deploy_squad_data}
   - {addr: 0x801cd274, name: g_deploy_current_squad_data}
+  - {addr: 0x801cd2b0, name: g_deploy_text_section_offsets}
   - {addr: 0x801cd2b4, name: g_deploy_text_roster_unit_names_offset}
   - {addr: 0x801cd2b8, name: g_deploy_text_job_names_offset}
   - {addr: 0x801cd330, name: g_text_data}
