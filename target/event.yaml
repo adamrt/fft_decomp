@@ -2472,8 +2472,7 @@ data:
   - {addr: 0x801d00a4, name: g_unit_panel_character_status_origin_x}
   - {addr: 0x801d00b0, name: g_unit_panel_character_status_redraw_request}
   - {addr: 0x801d00b8, name: g_zodiac_texture_page_origin}
-  - {addr: 0x801d00e0, name: g_after_battle_join_menu_descriptor}
-  - {addr: 0x801d0158, name: g_party_removal_menus}
+  - {addr: 0x801d00e0, name: g_after_battle_menu_entries}
   - {addr: 0x801d02fc, name: g_unit_panel_status_frames}
   - {addr: 0x801d068c, name: g_unit_panel_status_frame_scales}
   - {addr: 0x801d07bc, name: g_unit_panel_panel_status_group_bounds}

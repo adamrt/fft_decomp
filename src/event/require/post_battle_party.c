@@ -654,7 +654,7 @@ static void status_screen_open_after_battle(void) {
     thread_exit_current();
 }
 
-/* Run status_screen_open_after_battle in thread slot 6, wait for it, and exit. Nothing references it. */
+/* The recruitment menu's Status choice: run status_screen_open_after_battle in thread slot 6 and wait for it. */
 void status_screen_open_after_battle_thread(void) {
     thread_start(6, status_screen_open_after_battle);
     thread_wait_until_inactive(6);

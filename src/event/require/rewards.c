@@ -1,5 +1,6 @@
-/* Rewards, including item and equipment overflow, post-battle changes, war trophies and bonus money, the gil ticker,
- * POLY_GT4 arrays, condition display, the bonus image burst and the help menu overlay. */
+/* REQUIRE's recruitment, dismissal and War Trophies screens share their menus
+ * and unit-panel support here. This unit also draws the battle-condition
+ * banners and the BONUS.BIN tile burst requested by event scripts. */
 
 #include "fft/ability.h"
 #include "fft/after_battle.h"
@@ -55,9 +56,6 @@ extern RECT g_party_palette_move_rect;
 extern s16 g_party_palette_destination;
 extern s16 g_party_palette_destination_y;
 
-/* Six consecutive 0x3c-byte menu records; the target derives entry [4]'s address from entry [2], so they are one
- * array. */
-extern menu_entry_t g_party_removal_menus[6];
 extern s16 g_party_removal_result;
 
 /* One cell of the 12-row, 24-column burst grid: two flat quads and its motion state. */
@@ -123,8 +121,24 @@ extern RECT g_war_trophy_money_clip_rect_1;
 /* Upload rectangle for the current entry's text image. */
 extern RECT g_war_trophy_image_rect;
 
-/* Join prompt descriptor and its unused message result. */
-extern menu_entry_t g_after_battle_join_menu_descriptor[];
+/* Entries in the post-battle recruitment and dismissal menu table. */
+typedef enum after_battle_menu_entry {
+    AFTER_BATTLE_MENU_JOIN_PROMPT = 0,
+    AFTER_BATTLE_MENU_JOIN_CHOICES = 1,
+    AFTER_BATTLE_MENU_DISMISS_CONFIRMATION = 2,
+    AFTER_BATTLE_MENU_STATUS_SCREEN = 3,
+    AFTER_BATTLE_MENU_ROSTER_FULL_PROMPT = 4,
+    AFTER_BATTLE_MENU_ROSTER_FULL_CHOICES = 5,
+    AFTER_BATTLE_MENU_DISMISS_UNIT_PROMPT = 6,
+    AFTER_BATTLE_MENU_EQUIPMENT_SOLD_MESSAGE = 7,
+    AFTER_BATTLE_MENU_MONSTER_JOIN_CHOICES = 8,
+    AFTER_BATTLE_MENU_ENTRY_COUNT = 9
+} after_battle_menu_entry_e;
+
+/* Post-battle recruitment prompts, dismissal menus and equipment-overflow messages. */
+extern menu_entry_t g_after_battle_menu_entries[AFTER_BATTLE_MENU_ENTRY_COUNT];
+
+/* The join prompt's unused message result. */
 extern s16 g_after_battle_message_menu_result;
 
 /* Member access reschedules a summary-field store in party_apply_post_battle_changes. */
@@ -550,7 +564,8 @@ static s32 party_select_unit_to_dismiss(void) {
     for (;;) {
         g_party_removal_result = 0xff;
         thread_start(AFTER_BATTLE_THREAD_SLOT_MESSAGE, menu_icon_linked_entry_thread);
-        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MESSAGE, (s32)&g_party_removal_menus[2], 0, 0);
+        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MESSAGE,
+            (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_ROSTER_FULL_PROMPT], 0, 0);
         portrait_rect = &g_party_portrait_move_rect;
         portrait_destination = &g_party_portrait_destination;
         palette_rect = &g_party_palette_move_rect;
@@ -577,7 +592,8 @@ static s32 party_select_unit_to_dismiss(void) {
 
     selection_menu:
         thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
-        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, (s32)&g_party_removal_menus[4], 0, 0);
+        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
+            (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_DISMISS_UNIT_PROMPT], 0, 0);
         thread_wait_until_inactive(AFTER_BATTLE_THREAD_SLOT_MENU);
         unit_panel_set_transition(0);
         for (;;) {
@@ -693,7 +709,8 @@ static s32 party_select_unit_to_dismiss(void) {
             AFTER_BATTLE_THREAD_SLOT_MESSAGE, 0x19, message_id, selected_battle_unit->unit_id, should_restore);
         g_threads[AFTER_BATTLE_THREAD_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = 0x18;
         thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
-        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, (s32)&g_party_removal_menus[0], 0, 0);
+        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
+            (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_DISMISS_CONFIRMATION], 0, 0);
         menu_wait_selection_threads();
         if (g_after_battle_menu_selection_result != 0)
             continue;
@@ -728,7 +745,8 @@ static s32 party_select_unit_to_dismiss(void) {
     /* Never taken: should_restore is 0 on both exits (the item restore always returns 0). */
     if (should_restore != 0) {
         thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
-        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, (s32)&g_party_removal_menus[5], 0, 0);
+        thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
+            (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_EQUIPMENT_SOLD_MESSAGE], 0, 0);
         thread_wait_until_inactive(AFTER_BATTLE_THREAD_SLOT_MENU);
     }
 
@@ -787,7 +805,7 @@ static void party_apply_post_battle_changes(void) {
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = text_data + g_text_section_offsets[1];
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES] = text_data + g_text_section_offsets[2];
     saved_menu_descriptor = g_menu_thread_menu_data;
-    menu_base = g_after_battle_join_menu_descriptor;
+    menu_base = g_after_battle_menu_entries;
     g_menu_thread_menu_data = menu_base;
     g_text_section_pointers[AFTER_BATTLE_TEXT_SECTION_DISMISS_UNIT_REPLIES] = text_data + g_text_section_offsets[3];
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = text_data + g_text_section_offsets[4];
@@ -935,12 +953,15 @@ static void party_apply_post_battle_changes(void) {
                         if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
                             thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
-                                (s32)(menu_fields + 8 * sizeof(*menu_base) - offsetof(menu_entry_t, inner_width)), 0,
-                                0);
+                                (s32)(menu_fields + AFTER_BATTLE_MENU_MONSTER_JOIN_CHOICES * sizeof(*menu_base)
+                                    - offsetof(menu_entry_t, inner_width)),
+                                0, 0);
                         } else {
                             thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
-                                (s32)(menu_fields + sizeof(*menu_base) - offsetof(menu_entry_t, inner_width)), 0, 0);
+                                (s32)(menu_fields + AFTER_BATTLE_MENU_JOIN_CHOICES * sizeof(*menu_base)
+                                    - offsetof(menu_entry_t, inner_width)),
+                                0, 0);
                         }
                     }
 
@@ -1008,10 +1029,11 @@ static void party_apply_post_battle_changes(void) {
                 }
             } while (g_party_removal_result != 0);
 
-            /* Equipment the inventory cannot hold is sold; menu entry 5 says so. */
+            /* Equipment the inventory cannot hold is sold; explain the sale before the unit joins. */
             if (party_sell_equipment_over_limit(*selected_unit_index_ptr) != 0) {
                 thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
-                thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU, (s32)&g_party_removal_menus[5], 0, 0);
+                thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
+                    (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_EQUIPMENT_SOLD_MESSAGE], 0, 0);
                 thread_wait_until_inactive(AFTER_BATTLE_THREAD_SLOT_MENU);
             }
 
