@@ -4,6 +4,7 @@
 /* BATTLE's game state machine: the frame loop, the handler and entry function of each game state, map jumps,
  * battle outcomes and the battle's close. */
 
+#include "fft/system.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
@@ -202,7 +203,7 @@ void state_start_change_map_jump_in(s32 duration);
 void state_enter_close_battle_to_world(s32 duration);
 
 /* Queues CLOSE_BATTLE; the callers always pass transition step 8. */
-void state_enter_close_battle(s32 transition_step, s32 close_flow_state);
+void state_enter_close_battle(s32 transition_step, system_game_flow_e close_flow_state);
 
 /* event outcomes and scenarios */
 

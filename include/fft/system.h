@@ -83,7 +83,7 @@ typedef enum system_game_flow {
 } system_game_flow_e;
 
 /* BATTLE reloads this result with its program image; MAIN reads it after battle_entrypoint returns. */
-extern u32 g_game_flow_state;
+extern system_game_flow_e g_game_flow_state;
 
 extern u32 g_system_flags;                 /* system_flags_e bits; cleared by save_init_data_tables */
 extern s32 g_system_frontend_world_result; /* world_map_result_e */

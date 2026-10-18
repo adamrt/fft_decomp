@@ -62,7 +62,7 @@ extern s32 g_sprite_compressed_nibble_phase;
 extern s32 g_sprite_compressed_offset;
 
 /* Loading BATTLE initializes the result; MAIN reads it when the battle loop returns. */
-u32 g_game_flow_state = SYSTEM_GAME_FLOW_BATTLE;
+system_game_flow_e g_game_flow_state = SYSTEM_GAME_FLOW_BATTLE;
 
 static SVECTOR g_sprite_gte_rtpt_vxy0 = { 0 };
 static SVECTOR g_sprite_gte_rtpt_vxy1 = { 0 };

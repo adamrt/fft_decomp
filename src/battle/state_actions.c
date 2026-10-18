@@ -770,7 +770,7 @@ void state_enter_map_jumping_in(void) {
 }
 
 /* Queue the CloseBattle game state; callers always pass transition step 8. */
-void state_enter_close_battle(s32 transition_step, s32 close_flow_state) {
+void state_enter_close_battle(s32 transition_step, system_game_flow_e close_flow_state) {
     g_system_vsync_interval = 2;
     g_game_state = GAME_STATE_CLOSE_BATTLE;
     g_fade_step = transition_step;
