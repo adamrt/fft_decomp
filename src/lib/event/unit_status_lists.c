@@ -163,16 +163,7 @@ extern menu_quad_page_t g_unit_view_height_display_pages[2];
 /* Status uses two alternate views of the stats-page storage: its numeric
  * records begin at page 2, and its frame records begin at page 5. */
 extern status_screen_frame_t g_status_screen_frames[2];
-extern RECT g_status_screen_panel_rect;  /* panel box */
-extern RECT g_status_screen_cursor_rect; /* cursor source */
 extern menu_palette_primitives_t g_status_screen_palette;
-extern RECT g_status_screen_text_rect_a; /* first text image */
-extern RECT g_status_screen_text_rect_b; /* second text image */
-extern image_layout_t g_status_screen_row_image_params_a[4];
-extern image_layout_t g_status_screen_row_image_params_b[4];
-extern image_layout_t g_status_screen_sprite_image_params_a[19];
-extern image_layout_t g_status_screen_sprite_image_params_b[19];
-extern image_layout_t g_status_screen_item_icon_image_params[5];
 extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
 extern menu_number_entry_t g_status_screen_numbers_entries[15];
 extern RECT g_status_screen_numbers_frame_rect;
@@ -246,6 +237,40 @@ typedef enum menu_status_screen_line_layout_offset {
     MENU_STATUS_SCREEN_LINE_Y1 = 6,
     MENU_STATUS_SCREEN_LINE_SIZE = 7
 } menu_status_screen_line_layout_offset_e;
+
+/* Status-screen geometry. The sprite layouts differ in their ability-column
+ * labels: two skillsets plus Reaction/Support/Movement, or monster abilities.
+ * Both layouts replace their hand rows when a weapon uses Two Hands. */
+static RECT s_status_screen_panel_rect = { 140, 128, 234, 92 };
+static RECT s_status_screen_draw_area_rect = { 132, 120, 250, 108 };
+static RECT s_status_screen_equipment_text_rect = { 384, 168, 20, 80 };
+static RECT s_status_screen_ability_text_rect = { 418, 0, 20, 80 };
+
+static image_layout_t s_status_screen_skillset_sprite_layouts[19] = { { { 28, 32, 18, 10 }, 17, -3 },
+    { { 0, 32, 26, 10 }, 119, -3 }, { { 0, 140, 8, 12 }, 6, 11 }, { { 8, 140, 8, 12 }, 6, 27 },
+    { { 16, 140, 8, 12 }, 5, 43 }, { { 36, 140, 12, 10 }, 4, 59 }, { { 24, 140, 12, 10 }, 3, 75 },
+    { { 136, 0, 12, 16 }, 126, 8 }, { { 136, 0, 12, 16 }, 126, 24 }, { { 148, 0, 12, 16 }, 126, 40 },
+    { { 136, 16, 16, 16 }, 124, 56 }, { { 152, 16, 16, 16 }, 124, 72 }, { { 0, 168, 80, 80 }, 38, 9 },
+    { { 136, 0, 80, 80 }, 146, 9 }, { { 0, 128, 8, 12 }, 6, 11 }, { { 8, 128, 8, 12 }, 6, 27 },
+    { { 16, 128, 12, 12 }, 5, 43 }, { { 36, 128, 12, 12 }, 4, 59 }, { { 26, 128, 12, 12 }, 5, 75 } };
+
+static image_layout_t s_status_screen_monster_sprite_layouts[19] = { { { 28, 32, 18, 10 }, 17, -3 },
+    { { 0, 32, 26, 10 }, 119, -3 }, { { 0, 140, 8, 12 }, 6, 11 }, { { 8, 140, 8, 12 }, 6, 27 },
+    { { 16, 140, 8, 12 }, 5, 43 }, { { 36, 140, 12, 10 }, 4, 59 }, { { 24, 140, 12, 10 }, 3, 75 },
+    { { 232, 16, 16, 16 }, 124, 8 }, { { 232, 16, 16, 16 }, 124, 24 }, { { 232, 16, 16, 16 }, 124, 40 },
+    { { 232, 16, 16, 16 }, 124, 56 }, { { 232, 16, 16, 16 }, -388, 72 }, { { 0, 168, 80, 80 }, 38, 9 },
+    { { 136, 0, 80, 80 }, 146, 9 }, { { 0, 128, 8, 12 }, 6, 11 }, { { 8, 128, 8, 12 }, 6, 27 },
+    { { 16, 128, 12, 12 }, 5, 43 }, { { 36, 128, 12, 12 }, 4, 59 }, { { 26, 128, 12, 12 }, 5, 75 } };
+
+static image_layout_t s_status_screen_separate_hand_layouts[4] = { { { 0, 140, 8, 12 }, 6, 11 },
+    { { 8, 140, 8, 12 }, 6, 27 }, { { 0, 128, 8, 12 }, 6, 11 }, { { 8, 128, 8, 12 }, 6, 27 } };
+
+static image_layout_t s_status_screen_two_hands_layouts[4] = { { { 48, 144, 16, 16 }, 4, 15 },
+    { { 8, 140, 8, 12 }, 518, 27 }, { { 48, 144, 16, 16 }, 4, 15 }, { { 8, 128, 8, 12 }, 518, 27 } };
+
+static image_layout_t s_status_screen_item_icon_layouts[5]
+    = { { { 0, 0, 16, 16 }, 18, 8 }, { { 16, 0, 16, 16 }, 18, 24 }, { { 32, 16, 16, 16 }, 18, 40 },
+          { { 48, 16, 16, 16 }, 18, 56 }, { { 64, 16, 16, 16 }, 18, 72 } };
 
 static u8 g_status_screen_line_colors[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
@@ -1800,8 +1825,8 @@ void status_screen_thread(void) {
     setRGB0(&frame_record->tiles[0], 0x30, 0x30, 0x30);
     frame_record->tiles[0].w = 0x10;
     frame_record->tiles[0].h = 0x5A;
-    frame_record->tiles[0].x0 = g_status_screen_panel_rect.x;
-    frame_record->tiles[0].y0 = g_status_screen_panel_rect.y + 1;
+    frame_record->tiles[0].x0 = s_status_screen_panel_rect.x;
+    frame_record->tiles[0].y0 = s_status_screen_panel_rect.y + 1;
     mem_copy_bytes_nonempty(&frame_record->tiles[1], &frame_record->tiles[0], sizeof(TILE));
     frame_record->tiles[0].x0 += 0x12;
     frame_record->tiles[1].x0 += 0x7C;
@@ -1813,10 +1838,10 @@ void status_screen_thread(void) {
         setRGB0(line, g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_R],
             g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_G],
             g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_B]);
-        setXY2(line, g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_X0] + g_status_screen_panel_rect.x,
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_Y0] + g_status_screen_panel_rect.y,
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_X1] + g_status_screen_panel_rect.x,
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_Y1] + g_status_screen_panel_rect.y);
+        setXY2(line, g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_X0] + s_status_screen_panel_rect.x,
+            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_Y0] + s_status_screen_panel_rect.y,
+            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_X1] + s_status_screen_panel_rect.x,
+            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_Y1] + s_status_screen_panel_rect.y);
         line++;
     }
 
@@ -1827,21 +1852,21 @@ void status_screen_thread(void) {
      * common tails, leaving only the first call's table loads in the arms. */
     if (g_unit_panel_selected_unit_fields.state.two_hands != 0) {
         mem_copy_bytes_nonempty(
-            &g_status_screen_sprite_image_params_a[2], g_status_screen_row_image_params_b, 2 * sizeof(image_layout_t));
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_a[14], &g_status_screen_row_image_params_b[2],
+            &s_status_screen_skillset_sprite_layouts[2], s_status_screen_two_hands_layouts, 2 * sizeof(image_layout_t));
+        mem_copy_bytes_nonempty(&s_status_screen_skillset_sprite_layouts[14], &s_status_screen_two_hands_layouts[2],
             2 * sizeof(image_layout_t));
         mem_copy_bytes_nonempty(
-            &g_status_screen_sprite_image_params_b[2], g_status_screen_row_image_params_b, 2 * sizeof(image_layout_t));
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_b[14], &g_status_screen_row_image_params_b[2],
+            &s_status_screen_monster_sprite_layouts[2], s_status_screen_two_hands_layouts, 2 * sizeof(image_layout_t));
+        mem_copy_bytes_nonempty(&s_status_screen_monster_sprite_layouts[14], &s_status_screen_two_hands_layouts[2],
             2 * sizeof(image_layout_t));
     } else {
-        mem_copy_bytes_nonempty(
-            &g_status_screen_sprite_image_params_a[2], g_status_screen_row_image_params_a, 2 * sizeof(image_layout_t));
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_a[14], &g_status_screen_row_image_params_a[2],
+        mem_copy_bytes_nonempty(&s_status_screen_skillset_sprite_layouts[2], s_status_screen_separate_hand_layouts,
             2 * sizeof(image_layout_t));
-        mem_copy_bytes_nonempty(
-            &g_status_screen_sprite_image_params_b[2], g_status_screen_row_image_params_a, 2 * sizeof(image_layout_t));
-        mem_copy_bytes_nonempty(&g_status_screen_sprite_image_params_b[14], &g_status_screen_row_image_params_a[2],
+        mem_copy_bytes_nonempty(&s_status_screen_skillset_sprite_layouts[14], &s_status_screen_separate_hand_layouts[2],
+            2 * sizeof(image_layout_t));
+        mem_copy_bytes_nonempty(&s_status_screen_monster_sprite_layouts[2], s_status_screen_separate_hand_layouts,
+            2 * sizeof(image_layout_t));
+        mem_copy_bytes_nonempty(&s_status_screen_monster_sprite_layouts[14], &s_status_screen_separate_hand_layouts[2],
             2 * sizeof(image_layout_t));
     }
 
@@ -1849,19 +1874,19 @@ void status_screen_thread(void) {
     if (g_unit_panel_selected_unit_fields.state.generic_monster == 0) {
         for (i = 0; i < 19; i++) {
             gfx_set_image_primitive_layout(&frame_record->sprites[i], &g_menu_texture_origin,
-                &g_status_screen_panel_rect, &g_status_screen_sprite_image_params_a[i]);
+                &s_status_screen_panel_rect, &s_status_screen_skillset_sprite_layouts[i]);
         }
     } else {
         for (i = 0; i < 19; i++) {
             gfx_set_image_primitive_layout(&frame_record->sprites[i], &g_menu_texture_origin,
-                &g_status_screen_panel_rect, &g_status_screen_sprite_image_params_b[i]);
+                &s_status_screen_panel_rect, &s_status_screen_monster_sprite_layouts[i]);
         }
     }
 
     menu_init_sprite_array(&frame_record->sprites[19], 5, 0x7CFC);
     for (i = 0; i < 5; i++) {
         gfx_set_image_primitive_layout(&frame_record->sprites[19 + i], &g_gfx_item_icon_image_location,
-            &g_status_screen_panel_rect, &g_status_screen_item_icon_image_params[i]);
+            &s_status_screen_panel_rect, &s_status_screen_item_icon_layouts[i]);
         gfx_set_item_icon_sprite(&frame_record->sprites[19 + i], g_unit_panel_selected_unit_fields.state.equipment[i]);
     }
 
@@ -1878,7 +1903,7 @@ void status_screen_thread(void) {
             g_menu_window_text_pen.rect.y += 0x10;
         }
     }
-    LoadImage(&g_status_screen_text_rect_a, (u32*)buffer);
+    LoadImage(&s_status_screen_equipment_text_rect, (u32*)buffer);
     /* Give the upload a frame before the buffer is cleared for the ability names. */
     thread_yield();
 
@@ -1916,15 +1941,15 @@ void status_screen_thread(void) {
         }
     }
 
-    LoadImage(&g_status_screen_text_rect_b, (u32*)buffer);
+    LoadImage(&s_status_screen_ability_text_rect, (u32*)buffer);
     thread_yield();
     menu_free_memory(buffer);
 
     mem_copy_bytes_nonempty(&records[1], frame_record, sizeof(status_screen_frame_t));
     records[0].palette = &palette.primitives;
     records[1].palette = &g_status_screen_palette;
-    status_screen_init_numbers_frame(&g_status_screen_panel_rect, records[0].palette);
-    status_screen_init_numbers_frame(&g_status_screen_panel_rect, records[1].palette);
+    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[0].palette);
+    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[1].palette);
 
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, status_screen_numbers_thread);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
@@ -1935,7 +1960,7 @@ void status_screen_thread(void) {
         thread_yield();
         frame_record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
-            &frame_record->draw_areas, &g_status_screen_cursor_rect, frame, g_gfx_screen_polarity);
+            &frame_record->draw_areas, &s_status_screen_draw_area_rect, frame, g_gfx_screen_polarity);
         if (g_menu_input_lock_mode == 0 && g_help_open == 0 && thread_get_current_parameter_3() != 0) {
             break;
         }
