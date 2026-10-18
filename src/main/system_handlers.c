@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 /* Cleared by the two error hooks below; its original purpose and any reader are unknown. */
-extern s32 g_system_error_hook_word;
+static s32 g_system_error_hook_word = 0;
 static const game_options_t g_game_options_defaults = { 0x00201648 };
 
 /* Set with the input repeat timings; no reader has been identified. */
