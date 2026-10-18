@@ -65,7 +65,7 @@ units:
   - {name: text_entries, source: src/lib/event/text_entries.c, data: [{addr: 0x80169790, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x801697a0, size: 16, hash: 6ff8555916aa10e6}]}
   - {name: text_skip_to_entry, source: src/lib/event/text_skip_to_entry.c}
   - {name: texture_allocator, source: src/lib/menu/texture_allocator.c}
-  - {name: thread, source: src/lib/thread/thread.c, data: [{addr: 0x8016986c, size: 16384, hash: 4fe7b59af6de3b66}]}
+  - {name: thread, source: src/lib/thread/thread.c, data: [{addr: 0x8016986c, size: 16384, hash: 4fe7b59af6de3b66}], bss: [{addr: 0x80174038, size: 4, hash: df3f619804a92fdb}]}
   - {name: thread_accessors, source: src/lib/thread/thread_accessors.c}
   - {name: turn_order, source: src/battle/turn_order.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: unit_animations, source: src/battle/unit_animations.c, data: [{addr: 0x80094c04, size: 72, hash: cab01352aee9f525}, {addr: 0x80094c4c, size: 72, hash: 05a1775a42db17c8}, {addr: 0x80094c94, size: 16, hash: e8877e5cf3d312c9}, {addr: 0x80094ca4, size: 16, hash: 4b74bb45f0b85a11}, {addr: 0x80094cb4, size: 16, hash: 682ea28f475f1fe5}, {addr: 0x80094cc4, size: 16, hash: 5cf971573bd3ea07}, {addr: 0x80094cd4, size: 1272, hash: ed600454c88e8d7b}]}
