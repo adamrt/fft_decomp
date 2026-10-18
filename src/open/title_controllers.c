@@ -532,7 +532,7 @@ void title_update_menu(controller_record_t* record) {
 
         case TITLE_MENU_CONTINUE:
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-            new_game_init_party(1, 1);
+            new_game_init_party(PARTY_NEW_GAME_EMPTY, 1);
             DrawSync(0);
             VSync(0);
             SetDispMask(1);
@@ -563,7 +563,7 @@ void title_update_menu(controller_record_t* record) {
             return;
 
         case TITLE_MENU_TUTORIAL:
-            new_game_init_party(0, 1);
+            new_game_init_party(PARTY_NEW_GAME_RAMZA, 1);
             g_system_result = 2;
             g_window_record_count -= 6;
             g_window_render_object_count -= 6;
@@ -789,7 +789,7 @@ void new_game_update(controller_record_t* record) {
     }
 
     if (state->step == 4) {
-        new_game_init_party(0, 0);
+        new_game_init_party(PARTY_NEW_GAME_RAMZA, 0);
         screen_init_with_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */

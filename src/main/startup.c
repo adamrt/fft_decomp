@@ -251,12 +251,7 @@ void item_init_new_game_inventory(void) {
     g_item_quantities[ITEM_ID_PHOENIX_DOWN] = 2;
 }
 
-enum {
-    NEW_GAME_GENERATE_DEFAULT_UNIT = 0,
-    NEW_GAME_LOAD_ENCOUNTER_PARTY = 2,
-    STARTING_ENCOUNTER_ID = 254,
-    STARTING_WAR_FUNDS = 2000
-};
+enum { STARTING_ENCOUNTER_ID = 254, STARTING_WAR_FUNDS = 2000 };
 
 /* Start a new roster: empty it, then generate Ramza alone (mode 0) or load the
  * party from ENTD encounter 254 (mode 2); any other mode leaves it empty. The
@@ -265,9 +260,9 @@ void party_init_new_game(int mode) {
     screen_init_with_world_text();
     party_clear();
 
-    if (mode == NEW_GAME_GENERATE_DEFAULT_UNIT) {
+    if (mode == PARTY_NEW_GAME_RAMZA) {
         party_generate_unit(UNIT_TYPE_RAMZA);
-    } else if (mode == NEW_GAME_LOAD_ENCOUNTER_PARTY) {
+    } else if (mode == PARTY_NEW_GAME_ENCOUNTER) {
         encounter_init_party(STARTING_ENCOUNTER_ID);
     }
 

@@ -691,7 +691,8 @@ u32 input_update_repeat(u32 buttons) {
     return 0;
 }
 
-/* Load WORLD if needed, then initialize the selected new-game party. */
+/* Load WORLD if needed, then prepare Ramza's roster or the empty Continue
+ * roster. Remember the party mode so repeated calls do not rebuild it. */
 void new_game_init_party(s32 party_mode, s32 world_load_mode) {
     u32 flags;
     u32 party_mode_flag;

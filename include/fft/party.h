@@ -12,6 +12,13 @@
 #include "psx/types.h"
 
 /* roster */
+/* Initial roster used by OPEN before the name/birthday screens or Continue. */
+typedef enum party_new_game_mode {
+    PARTY_NEW_GAME_RAMZA = 0,
+    PARTY_NEW_GAME_EMPTY = 1,    /* Continue replaces this roster with the loaded save. */
+    PARTY_NEW_GAME_ENCOUNTER = 2 /* Load ENTD 254; no OPEN caller selects this mode. */
+} party_new_game_mode_e;
+
 extern party_unit_t g_party_units[PARTY_ROSTER_SLOT_COUNT];
 
 void party_clear(void);
