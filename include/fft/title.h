@@ -52,7 +52,7 @@ typedef enum title_state {
 /* Title-menu controller state (handler 2), pushed into the next controller
  * record by title_push_menu and run by title_update_menu. */
 typedef struct title_menu_state {
-    /* 0x00 */ s32 records_36[5]; /* logo, then the four menu items */
+    /* 0x00 */ s32 render_indices[5]; /* logo, then the four menu items */
     /* 0x14 */ s32 idle_timer;
     /* 0x18 */ s32 cd_end_position;
     /* 0x1c */ s32 cursor; /* title_menu_entry_e */

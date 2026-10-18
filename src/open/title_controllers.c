@@ -326,7 +326,7 @@ void title_push_menu(s32 argument) {
     records = entry;
     field = &records->position.x;
     positions = (window_xy_t*)field;
-    g_controller_records[g_controller_depth].title.records_36[0] = record;
+    g_controller_records[g_controller_depth].title.render_indices[0] = record;
     g_window_records[record].sequence = 0x11;
     g_window_records[record].priority = 4;
     g_window_records[record].anim_counter = 0;
@@ -336,7 +336,7 @@ void title_push_menu(s32 argument) {
 
     for (i = 0, y = 0x1e; i < 4; i++) {
         record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-        g_controller_records[g_controller_depth].title.records_36[i + 1] = record;
+        g_controller_records[g_controller_depth].title.render_indices[i + 1] = record;
         g_window_records[record].sequence = i + 3;
         g_window_records[record].priority = 4;
         records[record].anim_counter = 0;
@@ -368,7 +368,7 @@ void title_push_menu(s32 argument) {
     g_controller_records[controller].title.cd_end_position = argument;
     g_controller_records[controller].title.state = TITLE_STATE_MENU;
     g_controller_records[controller].title.exiting = 0;
-    record = g_controller_records[controller].title.records_36[g_controller_records[controller].title.cursor + 1];
+    record = g_controller_records[controller].title.render_indices[g_controller_records[controller].title.cursor + 1];
     g_controller_depth = controller + 1;
     g_window_records[record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
     field = &g_controller_handler_indices[controller];
@@ -377,18 +377,18 @@ void title_push_menu(s32 argument) {
 
 /* Show the four title menu entries. */
 static void title_show_menu_entries(title_menu_state_t* title) {
-    g_window_records[title->records_36[1]].flags &= ~DISPLAY_OBJECT_HIDDEN;
-    g_window_records[title->records_36[2]].flags &= ~DISPLAY_OBJECT_HIDDEN;
-    g_window_records[title->records_36[3]].flags &= ~DISPLAY_OBJECT_HIDDEN;
-    g_window_records[title->records_36[4]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[1]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[2]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[3]].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[4]].flags &= ~DISPLAY_OBJECT_HIDDEN;
 }
 
 /* Hide the four title menu entries. */
 static void title_hide_menu_entries(title_menu_state_t* title) {
-    g_window_records[title->records_36[1]].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[title->records_36[2]].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[title->records_36[3]].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[title->records_36[4]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[1]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[2]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[3]].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_window_records[title->render_indices[4]].flags |= DISPLAY_OBJECT_HIDDEN;
 }
 
 /* Per-frame handler for the OPEN title menu controller.
@@ -609,23 +609,23 @@ void title_update_menu(controller_record_t* record) {
 
     if (input_update_repeat(PSX_PAD_UP) != 0) {
         state->idle_timer = 0;
-        g_window_records[state->records_36[state->cursor + 1]].palette = 0;
+        g_window_records[state->render_indices[state->cursor + 1]].palette = 0;
         state->cursor--;
         if (state->cursor < 0) {
             state->cursor = TITLE_MENU_SOUND;
         }
-        g_window_records[state->records_36[state->cursor + 1]].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+        g_window_records[state->render_indices[state->cursor + 1]].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (input_update_repeat(PSX_PAD_DOWN) != 0 || (g_input_new_button_presses & PSX_PAD_SELECT)) {
         state->idle_timer = 0;
-        g_window_records[state->records_36[state->cursor + 1]].palette = 0;
+        g_window_records[state->render_indices[state->cursor + 1]].palette = 0;
         state->cursor++;
         if (state->cursor >= 4) {
             state->cursor = TITLE_MENU_NEW_GAME;
         }
-        g_window_records[state->records_36[state->cursor + 1]].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+        g_window_records[state->render_indices[state->cursor + 1]].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
