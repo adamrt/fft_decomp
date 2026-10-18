@@ -12,13 +12,13 @@ typedef struct effect_heap_owner_list {
 } effect_heap_owner_list_t;
 
 /* Heap block lists and allocation bounds. */
-extern effect_heap_node_t* g_effect_heap_rover;
+static effect_heap_node_t* g_effect_heap_rover;
 static effect_heap_owner_list_t g_effect_heap_owner_lists[EFFECT_HEAP_OWNER_COUNT] = { 0 };
 static effect_heap_node_t* g_effect_heap_base = 0;
 static s16 g_effect_heap_block_count = 0;
 
 /* Heap statistics. */
-extern s32 g_effect_heap_min_largest_free; /* lowest largest-free-block size seen, in 8-byte units */
+static s32 g_effect_heap_min_largest_free; /* lowest largest-free-block size seen, in 8-byte units */
 
 /* Provisional: never written; effect_heap_print_stats prints it x4 in its "DP" line. */
 extern s32 g_effect_heap_debug_dp_words;
