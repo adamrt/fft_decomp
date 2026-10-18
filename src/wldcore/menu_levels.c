@@ -420,11 +420,11 @@ void world_map_init_menus_and_date(void) {
  *
  * Skipped while SYSTEM_FLAG_SKIP_MENU_FRAME is set. While the unit panel
  * threads are in use it draws the window frames, runs the event input update
- * and plays the frame's sound effect itself; otherwise it runs the formation
- * menu frame. Buttons in g_menu_blocked_buttons are withheld from
+ * and plays the frame's sound effect itself; otherwise it runs the WORLD
+ * screen/menu frame. Buttons in g_menu_blocked_buttons are withheld from
  * the menus.
  */
-void world_map_run_world_menus(GsOT* context) {
+void world_map_update_menus(GsOT* context) {
     u32* otag_entries;
     u32* sprite_entries;
     u32* menu_entries;

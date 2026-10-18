@@ -25,7 +25,7 @@ typedef enum system_flags {
     SYSTEM_FLAG_HIDE_MAP_ROUTES = 0x00000020,
     /* wldcore_entrypoint masks the display for the frame. */
     SYSTEM_FLAG_DISPLAY_OFF = 0x00000040,
-    /* world_map_run_world_menus returns without running the menu frame; no code sets it. */
+    /* world_map_update_menus returns without running the menu frame; no code sets it. */
     SYSTEM_FLAG_SKIP_MENU_FRAME = 0x00000080,
     /* Set by world_map_step_brave_story_request: the return level opens the Brave Story screen. */
     SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,

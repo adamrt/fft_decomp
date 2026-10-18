@@ -39,21 +39,22 @@ extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
 static void world_map_finalize_loop(void);
 static void world_map_draw_frame_with_map(void);
 static void world_map_init_gfx(void);
-static s32 world_map_handle_exit_request(void);
+static s32 world_map_handle_formation_return(void);
 static void world_map_init_screen(void);
 static void world_map_init_subsystems(void);
 static void world_map_init_state(void);
 static void world_map_restore_entry_level(void);
 static void world_map_update_backdrop(void);
 
-/* WLDCORE's main loop: set up, fade in and run world-map frames until a menu level
- * stops it, then return why as a world_map_result_e. A card-menu restart loops
- * instead. */
+/* Run world-map frames until a menu level stops the loop, then return why as a
+ * world_map_result_e. A pending Formation return reopens WORLD's Formation screen
+ * and returns before map initialization; a card-menu restart initializes the map
+ * again instead of returning. */
 s32 wldcore_entrypoint(void) {
     s32 buffer_index;
 
     for (;;) {
-        if (world_map_handle_exit_request() != 0) {
+        if (world_map_handle_formation_return() != 0) {
             return 0;
         }
         world_map_init_subsystems();
@@ -162,7 +163,7 @@ void world_map_capture_backdrop(void) {
     g_picture_background_loaded_set = -1;
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_update_marker();
-    world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -193,7 +194,7 @@ static void world_map_draw_frame_with_map(void) {
     world_map_project_dots();
     world_map_update_marker();
     world_map_restore_previous_stack();
-    world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -224,7 +225,7 @@ void world_map_draw_frame(void) {
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
     event_transition_draw_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -542,7 +543,7 @@ static void world_map_restore_entry_level(void) {
 /* Called at the top of wldcore_entrypoint's loop. A nonzero
  * EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT clears SYSTEM_FLAG_RESTART,
  * restores WORLD's formation menu and makes the entrypoint return 0. */
-static s32 world_map_handle_exit_request(void) {
+static s32 world_map_handle_formation_return(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_system_flags &= ~SYSTEM_FLAG_RESTART;
         formation_reopen_after_world_map();

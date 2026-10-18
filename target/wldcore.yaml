@@ -43,7 +43,7 @@ functions:
   - {addr: 0x800682a0, size: 104, name: world_map_finalize_loop, hash: 8bb0c6cc847f2ab4, unit: startup}
   - {addr: 0x80068308, size: 244, name: world_map_init_screen, hash: 958d57491c632bc5, unit: startup}
   - {addr: 0x800683fc, size: 400, name: world_map_restore_entry_level, hash: b0014d61c955a268, unit: startup}
-  - {addr: 0x8006858c, size: 84, name: world_map_handle_exit_request, hash: 4cc1e38c1a2d32ff, unit: startup}
+  - {addr: 0x8006858c, size: 84, name: world_map_handle_formation_return, hash: 4cc1e38c1a2d32ff, unit: startup}
   - {addr: 0x800685e0, size: 96, name: file_wait_then_request_read, hash: 5d2462dc5511c5a9, unit: file_wait}
   - {addr: 0x80068640, size: 136, name: world_map_load_texture, hash: bd1749a0f84c27ce, unit: file_wait}
   - {addr: 0x800686c8, size: 100, name: file_wait_for_pending, hash: 2cb1c83c2614745a, unit: file_wait}
@@ -97,7 +97,7 @@ functions:
   - {addr: 0x8006bf9c, size: 364, name: calendar_draw_date, hash: fad8f45c4135b000, unit: menu_levels}
   - {addr: 0x8006c108, size: 244, name: location_draw_label, hash: 1dc3a756616af99e, unit: menu_levels}
   - {addr: 0x8006c1fc, size: 76, name: world_map_init_menus_and_date, hash: 612b5687dd91566d, unit: menu_levels}
-  - {addr: 0x8006c248, size: 264, name: world_map_run_world_menus, hash: a7b6c9f7d5ebedab, unit: menu_levels}
+  - {addr: 0x8006c248, size: 264, name: world_map_update_menus, hash: a7b6c9f7d5ebedab, unit: menu_levels}
   - {addr: 0x8006c350, size: 140, name: menu_stack_reset, hash: 70bde74f247d3161, unit: menu_levels}
   - {addr: 0x8006c3dc, size: 112, name: menu_stack_dispatch_idle, hash: 2d06b000d9070865, unit: menu_levels}
   - {addr: 0x8006c44c, size: 112, name: menu_stack_dispatch_resume, hash: c5020d97809230c1, unit: menu_levels}

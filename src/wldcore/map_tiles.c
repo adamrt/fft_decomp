@@ -121,7 +121,7 @@ void world_map_toggle_captured_frame(s32 capture) {
     DrawSync(0);
     g_picture_background_loaded_set = -1;
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_run_world_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     {
         s32 map_window_index;
         s32 menu_window_index;

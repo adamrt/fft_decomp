@@ -416,7 +416,7 @@ typedef enum world_map_text_id {
 extern s32 g_world_map_window_index;
 extern s32 g_world_map_cursor_window;
 
-void world_map_run_world_menus(GsOT* context);
+void world_map_update_menus(GsOT* context);
 void world_map_push_menu_level(void);
 void world_map_resume_cursor_level(menu_stack_record_t* level);
 void world_map_step_cursor_level(menu_stack_record_t* level);
