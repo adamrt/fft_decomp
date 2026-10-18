@@ -74,7 +74,7 @@ static void calendar_advance_birthdays(void);
  * The switch's jump table is the first 32 bytes of WLDCORE.BIN. */
 void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
     RECT rect;
-    u8 mode[8];
+    u8 mode;
     s32 rect_count;
     s32 word;
     s32 n;
@@ -84,8 +84,8 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
     case FILE_LOAD_STATE_IDLE:
         break;
     case FILE_LOAD_STATE_SET_DOUBLE_SPEED:
-        mode[0] = CdlModeSpeed;
-        CdControl(CdlSetmode, mode, 0);
+        mode = CdlModeSpeed;
+        CdControl(CdlSetmode, &mode, 0);
         g_system_wait_frames = 0;
         stream->state++;
         break;
