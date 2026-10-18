@@ -190,9 +190,6 @@ typedef enum menu_arithmeticks_list {
 
 extern s32 g_menu_scrolling_list_depth;
 
-/* The CLUT the outermost scrolling ability list saves, derives four more from and blinks while it
- * runs. */
-extern RECT g_menu_ability_list_clut_rect;
 extern s16 g_command_action_slot_row_actions[6];
 
 /* Walks the stored unit's menu record slots from the top down to zero, presenting each and writing the chosen

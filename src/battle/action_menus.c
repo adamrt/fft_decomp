@@ -38,6 +38,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern move_found_item_t g_move_find_display_item;
+
 static s32 g_action_message_count = 0;
 action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY] = { 0 };
 

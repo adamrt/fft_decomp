@@ -22,6 +22,12 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Provisional: written only by the uncalled action_store_acting_unit_value; never read. */
+extern u8 g_action_acting_unit_value;
+
+/* The copy of g_action_mimic_attacker that ai_simulate_begin saves and ai_simulate_end restores. */
+extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
+
 static u8 g_action_ability_target_list[UNIT_RUNTIME_SLOT_COUNT] = { 0 };
 
 /* Enter AI action simulation, save the current attacker and clear Hamedo state. */

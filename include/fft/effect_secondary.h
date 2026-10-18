@@ -132,10 +132,6 @@ typedef struct effect_secondary_animation {
     s16 parameter;
 } effect_secondary_animation_t;
 
-/* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
- * crossbows, NONE for the rest. */
-extern u8 g_effect_weapon_projectile_animations[];
-
 /* elements */
 /* What effect_get_element_index makes of an element mask: the position of its first element in
  * g_effect_element_masks, 0 for no element. It picks the CLUT of the weapon hit and

@@ -449,9 +449,6 @@ const SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
 s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 
 /* encounters and deployment */
-extern s16 g_unit_entd_spritesheet_ids[];
-extern s32 g_unit_entd_spritesheet_count;
-
 unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id);
 void unit_entd_load(entd_encounter_t* entd_data, s32 mode);
 s32 unit_put_on_field(u32 battle_id);
@@ -478,10 +475,5 @@ void unit_play_sfx(struct unit* unit, s32 sound_id);
 
 /* action relocation */
 extern s32 g_unit_casting_runtime_id;
-
-/* Dismount destinations reserved since the last strike setup; turn-status
- * and trap results also append. */
-extern s32 g_unit_relocated_count;
-extern move_tile_coordinates_t g_unit_relocated_coords[];
 
 #endif

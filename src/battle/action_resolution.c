@@ -21,6 +21,9 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
+extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1];
+extern const u8 g_terrain_status_flags[64];
+
 /* Formula IDs are one-based; zero and invalid IDs select the weapon formula. */
 static void (*g_formula_handlers[ABILITY_FORMULA_ID_LIMIT - 1])(void) = {
     formula_weapon_damage,

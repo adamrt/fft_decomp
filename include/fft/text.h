@@ -446,7 +446,6 @@ enum {
 };
 
 extern s32 g_text_current_line;
-extern s32 g_text_awaiting_input;
 
 /* typewriter glyphs */
 /* One pending text glyph: g_message_typewriter_glyph, which message_dialog_thread fills and

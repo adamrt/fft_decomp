@@ -19,6 +19,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s32 g_text_awaiting_input;
+
 /* &win[index], the window of the current packet buffer; the byte arithmetic
  * matches the target where plain indexing does not. */
 #define WINDOW_AT(index) ((menu_window_buffer_t*)((index) * sizeof(menu_window_buffer_t) + (s32)win))

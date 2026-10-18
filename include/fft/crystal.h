@@ -38,10 +38,7 @@ enum {
     CRYSTAL_TAKE_TREASURE = 0x4 /* add the treasure's item instead */
 };
 
-extern crystal_pickup_result_t g_crystal_pickup_result;
 extern crystal_pickup_result_t* g_crystal_pickup_context;
-extern u8 g_crystal_learnable_abilities[];
-extern u8 g_crystal_treasure_item_id;
 
 crystal_pickup_result_t* crystal_build_pickup_result(unit_stats_t* mover);
 s32 crystal_apply_choice(unit_stats_t* unit, s32 flags);

@@ -23,6 +23,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* The CLUT the outermost scrolling ability list saves, derives four more from and blinks while it
+ * runs. */
+extern RECT g_menu_ability_list_clut_rect;
+
 /*
  * Scrolling three-column ability list thread, BATTLE's body (WORLD's is at 0x800edaa8).
  *

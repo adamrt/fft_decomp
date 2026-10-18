@@ -27,6 +27,20 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Deployment placement, the acting tile and strike relocation reservations. */
+extern unit_deployment_coordinates_t* g_unit_deployed_coords;
+extern u8 g_action_loaded_ability_flags_1;
+extern u8 g_action_actor_x;
+extern u8 g_action_actor_y;
+extern u8 g_action_actor_elevation;
+extern s16 g_unit_entd_spritesheet_ids[];
+extern s32 g_unit_entd_spritesheet_count;
+
+/* Dismount destinations reserved since the last strike setup; turn-status
+ * and trap results also append. */
+extern s32 g_unit_relocated_count;
+extern move_tile_coordinates_t g_unit_relocated_coords[];
+
 static s32 action_check_and_consume_mp(unit_stats_t* unit);
 static void action_finalize_draw_out_katana(unit_stats_t* attacker, action_strike_work_t* work, u8 hit_count);
 static void action_init_strike_data(unit_stats_t* unit);

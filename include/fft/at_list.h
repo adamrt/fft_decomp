@@ -46,8 +46,6 @@ typedef enum at_list_mode {
  * charged-action entry adds AT_LIST_ENTRY_CHARGED_ACTION. */
 enum { AT_LIST_ENTRY_EMPTY = -4, AT_LIST_ENTRY_BATTLE_ID_MASK = 0xff, AT_LIST_ENTRY_CHARGED_ACTION = 0x100 };
 
-extern s32 g_at_list_cursor;
-
 s32 at_list_build(at_entry_t* list, at_list_mode_e mode);
 s32 at_list_get_entry_unit_id(s32 at_index);
 s32 at_list_find_unit(const unit_stats_t* unit);

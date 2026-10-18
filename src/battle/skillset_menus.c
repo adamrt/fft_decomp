@@ -18,6 +18,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+extern u8 g_skillset_math_sources[4];
+
 static u8 g_turn_pending_flags[21] = { 0 };
 
 static s32 turn_set_move_act_taken(s32 idx, s32 move_flag, s32 act_flag);

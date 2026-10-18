@@ -504,7 +504,6 @@ extern item_evade_t
     g_item_accessory_data[ITEM_ID_CONSUMABLE_FIRST - ITEM_ID_ACCESSORY_FIRST]; /* unit accessory evade slots */
 extern item_attribute_t g_item_attributes[];
 extern u8 g_item_ability_item_ids[14];
-extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1];
 
 const item_data_t* item_get_data(s32 item_id);
 

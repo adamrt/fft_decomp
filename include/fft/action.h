@@ -247,7 +247,6 @@ extern action_state_e g_action_state;
 extern action_context_e g_action_context;
 extern s32 g_action_phase;
 extern action_current_ability_t g_action_current_ability;
-extern u8 g_action_loaded_ability_flags_1;
 extern unit_stats_t* g_action_attacker;
 extern action_data_t* g_action_attacker_data;
 extern action_data_t g_action_attacker_action_data;
@@ -256,16 +255,10 @@ extern action_data_t* g_action_target_data;
 extern u8 g_action_canceled_statuses[];
 extern action_command_t g_action_saved_command;
 extern s32 g_action_actor_id;
-extern u8 g_action_actor_x;
-extern u8 g_action_actor_y;
-extern u8 g_action_actor_elevation;
 extern s16 g_action_actor_used_ability_id;
 
 /* Golem barrier HP per team, shared by action resolution and AI snapshots. */
 extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
-
-/* Provisional: written only by the uncalled action_store_acting_unit_value; never read. */
-extern u8 g_action_acting_unit_value;
 
 s32 action_init_current_data(s32 unit_id);
 void action_store_actor_data(unit_stats_t* unit);
@@ -326,8 +319,6 @@ typedef struct action_post_effect_msg {
 typedef char action_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_msg_t) == 8) ? 1 : -1];
 
 enum { ACTION_POST_EFFECT_MSG_CAPACITY = 16 };
-
-extern action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY];
 
 void action_message_show_for_caster(void);
 s32 action_message_show_next(void);

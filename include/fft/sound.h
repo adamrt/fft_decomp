@@ -13,7 +13,6 @@
  * not a track: it toggles g_sound_current_music_track_index and starts the track in that slot
  * (g_sound_music_track_1_id or _2_id) with the volume and fade of
  * g_event_music_switch_volume and g_event_music_switch_fade (script.h). */
-extern s16 g_sound_music_set_track_request;
 extern s16 g_sound_music_switch_request;
 extern s16 g_sound_music_unload_slot_request;
 

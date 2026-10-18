@@ -198,8 +198,6 @@ typedef enum skillset_ability_filter {
 } skillset_ability_filter_e;
 
 /* action menu lists */
-extern u8 g_skillset_math_sources[4];
-
 s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
 s32 skillset_get_unit_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);

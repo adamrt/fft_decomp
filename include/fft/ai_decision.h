@@ -267,8 +267,4 @@ typedef struct ai_facing_tile_offsets {
 s32 ai_facing_choose_for_wait(void);
 ai_direction_e ai_facing_find_target_direction(const ai_coords_t* target, const ai_coords_t* origin);
 
-/* mimic simulation */
-/* The copy of g_action_mimic_attacker that ai_simulate_begin saves and ai_simulate_end restores. */
-extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
-
 #endif

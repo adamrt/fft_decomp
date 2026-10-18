@@ -24,6 +24,10 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+extern crystal_pickup_result_t g_crystal_pickup_result;
+extern u8 g_crystal_learnable_abilities[];
+extern u8 g_crystal_treasure_item_id;
+
 /* Move-Find scratch is private to this unit. The first-byte flags alias retains
  * the target's independent address load; accessing every byte through the record
  * instead merges that load with the returned record address. */

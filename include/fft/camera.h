@@ -121,10 +121,7 @@ void camera_zoom_update(void);
 void camera_zoom_update_animation(void);
 
 /* script camera */
-extern VECTOR* g_camera_published_coords_ptr;
-extern SVECTOR* g_camera_published_rotation_ptr;
 extern SVECTOR g_camera_script_rotation;
-extern VECTOR g_camera_script_vector;
 extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
 extern u16 g_camera_shake_z_offset;
 extern u16 g_camera_position_locked;

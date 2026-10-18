@@ -401,7 +401,6 @@ enum {
     TERRAIN_COST_BLOCKED = 0xff /* stays so under Any Ground */
 };
 
-extern const u8 g_terrain_status_flags[64];
 extern const u8 g_terrain_geomancy_abilities[];
 
 /* selected tile */

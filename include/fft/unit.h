@@ -367,8 +367,6 @@ typedef struct unit_deployment_coordinates {
 } unit_deployment_coordinates_t;
 typedef char unit_deployment_coordinates_size_must_be_4[(sizeof(unit_deployment_coordinates_t) == 4) ? 1 : -1];
 
-extern unit_deployment_coordinates_t* g_unit_deployed_coords;
-
 /* teams and control */
 /* Team bits select one of four independently tracked battle teams. */
 enum { UNIT_TEAM_COUNT = 4, UNIT_TEAM_SHIFT = 4, UNIT_TEAM_INDEX_MASK = 0x03 };
@@ -727,7 +725,6 @@ void unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
 void unit_increase_casualty_counters(const unit_stats_t* unit);
 
 /* menus and panels */
-
 extern s16 g_unit_selected_index; /* the unit the unit-list screens have selected */
 
 #endif

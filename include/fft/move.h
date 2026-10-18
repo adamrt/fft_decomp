@@ -404,8 +404,6 @@ typedef struct move_find_result_data {
 } move_find_result_data_t;
 typedef char move_find_result_data_size_must_be_6[(sizeof(move_find_result_data_t) == 6) ? 1 : -1];
 
-extern move_found_item_t g_move_find_display_item;
-
 /* The current map's entries, copied from g_move_find_map_data when the map loads. */
 extern move_find_map_data_t g_move_find_current_map_data;
 

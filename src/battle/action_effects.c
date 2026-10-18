@@ -25,6 +25,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
+extern s32 g_at_list_cursor;
+
 /* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
  * crossbows, NONE for the rest. */
 u8 g_effect_weapon_projectile_animations[32]

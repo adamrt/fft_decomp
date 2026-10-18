@@ -39,6 +39,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern VECTOR* g_camera_published_coords_ptr;
+extern SVECTOR* g_camera_published_rotation_ptr;
+extern VECTOR g_camera_script_vector;
+
+/* Reset to -1 at event entry. The request processor accepts a track ID here, but no named writer queues one. */
+extern s16 g_sound_music_set_track_request;
+
 /* The event frame compares slots 1..15 across its yield, including in WORLD. */
 extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
 
