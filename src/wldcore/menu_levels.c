@@ -42,6 +42,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+menu_stack_level_e g_menu_stack_types[MENU_STACK_CAPACITY];
+
 typedef struct deep_dungeon_battle {
     u8 map_id;   /* 0x00 */
     u8 squad_id; /* 0x01: deployment zone id */
@@ -57,9 +59,9 @@ extern world_map_scroll_axis_t g_world_map_scroll_x;
 extern world_map_scroll_axis_t g_world_map_scroll_y;
 
 /* Menu-level dispatch tables; their definitions follow the callback declarations below. */
-static void (*g_menu_stack_idle_handlers[57])(menu_stack_record_t*);
-static void (*g_menu_stack_resume_handlers[57])(menu_stack_record_t*);
-static void (*g_menu_stack_suspend_handlers[57])(menu_stack_record_t*);
+static void (*g_menu_stack_idle_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*);
+static void (*g_menu_stack_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*);
+static void (*g_menu_stack_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*);
 
 static void bar_push_level(void);
 static void hud_draw_funds(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
@@ -2444,7 +2446,7 @@ void bar_resume_level(menu_stack_record_t* level) {
 }
 
 /* Indexed by menu_stack_level_e. */
-static void (*g_menu_stack_idle_handlers[57])(menu_stack_record_t*) = {
+static void (*g_menu_stack_idle_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     world_map_step_cursor_level,                   /* MENU_STACK_LEVEL_WORLD_MAP */
     world_map_step_menu_level,                     /* MENU_STACK_LEVEL_WORLD_MENU */
     menu_stack_wait_text_then_pop,                 /* MENU_STACK_LEVEL_TEXT_WINDOW */
@@ -2505,7 +2507,7 @@ static void (*g_menu_stack_idle_handlers[57])(menu_stack_record_t*) = {
 };
 
 /* Indexed by menu_stack_level_e; zero entries preserve the original table. */
-static void (*g_menu_stack_resume_handlers[57])(menu_stack_record_t*) = {
+static void (*g_menu_stack_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     world_map_resume_cursor_level,                   /* MENU_STACK_LEVEL_WORLD_MAP */
     0,                                               /* MENU_STACK_LEVEL_WORLD_MENU */
     0,                                               /* MENU_STACK_LEVEL_TEXT_WINDOW */
@@ -2566,7 +2568,7 @@ static void (*g_menu_stack_resume_handlers[57])(menu_stack_record_t*) = {
 };
 
 /* Indexed by menu_stack_level_e; zero entries preserve the original table. */
-static void (*g_menu_stack_suspend_handlers[57])(menu_stack_record_t*) = {
+static void (*g_menu_stack_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     world_map_suspend_cursor_level,                 /* MENU_STACK_LEVEL_WORLD_MAP */
     0,                                              /* MENU_STACK_LEVEL_WORLD_MENU */
     0,                                              /* MENU_STACK_LEVEL_TEXT_WINDOW */

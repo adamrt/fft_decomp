@@ -70,15 +70,17 @@ typedef enum menu_stack_level {
     MENU_STACK_LEVEL_WORLD_MAP_PATH = 53,
     MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY = 54,
     MENU_STACK_LEVEL_PROPOSITION_DISCOVERY = 55,
-    MENU_STACK_LEVEL_UNIT_PANEL_HELP = 56
+    MENU_STACK_LEVEL_UNIT_PANEL_HELP = 56,
+    MENU_STACK_LEVEL_COUNT = 57
 } menu_stack_level_e;
+typedef char menu_stack_level_size_must_be_4[sizeof(menu_stack_level_e) == 4 ? 1 : -1];
 
 enum { MENU_STACK_CAPACITY = 8 };
 
 /* Depth is the number of active levels: the top occupies depth - 1, and a push
  * writes slot depth before incrementing it. The root occupies physical slot 0. */
 extern s32 g_menu_stack_depth;
-extern s32 g_menu_stack_types[MENU_STACK_CAPACITY]; /* menu_stack_level_e of each level */
+extern menu_stack_level_e g_menu_stack_types[MENU_STACK_CAPACITY];
 extern s32 g_menu_stack_ot_offset;
 
 /* Handlers by level type. Idle runs the top level each frame; suspend runs just before another level opens over it
