@@ -322,7 +322,7 @@ units:
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801cecfc, size: 16, hash: ed44f3f59883c72d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: screen_fade, source: src/lib/menu/screen_fade.c}
-  - {name: selection_records, source: src/lib/menu/selection_records.c}
+  - {name: selection_records, source: src/lib/menu/selection_records.c, data: [{addr: 0x801eb22c, size: 84, hash: 4fea5e6a3ec5f547}]}
   - {name: status_thread_toggles, source: src/lib/menu/status_thread_toggles.c}
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
   - {name: texture_commands, source: src/lib/menu/texture_commands.c}
@@ -1352,7 +1352,7 @@ units:
   - {name: preview_bonuses, source: src/lib/menu/preview_bonuses.c}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
   - {name: screen_init, source: src/event/equip/screen_init.c, data: [{addr: 0x801e0b9c, size: 472, hash: 22fec3bc784546d7}, {addr: 0x801e0d74, size: 720, hash: fe2f74a1e0b16a66}, {addr: 0x801e1044, size: 320, hash: 7b6436b0c98f6238}, {addr: 0x801e1184, size: 320, hash: 7b6436b0c98f6238}]}
-  - {name: selection_records, source: src/lib/menu/selection_records.c}
+  - {name: selection_records, source: src/lib/menu/selection_records.c, data: [{addr: 0x801e12c4, size: 30, hash: 0679246d6c4216de}]}
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
   - {name: texture_commands, source: src/lib/menu/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
@@ -1944,7 +1944,7 @@ units:
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801fa81c, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_window_commands, source: src/event/jobstts/menu_window_commands.c, data: [{addr: 0x801f0008, size: 16, hash: 488cf8e6977e8d53}]}
   - {name: selection_and_quads, source: src/event/jobstts/selection_and_quads.c, data: [{addr: 0x801fa6ac, size: 16, hash: 374708fff7719dd5}]}
-  - {name: selection_records, source: src/lib/menu/selection_records.c}
+  - {name: selection_records, source: src/lib/menu/selection_records.c, data: [{addr: 0x801fa530, size: 30, hash: 0679246d6c4216de}]}
   - {name: text_id_lists, source: src/lib/menu/text_id_lists.c}
   - {name: texture_commands, source: src/lib/menu/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}

@@ -4,6 +4,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Each menu program keeps its own remembered list positions. */
+menu_selection_record_t g_menu_selection_records[VARIANT_MENU_SELECTION_RECORD_COUNT] = { 0 };
+
 /* Clear every menu selection record. */
 void menu_clear_selection_records(void) {
     memset(g_menu_selection_records, 0, VARIANT_MENU_SELECTION_RECORD_COUNT * sizeof(menu_selection_record_t));
