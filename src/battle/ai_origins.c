@@ -38,18 +38,25 @@ typedef struct ai_facing_tile_offsets {
 } ai_facing_tile_offsets_t;
 
 /* Origin masks, Math Skill iteration and facing offsets. */
-extern u16 g_ai_origin_range_row_masks[];
 extern s32 g_ai_origin_self_target_stage;
 extern s32 g_ai_math_ability_index;
 extern u16* g_ai_math_ability_list; /* borrowed from main's temporary skillset list */
 extern s32 g_ai_math_skillset_id;
 extern s32 g_ai_math_skillset_index;
-extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets;
+
+/* Diamond rows centered on map column 7, for radii 0 through 7.
+ * The unchecked reader also reaches the following status weights for radii 8..15. */
+#define AI_ORIGIN_ROW_MASK(radius) (((1 << (2 * (radius) + 1)) - 1) << (8 - (radius)))
+static u16 g_ai_origin_range_row_masks[] = { AI_ORIGIN_ROW_MASK(0), AI_ORIGIN_ROW_MASK(1), AI_ORIGIN_ROW_MASK(2),
+    AI_ORIGIN_ROW_MASK(3), AI_ORIGIN_ROW_MASK(4), AI_ORIGIN_ROW_MASK(5), AI_ORIGIN_ROW_MASK(6), AI_ORIGIN_ROW_MASK(7) };
+#undef AI_ORIGIN_ROW_MASK
 
 /* Signed scoring weights, indexed by status ID. */
 static s16 g_ai_status_priority_weights[STATUS_COUNT]
     = { 0, -192, -192, -39, 0, 0, 0, 0, -116, -231, -64, -64, -90, -116, 0, -192, -7, 12, 51, 38, -39, -26, -52, -32,
           -26, 25, 25, 25, 19, -39, -90, 64, 6, -7, -64, -39, -39, -64, 25, -103 }; /* 0x8019f308..0x8019f357 */
+
+static ai_facing_tile_offsets_t g_ai_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 }, { 0, 1 }, { 1, 0 } } };
 
 static void ai_origin_build_monster_skill_mask(void);
 static void ai_origin_build_targetable_mask(ai_tile_mask_mode_e mode, s32 radius);
