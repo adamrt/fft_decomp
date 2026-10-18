@@ -16,12 +16,12 @@
 
 /* frame input state */
 extern menu_input_state_t g_screen_input_frame_state;
-extern u32 g_screen_input_frame_current;
-extern u32 g_screen_input_frame_new;
-extern u32 g_screen_input_frame_previous;
-extern u32 g_screen_input_frame_initial_repeat_counter;
-extern u32 g_screen_input_frame_repeat_counter;
-extern u32 g_screen_input_frame_secondary_repeat_counter;
+static u32 g_screen_input_frame_new;
+static u32 g_screen_input_frame_current;
+static u32 g_screen_input_frame_previous;
+static u32 g_screen_input_frame_initial_repeat_counter;
+static u32 g_screen_input_frame_repeat_counter;
+static u32 g_screen_input_frame_secondary_repeat_counter;
 
 /* Per-frame event input update: derives the edge/auto-repeat 32-bit input mask,
  * publishes it, and yields once while tracking thread status changes. A new

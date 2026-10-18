@@ -101,7 +101,7 @@ units:
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
   - {name: thread, source: src/lib/thread/thread.c, data: [{addr: 0x80195cd0, size: 17408, hash: 3f1f6f76c52276c8}], bss: [{addr: 0x801cd170, size: 4, hash: df3f619804a92fdb}]}
   - {name: thread_accessors, source: src/lib/thread/thread_accessors.c}
-  - {name: thread_state, source: src/world/thread_state.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: thread_state, source: src/world/thread_state.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, bss: [{addr: 0x801c0528, size: 24, hash: 9d908ecfb6b256de}]}
   - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801cc570, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc574, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc578, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc57c, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc674, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc76c, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc778, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc784, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c, data: [{addr: 0x801ca6f8, size: 64, hash: f5a5fd42d16a2030}, {addr: 0x801ca738, size: 2, hash: 96a296d224f285c6}]}
   - {name: unit_name_list, source: src/lib/event/unit_name_list.c}
