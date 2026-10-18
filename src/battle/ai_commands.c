@@ -169,7 +169,7 @@ s32 ai_command_build(s32 unit_id, ai_command_t* command) {
             command->kind = AI_COMMAND_MOVE;
             command->data.move.x = ai->selected_action.coords.fields.x;
             command->data.move.y = ai->selected_action.coords.fields.y;
-            command->data.move.layer = ai->selected_action.coords.fields.elevation;
+            command->data.move.layer = ai->selected_action.coords.fields.layer;
             goto preserve;
         }
     }
@@ -207,7 +207,7 @@ static void ai_init_acting_unit(void) {
     g_ai_data.acting_unit_decision = &ai->unit_decisions[id];
     g_ai_data.acting_unit_coords.fields.x = unit->x;
     g_ai_data.acting_unit_coords.fields.y = unit->position.y;
-    g_ai_data.acting_unit_coords.fields.elevation = unit->position.higher_elevation;
+    g_ai_data.acting_unit_coords.fields.layer = unit->position.higher_elevation;
     g_ai_data.acting_unit_coords.fields.zero = 0;
     g_ai_data.acting_unit_compact_index = ai->unit_compact_indices[id];
     g_ai_data.acting_unit_team = unit->team_flags & UNIT_TEAM_MASK;
@@ -485,7 +485,7 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
         if (movement_taken != 0
             || (ai->acting_unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
                 & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE))) {
-            ai->reachable_tiles[0][ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
+            ai->reachable_tiles[0][ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
                 = 0x8000 >> ai->acting_unit_coords.fields.x;
             return 0;
         }
@@ -495,8 +495,8 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
         } else {
             i = ai->acting_unit_id;
         }
-        move_range_build(i, ai->acting_unit_coords.fields.x, ai->acting_unit_coords.fields.y,
-            ai->acting_unit_coords.fields.elevation);
+        move_range_build(
+            i, ai->acting_unit_coords.fields.x, ai->acting_unit_coords.fields.y, ai->acting_unit_coords.fields.layer);
     }
 
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
@@ -540,7 +540,7 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
             ai->reachable_tiles[0][unit->position.higher_elevation][unit->position.y] &= ~(0x8000 >> unit->x);
         }
     }
-    ai->reachable_tiles[0][ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
+    ai->reachable_tiles[0][ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
         |= 0x8000 >> ai->acting_unit_coords.fields.x;
 
     if (*(u32*)&ai->acting_unit->status_sets.current[0]
@@ -552,9 +552,9 @@ static s32 ai_move_build_reachable_tiles(s32 movement_taken) {
         if (coords->fields.x == 0xff) {
             break;
         }
-        ai->reachable_tiles[0][coords->fields.elevation][coords->fields.y] &= ~(0x8000 >> coords->fields.x);
+        ai->reachable_tiles[0][coords->fields.layer][coords->fields.y] &= ~(0x8000 >> coords->fields.x);
     }
-    ai->reachable_tiles[0][ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
+    ai->reachable_tiles[0][ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
         |= 0x8000 >> ai->acting_unit_coords.fields.x;
     return 0;
 }
@@ -1361,7 +1361,7 @@ static void ai_rank_seed_baseline(void) {
     g_ai_data.move_baseline_action.rank.decided = 0;
     g_ai_data.move_baseline_action.rank.base_hit_percent = AI_BASE_HIT_PERCENT;
     coords = &ai->candidate_coords[scenario];
-    level_row = (u8*)ai + coords->fields.elevation * AI_TILE_LEVEL_BYTE_STRIDE + AI_TILE_PRIORITY_OFFSET;
+    level_row = (u8*)ai + coords->fields.layer * AI_TILE_LEVEL_BYTE_STRIDE + AI_TILE_PRIORITY_OFFSET;
     row = coords->fields.y * AI_TILE_ROW_BYTE_STRIDE + (u32)level_row;
     g_ai_data.move_baseline_action.rank.priority = -*(u16*)(coords->fields.x * 2 + row);
 }
@@ -1426,7 +1426,7 @@ static s32 ai_move_build_scenarios(void) {
                     && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                         & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))) {
                     ai_copy_unit_coordinates(g_ai_move_unit_index, &ai->considered_unit_coords);
-                    ai->tile_target_distance[ai->considered_unit_coords.fields.elevation]
+                    ai->tile_target_distance[ai->considered_unit_coords.fields.layer]
                                             [ai->considered_unit_coords.fields.y][ai->considered_unit_coords.fields.x]
                         = 1;
                 }
@@ -1434,7 +1434,7 @@ static s32 ai_move_build_scenarios(void) {
         }
     }
     g_ai_move_target_distance
-        = ai->tile_target_distance[ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
+        = ai->tile_target_distance[ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
                                   [ai->acting_unit_coords.fields.x];
     g_ai_move_target_reach = ai_move_get_target_reach();
     limit = g_ai_move_target_distance;
@@ -1444,7 +1444,7 @@ static s32 ai_move_build_scenarios(void) {
         if ((decision->flags & AI_DECISION_STAY_NEAR_COORDINATES)
             && ((g_ai_move_unit_index = ai_find_unit_at_coordinates(&decision->target)) == ai->acting_unit_id
                 || g_ai_move_unit_index == UNIT_ID_NONE)
-            && (ai->reachable_tiles[0][decision->target.fields.elevation][decision->target.fields.y]
+            && (ai->reachable_tiles[0][decision->target.fields.layer][decision->target.fields.y]
                 & (0x8000 >> decision->target.fields.x))) {
             ai->candidate_coords[ai->movement_scenario] = decision->target;
             ai_move_set_candidate_and_actor_reachable();
@@ -1487,7 +1487,7 @@ score_tiles:
     } else {
         ai->candidate_coords[0] = ai->candidate_coords[1];
     }
-    ai->reachable_tiles[1][ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
+    ai->reachable_tiles[1][ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
         |= 0x8000 >> ai->acting_unit_coords.fields.x;
     return 0;
 }
@@ -1584,7 +1584,7 @@ static s32 ai_move_select_destination(s32 max_distance, ai_destination_order_e o
                         best_distance = distance;
                         destination->fields.x = x;
                         destination->fields.y = y;
-                        destination->fields.elevation = level;
+                        destination->fields.layer = level;
                         destination->fields.zero = 0;
                     }
                 }
@@ -1728,10 +1728,10 @@ s32 ai_rank_is_higher(const ai_action_data_t* first, const ai_action_data_t* sec
     if (comparison == AI_RANK_ABOVE)
         return value;
     if (comparison == AI_RANK_EQUAL) {
-        value = first->coords.fields.elevation;
+        value = first->coords.fields.layer;
         proximity_a = ai->tile_foe_proximity[value][first->coords.fields.y][first->coords.fields.x];
         proximity_b
-            = ai->tile_foe_proximity[second->coords.fields.elevation][second->coords.fields.y][second->coords.fields.x];
+            = ai->tile_foe_proximity[second->coords.fields.layer][second->coords.fields.y][second->coords.fields.x];
         return proximity_a < proximity_b;
     }
     return 0;
@@ -2052,7 +2052,7 @@ static s32 ai_select_random(void) {
                     while (ai_take_random_tile(ai->targetable_tiles, &ai->considered_unit_coords, index_or_count)) {
                         ai->current_action.command.target_position.vx = ai->considered_unit_coords.fields.x;
                         ai->current_action.command.target_position.vz = ai->considered_unit_coords.fields.y;
-                        ai->current_action.command.target_position.vy = ai->considered_unit_coords.fields.elevation;
+                        ai->current_action.command.target_position.vy = ai->considered_unit_coords.fields.layer;
                         ai->current_action.wait_facing_hint
                             = ai_facing_find_target_direction(&ai->considered_unit_coords, &ai->current_action.coords);
                         if (ai->current_action.command.targeting_type == TARGET_TYPE_UNIT
@@ -2132,7 +2132,7 @@ static s32 ai_origin_calculate_ability_range(void) {
         } while (x < BATTLE_MAP_TILE_COUNT);
         g_battle_map_tile_data[ai->current_action.coords.fields.y * ai->terrain_width
             + ai->current_action.coords.fields.x
-            + (ai->current_action.coords.fields.elevation * BATTLE_MAP_TILES_PER_LAYER)]
+            + (ai->current_action.coords.fields.layer * BATTLE_MAP_TILES_PER_LAYER)]
             .ceiling_depth_and_marks.ability_range = 1;
     }
 
@@ -2190,7 +2190,7 @@ static s32 ai_take_random_tile(
                         if (selected == 0) {
                             coordinates->fields.x = x;
                             coordinates->fields.y = y;
-                            coordinates->fields.elevation = level;
+                            coordinates->fields.layer = level;
                             coordinates->fields.zero = 0;
                             tiles[level][y] ^= 0x8000 >> x;
                             return 1;
@@ -2513,7 +2513,7 @@ static s32 ai_move_build_targeted(void) {
     /* Direct typed level indexing reverses the two address-building instructions
      * at +0xbc/+0xc0. Stage only the level base; retain the real member offset
      * and typed row/column indexing for the byte-exact match. */
-    distance_level_base = ai->acting_unit_coords.fields.elevation * sizeof(ai->tile_target_distance[0]) + (u32)ai;
+    distance_level_base = ai->acting_unit_coords.fields.layer * sizeof(ai->tile_target_distance[0]) + (u32)ai;
     distance_rows = (u8(*)[AI_GRID_COLUMN_COUNT])(distance_level_base + offsetof(ai_data_t, tile_target_distance));
     limit = range;
     distance = distance_rows[ai->acting_unit_coords.fields.y][ai->acting_unit_coords.fields.x];
@@ -2543,7 +2543,7 @@ static s32 ai_move_build_targeted(void) {
     } else {
         ai->candidate_coords[2] = ai->candidate_coords[1];
     }
-    ai->reachable_tiles[1][ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
+    ai->reachable_tiles[1][ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
         |= 0x8000 >> ai->acting_unit_coords.fields.x;
     return 0;
 }
@@ -3099,7 +3099,7 @@ static void ai_move_set_candidate_and_actor_reachable(void) {
         u32 level_address;
         u32 row_address;
         scenario_address += offsetof(ai_data_t, reachable_tiles);
-        level_address = *(u8*)(coords_address + offsetof(ai_data_t, candidate_coords[0].fields.elevation))
+        level_address = *(u8*)(coords_address + offsetof(ai_data_t, candidate_coords[0].fields.layer))
                 * sizeof(ai->reachable_tiles[0][0])
             + scenario_address;
         row_address = *(u8*)(coords_address + offsetof(ai_data_t, candidate_coords[0].fields.y))
@@ -3112,7 +3112,7 @@ static void ai_move_set_candidate_and_actor_reachable(void) {
         u32 level_address;
         u32 row_address;
         scenario_address += offsetof(ai_data_t, reachable_tiles);
-        level_address = ai->acting_unit_coords.fields.elevation * sizeof(ai->reachable_tiles[0][0]) + scenario_address;
+        level_address = ai->acting_unit_coords.fields.layer * sizeof(ai->reachable_tiles[0][0]) + scenario_address;
         row_address = ai->acting_unit_coords.fields.y * sizeof(ai->reachable_tiles[0][0][0]) + level_address;
         *(u16*)row_address |= 0x8000 >> ai->acting_unit_coords.fields.x;
     }
@@ -3163,12 +3163,12 @@ static s32 ai_move_fill_target_distance_grid(const ai_coords_t* target) {
             & (UNIT_MOVEMENT_SET_2_TELEPORT | UNIT_MOVEMENT_SET_2_TELEPORT_2))) {
         use_manhattan = 1;
     } else {
-        ai_move_propagate_from_target(ai->acting_unit_id, target->fields.x, target->fields.y, target->fields.elevation,
+        ai_move_propagate_from_target(ai->acting_unit_id, target->fields.x, target->fields.y, target->fields.layer,
             ai->search_resume_flag, &suspended, 1);
         if (suspended != 0)
             return -1;
         ai->resume_pending = 0;
-        target_remaining_range = g_target_panels[(target->fields.elevation * BATTLE_MAP_TILES_PER_LAYER)
+        target_remaining_range = g_target_panels[(target->fields.layer * BATTLE_MAP_TILES_PER_LAYER)
             + target->fields.y * ai->terrain_width + target->fields.x]
                                      .remaining_range;
     }
@@ -3295,7 +3295,7 @@ static s32 ai_move_score_reachable_tiles(void) {
     if (g_ai_data.resume_pending != 0) {
         x = g_ai_data.current_action.coords.fields.x;
         y = g_ai_data.current_action.coords.fields.y;
-        level = g_ai_data.current_action.coords.fields.elevation;
+        level = g_ai_data.current_action.coords.fields.layer;
         {
             u32 scenario_address = g_ai_data.movement_scenario * sizeof(ai->reachable_tiles[0]) + (u32)ai;
             u32 level_address;
@@ -3327,7 +3327,7 @@ static s32 ai_move_score_reachable_tiles(void) {
                     if ((row << x) & 0x8000) {
                         ai->current_action.coords.fields.x = x;
                         ai->current_action.coords.fields.y = y;
-                        ai->current_action.coords.fields.elevation = level;
+                        ai->current_action.coords.fields.layer = level;
                         ai_update_tile_pickup();
                     evaluate_tile:
                         if (ai_simulate_action_and_score() == -1) {
@@ -3575,7 +3575,7 @@ void ai_init_unit_abilities(s32 unit_id) {
     ai_mem_copy_bytes(&decision->flags, &unit->ai.fields.flags, 5);
     decision->target.fields.x = unit->ai.fields.target_x;
     decision->target.fields.y = unit->ai.fields.target_y;
-    decision->target.fields.elevation = unit->ai.fields.flags >> 7;
+    decision->target.fields.layer = unit->ai.fields.flags >> 7;
     decision->target.fields.zero = 0;
     if (!(decision->flags & AI_DECISION_SPECIAL_BEHAVIOR)) {
         return;

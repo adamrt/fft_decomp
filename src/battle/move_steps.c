@@ -185,7 +185,7 @@ void move_step_start_teleport_animation(unit_t* unit) {
     if (unit->path.count == MOVE_PATH_TELEPORT) {
         unit->movement.destination_x = unit->path.data.teleport.x;
         unit->movement.destination_y = unit->path.data.teleport.y;
-        unit->movement.destination_layer = unit->path.data.teleport.elevation;
+        unit->movement.destination_layer = unit->path.data.teleport.layer;
     } else {
         unit->movement.destination_x = unit->map_x;
         unit->movement.destination_y = unit->map_y;

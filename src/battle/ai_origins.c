@@ -159,7 +159,7 @@ s32 ai_facing_choose_for_wait(void) {
             = ai->acting_unit_coords.fields.x + g_ai_facing_tile_offsets.by_direction[direction][0];
         work.target_coords.fields.y
             = ai->acting_unit_coords.fields.y + g_ai_facing_tile_offsets.by_direction[direction][1];
-        work.target_coords.fields.elevation = 0;
+        work.target_coords.fields.layer = 0;
         if (ai_facing_is_tile_blocked(&ai->acting_unit_coords, &work.target_coords) != 0) {
             work.viability.by_direction[direction] = 0;
         } else {
@@ -217,7 +217,7 @@ static s32 ai_facing_is_tile_blocked(const ai_coords_t* source, const ai_coords_
         return 1;
     }
     return tile->height
-        - g_battle_map_tile_data[(source->fields.elevation * BATTLE_MAP_TILES_PER_LAYER) + source->fields.y * width
+        - g_battle_map_tile_data[(source->fields.layer * BATTLE_MAP_TILES_PER_LAYER) + source->fields.y * width
             + source->fields.x]
               .height
         >= 3;
@@ -236,6 +236,7 @@ void ai_init_selected_action(void) {
  *
  * Current coordinates and selected-action defaults are updated even when the
  * list is full. Equality includes all four bytes; x == 0xff marks an empty slot.
+ * The post-move trap path passes x/layer/y; this routine stores x/y/layer.
  */
 void ai_record_triggered_trap_coords(s32 x, s32 y, s32 level) {
     ai_data_t* ai = &g_ai_data;
@@ -243,7 +244,7 @@ void ai_record_triggered_trap_coords(s32 x, s32 y, s32 level) {
 
     g_ai_data.considered_unit_coords.fields.x = x;
     g_ai_data.considered_unit_coords.fields.y = y;
-    g_ai_data.considered_unit_coords.fields.elevation = level;
+    g_ai_data.considered_unit_coords.fields.layer = level;
     g_ai_data.considered_unit_coords.fields.zero = 0;
     ai_init_selected_action();
     for (i = 0; i < AI_KNOWN_TRAP_COUNT; i++) {
@@ -521,7 +522,7 @@ s32 ai_origin_is_allowed(const ai_coords_t* coords) {
 
     if (g_ai_data.water_penalty) {
         s32 depth = g_battle_map_tile_data[coords->fields.y * g_ai_data.terrain_width + coords->fields.x
-            + (coords->fields.elevation * BATTLE_MAP_TILES_PER_LAYER)]
+            + (coords->fields.layer * BATTLE_MAP_TILES_PER_LAYER)]
                         .depth_half_height.depth;
         if (depth >= 2)
             return 0;
@@ -570,7 +571,7 @@ s32 ai_calculate_height_difference(const ai_coords_t* coords, const unit_stats_t
     tile = &g_battle_map_tile_data[unit->position.higher_elevation * BATTLE_MAP_TILES_PER_LAYER
         + unit->position.y * g_ai_data.terrain_width + unit->x];
     h1 = tile->height * 2 + tile->depth_half_height.half_height;
-    tile = &g_battle_map_tile_data[(coords->fields.elevation * BATTLE_MAP_TILES_PER_LAYER)
+    tile = &g_battle_map_tile_data[(coords->fields.layer * BATTLE_MAP_TILES_PER_LAYER)
         + coords->fields.y * g_ai_data.terrain_width + coords->fields.x];
     h2 = tile->height * 2 + tile->depth_half_height.half_height;
     return (h1 - h2) / 2;
@@ -586,7 +587,7 @@ static s32 ai_origin_can_use_elemental(const ai_coords_t* coords) {
     u32 tile_type;
     u32 ability_terrain;
 
-    tile_id = (coords->fields.elevation * BATTLE_MAP_TILES_PER_LAYER) + coords->fields.y * g_ai_data.terrain_width
+    tile_id = (coords->fields.layer * BATTLE_MAP_TILES_PER_LAYER) + coords->fields.y * g_ai_data.terrain_width
         + coords->fields.x;
     tile_type = g_battle_map_tile_data[tile_id].surface.type;
     ability_terrain = g_terrain_geomancy_abilities[tile_type];
@@ -663,7 +664,7 @@ static s32 ai_origin_evaluate_reflected(void) {
                 continue;
             for (ai->reflected_candidate_level = 0; ai->reflected_candidate_level < BATTLE_MAP_TERRAIN_LAYER_COUNT;
                 ai->reflected_candidate_level++) {
-                ai->current_action.coords.fields.elevation = ai->reflected_candidate_level;
+                ai->current_action.coords.fields.layer = ai->reflected_candidate_level;
                 if ((ai->reachable_tiles[ai->movement_scenario][ai->reflected_candidate_level]
                                         [ai->current_action.coords.fields.y]
                         << ai->current_action.coords.fields.x)
@@ -859,7 +860,7 @@ begin_evaluation:
                         if ((row << ai->max_possibilities) & 0x8000) {
                             ai->current_action.coords.fields.x = ai->max_possibilities;
                             ai->current_action.coords.fields.y = ai->y_counter;
-                            ai->current_action.coords.fields.elevation = ai->map_level_counter;
+                            ai->current_action.coords.fields.layer = ai->map_level_counter;
                             ai_origin_finalize_destination();
                         evaluate_scanned_origin:
                             if (ai_origin_evaluate_aim_tiles() == -1) {
@@ -922,14 +923,14 @@ static void ai_origin_take_next(void) {
                             best_key = key;
                             ai->current_action.coords.fields.x = x;
                             ai->current_action.coords.fields.y = y;
-                            ai->current_action.coords.fields.elevation = level;
+                            ai->current_action.coords.fields.layer = level;
                         }
                     }
                 }
             }
         }
     }
-    ai->cast_origin_tiles[ai->current_action.coords.fields.elevation][ai->current_action.coords.fields.y]
+    ai->cast_origin_tiles[ai->current_action.coords.fields.layer][ai->current_action.coords.fields.y]
         ^= 0x8000 >> ai->current_action.coords.fields.x;
     ai->cast_origin_tile_count--;
 }
@@ -1004,7 +1005,7 @@ void ai_origin_build_cast_and_aim_tiles(void) {
                             == ACTION_MENU_TYPE_ELEMENTS) {
                             ai->considered_unit_coords.fields.x = x;
                             ai->considered_unit_coords.fields.y = j;
-                            ai->considered_unit_coords.fields.elevation = i;
+                            ai->considered_unit_coords.fields.layer = i;
                             if (!ai_origin_can_use_elemental(&ai->considered_unit_coords))
                                 ai->cast_origin_tiles[i][j] ^= 0x8000 >> x;
                         }
@@ -1241,7 +1242,7 @@ static s32 ai_origin_evaluate_aim_tiles(void) {
         for (i = 0; i < BATTLE_MAP_TILE_COUNT; i++, tile++)
             tile->ceiling_depth_and_marks.ability_range = 0;
         g_battle_map_tile_data[origin->fields.y * ai->terrain_width + origin->fields.x
-            + (origin->fields.elevation * BATTLE_MAP_TILES_PER_LAYER)]
+            + (origin->fields.layer * BATTLE_MAP_TILES_PER_LAYER)]
             .ceiling_depth_and_marks.ability_range = 1;
     }
 
@@ -1371,7 +1372,7 @@ s32 ai_find_unit_at_coordinates(const ai_coords_t* coords) {
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit = &g_unit_stats[i];
         if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && unit->x == coords->fields.x
-            && unit->position.y == coords->fields.y && (unit->position.higher_elevation) == coords->fields.elevation) {
+            && unit->position.y == coords->fields.y && (unit->position.higher_elevation) == coords->fields.layer) {
             break;
         }
     }
@@ -2415,14 +2416,13 @@ static s32 ai_is_unit_movement_eligible_after_delay(s32 limit, s32 unit_id) {
 void ai_place_acting_unit(const ai_coords_t* coord) {
     g_ai_data.acting_unit->x = coord->fields.x;
     g_ai_data.acting_unit->position.y = coord->fields.y;
-    g_ai_data.acting_unit->position.higher_elevation = coord->fields.elevation;
+    g_ai_data.acting_unit->position.higher_elevation = coord->fields.layer;
 }
 
-/* Pack a unit's tile as AI coordinates: x, y and the elevation bit (position
- * bit 15). */
+/* Pack a unit's tile coordinates and terrain-layer bit (position bit 15). */
 void ai_copy_unit_coordinates(s32 unit_idx, ai_coords_t* dst) {
     dst->fields.x = g_unit_stats[unit_idx].x;
     dst->fields.y = g_unit_stats[unit_idx].position.y;
-    dst->fields.elevation = g_unit_stats[unit_idx].position.higher_elevation;
+    dst->fields.layer = g_unit_stats[unit_idx].position.higher_elevation;
     dst->fields.zero = 0;
 }

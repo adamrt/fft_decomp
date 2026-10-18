@@ -413,7 +413,7 @@ typedef struct action_command {
     u8 _unused_09;             /* 0x09 */
     u8 targeting_type;         /* 0x0a; target_type_e */
     u8 target_id;              /* 0x0b */
-    SVECTOR target_position;   /* 0x0c; tile x, elevation, y; padding is unread */
+    SVECTOR target_position;   /* 0x0c; tile x, terrain layer, y; padding is unread */
 } action_command_t;
 typedef char action_command_size_must_be_20[(sizeof(action_command_t) == 20) ? 1 : -1];
 
@@ -653,7 +653,7 @@ typedef enum unit_motion_flags {
 typedef struct move_tile_coordinates {
     u8 x;
     u8 y;
-    u8 elevation;
+    u8 layer;
 } move_tile_coordinates_t;
 typedef char move_tile_coordinates_size_must_be_3[(sizeof(move_tile_coordinates_t) == 3) ? 1 : -1];
 

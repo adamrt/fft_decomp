@@ -24,13 +24,12 @@ enum {
 };
 
 /* coordinates */
-/* X / map elevation / Y / zero, written in that order by ai_copy_unit_coordinates
- * and read as one 32-bit value for equality tests. */
+/* Tile x / terrain layer / y / zero, with a packed word view for equality tests. */
 typedef union ai_coords {
     u32 word;
     struct {
         u8 x;
-        u8 elevation;
+        u8 layer;
         u8 y;
         u8 zero;
     } fields;
@@ -302,7 +301,7 @@ typedef enum ai_targeting_flags_2 {
 /* Per-unit AI decision record (ai_data_t.unit_decisions); acting_unit_decision points at the
  * acting unit's. */
 typedef struct ai_unit_decision {
-    ai_coords_t target;         /* 0x00..0x03; x, elevation, y, 0 */
+    ai_coords_t target;         /* 0x00..0x03; x, layer, y, 0 */
     u8 flags;                   /* 0x04; ai_decision_flags_e */
     u8 main_target_id;          /* 0x05 */
     u8 targeting_flags_1;       /* 0x06; ai_targeting_flags_1_e. MOSTLY_SUPPORT is cleared again for the

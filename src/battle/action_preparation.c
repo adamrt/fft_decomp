@@ -1859,7 +1859,7 @@ s32 unit_find_relocation_tile(s32 unit_index, battle_map_tile_coordinates_t* des
         }
     }
     for (i = 0; i < g_unit_relocated_count; i++) {
-        index = g_unit_relocated_coords[i].elevation * 256 + g_unit_relocated_coords[i].y * g_battle_map_terrain_width
+        index = g_unit_relocated_coords[i].layer * 256 + g_unit_relocated_coords[i].y * g_battle_map_terrain_width
             + g_unit_relocated_coords[i].x;
         panel = &g_target_panels[index];
         panel->unit_record_index = 1;
@@ -1922,7 +1922,7 @@ s32 unit_find_relocation_tile(s32 unit_index, battle_map_tile_coordinates_t* des
                             destination->x = found_x;
                             g_unit_relocated_coords[g_unit_relocated_count].x = found_x;
                             g_unit_relocated_coords[g_unit_relocated_count].y = destination->y = found_y;
-                            g_unit_relocated_coords[g_unit_relocated_count].elevation = destination->layer = level;
+                            g_unit_relocated_coords[g_unit_relocated_count].layer = destination->layer = level;
                             g_unit_relocated_count++;
                             return 0;
                         }

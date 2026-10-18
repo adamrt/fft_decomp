@@ -760,6 +760,8 @@ written that way.
   it assigns before reading.
 - `battle_map_calculate_slope_height` masks its terrain layer to a byte; two callers
   pass the 16-bit `action_command.target_position.vy` unmasked.
+- `move_start_next_post_event` passes x/layer/y to `ai_record_triggered_trap_coords`,
+  whose byte stores expect x/y/layer. The argument-order disagreement is preserved.
 - WLDCORE passes its 8-byte records by value:
   `RECT` to the three render-record builders and
   `point32_t` to `window_build_yes_no_panel`.

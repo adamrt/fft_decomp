@@ -1461,7 +1461,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
             g_move_path.count = MOVE_PATH_TELEPORT;
             g_move_path.data.teleport.x = x;
             g_move_path.data.teleport.y = y;
-            g_move_path.data.teleport.elevation = elevation;
+            g_move_path.data.teleport.layer = elevation;
         } else {
             g_move_path.count = MOVE_PATH_TELEPORT_FAILED;
         }
