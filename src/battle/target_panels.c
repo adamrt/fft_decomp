@@ -18,6 +18,8 @@
 
 extern u8 g_ability_calculator_primes[CALCULATOR_PRIME_COUNT];
 
+s32 g_target_sort_nearest_first = 0;
+
 static void target_area_apply_unit_team_eligibility(
     s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_whole_map);
 static void target_range_mark_cardinal_lines(s32 x, s32 y);
@@ -515,7 +517,7 @@ static void target_range_clear_untargetable_tiles(void) {
  * per-tile panel pointers taken upper layer first, because loop.c keeps its
  * giv list in reverse discovery order. */
 static s32 target_range_set_for_jump(const action_command_t* source) {
-    u16 abilities[0x14];
+    s16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 ability_ct[0x48];
     u8 usable[0x18];
@@ -561,7 +563,7 @@ static s32 target_range_set_for_jump(const action_command_t* source) {
     tile_height = tile->height;
     height = tile->depth_half_height.half_height + tile_height * 2;
     count = skillset_get_unit_ability_data(
-        action.actor_id, action.skillset_id, (s16*)abilities, mp_costs, ability_ct, 0, usable, turns);
+        action.actor_id, action.skillset_id, abilities, mp_costs, ability_ct, 0, usable, turns);
     for (i = 0; i < count; i++) {
         ability_id = abilities[i];
         if (ability_id >= ABILITY_ID_JUMP_FIRST && ability_id < ABILITY_ID_CHARGE_FIRST) {

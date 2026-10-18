@@ -61,7 +61,7 @@ units:
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}
   - {name: status_billboard, source: src/lib/menu/status_billboard.c}
-  - {name: target_panels, source: src/battle/target_panels.c}
+  - {name: target_panels, source: src/battle/target_panels.c, data: [{addr: 0x8018f4f8, size: 4, hash: df3f619804a92fdb}]}
   - {name: text_entries, source: src/lib/event/text_entries.c, data: [{addr: 0x80169790, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x801697a0, size: 16, hash: 6ff8555916aa10e6}]}
   - {name: text_skip_to_entry, source: src/lib/event/text_skip_to_entry.c}
   - {name: texture_allocator, source: src/lib/menu/texture_allocator.c}
