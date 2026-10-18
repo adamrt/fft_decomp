@@ -29,26 +29,27 @@ typedef enum memcard_result {
     MEMCARD_RESULT_TIMEOUT = 2,
     MEMCARD_RESULT_NEW_CARD = 3
 } memcard_result_e;
+typedef char memcard_result_size_must_be_4[(sizeof(memcard_result_e) == 4) ? 1 : -1];
 
 extern s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT];
 
 void memcard_init_events(void);
 void memcard_consume_all_events(void);
-s32 memcard_poll_bios_event_result(void);
-s32 memcard_wait_for_bios_event(void);
+memcard_result_e memcard_poll_bios_event_result(void);
+memcard_result_e memcard_wait_for_bios_event(void);
 
 /* card operations */
 extern u8 g_memcard_slot;
 extern u8 g_memcard_info_pending;
 
 void memcard_set_selected_slot(s32 slot);
-s32 memcard_wait_operation_result(s32 retry_limit);
-s32 memcard_open_or_create_selected_card(void);
+memcard_result_e memcard_wait_operation_result(s32 retry_limit);
+memcard_result_e memcard_open_or_create_selected_card(void);
 s32 memcard_format_selected_slot(void);
 
 /* OPEN builds its own bodies of these two. */
-s32 memcard_get_info_with_retries(s32 port, s32 retry_limit);
-s32 memcard_poll_operation_result(void);
+memcard_result_e memcard_get_info_with_retries(s32 port, s32 retry_limit);
+memcard_result_e memcard_poll_operation_result(void);
 
 /* files */
 struct DIRENTRY;

@@ -8,9 +8,9 @@
 /* Issue _card_info on `port` up to retry_limit times, waiting for its BIOS event
  * each time. Returns complete on the first success, otherwise the result of the
  * last attempt (error when _card_info itself refused). */
-s32 memcard_get_info_with_retries(s32 port, s32 retry_limit) {
+memcard_result_e memcard_get_info_with_retries(s32 port, s32 retry_limit) {
     s32 i;
-    s32 result;
+    memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
@@ -28,9 +28,9 @@ s32 memcard_get_info_with_retries(s32 port, s32 retry_limit) {
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-s32 memcard_poll_operation_result(void) {
+memcard_result_e memcard_poll_operation_result(void) {
     s32 status;
-    s32 result;
+    memcard_result_e result;
 
     if (g_memcard_info_pending == 0) {
         _card_info(g_memcard_slot << 4);
@@ -57,10 +57,10 @@ s32 memcard_poll_operation_result(void) {
 /* Probe the selected slot until three probes in a row complete, and return
  * complete. Any other settled result counts against retry_limit and is returned
  * when the limit is reached. A nonpositive limit leaves the result unset. */
-static s32 memcard_poll_info_until_stable(s32 retry_limit) {
+static memcard_result_e memcard_poll_info_until_stable(s32 retry_limit) {
     s32 attempts = 0;
     s32 consecutive_successes = 0;
-    s32 result;
+    memcard_result_e result;
 
     while (attempts < retry_limit) {
         do {
@@ -86,7 +86,7 @@ static s32 memcard_poll_info_until_stable(s32 retry_limit) {
  * count as a card. */
 s32 title_check_card_slots(void) {
     s32 card_present = 0;
-    s32 result;
+    memcard_result_e result;
 
     memcard_consume_all_events();
 

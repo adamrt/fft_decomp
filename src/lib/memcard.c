@@ -46,8 +46,8 @@ void memcard_consume_all_events(void) {
 /* Test the four BIOS card events (done, error, timeout, new card) and return
  * the matching MEMCARD_RESULT_*, or MEMCARD_RESULT_PENDING when none has
  * fired. A result clears all four events. */
-s32 memcard_poll_bios_event_result(void) {
-    s32 result = MEMCARD_RESULT_PENDING;
+memcard_result_e memcard_poll_bios_event_result(void) {
+    memcard_result_e result = MEMCARD_RESULT_PENDING;
     if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE]) == 1)
         result = MEMCARD_RESULT_COMPLETE;
     else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_ERROR]) == 1)
@@ -64,8 +64,8 @@ s32 memcard_poll_bios_event_result(void) {
 /* Poll the BIOS card event until it reports a result. A poll that finds
  * nothing while bit 0 of _card_status is set ends the wait with
  * MEMCARD_RESULT_TIMEOUT. */
-s32 memcard_wait_for_bios_event(void) {
-    s32 result;
+memcard_result_e memcard_wait_for_bios_event(void) {
+    memcard_result_e result;
     s32 ready;
 
     while (1) {
@@ -89,8 +89,8 @@ static void memcard_consume_bios_events(void) {
 /* Test the four hardware card events (done, error, timeout, new card) and return
  * the matching MEMCARD_RESULT_*, or MEMCARD_RESULT_PENDING when none has
  * fired. A result clears all four events. */
-static s32 memcard_poll_hardware_event_result(void) {
-    s32 result = MEMCARD_RESULT_PENDING;
+static memcard_result_e memcard_poll_hardware_event_result(void) {
+    memcard_result_e result = MEMCARD_RESULT_PENDING;
     if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_DONE]) == 1)
         result = MEMCARD_RESULT_COMPLETE;
     else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_ERROR]) == 1)
@@ -107,8 +107,8 @@ static s32 memcard_poll_hardware_event_result(void) {
 /* Poll the hardware card event until it reports a result. A poll that finds
  * nothing while bit 0 of _card_status is set ends the wait with
  * MEMCARD_RESULT_TIMEOUT. Nothing in OPEN.BIN calls it. */
-static s32 memcard_wait_for_hardware_event(void) {
-    s32 result;
+static memcard_result_e memcard_wait_for_hardware_event(void) {
+    memcard_result_e result;
     s32 ready;
 
     while (1) {
@@ -133,9 +133,9 @@ static void memcard_consume_hardware_events(void) {
 /* Run _card_info on `port` until the BIOS event reports completion, trying
  * up to `retry_limit` times. Returns the last result (a rejected call counts
  * as a timeout; the opening's own body counts it as an error). */
-s32 memcard_get_info_with_retries(s32 port, s32 retry_limit) {
+memcard_result_e memcard_get_info_with_retries(s32 port, s32 retry_limit) {
     s32 i;
-    s32 result;
+    memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
@@ -152,9 +152,9 @@ s32 memcard_get_info_with_retries(s32 port, s32 retry_limit) {
 /* Run _card_load on `port` until the BIOS event reports completion, trying
  * up to `retry_limit` times two frames apart. Returns the last result (a
  * rejected call counts as a timeout). */
-static s32 memcard_load_with_retries(s32 port, s32 retry_limit) {
+static memcard_result_e memcard_load_with_retries(s32 port, s32 retry_limit) {
     s32 i;
-    s32 result;
+    memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_load(port) == 1) {
@@ -173,9 +173,9 @@ static s32 memcard_load_with_retries(s32 port, s32 retry_limit) {
  * `retry_limit` times. Returns MEMCARD_RESULT_COMPLETE once the hardware
  * event or a follow-up info request reports completion, otherwise the last
  * failure (a rejected call counts as a timeout). */
-static s32 memcard_create_new_with_retries(s32 port, s32 retry_limit) {
+static memcard_result_e memcard_create_new_with_retries(s32 port, s32 retry_limit) {
     s32 i;
-    s32 result;
+    memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_clear(port) == 1) {
@@ -201,9 +201,9 @@ static s32 memcard_create_new_with_retries(s32 port, s32 retry_limit) {
  * other than "complete" is checked again with a retried info request, and an
  * error is reported as a timeout. The opening's own body reissues the request
  * instead of timing out. */
-s32 memcard_poll_operation_result(void) {
+memcard_result_e memcard_poll_operation_result(void) {
     s32 status;
-    s32 result;
+    memcard_result_e result;
 
     if (g_memcard_info_pending == 0) {
         _card_info(g_memcard_slot << 4);
@@ -229,8 +229,8 @@ s32 memcard_poll_operation_result(void) {
 
 /* Run the card status poll to a result, repeating it up to `retry_limit`
  * times until it reports completion. Returns the last result. */
-s32 memcard_wait_operation_result(s32 retry_limit) {
-    s32 result;
+memcard_result_e memcard_wait_operation_result(s32 retry_limit) {
+    memcard_result_e result;
     s32 i = 0;
 
     while (i < retry_limit) {
@@ -294,8 +294,8 @@ s32 memcard_file_count_free_blocks(const DIRENTRY* entries, s32 entry_count) {
  * Returns MEMCARD_RESULT_COMPLETE,
  * MEMCARD_RESULT_NEW_CARD (the load still reports a new, unformatted card)
  * or MEMCARD_RESULT_TIMEOUT for any failure. */
-s32 memcard_open_or_create_selected_card(void) {
-    s32 result = memcard_wait_operation_result(10);
+memcard_result_e memcard_open_or_create_selected_card(void) {
+    memcard_result_e result = memcard_wait_operation_result(10);
 
     if (result == MEMCARD_RESULT_NEW_CARD) {
         result = memcard_create_new_with_retries(g_memcard_slot << 4, 10);
