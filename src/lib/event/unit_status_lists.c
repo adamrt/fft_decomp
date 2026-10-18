@@ -240,7 +240,7 @@ typedef enum menu_status_screen_line_layout_offset {
 
 /* Status-screen geometry. The sprite layouts differ in their ability-column
  * labels: two skillsets plus Reaction/Support/Movement, or monster abilities.
- * Both layouts replace their hand rows when a weapon uses Two Hands. */
+ * Both layouts replace their hand rows when a weapon occupies both hands. */
 static RECT s_status_screen_panel_rect = { 140, 128, 234, 92 };
 static RECT s_status_screen_draw_area_rect = { 132, 120, 250, 108 };
 static RECT s_status_screen_equipment_text_rect = { 384, 168, 20, 80 };
