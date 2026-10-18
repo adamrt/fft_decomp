@@ -26,7 +26,7 @@ units:
   - {name: dialog_cursor, source: src/lib/event/dialog_cursor.c, rodata: [{addr: 0x8012d8a0, size: 3, hash: 0b782fc3030dbdf3}]}
   - {name: dialog_helpers, source: src/lib/event/dialog_helpers.c, data: [{addr: 0x801678ac, size: 112, hash: 7913c92a7308b758}]}
   - {name: dialog_messages, source: src/lib/event/dialog_messages.c, data: [{addr: 0x8016dae4, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8016daf8, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
-  - {name: effect_heap, source: src/battle/effect_heap.c, rodata: [{addr: 0x801a0df8, size: 60, hash: bd310980baa06c2e}]}
+  - {name: effect_heap, source: src/battle/effect_heap.c, rodata: [{addr: 0x801a0df8, size: 60, hash: bd310980baa06c2e}], data: [{addr: 0x801b8968, size: 136, hash: b707241545a34626}]}
   - {name: effect_renderer, source: src/battle/effect_renderer.c, data: [{addr: 0x801b69b0, size: 12, hash: 87026771f70658d8}, {addr: 0x801b69bc, size: 16, hash: d9c265329e338700}]}
   - {name: effect_script, source: src/battle/effect_script.c, data: [{addr: 0x801b53e8, size: 4096, hash: c0ef3379bda21409}]}
   - {name: effect_system, source: src/battle/effect_system.c, data: [{addr: 0x801b8564, size: 782, hash: 16fe36168f4498dd}]}
@@ -48,7 +48,7 @@ units:
   - {name: menu_entries, source: src/lib/menu/menu_entries.c, rodata: [{addr: 0x801660d4, size: 24, hash: e63f757dcd06f8bb}], data: [{addr: 0x80168d94, size: 240, hash: d7bc04a05b00901b}, {addr: 0x80168e84, size: 60, hash: 65d0190d17e9d8b3}, {addr: 0x80168ec0, size: 16, hash: d97b0fbadb184c5a}, {addr: 0x80168ed0, size: 26, hash: 96f2a0178f0106e0}]}
   - {name: message_threads, source: src/lib/menu/message_threads.c}
   - {name: move_paths, source: src/battle/move_paths.c, data: [{addr: 0x800e4e90, size: 12, hash: 15ec7bf0b50732b4}]}
-  - {name: move_range, source: src/battle/move_range.c}
+  - {name: move_range, source: src/battle/move_range.c, data: [{addr: 0x8018f4d8, size: 7, hash: 0728fe0267ae84db}, {addr: 0x8018f4e0, size: 20, hash: 7d523b51bbc07014}]}
   - {name: move_steps, source: src/battle/move_steps.c, data: [{addr: 0x80093c9c, size: 4, hash: 02d0e6c850c1f217}, {addr: 0x80093ca0, size: 4, hash: 0e3f601857911ecc}, {addr: 0x80093ca4, size: 4, hash: eae2ccfcdac29c2d}, {addr: 0x80093ca8, size: 4, hash: 2ef245921b9d3ae8}]}
   - {name: music_tracks, source: src/lib/sound/music_tracks.c}
   - {name: numbers_frame, source: src/lib/menu/numbers_frame.c, data: [{addr: 0x80167838, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80167844, size: 96, hash: 54145c650f08eb0b}]}

@@ -196,18 +196,24 @@ typedef struct move_record {
 } move_record_t;
 typedef char move_record_size_must_be_7[(sizeof(move_record_t) == 7) ? 1 : -1];
 
+/* Half-height samples for paths across slopes and raised units. */
+static u8 g_move_height_offsets[7] = { 0, 6, 1, 2, 3, 4, 5 };
+
+/* The pathfinder divides the 1 KB scratchpad among its config, spread state,
+ * compact unit records, terrain costs and per-panel frontier flags. */
+static move_pathfind_scratch_t* g_move_config_ptr = (move_pathfind_scratch_t*)getScratchAddr(0);
+static move_spread_state_t* g_move_scratch_pad_ptr = (move_spread_state_t*)getScratchAddr(0x60);
+static move_record_t* g_move_records_ptr = (move_record_t*)getScratchAddr(0x20);
+static u8* g_move_terrain_costs_ptr = (u8*)getScratchAddr(0x40);
+static u8* g_move_frontier_flags_ptr = (u8*)getScratchAddr(0x80);
+
 /* Terrain costs and pathfinder work cursors. */
 extern const u8 g_terrain_movement_cost_tables[][64];
-extern u8* g_move_terrain_costs_ptr;
 extern u8 g_move_terrain_cost;
 extern u8 g_move_weather_terrain_cost;
 extern s32 g_move_range_valid;
 extern s32 g_move_range_unit_id;
 extern u8 g_move_path_scratch;
-extern move_pathfind_scratch_t* g_move_config_ptr;
-extern move_spread_state_t* g_move_scratch_pad_ptr;
-extern move_record_t* g_move_records_ptr;
-extern u8* g_move_frontier_flags_ptr;
 extern u8* g_move_path_frontier;
 extern s32 g_move_path_resume_pass;
 extern s32 g_move_path_tile_index;
@@ -215,10 +221,6 @@ extern void (*g_move_spread_preset_table[])(void);
 
 /* Provisional: always 0; copied into the move config byte 0x1a, which nothing reads. */
 extern u8 g_move_config_unknown_1a_value;
-
-/* Seven proven half-height offsets; the following byte is not
- * established as another element. Extended callers select indices 0..6. */
-extern u8 g_move_height_offsets[7];
 
 /* Zeroed by move_path_calculate and never read. That pass keeps in global scratch what
  * move_spread_store_unit_to_scratchpad keeps in locals; these three stand where it sets

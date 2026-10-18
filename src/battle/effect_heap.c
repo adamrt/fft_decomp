@@ -15,7 +15,7 @@ typedef struct effect_heap_owner_list {
 extern effect_heap_node_t* g_effect_heap_base;
 extern s16 g_effect_heap_block_count;
 extern effect_heap_node_t* g_effect_heap_rover;
-extern effect_heap_owner_list_t g_effect_heap_owner_lists[EFFECT_HEAP_OWNER_COUNT];
+static effect_heap_owner_list_t g_effect_heap_owner_lists[EFFECT_HEAP_OWNER_COUNT] = { 0 };
 
 /* Heap statistics. */
 extern s32 g_effect_heap_min_largest_free; /* lowest largest-free-block size seen, in 8-byte units */
