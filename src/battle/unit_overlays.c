@@ -1166,6 +1166,9 @@ static void status_bubble_determine_parameters(unit_t* unit) {
     }
 }
 
+/* Unit scale for status bubbles and post-action text. */
+const SVECTOR g_status_bubble_zoom = { ONE, ONE, ONE, 0 };
+
 /*
  * Queue the unit's status bubble into the ordering table.
  *
@@ -1265,10 +1268,6 @@ void status_bubble_draw(unit_t* unit, const DVECTOR* unused_screen_coords) {
     depth = transformed.vz / 4;
     sprite_display_construct_polygon_data(display, display->part_count, 0, &position, 0, 0, &zoom, otag + depth);
 }
-
-/* Unit scale for status bubbles and post-action text. Keep the initializer
- * after its reader so GCC retains the original vector copy. */
-const SVECTOR g_status_bubble_zoom = { ONE, ONE, ONE, 0 };
 
 /* Per-frame float and status-bubble update of one unit: adjusts its float height
  * except during the four float-jump step phases, then advances its status bubble
