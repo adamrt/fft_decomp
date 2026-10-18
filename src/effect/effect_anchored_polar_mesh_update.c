@@ -46,9 +46,9 @@ typedef struct effect_anchored_polar_mesh_scratch {
     s32 acceleration_angle; /* 0x5c */
     VECTOR center;          /* 0x60: interpolated emitter spawn position */
     u8 _unused_070[0x30];
-    point32_t velocity; /* 0xa0 */
+    point32_t velocity; /* 0xa0: screen-space center step per ring, Q12 */
     u8 _unused_0a8[0x08];
-    point32_t acceleration; /* 0xb0 */
+    point32_t acceleration; /* 0xb0: change in center step per ring, Q12 */
     u8 _unused_0b8[0x18];
     s32 target_index; /* 0xd0 */
     u8 _unused_0d4[0x14];

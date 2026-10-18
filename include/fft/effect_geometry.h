@@ -366,7 +366,7 @@ typedef struct effect_polar_curve_bindings {
     u16 radius_step : 4;
     u16 radius_step_delta : 4;
     u16 scroll : 4;
-    u16 _unused_04 : 4;
+    u16 _unused_05 : 4;
     u16 angle_step : 4;
     u8 _unused_06;
     u8 angle_step_delta : 4;
