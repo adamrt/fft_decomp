@@ -154,16 +154,16 @@ enum {
  * renderers that spawn like the particle emitter embed it. The spread is the ellipsoid or box half-extent around the
  * spawn position and the velocity spread randomizes the base angles. */
 typedef struct effect_emitter_geometry_view {
-    vec3s16_t spawn_position_start;      /* 0x14 */
-    vec3s16_t spawn_position_end;        /* 0x1a */
-    vec3s16_t spawn_spread_start;        /* 0x20 */
-    vec3s16_t spawn_spread_end;          /* 0x26 */
-    vec3s16_t velocity_base_angle_start; /* 0x2c */
-    vec3s16_t velocity_base_angle_end;   /* 0x32 */
-    vec3s16_t velocity_spread_start;     /* 0x38 */
-    vec3s16_t velocity_spread_end;       /* 0x3e */
-    ranges16_t inertia_start;            /* 0x44 */
-    ranges16_t inertia_end;              /* 0x48 */
+    vec3s16_t spawn_position_start;      /* 0x00 */
+    vec3s16_t spawn_position_end;        /* 0x06 */
+    vec3s16_t spawn_spread_start;        /* 0x0c */
+    vec3s16_t spawn_spread_end;          /* 0x12 */
+    vec3s16_t velocity_base_angle_start; /* 0x18 */
+    vec3s16_t velocity_base_angle_end;   /* 0x1e */
+    vec3s16_t velocity_spread_start;     /* 0x24 */
+    vec3s16_t velocity_spread_end;       /* 0x2a */
+    ranges16_t inertia_start;            /* 0x30 */
+    ranges16_t inertia_end;              /* 0x34 */
 } effect_emitter_geometry_view_t;
 typedef char effect_emitter_geometry_view_size_must_be_56[sizeof(effect_emitter_geometry_view_t) == 56 ? 1 : -1];
 
