@@ -20,6 +20,8 @@ The game keeps a resident executable in memory and loads other programs into fix
 
 An overlay need not have one main function. OPEN exposes separate title and ending runners. EQUIP and JOBSTTS expose functions called once per frame, whereas BUNIT runs a complete screen loop. Effect code is selected through a resident callback catalog and script instructions, with initialization, update and destruction phases. The first function in a file is often a helper rather than its external entry.
 
+Even the ending crosses this split: OPEN plays the movie and credits, then MAIN reloads BATTLE, whose scenario loader enters Delita and Ovelia's epilogue.
+
 The EFFECT directory contains 512 numbered files: 111 are empty, 110 contain native code before their section tables, and 291 begin directly with data section tables. Many effects therefore use data alone; the code-bearing files reuse a small collection of animation routines. All 512 directory records carry the date October 17, 1997.
 
 ## Compiler fingerprints

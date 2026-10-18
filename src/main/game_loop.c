@@ -72,8 +72,8 @@ static void overlay_load_battle(void) {
  * goes straight into BATTLE.BIN; otherwise WLDCORE and WORLD run first and leave
  * their result in g_system_frontend_world_result. World map and BATTLE.BIN
  * then alternate until g_game_flow_state asks for a reset or the
- * ending. The ending sets event 0x12a, plays OPEN.BIN's ending cutscene and runs
- * BATTLE.BIN once more. */
+ * ending. The ending seeds ATTACK's post-funeral route, plays OPEN.BIN's ending
+ * cutscene and runs BATTLE.BIN once more to enter the epilogue. */
 void system_run_game_loop(void) {
     int open_mode;
 
@@ -120,7 +120,7 @@ void system_run_game_loop(void) {
             sound_stop_all_sfx();
             music_unload_scenario_and_tunes();
             script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_MALAK_REVIVED);
+            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_THE_LYING_HEART);
             overlay_exec_open_ending();
             overlay_load_battle();
             zodiac_load_frame();

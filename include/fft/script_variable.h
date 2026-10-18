@@ -118,7 +118,7 @@ typedef enum event_script_variable_id {
     EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED = 0x90,
     EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED = 0x91,
     EVENT_SCRIPT_VAR_FACTS_ENABLED = 0x92,
-    /* Set by event EVENT_ID_MALAK_REVIVED; Goug's steel ball events need it. */
+    /* Set by event EVENT_ID_THE_LYING_HEART; Goug's steel ball events need it. */
     EVENT_SCRIPT_VAR_GOUG_EVENTS_UNLOCKED = 0x94,
     /* Set by event 0x071. */
     EVENT_SCRIPT_VAR_ELIDIBS_DEFEATED = 0x95,
@@ -274,9 +274,9 @@ typedef enum event_id {
     /* A Zodiac Stone speaks in these two. Their centered messages start at
      * the box's left edge while ETC's graphics are off. */
     EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9, /* Brave Story record "Velius" (setup 0xf8) */
-    /* Also the event the ending leaves current, with the next scenario
-     * requested, so that ATTACK steps on from it. */
-    EVENT_ID_MALAK_REVIVED = 0x12a, /* Brave Story record "The lying heart" (setup 0x129) */
+    /* MAIN leaves this event current with the next scenario requested before the ending.
+     * ATTACK selects the epilogue setup when the funeral flag is set. */
+    EVENT_ID_THE_LYING_HEART = 0x12a, /* Brave Story record "The lying heart" (setup 0x129) */
     EVENT_ID_EPILOGUE_SETUP = 0x12b,
     /* King Delita and Ovelia. Its save does not request the next scenario. */
     EVENT_ID_EPILOGUE = 0x12c, /* Brave Story record "Things obtained" (setup 0x12b) */

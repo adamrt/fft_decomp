@@ -114,17 +114,17 @@ s32 scenario_load_conditionals(void) {
     }
     script_set_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 1);
 
-    /* Chapter 1 advances to Chapter 2. Malak's revival normally advances to the Riovanes
+    /* Chapter 1 advances to Chapter 2. "The lying heart" normally advances to the Riovanes
      * aftermath; after the funeral, it selects the epilogue instead. */
     if (script_get_variable(EVENT_SCRIPT_VAR_OLAN_SAW_RAMZA_FUNERAL) != 0
         && script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
-        && script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_MALAK_REVIVED) {
+        && script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_THE_LYING_HEART) {
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_EPILOGUE_SETUP);
     } else if (script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0) {
         id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if (id == EVENT_ID_FORT_ZEAKDEN_EXPLOSION) {
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_CHAPTER_2_SETUP);
-        } else if (id == EVENT_ID_MALAK_REVIVED) {
+        } else if (id == EVENT_ID_THE_LYING_HEART) {
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_RIOVANES_AFTERMATH_SETUP);
         } else {
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, id + 1);

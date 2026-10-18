@@ -405,7 +405,7 @@ void message_dialog_thread(void) {
      * events (unless primitives draw immediately), where lines start flush left. */
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-        if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_MALAK_REVIVED)
+        if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_THE_LYING_HEART)
             && g_gfx_draw_primitives_immediately == 0) {
             cursor_x = rec.x;
         } else {
@@ -658,7 +658,7 @@ void message_dialog_thread(void) {
 
             if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                 event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-                if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_MALAK_REVIVED)
+                if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_THE_LYING_HEART)
                     && g_gfx_draw_primitives_immediately == 0) {
                     cursor_x = rec.x;
                 } else {
