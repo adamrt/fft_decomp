@@ -1316,7 +1316,7 @@ static void save_draw_slot_text(s32 save_slot_index) {
         destination_rect.w = 0x32;
         destination_rect.h = 0x20;
     }
-    screen_text_render_rows(
+    text_render_id_rows_to_vram(
         g_save_slot_descriptions[save_slot_index], g_save_slot_description_row_ids, &destination_rect, 0);
 }
 

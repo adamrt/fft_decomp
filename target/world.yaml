@@ -937,7 +937,7 @@ functions:
   - {addr: 0x8012a3e8, size: 224, name: menu_text_start_or_poll_thread, hash: 115cc3eda2acc9a0, source: src/lib/menu/menu_text_start_or_poll_thread.c}
   - {addr: 0x8012a4c8, size: 208, name: text_concatenate_entries, hash: a2f06b32ac8b39ec, source: src/lib/menu/text_concatenate_entries.c}
   - {addr: 0x8012a598, size: 40, name: menu_request_thread_stop, hash: 93b25e9e20d525d7, source: src/lib/menu/menu_request_thread_stop.c}
-  - {addr: 0x8012a5c0, size: 280, name: screen_text_render_rows, hash: cd76563eae076577, unit: font_rendering}
+  - {addr: 0x8012a5c0, size: 280, name: text_render_id_rows_to_vram, hash: cd76563eae076577, unit: font_rendering}
   - {addr: 0x8012a6d8, size: 320, name: screen_text_kern, hash: 9ad7bc78c81c3264, unit: font_rendering}
   - {addr: 0x8012a818, size: 240, name: screen_font_upload_glyph, hash: b2aeee5751201db0, unit: font_rendering}
   - {addr: 0x8012a908, size: 120, name: screen_text_advance_chars, hash: 32ea1eed86f15077, unit: font_rendering}

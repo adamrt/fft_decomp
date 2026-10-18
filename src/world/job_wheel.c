@@ -80,7 +80,7 @@ static u8 g_formation_job_wheel_open_frame = 255;
 static u8 g_formation_job_wheel_closing = 0;
 static u8 g_formation_job_wheel_opening = 0;
 
-/* One row for screen_text_render_rows, followed by its -1 terminator. */
+/* One row for text_render_id_rows_to_vram, followed by its -1 terminator. */
 static s16 g_formation_job_wheel_name_text[2] = { 0, -1 };
 static oriented_quad_t g_formation_job_wheel_mastered_icon_sprite
     = { { 0, 0 }, 10, 10, { 36, 200, 10, 10, 0x7ee7, 31 } };
@@ -766,7 +766,7 @@ static void formation_job_build_wheel_name(void) {
     destination_rect.y = 0x130;
     destination_rect.w = 0x14;
     destination_rect.h = 0x10;
-    screen_text_render_rows(text_table, text_ids, &destination_rect, 0);
+    text_render_id_rows_to_vram(text_table, text_ids, &destination_rect, 0);
     pixel_width = screen_text_measure_width(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
     g_formation_job_wheel_name_rect.x = ((0x50 - pixel_width) >> 1) + 0x58;
     g_formation_job_wheel_name_rect.y = 0xD7;

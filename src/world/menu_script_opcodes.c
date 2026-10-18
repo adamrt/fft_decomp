@@ -12,6 +12,7 @@
 #include "fft/menu_window.h"
 #include "fft/screen.h"
 #include "fft/sound.h"
+#include "fft/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -1036,7 +1037,7 @@ void screen_load_list_layout(const menu_instruction_t* script) {
         rect.y = 0x130;
         rect.w = g_screen_list_image_width;
         rect.h = g_screen_row_height;
-        screen_text_render_rows(g_screen_list_text_table, text_ids, &rect, 0);
+        text_render_id_rows_to_vram(g_screen_list_text_table, text_ids, &rect, 0);
     }
     g_screen_list_scroll_direction = 0;
     g_screen_list_layout_pending = 0;
@@ -1120,7 +1121,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                         rect.y = 0x120;
                         rect.w = g_screen_list_image_width;
                         rect.h = g_screen_row_height;
-                        screen_text_render_rows(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
+                        text_render_id_rows_to_vram(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
                     }
                 }
             } else if (g_menu_script_input & PSX_PAD_UP) {
@@ -1137,7 +1138,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                         rect.y = g_screen_list_visible_rows * g_screen_row_height + 0x130;
                         rect.w = g_screen_list_image_width;
                         rect.h = g_screen_row_height;
-                        screen_text_render_rows(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
+                        text_render_id_rows_to_vram(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
                     }
                 }
             } else {

@@ -13,7 +13,7 @@ static u8 g_screen_text_row_image_buffer[2048] = { 0 };
 /* Renders each text id of a -1 terminated list into its own 16 pixel line of
  * `destination`, uploading one line at a time through the scratch image at
  * g_screen_text_row_image_buffer. */
-void screen_text_render_rows(const u8* text_table, const s16* text_ids, const RECT* destination, s32 palette) {
+void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags) {
     text_image_bounds_t bounds;
     RECT destination_row;
     s16 row_text_ids[4];
@@ -31,7 +31,7 @@ void screen_text_render_rows(const u8* text_table, const s16* text_ids, const RE
         row_text_ids[1] = -1;
         memset(g_screen_text_row_image_buffer, 0, 0x800);
         menu_text_render_encoded_ids_to_image(
-            g_screen_text_row_image_buffer, &bounds, 0xa, 0x64, text_table, row_text_ids, 0x64, 0xe7, palette);
+            g_screen_text_row_image_buffer, &bounds, 0xa, 0x64, text_table, row_text_ids, 0x64, 0xe7, flags);
         gfx_load_image_and_wait(&destination_row, g_screen_text_row_image_buffer);
         destination_row.y += 0x10;
     }
@@ -43,9 +43,9 @@ void screen_text_render_rows(const u8* text_table, const s16* text_ids, const RE
  * The pen advances by the glyph's width plus kerning pads chosen by that
  * width (2: two pixels before and after, 3: one before and two after, 4: one
  * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
- * as the text table for screen_text_render_rows, with the
- * caller's text ids, destination and palette passed through unchanged. */
-void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 palette) {
+ * as the text table for text_render_id_rows_to_vram, with the
+ * caller's text ids, destination and flags passed through unchanged. */
+void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags) {
     u8 buf[0x78];
     u8* out;
     s32 len;
@@ -110,7 +110,7 @@ void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destinati
         } while (glyph != TEXT_END_WAIT_FOR_CONFIRM);
     }
     buf[len] = TEXT_END_WAIT_FOR_CONFIRM;
-    screen_text_render_rows(buf, text_ids, destination, palette);
+    text_render_id_rows_to_vram(buf, text_ids, destination, flags);
 }
 
 /* Renders one encoded glyph (either a direct id or a 0xD?-prefixed

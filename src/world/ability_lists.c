@@ -154,7 +154,7 @@ s32 formation_ability_learn_list(void) {
         rect.w = 0x14;
         rect.h = 0x10;
         g_formation_ability_learn_job_name_list[0] = g_formation_ability_learn_selected_job;
-        screen_text_render_rows(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_formation_ability_learn_job_name_list, &rect, 0);
         g_formation_ability_learn_ability_list_open = 1;
         g_formation_cursor_ot_override = 0x3c;
@@ -319,7 +319,7 @@ static s32 formation_ability_view_list(void) {
         rect.w = 0x14;
         rect.h = 0x10;
         g_formation_ability_view_job_names[0] = g_formation_ability_learn_selected_job;
-        screen_text_render_rows(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_formation_ability_view_job_names, &rect, 0);
         g_formation_ability_category = menu_update_wrapped_horizontal_selection(4, SCREEN_CURSOR_ABILITY_TAB, 0);
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
