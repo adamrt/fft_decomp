@@ -2054,9 +2054,10 @@ s32 ability_get_elemental_id(const unit_stats_t* unit) {
             .surface.type];
 }
 
-/* Build battle slot unit_index from the party member the current deployment row names: rebuild it
+/* Build battle slot unit_index from the party member named by g_unit_deployed_coords: rebuild it
  * from the party record, then clear its war trophy and bonus money and initialize its statuses. -1
- * when that party slot is unavailable; the first two parameters are unused. */
+ * when that party slot is unavailable. The target reads the slot from incoming a2; no caller contract
+ * is known, so preserve the two preceding unused argument slots. */
 s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index) {
     unit_stats_t* unit = &g_unit_stats[unit_index];
     s32 formation_id = g_unit_deployed_coords->party_id;
