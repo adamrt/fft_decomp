@@ -13,6 +13,8 @@ units:
   - {name: audio_queue, source: src/wldcore/audio_queue.c}
   - {name: bar, source: src/wldcore/bar.c}
   - {name: brave_story, source: src/wldcore/brave_story.c}
+  - {name: brave_story_collections, source: src/wldcore/brave_story_collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
+  - {name: event_transition, source: src/wldcore/event_transition.c}
   - {name: file_wait, source: src/lib/file/file_wait.c}
   - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}]}
@@ -20,7 +22,7 @@ units:
   - {name: map_tiles, source: src/wldcore/map_tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}]}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
-  - {name: proposition_results, source: src/wldcore/proposition_results.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
+  - {name: proposition_results, source: src/wldcore/proposition_results.c}
   - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: sound_novel, source: src/wldcore/sound_novel.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
   - {name: startup, source: src/wldcore/startup.c}
@@ -207,36 +209,36 @@ functions:
   - {addr: 0x8007af9c, size: 1348, name: proposition_push_recall_level, hash: c9b62e341b9e42a3, unit: proposition_results}
   - {addr: 0x8007b4e0, size: 756, name: proposition_build_detail_panel, hash: 71b14415a1da4b72, unit: proposition_results}
   - {addr: 0x8007b7d4, size: 740, name: proposition_handle_recall_input, hash: ecedf486c1c63c54, unit: proposition_results}
-  - {addr: 0x8007bab8, size: 1360, name: sound_novel_push_level, hash: a9b47b074e27ea14, unit: proposition_results}
-  - {addr: 0x8007c008, size: 292, name: sound_novel_resume_level, hash: 60796fceb233cfcb, unit: proposition_results}
-  - {addr: 0x8007c12c, size: 8, name: sound_novel_suspend_level, hash: 6d64edf91449c1b1, unit: proposition_results}
-  - {addr: 0x8007c134, size: 1880, name: sound_novel_step_level, hash: 38e6aa4b211d76d0, unit: proposition_results}
-  - {addr: 0x8007c88c, size: 1052, name: sound_novel_push_quit_level, hash: 85d07d42edfefb9c, unit: proposition_results}
-  - {addr: 0x8007cca8, size: 208, name: sound_novel_resume_quit_level, hash: b5918d30a7aa2ca2, unit: proposition_results}
-  - {addr: 0x8007cd78, size: 224, name: sound_novel_suspend_quit_level, hash: 7b292ddd6e01673f, unit: proposition_results}
-  - {addr: 0x8007ce58, size: 1332, name: sound_novel_step_quit_level, hash: fd7f34ad68cc922f, unit: proposition_results}
-  - {addr: 0x8007d38c, size: 132, name: hud_show_play_time, hash: 133f43f6ea4a69d0, unit: proposition_results}
-  - {addr: 0x8007d410, size: 1336, name: sound_novel_push_history_level, hash: e6d72d860bf58c21, unit: proposition_results}
-  - {addr: 0x8007d948, size: 1596, name: sound_novel_step_history_level, hash: 67c60f0dcfe436af, unit: proposition_results}
-  - {addr: 0x8007df84, size: 72, name: sound_novel_draw_history_entry, hash: 4045135c6ffd37ae, unit: proposition_results}
-  - {addr: 0x8007dfcc, size: 372, name: brave_story_open_unexplored_land_list, hash: 189cdddb19bf616a, unit: proposition_results}
-  - {addr: 0x8007e140, size: 56, name: brave_story_restore_unexplored_land_list_prompt, hash: ebfa76d520ec41f0, unit: proposition_results}
-  - {addr: 0x8007e178, size: 20, name: brave_story_block_unexplored_land_list_buttons, hash: 11034aa27eaa3095, unit: proposition_results}
-  - {addr: 0x8007e18c, size: 468, name: brave_story_handle_unexplored_land_list_input, hash: d4fecba5e2467a68, unit: proposition_results}
-  - {addr: 0x8007e360, size: 916, name: brave_story_push_unexplored_land_level, hash: e48c5a605fed2590, unit: proposition_results}
-  - {addr: 0x8007e6f4, size: 1288, name: brave_story_step_unexplored_land_level, hash: 5d5777d15b601fa0, unit: proposition_results}
-  - {addr: 0x8007ebfc, size: 372, name: brave_story_open_treasure_list, hash: fc2b22fd94af9bb3, unit: proposition_results}
-  - {addr: 0x8007ed70, size: 56, name: brave_story_restore_treasure_list_prompt, hash: ebfa76d520ec41f0, unit: proposition_results}
-  - {addr: 0x8007eda8, size: 20, name: brave_story_block_treasure_list_buttons, hash: 11034aa27eaa3095, unit: proposition_results}
-  - {addr: 0x8007edbc, size: 484, name: brave_story_handle_treasure_list_input, hash: 5d21f044d9b79fef, unit: proposition_results}
-  - {addr: 0x8007efa0, size: 908, name: brave_story_push_treasure_level, hash: 318a0fe5694cdb34, unit: proposition_results}
-  - {addr: 0x8007f32c, size: 1644, name: brave_story_step_treasure_level, hash: 58c1101f8880101f, unit: proposition_results}
-  - {addr: 0x8007f998, size: 600, name: picture_step_dissolve_upload, hash: 96cd26d84c2c77e2, unit: proposition_results}
-  - {addr: 0x8007fbf0, size: 1396, name: sound_novel_push_restart_level, hash: f616e5abec5df5d4, unit: proposition_results}
-  - {addr: 0x80080164, size: 792, name: sound_novel_step_restart_level, hash: 6773d16d8df13897, unit: proposition_results}
-  - {addr: 0x8008047c, size: 732, name: event_transition_push_level, hash: a00914902b5a7a1d, unit: proposition_results}
-  - {addr: 0x80080758, size: 132, name: event_transition_draw_sprite, hash: f8623b007ab10664, unit: brave_story}
-  - {addr: 0x800807dc, size: 1656, name: event_transition_step_level, hash: 1cd46cc6d961f5e1, unit: brave_story}
+  - {addr: 0x8007bab8, size: 1360, name: sound_novel_push_level, hash: a9b47b074e27ea14, unit: brave_story_collections}
+  - {addr: 0x8007c008, size: 292, name: sound_novel_resume_level, hash: 60796fceb233cfcb, unit: brave_story_collections}
+  - {addr: 0x8007c12c, size: 8, name: sound_novel_suspend_level, hash: 6d64edf91449c1b1, unit: brave_story_collections}
+  - {addr: 0x8007c134, size: 1880, name: sound_novel_step_level, hash: 38e6aa4b211d76d0, unit: brave_story_collections}
+  - {addr: 0x8007c88c, size: 1052, name: sound_novel_push_quit_level, hash: 85d07d42edfefb9c, unit: brave_story_collections}
+  - {addr: 0x8007cca8, size: 208, name: sound_novel_resume_quit_level, hash: b5918d30a7aa2ca2, unit: brave_story_collections}
+  - {addr: 0x8007cd78, size: 224, name: sound_novel_suspend_quit_level, hash: 7b292ddd6e01673f, unit: brave_story_collections}
+  - {addr: 0x8007ce58, size: 1332, name: sound_novel_step_quit_level, hash: fd7f34ad68cc922f, unit: brave_story_collections}
+  - {addr: 0x8007d38c, size: 132, name: hud_show_play_time, hash: 133f43f6ea4a69d0, unit: brave_story_collections}
+  - {addr: 0x8007d410, size: 1336, name: sound_novel_push_history_level, hash: e6d72d860bf58c21, unit: brave_story_collections}
+  - {addr: 0x8007d948, size: 1596, name: sound_novel_step_history_level, hash: 67c60f0dcfe436af, unit: brave_story_collections}
+  - {addr: 0x8007df84, size: 72, name: sound_novel_draw_history_entry, hash: 4045135c6ffd37ae, unit: brave_story_collections}
+  - {addr: 0x8007dfcc, size: 372, name: brave_story_open_unexplored_land_list, hash: 189cdddb19bf616a, unit: brave_story_collections}
+  - {addr: 0x8007e140, size: 56, name: brave_story_restore_unexplored_land_list_prompt, hash: ebfa76d520ec41f0, unit: brave_story_collections}
+  - {addr: 0x8007e178, size: 20, name: brave_story_block_unexplored_land_list_buttons, hash: 11034aa27eaa3095, unit: brave_story_collections}
+  - {addr: 0x8007e18c, size: 468, name: brave_story_handle_unexplored_land_list_input, hash: d4fecba5e2467a68, unit: brave_story_collections}
+  - {addr: 0x8007e360, size: 916, name: brave_story_push_unexplored_land_level, hash: e48c5a605fed2590, unit: brave_story_collections}
+  - {addr: 0x8007e6f4, size: 1288, name: brave_story_step_unexplored_land_level, hash: 5d5777d15b601fa0, unit: brave_story_collections}
+  - {addr: 0x8007ebfc, size: 372, name: brave_story_open_treasure_list, hash: fc2b22fd94af9bb3, unit: brave_story_collections}
+  - {addr: 0x8007ed70, size: 56, name: brave_story_restore_treasure_list_prompt, hash: ebfa76d520ec41f0, unit: brave_story_collections}
+  - {addr: 0x8007eda8, size: 20, name: brave_story_block_treasure_list_buttons, hash: 11034aa27eaa3095, unit: brave_story_collections}
+  - {addr: 0x8007edbc, size: 484, name: brave_story_handle_treasure_list_input, hash: 5d21f044d9b79fef, unit: brave_story_collections}
+  - {addr: 0x8007efa0, size: 908, name: brave_story_push_treasure_level, hash: 318a0fe5694cdb34, unit: brave_story_collections}
+  - {addr: 0x8007f32c, size: 1644, name: brave_story_step_treasure_level, hash: 58c1101f8880101f, unit: brave_story_collections}
+  - {addr: 0x8007f998, size: 600, name: picture_step_dissolve_upload, hash: 96cd26d84c2c77e2, unit: brave_story_collections}
+  - {addr: 0x8007fbf0, size: 1396, name: sound_novel_push_restart_level, hash: f616e5abec5df5d4, unit: brave_story_collections}
+  - {addr: 0x80080164, size: 792, name: sound_novel_step_restart_level, hash: 6773d16d8df13897, unit: brave_story_collections}
+  - {addr: 0x8008047c, size: 732, name: event_transition_push_level, hash: a00914902b5a7a1d, unit: event_transition}
+  - {addr: 0x80080758, size: 132, name: event_transition_draw_sprite, hash: f8623b007ab10664, unit: event_transition}
+  - {addr: 0x800807dc, size: 1656, name: event_transition_step_level, hash: 1cd46cc6d961f5e1, unit: event_transition}
   - {addr: 0x80080e54, size: 2288, name: brave_story_push_level, hash: 4050bf601980cdcc, unit: brave_story}
   - {addr: 0x80081744, size: 1572, name: brave_story_build_rows, hash: cefca88b09384215, unit: brave_story}
   - {addr: 0x80081d68, size: 948, name: brave_story_resume_level, hash: f18117aca5ca9e1b, unit: brave_story}

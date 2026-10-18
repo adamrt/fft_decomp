@@ -479,10 +479,6 @@ typedef struct event_transition_level {
     s32 mode; /* 0x20; event_transition_mode_e; argument of the push */
 } event_transition_level_t;
 
-/* The event transition's spinning screen-capture sprite, sorted with GsSortSprite by
- * event_transition_draw_sprite. */
-extern GsSPRITE g_event_transition_sprite;
-
 void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b);
 void screen_transition_step_level(menu_stack_record_t* level);
 void event_transition_push_level(s32 mode);
