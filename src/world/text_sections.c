@@ -1,4 +1,6 @@
-/* Shop background TIM loading, text section binding, resident data and tutorial file loading. */
+/* WORLD's built-in menu text and resource loaders. The nine shop backdrops are
+ * grouped by shop type, three entries each for the item shop, Fur Shop and Soldier
+ * Office. Each Formation tutorial pairs a message file with its command stream. */
 
 #include "fft/file.h"
 #include "fft/screen.h"
