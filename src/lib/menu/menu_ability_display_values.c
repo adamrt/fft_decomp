@@ -5,6 +5,10 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
+extern ability_type_e g_ability_list_ability_type;
+extern const ability_data_t* g_ability_list_selected_ability_data;
+extern ability_secondary_pointer_t g_ability_list_selected_ability_secondary_data;
+
 /* Row callback for ability lists: look up the listed ability (caching its data for the panel) and
  * return 1 when it is not an action ability and its entry carries no disabled bits. */
 s32 ability_list_is_non_action_learned(s32 index) {

@@ -25,9 +25,6 @@ typedef enum menu_window_frame_mode {
     MENU_WINDOW_FRAME_ALTERNATE_BUILD = 3
 } menu_window_frame_mode_e;
 
-/* Image the window frame thread composes its border pieces in before uploading them. */
-extern u8 g_menu_window_frame_image[];
-
 void menu_build_window_image_row(const u16* tiles, u16* row, s32 count, s32 index);
 
 /* With keep set, returns the image instead of uploading and freeing it. */
@@ -160,10 +157,6 @@ typedef union menu_scratch_buffer {
 
 extern menu_window_rect_source_t* g_menu_window_rect_source;
 extern menu_scratch_buffer_t g_menu_scratch_buffer;
-
-/* Texture windows of the frame pieces the frame threads upload. */
-extern RECT g_menu_thin_panel_texture_windows[7];
-extern RECT g_menu_panel_texture_windows[7];
 
 void menu_window_frame_thread(void);
 void menu_thin_window_frame_thread(void);

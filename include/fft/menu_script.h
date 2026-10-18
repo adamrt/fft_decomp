@@ -285,8 +285,6 @@ menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t*
 menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command);
 
 /* opcode handlers */
-extern menu_sprite_command_t g_menu_script_quad_command;
-extern menu_window_command_t g_menu_window_interior_command;
 extern s16 g_menu_window_right_x;
 
 /* The JOBSTTS and CARD window-frame handlers' copy of g_menu_window_interior_command. */

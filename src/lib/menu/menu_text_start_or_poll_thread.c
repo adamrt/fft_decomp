@@ -5,6 +5,8 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
+extern s32 g_menu_text_active_key;
+
 /* Starts the text character handling thread on thread_id with the given
  * parameters when no text is pending. Returns 0 once the pending text
  * matches `key` and has finished, 1 when a new thread was started, otherwise

@@ -13,6 +13,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Image the window frame thread composes its border pieces in before uploading them. */
+extern u8 g_menu_window_frame_image[];
+
+/* Texture windows of the frame pieces this thread uploads. */
+extern RECT g_menu_panel_texture_windows[7];
+
 /* Thread body of a window frame drawn with nine sprites until a stop request; parameter 1 is
  * the window rectangle (urect16_t). The border pieces are copied from the menu glyph sheet into
  * one 128x16 VRAM image: the interior and the four edges tile their pieces through texture

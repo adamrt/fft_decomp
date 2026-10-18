@@ -147,8 +147,6 @@ typedef enum action_menu_pseudo_skillset { ACTION_MENU_PSEUDO_SKILLSET_ANYTHING 
 
 extern u8 g_command_menu_types_by_skillset[0xe0];
 extern u8 g_command_skillsets[]; /* SKILLSET_ID_NONE terminates the rows. */
-extern s16 g_command_skillset_row_actions[];
-extern u8 g_command_skillset_disabled_flags[]; /* per-row grayed flag */
 extern s32 g_command_selected_skill_ct;
 extern s16 g_command_action_type_modes[][2];
 
@@ -196,7 +194,6 @@ extern s32 g_menu_scrolling_list_depth;
  * runs. */
 extern RECT g_menu_ability_list_clut_rect;
 extern s16 g_command_action_slot_row_actions[6];
-extern s16 g_command_action_slot_selected_option;
 
 /* Walks the stored unit's menu record slots from the top down to zero, presenting each and writing the chosen
  * entry back into the record. */

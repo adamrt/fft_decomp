@@ -112,17 +112,9 @@ enum { MENU_CLUT_NORMAL = 0x7c3c, MENU_CLUT_DIMMED = 0x7d3c };
 extern menu_palette_pair_t g_menu_palette_colors;
 extern u8 g_menu_use_alternate_palette;
 extern u16 g_menu_palette_clut;
-extern u16 g_menu_active_clut_back;
-extern u16 g_menu_active_clut_front;
 extern u16 g_menu_window_clut;
-extern u16 g_menu_text_clut_0_mode0;
-extern u16 g_menu_text_clut_0_mode1;
 extern u16 g_menu_text_clut_1_mode0;
-extern u16 g_menu_text_clut_1_mode1;
 extern u16 g_menu_text_clut_2_mode0;
-extern u16 g_menu_text_clut_2_mode1;
-extern u16 g_menu_text_clut_3_mode0;
-extern u16 g_menu_text_clut_3_mode1;
 extern u16 g_menu_alternate_number_clut;
 extern u16 g_menu_disabled_number_clut;
 

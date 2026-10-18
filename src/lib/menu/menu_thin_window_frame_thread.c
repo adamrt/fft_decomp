@@ -13,6 +13,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Texture windows of the frame pieces this thread uploads. */
+extern RECT g_menu_thin_panel_texture_windows[7];
+
 /* menu_window_frame_thread with thin border pieces: the same nine-sprite frame, but its top and
  * bottom edges are 8 pixels tall instead of 16, and the border image is built in a buffer
  * allocated from the menu arena.

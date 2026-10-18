@@ -16,6 +16,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern RECT g_unit_panel_character_status_draw_area_rect;
+
 /* The overlays with separate rendered panels keep their local bodies. */
 #if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_DEBUGCHR) || defined(FFT_EVENT_REQUIRE)
 void unit_panel_equipment_thread(void) {

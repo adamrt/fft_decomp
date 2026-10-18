@@ -9,6 +9,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Status image rectangles, indexed by status id, that item_draw_status_list draws in the item detail panel's status
+ * column. */
+extern RECT g_unit_panel_status_display_image_rects[];
+
 /* Draw the item detail panel's status column: immunity icons, then the
  * innate/starting status icons.
  *

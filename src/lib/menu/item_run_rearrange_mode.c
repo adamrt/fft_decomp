@@ -15,6 +15,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern s16 g_item_rearrange_picked_cursor;
+extern s16 g_item_rearrange_preview_cursor;
+extern u16 g_item_rearrange_picked_scroll;
+extern u8 g_item_rearrange_anim_frame;
+
 /* Runs item-list rearrangement mode.
  *
  * Confirm swaps the picked entry with the current entry and stores the new order as the

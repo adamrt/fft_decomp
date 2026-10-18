@@ -23,6 +23,10 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
+extern s16 g_command_skillset_row_actions[];
+extern u8 g_command_skillset_disabled_flags[]; /* per-row grayed flag */
+extern s16 g_command_action_slot_selected_option;
+
 /* The selected row and scroll position of an ability list. */
 typedef struct menu_list_selection {
     u8 selected_index;

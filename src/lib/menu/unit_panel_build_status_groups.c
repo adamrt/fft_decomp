@@ -7,6 +7,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern u8 g_unit_panel_panel_status_group_ids[];
+extern u8 g_unit_panel_panel_status_group_bounds[];
+extern sprite_draw_offset_t g_unit_panel_panel_status_offsets[];
+extern const u16 g_unit_panel_panel_status_y_offsets[];
+
 /* Render the animated status groups of a menu panel.
  *
  * Each group's animation byte counts down: values above 0x40 step by 2, the

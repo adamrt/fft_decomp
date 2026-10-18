@@ -143,16 +143,12 @@ extern option_page_t g_option_pages[2];
 
 /* WORLD and OPTION each define one column layout for the game options list. */
 extern menu_text_layout_t g_option_entry_table;
-extern menu_entry_t g_option_icon_thread_param;
-extern menu_icon_record_t g_option_picker_icon_records[2];
 extern menu_input_timing_profile_t g_option_input_repeat_timings[];
 extern RECT g_option_title_image_rect;
 extern RECT g_option_entry_panel_rect;
 extern RECT g_option_value_image_rect;
 extern s32 g_option_values[GAME_OPTION_MENU_ROW_COUNT]; /* edited values plus the Initialize row */
 extern s32 g_option_reference_values[GAME_OPTION_MENU_ROW_COUNT];
-extern s32 g_option_choice_counts[GAME_OPTION_MENU_ROW_COUNT];
-extern s32 g_option_choice_widths[GAME_OPTION_MENU_ROW_COUNT];
 extern s32 g_option_value_text_id_bases[GAME_OPTION_MENU_ROW_COUNT];
 
 void option_game_options_thread(void);

@@ -459,8 +459,6 @@ typedef enum menu_indicator_state {
     MENU_INDICATOR_STATE_FADING_OUT = 2 /* brightness falls by 0xc a frame; at zero the state returns to HIDDEN */
 } menu_indicator_state_e;
 
-extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
-
 void menu_draw_status_panel_backdrops(void);
 
 #endif

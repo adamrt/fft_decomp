@@ -65,12 +65,8 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame);
  * one repeat counter per button. */
 extern u32* g_menu_input_controller;
 extern u16 g_menu_input_newly_pressed;
-extern u16 g_menu_input_previous;
-extern u16 g_menu_input_latched_button;
-extern u8 g_menu_input_activation_timer;
 extern u32 g_menu_input_primary_repeat;
 extern u32 g_menu_input_secondary_repeat;
-extern s32 g_menu_input_repeat_counters[16];
 
 /* Buttons OPEN and WLDCORE keep from their menus, -1 for all. */
 extern s32 g_menu_blocked_buttons;

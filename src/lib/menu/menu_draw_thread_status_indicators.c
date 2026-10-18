@@ -7,6 +7,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
+
 static s32 g_menu_indicator_packet_index[2] = { 0 };
 static s32 g_menu_indicator_brightness[2] = { 0 };
 static s32 g_menu_indicator_fade_work[2] = { 0 };

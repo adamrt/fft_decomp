@@ -196,10 +196,6 @@ extern u8 g_unit_panel_status_animation[];
  * group has a countdown byte in g_unit_panel_panel_status_animation; 0xff marks an inactive group. */
 extern u8 g_unit_panel_panel_status_animation[];
 extern u8 g_unit_panel_panel_status_group_count;
-extern u8 g_unit_panel_panel_status_group_ids[];
-extern u8 g_unit_panel_panel_status_group_bounds[];
-extern sprite_draw_offset_t g_unit_panel_panel_status_offsets[];
-extern const u16 g_unit_panel_panel_status_y_offsets[];
 
 void unit_panel_build_status_groups(POLY_FT4* poly);
 
@@ -210,7 +206,6 @@ extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 /* character status panel */
 /* The selected unit's and the comparison unit's status panels, with their billboards, packets, numbers, name
  * and portrait. */
-extern RECT g_unit_panel_character_status_draw_area_rect;
 extern RECT g_unit_panel_frame_rect;
 
 /* WORLD, ATTACK, BUNIT, DEBUGCHR and EQUIP each bind this down/up curve. */
@@ -260,7 +255,6 @@ void unit_panel_equipment_thread(void);
 
 /* numeric panel */
 extern menu_status_panel_numeric_geometry_t g_unit_panel_editor_numeric_table;
-extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state[2];
 extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state_a[2];
 extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state_b[2];
 extern menu_number_entry_t g_unit_panel_editor_numeric_descriptor_a[];

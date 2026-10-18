@@ -25,6 +25,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern menu_entry_t g_option_icon_thread_param;
+extern menu_icon_record_t g_option_picker_icon_records[2];
+extern s32 g_option_choice_counts[GAME_OPTION_MENU_ROW_COUNT];
+extern s32 g_option_choice_widths[GAME_OPTION_MENU_ROW_COUNT];
+
 /* Option-menu value picker thread for one game option.
  *
  * The option index arrives in the thread's first parameter, which is then

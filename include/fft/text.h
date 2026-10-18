@@ -470,7 +470,6 @@ extern s32 g_text_slot_glyph_counts[3];
 /* text threads */
 extern s32 g_text_selection_id;
 extern u8 g_text_thread_running_state;
-extern s32 g_menu_text_active_key;
 
 /* Starts the text thread on thread_id only when its scheduler slot is idle. */
 void menu_text_start_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 third);

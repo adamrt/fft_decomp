@@ -81,9 +81,6 @@ typedef enum ability_page_row_callback {
  * lookups cache the listed ability's data for the panel. */
 extern s16 g_ability_list_ability_category;  /* menu_ability_category_e; BUNIT and JOBSTTS tab selection */
 extern s16 g_ability_list_ability_entries[]; /* Packed ability IDs/flags; -1 terminates the list. */
-extern ability_type_e g_ability_list_ability_type;
-extern const ability_data_t* g_ability_list_selected_ability_data;
-extern ability_secondary_pointer_t g_ability_list_selected_ability_secondary_data;
 
 s32 ability_list_is_learned(s32 index); /* 1 unless the entry's disabled bit (0x4000) is set */
 s32 ability_list_is_action(s32 unused_row);

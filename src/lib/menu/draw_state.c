@@ -6,6 +6,15 @@
 #include "fft/menu_gfx.h"
 #include "psx/types.h"
 
+extern u16 g_menu_active_clut_back;
+extern u16 g_menu_active_clut_front;
+extern u16 g_menu_text_clut_0_mode0;
+extern u16 g_menu_text_clut_0_mode1;
+extern u16 g_menu_text_clut_1_mode1;
+extern u16 g_menu_text_clut_2_mode1;
+extern u16 g_menu_text_clut_3_mode0;
+extern u16 g_menu_text_clut_3_mode1;
+
 /* WORLD owns its drawing-color setter; JOBSTTS does not link this accessor. */
 #if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_EQUIP) || defined(FFT_EVENT_CARD)
 /* Set the menu text color. BUNIT accepts a null pointer; CARD and EQUIP do not check it. */

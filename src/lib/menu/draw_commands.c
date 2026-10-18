@@ -9,6 +9,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern menu_sprite_command_t g_menu_script_quad_command;
+extern menu_window_command_t g_menu_window_interior_command;
+extern s16 g_gfx_window_zoom_percent[];
+
 /* Only EQUIP links the flat-tile and line instructions. */
 #ifdef FFT_EVENT_EQUIP
 /* Stream command: draw a flat tile of size (cmd->tile.width, cmd->tile.height) at

@@ -16,6 +16,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state[2];
+
 /* The numeric stats panel as unit_panel_numbers_thread draws it, except that the
  * draw offset follows the screen polarity and both slots use g_unit_panel_editor_numeric_state, so a
  * preview panel shares the main panel's primitive buffers (retail). Runs until a stop

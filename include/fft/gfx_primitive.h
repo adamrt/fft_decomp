@@ -76,7 +76,6 @@ extern DR_MOVE g_gfx_draw_move_buffer[];
 /* draw areas */
 extern RECT g_gfx_draw_area;
 extern RECT g_gfx_tiled_rect;
-extern s16 g_gfx_window_zoom_percent[];
 extern u16 g_gfx_draw_offset_y;
 
 void gfx_build_scaled_draw_area_pair_swapped(
@@ -111,12 +110,6 @@ void gfx_ramp_screen_overlay_intensity_to_max(void);
 void gfx_ramp_screen_overlay_intensity_to_zero(void);
 
 /* The menu library's fades, which BUNIT and CARD run. */
-extern u8 g_gfx_increasing_fade_active;
-extern s16 g_gfx_fade_intensity;
-extern RECT g_gfx_fade_rect;
-extern rgb24_t g_gfx_fade_color;
-extern u8 g_gfx_decreasing_fade_active;
-
 void gfx_start_increasing_fade(void);
 s32 gfx_update_increasing_fade(void);
 void gfx_start_decreasing_fade(void);

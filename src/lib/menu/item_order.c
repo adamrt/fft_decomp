@@ -4,6 +4,10 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* The owned items of each list category (0 weapons and shields, then headgear, body armor, accessories and
+ * other: the menu category minus one), byte lists ending in a terminator. */
+extern u8* g_item_category_lists[];
+
 static s32 item_is_in_category_list(s32 item_id, s32 category_index);
 static void item_prepend_to_category_list(s32 item_id, s32 category_index);
 static void item_remove_from_category_list(s32 item_id, s32 category_index);

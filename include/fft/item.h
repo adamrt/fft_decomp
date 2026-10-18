@@ -588,10 +588,6 @@ extern u8 g_item_armor_page_order[0x25];
 extern u8 g_item_accessory_page_order[0x21];
 extern u8 g_item_page_order[0x15];
 
-/* The owned items of each list category (0 weapons and shields, then headgear, body armor, accessories and
- * other: the menu category minus one), byte lists ending in a terminator. */
-extern u8* g_item_category_lists[];
-
 /* The equipment slot or list category the item screens show (menu_equipment_slot_e). */
 extern u8 g_menu_selected_slot;
 
@@ -668,13 +664,6 @@ extern struct unit_panel_record g_item_preview_stat_detail;
 void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate);
 
 /* icons and the item panel */
-/* The texture origin of each item type's 12x12 icon, read by item_get_type_icon_rect. */
-extern uv8_t g_item_type_icon_origins[];
-
-/* Status image rectangles, indexed by status id, that item_draw_status_list draws in the item detail panel's status
- * column. */
-extern RECT g_unit_panel_status_display_image_rects[];
-
 /* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_get_type_icon_rect gives the
  * texture cell of an item type's 12x12 icon. */
 void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
@@ -693,10 +682,6 @@ extern menu_entry_t g_item_action_menu;
 /* rearranging */
 /* The item screens' rearrange mode: pick an item up and move it within its category list. */
 extern s8 g_item_rearrange_initialized;
-extern s16 g_item_rearrange_picked_cursor;
-extern s16 g_item_rearrange_preview_cursor;
-extern u16 g_item_rearrange_picked_scroll;
-extern u8 g_item_rearrange_anim_frame;
 
 s32 item_run_rearrange_mode(void);
 

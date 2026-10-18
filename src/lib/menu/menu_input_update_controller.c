@@ -6,6 +6,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u16 g_menu_input_previous;
+extern u16 g_menu_input_latched_button;
+extern u8 g_menu_input_activation_timer;
+extern s32 g_menu_input_repeat_counters[16];
+
 /*
  * Publish newly pressed buttons and two repeat rates for menus.
  *
