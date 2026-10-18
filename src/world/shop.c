@@ -145,16 +145,20 @@ extern s16 g_fur_shop_sale_message_wait;
 extern u8 g_fur_shop_quantity_menu_running; /* sell quantity menu thread (menu_start_managed_thread) */
 
 /* soldier office */
-/* Prefix of the shop roster display stream, through its first number command. */
+/* The Soldier Office's party count and limit display stream, through its end opcode. */
 typedef struct soldier_office_unit_count_script {
-    menu_draw_state_command_t priority;       /* 0x00 */
-    menu_texture_page_command_t texture_page; /* 0x04 */
-    menu_fixed_clut_command_t clut;           /* 0x09 */
-    menu_sprite_command_t sprites[2];         /* 0x0e */
-    menu_draw_number_command_t unit_count;    /* 0x20 */
+    menu_draw_state_command_t priority;                 /* 0x00 */
+    menu_texture_page_command_t texture_page;           /* 0x04 */
+    menu_fixed_clut_command_t clut;                     /* 0x09 */
+    menu_sprite_command_t sprites[2];                   /* 0x0e */
+    menu_draw_number_command_t unit_count;              /* 0x20 */
+    menu_draw_number_command_t unit_limit;              /* 0x2a; direct value 16 */
+    menu_texture_page_command_t separator_texture_page; /* 0x34 */
+    menu_sprite_command_t separator;                    /* 0x39 */
+    u8 end;                                             /* 0x42; SCREEN_SCRIPT_END */
 } soldier_office_unit_count_script_t;
 typedef char
-    soldier_office_unit_count_script_size_must_be_42[(sizeof(soldier_office_unit_count_script_t) == 42) ? 1 : -1];
+    soldier_office_unit_count_script_size_must_be_67[(sizeof(soldier_office_unit_count_script_t) == 67) ? 1 : -1];
 
 extern u8 g_soldier_office_hire_menu_initialized;
 extern u8 g_soldier_office_hire_unread_flag_1; /* cleared when the Soldier Office hire menu opens; never read */
