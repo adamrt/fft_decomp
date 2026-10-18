@@ -38,7 +38,7 @@ units:
   - {name: formula_damage, source: src/battle/formula_damage.c}
   - {name: formula_effects, source: src/battle/formula_effects.c}
   - {name: formula_weapons, source: src/battle/formula_weapons.c}
-  - {name: frame, source: src/battle/frame.c}
+  - {name: frame, source: src/battle/frame.c, rodata: [{addr: 0x800683b8, size: 8, hash: 00da4583f2609ee7}]}
   - {name: icon_selection, source: src/lib/event/icon_selection.c, data: [{addr: 0x80166a24, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: map_commands, source: src/battle/map_commands.c}
   - {name: map_gns, source: src/battle/map_gns.c}

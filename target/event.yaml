@@ -22,7 +22,7 @@ units:
   - {name: portrait_textures, source: src/event/attack/portrait_textures.c, data: [{addr: 0x801dd2d4, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2dc, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2e4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x801dd5e4, size: 1152, hash: 4cf9816ed1062189}]}
   - {name: portrait_transitions, source: src/lib/menu/portrait_transitions.c, data: [{addr: 0x801ca480, size: 16, hash: ed44f3f59883c72d}]}
   - {name: scaled_draw_area, source: src/lib/menu/scaled_draw_area.c}
-  - {name: scenario_setup, source: src/event/attack/scenario_setup.c}
+  - {name: scenario_setup, source: src/event/attack/scenario_setup.c, rodata: [{addr: 0x801bf000, size: 4, hash: df3f619804a92fdb}]}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_panel_primitives.c}
   - {name: zodiac_primitives, source: src/lib/menu/zodiac_primitives.c}
 

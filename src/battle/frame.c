@@ -24,8 +24,6 @@ extern u32 g_input_previous_copy_1;
 extern u32 g_input_previous_copy_2;
 extern u32 g_input_previous_copy_3;
 
-extern const RECT g_deploy_clear_rect;
-
 /* Read pad 1 for the battle loop: derive the pressed and released buttons and the stable-frame
  * count, keeping last frame's values in the input copies. Triangle requests the status menu on a
  * turn the player does not control; Start+Select+L1+R1 resets the game. Always returns 1. */
@@ -102,12 +100,12 @@ s32 deploy_update_controller_input(void) {
  *
  * The second buffer lies at y 0xf0 unless the height is 0x1e0. The draw
  * environments start at x -0x80, so primitive x 0x80 is the left screen edge;
- * dithering is on and the automatic background clear is off. The area of
- * g_deploy_clear_rect is cleared to black and, when font printing is
+ * dithering is on and the automatic background clear is off. The fixed
+ * 256 x 480 area is cleared to black and, when font printing is
  * enabled, debug_load_efc_font loads the print font again.
  * state_run_map_load calls this with 256 x 240 and projection 0x200. */
 void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue) {
-    RECT clear_rect = g_deploy_clear_rect;
+    RECT clear_rect = { 0, 0, 256, 480 };
     s32 second_y = -(height != 0x1e0) & 0xf0;
 
     SetDispMask(0);

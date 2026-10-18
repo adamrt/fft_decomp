@@ -20,9 +20,6 @@
 extern u16 g_event_scenario_music_1_id;
 extern u16 g_event_scenario_music_2_id;
 
-/* Map darkness uses RGB and ignores the fourth byte. */
-extern const CVECTOR g_deploy_map_darkness_color;
-
 typedef struct scenario_setup {
     u8 id[2];            /* 0x00 */
     u8 map_id;           /* 0x02 */
@@ -259,7 +256,7 @@ s32 scenario_load_conditionals(void) {
 }
 
 /* Re-syncs the two battle scenario-music slots with the pending track pair,
- * then applies the map darkness record.
+ * then sets the map darkness color to black.
  *
  * The music step is skipped when g_scenario_event_active is clear or the current
  * event is in 410..425. When the playing track is one of the pending pair, only the idle
@@ -268,7 +265,8 @@ s32 scenario_load_conditionals(void) {
  * `playing` is s32 rather than u16 because a u16 merge of the two lhu results
  * adds an andi 0xffff that the target does not have. */
 void scenario_restore_music_and_darkness(void) {
-    CVECTOR darkness = g_deploy_map_darkness_color;
+    /* Map darkness uses RGB and ignores the fourth byte. */
+    CVECTOR darkness = { 0, 0, 0, 0 };
     s32 scenario;
     s32 playing;
     u16 replacement;
