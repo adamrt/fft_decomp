@@ -299,7 +299,7 @@ void state_handle_post_move_events(void) {
     command = command_get_selected();
     source = unit_get_source();
     casting = unit_get_casting();
-    switch ((s32)command->kind) {
+    switch (command->kind) {
     case CRYSTAL_RESTORE_HP_MP:
         crystal_apply_choice(source->stats, CRYSTAL_RESTORE_HP_MP);
         g_state_window_closed = 1;
@@ -1115,7 +1115,7 @@ void state_handle_target_select_confirm(void) {
 
     state_update_units();
     menu_update_menus_and_event_speed(gfx_get_battle_otag(), g_input_current_buttons);
-    switch ((s32)command_get_selected()->kind) {
+    switch (command_get_selected()->kind) {
     case AI_COMMAND_PROMPT_YES:
         caster = unit_get_casting();
         target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);

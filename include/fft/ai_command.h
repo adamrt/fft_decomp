@@ -36,7 +36,7 @@ typedef enum ai_command_kind {
  * (ai_action_data_t.command); MOVE writes only the destination's x, layer and y, and END_TURN leaves
  * the payload as it was. */
 typedef struct ai_command {
-    ai_command_kind_e kind;
+    s32 kind; /* AI_COMMAND_*, or the current menu's targeting/crystal choice. */
     union {
         battle_map_tile_coordinates_t move;
         action_command_t action;

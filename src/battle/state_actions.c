@@ -909,10 +909,9 @@ void state_handle_open_action_menus(void) {
  * skillset, Wait (2) chooses a facing, and the remaining commands enter
  * target selection/display, the event check or scripted menus.
  *
- * The kind is switched as s32: the unsigned enum type makes GCC emit sltiu
- * where the target has slti. The empty cases for the unresolved commands 0xfe
- * and 0xff keep the switch a compare tree with the target's split: a
- * two-value range above 0x19 disables the jump table (range > 10 * count). */
+ * The empty cases for the unresolved commands 0xfe and 0xff keep the switch a
+ * compare tree: the two-value range above 0x19 disables the jump table
+ * (range > 10 * count). */
 void state_handle_idling_action_menus(void) {
     ai_command_t* command;
     unit_t* unit;
@@ -928,7 +927,7 @@ void state_handle_idling_action_menus(void) {
     menu_update_menus_and_event_speed(gfx_get_battle_otag(), g_input_current_buttons);
     command = command_get_selected();
     unit = unit_get_casting();
-    switch ((s32)command->kind) {
+    switch (command->kind) {
     case AI_COMMAND_MOVE:
         if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
             g_unit_casting_runtime_id = unit_get_by_runtime_id(unit->mount_partner_runtime_id)->runtime_id;
