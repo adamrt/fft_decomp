@@ -13,7 +13,7 @@ typedef struct suzuki_smd_header suzuki_smd_header_t;
 /* sequence */
 /* Suzuki sound driver (SCUS_942.21 0x800120f4-0x800186c4) records, tables and
  * globals. Offsets and widths are taken from the driver code named beside
- * each field; the driver writes its _unknown_XX members and never reads them. */
+ * each field. */
 /* Linear ramp stepped once per tick by suzuki_smd_step_ramp (0x80014f18):
  * value moves by step until count reaches zero, then snaps to target << 16.
  * The root-counter handler tests count with `lh` before stepping MUS
