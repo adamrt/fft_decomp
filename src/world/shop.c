@@ -462,7 +462,7 @@ void shop_run_screen(s32 shop_type) {
     heap_free(tim);
 }
 
-/* The on_change callback of the shop's quantity range: nothing to do. */
+/* The on_confirm callback of the shop's quantity range: nothing to do. */
 void shop_noop_callback(void) {
 }
 

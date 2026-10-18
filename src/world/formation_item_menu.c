@@ -567,7 +567,7 @@ static s32 formation_item_remove_all_prompt(void) {
     return 1;
 }
 
-/* The on_change callback of g_formation_item_action_quantity_range and the prepare callback of
+/* The on_confirm callback of g_formation_item_action_quantity_range and the prepare callback of
  * g_formation_selected_unit_text_binding: nothing to do. */
 void formation_noop_callback(void) {
 }

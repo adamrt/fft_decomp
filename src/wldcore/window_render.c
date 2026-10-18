@@ -251,7 +251,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_values, s32 text
     g_window_panel_number_state.bounds.max = max;
     g_window_panel_number_state._unknown_04[0] = -1;
     g_window_panel_number_state._unknown_04[1] = -1;
-    g_window_panel_number_state.on_change = window_number_panel_noop;
+    g_window_panel_number_state.on_confirm = window_number_panel_noop;
     g_menu_stack_entry_values[0] = g_menu_stack_entry_values[1] = 2000;
     if (min < 10 && max < 10) {
         width = 1;
@@ -301,7 +301,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_values, s32 text
     thread_set_parameters(thread_id, (s32)&g_window_panel_render_state, 0, 0);
 }
 
-/* The on_change callback of the number panel's value range: nothing to do. */
+/* The on_confirm callback of the number panel's value range: nothing to do. */
 static void window_number_panel_noop(void) {
 }
 

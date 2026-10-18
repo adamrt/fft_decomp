@@ -186,7 +186,7 @@ static void screen_place_number_entry_cursor(
  * and a changed value is redrawn as a signed number in the window. When the
  * cancel/confirm handlers change the 32-bit input mask, a -1 left in the value
  * restores the original; otherwise the value is stored and the range's
- * on_change callback runs. */
+ * on_confirm callback runs. */
 void screen_number_entry_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
@@ -302,7 +302,7 @@ void screen_number_entry_thread(void) {
 
                 *result = value;
                 current_range = param->context;
-                current_range->on_change();
+                current_range->on_confirm();
             }
         }
 
@@ -490,7 +490,7 @@ void screen_labeled_number_entry_thread(void) {
 
                 *result = value;
                 current_range = param->context;
-                current_range->on_change();
+                current_range->on_confirm();
             }
         }
 

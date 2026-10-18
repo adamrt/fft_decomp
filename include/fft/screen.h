@@ -242,11 +242,12 @@ void screen_start_help_text(s32 position);
 
 /* number entries */
 /* Value range of a numeric menu entry (screen_number_entry_thread and
- * screen_labeled_number_entry_thread). */
+ * screen_labeled_number_entry_thread). The callback runs when the entry is
+ * confirmed, including when the value is unchanged. */
 typedef struct screen_number_range {
-    ranges16_t bounds;       /* 0x00 */
-    s16 _unknown_04[2];      /* 0x04: -1 from window_start_number_panel_thread */
-    void (*on_change)(void); /* 0x08 */
+    ranges16_t bounds;        /* 0x00 */
+    s16 _unknown_04[2];       /* 0x04: -1 from window_start_number_panel_thread */
+    void (*on_confirm)(void); /* 0x08 */
 } screen_number_range_t;
 
 void screen_number_entry_thread(void);
