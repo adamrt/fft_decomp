@@ -17,7 +17,7 @@ units:
   - {name: init, source: src/open/init.c}
   - {name: memcard, source: src/lib/memcard.c}
   - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
-  - {name: title_controllers, source: src/open/title_controllers.c, data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
+  - {name: title_controllers, source: src/open/title_controllers.c, rodata: [{addr: 0x80073f58, size: 32, hash: f203b21866f47f5b}], data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
   - {name: title_sequence, source: src/open/title_sequence.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}, {addr: 0x80073fd4, size: 96, hash: 9244268b09d6a718}]}
   - {name: window_records, source: src/open/window_records.c}
   - {name: window_render, source: src/open/window_render.c}
@@ -193,7 +193,7 @@ data:
   - {addr: 0x80073f10, name: g_psyq_press_vlc_state}
   - {addr: 0x80073f34, name: g_calendar_month_lengths}
   - {addr: 0x80073f40, name: g_birthday_zodiac_start_dates}
-  - {addr: 0x80073f58, name: g_file_openbk_sector_offsets}
+  - {addr: 0x80073f58, name: s_file_openbk_sector_offsets}
   - {addr: 0x80073f78, name: g_controller_handlers}
   - {addr: 0x80073fb4, name: g_music_test_row_actions}
   - {addr: 0x80073fd4, name: g_music_test_music_ids}

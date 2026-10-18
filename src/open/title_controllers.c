@@ -54,7 +54,7 @@ static controller_handler_t g_controller_handlers[13] = {
 };
 
 /* Seven OPNBK images use eight sector boundaries. */
-extern const s32 g_file_openbk_sector_offsets[8];
+static const s32 s_file_openbk_sector_offsets[8] = { 0, 75, 135, 172, 209, 246, 283, 403 };
 
 /* Interior sound-menu fields at +0x1c, with a 25-word controller stride.
  * Direct member stores shrink title_push_sound_type_menu's frame by eight bytes. */
@@ -142,9 +142,9 @@ void file_request_openbk_image(s32 image_id, void* destination) {
     }
 
     g_file_current_openbk_image_id = image_id;
-    start_offset = g_file_openbk_sector_offsets[image_id];
+    start_offset = s_file_openbk_sector_offsets[image_id];
     file_wait_then_request_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNBK_BIN + start_offset,
-        g_file_openbk_sector_offsets[image_id + 1] - start_offset, destination);
+        s_file_openbk_sector_offsets[image_id + 1] - start_offset, destination);
 }
 
 /* Poll the pending CD command: 1 when it has completed, -1 on a disc error and 0
