@@ -105,8 +105,8 @@ typedef char file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t)
 
 extern file_load_descriptor_t g_file_cd_state;
 
-int file_request_read(
-    file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
+s32 file_request_read(
+    file_load_descriptor_t* state, s32 lba, s32 sector_count, void* destination, s32 loading_display_mode);
 
 /* Forwards file_request_read's result. */
 s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);

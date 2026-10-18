@@ -8,9 +8,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* MAIN keeps the shared read descriptor across overlay loads. */
+file_load_descriptor_t g_file_cd_state = { 0 };
+
 /* file_request_read with the Now Loading message turned off (NNL: no Now Loading); returns
  * its result. */
-int file_request_read_quiet(file_load_descriptor_t* header, int sector, int sectors, void* destination) {
+s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination) {
     return file_request_read(header, sector, sectors, destination, FILE_LOADING_DISPLAY_OFF);
 }
 

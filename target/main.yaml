@@ -11,7 +11,7 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
-  - {name: file_requests, source: src/main/file_requests.c}
+  - {name: file_requests, source: src/main/file_requests.c, data: [{addr: 0x8004eaf4, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: game_loop, source: src/main/game_loop.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}]}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: loading_draw_message, source: src/main/loading_draw_message.c, data: [{addr: 0x80032a68, size: 16, hash: 374708fff7719dd5}]}
