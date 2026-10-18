@@ -14,6 +14,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern u8 g_portrait_cell_pixels[768];
+extern RECT g_portrait_cell_rect;
+extern RECT g_portrait_palette_rect;
+
 /* Uploads the 20 party portraits (sprite and palette cells) from EVENT/WLDFACE.BIN to
  * VRAM; with no entry mode set the sheets are read back from VRAM instead. The loop is
  * ATTACK's (portrait_prepare_party_textures) with its slot 20, the special

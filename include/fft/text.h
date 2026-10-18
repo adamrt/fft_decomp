@@ -200,15 +200,6 @@ const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2)
 void text_relocate_pointer_table(const u32* offsets);
 
 /* battle name text */
-/* Offsets of the two name sections in g_text_name_data. */
-typedef struct text_name_section_offsets {
-    u32 unit_names;
-    u32 job_names;
-} text_name_section_offsets_t;
-
-extern u8 g_text_name_data[];
-extern const text_name_section_offsets_t g_text_name_section_offsets;
-
 /* SMALL.OUT's entrypoint: bind its battle name text and clear the deployment unit limit. */
 void small_entrypoint(void);
 

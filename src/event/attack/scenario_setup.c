@@ -17,6 +17,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+extern u16 g_event_scenario_music_1_id;
+extern u16 g_event_scenario_music_2_id;
+
 /* Map darkness uses RGB and ignores the fourth byte. */
 extern const CVECTOR g_deploy_map_darkness_color;
 

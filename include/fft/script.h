@@ -294,8 +294,6 @@ extern u16 g_event_field_object_use_request;
 
 /* battle event state */
 extern s32 g_event_frame_counter; /* counts the frames the event interpreter runs */
-extern u16 g_event_scenario_music_1_id;
-extern u16 g_event_scenario_music_2_id;
 
 /* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
  * operands; script_process_pending_requests passes them to battle_map_set_3d_object_state

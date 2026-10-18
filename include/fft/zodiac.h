@@ -35,7 +35,6 @@ s32 zodiac_calculate_sign(u16 birthday);
 
 /* zodiac pictures */
 extern upoint16_t g_zodiac_screen_position;
-extern POLY_FT4 g_zodiac_primitives[2][30];
 
 void zodiac_load_frame(void);
 

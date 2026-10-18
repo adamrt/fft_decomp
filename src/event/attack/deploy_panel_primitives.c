@@ -8,6 +8,14 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* ATTACK's status groups, drawn by its own unit_panel_build_status_groups: per-sprite first/end cell indices
+ * (interleaved pairs), the visible-entry count, each entry's sprite id and fade/blink state, and a 4-byte record per
+ * entry whose first 16-bit value biases the draw point's y. */
+extern u8 g_unit_panel_status_group_bounds[];
+extern u8 g_unit_panel_status_group_count;
+extern u8 g_unit_panel_status_group_ids[];
+extern sprite_draw_offset_t g_unit_panel_status_offsets[];
+
 /* Rebuild and submit the deployment panel's prompt icon groups, one scaled quad per
  * cell, after advancing each group's animation byte by one frame:
  *   0xff         hidden;

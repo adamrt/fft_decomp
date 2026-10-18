@@ -40,6 +40,26 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+/* Scalar x aliases of the three panels' origins; they preserve the retail
+ * transition-store scheduling. */
+extern s32 g_unit_panel_status_display_origin_x;
+extern s32 g_unit_panel_character_status_origin_x;
+extern s32 g_unit_panel_numbers_origin_x;
+extern u8 g_party_removable_flags[];
+extern RECT g_party_portrait_move_rect;
+extern s16 g_party_portrait_destination;
+extern RECT g_party_palette_move_rect;
+
+/* x and y of the palette MoveImage destination RECT. Read as two scalar symbols: a RECT view lets GCC keep the
+ * struct address live in a saved register and changes the allocation. */
+extern s16 g_party_palette_destination;
+extern s16 g_party_palette_destination_y;
+
+/* Six consecutive 0x3c-byte menu records; the target derives entry [4]'s address from entry [2], so they are one
+ * array. */
+extern menu_entry_t g_party_removal_menus[6];
+extern s16 g_party_removal_result;
+
 /* One cell of the 12-row, 24-column burst grid: two flat quads and its motion state. */
 typedef struct conditions_burst_tile {
     POLY_F4 poly[2];   /* 0x00 */

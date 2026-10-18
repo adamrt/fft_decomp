@@ -29,6 +29,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern POLY_FT4 g_zodiac_primitives[2][30];
+
 /* deployment state */
 typedef enum deploy_orientation {
     DEPLOY_ORIENTATION_NORMAL = 0,

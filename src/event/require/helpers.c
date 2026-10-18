@@ -15,6 +15,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Three unit ids whose presence selects the event variable at +6. */
+typedef struct party_class_variable_record {
+    u16 unit_ids[3];
+    u16 variable;
+} party_class_variable_record_t;
+
+extern party_class_variable_record_t g_party_bio_update_records[11];
+
 /* BONUS.BIN stores a 256x200 4bpp image, followed by eight 16-color palette slots. */
 typedef struct conditions_banner_file {
     u32 pixels[200][32];   /* 0x0000; eight 4bpp pixels per 32-bit value */

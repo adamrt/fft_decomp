@@ -204,8 +204,6 @@ s32 formation_step_grid_return(s32 mode);
 
 /* unit sprites and portraits */
 extern u8 g_formation_monster_sprite_table[20]; /* indexed by sprite code - 0x3f */
-extern RECT g_formation_sheet_rect;
-extern RECT g_formation_sheet_source_rect;
 extern u8 g_formation_sprite_tall_cell[];
 
 void formation_prepare_sprites(void);

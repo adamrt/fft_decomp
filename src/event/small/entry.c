@@ -4,6 +4,15 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
+/* Offsets of the two name sections in g_text_name_data. */
+typedef struct text_name_section_offsets {
+    u32 unit_names;
+    u32 job_names;
+} text_name_section_offsets_t;
+
+extern u8 g_text_name_data[];
+extern const text_name_section_offsets_t g_text_name_section_offsets;
+
 /* SMALL.OUT's entry point, run once the overlay is loaded: point the roster-name and
  * job-name text sections at its own name data, copy the skillset-names pointer and
  * clear the deployment unit limit. */

@@ -40,29 +40,8 @@ typedef enum party_bio_state {
     PARTY_BIO_STATE_LOST_IN_BATTLE = 15
 } party_bio_state_e;
 
-/* Three unit ids whose presence selects the event variable at +6. */
-typedef struct party_class_variable_record {
-    u16 unit_ids[3];
-    u16 variable;
-} party_class_variable_record_t;
-
-extern party_class_variable_record_t g_party_bio_update_records[11];
 extern s32 g_party_affected_unit_count;
 extern s32 g_party_affected_battle_unit_indices[];
-extern u8 g_party_removable_flags[];
-extern RECT g_party_portrait_move_rect;
-extern s16 g_party_portrait_destination;
-extern RECT g_party_palette_move_rect;
-
-/* x and y of the palette MoveImage destination RECT. Read as two scalar symbols: a RECT view lets GCC keep the
- * struct address live in a saved register and changes the allocation. */
-extern s16 g_party_palette_destination;
-extern s16 g_party_palette_destination_y;
-
-/* Six consecutive 0x3c-byte menu records; the target derives entry [4]'s address from entry [2], so they are one
- * array. */
-extern menu_entry_t g_party_removal_menus[6];
-extern s16 g_party_removal_result;
 
 s32 party_update_after_battle(void);
 void party_brave_faith_report_thread(void);

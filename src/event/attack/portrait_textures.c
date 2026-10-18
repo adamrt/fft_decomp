@@ -15,6 +15,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern RECT g_formation_sheet_rect;
+extern RECT g_formation_sheet_source_rect;
+
 static RECT g_portrait_upload_rect = { 0 };
 static RECT g_portrait_palette_upload_rect = { 0 };
 static u8 g_portrait_staging[768] = { 0 };

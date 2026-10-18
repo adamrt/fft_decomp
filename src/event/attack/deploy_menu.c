@@ -23,6 +23,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern RECT g_battle_map_title_image_rect;
+extern s32 g_battle_map_title_palette_data;
+extern RECT g_battle_map_title_palette_rect;
+extern s32 g_battle_map_title_closing_past_midpoint;
+
+/* Two buffers of the four shaded title-panel strips. */
+extern POLY_GT4 g_battle_map_title_sprites[2][4];
+
 extern help_navigation_record_t g_deploy_help_cursor_nodes[31];
 
 /* text */
