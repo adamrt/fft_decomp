@@ -180,8 +180,8 @@ typedef struct effect_emitter_values {
     vec3s16_t angle;        /* 0x16 */
     vec3s16_t angle_spread; /* 0x1c */
     ranges16_t weight;      /* 0x22 */
-    u16 speed_min;          /* 0x26 */
-    u16 speed_max;          /* 0x28 */
+    s16 speed_min;          /* 0x26; Q9 */
+    s16 speed_max;          /* 0x28; Q9 */
     u8 spawns_per_frame;    /* 0x2a; secondary groups: slots one frame may start */
     u8 _unused_2b;          /* 0x2b */
     s8 lifetime_min;        /* 0x2c */

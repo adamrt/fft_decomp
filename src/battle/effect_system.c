@@ -6,6 +6,7 @@
 #include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
+#include "fft/effect_geometry.h"
 #include "fft/effect_model.h"
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
@@ -60,41 +61,60 @@ extern u8 g_effect_element_masks[EFFECT_ELEMENT_INDEX_COUNT];
  * handlers spawn while spawn_start_frame <= timer < spawn_end_frame and finish
  * once timer passes spawn_start_frame with no live slots;
  * effect_secondary_update_active_slots walks count active slots. The level-up
- * handler seeds group 5's position.y with -8, then lowers it by 3 per frame. */
+ * handler seeds group 5's position.y with -8, then lowers it by 3 per frame.
+ * Motion bit 0x20 in the level-up and fall-dust rows lies outside the velocity mode mask. */
 static effect_emitter_values_t g_effect_secondary_particle_configs[17] = {
-    { 0, 0, 0, 4, 8, 0, 0x600, 0x10, { 0, -16, 0 }, { 12, 9, 12 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 3, 1, -1,
-        -1 },
-    { 5, 0, 0, 2, 16, 0, 0x600, 0x400, { -16, 0, 0 }, { 3, 3, 3 }, { 0, 0, 3840 }, { 1024, 1024, 1536 }, { 1376, 1376 },
-        62592, 62576, 8, 1, 12, 6 },
-    { 4, 0, 0, 8, 16, 0, 0x600, 0x0, { 0, 0, 0 }, { 11, 4, 11 }, { 0, 0, 1280 }, { 0, 4096, 128 }, { -800, -768 }, 2624,
-        2596, 2, 1, -1, -1 },
-    { 10, 0, 0, 7, 24, 0, 0x600, 0x0, { 0, 0, 0 }, { 8, 9, 8 }, { 2048, 0, 0 }, { 0, 0, 0 }, { -781, -780 }, 1693, 1693,
-        3, 1, -1, -1 },
-    { 12, 0, 0, 1, 2, 0, 0x600, 0x10, { 0, -10, 0 }, { 5, 1, 5 }, { 2048, 0, 0 }, { 0, 0, 0 }, { -1168, -1200 }, 0, 0,
-        2, 20, -1, -1 },
-    { 14, 0, 0, 15, 32, 0, 0x600, 0x30, { 0, -124, 0 }, { 12, 2, 12 }, { 2048, 0, 0 }, { 1696, 1696, 1696 },
-        { -1184, -1200 }, 64112, 64096, 4, 1, -1, -1 },
-    { 4, 0, 0, 7, 32, 0, 0x600, 0x30, { 0, 0, 0 }, { 11, 4, 11 }, { 2048, 0, 0 }, { 0, 0, 0 }, { -512, -496 }, 64864,
-        64864, 2, 1, -1, -1 },
-    { 6, 0, 0, 7, 32, 0, 0x600, 0x0, { 0, 0, 0 }, { 5, 2, 5 }, { 2048, 0, 0 }, { 0, 4096, 1280 }, { 1056, 816 }, 1024,
-        2048, 4, 1, -1, -1 },
-    { 2, 0, 0, 7, 32, 0, 0x600, 0x0, { 0, -17, 0 }, { 8, 8, 8 }, { 2048, 0, 0 }, { 1184, 1184, 1184 }, { -528, -496 },
-        1044, 1092, 3, 1, 15, 15 },
-    { 5, 0, 0, 2, 16, 0, 0x600, 0x400, { -16, 0, 0 }, { 3, 3, 3 }, { 0, 0, 2304 }, { 1024, 1024, 1536 }, { 1376, 1376 },
-        62592, 62576, 8, 1, 12, 6 },
-    { 8, 0, 0, 9, 16, 0, 0x400, 0x10, { 0, -18, 0 }, { 32, 32, 32 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 1840, 1840, 2,
-        1, -1, -1 },
-    { 7, 0, 0, 5, 30, 0, 0x600, 0x10, { 0, -24, 0 }, { 4, 2, 4 }, { 0, 0, 0 }, { 0, 0, 0 }, { 1392, 1424 }, 63152,
-        63168, 3, 1, -1, -1 },
-    { 5, 0, 0, 8, 10, 0, 0x400, 0x10, { 0, -23, 0 }, { 48, 48, 48 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 2112, 1872, 1,
-        1, 10, 10 },
-    { 3, 0, 0, 8, 6, 0, 0x400, 0x0, { 0, -37, 0 }, { 2, 2, 2 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 1, 1, 10,
-        10 },
-    { 9, 0, 0, 8, 30, 0, 0x400, 0x0, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 1, 1, -1, -1 },
-    { 13, 0, 0, 48, 30, 0, 0x600, 0x0, { 0, -6, 0 }, { 15, 17, 15 }, { 2048, 0, 0 }, { 0, 0, 0 }, { 176, 192 }, 2480,
-        2512, 2, 1, 12, 16 },
-    { 16, 0, 0, 1, 1, 0, 0x600, 0x0, { 0, -16, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 1, 1, -1,
-        -1 },
+    /* 0: weapon hit, first slot set. */
+    { 0, 0, 0, 4, 8, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_INWARD, { 0, -16, 0 }, { 12, 9, 12 },
+        { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 3, 1, -1, -1 },
+    /* 1: weapon hit, second slot set. */
+    { 5, 0, 0, 2, 16, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_TOWARD_TARGET, { -16, 0, 0 },
+        { 3, 3, 3 }, { 0, 0, 3840 }, { 1024, 1024, 1536 }, { 1376, 1376 }, -2944, -2960, 8, 1, 12, 6 },
+    /* 2: unnamed group 2. */
+    { 4, 0, 0, 8, 16, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, 0, 0 },
+        { 11, 4, 11 }, { 0, 0, 1280 }, { 0, 4096, 128 }, { -800, -768 }, 2624, 2596, 2, 1, -1, -1 },
+    /* 3: zodiac poof. */
+    { 10, 0, 0, 7, 24, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, 0, 0 },
+        { 8, 9, 8 }, { 2048, 0, 0 }, { 0, 0, 0 }, { -781, -780 }, 1693, 1693, 3, 1, -1, -1 },
+    /* 4: death poof. */
+    { 12, 0, 0, 1, 2, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_INWARD, { 0, -10, 0 }, { 5, 1, 5 },
+        { 2048, 0, 0 }, { 0, 0, 0 }, { -1168, -1200 }, 0, 0, 2, 20, -1, -1 },
+    /* 5: level up. */
+    { 14, 0, 0, 15, 32, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_INWARD | 0x20, { 0, -124, 0 },
+        { 12, 2, 12 }, { 2048, 0, 0 }, { 1696, 1696, 1696 }, { -1184, -1200 }, -1424, -1440, 4, 1, -1, -1 },
+    /* 6: fall dust. */
+    { 4, 0, 0, 7, 32, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_INWARD | 0x20, { 0, 0, 0 },
+        { 11, 4, 11 }, { 2048, 0, 0 }, { 0, 0, 0 }, { -512, -496 }, -672, -672, 2, 1, -1, -1 },
+    /* 7: splash. */
+    { 6, 0, 0, 7, 32, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, 0, 0 }, { 5, 2, 5 },
+        { 2048, 0, 0 }, { 0, 4096, 1280 }, { 1056, 816 }, 1024, 2048, 4, 1, -1, -1 },
+    /* 8: trap. */
+    { 2, 0, 0, 7, 32, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, -17, 0 },
+        { 8, 8, 8 }, { 2048, 0, 0 }, { 1184, 1184, 1184 }, { -528, -496 }, 1044, 1092, 3, 1, 15, 15 },
+    /* 9: weapon hit, missed second slot set. */
+    { 5, 0, 0, 2, 16, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_TOWARD_TARGET, { -16, 0, 0 },
+        { 3, 3, 3 }, { 0, 0, 2304 }, { 1024, 1024, 1536 }, { 1376, 1376 }, -2944, -2960, 8, 1, 12, 6 },
+    /* 10: red orbs. */
+    { 8, 0, 0, 9, 16, 0, EFFECT_EMITTER_ORIGIN_CASTER, EFFECT_EMITTER_VELOCITY_INWARD, { 0, -18, 0 }, { 32, 32, 32 },
+        { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 1840, 1840, 2, 1, -1, -1 },
+    /* 11: equipment break. */
+    { 7, 0, 0, 5, 30, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_INWARD, { 0, -24, 0 }, { 4, 2, 4 },
+        { 0, 0, 0 }, { 0, 0, 0 }, { 1392, 1424 }, -2384, -2368, 3, 1, -1, -1 },
+    /* 12: spell charge. */
+    { 5, 0, 0, 8, 10, 0, EFFECT_EMITTER_ORIGIN_CASTER, EFFECT_EMITTER_VELOCITY_INWARD, { 0, -23, 0 }, { 48, 48, 48 },
+        { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 2112, 1872, 1, 1, 10, 10 },
+    /* 13: spell charge height copy. */
+    { 3, 0, 0, 8, 6, 0, EFFECT_EMITTER_ORIGIN_CASTER, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, -37, 0 },
+        { 2, 2, 2 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 1, 1, 10, 10 },
+    /* 14: summon charge. */
+    { 9, 0, 0, 8, 30, 0, EFFECT_EMITTER_ORIGIN_CASTER, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, 0, 0 }, { 0, 0, 0 },
+        { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 1, 1, -1, -1 },
+    /* 15: teleport. */
+    { 13, 0, 0, 48, 30, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, -6, 0 },
+        { 15, 17, 15 }, { 2048, 0, 0 }, { 0, 0, 0 }, { 176, 192 }, 2480, 2512, 2, 1, 12, 16 },
+    /* 16: Golem. */
+    { 16, 0, 0, 1, 1, 0, EFFECT_EMITTER_ORIGIN_TARGET, EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED, { 0, -16, 0 },
+        { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0 }, 0, 0, 1, 1, -1, -1 },
 };
 extern effect_sprite_section_t* g_effect_secondary_particle_frame_data_ptr;
 
