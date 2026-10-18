@@ -63,19 +63,19 @@ extern s8 g_save_completed;
  * and its delayed twin start descriptor->thread_entry (+0x28). The yes/no prompts are a message record followed by a
  * choice record whose text_id is 0xd810; the choice's selected_index (+0x74 of the prompt) is the default answer,
  * and the message window.y (+0x0a) places the prompt. */
-extern menu_entry_t g_save_initial_prompt_descriptor[];
-extern menu_entry_t g_save_card_slot_selection_descriptor[];
-extern menu_entry_t g_save_checking_message_descriptor[];
-extern menu_entry_t g_save_card_error_prompt_descriptor[];
-extern menu_entry_t g_save_no_data_prompt_descriptor[];
+extern menu_entry_t g_save_initial_prompt_descriptor[2];
+extern menu_entry_t g_save_card_slot_selection_descriptor[2];
+extern menu_entry_t g_save_checking_message_descriptor;
+extern menu_entry_t g_save_card_error_prompt_descriptor;
+extern menu_entry_t g_save_no_data_prompt_descriptor;
 extern menu_entry_t g_save_format_prompt_descriptor[2];
-extern menu_entry_t g_save_formatting_message_descriptor[];
+extern menu_entry_t g_save_formatting_message_descriptor;
 extern menu_entry_t g_save_overwrite_prompt_descriptor[2];
-extern menu_entry_t g_save_in_progress_thread_descriptor[];
-extern menu_entry_t g_save_failure_thread_descriptor[];
+extern menu_entry_t g_save_in_progress_thread_descriptor;
+extern menu_entry_t g_save_failure_thread_descriptor;
 
-/* A pointer cell, not a record: save_update_scan_result clears it to
- * 0, tests it, and assigns g_save_no_data_prompt_descriptor into it. */
+/* save_update_scan_result clears this pointer, then points it at the
+ * no-data prompt when every save slot is empty. */
 extern menu_entry_t* g_save_slot_scan_prompt_descriptor;
 extern s16 g_save_initial_prompt_timer;
 extern u8 g_save_initial_prompt_thread_state;
@@ -430,7 +430,7 @@ static void save_update_scan_result(void) {
         }
 
         if (all_empty != 0) {
-            g_save_slot_scan_prompt_descriptor = g_save_no_data_prompt_descriptor;
+            g_save_slot_scan_prompt_descriptor = &g_save_no_data_prompt_descriptor;
         }
         if (g_save_slot_scan_prompt_descriptor == 0) {
             g_save_list_scroll_base_y = 24;
@@ -475,7 +475,7 @@ static void save_update_write(s32 slot) {
         g_save_write_failed = 0;
         g_save_unread_flag = 0;
         save_build_image(slot);
-        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_save_in_progress_thread_descriptor);
+        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_in_progress_thread_descriptor);
         g_sound_suppressed = 1;
         return;
     } else {
@@ -487,7 +487,7 @@ static void save_update_write(s32 slot) {
 
     g_sound_suppressed = 0;
     if (g_save_write_failed != 0) {
-        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_save_failure_thread_descriptor);
+        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_failure_thread_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0) {
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             g_save_write_phase = 0;
@@ -759,7 +759,7 @@ static void save_update_scan(void) {
                 ClearImage(&rect, 0, 0, 0);
             }
             if (g_save_scan_setup_step == 1) {
-                menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_save_checking_message_descriptor);
+                menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_checking_message_descriptor);
             }
             g_save_scan_setup_step++;
             return;
@@ -819,7 +819,7 @@ static void save_update_scan(void) {
             g_save_format_prompt_active
                 = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_save_format_prompt_descriptor);
             if (g_save_format_prompt_active == 0 && g_save_slot_index == 0) {
-                menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_save_formatting_message_descriptor);
+                menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_formatting_message_descriptor);
             }
         }
         return;
@@ -827,7 +827,7 @@ static void save_update_scan(void) {
 
     if (g_save_open_result == MEMCARD_RESULT_ERROR || g_save_open_result == MEMCARD_RESULT_TIMEOUT) {
         result = memcard_poll_operation_result();
-        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_save_card_error_prompt_descriptor);
+        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_card_error_prompt_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);
             g_save_sound_queued_effect_id = SOUND_SFX_CANCEL;
