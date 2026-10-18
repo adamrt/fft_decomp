@@ -1789,7 +1789,7 @@ effect_script_result_e effect_script_opcode_25_update_all_particles(effect_recor
         }
 
         if (node->lifetime == EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN) {
-            if (node->data.sprite->frame_timer != 0) {
+            if (node->data->frame_timer != 0) {
                 continue;
             }
         } else if (--node->lifetime != 0) {

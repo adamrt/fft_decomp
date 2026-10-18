@@ -38,16 +38,16 @@ enum { EFFECT_EMITTER_HOMING_MASK = 0xe0 };
 
 /* The 16-bit flags at 0x02 of an emitter record (effect_geometry_entry_t.placement_flags), copied to each
  * particle's kind_flags. Bits 0x0e0 are effect_emitter_homing_e and bits 0xe00
- * effect_emitter_origin_e. The work kind says what a particle's data is: a sprite node placed one
- * of the four EFFECT_LIST_NODE_* ways, or a heap block. Retail emitters use SPRITE_WORLD and
- * SPRITE_WORLD_UNSCALED only. */
+ * effect_emitter_origin_e. The four sprite kinds select a list-node placement. Kind 0x4000 frees
+ * data through the effect heap; its producer is unknown. Retail emitter data uses SPRITE_WORLD
+ * and SPRITE_WORLD_UNSCALED only. */
 enum {
     EFFECT_EMITTER_ORIENT_TO_VELOCITY = 0x0002, /* turn the sprite along its heading on screen */
     EFFECT_EMITTER_BOX_SPREAD = 0x0100,         /* spawn inside the spread box; clear, on the spread ellipsoid */
     EFFECT_WORK_KIND_MASK = 0xf000
 };
 
-/* The work-record payload selected by the high nibble of placement_flags. */
+/* Work-kind values used by allocation and cleanup, in the high nibble of placement_flags. */
 typedef enum effect_work_kind {
     EFFECT_WORK_KIND_SPRITE_WORLD = 0x0000,
     EFFECT_WORK_KIND_SPRITE_SCREEN_OFFSET = 0x1000,

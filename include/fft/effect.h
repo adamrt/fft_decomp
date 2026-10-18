@@ -184,19 +184,16 @@ typedef struct effect_work_record {
     vec3s16_t target;                /* 0x3c */
     s16 lifetime;                    /* 0x42; frames or EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN */
     u8 _unused_44;
-    u8 homing_curve_selector;  /* 0x45; zero disables, otherwise curve row + 1 */
-    rgb24_t color_curves;      /* 0x46; zero-based RGB animation curve indices */
-    u8 _padding_49;            /* aligns homing_strength */
-    s16 homing_strength;       /* 0x4a */
-    s16 kind_flags;            /* 0x4c; EFFECT_EMITTER_* placement and EFFECT_WORK_KIND_* */
-    u16 flags;                 /* 0x4e; EFFECT_EMITTER_FLAG_* */
-    s16 curve_frame;           /* 0x50 */
-    u8 child_emitter_on_death; /* 0x52 */
-    u8 child_emitter_mid_life; /* 0x53 */
-    union {
-        struct effect_list_node* sprite;
-        void* heap;
-    } data; /* 0x54; selected by EFFECT_WORK_KIND_* */
+    u8 homing_curve_selector;      /* 0x45; zero disables, otherwise curve row + 1 */
+    rgb24_t color_curves;          /* 0x46; zero-based RGB animation curve indices */
+    u8 _padding_49;                /* aligns homing_strength */
+    s16 homing_strength;           /* 0x4a */
+    s16 kind_flags;                /* 0x4c; EFFECT_EMITTER_* placement and EFFECT_WORK_KIND_* */
+    u16 flags;                     /* 0x4e; EFFECT_EMITTER_FLAG_* */
+    s16 curve_frame;               /* 0x50 */
+    u8 child_emitter_on_death;     /* 0x52 */
+    u8 child_emitter_mid_life;     /* 0x53 */
+    struct effect_list_node* data; /* 0x54; known sprite node; heap-kind producer unknown */
 } effect_work_record_t;
 typedef char effect_work_record_size_must_be_88[sizeof(effect_work_record_t) == 88 ? 1 : -1];
 
