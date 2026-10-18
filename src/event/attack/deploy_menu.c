@@ -23,8 +23,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Map-title texture and its 16-color palette, transferred as eight GPU words. */
 extern RECT g_battle_map_title_image_rect;
-extern s32 g_battle_map_title_palette_data;
+extern u32 g_battle_map_title_palette_data[8];
 extern RECT g_battle_map_title_palette_rect;
 extern s32 g_battle_map_title_closing_past_midpoint;
 
@@ -597,6 +598,6 @@ void battle_map_title_load_graphic(void) {
     }
 
     LoadImage(&g_battle_map_title_image_rect, (u32*)(image + group * 0xa00));
-    LoadImage(&g_battle_map_title_palette_rect, &g_battle_map_title_palette_data);
+    LoadImage(&g_battle_map_title_palette_rect, g_battle_map_title_palette_data);
     menu_free_memory(image);
 }
