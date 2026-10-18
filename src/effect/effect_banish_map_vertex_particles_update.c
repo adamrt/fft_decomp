@@ -9,7 +9,20 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern effect_map_vertex_location_t g_effect_banish_vertex_locations[12];
+static effect_map_vertex_location_t g_effect_banish_vertex_locations[12] = {
+    { 0, 0 },
+    { 1, 0 },
+    { 2, 0 },
+    { 3, 0 },
+    { 0, 1 },
+    { 1, 1 },
+    { 0, 2 },
+    { 1, 2 },
+    { 0, 3 },
+    { 1, 3 },
+    { 0, 4 },
+    { 1, 4 },
+};
 
 /* Banish particle handler: phase 1 allocates the 32-vertex cache and sets map
  * 3D objects 1-6 to state 1, phase 2 spawns each live emitter's particles at

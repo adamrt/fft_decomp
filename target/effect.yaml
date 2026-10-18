@@ -1486,8 +1486,11 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 defines: {VARIANT_QUAD_GRID_SIZE: 4}
 
+units:
+  - {name: effect_banish_map_vertex_particles, source: src/effect/effect_banish_map_vertex_particles_update.c, data: [{addr: 0x801c48dc, size: 24, hash: 8ef2a0b7e3123f4a}]}
+
 functions:
-  - {addr: 0x801c2500, size: 1000, name: effect_banish_map_vertex_particles_update, hash: 96b9db988669fa57}
+  - {addr: 0x801c2500, size: 1000, name: effect_banish_map_vertex_particles_update, hash: 96b9db988669fa57, unit: effect_banish_map_vertex_particles}
   - {addr: 0x801c28e8, size: 260, name: effect_map_set_3d_objects_state_2, hash: c50b73d4a0e1859b}
   - {addr: 0x801c29ec, size: 6012, name: effect_polar_mesh_update, hash: b706f2b469299fd3}
   - {addr: 0x801c4168, size: 1908, name: effect_textured_quad_grid_update, hash: 7c4feff22928839e}
@@ -1638,13 +1641,14 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
+  - {name: effect_altima_transformation_map_vertex_particles, source: src/effect/effect_altima_transformation_map_vertex_particles_update.c, data: [{addr: 0x801c4ecc, size: 6, hash: 3badc753202410a0}]}
   - {name: effect_dome_mesh, source: src/effect/effect_dome_mesh.c}
 
 functions:
   - {addr: 0x801c2500, size: 120, name: effect_dome_mesh_load_translated_vertex, hash: 8f768abda88cbfca, unit: effect_dome_mesh}
   - {addr: 0x801c2578, size: 4744, name: effect_dome_mesh_update, hash: 2839d18641d237ff, unit: effect_dome_mesh}
   - {addr: 0x801c3800, size: 4948, name: effect_single_ring_mesh_update, hash: edddd6045178114b}
-  - {addr: 0x801c4b54, size: 624, name: effect_altima_transformation_map_vertex_particles_update, hash: c2934ee8a7ae52a5}
+  - {addr: 0x801c4b54, size: 624, name: effect_altima_transformation_map_vertex_particles_update, hash: c2934ee8a7ae52a5, unit: effect_altima_transformation_map_vertex_particles}
 
 data:
   - {addr: 0x801c4dc4, name: g_effect_dome_mesh_brightness_table}
