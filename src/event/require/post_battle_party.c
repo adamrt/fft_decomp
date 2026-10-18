@@ -671,11 +671,11 @@ void status_screen_open_after_battle_thread(void) {
  */
 void unit_panel_transition_thread(void) {
     s32 frame = 0;
-    u8* saved;
+    thread_t* saved;
 
     thread_suspend(g_after_battle_thread_suspended_id);
-    saved = menu_alloc_memory(THREAD_STRIDE);
-    mem_copy_bytes_nonempty(saved, &g_threads[g_after_battle_thread_suspended_id], THREAD_STRIDE);
+    saved = menu_alloc_memory(sizeof(*saved));
+    mem_copy_bytes_nonempty(saved, &g_threads[g_after_battle_thread_suspended_id], sizeof(*saved));
     g_unit_panel_panel_status_group_count = 2;
     while (1) {
         s32 buffer = frame & 1;
@@ -687,7 +687,7 @@ void unit_panel_transition_thread(void) {
         }
         frame++;
     }
-    mem_copy_bytes_nonempty(&g_threads[g_after_battle_thread_suspended_id], saved, THREAD_STRIDE);
+    mem_copy_bytes_nonempty(&g_threads[g_after_battle_thread_suspended_id], saved, sizeof(*saved));
     menu_free_memory(saved);
     thread_resume(g_after_battle_thread_suspended_id);
     thread_yield();
