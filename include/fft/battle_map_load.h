@@ -183,13 +183,14 @@ typedef enum battle_map_mesh_animation_record_type {
     BATTLE_MAP_MESH_ANIMATION_RECORD_PART_PROPERTIES = 3
 } battle_map_mesh_animation_record_type_e;
 
-/* Record header parsed by battle_map_mesh_load_animation_record: a 32-bit type,
- * an entry count and the packed entries. */
+/* Animation record header. END occupies only the four-byte type word; the other
+ * types add a count or packed dimensions followed by a variable payload. */
 typedef struct battle_map_state_record {
-    u32 type;  /* battle_map_mesh_animation_record_type_e */
-    u32 count; /* types 1/3: entry count; type 2: packed instruction/state dimensions */
-    u8 data[4];
+    u32 type;   /* battle_map_mesh_animation_record_type_e */
+    u32 count;  /* types 1/3: entry count; type 2: packed instruction/state dimensions */
+    u8 data[0]; /* 0x08; variable-length payload selected by type */
 } battle_map_state_record_t;
+typedef char battle_map_state_record_size_must_be_8[sizeof(battle_map_state_record_t) == 8 ? 1 : -1];
 
 /* resource_type selects a serialized prefix or block; file offsets locate
  * variable-length chunks within the loaded resource. */
