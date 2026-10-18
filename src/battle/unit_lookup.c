@@ -55,7 +55,7 @@ extern s32 g_system_battle_frame_hsync_count_max;
 extern palette_t g_cursor_map_selection_palette;
 extern palette_t g_unit_facing_wait_arrow_palette;
 
-/* Private cursor state for the SP2 nibble decoder. */
+/* Cursor state for the compressed attack-image tail of a unit SPR file. */
 extern const u8* g_sprite_compressed_data;
 extern s32 g_sprite_compressed_nibble_phase;
 extern s32 g_sprite_compressed_offset;
@@ -856,7 +856,8 @@ static u32 sprite_read_compressed_nibble(void) {
  * A non-zero nibble is one pixel. A zero nibble starts a run of transparent
  * (index 0) pixels; the next nibble is the run length itself, except that 0
  * takes the length from one more nibble, and 7 and 8 from two or three more,
- * low nibble first. Decoding stops when the output is full. */
+ * low nibble first. Output packs the first pixel into the high nibble.
+ * Decoding stops when the output is full. */
 void sprite_decompress_attack_image(const u8* source, u8* destination) {
     s32 high = 0;
     s32 count = 0;
