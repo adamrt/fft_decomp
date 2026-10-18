@@ -400,6 +400,8 @@ void screen_labeled_number_entry_thread(void) {
 
     g_screen_list_controller_input = script_get_controller_input_pointer(0);
     thread = &g_threads[g_thread_current_id];
+    /* Read the first thread payload as a menu entry; using the named field
+     * moves the input-pointer store after the thread and entry loads. */
     param = *(menu_entry_t**)thread;
     range = param->context;
     digits = text_count_decimal_digits(range->bounds.max);
