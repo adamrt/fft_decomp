@@ -16,6 +16,7 @@ units:
   - {name: calendar_advance_days, source: src/wldcore/calendar_advance_days.c, data: [{addr: 0x80096a48, size: 4, hash: b687ec89faf1bf8a}]}
   - {name: event_transition, source: src/wldcore/event_transition.c}
   - {name: file_wait, source: src/lib/file/file_wait.c}
+  - {name: input, source: src/wldcore/input.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: list_levels, source: src/wldcore/list_levels.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}]}
   - {name: map_routes, source: src/wldcore/map_routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}]}
@@ -24,7 +25,8 @@ units:
   - {name: music_queue, source: src/wldcore/music_queue.c}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: proposition_results, source: src/wldcore/proposition_results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
-  - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
+  - {name: resource_loading, source: src/wldcore/resource_loading.c}
+  - {name: resources, source: src/wldcore/resources.c}
   - {name: sound_novel, source: src/wldcore/sound_novel.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
   - {name: startup, source: src/wldcore/startup.c}
   - {name: tutorial_topics, source: src/wldcore/tutorial_topics.c}
@@ -48,18 +50,18 @@ functions:
   - {addr: 0x800685e0, size: 96, name: file_wait_then_request_read, hash: 5d2462dc5511c5a9, unit: file_wait}
   - {addr: 0x80068640, size: 136, name: world_map_load_texture, hash: bd1749a0f84c27ce, unit: file_wait}
   - {addr: 0x800686c8, size: 100, name: file_wait_for_pending, hash: 2cb1c83c2614745a, unit: file_wait}
-  - {addr: 0x8006872c, size: 828, name: world_map_poll_texture_stream, hash: 26a8e79c258efc1c, unit: resources, rodata: [{addr: 0x80067000, size: 32, hash: afd8c59574a140ff}]}
-  - {addr: 0x80068a68, size: 76, name: location_load_picture, hash: 43c1d216b7baabcd, unit: resources}
-  - {addr: 0x80068ab4, size: 136, name: picture_load_set, hash: aad04349279159e2, unit: resources}
-  - {addr: 0x80068b3c, size: 136, name: picture_load_background_set, hash: 68a43c0bacc24d2c, unit: resources}
-  - {addr: 0x80068bc4, size: 160, name: message_block_load_if_changed, hash: 6d52ff3612d01b49, unit: resources}
-  - {addr: 0x80068c64, size: 220, name: sound_novel_load_files, hash: 070cab2d292b95f8, unit: resources}
-  - {addr: 0x80068d40, size: 52, name: event_transition_seek_battle_bin, hash: e96aed18062103de, unit: resources}
-  - {addr: 0x80068d74, size: 48, name: world_map_set_display_rect, hash: 318e2bd701eb87fa, unit: resources}
-  - {addr: 0x80068da4, size: 204, name: world_map_read_pad, hash: 6121aaec16ecf650, unit: resources}
-  - {addr: 0x80068e70, size: 312, name: world_map_update_scroll_axis, hash: 847c2250f4204453, unit: resources}
-  - {addr: 0x80068fa8, size: 104, name: world_map_init_input_repeat, hash: cd033db34fcf2c41, unit: resources}
-  - {addr: 0x80069010, size: 668, name: world_map_update_input_repeat, hash: f5ac2d626cd95e19, unit: resources}
+  - {addr: 0x8006872c, size: 828, name: world_map_poll_texture_stream, hash: 26a8e79c258efc1c, unit: resource_loading, rodata: [{addr: 0x80067000, size: 32, hash: afd8c59574a140ff}]}
+  - {addr: 0x80068a68, size: 76, name: location_load_picture, hash: 43c1d216b7baabcd, unit: resource_loading}
+  - {addr: 0x80068ab4, size: 136, name: picture_load_set, hash: aad04349279159e2, unit: resource_loading}
+  - {addr: 0x80068b3c, size: 136, name: picture_load_background_set, hash: 68a43c0bacc24d2c, unit: resource_loading}
+  - {addr: 0x80068bc4, size: 160, name: message_block_load_if_changed, hash: 6d52ff3612d01b49, unit: resource_loading}
+  - {addr: 0x80068c64, size: 220, name: sound_novel_load_files, hash: 070cab2d292b95f8, unit: resource_loading}
+  - {addr: 0x80068d40, size: 52, name: event_transition_seek_battle_bin, hash: e96aed18062103de, unit: resource_loading}
+  - {addr: 0x80068d74, size: 48, name: world_map_set_display_rect, hash: 318e2bd701eb87fa, unit: resource_loading}
+  - {addr: 0x80068da4, size: 204, name: world_map_read_pad, hash: 6121aaec16ecf650, unit: input}
+  - {addr: 0x80068e70, size: 312, name: world_map_update_scroll_axis, hash: 847c2250f4204453, unit: input}
+  - {addr: 0x80068fa8, size: 104, name: world_map_init_input_repeat, hash: cd033db34fcf2c41, unit: input}
+  - {addr: 0x80069010, size: 668, name: world_map_update_input_repeat, hash: f5ac2d626cd95e19, unit: input}
   - {addr: 0x800692ac, size: 340, name: window_set_render_objects_visible, hash: 082e633a45d41f5d, unit: resources}
   - {addr: 0x80069400, size: 168, name: world_map_fade_start, hash: 3278f2a87335c5a6, unit: resources}
   - {addr: 0x800694a8, size: 624, name: world_map_fade_step, hash: a288f6e5f4b66b67, unit: resources}
