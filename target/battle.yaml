@@ -38,6 +38,7 @@ units:
   - {name: formula_damage, source: src/battle/formula_damage.c}
   - {name: formula_effects, source: src/battle/formula_effects.c}
   - {name: formula_weapons, source: src/battle/formula_weapons.c}
+  - {name: frame, source: src/battle/frame.c}
   - {name: icon_selection, source: src/lib/event/icon_selection.c, data: [{addr: 0x80166a24, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: map_commands, source: src/battle/map_commands.c}
   - {name: map_gns, source: src/battle/map_gns.c}
@@ -726,11 +727,11 @@ functions:
   - {addr: 0x800935f4, size: 32, name: battle_map_background_set, hash: 964051baf9f5ea72, unit: map_palettes}
   - {addr: 0x80093614, size: 32, name: battle_map_ambient_set, hash: a9e5e01a02dac9d0, unit: map_palettes}
   - {addr: 0x80093634, size: 32, name: battle_map_darkness_set, hash: d69611460c2670ab, unit: map_palettes}
-  - {addr: 0x80093654, size: 420, name: state_update_controller_input, hash: f25584ec404f46a3, unit: map_palettes}
-  - {addr: 0x800937f8, size: 116, name: deploy_update_controller_input, hash: c4bd975c63b4f027, unit: map_palettes}
-  - {addr: 0x8009386c, size: 556, name: deploy_init_display, hash: cdd83879e45dc797, unit: map_palettes}
-  - {addr: 0x80093a98, size: 344, name: state_sync_frame, hash: 1b36797b7b673151, unit: map_palettes}
-  - {addr: 0x80093bf0, size: 168, name: deploy_sync_and_submit_frame, hash: ad55a2d1211cecdc, unit: map_palettes}
+  - {addr: 0x80093654, size: 420, name: state_update_controller_input, hash: f25584ec404f46a3, unit: frame}
+  - {addr: 0x800937f8, size: 116, name: deploy_update_controller_input, hash: c4bd975c63b4f027, unit: frame}
+  - {addr: 0x8009386c, size: 556, name: deploy_init_display, hash: cdd83879e45dc797, unit: frame}
+  - {addr: 0x80093a98, size: 344, name: state_sync_frame, hash: 1b36797b7b673151, unit: frame}
+  - {addr: 0x80093bf0, size: 168, name: deploy_sync_and_submit_frame, hash: ad55a2d1211cecdc, unit: frame}
   - {addr: 0x800e72a0, size: 988, name: battle_map_polygon_flag_command, hash: e18bb92dd93af878, unit: map_rendering}
   - {addr: 0x800e767c, size: 316, name: battle_map_light_set_matrices, hash: 6dcde04983ba7065, unit: map_rendering}
   - {addr: 0x800e77b8, size: 264, name: battle_map_light_control_back_color, hash: bbc1724e07a629c8, unit: map_rendering}
