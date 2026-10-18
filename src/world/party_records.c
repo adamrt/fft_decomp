@@ -92,11 +92,11 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
         count = 0;
         for (i = 0; i < 3; i++) {
             if (abilities[i] != 0) {
-                record->abilities.slots[count++] = abilities[i];
+                record->abilities[count++] = abilities[i];
             }
         }
     } else {
-        record->abilities.fields.primary_skillset = unit->primary_skillset;
+        record->abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET] = unit->primary_skillset;
         if (record->identity.job_id != JOB_ID_MIME) {
             record->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]
                 = party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
@@ -114,10 +114,13 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
                     record->equipment[i] = ITEM_ID_NOTHING;
                 }
             }
-            record->abilities.fields.secondary_skillset = party->secondary_skillset;
-            record->abilities.fields.reaction_ability = party->reaction_ability[0] + (party->reaction_ability[1] << 8);
-            record->abilities.fields.support_ability = party->support_ability[0] + (party->support_ability[1] << 8);
-            record->abilities.fields.movement_ability = party->movement_ability[0] + (party->movement_ability[1] << 8);
+            record->abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET] = party->secondary_skillset;
+            record->abilities[FORMATION_ABILITY_SLOT_REACTION]
+                = party->reaction_ability[0] + (party->reaction_ability[1] << 8);
+            record->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+                = party->support_ability[0] + (party->support_ability[1] << 8);
+            record->abilities[FORMATION_ABILITY_SLOT_MOVEMENT]
+                = party->movement_ability[0] + (party->movement_ability[1] << 8);
         }
     }
 
@@ -238,13 +241,13 @@ void formation_save_records(void) {
         party = party_get_unit(slot);
         party->job_id = g_formation_unit_pointers[i]->identity.job_id;
         party->gender_flags = g_formation_unit_pointers[i]->gender_flags;
-        party->secondary_skillset = g_formation_unit_pointers[i]->abilities.fields.secondary_skillset;
-        party->reaction_ability[0] = g_formation_unit_pointers[i]->abilities.fields.reaction_ability;
-        party->reaction_ability[1] = g_formation_unit_pointers[i]->abilities.fields.reaction_ability >> 8;
-        party->support_ability[0] = g_formation_unit_pointers[i]->abilities.fields.support_ability;
-        party->support_ability[1] = g_formation_unit_pointers[i]->abilities.fields.support_ability >> 8;
-        party->movement_ability[0] = g_formation_unit_pointers[i]->abilities.fields.movement_ability;
-        party->movement_ability[1] = g_formation_unit_pointers[i]->abilities.fields.movement_ability >> 8;
+        party->secondary_skillset = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET];
+        party->reaction_ability[0] = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_REACTION];
+        party->reaction_ability[1] = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_REACTION] >> 8;
+        party->support_ability[0] = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_SUPPORT];
+        party->support_ability[1] = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] >> 8;
+        party->movement_ability[0] = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_MOVEMENT];
+        party->movement_ability[1] = g_formation_unit_pointers[i]->abilities[FORMATION_ABILITY_SLOT_MOVEMENT] >> 8;
         if (g_formation_unit_pointers[i]->uses_monster_skillset == 0) {
             item = g_formation_unit_pointers[i]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
             party->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;

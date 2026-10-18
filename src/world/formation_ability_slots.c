@@ -87,7 +87,7 @@ s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_eq
 
     if (formation_get_unit_lock(unit_id) == FORMATION_UNIT_UNLOCKED) {
         formation_unit_t* unit = g_formation_unit_pointers[unit_id];
-        unit->abilities.slots[slot] = ability;
+        unit->abilities[slot] = ability;
         formation_save_records();
         formation_remove_invalid_loadout(unit_id);
         if (update_equipment != 0) {

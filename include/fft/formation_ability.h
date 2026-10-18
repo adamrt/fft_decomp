@@ -12,14 +12,17 @@
 #include "psx/types.h"
 
 /* ability slots */
-/* Formation ability slots are selected by index in the equipment menu. */
-typedef struct formation_ability_fields {
-    u16 primary_skillset;   /* 0x00 */
-    u16 secondary_skillset; /* 0x02 */
-    s16 reaction_ability;   /* 0x04 */
-    u16 support_ability;    /* 0x06 */
-    s16 movement_ability;   /* 0x08 */
-} formation_ability_fields_t;
+/* Humans use these five slots for their command and RSM abilities. Monster
+ * formation records instead pack up to three action ability IDs from their skillset
+ * into the first slots. Both views are displayed and copied as an indexed list. */
+typedef enum formation_ability_slot {
+    FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET = 0,
+    FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET = 1,
+    FORMATION_ABILITY_SLOT_REACTION = 2,
+    FORMATION_ABILITY_SLOT_SUPPORT = 3,
+    FORMATION_ABILITY_SLOT_MOVEMENT = 4,
+    FORMATION_ABILITY_SLOT_COUNT = 5
+} formation_ability_slot_e;
 
 s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_equipment);
 s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out);

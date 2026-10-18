@@ -89,7 +89,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     generic = job_get_generic_index(job);
     /* A skillset no job owns (a special character's) falls back to the unit's primary skillset. */
     if (job_find_first_for_skillset(skillset) == -1) {
-        skillset = g_formation_unit_pointers[unit_index]->abilities.fields.primary_skillset;
+        skillset = g_formation_unit_pointers[unit_index]->abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET];
     }
     abilities = (s16*)ability_store_skillset_abilities(skillset, SKILLSET_ABILITY_FILTER_ALL);
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {

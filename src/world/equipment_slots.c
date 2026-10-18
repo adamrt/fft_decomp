@@ -655,27 +655,31 @@ void formation_remove_invalid_loadout(s16 unit_id) {
         g_formation_unit_pointers[unit_id]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MIME) {
-        memset(&g_formation_unit_pointers[unit_id]->abilities, 0, sizeof(formation_abilities_t));
+        memset(g_formation_unit_pointers[unit_id]->abilities, 0, sizeof(g_formation_unit_pointers[unit_id]->abilities));
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_CHEMIST
-        && g_formation_unit_pointers[unit_id]->abilities.fields.support_ability == ABILITY_ID_SUPPORT_THROW_ITEM) {
-        g_formation_unit_pointers[unit_id]->abilities.fields.support_ability = 0;
+        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+            == ABILITY_ID_SUPPORT_THROW_ITEM) {
+        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MONK
-        && g_formation_unit_pointers[unit_id]->abilities.fields.support_ability == ABILITY_ID_SUPPORT_MARTIAL_ARTS) {
-        g_formation_unit_pointers[unit_id]->abilities.fields.support_ability = 0;
+        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+            == ABILITY_ID_SUPPORT_MARTIAL_ARTS) {
+        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_MEDIATOR
-        && g_formation_unit_pointers[unit_id]->abilities.fields.support_ability == ABILITY_ID_SUPPORT_MONSTER_TALK) {
-        g_formation_unit_pointers[unit_id]->abilities.fields.support_ability = 0;
+        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+            == ABILITY_ID_SUPPORT_MONSTER_TALK) {
+        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
     if (g_formation_unit_pointers[unit_id]->identity.job_id == JOB_ID_NINJA
-        && g_formation_unit_pointers[unit_id]->abilities.fields.support_ability == ABILITY_ID_SUPPORT_TWO_SWORDS) {
-        g_formation_unit_pointers[unit_id]->abilities.fields.support_ability = 0;
+        && g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT]
+            == ABILITY_ID_SUPPORT_TWO_SWORDS) {
+        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SUPPORT] = 0;
     }
-    if (g_formation_unit_pointers[unit_id]->abilities.fields.primary_skillset
-        == g_formation_unit_pointers[unit_id]->abilities.fields.secondary_skillset) {
-        g_formation_unit_pointers[unit_id]->abilities.fields.secondary_skillset = 0;
+    if (g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET]
+        == g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET]) {
+        g_formation_unit_pointers[unit_id]->abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET] = 0;
     }
     if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
         formation_save_records();
