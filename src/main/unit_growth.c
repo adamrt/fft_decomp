@@ -774,13 +774,13 @@ u32 job_calculate_level(u16 job_jp) {
 
 /* Pack each pair of job levels from the jobs' total JP: the first job of a pair in the high
  * nibble, the second in the low. */
-void unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels) {
+void unit_init_job_levels(const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]) {
     s32 i;
     s32 level;
 
     for (i = 0; i < UNIT_JOB_LEVEL_BYTE_COUNT; i++) {
-        level = job_calculate_level(unit_job_jp[i * UNIT_JOBS_PER_LEVEL_BYTE]) << 4;
-        unit_job_levels[i] = level | job_calculate_level(unit_job_jp[i * UNIT_JOBS_PER_LEVEL_BYTE + 1]);
+        level = job_calculate_level(unit_job_jp->values[i * UNIT_JOBS_PER_LEVEL_BYTE]) << 4;
+        unit_job_levels[i] = level | job_calculate_level(unit_job_jp->values[i * UNIT_JOBS_PER_LEVEL_BYTE + 1]);
     }
 }
 

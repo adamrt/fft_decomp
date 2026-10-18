@@ -705,7 +705,7 @@ s32 unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text) 
     if (party_unit->party_id == PARTY_ID_NONE) {
         return -1;
     }
-    unit_init_job_levels(party_unit->career.job_points.total.values, party_unit->career.job_levels);
+    unit_init_job_levels(&party_unit->career.job_points.total, party_unit->career.job_levels);
     job_store_unlock_bitset(party_unit->career.unlocked_jobs,
         job_calculate_unlocked(party_unit->career.job_levels, party_unit->gender_flags));
     unit_reset_battle_state(unit);

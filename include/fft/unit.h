@@ -703,7 +703,7 @@ typedef enum unit_entd_init_kind {
 
 s32 unit_init_from_encounter(unit_stats_t* unit, const struct entd_unit* entd, u32 use_world_text, s32 kind);
 s32 unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text);
-void unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels);
+void unit_init_job_levels(const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
 void unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards);
 void unit_init_position_and_rewards(unit_stats_t* unit, const struct entd_unit* entd);
 void unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const struct entd_unit* entd);
