@@ -511,7 +511,7 @@ s32 memcard_file_delete_selected_with_retries(const char* filename) {
 /* Read a card file in up to 40 attempts. A failed seek stops the read;
  * partial reads and -1 results allow another attempt. A successful close
  * returns the bytes read. The seek has the same relative-offset quirk as
- * memcard_file_write_buffer. */
+ * save_write_file_chunked. */
 s32 save_read_file_chunked(const char* filename, u8* destination, u32 size) {
     u32 total;
     s32 result = memcard_file_open_selected_with_retries(filename, 1);
