@@ -158,9 +158,9 @@ void action_prepare_in_place(action_command_t* action) {
  * An action that resolves immediately also ends the unit's Charging, Jump,
  * Defending and Performing statuses, but only in the primary action context.
  * Returns the action_preparation_e result. */
-s32 action_commit_preparation(action_command_t* command) {
+action_preparation_e action_commit_preparation(const action_command_t* command) {
     unit_stats_t* unit = &g_unit_stats[command->actor_id];
-    s32 result = action_prepare(command, &unit->action_command, 1);
+    action_preparation_e result = action_prepare(command, &unit->action_command, 1);
 
     if (result == ACTION_PREPARATION_IMMEDIATE && g_action_context == ACTION_CONTEXT_PRIMARY) {
         status_clear_action_state(unit);
@@ -182,7 +182,7 @@ s32 action_commit_preparation(action_command_t* command) {
  * so global-alloc ranks `skip` above `persevere` and gives them s6/s7 as in
  * the target.
  */
-s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase) {
+action_preparation_e action_prepare(const action_command_t* source, action_command_t* dest, s32 phase) {
     action_command_t action;
     unit_stats_t* unit;
     ability_secondary_data_t* entry;
@@ -493,11 +493,11 @@ static s32 reaction_build_targets(s32 actor_id, action_strike_work_t* work, s32*
         u8 target_elevation;
         u8 mount_info;
 
-        work->target_new_x = target_x;
+        work->target_tile.x = target_x;
         target_y = actor->action_command.target_position.vz;
-        work->target_new_y = target_y;
+        work->target_tile.y = target_y;
         target_elevation = actor->action_command.target_position.vy;
-        work->target_new_map_level = target_elevation;
+        work->target_tile.layer = target_elevation;
         target_or_count = target_find_unit_at_tile(target_x, target_y, target_elevation);
         if (target_or_count < 0) {
             *target_count = 0;
@@ -767,9 +767,9 @@ s32 action_resolve_strike(s32 battle_id, action_strike_work_t* work) {
     work->reaction_id = g_action_current_ability.reaction_id;
     if (g_action_current_ability.knockback_flags != 0) {
         work->knockback_flags = g_action_current_ability.knockback_flags & MOVE_KNOCKBACK_KIND_MASK;
-        work->target_new_x = g_action_current_ability.target_new_x;
-        work->target_new_y = g_action_current_ability.target_new_y;
-        work->target_new_map_level = g_action_current_ability.target_new_elevation;
+        work->target_tile.x = g_action_current_ability.target_tile.x;
+        work->target_tile.y = g_action_current_ability.target_tile.y;
+        work->target_tile.layer = g_action_current_ability.target_tile.layer;
     }
 
     /* A pending weapon proc or knockback continues the attack without counting a strike. */
@@ -800,18 +800,18 @@ static void target_set_strike_coordinates(const unit_stats_t* acting, action_str
 
     out->skip_empty_tile_effect = 0;
     if (g_action_current_ability.random_fire_flag != 0) {
-        out->target_new_x = g_action_current_ability.target_new_x;
-        out->target_new_y = g_action_current_ability.target_new_y;
-        out->target_new_map_level = g_action_current_ability.target_new_elevation;
+        out->target_tile.x = g_action_current_ability.target_tile.x;
+        out->target_tile.y = g_action_current_ability.target_tile.y;
+        out->target_tile.layer = g_action_current_ability.target_tile.layer;
     } else if (acting->action_command.targeting_type == TARGET_TYPE_UNIT) {
         target = &g_unit_stats[acting->action_command.target_id];
-        out->target_new_x = target->x;
-        out->target_new_y = target->position.y;
-        out->target_new_map_level = target->position.higher_elevation;
+        out->target_tile.x = target->x;
+        out->target_tile.y = target->position.y;
+        out->target_tile.layer = target->position.higher_elevation;
     } else {
-        out->target_new_x = acting->action_command.target_position.vx;
-        out->target_new_y = acting->action_command.target_position.vz;
-        out->target_new_map_level = acting->action_command.target_position.vy;
+        out->target_tile.x = acting->action_command.target_position.vx;
+        out->target_tile.y = acting->action_command.target_position.vz;
+        out->target_tile.layer = acting->action_command.target_position.vy;
     }
 }
 
@@ -985,9 +985,9 @@ static void target_select_random_fire_tile(void) {
     g_battle_map_tile_data[tile].ceiling_depth_and_marks.targeted = 1;
     g_action_current_ability.random_fire_flag = 1;
     /* A tile index is level * 256 + y * map width + x, and g_battle_map_terrain_width is the width. */
-    g_action_current_ability.target_new_elevation = tile / 256;
-    g_action_current_ability.target_new_y = (tile & 0xFF) / g_battle_map_terrain_width;
-    g_action_current_ability.target_new_x = (tile & 0xFF) % g_battle_map_terrain_width;
+    g_action_current_ability.target_tile.layer = tile / 256;
+    g_action_current_ability.target_tile.y = (tile & 0xFF) / g_battle_map_terrain_width;
+    g_action_current_ability.target_tile.x = (tile & 0xFF) % g_battle_map_terrain_width;
     target_clear_panel_spread_flags();
 }
 

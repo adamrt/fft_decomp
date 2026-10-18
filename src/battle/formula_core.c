@@ -246,8 +246,8 @@ s32 formula_calculate_dance_song_hit(void) {
  * untargetable, in water (any depth), steep (half height 3 or more), lava nor
  * an obstacle. On success g_action_current_ability.knockback_flags records
  * MOVE_KNOCKBACK_PENDING with the knockback kind (NO_FALL_DAMAGE for a flier
- * that is neither a Frog nor a Chicken, otherwise FALL_DAMAGE), target_new_x,
- * target_new_y and target_new_elevation the destination, and the target's
+ * that is neither a Frog nor a Chicken, otherwise FALL_DAMAGE), target_tile
+ * holds the destination, and the target's
  * action data gets the knockback special effect.
  *
  * abs() is the builtin: its MIPS abssi2 pattern emits the target's
@@ -335,9 +335,9 @@ static void move_knockback_calculate(void) {
     } else {
         g_action_current_ability.knockback_flags = MOVE_KNOCKBACK_PENDING | MOVE_KNOCKBACK_NO_FALL_DAMAGE;
     }
-    g_action_current_ability.target_new_x = x;
-    g_action_current_ability.target_new_y = y;
-    g_action_current_ability.target_new_elevation = level;
+    g_action_current_ability.target_tile.x = x;
+    g_action_current_ability.target_tile.y = y;
+    g_action_current_ability.target_tile.layer = level;
     g_action_target_data->special_effect |= ACTION_SPECIAL_EFFECT_KNOCKBACK;
 }
 

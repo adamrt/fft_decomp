@@ -74,7 +74,7 @@ static void effect_start_for_action(s32 ability, unit_t* unit) {
     init.targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
     init.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id = unit->runtime_id;
     vector_set_svector(
-        &init.target_tile, unit->strike.target_new_x, unit->strike.target_new_map_level, unit->strike.target_new_y);
+        &init.target_tile, unit->strike.target_tile.x, unit->strike.target_tile.layer, unit->strike.target_tile.y);
     block = &unit->strike;
     if (init.target_count != 0) {
         for (i = 0; i < init.target_count; i++) {
@@ -97,9 +97,9 @@ static void effect_start_for_action(s32 ability, unit_t* unit) {
     } else if (unit->strike.skip_empty_tile_effect == 0) {
         init.target_count = 1;
         init.targets[0].target_type = EFFECT_TARGET_TYPE_TILE;
-        init.targets[0].data.tile.vx = unit->strike.target_new_x;
-        init.targets[0].data.tile.vz = unit->strike.target_new_y;
-        init.targets[0].data.tile.vy = unit->strike.target_new_map_level;
+        init.targets[0].data.tile.vx = unit->strike.target_tile.x;
+        init.targets[0].data.tile.vz = unit->strike.target_tile.y;
+        init.targets[0].data.tile.vy = unit->strike.target_tile.layer;
     }
     spectators = 0;
     for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
@@ -280,9 +280,9 @@ void action_apply_strike_results(void) {
         for (i = 0; i < unit->strike.target_count; i++) {
             target = unit_get_by_battle_id(action->target_list[i]);
             if (target != 0) {
-                target->map_x = unit->strike.target_new_x;
-                target->map_y = unit->strike.target_new_y;
-                target->map_layer = unit->strike.target_new_map_level;
+                target->map_x = unit->strike.target_tile.x;
+                target->map_y = unit->strike.target_tile.y;
+                target->map_layer = unit->strike.target_tile.layer;
                 unit_set_tile_position(target->stats->battle_id, target->map_x, target->map_y, target->map_layer,
                     target->facing / UNIT_FACING_QUARTER_TURN);
                 unit_set_move_and_world_coords(target);

@@ -478,9 +478,9 @@ static void move_knockback_init(unit_t* unit) {
  * its target into the target's (dst) movement destination and start the target's
  * one-step knockback path. */
 void move_knockback_start(const unit_t* src, unit_t* dst) {
-    dst->movement.destination_x = src->strike.target_new_x;
-    dst->movement.destination_y = src->strike.target_new_y;
-    dst->movement.destination_layer = src->strike.target_new_map_level;
+    dst->movement.destination_x = src->strike.target_tile.x;
+    dst->movement.destination_y = src->strike.target_tile.y;
+    dst->movement.destination_layer = src->strike.target_tile.layer;
     move_knockback_init(dst);
 }
 

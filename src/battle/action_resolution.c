@@ -1057,7 +1057,7 @@ static s32 item_add_poached_to_fur_shop(void) {
  * formation index meanwhile lets the level growth run. */
 void unit_transform_into_morbol(unit_stats_t* unit) {
     u8 saved_name[0x10];
-    u8 palette[8];
+    u8 palette;
     u8* name;
     u8 unit_id;
     u8 formation_index;
@@ -1086,7 +1086,7 @@ void unit_transform_into_morbol(unit_stats_t* unit) {
     unit->position.facing = facing;
     mem_copy_byte_data_source_first(saved_name, name, sizeof(saved_name));
     unit->unit_id = unit_id;
-    unit_calculate_palette_spritesheet(unit, palette);
+    unit_calculate_palette_spritesheet(unit, &palette);
 }
 
 /* Apply a level-up or level-down special effect: level + 1 (99 at most) or
@@ -1930,7 +1930,7 @@ s32 move_init_ability_benefit(unit_stats_t* unit) {
  * new level and job level to rewards. Returns -1 for an empty unit slot,
  * otherwise action_apply_target_result's result. */
 s32 reward_apply_result_and_collect(unit_stats_t* unit, action_reward_display_t* rewards) {
-    s32 job_slot[2];
+    s32 job_slot;
     s32 result;
     s32 unit_id;
 
@@ -1952,7 +1952,7 @@ s32 reward_apply_result_and_collect(unit_stats_t* unit, action_reward_display_t*
     }
     rewards->job_level_for_display = 0;
     if (g_action_current_ability.job_level_gained_flag != 0) {
-        rewards->job_level_for_display = reward_load_job_level(unit, unit->job_id, job_slot);
+        rewards->job_level_for_display = reward_load_job_level(unit, unit->job_id, &job_slot);
     }
     return result;
 }

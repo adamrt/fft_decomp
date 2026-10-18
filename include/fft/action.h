@@ -23,9 +23,9 @@ typedef enum action_preparation {
 } action_preparation_e;
 
 void action_copy_data(const action_command_t* source, action_command_t* destination);
-s32 action_prepare(action_command_t* source, action_command_t* dest, s32 phase);
+action_preparation_e action_prepare(const action_command_t* source, action_command_t* dest, s32 phase);
 void action_prepare_in_place(action_command_t* action);
-s32 action_commit_preparation(action_command_t* command);
+action_preparation_e action_commit_preparation(const action_command_t* command);
 void action_execute_ability(void);
 
 /* action results */
@@ -151,9 +151,7 @@ typedef struct action_current_ability {
     u8 secondary_weapon_id;                     /* 0x05 */
     u16 reaction_id;                            /* 0x06 */
     u16 weapon_proc_pending;                    /* 0x08; a weapon proc spell is still to strike */
-    u8 target_new_x;                            /* 0x0a; knockback or random-fire tile */
-    u8 target_new_y;                            /* 0x0b */
-    u8 target_new_elevation;                    /* 0x0c */
+    move_tile_coordinates_t target_tile;        /* 0x0a; knockback or random-fire tile */
     u8 terrain;                                 /* 0x0d: surface type under the target */
     s16 xa;                                     /* 0x0e */
     s16 ya;                                     /* 0x10 */
@@ -230,9 +228,7 @@ typedef struct action_strike_work {
     u8 continue_attack;
     u8 current_hit_number;
     s16 reaction_id;
-    u8 target_new_x;
-    u8 target_new_y;
-    u8 target_new_map_level;
+    move_tile_coordinates_t target_tile; /* 0x1c */
     u8 used_weapon_id;
     s16 reaction_ability_id; /* 0x20; runtime 0x1ac */
     /* 0x22; runtime 0x1ae. g_action_current_ability.knockback_flags & 0x7f, stored with
