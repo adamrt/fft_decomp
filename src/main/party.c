@@ -152,8 +152,8 @@ party_unit_t* party_get_unit(s32 party_index) {
 /* Build a battle unit from one ENTD unit slot on the stack and save it into the
  * party roster. Returns -2 for an empty ENTD slot, otherwise
  * party_save_unit's result (0, or -1 when the roster is full). */
-s32 party_save_encounter_unit(entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text) {
-    entd_unit_t* entd_unit = &entd->units[unit_id];
+s32 party_save_encounter_unit(const entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text) {
+    const entd_unit_t* entd_unit = &entd->units[unit_id];
 
     g_encounter_current_unit = entd_unit;
     if (entd_unit->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
@@ -182,7 +182,7 @@ s32 party_save_encounter_unit(entd_encounter_t* entd, s32 unit_id, s32 allow_gue
  * UNIT_FLAG_SAVE_FORMATION. A guest record keeps the unit's palette; an
  * ordinary one gets palette 0 and drops the save-formation flag.
  */
-s32 party_save_unit(unit_stats_t* unit, s32 allow_guest) {
+s32 party_save_unit(const unit_stats_t* unit, s32 allow_guest) {
     party_unit_t* party;
     s32 slot;
     s32 index;

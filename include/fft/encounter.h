@@ -18,7 +18,7 @@ typedef enum unit_entd_selection {
 
 extern s32 g_encounter_current_id;
 extern entd_file_t* g_encounter_set;
-extern entd_unit_t* g_encounter_current_unit;
+extern const entd_unit_t* g_encounter_current_unit;
 
 /* unit_entd_selection_e. BATTLE's load ordering requires the qualified declaration;
  * a local volatile pointer access changes the original instructions. */
