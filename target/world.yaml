@@ -98,7 +98,7 @@ units:
   - {name: text_skip_to_entry, source: src/lib/event/text_skip_to_entry.c}
   - {name: texture_allocator, source: src/lib/menu/texture_allocator.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: textured_quads, source: src/lib/menu/textured_quads.c}
-  - {name: thread, source: src/lib/thread/thread.c}
+  - {name: thread, source: src/lib/thread/thread.c, data: [{addr: 0x80195cd0, size: 17408, hash: 3f1f6f76c52276c8}]}
   - {name: thread_accessors, source: src/lib/thread/thread_accessors.c}
   - {name: thread_state, source: src/world/thread_state.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801cc570, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc574, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc578, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc57c, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc674, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc76c, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc778, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc784, size: 1, hash: 6e340b9cffb37a98}]}

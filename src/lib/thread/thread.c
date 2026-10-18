@@ -4,6 +4,10 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
+/* WORLD has a seventeenth slot for tutorial text; reset clears only sixteen.
+ * Unit-view digits and Status palettes reuse stack storage in slots 0 and 14. */
+thread_t g_thread_contexts[VARIANT_THREAD_TABLE_SLOT_COUNT] = { 0 };
+
 /* Wait count frames by yielding count times. */
 void thread_wait_frames(s32 count) {
     s32 i;

@@ -29,9 +29,8 @@ extern image_layout_t g_formation_status_portrait_params;
 extern menu_number_entry_t g_formation_selected_unit_number_entries[];
 extern menu_number_entry_t g_formation_comparison_unit_number_entries[];
 
-/* Panel scratch aliases inside g_thread_contexts[0] and [14], at
- * +0x100 and +0x200 in each slot's stack. These stay separate symbols;
- * the palette areas hold one slot per page. */
+/* Selected- and comparison-unit panel storage. Packet and portrait palette
+ * arrays are indexed by the active page. */
 extern menu_status_panel_editor_packet_t g_formation_selected_unit_summary_packets[2];
 extern menu_status_panel_packet_t g_formation_selected_unit_status_packets[2];
 extern u8 g_formation_selected_unit_stat_text_image[];
