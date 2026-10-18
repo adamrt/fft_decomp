@@ -25,7 +25,7 @@ units:
   - {name: music_queue, source: src/wldcore/music_queue.c, data: [{addr: 0x800d45a4, size: 160, hash: b393978842a0fa3d}]}
   - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: proposition_results, source: src/wldcore/proposition_results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
-  - {name: resource_loading, source: src/wldcore/resource_loading.c}
+  - {name: resource_loading, source: src/wldcore/resource_loading.c, data: [{addr: 0x8009e0ec, size: 1408, hash: 697848efa3c9d262}]}
   - {name: resources, source: src/wldcore/resources.c}
   - {name: sound_novel, source: src/wldcore/sound_novel.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
   - {name: startup, source: src/wldcore/startup.c}
