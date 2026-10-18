@@ -9,6 +9,9 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+/* WLDCORE keeps the pending commands and playback state between menu frames. */
+music_queue_t g_music_queue = { 0 };
+
 /* Play sound effect `sound_id` (WLDCORE's wrapper for sound_play_sfx). */
 void sound_play_effect(s32 sound_id) {
     sound_play_sfx(sound_id);
