@@ -1,5 +1,7 @@
-/* The formation unit grid, including the stat and change banner panel toggles, unit stat accessors, egg hatch progress,
- * grid rows, scrolling, the cursor, transitions, portrait slides and sprites, and graphics drawn below the sprite. */
+/* Formation's party grid and per-unit readouts. L2/R2 switch between HP, MP, CT,
+ * level/Exp and Brave/Faith; submenu callbacks replace those readouts with equipment
+ * or departure labels. This also coordinates the selected-unit panels while browsing
+ * or comparing units. */
 
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
@@ -65,9 +67,6 @@ extern menu_draw_number_command_t g_formation_brave_number;
 extern menu_draw_number_command_t g_formation_faith_number;
 extern menu_draw_number_command_t g_formation_brave_number_wide;
 extern menu_draw_number_command_t g_formation_faith_number_wide;
-extern rgb24_t g_formation_hp_gauge_colors[4];
-extern rgb24_t g_formation_mp_gauge_colors[4];
-extern rgb24_t g_formation_ct_gauge_colors[4];
 extern u16 g_screen_hp_gauge_clut;
 extern u16 g_screen_mp_gauge_clut;
 extern u16 g_screen_ct_gauge_clut;
@@ -96,7 +95,15 @@ typedef struct formation_gauge_offsets {
 } formation_gauge_offsets_t;
 typedef char formation_gauge_offsets_size_must_be_4[sizeof(formation_gauge_offsets_t) == 4 ? 1 : -1];
 
-extern formation_gauge_offsets_t g_formation_gauge_bar_offsets;
+static formation_gauge_offsets_t g_formation_gauge_bar_offsets = { 3, 1, 0, 4 };
+
+/* Gauge corner colors, in top-left, top-right, bottom-left, bottom-right order. */
+static rgb24_t g_formation_hp_gauge_colors[4]
+    = { { 72, 104, 120 }, { 168, 184, 112 }, { 72, 104, 120 }, { 168, 184, 112 } };
+static rgb24_t g_formation_mp_gauge_colors[4]
+    = { { 128, 64, 56 }, { 224, 160, 80 }, { 128, 64, 56 }, { 224, 160, 80 } };
+static rgb24_t g_formation_ct_gauge_colors[4]
+    = { { 80, 104, 64 }, { 176, 176, 64 }, { 80, 104, 64 }, { 176, 176, 64 } };
 
 static s32 formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor);
 static void formation_draw_cursor_trail(point16_t* cursor);

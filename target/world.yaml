@@ -37,7 +37,7 @@ units:
   - {name: font_rendering, source: src/world/font_rendering.c, data: [{addr: 0x801c9ee8, size: 2048, hash: e5a00aa9991ac8a5}]}
   - {name: formation_ability_menu, source: src/world/formation_ability_menu.c, data: [{addr: 0x801c8528, size: 10, hash: 01d448afd9280654}]}
   - {name: formation_display_init, source: src/world/formation_display_init.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018bb50, size: 1408, hash: d277279fc1b0c76a}, {addr: 0x8018c0d0, size: 8, hash: e2d93ece070c6ba5}]}
-  - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018c740, size: 4, hash: c379451c75a2813d}, {addr: 0x8018c744, size: 12, hash: 1d20c89ea5a44018}, {addr: 0x8018c750, size: 12, hash: 5861b9bcdd5acbd6}, {addr: 0x8018c75c, size: 12, hash: 2ff0fd78112d9482}]}
   - {name: formation_icon_list, source: src/world/formation_icon_list.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
   - {name: formation_item_menu, source: src/world/formation_item_menu.c}
   - {name: formation_screen, source: src/world/formation_screen.c, profile: gcc-2.6.3_O1_aspsx-2.34}
