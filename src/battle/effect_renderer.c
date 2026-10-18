@@ -78,7 +78,7 @@ static void effect_vector_add_svector_to_vector(const SVECTOR* first, const VECT
 static effect_list_node_t* effect_particle_alloc_list_node(s16 kind);
 static void effect_particle_free_list_node(effect_list_node_t* node);
 static s32 effect_get_random_between(s32 value_a, s32 value_b);
-static void effect_particle_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index);
+static void effect_particle_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s16 animation_index);
 static void effect_particle_render_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
 
 /* The four sprite work kinds share one updater; heap-block work has no entry. */
@@ -1883,14 +1883,14 @@ static void effect_particle_free_list_node(effect_list_node_t* node) {
 /* Point a sprite animation node at parameter set animation_index and restart
  * it: clear the sequence position and hold time, store frame_group doubled and
  * set kind bit 0 to mark the frame dirty. */
-static void effect_particle_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index) {
+static void effect_particle_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s16 animation_index) {
     u8* sequences = g_effect_animation_sequences;
     u8* entry;
     s16 offset;
     u16 flags;
 
     /* Integer addresses preserve the offset/base operand order at both additions. */
-    entry = (u8*)((s16)animation_index * 2 + (s32)sequences);
+    entry = (u8*)(animation_index * 2 + (s32)sequences);
     flags = state->kind | EFFECT_LIST_NODE_FRAME_CHANGED;
     offset = entry[0] + (entry[1] << 8);
     state->sequence_offset = 0;
