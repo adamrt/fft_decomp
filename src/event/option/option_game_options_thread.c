@@ -179,7 +179,7 @@ void option_game_options_thread(void) {
     value_rect.y = base->setting_panel.y0;
     value_rect.w = base->setting_panel.w;
     value_rect.h = base->setting_panel.h;
-    mem_copy_bytes_nonempty(&g_option_entry_panel_rect, &entry->window.x, 8);
+    mem_copy_bytes_nonempty(&g_option_entry_panel_rect, &entry->window, sizeof(g_option_entry_panel_rect));
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     g_option_entry_panel_rect.h += 0xC;
     g_option_entry_panel_rect.y -= 2;
@@ -353,9 +353,9 @@ void option_game_options_thread(void) {
 
         /* The frame thread dims its border while the value picker (the thread before this one) runs. */
         if ((thread - 1)->is_running == 0) {
-            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
+            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
         } else {
-            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
+            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
         }
 
         gfx_build_scaled_draw_area_pair_swapped(&page->list_area, &entry->window, i, g_gfx_screen_polarity);
