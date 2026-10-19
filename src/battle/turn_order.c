@@ -504,7 +504,10 @@ turn_status_flags_e turn_calculate_status_flags(const unit_stats_t* unit) {
     if ((status1 & STATUS_BYTE_MASK(STATUS_ID_DEAD)) != 0) {
         return TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD;
     }
-    flags = -((status5 & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) != 0) & (TURN_STATUS_INCAPACITATED | TURN_STATUS_SLEEP);
+    flags = 0;
+    if ((status5 & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) != 0) {
+        flags = TURN_STATUS_INCAPACITATED | TURN_STATUS_SLEEP;
+    }
     if ((status4 & STATUS_BYTE_MASK(STATUS_ID_HASTE)) != 0) {
         flags |= TURN_STATUS_HASTE;
     }
