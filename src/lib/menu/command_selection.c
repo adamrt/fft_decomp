@@ -130,6 +130,7 @@ void command_restore_unit_selection(s32 menu_id) {
     g_menu_thread_menu_data[menu_id].selected_index = record->command_index;
 }
 
+/* The signed initializer keeps GCC 2.6.3's reset-loop comparisons signed. */
 enum { MENU_UNIT_SELECTION_RECORD_BYTES = (s32)sizeof(menu_unit_selection_record_t) };
 
 /* Reset the per-unit menu records, clearing each and marking byte 1 as
