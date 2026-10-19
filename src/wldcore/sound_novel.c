@@ -221,16 +221,17 @@ static void sound_novel_reset_reading(sound_novel_reading_t* record) {
  *
  * The record holds the loaded script's section-offset table. */
 s32 sound_novel_run_until_yield(void) {
-    s32 low;
-    s32 high;
+    s32 sound_id;
+    s32 weather_sound_id;
     u32 section_byte_offset;
     u16 flags;
     s32 aborted;
 
     do {
-        low = script_get_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT);
-        high = script_get_variable(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND);
-        sound_novel_play_pending_sounds(low, high, script_get_variable(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK));
+        sound_id = script_get_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT);
+        weather_sound_id = script_get_variable(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND);
+        sound_novel_play_pending_sounds(
+            sound_id, weather_sound_id, script_get_variable(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK));
         sound_novel_step_countdown();
 
         if (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_BRANCH) {
