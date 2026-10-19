@@ -642,8 +642,8 @@ void proposition_open_active_list(void) {
     s32 previous;
     s32 total;
     s32 entry_value_base;
-    s16* row_flags;
-    s32 active_row_flag;
+    s16* row_colors;
+    s32 recalled_color;
 
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_IN_PROGRESS, 0);
     count = 0;
@@ -651,16 +651,16 @@ void proposition_open_active_list(void) {
     i = 0;
     if (loaded_count > 0) {
         entry_value_base = TEXT_ID_PROPOSITION_NAME_BASE;
-        row_flags = g_menu_stack_row_flags;
-        active_row_flag = 8;
+        row_colors = g_menu_stack_row_text_colors;
+        recalled_color = 8;
         total = loaded_count;
         do {
             if ((g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED) == 0) {
                 g_menu_stack_entry_values[count] = g_proposition_active[i].proposition_id + entry_value_base;
                 if ((g_proposition_active[i].flags & PROPOSITION_PROGRESS_RECALLED) != 0) {
-                    row_flags[count] = active_row_flag;
+                    row_colors[count] = recalled_color;
                 } else {
-                    row_flags[count] = 0;
+                    row_colors[count] = 0;
                 }
                 g_menu_stack_records[g_menu_stack_depth].panel.entries[count] = i;
                 count++;
@@ -751,7 +751,7 @@ void proposition_handle_active_list_input(menu_stack_record_t* level) {
         proposition_block_active_list_buttons(level);
         menu_stack_push_message_level(0x1062, 1);
     } else if (buttons & PSX_PAD_CIRCLE) {
-        if (g_menu_stack_row_flags[g_window_panel_render_state.selected_index] != 0) {
+        if (g_menu_stack_row_text_colors[g_window_panel_render_state.selected_index] != 0) {
             sound_play_effect(SOUND_SFX_INVALID);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RETURN_TOMORROW, 0);
         } else {

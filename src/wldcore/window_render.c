@@ -172,7 +172,7 @@ void window_init_panel_state(s32 unused, s32 extent, window_panel_layout_t* layo
     g_window_panel_label_state.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
     g_window_panel_label_state.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
     g_window_panel_label_state.text_ids[0] = g_menu_stack_entry_values;
-    g_window_panel_label_state.text_colors[0] = g_menu_stack_row_flags;
+    g_window_panel_label_state.text_colors[0] = g_menu_stack_row_text_colors;
     text_width = (width + 0x18) & 0xFFFC;
     g_window_panel_render_state.vram_origin.x = 0x200;
     g_window_panel_render_state.vram_origin.y = 0x100;

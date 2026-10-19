@@ -190,9 +190,9 @@ void menu_stack_clear_cursor(s32 index);
 void menu_stack_store_cursor(s32 index);
 
 /* list panels */
-/* Per-row flag column of the list panels; the list steps compare it signed, and the two writers that only store
- * into it agree on the width. */
-extern s16 g_menu_stack_row_flags[];
+/* Per-row text palette offsets for list panels. The active-proposition list also
+ * tests a nonzero color to recognize a recalled job. */
+extern s16 g_menu_stack_row_text_colors[];
 
 /* Row value column of the list panels, read signed as `value & 0x7ff`. */
 extern s16 g_menu_stack_entry_values[];

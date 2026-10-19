@@ -880,7 +880,7 @@ void brave_story_open_unexplored_land_list(void) {
     for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_UNEXPLORED_LAND_NAME_BASE;
-            g_menu_stack_row_flags[count] = 0;
+            g_menu_stack_row_text_colors[count] = 0;
             count++;
         }
     }
@@ -1138,7 +1138,7 @@ void brave_story_open_treasure_list(void) {
     for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_TREASURE_NAME_BASE;
-            g_menu_stack_row_flags[count] = 0;
+            g_menu_stack_row_text_colors[count] = 0;
             count++;
         }
     }

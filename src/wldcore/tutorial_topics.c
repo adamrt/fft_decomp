@@ -21,7 +21,7 @@ static void tutorial_push_topic_level(s32 topic);
 #define append_panel_list_entry(count, value)                                                                          \
     do {                                                                                                               \
         g_menu_stack_entry_values[count] = value;                                                                      \
-        g_menu_stack_row_flags[count] = 0;                                                                             \
+        g_menu_stack_row_text_colors[count] = 0;                                                                       \
         count = (count) + 1;                                                                                           \
     } while (0)
 

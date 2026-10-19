@@ -203,7 +203,7 @@ static void rumor_open_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
-    s16* flags;
+    s16* colors;
     s32* locations;
     s32 mask;
     s32 entry;
@@ -211,7 +211,7 @@ static void rumor_open_list(void) {
     s32 i = 0;
     s32 record_index;
 
-    flags = g_menu_stack_row_flags;
+    colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
     locations = g_rumor_location_masks;
     /* The masks hold one bit per town, location 0 in bit 14. */
@@ -222,8 +222,8 @@ static void rumor_open_list(void) {
         entry = *locations;
         if ((entry & mask) && script_get_variable(i + EVENT_SCRIPT_VAR_RUMOR_FIRST) != 0) {
             *values = i + TEXT_ID_RUMOR_NAME_BASE;
-            *flags = 0;
-            flags++;
+            *colors = 0;
+            colors++;
             values++;
             count++;
         }
@@ -440,7 +440,7 @@ void proposition_open_available_list(void) {
             && !(g_proposition_states[i] & PROPOSITION_STATE_DAYS_MASK)
             && proposition_is_available_at(i, g_world_map_marker_state.marker.location_id + 1) != 0) {
             g_menu_stack_entry_values[count] = i + TEXT_ID_PROPOSITION_NAME_BASE;
-            g_menu_stack_row_flags[count] = 0;
+            g_menu_stack_row_text_colors[count] = 0;
             count++;
         }
     }

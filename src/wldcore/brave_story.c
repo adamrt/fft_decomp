@@ -596,7 +596,7 @@ static void brave_story_open_event_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
-    s16* flags;
+    s16* colors;
     s32 count;
     s32 i;
     s32 record_index;
@@ -604,13 +604,13 @@ static void brave_story_open_event_list(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
     count = 0;
     i = 0;
-    flags = g_menu_stack_row_flags;
+    colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
     for (; i < EVENT_SCRIPT_VAR_STORY_EVENT_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_STORY_EVENT_FIRST) != 0) {
             *values = i + TEXT_ID_STORY_EVENT_NAME_BASE;
-            *flags = 0;
-            flags++;
+            *colors = 0;
+            colors++;
             values++;
             count++;
         }
@@ -814,7 +814,7 @@ static void brave_story_open_person_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
-    s16* flags;
+    s16* colors;
     s32 count;
     s32 i;
     s32 value;
@@ -823,14 +823,14 @@ static void brave_story_open_person_list(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
     count = 0;
     i = 0;
-    flags = g_menu_stack_row_flags;
+    colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
     for (; i < EVENT_SCRIPT_VAR_PERSON_PROFILE_COUNT; i++) {
         value = script_get_variable(i + EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST);
         if (value != 0) {
             *values = TEXT_ID_PERSON_PROFILE_NAME_BASE + (i << 4) + value;
-            *flags = 0;
-            flags++;
+            *colors = 0;
+            colors++;
             values++;
             count++;
         }

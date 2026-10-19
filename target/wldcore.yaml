@@ -559,7 +559,7 @@ data:
   - {addr: 0x800bb3c0, name: g_menu_blocked_buttons}
   - {addr: 0x800bb3c4, name: g_world_map_aux_ordering_tables}
   - {addr: 0x800bb3ec, name: g_menu_stack_ot_offset}
-  - {addr: 0x800bb3f0, name: g_menu_stack_row_flags}
+  - {addr: 0x800bb3f0, name: g_menu_stack_row_text_colors}
   - {addr: 0x800bb4f0, name: g_menu_stack_depth}
   - {addr: 0x800bb4f4, name: g_hud_ot_priority}
   - {addr: 0x800bb4f8, name: g_sound_novel_countdown_frames}

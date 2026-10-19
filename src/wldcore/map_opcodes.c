@@ -521,18 +521,18 @@ void brave_story_open_fact_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
-    s16* flags;
+    s16* colors;
     s32 count = 0;
     s32 i = 0;
     s32 record_index;
 
-    flags = g_menu_stack_row_flags;
+    colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
     for (; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
             *values = i + TEXT_ID_FACT_NAME_BASE;
-            *flags = 0;
-            flags++;
+            *colors = 0;
+            colors++;
             values++;
             count++;
         }

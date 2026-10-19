@@ -1022,7 +1022,7 @@ static void brave_story_open_work_history(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
-    s16* flags;
+    s16* colors;
     s32 count;
     s32 i;
     s32 record_index;
@@ -1030,13 +1030,13 @@ static void brave_story_open_work_history(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
     count = 0;
     i = 0;
-    flags = g_menu_stack_row_flags;
+    colors = g_menu_stack_row_text_colors;
     values = g_menu_stack_entry_values;
     for (; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_PROPOSITION_FIRST) & PROPOSITION_VARIABLE_COMPLETED) {
             *values = i + TEXT_ID_COMPLETED_PROPOSITION_NAME_BASE;
-            *flags = 0;
-            flags++;
+            *colors = 0;
+            colors++;
             values++;
             count++;
         }
@@ -1686,7 +1686,7 @@ void tutorial_handle_menu_input(menu_stack_record_t* level) {
  * g_tutorial_progress_masks[0] shows it was viewed, at (0x54, 0x50),
  * 0x8c wide, and pushes MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST.
  *
- * The flag value lives in its own variable so the target keeps 8 in a saved
+ * The viewed-entry palette lives in its own variable so the target keeps 8 in a saved
  * register across the loop. */
 static void tutorial_open_formation_list(void) {
     window_panel_layout_t layout;
@@ -1694,14 +1694,14 @@ static void tutorial_open_formation_list(void) {
     s32 i = 0;
     s32 count;
     s32 record_index;
-    s32 enabled = 8;
+    s32 viewed_color = 8;
 
     for (; i < TUTORIAL_FORMATION_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE;
         if (bits_test(g_tutorial_progress_masks, i) != 0) {
-            g_menu_stack_row_flags[i] = enabled;
+            g_menu_stack_row_text_colors[i] = viewed_color;
         } else {
-            g_menu_stack_row_flags[i] = 0;
+            g_menu_stack_row_text_colors[i] = 0;
         }
     }
     count = i;
@@ -1815,9 +1815,9 @@ static void tutorial_open_battle_list(void) {
     for (i = 0; i < TUTORIAL_BATTLE_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE + 16;
         if (bits_test(&g_tutorial_progress_masks[1], i) != 0) {
-            g_menu_stack_row_flags[i] = 8;
+            g_menu_stack_row_text_colors[i] = 8;
         } else {
-            g_menu_stack_row_flags[i] = 0;
+            g_menu_stack_row_text_colors[i] = 0;
         }
     }
     count = i;

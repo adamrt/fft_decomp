@@ -1892,7 +1892,7 @@ void location_push_menu_level(s32 menu) {
     for (i = 0; i < count; i++) {
         value = g_menu_stack_records[g_menu_stack_depth].location_menu.entries[i];
         g_menu_stack_entry_values[i] = value;
-        g_menu_stack_row_flags[i] = 0;
+        g_menu_stack_row_text_colors[i] = 0;
     }
 
     /* At most four rows show; the panel is centered on x, and without a picture it rises 8 pixels a row. */

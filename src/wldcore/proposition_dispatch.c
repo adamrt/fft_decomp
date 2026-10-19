@@ -315,7 +315,7 @@ void proposition_push_send_unit_level(void) {
     g_window_panel_label_state.mode[1] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
     g_window_panel_label_state.x[1] = 0x58;
     g_window_panel_label_state.text_ids[1] = g_proposition_candidate_levels;
-    g_window_panel_label_state.text_colors[1] = g_menu_stack_row_flags;
+    g_window_panel_label_state.text_colors[1] = g_menu_stack_row_text_colors;
     g_window_panel_label_state.x[0] = 0;
     g_window_panel_render_state.header_id = 0x10;
     g_window_panel_render_state.selected_index = 0;
@@ -504,9 +504,9 @@ static s32 proposition_load_send_unit_candidates(proposition_send_unit_level_t* 
             }
         }
         if (j < g_proposition_send_unit_count) {
-            g_menu_stack_row_flags[level->unit_count] = 8;
+            g_menu_stack_row_text_colors[level->unit_count] = 8;
         } else {
-            g_menu_stack_row_flags[level->unit_count] = 0;
+            g_menu_stack_row_text_colors[level->unit_count] = 0;
         }
         g_menu_stack_entry_values[level->unit_count] = i + TEXT_ID_UNIT_NAME_BASE;
         g_proposition_candidate_levels[level->unit_count] = unit->level;
@@ -1002,7 +1002,7 @@ void proposition_open_returned_list(void) {
             if ((g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)
                 && g_proposition_active[i].location == *location) {
                 g_menu_stack_entry_values[count] = g_proposition_active[i].proposition_id + entry_value_base;
-                g_menu_stack_row_flags[count] = 0;
+                g_menu_stack_row_text_colors[count] = 0;
                 g_menu_stack_records[g_menu_stack_depth].panel.entries[count] = i;
                 count++;
             }
