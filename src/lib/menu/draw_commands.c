@@ -22,13 +22,11 @@ extern s16 g_gfx_window_zoom_percent[];
 menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* cmd) {
     RECT rect;
     s32 y;
-    s32 base;
 
     if (g_menu_list_row_mode == 0) {
         y = cmd->tile.y;
     } else {
-        base = g_menu_list_row_height * g_menu_list_row_index + cmd->tile.y;
-        y = base + g_menu_list_scroll_offset;
+        y = g_menu_list_row_height * g_menu_list_row_index + cmd->tile.y + g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             y = y - g_menu_list_row_height;
         }
