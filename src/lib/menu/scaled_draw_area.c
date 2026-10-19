@@ -15,11 +15,11 @@
  * thread's x and y, and cropped about its center to
  * g_menu_draw_area_scale_percent[scale_index] percent of its size;
  * scale_index is doubled at event speed 2 and capped at 11. The second
- * rectangle is the frame buffer's own area. With `lower_half` zero both are
- * placed in the buffer at y 0xF0.
+ * rectangle is the frame buffer's own area. Nonzero `upper_half` places both
+ * in the buffer at y 0; zero selects the buffer at y 240.
  */
 void menu_build_scaled_draw_area_packets(
-    scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index, s32 lower_half, const point32_t* position) {
+    scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index, s32 upper_half, const point32_t* position) {
     s32 percent;
     s32 w;
     s32 h;
@@ -44,7 +44,7 @@ void menu_build_scaled_draw_area_packets(
     packet->rects[0].y = h / 2 + packet->rects[0].y - scaled;
     packet->rects[0].w = (packet->rects[0].w * percent) / 100;
     packet->rects[0].h = (packet->rects[0].h * percent) / 100;
-    if (lower_half != 0) {
+    if (upper_half != 0) {
         packet->rects[1].y = 0;
     } else {
         packet->rects[1].y = 0xF0;

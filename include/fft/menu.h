@@ -411,8 +411,9 @@ typedef char
 extern const u16 g_menu_draw_area_scale_percent[12];
 extern RECT g_menu_draw_area_template;
 
+/* Nonzero upper_half selects the buffer at y 0; zero selects the one at y 240. */
 void menu_build_scaled_draw_area_packets(
-    scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index, s32 lower_half, const point32_t* position);
+    scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index, s32 upper_half, const point32_t* position);
 
 /* Clears the first draw area's width and installs the default second draw area. */
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
