@@ -27,6 +27,18 @@
 
 extern u32 g_proposition_detail_image_buffer[];
 
+/* Ordinary jobs use their zero-based Squire-through-Mime index. */
+enum { PROPOSITION_JOB_CATEGORY_MONSTER = 21, PROPOSITION_JOB_CATEGORY_SPECIAL = 22 };
+
+typedef enum proposition_participant_message_phase {
+    PROPOSITION_PARTICIPANT_MESSAGE_SELECT_SPEAKER = 0,
+    PROPOSITION_PARTICIPANT_MESSAGE_WAIT_PREVIOUS = 1,
+    PROPOSITION_PARTICIPANT_MESSAGE_SHOW = 2,
+    PROPOSITION_PARTICIPANT_MESSAGE_WAIT_CONFIRM = 3,
+    PROPOSITION_PARTICIPANT_MESSAGE_CLOSE = 4,
+    PROPOSITION_PARTICIPANT_MESSAGE_WAIT_CLOSE = 5
+} proposition_participant_message_phase_e;
+
 /* Collection counts that earn a milestone message. */
 static u8 g_proposition_treasure_milestones[8] = { 1, 4, 8, 12, 16, 20, 24, 31 };
 static u8 g_proposition_unexplored_land_milestones[8] = { 1, 3, 6, 8, 10, 12, 14, 16 };
@@ -45,7 +57,7 @@ static void proposition_push_recall_level(s32 proposition);
  */
 s32 proposition_step_participant_message(proposition_report_level_t* state, s32 message, s32 speaker) {
     switch (state->phase) {
-    case 0:
+    case PROPOSITION_PARTICIPANT_MESSAGE_SELECT_SPEAKER:
         if (speaker == -1) {
             s32 candidates[5];
             s32 count;
@@ -70,12 +82,12 @@ s32 proposition_step_participant_message(proposition_report_level_t* state, s32 
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         state->phase++;
         break;
-    case 1:
+    case PROPOSITION_PARTICIPANT_MESSAGE_WAIT_PREVIOUS:
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE))
             return 0;
         state->phase++;
         break;
-    case 2:
+    case PROPOSITION_PARTICIPANT_MESSAGE_SHOW:
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         g_text_substitution_values[0] = g_proposition_report.speaker_party_index + TEXT_ID_UNIT_NAME_BASE;
         script_set_variable(
@@ -85,21 +97,21 @@ s32 proposition_step_participant_message(proposition_report_level_t* state, s32 
             0);
         state->phase++;
         break;
-    case 3:
+    case PROPOSITION_PARTICIPANT_MESSAGE_WAIT_CONFIRM:
         if (!(g_world_map_input_new_button_presses & PSX_PAD_CIRCLE))
             return 0;
         if (!screen_is_dialog_waiting())
             return 0;
         state->phase++;
         break;
-    case 4:
+    case PROPOSITION_PARTICIPANT_MESSAGE_CLOSE:
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         state->phase++;
         break;
-    case 5:
+    case PROPOSITION_PARTICIPANT_MESSAGE_WAIT_CLOSE:
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE))
             return 0;
-        state->phase = 0;
+        state->phase = PROPOSITION_PARTICIPANT_MESSAGE_SELECT_SPEAKER;
         return 1;
     }
 
@@ -110,12 +122,12 @@ s32 proposition_step_participant_message(proposition_report_level_t* state, s32 
  * special jobs below Squire and 21 for anything above Mime (monsters). */
 static s32 proposition_get_job_category(s32 job_id) {
     if (job_id < JOB_ID_SQUIRE) {
-        return 22;
+        return PROPOSITION_JOB_CATEGORY_SPECIAL;
     }
     if (job_id <= JOB_ID_MIME) {
         return job_id - JOB_ID_SQUIRE;
     }
-    return 21;
+    return PROPOSITION_JOB_CATEGORY_MONSTER;
 }
 
 /* Scores the current proposition's success chance.
@@ -243,8 +255,6 @@ void proposition_calculate_jp_and_gil(void) {
         jp_rewards = proposition_get_data(PROPOSITION_DATA_JP_AMOUNTS);
         gil_rewards = proposition_get_data(PROPOSITION_DATA_GIL_AMOUNTS);
         count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
-        value = 0;
-
         for (i = 0; i < count; i++) {
             value = jp_rewards[g_proposition_selected_row.jp_reward - 1];
             if (g_proposition_report.result == PROPOSITION_RESULT_FAILURE) {
