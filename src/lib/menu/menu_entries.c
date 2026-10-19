@@ -503,9 +503,10 @@ void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step) {
  * Build a double-buffered draw-area pair whose rectangle is cropped to a
  * percentage of `geometry` about its center. Sources at x < 0x80 are moved
  * to the right-hand page (x + 0x80, y + 0x78); others are moved left.
+ * Nonzero upper_half selects the buffer at y 0; zero selects y 240.
  */
 void gfx_build_scaled_draw_area_pair_swapped(
-    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 flag) {
+    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 upper_half) {
     s32 percent;
     s16 width;
     s16 height;
@@ -533,7 +534,7 @@ void gfx_build_scaled_draw_area_pair_swapped(
     packets->rects[0].y = height / 2 + packets->rects[0].y - offset;
     packets->rects[0].w = (packets->rects[0].w * percent) / 100;
     packets->rects[0].h = (packets->rects[0].h * percent) / 100;
-    if (flag != 0) {
+    if (upper_half != 0) {
         packets->rects[1].y = 0;
     } else {
         packets->rects[1].y = 0xF0;

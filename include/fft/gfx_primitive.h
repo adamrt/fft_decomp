@@ -78,8 +78,9 @@ extern RECT g_gfx_draw_area;
 extern RECT g_gfx_tiled_rect;
 extern u16 g_gfx_draw_offset_y;
 
+/* Nonzero upper_half selects the buffer at y 0; zero selects y 240. */
 void gfx_build_scaled_draw_area_pair_swapped(
-    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 flag);
+    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 upper_half);
 
 /* enqueue helpers */
 extern oriented_quad_t g_gfx_blank_cell_rect;
