@@ -3331,10 +3331,10 @@ s32 sprite_load_step_shp_seq_data(void) {
             if (*slot == 0) {
                 break;
             }
-            if (file_request_read_bytes(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, (void*)*slot) == 0) {
+            if (file_request_read_bytes(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, *slot) == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_call_free((void*)*slot);
+                heap_call_free(*slot);
             }
             break;
         case SPRITE_LOAD_SHARED_OTHER_SPR:
@@ -3342,10 +3342,10 @@ s32 sprite_load_step_shp_seq_data(void) {
             if (*slot == 0) {
                 break;
             }
-            if (file_request_read_bytes(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, (void*)*slot) == 0) {
+            if (file_request_read_bytes(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, *slot) == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_call_free((void*)*slot);
+                heap_call_free(*slot);
             }
             break;
         }
