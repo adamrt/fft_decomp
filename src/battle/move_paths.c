@@ -1626,9 +1626,8 @@ static s32 camera_scale_cursor_tile_vector(void) {
  * step, without overshooting. The bound is compared against the component's
  * whole-unit part, so the clamp lands exactly on bound * ONE. The test is
  * written once per sign of the step because the overshoot comparison reverses
- * with it. The body is a bare if/else: wrapped in do/while (0) it becomes a
- * loop to the compiler, which doubles its reference counts and changes the
- * register allocation. */
+ * with it. A do/while (0) wrapper changes the compiler's loop weighting and
+ * register allocation, so this macro keeps a bare if/else body. */
 #define CAMERA_STEP_TOWARD(component, step, limit)                                                                     \
     if (step < 0) {                                                                                                    \
         s32* position = component;                                                                                     \
