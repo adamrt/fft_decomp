@@ -61,7 +61,6 @@ s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
  * bits of the entry are the item id. */
 s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
     s32 item_id = item_entry & ITEM_ENTRY_ID_MASK;
-    s32 result;
 
     if (item_id == 0) {
         return EQUIPMENT_SLOT_ITEM_ALLOWED;
@@ -72,12 +71,7 @@ s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
     /* Skip to the item type's bit in the unit's bitfield, first byte's bit 7 first. */
     bits_init_primary_reader(g_equipment_unit_data[unit_index]->equipment_categories);
     bits_read_primary(item_get_type(item_id));
-    if (bits_read_primary(1) == 0) {
-        result = EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP;
-    } else {
-        result = EQUIPMENT_SLOT_ITEM_ALLOWED;
-    }
-    return result;
+    return bits_read_primary(1) == 0 ? EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP : EQUIPMENT_SLOT_ITEM_ALLOWED;
 }
 
 /* Validate a candidate item against slot locks, job rules, and hand pairing.

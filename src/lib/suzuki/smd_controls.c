@@ -169,10 +169,8 @@ u16* suzuki_smd_get_min_loop_count(suzuki_music_t* music) {
     result = &music->min_loop_count;
     min = 0xffff;
     do {
-        if (channel->flags != 0) {
-            if (channel->loop_count < min) {
-                min = channel->loop_count;
-            }
+        if (channel->flags != 0 && channel->loop_count < min) {
+            min = channel->loop_count;
         }
         channel++;
     } while (--count != 0);
@@ -189,10 +187,7 @@ char* suzuki_smd_get_music_filename(suzuki_music_t* music) {
     suzuki_music_t* entry = g_suzuki_sound_active_music_list;
 
     if (music != 0) {
-        while (entry != 0) {
-            if (entry == music) {
-                break;
-            }
+        while (entry != 0 && entry != music) {
             entry = entry->next;
         }
     }

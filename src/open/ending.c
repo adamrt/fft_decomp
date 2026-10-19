@@ -506,12 +506,8 @@ static void ending_update_xa_audio(void) {
         case 4:
             CdIntToPos(DISC_SECTOR_OPEN_ENDING_XA, &g_file_cd_state.position);
             CdControlF(CdlSeekL, (u8*)&g_file_cd_state.position);
-            {
-                s32* state = &g_ending_script_state.control_state;
-
-                g_system_wait_frames = 0;
-                (*state)++;
-            }
+            g_system_wait_frames = 0;
+            g_ending_script_state.control_state++;
             break;
 
         case 5: {
@@ -530,11 +526,7 @@ static void ending_update_xa_audio(void) {
 
         case 6:
             filter.file = 1;
-            {
-                s32 parameter = g_ending_script_state.control_parameter;
-
-                filter.chan = parameter;
-            }
+            filter.chan = g_ending_script_state.control_parameter;
             CdControlF(CdlSetfilter, (u8*)&filter);
             g_ending_script_state.control_state++;
             break;
