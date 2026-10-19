@@ -229,12 +229,12 @@ static void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
  * and g_ability_list_ability_layout is set up for 6 visible rows.
  *
  * Matching notes: the layout block is one struct (its x/y are s16, so `-= 4`
- * stays an addiu immediate and the constant is not shared); window_x is a
+ * stays an addiu immediate and the constant is not shared); window_width is a
  * separate local from the unit index, and its updates follow the loader
  * calls in each arm. */
 static void command_build_ability_list(s32 mode) {
     s32 unit_index;
-    s32 window_x;
+    s32 window_width;
     unit_stats_t* unit;
     s32 i;
     s32 type;
@@ -243,7 +243,7 @@ static void command_build_ability_list(s32 mode) {
     s32 found;
     s32 columns;
     s32 header_id;
-    s32 row_flags;
+    s32 text_id_base;
     menu_ability_list_t* list;
 
     g_ability_list_ability_layout.columns.text_ids[0] = (s16*)g_ai_workspace_ptr->ability_list.ids;
@@ -311,7 +311,7 @@ static void command_build_ability_list(s32 mode) {
             g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.mp_costs, 0x50);
     }
 
-    window_x = 0xAC;
+    window_width = 0xAC;
     if (type != ACTION_MENU_TYPE_ARITHMETICKS) {
         mode = MENU_ARITHMETICKS_LIST_ABILITIES;
     }
@@ -341,15 +341,15 @@ static void command_build_ability_list(s32 mode) {
 
         header_id = MENU_ICON_HEADER_STOCK_TURN_REFLECT;
         if (found != 0) {
-            window_x -= 4;
+            window_width -= 4;
         } else {
             g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
             menu_copy_u8_to_u16(g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.turns, count);
-            window_x = 0x94;
+            window_width = 0x94;
             header_id = MENU_ICON_HEADER_TURN_REFLECT;
         }
 
-        row_flags = TEXT_ID_ITEM_NAME_BASE;
+        text_id_base = TEXT_ID_ITEM_NAME_BASE;
         g_ability_list_ability_layout.columns.x[1] -= 4;
         g_ability_list_ability_layout.columns.x[2] -= 4;
         columns = 0x11;
@@ -375,7 +375,7 @@ static void command_build_ability_list(s32 mode) {
         }
 
         if (type == ACTION_MENU_TYPE_ARITHMETICKS && mode > 0) {
-            window_x = 0x88;
+            window_width = 0x88;
             g_ability_list_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
             g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
             header_id = MENU_ICON_HEADER_ABILITY;
@@ -383,7 +383,7 @@ static void command_build_ability_list(s32 mode) {
             if (found != 0 && type == ACTION_MENU_TYPE_DEFAULT) {
                 menu_copy_u8_to_u16_terminated(
                     g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.mp_costs);
-                window_x -= 8;
+                window_width -= 8;
                 menu_copy_u8_to_u16(
                     g_ai_workspace_ptr->ability_list.extras, g_ai_workspace_ptr->ability_list.turns, count);
                 header_id = MENU_ICON_HEADER_ABILITY_MP_TURN_REFLECT;
@@ -392,7 +392,7 @@ static void command_build_ability_list(s32 mode) {
             } else {
                 menu_copy_u8_to_u16(
                     g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.turns, count);
-                window_x = 0x94;
+                window_width = 0x94;
                 header_id = MENU_ICON_HEADER_ABILITY_TURN_REFLECT;
                 g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
                 g_ability_list_ability_layout.columns.x[1] -= 4;
@@ -400,18 +400,18 @@ static void command_build_ability_list(s32 mode) {
             }
         }
 
-        row_flags = TEXT_ID_ABILITY_NAME_BASE;
+        text_id_base = TEXT_ID_ABILITY_NAME_BASE;
         columns = 5;
     }
 
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].inner_width = window_x;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.w = window_x;
-    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].text_image.source.w = window_x;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].inner_width = window_width;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].window.w = window_width;
+    g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].text_image.source.w = window_width;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = header_id;
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].select_text_table = columns;
 
     for (i = 0; i < count; i++) {
-        g_ai_workspace_ptr->ability_list.ids[i] |= row_flags;
+        g_ai_workspace_ptr->ability_list.ids[i] |= text_id_base;
         if (type == ACTION_MENU_TYPE_DEFAULT) {
             if (unit->mp - g_ai_workspace_ptr->ability_list.mp_costs[i] < 0
                 && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0) {

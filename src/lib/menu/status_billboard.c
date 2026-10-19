@@ -93,8 +93,8 @@ static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* 
  * Empty secondary skillsets mark byte 1 of the name buffer before the names are copied. */
 void unit_panel_load_selected(void) {
     unit_stats_t* unit = unit_get_stats(g_unit_panel_comparison_unit_data.battle_id);
-    menu_status_panel_slot_state_t* editor = &g_unit_panel_selected_unit_fields.state;
-    u16* innate_items;
+    menu_status_panel_slot_state_t* fields = &g_unit_panel_selected_unit_fields.state;
+    u16* ability_ids;
     const item_data_t* item;
     s32 i;
     s32 output_index;
@@ -118,59 +118,59 @@ void unit_panel_load_selected(void) {
     /* The zodiac sign is the top nibble of the 16-bit birthday value. */
     g_unit_panel_selected_unit.zodiac = unit->birthday.zodiac;
 
-    editor->move = unit->move;
-    editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
-    editor->jump = unit->jump;
-    editor->right_weapon_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE];
-    editor->left_weapon_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
-    editor->right_weapon_power = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
-    editor->left_weapon_power = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
+    fields->move = unit->move;
+    fields->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
+    fields->jump = unit->jump;
+    fields->right_weapon_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE];
+    fields->left_weapon_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
+    fields->right_weapon_power = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
+    fields->left_weapon_power = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
 
-    editor->physical_attack = unit->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
-    editor->physical_class_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
-    editor->physical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
+    fields->physical_attack = unit->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
+    fields->physical_class_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
+    fields->physical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
     if (unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE]
         <= unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE])
-        editor->physical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
-    editor->physical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
+        fields->physical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
+    fields->physical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
 
-    editor->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
-    editor->magical_class_evade = 0;
-    editor->magical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
+    fields->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
+    fields->magical_class_evade = 0;
+    fields->magical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
     if (unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE]
         <= unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE])
-        editor->magical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
-    editor->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
+        fields->magical_shield_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE];
+    fields->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
     for (i = 4; i >= 0; i--)
-        editor->equipment[i] = 0;
+        fields->equipment[i] = 0;
 
     if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
-        editor->equipment[0] = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
+        fields->equipment[0] = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
             ? unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]
             : unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
-        editor->equipment[1] = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] != ITEM_ID_NONE
+        fields->equipment[1] = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] != ITEM_ID_NONE
             ? unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON]
             : unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
-        editor->equipment[2] = unit->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
-        editor->equipment[3] = unit->equipment[UNIT_EQUIPMENT_SLOT_BODY];
-        editor->equipment[4] = unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
+        fields->equipment[2] = unit->equipment[UNIT_EQUIPMENT_SLOT_HEAD];
+        fields->equipment[3] = unit->equipment[UNIT_EQUIPMENT_SLOT_BODY];
+        fields->equipment[4] = unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY];
     }
 
     for (i = 0; i < 5; i++) {
-        if (editor->equipment[i] == ITEM_ID_NOTHING || editor->equipment[i] == ITEM_ID_NONE)
-            editor->equipment[i] = -1;
+        if (fields->equipment[i] == ITEM_ID_NOTHING || fields->equipment[i] == ITEM_ID_NONE)
+            fields->equipment[i] = -1;
     }
 
-    editor->generic_monster = 0;
+    fields->generic_monster = 0;
     if (unit->primary_skillset >= SKILLSET_ID_MONSTER_FIRST && unit->primary_skillset < SKILLSET_ID_END)
-        editor->generic_monster = 1;
+        fields->generic_monster = 1;
 
-    if (editor->generic_monster != 0) {
-        innate_items = ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+    if (fields->generic_monster != 0) {
+        ability_ids = ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
-            editor->ability_ids[i] = *innate_items++;
+            fields->ability_ids[i] = *ability_ids++;
             i++;
         } while (i < 5);
 
@@ -178,45 +178,45 @@ void unit_panel_load_selected(void) {
          * check runs on the main stack. */
         g_thread_call_target = skillset_monster_count_supporters;
         if (thread_call_on_main_stack(unit) == 0)
-            editor->ability_ids[3] = 0;
+            fields->ability_ids[3] = 0;
 
         output_index = 0;
         for (item_id = 0; item_id < 5; item_id++) {
-            if (editor->ability_ids[item_id] != 0)
-                editor->ability_ids[output_index++] = editor->ability_ids[item_id];
+            if (fields->ability_ids[item_id] != 0)
+                fields->ability_ids[output_index++] = fields->ability_ids[item_id];
         }
         while (output_index < 5)
-            editor->ability_ids[output_index++] = 0;
+            fields->ability_ids[output_index++] = 0;
     } else {
         /* Both name marks are overwritten when the names are refilled and copied at the end. */
         field_value = unit->primary_skillset;
-        editor->ability_ids[0] = field_value;
+        fields->ability_ids[0] = field_value;
         if (field_value == 0)
             g_unit_panel_billboard_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
-        editor->ability_ids[1] = field_value;
+        fields->ability_ids[1] = field_value;
         if (field_value == 0)
             g_unit_panel_billboard_secondary_skillset_name[1] = 0xfe;
-        editor->ability_ids[2] = unit->abilities.reaction;
-        editor->ability_ids[3] = unit->abilities.support;
-        editor->ability_ids[4] = unit->abilities.movement;
+        fields->ability_ids[2] = unit->abilities.reaction;
+        fields->ability_ids[3] = unit->abilities.support;
+        fields->ability_ids[4] = unit->abilities.movement;
     }
 
     /* Empty ability rows become -1, as empty equipment slots do. */
     for (i = 0; i < 5; i++) {
-        list_value = editor->ability_ids[i];
+        list_value = fields->ability_ids[i];
         if (list_value == 0)
-            editor->ability_ids[i] = list_value - 1;
+            fields->ability_ids[i] = list_value - 1;
     }
 
     /* Two hands applies only when exactly one hand holds an item. */
     item_id = ITEM_ID_NOTHING;
-    editor->two_hands = 0;
-    if (editor->equipment[0] != -1) {
-        if (editor->equipment[1] == -1)
-            item_id = editor->equipment[0];
-    } else if (editor->equipment[1] != -1) {
-        item_id = editor->equipment[1];
+    fields->two_hands = 0;
+    if (fields->equipment[0] != -1) {
+        if (fields->equipment[1] == -1)
+            item_id = fields->equipment[0];
+    } else if (fields->equipment[1] != -1) {
+        item_id = fields->equipment[1];
     }
 
     if (item_id != ITEM_ID_NOTHING) {
@@ -226,7 +226,7 @@ void unit_panel_load_selected(void) {
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
                 || ((unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS)
                     && (item_flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE)))
-                editor->two_hands = 1;
+                fields->two_hands = 1;
         }
     }
 
