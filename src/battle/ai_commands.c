@@ -2810,8 +2810,7 @@ static s32 ai_target_select_in_peril(void) {
         } else {
             status_score = 0;
             if (ai->acting_unit_decision->targeting_flags_1 & AI_TARGETING_FLAG_1_CAN_HEAL_ALLIES) {
-                /* Branch-free 0x72 below half HP: the flag is bit 0, so its negation is all ones. */
-                status_score = -(decision->targeting_flags_2 & AI_TARGET_HP_BELOW_HALF) & 0x72;
+                status_score = (decision->targeting_flags_2 & AI_TARGET_HP_BELOW_HALF) != 0 ? 0x72 : 0;
             }
         }
         if (status_score == 0) {
