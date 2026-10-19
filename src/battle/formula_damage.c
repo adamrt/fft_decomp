@@ -224,10 +224,8 @@ void formula_damage_random_y_times_pa(void) {
 
 /* Formula 0x3D: status, hit (MA+X)%; magic evade. */
 void formula_hit_ma_x_percent_magical_evade(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_faith() == 0) {
-            formula_apply_status_to_action();
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_faith() == 0) {
+        formula_apply_status_to_action();
     }
 }
 
@@ -538,16 +536,14 @@ void formula_moldball_virus(void) {
 void formula_level_blast(void) {
     action_data_t* action;
 
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_faith() == 0) {
-            if (g_action_target->level < 2) {
-                formula_force_attack_miss();
-            }
-            action = g_action_target_data;
-            /* The target writes the combined special-effect field as one 16-bit value. */
-            action->special_effect = ACTION_SPECIAL_EFFECT_LEVEL_DOWN;
-            action->attack_type = ACTION_TYPE_PSEUDO_STATUS;
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_faith() == 0) {
+        if (g_action_target->level < 2) {
+            formula_force_attack_miss();
         }
+        action = g_action_target_data;
+        /* The target writes the combined special-effect field as one 16-bit value. */
+        action->special_effect = ACTION_SPECIAL_EFFECT_LEVEL_DOWN;
+        action->attack_type = ACTION_TYPE_PSEUDO_STATUS;
     }
 }
 
@@ -608,19 +604,15 @@ void formula_damage_ma_plus_y_half_times_ma_status(void) {
 
 /* Formula 0x61: -Brave (Y), hit F(MA+X)%; magic evade. */
 void formula_lower_brave_y(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic() == 0) {
-            formula_set_brave_loss_y();
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic() == 0) {
+        formula_set_brave_loss_y();
     }
 }
 
 /* Formula 0x62: -Brave (Y), hit (MA+X)%; magic evade. */
 void formula_look_of_fright(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_faith() == 0) {
-            formula_set_brave_loss_y();
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_faith() == 0) {
+        formula_set_brave_loss_y();
     }
 }
 

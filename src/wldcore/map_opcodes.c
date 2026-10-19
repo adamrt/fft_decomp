@@ -62,10 +62,8 @@ s32 location_script_run(s32 location, s32 action_mask) {
                      & (LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_RESULT_CONDITION_FAILED))
             == 0);
         flags = g_location_script_state.flags;
-        if (flags & LOCATION_SCRIPT_RESULT_ACTION_REACHED) {
-            if (flags & action_mask) {
-                return 1;
-            }
+        if ((flags & LOCATION_SCRIPT_RESULT_ACTION_REACHED) && (flags & action_mask)) {
+            return 1;
         }
     }
     return 0;
