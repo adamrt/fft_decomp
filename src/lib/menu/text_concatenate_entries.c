@@ -25,6 +25,7 @@ void text_concatenate_entries(const u8* text_table, u8* out, const s16* text_ids
             }
         } while (*ids != -1);
     }
+    /* An empty id list with separators still backs up before the output buffer. */
     if (separate != 0) {
         out--;
     }
