@@ -1331,7 +1331,7 @@ static void save_build_file_header(s32 slot, s32 level, save_file_header_t* head
     header->magic1 = SAVE_HEADER_MAGIC_C;
     header->icon_flags = SAVE_HEADER_ICON_ONE_FRAME;
     header->block_count = SAVE_HEADER_BLOCK_COUNT_ONE;
-    memset(header->reserved, 0, 0x1C);
+    memset(header->reserved, 0, sizeof(header->reserved));
     slot++;
     bcopy(g_save_title_template, header->title, 0x16);
 
@@ -1396,6 +1396,6 @@ static void save_build_file_header(s32 slot, s32 level, save_file_header_t* head
     records = g_save_icon_records;
     value = (slot - 1) % 15;
     record = records + value;
-    bcopy(record->clut, header->icon_clut, 0x20);
-    bcopy(record->image, header->icon_image, 0x80);
+    bcopy(record->clut, header->icon_clut, sizeof(header->icon_clut));
+    bcopy(record->image, header->icon_image, sizeof(header->icon_image));
 }
