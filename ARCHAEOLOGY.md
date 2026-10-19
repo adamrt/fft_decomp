@@ -62,6 +62,8 @@ Paths such as `c:\fftimg\event\attack.out` and `C:\FFTIMG\MAP\GNS\` survive in f
 
 Some text resources also survive as complete embedded files: `SAMPLE.LZW` in BATTLE and WORLD, `HELP.LZW` in HELPMENU and WORLD, `WLDHELP.LZW` in WORLD, and `JOIN.LZW` in REQUIRE. Despite the extension, their decoder uses LZ-style distance/length backreferences rather than an LZW dictionary. HELP and WLDHELP use those commands; SAMPLE and JOIN contain none.
 
+BATTLE and WORLD also embed byte-identical copies of `EVENT/FONT.BIN`: 77,000 bytes for 2,200 glyphs, stored as 10×14 grids of two-bit pixels.
+
 The credits distinguish **Taku Murata — Main Program**, **Hiroshi Ono — World Map Program**, **Masaaki Kubo — Shop & Organization Program**, and **Hidenori Suzuki — Sound Programmer**. Those named responsibilities fit the broad program split. The binaries do not establish who wrote every renderer, interpreter or shared object, so finer ownership remains uncertain. The credit blocks begin at file offsets `0xae65` and `0xb3fc` in `OPEN/OPEN.BIN`.
 
 Some low-level routines have strong assembly fingerprints: cooperative context switches, stack-changing trampolines and several small accessors and copy loops. Register conventions, delay slots and trapping arithmetic distinguish them from the surrounding compiler output. These clues concern how the code was built; GTE or scratchpad use alone does not establish Sony library ownership.
