@@ -269,17 +269,10 @@ s32 menu_should_close_thread(u32* input) {
 void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
     s32 kind;
     s32 index;
-    /* HImode is load-bearing. `cse` keys its constant equivalence classes by
-     * mode, so a u16 `size` is not value-equal to the SImode 0x10 of the
-     * `kind == 0x10` test below; that restores the target's separate
-     * `li v0,0x10` for the compare and keeps `size` live across the arm's
-     * call, which is what parks it in callee-saved s1. `s32` here changes the allocation. */
+    /* Keep this halfword value separate from integer header-ID constants
+     * to preserve the original register allocation. */
     u16 size;
-    /* The target's frame is 0x40 with its register saves at 0x20 and a 20-byte
-     * outgoing-argument area, so `vars` is 8 bytes the code never touches.
-     * Those bytes sit above the argument area and below the saves, which is
-     * where a declared aggregate lands; an unreferenced one reproduces the
-     * frame at zero instructions. Worth the whole prologue and epilogue. */
+    /* Eight untouched bytes preserve the original 0x40-byte stack frame. */
     u8 unused_scratch[8];
 
     thread_set_current_task_id(THREAD_TASK_MENU_WINDOW_BUILD);
