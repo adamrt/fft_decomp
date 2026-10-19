@@ -370,14 +370,12 @@ void formula_return_2(void) {
 /* Formula 0x16 (Mute): MP damage equal to the target's current MP, hit F(MA+X)%;
  * magic evade. */
 void formula_mute(void) {
-    unit_stats_t* target;
     action_data_t* action;
     u16 mp;
 
     if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_strengthen() == 0) {
-        target = g_action_target;
         action = g_action_target_data;
-        mp = target->mp;
+        mp = g_action_target->mp;
         action->attack_type = ACTION_TYPE_MP_DAMAGE;
         action->mp_damage = mp;
     }
