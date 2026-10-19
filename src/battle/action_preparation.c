@@ -1405,8 +1405,7 @@ s32 reaction_prepare_next(s16* out_ability) {
 
                     switch (reaction_id) {
                     case ABILITY_ID_REACTION_REFLECT:
-                        /* REFLECT when the bounce tile is valid, else NONE. */
-                        outcome = -(reaction_apply_reflect(unit) == 0) & REACTION_OUTCOME_REFLECT;
+                        outcome = reaction_apply_reflect(unit) == 0 ? REACTION_OUTCOME_REFLECT : REACTION_OUTCOME_NONE;
                         break;
                     case ABILITY_ID_REACTION_MEATBONE_SLASH:
                         if (reaction_store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
@@ -1417,8 +1416,9 @@ s32 reaction_prepare_next(s16* out_ability) {
                         }
                         break;
                     case ABILITY_ID_REACTION_COUNTER_MAGIC:
-                        outcome
-                            = (reaction_store_counter_ability(unit, SKILLSET_ID_BLACK_MAGIC, last_attack, 0) == 0) * 2;
+                        outcome = reaction_store_counter_ability(unit, SKILLSET_ID_BLACK_MAGIC, last_attack, 0) == 0
+                            ? REACTION_OUTCOME_COUNTER
+                            : REACTION_OUTCOME_NONE;
                         break;
                     case ABILITY_ID_REACTION_COUNTER_TACKLE:
                         if (reaction_store_counter_ability(
@@ -1429,10 +1429,11 @@ s32 reaction_prepare_next(s16* out_ability) {
                         break;
                     case ABILITY_ID_REACTION_COUNTER_FLOOD:
                         surface = g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)].surface.type;
-                        outcome = (reaction_store_counter_ability(
-                                       unit, SKILLSET_ID_ELEMENTAL, g_terrain_geomancy_abilities[surface], 0)
-                                      == 0)
-                            * 2;
+                        outcome = reaction_store_counter_ability(
+                                      unit, SKILLSET_ID_ELEMENTAL, g_terrain_geomancy_abilities[surface], 0)
+                                == 0
+                            ? REACTION_OUTCOME_COUNTER
+                            : REACTION_OUTCOME_NONE;
                         break;
                     case ABILITY_ID_REACTION_AUTO_POTION:
                         result = reaction_select_auto_potion_item(unit);
@@ -1461,11 +1462,11 @@ s32 reaction_prepare_next(s16* out_ability) {
                         }
                         break;
                     default:
-                        /* SELF_TILE for a reaction flagged neither passive nor active, else NONE. */
-                        outcome
-                            = -((g_ability_reaction_behavior_flags[g_reaction_ability_id - ABILITY_ID_REACTION_FIRST]
-                                    & (REACTION_BEHAVIOR_FLAG_PASSIVE | REACTION_BEHAVIOR_FLAG_ACTIVE))
-                                == 0);
+                        outcome = (g_ability_reaction_behavior_flags[g_reaction_ability_id - ABILITY_ID_REACTION_FIRST]
+                                      & (REACTION_BEHAVIOR_FLAG_PASSIVE | REACTION_BEHAVIOR_FLAG_ACTIVE))
+                                == 0
+                            ? REACTION_OUTCOME_SELF_TILE
+                            : REACTION_OUTCOME_NONE;
                         break;
                     }
 
