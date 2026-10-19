@@ -10,7 +10,6 @@ s32 menu_update_horizontal_selection_and_mark_change(u16 entry_count, u8 selecti
     s16 previous_selection;
     s16 selection;
 
-    selection_index &= 0xff;
     previous_selection = g_menu_selection_values[selection_index];
     selection = menu_update_wrapped_horizontal_selection(entry_count, selection_index, input_mask);
     if (previous_selection != selection) {
