@@ -1864,7 +1864,7 @@ static void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angl
     SPRT sprite;
     SVECTOR local;
     VECTOR position;
-    s32 sxy;
+    s32 depth_cue;
     s32 flag;
     effect_slot_t* slot = &g_effect_slots[g_effect_secondary_current->slot_ids[0]];
     POLY_FT4* prim;
@@ -1916,8 +1916,8 @@ static void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angl
     g_effect_corner_bottom_right.vy = bottom;
     g_effect_corner_bottom_left.vy = bottom;
     RotTransPers3(&g_effect_corner_top_left, &g_effect_corner_top_right, &g_effect_corner_bottom_left, (s32*)&prim->x0,
-        (s32*)&prim->x1, (s32*)&prim->x2, &sxy, &flag);
-    RotTransPers(&g_effect_corner_bottom_right, (s32*)&prim->x3, &sxy, &flag);
+        (s32*)&prim->x1, (s32*)&prim->x2, &depth_cue, &flag);
+    RotTransPers(&g_effect_corner_bottom_right, (s32*)&prim->x3, &depth_cue, &flag);
     AddPrim(g_effect_polygon_depth_data + depth, prim);
 }
 
