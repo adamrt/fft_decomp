@@ -53,7 +53,7 @@ extern s32 g_party_affected_battle_unit_indices[];
 s32 party_update_after_battle(void);
 void party_brave_faith_report_thread(void);
 void party_departures_thread(void);
-void party_set_class_variable(s32 unit_class, s32 value);
+void party_set_class_variable(s32 character_identity, s32 bio_state);
 s32 party_store_or_sell_equipment(s32 unit_id);
 s32 party_sell_equipment_over_limit(s32 unit_id);
 

@@ -1,5 +1,5 @@
-/* A 16-frame thread stop, the bio variable by unit class, bonus image loading, frame waits with skip and a 31-frame RGB
- * fade. */
+/* REQUIRE screen support: banner loading through the main-stack CD bridge,
+ * skippable frame waits, RGB fades and character biography updates. */
 
 #include "fft/after_battle.h"
 #include "fft/file.h"
@@ -15,13 +15,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Three unit ids whose presence selects the event variable at +6. */
-typedef struct party_class_variable_record {
-    u16 unit_ids[3];
+/* Character identities that share a Brave Story biography variable. */
+typedef struct party_bio_variable_record {
+    u16 character_identities[3];
     u16 variable;
-} party_class_variable_record_t;
+} party_bio_variable_record_t;
 
-extern party_class_variable_record_t g_party_bio_update_records[11];
+extern party_bio_variable_record_t g_party_bio_update_records[11];
 
 /* BONUS.BIN stores a 256x200 4bpp image, followed by eight 16-color palette slots. */
 typedef struct conditions_banner_file {
@@ -39,21 +39,19 @@ void thread_stop_after_16_frames(void) {
     thread_exit_current_wrapper();
 }
 
-/* Set to `value` the script variable of every record in
- * g_party_bio_update_records that lists `unit_class` among its three
- * identities, a party_bio_state_e. */
-void party_set_class_variable(s32 unit_class, s32 value) {
+/* Update the character's Brave Story biography state through its script variable. */
+void party_set_class_variable(s32 character_identity, s32 bio_state) {
     s32 i;
     s32 j;
 
     for (i = 0; i < 11; i++) {
         for (j = 0; j < 3; j++) {
-            if (unit_class == g_party_bio_update_records[i].unit_ids[j]) {
+            if (character_identity == g_party_bio_update_records[i].character_identities[j]) {
                 break;
             }
         }
         if (j != 3) {
-            script_set_variable(g_party_bio_update_records[i].variable, value);
+            script_set_variable(g_party_bio_update_records[i].variable, bio_state);
         }
     }
 }
@@ -69,26 +67,21 @@ void party_set_class_variable(s32 unit_class, s32 value) {
 void conditions_load_banner_image(s32 image_id) {
     void* allocation;
     conditions_banner_file_t* banner;
-    s32 (*read_operation)(s32 sector, u32 size, void* destination);
 
     do {
         thread_yield();
         allocation = heap_reserve_at(g_heap_high_overlay_load_address, 0x8000);
     } while (allocation != g_heap_high_overlay_load_address);
 
-    read_operation = file_request_read_bytes;
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))read_operation;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(image_id * 13 + DISC_SECTOR_EVENT_BONUS_BIN, sizeof(*banner), allocation) != 0);
 
-    {
-        int (*poll_operation)(void) = file_is_still_loading;
-        do {
-            thread_yield();
-            g_thread_call_target = (void (*)(void))poll_operation;
-        } while (thread_call_on_main_stack() != 0);
-    }
+    do {
+        thread_yield();
+        g_thread_call_target = (void (*)(void))file_is_still_loading;
+    } while (thread_call_on_main_stack() != 0);
 
     banner = allocation;
     /* The 256-row upload includes the reserved suffix beyond the 0x6800-byte file. */
@@ -122,7 +115,7 @@ void input_wait_frames_or_skip(s32 frames) {
 
 /* Fade g_after_battle_gfx_fade_rgb linearly from its current value to eight times
  * each target over 31 frames, yielding once per frame. */
-void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2) {
+void gfx_fade_rgb_31_frames(s32 target_red, s32 target_green, s32 target_blue) {
     s32 current[3];
     s32 interpolated[3];
     s32 target[3];
@@ -130,9 +123,9 @@ void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2) {
     s32 i;
 
     frame = 0;
-    target[0] = target_0 * 8;
-    target[1] = target_1 * 8;
-    target[2] = target_2 * 8;
+    target[0] = target_red * 8;
+    target[1] = target_green * 8;
+    target[2] = target_blue * 8;
     current[0] = g_after_battle_gfx_fade_rgb[0];
     current[1] = g_after_battle_gfx_fade_rgb[1];
     current[2] = g_after_battle_gfx_fade_rgb[2];

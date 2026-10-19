@@ -43,7 +43,7 @@ void require_dark_screen_entrypoint(void);
 extern s16 g_after_battle_menu_selection_result;
 extern u8 g_after_battle_gfx_fade_rgb[3];
 
-void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
+void gfx_fade_rgb_31_frames(s32 target_red, s32 target_green, s32 target_blue);
 
 /* text */
 /* Character identities grouped by their warning, departure and dismissal text. */
