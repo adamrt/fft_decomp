@@ -597,9 +597,9 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
     s32 result;
     s32 segment;
     s32 start_value;
-    s32 t0;
-    s32 t1;
-    s32 t2;
+    s32 key_time0;
+    s32 key_time1;
+    s32 key_time2;
     s32 lead;
     s32 time_delta0;
     s32 time_delta1;
@@ -617,12 +617,12 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
     /* Entering a segment: its length in frames and the value it starts from. */
     if (track->segment_frame == 0) {
         segment = track->segment;
-        t2 = track->keys[segment + 2].time;
-        t1 = track->keys[segment + 1].time;
-        t0 = track->keys[segment].time;
-        span = t2 - t1;
-        lead = t1 - t0;
-        frame = t2 - t0; /* whole two-key span */
+        key_time2 = track->keys[segment + 2].time;
+        key_time1 = track->keys[segment + 1].time;
+        key_time0 = track->keys[segment].time;
+        span = key_time2 - key_time1;
+        lead = key_time1 - key_time0;
+        frame = key_time2 - key_time0; /* whole two-key span */
         /* With four or more keys each segment runs between interval midpoints; the first
          * and last segments reach the end keys. */
         if (track->key_count >= 4) {
