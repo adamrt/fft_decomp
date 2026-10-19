@@ -531,7 +531,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   repeats the layer test that the statement before it has just made false;
   `turn_calculate_status_flags` cannot report Sleep, whose
   `g_status_effect_data` record carries the freeze-CT flag tested first;
-  `animation_set_mounted` tests a depth masked to a byte for `< 0`
+  `animation_set_stand` tests a depth masked to a byte for `< 0`
   and a nonzero animation for 0; `menu_get_thread_activity` tests `i != 3`
   inside its scan of threads 4-9;
   `camera_rotate_when_unit_tile_not_visible` adjusts a negative
