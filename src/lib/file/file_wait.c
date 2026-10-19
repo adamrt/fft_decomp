@@ -19,10 +19,9 @@ void file_wait_then_request_read(file_load_descriptor_t* header, s32 sector, s32
  * polling with world_map_poll_texture_stream until the read completes.
  * Skipped when the core is restarting (SYSTEM_FLAG_RESTART).
  *
- * The target frame is 0x20 rather than the 0x18 this body needs: 16 bytes of
- * outgoing arguments plus the ra/s0 save pair leave 8 bytes of unreferenced
- * locals, so the original declared an 8-byte stack object it never used. Its
- * type is unknown; the array below reproduces the slot exactly. */
+ * The original 0x20-byte frame holds 16 bytes of outgoing arguments, the
+ * ra/s0 save pair and eight bytes this body never references. The array below
+ * preserves that frame size; the original local declarations are unknown. */
 void world_map_load_texture(void) {
     s32 unused_stack_slot[2];
 
