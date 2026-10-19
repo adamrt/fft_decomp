@@ -103,12 +103,8 @@ static s32 party_update_brave_faith(void) {
     s32 faith;
     s32 base;
     s32 raw;
-    s32 delta1;
-    s32 delta2;
-    s32 value1;
-    s32 value2;
-    s32 value3;
-    s32 value4;
+    s32 change;
+    s32 scaled_change;
 
     g_party_affected_unit_count = 0;
     for (battle_index = 0; battle_index < UNIT_SLOT_COUNT; battle_index++) {
@@ -121,18 +117,18 @@ static s32 party_update_brave_faith(void) {
 
         base = unit->original_brave;
         raw = unit->brave;
-        delta1 = raw - base;
-        delta2 = delta1 * 250;
-        raw = delta2 / 100;
+        change = raw - base;
+        scaled_change = change * 250;
+        raw = scaled_change / 100;
         raw = raw / 10;
         brave = base + raw;
         unit->original_brave = brave;
         unit->brave = brave;
         base = unit->original_faith;
         raw = unit->faith;
-        delta1 = raw - base;
-        delta2 = delta1 * 250;
-        raw = delta2 / 100;
+        change = raw - base;
+        scaled_change = change * 250;
+        raw = scaled_change / 100;
         raw = raw / 10;
         faith = base + raw;
         unit->original_faith = faith;
@@ -148,6 +144,7 @@ static s32 party_update_brave_faith(void) {
         if (brave >= 6 && brave <= 15) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 column;
+                s32 warning_index;
 
                 /* Find the identity's message group (three identities each); an identity in
                  * none uses group 0, and group 71 shares group 72's line. */
@@ -167,18 +164,20 @@ static s32 party_update_brave_faith(void) {
                 if (brave == 71) {
                     brave = 72;
                 }
-                value1 = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[value1] = unit->character_identity;
-                g_party_affected_unit_message_ids[value1] = brave + 0x818;
-                g_party_affected_battle_unit_indices[value1] = battle_index;
-                g_party_affected_unit_count = value1 + 1;
+                warning_index = g_party_affected_unit_count;
+                g_party_affected_unit_message_args[warning_index] = unit->character_identity;
+                g_party_affected_unit_message_ids[warning_index] = brave + 0x818;
+                g_party_affected_battle_unit_indices[warning_index] = battle_index;
+                g_party_affected_unit_count = warning_index + 1;
             } else {
-                value2 = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[value2] = unit->unit_id;
-                g_party_affected_unit_message_ids[value2]
+                s32 warning_index;
+
+                warning_index = g_party_affected_unit_count;
+                g_party_affected_unit_message_args[warning_index] = unit->unit_id;
+                g_party_affected_unit_message_ids[warning_index]
                     = (unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) * 4 + (battle_index & 3) + 0x800;
-                g_party_affected_battle_unit_indices[value2] = battle_index;
-                g_party_affected_unit_count = value2 + 1;
+                g_party_affected_battle_unit_indices[warning_index] = battle_index;
+                g_party_affected_unit_count = warning_index + 1;
             }
             warning_count++;
         }
@@ -187,6 +186,7 @@ static s32 party_update_brave_faith(void) {
             if (unit->character_identity < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 s32 group_index;
                 s32 column;
+                s32 warning_index;
 
                 for (group_index = 0; group_index < PARTY_MESSAGE_IDENTITY_GROUP_COUNT; group_index++) {
                     for (column = 0; column < PARTY_MESSAGE_IDENTITIES_PER_GROUP; column++) {
@@ -204,18 +204,20 @@ static s32 party_update_brave_faith(void) {
                 if (group_index == 71) {
                     group_index = 72;
                 }
-                value3 = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[value3] = unit->unit_id;
-                g_party_affected_unit_message_ids[value3] = group_index + 0x862;
-                g_party_affected_battle_unit_indices[value3] = battle_index;
-                g_party_affected_unit_count = value3 + 1;
+                warning_index = g_party_affected_unit_count;
+                g_party_affected_unit_message_args[warning_index] = unit->unit_id;
+                g_party_affected_unit_message_ids[warning_index] = group_index + 0x862;
+                g_party_affected_battle_unit_indices[warning_index] = battle_index;
+                g_party_affected_unit_count = warning_index + 1;
             } else {
-                value4 = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[value4] = unit->unit_id;
-                g_party_affected_unit_message_ids[value4]
+                s32 warning_index;
+
+                warning_index = g_party_affected_unit_count;
+                g_party_affected_unit_message_args[warning_index] = unit->unit_id;
+                g_party_affected_unit_message_ids[warning_index]
                     = (unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) * 4 + (battle_index & 3) + 0x80c;
-                g_party_affected_battle_unit_indices[value4] = battle_index;
-                g_party_affected_unit_count = value4 + 1;
+                g_party_affected_battle_unit_indices[warning_index] = battle_index;
+                g_party_affected_unit_count = warning_index + 1;
             }
             warning_count++;
         }
@@ -307,7 +309,7 @@ static s32 party_find_departures(void) {
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
             }
-            /* The target passes three arguments the callee does not take. */
+            /* Retail calls this empty reporting stub for low-Brave departures only. */
             party_report_departure_stub(battle_index, unit->unit_id, unit->character_identity);
             departure_count++;
         } else if (faith >= 95) {
@@ -455,11 +457,10 @@ s32 party_update_after_battle(void) {
                     party_save_unit(unit, unit->unit_flags & UNIT_FLAG_SAVE_FORMATION);
                 } else {
                     s32 count;
-                    s32 script_index = EVENT_SCRIPT_VAR_RANDOM_VALUE;
                     s32 script_variant;
                     unit->unit_flags &= ~(UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
                     g_party_affected_unit_message_args[g_party_affected_unit_count] = unit->unit_id;
-                    script_variant = script_get_variable(script_index) & 7;
+                    script_variant = script_get_variable(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 7;
                     prompt_count++;
                     count = g_party_affected_unit_count;
                     g_party_affected_unit_message_ids[count]
