@@ -52,8 +52,8 @@ s32 gfx_update_decreasing_fade(void) {
         {
             rgb24_t* color = &g_gfx_fade_color;
 
-            g_gfx_fade_color.b = g_gfx_fade_intensity;
-            g_gfx_fade_color.g = g_gfx_fade_intensity;
+            color->b = g_gfx_fade_intensity;
+            color->g = g_gfx_fade_intensity;
             color->r = g_gfx_fade_intensity;
             gfx_enqueue_tile(&g_gfx_fade_rect, color, 1, g_gfx_otag_count - 1);
         }
@@ -80,8 +80,8 @@ s32 gfx_update_increasing_fade(void) {
         {
             rgb24_t* color = &g_gfx_fade_color;
 
-            g_gfx_fade_color.b = g_gfx_fade_intensity;
-            g_gfx_fade_color.g = g_gfx_fade_intensity;
+            color->b = g_gfx_fade_intensity;
+            color->g = g_gfx_fade_intensity;
             color->r = g_gfx_fade_intensity;
             gfx_enqueue_tile(&g_gfx_fade_rect, color, 1, g_gfx_otag_count - 1);
         }
