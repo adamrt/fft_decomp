@@ -121,11 +121,11 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
             }
             record->detail.abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET] = party->secondary_skillset;
             record->detail.abilities[FORMATION_ABILITY_SLOT_REACTION]
-                = party->reaction_ability[0] + (party->reaction_ability[1] << 8);
+                = party->reaction_ability.low + (party->reaction_ability.high << 8);
             record->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT]
-                = party->support_ability[0] + (party->support_ability[1] << 8);
+                = party->support_ability.low + (party->support_ability.high << 8);
             record->detail.abilities[FORMATION_ABILITY_SLOT_MOVEMENT]
-                = party->movement_ability[0] + (party->movement_ability[1] << 8);
+                = party->movement_ability.low + (party->movement_ability.high << 8);
         }
     }
 
@@ -248,13 +248,14 @@ void formation_save_records(void) {
         party->gender_flags = g_formation_unit_pointers[i]->gender_flags;
         party->secondary_skillset
             = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_SECONDARY_SKILLSET];
-        party->reaction_ability[0] = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_REACTION];
-        party->reaction_ability[1]
+        party->reaction_ability.low = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_REACTION];
+        party->reaction_ability.high
             = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_REACTION] >> 8;
-        party->support_ability[0] = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT];
-        party->support_ability[1] = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT] >> 8;
-        party->movement_ability[0] = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_MOVEMENT];
-        party->movement_ability[1]
+        party->support_ability.low = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT];
+        party->support_ability.high
+            = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_SUPPORT] >> 8;
+        party->movement_ability.low = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_MOVEMENT];
+        party->movement_ability.high
             = g_formation_unit_pointers[i]->detail.abilities[FORMATION_ABILITY_SLOT_MOVEMENT] >> 8;
         if (g_formation_unit_pointers[i]->detail.uses_monster_skillset == 0) {
             item = g_formation_unit_pointers[i]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];

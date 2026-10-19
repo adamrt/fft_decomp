@@ -17,17 +17,21 @@ struct unit_stats;
 typedef struct unit unit_t;
 
 /* names */
-/* A packed unit-name ID and its index and text-page class. */
+/* The persistent name ID's index and text-page class bytes. */
+typedef struct unit_name_id_fields {
+    u8 index;
+    u8 name_class;
+} unit_name_id_fields_t;
+typedef char unit_name_id_fields_size_must_be_2[(sizeof(unit_name_id_fields_t) == 2) ? 1 : -1];
+
+/* A packed runtime unit-name ID and its component bytes. */
 typedef union unit_name_id {
     u16 value;
-    struct {
-        u8 index;
-        u8 name_class;
-    } fields;
+    unit_name_id_fields_t fields;
 } unit_name_id_t;
 typedef char unit_name_id_size_must_be_2[(sizeof(unit_name_id_t) == 2) ? 1 : -1];
 
-/* unit_name_id_t.fields.name_class selects the unit-name text page. */
+/* unit_name_id_fields_t.name_class selects the unit-name text page. */
 typedef enum party_name_class {
     PARTY_NAME_CLASS_SPECIAL = 0,
     PARTY_NAME_CLASS_GENERIC_MALE = 1,

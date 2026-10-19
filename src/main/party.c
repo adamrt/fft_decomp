@@ -242,8 +242,8 @@ s32 party_save_unit(const unit_stats_t* unit, s32 allow_guest) {
     /* The saved span includes the career record and following 16-byte name. */
     mem_copy_byte_data_source_first(&unit->career, &party->career, sizeof(party->career) + sizeof(party->name));
     /* name_id is stored as two byte writes (lbu / lhu+srl), not one sh. */
-    party->name_id.fields.index = unit->quote_name_id.value;
-    party->name_id.fields.name_class = unit->quote_name_id.value >> 8;
+    party->name_id.index = unit->quote_name_id.value;
+    party->name_id.name_class = unit->quote_name_id.value >> 8;
     party->proposition_status = 0;
     party->egg_color = 0;
     return 0;
@@ -466,8 +466,8 @@ static void unit_generate_party_record(party_unit_t* party, unit_generation_type
     if (unit_type == UNIT_TYPE_RAMZA) {
         name_id.value = 1;
     } else {
-        party->name_id.fields.index = 0xff;
-        party->name_id.fields.name_class = name_base.fields.name_class;
+        party->name_id.index = 0xff;
+        party->name_id.name_class = name_base.fields.name_class;
         do {
             found = 1;
             name_id.value = name_base.value + (rand() * 255) / 0x8000;
@@ -475,8 +475,8 @@ static void unit_generate_party_record(party_unit_t* party, unit_generation_type
                 other = &g_party_units[i];
                 if (other->party_id != PARTY_ID_NONE && (other->sprite_set & -(other->sprite_set >> 7)) == generic_id) {
                     existing_name.value = 0;
-                    existing_name.fields.name_class = other->name_id.fields.name_class;
-                    existing_name.fields.index = other->name_id.fields.index;
+                    existing_name.fields.name_class = other->name_id.name_class;
+                    existing_name.fields.index = other->name_id.index;
                     if (existing_name.value == name_id.value) {
                         found = 0;
                         break;
@@ -485,8 +485,8 @@ static void unit_generate_party_record(party_unit_t* party, unit_generation_type
             }
         } while (found == 0);
     }
-    party->name_id.fields.index = name_id.fields.index;
-    party->name_id.fields.name_class = name_id.fields.name_class;
+    party->name_id.index = name_id.fields.index;
+    party->name_id.name_class = name_id.fields.name_class;
     name_flags += name_id.fields.index;
     mem_copy_bytes_source_first(world_text_find_entry(name_flags), party->name, sizeof(party->name));
     party->proposition_status = 0;
@@ -991,9 +991,9 @@ static void unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party
     unit->birthday.birthday = value;
     unit->birthday.zodiac = party->zodiac >> PARTY_ZODIAC_SHIFT;
     unit->secondary_skillset = party->secondary_skillset;
-    unit->abilities.reaction = party->reaction_ability[0] + (party->reaction_ability[1] << 8);
-    unit->abilities.support = party->support_ability[0] + (party->support_ability[1] << 8);
-    unit->abilities.movement = party->movement_ability[0] + (party->movement_ability[1] << 8);
+    unit->abilities.reaction = party->reaction_ability.low + (party->reaction_ability.high << 8);
+    unit->abilities.support = party->support_ability.low + (party->support_ability.high << 8);
+    unit->abilities.movement = party->movement_ability.low + (party->movement_ability.high << 8);
     mem_copy_byte_data_source_first(party->equipment, unit->equipment, UNIT_EQUIPMENT_SLOT_COUNT);
     unit->experience = party->experience;
     unit->level = party->level;
@@ -1010,7 +1010,7 @@ static void unit_copy_party_record(unit_stats_t* unit, const party_unit_t* party
     mem_copy_byte_data_source_first(
         &party->career.job_points, &unit->career.job_points, sizeof(unit->career.job_points));
     mem_copy_byte_data_source_first(party->name, unit->name, sizeof(unit->name));
-    unit->quote_name_id.value = party->name_id.fields.index + (party->name_id.fields.name_class << 8);
+    unit->quote_name_id.value = party->name_id.index + (party->name_id.name_class << 8);
     mem_zero(&unit->ai, sizeof(unit->ai));
 }
 
@@ -1861,7 +1861,7 @@ static void unit_store_names(unit_stats_t* unit) {
     u8* text;
     party_unit_t* party;
     unit_stats_t* other;
-    const unit_name_id_t* name_id_record;
+    const unit_name_id_fields_t* name_id_record;
 
     prepare_text = battle_text_find_entry;
     if (g_unit_name_uses_world_text != 0) {
@@ -1894,8 +1894,8 @@ static void unit_store_names(unit_stats_t* unit) {
                     if (party->party_id != PARTY_ID_NONE && gender == (party->gender_flags & NAME_GENDER_MASK)) {
                         name_id_record = &party->name_id;
                         existing_name.value = 0;
-                        existing_name.fields.name_class = name_id_record->fields.name_class;
-                        existing_name.fields.index = name_id_record->fields.index;
+                        existing_name.fields.name_class = name_id_record->name_class;
+                        existing_name.fields.index = name_id_record->index;
                         if (existing_name.value == name_id.value) {
                             name_available = 0;
                             break;

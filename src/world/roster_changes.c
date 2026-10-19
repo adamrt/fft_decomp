@@ -60,12 +60,12 @@ s32 formation_generate_unit(s16 unit_type) {
     party = party_get_unit(roster_slot);
     party->secondary_skillset = 0;
     /* Byte stores are required for the exact match; 16-bit assignments emit SH. */
-    party->reaction_ability[0] = 0;
-    party->reaction_ability[1] = 0;
-    party->support_ability[0] = 0;
-    party->support_ability[1] = 0;
-    party->movement_ability[0] = 0;
-    party->movement_ability[1] = 0;
+    party->reaction_ability.low = 0;
+    party->reaction_ability.high = 0;
+    party->support_ability.low = 0;
+    party->support_ability.high = 0;
+    party->movement_ability.low = 0;
+    party->movement_ability.high = 0;
     formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
     return formation_find_by_roster_slot(roster_slot);
 }

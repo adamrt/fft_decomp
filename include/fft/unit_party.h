@@ -24,34 +24,40 @@ enum {
     PARTY_ZODIAC_MASK = 0xf0
 };
 
+/* Little-endian ability ID kept as two separately accessed save bytes. */
+typedef struct party_ability_id_bytes {
+    u8 low;
+    u8 high;
+} party_ability_id_bytes_t;
+typedef char party_ability_id_bytes_size_must_be_2[(sizeof(party_ability_id_bytes_t) == 2) ? 1 : -1];
+
 /*
  * Persistent roster record. Its 0x100-byte stride is established by the
  * indexed SCUS lookup, while its named prefix is established by the target
  * party_unit_t-to-unit_stats_t initializer. It is distinct from entd_unit_t.
  */
 typedef struct party_unit {
-    u8 sprite_set;         /* 0x00 */
-    u8 party_id;           /* 0x01 */
-    u8 job_id;             /* 0x02 */
-    u8 palette;            /* 0x03 */
-    u8 gender_flags;       /* 0x04 */
-    u8 birthday_day;       /* 0x05 */
-    u8 zodiac;             /* 0x06 */
-    u8 secondary_skillset; /* 0x07 */
-    /* Little-endian ability ids; every reader and writer accesses the two bytes separately. */
-    u8 reaction_ability[2];                  /* 0x08 */
-    u8 support_ability[2];                   /* 0x0a */
-    u8 movement_ability[2];                  /* 0x0c */
-    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT]; /* 0x0e; unit_equipment_slot_e */
-    u8 experience;                           /* 0x15 */
-    u8 level;                                /* 0x16 */
-    u8 bravery;                              /* 0x17 */
-    u8 faith;                                /* 0x18 */
-    unit_raw_stats_t raw_stats;              /* 0x19 */
-    unit_career_data_t career;               /* 0x28; unlocked jobs, learned abilities, levels and JP */
-    u8 name[UNIT_NAME_SIZE];                 /* 0xbe */
-    unit_name_id_t name_id;                  /* 0xce */
-    u8 proposition_status;                   /* 0xd0; nonzero while unavailable on a proposition */
+    u8 sprite_set;                             /* 0x00 */
+    u8 party_id;                               /* 0x01 */
+    u8 job_id;                                 /* 0x02 */
+    u8 palette;                                /* 0x03 */
+    u8 gender_flags;                           /* 0x04 */
+    u8 birthday_day;                           /* 0x05 */
+    u8 zodiac;                                 /* 0x06 */
+    u8 secondary_skillset;                     /* 0x07 */
+    party_ability_id_bytes_t reaction_ability; /* 0x08 */
+    party_ability_id_bytes_t support_ability;  /* 0x0a */
+    party_ability_id_bytes_t movement_ability; /* 0x0c */
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];   /* 0x0e; unit_equipment_slot_e */
+    u8 experience;                             /* 0x15 */
+    u8 level;                                  /* 0x16 */
+    u8 bravery;                                /* 0x17 */
+    u8 faith;                                  /* 0x18 */
+    unit_raw_stats_t raw_stats;                /* 0x19 */
+    unit_career_data_t career;                 /* 0x28; unlocked jobs, learned abilities, levels and JP */
+    u8 name[UNIT_NAME_SIZE];                   /* 0xbe */
+    unit_name_id_fields_t name_id;             /* 0xce */
+    u8 proposition_status;                     /* 0xd0; nonzero while unavailable on a proposition */
     u8 _unused_d1;
     u8 egg_color;        /* 0xd2; create/save/generate unit stores */
     u8 _unused_d3[0x2d]; /* 0xd3; saves and loads copy 0xe0 bytes per record, so 0xe0..0xff is not saved */
