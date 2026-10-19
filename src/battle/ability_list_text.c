@@ -49,7 +49,7 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
                     g_menu_text_palette_offset = layout->text_colors[column][index];
                     /* 32-bit x and y, as above. */
                     menu_set_text_origin(layout->x[column] + 0x50, row * 0x10);
-                    menu_display_text_entry(0x5088, buffer, &g_menu_window_text_pen);
+                    menu_display_text_entry(TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                 }
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
                 menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
@@ -66,7 +66,7 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
                         if ((value & 0x7FF) >= 100) {
                             g_menu_text_palette_offset = 0;
                             g_menu_window_text_pen.rect.x += 3;
-                            menu_display_text_entry(0x509D, buffer, &g_menu_window_text_pen);
+                            menu_display_text_entry(TEXT_ID_INFINITY, buffer, &g_menu_window_text_pen);
                         } else {
                             menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
                         }

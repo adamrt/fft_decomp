@@ -147,6 +147,9 @@ typedef enum text_id_base {
     TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE = 0xf800 /* by proposition_fields_t::name_text less one */
 } text_id_base_e;
 
+/* Shared menu symbols. */
+enum { TEXT_ID_ABILITY_REFLECTABLE_MARKER = 0x5088, TEXT_ID_INFINITY = 0x509d };
+
 /* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
  * then the no-reward name, the unexplored lands and the treasures, each by reward_index. */
 enum {

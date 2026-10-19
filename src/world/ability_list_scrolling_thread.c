@@ -262,7 +262,8 @@ void ability_list_scrolling_thread(void) {
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
                             && (g_ai_workspace_ptr->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                             menu_set_text_origin(layout->columns.x[column] + 0x50, 0);
-                            menu_display_text_entry(0x5088, buffer, &g_menu_window_text_pen);
+                            menu_display_text_entry(
+                                TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                         }
                     } else if (layout->columns.mode[column] == MENU_TEXT_COLUMN_NUMBER) {
                         menu_display_number_entry(
@@ -281,7 +282,7 @@ void ability_list_scrolling_thread(void) {
                                 if ((value & 0x7FF) >= 100) {
                                     g_menu_text_palette_offset = 0;
                                     g_menu_window_text_pen.rect.x += 3;
-                                    menu_display_text_entry(0x509D, buffer, &g_menu_window_text_pen);
+                                    menu_display_text_entry(TEXT_ID_INFINITY, buffer, &g_menu_window_text_pen);
                                 } else {
                                     menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
                                 }
