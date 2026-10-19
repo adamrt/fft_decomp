@@ -208,8 +208,7 @@ suzuki_waveset_t* suzuki_sound_find_waveset(s16 id) {
     return waveset;
 }
 
-/* Appends a loaded SED/SMD block to the end of the Suzuki driver's sound
- * resource list. */
+/* Append a loaded SED sound bank to the driver's resource list. */
 void suzuki_sound_append_resource(suzuki_sound_resource_t* resource) {
     suzuki_sound_resource_t** slot = &g_suzuki_sound_resource_list;
     suzuki_sound_resource_t* node;
@@ -224,8 +223,7 @@ void suzuki_sound_append_resource(suzuki_sound_resource_t* resource) {
     resource->next = 0;
 }
 
-/* Unlinks resource from the loaded VFX sound list after stopping the SFX
- * channels that play its sounds.
+/* Unlink a sound bank after stopping the SFX channels that play its sounds.
  *
  * The search and unlink use a copy of the parameter while the call passes the
  * parameter itself, which stays in $a0 (the target loads no argument). The

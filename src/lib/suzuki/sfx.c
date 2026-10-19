@@ -171,12 +171,10 @@ void suzuki_sound_stop_sfx_channels(s32 sound_id) {
     music = g_suzuki_sound_sfx_music;
     channel = music->channels;
     for (i = SUZUKI_SFX_CHANNEL_COUNT; i != 0; i--) {
-        if (channel->flags & SUZUKI_CHANNEL_IN_USE) {
-            if (channel->sound_id == sound_id) {
-                channels |= bit;
-                voices |= channel->voice_attr.voice;
-                channel->flags = 0;
-            }
+        if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && channel->sound_id == sound_id) {
+            channels |= bit;
+            voices |= channel->voice_attr.voice;
+            channel->flags = 0;
         }
         bit <<= 1;
         channel++;
@@ -245,19 +243,15 @@ void suzuki_sound_release_sfx_voices(suzuki_music_t* music, u32 channel_mask, u3
  * and its own read of g_suzuki_sound_sfx_music, which is what the target's
  * register allocation reflects. */
 void suzuki_sound_set_sfx_volume(int sound_id, s16 volume) {
-    suzuki_music_t* music;
     suzuki_music_channel_t* channel;
     s32 count = SUZUKI_SFX_CHANNEL_COUNT;
 
-    music = g_suzuki_sound_sfx_music;
-    channel = music->channels;
+    channel = g_suzuki_sound_sfx_music->channels;
     if (volume != 0) {
         do {
-            if (channel->flags & SUZUKI_CHANNEL_IN_USE) {
-                if (channel->sound_id == sound_id) {
-                    channel->velocity = volume << 8;
-                    channel->voice_update_flags = SUZUKI_VOICE_UPDATE_VOLUME;
-                }
+            if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && channel->sound_id == sound_id) {
+                channel->velocity = volume << 8;
+                channel->voice_update_flags = SUZUKI_VOICE_UPDATE_VOLUME;
             }
             channel++;
         } while (--count != 0);
@@ -276,12 +270,10 @@ void suzuki_sound_set_sfx_volume(int sound_id, s16 volume) {
         channels = 0;
         remaining = SUZUKI_SFX_CHANNEL_COUNT;
         do {
-            if (stop->flags & SUZUKI_CHANNEL_IN_USE) {
-                if (stop->sound_id == sound_id) {
-                    channels |= bit;
-                    voices |= stop->voice_attr.voice;
-                    stop->flags = 0;
-                }
+            if ((stop->flags & SUZUKI_CHANNEL_IN_USE) && stop->sound_id == sound_id) {
+                channels |= bit;
+                voices |= stop->voice_attr.voice;
+                stop->flags = 0;
             }
             bit <<= 1;
             stop++;
@@ -300,11 +292,9 @@ void suzuki_sound_set_sfx_balance(s32 sound_id, s32 balance) {
 
     channel = g_suzuki_sound_sfx_music->channels;
     do {
-        if (channel->flags & SUZUKI_CHANNEL_IN_USE) {
-            if (channel->sound_id == sound_id) {
-                channel->balance = balance << 8;
-                channel->voice_update_flags = SUZUKI_VOICE_UPDATE_VOLUME;
-            }
+        if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && channel->sound_id == sound_id) {
+            channel->balance = balance << 8;
+            channel->voice_update_flags = SUZUKI_VOICE_UPDATE_VOLUME;
         }
         channel++;
     } while (--count != 0);
@@ -331,10 +321,8 @@ u32 suzuki_sound_get_sfx_channels(s32 sound_id) {
         } while (--count != 0);
     } else {
         do {
-            if (channel->flags & SUZUKI_CHANNEL_IN_USE) {
-                if (channel->sound_id == sound_id) {
-                    channels |= bit;
-                }
+            if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && channel->sound_id == sound_id) {
+                channels |= bit;
             }
             channel++;
             bit <<= 1;
@@ -369,12 +357,10 @@ s32 suzuki_sound_find_sfx_channel(s32 sound_id, s32 voice_count) {
     count = SUZUKI_SFX_CHANNEL_COUNT;
     channel = music->channels;
     do {
-        if (channel->flags & SUZUKI_CHANNEL_IN_USE) {
-            if (channel->sound_id == sound_id) {
-                channels |= mask;
-                voices |= channel->voice_attr.voice;
-                channel->flags = 0;
-            }
+        if ((channel->flags & SUZUKI_CHANNEL_IN_USE) && channel->sound_id == sound_id) {
+            channels |= mask;
+            voices |= channel->voice_attr.voice;
+            channel->flags = 0;
         }
         mask <<= 1;
         channel++;
