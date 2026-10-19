@@ -7,7 +7,6 @@
 #include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu_input.h"
-#include "fft/party.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/thread.h"

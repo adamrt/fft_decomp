@@ -1,8 +1,8 @@
 #ifndef AFTER_BATTLE_H
 #define AFTER_BATTLE_H
 
-/* REQUIRE's after-battle screens: the battle conditions banners and their bursts (BONUS.BIN), the war trophies, and the
- * screens' menus, graphics, text sections and threads. */
+/* REQUIRE's party changes and after-battle screens: the battle conditions banners and their bursts (BONUS.BIN), the war
+ * trophies, and the screens' menus, graphics, text sections and threads. */
 
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -39,11 +39,31 @@ void conditions_load_banner_image(s32 image_id);
 /* REQUIRE's banner-burst thread, entered by DarkScreen after the overlay loads. */
 void require_dark_screen_entrypoint(void);
 
+/* party changes */
+/* What party_set_biography_state stores in a character's bio variables. */
+typedef enum party_bio_state {
+    PARTY_BIO_STATE_DISMISSED = 12, /* dismissed or turned away */
+    PARTY_BIO_STATE_LEFT_LOW_BRAVE = 13,
+    PARTY_BIO_STATE_LEFT_HIGH_FAITH = 14,
+    PARTY_BIO_STATE_LOST_IN_BATTLE = 15
+} party_bio_state_e;
+
+extern s32 g_party_affected_unit_count;
+extern s32 g_party_affected_battle_unit_indices[];
+
+s32 party_update_after_battle(void);
+void party_brave_faith_report_thread(void);
+void party_departures_thread(void);
+void party_set_biography_state(s32 character_identity, s32 bio_state);
+s32 party_store_or_sell_equipment(s32 unit_id);
+s32 party_sell_equipment_over_limit(s32 unit_id);
+
 /* menus and graphics */
 extern s16 g_after_battle_menu_selection_result;
 extern u8 g_after_battle_gfx_fade_rgb[3];
 
 void gfx_fade_rgb_31_frames(s32 target_red, s32 target_green, s32 target_blue);
+void menu_wait_selection_threads(void);
 
 /* text */
 /* Character identities grouped by their warning, departure and dismissal text. */

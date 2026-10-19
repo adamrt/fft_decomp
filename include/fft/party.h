@@ -1,14 +1,11 @@
 #ifndef PARTY_H
 #define PARTY_H
 
-/* The party roster: MAIN's routines that build, save, level and remove its units and monster eggs, and REQUIRE's
- * after-battle party changes (departures, dismissals, equipment returns and bio variables). */
+/* The party roster: resident routines that build, save, level and remove its units and monster eggs. */
 
-#include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "fft/unit_party.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* roster */
@@ -37,24 +34,5 @@ void party_join_event_units(void); /* event library: saves the units marked to j
 /* Out-of-battle generation normalizes every value except male, female and
  * monster to Ramza. The raw-stat generator indexes the tables directly. */
 s32 party_generate_unit(unit_generation_type_e unit_type);
-
-/* after-battle changes */
-/* What party_set_biography_state stores in a character's bio variables. */
-typedef enum party_bio_state {
-    PARTY_BIO_STATE_DISMISSED = 12, /* dismissed or turned away */
-    PARTY_BIO_STATE_LEFT_LOW_BRAVE = 13,
-    PARTY_BIO_STATE_LEFT_HIGH_FAITH = 14,
-    PARTY_BIO_STATE_LOST_IN_BATTLE = 15
-} party_bio_state_e;
-
-extern s32 g_party_affected_unit_count;
-extern s32 g_party_affected_battle_unit_indices[];
-
-s32 party_update_after_battle(void);
-void party_brave_faith_report_thread(void);
-void party_departures_thread(void);
-void party_set_biography_state(s32 character_identity, s32 bio_state);
-s32 party_store_or_sell_equipment(s32 unit_id);
-s32 party_sell_equipment_over_limit(s32 unit_id);
 
 #endif
