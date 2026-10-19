@@ -61,11 +61,9 @@ void overlay_open_world(s32 mode) {
  * and -1 turns the message off. */
 static void file_load_data_from_disc(
     int sector, int sectors, void* destination, file_loading_display_mode_e loading_display_mode) {
-    file_load_descriptor_t* descriptor = &g_file_cd_state;
-
-    file_request_read(descriptor, sector, sectors, destination, loading_display_mode);
+    file_request_read(&g_file_cd_state, sector, sectors, destination, loading_display_mode);
     while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
-        file_poll_load(descriptor);
+        file_poll_load(&g_file_cd_state);
         VSync(0);
     }
 }

@@ -376,11 +376,9 @@ s32 suzuki_sound_find_sfx_channel(s32 sound_id, s32 voice_count) {
     busy = ~channels & music->channel_mask;
     oldest = -1;
     while (busy & mask) {
-        if (channel->start_tick < oldest) {
-            if (channel->priority <= SUZUKI_SOUND_SFX_PRIORITY_STEALABLE) {
-                oldest = channel->start_tick;
-                best = index;
-            }
+        if (channel->start_tick < oldest && channel->priority <= SUZUKI_SOUND_SFX_PRIORITY_STEALABLE) {
+            oldest = channel->start_tick;
+            best = index;
         }
         mask >>= voice_count;
         if (mask < group) {

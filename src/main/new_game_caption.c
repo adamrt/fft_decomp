@@ -37,7 +37,7 @@ static void new_game_set_display_draw(int width, int height, int projection, u8 
 /* Present one frame for the Orbonne caption fades: swap the display buffers after VSync, draw otag
  * and flush the debug print stream. Returns VSync's result. */
 static int new_game_present_caption_frame(u32* otag) {
-    /* Matching constraint: the retail function reserves one unused RECT. */
+    /* Unused local retains the retail stack frame. */
     RECT matching_stack_space;
     int elapsed;
 
@@ -52,7 +52,7 @@ static int new_game_present_caption_frame(u32* otag) {
     return elapsed;
 }
 
-/* Fade in a 256x24 caption strip centered on a black 256x240 screen.
+/* Fade in a 256x24 caption strip on a black 256x240 screen.
  *
  * The strip is the texture at VRAM (896, 256) with its CLUT at (896, 287), drawn
  * at y 116. A full-screen subtractive quad steps from 248 to 0 in 32 frames, each
