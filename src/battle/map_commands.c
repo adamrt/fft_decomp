@@ -171,29 +171,30 @@ s32 battle_map_load_poll(void) {
     return battle_map_load_data(g_battle_map_id, BATTLE_MAP_LOAD_COMMAND_POLL);
 }
 
-/* Event Use3DObject: start state row value_b of map mesh part value_a (map data
- * command 0x80, with flag 1). Always returns 1. */
-s32 battle_map_set_3d_object_state(s32 value_a, s32 value_b) {
-    battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, value_a, value_b, 1);
+/* Event Use3DObject: start a state row of the map mesh part (map data command
+ * 0x80, with flag 1). Always returns 1. */
+s32 battle_map_set_3d_object_state(s32 part_index, s32 state_row) {
+    battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, part_index, state_row, 1);
     return 1;
 }
 
 /* Return the map mesh part's animation state; zero means its animation has ended. */
-s32 battle_map_get_3d_object_state(s32 value) {
-    return battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_GET_3D_OBJECT_STATE, value, 1, 1);
+s32 battle_map_get_3d_object_state(s32 part_index) {
+    return battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_GET_3D_OBJECT_STATE, part_index, 1, 1);
 }
 
-/* Start map texture animation value_a from its first frame (map data command
- * 0x83). value_b goes in the object state argument, which that command does not
- * read. Always returns 1. */
-s32 battle_map_texture_start_animation(s32 value_a, s32 value_b) {
-    battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_START_TEXTURE_ANIMATION, value_a, value_b, 1);
+/* Start a map texture animation from its first frame (map data command 0x83).
+ * Forward object_state unchanged; the dispatcher does not read it for this command.
+ * Always returns 1. */
+s32 battle_map_texture_start_animation(s32 animation_index, s32 object_state) {
+    battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_START_TEXTURE_ANIMATION, animation_index, object_state, 1);
     return 1;
 }
 
 /* Return whether the map texture animation is still playing. */
-s32 battle_map_texture_get_animation_active(s32 value) {
-    return battle_map_dispatch_data_command(BATTLE_MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE, value, 1, 1);
+s32 battle_map_texture_get_animation_active(s32 animation_index) {
+    return battle_map_dispatch_data_command(
+        BATTLE_MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE, animation_index, 1, 1);
 }
 
 /* Nonzero while the camera moves: a pan step, a rotation, a tilt or a zoom is in progress. Event

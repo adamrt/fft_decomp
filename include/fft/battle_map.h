@@ -477,10 +477,10 @@ typedef enum battle_map_data_command {
 } battle_map_data_command_e;
 
 s32 battle_map_dispatch_data_command(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);
-s32 battle_map_get_3d_object_state(s32 value);
-s32 battle_map_set_3d_object_state(s32 value_a, s32 value_b);
-s32 battle_map_texture_get_animation_active(s32 value);
-s32 battle_map_texture_start_animation(s32 value_a, s32 value_b);
+s32 battle_map_get_3d_object_state(s32 part_index);
+s32 battle_map_set_3d_object_state(s32 part_index, s32 state_row);
+s32 battle_map_texture_get_animation_active(s32 animation_index);
+s32 battle_map_texture_start_animation(s32 animation_index, s32 object_state);
 
 /* map title */
 /* The title card of the battle map. The BATTLE and WORLD event interpreters
