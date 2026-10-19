@@ -35,13 +35,13 @@ extern s16 g_auto_battle_option_colors[5]; /* text color per option */
  * The main-stack preview fills all 40 AT entries; the menu displays entries
  * 1 through 39. */
 typedef struct at_list_work {
-    s16 primary_values[AT_LIST_CAPACITY];   /* 0x000: turn-value column */
-    s16 secondary_values[AT_LIST_CAPACITY]; /* 0x050: unit-name column */
-    s16 entry_numbers[AT_LIST_CAPACITY];    /* 0x0a0: ordinal column */
-    s16 primary_colors[AT_LIST_CAPACITY];   /* 0x0f0 */
-    s16 secondary_colors[AT_LIST_CAPACITY]; /* 0x140 */
-    u8 text[0x4f0];                         /* 0x190: packed 0xfe-terminated names */
-    at_entry_t entries[AT_LIST_CAPACITY];   /* 0x680; entry 0 is omitted from the menu */
+    s16 primary_text_ids[AT_LIST_CAPACITY];   /* 0x000: first text column, unit or action names */
+    s16 secondary_text_ids[AT_LIST_CAPACITY]; /* 0x050: second text column, unit names on action rows */
+    s16 entry_numbers[AT_LIST_CAPACITY];      /* 0x0a0: ordinal column */
+    s16 primary_colors[AT_LIST_CAPACITY];     /* 0x0f0 */
+    s16 secondary_colors[AT_LIST_CAPACITY];   /* 0x140 */
+    u8 text[0x4f0];                           /* 0x190: packed 0xfe-terminated names */
+    at_entry_t entries[AT_LIST_CAPACITY];     /* 0x680; entry 0 is omitted from the menu */
 } at_list_work_t;
 typedef char at_list_work_size_must_be_1824[(sizeof(at_list_work_t) == 1824) ? 1 : -1];
 
@@ -334,12 +334,12 @@ static void at_list_build_ability_preview(void) {
         /* Text id 0xf800 + index is entry `index` of the AT list section, the name just
          * written: unit rows show it in the first text column, action rows in the second. */
         if ((slot->unit_code & AT_ACTION_ENTRY) != 0) {
-            work->secondary_values[count] = index - 0x800;
+            work->secondary_text_ids[count] = index - 0x800;
         } else {
-            work->primary_values[count] = index - 0x800;
+            work->primary_text_ids[count] = index - 0x800;
         }
         if ((slot->unit_code & AT_ACTION_ENTRY) == 0) {
-            work->secondary_values[count] = TEXT_ID_ABILITY_NAME_BASE;
+            work->secondary_text_ids[count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             s32 action_text_id;
             s32 action_id;
@@ -359,7 +359,7 @@ static void at_list_build_ability_preview(void) {
                     action_text_id = action_id + TEXT_ID_ABILITY_NAME_BASE;
                 }
             }
-            work->primary_values[count] = action_text_id;
+            work->primary_text_ids[count] = action_text_id;
         }
 
         if ((stats->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
@@ -432,9 +432,9 @@ static void at_list_build_ability_preview(void) {
     }
 
     g_at_list_layout.columns.text_ids[0] = work->entry_numbers;
-    g_at_list_layout.columns.text_ids[2] = work->secondary_values;
+    g_at_list_layout.columns.text_ids[2] = work->secondary_text_ids;
     g_at_list_layout.columns.text_colors[0] = work->primary_colors;
-    g_at_list_layout.columns.text_ids[1] = work->primary_values;
+    g_at_list_layout.columns.text_ids[1] = work->primary_text_ids;
     g_at_list_layout.columns.text_colors[1] = work->secondary_colors;
     g_at_list_layout.columns.text_colors[2] = work->secondary_colors;
 }
