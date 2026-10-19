@@ -9,7 +9,7 @@ menu_selection_record_t g_menu_selection_records[VARIANT_MENU_SELECTION_RECORD_C
 
 /* Clear every menu selection record. */
 void menu_clear_selection_records(void) {
-    memset(g_menu_selection_records, 0, VARIANT_MENU_SELECTION_RECORD_COUNT * sizeof(menu_selection_record_t));
+    memset(g_menu_selection_records, 0, sizeof(g_menu_selection_records));
 }
 
 /* Clear the 6-byte selection record at `index`. */
