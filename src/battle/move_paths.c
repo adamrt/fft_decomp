@@ -430,44 +430,33 @@ void move_knockback_update(unit_t* unit) {
 
 /* Give a knocked-back unit a one-step path to its destination: a plain step in the travel
  * direction with the destination level as its elevation bit, at walk speed 0x8000 (four times the
- * usual 0x2000), which move_knockback_update then slows.
- *
- * The masks edit path.data.steps[0] as bits 8-15 of the path's first word: 0x300 length,
- * 0x400 slow, 0x800 climb, 0x1000 mount, 0x2000 higher and 0xc000 the move_step_direction_e. */
+ * usual 0x2000), which move_knockback_update then slows. */
 static void move_knockback_init(unit_t* unit) {
-    u32* path_word = (u32*)&unit->path;
-    u32 state;
-    u32 knockback_state;
     s32 direction;
 
     unit->movement_path_offset = 0;
     unit->path.count = 1;
     unit->path.flags = move_get_effective_flags(unit->stats);
 
-    state = *path_word;
-    state &= ~0x300;
-    state &= ~0x400;
-    state &= ~0x800;
-    state &= ~0x1000;
-    *path_word = state;
-
-    knockback_state = state & ~0x2000;
-    knockback_state |= (unit->movement.destination_layer & 1) << 13;
-    *path_word = knockback_state;
+    unit->path.data.steps[0].length = 0;
+    unit->path.data.steps[0].slow = 0;
+    unit->path.data.steps[0].climb = 0;
+    unit->path.data.steps[0].mount = 0;
+    unit->path.data.steps[0].higher = unit->movement.destination_layer & 1;
     direction = move_step_get_direction(unit);
 
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
-        *path_word |= 0xc000;
+        unit->path.data.steps[0].direction = MOVE_STEP_DIRECTION_NORTH;
         break;
     case MOVE_DIRECTION_SOUTH:
-        *path_word = (*path_word & ~0xc000) | 0x8000;
+        unit->path.data.steps[0].direction = MOVE_STEP_DIRECTION_SOUTH;
         break;
     case MOVE_DIRECTION_WEST:
-        *path_word = (*path_word & ~0xc000) | 0x4000;
+        unit->path.data.steps[0].direction = MOVE_STEP_DIRECTION_WEST;
         break;
     case MOVE_DIRECTION_EAST:
-        *path_word &= ~0xc000;
+        unit->path.data.steps[0].direction = MOVE_STEP_DIRECTION_EAST;
         break;
     }
 
