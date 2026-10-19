@@ -14,12 +14,19 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static u8 g_turn_pending_flags[21] = { 0 };
+typedef enum status_upkeep_result {
+    STATUS_UPKEEP_NONE = 0,
+    STATUS_UPKEEP_CRYSTAL_OR_TREASURE = 1,
+    STATUS_UPKEEP_CHANGE = 2,
+    STATUS_UPKEEP_DEATH_SENTENCE = 3
+} status_upkeep_result_e;
 
-static s32 turn_set_move_act_taken(s32 idx, s32 move_flag, s32 act_flag);
+static u8 g_turn_pending_flags[UNIT_SLOT_COUNT] = { 0 };
+
+static s32 turn_set_move_act_taken(s32 unit_id, s32 move_flag, s32 act_flag);
 static s32 turn_should_end(const unit_stats_t* unit);
 static s32 at_list_insert_entry(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list);
-static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
+static status_upkeep_result_e status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
 static s32 at_list_is_unit_excluded(const unit_stats_t* unit);
 
 /* The clocktick loop between turns. RESET clears every unit's CT and turn state; FIND_ACTIVE_UNIT
@@ -40,7 +47,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
     u16 max_ct;
     u16 speed;
     u16 ct;
-    u8 value;
+    u8 charge_ct;
 
     if (mode == TURN_CLOCK_MODE_RESET) {
         g_turn_clock_state = TURN_CLOCK_STATE_ADD_CT;
@@ -133,12 +140,12 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
                 }
 
                 ret = status_build_upkeep_action(best, unit);
-                if (ret != 0) {
+                if (ret != STATUS_UPKEEP_NONE) {
                     result = best | TURN_EVENT_ACTION_RESULT;
                     /* A crystal or treasure (1) or an expired Death Sentence (3) ends here without
                      * a turn; only the first counts as a casualty. */
                     if (ret & 1) {
-                        if (ret == 1) {
+                        if (ret == STATUS_UPKEEP_CRYSTAL_OR_TREASURE) {
                             unit_increase_casualty_counters(unit);
                         }
                         return result;
@@ -147,12 +154,13 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
 
                 /* A staged revival or other change (2) gets its turn even when the unit can't act. */
                 flags = turn_calculate_status_flags(unit);
-                if (!(flags & (TURN_STATUS_CT_FROZEN | TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD)) || ret == 2) {
+                if (!(flags & (TURN_STATUS_CT_FROZEN | TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD))
+                    || ret == STATUS_UPKEEP_CHANGE) {
                     unit->has_turn = 1;
                     unit->movement_taken = 0;
                     unit->action_taken = 0;
                     unit->transparent_removal_flag = 1;
-                    if (ret == 0) {
+                    if (ret == STATUS_UPKEEP_NONE) {
                         result = best | TURN_EVENT_UNIT_READY;
                     }
                     g_turn_clock_resume_state = g_turn_clock_state;
@@ -171,10 +179,10 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
                 unit = &g_unit_stats[i];
                 flags = turn_calculate_status_flags(unit);
                 if (!(flags & TURN_STATUS_BLOCKS_WAIT_MENU_MASK)) {
-                    value = unit->charged_ability_ct;
-                    if (value != 0xff && value != 0) {
-                        value--;
-                        unit->charged_ability_ct = value;
+                    charge_ct = unit->charged_ability_ct;
+                    if (charge_ct != 0xff && charge_ct != 0) {
+                        charge_ct--;
+                        unit->charged_ability_ct = charge_ct;
                     }
                 }
                 /* clang-format off */
@@ -384,7 +392,7 @@ s32 turn_run_clock(turn_clock_mode_e mode) {
  * runs out revives on a coin flip with 1 to max HP. Outside the execute action
  * state (previews and AI simulations) a dead unit's counter does not move.
  */
-static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
+static status_upkeep_result_e status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     action_data_t* action = &unit->action;
     s32 roll;
     s32 mask;
@@ -400,29 +408,29 @@ static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
         action->status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_RERAISE)] = STATUS_BYTE_MASK(STATUS_ID_RERAISE);
         action->attack_type = ACTION_TYPE_HP_HEALING | ACTION_TYPE_STATUS_CHANGE;
         action->hp_healing = unit->max_hp / 10;
-        return 2;
+        return STATUS_UPKEEP_CHANGE;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD))
         && g_action_state == ACTION_STATE_EXECUTE) {
         if (unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL) {
-            return 0;
+            return STATUS_UPKEEP_NONE;
         }
         if (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION)) {
-            return 0;
+            return STATUS_UPKEEP_NONE;
         }
         /* The unit leaves on the tick its counter is already 0. */
         counter = unit->death_counter;
         counter -= 1;
         if (counter != 0xff) {
             unit->death_counter = counter;
-            return 0;
+            return STATUS_UPKEEP_NONE;
         }
         if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)] & STATUS_BYTE_MASK(STATUS_ID_UNDEAD))
             && (roll & 1)) {
             action->status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] = STATUS_BYTE_MASK(STATUS_ID_DEAD);
             action->hp_healing = ((rand() * unit->max_hp) / 0x8000) + 1;
             action->attack_type = ACTION_TYPE_HP_HEALING | ACTION_TYPE_STATUS_CHANGE;
-            return 2;
+            return STATUS_UPKEEP_CHANGE;
         }
         /* Any set bit of the mask gives a crystal: 1 in 2 units, or 3 in 4 for a
          * unit that started player-controlled; treasure otherwise. */
@@ -434,11 +442,11 @@ static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
             action->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                 = STATUS_BYTE_MASK(STATUS_ID_CRYSTAL);
             action->attack_type = ACTION_TYPE_STATUS_CHANGE;
-            return 1;
+            return STATUS_UPKEEP_CRYSTAL_OR_TREASURE;
         }
         action->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] = STATUS_BYTE_MASK(STATUS_ID_TREASURE);
         action->attack_type = ACTION_TYPE_STATUS_CHANGE;
-        return 1;
+        return STATUS_UPKEEP_CRYSTAL_OR_TREASURE;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEATH_SENTENCE)]
         & STATUS_BYTE_MASK(STATUS_ID_DEATH_SENTENCE)) {
@@ -451,7 +459,7 @@ static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
             if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
                     & STATUS_BYTE_MASK(STATUS_ID_UNDEAD))) {
                 action->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] = STATUS_BYTE_MASK(STATUS_ID_DEAD);
-                return 3;
+                return STATUS_UPKEEP_DEATH_SENTENCE;
             }
         } else {
             unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] = counter;
@@ -465,7 +473,7 @@ static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
         action->brave_change = ACTION_STAT_CHANGE_INCREASE | 1;
         action->attack_type |= ACTION_TYPE_PSEUDO_STATUS;
     }
-    return (action->attack_type != 0) * 2;
+    return action->attack_type != 0 ? STATUS_UPKEEP_CHANGE : STATUS_UPKEEP_NONE;
 }
 
 /* Returns the TURN_STATUS_* flags that decide how a unit takes part in the
