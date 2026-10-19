@@ -1472,9 +1472,8 @@ static void reaction_try_mp_switch(void) {
  * roll passes, record the reaction with the excess as its amount. */
 static void reaction_try_distribute(void) {
     unit_stats_t* target = g_action_target;
-    action_data_t* action = g_action_target_data;
     /* hp_healing is read signed (lh) here. */
-    s32 excess = action->hp_healing - (target->max_hp - target->hp);
+    s32 excess = g_action_target_data->hp_healing - (target->max_hp - target->hp);
 
     if (excess > 0 && reaction_fails_brave_roll(target) == 0) {
         g_action_target_data->last_received_attack = excess;

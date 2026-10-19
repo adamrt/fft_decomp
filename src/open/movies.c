@@ -657,7 +657,9 @@ u32 input_update_repeat(u32 buttons) {
         if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
             s32* up_counter = &g_input_directional_repeat.counter_up;
 
-            if (g_input_directional_repeat.initial_delay < (*up_counter = next = *up_counter + 1)) {
+            next = *up_counter + 1;
+            *up_counter = next;
+            if (g_input_directional_repeat.initial_delay < next) {
                 *up_counter = next - g_input_directional_repeat.period;
                 return PSX_PAD_UP;
             }
@@ -675,7 +677,9 @@ u32 input_update_repeat(u32 buttons) {
             /* Spelled apart from the Up branch: separate old and next values give
              * this branch the retail register assignment. */
             old_counter = *down_counter;
-            if (g_input_directional_repeat.initial_delay < (*down_counter = down_next = old_counter + 1)) {
+            down_next = old_counter + 1;
+            *down_counter = down_next;
+            if (g_input_directional_repeat.initial_delay < down_next) {
                 old_counter = down_next - g_input_directional_repeat.period;
                 *down_counter = old_counter;
                 return PSX_PAD_DOWN;

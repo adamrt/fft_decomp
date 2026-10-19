@@ -428,9 +428,7 @@ static s32 sound_novel_step_countdown(void) {
 
 /* Sound-novel opcode 0x00: end the script; sound_novel_run_until_yield then returns 0. */
 void sound_novel_opcode_00_end_script(void) {
-    u16* flags = &g_sound_novel_reading.state_flags;
-
-    *flags |= SOUND_NOVEL_STATE_END;
+    g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_END;
 }
 
 /* Sound-novel opcode: end the section; the script branches to the recorded
@@ -510,14 +508,11 @@ void sound_novel_opcode_07_branch_if_dialog_option_equal(void) {
 static void sound_novel_branch_if_dialog_option(s32 branch_if_equal) {
     u8 operand = (g_sound_novel_reading.instruction >> 16);
 
-    if (operand == script_get_variable(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) ? branch_if_equal == 1
-                                                                                : branch_if_equal == 0) {
+    if ((operand == script_get_variable(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION)) == branch_if_equal) {
         g_sound_novel_reading.section = (u8)(g_sound_novel_reading.instruction >> 8);
         g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_BRANCH;
     } else {
-        u16* flags = &g_sound_novel_reading.state_flags;
-
-        *flags |= SOUND_NOVEL_STATE_FETCH;
+        g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
     }
 }
 
@@ -957,10 +952,9 @@ void sound_novel_opcode_25_branch_if_greater(void) {
 /* Sound-novel opcode: fade the music to silence over operand 0 * 3 steps and
  * clear the playing flag and the selected music id (the slot is kept). */
 void sound_novel_opcode_26_fade_out_music(void) {
-    s32* state = &g_music_queue.music.flags;
     s32 operand;
 
-    *state &= ~MUSIC_QUEUE_PLAYING;
+    g_music_queue.music.flags &= ~MUSIC_QUEUE_PLAYING;
     operand = (u8)(g_sound_novel_reading.instruction >> 8);
     music_set_volume_target(0, operand * 3);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
