@@ -573,8 +573,8 @@ static s32 shop_buy_get_price(s32 entry_index) {
 
 /* Switch the active item category and restore its saved list cursor. */
 static void shop_switch_item_tab(s32 input) {
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     s32 category;
     s32 cursor_slot;
     s16 item;
@@ -601,8 +601,9 @@ static void shop_switch_item_tab(s32 input) {
                 ITEM_LIST_MODE_ALL);
             cursor_slot = g_shop_item_category + 5;
         }
-        menu_get_selection_record(cursor_slot, &x, &y, g_item_list_entries);
-        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record(cursor_slot, &selected_index, &scroll_base_index, g_item_list_entries);
+        menu_init_scrollable_list(
+            g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
     }
     screen_draw_item_tabs(1, g_shop_item_category, g_menu_input_lock_mode);
@@ -620,8 +621,8 @@ static void shop_switch_item_tab(s32 input) {
  * item once the message box has closed, and Circle starts buying it.
  */
 static void shop_buy_list_step(void) {
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     s32 input;
     s32 disabled;
     s8 result;
@@ -635,8 +636,9 @@ static void shop_buy_list_step(void) {
         shop_build_stock_list(-1, g_screen_context_id,
             g_shop_item_category != ITEM_MENU_TAB_OTHER ? g_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        menu_get_selection_record(g_shop_item_category, &x, &y, g_item_list_entries);
-        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record(g_shop_item_category, &selected_index, &scroll_base_index, g_item_list_entries);
+        menu_init_scrollable_list(
+            g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
         g_menu_row_callbacks[1].value = equipment_get_row_item_count;
         g_menu_row_callbacks[2].icon = item_build_type_icon_source;
@@ -1165,15 +1167,14 @@ static void shop_fitting_menu_step(void) {
  * while moving the cursor previews the stat change. Cancel leaves the list,
  * or from the slot list goes back to the fitting room's unit grid. */
 static void shop_fitting_equip_step(void) {
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     s32 prev;
     s32 slot;
     s32 value;
     u16 item;
     s16 equip;
     s32 result;
-    s16* cursor_y;
 
     if (g_shop_fitting_equip_menu_initialized == 0) {
         g_shop_fitting_equip_menu_initialized = 1;
@@ -1224,8 +1225,9 @@ static void shop_fitting_equip_step(void) {
             if (g_shop_fitting_equip_slot != 0) {
                 slot = g_shop_fitting_equip_slot - 1;
             }
-            menu_get_selection_record(slot, &x, &y, g_item_list_entries);
-            menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+            menu_get_selection_record(slot, &selected_index, &scroll_base_index, g_item_list_entries);
+            menu_init_scrollable_list(g_item_list_entries, selected_index, scroll_base_index,
+                g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
             g_menu_row_callbacks[1].value = equipment_get_row_item_count;
             g_menu_row_callbacks[2].icon = item_build_type_icon_source;
@@ -1302,8 +1304,7 @@ static void shop_fitting_equip_step(void) {
         menu_set_selection_record(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
     }
 
-    cursor_y = &g_shop_fitting_slot_cursor_point.y;
-    *cursor_y = g_shop_fitting_equip_slot * 16 + 0x90;
+    g_shop_fitting_slot_cursor_point.y = g_shop_fitting_equip_slot * 16 + 0x90;
     gfx_set_otag_index(0x3d);
     screen_draw_sliding_cursor(&g_shop_fitting_slot_cursor_point, &g_shop_fitting_slot_cursor_anim,
         g_shop_fitting_item_list_open != 0 || g_menu_input_lock_mode != 0);
@@ -1363,7 +1364,6 @@ static void shop_fitting_remove_step(void) {
     s32 index;
     s32 value;
     s32 equipped_item;
-    s16* cursor_y;
     s16 unit;
 
     if (g_shop_fitting_remove_previewed_unit_index != g_unit_selected_index) {
@@ -1393,8 +1393,7 @@ static void shop_fitting_remove_step(void) {
         value = -1;
     }
     g_help_message_text_id = value;
-    cursor_y = &g_shop_fitting_remove_cursor_point.y;
-    *cursor_y = (u8)slot * 16 + 0x90;
+    g_shop_fitting_remove_cursor_point.y = (u8)slot * 16 + 0x90;
     gfx_set_otag_index(0x3D);
     screen_draw_sliding_cursor(
         &g_shop_fitting_remove_cursor_point, &g_shop_fitting_remove_cursor_anim, menu_input_get_lock_mode(0));
@@ -2168,8 +2167,8 @@ static s32 fur_shop_buy_get_price(s32 entry_index) {
  * Mirrors shop_buy_list_step with the half-price value and
  * the poached-stock quantity as callbacks. */
 static void fur_shop_buy_list_step(void) {
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     s32 input;
     s32 disabled;
     s8 result;
@@ -2183,8 +2182,9 @@ static void fur_shop_buy_list_step(void) {
         shop_build_stock_list(-1, g_screen_context_id,
             g_shop_item_category != ITEM_MENU_TAB_OTHER ? g_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        menu_get_selection_record(g_shop_item_category, &x, &y, g_item_list_entries);
-        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record(g_shop_item_category, &selected_index, &scroll_base_index, g_item_list_entries);
+        menu_init_scrollable_list(
+            g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
         g_menu_row_callbacks[1].value = equipment_get_row_item_count;
         g_menu_row_callbacks[2].icon = item_build_type_icon_source;

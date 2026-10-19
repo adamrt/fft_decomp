@@ -57,8 +57,8 @@ extern u8 g_formation_item_category_tabs_wide_script[121];
  * id.
  */
 s8 formation_item_action_menu(void) {
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     u8* text;
     s32 result;
     s32 selected;
@@ -211,8 +211,9 @@ s8 formation_item_action_menu(void) {
         formation_item_build_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        menu_get_selection_record(g_menu_selected_slot, &x, &y, g_item_list_entries);
-        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record(g_menu_selected_slot, &selected_index, &scroll_base_index, g_item_list_entries);
+        menu_init_scrollable_list(
+            g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
         if (g_menu_list_entry_count != 0) {
             result = g_item_list_entries[g_menu_list_selected_index];
