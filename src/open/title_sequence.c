@@ -330,10 +330,9 @@ static void controller_start_text_message(s32 parameter, s32 use_world_text) {
 
     {
         s32 controller = g_controller_depth;
-        s32 next_controller = controller + 1;
 
         g_controller_handler_indices[controller] = CONTROLLER_TEXT_MESSAGE;
-        g_controller_depth = next_controller;
+        g_controller_depth = controller + 1;
     }
 }
 
