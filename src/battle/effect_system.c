@@ -3927,7 +3927,7 @@ s32 effect_secondary_reflect_handler(void) {
         position.vx = target->vx;
         position.vz = target->vz;
         position.vy = target->vy
-            - (s32)sprite_get_unit_spritesheet_height_by_runtime_id(
+            - sprite_get_unit_spritesheet_height_by_runtime_id(
                   g_effect_secondary_current->target.record.data.unit.runtime_id)
                 / 2;
         angles.vy = ratan2(-delta.vz, delta.vx);
