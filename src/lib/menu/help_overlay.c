@@ -65,7 +65,7 @@ void helpmenu_battle_entrypoint(void) {
     help_navigation_record_t* node;
     s32 y;
     s32 bob;
-    s32 buffer;
+    s32 buffer_index;
     s32 u;
     s32 u_mid;
     s32 shadow_offset;
@@ -423,54 +423,56 @@ void helpmenu_battle_entrypoint(void) {
         self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
 
-        buffer = frame & 1;
+        buffer_index = frame & 1;
         if (node->vertical_cursor != 0) {
             /* The upright cursor is the same texture cell transposed. */
             u = 0xA8;
-            cursor_quads[buffer].u0 = u;
-            cursor_quads[buffer].u1 = u;
-            cursor_quads[buffer].u2 = u_mid;
-            cursor_quads[buffer].u3 = u_mid;
-            cursor_quads[buffer].v0 = 0;
-            cursor_quads[buffer].v1 = 0x10;
-            cursor_quads[buffer].v2 = 0;
-            cursor_quads[buffer].v3 = 0x10;
+            cursor_quads[buffer_index].u0 = u;
+            cursor_quads[buffer_index].u1 = u;
+            cursor_quads[buffer_index].u2 = u_mid;
+            cursor_quads[buffer_index].u3 = u_mid;
+            cursor_quads[buffer_index].v0 = 0;
+            cursor_quads[buffer_index].v1 = 0x10;
+            cursor_quads[buffer_index].v2 = 0;
+            cursor_quads[buffer_index].v3 = 0x10;
 
             u = 0xB8;
-            shadow_quads[buffer].u0 = u;
-            shadow_quads[buffer].u1 = u;
-            shadow_quads[buffer].u2 = 0xC8;
-            shadow_quads[buffer].u3 = 0xC8;
-            shadow_quads[buffer].v0 = 0;
-            shadow_quads[buffer].v1 = 0x10;
-            shadow_quads[buffer].v2 = 0;
-            shadow_quads[buffer].v3 = 0x10;
+            shadow_quads[buffer_index].u0 = u;
+            shadow_quads[buffer_index].u1 = u;
+            shadow_quads[buffer_index].u2 = 0xC8;
+            shadow_quads[buffer_index].u3 = 0xC8;
+            shadow_quads[buffer_index].v0 = 0;
+            shadow_quads[buffer_index].v1 = 0x10;
+            shadow_quads[buffer_index].v2 = 0;
+            shadow_quads[buffer_index].v3 = 0x10;
 
-            setXY4(&cursor_quads[buffer], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10, y + bob + 0x10);
-            setXY4(shadow_quads + buffer, x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12, x + 0x12,
-                y + bob + 0x12);
+            setXY4(&cursor_quads[buffer_index], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10,
+                y + bob + 0x10);
+            setXY4(shadow_quads + buffer_index, x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12,
+                x + 0x12, y + bob + 0x12);
         } else {
             u = 0xA8;
-            setUV4(cursor_quads + buffer, u, 0, u_mid, 0, 0xA8, 0x10, u_mid, 0x10);
+            setUV4(cursor_quads + buffer_index, u, 0, u_mid, 0, 0xA8, 0x10, u_mid, 0x10);
             u = 0xB8;
-            setUV4(shadow_quads + buffer, u, 0, 0xC8, 0, u_mid, 0x10, 0xC8, 0x10);
-            setXY4(cursor_quads + buffer, x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10, y + 0x10);
+            setUV4(shadow_quads + buffer_index, u, 0, 0xC8, 0, u_mid, 0x10, 0xC8, 0x10);
+            setXY4(cursor_quads + buffer_index, x + bob, y, x + bob + 0x10, y, x + bob, y + 0x10, x + bob + 0x10,
+                y + 0x10);
             shadow_offset = bob + 2;
-            setXY4(shadow_quads + buffer, x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2, x + shadow_offset,
-                y + 0x12, x + shadow_offset + 0x10, y + 0x12);
+            setXY4(shadow_quads + buffer_index, x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2,
+                x + shadow_offset, y + 0x12, x + shadow_offset + 0x10, y + 0x12);
         }
 
         /* The cursor and its shade switch palettes while the help text is open. */
         if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
-            cursor_quads[buffer].clut = 0x7DFC;
-            shadow_quads[buffer].clut = 0x7E3C;
+            cursor_quads[buffer_index].clut = 0x7DFC;
+            shadow_quads[buffer_index].clut = 0x7E3C;
         } else {
-            cursor_quads[buffer].clut = 0x7D7C;
-            shadow_quads[buffer].clut = 0x7DBC;
+            cursor_quads[buffer_index].clut = 0x7D7C;
+            shadow_quads[buffer_index].clut = 0x7DBC;
         }
 
-        gfx_draw_or_append_gpu_primitive(&cursor_quads[buffer]);
-        gfx_draw_or_append_gpu_primitive(&shadow_quads[buffer]);
+        gfx_draw_or_append_gpu_primitive(&cursor_quads[buffer_index]);
+        gfx_draw_or_append_gpu_primitive(&shadow_quads[buffer_index]);
         thread_wait_frames(1);
         frame++;
     }
@@ -508,7 +510,7 @@ void helpmenu_after_battle_entrypoint(void) {
     thread_t* text_thread;
     s32 text_thread_id;
     s32 frame;
-    s32 buffer;
+    s32 buffer_index;
     s32 x;
     s32 y;
     s32 bob;
@@ -668,14 +670,14 @@ void helpmenu_after_battle_entrypoint(void) {
         self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
 
-        buffer = frame & 1;
+        buffer_index = frame & 1;
         if (entry->vertical_cursor != 0) {
             POLY_FT4* quad;
             POLY_FT4* shadow_quad;
 
             /* The upright cursor is the same texture cell transposed. */
             u = 0xA8;
-            quad = &cursor[buffer];
+            quad = &cursor[buffer_index];
             quad->u0 = u;
             quad->u1 = u;
             quad->u2 = u + 16;
@@ -686,7 +688,7 @@ void helpmenu_after_battle_entrypoint(void) {
             quad->v3 = 16;
 
             u += 16;
-            shadow_quad = &shadow[buffer];
+            shadow_quad = &shadow[buffer_index];
             shadow_quad->u0 = u;
             shadow_quad->u1 = u;
             shadow_quad->u2 = u + 16;
@@ -697,7 +699,7 @@ void helpmenu_after_battle_entrypoint(void) {
             shadow_quad->v3 = 16;
 
             setXYWH(quad, x, y + bob, 16, 16);
-            /* &quad[2] is shadow[buffer]: the shadow array follows cursor on the stack, and
+            /* &quad[2] is shadow[buffer_index]: the shadow array follows cursor on the stack, and
              * naming it changes the store scheduling. */
             setXYWH(&quad[2], x + 2, y + bob + 2, 16, 16);
         } else {
@@ -707,25 +709,25 @@ void helpmenu_after_battle_entrypoint(void) {
             /* Retail loads each quad's third u from its own constant, not from `u`. */
             u = 0xA8;
             quads = cursor;
-            setUV4(&quads[buffer], u, 0, u + 16, 0, 0xA8, 16, u + 16, 16);
+            setUV4(&quads[buffer_index], u, 0, u + 16, 0, 0xA8, 16, u + 16, 16);
             u += 16;
-            setUV4(&shadow[buffer], u, 0, u + 16, 0, 0xB8, 16, u + 16, 16);
-            setXYWH(&quads[buffer], x + bob, y, 16, 16);
+            setUV4(&shadow[buffer_index], u, 0, u + 16, 0, 0xB8, 16, u + 16, 16);
+            setXYWH(&quads[buffer_index], x + bob, y, 16, 16);
             shadow_x = x + 2 + bob;
-            setXYWH(&shadow[buffer], shadow_x, y + 2, 16, 16);
+            setXYWH(&shadow[buffer_index], shadow_x, y + 2, 16, 16);
         }
 
         /* The cursor and its shade switch palettes while the help text is open. */
         if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
-            cursor[buffer].clut = 0x7DFC;
-            shadow[buffer].clut = 0x7E3C;
+            cursor[buffer_index].clut = 0x7DFC;
+            shadow[buffer_index].clut = 0x7E3C;
         } else {
-            cursor[buffer].clut = 0x7D7C;
-            shadow[buffer].clut = 0x7DBC;
+            cursor[buffer_index].clut = 0x7D7C;
+            shadow[buffer_index].clut = 0x7DBC;
         }
 
-        gfx_draw_or_append_gpu_primitive(&cursor[buffer]);
-        gfx_draw_or_append_gpu_primitive(&shadow[buffer]);
+        gfx_draw_or_append_gpu_primitive(&cursor[buffer_index]);
+        gfx_draw_or_append_gpu_primitive(&shadow[buffer_index]);
         thread_wait_frames(1);
     }
 

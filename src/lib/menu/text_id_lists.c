@@ -28,7 +28,7 @@ const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2)
  * a style override, 0xE7 sets the x position, 0xFE/0xFF end the entry.
  * `col` is only assigned by the glyph-copy branch; the text branch compares
  * whatever it last held against `max_chars`, which reproduces the target.
- * `colors` and `colors2` are distinct copies of &text_ids[k]: one shared local
+ * `text_entry` and `glyph_entry` are distinct copies of &text_ids[k]: one shared local
  * changes the register assignment. The caller also passes its row flags as a
  * ninth argument, which is never read. */
 void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t* bounds, s32 unused, s32 max_chars,
@@ -40,8 +40,8 @@ void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t*
     s32 k;
     const u8* text;
     s32 code;
-    const s16* colors;
-    const s16* colors2;
+    const s16* text_entry;
+    const s16* glyph_entry;
 
     line = 0;
     position.row_stride = bounds->row_stride;
@@ -54,15 +54,16 @@ void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t*
         style = 0;
         if (text_ids[k] & 0x2000) {
             col = 0;
-            colors2 = &text_ids[k];
+            glyph_entry = &text_ids[k];
             for (; col < 8; col++) {
-                position.x += menu_text_render_glyph_to_4bpp_image(glyph, image, &position, (*colors2 >> 14) | style);
+                position.x
+                    += menu_text_render_glyph_to_4bpp_image(glyph, image, &position, (*glyph_entry >> 14) | style);
             }
         } else {
             text = menu_text_find_entry_by_index(text_table, text_ids[k] & 0xFFF, 2);
             code = *text++;
             if (code < 0xFE) {
-                colors = &text_ids[k];
+                text_entry = &text_ids[k];
                 do {
                     if (code == TEXT_NEWLINE || col >= max_chars) {
                         position.x = bounds->x;
@@ -74,8 +75,8 @@ void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t*
                             code &= 0xF;
                             code = code * TEXT_GLYPHS_PER_PREFIX + *text++;
                         }
-                        position.x
-                            += menu_text_render_glyph_to_4bpp_image(code, image, &position, (*colors >> 14) | style);
+                        position.x += menu_text_render_glyph_to_4bpp_image(
+                            code, image, &position, (*text_entry >> 14) | style);
                     } else if (code == TEXT_SPACE) {
                         position.x += 4;
                     } else if (code == TEXT_SET_X_POSITION) {
