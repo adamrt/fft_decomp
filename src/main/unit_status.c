@@ -272,9 +272,9 @@ void status_set_action_state(unit_stats_t* unit, u8 action_state) {
         status_id++) {
         if (changed & mask) {
             if ((old_status & mask) != 0) {
-                status_queue_display_flag_change_if_executing(status_id, 0, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
             } else {
-                status_queue_display_flag_change_if_executing(status_id, 1, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_id);
             }
         }
         mask >>= 1;

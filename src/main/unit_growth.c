@@ -474,9 +474,9 @@ static void unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 ski
                 if (initializing != 0) {
                     status_set_ct(unit, i, 0);
                 }
-                status_queue_display_flag_change_if_executing(status_id, 1, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_id);
             } else {
-                status_queue_display_flag_change_if_executing(status_id, 0, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
             }
         }
     }

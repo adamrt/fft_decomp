@@ -555,7 +555,7 @@ void status_clear_all(unit_stats_t* unit) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), 0, battle_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
         }
     }
     mem_zero(unit->status_sets.innate, 0x1F);
@@ -575,7 +575,7 @@ s32 status_init_display_flags(s32 unit_id) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), 1, unit_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, unit_id);
         }
     }
     return 0;

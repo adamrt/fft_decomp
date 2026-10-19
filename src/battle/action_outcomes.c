@@ -212,9 +212,9 @@ void ability_learn_used(unit_stats_t* unit) {
  * executing: previews and AI simulations change no display state.
  *
  * status_id is the status handler index (status id + 1). */
-void status_queue_display_flag_change_if_executing(s32 status_id, s32 enabled, s32 battle_id) {
+void status_queue_display_flag_change_if_executing(s32 status_id, s32 change_type, s32 battle_id) {
     if (g_action_state == ACTION_STATE_EXECUTE) {
-        status_queue_display_flag_change(status_id, enabled, battle_id);
+        status_queue_display_flag_change(status_id, change_type, battle_id);
     }
 }
 
@@ -331,7 +331,8 @@ void status_apply_unit_action_removal(unit_stats_t* unit) {
         mask = 0x80 >> (i & 7);
         if (g_action_target_data->status_changes.removal[byte_index] & mask) {
             status_set_ct(unit, i, 0);
-            status_queue_display_flag_change_if_executing(STATUS_HANDLER_INDEX(i), 0, battle_id);
+            status_queue_display_flag_change_if_executing(
+                STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
         }
     }
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {

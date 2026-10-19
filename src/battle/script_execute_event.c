@@ -352,7 +352,8 @@ restart_script:
             if (operand_1 == EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS) {
                 draw_runtime_id = script_resolve_runtime_id(CHARACTER_IDENTITY_ZALERA);
                 if (draw_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                    status_queue_current_status_graphics(unit_get_battle_id_by_runtime_id(draw_runtime_id), 0);
+                    status_queue_current_status_graphics(
+                        unit_get_battle_id_by_runtime_id(draw_runtime_id), STATUS_DISPLAY_CHANGE_REMOVE);
                     g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                     thread_call_on_main_stack(draw_runtime_id);
                 }
@@ -855,7 +856,8 @@ restart_script:
             if (draw_runtime_id != EVENT_RUNTIME_ID_NONE) {
                 unit_draw_and_activate_by_runtime_id(draw_runtime_id);
                 if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_LIMBERRY_CEMETERY_BATTLE) {
-                    status_queue_current_status_graphics(unit_get_battle_id_by_runtime_id(draw_runtime_id), 1);
+                    status_queue_current_status_graphics(
+                        unit_get_battle_id_by_runtime_id(draw_runtime_id), STATUS_DISPLAY_CHANGE_ADD);
                     g_thread_call_target = (void (*)(void))unit_update_graphics_by_runtime_id;
                     thread_call_on_main_stack(draw_runtime_id);
                 }

@@ -457,14 +457,14 @@ void unit_update_display_by_battle_id(u16 battle_id) {
  * data when Frog changes keeps its usable-ability list synchronized with the
  * graphics transition.
  */
-s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id) {
+s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id) {
     unit_t* unit = unit_get_by_battle_id(battle_id);
 
     if (unit == 0) {
         return 0;
     }
-    switch (enabled) {
-    case 0:
+    switch (change_type) {
+    case STATUS_DISPLAY_CHANGE_REMOVE:
         switch (status) {
         case STATUS_HANDLER_INDEX(STATUS_ID_CRYSTAL):
         case STATUS_HANDLER_INDEX(STATUS_ID_CHICKEN):
@@ -493,7 +493,7 @@ s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id) {
             break;
         }
         break;
-    case 1:
+    case STATUS_DISPLAY_CHANGE_ADD:
         switch (status) {
         case STATUS_HANDLER_INDEX(STATUS_ID_CRYSTAL):
             unit->statuses_to_add_5_6 |= UNIT_STATUS_CRYSTAL;
@@ -528,7 +528,7 @@ s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id) {
             break;
         }
         break;
-    case 2:
+    case STATUS_DISPLAY_CHANGE_KEEP:
         /* No effect, but the label makes 1 the root of the target's
          * compare tree. */
         break;

@@ -2037,7 +2037,8 @@ static void status_apply_action_removals(s32 unit_idx) {
         if (unit->action.status_changes.removal[byte_index] & mask) {
             unit->inflicted_status[byte_index] &= ~mask;
             if (status_set_ct(unit, i, 1) == 0) {
-                status_queue_display_flag_change_if_executing(STATUS_HANDLER_INDEX(i), 0, unit_idx);
+                status_queue_display_flag_change_if_executing(
+                    STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, unit_idx);
             }
         }
     }
@@ -2094,9 +2095,9 @@ static void status_apply_action_inflictions(s32 unit_id, s32 removal_only) {
             continue;
         }
         if ((previous & mask) && i != STATUS_ID_CRYSTAL && i != STATUS_ID_OIL) {
-            status_queue_display_flag_change_if_executing(STATUS_HANDLER_INDEX(i), 2, unit_id);
+            status_queue_display_flag_change_if_executing(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_KEEP, unit_id);
         } else {
-            status_queue_display_flag_change_if_executing(STATUS_HANDLER_INDEX(i), 1, unit_id);
+            status_queue_display_flag_change_if_executing(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, unit_id);
         }
         if (i == STATUS_ID_TRANSPARENT) {
             g_action_target->transparent_removal_flag = 0;

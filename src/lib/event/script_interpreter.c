@@ -1331,7 +1331,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
 /* Queue the renderer status flags for each of a unit's current statuses on
  * the main stack; the Draw event instruction runs this only for the Zalera
  * event. */
-void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
+void status_queue_current_status_graphics(s32 battle_id, s32 change_type) {
     unit_stats_t* stats = unit_get_stats(battle_id);
     s32 i;
     s32 mask;
@@ -1340,7 +1340,7 @@ void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
     for (i = 0; i < STATUS_COUNT; i++) {
         mask = 0x80 >> (i % 8);
         if ((stats->status_sets.current[i / 8] & mask) != 0) {
-            thread_call_on_main_stack(STATUS_HANDLER_INDEX(i), enabled, battle_id);
+            thread_call_on_main_stack(STATUS_HANDLER_INDEX(i), change_type, battle_id);
         }
     }
 }
@@ -1480,10 +1480,10 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
             byte_index = i / 8;
             mask = 0x80 >> (i % 8);
             if (g_unit_status_staging_data->added[battle_id][byte_index] & mask) {
-                thread_call_on_main_stack(STATUS_HANDLER_INDEX(i), 0, battle_id);
+                thread_call_on_main_stack(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
             }
             if (g_unit_status_staging_data->removed[battle_id][byte_index] & mask) {
-                thread_call_on_main_stack(STATUS_HANDLER_INDEX(i), 1, battle_id);
+                thread_call_on_main_stack(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, battle_id);
             }
         }
         if (g_unit_status_staging_data->removed[battle_id][STATUS_BYTE_INDEX(STATUS_ID_JUMP)]

@@ -239,10 +239,17 @@ s32 status_prepare_terrain_poison(struct unit_stats* unit);
 s32 status_prepare_poison_and_regen(struct unit_stats* unit);
 
 /* status display */
+/* Requests for the renderer's pending status flags. */
+typedef enum status_display_change {
+    STATUS_DISPLAY_CHANGE_REMOVE = 0,
+    STATUS_DISPLAY_CHANGE_ADD = 1,
+    STATUS_DISPLAY_CHANGE_KEEP = 2 /* leave pending changes untouched */
+} status_display_change_e;
+
 s32 status_init_display_flags(s32 unit_id);
-s32 status_queue_display_flag_change(s32 status, s32 enabled, s32 battle_id);
-void status_queue_display_flag_change_if_executing(s32 status_id, s32 enabled, s32 battle_id);
-void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
+s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id);
+void status_queue_display_flag_change_if_executing(s32 status_id, s32 change_type, s32 battle_id);
+void status_queue_current_status_graphics(s32 battle_id, s32 change_type);
 
 /* status bubbles */
 /* unit_t.status_bubble_id: the bubbles the code names. The others follow the statuses of
