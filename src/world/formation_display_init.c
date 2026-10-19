@@ -161,13 +161,8 @@ void formation_rebuild_unit_list(void) {
  * a menu runs in the upper menu or screen menu thread slot, or menu input is
  * locked (g_menu_input_lock_mode). */
 s32 screen_is_busy(void) {
-    s32 result = 0;
-
-    if (g_screen_grid_id != MENU_GRID_HELP_NONE || thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU) != 0
-        || g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0) {
-        result = 1;
-    }
-    return result;
+    return g_screen_grid_id != MENU_GRID_HELP_NONE || thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU) != 0
+        || g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0;
 }
 
 /* Show message `message_id` in the text thread (dialog type 0x2B), play
