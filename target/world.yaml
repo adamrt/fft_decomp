@@ -2023,11 +2023,11 @@ data:
   - {addr: 0x801ac92c, name: g_screen_image_blit_destination}
   - {addr: 0x801ac93c, name: g_menu_window_frame_image}
   - {addr: 0x801acd3c, name: g_option_entry_panel_rect}
-  - {addr: 0x801acd44, name: g_at_list_primary_values}
-  - {addr: 0x801ad144, name: g_at_list_secondary_values}
+  - {addr: 0x801acd44, name: g_at_list_primary_text_ids}
+  - {addr: 0x801ad144, name: g_at_list_secondary_text_ids}
   - {addr: 0x801ad344, name: g_at_list_indices}
   - {addr: 0x801ad544, name: g_crystal_pickup_row_colors}
-  - {addr: 0x801ad944, name: g_at_list_flags}
+  - {addr: 0x801ad944, name: g_at_list_row_text_colors}
   - {addr: 0x801adb4c, name: g_crystal_pickup_menu_result}
   - {addr: 0x801adb50, name: g_crystal_pickup_choice_result}
   - {addr: 0x801ae334, name: g_at_list_descriptors}

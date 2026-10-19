@@ -2278,11 +2278,11 @@ data:
   - {addr: 0x801c9cf4, name: g_text_glyph_dest}
   - {addr: 0x801c9d04, name: g_menu_window_frame_image}
   - {addr: 0x801ca104, name: g_option_entry_panel_rect}
-  - {addr: 0x801ca10c, name: g_at_list_primary_values}
-  - {addr: 0x801ca50c, name: g_at_list_secondary_values}
+  - {addr: 0x801ca10c, name: g_at_list_primary_text_ids}
+  - {addr: 0x801ca50c, name: g_at_list_secondary_text_ids}
   - {addr: 0x801ca70c, name: g_at_list_indices}
   - {addr: 0x801ca90c, name: g_crystal_pickup_row_colors}
-  - {addr: 0x801cad0c, name: g_at_list_flags}
+  - {addr: 0x801cad0c, name: g_at_list_row_text_colors}
   - {addr: 0x801caf14, name: g_crystal_pickup_menu_result}
   - {addr: 0x801caf18, name: g_crystal_pickup_choice_result}
   - {addr: 0x801cb6fc, name: g_at_list_descriptors}

@@ -44,9 +44,9 @@ extern menu_entry_t g_at_list_state;
 extern menu_text_layout_t g_at_list_entry_table;
 extern u8 g_at_list_text[];
 extern s16 g_at_list_indices[];
-extern s16 g_at_list_primary_values[];
-extern s16 g_at_list_secondary_values[];
-extern s16 g_at_list_flags[];
+extern s16 g_at_list_primary_text_ids[];
+extern s16 g_at_list_secondary_text_ids[];
+extern s16 g_at_list_row_text_colors[];
 
 /* Give other event work one turn before terminating this thread. */
 void thread_stop_after_yield(void) {
@@ -97,7 +97,7 @@ void crystal_start_pickup_threads(void) {
                  * the pair into a strength-reduced giv. */
                 s32 value = bit_index + TEXT_ID_ABILITY_NAME_BASE;
 
-                g_at_list_primary_values[value_count++] = byte_index * 8 + value;
+                g_at_list_primary_text_ids[value_count++] = byte_index * 8 + value;
             }
             mask *= 2;
         }
@@ -259,7 +259,7 @@ void crystal_start_pickup_threads(void) {
  *
  * The target keeps two counters that always hold the same value: the loop
  * index addresses the descriptor table and the entry-number column, while
- * the separate accepted-entry counter addresses the value and flag columns.
+ * the separate accepted-entry counter addresses the text and color columns.
  * Merging them makes the four 16-bit columns share one induction variable
  * and loses the entry-number column's recomputed shift.
  *
@@ -278,7 +278,7 @@ static void at_list_init(menu_entry_t* menu) {
 
     for (index = 0; index < 0x100; index++) {
         g_crystal_pickup_row_colors[index] = 0;
-        g_at_list_flags[index] = 0;
+        g_at_list_row_text_colors[index] = 0;
     }
 
     g_text_section_pointers[TEXT_SECTION_AT_LIST] = g_at_list_text;
@@ -317,28 +317,28 @@ static void at_list_init(menu_entry_t* menu) {
         *text++ = 0xfe;
 
         if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
-            g_at_list_secondary_values[entry_count] = index - 0x800;
+            g_at_list_secondary_text_ids[entry_count] = index - 0x800;
         } else {
-            g_at_list_primary_values[entry_count] = index - 0x800;
+            g_at_list_primary_text_ids[entry_count] = index - 0x800;
         }
 
         if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) == 0) {
-            g_at_list_secondary_values[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
+            g_at_list_secondary_text_ids[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
             if ((g_at_list_descriptors[index].unit_code & AT_JUMP) != 0) {
-                g_at_list_primary_values[entry_count] = 0xb012;
+                g_at_list_primary_text_ids[entry_count] = 0xb012;
             } else {
                 s32 value = g_at_list_descriptors[index].action_id_low;
                 if ((g_at_list_descriptors[index].unit_code & AT_ABILITY_ID_HIGH_BIT) != 0) {
                     value += 0x100;
                 }
-                g_at_list_primary_values[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;
+                g_at_list_primary_text_ids[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;
             }
         }
 
         if ((unit->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
-            g_at_list_flags[entry_count] = 8;
+            g_at_list_row_text_colors[entry_count] = 8;
         }
         entry_count++;
     }
@@ -388,12 +388,11 @@ static void at_list_init(menu_entry_t* menu) {
     }
 }
 
-/* Thread body: pauses the four worker threads after this one and yields until
- * g_at_list_selection_finished is raised, publishing the AT list's cursor row plus 100 in
- * g_menu_transition_state every frame (menu_get_thread_activity reports it). Then it resets the
- * state, closes the unit view panels (threads 13..10), points
- * g_text_section_pointers[TEXT_SECTION_AT_LIST] at g_at_list_text again, resumes the worker
- * threads and stops itself. */
+/* Pause the four worker threads after this one and yield until
+ * g_at_list_selection_finished is raised. Publish the AT list's cursor row plus
+ * 100 in g_menu_transition_state before each completion check, including the final one.
+ * Then reset the state, close the unit view panels (threads 13..10), rebind
+ * TEXT_SECTION_AT_LIST to g_at_list_text, resume the workers and stop this thread. */
 void at_list_select_unit_thread(void) {
     g_menu_modal_open = 1;
     g_menu_overlay_state = 2;
@@ -401,7 +400,11 @@ void at_list_select_unit_thread(void) {
     thread_suspend(g_thread_current_id + 2);
     thread_suspend(g_thread_current_id + 3);
     thread_suspend(g_thread_current_id + 4);
-    while (g_menu_transition_state = g_at_list_state.selected_index + 100, g_at_list_selection_finished == 0) {
+    for (;;) {
+        g_menu_transition_state = g_at_list_state.selected_index + 100;
+        if (g_at_list_selection_finished != 0) {
+            break;
+        }
         thread_yield();
     }
     g_at_list_selection_finished = 0;
