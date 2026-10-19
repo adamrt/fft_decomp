@@ -92,6 +92,7 @@ void formation_build_unit_record(const unit_stats_t* unit, formation_unit_t* rec
     if (record->detail.uses_monster_skillset != 0) {
         s32 count;
 
+        /* The signed view keeps the original single-load copy loop. */
         abilities = (s16*)ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 3; i++) {
