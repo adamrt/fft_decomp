@@ -648,7 +648,8 @@ void proposition_open_active_list(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_IN_PROGRESS, 0);
     count = 0;
     loaded_count = g_proposition_count;
-    if ((i = 0, loaded_count) > 0) {
+    i = 0;
+    if (loaded_count > 0) {
         entry_value_base = TEXT_ID_PROPOSITION_NAME_BASE;
         row_flags = g_menu_stack_row_flags;
         active_row_flag = 8;

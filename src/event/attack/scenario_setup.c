@@ -71,13 +71,12 @@ s32 scenario_load_conditionals(void) {
     s32 first;
     s32 count;
 
-    if (script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0) {
-        if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_MILITARY_ACADEMY) {
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GARILAND_BATTLE_SETUP);
-            script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
-            g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
-            g_system_go_straight_to_battle = 0;
-        }
+    if (script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
+        && script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_MILITARY_ACADEMY) {
+        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GARILAND_BATTLE_SETUP);
+        script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
+        g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
+        g_system_go_straight_to_battle = 0;
     }
 
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {

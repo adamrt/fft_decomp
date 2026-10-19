@@ -1178,27 +1178,23 @@ void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction)
 void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
     u8 rotation;
     s16 animation;
-    s16 call_runtime_id;
     s16 runtime_id = script_read_s16(parameters->unit_id_le);
-    s32 index;
     unit_animation_state_t* rotation_state;
 
     rotation = parameters->rotation;
     animation = script_read_s16(parameters->animation_le);
-    call_runtime_id = script_resolve_runtime_id(runtime_id);
-    runtime_id = call_runtime_id;
+    runtime_id = script_resolve_runtime_id(runtime_id);
     if (parameters->animation_le[1] == 0) {
-        unit_clear_facing_update_suppression(call_runtime_id);
+        unit_clear_facing_update_suppression(runtime_id);
     } else {
-        unit_set_facing_update_suppression(call_runtime_id);
+        unit_set_facing_update_suppression(runtime_id);
     }
-    index = runtime_id;
-    rotation_state = &g_unit_animation_states[index];
+    rotation_state = &g_unit_animation_states[runtime_id];
     rotation_state->target_facing = rotation;
     rotation_state->delay = 0;
     rotation_state->rotating = 0;
-    unit_set_facing(index, rotation);
-    unit_set_animation(index, animation);
+    unit_set_facing(runtime_id, rotation);
+    unit_set_animation(runtime_id, animation);
 }
 
 /* FACE_UNIT and FACE_EACH_OTHER event instructions:

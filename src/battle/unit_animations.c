@@ -808,7 +808,7 @@ void sprite_palette_set_thrown_item(s32 item_id, unit_t* unit) {
     weapon_type = item->type;
     if ((weapon_type >= ITEM_TYPE_SHURIKEN)
         || ((u32)(unit->used_ability_id - ABILITY_ID_THROW_FIRST) < ABILITY_ID_JUMP_FIRST - ABILITY_ID_THROW_FIRST)
-        || ((ability_id = unit->used_ability_id), ability_id == ABILITY_ID_BASIC_SKILL_THROW_STONE)) {
+        || (ability_id = unit->used_ability_id) == ABILITY_ID_BASIC_SKILL_THROW_STONE) {
         weapon_type = 0x15;
     }
     clut_index = unit->runtime_id;

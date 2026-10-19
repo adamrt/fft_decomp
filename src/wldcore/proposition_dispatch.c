@@ -993,7 +993,8 @@ void proposition_open_returned_list(void) {
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_RETURNED, 0);
     count = 0;
     loaded_count = g_proposition_count;
-    if ((i = 0, loaded_count) > 0) {
+    i = 0;
+    if (loaded_count > 0) {
         location = &g_world_map_marker_state.marker.location_id;
         entry_value_base = TEXT_ID_PROPOSITION_NAME_BASE;
         total = loaded_count;
