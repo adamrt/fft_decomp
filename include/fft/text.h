@@ -477,11 +477,12 @@ extern s32 g_text_slot_glyph_counts[3];
 extern s32 g_text_selection_id;
 extern u8 g_text_thread_running_state;
 
-/* Starts the text thread on thread_id only when its scheduler slot is idle. */
-void menu_text_start_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 third);
+/* Start a dialog only when its scheduler slot is idle. */
+void menu_text_start_thread_if_idle(s32 thread_id, s32 dialog_type, s32 text_id, s32 speaker_id);
 
-/* Starts the text thread when no text is pending and returns 1; returns 0 once the pending text matches key and
- * has finished, otherwise the running status. */
-s32 menu_text_start_or_poll_thread(s32 thread_id, s32 parameter_0, s32 key, s32 parameter_2, s32 y_offset);
+/* Acknowledge a matching pending text ID when this slot is idle (return 0).
+ * Otherwise start a dialog when no ID is pending (return 1), or return the
+ * slot's running flag. The pending ID is shared across slots. */
+s32 menu_text_start_or_poll_thread(s32 thread_id, s32 dialog_type, s32 text_id, s32 speaker_id, s32 y_offset);
 
 #endif
