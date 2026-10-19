@@ -1676,7 +1676,7 @@ s32 result_build_next_display(unit_t* unit) {
         image_id = status;
         sprite_display_store_data(display_2, 0, -21, -32, g_result_image_rects[image_id].u,
             g_result_image_rects[image_id].v, g_result_image_rects[image_id].width,
-            (g_result_image_rects + image_id)->height, 0);
+            g_result_image_rects[image_id].height, 0);
         break;
     case RESULT_DISPLAY_LEVEL_DOWN:
         /* The fall-through overwrites both sprites, so level down places them like level up. */

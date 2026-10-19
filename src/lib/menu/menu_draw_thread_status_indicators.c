@@ -131,7 +131,7 @@ draw_panels:
                 (k + prims->top)->b0 = g_menu_indicator_fade_work[i];
                 setRGB0(&prims->bottom[j], g_menu_indicator_fade_work[i], g_menu_indicator_fade_work[i],
                     g_menu_indicator_fade_work[i]);
-                gfx_draw_or_append_gpu_primitive((k + prims->top));
+                gfx_draw_or_append_gpu_primitive(&prims->top[k]);
                 gfx_draw_or_append_gpu_primitive(&prims->bottom[j]);
             }
             gfx_draw_or_append_gpu_primitive(&prims->center);
