@@ -310,17 +310,14 @@ static void movie_init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32
  * `sector` and leaves its position in the loader descriptor, which is then
  * set as the read location. */
 static void movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
-    file_load_descriptor_t* header;
-
     DecDCTReset(0);
     DecDCToutCallback(output_callback);
     StSetRing(g_movie_cd_stream_ring_buffer, 0x30);
     StSetStream(1, 0, -1, 0, 0); /* 24-bit mode, from frame 0, no end frame, no callbacks */
 
-    header = &g_file_cd_state;
-    file_request_read_quiet(header, sector, 1, 0);
+    file_request_read_quiet(&g_file_cd_state, sector, 1, 0);
     while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
-        file_poll_load(header);
+        file_poll_load(&g_file_cd_state);
         VSync(0);
     }
 
