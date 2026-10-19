@@ -33,7 +33,7 @@ void save_init_data_tables(void) {
         record->text_history[0] = -1;
         record->picture_id = -1;
         g_sound_novel_saved_readings[i].background_set = -1;
-        record->sound_mode = 0;
+        record->sound_mode = SOUND_NOVEL_SOUND_MODE_EFFECTS_ONLY;
         record->music_selection = 0;
         record->state_flags = 0;
         g_sound_novel_saved_readings[i].section = 0;
