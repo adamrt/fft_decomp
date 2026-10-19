@@ -683,7 +683,8 @@ s32 at_list_preview(unit_stats_t* unit, action_command_t* action, at_entry_t* at
 
 /* Rebuilds the 40-entry AT list: charged and performing actions first, then
  * each unit's next turns simulated tick by tick under Stop/Sleep, Slow and
- * Haste. Returns -1 when no entry was added.
+ * Haste. Returns -1 when no charged or simulated turn entry was added;
+ * the current unit's leading entry does not count toward this result.
  *
  * One u8 local holds the Sleep CT, the charging CT and the per-tick CT gain,
  * as the target's shared $v1 shows. Its early live range conflicts with $v0,
@@ -852,7 +853,7 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
         }
     }
 
-    return -(placed == 0);
+    return placed == 0 ? -1 : 0;
 }
 
 /* Insert an entry into the 40-entry AT list ahead of the first one with a

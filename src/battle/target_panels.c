@@ -1117,7 +1117,7 @@ s32 target_area_set_for_action(const action_command_t* source) {
     if (result == 0) {
         return 1;
     }
-    return -(result == -1);
+    return result == -1 ? -1 : 0;
 }
 
 /* Re-validate the acting unit's stored target and mark the target's tile.
