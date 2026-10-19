@@ -21,7 +21,7 @@
 
 /* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. ATTACK draws
  * full-width gauge bars and two entries in the second number image. The third small-number cell
- * shows battle_id + 1, or stays blank during post-battle unit changes. */
+ * shows the party slot + 1 (stored in battle_id), or stays blank during post-battle unit changes. */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
