@@ -946,7 +946,6 @@ s32 turn_end(s32 unit_id) {
     u8 status5;
     u8 movement_check;
     u8 action_check;
-    u32 result;
 
     if (g_unit_stats[unit_id].active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
         return 1;
@@ -960,12 +959,10 @@ s32 turn_end(s32 unit_id) {
     if (movement_check == 0) {
         ct += TURN_UNUSED_CT_REFUND;
     }
-    result = ct;
     if (action_check == 0) {
         ct += TURN_UNUSED_CT_REFUND;
-        result = ct;
     }
-    if (result > TURN_END_CT_MAX)
+    if (ct > TURN_END_CT_MAX)
         ct = TURN_END_CT_MAX;
     unit->ct = ct;
     unit->has_turn = 0;

@@ -1578,16 +1578,12 @@ static s32 target_area_keep_only_target_tile(const action_command_t* action) {
     x = action_copy.target_position.vx;
     y = action_copy.target_position.vz;
     level = action_copy.target_position.vy;
-    if (x < g_battle_map_terrain_width) {
-        if (y < g_battle_map_terrain_depth) {
-            if (level < 2) {
-                tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_terrain_width + x];
-                if ((tile->flags.blocked) == 0) {
-                    target_area_clear_flags();
-                    tile->ceiling_depth_and_marks.targeted = 1;
-                    return 1;
-                }
-            }
+    if (x < g_battle_map_terrain_width && y < g_battle_map_terrain_depth && level < 2) {
+        tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_terrain_width + x];
+        if ((tile->flags.blocked) == 0) {
+            target_area_clear_flags();
+            tile->ceiling_depth_and_marks.targeted = 1;
+            return 1;
         }
     }
     return -1;

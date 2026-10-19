@@ -444,29 +444,26 @@ void formula_select_magic_gun_ability(void) {
     if (element & ELEMENT_FIRE) {
         if (pct < 10) {
             id = ABILITY_ID_BLACK_MAGIC_FIRE_3;
+        } else if (pct < 40) {
+            id = ABILITY_ID_BLACK_MAGIC_FIRE_2;
         } else {
             id = ABILITY_ID_BLACK_MAGIC_FIRE;
-            if (pct < 40) {
-                id = ABILITY_ID_BLACK_MAGIC_FIRE_2;
-            }
         }
     } else if (element & ELEMENT_LIGHTNING) {
         if (pct < 10) {
             id = ABILITY_ID_BLACK_MAGIC_BOLT_3;
+        } else if (pct < 40) {
+            id = ABILITY_ID_BLACK_MAGIC_BOLT_2;
         } else {
             id = ABILITY_ID_BLACK_MAGIC_BOLT;
-            if (pct < 40) {
-                id = ABILITY_ID_BLACK_MAGIC_BOLT_2;
-            }
         }
     } else {
         if (pct < 10) {
             id = ABILITY_ID_BLACK_MAGIC_ICE_3;
+        } else if (pct < 40) {
+            id = ABILITY_ID_BLACK_MAGIC_ICE_2;
         } else {
             id = ABILITY_ID_BLACK_MAGIC_ICE;
-            if (pct < 40) {
-                id = ABILITY_ID_BLACK_MAGIC_ICE_2;
-            }
         }
     }
     g_action_current_ability.ability_id = id;
