@@ -32,15 +32,7 @@ extern u8 g_formation_item_hp_mp_bonus_window_script[88];
  * stops the side panels. Each frame then dispatches on g_formation_item_menu_mode to the browse,
  * rearrange, action, sort order or equipped-by sub-menus, and draws the Triangle (equipped-by)
  * button, the list window and the selected item's details. Returns 0 once the screen closes,
- * 1 otherwise.
- *
- * `busy = 0;` is written after the pressable-button call. The target
- * interleaves `move s0,zero` into that call's argument setup (after
- * `li a2,0x3c`, before `lui a3`); written before the call it is instead
- * emitted first, and reorg then steals it into the preceding `bnez` delay slot
- * and retargets the branch past its own slot instruction. `busy` is not an
- * argument to that call -- it is only read by the script call below -- so the
- * later position is the natural one. */
+ * 1 otherwise. */
 s32 equipment_update_menu(void) {
     s32 input;
     s32 disabled;
@@ -96,17 +88,11 @@ s32 equipment_update_menu(void) {
     } else {
         g_screen_prompt_active = 1;
     }
-    disabled = 0;
-    if (screen_is_busy() != 0 || g_formation_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
-        || item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) == 0) {
-        disabled = 1;
-    }
+    disabled = screen_is_busy() != 0 || g_formation_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
+        || item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) == 0;
     menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 0xB8, 0x3C,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, SOUND_SFX_CONFIRM);
-    busy = 0;
-    if (menu_input_get_lock_mode(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
-        busy = 1;
-    }
+    busy = menu_input_get_lock_mode(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0;
     menu_run_script_with_palette_mode(g_formation_item_list_window_script, input, busy);
     screen_draw_item_tabs(0, g_menu_selected_slot, busy);
     if (g_menu_list_entry_count != 0) {
