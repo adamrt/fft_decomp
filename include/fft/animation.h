@@ -4,13 +4,12 @@
 /* BATTLE unit animations: SEQ sequence opcodes and the animation state, animation ids, the charge, attack and reaction
  * animations of actions, and the distortion motions (teleport, rise, settle). */
 
-#include "fft/status.h"
-#include "fft/unit.h"
 #include "psx/types.h"
 
 struct sprite_display;
 struct sprite_unit_seq_table;
 struct sprite_unit_shp_frame_tables;
+struct unit;
 
 /* sequences */
 /* SEQ sequence bytes, as animation_run_unit_seq_script (unit sheets) and
@@ -221,16 +220,16 @@ typedef enum animation {
 enum { ANIMATION_ATTACK_FIRST = ANIMATION_TELEPORT };
 
 void animation_set_specific_by_runtime_id(u32 runtime_id, u32 animation);
-void animation_store_facing(u32 animation, s32 facing, unit_t* unit);
-void animation_force_facing(s32 animation, s32 facing, unit_t* unit);
-void animation_set_walk(unit_t* unit);
-void animation_set_level_up(unit_t* unit);
-void animation_set_stand(unit_t* unit);
+void animation_store_facing(u32 animation, s32 facing, struct unit* unit);
+void animation_force_facing(s32 animation, s32 facing, struct unit* unit);
+void animation_set_walk(struct unit* unit);
+void animation_set_level_up(struct unit* unit);
+void animation_set_stand(struct unit* unit);
 void animation_set_stand_by_runtime_id(u32 runtime_id);
-void animation_set_for_status(unit_t* unit);
+void animation_set_for_status(struct unit* unit);
 void animation_call_set_for_status(struct unit* unit);
 void animation_set_status_by_runtime_id(u32 runtime_id);
-void animation_update_for_status_changes(unit_t* unit);
+void animation_update_for_status_changes(struct unit* unit);
 
 /* action animations */
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
@@ -248,10 +247,10 @@ enum { ANIMATION_ABILITY_COUNT = 454, ANIMATION_CHARGE_SET_COUNT = 20, ANIMATION
 /* Selectors in attack_animation; other values are animation_e IDs. */
 enum { ANIMATION_ATTACK_USE_WEAPON = 0, ANIMATION_ATTACK_USE_ITEM = 1 };
 
-void animation_start_ability_charge(unit_t* unit);
-void animation_start_ability_charge_hold(unit_t* unit);
-void animation_select_attack_for_ability(unit_t* attacker, unit_t* target);
-void animation_select_weapon_attack(unit_t* attacker, unit_t* target);
+void animation_start_ability_charge(struct unit* unit);
+void animation_start_ability_charge_hold(struct unit* unit);
+void animation_select_attack_for_ability(struct unit* attacker, struct unit* target);
+void animation_select_weapon_attack(struct unit* attacker, struct unit* target);
 
 /* distortions */
 /* unit_t.distortion_animation_id: the motion that
@@ -279,6 +278,6 @@ typedef enum animation_distortion {
     ANIMATION_DISTORTION_JUMP_RISE = 17               /* 12 with the jump sound, unless the unit is that high already */
 } animation_distortion_e;
 
-void animation_distortion_dispatch(unit_t* unit);
+void animation_distortion_dispatch(struct unit* unit);
 
 #endif

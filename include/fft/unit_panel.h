@@ -5,14 +5,15 @@
  * ability panels and the numeric panel): the selected and comparison unit records, the panel threads, packets, status
  * icons, portraits and cell layouts, and each overlay's own panel state. */
 
-#include "fft/battle_map.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/menu_stack.h"
-#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+struct battle_map_selected_tile;
+struct unit_stats;
+union menu_stack_record;
 
 /* selected and comparison units */
 /* The unit a status panel shows, saved and restored whole by unit_panel_copy_billboard_out and
@@ -89,7 +90,7 @@ void unit_panel_load_selected(void);
 /* Copies the selected unit's records and the cursor tile into the caller's buffers; _in restores them without
  * the tile. */
 void unit_panel_copy_billboard_out(unit_panel_summary_t* banner, unit_panel_unit_t* unit,
-    unit_panel_record_t* billboard, battle_map_selected_tile_t* cursor_tile);
+    unit_panel_record_t* billboard, struct battle_map_selected_tile* cursor_tile);
 void unit_panel_copy_billboard_in(
     const unit_panel_summary_t* banner, const unit_panel_unit_t* unit, const unit_panel_record_t* billboard);
 
@@ -320,6 +321,6 @@ typedef struct unit_panel_help_level {
 } unit_panel_help_level_t;
 
 void unit_panel_push_help_level(void);
-void unit_panel_resume_help_level(menu_stack_record_t* level);
+void unit_panel_resume_help_level(union menu_stack_record* level);
 
 #endif
