@@ -447,12 +447,11 @@ s32 location_build_menu_entries(s32 location_id, s32* out) {
         out[0] = TEXT_ID_BAR;
         out[1] = TEXT_ID_SHOP;
         out[2] = TEXT_ID_SOLDIER_OFFICE;
-        if (script_get_variable(EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED) != 0) {
-            if ((location_id == LOCATION_DORTER) || (location_id == LOCATION_WARJILIS)
-                || (location_id == LOCATION_ZARGHIDAS)) {
-                out[count] = TEXT_ID_FUR_SHOP;
-                count++;
-            }
+        if (script_get_variable(EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED) != 0
+            && ((location_id == LOCATION_DORTER) || (location_id == LOCATION_WARJILIS)
+                || (location_id == LOCATION_ZARGHIDAS))) {
+            out[count] = TEXT_ID_FUR_SHOP;
+            count++;
         }
     }
     return count;

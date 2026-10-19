@@ -195,6 +195,6 @@ void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override) {
         secondary_x = x + 7;
     }
     secondary->position.x = secondary_x;
-    g_equipment_secondary_slot_marker.position.y = base_y + 10;
+    secondary->position.y = base_y + 10;
     menu_gfx_enqueue_oriented_textured_quad(secondary, 0, TEXTURE_UV_FLIP_NONE, 0, EQUIPMENT_SLOT_MARKER_SECOND_OTAG);
 }

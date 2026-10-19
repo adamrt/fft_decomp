@@ -703,7 +703,7 @@ restart_script:
             }
         } else if (opcode == EVENT_OPCODE_COLOR_BG_BETA) {
             battle_map_background_modify(
-                parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
+                parameters[0], parameters[4], (s8)parameters[1], (s8)parameters[2], (s8)parameters[3]);
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_opcode_32_color_unit((const event_color_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_RESUME_UNIT_PALETTE_UPDATES) {
@@ -712,7 +712,7 @@ restart_script:
             script_set_units_palette_update_suppression((u16)first_operand, 1);
         } else if (opcode == EVENT_OPCODE_COLOR_FIELD) {
             battle_map_color_field(
-                parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
+                parameters[0], parameters[4], (s8)parameters[1], (s8)parameters[2], (s8)parameters[3]);
         } else if (opcode == EVENT_OPCODE_STORE_MODIFIED_MAP_PALETTE) {
             battle_map_palette_store_modified_colors(0, 0, 1);
         } else if (opcode == EVENT_OPCODE_SET_TILE_CAMERA_BLOCK) {
