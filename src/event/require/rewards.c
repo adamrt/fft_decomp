@@ -1191,16 +1191,15 @@ static void war_trophy_collect(void) {
     }
 }
 
-/* Screen x of war-trophy entry `value`'s column, given the entry count
- * `index`: one column at 0xd0 for fewer than five entries, otherwise 0x9c
- * for even entries and 0x104 for odd ones. */
-static s32 war_trophy_get_column_x(s32 value, s32 index) {
+/* Screen x for an entry: one column at 0xd0 when the total entry count is
+ * below five, otherwise 0x9c for even entry indices and 0x104 for odd ones. */
+static s32 war_trophy_get_column_x(s32 entry_index, s32 entry_count) {
     s32 result = 0xd0;
 
-    if (index >= 5) {
+    if (entry_count >= 5) {
         s32 alternate = 0x9c;
 
-        if (value & 1) {
+        if (entry_index & 1) {
             alternate = 0x104;
         }
         result = alternate;
@@ -1208,14 +1207,14 @@ static s32 war_trophy_get_column_x(s32 value, s32 index) {
     return result;
 }
 
-/* Screen y of war-trophy row `value`, given the entry count `index`: 20
- * pixels per entry in the single column, per pair of entries in two
- * columns, from y 0x78. */
-static s32 war_trophy_get_row_y(s32 value, s32 index) {
-    if (index < 5) {
-        return value * 20 + 0x78;
+/* Screen y for a page-relative entry index, starting at 0x78: 20 pixels
+ * per entry in one column or per pair in two. The total entry count selects
+ * the layout, so a short final page still uses two columns. */
+static s32 war_trophy_get_row_y(s32 page_entry_index, s32 entry_count) {
+    if (entry_count < 5) {
+        return page_entry_index * 20 + 0x78;
     }
-    return (value / 2) * 20 + 0x78;
+    return (page_entry_index / 2) * 20 + 0x78;
 }
 
 /*
