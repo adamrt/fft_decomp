@@ -40,11 +40,10 @@ void menu_input_update_controller(void) {
         g_menu_input_latched_button = 0;
         g_menu_input_activation_timer += speed;
     } else {
-        if (g_menu_input_activation_timer < 4) {
-            if (current_input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT)) {
-                current_input &= PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT;
-                g_menu_input_activation_timer = 10;
-            }
+        if (g_menu_input_activation_timer < 4
+            && (current_input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT))) {
+            current_input &= PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT;
+            g_menu_input_activation_timer = 10;
         }
         if (g_menu_input_activation_timer >= 4) {
             g_menu_input_activation_timer = 0;

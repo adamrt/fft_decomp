@@ -125,20 +125,16 @@ s32 formula_accuracy_calculate_physical_status(void) {
 /* Formula 0x01: weapon damage (XA * YA by weapon type) with the weapon's
  * element; physical evade; 19% status. */
 void formula_weapon_damage(void) {
-    if (formula_evade_calculate_physical() == 0) {
-        if (formula_calculate_weapon_damage() == 0) {
-            formula_apply_status();
-        }
+    if (formula_evade_calculate_physical() == 0 && formula_calculate_weapon_damage() == 0) {
+        formula_apply_status();
     }
 }
 
 /* Formula 0x02: as 0x01, but the 19% roll queues the weapon's proc ability on
  * the target instead of a status. */
 void formula_weapon_damage_with_proc(void) {
-    if (formula_evade_calculate_physical() == 0) {
-        if (formula_calculate_weapon_damage() == 0) {
-            formula_queue_weapon_spell();
-        }
+    if (formula_evade_calculate_physical() == 0 && formula_calculate_weapon_damage() == 0) {
+        formula_queue_weapon_spell();
     }
 }
 
@@ -245,10 +241,8 @@ void formula_magic_hp_percent_damage(void) {
 
 /* Formula 0x0A: status, hit F(MA+X)%; magic evade. */
 void formula_hit_faith_ma_x_percent(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic() == 0) {
-            formula_apply_status_to_action();
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic() == 0) {
+        formula_apply_status_to_action();
     }
 }
 
@@ -334,11 +328,9 @@ void formula_absorb_mp_y_percent(void) {
 
 /* Formula 0x10: absorb (Y)% of max HP, hit F(MA+X)%; magic evade. */
 void formula_magic_hp_absorb(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_strengthen() == 0) {
-            formula_calculate_hp_percent_damage();
-            formula_apply_hp_absorption();
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_strengthen() == 0) {
+        formula_calculate_hp_percent_damage();
+        formula_apply_hp_absorption();
     }
 }
 
@@ -369,11 +361,9 @@ void formula_set_golem(void) {
 
 /* Formula 0x15 (Return 2): CT to 0, hit F(MA+X)%; magic evade. */
 void formula_return_2(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_strengthen() == 0) {
-            g_action_target_data->ct_change = ACTION_CT_CHANGE_ZERO;
-            g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_strengthen() == 0) {
+        g_action_target_data->ct_change = ACTION_CT_CHANGE_ZERO;
+        g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
     }
 }
 
@@ -384,24 +374,20 @@ void formula_mute(void) {
     action_data_t* action;
     u16 mp;
 
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_strengthen() == 0) {
-            target = g_action_target;
-            action = g_action_target_data;
-            mp = target->mp;
-            action->attack_type = ACTION_TYPE_MP_DAMAGE;
-            action->mp_damage = mp;
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_strengthen() == 0) {
+        target = g_action_target;
+        action = g_action_target_data;
+        mp = target->mp;
+        action->attack_type = ACTION_TYPE_MP_DAMAGE;
+        action->mp_damage = mp;
     }
 }
 
 /* Formula 0x17 (Gravi 2): damage equal to the target's current HP - 1, hit F(MA+X)%;
  * magic evade. */
 void formula_gravi_2(void) {
-    if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic_without_strengthen() == 0) {
-            formula_calculate_damage_leaving_one_hp();
-        }
+    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_strengthen() == 0) {
+        formula_calculate_damage_leaving_one_hp();
     }
 }
 
