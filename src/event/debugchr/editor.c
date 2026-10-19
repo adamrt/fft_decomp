@@ -437,7 +437,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 }
 
 /* Ordinary indexing changes the ADDU operand order at the primitive bases. */
-#define PRIM_AT(base, index) ((POLY_FT4*)((s32)((index) * sizeof(POLY_FT4)) - -(s32)(base)))
+#define PRIM_AT(base, index) ((POLY_FT4*)((s32)((index) * sizeof(POLY_FT4)) + (s32)(base)))
 
 /* Run the debug unit editor on the battle units present on the field.
  *
