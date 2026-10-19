@@ -66,7 +66,6 @@ static void equipment_update_state(void) {
     s32 result;
     s32 state;
     s32 mode;
-    s16* value_ptr;
 
     if (g_equipment_thread_running == 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_COMMAND_MENU) == 0) {
@@ -84,8 +83,7 @@ static void equipment_update_state(void) {
     }
     state = g_equipment_screen_state;
     if (state == EQUIPMENT_STATE_COMMAND_MENU) {
-        value_ptr = &g_equipment_result_rows[0];
-        mode = *value_ptr;
+        mode = g_equipment_result_rows[0];
         /* Each row's help text, from entry 0x29 of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
         g_help_message_text_id = g_equipment_command_menu.selected_index + 0x1029;
         if (mode == 1) {
@@ -93,7 +91,7 @@ static void equipment_update_state(void) {
             equipment_reset_selection();
         } else if (mode != -1) {
             thread_start(EQUIPMENT_THREAD_SLOT_COMMAND_MENU_CHILD, thread_wait_forever_by_frames);
-            g_equipment_screen_state = *value_ptr + EQUIPMENT_STATE_EQUIP;
+            g_equipment_screen_state = g_equipment_result_rows[0] + EQUIPMENT_STATE_EQUIP;
             menu_set_selection_value(0, 0);
             menu_set_selection_value(1, 0);
             menu_set_selection_value(2, 0);
