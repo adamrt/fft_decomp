@@ -186,7 +186,7 @@ void event_transition_step_level(menu_stack_record_t* level) {
             g_event_transition_sprite.y = g_event_transition_sprite.y - 1;
         }
 
-        if (level->event_transition.frame == ((level->event_transition.frame / 3) * 3)) {
+        if (level->event_transition.frame % 3 == 0) {
             step = level->event_transition.anim_step + 2;
             level->event_transition.anim_step = step;
             g_event_transition_sprite.scalex = 0x1100 - (step << 7);
@@ -247,7 +247,7 @@ void event_transition_step_level(menu_stack_record_t* level) {
             g_event_transition_sprite.y = g_event_transition_sprite.y + 1;
         }
 
-        if (level->event_transition.frame == ((level->event_transition.frame / 3) * 3)) {
+        if (level->event_transition.frame % 3 == 0) {
             step = level->event_transition.anim_step + 4;
             level->event_transition.anim_step = step;
             g_event_transition_sprite.scalex = 0x1100 - ((0x40 - step) << 7);

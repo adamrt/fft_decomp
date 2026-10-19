@@ -459,9 +459,7 @@ s32 screen_is_dialog_waiting(void) {
 /* Ask a thread to stop by setting its task id to
  * THREAD_TASK_STOP_REQUEST. */
 void screen_thread_request_stop(s32 thread_id) {
-    thread_t* thread = &g_threads[thread_id];
-
-    thread->task_id = THREAD_TASK_STOP_REQUEST;
+    g_threads[thread_id].task_id = THREAD_TASK_STOP_REQUEST;
 }
 
 /* Let a dialog thread that is waiting for more text continue: switch its task to resume and set
@@ -477,9 +475,7 @@ void screen_text_resume_printing(s32 thread_id) {
 
 /* Returns 1 while the text thread's task id is RESUME. */
 s32 screen_text_is_printing(s32 thread_id) {
-    thread_t* thread = &g_threads[thread_id];
-
-    return thread->task_id == THREAD_TASK_RESUME;
+    return g_threads[thread_id].task_id == THREAD_TASK_RESUME;
 }
 
 /* Idle thread body: yield to the next WORLD thread, forever. */
@@ -494,9 +490,7 @@ void screen_thread_park_slots_5_to_8(void) {
     s32 thread_id;
 
     for (thread_id = 8; thread_id >= 5; thread_id--) {
-        thread_t* thread = &g_threads[thread_id];
-
-        if (thread->is_running == 0) {
+        if (g_threads[thread_id].is_running == 0) {
             thread_start(thread_id, screen_thread_idle);
         }
     }
@@ -512,9 +506,7 @@ void screen_thread_stop_slots_5_to_8(void) {
     s32 thread_id;
 
     for (thread_id = 8; thread_id >= 5; thread_id--) {
-        thread_t* thread = &g_threads[thread_id];
-
-        if (thread->is_running == 0) {
+        if (g_threads[thread_id].is_running == 0) {
             thread_suspend(thread_id + 1);
         }
     }

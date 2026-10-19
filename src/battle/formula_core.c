@@ -1226,9 +1226,8 @@ void formula_apply_attack_up_and_martial_arts(void) {
 
     {
         u8 weapon_id = g_action_current_ability.weapon_id;
-        unit_stats_t* attacker = g_action_attacker;
         u8 weapon_type = g_item_primary_data[weapon_id].type;
-        u8 has_martial_arts = attacker->ability_flags.support[2] & UNIT_SUPPORT_SET_3_MARTIAL_ARTS;
+        u8 has_martial_arts = g_action_attacker->ability_flags.support[2] & UNIT_SUPPORT_SET_3_MARTIAL_ARTS;
 
         if (has_martial_arts && weapon_type == ITEM_TYPE_UNARMED) {
             g_action_current_ability.xa = g_action_current_ability.xa * 3 / 2;
@@ -1370,9 +1369,7 @@ void formula_calculate_mp_percent_damage(void) {
 
 /* HP damage equal to the target's current HP - 1 (0 when it has none). */
 void formula_calculate_damage_leaving_one_hp(void) {
-    unit_stats_t* target = g_action_target;
-
-    if (target->hp != 0) {
+    if (g_action_target->hp != 0) {
         g_action_target_data->hp_damage = g_action_target->hp - 1;
     } else {
         g_action_target_data->hp_damage = 0;
