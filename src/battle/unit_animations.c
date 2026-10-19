@@ -1316,23 +1316,18 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
  * facing north, -x facing south, +z facing west, -z facing east. A diagonal
  * facing matches no case. */
 static void animation_shift_right_or_left(unit_t* unit, s8 delta) {
-    s16* vector;
     switch (unit->facing & (UNIT_FACING_EAST | UNIT_FACING_NORTH)) {
     case UNIT_FACING_NORTH:
-        vector = &unit->seq_offset.vx;
-        *vector = *vector + delta;
+        unit->seq_offset.vx += delta;
         return;
     case UNIT_FACING_SOUTH:
-        vector = &unit->seq_offset.vx;
-        *vector = *vector - delta;
+        unit->seq_offset.vx -= delta;
         return;
     case UNIT_FACING_WEST:
-        vector = &unit->seq_offset.vz;
-        *vector = *vector + delta;
+        unit->seq_offset.vz += delta;
         return;
     case UNIT_FACING_EAST:
-        vector = &unit->seq_offset.vz;
-        *vector = *vector - delta;
+        unit->seq_offset.vz -= delta;
         return;
     }
 }

@@ -6,6 +6,7 @@
 #include "fft/cursor.h"
 #include "fft/effect.h"
 #include "fft/effect_secondary.h"
+#include "fft/gfx.h"
 #include "fft/move.h"
 #include "fft/move_step.h"
 #include "fft/sound.h"
@@ -741,7 +742,7 @@ static void move_step_start_float_jump(unit_t* unit, const battle_map_tile_t* fr
  * The first switch repeats the layer test that the statement before it has just
  * made false, so its bodies never run. */
 void move_step_apply_velocity(unit_t* unit) {
-    s16 tile[2];
+    point16_t tile;
     u8 layer;
     s16 ground_height;
     s16 destination_height;
@@ -749,11 +750,11 @@ void move_step_apply_velocity(unit_t* unit) {
     unit_t* rider;
     s32 depth;
 
-    tile[0] = (unit->real.vx + unit->velocity.vx) / (BATTLE_MAP_TILE_SIZE * ONE);
-    tile[1] = (unit->real.vz + unit->velocity.vz) / (BATTLE_MAP_TILE_SIZE * ONE);
+    tile.x = (unit->real.vx + unit->velocity.vx) / (BATTLE_MAP_TILE_SIZE * ONE);
+    tile.y = (unit->real.vz + unit->velocity.vz) / (BATTLE_MAP_TILE_SIZE * ONE);
     /* Entering the destination tile switches the unit to the destination's layer. */
     layer = unit->map_layer;
-    if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
+    if (tile.x == unit->movement.destination_x && tile.y == unit->movement.destination_y
         && unit->map_layer != unit->movement.destination_layer) {
         layer = unit->map_layer = unit->movement.destination_layer;
     }
@@ -764,10 +765,10 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_WEST:
-        if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
+        if (tile.x == unit->movement.destination_x && tile.y == unit->movement.destination_y
             && unit->map_layer != unit->movement.destination_layer) {
             layer = unit->map_layer = unit->movement.destination_layer;
-            map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+            map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
             move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
             move_step_scale_velocity(unit, unit->walk_speed);
         }
@@ -776,10 +777,10 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST:
-        if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
+        if (tile.x == unit->movement.destination_x && tile.y == unit->movement.destination_y
             && unit->map_layer != unit->movement.destination_layer) {
             layer = unit->map_layer = unit->movement.destination_layer;
-            map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+            map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
             move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
             move_step_scale_velocity(unit, unit->step_speed);
         }
@@ -801,7 +802,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_WALK_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_WALK_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if ((-unit->real.vy / ONE) <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             move_step_set_delta_center_to_edge(unit, &unit->current_path_step, map_tile, unit->current_edge_height);
@@ -826,7 +827,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if ((-unit->real.vy / ONE) <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             if (unit->step_speed <= 0x7FFF) {
@@ -854,7 +855,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
@@ -880,7 +881,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             if (unit->step_speed <= 0x7FFF) {
@@ -932,7 +933,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
@@ -950,7 +951,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
@@ -972,7 +973,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_FLY_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             move_step_set_velocity_clamped(unit, &unit->path, &unit->current_path_step);
@@ -985,7 +986,7 @@ void move_step_apply_velocity(unit_t* unit) {
     case MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        battle_map_tile_get_pointer(tile[0], tile[1], layer);
+        battle_map_tile_get_pointer(tile.x, tile.y, layer);
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
