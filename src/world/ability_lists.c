@@ -54,6 +54,14 @@ extern s16 g_formation_ability_view_job_names[];
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];
 
+/* The dismiss prompt keeps its eligibility result until an answer queues a sound. */
+enum {
+    FORMATION_DISMISS_REFUSED = 0,
+    FORMATION_DISMISS_CONFIRM = 1,
+    FORMATION_DISMISS_PROPOSITION_MESSAGE = 2,
+    FORMATION_DISMISS_SOUND_QUEUED = 100
+};
+
 /* Special identities whose Brave Story profile is marked when dismissed. */
 typedef struct formation_dismiss_entry {
     s16 character_identity;
@@ -114,8 +122,8 @@ static s32 formation_ability_is_learned(s32 index) {
 s32 formation_ability_learn_list(void) {
     s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     s32 category;
     u8 running;
     s32 input;
@@ -195,9 +203,10 @@ s32 formation_ability_learn_list(void) {
             g_formation_ability_category = category;
             ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job,
                 g_formation_ability_category, g_ability_list_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
-            menu_get_selection_record(g_formation_ability_category + 10, &x, &y, g_ability_list_ability_entries);
-            menu_init_scrollable_list(
-                g_ability_list_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
+            menu_get_selection_record(
+                g_formation_ability_category + 10, &selected_index, &scroll_base_index, g_ability_list_ability_entries);
+            menu_init_scrollable_list(g_ability_list_ability_entries, selected_index, scroll_base_index,
+                g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
             menu_set_window_scale_step(10);
         }
     } else {
@@ -287,8 +296,8 @@ void formation_ability_view_menu(void) {
 static s32 formation_ability_view_list(void) {
     s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
-    s16 x;
-    s16 y;
+    s16 selected_index;
+    s16 scroll_base_index;
     u16 entry;
     s32 category;
 
@@ -352,9 +361,10 @@ static s32 formation_ability_view_list(void) {
         g_formation_ability_category = category;
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_get_selection_record(g_formation_ability_category + 10, &x, &y, g_ability_list_ability_entries);
-        menu_init_scrollable_list(
-            g_ability_list_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
+        menu_get_selection_record(
+            g_formation_ability_category + 10, &selected_index, &scroll_base_index, g_ability_list_ability_entries);
+        menu_init_scrollable_list(g_ability_list_ability_entries, selected_index, scroll_base_index,
+            g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(10);
     }
     menu_run_script_with_palette_mode(
@@ -496,7 +506,7 @@ void formation_dismiss_menu(void) {
         sprite = g_unit_selected_index;
         if (g_formation_unit_pointers[sprite]->proposition_status != 0) {
             message_box_show_with_sound(0xC012, SOUND_SFX_ERROR_MESSAGE);
-            g_formation_dismiss_step = 2;
+            g_formation_dismiss_step = FORMATION_DISMISS_PROPOSITION_MESSAGE;
             g_formation_dismiss_prompt_running = 1;
         } else {
             g_formation_dismiss_step = formation_can_dismiss(sprite);
@@ -522,7 +532,7 @@ void formation_dismiss_menu(void) {
                 if (sprite == CHARACTER_IDENTITY_REIS_DRAGON) {
                     sprite = CHARACTER_IDENTITY_REIS_DRAGON + 1;
                 }
-                if (g_formation_dismiss_step != 0) {
+                if (g_formation_dismiss_step != FORMATION_DISMISS_REFUSED) {
                     value = sprite + 0x17;
                 } else {
                     value = sprite + 0x61;
@@ -531,7 +541,7 @@ void formation_dismiss_menu(void) {
             text_id = value + TEXT_ID_FORMATION_TEXT_BASE;
 
             /* A refusal is a plain prompt; a dismissable unit gets the yes/no menu with its farewell. */
-            if (g_formation_dismiss_step == 0) {
+            if (g_formation_dismiss_step == FORMATION_DISMISS_REFUSED) {
                 g_sound_suppressed = 1;
                 g_formation_dismiss_menu_data = &g_formation_dismiss_prompt;
                 if (g_formation_unit_banner_at_bottom != 0) {
@@ -556,7 +566,7 @@ void formation_dismiss_menu(void) {
         g_help_message_text_id = -1;
     }
 
-    if (g_formation_dismiss_step == 2) {
+    if (g_formation_dismiss_step == FORMATION_DISMISS_PROPOSITION_MESSAGE) {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
         g_formation_dismiss_prompt_running = running;
         if (running != 0) {
@@ -569,11 +579,11 @@ void formation_dismiss_menu(void) {
     running = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_formation_dismiss_menu_data);
     step = g_formation_dismiss_step;
     g_formation_dismiss_prompt_running = running;
-    if (step != 0) {
+    if (step != FORMATION_DISMISS_REFUSED) {
         /* Step 1 queues the answer's sound once; 0x64 then keeps the step nonzero without repeating it. */
         if (thread_is_running(3) != 0) {
             step = g_formation_dismiss_step;
-            if (step == 1) {
+            if (step == FORMATION_DISMISS_CONFIRM) {
                 selection = g_screen_selection_results[10];
                 g_sound_suppressed = step;
                 if (selection == 0) {
@@ -587,9 +597,9 @@ void formation_dismiss_menu(void) {
                  * fall-through (`beqz` at 0x3e4). An if/else emits the opposite
                  * branch sense and orders the two `li`s the other way, which
                  * also costs the store's register. */
-                step = 1;
+                step = FORMATION_DISMISS_CONFIRM;
                 if (g_sound_queued_effect_id != SOUND_SFX_NONE) {
-                    step = 0x64;
+                    step = FORMATION_DISMISS_SOUND_QUEUED;
                 }
                 g_formation_dismiss_step = step;
             }
