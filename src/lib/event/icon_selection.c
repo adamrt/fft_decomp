@@ -77,7 +77,7 @@ void auto_battle_settings_thread(void) {
     u8* buffer;
     s32 i;
     s32 j;
-    s32 fresh;
+    s32 image_pending_free;
     s32 before;
     s32 after;
     s32 selected;
@@ -101,7 +101,7 @@ void auto_battle_settings_thread(void) {
     previous = cursor;
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
-    fresh = 0;
+    image_pending_free = 0;
     i = 0;
     color = g_auto_battle_option_colors;
     for (;; i++) {
@@ -152,12 +152,12 @@ void auto_battle_settings_thread(void) {
                 menu_display_text_entry(j + 0x5009, buffer, &g_menu_window_text_pen);
             }
             LoadImage(&rect, (u32*)buffer);
-            fresh = 1;
+            image_pending_free = 1;
         }
         thread_yield();
-        if (fresh != 0) {
+        if (image_pending_free != 0) {
             menu_free_memory(buffer);
-            fresh = 0;
+            image_pending_free = 0;
         }
         param->selected_index = cursor;
         if (menu_should_close_thread(&g_script_event_input) != 0) {
@@ -278,13 +278,10 @@ static void at_list_build_ability_preview(void) {
 
     /* Without an AT position for the action, this thread shows preview message 0x1023
      * and exits. */
-
-    count = 0;
     if (turn < 0 || turn == 0xff) {
         g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE].text_id = 0x1023;
         thread_set_parameters(
             g_thread_current_id, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE], 0, 0);
-        count = 0;
         menu_icon_linked_entry_thread();
     }
 

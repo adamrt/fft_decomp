@@ -194,17 +194,15 @@ menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* data)
 
 /* Select the normal or alternate sprite color. */
 menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* data) {
-    u8 blue;
     if (g_menu_use_alternate_palette != 0) {
         g_menu_text_color.r = data->sprite_color.alternate.r;
         g_menu_text_color.g = data->sprite_color.alternate.g;
-        blue = data->sprite_color.alternate.b;
+        g_menu_text_color.b = data->sprite_color.alternate.b;
     } else {
         g_menu_text_color.r = data->sprite_color.normal.r;
         g_menu_text_color.g = data->sprite_color.normal.g;
-        blue = data->sprite_color.normal.b;
+        g_menu_text_color.b = data->sprite_color.normal.b;
     }
-    g_menu_text_color.b = blue;
     return menu_next_instruction(data);
 }
 
