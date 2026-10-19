@@ -577,22 +577,20 @@ void world_map_suspend_cursor_level(menu_stack_record_t* level) {
  * The flag tests are signed `> 0` comparisons; `!= 0` folds to srl/andi. */
 void location_script_dispatch_requests(void) {
     s32* location = &g_world_map_marker_state.marker.location_id;
-    s32* flags;
     s32 id;
 
     if (location_script_run(*location, LOCATION_SCRIPT_ACTION_MAP_MENU_MASK) == 0) {
         return;
     }
-    flags = &g_location_script_state.flags;
-    if (*flags & LOCATION_SCRIPT_ACTION_PATH_MASK) {
+    if (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_PATH_MASK) {
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         world_map_push_path_level(g_location_script_state.args[0], g_location_script_state.args[1],
-            (*flags & LOCATION_SCRIPT_ACTION_ERASE_PATH) > 0);
-    } else if (*flags & LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
+            (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_ERASE_PATH) > 0);
+    } else if (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
-        world_map_push_location_visibility_level(
-            g_location_script_state.args[0], (*flags & LOCATION_SCRIPT_ACTION_ERASE_LOCATION) > 0);
-    } else if (*flags & LOCATION_SCRIPT_ACTION_FOCUS_LOCATION) {
+        world_map_push_location_visibility_level(g_location_script_state.args[0],
+            (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_ERASE_LOCATION) > 0);
+    } else if (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_FOCUS_LOCATION) {
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         id = g_location_script_state.args[0];
         if (id == 0xFF) {
