@@ -912,38 +912,36 @@ s32 travel_start(s32 from_location, s32 to_location) {
         event_transition_push_level(g_location_script_state.args[1]);
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         return 0;
-    } else {
-        if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
-            script_set_variable(g_location_script_state.args[0], g_location_script_state.args[1]);
-        }
-        g_travel_search_cost = 0;
-        g_travel_search_depth = 0;
-        g_travel.best_cost = g_travel.best_length_bound = 99999;
-        g_travel.flags = 0;
-        travel_find_best_path(from_location, to_location);
-        if (!(g_travel.flags & TRAVEL_ACTIVE)) {
-            return 1;
-        }
-        g_travel.route_index = 0;
-        if (g_travel.best_path_length == 0) {
-            return 1;
-        }
-        g_travel.segment_count = travel_begin_segment(&g_travel, g_travel.route_path.routes[0], 0);
-        g_travel.segment_index = 0;
-        g_world_map_marker_state.angle = g_travel.heading;
-        depth = g_menu_stack_depth - 1;
-        g_travel.menu_level = depth;
-        g_window_records[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        if (world_map_start_pan_if_outside(
-                &g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
-            == 0) {
-            g_world_map_marker_state.flags
-                |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
-        }
-        g_world_map_marker_state.marker.picture_id = location_load_picture(to_location);
-        g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    }
+    if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
+        script_set_variable(g_location_script_state.args[0], g_location_script_state.args[1]);
+    }
+    g_travel_search_cost = 0;
+    g_travel_search_depth = 0;
+    g_travel.best_cost = g_travel.best_length_bound = 99999;
+    g_travel.flags = 0;
+    travel_find_best_path(from_location, to_location);
+    if (!(g_travel.flags & TRAVEL_ACTIVE)) {
         return 1;
     }
+    g_travel.route_index = 0;
+    if (g_travel.best_path_length == 0) {
+        return 1;
+    }
+    g_travel.segment_count = travel_begin_segment(&g_travel, g_travel.route_path.routes[0], 0);
+    g_travel.segment_index = 0;
+    g_world_map_marker_state.angle = g_travel.heading;
+    depth = g_menu_stack_depth - 1;
+    g_travel.menu_level = depth;
+    g_window_records[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    if (world_map_start_pan_if_outside(
+            &g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
+        == 0) {
+        g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
+    }
+    g_world_map_marker_state.marker.picture_id = location_load_picture(to_location);
+    g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    return 1;
 }
 
 /* Advances the world-map movement along the current location route.
