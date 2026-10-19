@@ -93,7 +93,7 @@ void tutorial_handle_topic_list_input(menu_stack_record_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -102,7 +102,7 @@ void tutorial_handle_topic_list_input(menu_stack_record_t* level) {
         tutorial_block_topic_list_buttons(level);
         menu_stack_push_message_level(0x108D, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
-        && g_file_cd_state.state == 0) {
+        && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);

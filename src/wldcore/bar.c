@@ -311,7 +311,7 @@ void rumor_handle_list_input(menu_stack_record_t* level) {
         menu_stack_dispatch_resume();
         return;
     }
-    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
+    if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -321,7 +321,7 @@ void rumor_handle_list_input(menu_stack_record_t* level) {
         menu_stack_push_message_level(0x105E, 1);
         return;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
-        && g_file_cd_state.state == 0) {
+        && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -526,7 +526,8 @@ void proposition_handle_available_list_input(menu_stack_record_t* level) {
             level->panel.result = 1;
             g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         }
-    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == 0) {
+    } else if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS)
+        && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -535,7 +536,7 @@ void proposition_handle_available_list_input(menu_stack_record_t* level) {
         proposition_block_available_list_buttons(level);
         menu_stack_push_message_level(0x105F, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
-        && g_file_cd_state.state == 0) {
+        && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         if (g_proposition_count >= 8) {
             sound_play_effect(SOUND_SFX_INVALID);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_MORE_JOBS, 0);

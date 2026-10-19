@@ -2099,7 +2099,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
             menu_stack_push_message_level(text, 1);
         }
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->location_menu.entry_count != 0
-        && g_file_cd_state.state == 0) {
+        && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
         music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 2);

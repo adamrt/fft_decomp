@@ -231,12 +231,12 @@ suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_cd_state.state != 0) {
+    if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         do {
             VSync(0);
             system_frame_stub();
             file_poll_load(&g_file_cd_state);
-        } while (g_file_cd_state.state != 0);
+        } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
     }
     return buffer;
 }
@@ -256,12 +256,12 @@ static void* file_load_to_heap(s32 sector, u32 size) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_cd_state.state != 0) {
+    if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         do {
             VSync(0);
             system_frame_stub();
             file_poll_load(&g_file_cd_state);
-        } while (g_file_cd_state.state != 0);
+        } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
     }
     return destination;
 }
@@ -276,12 +276,12 @@ void* file_load_to_address(int sector, unsigned int size, void* destination) {
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
-    if (g_file_cd_state.state != 0) {
+    if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         do {
             VSync(0);
             system_frame_stub();
             file_poll_load(&g_file_cd_state);
-        } while (g_file_cd_state.state != 0);
+        } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
     }
     return destination;
 }

@@ -68,7 +68,7 @@ next:
         g_music_queue.count--;
         break;
     case MUSIC_QUEUE_COMMAND_PLAY_TRACK:
-        if (g_file_cd_state.state != 0) {
+        if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
             return;
         }
         slot = (g_music_queue.current_value & 0xF00) >> 8;
@@ -120,7 +120,7 @@ next:
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_NONE;
         break;
     case MUSIC_QUEUE_COMMAND_WAIT_LOAD:
-        if (g_file_cd_state.state == 0) {
+        if (g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
             goto clear_command;
         }
         return;
