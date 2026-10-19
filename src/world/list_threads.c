@@ -96,7 +96,7 @@ void unit_panel_equipment_thread(void) {
     for (;;) {
         screen = &base[frame & 1];
 
-        mode = (state->two_hands != 0) * 2;
+        mode = state->two_hands != 0 ? 2 : 0;
         if (state->generic_monster != 0) {
             mode++;
         }

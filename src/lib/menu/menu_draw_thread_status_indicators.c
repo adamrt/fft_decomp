@@ -37,7 +37,7 @@ void menu_draw_status_panel_backdrops(void) {
     if (menu_thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) != 0) {
         if (g_threads[THREAD_SCREEN_SLOT_UNIT_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             display = (unit_panel_thread_t*)g_threads[THREAD_SCREEN_SLOT_UNIT_STATUS].function_parameter_1;
-            active = (display->position.x == 0) * 8;
+            active = display->position.x == 0 ? 8 : 0;
         }
     }
     if (menu_thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {

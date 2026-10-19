@@ -84,7 +84,7 @@ void unit_panel_equipment_ability_thread(void) {
         screen = &base[frame & 1];
 
         /* The label layout follows the unit: two-handed adds 2, a monster adds 1. */
-        mode = (state->two_hands != 0) * 2;
+        mode = state->two_hands != 0 ? 2 : 0;
         if (state->generic_monster != 0) {
             mode++;
         }
