@@ -139,7 +139,7 @@ void at_list_run(void) {
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
-    thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
+    thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
     menu_draw_text_columns(entry, &row_offset, buffer);
     ring = 0;
     image_rect.w = g_menu_window_text_pen.stride >> 2;
@@ -171,9 +171,9 @@ void at_list_run(void) {
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
+            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
         } else {
-            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
+            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
