@@ -75,26 +75,22 @@ void location_script_opcode_00_nop(void) {
 
 /* Map script opcodes 0x14 and 0x15: skip one operand without testing anything. */
 void location_script_opcode_14_skip_1_operand(void) {
-    u16* ip = &g_location_script_state.ip;
-    *ip += 1;
+    g_location_script_state.ip += 1;
 }
 
 /* Map script opcodes 0x05 to 0x0B and 0x1B: skip two operands without testing anything. */
 void location_script_opcode_05_skip_2_operands(void) {
-    u16* ip = &g_location_script_state.ip;
-    *ip += 2;
+    g_location_script_state.ip += 2;
 }
 
 /* Map script opcode 0x17: skip three operands without testing anything. */
 void location_script_opcode_17_skip_3_operands(void) {
-    u16* ip = &g_location_script_state.ip;
-    *ip += 3;
+    g_location_script_state.ip += 3;
 }
 
 /* Map script opcode 0x18: skip four operands without testing anything. */
 void location_script_opcode_18_skip_4_operands(void) {
-    u16* ip = &g_location_script_state.ip;
-    *ip += 4;
+    g_location_script_state.ip += 4;
 }
 
 /* Reject the Var= condition when the script variable differs from the operand. */
@@ -173,15 +169,13 @@ void location_script_opcode_04_check_roster_has_character(void) {
 /* Map script opcode 0x0C: skip one operand without testing anything (its own copy of the 0x14
  * body). */
 void location_script_opcode_0c_skip_1_operand(void) {
-    u16* ip = &g_location_script_state.ip;
-    *ip += 1;
+    g_location_script_state.ip += 1;
 }
 
 /* Map script opcode 0x0D: skip one operand without testing anything (its own copy of the 0x14
  * body). */
 void location_script_opcode_0d_skip_1_operand(void) {
-    u16* ip = &g_location_script_state.ip;
-    *ip += 1;
+    g_location_script_state.ip += 1;
 }
 
 /* Reject the Gil>= condition when current war funds are below the operand. */
