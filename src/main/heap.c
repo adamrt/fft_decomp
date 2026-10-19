@@ -222,7 +222,6 @@ int file_is_still_loading(void) {
  * it skips the read for a null destination. */
 suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
     suzuki_smd_header_t* buffer = heap_alloc_smd(size);
-    file_load_descriptor_t* header;
 
     if (buffer == 0) {
         system_handle_error(SYSTEM_ERROR_SMD_LOAD);
@@ -233,11 +232,10 @@ suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
         file_poll_load(&g_file_cd_state);
     }
     if (g_file_cd_state.state != 0) {
-        header = &g_file_cd_state;
         do {
             VSync(0);
             system_frame_stub();
-            file_poll_load(header);
+            file_poll_load(&g_file_cd_state);
         } while (g_file_cd_state.state != 0);
     }
     return buffer;
@@ -249,7 +247,6 @@ suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
  * loop with the separate music heap. */
 static void* file_load_to_heap(s32 sector, u32 size) {
     void* destination = heap_alloc(size);
-    file_load_descriptor_t* header;
 
     if (destination == 0) {
         system_handle_error(SYSTEM_ERROR_HEAP_ALLOC);
@@ -260,11 +257,10 @@ static void* file_load_to_heap(s32 sector, u32 size) {
         file_poll_load(&g_file_cd_state);
     }
     if (g_file_cd_state.state != 0) {
-        header = &g_file_cd_state;
         do {
             VSync(0);
             system_frame_stub();
-            file_poll_load(header);
+            file_poll_load(&g_file_cd_state);
         } while (g_file_cd_state.state != 0);
     }
     return destination;
@@ -275,19 +271,16 @@ static void* file_load_to_heap(s32 sector, u32 size) {
  * for the shared loader to be idle, then polls it once per frame until the read
  * ends. Always returns destination. */
 void* file_load_to_address(int sector, unsigned int size, void* destination) {
-    file_load_descriptor_t* header;
-
     while (file_request_read_quiet(&g_file_cd_state, sector, size >> 11, destination) != 0) {
         VSync(0);
         system_frame_stub();
         file_poll_load(&g_file_cd_state);
     }
     if (g_file_cd_state.state != 0) {
-        header = &g_file_cd_state;
         do {
             VSync(0);
             system_frame_stub();
-            file_poll_load(header);
+            file_poll_load(&g_file_cd_state);
         } while (g_file_cd_state.state != 0);
     }
     return destination;
