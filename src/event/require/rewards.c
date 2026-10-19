@@ -1110,7 +1110,6 @@ static void war_trophy_collect(void) {
     s32 item_id;
     s32 quantity;
     s32 price;
-    s32 adj;
     s32 funds;
     s32 item_count;
     const item_data_t* item;
@@ -1168,12 +1167,7 @@ static void war_trophy_collect(void) {
                 if (quantity == 99) {
                     item = item_get_data(*vp);
                     price = item->price;
-                    if (price < 0) {
-                        adj = price + 3;
-                    } else {
-                        adj = price;
-                    }
-                    price = adj >> 2;
+                    price /= 4;
                     funds = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
                     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, funds + price);
                 } else {
