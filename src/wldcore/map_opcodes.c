@@ -146,7 +146,6 @@ void location_script_opcode_04_check_roster_has_character(void) {
     u16* ipp;
     u16 ip;
     party_unit_t* unit;
-    s32* flags;
 
     ipp = &g_location_script_state.ip;
     ip = *ipp;
@@ -161,8 +160,7 @@ void location_script_opcode_04_check_roster_has_character(void) {
         }
     }
     if (i == PARTY_ROSTER_SLOT_COUNT) {
-        flags = &g_location_script_state.flags;
-        *flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
+        g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
 
@@ -203,12 +201,10 @@ void location_script_opcode_0f_check_war_funds_at_most(void) {
 /* Reject the Date>= condition when the current date precedes the operand. */
 void location_script_opcode_10_check_date_on_or_after(void) {
     s32 month, day, current_month, current_day;
-    s32* flags;
 
     location_script_read_operand_pair_and_date(&month, &day, &current_month, &current_day);
     if ((current_month < month) || ((current_month == month) && (current_day < day))) {
-        flags = &g_location_script_state.flags;
-        *flags = *flags | LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
+        g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
 
@@ -232,12 +228,10 @@ static void location_script_read_operand_pair_and_date(
 /* Reject the Date<= condition when the current date follows the operand. */
 void location_script_opcode_11_check_date_on_or_before(void) {
     s32 month, day, current_month, current_day;
-    s32* flags;
 
     location_script_read_operand_pair_and_date(&month, &day, &current_month, &current_day);
     if ((current_month > month) || ((current_month == month) && (current_day > day))) {
-        flags = &g_location_script_state.flags;
-        *flags = *flags | LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
+        g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
 
@@ -384,15 +378,9 @@ void location_script_opcode_24_focus_location(void) {
         g_location_selected = index + 1;
     }
     if (world_map_is_outside_pan_bounds(&g_world_map_dots[index].render.position) != 0) {
-        s32* flags = &g_location_script_state.flags;
-
-        *flags |= LOCATION_SCRIPT_ACTION_FOCUS_LOCATION;
+        g_location_script_state.flags |= LOCATION_SCRIPT_ACTION_FOCUS_LOCATION;
     }
-    {
-        s32* flags = &g_location_script_state.flags;
-
-        *flags |= LOCATION_SCRIPT_RESULT_ACTION_REACHED;
-    }
+    g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_ACTION_REACHED;
 }
 
 /* Reject the MCBrave>= condition when Ramza's Brave is below the operand. */
