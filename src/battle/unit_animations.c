@@ -33,6 +33,87 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* sheet files */
+/* Unit SPR file: 16 palettes, two uncompressed 4bpp image blocks, then
+ * a variable-length compressed attack-image stream. */
+typedef struct sprite_unit_file {
+    clut_t clut;                          /* 0x0000; 16 palettes of 16 colors */
+    u8 pixels[256][128];                  /* 0x0200; 256 x 256 pixels, two per byte */
+    u8 portrait_and_body_pixels[32][128]; /* 0x8200; 256 x 32 pixels, two per byte */
+    u8 compressed_attack_image[0];        /* 0x9200; variable byte tail */
+} sprite_unit_file_t;
+typedef char sprite_unit_file_size_must_be_37376[sizeof(sprite_unit_file_t) == 37376 ? 1 : -1];
+
+/* Packed unit SEQ file. Values and offsets are little-endian byte
+ * sequences, so this view needs no native 16-bit or 32-bit alignment. */
+typedef struct sprite_packed_seq_record {
+    u8 first_attack_sequence[2];   /* 0x000; unsigned little-endian 16-bit value */
+    u8 first_sp2_sequence[2];      /* 0x002; unsigned little-endian 16-bit value */
+    u8 sequence_offsets[0x100][4]; /* 0x004; signed little-endian 32-bit values, -1 means offset zero */
+    u8 sequence_data_size[2];      /* 0x404; unsigned little-endian 16-bit value */
+    u8 sequence_data[0];           /* 0x406; variable byte tail */
+} sprite_packed_seq_record_t;
+typedef char sprite_packed_seq_record_size_must_be_1030[sizeof(sprite_packed_seq_record_t) == 1030 ? 1 : -1];
+
+/* file layouts */
+/* Serialized SHP/SEQ values are little-endian byte sequences. These file
+ * views have byte alignment; their decoded RAM tables remain separate. */
+
+/* A unit SHP frame set: primary at file +8; an optional submerged set is
+ * addressed by the file header. Only the first 0xd0 offsets are installed. */
+typedef struct sprite_packed_unit_shp_frame_set {
+    u8 frame_offsets[0x100][4]; /* 0x000; signed 32-bit values, -1 resolves to offset zero */
+    u8 frame_data_size[2];      /* 0x400; unsigned 16-bit value */
+    u8 frame_data[0];           /* 0x402; variable tail */
+} sprite_packed_unit_shp_frame_set_t;
+typedef char
+    sprite_packed_unit_shp_frame_set_size_must_be_1026[sizeof(sprite_packed_unit_shp_frame_set_t) == 1026 ? 1 : -1];
+
+typedef struct sprite_packed_unit_shp_record {
+    u8 submerged_frame_set_offset[4];                     /* 0x000; 8 means both native tables share the primary set */
+    u8 first_attack_frame[2];                             /* 0x004; unsigned 16-bit value */
+    u8 first_sp2_frame[2];                                /* 0x006; unsigned 16-bit value */
+    sprite_packed_unit_shp_frame_set_t primary_frame_set; /* 0x008 */
+} sprite_packed_unit_shp_record_t;
+typedef char sprite_packed_unit_shp_record_size_must_be_1034[sizeof(sprite_packed_unit_shp_record_t) == 1034 ? 1 : -1];
+
+/* WEP/EFF SHP has a different header and twice as many frame offsets. */
+typedef struct sprite_packed_weapon_shp_record {
+    u8 _unused_000[4];          /* 0x000; loader skips this 32-bit value */
+    u8 first_frame[0x20][2];    /* 0x004; unsigned zero-frame indices by weapon type */
+    u8 frame_offsets[0x200][4]; /* 0x044; signed 32-bit values, -1 resolves to offset zero */
+    u8 frame_data_size[2];      /* 0x844; unsigned 16-bit value */
+    u8 frame_data[0];           /* 0x846; variable tail */
+} sprite_packed_weapon_shp_record_t;
+typedef char
+    sprite_packed_weapon_shp_record_size_must_be_2118[sizeof(sprite_packed_weapon_shp_record_t) == 2118 ? 1 : -1];
+
+/* WEP/EFF SEQ stores 256 offsets followed by a variable sequence payload. */
+typedef struct sprite_packed_offset_table {
+    u8 _unused_000[4];  /* 0x000; WEP/EFF loader skips the 32-bit header value */
+    u8 entry[0x100][4]; /* 0x004; signed sequence offsets, -1 resolves to zero */
+    u8 payload_size[2]; /* 0x404; unsigned 16-bit value */
+    u8 payload[0];      /* 0x406; variable sequence data */
+} sprite_packed_offset_table_t;
+typedef char sprite_packed_offset_table_size_must_be_1030[sizeof(sprite_packed_offset_table_t) == 1030 ? 1 : -1];
+
+/* OTHER.SPR: the palette helper copies only the first 21 of 32 palettes. */
+typedef struct sprite_other_archive {
+    palette_t palettes[32]; /* 0x0000 */
+    u8 pixels[256 * 128];   /* 0x0400; uncompressed 256x256, 4bpp */
+} sprite_other_archive_t;
+typedef char sprite_other_archive_size_must_be_33792[sizeof(sprite_other_archive_t) == 33792 ? 1 : -1];
+
+/* WEP.SPR contains three CLUT/image pairs: weapons, trails and particles. */
+typedef struct sprite_weapon_archive {
+    clut_t weapon_clut;           /* 0x00000 */
+    u8 weapon_pixels[256][128];   /* 0x00200; 4bpp */
+    clut_t trail_clut;            /* 0x08200 */
+    u8 trail_pixels[256][128];    /* 0x08400; 4bpp */
+    clut_t particle_clut;         /* 0x10400 */
+    u8 particle_pixels[144][128]; /* 0x10600; 4bpp */
+} sprite_weapon_archive_t;
+
 /* Where a weapon or item graphic sits in WEP.SPR, per item graphic id. */
 typedef struct sprite_item_graphic {
     u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for BATTLE_MAP_CLUT_ROW_ITEM_A, low for _B */

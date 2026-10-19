@@ -1,74 +1,17 @@
 #ifndef SPRITE_SHEET_H
 #define SPRITE_SHEET_H
 
-/* BATTLE spritesheets: the SHP, SEQ and SPR file layouts, spritesheet ids, the frame and sequence tables, item
+/* BATTLE spritesheets: spritesheet ids, the loaded frame and sequence tables, item
  * graphics, the VRAM slots that hold sheets and EVTCHR images, and the loader that fills them. */
 
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/sprite.h"
-#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* file layouts */
-/* Serialized SHP/SEQ values are little-endian byte sequences. These file
- * views have byte alignment; their decoded RAM tables remain separate. */
-
-/* A unit SHP frame set: primary at file +8; an optional submerged set is
- * addressed by the file header. Only the first 0xd0 offsets are installed. */
-typedef struct sprite_packed_unit_shp_frame_set {
-    u8 frame_offsets[0x100][4]; /* 0x000; signed 32-bit values, -1 resolves to offset zero */
-    u8 frame_data_size[2];      /* 0x400; unsigned 16-bit value */
-    u8 frame_data[0];           /* 0x402; variable tail */
-} sprite_packed_unit_shp_frame_set_t;
-typedef char
-    sprite_packed_unit_shp_frame_set_size_must_be_1026[sizeof(sprite_packed_unit_shp_frame_set_t) == 1026 ? 1 : -1];
-
-typedef struct sprite_packed_unit_shp_record {
-    u8 submerged_frame_set_offset[4];                     /* 0x000; 8 means both native tables share the primary set */
-    u8 first_attack_frame[2];                             /* 0x004; unsigned 16-bit value */
-    u8 first_sp2_frame[2];                                /* 0x006; unsigned 16-bit value */
-    sprite_packed_unit_shp_frame_set_t primary_frame_set; /* 0x008 */
-} sprite_packed_unit_shp_record_t;
-typedef char sprite_packed_unit_shp_record_size_must_be_1034[sizeof(sprite_packed_unit_shp_record_t) == 1034 ? 1 : -1];
-
-/* WEP/EFF SHP has a different header and twice as many frame offsets. */
-typedef struct sprite_packed_weapon_shp_record {
-    u8 _unused_000[4];          /* 0x000; loader skips this 32-bit value */
-    u8 first_frame[0x20][2];    /* 0x004; unsigned zero-frame indices by weapon type */
-    u8 frame_offsets[0x200][4]; /* 0x044; signed 32-bit values, -1 resolves to offset zero */
-    u8 frame_data_size[2];      /* 0x844; unsigned 16-bit value */
-    u8 frame_data[0];           /* 0x846; variable tail */
-} sprite_packed_weapon_shp_record_t;
-typedef char
-    sprite_packed_weapon_shp_record_size_must_be_2118[sizeof(sprite_packed_weapon_shp_record_t) == 2118 ? 1 : -1];
-
-/* WEP/EFF SEQ stores 256 offsets followed by a variable sequence payload. */
-typedef struct sprite_packed_offset_table {
-    u8 _unused_000[4];  /* 0x000; WEP/EFF loader skips the 32-bit header value */
-    u8 entry[0x100][4]; /* 0x004; signed sequence offsets, -1 resolves to zero */
-    u8 payload_size[2]; /* 0x404; unsigned 16-bit value */
-    u8 payload[0];      /* 0x406; variable sequence data */
-} sprite_packed_offset_table_t;
-typedef char sprite_packed_offset_table_size_must_be_1030[sizeof(sprite_packed_offset_table_t) == 1030 ? 1 : -1];
-
-/* OTHER.SPR: the palette helper copies only the first 21 of 32 palettes. */
-typedef struct sprite_other_archive {
-    palette_t palettes[32]; /* 0x0000 */
-    u8 pixels[256 * 128];   /* 0x0400; uncompressed 256x256, 4bpp */
-} sprite_other_archive_t;
-typedef char sprite_other_archive_size_must_be_33792[sizeof(sprite_other_archive_t) == 33792 ? 1 : -1];
-
-/* WEP.SPR contains three CLUT/image pairs: weapons, trails and particles. */
-typedef struct sprite_weapon_archive {
-    clut_t weapon_clut;           /* 0x00000 */
-    u8 weapon_pixels[256][128];   /* 0x00200; 4bpp */
-    clut_t trail_clut;            /* 0x08200 */
-    u8 trail_pixels[256][128];    /* 0x08400; 4bpp */
-    clut_t particle_clut;         /* 0x10400 */
-    u8 particle_pixels[144][128]; /* 0x10600; 4bpp */
-} sprite_weapon_archive_t;
+struct unit;
+struct unit_stats;
 
 /* spritesheets */
 /* Spritesheet ids index g_sprite_sheet_data and
@@ -422,7 +365,7 @@ s32 sprite_evtchr_clear_loaded_slot(s32 slot_index);
 s32 sprite_evtchr_clear_saved_slot(s32 slot_index);
 s32 sprite_evtchr_release_reserved_slot(s32 slot_index);
 s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary);
-void sprite_evtchr_invalidate_sp2(unit_t* unit);
+void sprite_evtchr_invalidate_sp2(struct unit* unit);
 
 /* loading */
 /* g_sprite_load_state.phase: the phase of the file being loaded. */
@@ -472,7 +415,7 @@ extern u32* g_sprite_sp2_data;
 void sprite_load_reset_state(void);
 void sprite_load_clear_state(s32 unused_map_id);
 void sprite_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
-    s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags);
+    s16 palette_id, s16 runtime_id, struct unit_stats* unit, u32 flags);
 s32 sprite_load_unit_graphics_by_battle_id(s32, s32);
 
 /* Drains the immediate loader steps (2); returns 0 when finished or 1 while work remains pending
@@ -482,7 +425,7 @@ s32 sprite_load_step_shp_seq_data(void);
 
 /* 0 finished, 1 pending or deferred, 2 immediate progress. */
 s32 sprite_load_step_queued(void);
-s32 sprite_open_sp2_file(unit_t* unit, u32* destination);
+s32 sprite_open_sp2_file(struct unit* unit, u32* destination);
 void sprite_decompress_attack_image(const u8* source, u8* destination);
 s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot);
 

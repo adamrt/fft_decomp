@@ -5,35 +5,12 @@
  * weapon and effect sprite blocks, frames, afterimages, shadows and palettes. */
 
 #include "fft/gfx.h"
-#include "fft/status.h"
-#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
 struct animation_state;
-
-/* sheet files */
-/* Unit SPR file: 16 palettes, two uncompressed 4bpp image blocks, then
- * a variable-length compressed attack-image stream. */
-typedef struct sprite_unit_file {
-    clut_t clut;                          /* 0x0000; 16 palettes of 16 colors */
-    u8 pixels[256][128];                  /* 0x0200; 256 x 256 pixels, two per byte */
-    u8 portrait_and_body_pixels[32][128]; /* 0x8200; 256 x 32 pixels, two per byte */
-    u8 compressed_attack_image[0];        /* 0x9200; variable byte tail */
-} sprite_unit_file_t;
-typedef char sprite_unit_file_size_must_be_37376[sizeof(sprite_unit_file_t) == 37376 ? 1 : -1];
-
-/* Packed unit SEQ file. Values and offsets are little-endian byte
- * sequences, so this view needs no native 16-bit or 32-bit alignment. */
-typedef struct sprite_packed_seq_record {
-    u8 first_attack_sequence[2];   /* 0x000; unsigned little-endian 16-bit value */
-    u8 first_sp2_sequence[2];      /* 0x002; unsigned little-endian 16-bit value */
-    u8 sequence_offsets[0x100][4]; /* 0x004; signed little-endian 32-bit values, -1 means offset zero */
-    u8 sequence_data_size[2];      /* 0x404; unsigned little-endian 16-bit value */
-    u8 sequence_data[0];           /* 0x406; variable byte tail */
-} sprite_packed_seq_record_t;
-typedef char sprite_packed_seq_record_size_must_be_1030[sizeof(sprite_packed_seq_record_t) == 1030 ? 1 : -1];
+struct unit;
 
 /* SHP frames */
 /* One part of an SHP frame: a rectangle of the sheet and where it is drawn. */
@@ -257,12 +234,12 @@ typedef struct sprite_unit_query {
     s16 graphic_y_offset; /* 0x06 */
 } sprite_unit_query_t;
 
-void sprite_frame_load_unit(unit_t* unit, struct animation_state* state, u16 frame, u16 sequence_id);
+void sprite_frame_load_unit(struct unit* unit, struct animation_state* state, u16 frame, u16 sequence_id);
 const sprite_frame_t* sprite_get_unit_frame_and_vram_ids(u32 runtime_id, sprite_unit_query_t* out);
 void sprite_set_horizontal_flip_flag(u32 runtime_id);
 void sprite_clear_horizontal_flip_flag(u32 runtime_id);
 void sprite_update_transparency_flag(struct unit* unit);
-void sprite_sheet_apply_status_change(unit_t* unit, s32 tile_effect_level);
+void sprite_sheet_apply_status_change(struct unit* unit, s32 tile_effect_level);
 void sprite_draw_item_display(struct unit* unit);
 void sprite_project_all_units(void);
 void sprite_update_status_bubbles_and_graphics(void);
@@ -270,11 +247,11 @@ void sprite_update_status_bubbles_and_graphics(void);
 /* afterimages */
 void sprite_afterimage_init(struct unit* unit);
 void sprite_afterimage_shift_and_fill(struct unit* unit);
-void sprite_afterimage_draw(unit_t* unit);
+void sprite_afterimage_draw(struct unit* unit);
 
 /* shadows */
-void sprite_shadow_build_quad(unit_t* unit);
-void sprite_shadow_draw(unit_t* unit, u32* ot);
+void sprite_shadow_build_quad(struct unit* unit);
+void sprite_shadow_draw(struct unit* unit, u32* ot);
 s32 sprite_shadow_hide_by_runtime_id(u32 runtime_id);
 s32 sprite_shadow_show_by_runtime_id(u32 runtime_id);
 
@@ -294,11 +271,11 @@ extern palette_t g_sprite_shadow_palette;
 void sprite_palette_reset_by_runtime_id(u32 runtime_id);
 void sprite_palette_restore_all(void);
 void sprite_palette_check_tile_status_mod(struct unit* unit, s32 tile_effect_level, s32 update_current_colors);
-void sprite_palette_tint_unit(unit_t* unit, s32 level, s32 update_current_colors);
+void sprite_palette_tint_unit(struct unit* unit, s32 level, s32 update_current_colors);
 void sprite_palette_tint_by_team(struct unit* unit, s32 amount);
 void sprite_palette_tint_all_by_team(void);
 void sprite_palette_apply_modulation_to_units(s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue);
-void sprite_palette_set_thrown_item(s32 item_id, unit_t* unit);
+void sprite_palette_set_thrown_item(s32 item_id, struct unit* unit);
 void sprite_palette_set_thrown_item_by_runtime_id(u32 item_id, u32 runtime_id);
 void sprite_evtchr_set_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32 clut_index);
 
