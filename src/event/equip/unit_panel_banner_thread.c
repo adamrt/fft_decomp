@@ -24,8 +24,8 @@ extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
  * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. EQUIP's
  * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIPMENT_THREAD_SLOT_UNIT_STATUS selects the
  * first packet set. While the item preview panel is open (g_equipment_item_numeric_thread_enabled)
- * the first numeric block is drawn as five separate entries, two of them signed; the third
- * large number is always the roster slot + 1 (DEBUGCHR's editor branch is absent).
+ * the first numeric block is drawn as five separate entries, two of them signed. The third
+ * small-number cell shows the roster slot + 1, or stays blank during post-battle unit changes.
  *
  * The packet, state and thread layouts are the shared fft/unit_panel.h records: the editor packets
  * at g_unit_panel_selected_editor_packets / g_unit_panel_comparison_editor_packets, the status-panel
@@ -62,13 +62,13 @@ void unit_panel_banner_thread(void) {
     s32 panel_shake_y;
     s32 editor_x;
     s32 editor_shake_y;
-    s32* window_width;
+    s32* pen_stride;
     s32 panel_y_a;
     s32 panel_y_b;
     s32 editor_y_a;
     s32 editor_y_b;
     s16 zodiac;
-    glyph_blit_t* text_position;
+    glyph_blit_t* text_pen;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
     SPRT* panel_sprites;
@@ -438,39 +438,37 @@ void unit_panel_banner_thread(void) {
             }
             LoadImage(&rects[0], number_pixels);
 
-            window_width = &g_menu_window_text_pen.stride;
-            text_position = &g_menu_window_text_pen;
+            pen_stride = &g_menu_window_text_pen.stride;
+            text_pen = &g_menu_window_text_pen;
             number_pixels_b = number_pixels + 0x400;
-            *window_width = 0x60;
-            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);
+            *pen_stride = 0x60;
+            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_pen, 4);
             LoadImage(&rects[1], number_pixels_b);
             thread->redraw_request = 0;
 
             menu_clear_render_buffer(name_image, 0x580);
-            *window_width = 0x58;
+            *pen_stride = 0x58;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(unit_data->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
+            menu_display_text_entry(unit_data->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
             menu_set_text_origin(0, 0x10);
-            menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
+            menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
             LoadImage(&rects[2], name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
-            *window_width = 0x10;
+            *pen_stride = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(
-                unit_data->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_position);
+            text_draw_small_number_glyphs(unit_data->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
             LoadImage(&rects[3], value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_small_number_glyphs(
-                unit_data->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_position);
+            text_draw_small_number_glyphs(unit_data->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
             LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
-                text_draw_small_number_glyphs(unit_data->roster_slot + 1, 0x4002, value_pixels_c, text_position);
+                text_draw_small_number_glyphs(unit_data->roster_slot + 1, 0x4002, value_pixels_c, text_pen);
                 LoadImage(&rects[5], value_pixels_c);
             } else {
                 LoadImage(&rects[5], value_pixels + 0xA0);

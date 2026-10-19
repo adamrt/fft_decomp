@@ -21,9 +21,9 @@
 extern palette_t g_unit_panel_panel_selected_portrait_palettes[2];
 extern palette_t g_unit_panel_panel_comparison_portrait_palettes[2];
 
-/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. BUNIT's body
- * (DEBUGCHR and ATTACK have their own): the gauge bars scale by value / limit, and the third large
- * number is the unit's formation slot + 1 for battle ids from 0x10. */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. BUNIT scales
+ * gauge bars by value / limit. The third small-number cell shows formation slot + 1 for battle ids
+ * from 0x10, treating no formation slot as slot 0; lower ids and post-battle changes leave it blank. */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -49,7 +49,7 @@ void unit_panel_banner_thread(void) {
     s32 thread_id;
     s32 frame;
     s32 i;
-    s32* window_width;
+    s32* pen_stride;
     s32 panel_x;
     s32 panel_shake_y;
     s32 editor_x;
@@ -59,7 +59,7 @@ void unit_panel_banner_thread(void) {
     s32 editor_y_a;
     s32 editor_y_b;
     s16 zodiac;
-    glyph_blit_t* text_position;
+    glyph_blit_t* text_pen;
     menu_status_panel_packet_t* panel;
     menu_status_panel_editor_packet_t* editor;
     SPRT* panel_sprites;
@@ -409,36 +409,34 @@ void unit_panel_banner_thread(void) {
                 number_entries[6].format = 2;
             }
             menu_clear_render_buffer(number_pixels, 0x700);
-            window_width = &g_menu_window_text_pen.stride;
-            text_position = &g_menu_window_text_pen;
-            *window_width = 0x38;
-            menu_draw_numeric_display_entries(number_pixels, number_entries, text_position, 6);
+            pen_stride = &g_menu_window_text_pen.stride;
+            text_pen = &g_menu_window_text_pen;
+            *pen_stride = 0x38;
+            menu_draw_numeric_display_entries(number_pixels, number_entries, text_pen, 6);
             LoadImage(&rects[0], (u32*)number_pixels);
 
             number_pixels_b = number_pixels + 0x400;
-            *window_width = 0x60;
-            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);
+            *pen_stride = 0x60;
+            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_pen, 4);
             LoadImage(&rects[1], (u32*)number_pixels_b);
             thread->redraw_request = 0;
 
             menu_clear_render_buffer(name_image, 0x580);
-            *window_width = 0x58;
+            *pen_stride = 0x58;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
+            menu_display_text_entry(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
             menu_set_text_origin(0, 0x10);
-            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
+            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
             LoadImage(&rects[2], (u32*)name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
-            *window_width = 0x10;
+            *pen_stride = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_small_number_glyphs(
-                unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_position);
+            text_draw_small_number_glyphs(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
             LoadImage(&rects[3], (u32*)value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_small_number_glyphs(
-                unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_position);
+            text_draw_small_number_glyphs(unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
             LoadImage(&rects[4], (u32*)value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
@@ -452,7 +450,7 @@ void unit_panel_banner_thread(void) {
                     if (id == UNIT_FORMATION_INDEX_NONE) {
                         id = 0;
                     }
-                    text_draw_small_number_glyphs(id + 1, 0x4002, value_pixels + 0xA0, text_position);
+                    text_draw_small_number_glyphs(id + 1, 0x4002, value_pixels + 0xA0, text_pen);
                 }
             }
             LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));
