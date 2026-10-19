@@ -128,7 +128,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     formation_init_menu_state();
 
     /* Values above 10 are not tutorials and become 0, the plain screen. */
-    tutorial = -(tutorial < 11) & tutorial;
+    tutorial = tutorial < 11 ? tutorial : 0;
     tutorial_start(tutorial);
     if (tutorial == 0) {
         g_screen_music_slot = music_load_into_free_slot(MUSIC_FORMATION);

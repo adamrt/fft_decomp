@@ -153,11 +153,14 @@ void file_request_openbk_image(s32 image_id, void* destination) {
 s32 file_get_cd_sync_state_delta(void) {
     s32 status = CdSync(1, 0);
 
-    if (status == 2) {
+    if (status == CdlComplete) {
         return 1;
     }
 
-    return -(status == 5);
+    if (status == CdlDiskError) {
+        return -1;
+    }
+    return 0;
 }
 
 /* Upload an OPNTEX image, preceded by its CLUT when flag bit 3 is set.
