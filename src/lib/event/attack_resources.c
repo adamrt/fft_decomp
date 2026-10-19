@@ -140,7 +140,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component);
 static void battle_map_store_selected_tile_data(void);
 static void menu_init_subsystems(void);
 static void unit_view_supervisor_thread(void);
-static s32 script_interpolate_range_q12(s32 start, s32 end, s32 fraction, s32 value);
+static s32 script_interpolate_range_q12(s32 start, s32 end, s32 frame, s32 duration);
 static void unit_reset_animation_states(void);
 
 /* Load ATTACK.OUT (unless preloaded) with its scenario conditions and graphics, reset menu
@@ -745,10 +745,9 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
     return result / 4;
 }
 
-/* Linear interpolation from start to end at fraction / value, returned in 20.12
- * fixed point: start * ONE + (end - start) * fraction * ONE / value. */
-static s32 script_interpolate_range_q12(s32 start, s32 end, s32 fraction, s32 value) {
-    return mul_div_s64(end - start, fraction * ONE, value) + (start * ONE);
+/* Interpolate from start to end at frame / duration, returning a Q12 value. */
+static s32 script_interpolate_range_q12(s32 start, s32 end, s32 frame, s32 duration) {
+    return mul_div_s64(end - start, frame * ONE, duration) + (start * ONE);
 }
 
 /* DebugPause event instruction (0x72): print the pause message with the debug font, yield once and
