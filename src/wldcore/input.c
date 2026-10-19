@@ -58,8 +58,8 @@ void world_map_read_pad(void) {
 }
 
 /* Step one map scroll axis: direction 1 or -1 accelerates `value` by `step` up to +/-`limit`,
- * direction 0 decays it toward zero by `decay`; `output` is the 8.8 value's whole part, truncated
- * toward zero. */
+ * and direction 0 decays it toward zero by `decay`. Converting Q8 speed to whole pixels rounds
+ * down for +1 and up for -1, even while reversing; decay truncates toward zero. */
 void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction) {
     switch (direction) {
     case 1:
@@ -137,7 +137,9 @@ u32 world_map_update_input_repeat(u32 buttons) {
         if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
             s32* counter = &g_world_map_input_repeat.counter_up;
 
-            if (g_world_map_input_repeat.initial_delay < (*counter = next = *counter + 1)) {
+            next = *counter + 1;
+            *counter = next;
+            if (g_world_map_input_repeat.initial_delay < next) {
                 *counter = next - g_world_map_input_repeat.period;
                 return PSX_PAD_UP;
             }
@@ -150,7 +152,9 @@ u32 world_map_update_input_repeat(u32 buttons) {
         if ((g_input_current_buttons & PSX_PAD_DOWN) != 0) {
             s32* counter = &g_world_map_input_repeat.counter_down;
 
-            if (g_world_map_input_repeat.initial_delay < (*counter = next = *counter + 1)) {
+            next = *counter + 1;
+            *counter = next;
+            if (g_world_map_input_repeat.initial_delay < next) {
                 *counter = next - g_world_map_input_repeat.period;
                 return PSX_PAD_DOWN;
             }
@@ -163,7 +167,9 @@ u32 world_map_update_input_repeat(u32 buttons) {
         if ((g_input_current_buttons & PSX_PAD_RIGHT) != 0) {
             s32* counter = &g_world_map_input_repeat.counter_right;
 
-            if (g_world_map_input_repeat.initial_delay < (*counter = next = *counter + 1)) {
+            next = *counter + 1;
+            *counter = next;
+            if (g_world_map_input_repeat.initial_delay < next) {
                 *counter = next - g_world_map_input_repeat.period;
                 return PSX_PAD_RIGHT;
             }
@@ -176,7 +182,9 @@ u32 world_map_update_input_repeat(u32 buttons) {
         if ((g_input_current_buttons & PSX_PAD_LEFT) != 0) {
             s32* counter = &g_world_map_input_repeat.counter_left;
 
-            if (g_world_map_input_repeat.initial_delay < (*counter = next = *counter + 1)) {
+            next = *counter + 1;
+            *counter = next;
+            if (g_world_map_input_repeat.initial_delay < next) {
                 *counter = next - g_world_map_input_repeat.period;
                 return PSX_PAD_LEFT;
             }
@@ -189,7 +197,9 @@ u32 world_map_update_input_repeat(u32 buttons) {
         if ((g_input_current_buttons & PSX_PAD_R1) != 0) {
             s32* counter = &g_world_map_input_repeat.counter_r1;
 
-            if (g_world_map_input_repeat.initial_delay < (*counter = next = *counter + 1)) {
+            next = *counter + 1;
+            *counter = next;
+            if (g_world_map_input_repeat.initial_delay < next) {
                 *counter = next - g_world_map_input_repeat.secondary_period;
                 return PSX_PAD_R1;
             }

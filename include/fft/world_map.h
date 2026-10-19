@@ -217,16 +217,14 @@ typedef enum world_map_scroll_limits {
     WORLD_MAP_SCROLL_MAX_Y = 80
 } world_map_scroll_limits_e;
 
-/* Provisional: one axis of the accelerating map scroll stepped by
- * world_map_update_scroll_axis: the fixed-point accumulator, its
- * signed limit, the acceleration and decay steps, and the exported whole-unit
- * speed. */
+/* One axis of accelerating world-map scroll. Value, limit, step and decay
+ * use Q8; output is the whole-pixel speed. */
 typedef struct world_map_scroll_axis {
     s32 value;
     s32 limit;
     s32 step;
     s32 decay;
-    s32 output; /* 0x10; value >> 8, truncated toward zero */
+    s32 output; /* 0x10; whole-pixel speed with direction-dependent rounding */
 } world_map_scroll_axis_t;
 
 void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction);
