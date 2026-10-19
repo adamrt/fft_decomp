@@ -81,10 +81,10 @@ void unit_set_animation(s32 runtime_id, u32 animation) {
     unit_stats_t* stats;
     s32 depth;
 
-    if ((script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0)
-        && (script_get_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) != 0)) {
+    if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0
+        && script_get_variable(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) != 0) {
         battle_id = unit_get_battle_id_by_runtime_id(runtime_id);
-        if ((battle_id >= 0) && (animation < ANIMATION_SEQUENCE_EVTCHR_SLOT_0)) {
+        if (battle_id >= 0 && animation < ANIMATION_SEQUENCE_EVTCHR_SLOT_0) {
             stats = unit_get_stats(battle_id);
             depth = battle_map_tile_get_value(
                 BATTLE_MAP_TILE_DATA_DEPTH, stats->x, stats->position.y, stats->position.higher_elevation);
@@ -319,12 +319,12 @@ void script_clamp_s32_to_range(s32* value, s32 min, s32 max) {
  * initial delay the repeatable buttons fire once, and from then on the d-pad
  * fires every repeat period and L1/R1 every secondary period. While Square is
  * held the d-pad repeat is limited to Left/Right, and Up/Down fire with L1/R1 on
- * the secondary period. The three delays (g_main_input_repeat_*) are divided by
- * the event speed.
+ * the secondary period. The initial delay and both repeat periods are divided
+ * by the event speed.
  *
  * No input at all, or a tutorial event that has Up or Down disabled, resets the
- * three repeat counters. script_route_event_input is the WORLD copy;
- * it takes no argument and fetches the buttons itself. */
+ * three repeat counters. WORLD handles its tutorial text input separately in
+ * script_route_event_input, which fetches the buttons itself. */
 void script_update_event_input_state(u32 input) {
     u32 filtered_input;
     s32 initial_delay;
