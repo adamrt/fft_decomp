@@ -804,6 +804,8 @@ static void prologue_step_crossfade(void) {
     s16 destination_component;
     s32 previous_components;
     s32 difference;
+    s16 component_delta_q8;
+    s16 weighted_delta_q8;
     u8 fade;
 
     if (g_prologue_crossfade.active != 0) {
@@ -829,9 +831,10 @@ static void prologue_step_crossfade(void) {
                                 destination_component = destination_pixel & 0x1F;
                                 if (source_component != destination_component) {
                                     difference = source_component - destination_component;
+                                    component_delta_q8 = difference << 8;
+                                    weighted_delta_q8 = component_delta_q8 / 16 * fade;
                                     pixel = previous_components
-                                        | ((destination_component + (s16)((s16)(difference << 8) / 16 * fade) / 256)
-                                            << 10);
+                                        | ((destination_component + weighted_delta_q8 / 256) << 10);
                                 } else {
                                     pixel = previous_components | (source_component << 10);
                                 }
