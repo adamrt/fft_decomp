@@ -368,12 +368,7 @@ void script_update_event_input_state(u32 input) {
                     g_script_event_input = input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
                 }
             }
-            secondary_repeat_delay = g_input_secondary_repeat_period;
-            {
-                s32 event_speed;
-                event_speed = g_script_event_speed;
-                secondary_repeat_delay /= event_speed;
-            }
+            secondary_repeat_delay = g_input_secondary_repeat_period / g_script_event_speed;
             if (g_script_event_secondary_repeat_counter >= secondary_repeat_delay) {
                 g_script_event_secondary_repeat_counter = 0;
                 if ((g_script_event_current_input & PSX_PAD_SQUARE) != 0) {
