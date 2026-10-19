@@ -17,8 +17,10 @@
 
 extern struct screen_number_range g_window_panel_number_state;
 
-static s16 g_window_panel_row_actions[16]
-    = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
+static s16 g_window_panel_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+    MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+    MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+    MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE };
 
 static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output);
 static void text_window_render_page(text_window_t* state, s32 row);
@@ -252,7 +254,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
     g_window_panel_number_state._unknown_04[0] = -1;
     g_window_panel_number_state._unknown_04[1] = -1;
     g_window_panel_number_state.on_confirm = window_number_panel_noop;
-    g_menu_stack_entry_values[0] = g_menu_stack_entry_values[1] = 2000;
+    g_menu_stack_entry_values[0] = g_menu_stack_entry_values[1] = MENU_ROW_ACTION_NONE;
     if (min < 10 && max < 10) {
         width = 1;
     } else {

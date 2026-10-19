@@ -194,7 +194,8 @@ void menu_stack_store_cursor(s32 index);
  * tests a nonzero color to recognize a recalled job. */
 extern s16 g_menu_stack_row_text_colors[];
 
-/* Row value column of the list panels, read signed as `value & 0x7ff`. */
+/* List row values, usually text IDs. Number panels borrow the first two entries
+ * for row actions. */
 extern s16 g_menu_stack_entry_values[];
 
 #endif
