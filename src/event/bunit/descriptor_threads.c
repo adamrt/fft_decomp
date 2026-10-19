@@ -309,7 +309,7 @@ static void input_update_controller(void) {
             current_input &= ~(1 << index);
         }
         if (counter_base[index] >= initial_delay) {
-            current_input |= 1 << (index + 16);
+            current_input |= 1U << (index + 16);
         }
         if ((counter_base[index] >= initial_delay && counter_base[index] % secondary_repeat_period != 0)
             || (counter_base[index] >= 2 && counter_base[index] < initial_delay << 1)) {
