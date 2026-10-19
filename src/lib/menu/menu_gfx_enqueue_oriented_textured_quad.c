@@ -12,7 +12,7 @@
  * by 0x80. */
 void menu_gfx_enqueue_oriented_textured_quad(
     const oriented_quad_t* descriptor, const rgb24_t* color, s32 orientation, s32 semitrans, s32 otag_index) {
-    s32 quad_semitrans = semitrans;
+    /* The orientation copy preserves the original UV-switch code. */
     s32 quad_orientation = orientation;
     POLY_FT4* poly;
 
@@ -24,7 +24,7 @@ void menu_gfx_enqueue_oriented_textured_quad(
     } else {
         SetShadeTex(poly, 1);
     }
-    SetSemiTrans(poly, quad_semitrans);
+    SetSemiTrans(poly, semitrans);
 
     setXY4(poly, descriptor->position.x + 0x80, descriptor->position.y, descriptor->position.x + (descriptor->w + 0x80),
         descriptor->position.y, descriptor->position.x + 0x80, descriptor->position.y + descriptor->h,
