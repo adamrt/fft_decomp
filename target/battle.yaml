@@ -453,7 +453,7 @@ functions:
   - {addr: 0x80082b80, size: 144, name: animation_start_ability_charge_hold, hash: 90bbb3852a7b79aa, unit: unit_animations}
   - {addr: 0x80082c10, size: 180, name: animation_select_attack_for_ability, hash: 06c4df3d74f37cf4, unit: unit_animations}
   - {addr: 0x80082cc4, size: 140, name: animation_set_level_up, hash: 4c95343d6653ccb0, unit: unit_animations}
-  - {addr: 0x80082d50, size: 168, name: animation_set_mounted, hash: 762e4b18e7a18b7e, unit: unit_animations}
+  - {addr: 0x80082d50, size: 168, name: animation_set_stand, hash: 762e4b18e7a18b7e, unit: unit_animations}
   - {addr: 0x80082df8, size: 244, name: animation_set_walk, hash: 4b5de62fd25c96cf, unit: unit_animations}
   - {addr: 0x80082eec, size: 716, name: animation_set_for_status, hash: 31805f1285dc35ce, unit: unit_animations}
   - {addr: 0x800831b8, size: 692, name: animation_update_for_status_changes, hash: bd35a7a465dae3b3, unit: unit_animations}
@@ -569,7 +569,7 @@ functions:
   - {addr: 0x8008bcbc, size: 80, name: battle_map_light_set_back_color, hash: ba52d13bcde9f6c9, unit: unit_control}
   - {addr: 0x8008bd0c, size: 216, name: battle_map_light_adjust_back_color, hash: 9bae227cf22e75d3, unit: unit_control}
   - {addr: 0x8008bde4, size: 32, name: unit_update_graphics_by_runtime_id, hash: eb19fdb31e39114c, unit: unit_control}
-  - {addr: 0x8008be04, size: 40, name: animation_set_mounted_by_runtime_id, hash: 354f53b3f99112a1, unit: unit_control}
+  - {addr: 0x8008be04, size: 40, name: animation_set_stand_by_runtime_id, hash: 354f53b3f99112a1, unit: unit_control}
   - {addr: 0x8008be2c, size: 40, name: animation_set_walk_by_runtime_id, hash: 6bf2fd76114607ea, unit: unit_control}
   - {addr: 0x8008be54, size: 40, name: animation_set_status_by_runtime_id, hash: 6857e07d2ec65913, unit: unit_control}
   - {addr: 0x8008be7c, size: 64, name: animation_set_specific_by_runtime_id, hash: 51719a3c25c0c59f, unit: unit_control}

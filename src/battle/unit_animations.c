@@ -383,7 +383,7 @@ void animation_set_level_up(unit_t* unit) {
  * the submerged idle in water two or more deep; a mount on land also puts
  * its rider back in the riding animation. The depth is a byte, so its
  * negative test never holds. */
-void animation_set_mounted(unit_t* unit) {
+void animation_set_stand(unit_t* unit) {
     s32 anim = ANIMATION_RIDING;
     s32 selected;
     s32 water_depth;

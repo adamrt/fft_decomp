@@ -1580,8 +1580,8 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore) {
 /* Thread body of InflictStatus: snapshot the unit's statuses (unit_update_staged_status_data),
  * then poison it, crystallize it, or revive it at 1 HP with Critical when it is dead. The
  * matching inflict-status mode makes the snapshot restore at the event's end apply the same
- * change for real. REVIVE on a unit that is neither dead nor Critical only refreshes its
- * mounted animation. Waits wait_frames frames before exiting. */
+ * change for real. REVIVE on a unit that is neither dead nor Critical requests its
+ * standing pose. Waits wait_frames frames before exiting. */
 void script_inflict_status_thread(void) {
     event_inflict_status_parameters_t* parameters;
     s32 unit_id;
@@ -1635,7 +1635,7 @@ void script_inflict_status_thread(void) {
             thread_call_on_main_stack(runtime_id);
             g_sound_pending_sfx_id = SOUND_SFX_EVENT_REVIVE;
         } else if (health == 2) {
-            g_thread_call_target = (void (*)(void))animation_set_mounted_by_runtime_id;
+            g_thread_call_target = (void (*)(void))animation_set_stand_by_runtime_id;
             thread_call_on_main_stack(runtime_id);
         }
     }

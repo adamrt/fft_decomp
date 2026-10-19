@@ -81,10 +81,10 @@ void unit_update_graphics_by_runtime_id(u32 runtime_id) {
     unit_update_display_by_runtime_id(runtime_id);
 }
 
-/* animation_set_mounted by runtime id; event threads run it on the main
+/* animation_set_stand by runtime id; event threads run it on the main
  * stack. */
-void animation_set_mounted_by_runtime_id(u32 runtime_id) {
-    animation_set_mounted(unit_get_by_runtime_id(runtime_id));
+void animation_set_stand_by_runtime_id(u32 runtime_id) {
+    animation_set_stand(unit_get_by_runtime_id(runtime_id));
 }
 
 /* animation_set_walk by runtime id. No retail code

@@ -74,7 +74,7 @@ void script_process_inflict_status_commands(void) {
 /* Set a unit's animation. Once the battle has started and script variable
  * EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY is set, a unit that rides or carries
  * another gets its status animation instead, and a unit standing in water of depth 2
- * or more its mounted animation; both run on the main stack. Animations from
+ * or more uses the standing pose selector; both run on the main stack. Animations from
  * ANIMATION_SEQUENCE_EVTCHR_SLOT_0 up are always played as requested. */
 void unit_set_animation(s32 runtime_id, u32 animation) {
     s32 battle_id;
@@ -91,7 +91,7 @@ void unit_set_animation(s32 runtime_id, u32 animation) {
             if ((stats->mount_info & UNIT_MOUNT_INFO_ROLE_MASK) != 0) {
                 g_thread_call_target = (void (*)(void))animation_set_status_by_runtime_id;
             } else if ((depth & 0xFF) >= 2) {
-                g_thread_call_target = (void (*)(void))animation_set_mounted_by_runtime_id;
+                g_thread_call_target = (void (*)(void))animation_set_stand_by_runtime_id;
             } else {
                 animation_set_specific_by_runtime_id(runtime_id, animation);
                 return;
