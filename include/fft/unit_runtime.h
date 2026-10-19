@@ -84,22 +84,23 @@ struct unit {
     /* 0x078; unit_increment_or_decrement_height_mod advances it by
      * g_system_vsync_interval. */
     u16 float_bob_phase;
-    u16 special_graphic_y_offset;      /* 0x07a; added to the v of each part: a status sheet's rows in OTHER.SPR */
-    u8 map_x;                          /* 0x07c */
-    u8 map_y;                          /* 0x07d */
-    u8 map_layer;                      /* 0x07e */
-    u8 step_phase;                     /* 0x07f; move_step_phase_e */
-    move_destination_t movement;       /* 0x080 */
-    u8 previous_map_x;                 /* 0x084 */
-    u8 previous_map_y;                 /* 0x085 */
-    u8 previous_map_layer;             /* 0x086 */
-    u8 distortion_animation_id;        /* 0x087; animation_distortion_e */
-    s32 distortion_phase;              /* 0x088; the handler's own step, 0 when the distortion animation starts */
-    s32 distortion_timer;              /* 0x08c; frames left: the second operand of ANIMATION_SEQ_OP_START_DISTORTION */
-    s32 distortion_target;             /* 0x090; target real.vy or frame threshold of the distortion step */
+    u16 special_graphic_y_offset; /* 0x07a; added to the v of each part: a status sheet's rows in OTHER.SPR */
+    u8 map_x;                     /* 0x07c */
+    u8 map_y;                     /* 0x07d */
+    u8 map_layer;                 /* 0x07e */
+    u8 step_phase;                /* 0x07f; move_step_phase_e */
+    move_destination_t movement;  /* 0x080 */
+    u8 previous_map_x;            /* 0x084 */
+    u8 previous_map_y;            /* 0x085 */
+    u8 previous_map_layer;        /* 0x086 */
+    u8 distortion_animation_id;   /* 0x087; animation_distortion_e */
+    s32 distortion_phase;         /* 0x088; the handler's own step, 0 when the distortion animation starts */
+    /* Handler work, initialized from the SEQ duration: countdown, elapsed timer, angle or Q12 step. */
+    s32 distortion_timer;              /* 0x08c */
+    s32 distortion_target;             /* 0x090; Q12 destination height, pulse angle or faded-jump frame threshold */
     u16 previous_facing;               /* 0x094 */
-    u8 destination_edge_height;        /* 0x096; destination slope corner, as g_move_step_destination_edge_height */
-    u8 current_edge_height;            /* 0x097; current slope corner, as g_move_step_current_edge_height */
+    u8 destination_edge_scale;         /* 0x096; destination slope_type edge sample, multiplied by half_height */
+    u8 current_edge_scale;             /* 0x097; current slope_type edge sample, multiplied by half_height */
     u32 movement_path_offset;          /* 0x098; index of the next packed path step */
     move_path_t path;                  /* 0x09c..0x11b */
     move_step_t current_path_step;     /* 0x11c; path step byte being executed */

@@ -81,10 +81,10 @@ static void move_step_update_fly_to_edge(unit_t* unit) {
     if (move_step_has_reached_exit_edge(direction, unit) != 0) {
         move_step_snap_axis_to_exit_edge(direction, unit);
         g_move_step_current_edge_height = g_move_step_current_tile->height * 2
-            + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_height;
+            + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_scale;
         unit->standing_on_battle_id_plus_one = 0;
         g_move_step_destination_edge_height = g_move_step_destination_tile->height * 2
-            + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_scale;
         move_step_set_velocity_with_final_height(unit, &unit->path, &unit->current_path_step);
         move_step_scale_velocity(unit, unit->walk_speed);
         unit->step_phase = MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH;
@@ -154,32 +154,31 @@ static void move_step_set_slope_scales(unit_t* unit) {
     sprite_palette_check_tile_status_mod(unit, g_move_step_destination_tile->flags.shading, 1);
     switch (g_move_step_value.direction) {
     case MOVE_STEP_DIRECTION_EAST:
-        unit->destination_edge_height = g_move_step_destination_edge_height
+        unit->destination_edge_scale = g_move_step_destination_edge_height
             = (g_move_step_destination_tile->slope_type & 0xC) >> 2;
-        unit->current_edge_height = g_move_step_current_edge_height = g_move_step_current_tile->slope_type & 3;
+        unit->current_edge_scale = g_move_step_current_edge_height = g_move_step_current_tile->slope_type & 3;
         break;
     case MOVE_STEP_DIRECTION_WEST:
-        unit->destination_edge_height = g_move_step_destination_edge_height
+        unit->destination_edge_scale = g_move_step_destination_edge_height
             = g_move_step_destination_tile->slope_type & 3;
-        unit->current_edge_height = g_move_step_current_edge_height = (g_move_step_current_tile->slope_type & 0xC) >> 2;
+        unit->current_edge_scale = g_move_step_current_edge_height = (g_move_step_current_tile->slope_type & 0xC) >> 2;
         break;
     case MOVE_STEP_DIRECTION_SOUTH:
-        unit->destination_edge_height = g_move_step_destination_edge_height
+        unit->destination_edge_scale = g_move_step_destination_edge_height
             = g_move_step_destination_tile->slope_type >> 6;
-        unit->current_edge_height = g_move_step_current_edge_height
-            = (g_move_step_current_tile->slope_type & 0x30) >> 4;
+        unit->current_edge_scale = g_move_step_current_edge_height = (g_move_step_current_tile->slope_type & 0x30) >> 4;
         break;
     case MOVE_STEP_DIRECTION_NORTH:
-        unit->destination_edge_height = g_move_step_destination_edge_height
+        unit->destination_edge_scale = g_move_step_destination_edge_height
             = (g_move_step_destination_tile->slope_type & 0x30) >> 4;
-        unit->current_edge_height = g_move_step_current_edge_height = g_move_step_current_tile->slope_type >> 6;
+        unit->current_edge_scale = g_move_step_current_edge_height = g_move_step_current_tile->slope_type >> 6;
         break;
     }
     if (unit->standing_on_battle_id_plus_one != 0) {
-        unit->current_edge_height = g_move_step_current_edge_height = 0;
+        unit->current_edge_scale = g_move_step_current_edge_height = 0;
     }
     if (g_move_step_value.mount) {
-        unit->destination_edge_height = g_move_step_destination_edge_height = 0;
+        unit->destination_edge_scale = g_move_step_destination_edge_height = 0;
     }
 }
 

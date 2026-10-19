@@ -105,12 +105,12 @@ typedef struct animation_state {
      * animation_e * 2, + 1 when it faces away from the camera;
      * from ANIMATION_SEQUENCE_EVTCHR_SLOT_0 up it is a sequence of an EVTCHR slot. */
     u16 sequence_id;
-    u16 script_pos;        /* 0x06; offset of the next byte to read in the sequence */
+    s16 script_pos;        /* 0x06; offset of the next byte to read in the sequence */
     u16 frame;             /* 0x08; SHP frame on display */
     u16 wait;              /* 0x0a; frames until the sequence is read again; 0 when it has stopped */
     u16 restart_count;     /* 0x0c; ANIMATION_SEQ_OP_RESTART commands run since the sequence started */
     u16 saved_sequence_id; /* 0x0e; where ANIMATION_SEQ_OP_RETURN resumes */
-    u16 saved_script_pos;  /* 0x10 */
+    s16 saved_script_pos;  /* 0x10 */
     u16 wait_bias;         /* 0x12; ANIMATION_SEQ_OP_SET_WAIT_BIAS: added to each wait read */
     u16 frame_bias;        /* 0x14; ANIMATION_SEQ_OP_SET_FRAME_BIAS: added to each frame id read */
     u16 repeat_count;      /* 0x16; jumps the ANIMATION_SEQ_OP_REPEAT in progress has left; 0 when none is */
@@ -260,7 +260,7 @@ void animation_select_weapon_attack(unit_t* attacker, unit_t* target);
  * id less 2 and, for most, the frames it takes (distortion_timer). */
 typedef enum animation_distortion {
     ANIMATION_DISTORTION_NONE = 0,
-    ANIMATION_DISTORTION_SCALE_PULSE = 1,      /* squeezes the sprite thin and tall; nothing starts it */
+    ANIMATION_DISTORTION_SCALE_PULSE = 1,      /* squeezes the sprite thin and tall */
     ANIMATION_DISTORTION_RISE = 2,             /* 0x24 up */
     ANIMATION_DISTORTION_SETTLE = 3,           /* back to the height of where the unit stands */
     ANIMATION_DISTORTION_MOVE_TO_TARGET = 4,   /* to the first target, or to the targeted panel */

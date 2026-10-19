@@ -29,6 +29,18 @@ enum {
     ANIMATION_DISTORTION_COUNT = 18 /* the handlers of g_animation_distortion_handlers */
 };
 
+/* Phases of the teleport distortion; other distortions reuse the phase field separately. */
+typedef enum animation_teleport_phase {
+    ANIMATION_TELEPORT_PHASE_START_DEPARTURE = 0,
+    ANIMATION_TELEPORT_PHASE_WAIT_DEPARTURE_LOAD = 1,
+    ANIMATION_TELEPORT_PHASE_HOLD_DEPARTURE_FLASH = 2,
+    ANIMATION_TELEPORT_PHASE_MOVE_TO_DESTINATION = 3,
+    ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_LOAD = 4,
+    ANIMATION_TELEPORT_PHASE_HOLD_ARRIVAL_DARK = 5,
+    ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_FADE = 6,
+    ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_END = 7
+} animation_teleport_phase_e;
+
 /* The dispatcher ignores the result and the handlers supply no value. The s32
  * callback shape preserves the pulse and teleport handlers' instruction scheduling. */
 typedef s32 (*animation_distortion_handler_t)(unit_t* unit);
@@ -215,10 +227,9 @@ static void unit_set_real_coords_from_map_coords(unit_t* unit) {
 static s32 animation_distortion_none(unit_t* unused_unit) {
 }
 
-/* Distortion animation 1 (ANIMATION_DISTORTION_SCALE_PULSE; nothing starts it, and the
- * teleport is animation 14). Over 40 frames the sprite's width follows sin(timer) as the timer
- * runs from 0x300 to 0x800, shrinking it to nothing, while its height swells to 2.5 times and back
- * (1 + 1.5 sin(angle) for an angle stepping 51 per frame); then both scales return to 1.
+/* Distortion animation 1 (ANIMATION_DISTORTION_SCALE_PULSE). Over 40 frames the sprite's width follows sin(timer) as
+ * the timer runs from 0x300 to 0x800, shrinking it to nothing, while its height swells to 2.5 times and back (1 + 1.5
+ * sin(angle) for an angle stepping 51 per frame); then both scales return to 1.
  *
  * An ignored s32 result keeps $v0 live at the exit and the dispatch branch's delay
  * slot empty. This callback supplies no return value. */
@@ -832,26 +843,26 @@ static void animation_teleport_start_fade_out(unit_t* unit) {
 static s32 animation_distortion_teleport(unit_t* unit) {
     unit->distortion_timer++;
     switch (unit->distortion_phase) {
-    case 0:
+    case ANIMATION_TELEPORT_PHASE_START_DEPARTURE:
         if (animation_teleport_start_departure(unit) == 0) {
             animation_teleport_start_white_flash(unit);
         }
         unit->distortion_phase++;
         break;
-    case 1:
+    case ANIMATION_TELEPORT_PHASE_WAIT_DEPARTURE_LOAD:
         /* The target passes no argument here. */
         if (effect_file_update_load() == 0 && camera_is_active() == 0) {
             animation_teleport_start_white_flash(unit);
         }
         break;
-    case 2:
+    case ANIMATION_TELEPORT_PHASE_HOLD_DEPARTURE_FLASH:
         if (unit->distortion_timer >= 0x11) {
             sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, 4, unit->runtime_id, -31, -31, -31);
             unit->distortion_timer = 0;
             unit->distortion_phase++;
         }
         break;
-    case 3:
+    case ANIMATION_TELEPORT_PHASE_MOVE_TO_DESTINATION:
         if (g_state_animation_continue_check == 0) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
@@ -864,25 +875,25 @@ static s32 animation_distortion_teleport(unit_t* unit) {
             unit->distortion_phase++;
         }
         break;
-    case 4:
+    case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_LOAD:
         if (effect_file_update_load() == 0 && camera_is_active() == 0) {
             animation_teleport_start_fade_out(unit);
         }
         break;
-    case 5:
+    case ANIMATION_TELEPORT_PHASE_HOLD_ARRIVAL_DARK:
         if (unit->distortion_timer >= 0x11) {
             sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, 4, unit->runtime_id, 31, 31, 31);
             unit->distortion_phase++;
         }
         break;
-    case 6:
+    case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_FADE:
         if (unit->distortion_timer >= 0x21) {
             sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_RESTORE, 2, unit->runtime_id, 0, 0, 0);
             unit->distortion_timer = 0;
             unit->distortion_phase++;
         }
         break;
-    case 7:
+    case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_END:
         if (g_state_animation_continue_check == 0) {
             unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
             unit->sprite_display_flags &= ~SPRITE_DISPLAY_SEMI_TRANSPARENT;

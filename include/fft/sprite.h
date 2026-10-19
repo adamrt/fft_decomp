@@ -230,12 +230,12 @@ typedef struct sprite_block {
     u16 trigger;               /* 0x00; nonzero while the sprite is drawn */
     u16 graphic_type;          /* 0x02; sprite_graphic_type_e */
     u16 sequence_id;           /* 0x04 */
-    u16 script_pos;            /* 0x06 */
+    s16 script_pos;            /* 0x06 */
     u16 frame;                 /* 0x08; includes the weapon type's first frame */
     u16 wait;                  /* 0x0a */
     u16 restart_count;         /* 0x0c */
     u16 saved_sequence_id;     /* 0x0e */
-    u16 saved_script_pos;      /* 0x10 */
+    s16 saved_script_pos;      /* 0x10 */
     u16 wait_bias;             /* 0x12 */
     u16 frame_bias;            /* 0x14 */
     u16 repeat_count;          /* 0x16 */

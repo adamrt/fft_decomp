@@ -216,7 +216,7 @@ void move_step_start_float(unit_t* unit, const battle_map_tile_t* from, const ba
     u8 next;
 
     unit_mount_dismount_rider_and_update_display(unit);
-    edge_height = unit->current_edge_height;
+    edge_height = unit->current_edge_scale;
     step = &unit->current_path_step;
     /* The byte copy prevents a wider direction load. */
     current_step = unit->current_path_step;
@@ -322,7 +322,7 @@ void move_step_start_fly(
 void move_step_start_walk(unit_t* unit, const battle_map_tile_t* from, const battle_map_tile_t* unused_to) {
     move_step_t* step;
     move_step_t current_step;
-    s32 edge_height = unit->current_edge_height;
+    s32 edge_height = unit->current_edge_scale;
     s16 facing;
     u8 next;
 
@@ -379,7 +379,7 @@ void move_step_start_climb(unit_t* unit, const battle_map_tile_t* from, const ba
     unit_t* rider;
     u8 next;
 
-    edge_height = unit->current_edge_height;
+    edge_height = unit->current_edge_scale;
     step = &unit->current_path_step;
     /* The byte copy prevents a wider direction load. */
     current_step = unit->current_path_step;
@@ -497,7 +497,7 @@ static void move_step_start_jump(
  * the unit it lands on (standing_on_battle_id_plus_one, set for a step onto a
  * unit; per unit_calculate_height_data) or, when there is none or its
  * height is UNIT_HEIGHT_UNAVAILABLE, the destination tile's height plus
- * its slope scaled by destination_edge_height, plus 2. The launch speed comes
+ * its slope scaled by destination_edge_scale, plus 2. The launch speed comes
  * from the rise over the unit's current height plus two half-steps of
  * clearance per tile crossed (length + 1); the frame count adds a fall from
  * the apex, and the horizontal speed covers half a tile over those frames.
@@ -518,7 +518,7 @@ static void move_step_start_climb_jump(unit_t* unit, const battle_map_tile_t* fr
             (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) == 0)) {
         height = height_data.total_height;
     } else {
-        height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_height + 2;
+        height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_scale + 2;
     }
     /* Grouping each constant with the gravity term keeps the target's order
      * (scale, then multiply by gravity); the flat spelling scales gravity first. */
@@ -590,7 +590,7 @@ static void move_step_start_climb_hop(unit_t* unit, const battle_map_tile_t* fro
             (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) == 0)) {
         height = height_data.total_height;
     } else {
-        height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_height;
+        height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_scale;
     }
     rise_height = (height - -unit->world_coords.vy / 6) * 6 + 1;
     rise = SquareRoot12(rise_height * g_move_jump_gravity * 2);
@@ -667,7 +667,7 @@ static void move_step_start_float_jump(unit_t* unit, const battle_map_tile_t* fr
     u8 next;
 
     step = &unit->current_path_step;
-    height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_height + 2;
+    height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_scale + 2;
     height -= -unit->world_coords.vy / 6;
     current_step = unit->current_path_step;
     height += (current_step.length + 1) * 2;
@@ -769,7 +769,7 @@ void move_step_apply_velocity(unit_t* unit) {
             && unit->map_layer != unit->movement.destination_layer) {
             layer = unit->map_layer = unit->movement.destination_layer;
             map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
-            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
+            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_scale);
             move_step_scale_velocity(unit, unit->walk_speed);
         }
         break;
@@ -781,7 +781,7 @@ void move_step_apply_velocity(unit_t* unit) {
             && unit->map_layer != unit->movement.destination_layer) {
             layer = unit->map_layer = unit->movement.destination_layer;
             map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
-            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
+            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_scale);
             move_step_scale_velocity(unit, unit->step_speed);
         }
         break;
@@ -805,7 +805,7 @@ void move_step_apply_velocity(unit_t* unit) {
         map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if ((-unit->real.vy / ONE) <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_step_set_delta_center_to_edge(unit, &unit->current_path_step, map_tile, unit->current_edge_height);
+            move_step_set_delta_center_to_edge(unit, &unit->current_path_step, map_tile, unit->current_edge_scale);
             move_step_scale_velocity(unit, unit->walk_speed);
         } else {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
@@ -833,7 +833,7 @@ void move_step_apply_velocity(unit_t* unit) {
             if (unit->step_speed <= 0x7FFF) {
                 unit->step_speed += g_move_jump_gravity;
             }
-            move_step_set_delta_center_to_edge(unit, &unit->current_path_step, map_tile, unit->current_edge_height);
+            move_step_set_delta_center_to_edge(unit, &unit->current_path_step, map_tile, unit->current_edge_scale);
             move_step_scale_velocity(unit, unit->step_speed);
         } else {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
@@ -858,7 +858,7 @@ void move_step_apply_velocity(unit_t* unit) {
         map_tile = battle_map_tile_get_pointer(tile.x, tile.y, layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
+            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_scale);
             move_step_scale_velocity(unit, unit->walk_speed);
         }
         if (-ground_height < (-unit->real.vy / ONE)) {
@@ -887,7 +887,7 @@ void move_step_apply_velocity(unit_t* unit) {
             if (unit->step_speed <= 0x7FFF) {
                 unit->step_speed += g_move_jump_gravity;
             }
-            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
+            move_step_set_delta_edge_to_center(unit, &unit->current_path_step, map_tile, unit->destination_edge_scale);
             move_step_scale_velocity(unit, unit->step_speed);
         }
         if ((-unit->real.vy / ONE) > -ground_height) {
@@ -938,7 +938,7 @@ void move_step_apply_velocity(unit_t* unit) {
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             move_step_set_float_delta_center_to_edge(
-                unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
+                unit, &unit->current_path_step, map_tile, unit->destination_edge_scale);
             move_step_scale_velocity(unit, unit->walk_speed);
         } else {
             /* Shared with the next case: a duplicated branch does not merge. */
@@ -956,7 +956,7 @@ void move_step_apply_velocity(unit_t* unit) {
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             move_step_set_float_delta_edge_to_center(
-                unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
+                unit, &unit->current_path_step, map_tile, unit->destination_edge_scale);
             move_step_scale_velocity(unit, unit->walk_speed);
         } else {
         accelerate:
@@ -1772,13 +1772,13 @@ void move_step_update_walk_to_edge(unit_t* unit) {
             unit_calculate_height_data(&g_move_step_tile_occupant_height, standing_on - 1);
             if (g_move_step_tile_occupant_height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
                 g_move_step_current_edge_height = g_move_step_current_tile->height * 2
-                    + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_height;
+                    + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_scale;
             } else {
                 g_move_step_current_edge_height = g_move_step_tile_occupant_height.total_height;
             }
         } else {
             g_move_step_current_edge_height = g_move_step_current_tile->height * 2
-                + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_height;
+                + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_scale;
             g_move_step_current_edge_height += move_get_water_standing_offset(unit, g_move_step_current_tile);
         }
 
@@ -1789,14 +1789,14 @@ void move_step_update_walk_to_edge(unit_t* unit) {
             unit_calculate_height_data(&g_move_step_tile_occupant_height, g_move_step_tile_occupant->stats->battle_id);
             if (g_move_step_tile_occupant_height.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
                 g_move_step_destination_edge_height = g_move_step_destination_tile->height * 2
-                    + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+                    + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_scale;
             } else {
                 g_move_step_destination_edge_height = g_move_step_tile_occupant_height.total_height;
             }
         } else {
             unit->standing_on_battle_id_plus_one = 0;
             g_move_step_destination_edge_height = g_move_step_destination_tile->height * 2
-                + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+                + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_scale;
             /* Retail adds the destination's water lift to the current height, not to the
              * destination height, so a step up onto deep water can pass as a plain step. */
             g_move_step_current_edge_height += move_get_water_standing_offset(unit, g_move_step_destination_tile);
@@ -1851,10 +1851,10 @@ void move_step_update_float_to_edge(unit_t* unit) {
     if (move_step_has_reached_exit_edge(direction, unit) != 0) {
         move_step_snap_axis_to_exit_edge(direction, unit);
         g_move_step_current_edge_height = g_move_step_current_tile->height * 2
-            + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_height;
+            + g_move_step_current_tile->depth_half_height.half_height * unit->current_edge_scale;
         unit->standing_on_battle_id_plus_one = 0;
         g_move_step_destination_edge_height = g_move_step_destination_tile->height * 2
-            + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            + g_move_step_destination_tile->depth_half_height.half_height * unit->destination_edge_scale;
         if (g_move_step_current_edge_height + 1 >= g_move_step_destination_edge_height) {
             move_step_start_float(unit, g_move_step_current_tile, g_move_step_destination_tile);
             unit->step_phase = g_move_step_float_to_center_phases[direction];
