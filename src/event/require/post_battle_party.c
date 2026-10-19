@@ -32,6 +32,7 @@ extern POLY_FT4 g_unit_panel_transition_quads[2][30];
 
 static s32 g_party_affected_unit_message_args[50] = { 0 };
 static s32 g_party_affected_unit_message_ids[50] = { 0 };
+s32 g_party_affected_battle_unit_indices[50] = { 0 };
 
 /*
  * Thread body of the "Congratulations!" battle-complete display.
