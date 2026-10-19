@@ -98,7 +98,7 @@ s32 deploy_update_controller_input(void) {
 /* Reset the GPU and set up the two frame buffers for a width x height battle
  * screen with the given projection distance and background color.
  *
- * The second buffer lies at y 0xf0 unless the height is 0x1e0. The draw
+ * The second buffer lies at y 240 unless the height is 480. The draw
  * environments start at x -0x80, so primitive x 0x80 is the left screen edge;
  * dithering is on and the automatic background clear is off. The fixed
  * 256 x 480 area is cleared to black and, when font printing is
@@ -106,7 +106,7 @@ s32 deploy_update_controller_input(void) {
  * state_run_map_load calls this with 256 x 240 and projection 0x200. */
 void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue) {
     RECT clear_rect = { 0, 0, 256, 480 };
-    s32 second_y = -(height != 0x1e0) & 0xf0;
+    s32 second_y = height != 480 ? 240 : 0;
 
     SetDispMask(0);
     ResetGraph(1);

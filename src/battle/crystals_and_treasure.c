@@ -707,8 +707,7 @@ static command_menu_e menu_action_get_unit_menu_id(const unit_stats_t* unit) {
  *
  * CANNOT_ACT for Don't Act or a ridden mount. DEEP_WATER on a tile of depth 2 or
  * more, unless the unit has Float, Chicken or Frog, one of the Move in Water,
- * Walk on Water or Float movement abilities, or is a rider; the last test
- * computes DEEP_WATER (2) as the rider test shifted left once. */
+ * Walk on Water or Float movement abilities, or is a rider. */
 unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) {
     s32 depth;
 
@@ -734,7 +733,8 @@ unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) 
         != 0) {
         return UNIT_ACTION_RESTRICTION_NONE;
     }
-    return ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) == 0) << 1;
+    return (unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) == 0 ? UNIT_ACTION_RESTRICTION_DEEP_WATER
+                                                                : UNIT_ACTION_RESTRICTION_NONE;
 }
 
 /* Build a unit's 0xff-terminated action-menu skillset list and load each
