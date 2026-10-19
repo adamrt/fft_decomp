@@ -1168,30 +1168,22 @@ void camera_pan_update(void) {
             coord = &g_camera_real_coords.vx;
             *coord += 4 * ONE;
             break;
-        case UNIT_FACING_NORTH_EAST: {
-            s32* y = &g_camera_real_coords.vz;
-            *y += 4 * ONE;
+        case UNIT_FACING_NORTH_EAST:
+            g_camera_real_coords.vz += 4 * ONE;
             g_camera_real_coords.vx += 4 * ONE;
             break;
-        }
-        case UNIT_FACING_NORTH_WEST: {
-            s32* y = &g_camera_real_coords.vz;
-            *y += 4 * ONE;
+        case UNIT_FACING_NORTH_WEST:
+            g_camera_real_coords.vz += 4 * ONE;
             g_camera_real_coords.vx -= 4 * ONE;
             break;
-        }
-        case UNIT_FACING_SOUTH_EAST: {
-            s32* y = &g_camera_real_coords.vz;
-            *y -= 4 * ONE;
+        case UNIT_FACING_SOUTH_EAST:
+            g_camera_real_coords.vz -= 4 * ONE;
             g_camera_real_coords.vx += 4 * ONE;
             break;
-        }
-        case UNIT_FACING_SOUTH_WEST: {
-            s32* y = &g_camera_real_coords.vz;
-            *y -= 4 * ONE;
+        case UNIT_FACING_SOUTH_WEST:
+            g_camera_real_coords.vz -= 4 * ONE;
             g_camera_real_coords.vx -= 4 * ONE;
             break;
-        }
         }
         {
             s32* x = &g_camera_real_coords.vx;
