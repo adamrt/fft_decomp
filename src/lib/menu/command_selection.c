@@ -609,7 +609,6 @@ static void command_build_act_menu(void) {
 void command_act_menu_thread(void) {
     s32 param_value;
     menu_unit_selection_record_t* row;
-    s32* param;
 
     command_check_restrictions();
     g_thread_call_target = command_build_act_menu;
@@ -631,8 +630,7 @@ void command_act_menu_thread(void) {
             }
         }
     }
-    param = &g_thread_contexts[g_thread_current_id].function_parameter_2;
-    *param = param_value;
+    g_thread_contexts[g_thread_current_id].function_parameter_2 = param_value;
     row = &g_menu_unit_selection_records[g_unit_panel_selected_unit.battle_id];
     g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = row->skillset_index;
     g_menu_restore_depth = 1;
