@@ -718,7 +718,7 @@ static s32 party_select_unit_to_dismiss(void) {
         should_restore = party_return_equipment(selected_party_index);
         result = 0;
         party_remove_unit(selected_party_index);
-        party_set_class_variable(party_unit->sprite_set, PARTY_BIO_STATE_DISMISSED);
+        party_set_biography_state(party_unit->sprite_set, PARTY_BIO_STATE_DISMISSED);
         break;
     }
 
@@ -1065,7 +1065,7 @@ static void party_apply_post_battle_changes(void) {
             thread_wait_frames(10);
             unit = unit_get_stats(*selected_unit_index_ptr);
             unit_index_ptr++;
-            party_set_class_variable(unit->character_identity, PARTY_BIO_STATE_DISMISSED);
+            party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_DISMISSED);
         next_unit:
             affected_index++;
         } while (affected_index < g_party_affected_unit_count);

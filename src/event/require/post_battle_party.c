@@ -298,7 +298,7 @@ static s32 party_find_departures(void) {
                 g_party_affected_unit_message_ids[count] = group + 0x1018;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
-                party_set_class_variable(unit->character_identity, PARTY_BIO_STATE_LEFT_LOW_BRAVE);
+                party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_LOW_BRAVE);
             } else {
                 s32 count;
 
@@ -337,7 +337,7 @@ static s32 party_find_departures(void) {
                 g_party_affected_unit_message_ids[count] = group + 0x1062;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
-                party_set_class_variable(unit->character_identity, PARTY_BIO_STATE_LEFT_HIGH_FAITH);
+                party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_HIGH_FAITH);
             } else {
                 s32 count;
 
@@ -402,7 +402,7 @@ s32 party_update_after_battle(void) {
                                 & STATUS_BYTE_MASK(STATUS_ID_TREASURE)))
                             party_store_or_sell_equipment(i);
                         party_remove_unit(party_index);
-                        party_set_class_variable(unit->character_identity, PARTY_BIO_STATE_LOST_IN_BATTLE);
+                        party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LOST_IN_BATTLE);
                     }
                 } else if (unit->character_identity != CHARACTER_IDENTITY_ENTD_NONE
                     && unit->character_identity < CHARACTER_IDENTITY_RAMZA_END) {

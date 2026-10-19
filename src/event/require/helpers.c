@@ -40,7 +40,7 @@ void thread_stop_after_16_frames(void) {
 }
 
 /* Update the character's Brave Story biography state through its script variable. */
-void party_set_class_variable(s32 character_identity, s32 bio_state) {
+void party_set_biography_state(s32 character_identity, s32 bio_state) {
     s32 i;
     s32 j;
 

@@ -2362,7 +2362,7 @@ functions:
   - {addr: 0x801c345c, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: zodiac_primitives}
   - {addr: 0x801c372c, size: 692, name: zodiac_build_primitives, hash: 0d33bf568d157774, unit: zodiac_primitives}
   - {addr: 0x801c39e0, size: 40, name: thread_stop_after_16_frames, hash: 83373904c4781138, unit: helpers}
-  - {addr: 0x801c3a08, size: 168, name: party_set_class_variable, hash: 39b2124bf596bf04, unit: helpers}
+  - {addr: 0x801c3a08, size: 168, name: party_set_biography_state, hash: 39b2124bf596bf04, unit: helpers}
   - {addr: 0x801c3ab0, size: 244, name: conditions_load_banner_image, hash: 83bdf7ea18ea62c4, unit: helpers}
   - {addr: 0x801c3ba4, size: 108, name: input_wait_frames_or_skip, hash: 0a5f70e3ab9123be, unit: helpers}
   - {addr: 0x801c3c10, size: 248, name: gfx_fade_rgb_31_frames, hash: 72b0b45d367d072d, unit: helpers}
