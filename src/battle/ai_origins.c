@@ -46,10 +46,7 @@ extern s32 g_ai_math_skillset_index;
 
 /* Diamond rows centered on map column 7, for radii 0 through 7.
  * The unchecked reader also reaches the following status weights for radii 8..15. */
-#define AI_ORIGIN_ROW_MASK(radius) (((1 << (2 * (radius) + 1)) - 1) << (8 - (radius)))
-static u16 g_ai_origin_range_row_masks[] = { AI_ORIGIN_ROW_MASK(0), AI_ORIGIN_ROW_MASK(1), AI_ORIGIN_ROW_MASK(2),
-    AI_ORIGIN_ROW_MASK(3), AI_ORIGIN_ROW_MASK(4), AI_ORIGIN_ROW_MASK(5), AI_ORIGIN_ROW_MASK(6), AI_ORIGIN_ROW_MASK(7) };
-#undef AI_ORIGIN_ROW_MASK
+static u16 g_ai_origin_range_row_masks[] = { 0x0100, 0x0380, 0x07c0, 0x0fe0, 0x1ff0, 0x3ff8, 0x7ffc, 0xfffe };
 
 /* Signed scoring weights, indexed by status ID. */
 static s16 g_ai_status_priority_weights[STATUS_COUNT]
