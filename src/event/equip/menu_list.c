@@ -262,10 +262,10 @@ void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s
     active_test = active;
     if (active_test != 0) {
         if (frame < 0x25) {
-            *state = *state + 1;
+            (*state)++;
         }
     } else if (frame < 0x2F) {
-        *state = *state + 1;
+        (*state)++;
     } else {
         *state = 0;
     }
