@@ -270,7 +270,7 @@ static void* file_load_to_heap(s32 sector, u32 size) {
  * message. size is in bytes and only whole sectors (size >> 11) are read. Waits
  * for the shared loader to be idle, then polls it once per frame until the read
  * ends. Always returns destination. */
-void* file_load_to_address(int sector, unsigned int size, void* destination) {
+void* file_load_to_address(int sector, u32 size, void* destination) {
     while (file_request_read_quiet(&g_file_cd_state, sector, size >> 11, destination) != 0) {
         VSync(0);
         system_frame_stub();
