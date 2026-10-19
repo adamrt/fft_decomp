@@ -1035,23 +1035,23 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
  * battle unit as not existing. A unit id that does not resolve does nothing. The
  * interpreter always passes remove = 1. */
 void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
-    s32 unit = script_resolve_runtime_id(unit_id);
-    s32 idx;
+    s32 runtime_id = script_resolve_runtime_id(unit_id);
+    s32 battle_id;
 
-    if (unit == EVENT_RUNTIME_ID_NONE) {
+    if (runtime_id == EVENT_RUNTIME_ID_NONE) {
         return;
     }
     g_sound_pending_sfx_id = SOUND_SFX_TELEPORT_OUT;
     g_thread_call_target = (void (*)(void))effect_secondary_set_teleport_by_runtime_id;
-    thread_call_on_main_stack(unit);
-    idx = unit_get_battle_id_by_runtime_id(unit);
-    unit_set_animation(unit, ANIMATION_RAISE_HANDS);
-    unit_fade_out_start_for_event(unit, 2, 0x1F, 0x1F, 0x1F);
+    thread_call_on_main_stack(runtime_id);
+    battle_id = unit_get_battle_id_by_runtime_id(runtime_id);
+    unit_set_animation(runtime_id, ANIMATION_RAISE_HANDS);
+    unit_fade_out_start_for_event(runtime_id, 2, 0x1F, 0x1F, 0x1F);
     thread_wait_frames(0x3C);
-    unit_fade_out_start_for_event(unit, 2, -0x1F, -0x1F, -0x1F);
+    unit_fade_out_start_for_event(runtime_id, 2, -0x1F, -0x1F, -0x1F);
     thread_wait_frames(0x3C);
     if (remove != 0) {
-        unit_set_off_field(idx);
+        unit_set_off_field(battle_id);
     }
 }
 
@@ -1070,16 +1070,16 @@ void script_opcode_98_teleport_in(s32 unit_id, s32 unused) {
  * reports -2. */
 void script_blue_remove_all_enemy_units(void) {
     s32 i;
-    s32 idx;
+    s32 battle_id;
     s32 out_index;
     unit_stats_t* stats;
     unit_stats_t* found;
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         if (unit_has_runtime_id(i) != 0) {
-            idx = unit_get_battle_id_by_runtime_id(i);
-            if (idx != -1) {
-                stats = unit_get_stats(idx);
+            battle_id = unit_get_battle_id_by_runtime_id(i);
+            if (battle_id != -1) {
+                stats = unit_get_stats(battle_id);
                 found = unit_entd_find_stats(stats->unit_id, &out_index);
                 if ((found->initial_team_flags & UNIT_TEAM_MASK) && out_index != -2) {
                     unit_fade_out_start_for_event(i, 2, -0x1F, -0x1F, 0);
@@ -1656,16 +1656,16 @@ void script_inflict_status_thread(void) {
  * is set and status_resolve_unit_changes runs on the main stack with
  * removal_only. Nothing happens when the id resolves to no unit on the field. */
 static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
-    s32 idx = unit_get_battle_id_by_event_unit_id(event_unit_id);
+    s32 battle_id = unit_get_battle_id_by_event_unit_id(event_unit_id);
     unit_stats_t* unit;
     s32 i;
     s32 byte;
     s32 bit;
 
-    if (idx == EVENT_BATTLE_ID_NONE) {
+    if (battle_id == EVENT_BATTLE_ID_NONE) {
         return;
     }
-    unit = unit_get_stats(idx);
+    unit = unit_get_stats(battle_id);
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         unit->action.status_changes.infliction[i] = 0;
         unit->action.status_changes.removal[i] = 0;
@@ -1680,7 +1680,7 @@ static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 w
         unit->action.status_changes.removal[byte] = bit;
     }
     g_thread_call_target = (void (*)(void))status_resolve_unit_changes;
-    thread_call_on_main_stack(idx, removal_only);
+    thread_call_on_main_stack(battle_id, removal_only);
 }
 
 /* ChangeStats event instruction: add a signed delta to one stat of each
