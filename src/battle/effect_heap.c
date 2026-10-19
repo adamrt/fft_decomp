@@ -71,10 +71,9 @@ void* effect_heap_alloc_block(u32 size, s32 owner) {
             g_effect_heap_rover = prev;
             g_effect_heap_owner_lists[owner].head = node;
             return node + 1;
-        } else {
-            prev = node;
-            node = node->next;
         }
+        prev = node;
+        node = node->next;
     }
 }
 

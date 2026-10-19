@@ -139,13 +139,11 @@ void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2,
         for (i = 0; i < 3 - g_script_event_speed; i++) {
             fade = (ONE - step) >> 5;
             thread_yield();
-            if (table == 4) {
-                if (*easing != ONE) {
-                    buffer_index = g_menu_packet_buffer_index;
-                    buffers[buffer_index].color.b = fade;
-                    buffers[buffer_index].color.g = fade;
-                    buffers[buffer_index].color.r = fade;
-                }
+            if (table == 4 && *easing != ONE) {
+                buffer_index = g_menu_packet_buffer_index;
+                buffers[buffer_index].color.b = fade;
+                buffers[buffer_index].color.g = fade;
+                buffers[buffer_index].color.r = fade;
             }
             menu_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from, to, step);
             if (to2->x != 0) {
