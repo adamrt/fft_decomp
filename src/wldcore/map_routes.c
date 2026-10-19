@@ -1280,7 +1280,7 @@ static s32 random_battle_roll(s32 location, s32 route) {
 }
 
 /* Places the player's map marker on EVENT_SCRIPT_VAR_LOCATION, queues it for
- * drawing, picks its animation from EVENT_SCRIPT_VAR_TOWN_BACKGROUND, then
+ * drawing, picks its palette from EVENT_SCRIPT_VAR_TOWN_BACKGROUND, then
  * centers the projection on it and refreshes the camera.
  *
  * The map-dot position is copied as one SVECTOR, which reproduces the
@@ -1288,17 +1288,15 @@ static s32 random_battle_roll(s32 location, s32 route) {
 void world_map_init_marker_and_camera(void) {
     VECTOR unused; /* unreferenced; reproduces the target's 0x38-byte frame */
     world_map_marker_t* marker;
-    SVECTOR* position;
-    s32 index = script_get_variable(EVENT_SCRIPT_VAR_LOCATION);
+    s32 location_id = script_get_variable(EVENT_SCRIPT_VAR_LOCATION);
     s32 count;
-    s32 value;
+    s32 background;
 
     /* Only the location ID, position and flags go through the pointer, as in the
      * target; the other fields are addressed through the symbol. */
     marker = &g_world_map_marker_state.marker;
-    marker->location_id = index;
-    position = &g_world_map_dots[index].position;
-    marker->position = *position;
+    marker->location_id = location_id;
+    marker->position = g_world_map_dots[location_id].position;
     g_world_map_marker_state.angle = 0;
     g_world_map_marker_state.flags = WORLD_MAP_MARKER_UPDATE_POSITION | WORLD_MAP_MARKER_UPDATE_DIRECTION;
     count = g_window_render_object_count;
@@ -1311,12 +1309,12 @@ void world_map_init_marker_and_camera(void) {
     g_world_map_marker_state.marker.render.color.r = 0x80;
     g_world_map_marker_state.marker.render.color.g = 0x80;
     g_world_map_marker_state.marker.render.color.b = 0x80;
-    value = script_get_variable(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
+    background = script_get_variable(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
     g_world_map_marker_state.marker.render.palette = 0;
-    if (value == 1) {
+    if (background == 1) {
         g_world_map_marker_state.marker.render.palette = 2;
     }
-    if (value == 2) {
+    if (background == 2) {
         g_world_map_marker_state.marker.render.palette = 3;
     }
     marker->position = g_world_map_dots[marker->location_id].position;
