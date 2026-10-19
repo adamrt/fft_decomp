@@ -174,9 +174,9 @@ s32 tutorial_is_current_event(void) {
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     s32 runtime_id = script_resolve_runtime_id(event_unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        s32 idx = unit_get_battle_id_by_runtime_id(runtime_id);
-        if (idx != -1) {
-            return idx;
+        s32 battle_id = unit_get_battle_id_by_runtime_id(runtime_id);
+        if (battle_id != -1) {
+            return battle_id;
         }
     }
     return EVENT_BATTLE_ID_NONE;

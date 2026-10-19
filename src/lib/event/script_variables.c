@@ -17,6 +17,7 @@ s32* g_script_variables = g_script_variable_storage;
  * mesh selection combines those upper bits with the layout's low 12 bits. */
 s32 script_get_variable(s32 variable_id) {
     s32 saved_current_variable = *g_script_variables;
+    s32 value;
 
     if (variable_id == EVENT_SCRIPT_VAR_WEATHER_AND_TIME) {
         s32 time_of_day;
@@ -32,12 +33,9 @@ s32 script_get_variable(s32 variable_id) {
     }
     script_run_variable_command(EVENT_OPCODE_ZERO_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, 0, 0);
     script_run_variable_command(EVENT_OPCODE_ADD_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, variable_id, 0);
-    {
-        s32 value = *g_script_variables;
-
-        *g_script_variables = saved_current_variable;
-        return value;
-    }
+    value = *g_script_variables;
+    *g_script_variables = saved_current_variable;
+    return value;
 }
 
 /* Store a value in a script variable, whichever of the 32-bit variable, flag and nibble
