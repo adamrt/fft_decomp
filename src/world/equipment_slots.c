@@ -603,21 +603,18 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
     }
     formation_save_records();
     formation_remove_invalid_loadout(unit_id);
-    if (update_equipment != 0) {
-        if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
-            if (g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
-                formation_item_build_best_fit(unit_id, equipment);
-                for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                    item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
-                }
-                for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                    g_formation_unit_pointers[unit_id]->detail.equipment[i] = equipment[i];
-                    item_adjust_inventory_count(equipment[i], -1);
-                }
-                formation_save_records();
-                formation_banner_countdown(0xD811, 0x1E);
-            }
+    if (update_equipment != 0 && unit_id != FORMATION_PREVIEW_UNIT_INDEX
+        && g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
+        formation_item_build_best_fit(unit_id, equipment);
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
+            item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
         }
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
+            g_formation_unit_pointers[unit_id]->detail.equipment[i] = equipment[i];
+            item_adjust_inventory_count(equipment[i], -1);
+        }
+        formation_save_records();
+        formation_banner_countdown(0xD811, 0x1E);
     }
     return 1;
 }

@@ -414,9 +414,7 @@ static void tutorial_opcode_16_wait_for_button(void) {
         if (g_tutorial_button_input != 0) {
             g_tutorial_command_ptr++;
         }
-    } else if (screen_text_is_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
-        if (g_tutorial_button_input != 0) {
-            g_tutorial_command_ptr++;
-        }
+    } else if (screen_text_is_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1 && g_tutorial_button_input != 0) {
+        g_tutorial_command_ptr++;
     }
 }

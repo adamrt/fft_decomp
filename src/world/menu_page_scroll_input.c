@@ -81,16 +81,12 @@ menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
         delay = g_input_repeat_initial_delay / value;
         repeat = g_input_secondary_repeat_period / value;
         counter = g_screen_scroll_hold_counter;
-        if (counter >= delay) {
-            if (counter % repeat != 0) {
-                return MENU_VERTICAL_SCROLL_WAIT;
-            }
+        if (counter >= delay && counter % repeat != 0) {
+            return MENU_VERTICAL_SCROLL_WAIT;
         }
         counter = g_screen_scroll_hold_counter;
-        if (counter >= 2) {
-            if (counter < delay) {
-                return MENU_VERTICAL_SCROLL_WAIT;
-            }
+        if (counter >= 2 && counter < delay) {
+            return MENU_VERTICAL_SCROLL_WAIT;
         }
     }
     return result;
