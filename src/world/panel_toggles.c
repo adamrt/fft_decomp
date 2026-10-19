@@ -11,10 +11,8 @@
 /* Open or close the equipment-change panel and its numeric stats panel. While the status panel
  * slides, an open request does nothing, so per-frame callers open it once the slide ends. */
 void formation_toggle_change_panel(s32 enable) {
-    s32 state = enable;
-
-    if (state != 0) {
-        state = 1;
+    if (enable != 0) {
+        enable = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
             if (thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
@@ -22,7 +20,7 @@ void formation_toggle_change_panel(s32 enable) {
                 thread_set_parameters(
                     SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_change_banner_thread_params, 0, 0);
             }
-            unit_panel_toggle_numbers_thread(state);
+            unit_panel_toggle_numbers_thread(enable);
         }
     } else {
         menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);

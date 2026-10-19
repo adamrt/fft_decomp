@@ -121,10 +121,8 @@ static void formation_reset_slots_and_frame_tpages(void);
  * or the thread already runs) or ask it to close, and record the state as the numeric
  * panel style. */
 void formation_toggle_preview_stats_window(s32 flag) {
-    s32 stored = flag;
-
-    if (stored != 0) {
-        stored = 1;
+    if (flag != 0) {
+        flag = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(SCREEN_THREAD_SLOT_PREVIEW_STATS) == 0) {
@@ -135,8 +133,8 @@ void formation_toggle_preview_stats_window(s32 flag) {
     } else {
         menu_request_thread_stop(SCREEN_THREAD_SLOT_PREVIEW_STATS);
     }
-    g_unit_panel_numeric_panel_params.style = stored;
-    g_formation_preview_stats_window_active = stored;
+    g_unit_panel_numeric_panel_params.style = flag;
+    g_formation_preview_stats_window_active = flag;
 }
 
 /* With `enable` set, start unit_panel_ability_thread in the equip/ability panel slot (with
