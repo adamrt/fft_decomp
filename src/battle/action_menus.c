@@ -1092,6 +1092,7 @@ void unit_facing_turn_to_cursor(unit_t* unit) {
         s32 cursor_y = g_cursor_y;
         s32 tile_x;
         s32 tile_y;
+        /* Retail retains these zero stores before overwriting both components. */
         difference.vz = 0;
         difference.vx = 0;
         tile_x = cursor_x * BATTLE_MAP_TILE_SIZE;

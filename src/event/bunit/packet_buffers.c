@@ -24,12 +24,8 @@ static s16 g_unit_list_gfx_poly_f4_count = 0;
 void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
     u32* previous_otag = g_menu_gfx_context->otag;
     menu_gfx_context_t* context;
-    /*
-     * The target reserves 0x60 bytes of frame it never reads or writes
-     * (frame 0x80 with the four register saves at 0x70..0x7c and nothing
-     * else sp-relative), so the original source declared a local buffer of
-     * this size that the body no longer uses.
-     */
+    /* Preserve the target's unused 0x60-byte stack area (0x80-byte frame,
+     * four register saves at 0x70..0x7c). Its original declaration is unknown. */
     u8 unused_scratch[0x60];
 
     system_frame_stub();
