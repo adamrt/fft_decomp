@@ -2975,7 +2975,7 @@ regions:
   - {addr: 0x80080e7c, end: 0x80080ebc, kind: interior, why: "inside 0x800808b8: case body inside the enclosing display dispatcher; no independent ABI"}
   - {addr: 0x80080ebc, end: 0x80080f04, kind: interior, why: "inside 0x800808b8: reads caller s1/arg slots and falls through after jal; no return"}
   - {addr: 0x80114680, end: 0x80114750, kind: padding, why: "52 consecutive nop words and no return"}
-  - {addr: 0x8012cc54, end: 0x8012cf44, kind: handwritten, why: "handwritten GTE sprite-quad transform: prologue, jr ra at 0x8012cce0, body after the return"}
+  - {addr: 0x8012cc54, end: 0x8012cf44, kind: handwritten, why: "handwritten GTE textured map-triangle queue: prologue, jr ra at 0x8012cce0, body after the return"}
   - {addr: 0x8012cce8, end: 0x8012cf44, kind: interior, why: "inside 0x8012cc54: body after the parent jr ra; reached only by branches from 0x8012cc54"}
   - {addr: 0x8012cf44, end: 0x8012d2b4, kind: handwritten, why: "handwritten GTE/addi routine: prologue, jr ra at 0x8012cfd4, body after the return"}
   - {addr: 0x8012cfdc, end: 0x8012d2b4, kind: interior, why: "inside 0x8012cf44: body after the parent jr ra at 0x8012cfd4"}
