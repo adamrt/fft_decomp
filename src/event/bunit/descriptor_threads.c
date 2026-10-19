@@ -258,11 +258,9 @@ static void input_update_controller(void) {
         g_unit_list_input_latched_button = 0;
         g_input_activation_timer += speed;
     } else {
-        if (g_input_activation_timer < 4) {
-            if (current_input & PSX_PAD_DPAD_MASK) {
-                current_input &= PSX_PAD_DPAD_MASK;
-                g_input_activation_timer = 10;
-            }
+        if (g_input_activation_timer < 4 && (current_input & PSX_PAD_DPAD_MASK)) {
+            current_input &= PSX_PAD_DPAD_MASK;
+            g_input_activation_timer = 10;
         }
         if (g_input_activation_timer >= 4) {
             g_input_activation_timer = 0;
