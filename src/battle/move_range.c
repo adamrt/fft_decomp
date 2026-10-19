@@ -996,7 +996,7 @@ static s32 move_spread_init_source_panel(s32 direction) {
         }
         state->source_panel = &g_target_panels[state->source_panel_index = state->tile_index];
     }
-    return (state->source_panel->remaining_range < 2) * 4;
+    return state->source_panel->remaining_range < 2 ? 4 : 0;
 }
 
 /*
