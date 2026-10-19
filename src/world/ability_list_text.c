@@ -101,9 +101,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
             g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 0;
         }
         if (changed != 0) {
-            {
-                buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
-            }
+            buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
             menu_draw_text_columns_narrow(entry, row_offset, buffer);
             *redraw = 0;
