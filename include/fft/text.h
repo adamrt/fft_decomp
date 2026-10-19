@@ -352,9 +352,8 @@ extern u32 g_text_decimal_divisors[];
 s32 text_count_decimal_digits(s32 value);
 void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 
-/* The battle ability lists draw this pair in the number column instead of a value of 0 or 1 when the ability's
- * skill_ct is 0 or 0xff. */
-void menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position);
+/* Draw "Now" in the charge-time column for an immediate ability. */
+void menu_draw_charge_time_now(u8* pixels, glyph_blit_t* position);
 void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin);
 void menu_draw_numeric_display_entries(
     u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count);

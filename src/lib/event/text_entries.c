@@ -1,4 +1,4 @@
-/* Stacked glyph pairs and the display of text entries and strings. */
+/* The ability list's "Now" label and main-stack text drawing. */
 
 #include "fft/gfx.h"
 #include "fft/menu_gfx.h"
@@ -7,18 +7,17 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static glyph_blit_t g_menu_stacked_glyph_lower = { { 190, 28, 20, 4 }, 256, 0 };
-static glyph_blit_t g_menu_stacked_glyph_upper = { { 168, 28, 20, 4 }, 256, 0 };
+static glyph_blit_t g_menu_charge_time_now_lower = { { 190, 28, 20, 4 }, 256, 0 };
+static glyph_blit_t g_menu_charge_time_now_upper = { { 168, 28, 20, 4 }, 256, 0 };
 
-/* Draw g_menu_stacked_glyph_upper and, four rows lower, g_menu_stacked_glyph_lower, starting two
- * pixels left of and below the pen. The battle ability lists draw it in the number column instead
- * of a value of 0 or 1 when the ability's skill_ct is 0 or 0xff. */
-void menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position) {
+/* Draw the ability list's "Now" charge time in two stacked halves. The caller
+ * selects it for skill_ct 0 or 0xff; the pen ends on the lower half. */
+void menu_draw_charge_time_now(u8* pixels, glyph_blit_t* position) {
     position->rect.x -= 2;
     position->rect.y += 2;
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_stacked_glyph_upper, position);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_charge_time_now_upper, position);
     position->rect.y += 4;
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_stacked_glyph_lower, position);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_charge_time_now_lower, position);
 }
 
 /* Render text entry text_id into a 4bpp image at the pen origin, running menu_display_text

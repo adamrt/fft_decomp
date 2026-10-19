@@ -1126,7 +1126,7 @@ functions:
   - {addr: 0x8014ab58, size: 216, name: menu_display_number_entry, hash: ee3a5bfa118b7022, unit: script_commands}
   - {addr: 0x8014ac30, size: 656, name: menu_draw_large_number_glyphs, hash: 97ee6a6ad4dcbfc5, unit: script_commands}
   - {addr: 0x8014aec0, size: 932, name: text_draw_small_number_glyphs, hash: 9b2bbc5f2d00b289}
-  - {addr: 0x8014b264, size: 140, name: menu_draw_stacked_glyph_pair, hash: 85d8816274595d47, unit: text_entries}
+  - {addr: 0x8014b264, size: 140, name: menu_draw_charge_time_now, hash: 85d8816274595d47, unit: text_entries}
   - {addr: 0x8014b2f0, size: 48, name: menu_display_text_entry, hash: 13c8529cf5d5a487, unit: text_entries}
   - {addr: 0x8014b320, size: 48, name: menu_display_text_entry_past_choice_marks, hash: f66a71771a466060, unit: text_entries}
   - {addr: 0x8014b350, size: 68, name: menu_display_text_string, hash: ebe5d1168147a19f, unit: text_entries}
@@ -2574,8 +2574,8 @@ data:
   - {addr: 0x80169758, name: g_unit_status_staging_masks}
   - {addr: 0x80169770, name: g_menu_large_number_glyph}
   - {addr: 0x80169780, name: g_text_small_number_glyph_rect}
-  - {addr: 0x80169790, name: g_menu_stacked_glyph_lower}
-  - {addr: 0x801697a0, name: g_menu_stacked_glyph_upper}
+  - {addr: 0x80169790, name: g_menu_charge_time_now_lower}
+  - {addr: 0x801697a0, name: g_menu_charge_time_now_upper}
   - {addr: 0x801697b0, name: g_menu_window_sprite_glyph}
   - {addr: 0x801697c0, name: g_menu_window_sprite_position}
   - {addr: 0x801697d0, name: g_script_event_input}

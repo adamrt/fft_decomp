@@ -59,7 +59,7 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
                     && (g_ai_workspace_ptr->ability_list.skill_ct[index] == 0xFF
                         || g_ai_workspace_ptr->ability_list.skill_ct[index] == 0)) {
                     g_menu_window_text_pen.rect.y += 2;
-                    menu_draw_stacked_glyph_pair(buffer, &g_menu_window_text_pen);
+                    menu_draw_charge_time_now(buffer, &g_menu_window_text_pen);
                 } else {
                     value = layout->text_ids[column][index];
                     if (value & 0x7FF) {
