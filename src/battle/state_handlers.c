@@ -679,7 +679,6 @@ void state_handle_open_sp2_files(void) {
     s32 slot;
     s32 free_owner;
     s32 offset;
-    RECT* image_rect_address;
     u32* sp2_data;
 
     if (g_sprite_sp2_data == 0) {
@@ -700,15 +699,14 @@ void state_handle_open_sp2_files(void) {
         offset = 0;
         do {
             if (((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->owner == free_owner) {
-                image_rect_address = &image_rect;
                 sp2_data = g_sprite_sp2_data;
                 ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->owner
                     = unit->runtime_id | SPRITE_EVTCHR_SLOT_OWNER_SP2;
-                image_rect_address->x = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->image_rect.x;
-                image_rect_address->y = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->image_rect.y;
-                image_rect_address->w = 0x40;
-                image_rect_address->h = 0x100;
-                LoadImage(image_rect_address, sp2_data);
+                image_rect.x = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->image_rect.x;
+                image_rect.y = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->image_rect.y;
+                image_rect.w = 0x40;
+                image_rect.h = 0x100;
+                LoadImage(&image_rect, sp2_data);
                 action_start_next_strike();
                 break;
             }
@@ -1142,12 +1140,9 @@ void state_handle_target_display_start(void) {
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
         g_state_window_closed = 1;
     }
-    if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0) {
-        if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
-            if (g_state_window_closed != 0) {
-                state_enter_target_display();
-            }
-        }
+    if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
+        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_state_window_closed != 0) {
+        state_enter_target_display();
     }
 }
 

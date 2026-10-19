@@ -1247,9 +1247,6 @@ void state_handle_select_move_tile(void) {
     move_path_t* path;
     s32 buttons;
     u16 frame;
-    s32 x;
-    s32 elevation;
-    s32 y;
     unit_command_state_t scratch; /* never used; retail reserves its frame space */
 
     state_update_units();
@@ -1294,12 +1291,9 @@ void state_handle_select_move_tile(void) {
         source->command_state.ai.data.move.y, source->command_state.ai.data.move.layer);
     target_set_tile_mark_colors(BATTLE_MAP_TILE_MARK_NONE, 1);
     if (path != 0) {
-        x = source->command_state.ai.data.move.x;
-        elevation = source->command_state.ai.data.move.layer;
-        y = source->command_state.ai.data.move.y;
-        g_cursor_x = x;
-        g_cursor_layer = elevation;
-        g_cursor_y = y;
+        g_cursor_x = source->command_state.ai.data.move.x;
+        g_cursor_layer = source->command_state.ai.data.move.layer;
+        g_cursor_y = source->command_state.ai.data.move.y;
         casting->path = *path;
         casting->walk_speed = 0x2000;
         state_enter_unit_moving_setup();
