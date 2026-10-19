@@ -78,8 +78,10 @@ extern s16 g_music_test_list_entry_flags[96];
 extern s16 g_music_test_selected_option;
 extern struct suzuki_music* g_music_test_sound_handle; /* handle of the playing music test track */
 
-static s16 g_music_test_row_actions[16]
-    = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
+static s16 g_music_test_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+    MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+    MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+    MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE };
 
 /* The 96 music-test rows select scenario music IDs 1 through 96. */
 #define MUSIC_TEST_TRACK_IDS_16(first)                                                                                 \

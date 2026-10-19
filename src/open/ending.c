@@ -500,11 +500,7 @@ static void ending_update_xa_audio(void) {
         case 0:
             mode = CdlModeRT | CdlModeSF | CdlModeSize1;
             CdControlF(CdlSetmode, &mode);
-            {
-                s32* state = &g_ending_script_state.control_state;
-
-                (*state)++;
-            }
+            g_ending_script_state.control_state++;
             break;
 
         case 4:
@@ -554,11 +550,7 @@ static void ending_update_xa_audio(void) {
 
         case 8:
             CdControlF(CdlReadS, 0);
-            {
-                s32* state = &g_ending_script_state.control_state;
-
-                (*state)++;
-            }
+            g_ending_script_state.control_state++;
             break;
 
         case 9:
@@ -571,11 +563,9 @@ static void ending_update_xa_audio(void) {
             break;
 
         /* Steps 2 and 3 issue nothing and only wait a frame each. */
-        default: {
-            s32* state = &g_ending_script_state.control_state;
-
-            (*state)++;
-        } break;
+        default:
+            g_ending_script_state.control_state++;
+            break;
         }
     }
 
@@ -607,21 +597,13 @@ static void ending_update_xa_audio(void) {
         switch (g_ending_script_state.control_state) {
         case 0:
             CdControlF(CdlPause, 0);
-            {
-                s32* state = &g_ending_script_state.control_state;
-
-                (*state)++;
-            }
+            g_ending_script_state.control_state++;
             break;
 
         case 2:
             mode = CdlModeSpeed;
             CdControlF(CdlSetmode, &mode);
-            {
-                s32* state = &g_ending_script_state.control_state;
-
-                (*state)++;
-            }
+            g_ending_script_state.control_state++;
             break;
 
         case 1:
@@ -633,19 +615,15 @@ static void ending_update_xa_audio(void) {
             *state = value + delta;
         } break;
 
-        case 6: {
-            u32* control = &g_ending_script_state.dispatch.flags;
-
-            *control ^= ENDING_SCRIPT_DISPATCH_XA_STOPPING;
+        case 6:
+            g_ending_script_state.dispatch.flags ^= ENDING_SCRIPT_DISPATCH_XA_STOPPING;
             sound_set_cd_mix_and_volume(0xc0, 1);
-        } break;
+            break;
 
         /* Steps 4 and 5 only wait a frame each. */
-        default: {
-            s32* state = &g_ending_script_state.control_state;
-
-            (*state)++;
-        } break;
+        default:
+            g_ending_script_state.control_state++;
+            break;
         }
     }
 }
