@@ -57,16 +57,15 @@ void bar_suspend_level(menu_stack_record_t* level) {
 /* Leave the bar: pop its level, show the date and location label again, rebuild and push the
  * location menu for the current location, fade the map back in and clear the scratch buffer. */
 static void bar_leave(bar_menu_level_t* unused_level) {
-    s32* selected = &g_world_map_marker_state.marker.location_id;
     s32 i;
 
     window_set_render_objects_visible(1);
     g_menu_stack_depth = g_menu_stack_depth - 1;
     g_system_flags &= ~(SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL);
     menu_stack_dispatch_suspend();
-    g_menu_stack_records[g_menu_stack_depth].panel.entry_count
-        = location_build_menu_entries(*selected, g_menu_stack_records[g_menu_stack_depth].panel.entries);
-    location_push_menu_level(*selected);
+    g_menu_stack_records[g_menu_stack_depth].panel.entry_count = location_build_menu_entries(
+        g_world_map_marker_state.marker.location_id, g_menu_stack_records[g_menu_stack_depth].panel.entries);
+    location_push_menu_level(g_world_map_marker_state.marker.location_id);
     world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
     world_map_clear_screen_and_set_clip_rect(0);
     /* Blank the backdrop image until the map is captured again. */
@@ -81,7 +80,6 @@ static void bar_leave(bar_menu_level_t* unused_level) {
 void bar_handle_input(menu_stack_record_t* level) {
     s32 flags;
     u32 buttons;
-    s32* selected_entry;
 
     if (g_window_gs_image_records[level->bar.rows_image].flags & DISPLAY_OBJECT_POP_IN) {
         return;
@@ -132,9 +130,8 @@ void bar_handle_input(menu_stack_record_t* level) {
 
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        selected_entry = &level->bar.selected_entry;
-        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = *selected_entry;
-        if (level->bar.entries[*selected_entry] != BAR_ROW_LEAVE) {
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = level->bar.selected_entry;
+        if (level->bar.entries[level->bar.selected_entry] != BAR_ROW_LEAVE) {
             g_window_records[level->bar.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
         }
         switch (level->bar.entries[level->bar.selected_entry]) {
@@ -382,9 +379,7 @@ static void rumor_push_detail_level(s32 value) {
  * menu's two windows and frame again, pops the stack and replays the frame's
  * pop-in while rumor_open_list rebuilds the list. */
 void rumor_wait_detail_then_pop(menu_stack_record_t* level) {
-    s32* index = &g_text_window.render_record_index;
-
-    if (g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
     if (text_window_step(&g_text_window) != 0) {
