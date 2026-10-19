@@ -2040,17 +2040,14 @@ void battle_map_darkness_init(void) {
  * on the next call move them into place. */
 void battle_map_clut_upload_rows(void) {
     RECT rectangle;
-    s32* move_pending;
 
-    move_pending = &g_battle_map_palette_state.move_pending;
-
-    if (*move_pending != 0) {
+    if (g_battle_map_palette_state.move_pending != 0) {
         rectangle.x = 0;
         rectangle.y = BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_COUNT;
         rectangle.w = BATTLE_MAP_CLUT_ROW_COLOR_COUNT;
         rectangle.h = BATTLE_MAP_CLUT_ROW_COUNT;
         MoveImage(&rectangle, 0, BATTLE_MAP_CLUT_ROWS_Y);
-        *move_pending = 0;
+        g_battle_map_palette_state.move_pending = 0;
     }
 
     if (g_battle_map_palette_state.upload_pending != 0) {
@@ -2060,7 +2057,7 @@ void battle_map_clut_upload_rows(void) {
         rectangle.h = BATTLE_MAP_CLUT_ROW_COUNT;
         LoadImage(&rectangle, (u32*)g_battle_map_palette_modified_colors);
         g_battle_map_palette_state.upload_pending = 0;
-        *move_pending = 1;
+        g_battle_map_palette_state.move_pending = 1;
     }
 }
 
