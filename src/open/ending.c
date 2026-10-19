@@ -47,7 +47,7 @@ typedef enum ending_opcode {
 
 static void ending_opcode_00_end_script(s16* unused_entry);
 static void ending_opcode_01_create_positioned_text_record(s16* command);
-static void ending_opcode_02_set_scroll_speed(s16* entry);
+static void ending_opcode_02_set_scroll_speed(s16* command);
 static void ending_opcode_03_start_overlay_fade_out(s16* command);
 static void ending_opcode_04_start_overlay_fade_in(s16* command);
 static void ending_opcode_05_wait_counted(s16* entry);
@@ -903,8 +903,7 @@ static void ending_opcode_01_create_positioned_text_record(s16* command) {
 /* Opcode 2: set the text scroll speed to command[1] (1/256 pixel per frame,
  * negative for upward) and zero the fraction and the scrolled-distance counter.
  * Four bytes. */
-static void ending_opcode_02_set_scroll_speed(s16* entry) {
-    const s16* command = entry;
+static void ending_opcode_02_set_scroll_speed(s16* command) {
     s32 value = command[1];
     s32 next = g_ending_script_byte_offset + 4;
 

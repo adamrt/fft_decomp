@@ -222,25 +222,22 @@ void status_queue_display_flag_change_if_executing(s32 status_id, s32 enabled, s
  * chest): with 99 already in stock, the item becomes a quarter of its price in war funds instead.
  * Items 0 and 0xFF, other teams and non-executing states do nothing. */
 s32 item_give(unit_stats_t* unit, u8 item) {
-    u8 item_id;
-
     if (g_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
     if ((unit->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
         return 0;
     }
-    item_id = item;
-    if (item_id == ITEM_ID_NOTHING) {
+    if (item == ITEM_ID_NOTHING) {
         return 0;
     }
-    if (item_id == ITEM_ID_NONE) {
+    if (item == ITEM_ID_NONE) {
         return 0;
     }
-    if (item_get_total_quantity(item_id, 1) >= 99) {
-        return reward_add_war_funds(unit, 0, item_id);
+    if (item_get_total_quantity(item, 1) >= 99) {
+        return reward_add_war_funds(unit, 0, item);
     }
-    g_item_quantities[item_id] += 1;
+    g_item_quantities[item] += 1;
     return 0;
 }
 
