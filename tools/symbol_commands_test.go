@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,6 +71,67 @@ func TestRenameFunctionUpdatesOverridesAndRejectsCollisions(t *testing.T) {
 	}
 	if readTestFile(t, p, "target/main.yaml") != before {
 		t.Fatal("a rejected rename changed the configuration")
+	}
+}
+
+func TestRenameFunctionKeepsConceptAndSharedUnitPaths(t *testing.T) {
+	for _, source := range []string{"src/lib/calendar.c", "src/lib/main_first.c"} {
+		for _, sharedUnit := range []bool{false, true} {
+			if !sharedUnit && strings.HasSuffix(source, "/main_first.c") {
+				continue // The existing standalone-source test covers this move.
+			}
+			t.Run(source+fmt.Sprint(sharedUnit), func(t *testing.T) {
+				p := validTestProject(t)
+				config, err := p.loadProjectConfig()
+				if err != nil {
+					t.Fatal(err)
+				}
+				main, _ := config.module("main")
+				main.Functions[0].Source = source
+				body := "void main_first(void) {}\n"
+				if sharedUnit {
+					battle, _ := config.module("battle")
+					battle.Units = []unitDef{{Name: "calendar", Source: source}}
+					battle.Functions[0].Unit = "calendar"
+					battle.Functions[0].Source = ""
+					battle.Functions[0].SourceSymbol = "main_first"
+					battle.Functions = append(battle.Functions, functionSpec{
+						Addr: battle.Functions[0].Addr + uint32(battle.Functions[0].Size),
+						Size: 4, Name: "calendar_reverse", Hash: "0123456789abcdef", Unit: "calendar",
+					})
+					body += "#ifdef FFT_BATTLE\nvoid calendar_reverse(void) {}\n#endif\n"
+				}
+				for path, contents := range renderConfigFiles(config) {
+					writeSymbolRenameFixture(t, p.root, path, string(contents))
+				}
+				if err := os.Remove(filepath.Join(p.root, "src/main/main_first.c")); err != nil {
+					t.Fatal(err)
+				}
+				writeSymbolRenameFixture(t, p.root, source, body)
+				before := main.Functions[0]
+				if err := p.symbolsCommand([]string{"rename-function", "--old", "main_first", "--new", "calendar_forward"}); err != nil {
+					t.Fatal(err)
+				}
+				if got := readTestFile(t, p, source); got != strings.ReplaceAll(body, "main_first", "calendar_forward") {
+					t.Fatalf("source = %q", got)
+				}
+				config, err = p.loadProjectConfig()
+				if err != nil {
+					t.Fatal(err)
+				}
+				main, _ = config.module("main")
+				after := main.function("calendar_forward")
+				if after == nil || main.sourceOf(after) != source || after.Addr != before.Addr || after.Size != before.Size || after.Hash != before.Hash || after.Profile != before.Profile {
+					t.Fatalf("entry contract changed: %+v", after)
+				}
+				if sharedUnit {
+					battle, _ := config.module("battle")
+					if battle.Units[0].Source != source || battle.Functions[0].sourceSymbol() != "calendar_forward" {
+						t.Fatal("shared unit source or binding changed")
+					}
+				}
+			})
+		}
 	}
 }
 

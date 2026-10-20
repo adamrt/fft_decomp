@@ -687,7 +687,9 @@ type symbolRename struct {
 
 // renameSymbols renames functions (function true) or data symbols across the
 // configuration and every source under src/ and include/. A function
-// definition rename also moves its source file to <dir>/<new>.c.
+// definition rename also moves a standalone source named after the definition
+// or one of its target entries to <new>.c.
+// Concept-named sources and sources used by any merged unit keep their paths.
 func (p project) renameSymbols(renames []symbolRename, function, dryRun bool) (result symbolMutationResult, err error) {
 	return p.renameSymbolsUnify(renames, function, dryRun, false)
 }
@@ -794,10 +796,17 @@ func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, un
 }
 
 // renameConfigFunction keeps entry-only renames separate from source-definition
-// renames. A definition rename updates every owner and moves its shared source.
+// renames. A definition rename updates every owner; only standalone sources
+// named after the old definition or one of its target entries move with it.
 func renameConfigFunction(config *projectConfig, oldName, newName string, unify bool) (string, string, error) {
 	from, to := "", ""
 	found := false
+	unitSources := make(map[string]bool)
+	for _, m := range config.Modules {
+		for _, unit := range m.Units {
+			unitSources[unit.Source] = true
+		}
+	}
 	for _, m := range config.Modules {
 		if existing := m.function(newName); existing != nil {
 			// Unifying lets another module already use the name; the same
@@ -826,6 +835,10 @@ func renameConfigFunction(config *projectConfig, oldName, newName string, unify 
 					continue
 				}
 				source := m.sourceOf(f)
+				stem := strings.TrimSuffix(filepath.Base(source), filepath.Ext(source))
+				if unitSources[source] || (stem != oldName && stem != f.Name) {
+					continue
+				}
 				if from != "" && source != from {
 					return "", "", fmt.Errorf("%s has different sources in different modules; rename it manually", oldName)
 				}
