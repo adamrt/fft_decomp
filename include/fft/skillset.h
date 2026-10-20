@@ -187,7 +187,7 @@ enum {
     SKILLSET_ABILITY_LIST_COUNT = 24
 };
 
-/* Ability classes ability_store_skillset_abilities collects from a
+/* Ability classes ability_skillset_list_build collects from a
  * skillset; the random R/S/M selector uses rsm_ability_filter_e instead. */
 typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_ACTION = 0x01,

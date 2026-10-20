@@ -14,7 +14,7 @@ s32 g_save_play_time_hours;
 /* VSync callback. Draws one rand() per frame, advances the play-time clock at 60
  * frames a second (the hours stop at 1000) and counts
  * g_system_wait_frames. */
-void system_handle_vsync(void) {
+void system_vsync_callback(void) {
     rand();
 
     g_save_play_time_frames++;
@@ -36,17 +36,17 @@ void system_handle_vsync(void) {
     g_system_wait_frames++;
 }
 
-/* Empty DrawSync callback, installed by boot_run_startup. */
-void system_handle_draw_sync(void) {
+/* Empty DrawSync callback, installed by boot_startup_run. */
+void system_draw_sync_callback(void) {
 }
 
-/* Empty CdReadyCallback handler, installed by boot_run_startup; the CdInit
- * that file_reset_cdrom_cpu_ram runs right after replaces it, so it never
+/* Empty CdReadyCallback handler, installed by boot_startup_run; the CdInit
+ * that cd_memory_init runs right after replaces it, so it never
  * runs. */
-void file_handle_cd_ready(u8 event, u8* result) {
+void file_cd_ready_callback(u8 event, u8* result) {
 }
 
-/* Empty CdReadCallback handler, installed by boot_run_startup and replaced
+/* Empty CdReadCallback handler, installed by boot_startup_run and replaced
  * by CdInit right after, like the ready callback. */
-void file_handle_cd_read(u8 event, u8* result) {
+void file_cd_read_callback(u8 event, u8* result) {
 }

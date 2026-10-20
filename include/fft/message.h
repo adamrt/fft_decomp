@@ -13,8 +13,8 @@ struct action_command;
 extern u16 g_message_speaker_swap_unit_a;
 extern u16 g_message_speaker_swap_unit_b;
 
-void message_render_record_image(text_dialog_record_t* record);
-void message_build_display(s32 offset, s32 flags, s32* out_width);
+void message_record_image_render(text_dialog_record_t* record);
+void message_window_width_measure(s32 offset, s32 flags, s32* out_width);
 
 /* BATTLE and WORLD each have their own body. */
 void message_dialog_thread(void);
@@ -23,11 +23,11 @@ void message_dialog_thread(void);
 extern text_glyph_state_t g_message_typewriter_glyph;
 
 /* Frees the slot the current thread owns; a closing dialog thread calls it. */
-void message_release_typewriter_slot(void);
+void message_typewriter_slot_release(void);
 
 /* Draws g_message_typewriter_glyph into VRAM, then paces the message: delay 0 waits for the draw, 2 or more waits
  * that many steps per glyph and 1 follows the message speed option. */
-void message_draw_glyph_with_delay(s32 pen_x, s32 pen_y, s32 delay);
+void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay);
 
 /* timed messages */
 void message_set_duration(u16 frames);

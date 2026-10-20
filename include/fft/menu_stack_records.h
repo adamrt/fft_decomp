@@ -28,7 +28,7 @@ union menu_stack_record {
     menu_stack_message_level_t message;
     world_map_menu_level_t return_level;
     menu_stack_panel_level_t panel;
-    proposition_discovery_level_t discovery; /* pushed by proposition_push_discovery_level */
+    proposition_discovery_level_t discovery; /* pushed by proposition_discovery_open */
     rumor_detail_level_t rumor_detail;
     brave_story_menu_level_t brave_story;
     bar_menu_level_t bar;

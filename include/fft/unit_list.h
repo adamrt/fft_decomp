@@ -67,12 +67,12 @@ enum { UNIT_LIST_SORT_KEY_COUNT = 11 };
 /* Unit List menu snapshot built from unit_stats_t, with display values and
  * the battle_id used to return the selected unit. */
 typedef struct unit_list_record {
-    s16 level;            /* 0x00; unit_list_get_level, _experience, _brave and _faith read the four stats */
-    s16 team_kind;        /* 0x02 */
-    s16 list_index;       /* 0x04 */
-    s16 unit_count;       /* 0x06; shown units plus eggs in each billboard record */
-    s16 experience;       /* 0x08 */
-    s16 active_battle_id; /* 0x0a */
+    s16 level;                          /* 0x00; grid_level_get, _experience, _brave and _faith read the four stats */
+    s16 team_kind;                      /* 0x02 */
+    s16 list_index;                     /* 0x04 */
+    s16 unit_count;                     /* 0x06; shown units plus eggs in each billboard record */
+    s16 experience;                     /* 0x08 */
+    s16 active_battle_id;               /* 0x0a */
     menu_unit_status_gauge_t gauges[3]; /* 0x0c; HP, MP and CT */
     s16 formation_index;                /* 0x1e */
     u8 _unused_020[2];
@@ -144,6 +144,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
 /* reorder list */
 extern s16 g_unit_list_reorder_result;
 extern u8 g_unit_list_reorderable_count;
+extern u8 g_unit_list_reorderable_indices[];
 
 void unit_list_run_sort_menu(void);
 s32 unit_list_build_sortable(void);
@@ -184,6 +185,7 @@ void unit_list_draw_shaded_rows(s32 y);
 
 /* input */
 extern u32 g_unit_list_input_secondary_repeat;
+extern u32 g_unit_list_input_primary_repeat;
 
 s32 unit_list_get_input_lock(void);
 void unit_list_update_input(void);

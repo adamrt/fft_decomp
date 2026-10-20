@@ -2,7 +2,7 @@
 #define FORMULA_H
 
 /* Ability formulas: the handler of each formula id and the steps they share to work out an action's damage, accuracy,
- * elements and statuses. They take no arguments and work on g_action_current_ability and the target's action data
+ * elements and statuses. They take no arguments and work on g_action_work and the target's action data
  * (action.h). */
 
 #include "psx/types.h"

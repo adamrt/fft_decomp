@@ -5,8 +5,8 @@
 
 #include "psx/types.h"
 
-u8* name_entry_run_screen(const u8* list, u32* image);
-u8* name_entry_keyboard_frame(const u8* list, s32 unused_1);
+u8* name_entry_screen_run(const u8* list, u32* image);
+u8* name_entry_keyboard_update(const u8* list, s32 unused_1);
 void name_entry_confirm_menu(void);
 
 #endif

@@ -161,7 +161,7 @@ typedef enum battle_map_id {
 
 extern s32 g_battle_map_id;
 
-void battle_map_stop_animations(void);
+void battle_map_animations_stop(void);
 s32 battle_map_stop_clut_cycles_and_weather_sfx(void);
 
 /* terrain */
@@ -236,7 +236,7 @@ enum {
 };
 
 /* Tile byte 0x05. Retail reads the depth as a bitfield: its zero test and
- * its value are separate loads (projectile_test_position_for_obstacle). */
+ * its value are separate loads (position_for_obstacle_test). */
 typedef struct battle_map_tile_marks {
     u8 ceiling_depth : 5;
     u8 move_destination : 1;
@@ -367,14 +367,14 @@ battle_map_tile_t* battle_map_tile_get_pointer(s32 x, s32 y, u32 layer);
 s32 battle_map_tile_get_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
 s32 battle_map_tile_set_value(battle_map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value);
 s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit);
-battle_map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
-battle_map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id);
-battle_map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
-s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 layer);
-void battle_map_store_dimensions(SVECTOR* destination);
+battle_map_tile_t* battle_map_unit_tile_data_get(u32 battle_id);
+battle_map_tile_t* battle_map_runtime_unit_tile_get(u32 runtime_id);
+battle_map_tile_t* battle_map_world_tile_get(u32 runtime_id);
+s32 battle_map_slope_height_calculate(const SVECTOR* coords, s32 layer);
+void battle_map_dimensions_store(SVECTOR* destination);
 
 /* A typed terrain parameter loses the first retail byte-cursor increment. */
-void battle_map_tile_copy_size_and_data(u8* data);
+void battle_map_tile_data_copy(u8* data);
 
 /* terrain tables */
 /* g_terrain_status_flags has one byte per battle_map_surface_type_e; only
@@ -384,7 +384,7 @@ enum {
 };
 
 /* Rows of g_terrain_movement_cost_tables, chosen from the unit's movement
- * abilities by move_spread_store_unit_to_scratchpad; each has one
+ * abilities by spread_unit_to_scratchpad_store; each has one
  * cost per battle_map_surface_type_e. */
 typedef enum terrain_cost_table {
     TERRAIN_COST_TABLE_DEFAULT = 0,
@@ -397,7 +397,7 @@ typedef enum terrain_cost_table {
 
 /* Costs in those rows that are not a number of Move points. */
 enum {
-    TERRAIN_COST_WEATHER = 0,   /* replaced by move_get_weather_terrain_cost */
+    TERRAIN_COST_WEATHER = 0,   /* replaced by weather_terrain_cost_get */
     TERRAIN_COST_BLOCKED = 0xff /* stays so under Any Ground */
 };
 
@@ -405,7 +405,7 @@ extern const u8 g_terrain_geomancy_abilities[];
 
 /* selected tile */
 /* Provisional 0xa-byte selected-tile record, filled by
- * battle_map_store_selected_tile_data and copied whole by
+ * selected_tile_data_store and copied whole by
  * unit_panel_copy_billboard_out. _unknown_02/_unknown_04 are the two bytes of
  * the per-surface-type main table g_terrain_tile_info_pairs, 25 and 25
  * for all 64 surface types; nothing reads them back. */
@@ -419,12 +419,12 @@ typedef struct battle_map_selected_tile {
 
 extern battle_map_selected_tile_t g_battle_map_selected_tile_data;
 
-void battle_map_store_selected_tile_coordinates(SVECTOR* destination);
+void battle_map_selected_tile_store(SVECTOR* destination);
 
 /* tile marks */
-/* target_set_tile_mark_colors modes and the g_battle_map_tile_mark_modes states:
+/* target_tile_mark_colors_set modes and the g_battle_map_tile_mark_modes states:
  * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
- * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
+ * request recolors the current render buffer; battle_map_mesh_weather_draw then does the
  * other buffer and leaves the layer SHOWN or NONE. */
 typedef enum battle_map_tile_mark_mode {
     BATTLE_MAP_TILE_MARK_NONE = 0, /* as a mode: restore every polygon and request the three HIDEs */
@@ -457,7 +457,7 @@ typedef char battle_map_background_gradient_colors_size_must_be_8[(sizeof(battle
         : -1];
 
 /* map data commands */
-/* Commands of battle_map_dispatch_data_command, which switches on command
+/* Commands of battle_map_data_command_dispatch, which switches on command
  * - 0x6a. This is its own id space: event Use3DObject (0x54) reaches command
  * 0x80. Names come from the case bodies. */
 typedef enum battle_map_data_command {
@@ -476,11 +476,11 @@ typedef enum battle_map_data_command {
     BATTLE_MAP_DATA_COMMAND_SET_TEXTURE_ANIMATION_DURATION = 0x9d
 } battle_map_data_command_e;
 
-s32 battle_map_dispatch_data_command(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);
-s32 battle_map_get_3d_object_state(s32 part_index);
-s32 battle_map_set_3d_object_state(s32 part_index, s32 state_row);
-s32 battle_map_texture_get_animation_active(s32 animation_index);
-s32 battle_map_texture_start_animation(s32 animation_index, s32 object_state);
+s32 battle_map_data_command_dispatch(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);
+s32 battle_map_object_state_get(s32 part_index);
+s32 battle_map_object_state_set(s32 part_index, s32 state_row);
+s32 battle_map_texture_animation_active_get(s32 animation_index);
+s32 battle_map_texture_animation_start(s32 animation_index, s32 object_state);
 
 /* map title */
 /* The title card of the battle map. The BATTLE and WORLD event interpreters
@@ -495,11 +495,11 @@ void attack_map_title_entrypoint(void);
 extern s16 g_battle_map_destruction_wait_state;
 extern u16 g_battle_map_refresh_pending;
 
-void battle_map_wait_for_refresh(void);
+void battle_map_refresh_wait(void);
 s32 battle_map_return_zero_1(void); /* unreferenced stub */
 
 /* The raw weather script variable, before indoor and snow flags apply. */
-s32 battle_map_get_weather(void);
+s32 battle_map_weather_get(void);
 
 /* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
 void battle_map_skip_deployment_thread(void);
@@ -507,6 +507,6 @@ void battle_map_skip_deployment_thread(void);
 /* script lighting */
 /* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
 void battle_map_light_thread(void);
-void battle_map_reset_script_light_transform(void);
+void battle_map_script_light_reset(void);
 
 #endif

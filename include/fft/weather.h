@@ -34,7 +34,7 @@ typedef enum weather_flags {
     BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02
 } weather_flags_e;
 
-/* Commands of weather_run_command and weather_init_particles. */
+/* Commands of weather_command_dispatch and weather_particles_init. */
 typedef enum weather_command {
     BATTLE_MAP_WEATHER_COMMAND_SNOW = 0x53,
     BATTLE_MAP_WEATHER_COMMAND_CLEAR = 0x54,
@@ -47,7 +47,7 @@ typedef enum weather_command {
     BATTLE_MAP_WEATHER_COMMAND_LIGHTNING = 0x8a,            /* random lightning from now on */
     BATTLE_MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
     BATTLE_MAP_WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
-    BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* weather_init_particles */
+    BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* weather_particles_init */
     BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90
 } weather_command_e;
 
@@ -67,7 +67,7 @@ extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
 s32 weather_get_effective(void);
 
 /* A byte-valued weather_command_e, also read from the event command table. */
-void weather_run_command(u8 command);
+void weather_command_dispatch(u8 command);
 
 /* timed particle transform */
 /* Frame, duration and rotation of E458's timed particle transform
@@ -75,18 +75,18 @@ void weather_run_command(u8 command);
 extern s32 g_weather_timed_transform_frame;
 extern s32 g_weather_timed_transform_duration;
 
-void weather_set_timed_transform_duration(s32 id, s32 value);
+void weather_transform_duration_set(s32 id, s32 value);
 
 /* sound */
-/* Sound IDs remembered for weather_stop_sfx; zero means no ID is stored.
+/* Sound IDs remembered for weather_sfx_stop; zero means no ID is stored.
  * The rain ID is also retained while weather sounds are disabled. */
 extern s32 g_weather_rain_sfx_id;
 extern s32 g_weather_thunder_a_sfx_id;
 extern s32 g_weather_thunder_b_sfx_id;
 extern u8 g_weather_sfx_enabled;
 
-void weather_start_sfx(void);
-s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
+void weather_sfx_start(void);
+s32 weather_sfx_stop(void); /* the result is indeterminate; no caller reads it */
 
 /* palette modifier encoding */
 /* The signed palette modifier shares the 32-bit value above its seven low flag bits. */

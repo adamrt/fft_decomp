@@ -71,7 +71,7 @@ static void equipment_load_images(void) {
     rect.w = 0xC;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
-    menu_clear_selection_values();
+    menu_selection_values_clear();
     g_help_message_text_id = 0;
     equipment_reset_selection();
     item_build_inventory_totals();
@@ -80,7 +80,7 @@ static void equipment_load_images(void) {
     item_rebuild_category_list(2);
     item_rebuild_category_list(3);
     item_rebuild_category_list(4);
-    menu_clear_selection_records();
+    menu_selection_records_clear();
 }
 
 /* Size the primitive pools, load the unit `battle_id` and start the equipment screen threads. */
@@ -130,7 +130,7 @@ void unit_panel_toggle_banner_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-            thread_set_parameters(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)&g_unit_panel_unit_status_panel_params, 0, 0);
+            thread_parameters_set(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)&g_unit_panel_unit_status_panel_params, 0, 0);
         }
     } else {
         menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
@@ -143,7 +143,7 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, unit_panel_equipment_thread);
-            thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)&g_equipment_panel_params, 0, 0);
+            thread_parameters_set(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)&g_equipment_panel_params, 0, 0);
         }
         unit_panel_toggle_numbers_thread(enable);
         return;

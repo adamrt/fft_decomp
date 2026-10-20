@@ -10,7 +10,7 @@
 
 /* range panels */
 /* Five-byte range and targeting work entry, 256 per level. Movement-cost propagation uses
- * remaining_range as the residual budget; ai_move_fill_target_distance_grid reads it too. */
+ * remaining_range as the residual budget; target_distance_grid_fill reads it too. */
 typedef struct target_panel {
     u8 remaining_range;
     /* Targeting frontier/targeted mark; pathing stores the step number here. */
@@ -18,12 +18,12 @@ typedef struct target_panel {
     /* Move spreading stores the compact movement-record index 0..15 (0 is valid).
      * Relocation search reuses this byte as 0 free, 1 occupied or reserved. */
     u8 unit_record_index;
-    /* Remaining range after landing on a rideable unit (move_spread_check_occupied_tile_standing_height);
+    /* Remaining range after landing on a rideable unit (spread_occupied_tile_standing_height_check);
      * cleared on the acting tile by ai_move_propagate_from_target; pathing reuses it on 512+
      * panels as the step number. */
     u8 ride_remaining_range;
     /* Largest single height step along the path, the equal-budget tie-breaker
-     * (move_spread_propagate_destination, move_path_update_candidate); 0xff initial value in
+     * (spread_destination_propagate, path_candidate_update); 0xff initial value in
      * mode 1. AI propagation sets the target to 0 and old actor tile to 0xff. */
     u8 max_height_delta;
 } target_panel_t;
@@ -45,7 +45,7 @@ typedef enum target_type {
 } target_type_e;
 
 /* Result of target_range_set_for_action, kept in
- * unit_t.ability_preview_phase: how the action's target is chosen. */
+ * unit_runtime_t.ability_preview_phase: how the action's target is chosen. */
 typedef enum target_panels {
     TARGET_PANELS_INVALID = -1,
     TARGET_PANELS_UNIT_OR_TILE = 0, /* the ability can follow a unit */
@@ -54,7 +54,7 @@ typedef enum target_panels {
     TARGET_PANELS_NONE = 3          /* the panel routine marked no tile */
 } target_panels_e;
 
-/* Directions of target_area_calculate_linear_attack_tiles. */
+/* Directions of area_linear_attack_tiles_calculate. */
 typedef enum target_line_direction {
     TARGET_LINE_EAST = 0,  /* +x */
     TARGET_LINE_WEST = 2,  /* -x */
@@ -74,8 +74,8 @@ s32 target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index);
 s32 target_validate_for_weapon(const action_command_t* source);
 
 /* tile selection */
-target_panels_e target_begin_tile_selection(void);
-void target_select_tile(void);
-void target_set_tile_mark_colors(s32 mode, s32 unused);
+target_panels_e target_tile_selection_start(void);
+void target_tile_select(void);
+void target_tile_mark_colors_set(s32 mode, s32 unused);
 
 #endif

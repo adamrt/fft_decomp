@@ -1,67 +1,59 @@
 /* Power-on and fresh-session setup. The first boot starts the hardware and
  * shows both logos; later session resets reload the shared resources under
- * the Squaresoft logo. New-game routines seed the inventory and party. */
+ * the Squaresoft logo. */
 
-#include "fft/encounter.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/item.h"
 #include "fft/memcard.h"
 #include "fft/memory.h"
 #include "fft/music.h"
-#include "fft/party.h"
 #include "fft/save.h"
-#include "fft/screen.h"
-#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/status.h"
 #include "fft/system.h"
-#include "fft/unit.h"
-#include "fft/unit_entd.h"
-#include "fft/vector.h"
 #include "fft/zodiac.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/libspu.h"
 #include "psx/types.h"
 
-static s32 g_boot_has_reset_game_state = 0;
+static s32 g_session_initialized = 0;
 
 /* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
  * mark the shared file descriptor idle. */
-static void file_reset_cdrom_cpu_ram(void) {
+static void cd_memory_init(void) {
     SetMem(2);
     CdInit();
     CdSetDebug(0);
-    file_reset_pause_cdrom(&g_file_cd_state);
+    file_cd_pause_reset(&g_file_cd_state);
     g_file_cd_state.state = FILE_LOAD_STATE_IDLE;
 }
 
 /* BATTLE/ZODIAC.BIN is a headerless image, not an executable overlay.
  * Sector 0xec61 supplies 0x10000 bytes: 128 * 256 16-bit VRAM transfer
  * values at (640, 0), subsequently rendered as 8-bit indexed texture data. */
-void zodiac_load_frame(void) {
+void zodiac_frame_load(void) {
     RECT destination = { 640, 0, 128, 256 };
-    u32* image = file_load_checked_to_heap(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
+    u32* image = file_heap_load_checked(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
 
     LoadImage(&destination, image);
     DrawSync(0);
     heap_free(image);
-    gfx_load_frame_bin();
+    gfx_frame_texture_load();
 }
 
 /* Power-on initialization: install the VSync, DrawSync and CD callbacks, start
  * the GPU, pad, SPU and CD, show the two logos, open the memory-card events and
  * load the shared sounds and the zodiac frame while the Squaresoft logo is up.
  *
- * rand is seeded with 1, and g_boot_has_reset_game_state is cleared so the first
- * boot_reset_game_state does not repeat the hardware restart. */
-void boot_run_startup(void) {
-    heap_clear_game_table();
+ * rand is seeded with 1, and g_session_initialized is cleared so the first
+ * boot_session_reset does not repeat the hardware restart. */
+void boot_startup_run(void) {
+    heap_game_table_clear();
     ResetCallback();
 
     g_save_play_time_hours = 0;
@@ -69,25 +61,25 @@ void boot_run_startup(void) {
     g_save_play_time_seconds = 0;
     g_save_play_time_frames = 0;
 
-    VSyncCallback(system_handle_vsync);
-    DrawSyncCallback(system_handle_draw_sync);
-    CdReadyCallback(file_handle_cd_ready);
-    CdReadCallback(file_handle_cd_read);
+    VSyncCallback(system_vsync_callback);
+    DrawSyncCallback(system_draw_sync_callback);
+    CdReadyCallback(file_cd_ready_callback);
+    CdReadCallback(file_cd_read_callback);
 
     ResetGraph(0);
     SetGraphDebug(0);
     PadInit(0);
     SpuInit();
-    file_reset_cdrom_cpu_ram();
-    gfx_reset_display(256, 240, 512, 0, 0, 0);
-    boot_show_sceap_logo();
-    boot_fade_in_squaresoft_logo();
-    memcard_init_events();
+    cd_memory_init();
+    gfx_display_reset(256, 240, 512, 0, 0, 0);
+    boot_sceap_logo_show();
+    boot_squaresoft_logo_fade_in();
+    memcard_events_init();
     sound_init();
-    zodiac_load_frame();
+    zodiac_frame_load();
     srand(1);
-    boot_fade_out_squaresoft_logo();
-    g_boot_has_reset_game_state = 0;
+    boot_squaresoft_logo_fade_out();
+    g_session_initialized = 0;
 }
 
 /* Prepare a fresh session before the opening runs: reset the 32-bit save values and
@@ -95,17 +87,17 @@ void boot_run_startup(void) {
  * tables.
  *
  * On the first pass after power-on only that is done, because
- * boot_run_startup has just shown the logos. On every later pass (a soft
+ * boot_startup_run has just shown the logos. On every later pass (a soft
  * reset or the end of the game) it first frees the game heap, unloads the
  * scenario music, zeroes the play time, restarts the GPU, SPU and CD, and shows
  * the Squaresoft logo again for at least 60 frames while the shared sounds and
  * the zodiac frame reload. */
-void boot_reset_game_state(void) {
+void boot_session_reset(void) {
     int frame;
 
-    if (g_boot_has_reset_game_state != 0) {
-        heap_clear_game_table();
-        music_unload_scenario_and_tunes();
+    if (g_session_initialized != 0) {
+        heap_game_table_clear();
+        music_all_unload();
         g_save_play_time_hours = 0;
         g_save_play_time_minutes = 0;
         g_save_play_time_seconds = 0;
@@ -113,175 +105,24 @@ void boot_reset_game_state(void) {
         ResetGraph(1);
         SetGraphDebug(0);
         SpuInitHot();
-        file_reset_cdrom_cpu_ram();
-        gfx_reset_display(256, 240, 512, 0, 0, 0);
-        boot_fade_in_squaresoft_logo();
+        cd_memory_init();
+        gfx_display_reset(256, 240, 512, 0, 0, 0);
+        boot_squaresoft_logo_fade_in();
         sound_init();
-        zodiac_load_frame();
+        zodiac_frame_load();
     }
 
-    save_init_state_and_options();
-    status_init_check_data();
-    save_init_data_tables();
-    item_init_order_tables();
+    save_state_init();
+    status_check_data_init();
+    save_data_tables_init();
+    item_order_tables_init();
 
-    if (g_boot_has_reset_game_state != 0) {
+    if (g_session_initialized != 0) {
         for (frame = 0; frame < 60; frame++) {
             VSync(0);
         }
-        boot_fade_out_squaresoft_logo();
+        boot_squaresoft_logo_fade_out();
     }
 
-    g_boot_has_reset_game_state = 1;
-}
-
-/* Start loading the ENTD file that holds g_encounter_current_id into a new
- * 0x14000-byte heap block (g_encounter_set). The four files cover 128 encounters
- * each.
- *
- * Returns 1 once the read is queued, and also for encounter 0, which loads nothing.
- * Returns 0 with the block freed when the loader is busy; the caller retries. */
-int encounter_open_file(void) {
-    int lba;
-    entd_file_t* entd_set;
-
-    if (g_encounter_current_id != 0) {
-        if (g_encounter_current_id < ENTD2_FIRST_ENCOUNTER) {
-            entd_set = heap_alloc(sizeof(entd_file_t));
-            g_encounter_set = entd_set;
-            lba = DISC_SECTOR_BATTLE_ENTD1_ENT;
-        } else if (g_encounter_current_id < ENTD3_FIRST_ENCOUNTER) {
-            entd_set = heap_alloc(sizeof(entd_file_t));
-            g_encounter_set = entd_set;
-            lba = DISC_SECTOR_BATTLE_ENTD2_ENT;
-        } else if (g_encounter_current_id < ENTD4_FIRST_ENCOUNTER) {
-            entd_set = heap_alloc(sizeof(entd_file_t));
-            g_encounter_set = entd_set;
-            lba = DISC_SECTOR_BATTLE_ENTD3_ENT;
-        } else {
-            entd_set = heap_alloc(sizeof(entd_file_t));
-            g_encounter_set = entd_set;
-            lba = DISC_SECTOR_BATTLE_ENTD4_ENT;
-        }
-
-        if (file_request_read_bytes(lba, sizeof(entd_file_t), entd_set) != 0) {
-            heap_call_free(g_encounter_set);
-            return 0;
-        }
-    }
-    return 1;
-}
-
-/* Return the selected encounter in the loaded ENTD file: -1 when there
- * is no selected encounter, NULL while the file is still loading. Encounter ids 0-127
- * index the file directly; each further range of 128 ids (the last one
- * open-ended) indexes it from its own base. */
-const entd_encounter_t* encounter_get_current(void) {
-    int* encounter_id = &g_encounter_current_id;
-    int id;
-
-    if (*encounter_id == 0) {
-        return (const entd_encounter_t*)-1;
-    }
-    if (file_is_still_loading() == 0) {
-        id = *encounter_id;
-        if (id < ENTD2_FIRST_ENCOUNTER) {
-            return &g_encounter_set->encounters[id];
-        }
-        return &g_encounter_set->encounters[id < ENTD3_FIRST_ENCOUNTER ? id - ENTD2_FIRST_ENCOUNTER
-                : id < ENTD4_FIRST_ENCOUNTER                           ? id - ENTD3_FIRST_ENCOUNTER
-                                                                       : id - ENTD4_FIRST_ENCOUNTER];
-    }
-    return 0;
-}
-
-/* Rebuild the party roster from an ENTD encounter: load its file (blocking),
- * empty the roster, save its 16 unit slots through party_save_encounter_unit,
- * and free the file. */
-void encounter_init_party(int encounter_id) {
-    const entd_encounter_t* entd;
-    int unit_id;
-
-    g_encounter_current_id = encounter_id;
-    while (encounter_open_file() == 0) {
-        VSync(0);
-        file_poll_load(&g_file_cd_state);
-    }
-
-    for (;;) {
-        entd = encounter_get_current();
-        if (entd == (const entd_encounter_t*)-1) {
-            break;
-        }
-        if (entd != 0) {
-            party_clear();
-            for (unit_id = 0; unit_id < ENTD_UNITS_PER_ENCOUNTER; unit_id++) {
-                party_save_encounter_unit(entd, unit_id, 0, 1);
-            }
-            heap_call_free(g_encounter_set);
-            break;
-        }
-        VSync(0);
-        file_poll_load(&g_file_cd_state);
-    }
-}
-
-/* Empty the inventory, then stock the new-game consumables: five Potions, two each of Hi-Potion,
- * Eye Drop and Phoenix Down, and one of each other basic restorative. */
-void item_init_new_game_inventory(void) {
-    s32 remaining;
-    u8* quantity;
-
-    for (remaining = ITEM_ID_COUNT - 1, quantity = &g_item_quantities[ITEM_ID_COUNT - 1]; remaining >= 0;
-        remaining--, quantity--) {
-        *quantity = 0;
-    }
-
-    g_item_quantities[ITEM_ID_POTION] = 5;
-    g_item_quantities[ITEM_ID_HI_POTION] = 2;
-    g_item_quantities[ITEM_ID_X_POTION] = 1;
-    g_item_quantities[ITEM_ID_ETHER] = 1;
-    g_item_quantities[ITEM_ID_HI_ETHER] = 1;
-    g_item_quantities[ITEM_ID_ELIXIR] = 1;
-    g_item_quantities[ITEM_ID_ANTIDOTE] = 1;
-    g_item_quantities[ITEM_ID_EYE_DROP] = 2;
-    g_item_quantities[ITEM_ID_ECHO_GRASS] = 1;
-    g_item_quantities[ITEM_ID_MAIDENS_KISS] = 1;
-    g_item_quantities[ITEM_ID_SOFT] = 1;
-    g_item_quantities[ITEM_ID_HOLY_WATER] = 1;
-    g_item_quantities[ITEM_ID_REMEDY] = 1;
-    g_item_quantities[ITEM_ID_PHOENIX_DOWN] = 2;
-}
-
-enum { STARTING_ENCOUNTER_ID = 254, STARTING_WAR_FUNDS = 2000 };
-
-/* Start a new roster: empty it, then generate Ramza alone (mode 0) or load the
- * party from ENTD encounter 254 (mode 2); any other mode leaves it empty. The
- * inventory is reset to the new-game stock and the war funds to 2000. */
-void party_init_new_game(int mode) {
-    screen_init_with_world_text();
-    party_clear();
-
-    if (mode == PARTY_NEW_GAME_RAMZA) {
-        party_generate_unit(UNIT_TYPE_RAMZA);
-    } else if (mode == PARTY_NEW_GAME_ENCOUNTER) {
-        encounter_init_party(STARTING_ENCOUNTER_ID);
-    }
-
-    item_init_new_game_inventory();
-    script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
-}
-
-/* Store x, y and z in an SVECTOR, truncated to 16 bits. */
-void vector_set_svector(SVECTOR* vector, s32 x, s32 y, s32 z) {
-    vector->vx = x;
-    vector->vy = y;
-    vector->vz = z;
-}
-
-/* Store x, y and z in a VECTOR. */
-void vector_set_vector(VECTOR* vector, s32 x, s32 y, s32 z) {
-    vector->vx = x;
-    vector->vy = y;
-    vector->vz = z;
+    g_session_initialized = 1;
 }

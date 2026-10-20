@@ -7,6 +7,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+struct effect_record;
+
 /* timeline shape */
 /* Particle channels and sound tracks of each timeline phase. */
 enum { EFFECT_PARTICLE_CHANNEL_COUNT = 5, EFFECT_SOUND_TRACK_COUNT = 3 };
@@ -28,7 +30,7 @@ typedef struct effect_keyframe_table {
 typedef char effect_keyframe_table_size_must_be_128[(sizeof(effect_keyframe_table_t) == 128) ? 1 : -1];
 
 /* A particle channel keyframe's 16-bit action value (effect_keyframe_table_t.action), run by
- * effect_timeline_run_keyframe_actions when the keyframe is entered. Bit 7 is set in a few retail
+ * keyframe_actions_run when the keyframe is entered. Bit 7 is set in a few retail
  * files and read by nothing. */
 enum {
     EFFECT_KEYFRAME_ACTION_CALLBACK_MASK = 0x0007,
@@ -155,7 +157,7 @@ typedef struct effect_camera_keyframes_21 {
     s16 last_keyframe_index;
 } effect_camera_keyframes_21_t;
 
-/* The camera table effect_camera_find_active_keyframe found its keyframe in: the high half of the
+/* The camera table camera_active_keyframe_find found its keyframe in: the high half of the
  * index it reports. */
 enum { EFFECT_CAMERA_TABLE_PHASE1 = 0, EFFECT_CAMERA_TABLE_CHILD = 1, EFFECT_CAMERA_TABLE_PHASE2 = 2 };
 
@@ -320,11 +322,13 @@ extern u32 g_effect_camera_zoom_mode;
 extern VECTOR g_effect_camera_zoom_saved;
 
 void effect_camera_init(void);
-void effect_camera_seed_tracks(void);
+void effect_camera_tracks_seed(void);
 
 /* camera playback */
 void effect_camera_start_parent_keyframe_moves(s16 frame);
 void effect_camera_start_child_keyframe_moves(s16 frame);
 void effect_camera_update_tracks(void);
+void effect_camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VECTOR* zoom);
+void effect_camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset);
 
 #endif

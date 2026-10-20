@@ -13,36 +13,36 @@ extern s16 g_screen_fade_intensity;
 /* Fade tile RGB channels, set to equal levels by the fade updaters. */
 extern rgb24_t g_screen_fade_tile_color;
 
-static u8 g_screen_fade_decreasing = 0;
-static u8 g_screen_fade_disabled = 0;
-static u8 g_screen_fade_increasing = 0;
+static u8 g_fade_in_active = 0;
+static u8 g_fade_disabled = 0;
+static u8 g_fade_out_active = 0;
 static RECT g_screen_fade_tile_rect = { 0, 0, 256, 240 };
 
 /* Return the active WORLD fades as SCREEN_FADE_STATE bits (decreasing 1, increasing 2), or none
  * while fades are disabled. */
-s32 screen_fade_get_state(void) {
-    if (g_screen_fade_disabled != 0) {
+s32 screen_fade_state_get(void) {
+    if (g_fade_disabled != 0) {
         return SCREEN_FADE_STATE_NONE;
     }
-    return g_screen_fade_decreasing + (g_screen_fade_increasing * SCREEN_FADE_STATE_INCREASING);
+    return g_fade_in_active + (g_fade_out_active * SCREEN_FADE_STATE_INCREASING);
 }
 
 /* Start the fade from intensity 240 down to zero (the screen fades in),
  * unless fades are disabled. */
-void screen_fade_start_decreasing(void) {
-    if (g_screen_fade_disabled == 0) {
-        g_screen_fade_decreasing = 1;
-        g_screen_fade_increasing = 0;
+void screen_fade_in_start(void) {
+    if (g_fade_disabled == 0) {
+        g_fade_in_active = 1;
+        g_fade_out_active = 0;
         g_screen_fade_intensity = 240;
     }
 }
 
 /* Start the fade from intensity 0 up to full (the screen fades out), unless
  * fades are disabled. */
-void screen_fade_start_increasing(void) {
-    if (g_screen_fade_disabled == 0) {
-        g_screen_fade_decreasing = 0;
-        g_screen_fade_increasing = 1;
+void screen_fade_out_start(void) {
+    if (g_fade_disabled == 0) {
+        g_fade_in_active = 0;
+        g_fade_out_active = 1;
         g_screen_fade_intensity = 0;
     }
 }
@@ -55,16 +55,16 @@ void screen_fade_start_increasing(void) {
  * Unlike the fade out, the level is not clamped when it ends: at a frame step
  * of 2 it goes 16 to -16, and that last tile is drawn with the low byte, 240,
  * darkening the screen for one frame. */
-s32 screen_fade_update_in(void) {
+s32 screen_fade_in_update(void) {
     s32 running = 1;
 
-    if (g_screen_fade_disabled != 0) {
+    if (g_fade_disabled != 0) {
         return 0;
     }
-    if (g_screen_fade_decreasing != 0) {
+    if (g_fade_in_active != 0) {
         g_screen_fade_intensity -= menu_get_event_speed() * 0x10;
         if (g_screen_fade_intensity <= 0) {
-            g_screen_fade_decreasing = 0;
+            g_fade_in_active = 0;
             running = 0;
         }
         menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_screen_ot_length - 2);
@@ -74,22 +74,22 @@ s32 screen_fade_update_in(void) {
     return running;
 }
 
-/* Sibling of screen_fade_update_in. Steps the subtractive fade level
+/* Sibling of screen_fade_in_update. Steps the subtractive fade level
  * up (the screen darkens) and draws the full-screen fade tile, ending clamped
  * at 0xFF. Returns 0 on the completion step or while disabled; otherwise 1,
  * including calls when this fade direction is inactive. */
-s32 screen_fade_update_out(void) {
+s32 screen_fade_out_update(void) {
     s32 running = 1;
     s32 unused[4]; /* target frame is 0x10 larger than the live locals need */
 
-    if (g_screen_fade_disabled != 0) {
+    if (g_fade_disabled != 0) {
         return 0;
     }
-    if (g_screen_fade_increasing != 0) {
+    if (g_fade_out_active != 0) {
         g_screen_fade_intensity += menu_get_event_speed() * 0x10;
         if (g_screen_fade_intensity >= 0x100) {
             running = 0;
-            g_screen_fade_increasing = 0;
+            g_fade_out_active = 0;
             g_screen_fade_intensity = 0xFF;
         }
         menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_screen_ot_length - 2);
@@ -101,6 +101,6 @@ s32 screen_fade_update_out(void) {
 
 /* When set, the fade helpers in this file all bail out immediately, leaving
  * g_screen_fade_intensity untouched. */
-void screen_fade_set_disabled(u8 disabled) {
-    g_screen_fade_disabled = disabled;
+void screen_fade_disabled_set(u8 disabled) {
+    g_fade_disabled = disabled;
 }

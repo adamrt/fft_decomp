@@ -43,7 +43,7 @@ void menu_thin_window_frame_thread(void) {
     s32 index;
     s32 frame;
 
-    menu = (urect16_t*)thread_get_current_parameter_1();
+    menu = (urect16_t*)thread_current_parameter_1_get();
     pixels = menu_alloc_memory(0x400);
 
     menu_clear_render_buffer(pixels, 0x400);
@@ -150,7 +150,7 @@ void menu_thin_window_frame_thread(void) {
         &g_menu_scratch_buffer.panel_frames[1], &g_menu_scratch_buffer.panel_frames[0], sizeof(menu_panel_frame_t));
 
     frame = 0;
-    while (thread_get_current_parameter_3() == 0) {
+    while (thread_current_parameter_3_get() == 0) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(&prim->draw_areas, (const RECT*)menu, frame, g_gfx_screen_polarity);
 
@@ -159,7 +159,7 @@ void menu_thin_window_frame_thread(void) {
          * is dead. A separate local is allocated a different callee-saved
          * register and does not reproduce the target. */
         texture_u = MENU_CLUT_DIMMED;
-        if (thread_get_current_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_current_parameter_2_get() == 0 && g_menu_input_lock_mode == 0) {
             texture_u = MENU_CLUT_NORMAL;
         }
         for (index = 8; index >= 0; index--) {
@@ -187,5 +187,5 @@ void menu_thin_window_frame_thread(void) {
     thread_yield();
     menu_free_memory(pixels);
     gfx_free_texture_rect(&texture);
-    thread_exit_current();
+    thread_current_exit();
 }

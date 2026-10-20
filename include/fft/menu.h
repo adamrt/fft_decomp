@@ -15,7 +15,7 @@ extern s8 g_menu_event_speed;
 
 s32 menu_get_event_speed(void);
 void menu_set_vsync_mode_and_event_speed(s32 speed);
-s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
+s32 menu_event_frame_update(u32* otag, s32 controller_input);
 
 /* menu arena */
 void* menu_alloc_memory(s32 bytes);
@@ -86,7 +86,7 @@ typedef enum menu_icon_header {
 /* One menu window, shared by BATTLE, WORLD and the overlays; g_menu_thread_menu_data points at the scene's
  * current table. The icon threads read vram_origin and the inner size as the text image's upload rectangle and
  * window.x/y as the icon origin (the icon list thread clears bit 0 of window.y);
- * menu_step_wrapping_cursor_on_scroll_buttons wraps the cursor at max_row_index. */
+ * menu_row_cursor_update wraps the cursor at max_row_index. */
 typedef struct menu_entry {
     point16_t vram_origin; /* 0x00: text-image VRAM origin passed to the draw-mode helpers */
     s16 inner_width;       /* 0x04: text-image width; RECT.w = inner_width >> 2 (4bpp) */
@@ -96,10 +96,10 @@ typedef struct menu_entry {
      * inner and window sizes; the load origin and screen offsets are cleared
      * with them. */
     image_layout_t text_image;
-    s16 text_id;                 /* 0x1c: passed to text_find_entry */
+    s16 text_id;                 /* 0x1c: passed to text_entry_find */
     s16 max_row_index;           /* 0x1e: row count - 1 (command_build_act_menu) */
     s16 thread_count;            /* 0x20: threads menu_handle_cancel_input stops, -1 when there is no thread
-                                    group; set from the system-function table by menu_run_system_function_thread */
+                                    group; set from the system-function table by request_thread_run */
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24: each row's action, indexed by selected_index */
     void (*thread_entry)(void);  /* 0x28 */
@@ -150,7 +150,7 @@ extern s32 g_menu_formation_display_mode;
 extern s32 g_menu_post_battle_unit_changes_active;
 extern u8 g_menu_common_graphics_loaded;
 
-/* The field y (0 or 0xf0) handed to menu_input_update_event_state each frame; the panels draw into the other
+/* The field y (0 or 0xf0) handed to menu_input_event_state_update each frame; the panels draw into the other
  * frame-buffer half. */
 extern u16 g_frame_arg;
 
@@ -164,17 +164,18 @@ extern u16 g_menu_overlay_state;
 extern u16 g_menu_transition_state;
 
 /* Loads the default menu palettes and rebuilds the text section pointers. */
-void menu_init_palette_and_text(s32 unused_0);
+void menu_palette_text_init(s32 unused_0);
 
 /* Binds the scene's working pointers and clears its menu-session flags. */
-void menu_init_subsystem_pointers(void);
+void menu_subsystem_pointers_init(void);
+void menu_subsystems_init(void);
 
 /* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
-void menu_reset_subsystems(void);
+void menu_subsystems_reset(void);
 
 /* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
  * g_menu_transition_state when it is set. */
-s32 menu_get_thread_activity(void);
+s32 menu_thread_activity_get(void);
 
 /* unreferenced stubs */
 /* Empty functions that nothing on the disc calls or points at; the names are neutral placeholders. */
@@ -207,7 +208,7 @@ typedef struct menu_unit_status_identity {
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
     s16 zodiac;      /* 0x08 */
-    s16 roster_slot; /* 0x0a: party slot (formation_get_selected_unit_name_id); shown as value + 1 */
+    s16 roster_slot; /* 0x0a: party slot (formation_selected_unit_name_id_get); shown as value + 1 */
     u8 _unused_0c[2];
 } menu_unit_status_identity_t;
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
@@ -262,7 +263,7 @@ typedef struct menu_unit_status_gauge {
 } menu_unit_status_gauge_t;
 typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gauge_t) == 6) ? 1 : -1];
 
-/* What the unit grids draw below a unit (formation_draw_unit_readout,
+/* What the unit grids draw below a unit (unit_readout_draw,
  * unit_list_update_grid). L2/R2 step g_formation_stat_display_mode and
  * g_unit_list_stat_mode through the first five, wrapping between HP and
  * BRAVE_FAITH; WORLD picks the others per unit. */
@@ -279,7 +280,7 @@ typedef enum menu_unit_readout {
 } menu_unit_readout_e;
 
 /* The battle unit stats of g_unit_panel_selected_unit. */
-struct unit_stats* menu_get_selected_unit_stats(void);
+struct unit_stats* menu_selected_unit_stats_get(void);
 
 /* panel threads */
 /* Flags of the unit status panel parameter records. */
@@ -439,7 +440,7 @@ void menu_update_panel_fade(void);
 void menu_init_panel_fade_tiles(void);
 
 /* thread status indicators */
-/* g_menu_indicator_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
+/* g_menu_panel_backdrop_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
  * panels menu_draw_status_panel_backdrops draws behind the unit status banners. */
 typedef enum menu_indicator_state {
     MENU_INDICATOR_STATE_HIDDEN = 0,    /* not drawn */

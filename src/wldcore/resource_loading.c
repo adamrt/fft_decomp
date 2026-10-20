@@ -395,7 +395,7 @@ static s32 g_sound_novel_text_sector_offsets[7] = {
  * change at the current sector.
  *
  * The switch's jump table is the first 32 bytes of WLDCORE.BIN. */
-void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
+void world_map_texture_stream_update(file_load_descriptor_t* stream) {
     RECT rect;
     u8 mode;
     s32 rect_count;
@@ -457,7 +457,7 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
             stream->error_count++;
         }
         if (stream->wait_frames > 0x40000 || (CdStatus() & 1) != 0) {
-            file_reset_cd_subsystems();
+            file_cd_subsystems_reset();
             CdIntToPos(stream->lba + stream->sector_index, &stream->position);
             stream->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             stream->error_count++;
@@ -498,7 +498,7 @@ void world_map_poll_texture_stream(file_load_descriptor_t* stream) {
 
 /* Load the picture data set of location record `index` (stored as set + 1)
  * and return the stored value; 0 means the record has no picture. */
-s32 location_load_picture(s32 index) {
+s32 location_picture_load(s32 index) {
     s32 value = g_location_records[index].picture;
 
     if (value != 0)
@@ -510,9 +510,9 @@ s32 location_load_picture(s32 index) {
  * is already resident. */
 void picture_load_set(s32 set) {
     if (set != g_picture_loaded_set) {
-        file_wait_for_pending();
+        file_pending_wait();
         g_picture_loaded_set = set;
-        file_wait_then_request_read(&g_file_cd_state, g_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
+        file_pending_read_request(&g_file_cd_state, g_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
             g_picture_sector_offsets[set + 1] - g_picture_sector_offsets[set], g_picture_buffer);
     }
 }
@@ -525,9 +525,9 @@ void picture_load_set(s32 set) {
  * other sector-offset tables in this file have the same shape. */
 void picture_load_background_set(s32 set) {
     if (set != g_picture_background_loaded_set) {
-        file_wait_for_pending();
+        file_pending_wait();
         g_picture_background_loaded_set = set;
-        file_wait_then_request_read(&g_file_cd_state,
+        file_pending_read_request(&g_file_cd_state,
             g_picture_background_sector_offsets[set] + DISC_SECTOR_WORLD_WLDBK_BIN,
             g_picture_background_sector_offsets[set + 1] - g_picture_background_sector_offsets[set],
             g_world_map_scratch_buffer);
@@ -536,14 +536,14 @@ void picture_load_background_set(s32 set) {
 
 /* Loads message block `block` (message_block_e) unless it is the one already loaded.
  * g_message_block_sector_offsets has the same shape as the pair used by
- * sound_novel_load_files: entry i is the start sector of block i relative to the disc
+ * sound_novel_files_load: entry i is the start sector of block i relative to the disc
  * LBA below, so entry i+1 minus entry i is that block's length. */
 void message_block_load_if_changed(s32 block) {
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_message_block_buffer;
     if (block != g_message_block_loaded) {
-        file_wait_for_pending();
+        file_pending_wait();
         g_message_block_loaded = block;
-        file_wait_then_request_read(&g_file_cd_state,
+        file_pending_read_request(&g_file_cd_state,
             g_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
             g_message_block_sector_offsets[block + 1] - g_message_block_sector_offsets[block], g_message_block_buffer);
     }
@@ -555,14 +555,14 @@ void message_block_load_if_changed(s32 block) {
  * Each file comes from a seven-entry sector-offset table. An entry is the
  * start sector of one chapter's data relative to the disc LBA added to it,
  * so entry i+1 minus entry i is that chapter's sector count. */
-void sound_novel_load_files(s32 chapter) {
-    file_wait_for_pending();
-    file_wait_then_request_read(&g_file_cd_state,
+void sound_novel_files_load(s32 chapter) {
+    file_pending_wait();
+    file_pending_read_request(&g_file_cd_state,
         g_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
         g_sound_novel_script_sector_offsets[chapter + 1] - g_sound_novel_script_sector_offsets[chapter],
         &g_sound_novel_script);
-    file_wait_for_pending();
-    file_wait_then_request_read(&g_file_cd_state,
+    file_pending_wait();
+    file_pending_read_request(&g_file_cd_state,
         g_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
         g_sound_novel_text_sector_offsets[chapter + 1] - g_sound_novel_text_sector_offsets[chapter],
         g_message_block_buffer);
@@ -573,12 +573,12 @@ void sound_novel_load_files(s32 chapter) {
 /* Queue a one-sector read of BATTLE.BIN's first sector with no destination,
  * which seeks the drive there while the event transition plays. */
 void event_transition_seek_battle_bin(void) {
-    file_wait_then_request_read(&g_file_cd_state, g_file_battle_sector, 1, 0);
+    file_pending_read_request(&g_file_cd_state, g_file_battle_sector, 1, 0);
 }
 
 /* Fill the rectangle with the 256x238 display area of frame
  * buffer 0 (y 0) or 1 (y 0xF0). */
-void world_map_set_display_rect(s32 buffer_index, RECT* rect) {
+void world_map_display_rect_set(s32 buffer_index, RECT* rect) {
     rect->w = 0x100;
     rect->x = 0;
     rect->h = 0xEE;

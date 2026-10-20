@@ -1,5 +1,4 @@
-/* Calendar month and day, the captured world frame, the map tile atlas, tile projection and culling, and clamped
- * scrolling. */
+/* The captured world-map frame and the tile atlas, projection, culling and clamped map scrolling. */
 
 #include "fft/calendar.h"
 #include "fft/gfx.h"
@@ -21,7 +20,7 @@ typedef enum world_map_tile_flag {
 } world_map_tile_flag_e;
 
 /* Provisional: an entry of the projected-tile table (g_world_map_projected_tiles), filled by
- * world_map_init_tile_atlas and projected by the RotTrans pass of world_map_project_tiles. */
+ * world_map_tile_atlas_init and projected by the RotTrans pass of world_map_project_tiles. */
 typedef struct world_map_projected_tile {
     s32 flags;        /* 0x00; world_map_tile_flag_e */
     s32 texture;      /* 0x04; packed texture rectangle: u << 24 | v << 16 | w << 8 | h */
@@ -30,7 +29,7 @@ typedef struct world_map_projected_tile {
 } world_map_projected_tile_t;
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 
-/* g_system_flags as saved by world_map_toggle_captured_frame (system_flags_e). */
+/* g_system_flags as saved by world_map_backdrop_mode_set (system_flags_e). */
 extern u32 g_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[];
 
@@ -44,27 +43,6 @@ static SVECTOR g_world_map_projection_rotation = { 0 };
 #define WORLD_MAP_CORNER_COUNT ((WORLD_MAP_TILE_ROWS + 1) * WORLD_MAP_ROW_STRIDE)
 #define WORLD_MAP_TILE_CLUT_Y  0x1e0
 
-/* 0-based day-of-year index (party_unit_t.birthday_day) to 1-based month
- * and day. */
-void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day) {
-    s32 month = 0;
-    s32 days_in_month;
-
-    while (1) {
-        days_in_month = g_calendar_month_lengths[month];
-        if (day_of_year < days_in_month) {
-            break;
-        }
-        month += 1;
-        day_of_year -= days_in_month;
-        if (month >= 12) {
-            break;
-        }
-    }
-    *output_month = month + 1;
-    *output_day = day_of_year + 1;
-}
-
 /* Freeze the world map behind a full-screen menu, or release it.
  *
  * With `capture` set it draws one whole map frame into both ordering tables,
@@ -74,7 +52,7 @@ void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* o
  * objects, context value, date and marker). With `capture` 0 the two windows
  * are shown again and the saved flags come back with SYSTEM_FLAG_DRAW_MAP
  * set, so the next frame redraws the map. */
-void world_map_toggle_captured_frame(s32 capture) {
+void world_map_backdrop_mode_set(s32 capture) {
     RECT display_rect;
     s32 buffer_index;
 
@@ -100,13 +78,13 @@ void world_map_toggle_captured_frame(s32 capture) {
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     world_map_project_tiles();
-    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_tiles_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_routes_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    world_map_update_marker();
-    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_marker_update();
+    hud_value_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    calendar_date_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    location_label_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     window_dispatch_gs_record_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index],
         g_window_aux_render_object_queue, g_window_aux_render_object_count);
     window_dispatch_gs_record_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index],
@@ -116,12 +94,12 @@ void world_map_toggle_captured_frame(s32 capture) {
     GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    world_map_set_display_rect(g_gfx_active_buffer_index, &display_rect);
+    world_map_display_rect_set(g_gfx_active_buffer_index, &display_rect);
     StoreImage(&display_rect, g_world_map_scratch_buffer);
     DrawSync(0);
     g_picture_background_loaded_set = -1;
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_menus_update(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     {
         s32 map_window_index;
         s32 menu_window_index;
@@ -142,9 +120,9 @@ void world_map_toggle_captured_frame(s32 capture) {
     DrawSync(0);
 }
 
-/* World-map tile atlas setup, run once from world_map_init_subsystems between
- * window_init_record_pools() and
- * world_map_init_menus_and_date(). Because the allocation counters were just
+/* World-map tile atlas setup, run once from subsystems_init between
+ * window_record_pools_init() and
+ * world_map_menu_state_init(). Because the allocation counters were just
  * reset, the two append calls here return records 0 and 1.
  *
  * Layout:
@@ -178,7 +156,7 @@ void world_map_toggle_captured_frame(s32 capture) {
  *  - `y` is initialized before `k` and `i`: the target emits `li t3,-192`
  *    first in the outer preheader.
  */
-void world_map_init_tile_atlas(void) {
+void world_map_tile_atlas_init(void) {
     s32* descriptor;
     point32_t* wpos;
     point32_t* wpos2;
@@ -329,7 +307,7 @@ void world_map_project_tiles(void) {
  * `addiu at,at,<offset>` under 2.21 and lose it under 2.34. Each tile reads
  * its own entry and the next one's .screen.x, so the accesses are written
  * against `index` and `index + 1`. */
-void world_map_draw_tiles(GsOT* ot) {
+void world_map_tiles_draw(GsOT* ot) {
     POLY_FT4 poly;
     CVECTOR color;
     s32 row;
@@ -387,15 +365,15 @@ void world_map_draw_tiles(GsOT* ot) {
 
 /* Scroll `position` by `amount` on both axes within the scroll limits, leaving
  * the part that could not be applied in `amount`. */
-void world_map_apply_clamped_scroll(point32_t* amount, VECTOR* position) {
-    world_map_apply_clamped_horizontal_scroll(&amount->x, &position->vx);
-    world_map_apply_clamped_vertical_scroll(amount, position);
+void world_map_scroll_apply(point32_t* amount, VECTOR* position) {
+    world_map_horizontal_scroll_apply(&amount->x, &position->vx);
+    world_map_vertical_scroll_apply(amount, position);
 }
 
 /* Apply a (negated) scroll amount to a position clamped to [-116, 128] (the
- * same x range world_map_negate_and_clamp clamps to) and leave the unapplied
+ * same x range coordinates_clamp clamps to) and leave the unapplied
  * remainder in *amount. */
-void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
+void world_map_horizontal_scroll_apply(s32* amount, s32* position) {
     s32 delta = -*amount;
     s32 old_position;
     s32 value;
@@ -424,10 +402,10 @@ void world_map_apply_clamped_horizontal_scroll(s32* amount, s32* position) {
     *amount = -*amount;
 }
 
-/* Vertical counterpart of world_map_apply_clamped_horizontal_scroll: the
+/* Vertical counterpart of world_map_horizontal_scroll_apply: the
  * same shape applied to the vertical amount and projection origin,
- * clamped to [-64, 80], the y range world_map_negate_and_clamp uses. */
-void world_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* position) {
+ * clamped to [-64, 80], the y range coordinates_clamp uses. */
+void world_map_vertical_scroll_apply(point32_t* amount, VECTOR* position) {
     s32 delta = -amount->y;
     s32 old_position;
     s32 value;

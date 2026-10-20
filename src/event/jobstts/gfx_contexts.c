@@ -1,14 +1,10 @@
-/* Page scroll input, context swaps, and primitive buffer and context init. */
+/* Swap JOBSTTS's graphics contexts and partition and initialize their
+ * primitive pools for the status screen frame. */
 
 #include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_script.h"
 #include "fft/status_screen.h"
-#include "psx/libetc.h"
 #include "psx/libgpu.h"
-#include "psx/pad.h"
 #include "psx/types.h"
 
 extern status_screen_gfx_context_t* g_status_screen_gfx_context_base;
@@ -16,40 +12,6 @@ extern s16 g_status_screen_gfx_line_f2_count;
 extern s16 g_status_screen_gfx_poly_f4_count;
 extern s16 g_status_screen_gfx_poly_g4_count;
 extern s16 g_status_screen_gfx_tile_count;
-
-/*
- * Returns a repeated page-scroll direction while Square and Up/Down are held.
- *
- * The first held frame is accepted immediately. Further input is suppressed
- * until the scaled initial delay, then accepted at the scaled repeat period.
- */
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
-    menu_vertical_scroll_direction_e page_direction = MENU_VERTICAL_SCROLL_NONE;
-    s32 input = PadRead(0);
-    s32 initial_delay;
-    s32 repeat_period;
-    u16 held_frames;
-
-    if ((input & PSX_PAD_UP) && (input & PSX_PAD_SQUARE)) {
-        page_direction = MENU_VERTICAL_SCROLL_UP;
-        g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
-    } else if ((input & PSX_PAD_DOWN) && (input & PSX_PAD_SQUARE)) {
-        page_direction = MENU_VERTICAL_SCROLL_DOWN;
-        g_input_page_scroll_hold_frames = g_input_page_scroll_hold_frames + 1;
-    } else {
-        g_input_page_scroll_hold_frames = 0;
-    }
-    /* One variable holds the input and then the speed, as in the target. */
-    input = g_menu_event_speed;
-    initial_delay = g_input_repeat_initial_delay / input;
-    repeat_period = g_input_secondary_repeat_period / input;
-    held_frames = g_input_page_scroll_hold_frames;
-    if ((held_frames >= initial_delay && (held_frames % repeat_period) != 0)
-        || (held_frames >= 2 && held_frames < initial_delay)) {
-        page_direction = MENU_VERTICAL_SCROLL_NONE;
-    }
-    return page_direction;
-}
 
 /* Reset every primitive count, record the draw environment's y, switch to the
  * other packet buffer and clear its ordering table from entry `first_otag`

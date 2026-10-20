@@ -51,7 +51,7 @@ extern s16 g_at_list_row_text_colors[];
 /* Give other event work one turn before terminating this thread. */
 void thread_stop_after_yield(void) {
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Run the menus of a crystal or treasure pickup (g_crystal_pickup_context) and leave the
@@ -127,25 +127,25 @@ void crystal_start_pickup_threads(void) {
         message_id = 0x183c;
         g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE].text_id = message_id;
         thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-        thread_set_parameters(
+        thread_parameters_set(
             g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE], 0, 0);
-        thread_wait_until_inactive(g_thread_current_id - 1);
-        thread_wait_frames(2);
+        thread_inactive_wait(g_thread_current_id - 1);
+        thread_frames_wait(2);
         g_crystal_pickup_action = 0;
         g_menu_thread_menu_data = previous_menu_descriptor;
         g_command_pending_selection[0] = 0;
         /* Thread exit does not return; a source return changes epilogue sharing. */
-        thread_exit_current();
+        thread_current_exit();
     }
 
     g_crystal_pickup_item = 0;
     if (context->result == CRYSTAL_PICKUP_TREASURE) {
         /* At the 99 limit, message 0x101b also shows a quarter of the item's price. */
-        if (item_get_total_quantity(context->treasure_item, 1) == 0x63) {
+        if (item_total_quantity_get(context->treasure_item, 1) == 0x63) {
             g_text_substitution_values[0] = context->treasure_item;
             g_text_substitution_values[1] = context->treasure_item;
             message_id = 0x101b;
-            g_text_substitution_values[2] = item_get_data(context->treasure_item)->price >> 2;
+            g_text_substitution_values[2] = item_data_get(context->treasure_item)->price >> 2;
             g_crystal_pickup_item = context->treasure_item;
         } else {
             message_id = 0x101a;
@@ -154,26 +154,26 @@ void crystal_start_pickup_threads(void) {
         }
         g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE].text_id = message_id;
         thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-        thread_set_parameters(
+        thread_parameters_set(
             g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_MESSAGE], 0, 0);
-        thread_wait_until_inactive(g_thread_current_id - 1);
-        thread_wait_frames(2);
+        thread_inactive_wait(g_thread_current_id - 1);
+        thread_frames_wait(2);
         g_crystal_pickup_action = 4;
         g_menu_thread_menu_data = previous_menu_descriptor;
         g_command_pending_selection[0] = 0;
-        thread_exit_current();
+        thread_current_exit();
     }
 
     /* Close the tile, summary and two unit stats panels before the crystal menus. */
 
-    thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
-    thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
-    thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
-    thread_set_parameters(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
-    thread_wait_until_inactive(THREAD_SLOT_TILE_INFO_PANEL);
-    thread_wait_until_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);
-    thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
-    thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
+    thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
+    thread_parameters_set(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
+    thread_parameters_set(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
+    thread_parameters_set(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
+    thread_inactive_wait(THREAD_SLOT_TILE_INFO_PANEL);
+    thread_inactive_wait(THREAD_SLOT_UNIT_SUMMARY_PANEL);
+    thread_inactive_wait(THREAD_SLOT_RIGHT_UNIT_STATS);
+    thread_inactive_wait(THREAD_SLOT_HOVERED_UNIT_STATS);
 
     /* LEARNED shows the learned-ability list, CRYSTAL the confirm menu, and both together first
      * offer the choice between them. */
@@ -181,9 +181,9 @@ void crystal_start_pickup_threads(void) {
         if (context->result == (CRYSTAL_PICKUP_CRYSTAL | CRYSTAL_PICKUP_LEARNED)) {
             g_crystal_pickup_choice_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_run_icon_selection_loop);
-            thread_set_parameters(
+            thread_parameters_set(
                 g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_CHOICE], 0, 0);
-            thread_wait_until_inactive(g_thread_current_id - 1);
+            thread_inactive_wait(g_thread_current_id - 1);
         }
 
         g_crystal_pickup_menu_result = 0xff;
@@ -191,9 +191,9 @@ void crystal_start_pickup_threads(void) {
                 && g_crystal_pickup_choice_result == 0)
             || context->result == CRYSTAL_PICKUP_LEARNED) {
             thread_start(g_thread_current_id - 2, at_list_run);
-            thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
+            thread_parameters_set(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
             thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
-            thread_set_parameters(
+            thread_parameters_set(
                 THREAD_BORROWED_SLOT_AT_LIST_MENU, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_AT_LIST], 0, 0);
             for (;;) {
                 thread_yield();
@@ -207,12 +207,12 @@ void crystal_start_pickup_threads(void) {
                 }
                 g_crystal_pickup_controller_input = script_get_controller_input_pointer(0);
                 if ((*g_crystal_pickup_controller_input & PSX_PAD_SELECT) != 0) {
-                    help_start_menu_thread();
+                    help_menu_thread_start();
                 }
             }
 
-            thread_wait_until_inactive(g_thread_current_id - 1);
-            thread_set_parameters(THREAD_BORROWED_SLOT_AT_LIST_MENU, 0, 0, 1);
+            thread_inactive_wait(g_thread_current_id - 1);
+            thread_parameters_set(THREAD_BORROWED_SLOT_AT_LIST_MENU, 0, 0, 1);
             thread_suspend(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD);
             if (g_crystal_pickup_menu_result == 0) {
                 g_crystal_pickup_action = 1;
@@ -231,9 +231,9 @@ void crystal_start_pickup_threads(void) {
             || context->result == CRYSTAL_PICKUP_CRYSTAL) {
             g_crystal_pickup_menu_result = 0xff;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_set_parameters(
+            thread_parameters_set(
                 g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_CRYSTAL_PICKUP_CONFIRM], 0, 0);
-            thread_wait_until_inactive(g_thread_current_id - 1);
+            thread_inactive_wait(g_thread_current_id - 1);
             if (g_crystal_pickup_menu_result == 0) {
                 g_crystal_pickup_action = 2;
                 break;
@@ -247,10 +247,10 @@ void crystal_start_pickup_threads(void) {
         break;
     }
 
-    thread_wait_frames(0x14);
+    thread_frames_wait(0x14);
     g_menu_thread_menu_data = previous_menu_descriptor;
     g_command_pending_selection[0] = 0;
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /*
@@ -295,7 +295,7 @@ static void at_list_init(menu_entry_t* menu) {
         }
 
         g_at_list_indices[index] = index + 1;
-        unit = unit_get_stats(g_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK);
+        unit = unit_stats_get(g_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK);
         if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbe;
@@ -410,10 +410,10 @@ void at_list_select_unit_thread(void) {
     g_at_list_selection_finished = 0;
     g_menu_transition_state = 0;
     unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
-    thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
-    thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
-    thread_wait_until_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);
-    thread_wait_until_inactive(THREAD_SLOT_TILE_INFO_PANEL);
+    thread_inactive_wait(THREAD_SLOT_HOVERED_UNIT_STATS);
+    thread_inactive_wait(THREAD_SLOT_RIGHT_UNIT_STATS);
+    thread_inactive_wait(THREAD_SLOT_UNIT_SUMMARY_PANEL);
+    thread_inactive_wait(THREAD_SLOT_TILE_INFO_PANEL);
     g_text_section_pointers[TEXT_SECTION_AT_LIST] = g_at_list_text;
     thread_resume(g_thread_current_id + 1);
     thread_resume(g_thread_current_id + 2);
@@ -421,7 +421,7 @@ void at_list_select_unit_thread(void) {
     thread_resume(g_thread_current_id + 4);
     g_menu_modal_open = 0;
     g_menu_overlay_state = 0;
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Runs the g_at_list_state menu on the thread two below the current one and
@@ -435,11 +435,11 @@ void at_list_start_thread(void) {
     g_at_list_state.context = &g_at_list_entry_table;
     at_list_init(list);
     thread_start(g_thread_current_id - 2, at_list_run);
-    thread_set_parameters(g_thread_current_id - 2, (s32)list, 0, 0);
+    thread_parameters_set(g_thread_current_id - 2, (s32)list, 0, 0);
     do {
         thread_yield();
     } while (
         thread_is_running_asm(g_thread_current_id - 2) != 0 || thread_is_running_asm(g_thread_current_id - 3) != 0);
     g_menu_thread_menu_data = saved;
-    thread_exit_current();
+    thread_current_exit();
 }

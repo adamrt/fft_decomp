@@ -153,7 +153,7 @@ void menu_free_memory(void* buffer_pointer) {
             page_count_cursor += sizeof(menu_allocation_t) / sizeof(*page_count_cursor);
             allocation++;
             if ((s32)page_count_cursor >= (s32)page_count_end) {
-                thread_exit_current();
+                thread_current_exit();
                 return;
             }
         }

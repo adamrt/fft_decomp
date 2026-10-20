@@ -81,7 +81,7 @@ extern s32 g_state_map_init_step;
 
 /* Nonzero while the action's effect is pending: 1 while its file loads, 2 while it plays, with
  * the knockback targets' step phases ORed in. SEQ ops 0xd3 and 0xd6 and
- * script_play_effect_and_wait wait on it. */
+ * script_effect_wait wait on it. */
 extern s32 g_state_animation_continue_check;
 
 /* Run BATTLE's deployment and game-state loop until control returns to MAIN. */
@@ -208,6 +208,6 @@ void state_enter_close_battle(s32 transition_step, system_game_flow_e close_flow
 /* event outcomes and scenarios */
 
 s32 event_check_battle_outcome(void);
-s32 event_try_enter_scenario(unit_t* unit);
+s32 event_try_enter_scenario(unit_runtime_t* unit);
 
 #endif

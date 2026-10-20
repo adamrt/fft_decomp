@@ -24,10 +24,10 @@ extern title_result_e g_title_result;
 title_result_e open_title_entrypoint(s32 skip_movie);
 
 /* Load OPEN and return the title sequence's route to the resident game loop. */
-title_result_e overlay_exec_open_title(s32 skip_movie);
-void title_init_sequence(s32 skip_movie);
-void title_start_logo_movie_or_menu(s32 use_alternate);
-void title_load_menu_graphics(void);
+title_result_e overlay_title_run(s32 skip_movie);
+void title_sequence_init(s32 skip_movie);
+void title_sequence_start(s32 use_alternate);
+void title_graphics_load(void);
 s32 title_check_card_slots(void);
 
 /* title menu */
@@ -50,7 +50,7 @@ typedef enum title_state {
 } title_state_e;
 
 /* Title-menu controller state (handler 2), pushed into the next controller
- * record by title_push_menu and run by title_update_menu. */
+ * record by title_menu_push and run by main_menu_update. */
 typedef struct title_menu_state {
     /* 0x00 */ s32 render_indices[5]; /* logo, then the four menu items */
     /* 0x14 */ s32 idle_timer;
@@ -89,9 +89,7 @@ typedef struct title_card_warning_state {
 
 extern s32 g_title_demo_movie_index;
 
-void title_push_menu(s32 argument);
-void title_update_menu(union controller_record* record);
-void title_update_sound_type_menu(union controller_record* record);
+void title_menu_push(s32 argument);
 void title_select_new_game(void);
 void title_update_card_warning(union controller_record* record);
 
@@ -104,8 +102,7 @@ typedef struct new_game_state {
     /* 0x20 */ s32 name_text_id;
 } new_game_state_t;
 
-void new_game_update(union controller_record* record);
-void new_game_init_party(s32 party_mode, s32 world_load_mode);
+void new_game_party_init(s32 party_mode, s32 world_load_mode);
 
 /* birthday */
 /* Birthday date-selection controller state (handler 5), shared with its redraw routine. */
@@ -134,11 +131,8 @@ typedef struct birthday_confirmation_state {
 } birthday_confirmation_state_t;
 typedef char birthday_confirmation_state_size_must_be_100[(sizeof(birthday_confirmation_state_t) == 100) ? 1 : -1];
 
-void birthday_update_date_menu(union controller_record* record);
-void birthday_update_confirmation(union controller_record* record);
-
 /* music test */
-/* Step of the music test controller (music_test_update). */
+/* Step of the music test controller (music_test_menu_update). */
 typedef enum music_test_step {
     MUSIC_TEST_STEP_IDLE = 0,
     MUSIC_TEST_STEP_CLOSE = 1,       /* waits for the list thread, then fades the screen */
@@ -147,11 +141,11 @@ typedef enum music_test_step {
     MUSIC_TEST_STEP_OPEN = 4         /* waits for the fade, then starts the list thread */
 } music_test_step_e;
 
-/* Music test controller state (handler 7), pushed by music_test_open. */
+/* Music test controller state (handler 7), pushed by music_test_menu_open. */
 typedef struct music_test_state {
     /* 0x00 */ s32 music_id;     /* scenario music selected for playback */
     /* 0x04 */ s32 delay;        /* frames before loading music_id */
-    /* 0x08 */ s32 music_slot;   /* slot from music_load_into_free_slot */
+    /* 0x08 */ s32 music_slot;   /* slot from music_free_slot_load */
     /* 0x0c */ s32 step;         /* music_test_step_e */
     /* 0x10 */ s32 blink_frames; /* counts ten frames after a selection, while Up and Down stay blocked */
 } music_test_state_t;
@@ -161,9 +155,10 @@ enum { MUSIC_TEST_THREAD_SLOT_LIST = 12 };
 
 /* Entry of g_gfx_otags the WORLD menu frame draws into while
  * SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set. */
-extern s32 g_music_test_world_menu_otag_index;
+extern s32 g_music_test_menu_otag_index;
 
-void music_test_open(void);
-void music_test_update(union controller_record* record);
+void music_test_menu_open(void);
+void music_test_menu_update(union controller_record* record);
+void music_test_menu_frame_run(void);
 
 #endif

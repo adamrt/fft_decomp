@@ -9,7 +9,7 @@
 
 /* Return the tutorial's scripted 16-bit button mask while a tutorial runs, pad 0
  * otherwise. The soft-reset combination resets the game. */
-s32 screen_input_read(s32 unused_0) {
+s32 screen_buttons_read(s32 unused_0) {
     u32 input;
 
     if (g_tutorial_id != 0) {
@@ -19,7 +19,7 @@ s32 screen_input_read(s32 unused_0) {
     }
     if (input == INPUT_RESET_BUTTONS) {
         save_close_stub();
-        screen_reset_game();
+        screen_game_reset();
     }
     return input;
 }

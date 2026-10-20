@@ -7,7 +7,7 @@
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 
-/* Countdown maintained by screen_input_update_lockout. Volatile:
+/* Countdown maintained by screen_input_lockout_update. Volatile:
  * that routine reloads it after the zero test and again before the running
  * check instead of reusing the first load. */
 extern volatile u8 g_screen_input_lockout_timer;
@@ -15,7 +15,7 @@ extern volatile u8 g_screen_input_lockout_timer;
 /* Count g_screen_input_lockout_timer down while thread 7 (the comparison status panel) is idle
  * and no status panel slides, and reset it to 10 otherwise. While it is nonzero, the menu input
  * masks are cleared (menu_input_clear_state). */
-void screen_input_update_lockout(void) {
+void screen_input_lockout_update(void) {
     s32 value;
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
@@ -35,8 +35,8 @@ void screen_input_update_lockout(void) {
     }
 }
 
-/* Countdown maintained by screen_input_update_lockout; while it is nonzero the formation
+/* Countdown maintained by screen_input_lockout_update; while it is nonzero the formation
  * screen's per-frame handler returns before reading controller input. */
-s32 screen_input_get_lockout(void) {
+s32 screen_input_lockout_get(void) {
     return g_screen_input_lockout_timer;
 }

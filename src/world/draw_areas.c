@@ -27,7 +27,7 @@ extern u16 g_screen_active_clut_back;
  * 0x60/0x60/0x80) is what the shop and formation screens show while input is
  * locked to another window.
  */
-void screen_set_palette_mode(s32 mode) {
+void screen_palette_mode_set(s32 mode) {
     u16 clut;
 
     g_screen_use_alternate_palette = mode;
@@ -62,7 +62,7 @@ void screen_set_palette_mode(s32 mode) {
 menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked != 0) {
         g_screen_temporary_draw_area.y = 0;
-        screen_add_draw_area(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
+        screen_draw_area_add(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
         g_gfx_otag_index_locked = 0;
     }
     return menu_next_instruction(instruction);
@@ -79,7 +79,7 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
         rect.y = instruction->draw_area.y;
         rect.w = instruction->draw_area.width;
         rect.h = instruction->draw_area.height;
-        screen_add_draw_area(&rect, g_menu_gfx_otag_index - 1);
+        screen_draw_area_add(&rect, g_menu_gfx_otag_index - 1);
     }
     return menu_next_instruction(instruction);
 }
@@ -90,7 +90,7 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
 menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         g_screen_temporary_draw_area.y = 0;
-        screen_add_draw_area(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
+        screen_draw_area_add(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
     }
     return menu_next_instruction(instruction);
 }

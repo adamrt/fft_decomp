@@ -18,25 +18,25 @@ typedef char calendar_date_size_must_be_2[sizeof(calendar_date_t) == 2 ? 1 : -1]
 /* days */
 extern u8 g_calendar_month_lengths[12];
 
-s32 calendar_calculate_day_of_year(s32 month, s32 day);
-void calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day);
-void calendar_advance_day(void);
-void calendar_advance_days(s32 days);
-void calendar_advance_one_year(void);
+s32 calendar_day_of_year_calculate(s32 month, s32 day);
+void calendar_month_and_day_calculate(s32 day_of_year, s32* output_month, s32* output_day);
+void calendar_day_advance(void);
+void calendar_days_advance(s32 days);
+void calendar_year_advance(void);
 
 /* zodiac signs */
-void calendar_convert_date_to_zodiac(s32* month, s32* day);
+void calendar_date_to_zodiac_convert(s32* month, s32* day);
 
 /* date bitmaps */
 /* Dates kept as nine-bit records in a bit array (day in bits 0-4, month in bits 5-8), as the save's acquisition and
  * discovery date bitmaps hold them. */
-void calendar_write_date(u32* bits, s32 record, calendar_date_t* source);
-void calendar_read_date(u32* bits, s32 record, calendar_date_t* dest);
+void calendar_date_write(u32* bits, s32 record, calendar_date_t* source);
+void calendar_date_read(u32* bits, s32 record, calendar_date_t* dest);
 
 /* date display */
-/* Screen position of the date calendar_draw_date draws. */
+/* Screen position of the date calendar_date_draw draws. */
 extern point32_t g_calendar_display_position;
 
-void calendar_draw_date(GsOT* ot);
+void calendar_date_draw(GsOT* ot);
 
 #endif

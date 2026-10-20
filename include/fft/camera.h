@@ -8,7 +8,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-struct unit;
+struct unit_runtime;
 
 /* state and projection */
 enum { CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178 };
@@ -19,10 +19,10 @@ extern MATRIX g_camera_matrix;
  * .vx is the camera pitch and .vy its yaw. */
 extern SVECTOR g_camera_render_state;
 
-void camera_update_matrices(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom);
+void camera_matrices_update(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom);
 s32 camera_is_active(void);
 void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
-void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation);
+void camera_cursor_focus_set(const SVECTOR* coords, const SVECTOR* rotation);
 void camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void camera_get_tile_depth_point_unbiased(const SVECTOR* world, SVECTOR* destination);
 void camera_get_tile_depth_point_biased(const SVECTOR* world, SVECTOR* destination);
@@ -30,7 +30,7 @@ void camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output)
 void camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output);
 
 /* input */
-/* camera_get_input_direction sources: which button state it reads. */
+/* cursor_input_direction_get sources: which button state it reads. */
 typedef enum camera_input_source {
     CAMERA_INPUT_HELD = 0,
     CAMERA_INPUT_PRESSED = 1, /* newly pressed, repeating at the cursor repeat speed while held */
@@ -42,7 +42,7 @@ extern s32 g_camera_pan_enabled;
 
 void camera_pan_disable(void);
 void camera_pan_enable(void);
-s32 camera_get_input_direction(s32 source);
+s32 cursor_input_direction_get(s32 source);
 void camera_pan_update(void);
 void camera_rotation_handle_input(void);
 void camera_tilt_handle_input(void);
@@ -58,8 +58,8 @@ void camera_real_coords_set(const VECTOR* coords);
 void camera_real_coords_save(void);
 void camera_real_coords_restore(void);
 void camera_real_coords_update_animation(void);
-void camera_update_cursor_tile_vector(void);
-void camera_update_vector_from_game_state(void);
+void camera_cursor_focus_update(void);
+void camera_scene_focus_update(void);
 
 /* screen offset */
 extern VECTOR g_camera_screen_offset;
@@ -90,7 +90,7 @@ void camera_rotation_save(void);
 void camera_rotation_restore(void);
 void camera_rotation_update(void);
 void camera_rotation_update_animation(void);
-void camera_rotate_when_unit_tile_not_visible(const struct unit* unit);
+void camera_unit_visibility_rotate(const struct unit_runtime* unit);
 
 /* tilt */
 /* g_camera_tilt_action and g_camera_zoom_action: the move in progress towards
@@ -131,13 +131,13 @@ extern s32 g_camera_wrap_yaw_pending;
 extern s32 g_camera_speed_curve;
 
 void camera_thread(void);
-void camera_wait_until_idle(void);
-void camera_init_tilt_and_zoom(void);
-void camera_clear_zoom_variable_low_bit(void);
-void camera_normalize_yaw_angle(void);
-void camera_store_yaw_band(s32 value);
-s32 camera_wrap_yaw_angle(void);
-void camera_store_state_to_script_variables(void);
+void camera_idle_wait(void);
+void camera_tilt_zoom_init(void);
+void camera_zoom_flag_clear(void);
+void camera_yaw_normalize(void);
+void camera_yaw_band_store(s32 value);
+s32 camera_yaw_wrap(void);
+void camera_state_to_script_variables_store(void);
 
 /* fusion tracks */
 /* A camera operand or key value that keeps the component's current value. */

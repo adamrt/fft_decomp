@@ -22,12 +22,12 @@ static s16 g_window_panel_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACT
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE };
 
-static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output);
-static void text_window_render_page(text_window_t* state, s32 row);
-static void text_window_update_page_prompt(text_window_t* state);
-static void text_window_update_scroll_indicators(text_window_t* state);
-static void window_init_animated_record(s32 index, s32 priority, s32 sequence);
-static void window_number_panel_noop(void);
+static void image_vram_position_get(s32 mode, RECT bounds, point32_t* output);
+static void page_render(text_window_t* state, s32 row);
+static void page_prompt_update(text_window_t* state);
+static void scroll_indicators_update(text_window_t* state);
+static void animated_record_init(s32 index, s32 priority, s32 sequence);
+static void number_confirm_noop(void);
 
 /* Set up render record `index` for a window image of `bounds`: unhide it, place it at bounds.x -
  * 0x80, bounds.y - 0x78, give it the window CLUT at (0, 0x1E1) and the texture page of the mode's
@@ -48,12 +48,12 @@ void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mod
     clut->y = 0x1E1;
     clut->x = 0;
     g_window_gs_image_records[index].bounds = bounds;
-    window_get_image_vram_position(coordinate_mode, bounds, &transformed);
+    image_vram_position_get(coordinate_mode, bounds, &transformed);
     g_window_gs_image_records[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
     color = &g_window_gs_image_records[index].color;
     color->b = color->g = color->r = 0x80;
     g_window_gs_image_records[index].anim_counter = 0;
-    screen_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
+    screen_window_frame_image_build(bounds.w, bounds.h, (u16*)image);
 }
 
 /* The VRAM position of a window image at `bounds` in coordinate mode `mode`.
@@ -63,7 +63,7 @@ void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mod
  * The callee receives the adjacent position and dimensions registers as one
  * eight-byte aggregate. Dimensions are preserved by the ABI but unused here.
  */
-static void window_get_image_vram_position(s32 mode, RECT bounds, point32_t* output) {
+static void image_vram_position_get(s32 mode, RECT bounds, point32_t* output) {
     switch (mode) {
     case 0:
     case 1:
@@ -83,7 +83,7 @@ void window_load_render_record_image(s32 index, u32* image) {
     point32_t transformed;
     RECT rect;
 
-    window_get_image_vram_position(
+    image_vram_position_get(
         g_window_gs_image_records[index].coordinate_mode, g_window_gs_image_records[index].bounds, &transformed);
     rect.x = transformed.x;
     rect.y = transformed.y;
@@ -105,18 +105,18 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 }
 
 /* Padded image size using proportional pixel widths. No retail caller. */
-void window_measure_text_image(s32 text_id, size32_t* output) {
+void window_text_image_measure(s32 text_id, size32_t* output) {
     s16 measured_width;
     s16 rows;
 
-    text_measure_pixels(&measured_width, &rows, text_find_entry(text_id));
+    text_pixels_measure(&measured_width, &rows, text_entry_find(text_id));
     output->width = (measured_width + 24) & 0xfffc;
     output->height = rows * 16 + 16;
 }
 
 /* Build and upload a window image, draw the entry at (8, 8) unless its id is zero,
  * and start the record's pop-in animation. */
-void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image) {
+void window_text_record_init(s32 record_index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image) {
     /* The pair is stack-resident because it is passed by value. */
     point32_t text_origin;
 
@@ -152,17 +152,17 @@ void window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 
 }
 
 /* Initialize panel state and start its WORLD rendering thread. */
-void window_start_panel_thread(s32 thread_id, s32 extent, window_panel_layout_t* layout, point32_t* origin) {
-    window_init_panel_state(thread_id, extent, layout, origin);
+void window_panel_thread_start(s32 thread_id, s32 extent, window_panel_layout_t* layout, point32_t* origin) {
+    window_panel_state_init(thread_id, extent, layout, origin);
     thread_start(thread_id, screen_text_list_thread);
-    thread_set_parameters(thread_id, &g_window_panel_render_state, 0, 0);
+    thread_parameters_set(thread_id, &g_window_panel_render_state, 0, 0);
 }
 
 /* Initialize the panel renderer's shared geometry and data pointers.
  *
  * Width is rounded for its tiled image; stored origins are screen-relative.
  * Layout and origin values are loaded as full 32-bit values before narrowing to s16. */
-void window_init_panel_state(s32 unused, s32 extent, window_panel_layout_t* layout, point32_t* origin) {
+void window_panel_state_init(s32 unused, s32 extent, window_panel_layout_t* layout, point32_t* origin) {
     s32 width = layout->text_width;
     s32 rows = layout->visible_rows;
     s32 text_width;
@@ -200,7 +200,7 @@ void window_init_panel_state(s32 unused, s32 extent, window_panel_layout_t* layo
 }
 
 /* Save the active menu position in a persistent cursor slot. */
-void menu_stack_store_cursor(s32 index) {
+void menu_stack_cursor_store(s32 index) {
     g_menu_stack_cursor_states[index].selected_index = g_window_panel_render_state.selected_index;
     g_menu_stack_cursor_states[index].scroll_offset = g_window_panel_render_state.select_text_table;
 }
@@ -229,7 +229,7 @@ void menu_stack_clamp_cursor(s32 index, s32 count, s32 visible) {
 }
 
 /* Reset persistent cursor slot `index` to the first row. */
-void menu_stack_clear_cursor(s32 index) {
+void menu_stack_cursor_clear(s32 index) {
     g_menu_stack_cursor_states[index].scroll_offset = 0;
     g_menu_stack_cursor_states[index].selected_index = 0;
 }
@@ -239,7 +239,7 @@ void menu_stack_clear_cursor(s32 index) {
  * The low and high halfwords supply the lower and upper bounds for one editable value.
  * The bounds select a one- through four-digit panel width before the optional label is measured.
  * `width` holds the digit count first and the panel's pixel width after. */
-void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text_id, point32_t* origin) {
+void window_number_panel_thread_start(s32 thread_id, u32 packed_bounds, s32 text_id, point32_t* origin) {
     s16 text_width;
     s16 text_height;
     s32 width;
@@ -253,7 +253,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
     g_window_panel_number_state.bounds.max = max;
     g_window_panel_number_state._unknown_04[0] = -1;
     g_window_panel_number_state._unknown_04[1] = -1;
-    g_window_panel_number_state.on_confirm = window_number_panel_noop;
+    g_window_panel_number_state.on_confirm = number_confirm_noop;
     g_menu_stack_entry_values[0] = g_menu_stack_entry_values[1] = MENU_ROW_ACTION_NONE;
     if (min < 10 && max < 10) {
         width = 1;
@@ -269,7 +269,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
 
     text_width = 0;
     if (text_id != 0) {
-        text_measure_pixels(&text_width, &text_height, text_find_entry(text_id));
+        text_pixels_measure(&text_width, &text_height, text_entry_find(text_id));
     }
 
     label_width = text_width + 0x18;
@@ -300,11 +300,11 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
     g_window_panel_render_state.selected_index = 0;
     g_window_panel_render_state.select_text_table = 0;
     thread_start(thread_id, screen_labeled_number_entry_thread);
-    thread_set_parameters(thread_id, (s32)&g_window_panel_render_state, 0, 0);
+    thread_parameters_set(thread_id, (s32)&g_window_panel_render_state, 0, 0);
 }
 
 /* The on_confirm callback of the number panel's value range: nothing to do. */
-static void window_number_panel_noop(void) {
+static void number_confirm_noop(void) {
 }
 
 /* Open the scrollable text window for state->text_id: add the page-prompt, scroll-arrow
@@ -324,16 +324,16 @@ void text_window_open(text_window_t* state) {
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     state->page_prompt_record = index;
-    window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_PAGE_PROMPT);
+    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_PAGE_PROMPT);
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     state->up_arrow_record = index;
-    window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_UP);
+    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_UP);
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     state->down_arrow_record = index;
-    window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_DOWN);
+    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_DOWN);
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
     state->scroll_thumb_record = index;
-    window_init_animated_record(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_THUMB);
+    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_THUMB);
     render_index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
     state->render_record_index = render_index;
     g_window_gs_image_records[render_index].flags |= DISPLAY_OBJECT_POP_IN;
@@ -360,7 +360,7 @@ void text_window_open(text_window_t* state) {
     g_window_records[state->scroll_thumb_record].position.x = window_x;
     g_window_records[state->scroll_thumb_record].position.y = lower_y;
 
-    text_measure(&text_metrics[0], &text_metrics[1], text_find_entry(state->text_id));
+    text_measure(&text_metrics[0], &text_metrics[1], text_entry_find(state->text_id));
     rows = text_metrics[1];
     last_page_row = (rows - 1) / state->rows_per_page * state->rows_per_page;
     state->page_start_row = 0;
@@ -369,13 +369,13 @@ void text_window_open(text_window_t* state) {
     state->measured_rows = rows;
     state->measured_columns = columns;
     state->last_page_row = last_page_row;
-    text_window_render_page(state, state->page_start_row);
+    page_render(state, state->page_start_row);
 }
 
 /* Initializes window record `index` hidden and animating even while the map is
  * frozen, with its animation sequence and OT priority, and restarts the
  * animation. */
-static void window_init_animated_record(s32 index, s32 priority, s32 sequence) {
+static void animated_record_init(s32 index, s32 priority, s32 sequence) {
     g_window_records[index].sequence = sequence;
     g_window_records[index].priority = priority;
     g_window_records[index].anim_counter = 0;
@@ -398,11 +398,11 @@ static void window_init_animated_record(s32 index, s32 priority, s32 sequence) {
  * so only the other paths load $a0 (in their jump delay slots), as in the
  * target.
  */
-s32 text_window_step(text_window_t* state) {
+s32 text_window_update(text_window_t* state) {
     if (state->scroll_state == TEXT_WINDOW_SCROLL_RETURN) {
         if (state->scroll_row == state->page_start_row) {
             state->scroll_state = TEXT_WINDOW_SCROLL_PAGING;
-            text_window_update_page_prompt(state);
+            page_prompt_update(state);
             return 1;
         }
         state->scroll_timer += 1;
@@ -411,7 +411,7 @@ s32 text_window_step(text_window_t* state) {
         }
         state->scroll_timer = 0;
         state->scroll_row += 1;
-        text_window_render_page(state, state->scroll_row);
+        page_render(state, state->scroll_row);
         return 1;
     }
 
@@ -424,9 +424,9 @@ s32 text_window_step(text_window_t* state) {
             g_window_records[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
-        if ((world_map_update_input_repeat(PSX_PAD_UP) != 0) && (state->scroll_row != 0)) {
+        if ((world_map_input_repeat_update(PSX_PAD_UP) != 0) && (state->scroll_row != 0)) {
             state->scroll_row--;
-        } else if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
+        } else if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
             if (state->page_start_row > state->scroll_row) {
                 state->scroll_row++;
             } else {
@@ -436,8 +436,8 @@ s32 text_window_step(text_window_t* state) {
             return 1;
         }
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-        text_window_render_page(state, state->scroll_row);
-        text_window_update_scroll_indicators(state);
+        page_render(state, state->scroll_row);
+        scroll_indicators_update(state);
         return 1;
     }
 
@@ -454,15 +454,15 @@ s32 text_window_step(text_window_t* state) {
                 return 0;
             }
             sound_play_effect(SOUND_SFX_TEXT_PAGE);
-            text_window_render_page(state, state->page_start_row);
+            page_render(state, state->page_start_row);
         } else if (g_world_map_input_new_button_presses & PSX_PAD_SQUARE) {
             state->scroll_state = TEXT_WINDOW_SCROLL_MANUAL;
             state->scroll_row = state->page_start_row;
-            text_window_update_scroll_indicators(state);
+            scroll_indicators_update(state);
             g_window_records[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
-        text_window_update_page_prompt(state);
+        page_prompt_update(state);
         return 1;
     }
 
@@ -474,7 +474,7 @@ s32 text_window_step(text_window_t* state) {
  *
  * The final base copy is one point32 block copy (both loads precede both
  * stores); two field assignments reorder it. */
-static void text_window_render_page(text_window_t* state, s32 row) {
+static void page_render(text_window_t* state, s32 row) {
     RECT bounds;
     point32_t point;
     s32 i;
@@ -521,7 +521,7 @@ static void text_window_render_page(text_window_t* state, s32 row) {
 }
 
 /* Show the text-page prompt while more pages remain. */
-static void text_window_update_page_prompt(text_window_t* state) {
+static void page_prompt_update(text_window_t* state) {
     if (state->page_start_row < state->last_page_row) {
         g_window_records[state->page_prompt_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
@@ -533,7 +533,7 @@ static void text_window_update_page_prompt(text_window_t* state) {
  * Position the scroll-thumb window between the up and down arrow windows and
  * hide the arrows that are not usable at the current scroll position.
  */
-static void text_window_update_scroll_indicators(text_window_t* state) {
+static void scroll_indicators_update(text_window_t* state) {
     s32 top;
     s32 bottom;
 

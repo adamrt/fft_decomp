@@ -8,7 +8,7 @@
 #include "fft/move.h"
 #include "psx/types.h"
 
-struct unit;
+struct unit_runtime;
 
 /* Travel direction of the step in progress, as move_step_get_direction derives it from the
  * unit's tile and its destination tile. */
@@ -19,7 +19,7 @@ typedef enum move_direction {
     MOVE_DIRECTION_WEST = 3   /* -x */
 } move_direction_e;
 
-/* unit_t.step_phase: the stage of the movement step in progress. Every stage has one
+/* unit_runtime_t.step_phase: the stage of the movement step in progress. Every stage has one
  * value per move_direction_e direction, in that order. The handlers dispatch on the stage and
  * take the direction from the unit's coordinates, and the stores that change stage in the middle of
  * a step write the NORTH value whatever the direction. */
@@ -101,37 +101,39 @@ extern u8 g_move_step_float_to_center_phases[];
 extern battle_map_tile_t* g_move_step_current_tile;
 extern battle_map_tile_t* g_move_step_destination_tile;
 
-void move_step_update_all_units(void);
-void move_step_update(struct unit* unit);
-move_direction_e move_step_get_direction(const struct unit* unit);
+void move_units_update(void);
+void move_step_update(struct unit_runtime* unit);
+move_direction_e move_step_get_direction(const struct unit_runtime* unit);
 void move_step_get_current_and_destination_tiles(
-    struct unit* unit, battle_map_tile_t** current_tile, battle_map_tile_t** destination_tile);
-void move_step_start_walk(struct unit* unit, const battle_map_tile_t* from, const battle_map_tile_t* unused_to);
-void move_step_start_climb(struct unit* unit, const battle_map_tile_t* from, const battle_map_tile_t* unused_to);
-void move_step_start_float(struct unit* unit, const battle_map_tile_t* from, const battle_map_tile_t* to);
-void move_step_start_fly(
-    struct unit* unit, const battle_map_tile_t* unused_current_tile, const battle_map_tile_t* unused_destination_tile);
-void move_step_start_teleport(struct unit* unit);
-void move_step_start_teleport_animation(struct unit* unit);
-void move_step_set_velocity_with_final_height(struct unit* unit, const move_path_t* path, const move_step_t* step);
-void move_step_set_velocity_clamped(struct unit* unit, const move_path_t* path, const move_step_t* step);
-void move_step_scale_velocity(struct unit* unit, s32 scale); /* scales each velocity component by scale / ONE */
-void move_step_apply_velocity(struct unit* unit);
-void move_step_update_walk_to_edge(struct unit* unit);
-void move_step_update_walk_to_center(struct unit* unit);
-void move_step_update_float_to_edge(struct unit* unit);
-void move_step_update_float_to_center(struct unit* unit);
-void move_step_update_jump_ascent(struct unit* unit);
-void move_step_update_jump_flight(struct unit* unit);
-void move_step_update_jump_landing(struct unit* unit);
+    struct unit_runtime* unit, battle_map_tile_t** current_tile, battle_map_tile_t** destination_tile);
+void move_step_start_walk(struct unit_runtime* unit, const battle_map_tile_t* from, const battle_map_tile_t* unused_to);
+void move_step_start_climb(
+    struct unit_runtime* unit, const battle_map_tile_t* from, const battle_map_tile_t* unused_to);
+void move_step_start_float(struct unit_runtime* unit, const battle_map_tile_t* from, const battle_map_tile_t* to);
+void move_step_start_fly(struct unit_runtime* unit, const battle_map_tile_t* unused_current_tile,
+    const battle_map_tile_t* unused_destination_tile);
+void move_step_start_teleport(struct unit_runtime* unit);
+void move_step_start_teleport_animation(struct unit_runtime* unit);
+void move_step_set_velocity_with_final_height(
+    struct unit_runtime* unit, const move_path_t* path, const move_step_t* step);
+void move_step_set_velocity_clamped(struct unit_runtime* unit, const move_path_t* path, const move_step_t* step);
+void move_step_scale_velocity(struct unit_runtime* unit, s32 scale); /* scales each velocity component by scale / ONE */
+void move_step_apply_velocity(struct unit_runtime* unit);
+void move_step_update_walk_to_edge(struct unit_runtime* unit);
+void move_step_update_walk_to_center(struct unit_runtime* unit);
+void move_step_update_float_to_edge(struct unit_runtime* unit);
+void move_step_update_float_to_center(struct unit_runtime* unit);
+void move_step_update_jump_ascent(struct unit_runtime* unit);
+void move_step_update_jump_flight(struct unit_runtime* unit);
+void move_step_update_jump_landing(struct unit_runtime* unit);
 
 /* Directions come from move_step_get_direction; other values leave the result unset.
  * The signed parameter preserves the original dispatch. */
-s32 move_step_has_reached_exit_edge(s32 direction, const struct unit* unit);
-s32 move_step_has_reached_center(s32 direction, const struct unit* unit);
-s32 move_step_has_reached_entry_edge(s32 direction, const struct unit* unit);
-void move_step_snap_axis_to_exit_edge(s32 direction, struct unit* unit);
-void move_step_snap_axis_to_center(s32 direction, struct unit* unit);
-void move_step_displace_unit_at_destination_tile(struct unit* unit, s32 direction);
+s32 move_step_has_reached_exit_edge(s32 direction, const struct unit_runtime* unit);
+s32 move_step_has_reached_center(s32 direction, const struct unit_runtime* unit);
+s32 move_step_has_reached_entry_edge(s32 direction, const struct unit_runtime* unit);
+void move_step_snap_axis_to_exit_edge(s32 direction, struct unit_runtime* unit);
+void move_step_snap_axis_to_center(s32 direction, struct unit_runtime* unit);
+void move_step_displace_unit_at_destination_tile(struct unit_runtime* unit, s32 direction);
 
 #endif

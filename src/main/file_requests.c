@@ -11,21 +11,21 @@
 /* MAIN keeps the shared read descriptor across overlay loads. */
 file_load_descriptor_t g_file_cd_state = { 0 };
 
-/* file_request_read with the Now Loading message turned off (NNL: no Now Loading); returns
+/* file_read_request with the Now Loading message turned off (NNL: no Now Loading); returns
  * its result. */
-s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination) {
-    return file_request_read(header, sector, sectors, destination, FILE_LOADING_DISPLAY_OFF);
+s32 file_read_request_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination) {
+    return file_read_request(header, sector, sectors, destination, FILE_LOADING_DISPLAY_OFF);
 }
 
 /* Queue an asynchronous read of sector_count sectors from lba into destination
- * on an idle descriptor; file_poll_load then carries it out. Returns 1
+ * on an idle descriptor; file_load_poll then carries it out. Returns 1
  * without queuing when the descriptor is busy, else 0.
  *
  * loading_display_mode other than PRESERVE restarts the Now Loading counter
  * (OFF, -1, keeps the message hidden). INIT also blanks the display, builds
  * the message, clears both 256x240 buffers of VRAM and sets up a plain
  * double-buffered 256x240 display for it. */
-s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination,
+s32 file_read_request(file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination,
     file_loading_display_mode_e loading_display_mode) {
     RECT rect;
 
@@ -37,7 +37,7 @@ s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count,
     }
     if (loading_display_mode == FILE_LOADING_DISPLAY_INIT) {
         SetDispMask(0);
-        loading_build_message(1, 0, 0);
+        loading_message_build(1, 0, 0);
         rect.x = 0;
         rect.y = 0;
         rect.w = 0x100;
@@ -72,15 +72,15 @@ s32 file_request_read(file_load_descriptor_t* header, s32 lba, s32 sector_count,
 
 /* Mark the load descriptor idle, flush pending CD commands, retry CdlPause until the drive accepts
  * it, then wait three vertical blanks. */
-void file_reset_pause_cdrom(file_load_descriptor_t* state) {
+void file_cd_pause_reset(file_load_descriptor_t* state) {
     state->state = FILE_LOAD_STATE_IDLE;
     CdFlush();
     while (CdControlB(CdlPause, 0, 0) == 0) { }
     VSync(3);
 }
 
-/* Reset the CD-ROM library (CdReset(0)); file_poll_load calls it before retrying a failed
+/* Reset the CD-ROM library (CdReset(0)); file_load_poll calls it before retrying a failed
  * seek or a stalled read. */
-void file_reset_cd_subsystems(void) {
+void file_cd_subsystems_reset(void) {
     CdReset(0);
 }

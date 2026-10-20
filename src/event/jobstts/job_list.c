@@ -22,8 +22,8 @@ extern u8 g_job_list_render_commands[216];
 /* Job level of the unit in the job list's `index`th job, also left in
  * g_job_list_job_current_level; levels are packed two per byte (odd jobs in
  * the low nibble). */
-s32 job_list_calculate_level(s32 index) {
-    s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
+s32 job_list_level_calculate(s32 index) {
+    s32 generic_job = job_generic_index_get(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_status_screen_unit_data[0]->career.job_levels[generic_job >> 1];
     if (generic_job & 1) {
@@ -36,14 +36,14 @@ s32 job_list_calculate_level(s32 index) {
 
 /* Also returns the value: callers read it through g_menu_row_callbacks. */
 static s32 job_list_calculate_jp(s32 index) {
-    s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
+    s32 generic_job = job_generic_index_get(g_job_list_job_ids[index]);
 
     return g_job_current_jp = g_status_screen_unit_data[0]->career.job_points.current.values[generic_job];
 }
 
 /* Also returns the value: callers read it through g_menu_row_callbacks. */
-s32 job_list_calculate_total_jp(s32 index) {
-    s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
+s32 job_list_total_jp_calculate(s32 index) {
+    s32 generic_job = job_generic_index_get(g_job_list_job_ids[index]);
 
     return g_job_current_total_jp = g_status_screen_unit_data[0]->career.job_points.total.values[generic_job];
 }
@@ -52,10 +52,10 @@ s32 job_list_calculate_total_jp(s32 index) {
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
  * `index`th job is looked up but its result is not used. */
-s32 job_list_calculate_next_level_jp(s32 index) {
+s32 job_list_next_level_jp_calculate(s32 index) {
     s32 level;
 
-    job_get_generic_index(g_job_list_job_ids[index]);
+    job_generic_index_get(g_job_list_job_ids[index]);
     level = g_job_list_job_current_level & 0xf;
     if (level >= UNIT_JOB_LEVEL_MAX) {
         g_job_list_job_next_level_jp_requirement |= MENU_NUMBER_VALUE_DASHES;
@@ -67,7 +67,7 @@ s32 job_list_calculate_next_level_jp(s32 index) {
 
 /* JOBSTTS builds the unlearned list; its final argument is Boolean,
  * so the original 2 requests unlearned abilities only. */
-s32 job_list_calculate_mastered(s32 index) {
+s32 job_list_mastered_calculate(s32 index) {
     s16 ability_list[24];
 
     g_job_current_mastered
@@ -89,13 +89,13 @@ s32 job_list_run(void) {
     s32 mask;
 
     if (g_job_list_menu_initialized == 0) {
-        g_menu_row_callbacks[0].value = job_list_calculate_level;
+        g_menu_row_callbacks[0].value = job_list_level_calculate;
         g_menu_row_callbacks[2].value = job_list_calculate_jp;
-        g_menu_row_callbacks[5].value = job_list_calculate_next_level_jp;
-        g_menu_row_callbacks[6].value = job_list_calculate_total_jp;
-        g_menu_row_callbacks[13].value = job_list_calculate_mastered;
+        g_menu_row_callbacks[5].value = job_list_next_level_jp_calculate;
+        g_menu_row_callbacks[6].value = job_list_total_jp_calculate;
+        g_menu_row_callbacks[13].value = job_list_mastered_calculate;
         job_list_build(0, g_job_list_job_ids, 0);
-        menu_get_selection_record(4, &selected, &scroll, g_job_list_job_ids);
+        menu_selection_record_restore(4, &selected, &scroll, g_job_list_job_ids);
         menu_init_scrollable_list(
             g_job_list_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_job_list_menu_initialized = 1;
@@ -105,14 +105,14 @@ s32 job_list_run(void) {
     mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CIRCLE) {
         g_job_list_selected_id = g_job_list_job_ids[g_menu_list_selected_index];
-        job_list_calculate_level(g_menu_list_selected_index);
+        job_list_level_calculate(g_menu_list_selected_index);
         job_list_calculate_jp(g_menu_list_selected_index);
-        job_list_calculate_total_jp(g_menu_list_selected_index);
+        job_list_total_jp_calculate(g_menu_list_selected_index);
         /* A mastered job has no next level to show. */
-        if (job_list_calculate_mastered(g_menu_list_selected_index) == 0) {
-            job_list_calculate_next_level_jp(g_menu_list_selected_index);
+        if (job_list_mastered_calculate(g_menu_list_selected_index) == 0) {
+            job_list_next_level_jp_calculate(g_menu_list_selected_index);
         }
-        menu_set_selection_record(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
+        menu_selection_record_set(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
         g_job_list_menu_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;

@@ -7,13 +7,14 @@
 #include "psx/types.h"
 
 struct sprite_display;
+struct sprite_block;
 struct sprite_unit_seq_table;
 struct sprite_unit_shp_frame_tables;
-struct unit;
+struct unit_runtime;
 
 /* sequences */
-/* SEQ sequence bytes, as animation_run_unit_seq_script (unit sheets) and
- * animation_run_wep_eff_seq_script (weapon and effect sheets) read them.
+/* SEQ sequence bytes, as unit_seq_run (unit sheets) and
+ * weapon_seq_run (weapon and effect sheets) read them.
  * A sequence is a run of two-byte frame instructions (an SHP frame, then the
  * frames to wait; a wait of 0 holds the frame for good) and of commands:
  * ANIMATION_SEQ_OP_PREFIX, an opcode and its operand bytes. A jump offset is a
@@ -30,7 +31,7 @@ typedef enum animation_seq_opcode {
     ANIMATION_SEQ_OP_NOP = 0xc2,
     ANIMATION_SEQ_OP_HIDE_ITEM = 0xc3,
     ANIMATION_SEQ_OP_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
-    ANIMATION_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (sprite_draw_item_display) */
+    ANIMATION_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (sprite_item_display_draw) */
     ANIMATION_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_state_window_closed is 0 */
     ANIMATION_SEQ_OP_UNKNOWN_C7 = 0xc7,        /* two operands */
     ANIMATION_SEQ_OP_UNKNOWN_C8 = 0xc8,        /* two operands */
@@ -138,10 +139,10 @@ typedef enum animation {
     ANIMATION_IDLE_FLYING = 6, /* sheets with the flying flag */
     ANIMATION_IDLE_FLYING_HASTE = 7,
     ANIMATION_IDLE_FLYING_SLOW = 8,
-    ANIMATION_SUBMERGED_IDLE = 9, /* in water two or more deep (animation_get_water_mode); also the crystal sprite */
+    ANIMATION_SUBMERGED_IDLE = 9, /* in water two or more deep (water_mode_get); also the crystal sprite */
     ANIMATION_SUBMERGED_IDLE_HASTE = 10,
     ANIMATION_SUBMERGED_IDLE_SLOW = 11,
-    ANIMATION_WALK = 12, /* a movement step on foot (animation_set_walk) */
+    ANIMATION_WALK = 12, /* a movement step on foot (animation_walk_set) */
     ANIMATION_WALK_FAST = 13,
     ANIMATION_WALK_SLOW = 14,
     ANIMATION_FLY = 18,      /* a flying unit's movement step */
@@ -192,7 +193,7 @@ typedef enum animation {
     ANIMATION_GUN_HIGH = 80,
     ANIMATION_GUN_LEVEL = 81,
     ANIMATION_GUN_LOW = 82,
-    ANIMATION_BOW_HIGH = 83, /* selected through projectile_get_bow_animation_column */
+    ANIMATION_BOW_HIGH = 83, /* selected through projectile_bow_animation_column_get */
     ANIMATION_BOW_LEVEL = 84,
     ANIMATION_BOW_LOW = 85,
     ANIMATION_BOOK = 86,
@@ -219,17 +220,17 @@ typedef enum animation {
 /* The teleport animation and the attack animations after it are ATTACK_FIRST and up. */
 enum { ANIMATION_ATTACK_FIRST = ANIMATION_TELEPORT };
 
-void animation_set_specific_by_runtime_id(u32 runtime_id, u32 animation);
-void animation_store_facing(u32 animation, s32 facing, struct unit* unit);
-void animation_force_facing(s32 animation, s32 facing, struct unit* unit);
-void animation_set_walk(struct unit* unit);
-void animation_set_level_up(struct unit* unit);
-void animation_set_stand(struct unit* unit);
-void animation_set_stand_by_runtime_id(u32 runtime_id);
-void animation_set_for_status(struct unit* unit);
-void animation_call_set_for_status(struct unit* unit);
-void animation_set_status_by_runtime_id(u32 runtime_id);
-void animation_update_for_status_changes(struct unit* unit);
+void animation_runtime_sequence_set(u32 runtime_id, u32 animation);
+void animation_facing_store(u32 animation, s32 facing, struct unit_runtime* unit);
+void animation_facing_force(s32 animation, s32 facing, struct unit_runtime* unit);
+void animation_walk_set(struct unit_runtime* unit);
+void animation_level_up_set(struct unit_runtime* unit);
+void animation_stand_set(struct unit_runtime* unit);
+void animation_runtime_stand_set(u32 runtime_id);
+void animation_status_set(struct unit_runtime* unit);
+void animation_status_set_on_main_stack(struct unit_runtime* unit);
+void animation_runtime_status_set(u32 runtime_id);
+void animation_status_changes_update(struct unit_runtime* unit);
 
 /* action animations */
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
@@ -247,13 +248,14 @@ enum { ANIMATION_ABILITY_COUNT = 454, ANIMATION_CHARGE_SET_COUNT = 20, ANIMATION
 /* Selectors in attack_animation; other values are animation_e IDs. */
 enum { ANIMATION_ATTACK_USE_WEAPON = 0, ANIMATION_ATTACK_USE_ITEM = 1 };
 
-void animation_start_ability_charge(struct unit* unit);
-void animation_start_ability_charge_hold(struct unit* unit);
-void animation_select_attack_for_ability(struct unit* attacker, struct unit* target);
-void animation_select_weapon_attack(struct unit* attacker, struct unit* target);
+void animation_ability_charge_start(struct unit_runtime* unit);
+void animation_ability_charge_hold_start(struct unit_runtime* unit);
+void animation_ability_attack_select(struct unit_runtime* attacker, struct unit_runtime* target);
+void animation_weapon_attack_select(struct unit_runtime* attacker, struct unit_runtime* target);
+void animation_shield_block_attacker_set(struct unit_runtime* attacker, struct unit_runtime* target);
 
 /* distortions */
-/* unit_t.distortion_animation_id: the motion that
+/* unit_runtime_t.distortion_animation_id: the motion that
  * animation_distortion_dispatch steps once an animation frame
  * until its handler clears the id. ANIMATION_SEQ_OP_START_DISTORTION gives the
  * id less 2 and, for most, the frames it takes (distortion_timer). */
@@ -278,6 +280,6 @@ typedef enum animation_distortion {
     ANIMATION_DISTORTION_JUMP_RISE = 17               /* 12 with the jump sound, unless the unit is that high already */
 } animation_distortion_e;
 
-void animation_distortion_dispatch(struct unit* unit);
+void animation_distortion_dispatch(struct unit_runtime* unit);
 
 #endif

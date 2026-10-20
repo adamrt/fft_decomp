@@ -374,7 +374,7 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
         rect.y = 0x30;
         rect.w = g_menu_list_vram_width;
         rect.h = g_menu_list_row_height;
-        text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
+        text_id_rows_to_vram_render(g_menu_list_text_table, row_ids, &rect, 0);
     }
 
     g_menu_list_scroll_direction = 0;
@@ -384,7 +384,7 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
 /* Set up a scrollable list without a scroll base and draw it with the given menu script. */
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
-    menu_init_scrollable_list_core(entries, selected_index, text_table);
+    menu_scrollable_list_core_init(entries, selected_index, text_table);
     menu_draw_scrollable_list(script);
 }
 
@@ -455,7 +455,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
                             *row_ids = text_id;
-                            text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
+                            text_id_rows_to_vram_render(g_menu_list_text_table, row_ids, &rect, 0);
                         }
                     }
                 } else if (input & PSX_PAD_UP) {
@@ -475,7 +475,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
-                            text_render_id_rows_to_vram(g_menu_list_text_table, entry_ids, &rect, 0);
+                            text_id_rows_to_vram_render(g_menu_list_text_table, entry_ids, &rect, 0);
                         }
                     }
                 } else if (g_menu_list_selected_index < g_menu_list_entry_count - 1 && (input & PSX_PAD_DOWN)) {

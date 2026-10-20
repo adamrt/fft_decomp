@@ -65,13 +65,13 @@ static void fullscreen_graphic_open(s32 graphic_id) {
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_request_read_bytes;
+        g_thread_call_target = (void (*)(void))file_bytes_read_request;
     } while (thread_call_on_main_stack(
                  g_fullscreen_graphics[graphic_id].lba, g_fullscreen_graphics[graphic_id].size, image_buffer)
         != 0);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_is_still_loading;
+        g_thread_call_target = (void (*)(void))file_load_state_get;
     } while (thread_call_on_main_stack() != 0);
 
     if (g_fullscreen_graphics[graphic_id].texture_mode < 2U) {
@@ -424,15 +424,15 @@ static void game_over_show(s32 graphic_id) {
     s32 color;
     sprite_sheet_frame_t* dimensions;
 
-    g_thread_call_target = music_unload_scenario_and_tunes;
+    g_thread_call_target = music_all_unload;
     thread_call_on_main_stack();
-    g_thread_call_target = (void (*)(void))music_start_load_into_free_slot;
+    g_thread_call_target = (void (*)(void))music_free_slot_load_start;
     thread_call_on_main_stack(MUSIC_GAME_OVER);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))music_poll_scenario_load;
+        g_thread_call_target = (void (*)(void))music_scenario_load_poll;
     } while (thread_call_on_main_stack() != 0);
-    g_thread_call_target = (void (*)(void))music_switch_track;
+    g_thread_call_target = (void (*)(void))music_track_switch;
     thread_call_on_main_stack(1, 0x7f, 0);
 
     dimensions = g_fullscreen_graphics[graphic_id].dimensions;
@@ -472,7 +472,7 @@ static void game_over_show(s32 graphic_id) {
 /* Thread body: load ETC graphic parameter 1 and run its show routine, the
  * chapter title for texture mode 0 or the game-over screen for mode 1. */
 void etc_entrypoint(void) {
-    s32 graphic_id = thread_get_current_parameter_1();
+    s32 graphic_id = thread_current_parameter_1_get();
     s32 graphic_type;
 
     fullscreen_graphic_open(graphic_id);
@@ -482,5 +482,5 @@ void etc_entrypoint(void) {
     } else if (graphic_type == 1) {
         game_over_show(graphic_id);
     }
-    thread_exit_current();
+    thread_current_exit();
 }

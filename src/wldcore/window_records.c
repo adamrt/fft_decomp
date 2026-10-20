@@ -17,11 +17,11 @@ extern display_object_cel_header_t* g_window_anim_cel_table[];
 static display_object_sequence_header_t** g_window_anim_sequences = g_window_anim_sequence_table;
 static display_object_cel_header_t** g_window_anim_cels = g_window_anim_cel_table;
 
-static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
-static void window_draw_gs_image_record(window_gs_image_record_t* object, GsOT* ot);
+static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
+static void image_record_draw(window_gs_image_record_t* object, GsOT* ot);
 
 /* Reset both world-map window pools and their allocation counters. */
-void window_init_record_pools(void) {
+void window_record_pools_init(void) {
     /* Member pointers preserve the separate color and CLUT address walks. */
     CVECTOR* color;
     point32_t* clut;
@@ -66,10 +66,10 @@ void window_dispatch_gs_record_list(GsOT* otag, void** list, s32 count) {
         }
         if (*flags & DISPLAY_OBJECT_ANIMATED) {
             display_object_animated_t* animated = object;
-            window_draw_gs_animated_record(animated, otag);
+            window_gs_animated_record_draw(animated, otag);
         } else if (*flags & DISPLAY_OBJECT_IMAGE) {
             window_gs_image_record_t* image = object;
-            window_draw_gs_image_record(image, otag);
+            image_record_draw(image, otag);
         }
     }
 }
@@ -104,7 +104,7 @@ void window_dispatch_gs_record_list(GsOT* otag, void** list, s32 count) {
  * as a USE-only pseudo. That pseudo and the part loop's folded entry test
  * (combine turns it into `blez part_count`, keeps `i = 0`, and leaves the slt
  * pseudo only a USE) get the unreferenced reload slots at 0x50 and 0x58. */
-void window_draw_gs_animated_record(display_object_animated_t* object, GsOT* ot) {
+void window_gs_animated_record_draw(display_object_animated_t* object, GsOT* ot) {
     GsSPRITE sprite;
     CVECTOR color;
     display_object_sequence_header_t* sequence;
@@ -216,7 +216,7 @@ step_frame:
  * uses the object's color as is, otherwise world_map_fade_tint_color
  * applies the global fade tint. A nonzero palette picks the CLUT
  * (palette - 1) * 16 pixels right of the record's. POP_IN draws the window
- * growing: gfx_calculate_scaled_rectangle gives the centered part shown at
+ * growing: scaled_rectangle_calculate gives the centered part shown at
  * step anim_counter / 2, and the flag clears itself after the full-size step.
  *
  * A field-to-field copy narrows the load to the store's mode at expand time;
@@ -235,7 +235,7 @@ step_frame:
  *   scheduler ready list ordered by source, and the other order transposes
  *   two of them.
  */
-static void window_draw_gs_image_record(window_gs_image_record_t* object, GsOT* ot) {
+static void image_record_draw(window_gs_image_record_t* object, GsOT* ot) {
     GsSPRITE sprite;
     RECT frame;
     CVECTOR color;
@@ -273,7 +273,7 @@ static void window_draw_gs_image_record(window_gs_image_record_t* object, GsOT* 
         s32 ox;
         s32 oy;
 
-        gfx_calculate_scaled_rectangle(object->anim_counter / 2, &object->bounds, &frame);
+        scaled_rectangle_calculate(object->anim_counter / 2, &object->bounds, &frame);
         ox = object->base.x;
         fx = frame.x;
         fy = frame.y;
@@ -350,7 +350,7 @@ s32 window_append_record(void** queue, s32* count) {
 
 /* Build the centered sub-rectangle of the source area for a scale mode
  * (20%, 50%, 80%, 90% or 100%), aligned to 4 pixels. */
-static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
+static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle) {
     s32 scale;
     s32 source_width;
     s32 source_height;

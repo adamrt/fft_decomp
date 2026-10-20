@@ -97,13 +97,13 @@ void item_rebuild_category_list(s32 category) {
 
     for (i = 1; i < ITEM_ID_END; i++) {
         item = i;
-        type = item_get_menu_category(item);
+        type = item_menu_category_get(item);
         cat = 0;
         if (type != ITEM_MENU_CATEGORY_WEAPON) {
             cat = type - 1;
         }
         if (category == cat) {
-            if (item_get_total_count(item) != 0) {
+            if (item_total_count_get(item) != 0) {
                 if (item_is_in_category_list(i, category) == 0) {
                     item_prepend_to_category_list(i, category);
                 }

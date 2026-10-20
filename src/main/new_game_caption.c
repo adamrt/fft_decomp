@@ -6,13 +6,13 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* A second copy of gfx_set_display_draw in the original, for the Orbonne
+/* A second copy of gfx_display_setup in the original, for the Orbonne
  * caption fades. Set up double-buffered drawing at width x height without
  * restarting the GPU: the second buffer sits 240 lines below the first (a
  * 480-line mode uses one), both draw environments clear to the given color,
  * and the display is masked until the caller turns it on. image_rect is not
  * used. */
-static void new_game_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+static void caption_display_setup(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
 
@@ -36,7 +36,7 @@ static void new_game_set_display_draw(int width, int height, int projection, u8 
 
 /* Present one frame for the Orbonne caption fades: swap the display buffers after VSync, draw otag
  * and flush the debug print stream. Returns VSync's result. */
-static int new_game_present_caption_frame(u32* otag) {
+static int caption_frame_present(u32* otag) {
     /* Unused local retains the retail stack frame. */
     RECT matching_stack_space;
     int elapsed;
@@ -56,9 +56,9 @@ static int new_game_present_caption_frame(u32* otag) {
  *
  * The strip is the texture at VRAM (896, 256) with its CLUT at (896, 287), drawn
  * at y 116. A full-screen subtractive quad steps from 248 to 0 in 32 frames, each
- * presented with new_game_present_caption_frame. No function in the tree calls this
- * routine or new_game_fade_out_orbonne_caption. */
-void new_game_fade_in_orbonne_caption(void) {
+ * presented with caption_frame_present. No function in the tree calls this
+ * routine or new_game_orbonne_caption_fade_out. */
+void new_game_orbonne_caption_fade_in(void) {
     POLY_F4 fade_polygons[2];
     DR_MODE draw_modes[2];
     POLY_FT4 title_polygons[2];
@@ -68,7 +68,7 @@ void new_game_fade_in_orbonne_caption(void) {
     u32* current_otag;
     s16 intensity = 248;
 
-    new_game_set_display_draw(256, 240, 512, 0, 0, 0);
+    caption_display_setup(256, 240, 512, 0, 0, 0);
 
     SetPolyF4(&fade_polygons[0]);
     setRGB0(&fade_polygons[0], 0, 0, 0);
@@ -103,7 +103,7 @@ void new_game_fade_in_orbonne_caption(void) {
         AddPrim(current_otag, &fade_polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
         AddPrim(current_otag, &title_polygons[g_gfx_screen_polarity]);
-        new_game_present_caption_frame(current_otag);
+        caption_frame_present(current_otag);
         intensity -= 8;
     }
 
@@ -111,10 +111,10 @@ void new_game_fade_in_orbonne_caption(void) {
     DrawSync(0);
 }
 
-/* Fade out the caption strip new_game_fade_in_orbonne_caption shows: the
+/* Fade out the caption strip new_game_orbonne_caption_fade_in shows: the
  * subtractive quad steps from 0 to 255 in 32 frames over the same strip, then
  * both display buffers are cleared. */
-void new_game_fade_out_orbonne_caption(void) {
+void new_game_orbonne_caption_fade_out(void) {
     POLY_F4 fade_polygons[2];
     DR_MODE draw_modes[2];
     POLY_FT4 title_polygons[2];
@@ -153,7 +153,7 @@ void new_game_fade_out_orbonne_caption(void) {
         AddPrim(current_otag, &fade_polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
         AddPrim(current_otag, &title_polygons[g_gfx_screen_polarity]);
-        new_game_present_caption_frame(current_otag);
+        caption_frame_present(current_otag);
         intensity += 8;
     }
 

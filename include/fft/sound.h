@@ -9,7 +9,7 @@
 void sound_init(void);
 
 /* music requests */
-/* Left by the event script's music instructions for script_process_pending_requests, which
+/* Left by the event script's music instructions for pending_requests_process, which
  * carries them out once per event frame; -1 means no request. The switch request is a trigger,
  * not a track: it toggles g_sound_current_music_track_index and starts the track in that slot
  * (g_sound_music_track_1_id or _2_id) with the volume and fade of
@@ -30,14 +30,14 @@ extern u16 g_sound_music_track_2_id;
 /* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
  * loaded suzuki_sound_resource_t in the high 16 bits and the index of a
  * sound in it in the low. Each battle effect file brings a resource of its
- * own (effect_file_load_sound_section). */
+ * own (sound_section_load). */
 typedef enum sound_resource {
     SOUND_RESOURCE_SYSTEM = 0,       /* SOUND/SYSTEM.SED: sound_sfx_e */
     SOUND_RESOURCE_ENV = 1,          /* SOUND/ENV.SED: sound_env_sfx_e */
     SOUND_RESOURCE_SOUND_NOVEL = 225 /* g_sound_novel_sound_resource, 81 sounds */
 } sound_resource_e;
 
-/* Sound-effect ids passed to sound_play_sfx and the module queues that
+/* Sound-effect ids passed to sound_sfx_play and the module queues that
  * feed it (sound_play_effect, screen_sound_dispatch_effect and the
  * g_*_sound_*effect_id globals); every path reaches suzuki_sound_start_sfx with
  * SOUND_RESOURCE_SYSTEM in the high 16 bits, so this is one id space.
@@ -47,8 +47,8 @@ typedef enum sound_resource {
  * for "no request"; the dispatchers turn a negative id into SOUND_SFX_NONE. */
 typedef enum sound_sfx {
     /* Nothing queued. SYSTEM.SED entry 0 has no streams, so playing it stops
-     * the channel pair sound_play_sfx uses;
-     * world_map_step_path_level plays it when the path animation ends. */
+     * the channel pair sound_sfx_play uses;
+     * path_level_update plays it when the path animation ends. */
     SOUND_SFX_NONE = 0,
     SOUND_SFX_CONFIRM = 1,
     SOUND_SFX_CANCEL = 2,
@@ -63,12 +63,12 @@ typedef enum sound_sfx {
     SOUND_SFX_CAMERA_ROTATE_LEFT = 11,
     SOUND_SFX_CAMERA_ROTATE_RIGHT = 12,
     SOUND_SFX_CAMERA_ROTATE_STOP = 13, /* the rotation reached its target */
-    /* Paired zoom sounds: camera_zoom_toggle and camera_zoom_start
+    /* Paired zoom sounds: zoom_toggle and camera_zoom_start
      * play 0x11 with zoom action 4 and 0xe with action 2; the in/out reading
-     * follows the zoom-target comment in camera_zoom_toggle. The
+     * follows the zoom-target comment in zoom_toggle. The
      * ATTACK deploy screen also plays 0x11 when a placed unit is moved. */
     SOUND_SFX_CAMERA_ZOOM_IN = 14,
-    /* L1/R1 on the world map (world_map_step_cursor_level): 0x10 when
+    /* L1/R1 on the world map (cursor_level_update): 0x10 when
      * the toggle sets the zoomed-out bit of g_world_map_zoom, 0xf
      * when it clears it. */
     SOUND_SFX_WORLD_MAP_ZOOM_IN = 15,
@@ -90,7 +90,7 @@ typedef enum sound_sfx {
     SOUND_SFX_SPELL_CHARGE = 31,
     SOUND_SFX_SUMMON_CHARGE = 33,
     SOUND_SFX_TRAP = 34, /* effect_secondary_trap_handler starts */
-    /* move_step_play_landing_sfx_by_surface_type: water surfaces play
+    /* landing_sfx_play: water surfaces play
      * 0x23, grassland, thicket and rug 0x28, wooden floor, tree and box 0x3a,
      * every other surface 0x29. A step that ends on another unit also plays
      * 0x28, and mounting a unit named by battle id plays 0x29. */
@@ -117,7 +117,7 @@ typedef enum sound_sfx {
     SOUND_SFX_EVENT_REVIVE = 65,     /* the event script's revive status change (*_script_inflict_status_thread) */
     SOUND_SFX_WORLD_MAP_ARRIVE = 67, /* a route leg ends at a location with no event or encounter */
     /* Dead status added outside an event
-     * (animation_update_for_status_changes), chosen by the unit's
+     * (animation_status_changes_update), chosen by the unit's
      * male, female or monster flag; the male sound is 0x9a. */
     SOUND_SFX_DEATH_FEMALE = 69,
     SOUND_SFX_DEATH_MONSTER = 70,
@@ -138,7 +138,7 @@ typedef enum sound_sfx {
     SOUND_SFX_TELEPORT_OUT = 106,
     SOUND_SFX_TELEPORT_IN = 107,
     /* Animation step 4 of the world event-transition sprite
-     * (event_transition_step_level): 0x6c in mode 0, which a
+     * (event_transition_update): 0x6c in mode 0, which a
      * random encounter pushes, 0x6d in the other spinning modes. */
     SOUND_SFX_EVENT_TRANSITION_MODE_0 = 108,
     SOUND_SFX_EVENT_TRANSITION_MODE_1 = 109,
@@ -166,36 +166,36 @@ typedef enum sound_sfx {
  * holds 27 (0, 0x15, 0x16 and 0x17 are empty); event scripts choose the
  * others through EVENT_OPCODE_BG_SOUND. */
 typedef enum sound_env_sfx {
-    SOUND_ENV_SFX_RAIN = 2,      /* weather_run_command: rain without snow, and the thunder command */
-    SOUND_ENV_SFX_THUNDER_A = 3, /* battle_map_draw_mesh_and_weather picks one of the two for a lightning flash */
+    SOUND_ENV_SFX_RAIN = 2,      /* weather_command_dispatch: rain without snow, and the thunder command */
+    SOUND_ENV_SFX_THUNDER_A = 3, /* battle_map_mesh_weather_draw picks one of the two for a lightning flash */
     SOUND_ENV_SFX_THUNDER_B = 14
 } sound_env_sfx_e;
 
-void sound_play_sfx(s32 sound_id);
+void sound_sfx_play(s32 sound_id);
 void sound_play_effect(s32 sound_id);
-void sound_play_sfx_on_free_channel(s32 sound_id);
-void sound_set_sfx_volume(int sound_id, int volume);
-void sound_play_background(s32 sound_id);
-void sound_replay_background(void);
-void sound_stop_background(void);
-void sound_stop_all_sfx(void);
+void sound_free_channel_sfx_play(s32 sound_id);
+void sound_sfx_volume_set(int sound_id, int volume);
+void sound_background_play(s32 sound_id);
+void sound_background_replay(void);
+void sound_background_stop(void);
+void sound_all_sfx_stop(void);
 
-/* battle_map_step_init_sequence calls this without loading $a0, but the body reads sound_id. */
-void sound_stop_sfx(int sound_id);
+/* battle_map_init_update calls this without loading $a0, but the body reads sound_id. */
+void sound_sfx_stop(int sound_id);
 
 /* queued effects */
 extern s32 g_sound_pending_sfx_id; /* sound_sfx_e; -1 means no request */
 extern s32 g_sound_suppressed;
 extern u8 g_sound_queued_effect_id; /* sound_sfx_e */
 
-void sound_queue_sfx_cancel(void);
-void sound_queue_sfx_confirm(void);
-void sound_queue_sfx_cursor_move(void);
-void sound_queue_sfx_invalid(void);
+void sound_cancel_queue(void);
+void sound_confirm_queue(void);
+void sound_cursor_queue(void);
+void sound_invalid_queue(void);
 
 /* background sound threads */
-void sound_background_fade_thread(void);
-void sound_background_thread(void);
+void sound_background_fade_thread_run(void);
+void sound_background_thread_run(void);
 
 /* CD audio */
 /* Fades the CD audio in at the given mix level (suzuki_sound_put_type), or out when it is 0. */

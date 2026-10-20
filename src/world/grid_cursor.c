@@ -1,6 +1,5 @@
-/* The description text thread, the grid cursor, the unit status banner countdown and the bits reader init. */
+/* Help dialogs and the Formation banner use a directional grid cursor. */
 
-#include "fft/bits.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
@@ -19,7 +18,9 @@
 
 /* banner menu state */
 extern menu_entry_t g_formation_banner_menu;
-extern s8 g_formation_banner_state; /* banner state: 0 idle, 1 finishing, else countdown */
+extern s8 g_formation_banner_state;
+
+/* banner state: 0 idle, 1 finishing, else countdown */
 
 extern help_navigation_record_t g_screen_grid_default_cells[];
 extern help_navigation_record_t g_screen_grid_shop_cells[];
@@ -29,25 +30,25 @@ extern u8 g_screen_grid_selected_cell;
 extern u16 g_screen_grid_cursor_anim;
 extern u8 g_screen_grid_initialized;
 
+/* g_screen_grid_default_cells[23]/[24].help_base, bound separately: as
+ * members GCC addresses the second store from the first's base. */
+extern s16 g_screen_grid_cell_23_text_offset;
+extern s16 g_screen_grid_cell_24_text_offset;
+
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
-void screen_start_help_text(s32 position) {
+void screen_help_text_start(s32 position) {
     if (g_help_message_text_id > 0x1ffff) {
         g_screen_grid_id = g_help_message_text_id;
         return;
     }
     if (g_help_message_text_id > 0) {
         thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
-        thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, position + (DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL),
+        thread_parameters_set(THREAD_SCREEN_SLOT_TEXT, position + (DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL),
             g_help_message_text_id, 0);
         g_menu_input_lock_mode = 1;
     }
 }
-
-/* g_screen_grid_default_cells[23]/[24].help_base, bound separately: as
- * members GCC addresses the second store from the first's base. */
-extern s16 g_screen_grid_cell_23_text_offset;
-extern s16 g_screen_grid_cell_24_text_offset;
 
 /* Runs the d-pad help grid selected by g_screen_grid_id (the shop banner
  * grids for MENU_GRID_HELP_BANNER_TOP and _BOTTOM, else the default grid) and
@@ -57,7 +58,7 @@ extern s16 g_screen_grid_cell_24_text_offset;
  * Cross latches the menu id as the description text and closes the grid;
  * Circle opens the cell's description (its text id plus the cell's offset),
  * except for empty cells 18-27. */
-void screen_update_grid_cursor(s16 alternate) {
+void screen_grid_cursor_update(s16 alternate) {
     point16_t cursor;
     s32 busy;
     s32 cell;
@@ -99,7 +100,7 @@ void screen_update_grid_cursor(s16 alternate) {
                 /* This grid adds the base as an unsigned 16-bit text ID. */
                 g_help_message_text_id
                     = text_id + (u16)g_screen_grid_active_cells[g_screen_grid_selected_cell].help_base;
-                screen_start_help_text(DIALOG_POSITION_CENTER);
+                screen_help_text_start(DIALOG_POSITION_CENTER);
             }
         } else if (input & PSX_PAD_UP) {
             cell = g_screen_grid_active_cells[cell].destination[0];
@@ -133,7 +134,7 @@ void screen_update_grid_cursor(s16 alternate) {
     } else {
         cursor.x -= 2;
         cursor.y += 6;
-        screen_draw_sliding_cursor(&cursor, &g_screen_grid_cursor_anim, busy);
+        screen_sliding_cursor_draw(&cursor, &g_screen_grid_cursor_anim, busy);
     }
 }
 
@@ -147,7 +148,7 @@ s32 formation_banner_countdown(s32 message_id, s32 frames) {
         g_formation_banner_state = frames;
         g_formation_banner_menu.text_id = message_id;
         thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_banner_menu.thread_entry);
-        thread_set_parameters(THREAD_SCREEN_SLOT_MENU, (s32)&g_formation_banner_menu, 0, 0);
+        thread_parameters_set(THREAD_SCREEN_SLOT_MENU, (s32)&g_formation_banner_menu, 0, 0);
         g_formation_banner_active = 1;
     }
     current = g_formation_banner_state;
@@ -162,16 +163,4 @@ s32 formation_banner_countdown(s32 message_id, s32 frames) {
     }
     g_formation_banner_state = current - 1;
     return 1;
-}
-
-/* Selects the primary bitstream and resets its next operation to bit 7. */
-void bits_init_primary_reader(u8* data) {
-    g_bits_primary_reset = 1;
-    g_bits_primary_cursor = data;
-}
-
-/* Selects the secondary read-only bitstream and resets it to bit 7. */
-void bits_init_secondary_reader(const u8* data) {
-    g_bits_secondary_reset = 1;
-    g_bits_secondary_cursor = data;
 }

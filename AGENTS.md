@@ -44,8 +44,11 @@ preserving every original byte.
 ## Organization
 
 - `src/<program>/` (`main`, `battle`, `world`, `wldcore`, `open`): each
-  program's own code as feature files of a few to a few dozen functions,
-  named after what they hold. A file's leading comment explains its role in
+  program's own code grouped by game system, shared state and complete
+  workflow. Use feature folders when they help navigate a large program.
+  Keep a feature's callbacks, private helpers, tables and working records
+  together; file size and function count are not reasons to split it.
+  A file's leading comment explains its role in
   the game for a programmer familiar with FFT. Use a short paragraph when
   useful to describe the feature, its state or its relationship to other
   systems; there is no one-line limit. Avoid generic summaries, function
@@ -70,8 +73,9 @@ preserving every original byte.
   lives in each program's folder.
 - File boundaries come from evidence first: hand-written and library
   objects, a change of compiler profile, jump-table alignment, read-only
-  data that is not contiguous. Where the binary is silent, cut by topic to
-  about 20 to 60 functions. A name prefix is never boundary evidence.
+  data that is not contiguous. Where the binary is silent, prefer a coherent
+  owner; split only for an independent responsibility with a useful
+  interface. A name prefix is never boundary evidence.
   Existing single-function files are not evidence of original boundaries;
   different function orders can reflect separate objects or edited source copies.
 - `include/fft/`: one flat folder of game headers named by concept
@@ -94,7 +98,7 @@ functions; order sections so a type comes before its first use. Plain
 declarations run together without blank lines, a size assert follows its type
 directly, and blank lines separate type blocks and come before a commented
 declaration. Headers include their own dependencies and compile alone; a
-header that only passes a record around names it by its tag (`struct unit*`)
+header that only passes a record around names it by its tag (`struct unit_runtime*`)
 instead of including the record's header.
 
 ## Code style
@@ -116,9 +120,14 @@ instead of including the record's header.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
-- Name a function by concept, optional sub-topic, then behavior
-  (`shop_buy_`, `proposition_open_returned_list`, `battle_map_load_data`,
-  `unit_panel_`). The concept is the game's own US term where the player
+- Name public functions from broad to specific:
+  `<module>_[<submodule>_]<noun>_<verb>` (`unit_stats_refresh`,
+  `world_map_save_request`, `party_levels_gain`). The module is the owning
+  game concept, not the executable. Static functions use concise
+  `<noun>_<verb>` names without redundant module/submodule prefixes; local
+  variables and private types/state likewise use their enclosing context.
+  Retain enough qualification to distinguish roles and avoid target-symbol
+  collisions. The concept is the game's own US term where the player
   sees one (bar, rumor, proposition, Brave Story, sound novel, formation,
   reaction, AT List); code with no player concept takes a mechanism topic
   (`script_`, `thread_`, `text_`, `menu_`, `screen_`, `window_`, `gfx_`,
@@ -127,7 +136,7 @@ instead of including the record's header.
   mode (`shop_buy_`, `formation_job_`). Except for program entrypoints below,
   names carry no program token; the folder says which program a body belongs
   to. One role takes one name in every program, so bodies that differ by
-  program share it (CARD's and WORLD's `save_build_image`); different roles
+  program share it (CARD's and WORLD's save-image builder); different roles
   take different names, and every name is unique across programs except
   same-role bodies, which never share a link.
 - Name execution roles consistently: `_init` sets up state or resources,
@@ -164,14 +173,14 @@ instead of including the record's header.
   private body whose role another program declares in a shared header drops
   `static` and takes that declaration.
 - Use snake_case, `_t` for struct typedefs, `_e` for enum typedefs (the tag
-  repeats the typedef's name without its suffix), uppercase enumerators, and
-  `_init_`. A size assert is named after its type (`unit_size_must_be_N`). Use decimal for counts/ordinary enum values and
+  repeats the typedef's name without its suffix), and uppercase enumerators.
+  A size assert is named after its type (`unit_size_must_be_N`). Use decimal for counts/ordinary enum values and
   hex for flags and encoded values. Header guards have no `FFT_` prefix.
 - Unknown members are `_unknown_XX`; `_unused_XX` means no named access;
   `_padding_XX` means proven alignment/size filler. Offsets are relative to the
   member's own struct. Never access unused or padding members by name.
 - Use `ONE` for fixed-point 1.0 (4096). A name that states a fixed-point
-  format uses `qN` for N fraction bits (`battle_lerp_q8`, `menu_lerp_q12`).
+  format uses `qN` for N fraction bits (`battle_lerp_q8`, `value_q12_lerp`).
   Add `const` only for genuinely read-only inputs and verify all callers
   under their historical compiler profiles.
 - Use American spelling.

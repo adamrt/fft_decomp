@@ -28,7 +28,7 @@ extern s32 g_unit_view_mode;
 void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
 
 /* Yields until the four panel threads (hovered and right unit stats, unit summary, tile info) have stopped. */
-void unit_view_wait_for_panels(void);
+void unit_view_panels_wait(void);
 
 /* unit stats panels */
 extern RECT g_unit_view_hovered_stats_rect;

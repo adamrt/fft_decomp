@@ -231,12 +231,12 @@ extern s32 g_battle_map_deep_dungeon_load_in_progress;
 s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command);
 s32 battle_map_load_start(void);
 s32 battle_map_load_poll(void);
-void* battle_map_load_start_file(const char* unused_directory_path, const battle_map_gns_load_info_t* load_info,
+void* battle_map_file_load_start(const char* unused_directory_path, const battle_map_gns_load_info_t* load_info,
     void* destination, s32 unused_resource_type);
 s32 battle_map_load_alternate_mesh(s32 palette_mode);
-battle_map_gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id);
-s32 battle_map_step_init_sequence(s32 map_id, s32 step);
-s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running);
+battle_map_gns_record_t* battle_map_gns_move_find_load(s32 map_id);
+s32 battle_map_init_update(s32 map_id, s32 step);
+s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_running);
 
 /* GNS dispatch */
 extern battle_map_gns_record_t g_battle_map_gns_records[150];
@@ -248,9 +248,9 @@ extern battle_map_gns_record_t g_battle_map_pending_gns_records[GNS_RESOURCE_TAB
 extern battle_map_gns_record_t g_battle_map_loaded_gns_records[GNS_RESOURCE_TABLE_COUNT];
 extern u8 g_battle_map_gns_dispatch_held;
 
-s32 battle_map_gns_dispatch_resource(u8 resource_type, battle_map_resource_t* data);
+s32 battle_map_gns_resource_dispatch(u8 resource_type, battle_map_resource_t* data);
 s32 battle_map_gns_apply_command(s32 phase, battle_map_resource_t* record);
-s16 battle_map_gns_is_record_matching_state(s32 comparison, s16 record_state, s16 requested_state);
+s16 battle_map_gns_record_matches_state(s32 comparison, s16 record_state, s16 requested_state);
 
 /* pending resources */
 /* Resources read but not yet applied: the palette and lighting data wait for BATTLE_MAP_RESOURCE_APPLY_PALETTES and

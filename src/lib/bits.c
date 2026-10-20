@@ -7,25 +7,22 @@ extern s32 g_bits_primary_read_index;
 extern s32 g_bits_primary_write_index;
 extern s32 g_bits_secondary_read_index;
 
-/* WORLD keeps both initializers with its grid-cursor helpers. */
-#ifndef FFT_WORLD
 /* Start the primary bit reader on a new data stream. */
-void bits_init_primary_reader(u8* data) {
+void bits_primary_reader_init(u8* data) {
     g_bits_primary_reset = 1;
     g_bits_primary_cursor = data;
 }
 
 /* Start the secondary bit reader on a new data stream. */
-void bits_init_secondary_reader(const u8* data) {
+void bits_secondary_reader_init(const u8* data) {
     g_bits_secondary_reset = 1;
     g_bits_secondary_cursor = data;
 }
-#endif
 
 /* Reads a `count`-bit value, most significant bit first, from the primary
  * bitstream. The first read after a reset starts at bit 7 of the current
  * byte. */
-u32 bits_read_primary(s32 count) {
+u32 bits_primary_read(s32 count) {
     u32 result;
     u8* cursor;
     s32 bit;
@@ -59,7 +56,7 @@ u32 bits_read_primary(s32 count) {
 #if defined(FFT_EVENT_CARD) || defined(FFT_WORLD)
 /* Writes one bit (set when the low byte of `value` is nonzero) through the
  * primary cursor, MSB first, advancing the cursor after every 8 bits. */
-void bits_write_primary(s32 value) {
+void bits_primary_write(s32 value) {
     s32 bit_index;
     u8 mask;
 
@@ -84,7 +81,7 @@ void bits_write_primary(s32 value) {
 /* Reads a `count`-bit value, most significant bit first, from the secondary
  * bitstream. The first read after a reset starts at bit 7 of the current
  * byte. */
-s32 bits_read_secondary(s32 count) {
+s32 bits_secondary_read(s32 count) {
     s32 result;
     const u8* cursor;
     s32 bit;

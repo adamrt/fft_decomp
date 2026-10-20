@@ -27,7 +27,7 @@ void status_screen_build_status_list(void);
 
 /* overlay screens */
 void status_screen_jobs_thread(void);               /* runs JOBSTTS while its state is nonzero */
-void status_screen_open_mounted_unit(void);         /* DEBUGCHR's view of a selected rider or mount */
+void status_screen_mounted_unit_open(void);         /* DEBUGCHR's view of a selected rider or mount */
 void debugchr_mounted_unit_entrypoint(s32 unit_id); /* DEBUGCHR's read-only rider/mount Status loop */
 
 /* job pages (JOBSTTS) */

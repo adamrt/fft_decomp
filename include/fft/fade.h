@@ -21,8 +21,8 @@ extern fade_overlay_t g_fade_overlays[2];
 extern DR_MODE g_fade_tint_draw_modes[2];
 extern POLY_F4 g_fade_tint_polygons[2];
 
-void fade_tint_start_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
-void fade_tint_update_fade(void);
-void fade_tint_draw_overlay(void);
+void fade_tint_fade_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
+void fade_tint_fade_update(void);
+void fade_tint_overlay_draw(void);
 
 #endif

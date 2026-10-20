@@ -20,7 +20,7 @@ calendar_date_t* g_brave_story_birthdays = g_brave_story_birthday_table;
  * within the remaining days gains a year, and ages are capped at 99. Entry 0
  * is the player character, whose birthday lives in the
  * EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY variables, as in
- * calendar_advance_birthdays.
+ * birthdays_advance.
  *
  * Every active proposition not yet returned returns when its elapsed days plus
  * the advanced days reach its assigned days (elapsed becomes the assigned
@@ -34,7 +34,7 @@ calendar_date_t* g_brave_story_birthdays = g_brave_story_birthday_table;
  * at function entry, for the first call's `li a0,0x67` to precede the
  * reciprocal-division `mult`.
  */
-void calendar_advance_days(s32 days) {
+void calendar_days_advance(s32 days) {
     s32 i;
     s32 years;
     calendar_date_t* birthdays;
@@ -46,23 +46,23 @@ void calendar_advance_days(s32 days) {
 
     birthdays = g_brave_story_birthdays;
     years = days / 365;
-    script_set_variable(EVENT_SCRIPT_VAR_UNKNOWN_67, script_get_variable(EVENT_SCRIPT_VAR_UNKNOWN_67) + years);
+    script_variable_set(EVENT_SCRIPT_VAR_UNKNOWN_67, script_variable_get(EVENT_SCRIPT_VAR_UNKNOWN_67) + years);
     days %= 365;
-    month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
-    day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
-    today = calendar_calculate_day_of_year(month, day);
+    month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
+    day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
+    today = calendar_day_of_year_calculate(month, day);
     for (i = 0; i < 64; i++) {
         g_brave_story_character_ages[i] += years;
         if (i == 0) {
-            month = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH);
-            day = script_get_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY);
+            month = script_variable_get(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH);
+            day = script_variable_get(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY);
         } else {
             month = birthdays[i].month;
             day = birthdays[i].day;
         }
         /* Only birthdays later in this year count: an advance that runs past
          * 31 December misses those early in the new year (retail quirk). */
-        until_birthday = calendar_calculate_day_of_year(month, day) - today;
+        until_birthday = calendar_day_of_year_calculate(month, day) - today;
         if (until_birthday > 0 && days >= until_birthday) {
             g_brave_story_character_ages[i] += 1;
         }
@@ -73,12 +73,12 @@ void calendar_advance_days(s32 days) {
 
     today += days;
     if (today >= 365) {
-        script_set_variable(EVENT_SCRIPT_VAR_UNKNOWN_67, script_get_variable(EVENT_SCRIPT_VAR_UNKNOWN_67) + 1);
+        script_variable_set(EVENT_SCRIPT_VAR_UNKNOWN_67, script_variable_get(EVENT_SCRIPT_VAR_UNKNOWN_67) + 1);
         today -= 365;
     }
-    calendar_calculate_month_and_day(today, &month, &day);
-    script_set_variable(EVENT_SCRIPT_VAR_MONTH, month);
-    script_set_variable(EVENT_SCRIPT_VAR_DAY, day);
+    calendar_month_and_day_calculate(today, &month, &day);
+    script_variable_set(EVENT_SCRIPT_VAR_MONTH, month);
+    script_variable_set(EVENT_SCRIPT_VAR_DAY, day);
 
     for (i = 0; i < g_proposition_count; i++) {
         if (!(g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)) {

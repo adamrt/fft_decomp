@@ -18,15 +18,15 @@ enum {
     EVENT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
     EVENT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
     /* First unit-group selector. The instructions that take a unit group pass
-     * selector - 0xfe to script_filter_unit_id_by_mode as its mode (2 up);
+     * selector - 0xfe to unit_id_filter as its mode (2 up);
      * unit id 0 selects mode 1, every unit. */
     EVENT_UNIT_GROUP_FIRST = 0x100,
     /* Five ordinary deployed-unit IDs; the end value is exclusive. */
     EVENT_UNIT_ID_DEPLOYED_FIRST = 0x78,
     EVENT_UNIT_ID_DEPLOYED_END = 0x7d,
-    /* script_resolve_runtime_id result for an absent unit. */
+    /* script_runtime_id_resolve result for an absent unit. */
     EVENT_RUNTIME_ID_NONE = 2000,
-    /* unit_get_battle_id_by_event_unit_id result for an absent unit: the same value. */
+    /* unit_event_battle_id_get result for an absent unit: the same value. */
     EVENT_BATTLE_ID_NONE = EVENT_RUNTIME_ID_NONE,
     /* g_script_unit_slots[] entry with no ghost unit assigned. */
     EVENT_UNIT_SLOT_EMPTY = 1000
@@ -47,9 +47,9 @@ enum {
  * Each comment gives the encoded operand byte count, then the operands in the
  * order the handler reads them. A plain name is one unsigned byte, (s8) a
  * signed byte, (u16) or (s16) a 16-bit value, and "unread" a byte no handler
- * reads. A "unit id" names one unit (script_resolve_runtime_id); a "unit group"
+ * reads. A "unit id" names one unit (script_runtime_id_resolve); a "unit group"
  * is a unit id, 0 for every unit, or a team selector from
- * EVENT_UNIT_GROUP_FIRST (script_prepare_unit_filter).
+ * EVENT_UNIT_GROUP_FIRST (unit_filter_prepare).
  *
  * UNKNOWN values are explicit dispatch cases, not guesses for otherwise
  * unrecognized byte values. UNHANDLED values have a length in the table but
@@ -329,7 +329,7 @@ typedef enum event_rotate_unit_facing {
 } event_rotate_unit_facing_e;
 
 /* First 16-bit value of a scenario condition record, as
- * scenario_check_condition tests it. The record's next 16-bit values are
+ * condition_check tests it. The record's next 16-bit values are
  * called id and value below; the two tile conditions also read a y and an
  * elevation. Other types fail. */
 typedef enum event_scenario_condition {
@@ -361,8 +361,8 @@ typedef enum event_scenario_condition {
     EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE = 37
 } event_scenario_condition_e;
 
-/* Result of scenario_check_condition for one condition record.
- * scenario_run_conditions walks a chain of records while they pass,
+/* Result of condition_check for one condition record.
+ * scenario_conditions_run walks a chain of records while they pass,
  * drops the chain at the first failure and reports an event to run when it
  * reaches the record (type 25) that stores the event id. */
 typedef enum event_scenario_condition_result {
@@ -388,11 +388,11 @@ typedef enum event_inflict_status {
 } event_inflict_status_e;
 
 /* event file */
-/* event_file_block_t.text_offset_or_marker once script_load_event has processed the block. */
+/* event_file_block_t.text_offset_or_marker once script_event_load has processed the block. */
 #define EVENT_TEXT_OFFSET_PROCESSED 0xf2f2f2f2U
 
 /* EVENT/TEST.EVT record. The first 32-bit value is relative to the block base, not
- * data[]. script_load_event converts it to a text pointer, then overwrites
+ * data[]. script_event_load converts it to a text pointer, then overwrites
  * it with EVENT_TEXT_OFFSET_PROCESSED. This is not a decoded instruction
  * array or a native scheduler context. The interpreter starts at byte zero:
  * the processed header is four one-byte 0xf2 NOPs before data[]. */

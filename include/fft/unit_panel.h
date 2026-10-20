@@ -43,8 +43,8 @@ typedef char unit_panel_record_size_must_be_64[(sizeof(unit_panel_record_t) == 6
 /* A unit's status summary: g_unit_panel_selected_unit_status (BATTLE's AT banner) and
  * g_unit_panel_comparison_unit_status (its status billboard), WORLD's formation records
  * g_unit_panel_selected_unit_stat_summary and g_formation_comparison_unit_stat_summary, and each overlay's pair of
- * panel billboards, each pair 0x24 apart. unit_panel_fill_billboard and unit_panel_build_unit_data fill the first 0x1e
- * bytes, unit_view_stats_panel_thread and the overlays' unit_panel_banner_thread draw it, and
+ * panel billboards, each pair 0x24 apart. unit_panel_fill_billboard and unit_panel_party_unit_prepare fill the first
+ * 0x1e bytes, unit_view_stats_panel_thread and the overlays' unit_panel_banner_thread draw it, and
  * unit_panel_copy_billboard_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
 typedef struct unit_panel_summary {
@@ -100,7 +100,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index);
 
 /* WLDCORE's: loads party member party_index into g_unit_panel_unit and fills the status-panel records the
  * participant detail level draws. */
-void unit_panel_build_unit_data(s32 party_index);
+void unit_panel_party_unit_prepare(s32 party_index);
 
 /* panel threads */
 /* Parameter block of the task-0x3b status panel threads (WORLD's formation
@@ -311,7 +311,7 @@ void unit_panel_set_transition(s32 value);
 void unit_panel_transition_thread(void);
 
 /* help levels (WLDCORE) */
-/* The window-layout request that opens a MENU_STACK_LEVEL_UNIT_PANEL_HELP level. unit_panel_move_help_cursor reads the
+/* The window-layout request that opens a MENU_STACK_LEVEL_UNIT_PANEL_HELP level. help_cursor_move reads the
  * first three fields. */
 typedef struct unit_panel_help_level {
     s32 window_index;
@@ -320,7 +320,6 @@ typedef struct unit_panel_help_level {
     s32 saved_state; /* 0x0c; previous g_menu_stack_ot_offset, saved by the push */
 } unit_panel_help_level_t;
 
-void unit_panel_push_help_level(void);
-void unit_panel_resume_help_level(union menu_stack_record* level);
+void unit_panel_help_open(void);
 
 #endif

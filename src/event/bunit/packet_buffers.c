@@ -72,7 +72,7 @@ void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
 /* Initializes every primitive pool of one frame buffer with its libgpu
  * constructor; polygons additionally get texture shading enabled.
  *
- * BUNIT twin of screen_init_packet_pools. */
+ * BUNIT twin of packet_pools_init. */
 static void unit_list_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     s32 i;
 
@@ -155,7 +155,7 @@ static void unit_list_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
 /* Bind both frame buffers' primitive pools, set up their draw/display
  * environments and present twice to establish the active pair.
  *
- * BUNIT twin of screen_init_packet_buffers: one pool argument per
+ * BUNIT twin of screen_packet_buffers_init: one pool argument per
  * frame-buffer pointer, each advanced by its capacity for the second buffer. */
 void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,

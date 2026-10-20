@@ -19,7 +19,7 @@ typedef enum crystal_pickup_kind {
     CRYSTAL_PICKUP_TREASURE = 0x4
 } crystal_pickup_kind_e;
 
-/* Crystal/treasure pickup result (g_crystal_pickup_result) that crystal_build_pickup_result
+/* Crystal/treasure pickup result (g_crystal_pickup_result) that crystal_pickup_result_build
  * builds on the main thread stack and returns; each program keeps the pointer in g_crystal_pickup_context. The
  * crystal pickup panels pick their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {
@@ -31,7 +31,7 @@ typedef struct crystal_pickup_result {
     u8 learned_abilities[0x40]; /* 0x53 */
 } crystal_pickup_result_t;
 
-/* The choices crystal_apply_choice applies, as flags. */
+/* The choices crystal_choice_apply applies, as flags. */
 enum {
     CRYSTAL_LEARN_ABILITIES = 0x1,
     CRYSTAL_RESTORE_HP_MP = 0x2,
@@ -40,10 +40,10 @@ enum {
 
 extern crystal_pickup_result_t* g_crystal_pickup_context;
 
-crystal_pickup_result_t* crystal_build_pickup_result(unit_stats_t* mover);
-s32 crystal_apply_choice(unit_stats_t* unit, s32 flags);
+crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover);
+s32 crystal_choice_apply(unit_stats_t* unit, s32 flags);
 
-/* Runs crystal_build_pickup_result for the unit on the main stack, keeps the result in
+/* Runs crystal_pickup_result_build for the unit on the main stack, keeps the result in
  * g_crystal_pickup_context and returns the treasure item when there is one, otherwise -1. */
 s32 crystal_resolve_pickup(s32 battle_id);
 
@@ -52,7 +52,7 @@ s32 crystal_resolve_pickup(s32 battle_id);
 extern s32 g_crystal_pickup_action;
 extern s32 g_crystal_pickup_item;
 
-void crystal_open_pickup_panel(void);
+void crystal_pickup_panel_open(void);
 
 /* Runs the crystal/treasure result panel and its list and choice threads. */
 void crystal_start_pickup_threads(void);

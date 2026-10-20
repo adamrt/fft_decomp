@@ -5,8 +5,8 @@
  * command selection and per-unit remembered rows, Auto-Battle settings, the Triangle mini menu, system functions and
  * Status screen selection. */
 
-#include "fft/ai_command.h"
 #include "fft/menu.h"
+#include "fft/turn_command.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -16,7 +16,7 @@
  * and the index of its entry in g_command_idle_action_entries, which is also what a row action from 0 to
  * 0xff opens. The unit menus are picked by
  * menu_action_get_menu_id. A system function
- * (menu_system_function_t) shows its text in MESSAGE or in one of the
+ * (request_entry_t) shows its text in MESSAGE or in one of the
  * choice entries and sets the current id itself; ids from 0x62 exist only
  * there and have no entry.
  *
@@ -75,7 +75,7 @@ typedef enum command_menu {
     MENU_COMMAND_ID_AUTO_BATTLE_UNIT = 40,    /* Attack, Quit or Defend, Quit: the unit an auto-battle setting names */
     MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT = 41, /* Attack, Quit under MESSAGE */
     MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT = 42, /* Defend, Quit under MESSAGE */
-    MENU_COMMAND_ID_EFFECT_MESSAGE = 43,      /* MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE's entry */
+    MENU_COMMAND_ID_EFFECT_MESSAGE = 43,      /* MENU_PROMPT_EFFECT_MESSAGE's entry */
     MENU_COMMAND_ID_DEBUG_UNIT_EDITOR = 44,   /* debug_unit_editor_open */
     MENU_COMMAND_ID_MESSAGE_EXECUTE = 45,     /* Execute, Quit under MESSAGE */
     MENU_COMMAND_ID_RIDER_TURN = 46,          /* the TURN menus of a mounted unit, with a Stop ride row */
@@ -106,7 +106,7 @@ extern menu_entry_t g_command_idle_action_entries[56];
 
 /* Opens an idle action menu (command_menu_e) for the active-turn unit beside it and restores the row it last
  * chose. WORLD's body only clears g_menu_building_thread_started. */
-void command_open_menu(s32 menu_id);
+void command_menu_open(s32 menu_id);
 
 /* Thread entry of the turn menus: the icon selection loop, then the chosen row remembered for the unit. */
 void command_turn_menu_thread(void);
@@ -181,7 +181,6 @@ typedef struct menu_ability_list {
 } menu_ability_list_t;
 
 extern s32 g_menu_scrolling_list_depth;
-
 extern s16 g_command_action_slot_row_actions[6];
 
 /* Walks the stored unit's menu record slots from the top down to zero, presenting each and writing the chosen
@@ -211,9 +210,9 @@ typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ?
 extern menu_command_map_t g_command_maps[31];
 
 /* The selected command: its kind, then the action staged for at_list_preview. */
-extern ai_command_t g_command_selected_command;
+extern turn_command_t g_command_selected_command;
 
-ai_command_t* command_get_selected(void);
+turn_command_t* command_get_selected(void);
 
 /* Publishes the resolved command, option and item and returns them packed into one value. */
 s32 command_resolve_selection(void);
@@ -228,7 +227,7 @@ void command_record_unit_selection(void);
 void command_reset_unit_record(s32 battle_id);
 
 /* Calls command_reset_unit_records; nothing calls it. */
-void command_reset_unit_records_wrapper(void);
+void command_unit_records_reset(void);
 
 /* Restores the selected unit's command row after Move or Act changes the available choices. */
 void command_restore_unit_selection(s32 menu_id);
@@ -256,36 +255,36 @@ void mini_menu_cancel_delay_thread(void);
 void mini_menu_confirm_delay_thread(void);
 
 /* system functions */
-/* First argument of menu_init_system_function and
- * menu_dispatch_system_function; `option` selects the variant. */
-typedef enum menu_system_command {
-    MENU_SYSTEM_COMMAND_TARGETING_PROMPT = 1, /* prompt for the resolved menu command */
-    MENU_SYSTEM_COMMAND_MOVE_FEEDBACK = 2,    /* option: menu_move_feedback_option_e */
-    MENU_SYSTEM_COMMAND_WAIT_MENU = 3,
-    MENU_SYSTEM_COMMAND_ACTION_CONFIRM = 4,
-    MENU_SYSTEM_COMMAND_SPELL_QUOTE = 5,
-    MENU_SYSTEM_COMMAND_CLOSE = 6,
-    MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT = 7,
-    MENU_SYSTEM_COMMAND_SCENARIO_CHECK = 8, /* may start event 0x190-0x193; otherwise closes */
-    MENU_SYSTEM_COMMAND_TARGET_CONFIRM = 9,
-    MENU_SYSTEM_COMMAND_EFFECT_MESSAGE = 10,  /* option: text id */
-    MENU_SYSTEM_COMMAND_ABILITY_LEARNED = 11, /* option: ability id */
-    MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE = 12,
-    MENU_SYSTEM_COMMAND_MOVE_CONFIRM = 13,
-    MENU_SYSTEM_COMMAND_TRAP_RESULT = 14,    /* option: trap id */
-    MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM = 15, /* option: item id */
-    MENU_SYSTEM_COMMAND_MOVE_CONFIRM_SILENT = 16,
-    MENU_SYSTEM_COMMAND_POST_ACTION_RESULT = 17 /* option: action_display_image_id_e */
-} menu_system_command_e;
+/* First argument of menu_request_dispatch and
+ * request_dispatch; `option` selects the variant. */
+typedef enum menu_request {
+    MENU_REQUEST_TARGETING_PROMPT = 1, /* prompt for the resolved menu command */
+    MENU_REQUEST_MOVE_FEEDBACK = 2,    /* option: menu_move_feedback_option_e */
+    MENU_REQUEST_WAIT_MENU = 3,
+    MENU_REQUEST_ACTION_CONFIRM = 4,
+    MENU_REQUEST_SPELL_QUOTE = 5,
+    MENU_REQUEST_CLOSE = 6,
+    MENU_REQUEST_ABILITY_ANNOUNCEMENT = 7,
+    MENU_REQUEST_SCENARIO_CHECK = 8, /* may start event 0x190-0x193; otherwise closes */
+    MENU_REQUEST_TARGET_CONFIRM = 9,
+    MENU_REQUEST_EFFECT_MESSAGE = 10,  /* option: text id */
+    MENU_REQUEST_ABILITY_LEARNED = 11, /* option: ability id */
+    MENU_REQUEST_CRYSTAL_OR_TREASURE = 12,
+    MENU_REQUEST_MOVE_CONFIRM = 13,
+    MENU_REQUEST_TRAP_RESULT = 14,    /* option: trap id */
+    MENU_REQUEST_MOVE_FIND_ITEM = 15, /* option: item id */
+    MENU_REQUEST_MOVE_CONFIRM_SILENT = 16,
+    MENU_REQUEST_POST_ACTION_RESULT = 17 /* option: action_display_image_id_e */
+} menu_request_e;
 
-/* MENU_SYSTEM_COMMAND_TARGETING_PROMPT options. */
+/* MENU_REQUEST_TARGETING_PROMPT options. */
 typedef enum menu_targeting_prompt_option {
     MENU_TARGETING_PROMPT_DEFAULT = 0,
     MENU_TARGETING_PROMPT_NO_TARGET = 1,    /* the ability preview marked no tile */
     MENU_TARGETING_PROMPT_NO_MOVE_RANGE = 2 /* the moving unit has no reachable tile */
 } menu_targeting_prompt_option_e;
 
-/* MENU_SYSTEM_COMMAND_MOVE_FEEDBACK options. Any option not named here rejects the move with the
+/* MENU_REQUEST_MOVE_FEEDBACK options. Any option not named here rejects the move with the
  * invalid sound and system function option + 13. */
 typedef enum menu_move_feedback_option {
     MENU_MOVE_FEEDBACK_CLOSE = 0,
@@ -294,42 +293,42 @@ typedef enum menu_move_feedback_option {
     MENU_MOVE_FEEDBACK_CRYSTAL = 4       /* confirm a step onto a crystal */
 } menu_move_feedback_option_e;
 
-/* MENU_SYSTEM_COMMAND_SCENARIO_CHECK options. */
+/* MENU_REQUEST_SCENARIO_CHECK options. */
 typedef enum menu_scenario_check_option {
     MENU_SCENARIO_CHECK_START = 0, /* start the event the check finds */
     MENU_SCENARIO_CHECK_SKIP = 1,  /* skip the checks and close */
     MENU_SCENARIO_CHECK_TEST = 2   /* only record the event in g_script_next_event_id */
 } menu_scenario_check_option_e;
 
-/* Result of menu_dispatch_system_function (and of
- * menu_init_system_function, which returns it). */
-typedef enum menu_system_dispatch_result {
-    MENU_SYSTEM_DISPATCH_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
-    MENU_SYSTEM_DISPATCH_DONE = 1,            /* a system function was started, or nothing had to run */
-    MENU_SYSTEM_DISPATCH_EVENT = 2            /* SCENARIO_CHECK started an event, or queued it for option 2 */
-} menu_system_dispatch_result_e;
+/* Result of request_dispatch (and of
+ * menu_request_dispatch, which returns it). */
+typedef enum menu_request_result {
+    MENU_REQUEST_RESULT_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
+    MENU_REQUEST_RESULT_DONE = 1,            /* a system function was started, or nothing had to run */
+    MENU_REQUEST_RESULT_EVENT = 2            /* SCENARIO_CHECK started an event, or queued it for option 2 */
+} menu_request_result_e;
 
-/* Indices of g_menu_system_function_table that the dispatcher names; the rest are message variants. */
-typedef enum menu_system_function_id {
-    MENU_SYSTEM_FUNCTION_WAIT_MENU = 1,
-    MENU_SYSTEM_FUNCTION_CLOSE = 8,
-    MENU_SYSTEM_FUNCTION_ABILITY_ANNOUNCEMENT = 10,
-    MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE = 29,
-    MENU_SYSTEM_FUNCTION_ABILITY_LEARNED = 30,
-    MENU_SYSTEM_FUNCTION_CRYSTAL_OR_TREASURE = 31,
-    MENU_SYSTEM_FUNCTION_MOVE_CONFIRM = 33,
-    MENU_SYSTEM_FUNCTION_TRAP_RESULT_FIRST = 34,
-    MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM_SOLD = 38,
-    MENU_SYSTEM_FUNCTION_MOVE_FIND_ITEM = 39,
-    MENU_SYSTEM_FUNCTION_MOVE_CONFIRM_SILENT = 40,
-    MENU_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT = 44,
-    MENU_SYSTEM_FUNCTION_POST_ACTION_RESULT = 50
-} menu_system_function_id_e;
+/* Indices of g_request_entries that the dispatcher names; the rest are message variants. */
+typedef enum menu_prompt_id {
+    MENU_PROMPT_WAIT_MENU = 1,
+    MENU_PROMPT_CLOSE = 8,
+    MENU_PROMPT_ABILITY_ANNOUNCEMENT = 10,
+    MENU_PROMPT_EFFECT_MESSAGE = 29,
+    MENU_PROMPT_ABILITY_LEARNED = 30,
+    MENU_PROMPT_CRYSTAL_OR_TREASURE = 31,
+    MENU_PROMPT_MOVE_CONFIRM = 33,
+    MENU_PROMPT_TRAP_RESULT_FIRST = 34,
+    MENU_PROMPT_MOVE_FIND_ITEM_SOLD = 38,
+    MENU_PROMPT_MOVE_FIND_ITEM = 39,
+    MENU_PROMPT_MOVE_CONFIRM_SILENT = 40,
+    MENU_PROMPT_ARITHMETICKS_ANNOUNCEMENT = 44,
+    MENU_PROMPT_POST_ACTION_RESULT = 50
+} menu_prompt_id_e;
 
-extern s32 g_menu_system_function_thread_busy;
+extern s32 g_menu_request_busy;
 
-/* Runs a system function (menu_system_command_e) for unit_id. */
-s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
+/* Runs a system function (menu_request_e) for unit_id. */
+s32 menu_request_dispatch(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 
 /* status screen */
 extern s32 g_menu_status_enabled;

@@ -9,7 +9,7 @@
 /* context */
 /* Native cooperative scheduler context, not scenario bytecode or its operand buffer. thread_start initializes the
  * same layout in BATTLE and WORLD: both index slots with thread_id << 10 and start SP/FP at slot + 0x3f0.
- * thread_set_parameters and thread_set_four_parameters store full 32-bit payload values. The seven 32-bit task
+ * thread_parameters_set and thread_four_parameters_set store full 32-bit payload values. The seven 32-bit task
  * values at 0x50 are zeroed by thread_start; each task gives them its own meaning, named beside its thread
  * functions: DIALOG_THREAD_WORD_* (text.h), SPRITE_MOVE_THREAD_WORD_* (script.h), and the menu cursor bob and
  * scrolling text list words MENU_CURSOR_THREAD_WORD_* (menu_cursor.h) and MENU_LIST_THREAD_WORD_* (menu_list.h). The
@@ -68,7 +68,7 @@ extern u8 g_thread_status_snapshot[16];
  * equipment_thread_slot_e, after_battle_thread_slot_e). */
 typedef enum thread_slot {
     THREAD_SLOT_MAIN = 0,
-    THREAD_SLOT_EVENT = 1,           /* the event script: script_run_next_event */
+    THREAD_SLOT_EVENT = 1,           /* the event script: script_event_thread_run */
     THREAD_SLOT_UNIT_VIEW = 2,       /* the unit view supervisor that starts the four panels below */
     THREAD_SLOT_MENU_BUILDING = 3,   /* the menu entry starter and the help menu thread */
     THREAD_SLOT_SYSTEM_FUNCTION = 4, /* the system function thread and the spell quote it dispatches */
@@ -81,7 +81,7 @@ typedef enum thread_slot {
     THREAD_SLOT_UNIT_SUMMARY_PANEL = 11, /* unit summary */
     THREAD_SLOT_RIGHT_UNIT_STATS = 12,   /* right unit stats or attack caster stats */
     THREAD_SLOT_HOVERED_UNIT_STATS = 13, /* hovered unit stats or attack target stats */
-    /* Passed to the thread_resolve_id functions, which return a slot below 16
+    /* Passed to the thread_slot_resolve functions, which return a slot below 16
      * unchanged and otherwise the first idle slot. */
     THREAD_SLOT_FIRST_IDLE = 16
 } thread_slot_e;
@@ -113,14 +113,14 @@ typedef enum thread_borrowed_slot {
 
 /* tasks */
 /* task_id values shared by the BATTLE and WORLD schedulers. Each named id is
- * set by one thread function (thread_set_current_task_id or a direct task_id
- * store) and is looked up with thread_find_running_by_task.
+ * set by one thread function (thread_current_task_set or a direct task_id
+ * store) and is looked up with thread_task_find.
  * 1/2/3 are the dialogue text threads' handshake: a text thread runs as 1,
  * sets 2 to wait until another thread stores 1 to resume it, and stops when
  * another thread stores 3. Ids without a known setter stay literal. */
 typedef enum thread_task {
-    /* No task: thread_start and thread_exit_current store it, and
-     * world_map_menu_start_group stores it into thread 12 when the location changes. */
+    /* No task: thread_start and thread_current_exit store it, and
+     * window_group_start stores it into thread 12 when the location changes. */
     THREAD_TASK_NONE = 0,
     THREAD_TASK_RESUME = 1,
     THREAD_TASK_WAIT_FOR_RESUME = 2,
@@ -148,7 +148,7 @@ typedef enum thread_task {
     THREAD_TASK_MESSAGE_BOX = 38,
     THREAD_TASK_MENU_WINDOW_BUILD = 49,
     /* Text thread waiting for its next message; Change Dialog and
-     * screen_text_resume_printing swap in new text and store 1. */
+     * screen_text_printing_resume swap in new text and store 1. */
     THREAD_TASK_DIALOG_AWAIT_TEXT = 51,
     THREAD_TASK_LOAD_EVTCHR = 52,
     THREAD_TASK_BG_SOUND = 53,
@@ -174,30 +174,30 @@ typedef enum thread_task {
 void thread_start(s32 thread_id, void (*function)(void));
 void thread_resume(s32 thread_id);
 void thread_suspend(s32 thread_id);
-void thread_exit_current(void);
+void thread_current_exit(void);
 s32 thread_is_running(s32 thread_id);
-void thread_reset_scheduler(void);
-s32 thread_find_running_by_task(s32 task_id);
-s32 thread_resolve_id(s32 requested_thread_id);
-s32 thread_resolve_id_after_current(s32 requested_thread_id);
+void thread_scheduler_reset(void);
+s32 thread_task_find(s32 task_id);
+s32 thread_slot_resolve(s32 requested_thread_id);
+s32 thread_next_slot_resolve(s32 requested_thread_id);
 
 /* The menu callers' running-flag accessor. WORLD links this separately from thread_is_running. */
-s32 menu_thread_is_running(s32 thread_id);
+s32 menu_thread_running_check(s32 thread_id);
 
-/* REQUIRE's own call through to thread_exit_current. */
+/* REQUIRE's own call through to thread_current_exit. */
 void thread_exit_current_wrapper(void);
 
 /* parameters and task ids */
-void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
-void thread_set_four_parameters(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
-s32 thread_get_current_task_id(void);
-void thread_set_current_task_id(s32 task_id);
+void thread_parameters_set(s32 thread_id, s32 first, s32 second, s32 third);
+void thread_four_parameters_set(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
+s32 thread_current_task_get(void);
+void thread_current_task_set(s32 task_id);
 
 /* Original assembly accessors: BATTLE adds the record offset with addu,
  * WORLD with the trapping add. */
-s32 thread_get_current_parameter_1(void);
-s32 thread_get_current_parameter_2(void);
-s32 thread_get_current_parameter_3(void);
+s32 thread_current_parameter_1_get(void);
+s32 thread_current_parameter_2_get(void);
+s32 thread_current_parameter_3_get(void);
 s32 thread_is_previous_running(void);
 s32 thread_is_running_asm(s32 thread_id);
 
@@ -205,8 +205,8 @@ s32 thread_is_running_asm(s32 thread_id);
 /* Yield to the next active context in the resident scene scheduler.
  * BATTLE scans 16 slots; WORLD scans 17. Each keeps its own frame hook. */
 void thread_yield(void);
-void thread_wait_frames(s32 count);
-void thread_wait_until_inactive(s32 thread_id);
+void thread_frames_wait(s32 count);
+void thread_inactive_wait(s32 thread_id);
 void thread_wait_forever(void);
 void thread_wait_forever_by_frames(void);
 
@@ -219,7 +219,7 @@ void thread_wait_forever_by_frames(void);
         : "$1")
 
 /* Read the running CPU's $gp when seeding a native thread context. */
-void* thread_get_current_global_pointer(void);
+void* thread_current_global_pointer_get(void);
 
 /* main-stack calls */
 /* Main-stack callback dispatch, bound to the resident BATTLE or WORLD scheduler.
@@ -227,7 +227,6 @@ void* thread_get_current_global_pointer(void);
  * arguments beyond those registers are not copied across the stack switch.
  * The argument list stays unspecified because callback signatures differ. */
 extern void (*g_thread_call_target)(void);
-
 s32 thread_call_on_main_stack();
 
 #endif

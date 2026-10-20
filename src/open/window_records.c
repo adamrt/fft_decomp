@@ -19,13 +19,13 @@ static display_object_cel_header_t** g_window_anim_cels = g_window_anim_cel_tabl
 extern window_sprite_prim_t g_window_sprite_primitive_pool[2][32];
 extern s32 g_window_primitive_count;
 
-static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
+static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void window_draw_gpu_animated_record(display_object_animated_t* actor, u32* ot);
 static void window_draw_gpu_image_record(window_gpu_image_record_t* record, u32* ot);
 
 /* Empty both render record pools and the pointer list. Every record gets its
  * layout flag, ordering-table entry 8 and the neutral color 0x80. */
-void window_init_record_pools(void) {
+void window_record_pools_init(void) {
     s32 i;
     CVECTOR* color;
 
@@ -191,7 +191,7 @@ loop:
  *
  * 8BIT_CLUT and BLEND_RATE_MASK select the texture page mode, SEMI_TRANSPARENT
  * enables semi-transparency, and POP_IN runs the pop-in scale: pop_in_step counts the
- * animation, gfx_calculate_scaled_rectangle turns half of it into a
+ * animation, scaled_rectangle_calculate turns half of it into a
  * shrunken source rectangle, and the flag clears once the record is at full
  * size. A nonzero palette picks the CLUT (palette - 1) * 16 pixels right of clut.
  *
@@ -243,7 +243,7 @@ static void window_draw_gpu_image_record(window_gpu_image_record_t* record, u32*
     }
 
     if (record->flags & DISPLAY_OBJECT_POP_IN) {
-        gfx_calculate_scaled_rectangle(record->pop_in_step / 2, &record->bounds, &scaled);
+        scaled_rectangle_calculate(record->pop_in_step / 2, &record->bounds, &scaled);
         px = record->position.x;
         g_window_sprite_primitive_pool[g_gfx_active_buffer_index][g_window_primitive_count].sprt.x0 = scaled.x + px;
         py = record->position.y;
@@ -314,7 +314,7 @@ s32 window_append_record(void** list, s32* count) {
 
 /* Build the centered sub-rectangle of the source area for a scale mode
  * (20%, 50%, 80%, 90% or 100%), aligned to 4 pixels. */
-static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
+static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle) {
     s32 scale;
     s32 source_width;
     s32 source_height;

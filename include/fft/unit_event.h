@@ -21,7 +21,7 @@ typedef enum unit_status_staging_state {
 } unit_status_staging_state_e;
 
 /* unit_status_staging_t.inflict_status_mode of one unit: the change the
- * InflictStatus event thread stages and unit_apply_staged_status_data
+ * InflictStatus event thread stages and staged_status_apply
  * applies. */
 typedef enum unit_inflict_status_mode {
     UNIT_INFLICT_STATUS_MODE_NONE = 0,
@@ -30,8 +30,8 @@ typedef enum unit_inflict_status_mode {
     UNIT_INFLICT_STATUS_MODE_POISON = 3
 } unit_inflict_status_mode_e;
 
-/* Shared event snapshot for all 21 simulation slots. unit_save_staged_status_data
- * writes the saved fields; unit_apply_staged_status_data restores them and
+/* Shared event snapshot for all 21 simulation slots. unit_status_staging_save
+ * writes the saved fields; staged_status_apply restores them and
  * applies intervening status differences through BATTLE callbacks. */
 typedef struct unit_status_staging {
     u8 innate[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];
@@ -50,9 +50,9 @@ typedef struct unit_status_staging {
 } unit_status_staging_t;
 typedef char unit_status_staging_size_must_be_1010[sizeof(unit_status_staging_t) == 1010 ? 1 : -1];
 
-s32 unit_save_staged_status_data(s32 battle_id);
-void unit_clear_status_staging_data(void);
-void unit_update_staged_status_data(u16 unit_id, u16 restore);
+s32 unit_status_staging_save(s32 battle_id);
+void unit_status_staging_clear(void);
+void unit_status_staging_update(u16 unit_id, u16 restore);
 
 /* facing and animation */
 /* unit_animation_state_t.rotate_mode: how the facing nibble steps toward target_facing. */
@@ -63,7 +63,7 @@ typedef enum unit_rotate_mode {
 } unit_rotate_mode_e;
 
 /* Per-unit facing/animation state written by the event interpreters and
- * advanced every frame by unit_update_facing_and_pending_animations.
+ * advanced every frame by unit_pending_animations_update.
  * Seven bytes per unit, 21 units. */
 typedef struct unit_animation_state {
     u8 target_facing;
@@ -84,21 +84,22 @@ extern unit_animation_state_t g_unit_animation_states[]; /* event-script rotatio
 extern u16 g_unit_pending_animation_ids[];
 extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
 
-void unit_update_facing_and_pending_animations(void);
-void unit_set_animation(s32 runtime_id, u32 animation);
-void unit_set_facing(s32 runtime_id, s32 facing);
-s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
+void unit_pending_animations_update(void);
+void unit_animation_states_reset(void);
+void unit_event_animation_set(s32 runtime_id, u32 animation);
+void unit_event_facing_set(s32 runtime_id, s32 facing);
+s32 unit_camera_facing_check(s32 event_unit_id);
 s32 unit_is_moving(s32 runtime_id);
 
 /* event unit lookups */
 extern SVECTOR g_unit_scratch_coords; /* a unit's map coordinates or projected screen position */
 
-s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
-SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
-void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
-void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
-void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
+s32 unit_event_battle_id_get(s32 event_unit_id);
+SVECTOR* unit_scratch_coords_copy(u32 runtime_id);
+void unit_world_coords_copy(u32 runtime_id, SVECTOR* world_coords);
+void unit_world_vector_copy(u32 runtime_id, VECTOR* destination);
+void unit_screen_position_project(u32 runtime_id, SVECTOR* screen_coordinates);
+void unit_runtime_map_coords_copy(u32 runtime_id, SVECTOR* coords);
 s32 unit_has_any_current_status(s32 battle_id);
 void unit_increase_blue_team_brave_by_10(void);
 

@@ -48,7 +48,7 @@ static void help_close(void) {
     mem_copy_bytes_nonempty(g_text_section_pointers, g_text_saved_pointers, sizeof(g_text_saved_pointers));
     heap_free(g_heap_high_overlay_load_address);
     g_help_open = 0;
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Opens help for the running menu's pending request, or runs the bouncing
@@ -91,7 +91,7 @@ void helpmenu_battle_entrypoint(void) {
 
     u_mid = 0xB8;
     if (g_menu_modal_open != 0) {
-        thread_exit_current();
+        thread_current_exit();
     }
 
     /* Save the text section pointers for help_close to restore, and point the help sections into the
@@ -168,25 +168,25 @@ void helpmenu_battle_entrypoint(void) {
                     help_id |= HELP_TEXT_ID_ABILITY_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                     *g_help_controller_state_ptr = 0;
-                    thread_wait_frames(1);
+                    thread_frames_wait(1);
                     help_close();
                 } else if (request_kind == HELP_REQUEST_SKILLSET_ROW) {
                     help_id = g_command_skillsets[request->selected_index];
                     /* No help for this entry: help_close ends the thread and does not return. */
                     if (help_id == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING) {
                         *g_help_controller_state_ptr = 0;
-                        thread_wait_frames(1);
+                        thread_frames_wait(1);
                         help_close();
                     }
                     help_id |= HELP_TEXT_ID_SKILLSET_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 } else if (request_kind == HELP_REQUEST_NONE) {
                     *g_help_controller_state_ptr = 0;
-                    thread_wait_frames(1);
+                    thread_frames_wait(1);
                     help_close();
                 } else if (request_kind == HELP_REQUEST_ABILITY_ROW) {
                     menu_text_layout_t* layout = request->context;
@@ -195,27 +195,27 @@ void helpmenu_battle_entrypoint(void) {
                     help_id |= HELP_TEXT_ID_ABILITY_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 } else if (request_kind == HELP_REQUEST_ITEM_ROW) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
                     if (help_id == 0) {
                         *g_help_controller_state_ptr = 0;
-                        thread_wait_frames(1);
+                        thread_frames_wait(1);
                         help_close();
                     }
                     help_id |= HELP_TEXT_ID_ITEM_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 } else if (request_kind == HELP_REQUEST_DRAW_OUT_ROW) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
                     if (help_id == 0) {
                         *g_help_controller_state_ptr = 0;
-                        thread_wait_frames(1);
+                        thread_frames_wait(1);
                         help_close();
                     }
                     /* Katana entries show the help of their Draw Out ability. */
@@ -223,7 +223,7 @@ void helpmenu_battle_entrypoint(void) {
                     help_id |= HELP_TEXT_ID_ABILITY_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 } else if (request_kind == HELP_REQUEST_STATUS_COLUMNS) {
                     menu_text_layout_t* layout = request->context;
                     /* The list stores its column toggle in the third text pointer. */
@@ -236,13 +236,13 @@ void helpmenu_battle_entrypoint(void) {
                     help_id &= 0x7FF;
                     if (help_id == 0) {
                         *g_help_controller_state_ptr = 0;
-                        thread_wait_frames(1);
+                        thread_frames_wait(1);
                         help_close();
                     }
                     help_id |= HELP_TEXT_ID_STATUS_BASE;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 } else if (request_kind == HELP_REQUEST_MIXED_SECOND_COLUMN) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[1][request->selected_index];
@@ -267,27 +267,27 @@ void helpmenu_battle_entrypoint(void) {
                     }
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 } else {
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     g_help_topic_text_ids = g_help_active_text_id_tables[request_kind];
                     thread_start(help_thread_id - 1, message_dialog_thread);
-                    thread_set_parameters(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED,
+                    thread_parameters_set(help_thread_id - 1, HELP_DIALOG_TYPE_CENTERED,
                         g_help_topic_text_ids[request->selected_index], 0);
                 }
 
                 /* Wait for the text thread in the preceding slot. */
                 frame = help_thread_id;
                 do {
-                    thread_wait_frames(1);
+                    thread_frames_wait(1);
                 } while (g_threads[frame - 1].is_running != 0);
                 *g_help_controller_state_ptr = 0;
-                thread_wait_frames(1);
+                thread_frames_wait(1);
                 help_close();
             }
         } else {
             *g_help_controller_state_ptr = 0;
-            thread_wait_frames(1);
+            thread_frames_wait(1);
             help_close();
         }
     }
@@ -304,11 +304,11 @@ void helpmenu_battle_entrypoint(void) {
             g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
             help_id = g_help_menu_cursor_tile.surface_type + HELP_TEXT_ID_TERRAIN_BASE;
-            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
             g_threads[THREAD_SCREEN_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = -0x20;
-            thread_wait_until_inactive(THREAD_SCREEN_SLOT_MESSAGE);
+            thread_inactive_wait(THREAD_SCREEN_SLOT_MESSAGE);
             *g_help_controller_state_ptr = 0;
-            thread_wait_frames(1);
+            thread_frames_wait(1);
             help_close();
         } else if (view_mode == UNIT_VIEW_MODE_HOVERED_UNIT) {
             /* Unreachable: the arm above already takes modes 1 and 2. */
@@ -328,7 +328,7 @@ void helpmenu_battle_entrypoint(void) {
 
     while (1) {
         if (help_thread->is_running == 0) {
-            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
             if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
@@ -339,10 +339,10 @@ void helpmenu_battle_entrypoint(void) {
             node = &navigation[menu_index];
             y = node->y;
             x = node->x;
-            if (thread_find_running_by_task(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
+            if (thread_task_find(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
                 y += 8;
             }
-            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
 
@@ -366,7 +366,7 @@ void helpmenu_battle_entrypoint(void) {
                         } else {
                             g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                             thread_start(help_thread_id, message_dialog_thread);
-                            thread_set_parameters(help_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                            thread_parameters_set(help_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                         }
                     } else if (node->help_base == HELP_TEXT_ID_ABILITY_BASE && (u32)((u16)*node->value - 1) >= 0x301) {
                         *g_help_controller_state_ptr = 0;
@@ -378,13 +378,13 @@ void helpmenu_battle_entrypoint(void) {
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                         thread_start(help_thread_id, message_dialog_thread);
-                        thread_set_parameters(help_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                        thread_parameters_set(help_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                     }
                 } else {
                     help_id = node->help_base;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id, message_dialog_thread);
-                    thread_set_parameters(help_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(help_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 }
             } else if (input & PSX_PAD_DPAD_MASK) {
                 /* help_id doubles as the direction index into the node's up, down, right and left links. */
@@ -406,7 +406,7 @@ void helpmenu_battle_entrypoint(void) {
             }
         } else {
             /* The help text is up: node, x and y keep the values of the last idle frame. */
-            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
             if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
@@ -473,12 +473,12 @@ void helpmenu_battle_entrypoint(void) {
 
         gfx_draw_or_append_gpu_primitive(&cursor_quads[buffer_index]);
         gfx_draw_or_append_gpu_primitive(&shadow_quads[buffer_index]);
-        thread_wait_frames(1);
+        thread_frames_wait(1);
         frame++;
     }
 
     *g_help_controller_state_ptr = 0;
-    thread_wait_frames(1);
+    thread_frames_wait(1);
     help_close();
 }
 
@@ -571,12 +571,12 @@ void helpmenu_after_battle_entrypoint(void) {
     g_help_after_battle_navigation[3].destination[0] = 0;
 
     navigation = g_help_after_battle_navigation;
-    text_thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+    text_thread_id = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
     text_thread = &g_threads[text_thread_id];
 
     for (frame = 0;; frame++) {
         if (text_thread->is_running == 0) {
-            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
             if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
@@ -587,10 +587,10 @@ void helpmenu_after_battle_entrypoint(void) {
             entry = &navigation[menu_index];
             y = entry->y;
             x = entry->x;
-            if (thread_find_running_by_task(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
+            if (thread_task_find(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
                 y += 8;
             }
-            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
 
@@ -614,7 +614,7 @@ void helpmenu_after_battle_entrypoint(void) {
                         } else {
                             g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                             thread_start(text_thread_id, message_dialog_thread);
-                            thread_set_parameters(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                            thread_parameters_set(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                         }
                     } else if (entry->help_base == HELP_TEXT_ID_ABILITY_BASE && ((u16)*entry->value - 1) >= 0x301U) {
                         *g_help_controller_state_ptr = 0;
@@ -626,13 +626,13 @@ void helpmenu_after_battle_entrypoint(void) {
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                         thread_start(text_thread_id, message_dialog_thread);
-                        thread_set_parameters(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                        thread_parameters_set(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                     }
                 } else {
                     help_id = entry->help_base;
                     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                     thread_start(text_thread_id, message_dialog_thread);
-                    thread_set_parameters(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
+                    thread_parameters_set(text_thread_id, HELP_DIALOG_TYPE_CENTERED, help_id, 0);
                 }
             } else if (input & PSX_PAD_DPAD_MASK) {
                 /* help_id doubles as the direction index into the node's up, down, right and left links. */
@@ -653,7 +653,7 @@ void helpmenu_after_battle_entrypoint(void) {
         } else {
             /* The help text is up: entry, x and y keep the values of the last
              * idle frame. */
-            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
             if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
@@ -728,10 +728,10 @@ void helpmenu_after_battle_entrypoint(void) {
 
         gfx_draw_or_append_gpu_primitive(&cursor[buffer_index]);
         gfx_draw_or_append_gpu_primitive(&shadow[buffer_index]);
-        thread_wait_frames(1);
+        thread_frames_wait(1);
     }
 
     *g_help_controller_state_ptr = 0;
-    thread_wait_frames(1);
+    thread_frames_wait(1);
     help_close();
 }

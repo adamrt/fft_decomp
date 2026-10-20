@@ -191,7 +191,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     record->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
     if (record->uses_monster_skillset != 0) {
-        abilities = (s16*)ability_store_skillset_abilities(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 4; i++) {
             found = 0;
@@ -230,7 +230,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
         record->abilities[4] = unit->abilities.movement;
     }
 
-    record->runtime_id = unit_get_runtime_id_by_battle_id(unit->active_battle_id);
+    record->runtime_id = unit_battle_runtime_id_get(unit->active_battle_id);
     record->initial_team_flags = unit->initial_team_flags;
     record->mount_info = unit->mount_info;
     record->two_handed
@@ -241,7 +241,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     if (job_is_special_monster(unit->job_id) != 0 || record->uses_monster_skillset != 0 || record->team_kind == 1) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
-        i = job_calculate_unlocked(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
+        i = job_unlocks_calculate(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
         /* The 24-bit unlocked-job mask is stored high byte first. */
         record->unlocked_jobs[0] = i >> 16;
         record->unlocked_jobs[1] = i >> 8;
@@ -277,7 +277,7 @@ s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32
 
     /* Keep status-byte reads separate; GCC otherwise merges the two tests into one 16-bit load. */
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = unit_get_stats(i);
+        unit = unit_stats_get(i);
         if ((unit != 0) && (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)) {
             if (unit->unit_flags & UNIT_FLAG_EGG) {
                 total++;

@@ -15,7 +15,7 @@
 /* Scanlines since vertical blank at which each search yields. */
 enum { AI_TURN_SIMULATION_SCANLINE_LIMIT = 313, AI_PATHFIND_SCANLINE_LIMIT = 325, AI_DECISION_SCANLINE_LIMIT = 441 };
 
-s32 ai_is_pathfinding_budget_exhausted(void);
+s32 ai_pathfinding_budget_is_exhausted(void);
 
 /* action selection */
 /* Byte-sized resume labels for initial action selection; the gaps are not dispatched. */
@@ -86,16 +86,16 @@ typedef enum ai_ability_effect {
 
 ai_ability_effect_e ai_target_classify_ability_effect(s32 unit_id, s32 check_reflect);
 s32 ai_target_find_nearest(ai_nearest_target_mode_e mode);
-s32 ai_find_unit_at_coordinates(const ai_coords_t* coords);
+s32 ai_tile_unit_find(const ai_coords_t* coords);
 s32 ai_target_is_untargetable(s32 unit_id);
 
 /* status and turn timing */
-s32 ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit);
+s32 ai_unit_turn_delay_calculate(const unit_stats_t* unit);
 s32 ai_status_is_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id);
 
 /* Declared without parameters: callers pass only the unit, and the definition takes two more
  * that it overwrites before use. */
-s32 ai_calculate_clockticks_until_death_counter_expires();
+s32 ai_unit_death_delay_calculate();
 
 /* movement */
 typedef enum ai_movement_stage { AI_MOVEMENT_TARGET_DISTANCE = 0, AI_MOVEMENT_SCORE_TILES = 1 } ai_movement_stage_e;
@@ -107,14 +107,14 @@ typedef enum ai_move_retreat_stage {
 
 s32 ai_move_propagate_from_target(
     s32 unit_id, s32 target_x, s32 target_y, s32 target_elevation, s32 initialize, s32* suspended, s32 check_budget);
-void ai_record_triggered_trap_coords(s32 x, s32 y, s32 level);
+void ai_triggered_trap_coords_store(s32 x, s32 y, s32 level);
 
 /* target geometry */
-void ai_origin_build_cast_and_aim_tiles(void);
-s32 ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
-s32 ai_calculate_height_difference(const ai_coords_t* coords, const unit_stats_t* unit);
-void ai_copy_unit_coordinates(s32 unit_index, ai_coords_t* destination);
-s32 ai_count_flagged_tiles_within_map_bounds(u16 rows[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]);
+void ai_cast_aim_tiles_build(void);
+s32 ai_unit_distance_calculate(const unit_stats_t* a, const unit_stats_t* b);
+s32 ai_height_difference_calculate(const ai_coords_t* coords, const unit_stats_t* unit);
+void ai_unit_coordinates_copy(s32 unit_index, ai_coords_t* destination);
+s32 ai_flagged_tiles_count(u16 rows[BATTLE_MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]);
 s32 ai_origin_is_allowed(const ai_coords_t* coordinates);
 
 /* ability evaluation */
@@ -147,9 +147,9 @@ typedef enum ai_charging_stage {
     AI_CHARGING_WITHOUT_CHARGE = 2
 } ai_charging_stage_e;
 
-s32 ai_ability_evaluate_outcome(void);
-s32 ai_origin_evaluate_before_and_after_move(void);
-s32 ai_evaluate_current_action(void);
+s32 ai_ability_outcome_evaluate(void);
+s32 ai_move_origins_evaluate(void);
+s32 ai_action_evaluate(void);
 
 /* math skill */
 enum { AI_MATH_SOURCE_SKILLSET_COUNT = 4, AI_MATH_EXTRA_KNOWN_ABILITY_COUNT = 10 };
@@ -157,10 +157,10 @@ enum { AI_MATH_SOURCE_SKILLSET_COUNT = 4, AI_MATH_EXTRA_KNOWN_ABILITY_COUNT = 10
 extern u8 g_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
 
 /* action ranking */
-void ai_init_selected_action(void);
-void ai_rank_insert_best(void);
+void ai_selected_action_init(void);
+void ai_best_rank_insert(void);
 s32 ai_rank_is_higher(const ai_action_data_t* a, const ai_action_data_t* b);
-void ai_rank_reset_action(ai_action_data_t* action);
+void ai_action_rank_reset(ai_action_data_t* action);
 
 /* simulation */
 /* Turn-event iteration limit for one simulated action. */
@@ -179,8 +179,8 @@ typedef enum ai_tile_pickup_kind {
     AI_TILE_PICKUP_TREASURE = 2
 } ai_tile_pickup_kind_e;
 
-/* Selected unit state saved by ai_simulate_save_unit_state and restored by
- * ai_simulate_restore_unit_state. HP occupies unaligned bytes 0x1b..0x1c; max HP/MP are not saved. */
+/* Selected unit state saved by simulation_unit_state_save and restored by
+ * simulation_unit_state_restore. HP occupies unaligned bytes 0x1b..0x1c; max HP/MP are not saved. */
 typedef struct ai_extended_snapshot {
     ai_status_snapshot_t status;              /* 0x00 */
     u8 status_ct[STATUS_TIMED_COUNT];         /* 0x08 */
@@ -215,11 +215,11 @@ typedef char ai_extended_snapshot_size_must_be_64[sizeof(ai_extended_snapshot_t)
 extern ai_extended_snapshot_t g_ai_unit_snapshot_storage[AI_COMPACT_UNIT_COUNT];
 extern ai_extended_snapshot_t* g_ai_unit_snapshots;
 
-void ai_simulate_begin(void);
-void ai_simulate_end(void);
-void ai_place_acting_unit(const ai_coords_t* coordinates);
-s32 ai_simulate_action_and_score(void);
-void ai_update_tile_pickup(void);
+void ai_simulation_begin(void);
+void ai_simulation_end(void);
+void ai_acting_unit_place(const ai_coords_t* coordinates);
+s32 ai_action_simulate_and_score(void);
+void ai_tile_pickup_update(void);
 
 /* facing */
 typedef enum ai_direction {
@@ -231,7 +231,7 @@ typedef enum ai_direction {
     AI_DIRECTION_CHOOSE_AT_WAIT = 5
 } ai_direction_e;
 
-s32 ai_facing_choose_for_wait(void);
-ai_direction_e ai_facing_find_target_direction(const ai_coords_t* target, const ai_coords_t* origin);
+s32 ai_wait_facing_choose(void);
+ai_direction_e ai_target_facing_find(const ai_coords_t* target, const ai_coords_t* origin);
 
 #endif

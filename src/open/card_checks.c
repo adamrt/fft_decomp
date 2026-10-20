@@ -8,13 +8,13 @@
 /* Issue _card_info on `port` up to retry_limit times, waiting for its BIOS event
  * each time. Returns complete on the first success, otherwise the result of the
  * last attempt (error when _card_info itself refused). */
-memcard_result_e memcard_get_info_with_retries(s32 port, s32 retry_limit) {
+memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
     s32 i;
     memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
-            result = memcard_wait_for_bios_event();
+            result = memcard_bios_event_wait();
             if (result == MEMCARD_RESULT_COMPLETE)
                 break;
         } else {
@@ -28,7 +28,7 @@ memcard_result_e memcard_get_info_with_retries(s32 port, s32 retry_limit) {
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-memcard_result_e memcard_poll_operation_result(void) {
+memcard_result_e memcard_operation_poll(void) {
     s32 status;
     memcard_result_e result;
 
@@ -38,7 +38,7 @@ memcard_result_e memcard_poll_operation_result(void) {
     }
 
     status = _card_status(g_memcard_slot) & 1;
-    result = memcard_poll_bios_event_result();
+    result = memcard_bios_event_poll();
     if (status != 0 && result == MEMCARD_RESULT_PENDING) {
         g_memcard_info_pending = 0;
     }
@@ -46,7 +46,7 @@ memcard_result_e memcard_poll_operation_result(void) {
         g_memcard_info_pending = 0;
     }
     if (result > MEMCARD_RESULT_COMPLETE) {
-        result = memcard_get_info_with_retries(g_memcard_slot << 4, 2);
+        result = memcard_info_retry(g_memcard_slot << 4, 2);
     }
     if (result == MEMCARD_RESULT_ERROR) {
         result = MEMCARD_RESULT_TIMEOUT;
@@ -64,7 +64,7 @@ static memcard_result_e memcard_poll_info_until_stable(s32 retry_limit) {
 
     while (attempts < retry_limit) {
         do {
-            result = memcard_poll_operation_result();
+            result = memcard_operation_poll();
         } while (result == MEMCARD_RESULT_PENDING);
 
         if (result == MEMCARD_RESULT_COMPLETE) {
@@ -88,15 +88,15 @@ s32 title_check_card_slots(void) {
     s32 card_present = 0;
     memcard_result_e result;
 
-    memcard_consume_all_events();
+    memcard_events_clear();
 
-    memcard_set_selected_slot(1);
+    memcard_slot_set(1);
     result = memcard_poll_info_until_stable(3);
     if (result == MEMCARD_RESULT_COMPLETE || result == MEMCARD_RESULT_NEW_CARD) {
         card_present = 1;
     }
 
-    memcard_set_selected_slot(0);
+    memcard_slot_set(0);
     result = memcard_poll_info_until_stable(3);
     if (result == MEMCARD_RESULT_COMPLETE || result == MEMCARD_RESULT_NEW_CARD) {
         card_present = 1;

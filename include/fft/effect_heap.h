@@ -8,7 +8,7 @@
 
 /* allocator */
 /* Battle heap block header: blocks are counted in 8-byte units and linked
- * either on the circular free list (g_effect_heap_rover) or on an owner list.
+ * either on the circular free list (g_rover) or on an owner list.
  * Owner 0 holds shared pools; owners 1 through 16 hold effect-script records. */
 typedef struct effect_heap_node {
     struct effect_heap_node* next;

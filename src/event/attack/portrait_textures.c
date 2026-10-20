@@ -2,7 +2,6 @@
 
 #include "fft/file.h"
 #include "fft/formation.h"
-#include "fft/formation_job.h"
 #include "fft/job.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
@@ -27,7 +26,7 @@ static u8 g_formation_sprite_staging[1152] = { 0 };
  * plus slot 20, the scenario's special portrait (g_portrait_special_wldface_id). With
  * no entry mode set the sheets are read back from VRAM instead of the disc.
  *
- * Here `value` temporarily holds the party index passed to party_get_unit,
+ * Here `value` temporarily holds the party index passed to party_unit_get,
  * so the pixel-row counter is a separate variable `j`. The never-taken `j <= 0` test after the row loop only
  * adds one reference to `j`, raising its global-allocation priority above the
  * source pointer's so the counter gets $a3 as in the target. */
@@ -54,7 +53,7 @@ void portrait_prepare_party_textures(void) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE, file);
         } else {
-            g_thread_call_target = (void (*)(void))file_load_checked_to_address;
+            g_thread_call_target = (void (*)(void))file_buffer_load_checked;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE, file);
         }
     } else {
@@ -74,7 +73,7 @@ void portrait_prepare_party_textures(void) {
          * a generic job's male/female pair from 0x60 (Mime's pair two lower, as Bard and
          * Dancer take one code each), or the job's sprite sheet for a monster. */
         if (i != 20) {
-            unit = party_get_unit(value);
+            unit = party_unit_get(value);
             if (unit->sprite_set < CHARACTER_IDENTITY_SELECTOR_FIRST) {
                 value = unit->sprite_set;
             } else {
@@ -91,8 +90,8 @@ void portrait_prepare_party_textures(void) {
                         value = base + 0x5f;
                     }
                 } else {
-                    g_formation_job_data = job_get_data(unit->job_id);
-                    value = g_formation_job_data->spritesheet_id;
+                    g_portrait_job_data = job_data_get(unit->job_id);
+                    value = g_portrait_job_data->spritesheet_id;
                 }
                 job_id = unit->job_id;
                 if (job_id == JOB_ID_BARD) {
@@ -107,7 +106,7 @@ void portrait_prepare_party_textures(void) {
                 value = 0;
             }
             if (unit->sprite_set == CHARACTER_IDENTITY_MONSTER) {
-                value |= g_formation_job_data->job_portrait_palette << 10;
+                value |= g_portrait_job_data->job_portrait_palette << 10;
             }
         }
         /* The code's low byte is the portrait (cell) index; bits 10-11 pick a monster's palette. */
@@ -172,7 +171,7 @@ void portrait_prepare_party_textures(void) {
             DrawSync(0);
         }
     }
-    heap_call_free(file);
+    heap_block_release(file);
 }
 
 /* Loads EVENT/UNIT.BIN (0x10000 bytes) via the entry-mode load paths and uploads its
@@ -219,7 +218,7 @@ void formation_prepare_sprites(void) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         } else {
-            g_thread_call_target = (void (*)(void))file_load_checked_to_address;
+            g_thread_call_target = (void (*)(void))file_buffer_load_checked;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         }
     } else {
@@ -236,7 +235,7 @@ void formation_prepare_sprites(void) {
     }
 
     for (i = 0; i < 16; i++) {
-        party = party_get_unit(i);
+        party = party_unit_get(i);
         /* Generic jobs take a male and female pair of codes from 0x60; Bard and Dancer take one code each
          * (0x82, 0x83), which moves Mime's pair down by two. */
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
@@ -253,8 +252,8 @@ void formation_prepare_sprites(void) {
                     code = base + 0x5F;
                 }
             } else {
-                g_formation_job_data = job_get_data(party->job_id);
-                code = g_formation_job_data->spritesheet_id;
+                g_portrait_job_data = job_data_get(party->job_id);
+                code = g_portrait_job_data->spritesheet_id;
             }
             if (party->job_id == JOB_ID_BARD) {
                 code = 0x82;
@@ -272,7 +271,7 @@ void formation_prepare_sprites(void) {
         }
         /* The palette bits ORed in for a monster are masked off again by `code &= 0xFF`. */
         if (party->sprite_set == CHARACTER_IDENTITY_MONSTER) {
-            code |= g_formation_job_data->job_portrait_palette << 10;
+            code |= g_portrait_job_data->job_portrait_palette << 10;
         }
         code &= 0xFF;
 
@@ -357,7 +356,7 @@ void formation_prepare_sprites(void) {
             code = 0x7A;
         } else if (code >= 0x3E) {
             product = (code - 0x3E) * 3;
-            palette_base = g_formation_job_data->job_portrait_palette + 0x3E;
+            palette_base = g_portrait_job_data->job_portrait_palette + 0x3E;
             code = product + palette_base;
         }
 
@@ -376,5 +375,5 @@ void formation_prepare_sprites(void) {
             DrawSync(0);
         }
     }
-    heap_call_free(buffer);
+    heap_block_release(buffer);
 }

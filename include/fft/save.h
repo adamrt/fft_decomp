@@ -26,7 +26,7 @@ extern s32 g_save_play_time_minutes;
 extern s32 g_save_play_time_hours;
 
 /* save image */
-/* PlayStation memory-card save-file header block (256 bytes), as built by save_build_file_header, which CARD and
+/* PlayStation memory-card save-file header block (256 bytes), as built by file_header_build, which CARD and
  * WORLD each define. */
 typedef struct save_file_header {
     u8 magic0;           /* 0x00: 'S' */
@@ -62,14 +62,14 @@ typedef char save_summary_size_must_be_24[(sizeof(save_summary_t) == 24) ? 1 : -
 
 /* The 0x1e00-byte memory-card save image, parity-covered per 128-byte block.
  * WORLD builds and loads it in g_save_work_buffer; CARD fills the same
- * layout from the SCUS globals in save_build_image through
+ * layout from the SCUS globals in save_image_build through
  * g_save_buffer_pointer. */
 typedef struct save_image {
     save_file_header_t header; /* 0x000 */
     save_summary_t summary;    /* 0x100 */
     u8 parity_bits[8];         /* 0x118; one parity bit per 128-byte block */
     s32 elapsed_seconds;       /* 0x120 */
-    /* 0x124-0x1dbe: filled by CARD's and WORLD's save_build_image from the SCUS globals named in their bcopy
+    /* 0x124-0x1dbe: filled by CARD's and WORLD's save_image_build from the SCUS globals named in their bcopy
      * calls. */
     u8 treasure_acquisition_date_bits[0x35];     /* 0x124; 47 packed 9-bit dates and 1 spare bit */
     u8 land_discovery_date_bits[0x12];           /* 0x159; packed 9-bit discovery dates */
@@ -90,7 +90,7 @@ typedef struct save_image {
     /* 0x1804; first 0x40 bytes are Move-Find-Item flags, second half unknown. */
     u8 item_location_flags[0x80];
     s32 script_variables[0x100];          /* 0x1884 */
-    game_options_fields_t options;        /* 0x1c84; copied to g_game_options by save_restore_image */
+    game_options_fields_t options;        /* 0x1c84; copied to g_game_options by save_image_restore */
     u8 _unknown_1c88;                     /* 0x1c88 */
     s8 unit_list_sort_order[0xc];         /* 0x1c89; signed, -1-terminated */
     u8 _unused_1c95[1];                   /* 0x1c95; serialized and parity-covered */
@@ -124,8 +124,8 @@ typedef struct save_icon {
  * Its purpose is unknown; the original MAIN and tutorial images contain 0xc5. */
 extern u8 g_save_unknown_byte;
 
-void save_init_data_tables(void);
-void save_init_state_and_options(void);
+void save_data_tables_init(void);
+void save_state_init(void);
 
 /* save slots */
 /* The scanner initializes 15 file states, then allocates available card
@@ -174,7 +174,7 @@ extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x8C];
 extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x50];
 #endif
 
-void save_build_image(s32 slot);
+void save_image_build(s32 slot);
 
 /* CARD save menu */
 /* Run CARD's save-menu loop until it closes. */
@@ -225,17 +225,17 @@ void save_gfx_submit_frame(s32 first_otag, s32 draw_otag);
 void save_update_input(void);
 
 /* WORLD memory card screen */
-void save_init_screen(void);
-s32 save_run_screen(s32 mode_select_enabled);
+void save_screen_init(void);
+s32 save_screen_run(s32 mode_select_enabled);
 void save_close_stub(void);
 
 /* card file transfers */
-s32 save_read_file_chunked(const char* filename, u8* destination, u32 size);
-s32 save_write_file_chunked(const char* filename, const save_image_t* source, u32 size, s32 create_file);
+s32 save_file_read(const char* filename, u8* destination, u32 size);
+s32 save_file_write(const char* filename, const save_image_t* source, u32 size, s32 create_file);
 
 /* WORLD save image */
 extern save_image_t* g_save_work_buffer;
 
-s32 save_restore_image(s32 partial_load);
+s32 save_image_restore(s32 partial_load);
 
 #endif

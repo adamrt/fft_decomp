@@ -4,7 +4,7 @@
 /* BATTLE effect particles: emitter motion, the work-record and sprite-node pools, and their rendering. */
 
 #include "fft/effect.h"
-#include "fft/effect_geometry.h"
+#include "fft/effect_emitter_data.h"
 #include "fft/gfx.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -16,17 +16,16 @@ enum { EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN = -1 };
 /* Vertex work allocated by Banish/Altima and filled by the map renderer. */
 extern VECTOR* g_effect_map_vertices;
 
-void effect_set_gravity(const vec3s32_t* src);
-void effect_save_gravity(void);
-void effect_restore_gravity(void);
-void effect_set_inertia_threshold(s32 threshold);
-void effect_save_inertia_threshold(void);
-void effect_restore_inertia_threshold(void);
-void effect_interpolate_emitter_spawn_position(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
-void effect_interpolate_emitter_spawn_spread(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
-void effect_interpolate_emitter_velocity_base_angles(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
-void effect_interpolate_emitter_velocity_direction_spread(
-    const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_gravity_set(const vec3s32_t* src);
+void effect_gravity_save(void);
+void effect_gravity_restore(void);
+void effect_inertia_threshold_set(s32 threshold);
+void effect_inertia_threshold_save(void);
+void effect_inertia_threshold_restore(void);
+void effect_emitter_spawn_position_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_emitter_spawn_spread_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_emitter_velocity_angles_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_emitter_velocity_spread_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
 void effect_particle_integrate_motion(effect_work_record_t* list);
 
 /* parent is the particle a child emitter spawns from, read only for the
@@ -35,13 +34,12 @@ void effect_particle_integrate_motion(effect_work_record_t* list);
  * their stack that holds a position, and the timeline none. The emitter index
  * arrives as a full 32-bit value. The function is declared with an int result it
  * never sets and no caller reads; a void declaration changes effect_script.c's code. */
-s32 effect_particle_spawn_from_emitter(
-    s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent);
+s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent);
 
 /* particle pools */
 
-effect_work_record_t* effect_particle_get_work_record(s16 record_index, s16 requested_index);
-void effect_particle_free_work_record(s16 record_index, effect_work_record_t* work);
+effect_work_record_t* effect_particle_record_get(s16 record_index, s16 requested_index);
+void effect_particle_record_free(s16 record_index, effect_work_record_t* work);
 
 /* rendering */
 /* Ordering-table depth clamp shared by the EFFECT renderers: a depth below MIN
@@ -53,7 +51,7 @@ enum {
     EFFECT_SPRITE_OT_DEPTH_MAX = 382 /* the farthest depth of a particle sprite */
 };
 
-/* Size of the per-effect arena used by effect_render_alloc_primitive. */
+/* Size of the per-effect arena used by primitive_alloc. */
 enum { EFFECT_PRIMITIVE_BUFFER_SIZE = 32768 };
 
 /* Initial Z coordinate of each particle sprite's four corner vectors. */
@@ -64,7 +62,6 @@ enum { EFFECT_CORNER_Z_DEFAULT = 512 };
  * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end
  * of its block, and the pc update is allocated $3 as in the target. */
 extern s32 (*g_effect_particle_render_handlers[4])(effect_record_t* record, effect_work_record_t* work);
-
 extern MATRIX g_effect_matrix;
 extern u32* g_effect_otag;
 
@@ -73,10 +70,9 @@ extern SVECTOR g_effect_corner_top_left __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_top_right __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_left __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_right __attribute__((aligned(4)));
-
-void effect_render_start_frame(void);
-void effect_render_reset_state(void);
-s32 effect_render_get_prim_buffer_offset(void);
+void effect_render_frame_start(void);
+void effect_render_state_reset(void);
+s32 effect_render_prim_offset_get(void);
 
 /* flag prefix */
 /* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.

@@ -38,7 +38,7 @@ static u8 g_message_box_slot_prev_width[3] = { 0 };
 
 /* Render a message box's lines into its window image with the pen at (8, 8) and upload it; a
  * portrait box builds its tailed window image first, and centered boxes are skipped. */
-static void message_box_render_text_image(text_dialog_record_t* record) {
+static void box_text_image_render(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
             record->buffer = menu_build_window_image(
@@ -60,7 +60,7 @@ static void message_box_render_text_image(text_dialog_record_t* record) {
 }
 
 /* Free the message box text slot owned by the current thread, if any, and reset its glyph counter. */
-static void message_box_release_slot(void) {
+static void box_slot_release(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
@@ -74,11 +74,11 @@ static void message_box_release_slot(void) {
 
 /* Draw the message box's pending glyph into VRAM and hold it for the typewriter delay.
  *
- * Cousin of message_draw_glyph_with_delay without the request pointer, task-id checks or
+ * Cousin of message_glyph_draw_timed without the request pointer, task-id checks or
  * script counters. The ring byte is read before the phase and the inner bound
  * is `width / 2`, which keeps the per-row recomputation of the target.
  */
-static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
+static void box_glyph_draw(s32 x, s32 y, s32 wait) {
     s32 slot;
     s32 i;
     s32 j;
@@ -222,7 +222,7 @@ static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
         g_message_box_slot_glyph_counters[slot] = 0;
     } else if (wait >= 2) {
         for (i = 0; i < wait * (3 - g_script_event_speed); i++) {
-            thread_wait_frames(1);
+            thread_frames_wait(1);
         }
         g_message_box_slot_glyph_counters[slot] = 0;
     } else {
@@ -237,7 +237,7 @@ static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
         }
         if (g_message_box_slot_glyph_counters[slot] >= g_message_box_glyph_delay) {
             for (i = 0; i < 3 - g_script_event_speed; i++) {
-                thread_wait_frames(1);
+                thread_frames_wait(1);
             }
             g_message_box_slot_glyph_counters[slot] = 0;
         }
@@ -250,7 +250,7 @@ static void message_box_draw_glyph(s32 x, s32 y, s32 wait) {
 
 /* Mirror a POLY_FT4 texture horizontally when direction is negative: u0/u1
  * and u2/u3 trade places, each shifted by one texel. */
-static void screen_flip_poly_ft4_u(POLY_FT4* poly, s32 direction) {
+static void box_quad_flip(POLY_FT4* poly, s32 direction) {
     s32 step;
     u8 u;
 
@@ -270,18 +270,18 @@ static void screen_flip_poly_ft4_u(POLY_FT4* poly, s32 direction) {
     poly->u3 = u;
 }
 
-/* The menu-screen library's copy of menu_lerp_q12 (the same routine compiled twice). */
-static s32 screen_lerp_q12(s32 from, s32 to, s32 t) {
+/* The menu-screen library's copy of value_q12_lerp (the same routine compiled twice). */
+static s32 box_q12_lerp(s32 from, s32 to, s32 t) {
     return ((to - from) * t) / ONE + from;
 }
 
 /* Interpolate the four corners of a textured quad between two RECTs. The menu-screen library's copy of
- * menu_lerp_rect_to_poly_ft4; screen_animate_window_quads_to_rects calls this one. */
-static void screen_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
-    setXY4(poly, screen_lerp_q12(from->x, to->x, t), screen_lerp_q12(from->y, to->y, t),
-        screen_lerp_q12(from->x + from->w, to->x + to->w, t), screen_lerp_q12(from->y, to->y, t),
-        screen_lerp_q12(from->x, to->x, t), screen_lerp_q12(from->y + from->h, to->y + to->h, t),
-        screen_lerp_q12(from->x + from->w, to->x + to->w, t), screen_lerp_q12(from->y + from->h, to->y + to->h, t));
+ * rectangle_quad_lerp; box_quads_animate calls this one. */
+static void box_corners_lerp(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
+    setXY4(poly, box_q12_lerp(from->x, to->x, t), box_q12_lerp(from->y, to->y, t),
+        box_q12_lerp(from->x + from->w, to->x + to->w, t), box_q12_lerp(from->y, to->y, t),
+        box_q12_lerp(from->x, to->x, t), box_q12_lerp(from->y + from->h, to->y + to->h, t),
+        box_q12_lerp(from->x + from->w, to->x + to->w, t), box_q12_lerp(from->y + from->h, to->y + to->h, t));
 }
 
 /*
@@ -291,7 +291,7 @@ static void screen_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const
  * growing (its quad area is smaller than the destination area) the sweep runs
  * a little past 0x1000 and then settles back down to it.
  */
-static void screen_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon) {
+static void box_quads_animate(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon) {
     RECT from_main;
     RECT from_icon;
     s32 quad_area;
@@ -332,9 +332,9 @@ static void screen_animate_window_quads_to_rects(menu_window_buffer_t* buffers, 
     for (; t <= limit; t += step) {
         for (frame = 0; frame < 3 - g_script_event_speed; frame++) {
             thread_yield();
-            screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
+            box_corners_lerp(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
             if (to_icon->x != 0) {
-                screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
+                box_corners_lerp(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
             }
         }
         if (quad_area < target_area) {
@@ -349,9 +349,9 @@ static void screen_animate_window_quads_to_rects(menu_window_buffer_t* buffers, 
         for (t = limit; t >= ONE; t -= 32) {
             for (frame = 0; frame < 3 - g_script_event_speed; frame++) {
                 thread_yield();
-                screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
+                box_corners_lerp(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
                 if (to_icon->x != 0) {
-                    screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
+                    box_corners_lerp(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
                 }
             }
         }
@@ -360,22 +360,22 @@ static void screen_animate_window_quads_to_rects(menu_window_buffer_t* buffers, 
     t = ONE;
     for (frame = 0; frame < 3 - g_script_event_speed; frame++) {
         thread_yield();
-        screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
+        box_corners_lerp(&buffers[g_menu_packet_buffer_index].quads[0], &from_main, to_main, t);
         if (to_icon->x != 0) {
-            screen_lerp_rect_to_poly_ft4(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
+            box_corners_lerp(&buffers[g_menu_packet_buffer_index].quads[1], &from_icon, to_icon, t);
         }
     }
 }
 
 /*
- * Twin of menu_animate_window_quad_crop without the two-pixel right
+ * Twin of menu_window_crop_animate without the two-pixel right
  * inset. Animate the current window's first quad growing out from the rectangle
  * center: each frame crops a sprite of the rectangle by the level's
  * percentage and copies the cropped bounds into the quad's corners.
  */
-static void screen_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
+static void box_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
-    void* source; /* never assigned: a stale $s5 the callee never reads, as in menu_animate_window_quad_crop */
+    void* source; /* never assigned: a stale $s5 the callee never reads, as in menu_window_crop_animate */
     s32 level;
     u8 u = buffers->quads[0].u0;
     u8 v = buffers->quads[0].v0;
@@ -457,17 +457,17 @@ void message_box_thread(void) {
     s32* substitution;
     s32 no_value;
 
-    thread_set_current_task_id(THREAD_TASK_MESSAGE_BOX);
+    thread_current_task_set(THREAD_TASK_MESSAGE_BOX);
     value_index = 0;
     script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     g_screen_dialog_waiting = 0;
-    param = thread_get_current_parameter_1();
+    param = thread_current_parameter_1_get();
     rec.box_type = param & 0x70;
     rec.dialog_type = param;
     rec.position = param & 3;
     rec.options = param & 0xC;
-    text = text_find_entry(thread_get_current_parameter_2());
-    base_entry = text_find_entry(thread_get_current_parameter_2() & 0xF800);
+    text = text_entry_find(thread_current_parameter_2_get());
+    base_entry = text_entry_find(thread_current_parameter_2_get() & 0xF800);
 
     /* Unlike a dialog, the box has a fixed size: 3 lines of 0x12 cells with a portrait, else 2 of 0x14. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
@@ -502,20 +502,20 @@ void message_box_thread(void) {
 
     /* A leading portrait command picks the portrait; otherwise the last one shown is kept. */
     win = menu_alloc_window_buffer_pair();
-    win->message_id = thread_get_current_parameter_2();
+    win->message_id = thread_current_parameter_2_get();
     if (text[0] == TEXT_SET_PORTRAIT) {
         win[0].portrait_code = text[1];
         win[1].portrait_code = text[1];
-        script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
+        script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
     } else {
-        win[0].portrait_code = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
-        win[1].portrait_code = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+        win[0].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+        win[1].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
     }
     win[0].is_message_box = 1;
     win[1].is_message_box = 1;
 
-    rec.text = thread_get_current_parameter_2();
-    message = thread_get_current_parameter_2();
+    rec.text = thread_current_parameter_2_get();
+    message = thread_current_parameter_2_get();
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
@@ -545,7 +545,7 @@ void message_box_thread(void) {
         to.y = y + 7;
         to.w = 0x1F;
         to.h = 0x30;
-        screen_flip_poly_ft4_u(&win->quads[1], -1);
+        box_quad_flip(&win->quads[1], -1);
     } else {
         to.x = x + rec.width - 0x30;
         to.y = y + 8;
@@ -558,9 +558,9 @@ void message_box_thread(void) {
     win[0].active = 1;
     win[1].active = 1;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-        screen_animate_window_quads_to_rects(win, &from, &to);
+        box_quads_animate(win, &from, &to);
     } else {
-        screen_animate_window_quad_crop(win, &from, &to);
+        box_crop_animate(win, &from, &to);
     }
 
     /* From here x and y address the window's image in VRAM, not the screen. */
@@ -588,18 +588,18 @@ void message_box_thread(void) {
 
         /* A new parameter 2 restarts the box on that message; 0xFFFF closes it. A message is
          * shown once its text section resolves to the same start as the first message's. */
-        if (thread_get_current_parameter_2() != message) {
-            if ((thread_get_current_parameter_2() & no_value) != no_value) {
-                while (base_entry != text_find_entry(thread_get_current_parameter_2() & 0xF800)) {
+        if (thread_current_parameter_2_get() != message) {
+            if ((thread_current_parameter_2_get() & no_value) != no_value) {
+                while (base_entry != text_entry_find(thread_current_parameter_2_get() & 0xF800)) {
                     thread_yield();
                 }
             }
-            message = thread_get_current_parameter_2();
+            message = thread_current_parameter_2_get();
             if ((message & no_value) == no_value) {
                 g_screen_dialog_waiting = 0;
                 break;
             }
-            text = text_find_entry(message);
+            text = text_entry_find(message);
             if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                 menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
             } else {
@@ -623,10 +623,10 @@ void message_box_thread(void) {
             if (text[0] == TEXT_SET_PORTRAIT) {
                 win[0].portrait_code = text[1];
                 win[1].portrait_code = text[1];
-                script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
+                script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, text[1]);
             } else {
-                win[0].portrait_code = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
-                win[1].portrait_code = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+                win[0].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
+                win[1].portrait_code = script_variable_get(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
             }
             thread_yield();
             continue;
@@ -672,7 +672,7 @@ void message_box_thread(void) {
                 if (no_wait == 0) {
                     for (i = 0;; i += g_script_event_speed) {
                         thread_yield();
-                        if (thread_get_current_parameter_2() != message) {
+                        if (thread_current_parameter_2_get() != message) {
                             break;
                         }
                         /* A page break bobs the cursor sprite after the text; a line break shows the arrow. */
@@ -703,7 +703,7 @@ void message_box_thread(void) {
                                     WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0;
                                     rec.first_line++;
                                     rec.last_line = rec.first_line + rec.lines;
-                                    message_box_render_text_image(&rec);
+                                    box_text_image_render(&rec);
                                 } else {
                                     break;
                                 }
@@ -726,7 +726,7 @@ void message_box_thread(void) {
                 if (code == TEXT_PAGE_BREAK) {
                     continue;
                 }
-                if (thread_get_current_parameter_2() != message) {
+                if (thread_current_parameter_2_get() != message) {
                     continue;
                 }
 
@@ -762,7 +762,7 @@ void message_box_thread(void) {
             NEXT();
             win[0].portrait_code = *text;
             win[1].portrait_code = *text;
-            script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *text);
+            script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *text);
             NEXT();
         } else if (code == TEXT_SET_VARIABLE_BASE) {
             NEXT();
@@ -770,12 +770,12 @@ void message_box_thread(void) {
             NEXT();
         } else if (code == TEXT_STORE_VARIABLE) {
             NEXT();
-            i = script_get_variable(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
+            i = script_variable_get(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
             if (i != 0) {
-                script_set_variable(script_variable_base + i * 10, *text);
-                script_set_variable(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
+                script_variable_set(script_variable_base + i * 10, *text);
+                script_variable_set(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
             } else {
-                script_set_variable(script_variable_base, *text);
+                script_variable_set(script_variable_base, *text);
             }
             NEXT();
         } else if (code == TEXT_SET_GLYPH_DELAY) {
@@ -789,11 +789,11 @@ void message_box_thread(void) {
         } else {
             /* A format code draws a whole string, then returns to `saved`. */
             substitution = &g_text_substitution_values[value_index];
-            value = text_resolve_format_string_id(code, *substitution);
+            value = text_format_id_resolve(code, *substitution);
             if (value != -1) {
                 saved = text + 1;
                 value_index++;
-                text = text_find_entry(value);
+                text = text_entry_find(value);
                 continue;
             }
 
@@ -811,7 +811,7 @@ void message_box_thread(void) {
                 }
 
                 /* Print the number in `digits` places, padding leading zeros with spaces. */
-                digits = text_count_decimal_digits(value);
+                digits = text_decimal_digits_count(value);
                 started = 0;
                 if (width_override != no_value) {
                     digits = width_override;
@@ -830,7 +830,7 @@ void message_box_thread(void) {
                     g_message_box_glyph.y = cursor_y;
                     g_message_box_glyph.mode = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
                     g_message_box_glyph.palette = rec.color;
-                    message_box_draw_glyph(cursor_x, cursor_y, delay);
+                    box_glyph_draw(cursor_x, cursor_y, delay);
                     if (code == TEXT_SPACE) {
                         cursor_x += 4;
                     } else {
@@ -864,7 +864,7 @@ void message_box_thread(void) {
                 g_message_box_glyph.palette = rec.color;
                 g_message_box_glyph.x = cursor_x;
                 g_message_box_glyph.y = cursor_y;
-                message_box_draw_glyph(cursor_x, cursor_y, delay);
+                box_glyph_draw(cursor_x, cursor_y, delay);
                 if (code == TEXT_SPACE) {
                     cursor_x += 4;
                 } else {
@@ -882,12 +882,12 @@ void message_box_thread(void) {
         from.x = right;
         from.y = bottom;
         mem_copy_bytes_nonempty(&to, &from, sizeof(to));
-        screen_animate_window_quads_to_rects(win, &from, &to);
+        box_quads_animate(win, &from, &to);
     }
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
-    message_box_release_slot();
+    box_slot_release();
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }

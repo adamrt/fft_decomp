@@ -12,9 +12,9 @@
 /* WLDCORE keeps the pending commands and playback state between menu frames. */
 music_queue_t g_music_queue = { 0 };
 
-/* Play sound effect `sound_id` (WLDCORE's wrapper for sound_play_sfx). */
+/* Play sound effect `sound_id` (WLDCORE's wrapper for sound_sfx_play). */
 void sound_play_effect(s32 sound_id) {
-    sound_play_sfx(sound_id);
+    sound_sfx_play(sound_id);
 }
 
 /* Queue a music command, servicing frame work while the queue is full.
@@ -23,7 +23,7 @@ void sound_play_effect(s32 sound_id) {
  * after each array store. */
 void music_queue_add(music_queue_command_e command, s32 value) {
     while (g_music_queue.count >= MUSIC_QUEUE_CAPACITY) {
-        file_poll_load(&g_file_cd_state);
+        file_load_poll(&g_file_cd_state);
         music_queue_process();
         VSync(0);
     }
@@ -77,13 +77,13 @@ next:
         if (*slot_track == track) {
             g_music_queue.current_slot = slot;
             g_music_queue.current_command = MUSIC_QUEUE_COMMAND_NONE;
-            music_switch_track(slot, 0, 0);
+            music_track_switch(slot, 0, 0);
             return;
         }
         if (*slot_track != 0) {
-            music_unload_scenario_slot(slot);
+            music_scenario_slot_unload(slot);
         }
-        if (music_load_into_slot(track, slot) != 0) {
+        if (music_slot_load(track, slot) != 0) {
             g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_LOAD;
             g_music_queue.current_slot = slot;
             *slot_track = track;
@@ -95,12 +95,12 @@ next:
         if ((g_music_queue.music.flags & MUSIC_QUEUE_PLAYING) == 0) {
             goto clear_command;
         }
-        music_set_volume_target(0, g_music_queue.current_value << 2);
+        music_volume_target_set(0, g_music_queue.current_value << 2);
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_FADE_OUT;
         return;
     case MUSIC_QUEUE_COMMAND_FADE_IN:
-        music_switch_track(g_music_queue.current_slot, 0, 0);
-        music_set_volume_target(g_music_queue.volume, g_music_queue.current_value << 2);
+        music_track_switch(g_music_queue.current_slot, 0, 0);
+        music_volume_target_set(g_music_queue.volume, g_music_queue.current_value << 2);
         g_music_queue.current_command = MUSIC_QUEUE_COMMAND_WAIT_FADE_IN;
         return;
     case MUSIC_QUEUE_COMMAND_UNLOAD:
@@ -110,7 +110,7 @@ next:
         } else {
             slot = g_music_queue.current_slot;
         }
-        music_unload_scenario_slot(slot);
+        music_scenario_slot_unload(slot);
         if (slot == g_music_queue.current_slot) {
             g_music_queue.music.flags &= ~MUSIC_QUEUE_PLAYING;
         }
@@ -145,7 +145,7 @@ next:
 
 /* Queue a music change: fade out what is playing, start `value` (a packed
  * slot and music id) and fade it in over 0x10 steps. */
-void music_queue_start_track(s32 value) {
+void music_queue_track_start(s32 value) {
     if (g_music_queue.music.flags & MUSIC_QUEUE_PLAYING) {
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
     }
@@ -153,13 +153,13 @@ void music_queue_start_track(s32 value) {
     music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
 }
 
-/* Twin of file_wait_for_pending with the music queue as the wait condition:
+/* Twin of file_pending_wait with the music queue as the wait condition:
  * run frames until no command is queued or running. The two 32-bit busy
  * fields are read as g_music_queue members rather than as separate
  * scalars. */
 void music_queue_wait_until_empty(void) {
     while (g_music_queue.count != 0 || g_music_queue.current_command != MUSIC_QUEUE_COMMAND_NONE) {
-        file_poll_load(&g_file_cd_state);
+        file_load_poll(&g_file_cd_state);
         music_queue_process();
         VSync(0);
     }

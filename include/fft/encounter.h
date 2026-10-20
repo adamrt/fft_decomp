@@ -7,7 +7,7 @@
 #include "fft/unit_entd.h"
 #include "psx/types.h"
 
-/* g_encounter_selection_mode: which ENTD unit_entd_select_and_open opens. */
+/* g_encounter_selection_mode: which ENTD entd_open_start opens. */
 typedef enum unit_entd_selection {
     UNIT_ENTD_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
     UNIT_ENTD_SELECTION_ENTD_250 = 1,
@@ -28,11 +28,11 @@ extern volatile s32 g_encounter_selection_mode;
 extern s32 g_encounter_selection_mode;
 #endif
 
-int encounter_open_file(void);
-void encounter_init_party(int encounter_id);
+int encounter_file_open(void);
+void encounter_party_init(int encounter_id);
 
 /* Current encounter, NULL while loading, or (const entd_encounter_t *)-1 when
  * no encounter is selected. */
-const entd_encounter_t* encounter_get_current(void);
+const entd_encounter_t* encounter_current_get(void);
 
 #endif

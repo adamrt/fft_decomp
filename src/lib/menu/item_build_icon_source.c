@@ -6,7 +6,7 @@
 #include "psx/types.h"
 
 /* Build the 16x16 item icon texture source. */
-void item_build_icon_source(menu_icon_source_t* output, u32 item_id) {
+void item_icon_source_build(menu_icon_source_t* output, u32 item_id) {
     SPRT graphic;
 
     gfx_set_item_icon_sprite(&graphic, item_id);

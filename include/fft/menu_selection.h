@@ -34,10 +34,10 @@ typedef char menu_selection_record_size_must_be_6[sizeof(menu_selection_record_t
 /* VARIANT_MENU_SELECTION_RECORD_COUNT records: 14 in BUNIT and WORLD, 5 in EQUIP and JOBSTTS. */
 extern menu_selection_record_t g_menu_selection_records[];
 
-void menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, const s16* entries);
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, const s16* entries);
-void menu_clear_selection_record(s32 index);
-void menu_clear_selection_records(void);
+void menu_selection_record_set(s32 index, s32 selected_index, s32 scroll_base_index, const s16* entries);
+void menu_selection_record_restore(s32 index, s16* selected_index, s16* scroll_base_index, const s16* entries);
+void menu_selection_record_clear(s32 index);
+void menu_selection_records_clear(void);
 
 /* selection values */
 /* Stands for "no option" or "no item" in a resolved menu selection. */
@@ -46,18 +46,18 @@ enum { MENU_SELECTION_NONE = 0xFFFE };
 /* VARIANT_MENU_SELECTION_VALUE_COUNT values. */
 extern s16 g_menu_selection_values[];
 
-void menu_clear_selection_values(void);
-s32 menu_set_selection_value(u8 index, s16 value);
-s32 menu_init_selection_value(u8 index, s16 value);
+void menu_selection_values_clear(void);
+s32 menu_selection_value_set(u8 index, s16 value);
+s32 menu_selection_value_init(u8 index, s16 value);
 
 /* selection steppers */
 /* The horizontal and vertical steppers move selection value selection_index (g_menu_selection_values) by the
  * D-pad, wrapping within entry_count, and return it; the _and_mark_change forms also queue a sound effect when
  * it moves. The grid stepper moves a grid index instead. */
-s16 menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, s32 input_mask);
-s32 menu_update_horizontal_selection_and_mark_change(u16 entry_count, u8 selection_index, s32 input_mask, u8 sound_id);
-s16 menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, s32 input_mask);
-s32 menu_update_vertical_selection_and_mark_change(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
-s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);
+s16 menu_selection_horizontal_step(u16 entry_count, u8 selection_index, s32 input_mask);
+s32 menu_selection_horizontal_sound_step(u16 entry_count, u8 selection_index, s32 input_mask, u8 sound_id);
+s16 menu_selection_vertical_step(u16 entry_count, u8 selection_index, s32 input_mask);
+s32 menu_selection_vertical_sound_step(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
+s32 menu_grid_selection_step(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);
 
 #endif

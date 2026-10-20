@@ -2,7 +2,6 @@
 
 #include "fft/ability_list.h"
 #include "fft/ai.h"
-#include "fft/ai_command.h"
 #include "fft/command.h"
 #include "fft/equipment.h"
 #include "fft/item.h"
@@ -17,6 +16,7 @@
 #include "fft/status.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/turn_command.h"
 #include "fft/tutorial.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
@@ -163,7 +163,7 @@ void command_reset_unit_records(void) {
 /* Clear one unit's remembered menu rows, as command_reset_unit_records does for all (byte 1 back to
  * 0xff), but only for a unit under manual control. The test sits inside the byte loop. */
 void command_reset_unit_record(s32 battle_id) {
-    unit_stats_t* stats = unit_get_stats(battle_id);
+    unit_stats_t* stats = unit_stats_get(battle_id);
     menu_unit_selection_record_t* records = g_menu_unit_selection_records;
     s32 i;
 
@@ -176,24 +176,24 @@ void command_reset_unit_record(s32 battle_id) {
 }
 
 /* The command record the menus fill when the player picks a command (g_command_selected_command). */
-ai_command_t* command_get_selected(void) {
+turn_command_t* command_get_selected(void) {
     return &g_command_selected_command;
 }
 
 /* Post the close command after two frames under the mini-menu task id. */
 void mini_menu_cancel_delay_thread(void) {
-    thread_set_current_task_id(THREAD_TASK_MINI_MENU);
-    thread_wait_frames(2);
+    thread_current_task_set(THREAD_TASK_MINI_MENU);
+    thread_frames_wait(2);
     g_command_pending_selection[0] = 7;
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Queue the confirm sound and hold the mini-menu task id for 16 frames. */
 void mini_menu_confirm_delay_thread(void) {
     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-    thread_set_current_task_id(THREAD_TASK_MINI_MENU);
-    thread_wait_frames(16);
-    thread_exit_current();
+    thread_current_task_set(THREAD_TASK_MINI_MENU);
+    thread_frames_wait(16);
+    thread_current_exit();
 }
 
 /* Widen bytes into 16-bit menu values up to a 0xff terminator, which is not copied, and return the
@@ -225,7 +225,7 @@ static void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
 
 /* Builds the ability list for the active skillset menu entry (menu entry 4's
  * selected_index selects the skillset; g_menu_skillset_types gives its list type). Each type
- * fills the 0x52-row work buffer at *g_ai_workspace_ptr through its own loader, then
+ * fills the 0x52-row work buffer at *g_event_work through its own loader, then
  * the rows are sized, grayed (not enough MP, or silenced for voice abilities)
  * and g_ability_list_ability_layout is set up for 6 visible rows.
  *
@@ -247,69 +247,68 @@ static void command_build_ability_list(s32 mode) {
     s32 text_id_base;
     menu_ability_list_t* list;
 
-    g_ability_list_ability_layout.columns.text_ids[0] = (s16*)g_ai_workspace_ptr->ability_list.ids;
-    g_ability_list_ability_layout.columns.text_ids[1] = (s16*)g_ai_workspace_ptr->ability_list.values;
-    g_ability_list_ability_layout.columns.text_ids[2] = (s16*)g_ai_workspace_ptr->ability_list.extras;
+    g_ability_list_ability_layout.columns.text_ids[0] = (s16*)g_event_work->ability_list.ids;
+    g_ability_list_ability_layout.columns.text_ids[1] = (s16*)g_event_work->ability_list.values;
+    g_ability_list_ability_layout.columns.text_ids[2] = (s16*)g_event_work->ability_list.extras;
 
     unit_index = g_unit_panel_selected_unit.battle_id;
-    unit = menu_get_selected_unit_stats();
+    unit = menu_selected_unit_stats_get();
     type = g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
     skillset = g_command_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
     g_command_selected_command.data.action.skillset_id = skillset;
 
     for (i = 0; i < 80; i++) {
-        g_ai_workspace_ptr->ability_list.ids[i] = 0xFFFF;
-        g_ai_workspace_ptr->ability_list.mp_costs[i] = 0xFF;
-        g_ai_workspace_ptr->ability_list.ct[i] = 1;
-        g_ai_workspace_ptr->ability_list.values[i] = 0;
-        g_ai_workspace_ptr->ability_list.extras[i] = 0xFFFF;
-        g_ai_workspace_ptr->ability_list.flags[i] = 0;
-        g_ai_workspace_ptr->ability_list.turns[i] = 1;
-        g_ai_workspace_ptr->ability_list.skill_ct[i] = 0xFF;
+        g_event_work->ability_list.ids[i] = 0xFFFF;
+        g_event_work->ability_list.mp_costs[i] = 0xFF;
+        g_event_work->ability_list.ct[i] = 1;
+        g_event_work->ability_list.values[i] = 0;
+        g_event_work->ability_list.extras[i] = 0xFFFF;
+        g_event_work->ability_list.flags[i] = 0;
+        g_event_work->ability_list.turns[i] = 1;
+        g_event_work->ability_list.skill_ct[i] = 0xFF;
         g_ability_list_ability_display_flags[i] = 0;
     }
     /* Row 0x50 ends the byte columns with the 0xff terminator the widening copies stop at. */
-    g_ai_workspace_ptr->ability_list.mp_costs[0x50] = 0xFF;
-    g_ai_workspace_ptr->ability_list.ct[0x50] = 0xFF;
-    g_ai_workspace_ptr->ability_list.flags[0x50] = 0xFF;
-    g_ai_workspace_ptr->ability_list.turns[0x50] = 0xFF;
-    g_ai_workspace_ptr->ability_list.skill_ct[0x50] = 0xFF;
+    g_event_work->ability_list.mp_costs[0x50] = 0xFF;
+    g_event_work->ability_list.ct[0x50] = 0xFF;
+    g_event_work->ability_list.flags[0x50] = 0xFF;
+    g_event_work->ability_list.turns[0x50] = 0xFF;
+    g_event_work->ability_list.skill_ct[0x50] = 0xFF;
 
     if (type == ACTION_MENU_TYPE_DEFAULT) {
-        list = &g_ai_workspace_ptr->ability_list;
+        list = &g_event_work->ability_list;
         skillset_get_unit_ability_data(
             unit_index, skillset, (s16*)list->ids, list->mp_costs, list->ct, 0, list->flags, list->turns);
-        mem_copy_bytes_nonempty(g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.ct, 0x50);
+        mem_copy_bytes_nonempty(g_event_work->ability_list.skill_ct, g_event_work->ability_list.ct, 0x50);
     }
     if (type == ACTION_MENU_TYPE_ITEM_INVENTORY) {
-        skillset_load_item_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        skillset_load_item_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
-        skillset_load_throw_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        skillset_load_throw_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_ARITHMETICKS) {
         if (mode == MENU_ARITHMETICKS_LIST_ATTRIBUTES) {
-            skillset_math_load_attributes(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
+            skillset_math_load_attributes(unit_index, skillset, g_event_work->ability_list.ids);
         }
         if (mode == MENU_ARITHMETICKS_LIST_MULTIPLES) {
-            skillset_math_load_multiples(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
+            skillset_math_load_multiples(unit_index, skillset, g_event_work->ability_list.ids);
         }
         if (mode == MENU_ARITHMETICKS_LIST_ABILITIES) {
-            skillset_math_collect_calculator_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids);
+            skillset_math_collect_calculator_abilities(unit_index, skillset, g_event_work->ability_list.ids);
         }
     }
     if (type == ACTION_MENU_TYPE_MONSTER) {
         skillset_monster_collect_abilities(
-            unit_index, skillset, g_ai_workspace_ptr->ability_list.ids, 0, g_ai_workspace_ptr->ability_list.flags);
+            unit_index, skillset, g_event_work->ability_list.ids, 0, g_event_work->ability_list.flags);
     }
     if (type == ACTION_MENU_TYPE_KATANA_INVENTORY) {
-        skillset_load_draw_out_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        skillset_load_draw_out_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_CHARGE) {
-        skillset_load_charge_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.ids,
-            g_ai_workspace_ptr->ability_list.mp_costs, g_ai_workspace_ptr->ability_list.turns);
-        mem_copy_bytes_nonempty(
-            g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.mp_costs, 0x50);
+        skillset_load_charge_abilities(unit_index, skillset, g_event_work->ability_list.ids,
+            g_event_work->ability_list.mp_costs, g_event_work->ability_list.turns);
+        mem_copy_bytes_nonempty(g_event_work->ability_list.skill_ct, g_event_work->ability_list.mp_costs, 0x50);
     }
 
     window_width = 0xAC;
@@ -325,13 +324,12 @@ static void command_build_ability_list(s32 mode) {
     if (g_command_action_type_modes[type][1] == 1) { /* lists by id */
         /* Inventory loaders leave item ids in the byte column mp_costs; the value column
          * shows each item's quantity. */
-        count = menu_copy_u8_to_u16_terminated(
-            g_ai_workspace_ptr->ability_list.ids, g_ai_workspace_ptr->ability_list.mp_costs);
-        menu_copy_u8_to_u16(g_ai_workspace_ptr->ability_list.extras, g_ai_workspace_ptr->ability_list.turns, count);
+        count = menu_copy_u8_to_u16_terminated(g_event_work->ability_list.ids, g_event_work->ability_list.mp_costs);
+        menu_copy_u8_to_u16(g_event_work->ability_list.extras, g_event_work->ability_list.turns, count);
         found = 0;
         for (i = 0; i < count; i++) {
-            g_ai_workspace_ptr->ability_list.values[i] = g_item_quantities[g_ai_workspace_ptr->ability_list.ids[i]];
-            if (g_ai_workspace_ptr->ability_list.values[i] == 0) {
+            g_event_work->ability_list.values[i] = g_item_quantities[g_event_work->ability_list.ids[i]];
+            if (g_event_work->ability_list.values[i] == 0) {
                 g_ability_list_ability_display_flags[i] = 4;
             } else {
                 found = 1;
@@ -345,7 +343,7 @@ static void command_build_ability_list(s32 mode) {
             window_width -= 4;
         } else {
             g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
-            menu_copy_u8_to_u16(g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.turns, count);
+            menu_copy_u8_to_u16(g_event_work->ability_list.values, g_event_work->ability_list.turns, count);
             window_width = 0x94;
             header_id = MENU_ICON_HEADER_TURN_REFLECT;
         }
@@ -360,7 +358,7 @@ static void command_build_ability_list(s32 mode) {
     } else {
         found = 0;
         for (count = 0; count < 64; count++) {
-            if (g_ai_workspace_ptr->ability_list.ids[count] == 0xFFFF) {
+            if (g_event_work->ability_list.ids[count] == 0xFFFF) {
                 break;
             }
         }
@@ -368,7 +366,7 @@ static void command_build_ability_list(s32 mode) {
         /* The MP column shows only when some ability costs MP. */
         if (type == ACTION_MENU_TYPE_DEFAULT) {
             for (i = 0; i < count; i++) {
-                if (g_ai_workspace_ptr->ability_list.mp_costs[i] != 0) {
+                if (g_event_work->ability_list.mp_costs[i] != 0) {
                     found = 1;
                     break;
                 }
@@ -382,17 +380,14 @@ static void command_build_ability_list(s32 mode) {
             header_id = MENU_ICON_HEADER_ABILITY;
         } else {
             if (found != 0 && type == ACTION_MENU_TYPE_DEFAULT) {
-                menu_copy_u8_to_u16_terminated(
-                    g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.mp_costs);
+                menu_copy_u8_to_u16_terminated(g_event_work->ability_list.values, g_event_work->ability_list.mp_costs);
                 window_width -= 8;
-                menu_copy_u8_to_u16(
-                    g_ai_workspace_ptr->ability_list.extras, g_ai_workspace_ptr->ability_list.turns, count);
+                menu_copy_u8_to_u16(g_event_work->ability_list.extras, g_event_work->ability_list.turns, count);
                 header_id = MENU_ICON_HEADER_ABILITY_MP_TURN_REFLECT;
                 g_ability_list_ability_layout.columns.x[1] -= 8;
                 g_ability_list_ability_layout.columns.x[2] -= 8;
             } else {
-                menu_copy_u8_to_u16(
-                    g_ai_workspace_ptr->ability_list.values, g_ai_workspace_ptr->ability_list.turns, count);
+                menu_copy_u8_to_u16(g_event_work->ability_list.values, g_event_work->ability_list.turns, count);
                 window_width = 0x94;
                 header_id = MENU_ICON_HEADER_ABILITY_TURN_REFLECT;
                 g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
@@ -412,16 +407,15 @@ static void command_build_ability_list(s32 mode) {
     g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].select_text_table = columns;
 
     for (i = 0; i < count; i++) {
-        g_ai_workspace_ptr->ability_list.ids[i] |= text_id_base;
+        g_event_work->ability_list.ids[i] |= text_id_base;
         if (type == ACTION_MENU_TYPE_DEFAULT) {
-            if (unit->mp - g_ai_workspace_ptr->ability_list.mp_costs[i] < 0
-                && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0) {
+            if (unit->mp - g_event_work->ability_list.mp_costs[i] < 0 && g_event_work->ability_list.skill_ct[i] != 0) {
                 g_ability_list_ability_display_flags[i] = 8;
             }
         }
         if (type == ACTION_MENU_TYPE_DEFAULT || type == ACTION_MENU_TYPE_MONSTER) {
-            if ((g_ai_workspace_ptr->ability_list.flags[i] & MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE)
-                && g_ai_workspace_ptr->ability_list.skill_ct[i] != 0
+            if ((g_event_work->ability_list.flags[i] & MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE)
+                && g_event_work->ability_list.skill_ct[i] != 0
                 && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)]
                     & STATUS_BYTE_MASK(STATUS_ID_SILENCE))) {
                 g_ability_list_ability_display_flags[i] = 8;
@@ -433,9 +427,9 @@ static void command_build_ability_list(s32 mode) {
     if (count == 0) {
         count = 1;
         g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].header_id = MENU_ICON_HEADER_NONE;
-        g_ai_workspace_ptr->ability_list.ids[0] = TEXT_ID_ABILITY_NAME_BASE;
-        g_ai_workspace_ptr->ability_list.values[0] = 0;
-        g_ai_workspace_ptr->ability_list.extras[0] = 0;
+        g_event_work->ability_list.ids[0] = TEXT_ID_ABILITY_NAME_BASE;
+        g_event_work->ability_list.values[0] = 0;
+        g_event_work->ability_list.extras[0] = 0;
         g_ability_list_ability_display_flags[0] = 4;
     }
 
@@ -514,16 +508,15 @@ void command_ability_list_thread(void) {
         slot->selected_index = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_ability_list_ability_layout.row_offset;
         if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {
-            thread_exit_current();
+            thread_current_exit();
         }
         if (g_command_action_slot_selected_option == -1) {
             if (i == 2) {
-                thread_exit_current();
+                thread_current_exit();
             }
             i += 2;
         } else {
-            text = g_ai_workspace_ptr->ability_list
-                       .ids[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index]
+            text = g_event_work->ability_list.ids[g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index]
                 - 0x7000;
             if (i == 2) {
                 g_command_selected_command.data.action.calculator_type = text;
@@ -536,7 +529,7 @@ void command_ability_list_thread(void) {
             }
         }
     }
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Build the Act submenu (SKILLSET_LIST) for the selected unit: its skillset rows from
@@ -554,8 +547,8 @@ static void command_build_act_menu(void) {
     g_command_skillsets[0] = 0;
     g_command_skillset_build_result = skillset_build_menu_list(g_unit_panel_selected_unit.battle_id,
         g_command_skillsets, g_command_skillset_disabled_flags, g_menu_skillset_types);
-    rows = (menu_text_row_t*)text_find_entry(0x5010);
-    if (unit_get_action_restriction(menu_get_selected_unit_stats()) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
+    rows = (menu_text_row_t*)text_entry_find(0x5010);
+    if (unit_get_action_restriction(menu_selected_unit_stats_get()) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
         for (i = 0; i < 6; i++) {
             g_command_skillset_disabled_flags[i] = 1;
             if (g_menu_skillset_types[i] == ACTION_MENU_TYPE_UNKNOWN_0D) {
@@ -588,7 +581,7 @@ static void command_build_act_menu(void) {
         }
         count++;
     }
-    if (script_get_variable(EVENT_SCRIPT_VAR_ANYTHING_ACTION_ENABLED) != 0 && i < 6) {
+    if (script_variable_get(EVENT_SCRIPT_VAR_ANYTHING_ACTION_ENABLED) != 0 && i < 6) {
         rows[i].style = 0;
         g_command_skillset_row_actions[i] = 0x16;
         g_command_skillsets[i] = ACTION_MENU_PSEUDO_SKILLSET_ANYTHING;
@@ -619,15 +612,15 @@ void command_act_menu_thread(void) {
         g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index = 0;
         if (g_menu_restore_pending == 0) {
             thread_start(g_thread_current_id - 1, command_ability_list_thread);
-            thread_set_parameters(
+            thread_parameters_set(
                 g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
         } else {
-            thread_wait_frames(2);
+            thread_frames_wait(2);
         }
         for (;;) {
             thread_yield();
             if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
-                thread_exit_current();
+                thread_current_exit();
             }
         }
     }
@@ -638,7 +631,7 @@ void command_act_menu_thread(void) {
     tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST);
     menu_run_icon_selection_loop();
     row->skillset_index = g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index;
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Record the current menu's selection byte for the selected unit, when that
@@ -660,7 +653,7 @@ void command_record_unit_selection(void) {
  * 0x2e-0x33 of the idle action menu table): run the icon selection loop, then
  * remember the chosen row for the active-turn unit and exit. */
 void command_turn_menu_thread(void) {
-    menu_entry_t* parameter = (menu_entry_t*)thread_get_current_parameter_1();
+    menu_entry_t* parameter = (menu_entry_t*)thread_current_parameter_1_get();
     menu_unit_selection_record_t* record;
     s32 unit_id = g_unit_panel_selected_unit.battle_id;
 
@@ -669,5 +662,5 @@ void command_turn_menu_thread(void) {
     g_thread_contexts[g_thread_current_id].function_parameter_2 = 1;
     menu_run_icon_selection_loop();
     record->command_index = parameter->selected_index;
-    thread_exit_current();
+    thread_current_exit();
 }

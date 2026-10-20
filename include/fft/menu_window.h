@@ -94,8 +94,8 @@ extern s8 g_gfx_transition_frame;
 
 void menu_set_window_scale_step(s32 value);
 s32 menu_get_window_scale_step(void);
-void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
-void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
+void menu_window_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
+void menu_window_quads_tween(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 
 /* window icons */
 /* Icon packet head: two DR_MODE packets at +0x00/+0x0c and four SPRT packets

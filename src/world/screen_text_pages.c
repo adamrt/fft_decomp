@@ -19,13 +19,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static menu_list_page_t g_screen_text_list_pages[2] = { 0 };
+static menu_list_page_t g_text_list_pages[2] = { 0 };
 
 /* Page a three-column text screen while Square is held: Up and Down move by a page within the
  * hidden rows, and a pending redraw request also counts. When anything changed, redraw the columns
  * into a new image, upload it (resetting the image ring to its first row) and return it; otherwise
  * return 0. */
-static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offset, s32* ring, s32* unused_cursor) {
+static u8* text_page_scroll_update(menu_entry_t* entry, s32* row_offset, s32* ring, s32* unused_cursor) {
     menu_text_layout_t* layout = entry->context;
     u32* input0;
     u32* input1;
@@ -85,7 +85,7 @@ static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offse
 
 /*
  * Scrolling three-column text list thread (an older sibling of
- * ability_list_scrolling_thread with a fixed page pair, g_screen_text_list_pages, and
+ * ability_list_scrolling_thread with a fixed page pair, g_text_list_pages, and
  * screen_window_frame_thread in the frame thread slot). The menu-screen library's
  * variant of at_list_run: the formation screens, the world map menus and the title's music
  * test run it.
@@ -93,7 +93,7 @@ static u8* screen_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offse
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row
  * scroll whose new row is drawn into the image ring; page scrolling is left
- * to screen_redraw_text_page_on_scroll, and the scroll-bar thumb tracks
+ * to text_page_scroll_update, and the scroll-bar thumb tracks
  * entry->selected_index. The list layout is read into `binding` for sizing and
  * copied to `layout` before the loop: with one variable the allocator gives
  * the image buffer the last callee-saved register instead of the layout.
@@ -131,14 +131,14 @@ void screen_text_list_thread(void) {
     s32 span;
     s32 repeat;
 
-    page = g_screen_text_list_pages;
+    page = g_text_list_pages;
     timer = 0;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);
     row_offset = 0;
     cursor = 0;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_current_parameter_1_get();
     binding = entry->context;
     entry->window.h = binding->row_count * 16 + 0x1C;
     entry->inner_height = binding->row_count * 16 + 0x1C;
@@ -158,10 +158,10 @@ void screen_text_list_thread(void) {
     texture_window.h = 0x100;
 
     for (i = 0; i < 2; i++) {
-        g_screen_text_list_pages[i].icons.icons[0] = &icons0[i];
-        g_screen_text_list_pages[i].icons.icons[1] = &icons1[i];
-        g_screen_text_list_pages[i].icons.icons[2] = &icons2[i];
-        menu_build_window_sprites(&image_rect, entry, &g_screen_text_list_pages[i].icons);
+        g_text_list_pages[i].icons.icons[0] = &icons0[i];
+        g_text_list_pages[i].icons.icons[1] = &icons1[i];
+        g_text_list_pages[i].icons.icons[2] = &icons2[i];
+        menu_build_window_sprites(&image_rect, entry, &g_text_list_pages[i].icons);
     }
 
     menu_init_scaled_draw_area_packets(&page->draw_areas);
@@ -209,7 +209,7 @@ void screen_text_list_thread(void) {
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(SCREEN_THREAD_SLOT_AT_LIST_FRAME, screen_window_frame_thread);
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+    thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
     screen_draw_text_columns(entry, &row_offset, buffer);
@@ -227,11 +227,11 @@ void screen_text_list_thread(void) {
 
     /* The loop draws from the two pages alternately. The copy also took page 0's icon pointers,
      * so point each page back at its own sprites. */
-    mem_copy_bytes_nonempty(&g_screen_text_list_pages[1], g_screen_text_list_pages, sizeof(menu_list_page_t));
+    mem_copy_bytes_nonempty(&g_text_list_pages[1], g_text_list_pages, sizeof(menu_list_page_t));
     for (i = 0; i < 2; i++) {
-        g_screen_text_list_pages[i].icons.icons[0] = &icons0[i];
-        g_screen_text_list_pages[i].icons.icons[1] = &icons1[i];
-        g_screen_text_list_pages[i].icons.icons[2] = &icons2[i];
+        g_text_list_pages[i].icons.icons[0] = &icons0[i];
+        g_text_list_pages[i].icons.icons[1] = &icons1[i];
+        g_text_list_pages[i].icons.icons[2] = &icons2[i];
     }
 
     layout = binding;
@@ -241,18 +241,18 @@ void screen_text_list_thread(void) {
     i = 0;
     *input1 = 0;
     for (;;) {
-        page = &g_screen_text_list_pages[i & 1];
+        page = &g_text_list_pages[i & 1];
         frame = &page->frame;
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
+            thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
         } else {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+            thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
-            /* Square with up or down pages through the list instead (screen_redraw_text_page_on_scroll). */
+            /* Square with up or down pages through the list instead (text_page_scroll_update). */
             if ((*input0 & PSX_PAD_UP) && !(*input1 & PSX_PAD_SQUARE)) {
                 if (cursor != 0) {
                     cursor--;
@@ -334,7 +334,7 @@ void screen_text_list_thread(void) {
             redraw_pending = 0;
         }
         if (delta == 0 && menu_can_accept_input() != 0) {
-            buffer = screen_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
+            buffer = text_page_scroll_update(entry, &row_offset, &ring, &cursor);
             /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
@@ -351,7 +351,7 @@ void screen_text_list_thread(void) {
         }
         menu_handle_cancel_input(entry);
 
-        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
+        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step;
@@ -367,7 +367,7 @@ void screen_text_list_thread(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = script_get_event_initial_repeat_counter();
+            repeat = script_event_initial_repeat_counter_get();
             delta = 0;
             accum = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -423,12 +423,12 @@ void screen_text_list_thread(void) {
     }
 
     /* A nonzero third parameter ends the frame thread. */
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
+    thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     /* A row scroll still under way owns its row buffer. */
     if (accum & 0xF) {
         menu_free_memory(buffer);
     }
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }

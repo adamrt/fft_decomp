@@ -66,14 +66,14 @@ s32 equipment_update_item_actions(void) {
     /* Each row's help text, from entry 0x2f of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
     g_help_message_text_id = g_equipment_item_action_active_menu->selected_index + 0x102F;
     g_equipment_item_action_menu_active
-        = menu_start_managed_thread(EQUIPMENT_THREAD_SLOT_POPUP_MENU, g_equipment_item_action_active_menu);
+        = menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, g_equipment_item_action_active_menu);
     if (g_equipment_item_action_menu_active == 0) {
         return MENU_ITEM_LIST_STATE_BROWSE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_item_action_menu.selected_index == 2) {
             g_equipment_item_action_menu_active = 0;
-            menu_stop_managed_thread(EQUIPMENT_THREAD_SLOT_POPUP_MENU);
+            menu_managed_thread_stop(EQUIPMENT_THREAD_SLOT_POPUP_MENU);
             return MENU_ITEM_LIST_STATE_SORT_ORDER;
         }
         g_sound_queued_effect_id = SOUND_SFX_INVALID;
@@ -145,14 +145,14 @@ s32 equipment_run_type_order_mode(void) {
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
-        menu_init_scrollable_list_core(
+        menu_scrollable_list_core_init(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
-        item_collect_stat_deltas(g_item_list_entries[g_menu_list_selected_index],
+        item_stat_preview_build(g_item_list_entries[g_menu_list_selected_index],
             &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
-    if (menu_start_managed_thread(EQUIPMENT_THREAD_SLOT_POPUP_MENU, g_equipment_item_type_order_active_menu) == 0) {
+    if (menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, g_equipment_item_type_order_active_menu) == 0) {
         g_equipment_type_order_ready = 0;
         return MENU_ITEM_LIST_STATE_ACTION;
     }
@@ -173,7 +173,7 @@ enum {
  * branch instead of the target's `li`/`sltiu`/`subu`. Assigning it before the
  * window call also keeps the constant load after the marker address arithmetic.
  *
- * Structurally identical to screen_draw_item_tabs, which draws
+ * Structurally identical to screen_item_tabs_draw, which draws
  * the same window/marker pair for the world-map menu.
  */
 void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override) {

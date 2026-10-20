@@ -31,7 +31,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
     s32 started;
 
     /* Refresh the player name buffer that the Ramza format code reads: end bytes, then party unit 0's name. */
-    party = party_get_unit(0);
+    party = party_unit_get(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
         fill[i] = terminator;
@@ -41,7 +41,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
     }
 
     if (text == 0 || text == (const u8*)1) {
-        cursor = text_find_entry(text_id);
+        cursor = text_entry_find(text_id);
     } else {
         cursor = text;
     }
@@ -76,18 +76,18 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                 } else if (state->command == TEXT_SET_PORTRAIT) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-                    script_set_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *cursor);
+                    script_variable_set(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, *cursor);
                 } else if (state->command == TEXT_SET_VARIABLE_BASE) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                     variable_id = *cursor;
                 } else if (state->command == TEXT_STORE_VARIABLE) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-                    i = script_get_variable(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
+                    i = script_variable_get(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX);
                     if (i != 0) {
-                        script_set_variable(variable_id + i * 10, *cursor);
-                        script_set_variable(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
+                        script_variable_set(variable_id + i * 10, *cursor);
+                        script_variable_set(EVENT_SCRIPT_VAR_TEXT_STORE_INDEX, 0);
                     } else {
-                        script_set_variable(variable_id, *cursor);
+                        script_variable_set(variable_id, *cursor);
                     }
                 } else if (state->command == TEXT_SET_PALETTE) {
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
@@ -123,7 +123,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                     i = state->pending_width - 1;
                     if (state->pending_width == 0xFFFF) {
                         started = 0;
-                        i = text_count_decimal_digits(state->value) - 1;
+                        i = text_decimal_digits_count(state->value) - 1;
                     } else {
                         state->pending_width = 0xFFFF;
                         started = 0;
@@ -149,13 +149,13 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
 
                 /* Every command above also reaches these tests; only a format code, a backreference
                  * or an end byte matches one. */
-                state->value = text_resolve_format_string_id(state->command, *state->value_cursor);
+                state->value = text_format_id_resolve(state->command, *state->value_cursor);
                 if (state->value != -1) {
                     state->return_cursor = cursor + 1;
                     if (state->command == TEXT_FORMAT_RAMZA_NAME) {
                         cursor = g_text_player_name_buffer;
                     } else {
-                        cursor = text_find_entry(state->value);
+                        cursor = text_entry_find(state->value);
                     }
                     state->value_cursor++;
                     continue;

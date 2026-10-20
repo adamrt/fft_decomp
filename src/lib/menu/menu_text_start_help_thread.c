@@ -12,10 +12,10 @@
  * input. The dialog type is HELP_DIALOG_TYPE at the position `thread_data` gives. */
 void menu_text_start_help_thread(s32 thread_data) {
     if (g_help_message_text_id > 0) {
-        text_save_section_pointers();
-        text_relocate_pointer_table(g_help_text_table);
+        text_section_pointers_save();
+        text_pointer_table_relocate(g_help_text_table);
         thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
-        thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, thread_data + HELP_DIALOG_TYPE, g_help_message_text_id, 0);
+        thread_parameters_set(THREAD_SCREEN_SLOT_TEXT, thread_data + HELP_DIALOG_TYPE, g_help_message_text_id, 0);
         g_menu_input_lock_mode = 1;
     }
 }

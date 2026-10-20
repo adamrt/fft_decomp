@@ -82,8 +82,8 @@ static rgb24_t g_tutorial_highlight_colors_a[4] = { 0 };         /* first quad c
 static rgb24_t g_tutorial_highlight_colors_b[4] = { 0 };         /* second quad corner colors */
 static u8 g_tutorial_highlight_quad_count = 0;
 
-static void tutorial_advance_highlight(void);
-static void tutorial_draw_highlight(s32 brightness);
+static void highlight_update(void);
+static void highlight_draw(s32 brightness);
 static void tutorial_opcode_00_press_button(void);
 static void tutorial_opcode_10_display_message(void);
 static void tutorial_opcode_11_change_dialog(void);
@@ -96,7 +96,7 @@ static s32 tutorial_opcode_17_end(void);
 
 /* The pad state tutorial_step read this frame; the tutorial text
  * thread takes its button input from it. */
-s32 tutorial_get_buttons(void) {
+s32 tutorial_buttons_get(void) {
     return g_tutorial_buttons;
 }
 
@@ -113,19 +113,19 @@ s32 tutorial_get_buttons(void) {
 void tutorial_start(s32 index) {
     g_tutorial_id = index;
     if (index != 0) {
-        tutorial_load_files(index, &g_tutorial_state);
+        tutorial_files_load(index, &g_tutorial_state);
         g_tutorial_command_ptr = g_tutorial_state.script;
         g_text_section_pointers[SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = g_tutorial_state.messages;
-        save_init_screen();
-        save_build_image(-1);
+        save_screen_init();
+        save_image_build(-1);
         bcopy(g_save_work_buffer, &g_tutorial_state.saved_game, sizeof(g_tutorial_state.saved_game));
-        file_load_checked_to_address(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_save_work_buffer);
+        file_buffer_load_checked(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_save_work_buffer);
         g_save_work_buffer->options.show_unequippable_items = GAME_OPTION_ON;
         g_save_work_buffer->options.max_equip_at_job_change = g_game_options.fields.max_equip_at_job_change;
         g_save_work_buffer->options.sound_mode = g_game_options.fields.sound_mode;
-        save_restore_image(1);
+        save_image_restore(1);
         g_tutorial_command_active = 0;
-        formation_build_roster_names();
+        formation_roster_names_build();
     }
 }
 
@@ -148,11 +148,11 @@ s32 tutorial_step(void) {
     }
     g_tutorial_button_input = PadRead(0);
     if (g_tutorial_button_input == INPUT_RESET_BUTTONS) {
-        screen_reset_game();
+        screen_game_reset();
     }
     g_tutorial_buttons = g_tutorial_button_input;
     if (g_tutorial_highlight_brightness != 0) {
-        tutorial_advance_highlight();
+        highlight_update();
     }
     cmd = *g_tutorial_command_ptr;
     if (cmd < TUTORIAL_CMD_PRESS_BUTTON_LIMIT) {
@@ -186,19 +186,19 @@ s32 tutorial_step(void) {
  * tutorial_step passes 1 on. */
 static s32 tutorial_opcode_17_end(void) {
     if (g_tutorial_command_active != 0) {
-        if (screen_fade_update_out() == 0) {
+        if (screen_fade_out_update() == 0) {
             g_tutorial_id = 0;
-            heap_call_free(g_tutorial_state.messages);
-            heap_call_free(g_tutorial_state.script);
+            heap_block_release(g_tutorial_state.messages);
+            heap_block_release(g_tutorial_state.script);
             bcopy(&g_tutorial_state.saved_game, g_save_work_buffer, sizeof(g_tutorial_state.saved_game));
-            save_restore_image(1);
-            formation_build_roster_names();
-            heap_call_free(g_save_work_buffer);
-            formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
+            save_image_restore(1);
+            formation_roster_names_build();
+            heap_block_release(g_save_work_buffer);
+            formation_record_list_build(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
             return 0;
         }
     } else {
-        screen_fade_start_increasing();
+        screen_fade_out_start();
         g_tutorial_command_active = 1;
     }
 }
@@ -231,7 +231,7 @@ static void tutorial_opcode_00_press_button(void) {
  * the operand fields preserves the -O0 byte-address steps. */
 static void tutorial_opcode_10_display_message(void) {
     thread_start(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
-    thread_set_parameters(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
+    thread_parameters_set(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(*(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->text_id_le[1]) * 0x100)
             + (*(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
         0);
@@ -245,7 +245,7 @@ static void tutorial_opcode_10_display_message(void) {
 /* Tutorial command: let the tutorial text continue and move on once its
  * thread has ended. */
 static void tutorial_opcode_12_wait_for_message(void) {
-    screen_text_resume_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
+    screen_text_printing_resume(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
     if (thread_is_running(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) == 0) {
         g_tutorial_command_ptr++;
     }
@@ -261,8 +261,8 @@ static void tutorial_opcode_12_wait_for_message(void) {
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
 static void tutorial_opcode_11_change_dialog(void) {
-    if (screen_text_is_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
-        thread_set_parameters(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
+    if (screen_text_printing_check(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
+        thread_parameters_set(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
             (s32)((u8*)(*(&((tutorial_dialog_instruction_t*)g_tutorial_command_ptr)->text_id_le[1]) * 0x100)
                 + (*(&((tutorial_dialog_instruction_t*)g_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
             0);
@@ -339,7 +339,7 @@ static void tutorial_opcode_13_highlight_ring(void) {
 /* Draw the tutorial highlight ring each frame while it is up. Until a WAIT
  * command runs, the ring grows by one quad per VSync up to all 30, at full
  * brightness (18); WAIT then counts the brightness down to fade it out. */
-static void tutorial_advance_highlight(void) {
+static void highlight_update(void) {
     if (*g_tutorial_command_ptr != TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
         g_tutorial_highlight_brightness = 0x12;
         g_tutorial_highlight_quad_count += menu_get_event_speed();
@@ -347,7 +347,7 @@ static void tutorial_advance_highlight(void) {
             g_tutorial_highlight_quad_count = 0x1e;
         }
     }
-    tutorial_draw_highlight(g_tutorial_highlight_brightness);
+    highlight_draw(g_tutorial_highlight_brightness);
 }
 
 /* Tutorial command: fade the highlight out, counting its brightness down by the
@@ -366,7 +366,7 @@ static void tutorial_opcode_14_fade_out_highlight(void) {
  * way round, with brightness scaled by ten. Built with -O0 like the other
  * tutorial handlers.
  */
-static void tutorial_draw_highlight(s32 brightness) {
+static void highlight_draw(s32 brightness) {
     s32 i;
 
     brightness = brightness * 10;
@@ -414,7 +414,7 @@ static void tutorial_opcode_16_wait_for_button(void) {
         if (g_tutorial_button_input != 0) {
             g_tutorial_command_ptr++;
         }
-    } else if (screen_text_is_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1 && g_tutorial_button_input != 0) {
+    } else if (screen_text_printing_check(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1 && g_tutorial_button_input != 0) {
         g_tutorial_command_ptr++;
     }
 }

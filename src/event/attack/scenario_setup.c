@@ -71,10 +71,10 @@ s32 scenario_load_conditionals(void) {
     s32 first;
     s32 count;
 
-    if (script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
-        && script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_MILITARY_ACADEMY) {
-        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GARILAND_BATTLE_SETUP);
-        script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
+    if (script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
+        && script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_MILITARY_ACADEMY) {
+        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GARILAND_BATTLE_SETUP);
+        script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
         g_system_go_straight_to_battle = 0;
     }
@@ -82,7 +82,7 @@ s32 scenario_load_conditionals(void) {
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         g_portrait_special_wldface_id = 0;
         g_portrait_special_unit_id = 0;
-        value = g_scenario_event_finish_operations[script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT)];
+        value = g_scenario_event_finish_operations[script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT)];
         if (value == 0) {
             return;
         }
@@ -109,35 +109,35 @@ s32 scenario_load_conditionals(void) {
 
     g_scenario_event_active = 0;
     for (i = EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST; i < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_END; i++) {
-        script_set_variable(i, 0);
+        script_variable_set(i, 0);
     }
-    script_set_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 1);
+    script_variable_set(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 1);
 
     /* Chapter 1 advances to Chapter 2. "The lying heart" normally advances to the Riovanes
      * aftermath; after the funeral, it selects the epilogue instead. */
-    if (script_get_variable(EVENT_SCRIPT_VAR_OLAN_SAW_RAMZA_FUNERAL) != 0
-        && script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
-        && script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_THE_LYING_HEART) {
-        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_EPILOGUE_SETUP);
-    } else if (script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0) {
-        id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+    if (script_variable_get(EVENT_SCRIPT_VAR_OLAN_SAW_RAMZA_FUNERAL) != 0
+        && script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
+        && script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_THE_LYING_HEART) {
+        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_EPILOGUE_SETUP);
+    } else if (script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0) {
+        id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if (id == EVENT_ID_FORT_ZEAKDEN_EXPLOSION) {
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_CHAPTER_2_SETUP);
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_CHAPTER_2_SETUP);
         } else if (id == EVENT_ID_THE_LYING_HEART) {
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_RIOVANES_AFTERMATH_SETUP);
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_RIOVANES_AFTERMATH_SETUP);
         } else {
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, id + 1);
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, id + 1);
         }
     } else if (g_system_go_straight_to_battle != 0) {
-        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 1);
+        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 1);
         for (i = 1; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-            party_remove_unit(i);
+            party_unit_remove(i);
         }
     }
 
     g_system_go_straight_to_battle = 0;
-    script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
-    event = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+    script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
+    event = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
 
     /* Rebuild the finish-operation table from every scenario record (the after-event code from
      * bit 8, the next scenario encoded as above), then fix the battle-result events' entries. */
@@ -155,7 +155,7 @@ s32 scenario_load_conditionals(void) {
     g_scenario_event_finish_operations[EVENT_ID_BATTLE_WON] = 0x8000;
     g_scenario_event_finish_operations[EVENT_ID_BATTLE_START] = 0;
     g_scenario_event_finish_operations[EVENT_ID_DEBUG_BATTLE_START] = 0;
-    if (script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+    if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
         g_scenario_event_finish_operations[EVENT_ID_GAME_OVER] = 0x8000;
         g_scenario_event_finish_operations[EVENT_ID_GAME_OVER_RAMZA] = 0x8000;
     } else {
@@ -173,8 +173,8 @@ s32 scenario_load_conditionals(void) {
     }
 
     if (id == 0) {
-        script_set_variable(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, 0);
-        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
+        script_variable_set(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, 0);
+        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
         return 0;
     }
 
@@ -224,33 +224,33 @@ s32 scenario_load_conditionals(void) {
         }
     }
 
-    script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, map_id);
+    script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, map_id);
     /* The weather byte's high nibble is the map arrangement. */
-    script_set_variable(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, weather >> 4);
-    script_set_variable(EVENT_SCRIPT_VAR_WEATHER, weather & 0xf);
-    script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, daytime);
+    script_variable_set(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, weather >> 4);
+    script_variable_set(EVENT_SCRIPT_VAR_WEATHER, weather & 0xf);
+    script_variable_set(EVENT_SCRIPT_VAR_TIME_OF_DAY, daytime);
     if (entd != 0) {
-        if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, squads[3]);
+        if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, squads[3]);
         } else {
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_ENTD, entd);
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, entd);
         }
-    } else if (script_get_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT) >= 5) {
-        script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, 0);
+    } else if (script_variable_get(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT) >= 5) {
+        script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, 0);
     }
 
     g_encounter_selection_mode = UNIT_ENTD_SELECTION_SCRIPT_VARIABLE;
-    script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, count);
-    script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
+    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, count);
+    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
 
     if (squads[0] == 0) {
         return 1;
     }
-    script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, squads[0]);
-    script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, squads[1]);
-    script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_THIRD_SQUAD_ID, 0);
-    script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_FOURTH_SQUAD_ID, 0);
-    script_set_variable(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, ramza);
+    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, squads[0]);
+    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, squads[1]);
+    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_THIRD_SQUAD_ID, 0);
+    script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_FOURTH_SQUAD_ID, 0);
+    script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, ramza);
     return 0;
 }
 
@@ -270,11 +270,11 @@ void scenario_restore_music_and_darkness(void) {
     s32 playing;
     u16 replacement;
 
-    scenario = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+    scenario = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
     if (g_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
         if (g_sound_music_track_1_id == 0 && g_sound_music_track_2_id == 0) {
             g_sound_current_music_track_index = 0;
-            music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
+            music_tracks_play(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
         } else {
             if (g_sound_current_music_track_index == 0) {
                 playing = g_sound_music_track_1_id;
@@ -286,13 +286,13 @@ void scenario_restore_music_and_darkness(void) {
 
             if (playing != g_event_scenario_music_1_id && playing != g_event_scenario_music_2_id) {
                 g_sound_current_music_track_index = 0;
-                music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
+                music_tracks_play(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
             } else {
-                g_thread_call_target = (void (*)(void))music_unload_scenario_slot;
+                g_thread_call_target = (void (*)(void))music_scenario_slot_unload;
                 thread_call_on_main_stack((g_sound_current_music_track_index ^ 1) + 1);
-                g_thread_call_target = (void (*)(void))music_load_into_slot;
+                g_thread_call_target = (void (*)(void))music_slot_load;
                 thread_call_on_main_stack(replacement, (g_sound_current_music_track_index ^ 1) + 1);
-                music_wait_for_load();
+                music_load_wait();
             }
         }
 

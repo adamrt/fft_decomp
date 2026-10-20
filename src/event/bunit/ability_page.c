@@ -60,8 +60,8 @@ void unit_list_update_job_page(void) {
     if (g_job_list_menu_active == 0) {
         g_job_list_menu_active = 1;
         g_job_list_menu_phase = MENU_JOB_LIST_STEP_JOBS;
-        menu_set_selection_value(0, 0);
-        menu_clear_selection_records();
+        menu_selection_value_set(0, 0);
+        menu_selection_records_clear();
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
@@ -110,21 +110,21 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
         g_ability_list_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
-        menu_clear_selection_record(10);
-        menu_clear_selection_record(11);
-        menu_clear_selection_record(12);
-        menu_clear_selection_record(13);
+        menu_selection_record_clear(10);
+        menu_selection_record_clear(11);
+        menu_selection_record_clear(12);
+        menu_selection_record_clear(13);
         rect.x = 0x100;
         rect.y = 0xC8;
         rect.w = 0x14;
         rect.h = 0x10;
         g_ability_list_job_name_ids[0] = g_job_list_selected_id;
-        text_render_id_rows_to_vram(
+        text_id_rows_to_vram_render(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_ids, &rect, 0);
-        g_ability_list_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
+        g_ability_list_ability_category = menu_selection_horizontal_step(4, 0, 0);
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_init_scrollable_list_core(
+        menu_scrollable_list_core_init(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_ability_list_ready = 1;
     }
@@ -146,15 +146,14 @@ s32 ability_list_update(void) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
-    category
-        = menu_update_horizontal_selection_and_mark_change(4, 0, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
+    category = menu_selection_horizontal_sound_step(4, 0, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (category != g_ability_list_ability_category) {
-        menu_set_selection_record(g_ability_list_ability_category + 10, g_menu_list_selected_index,
+        menu_selection_record_set(g_ability_list_ability_category + 10, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_ability_list_ability_entries);
         g_ability_list_ability_category = category;
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_get_selection_record(
+        menu_selection_record_restore(
             g_ability_list_ability_category + 10, &selected, &scroll, g_ability_list_ability_entries);
         menu_init_scrollable_list(
             g_ability_list_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);

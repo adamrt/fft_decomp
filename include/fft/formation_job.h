@@ -1,10 +1,8 @@
 #ifndef FORMATION_JOB_H
 #define FORMATION_JOB_H
 
-/* The Formation screen's job menu in WORLD: changing a unit's job, the job wheel and its job-change animation; the
- * ATTACK and REQUIRE overlays' party portrait job record sits here too. */
+/* Formation job changes, the job wheel and its job-change animation. */
 
-#include "fft/job.h"
 #include "psx/types.h"
 
 /* job change */
@@ -24,11 +22,6 @@ enum {
 enum { FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS = 2 };
 
 extern s8 g_formation_job_wheel_initialized;
-void formation_job_wheel_menu(void);
-
-/* party portraits */
-/* The job record the ATTACK and REQUIRE party portrait builders last looked
- * up; each overlay defines its own. */
-extern const job_data_t* g_formation_job_data;
+void formation_job_menu_update(void);
 
 #endif

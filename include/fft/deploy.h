@@ -21,7 +21,7 @@ void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green
 s32 deploy_sync_and_submit_frame(u32* ordering_table);
 s32 deploy_update_controller_input(void);
 void deploy_mark_finished(void);
-void deploy_init_and_reset_sprite_load_state(void);
+void deploy_sprite_load_init(void);
 s32 deploy_build_units(unit_deployment_coordinates_t* formation, s32 unused_1);
 s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index);
 void deploy_init_units_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1);

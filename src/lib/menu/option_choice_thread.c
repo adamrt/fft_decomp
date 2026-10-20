@@ -71,7 +71,7 @@ void option_choice_thread(void) {
     }
     height = g_option_choice_counts[kind] * 16 + 16;
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
-    thread_wait_frames(1);
+    thread_frames_wait(1);
 
     g_menu_window_text_pen.stride = width;
     for (i = 0; i < g_option_choice_counts[kind]; i++) {
@@ -109,7 +109,7 @@ void option_choice_thread(void) {
 
     LoadImage(&rect, buffer);
     menu_free_memory(buffer);
-    thread_wait_frames(1);
+    thread_frames_wait(1);
 
     cursor = g_option_values[kind];
     /* `width` is reused as the frame counter. */
@@ -170,7 +170,7 @@ void option_choice_thread(void) {
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, width, cursor);
         menu_submit_icon_primitives(record);
-        thread_wait_frames(1);
+        thread_frames_wait(1);
     }
 
     g_game_options.fields.cursor_movement = g_option_values[GAME_OPTION_CURSOR_MOVEMENT];
@@ -200,6 +200,6 @@ void option_choice_thread(void) {
 
     /* Clear the closing press so the options list thread does not act on it too. */
     *input = 0;
-    thread_wait_frames(1);
-    thread_exit_current();
+    thread_frames_wait(1);
+    thread_current_exit();
 }

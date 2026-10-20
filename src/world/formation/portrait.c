@@ -1,0 +1,70 @@
+/* Resolve a roster unit's sprite sheet to a WLDFACE portrait and texture its quad. */
+
+#include "fft/portrait.h"
+#include "fft/job.h"
+#include "fft/menu.h"
+#include "fft/party.h"
+#include "fft/screen.h"
+#include "fft/unit_identity.h"
+#include "fft/unit_party.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
+
+extern u16 g_portrait_code_by_sprite_sheet_id[];
+/* packed portrait code per sprite-sheet id */ /* packed portrait code per sprite-sheet id */
+
+/*
+ * Resolves a roster slot's sprite sheet to its 16-bit portrait code and,
+ * unless the code's suppress bits are set, textures `poly` with that portrait.
+ *
+ * Special characters index the portrait table by their sprite set; generic
+ * units by job and gender, Bard and Dancer included; monsters by their job's
+ * sprite sheet, with the job's portrait palette added from bit 10. An empty
+ * slot (no sprite set) gets code 0.
+ */
+void portrait_poly_build(s32 roster_slot, POLY_FT4* poly) {
+    party_unit_t* party = party_unit_get(roster_slot);
+    const job_data_t* job;
+    u32 sprite = party->sprite_set;
+    u8 job_id;
+    s32 offset;
+    s32 current_job;
+
+    if (sprite >= CHARACTER_IDENTITY_GENERIC_MALE) {
+        if (sprite == CHARACTER_IDENTITY_GENERIC_MALE) {
+            job_id = party->job_id;
+            offset = (job_id - JOB_ID_GENERIC_FIRST) * 2;
+            sprite = offset + JOB_SHEET_GENERIC_MALE_BASE;
+            if (job_id == JOB_ID_MIME) {
+                sprite = offset + JOB_SHEET_GENERIC_MALE_MIME_BASE;
+            }
+        } else if (sprite == CHARACTER_IDENTITY_GENERIC_FEMALE) {
+            job_id = party->job_id;
+            offset = (job_id - JOB_ID_GENERIC_FIRST) * 2;
+            sprite = offset + JOB_SHEET_GENERIC_FEMALE_BASE;
+            if (job_id == JOB_ID_MIME) {
+                sprite = offset + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
+            }
+        } else {
+            job = job_data_get(party->job_id);
+            sprite = job->spritesheet_id;
+        }
+        current_job = party->job_id;
+        if (current_job == JOB_ID_BARD) {
+            sprite = JOB_SHEET_BARD;
+        }
+        if (current_job == JOB_ID_DANCER) {
+            sprite = JOB_SHEET_DANCER;
+        }
+    }
+    sprite = g_portrait_code_by_sprite_sheet_id[sprite];
+    if (party->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
+        sprite = 0;
+    }
+    if (party->sprite_set == CHARACTER_IDENTITY_MONSTER) {
+        sprite |= job->job_portrait_palette << 10;
+    }
+    if ((sprite & PORTRAIT_CODE_SUPPRESS_MASK) == 0) {
+        portrait_build_wldface_poly(poly, sprite);
+    }
+}

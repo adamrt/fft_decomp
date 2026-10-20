@@ -81,21 +81,21 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = ability_list_is_action_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
-        menu_clear_selection_record(MENU_ABILITY_CATEGORY_ACTION);
-        menu_clear_selection_record(MENU_ABILITY_CATEGORY_REACTION);
-        menu_clear_selection_record(MENU_ABILITY_CATEGORY_SUPPORT);
-        menu_clear_selection_record(MENU_ABILITY_CATEGORY_MOVEMENT);
+        menu_selection_record_clear(MENU_ABILITY_CATEGORY_ACTION);
+        menu_selection_record_clear(MENU_ABILITY_CATEGORY_REACTION);
+        menu_selection_record_clear(MENU_ABILITY_CATEGORY_SUPPORT);
+        menu_selection_record_clear(MENU_ABILITY_CATEGORY_MOVEMENT);
         rect.x = 0x100;
         rect.y = 0xc8;
         rect.w = 0x14;
         rect.h = 0x10;
         g_ability_list_job_name_ids[0] = g_job_list_selected_id;
-        text_render_id_rows_to_vram(
+        text_id_rows_to_vram_render(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_ids, &rect, 0);
         g_ability_list_ability_category = status_screen_update_wrapped_horizontal_selection(4, 5, 0);
         ability_list_build(
             0, g_job_list_selected_id & 0x3ff, g_ability_list_ability_category, g_ability_list_ability_entries, 0);
-        menu_init_scrollable_list_core(
+        menu_scrollable_list_core_init(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_ability_list_initialized = 1;
     }
@@ -126,12 +126,13 @@ s32 ability_list_update(void) {
     /* On a tab change, save the old tab's cursor and rebuild the list for the new one. */
     category = status_screen_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
     if (category != g_ability_list_ability_category) {
-        menu_set_selection_record(g_ability_list_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index,
+        menu_selection_record_set(g_ability_list_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index,
             g_ability_list_ability_entries);
         g_ability_list_ability_category = category;
         ability_list_build(
             0, g_job_list_selected_id, g_ability_list_ability_category, g_ability_list_ability_entries, 0);
-        menu_get_selection_record(g_ability_list_ability_category, &selected, &scroll, g_ability_list_ability_entries);
+        menu_selection_record_restore(
+            g_ability_list_ability_category, &selected, &scroll, g_ability_list_ability_entries);
         menu_init_scrollable_list(
             g_ability_list_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(0xa);

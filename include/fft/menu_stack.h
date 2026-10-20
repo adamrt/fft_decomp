@@ -93,7 +93,7 @@ void menu_stack_dispatch_resume(void);
 
 /* levels */
 /* Leading 32-bit fields of a menu level that owns up to two window/render record
- * pairs; menu_stack_pop_and_release_records releases each index
+ * pairs; level_records_release releases each index
  * that is not -1. */
 typedef struct menu_stack_slot_set {
     s32 result;   /* 0x00; the location menu step sets 1 on confirm, 0 on cancel */
@@ -103,7 +103,7 @@ typedef struct menu_stack_slot_set {
     s32 render_b; /* 0x10 */
 } menu_stack_slot_set_t;
 
-/* The MESSAGE and TEXT_WINDOW levels (menu_stack_push_message_level, menu_stack_push_text_window_level). */
+/* The MESSAGE and TEXT_WINDOW levels (menu_stack_message_open, menu_stack_text_window_open). */
 typedef struct menu_stack_message_level {
     s32 reload_text;
     s32 saved_blocked_buttons; /* 0x04; g_menu_blocked_buttons at push time */
@@ -111,17 +111,17 @@ typedef struct menu_stack_message_level {
     s32 _unknown_0c;           /* 0x0c; set to 8 at push */
 } menu_stack_message_level_t;
 
-/* The SCROLLABLE_TEXT level, pushed by menu_stack_push_scrollable_text_level and stepped by
- * menu_stack_step_scrollable_text_level. */
+/* The SCROLLABLE_TEXT level, pushed by menu_stack_scrollable_text_open and stepped by
+ * scrollable_text_level_update. */
 typedef struct menu_stack_scrollable_text_level {
     s32 window_index; /* 0x00; window record of the frame */
     u8 _unused_04[0x1c];
     s32 _unknown_20; /* 0x20; 0x28 at push; nothing reads it */
 } menu_stack_scrollable_text_level_t;
 
-/* Panel levels: the number panels (proposition_push_days_level, debug_push_variable_edit_level and
- * debug_push_party_number_level) and the list
- * panels (brave_story_open_unexplored_land_list, tutorial_open_topic_list and
+/* Panel levels: the number panels (proposition_days_open, variable_edit_open and
+ * party_number_open) and the list
+ * panels (brave_story_unexplored_land_list_open, tutorial_topic_list_open and
  * bar_leave). */
 typedef struct menu_stack_panel_level {
     /* 0x00; number panel: 0 running, 1 confirmed, 2 canceled; list panels
@@ -130,7 +130,7 @@ typedef struct menu_stack_panel_level {
     s32 variable_id; /* 0x04; script variable edited by number panels */
     u8 _unused_08[0x28];
     s32 entry_count; /* 0x30; rows in the panel list */
-    /* 0x34; entry text ids, filled by location_build_menu_entries, whose result is the entry count;
+    /* 0x34; entry text ids, filled by location_menu_entries_build, whose result is the entry count;
      * the same offset as the Brave Story and proposition-list entries */
     s32 entries[10];
 } menu_stack_panel_level_t;
@@ -144,12 +144,12 @@ typedef enum menu_stack_window_mode {
     MENU_STACK_WINDOW_MODE_LEAVE_WAIT = 3     /* faded out; waits for thread 14 to end, then pops */
 } menu_stack_window_mode_e;
 
-void menu_stack_push_message_level(s32 text, s32 reload_text);
-void menu_stack_push_text_window_level(s32 text, s32 reload_text);
-void menu_stack_push_scrollable_text_level(s32 text_id);
+void menu_stack_message_open(s32 text, s32 reload_text);
+void menu_stack_text_window_open(s32 text, s32 reload_text);
+void menu_stack_scrollable_text_open(s32 text_id);
 
 /* menu levels */
-/* A window record and a render record handled together (proposition_suspend_detail_level). */
+/* A window record and a render record handled together (proposition_detail_level_suspend). */
 typedef struct window_render_pair {
     s32 window_index;
     s32 render_index;
@@ -186,8 +186,8 @@ enum { MENU_STACK_CURSOR_SLOT_COUNT = 21 };
 extern menu_cursor_state_t g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_COUNT];
 
 void menu_stack_clamp_cursor(s32 index, s32 count, s32 visible);
-void menu_stack_clear_cursor(s32 index);
-void menu_stack_store_cursor(s32 index);
+void menu_stack_cursor_clear(s32 index);
+void menu_stack_cursor_store(s32 index);
 
 /* list panels */
 /* Per-row text palette offsets for list panels. The active-proposition list also

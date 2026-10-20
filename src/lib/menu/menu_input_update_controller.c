@@ -14,7 +14,7 @@ extern s32 g_menu_input_repeat_counters[16];
 /*
  * Publish newly pressed buttons and two repeat rates for menus.
  *
- * Same latch/activation/repeat logic as screen_input_update_pad and
+ * Same latch/activation/repeat logic as screen_input_pad_update and
  * save_input_update_controller, with the frame-speed divisor fixed at 2.
  * The divisor stays a variable: the target divides by a register holding 2
  * rather than shifting. Counter slots 4..11 are skipped: only the shoulder

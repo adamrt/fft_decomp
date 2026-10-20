@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* bar menu */
-/* Row kinds of the bar's menu (bar_build_rows); the row text is TEXT_ID_WORLD_MENU_BASE + kind. */
+/* Row kinds of the bar's menu (bar_rows_build); the row text is TEXT_ID_WORLD_MENU_BASE + kind. */
 typedef enum bar_row {
     BAR_ROW_RUMORS = 0,
     BAR_ROW_AVAILABLE_PROPOSITIONS = 1,
@@ -33,12 +33,13 @@ typedef struct bar_menu_level {
 } bar_menu_level_t;
 typedef char bar_menu_level_size_must_be_72[sizeof(bar_menu_level_t) == 72 ? 1 : -1];
 
-void bar_build_rows(bar_menu_level_t* level);
-void bar_resume_level(menu_stack_record_t* level);
-void bar_handle_input(menu_stack_record_t* level);
+void bar_rows_build(bar_menu_level_t* level);
+void bar_menu_open(void);
+void bar_menu_resume(menu_stack_record_t* level);
+void bar_menu_update(menu_stack_record_t* level);
 
 /* Suspend handler of the bar menu level: dim its windows (palettes 10, 6, 2) and show the pressed cursor. */
-void bar_suspend_level(menu_stack_record_t* level);
+void bar_menu_suspend(menu_stack_record_t* level);
 
 /* rumors */
 /* The RUMOR_DETAIL level pushed by rumor_push_detail_level. Its close handler
@@ -53,8 +54,8 @@ typedef struct rumor_detail_level {
 
 /* Withhold every button before a list level opens a message over itself. */
 void rumor_block_list_buttons(menu_stack_record_t* unused_level);
-void rumor_handle_list_input(menu_stack_record_t* level);
-void rumor_restore_list_prompt(menu_stack_record_t* level);
+void rumor_list_input_update(menu_stack_record_t* level);
+void rumor_list_prompt_restore(menu_stack_record_t* level);
 void rumor_wait_detail_then_pop(menu_stack_record_t* level);
 
 #endif

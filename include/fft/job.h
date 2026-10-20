@@ -21,8 +21,8 @@ typedef char job_stat_growth_size_must_be_2[(sizeof(job_stat_growth_t) == 2) ? 1
 
 /*
  * 0x30-byte job record (g_job_data_pointer). The named fields are those copied
- * by unit_copy_job_data, unit_calculate_encounter_abilities and
- * unit_set_equipment_stats into unit_stats_t.
+ * by job_data_copy, encounter_abilities_set and
+ * unit_equipment_stats_set into unit_stats_t.
  */
 typedef struct job_data {
     u8 skillset;                       /* 0x00 */
@@ -42,8 +42,8 @@ typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 
 extern job_data_t* g_job_data_pointer;
 
-const job_data_t* job_get_data(s32 job_id);
-s32 job_find_by_skillset(u8 skillset_id);
+const job_data_t* job_data_get(s32 job_id);
+s32 job_skillset_find(u8 skillset_id);
 
 /* job ids */
 /* Job ids index the 160 records of g_job_data. A name is the job's name
@@ -271,8 +271,8 @@ typedef enum unit_career_job_index {
 enum { UNIT_JOB_LEVEL_MAX = 8, UNIT_JOB_POINT_MAX = 9999 };
 
 /* Serialized unit-career layout shared by party records and battle stats.
- * unit_generate_party_record clears the 0x96-byte span, while
- * job_add_proposition_jp and unit_copy_party_record establish the
+ * party_record_generate clears the 0x96-byte span, while
+ * job_proposition_jp_add and party_record_copy establish the
  * little-endian byte order of each serialized JP value. Each packed level byte
  * stores the even career index in its high nibble and the following odd index
  * in its low nibble. */
@@ -338,10 +338,10 @@ typedef char unit_career_data_size_must_be_150[(sizeof(unit_career_data_t) == UN
 extern const u16 g_job_jp_requirements_by_level[UNIT_JOB_LEVEL_MAX + 1];
 extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
 
-u32 job_calculate_level(u16 job_jp);
-u32 job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags);
-void job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
-s32 job_add_proposition_jp(u32 party_index, s32 jp);
+u32 job_level_calculate(u16 job_jp);
+u32 job_unlocks_calculate(const u8* packed_job_levels, u32 gender_flags);
+void job_unlocks_store(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
+s32 job_proposition_jp_add(u32 party_index, s32 jp);
 
 /* menu library helpers */
 struct party_unit;
@@ -349,9 +349,9 @@ struct party_unit;
 /* The menu library's job helpers (src/lib/menu), compiled into WORLD and the
  * EVENT overlays. */
 void job_calculate_and_store_unlocks(struct party_unit* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
-s32 job_find_first_for_skillset(s32 skillset);
-s32 job_get_generic_index(s32 job_id);
-s32 job_get_skillset(s32 job_id);
+s32 job_first_for_skillset_find(s32 skillset);
+s32 job_generic_index_get(s32 job_id);
+s32 job_skillset_get(s32 job_id);
 s32 job_is_special_monster(s32 job_id);
 
 #endif

@@ -121,7 +121,7 @@ extern u16 g_menu_text_clut_2_mode0;
 extern u16 g_menu_alternate_number_clut;
 extern u16 g_menu_disabled_number_clut;
 
-void menu_set_palette_colors(const menu_palette_pair_t* source);
+void menu_palette_colors_set(const menu_palette_pair_t* source);
 void menu_set_palette_mode(s32 mode);
 void menu_select_sprite_clut(void* packet);
 void menu_select_icon_sprite_clut(SPRT* slot);
@@ -141,7 +141,7 @@ extern menu_glyph_sheet_t g_menu_glyph_image_data;
 
 /* sprite pages */
 /* One double-buffered sprite page (0xa0 bytes): five DR_MODE texture-window packets followed by the five SPRTs
- * they apply to. menu_build_sprite_page builds two of them in g_menu_scratch_buffer for the unit stats panels. */
+ * they apply to. sprite_page_build builds two of them in g_menu_scratch_buffer for the unit stats panels. */
 typedef struct menu_sprite_page {
     DR_MODE modes[5]; /* 0x00 */
     SPRT sprites[5];  /* 0x3c */

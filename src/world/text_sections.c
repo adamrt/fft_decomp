@@ -860,16 +860,15 @@ static s32 g_tutorial_script_files[TUTORIAL_FORMATION_COUNT * 2]
 
 /* Load shop background image `index` to the heap; the table holds a sector
  * and a size per image. */
-u32* shop_load_background(s32 index) {
-    return file_load_checked_to_heap(
-        g_shop_background_tim_files[index * 2], g_shop_background_tim_files[(index * 2) + 1]);
+u32* shop_background_load(s32 index) {
+    return file_heap_load_checked(g_shop_background_tim_files[index * 2], g_shop_background_tim_files[(index * 2) + 1]);
 }
 
 /* Points one of the text section pointers at its resident text data.
  *
- * No path returns a value; save_build_slot_description uses the
+ * No path returns a value; slot_description_build uses the
  * bound address the store leaves in $v0. */
-u8* screen_text_bind_section(u32 index) {
+u8* screen_text_section_bind(u32 index) {
     switch (index) {
     case SCREEN_TEXT_DATA_SKILLSET_NAMES:
         g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES] = g_screen_text_skillset_names_data;
@@ -899,17 +898,16 @@ u8* screen_text_bind_section(u32 index) {
 }
 
 /* Return the resident text resource; index 6 has no data. */
-u8* screen_text_get_resident(screen_text_data_e index) {
+u8* screen_text_resident_get(screen_text_data_e index) {
     return g_screen_text_resident_data[index];
 }
 
 /* Load tutorial `index`'s (1-based) message text and command stream to the
  * heap and store their addresses in `record`. */
-void tutorial_load_files(s32 index, tutorial_state_t* record) {
+void tutorial_files_load(s32 index, tutorial_state_t* record) {
     s32 slot = index - 1;
 
     record->messages
-        = file_load_checked_to_heap(g_tutorial_message_files[slot * 2], g_tutorial_message_files[(slot * 2) + 1]);
-    record->script
-        = file_load_checked_to_heap(g_tutorial_script_files[slot * 2], g_tutorial_script_files[(slot * 2) + 1]);
+        = file_heap_load_checked(g_tutorial_message_files[slot * 2], g_tutorial_message_files[(slot * 2) + 1]);
+    record->script = file_heap_load_checked(g_tutorial_script_files[slot * 2], g_tutorial_script_files[(slot * 2) + 1]);
 }

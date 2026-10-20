@@ -45,7 +45,7 @@ void unit_panel_equipment_thread(void) {
     s32 i;
     s32 item_id;
 
-    thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
+    thread_current_task_set(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
@@ -184,13 +184,13 @@ void unit_panel_equipment_thread(void) {
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
         thread_yield();
-        if (thread_get_current_parameter_3() != 0) {
+        if (thread_current_parameter_3_get() != 0) {
             break;
         }
         frame++;
     }
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Two-column ability panel thread (task THREAD_TASK_STATUS_PANEL).
@@ -212,7 +212,7 @@ void unit_panel_ability_thread(void) {
     s32 i;
     s32 id;
 
-    thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
+    thread_current_task_set(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
@@ -342,11 +342,11 @@ void unit_panel_ability_thread(void) {
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
         thread_yield();
-        if (thread_get_current_parameter_3() != 0) {
+        if (thread_current_parameter_3_get() != 0) {
             break;
         }
         frame++;
     }
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }

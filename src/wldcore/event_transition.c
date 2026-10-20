@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 /* The event transition's spinning screen-capture sprite, sorted with GsSortSprite by
- * event_transition_draw_sprite. */
+ * event_transition_sprite_draw. */
 static GsSPRITE g_event_transition_sprite = { 0 };
 
 /* The byte color triple of the screen-wide fade overlay. It
@@ -30,7 +30,7 @@ extern CVECTOR g_world_map_fade_color;
  * the tiles, save VRAM (0x100, 0) 128x256 to (0x200, 0x100) and clear it for
  * the screen capture, set up the transition sprite over that area, fade the
  * music out and pick a random drift and spin direction. */
-void event_transition_push_level(s32 mode) {
+void event_transition_open(s32 mode) {
     RECT rect;
     s32 depth;
 
@@ -89,7 +89,7 @@ void event_transition_push_level(s32 mode) {
 
 /* Draws the event transition's spinning sprite while that level is on top of
  * the menu stack, unless it is a plain fade. */
-void event_transition_draw_sprite(GsOT* ordering_table) {
+void event_transition_sprite_draw(GsOT* ordering_table) {
     s32 current = g_menu_stack_depth;
 
     if (g_menu_stack_types[current - 1] == MENU_STACK_LEVEL_EVENT_TRANSITION
@@ -99,7 +99,7 @@ void event_transition_draw_sprite(GsOT* ordering_table) {
 }
 
 /* Per-frame step of the event-transition level (MENU_STACK_LEVEL_EVENT_TRANSITION)
- * pushed by event_transition_push_level: the screen effect that
+ * pushed by event_transition_open: the screen effect that
  * leads from the map into an event or battle.
  *
  * In FADE mode it only waits for the screen fade and then ends the world loop
@@ -111,7 +111,7 @@ void event_transition_draw_sprite(GsOT* ordering_table) {
  * to 0x80 (FLASH), then whites out by 8 a frame (WHITE_OUT); at full white the
  * world loop ends and the picture at VRAM (0x200, 0x100) is moved to
  * (0x100, 0). */
-void event_transition_step_level(menu_stack_record_t* level) {
+void event_transition_update(menu_stack_record_t* level) {
     RECT rect;
     s32 step;
     s32 shade;

@@ -12,7 +12,7 @@
  * address 32-bit values, 0x080-0x35f packed bits, and 0x360-0x3ff packed
  * four-bit values. These are not uniform byte offsets into the backing bank.
  * The calendar and location ids are also serialized into the memory-card
- * slot description by save_build_image. */
+ * slot description by save_image_build. */
 typedef enum event_script_variable_id {
     /* 32-bit result tested by the conditional-jump opcodes. */
     EVENT_SCRIPT_VAR_COMPARISON_RESULT = 0x00,
@@ -219,9 +219,9 @@ enum {
  * sound effect's variable before it runs the entry script. */
 enum { EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION = 0x5c };
 
-/* Script variable caps: script_set_variable and each program that adds to
+/* Script variable caps: script_variable_set and each program that adds to
  * EVENT_SCRIPT_VAR_WAR_FUNDS stop the war funds at 99,999,999, and
- * unit_increase_casualty_counters stops EVENT_SCRIPT_VAR_CASUALTIES and
+ * unit_casualties_count stops EVENT_SCRIPT_VAR_CASUALTIES and
  * EVENT_SCRIPT_VAR_INJURED at 9999. */
 enum { EVENT_WAR_FUNDS_MAX = 99999999, EVENT_CASUALTY_COUNT_MAX = 9999 };
 
@@ -246,15 +246,15 @@ extern s32* g_script_variables;
  * occupy the first 684 bytes. Save images also preserve the remaining bytes. */
 extern s32 g_script_variable_storage[0x100];
 
-void script_set_variable(s32 variable_id, s32 value);
-void script_run_condition(event_opcode_e opcode);
+void script_variable_set(s32 variable_id, s32 value);
+void script_condition_run(event_opcode_e opcode);
 
 /* Read through the resident scene's variable commands, preserving the comparison
  * result. Reading weather/time first rebuilds it from the separate variables. */
-s32 script_get_variable(s32 variable_id);
+s32 script_variable_get(s32 variable_id);
 
 /* The fourth argument is supplied by callers but is not read. */
-void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32 unused);
+void script_variable_command_run(s32 opcode, s32 destination_id, s32 source, s32 unused);
 
 /* event ids */
 /* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
@@ -282,7 +282,7 @@ typedef enum event_id {
     EVENT_ID_EPILOGUE = 0x12c, /* Brave Story record "Things obtained" (setup 0x12b) */
     /* REQUIRE congratulates the player on completing the game after it. */
     EVENT_ID_FINAL_BATTLE_WON = 0x145,
-    /* script_run_event_frame returns SCRIPT_EVENT_FRAME_ENDING when it ends. */
+    /* script_event_frame_run returns SCRIPT_EVENT_FRAME_ENDING when it ends. */
     EVENT_ID_FUNERAL = 0x147, /* Brave Story record "Reunion and beyond..." (setup 0x146) */
     /* Ramza, Rafa and Malak discuss Alma after the battle. */
     EVENT_ID_RIOVANES_AFTERMATH_SETUP = 0x148,

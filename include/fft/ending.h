@@ -13,7 +13,7 @@
 /* Run OPEN's ending movie and script, then restore graphics state. */
 void open_ending_entrypoint(void);
 void ending_init(void);
-void ending_load_movie_graphics(void);
+void ending_graphics_load(void);
 
 /* text records */
 /* ending_text_record_t.flags. */

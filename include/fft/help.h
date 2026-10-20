@@ -43,7 +43,7 @@ enum {
 
 extern u16* const* g_help_active_text_id_tables;
 
-/* The help text file's section offsets, which text_relocate_pointer_table binds while a help window is open. */
+/* The help text file's section offsets, which text_pointer_table_relocate binds while a help window is open. */
 extern u32 g_help_text_table[];
 
 /* help cursor */
@@ -94,7 +94,8 @@ typedef enum help_request_kind {
 extern s32 g_help_open;
 
 /* Opens the help menu on the menu-building thread slot unless input is held off or another screen is busy. */
-void help_start_menu_thread(void);
+void help_menu_thread_start(void);
+void help_menu_thread(void);
 
 /* HELPMENU's menu/unit-view help loop; WORLD also links this body. Opens a pending
  * request or runs the help cursor over the menu or unit-view navigation table. */

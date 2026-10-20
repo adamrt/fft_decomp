@@ -13,7 +13,7 @@
 struct action_data;
 
 /* preparation */
-/* Result of action_prepare, kept in unit_t.attack_phase_state. */
+/* Result of action_prepare, kept in unit_runtime_t.attack_phase_state. */
 typedef enum action_preparation {
     ACTION_PREPARATION_INVALID = -1,
     ACTION_PREPARATION_CHARGE = 0, /* the action has a charge time; also Defend */
@@ -22,7 +22,7 @@ typedef enum action_preparation {
     ACTION_PREPARATION_JUMP = 3
 } action_preparation_e;
 
-void action_copy_data(const action_command_t* source, action_command_t* destination);
+void action_command_copy(const action_command_t* source, action_command_t* destination);
 action_preparation_e action_prepare(const action_command_t* source, action_command_t* dest, s32 phase);
 void action_prepare_in_place(action_command_t* action);
 action_preparation_e action_commit_preparation(const action_command_t* command);
@@ -114,7 +114,7 @@ typedef enum action_state {
     ACTION_STATE_PREVIEW = 2
 } action_state_e;
 
-/* Why action_init_current_data rejects an action; result_queue_charge_failure_message
+/* Why action_init_current_data rejects an action; result_charge_failure_queue
  * shows a pop-up for the codes below 4. */
 typedef enum action_rejection {
     ACTION_REJECTION_NONE = 0,
@@ -148,11 +148,11 @@ typedef struct action_evades {
 } action_evades_t;
 typedef char action_evades_size_must_be_4[sizeof(action_evades_t) == 4 ? 1 : -1];
 
-/* g_action_current_ability: the attacker/target pair, weapons, formula
+/* g_action_work: the attacker/target pair, weapons, formula
  * inputs and results of the strike being resolved, with copies of the ability's
  * secondary data, the weapon's data and the status-infliction record that
  * action_calculate_target_result loads. */
-typedef struct action_current_ability {
+typedef struct action_work {
     u8 attacker_id;                             /* 0x00 */
     u8 target_id;                               /* 0x01 */
     u8 strike_count;                            /* 0x02 */
@@ -187,7 +187,7 @@ typedef struct action_current_ability {
     u8 defaulted_to_attack;                     /* 0x29 */
     u8 random_damage_factor;                    /* 0x2a */
     u8 mp_cost;                                 /* 0x2b: effective cost recorded before the MP checks of
-                                                 * action_check_and_consume_mp; reaction
+                                                 * mp_check_and_consume; reaction
                                                  * eligibility reads it even when no MP was subtracted */
     u8 target_count;                            /* 0x2c */
     u8 knockback_flags;                         /* 0x2d */
@@ -200,10 +200,10 @@ typedef struct action_current_ability {
     u8 job_level_gained_flag;                   /* 0x4d */
     u8 post_action_message;                     /* 0x4e; 6 poached, 9 trained */
     u8 random_fire_flag;                        /* 0x4f */
-} action_current_ability_t;
-typedef char action_current_ability_size_must_be_80[(sizeof(action_current_ability_t) == 80) ? 1 : -1];
+} action_work_t;
+typedef char action_work_size_must_be_80[(sizeof(action_work_t) == 80) ? 1 : -1];
 
-/* action_current_ability_t.post_action_message, copied to the strike work and
+/* action_work_t.post_action_message, copied to the strike work and
  * the runtime unit record: the message the post-action state opens. */
 typedef enum action_post_message {
     ACTION_POST_MESSAGE_NONE = 0,
@@ -220,7 +220,7 @@ typedef struct action_reward_display {
 } action_reward_display_t;
 typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_t) == 4) ? 1 : -1];
 
-/* The strike work record, embedded in unit_t.strike (+0x18c)
+/* The strike work record, embedded in unit_runtime_t.strike (+0x18c)
  * and used as a standalone AI work record. Reaction targeting writes its
  * redirected tile at +0x1c..+0x1e before the strike is processed. */
 typedef struct action_strike_work {
@@ -238,7 +238,7 @@ typedef struct action_strike_work {
     move_tile_coordinates_t target_tile; /* 0x1c */
     u8 used_weapon_id;
     s16 reaction_ability_id; /* 0x20; runtime 0x1ac */
-    /* 0x22; runtime 0x1ae. g_action_current_ability.knockback_flags & 0x7f, stored with
+    /* 0x22; runtime 0x1ae. g_action_work.knockback_flags & 0x7f, stored with
      * the knockback destination. */
     u8 knockback_flags;
     u8 can_earn_experience;
@@ -249,7 +249,7 @@ typedef char action_strike_work_size_must_be_40[sizeof(action_strike_work_t) == 
 extern action_state_e g_action_state;
 extern action_context_e g_action_context;
 extern s32 g_action_phase;
-extern action_current_ability_t g_action_current_ability;
+extern action_work_t g_action_work;
 extern unit_stats_t* g_action_attacker;
 extern action_data_t* g_action_attacker_data;
 extern action_data_t g_action_attacker_action_data;
@@ -271,14 +271,14 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
 void action_switch_ability_to_default_attack(void);
 void action_start_next_strike(void);
 void action_apply_strike_results(void);
-void action_start_target_response(unit_t* attacker, unit_t* target);
+void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* target);
 s32 action_start_target_response_by_runtime_id(s32 runtime_id);
 void action_start_projectile_hit_response_by_runtime_id(u16 attacker_id, u16 target_id);
 void action_store_target_ids(u8* src);
 s32 action_copy_ability_targets(u8* out);
 void action_remove_ability_target(s32 target_battle_id);
 void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
-void action_end_command(unit_t* unit);
+void action_end_command(unit_runtime_t* unit);
 
 /* Preview action calculation entry run on the main stack. */
 s32 action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
@@ -290,7 +290,7 @@ s32 action_announce_next(void);
 /* mimic */
 /* g_action_mimic_attacker, filled by action_mimic_record and read
  * by action_mimic_set_ability. The AI saves and restores it whole as 30 bytes
- * (ai_simulate_begin and ai_simulate_end). */
+ * (ai_simulation_begin and ai_simulation_end). */
 typedef struct action_mimic_attacker {
     u8 facing;               /* 0x00 */
     u8 mimic_pending;        /* 0x01: a non-Mime action was recorded; state 13 queues the Mimes */
@@ -310,8 +310,8 @@ void action_mimic_record(unit_stats_t* unit);
 s32 action_mimic_set_ability(unit_stats_t* unit);
 
 /* effect messages */
-/* Queue of post-action "effect message" popups (g_action_messages), filled by
- * action_message_queue_for_unit and drained newest first by
+/* Queue of post-action "effect message" popups (g_post_effect_messages), filled by
+ * message_for_unit_queue and drained newest first by
  * action_message_show_next. */
 typedef struct action_post_effect_msg {
     u8 code;           /* 0x00 action_display_image_id_e of the popup */
@@ -327,6 +327,6 @@ void action_message_show_for_caster(void);
 s32 action_message_show_next(void);
 
 /* weapon sounds */
-void action_play_weapon_sfx(struct unit* unit, s32 hit);
+void action_play_weapon_sfx(struct unit_runtime* unit, s32 hit);
 
 #endif

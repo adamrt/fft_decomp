@@ -12,7 +12,7 @@ typedef enum menu_input_mode {
     MENU_INPUT_PLAYER = 0,  /* the controller */
     MENU_INPUT_BLOCKED = 1, /* the event frame returns early and no idle action menu is built;
                                no code stores this value */
-    MENU_INPUT_TUTORIAL = 2 /* a tutorial event supplies the input; set by menu_start_entry_thread */
+    MENU_INPUT_TUTORIAL = 2 /* a tutorial event supplies the input; set by entry_thread_start */
 } menu_input_mode_e;
 
 extern u16 g_menu_input_mode; /* menu_input_mode_e */
@@ -29,9 +29,9 @@ extern u16 g_menu_modal_open;
 extern u16 g_menu_input_block_frames;
 
 /* Returns the input-lock mode; the argument is ignored. */
-s32 menu_input_get_lock_mode(s32 unused_0);
-void menu_set_modal_open(void);
-void menu_clear_modal_open(void);
+s32 menu_input_lock_mode_get(s32 unused_0);
+void menu_modal_open(void);
+void menu_modal_close(void);
 
 /* 1 when a menu thread may act on input: no previous thread running, no stop request, the input not locked,
  * no help window open and no block frames left. In WORLD an open Help box also blocks input for five frames. */
@@ -43,7 +43,7 @@ s32 menu_can_accept_input(void);
 s32 menu_should_close_thread(u32* input);
 
 /* event input */
-/* menu_input_update_event_state runs once per frame: it derives the event input from the controller, with
+/* menu_input_event_state_update runs once per frame: it derives the event input from the controller, with
  * edge detection and key repeat, and yields. WORLD, BUNIT and CARD build full bodies, BUNIT's and CARD's
  * keeping their state in the g_input_* globals; ATTACK, DEBUGCHR, EQUIP and REQUIRE link an empty one. */
 typedef struct menu_input_state {
@@ -58,7 +58,7 @@ typedef char menu_input_state_size_must_be_24[sizeof(menu_input_state_t) == 24 ?
 
 extern u32 g_previous_input;
 
-void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame);
+void menu_input_event_state_update(u32* otag, u32 input, s32 count_frame);
 
 /* menu controller */
 /* menu_input_update_controller publishes the newly pressed buttons and two repeat rates for the menus, with
@@ -75,7 +75,7 @@ void menu_input_update_controller(void);
 void menu_input_clear_state(void);
 
 /* EQUIP, JOBSTTS and WORLD each build a separate body. */
-void menu_input_update_with_message_state(void);
+void menu_input_message_state_update(void);
 
 /* repeat timing */
 /* Six-byte row selected by the finger cursor repeat speed option (game options bits 9-11). The first three
@@ -94,7 +94,7 @@ extern u8 g_menu_scroll_slow_step;
 extern u8 g_menu_scroll_fast_step;
 
 /* pressable buttons */
-/* The index argument of WORLD's menu_draw_pressable_button and BUNIT's unit_list_draw_pressable_button: an on-screen
+/* The index argument of WORLD's menu_pressable_button_draw and BUNIT's button_draw: an on-screen
  * button, named after the pad button its callers test. */
 typedef enum menu_pressable_button {
     MENU_PRESSABLE_BUTTON_L1 = 0,
@@ -105,7 +105,7 @@ typedef enum menu_pressable_button {
     MENU_PRESSABLE_BUTTON_R2 = 5
 } menu_pressable_button_e;
 
-/* 12-byte piece of a pressable button (menu_draw_pressable_button, unit_list_draw_pressable_button): source
+/* 12-byte piece of a pressable button (menu_pressable_button_draw, button_draw): source
  * rectangle, then its offset from the button origin. */
 typedef struct menu_button_piece {
     u16 u;        /* 0x00 */
@@ -122,6 +122,6 @@ extern u16 g_menu_button_clut;
 extern u8 g_menu_button_piece_starts[];
 extern s8 g_menu_button_press_timers[];
 
-void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
+void menu_pressable_button_draw(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 
 #endif

@@ -9,6 +9,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+struct battle_map_state_record;
+
 /* geometry */
 /* Serialized GNS primary/animated mesh geometry. Counts are unsigned; the
  * variable tail stores unpadded XYZ 16-bit values, normals, materials and terrain
@@ -76,8 +78,8 @@ enum {
     BATTLE_MAP_POLYGON_FLAG_LIT = 0x8000
 };
 
-/* Commands of battle_map_polygon_flag_command. */
-typedef enum battle_map_polygon_flag_command {
+/* Commands of polygon_flags_dispatch. */
+typedef enum polygon_flags_dispatch {
     BATTLE_MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,   /* copy LIT into LIT_ACTIVE on every polygon */
     BATTLE_MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,   /* clear LIT_ACTIVE everywhere */
     BATTLE_MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94 /* repaint the polygons without LIT in the ambient color */
@@ -196,7 +198,7 @@ typedef enum battle_map_texture_animation_mode {
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_7 = 28,
     /* starts a battle_map_clut_start_cycle over colors canvas_x .. canvas_x + width - 1 of BATTLE_MAP_CLUT_ROW_MAP */
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_COLOR_CYCLE = 29,
-    /* Playback states written and dispatched by battle_map_texture_update_animations. */
+    /* Playback states written and dispatched by texture_animations_update. */
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK = 128,
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_PALETTE_PING_PONG_BACK = 129,
     BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING = 130
@@ -248,7 +250,7 @@ extern s32 g_battle_map_untextured_triangle_count;
 void battle_map_mesh_append_geometry(const battle_map_mesh_geometry_t* geometry_data, battle_map_mesh_part_t* metadata);
 
 /* rendering */
-/* Commands of battle_map_configure_effect_data_state: the ordering-table
+/* Commands of battle_map_effect_data_state_set: the ordering-table
  * handling of untextured map polygons while an effect draws. */
 typedef enum battle_map_effect_data_command {
     BATTLE_MAP_EFFECT_DATA_END = 0x87,
@@ -256,11 +258,11 @@ typedef enum battle_map_effect_data_command {
 } battle_map_effect_data_command_e;
 
 void battle_map_mesh_reset_render_state(void);
-void battle_map_draw_mesh_and_weather(MATRIX* camera_matrix);
+void battle_map_mesh_weather_draw(MATRIX* camera_matrix);
 void battle_map_queue_textured_quads(u32* otag, POLY_GT4* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_textured_triangles(u32* otag, POLY_GT3* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_untextured_triangles(u32* otag, POLY_F3* prims, s32 yaw, s32* unused_count);
-s32 battle_map_configure_effect_data_state(battle_map_effect_data_command_e command);
+s32 battle_map_effect_data_state_set(battle_map_effect_data_command_e command);
 
 #endif

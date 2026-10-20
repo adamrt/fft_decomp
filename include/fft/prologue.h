@@ -17,5 +17,6 @@ void prologue_start(void);
 void prologue_init_sequence(s32 target, s32 ot_layer, prologue_entry_t** entry_table);
 s32 prologue_update(void);
 void prologue_finished_stub(void);
+void prologue_text_pages_load(void);
 
 #endif

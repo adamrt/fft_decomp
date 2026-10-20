@@ -19,22 +19,22 @@ extern s32 g_menu_managed_thread_state;
 
 /* Starts thread_id on the entry's thread and returns 1 on the first call; later calls return whether the
  * thread still runs. */
-s32 menu_start_managed_thread(s32 thread_id, menu_entry_t* descriptor);
+s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor);
 void menu_request_thread_stop(s32 thread_id);
-void menu_stop_managed_thread(s32 thread_id);
+void menu_managed_thread_stop(s32 thread_id);
 
 /* Requests a stop and runs input-update frames until the thread has ended. */
-void menu_stop_thread_and_wait(s32 thread_id);
+void menu_thread_stop_and_wait(s32 thread_id);
 void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
 
-/* Empty; menu_init_subsystems calls it between the palette and text setup and the subsystem reset. */
+/* Empty; menu_subsystems_init calls it between the palette and text setup and the subsystem reset. */
 void menu_init_stub(void);
 
 /* Acts on Circle for a row: starts the row's entry one thread slot below, clears the selection, or (for a
  * negative action -n) closes n menu threads; stores the row as the entry's result. */
 void menu_handle_action(menu_entry_t* entry, s32 row_index);
 void menu_handle_cancel_input(menu_entry_t* context);
-void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor);
+void menu_row_cursor_update(menu_entry_t* bounds, s32* cursor);
 
 /* entry window threads */
 /* Thread bodies a menu entry names as its thread_entry. */
@@ -43,7 +43,7 @@ void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* curs
 void menu_input_thread(void);
 
 /* A refused command: queues the invalid-choice sound and exits. */
-void menu_run_invalid_choice_thread(void);
+void menu_invalid_choice_thread_run(void);
 
 /* A simple menu window: its text in the frame, a wrapping cursor and an animated cursor icon. */
 void menu_icon_list_thread(void);
@@ -74,7 +74,7 @@ typedef struct menu_scroll_text_layout {
 
 /* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
  * helper redraws the page once and clears the request, which
- * screen_thread_request_redraw sets. */
+ * screen_thread_redraw_request sets. */
 enum { MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4 };
 
 void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
@@ -87,7 +87,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset
 
 /* list pages */
 /* One of the two 0x134-byte packet pages a scrolling text list alternates between frames
- * (g_formation_ability_list_pages, g_at_list_pages, g_screen_text_list_pages). Provisional. */
+ * (g_formation_ability_list_pages, g_at_list_pages, g_text_list_pages). Provisional. */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
     SPRT arrows[2];                     /* 0x14: scroll arrows */

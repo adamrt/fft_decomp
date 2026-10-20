@@ -391,8 +391,8 @@ enum {
 };
 
 /* formation_unit_t.equipment 16-bit values carry the item id in the low ten bits and flags above (bit 14 is tested
- * by shop_fitting_buy and the job wheel); the WORLD item tables are indexed by the masked id (shop_get_item_price,
- * item_get_type). */
+ * by fitting_purchase_commit and the job wheel); the WORLD item tables are indexed by the masked id
+ * (shop_item_price_get, item_type_get). */
 enum {
     ITEM_ENTRY_ID_MASK = 0x3ff,
     ITEM_ENTRY_UNEQUIPPABLE = 0x4000, /* item list entries: listed, but the unit cannot equip the item */
@@ -434,7 +434,7 @@ typedef enum weapon_flag {
 } weapon_flag_e;
 
 /* Weapon record selected by item_data_t.secondary_data_id. Offsets are fixed
- * by unit_set_equipment_stats and unit_calculate_encounter_equipment. */
+ * by unit_equipment_stats_set and encounter_equipment_set. */
 typedef struct weapon_data {
     u8 range;      /* 0x00 */
     u8 flags;      /* 0x01; weapon_flag_e */
@@ -471,7 +471,7 @@ typedef struct armor_data {
 } armor_data_t;
 
 /* 25-byte item Attribute record (g_item_attributes). MAIN applies these
- * bonuses to battle units; WORLD's item_collect_stat_deltas reads the same
+ * bonuses to battle units; WORLD's item_stat_preview_build reads the same
  * first five bytes for equipment previews. */
 typedef struct item_attribute {
     u8 attributes[UNIT_ATTRIBUTE_COUNT]; /* 0x00; unit_attribute_index_e */
@@ -505,7 +505,7 @@ extern item_evade_t
 extern item_attribute_t g_item_attributes[];
 extern u8 g_item_ability_item_ids[14];
 
-const item_data_t* item_get_data(s32 item_id);
+const item_data_t* item_data_get(s32 item_id);
 
 /* inventory */
 extern u8 g_item_quantities[ITEM_ID_COUNT];
@@ -515,16 +515,16 @@ extern u8 g_item_poached_quantities[ITEM_ID_COUNT];
  * identified. Both halves are initialized and serialized as one block. */
 extern u8 g_item_location_flags[0x80];
 
-void item_init_new_game_inventory(void);
-s32 item_get_total_quantity(u8 item_id, s32 include_battle);
+void item_new_game_inventory_init(void);
+s32 item_total_quantity_get(u8 item_id, s32 include_battle);
 s32 item_give(unit_stats_t* unit, u8 item);
 s32 item_decrement_party_quantity(unit_stats_t* unit, s32 item_id, s32 spend);
 void item_build_inventory_totals(void);
 
 /* EQUIP and WORLD each build their own bodies of the first two. */
-s32 item_get_total_count(s16 item_id);
-s32 item_get_equipped_count(s32 item_entry);
-s32 item_adjust_inventory_count(s16 item_entry, s32 delta);
+s32 item_total_count_get(s16 item_id);
+s32 item_equipped_count_get(s32 item_entry);
+s32 item_inventory_count_adjust(s16 item_entry, s32 delta);
 
 /* item lists */
 /* Broad item categories shared by the WORLD and EQUIP menu classifiers.
@@ -539,8 +539,8 @@ typedef enum item_menu_category {
     ITEM_MENU_CATEGORY_OTHER = 5
 } item_menu_category_e;
 
-/* The category argument of formation_item_build_list,
- * shop_build_stock_list and equipment_build_item_list. 0 to 4
+/* The category argument of formation_item_list_build,
+ * shop_stock_list_build and equipment_build_item_list. 0 to 4
  * select what fits that equipment slot. The item menus pass their tab + 1 for
  * the first four tabs and OTHER for the fifth; the best-fit builders pass
  * WEAPON or SHIELD for the left hand. */
@@ -564,7 +564,7 @@ typedef enum item_list_mode {
     ITEM_LIST_MODE_MARK_UNEQUIPPABLE = 1,      /* 0x4000 on entries the unit cannot equip; taken as
                                                   EQUIPPABLE unless Show Unequippable Items is on */
     ITEM_LIST_MODE_EQUIPPABLE = 2,             /* entries the unit cannot equip are left out */
-    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3 /* formation_item_build_list only: as
+    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3 /* formation_item_list_build only: as
                                                    EQUIPPABLE, counting no equipped copies */
 } item_list_mode_e;
 
@@ -590,10 +590,10 @@ extern u8 g_item_page_order[0x15];
 /* The equipment slot or list category the item screens show (menu_equipment_slot_e). */
 extern u8 g_menu_selected_slot;
 
-s32 item_get_type(s32 item_id);
+s32 item_type_get(s32 item_id);
 
 /* Throwable weapons and consumables share the fallback category. */
-item_menu_category_e item_get_menu_category(s16 item_id);
+item_menu_category_e item_menu_category_get(s16 item_id);
 
 /* Reconciles a category list with what the party owns: newly owned items go first. */
 void item_rebuild_category_list(s32 category);
@@ -603,12 +603,12 @@ s32 item_sort_list_by_category_order(s32 category_index, s16* list);
 void item_store_category_list(s32 category_index, const s16* source);
 
 /* sort orders */
-/* A key in the list that item_sort_id_list (EQUIP and WORLD each build their own body) sorts by
+/* A key in the list that item_id_list_sort (EQUIP and WORLD each build their own body) sorts by
  * (g_item_type_order_lists); -1 ends the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
     ITEM_SORT_KEY_TYPE = 0,
     ITEM_SORT_KEY_PRICE = 1,
-    ITEM_SORT_KEY_RANKING = 2, /* item_get_ranking_value */
+    ITEM_SORT_KEY_RANKING = 2, /* item_ranking_value_get */
     ITEM_SORT_KEY_PHYSICAL_EVADE = 3,
     ITEM_SORT_KEY_MAGIC_EVADE = 4,
     ITEM_SORT_KEY_HELD_COUNT = 5 /* inventory plus equipped copies */
@@ -649,9 +649,9 @@ extern menu_sort_orders_t g_menu_sort_orders;
  * is fixed; item_store_type_order edits the lists it selects. */
 extern s8* const g_item_type_order_lists[];
 
-void item_init_order_tables(void);
-s32 item_get_ranking_value(s32 item_id);
-void item_sort_id_list(s32 mode, s16* list);
+void item_order_tables_init(void);
+s32 item_ranking_value_get(s32 item_id);
+void item_id_list_sort(s32 mode, s16* list);
 
 /* Store and load a category's sort key order as -1 terminated halfwords. */
 void item_store_type_order(s32 list_index, const s16* source);
@@ -661,13 +661,13 @@ void item_load_type_order(s32 list_index, s16* destination);
 extern struct unit_panel_record g_item_preview_stat_detail;
 
 /* EQUIP and WORLD each build their own body. */
-void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate);
+void item_stat_preview_build(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate);
 
 /* icons and the item panel */
-/* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_get_type_icon_rect gives the
+/* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_type_icon_build gives the
  * texture cell of an item type's 12x12 icon. */
-void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
-void item_build_icon_source(menu_icon_source_t* output, u32 item_id);
+void item_type_icon_build(s32 item_type, menu_icon_source_t* output);
+void item_icon_source_build(menu_icon_source_t* output, u32 item_id);
 menu_icon_source_t* item_build_type_icon_source(s32 index);
 
 /* A weapon's hand marks on the item panel: two-handed, or the Two Hands and Two Swords marks it allows. */

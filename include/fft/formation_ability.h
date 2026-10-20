@@ -24,8 +24,8 @@ typedef enum formation_ability_slot {
     FORMATION_ABILITY_SLOT_COUNT = 5
 } formation_ability_slot_e;
 
-s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_equipment);
-s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out);
+s32 formation_ability_slot_set(s16 unit_id, s16 slot, s16 ability, s32 update_equipment);
+s32 formation_ability_rsm_list_build(s16 unit_index, s32 slot, s16* out);
 void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability);
 s32 formation_ability_has_secret_hunt(s32 unit_id);
 s32 formation_ability_has_two_hands(s16 unit_id);
@@ -41,7 +41,7 @@ enum {
 extern s8 g_formation_ability_menu_initialized;
 extern unit_panel_thread_t g_formation_ability_panel_thread_params;
 
-void formation_ability_menu(void);
+void formation_ability_menu_update(void);
 
 /* learning */
 extern s8 g_formation_ability_learn_menu_initialized;
@@ -51,18 +51,17 @@ extern s8 g_formation_ability_learn_ability_list_open;
 extern s16 g_formation_ability_learn_selected_job;
 extern s16 g_formation_ability_learn_selected_job_index;
 
-s32 formation_ability_learn_job_list(void);
-s32 formation_ability_learn_job_jp(s32 index);
-s32 formation_ability_learn_list(void);
+s32 formation_ability_job_list_update(void);
+s32 formation_ability_learn_list_update(void);
 void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id);
 
 /* Row callbacks of the learn and view job lists: the level and JP values of the job chosen in the learn menu; the
  * row is ignored. */
-s32 formation_ability_get_chosen_job_level(s32 unused_row);
-s32 formation_ability_get_chosen_job_next_jp(s32 unused_row);
+s32 formation_ability_chosen_job_level_get(s32 unused_row);
+s32 formation_ability_chosen_job_next_jp_get(s32 unused_row);
 s32 formation_ability_is_chosen_job_mastered(s32 unused_row);
-s32 formation_ability_get_chosen_job_total_jp(s32 unused_row);
-s32 formation_ability_get_chosen_job_jp(s32 unused_row);
+s32 formation_ability_chosen_job_total_jp_get(s32 unused_row);
+s32 formation_ability_chosen_job_jp_get(s32 unused_row);
 
 /* ability view */
 extern s8 g_formation_ability_view_initialized;

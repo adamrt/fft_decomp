@@ -28,7 +28,7 @@ void menu_icon_list_thread(void) {
     s16* redraw;
 
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    state = (menu_entry_t*)thread_get_current_parameter_1();
+    state = (menu_entry_t*)thread_current_parameter_1_get();
     state->window.y &= ~1;
     cursor = state->selected_index;
     record = &records[0];
@@ -62,7 +62,7 @@ void menu_icon_list_thread(void) {
         if (menu_should_close_thread(g_menu_input_controller) != 0) {
             break;
         }
-        menu_step_wrapping_cursor_on_scroll_buttons(state, &cursor);
+        menu_row_cursor_update(state, &cursor);
         menu_handle_action(state, cursor);
         menu_handle_cancel_input(state);
         menu_select_icon_cluts(&record->base);
@@ -70,7 +70,7 @@ void menu_icon_list_thread(void) {
         menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /*
@@ -104,10 +104,10 @@ void menu_text_entry_wait_thread(void) {
     *input = PSX_PAD_CIRCLE;
     menu_handle_action(entry, 0);
     thread_start(text_thread_id, message_dialog_thread);
-    thread_set_four_parameters(text_thread_id, header_id, text_id, speaker_id, speaker_id);
-    thread_wait_until_inactive(g_thread_current_id - 1);
-    thread_wait_until_inactive(text_thread_id);
-    thread_exit_current();
+    thread_four_parameters_set(text_thread_id, header_id, text_id, speaker_id, speaker_id);
+    thread_inactive_wait(g_thread_current_id - 1);
+    thread_inactive_wait(text_thread_id);
+    thread_current_exit();
 }
 
 /* Menu window thread without a cursor: rebuilds the text image every seventh
@@ -123,7 +123,7 @@ void menu_icon_strip_thread(void) {
     menu_icon_record_t* record;
 
     input = 0;
-    state = (menu_entry_t*)thread_get_current_parameter_1();
+    state = (menu_entry_t*)thread_current_parameter_1_get();
     record = &records[0];
     menu_build_window_sprites(&rect, state, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
@@ -151,5 +151,5 @@ void menu_icon_strip_thread(void) {
         menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }

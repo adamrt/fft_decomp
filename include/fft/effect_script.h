@@ -10,7 +10,7 @@
 #include "psx/types.h"
 
 /* loading and playback */
-/* The stages of effect_update_stage, kept in g_effect_playback_phase. */
+/* The stages of stage_update, kept in g_effect_playback_phase. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,
     EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_play */
@@ -20,7 +20,7 @@ typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT = 6 /* start the script again without rebinding the file */
 } effect_playback_phase_e;
 
-/* The target_mode of effect_start_new. */
+/* The target_mode of effect_request_start. */
 typedef enum effect_start_target {
     EFFECT_START_ON_UNIT = 0,
     EFFECT_START_ON_TILE = 1,
@@ -34,27 +34,27 @@ typedef union effect_start_target_data {
 } effect_start_target_data_t;
 typedef char effect_start_target_data_size_must_be_4[sizeof(effect_start_target_data_t) == 4 ? 1 : -1];
 
-void effect_init_system(void);
-void effect_reset_subsystems(void);
+void effect_system_init(void);
+void effect_subsystems_reset(void);
 u32 effect_ability_has_no_file(s32 ability_id);
 s32 effect_is_item_ability(s32 ability_id);
-void effect_set_ability_animation(u32 packed, s32 ability, const effect_context_t* source);
-void effect_start_new(s32 ability_id, s32 target_mode, effect_start_target_data_t target);
-s32 effect_file_update_load(void);
-s32 effect_file_poll_load(void);
+void effect_ability_animation_set(u32 packed, s32 ability, const effect_context_t* source);
+void effect_request_start(s32 ability_id, s32 target_mode, effect_start_target_data_t target);
+s32 effect_file_load_update(void);
+s32 effect_request_load_poll(void);
 void effect_play(void);
-void effect_call_play(void);
-void effect_cancel_playback_request(void);
-s32 effect_get_playback_phase(void);
-s32 effect_update_cycle(void);
+void effect_request_play(void);
+void effect_playback_request_cancel(void);
+s32 effect_playback_phase_get(void);
+s32 effect_playback_update(void);
 
 /* script records */
 extern effect_record_t g_effect_state_records[EFFECT_STATE_RECORD_CAPACITY + 1];
 
-void effect_script_init_state_records(void);
+void effect_script_instances_init(void);
 
 /* script */
-/* What an opcode handler returns to effect_script_run_block. */
+/* What an opcode handler returns to script_block_run. */
 typedef enum effect_script_result {
     EFFECT_SCRIPT_RESULT_YIELD = 0,    /* stop for this frame */
     EFFECT_SCRIPT_RESULT_CONTINUE = 1, /* run the next instruction */

@@ -89,7 +89,7 @@ typedef enum file_load_state {
     FILE_LOAD_STATE_UPLOAD_VRAM = 7 /* WLDCORE image stream only */
 } file_load_state_e;
 
-/* Asynchronous CD read state advanced by file_poll_load. */
+/* Asynchronous CD read state advanced by file_load_poll. */
 typedef struct file_load_descriptor {
     s32 _unknown_00;
     file_load_state_e state;
@@ -97,7 +97,7 @@ typedef struct file_load_descriptor {
     s32 wait_frames;
     s32 sector_count;
     s32 lba;
-    s32 sector_index; /* 0x18; sector being read by world_map_poll_texture_stream */
+    s32 sector_index; /* 0x18; sector being read by world_map_texture_stream_update */
     CdlLOC position;
     u32* destination; /* word-aligned CD transfer buffer */
 } file_load_descriptor_t;
@@ -105,32 +105,32 @@ typedef char file_load_descriptor_size_must_be_36[sizeof(file_load_descriptor_t)
 
 extern file_load_descriptor_t g_file_cd_state;
 
-s32 file_request_read(file_load_descriptor_t* state, s32 lba, s32 sector_count, void* destination,
+s32 file_read_request(file_load_descriptor_t* state, s32 lba, s32 sector_count, void* destination,
     file_loading_display_mode_e loading_display_mode);
 
-/* Forwards file_request_read's result. */
-s32 file_request_read_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
+/* Forwards file_read_request's result. */
+s32 file_read_request_quiet(file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
 
 /* Byte-count reads transfer size >> 11 whole sectors, without rounding up. */
-s32 file_request_read_bytes(s32 sector, u32 size, void* destination);
-void file_poll_load(file_load_descriptor_t* state);
-int file_is_still_loading(void);
-void file_reset_pause_cdrom(file_load_descriptor_t* state);
-void file_reset_cd_subsystems(void);
-void file_handle_cd_read(u8 event, u8* result);
-void file_handle_cd_ready(u8 event, u8* result);
+s32 file_bytes_read_request(s32 sector, u32 size, void* destination);
+void file_load_poll(file_load_descriptor_t* state);
+int file_load_state_get(void);
+void file_cd_pause_reset(file_load_descriptor_t* state);
+void file_cd_subsystems_reset(void);
+void file_cd_read_callback(u8 event, u8* result);
+void file_cd_ready_callback(u8 event, u8* result);
 
 /* Blocking byte-count loads use the same whole-sector rule. Heap loads allocate
  * size bytes, even when a partial final sector would remain unread. */
-void* file_load_to_address(int sector, u32 size, void* destination);
-void* file_load_checked_to_address(int sector, int size, void* destination);
-void* file_load_checked_to_heap(int sector, int size);
-struct suzuki_smd_header* file_load_smd(int sector, u32 size);
+void* file_buffer_load(int sector, u32 size, void* destination);
+void* file_buffer_load_checked(int sector, int size, void* destination);
+void* file_heap_load_checked(int sector, int size);
+struct suzuki_smd_header* file_smd_load(int sector, u32 size);
 
 /* loading helpers */
 void file_load_sync(s32 lba, s32 size, void* destination);
-void file_wait_then_request_read(file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination);
-void file_wait_for_pending(void);
+void file_pending_read_request(file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination);
+void file_pending_wait(void);
 
 /* OPEN title backgrounds */
 extern void* g_file_destination;

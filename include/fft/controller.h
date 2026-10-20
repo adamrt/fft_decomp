@@ -11,14 +11,14 @@
 /* Rows of g_controller_handlers: the value a push stores in
  * g_controller_handler_indices. */
 typedef enum controller_handler {
-    CONTROLLER_FFTST_MOVIE = 0,           /* movie_update_fftst */
-    CONTROLLER_FFTOP_MOVIE = 1,           /* movie_update_fftop */
-    CONTROLLER_TITLE_MENU = 2,            /* title_update_menu */
-    CONTROLLER_SOUND_TYPE_MENU = 3,       /* title_update_sound_type_menu */
+    CONTROLLER_FFTST_MOVIE = 0,           /* logo_movie_update */
+    CONTROLLER_FFTOP_MOVIE = 1,           /* opening_movie_update */
+    CONTROLLER_TITLE_MENU = 2,            /* main_menu_update */
+    CONTROLLER_SOUND_TYPE_MENU = 3,       /* sound_menu_update */
     CONTROLLER_NEW_GAME_START = 4,        /* new_game_update */
-    CONTROLLER_BIRTHDAY_DATE = 5,         /* birthday_update_date_menu */
-    CONTROLLER_BIRTHDAY_CONFIRMATION = 6, /* birthday_update_confirmation */
-    CONTROLLER_MUSIC_TEST = 7,            /* music_test_update */
+    CONTROLLER_BIRTHDAY_DATE = 5,         /* birthday_menu_update */
+    CONTROLLER_BIRTHDAY_CONFIRMATION = 6, /* birthday_confirmation_update */
+    CONTROLLER_MUSIC_TEST = 7,            /* music_test_menu_update */
     CONTROLLER_TEXT_MESSAGE = 8,          /* controller_wait_text_message */
     CONTROLLER_FFTEND_MOVIE = 9,          /* movie_update_fftend */
     CONTROLLER_SCRIPT = 10,               /* ending_update_script */

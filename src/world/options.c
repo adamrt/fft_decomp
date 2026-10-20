@@ -33,7 +33,7 @@
  * The Initialize row initially shows Initialize if all 13 options equal their
  * reference values, otherwise Customize. */
 void option_entrypoint(s32 mode) {
-    menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
+    menu_entry_t* entry = (menu_entry_t*)thread_current_parameter_1_get();
     game_options_fields_t options = g_game_options.fields;
     s32 i;
     s32 last_mode;
@@ -67,9 +67,9 @@ void option_entrypoint(s32 mode) {
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         entry->select_text_table = 1;
         entry->context = &g_option_entry_table;
-        thread_set_parameters(g_thread_current_id - 1, (s32)entry, 0, 0);
-        thread_wait_until_inactive(g_thread_current_id - 1);
-        thread_exit_current();
+        thread_parameters_set(g_thread_current_id - 1, (s32)entry, 0, 0);
+        thread_inactive_wait(g_thread_current_id - 1);
+        thread_current_exit();
     }
     if (mode == MENU_OPTION_TYPE_AT_LIST) {
         tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
@@ -218,7 +218,7 @@ void option_game_options_thread(void) {
     ring = 0;
     image_rect.w = g_menu_window_text_pen.stride >> 2;
     LoadImage(&image_rect, (u32*)image);
-    thread_wait_frames(1);
+    thread_frames_wait(1);
 
     menu_init_scaled_draw_area_packets(&page->list_area);
     menu_init_scaled_draw_area_packets(&page->setting_area);
@@ -232,7 +232,7 @@ void option_game_options_thread(void) {
     menu_set_text_origin(0x18, 0xE);
     menu_display_text_entry(0x502B, image, &g_menu_window_text_pen);
     LoadImage(&g_option_title_image_rect, (u32*)image);
-    thread_wait_frames(1);
+    thread_frames_wait(1);
     menu_free_memory(image);
 
     value_rect.x = base->setting_panel.x0;
@@ -243,7 +243,7 @@ void option_game_options_thread(void) {
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     g_option_entry_panel_rect.h += 0xC;
     g_option_entry_panel_rect.y -= 2;
-    thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_entry_panel_rect, 0, 0);
+    thread_parameters_set(g_thread_current_id + 1, (s32)&g_option_entry_panel_rect, 0, 0);
     thread_yield();
 
     menu_init_sprt(&base->setting_value);
@@ -323,7 +323,7 @@ void option_game_options_thread(void) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
                     thread_start(g_thread_current_id - 1, option_choice_thread);
-                    thread_set_parameters(g_thread_current_id - 1, index, 0, 0);
+                    thread_parameters_set(g_thread_current_id - 1, index, 0, 0);
                 }
             }
             if (*input0 & PSX_PAD_CROSS) {
@@ -357,7 +357,7 @@ void option_game_options_thread(void) {
         page->icons.base.sprites[2].y0 += 2;
         entry->selected_index = row_offset + cursor;
 
-        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
+        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step * 2;
@@ -374,7 +374,7 @@ void option_game_options_thread(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = script_get_event_initial_repeat_counter();
+            repeat = script_event_initial_repeat_counter_get();
             delta = 0;
             accum = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -412,9 +412,9 @@ void option_game_options_thread(void) {
 
         /* The frame thread dims its border while the value picker (the thread before this one) runs. */
         if ((thread - 1)->is_running == 0) {
-            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
+            thread_parameters_set(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
         } else {
-            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
+            thread_parameters_set(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
         }
 
         gfx_build_scaled_draw_area_pair_swapped(&page->list_area, &entry->window, i, g_gfx_active_buffer_index);
@@ -462,9 +462,9 @@ void option_game_options_thread(void) {
     menu_free_memory(buffer);
     gfx_free_texture_rect(&g_option_title_image_rect);
     gfx_free_texture_rect(&g_option_value_image_rect);
-    thread_wait_frames(1);
+    thread_frames_wait(1);
     g_screen_thread_result = 2;
     /* A nonzero third parameter ends the frame thread. */
-    thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
-    thread_exit_current();
+    thread_parameters_set(g_thread_current_id + 1, 0, 0, 1);
+    thread_current_exit();
 }

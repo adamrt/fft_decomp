@@ -10,13 +10,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-struct unit;
+struct unit_runtime;
 struct unit_stats;
 
 /* spritesheets */
 /* Spritesheet ids index g_sprite_sheet_data and
- * g_sprite_sheet_files. An id below 0x80 is the character_identity_e
- * value it is loaded for (unit_get_spritesheet_palette returns those
+ * g_sheet_files. An id below 0x80 is the character_identity_e
+ * value it is loaded for (sprite_identity_resolve returns those
  * unchanged) and has that identity's name; a numbered name loads the file of
  * the sheet with the plain name. From 0x60 the sheets are the generic jobs',
  * male then female: the generic selectors resolve to
@@ -201,7 +201,7 @@ typedef struct sprite_sheet_data {
 typedef char sprite_sheet_data_size_must_be_4[(sizeof(sprite_sheet_data_t) == 4) ? 1 : -1];
 
 /* sprite_sheet_data_t.shp_id: index of the sheet's frame table file in
- * g_sprite_shp_files (BATTLE/TYPE1.SHP ...). Id 5 has no file. */
+ * g_shp_files (BATTLE/TYPE1.SHP ...). Id 5 has no file. */
 typedef enum sprite_shp_type {
     SPRITE_SHP_TYPE1 = 0,
     SPRITE_SHP_TYPE2 = 1,
@@ -213,7 +213,7 @@ typedef enum sprite_shp_type {
 } sprite_shp_type_e;
 
 /* sprite_sheet_data_t.seq_id: index of the sheet's animation file in
- * g_sprite_seq_files (BATTLE/TYPE1.SEQ ...). */
+ * g_seq_files (BATTLE/TYPE1.SEQ ...). */
 typedef enum sprite_seq_type {
     SPRITE_SEQ_TYPE1 = 0,
     SPRITE_SEQ_TYPE3 = 1,
@@ -229,8 +229,17 @@ extern sprite_sheet_data_t g_sprite_sheet_data[SPRITE_SHEET_ID_COUNT];
 
 s32 sprite_sheet_is_loaded(s16 spritesheet_id);
 u32 sprite_sheet_get_flying_flag(u32 spritesheet_id);
-s32 sprite_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id);
-s32 sprite_get_unit_spritesheet_height_by_battle_id(u32 battle_id);
+s32 sprite_runtime_sheet_height_get(u32 runtime_id);
+s32 sprite_battle_sheet_height_get(u32 battle_id);
+
+/* WEP.SPR weapon/item graphics: palette rows and texture-row placement. */
+typedef struct sprite_item_graphic {
+    u8 palettes;    /* 0x00; g_sprite_weapon_clut rows: high nibble for BATTLE_MAP_CLUT_ROW_ITEM_A, low for _B */
+    u8 texture_row; /* 0x01; top of the graphic on its texture page, in steps of 8 pixels */
+} sprite_item_graphic_t;
+typedef char sprite_item_graphic_size_must_be_2[(sizeof(sprite_item_graphic_t) == 2) ? 1 : -1];
+
+extern sprite_item_graphic_t g_sprite_item_graphic_data[146];
 
 /* frame and sequence tables */
 extern sprite_unit_shp_frame_tables_t g_sprite_unit_shp_frame_tables[5];
@@ -270,7 +279,7 @@ typedef struct sprite_sheet_slot {
     u8 in_use;                          /* 0x00; cleared when no live unit uses the slot */
     u8 spritesheet_id;                  /* 0x01 */
     u8 compressed_attack_image[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by
-                                         * sprite_sheet_load_into_vram_slot */
+                                         * vram_sheet_load */
     clut_t clut;                        /* 0x30d6; 16 palettes with the STP bit set */
 } sprite_sheet_slot_t;
 typedef char sprite_sheet_slot_size_must_be_13014[(sizeof(sprite_sheet_slot_t) == 13014) ? 1 : -1];
@@ -298,7 +307,7 @@ enum {
 
 /* The SHP frames of an EVTCHR slot, laid out as sprite_unit_shp_frame_tables_t
  * so that frame ids from SPRITE_SHP_FRAME_EVTCHR_FIRST up index it
- * (sprite_frame_select_unit_shp). The file has 0x28 frames; their data
+ * (frame_unit_shp_select). The file has 0x28 frames; their data
  * is stored twice, once for each frame table, with the same contents. */
 typedef struct sprite_evtchr_shp {
     sprite_unit_shp_frame_tables_t tables; /* 0x000; 32-bit header fields remain unset and unread */
@@ -310,7 +319,7 @@ typedef struct sprite_evtchr_shp {
  * The two EVTCHR slots: each owns a 256x200 texture page (image_rect) for the
  * pictures that do not fit a unit's spritesheet slot, and a buffer to build
  * them in. A page shows a unit's attack image (decompressed on demand by
- * sprite_evtchr_load_unit), a unit's SP2 file, or the image of
+ * evtchr_unit_load), a unit's SP2 file, or the image of
  * an EVTCHR.BIN block: the event instruction LoadEVTCHR unpacks a block into
  * seq, shp, cluts and image_data and SaveEVTCHR uploads the image. Every
  * target access uses a 0x7564-byte stride.
@@ -365,7 +374,7 @@ s32 sprite_evtchr_clear_loaded_slot(s32 slot_index);
 s32 sprite_evtchr_clear_saved_slot(s32 slot_index);
 s32 sprite_evtchr_release_reserved_slot(s32 slot_index);
 s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary);
-void sprite_evtchr_invalidate_sp2(struct unit* unit);
+void sprite_evtchr_invalidate_sp2(struct unit_runtime* unit);
 
 /* loading */
 /* g_sprite_load_state.phase: the phase of the file being loaded. */
@@ -377,8 +386,8 @@ typedef enum sprite_load_phase {
 } sprite_load_phase_e;
 
 /* g_sprite_load_state.file_kind, the file kind, counts through one of two lists:
- * sprite_load_step_queued loads three files per queued unit and
- * sprite_load_step_shp_seq_data the shared sprite, weapon and effect files. */
+ * sprite_queued_load_update loads three files per queued unit and
+ * sprite_shp_seq_load_update the shared sprite, weapon and effect files. */
 typedef enum sprite_load_queued_kind {
     SPRITE_LOAD_QUEUED_SHP = 0,
     SPRITE_LOAD_QUEUED_SEQ = 1,
@@ -412,21 +421,21 @@ typedef char sprite_load_state_size_must_be_16[sizeof(sprite_load_state_t) == 16
 extern sprite_load_state_t g_sprite_load_state;
 extern u32* g_sprite_sp2_data;
 
-void sprite_load_reset_state(void);
-void sprite_load_clear_state(s32 unused_map_id);
-void sprite_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
+void sprite_load_state_reset(void);
+void sprite_load_state_clear(s32 unused_map_id);
+void sprite_unit_graphics_load_queue(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
     s16 palette_id, s16 runtime_id, struct unit_stats* unit, u32 flags);
-s32 sprite_load_unit_graphics_by_battle_id(s32, s32);
+s32 sprite_unit_graphics_load_start(s32, s32);
 
 /* Drains the immediate loader steps (2); returns 0 when finished or 1 while work remains pending
  * (including an allocation retry). */
-s32 sprite_poll_unit_graphics_load(void);
-s32 sprite_load_step_shp_seq_data(void);
+s32 sprite_unit_graphics_load_poll(void);
+s32 sprite_shp_seq_load_update(void);
 
 /* 0 finished, 1 pending or deferred, 2 immediate progress. */
-s32 sprite_load_step_queued(void);
-s32 sprite_open_sp2_file(struct unit* unit, u32* destination);
-void sprite_decompress_attack_image(const u8* source, u8* destination);
+s32 sprite_queued_load_update(void);
+s32 sprite_sp2_file_open(struct unit_runtime* unit, u32* destination);
+void sprite_attack_image_decompress(const u8* source, u8* destination);
 s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot);
 
 #endif

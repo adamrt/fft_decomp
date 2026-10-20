@@ -84,7 +84,7 @@ typedef char
 
 typedef struct battle_map_palette_animation_state {
     u8 active;
-    u8 blend_step;    /* 0x01; index into g_battle_map_palette_blend_steps_32/_8 */
+    u8 blend_step;    /* 0x01; index into g_palette_blend_steps_32/_8 */
     u8 delay_counter; /* 0x02; one blend step each time it reaches mode >> 2 */
     u8 mode;
     u8 repeat;            /* 0x04; battle_map_color_repeat_e */

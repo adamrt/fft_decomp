@@ -12,15 +12,15 @@ static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, 
 
 /* Number of copies of the item the party has equipped: the total held
  * (g_equipment_item_inventory_totals) minus the inventory count (read with a zero delta). */
-s32 item_get_equipped_count(s32 item_entry) {
+s32 item_equipped_count_get(s32 item_entry) {
     s32 item_id = item_entry & ITEM_ENTRY_ID_MASK;
 
-    return g_equipment_item_inventory_totals[item_id] - item_adjust_inventory_count(item_id, 0);
+    return g_equipment_item_inventory_totals[item_id] - item_inventory_count_adjust(item_id, 0);
 }
 
 /* Return how many of an item the party has in all, from the inventory totals table; only the
  * low ten bits of item_id are used. */
-s32 item_get_total_count(s16 item_id) {
+s32 item_total_count_get(s16 item_id) {
     return g_equipment_item_inventory_totals[item_id & ITEM_ENTRY_ID_MASK];
 }
 
@@ -39,12 +39,12 @@ s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
         return result;
     }
     if (unit_index != 1) {
-        item_adjust_inventory_count(g_equipment_unit_data[unit_index]->equipment[slot], 1);
+        item_inventory_count_adjust(g_equipment_unit_data[unit_index]->equipment[slot], 1);
     }
     if (slot < MENU_EQUIPMENT_SLOT_HAND_COUNT && result != EQUIPMENT_SLOT_ITEM_ALLOWED) {
         s32 other = slot == MENU_EQUIPMENT_SLOT_RIGHT_HAND;
         if (unit_index != 1) {
-            item_adjust_inventory_count(g_equipment_unit_data[unit_index]->equipment[other], 1);
+            item_inventory_count_adjust(g_equipment_unit_data[unit_index]->equipment[other], 1);
         }
         g_equipment_unit_data[unit_index]->equipment[other] = 0;
     }
@@ -59,19 +59,19 @@ s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
  * type bit is set in the unit's equippable-types bitfield, EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP for an item
  * of the "other" menu category or a type the unit cannot use. The low ten
  * bits of the entry are the item id. */
-s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
+s32 equipment_item_compatibility_check(s16 unit_index, s16 item_entry) {
     s32 item_id = item_entry & ITEM_ENTRY_ID_MASK;
 
     if (item_id == 0) {
         return EQUIPMENT_SLOT_ITEM_ALLOWED;
     }
-    if (item_get_menu_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
+    if (item_menu_category_get(item_id) == ITEM_MENU_CATEGORY_OTHER) {
         return EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP;
     }
     /* Skip to the item type's bit in the unit's bitfield, first byte's bit 7 first. */
-    bits_init_primary_reader(g_equipment_unit_data[unit_index]->equipment_categories);
-    bits_read_primary(item_get_type(item_id));
-    return bits_read_primary(1) == 0 ? EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP : EQUIPMENT_SLOT_ITEM_ALLOWED;
+    bits_primary_reader_init(g_equipment_unit_data[unit_index]->equipment_categories);
+    bits_primary_read(item_type_get(item_id));
+    return bits_primary_read(1) == 0 ? EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP : EQUIPMENT_SLOT_ITEM_ALLOWED;
 }
 
 /* Validate a candidate item against slot locks, job rules, and hand pairing.
@@ -80,7 +80,7 @@ s32 equipment_can_equip_item(s16 unit_index, s16 item_entry) {
  * calling convention; menu_equipment_slot_e names its accepted values.
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id (the same shape as
- * formation_item_can_equip_in_slot). */
+ * formation_item_slot_check). */
 static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
     s32 result;
     s16 id = item_id & ITEM_ENTRY_ID_MASK;
@@ -101,7 +101,7 @@ static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, 
     if (g_item_primary_data[g_equipment_unit_data[unit]->equipment[slot]].type_flags & ITEM_TYPE_FLAG_UNREMOVABLE) {
         return EQUIPMENT_SLOT_ITEM_CURRENT_LOCKED;
     }
-    result = equipment_can_equip_item(unit, id);
+    result = equipment_item_compatibility_check(unit, id);
 
     /* Hand pairing, where ids from ITEM_ID_THROWABLE_FIRST on (shields included) count as
      * non-weapons: two Two Swords weapons pair when the unit has Two Swords; otherwise two
@@ -154,7 +154,7 @@ static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, 
  * with ITEM_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
  * promoted to 2 when Show Unequippable is not On. `sort_mode` 1-5 with a
  * category list index below 5 uses that category order list; anything else falls back to
- * item_sort_id_list. Returns the number of listed items.
+ * item_id_list_sort. Returns the number of listed items.
  */
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter) {
     s32 count;
@@ -172,10 +172,10 @@ s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* l
     count = 0;
     for (; item_id < ITEM_ID_END; item_id++) {
         entry = item_id;
-        if (item_get_total_count(item_id) == 0) {
+        if (item_total_count_get(item_id) == 0) {
             continue;
         }
-        item_category = item_get_menu_category(item_id);
+        item_category = item_menu_category_get(item_id);
         matches = 0;
         if (category < ITEM_LIST_FILTER_HEADGEAR) {
             /* Either hand lists weapons and shields. */
@@ -209,7 +209,7 @@ s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* l
             continue;
         }
         if (equip_filter != ITEM_LIST_MODE_ALL) {
-            matches = equipment_can_equip_item(unit_index, entry);
+            matches = equipment_item_compatibility_check(unit_index, entry);
             if (equip_filter == ITEM_LIST_MODE_EQUIPPABLE && matches == EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP) {
                 continue;
             }
@@ -233,7 +233,7 @@ s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* l
     if (category_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(category_index, list);
     } else {
-        item_sort_id_list(sort_mode & 0xF, list);
+        item_id_list_sort(sort_mode & 0xF, list);
     }
     return count;
 }

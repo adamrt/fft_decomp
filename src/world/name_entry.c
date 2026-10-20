@@ -46,7 +46,7 @@ extern RECT g_name_entry_screen_image_rect;
 extern RECT g_name_entry_text_vram_rect;
 
 /* keyboard */
-/* Editing keys of name_entry_apply_key; any other key is the character
+/* Editing keys of key_apply; any other key is the character
  * written at the cursor. */
 typedef enum name_entry_key {
     NAME_ENTRY_KEY_BACKSPACE = -1,
@@ -83,38 +83,38 @@ extern u8 g_name_entry_keyboard_script[41];
 
 static u8 g_name_entry_text[17] = { 0 };
 
-static void name_entry_apply_key(s16 key);
-static void name_entry_init(const u8* name);
-static void name_entry_update_cursor(void);
+static void key_apply(s16 key);
+static void keyboard_init(const u8* name);
+static void keyboard_cursor_update(void);
 
 /* One frame of the name-entry keyboard inside another screen (the shop's rename and hire
  * steps). The first call, once the message box is idle, starts editing the name at `list`;
  * later calls apply L1/R1 (cursor) and Square (delete), run the current entry state's handler
  * and draw the name, its cursor, the shoulder buttons and the keyboard. Returns 0 while
  * editing and the encoded name once the state reaches NAME_ENTRY_STATE_FINISHED. */
-u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
+u8* name_entry_keyboard_update(const u8* list, s32 unused_1) {
     point16_t cursor;
     s32 busy;
 
     if (g_name_entry_started == 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             g_name_entry_keyboard_last_state = -1;
-            name_entry_init(list);
+            keyboard_init(list);
             g_name_entry_started = 1;
         }
         return 0;
     }
     if (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
-        busy = screen_is_busy();
+        busy = screen_busy_check();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
-                name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
+                key_apply(NAME_ENTRY_KEY_CURSOR_LEFT);
             }
             if (g_menu_input_primary_repeat & PSX_PAD_R1) {
-                name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_RIGHT);
+                key_apply(NAME_ENTRY_KEY_CURSOR_RIGHT);
             }
             if (g_menu_input_primary_repeat & PSX_PAD_SQUARE) {
-                name_entry_apply_key(NAME_ENTRY_KEY_DELETE);
+                key_apply(NAME_ENTRY_KEY_DELETE);
             }
         }
         g_name_entry_state_handlers[g_name_entry_state]();
@@ -123,9 +123,9 @@ u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
         gfx_set_otag_index(0x28);
         menu_update_and_draw_bouncing_cursor(&cursor, &g_name_entry_keyboard_text_cursor_anim, busy);
         menu_run_script_with_palette_mode(g_name_entry_display_script, 0, busy);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
+        menu_pressable_button_draw(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
             SOUND_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
+        menu_pressable_button_draw(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
             SOUND_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         if (g_name_entry_state != g_name_entry_keyboard_last_state) {
@@ -150,7 +150,7 @@ u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
  * value is one local reused for the cursor x, the drawn-state compare and the
  * sound id; the shared pseudo conflicts with $a0 and keeps all three in $v1.
  */
-u8* name_entry_run_screen(const u8* list, u32* image) {
+u8* name_entry_screen_run(const u8* list, u32* image) {
     point16_t cursor;
     POLY_FT4 textured_quads[2 * 220];
     TILE tiles[2 * 4];
@@ -190,18 +190,18 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     g_screen_draw_move_capacity = 30;
     g_gfx_draw_mode_capacity = 30;
     g_screen_draw_area_capacity = 10;
-    screen_init_packet_buffers(buffers, otags, 0, 0, 0, textured_quads, 0, 0, 0, 0, flat_lines, 0, 0, 0, 0, 0, tiles, 0,
+    screen_packet_buffers_init(buffers, otags, 0, 0, 0, textured_quads, 0, 0, 0, 0, flat_lines, 0, 0, 0, 0, 0, tiles, 0,
         0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
     g_screen_context_id = SCREEN_CONTEXT_NAME_ENTRY;
-    formation_init_display();
+    formation_display_init();
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
-    name_entry_init(list);
+    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
+    keyboard_init(list);
     g_name_entry_last_state = -1;
-    screen_fade_set_disabled(1);
-    menu_input_update_with_message_state();
+    screen_fade_disabled_set(1);
+    menu_input_message_state_update();
     while (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
-        screen_fade_update_in();
+        screen_fade_in_update();
         system_frame_stub();
         g_gfx_poly_f3_count = 0;
         g_gfx_poly_ft3_count = 0;
@@ -245,17 +245,17 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         gfx_load_image_and_wait(&g_name_entry_screen_image_rect, image);
         DrawOTag(otag);
         ClearOTag(g_menu_gfx_context->otag, g_screen_ot_length);
-        menu_input_update_with_message_state();
-        busy = screen_is_busy();
+        menu_input_message_state_update();
+        busy = screen_busy_check();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
-                name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
+                key_apply(NAME_ENTRY_KEY_CURSOR_LEFT);
             }
             if (g_menu_input_primary_repeat & PSX_PAD_R1) {
-                name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_RIGHT);
+                key_apply(NAME_ENTRY_KEY_CURSOR_RIGHT);
             }
             if (g_menu_input_primary_repeat & PSX_PAD_SQUARE) {
-                name_entry_apply_key(NAME_ENTRY_KEY_DELETE);
+                key_apply(NAME_ENTRY_KEY_DELETE);
             }
         }
         g_name_entry_state_handlers[g_name_entry_state]();
@@ -265,14 +265,14 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         gfx_set_otag_index(0x28);
         menu_update_and_draw_bouncing_cursor(&cursor, &g_name_entry_text_cursor_anim, busy);
         menu_run_script_with_palette_mode(g_name_entry_display_script, 0, busy);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
+        menu_pressable_button_draw(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy,
             SOUND_SFX_PAGE_SWITCH);
-        menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
+        menu_pressable_button_draw(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy,
             SOUND_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(g_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
-        menu_input_update_event_state(
+        menu_input_event_state_update(
             g_menu_gfx_context->otag + 63, PadRead(0), g_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         value = g_name_entry_state;
         if (value != g_name_entry_last_state) {
@@ -289,21 +289,21 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
             value = g_sound_queued_effect_id;
         }
         if (value == SOUND_SFX_TEXT_GLYPH) {
-            sound_play_sfx_on_free_channel(SOUND_SFX_TEXT_GLYPH);
+            sound_free_channel_sfx_play(SOUND_SFX_TEXT_GLYPH);
         } else if (value != SOUND_SFX_NONE) {
-            sound_play_sfx(value);
+            sound_sfx_play(value);
         }
         g_sound_queued_effect_id = SOUND_SFX_NONE;
         g_sound_pending_sfx_id = SOUND_SFX_NONE;
     }
     menu_set_vsync_mode_and_event_speed(2);
-    screen_reset_context();
-    screen_fade_set_disabled(0);
+    screen_context_reset();
+    screen_fade_disabled_set(0);
     return g_name_entry_text;
 }
 
 /* Open the name-entry key list: identity entry ids 0..8 plus a -1 terminator. */
-static void name_entry_open_key_list(void) {
+static void key_list_open(void) {
     s32 count = 0;
     s32 i;
 
@@ -312,8 +312,8 @@ static void name_entry_open_key_list(void) {
         count++;
     }
     g_name_entry_key_ids[count] = -1;
-    screen_init_list(g_name_entry_key_ids, g_menu_list_selected_index,
-        screen_text_get_resident(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD),
+    screen_list_init(g_name_entry_key_ids, g_menu_list_selected_index,
+        screen_text_resident_get(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD),
         (menu_instruction_t*)g_name_entry_keyboard_script);
 }
 
@@ -326,19 +326,19 @@ static void name_entry_open_key_list(void) {
  * to. Other state and sound requests are left for the surrounding menu
  * handlers.
  */
-void name_entry_handle_keys(void) {
+void name_entry_keys_update(void) {
     u8 previous;
     s32 character;
 
     if (g_name_entry_confirm_message_shown == 0) {
         g_name_entry_input_delay = 0;
-        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
+        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
         g_name_entry_confirm_message_shown = 1;
     }
     if (g_name_entry_input_delay < 10) {
         g_name_entry_input_delay++;
     }
-    name_entry_update_cursor();
+    keyboard_cursor_update();
     g_name_entry_confirm_message_shown = 0;
     if ((g_menu_input_primary_repeat & (PSX_PAD_CROSS | PSX_PAD_START)) && g_name_entry_input_delay >= 10) {
         previous = g_name_entry_state;
@@ -356,17 +356,17 @@ void name_entry_handle_keys(void) {
                 g_name_entry_confirm_message_shown = 0;
                 g_name_entry_saved_state = previous;
             } else {
-                name_entry_apply_key(g_name_entry_key_codes[g_name_entry_cursor_index]);
+                key_apply(g_name_entry_key_codes[g_name_entry_cursor_index]);
             }
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             return;
         }
-        character = screen_text_get_char_at(
+        character = screen_text_char_at_get(
             g_name_entry_character_rows, g_name_entry_key_ids[g_name_entry_list_cursor], g_name_entry_cursor_index);
         if (character == TEXT_END_WAIT_FOR_CONFIRM) {
             character = TEXT_SPACE;
         }
-        name_entry_apply_key(character);
+        key_apply(character);
     }
 }
 
@@ -376,7 +376,7 @@ void name_entry_handle_keys(void) {
  * between them remaps the column through
  * g_name_entry_special_to_char_column/g_name_entry_char_to_special_column. Left/right wrap within the row,
  * and a column change queues the cursor-move sound. */
-static void name_entry_update_cursor(void) {
+static void keyboard_cursor_update(void) {
     point16_t cursor;
     s32 previous = g_name_entry_cursor_index;
     u32 input;
@@ -423,7 +423,7 @@ static void name_entry_update_cursor(void) {
         g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
     gfx_set_otag_index(0x28);
-    screen_draw_sliding_cursor(&cursor, &g_name_entry_key_cursor_anim, g_menu_input_lock_mode);
+    screen_sliding_cursor_draw(&cursor, &g_name_entry_key_cursor_anim, g_menu_input_lock_mode);
 }
 
 /* Applies a name-entry key to the encoded name at g_name_entry_text and re-kerns it.
@@ -433,7 +433,7 @@ static void name_entry_update_cursor(void) {
  * the cursor, -3 inserts a space, -4/-5 move the cursor left/right, and any
  * other key overwrites the slot at the cursor and advances it. The slots are
  * re-encoded with trailing spaces trimmed before the terminator. */
-static void name_entry_apply_key(s16 key) {
+static void key_apply(s16 key) {
     u16 chars[14];
     s32 i;
     s32 j;
@@ -536,7 +536,7 @@ void name_entry_confirm_menu(void) {
         }
         g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_name_entry_text;
         g_text_substitution_values[0] = 0xc800;
-        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xc01a, 0);
+        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xc01a, 0);
         g_name_entry_confirm_initialized = 1;
         g_name_entry_confirm_finished = 0;
         g_name_entry_confirm_result = -1;
@@ -548,10 +548,10 @@ void name_entry_confirm_menu(void) {
             g_name_entry_state = NAME_ENTRY_STATE_FINISHED;
             g_screen_prompt_active = 0;
         }
-    } else if (menu_start_managed_thread(SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
+    } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
         if (g_name_entry_confirm_result == 0) {
             g_name_entry_confirm_finished = 1;
-            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, -1, 0);
+            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, -1, 0);
             return;
         }
         g_name_entry_state = g_name_entry_saved_state;
@@ -563,17 +563,17 @@ void name_entry_confirm_menu(void) {
 }
 
 /* Seed the editable name and open its keyboard and message window. */
-static void name_entry_init(const u8* name) {
+static void keyboard_init(const u8* name) {
     s32 i;
 
     g_name_entry_original_name = name;
     g_name_entry_cursor_index = 0;
     g_name_entry_list_cursor = 1;
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
-    menu_init_scrollable_list_core(0, 0, 0);
+    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
+    menu_scrollable_list_core_init(0, 0, 0);
     g_menu_list_selected_index = 1;
-    screen_text_bind_section(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD);
+    screen_text_section_bind(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD);
     g_text_section_pointers[SCREEN_TEXT_SECTION_NAME_ENTRY_KEYS] = g_screen_text_name_entry_keys_data;
     g_name_entry_cursor = 0;
     i = 0;
@@ -585,9 +585,9 @@ static void name_entry_init(const u8* name) {
         i++;
     }
     /* A cursor move at slot 0 changes nothing but kerns and uploads the name. */
-    name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
+    key_apply(NAME_ENTRY_KEY_CURSOR_LEFT);
     g_sound_queued_effect_id = SOUND_SFX_NONE;
     g_name_entry_state = NAME_ENTRY_STATE_EDITING;
-    name_entry_open_key_list();
+    key_list_open();
     menu_set_vsync_mode_and_event_speed(2);
 }

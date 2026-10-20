@@ -6,7 +6,7 @@
 /* Classify an item ID into the equipment menu's broad list category.
  *
  * Throwable weapons and consumables share the fallback category. */
-item_menu_category_e item_get_menu_category(s16 item_id) {
+item_menu_category_e item_menu_category_get(s16 item_id) {
     s32 result;
 
     item_id &= ITEM_ENTRY_ID_MASK;

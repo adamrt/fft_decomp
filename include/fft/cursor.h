@@ -34,20 +34,20 @@ void cursor_update(void);
 void cursor_show(void);
 void cursor_hide(void);
 s32 cursor_move_by_input(void);
-void cursor_move_to_unit(const unit_t* unit);
-s32 cursor_move_to_battle_id(u32 battle_id);
-void cursor_move_to_action_target(const unit_t* unit);
-void cursor_move_to_selection(const unit_t* unit, const unit_t* selected_unit);
-void cursor_project_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised);
+void cursor_move_to_unit(const unit_runtime_t* unit);
+s32 cursor_unit_tile_move(u32 battle_id);
+void cursor_move_to_action_target(const unit_runtime_t* unit);
+void cursor_move_to_selection(const unit_runtime_t* unit, const unit_runtime_t* selected_unit);
+void cursor_tile_project(VECTOR* projected, SVECTOR* position, SVECTOR* raised);
 
 /* drawing */
 extern palette_t g_cursor_tile_glow_palettes[2];
 
-void cursor_draw_with_tile_glow(void);
+void cursor_tile_glow_draw(void);
 s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad);
-void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot);
-void cursor_cycle_tile_glow_palettes(void);
-void cursor_draw_map_selection(SVECTOR* base, u32* ot);
+void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot);
+void cursor_tile_glow_palettes_update(void);
+void cursor_map_selection_draw(SVECTOR* base, u32* ot);
 
 /* unit panels */
 void cursor_show_hovered_unit_panel(void);

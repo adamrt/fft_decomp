@@ -26,13 +26,13 @@ extern s16* g_screen_entry_text_id_tables[]; /* 16-bit tables selected by entry 
 extern s32 g_screen_number_entry_digit_steps[];
 extern u32* g_screen_list_controller_input;
 
-static void screen_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
+static void signed_number_draw(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
 
 /* Select's help-text thread: take the menu entry's selected row (for table kinds 2 and
  * -1, the next running menu thread's entry), look up its text id and show it in a dialog,
  * then unlock menu input and restore the saved input state. */
 void screen_help_text_thread(void) {
-    menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
+    menu_entry_t* entry = (menu_entry_t*)thread_current_parameter_1_get();
     thread_t* thread;
     s32 kind = entry->select_text_table;
     s32 index;
@@ -67,12 +67,12 @@ void screen_help_text_thread(void) {
         value = g_screen_entry_text_id_tables[kind][index];
     }
     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
-    thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
+    thread_parameters_set(g_thread_current_id, 0x3F, value, 0);
     message_dialog_thread();
     g_screen_new_buttons = 0;
     g_menu_input_lock_mode = 0;
     script_load_event_input_state(&g_screen_input_state);
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Menu icon list thread with a clamped cursor: builds the text image once,
@@ -91,7 +91,7 @@ void screen_clamped_icon_list_thread(void) {
     menu_icon_sprites_t* sprites;
 
     g_screen_list_controller_input = script_get_controller_input_pointer(0);
-    param = (menu_entry_t*)thread_get_current_parameter_1();
+    param = (menu_entry_t*)thread_current_parameter_1_get();
     cursor = param->selected_index;
     record = &records[0];
     if (cursor == -1) {
@@ -135,13 +135,12 @@ void screen_clamped_icon_list_thread(void) {
         gfx_draw_or_append_gpu_primitive(&sprites->draw_mode);
     }
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Place a number entry's bobbing digit cursor and its shadow over digit cursor (counted from the
  * right edge), freezing the bob while input belongs to another thread. */
-static void screen_place_number_entry_cursor(
-    menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* shadow, s32 unused, s32 cursor) {
+static void digit_cursor_place(menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* shadow, s32 unused, s32 cursor) {
     thread_t* thread = &g_threads[g_thread_current_id];
     s32 x;
     s32 y;
@@ -217,7 +216,7 @@ void screen_number_entry_thread(void) {
     parameter = &thread->function_parameter_1;
     param = (menu_entry_t*)*parameter;
     range = param->context;
-    digits = text_count_decimal_digits(range->bounds.max);
+    digits = text_decimal_digits_count(range->bounds.max);
 
     /* Start from the stored value, or from the minimum when it is out of range. */
     {
@@ -268,7 +267,7 @@ void screen_number_entry_thread(void) {
     *stride = param->inner_width;
     menu_set_text_origin(8, 9);
     menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-    screen_draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
+    signed_number_draw(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
     LoadImage(&rect, buffer);
     redraw = 1;
 
@@ -278,7 +277,7 @@ void screen_number_entry_thread(void) {
             s16* result = param->value;
             *result = value;
         }
-        thread_wait_frames(1);
+        thread_frames_wait(1);
         /* A redrawn image is freed a frame late, after its upload has run. */
         if (redraw == 1) {
             redraw = 0;
@@ -338,15 +337,14 @@ void screen_number_entry_thread(void) {
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             *stride = param->inner_width;
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-            screen_draw_signed_number(
-                value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
+            signed_number_draw(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
             LoadImage(&rect, buffer);
         }
 
         /* The cursor and its shadow switch to dimmed CLUTs while the thread before this one runs. */
         cursor_quad = &cursor_quads[i & 1];
         shadow_quad = &shadow_quads[i & 1];
-        screen_place_number_entry_cursor(param, cursor_quad, shadow_quad, i, digit);
+        digit_cursor_place(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
         if (thread_is_previous_running() == 0) {
@@ -366,7 +364,7 @@ void screen_number_entry_thread(void) {
     }
 
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /*
@@ -404,7 +402,7 @@ void screen_labeled_number_entry_thread(void) {
      * moves the input-pointer store after the thread and entry loads. */
     param = *(menu_entry_t**)thread;
     range = param->context;
-    digits = text_count_decimal_digits(range->bounds.max);
+    digits = text_decimal_digits_count(range->bounds.max);
 
     /* Start from the stored value, or from the minimum when it is out of range. */
     {
@@ -452,12 +450,12 @@ void screen_labeled_number_entry_thread(void) {
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
-    text_measure_pixels(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
+    text_pixels_measure(&label_size.width, &label_size.rows, text_entry_find(param->text_id));
     menu_set_text_origin(8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     menu_set_text_origin((u16)label_size.width + 8, 9);
     menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-    screen_draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
+    signed_number_draw(value, digits, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
     redraw = 1;
 
@@ -466,7 +464,7 @@ void screen_labeled_number_entry_thread(void) {
             s16* result = param->value;
             *result = value;
         }
-        thread_wait_frames(1);
+        thread_frames_wait(1);
         /* A redrawn image is freed a frame late, after its upload has run. */
         if (redraw == 1) {
             menu_free_memory(buffer);
@@ -526,19 +524,19 @@ void screen_labeled_number_entry_thread(void) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_window_text_pen.stride = param->inner_width;
-            text_measure(&label_size.width, &label_size.rows, text_find_entry(param->text_id));
+            text_measure(&label_size.width, &label_size.rows, text_entry_find(param->text_id));
             menu_set_text_origin(8, 9);
             menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
             menu_set_text_origin((u16)label_size.width * 6 + 8, 9);
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
-            screen_draw_signed_number(value, digits, buffer, &g_menu_window_text_pen);
+            signed_number_draw(value, digits, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, buffer);
         }
 
         /* The cursor and its shadow switch to dimmed CLUTs while the thread before this one runs. */
         cursor_quad = &cursor_quads[i & 1];
         shadow_quad = &shadow_quads[i & 1];
-        screen_place_number_entry_cursor(param, cursor_quad, shadow_quad, i, digit);
+        digit_cursor_place(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
         if (thread_is_previous_running() == 0) {
@@ -558,7 +556,7 @@ void screen_labeled_number_entry_thread(void) {
     }
 
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /*
@@ -569,7 +567,7 @@ void screen_labeled_number_entry_thread(void) {
  *
  * `digits` arrives as a full 32-bit value and only its low byte is used.
  */
-static void screen_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
+static void signed_number_draw(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
     s32 original = value;
     s32 i;
 
@@ -591,13 +589,13 @@ static void screen_draw_signed_number(s32 value, s32 digits, u8* image, glyph_bl
 /* Reopen a chain of menu entries, each in the thread slot below the previous one, following each
  * entry's selected row action until a number-entry window is started or the action is not a menu
  * index. */
-void screen_start_entry_chain(u32 index, s32 thread) {
+void screen_entry_chain_start(u32 index, s32 thread) {
     menu_entry_t* entry;
 
     do {
         entry = &g_menu_thread_menu_data[index];
         thread_start(thread, entry->thread_entry);
-        thread_set_parameters(thread, (s32)entry, 0, 0);
+        thread_parameters_set(thread, (s32)entry, 0, 0);
         if (entry->thread_entry == screen_labeled_number_entry_thread
             || entry->thread_entry == screen_number_entry_thread) {
             return;
@@ -629,8 +627,8 @@ void screen_text_entry_thread(void) {
     text_thread = binding->text_thread_id;
     speaker_id = binding->speaker_id;
     thread_start(text_thread, message_dialog_thread);
-    thread_set_parameters(text_thread, second, text_id, speaker_id);
-    thread_wait_until_inactive(text_thread);
+    thread_parameters_set(text_thread, second, text_id, speaker_id);
+    thread_inactive_wait(text_thread);
     *g_screen_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
         menu_handle_action(entry, 0);
@@ -640,9 +638,9 @@ void screen_text_entry_thread(void) {
         if ((thread - 1)->function_parameter_3 != 0) {
             break;
         }
-        thread_wait_frames(1);
+        thread_frames_wait(1);
     }
-    thread_exit_current();
+    thread_current_exit();
 }
 
 /* Resize the current thread's menu entry's first parent entry to fit a
@@ -660,7 +658,7 @@ void screen_fit_parent_entry_to_digits(void) {
         entry = &g_menu_thread_menu_data[index];
         /* Retail bug (QUIRKS.md): `value` is never set, so the callee counts the digits of a
          * stale $a0. Nothing calls this function. */
-        digits = text_count_decimal_digits(value);
+        digits = text_decimal_digits_count(value);
         width = digits * 6;
         margin = (digits & 1) * 2 + 0x18;
         width += margin;

@@ -53,7 +53,31 @@ typedef struct effect_decoded_model_command {
 } effect_decoded_model_command_t;
 typedef char effect_decoded_model_command_size_must_be_112[sizeof(effect_decoded_model_command_t) == 112 ? 1 : -1];
 
-s32 effect_model_init_sections(const psyq_tmd_header_t* resource, s32 unused_1);
-void effect_model_decode_next_command(effect_decoded_model_command_t* out);
+/* Model packets shared by secondary-effect initialization and rendering.
+ * The arrow allocation retains the original trailing work area. */
+typedef struct effect_arrow_buffer {
+    POLY_G3 g3[2][4];  /* 0x000 */
+    POLY_G4 g4[2][13]; /* 0x0e0 */
+    u8 _unused_488[0x800];
+} effect_arrow_buffer_t;
+typedef char effect_arrow_buffer_size_must_be_3208[(sizeof(effect_arrow_buffer_t) == 3208) ? 1 : -1];
+
+typedef struct effect_stone_buffer {
+    POLY_G3 g3[2][12];
+} effect_stone_buffer_t;
+
+typedef struct effect_shuriken_buffer {
+    POLY_G3 g3[2][16];
+} effect_shuriken_buffer_t;
+
+typedef struct effect_reflect_buffer {
+    u16 clut[2][6];
+    POLY_GT3 prims[2][24];
+} effect_reflect_buffer_t;
+
+s32 effect_model_sections_init(const psyq_tmd_header_t* resource, s32 unused_1);
+void effect_model_command_decode(effect_decoded_model_command_t* out);
+void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter);
+void effect_thrown_item_sprite_draw(VECTOR* origin, s32 item_id, s32 angle);
 
 #endif

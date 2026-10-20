@@ -46,7 +46,7 @@ typedef struct move_step {
 typedef char move_step_size_must_be_1[sizeof(move_step_t) == 1 ? 1 : -1];
 
 /* Packed half-height offsets (move_path_t.height_offsets). A missing presence flag keeps
- * that side's previous value when move_path_apply_selected_candidate applies a saved candidate. */
+ * that side's previous value when path_selected_candidate_apply applies a saved candidate. */
 typedef struct move_height_offsets {
     u8 destination_present : 1;
     u8 destination_height_offset : 3;
@@ -55,7 +55,7 @@ typedef struct move_height_offsets {
 } move_height_offsets_t;
 typedef char move_height_offsets_size_must_be_1[(sizeof(move_height_offsets_t) == 1) ? 1 : -1];
 
-/* The complete movement record, copied from g_move_path into unit_t.path.
+/* The complete movement record, copied from g_move_path into unit_runtime_t.path.
  * Count 0xfe selects the explicit teleport destination; 0xff is a failed
  * teleport. Ordinary counts select packed steps, each spanning one or more
  * tiles. Byte alignment preserves the original whole-record copies. */
@@ -82,7 +82,7 @@ enum {
 enum { MOVE_PENDING_MOUNT_ID_MASK = 0x7f, MOVE_PENDING_MOUNT_SET = 0x80 };
 
 /* movement classes and terrain */
-/* Ordered class selection in move_spread_store_unit_to_scratchpad, not movement ability
+/* Ordered class selection in spread_unit_to_scratchpad_store, not movement ability
  * flags or the separate cost-table selector. Water names describe standing
  * height. The UNIT_MOVEMENT_SET_3 bits carry the retail ability names, which
  * are the other way round: "Move in Water" (0x1f6) stands on the surface and
@@ -109,7 +109,7 @@ typedef enum move_effective_flags {
 
 move_effective_flags_e move_get_effective_flags(const unit_stats_t* unit);
 s32 move_get_ability_events(const unit_stats_t* unit);
-s32 move_get_water_standing_offset(unit_t* unit, battle_map_tile_t* tile);
+s32 move_get_water_standing_offset(unit_runtime_t* unit, battle_map_tile_t* tile);
 
 /* pathfinding */
 /* Generic pathfinding flags, distinct from movement ability bytes. */
@@ -132,7 +132,7 @@ enum {
     FRONTIER_FLAG_BLOCKED = 0x80         /* a blocked tile, or the tile of Altima's second form */
 };
 
-/* move_spread_set_frontier_flags modes. Bit 0 clears the target panels' ranges. */
+/* spread_frontier_flags_set modes. Bit 0 clears the target panels' ranges. */
 typedef enum move_frontier_mode {
     MOVE_TILE_FLAGS_MODE_START_SPREAD = 1, /* mark the units and queue the mover's own tile */
     MOVE_TILE_FLAGS_MODE_KEEP_RANGES = 2,  /* mark the units only */
@@ -155,11 +155,11 @@ s32 move_start_walk_to(
     s32 runtime_id, const battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
 s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length);
 s32 move_is_unit_moving_by_runtime_id(u32 runtime_id);
-void move_settle_on_tile(unit_t* unit);
+void move_settle_on_tile(unit_runtime_t* unit);
 
 /* knockback */
-/* action_current_ability_t.knockback_flags: the kind of knockback found by
- * move_knockback_calculate, with PENDING set until it is applied. */
+/* action_work_t.knockback_flags: the kind of knockback found by
+ * knockback_calculate, with PENDING set until it is applied. */
 typedef enum move_knockback_kind {
     MOVE_KNOCKBACK_FALL_DAMAGE = 1,   /* a grounded target: the fall height can hurt */
     MOVE_KNOCKBACK_NO_FALL_DAMAGE = 2 /* a flying target */
@@ -168,8 +168,8 @@ typedef enum move_knockback_kind {
 /* Encoding of the kind and pending marker in the same byte. */
 enum { MOVE_KNOCKBACK_KIND_MASK = 0x7f, MOVE_KNOCKBACK_PENDING = 0x80 };
 
-void move_knockback_start(const unit_t* src, unit_t* dst);
-void move_knockback_update(unit_t* unit);
+void move_knockback_start(const unit_runtime_t* src, unit_runtime_t* dst);
+void move_knockback_update(unit_runtime_t* unit);
 void move_knockback_cancel(void);
 
 /* Move-Find items and traps */
@@ -234,8 +234,8 @@ typedef char move_find_result_data_size_must_be_6[(sizeof(move_find_result_data_
 extern move_find_map_data_t g_move_find_current_map_data;
 
 void move_find_load_item_data(move_find_map_data_t* map_data);
-move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer);
-move_found_item_t* move_find_determine_item(unit_stats_t* unit);
+move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer);
+move_found_item_t* move_find_item_determine(unit_stats_t* unit);
 s32 move_find_prepare_trap_result(unit_stats_t* unit);
 
 /* post movement */

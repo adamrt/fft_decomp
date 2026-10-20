@@ -25,6 +25,7 @@ typedef enum conditions_banner {
 } conditions_banner_e;
 
 void conditions_show_ready_bugged(void);
+void conditions_show_general(s32 hold_frames);
 void conditions_special_thread(void);
 void victory_congratulations_thread(void);
 
@@ -52,6 +53,7 @@ extern s32 g_party_affected_unit_count;
 extern s32 g_party_affected_battle_unit_indices[];
 
 s32 party_update_after_battle(void);
+void party_apply_post_battle_changes(void);
 void party_brave_faith_report_thread(void);
 void party_departures_thread(void);
 void party_set_biography_state(s32 character_identity, s32 bio_state);
@@ -64,6 +66,11 @@ extern u8 g_after_battle_gfx_fade_rgb[3];
 
 void gfx_fade_rgb_31_frames(s32 target_red, s32 target_green, s32 target_blue);
 void menu_wait_selection_threads(void);
+void help_open_after_battle(void);
+
+/* war trophies */
+void war_trophy_list_thread(void);
+void war_trophy_run_gil_ticker(void);
 
 /* text */
 /* Character identities grouped by their warning, departure and dismissal text. */
@@ -80,6 +87,8 @@ typedef enum after_battle_text_section {
 } after_battle_text_section_e;
 
 extern u8 g_party_message_identity_groups[PARTY_MESSAGE_IDENTITY_GROUP_COUNT][PARTY_MESSAGE_IDENTITIES_PER_GROUP];
+
+void text_build_battle_unit_names(void);
 
 /* threads */
 /* Slots of the after-battle screens' own threads; thread_screen_slot_e

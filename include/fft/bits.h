@@ -13,20 +13,20 @@ extern u8 g_bits_secondary_reset;
 extern const u8* g_bits_secondary_cursor;
 
 /* WORLD builds its own bodies of these two. */
-void bits_init_primary_reader(u8* data);
-void bits_init_secondary_reader(const u8* data);
+void bits_primary_reader_init(u8* data);
+void bits_secondary_reader_init(const u8* data);
 
 /* The first read or write after a reset starts at bit 7 of the current byte. */
-u32 bits_read_primary(s32 count);
-void bits_write_primary(s32 value);
-s32 bits_read_secondary(s32 count);
+u32 bits_primary_read(s32 count);
+void bits_primary_write(s32 value);
+s32 bits_secondary_read(s32 count);
 
 /* BUNIT unit list reader */
 void bits_init_reader(const u8* data);
 u32 bits_read(s32 bit_count);
 
 /* WLDCORE bit arrays */
-void bits_set_value(u32* bits, s32 index, s32 set);
+void bits_value_set(u32* bits, s32 index, s32 set);
 s32 bits_test(u32* bits, s32 index);
 
 #endif

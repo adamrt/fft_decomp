@@ -86,7 +86,7 @@ typedef struct menu_draw_number_command {
     u8 value;
 } menu_draw_number_command_t;
 
-/* Variable-length list command (0x10) in the menu display stream: the layout screen_load_list_layout reads and the
+/* Variable-length list command (0x10) in the menu display stream: the layout screen_list_layout_load reads and the
  * placement each program's menu_opcode_10_draw_scrollable_list draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
@@ -356,14 +356,14 @@ extern s16 g_menu_list_scroll_offset;
 void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 
 /* BUNIT, EQUIP and JOBSTTS share the core; WORLD uses its screen state. */
-void menu_init_scrollable_list_core(const s16* entries, s32 selected_index, u8* text_table);
+void menu_scrollable_list_core_init(const s16* entries, s32 selected_index, u8* text_table);
 void menu_draw_scrollable_list(const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
-menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
+menu_vertical_scroll_direction_e menu_input_page_scroll_direction_read(void);
 
 /* number rendering */
 /* BUNIT, EQUIP, JOBSTTS and CARD each define this decimal-number format. */

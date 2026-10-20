@@ -519,7 +519,7 @@ static void ending_update_xa_audio(void) {
 
             /* The frame counter was cleared when the seek was issued. */
             if (g_system_wait_frames >= 0x79 && *state == 5) {
-                file_reset_cd_subsystems();
+                file_cd_subsystems_reset();
                 *state = 0;
             }
         } break;
@@ -740,7 +740,7 @@ static void ending_update_opntex_sequence(void) {
 
 /* Start FFTEND.STR (sector 0x21908, ending at frame 0x571) as the first
  * controller. */
-void movie_play_ending(void) {
+void movie_ending_start(void) {
     g_controller_depth = 0;
     g_gfx_active_buffer_index = 0;
     movie_stream_fftend(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
@@ -752,7 +752,7 @@ static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
     s32 controller;
 
     (void)unused;
-    movie_start_stream(start_sector, end_frame, -1, 0x7e);
+    movie_stream_start(start_sector, end_frame, -1, 0x7e);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     controller = g_controller_depth;
     g_controller_handler_indices[controller] = CONTROLLER_FFTEND_MOVIE;
@@ -779,7 +779,7 @@ void movie_update_fftend(controller_record_t* unused_record) {
     }
 
     if (g_input_new_button_presses & PSX_PAD_START) {
-        movie_stop_stream(1);
+        movie_stream_stop(1);
     }
 }
 

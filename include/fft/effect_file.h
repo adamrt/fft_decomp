@@ -74,7 +74,7 @@ typedef char effect_flags_section_size_must_be_24[(sizeof(effect_flags_section_t
 
 /* The effect_flags_section_t.flags bits the engine reads. */
 enum {
-    /* caster and target anchors take the tile's surface height: effect_resolve_target_world_coords */
+    /* caster and target anchors take the tile's surface height: effect_target_world_coords_resolve */
     EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST = 0x08,
     EFFECT_FLAG_QUIET_MUSIC = 0x10,         /* lower the music while the effect loads and plays */
     EFFECT_FLAG_TIMING_CURVE_PHASE1 = 0x20, /* phase 1 of the parent timeline sets the time scale from its curve */

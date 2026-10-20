@@ -11,7 +11,7 @@
 
 /* ability ids */
 /*
- * Ability id classes, as ability_get_data_and_type splits
+ * Ability id classes, as ability_records_get splits
  * them: default 0x000-0x16f, item 0x170-0x17d, throw 0x17e-0x189, jump
  * 0x18a-0x195, charge 0x196-0x19d, math 0x19e-0x1a5, then 32 reaction, 32
  * support and the movement abilities.
@@ -27,7 +27,7 @@ enum {
     ABILITY_ID_REACTION_FIRST = 422,
     ABILITY_ID_SUPPORT_FIRST = 454,
     ABILITY_ID_MOVEMENT_FIRST = 486,
-    /* 0x1fe/0x1ff request a random R/S/M pick; unit_calculate_rsm returns
+    /* 0x1fe/0x1ff request a random R/S/M pick; unit_rsm_select returns
      * any smaller id unchanged. */
     ABILITY_ID_RANDOM_FIRST = 510
 };
@@ -550,7 +550,7 @@ typedef enum ability_type_flag {
 
 enum { ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT = 7 };
 
-/* The ID-range classification returned by ability_get_data_and_type.
+/* The ID-range classification returned by ability_records_get.
  * Values 0..8 are not the serialized low type_flags nibble, numbered 1..9. */
 typedef enum ability_type {
     ABILITY_TYPE_DEFAULT = 0,
@@ -633,7 +633,7 @@ typedef enum ability_secondary_flags_4 {
 } ability_secondary_flags_4_e;
 
 /* One-based formula IDs of abilities, weapons and items: BATTLE resolves an
- * action through g_formula_handlers[id - 1]. Only IDs tested by the
+ * action through g_formulas[id - 1]. Only IDs tested by the
  * code are named. */
 typedef enum ability_formula {
     ABILITY_FORMULA_WEAPON_DAMAGE = 1, /* also stands in for 0 and for ids past the table */
@@ -651,15 +651,15 @@ typedef enum ability_formula {
 enum { ABILITY_FORMULA_ID_LIMIT = 101 };
 
 /* Default-ability secondary records, g_ability_range_data.
- * ability_get_range uses the 14-byte stride and the range;
+ * ability_range_get uses the 14-byte stride and the range;
  * action_calculate_target_result reads flags_1,
  * ai_target_classify_ability_effect reads flags_2, and
- * ai_ability_load_entry copies the element, CT and AoE into the
+ * ai_ability_entry_load copies the element, CT and AoE into the
  * considered AI ability. Other bytes stay provisional. */
 typedef struct ability_secondary_data {
     u8 range;                /* 0x00; ABILITY_RANGE_WHOLE_MAP covers the whole map */
     u8 aoe;                  /* 0x01; ABILITY_RANGE_WHOLE_MAP covers the whole map */
-    u8 vertical;             /* 0x02; vertical tolerance (target_range_set_for_ability) */
+    u8 vertical;             /* 0x02; vertical tolerance (ability_range_set) */
     u8 flags_1;              /* 0x03; ability_secondary_flags_1_e */
     u8 flags_2;              /* 0x04; ability_secondary_flags_2_e */
     u8 flags_3;              /* 0x05; ability_secondary_flags_3_e */
@@ -716,7 +716,7 @@ extern u8 g_ability_math_rsm_data[ABILITY_ID_COUNT - ABILITY_ID_MATH_FIRST];
 /* Indexed by reaction ability id - ABILITY_ID_REACTION_FIRST. */
 extern const u8 g_ability_reaction_behavior_flags[ABILITY_ID_SUPPORT_FIRST - ABILITY_ID_REACTION_FIRST];
 
-ability_type_e ability_get_data_and_type(
+ability_type_e ability_records_get(
     s32 id, const ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data);
 
 /* skillset lookup */
@@ -728,8 +728,8 @@ typedef enum rsm_ability_filter {
     RSM_ABILITY_FILTER_MOVEMENT = 0x08
 } rsm_ability_filter_e;
 
-s32 ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
-u16* ability_store_skillset_abilities(s32 skillset, s32 flags);
+s32 ability_skillset_id_get(s32 skillset_id, s32 ability_index);
+u16* ability_skillset_list_build(s32 skillset, s32 flags);
 
 /* The Elemental ability that the surface type of the unit's tile selects. */
 s32 ability_get_elemental_id(const unit_stats_t* unit);
@@ -788,7 +788,7 @@ enum { ELEMENTAL_AFFINITY_COUNT = 5 };
 /* learning */
 extern s32 g_ability_learn_on_hit_unit_id;
 
-u32 ability_get_learned(const unit_stats_t* unit, u32 job_index);
+u32 ability_learned_get(const unit_stats_t* unit, u32 job_index);
 s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id);
 void ability_learn_used(unit_stats_t* unit);
 

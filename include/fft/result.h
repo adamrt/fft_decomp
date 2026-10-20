@@ -12,8 +12,8 @@
 #include "psx/types.h"
 
 /* Pending post-action displays are queued as one little-endian 32-bit value in runtime
- * Unit Data 0x1b8..0x1bb. result_build_next_display and
- * result_build_next_special_display consume one bit at a time in ascending
+ * Unit Data 0x1b8..0x1bb. result_next_display_build and
+ * result_next_special_display_build consume one bit at a time in ascending
  * order. */
 typedef enum action_display_flag {
     ACTION_DISPLAY_FLAG_HP_DAMAGE = 0x00000001,
@@ -113,13 +113,13 @@ typedef char action_display_image_rect_size_must_be_4[(sizeof(action_display_ima
 /* Packed image IDs in the action-result status list. */
 enum { ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f, ACTION_STATUS_DISPLAY_REMOVAL = 0x80 };
 
-/* Entries of unit_t.status_display_image_list. */
+/* Entries of unit_runtime_t.status_display_image_list. */
 enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
 
 /* Block view of the numeric display fields at runtime unit data 0x2bc..0x2cf,
  * taken as one pointer by the action result display builders
- * (result_build_next_display, result_build_next_special_display
- * and result_animate_text). */
+ * (result_next_display_build, result_next_special_display_build
+ * and result_text_animate). */
 typedef struct action_result_display {
     u8 active;                     /* 0x00 */
     u8 _padding_01;                /* 0x01; aligns selector */
@@ -173,12 +173,12 @@ enum { RESULT_DISPLAY_SELECTOR_MASK = 0x1ff, RESULT_DISPLAY_MODIFIER_CRITICAL = 
 
 extern action_display_image_rect_t g_result_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
 
-void result_prepare_display(unit_t* unit);
-s32 result_prepare_display_by_runtime_id(s32 runtime_id);
-s32 result_build_next_display(unit_t* unit);
-s32 result_build_next_special_display(unit_t* unit);
-void result_init_earned_exp_jp_display(struct unit* unit);
-void result_queue_charge_failure_message(unit_t* unit, s32 mode);
-void result_animate_text(unit_t* unit, const SVECTOR* screen_coords);
+void result_display_prepare(unit_runtime_t* unit);
+s32 result_runtime_display_prepare(s32 runtime_id);
+s32 result_next_display_build(unit_runtime_t* unit);
+s32 result_next_special_display_build(unit_runtime_t* unit);
+void result_exp_jp_display_init(struct unit_runtime* unit);
+void result_charge_failure_queue(unit_runtime_t* unit, s32 mode);
+void result_text_animate(unit_runtime_t* unit, const SVECTOR* screen_coords);
 
 #endif

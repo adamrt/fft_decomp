@@ -2,8 +2,7 @@
 #define EFFECT_H
 
 /* Ability effects shared by BATTLE and the effect overlays (EFFECT/E###.BIN): the effect context and its targets,
- * native callbacks, particles, script records and vector math, and the overlays' native handlers with their work
- * records. */
+ * native callbacks, particles, script records, and the overlays' native handlers with their work records. */
 
 #include "fft/effect_file.h"
 #include "fft/effect_timeline.h"
@@ -18,9 +17,9 @@
  * index or ignore unused arguments. Effect script opcode 06 puts a handler in one of the callback slots, and a
  * particle keyframe whose 16-bit action value names the slot binds it to the record. While a keyframe that names the
  * slot runs, the particle channel calls the handler once a frame in place of the particle emitter: emitter_index is
- * the keyframe's emitter record, which the handler reads through its own view of effect_geometry.h, and frame counts
- * from the start of the keyframe. The slot's phase (effect_record_t.callback_phase, effect_callback_phase_e) starts
- * at INIT, where the handler allocates its work block into work_slots; it then stays at UPDATE until the channel
+ * the keyframe's emitter record, which the handler reads through its own view of effect_emitter_data.h, and frame
+ * counts from the start of the keyframe. The slot's phase (effect_record_t.callback_phase, effect_callback_phase_e)
+ * starts at INIT, where the handler allocates its work block into work_slots; it then stays at UPDATE until the channel
  * sets DESTROY two frames before the keyframe ends. Results are ignored; the s32
  * callback contract preserves instruction scheduling in several handlers. */
 typedef s32 (*effect_callback_t)(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
@@ -43,7 +42,7 @@ s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_em
 enum {
     EFFECT_TARGET_COUNT_MAX = UNIT_RUNTIME_SLOT_COUNT,
     EFFECT_CASTER_ENTRY = EFFECT_TARGET_COUNT_MAX, /* index of the caster's record in effect_context_t.targets */
-    /* the target index that makes effect_resolve_target_world_coords resolve the caster */
+    /* the target index that makes effect_target_world_coords_resolve resolve the caster */
     EFFECT_TARGET_INDEX_CASTER = -1
 };
 
@@ -67,8 +66,8 @@ typedef struct effect_target {
 typedef char effect_target_size_must_be_10[(sizeof(effect_target_t) == 10) ? 1 : -1];
 
 /* result_animation of a target in an effect init record. The records built by
- * effect_start_for_action use the first four; the weapon-hit
- * records (effect_secondary_build_init_from_action) use all but REFLECTED. */
+ * action_effect_start use the first four; the weapon-hit
+ * records (action_secondary_init_build) use all but REFLECTED. */
 typedef enum effect_hit_result {
     EFFECT_HIT_NORMAL = 0,
     EFFECT_HIT_CRITICAL = 1,
@@ -98,15 +97,15 @@ typedef char effect_context_size_must_be_200[(sizeof(effect_context_t) == 200) ?
 extern effect_context_t g_effect_context;
 
 void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-void effect_get_world_coords_by_battle_id(
+void effect_unit_world_coords_get(
     s32 adjust_for_tile_height, u32 battle_id, const effect_context_t* effect_coordinates, SVECTOR* destination);
-void effect_resolve_target_world_coords(
+void effect_target_world_coords_resolve(
     s32 add_depth, s32 target_index, const effect_context_t* coord_data, SVECTOR* out);
 
 /* particles */
 /* Motion state of an effect slot (effect_slot_t +0x98) and of a
  * particle (effect_work_record_t +0x08), stepped once a frame by
- * effect_slot_step_motion and effect_particle_integrate_motion:
+ * slot_motion_step and effect_particle_integrate_motion:
  * position gains velocity; velocity keeps (inertia -
  * g_effect_inertia_threshold) / inertia of itself, gains
  * acceleration * ONE / inertia and gains g_effect_gravity scaled by
@@ -121,7 +120,7 @@ typedef struct effect_motion {
 } effect_motion_t;
 typedef char effect_motion_size_must_be_52[(sizeof(effect_motion_t) == 52) ? 1 : -1];
 
-/* effect_list_node_t.kind: how effect_particle_render_sprite places the sprite, and the
+/* effect_list_node_t.kind: how particle_sprite_draw places the sprite, and the
  * FRAME_CHANGED bit it sets when the sequence picks another frame. */
 enum { EFFECT_LIST_NODE_FRAME_CHANGED = 0x1, EFFECT_LIST_NODE_PLACEMENT_MASK = 0x6 };
 
@@ -133,7 +132,7 @@ typedef enum effect_list_node_placement {
     EFFECT_LIST_NODE_SCREEN = 0x6          /* screen position as stored, no zoom */
 } effect_list_node_placement_e;
 
-/* A sprite node's heap block (effect_render_alloc_sprite_block): an eight-byte prefix, then one
+/* A sprite node's heap block (sprite_block_alloc): an eight-byte prefix, then one
  * pointer for each sprite part. */
 typedef struct effect_sprite_block {
     struct {
@@ -150,23 +149,23 @@ typedef char effect_sprite_block_size_must_be_8[sizeof(effect_sprite_block_t) ==
  * is the sentinel. g_effect_active_list_node_head is the list head and
  * g_effect_free_list_node_head the free-list head. */
 typedef struct effect_list_node {
-    u16 prev;                  /* 0x00 */
-    u16 next;                  /* 0x02 */
-    u16 index;                 /* 0x04: this node's own array index */
-    s16 kind;                  /* 0x06: EFFECT_LIST_NODE_* */
-    s16 sprite_offset_x;       /* 0x08: added to x when drawn */
-    s16 sprite_offset_y;       /* 0x0a: added to y when drawn */
-    s16 x;                     /* 0x0c: from the owning work record's position */
-    s16 y;                     /* 0x0e */
-    s16 z;                     /* 0x10 */
-    s16 screen_rotation_angle; /* 0x12: effect_particle_update_node_from_work stores the velocity heading here */
-    u8 depth_mode;             /* 0x14: effect_sprite_depth_mode_e */
-    u8 _padding_15;            /* aligns frame_timer */
-    s16 frame_timer;           /* 0x16: counts down by 2; the next opcode runs at <= 0 */
-    u8* sequence_data;         /* 0x18: base of the u8 animation sequence */
-    u16 sequence_offset;       /* 0x1c: byte offset of the next sequence opcode */
-    u8 frame_group_offset;     /* 0x1e: byte offset into the frame-group offset table */
-    u8 sprite_frame_index;     /* 0x1f: frame id from the sequence opcode */
+    u16 prev;                            /* 0x00 */
+    u16 next;                            /* 0x02 */
+    u16 index;                           /* 0x04: this node's own array index */
+    s16 kind;                            /* 0x06: EFFECT_LIST_NODE_* */
+    s16 sprite_offset_x;                 /* 0x08: added to x when drawn */
+    s16 sprite_offset_y;                 /* 0x0a: added to y when drawn */
+    s16 x;                               /* 0x0c: from the owning work record's position */
+    s16 y;                               /* 0x0e */
+    s16 z;                               /* 0x10 */
+    s16 screen_rotation_angle;           /* 0x12: particle_sprite_state_update stores the velocity heading here */
+    u8 depth_mode;                       /* 0x14: effect_sprite_depth_mode_e */
+    u8 _padding_15;                      /* aligns frame_timer */
+    s16 frame_timer;                     /* 0x16: counts down by 2; the next opcode runs at <= 0 */
+    u8* sequence_data;                   /* 0x18: base of the u8 animation sequence */
+    u16 sequence_offset;                 /* 0x1c: byte offset of the next sequence opcode */
+    u8 frame_group_offset;               /* 0x1e: byte offset into the frame-group offset table */
+    u8 sprite_frame_index;               /* 0x1f: frame id from the sequence opcode */
     effect_sprite_block_t* sprite_block; /* 0x20 */
 } effect_list_node_t;
 typedef char effect_list_node_size_must_be_36[sizeof(effect_list_node_t) == 36 ? 1 : -1];
@@ -245,38 +244,6 @@ static inline u16 effect_get_current_script_header(effect_record_t* record) {
     /* Loading the 16-bit value here preserves the retail base/offset register order. */
     return *(const u16*)(record->script + record->pc);
 }
-
-/* vector math */
-void effect_vector_load(const vec3s16_t* src, VECTOR* dst);
-void effect_vector_load_svector(const vec3s16_t* src, SVECTOR* dst);
-void effect_vector_add(const VECTOR* first, const VECTOR* second, VECTOR* out);
-void effect_vector_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
-void effect_vector_add_to_svector(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-void effect_vector_add_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-void effect_vector_add_to_svector_rot_y_180(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-void effect_vector_add_to_svector_rot_y_270(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-void effect_vector_add_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out);
-void effect_vector_add_rotations_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
-void effect_vector_add_random_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
-void effect_vector_add_random_offsets_and_store_q12(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
-void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination);
-void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst);
-void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst);
-void effect_vector_mask_low_12_bits(const SVECTOR* src, SVECTOR* dst);
-s16 effect_select_larger_magnitude_s16(s16 first, s16 second);
-s16 effect_select_largest_magnitude_s16(s16 first, s16 second, s16 third);
-s32 effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 current);
-void effect_interpolate_svector_linear(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_interpolate_svector_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_interpolate_svector_cos_out_and_back(
-    const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_interpolate_vector_q13_linear(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_interpolate_vector_q13_cos(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_interpolate_vector_q13_cos_out_and_back(
-    const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-
-/* start + (end - start) * factor / 256, the division an arithmetic shift. */
-s32 effect_lerp_q8(s32 start, s32 end, s32 factor);
 
 /* map control */
 s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);

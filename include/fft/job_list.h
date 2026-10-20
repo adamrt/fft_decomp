@@ -20,7 +20,7 @@ typedef enum menu_job_list_step {
 extern s16 g_job_list_selected_id;
 
 s32 job_list_run(void);
-s32 job_list_get_base(s16 unit_id);
+s32 job_list_base_get(s16 unit_id);
 
 /* WORLD and JOBSTTS each build their own body. */
 s32 job_list_build(u8 unit_index, s16* job_ids, s32 mode);
@@ -36,14 +36,14 @@ extern u32 g_job_current_jp;
 extern u32 g_job_current_total_jp;
 extern s32 g_job_current_mastered;
 
-s32 job_list_calculate_level(s32 index);
-s32 job_list_calculate_total_jp(s32 index);
+s32 job_list_level_calculate(s32 index);
+s32 job_list_total_jp_calculate(s32 index);
 
 /* Caches and returns whether the index-th job's skillset has nothing left to learn for the selected unit. */
-s32 job_list_calculate_mastered(s32 index);
+s32 job_list_mastered_calculate(s32 index);
 
-/* JP needed for the next level of the job whose level job_list_calculate_level last cached. */
-s32 job_list_calculate_next_level_jp(s32 index);
+/* JP needed for the next level of the job whose level job_list_level_calculate last cached. */
+s32 job_list_next_level_jp_calculate(s32 index);
 
 /* Row callbacks returning the values the calculators last cached in the globals above. */
 s32 job_list_get_level(s32 unused_row);

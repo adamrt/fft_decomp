@@ -78,7 +78,7 @@ void ability_list_scrolling_thread(void) {
 
     toggle = 0;
     page = g_formation_ability_list_pages[g_thread_current_id];
-    entry = (menu_entry_t*)thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_current_parameter_1_get();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
@@ -167,7 +167,7 @@ void ability_list_scrolling_thread(void) {
     }
 
     /* The first page's buffer is freed after the first yield, once its upload has run. */
-    menu_draw_text_columns_narrow(entry, &row_offset, buffer);
+    menu_text_columns_narrow_draw(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.source.x / 4 + entry->vram_origin.x;
@@ -207,25 +207,25 @@ void ability_list_scrolling_thread(void) {
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
                     cursor--;
-                    sound_queue_sfx_cursor_move();
+                    sound_cursor_queue();
                 } else if (row_offset != 0) {
                     scroll_delta = -1;
-                    sound_queue_sfx_cursor_move();
+                    sound_cursor_queue();
                 } else if (layout->columns.hidden_rows == 0) {
                     cursor = layout->columns.row_count - 1;
-                    sound_queue_sfx_cursor_move();
+                    sound_cursor_queue();
                 }
             } else if ((g_script_event_input & PSX_PAD_DOWN)
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != layout->columns.row_count - 1) {
                     cursor++;
-                    sound_queue_sfx_cursor_move();
+                    sound_cursor_queue();
                 } else if (row_offset != layout->columns.hidden_rows) {
                     scroll_delta++;
-                    sound_queue_sfx_cursor_move();
+                    sound_cursor_queue();
                 } else if (row_offset == 0) {
                     cursor = 0;
-                    sound_queue_sfx_cursor_move();
+                    sound_cursor_queue();
                 }
             } else {
                 hold_time = 0;
@@ -260,7 +260,7 @@ void ability_list_scrolling_thread(void) {
                             layout->columns.text_ids[column][index], buffer, &g_menu_window_text_pen);
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
-                            && (g_ai_workspace_ptr->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
+                            && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                             menu_set_text_origin(layout->columns.x[column] + 0x50, 0);
                             menu_display_text_entry(
                                 TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
@@ -272,8 +272,8 @@ void ability_list_scrolling_thread(void) {
                         if ((column == 2 || (column == 1 && layout->columns.mode[2] == MENU_TEXT_COLUMN_HIDDEN))
                             && layout->columns.text_ids[column][index] >= 0
                             && layout->columns.text_ids[column][index] < 2
-                            && (g_ai_workspace_ptr->ability_list.skill_ct[index] == 0xFF
-                                || g_ai_workspace_ptr->ability_list.skill_ct[index] == 0)) {
+                            && (g_event_work->ability_list.skill_ct[index] == 0xFF
+                                || g_event_work->ability_list.skill_ct[index] == 0)) {
                             g_menu_window_text_pen.rect.y += 2;
                             menu_draw_charge_time_now(buffer, &g_menu_window_text_pen);
                         } else {
@@ -358,7 +358,7 @@ void ability_list_scrolling_thread(void) {
 
         /* Advance a row scroll every other frame at speed 1 and every frame at speed 2, faster once
          * the button has been held past the acceleration delay. */
-        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
+        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
             || g_script_event_speed == 2) {
             if (hold_time < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step;
@@ -374,7 +374,7 @@ void ability_list_scrolling_thread(void) {
         if (scroll_accum < -0xF || scroll_accum > 0xF) {
             ring += scroll_delta;
             row_offset += scroll_delta;
-            repeat = script_get_event_initial_repeat_counter();
+            repeat = script_event_initial_repeat_counter_get();
             scroll_accum = 0;
             scroll_delta = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -424,7 +424,7 @@ void ability_list_scrolling_thread(void) {
     }
     thread_yield();
     g_screen_scrolling_list_depth--;
-    if (thread_get_current_parameter_2() == 0) {
-        thread_exit_current();
+    if (thread_current_parameter_2_get() == 0) {
+        thread_current_exit();
     }
 }

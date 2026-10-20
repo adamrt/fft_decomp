@@ -19,6 +19,7 @@ void gfx_move_image_and_wait(RECT* rect, s16 x, s16 y);
 void gfx_store_image_and_wait(RECT* rect, void* data);
 void gfx_load_evtchr_thread(void);
 void gfx_set_clut_rect_from_id(RECT* rect, u16 clut_id);
+void gfx_mirror_4bpp_rect(u8* pixels, const struct glyph_blit* rect);
 
 /* scene texture allocation */
 void gfx_alloc_texture_rect(RECT* rect, void* primitive, u32* image);

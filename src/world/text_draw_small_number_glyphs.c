@@ -17,7 +17,7 @@
  * digits here. `work` holds the format flags and then the final cursor x;
  * sharing that local and mixing `src` with the global glyph address preserve
  * the original register assignment. */
-void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
+void text_small_number_glyphs_draw(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
     glyph_blit_t* src = &g_text_small_number_glyph_rect;
     s32 work = format & SMALL_NUMBER_FORMAT_MASK;
     s32 i;

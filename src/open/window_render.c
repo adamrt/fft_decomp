@@ -33,7 +33,7 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
     color = &g_window_gpu_image_records[index].color;
     color->b = color->g = color->r = 0x80;
     g_window_gpu_image_records[index].pop_in_step = 0;
-    screen_build_window_frame_image(quad.w, quad.h, (u16*)image);
+    screen_window_frame_image_build(quad.w, quad.h, (u16*)image);
 }
 
 /* Upload a window record's image to its place in VRAM.
@@ -70,18 +70,18 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 }
 
 /* Padded image size, reserving ten pixels per character column. No retail caller. */
-void window_measure_text_image(s32 text_id, size32_t* output) {
+void window_text_image_measure(s32 text_id, size32_t* output) {
     s16 measured_width;
     s16 rows;
 
-    text_measure(&measured_width, &rows, text_find_entry(text_id));
+    text_measure(&measured_width, &rows, text_entry_find(text_id));
     output->width = (measured_width * 10 + 24) & 0xfffc;
     output->height = rows * 16 + 16;
 }
 
 /* Build and upload a window image, draw the entry at (8, 8) unless its id is zero,
  * and start the record's pop-in animation. */
-void window_init_text_record(s32 record_index, RECT bounds, s32 image_page_offset, s32 text_id, u32* image) {
+void window_text_record_init(s32 record_index, RECT bounds, s32 image_page_offset, s32 text_id, u32* image) {
     /* The pair is stack-resident because it is passed by value; in OPEN this
      * also lets the y store fill the beqz delay slot. */
     point32_t text_origin;

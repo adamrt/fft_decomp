@@ -15,17 +15,15 @@ typedef struct movie_stream_state {
 } movie_stream_state_t;
 
 /* The movies' controller handlers (CONTROLLER_*_MOVIE). */
-void movie_update_fftst(union controller_record* record);
-void movie_update_fftop(union controller_record* unused_record);
 void movie_update_fftend(union controller_record* unused_record);
 void movie_update_title_demo(union controller_record* unused_record);
 
 /* movie streams */
-void movie_start_stream(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_mix_level);
-void movie_stop_stream(s32 pause_cd_audio);
-void movie_pause_cd_audio(void);
-void movie_stream_fftst(s32 start_sector, s32 stream_length, s32 end_frame, s32 video_end_frame);
-void movie_stream_title_demo(s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level);
-void movie_play_ending(void);
+void movie_stream_start(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_mix_level);
+void movie_stream_stop(s32 pause_cd_audio);
+void movie_cd_audio_pause(void);
+void movie_logo_start(s32 start_sector, s32 stream_length, s32 end_frame, s32 video_end_frame);
+void movie_title_demo_start(s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level);
+void movie_ending_start(void);
 
 #endif

@@ -26,7 +26,7 @@ void equipment_set_unread_input_value(s32 value) {
  * and 0 once it has ended, when the message and sound locks are released.
  * Any repeat input starts a five-frame timer during which L2 is masked out.
  */
-void menu_input_update_with_message_state(void) {
+void menu_input_message_state_update(void) {
     s32 running = 0;
     s32 frame;
     u8 state;

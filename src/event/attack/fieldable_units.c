@@ -54,7 +54,7 @@ void deploy_find_fieldable_units(void) {
     g_deploy_fieldable_unit_count = 0;
 
     for (index = 0; index < PARTY_ROSTER_SLOT_COUNT; index++) {
-        party_unit = party_get_unit(index);
+        party_unit = party_unit_get(index);
         if (party_unit->party_id == PARTY_ID_NONE || index >= PARTY_GUEST_SLOT_FIRST
             || party_unit->proposition_status != 0 || (party_unit->gender_flags & UNIT_FLAG_EGG) != 0) {
             g_deploy_unit_fieldable[index] = 0;
@@ -84,8 +84,8 @@ void deploy_find_fieldable_units(void) {
         g_deploy_current_squad_id = 0;
     }
 
-    if (script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-        s32 map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
+        s32 map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
 
         g_deploy_current_squad_id = 0;
         for (index = 0; index < 0x300; index++) {
@@ -97,20 +97,20 @@ void deploy_find_fieldable_units(void) {
         if (g_deploy_squad_data[g_deploy_current_squad_id].valid_tile_bitmap == 0) {
             g_deploy_current_squad_id = 0;
         }
-        script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 2);
-        script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_deploy_current_squad_id);
+        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 2);
+        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_deploy_current_squad_id);
         if (g_deploy_current_squad_id == 0) {
-            script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 0);
+            script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 0);
         } else {
-            script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, g_deploy_current_squad_id + 1);
+            script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, g_deploy_current_squad_id + 1);
         }
-        script_set_variable(
+        script_variable_set(
             EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
         g_deploy_squad_data[g_deploy_current_squad_id].unit_limit = 4;
     } else {
         g_encounter_selection_mode = UNIT_ENTD_SELECTION_SCRIPT_VARIABLE;
-        g_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
-        script_set_variable(
+        g_deploy_current_squad_id = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
+        script_variable_set(
             EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, g_deploy_squad_data[g_deploy_current_squad_id].unit_limit);
     }
 }

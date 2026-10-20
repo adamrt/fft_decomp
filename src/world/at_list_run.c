@@ -72,7 +72,7 @@ void at_list_run(void) {
     row_offset = 0;
     cursor = 0;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_current_parameter_1_get();
     layout = entry->context;
     entry->window.h = layout->row_count * 16 + 0x1C;
     entry->inner_height = layout->row_count * 16 + 0x1C;
@@ -142,7 +142,7 @@ void at_list_run(void) {
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_window_frame_thread);
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+    thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
     menu_draw_text_columns(entry, &row_offset, buffer);
@@ -178,9 +178,9 @@ void at_list_run(void) {
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
+            thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
         } else {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+            thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
@@ -284,7 +284,7 @@ void at_list_run(void) {
         }
         menu_handle_cancel_input(entry);
 
-        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
+        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step << 1;
@@ -300,7 +300,7 @@ void at_list_run(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = script_get_event_initial_repeat_counter();
+            repeat = script_event_initial_repeat_counter_get();
             delta = 0;
             accum = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -355,8 +355,8 @@ void at_list_run(void) {
     }
 
     /* A nonzero third parameter ends the frame thread. */
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
+    thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     thread_yield();
-    thread_exit_current();
+    thread_current_exit();
 }

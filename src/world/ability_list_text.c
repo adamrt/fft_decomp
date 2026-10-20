@@ -16,7 +16,7 @@
 #include "psx/types.h"
 
 /* Draw three-column text 8 pixels narrower than the entry, skipping text id 0x7ff. */
-void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer) {
+void menu_text_columns_narrow_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
     s32 column;
@@ -103,7 +103,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
         if (changed != 0) {
             buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-            menu_draw_text_columns_narrow(entry, row_offset, buffer);
+            menu_text_columns_narrow_draw(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);
             /* Clear the two VRAM rows above the image, wrapping within its 256-row page. */
@@ -121,6 +121,6 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
 
 /* Frames the current repeatable buttons have been held unchanged (0 after a change);
  * the scrolling lists pace and repeat their scrolling by it. */
-u32 script_get_event_initial_repeat_counter(void) {
+u32 script_event_initial_repeat_counter_get(void) {
     return g_script_event_initial_repeat_counter;
 }

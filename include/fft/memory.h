@@ -34,11 +34,11 @@ extern u8* g_heap_companion_overlay_load_address;
 
 void* heap_alloc(u32 size);
 s32 heap_free(void* allocation);
-void heap_call_free(void* allocation);
+void heap_block_release(void* allocation);
 void* heap_reserve_at(void* allocation, u32 size);
-void heap_clear_game_table(void);
-void* heap_alloc_smd(u32 size);
-s32 heap_free_smd(void* allocation);
-void heap_clear_smd_table(void);
+void heap_game_table_clear(void);
+void* heap_smd_alloc(u32 size);
+s32 heap_smd_free(void* allocation);
+void heap_smd_table_clear(void);
 
 #endif

@@ -164,7 +164,7 @@ static void equipment_build_unit_preview(unit_stats_t* stats, equipment_unit_pre
 /* Build the equipment data and HP/MP for `battle_id` and count the units still on the field
  * (eggs included, crystals and treasure chests not). */
 void equipment_load_unit(s32 battle_id) {
-    unit_stats_t* stats = unit_get_stats(battle_id);
+    unit_stats_t* stats = unit_stats_get(battle_id);
     s32 i;
     s32 unit_count;
     u16 hp;
@@ -178,7 +178,7 @@ void equipment_load_unit(s32 battle_id) {
     g_equipment_unit_saved_mp = mp;
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        stats = unit_get_stats(i);
+        stats = unit_stats_get(i);
         if (stats == 0) {
             continue;
         }
@@ -218,7 +218,7 @@ void equipment_commit_loadout(void) {
     s32 mp;
     s32 max;
 
-    stats = unit_get_stats(unit_id);
+    stats = unit_stats_get(unit_id);
     item_id = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
     stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
@@ -249,9 +249,9 @@ void equipment_commit_loadout(void) {
         = g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY] != 0
         ? g_equipment_unit_data[0]->equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
         : ITEM_ID_NONE;
-    bcopy(stats->equipment, party_get_unit(g_equipment_unit_data[0]->party_index)->equipment, sizeof(stats->equipment));
-    unit_refresh_stats_and_statuses(stats);
-    stats = unit_get_stats(unit_id);
+    bcopy(stats->equipment, party_unit_get(g_equipment_unit_data[0]->party_index)->equipment, sizeof(stats->equipment));
+    unit_stats_refresh(stats);
+    stats = unit_stats_get(unit_id);
     hp = g_equipment_unit_saved_hp;
     mp = g_equipment_unit_saved_mp;
     max = stats->max_hp;
@@ -261,7 +261,7 @@ void equipment_commit_loadout(void) {
     stats->hp = hp;
     max = stats->max_mp;
     stats->mp = mp > max ? max : mp;
-    equipment_sum_weapon_and_evade_bonuses(&bonuses, g_equipment_unit_data[0]->equipment);
+    equipment_weapon_evade_totals_build(&bonuses, g_equipment_unit_data[0]->equipment);
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = bonuses.state.right_weapon_power;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
     stats->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;

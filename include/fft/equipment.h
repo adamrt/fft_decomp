@@ -21,7 +21,7 @@ typedef enum equipment_state {
     EQUIPMENT_STATE_COMMAND_MENU = 1,
     EQUIPMENT_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
     EQUIPMENT_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
-    EQUIPMENT_STATE_ITEM_LIST = 5, /* equipment_update_menu */
+    EQUIPMENT_STATE_ITEM_LIST = 5, /* formation_items_update */
     EQUIPMENT_STATE_CLOSED = 0xff  /* equip_entrypoint returns its result */
 } equipment_state_e;
 
@@ -99,7 +99,7 @@ s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id);
 void equipment_commit_loadout(void);
 
 /* EQUIP and WORLD each build their own body. */
-s32 equipment_can_equip_item(s16 unit_index, s16 item_id);
+s32 equipment_item_compatibility_check(s16 unit_index, s16 item_id);
 
 /* equipment slots */
 extern u16 g_equipment_remove_all_equipment_ids[5]; /* weapon, shield, head, body, accessory */
@@ -118,18 +118,18 @@ s32 equipment_get_preview_hp_bonus_display(s32 unused_row);
 s32 equipment_get_preview_mp_bonus_display(s32 unused_row);
 
 /* Clears the HP and MP preview bonuses and the equipment-detail stats. */
-void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail);
+void equipment_stat_preview_clear(unit_panel_summary_t* summary, unit_panel_record_t* detail);
 
 /* Sums weapon power and equipment evade from five items; other detail fields are unchanged. */
-void equipment_sum_weapon_and_evade_bonuses(unit_panel_record_t* total, const u16* equipment);
+void equipment_weapon_evade_totals_build(unit_panel_record_t* total, const u16* equipment);
 
 /* The stat changes of swapping item_before for item_after in a slot: the HP and MP bonus differences into delta
  * and the equipment-detail differences into output. */
-void equipment_calculate_swap_stat_delta(
+void equipment_swap_delta_calculate(
     unit_panel_record_t* output, unit_panel_summary_t* delta, s16 item_before, s16 item_after, s32 slot);
 
 /* Sums the stat changes of swapping each of the five slots from from_items to to_items. */
-void equipment_calculate_total_swap_delta(
+void equipment_loadout_delta_calculate(
     unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total, const u16* from_items, const u16* to_items);
 
 /* item lists */
@@ -138,8 +138,8 @@ extern u8 g_equipment_item_inventory_totals[];
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 
 /* EQUIP and WORLD each build their own bodies of these two. */
-s32 equipment_update_menu(void);
-s32 equipment_run_item_list(void);
+s32 formation_items_update(void);
+s32 formation_items_browse_update(void);
 
 /* Row callbacks of the item lists. */
 menu_icon_source_t* equipment_get_row_icon_source(s32 row);

@@ -31,7 +31,7 @@ static world_map_input_repeat_t g_world_map_input_repeat = { 0 };
  * and the newly pressed ones (both 0 while SYSTEM_FLAG_INPUT_BLOCKED is
  * set). Exactly L1 + R1 + Select + Start restores the sound volumes and
  * resets the game. */
-void world_map_read_pad(void) {
+void world_map_pad_read(void) {
     u32 input;
     u32 previous;
 
@@ -53,14 +53,14 @@ void world_map_read_pad(void) {
         suzuki_sound_set_master_volume(0x3fff, 1);
         suzuki_sound_put_type(0xc0);
         suzuki_sound_set_cd_volume(0x74ff, 1);
-        system_reset_game();
+        system_game_reset();
     }
 }
 
 /* Step one map scroll axis: direction 1 or -1 accelerates `value` by `step` up to +/-`limit`,
  * and direction 0 decays it toward zero by `decay`. Converting Q8 speed to whole pixels rounds
  * down for +1 and up for -1, even while reversing; decay truncates toward zero. */
-void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction) {
+void world_map_scroll_axis_update(world_map_scroll_axis_t* axis, s32 direction) {
     switch (direction) {
     case 1:
         if (axis->value < axis->limit) {
@@ -103,7 +103,7 @@ void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction) 
 
 /* Clear the six auto-repeat counters and copy the repeat delay and periods from MAIN's input
  * settings. */
-void world_map_init_input_repeat(void) {
+void world_map_input_repeat_init(void) {
     g_world_map_input_repeat.counter_l1 = 0;
     g_world_map_input_repeat.counter_r1 = 0;
     g_world_map_input_repeat.counter_right = 0;
@@ -120,7 +120,7 @@ void world_map_init_input_repeat(void) {
  *
  * The arms test RIGHT before LEFT, unlike the counters' address order, and a
  * new press clears only the four direction counters, not R1 and L1. */
-u32 world_map_update_input_repeat(u32 buttons) {
+u32 world_map_input_repeat_update(u32 buttons) {
     s32 next;
     u32 pressed = g_world_map_input_new_button_presses;
 

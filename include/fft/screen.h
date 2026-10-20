@@ -18,7 +18,7 @@
 /* Slots that the WORLD screens use for threads of their own; thread.h has the maps shared with BATTLE, world_map.h
  * and title.h the WLDCORE and OPEN ones. */
 typedef enum screen_thread_slot {
-    SCREEN_THREAD_SLOT_MENU_GROUP = 2,           /* world_map_menu_group_thread */
+    SCREEN_THREAD_SLOT_MENU_GROUP = 2,           /* window_group_run */
     SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL = 10, /* the equipment (change banner) or the ability panel */
     SCREEN_THREAD_SLOT_PREVIEW_STATS = 11,       /* the numeric panel thread of the preview stats window */
     SCREEN_THREAD_SLOT_UPPER_MENU_CHILD = 14,    /* the child of the menu in slot 15, or a wait-forever thread
@@ -31,7 +31,7 @@ typedef enum screen_thread_slot {
 enum { SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15 };
 
 void screen_thread_yield_forever(void);
-void screen_thread_request_redraw(s32 thread_id);
+void screen_thread_redraw_request(s32 thread_id);
 void screen_thread_request_stop(s32 thread_id);
 
 /* menu frame */
@@ -51,11 +51,11 @@ extern menu_input_state_t g_screen_input_state;
 /* Alias for the first 32-bit field retained for the target's separate absolute store. */
 extern s32 g_screen_new_buttons;
 
-s16 screen_menu_frame(u32* otag, u32 input);
-void screen_reset_context(void);
-void screen_set_allowed_buttons(u32 mask);
-s32 screen_is_busy(void);
-void screen_reset_game(void);
+s16 screen_menu_frame_update(u32* otag, u32 input);
+void screen_context_reset(void);
+void screen_allowed_buttons_set(u32 mask);
+s32 screen_busy_check(void);
+void screen_game_reset(void);
 
 /* controller input */
 extern u16 g_screen_input_latched_button;
@@ -63,9 +63,10 @@ extern u32 g_screen_input_primary_repeat;
 extern s32 g_screen_input_primary_repeat_latched;
 extern s32 g_screen_input_secondary_repeat_latched;
 
-s32 screen_input_filter(void);
-s32 screen_input_get_lockout(void);
-void screen_input_update_lockout(void);
+s32 screen_buttons_filter(void);
+s32 screen_input_lockout_get(void);
+void screen_input_lockout_update(void);
+void screen_input_pad_update(void);
 
 /* packet buffers */
 extern menu_gfx_context_t* g_screen_packet_buffers;
@@ -81,22 +82,22 @@ extern u16 g_screen_line_g3_capacity;
 extern u16 g_screen_poly_f4_count;
 extern u16 g_screen_draw_area_count;
 
-/* Volatile: screen_init_packet_buffers must read the draw-area count
+/* Volatile: screen_packet_buffers_init must read the draw-area count
  * after the draw-move count, as the target does. */
 extern volatile u16 g_screen_draw_area_capacity;
 
 /* Draw move count; volatile for the same read order as g_screen_draw_area_capacity. */
 extern volatile u16 g_screen_draw_move_capacity;
 
-void screen_init_packet_buffers(menu_gfx_context_t* buffers, u32* otags, void* unused_2, void* unused_3, void* unused_4,
+void screen_packet_buffers_init(menu_gfx_context_t* buffers, u32* otags, void* unused_2, void* unused_3, void* unused_4,
     POLY_FT4* textured_quads, void* unused_6, void* unused_7, POLY_G4* gradient_quads,
     POLY_GT4* textured_gradient_quads, LINE_F2* flat_lines, void* unused_11, void* unused_12, LINE_G2* gradient_lines,
     void* unused_14, void* unused_15, TILE* tiles, void* unused_17, void* unused_18, void* unused_19, void* unused_20,
     void* unused_21, void* unused_22, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
-void screen_present_frame(s32 first_otag, s32 draw_otag);
+void screen_frame_present(s32 first_otag, s32 draw_otag);
 void screen_append_poly_f4(point16_t* xy, rgb24_t* rgb, s32 semi_trans, s32 ot_index);
 void screen_add_gradient_line(point16_t* endpoints, rgb24_t* colors, s32 semi_trans, s32 ot_index);
-void screen_add_draw_area(RECT* rect, s32 otag_index);
+void screen_draw_area_add(RECT* rect, s32 otag_index);
 
 /* draw areas and blits */
 extern RECT g_screen_temporary_draw_area;
@@ -107,7 +108,7 @@ extern RECT g_screen_temporary_draw_area;
 extern const RECT g_screen_full_texture_window;
 
 void screen_set_blit_dest_position(s32 x, s32 y);
-void screen_set_blit_source_rect(s16 x, s16 y, s16 width, s16 height);
+void screen_blit_source_rect_set(s16 x, s16 y, s16 width, s16 height);
 
 /* fades */
 /* Separate decreasing/increasing RGB-intensity flags.
@@ -120,12 +121,12 @@ typedef enum screen_fade_state {
 
 extern rgb24_t g_screen_black_tile_color;
 
-void screen_fade_set_disabled(u8 disabled);
-s32 screen_fade_get_state(void);
-void screen_fade_start_decreasing(void);
-void screen_fade_start_increasing(void);
-s32 screen_fade_update_in(void);
-s32 screen_fade_update_out(void);
+void screen_fade_disabled_set(u8 disabled);
+s32 screen_fade_state_get(void);
+void screen_fade_in_start(void);
+void screen_fade_out_start(void);
+s32 screen_fade_in_update(void);
+s32 screen_fade_out_update(void);
 
 /* graphics resources */
 /* Texture-page 7 uses a grid of 16-pixel square allocation cells. */
@@ -151,15 +152,15 @@ extern s32 g_screen_color_green;
 extern s32 g_screen_color_blue;
 extern rgb24_t g_screen_sprite_color;
 
-void screen_set_palette_mode(s32 mode);
-void screen_set_sprite_color(const rgb24_t* src);
+void screen_palette_mode_set(s32 mode);
+void screen_sprite_color_set(const rgb24_t* src);
 rgb24_t* screen_get_draw_color(void);
-void screen_set_brightness(s32 red, s32 green, s32 blue);
+void screen_brightness_set(s32 red, s32 green, s32 blue);
 
 /* window frames */
 extern RECT g_screen_thin_panel_texture_windows[7];
 
-s32 screen_build_window_frame_image(s32 width, s32 height, u16* destination);
+s32 screen_window_frame_image_build(s32 width, s32 height, u16* destination);
 void screen_build_window_image_row(const u16* source, u16* dest, s32 count, s32 offset);
 void screen_window_frame_thread(void);
 void screen_panel_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
@@ -168,21 +169,21 @@ void screen_panel_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 extern s32 g_screen_thread_result;
 extern s32 g_screen_dialog_waiting;
 
-void screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
-void screen_set_default_entry_0_text(u32 text_index, u32 value);
-void screen_set_default_entry_1_text(s32 value);
-void screen_set_entry_4_cursor(s32 index);
+void screen_entry_window_open(s32 index, s32 unused_x, s32 unused_y);
+void screen_default_entry_0_text_set(u32 text_index, u32 value);
+void screen_default_entry_1_text_set(s32 value);
+void screen_entry_4_cursor_set(s32 index);
 s32 screen_is_dialog_waiting(void);
 void screen_text_list_thread(void);
 
 /* Set up the WORLD menus with EVENT/WORLD.LZW from the main thread. */
-void screen_init_with_world_text(void);
+void screen_world_text_init(void);
 
 /* Set up the WORLD menus with EVENT/WORLD.LZW and the WLDFACE portraits. */
-void screen_init_with_world_text_and_faces(void);
+void screen_world_resources_init(void);
 
 /* Set up the menus with EVENT/OPEN.LZW for the new-game prologue. */
-void screen_init_with_open_text(void);
+void screen_open_text_init(void);
 
 /* display script commands */
 typedef char LINE_F2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
@@ -196,12 +197,12 @@ extern s8 g_screen_list_layout_pending;
 extern s16 g_screen_use_scroll_position;
 extern s16 g_screen_text_redraw_request;
 
-void screen_init_list(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
-void screen_load_list_layout(const menu_instruction_t* script);
+void screen_list_init(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
+void screen_list_layout_load(const menu_instruction_t* script);
 void screen_init_and_draw_list(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void screen_scroll_list_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
-void screen_draw_item_tabs(s32 wide, s32 row, s32 mode);
+void screen_item_tabs_draw(s32 wide, s32 row, s32 mode);
 void screen_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 
 /* cursors, selections and input */
@@ -225,20 +226,20 @@ typedef enum screen_cursor {
 
 extern u8 g_screen_prompt_active;
 
-/* Result slot per menu (-1 while none); screen_reset_selection_results clears all 16. */
+/* Result slot per menu (-1 while none); screen_selection_results_reset clears all 16. */
 extern s16 g_screen_selection_results[16];
 
-void screen_reset_selection_results(void);
-s16 screen_init_cursor_position(u8 index, s16 value);
-s32 screen_input_read(s32 unused_0);
-void screen_input_update_dialog_state(void);
-void screen_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
+void screen_selection_results_reset(void);
+s16 screen_cursor_position_init(u8 index, s16 value);
+s32 screen_buttons_read(s32 unused_0);
+void screen_dialog_input_update(void);
+void screen_sliding_cursor_draw(point16_t* pos, u16* state, s32 mode);
 
 /* grid menus */
 extern s32 g_screen_grid_id; /* help_grid_id_e */
 
-void screen_update_grid_cursor(s16 alternate);
-void screen_start_help_text(s32 position);
+void screen_grid_cursor_update(s16 alternate);
+void screen_help_text_start(s32 position);
 
 /* number entries */
 /* Value range of a numeric menu entry (screen_number_entry_thread and
@@ -246,7 +247,7 @@ void screen_start_help_text(s32 position);
  * confirmed, including when the value is unchanged. */
 typedef struct screen_number_range {
     ranges16_t bounds;        /* 0x00 */
-    s16 _unknown_04[2];       /* 0x04: -1 from window_start_number_panel_thread */
+    s16 _unknown_04[2];       /* 0x04: -1 from window_number_panel_thread_start */
     void (*on_confirm)(void); /* 0x08 */
 } screen_number_range_t;
 
@@ -256,8 +257,8 @@ void screen_help_text_thread(void);
 void screen_fit_parent_entry_to_digits(void);
 
 /* text sections */
-/* Resident text resource indices, used by screen_text_get_resident and
- * screen_text_bind_section. */
+/* Resident text resource indices, used by screen_text_resident_get and
+ * screen_text_section_bind. */
 typedef enum screen_text_data {
     SCREEN_TEXT_DATA_SKILLSET_NAMES = 0,
     SCREEN_TEXT_DATA_JOB_NAMES = 1,
@@ -286,21 +287,21 @@ typedef enum screen_text_section {
 
 extern u32 g_screen_text_section_offsets[];
 
-u8* screen_text_get_resident(screen_text_data_e index);
-u8* screen_text_bind_section(u32 index);
-const u8* screen_text_advance_chars(const u8* text, s32 count);
-s16 screen_text_get_char_at(const u8* table, s16 index, s32 position);
+u8* screen_text_resident_get(screen_text_data_e index);
+u8* screen_text_section_bind(u32 index);
+const u8* screen_text_chars_advance(const u8* text, s32 count);
+s16 screen_text_char_at_get(const u8* table, s16 index, s32 position);
 
-/* MAIN selects the WORLD address of text_find_entry through this existing alias. */
+/* MAIN selects the WORLD address of text_entry_find through this existing alias. */
 u8* world_text_find_entry(u32 text_id);
 
 /* text images */
 void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags);
-s32 screen_text_measure_width(const u8* entry);
+s32 screen_text_width_measure(const u8* entry);
 
 /* message box */
-s32 screen_text_is_printing(s32 thread_id);
-void screen_text_resume_printing(s32 thread_id);
+s32 screen_text_printing_check(s32 thread_id);
+void screen_text_printing_resume(s32 thread_id);
 
 /* music and sound effects */
 extern u8 g_screen_sound_release_held_loop;

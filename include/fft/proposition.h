@@ -17,8 +17,8 @@ typedef enum proposition_progress_flag {
 } proposition_progress_flag_e;
 
 /* One active proposition (g_proposition_active).
- * proposition_advance_day advances elapsed_days and sets the
- * returned flag; proposition_handle_dispatch_confirm_input stores the
+ * proposition_day_advance advances elapsed_days and sets the
+ * returned flag; proposition_dispatch_confirm_update stores the
  * current world-map location and the participants, and
  * proposition_count_returned filters returned records by location. */
 typedef struct proposition_progress {
@@ -27,7 +27,7 @@ typedef struct proposition_progress {
     u8 elapsed_days;
     u8 assigned_days;
     u8 location;
-    u8 participant_count;      /* 0x05; proposition_step_participant_message trusts this count */
+    u8 participant_count;      /* 0x05; proposition_participant_message_update trusts this count */
     u8 participant_indices[3]; /* 0x06; party indices, each checked by a party lookup before it is stored */
 } proposition_progress_t;
 typedef char proposition_progress_size_must_be_9[sizeof(proposition_progress_t) == 9 ? 1 : -1];
@@ -58,11 +58,11 @@ extern u8 g_proposition_states[96]; /* proposition_state_e */
  * at the end of its allocation. */
 extern u32 g_proposition_last_attempt_date_bits[27]; /* written only for a successful result */
 
-void proposition_advance_day(void);
+void proposition_day_advance(void);
 s32 proposition_count_returned(s32 location);
 
 /* proposition data */
-/* Records of the proposition data file (proposition_get_data). */
+/* Records of the proposition data file (proposition_data_get). */
 typedef enum proposition_data_record {
     PROPOSITION_DATA_ROWS = 0,                /* 23-byte proposition rows */
     PROPOSITION_DATA_FEES = 1,                /* 16-bit values behind the rows' two fee indices */
@@ -135,20 +135,20 @@ s32 proposition_is_available_at(s32 index, s32 location);
 
 /* Embedded sections have different layouts; the selected record determines the table type.
  * Callers only read them, but const table views change the original GCC 2.7.2 code. */
-void* proposition_get_data(proposition_data_record_e record);
+void* proposition_data_get(proposition_data_record_e record);
 
 /* lists */
-void proposition_open_available_list(void);
-void proposition_handle_available_list_input(menu_stack_record_t* level);
-void proposition_restore_available_list_prompt(menu_stack_record_t* level);
+void proposition_available_list_open(void);
+void proposition_available_list_input_update(menu_stack_record_t* level);
+void proposition_available_list_prompt_restore(menu_stack_record_t* level);
 void proposition_block_available_list_buttons(menu_stack_record_t* unused_level);
-void proposition_open_active_list(void);
-void proposition_handle_active_list_input(menu_stack_record_t* level);
-void proposition_restore_active_list_prompt(menu_stack_record_t* level);
+void proposition_active_list_open(void);
+void proposition_active_list_input_update(menu_stack_record_t* level);
+void proposition_active_list_prompt_restore(menu_stack_record_t* level);
 void proposition_block_active_list_buttons(menu_stack_record_t* unused_level);
-void proposition_open_returned_list(void);
-void proposition_handle_returned_list_input(menu_stack_record_t* level);
-void proposition_restore_returned_list_prompt(menu_stack_record_t* level);
+void proposition_returned_list_open(void);
+void proposition_returned_list_input_update(menu_stack_record_t* level);
+void proposition_returned_list_prompt_restore(menu_stack_record_t* level);
 void proposition_block_returned_list_buttons(menu_stack_record_t* unused_level);
 
 /* detail and recall */
@@ -161,7 +161,7 @@ typedef struct proposition_detail_level {
 typedef char proposition_detail_level_size_must_be_8[sizeof(proposition_detail_level_t) == 8 ? 1 : -1];
 
 /* The proposition detail panel's outputs, at the same offsets in the PROPOSITION_RECALL and
- * BRAVE_STORY_PARTICIPANTS levels (proposition_build_detail_panel). */
+ * BRAVE_STORY_PARTICIPANTS levels (proposition_detail_panel_build). */
 typedef struct proposition_detail_panel {
     u8 _unused_00[8]; /* the owning level's own fields */
     s32 render_index; /* 0x08 */
@@ -182,14 +182,14 @@ typedef struct proposition_recall_level {
     s32 frame_window; /* 0x20 */
 } proposition_recall_level_t;
 
-void proposition_push_detail_level(s32 value);
-void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode);
-void proposition_suspend_detail_level(menu_stack_record_t* level);
-void proposition_resume_detail_level(menu_stack_record_t* level);
-void proposition_handle_recall_input(menu_stack_record_t* level);
+void proposition_detail_level_open(s32 value);
+void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode);
+void proposition_detail_level_suspend(menu_stack_record_t* level);
+void proposition_detail_level_resume(menu_stack_record_t* level);
+void proposition_recall_update(menu_stack_record_t* level);
 
 /* accepting and sending units */
-/* proposition_accept_confirm_level_t.mode as proposition_handle_accept_confirm_input steps it. */
+/* proposition_accept_confirm_level_t.mode as proposition_accept_update steps it. */
 typedef enum proposition_accept_mode {
     PROPOSITION_ACCEPT_MODE_CHOOSE = 0,
     PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE = 1, /* nobody can go: a press shows the second message */
@@ -232,7 +232,7 @@ typedef enum proposition_send_unit_mode {
 } proposition_send_unit_mode_e;
 
 /* Provisional: the PROPOSITION_SEND_UNIT level, where up to three units are chosen for a proposition.
- * proposition_step_send_unit_slots selects the slot and owns the portrait render records. */
+ * participant_slots_update selects the slot and owns the portrait render records. */
 typedef struct proposition_send_unit_level {
     window_render_pair_t list_frame; /* 0x00 */
     s32 frame_window_a;              /* 0x08 */
@@ -245,7 +245,7 @@ typedef struct proposition_send_unit_level {
     s32 shown_preview; /* 0x24 */
     s32 slot;          /* 0x28 */
     u8 _unused_2c[4];
-    s32 unit_count;      /* 0x30; wrap bound, written by proposition_load_send_unit_candidates */
+    s32 unit_count;      /* 0x30; wrap bound, written by candidates_build */
     s32 portrait_render; /* 0x34 */
     s32 portrait_frame;  /* 0x38 */
     s32 portrait_window; /* 0x3c */
@@ -259,16 +259,16 @@ typedef char proposition_send_unit_level_size_must_be_92[sizeof(proposition_send
 extern s32 g_proposition_gil_amount;
 extern s32 g_proposition_dispatch_days;
 
-void proposition_push_send_unit_level(void);
-void proposition_handle_accept_input(menu_stack_record_t* level);
-void proposition_handle_accept_confirm_input(menu_stack_record_t* level);
-void proposition_step_send_unit_level(menu_stack_record_t* level);
-void proposition_suspend_send_unit_level(menu_stack_record_t* level);
-void proposition_resume_send_unit_level(menu_stack_record_t* level);
-void proposition_push_days_level(void);
-void proposition_step_days_level(menu_stack_record_t* level);
-void proposition_push_dispatch_confirm_level(void);
-void proposition_handle_dispatch_confirm_input(menu_stack_record_t* level);
+void proposition_participants_open(void);
+void proposition_detail_update(menu_stack_record_t* level);
+void proposition_accept_update(menu_stack_record_t* level);
+void proposition_participants_update(menu_stack_record_t* level);
+void proposition_participants_suspend(menu_stack_record_t* level);
+void proposition_participants_resume(menu_stack_record_t* level);
+void proposition_days_open(void);
+void proposition_days_update(menu_stack_record_t* level);
+void proposition_dispatch_confirm_open(void);
+void proposition_dispatch_confirm_update(menu_stack_record_t* level);
 
 /* report */
 /* Outcome of a proposition (proposition_report_t.result), from the
@@ -290,13 +290,13 @@ typedef enum proposition_reward {
 } proposition_reward_e;
 
 /* Provisional: the PROPOSITION_REPORT_CONFIRM level, which asks whether to hear a returned proposition's report.
- * proposition_handle_returned_list_input pushes it over the yes/no panel. */
+ * proposition_returned_list_input_update pushes it over the yes/no panel. */
 typedef struct proposition_report_confirm_level {
     s32 cursor_window; /* 0x00; window record moved between the two rows */
     s32 render_index;  /* 0x04; render record holding the confirmation text */
     s32 selection;     /* 0x08; 0 = upper row, 1 = lower row */
     s32 _unused_0c;
-    s32 argument; /* 0x10; argument of the level proposition_push_report_level pushes */
+    s32 argument; /* 0x10; argument of the level report_open pushes */
 } proposition_report_confirm_level_t;
 
 /* Values of proposition_report_level_t.load_phase. */
@@ -306,11 +306,11 @@ typedef enum proposition_report_load {
     PROPOSITION_REPORT_LOAD_PICTURE = 2   /* waits for it, then loads the reward's picture set */
 } proposition_report_load_e;
 
-/* Provisional: the PROPOSITION_REPORT level pushed by proposition_push_report_level, which starts the
- * message thread (WORLD_MAP_THREAD_SLOT_MESSAGE), and stepped by proposition_step_report_level. */
+/* Provisional: the PROPOSITION_REPORT level pushed by report_open, which starts the
+ * message thread (WORLD_MAP_THREAD_SLOT_MESSAGE), and stepped by proposition_report_update. */
 typedef struct proposition_report_level {
     s32 state; /* 0x00; step index, -1 .. 0x12; pushed as -1, or 0x63 when the proposition was recalled */
-    s32 phase; /* 0x04; proposition_step_message phase; cleared at push */
+    s32 phase; /* 0x04; report_message_update phase; cleared at push */
     u8 _unused_08[4];
     s32 load_phase;   /* 0x0c; proposition_report_load_e; MESSAGES at push */
     s32 render_index; /* 0x10; picture render record; -1 at push */
@@ -325,8 +325,8 @@ typedef enum proposition_result_phase {
     PROPOSITION_RESULT_PHASE_DONE = 2     /* waits for the audio queue, then pops */
 } proposition_result_phase_e;
 
-/* Provisional: the PROPOSITION_RESULT level pushed by proposition_push_result_level and stepped by
- * proposition_step_result_level. */
+/* Provisional: the PROPOSITION_RESULT level pushed by result_open and stepped by
+ * proposition_result_update. */
 typedef struct proposition_result_level {
     s32 render_index; /* 0x00 */
     u8 _unused_04[0xc];
@@ -338,13 +338,13 @@ typedef struct proposition_result_level {
 } proposition_result_level_t;
 
 /* Provisional: the outcome of a returned proposition (g_proposition_report), worked out while its report
- * runs. It is one object: proposition_find_preferred_job_unit reads reporter_party_index at -0xc from its
- * &proposition_index base, and proposition_calculate_jp_and_gil and proposition_step_result_level reach -0x10..+0x24
+ * runs. It is one object: proposition_preferred_job_unit_find reads reporter_party_index at -0xc from its
+ * &proposition_index base, and proposition_jp_and_gil_calculate and proposition_result_update reach -0x10..+0x24
  * from single bases. */
 typedef struct proposition_report {
     s32 reporter_party_index; /* 0x00 */
-    s32 speaker_party_index;  /* 0x04; chosen and read back by proposition_step_participant_message */
-    s32 preferred_unit;       /* 0x08; fixed speaker passed to proposition_step_participant_message */
+    s32 speaker_party_index;  /* 0x04; chosen and read back by proposition_participant_message_update */
+    s32 preferred_unit;       /* 0x08; fixed speaker passed to proposition_participant_message_update */
     s32 proposition_index;    /* 0x0c; index into g_proposition_active */
     s32 result;               /* 0x10; proposition_result_e */
     s32 reward_type;          /* 0x14; proposition_reward_e */
@@ -360,16 +360,16 @@ typedef char proposition_report_size_must_be_88[sizeof(proposition_report_t) == 
 
 extern proposition_report_t g_proposition_report;
 
-void proposition_handle_report_confirm_input(menu_stack_record_t* level);
-void proposition_step_report_level(menu_stack_record_t* level);
-void proposition_step_result_level(menu_stack_record_t* level);
-void proposition_determine_success(void);
-s32 proposition_find_preferred_job_unit(void);
-s32 proposition_step_participant_message(proposition_report_level_t* state, s32 message, s32 speaker);
-s32 proposition_adjust_message(s32 base, s32 party_index);
-void proposition_calculate_jp_and_gil(void);
-void proposition_apply_extra_days(void);
-void proposition_roll_bonus_reward(void);
+void proposition_report_confirm_update(menu_stack_record_t* level);
+void proposition_report_update(menu_stack_record_t* level);
+void proposition_result_update(menu_stack_record_t* level);
+void proposition_success_determine(void);
+s32 proposition_preferred_job_unit_find(void);
+s32 proposition_participant_message_update(proposition_report_level_t* state, s32 message, s32 speaker);
+s32 proposition_message_adjust(s32 base, s32 party_index);
+void proposition_jp_and_gil_calculate(void);
+void proposition_extra_days_apply(void);
+void proposition_bonus_reward_roll(void);
 
 /* discovery */
 /* Values of proposition_discovery_level_t.phase. */
@@ -380,9 +380,9 @@ typedef enum proposition_discovery_phase {
     PROPOSITION_DISCOVERY_PHASE_CLOSE = 3         /* waits for the audio queue, then pops */
 } proposition_discovery_phase_e;
 
-/* The PROPOSITION_DISCOVERY level pushed by proposition_push_discovery_level after a report that found treasure or
- * unexplored land: a run of "found" messages ending in the milestone jingle. proposition_show_next_milestone_message
- * shows each message and sets LAST_MESSAGE when the count runs out; proposition_step_discovery_level then advances
+/* The PROPOSITION_DISCOVERY level pushed by proposition_discovery_open after a report that found treasure or
+ * unexplored land: a run of "found" messages ending in the milestone jingle. milestone_message_advance
+ * shows each message and sets LAST_MESSAGE when the count runs out; proposition_discovery_update then advances
  * the later phases. */
 typedef struct proposition_discovery_level {
     s32 current;
@@ -391,8 +391,8 @@ typedef struct proposition_discovery_level {
     s32 timer; /* 0x0c; frames spent in phase 2 */
 } proposition_discovery_level_t;
 
-s32 proposition_get_milestone_rank(void);
-void proposition_push_discovery_level(void);
-void proposition_step_discovery_level(menu_stack_record_t* level);
+s32 proposition_milestone_rank_get(void);
+void proposition_discovery_open(void);
+void proposition_discovery_update(menu_stack_record_t* level);
 
 #endif

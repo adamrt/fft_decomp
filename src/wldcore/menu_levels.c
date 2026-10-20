@@ -1,5 +1,5 @@
-/* Value, cursor, number and date drawing, the world frame, level dispatch, and the root, map cursor, focus, path,
- * visibility, entry, text, message, variable list, number panel, layout window and location menu levels. */
+/* The world map runs one stack of menu levels. Its root handles travel and map requests; message windows, location
+ * services, status Help and debug editors suspend and resume that same stack. */
 
 #include "fft/bar.h"
 #include "fft/brave_story.h"
@@ -14,12 +14,10 @@
 #include "fft/location.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
-#include "fft/menu_selection.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/menu_window.h"
 #include "fft/message.h"
-#include "fft/message_box.h"
 #include "fft/music.h"
 #include "fft/proposition.h"
 #include "fft/save.h"
@@ -42,378 +40,245 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-menu_stack_level_e g_menu_stack_types[MENU_STACK_CAPACITY];
-
 typedef struct deep_dungeon_battle {
     u8 map_id;   /* 0x00 */
     u8 squad_id; /* 0x01: deployment zone id */
     u8 entd_ids[8];
 } deep_dungeon_battle_t;
 
-extern u32* g_location_picture_frame_tim;
-extern deep_dungeon_battle_t* g_deep_dungeon_battles;
-extern help_navigation_record_t g_unit_panel_help_rows[];
-
 /* The horizontal and vertical map scroll axes. */
 extern world_map_scroll_axis_t g_world_map_scroll_x;
 extern world_map_scroll_axis_t g_world_map_scroll_y;
 
-/* Menu-level dispatch tables; their definitions follow the callback declarations below. */
-static void (*g_menu_stack_idle_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*);
-static void (*g_menu_stack_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*);
-static void (*g_menu_stack_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*);
+menu_stack_level_e g_menu_stack_types[MENU_STACK_CAPACITY];
+extern u32* g_location_picture_frame_tim;
+extern deep_dungeon_battle_t* g_deep_dungeon_battles;
+extern help_navigation_record_t g_unit_panel_help_rows[];
 
-static void bar_push_level(void);
-static void hud_draw_funds(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
-static void hud_draw_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot);
-static void hud_draw_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad);
-static void menu_stack_pop_and_release_records(menu_stack_slot_set_t* slots, s32 restore);
-static void debug_push_party_number_level(void);
-static void world_map_push_focus_level(s32 dot_index);
-static void world_map_push_path_level(s32 from, s32 to, s32 erase);
-static void debug_push_variable_edit_level(s32 variable_id, s32 value);
-static void world_map_push_cursor_level(void);
-static void debug_push_variable_list_level(void);
-static void debug_draw_variable_list(debug_variable_list_level_t* level);
-static void location_run_shop(s32 shop_id);
-static void world_map_push_location_visibility_level(s32 dot_index, s32 erase);
-static void unit_panel_move_help_cursor(unit_panel_help_level_t* request);
+static void cursor_level_open(void);
+static void cursor_level_resume(menu_stack_record_t* level);
+static void cursor_level_update(menu_stack_record_t* level);
+static void focus_level_open(s32 dot_index);
+static void focus_level_update(menu_stack_record_t* entry);
+static void path_level_open(s32 from, s32 to, s32 erase);
+static void path_level_update(menu_stack_record_t* level);
+static void visibility_level_open(s32 dot_index, s32 erase);
+static void visibility_level_update(menu_stack_record_t* level);
+static void map_menu_return_update(menu_stack_record_t* level);
+static void text_level_update(menu_stack_record_t* level);
+static void message_level_update(menu_stack_record_t* level);
+static void variable_list_open(void);
+static void variable_list_draw(debug_variable_list_level_t* level);
+static void variable_list_update(menu_stack_record_t* level);
+static void variable_edit_open(s32 variable_id, s32 value);
+static void variable_edit_update(menu_stack_record_t* level);
+static void help_cursor_move(unit_panel_help_level_t* request);
+static void panel_help_resume(menu_stack_record_t* level);
+static void panel_help_suspend(menu_stack_record_t* unused_level);
+static void panel_help_update(menu_stack_record_t* request);
+static void location_menu_resume(menu_stack_record_t* level);
+static void location_menu_suspend(menu_stack_record_t* slots);
+static void location_menu_update(menu_stack_record_t* level);
+static void level_records_release(menu_stack_slot_set_t* slots, s32 restore);
+static void location_shop_run(s32 shop_id);
+static void scrollable_text_level_update(menu_stack_record_t* level);
+static void party_number_open(void);
+static void party_number_update(menu_stack_record_t* level);
 
-/* Draws the HUD numeric readout at the context-value display position, laid
- * out by g_hud_value_mode: FUNDS is the labeled,
- * underlined war funds, PLAY_TIME hours, minutes and seconds with separators,
- * PLAIN and LABELED an eight-digit value (LABELED under a small label sprite)
- * and COST_AND_FUNDS a labeled five-digit secondary value plus the FUNDS
- * readout.
- *
- * LABELED falls through into PLAIN, so the case bodies are ordered FUNDS,
- * PLAY_TIME, LABELED, PLAIN, COST_AND_FUNDS to follow the target's jump
- * table. The color triple stores into
- * `separator` precede those into `sprite`. The position read back at the end
- * of case 4 is a plain 32-bit load narrowed by the store, where the chained
- * assignment before the switch reads only the low 16 bits. */
-void hud_draw_value(GsOT* ot) {
-    GsSPRITE sprite;
-    GsSPRITE separator;
-    GsLINE line;
-    CVECTOR color;
+/* Indexed by menu_stack_level_e. */
+static void (*g_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
+    cursor_level_update,                           /* MENU_STACK_LEVEL_WORLD_MAP */
+    map_menu_return_update,                        /* MENU_STACK_LEVEL_WORLD_MENU */
+    text_level_update,                             /* MENU_STACK_LEVEL_TEXT_WINDOW */
+    message_level_update,                          /* MENU_STACK_LEVEL_MESSAGE */
+    location_menu_update,                          /* MENU_STACK_LEVEL_LOCATION */
+    bar_menu_update,                               /* MENU_STACK_LEVEL_BAR */
+    rumor_list_input_update,                       /* MENU_STACK_LEVEL_RUMOR_LIST */
+    proposition_available_list_input_update,       /* MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST */
+    rumor_wait_detail_then_pop,                    /* MENU_STACK_LEVEL_RUMOR_DETAIL */
+    proposition_detail_update,                     /* MENU_STACK_LEVEL_PROPOSITION_DETAIL */
+    proposition_accept_update,                     /* MENU_STACK_LEVEL_PROPOSITION_ACCEPT */
+    variable_list_update,                          /* MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST */
+    proposition_days_update,                       /* MENU_STACK_LEVEL_PROPOSITION_DAYS */
+    proposition_dispatch_confirm_update,           /* MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM */
+    proposition_returned_list_input_update,        /* MENU_STACK_LEVEL_PROPOSITION_RETURNED_LIST */
+    proposition_report_confirm_update,             /* MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM */
+    proposition_report_update,                     /* MENU_STACK_LEVEL_PROPOSITION_REPORT */
+    proposition_result_update,                     /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
+    proposition_active_list_input_update,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
+    proposition_recall_update,                     /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
+    sound_novel_reading_choice_update,             /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
+    sound_novel_reader_update,                     /* MENU_STACK_LEVEL_SOUND_NOVEL */
+    sound_novel_quit_update,                       /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
+    sound_novel_history_update,                    /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
+    brave_story_unexplored_land_list_input_update, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
+    brave_story_unexplored_land_level_update,      /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
+    brave_story_treasure_list_input_update,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
+    brave_story_treasure_level_update,             /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURE */
+    brave_story_menu_update,                       /* MENU_STACK_LEVEL_BRAVE_STORY */
+    brave_story_event_list_input_update,           /* MENU_STACK_LEVEL_BRAVE_STORY_EVENTS */
+    brave_story_event_input_update,                /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
+    brave_story_person_list_input_update,          /* MENU_STACK_LEVEL_BRAVE_STORY_PERSONS */
+    brave_story_person_level_update,               /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
+    tutorial_topic_list_input_update,              /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
+    tutorial_wait_topic_then_pop,                  /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
+    event_transition_update,                       /* MENU_STACK_LEVEL_EVENT_TRANSITION */
+    proposition_participants_update,               /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
+    brave_story_propositions_input_update,         /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
+    brave_story_advancing_list_input_update,       /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
+    brave_story_participant_list_input_update,     /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS */
+    brave_story_participant_input_update,          /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT */
+    brave_story_work_history_input_update,         /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY */
+    brave_story_wait_work_history_then_pop,        /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
+    tutorial_menu_update,                          /* MENU_STACK_LEVEL_TUTORIAL */
+    tutorial_formation_list_input_update,          /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
+    tutorial_battle_list_input_update,             /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
+    brave_story_fact_list_input_update,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
+    brave_story_wait_fact_then_pop,                /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
+    variable_edit_update,                          /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
+    screen_transition_update,                      /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
+    focus_level_update,                            /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
+    scrollable_text_level_update,                  /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
+    party_number_update,                           /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
+    path_level_update,                             /* MENU_STACK_LEVEL_WORLD_MAP_PATH */
+    visibility_level_update,                       /* MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY */
+    proposition_discovery_update,                  /* MENU_STACK_LEVEL_PROPOSITION_DISCOVERY */
+    panel_help_update,                             /* MENU_STACK_LEVEL_UNIT_PANEL_HELP */
+};
 
-    if (g_system_flags & SYSTEM_FLAG_HIDE_CONTEXT_VALUE) {
-        return;
-    }
+/* Indexed by menu_stack_level_e; zero entries preserve the original table. */
+static void (*g_level_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
+    cursor_level_resume,                             /* MENU_STACK_LEVEL_WORLD_MAP */
+    0,                                               /* MENU_STACK_LEVEL_WORLD_MENU */
+    0,                                               /* MENU_STACK_LEVEL_TEXT_WINDOW */
+    0,                                               /* MENU_STACK_LEVEL_MESSAGE */
+    location_menu_resume,                            /* MENU_STACK_LEVEL_LOCATION */
+    bar_menu_resume,                                 /* MENU_STACK_LEVEL_BAR */
+    rumor_list_prompt_restore,                       /* MENU_STACK_LEVEL_RUMOR_LIST */
+    proposition_available_list_prompt_restore,       /* MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST */
+    0,                                               /* MENU_STACK_LEVEL_RUMOR_DETAIL */
+    proposition_detail_level_resume,                 /* MENU_STACK_LEVEL_PROPOSITION_DETAIL */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_ACCEPT */
+    0,                                               /* MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_DAYS */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM */
+    proposition_returned_list_prompt_restore,        /* MENU_STACK_LEVEL_PROPOSITION_RETURNED_LIST */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_REPORT */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
+    proposition_active_list_prompt_restore,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
+    0,                                               /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
+    sound_novel_reader_resume,                       /* MENU_STACK_LEVEL_SOUND_NOVEL */
+    sound_novel_quit_resume,                         /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
+    0,                                               /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
+    brave_story_unexplored_land_list_prompt_restore, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
+    brave_story_treasure_list_prompt_restore,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURE */
+    brave_story_menu_resume,                         /* MENU_STACK_LEVEL_BRAVE_STORY */
+    brave_story_event_list_prompt_restore,           /* MENU_STACK_LEVEL_BRAVE_STORY_EVENTS */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
+    brave_story_person_list_prompt_restore,          /* MENU_STACK_LEVEL_BRAVE_STORY_PERSONS */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
+    tutorial_topic_list_buttons_restore,             /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
+    0,                                               /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
+    0,                                               /* MENU_STACK_LEVEL_EVENT_TRANSITION */
+    proposition_participants_resume,                 /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
+    brave_story_propositions_level_resume,           /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
+    brave_story_advancing_list_resume,               /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS */
+    brave_story_participant_level_resume,            /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT */
+    brave_story_work_history_resume,                 /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
+    tutorial_menu_resume,                            /* MENU_STACK_LEVEL_TUTORIAL */
+    tutorial_formation_list_buttons_restore,         /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
+    tutorial_battle_list_buttons_restore,            /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
+    brave_story_fact_list_buttons_restore,           /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
+    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
+    0,                                               /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
+    0,                                               /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
+    0,                                               /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
+    0,                                               /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
+    0,                                               /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
+    0,                                               /* MENU_STACK_LEVEL_WORLD_MAP_PATH */
+    0,                                               /* MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY */
+    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_DISCOVERY */
+    panel_help_resume,                               /* MENU_STACK_LEVEL_UNIT_PANEL_HELP */
+};
 
-    separator.attribute = sprite.attribute = 0;
-    separator.tpage = sprite.tpage = GetTPage(0, 0, 0x3C0, 0x100);
-    separator.cy = sprite.cy = 0x1E1;
-    world_map_fade_tint_color(&g_hud_color, &color);
-    separator.r = color.r;
-    separator.g = color.g;
-    separator.b = color.b;
-    sprite.r = color.r;
-    sprite.g = color.g;
-    sprite.b = color.b;
-    separator.x = sprite.x = g_hud_value_position.x;
-    separator.y = sprite.y = g_hud_value_position.y;
-
-    switch (g_hud_value_mode) {
-    case HUD_VALUE_FUNDS:
-        hud_draw_funds(ot, &sprite, &line);
-        break;
-    case HUD_VALUE_PLAY_TIME:
-        sprite.u = 0x60;
-        sprite.v = 0x10;
-        sprite.w = 0x14;
-        sprite.h = 8;
-        sprite.cx = 0x20;
-        GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
-
-        separator.u = 0x28;
-        separator.v = 0;
-        separator.w = 6;
-        separator.h = 8;
-        separator.cx = 0x20;
-        sprite.y += 8;
-        separator.y = sprite.y + 4;
-        sprite.x -= 8;
-        hud_draw_digits(g_hud_value, 4, &sprite, ot);
-
-        separator.x = sprite.x;
-        GsSortFastSprite(&separator, ot, g_hud_ot_priority);
-        sprite.x += 6;
-        hud_draw_digits_with_fill(g_hud_value_secondary, 2, &sprite, ot, 1);
-
-        separator.x = sprite.x;
-        GsSortFastSprite(&separator, ot, g_hud_ot_priority);
-        sprite.x += 6;
-        hud_draw_digits_with_fill(g_hud_value_tertiary, 2, &sprite, ot, 1);
-        break;
-    case HUD_VALUE_LABELED:
-        sprite.u = 0xA8;
-        sprite.v = 0x20;
-        sprite.w = 0xD;
-        sprite.h = 9;
-        sprite.cx = 0x20;
-        GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
-        /* fallthrough */
-    case HUD_VALUE_PLAIN:
-        sprite.x -= 0xC;
-        sprite.y += 8;
-        hud_draw_digits(g_hud_value, 8, &sprite, ot);
-        break;
-    case HUD_VALUE_COST_AND_FUNDS:
-        sprite.u = 0x60;
-        sprite.w = 0x18;
-        sprite.h = 8;
-        sprite.v = 0;
-        sprite.cx = 0x20;
-        sprite.x -= 0x40;
-        GsSortFastSprite(&sprite, ot, g_hud_ot_priority);
-
-        sprite.x += 4;
-        sprite.y += 8;
-        hud_draw_digits_with_fill(g_hud_value_secondary, 5, &sprite, ot, 0);
-
-        sprite.x = g_hud_value_position.x;
-        sprite.y = g_hud_value_position.y;
-        hud_draw_funds(ot, &sprite, &line);
-        break;
-    }
-}
-
-/* Draws the FUNDS readout: the 41x8 label sprite at texel (0x9c, 0x78) with a
- * short black line under its right end, then g_hud_value
- * in eight columns offset by (4, 8), through
- * hud_draw_digits_with_fill. */
-static void hud_draw_funds(GsOT* ot, GsSPRITE* sprite, GsLINE* line) {
-    /* u16: the target reads GsSPRITE's short x/y with lhu. */
-    u16 x;
-    u16 y;
-
-    sprite->u = 0x9C;
-    sprite->v = 0x78;
-    sprite->w = 0x29;
-    sprite->h = 8;
-    sprite->cx = 0x20;
-    GsSortFastSprite(sprite, ot, g_hud_ot_priority);
-
-    line->attribute = 0;
-    line->r = 0;
-    line->g = 0;
-    line->b = 0;
-    x = sprite->x;
-    line->x0 = x + 0x24;
-    line->x1 = x + 0x28;
-    y = sprite->y + 8;
-    line->y1 = y;
-    line->y0 = y;
-    GsSortLine(line, ot, g_hud_ot_priority);
-
-    sprite->x += 4;
-    sprite->y += 8;
-    hud_draw_digits_with_fill(g_hud_value, 8, sprite, ot, 0);
-}
-
-/* Draws value right-aligned as digits glyphs, one 8x12 or 8x15 cell per
- * digit, stepping the sprite eight pixels right per column. Leading zeros are
- * skipped: a column only draws once the running divisor has dropped to or
- * below value, and the last column always draws. Digit d's glyph is at
- * u 0xa8 + 8 * d; 0 to 5 are 12 pixels tall and 6 to 9 are 15, each placed so
- * the glyphs share a bottom edge.
- *
- * The target wraps `value / divisor` in ASPSX's zero and INT_MIN traps
- * (divcheck expansion). Splitting the division and the remainder into two
- * statements gives the target's order; `s32 saved_y` (not s16) makes the
- * saved y load `lh`. */
-static void hud_draw_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
-    s32 divisor = 1;
-    s32 i;
-    s32 digit;
-    s32 saved_y;
-
-    sprite->w = 8;
-    sprite->v = 0x31;
-    saved_y = sprite->y;
-    sprite->cx = 0x70;
-
-    for (i = 0; i < digits - 1; i++) {
-        divisor = divisor * 10;
-    }
-
-    for (i = 0; i < digits;) {
-        if (value >= divisor || i == digits - 1) {
-            digit = value / divisor;
-            digit = digit % 10;
-            sprite->u = digit * 8 - 0x58;
-            if (digit < 6) {
-                sprite->v = 0x34;
-                sprite->h = 0xc;
-                sprite->y = sprite->y + 4;
-            } else {
-                sprite->v = 0x31;
-                sprite->h = 0xf;
-                sprite->y = sprite->y + 1;
-            }
-            GsSortFastSprite(sprite, ot, g_hud_ot_priority);
-            sprite->y = saved_y;
-        }
-        sprite->x = sprite->x + 8;
-        divisor = divisor / 10;
-        i++;
-    }
-}
-
-/* Draws value right-aligned in `digits` columns like
- * hud_draw_digits, but also draws the columns ahead of the
- * first significant digit: a zero glyph when `zero_pad` is set, otherwise the
- * 8x8 filler glyph at (0xd0, 0x28). */
-static void hud_draw_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad) {
-    s32 divisor = 1;
-    s32 y;
-    s32 digit;
-    s32 i = 0;
-
-    sprite->w = 8;
-    y = sprite->y;
-    sprite->h = 0x10;
-    for (; i < digits - 1; i++) {
-        divisor *= 10;
-    }
-
-    for (i = 0; i < digits; i++) {
-        if (value >= divisor || i == digits - 1) {
-            digit = value / divisor;
-            digit = digit % 10;
-            sprite->cx = 0x70;
-            sprite->u = digit * 8 - 0x58;
-            if (digit < 6) {
-                sprite->v = 0x34;
-                sprite->h = 0xC;
-                sprite->y += 4;
-            } else {
-                sprite->v = 0x31;
-                sprite->h = 0xF;
-                sprite->y += 1;
-            }
-            GsSortFastSprite(sprite, ot, g_hud_ot_priority);
-            sprite->y = y;
-        } else {
-            if (zero_pad != 0) {
-                sprite->u = 0xA8;
-                sprite->cx = 0x70;
-                sprite->v = 0x31;
-                sprite->h = 0xF;
-                sprite->y += 1;
-            } else {
-                sprite->u = 0xD0;
-                sprite->v = 0x28;
-                sprite->cx = 0x70;
-                sprite->h = 8;
-                sprite->y += 4;
-            }
-            GsSortFastSprite(sprite, ot, g_hud_ot_priority);
-            sprite->y = y;
-        }
-        sprite->x += 8;
-        divisor /= 10;
-    }
-}
-
-/* Draws the world map's date: the month's zodiac sequence for the month
- * script variable, then the day as one or two digit sequences 0x1A pixels to
- * its right, in the tinted HUD color. Nothing is drawn while
- * SYSTEM_FLAG_HIDE_CALENDAR_DATE is set. */
-void calendar_draw_date(GsOT* ot) {
-    display_object_animated_t request;
-    CVECTOR color;
-    s32 first;
-    s32 second;
-
-    if (g_system_flags & SYSTEM_FLAG_HIDE_CALENDAR_DATE) {
-        return;
-    }
-
-    request.flags = DISPLAY_OBJECT_ANIMATED;
-    request.priority = 4;
-    request.palette = 0;
-    request.anim_counter = 0;
-    request.frame_index = 0;
-    request.position.x = g_calendar_display_position.x;
-    request.position.y = g_calendar_display_position.y;
-    world_map_fade_tint_color(&g_hud_color, &color);
-    request.color.r = color.r;
-    request.color.g = color.g;
-    request.color.b = color.b;
-
-    first = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
-    second = script_get_variable(EVENT_SCRIPT_VAR_DAY);
-    request.sequence = first + (WINDOW_ANIM_MONTH_FIRST - 1);
-    window_draw_gs_animated_record(&request, ot);
-
-    request.position.x += 0x1A;
-    request.position.y -= 4;
-    if (second >= 10) {
-        request.anim_counter = 0;
-        request.frame_index = 0;
-        request.sequence = second / 10 + WINDOW_ANIM_DIGIT_FIRST;
-        window_draw_gs_animated_record(&request, ot);
-        request.position.x += 8;
-    }
-    request.sequence = second % 10 + WINDOW_ANIM_DIGIT_FIRST;
-    window_draw_gs_animated_record(&request, ot);
-}
-
-/* Draws the name label of the selected location (g_location_selected,
- * location + 1) over its map dot, unless SYSTEM_FLAG_HIDE_LOCATION_LABEL
- * is set or no location is selected.
- *
- * The color is g_location_label_shade replicated across the three
- * channels and tinted in place by world_map_fade_tint_color. sequence
- * is written after that call because the target reloads the selection
- * there. */
-void location_draw_label(GsOT* ot) {
-    display_object_animated_t request;
-    CVECTOR color;
-    s32 index;
-    s32 shade;
-
-    if (g_system_flags & SYSTEM_FLAG_HIDE_LOCATION_LABEL) {
-        return;
-    }
-    if (g_location_selected == 0) {
-        return;
-    }
-
-    index = g_location_selected - 1;
-    request.flags = DISPLAY_OBJECT_ANIMATED;
-    request.position.x = g_world_map_dots[index].render.position.x;
-    request.position.y = g_world_map_dots[index].render.position.y;
-    shade = g_location_label_shade;
-    request.priority = 4;
-    request.palette = 0;
-    request.anim_counter = 0;
-    request.frame_index = 0;
-    color.r = shade;
-    color.g = shade;
-    color.b = shade;
-    world_map_fade_tint_color(&color, &color);
-    request.color.r = color.r;
-    request.color.g = color.g;
-    request.color.b = color.b;
-    request.sequence = g_location_selected + (WINDOW_ANIM_LOCATION_NAME_FIRST - 1);
-    window_draw_gs_animated_record(&request, ot);
-}
+/* Indexed by menu_stack_level_e; zero entries preserve the original table. */
+static void (*g_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
+    world_map_cursor_level_suspend,                 /* MENU_STACK_LEVEL_WORLD_MAP */
+    0,                                              /* MENU_STACK_LEVEL_WORLD_MENU */
+    0,                                              /* MENU_STACK_LEVEL_TEXT_WINDOW */
+    0,                                              /* MENU_STACK_LEVEL_MESSAGE */
+    location_menu_suspend,                          /* MENU_STACK_LEVEL_LOCATION */
+    bar_menu_suspend,                               /* MENU_STACK_LEVEL_BAR */
+    rumor_block_list_buttons,                       /* MENU_STACK_LEVEL_RUMOR_LIST */
+    proposition_block_available_list_buttons,       /* MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST */
+    0,                                              /* MENU_STACK_LEVEL_RUMOR_DETAIL */
+    proposition_detail_level_suspend,               /* MENU_STACK_LEVEL_PROPOSITION_DETAIL */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_ACCEPT */
+    0,                                              /* MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_DAYS */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM */
+    proposition_block_returned_list_buttons,        /* MENU_STACK_LEVEL_PROPOSITION_RETURNED_LIST */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_REPORT */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
+    proposition_block_active_list_buttons,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
+    0,                                              /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
+    sound_novel_reader_suspend,                     /* MENU_STACK_LEVEL_SOUND_NOVEL */
+    sound_novel_quit_suspend,                       /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
+    0,                                              /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
+    brave_story_block_unexplored_land_list_buttons, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
+    brave_story_block_treasure_list_buttons,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURE */
+    brave_story_menu_suspend,                       /* MENU_STACK_LEVEL_BRAVE_STORY */
+    brave_story_block_event_list_buttons,           /* MENU_STACK_LEVEL_BRAVE_STORY_EVENTS */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
+    brave_story_block_person_list_buttons,          /* MENU_STACK_LEVEL_BRAVE_STORY_PERSONS */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
+    tutorial_block_topic_list_buttons,              /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
+    0,                                              /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
+    0,                                              /* MENU_STACK_LEVEL_EVENT_TRANSITION */
+    proposition_participants_suspend,               /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
+    brave_story_propositions_level_suspend,         /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
+    brave_story_advancing_list_suspend,             /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS */
+    brave_story_participant_level_suspend,          /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT */
+    brave_story_work_history_suspend,               /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
+    tutorial_menu_suspend,                          /* MENU_STACK_LEVEL_TUTORIAL */
+    tutorial_block_formation_list_buttons,          /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
+    tutorial_block_battle_list_buttons,             /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
+    brave_story_block_fact_list_buttons,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
+    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
+    0,                                              /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
+    0,                                              /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
+    0,                                              /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
+    0,                                              /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
+    0,                                              /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
+    0,                                              /* MENU_STACK_LEVEL_WORLD_MAP_PATH */
+    0,                                              /* MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY */
+    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_DISCOVERY */
+    panel_help_suspend,                             /* MENU_STACK_LEVEL_UNIT_PANEL_HELP */
+};
 
 /* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
  * then apply and clear any day advance pending in EVENT_SCRIPT_VAR_DATE_ADVANCE. */
-void world_map_init_menus_and_date(void) {
+void world_map_menu_state_init(void) {
     s32 value;
 
-    screen_init_with_world_text_and_faces();
-    formation_build_roster_names();
-    value = script_get_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE);
+    screen_world_resources_init();
+    formation_roster_names_build();
+    value = script_variable_get(EVENT_SCRIPT_VAR_DATE_ADVANCE);
     if (value != 0) {
-        calendar_advance_days(value);
-        script_set_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE, 0);
+        calendar_days_advance(value);
+        script_variable_set(EVENT_SCRIPT_VAR_DATE_ADVANCE, 0);
     }
 }
 
@@ -426,7 +291,7 @@ void world_map_init_menus_and_date(void) {
  * screen/menu frame. Buttons in g_menu_blocked_buttons are withheld from
  * the menus.
  */
-void world_map_update_menus(GsOT* context) {
+void world_map_menus_update(GsOT* context) {
     u32* otag_entries;
     u32* sprite_entries;
     u32* menu_entries;
@@ -434,21 +299,21 @@ void world_map_update_menus(GsOT* context) {
     if (g_system_flags & SYSTEM_FLAG_SKIP_MENU_FRAME) {
         return;
     }
-    formation_set_backdrop_otag((u32*)(context->org + 15));
-    screen_set_allowed_buttons(~g_menu_blocked_buttons);
+    formation_backdrop_otag_set((u32*)(context->org + 15));
+    screen_allowed_buttons_set(~g_menu_blocked_buttons);
     if (g_system_flags & SYSTEM_FLAG_UNIT_PANEL_THREADS) {
         otag_entries = (u32*)context->org;
         g_gfx_current_otag_entry = otag_entries + g_menu_stack_ot_offset;
         menu_draw_active_window_frames();
         sprite_entries = (u32*)context->org;
-        menu_input_update_event_state(
+        menu_input_event_state_update(
             sprite_entries + g_menu_stack_ot_offset + 2, g_input_current_buttons, g_gfx_active_buffer_index * 240);
         if (g_sound_pending_sfx_id != -1) {
             sound_play_effect(g_sound_pending_sfx_id);
         }
     } else {
         menu_entries = (u32*)context->org;
-        screen_menu_frame(menu_entries + g_menu_stack_ot_offset, g_input_current_buttons);
+        screen_menu_frame_update(menu_entries + g_menu_stack_ot_offset, g_input_current_buttons);
     }
 }
 
@@ -456,7 +321,7 @@ void world_map_update_menus(GsOT* context) {
  * projected location marker (4 pixels above it). */
 void menu_stack_reset(void) {
     g_menu_stack_depth = 0;
-    world_map_push_cursor_level();
+    cursor_level_open();
     g_window_records[g_menu_stack_records[0].window_index].position.x
         = g_world_map_marker_state.marker.render.position.x;
     g_window_records[g_menu_stack_records[0].window_index].position.y
@@ -467,7 +332,7 @@ void menu_stack_reset(void) {
 void menu_stack_dispatch_idle(void) {
     s32 index = g_menu_stack_depth;
 
-    g_menu_stack_idle_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
+    g_level_update_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Run the resume handler of the level now on top of the stack after the level above it closed:
@@ -475,7 +340,7 @@ void menu_stack_dispatch_idle(void) {
 void menu_stack_dispatch_resume(void) {
     s32 index = g_menu_stack_depth;
 
-    g_menu_stack_resume_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
+    g_level_resume_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Run the top level's suspend handler, called just before another level opens over it: list levels
@@ -484,7 +349,7 @@ void menu_stack_dispatch_resume(void) {
 void menu_stack_dispatch_suspend(void) {
     s32 index = g_menu_stack_depth;
 
-    g_menu_stack_suspend_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
+    g_level_suspend_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Pushes a two-window menu level: appends two window records, points the new
@@ -493,7 +358,7 @@ void menu_stack_dispatch_suspend(void) {
  *
  * The level record is re-read into its own local after the script call; reusing
  * the window-level depth local changes the register allocation. */
-static void world_map_push_cursor_level(void) {
+static void cursor_level_open(void) {
     window_xy_t* xy;
     display_object_animated_t* records;
     s32 window_index;
@@ -538,7 +403,7 @@ static void world_map_push_cursor_level(void) {
     g_world_map_scroll_y.step = 0x80;
     g_world_map_scroll_x.step = 0x80;
 
-    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
     level = g_menu_stack_depth;
     g_menu_stack_records[level].map_cursor.wide_view = 0;
     g_menu_stack_records[level].map_cursor.snap_hit = g_world_map_marker_state.marker.location_id + 1;
@@ -550,19 +415,19 @@ static void world_map_push_cursor_level(void) {
 /* Resume handler of the world map's root level: show the war funds in the
  * context value display, reset the level's window palette, restore the live
  * map if the captured frame is showing and run any pending script requests. */
-void world_map_resume_cursor_level(menu_stack_record_t* level) {
+static void cursor_level_resume(menu_stack_record_t* level) {
     g_hud_value_mode = HUD_VALUE_FUNDS;
     g_window_records[level->map_cursor.window_index].palette = 0;
-    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
     if (g_window_records[g_world_map_window_index].flags & DISPLAY_OBJECT_HIDDEN) {
-        world_map_toggle_captured_frame(0);
+        world_map_backdrop_mode_set(0);
     }
-    location_script_dispatch_requests();
+    location_script_requests_dispatch();
 }
 
 /* Reset the window palette and both map-cursor scroll axes. The scroll fields
  * preserve the original store order after the indexed window store. */
-void world_map_suspend_cursor_level(menu_stack_record_t* level) {
+void world_map_cursor_level_suspend(menu_stack_record_t* level) {
     g_window_records[level->window_index].palette = 10;
     g_world_map_scroll_y.value = 0;
     g_world_map_scroll_x.value = 0;
@@ -575,7 +440,7 @@ void world_map_suspend_cursor_level(menu_stack_record_t* level) {
  * request. A focus location of 0xff means the current location.
  *
  * The flag tests are signed `> 0` comparisons; `!= 0` folds to srl/andi. */
-void location_script_dispatch_requests(void) {
+void location_script_requests_dispatch(void) {
     s32* location = &g_world_map_marker_state.marker.location_id;
     s32 id;
 
@@ -583,20 +448,20 @@ void location_script_dispatch_requests(void) {
         return;
     }
     if (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_PATH_MASK) {
-        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
-        world_map_push_path_level(g_location_script_state.args[0], g_location_script_state.args[1],
+        world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
+        path_level_open(g_location_script_state.args[0], g_location_script_state.args[1],
             (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_ERASE_PATH) > 0);
     } else if (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK) {
-        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
-        world_map_push_location_visibility_level(g_location_script_state.args[0],
+        world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
+        visibility_level_open(g_location_script_state.args[0],
             (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_ERASE_LOCATION) > 0);
     } else if (g_location_script_state.flags & LOCATION_SCRIPT_ACTION_FOCUS_LOCATION) {
-        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
+        world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
         id = g_location_script_state.args[0];
         if (id == 0xFF) {
             id = *location;
         }
-        world_map_push_focus_level(id);
+        focus_level_open(id);
     }
 }
 
@@ -610,13 +475,13 @@ void location_script_dispatch_requests(void) {
  * Otherwise it handles input: Circle on the marker's own dot opens its
  * location menu, on another dot walks the marker there
  * (travel_start), and off every dot hides the cursor and
- * pans back to the marker (world_map_push_focus_level); Triangle
- * or Start opens the entry window (world_map_push_menu_level);
+ * pans back to the marker (focus_level_open); Triangle
+ * or Start opens the entry window (world_map_menu_level_open);
  * Select on a dot shows the location's help message (0x8000 + location) over
  * a captured frame; L1 or R1 starts or reverses the zoom; holding Square
  * swaps the cursor window for the wide-view window. With no modal state
  * it accelerates the two scroll axes, snaps the cursor toward the nearest dot
- * through world_map_get_dot_snap_step, scrolls the projection origin when
+ * through world_map_dot_snap_get, scrolls the projection origin when
  * the cursor approaches a screen edge, and finally clamps the cursor window to
  * x in [-0x70, 0x78] and y in [-0x68, 0x68].
  *
@@ -626,7 +491,7 @@ void location_script_dispatch_requests(void) {
  * stores keep each branch's scale value a single-set temporary; one variable
  * shared by both branches is multi-set, is scheduled early and changes the
  * register allocation of the interpolation. */
-void world_map_step_cursor_level(menu_stack_record_t* level) {
+static void cursor_level_update(menu_stack_record_t* level) {
     point32_t amount;
     point32_t point;
     point32_t target;
@@ -667,7 +532,7 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
         if (!(g_world_map_zoom.flags & (WORLD_MAP_PAN_ACTIVE | WORLD_MAP_PAN_ZOOMED_OUT)) && g_music_queue.count == 0) {
             if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
                 /* The hit test returns a one-based dot index, 0 for no dot. */
-                hit = world_map_find_dot_at(g_window_records[level->map_cursor.window_index].position);
+                hit = world_map_dot_find(g_window_records[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     sound_play_effect(SOUND_SFX_CONFIRM);
                     hit--;
@@ -678,15 +543,15 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
                         return;
                     }
                     g_menu_stack_records[g_menu_stack_depth].panel.entry_count
-                        = location_build_menu_entries(hit, g_menu_stack_records[g_menu_stack_depth].panel.entries);
+                        = location_menu_entries_build(hit, g_menu_stack_records[g_menu_stack_depth].panel.entries);
                     if (g_menu_stack_records[g_menu_stack_depth].panel.entry_count != 0) {
-                        world_map_suspend_cursor_level(level);
-                        location_push_menu_level(hit);
+                        world_map_cursor_level_suspend(level);
+                        location_menu_open(hit);
                         return;
                     }
                 } else {
                     g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-                    world_map_push_focus_level(g_world_map_marker_state.marker.location_id);
+                    focus_level_open(g_world_map_marker_state.marker.location_id);
                     return;
                 }
             }
@@ -694,17 +559,17 @@ void world_map_step_cursor_level(menu_stack_record_t* level) {
             buttons = g_world_map_input_new_button_presses;
             if (buttons & (PSX_PAD_TRIANGLE | PSX_PAD_START)) {
                 sound_play_effect(SOUND_SFX_CONFIRM);
-                world_map_suspend_cursor_level(level);
-                world_map_push_menu_level();
+                world_map_cursor_level_suspend(level);
+                world_map_menu_level_open();
                 return;
             }
             if (buttons & PSX_PAD_SELECT) {
-                hit = world_map_find_dot_at(g_window_records[level->map_cursor.window_index].position);
+                hit = world_map_dot_find(g_window_records[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     hit--;
-                    world_map_suspend_cursor_level(level);
-                    world_map_toggle_captured_frame(1);
-                    menu_stack_push_message_level(hit + 0x8000, 1);
+                    world_map_cursor_level_suspend(level);
+                    world_map_backdrop_mode_set(1);
+                    menu_stack_message_open(hit + 0x8000, 1);
                     return;
                 }
             }
@@ -799,23 +664,23 @@ scroll:
         held = g_input_current_buttons;
         if (held & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
             if (held & PSX_PAD_LEFT) {
-                world_map_update_scroll_axis(&g_world_map_scroll_x, -1);
+                world_map_scroll_axis_update(&g_world_map_scroll_x, -1);
             } else {
-                world_map_update_scroll_axis(&g_world_map_scroll_x, 1);
+                world_map_scroll_axis_update(&g_world_map_scroll_x, 1);
             }
         } else {
-            world_map_update_scroll_axis(&g_world_map_scroll_x, 0);
+            world_map_scroll_axis_update(&g_world_map_scroll_x, 0);
         }
 
         held = g_input_current_buttons;
         if (held & (PSX_PAD_UP | PSX_PAD_DOWN)) {
             if (held & PSX_PAD_UP) {
-                world_map_update_scroll_axis(&g_world_map_scroll_y, -1);
+                world_map_scroll_axis_update(&g_world_map_scroll_y, -1);
             } else {
-                world_map_update_scroll_axis(&g_world_map_scroll_y, 1);
+                world_map_scroll_axis_update(&g_world_map_scroll_y, 1);
             }
         } else {
-            world_map_update_scroll_axis(&g_world_map_scroll_y, 0);
+            world_map_scroll_axis_update(&g_world_map_scroll_y, 0);
         }
 
         /* Pull the move toward the nearest dot, then scroll the map when the cursor nears a screen edge. */
@@ -824,7 +689,7 @@ scroll:
         if (!(g_world_map_zoom.flags & WORLD_MAP_PAN_ZOOMED_OUT)) {
             target.x = g_window_records[level->map_cursor.window_index].position.x + amount.x;
             target.y = g_window_records[level->map_cursor.window_index].position.y + amount.y;
-            level->map_cursor.snap_hit = world_map_get_dot_snap_step(target, &step_x, &step_y);
+            level->map_cursor.snap_hit = world_map_dot_snap_get(target, &step_x, &step_y);
             amount.x += step_x;
             amount.y += step_y;
 
@@ -832,10 +697,10 @@ scroll:
             target.y = g_window_records[level->map_cursor.window_index].position.y + amount.y;
             saved = g_world_map_projection_view.origin;
             if ((amount.x < 0 && target.x < -0x40) || (amount.x > 0 && target.x >= 0x49)) {
-                world_map_apply_clamped_horizontal_scroll(&amount.x, &g_world_map_projection_view.origin.vx);
+                world_map_horizontal_scroll_apply(&amount.x, &g_world_map_projection_view.origin.vx);
             }
             if ((amount.y < 0 && target.y < -0x40) || (amount.y > 0 && target.y >= 0x41)) {
-                world_map_apply_clamped_vertical_scroll(&amount, &g_world_map_projection_view.origin);
+                world_map_vertical_scroll_apply(&amount, &g_world_map_projection_view.origin);
             }
             if (saved.vx != g_world_map_projection_view.origin.vx
                 || saved.vy != g_world_map_projection_view.origin.vy) {
@@ -878,7 +743,7 @@ scroll:
             }
 
             saved = g_world_map_projection_view.origin;
-            world_map_apply_clamped_scroll(&amount, &g_world_map_projection_view.origin);
+            world_map_scroll_apply(&amount, &g_world_map_projection_view.origin);
             if (saved.vx != g_world_map_projection_view.origin.vx
                 || saved.vy != g_world_map_projection_view.origin.vy) {
                 g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
@@ -898,12 +763,12 @@ finish:
 
 /* Push a map-dot focus level and hide its parent window during the projection move.
  * Keeping the render pointer as the base preserves the two related call addresses. */
-static void world_map_push_focus_level(s32 dot_index) {
+static void focus_level_open(s32 dot_index) {
     display_object_animated_t* render;
 
     render = &g_world_map_dots[dot_index].render;
     g_menu_stack_records[g_menu_stack_depth].focus_dot_index = dot_index;
-    world_map_start_pan_if_outside(&render->position, &g_world_map_dots[dot_index].position);
+    world_map_pan_start(&render->position, &g_world_map_dots[dot_index].position);
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
         g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
         g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -920,12 +785,12 @@ static void world_map_push_focus_level(s32 dot_index) {
  * The entry must be a struct pointer: the target hoists its reload above the
  * scalar g_system_flags store, which GCC only allows for an in-struct
  * access. */
-void world_map_step_focus_level(menu_stack_record_t* entry) {
+static void focus_level_update(menu_stack_record_t* entry) {
     world_map_marker_state_t* state;
     s32 level;
 
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
-        world_map_step_pan();
+        world_map_pan_update();
         state = &g_world_map_marker_state;
         state->flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
         g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
@@ -944,11 +809,11 @@ void world_map_step_focus_level(menu_stack_record_t* entry) {
 /* Start drawing or erasing the map route between locations `from` and `to`
  * and hide the parent window until the animation finishes. Indexed stores
  * keep their named globals to preserve the original address sequences. */
-static void world_map_push_path_level(s32 from, s32 to, s32 erase) {
+static void path_level_open(s32 from, s32 to, s32 erase) {
     s32 depth;
     s32 window_index;
 
-    world_map_prepare_path_animation(from, to);
+    world_map_path_animation_prepare(from, to);
     depth = g_menu_stack_depth;
     g_menu_stack_records[depth].path.from_location = from;
     g_menu_stack_records[depth].path.to_location = to;
@@ -968,7 +833,7 @@ static void world_map_push_path_level(s32 from, s32 to, s32 erase) {
  * the route (setting the visible variable once all pages are drawn) or
  * backwards to erase it; afterwards the level pops and its parent resumes.
  */
-void world_map_step_path_level(menu_stack_record_t* level) {
+static void path_level_update(menu_stack_record_t* level) {
     s32 depth;
     s32 window_index;
 
@@ -977,7 +842,7 @@ void world_map_step_path_level(menu_stack_record_t* level) {
             return;
         }
         if (level->path.erase != 0) {
-            script_set_variable(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 0);
+            script_variable_set(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 0);
             g_world_map_path_animation.segment_index = g_world_map_path_animation.segment_count - 1;
             g_world_map_path_animation.frame_timer
                 = g_world_map_path_animation.segment_frames[g_world_map_path_animation.segment_count - 1] - 1;
@@ -996,7 +861,7 @@ void world_map_step_path_level(menu_stack_record_t* level) {
                 g_world_map_path_animation.segment_index++;
                 g_world_map_path_animation.frame_timer = 0;
                 if (g_world_map_path_animation.segment_index >= g_world_map_path_animation.segment_count) {
-                    script_set_variable(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 1);
+                    script_variable_set(g_world_map_path_animation.route_id + EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST, 1);
                 }
             }
         } else {
@@ -1026,7 +891,7 @@ void world_map_step_path_level(menu_stack_record_t* level) {
 /* Start a delayed map-location visibility change and hide the parent window
  * until it finishes. Indexed stores keep their named globals to preserve
  * the original address sequences. */
-static void world_map_push_location_visibility_level(s32 dot_index, s32 erase) {
+static void visibility_level_open(s32 dot_index, s32 erase) {
     s32 depth = g_menu_stack_depth;
     s32 window_index;
 
@@ -1049,7 +914,7 @@ static void world_map_push_location_visibility_level(s32 dot_index, s32 erase) {
  *
  * The window index is read into a local before the flag clear, which keeps
  * the target's load and store order. */
-void world_map_step_location_visibility_level(menu_stack_record_t* level) {
+static void visibility_level_update(menu_stack_record_t* level) {
     s32 index;
 
     if (level->visibility.pending_sound != 0) {
@@ -1059,7 +924,7 @@ void world_map_step_location_visibility_level(menu_stack_record_t* level) {
         if (level->visibility.erase != 0) {
             sound_play_effect(SOUND_SFX_CANCEL);
         } else {
-            script_set_variable(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 1);
+            script_variable_set(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 1);
             sound_play_effect(SOUND_SFX_WORLD_MAP_LOCATION_APPEAR);
         }
         level->visibility.pending_sound = 0;
@@ -1071,7 +936,7 @@ void world_map_step_location_visibility_level(menu_stack_record_t* level) {
     }
     if (level->visibility.erase != 0) {
         g_world_map_dots[level->visibility.dot_index].render.flags |= DISPLAY_OBJECT_HIDDEN;
-        script_set_variable(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
+        script_variable_set(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
     }
     g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
     g_menu_stack_depth--;
@@ -1082,15 +947,15 @@ void world_map_step_location_visibility_level(menu_stack_record_t* level) {
 }
 
 /* Open the entry window and push its world-map return level. */
-void world_map_push_menu_level(void) {
+void world_map_menu_level_open(void) {
     u32 flags;
     s32 depth;
     s32* counter;
 
     g_menu_blocked_buttons = -1;
-    screen_open_entry_window(4, -0x30, -0x38);
+    screen_entry_window_open(4, -0x30, -0x38);
     g_hud_value_mode = HUD_VALUE_FUNDS;
-    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
     depth = g_menu_stack_depth;
     flags = g_system_flags;
     g_menu_stack_records[depth].return_level.delay = 3;
@@ -1112,7 +977,7 @@ void world_map_push_menu_level(void) {
 /* Per-frame handler of the world-map return level: waits out its own delay,
  * then pops the level and dispatches whichever pending system-flag request
  * asked for the return. */
-void world_map_step_menu_level(menu_stack_record_t* level) {
+static void map_menu_return_update(menu_stack_record_t* level) {
     s32 flags;
     s32 cleared;
     s32 location;
@@ -1124,7 +989,7 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
     if (g_system_flags & SYSTEM_FLAG_FADING) {
         if (level->return_level.pending != 0) {
             level->return_level.pending = 0;
-            world_map_toggle_captured_frame(0);
+            world_map_backdrop_mode_set(0);
             level->return_level.delay = 3;
             g_system_flags |= SYSTEM_FLAG_FADING | SYSTEM_FLAG_FREEZE_ANIMATION;
         }
@@ -1135,31 +1000,31 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
     if (level->return_level.delay != 0) {
         level->return_level.delay -= 1;
         if (level->return_level.delay == 0) {
-            world_map_toggle_captured_frame(1);
+            world_map_backdrop_mode_set(1);
         }
         return;
     }
 
     g_menu_blocked_buttons = 0;
-    if (menu_get_thread_activity() != 0) {
+    if (menu_thread_activity_get() != 0) {
         return;
     }
 
-    world_map_init_input_repeat();
+    world_map_input_repeat_init();
     flags = g_system_flags;
-    world_map_toggle_captured_frame(0);
+    world_map_backdrop_mode_set(0);
     cleared = g_system_flags & ~SYSTEM_FLAG_FREEZE_ANIMATION;
     g_system_flags = cleared;
     g_menu_stack_depth -= 1;
     if (flags & SYSTEM_FLAG_REQUEST_BRAVE_STORY) {
         g_system_flags = cleared ^ SYSTEM_FLAG_DRAW_MAP;
-        screen_transition_push_level(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
+        screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
         return;
     }
 
     if (flags & SYSTEM_FLAG_REQUEST_DESTINATION) {
-        location = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
-        world_map_capture_backdrop();
+        location = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
+        world_map_backdrop_capture();
         menu_stack_dispatch_resume();
         if (g_world_map_marker_state.marker.location_id != location) {
             travel_start(g_world_map_marker_state.marker.location_id, location);
@@ -1169,24 +1034,24 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
 
     if (flags & SYSTEM_FLAG_REQUEST_TUTORIAL) {
         g_system_flags = cleared ^ SYSTEM_FLAG_DRAW_MAP;
-        screen_transition_push_level(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
+        screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
         return;
     }
 
     if (flags & SYSTEM_FLAG_REQUEST_VARIABLE_LIST) {
-        debug_push_variable_list_level();
+        variable_list_open();
         return;
     }
 
     if (flags & SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER) {
-        debug_push_party_number_level();
+        party_number_open();
         return;
     }
 
     if (flags & SYSTEM_FLAG_RESTART) {
         g_system_flags = cleared & ~(SYSTEM_FLAG_RUNNING | SYSTEM_FLAG_UNLOCK_ALL);
-        if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
-            || script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
+        if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
+            || script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
             g_system_flags |= SYSTEM_FLAG_RESTART;
         } else {
             g_system_flags &= ~SYSTEM_FLAG_RESTART;
@@ -1199,7 +1064,7 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
 }
 
 /* Pushes the self-sizing message window (MENU_STACK_LEVEL_TEXT_WINDOW), the
- * windowed sibling of menu_stack_push_message_level. It stores the reload
+ * windowed sibling of menu_stack_message_open. It stores the reload
  * flag and, when set, re-points the text formatter at
  * g_screen_text_section_offsets; appends the window's label record (priority
  * 1); measures the entry, clamped to three rows; fills the shared scrollable
@@ -1215,7 +1080,7 @@ void world_map_step_menu_level(menu_stack_record_t* level) {
  * in memory across text_window_open; `dims` is an aggregate so
  * it is laid out in declaration order at 32(sp). `unused_point` and `unused`
  * are sized from the target frame only; their original types are unknown. */
-void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
+void menu_stack_text_window_open(s32 text, s32 reload_text) {
     text_window_t* window;
     display_object_animated_t* records;
     point32_t* positions;
@@ -1230,8 +1095,8 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
 
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
-        text_save_section_pointers();
-        text_relocate_pointer_table(g_screen_text_section_offsets);
+        text_section_pointers_save();
+        text_pointer_table_relocate(g_screen_text_section_offsets);
     }
 
     index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
@@ -1242,8 +1107,8 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
     records = g_window_records;
     records[index].frame_index = 0;
 
-    entry = text_find_entry(text);
-    text_measure_pixels(&dims.width, &dims.rows, entry);
+    entry = text_entry_find(text);
+    text_pixels_measure(&dims.width, &dims.rows, entry);
     if (dims.rows > 3) {
         dims.rows = 3;
     }
@@ -1282,14 +1147,14 @@ void menu_stack_push_text_window_level(s32 text, s32 reload_text) {
 }
 
 /* Steps a message level: once the text window has popped in and
- * text_window_step reports it closed, pops the level, restores the
+ * text_window_update reports it closed, pops the level, restores the
  * blocked-button mask it saved and (when asked) the text section pointers,
  * and resumes the level underneath. */
-void menu_stack_wait_text_then_pop(menu_stack_record_t* level) {
+static void text_level_update(menu_stack_record_t* level) {
     if (g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
-    if (text_window_step(&g_text_window) != 0) {
+    if (text_window_update(&g_text_window) != 0) {
         return;
     }
     g_input_current_buttons = 0;
@@ -1298,7 +1163,7 @@ void menu_stack_wait_text_then_pop(menu_stack_record_t* level) {
     g_window_render_object_count -= 1;
     g_menu_stack_depth -= 1;
     if (level->message.reload_text != 0) {
-        text_restore_section_pointers();
+        text_section_pointers_restore();
     }
     menu_stack_dispatch_resume();
 }
@@ -1308,19 +1173,19 @@ void menu_stack_wait_text_then_pop(menu_stack_record_t* level) {
  * thread (mode 0x3b while SYSTEM_FLAG_UNIT_PANEL_THREADS is set, else
  * 0x33), saves the blocked buttons in the level and blocks them all, and
  * plays SOUND_SFX_WINDOW_OPEN. */
-void menu_stack_push_message_level(s32 text, s32 reload_text) {
+void menu_stack_message_open(s32 text, s32 reload_text) {
     s32 index;
 
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
-        text_save_section_pointers();
-        text_relocate_pointer_table(g_screen_text_section_offsets);
+        text_section_pointers_save();
+        text_pointer_table_relocate(g_screen_text_section_offsets);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
     if (g_system_flags & SYSTEM_FLAG_UNIT_PANEL_THREADS) {
-        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x3B, text, 0);
+        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x3B, text, 0);
     } else {
-        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, text, 0);
+        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x33, text, 0);
     }
     g_menu_stack_records[g_menu_stack_depth].message.saved_blocked_buttons = g_menu_blocked_buttons;
     g_menu_blocked_buttons = -1;
@@ -1337,7 +1202,7 @@ void menu_stack_push_message_level(s32 text, s32 reload_text) {
  * the level underneath and (when asked) restores the text section pointers.
  * Over the Brave Story or proposition category level it keeps the displayed
  * play time current while waiting. */
-void menu_stack_wait_message_then_pop(menu_stack_record_t* level) {
+static void message_level_update(menu_stack_record_t* level) {
     if (g_menu_stack_types[g_menu_stack_depth - 2] == MENU_STACK_LEVEL_BRAVE_STORY
         || g_menu_stack_types[g_menu_stack_depth - 2] == MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS) {
         g_hud_value = g_save_play_time_hours;
@@ -1349,14 +1214,14 @@ void menu_stack_wait_message_then_pop(menu_stack_record_t* level) {
         g_menu_stack_depth = g_menu_stack_depth - 1;
         menu_stack_dispatch_resume();
         if (level->message.reload_text != 0) {
-            text_restore_section_pointers();
+            text_section_pointers_restore();
         }
     }
 }
 
 /* Pushes the debug script-variable list (MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST):
  * one cursor window record and one render record, laid out by
- * debug_draw_variable_list and then positioned from the render
+ * variable_list_draw and then positioned from the render
  * record's origin.
  *
  * Both appended indices share one local, which is what holds them in $a2.
@@ -1365,7 +1230,7 @@ void menu_stack_wait_message_then_pop(menu_stack_record_t* level) {
  * of the stack record rather than kept in locals; the `- -` keeps the row
  * offset's constant on the multiply chain, which a plain `+` reassociates
  * onto base_y. */
-static void debug_push_variable_list_level(void) {
+static void variable_list_open(void) {
     s32 index;
     s32 record_index;
     u8 unused_locals[0x10];
@@ -1381,7 +1246,7 @@ static void debug_push_variable_list_level(void) {
     g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
     g_window_gs_image_records[index].priority = 3;
     g_menu_stack_records[g_menu_stack_depth].variable_list.first_variable = 0;
-    debug_draw_variable_list(&g_menu_stack_records[g_menu_stack_depth].variable_list);
+    variable_list_draw(&g_menu_stack_records[g_menu_stack_depth].variable_list);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].variable_list.cursor = 0;
     g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.x
@@ -1401,7 +1266,7 @@ static void debug_push_variable_list_level(void) {
  *
  * `value` first holds the row count for the panel height and then each
  * variable's value: one register (v1) in the target. */
-static void debug_draw_variable_list(debug_variable_list_level_t* level) {
+static void variable_list_draw(debug_variable_list_level_t* level) {
     RECT bounds;
     point32_t point;
     s32 index;
@@ -1433,7 +1298,7 @@ static void debug_draw_variable_list(debug_variable_list_level_t* level) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < level->row_count; i++) {
-        value = script_get_variable(variable);
+        value = script_variable_get(variable);
         if (value < 10000) {
             g_text_substitution_values[0] = variable;
             g_text_substitution_values[1] = value;
@@ -1455,7 +1320,7 @@ static void debug_draw_variable_list(debug_variable_list_level_t* level) {
  * level. Up/down move the cursor, or scroll the first displayed variable by
  * 100 with Triangle held and by 10 with Square held (Square wraps between 0
  * and 1020). Scrolling redraws the rows through
- * debug_draw_variable_list and clamps the cursor; a plain cursor move only repositions
+ * variable_list_draw and clamps the cursor; a plain cursor move only repositions
  * the cursor window.
  *
  * Every scroll arm falls into the one redraw, which clamps the cursor and
@@ -1463,7 +1328,7 @@ static void debug_draw_variable_list(debug_variable_list_level_t* level) {
  * move in the target, so it and the move are reached by goto: a redraw
  * repeated in each arm is not merged back (its clamp store is cross-jumped
  * into the cursor-down arm first). */
-void debug_handle_variable_list_input(menu_stack_record_t* level) {
+static void variable_list_update(menu_stack_record_t* level) {
     s32 variable;
     s32 dead[2];
 
@@ -1478,7 +1343,7 @@ void debug_handle_variable_list_input(menu_stack_record_t* level) {
         g_window_records[level->variable_list.window_index].anim_counter
             = g_window_records[level->variable_list.window_index].frame_index = 0;
         variable = level->variable_list.first_variable + level->variable_list.cursor;
-        debug_push_variable_edit_level(variable, script_get_variable(variable));
+        variable_edit_open(variable, script_variable_get(variable));
         return;
     }
 
@@ -1491,7 +1356,7 @@ void debug_handle_variable_list_input(menu_stack_record_t* level) {
         return;
     }
 
-    if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
+    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
         if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->variable_list.first_variable < 0x64) {
                 level->variable_list.first_variable = 0;
@@ -1512,7 +1377,7 @@ void debug_handle_variable_list_input(menu_stack_record_t* level) {
             }
             goto move_cursor;
         }
-    } else if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
+    } else if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->variable_list.first_variable + 0x64 < 0x3fd) {
                 level->variable_list.first_variable += 0x64;
@@ -1532,7 +1397,7 @@ void debug_handle_variable_list_input(menu_stack_record_t* level) {
         return;
     }
 
-    debug_draw_variable_list(&level->variable_list);
+    variable_list_draw(&level->variable_list);
     if (level->variable_list.cursor < level->variable_list.row_count) {
         return;
     }
@@ -1555,7 +1420,7 @@ move_cursor:
 
 /* Pushes MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT, a number panel (0 to
  * 9999) that edits script variable `variable_id`, starting at `value`. */
-static void debug_push_variable_edit_level(s32 variable_id, s32 value) {
+static void variable_edit_open(s32 variable_id, s32 value) {
     point32_t origin;
     s32 record_index;
 
@@ -1564,7 +1429,7 @@ static void debug_push_variable_edit_level(s32 variable_id, s32 value) {
     g_window_panel_value = value;
     origin.x = 0x20;
     origin.y = 0x20;
-    window_start_number_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
+    window_number_panel_thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 9999 << 16, 0, &origin);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].panel.result = 0;
     g_menu_stack_records[record_index].panel.variable_id = variable_id;
@@ -1583,7 +1448,7 @@ static void debug_push_variable_edit_level(s32 variable_id, s32 value) {
  * Reading the parent window index before the render-record store is what
  * lets the scheduler place that load inside the render index's multiply
  * sequence, as the target does. */
-void debug_step_variable_edit_level(menu_stack_record_t* level) {
+static void variable_edit_update(menu_stack_record_t* level) {
     s32 depth;
     s32 parent;
     s32 slot;
@@ -1596,7 +1461,7 @@ void debug_step_variable_edit_level(menu_stack_record_t* level) {
         depth = g_menu_stack_depth - 1;
         g_menu_stack_depth = depth;
         if (level->panel.result == 1) {
-            debug_draw_variable_list(&g_menu_stack_records[depth - 1].variable_list);
+            variable_list_draw(&g_menu_stack_records[depth - 1].variable_list);
         }
         parent = g_menu_stack_depth - 1;
         g_window_records[g_menu_stack_records[parent].variable_list.window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
@@ -1614,11 +1479,11 @@ void debug_step_variable_edit_level(menu_stack_record_t* level) {
     } else if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
-        script_set_variable(level->panel.variable_id, g_window_panel_value);
+        script_variable_set(level->panel.variable_id, g_window_panel_value);
     } else {
         return;
     }
-    thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+    thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
 }
 
 /* Appends a window-list record: saves g_menu_stack_ot_offset into it, allocates a window
@@ -1628,7 +1493,7 @@ void debug_step_variable_edit_level(menu_stack_record_t* level) {
  * Writing the window columns as fields of g_window_records (not separate stride
  * arrays) keeps the scheduler from sinking the record's window_index store
  * below them. */
-void unit_panel_push_help_level(void) {
+void unit_panel_help_open(void) {
     s32 window;
 
     g_menu_stack_records[g_menu_stack_depth].layout_window.saved_state = g_menu_stack_ot_offset;
@@ -1641,7 +1506,7 @@ void unit_panel_push_help_level(void) {
     g_window_records[window].frame_index = 0;
     g_menu_stack_records[g_menu_stack_depth].layout_window.layout = 0;
     g_menu_stack_records[g_menu_stack_depth].layout_window.cached_layout_kind = 1;
-    unit_panel_move_help_cursor(&g_menu_stack_records[g_menu_stack_depth].layout_window);
+    help_cursor_move(&g_menu_stack_records[g_menu_stack_depth].layout_window);
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_UNIT_PANEL_HELP;
     g_menu_stack_depth++;
 }
@@ -1652,7 +1517,7 @@ void unit_panel_push_help_level(void) {
  *
  * Routing both stores through one base variable (rather than
  * direct record indexing) preserves the separate position-column base. */
-static void unit_panel_move_help_cursor(unit_panel_help_level_t* request) {
+static void help_cursor_move(unit_panel_help_level_t* request) {
     window_xy_t* xy = (window_xy_t*)&g_window_records[0].position;
     s32 index = request->window_index;
     s32 layout = request->layout;
@@ -1671,7 +1536,7 @@ static void unit_panel_move_help_cursor(unit_panel_help_level_t* request) {
 
 /* Clear the text-task flag and move a window record to the sequence after
  * its current one, restarting the animation with the default palette. */
-void unit_panel_resume_help_level(menu_stack_record_t* level) {
+static void panel_help_resume(menu_stack_record_t* level) {
     s32 index = level->layout_window.window_index;
     display_object_animated_t* entry = &g_window_records[index];
 
@@ -1682,8 +1547,8 @@ void unit_panel_resume_help_level(menu_stack_record_t* level) {
     g_window_records[index].frame_index = 0;
 }
 
-/* The g_menu_stack_suspend_handlers entry of MENU_STACK_LEVEL_UNIT_PANEL_HELP: nothing to suspend. */
-void unit_panel_suspend_help_level(menu_stack_record_t* unused_level) {
+/* The g_level_suspend_handlers entry of MENU_STACK_LEVEL_UNIT_PANEL_HELP: nothing to suspend. */
+static void panel_help_suspend(menu_stack_record_t* unused_level) {
 }
 
 /* Input handler for a layout-window menu level.
@@ -1692,7 +1557,7 @@ void unit_panel_suspend_help_level(menu_stack_record_t* unused_level) {
  * to the neighboring layout named by the row. A row with a counter pointer
  * adds the counter to the base message id, and suppresses the message entirely
  * when the counter reads 0 or -1 (except for layout 0x0b). */
-void unit_panel_handle_help_input(menu_stack_record_t* request) {
+static void panel_help_update(menu_stack_record_t* request) {
     s32 layout;
     s16* counter;
     s16 message;
@@ -1720,7 +1585,7 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
         } else {
             message = g_unit_panel_help_rows[layout].help_base;
         }
-        menu_stack_push_message_level(message, 1);
+        menu_stack_message_open(message, 1);
         g_menu_input_lock_mode = 1;
         window = request->layout_window.window_index;
         record = &g_window_records[window];
@@ -1731,35 +1596,35 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
         return;
     }
 
-    if (world_map_update_input_repeat(PSX_PAD_UP) != 0) {
+    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
         if (g_unit_panel_help_rows[request->layout_window.layout].destination[0] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
             request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[0];
-            unit_panel_move_help_cursor(&request->layout_window);
+            help_cursor_move(&request->layout_window);
             return;
         }
     }
-    if (world_map_update_input_repeat(PSX_PAD_DOWN) != 0) {
+    if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         if (g_unit_panel_help_rows[request->layout_window.layout].destination[1] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
             request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[1];
-            unit_panel_move_help_cursor(&request->layout_window);
+            help_cursor_move(&request->layout_window);
             return;
         }
     }
-    if (world_map_update_input_repeat(PSX_PAD_RIGHT) != 0) {
+    if (world_map_input_repeat_update(PSX_PAD_RIGHT) != 0) {
         if (g_unit_panel_help_rows[request->layout_window.layout].destination[2] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
             request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[2];
-            unit_panel_move_help_cursor(&request->layout_window);
+            help_cursor_move(&request->layout_window);
             return;
         }
     }
-    if (world_map_update_input_repeat(PSX_PAD_LEFT) != 0) {
+    if (world_map_input_repeat_update(PSX_PAD_LEFT) != 0) {
         if (g_unit_panel_help_rows[request->layout_window.layout].destination[3] != request->layout_window.layout) {
             sound_play_effect(SOUND_SFX_CURSOR_MOVE);
             request->layout_window.layout = g_unit_panel_help_rows[request->layout_window.layout].destination[3];
-            unit_panel_move_help_cursor(&request->layout_window);
+            help_cursor_move(&request->layout_window);
         }
     }
 }
@@ -1771,7 +1636,7 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
  * location's picture at g_picture_buffer to VRAM, binds a render
  * record to the picture and adds its border window at (-8, 0x10). It then
  * measures every
- * entry's text through text_find_entry / text_measure_pixels to
+ * entry's text through text_entry_find / text_pixels_measure to
  * size the panel, copies the entry values into g_menu_stack_entry_values with
  * cleared row flags, clamps the cursor to at most four visible rows, and
  * starts the panel render state centered on the measured width.
@@ -1782,7 +1647,7 @@ void unit_panel_handle_help_input(menu_stack_record_t* request) {
  * stored through a stride-36 view based at &records->position, as the target forms
  * (records + 0x18) + index * 36.
  */
-void location_push_menu_level(s32 menu) {
+void location_menu_open(s32 menu) {
     GsIMAGE image;
     RECT bounds;
     point32_t origin;
@@ -1804,13 +1669,13 @@ void location_push_menu_level(s32 menu) {
     window_xy_t* position;
 
     /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
-    g_world_map_marker_state.marker.picture_id = location_load_picture(g_world_map_marker_state.marker.location_id);
+    g_world_map_marker_state.marker.picture_id = location_picture_load(g_world_map_marker_state.marker.location_id);
     if (g_world_map_marker_state.marker.picture_id != 0) {
         menu += 0x37;
     } else {
         menu += 0x37;
     }
-    file_wait_for_pending();
+    file_pending_wait();
 
     flags = g_system_flags | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
     level = &g_menu_stack_records[g_menu_stack_depth].location_menu;
@@ -1879,8 +1744,8 @@ void location_push_menu_level(s32 menu) {
     widest = 0;
     count = g_menu_stack_records[g_menu_stack_depth].location_menu.entry_count;
     for (i = 0; i < count; i++) {
-        text_measure_pixels(&text_width, &text_rows,
-            text_find_entry(g_menu_stack_records[g_menu_stack_depth].location_menu.entries[i]));
+        text_pixels_measure(&text_width, &text_rows,
+            text_entry_find(g_menu_stack_records[g_menu_stack_depth].location_menu.entries[i]));
         if (widest < text_width) {
             widest = text_width;
         }
@@ -1907,7 +1772,7 @@ void location_push_menu_level(s32 menu) {
         origin.y = 0x70 - i * 8;
     }
     menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_LOCATION, count, i);
-    window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].location_menu.entry_count, &layout, &origin);
+    window_panel_state_init(0xC, g_menu_stack_records[g_menu_stack_depth].location_menu.entry_count, &layout, &origin);
     g_window_panel_render_state.vram_origin.x = 0x240;
     g_window_panel_render_state.header_id = 0;
     g_window_panel_render_state.vram_origin.y = 0x100;
@@ -1933,14 +1798,14 @@ void location_push_menu_level(s32 menu) {
 }
 
 /* Restore the location list's optional renderer palette. */
-void location_resume_menu_level(menu_stack_record_t* level) {
+static void location_menu_resume(menu_stack_record_t* level) {
     if (level->location_menu.slots.render_b != -1) {
         g_window_gs_image_records[level->location_menu.slots.render_b].palette = 0;
     }
 }
 
 /* Sets the second owned render record's palette selector when its slot is present. */
-void location_suspend_menu_level(menu_stack_record_t* slots) {
+static void location_menu_suspend(menu_stack_record_t* slots) {
     if (slots->location_menu.slots.render_b != -1) {
         g_window_gs_image_records[slots->location_menu.slots.render_b].palette = 2;
     }
@@ -1951,7 +1816,7 @@ void location_suspend_menu_level(menu_stack_record_t* slots) {
  * the bar, a shop, a deep-dungeon battle chosen by the location's conditional
  * set or the selected destination map; the help button shows the entry's
  * message and cancel closes the level. */
-void location_step_menu_level(menu_stack_record_t* level) {
+static void location_menu_update(menu_stack_record_t* level) {
     s16* selected;
     u8 unused[0x28];
     s16* values;
@@ -1975,7 +1840,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
         g_window_records[level->location_menu.slots.window_b].color.b = level->location_menu.fade;
         if (level->location_menu.fade == 0x80) {
             level->location_menu.fade = 0;
-            world_map_toggle_captured_frame(1);
+            world_map_backdrop_mode_set(1);
         } else {
             level->location_menu.fade += 7;
         }
@@ -1986,7 +1851,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
     if (level->location_menu.delay != 0) {
         if (level->location_menu.delay == 8) {
             thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
-            thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
+            thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
         }
         level->location_menu.delay--;
         return;
@@ -1998,11 +1863,11 @@ void location_step_menu_level(menu_stack_record_t* level) {
 
     /* A confirm or cancel below closed the panel; act on slots.result once its thread has finished. */
     if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        world_map_toggle_captured_frame(0);
+        world_map_backdrop_mode_set(0);
         g_system_flags
             = (g_system_flags | SYSTEM_FLAG_INPUT_BLOCKED) & ~(SYSTEM_FLAG_DRAW_MAP | SYSTEM_FLAG_FREEZE_ANIMATION);
         if (level->location_menu.slots.result != 0) {
-            menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_LOCATION);
+            menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_LOCATION);
             selected = &g_window_panel_render_state.selected_index;
             values = g_menu_stack_entry_values;
             value = values[*selected];
@@ -2013,26 +1878,26 @@ void location_step_menu_level(menu_stack_record_t* level) {
                 value &= TEXT_ID_ENTRY_MASK;
                 switch (value) {
                 case TEXT_ID_BAR& TEXT_ID_ENTRY_MASK:
-                    menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
-                    music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
-                    bar_push_level();
+                    level_records_release(&level->location_menu.slots, 0);
+                    music_queue_track_start(MUSIC_QUEUE_TRACK(2, MUSIC_BAR));
+                    bar_menu_open();
                     return;
                 case TEXT_ID_SHOP& TEXT_ID_ENTRY_MASK:
-                    menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
-                    location_run_shop(0);
+                    level_records_release(&level->location_menu.slots, 0);
+                    location_shop_run(0);
                     return;
                 case TEXT_ID_SOLDIER_OFFICE& TEXT_ID_ENTRY_MASK:
-                    menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
-                    location_run_shop(SCREEN_CONTEXT_SOLDIER_OFFICE);
+                    level_records_release(&level->location_menu.slots, 0);
+                    location_shop_run(SCREEN_CONTEXT_SOLDIER_OFFICE);
                     return;
                 case TEXT_ID_FUR_SHOP& TEXT_ID_ENTRY_MASK:
-                    menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
-                    location_run_shop(SCREEN_CONTEXT_FUR_SHOP);
+                    level_records_release(&level->location_menu.slots, 0);
+                    location_shop_run(SCREEN_CONTEXT_FUR_SHOP);
                     return;
                 default:
-                    script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION,
+                    script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION,
                         value - (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK));
-                    menu_stack_pop_and_release_records(&level->location_menu.slots, 0);
+                    level_records_release(&level->location_menu.slots, 0);
                     if (location_script_run(
                             g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
                         != 0) {
@@ -2042,24 +1907,24 @@ void location_step_menu_level(menu_stack_record_t* level) {
                         record = &records[g_location_script_state.args[0]];
                         g_travel_next_map_id = record->map_id;
                         /* Direct ENTD indexing folds the table base and removes a retail addition. */
-                        script_set_variable(
+                        script_variable_set(
                             EVENT_SCRIPT_VAR_CURRENT_ENTD, (&records->entd_ids[0])[((rand() * 8) >> 15) + offset]);
-                        script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
-                        script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, record->squad_id);
-                        script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[1]);
-                        script_set_variable(
+                        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
+                        script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, record->squad_id);
+                        script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[1]);
+                        script_variable_set(
                             EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, (rand() * g_location_script_state.args[2]) >> 15);
                         g_system_flags = (g_system_flags | SYSTEM_FLAG_DEEP_DUNGEON_BATTLE) ^ SYSTEM_FLAG_RUNNING;
                     } else {
                         world_map_fade_start(0, 0x10);
-                        music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
+                        music_queue_track_start(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
                     }
                     return;
                 }
             }
 
             /* A map entry runs the row's event and travels to map entry + 1. */
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
             g_system_flags ^= SYSTEM_FLAG_RUNNING;
             value = values[*selected] & TEXT_ID_ENTRY_MASK;
             g_travel_next_map_id = value + 1;
@@ -2067,8 +1932,8 @@ void location_step_menu_level(menu_stack_record_t* level) {
         }
 
         g_system_flags = (g_system_flags | SYSTEM_FLAG_DRAW_MAP) & ~SYSTEM_FLAG_INPUT_BLOCKED;
-        menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_LOCATION);
-        menu_stack_pop_and_release_records(&level->location_menu.slots, 1);
+        menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_LOCATION);
+        level_records_release(&level->location_menu.slots, 1);
         return;
     }
 
@@ -2078,23 +1943,23 @@ void location_step_menu_level(menu_stack_record_t* level) {
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_WORLD_MENU_BASE) {
             sound_play_effect(SOUND_SFX_CANCEL);
             level->location_menu.slots.result = 0;
-            thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+            thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
             g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
         }
     } else if (g_world_map_input_new_button_presses & PSX_PAD_SELECT) {
         /* Help: map names, services and deep-dungeon floors each have their own message range. */
-        location_suspend_menu_level(level);
+        location_menu_suspend(level);
         value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index];
         /* A map's help is 0x8801 + map, a service's 0x104b on and a floor's 0x1090 on. */
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_MAP_NAME_BASE) {
-            menu_stack_push_message_level((value & TEXT_ID_ENTRY_MASK) + 0x8801, 1);
+            menu_stack_message_open((value & TEXT_ID_ENTRY_MASK) + 0x8801, 1);
         } else {
             value &= TEXT_ID_ENTRY_MASK;
             text = value + 0xFEE;
             if (value >= (TEXT_ID_DEEP_DUNGEON_FLOOR_FIRST & TEXT_ID_ENTRY_MASK)) {
                 text = value + 0xFA3;
             }
-            menu_stack_push_message_level(text, 1);
+            menu_stack_message_open(text, 1);
         }
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->location_menu.entry_count != 0
         && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
@@ -2103,7 +1968,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
         music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 2);
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->location_menu.slots.result = 1;
-        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
     }
 }
@@ -2112,7 +1977,7 @@ void location_step_menu_level(menu_stack_record_t* level) {
  * each of the four slots that is not -1 releases one window or render record
  * and its queue entry. With `restore` the level underneath is resumed. Also
  * unblocks the menu buttons and re-shows the location label. */
-static void menu_stack_pop_and_release_records(menu_stack_slot_set_t* slots, s32 restore) {
+static void level_records_release(menu_stack_slot_set_t* slots, s32 restore) {
     g_menu_blocked_buttons = 0;
     if (slots->window_a != -1) {
         g_window_record_count -= 1;
@@ -2138,26 +2003,26 @@ static void menu_stack_pop_and_release_records(menu_stack_slot_set_t* slots, s32
 }
 
 /* At full brightness, run WORLD's shop, soldier office or fur shop screen
- * (shop_run_screen), then reload the war funds, reset the parent
+ * (shop_screen_run), then reload the war funds, reset the parent
  * level's window, push the location menu again, fade in, blank the backdrop
  * image and restart the world-map music.
  *
  * The local alias for the current location id reproduces the target's
  * saved-register base for its two loads. */
-static void location_run_shop(s32 shop_id) {
+static void location_shop_run(s32 shop_id) {
     s32* selected;
     u32* clear;
     s32 i;
 
-    screen_set_brightness(0x80, 0x80, 0x80);
+    screen_brightness_set(0x80, 0x80, 0x80);
     music_queue_wait_until_empty();
-    shop_run_screen(shop_id);
-    g_hud_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
+    shop_screen_run(shop_id);
+    g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
+    world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
     selected = &g_world_map_marker_state.marker.location_id;
     g_menu_stack_records[g_menu_stack_depth].panel.entry_count
-        = location_build_menu_entries(*selected, g_menu_stack_records[g_menu_stack_depth].panel.entries);
-    location_push_menu_level(*selected);
+        = location_menu_entries_build(*selected, g_menu_stack_records[g_menu_stack_depth].panel.entries);
+    location_menu_open(*selected);
     world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
     world_map_clear_screen_and_set_clip_rect(0);
     /* Blank the backdrop image from the end. */
@@ -2167,7 +2032,7 @@ static void location_run_shop(s32 shop_id) {
         *clear = 0;
         clear--;
     }
-    music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
+    music_queue_track_start(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
 }
 
 /* Pushes g_text_window on message `text` as
@@ -2176,11 +2041,11 @@ static void location_run_shop(s32 shop_id) {
  * rows), initializes the scrollable text state, hides the text render record
  * and the parent level's window until the step shows them, and hides the
  * location label and freezes the map animation. */
-void menu_stack_push_scrollable_text_level(s32 text) {
+void menu_stack_scrollable_text_open(s32 text) {
     s16 width;
     s16 rows;
 
-    text_measure_pixels(&width, &rows, text_find_entry(text));
+    text_pixels_measure(&width, &rows, text_entry_find(text));
     if (rows > 4) {
         rows = 4;
     }
@@ -2229,11 +2094,11 @@ void menu_stack_push_scrollable_text_level(s32 text) {
 /* Menu-level step for the scrollable text window g_text_window.
  * While its render record is hidden, the first frame without a screen fade
  * plays SOUND_SFX_WINDOW_OPEN and shows the header window and the text.
- * Otherwise, once text_window_step reports the window
+ * Otherwise, once text_window_update reports the window
  * closed, it releases the header window, pops the level, shows the location label
  * and unfreezes the map, shows the parent level's window and resumes the
  * parent level. */
-void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
+static void scrollable_text_level_update(menu_stack_record_t* level) {
     s32* index = &g_text_window.render_record_index;
     s32 depth;
 
@@ -2244,7 +2109,7 @@ void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
             g_window_gs_image_records[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
     } else if (!(g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_POP_IN)
-        && text_window_step(&g_text_window) == 0) {
+        && text_window_update(&g_text_window) == 0) {
         g_window_record_count--;
         g_window_render_object_count--;
         depth = g_menu_stack_depth;
@@ -2257,8 +2122,8 @@ void menu_stack_step_scrollable_text_level(menu_stack_record_t* level) {
 
 /* Push the debug "Party number" panel (SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER):
  * a number from 0 to 999, starting at 0. Sibling of
- * debug_push_variable_edit_level. */
-static void debug_push_party_number_level(void) {
+ * variable_edit_open. */
+static void party_number_open(void) {
     point32_t origin;
     s32 record_index;
 
@@ -2267,7 +2132,7 @@ static void debug_push_party_number_level(void) {
     origin.x = -0x28;
     origin.y = -0x16;
     g_window_panel_value = 0;
-    window_start_number_panel_thread(
+    window_number_panel_thread_start(
         WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 999 << 16, TEXT_ID_PARTY_NUMBER_LABEL, &origin);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].panel.result = 0;
@@ -2277,10 +2142,10 @@ static void debug_push_party_number_level(void) {
 
 /* Step of the debug party number panel: Circle or Cross closes it, and once
  * the panel thread has ended a confirmed number below 0x200 is loaded with
- * encounter_init_party and the roster names are rebuilt.
+ * encounter_party_init and the roster names are rebuilt.
  *
  * The panel result is 0 while waiting, 1 on confirm and -1 on cancel. */
-void debug_step_party_number_level(menu_stack_record_t* level) {
+static void party_number_update(menu_stack_record_t* level) {
     u32 buttons;
 
     if ((level->panel.result != 0) && (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0)) {
@@ -2289,8 +2154,8 @@ void debug_step_party_number_level(menu_stack_record_t* level) {
         g_menu_stack_depth--;
         if (level->panel.result == 1) {
             if (g_window_panel_value < 0x200) {
-                encounter_init_party(g_window_panel_value);
-                formation_build_roster_names();
+                encounter_party_init(g_window_panel_value);
+                formation_roster_names_build();
                 g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
             }
         }
@@ -2302,326 +2167,10 @@ void debug_step_party_number_level(menu_stack_record_t* level) {
     if ((buttons & PSX_PAD_CROSS) != 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = -1;
-        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if ((buttons & PSX_PAD_CIRCLE) != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
-        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     }
 }
-
-/* Opens the bar (MENU_STACK_LEVEL_BAR): hides the map, loads the bar
- * background (set 0x16 or 0x17 by EVENT_SCRIPT_VAR_TOWN_BACKGROUND, else 0),
- * starts the message box on TEXT_ID_BAR_WELCOME, and allocates two
- * window records and one render record for the level before
- * bar_build_rows fills it. */
-static void bar_push_level(void) {
-    s32 value;
-    s32 set;
-    s32 record_index;
-
-    world_map_clear_screen_and_set_clip_rect(1);
-    window_set_render_objects_visible(0);
-    world_map_fade_start(0, 0x10);
-    value = script_get_variable(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
-    set = value == 1 ? 0x16 : 0;
-    if (value == 2) {
-        set = 0x17;
-    }
-    picture_load_background_set(set);
-    file_wait_for_pending();
-    g_system_flags |= SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
-    g_menu_stack_records[g_menu_stack_depth].bar.cursor_window
-        = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].bar.label_window
-        = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_menu_stack_records[g_menu_stack_depth].bar.rows_image
-        = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
-    bar_build_rows(&g_menu_stack_records[g_menu_stack_depth].bar);
-    record_index = g_menu_stack_depth;
-    g_menu_stack_records[record_index].bar.restore_welcome = 0;
-    g_menu_stack_types[record_index] = MENU_STACK_LEVEL_BAR;
-    g_menu_stack_depth = record_index + 1;
-}
-
-/* Fill the bar menu: Rumors always, Propositions once EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED is
- * set, the job report while jobs have returned to this town, the in-progress list while some
- * accepted job has not returned, then Leave; draw the rows into the frame window. */
-void bar_build_rows(bar_menu_level_t* level) {
-    s32 index;
-    point32_t point;
-    RECT bounds;
-    s32 unused[8];
-    menu_cursor_state_t* cursor;
-    point32_t* base;
-    window_gs_image_record_t* render;
-    s32 i;
-
-    index = level->cursor_window;
-    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[index].priority = 0xA;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    index = level->label_window;
-    g_window_records[index].sequence = WINDOW_ANIM_LIST_SIDE_LABEL;
-    g_window_records[index].priority = 0xA;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    level->entries[0] = BAR_ROW_RUMORS;
-    level->entry_count = 1;
-    if (script_get_variable(EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED) != 0) {
-        level->entries[1] = BAR_ROW_AVAILABLE_PROPOSITIONS;
-        level->entry_count++;
-    }
-
-    if (proposition_count_returned(g_world_map_marker_state.marker.location_id) != 0) {
-        level->entries[level->entry_count] = BAR_ROW_RETURNED;
-        level->entry_count++;
-    }
-
-    if (g_proposition_count != proposition_count_returned(-1)) {
-        level->entries[level->entry_count] = BAR_ROW_ACTIVE_PROPOSITIONS;
-        level->entry_count++;
-    }
-
-    level->entries[level->entry_count] = BAR_ROW_LEAVE;
-    level->entry_count++;
-    index = level->rows_image;
-    bounds.x = 0;
-    bounds.y = 0;
-    bounds.w = 0x48;
-    bounds.h = level->entry_count * 0x10 + 0x10;
-    window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 0xA;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_gs_image_records[index].base;
-    base->x = -0x78;
-    base->y = -0x28;
-    point.x = 8;
-    point.y = 8;
-    for (i = 0; i < level->entry_count; i++) {
-        window_display_text_entry(index, level->entries[i] + TEXT_ID_WORLD_MENU_BASE, point, g_window_image_buffer);
-        point.y += 0x10;
-    }
-
-    window_load_render_record_image(index, g_window_image_buffer);
-    cursor = &g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR];
-    if (level->entry_count < cursor->selected_index + 1) {
-        cursor->selected_index = 0;
-    }
-
-    g_menu_stack_records[g_menu_stack_depth].bar.selected_entry = cursor->selected_index;
-    g_menu_stack_records[g_menu_stack_depth].bar.mode = MENU_STACK_WINDOW_MODE_BROWSE;
-    render = &g_window_gs_image_records[index];
-    g_window_records[level->cursor_window].position.x = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[level->cursor_window].position.y
-        = g_window_gs_image_records[index].base.y + cursor->selected_index * 0x10 + 0xE;
-    g_window_records[level->label_window].position.x = render->base.x + 3;
-    g_window_records[level->label_window].position.y = g_window_gs_image_records[index].base.y - 2;
-}
-
-/* Restore the bar list's palettes and cursor animation, then show its welcome text. */
-void bar_resume_level(menu_stack_record_t* level) {
-    s32 main_window;
-    s32 side_window;
-    s32 slot;
-    /* The original frame reserves eight unused bytes. */
-    s32 pad[2];
-
-    main_window = level->bar.cursor_window;
-    side_window = level->bar.label_window;
-    g_window_gs_image_records[level->bar.rows_image].palette = 0;
-    g_window_records[side_window].palette = 0;
-    g_window_records[main_window].palette = 0;
-    slot = level->bar.cursor_window;
-    g_window_records[slot].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    slot = level->bar.cursor_window;
-    g_window_records[slot].anim_counter = 0;
-    g_window_records[slot].frame_index = 0;
-    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
-}
-
-/* Indexed by menu_stack_level_e. */
-static void (*g_menu_stack_idle_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
-    world_map_step_cursor_level,                   /* MENU_STACK_LEVEL_WORLD_MAP */
-    world_map_step_menu_level,                     /* MENU_STACK_LEVEL_WORLD_MENU */
-    menu_stack_wait_text_then_pop,                 /* MENU_STACK_LEVEL_TEXT_WINDOW */
-    menu_stack_wait_message_then_pop,              /* MENU_STACK_LEVEL_MESSAGE */
-    location_step_menu_level,                      /* MENU_STACK_LEVEL_LOCATION */
-    bar_handle_input,                              /* MENU_STACK_LEVEL_BAR */
-    rumor_handle_list_input,                       /* MENU_STACK_LEVEL_RUMOR_LIST */
-    proposition_handle_available_list_input,       /* MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST */
-    rumor_wait_detail_then_pop,                    /* MENU_STACK_LEVEL_RUMOR_DETAIL */
-    proposition_handle_accept_input,               /* MENU_STACK_LEVEL_PROPOSITION_DETAIL */
-    proposition_handle_accept_confirm_input,       /* MENU_STACK_LEVEL_PROPOSITION_ACCEPT */
-    debug_handle_variable_list_input,              /* MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST */
-    proposition_step_days_level,                   /* MENU_STACK_LEVEL_PROPOSITION_DAYS */
-    proposition_handle_dispatch_confirm_input,     /* MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM */
-    proposition_handle_returned_list_input,        /* MENU_STACK_LEVEL_PROPOSITION_RETURNED_LIST */
-    proposition_handle_report_confirm_input,       /* MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM */
-    proposition_step_report_level,                 /* MENU_STACK_LEVEL_PROPOSITION_REPORT */
-    proposition_step_result_level,                 /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
-    proposition_handle_active_list_input,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
-    proposition_handle_recall_input,               /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
-    sound_novel_step_restart_level,                /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
-    sound_novel_step_level,                        /* MENU_STACK_LEVEL_SOUND_NOVEL */
-    sound_novel_step_quit_level,                   /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
-    sound_novel_step_history_level,                /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
-    brave_story_handle_unexplored_land_list_input, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
-    brave_story_step_unexplored_land_level,        /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
-    brave_story_handle_treasure_list_input,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
-    brave_story_step_treasure_level,               /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURE */
-    brave_story_handle_input,                      /* MENU_STACK_LEVEL_BRAVE_STORY */
-    brave_story_handle_event_list_input,           /* MENU_STACK_LEVEL_BRAVE_STORY_EVENTS */
-    brave_story_handle_event_input,                /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
-    brave_story_handle_person_list_input,          /* MENU_STACK_LEVEL_BRAVE_STORY_PERSONS */
-    brave_story_step_person_level,                 /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
-    tutorial_handle_topic_list_input,              /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
-    tutorial_wait_topic_then_pop,                  /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
-    event_transition_step_level,                   /* MENU_STACK_LEVEL_EVENT_TRANSITION */
-    proposition_step_send_unit_level,              /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
-    brave_story_handle_propositions_input,         /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
-    brave_story_handle_advancing_list_input,       /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
-    brave_story_handle_participant_list_input,     /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS */
-    brave_story_handle_participant_input,          /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT */
-    brave_story_handle_work_history_input,         /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY */
-    brave_story_wait_work_history_then_pop,        /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
-    tutorial_handle_menu_input,                    /* MENU_STACK_LEVEL_TUTORIAL */
-    tutorial_handle_formation_list_input,          /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
-    tutorial_handle_battle_list_input,             /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
-    brave_story_handle_fact_list_input,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
-    brave_story_wait_fact_then_pop,                /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
-    debug_step_variable_edit_level,                /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    screen_transition_step_level,                  /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
-    world_map_step_focus_level,                    /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
-    menu_stack_step_scrollable_text_level,         /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
-    debug_step_party_number_level,                 /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
-    world_map_step_path_level,                     /* MENU_STACK_LEVEL_WORLD_MAP_PATH */
-    world_map_step_location_visibility_level,      /* MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY */
-    proposition_step_discovery_level,              /* MENU_STACK_LEVEL_PROPOSITION_DISCOVERY */
-    unit_panel_handle_help_input,                  /* MENU_STACK_LEVEL_UNIT_PANEL_HELP */
-};
-
-/* Indexed by menu_stack_level_e; zero entries preserve the original table. */
-static void (*g_menu_stack_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
-    world_map_resume_cursor_level,                   /* MENU_STACK_LEVEL_WORLD_MAP */
-    0,                                               /* MENU_STACK_LEVEL_WORLD_MENU */
-    0,                                               /* MENU_STACK_LEVEL_TEXT_WINDOW */
-    0,                                               /* MENU_STACK_LEVEL_MESSAGE */
-    location_resume_menu_level,                      /* MENU_STACK_LEVEL_LOCATION */
-    bar_resume_level,                                /* MENU_STACK_LEVEL_BAR */
-    rumor_restore_list_prompt,                       /* MENU_STACK_LEVEL_RUMOR_LIST */
-    proposition_restore_available_list_prompt,       /* MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST */
-    0,                                               /* MENU_STACK_LEVEL_RUMOR_DETAIL */
-    proposition_resume_detail_level,                 /* MENU_STACK_LEVEL_PROPOSITION_DETAIL */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_ACCEPT */
-    0,                                               /* MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_DAYS */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM */
-    proposition_restore_returned_list_prompt,        /* MENU_STACK_LEVEL_PROPOSITION_RETURNED_LIST */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_REPORT */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
-    proposition_restore_active_list_prompt,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
-    0,                                               /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
-    sound_novel_resume_level,                        /* MENU_STACK_LEVEL_SOUND_NOVEL */
-    sound_novel_resume_quit_level,                   /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
-    0,                                               /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
-    brave_story_restore_unexplored_land_list_prompt, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
-    brave_story_restore_treasure_list_prompt,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURE */
-    brave_story_resume_level,                        /* MENU_STACK_LEVEL_BRAVE_STORY */
-    brave_story_restore_event_list_prompt,           /* MENU_STACK_LEVEL_BRAVE_STORY_EVENTS */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
-    brave_story_restore_person_list_prompt,          /* MENU_STACK_LEVEL_BRAVE_STORY_PERSONS */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
-    tutorial_restore_topic_list_buttons,             /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
-    0,                                               /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
-    0,                                               /* MENU_STACK_LEVEL_EVENT_TRANSITION */
-    proposition_resume_send_unit_level,              /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
-    brave_story_resume_propositions_level,           /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
-    brave_story_resume_advancing_list,               /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS */
-    brave_story_resume_participant_level,            /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT */
-    brave_story_resume_work_history,                 /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
-    tutorial_resume_menu_level,                      /* MENU_STACK_LEVEL_TUTORIAL */
-    tutorial_restore_formation_list_buttons,         /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
-    tutorial_restore_battle_list_buttons,            /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
-    brave_story_restore_fact_list_buttons,           /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
-    0,                                               /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
-    0,                                               /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    0,                                               /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
-    0,                                               /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
-    0,                                               /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
-    0,                                               /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
-    0,                                               /* MENU_STACK_LEVEL_WORLD_MAP_PATH */
-    0,                                               /* MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY */
-    0,                                               /* MENU_STACK_LEVEL_PROPOSITION_DISCOVERY */
-    unit_panel_resume_help_level,                    /* MENU_STACK_LEVEL_UNIT_PANEL_HELP */
-};
-
-/* Indexed by menu_stack_level_e; zero entries preserve the original table. */
-static void (*g_menu_stack_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
-    world_map_suspend_cursor_level,                 /* MENU_STACK_LEVEL_WORLD_MAP */
-    0,                                              /* MENU_STACK_LEVEL_WORLD_MENU */
-    0,                                              /* MENU_STACK_LEVEL_TEXT_WINDOW */
-    0,                                              /* MENU_STACK_LEVEL_MESSAGE */
-    location_suspend_menu_level,                    /* MENU_STACK_LEVEL_LOCATION */
-    bar_suspend_level,                              /* MENU_STACK_LEVEL_BAR */
-    rumor_block_list_buttons,                       /* MENU_STACK_LEVEL_RUMOR_LIST */
-    proposition_block_available_list_buttons,       /* MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST */
-    0,                                              /* MENU_STACK_LEVEL_RUMOR_DETAIL */
-    proposition_suspend_detail_level,               /* MENU_STACK_LEVEL_PROPOSITION_DETAIL */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_ACCEPT */
-    0,                                              /* MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_DAYS */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM */
-    proposition_block_returned_list_buttons,        /* MENU_STACK_LEVEL_PROPOSITION_RETURNED_LIST */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_REPORT_CONFIRM */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_REPORT */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
-    proposition_block_active_list_buttons,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
-    0,                                              /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
-    sound_novel_suspend_level,                      /* MENU_STACK_LEVEL_SOUND_NOVEL */
-    sound_novel_suspend_quit_level,                 /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
-    0,                                              /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
-    brave_story_block_unexplored_land_list_buttons, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
-    brave_story_block_treasure_list_buttons,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURE */
-    brave_story_suspend_level,                      /* MENU_STACK_LEVEL_BRAVE_STORY */
-    brave_story_block_event_list_buttons,           /* MENU_STACK_LEVEL_BRAVE_STORY_EVENTS */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_EVENT */
-    brave_story_block_person_list_buttons,          /* MENU_STACK_LEVEL_BRAVE_STORY_PERSONS */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
-    tutorial_block_topic_list_buttons,              /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
-    0,                                              /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
-    0,                                              /* MENU_STACK_LEVEL_EVENT_TRANSITION */
-    proposition_suspend_send_unit_level,            /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
-    brave_story_suspend_propositions_level,         /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
-    brave_story_suspend_advancing_list,             /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS */
-    brave_story_suspend_participant_level,          /* MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT */
-    brave_story_suspend_work_history,               /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY */
-    tutorial_suspend_menu_level,                    /* MENU_STACK_LEVEL_TUTORIAL */
-    tutorial_block_formation_list_buttons,          /* MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST */
-    tutorial_block_battle_list_buttons,             /* MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST */
-    brave_story_block_fact_list_buttons,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
-    0,                                              /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
-    0,                                              /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    0,                                              /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
-    0,                                              /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
-    0,                                              /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
-    0,                                              /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
-    0,                                              /* MENU_STACK_LEVEL_WORLD_MAP_PATH */
-    0,                                              /* MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY */
-    0,                                              /* MENU_STACK_LEVEL_PROPOSITION_DISCOVERY */
-    unit_panel_suspend_help_level,                  /* MENU_STACK_LEVEL_UNIT_PANEL_HELP */
-};

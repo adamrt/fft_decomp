@@ -13,7 +13,7 @@
  * select entry `value`, and reset the scroll and render state. The scroll
  * base is only reset when the selection starts at the top, so a list
  * reopened on a remembered entry keeps its page. */
-void menu_init_scrollable_list_core(const s16* values, s32 value, u8* text_table) {
+void menu_scrollable_list_core_init(const s16* values, s32 value, u8* text_table) {
     g_screen_list_entry_ids = values;
     g_screen_list_text_table = text_table;
 

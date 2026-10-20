@@ -16,7 +16,7 @@
 #include "psx/types.h"
 
 /* overlay workspace */
-/* Provisional work block at *g_ai_workspace_ptr: the menus build their
+/* Provisional work block at *g_event_work: the menus build their
  * ability list and the outermost scrolling list's packet pages in it, events
  * keep the staged-status snapshot at 0x5f0. */
 typedef struct event_work {
@@ -27,8 +27,11 @@ typedef struct event_work {
 } event_work_t;
 typedef char event_work_size_must_be_2532[(sizeof(event_work_t) == 2532) ? 1 : -1];
 
+/* BATTLE and WORLD define this event/menu view of the shared AI work area. */
+extern event_work_t* g_event_work;
+
 /* event loading */
-/* The finish operation of a scenario's finish word: its high bits, as script_get_event_finish_operation
+/* The finish operation of a scenario's finish word: its high bits, as script_event_finish_operation_get
  * returns them. Another nonzero value acts as TO_WORLD and also clears the current event and ENTD. */
 enum { SCRIPT_FINISH_TO_WORLD = 0x80, SCRIPT_FINISH_NEXT_EVENT = 0x81, SCRIPT_FINISH_RESET = 0x82 };
 
@@ -41,11 +44,11 @@ extern event_file_block_t* g_script_event_block;
  * width schemas. The table ends after opcode 0xf3. */
 extern u8 g_script_event_instruction_sizes[0xf4];
 
-void script_load_event(s32 id);
-s32 script_load_next_event(void);
-void script_reset_event_state(void);
-s32 scenario_get_finish_operation(void);
-u32 script_get_event_finish_operation(void);
+void script_event_load(s32 id);
+s32 script_next_event_load(void);
+void script_event_state_reset(void);
+s32 scenario_finish_operation_get(void);
+u32 script_event_finish_operation_get(void);
 
 /* scenario */
 /* ATTACK reuses the setup records and condition blocks for deployment text after loading them. */
@@ -59,11 +62,11 @@ extern s16 g_scenario_condition_data[256];
 extern s32 g_scenario_condition_unit_battle_id;
 
 s32 scenario_load_conditionals(void);
-s32 scenario_run_conditions(void);
+s32 scenario_conditions_run(void);
 void scenario_restore_music_and_darkness(void);
 
 /* interpreter */
-/* script_run_event_frame results: RUNNING (or g_script_frame_result_override) while the script
+/* script_event_frame_run results: RUNNING (or g_script_frame_result_override) while the script
  * threads run; once they have all stopped, NO_FINISH or what the scenario's finish operation asks
  * for. Tutorial input mode reports NO_FINISH every frame. */
 typedef enum script_event_frame_result {
@@ -80,13 +83,13 @@ extern u16 g_script_frame_result_override;
 extern s16 g_scenario_event_active;
 extern s16 g_script_threads_idle;
 
-void script_run_next_event(void);
+void script_event_thread_run(void);
 void script_run_next_event_unused(void);
-void script_start_current_event_thread(void);
-s32 script_run_event_frame(u32* ot, u32 buttons);
+void script_current_event_thread_start(void);
+s32 script_event_frame_run(u32* ot, u32 buttons);
 void script_frame_after_requests_stub(void);
 void script_frame_after_threads_stub(void);
-void script_set_event_speed(s32 speed);
+void script_event_speed_set(s32 speed);
 
 /* BATTLE and WORLD each have their own body. */
 void script_execute_event(void);
@@ -132,19 +135,19 @@ s32 script_opcode_47_add_ghost_unit(
 void script_opcode_49_add_unit_start_thread(void);
 
 /* instruction scanning */
-s32 script_find_instruction_byte_offset(s32 offset, s32 opcode);
+s32 script_instruction_offset_find(s32 offset, s32 opcode);
 
 /* Returns the offset after the matching target marker; a missing target stops
  * the current thread. alternate_opcode accepts -1. */
-s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id);
+s32 script_jump_target_find(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id);
 
 /* Reads an unaligned little-endian signed 16-bit operand. */
-s16 script_read_s16(const void* source);
+s16 script_s16_read(const void* source);
 
 /* values */
-void script_seed_random_from_vsync(void);
-void script_clamp_s32_to_range(s32* value, s32 minimum, s32 maximum);
-s32 script_scale_music_volume(s32 volume);
+void script_random_seed(void);
+void script_value_clamp(s32* value, s32 minimum, s32 maximum);
+s32 script_music_volume_scale(s32 volume);
 
 /* units */
 /* Four unit bindings used by the scenario's slot selectors. */
@@ -152,10 +155,10 @@ extern s16 g_script_unit_slots[EVENT_UNIT_SELECTOR_SLOT_COUNT];
 
 void script_blue_remove_all_enemy_units(void);
 void script_inflict_status_thread(void);
-void script_process_inflict_status_commands(void);
+void script_status_commands_process(void);
 
 /* Event-unit lookup uses the resident scene's interpreter state. */
-s32 script_resolve_runtime_id(s32 unit_id);
+s32 script_runtime_id_resolve(s32 unit_id);
 
 /* unit movement and animation */
 /* Task words of a sprite-move thread. The SpriteMove instruction and the
@@ -169,12 +172,12 @@ void script_sprite_move_beta(void);
 void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters);
 void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* parameters);
-void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable);
-void script_wait_for_unit_ready(s32 runtime_id);
+void script_unit_palette_updates_suppress(s32 event_unit_id, s32 enable);
+void script_unit_ready_wait(s32 runtime_id);
 
 /* camera */
 void script_focus(event_focus_parameters_t* parameters);
-void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values);
+void script_relative_camera_apply(event_camera_values_t* parameters, const s32* camera_values);
 
 /* A typed operand plus a local Camera cursor reorders the original argument saves. */
 void script_focus_speed(u8* parameters, s32* position, s32* rotation);
@@ -195,7 +198,7 @@ extern VECTOR g_script_light_scale;
 extern MATRIX g_script_light_base_direction_matrix;
 extern MATRIX g_script_light_base_color_matrix;
 
-void script_set_specialized_map_destroyed(void);
+void script_specialized_map_destroyed_set(void);
 void script_dark_screen_thread(void);
 
 /* effects and graphics */
@@ -208,9 +211,9 @@ extern point16_t g_event_effect_target_position;
 extern u16 g_3d_object_wait_status;
 extern u16 g_field_object_wait_status;
 
-void script_play_effect_and_wait(void);
-void script_show_graphic(void);
-void script_execute_display_conditions_instruction(void);
+void script_effect_wait(void);
+void script_graphic_show(void);
+void script_conditions_display(void);
 
 /* EVTCHR and VRAM requests */
 extern s32 g_script_pending_loaded_evtchr_slot;
@@ -243,7 +246,7 @@ typedef enum script_tutorial_wait_value {
     SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST = 0xfc,
     SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS = 0xfd,
     SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe, /* the Triangle menu */
-    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* menu_start_entry_thread opened a menu */
+    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* entry_thread_start opened a menu */
 } script_tutorial_wait_value_e;
 
 extern u32 g_script_unfiltered_controller_input;
@@ -257,18 +260,18 @@ extern u16 g_script_input_suppression_frames;
 
 void script_filter_controller_input(u32* input);
 u32* script_get_controller_input_pointer(s32 use_current);
-u32 script_get_event_initial_repeat_counter(void);
+u32 script_event_initial_repeat_counter_get(void);
 void script_set_current_otag_entry_and_update_input(u32* entry, s32 input);
 
 /* Called by each program's native thread scheduler to route event input. */
 void script_route_event_input(void);
-void script_update_event_input_state(u32 buttons);
+void script_event_input_update(u32 buttons);
 void script_load_event_input_state(const menu_input_state_t* saved);
 
 /* debug */
 extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
 
-void script_print_debug_message(void);
+void script_debug_message_print(void);
 
 /* stubs */
 void script_noop_1(void);
@@ -298,8 +301,8 @@ extern u16 g_event_field_object_use_request;
 extern s32 g_event_frame_counter; /* counts the frames the event interpreter runs */
 
 /* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
- * operands; script_process_pending_requests passes them to battle_map_set_3d_object_state
- * and battle_map_texture_start_animation, and the matching wait instructions poll until
+ * operands; pending_requests_process passes them to battle_map_object_state_set
+ * and battle_map_texture_animation_start, and the matching wait instructions poll until
  * the object is done. Provisional: the operands' value domains. The consumer reads the u16
  * requests and operands with lhu; every other access is a store. */
 extern u16 g_event_3d_object_id;
