@@ -14,7 +14,7 @@ units:
   - {name: file_loading, source: src/main/file_loading.c}
   - {name: file_requests, source: src/main/file_requests.c, data: [{addr: 0x8004eaf4, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: frame_graphics, source: src/main/frame_graphics.c, data: [{addr: 0x80047598, size: 8, hash: 37cd35309c7e000f}, {addr: 0x800475a0, size: 8, hash: 6590074fb72aab6f}, {addr: 0x800475a8, size: 8, hash: 1c46d0293ec224c0}]}
-  - {name: game_loop, source: src/main/game_loop.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}]}
+  - {name: game_loop, source: src/main/entry.c, data: [{addr: 0x800473a0, size: 1, hash: 4bf5122f344554c5}]}
   - {name: heap, source: src/main/heap.c, data: [{addr: 0x8004e9d4, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: job_progress, source: src/main/job_progress.c}
   - {name: loading_draw_message, source: src/main/loading_screen.c, data: [{addr: 0x80032a68, size: 16, hash: 374708fff7719dd5}]}

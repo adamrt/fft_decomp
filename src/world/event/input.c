@@ -1,9 +1,9 @@
 /* WORLD publishes menu input to the event interpreter around one scheduler yield. Thread changes suppress script input
  * for the following frames. */
 
+#include "fft/input.h"
 #include "fft/formation.h"
 #include "fft/gfx_primitive.h"
-#include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"

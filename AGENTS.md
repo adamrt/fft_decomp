@@ -53,6 +53,13 @@ preserving every original byte.
   useful to describe the feature, its state or its relationship to other
   systems; there is no one-line limit. Avoid generic summaries, function
   inventories and text added only to fill space.
+- Put a program's entry-owning unit in `entry.c`. When separate units own
+  independent entrances, use `entry_<role>.c`; when one unit owns several,
+  keep them together in `entry.c`. Move the complete unit, including its
+  state and helpers. Keep shared entrances with their shared implementation
+  and list them, resident copies and service-only programs in README's
+  entrance index. Identify entrances from their callers; native EFFECT
+  callbacks keep their behavior files.
 - `src/lib/`: shared game components, grouped by concept. `event/` holds
   the script interpreter, dialog and related BATTLE/WORLD services; `menu/`
   holds shared in-game menus, windows, text and drawing support, grouped by
@@ -120,12 +127,19 @@ instead of including the record's header.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
-- Name public functions from broad to specific:
-  `<module>_[<submodule>_]<noun>_<verb>` (`unit_stats_refresh`,
-  `world_map_save_request`, `party_levels_gain`). The module is the owning
-  game concept, not the executable. Static functions use concise
-  `<noun>_<verb>` names without redundant module/submodule prefixes; local
-  variables and private types/state likewise use their enclosing context.
+- Name public functions with a stable concept owner followed by a natural
+  operation phrase: `<owner>_<operation>`. Build the owner from broad to
+  specific (`unit_stats_refresh`, `formation_roster_sort`,
+  `world_map_save_request`, `party_levels_gain`). The owner is the game
+  concept, not the executable. Prefer noun then verb for a focused operation,
+  but keep readable predicates, conversions and phrases such as
+  `unit_find_at_tile`, `menu_thread_is_running`, `calendar_date_to_day_index`
+  and `effect_vector_add_random_offsets`. A drawing API may consistently
+  group `owner_draw_thing` operations. Do not reorder words mechanically or
+  turn a status-returning operation into a boolean-sounding predicate.
+  Static functions use concise contextual names without redundant owner
+  prefixes or a private-name marker; local variables and private types/state
+  likewise use their enclosing context.
   Retain enough qualification to distinguish roles and avoid target-symbol
   collisions. The concept is the game's own US term where the player
   sees one (bar, rumor, proposition, Brave Story, sound novel, formation,

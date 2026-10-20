@@ -22,10 +22,10 @@ units:
   - {name: new_game, source: src/open/new_game.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: overlay_fade, source: src/open/overlay_fade.c}
   - {name: prologue, source: src/open/prologue.c}
-  - {name: runtime, source: src/open/runtime.c}
+  - {name: runtime, source: src/open/entry.c}
   - {name: title, source: src/open/title.c, data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
   - {name: title_demo, source: src/open/title_demo.c}
-  - {name: window_records, source: src/open/window_records.c, data: [{addr: 0x800707f8, size: 8, hash: 16ca3f8a47677229}]}
+  - {name: window_records, source: src/open/display_objects.c, data: [{addr: 0x800707f8, size: 8, hash: 16ca3f8a47677229}]}
   - {name: window_render, source: src/open/window_render.c}
 
 libraries:
@@ -55,7 +55,7 @@ functions:
   - {addr: 0x80068384, size: 156, name: new_game_party_init, hash: 3b01ce90b00a6557, unit: new_game}
   - {addr: 0x80068420, size: 300, name: calendar_date_to_zodiac_convert, hash: 9aaa68be5ea32880, unit: new_game}
   - {addr: 0x8006854c, size: 160, name: music_test_menu_frame_run, hash: b27c035b144dee4f, unit: music_test_frame}
-  - {addr: 0x800685ec, size: 76, name: calendar_day_of_year_calculate, hash: e796a8582427e794, source: src/wldcore/calendar_day_index.c}
+  - {addr: 0x800685ec, size: 76, name: calendar_day_of_year_calculate, hash: e796a8582427e794, source: src/lib/calendar.c}
   - {addr: 0x80068638, size: 76, name: sound_set_cd_mix_and_volume, hash: 3fcd975cc8b2da0c, unit: init}
   - {addr: 0x80068684, size: 88, name: title_sequence_init, hash: 7f2fe3e68306a213, unit: init}
   - {addr: 0x800686dc, size: 132, name: ending_init, hash: c5005cd2d64378db, unit: init}

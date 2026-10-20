@@ -1,8 +1,8 @@
 /* Formation, shops and name entry share controller input with tutorial button injection. Edge and repeat masks are
  * withheld while text, Help or a screen transition owns the input. */
 
-#include "fft/help.h"
 #include "fft/input.h"
+#include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_window.h"

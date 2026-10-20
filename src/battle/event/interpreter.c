@@ -1,6 +1,5 @@
 /* The event script interpreter that runs as the event thread. */
 
-#include "fft/script.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"
 #include "fft/battle_map_load.h"
@@ -24,6 +23,7 @@
 #include "fft/overlay.h"
 #include "fft/party.h"
 #include "fft/projectile.h"
+#include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
