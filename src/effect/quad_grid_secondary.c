@@ -52,7 +52,7 @@ typedef char
  * gives each C variable one pseudo, and that sharing is what places the curve
  * index, color curves and brightness in s2 and the curve factor in s3.
  */
-s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
+s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 unused_frame) {
     s16 state_index = record_index;
     effect_record_t* record = &g_effect_state_records[state_index];
     s32 translucent;

@@ -137,7 +137,7 @@ s32 party_unit_save(const unit_stats_t* unit, s32 allow_guest) {
     party->birthday_day = birthday;
     party->zodiac = birthday >> 8;
     mem_copy_byte_data_source_first(&unit->secondary_skillset, &party->secondary_skillset, 0x10);
-    party->bravery = unit->original_brave;
+    party->brave = unit->original_brave;
     party->faith = unit->original_faith;
     mem_copy_byte_data_source_first(unit->raw_stats, party->raw_stats, sizeof(party->raw_stats));
     /* The saved span includes the career record and following 16-byte name. */
@@ -318,10 +318,10 @@ static void party_record_generate(party_unit_t* party, unit_generation_type_e un
     party->zodiac = ((birthday & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) + zodiac;
 
     if (unit_type == UNIT_TYPE_RAMZA) {
-        party->bravery = 70;
+        party->brave = 70;
         party->faith = 70;
     } else {
-        party->bravery = (rand() * 31) / 0x8000 + 40;
+        party->brave = (rand() * 31) / 0x8000 + 40;
         party->faith = (rand() * 31) / 0x8000 + 40;
     }
 

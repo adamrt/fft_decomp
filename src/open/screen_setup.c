@@ -1,6 +1,7 @@
 /* Prepare OPEN's shared screen and working state for either session,
  * switching movie display modes and restoring FRAME.BIN after the ending. */
 
+#include "fft/display_object.h"
 #include "fft/ending.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
@@ -12,7 +13,6 @@
 #include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/title.h"
-#include "fft/window.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -46,7 +46,7 @@ void title_sequence_init(s32 skip_movie) {
     system_init_runtime_state();
     title_graphics_load();
     gfx_init_screen_environments(1);
-    window_record_pools_init();
+    display_object_pools_init();
     input_init_directional_state();
     title_sequence_start(skip_movie);
 }
@@ -69,7 +69,7 @@ void ending_init(void) {
     g_system_vsync_mode = 0;
     ending_graphics_load();
     gfx_init_screen_environments(1);
-    window_record_pools_init();
+    display_object_pools_init();
     movie_ending_start();
 }
 

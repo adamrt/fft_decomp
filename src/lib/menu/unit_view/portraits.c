@@ -7,6 +7,7 @@
 #include "fft/menu.h"
 #include "fft/portrait.h"
 #include "fft/script.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

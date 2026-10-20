@@ -64,7 +64,8 @@ typedef enum target_line_direction {
 
 target_panels_e target_range_set_for_action(const action_command_t* action);
 s32 target_area_set_for_action(const action_command_t* source);
-s32 target_resolve_rotated_offset_layer(unit_stats_t*, s32, s32, s32, s32*, s32*, s32*);
+s32 target_resolve_rotated_offset_layer(
+    unit_stats_t* unit, s32 dx, s32 dy, s32 flags, s32* out_x, s32* out_y, s32* out_layer);
 
 /* eligibility */
 extern s32 g_target_sort_nearest_first;

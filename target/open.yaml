@@ -55,7 +55,7 @@ functions:
   - {addr: 0x80068384, size: 156, name: new_game_party_init, hash: 3b01ce90b00a6557, unit: new_game}
   - {addr: 0x80068420, size: 300, name: calendar_date_to_zodiac_convert, hash: 9aaa68be5ea32880, unit: new_game}
   - {addr: 0x8006854c, size: 160, name: music_test_menu_frame_run, hash: b27c035b144dee4f, unit: music_test_frame}
-  - {addr: 0x800685ec, size: 76, name: calendar_day_of_year_calculate, hash: e796a8582427e794, source: src/lib/calendar.c}
+  - {addr: 0x800685ec, size: 76, name: calendar_date_to_day_index, hash: e796a8582427e794, source: src/lib/calendar.c}
   - {addr: 0x80068638, size: 76, name: sound_set_cd_mix_and_volume, hash: 3fcd975cc8b2da0c, unit: init}
   - {addr: 0x80068684, size: 88, name: title_sequence_init, hash: 7f2fe3e68306a213, unit: init}
   - {addr: 0x800686dc, size: 132, name: ending_init, hash: c5005cd2d64378db, unit: init}
@@ -63,13 +63,13 @@ functions:
   - {addr: 0x800687ac, size: 832, name: gfx_init_screen_environments, hash: 00685f629e5f306d, unit: init}
   - {addr: 0x80068aec, size: 136, name: system_init_runtime_state, hash: 1795eb2597584b2e, unit: init}
   - {addr: 0x80068b74, size: 60, name: gfx_clear_and_draw_current_frame, hash: 22d70e319b6161e8, unit: init}
-  - {addr: 0x80068bb0, size: 224, name: window_record_pools_init, hash: 39decc2065a64d27, unit: window_records}
+  - {addr: 0x80068bb0, size: 224, name: display_object_pools_init, hash: 39decc2065a64d27, unit: window_records}
   - {addr: 0x80068c90, size: 64, name: gfx_clear_current_otag, hash: 7dbb971d4cb43ee9, unit: window_records}
-  - {addr: 0x80068cd0, size: 176, name: window_dispatch_gpu_record_list, hash: a3a591bbfb26047c, unit: window_records}
-  - {addr: 0x80068d80, size: 1164, name: window_draw_gpu_animated_record, hash: d2445b3917e77445, unit: window_records}
-  - {addr: 0x8006920c, size: 1212, name: window_draw_gpu_image_record, hash: 6c7b3dae23c3f006, unit: window_records}
-  - {addr: 0x800696c8, size: 232, name: window_append_animated_record, hash: a3135d544f819f6f, unit: window_records}
-  - {addr: 0x800697b0, size: 272, name: window_append_record, hash: 6a95dfcd435c9a47, unit: window_records}
+  - {addr: 0x80068cd0, size: 176, name: display_object_gpu_list_draw, hash: a3a591bbfb26047c, unit: window_records}
+  - {addr: 0x80068d80, size: 1164, name: gpu_animated_draw, hash: d2445b3917e77445, unit: window_records}
+  - {addr: 0x8006920c, size: 1212, name: gpu_image_draw, hash: 6c7b3dae23c3f006, unit: window_records}
+  - {addr: 0x800696c8, size: 232, name: display_object_animated_append, hash: a3135d544f819f6f, unit: window_records}
+  - {addr: 0x800697b0, size: 272, name: display_object_image_append, hash: 6a95dfcd435c9a47, unit: window_records}
   - {addr: 0x800698c0, size: 276, name: scaled_rectangle_calculate, hash: 9676150bdf1ed31c, unit: window_records}
   - {addr: 0x800699d4, size: 96, name: file_pending_read_request, hash: b839cd0a4c5eb016, unit: file_wait}
   - {addr: 0x80069a34, size: 92, name: file_pending_wait, hash: 5e8c5303cf510992, unit: file_wait}
@@ -105,7 +105,7 @@ functions:
   - {addr: 0x8006c96c, size: 88, name: window_display_text_entry, hash: 5dccdaeb10297930, unit: window_render}
   - {addr: 0x8006c9c4, size: 104, name: window_text_image_measure, hash: 1dee4681dccf0eb6, unit: window_render}
   - {addr: 0x8006ca2c, size: 212, name: window_text_record_init, hash: 5f2251260b376d41, unit: window_render}
-  - {addr: 0x8006cb00, size: 248, name: window_init_vram_record, hash: e55c249f3c899201, unit: window_render}
+  - {addr: 0x8006cb00, size: 248, name: display_object_gpu_image_init, hash: e55c249f3c899201, unit: window_render}
   - {addr: 0x8006cbf8, size: 444, name: music_test_start_list_thread, hash: a1bb85931a6abb8e, unit: music_test}
   - {addr: 0x8006cdb4, size: 316, name: music_test_menu_open, hash: 45eaf45a7a3b75ee, unit: music_test}
   - {addr: 0x8006cef0, size: 876, name: music_test_menu_update, hash: c7076123a75c7032, unit: music_test}
@@ -190,10 +190,10 @@ data:
   - {addr: 0x80067080, name: g_psyq_press_timeout_dma_format}
   - {addr: 0x800670a8, name: g_psyq_press_timeout_fifo_format}
   - {addr: 0x800670e0, name: g_psyq_press_timeout_format}
-  - {addr: 0x800707f8, name: g_window_anim_sequences}
-  - {addr: 0x800707fc, name: g_window_anim_cels}
-  - {addr: 0x80070800, name: g_window_anim_sequence_table}
-  - {addr: 0x8007096c, name: g_window_anim_cel_table}
+  - {addr: 0x800707f8, name: g_display_object_sequences}
+  - {addr: 0x800707fc, name: g_display_object_cels}
+  - {addr: 0x80070800, name: g_display_object_sequence_table}
+  - {addr: 0x8007096c, name: g_display_object_cel_table}
   - {addr: 0x80070cb4, name: g_prologue_entries}
   - {addr: 0x80070d84, name: g_ending_script_font_metrics}
   - {addr: 0x80070d88, name: g_ending_script_initial_data_base}
@@ -201,7 +201,7 @@ data:
   - {addr: 0x80073f10, name: g_psyq_press_vlc_state}
   - {addr: 0x80073f34, name: g_calendar_month_lengths}
   - {addr: 0x80073f40, name: g_birthday_zodiac_start_dates}
-  - {addr: 0x80073f58, name: s_file_openbk_sector_offsets}
+  - {addr: 0x80073f58, name: g_opnbk_sector_offsets}
   - {addr: 0x80073f78, name: g_controller_handlers}
   - {addr: 0x80073fb4, name: g_music_test_row_actions}
   - {addr: 0x80073fd4, name: g_music_test_music_ids}
@@ -225,9 +225,9 @@ data:
   - {addr: 0x800849bc, name: g_psyq_press_ac_secondary_table}
   - {addr: 0x800851bc, name: g_input_current_buttons}
   - {addr: 0x800851c0, name: g_gfx_screen_environments}
-  - {addr: 0x800852a0, name: g_window_record_count}
+  - {addr: 0x800852a0, name: g_display_object_animated_count}
   - {addr: 0x800852a4, name: g_gfx_opntex_data}
-  - {addr: 0x800852a8, name: g_window_render_record_count}
+  - {addr: 0x800852a8, name: g_display_object_image_count}
   - {addr: 0x800852ac, name: g_input_previous_buttons}
   - {addr: 0x800852b0, name: g_movie_mdec_stream_state}
   - {addr: 0x800852e8, name: g_music_test_list_params}
@@ -249,12 +249,12 @@ data:
   - {addr: 0x800856f8, name: g_prologue_line_primitives}
   - {addr: 0x80085ca8, name: g_file_current_openbk_image_id}
   - {addr: 0x80085cac, name: g_gfx_overlay_fade}
-  - {addr: 0x80085d04, name: g_window_records}
-  - {addr: 0x80085f44, name: g_window_render_object_queue}
-  - {addr: 0x80085fc4, name: g_window_render_object_count}
+  - {addr: 0x80085d04, name: g_display_object_animated_pool}
+  - {addr: 0x80085f44, name: g_display_object_queue}
+  - {addr: 0x80085fc4, name: g_display_object_queue_count}
   - {addr: 0x80085fc8, name: g_ending_fade_primitives}
   - {addr: 0x80086018, name: g_gfx_otags}
-  - {addr: 0x80086098, name: g_window_gpu_image_records}
+  - {addr: 0x80086098, name: g_display_object_gpu_image_pool}
   - {addr: 0x80086418, name: g_input_directional_repeat}
   - {addr: 0x80086430, name: g_birthday_title_image}
   - {addr: 0x80087030, name: g_birthday_window_image}
@@ -268,7 +268,7 @@ data:
   - {addr: 0x8008e548, name: g_ending_script_state}
   - {addr: 0x8008e574, name: g_ending_script_byte_offset}
   - {addr: 0x8008fbf0, name: g_controller_handler_indices}
-  - {addr: 0x8008fc00, name: g_window_primitive_count}
+  - {addr: 0x8008fc00, name: g_display_object_gpu_sprite_count}
   - {addr: 0x8008fc04, name: g_controller_depth}
   - {addr: 0x8008fc08, name: g_movie_video_end_frame}
   - {addr: 0x8008fc0c, name: g_music_test_selected_option}
@@ -276,7 +276,7 @@ data:
   - {addr: 0x8008fc14, name: g_system_vsync_mode}
   - {addr: 0x8008fc18, name: g_movie_current_frame}
   - {addr: 0x8008fc1c, name: g_ending_credit_band_primitives}
-  - {addr: 0x8008fc6c, name: g_window_sprite_primitive_pool}
+  - {addr: 0x8008fc6c, name: g_display_object_gpu_sprite_packets}
   - {addr: 0x8009046c, name: g_music_test_sound_handle}
   - {addr: 0x80090470, name: g_ending_script_glyph_primitives}
   - {addr: 0x800c0000, name: g_movie_mdec_output_buffer_0}

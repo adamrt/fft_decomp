@@ -21,7 +21,7 @@
  * panel's unit_panel_thread_t record. The number images upload on the first frame and on the
  * record's redraw request; the panel zooms open over its first 13 frames, dims while the record's
  * style is 1 or menu input is locked, and runs until a stop request. Like WORLD, the draw offset
- * (0 or 0xF0) follows g_frame_arg. */
+ * (0 or 0xF0) follows g_menu_framebuffer_y. */
 void unit_panel_numbers_thread(void) {
     unit_panel_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;
@@ -125,7 +125,7 @@ void unit_panel_numbers_thread(void) {
         }
 
         /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the upper half. */
-        field_y = g_frame_arg;
+        field_y = g_menu_framebuffer_y;
         use_offset = field_y != 0xF0;
         g_gfx_draw_offset_y = -use_offset & 0xF0;
         menu_build_scaled_draw_area_packets(

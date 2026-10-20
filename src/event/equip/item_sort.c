@@ -1,6 +1,8 @@
 /* Sorting an item list by a mode's list of criteria, dropping empty and invalid entries. */
 
 #include "fft/item.h"
+#include "fft/item_menu.h"
+#include "fft/menu_sort.h"
 #include "psx/types.h"
 
 /* EQUIP uses the five editable item-category orders in resident MAIN storage.

@@ -1,6 +1,7 @@
 /* Sound novel saved state, script execution, pending sounds, the countdown timer and the sound novel opcodes. */
 
 #include "fft/bits.h"
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/menu_stack.h"
@@ -150,9 +151,9 @@ void sound_novel_reading_restore(s32 render_record) {
     script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
     script_variable_set(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);
     script_variable_set(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK, 0);
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].priority = 0xC;
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_POP_IN;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].priority = 0xC;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_POP_IN;
 
     picture_id = g_sound_novel_reading.picture_id;
     if (picture_id != -1) {
@@ -191,9 +192,9 @@ void sound_novel_reading_restore(s32 render_record) {
 
     state_flags = &g_sound_novel_reading.state_flags;
     if (*state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].sound_novel.quit_prompt_window].flags
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].sound_novel.quit_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].sound_novel.history_prompt_window].flags
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].sound_novel.history_prompt_window].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
     }
 
@@ -348,10 +349,10 @@ void window_centered_text_draw(s32 window_index, s32 text_id) {
     s32 i;
 
     text_pixels_measure(&text_width, &text_height, text_entry_find(text_id));
-    point.x = (((g_window_gs_image_records[window_index].bounds.w - text_width) / 2) & 0xfffe) + 8;
+    point.x = (((g_display_object_gs_image_pool[window_index].bounds.w - text_width) / 2) & 0xfffe) + 8;
     point.y = 10;
-    for (i = 0;
-        i < g_window_gs_image_records[window_index].bounds.w * g_window_gs_image_records[window_index].bounds.h / 8;
+    for (i = 0; i < g_display_object_gs_image_pool[window_index].bounds.w
+            * g_display_object_gs_image_pool[window_index].bounds.h / 8;
         i++) {
         g_window_image_buffer[i] = 0;
     }
@@ -620,8 +621,8 @@ static void sound_novel_opcode_0a_load_picture(void) {
     g_sound_novel_reading.picture_y = y;
     picture_load_set(picture);
     file_pending_wait();
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].base.x = x - 0x80;
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].base.y = y - 0x78;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].position.x = x - 0x80;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].position.y = y - 0x78;
     GsGetTimInfo(g_picture_buffer + 1, &image);
     bounds.x = image.px;
     bounds.y = image.py;
@@ -631,15 +632,15 @@ static void sound_novel_opcode_0a_load_picture(void) {
     clut_position.y = image.cy;
     LoadTPage(image.pixel, 0, 0, bounds.x, bounds.y, bounds.w * 4, bounds.h);
     LoadClut(image.clut, clut_position.x, clut_position.y);
-    window_init_vram_render_record(
+    display_object_gs_image_init(
         g_sound_novel_reading.picture_render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].anim_counter = 0;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].pop_in_step = 0;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Hides the sound-novel picture's render record and forgets the picture. */
 static void sound_novel_opcode_0b_hide_picture(void) {
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_sound_novel_reading.picture_id = -1;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH | SOUND_NOVEL_STATE_YIELD;
 }
@@ -649,16 +650,16 @@ static void sound_novel_opcode_0b_hide_picture(void) {
 static void sound_novel_opcode_0c_set_parent_windows_visible(void) {
     if ((u8)(g_sound_novel_reading.instruction >> 8) != 0) {
         g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window].flags
-            &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window]
+            .flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window]
+            .flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
         g_sound_novel_reading.state_flags &= ~SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].flags
-            |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window].flags
-            |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window]
+            .flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.history_prompt_window]
+            .flags |= DISPLAY_OBJECT_HIDDEN;
     }
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -825,7 +826,7 @@ static void sound_novel_opcode_1b_subtract_counter_delta(void) {
 static void sound_novel_opcode_1c_start_pending_value_transition(void) {
     s32 mode;
 
-    g_system_flags &= ~SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
     mode = (u8)(g_sound_novel_reading.instruction >> 8);
     g_sound_novel_reading.value_display_mode = mode;
     g_hud_value_mode = mode;
@@ -841,7 +842,7 @@ static void sound_novel_opcode_1c_start_pending_value_transition(void) {
 /* Opcode 29: take the numeric value display down again (sound_novel_opcode_1c_start_pending_value_transition
  * puts it up) and fetch the next instruction. */
 static void sound_novel_opcode_1d_hide_value_display(void) {
-    g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
     g_sound_novel_reading.state_flags
         = (g_sound_novel_reading.state_flags & ~SOUND_NOVEL_STATE_VALUE_DISPLAY) | SOUND_NOVEL_STATE_FETCH;
 }
@@ -1073,7 +1074,7 @@ static void sound_novel_opcode_2a_set_white_screen_overlay(void) {
         g_world_map_fade.boxes[0].r = 0xff;
         g_world_map_fade.boxes[0].g = 0xff;
         g_world_map_fade.boxes[0].b = 0xff;
-        g_system_flags &= ~SYSTEM_FLAG_FADING;
+        g_world_map_flags &= ~WORLD_MAP_FLAG_FADING;
         *state = (*state & ~(WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_OUT)) | WORLD_MAP_FADE_BOX_VISIBLE;
         g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_WHITE_OVERLAY;
         screen_brightness_set(0, 0, 0);
@@ -1083,7 +1084,7 @@ static void sound_novel_opcode_2a_set_white_screen_overlay(void) {
         g_world_map_fade.boxes[0].r = 0;
         g_world_map_fade.boxes[0].g = 0;
         g_world_map_fade.boxes[0].b = 0;
-        g_system_flags &= ~SYSTEM_FLAG_FADING;
+        g_world_map_flags &= ~WORLD_MAP_FLAG_FADING;
         *state &= ~(WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_OUT | WORLD_MAP_FADE_BOX_VISIBLE);
         g_sound_novel_reading.state_flags &= ~SOUND_NOVEL_STATE_WHITE_OVERLAY;
         screen_brightness_set(0x80, 0x80, 0x80);
@@ -1227,7 +1228,7 @@ static void sound_novel_opcode_33_add_counter_delta_if_choice(void) {
 
 /* Sound-novel opcode: yield while a screen fade is running. */
 static void sound_novel_opcode_34_wait_for_fade(void) {
-    if ((g_system_flags & SYSTEM_FLAG_FADING) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_FADING) == 0) {
         g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
     } else {
         g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_YIELD;

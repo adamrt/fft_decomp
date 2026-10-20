@@ -5,6 +5,7 @@
 #include "fft/equipment.h"
 #include "fft/formation_ability.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"

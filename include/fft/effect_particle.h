@@ -33,7 +33,7 @@ void effect_particle_integrate_motion(effect_work_record_t* list);
  * the particle, the EFFECT overlay's particle handlers a record built on
  * their stack that holds a position, and the timeline none. The emitter index
  * arrives as a full 32-bit value. The function is declared with an int result it
- * never sets and no caller reads; a void declaration changes effect_script.c's code. */
+ * never sets and no caller reads; a void declaration changes the effect script interpreter's code. */
 s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent);
 
 /* particle pools */

@@ -6,8 +6,8 @@
 
 #include "fft/gfx.h"
 #include "fft/job.h"
-#include "fft/menu.h"
 #include "fft/menu_list.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

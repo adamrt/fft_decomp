@@ -6,6 +6,7 @@
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/effect_secondary.h"
 #include "fft/item.h"
 #include "fft/move.h"
@@ -13,7 +14,6 @@
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
@@ -324,7 +324,7 @@ void animation_stand_set(unit_runtime_t* unit) {
 void animation_walk_set(unit_runtime_t* unit) {
     s32 anim;
     s32 walk_speed;
-    unit_runtime_t* mount;
+    unit_runtime_t* rider;
 
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
         animation_facing_store(ANIMATION_RIDING, unit->facing, unit);
@@ -343,9 +343,9 @@ void animation_walk_set(unit_runtime_t* unit) {
             }
         }
         if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
-            mount = unit_runtime_get(unit->mount_partner_runtime_id);
-            if (mount != 0) {
-                animation_facing_store(ANIMATION_RIDING, unit->facing, mount);
+            rider = unit_runtime_get(unit->mount_partner_runtime_id);
+            if (rider != 0) {
+                animation_facing_store(ANIMATION_RIDING, unit->facing, rider);
             }
         }
         break;
@@ -551,7 +551,7 @@ void animation_status_changes_update(unit_runtime_t* unit) {
             || g_sprite_sheet_data[unit->spritesheet_id].seq_id == SPRITE_SEQ_MON) {
             effect_secondary_death_smoke_start(unit);
         }
-        if (g_game_state != GAME_STATE_EVENT) {
+        if (g_battle_state != BATTLE_STATE_EVENT) {
             stats = unit->stats;
             if (stats != 0) {
                 if (stats->unit_flags & UNIT_FLAG_MALE) {
@@ -567,7 +567,7 @@ void animation_status_changes_update(unit_runtime_t* unit) {
     if (unit->statuses_to_add_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) {
         effect_secondary_zodiac_poof_start(unit);
     }
-    if (g_game_state == GAME_STATE_EVENT) {
+    if (g_battle_state == BATTLE_STATE_EVENT) {
         if (unit->statuses_to_add_5_6 & UNIT_STATUS_JUMP) {
             animation_facing_force(ANIMATION_JUMP_DEPART, unit->facing, unit);
         } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_JUMP) {

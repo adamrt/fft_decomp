@@ -268,7 +268,7 @@ void message_dialog_thread(void) {
 
     win = menu_alloc_window_buffer_pair();
     win->message_id = thread_current_parameter_2_get();
-    win->dialogue_selector = rec.position;
+    win->dialog_selector = rec.position;
     win->box_type = rec.box_type;
     rec.text = thread_current_parameter_2_get();
     rec.rect.w = rec.width;

@@ -5,6 +5,7 @@
 #include "fft/gfx_image.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -136,7 +137,7 @@ void formation_display_init(void) {
  * formation screen, the monsters at the soldier office and the available
  * humans in the other shops. Also reconciles the five item category lists
  * and resets the cursor and scroll. */
-void formation_rebuild_unit_list(void) {
+void formation_lists_rebuild(void) {
     formation_record_list_mode_e mode;
 
     if (g_screen_context_id == SCREEN_CONTEXT_FORMATION) {

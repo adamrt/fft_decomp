@@ -1,4 +1,4 @@
-/* AI simulation brackets, learn-on-hit, steal and war funds rewards, target list sorting and the last used ability. */
+/* Track action outcomes and Mime copies, including learn-on-hit, rewards, target lists and AI simulation state. */
 
 #include "fft/ability.h"
 #include "fft/action.h"
@@ -443,7 +443,7 @@ void action_mimic_record(unit_stats_t* unit) {
 
 /* Set up a Mime's copy of the recorded action (g_action_mimic_attacker).
  * The Mime must share the actor's team, not be the actor and not be prevented
- * from reacting; a default, Arithmeticks or monster ability flagged Cannot
+ * from reacting; a default, Math Skill or monster ability flagged Cannot
  * Mimic is refused. The Mime repeats the action from its own tile, with the
  * target offset turned by its facing relative to the actor's, and takes the
  * actor's weapons.
@@ -463,7 +463,7 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
     action_command_t* current;
     s32 x;
     s32 y;
-    s32 z;
+    s32 layer;
     s32 direction;
     u8 menu_type;
     s32 result;
@@ -487,7 +487,7 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
     menu_type = g_command_menu_types_by_skillset[current->skillset_id];
     /* The target loads the ability id signed (lh). */
     ability_id = g_action_mimic_attacker.action.ability_id;
-    if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_ARITHMETICKS
+    if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MATH_SKILL
         || menu_type == ACTION_MENU_TYPE_MONSTER) {
         if (g_ability_range_data[ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CANNOT_MIMIC) {
             return 0;
@@ -501,8 +501,8 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
     if (menu_type == ACTION_MENU_TYPE_JUMP) {
         direction |= 0x100;
     }
-    if (target_resolve_rotated_offset_layer(
-            unit, g_action_mimic_attacker.target_delta_x, g_action_mimic_attacker.target_delta_y, direction, &x, &y, &z)
+    if (target_resolve_rotated_offset_layer(unit, g_action_mimic_attacker.target_delta_x,
+            g_action_mimic_attacker.target_delta_y, direction, &x, &y, &layer)
         != 0) {
         return -1;
     }
@@ -511,7 +511,7 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
     action.actor_id = unit->battle_id;
     unit_id = unit->battle_id;
     action.target_position.vx = x;
-    action.target_position.vy = z;
+    action.target_position.vy = layer;
     weapon_id = g_action_mimic_attacker.right_hand_weapon_id;
     action.target_position.vz = y;
     action.target_id = unit_id;
@@ -521,7 +521,7 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
     /* A byte flag test retains the original compound-condition scheduling. */
     if (result == TARGET_PANELS_INVALID || result == TARGET_PANELS_NONE
         || (result < TARGET_PANELS_NO_TARGETING
-            && !((*(u8*)&g_battle_map_tile_data[saved_state = (z << 8) + (g_battle_map_terrain_width * y) + x]
+            && !((*(u8*)&g_battle_map_tile_data[saved_state = (layer << 8) + (g_battle_map_terrain_width * y) + x]
                          .ceiling_depth_and_marks)
                 & BATTLE_MAP_TILE_FLAG_ABILITY_RANGE))) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
@@ -550,14 +550,14 @@ s32 action_mimic_set_ability(unit_stats_t* unit) {
  *
  * The low two bits of `flags` turn (dx, dy) by that many quarter turns. Returns
  * -1 when the rotated offset leaves the map or lands where both layers are
- * blocked; otherwise 0 with `*out_flag` selecting the upper (1) or lower (0)
+ * blocked; otherwise 0 with `*out_layer` selecting the upper (1) or lower (0)
  * terrain layer. With one layer blocked the other is chosen. Bit 8 of `flags`
  * picks the higher layer outright; otherwise the layer nearer the height of the
  * unit's own tile wins, ties going to the higher one. An upper-layer tile sits
  * 0x100 entries after its lower-layer tile in g_battle_map_tile_data.
  */
 s32 target_resolve_rotated_offset_layer(
-    unit_stats_t* unit, s32 dx, s32 dy, s32 flags, s32* out_x, s32* out_y, s32* out_flag) {
+    unit_stats_t* unit, s32 dx, s32 dy, s32 flags, s32* out_x, s32* out_y, s32* out_layer) {
     battle_map_tile_t* current;
     battle_map_tile_t* lower;
     battle_map_tile_t* upper;
@@ -606,11 +606,11 @@ s32 target_resolve_rotated_offset_layer(
         if (upper_value != 0) {
             return -1;
         }
-        *out_flag = 1;
+        *out_layer = 1;
         return 0;
     }
     if (upper_value != 0) {
-        *out_flag = 0;
+        *out_layer = 0;
         return 0;
     }
     upper_value = upper->height;
@@ -618,10 +618,10 @@ s32 target_resolve_rotated_offset_layer(
     lower_height = lower->height;
     if ((flags & 0x100) != 0) {
         if (upper_value < lower_height) {
-            *out_flag = 0;
+            *out_layer = 0;
             return 0;
         }
-        *out_flag = 1;
+        *out_layer = 1;
         return 0;
     }
     if (lower_height > current_height) {
@@ -635,22 +635,22 @@ s32 target_resolve_rotated_offset_layer(
         upper_distance = current_height - upper_value;
     }
     if (upper_distance < lower_distance) {
-        *out_flag = 1;
+        *out_layer = 1;
         return 0;
     }
     if (lower_distance < upper_distance) {
-        *out_flag = 0;
+        *out_layer = 0;
         return 0;
     }
     if (upper_value < lower_height) {
-        *out_flag = 0;
+        *out_layer = 0;
     } else {
-        *out_flag = 1;
+        *out_layer = 1;
     }
     return 0;
 }
 
 /* Return the saved action's ability. Nothing in the game calls it. */
-s16 ability_load_last_used(void) {
+s16 ability_last_used_get(void) {
     return g_action_saved_command.ability_id;
 }

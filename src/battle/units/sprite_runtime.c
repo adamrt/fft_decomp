@@ -6,6 +6,7 @@
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/deploy.h"
@@ -23,7 +24,6 @@
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
@@ -129,7 +129,7 @@ extern s32 g_status_bubble_delay;
 extern u16 g_sprite_y_rotations[32];
 extern clut_t g_sprite_weapon_clut;
 
-/* the first 0x200 bytes of WEP.SPR */
+/* Trail CLUT copied from WEP.SPR at offset 0x8200. */
 extern clut_t g_sprite_trail_clut;
 
 /* The 24 orders in which unit_layers_draw queues a unit's
@@ -284,8 +284,8 @@ static void frame_unit_shp_select(unit_runtime_t* unit, animation_state_t* state
     const sprite_unit_shp_frame_tables_t* table;
     const sprite_frame_t* selected;
     s32 flags;
-    s32 height;
-    s32 z;
+    s32 water_height;
+    s32 unit_height;
 
     tile = battle_map_tile_get_pointer((unit->world_coords.vx / BATTLE_MAP_TILE_SIZE),
         (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
@@ -318,22 +318,22 @@ static void frame_unit_shp_select(unit_runtime_t* unit, animation_state_t* state
                         selected = table->frames[frame];
                     }
                 } else {
-                    height = (tile->height + tile->depth_half_height.depth) * 12;
-                    z = -unit->world_coords.vy;
-                    if (height >= z + 0x24) {
+                    water_height = (tile->height + tile->depth_half_height.depth) * 12;
+                    unit_height = -unit->world_coords.vy;
+                    if (water_height >= unit_height + 0x24) {
                         selected = table->submerged_frames[0];
-                    } else if (height >= z + 0xc) {
+                    } else if (water_height >= unit_height + 0xc) {
                         selected = table->submerged_frames[frame];
                     } else {
                         selected = table->frames[frame];
                     }
                 }
             } else {
-                height = (tile->height + tile->depth_half_height.depth) * 12;
-                z = -unit->world_coords.vy;
-                if (height >= z + 0x24) {
+                water_height = (tile->height + tile->depth_half_height.depth) * 12;
+                unit_height = -unit->world_coords.vy;
+                if (water_height >= unit_height + 0x24) {
                     selected = table->submerged_frames[0];
-                } else if (height >= z + 0xc) {
+                } else if (water_height >= unit_height + 0xc) {
                     selected = table->submerged_frames[frame];
                 } else {
                     selected = table->frames[frame];
@@ -633,7 +633,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 state->display->rotation = 0;
                 break;
             case ANIMATION_SEQ_OP_STRIKE_TARGETS:
-                if (g_game_state == GAME_STATE_EVENT) {
+                if (g_battle_state == BATTLE_STATE_EVENT) {
                     break;
                 }
                 /* The abilities whose hit is the weapon swing itself: a plain
@@ -686,7 +686,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 }
                 break;
             case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT:
-                if (g_state_animation_continue_check != 0) {
+                if (g_battle_animation_wait_state != 0) {
                     /* Jump offsets count from the prefix byte, two bytes behind pos. */
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
@@ -806,7 +806,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 unit->item_display_active = 0;
                 break;
             case ANIMATION_SEQ_OP_WAIT_FOR_INPUT:
-                if (g_state_window_closed == 0) {
+                if (g_battle_window_closed == 0) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
                 } else {
@@ -817,7 +817,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 action_play_weapon_sfx(unit, seq->sequences[index][pos++]);
                 break;
             case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD:
-                if (g_state_animation_continue_check == 1) {
+                if (g_battle_animation_wait_state == 1) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
                 } else {
@@ -1000,7 +1000,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                 unit->layer_priority = seq[sequence_id][pos++];
                 break;
             case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT:
-                if (g_state_animation_continue_check != 0) {
+                if (g_battle_animation_wait_state != 0) {
                     offset = (s8)seq[sequence_id][pos];
                     pos += offset - 2;
                 } else {
@@ -1064,7 +1064,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                 pos += 3;
                 break;
             case ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD:
-                if (g_state_animation_continue_check == 1) {
+                if (g_battle_animation_wait_state == 1) {
                     offset = (s8)seq[sequence_id][pos];
                     pos += offset - 2;
                 } else {
@@ -1743,19 +1743,19 @@ void sprite_units_project(void) {
 void sprite_units_display_update(void) {
     unit_runtime_t* unit;
 
-    switch (g_game_state) {
-    case GAME_STATE_FREE_CURSOR:
-    case GAME_STATE_HIGHLIGHT_UNITS:
-    case GAME_STATE_OPEN_ACTION_MENUS:
-    case GAME_STATE_IDLING_ACTION_MENUS:
-    case GAME_STATE_AI_COMMAND:
-    case GAME_STATE_DISPLAY_MOVE_AREA:
-    case GAME_STATE_UNIT_MOVE:
-    case GAME_STATE_SELECT_MOVE_TILE:
-    case GAME_STATE_TARGETING_PROMPT:
-    case GAME_STATE_TARGETING_RANGE:
-    case GAME_STATE_ABILITY_PREVIEW_HANDLING:
-    case GAME_STATE_CONFIRM_ACTION:
+    switch (g_battle_state) {
+    case BATTLE_STATE_FREE_CURSOR:
+    case BATTLE_STATE_HIGHLIGHT_UNITS:
+    case BATTLE_STATE_OPEN_ACTION_MENUS:
+    case BATTLE_STATE_IDLING_ACTION_MENUS:
+    case BATTLE_STATE_AI_COMMAND:
+    case BATTLE_STATE_DISPLAY_MOVE_AREA:
+    case BATTLE_STATE_UNIT_MOVE:
+    case BATTLE_STATE_SELECT_MOVE_TILE:
+    case BATTLE_STATE_TARGETING_PROMPT:
+    case BATTLE_STATE_TARGETING_RANGE:
+    case BATTLE_STATE_ABILITY_PREVIEW_HANDLING:
+    case BATTLE_STATE_CONFIRM_ACTION:
         if (g_camera_zoom_action == CAMERA_STEP_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
             && g_camera_rotation_action == CAMERA_ROTATION_NONE
             && !(g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz)) {

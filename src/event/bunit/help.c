@@ -43,7 +43,7 @@ extern s16 g_unit_list_help_node_24_help_base;
  * g_unit_list_thread_running is clear) publish it as g_menu_thread_menu_data and start
  * its thread there, unless the slot is busy. Returns 1 while that thread runs and 0 once
  * it has finished, also kept in g_unit_list_thread_running. */
-s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc) {
+s32 unit_list_update_menu_thread(s32 id, menu_entry_t* desc) {
     if (g_unit_list_thread_running == 0) {
         if (thread_is_running(id) != 0) {
             return 1;

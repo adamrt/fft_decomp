@@ -3,6 +3,7 @@
 #include "fft/bar.h"
 #include "fft/brave_story.h"
 #include "fft/calendar.h"
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/job.h"
@@ -52,11 +53,12 @@ void proposition_returned_list_open(void) {
     s32* location;
     s32 entry_value_base;
 
-    if (g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN) {
-        g_window_records[g_menu_stack_records[previous].bar.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
+    if (g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN) {
+        g_display_object_animated_pool[g_menu_stack_records[previous].bar.cursor_window].flags
+            &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
     }
 
     if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
@@ -130,10 +132,11 @@ void proposition_returned_list_input_update(menu_stack_record_t* level) {
     s32 depth;
     point32_t origin;
 
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
+        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
-        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         menu_stack_dispatch_resume();
         return;
@@ -143,7 +146,7 @@ void proposition_returned_list_input_update(menu_stack_record_t* level) {
     if (buttons & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_RETURNED);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         return;
     }
@@ -194,15 +197,15 @@ void proposition_returned_list_input_update(menu_stack_record_t* level) {
 void proposition_report_confirm_update(menu_stack_record_t* level) {
     s32 selection;
 
-    if (g_window_gs_image_records[level->proposition_report_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->proposition_report_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
     block_tail:
-        g_window_record_count -= 2;
-        g_window_render_record_count -= 1;
-        g_window_render_object_count -= 3;
+        g_display_object_animated_count -= 2;
+        g_display_object_image_count -= 1;
+        g_display_object_queue_count -= 3;
         g_menu_stack_depth -= 1;
         menu_stack_dispatch_resume();
         return;
@@ -210,8 +213,8 @@ void proposition_report_confirm_update(menu_stack_record_t* level) {
     if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         selection = level->proposition_report_confirm.selection ^ 1;
         level->proposition_report_confirm.selection = selection;
-        g_window_records[level->proposition_report_confirm.cursor_window].position.y
-            = g_window_gs_image_records[level->proposition_report_confirm.render_index].base.y
+        g_display_object_animated_pool[level->proposition_report_confirm.cursor_window].position.y
+            = g_display_object_gs_image_pool[level->proposition_report_confirm.render_index].position.y
             - -(selection * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
         return;
@@ -224,9 +227,9 @@ void proposition_report_confirm_update(menu_stack_record_t* level) {
             goto block_tail;
         } else {
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-            g_window_record_count -= 2;
-            g_window_render_record_count -= 1;
-            g_window_render_object_count -= 3;
+            g_display_object_animated_count -= 2;
+            g_display_object_image_count -= 1;
+            g_display_object_queue_count -= 3;
             g_menu_stack_depth -= 2;
             report_open(level->proposition_report_confirm.argument);
         }
@@ -240,9 +243,9 @@ void proposition_report_confirm_update(menu_stack_record_t* level) {
 static void report_open(s32 argument) {
     s32 depth = g_menu_stack_depth;
 
-    g_window_records[g_menu_stack_records[depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[depth - 1].bar.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[g_menu_stack_records[depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[g_menu_stack_records[depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[g_menu_stack_records[depth - 1].bar.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_records[depth].proposition_report.state = -1;
     g_menu_stack_records[depth].proposition_report.proposition = argument;
     g_menu_stack_records[depth].proposition_report.phase = 0;
@@ -460,7 +463,7 @@ void proposition_report_update(menu_stack_record_t* level) {
         if (level->proposition_report.phase == 0) {
             picture = &g_proposition_report.reward_type;
             if (*picture == PROPOSITION_REWARD_TREASURE) {
-                record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+                record = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
                 level->proposition_report.render_index = record;
                 GsGetTimInfo(g_picture_buffer + 1, &image);
                 LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
@@ -472,31 +475,31 @@ void proposition_report_update(menu_stack_record_t* level) {
                 bounds.h = image.ph;
                 clut.x = image.cx;
                 clut.y = image.cy;
-                window_init_vram_render_record(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
-                g_window_gs_image_records[record].priority = 9;
-                g_window_gs_image_records[record].flags |= DISPLAY_OBJECT_POP_IN;
+                display_object_gs_image_init(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
+                g_display_object_gs_image_pool[record].priority = 9;
+                g_display_object_gs_image_pool[record].flags |= DISPLAY_OBJECT_POP_IN;
                 {
-                    point32_t* base = &g_window_gs_image_records[record].base;
+                    point32_t* base = &g_display_object_gs_image_pool[record].position;
                     base->x = -image.pw - 4;
                     base->y = -(image.ph >> 1) + 0x1A;
                 }
 
-                record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+                record = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
                 bounds.x = 0;
                 bounds.y = 0x70;
                 bounds.w = 0x8C;
                 bounds.h = 0x8C;
                 window_text_record_init(record, bounds, 0, 0, g_window_image_buffer);
-                g_window_gs_image_records[record].priority = 9;
+                g_display_object_gs_image_pool[record].priority = 9;
                 {
-                    point32_t* base = &g_window_gs_image_records[record].base;
+                    point32_t* base = &g_display_object_gs_image_pool[record].position;
                     base->x = -0x46;
                     base->y = -0x2A;
                 }
                 sound_play_effect(SOUND_SFX_COMPLETE);
             }
             if (*picture == PROPOSITION_REWARD_UNEXPLORED_LAND) {
-                record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+                record = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
                 level->proposition_report.render_index = record;
                 GsGetTimInfo(g_picture_buffer + 1, &image);
                 LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
@@ -508,24 +511,24 @@ void proposition_report_update(menu_stack_record_t* level) {
                 bounds.h = image.ph;
                 clut.x = image.cx;
                 clut.y = image.cy;
-                window_init_vram_render_record(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
-                g_window_gs_image_records[record].priority = 9;
-                g_window_gs_image_records[record].flags |= DISPLAY_OBJECT_POP_IN;
+                display_object_gs_image_init(record, bounds, clut, DISPLAY_OBJECT_8BIT_CLUT);
+                g_display_object_gs_image_pool[record].priority = 9;
+                g_display_object_gs_image_pool[record].flags |= DISPLAY_OBJECT_POP_IN;
                 {
-                    point32_t* base = &g_window_gs_image_records[record].base;
+                    point32_t* base = &g_display_object_gs_image_pool[record].position;
                     base->x = -image.pw;
                     base->y = -(image.ph >> 1);
                 }
 
-                record = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+                record = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
                 bounds.x = 0;
                 bounds.y = 0x80;
                 bounds.w = 0x88;
                 bounds.h = 0x5A;
                 window_text_record_init(record, bounds, 0, 0, g_window_image_buffer);
-                g_window_gs_image_records[record].priority = 9;
+                g_display_object_gs_image_pool[record].priority = 9;
                 {
-                    point32_t* base = &g_window_gs_image_records[record].base;
+                    point32_t* base = &g_display_object_gs_image_pool[record].position;
                     base->x = -0x41;
                     base->y = -0x2C;
                 }
@@ -562,12 +565,12 @@ void proposition_report_update(menu_stack_record_t* level) {
 
         /* Drop the picture and caption records that state 14 appended. */
         if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
-            g_window_render_record_count -= 2;
-            g_window_render_object_count -= 2;
+            g_display_object_image_count -= 2;
+            g_display_object_queue_count -= 2;
         }
         if (g_proposition_report.reward_type == PROPOSITION_REWARD_UNEXPLORED_LAND) {
-            g_window_render_record_count -= 2;
-            g_window_render_object_count -= 2;
+            g_display_object_image_count -= 2;
+            g_display_object_queue_count -= 2;
         }
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         return;
@@ -631,7 +634,7 @@ static void result_open(s32 proposition) {
         break;
     }
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     panel_text = &g_proposition_selected_row.name_text;
     g_menu_stack_records[g_menu_stack_depth].proposition_result.render_index = index;
     text_pixels_measure(
@@ -673,9 +676,9 @@ static void result_open(s32 proposition) {
     }
 
     window_load_render_record_image(index, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 9;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_gs_image_records[index].base;
+    g_display_object_gs_image_pool[index].priority = 9;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_display_object_gs_image_pool[index].position;
     base->x = -0x7A;
     base->y = -0x2A;
     if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
@@ -742,7 +745,7 @@ void proposition_result_update(menu_stack_record_t* level) {
     s32 month;
     s32 i;
 
-    if (g_window_gs_image_records[level->proposition_result.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->proposition_result.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -783,8 +786,8 @@ void proposition_result_update(menu_stack_record_t* level) {
         return;
     }
 
-    g_window_render_record_count = g_window_render_record_count - 1;
-    g_window_render_object_count = g_window_render_object_count - 1;
+    g_display_object_image_count = g_display_object_image_count - 1;
+    g_display_object_queue_count = g_display_object_queue_count - 1;
     /* 0xFFFD clears PROPOSITION_VARIABLE_IN_PROGRESS from the 16-bit value. */
     proposition_flags = script_variable_get(g_proposition_active[level->proposition_result.proposition].proposition_id
                             + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
@@ -871,9 +874,9 @@ static void report_prepare(s32 proposition_index) {
 }
 
 /* Pick the participant who reports on a finished job: the only one, else the
- * one with the highest or lowest bravery or faith, as the unpacked row's
+ * one with the highest or lowest Brave or Faith, as the unpacked row's
  * speaker_mode says. A mode outside 1 to 4 would return `selected` unset. The
- * goto form for the shared bravery/faith tails matches the target, which
+ * goto form for the shared Brave/Faith tails matches the target, which
  * reloads the stat after the compare. */
 static s32 report_speaker_select(s32 index) {
     party_unit_t* unit;
@@ -884,22 +887,22 @@ static s32 report_speaker_select(s32 index) {
     if (g_proposition_active[index].participant_count == 1) {
         return g_proposition_active[index].participant_indices[0];
     }
-    best = (g_proposition_selected_row.speaker_mode == PROPOSITION_SPEAKER_HIGHEST_BRAVERY
+    best = (g_proposition_selected_row.speaker_mode == PROPOSITION_SPEAKER_HIGHEST_BRAVE
                || g_proposition_selected_row.speaker_mode == PROPOSITION_SPEAKER_HIGHEST_FAITH)
         ? -1
         : 99999;
     for (i = 0; i < g_proposition_active[index].participant_count; i++) {
         unit = party_roster_unit_get(g_proposition_active[index].participant_indices[i]);
         switch (g_proposition_selected_row.speaker_mode) {
-        case PROPOSITION_SPEAKER_HIGHEST_BRAVERY:
-            if (best < unit->bravery) {
-                goto take_bravery;
+        case PROPOSITION_SPEAKER_HIGHEST_BRAVE:
+            if (best < unit->brave) {
+                goto take_brave;
             }
             break;
-        case PROPOSITION_SPEAKER_LOWEST_BRAVERY:
-            if (unit->bravery < best) {
-            take_bravery:
-                best = unit->bravery;
+        case PROPOSITION_SPEAKER_LOWEST_BRAVE:
+            if (unit->brave < best) {
+            take_brave:
+                best = unit->brave;
                 selected = g_proposition_active[index].participant_indices[i];
             }
             break;
@@ -921,24 +924,24 @@ static s32 report_speaker_select(s32 index) {
 }
 
 /* Adjust message `base` for the unit who speaks it: add the entry of the 3x3
- * PROPOSITION_DATA_MESSAGE_ADJUSTMENTS table for the unit's faith and
- * bravery bands (below 36, 66 and 101), and 3 more unless the unit is male.
+ * PROPOSITION_DATA_MESSAGE_ADJUSTMENTS table for the unit's Faith and
+ * Brave bands (below 36, 66 and 101), and 3 more unless the unit is male.
  * A value of 101 or more would leave its band unset; stats never get there. */
 s32 proposition_message_adjust(s32 base, s32 party_index) {
     s32 faith_band;
-    s32 bravery_band;
+    s32 brave_band;
     u32 is_not_male;
     party_unit_t* party = party_roster_unit_get(party_index);
     const u8* adjustments;
 
-    if (party->bravery < 0x65) {
-        bravery_band = 2;
+    if (party->brave < 0x65) {
+        brave_band = 2;
     }
-    if (party->bravery < 0x42) {
-        bravery_band = 1;
+    if (party->brave < 0x42) {
+        brave_band = 1;
     }
-    if (party->bravery < 0x24) {
-        bravery_band = 0;
+    if (party->brave < 0x24) {
+        brave_band = 0;
     }
     if (party->faith < 0x65) {
         faith_band = 2;
@@ -952,7 +955,7 @@ s32 proposition_message_adjust(s32 base, s32 party_index) {
     is_not_male = party->gender_flags & UNIT_FLAG_MALE;
     is_not_male = is_not_male < 1;
     adjustments = proposition_data_get(PROPOSITION_DATA_MESSAGE_ADJUSTMENTS);
-    return base + adjustments[faith_band * 3 + bravery_band] + is_not_male * 3;
+    return base + adjustments[faith_band * 3 + brave_band] + is_not_male * 3;
 }
 
 /*

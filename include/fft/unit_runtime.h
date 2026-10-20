@@ -19,7 +19,7 @@
 #include "psx/types.h"
 
 /* unit record */
-/* Manual targeting and GAME_STATE_WAIT_DIRECTION reuse the AI command storage.
+/* Manual targeting and BATTLE_STATE_WAIT_DIRECTION reuse the AI command storage.
  * The 32-bit facing value overlaps the action's item/type/target-ID bytes. Cursor
  * coordinate readers use signed 16-bit values over the action's target fields. */
 typedef union unit_command_state {
@@ -146,7 +146,7 @@ struct unit_runtime {
     battle_map_tile_coordinates_t dismount; /* 0x184 */
     u8 _unused_18a[2];
     action_strike_work_t strike; /* 0x18c..0x1b3; current action targets, result and rewards */
-    /* 0x1b4; state_handle_ai_command sets it once the AI command is built; it
+    /* 0x1b4; battle_state_ai_command_update sets it once the AI command is built; it
      * gates command dispatch. */
     u8 command_ready;
     /* 0x1b5; strikes run after the first while continue_attack is set; zeroed
@@ -316,7 +316,7 @@ s32 unit_has_runtime_id(u32 runtime_id);
 s32 unit_is_ready(s32 unused_runtime_id);
 unit_stats_t* unit_stats_get(u32 battle_id);
 unit_stats_t* unit_present_stats_get(u32 battle_id);
-unit_stats_t* unit_find_active(void);
+unit_stats_t* unit_find_with_turn(void);
 s32 unit_find_slot_by_identity(u32 character_identity);
 unit_runtime_t* unit_source_get(void);
 unit_runtime_t* unit_casting_get(void);
@@ -454,7 +454,7 @@ s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 
 /* encounters and deployment */
 unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id);
-void unit_entd_load(const entd_encounter_t* entd_data, s32 mode);
+void unit_entd_load(const entd_encounter_t* entd_data, s32 unused_mode);
 s32 unit_put_on_field(u32 battle_id);
 s32 unit_place_in_new_location(u32 runtime_id, const battle_map_tile_coordinates_t* tile, s32 facing);
 s32 unit_find_relocation_tile(s32 unit_index, battle_map_tile_coordinates_t* destination);
@@ -469,9 +469,9 @@ void unit_transform_into_morbol(unit_stats_t* unit);
 /* visibility and facing arrows */
 void unit_jumping_hide(void);
 s32 unit_runtime_hide(u32 runtime_id);
-void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
+void unit_fade_out_start(s32 runtime_id, s32 fade_step, s16 red, s16 green, s16 blue);
 void unit_fade_out_start_red(s32 runtime_id);
-void unit_event_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
+void unit_event_fade_out_start(s32 runtime_id, s32 fade_step, s16 red, s16 green, s16 blue);
 void unit_float_status_bubble_update(unit_runtime_t* unit);
 void unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
 void unit_facing_draw_wait_direction(void);

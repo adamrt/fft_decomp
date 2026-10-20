@@ -5,6 +5,7 @@
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/cursor.h"
@@ -15,7 +16,6 @@
 #include "fft/result.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
@@ -574,7 +574,7 @@ static void float_height_update(unit_runtime_t* unit) {
         } else {
             unit->float_bob_offset = 0;
         }
-    } else if (g_game_state != GAME_STATE_POST_MOVE_EVENTS) {
+    } else if (g_battle_state != BATTLE_STATE_POST_MOVE_EVENTS) {
         if (unit->depth_height_offset != 0) {
             unit->depth_height_offset -= g_system_vsync_interval;
             if (unit->depth_height_offset < 0) {
@@ -1580,7 +1580,7 @@ void result_exp_jp_display_init(unit_runtime_t* unit) {
  *
  * The three numeric displays are pointed at the FRAME.BIN page, and the first
  * display is built at once unless one is already running. */
-void result_charge_failure_queue(unit_runtime_t* unit, s32 mode) {
+void result_charge_failure_queue(unit_runtime_t* unit, s32 reason) {
     sprite_display_t* display_0 = unit->numeric_display.displays[0];
     sprite_display_t* display_1 = unit->numeric_display.displays[1];
     sprite_display_t* display_2 = unit->numeric_display.displays[2];
@@ -1588,7 +1588,7 @@ void result_charge_failure_queue(unit_runtime_t* unit, s32 mode) {
     display_2->tpage = SPRITE_TPAGE_FRAME;
     display_1->tpage = SPRITE_TPAGE_FRAME;
     display_0->tpage = SPRITE_TPAGE_FRAME;
-    switch (mode) {
+    switch (reason) {
     case ACTION_REJECTION_NO_TARGET:
         unit->action_display_flags |= ACTION_DISPLAY_FLAG_NO_TARGET;
         break;

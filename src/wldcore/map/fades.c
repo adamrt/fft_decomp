@@ -1,32 +1,32 @@
 /* World-map fades hide render queues, tint colors and cover the display while menus change. */
 
+#include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/music.h"
 #include "fft/screen.h"
 #include "fft/system.h"
-#include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
 
-/* Clear (nonzero argument) or set the blank flag on both display-object queues.
+/* Enable or blank both display-object queues while preserving each object's HIDDEN flag.
  * Both record types start with the same signed 32-bit flags field. */
-void window_set_render_objects_visible(s32 clear) {
+void display_object_queues_set_enabled(s32 enabled) {
     s32 i;
 
-    if (clear) {
-        for (i = 0; i < g_window_aux_render_object_count; i++) {
-            *(s32*)g_window_aux_render_object_queue[i] &= ~DISPLAY_OBJECT_BLANK;
+    if (enabled) {
+        for (i = 0; i < g_display_object_aux_queue_count; i++) {
+            *(s32*)g_display_object_aux_queue[i] &= ~DISPLAY_OBJECT_BLANK;
         }
-        for (i = 0; i < g_window_render_object_count; i++) {
-            *(s32*)g_window_render_object_queue[i] &= ~DISPLAY_OBJECT_BLANK;
+        for (i = 0; i < g_display_object_queue_count; i++) {
+            *(s32*)g_display_object_queue[i] &= ~DISPLAY_OBJECT_BLANK;
         }
     } else {
-        for (i = 0; i < g_window_aux_render_object_count; i++) {
-            *(s32*)g_window_aux_render_object_queue[i] |= DISPLAY_OBJECT_BLANK;
+        for (i = 0; i < g_display_object_aux_queue_count; i++) {
+            *(s32*)g_display_object_aux_queue[i] |= DISPLAY_OBJECT_BLANK;
         }
-        for (i = 0; i < g_window_render_object_count; i++) {
-            *(s32*)g_window_render_object_queue[i] |= DISPLAY_OBJECT_BLANK;
+        for (i = 0; i < g_display_object_queue_count; i++) {
+            *(s32*)g_display_object_queue[i] |= DISPLAY_OBJECT_BLANK;
         }
     }
 }
@@ -39,7 +39,7 @@ void world_map_fade_start(s32 flags, s32 duration) {
         g_world_map_fade.flags[0] = flags | WORLD_MAP_FADE_RUNNING;
         g_world_map_fade.elapsed = 0;
         g_world_map_fade.duration = duration;
-        g_system_flags |= SYSTEM_FLAG_FADING;
+        g_world_map_flags |= WORLD_MAP_FLAG_FADING;
         if (flags & WORLD_MAP_FADE_START_MUSIC) {
             music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
@@ -66,7 +66,7 @@ s32 world_map_fade_update(void) {
                 = flags & ~(WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_REDRAW_MAP | WORLD_MAP_FADE_BOX_VISIBLE);
         } else {
             if (g_world_map_fade.elapsed + 1 == g_world_map_fade.duration) {
-                g_system_flags &= ~SYSTEM_FLAG_FADING;
+                g_world_map_flags &= ~WORLD_MAP_FLAG_FADING;
                 music_queue_wait_until_empty();
             }
             if (g_world_map_fade.flags[0] & WORLD_MAP_FADE_OUT) {
@@ -107,7 +107,7 @@ s32 world_map_fade_update(void) {
             g_world_map_fade.boxes[0].g = box_level;
             g_world_map_fade.boxes[0].b = box_level;
             if (g_world_map_fade.flags[0] & WORLD_MAP_FADE_REDRAW_MAP) {
-                g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+                g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
             }
             return 1;
         }

@@ -178,7 +178,7 @@ s32 result_runtime_display_prepare(s32 runtime_id);
 s32 result_next_display_build(unit_runtime_t* unit);
 s32 result_next_special_display_build(unit_runtime_t* unit);
 void result_exp_jp_display_init(struct unit_runtime* unit);
-void result_charge_failure_queue(unit_runtime_t* unit, s32 mode);
+void result_charge_failure_queue(unit_runtime_t* unit, s32 reason);
 void result_text_animate(unit_runtime_t* unit, const SVECTOR* screen_coords);
 
 #endif

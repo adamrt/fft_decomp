@@ -247,8 +247,8 @@ typedef enum status_display_change {
     STATUS_DISPLAY_CHANGE_KEEP = 2 /* leave pending changes untouched */
 } status_display_change_e;
 
-s32 status_init_display_flags(s32 unit_id);
-s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id);
+s32 status_init_display_flags(s32 battle_id);
+s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 battle_id);
 void status_queue_display_flag_change_if_executing(s32 status_id, s32 change_type, s32 battle_id);
 void status_current_graphics_queue(s32 battle_id, s32 change_type);
 

@@ -59,7 +59,7 @@ s32 unit_list_build_sortable(void) {
  * then stores the order back and re-sorts and rebuilds the unit list. The
  * handler returns to the unit list when the menu thread ends.
  */
-void unit_list_run_sort_menu(void) {
+void unit_list_sort_menu_update(void) {
     s16 opts[16];
     s16* src;
     s16* dst;
@@ -86,7 +86,7 @@ void unit_list_run_sort_menu(void) {
         g_unit_list_reorder_list_initialized = 1;
     }
 
-    if (unit_list_run_menu_thread(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
+    if (unit_list_update_menu_thread(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
         g_unit_list_reorder_list_initialized = 0;
         g_unit_list_current_menu = UNIT_LIST_MENU_UNIT_LIST;
     }

@@ -2,6 +2,7 @@
 
 #include "fft/formation.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/shop.h"
 #include "psx/types.h"

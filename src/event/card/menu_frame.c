@@ -17,14 +17,14 @@
  *
  * CARD's body, without the other bodies' frame_arg latch,
  * the numeric-value flag and the status-panel backdrops; CARD instead sets
- * g_gfx_screen_polarity when `count_frame` is nonzero. A held direction
+ * g_gfx_screen_polarity when `drawenv_y` is nonzero. A held direction
  * or L1/R1 repeats after g_input_repeat_initial_delay frames and then
  * every repeat period (directions) or secondary repeat period (L1/R1), all
  * divided by the event speed; holding Square restricts the fast repeat to
  * Left/Right and adds Up/Down to the slow one. Any input other than Select, or a thread starting or stopping across
  * the yield, sets five frames of event input suppression.
  */
-void menu_input_event_state_update(u32* otag, u32 input, s32 count_frame) {
+void menu_input_event_state_update(u32* otag, u32 input, s32 drawenv_y) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -34,7 +34,7 @@ void menu_input_event_state_update(u32* otag, u32 input, s32 count_frame) {
     s32 thread_id;
     s32 status;
 
-    if (count_frame != 0) {
+    if (drawenv_y != 0) {
         g_gfx_screen_polarity = 1;
     }
     g_gfx_current_otag_entry = otag;

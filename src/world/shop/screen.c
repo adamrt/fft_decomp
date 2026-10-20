@@ -10,6 +10,7 @@
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"

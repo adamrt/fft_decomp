@@ -1,6 +1,7 @@
 /* Menu sort-key orders and stored item category lists. */
 
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

@@ -7,10 +7,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u8 g_unit_panel_panel_status_group_ids[];
-extern u8 g_unit_panel_panel_status_group_bounds[];
-extern sprite_draw_offset_t g_unit_panel_panel_status_offsets[];
-extern const u16 g_unit_panel_panel_status_y_offsets[];
+extern u8 g_unit_panel_status_group_ids[];
+extern u8 g_unit_panel_status_group_bounds[];
+extern sprite_draw_offset_t g_unit_panel_status_offsets[];
+extern const u16 g_unit_panel_status_y_offsets[];
 
 /* Render the animated status groups of a menu panel.
  *
@@ -25,22 +25,22 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
     s32 index;
     u8 group_id;
 
-    for (group = 0; group < g_unit_panel_panel_status_group_count; group++) {
-        group_id = g_unit_panel_panel_status_group_ids[group];
-        count = g_unit_panel_panel_status_group_bounds[group_id + 1] - g_unit_panel_panel_status_group_bounds[group_id];
-        first = g_unit_panel_panel_status_group_bounds[group_id];
-        if (g_unit_panel_panel_status_animation[group] != 0xff) {
-            if (g_unit_panel_panel_status_animation[group] >= 0x41) {
-                g_unit_panel_panel_status_animation[group] -= 2;
-            } else if (g_unit_panel_panel_status_animation[group] >= 0x0b) {
-                g_unit_panel_panel_status_animation[group]--;
-                if (g_unit_panel_panel_status_animation[group] == 0x0b) {
-                    g_unit_panel_panel_status_animation[group] = 1;
+    for (group = 0; group < g_unit_panel_status_group_count; group++) {
+        group_id = g_unit_panel_status_group_ids[group];
+        count = g_unit_panel_status_group_bounds[group_id + 1] - g_unit_panel_status_group_bounds[group_id];
+        first = g_unit_panel_status_group_bounds[group_id];
+        if (g_unit_panel_status_animation[group] != 0xff) {
+            if (g_unit_panel_status_animation[group] >= 0x41) {
+                g_unit_panel_status_animation[group] -= 2;
+            } else if (g_unit_panel_status_animation[group] >= 0x0b) {
+                g_unit_panel_status_animation[group]--;
+                if (g_unit_panel_status_animation[group] == 0x0b) {
+                    g_unit_panel_status_animation[group] = 1;
                 }
-            } else if (g_unit_panel_panel_status_animation[group] >= 2) {
-                g_unit_panel_panel_status_animation[group]--;
-                if (g_unit_panel_panel_status_animation[group] == 1) {
-                    g_unit_panel_panel_status_animation[group] = 0;
+            } else if (g_unit_panel_status_animation[group] >= 2) {
+                g_unit_panel_status_animation[group]--;
+                if (g_unit_panel_status_animation[group] == 1) {
+                    g_unit_panel_status_animation[group] = 0;
                 }
             }
         }
@@ -48,22 +48,22 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
         for (cell = 0; cell < count; cell++) {
             menu_init_default_poly_ft4(poly);
             index = first + count - cell;
-            g_menu_draw_area_template.y += g_unit_panel_panel_status_y_offsets[group * 2];
+            g_menu_draw_area_template.y += g_unit_panel_status_y_offsets[group * 2];
             gfx_set_scaled_poly_ft4_4bpp(poly, &g_unit_panel_texture_origin, &g_menu_draw_area_template,
                 &g_unit_panel_status_frames[index - 1], &g_unit_panel_status_frame_scales[index - 1],
-                &g_unit_panel_panel_status_offsets[group]);
-            g_menu_draw_area_template.y -= g_unit_panel_panel_status_y_offsets[group * 2];
+                &g_unit_panel_status_offsets[group]);
+            g_menu_draw_area_template.y -= g_unit_panel_status_y_offsets[group * 2];
 
-            if (g_unit_panel_panel_status_animation[group] == 0x40) {
+            if (g_unit_panel_status_animation[group] == 0x40) {
                 setRGB0(poly, 0x80, 0x80, 0x80);
-                g_unit_panel_panel_status_animation[group] = 0;
+                g_unit_panel_status_animation[group] = 0;
             }
 
-            if (g_unit_panel_panel_status_animation[group] == 0 || g_unit_panel_panel_status_animation[group] >= 0x40) {
+            if (g_unit_panel_status_animation[group] == 0 || g_unit_panel_status_animation[group] >= 0x40) {
                 poly->clut = 0x7d7c;
-            } else if (g_unit_panel_panel_status_animation[group] == 1) {
+            } else if (g_unit_panel_status_animation[group] == 1) {
                 poly->clut = 0x7dfc;
-            } else if (g_unit_panel_panel_status_animation[group] < 0x40) {
+            } else if (g_unit_panel_status_animation[group] < 0x40) {
                 poly->clut = 0x7e7c;
                 poly->y0++;
                 poly->y1++;

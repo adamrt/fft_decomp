@@ -46,7 +46,7 @@ typedef enum menu_window_icon_flags {
 
 /* The six message window buffers, allocated and released as three adjacent pairs by
  * menu_alloc_window_buffer_pair, which fixes the 0x118 stride. The event instruction ChangeDialog scans
- * records 0, 2 and 4, compares dialogue_selector with its operand 0 and checks the thread for task 0x33. For
+ * records 0, 2 and 4, compares dialog_selector with its operand 0 and checks the thread for task 0x33. For
  * DisplayMessage the text threads store the dialog type's box nibble (& 0x70), the portrait unit and the scroll
  * state, which menu_draw_active_window_frames reads. */
 typedef struct menu_window_buffer {
@@ -57,7 +57,7 @@ typedef struct menu_window_buffer {
     s32 portrait_code;      /* 0x0c: portrait texture/CLUT descriptor, -1 when unused */
     s32 portrait_battle_id; /* 0x10: battle id of the DisplayMessage unit (box type 0x10),
                                drawn as the portrait when portrait_code == -1 */
-    s32 dialogue_selector;  /* 0x14 */
+    s32 dialog_selector;    /* 0x14 */
     s32 box_type;           /* 0x18: dialog type & 0x70; 0x10 is the portrait box */
     s32 portrait_flipped;   /* 0x1c: 1 when the tail offset is negative; event
                                instruction 0x37 toggles it */

@@ -18,8 +18,8 @@ typedef char calendar_date_size_must_be_2[sizeof(calendar_date_t) == 2 ? 1 : -1]
 /* days */
 extern u8 g_calendar_month_lengths[12];
 
-s32 calendar_day_of_year_calculate(s32 month, s32 day);
-void calendar_month_and_day_calculate(s32 day_of_year, s32* output_month, s32* output_day);
+s32 calendar_date_to_day_index(s32 month, s32 day);
+void calendar_day_index_to_date(s32 day_of_year, s32* output_month, s32* output_day);
 void calendar_day_advance(void);
 void calendar_days_advance(s32 days);
 void calendar_year_advance(void);

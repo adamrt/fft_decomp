@@ -139,7 +139,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     }
     menu_set_palette_mode(g_menu_input_lock_mode);
     if (g_status_screen_active_page == MENU_JOB_LIST_STEP_JOBS) {
-        g_status_screen_active_page = job_list_run();
+        g_status_screen_active_page = job_list_update();
         if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             result = 0;
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;

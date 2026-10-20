@@ -35,6 +35,41 @@ typedef struct menu_sprite_cell {
 } menu_sprite_cell_t;
 typedef char menu_sprite_cell_size_must_be_6[(sizeof(menu_sprite_cell_t) == 6) ? 1 : -1];
 
+/* Menu frame buffer: primitive pools followed by drawing/display state.
+ * BUNIT uses the environments; EQUIP owns the same 236-byte buffers without
+ * reading or writing the environment suffix. */
+typedef struct menu_gfx_context {
+    u32* otag;                            /* 0x00 */
+    POLY_F3* flat_triangles;              /* 0x04 */
+    POLY_FT3* textured_triangles;         /* 0x08 */
+    POLY_F4* flat_quads;                  /* 0x0c */
+    POLY_FT4* textured_quads;             /* 0x10 */
+    POLY_G3* gouraud_triangles;           /* 0x14 */
+    POLY_GT3* gouraud_textured_triangles; /* 0x18 */
+    POLY_G4* gouraud_quads;               /* 0x1c */
+    POLY_GT4* gouraud_textured_quads;     /* 0x20 */
+    LINE_F2* flat_lines;                  /* 0x24 */
+    LINE_F3* flat_lines_3;                /* 0x28 */
+    LINE_F4* flat_lines_4;                /* 0x2c */
+    LINE_G2* gouraud_lines;               /* 0x30 */
+    LINE_G3* gouraud_lines_3;             /* 0x34 */
+    LINE_G4* gouraud_lines_4;             /* 0x38 */
+    TILE* tiles;                          /* 0x3c */
+    TILE_1* tiles_1;                      /* 0x40 */
+    TILE_8* tiles_8;                      /* 0x44 */
+    TILE_16* tiles_16;                    /* 0x48 */
+    SPRT* sprites;                        /* 0x4c */
+    SPRT_8* sprites_8;                    /* 0x50 */
+    SPRT_16* sprites_16;                  /* 0x54 */
+    DR_MOVE* draw_moves;                  /* 0x58 */
+    DR_AREA* draw_areas;                  /* 0x5c */
+    DR_MODE* draw_modes;                  /* 0x60 */
+    DRAWENV draw_env;                     /* 0x64 */
+    DISPENV disp_env;                     /* 0xc0 */
+    u8 _unused_d4[0x18];                  /* 0xd4 */
+} menu_gfx_context_t;
+typedef char menu_gfx_context_size_must_be_236[(sizeof(menu_gfx_context_t) == 236) ? 1 : -1];
+
 /* Active context in WORLD, BUNIT and EQUIP; JOBSTTS and CARD use distinct layouts. */
 #if defined(FFT_EVENT_JOBSTTS)
 extern struct status_screen_gfx_context* g_menu_gfx_context;

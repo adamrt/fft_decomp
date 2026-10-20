@@ -234,12 +234,12 @@ void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_
     g_menu_text_palette_offset = 0;
 }
 
-/* Draw value as exactly (digits & 0xff) digits, zero-padded and right to left, 7 pixels apart from
+/* Draw value as exactly (format & 0xff) digits, zero-padded and right to left, 7 pixels apart from
  * the menu glyph sheet. The high byte adds marks: 0x1000 a leading glyph, MENU_DECIMAL_SIGN_PLUS
  * (0x400) or MENU_DECIMAL_SIGN_MINUS (0x800) a sign glyph before the digits, and 0xc00 two
  * dashes in place of the number. Hidden numeric values draw
  * a placeholder per digit; the pen ends after the last digit. */
-void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
+void menu_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src;
@@ -248,7 +248,7 @@ void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
      * cursor at afterwards; the target keeps both roles in $s6. */
     src = &g_menu_large_number_glyph;
     g_menu_large_number_glyph.rect.h = 0xF;
-    cursor = digits & 0xFF00;
+    cursor = format & 0xFF00;
     if (cursor == 0xC00) {
         pos->rect.x += 2;
         src->rect.x = 0xBA;
@@ -261,14 +261,14 @@ void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
         g_menu_large_number_glyph.rect.w = 8;
         return;
     }
-    if (digits & 0x1000) {
+    if (format & 0x1000) {
         src->rect.x = 0xC8;
         g_menu_large_number_glyph.rect.y = 0;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
     }
-    if ((digits & 0x800) || (digits & 0x400)) {
-        if (digits & 0x400) {
+    if ((format & 0x800) || (format & 0x400)) {
+        if (format & 0x400) {
             src->rect.x = 0xC8;
         } else {
             src->rect.x = 0xBA;
@@ -282,9 +282,9 @@ void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
     }
     /* Not a variable: the target recomputes the digit count at the loop test
      * rather than keeping it live, so each use spells the mask out. */
-    pos->rect.x += ((digits & 0xFF) - 1) * 7;
+    pos->rect.x += ((format & 0xFF) - 1) * 7;
     cursor = pos->rect.x + 7;
-    for (i = 0; i < (digits & 0xFF); i++) {
+    for (i = 0; i < (format & 0xFF); i++) {
         src->rect.y = 0;
         src->rect.x = (value % 10) * 8 + 0x78;
         if (g_unit_panel_hide_numeric_values != 0) {

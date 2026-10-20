@@ -2,7 +2,8 @@
  * pipeline that supplies their movies. The loops also present the background
  * image and poll the pad, including the retail soft-reset chord. */
 
-#include "fft/controller.h"
+#include "fft/controller_stack.h"
+#include "fft/display_object.h"
 #include "fft/ending.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
@@ -12,7 +13,6 @@
 #include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/title.h"
-#include "fft/window.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -97,7 +97,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_0);
-            window_dispatch_gpu_record_list(current_otag, g_window_render_object_queue, g_window_render_object_count);
+            display_object_gpu_list_draw(current_otag, g_display_object_queue, g_display_object_queue_count);
 
             graphics_buffer_index = g_gfx_active_buffer_index;
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_1);

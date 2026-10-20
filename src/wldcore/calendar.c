@@ -89,7 +89,7 @@ void calendar_date_to_zodiac_convert(s32* month_ptr, s32* day_ptr) {
 
 /*
  * The daily birthday sweep, run by calendar_day_advance after the
- * calendar rolls over: every brave-story character whose stored birthday is
+ * calendar rolls over: every Brave-story character whose stored birthday is
  * today gets a year older, capped at 99.
  *
  * Entry 0 is the player character. Its row in the birthday table is a

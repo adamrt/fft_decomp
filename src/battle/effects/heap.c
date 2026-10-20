@@ -20,10 +20,8 @@ static effect_heap_node_t* g_heap_base = 0;
 
 static s16 g_block_count = 0;
 
-/* Heap statistics. */
+/* Lowest largest-free-block size seen, in 8-byte units. */
 static s32 g_min_largest_free_block;
-
-/* lowest largest-free-block size seen, in 8-byte units */
 
 /* Provisional: never written; effect_heap_print_stats prints it x4 in its "DP" line. */
 extern s32 g_effect_heap_debug_dp_words;

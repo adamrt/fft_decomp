@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* Seven OPNBK images use eight sector boundaries. */
-static const s32 s_file_openbk_sector_offsets[8] = { 0, 75, 135, 172, 209, 246, 283, 403 };
+static const s32 g_opnbk_sector_offsets[8] = { 0, 75, 135, 172, 209, 246, 283, 403 };
 
 /* Load the title screen's graphics: upload the three TIMs at sectors 0, 0x11 and
  * 0x22 of OPNTEX.BIN, then read OPNBK image 0 as the frame image. */
@@ -90,9 +90,9 @@ void file_request_openbk_image(s32 image_id, void* destination) {
     }
 
     g_file_current_openbk_image_id = image_id;
-    start_offset = s_file_openbk_sector_offsets[image_id];
+    start_offset = g_opnbk_sector_offsets[image_id];
     file_pending_read_request(&g_file_cd_state, DISC_SECTOR_OPEN_OPNBK_BIN + start_offset,
-        s_file_openbk_sector_offsets[image_id + 1] - start_offset, destination);
+        g_opnbk_sector_offsets[image_id + 1] - start_offset, destination);
 }
 
 /* Poll the pending CD command: 1 when it has completed, -1 on a disc error and 0

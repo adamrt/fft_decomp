@@ -18,10 +18,6 @@ extern palette_t g_cursor_tile_glow_cycled_palettes[2];
 extern s32 g_cursor_tile_glow_cycle_offset;
 extern s32 g_cursor_tile_glow_cycle_timer;
 
-/* The dispatcher ignores the result and the handlers supply no value. The s32
- * callback shape preserves the pulse and teleport handlers' instruction scheduling. */
-typedef s32 (*animation_distortion_handler_t)(unit_runtime_t* unit);
-
 /* Cycles the colors of the two cursor tile glow palettes (sprite CLUTs 1 and 2).
  *
  * Every fourth animation tick the offset advances through 0..14 and the palettes

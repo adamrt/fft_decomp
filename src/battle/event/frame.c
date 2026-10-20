@@ -3,6 +3,7 @@
 #include "fft/ai.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_load.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/effect_script.h"
@@ -24,7 +25,6 @@
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/status_screen.h"
 #include "fft/system.h"
 #include "fft/thread.h"
@@ -56,7 +56,7 @@ static u16 g_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BA
     BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW,
     BATTLE_MAP_WEATHER_COMMAND_SNOW, BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW };
 
-static void state_from_script_variables_load(void);
+static void camera_from_script_variables_load(void);
 
 static void pending_requests_process(void);
 
@@ -257,7 +257,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
         g_script_input_suppression_frames--;
     }
 
-    state_from_script_variables_load();
+    camera_from_script_variables_load();
     g_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {
@@ -322,7 +322,7 @@ void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
  * finishes) to 2. pending_requests_process then releases the held
  * GNS data and polls the map load, returning the state to 0 when the load ends.
  * Any other state is left alone. */
-void script_specialized_map_destroyed_set(void) {
+void script_map_destruction_signal(void) {
     if (g_battle_map_destruction_wait_state == 1) {
         g_battle_map_destruction_wait_state = g_battle_map_destruction_wait_state + 1;
     }
@@ -356,15 +356,15 @@ static void pending_requests_process(void) {
 
     jump_out_map_id = g_event_pending_map_jump_out_id;
     if (jump_out_map_id != -1) {
-        state_start_map_jump_out(jump_out_map_id, 0x10);
+        battle_state_start_map_jump_out(jump_out_map_id, 0x10);
     }
     jump_out_2_map_id = g_event_pending_map_jump_out_2_id;
     if (jump_out_2_map_id != -1) {
-        state_start_change_map_jump_out(jump_out_2_map_id, 0x10);
+        battle_state_start_change_map_jump_out(jump_out_2_map_id, 0x10);
     }
     jump_in_duration = g_event_map_jump_in_request;
     if (jump_in_duration != 0) {
-        state_start_change_map_jump_in(jump_in_duration);
+        battle_state_start_change_map_jump_in(jump_in_duration);
     }
 
     if (g_event_3d_object_use_request != 0) {
@@ -379,7 +379,7 @@ static void pending_requests_process(void) {
         g_3d_object_wait_status = battle_map_object_state_get(g_event_3d_object_id);
     }
     if (g_field_object_wait_status != 0) {
-        g_field_object_wait_status = battle_map_texture_animation_active_get(g_event_map_command_83_arg1);
+        g_field_object_wait_status = battle_map_texture_animation_is_active(g_event_map_command_83_arg1);
     }
 
     if (g_battle_map_refresh_pending != 0) {
@@ -518,7 +518,7 @@ static void pending_requests_process(void) {
 }
 
 /* Load camera rotation, zoom and position back out of the script variables. */
-static void state_from_script_variables_load(void) {
+static void camera_from_script_variables_load(void) {
     setVector(&g_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
     camera_rotation_set(&g_camera_script_rotation);

@@ -15,6 +15,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+struct evtchr_file_record;
+
 /* overlay workspace */
 /* Provisional work block at *g_event_work: the menus build their
  * ability list and the outermost scrolling list's packet pages in it, events
@@ -198,7 +200,7 @@ extern VECTOR g_script_light_scale;
 extern MATRIX g_script_light_base_direction_matrix;
 extern MATRIX g_script_light_base_color_matrix;
 
-void script_specialized_map_destroyed_set(void);
+void script_map_destruction_signal(void);
 void script_dark_screen_thread(void);
 
 /* effects and graphics */
@@ -217,7 +219,7 @@ void script_conditions_display(void);
 
 /* EVTCHR and VRAM requests */
 extern s32 g_script_pending_loaded_evtchr_slot;
-extern evtchr_file_record_t* g_script_loaded_evtchr_buffer;
+extern struct evtchr_file_record* g_script_loaded_evtchr_buffer;
 extern s32 g_event_pending_evtchr_save_slot;
 extern s32 g_event_pending_loaded_evtchr_clear_slot;
 extern s32 g_event_pending_saved_evtchr_clear_slot;

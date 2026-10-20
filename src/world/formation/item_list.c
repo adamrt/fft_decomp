@@ -5,6 +5,7 @@
 #include "fft/formation_item.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
@@ -67,7 +68,7 @@ s32 formation_items_update(void) {
     if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_BROWSE) {
         g_formation_item_menu_mode = formation_items_browse_update();
     } else if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_REARRANGE) {
-        g_formation_item_menu_mode = item_run_rearrange_mode();
+        g_formation_item_menu_mode = item_rearrange_update();
     } else if (g_formation_item_menu_mode == MENU_ITEM_LIST_STATE_ACTION) {
         g_formation_cursor_ot_override = 0x3C;
         g_formation_item_menu_mode = formation_items_action_update();

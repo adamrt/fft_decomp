@@ -146,7 +146,7 @@ static void digit_cursor_place(menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* sh
     s32 y;
 
     if (cursor >= 0) {
-        if (g_menu_formation_display_mode == 1) {
+        if (g_menu_cursor_bob_hold == 1) {
             thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
             thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }

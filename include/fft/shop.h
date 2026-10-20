@@ -1,7 +1,7 @@
 #ifndef SHOP_H
 #define SHOP_H
 
-/* WORLD's shops: the outfitter's screen with its buy, sell and fitting-room modes, the fur shop and the soldier office,
+/* WORLD's shops: the shop's screen with its buy, sell and fitting-room modes, the fur shop and the soldier office,
  * and the item prices and stock they use. */
 
 #include "fft/menu.h"

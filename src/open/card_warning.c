@@ -1,7 +1,8 @@
 /* Starting a new game without a memory card saves the title background while
  * asking whether to continue, then restores the menu or starts the prologue. */
 
-#include "fft/controller.h"
+#include "fft/controller_stack.h"
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
@@ -9,7 +10,6 @@
 #include "fft/sound.h"
 #include "fft/system.h"
 #include "fft/title.h"
-#include "fft/window.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -49,11 +49,11 @@ void title_select_new_game(void) {
     }
 
     gfx_start_overlay_fade_out(0x10);
-    record = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
-    g_window_records[record].sequence = 0x12;
-    g_window_records[record].anim_counter = 0;
-    g_window_records[record].frame_index = 0;
-    position = &g_window_records[record].position;
+    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    g_display_object_animated_pool[record].sequence = 0x12;
+    g_display_object_animated_pool[record].anim_counter = 0;
+    g_display_object_animated_pool[record].frame_index = 0;
+    position = &g_display_object_animated_pool[record].position;
     controller = g_controller_depth;
     position->x = -4;
     position->y = -16;
@@ -78,8 +78,8 @@ void title_update_card_warning(controller_record_t* record) {
     }
 
     if (record->card_warning.state != TITLE_CARD_WARNING_INPUT) {
-        g_window_record_count -= 1;
-        g_window_render_object_count -= 1;
+        g_display_object_animated_count -= 1;
+        g_display_object_queue_count -= 1;
         g_controller_depth -= 1;
         state = record->card_warning.state;
         if (state == TITLE_CARD_WARNING_CANCEL) {

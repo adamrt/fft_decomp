@@ -82,7 +82,7 @@ s32 job_list_mastered_calculate(s32 index) {
  * CIRCLE caches the chosen job's figures, saves the cursor and returns
  * MENU_JOB_LIST_STEP_ABILITIES; otherwise the list script runs and the result is
  * MENU_JOB_LIST_STEP_JOBS (the entrypoint handles CROSS). */
-s32 job_list_run(void) {
+s32 job_list_update(void) {
     s16 unused[8]; /* Preserves the original frame size. */
     s16 selected;
     s16 scroll;

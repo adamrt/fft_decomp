@@ -52,7 +52,7 @@ s32 menu_selection_value_init(u8 index, s16 value);
 
 /* selection steppers */
 /* The horizontal and vertical steppers move selection value selection_index (g_menu_selection_values) by the
- * D-pad, wrapping within entry_count, and return it; the _and_mark_change forms also queue a sound effect when
+ * D-pad, wrapping within entry_count, and return it; the _sound_step forms also queue a sound effect when
  * it moves. The grid stepper moves a grid index instead. */
 s16 menu_selection_horizontal_step(u16 entry_count, u8 selection_index, s32 input_mask);
 s32 menu_selection_horizontal_sound_step(u16 entry_count, u8 selection_index, s32 input_mask, u8 sound_id);

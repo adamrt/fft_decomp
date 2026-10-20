@@ -1,4 +1,4 @@
-/* Post-battle party changes, including congratulations text, brave and faith updates, low brave and high faith
+/* Post-battle party changes, including congratulations text, Brave and Faith updates, low Brave and high Faith
  * departures, join candidates, the bugged ready condition, selection waits and the JOBSTTS overlay open. */
 
 #include "fft/after_battle.h"
@@ -231,8 +231,8 @@ void unit_panel_set_transition(s32 value) {
     g_unit_panel_status_display_thread_params.style = value;
     g_unit_panel_numbers_thread_params.style = value;
     g_unit_panel_character_status_frame_config.style = value;
-    g_unit_panel_panel_status_animation[0] = value;
-    g_unit_panel_panel_status_animation[1] = value;
+    g_unit_panel_status_animation[0] = value;
+    g_unit_panel_status_animation[1] = value;
 }
 
 /* Empty. Called for each unit that leaves over a Brave below 6, with its battle index, unit id and
@@ -427,8 +427,8 @@ s32 party_update_after_battle(void) {
         unit = unit_entd_find_stats(battle_unit->unit_id, &found_index);
         if (found_index >= 0 && party_index == found_index && unit->formation_index == UNIT_FORMATION_INDEX_NONE
             && unit->unit_id != 0) {
-            u32 base_class = unit->character_identity;
-            if ((base_class == CHARACTER_IDENTITY_ENTD_NONE || base_class >= CHARACTER_IDENTITY_RAMZA_END)
+            u32 identity = unit->character_identity;
+            if ((identity == CHARACTER_IDENTITY_ENTD_NONE || identity >= CHARACTER_IDENTITY_RAMZA_END)
                 && unit->unit_id >= 4
                 && ((unit->unit_flags & UNIT_FLAG_JOIN_AFTER_EVENT)
                     || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_INVITE)]
@@ -685,7 +685,7 @@ void unit_panel_transition_thread(void) {
     thread_suspend(g_after_battle_thread_suspended_id);
     saved = menu_alloc_memory(sizeof(*saved));
     mem_copy_bytes_nonempty(saved, &g_threads[g_after_battle_thread_suspended_id], sizeof(*saved));
-    g_unit_panel_panel_status_group_count = 2;
+    g_unit_panel_status_group_count = 2;
     while (1) {
         s32 buffer = frame & 1;
         gfx_build_gradient_grid_primitives(g_gfx_poly_gt4_buffers[buffer]);

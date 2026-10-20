@@ -1,6 +1,7 @@
 /* Run native event instructions for walking, sprite changes, effect playback and scripted unit creation. */
 
 #include "fft/battle_map.h"
+#include "fft/battle_state.h"
 #include "fft/effect_script.h"
 #include "fft/formation.h"
 #include "fft/move.h"
@@ -12,7 +13,6 @@
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
@@ -132,7 +132,7 @@ void script_effect_wait(void) {
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))state_get_animation_continue_check;
+        g_thread_call_target = (void (*)(void))battle_animation_wait_state_get;
     } while (thread_call_on_main_stack());
 }
 

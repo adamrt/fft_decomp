@@ -1,5 +1,6 @@
-/* Support REQUIRE's condition and party-change displays. Banner loading
- * borrows the main stack; waits and RGB fades yield the screen thread. */
+/* Support REQUIRE's condition and party-change displays, including Brave Story
+ * biography updates. Banner loading borrows the main stack; waits and RGB fades
+ * yield the screen thread. */
 
 #include "fft/after_battle.h"
 #include "fft/file.h"

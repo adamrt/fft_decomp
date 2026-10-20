@@ -1,6 +1,7 @@
 /* The resident loop alternates the title sequence, world map and battles.
  * Soft reset restores its saved stack and starts the loop again. */
 
+#include "fft/battle_state.h"
 #include "fft/file.h"
 #include "fft/item.h"
 #include "fft/memory.h"
@@ -8,7 +9,6 @@
 #include "fft/overlay.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
-#include "fft/state.h"
 #include "fft/suzuki.h"
 #include "fft/system.h"
 #include "fft/title.h"

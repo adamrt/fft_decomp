@@ -319,7 +319,7 @@ static s32 unit_list_run_frame(void) {
             /* Help for the highlighted row, from HELP_TEXT_SECTION_MENU_COMMANDS (0x1000). */
             g_text_selection_id = g_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
             if ((g_unit_list_triangle_menu_open
-                    = unit_list_run_menu_thread(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
+                    = unit_list_update_menu_thread(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
                 == 0) {
                 if (g_unit_list_primary_result == 0) {
                     banner_enabled = g_unit_list_status_banner_enabled;
@@ -374,7 +374,7 @@ static s32 unit_list_run_frame(void) {
             gfx_start_increasing_fade();
         }
     } else if (g_unit_list_current_menu == UNIT_LIST_MENU_REORDER_LIST) {
-        unit_list_run_sort_menu();
+        unit_list_sort_menu_update();
     }
     return 1;
 }

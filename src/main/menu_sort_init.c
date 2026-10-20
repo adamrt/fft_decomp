@@ -2,13 +2,15 @@
 
 #include "fft/formation.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
+#include "fft/menu_sort.h"
 #include "fft/unit_list.h"
 #include "psx/libc.h"
 
 /* Reset the Unit List, Formation and five item sort orders to their default -1-terminated
  * sequences, empty the weapon, helmet, armor, accessory and item page orders, and zero the
  * poached item counts. */
-void item_order_tables_init(void) {
+void menu_sort_tables_init(void) {
     g_menu_sort_orders.unit_list[0] = UNIT_LIST_SORT_KEY_NUMBER;
     g_menu_sort_orders.unit_list[1] = UNIT_LIST_SORT_KEY_LEVEL;
     g_menu_sort_orders.unit_list[2] = UNIT_LIST_SORT_KEY_JOB;

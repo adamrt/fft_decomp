@@ -12,6 +12,7 @@
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/unit_panel.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -34,7 +35,7 @@ static u32 g_screen_input_frame_secondary_repeat_counter;
  * (g_screen_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
-void menu_input_event_state_update(u32* otag, u32 input, s32 frame_arg) {
+void menu_input_event_state_update(u32* otag, u32 input, s32 framebuffer_y) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -45,7 +46,7 @@ void menu_input_event_state_update(u32* otag, u32 input, s32 frame_arg) {
     s32 status;
 
     g_gfx_current_otag_entry = otag;
-    g_frame_arg = frame_arg;
+    g_menu_framebuffer_y = framebuffer_y;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     g_formation_screen_active = 0;
     if (input == 0) {
@@ -131,7 +132,7 @@ void menu_input_event_state_update(u32* otag, u32 input, s32 frame_arg) {
 }
 
 /* Return whether a thread slot is running. */
-s32 menu_thread_running_check(s32 thread_id) {
+s32 menu_thread_is_running(s32 thread_id) {
     thread_t* thread = &g_threads[thread_id];
 
     return thread->is_running;

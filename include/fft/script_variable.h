@@ -184,7 +184,7 @@ typedef enum event_script_variable_id {
      * EVENT_SCRIPT_VAR_FACTS_ENABLED gates. */
     EVENT_SCRIPT_VAR_FACT_FIRST = 0x1a4,
     /* First variable of the world-map ranges WLDCORE indexes: one flag per
-     * Brave Story event, location dot, route, alternate dot color, rumour,
+     * Brave Story event, location dot, route, alternate dot color, rumor,
      * treasure and unexplored land, then one nibble of state bits per proposition. */
     EVENT_SCRIPT_VAR_STORY_EVENT_FIRST = 0x1bc,
     EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST = 0x200,

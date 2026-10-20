@@ -18,7 +18,7 @@
 
 /* Draw three-column text 8 pixels narrower than the entry, adding ability
  * reflection and charge-time markers where requested. */
-void menu_text_columns_narrow_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
+void ability_list_text_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
     s32 column;
@@ -129,7 +129,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-            menu_text_columns_narrow_draw(entry, row_offset, buffer);
+            ability_list_text_draw(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);
             /* Clear the two VRAM rows above the image, wrapping within its 256-row page. */

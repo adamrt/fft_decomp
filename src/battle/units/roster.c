@@ -1,4 +1,4 @@
-/* Find battle-stat records and calculate unit availability, enemy levels and war trophies. */
+/* Find battle-stat records and manage unit availability, status display, enemy levels and war trophies. */
 
 #include "fft/battle_map.h"
 #include "fft/item.h"
@@ -205,8 +205,8 @@ void status_clear_all(unit_stats_t* unit) {
 
 /* Enable the renderer status flags for each of a unit's current statuses.
  * Returns -1 for an empty unit slot, otherwise 0. */
-s32 status_init_display_flags(s32 unit_id) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+s32 status_init_display_flags(s32 battle_id) {
+    unit_stats_t* unit = &g_unit_stats[battle_id];
     s32 i;
 
     if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
@@ -216,7 +216,7 @@ s32 status_init_display_flags(s32 unit_id) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, unit_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, battle_id);
         }
     }
     return 0;
@@ -245,7 +245,7 @@ unit_stats_t* unit_present_stats_get(u32 battle_id) {
 }
 
 /* The first unit whose has_turn is set (the unit taking its turn), or 0. */
-unit_stats_t* unit_find_active(void) {
+unit_stats_t* unit_find_with_turn(void) {
     s32 i = 0;
     unit_stats_t* unit = g_unit_stats;
     for (; i < UNIT_SLOT_COUNT; i++, unit++) {

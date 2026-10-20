@@ -285,7 +285,7 @@ void menu_display_text_string(u8* image, glyph_blit_t* origin, const u8* text);
 void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text);
-void menu_text_columns_narrow_draw(menu_entry_t* entry, s32* row_offset, u8* buffer);
+void ability_list_text_draw(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t* bounds, s32 unused, s32 max_chars,
     const u8* text_table, const s16* text_ids, s32 count, s16 glyph, s32 unused_flags);
 void text_id_rows_to_vram_render(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags);

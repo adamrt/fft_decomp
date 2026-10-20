@@ -2,6 +2,7 @@
 
 #include "fft/equipment.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"

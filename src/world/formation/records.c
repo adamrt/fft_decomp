@@ -5,6 +5,7 @@
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/party.h"
@@ -170,7 +171,7 @@ void formation_unit_record_build(const unit_stats_t* unit, formation_unit_t* rec
  * monster skillset and special-monster jobs; MONSTERS drops eggs and humans.
  * A nonzero item id keeps only units with that item equipped. Returns the
  * record count. The list argument is unused here;
- * formation_sort_roster fills g_formation_unit_pointers.
+ * formation_roster_sort fills g_formation_unit_pointers.
  */
 s16 formation_record_list_build(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode) {
     unit_stats_t unit;
@@ -222,7 +223,7 @@ s16 formation_record_list_build(s32 item_id, formation_unit_t** unused_list, for
         count++;
     }
     g_formation_record_count = count;
-    formation_sort_roster(0);
+    formation_roster_sort(0);
     return g_formation_record_count;
 }
 

@@ -41,14 +41,6 @@ extern s16 g_formation_ability_view_job_names[];
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];
 
-/* The dismiss prompt keeps its eligibility result until an answer queues a sound. */
-enum {
-    FORMATION_DISMISS_REFUSED = 0,
-    FORMATION_DISMISS_CONFIRM = 1,
-    FORMATION_DISMISS_PROPOSITION_MESSAGE = 2,
-    FORMATION_DISMISS_SOUND_QUEUED = 100
-};
-
 static s32 view_list_update(void);
 
 /* Ability-list menu-script callback 13: 1 while the list shows the Action category. The

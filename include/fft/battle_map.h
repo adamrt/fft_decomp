@@ -479,7 +479,7 @@ typedef enum battle_map_data_command {
 s32 battle_map_data_command_dispatch(battle_map_data_command_e command, u32 index, s32 object_state, s32 flag);
 s32 battle_map_object_state_get(s32 part_index);
 s32 battle_map_object_state_set(s32 part_index, s32 state_row);
-s32 battle_map_texture_animation_active_get(s32 animation_index);
+s32 battle_map_texture_animation_is_active(s32 animation_index);
 s32 battle_map_texture_animation_start(s32 animation_index, s32 object_state);
 
 /* map title */

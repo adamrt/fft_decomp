@@ -13,6 +13,14 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
+static s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
+
+static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset);
+
+static s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
+
+static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
+
 static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit);
 
 static s32 ability_table_load(s32 unit_id, u8 skillset, u8 menu);
@@ -72,7 +80,7 @@ static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit) {
     u8 moved;
     u8 acted;
 
-    active = unit_find_active();
+    active = unit_find_with_turn();
     if (active != 0) {
         if ((active->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0
             || active->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
@@ -247,7 +255,7 @@ static s32 ability_table_load(s32 unit_id, u8 skillset, u8 menu) {
         return skillset_collect_item_abilities(unit_id, skillset, items);
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
         return skillset_collect_throwable_items(unit_id, skillset, items);
-    case ACTION_MENU_TYPE_ARITHMETICKS:
+    case ACTION_MENU_TYPE_MATH_SKILL:
         result = skillset_math_load_attributes(unit_id, skillset, abilities);
         if (result != 0) {
             result = skillset_math_load_multiples(unit_id, skillset, abilities);
@@ -455,7 +463,7 @@ s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
  * masked `id + 0xfe90` sum the range test already holds (the two differ only
  * above bit 15); spelled as one expression it is one instruction short.
  */
-s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
+static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
     unit_stats_t* unit;
     u16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -511,7 +519,7 @@ s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
  * a selected type that is throwable and in stock is listed (item_decrement_party_quantity:
  * only a player-team unit can run out).
  */
-s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
+static s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     u16 abilities[0x14];
     u8 item_types[0x14];
     u8 mp_costs[0x14];
@@ -680,7 +688,7 @@ s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* ou
 
 /* Return the Elemental (Geomancy) ability for the surface under the unit when
  * the unit knows and can use it, otherwise 0. */
-u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
+static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
     unit_stats_t* unit;
     s16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -842,7 +850,7 @@ s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids
  * into out_item_ids, terminated by ITEM_ID_NONE, and return 0x100 plus their
  * count (0 when the unit or skillset is wrong or the list is empty). Draw Out
  * abilities run in the same order as their katanas. */
-s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
+static s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
     u16 abilities[0x10];
     u8 mp_costs[0x10];
     u8 ability_flags[0x10];

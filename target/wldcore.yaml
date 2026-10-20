@@ -73,7 +73,7 @@ functions:
   - {addr: 0x80068e70, size: 312, name: world_map_scroll_axis_update, hash: 847c2250f4204453, unit: input}
   - {addr: 0x80068fa8, size: 104, name: world_map_input_repeat_init, hash: cd033db34fcf2c41, unit: input}
   - {addr: 0x80069010, size: 668, name: world_map_input_repeat_update, hash: f5ac2d626cd95e19, unit: input}
-  - {addr: 0x800692ac, size: 340, name: window_set_render_objects_visible, hash: 082e633a45d41f5d, unit: map_fades}
+  - {addr: 0x800692ac, size: 340, name: display_object_queues_set_enabled, hash: 082e633a45d41f5d, unit: map_fades}
   - {addr: 0x80069400, size: 168, name: world_map_fade_start, hash: 3278f2a87335c5a6, unit: map_fades}
   - {addr: 0x800694a8, size: 624, name: world_map_fade_update, hash: a288f6e5f4b66b67, unit: map_fades}
   - {addr: 0x80069718, size: 248, name: world_map_fade_tint_color, hash: 5451cf7fbc8915e8, unit: map_fades}
@@ -88,8 +88,8 @@ functions:
   - {addr: 0x80069e58, size: 172, name: calendar_date_write, hash: a100a01dd3458fa8, unit: calendar}
   - {addr: 0x80069f04, size: 276, name: calendar_date_read, hash: 337a6e03c2eb3680, unit: calendar}
   - {addr: 0x8006a018, size: 148, name: world_map_image_buffers_clear, hash: 6d07a88a3d3e8359, unit: map_buffers}
-  - {addr: 0x8006a0ac, size: 76, name: calendar_day_of_year_calculate, hash: efdeb3089d1c7472, unit: calendar_day_index}
-  - {addr: 0x8006a0f8, size: 72, name: calendar_month_and_day_calculate, hash: 65bc42f96d71e765, unit: calendar_day_index}
+  - {addr: 0x8006a0ac, size: 76, name: calendar_date_to_day_index, hash: efdeb3089d1c7472, unit: calendar_day_index}
+  - {addr: 0x8006a0f8, size: 72, name: calendar_day_index_to_date, hash: 65bc42f96d71e765, unit: calendar_day_index}
   - {addr: 0x8006a140, size: 1100, name: world_map_backdrop_mode_set, hash: 78cf845743021b10, unit: map_tiles}
   - {addr: 0x8006a58c, size: 764, name: world_map_tile_atlas_init, hash: d59a2e4f5886bb67, unit: map_tiles}
   - {addr: 0x8006a888, size: 336, name: world_map_project_tiles, hash: 54969fac20cc375c, unit: map_tiles}
@@ -97,12 +97,12 @@ functions:
   - {addr: 0x8006abc8, size: 64, name: world_map_scroll_apply, hash: d7be6cf7b2797cc0, unit: map_tiles}
   - {addr: 0x8006ac08, size: 144, name: world_map_horizontal_scroll_apply, hash: c3019786556de6da, unit: map_tiles}
   - {addr: 0x8006ac98, size: 144, name: world_map_vertical_scroll_apply, hash: d77a7b8dc971843f, unit: map_tiles}
-  - {addr: 0x8006ad28, size: 248, name: window_record_pools_init, hash: e025d61aca5111d9, unit: window_records}
-  - {addr: 0x8006ae20, size: 176, name: window_dispatch_gs_record_list, hash: a7e465f544089ca3, unit: window_records}
-  - {addr: 0x8006aed0, size: 924, name: window_gs_animated_record_draw, hash: 370928c0ecd01289, unit: window_records}
-  - {addr: 0x8006b26c, size: 500, name: image_record_draw, hash: 3a72d1b76b19a115, unit: window_records}
-  - {addr: 0x8006b460, size: 232, name: window_append_animated_record, hash: 9d472c712e7475fd, unit: window_records}
-  - {addr: 0x8006b548, size: 304, name: window_append_record, hash: 8b95487b55821e0b, unit: window_records}
+  - {addr: 0x8006ad28, size: 248, name: display_object_pools_init, hash: e025d61aca5111d9, unit: window_records}
+  - {addr: 0x8006ae20, size: 176, name: display_object_gs_list_draw, hash: a7e465f544089ca3, unit: window_records}
+  - {addr: 0x8006aed0, size: 924, name: display_object_gs_animated_draw, hash: 370928c0ecd01289, unit: window_records}
+  - {addr: 0x8006b26c, size: 500, name: gs_image_draw, hash: 3a72d1b76b19a115, unit: window_records}
+  - {addr: 0x8006b460, size: 232, name: display_object_animated_append, hash: 9d472c712e7475fd, unit: window_records}
+  - {addr: 0x8006b548, size: 304, name: display_object_image_append, hash: 8b95487b55821e0b, unit: window_records}
   - {addr: 0x8006b678, size: 276, name: scaled_rectangle_calculate, hash: 63903852735eac70, unit: window_records}
   - {addr: 0x8006b78c, size: 840, name: hud_value_draw, hash: a64c4fe093eb72d2, unit: hud, rodata: [{addr: 0x80067020, size: 20, hash: ec1dbbcbf2752505}]}
   - {addr: 0x8006bad4, size: 244, name: funds_draw, hash: 477515410b583ab3, unit: hud}
@@ -113,7 +113,7 @@ functions:
   - {addr: 0x8006c1fc, size: 76, name: world_map_menu_state_init, hash: 612b5687dd91566d, unit: menu_levels}
   - {addr: 0x8006c248, size: 264, name: world_map_menus_update, hash: a7b6c9f7d5ebedab, unit: menu_levels}
   - {addr: 0x8006c350, size: 140, name: menu_stack_reset, hash: 70bde74f247d3161, unit: menu_levels}
-  - {addr: 0x8006c3dc, size: 112, name: menu_stack_dispatch_idle, hash: 2d06b000d9070865, unit: menu_levels}
+  - {addr: 0x8006c3dc, size: 112, name: menu_stack_dispatch_update, hash: 2d06b000d9070865, unit: menu_levels}
   - {addr: 0x8006c44c, size: 112, name: menu_stack_dispatch_resume, hash: c5020d97809230c1, unit: menu_levels}
   - {addr: 0x8006c4bc, size: 112, name: menu_stack_dispatch_suspend, hash: d5a7b467aa69b15e, unit: menu_levels}
   - {addr: 0x8006c52c, size: 640, name: cursor_level_open, hash: e415cf31bc2c341d, unit: menu_levels}
@@ -400,7 +400,7 @@ functions:
   - {addr: 0x8008e2bc, size: 644, name: travel_start, hash: dba5b9b070f1b366, unit: map_routes}
   - {addr: 0x8008e540, size: 1784, name: travel_step, hash: bdccabd7e83f26a2, unit: map_routes}
   - {addr: 0x8008ec38, size: 200, name: world_map_pan_start, hash: f7dcd7c974b7c4de, unit: map_routes}
-  - {addr: 0x8008ed00, size: 188, name: world_map_pan_bounds_check, hash: a5a78c68439cf7d0, unit: map_routes}
+  - {addr: 0x8008ed00, size: 188, name: world_map_point_needs_pan, hash: a5a78c68439cf7d0, unit: map_routes}
   - {addr: 0x8008edbc, size: 84, name: coordinates_clamp, hash: 72354b94871c7f88, unit: map_routes}
   - {addr: 0x8008ee10, size: 300, name: world_map_pan_update, hash: 5de4aa694c18fd01, unit: map_routes}
   - {addr: 0x8008ef3c, size: 336, name: edge_scroll_apply, hash: 1cb30f8dbe68fea1, unit: map_routes}
@@ -413,7 +413,7 @@ functions:
   - {addr: 0x8008f828, size: 96, name: window_display_text_entry, hash: 534645d5cf3aaa4a, unit: window_render}
   - {addr: 0x8008f888, size: 88, name: window_text_image_measure, hash: 789af18accb6a0dc, unit: window_render}
   - {addr: 0x8008f8e0, size: 220, name: window_text_record_init, hash: 0e61d19ad6e8bbb6, unit: window_render}
-  - {addr: 0x8008f9bc, size: 284, name: window_init_vram_render_record, hash: 33e805bd9e9a05f8, unit: window_render}
+  - {addr: 0x8008f9bc, size: 284, name: display_object_gs_image_init, hash: 33e805bd9e9a05f8, unit: window_render}
   - {addr: 0x8008fad8, size: 80, name: window_panel_thread_start, hash: f4a9effe6dc74c0a, unit: window_render}
   - {addr: 0x8008fb28, size: 352, name: window_panel_state_init, hash: ef26f45135e74ef5, unit: window_render}
   - {addr: 0x8008fc88, size: 64, name: menu_stack_cursor_store, hash: ed2c569ea1468ba2, unit: window_render}
@@ -483,11 +483,11 @@ data:
   - {addr: 0x8008c0ac, name: unit_runtime_facing_sixteenth_get}
   - {addr: 0x80092b04, name: world_map_switch_to_stack}
   - {addr: 0x80092b1c, name: world_map_restore_previous_stack}
-  - {addr: 0x80092b2c, name: g_window_anim_sequences}
-  - {addr: 0x80092b30, name: g_window_anim_cels}
+  - {addr: 0x80092b2c, name: g_display_object_sequences}
+  - {addr: 0x80092b30, name: g_display_object_cels}
   - {addr: 0x80092b34, name: g_location_picture_frame_tim}
-  - {addr: 0x80092b38, name: g_window_anim_sequence_table}
-  - {addr: 0x8009324c, name: g_window_anim_cel_table}
+  - {addr: 0x80092b38, name: g_display_object_sequence_table}
+  - {addr: 0x8009324c, name: g_display_object_cel_table}
   - {addr: 0x80094df4, name: g_world_map_dot_sources}
   - {addr: 0x80094df8, name: g_location_records}
   - {addr: 0x80095000, name: g_world_map_routes}
@@ -537,17 +537,17 @@ data:
   - {addr: 0x8009eef4, name: g_location_label_shade}
   - {addr: 0x8009eef8, name: g_text_window}
   - {addr: 0x8009ef6c, name: g_world_map_scroll_x}
-  - {addr: 0x8009ef80, name: g_window_render_object_queue}
-  - {addr: 0x8009f180, name: g_window_record_count}
+  - {addr: 0x8009ef80, name: g_display_object_queue}
+  - {addr: 0x8009f180, name: g_display_object_animated_count}
   - {addr: 0x8009f184, name: g_world_map_scroll_y}
-  - {addr: 0x8009f198, name: g_window_render_object_count}
+  - {addr: 0x8009f198, name: g_display_object_queue_count}
   - {addr: 0x8009f19c, name: g_world_map_brightness_rgb}
-  - {addr: 0x8009f1a0, name: g_window_aux_render_object_queue}
+  - {addr: 0x8009f1a0, name: g_display_object_aux_queue}
   - {addr: 0x8009f1e0, name: g_sound_novel_sound_resource}
-  - {addr: 0x8009f1e4, name: g_world_map_previous_system_flags}
-  - {addr: 0x8009f1e8, name: g_window_aux_render_object_count}
+  - {addr: 0x8009f1e4, name: g_world_map_previous_flags}
+  - {addr: 0x8009f1e8, name: g_display_object_aux_queue_count}
   - {addr: 0x8009f1ec, name: g_proposition_report}
-  - {addr: 0x8009f244, name: g_window_render_record_count}
+  - {addr: 0x8009f244, name: g_display_object_image_count}
   - {addr: 0x8009f248, name: g_random_battle_squad_id}
   - {addr: 0x8009f24c, name: g_world_map_marker_state}
   - {addr: 0x8009f288, name: g_event_transition_sprite}
@@ -577,12 +577,12 @@ data:
   - {addr: 0x800bb4f8, name: g_sound_novel_countdown_frames_reset}
   - {addr: 0x800bb4fc, name: g_sound_novel_selected}
   - {addr: 0x800bb500, name: g_picture_background_loaded_set}
-  - {addr: 0x800bb504, name: g_window_records}
+  - {addr: 0x800bb504, name: g_display_object_animated_pool}
   - {addr: 0x800bb984, name: g_input_previous_buttons}
   - {addr: 0x800bb988, name: g_picture_buffer}
   - {addr: 0x800bb98c, name: g_menu_stack_records}
   - {addr: 0x800bbc6c, name: g_travel_next_map_id}
-  - {addr: 0x800bbc70, name: g_window_gs_image_records}
+  - {addr: 0x800bbc70, name: g_display_object_gs_image_pool}
   - {addr: 0x800bc2f0, name: g_world_map_input_new_button_presses}
   - {addr: 0x800bc2f4, name: g_message_block_buffer}
   - {addr: 0x800c72f4, name: g_world_map_scratch_buffer}

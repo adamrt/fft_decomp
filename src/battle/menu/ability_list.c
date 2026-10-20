@@ -192,7 +192,7 @@ void ability_list_scrolling_thread(void) {
         cursor = 0;
     }
 
-    menu_text_columns_narrow_draw(entry, &row_offset, buffer);
+    ability_list_text_draw(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
 

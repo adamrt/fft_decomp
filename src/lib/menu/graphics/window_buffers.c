@@ -50,7 +50,7 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
                 buffer->color.r = 0x80;
                 buffer->color.g = 0x80;
                 buffer->color.b = 0x80;
-                buffer->dialogue_selector = 0;
+                buffer->dialog_selector = 0;
                 buffer->portrait_flipped = 0;
                 buffer->is_message_box = 0;
                 buffer->icon_flags = 0;
@@ -213,7 +213,7 @@ void menu_draw_active_window_frames(void) {
         window->icon_sprites[1].x0 = window->quads[0].x0 + offset;
         window->icon_sprites[1].y0 = window->quads[0].y0 + height - 0x1A;
         if (window->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-            if (window->dialogue_selector == 1) {
+            if (window->dialog_selector == 1) {
                 window->icon_sprites[0].y0 -= 4;
                 window->icon_sprites[1].y0 -= 4;
             } else {

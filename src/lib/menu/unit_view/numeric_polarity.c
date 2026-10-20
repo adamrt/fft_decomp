@@ -23,7 +23,7 @@ extern menu_status_panel_numeric_buffer_t g_unit_panel_editor_numeric_state[2];
  * preview panel shares the main panel's primitive buffers (retail). Runs until a stop
  * request. ATTACK and REQUIRE only start slot 12. Their retained preview branch's
  * text_b image range overlaps later cursor/menu state. */
-void unit_panel_numbers_polarity_thread(void) {
+void unit_panel_numbers_thread(void) {
     unit_panel_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;
     menu_status_panel_numeric_buffer_t* buffers;

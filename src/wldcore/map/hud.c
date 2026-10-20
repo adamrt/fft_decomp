@@ -1,10 +1,10 @@
 /* The world-map HUD draws funds, time, the calendar date and the current location label. */
 
 #include "fft/calendar.h"
+#include "fft/display_object.h"
 #include "fft/location.h"
 #include "fft/script_variable.h"
 #include "fft/system.h"
-#include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -35,7 +35,7 @@ void hud_value_draw(GsOT* ot) {
     GsLINE line;
     CVECTOR color;
 
-    if (g_system_flags & SYSTEM_FLAG_HIDE_CONTEXT_VALUE) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE) {
         return;
     }
 
@@ -258,14 +258,14 @@ static void filled_digits_draw(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot
 /* Draws the world map's date: the month's zodiac sequence for the month
  * script variable, then the day as one or two digit sequences 0x1A pixels to
  * its right, in the tinted HUD color. Nothing is drawn while
- * SYSTEM_FLAG_HIDE_CALENDAR_DATE is set. */
+ * WORLD_MAP_FLAG_HIDE_CALENDAR_DATE is set. */
 void calendar_date_draw(GsOT* ot) {
     display_object_animated_t request;
     CVECTOR color;
     s32 first;
     s32 second;
 
-    if (g_system_flags & SYSTEM_FLAG_HIDE_CALENDAR_DATE) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_HIDE_CALENDAR_DATE) {
         return;
     }
 
@@ -283,24 +283,24 @@ void calendar_date_draw(GsOT* ot) {
 
     first = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
     second = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-    request.sequence = first + (WINDOW_ANIM_MONTH_FIRST - 1);
-    window_gs_animated_record_draw(&request, ot);
+    request.sequence = first + (DISPLAY_OBJECT_ANIM_MONTH_FIRST - 1);
+    display_object_gs_animated_draw(&request, ot);
 
     request.position.x += 0x1A;
     request.position.y -= 4;
     if (second >= 10) {
         request.anim_counter = 0;
         request.frame_index = 0;
-        request.sequence = second / 10 + WINDOW_ANIM_DIGIT_FIRST;
-        window_gs_animated_record_draw(&request, ot);
+        request.sequence = second / 10 + DISPLAY_OBJECT_ANIM_DIGIT_FIRST;
+        display_object_gs_animated_draw(&request, ot);
         request.position.x += 8;
     }
-    request.sequence = second % 10 + WINDOW_ANIM_DIGIT_FIRST;
-    window_gs_animated_record_draw(&request, ot);
+    request.sequence = second % 10 + DISPLAY_OBJECT_ANIM_DIGIT_FIRST;
+    display_object_gs_animated_draw(&request, ot);
 }
 
 /* Draws the name label of the selected location (g_location_selected,
- * location + 1) over its map dot, unless SYSTEM_FLAG_HIDE_LOCATION_LABEL
+ * location + 1) over its map dot, unless WORLD_MAP_FLAG_HIDE_LOCATION_LABEL
  * is set or no location is selected.
  *
  * The color is g_location_label_shade replicated across the three
@@ -313,7 +313,7 @@ void location_label_draw(GsOT* ot) {
     s32 index;
     s32 shade;
 
-    if (g_system_flags & SYSTEM_FLAG_HIDE_LOCATION_LABEL) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_HIDE_LOCATION_LABEL) {
         return;
     }
     if (g_location_selected == 0) {
@@ -336,6 +336,6 @@ void location_label_draw(GsOT* ot) {
     request.color.r = color.r;
     request.color.g = color.g;
     request.color.b = color.b;
-    request.sequence = g_location_selected + (WINDOW_ANIM_LOCATION_NAME_FIRST - 1);
-    window_gs_animated_record_draw(&request, ot);
+    request.sequence = g_location_selected + (DISPLAY_OBJECT_ANIM_LOCATION_NAME_FIRST - 1);
+    display_object_gs_animated_draw(&request, ot);
 }

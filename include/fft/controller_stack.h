@@ -1,5 +1,5 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#ifndef CONTROLLER_STACK_H
+#define CONTROLLER_STACK_H
 
 /* OPEN's stack of per-frame controllers: the handler table, the 100-byte state record each handler lays out, and the
  * dispatcher. */

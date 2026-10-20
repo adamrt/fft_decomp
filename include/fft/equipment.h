@@ -11,6 +11,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+struct menu_gfx_context;
+
 /* screen */
 /* g_equipment_screen_state: the index of the screen's handler in
  * g_equipment_screen_state_handlers. The command menu enters its picked row
@@ -19,8 +21,8 @@
 typedef enum equipment_state {
     EQUIPMENT_STATE_INIT = 0, /* equip_entrypoint builds the screen */
     EQUIPMENT_STATE_COMMAND_MENU = 1,
-    EQUIPMENT_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
-    EQUIPMENT_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
+    EQUIPMENT_STATE_EQUIP = 2,     /* equip_update */
+    EQUIPMENT_STATE_REMOVE = 4,    /* remove_update */
     EQUIPMENT_STATE_ITEM_LIST = 5, /* formation_items_update */
     EQUIPMENT_STATE_CLOSED = 0xff  /* equip_entrypoint returns its result */
 } equipment_state_e;
@@ -150,7 +152,7 @@ s32 equipment_get_row_equipped_count(s32 row);
 s32 equipment_update_item_actions(void);
 
 /* item type order */
-s32 equipment_run_type_order_mode(void);
+s32 equipment_type_order_update(void);
 
 /* unit panels */
 extern menu_unit_status_identity_t g_equipment_selected_unit_data;
@@ -165,7 +167,7 @@ extern u16 g_equipment_gfx_draw_move_capacity;
 extern volatile u16 g_equipment_gfx_line_g2_capacity;
 extern volatile u16 g_equipment_gfx_line_g3_capacity;
 
-void equipment_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
+void equipment_gfx_init_contexts(struct menu_gfx_context* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,

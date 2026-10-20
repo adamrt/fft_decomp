@@ -1,7 +1,7 @@
 /* Idle title-menu movies return to the logo sequence when playback finishes
  * or the player presses Start. */
 
-#include "fft/controller.h"
+#include "fft/controller_stack.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"

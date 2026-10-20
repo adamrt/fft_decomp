@@ -9,6 +9,7 @@
 #include "fft/formation_item.h"
 #include "fft/formation_job.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/option.h"

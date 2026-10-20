@@ -65,7 +65,7 @@ void unit_list_update_job_page(void) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
-        g_job_list_menu_phase = job_list_run();
+        g_job_list_menu_phase = job_list_update();
     } else if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_ABILITIES) {
         g_job_list_menu_phase = ability_list_update();
     }

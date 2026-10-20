@@ -177,10 +177,10 @@ s16 sprite_primitive_take(void);
 void sprite_display_construct_polygon_data(
     sprite_display_t* display, s32 end, s32 start, SVECTOR* position, s16 angle, s16 mode, SVECTOR* scale, u32* ot);
 sprite_display_t* sprite_display_init_unit(s32 runtime_id);
-sprite_display_t* sprite_display_init_weapon(s32 unit_index, s32 display_type);
+sprite_display_t* sprite_display_init_weapon(s32 runtime_id, s32 display_type);
 sprite_display_t* sprite_display_init_item(s32 runtime_id);
-sprite_display_t* sprite_display_init_numeric(s32 unit_index, s32 display_section);
-sprite_display_t* sprite_display_init_status_bubble(s32 unit_index);
+sprite_display_t* sprite_display_init_numeric(s32 runtime_id, s32 display_section);
+sprite_display_t* sprite_display_init_status_bubble(s32 runtime_id);
 void sprite_display_release_unit_stub(sprite_display_t* unused_display);
 void sprite_display_store_data(
     sprite_display_t* display, s32 index, s16 x_shift, s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags);

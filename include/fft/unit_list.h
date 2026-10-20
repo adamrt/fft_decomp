@@ -11,14 +11,17 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
+#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+struct menu_gfx_context;
 
 /* screen */
 /* g_unit_list_current_menu: what bunit_entrypoint runs. */
 typedef enum unit_list_menu {
     UNIT_LIST_MENU_UNIT_LIST = -1,   /* unit_list_run_frame: the grid and its triangle menu */
-    UNIT_LIST_MENU_REORDER_LIST = 0, /* unit_list_run_sort_menu, the triangle menu's first row */
+    UNIT_LIST_MENU_REORDER_LIST = 0, /* unit_list_sort_menu_update, the triangle menu's first row */
     UNIT_LIST_MENU_JOB = 2           /* unit_list_update_job_page: the selected unit's jobs and abilities */
 } unit_list_menu_e;
 
@@ -43,7 +46,7 @@ typedef enum unit_list_thread_slot {
     UNIT_LIST_THREAD_SLOT_REORDER_MENU = 15 /* the reorder list */
 } unit_list_thread_slot_e;
 
-s32 unit_list_run_menu_thread(s32 id, menu_entry_t* desc);
+s32 unit_list_update_menu_thread(s32 id, menu_entry_t* desc);
 
 /* sort keys */
 /* The eleven selectable priorities in the Unit List Reorder menu. */
@@ -146,7 +149,7 @@ extern s16 g_unit_list_reorder_result;
 extern u8 g_unit_list_reorderable_count;
 extern u8 g_unit_list_reorderable_indices[];
 
-void unit_list_run_sort_menu(void);
+void unit_list_sort_menu_update(void);
 s32 unit_list_build_sortable(void);
 void unit_list_load_sort_order(s32 unused, s16* entries);
 void unit_list_store_sort_order(s32 unused, const s16* entries);
@@ -174,7 +177,7 @@ extern u16 g_unit_list_gfx_draw_move_capacity;
 extern volatile u16 g_unit_list_gfx_line_g2_capacity;
 extern volatile u16 g_unit_list_gfx_line_g3_capacity;
 
-void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
+void unit_list_gfx_init_buffers(struct menu_gfx_context* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
     POLY_GT3* gouraud_textured_triangles, POLY_G4* gouraud_quads, POLY_GT4* gouraud_textured_quads, LINE_F2* flat_lines,
     LINE_F3* flat_lines_3, LINE_F4* flat_lines_4, LINE_G2* gouraud_lines, LINE_G3* gouraud_lines_3,
@@ -195,7 +198,7 @@ void unit_list_update_input(void);
 enum { UNIT_LIST_SCRIPT_END = 0x1c };
 
 /* text */
-/* Text-section buffers: unit_list_run_sort_menu passes g_unit_list_text_reorder_list_buffer
+/* Text-section buffers: unit_list_sort_menu_update passes g_unit_list_text_reorder_list_buffer
  * straight to text_concatenate_entries as its u8* output string and
  * g_unit_list_text_menu_section as the text-section base; unit_list_init_vram_and_fade
  * installs both addresses as u8* text-section pointers. */

@@ -11,6 +11,7 @@
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -344,7 +345,7 @@ void formation_menu_state_init(void) {
     g_formation_cursor_ot_override = 0;
     g_formation_triangle_menu_open = 0;
     formation_display_init();
-    formation_rebuild_unit_list();
+    formation_lists_rebuild();
 }
 
 /* Clear the 16 menu selection results to -1 (nothing chosen).

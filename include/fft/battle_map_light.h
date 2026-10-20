@@ -66,7 +66,7 @@ typedef enum battle_map_light_back_color_command {
     BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
 } battle_map_light_back_color_command_e;
 
-void battle_map_light_copy_back_color(void);
+void battle_map_light_save_back_color(void);
 void battle_map_light_restore_back_color(void);
 rgb24_t* battle_map_light_get_back_color(void);
 void battle_map_light_set_back_color(s32 red, s32 green, s32 blue);

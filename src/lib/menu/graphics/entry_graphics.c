@@ -215,7 +215,7 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
     s32 y;
 
     if (cursor >= 0) {
-        if (g_menu_formation_display_mode == 1) {
+        if (g_menu_cursor_bob_hold == 1) {
             thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
             thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }

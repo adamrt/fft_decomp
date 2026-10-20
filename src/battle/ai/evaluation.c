@@ -55,8 +55,6 @@ static s16 g_status_priority_weights[STATUS_COUNT]
     = { 0, -192, -192, -39, 0, 0, 0, 0, -116, -231, -64, -64, -90, -116, 0, -192, -7, 12, 51, 38, -39, -26, -52, -32,
           -26, 25, 25, 25, 19, -39, -90, 64, 6, -7, -64, -39, -39, -64, 25, -103 };
 
-/* 0x8019f308..0x8019f357 */
-
 static facing_tile_offsets_t g_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 }, { 0, 1 }, { 1, 0 } } };
 
 static void origin_monster_skill_mask_build(void);
@@ -302,7 +300,7 @@ s32 ai_pathfinding_budget_is_exhausted(void) {
  *
  * An ability the AI may not use, or a random-use ability that loses its roll,
  * is skipped. A map-tile ability is tried from the unit's tile and the
- * scenario's candidate tile (Arithmeticks from the unit's tile, over its
+ * scenario's candidate tile (Math Skill from the unit's tile, over its
  * calculator combinations). Otherwise the searches run in turn: for a
  * reflectable ability, casts reflected off a Reflect unit; then, on the units
  * the ability would be useful on, casts on the caster itself, unit-targeted
@@ -370,7 +368,7 @@ s32 ai_ability_outcome_evaluate(void) {
         ai->current_action.command.target_id = acting_id;
         ai->current_action.coords = ai->candidate_coords[ai->movement_scenario];
         ai_tile_pickup_update();
-        if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
+        if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_MATH_SKILL) {
         evaluate_math_targets:
             if (math_targets_evaluate() == -1) {
                 ai->outcome_evaluation_state = AI_ABILITY_EVALUATION_MATH_TARGETS;

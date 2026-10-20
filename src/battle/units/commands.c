@@ -3,13 +3,13 @@
 
 #include "fft/animation.h"
 #include "fft/battle_map.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/fade.h"
 #include "fft/move.h"
 #include "fft/script.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
@@ -208,38 +208,38 @@ s32 sprite_runtime_shadow_hide(u32 runtime_id) {
 /* Start a change to map_id (MapJumpingOut), saving the current game state: the
  * screen darkens by 0x100 / duration per frame (a duration of 0 takes one frame),
  * the map loads, the screen fades back in and the saved state resumes. */
-void state_start_map_jump_out(s32 map_id, s32 duration) {
+void battle_state_start_map_jump_out(s32 map_id, s32 duration) {
     g_battle_map_id = map_id;
-    g_game_state_previous = g_game_state;
-    g_game_state = GAME_STATE_MAP_JUMPING_OUT;
+    g_battle_state_previous = g_battle_state;
+    g_battle_state = BATTLE_STATE_MAP_JUMPING_OUT;
     g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Start an event's change to map_id (MapJumpingOut2), saving the current game
  * state: the screen darkens by 0x100 / duration per frame (a duration of 0 takes
  * one frame), the map loads, and the saved state resumes behind a black screen
- * until state_start_change_map_jump_in fades it in. */
-void state_start_change_map_jump_out(s32 map_id, s32 duration) {
+ * until battle_state_start_change_map_jump_in fades it in. */
+void battle_state_start_change_map_jump_out(s32 map_id, s32 duration) {
     g_battle_map_id = map_id;
-    g_game_state_previous = g_game_state;
-    g_game_state = GAME_STATE_MAP_JUMPING_OUT_2;
+    g_battle_state_previous = g_battle_state;
+    g_battle_state = BATTLE_STATE_MAP_JUMPING_OUT_2;
     g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Start the fade-in that ends an event's map change (MapJumpingIn2), saving the
  * current game state to return to. The screen lightens by 0x100 / duration per
  * frame; a duration of 0 takes one frame. */
-void state_start_change_map_jump_in(s32 duration) {
-    g_game_state_previous = g_game_state;
-    g_game_state = GAME_STATE_MAP_JUMPING_IN_2;
+void battle_state_start_change_map_jump_in(s32 duration) {
+    g_battle_state_previous = g_battle_state;
+    g_battle_state = BATTLE_STATE_MAP_JUMPING_IN_2;
     g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Leave the battle for the world map: enter CloseBattle at two vertical blanks
  * per frame with a fade step of 0x100 / duration (0x100 for a duration of 0). */
-void state_enter_close_battle_to_world(s32 duration) {
+void battle_state_enter_close_battle_to_world(s32 duration) {
     g_system_vsync_interval = 2;
-    g_game_state = GAME_STATE_CLOSE_BATTLE;
+    g_battle_state = BATTLE_STATE_CLOSE_BATTLE;
     g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
     g_game_flow_state = SYSTEM_GAME_FLOW_WORLD;
 }
@@ -771,6 +771,6 @@ s32 unit_runtime_remove(u32 runtime_id) {
 
 /* Calls unit_fade_out_start with the same
  * arguments; the event instructions that remove a unit start its fade-out here. */
-void unit_event_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue) {
-    unit_fade_out_start(runtime_id, mode, red, green, blue);
+void unit_event_fade_out_start(s32 runtime_id, s32 fade_step, s16 red, s16 green, s16 blue) {
+    unit_fade_out_start(runtime_id, fade_step, red, green, blue);
 }

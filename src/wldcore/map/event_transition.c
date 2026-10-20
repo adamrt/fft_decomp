@@ -1,11 +1,11 @@
 /* World-map departure effects: capture, draw and advance the spinning or fading transition into an event. */
 
+#include "fft/display_object.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/music.h"
 #include "fft/sound.h"
 #include "fft/system.h"
-#include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -36,16 +36,16 @@ void event_transition_open(s32 mode) {
 
     event_transition_seek_battle_bin();
     if (mode == EVENT_TRANSITION_MODE_FADE) {
-        g_system_flags |= SYSTEM_FLAG_FREEZE_ANIMATION;
+        g_world_map_flags |= WORLD_MAP_FLAG_FREEZE_ANIMATION;
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x20);
     } else {
         rect.x = 0x100;
         rect.y = 0;
         rect.w = 0x80;
         rect.h = 0x100;
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP | SYSTEM_FLAG_HIDE_MAP_DOTS | SYSTEM_FLAG_HIDE_MAP_ROUTES
-            | SYSTEM_FLAG_NO_BACKGROUND_IMAGE | SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE
-            | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP | WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES
+            | WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
+            | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         g_world_map_marker_state.marker.render.flags |= DISPLAY_OBJECT_HIDDEN;
         MoveImage(&rect, 0x200, 0x100);
         DrawSync(0);
@@ -103,7 +103,7 @@ void event_transition_sprite_draw(GsOT* ordering_table) {
  * leads from the map into an event or battle.
  *
  * In FADE mode it only waits for the screen fade and then ends the world loop
- * (toggling SYSTEM_FLAG_RUNNING off). Otherwise frame 1 copies the screen
+ * (toggling WORLD_MAP_FLAG_RUNNING off). Otherwise frame 1 copies the screen
  * to VRAM (0x100, 0) and hides the map and root windows; the sprite drifts a
  * pixel a frame and, every third frame, spins and shrinks in SPIN_IN, then in
  * SPIN mode spins back out (SPIN_OUT) textured with the captured screen. The
@@ -119,8 +119,8 @@ void event_transition_update(menu_stack_record_t* level) {
     s32 angle;
 
     if (level->event_transition.mode == EVENT_TRANSITION_MODE_FADE) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
-            g_system_flags = g_system_flags ^ SYSTEM_FLAG_RUNNING;
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
+            g_world_map_flags = g_world_map_flags ^ WORLD_MAP_FLAG_RUNNING;
         }
         return;
     }
@@ -133,8 +133,8 @@ void event_transition_update(menu_stack_record_t* level) {
         rect.h = 0xF0;
         MoveImage(&rect, 0x100, 0);
         DrawSync(0);
-        g_window_records[g_world_map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_world_map_cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_world_map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_world_map_cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 
     /* White-out: brighten the overlay by 8 a frame; at full white, toggle the running flag
@@ -152,7 +152,7 @@ void event_transition_update(menu_stack_record_t* level) {
             rect.y = 0x100;
             rect.w = 0x80;
             rect.h = 0x100;
-            g_system_flags = g_system_flags ^ SYSTEM_FLAG_RUNNING;
+            g_world_map_flags = g_world_map_flags ^ WORLD_MAP_FLAG_RUNNING;
             MoveImage(&rect, 0x100, 0);
             DrawSync(0);
         }

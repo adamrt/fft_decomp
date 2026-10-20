@@ -53,16 +53,16 @@ typedef struct effect_anchored_polar_mesh_scratch {
     u8 _unused_0b8[0x18];
     s32 target_index; /* 0xd0 */
     u8 _unused_0d4[0x14];
-    s32 radius;                 /* 0xe8 */
-    s32 radius_step;            /* 0xec */
-    s32 radius_step_delta;      /* 0xf0 */
-    s32 angle;                  /* 0xf4 */
-    s32 angle_step;             /* 0xf8 */
-    s32 angle_step_delta;       /* 0xfc */
-    s32 ot_depth;               /* 0x100 */
-    SVECTOR position;           /* 0x104 */
-    const SVECTOR* unit_coords; /* 0x10c */
-    VECTOR screen;              /* 0x110; RotTrans stores flags in the unused fourth 32-bit value */
+    s32 radius;                       /* 0xe8 */
+    s32 radius_step;                  /* 0xec */
+    s32 radius_step_delta;            /* 0xf0 */
+    s32 angle;                        /* 0xf4 */
+    s32 angle_step;                   /* 0xf8 */
+    s32 angle_step_delta;             /* 0xfc */
+    s32 ot_depth;                     /* 0x100 */
+    SVECTOR position;                 /* 0x104 */
+    const SVECTOR* unit_event_offset; /* 0x10c */
+    VECTOR screen;                    /* 0x110; RotTrans stores flags in the unused fourth 32-bit value */
     point16_t points[POLAR_MESH_RING_COUNT + 1][POLAR_MESH_SEGMENTS_PER_QUADRANT + 1]; /* 0x120 */
 } effect_anchored_polar_mesh_scratch_t;
 
@@ -139,11 +139,11 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->target_index = g_effect_state_records[state_index].timeline.target_index;
         effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
             scratch->target_index, &g_effect_context, &scratch->position);
-        scratch->unit_coords
+        scratch->unit_event_offset
             = unit_get_event_offset_by_runtime_id(g_effect_context.targets[scratch->target_index].data.unit.runtime_id);
-        scratch->position.vx += scratch->unit_coords->vx;
-        scratch->position.vy += scratch->unit_coords->vy;
-        scratch->position.vz += scratch->unit_coords->vz;
+        scratch->position.vx += scratch->unit_event_offset->vx;
+        scratch->position.vy += scratch->unit_event_offset->vy;
+        scratch->position.vz += scratch->unit_event_offset->vz;
         SetRotMatrix(&g_camera_matrix);
         SetTransMatrix(&g_camera_matrix);
         RotTrans(&scratch->position, &scratch->screen, &scratch->screen.pad);

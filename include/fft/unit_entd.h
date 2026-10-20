@@ -65,7 +65,7 @@ typedef struct entd_unit {
     u8 level;       /* 0x03; 0 or 0xfe: L - rnd(0..L/8); 100 + n: L + n; L: top party level */
     u8 birth_month; /* 0x04; 1..12 for a fixed birthday */
     u8 birth_day;   /* 0x05; 1..31 for a fixed birthday */
-    u8 bravery;     /* 0x06; above 100: random 45..74 */
+    u8 brave;       /* 0x06; above 100: random 45..74 */
     u8 faith;       /* 0x07; above 100: random 45..74 */
     /* Career job index (0 base job, 1 Chemist ... 19 Mime) whose level and
      * unlock requirements the unit gets; 20 or more gives no job levels. */

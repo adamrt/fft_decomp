@@ -117,11 +117,11 @@ extern u8 g_formation_unit_count;
 s16 formation_record_list_build(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode);
 void formation_unit_record_build(
     const struct unit_stats* unit, struct formation_unit* record, const struct party_unit* party);
-void formation_rebuild_unit_list(void);
+void formation_lists_rebuild(void);
 s32 formation_roster_slot_find(s16 roster_slot);
 void formation_unit_to_temp_copy(s16 index, s32 unused_slot);
 void formation_save_records(void);
-void formation_sort_roster(s32 index);
+void formation_roster_sort(s32 index);
 s32 formation_unit_lock_get(s32 unit_id);
 s32 formation_generate_unit(s16 unit_type);
 void formation_unit_name_set(s16 formation_index, const u8* name);
@@ -179,7 +179,6 @@ void formation_menu_state_init(void);
 void formation_display_init(void);
 void formation_world_map_return_run(void);
 void formation_backdrop_otag_set(u32* ordering_table);
-void formation_display_mode_set(s32 mode);
 void formation_background_tiles_draw(s32 y, s32 unused_1);
 void formation_zodiac_backdrop_run(void);
 

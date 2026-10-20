@@ -13,8 +13,6 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-/* the last two commands built, newest last */
-
 static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count);
 
 static void usable_abilities_build(s32 unit_id);
@@ -321,7 +319,7 @@ static void ability_weapon_attack_data_store(ai_weapon_data_t* out, s32 item_id,
  * return the updated count.
  *
  * Throw adds three shuriken and three ball entries, then at most one entry for
- * the first other known throw ability; Arithmeticks adds a single entry;
+ * the first other known throw ability; Math Skill adds a single entry;
  * Charge is skipped with a gun equipped. Other skillsets add each AI-usable,
  * known ability whose MP cost fits the unit's maximum MP and whose
  * sword/materia-blade requirement passes; a unit with innate Innocent adds
@@ -387,7 +385,7 @@ static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count
         }
         return count;
     }
-    if (menu == ACTION_MENU_TYPE_ARITHMETICKS) {
+    if (menu == ACTION_MENU_TYPE_MATH_SKILL) {
         entry = &ai->ability_lists[list_id][count];
         entry->skillset = skillset;
         entry->packed_id = unit_id << AI_ABILITY_ENTRY_UNIT_SHIFT;

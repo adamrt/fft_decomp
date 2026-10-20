@@ -1,6 +1,7 @@
 /* The bar dispatches propositions by choosing participants and confirming their assignment; day counters track their
  * return. */
 
+#include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu.h"
@@ -68,33 +69,33 @@ void proposition_dispatch_confirm_open(void) {
 
     thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CONFIRM_CONDITIONS, 0);
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.cursor_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[index].priority = 8;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.header_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
-    g_window_records[index].priority = 8;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CHOICE_PANEL_HEADER;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
     window_text_record_init(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 8;
-    position = &g_window_gs_image_records[index].base;
+    g_display_object_gs_image_pool[index].priority = 8;
+    position = &g_display_object_gs_image_pool[index].position;
     position->x = 0x48;
     position->y = 0x20;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.row = index;
     location = &g_proposition_selected_row.name_text;
@@ -127,24 +128,25 @@ void proposition_dispatch_confirm_open(void) {
             index, g_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, &g_window_image_buffer[0x200]);
     }
     window_load_render_record_image(index, &g_window_image_buffer[0x200]);
-    g_window_gs_image_records[index].priority = 8;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_gs_image_records[index].base;
+    g_display_object_gs_image_pool[index].priority = 8;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_display_object_gs_image_pool[index].position;
     base->x = -0x7A;
     base->y = -0x28;
 
     depth = g_menu_stack_depth;
     index = g_menu_stack_records[depth].dispatch_confirm.render_index;
     g_menu_stack_records[depth].dispatch_confirm.row = 0;
-    g_window_records[g_menu_stack_records[depth].dispatch_confirm.cursor_window].position.x
-        = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[g_menu_stack_records[depth].dispatch_confirm.cursor_window].position.y
-        = g_window_gs_image_records[index].base.y - -(g_menu_stack_records[depth].dispatch_confirm.row * 0x10 + 0xE);
-    g_window_records[g_menu_stack_records[depth].dispatch_confirm.header_window].position.x
-        = g_window_gs_image_records[index].base.x + 3;
+    g_display_object_animated_pool[g_menu_stack_records[depth].dispatch_confirm.cursor_window].position.x
+        = g_display_object_gs_image_pool[index].position.x + 6;
+    g_display_object_animated_pool[g_menu_stack_records[depth].dispatch_confirm.cursor_window].position.y
+        = g_display_object_gs_image_pool[index].position.y
+        - -(g_menu_stack_records[depth].dispatch_confirm.row * 0x10 + 0xE);
+    g_display_object_animated_pool[g_menu_stack_records[depth].dispatch_confirm.header_window].position.x
+        = g_display_object_gs_image_pool[index].position.x + 3;
     g_menu_stack_depth = depth + 1;
-    g_window_records[g_menu_stack_records[depth].dispatch_confirm.header_window].position.y
-        = g_window_gs_image_records[index].base.y - 2;
+    g_display_object_animated_pool[g_menu_stack_records[depth].dispatch_confirm.header_window].position.y
+        = g_display_object_gs_image_pool[index].position.y - 2;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM;
 }
 
@@ -158,7 +160,7 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
     s32 row;
     s32 i;
 
-    if (g_window_gs_image_records[level->dispatch_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->dispatch_confirm.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -168,9 +170,9 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
          * jump into it; duplicated copies cross-jump into the last one. */
     block_tail:
         g_hud_value_mode = HUD_VALUE_FUNDS;
-        g_window_record_count -= 2;
-        g_window_render_record_count -= 2;
-        g_window_render_object_count -= 4;
+        g_display_object_animated_count -= 2;
+        g_display_object_image_count -= 2;
+        g_display_object_queue_count -= 4;
         g_menu_stack_depth -= 1;
         proposition_available_list_open();
         return;
@@ -179,8 +181,8 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
     if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         row = level->dispatch_confirm.row ^ 1;
         level->dispatch_confirm.row = row;
-        g_window_records[level->dispatch_confirm.cursor_window].position.y
-            = g_window_gs_image_records[level->dispatch_confirm.render_index].base.y - -(row * 0x10 + 0xE);
+        g_display_object_animated_pool[level->dispatch_confirm.cursor_window].position.y
+            = g_display_object_gs_image_pool[level->dispatch_confirm.render_index].position.y - -(row * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
@@ -308,147 +310,147 @@ void proposition_participants_open(void) {
     thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
     thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_frame.window_index = index;
     {
-        point32_t* position = &g_window_records[index].position;
-        g_window_records[index].priority = 9;
+        point32_t* position = &g_display_object_animated_pool[index].position;
+        g_display_object_animated_pool[index].priority = 9;
         position->x = 0xE;
         position->y = -0x29;
     }
-    g_window_records[index].sequence = WINDOW_ANIM_PROPOSITION_COUNT_LABEL;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_PROPOSITION_COUNT_LABEL;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.cursor_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[index].priority = 9;
-    g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[index].priority = 9;
+    g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_frame.render_index = index;
     bounds.x = 0x80;
     bounds.y = 0;
     bounds.w = 0x6C;
     bounds.h = 0x40;
     window_text_record_init(index, bounds, 0, 0, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 9;
+    g_display_object_gs_image_pool[index].priority = 9;
     {
-        point32_t* base = &g_window_gs_image_records[index].base;
+        point32_t* base = &g_display_object_gs_image_pool[index].position;
         base->x = 0xC;
         base->y = -0x28;
     }
     DrawSync(0);
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.frame_window_a = index;
     {
-        point32_t* position = &g_window_records[index].position;
-        g_window_records[index].priority = 9;
+        point32_t* position = &g_display_object_animated_pool[index].position;
+        g_display_object_animated_pool[index].priority = 9;
         position->x = -0x60;
         position->y = 0x60;
     }
-    g_window_records[index].sequence = WINDOW_ANIM_SEND_UNIT_FRAME_A;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SEND_UNIT_FRAME_A;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.frame_window_b = index;
     {
-        point32_t* position = &g_window_records[index].position;
-        g_window_records[index].priority = 9;
+        point32_t* position = &g_display_object_animated_pool[index].position;
+        g_display_object_animated_pool[index].priority = 9;
         position->x = -0x12;
         position->y = 0x60;
     }
-    g_window_records[index].sequence = WINDOW_ANIM_SEND_UNIT_FRAME_B;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SEND_UNIT_FRAME_B;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.preview_render = index;
-    g_window_gs_image_records[index].priority = 9;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[index].priority = 9;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     {
-        point32_t* base = &g_window_gs_image_records[index].base;
+        point32_t* base = &g_display_object_gs_image_pool[index].position;
         base->x = 0x11;
         base->y = 0x18;
     }
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_render = index;
     bounds.x = 0x80;
     bounds.y = 0x40;
     bounds.w = 0x30;
     bounds.h = 0x3B;
     window_text_record_init(index, bounds, 0, 0, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 9;
+    g_display_object_gs_image_pool[index].priority = 9;
     {
-        point32_t* base = &g_window_gs_image_records[index].base;
+        point32_t* base = &g_display_object_gs_image_pool[index].position;
         base->x = 0xC;
         base->y = 0x14;
     }
     DrawSync(0);
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_render = index;
-    g_window_gs_image_records[index].priority = 9;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[index].priority = 9;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     {
-        point32_t* base = &g_window_gs_image_records[index].base;
+        point32_t* base = &g_display_object_gs_image_pool[index].position;
         base->x = 0x4D;
         base->y = 0x18;
     }
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_frame = index;
     bounds.x = 0x80;
     bounds.y = 0x40;
     bounds.w = 0x30;
     bounds.h = 0x3B;
     window_text_record_init(index, bounds, 0, 0, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 9;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[index].priority = 9;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     {
-        point32_t* base = &g_window_gs_image_records[index].base;
+        point32_t* base = &g_display_object_gs_image_pool[index].position;
         base->x = 0x48;
         base->y = 0x14;
     }
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_window = index;
     {
-        point32_t* position = &g_window_records[index].position;
-        g_window_records[index].priority = 9;
-        g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+        point32_t* position = &g_display_object_animated_pool[index].position;
+        g_display_object_animated_pool[index].priority = 9;
+        g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
         position->x = 0x3E;
         position->y = 0x28;
     }
-    g_window_records[index].sequence = WINDOW_ANIM_SEND_UNIT_PORTRAIT;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SEND_UNIT_PORTRAIT;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.left_arrow = index;
     {
-        point32_t* position = &g_window_records[index].position;
-        g_window_records[index].priority = 9;
-        g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+        point32_t* position = &g_display_object_animated_pool[index].position;
+        g_display_object_animated_pool[index].priority = 9;
+        g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
         position->x = -0x74;
         position->y = -0x69;
     }
-    g_window_records[index].sequence = WINDOW_ANIM_L1_BUTTON;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_L1_BUTTON;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.right_arrow = index;
     {
-        point32_t* position = &g_window_records[index].position;
+        point32_t* position = &g_display_object_animated_pool[index].position;
         g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
-        g_window_records[index].priority = 9;
-        g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[index].priority = 9;
+        g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
         position->x = 0x60;
         position->y = -0x69;
     }
-    g_window_records[index].sequence = WINDOW_ANIM_R1_BUTTON;
-    g_window_records[index].frame_index = g_window_records[index].anim_counter = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON;
+    g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
     thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
 
@@ -511,8 +513,8 @@ static void candidate_names_draw(proposition_send_unit_level_t* level) {
     s32 index = level->list_frame.render_index;
     s32 i;
 
-    screen_window_frame_image_build(g_window_gs_image_records[index].bounds.w,
-        g_window_gs_image_records[index].bounds.h, (u16*)g_window_image_buffer);
+    screen_window_frame_image_build(g_display_object_gs_image_pool[index].bounds.w,
+        g_display_object_gs_image_pool[index].bounds.h, (u16*)g_window_image_buffer);
     point.x = 8;
     point.y = 8;
     for (i = 0; i < g_proposition_send_unit_count; i++) {
@@ -538,18 +540,18 @@ static void candidate_portrait_show(proposition_send_unit_level_t* unused, s32 p
     code = portrait_party_unit_code_get(party_index);
     cell = code;
     portrait_build_wldface_poly(&poly, code);
-    g_window_gs_image_records[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
-    g_window_gs_image_records[index].clut.y = cell % 40 / 4 + 0x1F0;
-    g_window_gs_image_records[index].tpage = poly.tpage;
-    bounds = &g_window_gs_image_records[index].bounds;
+    g_display_object_gs_image_pool[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
+    g_display_object_gs_image_pool[index].clut.y = cell % 40 / 4 + 0x1F0;
+    g_display_object_gs_image_pool[index].tpage = poly.tpage;
+    bounds = &g_display_object_gs_image_pool[index].bounds;
     bounds->x = poly.u0;
     bounds->y = poly.v0;
     bounds->w = poly.u1 - poly.u0;
     bounds->h = poly.v2 - poly.v0;
-    color = &g_window_gs_image_records[index].color;
+    color = &g_display_object_gs_image_pool[index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_gs_image_records[index].anim_counter = 0;
-    g_window_gs_image_records[index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[index].pop_in_step = 0;
+    g_display_object_gs_image_pool[index].flags &= ~DISPLAY_OBJECT_HIDDEN;
 }
 
 /* Input step of the proposition send-unit level.
@@ -567,7 +569,7 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
     u32 buttons;
     s32 unit;
 
-    if ((g_window_gs_image_records[level->portrait_frame].flags & DISPLAY_OBJECT_POP_IN) == 0) {
+    if ((g_display_object_gs_image_pool[level->portrait_frame].flags & DISPLAY_OBJECT_POP_IN) == 0) {
         unit = g_proposition_send_units[level->slot] & 0x7FF;
         if (unit != level->shown_unit) {
             level->shown_unit = unit;
@@ -591,11 +593,12 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
         candidates_build(level);
         screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
     close:
-        g_window_records[level->frame_window_a].palette = g_window_records[level->frame_window_b].palette = 0;
-        g_window_gs_image_records[level->portrait_render].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->portrait_frame].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->portrait_window].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->frame_window_a].palette
+            = g_display_object_animated_pool[level->frame_window_b].palette = 0;
+        g_display_object_gs_image_pool[level->portrait_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->portrait_frame].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->portrait_window].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
         g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
         level->mode = PROPOSITION_SEND_UNIT_MODE_SELECT;
         return;
@@ -618,15 +621,15 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
     }
 
     sound_play_effect(SOUND_SFX_CURSOR_MOVE);
-    g_window_records[level->cursor_window].position.x
-        = g_window_gs_image_records[level->list_frame.render_index].base.x + 6;
-    g_window_records[level->cursor_window].position.y
-        = g_window_gs_image_records[level->list_frame.render_index].base.y + level->slot * 16 + 12;
+    g_display_object_animated_pool[level->cursor_window].position.x
+        = g_display_object_gs_image_pool[level->list_frame.render_index].position.x + 6;
+    g_display_object_animated_pool[level->cursor_window].position.y
+        = g_display_object_gs_image_pool[level->list_frame.render_index].position.y + level->slot * 16 + 12;
 }
 
 /* Build the status panel data of party member `party_index` and start the
  * three unit panel threads on it (status banner, numeric panel, equipment
- * and ability panel), raising SYSTEM_FLAG_UNIT_PANEL_THREADS. */
+ * and ability panel), raising WORLD_MAP_FLAG_UNIT_PANEL_THREADS. */
 static void participant_panels_start(s32 party_index) {
     unit_panel_thread_t* thread8;
 
@@ -642,7 +645,7 @@ static void participant_panels_start(s32 party_index) {
     thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
     thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
-    g_system_flags |= SYSTEM_FLAG_UNIT_PANEL_THREADS;
+    g_world_map_flags |= WORLD_MAP_FLAG_UNIT_PANEL_THREADS;
 }
 
 /* Status view of the send-unit level: once the panel threads stop it opens the unit's status
@@ -661,8 +664,8 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
             return;
         }
-        g_window_records[level->left_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->right_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->left_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->right_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
         level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS;
         menu_selected_index = &g_window_panel_render_state.selected_index;
         participant_panels_start(g_menu_stack_entry_values[*menu_selected_index] & TEXT_ID_ENTRY_MASK);
@@ -670,8 +673,8 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
     } else if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS) {
         buttons = g_world_map_input_new_button_presses;
         if (buttons & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
-            g_window_records[level->left_arrow].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[level->right_arrow].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->left_arrow].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->right_arrow].flags |= DISPLAY_OBJECT_HIDDEN;
             level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE;
             thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
             thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
@@ -679,22 +682,25 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
             return;
         }
         if (buttons & PSX_PAD_SELECT) {
-            g_window_records[level->left_arrow].palette = g_window_records[level->right_arrow].palette = 0xA;
+            g_display_object_animated_pool[level->left_arrow].palette
+                = g_display_object_animated_pool[level->right_arrow].palette = 0xA;
             sound_play_effect(SOUND_SFX_CONFIRM);
             unit_panel_help_open();
             return;
         }
         if (!(g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1))) {
-            g_window_records[level->left_arrow].sequence = WINDOW_ANIM_L1_BUTTON;
-            g_window_records[level->right_arrow].sequence = WINDOW_ANIM_R1_BUTTON;
-            g_window_records[level->left_arrow].frame_index = g_window_records[level->left_arrow].anim_counter
-                = g_window_records[level->right_arrow].frame_index = g_window_records[level->right_arrow].anim_counter
-                = 0;
+            g_display_object_animated_pool[level->left_arrow].sequence = DISPLAY_OBJECT_ANIM_L1_BUTTON;
+            g_display_object_animated_pool[level->right_arrow].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON;
+            g_display_object_animated_pool[level->left_arrow].frame_index
+                = g_display_object_animated_pool[level->left_arrow].anim_counter
+                = g_display_object_animated_pool[level->right_arrow].frame_index
+                = g_display_object_animated_pool[level->right_arrow].anim_counter = 0;
         }
         if (world_map_input_repeat_update(PSX_PAD_R1) != 0
-            && g_window_records[level->left_arrow].sequence != WINDOW_ANIM_L1_BUTTON_PRESS) {
-            g_window_records[level->right_arrow].sequence = WINDOW_ANIM_R1_BUTTON_PRESS;
-            g_window_records[level->right_arrow].frame_index = g_window_records[level->right_arrow].anim_counter = 0;
+            && g_display_object_animated_pool[level->left_arrow].sequence != DISPLAY_OBJECT_ANIM_L1_BUTTON_PRESS) {
+            g_display_object_animated_pool[level->right_arrow].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS;
+            g_display_object_animated_pool[level->right_arrow].frame_index
+                = g_display_object_animated_pool[level->right_arrow].anim_counter = 0;
             if (level->unit_count == 1) {
                 /* Shared tail: duplicating the sound call per arm is only
                  * partly cross-jumped and leaves an extra copy. */
@@ -709,11 +715,12 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
             direction = 1;
         } else {
             if (world_map_input_repeat_update(PSX_PAD_L1) == 0
-                || g_window_records[level->right_arrow].sequence == WINDOW_ANIM_R1_BUTTON_PRESS) {
+                || g_display_object_animated_pool[level->right_arrow].sequence == DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS) {
                 return;
             }
-            g_window_records[level->left_arrow].sequence = WINDOW_ANIM_L1_BUTTON_PRESS;
-            g_window_records[level->left_arrow].frame_index = g_window_records[level->left_arrow].anim_counter = 0;
+            g_display_object_animated_pool[level->left_arrow].sequence = DISPLAY_OBJECT_ANIM_L1_BUTTON_PRESS;
+            g_display_object_animated_pool[level->left_arrow].frame_index
+                = g_display_object_animated_pool[level->left_arrow].anim_counter = 0;
             if (level->unit_count == 1) {
                 goto done;
             }
@@ -741,17 +748,17 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
             return;
         }
         level->mode = PROPOSITION_SEND_UNIT_MODE_SELECT;
-        g_system_flags &= ~(SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_UNIT_PANEL_THREADS);
+        g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_UNIT_PANEL_THREADS);
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
         thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
-        g_window_records[level->list_frame.window_index].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->list_frame.render_index].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->frame_window_a].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->frame_window_b].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->preview_render].flags ^= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->list_render].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->list_frame.window_index].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->list_frame.render_index].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->frame_window_a].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->frame_window_b].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->preview_render].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->list_render].flags ^= DISPLAY_OBJECT_HIDDEN;
     }
 }
 
@@ -760,18 +767,19 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
 void proposition_participants_resume(menu_stack_record_t* level) {
     CVECTOR* color;
 
-    g_window_records[level->send_unit.list_frame.window_index].palette
-        = g_window_gs_image_records[level->send_unit.list_frame.render_index].palette
-        = g_window_gs_image_records[level->send_unit.list_render].palette
-        = g_window_records[level->send_unit.cursor_window].palette = 0;
+    g_display_object_animated_pool[level->send_unit.list_frame.window_index].palette
+        = g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].palette
+        = g_display_object_gs_image_pool[level->send_unit.list_render].palette
+        = g_display_object_animated_pool[level->send_unit.cursor_window].palette = 0;
     /* Each channel store reloads the level's render index. */
-    color = &g_window_gs_image_records[level->send_unit.preview_render].color;
+    color = &g_display_object_gs_image_pool[level->send_unit.preview_render].color;
     color->r = 0x80;
-    color = &g_window_gs_image_records[level->send_unit.preview_render].color;
+    color = &g_display_object_gs_image_pool[level->send_unit.preview_render].color;
     color->g = 0x80;
-    color = &g_window_gs_image_records[level->send_unit.preview_render].color;
+    color = &g_display_object_gs_image_pool[level->send_unit.preview_render].color;
     color->b = 0x80;
-    g_window_records[level->send_unit.left_arrow].palette = g_window_records[level->send_unit.right_arrow].palette = 0;
+    g_display_object_animated_pool[level->send_unit.left_arrow].palette
+        = g_display_object_animated_pool[level->send_unit.right_arrow].palette = 0;
 }
 
 /* Gray out the send-unit windows (palettes 6, 10 and 2) and tint the preview
@@ -780,13 +788,13 @@ void proposition_participants_resume(menu_stack_record_t* level) {
 void proposition_participants_suspend(menu_stack_record_t* level) {
     s32 pad[4];
 
-    g_window_records[level->send_unit.list_frame.window_index].palette = 6;
-    g_window_gs_image_records[level->send_unit.list_frame.render_index].palette = 2;
-    g_window_gs_image_records[level->send_unit.list_render].palette = 2;
-    g_window_records[level->send_unit.cursor_window].palette = 10;
-    g_window_gs_image_records[level->send_unit.preview_render].color.r = 0x40;
-    g_window_gs_image_records[level->send_unit.preview_render].color.g = 0x50;
-    g_window_gs_image_records[level->send_unit.preview_render].color.b = 0x70;
+    g_display_object_animated_pool[level->send_unit.list_frame.window_index].palette = 6;
+    g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].palette = 2;
+    g_display_object_gs_image_pool[level->send_unit.list_render].palette = 2;
+    g_display_object_animated_pool[level->send_unit.cursor_window].palette = 10;
+    g_display_object_gs_image_pool[level->send_unit.preview_render].color.r = 0x40;
+    g_display_object_gs_image_pool[level->send_unit.preview_render].color.g = 0x50;
+    g_display_object_gs_image_pool[level->send_unit.preview_render].color.b = 0x70;
 }
 
 /* Top-level step of the proposition send-unit menu level, dispatching on the
@@ -818,7 +826,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_CANCEL) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
-            g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags &= ~WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
             proposition_available_list_open();
         }
@@ -828,7 +836,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_ACCEPT) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
             g_menu_blocked_buttons = 0;
-            g_system_flags &= ~SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags &= ~WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
             proposition_detail_level_open(g_proposition_selected_row.id - 1);
             proposition_detail_level_suspend(level);
@@ -849,7 +857,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
         return;
     }
 
-    if (!(g_window_gs_image_records[level->send_unit.list_frame.render_index].flags & DISPLAY_OBJECT_POP_IN)) {
+    if (!(g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].flags & DISPLAY_OBJECT_POP_IN)) {
         value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         if (value != level->send_unit.shown_preview) {
             level->send_unit.shown_preview = value;
@@ -883,23 +891,23 @@ void proposition_participants_update(menu_stack_record_t* level) {
         level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_CANCEL;
     suspend:
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_window_record_count -= 7;
-        g_window_render_record_count -= 5;
-        g_window_render_object_count -= 0xC;
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_display_object_animated_count -= 7;
+        g_display_object_image_count -= 5;
+        g_display_object_queue_count -= 0xC;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         return;
     }
 
     if (buttons & PSX_PAD_SQUARE) {
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-        g_window_records[level->send_unit.list_frame.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->send_unit.list_frame.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->send_unit.frame_window_a].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->send_unit.frame_window_b].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->send_unit.preview_render].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[level->send_unit.list_render].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+        g_display_object_animated_pool[level->send_unit.list_frame.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->send_unit.frame_window_a].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->send_unit.frame_window_b].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->send_unit.preview_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[level->send_unit.list_render].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
         level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN;
         return;
     }
@@ -924,21 +932,21 @@ void proposition_participants_update(menu_stack_record_t* level) {
     }
 
     if (g_proposition_send_unit_count == 3) {
-        g_window_records[level->send_unit.frame_window_a].palette
-            = g_window_records[level->send_unit.frame_window_b].palette = 0xA;
-        g_window_gs_image_records[level->send_unit.portrait_frame].flags |= DISPLAY_OBJECT_POP_IN;
-        g_window_gs_image_records[level->send_unit.portrait_frame].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->send_unit.frame_window_a].palette
+            = g_display_object_animated_pool[level->send_unit.frame_window_b].palette = 0xA;
+        g_display_object_gs_image_pool[level->send_unit.portrait_frame].flags |= DISPLAY_OBJECT_POP_IN;
+        g_display_object_gs_image_pool[level->send_unit.portrait_frame].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_menu_blocked_buttons = -1;
-        g_window_records[level->send_unit.portrait_window].flags ^= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->send_unit.portrait_window].flags ^= DISPLAY_OBJECT_HIDDEN;
         level->send_unit.shown_unit = -1;
         level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_REPLACE;
         level->send_unit.slot = 0;
-        g_window_records[level->send_unit.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->send_unit.cursor_window].position.x
-            = g_window_gs_image_records[level->send_unit.list_frame.render_index].base.x + 6;
-        g_window_records[level->send_unit.cursor_window].position.y
-            = g_window_gs_image_records[level->send_unit.list_frame.render_index].base.y + level->send_unit.slot * 16
-            + 0xC;
+        g_display_object_animated_pool[level->send_unit.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->send_unit.cursor_window].position.x
+            = g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].position.x + 6;
+        g_display_object_animated_pool[level->send_unit.cursor_window].position.y
+            = g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].position.y
+            + level->send_unit.slot * 16 + 0xC;
         return;
     }
 

@@ -4,6 +4,7 @@
 #include "fft/bits.h"
 #include "fft/equipment.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/option.h"
 #include "psx/types.h"

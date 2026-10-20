@@ -3,6 +3,7 @@
 
 #include "fft/battle_map.h"
 #include "fft/battle_map_load.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/cursor.h"
@@ -11,7 +12,6 @@
 #include "fft/effect_script.h"
 #include "fft/effect_secondary.h"
 #include "fft/projectile.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
@@ -73,44 +73,44 @@ s32 effect_request_load_poll(void) {
     return effect_file_load_update() != 0;
 }
 
-/* effect_play as a g_thread_call_target: script_effect_wait runs it on the main
+/* effect_playback_start as a g_thread_call_target: script_effect_wait runs it on the main
  * stack. */
 void effect_request_play(void) {
-    effect_play();
+    effect_playback_start();
 }
 
-/* Return g_state_animation_continue_check, nonzero while the action's effect is still
+/* Return g_battle_animation_wait_state, nonzero while the action's effect is still
  * loading or playing; script_effect_wait polls it on the main stack. */
-s32 state_get_animation_continue_check(void) {
-    return g_state_animation_continue_check;
+s32 battle_animation_wait_state_get(void) {
+    return g_battle_animation_wait_state;
 }
 
 /* Enter the effect-playback game state, saving the state and vsync interval
- * that state_handle_effect restores. Returns 1 when the effect data is
+ * that battle_state_effect_update restores. Returns 1 when the effect data is
  * not ready yet and the caller must retry. No code calls it. */
-s32 state_enter_effect_playback(void) {
+s32 battle_state_try_enter_effect_playback(void) {
     s32 previous_state;
     s32 previous_vsync_interval;
 
     if (effect_file_load_update() != 0) {
         return 1;
     }
-    effect_play();
-    previous_state = g_game_state;
+    effect_playback_start();
+    previous_state = g_battle_state;
     previous_vsync_interval = g_system_vsync_interval;
-    g_game_state = GAME_STATE_EFFECT;
+    g_battle_state = BATTLE_STATE_EFFECT;
     g_system_vsync_interval = 2;
     g_fade_tint_fade_frames = 0;
     g_camera_screen_offset_countdown = 0;
     g_camera_rotation_countdown = 0;
     g_camera_zoom_countdown = 0;
-    g_game_state_previous = previous_state;
+    g_battle_state_previous = previous_state;
     g_system_saved_vsync_interval = previous_vsync_interval;
     return 0;
 }
 
 /* Empty, and nothing in the game calls it. */
-void state_noop_1(void) {
+void battle_state_noop_1(void) {
 }
 
 /* Stop the slow-down timer the game loop starts when a frame of the effect or
@@ -217,7 +217,7 @@ s32 battle_map_texture_animation_start(s32 animation_index, s32 object_state) {
 }
 
 /* Return whether the map texture animation is still playing. */
-s32 battle_map_texture_animation_active_get(s32 animation_index) {
+s32 battle_map_texture_animation_is_active(s32 animation_index) {
     return battle_map_data_command_dispatch(
         BATTLE_MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE, animation_index, 1, 1);
 }
@@ -284,14 +284,14 @@ void deploy_mark_finished(void) {
     g_deploy_finished = 1;
 }
 
-/* Returns the hsync count state_sync_frame measured for the last frame. No
+/* Returns the hsync count battle_frame_submit measured for the last frame. No
  * code calls it. */
 s32 system_frame_measurement_get(void) {
     return g_system_battle_frame_hsync_count;
 }
 
 /* Set g_system_min_vsync_interval, the minimum number of vertical blanks
- * state_sync_frame waits per frame in the effect and action-execute
+ * battle_frame_submit waits per frame in the effect and action-execute
  * states. Values outside 1-9 are ignored. */
 void system_min_vsync_interval_set(s32 value) {
     if (value >= 1 && value <= 9) {

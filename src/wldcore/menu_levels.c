@@ -4,6 +4,7 @@
 #include "fft/bar.h"
 #include "fft/brave_story.h"
 #include "fft/calendar.h"
+#include "fft/display_object.h"
 #include "fft/encounter.h"
 #include "fft/file.h"
 #include "fft/formation.h"
@@ -285,7 +286,7 @@ void world_map_menu_state_init(void) {
 /*
  * Runs the WORLD menu code for one world-map frame, drawing into `context`.
  *
- * Skipped while SYSTEM_FLAG_SKIP_MENU_FRAME is set. While the unit panel
+ * Skipped while WORLD_MAP_FLAG_SKIP_MENU_FRAME is set. While the unit panel
  * threads are in use it draws the window frames, runs the event input update
  * and plays the frame's sound effect itself; otherwise it runs the WORLD
  * screen/menu frame. Buttons in g_menu_blocked_buttons are withheld from
@@ -296,12 +297,12 @@ void world_map_menus_update(GsOT* context) {
     u32* sprite_entries;
     u32* menu_entries;
 
-    if (g_system_flags & SYSTEM_FLAG_SKIP_MENU_FRAME) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_SKIP_MENU_FRAME) {
         return;
     }
     formation_backdrop_otag_set((u32*)(context->org + 15));
     screen_allowed_buttons_set(~g_menu_blocked_buttons);
-    if (g_system_flags & SYSTEM_FLAG_UNIT_PANEL_THREADS) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_UNIT_PANEL_THREADS) {
         otag_entries = (u32*)context->org;
         g_gfx_current_otag_entry = otag_entries + g_menu_stack_ot_offset;
         menu_draw_active_window_frames();
@@ -322,14 +323,14 @@ void world_map_menus_update(GsOT* context) {
 void menu_stack_reset(void) {
     g_menu_stack_depth = 0;
     cursor_level_open();
-    g_window_records[g_menu_stack_records[0].window_index].position.x
+    g_display_object_animated_pool[g_menu_stack_records[0].window_index].position.x
         = g_world_map_marker_state.marker.render.position.x;
-    g_window_records[g_menu_stack_records[0].window_index].position.y
+    g_display_object_animated_pool[g_menu_stack_records[0].window_index].position.y
         = g_world_map_marker_state.marker.render.position.y - 4;
 }
 
 /* Run the per-frame handler of the menu level on top of the stack, passing its level record. */
-void menu_stack_dispatch_idle(void) {
+void menu_stack_dispatch_update(void) {
     s32 index = g_menu_stack_depth;
 
     g_level_update_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
@@ -359,38 +360,38 @@ void menu_stack_dispatch_suspend(void) {
  * The level record is re-read into its own local after the script call; reusing
  * the window-level depth local changes the register allocation. */
 static void cursor_level_open(void) {
-    window_xy_t* xy;
+    display_object_position_stride_t* xy;
     display_object_animated_t* records;
     s32 window_index;
     s32 depth;
     s32 level;
 
-    window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
 
     /* Keep the position-column base separate from the record base. */
-    xy = (window_xy_t*)&g_window_records[0].position;
-    records = g_window_records;
+    xy = (display_object_position_stride_t*)&g_display_object_animated_pool[0].position;
+    records = g_display_object_animated_pool;
 
     depth = g_menu_stack_depth;
     g_menu_stack_records[depth].map_cursor.window_index = window_index;
-    g_window_records[window_index].sequence = WINDOW_ANIM_CURSOR_STILL;
-    g_window_records[window_index].priority = 12;
+    g_display_object_animated_pool[window_index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_STILL;
+    g_display_object_animated_pool[window_index].priority = 12;
     xy[window_index].x = 0;
     xy[window_index].y = 0;
     records[window_index].anim_counter = 0;
-    g_window_records[window_index].frame_index = 0;
+    g_display_object_animated_pool[window_index].frame_index = 0;
 
-    window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     depth = g_menu_stack_depth;
     g_hud_value_mode = HUD_VALUE_FUNDS;
     g_menu_stack_records[depth].map_cursor.alt_window_index = window_index;
-    g_window_records[window_index].sequence = WINDOW_ANIM_MAP_EDGE_ARROWS;
-    g_window_records[window_index].priority = 12;
-    g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[window_index].sequence = DISPLAY_OBJECT_ANIM_MAP_EDGE_ARROWS;
+    g_display_object_animated_pool[window_index].priority = 12;
+    g_display_object_animated_pool[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     xy[window_index].x = 0;
     xy[window_index].y = 0;
     records[window_index].anim_counter = 0;
-    g_window_records[window_index].frame_index = 0;
+    g_display_object_animated_pool[window_index].frame_index = 0;
 
     g_world_map_scroll_y.limit = 0x400;
     g_world_map_scroll_x.limit = 0x400;
@@ -417,9 +418,9 @@ static void cursor_level_open(void) {
  * map if the captured frame is showing and run any pending script requests. */
 static void cursor_level_resume(menu_stack_record_t* level) {
     g_hud_value_mode = HUD_VALUE_FUNDS;
-    g_window_records[level->map_cursor.window_index].palette = 0;
+    g_display_object_animated_pool[level->map_cursor.window_index].palette = 0;
     g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
-    if (g_window_records[g_world_map_window_index].flags & DISPLAY_OBJECT_HIDDEN) {
+    if (g_display_object_animated_pool[g_world_map_window_index].flags & DISPLAY_OBJECT_HIDDEN) {
         world_map_backdrop_mode_set(0);
     }
     location_script_requests_dispatch();
@@ -428,7 +429,7 @@ static void cursor_level_resume(menu_stack_record_t* level) {
 /* Reset the window palette and both map-cursor scroll axes. The scroll fields
  * preserve the original store order after the indexed window store. */
 void world_map_cursor_level_suspend(menu_stack_record_t* level) {
-    g_window_records[level->window_index].palette = 10;
+    g_display_object_animated_pool[level->window_index].palette = 10;
     g_world_map_scroll_y.value = 0;
     g_world_map_scroll_x.value = 0;
     g_world_map_scroll_y.output = 0;
@@ -509,30 +510,30 @@ static void cursor_level_update(menu_stack_record_t* level) {
     /* The exits funnel into the shared snap-hit tail at `finish`; in the
      * target's block order these need gotos. */
     if (g_travel.flags & TRAVEL_ACTIVE) {
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
         goto finish;
     }
 
-    if (level->map_cursor.wide_view == 0 && !(g_world_map_previous_system_flags & SYSTEM_FLAG_DRAW_MAP)) {
+    if (level->map_cursor.wide_view == 0 && !(g_world_map_previous_flags & WORLD_MAP_FLAG_DRAW_MAP)) {
         if (level->map_cursor.pending_mode != 0) {
-            flags = g_system_flags;
-            if (flags & SYSTEM_FLAG_FADING) {
+            flags = g_world_map_flags;
+            if (flags & WORLD_MAP_FLAG_FADING) {
                 return;
             }
-            g_system_flags = flags ^ SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags = flags ^ WORLD_MAP_FLAG_INPUT_BLOCKED;
             if (level->map_cursor.pending_mode == 3) {
-                g_system_flags = flags ^ (SYSTEM_FLAG_RUNNING | SYSTEM_FLAG_INPUT_BLOCKED);
+                g_world_map_flags = flags ^ (WORLD_MAP_FLAG_RUNNING | WORLD_MAP_FLAG_INPUT_BLOCKED);
             }
             level->map_cursor.pending_mode = 0;
         }
-        if (g_system_flags & SYSTEM_FLAG_FADING) {
+        if (g_world_map_flags & WORLD_MAP_FLAG_FADING) {
             /* Skips the zoom handling and the wide-view toggle below. */
             goto scroll;
         }
         if (!(g_world_map_zoom.flags & (WORLD_MAP_PAN_ACTIVE | WORLD_MAP_PAN_ZOOMED_OUT)) && g_music_queue.count == 0) {
             if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
                 /* The hit test returns a one-based dot index, 0 for no dot. */
-                hit = world_map_dot_find(g_window_records[level->map_cursor.window_index].position);
+                hit = world_map_dot_find(g_display_object_animated_pool[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     sound_play_effect(SOUND_SFX_CONFIRM);
                     hit--;
@@ -550,7 +551,7 @@ static void cursor_level_update(menu_stack_record_t* level) {
                         return;
                     }
                 } else {
-                    g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+                    g_display_object_animated_pool[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
                     focus_level_open(g_world_map_marker_state.marker.location_id);
                     return;
                 }
@@ -564,7 +565,7 @@ static void cursor_level_update(menu_stack_record_t* level) {
                 return;
             }
             if (buttons & PSX_PAD_SELECT) {
-                hit = world_map_dot_find(g_window_records[level->map_cursor.window_index].position);
+                hit = world_map_dot_find(g_display_object_animated_pool[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     hit--;
                     world_map_cursor_level_suspend(level);
@@ -580,7 +581,7 @@ static void cursor_level_update(menu_stack_record_t* level) {
     motion = g_world_map_zoom.flags;
     if (!(motion & WORLD_MAP_PAN_ACTIVE)) {
         if (level->map_cursor.wide_view == 0 && (g_world_map_input_new_button_presses & (PSX_PAD_L1 | PSX_PAD_R1))) {
-            g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
             g_world_map_zoom.duration = 0x20;
             g_world_map_zoom.frame = 0;
             g_world_map_zoom.flags = (g_world_map_zoom.flags ^ WORLD_MAP_PAN_ZOOMED_OUT) | WORLD_MAP_PAN_ACTIVE;
@@ -609,7 +610,7 @@ static void cursor_level_update(menu_stack_record_t* level) {
                 = g_world_map_zoom.origin.vy + ((8 - g_world_map_zoom.origin.vy) * frame) / duration;
             g_world_map_projection_view.scale.vx = g_world_map_projection_view.scale.vy = ONE - step_x;
             g_world_map_zoom.frame = frame + 1;
-            g_system_flags |= SYSTEM_FLAG_HIDE_MAP_DOTS | SYSTEM_FLAG_HIDE_MAP_ROUTES;
+            g_world_map_flags |= WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES;
             if (frame + 1 == duration) {
                 g_world_map_projection_view.scale.vy = 0x800;
                 g_world_map_projection_view.scale.vx = 0x800;
@@ -627,11 +628,11 @@ static void cursor_level_update(menu_stack_record_t* level) {
                 g_world_map_projection_view.scale.vx = ONE;
                 g_world_map_projection_view.origin = g_world_map_zoom.origin;
                 g_world_map_zoom.flags ^= WORLD_MAP_PAN_ACTIVE;
-                g_system_flags &= ~(SYSTEM_FLAG_HIDE_MAP_DOTS | SYSTEM_FLAG_HIDE_MAP_ROUTES);
+                g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES);
             }
         }
 
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
         g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
         goto finish;
     }
@@ -644,15 +645,15 @@ static void cursor_level_update(menu_stack_record_t* level) {
     if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {
         if (level->map_cursor.wide_view != 0) {
             level->map_cursor.wide_view = 0;
-            g_window_records[level->map_cursor.alt_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->map_cursor.alt_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         }
-        g_window_records[level->map_cursor.window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->map_cursor.window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else if (level->map_cursor.wide_view != 1) {
         level->map_cursor.wide_view = 1;
-        g_window_records[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->map_cursor.alt_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->map_cursor.alt_window_index].anim_counter
-            = g_window_records[level->map_cursor.alt_window_index].frame_index = 0;
+        g_display_object_animated_pool[level->map_cursor.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->map_cursor.alt_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->map_cursor.alt_window_index].anim_counter
+            = g_display_object_animated_pool[level->map_cursor.alt_window_index].frame_index = 0;
         g_world_map_scroll_y.value = 0;
         g_world_map_scroll_x.value = 0;
         g_world_map_scroll_y.output = 0;
@@ -687,14 +688,14 @@ scroll:
         amount.x = g_world_map_scroll_x.output;
         amount.y = g_world_map_scroll_y.output;
         if (!(g_world_map_zoom.flags & WORLD_MAP_PAN_ZOOMED_OUT)) {
-            target.x = g_window_records[level->map_cursor.window_index].position.x + amount.x;
-            target.y = g_window_records[level->map_cursor.window_index].position.y + amount.y;
+            target.x = g_display_object_animated_pool[level->map_cursor.window_index].position.x + amount.x;
+            target.y = g_display_object_animated_pool[level->map_cursor.window_index].position.y + amount.y;
             level->map_cursor.snap_hit = world_map_dot_snap_get(target, &step_x, &step_y);
             amount.x += step_x;
             amount.y += step_y;
 
-            target.x = g_window_records[level->map_cursor.window_index].position.x + amount.x;
-            target.y = g_window_records[level->map_cursor.window_index].position.y + amount.y;
+            target.x = g_display_object_animated_pool[level->map_cursor.window_index].position.x + amount.x;
+            target.y = g_display_object_animated_pool[level->map_cursor.window_index].position.y + amount.y;
             saved = g_world_map_projection_view.origin;
             if ((amount.x < 0 && target.x < -0x40) || (amount.x > 0 && target.x >= 0x49)) {
                 world_map_horizontal_scroll_apply(&amount.x, &g_world_map_projection_view.origin.vx);
@@ -704,24 +705,24 @@ scroll:
             }
             if (saved.vx != g_world_map_projection_view.origin.vx
                 || saved.vy != g_world_map_projection_view.origin.vy) {
-                g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+                g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
                 g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
             }
         }
 
-        g_window_records[level->map_cursor.window_index].position.x += amount.x;
-        g_window_records[level->map_cursor.window_index].position.y += amount.y;
-        if (g_window_records[level->map_cursor.window_index].position.x < -0x70) {
-            g_window_records[level->map_cursor.window_index].position.x = -0x70;
+        g_display_object_animated_pool[level->map_cursor.window_index].position.x += amount.x;
+        g_display_object_animated_pool[level->map_cursor.window_index].position.y += amount.y;
+        if (g_display_object_animated_pool[level->map_cursor.window_index].position.x < -0x70) {
+            g_display_object_animated_pool[level->map_cursor.window_index].position.x = -0x70;
         }
-        if (g_window_records[level->map_cursor.window_index].position.x >= 0x79) {
-            g_window_records[level->map_cursor.window_index].position.x = 0x78;
+        if (g_display_object_animated_pool[level->map_cursor.window_index].position.x >= 0x79) {
+            g_display_object_animated_pool[level->map_cursor.window_index].position.x = 0x78;
         }
-        if (g_window_records[level->map_cursor.window_index].position.y < -0x68) {
-            g_window_records[level->map_cursor.window_index].position.y = -0x68;
+        if (g_display_object_animated_pool[level->map_cursor.window_index].position.y < -0x68) {
+            g_display_object_animated_pool[level->map_cursor.window_index].position.y = -0x68;
         }
-        if (g_window_records[level->map_cursor.window_index].position.y >= 0x69) {
-            g_window_records[level->map_cursor.window_index].position.y = 0x68;
+        if (g_display_object_animated_pool[level->map_cursor.window_index].position.y >= 0x69) {
+            g_display_object_animated_pool[level->map_cursor.window_index].position.y = 0x68;
         }
     } else {
         /* In wide view the d-pad scrolls the map 4 units a frame instead of moving the cursor. */
@@ -746,7 +747,7 @@ scroll:
             world_map_scroll_apply(&amount, &g_world_map_projection_view.origin);
             if (saved.vx != g_world_map_projection_view.origin.vx
                 || saved.vy != g_world_map_projection_view.origin.vy) {
-                g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+                g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
                 g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
             }
         }
@@ -770,8 +771,9 @@ static void focus_level_open(s32 dot_index) {
     g_menu_stack_records[g_menu_stack_depth].focus_dot_index = dot_index;
     world_map_pan_start(&render->position, &g_world_map_dots[dot_index].position);
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
-        g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags
+            |= DISPLAY_OBJECT_HIDDEN;
     }
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_WORLD_MAP_FOCUS;
     g_menu_stack_depth = g_menu_stack_depth + 1;
@@ -783,7 +785,7 @@ static void focus_level_open(s32 dot_index) {
  * label again and runs the parent's resume handler.
  *
  * The entry must be a struct pointer: the target hoists its reload above the
- * scalar g_system_flags store, which GCC only allows for an in-struct
+ * scalar g_world_map_flags store, which GCC only allows for an in-struct
  * access. */
 static void focus_level_update(menu_stack_record_t* entry) {
     world_map_marker_state_t* state;
@@ -793,15 +795,15 @@ static void focus_level_update(menu_stack_record_t* entry) {
         world_map_pan_update();
         state = &g_world_map_marker_state;
         state->flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
         return;
     }
     level = g_menu_stack_depth;
     g_menu_stack_depth = level - 1;
-    g_window_records[g_menu_stack_records[level - 2].window_index].position.x
+    g_display_object_animated_pool[g_menu_stack_records[level - 2].window_index].position.x
         = g_world_map_dots[entry->focus_dot_index].render.position.x;
-    g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_window_records[g_menu_stack_records[level - 2].window_index].position.y
+    g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
+    g_display_object_animated_pool[g_menu_stack_records[level - 2].window_index].position.y
         = g_world_map_dots[entry->focus_dot_index].render.position.y - 4;
     menu_stack_dispatch_resume();
 }
@@ -819,10 +821,10 @@ static void path_level_open(s32 from, s32 to, s32 erase) {
     g_menu_stack_records[depth].path.to_location = to;
     g_menu_stack_records[depth].path.erase = erase;
     g_menu_stack_records[depth].path.pending_sound = 1;
-    g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     window_index = g_menu_stack_records[depth - 1].window_index;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_WORLD_MAP_PATH;
-    g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
 }
 
@@ -838,7 +840,7 @@ static void path_level_update(menu_stack_record_t* level) {
     s32 window_index;
 
     if (level->path.pending_sound != 0) {
-        if (g_system_flags & SYSTEM_FLAG_FADING) {
+        if (g_world_map_flags & WORLD_MAP_FLAG_FADING) {
             return;
         }
         if (level->path.erase != 0) {
@@ -874,17 +876,17 @@ static void path_level_update(menu_stack_record_t* level) {
                 }
             }
         }
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
         return;
     }
 
     sound_play_effect(SOUND_SFX_NONE);
-    g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+    g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
     depth = g_menu_stack_depth;
     g_menu_stack_depth = depth - 1;
     window_index = g_menu_stack_records[depth - 2].window_index;
-    g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_window_records[window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
+    g_display_object_animated_pool[window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
     menu_stack_dispatch_resume();
 }
 
@@ -899,10 +901,10 @@ static void visibility_level_open(s32 dot_index, s32 erase) {
     g_menu_stack_records[depth].visibility.erase = erase;
     g_menu_stack_records[depth].visibility.delay = 0x10;
     g_menu_stack_records[depth].visibility.pending_sound = 1;
-    g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     window_index = g_menu_stack_records[depth - 1].window_index;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_WORLD_MAP_LOCATION_VISIBILITY;
-    g_window_records[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
 }
 
@@ -918,7 +920,7 @@ static void visibility_level_update(menu_stack_record_t* level) {
     s32 index;
 
     if (level->visibility.pending_sound != 0) {
-        if (g_system_flags & SYSTEM_FLAG_FADING) {
+        if (g_world_map_flags & WORLD_MAP_FLAG_FADING) {
             return;
         }
         if (level->visibility.erase != 0) {
@@ -930,7 +932,7 @@ static void visibility_level_update(menu_stack_record_t* level) {
         level->visibility.pending_sound = 0;
     }
     if (level->visibility.delay != 0) {
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
         level->visibility.delay--;
         return;
     }
@@ -938,11 +940,11 @@ static void visibility_level_update(menu_stack_record_t* level) {
         g_world_map_dots[level->visibility.dot_index].render.flags |= DISPLAY_OBJECT_HIDDEN;
         script_variable_set(level->visibility.dot_index + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST, 0);
     }
-    g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+    g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
     g_menu_stack_depth--;
     index = g_menu_stack_records[g_menu_stack_depth - 1].window_index;
-    g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-    g_window_records[index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
+    g_display_object_animated_pool[index].flags &= ~DISPLAY_OBJECT_HIDDEN;
     menu_stack_dispatch_resume();
 }
 
@@ -957,12 +959,12 @@ void world_map_menu_level_open(void) {
     g_hud_value_mode = HUD_VALUE_FUNDS;
     g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
     depth = g_menu_stack_depth;
-    flags = g_system_flags;
+    flags = g_world_map_flags;
     g_menu_stack_records[depth].return_level.delay = 3;
     g_menu_stack_records[depth].return_level.pending = 0;
-    g_system_flags = flags & ~SYSTEM_FLAG_SCREEN_CLEARED;
-    if ((flags & SYSTEM_FLAG_FADING) != 0) {
-        g_system_flags = (flags & ~SYSTEM_FLAG_SCREEN_CLEARED) | SYSTEM_FLAG_FREEZE_ANIMATION;
+    g_world_map_flags = flags & ~WORLD_MAP_FLAG_SCREEN_CLEARED;
+    if ((flags & WORLD_MAP_FLAG_FADING) != 0) {
+        g_world_map_flags = (flags & ~WORLD_MAP_FLAG_SCREEN_CLEARED) | WORLD_MAP_FLAG_FREEZE_ANIMATION;
         counter = &g_world_map_fade.elapsed;
         *counter = *counter - 4;
     }
@@ -982,16 +984,16 @@ static void map_menu_return_update(menu_stack_record_t* level) {
     s32 cleared;
     s32 location;
 
-    if (g_system_flags & SYSTEM_FLAG_SCREEN_CLEARED) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_SCREEN_CLEARED) {
         level->return_level.pending = 1;
     }
 
-    if (g_system_flags & SYSTEM_FLAG_FADING) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_FADING) {
         if (level->return_level.pending != 0) {
             level->return_level.pending = 0;
             world_map_backdrop_mode_set(0);
             level->return_level.delay = 3;
-            g_system_flags |= SYSTEM_FLAG_FADING | SYSTEM_FLAG_FREEZE_ANIMATION;
+            g_world_map_flags |= WORLD_MAP_FLAG_FADING | WORLD_MAP_FLAG_FREEZE_ANIMATION;
         }
         g_menu_blocked_buttons = -1;
         return;
@@ -1011,18 +1013,18 @@ static void map_menu_return_update(menu_stack_record_t* level) {
     }
 
     world_map_input_repeat_init();
-    flags = g_system_flags;
+    flags = g_world_map_flags;
     world_map_backdrop_mode_set(0);
-    cleared = g_system_flags & ~SYSTEM_FLAG_FREEZE_ANIMATION;
-    g_system_flags = cleared;
+    cleared = g_world_map_flags & ~WORLD_MAP_FLAG_FREEZE_ANIMATION;
+    g_world_map_flags = cleared;
     g_menu_stack_depth -= 1;
-    if (flags & SYSTEM_FLAG_REQUEST_BRAVE_STORY) {
-        g_system_flags = cleared ^ SYSTEM_FLAG_DRAW_MAP;
+    if (flags & WORLD_MAP_FLAG_REQUEST_BRAVE_STORY) {
+        g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
         screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
         return;
     }
 
-    if (flags & SYSTEM_FLAG_REQUEST_DESTINATION) {
+    if (flags & WORLD_MAP_FLAG_REQUEST_DESTINATION) {
         location = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
         world_map_backdrop_capture();
         menu_stack_dispatch_resume();
@@ -1032,31 +1034,31 @@ static void map_menu_return_update(menu_stack_record_t* level) {
         return;
     }
 
-    if (flags & SYSTEM_FLAG_REQUEST_TUTORIAL) {
-        g_system_flags = cleared ^ SYSTEM_FLAG_DRAW_MAP;
+    if (flags & WORLD_MAP_FLAG_REQUEST_TUTORIAL) {
+        g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
         screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
         return;
     }
 
-    if (flags & SYSTEM_FLAG_REQUEST_VARIABLE_LIST) {
+    if (flags & WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST) {
         variable_list_open();
         return;
     }
 
-    if (flags & SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER) {
+    if (flags & WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER) {
         party_number_open();
         return;
     }
 
-    if (flags & SYSTEM_FLAG_RESTART) {
-        g_system_flags = cleared & ~(SYSTEM_FLAG_RUNNING | SYSTEM_FLAG_UNLOCK_ALL);
+    if (flags & WORLD_MAP_FLAG_RESTART) {
+        g_world_map_flags = cleared & ~(WORLD_MAP_FLAG_RUNNING | WORLD_MAP_FLAG_UNLOCK_ALL);
         if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
             || script_variable_get(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
-            g_system_flags |= SYSTEM_FLAG_RESTART;
+            g_world_map_flags |= WORLD_MAP_FLAG_RESTART;
         } else {
-            g_system_flags &= ~SYSTEM_FLAG_RESTART;
+            g_world_map_flags &= ~WORLD_MAP_FLAG_RESTART;
         }
-        g_system_flags |= SYSTEM_FLAG_NO_BACKGROUND_IMAGE;
+        g_world_map_flags |= WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE;
         return;
     }
 
@@ -1099,12 +1101,12 @@ void menu_stack_text_window_open(s32 text, s32 reload_text) {
         text_pointer_table_relocate(g_screen_text_section_offsets);
     }
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].message.window_index = index;
-    g_window_records[index].sequence = WINDOW_ANIM_MESSAGE_LABEL;
-    g_window_records[index].priority = 1;
-    g_window_records[index].anim_counter = 0;
-    records = g_window_records;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_MESSAGE_LABEL;
+    g_display_object_animated_pool[index].priority = 1;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    records = g_display_object_animated_pool;
     records[index].frame_index = 0;
 
     entry = text_entry_find(text);
@@ -1151,7 +1153,7 @@ void menu_stack_text_window_open(s32 text, s32 reload_text) {
  * blocked-button mask it saved and (when asked) the text section pointers,
  * and resumes the level underneath. */
 static void text_level_update(menu_stack_record_t* level) {
-    if (g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
     if (text_window_update(&g_text_window) != 0) {
@@ -1159,8 +1161,8 @@ static void text_level_update(menu_stack_record_t* level) {
     }
     g_input_current_buttons = 0;
     g_menu_blocked_buttons = level->message.saved_blocked_buttons;
-    g_window_record_count -= 1;
-    g_window_render_object_count -= 1;
+    g_display_object_animated_count -= 1;
+    g_display_object_queue_count -= 1;
     g_menu_stack_depth -= 1;
     if (level->message.reload_text != 0) {
         text_section_pointers_restore();
@@ -1170,7 +1172,7 @@ static void text_level_update(menu_stack_record_t* level) {
 
 /* Pushes MENU_STACK_LEVEL_MESSAGE, a dialog box on message `text`:
  * optionally points the text formatter at WORLD's sections, starts the dialog
- * thread (mode 0x3b while SYSTEM_FLAG_UNIT_PANEL_THREADS is set, else
+ * thread (mode 0x3b while WORLD_MAP_FLAG_UNIT_PANEL_THREADS is set, else
  * 0x33), saves the blocked buttons in the level and blocks them all, and
  * plays SOUND_SFX_WINDOW_OPEN. */
 void menu_stack_message_open(s32 text, s32 reload_text) {
@@ -1182,7 +1184,7 @@ void menu_stack_message_open(s32 text, s32 reload_text) {
         text_pointer_table_relocate(g_screen_text_section_offsets);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
-    if (g_system_flags & SYSTEM_FLAG_UNIT_PANEL_THREADS) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_UNIT_PANEL_THREADS) {
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x3B, text, 0);
     } else {
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x33, text, 0);
@@ -1235,25 +1237,25 @@ static void variable_list_open(void) {
     s32 record_index;
     u8 unused_locals[0x10];
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].variable_list.window_index = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[index].priority = 3;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[index].priority = 3;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].variable_list.render_index = index;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    g_window_gs_image_records[index].priority = 3;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_display_object_gs_image_pool[index].priority = 3;
     g_menu_stack_records[g_menu_stack_depth].variable_list.first_variable = 0;
     variable_list_draw(&g_menu_stack_records[g_menu_stack_depth].variable_list);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].variable_list.cursor = 0;
-    g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.x
-        = g_window_gs_image_records[g_menu_stack_records[record_index].variable_list.render_index].base.x + 8;
+    g_display_object_animated_pool[g_menu_stack_records[record_index].variable_list.window_index].position.x
+        = g_display_object_gs_image_pool[g_menu_stack_records[record_index].variable_list.render_index].position.x + 8;
     g_menu_stack_depth = record_index + 1;
-    g_window_records[g_menu_stack_records[record_index].variable_list.window_index].position.y
-        = g_window_gs_image_records[g_menu_stack_records[record_index].variable_list.render_index].base.y
+    g_display_object_animated_pool[g_menu_stack_records[record_index].variable_list.window_index].position.y
+        = g_display_object_gs_image_pool[g_menu_stack_records[record_index].variable_list.render_index].position.y
         - -(g_menu_stack_records[record_index].variable_list.cursor * 0x10 + 0xC);
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_DEBUG_VARIABLE_LIST;
 }
@@ -1291,8 +1293,8 @@ static void variable_list_draw(debug_variable_list_level_t* level) {
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
     /* Direct record indexing moves the symbol load after the index scaling
      * and breaks the exact match. Retain the target's biased base and stride. */
-    records = &g_window_gs_image_records[0].base;
-    base = (point32_t*)((u8*)records + index * sizeof(window_gs_image_record_t));
+    records = &g_display_object_gs_image_pool[0].position;
+    base = (point32_t*)((u8*)records + index * sizeof(display_object_gs_image_t));
     base->x = -(bounds.w / 2);
     base->y = -88;
     point.x = 8;
@@ -1332,25 +1334,25 @@ static void variable_list_update(menu_stack_record_t* level) {
     s32 variable;
     s32 dead[2];
 
-    if (g_window_gs_image_records[level->variable_list.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->variable_list.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        g_window_records[level->variable_list.window_index].palette = 0xA;
-        g_window_gs_image_records[level->variable_list.render_index].palette = 2;
-        g_window_records[level->variable_list.window_index].sequence = WINDOW_ANIM_CURSOR_PRESS;
-        g_window_records[level->variable_list.window_index].anim_counter
-            = g_window_records[level->variable_list.window_index].frame_index = 0;
+        g_display_object_animated_pool[level->variable_list.window_index].palette = 0xA;
+        g_display_object_gs_image_pool[level->variable_list.render_index].palette = 2;
+        g_display_object_animated_pool[level->variable_list.window_index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
+        g_display_object_animated_pool[level->variable_list.window_index].anim_counter
+            = g_display_object_animated_pool[level->variable_list.window_index].frame_index = 0;
         variable = level->variable_list.first_variable + level->variable_list.cursor;
         variable_edit_open(variable, script_variable_get(variable));
         return;
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
-        g_window_record_count -= 1;
-        g_window_render_record_count -= 1;
-        g_window_render_object_count -= 2;
+        g_display_object_animated_count -= 1;
+        g_display_object_image_count -= 1;
+        g_display_object_queue_count -= 2;
         g_menu_stack_depth -= 1;
         menu_stack_dispatch_resume();
         return;
@@ -1411,10 +1413,10 @@ cursor_down:
         level->variable_list.cursor++;
     }
 move_cursor:
-    g_window_records[level->variable_list.window_index].position.x
-        = g_window_gs_image_records[level->variable_list.render_index].base.x + 8;
-    g_window_records[level->variable_list.window_index].position.y
-        = g_window_gs_image_records[level->variable_list.render_index].base.y
+    g_display_object_animated_pool[level->variable_list.window_index].position.x
+        = g_display_object_gs_image_pool[level->variable_list.render_index].position.x + 8;
+    g_display_object_animated_pool[level->variable_list.window_index].position.y
+        = g_display_object_gs_image_pool[level->variable_list.render_index].position.y
         - -(level->variable_list.cursor * 0x10 + 0xC);
 }
 
@@ -1464,13 +1466,14 @@ static void variable_edit_update(menu_stack_record_t* level) {
             variable_list_draw(&g_menu_stack_records[depth - 1].variable_list);
         }
         parent = g_menu_stack_depth - 1;
-        g_window_records[g_menu_stack_records[parent].variable_list.window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
+        g_display_object_animated_pool[g_menu_stack_records[parent].variable_list.window_index].sequence
+            = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
         slot = g_menu_stack_records[parent].variable_list.window_index;
-        g_window_gs_image_records[g_menu_stack_records[parent].variable_list.render_index].palette = 0;
-        record = &g_window_records[slot];
+        g_display_object_gs_image_pool[g_menu_stack_records[parent].variable_list.render_index].palette = 0;
+        record = &g_display_object_animated_pool[slot];
         record->palette = 0;
         record->frame_index = 0;
-        g_window_records[slot].anim_counter = 0;
+        g_display_object_animated_pool[slot].anim_counter = 0;
         return;
     }
     buttons = g_world_map_input_new_button_presses;
@@ -1490,7 +1493,7 @@ static void variable_edit_update(menu_stack_record_t* level) {
  * record from the render-object queue, initializes that window's delay and
  * counters, and applies layout 0 to it before advancing the list count.
  *
- * Writing the window columns as fields of g_window_records (not separate stride
+ * Writing the window columns as fields of g_display_object_animated_pool (not separate stride
  * arrays) keeps the scheduler from sinking the record's window_index store
  * below them. */
 void unit_panel_help_open(void) {
@@ -1498,12 +1501,12 @@ void unit_panel_help_open(void) {
 
     g_menu_stack_records[g_menu_stack_depth].layout_window.saved_state = g_menu_stack_ot_offset;
     g_menu_stack_ot_offset = 1;
-    window = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    window = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].layout_window.window_index = window;
-    g_window_records[window].sequence = WINDOW_ANIM_LAYOUT_CURSOR_IDLE;
-    g_window_records[window].priority = 2;
-    g_window_records[window].anim_counter = 0;
-    g_window_records[window].frame_index = 0;
+    g_display_object_animated_pool[window].sequence = DISPLAY_OBJECT_ANIM_LAYOUT_CURSOR_IDLE;
+    g_display_object_animated_pool[window].priority = 2;
+    g_display_object_animated_pool[window].anim_counter = 0;
+    g_display_object_animated_pool[window].frame_index = 0;
     g_menu_stack_records[g_menu_stack_depth].layout_window.layout = 0;
     g_menu_stack_records[g_menu_stack_depth].layout_window.cached_layout_kind = 1;
     help_cursor_move(&g_menu_stack_records[g_menu_stack_depth].layout_window);
@@ -1518,7 +1521,8 @@ void unit_panel_help_open(void) {
  * Routing both stores through one base variable (rather than
  * direct record indexing) preserves the separate position-column base. */
 static void help_cursor_move(unit_panel_help_level_t* request) {
-    window_xy_t* xy = (window_xy_t*)&g_window_records[0].position;
+    display_object_position_stride_t* xy
+        = (display_object_position_stride_t*)&g_display_object_animated_pool[0].position;
     s32 index = request->window_index;
     s32 layout = request->layout;
     s32 kind;
@@ -1528,9 +1532,10 @@ static void help_cursor_move(unit_panel_help_level_t* request) {
     kind = g_unit_panel_help_rows[layout].vertical_cursor;
     if (kind != request->cached_layout_kind) {
         request->cached_layout_kind = kind;
-        g_window_records[index].sequence = (kind != 0) ? WINDOW_ANIM_LAYOUT_CURSOR_IDLE : WINDOW_ANIM_CURSOR_IDLE;
-        g_window_records[index].anim_counter = 0;
-        g_window_records[index].frame_index = 0;
+        g_display_object_animated_pool[index].sequence
+            = (kind != 0) ? DISPLAY_OBJECT_ANIM_LAYOUT_CURSOR_IDLE : DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+        g_display_object_animated_pool[index].anim_counter = 0;
+        g_display_object_animated_pool[index].frame_index = 0;
     }
 }
 
@@ -1538,13 +1543,13 @@ static void help_cursor_move(unit_panel_help_level_t* request) {
  * its current one, restarting the animation with the default palette. */
 static void panel_help_resume(menu_stack_record_t* level) {
     s32 index = level->layout_window.window_index;
-    display_object_animated_t* entry = &g_window_records[index];
+    display_object_animated_t* entry = &g_display_object_animated_pool[index];
 
     g_menu_input_lock_mode = 0;
-    entry->sequence = g_window_records[index].sequence + 1;
-    g_window_records[index].palette = 0;
+    entry->sequence = g_display_object_animated_pool[index].sequence + 1;
+    g_display_object_animated_pool[index].palette = 0;
     entry->anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 }
 
 /* The g_level_suspend_handlers entry of MENU_STACK_LEVEL_UNIT_PANEL_HELP: nothing to suspend. */
@@ -1565,8 +1570,8 @@ static void panel_help_update(menu_stack_record_t* request) {
     s32 window;
 
     if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) != 0) {
-        g_window_record_count -= 1;
-        g_window_render_object_count -= 1;
+        g_display_object_animated_count -= 1;
+        g_display_object_queue_count -= 1;
         g_menu_stack_ot_offset = request->layout_window.saved_state;
         g_menu_stack_depth -= 1;
         menu_stack_dispatch_resume();
@@ -1588,11 +1593,11 @@ static void panel_help_update(menu_stack_record_t* request) {
         menu_stack_message_open(message, 1);
         g_menu_input_lock_mode = 1;
         window = request->layout_window.window_index;
-        record = &g_window_records[window];
-        record->sequence = g_window_records[window].sequence - 1;
-        g_window_records[window].palette = 0xA;
+        record = &g_display_object_animated_pool[window];
+        record->sequence = g_display_object_animated_pool[window].sequence - 1;
+        g_display_object_animated_pool[window].palette = 0xA;
         record->anim_counter = 0;
-        g_window_records[window].frame_index = 0;
+        g_display_object_animated_pool[window].frame_index = 0;
         return;
     }
 
@@ -1666,7 +1671,7 @@ void location_menu_open(s32 menu) {
     display_object_animated_t* records;
     location_menu_level_t* level;
     point32_t* base;
-    window_xy_t* position;
+    display_object_position_stride_t* position;
 
     /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
     g_world_map_marker_state.marker.picture_id = location_picture_load(g_world_map_marker_state.marker.location_id);
@@ -1677,29 +1682,29 @@ void location_menu_open(s32 menu) {
     }
     file_pending_wait();
 
-    flags = g_system_flags | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    flags = g_world_map_flags | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     level = &g_menu_stack_records[g_menu_stack_depth].location_menu;
     level->slots.render_b = -1;
     level->slots.window_b = -1;
     level->slots.render_a = -1;
     g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a = -1;
     g_menu_stack_records[g_menu_stack_depth].location_menu.fade = 0;
-    g_system_flags = flags;
+    g_world_map_flags = flags;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a = index;
-    records = g_window_records;
+    records = g_display_object_animated_pool;
     /* Direct record.color access changes the column base and instruction scheduling. */
     color = &records->color;
-    g_window_records[index].priority = 0xB;
-    g_window_records[index].sequence = menu;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].priority = 0xB;
+    g_display_object_animated_pool[index].sequence = menu;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 
     /* The windows start black and brighten from fade level 8. */
-    ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
-    ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
-    ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;
+    ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->r = 0;
+    ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->g = 0;
+    ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->b = 0;
     g_menu_stack_records[g_menu_stack_depth].location_menu.fade = 8;
 
     /* With a picture: upload the frame and picture TIMs, then add the picture and its border window. */
@@ -1711,7 +1716,7 @@ void location_menu_open(s32 menu) {
         LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
         LoadClut(image.clut, image.cx, image.cy);
 
-        index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+        index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
         g_menu_stack_records[g_menu_stack_depth].location_menu.slots.render_a = index;
         bounds.x = image.px;
         bounds.y = image.py;
@@ -1719,25 +1724,25 @@ void location_menu_open(s32 menu) {
         bounds.h = image.ph;
         origin.x = image.cx;
         origin.y = image.cy;
-        window_init_vram_render_record(index, bounds, origin, DISPLAY_OBJECT_8BIT_CLUT);
-        base = &g_window_gs_image_records[index].base;
-        g_window_gs_image_records[index].priority = 0xB;
+        display_object_gs_image_init(index, bounds, origin, DISPLAY_OBJECT_8BIT_CLUT);
+        base = &g_display_object_gs_image_pool[index].position;
+        g_display_object_gs_image_pool[index].priority = 0xB;
         base->x = -0x40;
         base->y = -0x4C;
-        g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
+        g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
 
-        index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+        index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
         g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_b = index;
-        g_window_records[index].sequence = WINDOW_ANIM_LOCATION_PICTURE_BORDER;
-        g_window_records[index].priority = 0xB;
+        g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_LOCATION_PICTURE_BORDER;
+        g_display_object_animated_pool[index].priority = 0xB;
         records[index].anim_counter = 0;
-        g_window_records[index].frame_index = 0;
-        position = (window_xy_t*)&records->position;
+        g_display_object_animated_pool[index].frame_index = 0;
+        position = (display_object_position_stride_t*)&records->position;
         position[index].x = -8;
         position[index].y = 0x10;
-        ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->r = 0;
-        ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->g = 0;
-        ((CVECTOR*)((u8*)color + index * sizeof(g_window_records[0])))->b = 0;
+        ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->r = 0;
+        ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->g = 0;
+        ((CVECTOR*)((u8*)color + index * sizeof(g_display_object_animated_pool[0])))->b = 0;
     }
 
     /* Size the panel to the widest entry plus an 8-pixel margin. */
@@ -1780,19 +1785,22 @@ void location_menu_open(s32 menu) {
     if (g_world_map_marker_state.marker.picture_id != 0) {
         s32 unused[6]; /* frame padding: the target frame is 0xb8 */
 
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.x = -4;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.y = 0;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.x
+            = -4;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.y
+            = 0;
     } else {
         /* Here `index` is still the cursor window's record index, yet it reads the render record pool (retail). */
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.x = -4;
-        g_window_records[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.y
-            = g_window_gs_image_records[index].base.y - 8;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.x
+            = -4;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].location_menu.slots.window_a].position.y
+            = g_display_object_gs_image_pool[index].position.y - 8;
     }
 
     depth = g_menu_stack_depth;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_menu_stack_records[depth].location_menu.delay = 8;
-    g_system_flags |= SYSTEM_FLAG_FREEZE_ANIMATION;
+    g_world_map_flags |= WORLD_MAP_FLAG_FREEZE_ANIMATION;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_LOCATION;
     g_menu_stack_depth = depth + 1;
 }
@@ -1800,14 +1808,14 @@ void location_menu_open(s32 menu) {
 /* Restore the location list's optional renderer palette. */
 static void location_menu_resume(menu_stack_record_t* level) {
     if (level->location_menu.slots.render_b != -1) {
-        g_window_gs_image_records[level->location_menu.slots.render_b].palette = 0;
+        g_display_object_gs_image_pool[level->location_menu.slots.render_b].palette = 0;
     }
 }
 
 /* Sets the second owned render record's palette selector when its slot is present. */
 static void location_menu_suspend(menu_stack_record_t* slots) {
     if (slots->location_menu.slots.render_b != -1) {
-        g_window_gs_image_records[slots->location_menu.slots.render_b].palette = 2;
+        g_display_object_gs_image_pool[slots->location_menu.slots.render_b].palette = 2;
     }
 }
 
@@ -1832,12 +1840,12 @@ static void location_menu_update(menu_stack_record_t* level) {
         if (level->location_menu.fade >= 0x80) {
             level->location_menu.fade = 0x80;
         }
-        g_window_records[level->location_menu.slots.window_a].color.r = level->location_menu.fade;
-        g_window_records[level->location_menu.slots.window_a].color.g = level->location_menu.fade;
-        g_window_records[level->location_menu.slots.window_a].color.b = level->location_menu.fade;
-        g_window_records[level->location_menu.slots.window_b].color.r = level->location_menu.fade;
-        g_window_records[level->location_menu.slots.window_b].color.g = level->location_menu.fade;
-        g_window_records[level->location_menu.slots.window_b].color.b = level->location_menu.fade;
+        g_display_object_animated_pool[level->location_menu.slots.window_a].color.r = level->location_menu.fade;
+        g_display_object_animated_pool[level->location_menu.slots.window_a].color.g = level->location_menu.fade;
+        g_display_object_animated_pool[level->location_menu.slots.window_a].color.b = level->location_menu.fade;
+        g_display_object_animated_pool[level->location_menu.slots.window_b].color.r = level->location_menu.fade;
+        g_display_object_animated_pool[level->location_menu.slots.window_b].color.g = level->location_menu.fade;
+        g_display_object_animated_pool[level->location_menu.slots.window_b].color.b = level->location_menu.fade;
         if (level->location_menu.fade == 0x80) {
             level->location_menu.fade = 0;
             world_map_backdrop_mode_set(1);
@@ -1857,15 +1865,16 @@ static void location_menu_update(menu_stack_record_t* level) {
         return;
     }
 
-    if (g_system_flags & SYSTEM_FLAG_FADING) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_FADING) {
         return;
     }
 
     /* A confirm or cancel below closed the panel; act on slots.result once its thread has finished. */
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
+        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         world_map_backdrop_mode_set(0);
-        g_system_flags
-            = (g_system_flags | SYSTEM_FLAG_INPUT_BLOCKED) & ~(SYSTEM_FLAG_DRAW_MAP | SYSTEM_FLAG_FREEZE_ANIMATION);
+        g_world_map_flags = (g_world_map_flags | WORLD_MAP_FLAG_INPUT_BLOCKED)
+            & ~(WORLD_MAP_FLAG_DRAW_MAP | WORLD_MAP_FLAG_FREEZE_ANIMATION);
         if (level->location_menu.slots.result != 0) {
             menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_LOCATION);
             selected = &g_window_panel_render_state.selected_index;
@@ -1874,7 +1883,7 @@ static void location_menu_update(menu_stack_record_t* level) {
 
             /* World-menu entries are services and deep-dungeon floors; anything else names a map. */
             if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_WORLD_MENU_BASE) {
-                g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+                g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
                 value &= TEXT_ID_ENTRY_MASK;
                 switch (value) {
                 case TEXT_ID_BAR& TEXT_ID_ENTRY_MASK:
@@ -1914,7 +1923,8 @@ static void location_menu_update(menu_stack_record_t* level) {
                         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[1]);
                         script_variable_set(
                             EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, (rand() * g_location_script_state.args[2]) >> 15);
-                        g_system_flags = (g_system_flags | SYSTEM_FLAG_DEEP_DUNGEON_BATTLE) ^ SYSTEM_FLAG_RUNNING;
+                        g_world_map_flags
+                            = (g_world_map_flags | WORLD_MAP_FLAG_DEEP_DUNGEON_BATTLE) ^ WORLD_MAP_FLAG_RUNNING;
                     } else {
                         world_map_fade_start(0, 0x10);
                         music_queue_track_start(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
@@ -1925,13 +1935,13 @@ static void location_menu_update(menu_stack_record_t* level) {
 
             /* A map entry runs the row's event and travels to map entry + 1. */
             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[*selected]);
-            g_system_flags ^= SYSTEM_FLAG_RUNNING;
+            g_world_map_flags ^= WORLD_MAP_FLAG_RUNNING;
             value = values[*selected] & TEXT_ID_ENTRY_MASK;
             g_travel_next_map_id = value + 1;
             return;
         }
 
-        g_system_flags = (g_system_flags | SYSTEM_FLAG_DRAW_MAP) & ~SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags = (g_world_map_flags | WORLD_MAP_FLAG_DRAW_MAP) & ~WORLD_MAP_FLAG_INPUT_BLOCKED;
         menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_LOCATION);
         level_records_release(&level->location_menu.slots, 1);
         return;
@@ -1944,7 +1954,7 @@ static void location_menu_update(menu_stack_record_t* level) {
             sound_play_effect(SOUND_SFX_CANCEL);
             level->location_menu.slots.result = 0;
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-            g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         }
     } else if (g_world_map_input_new_button_presses & PSX_PAD_SELECT) {
         /* Help: map names, services and deep-dungeon floors each have their own message range. */
@@ -1969,7 +1979,7 @@ static void location_menu_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->location_menu.slots.result = 1;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -1980,26 +1990,26 @@ static void location_menu_update(menu_stack_record_t* level) {
 static void level_records_release(menu_stack_slot_set_t* slots, s32 restore) {
     g_menu_blocked_buttons = 0;
     if (slots->window_a != -1) {
-        g_window_record_count -= 1;
-        g_window_render_object_count -= 1;
+        g_display_object_animated_count -= 1;
+        g_display_object_queue_count -= 1;
     }
     if (slots->render_a != -1) {
-        g_window_render_record_count -= 1;
-        g_window_render_object_count -= 1;
+        g_display_object_image_count -= 1;
+        g_display_object_queue_count -= 1;
     }
     if (slots->window_b != -1) {
-        g_window_record_count -= 1;
-        g_window_render_object_count -= 1;
+        g_display_object_animated_count -= 1;
+        g_display_object_queue_count -= 1;
     }
     if (slots->render_b != -1) {
-        g_window_render_record_count -= 1;
-        g_window_render_object_count -= 1;
+        g_display_object_image_count -= 1;
+        g_display_object_queue_count -= 1;
     }
     g_menu_stack_depth -= 1;
     if (restore != 0) {
         menu_stack_dispatch_resume();
     }
-    g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
 }
 
 /* At full brightness, run WORLD's shop, soldier office or fur shop screen
@@ -2057,13 +2067,13 @@ void menu_stack_scrollable_text_open(s32 text) {
         s32 index;
         s32 depth;
 
-        index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+        index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
         g_menu_stack_records[g_menu_stack_depth].window_index = index;
-        g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
-        g_window_records[index].priority = 3;
-        g_window_records[index].anim_counter = 0;
-        g_window_records[index].frame_index = 0;
-        g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CHOICE_PANEL_HEADER;
+        g_display_object_animated_pool[index].priority = 3;
+        g_display_object_animated_pool[index].anim_counter = 0;
+        g_display_object_animated_pool[index].frame_index = 0;
+        g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
 
         g_text_window.text_id = text;
         g_text_window.image_position.x = 0;
@@ -2079,13 +2089,13 @@ void menu_stack_scrollable_text_open(s32 text) {
         g_text_window.text_substitutions[0] = -1;
         text_window_open(&g_text_window);
 
-        g_window_gs_image_records[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
         depth = g_menu_stack_depth;
-        g_window_records[g_menu_stack_records[depth].window_index].position.x = g_text_window.base.x + 3;
-        g_window_records[g_menu_stack_records[depth].window_index].position.y = g_text_window.base.y - 2;
-        g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL | SYSTEM_FLAG_FREEZE_ANIMATION;
+        g_display_object_animated_pool[g_menu_stack_records[depth].window_index].position.x = g_text_window.base.x + 3;
+        g_display_object_animated_pool[g_menu_stack_records[depth].window_index].position.y = g_text_window.base.y - 2;
+        g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL | WORLD_MAP_FLAG_FREEZE_ANIMATION;
         g_menu_stack_depth = depth + 1;
-        g_window_records[g_menu_stack_records[depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_menu_stack_records[depth].scrollable_text._unknown_20 = 0x28;
         g_menu_stack_types[depth] = MENU_STACK_LEVEL_SCROLLABLE_TEXT;
     }
@@ -2102,25 +2112,25 @@ static void scrollable_text_level_update(menu_stack_record_t* level) {
     s32* index = &g_text_window.render_record_index;
     s32 depth;
 
-    if (g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_HIDDEN) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+    if (g_display_object_gs_image_pool[*index].flags & DISPLAY_OBJECT_HIDDEN) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             sound_play_effect(SOUND_SFX_WINDOW_OPEN);
-            g_window_records[level->window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            g_window_gs_image_records[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_gs_image_pool[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
-    } else if (!(g_window_gs_image_records[*index].flags & DISPLAY_OBJECT_POP_IN)
+    } else if (!(g_display_object_gs_image_pool[*index].flags & DISPLAY_OBJECT_POP_IN)
         && text_window_update(&g_text_window) == 0) {
-        g_window_record_count--;
-        g_window_render_object_count--;
+        g_display_object_animated_count--;
+        g_display_object_queue_count--;
         depth = g_menu_stack_depth;
         g_menu_stack_depth = depth - 1;
-        g_system_flags &= ~(SYSTEM_FLAG_HIDE_LOCATION_LABEL | SYSTEM_FLAG_FREEZE_ANIMATION);
-        g_window_records[g_menu_stack_records[depth - 2].window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_LOCATION_LABEL | WORLD_MAP_FLAG_FREEZE_ANIMATION);
+        g_display_object_animated_pool[g_menu_stack_records[depth - 2].window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         menu_stack_dispatch_resume();
     }
 }
 
-/* Push the debug "Party number" panel (SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER):
+/* Push the debug "Party number" panel (WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER):
  * a number from 0 to 999, starting at 0. Sibling of
  * variable_edit_open. */
 static void party_number_open(void) {
@@ -2156,7 +2166,7 @@ static void party_number_update(menu_stack_record_t* level) {
             if (g_window_panel_value < 0x200) {
                 encounter_party_init(g_window_panel_value);
                 formation_roster_names_build();
-                g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+                g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
             }
         }
         menu_stack_dispatch_resume();

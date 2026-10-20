@@ -13,7 +13,7 @@
 /* locations */
 /* World-map location ids (EVENT_SCRIPT_VAR_LOCATION), named as the location
  * name text (TEXT_ID_LOCATION_NAME_BASE + id) spells them. The first fifteen
- * are the towns; a town's id is also its outfitter's shop id and its bit,
+ * are the towns; a town's id is also its shop's shop id and its bit,
  * counted from the top, in g_shop_item_availability. */
 typedef enum location_id {
     LOCATION_LESALIA = 0,

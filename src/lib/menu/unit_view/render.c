@@ -307,7 +307,7 @@ static image_layout_t s_status_screen_item_icon_layouts[5]
     = { { { 0, 0, 16, 16 }, 18, 8 }, { { 16, 0, 16, 16 }, 18, 24 }, { { 32, 16, 16, 16 }, 18, 40 },
           { { 48, 16, 16, 16 }, 18, 56 }, { { 64, 16, 16, 16 }, 18, 72 } };
 
-static u8 g_status_screen_line_colors[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
+static u8 g_status_screen_line_layout[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
     123, 90, 32, 32, 32, 140, 1, 140, 90, 16, 16, 16, 141, 1, 141, 90 };
 
@@ -1615,13 +1615,13 @@ void status_screen_thread(void) {
     for (i = 0; i < 8 * MENU_STATUS_SCREEN_LINE_SIZE; i += MENU_STATUS_SCREEN_LINE_SIZE) {
         SetLineF2(line);
         SetSemiTrans(line, 1);
-        setRGB0(line, g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_R],
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_G],
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_B]);
-        setXY2(line, g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_X0] + s_status_screen_panel_rect.x,
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_Y0] + s_status_screen_panel_rect.y,
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_X1] + s_status_screen_panel_rect.x,
-            g_status_screen_line_colors[i + MENU_STATUS_SCREEN_LINE_Y1] + s_status_screen_panel_rect.y);
+        setRGB0(line, g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_R],
+            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_G],
+            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_B]);
+        setXY2(line, g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_X0] + s_status_screen_panel_rect.x,
+            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_Y0] + s_status_screen_panel_rect.y,
+            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_X1] + s_status_screen_panel_rect.x,
+            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_Y1] + s_status_screen_panel_rect.y);
         line++;
     }
 

@@ -32,7 +32,7 @@ typedef enum animation_seq_opcode {
     ANIMATION_SEQ_OP_HIDE_ITEM = 0xc3,
     ANIMATION_SEQ_OP_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
     ANIMATION_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (sprite_item_display_draw) */
-    ANIMATION_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_state_window_closed is 0 */
+    ANIMATION_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_window_closed is 0 */
     ANIMATION_SEQ_OP_UNKNOWN_C7 = 0xc7,        /* two operands */
     ANIMATION_SEQ_OP_UNKNOWN_C8 = 0xc8,        /* two operands */
     ANIMATION_SEQ_OP_UNKNOWN_C9 = 0xc9,        /* two operands */
@@ -45,10 +45,10 @@ typedef enum animation_seq_opcode {
     ANIMATION_SEQ_OP_MOVE_DOWN_1 = 0xd0,
     ANIMATION_SEQ_OP_MOVE_FORWARD_2 = 0xd1,
     ANIMATION_SEQ_OP_MOVE_FORWARD_1 = 0xd2,
-    ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD = 0xd3, /* offset: jump while g_state_animation_continue_check is 1 */
+    ANIMATION_SEQ_OP_WAIT_FOR_EFFECT_LOAD = 0xd3, /* offset: jump while g_battle_animation_wait_state is 1 */
     ANIMATION_SEQ_OP_PLAY_WEAPON_SOUND = 0xd4,    /* 0 swing, 1 hit: action_play_weapon_sfx */
     ANIMATION_SEQ_OP_RESTART = 0xd5,              /* back to the sequence's first byte, counting the restart */
-    ANIMATION_SEQ_OP_WAIT_FOR_EFFECT = 0xd6,      /* offset: jump while g_state_animation_continue_check is not 0 */
+    ANIMATION_SEQ_OP_WAIT_FOR_EFFECT = 0xd6,      /* offset: jump while g_battle_animation_wait_state is not 0 */
     ANIMATION_SEQ_OP_UNKNOWN_D7 = 0xd7,           /* one operand; the sequences of death and revival start with it */
     ANIMATION_SEQ_OP_SET_FRAME_BIAS = 0xd8,       /* signed; added to every later frame id */
     ANIMATION_SEQ_OP_LAUNCH_PROJECTILE = 0xd9, /* two unread operands: the thrown item, stone or arrow of the action */

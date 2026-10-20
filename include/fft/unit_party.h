@@ -51,7 +51,7 @@ typedef struct party_unit {
     u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];   /* 0x0e; unit_equipment_slot_e */
     u8 experience;                             /* 0x15 */
     u8 level;                                  /* 0x16 */
-    u8 bravery;                                /* 0x17 */
+    u8 brave;                                  /* 0x17 */
     u8 faith;                                  /* 0x18 */
     unit_raw_stats_t raw_stats;                /* 0x19 */
     unit_career_data_t career;                 /* 0x28; unlocked jobs, learned abilities, levels and JP */

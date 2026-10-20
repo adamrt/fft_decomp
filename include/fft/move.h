@@ -155,7 +155,6 @@ s32 move_start_walk_to(
     s32 runtime_id, const battle_map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
 s32 move_start_jump_by_runtime_id(u32 runtime_id, s32 direction, s32 jump_length);
 s32 move_is_unit_moving_by_runtime_id(u32 runtime_id);
-void move_settle_on_tile(unit_runtime_t* unit);
 
 /* knockback */
 /* action_work_t.knockback_flags: the kind of knockback found by

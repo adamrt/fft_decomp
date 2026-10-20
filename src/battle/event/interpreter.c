@@ -5,6 +5,7 @@
 #include "fft/battle_map_load.h"
 #include "fft/battle_map_mesh.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/brave_story.h"
 #include "fft/calendar.h"
 #include "fft/camera.h"
@@ -29,7 +30,6 @@
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/text.h"
@@ -112,7 +112,7 @@ void script_execute_event(void) {
     s32 operand_4;
     s32 operand_1;
     event_set_battle_unit_position_instruction_t* position_instruction;
-    u8* dialogue_cursor;
+    u8* dialog_cursor;
     event_display_message_instruction_t* message_instruction;
     s32* script_variables;
     u8* parameters;
@@ -275,7 +275,7 @@ restart_script:
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT) {
-                script_specialized_map_destroyed_set();
+                script_map_destruction_signal();
                 if (g_battle_map_destruction_wait_state != 0) {
                     do {
                         thread_yield();
@@ -374,7 +374,7 @@ restart_script:
                 gfx_screen_overlay_fade_out();
                 g_game_options = g_game_options_saved;
                 script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
-                state_enter_close_battle_to_world(0x20);
+                battle_state_enter_close_battle_to_world(0x20);
             }
 
             if (g_menu_input_mode == MENU_INPUT_PLAYER) {
@@ -455,9 +455,9 @@ restart_script:
             /* Script text ids count from 1. */
             g_thread_contexts[operand_1].function_parameter_2 = ((operand_4 << 8) + operand_3) - 1;
 
-            dialogue_cursor = (u8*)g_script_event_block;
-            dialogue_cursor += instruction_offset;
-            message_instruction = (event_display_message_instruction_t*)dialogue_cursor;
+            dialog_cursor = (u8*)g_script_event_block;
+            dialog_cursor += instruction_offset;
+            message_instruction = (event_display_message_instruction_t*)dialog_cursor;
             operand_4 = message_instruction->unit_id_le[1];
             operand_3 = message_instruction->unit_id_le[0];
             g_thread_contexts[operand_1].function_parameter_3 = (operand_4 << 8) + operand_3;
@@ -477,7 +477,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_CHANGE_DIALOG) {
             for (work_index = 0; work_index < 6; work_index += 2) {
                 operand_2 = g_menu_window_buffers[work_index].thread_id;
-                if ((g_menu_window_buffers[work_index].dialogue_selector == operand_1)
+                if ((g_menu_window_buffers[work_index].dialog_selector == operand_1)
                     && (thread_is_running_asm(operand_2) == 1)
                     && (g_thread_contexts[operand_2].task_id == THREAD_TASK_DIALOG_AWAIT_TEXT)) {
                     operand_1 = script_s16_read(

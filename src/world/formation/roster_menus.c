@@ -3,6 +3,7 @@
 #include "fft/formation.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"
@@ -103,7 +104,7 @@ void formation_order_menu_update(void) {
         text_concatenate_entries(g_formation_menu_text_table, g_formation_menu_text_buffer, option_ids, 1);
         g_screen_text_redraw_request = 1;
         item_store_type_order(0, g_formation_order_entries);
-        formation_sort_roster(0);
+        formation_roster_sort(0);
     }
 }
 

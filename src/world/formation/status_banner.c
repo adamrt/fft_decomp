@@ -286,7 +286,7 @@ void unit_panel_banner_thread(void) {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
 
-        g_gfx_draw_offset_y = (g_frame_arg != 0xF0) ? 0xF0 : 0;
+        g_gfx_draw_offset_y = (g_menu_framebuffer_y != 0xF0) ? 0xF0 : 0;
 
         /* Slide down through steps 1-6 or up through 11-16, one step every two frames, then keep
          * only the hidden flag. */

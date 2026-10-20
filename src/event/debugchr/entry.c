@@ -112,7 +112,8 @@ static const unit_editor_field_range_t g_unit_editor_monster_field_ranges[UNIT_E
     { 1, 100 },                                                  /* CT */
 };
 
-extern u8 g_unit_editor_unit_ids[UNIT_SLOT_COUNT];
+/* The status browser stores battle IDs here; the editor reuses the slots as availability flags. */
+extern u8 g_unit_editor_unit_slots[UNIT_SLOT_COUNT];
 extern help_navigation_record_t g_unit_editor_fields[UNIT_EDITOR_FIELD_COUNT];
 extern s32 g_unit_editor_field_edit_active;
 extern unit_panel_thread_t g_unit_editor_status_display_thread_params;
@@ -206,11 +207,11 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
     thread_current_task_set(THREAD_TASK_MOUNTED_STATUS_SCREEN);
     g_debug_unit_editor_active = 0;
-    g_unit_panel_panel_status_group_count = 2;
+    g_unit_panel_status_group_count = 2;
 
     /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. */
     unit = unit_stats_get(unit_id);
-    unit_ids = g_unit_editor_unit_ids;
+    unit_ids = g_unit_editor_unit_slots;
     unit_ids[0] = unit_id;
     {
         s32 partner_id;
@@ -269,7 +270,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     frame = 0;
     render_buffers = g_unit_editor_gfx_render_buffers[0];
     one = 1;
-    animation = g_unit_panel_panel_status_animation;
+    animation = g_unit_panel_status_animation;
     animation_second = animation + 1;
     animation_third = animation + 2;
     selected_unit = &g_unit_panel_selected_unit.battle_id;
@@ -366,11 +367,11 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
             slot = g_unit_editor_selected_unit_slot;
             g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-            g_unit_panel_panel_status_animation[1] = 7;
+            g_unit_panel_status_animation[1] = 7;
             slot ^= 1;
             g_unit_editor_selected_unit_slot = slot;
 
-            chosen_unit = &g_unit_editor_unit_ids[slot];
+            chosen_unit = &g_unit_editor_unit_slots[slot];
             *selected_unit = *chosen_unit;
             unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_id));
             unit_data->name_id = *chosen_unit;
@@ -393,11 +394,11 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
             slot = g_unit_editor_selected_unit_slot;
             g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-            g_unit_panel_panel_status_animation[0] = 7;
+            g_unit_panel_status_animation[0] = 7;
             slot ^= 1;
             g_unit_editor_selected_unit_slot = slot;
 
-            chosen_unit = &g_unit_editor_unit_ids[slot];
+            chosen_unit = &g_unit_editor_unit_slots[slot];
             *selected_unit = *chosen_unit;
             unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_id));
             unit_data->name_id = *chosen_unit;
@@ -422,14 +423,14 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
         selected_unit_ptr = &g_unit_panel_selected_unit.battle_id;
         unit_type_id_ptr = &g_unit_panel_selected_unit_status.unit_index;
-        selected_unit_ptr[0] = g_unit_editor_unit_ids[0];
+        selected_unit_ptr[0] = g_unit_editor_unit_slots[0];
         /* A register address keeps cse from folding this store to a direct
          * global address. */
         comparison_ptr = selected_unit_ptr
             - (offsetof(unit_panel_unit_t, battle_id) - offsetof(unit_panel_unit_t, name_id))
                 / sizeof(*selected_unit_ptr);
-        *comparison_ptr = g_unit_editor_unit_ids[0];
-        *unit_type_id_ptr = g_unit_editor_unit_ids[0];
+        *comparison_ptr = g_unit_editor_unit_slots[0];
+        *unit_type_id_ptr = g_unit_editor_unit_slots[0];
         unit_panel_load_selected();
         unit_panel_copy_billboard_in(
             &g_unit_panel_selected_unit_status, &g_unit_panel_selected_unit, &g_unit_panel_selected_unit_fields);
@@ -503,21 +504,21 @@ void debugchr_editor_entrypoint(void) {
     s32 cursor_x;
 
     g_debug_unit_editor_active = 1;
-    g_unit_panel_panel_status_group_count = 2;
+    g_unit_panel_status_group_count = 2;
 
     /* A slot is selectable when the lookup of its ENTD unit id returns that same slot: a present unit,
      * the first one with that id. */
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
         unit_entd_find_stats(unit_stats_get(i)->unit_id, &battle_id);
         if ((battle_id >= 0) && (i == battle_id)) {
-            g_unit_editor_unit_ids[i] = 1;
+            g_unit_editor_unit_slots[i] = 1;
         } else {
-            g_unit_editor_unit_ids[i] = 0;
+            g_unit_editor_unit_slots[i] = 0;
         }
     }
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        if (g_unit_editor_unit_ids[i] != 0) {
+        if (g_unit_editor_unit_slots[i] != 0) {
             g_unit_panel_selected_unit.battle_id = i;
             g_unit_panel_selected_unit.name_id = i;
             g_unit_panel_selected_unit_status.unit_index = i;
@@ -579,14 +580,14 @@ loop_outer:
         }
 
         if (buttons & PSX_PAD_R1) {
-            g_unit_panel_panel_status_animation[1] = 7;
+            g_unit_panel_status_animation[1] = 7;
             /* Label loops: a do-while's loop notes change the allocation. */
         next_unit:
             g_unit_editor_selected_unit_slot += 1;
             if (g_unit_editor_selected_unit_slot == 0x15) {
                 g_unit_editor_selected_unit_slot = 0;
             }
-            if (g_unit_editor_unit_ids[g_unit_editor_selected_unit_slot] == 0) {
+            if (g_unit_editor_unit_slots[g_unit_editor_selected_unit_slot] == 0) {
                 goto next_unit;
             }
 
@@ -611,13 +612,13 @@ loop_outer:
         }
 
         if (*g_menu_input_controller & PSX_PAD_L1) {
-            g_unit_panel_panel_status_animation[0] = 7;
+            g_unit_panel_status_animation[0] = 7;
         prev_unit:
             g_unit_editor_selected_unit_slot -= 1;
             if (g_unit_editor_selected_unit_slot == -1) {
                 g_unit_editor_selected_unit_slot = 0x14;
             }
-            if (g_unit_editor_unit_ids[g_unit_editor_selected_unit_slot] == 0) {
+            if (g_unit_editor_unit_slots[g_unit_editor_selected_unit_slot] == 0) {
                 goto prev_unit;
             }
 

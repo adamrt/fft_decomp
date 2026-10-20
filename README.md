@@ -52,6 +52,19 @@ records every program that compiles it, with the original addresses, compiler
 profiles, data bindings and byte hashes. A shared source can therefore have
 several independently checked program instances.
 
+Some useful header boundaries:
+
+| Concept | Header |
+| --- | --- |
+| Animated objects, image objects and their queues | `display_object.h` |
+| Framed text windows and paged panels | `window.h` |
+| Item data and inventory rules | `item.h` |
+| Item lists, sorting, previews and rearrangement | `item_menu.h` |
+| Saved sort preferences shared by menus | `menu_sort.h` |
+| Unit status banners, gauges and numeric panels | `unit_panel.h` |
+| Battle states and their transitions | `battle_state.h` |
+| OPEN's stack of per-frame behaviors | `controller_stack.h` |
+
 Files keep related state, private helpers and callbacks together. Reconstructed
 translation units follow binary evidence; a large file or a repeated name
 prefix alone does not justify splitting one.

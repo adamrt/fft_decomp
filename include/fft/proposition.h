@@ -66,10 +66,10 @@ s32 proposition_count_returned(s32 location);
 typedef enum proposition_data_record {
     PROPOSITION_DATA_ROWS = 0,                /* 23-byte proposition rows */
     PROPOSITION_DATA_FEES = 1,                /* 16-bit values behind the rows' two fee indices */
-    PROPOSITION_DATA_MESSAGE_ADJUSTMENTS = 2, /* by faith and bravery band */
+    PROPOSITION_DATA_MESSAGE_ADJUSTMENTS = 2, /* by Faith and Brave band */
     PROPOSITION_DATA_CATEGORY_JOB_SCORES = 3,
     PROPOSITION_DATA_JOB_LIST_JOB_SCORES = 4,
-    PROPOSITION_DATA_BRAVERY_LEVEL_SCORES = 5,
+    PROPOSITION_DATA_BRAVE_LEVEL_SCORES = 5,
     PROPOSITION_DATA_FAITH_SCORES = 6,
     PROPOSITION_DATA_JP_AMOUNTS = 8,
     PROPOSITION_DATA_GIL_AMOUNTS = 9,
@@ -88,8 +88,8 @@ typedef struct proposition_reward_pair {
 
 /* Which participant reports (proposition row speaker_mode). */
 typedef enum proposition_speaker {
-    PROPOSITION_SPEAKER_HIGHEST_BRAVERY = 1,
-    PROPOSITION_SPEAKER_LOWEST_BRAVERY = 2,
+    PROPOSITION_SPEAKER_HIGHEST_BRAVE = 1,
+    PROPOSITION_SPEAKER_LOWEST_BRAVE = 2,
     PROPOSITION_SPEAKER_HIGHEST_FAITH = 3,
     PROPOSITION_SPEAKER_LOWEST_FAITH = 4
 } proposition_speaker_e;

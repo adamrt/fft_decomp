@@ -7,6 +7,7 @@
 #include "fft/item.h"
 #include "fft/memcard.h"
 #include "fft/memory.h"
+#include "fft/menu_sort.h"
 #include "fft/music.h"
 #include "fft/save.h"
 #include "fft/sound.h"
@@ -115,7 +116,7 @@ void boot_session_reset(void) {
     save_state_init();
     status_check_data_init();
     save_data_tables_init();
-    item_order_tables_init();
+    menu_sort_tables_init();
 
     if (g_session_initialized != 0) {
         for (frame = 0; frame < 60; frame++) {

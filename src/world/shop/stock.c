@@ -2,6 +2,7 @@
 
 #include "fft/equipment.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/option.h"
 #include "fft/screen.h"
 #include "fft/script_variable.h"
@@ -9,7 +10,7 @@
 #include "psx/types.h"
 
 /* Two-byte shop availability mask, stored most significant byte first: bit
- * 0x8000 >> location id is set when that town's outfitter sells the item. */
+ * 0x8000 >> location id is set when that town's shop sells the item. */
 typedef struct shop_item_availability {
     u8 high;
     u8 low;

@@ -1,5 +1,6 @@
 /* The sound-novel reader opens from a treasure and manages its quit prompt and reading history. */
 
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
@@ -65,41 +66,41 @@ void sound_novel_reader_open(s32 argument) {
 
     /* Held from entry: with every saved register taken, reload rematerializes
      * the constant beside its one use, which is the target's la placement. */
-    render_pos = &g_window_gs_image_records[0].base;
+    render_pos = &g_display_object_gs_image_pool[0].position;
     g_hud_saved_value_position = g_hud_value_position;
-    g_system_flags |= SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
     world_map_image_buffers_clear(1);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.treasure_id = argument;
 
-    bar_render = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    bar_render = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.quit_prompt_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_START_BUTTON;
-    window1 = &g_window_records[index];
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_START_BUTTON;
+    window1 = &g_display_object_animated_pool[index];
     window1->priority = 0xA;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
-    pos1 = &g_window_records[index].position;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
+    g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    pos1 = &g_display_object_animated_pool[index].position;
     pos1->x = -0x7A;
     pos1->y = 0x60;
-    g_window_records[index].palette = 0xA;
+    g_display_object_animated_pool[index].palette = 0xA;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.history_prompt_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_SQUARE_BUTTON;
-    g_window_records[index].priority = 0xA;
-    g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
-    window2 = &g_window_records[index];
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_SQUARE_BUTTON;
+    g_display_object_animated_pool[index].priority = 0xA;
+    g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    window2 = &g_display_object_animated_pool[index];
     window2->anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    pos2 = &g_window_records[index].position;
+    g_display_object_animated_pool[index].frame_index = 0;
+    pos2 = &g_display_object_animated_pool[index].position;
     pos2->x = 0x42;
     pos2->y = 0x60;
-    g_window_records[index].palette = 0xA;
+    g_display_object_animated_pool[index].palette = 0xA;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.brightness_image = index;
     bounds.x = 0x1E4;
     bounds.y = 0x1E8;
@@ -107,25 +108,25 @@ void sound_novel_reader_open(s32 argument) {
     bounds.h = 8;
     origin.x = 0x20;
     origin.y = 0x1E8;
-    window_init_vram_render_record(index, bounds, origin, 0);
-    pos3 = (point32_t*)((u8*)render_pos + index * sizeof(window_gs_image_record_t));
+    display_object_gs_image_init(index, bounds, origin, 0);
+    pos3 = (point32_t*)((u8*)render_pos + index * sizeof(display_object_gs_image_t));
     pos3->x = 0x34;
     pos3->y = 0x55;
-    g_window_gs_image_records[index].priority = 8;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
+    g_display_object_gs_image_pool[index].priority = 8;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.brightness_overlay_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_OVERLAY;
-    g_window_records[index].priority = 8;
-    g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
-    window4 = &g_window_records[index];
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_OVERLAY;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
+    window4 = &g_display_object_animated_pool[index];
     window4->anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    pos4 = &g_window_records[index].position;
+    g_display_object_animated_pool[index].frame_index = 0;
+    pos4 = &g_display_object_animated_pool[index].position;
     pos4->x = 0x54;
     pos4->y = 0x58;
-    g_window_records[index].palette = 0;
+    g_display_object_animated_pool[index].palette = 0;
 
     suzuki_sound_append_resource(g_sound_novel_sound_resource);
     sound_novel_reading_restore(bar_render);
@@ -151,10 +152,10 @@ void sound_novel_reader_resume(menu_stack_record_t* level) {
         picture_load_background_set(set);
         file_pending_wait();
     }
-    g_window_gs_image_records[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_BLANK;
+    g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_BLANK;
     if (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
-        g_window_records[level->sound_novel.quit_prompt_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[level->sound_novel.history_prompt_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->sound_novel.quit_prompt_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->sound_novel.history_prompt_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
     }
     thread_resume(WORLD_MAP_THREAD_SLOT_MESSAGE);
 }
@@ -187,11 +188,11 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
     s32 window;
     u16 shade;
 
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && !(g_system_flags & SYSTEM_FLAG_FADING)) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
         switch (level->sound_novel.phase) {
         case SOUND_NOVEL_PHASE_OPEN_HISTORY:
             if (level->sound_novel.countdown == 0) {
-                g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+                g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
                 history_open();
                 return;
             }
@@ -202,14 +203,14 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
                 return;
             }
             g_menu_blocked_buttons = 0;
-            g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
             hud_restore();
             fade = &g_world_map_fade;
             g_world_map_fade.priorities[0] = 0xF;
             g_world_map_fade.flags[1] = 0;
-            g_window_record_count -= 3;
-            g_window_render_record_count -= 2;
-            g_window_render_object_count -= 5;
+            g_display_object_animated_count -= 3;
+            g_display_object_image_count -= 2;
+            g_display_object_queue_count -= 5;
             g_menu_stack_depth--;
             fade->flags[0] = (fade->flags[0] & ~WORLD_MAP_FADE_BOX_VISIBLE) | WORLD_MAP_FADE_OUT;
             sound_all_sfx_stop();
@@ -247,14 +248,15 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
         }
 
         if (level->sound_novel.fade_timer != 0) {
-            g_window_gs_image_records[level->sound_novel.brightness_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
-            g_window_records[level->sound_novel.brightness_overlay_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_gs_image_pool[level->sound_novel.brightness_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->sound_novel.brightness_overlay_window].flags
+                &= ~DISPLAY_OBJECT_HIDDEN;
             width = 0x100 - g_sound_novel_reading.brightness;
-            g_window_gs_image_records[level->sound_novel.brightness_image].bounds.w = width / 4;
+            g_display_object_gs_image_pool[level->sound_novel.brightness_image].bounds.w = width / 4;
             level->sound_novel.fade_timer--;
         } else {
-            g_window_gs_image_records[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_gs_image_pool[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
         }
 
         if (screen_is_dialog_waiting() != 0) {
@@ -262,8 +264,8 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
             if (buttons & PSX_PAD_CIRCLE) {
                 return;
             }
-            g_window_records[level->sound_novel.quit_prompt_window].palette
-                = g_window_records[level->sound_novel.history_prompt_window].palette = 0;
+            g_display_object_animated_pool[level->sound_novel.quit_prompt_window].palette
+                = g_display_object_animated_pool[level->sound_novel.history_prompt_window].palette = 0;
             if (buttons & PSX_PAD_SELECT) {
                 menu_stack_message_open(0x1036, 1);
                 return;
@@ -271,34 +273,36 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
             if ((buttons & PSX_PAD_START)
                 && (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
                 && !(g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
-                g_window_records[level->sound_novel.quit_prompt_window].sequence
-                    = WINDOW_ANIM_SOUND_NOVEL_START_BUTTON_PRESS;
-                g_window_records[level->sound_novel.quit_prompt_window].frame_index
-                    = g_window_records[level->sound_novel.quit_prompt_window].anim_counter = 0;
+                g_display_object_animated_pool[level->sound_novel.quit_prompt_window].sequence
+                    = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_START_BUTTON_PRESS;
+                g_display_object_animated_pool[level->sound_novel.quit_prompt_window].frame_index
+                    = g_display_object_animated_pool[level->sound_novel.quit_prompt_window].anim_counter = 0;
                 level->sound_novel.fade_timer = 0;
-                g_window_gs_image_records[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
-                g_window_records[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_display_object_gs_image_pool[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_display_object_animated_pool[level->sound_novel.brightness_overlay_window].flags
+                    |= DISPLAY_OBJECT_HIDDEN;
                 quit_menu_open();
                 return;
             }
             if ((g_input_current_buttons & PSX_PAD_SQUARE)
                 && (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE)
                 && g_sound_novel_reading.text_history[3] != -1) {
-                g_window_records[level->sound_novel.history_prompt_window].sequence
-                    = WINDOW_ANIM_SOUND_NOVEL_SQUARE_BUTTON_PRESS;
+                g_display_object_animated_pool[level->sound_novel.history_prompt_window].sequence
+                    = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_SQUARE_BUTTON_PRESS;
                 window = level->sound_novel.history_prompt_window;
-                g_window_records[window].anim_counter = 0;
-                g_window_records[window].frame_index = 0;
+                g_display_object_animated_pool[window].anim_counter = 0;
+                g_display_object_animated_pool[window].frame_index = 0;
                 level->sound_novel.fade_timer = 0;
-                g_window_gs_image_records[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
-                g_window_records[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
-                g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+                g_display_object_gs_image_pool[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_display_object_animated_pool[level->sound_novel.brightness_overlay_window].flags
+                    |= DISPLAY_OBJECT_HIDDEN;
+                g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
                 level->sound_novel.phase = SOUND_NOVEL_PHASE_OPEN_HISTORY;
                 level->sound_novel.countdown = 8;
             }
         } else {
-            g_window_records[level->sound_novel.quit_prompt_window].palette
-                = g_window_records[level->sound_novel.history_prompt_window].palette = 0xA;
+            g_display_object_animated_pool[level->sound_novel.quit_prompt_window].palette
+                = g_display_object_animated_pool[level->sound_novel.history_prompt_window].palette = 0xA;
         }
     } else {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
@@ -307,7 +311,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
         sound_all_sfx_stop();
         level->sound_novel.phase = SOUND_NOVEL_PHASE_END;
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         if (!(*state_flags & SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
             world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
         }
@@ -333,39 +337,39 @@ static void quit_menu_open(void) {
     s32 depth;
     world_map_fade_t* fade;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_quit.cursor_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[index].priority = 8;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_quit.second_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_LIST_SIDE_LABEL;
-    g_window_records[index].priority = 8;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_LIST_SIDE_LABEL;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_quit.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x3C;
     bounds.h = 0x30;
     bounds.y = 0;
     window_text_record_init(index, bounds, 0, TEXT_ID_QUIT_CONTINUE, g_window_image_buffer);
-    base = &g_window_gs_image_records[index].base;
-    g_window_gs_image_records[index].priority = 8;
+    base = &g_display_object_gs_image_pool[index].position;
+    g_display_object_gs_image_pool[index].priority = 8;
     depth = g_menu_stack_depth;
     base->x = -(bounds.w / 2);
     base->y = -0x18;
-    g_window_records[g_menu_stack_records[depth].sound_novel_quit.cursor_window].position.x
-        = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[g_menu_stack_records[depth].sound_novel_quit.cursor_window].position.y
-        = g_window_gs_image_records[index].base.y + 0xE;
-    g_window_records[g_menu_stack_records[depth].sound_novel_quit.second_window].position.x
-        = g_window_gs_image_records[index].base.x + 4;
+    g_display_object_animated_pool[g_menu_stack_records[depth].sound_novel_quit.cursor_window].position.x
+        = g_display_object_gs_image_pool[index].position.x + 6;
+    g_display_object_animated_pool[g_menu_stack_records[depth].sound_novel_quit.cursor_window].position.y
+        = g_display_object_gs_image_pool[index].position.y + 0xE;
+    g_display_object_animated_pool[g_menu_stack_records[depth].sound_novel_quit.second_window].position.x
+        = g_display_object_gs_image_pool[index].position.x + 4;
     g_menu_blocked_buttons = -1;
-    g_window_records[g_menu_stack_records[depth].sound_novel_quit.second_window].position.y
-        = g_window_gs_image_records[index].base.y - 2;
+    g_display_object_animated_pool[g_menu_stack_records[depth].sound_novel_quit.second_window].position.y
+        = g_display_object_gs_image_pool[index].position.y - 2;
     g_menu_stack_depth = depth + 1;
     fade = &g_world_map_fade;
     fade->boxes[0].r = 0;
@@ -388,13 +392,13 @@ void sound_novel_quit_resume(menu_stack_record_t* level) {
     /* The original frame reserves eight unused bytes. */
     s32 scratch[2];
 
-    g_window_gs_image_records[level->sound_novel_quit.render_index].palette = 0;
-    g_window_records[second].palette = 0;
-    g_window_records[first].palette = 0;
-    g_window_records[level->sound_novel_quit.cursor_window].sequence = WINDOW_ANIM_CURSOR_IDLE;
+    g_display_object_gs_image_pool[level->sound_novel_quit.render_index].palette = 0;
+    g_display_object_animated_pool[second].palette = 0;
+    g_display_object_animated_pool[first].palette = 0;
+    g_display_object_animated_pool[level->sound_novel_quit.cursor_window].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     index = level->sound_novel_quit.cursor_window;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 }
 
 /* Gray out the Quit/Continue menu (palettes 10, 6 and 2) and still its cursor
@@ -402,13 +406,13 @@ void sound_novel_quit_resume(menu_stack_record_t* level) {
 void sound_novel_quit_suspend(menu_stack_record_t* level) {
     s32 index;
 
-    g_window_records[level->sound_novel_quit.cursor_window].palette = 10;
-    g_window_records[level->sound_novel_quit.second_window].palette = 6;
-    g_window_gs_image_records[level->sound_novel_quit.render_index].palette = 2;
-    g_window_records[level->sound_novel_quit.cursor_window].sequence = WINDOW_ANIM_CURSOR_STILL;
+    g_display_object_animated_pool[level->sound_novel_quit.cursor_window].palette = 10;
+    g_display_object_animated_pool[level->sound_novel_quit.second_window].palette = 6;
+    g_display_object_gs_image_pool[level->sound_novel_quit.render_index].palette = 2;
+    g_display_object_animated_pool[level->sound_novel_quit.cursor_window].sequence = DISPLAY_OBJECT_ANIM_CURSOR_STILL;
     index = level->sound_novel_quit.cursor_window;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 }
 
 /* Step of the sound novel's Quit/Continue menu.
@@ -462,25 +466,25 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
         if (level->sound_novel_quit.fade_out <= 0) {
             g_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
             g_world_map_fade.flags[0] ^= WORLD_MAP_FADE_BOX_VISIBLE;
-            g_window_record_count -= 2;
-            g_window_render_record_count--;
-            g_window_render_object_count -= 3;
+            g_display_object_animated_count -= 2;
+            g_display_object_image_count--;
+            g_display_object_queue_count -= 3;
             g_menu_stack_depth--;
             menu_stack_dispatch_resume();
         }
         return;
     }
 
-    if (g_window_gs_image_records[level->sound_novel_quit.render_index].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->sound_novel_quit.render_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    flags = g_system_flags;
-    if (flags & SYSTEM_FLAG_FADING) {
+    flags = g_world_map_flags;
+    if (flags & WORLD_MAP_FLAG_FADING) {
         return;
     }
 
-    if (flags & SYSTEM_FLAG_INPUT_BLOCKED) {
+    if (flags & WORLD_MAP_FLAG_INPUT_BLOCKED) {
         if (level->sound_novel_quit.fade_in < 0xFF) {
             level->sound_novel_quit.fade_in += 8;
             if (level->sound_novel_quit.fade_in >= 0x100) {
@@ -505,16 +509,16 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
         g_sound_novel_history_0 = -1;
         g_menu_blocked_buttons = 0;
         g_sound_novel_countdown_frames = 0;
-        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_sound_novel_reading.text_history[3] = g_sound_novel_history_2;
         g_sound_novel_history_2 = g_sound_novel_history_1;
         g_sound_novel_history_1 = first;
         hud_restore();
         g_world_map_fade.priorities[0] = 0xF;
         g_world_map_fade.flags[1] = 0;
-        g_window_record_count -= 3;
-        g_window_render_record_count -= 2;
-        g_window_render_object_count -= 5;
+        g_display_object_animated_count -= 3;
+        g_display_object_image_count -= 2;
+        g_display_object_queue_count -= 5;
         g_menu_stack_depth -= 2;
         suzuki_sound_remove_resource(g_sound_novel_sound_resource);
         screen_transition_open(
@@ -537,23 +541,24 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
     if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         value = level->sound_novel_quit.choice ^ 1;
         level->sound_novel_quit.choice = value;
-        record = &g_window_records[level->sound_novel_quit.cursor_window];
-        base = g_window_gs_image_records[level->sound_novel_quit.render_index].base.y;
+        record = &g_display_object_animated_pool[level->sound_novel_quit.cursor_window];
+        base = g_display_object_gs_image_pool[level->sound_novel_quit.render_index].position.y;
         offset = value * 0x10 + 0xE;
         record->position.y = base + offset;
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        g_window_records[level->sound_novel_quit.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+        g_display_object_animated_pool[level->sound_novel_quit.cursor_window].sequence
+            = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
         window = level->sound_novel_quit.cursor_window;
-        g_window_records[window].anim_counter = 0;
-        g_window_records[window].frame_index = 0;
+        g_display_object_animated_pool[window].anim_counter = 0;
+        g_display_object_animated_pool[window].frame_index = 0;
         if (level->sound_novel_quit.choice == 0) {
-            g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
-            g_window_record_count -= 2;
-            g_window_render_record_count--;
-            g_window_render_object_count -= 3;
+            g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
+            g_display_object_animated_count -= 2;
+            g_display_object_image_count--;
+            g_display_object_queue_count -= 3;
             if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
                 screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
             }
@@ -577,11 +582,11 @@ static void hud_restore(void) {
     g_hud_value_position = g_hud_saved_value_position;
     g_hud_value_mode = HUD_VALUE_PLAY_TIME;
     g_hud_ot_priority = 1;
-    flags = g_system_flags;
+    flags = g_world_map_flags;
     hours = g_save_play_time_hours;
     minutes = g_save_play_time_minutes;
     seconds = g_save_play_time_seconds;
-    g_system_flags = flags | SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
+    g_world_map_flags = flags | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
     g_hud_value = hours;
     g_hud_value_secondary = minutes;
     g_hud_value_tertiary = seconds;
@@ -613,7 +618,7 @@ static void history_open(void) {
     RECT bounds;
     u8 unused[8];
     display_object_animated_t* windows;
-    window_xy_t* positions;
+    display_object_position_stride_t* positions;
     point32_t* position;
     CVECTOR* colors;
     s16* newest;
@@ -623,52 +628,53 @@ static void history_open(void) {
 
     thread_suspend(WORLD_MAP_THREAD_SLOT_MESSAGE);
 
-    windows = g_window_records;
-    positions = (window_xy_t*)&windows->position;
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    windows = g_display_object_animated_pool;
+    positions = (display_object_position_stride_t*)&windows->position;
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.upper_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_HISTORY_UPPER;
-    g_window_records[index].priority = 9;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_HISTORY_UPPER;
+    g_display_object_animated_pool[index].priority = 9;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
     positions[index].x = 0;
     positions[index].y = -0x6A;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.lower_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_SOUND_NOVEL_HISTORY_LOWER;
-    g_window_records[index].priority = 9;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_HISTORY_LOWER;
+    g_display_object_animated_pool[index].priority = 9;
     windows[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[index].frame_index = 0;
+    g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     positions[index].x = 0;
     positions[index].y = 0x5E;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.render_index = index;
     bounds.w = 0xF8;
     bounds.h = 0xB0;
     bounds.x = 0;
     bounds.y = 0;
     window_build_render_record_image(index, bounds, 1, g_window_image_buffer);
-    position = &g_window_gs_image_records[index].base;
+    position = &g_display_object_gs_image_pool[index].position;
     newest = &g_sound_novel_reading.text_history[3];
-    g_window_gs_image_records[index].priority = g_menu_stack_ot_offset;
+    g_display_object_gs_image_pool[index].priority = g_menu_stack_ot_offset;
     position->x = -0x80;
     position->y = -0x64;
-    g_window_gs_image_records[index].clut.x = 0x3C0;
-    g_window_gs_image_records[index].clut.y = 0x1F2;
+    g_display_object_gs_image_pool[index].clut.x = 0x3C0;
+    g_display_object_gs_image_pool[index].clut.y = 0x1F2;
     window_centered_text_draw(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
 
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].palette = 0xA;
+    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].palette
+        = 0xA;
     /* Direct record.color access changes the column base and instruction scheduling. */
-    colors = &g_window_gs_image_records->color;
-    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->r
-        = 0x80;
-    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->g
-        = 0x80;
-    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_window_gs_image_records[0])))->b
-        = 0x80;
+    colors = &g_display_object_gs_image_pool->color;
+    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_display_object_gs_image_pool[0])))
+        ->r = 0x80;
+    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_display_object_gs_image_pool[0])))
+        ->g = 0x80;
+    ((CVECTOR*)((u8*)colors + g_sound_novel_reading.picture_render_index * sizeof(g_display_object_gs_image_pool[0])))
+        ->b = 0x80;
     g_world_map_fade.boxes[0].r = 0;
     g_world_map_fade.boxes[0].g = 0;
     g_world_map_fade.boxes[0].b = 0;
@@ -682,7 +688,8 @@ static void history_open(void) {
     g_menu_blocked_buttons = -1;
     g_menu_stack_records[top].sound_novel_history.text_ids[2] = newest[-3];
     if (g_menu_stack_records[top].sound_novel_history.text_ids[0] == -1) {
-        g_window_records[g_menu_stack_records[top].sound_novel_history.upper_window].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[top].sound_novel_history.upper_window].flags
+            |= DISPLAY_OBJECT_HIDDEN;
     }
 
     depth = g_menu_stack_depth;
@@ -731,9 +738,9 @@ void sound_novel_history_update(menu_stack_record_t* level) {
         case SOUND_NOVEL_HISTORY_PHASE_DIM:
             shade = 0x80 - level->sound_novel_history.step * 8;
             index1 = &g_sound_novel_reading.picture_render_index;
-            g_window_gs_image_records[*index1].color.r = shade;
-            g_window_gs_image_records[*index1].color.g = shade;
-            g_window_gs_image_records[*index1].color.b = shade;
+            g_display_object_gs_image_pool[*index1].color.r = shade;
+            g_display_object_gs_image_pool[*index1].color.g = shade;
+            g_display_object_gs_image_pool[*index1].color.b = shade;
             g_hud_color.r = shade;
             g_hud_color.g = shade;
             g_hud_color.b = shade;
@@ -751,9 +758,9 @@ void sound_novel_history_update(menu_stack_record_t* level) {
         case SOUND_NOVEL_HISTORY_PHASE_RESTORE:
             index2 = &g_sound_novel_reading.picture_render_index;
             shade = level->sound_novel_history.step * 0x10 + 0x40;
-            g_window_gs_image_records[*index2].color.r = shade;
-            g_window_gs_image_records[*index2].color.g = shade;
-            g_window_gs_image_records[*index2].color.b = shade;
+            g_display_object_gs_image_pool[*index2].color.r = shade;
+            g_display_object_gs_image_pool[*index2].color.g = shade;
+            g_display_object_gs_image_pool[*index2].color.b = shade;
             g_hud_color.r = shade;
             g_hud_color.g = shade;
             g_hud_color.b = shade;
@@ -775,8 +782,8 @@ void sound_novel_history_update(menu_stack_record_t* level) {
                 point.y = 8;
                 for (;;) {
                     render_index = level->sound_novel_history.render_index;
-                    if (i >= g_window_gs_image_records[render_index].bounds.w
-                            * g_window_gs_image_records[render_index].bounds.h / 8) {
+                    if (i >= g_display_object_gs_image_pool[render_index].bounds.w
+                            * g_display_object_gs_image_pool[render_index].bounds.h / 8) {
                         break;
                     }
                     i++;
@@ -787,7 +794,7 @@ void sound_novel_history_update(menu_stack_record_t* level) {
                 y = point.y;
                 box.rect.x = x;
                 box.rect.y = y;
-                box.stride = g_window_gs_image_records[level->sound_novel_history.render_index].bounds.w;
+                box.stride = g_display_object_gs_image_pool[level->sound_novel_history.render_index].bounds.w;
                 menu_display_text_entry_past_choice_marks(text_id, g_window_image_buffer, &box);
                 window_load_render_record_image(level->sound_novel_history.render_index, g_window_image_buffer);
                 script_variable_set(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
@@ -799,11 +806,11 @@ void sound_novel_history_update(menu_stack_record_t* level) {
             g_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
             g_world_map_fade.flags[0] ^= WORLD_MAP_FADE_BOX_VISIBLE;
             depth = g_menu_stack_depth;
-            g_window_record_count -= 2;
-            g_window_render_record_count--;
-            g_window_render_object_count -= 3;
+            g_display_object_animated_count -= 2;
+            g_display_object_image_count--;
+            g_display_object_queue_count -= 3;
             g_menu_stack_depth = depth - 1;
-            g_window_records[g_menu_stack_records[depth - 2].sound_novel.quit_prompt_window].palette = 0;
+            g_display_object_animated_pool[g_menu_stack_records[depth - 2].sound_novel.quit_prompt_window].palette = 0;
             thread_resume(WORLD_MAP_THREAD_SLOT_MESSAGE);
             break;
         }
@@ -817,11 +824,11 @@ void sound_novel_history_update(menu_stack_record_t* level) {
             level->sound_novel_history.scroll = level->sound_novel_history.scroll + 1;
             if (level->sound_novel_history.scroll == 3
                 || level->sound_novel_history.text_ids[level->sound_novel_history.scroll] == -1) {
-                g_window_records[level->sound_novel_history.upper_window].flags |= DISPLAY_OBJECT_HIDDEN;
+                g_display_object_animated_pool[level->sound_novel_history.upper_window].flags |= DISPLAY_OBJECT_HIDDEN;
             } else {
-                g_window_records[level->sound_novel_history.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+                g_display_object_animated_pool[level->sound_novel_history.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
             }
-            g_window_records[level->sound_novel_history.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->sound_novel_history.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
     }
 
@@ -829,11 +836,11 @@ void sound_novel_history_update(menu_stack_record_t* level) {
         history_entry_draw(&level->sound_novel_history, 2);
         level->sound_novel_history.scroll = level->sound_novel_history.scroll - 1;
         if (level->sound_novel_history.scroll == 0) {
-            g_window_records[level->sound_novel_history.lower_window].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->sound_novel_history.lower_window].flags |= DISPLAY_OBJECT_HIDDEN;
         } else {
-            g_window_records[level->sound_novel_history.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[level->sound_novel_history.lower_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
-        g_window_records[level->sound_novel_history.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[level->sound_novel_history.upper_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
     }
 
     if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {

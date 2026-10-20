@@ -17,12 +17,12 @@ enum {
 };
 
 /* One 4-byte entry of the 40-entry AT list built by at_list_build and
- * kept in key order by entry_insert. Unit codes combine the unit index
+ * kept in key order by at_list_entry_insert. Unit codes combine the unit index
  * and action flags into one byte; insertion copies complete entries. */
 typedef struct at_entry {
     u8 unit_code;     /* 0x00; unit index and at_entry_flags_e */
     u8 action_id_low; /* 0x01; low byte of the ability id, or a staged item id */
-    u16 sort_key;     /* 0x02; insertion key for entry_insert */
+    u16 sort_key;     /* 0x02; insertion key for at_list_entry_insert */
 } at_entry_t;
 typedef char at_entry_size_must_be_4[(sizeof(at_entry_t) == 4) ? 1 : -1];
 

@@ -17,6 +17,11 @@ enum {
     MENU_CURSOR_THREAD_WORD_BOB_ACTIVE = 1 /* 2 after a press or while input is elsewhere: the active curve */
 };
 
+extern s32 g_menu_cursor_bob_hold;
+
+/* Hold the cursor in its active bob state while this flag is 1. */
+void menu_cursor_bob_hold_set(s32 mode);
+
 /* The vertical offset of the current thread's cursor this frame. */
 s32 menu_get_cursor_bob_offset(s32 mode);
 

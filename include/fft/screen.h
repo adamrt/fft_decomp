@@ -14,6 +14,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+struct menu_gfx_context;
+
 /* screen threads */
 /* Slots that the WORLD screens use for threads of their own; thread.h has the maps shared with BATTLE, world_map.h
  * and title.h the WLDCORE and OPEN ones. */
@@ -35,7 +37,7 @@ void screen_thread_redraw_request(s32 thread_id);
 void screen_thread_request_stop(s32 thread_id);
 
 /* menu frame */
-/* Ordinary outfitter screens use a town's location_id_e. These values
+/* Ordinary shop screens use a town's location_id_e. These values
  * identify the other screens that reuse the formation menu framework. */
 typedef enum screen_context {
     SCREEN_CONTEXT_NAME_ENTRY = -2,
@@ -69,7 +71,7 @@ void screen_input_lockout_update(void);
 void screen_input_pad_update(void);
 
 /* packet buffers */
-extern menu_gfx_context_t* g_screen_packet_buffers;
+extern struct menu_gfx_context* g_screen_packet_buffers;
 extern u16 g_screen_ot_length;
 extern u16 g_screen_draw_buffer_clip_y;
 extern u16 g_screen_textured_quad_capacity;          /* textured quad count */
@@ -89,8 +91,8 @@ extern volatile u16 g_screen_draw_area_capacity;
 /* Draw move count; volatile for the same read order as g_screen_draw_area_capacity. */
 extern volatile u16 g_screen_draw_move_capacity;
 
-void screen_packet_buffers_init(menu_gfx_context_t* buffers, u32* otags, void* unused_2, void* unused_3, void* unused_4,
-    POLY_FT4* textured_quads, void* unused_6, void* unused_7, POLY_G4* gradient_quads,
+void screen_packet_buffers_init(struct menu_gfx_context* buffers, u32* otags, void* unused_2, void* unused_3,
+    void* unused_4, POLY_FT4* textured_quads, void* unused_6, void* unused_7, POLY_G4* gradient_quads,
     POLY_GT4* textured_gradient_quads, LINE_F2* flat_lines, void* unused_11, void* unused_12, LINE_G2* gradient_lines,
     void* unused_14, void* unused_15, TILE* tiles, void* unused_17, void* unused_18, void* unused_19, void* unused_20,
     void* unused_21, void* unused_22, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);

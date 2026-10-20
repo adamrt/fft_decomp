@@ -46,17 +46,18 @@ typedef enum playback_load_state {
 /* Loaded effect sections and their saved starting positions. */
 extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
 extern s32 g_effect_sound_data_base;
+
+/* Per-channel call counts. */
 extern u8 g_effect_sound_call_counts[];
 
-/* per-channel call counts */
 extern effect_palette_section_t* g_effect_palette_ptr;
 extern const u8* g_effect_script;
 extern u8* g_effect_frame_data_start;
 extern u8* g_effect_animation_sequences_start;
 extern const effect_timing_curves_t* g_effect_timing_curves;
-extern u8 g_effect_secondary_charge_id;
 
-/* id of the charge secondary effect started with the ability; 0 none */
+/* ID of the charge secondary effect started with the ability; zero for none. */
+extern u8 g_effect_secondary_charge_id;
 
 /* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
  * caller's packed argument. */
@@ -64,15 +65,16 @@ extern u8 g_effect_secondary_by_charge_animation[];
 
 /* Ability effect loading and playback. */
 extern u32 g_heap_battle_end_address;
+
+/* File ID (EFFECT/E###.BIN) of the requested effect. */
 extern s16 g_effect_id;
 
-/* file id (EFFECT/E###.BIN) of the requested effect */
+/* Cleared when an ability effect is requested; nothing reads it. */
 extern s32 g_effect_request_unread;
 
-/* cleared when an ability effect is requested; nothing reads it */
+/* Action/reaction ability IDs index directly; event IDs map after those rows. */
 extern s16 g_effect_ability_files[];
 
-/* action/reaction ability ids index directly; event ids map after those rows */
 /* Disc extents for ability effects; sizes include the final sector.
  * Entry 0 deliberately uses the same file as Cure (entry 1). */
 static file_extent_t g_disc_extents[EFFECT_FILE_ID_COUNT] = {
@@ -832,7 +834,7 @@ void effect_report_0x320_2(void) {
  * is replaced by the Cure effect, as in effect_file_load_update's first
  * state, which requests the same file with a destination. Nothing in the game
  * calls it. */
-void effect_file_read_start(void) {
+void effect_file_seek_request(void) {
     s32 lba;
     s32 byte_length;
 
@@ -1001,7 +1003,7 @@ s32 effect_is_item_ability(s32 ability_id) {
 
 /* Releases a requested effect: stage_update starts it on its
  * next frame. */
-void effect_play(void) {
+void effect_playback_start(void) {
     if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
     }
@@ -1021,7 +1023,7 @@ s32 effect_playback_phase_get(void) {
 
 /* Runs the loaded effect file one frame and returns 1 while it plays.
  *
- * Once effect_play releases a requested effect, the file's two CLUT
+ * Once effect_playback_start releases a requested effect, the file's two CLUT
  * rows and its texture go to VRAM; the memory from that last section of the
  * file on then becomes the effect heap, the section pointers are bound and
  * the root record starts the script. Each later frame runs every allocated

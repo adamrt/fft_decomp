@@ -1,4 +1,5 @@
-/* Tentacle meshes: up to 8 segments spawned on the emitter interval, each drawn as a strip of shaded textured quads. */
+/* Tentacle meshes: up to 8 tentacles spawned on the emitter interval, each drawn as a strip of shaded textured quads.
+ */
 
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"
@@ -23,7 +24,7 @@ extern u32 g_effect_tentacle_mesh_brightness_table[][9];
 
 /* The tentacle renderer draws textured strips; the related particle-trail
  * renderer tracks points without drawing the strips. Both use the same emitter view. */
-typedef struct effect_tentacle_mesh_segment {
+typedef struct tentacle {
     SVECTOR tip;          /* 0x000 */
     VECTOR velocity;      /* 0x008: 20.12 fixed */
     VECTOR position;      /* 0x018: 20.12 fixed */
@@ -36,16 +37,16 @@ typedef struct effect_tentacle_mesh_segment {
     s16 frame;             /* 0x6e6: texture animation frame */
     s16 frame_timer;       /* 0x6e8 */
     u8 _padding_6ea[0x02]; /* tail padding to 4-byte alignment */
-} effect_tentacle_mesh_segment_t;
-typedef char effect_tentacle_mesh_segment_size_must_be_1772[sizeof(effect_tentacle_mesh_segment_t) == 1772 ? 1 : -1];
+} tentacle_t;
+typedef char tentacle_size_must_be_1772[sizeof(tentacle_t) == 1772 ? 1 : -1];
 
 typedef struct effect_tentacle_mesh_work {
-    s32 buffer;                                 /* 0x0000 */
-    s16 count;                                  /* 0x0004 */
-    u8 _padding_0006[0x02];                     /* aligns segments */
-    effect_tentacle_mesh_segment_t segments[8]; /* 0x0008 */
-    MATRIX matrix;                              /* 0x3768 */
-    s32 destroy_delay;                          /* 0x3788 */
+    s32 buffer;              /* 0x0000 */
+    s16 count;               /* 0x0004 */
+    u8 _padding_0006[0x02];  /* aligns tentacles */
+    tentacle_t tentacles[8]; /* 0x0008 */
+    MATRIX matrix;           /* 0x3768 */
+    s32 destroy_delay;       /* 0x3788 */
 } effect_tentacle_mesh_work_t;
 typedef char effect_tentacle_mesh_work_size_must_be_14220[sizeof(effect_tentacle_mesh_work_t) == 14220 ? 1 : -1];
 
@@ -69,13 +70,13 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
     VECTOR direction_spread;
     SVECTOR caster;
     SVECTOR target;
-    SVECTOR rotation;
+    SVECTOR vector;
     VECTOR out;
     SVECTOR tip_map_max;
     MATRIX facing;
     VECTOR screen0;
     VECTOR screen1;
-    effect_work_record_t emitter;
+    effect_work_record_t parent;
     SVECTOR map_max;
     effect_record_t* record;
     effect_tentacle_mesh_work_t* work;
@@ -104,7 +105,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
     u32 shade_g;
     u32 shade_b;
     u32* ot;
-    effect_tentacle_mesh_segment_t* seg;
+    tentacle_t* tentacle;
     POLY_GT4* quad;
     POLY_GT4* offset_quad;
     POLY_GT4* prev;
@@ -120,7 +121,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
     s32 tip_bindings;
     s32 index;
     s32 factor;
-    s16 len;
+    s16 largest;
     s32 speed;
     s32 brightness_row;
     s32 scratch; /* one register: INIT column, edge half-width x, then brightness factor */
@@ -168,16 +169,16 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
         /* Quad sets 0-1 are the double-buffered strips, sets 2-3 their one-pixel offset copies. */
         for (i = 0; i < 8; i++) {
             for (scratch = 0; scratch < 8; scratch++) {
-                quad = &work->segments[i].quads[0][scratch];
+                quad = &work->tentacles[i].quads[0][scratch];
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = tpage;
                 quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
-                work->segments[i].quads[1][scratch] = *quad;
-                work->segments[i].quads[2][scratch] = *quad;
-                work->segments[i].quads[3][scratch] = *quad;
+                work->tentacles[i].quads[1][scratch] = *quad;
+                work->tentacles[i].quads[2][scratch] = *quad;
+                work->tentacles[i].quads[3][scratch] = *quad;
             }
-            work->segments[i].active = 0;
+            work->tentacles[i].active = 0;
         }
 
         work->buffer = 0;
@@ -212,10 +213,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             caster_target = &g_effect_context.targets[EFFECT_CASTER_ENTRY];
             if (caster_target->target_type == EFFECT_TARGET_TYPE_UNIT) {
                 facing_yaw = ((unit_runtime_facing_quadrant_get(caster_target->data.unit.runtime_id) + 1) & 3) << 10;
-                rotation.vz = 0;
-                rotation.vx = 0;
-                rotation.vy = facing_yaw;
-                RotMatrix(&rotation, &facing);
+                vector.vz = 0;
+                vector.vx = 0;
+                vector.vy = facing_yaw;
+                RotMatrix(&vector, &facing);
             }
 
             effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
@@ -261,10 +262,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             effect_emitter_spawn_spread_interpolate(entry, factor, &spread);
             if (orient) {
                 SetRotMatrix(&facing);
-                rotation.vx = spread.vx;
-                rotation.vy = spread.vy;
-                rotation.vz = spread.vz;
-                RotTrans(&rotation, &spread, &out.pad);
+                vector.vx = spread.vx;
+                vector.vy = spread.vy;
+                vector.vz = spread.vz;
+                RotTrans(&vector, &spread, &out.pad);
             }
 
             index = (spawn_bindings >> EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT) & 0xf;
@@ -337,127 +338,127 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             travel_duration_max = effect_lerp_q8(
                 entry->tentacle_mesh.travel_duration_start.max, entry->tentacle_mesh.travel_duration_end.max, factor);
 
-            /* Start up to count tentacles while free segments remain. */
+            /* Start up to count tentacles while free slots remain. */
             for (i = 0; i < count; i++) {
                 if (work->count >= 8) {
                     break;
                 }
                 work->count++;
                 for (j = 0; j < 8; j++) {
-                    if (work->segments[j].active == 0) {
-                        seg = &work->segments[j];
+                    if (work->tentacles[j].active == 0) {
+                        tentacle = &work->tentacles[j];
                         break;
                     }
                 }
 
                 /* A random direction scaled by the spread on each axis: a point on the spread ellipsoid. */
-                len = effect_s16_largest_magnitude_select(spread.vx, spread.vy, spread.vz);
-                if (len != 0) {
-                    rotation.vx = rand();
-                    rotation.vy = rand();
-                    rotation.vz = rand();
-                    RotMatrix(&rotation, &work->matrix);
+                largest = effect_s16_largest_magnitude_select(spread.vx, spread.vy, spread.vz);
+                if (largest != 0) {
+                    vector.vx = rand();
+                    vector.vy = rand();
+                    vector.vz = rand();
+                    RotMatrix(&vector, &work->matrix);
                     SetRotMatrix(&work->matrix);
-                    rotation.vx = len;
-                    rotation.vz = 0;
-                    rotation.vy = 0;
-                    gte_RotTrans(&rotation, &out, &out.pad);
-                    seg->position.vx = ((out.vx * spread.vx) / len + origin.vx) * ONE;
-                    seg->position.vy = ((out.vy * spread.vy) / len + origin.vy) * ONE;
-                    seg->position.vz = ((out.vz * spread.vz) / len + origin.vz) * ONE;
+                    vector.vx = largest;
+                    vector.vz = 0;
+                    vector.vy = 0;
+                    gte_RotTrans(&vector, &out, &out.pad);
+                    tentacle->position.vx = ((out.vx * spread.vx) / largest + origin.vx) * ONE;
+                    tentacle->position.vy = ((out.vy * spread.vy) / largest + origin.vy) * ONE;
+                    tentacle->position.vz = ((out.vz * spread.vz) / largest + origin.vz) * ONE;
                 } else {
-                    seg->position.vx = origin.vx * ONE;
-                    seg->position.vy = origin.vy * ONE;
-                    seg->position.vz = origin.vz * ONE;
+                    tentacle->position.vx = origin.vx * ONE;
+                    tentacle->position.vy = origin.vy * ONE;
+                    tentacle->position.vz = origin.vz * ONE;
                 }
 
                 /* The tip gets the same treatment with its own spread. */
-                len = effect_s16_largest_magnitude_select(tip_spread.vx, tip_spread.vy, tip_spread.vz);
-                if (len != 0) {
-                    rotation.vx = rand();
-                    rotation.vy = rand();
-                    rotation.vz = rand();
-                    RotMatrix(&rotation, &work->matrix);
+                largest = effect_s16_largest_magnitude_select(tip_spread.vx, tip_spread.vy, tip_spread.vz);
+                if (largest != 0) {
+                    vector.vx = rand();
+                    vector.vy = rand();
+                    vector.vz = rand();
+                    RotMatrix(&vector, &work->matrix);
                     SetRotMatrix(&work->matrix);
-                    rotation.vx = len;
-                    rotation.vz = 0;
-                    rotation.vy = 0;
-                    RotTrans(&rotation, &out, &out.pad);
-                    seg->tip.vx = tip.vx + (tip_spread.vx * out.vx) / len;
-                    seg->tip.vy = tip.vy + (tip_spread.vy * out.vy) / len;
-                    seg->tip.vz = tip.vz + (tip_spread.vz * out.vz) / len;
+                    vector.vx = largest;
+                    vector.vz = 0;
+                    vector.vy = 0;
+                    RotTrans(&vector, &out, &out.pad);
+                    tentacle->tip.vx = tip.vx + (tip_spread.vx * out.vx) / largest;
+                    tentacle->tip.vy = tip.vy + (tip_spread.vy * out.vy) / largest;
+                    tentacle->tip.vz = tip.vz + (tip_spread.vz * out.vz) / largest;
                 } else {
-                    seg->tip = tip;
+                    tentacle->tip = tip;
                 }
 
                 /* Speeds are 1/512 unit a frame: << 3, or >> 9 of a 4.12 unit vector, gives 20.12. */
                 switch (flags & EFFECT_EMITTER_VELOCITY_MASK) {
                 case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
-                    rotation.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
-                    rotation.vy = base_angles.vy + RANDOM_BETWEEN(direction_spread.vy, -direction_spread.vy);
-                    rotation.vz = base_angles.vz + RANDOM_BETWEEN(direction_spread.vz, -direction_spread.vz);
-                    RotMatrix(&rotation, &work->matrix);
+                    vector.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
+                    vector.vy = base_angles.vy + RANDOM_BETWEEN(direction_spread.vy, -direction_spread.vy);
+                    vector.vz = base_angles.vz + RANDOM_BETWEEN(direction_spread.vz, -direction_spread.vz);
+                    RotMatrix(&vector, &work->matrix);
                     SetRotMatrix(&work->matrix);
-                    rotation.vz = 0;
-                    rotation.vx = 0;
-                    rotation.vy = RANDOM_BETWEEN(speed_min, speed_max);
-                    RotTrans(&rotation, &out, &out.pad);
-                    seg->velocity.vx = out.vx << 3;
-                    seg->velocity.vy = out.vy << 3;
-                    seg->velocity.vz = out.vz << 3;
+                    vector.vz = 0;
+                    vector.vx = 0;
+                    vector.vy = RANDOM_BETWEEN(speed_min, speed_max);
+                    RotTrans(&vector, &out, &out.pad);
+                    tentacle->velocity.vx = out.vx << 3;
+                    tentacle->velocity.vy = out.vy << 3;
+                    tentacle->velocity.vz = out.vz << 3;
                     break;
                 case EFFECT_EMITTER_VELOCITY_CASTER_FACING:
-                    rotation.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
-                    rotation.vy = base_angles.vy + RANDOM_BETWEEN(direction_spread.vy, -direction_spread.vy);
-                    rotation.vz = base_angles.vz + RANDOM_BETWEEN(direction_spread.vz, -direction_spread.vz);
-                    RotMatrix(&rotation, &work->matrix);
+                    vector.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
+                    vector.vy = base_angles.vy + RANDOM_BETWEEN(direction_spread.vy, -direction_spread.vy);
+                    vector.vz = base_angles.vz + RANDOM_BETWEEN(direction_spread.vz, -direction_spread.vz);
+                    RotMatrix(&vector, &work->matrix);
                     SetRotMatrix(&work->matrix);
-                    rotation.vz = 0;
-                    rotation.vx = 0;
-                    rotation.vy = RANDOM_BETWEEN(speed_min, speed_max);
-                    RotTrans(&rotation, &out, &out.pad);
+                    vector.vz = 0;
+                    vector.vx = 0;
+                    vector.vy = RANDOM_BETWEEN(speed_min, speed_max);
+                    RotTrans(&vector, &out, &out.pad);
                     SetRotMatrix(&facing);
-                    rotation.vx = out.vx;
-                    rotation.vy = out.vy;
-                    rotation.vz = out.vz;
-                    RotTrans(&rotation, &out, &out.pad);
-                    seg->velocity.vx = out.vx << 3;
-                    seg->velocity.vy = out.vy << 3;
-                    seg->velocity.vz = out.vz << 3;
+                    vector.vx = out.vx;
+                    vector.vy = out.vy;
+                    vector.vz = out.vz;
+                    RotTrans(&vector, &out, &out.pad);
+                    tentacle->velocity.vx = out.vx << 3;
+                    tentacle->velocity.vy = out.vy << 3;
+                    tentacle->velocity.vz = out.vz << 3;
                     break;
                 case EFFECT_EMITTER_VELOCITY_INWARD:
-                    out.vx = origin.vx - (seg->position.vx >> 12);
-                    out.vy = origin.vy - (seg->position.vy >> 12);
-                    out.vz = origin.vz - (seg->position.vz >> 12);
+                    out.vx = origin.vx - (tentacle->position.vx >> 12);
+                    out.vy = origin.vy - (tentacle->position.vy >> 12);
+                    out.vz = origin.vz - (tentacle->position.vz >> 12);
                     speed = RANDOM_BETWEEN(speed_min, speed_max);
                     /* A particle spawned on the origin has no direction to it and moves along +y. */
                     if (out.vx != 0 || out.vy != 0 || out.vz != 0) {
                         VectorNormal(&out, &out);
-                        seg->velocity.vx = (speed * out.vx) >> 9;
-                        seg->velocity.vy = (speed * out.vy) >> 9;
-                        seg->velocity.vz = (speed * out.vz) >> 9;
+                        tentacle->velocity.vx = (speed * out.vx) >> 9;
+                        tentacle->velocity.vy = (speed * out.vy) >> 9;
+                        tentacle->velocity.vz = (speed * out.vz) >> 9;
                     } else {
-                        seg->velocity.vy = speed << 3;
-                        seg->velocity.vz = 0;
-                        seg->velocity.vx = 0;
+                        tentacle->velocity.vy = speed << 3;
+                        tentacle->velocity.vz = 0;
+                        tentacle->velocity.vx = 0;
                     }
                     break;
                 }
 
-                seg->travel_duration = RANDOM_BETWEEN(travel_duration_min, travel_duration_max);
-                seg->age = 0;
-                seg->active = 1;
-                seg->frame = 0;
-                seg->frame_timer = entry->tentacle_mesh.frame_delay;
+                tentacle->travel_duration = RANDOM_BETWEEN(travel_duration_min, travel_duration_max);
+                tentacle->age = 0;
+                tentacle->active = 1;
+                tentacle->frame = 0;
+                tentacle->frame_timer = entry->tentacle_mesh.frame_delay;
 
                 /* Every trail point starts on the spawn position. */
-                rotation.vx = seg->position.vx >> 12;
-                rotation.vy = seg->position.vy >> 12;
-                rotation.vz = seg->position.vz >> 12;
+                vector.vx = tentacle->position.vx >> 12;
+                vector.vy = tentacle->position.vy >> 12;
+                vector.vz = tentacle->position.vz >> 12;
                 for (index = 0; index < 9; index++) {
-                    seg->points[index].x = rotation.vx;
-                    seg->points[index].y = rotation.vy;
-                    seg->points[index].z = rotation.vz;
+                    tentacle->points[index].x = vector.vx;
+                    tentacle->points[index].y = vector.vy;
+                    tentacle->points[index].z = vector.vz;
                 }
             }
         }
@@ -468,42 +469,47 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
         depth_bias = entry->tentacle_mesh.ot_depth;
         brightness_row = entry->tentacle_mesh.brightness_row;
         for (j = 0; j < 8; j++) {
-            if (work->segments[j].active == 0) {
+            if (work->tentacles[j].active == 0) {
                 continue;
             }
-            seg = &work->segments[j];
-            if (--seg->frame_timer == 0) {
-                if (++seg->frame > entry->tentacle_mesh.frame_count - 1) {
-                    seg->frame = 0;
+            tentacle = &work->tentacles[j];
+            if (--tentacle->frame_timer == 0) {
+                if (++tentacle->frame > entry->tentacle_mesh.frame_count - 1) {
+                    tentacle->frame = 0;
                 }
-                seg->frame_timer = entry->tentacle_mesh.frame_delay;
+                tentacle->frame_timer = entry->tentacle_mesh.frame_delay;
             }
 
             /* The color curves are read at the tentacle's age, not the effect frame. */
             if (entry->tentacle_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
                 factor = (entry->tentacle_mesh.color_curves & 0xfff);
-                red = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][seg->age];
-                green
-                    = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][seg->age];
-                blue = g_effect_animation_curve_data->curves[(factor >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][seg->age];
+                red = g_effect_animation_curve_data
+                          ->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][tentacle->age];
+                green = g_effect_animation_curve_data
+                            ->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][tentacle->age];
+                blue = g_effect_animation_curve_data
+                           ->curves[(factor >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][tentacle->age];
             } else {
                 red = green = blue = EFFECT_COLOR_NEUTRAL;
             }
 
             /* While travelling, the newest point eases from the particle's path towards the tip. After
              * arrival the strip's head stays on the arrival point and its tail catches up a point a frame. */
-            emitter.motion.position.x = x = seg->position.vx += seg->velocity.vx;
-            emitter.motion.position.y = y = seg->position.vy += seg->velocity.vy;
-            emitter.motion.position.z = z = seg->position.vz += seg->velocity.vz;
-            index = ++seg->age;
+            parent.motion.position.x = x = tentacle->position.vx += tentacle->velocity.vx;
+            parent.motion.position.y = y = tentacle->position.vy += tentacle->velocity.vy;
+            parent.motion.position.z = z = tentacle->position.vz += tentacle->velocity.vz;
+            index = ++tentacle->age;
             point_index = index % 9;
             px = x >> 12;
             py = y >> 12;
             pz = z >> 12;
-            if (index <= seg->travel_duration) {
-                seg->points[point_index].x = effect_s32_cos_interpolate(px, seg->tip.vx, seg->travel_duration, index);
-                seg->points[point_index].y = effect_s32_cos_interpolate(py, seg->tip.vy, seg->travel_duration, index);
-                seg->points[point_index].z = effect_s32_cos_interpolate(pz, seg->tip.vz, seg->travel_duration, index);
+            if (index <= tentacle->travel_duration) {
+                tentacle->points[point_index].x
+                    = effect_s32_cos_interpolate(px, tentacle->tip.vx, tentacle->travel_duration, index);
+                tentacle->points[point_index].y
+                    = effect_s32_cos_interpolate(py, tentacle->tip.vy, tentacle->travel_duration, index);
+                tentacle->points[point_index].z
+                    = effect_s32_cos_interpolate(pz, tentacle->tip.vz, tentacle->travel_duration, index);
                 /* Assigned after the calls; the scheduler hoists both stores above them. */
                 shade_index = 8;
                 link_count = 8;
@@ -512,11 +518,11 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 }
                 u = entry->tentacle_mesh.texture_u;
             } else {
-                seg->points[point_index].x = seg->tip.vx;
-                seg->points[point_index].y = seg->tip.vy;
-                seg->points[point_index].z = seg->tip.vz;
+                tentacle->points[point_index].x = tentacle->tip.vx;
+                tentacle->points[point_index].y = tentacle->tip.vy;
+                tentacle->points[point_index].z = tentacle->tip.vz;
                 tail_step = index - 8;
-                shade_index = seg->travel_duration - tail_step;
+                shade_index = tentacle->travel_duration - tail_step;
                 if (shade_index < 0) {
                     shade_index = 0;
                 }
@@ -531,33 +537,33 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             }
 
             /* Children spawn from the strip's head point. */
-            emitter.motion.position.x = seg->points[point_index].x * ONE;
-            emitter.motion.position.y = seg->points[point_index].y * ONE;
-            emitter.motion.position.z = seg->points[point_index].z * ONE;
+            parent.motion.position.x = tentacle->points[point_index].x * ONE;
+            parent.motion.position.y = tentacle->points[point_index].y * ONE;
+            parent.motion.position.z = tentacle->points[point_index].z * ONE;
             if (flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) {
                 effect_emitter_particles_spawn(
-                    record->record_index, seg->age, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
+                    record->record_index, tentacle->age, entry->tentacle_mesh.child_emitter_mid_life, &parent);
             }
 
             /* Head: the first quad's leading edge, perpendicular to the first segment (angle + 0x400).
              * Each quad has a copy in set buffer + 2, one pixel right and down. */
-            v = entry->tentacle_mesh.texture_v + seg->frame * height;
-            quad = &seg->quads[work->buffer][0];
-            offset_quad = &seg->quads[work->buffer + 2][0];
+            v = entry->tentacle_mesh.texture_v + tentacle->frame * height;
+            quad = &tentacle->quads[work->buffer][0];
+            offset_quad = &tentacle->quads[work->buffer + 2][0];
             SetRotMatrix(&g_camera_matrix);
             SetTransMatrix(&g_camera_matrix);
-            rotation.vx = seg->points[point_index].x;
-            rotation.vy = seg->points[point_index].y;
-            rotation.vz = seg->points[point_index].z;
-            RotTrans(&rotation, &screen0, &screen0.pad);
+            vector.vx = tentacle->points[point_index].x;
+            vector.vy = tentacle->points[point_index].y;
+            vector.vz = tentacle->points[point_index].z;
+            RotTrans(&vector, &screen0, &screen0.pad);
             point_index--;
             if (point_index < 0) {
                 point_index = 8;
             }
-            rotation.vx = seg->points[point_index].x;
-            rotation.vy = seg->points[point_index].y;
-            rotation.vz = seg->points[point_index].z;
-            RotTrans(&rotation, &screen1, &screen1.pad);
+            vector.vx = tentacle->points[point_index].x;
+            vector.vy = tentacle->points[point_index].y;
+            vector.vz = tentacle->points[point_index].z;
+            RotTrans(&vector, &screen1, &screen1.pad);
             prev_angle = ratan2(screen1.vy - screen0.vy, screen1.vx - screen0.vx);
             scratch = ((rcos(prev_angle + 0x400) * height) / 2) >> 12;
             dy = ((rsin(prev_angle + 0x400) * height) / 2) >> 12;
@@ -585,16 +591,16 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 point_index--;
                 prev = quad;
                 prev_offset_quad = offset_quad;
-                quad = &seg->quads[work->buffer][index];
-                offset_quad = &seg->quads[work->buffer + 2][index];
+                quad = &tentacle->quads[work->buffer][index];
+                offset_quad = &tentacle->quads[work->buffer + 2][index];
                 screen0 = screen1;
                 if (point_index < 0) {
                     point_index = 8;
                 }
-                rotation.vx = seg->points[point_index].x;
-                rotation.vy = seg->points[point_index].y;
-                rotation.vz = seg->points[point_index].z;
-                RotTrans(&rotation, &screen1, &screen1.pad);
+                vector.vx = tentacle->points[point_index].x;
+                vector.vy = tentacle->points[point_index].y;
+                vector.vz = tentacle->points[point_index].z;
+                RotTrans(&vector, &screen1, &screen1.pad);
                 angle = ratan2(screen1.vy - screen0.vy, screen1.vx - screen0.vx);
                 mid_angle = (angle + prev_angle) / 2;
                 edge_angle = mid_angle + 0x400;
@@ -665,12 +671,12 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             AddPrim(&ot[depth], quad);
 
             /* Done once the tail reaches the tip: the travel time plus a frame per trailing segment. */
-            if (seg->travel_duration + 8 == seg->age) {
+            if (tentacle->travel_duration + 8 == tentacle->age) {
                 if (flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
                     effect_emitter_particles_spawn(
-                        record->record_index, seg->age, entry->tentacle_mesh.child_emitter_on_death, &emitter);
+                        record->record_index, tentacle->age, entry->tentacle_mesh.child_emitter_on_death, &parent);
                 }
-                seg->active = 0;
+                tentacle->active = 0;
                 work->count--;
             }
         }

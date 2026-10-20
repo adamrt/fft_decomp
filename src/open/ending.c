@@ -1,7 +1,7 @@
 /* Ending movie and scrolling credits: script dispatch, text records, XA audio and picture sequences. */
 
 #include "fft/ending.h"
-#include "fft/controller.h"
+#include "fft/controller_stack.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"

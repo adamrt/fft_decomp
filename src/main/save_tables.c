@@ -5,6 +5,7 @@
 #include "fft/save.h"
 #include "fft/sound_novel.h"
 #include "fft/system.h"
+#include "fft/world_map.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -59,5 +60,5 @@ void save_data_tables_init(void) {
         g_proposition_states[i] = 0;
     }
     g_proposition_count = 0;
-    g_system_flags = 0;
+    g_world_map_flags = 0;
 }

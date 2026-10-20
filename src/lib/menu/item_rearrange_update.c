@@ -2,6 +2,7 @@
 
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
@@ -26,7 +27,7 @@ extern u8 g_item_rearrange_anim_frame;
  * category list (confirming on the picked entry itself opens the item action menu instead),
  * while cancel exits without changing the list. A blinking hand marks the picked row and the
  * item-stat preview follows the cursor. Returns the item list state to continue in. */
-s32 item_run_rearrange_mode(void) {
+s32 item_rearrange_update(void) {
     RECT rect;
     s32 unused[2];
     s32 cursor;

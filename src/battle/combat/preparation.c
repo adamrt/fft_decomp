@@ -162,7 +162,7 @@ action_preparation_e action_commit_preparation(const action_command_t* command) 
 
 /*
  * Validate an action and copy it to dest with its resolved ability id. Item,
- * Throw, Arithmeticks and Attack resolve at once; Jump stores a CT of 50 / Speed
+ * Throw, Math Skill and Attack resolve at once; Jump stores a CT of 50 / Speed
  * (at least 1); Charge takes its table CT; other abilities take their CT, halved
  * (rounded up) by Short Charge and zeroed by Non-Charge unless they are
  * performances (Persevere). A nonzero phase stores the CT; an odd phase also
@@ -246,7 +246,7 @@ action_preparation_e action_prepare(const action_command_t* source, action_comma
             unit->action_taken = 1;
         }
         return ACTION_PREPARATION_IMMEDIATE;
-    case ACTION_MENU_TYPE_ARITHMETICKS:
+    case ACTION_MENU_TYPE_MATH_SKILL:
         ability = action.ability_id;
         type = action.calculator_type;
         multiplier = action.calculator_multiplier;
@@ -1504,7 +1504,7 @@ static s32 reflect_apply(unit_stats_t* unit) {
     action_command_t* action = &unit->action_command;
     s32 x;
     s32 y;
-    s32 z;
+    s32 layer;
     s32 dx;
     s32 dy;
     s32 last_attack;
@@ -1514,7 +1514,7 @@ static s32 reflect_apply(unit_stats_t* unit) {
     if (dx == 0 && dy == 0) {
         return -1;
     }
-    if (target_resolve_rotated_offset_layer(unit, dx, dy, 0, &x, &y, &z) != 0) {
+    if (target_resolve_rotated_offset_layer(unit, dx, dy, 0, &x, &y, &layer) != 0) {
         return -1;
     }
     action->skillset_id = SKILLSET_ID_BLACK_MAGIC;
@@ -1524,7 +1524,7 @@ static s32 reflect_apply(unit_stats_t* unit) {
     action->ability_id = last_attack;
     action->target_position.vx = x;
     action->target_position.vz = y;
-    action->target_position.vy = z;
+    action->target_position.vy = layer;
     return 0;
 }
 

@@ -227,19 +227,6 @@ typedef struct zodiac_draw_context {
     sprite_draw_offset_t offset; /* 0x18 */
 } zodiac_draw_context_t;
 
-/* One of the 137 fixed-size blocks in EVTCHR.BIN. No native pointer tables
- * or widened 32-bit unit-animation headers are present in the file. */
-typedef struct evtchr_file_record {
-    u8 sequence_offsets[0x40][4]; /* 0x0000; signed 32-bit offsets, -1 resolves to zero */
-    u8 sequence_data[0x400];      /* 0x0100 */
-    u8 frame_offsets[0x28][4];    /* 0x0500; signed 32-bit offsets, -1 resolves to zero */
-    u8 frame_data[0x1e0];         /* 0x05a0; copied into both native frame sets */
-    u8 cluts[16 * 16 * 2];        /* 0x0780; 16 palettes of 16 little-endian colors */
-    u8 pixels[200 * 128];         /* 0x0980; 256x200, 4bpp */
-    u8 _unused_6d80[0xa80];       /* unread tail of the 0x7800-byte block */
-} evtchr_file_record_t;
-typedef char evtchr_file_record_size_must_be_30720[sizeof(evtchr_file_record_t) == 30720 ? 1 : -1];
-
 /* The 0x10-byte glyph blit descriptor used by the window frame threads and filled
  * by screen_blit_source_rect_set, text_set_blit_source_rect and
  * text_set_blit_destination. The stride is the surface width in pixels. */
@@ -259,41 +246,6 @@ typedef struct scaled_draw_area_pair {
     RECT rects[2];    /* 0x18 */
 } scaled_draw_area_pair_t;
 typedef char scaled_draw_area_pair_size_must_be_40[sizeof(scaled_draw_area_pair_t) == 40 ? 1 : -1];
-
-/* Menu frame buffer: primitive pools followed by drawing/display state.
- * BUNIT uses the environments; EQUIP owns the same 236-byte buffers without
- * reading or writing the environment suffix. */
-typedef struct menu_gfx_context {
-    u32* otag;                            /* 0x00 */
-    POLY_F3* flat_triangles;              /* 0x04 */
-    POLY_FT3* textured_triangles;         /* 0x08 */
-    POLY_F4* flat_quads;                  /* 0x0c */
-    POLY_FT4* textured_quads;             /* 0x10 */
-    POLY_G3* gouraud_triangles;           /* 0x14 */
-    POLY_GT3* gouraud_textured_triangles; /* 0x18 */
-    POLY_G4* gouraud_quads;               /* 0x1c */
-    POLY_GT4* gouraud_textured_quads;     /* 0x20 */
-    LINE_F2* flat_lines;                  /* 0x24 */
-    LINE_F3* flat_lines_3;                /* 0x28 */
-    LINE_F4* flat_lines_4;                /* 0x2c */
-    LINE_G2* gouraud_lines;               /* 0x30 */
-    LINE_G3* gouraud_lines_3;             /* 0x34 */
-    LINE_G4* gouraud_lines_4;             /* 0x38 */
-    TILE* tiles;                          /* 0x3c */
-    TILE_1* tiles_1;                      /* 0x40 */
-    TILE_8* tiles_8;                      /* 0x44 */
-    TILE_16* tiles_16;                    /* 0x48 */
-    SPRT* sprites;                        /* 0x4c */
-    SPRT_8* sprites_8;                    /* 0x50 */
-    SPRT_16* sprites_16;                  /* 0x54 */
-    DR_MOVE* draw_moves;                  /* 0x58 */
-    DR_AREA* draw_areas;                  /* 0x5c */
-    DR_MODE* draw_modes;                  /* 0x60 */
-    DRAWENV draw_env;                     /* 0x64 */
-    DISPENV disp_env;                     /* 0xc0 */
-    u8 _unused_d4[0x18];                  /* 0xd4 */
-} menu_gfx_context_t;
-typedef char menu_gfx_context_size_must_be_236[(sizeof(menu_gfx_context_t) == 236) ? 1 : -1];
 
 /* Full-screen fade primitive pair: a TILE followed by the DR_MODE that
  * selects its texture page and window. */
@@ -316,7 +268,6 @@ extern s32 g_gfx_screen_polarity;
 u32* gfx_battle_otag_get(void);
 void gfx_battle_otag_swap(void);
 void gfx_display_reset(int width, int height, int projection, u8 red, u8 green, u8 blue);
-void gfx_display_setup(int width, int height, int projection, u8 red, u8 green, u8 blue);
 
 /* screen environments */
 /* Double-buffered draw/display environments, one pair per frame buffer (0x70

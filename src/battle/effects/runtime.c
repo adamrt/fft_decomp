@@ -583,7 +583,7 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
     SVECTOR tile_anchor;
     const effect_geometry_record_t* entry;
     effect_work_record_t* particle;
-    const SVECTOR* unit_coords;
+    const SVECTOR* unit_event_offset;
     s32 time;
     s32 selector;
     u16 inertia_binding;
@@ -650,7 +650,8 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
         g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index, &g_effect_context, &target);
     if (g_effect_context.targets[target_index].target_type == EFFECT_TARGET_TYPE_UNIT) {
         unit_runtime_facing_quadrant_get(g_effect_context.targets[target_index].data.unit.runtime_id);
-        unit_coords = unit_get_event_offset_by_runtime_id(g_effect_context.targets[target_index].data.unit.runtime_id);
+        unit_event_offset
+            = unit_get_event_offset_by_runtime_id(g_effect_context.targets[target_index].data.unit.runtime_id);
     }
     tile = battle_map_tile_get_pointer(
         g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
@@ -703,9 +704,9 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
         spawn.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
         break;
     case EFFECT_EMITTER_ORIGIN_TRACKED_ENTITY:
-        spawn.vx += target.vx + unit_coords->vx;
-        spawn.vy += target.vy + unit_coords->vy;
-        spawn.vz += target.vz + unit_coords->vz;
+        spawn.vx += target.vx + unit_event_offset->vx;
+        spawn.vy += target.vy + unit_event_offset->vy;
+        spawn.vz += target.vz + unit_event_offset->vz;
         break;
     }
 

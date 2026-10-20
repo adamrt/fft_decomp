@@ -107,7 +107,7 @@ void sprite_palette_tint_all_by_team(void) {
 }
 
 /* Advance the AT list cursor, wrapping after the list's 40 entries. */
-static void cursor_advance(void) {
+static void at_list_cursor_advance(void) {
     g_at_list_cursor++;
     if (g_at_list_cursor >= AT_LIST_CAPACITY) {
         g_at_list_cursor = 0;
@@ -138,9 +138,9 @@ void at_list_show_next_entry(void) {
             }
             break;
         }
-        cursor_advance();
+        at_list_cursor_advance();
     }
-    cursor_advance();
+    at_list_cursor_advance();
 }
 
 /* Open the status menu once: mark it open and restart the AT list cursor at entry

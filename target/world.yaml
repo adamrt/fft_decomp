@@ -299,7 +299,7 @@ functions:
   - {addr: 0x800ecf20, size: 484, name: menu_run_icon_selection_loop, hash: 250b9e0de59e73e5, unit: icon_selection}
   - {addr: 0x800ed104, size: 1216, name: at_list_build_ability_preview, hash: 7287e112f97743bf, unit: icon_selection}
   - {addr: 0x800ed5c4, size: 48, name: at_list_ability_preview_thread, hash: e02dbd58ee62ae8e, unit: icon_selection}
-  - {addr: 0x800ed5f4, size: 488, name: menu_text_columns_narrow_draw, hash: e8638c05b3faf0ec, unit: ability_list_text}
+  - {addr: 0x800ed5f4, size: 488, name: ability_list_text_draw, hash: e8638c05b3faf0ec, unit: ability_list_text}
   - {addr: 0x800ed7dc, size: 700, name: menu_redraw_text_page_on_scroll_in_rect, hash: 4ebf226b668e0eb2, unit: ability_list_text}
   - {addr: 0x800eda98, size: 16, name: script_event_initial_repeat_counter_get, hash: 7fd0b897319e3c44, unit: ability_list_text}
   - {addr: 0x800edaa8, size: 4172, name: ability_list_scrolling_thread, hash: ea266beac968435e, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/world/menu/ability_list.c}
@@ -444,9 +444,9 @@ functions:
   - {addr: 0x800f67c4, size: 44, name: script_filter_controller_input, hash: fe99b31bcc328180, unit: event_frame}
   - {addr: 0x800f67f0, size: 1596, name: script_event_frame_run, hash: eac0cd402d9dd578, unit: event_frame}
   - {addr: 0x800f6e2c, size: 60, name: script_set_current_otag_entry_and_update_input, hash: d5b6fdd929637d19, unit: event_frame}
-  - {addr: 0x800f6e68, size: 48, name: script_specialized_map_destroyed_set, hash: d1d0b33651696dd9, unit: event_frame}
+  - {addr: 0x800f6e68, size: 48, name: script_map_destruction_signal, hash: d1d0b33651696dd9, unit: event_frame}
   - {addr: 0x800f6e98, size: 8, name: pending_requests_process, hash: 6d64edf91449c1b1, unit: event_frame}
-  - {addr: 0x800f6ea0, size: 8, name: state_from_script_variables_load, hash: 6d64edf91449c1b1, unit: event_frame}
+  - {addr: 0x800f6ea0, size: 8, name: camera_from_script_variables_load, hash: 6d64edf91449c1b1, unit: event_frame}
   - {addr: 0x800f6ea8, size: 8, name: camera_state_to_script_variables_store, hash: 6d64edf91449c1b1, unit: event_frame}
   - {addr: 0x800f6eb0, size: 24, name: battle_map_weather_get, hash: 81566a90318e897e, unit: event_frame}
   - {addr: 0x800f6ec8, size: 40, name: script_event_thread_run, hash: 7bcd75fff235e2a0, source: src/lib/event/script/event_thread.c}
@@ -643,7 +643,7 @@ functions:
   - {addr: 0x801085a0, size: 256, name: screen_build_window_image_row, hash: 03b43cffa473c30c, source: src/lib/menu/graphics/window_image_row.c, source_symbol: menu_build_window_image_row}
   - {addr: 0x801086a0, size: 640, name: screen_icon_list_thread, hash: 7c9eea9172dca7e4, unit: formation_icon_list}
   - {addr: 0x80108920, size: 216, name: formation_roster_names_build, hash: 96223aeecf91b09d, unit: formation_icon_list}
-  - {addr: 0x801089f8, size: 16, name: formation_display_mode_set, hash: 47216740e98df636, unit: formation_icon_list}
+  - {addr: 0x801089f8, size: 16, name: menu_cursor_bob_hold_set, hash: 47216740e98df636, unit: formation_icon_list}
   - {addr: 0x80108a08, size: 16, name: formation_backdrop_otag_set, hash: 268b8898cf44a43e, unit: formation_icon_list}
   - {addr: 0x80108a18, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: zodiac_primitives}
   - {addr: 0x80108ce8, size: 692, name: zodiac_build_primitives, hash: 49ec660645c9bf7d, unit: zodiac_primitives}
@@ -702,10 +702,10 @@ functions:
   - {addr: 0x80112704, size: 372, name: menu_icon_strip_thread, hash: 03519690175a4d3a, unit: menu_window_threads}
   - {addr: 0x80112878, size: 104, name: item_icon_source_build, hash: 17be9f26676bdbf8, source: src/lib/menu/item_build_icon_source.c}
   - {addr: 0x801128e0, size: 908, name: menu_input_event_state_update, hash: af5af8099faa9908, unit: thread_state}
-  - {addr: 0x80112c6c, size: 28, name: menu_thread_running_check, hash: 22d1fa2a224de3cd, unit: thread_state}
+  - {addr: 0x80112c6c, size: 28, name: menu_thread_is_running, hash: 22d1fa2a224de3cd, unit: thread_state}
   - {addr: 0x80112c88, size: 1236, name: menu_draw_status_panel_backdrops, hash: 98480b1c862dca4f, unit: menu_panel_backdrops}
   - {addr: 0x8011315c, size: 648, name: formation_display_init, hash: 03e723ed2bcd8184, unit: formation_display_init}
-  - {addr: 0x801133e4, size: 148, name: formation_rebuild_unit_list, hash: 97da11e8f7fbbc2b, unit: formation_display_init}
+  - {addr: 0x801133e4, size: 148, name: formation_lists_rebuild, hash: 97da11e8f7fbbc2b, unit: formation_display_init}
   - {addr: 0x80113478, size: 112, name: screen_busy_check, hash: 09c2bf94c7f79101, unit: formation_display_init}
   - {addr: 0x801134e8, size: 88, name: message_box_show_with_sound, hash: f4355019c7b2ad8b, unit: formation_display_init}
   - {addr: 0x80113540, size: 64, name: formation_show_unit_message, hash: faa146ebb4a3f05f, unit: formation_display_init}
@@ -797,7 +797,7 @@ functions:
   - {addr: 0x8011be18, size: 32, name: equipment_get_preview_mp_bonus_display, hash: e8685c5ab7aff020, unit: preview_bonuses}
   - {addr: 0x8011be38, size: 880, name: formation_items_update, hash: de9a8c90de4b7c65, unit: equipment_menus}
   - {addr: 0x8011c1a8, size: 1068, name: formation_items_browse_update, hash: 347872fab275499e, unit: equipment_menus}
-  - {addr: 0x8011c5d4, size: 772, name: item_run_rearrange_mode, hash: 1b604389387eba89, source: src/lib/menu/item_run_rearrange_mode.c}
+  - {addr: 0x8011c5d4, size: 772, name: item_rearrange_update, hash: 1b604389387eba89, source: src/lib/menu/item_rearrange_update.c}
   - {addr: 0x8011c8d8, size: 1744, name: formation_items_action_update, hash: ed683b96af414908, unit: item_actions}
   - {addr: 0x8011cfa8, size: 848, name: formation_items_sort_update, hash: c326cc985165527c, unit: item_actions}
   - {addr: 0x8011d2f8, size: 380, name: formation_items_equipped_units_update, hash: 470964449b528d46, unit: item_actions}
@@ -855,7 +855,7 @@ functions:
   - {addr: 0x801212b8, size: 688, name: formation_save_records, hash: c0932d02a682df31, unit: formation_records}
   - {addr: 0x80121568, size: 236, name: item_ranking_value_get, hash: c162face50932c06, source: src/lib/menu/item_get_ranking_value.c}
   - {addr: 0x80121654, size: 1548, name: item_id_list_sort, hash: cadb2570fbcc2eab, unit: roster_sorting}
-  - {addr: 0x80121c60, size: 872, name: formation_sort_roster, hash: 81bb011ed79bb2fb, unit: roster_sorting}
+  - {addr: 0x80121c60, size: 872, name: formation_roster_sort, hash: 81bb011ed79bb2fb, unit: roster_sorting}
   - {addr: 0x80121fc8, size: 88, name: item_load_type_order, hash: e9c6e09b68b8a95e, unit: item_order}
   - {addr: 0x80122020, size: 96, name: item_store_type_order, hash: baa6b7f2ddd835f6, unit: item_order}
   - {addr: 0x80122080, size: 88, name: item_store_category_list, hash: 7e29c4bdf54ddbc0, unit: item_order}
@@ -1259,7 +1259,7 @@ data:
   - {addr: 0x8015330c, name: g_menu_input_lock_mode}
   - {addr: 0x80153310, name: g_help_open}
   - {addr: 0x80153314, name: g_formation_screen_active}
-  - {addr: 0x80153318, name: g_menu_formation_display_mode}
+  - {addr: 0x80153318, name: g_menu_cursor_bob_hold}
   - {addr: 0x8015331c, name: g_screen_dialog_waiting}
   - {addr: 0x80153320, name: g_gfx_screen_fade}
   - {addr: 0x80153328, name: g_unit_panel_hide_numeric_values}
@@ -1365,7 +1365,7 @@ data:
   - {addr: 0x801560fc, name: s_status_screen_separate_hand_layouts}
   - {addr: 0x8015612c, name: s_status_screen_two_hands_layouts}
   - {addr: 0x8015615c, name: s_status_screen_item_icon_layouts}
-  - {addr: 0x80156198, name: g_status_screen_line_colors}
+  - {addr: 0x80156198, name: g_status_screen_line_layout}
   - {addr: 0x801561d0, name: g_status_screen_sprite_clut_pairs}
   - {addr: 0x80156224, name: s_menu_icon_strip_image_params}
   - {addr: 0x80156314, name: s_menu_single_icon_image_params}
@@ -2079,7 +2079,7 @@ data:
   - {addr: 0x801aed74, name: g_submenu_row_text_ids}
   - {addr: 0x801aed8c, name: g_menu_text_file_buffer}
   - {addr: 0x801bef8c, name: g_saved_text_values}
-  - {addr: 0x801bf00c, name: g_saved_system_flags}
+  - {addr: 0x801bf00c, name: g_saved_world_map_flags}
   - {addr: 0x801bf440, name: g_formation_ordering_table}
   - {addr: 0x801bf444, name: g_formation_view_quads}
   - {addr: 0x801bfda4, name: g_text_list_pages}
@@ -2087,7 +2087,7 @@ data:
   - {addr: 0x801c001c, name: g_text_glyph_dest}
   - {addr: 0x801c002c, name: g_screen_list_controller_input}
   - {addr: 0x801c0030, name: g_menu_panel_backdrop_packets}
-  - {addr: 0x801c0520, name: g_frame_arg}
+  - {addr: 0x801c0520, name: g_menu_framebuffer_y}
   - {addr: 0x801c0524, name: g_menu_input_controller}
   - {addr: 0x801c0528, name: g_screen_input_frame_new}
   - {addr: 0x801c0528, name: g_screen_input_frame_state}

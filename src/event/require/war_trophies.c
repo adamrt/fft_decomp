@@ -1,5 +1,5 @@
 /* Collect the battle's War Trophies and bonus money, show the paged item
- * list, and animate the gil reward before it is added to war funds. */
+ * list, and animate the gil reward after adding it to war funds. */
 
 #include "fft/after_battle.h"
 #include "fft/gfx.h"
@@ -82,10 +82,10 @@ static void war_trophy_collect(void) {
     s32 funds;
     s32 item_count;
     const item_data_t* item;
-    u8* qp;
+    u8* quantity_ptr;
     u32 pad[4];
-    s32* iv;
-    s32* it;
+    s32* entry_values;
+    s32* entry_types;
 
     g_war_trophy_entry_count = 0;
     reward_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
@@ -93,12 +93,12 @@ static void war_trophy_collect(void) {
     {
         s32 j;
         s32 next;
-        iv = g_war_trophy_entry_values;
-        it = g_war_trophy_entry_types;
+        entry_values = g_war_trophy_entry_values;
+        entry_types = g_war_trophy_entry_types;
         j = g_war_trophy_entry_count;
-        iv[j] = g_war_trophy_search_result.bonus_money;
-        it[j] = WAR_TROPHY_ENTRY_BONUS_MONEY;
-        if (iv[j] != 0) {
+        entry_values[j] = g_war_trophy_search_result.bonus_money;
+        entry_types[j] = WAR_TROPHY_ENTRY_BONUS_MONEY;
+        if (entry_values[j] != 0) {
             next = j + 1;
             g_war_trophy_entry_count = next;
         }
@@ -107,49 +107,49 @@ static void war_trophy_collect(void) {
     i = 0;
     item_count = g_war_trophy_item_count;
     if (item_count > 0) {
-        s32* tb;
-        s32* vb = iv;
-        u8* cp;
+        s32* types_base;
+        s32* values_base = entry_values;
+        u8* item_count_ptr;
         s32 entry;
         s32 loop_count;
-        tb = it;
-        cp = &g_war_trophy_search_result.item_count;
+        types_base = entry_types;
+        item_count_ptr = &g_war_trophy_search_result.item_count;
         do {
             entry = g_war_trophy_entry_count;
             item_id = g_war_trophy_search_result.item_ids[i];
             i++;
-            vb[entry] = item_id;
-            tb[entry] = WAR_TROPHY_ENTRY_ITEM;
-            loop_count = *cp;
+            values_base[entry] = item_id;
+            types_base[entry] = WAR_TROPHY_ENTRY_ITEM;
+            loop_count = *item_count_ptr;
             g_war_trophy_entry_count = entry + 1;
         } while (i < loop_count);
     }
 
     i = 0;
     if (g_war_trophy_entry_count > 0) {
-        s32* vp = g_war_trophy_entry_values;
-        s32* tp = g_war_trophy_entry_types;
+        s32* value_ptr = g_war_trophy_entry_values;
+        s32* type_ptr = g_war_trophy_entry_types;
         do {
-            if (*tp == WAR_TROPHY_ENTRY_ITEM) {
-                item_id = *vp;
+            if (*type_ptr == WAR_TROPHY_ENTRY_ITEM) {
+                item_id = *value_ptr;
                 quantity = item_total_quantity_get(item_id, 1);
                 if (quantity == 99) {
-                    item = item_data_get(*vp);
+                    item = item_data_get(*value_ptr);
                     price = item->price;
                     price /= 4;
                     funds = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
                     script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, funds + price);
                 } else {
-                    s32 id = *vp;
-                    qp = &g_item_quantities[id];
-                    (*qp)++;
+                    s32 id = *value_ptr;
+                    quantity_ptr = &g_item_quantities[id];
+                    (*quantity_ptr)++;
                 }
             } else {
                 funds = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
-                script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, funds + *vp);
+                script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, funds + *value_ptr);
             }
-            vp++;
-            tp++;
+            value_ptr++;
+            type_ptr++;
         } while (++i < g_war_trophy_entry_count);
     }
 }

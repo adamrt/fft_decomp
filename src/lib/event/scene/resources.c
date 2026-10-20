@@ -11,6 +11,7 @@
 #include "fft/portrait.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
+#include "fft/sprite_sheet.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"

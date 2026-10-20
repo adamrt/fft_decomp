@@ -1,13 +1,13 @@
 /* Battle camera input, focus tracking and unit movement updates. */
 
 #include "fft/battle_map.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/input.h"
 #include "fft/move_step.h"
 #include "fft/sound.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
@@ -183,7 +183,7 @@ void camera_rotation_update(void) {
             angle = (u16)g_camera_yaw_target & 0xFFF;
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_L1) {
-                if (g_game_state != GAME_STATE_EVENT) {
+                if (g_battle_state != BATTLE_STATE_EVENT) {
                     rotation_left_destination_set((angle & 0xFE0) - 0x400);
                 }
             } else {
@@ -200,7 +200,7 @@ void camera_rotation_update(void) {
             angle = (u16)g_camera_yaw_target & 0xFFF;
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_R1) {
-                if (g_game_state != GAME_STATE_EVENT) {
+                if (g_battle_state != BATTLE_STATE_EVENT) {
                     /* Retail continues the right turn through rotate_left. Harmless: the two
                      * differ only for a destination on an axis, which this one never is. */
                     rotation_left_destination_set((angle & 0xFE0) + 0x400);
@@ -628,7 +628,7 @@ static void real_coords_toward_target_step(const unit_runtime_t* target) {
  * window; the acting-unit states (unit moving, wait direction and pre-attack
  * animation) track the source unit's camera-relative position and step the
  * real coordinates toward the unit; the other states below
- * GAME_STATE_ACTION_ANNOUNCEMENT take the idle path of
+ * BATTLE_STATE_ACTION_ANNOUNCEMENT take the idle path of
  * camera_cursor_focus_update, and that state and those above it
  * clear the vector.
  *
@@ -642,7 +642,7 @@ void camera_scene_focus_update(void) {
     unit_runtime_t* unit;
     s32 height;
 
-    if (g_game_state == GAME_STATE_POST_MOVE_EVENTS) {
+    if (g_battle_state == BATTLE_STATE_POST_MOVE_EVENTS) {
         unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
         height = 0;
         if (unit != 0) {
@@ -657,8 +657,8 @@ void camera_scene_focus_update(void) {
         cursor_focus_step(cursor_tile_vector_scale());
         return;
     }
-    if (g_game_state == GAME_STATE_UNIT_MOVING || g_game_state == GAME_STATE_WAIT_DIRECTION
-        || g_game_state == GAME_STATE_PRE_ATTACK_ANIMATION) {
+    if (g_battle_state == BATTLE_STATE_UNIT_MOVING || g_battle_state == BATTLE_STATE_WAIT_DIRECTION
+        || g_battle_state == BATTLE_STATE_PRE_ATTACK_ANIMATION) {
         unit = unit_source_get();
         height = (g_sprite_sheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
         if (unit->camera_relative_x >= 0xB1 && unit->camera_relative_x < 0x150
@@ -675,7 +675,7 @@ void camera_scene_focus_update(void) {
         real_coords_toward_target_step(unit);
         return;
     }
-    if (g_game_state >= GAME_STATE_ACTION_ANNOUNCEMENT) {
+    if (g_battle_state >= BATTLE_STATE_ACTION_ANNOUNCEMENT) {
         vector_long_set(&g_camera_step_vector, 0, 0, 0);
         return;
     }

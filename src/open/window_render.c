@@ -3,6 +3,7 @@
  * its screen position, palette and pop-in state. Existing VRAM images can be
  * bound without rebuilding or uploading them. */
 
+#include "fft/display_object.h"
 #include "fft/screen.h"
 #include "fft/text.h"
 #include "fft/window.h"
@@ -17,22 +18,22 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
     s32 half;
     s32 scaled;
 
-    g_window_gpu_image_records[index].flags
+    g_display_object_gpu_image_pool[index].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
-    g_window_gpu_image_records[index].position.x = quad.x - 0x80;
-    g_window_gpu_image_records[index].position.y = quad.y - 0x78;
-    g_window_gpu_image_records[index].image_page_offset = image_page_offset;
-    clut = &g_window_gpu_image_records[index].clut;
+    g_display_object_gpu_image_pool[index].position.x = quad.x - 0x80;
+    g_display_object_gpu_image_pool[index].position.y = quad.y - 0x78;
+    g_display_object_gpu_image_pool[index].image_page_offset = image_page_offset;
+    clut = &g_display_object_gpu_image_pool[index].clut;
     clut->y = 0x1E0;
     clut->x = 0;
-    g_window_gpu_image_records[index].bounds = quad;
+    g_display_object_gpu_image_pool[index].bounds = quad;
     half = quad.x / 4;
     scaled = image_page_offset * 64 + 0x180;
-    g_window_gpu_image_records[index].vram_position.x = half + scaled;
-    g_window_gpu_image_records[index].vram_position.y = quad.y;
-    color = &g_window_gpu_image_records[index].color;
+    g_display_object_gpu_image_pool[index].vram_position.x = half + scaled;
+    g_display_object_gpu_image_pool[index].vram_position.y = quad.y;
+    color = &g_display_object_gpu_image_pool[index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_gpu_image_records[index].pop_in_step = 0;
+    g_display_object_gpu_image_pool[index].pop_in_step = 0;
     screen_window_frame_image_build(quad.w, quad.h, (u16*)image);
 }
 
@@ -47,13 +48,13 @@ void window_load_render_record_image(s32 record_index, u32* image) {
     s32 image_page_offset;
     s32 scaled;
 
-    x = g_window_gpu_image_records[record_index].bounds.x / 4;
-    image_page_offset = g_window_gpu_image_records[record_index].image_page_offset;
+    x = g_display_object_gpu_image_pool[record_index].bounds.x / 4;
+    image_page_offset = g_display_object_gpu_image_pool[record_index].image_page_offset;
     scaled = (image_page_offset << 6) + 0x180;
     destination.x = x + scaled;
-    destination.y = g_window_gpu_image_records[record_index].bounds.y;
-    destination.w = g_window_gpu_image_records[record_index].bounds.w / 4;
-    destination.h = g_window_gpu_image_records[record_index].bounds.h;
+    destination.y = g_display_object_gpu_image_pool[record_index].bounds.y;
+    destination.w = g_display_object_gpu_image_pool[record_index].bounds.w / 4;
+    destination.h = g_display_object_gpu_image_pool[record_index].bounds.h;
     LoadImage(&destination, image);
 }
 
@@ -65,7 +66,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 
     origin.rect.x = point.x;
     origin.rect.y = point.y;
-    origin.stride = g_window_gpu_image_records[record_index].bounds.w;
+    origin.stride = g_display_object_gpu_image_pool[record_index].bounds.w;
     menu_display_text_entry(text_id, (u8*)buffer, &origin);
 }
 
@@ -93,33 +94,33 @@ void window_text_record_init(s32 record_index, RECT bounds, s32 image_page_offse
         window_display_text_entry(record_index, text_id, text_origin, image);
     }
     window_load_render_record_image(record_index, image);
-    g_window_gpu_image_records[record_index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_display_object_gpu_image_pool[record_index].flags |= DISPLAY_OBJECT_POP_IN;
 }
 
-/* OPEN twin of window_init_vram_render_record for the 56-byte records: it keeps
+/* OPEN twin of display_object_gs_image_init for the 56-byte records: it keeps
  * the VRAM position instead of a texture page and also clears the 8-bit CLUT flag.
  * Nothing in OPEN.BIN calls it. */
-void window_init_vram_record(
+void display_object_gpu_image_init(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
     RECT* quad_base;
     RECT* quad;
     CVECTOR* color;
 
-    g_window_gpu_image_records[record_index].flags
-        = (g_window_gpu_image_records[record_index].flags
+    g_display_object_gpu_image_pool[record_index].flags
+        = (g_display_object_gpu_image_pool[record_index].flags
               & ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN))
         | flags;
-    g_window_gpu_image_records[record_index].clut = clut_position;
-    g_window_gpu_image_records[record_index].vram_position.x = vram_position.x;
-    g_window_gpu_image_records[record_index].vram_position.y = vram_position.y;
+    g_display_object_gpu_image_pool[record_index].clut = clut_position;
+    g_display_object_gpu_image_pool[record_index].vram_position.x = vram_position.x;
+    g_display_object_gpu_image_pool[record_index].vram_position.y = vram_position.y;
     /* Direct quad indexing changes the original record and column base selection. */
-    quad_base = &g_window_gpu_image_records[0].bounds;
-    quad = quad_base + record_index * (sizeof(window_gpu_image_record_t) / sizeof(RECT));
+    quad_base = &g_display_object_gpu_image_pool[0].bounds;
+    quad = quad_base + record_index * (sizeof(display_object_gpu_image_t) / sizeof(RECT));
     quad->x = (vram_position.x & 0x3f) * 2;
     quad->y = vram_position.y & 0xFF;
     quad->w = image_size.x * 2;
     quad->h = image_size.y;
-    color = &g_window_gpu_image_records[record_index].color;
+    color = &g_display_object_gpu_image_pool[record_index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_gpu_image_records[record_index].pop_in_step = 0;
+    g_display_object_gpu_image_pool[record_index].pop_in_step = 0;
 }

@@ -795,7 +795,7 @@ functions:
   - {addr: 0x80045234, size: 52, name: overlay_world_load, hash: f0dc6ce1683e216e, unit: overlay_loading}
   - {addr: 0x80045268, size: 132, name: disc_sectors_load, hash: 061eb9238379898e, unit: overlay_loading}
   - {addr: 0x800452ec, size: 480, name: save_data_tables_init, hash: 13bfa79a2bc689e1, unit: save_init_data_tables}
-  - {addr: 0x80045514, size: 524, name: item_order_tables_init, hash: d7bbcb00c4fad7e9, unit: menu_sort_init}
+  - {addr: 0x80045514, size: 524, name: menu_sort_tables_init, hash: d7bbcb00c4fad7e9, unit: menu_sort_init}
   - {addr: 0x80045720, size: 408, name: memcard_events_init, hash: c3df9151b2bf6647, unit: memcard_events}
   - {addr: 0x800458b8, size: 72, name: overlay_title_run, hash: ec2d3c302ca9b1f1, unit: open_overlay}
   - {addr: 0x80045900, size: 60, name: overlay_ending_run, hash: 47240d2c7733c304, unit: open_overlay}
@@ -1309,7 +1309,7 @@ data:
   - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_buffers}
   - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_flat_pool}
   - {addr: 0x8004d720, name: g_loading_primitives}
-  - {addr: 0x8004d950, name: g_system_flags}
+  - {addr: 0x8004d950, name: g_world_map_flags}
   - {addr: 0x8004d954, name: g_portrait_special_unit_id}
   - {addr: 0x8004d958, name: g_system_saved_vsync_interval}
   - {addr: 0x8004d95c, name: g_music}

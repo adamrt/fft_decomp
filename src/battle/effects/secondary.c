@@ -31,7 +31,7 @@
 
 /* CLUT of the zodiac poof's particles, an index in the weapons row, for each
  * sprite palette (the secondary effect's parameter). */
-extern u8 g_effect_zodiac_poof_animations[];
+extern u8 g_effect_zodiac_poof_clut_indices[];
 
 /* Per-group resident particle emitter records (stride 0x2e). The secondary-effect
  * handlers spawn while spawn_start_frame <= timer < spawn_end_frame and finish
@@ -106,7 +106,6 @@ extern SVECTOR g_projectile_origin;
 extern SVECTOR g_projectile_destination;
 extern s32 g_projectile_step_count;
 
-/* final projectile position */
 extern s32 g_projectile_hit_unit_id;
 
 /* Secondary handler work state. */
@@ -129,7 +128,7 @@ typedef struct charge_trail {
 /* Spell-charge state: the center the trails converge on, two buffers of 96 additive lines (16 trails of 6 segments),
  * its particle ids and counts, and the parameters copied from its g_effect_charge_line_params row; color is the
  * charge's element index. */
-typedef struct charge_state {
+typedef struct spell_charge_state {
     s16 x;                     /* 0x0000 */
     s16 y;                     /* 0x0002 */
     DR_MODE mode[2];           /* 0x0004 */
@@ -153,7 +152,7 @@ typedef struct charge_state {
     s32 max_trails;     /* 0x1150 */
     s32 fade_row;       /* 0x1154 */
     s32 done;           /* 0x1158 */
-} charge_state_t;
+} spell_charge_state_t;
 
 /* One 14-byte parameter row for the spell-charge secondary effect. */
 typedef struct charge_params {
@@ -174,7 +173,7 @@ typedef char charge_params_size_must_be_14[sizeof(charge_params_t) == 14 ? 1 : -
 enum { EFFECT_CHARGE_LINE_FADE_STEPS = 7 };
 
 /* Summon-charge state: three rings of ten trailing points. */
-typedef struct ring_state {
+typedef struct summon_ring_state {
     s32 index;             /* 0x00; newest trail column, 0..9 */
     s32 radius;            /* 0x04 */
     s32 angle;             /* 0x08 */
@@ -182,7 +181,7 @@ typedef struct ring_state {
     SVECTOR center;        /* 0x10 */
     s32 brightness;        /* 0x18 */
     SVECTOR points[3][10]; /* 0x1c */
-} ring_state_t;
+} summon_ring_state_t;
 
 /* Zodiac-poof spawn state for the 24-slot particle group 3. */
 typedef struct zodiac_poof_state {
@@ -195,8 +194,8 @@ typedef struct zodiac_poof_state {
  * spell-charge, summon-charge and zodiac-poof handlers each lay it out as
  * their own state. */
 typedef union secondary_state {
-    charge_state_t charge;
-    ring_state_t summon_ring;
+    spell_charge_state_t charge;
+    summon_ring_state_t summon_ring;
     zodiac_poof_state_t zodiac_poof;
 } secondary_state_t;
 
@@ -706,7 +705,7 @@ s32 effect_secondary_golem_handler(void) {
  * 0xff000000 mask in local allocation (a1 versus a2 in the target). */
 s32 effect_secondary_spell_charge_handler(void) {
     effect_secondary_data_t* effect;
-    charge_state_t* state;
+    spell_charge_state_t* state;
     SVECTOR in;
     s32 unused[4];
     VECTOR out;
@@ -1435,7 +1434,7 @@ s32 effect_secondary_zodiac_poof_handler(void) {
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        clut_index = g_effect_zodiac_poof_animations[effect->parameter];
+        clut_index = g_effect_zodiac_poof_clut_indices[effect->parameter];
         if (effect->timer >= g_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_start_frame
             && effect->timer < g_secondary_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF].spawn_end_frame) {
             for (spawned = 0;
@@ -1700,8 +1699,8 @@ s32 effect_secondary_linear_projectile_handler(void) {
     SVECTOR spin;
     SPRT sprite;
     effect_arrow_buffer_t* arrow;
-    effect_stone_buffer_t* work12;
-    effect_shuriken_buffer_t* work16;
+    effect_stone_buffer_t* stone;
+    effect_shuriken_buffer_t* shuriken;
     effect_slot_t* slot;
     s32 parameter;
     s32 item;
@@ -1743,11 +1742,11 @@ s32 effect_secondary_linear_projectile_handler(void) {
         }
 
         if ((parameter & 0xff) == EFFECT_MODEL_STONE) {
-            work12 = heap_alloc(0x2a0);
-            g_effect_secondary_current->allocation = work12;
+            stone = heap_alloc(0x2a0);
+            g_effect_secondary_current->allocation = stone;
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < 12; j++) {
-                    SetPolyG3(&work12->g3[i][j]);
+                    SetPolyG3(&stone->g3[i][j]);
                 }
             }
         }
@@ -1755,11 +1754,11 @@ s32 effect_secondary_linear_projectile_handler(void) {
         if (parameter == EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC) {
             item = g_effect_secondary_current->used_weapon_id;
             if (item >= ITEM_ID_SHURIKEN && item <= ITEM_ID_YAGYU_DARKNESS) {
-                work16 = heap_alloc(0x380);
-                g_effect_secondary_current->allocation = work16;
+                shuriken = heap_alloc(0x380);
+                g_effect_secondary_current->allocation = shuriken;
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 16; j++) {
-                        SetPolyG3(&work16->g3[i][j]);
+                        SetPolyG3(&shuriken->g3[i][j]);
                     }
                 }
             } else {
@@ -1853,7 +1852,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
             if (g_effect_secondary_current->target.record.target_type == EFFECT_TARGET_TYPE_UNIT
                 && g_effect_secondary_current->target.record.data.unit.result_animation != EFFECT_HIT_MISSED
                 && g_effect_secondary_current->target.record.data.unit.result_animation != EFFECT_HIT_NO_EFFECT) {
-                effect_play();
+                effect_playback_start();
                 system_vsync_interval_set(2);
             } else if (effect_playback_phase_get() == EFFECT_PLAYBACK_PHASE_REQUESTED) {
                 if (g_effect_secondary_current->target_count != 0) {
@@ -1939,7 +1938,7 @@ enum { EFFECT_RING_CLUT = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_WEAPONS, 12), EFFE
  */
 s32 effect_secondary_summon_charge_handler(void) {
     effect_secondary_data_t* effect;
-    ring_state_t* state;
+    summon_ring_state_t* state;
     effect_slot_t* slot;
     s32 unused[6]; /* Reserves the target's 0x68-byte frame. */
     s32 result;

@@ -1,5 +1,6 @@
 /* Window images and text, panel render threads, saved list cursors and scrollable text windows. */
 
+#include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu.h"
@@ -37,22 +38,22 @@ void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mod
     CVECTOR* color;
     point32_t transformed;
 
-    g_window_gs_image_records[index].flags
+    g_display_object_gs_image_pool[index].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN);
-    g_window_gs_image_records[index].base.x = bounds.x - 0x80;
-    g_window_gs_image_records[index].base.y = bounds.y - 0x78;
-    g_window_gs_image_records[index].coordinate_mode = coordinate_mode;
+    g_display_object_gs_image_pool[index].position.x = bounds.x - 0x80;
+    g_display_object_gs_image_pool[index].position.y = bounds.y - 0x78;
+    g_display_object_gs_image_pool[index].coordinate_mode = coordinate_mode;
     /* Struct view of clut_x/clut_y: as plain s32 stores they could alias the
      * stacked image argument, whose load the target schedules after them. */
-    clut = &g_window_gs_image_records[index].clut;
+    clut = &g_display_object_gs_image_pool[index].clut;
     clut->y = 0x1E1;
     clut->x = 0;
-    g_window_gs_image_records[index].bounds = bounds;
+    g_display_object_gs_image_pool[index].bounds = bounds;
     image_vram_position_get(coordinate_mode, bounds, &transformed);
-    g_window_gs_image_records[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
-    color = &g_window_gs_image_records[index].color;
+    g_display_object_gs_image_pool[index].tpage = GetTPage(0, 0, transformed.x, transformed.y);
+    color = &g_display_object_gs_image_pool[index].color;
     color->b = color->g = color->r = 0x80;
-    g_window_gs_image_records[index].anim_counter = 0;
+    g_display_object_gs_image_pool[index].pop_in_step = 0;
     screen_window_frame_image_build(bounds.w, bounds.h, (u16*)image);
 }
 
@@ -83,12 +84,12 @@ void window_load_render_record_image(s32 index, u32* image) {
     point32_t transformed;
     RECT rect;
 
-    image_vram_position_get(
-        g_window_gs_image_records[index].coordinate_mode, g_window_gs_image_records[index].bounds, &transformed);
+    image_vram_position_get(g_display_object_gs_image_pool[index].coordinate_mode,
+        g_display_object_gs_image_pool[index].bounds, &transformed);
     rect.x = transformed.x;
     rect.y = transformed.y;
-    rect.w = g_window_gs_image_records[index].bounds.w / 4;
-    rect.h = g_window_gs_image_records[index].bounds.h;
+    rect.w = g_display_object_gs_image_pool[index].bounds.w / 4;
+    rect.h = g_display_object_gs_image_pool[index].bounds.h;
     LoadImage(&rect, image);
 }
 
@@ -100,7 +101,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
 
     origin.rect.x = point.x;
     origin.rect.y = point.y;
-    origin.stride = g_window_gs_image_records[record_index].bounds.w;
+    origin.stride = g_display_object_gs_image_pool[record_index].bounds.w;
     menu_display_text_entry(text_id, (u8*)buffer, &origin);
 }
 
@@ -127,28 +128,28 @@ void window_text_record_init(s32 record_index, RECT bounds, s32 coordinate_mode,
         window_display_text_entry(record_index, text_id, text_origin, image);
     }
     window_load_render_record_image(record_index, image);
-    g_window_gs_image_records[record_index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_display_object_gs_image_pool[record_index].flags |= DISPLAY_OBJECT_POP_IN;
 }
 
 /* Point image render record `index` at a VRAM rectangle given in halfwords: its
  * texture page, page-relative bounds in 8-bit texels, CLUT and a neutral 0x80 tint.
  * Clears the blank and hidden flags and adds `flags`. */
-void window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags) {
+void display_object_gs_image_init(s32 index, RECT bounds, point32_t clut, s32 flags) {
     RECT* record_bounds;
     CVECTOR* rgb;
 
-    g_window_gs_image_records[index].flags
-        = (g_window_gs_image_records[index].flags & ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) | flags;
-    g_window_gs_image_records[index].clut = clut;
-    g_window_gs_image_records[index].tpage = GetTPage(0, 0, bounds.x, bounds.y);
-    record_bounds = &g_window_gs_image_records[index].bounds;
+    g_display_object_gs_image_pool[index].flags
+        = (g_display_object_gs_image_pool[index].flags & ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN)) | flags;
+    g_display_object_gs_image_pool[index].clut = clut;
+    g_display_object_gs_image_pool[index].tpage = GetTPage(0, 0, bounds.x, bounds.y);
+    record_bounds = &g_display_object_gs_image_pool[index].bounds;
     record_bounds->x = (bounds.x & 0x3F) * 2;
     record_bounds->y = bounds.y & 0xFF;
     record_bounds->w = bounds.w * 2;
     record_bounds->h = bounds.h;
-    rgb = &g_window_gs_image_records[index].color;
+    rgb = &g_display_object_gs_image_pool[index].color;
     rgb->b = rgb->g = rgb->r = 0x80;
-    g_window_gs_image_records[index].anim_counter = 0;
+    g_display_object_gs_image_pool[index].pop_in_step = 0;
 }
 
 /* Initialize panel state and start its WORLD rendering thread. */
@@ -322,23 +323,23 @@ void text_window_open(text_window_t* state) {
     s32 columns;
     s32 last_page_row;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     state->page_prompt_record = index;
-    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_PAGE_PROMPT);
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    animated_record_init(index, state->priority, DISPLAY_OBJECT_ANIM_TEXT_PAGE_PROMPT);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     state->up_arrow_record = index;
-    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_UP);
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    animated_record_init(index, state->priority, DISPLAY_OBJECT_ANIM_TEXT_SCROLL_UP);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     state->down_arrow_record = index;
-    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_DOWN);
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    animated_record_init(index, state->priority, DISPLAY_OBJECT_ANIM_TEXT_SCROLL_DOWN);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     state->scroll_thumb_record = index;
-    animated_record_init(index, state->priority, WINDOW_ANIM_TEXT_SCROLL_THUMB);
-    render_index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    animated_record_init(index, state->priority, DISPLAY_OBJECT_ANIM_TEXT_SCROLL_THUMB);
+    render_index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     state->render_record_index = render_index;
-    g_window_gs_image_records[render_index].flags |= DISPLAY_OBJECT_POP_IN;
-    g_window_gs_image_records[state->render_record_index].priority = state->priority;
-    g_window_gs_image_records[state->render_record_index].base = state->base;
+    g_display_object_gs_image_pool[render_index].flags |= DISPLAY_OBJECT_POP_IN;
+    g_display_object_gs_image_pool[state->render_record_index].priority = state->priority;
+    g_display_object_gs_image_pool[state->render_record_index].position = state->base;
 
     padded_width = (state->text_width + 0x18) & 0xfffc;
     window_x = state->base.x + padded_width;
@@ -348,17 +349,17 @@ void text_window_open(text_window_t* state) {
     } else {
         window_x -= 12;
     }
-    g_window_records[state->page_prompt_record].position.x = window_x - 14;
-    g_window_records[state->page_prompt_record].position.y = window_y - 22;
+    g_display_object_animated_pool[state->page_prompt_record].position.x = window_x - 14;
+    g_display_object_animated_pool[state->page_prompt_record].position.y = window_y - 22;
     lower_y = window_y - 26;
-    g_window_records[state->up_arrow_record].position.x = window_x;
+    g_display_object_animated_pool[state->up_arrow_record].position.x = window_x;
     do {
-        g_window_records[state->up_arrow_record].position.y = state->base.y + 8;
+        g_display_object_animated_pool[state->up_arrow_record].position.y = state->base.y + 8;
     } while (0);
-    g_window_records[state->down_arrow_record].position.x = window_x;
-    g_window_records[state->down_arrow_record].position.y = lower_y;
-    g_window_records[state->scroll_thumb_record].position.x = window_x;
-    g_window_records[state->scroll_thumb_record].position.y = lower_y;
+    g_display_object_animated_pool[state->down_arrow_record].position.x = window_x;
+    g_display_object_animated_pool[state->down_arrow_record].position.y = lower_y;
+    g_display_object_animated_pool[state->scroll_thumb_record].position.x = window_x;
+    g_display_object_animated_pool[state->scroll_thumb_record].position.y = lower_y;
 
     text_measure(&text_metrics[0], &text_metrics[1], text_entry_find(state->text_id));
     rows = text_metrics[1];
@@ -376,11 +377,11 @@ void text_window_open(text_window_t* state) {
  * frozen, with its animation sequence and OT priority, and restarts the
  * animation. */
 static void animated_record_init(s32 index, s32 priority, s32 sequence) {
-    g_window_records[index].sequence = sequence;
-    g_window_records[index].priority = priority;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
-    g_window_records[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED;
+    g_display_object_animated_pool[index].sequence = sequence;
+    g_display_object_animated_pool[index].priority = priority;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
+    g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_ANIMATE_WHILE_PAUSED;
 }
 
 /*
@@ -419,9 +420,9 @@ s32 text_window_update(text_window_t* state) {
         if ((g_input_current_buttons & PSX_PAD_SQUARE) == 0) {
             state->scroll_state = TEXT_WINDOW_SCROLL_RETURN;
             state->scroll_timer = 0;
-            g_window_records[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
         if ((world_map_input_repeat_update(PSX_PAD_UP) != 0) && (state->scroll_row != 0)) {
@@ -448,9 +449,9 @@ s32 text_window_update(text_window_t* state) {
             }
             if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS)
                 || (state->page_start_row > state->last_page_row)) {
-                g_window_record_count -= 4;
-                g_window_render_record_count -= 1;
-                g_window_render_object_count -= 5;
+                g_display_object_animated_count -= 4;
+                g_display_object_image_count -= 1;
+                g_display_object_queue_count -= 5;
                 return 0;
             }
             sound_play_effect(SOUND_SFX_TEXT_PAGE);
@@ -459,7 +460,7 @@ s32 text_window_update(text_window_t* state) {
             state->scroll_state = TEXT_WINDOW_SCROLL_MANUAL;
             state->scroll_row = state->page_start_row;
             scroll_indicators_update(state);
-            g_window_records[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
             return 1;
         }
         page_prompt_update(state);
@@ -500,32 +501,32 @@ static void page_render(text_window_t* state, s32 row) {
         top = state->extra_base.y - offset;
         limit = state->base.y + 8;
         if (top >= limit) {
-            g_window_gs_image_records[state->extra_render_index].base.y = top;
-            g_window_gs_image_records[state->extra_render_index].bounds.y = state->extra_bounds.y;
-            g_window_gs_image_records[state->extra_render_index].bounds.h = state->extra_bounds.h;
-            g_window_gs_image_records[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_gs_image_pool[state->extra_render_index].position.y = top;
+            g_display_object_gs_image_pool[state->extra_render_index].bounds.y = state->extra_bounds.y;
+            g_display_object_gs_image_pool[state->extra_render_index].bounds.h = state->extra_bounds.h;
+            g_display_object_gs_image_pool[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         } else if (top + state->extra_bounds.h >= limit) {
-            g_window_gs_image_records[state->extra_render_index].base.y = limit;
-            g_window_gs_image_records[state->extra_render_index].bounds.y = state->extra_bounds.y + offset;
-            g_window_gs_image_records[state->extra_render_index].bounds.h = state->extra_bounds.h - offset;
-            g_window_gs_image_records[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+            g_display_object_gs_image_pool[state->extra_render_index].position.y = limit;
+            g_display_object_gs_image_pool[state->extra_render_index].bounds.y = state->extra_bounds.y + offset;
+            g_display_object_gs_image_pool[state->extra_render_index].bounds.h = state->extra_bounds.h - offset;
+            g_display_object_gs_image_pool[state->extra_render_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         } else {
-            g_window_gs_image_records[state->extra_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_gs_image_pool[state->extra_render_index].flags |= DISPLAY_OBJECT_HIDDEN;
         }
     }
     point.x = 8;
     point.y = 8;
     window_display_text_entry(state->render_record_index, state->text_id, point, g_window_image_buffer);
     window_load_render_record_image(state->render_record_index, g_window_image_buffer);
-    g_window_gs_image_records[state->render_record_index].base = state->base;
+    g_display_object_gs_image_pool[state->render_record_index].position = state->base;
 }
 
 /* Show the text-page prompt while more pages remain. */
 static void page_prompt_update(text_window_t* state) {
     if (state->page_start_row < state->last_page_row) {
-        g_window_records[state->page_prompt_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->page_prompt_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_window_records[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->page_prompt_record].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }
 
@@ -538,25 +539,25 @@ static void scroll_indicators_update(text_window_t* state) {
     s32 bottom;
 
     if (state->page_start_row == 0) {
-        g_window_records[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_window_records[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->scroll_thumb_record].flags |= DISPLAY_OBJECT_HIDDEN;
         return;
     }
 
-    top = g_window_records[state->down_arrow_record].position.y;
-    bottom = g_window_records[state->up_arrow_record].position.y;
-    g_window_records[state->scroll_thumb_record].position.y
+    top = g_display_object_animated_pool[state->down_arrow_record].position.y;
+    bottom = g_display_object_animated_pool[state->up_arrow_record].position.y;
+    g_display_object_animated_pool[state->scroll_thumb_record].position.y
         = bottom + (top - bottom - 0x12) * state->scroll_row / state->page_start_row + 0x12;
-    g_window_records[state->scroll_thumb_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[state->scroll_thumb_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     if (state->scroll_row != 0) {
-        g_window_records[state->up_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->up_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_window_records[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->up_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
     }
     if (state->scroll_row != state->page_start_row) {
-        g_window_records[state->down_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->down_arrow_record].flags &= ~DISPLAY_OBJECT_HIDDEN;
     } else {
-        g_window_records[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[state->down_arrow_record].flags |= DISPLAY_OBJECT_HIDDEN;
     }
 }

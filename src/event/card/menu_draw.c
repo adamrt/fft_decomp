@@ -1,4 +1,5 @@
-/* Animate and draw CARD's save-list cursor from its sprite sequence. */
+/* Draw CARD's menu primitives, window records and numeric entries, including
+ * the save-list cursor animated from its sprite sequence. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"

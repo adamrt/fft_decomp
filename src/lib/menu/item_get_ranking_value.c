@@ -1,6 +1,7 @@
 /* The primary stat of an item's category, used to rank items in menu sorts. */
 
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "psx/types.h"
 
 /* Return the stat the menus sort an item by, highest first: a weapon's power, a shield's

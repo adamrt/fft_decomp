@@ -19,11 +19,11 @@ extern menu_input_state_t g_unit_list_input_event_state;
 /* Per-frame event input update: derives the edge/auto-repeat input 32-bit value,
  * publishes it, and yields once while tracking thread status changes.
  *
- * Latches `frame_arg`, clears g_unit_panel_hide_numeric_values, and draws the
+ * Latches `framebuffer_y`, clears g_unit_panel_hide_numeric_values, and draws the
  * status-panel backdrops after the yield. Needs the _divcheck profile for the
  * three repeat-period divisions.
  */
-void menu_input_event_state_update(u32* otag, u32 input, s32 frame_arg) {
+void menu_input_event_state_update(u32* otag, u32 input, s32 framebuffer_y) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -34,7 +34,7 @@ void menu_input_event_state_update(u32* otag, u32 input, s32 frame_arg) {
     s32 status;
 
     g_gfx_current_otag_entry = otag;
-    g_frame_arg = frame_arg;
+    g_menu_framebuffer_y = framebuffer_y;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     g_unit_panel_hide_numeric_values = 0;
     if (input == 0) {

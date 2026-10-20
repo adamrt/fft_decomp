@@ -3,6 +3,7 @@
 #include "fft/formation.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
@@ -115,8 +116,8 @@ void formation_roster_names_build(void) {
 }
 
 /* Set the formation display mode; the title script switches it between 0 and 1. */
-void formation_display_mode_set(s32 mode) {
-    g_menu_formation_display_mode = mode;
+void menu_cursor_bob_hold_set(s32 mode) {
+    g_menu_cursor_bob_hold = mode;
 }
 
 /* Set the ordering table the formation view zoom thread draws into. */

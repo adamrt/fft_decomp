@@ -2,6 +2,7 @@
 
 #include "fft/bits.h"
 #include "fft/brave_story.h"
+#include "fft/display_object.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/menu_input.h"
@@ -51,19 +52,19 @@ void tutorial_menu_open(s32 selected_entry, s32 reset) {
         g_tutorial_progress_masks[0] = 0;
     }
 
-    window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.cursor_window = window_index;
-    g_window_records[window_index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[window_index].priority = 0xA;
-    g_window_records[window_index].anim_counter = 0;
-    g_window_records[window_index].frame_index = 0;
+    g_display_object_animated_pool[window_index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[window_index].priority = 0xA;
+    g_display_object_animated_pool[window_index].anim_counter = 0;
+    g_display_object_animated_pool[window_index].frame_index = 0;
 
-    window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.label_window = window_index;
-    g_window_records[window_index].sequence = WINDOW_ANIM_LIST_SIDE_LABEL;
-    g_window_records[window_index].priority = 0xA;
-    g_window_records[window_index].anim_counter = 0;
-    g_window_records[window_index].frame_index = 0;
+    g_display_object_animated_pool[window_index].sequence = DISPLAY_OBJECT_ANIM_LIST_SIDE_LABEL;
+    g_display_object_animated_pool[window_index].priority = 0xA;
+    g_display_object_animated_pool[window_index].anim_counter = 0;
+    g_display_object_animated_pool[window_index].frame_index = 0;
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.entries[0] = TUTORIAL_MENU_ROW_FORMATION;
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.entries[1] = TUTORIAL_MENU_ROW_BATTLE;
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.entries[2] = TUTORIAL_MENU_ROW_TOPICS;
@@ -71,22 +72,22 @@ void tutorial_menu_open(s32 selected_entry, s32 reset) {
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.entry_count = TUTORIAL_MENU_ROW_COUNT;
 
     g_menu_stack_records[g_menu_stack_depth].tutorial_menu.rows_image
-        = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+        = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     tutorial_menu_panel_build(&g_menu_stack_records[g_menu_stack_depth].tutorial_menu);
 
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].tutorial_menu.selected_entry = selected_entry;
     g_menu_stack_records[record_index].tutorial_menu.mode = MENU_STACK_WINDOW_MODE_BROWSE;
-    g_window_records[g_menu_stack_records[record_index].tutorial_menu.cursor_window].position.x
-        = g_window_gs_image_records[g_menu_stack_records[record_index].tutorial_menu.rows_image].base.x + 6;
-    g_window_records[g_menu_stack_records[record_index].tutorial_menu.cursor_window].position.y
-        = g_window_gs_image_records[g_menu_stack_records[record_index].tutorial_menu.rows_image].base.y
+    g_display_object_animated_pool[g_menu_stack_records[record_index].tutorial_menu.cursor_window].position.x
+        = g_display_object_gs_image_pool[g_menu_stack_records[record_index].tutorial_menu.rows_image].position.x + 6;
+    g_display_object_animated_pool[g_menu_stack_records[record_index].tutorial_menu.cursor_window].position.y
+        = g_display_object_gs_image_pool[g_menu_stack_records[record_index].tutorial_menu.rows_image].position.y
         - -(g_menu_stack_records[record_index].tutorial_menu.selected_entry * 0x10) + 0xE;
-    g_window_records[g_menu_stack_records[record_index].tutorial_menu.label_window].position.x
-        = g_window_gs_image_records[g_menu_stack_records[record_index].tutorial_menu.rows_image].base.x + 3;
+    g_display_object_animated_pool[g_menu_stack_records[record_index].tutorial_menu.label_window].position.x
+        = g_display_object_gs_image_pool[g_menu_stack_records[record_index].tutorial_menu.rows_image].position.x + 3;
     g_menu_stack_depth = record_index + 1;
-    g_window_records[g_menu_stack_records[record_index].tutorial_menu.label_window].position.y
-        = g_window_gs_image_records[g_menu_stack_records[record_index].tutorial_menu.rows_image].base.y - 2;
+    g_display_object_animated_pool[g_menu_stack_records[record_index].tutorial_menu.label_window].position.y
+        = g_display_object_gs_image_pool[g_menu_stack_records[record_index].tutorial_menu.rows_image].position.y - 2;
     g_menu_stack_records[record_index].tutorial_menu._unknown_0c = 0x18;
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_TUTORIAL;
 }
@@ -109,9 +110,9 @@ void tutorial_menu_panel_build(tutorial_menu_level_t* panel) {
     bounds.w = 0x44;
     bounds.h = panel->entry_count * 0x10 + 0x10;
     window_build_render_record_image(index, bounds, 0, g_window_image_buffer);
-    g_window_gs_image_records[index].priority = 0xA;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_gs_image_records[index].base;
+    g_display_object_gs_image_pool[index].priority = 0xA;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_display_object_gs_image_pool[index].position;
     base->x = -0x78;
     base->y = -0x28;
     point.x = 8;
@@ -134,14 +135,14 @@ void tutorial_menu_resume(menu_stack_record_t* level) {
 
     main_window = level->tutorial_menu.cursor_window;
     side_window = level->tutorial_menu.label_window;
-    g_window_gs_image_records[level->tutorial_menu.rows_image].palette = 0;
-    g_window_records[side_window].palette = 0;
-    g_window_records[main_window].palette = 0;
+    g_display_object_gs_image_pool[level->tutorial_menu.rows_image].palette = 0;
+    g_display_object_animated_pool[side_window].palette = 0;
+    g_display_object_animated_pool[main_window].palette = 0;
     slot = level->tutorial_menu.cursor_window;
-    g_window_records[slot].sequence = WINDOW_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[slot].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     slot = level->tutorial_menu.cursor_window;
-    g_window_records[slot].anim_counter = 0;
-    g_window_records[slot].frame_index = 0;
+    g_display_object_animated_pool[slot].anim_counter = 0;
+    g_display_object_animated_pool[slot].frame_index = 0;
     thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
 }
 
@@ -151,13 +152,13 @@ void tutorial_menu_resume(menu_stack_record_t* level) {
 void tutorial_menu_suspend(menu_stack_record_t* level) {
     s32 index;
 
-    g_window_records[level->tutorial_menu.cursor_window].palette = 10;
-    g_window_records[level->tutorial_menu.label_window].palette = 6;
-    g_window_gs_image_records[level->tutorial_menu.rows_image].palette = 2;
-    g_window_records[level->tutorial_menu.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+    g_display_object_animated_pool[level->tutorial_menu.cursor_window].palette = 10;
+    g_display_object_animated_pool[level->tutorial_menu.label_window].palette = 6;
+    g_display_object_gs_image_pool[level->tutorial_menu.rows_image].palette = 2;
+    g_display_object_animated_pool[level->tutorial_menu.cursor_window].sequence = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
     index = level->tutorial_menu.cursor_window;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 }
 
 /* Input step of the tutorial category menu: Circle opens the formation tutorials, the battle
@@ -167,29 +168,29 @@ void tutorial_menu_update(menu_stack_record_t* level) {
     u32 buttons;
     s32* selected_entry;
 
-    if (g_window_gs_image_records[level->tutorial_menu.rows_image].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->tutorial_menu.rows_image].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    if (g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) {
         if (level->tutorial_menu.mode == MENU_STACK_WINDOW_MODE_FADE_OR_HELP
-            && !(g_system_flags & SYSTEM_FLAG_FADING)) {
+            && !(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             level->tutorial_menu.mode = MENU_STACK_WINDOW_MODE_LEAVE_WAIT;
             world_map_image_buffers_clear(1);
         }
         if (level->tutorial_menu.mode == MENU_STACK_WINDOW_MODE_LEAVE_WAIT
             && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
-            if ((g_system_flags & SYSTEM_FLAG_TITLE_TUTORIAL) == 0 || g_music_queue.count == 0) {
-                g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
-                window_set_render_objects_visible(1);
+            if ((g_world_map_flags & WORLD_MAP_FLAG_TITLE_TUTORIAL) == 0 || g_music_queue.count == 0) {
+                g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
+                display_object_queues_set_enabled(1);
                 g_menu_stack_depth = g_menu_stack_depth - 1;
-                g_system_flags = g_system_flags
-                    & ~(SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE
-                        | SYSTEM_FLAG_HIDE_LOCATION_LABEL);
+                g_world_map_flags = g_world_map_flags
+                    & ~(WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
+                        | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL);
                 menu_stack_dispatch_suspend();
-                if (g_system_flags & SYSTEM_FLAG_TITLE_TUTORIAL) {
-                    g_system_flags = (g_system_flags ^ (SYSTEM_FLAG_RUNNING | SYSTEM_FLAG_TITLE_TUTORIAL))
-                        | SYSTEM_FLAG_RETURN_TO_TITLE;
+                if (g_world_map_flags & WORLD_MAP_FLAG_TITLE_TUTORIAL) {
+                    g_world_map_flags = (g_world_map_flags ^ (WORLD_MAP_FLAG_RUNNING | WORLD_MAP_FLAG_TITLE_TUTORIAL))
+                        | WORLD_MAP_FLAG_RETURN_TO_TITLE;
                     return;
                 }
                 world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
@@ -203,9 +204,9 @@ void tutorial_menu_update(menu_stack_record_t* level) {
         if (g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
             level->tutorial_menu.mode = MENU_STACK_WINDOW_MODE_FADE_OR_HELP;
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
-            g_system_flags = g_system_flags | SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags = g_world_map_flags | WORLD_MAP_FLAG_INPUT_BLOCKED;
             world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
-            if (g_system_flags & SYSTEM_FLAG_TITLE_TUTORIAL) {
+            if (g_world_map_flags & WORLD_MAP_FLAG_TITLE_TUTORIAL) {
                 music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
                 music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 0);
             } else {
@@ -225,9 +226,9 @@ void tutorial_menu_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_PROMPT, 0);
         level->tutorial_menu.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
-        g_window_record_count -= 2;
-        g_window_render_record_count -= 1;
-        g_window_render_object_count -= 3;
+        g_display_object_animated_count -= 2;
+        g_display_object_image_count -= 1;
+        g_display_object_queue_count -= 3;
         return;
     }
 
@@ -244,26 +245,29 @@ void tutorial_menu_update(menu_stack_record_t* level) {
         switch (level->tutorial_menu.entries[*selected_entry]) {
         case TUTORIAL_MENU_ROW_FORMATION:
             tutorial_menu_suspend(level);
-            g_window_records[level->tutorial_menu.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].sequence
+                = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
             tutorial_formation_list_open();
             return;
         case TUTORIAL_MENU_ROW_BATTLE:
             tutorial_menu_suspend(level);
-            g_window_records[level->tutorial_menu.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].sequence
+                = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
             tutorial_battle_list_open();
             return;
         case TUTORIAL_MENU_ROW_TOPICS:
             message_block_load_if_changed(MESSAGE_BLOCK_TUTORIAL_TOPICS);
             tutorial_menu_suspend(level);
-            g_window_records[level->tutorial_menu.cursor_window].sequence = WINDOW_ANIM_CURSOR_PRESS;
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].sequence
+                = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
             tutorial_topic_list_open();
             return;
         case TUTORIAL_MENU_ROW_LEAVE:
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_PROMPT, 0);
             level->tutorial_menu.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
-            g_window_record_count -= 2;
-            g_window_render_record_count -= 1;
-            g_window_render_object_count -= 3;
+            g_display_object_animated_count -= 2;
+            g_display_object_image_count -= 1;
+            g_display_object_queue_count -= 3;
             return;
         }
         return;
@@ -271,10 +275,10 @@ void tutorial_menu_update(menu_stack_record_t* level) {
 
     if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
         if (level->tutorial_menu.selected_entry != 0) {
-            g_window_records[level->tutorial_menu.cursor_window].position.y -= 0x10;
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].position.y -= 0x10;
             level->tutorial_menu.selected_entry--;
         } else {
-            g_window_records[level->tutorial_menu.cursor_window].position.y
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].position.y
                 += (level->tutorial_menu.entry_count - 1) * 0x10;
             level->tutorial_menu.selected_entry = level->tutorial_menu.entry_count - 1;
         }
@@ -283,10 +287,10 @@ void tutorial_menu_update(menu_stack_record_t* level) {
 
     if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         if (level->tutorial_menu.selected_entry < level->tutorial_menu.entry_count - 1) {
-            g_window_records[level->tutorial_menu.cursor_window].position.y += 0x10;
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].position.y += 0x10;
             level->tutorial_menu.selected_entry++;
         } else {
-            g_window_records[level->tutorial_menu.cursor_window].position.y
+            g_display_object_animated_pool[level->tutorial_menu.cursor_window].position.y
                 -= (level->tutorial_menu.entry_count - 1) * 0x10;
             level->tutorial_menu.selected_entry = 0;
         }
@@ -368,28 +372,29 @@ void tutorial_formation_list_input_update(menu_stack_record_t* level) {
             formation_tutorial_run(*selected);
             g_menu_stack_ot_offset = 1;
             g_menu_blocked_buttons = 0;
-            g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED | SYSTEM_FLAG_DISPLAY_OFF;
+            g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED | WORLD_MAP_FLAG_DISPLAY_OFF;
             g_menu_stack_depth--;
             screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST, 0, 0);
         }
         return;
     }
 
-    if (g_system_flags & SYSTEM_FLAG_FADING) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_FADING) {
         return;
     }
 
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
+        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         if (level->panel.result != 0) {
             menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_FORMATION_TUTORIALS);
             level->panel.result = 2;
-            g_system_flags |= SYSTEM_FLAG_DISPLAY_OFF;
+            g_world_map_flags |= WORLD_MAP_FLAG_DISPLAY_OFF;
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
             return;
         }
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
-        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_FORMATION_TUTORIALS);
         menu_stack_dispatch_resume();
@@ -400,14 +405,14 @@ void tutorial_formation_list_input_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         tutorial_block_formation_list_buttons(level);
         menu_stack_message_open(0x108B, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
     }
@@ -478,7 +483,7 @@ void tutorial_block_battle_list_buttons(menu_stack_record_t* unused_level) {
  * g_tutorial_progress_masks[1], its event is set as
  * EVENT_SCRIPT_VAR_CURRENT_EVENT (with progress effects suppressed), the
  * list cursor and weather are saved, and the world loop ends with
- * SYSTEM_FLAG_TUTORIAL_EVENT. */
+ * WORLD_MAP_FLAG_TUTORIAL_EVENT. */
 void tutorial_battle_list_input_update(menu_stack_record_t* level) {
     s16* selected;
 
@@ -490,22 +495,22 @@ void tutorial_battle_list_input_update(menu_stack_record_t* level) {
             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_tutorial_battle_event_ids[*selected]);
             menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS);
             g_brave_story_saved_list_cursor_state = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS];
-            g_system_flags = (g_system_flags | SYSTEM_FLAG_TUTORIAL_EVENT) ^ SYSTEM_FLAG_RUNNING;
+            g_world_map_flags = (g_world_map_flags | WORLD_MAP_FLAG_TUTORIAL_EVENT) ^ WORLD_MAP_FLAG_RUNNING;
             g_brave_story_saved_weather_variable = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
         }
         return;
     }
 
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && !(g_system_flags & SYSTEM_FLAG_FADING)) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && !(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
         if (level->panel.result != 0) {
-            g_system_flags |= SYSTEM_FLAG_DISPLAY_OFF;
+            g_world_map_flags |= WORLD_MAP_FLAG_DISPLAY_OFF;
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
             level->panel.result = 2;
             return;
         }
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
-        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS);
         menu_stack_dispatch_resume();
@@ -516,14 +521,14 @@ void tutorial_battle_list_input_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         tutorial_block_battle_list_buttons(level);
         menu_stack_message_open(0x108C, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
     }

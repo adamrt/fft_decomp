@@ -4,7 +4,7 @@
 /* OPEN's ending: the sequence that plays it and the scrolling ending script, with its fonts, text records, interpreter
  * state, XA audio, OPNTEX picture sequence and opcode handlers. */
 
-#include "fft/controller.h"
+#include "fft/controller_stack.h"
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -430,7 +430,7 @@ void action_store_used_weapon(action_command_t* action) {
     }
     switch (g_command_menu_types_by_skillset[action->skillset_id]) {
     case ACTION_MENU_TYPE_DEFAULT:
-    case ACTION_MENU_TYPE_ARITHMETICKS:
+    case ACTION_MENU_TYPE_MATH_SKILL:
     case ACTION_MENU_TYPE_ELEMENTS:
     case ACTION_MENU_TYPE_MONSTER:
         ability_id = action->ability_id;
@@ -564,7 +564,7 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         action.ability_id = ability_get_elemental_id(g_action_attacker);
         /* fall through */
     case ACTION_MENU_TYPE_DEFAULT:
-    case ACTION_MENU_TYPE_ARITHMETICKS:
+    case ACTION_MENU_TYPE_MATH_SKILL:
     case ACTION_MENU_TYPE_MONSTER:
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;

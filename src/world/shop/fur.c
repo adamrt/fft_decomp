@@ -5,6 +5,7 @@
 #include "fft/formation_ability.h"
 #include "fft/formation_item.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"

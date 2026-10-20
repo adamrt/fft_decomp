@@ -166,7 +166,7 @@ static u32 g_menu_text_file_buffer[16512] = { 0 };
 /* 32-bit substitution values saved around the text calls. */
 static s32 g_saved_text_values[32] = { 0 };
 
-static u32 g_saved_system_flags = 0;
+static u32 g_saved_world_map_flags = 0;
 
 /* Menu thread of the location list: list every visible location by name (row color 8
  * while its color variable is clear, 4 for the current location, which starts
@@ -228,7 +228,7 @@ void world_map_confirm_destination(void) {
         value = g_world_map_destination_list_text_ids[selection] - TEXT_ID_LOCATION_NAME_BASE;
         pending[1] = value;
         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, value);
-        g_system_flags |= SYSTEM_FLAG_REQUEST_DESTINATION;
+        g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DESTINATION;
         thread_parameters_set(g_thread_current_id + 1, 0, 0, 1);
         thread_parameters_set(g_thread_current_id + 2, 0, 0, 1);
     } else {
@@ -786,22 +786,22 @@ void world_map_brave_story_request(void) {
  * background, display objects, context value, date and location label)
  * with the display off, for a full-screen menu. */
 static void map_layers_hide(void) {
-    g_saved_system_flags = g_system_flags;
-    g_system_flags |= SYSTEM_FLAG_HIDE_MAP_DOTS | SYSTEM_FLAG_HIDE_MAP_ROUTES | SYSTEM_FLAG_DISPLAY_OFF
-        | SYSTEM_FLAG_NO_BACKGROUND_IMAGE | SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS | SYSTEM_FLAG_HIDE_CONTEXT_VALUE
-        | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    g_saved_world_map_flags = g_world_map_flags;
+    g_world_map_flags |= WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES | WORLD_MAP_FLAG_DISPLAY_OFF
+        | WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE | WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE
+        | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
 }
 
 /* Restore the world-map flags saved around Formation or Save. */
 static void map_layers_restore(void) {
-    g_system_flags = g_saved_system_flags;
+    g_world_map_flags = g_saved_world_map_flags;
 }
 
 /* Debug battle setup thread: add 3 to the system flags, select the world debug battle style, clear
  * the event, map arrangement, weather and time variables, and make the number entered in the menu
  * the next map. */
 void debug_battle_setup_thread(void) {
-    g_system_flags += 3;
+    g_world_map_flags += 3;
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 1);
     script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
     script_variable_set(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, 0);
@@ -830,7 +830,7 @@ static void formation_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             g_formation_open_request_state = state + 1;
         }
         return;
@@ -865,7 +865,7 @@ static void formation_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_IN) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             g_formation_open_request_state = WORLD_MAP_REQUEST_IDLE;
         }
     }
@@ -883,7 +883,7 @@ void formation_tutorial_run(s32 tutorial_index) {
 
 /* Steps a pending request to open the tutorial categories from the world
  * map: start the screen fade-out, wait for it, then reset the menu context
- * and raise SYSTEM_FLAG_REQUEST_TUTORIAL. */
+ * and raise WORLD_MAP_FLAG_REQUEST_TUTORIAL. */
 static void tutorial_request_update(void) {
     s16 state = g_world_map_tutorial_request_state;
 
@@ -897,20 +897,20 @@ static void tutorial_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             g_world_map_tutorial_request_state = state + 1;
         }
         return;
     }
     screen_context_reset();
     screen_brightness_set(0x80, 0x80, 0x80);
-    g_system_flags |= SYSTEM_FLAG_REQUEST_TUTORIAL;
+    g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_TUTORIAL;
     g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_IDLE;
 }
 
 /* Serve a pending request to open the debug variable list from the world
  * map: reset the menu context and raise
- * SYSTEM_FLAG_REQUEST_VARIABLE_LIST. */
+ * WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST. */
 static void variable_list_request_update(void) {
     s32 state = g_world_map_debug_variable_list_request_state;
 
@@ -919,7 +919,7 @@ static void variable_list_request_update(void) {
         screen_context_reset();
         screen_brightness_set(0x80, 0x80, 0x80);
         g_world_map_debug_variable_list_request_state = 0;
-        g_system_flags |= SYSTEM_FLAG_REQUEST_VARIABLE_LIST;
+        g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST;
     }
 }
 
@@ -936,7 +936,7 @@ static void party_number_request_update(void) {
         text_pointer_table_relocate(g_menu_text_file_buffer);
         screen_brightness_set(0x80, 0x80, 0x80);
         g_world_map_debug_party_number_request_state = 0;
-        g_system_flags |= SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
+        g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
     }
 }
 
@@ -957,7 +957,7 @@ static void save_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             g_save_menu_request_state = state + 1;
         }
         return;
@@ -972,7 +972,7 @@ static void save_request_update(void) {
         map_layers_hide();
         if (result == 1) {
             g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
-            g_system_flags |= SYSTEM_FLAG_RESTART;
+            g_world_map_flags |= WORLD_MAP_FLAG_RESTART;
             return;
         }
         window_group_start(g_world_map_menu_group_parameter, g_world_map_destination_id,
@@ -997,7 +997,7 @@ static void save_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_IN) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
         }
     }
@@ -1017,7 +1017,7 @@ static void brave_story_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
-        if (!(g_system_flags & SYSTEM_FLAG_FADING)) {
+        if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
             g_world_map_brave_story_request_state = state + 1;
         }
         return;
@@ -1025,7 +1025,7 @@ static void brave_story_request_update(void) {
     if (state == WORLD_MAP_REQUEST_RUN) {
         screen_context_reset();
         g_world_map_brave_story_request_state = WORLD_MAP_REQUEST_IDLE;
-        g_system_flags |= SYSTEM_FLAG_REQUEST_BRAVE_STORY;
+        g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_BRAVE_STORY;
     }
 }
 
@@ -1300,7 +1300,7 @@ s16 screen_menu_frame_update(u32* otag, u32 input) {
     }
     if (g_command_pending_selection[0] == 0) {
         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, g_command_pending_selection[1]);
-        g_system_flags |= SYSTEM_FLAG_REQUEST_DESTINATION;
+        g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DESTINATION;
     }
     if (g_menu_input_block_frames != 0) {
         g_menu_input_block_frames--;

@@ -4,6 +4,7 @@
 #include "fft/battle_map_load.h"
 #include "fft/battle_map_mesh.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/cursor.h"
@@ -20,7 +21,6 @@
 #include "fft/script_variable.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/unit_runtime.h"
 #include "psx/gte_inline.h"
@@ -79,7 +79,7 @@ static void map_load_run(void) {
     s16 fade;
     POLY_FT4* banner_p;
 
-    deploy_init_display(0x100, 0xf0, 0x200, 0, 0, 0);
+    battle_display_init(0x100, 0xf0, 0x200, 0, 0, 0);
     show_banner = g_system_go_straight_to_battle;
     if (script_variable_get(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
         show_banner = 0;
@@ -87,7 +87,7 @@ static void map_load_run(void) {
     g_deploy_skipped = deploy_open();
     loading_centered_message_build(g_deploy_skipped);
     map_id = g_battle_map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
-    g_state_map_init_step = 0;
+    g_battle_map_init_step = 0;
     g_deploy_finished = 0;
 
     SetPolyF4(&g_fade_polygons[0]);
@@ -126,25 +126,25 @@ static void map_load_run(void) {
             AddPrim(gfx_battle_otag_get(), &g_fade_draw_modes[g_gfx_screen_polarity]);
             AddPrim(gfx_battle_otag_get(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-            g_system_battle_frame_hsync_count = deploy_sync_and_submit_frame(gfx_battle_otag_get() + 0x17f);
+            g_system_battle_frame_hsync_count = deploy_frame_submit(gfx_battle_otag_get() + 0x17f);
             fade -= 8;
         } while (fade >= 0);
     }
 
     banner_p = banner;
     fade = 0xff;
-    while (deploy_update_controller_input() != -1) {
+    while (deploy_input_update() != -1) {
         gfx_battle_otag_swap();
         if (show_banner != 0) {
             AddPrim(gfx_battle_otag_get(), &banner_p[g_gfx_screen_polarity]);
         } else {
             loading_otag_append(gfx_battle_otag_get());
         }
-        g_state_map_init_step = battle_map_deployment_init_update(
-            map_id, g_state_map_init_step, deploy_run_frame_and_check(gfx_battle_otag_get(), g_input_current_buttons));
-        if (g_state_map_init_step == 0xd) {
+        g_battle_map_init_step = battle_map_deployment_init_update(
+            map_id, g_battle_map_init_step, deploy_run_frame_and_check(gfx_battle_otag_get(), g_input_current_buttons));
+        if (g_battle_map_init_step == 0xd) {
             fixed_cluts_load();
-            state_enter_event_at_battle_start();
+            battle_state_enter_event_at_battle_start();
             g_fade_intensity = fade;
             /* Not `break`: jump optimization would move this exit block
              * past the loop end, which the target keeps inline. */
@@ -157,7 +157,7 @@ static void map_load_run(void) {
         AddPrim(gfx_battle_otag_get(), &g_fade_polygons[g_gfx_screen_polarity]);
         AddPrim(gfx_battle_otag_get(), &g_fade_draw_modes[g_gfx_screen_polarity]);
         g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-        g_system_battle_frame_hsync_count = deploy_sync_and_submit_frame(gfx_battle_otag_get() + 0x17f);
+        g_system_battle_frame_hsync_count = deploy_frame_submit(gfx_battle_otag_get() + 0x17f);
         file_load_poll(&g_file_cd_state);
         system_frame_stub();
     }
@@ -178,7 +178,7 @@ done:
             AddPrim(gfx_battle_otag_get(), &g_fade_draw_modes[g_gfx_screen_polarity]);
             AddPrim(gfx_battle_otag_get(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-            g_system_battle_frame_hsync_count = deploy_sync_and_submit_frame(gfx_battle_otag_get() + 0x17f);
+            g_system_battle_frame_hsync_count = deploy_frame_submit(gfx_battle_otag_get() + 0x17f);
             fade += 8;
         } while (fade < 0x100);
     }
@@ -189,11 +189,11 @@ done:
  * map animations and music, and presents the frame. Entering CloseBattle ends the
  * loop; it starts over with deployment while the game flow is still battle. */
 void battle_entrypoint(void) {
-    sprite_evtchr_slot_t* timer_field;
+    sprite_evtchr_slot_t* sprite_slot;
     SVECTOR* camera_integer;
     VECTOR* camera_fixed;
     s32 frame_measurement;
-    s32 empty_timer;
+    s32 buffer_marker;
     s32 timer;
     s32 camera_component;
     s32 init_offset;
@@ -221,7 +221,7 @@ void battle_entrypoint(void) {
         g_cursor_input_mode = g_game_options.fields.cursor_movement;
 
         for (;;) {
-            state_update_controller_input();
+            battle_input_update();
             sprite_render_frame_init();
             SetGeomScreen(0x200);
             gfx_battle_otag_swap();
@@ -242,189 +242,189 @@ void battle_entrypoint(void) {
             battle_map_mesh_weather_draw(&g_camera_matrix);
             /* The SEQ wait commands read this: 2 while an effect is updating, 0 otherwise. */
             if (effect_playback_update() != 0) {
-                g_state_animation_continue_check = 2;
+                g_battle_animation_wait_state = 2;
             } else {
-                g_state_animation_continue_check = 0;
+                g_battle_animation_wait_state = 0;
             }
 
-            switch (g_game_state) {
+            switch (g_battle_state) {
             default:
-            case GAME_STATE_FREE_CURSOR:
-                state_handle_free_cursor();
+            case BATTLE_STATE_FREE_CURSOR:
+                battle_state_free_cursor_update();
                 break;
-            case GAME_STATE_FREE_CURSOR_HELP:
-                state_handle_free_cursor_help();
+            case BATTLE_STATE_FREE_CURSOR_HELP:
+                battle_state_free_cursor_help_update();
                 break;
-            case GAME_STATE_HIGHLIGHT_UNITS:
-                state_handle_highlight_units();
+            case BATTLE_STATE_HIGHLIGHT_UNITS:
+                battle_state_highlight_units_update();
                 break;
-            case GAME_STATE_OPEN_ACTION_MENUS:
-                state_handle_open_action_menus();
+            case BATTLE_STATE_OPEN_ACTION_MENUS:
+                battle_state_open_action_menus_update();
                 break;
-            case GAME_STATE_IDLING_ACTION_MENUS:
-                state_handle_idling_action_menus();
+            case BATTLE_STATE_IDLING_ACTION_MENUS:
+                battle_state_idling_action_menus_update();
                 break;
-            case GAME_STATE_AI_COMMAND:
-                state_handle_ai_command();
+            case BATTLE_STATE_AI_COMMAND:
+                battle_state_ai_command_update();
                 break;
-            case GAME_STATE_ACTION_HELP_MENU:
-                state_handle_action_help_menu();
+            case BATTLE_STATE_ACTION_HELP_MENU:
+                battle_state_action_help_menu_update();
                 break;
-            case GAME_STATE_DISPLAY_MOVE_AREA:
-                state_handle_display_move_area();
+            case BATTLE_STATE_DISPLAY_MOVE_AREA:
+                battle_state_display_move_area_update();
                 break;
-            case GAME_STATE_MINI_MENU:
-                state_handle_mini_menu();
+            case BATTLE_STATE_MINI_MENU:
+                battle_state_mini_menu_update();
                 break;
-            case GAME_STATE_MINI_MENU_HELP:
-                state_handle_mini_menu_help();
+            case BATTLE_STATE_MINI_MENU_HELP:
+                battle_state_mini_menu_help_update();
                 break;
-            case GAME_STATE_AT_LIST_INSPECTION:
-                state_handle_at_list_inspection();
+            case BATTLE_STATE_AT_LIST_INSPECTION:
+                battle_state_at_list_inspection_update();
                 break;
-            case GAME_STATE_AFTER_COMMAND:
-                state_handle_after_command();
+            case BATTLE_STATE_AFTER_COMMAND:
+                battle_state_after_command_update();
                 break;
-            case GAME_STATE_CONTINUE_TURN:
-                state_handle_continue_turn();
+            case BATTLE_STATE_CONTINUE_TURN:
+                battle_state_continue_turn_update();
                 break;
-            case GAME_STATE_CHANGE_TURN:
-                state_handle_change_turn();
+            case BATTLE_STATE_CHANGE_TURN:
+                battle_state_change_turn_update();
                 break;
-            case GAME_STATE_STATUS_EXECUTE:
-                state_handle_status_execute();
+            case BATTLE_STATE_STATUS_EXECUTE:
+                battle_state_status_execute_update();
                 break;
-            case GAME_STATE_UNIT_MOVE:
-                state_handle_unit_move();
+            case BATTLE_STATE_UNIT_MOVE:
+                battle_state_unit_move_update();
                 break;
-            case GAME_STATE_SELECT_MOVE_TILE:
-                state_handle_select_move_tile();
+            case BATTLE_STATE_SELECT_MOVE_TILE:
+                battle_state_select_move_tile_update();
                 break;
-            case GAME_STATE_MOVE_RANGE_EXCEPTION:
-                state_handle_move_range_exception();
+            case BATTLE_STATE_MOVE_RANGE_EXCEPTION:
+                battle_state_move_range_exception_update();
                 break;
-            case GAME_STATE_ILLEGAL_MOVE_MENU:
-                state_handle_illegal_move_menu();
+            case BATTLE_STATE_ILLEGAL_MOVE_MENU:
+                battle_state_illegal_move_menu_update();
                 break;
-            case GAME_STATE_UNIT_MOVING_SETUP:
-                state_handle_unit_moving_setup();
+            case BATTLE_STATE_UNIT_MOVING_SETUP:
+                battle_state_unit_moving_setup_update();
                 break;
-            case GAME_STATE_UNIT_MOVING:
-                state_handle_unit_moving();
+            case BATTLE_STATE_UNIT_MOVING:
+                battle_state_unit_moving_update();
                 break;
-            case GAME_STATE_MOVE_CONFIRM_MENU:
-                state_handle_move_confirm_menu();
+            case BATTLE_STATE_MOVE_CONFIRM_MENU:
+                battle_state_move_confirm_menu_update();
                 break;
-            case GAME_STATE_WAIT_DIRECTION:
-                state_handle_wait_direction();
+            case BATTLE_STATE_WAIT_DIRECTION:
+                battle_state_wait_direction_update();
                 break;
-            case GAME_STATE_WAIT_MENU:
-                state_handle_wait_menu();
+            case BATTLE_STATE_WAIT_MENU:
+                battle_state_wait_menu_update();
                 break;
-            case GAME_STATE_POST_MOVE_EVENTS:
-                state_handle_post_move_events();
+            case BATTLE_STATE_POST_MOVE_EVENTS:
+                battle_state_post_move_events_update();
                 break;
-            case GAME_STATE_TARGETING_PROMPT:
-                state_handle_targeting_prompt();
+            case BATTLE_STATE_TARGETING_PROMPT:
+                battle_state_targeting_prompt_update();
                 break;
-            case GAME_STATE_TARGETING_RANGE:
-                state_handle_targeting_range();
+            case BATTLE_STATE_TARGETING_RANGE:
+                battle_state_targeting_range_update();
                 break;
-            case GAME_STATE_ILLEGAL_RANGE:
-                state_handle_illegal_range();
+            case BATTLE_STATE_ILLEGAL_RANGE:
+                battle_state_illegal_range_update();
                 break;
-            case GAME_STATE_ABILITY_PREVIEW_HANDLING:
-                state_handle_ability_preview();
+            case BATTLE_STATE_ABILITY_PREVIEW_HANDLING:
+                battle_state_ability_preview_update();
                 break;
-            case GAME_STATE_ABILITY_PREVIEW_HELP:
-                state_handle_ability_preview_help();
+            case BATTLE_STATE_ABILITY_PREVIEW_HELP:
+                battle_state_ability_preview_help_update();
                 break;
-            case GAME_STATE_CONFIRM_ACTION:
-                state_handle_confirm_action();
+            case BATTLE_STATE_CONFIRM_ACTION:
+                battle_state_confirm_action_update();
                 break;
-            case GAME_STATE_PRE_ATTACK_ANIMATION:
-                state_handle_pre_attack_animation();
+            case BATTLE_STATE_PRE_ATTACK_ANIMATION:
+                battle_state_pre_attack_animation_update();
                 break;
-            case GAME_STATE_ACTION_CAST:
-                state_handle_action_cast();
+            case BATTLE_STATE_ACTION_CAST:
+                battle_state_action_cast_update();
                 break;
-            case GAME_STATE_COMMENCE_ATTACK_PHASE:
-                state_handle_commence_attack_phase();
+            case BATTLE_STATE_COMMENCE_ATTACK_PHASE:
+                battle_state_commence_attack_phase_update();
                 break;
-            case GAME_STATE_ACTION_ANNOUNCEMENT:
-                state_handle_action_announcement();
+            case BATTLE_STATE_ACTION_ANNOUNCEMENT:
+                battle_state_action_announcement_update();
                 break;
-            case GAME_STATE_OPEN_SP2_FILES:
-                state_handle_open_sp2_files();
+            case BATTLE_STATE_OPEN_SP2_FILES:
+                battle_state_open_sp2_files_update();
                 break;
-            case GAME_STATE_START_EFFECT_FILE_OPEN:
-                state_handle_start_effect_file_open();
+            case BATTLE_STATE_START_EFFECT_FILE_OPEN:
+                battle_state_start_effect_file_open_update();
                 break;
-            case GAME_STATE_ACTION_EXECUTE_START:
-                state_handle_action_execute_start();
+            case BATTLE_STATE_ACTION_EXECUTE_START:
+                battle_state_action_execute_start_update();
                 break;
-            case GAME_STATE_ACTION_EXECUTE:
-                state_handle_action_execute();
+            case BATTLE_STATE_ACTION_EXECUTE:
+                battle_state_action_execute_update();
                 break;
-            case GAME_STATE_BATTLE_MESSAGE_DISPLAY:
-                state_handle_battle_message_display();
+            case BATTLE_STATE_BATTLE_MESSAGE_DISPLAY:
+                battle_state_battle_message_display_update();
                 break;
-            case GAME_STATE_RESUME_ATTACK_PHASE:
-                state_handle_resume_attack_phase();
+            case BATTLE_STATE_RESUME_ATTACK_PHASE:
+                battle_state_resume_attack_phase_update();
                 break;
-            case GAME_STATE_POST_ACTION_REPORTS:
-                state_handle_post_action_reports();
+            case BATTLE_STATE_POST_ACTION_REPORTS:
+                battle_state_post_action_reports_update();
                 break;
-            case GAME_STATE_DEEP_DUNGEON_MESH_LOAD:
-                state_handle_deep_dungeon_mesh_load();
+            case BATTLE_STATE_DEEP_DUNGEON_MESH_LOAD:
+                battle_state_deep_dungeon_mesh_load_update();
                 break;
-            case GAME_STATE_DEEP_DUNGEON_MESH_FINISH:
-                state_handle_deep_dungeon_mesh_finish();
+            case BATTLE_STATE_DEEP_DUNGEON_MESH_FINISH:
+                battle_state_deep_dungeon_mesh_finish_update();
                 break;
-            case GAME_STATE_TARGET_SELECT_START:
-                state_handle_target_select_start();
+            case BATTLE_STATE_TARGET_SELECT_START:
+                battle_state_target_select_start_update();
                 break;
-            case GAME_STATE_TARGET_SELECT:
-                state_handle_target_select();
+            case BATTLE_STATE_TARGET_SELECT:
+                battle_state_target_select_update();
                 break;
-            case GAME_STATE_TARGET_SELECT_DENIED:
-                state_handle_target_select_denied();
+            case BATTLE_STATE_TARGET_SELECT_DENIED:
+                battle_state_target_select_denied_update();
                 break;
-            case GAME_STATE_TARGET_SELECT_CONFIRM:
-                state_handle_target_select_confirm();
+            case BATTLE_STATE_TARGET_SELECT_CONFIRM:
+                battle_state_target_select_confirm_update();
                 break;
-            case GAME_STATE_TARGET_DISPLAY_START:
-                state_handle_target_display_start();
+            case BATTLE_STATE_TARGET_DISPLAY_START:
+                battle_state_target_display_start_update();
                 break;
-            case GAME_STATE_TARGET_DISPLAY:
-                state_handle_target_display();
+            case BATTLE_STATE_TARGET_DISPLAY:
+                battle_state_target_display_update();
                 break;
-            case GAME_STATE_EFFECT:
-                state_handle_effect();
+            case BATTLE_STATE_EFFECT:
+                battle_state_effect_update();
                 break;
-            case GAME_STATE_EVENT:
-                state_handle_event();
+            case BATTLE_STATE_EVENT:
+                battle_state_event_update();
                 break;
-            case GAME_STATE_MAP_JUMPING_OUT:
-                state_handle_map_jumping_out();
+            case BATTLE_STATE_MAP_JUMPING_OUT:
+                battle_state_map_jumping_out_update();
                 break;
-            case GAME_STATE_MAP_INITIALIZE:
-                state_handle_map_init();
+            case BATTLE_STATE_MAP_INITIALIZE:
+                battle_state_map_init_update();
                 break;
-            case GAME_STATE_MAP_JUMPING_IN:
-                state_handle_map_jumping_in();
+            case BATTLE_STATE_MAP_JUMPING_IN:
+                battle_state_map_jumping_in_update();
                 break;
-            case GAME_STATE_MAP_JUMPING_OUT_2:
-                state_handle_change_map_jumping_out();
+            case BATTLE_STATE_MAP_JUMPING_OUT_2:
+                battle_state_change_map_jumping_out_update();
                 break;
-            case GAME_STATE_MAP_INITIALIZE_2:
-                state_handle_change_map_init();
+            case BATTLE_STATE_MAP_INITIALIZE_2:
+                battle_state_change_map_init_update();
                 break;
-            case GAME_STATE_MAP_JUMPING_IN_2:
-                state_handle_change_map_jumping_in();
+            case BATTLE_STATE_MAP_JUMPING_IN_2:
+                battle_state_change_map_jumping_in_update();
                 break;
-            case GAME_STATE_CLOSE_BATTLE:
-                state_handle_close_battle();
+            case BATTLE_STATE_CLOSE_BATTLE:
+                battle_state_close_battle_update();
                 break;
             }
 
@@ -436,7 +436,7 @@ void battle_entrypoint(void) {
             music_tunes_update();
 
             /* A closing battle leaves before this frame is presented. */
-            if (g_game_state == GAME_STATE_CLOSE_BATTLE) {
+            if (g_battle_state == BATTLE_STATE_CLOSE_BATTLE) {
                 break;
             }
 
@@ -444,7 +444,7 @@ void battle_entrypoint(void) {
             g_gfx_screen_polarity = !g_gfx_screen_polarity;
             g_frame_counter++;
             battle_map_clut_upload_rows();
-            frame_measurement = state_sync_frame(gfx_battle_otag_get() + 0x17f);
+            frame_measurement = battle_frame_submit(gfx_battle_otag_get() + 0x17f);
             g_system_battle_frame_hsync_count = frame_measurement;
             i = 0;
             if (g_system_battle_frame_hsync_count_max < frame_measurement) {
@@ -453,23 +453,23 @@ void battle_entrypoint(void) {
 
             /* Count down the image buffers' upload timers; 0 (free) and BUFFER_EVTCHR are markers,
              * not timers. */
-            empty_timer = SPRITE_EVTCHR_SLOT_BUFFER_EVTCHR;
-            timer_field = g_sprite_evtchr_slots;
+            buffer_marker = SPRITE_EVTCHR_SLOT_BUFFER_EVTCHR;
+            sprite_slot = g_sprite_evtchr_slots;
             timer_offset = 0;
             do {
                 /* The byte offset preserves the target's separate indexed load. */
                 timer = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + timer_offset))->image_buffer_state;
-                timer_offset += sizeof(*timer_field);
-                if (timer != 0 && timer != empty_timer) {
-                    timer_field->image_buffer_state = timer - 1;
+                timer_offset += sizeof(*sprite_slot);
+                if (timer != 0 && timer != buffer_marker) {
+                    sprite_slot->image_buffer_state = timer - 1;
                 }
                 i++;
-                timer_field++;
+                sprite_slot++;
             } while (i < SPRITE_EVTCHR_SLOT_COUNT);
 
-            /* A frame that ran long during effects arms the pacing timer, which state_sync_frame
+            /* A frame that ran long during effects arms the pacing timer, which battle_frame_submit
              * uses to lengthen the following waits. */
-            if (g_game_state == GAME_STATE_EFFECT || g_game_state == GAME_STATE_ACTION_EXECUTE) {
+            if (g_battle_state == BATTLE_STATE_EFFECT || g_battle_state == BATTLE_STATE_ACTION_EXECUTE) {
                 if (g_system_vsync_interval == 1) {
                     g_system_frame_pacing_timer = 0;
                 } else if (g_system_frame_pacing_suppressed == 0) {

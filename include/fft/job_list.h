@@ -8,7 +8,7 @@
 
 /* job list */
 /* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job menu, the JOBSTTS page); each list's
- * handler returns the next step. In JOBSTTS, JOBS is job_list_run, ABILITIES is ability_list_update and CLOSE makes
+ * handler returns the next step. In JOBSTTS, JOBS is job_list_update, ABILITIES is ability_list_update and CLOSE makes
  * jobstts_entrypoint close the screen. */
 typedef enum menu_job_list_step {
     MENU_JOB_LIST_STEP_CLOSE = -1,
@@ -19,7 +19,7 @@ typedef enum menu_job_list_step {
 /* The job highlighted in the job list. */
 extern s16 g_job_list_selected_id;
 
-s32 job_list_run(void);
+s32 job_list_update(void);
 s32 job_list_base_get(s16 unit_id);
 
 /* WORLD and JOBSTTS each build their own body. */

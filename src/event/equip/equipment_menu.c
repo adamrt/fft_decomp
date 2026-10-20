@@ -5,6 +5,7 @@
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
@@ -23,7 +24,7 @@ extern s8 g_equipment_equip_mode_initialized;
 extern s8 g_equipment_remove_mode_initialized;
 
 /* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
- * (in equipment_run_type_order_mode) the item-type order menus. Each is
+ * (in equipment_type_order_update) the item-type order menus. Each is
  * started through menu_managed_thread_start, which makes it the current
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equipment_command_menu;
@@ -49,20 +50,20 @@ extern point16_t g_equipment_remove_all_cursor_position;
 /* EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN): none of the item is left. */
 enum { EQUIPMENT_TEXT_ID_OUT_OF_STOCK = (TEXT_SECTION_OVERLAY_SCREEN << TEXT_ID_SECTION_SHIFT) + 9 };
 
-static void equipment_update_state(void);
-static s32 equipment_run_equip_mode(void);
-static s32 equipment_run_remove_mode(void);
+static void state_update(void);
+static s32 equip_update(void);
+static s32 remove_update(void);
 static s32 equipment_update_remove_all_prompt(void);
 
 /* State 0 initializes before dispatch; the five other slots share the frame updater. */
-void (*g_equipment_screen_state_handlers[6])(void) = { 0, equipment_update_state, equipment_update_state,
-    equipment_update_state, equipment_update_state, equipment_update_state };
+void (*g_equipment_screen_state_handlers[6])(void)
+    = { 0, state_update, state_update, state_update, state_update, state_update };
 
 /* The g_equipment_screen_state_handlers entry of every state past INIT: keep the command
  * menu thread running, enter the mode its picked row names (row + EQUIPMENT_STATE_EQUIP;
  * row 1 would be state 3, which has no mode, and is refused), run that mode each frame and
  * return to the command menu when it ends. */
-static void equipment_update_state(void) {
+static void state_update(void) {
     s32 result;
     s32 state;
     s32 mode;
@@ -105,10 +106,10 @@ static void equipment_update_state(void) {
     }
     switch (state) {
     case EQUIPMENT_STATE_EQUIP:
-        result = equipment_run_equip_mode();
+        result = equip_update();
         break;
     case EQUIPMENT_STATE_REMOVE:
-        result = equipment_run_remove_mode();
+        result = remove_update();
         break;
     case EQUIPMENT_STATE_ITEM_LIST:
         result = formation_items_update();
@@ -131,7 +132,7 @@ static void equipment_update_state(void) {
  * The if/else spelling of the slot fallback is required: it keeps CSE from
  * reusing the stored slot for the category argument (the target reloads it)
  * and schedules the unit load ahead of the slot test. */
-static s32 equipment_run_equip_mode(void) {
+static s32 equip_update(void) {
     s16 selected;
     s16 scroll;
     s32 help_id;
@@ -261,7 +262,7 @@ static s32 equipment_run_equip_mode(void) {
 /* One frame of Remove mode: Circle takes off the item in the chosen slot unless it is
  * locked, Left offers to remove everything, and the stats preview the highlighted slot
  * empty. Returns 0 when Cross leaves the mode, else 1. */
-static s32 equipment_run_remove_mode(void) {
+static s32 remove_update(void) {
     /* Never referenced; the target frame reserves these bytes. */
     u8 unused[0x48];
     s32 i;

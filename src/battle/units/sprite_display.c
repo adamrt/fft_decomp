@@ -71,9 +71,9 @@ sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
 
 /* Reset the display of one of a unit's three sprite blocks: neutral color,
  * no flags on its three parts and none of them in use. */
-sprite_display_t* sprite_display_init_weapon(s32 unit_index, s32 display_type) {
+sprite_display_t* sprite_display_init_weapon(s32 runtime_id, s32 display_type) {
     s32 weapon_part;
-    sprite_weapon_display_t* weapons = (sprite_weapon_display_t*)((u8*)&g_unit_slot_states[unit_index]
+    sprite_weapon_display_t* weapons = (sprite_weapon_display_t*)((u8*)&g_unit_slot_states[runtime_id]
         + offsetof(unit_slot_state_t, unit.weapon_sprite_displays));
     sprite_display_t* display = &weapons[display_type].header;
 
@@ -90,19 +90,19 @@ sprite_display_t* sprite_display_init_weapon(s32 unit_index, s32 display_type) {
 /* Resets one of a unit's three numeric sprite displays to neutral color and no
  * parts. A display_section outside 0..2 leaves `display` unset; the only caller
  * passes 0, 1 and 2. */
-sprite_display_t* sprite_display_init_numeric(s32 unit_index, s32 display_section) {
+sprite_display_t* sprite_display_init_numeric(s32 runtime_id, s32 display_section) {
     sprite_display_t* display;
     s32 i;
 
     switch (display_section) {
     case 0:
-        display = &g_unit_slot_states[unit_index].unit.numeric_sprite_displays[0].header;
+        display = &g_unit_slot_states[runtime_id].unit.numeric_sprite_displays[0].header;
         break;
     case 1:
-        display = &g_unit_slot_states[unit_index].unit.numeric_sprite_displays[1].header;
+        display = &g_unit_slot_states[runtime_id].unit.numeric_sprite_displays[1].header;
         break;
     case 2:
-        display = &g_unit_slot_states[unit_index].unit.numeric_sprite_displays[2].header;
+        display = &g_unit_slot_states[runtime_id].unit.numeric_sprite_displays[2].header;
         break;
     }
 
@@ -117,8 +117,8 @@ sprite_display_t* sprite_display_init_numeric(s32 unit_index, s32 display_sectio
 
 /* Resets a unit's status bubble display to one 14 x 12 part at (0, 0xb0) of the
  * FRAME.BIN page with CLUT 7 of the sprite row, neutral color and scale ONE. */
-sprite_display_t* sprite_display_init_status_bubble(s32 unit_index) {
-    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[unit_index]
+sprite_display_t* sprite_display_init_status_bubble(s32 runtime_id) {
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[runtime_id]
         + offsetof(unit_slot_state_t, unit.status_bubble_sprite_display.header));
     s32 i;
 

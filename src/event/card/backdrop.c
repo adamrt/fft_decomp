@@ -9,7 +9,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern zodiac_draw_context_t g_save_input_display_state;
+extern zodiac_draw_context_t g_save_backdrop_draw_context;
 
 /* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
 static POLY_FT4 g_save_gfx_scaled_sprite_primitive_buffers[2][30] = { 0 };
@@ -34,31 +34,31 @@ void save_backdrop_thread(void) {
     s32 frame;
 
     if (g_formation_screen_active != 0) {
-        g_save_input_display_state.offset.position.x = 0;
-        g_save_input_display_state.offset.position.y = 8;
+        g_save_backdrop_draw_context.offset.position.x = 0;
+        g_save_backdrop_draw_context.offset.position.y = 8;
     } else {
-        g_save_input_display_state.offset.position.x = 0x100;
-        g_save_input_display_state.offset.position.y = 0x80;
+        g_save_backdrop_draw_context.offset.position.x = 0x100;
+        g_save_backdrop_draw_context.offset.position.y = 0x80;
     }
 
     if (thread_current_parameter_1_get() != 0) {
-        g_save_input_display_state.scale_x = ONE;
-        g_save_input_display_state.scale_y = ONE;
+        g_save_backdrop_draw_context.scale_x = ONE;
+        g_save_backdrop_draw_context.scale_y = ONE;
     } else {
-        g_save_input_display_state.scale_x = ONE * 2;
-        g_save_input_display_state.scale_y = ONE * 2;
+        g_save_backdrop_draw_context.scale_x = ONE * 2;
+        g_save_backdrop_draw_context.scale_y = ONE * 2;
     }
 
     for (frame = 0;; frame++) {
-        g_save_input_display_state.ot = g_save_gfx_render_otag;
-        if (g_save_input_display_state.scale_x > ONE) {
+        g_save_backdrop_draw_context.ot = g_save_gfx_render_otag;
+        if (g_save_backdrop_draw_context.scale_x > ONE) {
             s32 delta = g_script_event_speed << 8;
 
-            g_save_input_display_state.scale_x -= delta;
-            g_save_input_display_state.scale_y -= delta;
+            g_save_backdrop_draw_context.scale_x -= delta;
+            g_save_backdrop_draw_context.scale_y -= delta;
         }
-        g_save_input_display_state.brightness = 0x80;
-        zodiac_build_primitives(&g_save_input_display_state, g_save_gfx_scaled_sprite_primitive_buffers[frame & 1]);
+        g_save_backdrop_draw_context.brightness = 0x80;
+        zodiac_build_primitives(&g_save_backdrop_draw_context, g_save_gfx_scaled_sprite_primitive_buffers[frame & 1]);
         thread_yield();
         if (thread_current_parameter_3_get() != 0) {
             thread_current_exit();

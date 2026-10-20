@@ -1,12 +1,13 @@
 /* The hidden Music Test runs a WORLD list menu from OPEN and can open a text
  * description for the selected track while the title controller waits. */
 
-#include "fft/controller.h"
+#include "fft/controller_stack.h"
 #include "fft/file.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/message.h"
 #include "fft/music.h"
@@ -144,7 +145,7 @@ void music_test_menu_update(controller_record_t* record) {
 
     if (state->blink_frames != 0 && ++state->blink_frames >= 10) {
         state->blink_frames = 0;
-        formation_display_mode_set(0);
+        menu_cursor_bob_hold_set(0);
         g_menu_blocked_buttons ^= PSX_PAD_UP | PSX_PAD_DOWN;
     }
 
@@ -201,7 +202,7 @@ void music_test_menu_update(controller_record_t* record) {
         }
         buttons = g_input_new_button_presses;
         if (buttons & PSX_PAD_CIRCLE) {
-            formation_display_mode_set(1);
+            menu_cursor_bob_hold_set(1);
             state->blink_frames = 1;
             g_menu_blocked_buttons |= PSX_PAD_UP | PSX_PAD_DOWN;
             if (state->music_id != 0) {

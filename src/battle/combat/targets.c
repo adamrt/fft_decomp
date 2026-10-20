@@ -48,7 +48,8 @@ static void range_unit_panels_mark(const unit_stats_t* unit, s32 flags);
 
 static s32 panel_to_neighbors_spread(s32 y, s32 x);
 
-static s32 height_overlap_validate(s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id);
+static s32 height_overlap_validate(
+    s32 attacker_id, s32 unused_target_x, s32 unused_target_y, s32 unused_target_elevation, s32 target_id);
 
 static s32 lunge_validate(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
 
@@ -1059,7 +1060,7 @@ target_panels_e target_range_set_for_action(const action_command_t* source) {
 }
 
 /* Mark the tiles an action affects once its target is chosen, by skillset menu type: abilities go
- * through the green-panel pass, Arithmeticks through the calculator, and Item, Throw, Attack, Jump
+ * through the green-panel pass, Math Skill through the calculator, and Item, Throw, Attack, Jump
  * and Charge mark only the target tile. Returns 0 when tiles were marked, 1 when none were, 2 for
  * menu types without targeting, and -1 for an invalid actor, target, katana, ability id or target
  * tile. */
@@ -1097,7 +1098,7 @@ s32 target_area_set_for_action(const action_command_t* source) {
     case ACTION_MENU_TYPE_CHARGE:
         mode = 2;
         break;
-    case ACTION_MENU_TYPE_ARITHMETICKS:
+    case ACTION_MENU_TYPE_MATH_SKILL:
         result = area_calculator_run(&action);
         mode = 0;
         break;
@@ -1435,7 +1436,8 @@ static s32 lunge_validate(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_i
 /* Return the target only when its vertical span overlaps the attacker's.
  *
  * The coordinate arguments are unused here but are part of the caller ABI. */
-static s32 height_overlap_validate(s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id) {
+static s32 height_overlap_validate(
+    s32 attacker_id, s32 unused_target_x, s32 unused_target_y, s32 unused_target_elevation, s32 target_id) {
     unit_height_data_t height_data;
     u32 target_walking_height;
     u32 target_total_height;
@@ -1471,7 +1473,7 @@ void target_area_clear_flags(void) {
     }
 }
 
-/* Marks the tiles of every unit selected by a Calculator (Arithmeticks) action.
+/* Marks the tiles of every unit selected by a Calculator (Math Skill) action.
  *
  * The type ability picks the compared value (CT, capped at 100 and forced to
  * 100 for the caster, level, EXP, or whole-unit height, where half heights never

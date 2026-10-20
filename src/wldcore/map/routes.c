@@ -1,6 +1,7 @@
 /* Map dots, location menus, routes and path animation, travel, scrolling, random encounters and the player marker. */
 
 #include "fft/calendar.h"
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/location.h"
@@ -11,7 +12,6 @@
 #include "fft/sound.h"
 #include "fft/system.h"
 #include "fft/text.h"
-#include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
@@ -223,7 +223,7 @@ void world_map_dots_init(void) {
         color->g = 0x80;
         color->b = 0x80;
         alternate_dot = g_world_map_dots[i].kind == 2;
-        g_world_map_dots[i].render.sequence = alternate_dot + WINDOW_ANIM_MAP_DOT;
+        g_world_map_dots[i].render.sequence = alternate_dot + DISPLAY_OBJECT_ANIM_MAP_DOT;
         if (script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) != 0) {
             if (i < LOCATION_FIELD_FIRST) {
                 g_world_map_dots[i].render.palette = 0xc;
@@ -239,9 +239,9 @@ void world_map_dots_init(void) {
             g_world_map_dots[i].render.flags |= DISPLAY_OBJECT_HIDDEN;
         }
         dot++;
-        queue_index = g_window_render_object_count;
-        g_window_render_object_queue[queue_index] = (void*)(i * sizeof(world_map_dot_t) + (s32)flags_base);
-        g_window_render_object_count = queue_index + 1;
+        queue_index = g_display_object_queue_count;
+        g_display_object_queue[queue_index] = (void*)(i * sizeof(world_map_dot_t) + (s32)flags_base);
+        g_display_object_queue_count = queue_index + 1;
     }
 
     g_world_map_dot_count = LOCATION_COUNT;
@@ -249,7 +249,7 @@ void world_map_dots_init(void) {
 }
 
 /* Projects every world-map dot and hides the ones that are off screen, all of
- * them while SYSTEM_FLAG_HIDE_MAP_DOTS is set, and those whose location
+ * them while WORLD_MAP_FLAG_HIDE_MAP_DOTS is set, and those whose location
  * is not yet visible (EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST + location).
  *
  * The screen bounds are written as the target's unsigned range tests: x in
@@ -264,7 +264,7 @@ void world_map_project_dots(void) {
         g_world_map_dots[i].render.position.x = position.vx;
         g_world_map_dots[i].render.position.y = position.vy;
         if (position.vx < -128 || position.vx > 128 || position.vy < -116 || position.vy > 120
-            || (g_system_flags & SYSTEM_FLAG_HIDE_MAP_DOTS)
+            || (g_world_map_flags & WORLD_MAP_FLAG_HIDE_MAP_DOTS)
             || script_variable_get(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) == 0) {
             g_world_map_dots[i].render.flags |= DISPLAY_OBJECT_HIDDEN;
         } else {
@@ -274,7 +274,7 @@ void world_map_project_dots(void) {
 }
 
 /* Pulse the map dots' brightness. The phase counts up to 0x40 and back down,
- * a step a frame unless SYSTEM_FLAG_FREEZE_ANIMATION is set; dots with a
+ * a step a frame unless WORLD_MAP_FLAG_FREEZE_ANIMATION is set; dots with a
  * palette (colored towns and fields) run from 0x60 to 0xe0 with it and the
  * others the opposite way, so the two kinds pulse out of step.
  *
@@ -283,7 +283,7 @@ void world_map_project_dots(void) {
  * the limit ($v1); reusing the function-scope allocno reproduces the target
  * pair. */
 void world_map_pulse_dots(void) {
-    s32 flags = g_system_flags;
+    s32 flags = g_world_map_flags;
     s32 i;
     s32 phase;
     s32 bright;
@@ -292,11 +292,11 @@ void world_map_pulse_dots(void) {
     u8 counter;
     CVECTOR* color;
 
-    if (flags & SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS) {
+    if (flags & WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS) {
         return;
     }
 
-    if (!(flags & SYSTEM_FLAG_FREEZE_ANIMATION)) {
+    if (!(flags & WORLD_MAP_FLAG_FREEZE_ANIMATION)) {
         state = g_world_map_dot_pulse_direction;
         flags = 0x40;
         if (state == 0) {
@@ -514,7 +514,7 @@ void world_map_stub_init(void) {
  * are full they become one POLY_FT4 quad, emitted when either edge-leading
  * vertex was in bounds, and the last pair slides down to slots 0 and 1 so the
  * next pair closes the following segment. Nothing is drawn while
- * SYSTEM_FLAG_HIDE_MAP_ROUTES is set, and a route only once it is
+ * WORLD_MAP_FLAG_HIDE_MAP_ROUTES is set, and a route only once it is
  * revealed (EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST + route).
  *
  * The count is sign-extended into count_tmp, which the loop guard tests before
@@ -540,7 +540,7 @@ void world_map_routes_draw(GsOT* ot) {
     s16 raw;
     s32 count_tmp;
 
-    if (g_system_flags & SYSTEM_FLAG_HIDE_MAP_ROUTES) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_HIDE_MAP_ROUTES) {
         return;
     }
 
@@ -905,11 +905,12 @@ s32 travel_start(s32 from_location, s32 to_location) {
     s32 depth;
 
     if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_LOAD_EVENT) != 0) {
-        g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].window_index].flags
+            |= DISPLAY_OBJECT_HIDDEN;
         g_travel_next_map_id = 0;
         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
         event_transition_open(g_location_script_state.args[1]);
-        g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+        g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         return 0;
     }
     if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_SET_VAR_2) != 0) {
@@ -932,13 +933,13 @@ s32 travel_start(s32 from_location, s32 to_location) {
     g_world_map_marker_state.angle = g_travel.heading;
     depth = g_menu_stack_depth - 1;
     g_travel.menu_level = depth;
-    g_window_records[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
     if (world_map_pan_start(&g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
         == 0) {
         g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
     }
     g_world_map_marker_state.marker.picture_id = location_picture_load(to_location);
-    g_system_flags |= SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+    g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     return 1;
 }
 
@@ -1001,7 +1002,7 @@ void travel_step(void) {
             if (encounter_roll(g_travel.leg_end_location,
                     g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)
                 != 0) {
-                g_system_flags |= SYSTEM_FLAG_RANDOM_BATTLE;
+                g_world_map_flags |= WORLD_MAP_FLAG_RANDOM_BATTLE;
                 g_travel_next_map_id = g_random_battle_map_id;
                 script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
                 script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
@@ -1024,13 +1025,13 @@ void travel_step(void) {
                 g_world_map_marker_state.angle = g_travel.heading;
                 return;
             }
-            g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].flags
-                ^= DISPLAY_OBJECT_HIDDEN;
-            g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.x
-                = g_world_map_marker_state.marker.render.position.x;
-            g_window_records[g_menu_stack_records[g_travel.menu_level].location_transition.window_index].position.y
-                = g_world_map_marker_state.marker.render.position.y - 4;
-            g_system_flags &= ~SYSTEM_FLAG_HIDE_LOCATION_LABEL;
+            g_display_object_animated_pool[g_menu_stack_records[g_travel.menu_level].location_transition.window_index]
+                .flags ^= DISPLAY_OBJECT_HIDDEN;
+            g_display_object_animated_pool[g_menu_stack_records[g_travel.menu_level].location_transition.window_index]
+                .position.x = g_world_map_marker_state.marker.render.position.x;
+            g_display_object_animated_pool[g_menu_stack_records[g_travel.menu_level].location_transition.window_index]
+                .position.y = g_world_map_marker_state.marker.render.position.y - 4;
+            g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
             g_location_selected = g_world_map_marker_state.marker.location_id + 1;
             file_pending_wait();
             g_world_map_marker_state.angle = 0;
@@ -1076,7 +1077,7 @@ s32 world_map_pan_start(const point32_t* point, const SVECTOR* coordinates) {
     s32 dx;
     s32 dy;
 
-    if (world_map_pan_bounds_check(point) == 0) {
+    if (world_map_point_needs_pan(point) == 0) {
         return 0;
     }
 
@@ -1094,7 +1095,7 @@ s32 world_map_pan_start(const point32_t* point, const SVECTOR* coordinates) {
 /* Whether a point lies outside the view far enough to pan the camera: beyond an
  * edge while the projection origin still has more than 0x20 of scroll room
  * toward it. Nothing wraps; at the scroll limit the point counts as inside. */
-s32 world_map_pan_bounds_check(const point32_t* point) {
+s32 world_map_point_needs_pan(const point32_t* point) {
     if ((point->x < -0x40 && 0x80 - g_world_map_projection_view.origin.vx >= 0x21)
         || (point->x >= 0x49 && g_world_map_projection_view.origin.vx + 0x74 >= 0x21)) {
         return 1;
@@ -1168,7 +1169,7 @@ s32 world_map_pan_update(void) {
 
 /* Applies a scroll delta to the projection origin when the resulting window
  * origin would leave [-64, 72] horizontally or [-64, 64] vertically, and
- * sets SYSTEM_FLAG_DRAW_MAP if the origin's x or y changed. */
+ * sets WORLD_MAP_FLAG_DRAW_MAP if the origin's x or y changed. */
 static void edge_scroll_apply(point32_t* delta) {
     point32_t position;
     VECTOR saved = g_world_map_projection_view.origin;
@@ -1182,7 +1183,7 @@ static void edge_scroll_apply(point32_t* delta) {
         world_map_vertical_scroll_apply(delta, &g_world_map_projection_view.origin);
     }
     if (saved.vx != g_world_map_projection_view.origin.vx || saved.vy != g_world_map_projection_view.origin.vy) {
-        g_system_flags |= SYSTEM_FLAG_DRAW_MAP;
+        g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
     }
 }
 
@@ -1295,11 +1296,11 @@ void world_map_marker_and_camera_init(void) {
     marker->position = g_world_map_dots[location_id].position;
     g_world_map_marker_state.angle = 0;
     g_world_map_marker_state.flags = WORLD_MAP_MARKER_UPDATE_POSITION | WORLD_MAP_MARKER_UPDATE_DIRECTION;
-    count = g_window_render_object_count;
-    g_window_render_object_queue[count++] = &marker->render;
+    count = g_display_object_queue_count;
+    g_display_object_queue[count++] = &marker->render;
     marker->render.flags = DISPLAY_OBJECT_ANIMATED;
     g_world_map_marker_state.marker.render.priority = 0xE;
-    g_window_render_object_count = count;
+    g_display_object_queue_count = count;
     g_world_map_marker_state.marker.render.anim_counter = 0;
     g_world_map_marker_state.marker.render.frame_index = 0;
     g_world_map_marker_state.marker.render.color.r = 0x80;
@@ -1322,8 +1323,8 @@ void world_map_marker_and_camera_init(void) {
 /* Apply pending direction and GTE projection updates to the player marker.
  *
  * The 32-bit direction value is the player marker's sequence: the facing octant picks
- * one of eight marker sequences from WINDOW_ANIM_MARKER_FIRST, or from
- * WINDOW_ANIM_MARKER_ALTERNATE_FIRST for the alternate set. The
+ * one of eight marker sequences from DISPLAY_OBJECT_ANIM_MARKER_FIRST, or from
+ * DISPLAY_OBJECT_ANIM_MARKER_ALTERNATE_FIRST for the alternate set. The
  * marker's position is projected with RotTrans into its render position. */
 void world_map_marker_update(void) {
     VECTOR output;
@@ -1336,9 +1337,9 @@ void world_map_marker_update(void) {
     flags = state->flags;
     if (flags & WORLD_MAP_MARKER_UPDATE_DIRECTION) {
         angle_direction = ((state->angle + 0x100) >> 9) & 7;
-        direction = angle_direction + WINDOW_ANIM_MARKER_FIRST;
+        direction = angle_direction + DISPLAY_OBJECT_ANIM_MARKER_FIRST;
         if (flags & WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET) {
-            direction = angle_direction + WINDOW_ANIM_MARKER_ALTERNATE_FIRST;
+            direction = angle_direction + DISPLAY_OBJECT_ANIM_MARKER_ALTERNATE_FIRST;
         }
         if (state->marker.render.sequence != direction) {
             state->marker.render.sequence = direction;

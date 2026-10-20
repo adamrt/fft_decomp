@@ -23,13 +23,13 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-/* The mode argument of command_build_ability_list: which list an Arithmeticks
+/* The mode argument of command_build_ability_list: which list an Math Skill
  * (Math Skill) menu shows. Any other menu type builds its ability list. */
-typedef enum menu_arithmeticks_list {
-    MENU_ARITHMETICKS_LIST_ABILITIES = 0, /* skillset_math_collect_calculator_abilities */
-    MENU_ARITHMETICKS_LIST_MULTIPLES = 1, /* skillset_math_load_multiples */
-    MENU_ARITHMETICKS_LIST_ATTRIBUTES = 2 /* skillset_math_load_attributes */
-} menu_arithmeticks_list_e;
+typedef enum menu_math_skill_list {
+    MENU_MATH_SKILL_LIST_ABILITIES = 0, /* skillset_math_collect_calculator_abilities */
+    MENU_MATH_SKILL_LIST_MULTIPLES = 1, /* skillset_math_load_multiples */
+    MENU_MATH_SKILL_LIST_ATTRIBUTES = 2 /* skillset_math_load_attributes */
+} menu_math_skill_list_e;
 
 extern s16 g_command_skillset_row_actions[];
 extern u8 g_command_skillset_disabled_flags[]; /* per-row grayed flag */
@@ -43,7 +43,7 @@ typedef struct menu_list_selection {
 typedef char menu_list_selection_size_must_be_2[sizeof(menu_list_selection_t) == 2 ? 1 : -1];
 
 /* One remembered command/skillset selection per unit, followed by seven
- * ability-list positions. Arithmeticks uses list positions 4, 5 and 6. */
+ * ability-list positions. Math Skill uses list positions 4, 5 and 6. */
 typedef struct menu_unit_selection_record {
     u8 command_index;               /* 0x00 */
     u8 _unknown_01;                 /* 0x01; reset to 0xff */
@@ -287,14 +287,14 @@ static void command_build_ability_list(s32 mode) {
     if (type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
         skillset_load_throw_abilities(unit_index, skillset, g_event_work->ability_list.mp_costs);
     }
-    if (type == ACTION_MENU_TYPE_ARITHMETICKS) {
-        if (mode == MENU_ARITHMETICKS_LIST_ATTRIBUTES) {
+    if (type == ACTION_MENU_TYPE_MATH_SKILL) {
+        if (mode == MENU_MATH_SKILL_LIST_ATTRIBUTES) {
             skillset_math_load_attributes(unit_index, skillset, g_event_work->ability_list.ids);
         }
-        if (mode == MENU_ARITHMETICKS_LIST_MULTIPLES) {
+        if (mode == MENU_MATH_SKILL_LIST_MULTIPLES) {
             skillset_math_load_multiples(unit_index, skillset, g_event_work->ability_list.ids);
         }
-        if (mode == MENU_ARITHMETICKS_LIST_ABILITIES) {
+        if (mode == MENU_MATH_SKILL_LIST_ABILITIES) {
             skillset_math_collect_calculator_abilities(unit_index, skillset, g_event_work->ability_list.ids);
         }
     }
@@ -312,8 +312,8 @@ static void command_build_ability_list(s32 mode) {
     }
 
     window_width = 0xAC;
-    if (type != ACTION_MENU_TYPE_ARITHMETICKS) {
-        mode = MENU_ARITHMETICKS_LIST_ABILITIES;
+    if (type != ACTION_MENU_TYPE_MATH_SKILL) {
+        mode = MENU_MATH_SKILL_LIST_ABILITIES;
     }
 
     g_ability_list_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
@@ -373,7 +373,7 @@ static void command_build_ability_list(s32 mode) {
             }
         }
 
-        if (type == ACTION_MENU_TYPE_ARITHMETICKS && mode > 0) {
+        if (type == ACTION_MENU_TYPE_MATH_SKILL && mode > 0) {
             window_width = 0x88;
             g_ability_list_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
             g_ability_list_ability_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
@@ -452,7 +452,7 @@ static void command_build_ability_list(s32 mode) {
 
 /*
  * Run the ability list of the chosen skillset row, remembering its cursor row and scroll in
- * the selected unit's menu record. Arithmeticks walks three lists, attribute (i = 2), multiple
+ * the selected unit's menu record. Math Skill walks three lists, attribute (i = 2), multiple
  * (1) and ability (0), storing each choice in the selected action; backing out of one returns
  * to the previous list. Other skillsets run a single list and exit.
  *
@@ -476,7 +476,7 @@ void command_ability_list_thread(void) {
     /* Typed list indexing changes the address order; these byte views retain it. */
     for (i = (g_menu_restore_pending == 0) ? 2 : 0; i >= 0; i--) {
         command_check_row_restrictions(menu, i, check_unit);
-        if (menu == ACTION_MENU_TYPE_ARITHMETICKS) {
+        if (menu == ACTION_MENU_TYPE_MATH_SKILL) {
             slot = (menu_list_selection_t*)((u8*)row + (i + offsetof(menu_unit_selection_record_t, lists[4])) + i);
             g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index = slot->selected_index;
             g_ability_list_ability_layout.row_offset = slot->scroll_offset;
@@ -490,7 +490,7 @@ void command_ability_list_thread(void) {
             slot = (menu_list_selection_t*)(pair + offsetof(menu_unit_selection_record_t, lists));
         }
         for (j = 0; j < 6; j++) {
-            if (menu != ACTION_MENU_TYPE_ARITHMETICKS || i == 0) {
+            if (menu != ACTION_MENU_TYPE_MATH_SKILL || i == 0) {
                 g_command_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_ABILITY_CONFIRM;
             } else {
                 g_command_action_slot_row_actions[j] = -1;
@@ -507,7 +507,7 @@ void command_ability_list_thread(void) {
         ability_list_scrolling_thread();
         slot->selected_index = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_ability_list_ability_layout.row_offset;
-        if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {
+        if (menu != ACTION_MENU_TYPE_MATH_SKILL) {
             thread_current_exit();
         }
         if (g_command_action_slot_selected_option == -1) {

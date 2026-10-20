@@ -965,7 +965,7 @@ static void status_only_ability_disable(ai_ability_entry_t* entry, s32 status_id
  * The entry's packed id names the ability and the unit that owns it. Attack,
  * Charge and Jump take their AI flags from the owner's weapon summary (Attack
  * and Charge also its range and element; Charge and Jump add their CT, Jump its
- * own range), and Arithmeticks is weighed as inflicting every status on map
+ * own range), and Math Skill is weighed as inflicting every status on map
  * tiles. Other abilities read the ability tables for flags, CT, element, MP
  * cost (halved by Half of MP), range, area and statuses, with item, katana and
  * throw abilities substituting their item. The current action's calculator
@@ -991,7 +991,7 @@ void ai_ability_entry_load(const ai_ability_entry_t* entry) {
     menu = g_command_menu_types_by_skillset[entry->skillset];
     status_id = 0;
 
-    /* Attack, Jump, Charge and Arithmeticks fill in the whole ability and return;
+    /* Attack, Jump, Charge and Math Skill fill in the whole ability and return;
      * the other menus break to the ability-table load below. */
     switch (menu) {
     case ACTION_MENU_TYPE_ATTACK:
@@ -1069,10 +1069,10 @@ void ai_ability_entry_load(const ai_ability_entry_t* entry) {
         ai->considered_ability.ct = g_ability_charge_data[ability_id - ABILITY_ID_CHARGE_FIRST].ct;
         /* Placing this case above ATTACK to fall through reorders the blocks. */
         goto attack;
-    case ACTION_MENU_TYPE_ARITHMETICKS: {
+    case ACTION_MENU_TYPE_MATH_SKILL: {
         u32 status_cursor;
         s32 included = 0xff;
-        /* Arithmeticks is weighed as inflicting every status: all five bytes become 0xff. */
+        /* Math Skill is weighed as inflicting every status: all five bytes become 0xff. */
         value = 4;
         /* A direct status pointer folds the member offset into its base;
          * retain the field-derived base cursor for the exact five-byte fill. */
@@ -2028,7 +2028,7 @@ static s32 random_select(void) {
     g_ai_workspace_storage.current_action.command.skillset_id = ai->considered_ability.skillset;
     g_ai_workspace_storage.current_action.command.ability_id = ai->considered_ability.ability_id;
     g_ai_workspace_storage.current_action.command.item_id = ai->considered_ability.parameters.fields.item_id;
-    if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_ARITHMETICKS) {
+    if (g_command_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_MATH_SKILL) {
         do {
             skillset = g_ai_math_source_skillsets[rand() % AI_MATH_SOURCE_SKILLSET_COUNT];
             abilities = ability_skillset_list_build(skillset, SKILLSET_ABILITY_FILTER_ACTION);

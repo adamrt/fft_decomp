@@ -1,12 +1,12 @@
 /* Interpret directional input for the free cursor and show the hovered unit and action panels. */
 
 #include "fft/battle_map.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/input.h"
 #include "fft/option.h"
 #include "fft/sound.h"
-#include "fft/state.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
@@ -21,9 +21,8 @@ typedef struct cursor_tile_position {
 } cursor_tile_position_t;
 typedef char cursor_tile_position_size_must_be_12[sizeof(cursor_tile_position_t) == 12 ? 1 : -1];
 
+/* Free-cursor repeat counter. */
 extern u32 g_cursor_repeat_counter;
-
-/* free-cursor repeat counter */
 
 static cursor_tile_position_t g_cursor_previous_tile = { 0 };
 
@@ -110,7 +109,7 @@ s32 cursor_input_direction_get(s32 source) {
                     input = PSX_PAD_RIGHT | PSX_PAD_DOWN;
                 }
             } else if (g_input_pressed_copy_1 & PSX_PAD_UP) {
-                /* state_update_controller_input stores last frame's presses in both copy_0 and
+                /* battle_input_update stores last frame's presses in both copy_0 and
                  * copy_1, so these lone-direction tests never pass: a lone direction registers only
                  * through the auto-repeat below. */
                 if (!((pressed | g_input_pressed_copy_0) & PSX_PAD_UP) && (previous & PSX_PAD_UP)) {
@@ -471,13 +470,13 @@ void cursor_move_to_selection(const unit_runtime_t* unit, const unit_runtime_t* 
         g_cursor_y = unit->command_state.cursor.target_panel.vz;
     }
     if (((g_cursor_x != old_x) | (g_cursor_layer != old_layer) | (g_cursor_y != old_y)) != 0) {
-        switch (g_game_state) {
-        case GAME_STATE_FREE_CURSOR:
-        case GAME_STATE_SELECT_MOVE_TILE:
-        case GAME_STATE_TARGET_SELECT:
+        switch (g_battle_state) {
+        case BATTLE_STATE_FREE_CURSOR:
+        case BATTLE_STATE_SELECT_MOVE_TILE:
+        case BATTLE_STATE_TARGET_SELECT:
             cursor_show_hovered_unit_panel();
             break;
-        case GAME_STATE_TARGETING_RANGE:
+        case BATTLE_STATE_TARGETING_RANGE:
             cursor_show_right_unit_panel();
             break;
         }
@@ -654,13 +653,13 @@ s32 cursor_move_by_input(void) {
         != 0) {
         sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
         g_cursor_repeat_counter = 0;
-        switch (g_game_state) {
-        case GAME_STATE_FREE_CURSOR:
-        case GAME_STATE_SELECT_MOVE_TILE:
-        case GAME_STATE_TARGET_SELECT:
+        switch (g_battle_state) {
+        case BATTLE_STATE_FREE_CURSOR:
+        case BATTLE_STATE_SELECT_MOVE_TILE:
+        case BATTLE_STATE_TARGET_SELECT:
             cursor_show_hovered_unit_panel();
             break;
-        case GAME_STATE_TARGETING_RANGE:
+        case BATTLE_STATE_TARGETING_RANGE:
             cursor_show_right_unit_panel();
             break;
         }

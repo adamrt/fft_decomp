@@ -167,7 +167,7 @@ void ability_list_scrolling_thread(void) {
     }
 
     /* The first page's buffer is freed after the first yield, once its upload has run. */
-    menu_text_columns_narrow_draw(entry, &row_offset, buffer);
+    ability_list_text_draw(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.source.x / 4 + entry->vram_origin.x;

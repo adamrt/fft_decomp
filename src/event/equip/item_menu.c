@@ -1,5 +1,6 @@
 /* Equipment item browser and its menu state transitions. */
 
+#include "fft/item_menu.h"
 #include "fft/equipment.h"
 #include "fft/gfx_image.h"
 #include "fft/help.h"
@@ -77,11 +78,11 @@ s32 formation_items_update(void) {
     if (g_equipment_substate == MENU_ITEM_LIST_STATE_BROWSE) {
         g_equipment_substate = formation_items_browse_update();
     } else if (g_equipment_substate == MENU_ITEM_LIST_STATE_REARRANGE) {
-        g_equipment_substate = item_run_rearrange_mode();
+        g_equipment_substate = item_rearrange_update();
     } else if (g_equipment_substate == MENU_ITEM_LIST_STATE_ACTION) {
         g_equipment_substate = equipment_update_item_actions();
     } else if (g_equipment_substate == MENU_ITEM_LIST_STATE_SORT_ORDER) {
-        g_equipment_substate = equipment_run_type_order_mode();
+        g_equipment_substate = equipment_type_order_update();
     }
 
     /* Only browsing and rearranging take list input and page scrolling. */

@@ -6,13 +6,13 @@
 #include "fft/ai.h"
 #include "fft/animation.h"
 #include "fft/battle_map.h"
+#include "fft/battle_state.h"
 #include "fft/cursor.h"
 #include "fft/effect.h"
 #include "fft/effect_secondary.h"
 #include "fft/item.h"
 #include "fft/result.h"
 #include "fft/sprite.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
@@ -261,7 +261,7 @@ static void display_update(unit_runtime_t* unit) {
         unit_dismount_dead_rider(unit);
         sprite_transparency_update(unit);
         sprite_status_bubble_active_update(unit);
-        if (g_state_animation_continue_check != 0) {
+        if (g_battle_animation_wait_state != 0) {
             sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 0);
         } else {
             sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
@@ -293,13 +293,13 @@ void unit_battle_display_update(u16 battle_id) {
 /*
  * Queue the renderer-side status flags associated with a simulation status.
  *
- * The status argument is the callback-table index (canonical status ID + 1).
+ * The handler_index argument is the callback-table index (canonical status ID + 1).
  * Removing Crystal shares the Chicken case, so it queues the Chicken bit for
  * removal and leaves the Crystal bit set. Rebuilding the unit's AI ability
  * data when Frog changes keeps its usable-ability list synchronized with the
  * graphics transition.
  */
-s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id) {
+s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 battle_id) {
     unit_runtime_t* unit = unit_battle_get(battle_id);
 
     if (unit == 0) {
@@ -307,7 +307,7 @@ s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id)
     }
     switch (change_type) {
     case STATUS_DISPLAY_CHANGE_REMOVE:
-        switch (status) {
+        switch (handler_index) {
         case STATUS_HANDLER_INDEX(STATUS_ID_CRYSTAL):
         case STATUS_HANDLER_INDEX(STATUS_ID_CHICKEN):
             unit->statuses_to_remove_5_6 |= UNIT_STATUS_CHICKEN;
@@ -321,8 +321,8 @@ s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id)
         case STATUS_HANDLER_INDEX(STATUS_ID_JUMP):
         case STATUS_HANDLER_INDEX(STATUS_ID_FLOAT):
         case STATUS_HANDLER_INDEX(STATUS_ID_TRANSPARENT):
-            unit->statuses_to_remove_5_6 |= g_status_mask_by_handler_index[status];
-            unit->statuses_to_add_5_6 &= ~g_status_mask_by_handler_index[status];
+            unit->statuses_to_remove_5_6 |= g_status_mask_by_handler_index[handler_index];
+            unit->statuses_to_add_5_6 &= ~g_status_mask_by_handler_index[handler_index];
             break;
         case STATUS_HANDLER_INDEX(STATUS_ID_UNNAMED_00):
         case STATUS_HANDLER_INDEX(STATUS_ID_INVITE):
@@ -330,13 +330,13 @@ s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id)
         case STATUS_HANDLER_INDEX(STATUS_ID_WALL):
             break;
         default:
-            unit->statuses_to_remove_1_4 |= g_status_mask_by_handler_index[status];
-            unit->statuses_to_add_1_4 &= ~g_status_mask_by_handler_index[status];
+            unit->statuses_to_remove_1_4 |= g_status_mask_by_handler_index[handler_index];
+            unit->statuses_to_add_1_4 &= ~g_status_mask_by_handler_index[handler_index];
             break;
         }
         break;
     case STATUS_DISPLAY_CHANGE_ADD:
-        switch (status) {
+        switch (handler_index) {
         case STATUS_HANDLER_INDEX(STATUS_ID_CRYSTAL):
             unit->statuses_to_add_5_6 |= UNIT_STATUS_CRYSTAL;
             unit->statuses_to_remove_5_6 &= ~UNIT_STATUS_CRYSTAL;
@@ -357,16 +357,16 @@ s32 status_queue_display_flag_change(s32 status, s32 change_type, s32 battle_id)
         case STATUS_HANDLER_INDEX(STATUS_ID_JUMP):
         case STATUS_HANDLER_INDEX(STATUS_ID_FLOAT):
         case STATUS_HANDLER_INDEX(STATUS_ID_TRANSPARENT):
-            unit->statuses_to_add_5_6 |= g_status_mask_by_handler_index[status];
-            unit->statuses_to_remove_5_6 &= ~g_status_mask_by_handler_index[status];
+            unit->statuses_to_add_5_6 |= g_status_mask_by_handler_index[handler_index];
+            unit->statuses_to_remove_5_6 &= ~g_status_mask_by_handler_index[handler_index];
             break;
         case STATUS_HANDLER_INDEX(STATUS_ID_UNNAMED_00):
         case STATUS_HANDLER_INDEX(STATUS_ID_INVITE):
         case STATUS_HANDLER_INDEX(STATUS_ID_WALL):
             break;
         default:
-            unit->statuses_to_add_1_4 |= g_status_mask_by_handler_index[status];
-            unit->statuses_to_remove_1_4 &= ~g_status_mask_by_handler_index[status];
+            unit->statuses_to_add_1_4 |= g_status_mask_by_handler_index[handler_index];
+            unit->statuses_to_remove_1_4 &= ~g_status_mask_by_handler_index[handler_index];
             break;
         }
         break;

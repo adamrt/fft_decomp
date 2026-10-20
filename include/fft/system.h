@@ -7,72 +7,6 @@
 #include "psx/types.h"
 
 /* game loop */
-/* Bits of g_system_flags, the 32-bit control flags of the WLDCORE world-map
- * loop: frame state, what the frame leaves out, requests left by WORLD and
- * OPENING, and the reason the loop ends. */
-typedef enum system_flags {
-    /* wldcore_entrypoint runs frames while set; map_state_init sets it, a level clears it to leave. */
-    SYSTEM_FLAG_RUNNING = 0x00000001,
-    /* Draw this frame with the 3D map; map_frame_draw clears it after drawing. */
-    SYSTEM_FLAG_DRAW_MAP = 0x00000002,
-    /* A level waits for a thread or a fade: world_map_pad_read publishes no pad input. */
-    SYSTEM_FLAG_INPUT_BLOCKED = 0x00000004,
-    /* Set by world_map_fade_start, cleared by world_map_fade_update one step before the fade ends. */
-    SYSTEM_FLAG_FADING = 0x00000008,
-    /* world_map_project_dots hides every map dot. */
-    SYSTEM_FLAG_HIDE_MAP_DOTS = 0x00000010,
-    /* world_map_routes_draw draws no route. */
-    SYSTEM_FLAG_HIDE_MAP_ROUTES = 0x00000020,
-    /* wldcore_entrypoint masks the display for the frame. */
-    SYSTEM_FLAG_DISPLAY_OFF = 0x00000040,
-    /* world_map_menus_update returns without running the menu frame; no code sets it. */
-    SYSTEM_FLAG_SKIP_MENU_FRAME = 0x00000080,
-    /* Set by brave_story_request_update: the return level opens the Brave Story screen. */
-    SYSTEM_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
-    /* world_map_frame_draw does not load the scratch image into the display buffer. */
-    SYSTEM_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
-    /* window_dispatch_gs_record_list draws nothing and world_map_pulse_dots returns. */
-    SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
-    /* hud_value_draw draws nothing. */
-    SYSTEM_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,
-    /* calendar_date_draw draws nothing. */
-    SYSTEM_FLAG_HIDE_CALENDAR_DATE = 0x00001000,
-    /* location_label_draw draws no label; set while a level moves or covers the map view. */
-    SYSTEM_FLAG_HIDE_LOCATION_LABEL = 0x00002000,
-    /* WORLD's menu chose a map (script variable CURRENT_MAP): the return level restarts the core and travels there. */
-    SYSTEM_FLAG_REQUEST_DESTINATION = 0x00004000,
-    /* travel_step rolled an encounter: wldcore_entrypoint returns 1. */
-    SYSTEM_FLAG_RANDOM_BATTLE = 0x00008000,
-    /* Set after the card menu returns 1: wldcore_entrypoint restarts its loop instead of returning. */
-    SYSTEM_FLAG_RESTART = 0x00010000,
-    /* The unit-panel threads (8, 9 and 12) run: the menu frame draws their windows, not the formation menu. */
-    SYSTEM_FLAG_UNIT_PANEL_THREADS = 0x00020000,
-    /* A story event replays: wldcore_entrypoint returns 2 and the next entry reopens the story-event list. */
-    SYSTEM_FLAG_STORY_EVENT_REPLAY = 0x00040000,
-    /* Set by main_menu_update: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
-    SYSTEM_FLAG_TITLE_TUTORIAL = 0x00080000,
-    /* Set by tutorial_request_update: the return level opens the tutorial menu. */
-    SYSTEM_FLAG_REQUEST_TUTORIAL = 0x00100000,
-    /* A tutorial event plays: wldcore_entrypoint returns 2 with the music kept; the next entry reopens its list. */
-    SYSTEM_FLAG_TUTORIAL_EVENT = 0x00200000,
-    /* map_state_init sets the rumor, path, location and story-event variables; no code sets it. */
-    SYSTEM_FLAG_UNLOCK_ALL = 0x00400000,
-    /* Set by variable_list_request_update: the return level opens the variable list. */
-    SYSTEM_FLAG_REQUEST_VARIABLE_LIST = 0x00800000,
-    /* Set by party_number_request_update: opens the debug Party number panel. */
-    SYSTEM_FLAG_REQUEST_DEBUG_PARTY_NUMBER = 0x01000000,
-    /* The location menu chose a deep-dungeon battle: wldcore_entrypoint returns 4. */
-    SYSTEM_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,
-    /* Set by world_map_clear_screen_and_set_clip_rect; the return level then recaptures the world frame. */
-    SYSTEM_FLAG_SCREEN_CLEARED = 0x04000000,
-    /* Map dots stop pulsing and window_gs_animated_record_draw stops advancing frames. */
-    SYSTEM_FLAG_FREEZE_ANIMATION = 0x08000000,
-    /* wldcore_entrypoint returns 5: system_game_loop_run goes back to OPENING. */
-    SYSTEM_FLAG_RETURN_TO_TITLE = 0x10000000,
-    /* The world entry opens the Brave Story screen, which leaves through RETURN_TO_TITLE; no code sets it. */
-    SYSTEM_FLAG_TITLE_BRAVE_STORY = 0x20000000
-} system_flags_e;
-
 /* g_game_flow_state: what follows when the BATTLE.BIN loop closes a
  * battle or event. */
 typedef enum system_game_flow {
@@ -84,7 +18,6 @@ typedef enum system_game_flow {
 
 /* BATTLE reloads this result with its program image; MAIN reads it after battle_entrypoint returns. */
 extern system_game_flow_e g_game_flow_state;
-extern u32 g_system_flags; /* system_flags_e bits; cleared by save_data_tables_init */
 extern u8 g_system_go_straight_to_battle;
 
 /* Also entered by the native stack-restoring reset routine. */

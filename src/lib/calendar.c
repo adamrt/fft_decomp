@@ -5,7 +5,7 @@
 
 /* Zero-based day of the year of a 1-based month and day (1 January is 0), with
  * February at 28 days. */
-s32 calendar_day_of_year_calculate(s32 month, s32 day) {
+s32 calendar_date_to_day_index(s32 month, s32 day) {
     s32 index;
     s32 elapsed_days;
     s32 result;
@@ -26,7 +26,7 @@ s32 calendar_day_of_year_calculate(s32 month, s32 day) {
 #ifdef FFT_WLDCORE
 /* 0-based day-of-year index (party_unit_t.birthday_day) to 1-based month
  * and day. */
-void calendar_month_and_day_calculate(s32 day_of_year, s32* output_month, s32* output_day) {
+void calendar_day_index_to_date(s32 day_of_year, s32* output_month, s32* output_day) {
     s32 month = 0;
     s32 days_in_month;
 

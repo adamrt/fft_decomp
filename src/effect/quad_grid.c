@@ -38,7 +38,7 @@ typedef struct effect_textured_quad_grid_work {
     s32 frame;           /* column of the animation curves */
     s32 destroy_latched; /* phase 3 frees the block on its second call */
 } effect_textured_quad_grid_work_t;
-typedef char assert_effect_textured_quad_grid_work_size[sizeof(effect_textured_quad_grid_work_t)
+typedef char effect_textured_quad_grid_work_size_must_match_variant[sizeof(effect_textured_quad_grid_work_t)
             == (QUAD_GRID_SIZE == 2       ? 516
                     : QUAD_GRID_SIZE == 4 ? 1764
                                           : 6684)
@@ -62,7 +62,7 @@ extern u32 g_effect_textured_quad_grid_brightness_table[][QUAD_GRID_SIZE + 1];
  * gives each C variable one pseudo, and that sharing is what places the curve
  * index, color curves and brightness in s2 and the curve factor in s3.
  */
-s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
+s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 unused_frame) {
     s16 state_index = record_index;
     effect_record_t* record = &g_effect_state_records[state_index];
     s32 translucent;

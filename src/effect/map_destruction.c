@@ -23,7 +23,7 @@ s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unuse
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
     case EFFECT_CALLBACK_PHASE_UPDATE:
-        script_specialized_map_destroyed_set();
+        script_map_destruction_signal();
         break;
     case EFFECT_CALLBACK_PHASE_DESTROY:
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_IDLE;

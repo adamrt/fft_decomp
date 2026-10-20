@@ -7,6 +7,7 @@
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
@@ -156,14 +157,14 @@ void unit_panel_equipment_thread(void) {
         screen->frame.sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->position.x - 0x80;
-        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
+        g_gfx_draw_offset_y = g_menu_framebuffer_y != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_frame_arg, &thread->position);
+            &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_menu_framebuffer_y, &thread->position);
         unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
@@ -324,7 +325,7 @@ void unit_panel_ability_thread(void) {
         screen->frame.sprites[13].u0 = u;
 
         screen->draw_offsets[0].position.x = thread->position.x - 0xf3;
-        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
+        g_gfx_draw_offset_y = g_menu_framebuffer_y != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
@@ -333,7 +334,7 @@ void unit_panel_ability_thread(void) {
         offset.x = thread->position.x - 0x73;
         offset.y = thread->position.y;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_frame_arg, &offset);
+            &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_menu_framebuffer_y, &offset);
         unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 

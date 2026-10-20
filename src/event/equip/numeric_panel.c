@@ -17,7 +17,7 @@
 
 /* Thread task THREAD_TASK_STATUS_PANEL: numeric panel.
  *
- * Twin of unit_panel_numbers_polarity_thread / unit_panel_numbers_thread
+ * Twin of unit_panel_numbers_thread / unit_panel_numbers_thread
  * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
  * into the second buffer, then each frame re-renders the three text images when
  * requested, rescales the draw area, recolors the sprites for the thread

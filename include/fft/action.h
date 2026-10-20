@@ -26,7 +26,6 @@ void action_command_copy(const action_command_t* source, action_command_t* desti
 action_preparation_e action_prepare(const action_command_t* source, action_command_t* dest, s32 phase);
 void action_prepare_in_place(action_command_t* action);
 action_preparation_e action_commit_preparation(const action_command_t* command);
-void action_execute_ability(void);
 
 /* action results */
 /* Bitset in action_data_t.attack_type; one result can affect HP and MP. */
@@ -270,7 +269,6 @@ void action_store_used_weapon(action_command_t* action);
 s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
 void action_switch_ability_to_default_attack(void);
 void action_start_next_strike(void);
-void action_apply_strike_results(void);
 void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* target);
 s32 action_start_target_response_by_runtime_id(s32 runtime_id);
 void action_start_projectile_hit_response_by_runtime_id(u16 attacker_id, u16 target_id);
@@ -282,10 +280,6 @@ void action_end_command(unit_runtime_t* unit);
 
 /* Preview action calculation entry run on the main stack. */
 s32 action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
-
-/* Like the state_enter_ functions (state.h), sets up a state and switches g_game_state to it, but only when a
- * Hamedo, action or reaction is due. */
-s32 action_announce_next(void);
 
 /* mimic */
 /* g_action_mimic_attacker, filled by action_mimic_record and read

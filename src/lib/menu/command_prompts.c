@@ -6,6 +6,7 @@
 #include "fft/ability_list.h"
 #include "fft/action.h"
 #include "fft/ai.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/crystal.h"
@@ -22,13 +23,13 @@
 #include "fft/script_variable.h"
 #include "fft/skillset.h"
 #include "fft/sound.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
 #include "fft/unit.h"
+#include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "psx/pad.h"
@@ -166,7 +167,7 @@ static request_entry_t g_request_entries[51] = {
         43, { 0, 0 } },                                                                                       /* 42 */
     { 98, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 43, { 0, 0 } }, /* 43 */
     { MENU_COMMAND_ID_MESSAGE, 0x5089, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
-        MENU_PROMPT_ARITHMETICKS_ANNOUNCEMENT, { 0, 0 } }, /* 44 */
+        MENU_PROMPT_MATH_SKILL_ANNOUNCEMENT, { 0, 0 } }, /* 44 */
     { 101, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 },
         menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 45 */
     { 102, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
@@ -308,7 +309,7 @@ void command_check_restrictions(void) {
 }
 
 /* Check a chosen action-menu row before it opens. With check_unit, deep water, Frog or the menu's
- * own restriction shows its message, plays the invalid sound and ends the thread; an Arithmeticks
+ * own restriction shows its message, plays the invalid sound and ends the thread; an Math Skill
  * row shows navigation message 0x8009 - value. A row with no message and a negative action mode is
  * confirmed at once without sound. */
 void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
@@ -336,7 +337,7 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
             }
         }
     }
-    if (message == 0 && menu == ACTION_MENU_TYPE_ARITHMETICKS) {
+    if (message == 0 && menu == ACTION_MENU_TYPE_MATH_SKILL) {
         message = 0x8009 - value;
         mode = 1;
     }
@@ -903,11 +904,11 @@ static s32 request_dispatch(
         thread_parameters_set(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_announcement_spell_quote_last_ability_id, 0);
     } else if (command == MENU_REQUEST_ABILITY_ANNOUNCEMENT) {
         message_set_duration(60);
-        if (g_command_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_ARITHMETICKS) {
+        if (g_command_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_MATH_SKILL) {
             g_text_substitution_values[1] = unit->action_command.calculator_multiplier + TEXT_ID_ABILITY_NAME_BASE;
             g_text_substitution_values[0] = unit->action_command.calculator_type + TEXT_ID_ABILITY_NAME_BASE;
             g_text_substitution_values[2] = unit->action_command.ability_id + TEXT_ID_ABILITY_NAME_BASE;
-            request_thread_start(MENU_PROMPT_ARITHMETICKS_ANNOUNCEMENT);
+            request_thread_start(MENU_PROMPT_MATH_SKILL_ANNOUNCEMENT);
         } else {
             if (action->skillset_id == SKILLSET_ID_ITEM || action->skillset_id == SKILLSET_ID_THROW) {
                 item_id = action->item_id;

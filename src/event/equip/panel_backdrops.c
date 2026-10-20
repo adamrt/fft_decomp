@@ -38,13 +38,13 @@ void menu_draw_status_panel_backdrops(void) {
     s32 flip;
     s16 y;
 
-    if (menu_thread_running_check(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) != 0) {
+    if (menu_thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) != 0) {
         if (g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             display = (unit_panel_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_UNIT_STATUS].function_parameter_1;
             active = display->position.x == 0 ? 13 : 0;
         }
     }
-    if (menu_thread_running_check(EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS) != 0) {
+    if (menu_thread_is_running(EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS) != 0) {
         if (g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].task_id == THREAD_TASK_UNIT_STATUS_BANNER) {
             descriptor = (unit_panel_thread_t*)g_threads[EQUIPMENT_THREAD_SLOT_COMPARISON_STATUS].function_parameter_1;
             if (descriptor->position.x == 0) {

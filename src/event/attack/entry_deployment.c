@@ -802,7 +802,7 @@ ramza_placed:
                 if (g_unit_panel_status_animation[4] < 2) {
                     g_unit_panel_status_animation[4] = 1;
                 }
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_polarity_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
                 thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_deploy_numbers_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
                 thread_parameters_set(
@@ -1066,7 +1066,7 @@ static void first_deployable_select(void) {
 void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
-    u16* innate_items;
+    u16* abilities;
     const item_data_t* item;
     s32 i;
     s32 item_id;
@@ -1172,10 +1172,10 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        innate_items = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
-            editor->ability_ids[i] = *innate_items++;
+            editor->ability_ids[i] = *abilities++;
             i++;
         } while (i < 5);
         /* No monster skill check runs here (unlike unit_panel_load_selected),

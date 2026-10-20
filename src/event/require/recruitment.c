@@ -74,7 +74,7 @@ static thread_t g_after_battle_saved_thread = { 0 };
 void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
-    u16* innate_items;
+    u16* abilities;
     const item_data_t* item;
     s32 i;
     s32 item_id;
@@ -180,10 +180,10 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        innate_items = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
-            editor->ability_ids[i] = *innate_items++;
+            editor->ability_ids[i] = *abilities++;
             i++;
         } while (i < 5);
         /* No monster skill check runs here (unlike unit_panel_load_selected),
@@ -246,12 +246,12 @@ static s32 equipment_return(s32 party_index) {
 /* Sell each of a battle unit's seven equipped items of which 100 or more are
  * already held or equipped, for a quarter of its price, and remove it from
  * the unit. Returns 1 when it sold anything. */
-s32 party_sell_equipment_over_limit(s32 unit_id) {
+s32 party_sell_equipment_over_limit(s32 battle_index) {
     unit_stats_t* unit;
     s32 sold_equipment = 0;
     s32 equipment_slot;
 
-    unit = unit_stats_get(unit_id);
+    unit = unit_stats_get(battle_index);
     equipment_slot = 0;
     do {
         u8 item_id = unit->equipment[equipment_slot];
@@ -274,12 +274,12 @@ s32 party_sell_equipment_over_limit(s32 unit_id) {
  * An item of which 100 or more are already held or equipped is sold for a
  * quarter of its price instead and removed from the unit. Returns 1 when
  * it sold anything. */
-s32 party_store_or_sell_equipment(s32 unit_id) {
+s32 party_store_or_sell_equipment(s32 battle_index) {
     unit_stats_t* unit;
     s32 sold_equipment = 0;
     s32 equipment_slot;
 
-    unit = unit_stats_get(unit_id);
+    unit = unit_stats_get(battle_index);
     equipment_slot = 0;
     do {
         u8 item_id = unit->equipment[equipment_slot];
@@ -311,9 +311,9 @@ s32 party_store_or_sell_equipment(s32 unit_id) {
  * that is the palette of the first roster record with a Ramza identity (the
  * last record when there is none).
  */
-static s32 join_status_get(s32 unit_id) {
+static s32 join_status_get(s32 battle_index) {
     party_unit_t* party;
-    unit_stats_t* unit = unit_stats_get(unit_id);
+    unit_stats_t* unit = unit_stats_get(battle_index);
     s32 index;
 
     if (unit->unit_flags & UNIT_FLAG_SAVE_FORMATION) {
@@ -488,7 +488,7 @@ static s32 dismissal_selection_run(void) {
             /* R1 and L1 step to the next or previous removable unit. The status redraw
              * request doubles as the portrait slide direction: 1 (should_restore) for R1, 2 for L1. */
             if (*g_menu_input_controller & PSX_PAD_R1) {
-                g_unit_panel_panel_status_animation[1] = 7;
+                g_unit_panel_status_animation[1] = 7;
                 for (;;) {
                     selected_party_index++;
                     if (selected_party_index == PARTY_ROSTER_SLOT_COUNT)
@@ -507,7 +507,7 @@ static s32 dismissal_selection_run(void) {
                     }
                 }
             } else if (*g_menu_input_controller & PSX_PAD_L1) {
-                g_unit_panel_panel_status_animation[0] = 7;
+                g_unit_panel_status_animation[0] = 7;
                 do {
                     selected_party_index--;
                     if (selected_party_index == -1)
@@ -733,7 +733,7 @@ void party_apply_post_battle_changes(void) {
                 thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
                 thread_parameters_set(
                     THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_unit_panel_status_display_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_polarity_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
                 thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_numbers_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
                 thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)transition_c_ptr, 0, 0);

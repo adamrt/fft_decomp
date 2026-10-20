@@ -1,18 +1,9 @@
 /* Shop transactions adjust party funds and cash out inventory above the retail holding limit. */
 
 #include "fft/item.h"
-#include "fft/menu_script.h"
 #include "fft/script_variable.h"
 #include "fft/shop.h"
 #include "psx/types.h"
-
-/* The dismiss prompt keeps its eligibility result until an answer queues a sound. */
-enum {
-    FORMATION_DISMISS_REFUSED = 0,
-    FORMATION_DISMISS_CONFIRM = 1,
-    FORMATION_DISMISS_PROPOSITION_MESSAGE = 2,
-    FORMATION_DISMISS_SOUND_QUEUED = 100
-};
 
 /* Add `delta` to the war funds, clamped to 0..99,999,999, and return the new
  * amount. */

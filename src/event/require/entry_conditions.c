@@ -83,8 +83,8 @@ void help_open_after_battle(void) {
 
     thread_current_task_set(THREAD_TASK_HELP_MENU);
     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-    g_unit_panel_panel_status_animation[0] = 1;
-    g_unit_panel_panel_status_animation[1] = 1;
+    g_unit_panel_status_animation[0] = 1;
+    g_unit_panel_status_animation[1] = 1;
     while (heap_reserve_at(g_heap_high_overlay_load_address, 0x10000) != g_heap_high_overlay_load_address) {
         thread_yield();
     }
@@ -92,8 +92,8 @@ void help_open_after_battle(void) {
     thread_id = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, helpmenu_after_battle_entrypoint);
     thread_inactive_wait(thread_id);
-    g_unit_panel_panel_status_animation[0] = 0;
-    g_unit_panel_panel_status_animation[1] = 0;
+    g_unit_panel_status_animation[0] = 0;
+    g_unit_panel_status_animation[1] = 0;
     thread_current_exit();
 }
 

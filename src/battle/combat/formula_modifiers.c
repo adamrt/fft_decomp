@@ -1,5 +1,5 @@
-/* Formula helpers for brave and speed changes, elemental and weather modifiers, faith, HP and MP absorption, undead
- * reversal, status procs, equipment breaks, poach, catch, and hit and evade calculations. */
+/* Direct ability formulas and shared result modifiers: Brave and Speed changes, elemental and weather bonuses,
+ * Faith, absorption, undead reversal, status procs, equipment changes, poach, catch and hit calculations. */
 
 #include "fft/ability.h"
 #include "fft/action.h"

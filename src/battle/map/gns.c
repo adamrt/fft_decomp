@@ -8,9 +8,8 @@
 #include "psx/types.h"
 
 extern move_find_map_data_t g_move_find_map_data[BATTLE_MAP_ID_COUNT];
+/* Zero where the map ID has no file. */
 extern u32 g_battle_map_gns_lba[BATTLE_MAP_ID_COUNT];
-
-/* 0 where the map id has no file */
 
 /* Apply one command record that follows the resource rows of a map's GNS file and
  * step g_battle_map_gns_record_cursor past it.

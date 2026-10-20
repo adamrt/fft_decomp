@@ -13,7 +13,7 @@
 /* The stages of stage_update, kept in g_effect_playback_phase. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,
-    EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_play */
+    EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_playback_start */
     EFFECT_PLAYBACK_PHASE_INIT_PALETTE = 2,
     EFFECT_PLAYBACK_PHASE_START_SCRIPT = 3, /* bind the effect file's sections and start its script */
     EFFECT_PLAYBACK_PHASE_RUNNING = 4,
@@ -42,7 +42,7 @@ void effect_ability_animation_set(u32 packed, s32 ability, const effect_context_
 void effect_request_start(s32 ability_id, s32 target_mode, effect_start_target_data_t target);
 s32 effect_file_load_update(void);
 s32 effect_request_load_poll(void);
-void effect_play(void);
+void effect_playback_start(void);
 void effect_request_play(void);
 void effect_playback_request_cancel(void);
 s32 effect_playback_phase_get(void);

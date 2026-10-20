@@ -30,7 +30,7 @@ typedef struct sprite_size {
     u8 width;
     u8 height;
 } sprite_size_t;
-typedef char unit_list_sprite_size_must_be_2[sizeof(sprite_size_t) == 2 ? 1 : -1];
+typedef char sprite_size_must_be_2[sizeof(sprite_size_t) == 2 ? 1 : -1];
 
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_unit_list_grid_stat_bar_script_top[12];

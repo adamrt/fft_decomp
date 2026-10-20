@@ -248,7 +248,7 @@ void unit_panel_banner_thread(void) {
         }
 
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
-        g_gfx_draw_offset_y = g_frame_arg != 0xF0 ? 0xF0 : 0;
+        g_gfx_draw_offset_y = g_menu_framebuffer_y != 0xF0 ? 0xF0 : 0;
 
         /* A slide advances every other frame through the down or up half of the curve,
          * then clears every flag but HIDDEN. */

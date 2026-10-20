@@ -1,10 +1,10 @@
 /* Evaluate scenario victory and defeat conditions against units, teams and the party.
  * Matching blocks choose the operation that finishes the current event. */
 
+#include "fft/battle_state.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
-#include "fft/state.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_runtime.h"

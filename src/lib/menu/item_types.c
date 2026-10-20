@@ -1,6 +1,7 @@
 /* Item types and the texture cells used for their equipment-menu icons. */
 
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "psx/types.h"
 

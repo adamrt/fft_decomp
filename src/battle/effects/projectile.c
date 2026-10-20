@@ -60,12 +60,13 @@ extern s32 g_projectile_source_id;
 extern SVECTOR g_projectile_origin;
 extern SVECTOR g_projectile_destination;
 extern s32 g_projectile_step_count;
+
+/* Last step's movement. */
 extern VECTOR g_projectile_step;
 
-/* last step's movement */
+/* Final projectile position. */
 extern SVECTOR g_projectile_position;
 
-/* final projectile position */
 extern s32 g_projectile_hit_unit_id;
 extern battle_map_tile_coordinates_t g_projectile_tile;
 extern s32 g_projectile_tile_flags;

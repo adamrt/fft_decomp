@@ -275,7 +275,7 @@ static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
         unit->birthday.zodiac = ZODIAC_SIGN_SERPENTARIUS;
     }
 
-    value = entd->bravery;
+    value = entd->brave;
     if (value >= 0x65) {
         value = (30 * rand()) / 0x8000 + 45;
     }
@@ -351,7 +351,7 @@ static void party_record_copy(unit_stats_t* unit, const party_unit_t* party) {
     mem_copy_byte_data_source_first(party->equipment, unit->equipment, UNIT_EQUIPMENT_SLOT_COUNT);
     unit->experience = party->experience;
     unit->level = party->level;
-    unit->original_brave = unit->brave = party->bravery;
+    unit->original_brave = unit->brave = party->brave;
     unit->original_faith = unit->faith = party->faith;
     mem_copy_byte_data_source_first(party->raw_stats, unit->raw_stats, sizeof(unit->raw_stats));
     for (i = 0; i < UNIT_UNLOCKED_JOB_BYTE_COUNT; i++) {
@@ -507,8 +507,8 @@ static s32 unlocked_job_choose(const unit_stats_t* unit) {
 static void job_data_copy(unit_stats_t* unit) {
     job_data_t* job;
     s32 i;
-    s32 flag_a;
-    s32 flag_b;
+    s32 immortal;
+    s32 formation_flags;
 
     if (unit->character_identity < CHARACTER_IDENTITY_GENERIC_FIRST) {
         unit->base_job_skillset = g_job_data_pointer[unit->character_identity].skillset;
@@ -531,15 +531,15 @@ static void job_data_copy(unit_stats_t* unit) {
     }
     mem_copy_byte_data_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
 
-    flag_a = unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL;
-    flag_b = unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
-    if (flag_a != 0 && flag_b != 0) {
+    immortal = unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL;
+    formation_flags = unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
+    if (immortal != 0 && formation_flags != 0) {
         u8* statuses = unit->status_sets.immunity;
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            if (flag_a != 0) {
+            if (immortal != 0) {
                 statuses[i] |= g_status_check_sets[STATUS_CHECK_SET_IMMORTAL_IMMUNITY][i];
             }
-            if (flag_b != 0) {
+            if (formation_flags != 0) {
                 statuses[i] |= g_status_check_sets[STATUS_CHECK_SET_FORMATION_IMMUNITY][i];
             }
         }

@@ -5,15 +5,84 @@
  * value display, pictures, tiles, camera and scrolling, map dots and routes, the menu stack levels and transitions it
  * pushes, and WORLD's world map menu. */
 
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/menu_list.h"
 #include "fft/menu_stack.h"
-#include "fft/window.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+/* map loop flags */
+/* Bits of g_world_map_flags, the 32-bit control flags of the WLDCORE world-map
+ * loop: frame state, what the frame leaves out, requests left by WORLD and
+ * OPENING, and the reason the loop ends. */
+typedef enum world_map_flags {
+    /* wldcore_entrypoint runs frames while set; map_state_init sets it, a level clears it to leave. */
+    WORLD_MAP_FLAG_RUNNING = 0x00000001,
+    /* Draw this frame with the 3D map; map_frame_draw clears it after drawing. */
+    WORLD_MAP_FLAG_DRAW_MAP = 0x00000002,
+    /* A level waits for a thread or a fade: world_map_pad_read publishes no pad input. */
+    WORLD_MAP_FLAG_INPUT_BLOCKED = 0x00000004,
+    /* Set by world_map_fade_start, cleared by world_map_fade_update one step before the fade ends. */
+    WORLD_MAP_FLAG_FADING = 0x00000008,
+    /* world_map_project_dots hides every map dot. */
+    WORLD_MAP_FLAG_HIDE_MAP_DOTS = 0x00000010,
+    /* world_map_routes_draw draws no route. */
+    WORLD_MAP_FLAG_HIDE_MAP_ROUTES = 0x00000020,
+    /* wldcore_entrypoint masks the display for the frame. */
+    WORLD_MAP_FLAG_DISPLAY_OFF = 0x00000040,
+    /* world_map_menus_update returns without running the menu frame; no code sets it. */
+    WORLD_MAP_FLAG_SKIP_MENU_FRAME = 0x00000080,
+    /* Set by brave_story_request_update: the return level opens the Brave Story screen. */
+    WORLD_MAP_FLAG_REQUEST_BRAVE_STORY = 0x00000100,
+    /* world_map_frame_draw does not load the scratch image into the display buffer. */
+    WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE = 0x00000200,
+    /* display_object_gs_list_draw draws nothing and world_map_pulse_dots returns. */
+    WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS = 0x00000400,
+    /* hud_value_draw draws nothing. */
+    WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE = 0x00000800,
+    /* calendar_date_draw draws nothing. */
+    WORLD_MAP_FLAG_HIDE_CALENDAR_DATE = 0x00001000,
+    /* location_label_draw draws no label; set while a level moves or covers the map view. */
+    WORLD_MAP_FLAG_HIDE_LOCATION_LABEL = 0x00002000,
+    /* WORLD's menu chose a map (script variable CURRENT_MAP): the return level restarts the core and travels there. */
+    WORLD_MAP_FLAG_REQUEST_DESTINATION = 0x00004000,
+    /* travel_step rolled an encounter: wldcore_entrypoint returns 1. */
+    WORLD_MAP_FLAG_RANDOM_BATTLE = 0x00008000,
+    /* Set after the card menu returns 1: wldcore_entrypoint restarts its loop instead of returning. */
+    WORLD_MAP_FLAG_RESTART = 0x00010000,
+    /* The unit-panel threads (8, 9 and 12) run: the menu frame draws their windows, not the formation menu. */
+    WORLD_MAP_FLAG_UNIT_PANEL_THREADS = 0x00020000,
+    /* A story event replays: wldcore_entrypoint returns 2 and the next entry reopens the story-event list. */
+    WORLD_MAP_FLAG_STORY_EVENT_REPLAY = 0x00040000,
+    /* Set by main_menu_update: the world entry opens the tutorial menu, which leaves through RETURN_TO_TITLE. */
+    WORLD_MAP_FLAG_TITLE_TUTORIAL = 0x00080000,
+    /* Set by tutorial_request_update: the return level opens the tutorial menu. */
+    WORLD_MAP_FLAG_REQUEST_TUTORIAL = 0x00100000,
+    /* A tutorial event plays: wldcore_entrypoint returns 2 with the music kept; the next entry reopens its list. */
+    WORLD_MAP_FLAG_TUTORIAL_EVENT = 0x00200000,
+    /* map_state_init sets the rumor, path, location and story-event variables; no code sets it. */
+    WORLD_MAP_FLAG_UNLOCK_ALL = 0x00400000,
+    /* Set by variable_list_request_update: the return level opens the variable list. */
+    WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST = 0x00800000,
+    /* Set by party_number_request_update: opens the debug Party number panel. */
+    WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER = 0x01000000,
+    /* The location menu chose a deep-dungeon battle: wldcore_entrypoint returns 4. */
+    WORLD_MAP_FLAG_DEEP_DUNGEON_BATTLE = 0x02000000,
+    /* Set by world_map_clear_screen_and_set_clip_rect; the return level then recaptures the world frame. */
+    WORLD_MAP_FLAG_SCREEN_CLEARED = 0x04000000,
+    /* Map dots stop pulsing and display_object_gs_animated_draw stops advancing frames. */
+    WORLD_MAP_FLAG_FREEZE_ANIMATION = 0x08000000,
+    /* wldcore_entrypoint returns 5: system_game_loop_run goes back to OPENING. */
+    WORLD_MAP_FLAG_RETURN_TO_TITLE = 0x10000000,
+    /* The world entry opens the Brave Story screen, which leaves through RETURN_TO_TITLE; no code sets it. */
+    WORLD_MAP_FLAG_TITLE_BRAVE_STORY = 0x20000000
+} world_map_flags_e;
+
+extern u32 g_world_map_flags; /* world_map_flags_e bits; cleared by save_data_tables_init */
 
 /* entry */
 /* g_system_frontend_world_result: why wldcore_entrypoint returned, which tells BATTLE.BIN what
@@ -36,8 +105,8 @@ typedef enum world_map_thread_slot {
 /* MAIN saves WLDCORE's return value here for BATTLE's setup. */
 extern world_map_result_e g_system_frontend_world_result;
 
-/* g_system_flags as backdrop_update last saw it (system_flags_e). */
-extern u32 g_world_map_previous_system_flags;
+/* g_world_map_flags as backdrop_update last saw it (world_map_flags_e). */
+extern u32 g_world_map_previous_flags;
 
 /* Run WLDCORE's world-map loop and return a world_map_result_e. */
 world_map_result_e wldcore_entrypoint(void);
@@ -85,7 +154,7 @@ void world_map_backdrop_mode_set(s32 capture);
 typedef enum world_map_fade_flag {
     WORLD_MAP_FADE_RUNNING = 0x01,
     WORLD_MAP_FADE_OUT = 0x02,         /* fades to black; stays set while the screen is dark */
-    WORLD_MAP_FADE_REDRAW_MAP = 0x04,  /* every fade step sets SYSTEM_FLAG_DRAW_MAP */
+    WORLD_MAP_FADE_REDRAW_MAP = 0x04,  /* every fade step sets WORLD_MAP_FLAG_DRAW_MAP */
     WORLD_MAP_FADE_BOX_VISIBLE = 0x08, /* the fill box is drawn without a running fade */
     WORLD_MAP_FADE_STOP_MUSIC = 0x10,  /* also fades the music out and unloads it */
     WORLD_MAP_FADE_START_MUSIC = 0x20  /* also loads MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP), fading it in */
@@ -205,7 +274,7 @@ extern world_map_zoom_t g_world_map_zoom;
 void world_map_marker_update(void);
 s32 world_map_pan_update(void);
 s32 world_map_pan_start(const point32_t* point, const SVECTOR* coordinates);
-s32 world_map_pan_bounds_check(const point32_t* point);
+s32 world_map_point_needs_pan(const point32_t* point);
 
 /* scrolling */
 /* The range of the map scroll position. */
@@ -312,7 +381,7 @@ void world_map_path_animation_draw(GsOT* ot);
 /* menu levels */
 /* Provisional: the WORLD_MENU level that closes the world map, pushed by world_map_menu_level_open.
  * map_menu_return_update is its only reader: delay counts down the frames the fade needs and pending latches
- * while SYSTEM_FLAG_SCREEN_CLEARED is up. */
+ * while WORLD_MAP_FLAG_SCREEN_CLEARED is up. */
 typedef struct world_map_menu_level {
     s32 delay;
     s32 pending; /* 0x04 */

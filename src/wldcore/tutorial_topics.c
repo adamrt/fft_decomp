@@ -3,6 +3,7 @@
  * topic list at the saved cursor. Scripted Formation and battle lessons use the
  * separate Tutorial lists and player. */
 
+#include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/menu_input.h"
 #include "fft/menu_stack.h"
@@ -78,10 +79,11 @@ void tutorial_block_topic_list_buttons(menu_stack_record_t* unused_level) {
  * brave_story_treasure_list_input_update with help message 0x108d. A confirmed
  * topic's value is passed to topic_open. */
 void tutorial_topic_list_input_update(menu_stack_record_t* level) {
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
+        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
-        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->panel.result != 0) {
             menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_TUTORIAL_TOPICS);
@@ -96,7 +98,7 @@ void tutorial_topic_list_input_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
         tutorial_block_topic_list_buttons(level);
         menu_stack_message_open(0x108D, 1);
@@ -105,7 +107,7 @@ void tutorial_topic_list_input_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     }
 }
 
@@ -149,10 +151,13 @@ static void topic_open(s32 topic) {
     g_text_window.text_substitutions[0] = -1;
     text_window_open(&g_text_window);
     depth = g_menu_stack_depth;
-    g_window_records[g_menu_stack_records[depth - 1].tutorial_menu.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[depth - 1].tutorial_menu.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[g_menu_stack_records[depth - 1].tutorial_menu.cursor_window].flags
+        |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[g_menu_stack_records[depth - 1].tutorial_menu.label_window].flags
+        |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth = depth + 1;
-    g_window_gs_image_records[g_menu_stack_records[depth - 1].tutorial_menu.rows_image].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[g_menu_stack_records[depth - 1].tutorial_menu.rows_image].flags
+        |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_TUTORIAL_TOPIC;
 }
 
@@ -163,16 +168,18 @@ static void topic_open(s32 topic) {
 void tutorial_wait_topic_then_pop(menu_stack_record_t* unused_level) {
     s32 depth;
 
-    if (!(g_window_gs_image_records[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)
+    if (!(g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)
         && text_window_update(&g_text_window) == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
         depth = g_menu_stack_depth;
-        g_window_gs_image_records[g_menu_stack_records[depth - 2].tutorial_menu.rows_image].flags
+        g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].tutorial_menu.rows_image].flags
             |= DISPLAY_OBJECT_POP_IN;
-        g_window_records[g_menu_stack_records[depth - 2].tutorial_menu.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[depth - 2].tutorial_menu.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[depth - 2].tutorial_menu.cursor_window].flags
+            &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[depth - 2].tutorial_menu.label_window].flags
+            &= ~DISPLAY_OBJECT_HIDDEN;
         g_menu_stack_depth = depth - 1;
-        g_window_gs_image_records[g_menu_stack_records[depth - 2].tutorial_menu.rows_image].flags
+        g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].tutorial_menu.rows_image].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
         tutorial_topic_list_open();
     }

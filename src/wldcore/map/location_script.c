@@ -391,7 +391,7 @@ static void location_script_opcode_24_focus_location(void) {
         index = entry;
         g_location_selected = index + 1;
     }
-    if (world_map_pan_bounds_check(&g_world_map_dots[index].render.position) != 0) {
+    if (world_map_point_needs_pan(&g_world_map_dots[index].render.position) != 0) {
         g_location_script_state.flags |= LOCATION_SCRIPT_ACTION_FOCUS_LOCATION;
     }
     g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_ACTION_REACHED;
@@ -406,7 +406,7 @@ static void location_script_opcode_25_check_ramza_brave_at_least(void) {
     ip = g_location_script_state.ip;
     val = g_location_script_state.data[ip];
     g_location_script_state.ip = ip + 1;
-    if (party->bravery < val) {
+    if (party->brave < val) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
@@ -436,7 +436,7 @@ static void location_script_opcode_26_check_ramza_brave_at_most(void) {
     ip = g_location_script_state.ip;
     val = g_location_script_state.data[ip];
     g_location_script_state.ip = ip + 1;
-    if (val < party->bravery) {
+    if (val < party->brave) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }

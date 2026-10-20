@@ -79,7 +79,7 @@ enum {
 };
 
 /* Commands of polygon_flags_dispatch. */
-typedef enum polygon_flags_dispatch {
+typedef enum battle_map_polygon_flag_command {
     BATTLE_MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,   /* copy LIT into LIT_ACTIVE on every polygon */
     BATTLE_MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,   /* clear LIT_ACTIVE everywhere */
     BATTLE_MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94 /* repaint the polygons without LIT in the ambient color */

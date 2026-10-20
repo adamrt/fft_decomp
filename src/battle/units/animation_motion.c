@@ -4,6 +4,7 @@
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_script.h"
@@ -12,7 +13,6 @@
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
@@ -104,9 +104,9 @@ static animation_distortion_handler_t g_distortion_handlers[ANIMATION_DISTORTION
  * The unit moves to the head of the runtime list, enters UNIT_FADE_OUT_FLASH,
  * loses its shadow and its float and depth offsets, and is drawn with additive
  * blending while its palette fades by (red, green, blue) from the last applied
- * color. `mode` is the amount battle_map_palette_modify steps the fade by, not a
- * color mode. fade_out_removal_update continues from there. */
-void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue) {
+ * color. `fade_step` is the amount battle_map_palette_modify steps the fade by.
+ * fade_out_removal_update continues from there. */
+void unit_fade_out_start(s32 runtime_id, s32 fade_step, s16 red, s16 green, s16 blue) {
     unit_runtime_t* unit = unit_runtime_get(runtime_id);
 
     if (unit != 0) {
@@ -115,7 +115,7 @@ void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue)
         unit->shadow_graphic_trigger = 0;
         unit->sprite_display_flags = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK)
             | (SPRITE_DISPLAY_BLEND_ADD | SPRITE_DISPLAY_SEMI_TRANSPARENT);
-        sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, mode, runtime_id, red, green, blue);
+        sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, fade_step, runtime_id, red, green, blue);
         unit->float_bob_offset = 0;
         unit->depth_height_offset = 0;
     }
@@ -268,14 +268,14 @@ static void distortion_toward_target_step(unit_runtime_t* unit, s32 allow_height
     SVECTOR tile_center;
     VECTOR velocity;
     s32 timer = unit->distortion_timer;
-    s32 target_z = unit->distortion_target;
+    s32 saved_target = unit->distortion_target;
     unit_runtime_t* target;
 
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
     case 0:
         if (unit->stats != 0) {
-            if (g_game_state == GAME_STATE_EVENT) {
+            if (g_battle_state == BATTLE_STATE_EVENT) {
                 velocity.vx = ((unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2)) * ONE) - unit->real.vx;
                 velocity.vz = ((unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2)) * ONE) - unit->real.vz;
                 velocity.vy = 0;
@@ -323,7 +323,7 @@ static void distortion_toward_target_step(unit_runtime_t* unit, s32 allow_height
     unit->velocity = velocity;
     unit_set_world_coords_from_real_coords(unit);
     unit->distortion_timer = timer;
-    unit->distortion_target = target_z;
+    unit->distortion_target = saved_target;
 }
 
 /* Moves a unit to the center of its map tile over distortion_timer frames.
@@ -335,7 +335,7 @@ static void distortion_to_own_tile_step(unit_runtime_t* unit, s32 allow_height_c
     SVECTOR tile_center;
     VECTOR velocity;
     s32 timer = unit->distortion_timer;
-    s32 target_z = unit->distortion_target;
+    s32 saved_target = unit->distortion_target;
 
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
@@ -366,7 +366,7 @@ static void distortion_to_own_tile_step(unit_runtime_t* unit, s32 allow_height_c
     unit->velocity = velocity;
     unit_set_world_coords_from_real_coords(unit);
     unit->distortion_timer = timer;
-    unit->distortion_target = target_z;
+    unit->distortion_target = saved_target;
 }
 
 /* Distortion animation 0x04: move toward the action target in equal steps,
@@ -400,9 +400,9 @@ static s32 distortion_to_own_tile_level_move(unit_runtime_t* unit) {
  * plus 24, one over 24. `out->vy` is the negated speed of the first leg; x and
  * y (stored in vz) cover their distances evenly over the returned frame count. */
 static s32 distortion_jump_arc_velocity_calculate(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
-    s32 to_z = to->vy;
-    s32 from_z = from->vy;
-    s32 height = from_z - to_z + 24;
+    s32 to_height = to->vy;
+    s32 from_height = from->vy;
+    s32 height = from_height - to_height + 24;
     s32 speed;
     s32 frames;
 
@@ -630,7 +630,7 @@ static s32 distortion_fall_to_target(unit_runtime_t* unit) {
         unit->shadow_graphic_trigger = 1;
         unit->distortion_phase++;
     case 1:
-        if (g_game_state == GAME_STATE_EVENT) {
+        if (g_battle_state == BATTLE_STATE_EVENT) {
             unit->strike.target_count = 0;
             x = unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
             unit->world_coords.vx = x;
@@ -738,7 +738,7 @@ static s32 teleport_arrival_start(unit_runtime_t* unit) {
 static void teleport_white_flash_start(unit_runtime_t* unit) {
     if (unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_FIRST_FORM
         || unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
-        effect_play();
+        effect_playback_start();
     }
     unit->sprite_display_flags = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK)
         | (SPRITE_DISPLAY_BLEND_ADD | SPRITE_DISPLAY_SEMI_TRANSPARENT);
@@ -757,7 +757,7 @@ static void teleport_fade_out_start(unit_runtime_t* unit) {
 
     if (unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_FIRST_FORM
         || unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
-        effect_play();
+        effect_playback_start();
     }
     tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
     sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
@@ -796,7 +796,7 @@ static s32 distortion_teleport(unit_runtime_t* unit) {
         }
         break;
     case ANIMATION_TELEPORT_PHASE_MOVE_TO_DESTINATION:
-        if (g_state_animation_continue_check == 0) {
+        if (g_battle_animation_wait_state == 0) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
             unit->map_layer = unit->movement.destination_layer;
@@ -827,7 +827,7 @@ static s32 distortion_teleport(unit_runtime_t* unit) {
         }
         break;
     case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_END:
-        if (g_state_animation_continue_check == 0) {
+        if (g_battle_animation_wait_state == 0) {
             unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
             unit->sprite_display_flags &= ~SPRITE_DISPLAY_SEMI_TRANSPARENT;
         }

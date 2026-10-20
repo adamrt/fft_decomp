@@ -1,5 +1,6 @@
 /* Proposition reports, participant rewards, discoveries and active-proposition recall menus. */
 
+#include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/menu.h"
@@ -135,7 +136,7 @@ static s32 job_category_get(s32 job_id) {
  * A recalled proposition (PROPOSITION_PROGRESS_RECALLED) clears the JP
  * and gil awards and reports a bad failure. Otherwise each participant's score
  * accumulates four proposition data tables (records 3..6) keyed on the
- * proposition's fields, the participant's job category and its bravery, faith
+ * proposition's fields, the participant's job category and its Brave, Faith
  * and level tiers; a total of 99 or more is a success, 59 or more a failure,
  * anything less a bad failure. A named preferred job then gives a 61 in 100
  * roll to promote the result to success. The target builds the row walk pointers
@@ -157,7 +158,7 @@ void proposition_success_determine(void) {
     participant_count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
     job_table_a = proposition_data_get(PROPOSITION_DATA_CATEGORY_JOB_SCORES);
     job_table_b = proposition_data_get(PROPOSITION_DATA_JOB_LIST_JOB_SCORES);
-    tier_table_a = proposition_data_get(PROPOSITION_DATA_BRAVERY_LEVEL_SCORES);
+    tier_table_a = proposition_data_get(PROPOSITION_DATA_BRAVE_LEVEL_SCORES);
     total = 0;
     tier_table_b = proposition_data_get(PROPOSITION_DATA_FAITH_SCORES);
 
@@ -182,7 +183,7 @@ void proposition_success_determine(void) {
         g_proposition_report.participant_scores[i]
             += job_table_b[(g_proposition_selected_row.job_list_index - 1) * 22 + job_category_get(unit->job_id)];
 
-        value = unit->bravery;
+        value = unit->brave;
         if (value != 0) {
             tier = (value - 1) / 20;
         } else {
@@ -686,11 +687,13 @@ void proposition_active_list_open(void) {
     previous = g_menu_stack_depth - 1;
     g_menu_stack_ot_offset = 9;
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    if ((g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN) != 0) {
-        g_window_records[g_menu_stack_records[previous].bar.cursor_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_records[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_window_gs_image_records[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
+    if ((g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags & DISPLAY_OBJECT_HIDDEN)
+        != 0) {
+        g_display_object_animated_pool[g_menu_stack_records[previous].bar.cursor_window].flags
+            &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[g_menu_stack_records[previous].bar.label_window].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_gs_image_pool[g_menu_stack_records[previous].bar.rows_image].flags |= DISPLAY_OBJECT_POP_IN;
     }
 
     g_menu_stack_records[g_menu_stack_depth].panel.result = 0;
@@ -725,10 +728,11 @@ void proposition_active_list_input_update(menu_stack_record_t* level) {
     u32 buttons;
     s32 unused[2]; /* 8-byte frame slot the target reserves */
 
-    if ((g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
+    if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
+        && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_stack_ot_offset = 1;
         g_menu_blocked_buttons = 0;
-        g_system_flags ^= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->panel.result != 0) {
             recall_open(level->panel.entries[g_window_panel_render_state.selected_index]);
@@ -745,7 +749,7 @@ void proposition_active_list_input_update(menu_stack_record_t* level) {
         /* Scheduling barrier: keeps the store ahead of the cursor argument. */
         __asm__("");
         menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS);
-        g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+        g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if (buttons & PSX_PAD_SELECT) {
         proposition_block_active_list_buttons(level);
@@ -760,7 +764,7 @@ void proposition_active_list_input_update(menu_stack_record_t* level) {
             /* Scheduling barrier: keeps the store ahead of the cursor argument. */
             __asm__("");
             menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS);
-            g_system_flags |= SYSTEM_FLAG_INPUT_BLOCKED;
+            g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
             thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         }
     }
@@ -778,46 +782,48 @@ static void recall_open(s32 proposition) {
 
     proposition_unpack_row(&g_proposition_selected_row, g_proposition_active[proposition].proposition_id);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.proposition = proposition;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.label_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
+    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].flags
+        |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.label_window].flags
+        |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
     thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_PROMPT, 0);
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.cursor_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CURSOR_IDLE;
-    g_window_records[index].priority = 8;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 
-    index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.frame_window = index;
-    g_window_records[index].sequence = WINDOW_ANIM_CHOICE_PANEL_HEADER;
-    g_window_records[index].priority = 8;
-    g_window_records[index].anim_counter = 0;
-    g_window_records[index].frame_index = 0;
+    g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CHOICE_PANEL_HEADER;
+    g_display_object_animated_pool[index].priority = 8;
+    g_display_object_animated_pool[index].anim_counter = 0;
+    g_display_object_animated_pool[index].frame_index = 0;
 
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice_render = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
     window_text_record_init(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
-    base = &g_window_gs_image_records[index].base;
+    base = &g_display_object_gs_image_pool[index].position;
     depth = g_menu_stack_depth;
-    g_window_gs_image_records[index].priority = 8;
+    g_display_object_gs_image_pool[index].priority = 8;
     base->x = 0x48;
     base->y = 0x20;
-    g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.cursor_window].position.x
-        = g_window_gs_image_records[index].base.x + 6;
-    g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.cursor_window].position.y
-        = g_window_gs_image_records[index].base.y + 0xE;
-    g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.x
-        = g_window_gs_image_records[index].base.x + 3;
-    g_window_records[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.y
-        = g_window_gs_image_records[index].base.y - 2;
+    g_display_object_animated_pool[g_menu_stack_records[depth].proposition_cancel_confirm.cursor_window].position.x
+        = g_display_object_gs_image_pool[index].position.x + 6;
+    g_display_object_animated_pool[g_menu_stack_records[depth].proposition_cancel_confirm.cursor_window].position.y
+        = g_display_object_gs_image_pool[index].position.y + 0xE;
+    g_display_object_animated_pool[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.x
+        = g_display_object_gs_image_pool[index].position.x + 3;
+    g_display_object_animated_pool[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.y
+        = g_display_object_gs_image_pool[index].position.y - 2;
     proposition_detail_panel_build(&g_menu_stack_records[depth].proposition_detail_panel, proposition, 0);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice = 0;
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.confirmed = 0;
@@ -853,7 +859,7 @@ void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 propo
     point32_t* base;
 
     panel_text = &g_proposition_selected_row.name_text;
-    index = window_append_record(g_window_render_object_queue, &g_window_render_object_count);
+    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
     panel->render_index = index;
     text_pixels_measure(
         &text_width, &text_rows, text_entry_find(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
@@ -887,9 +893,9 @@ void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 propo
             g_proposition_detail_image_buffer);
     }
     window_load_render_record_image(index, g_proposition_detail_image_buffer);
-    g_window_gs_image_records[index].priority = 8;
-    g_window_gs_image_records[index].flags |= DISPLAY_OBJECT_POP_IN;
-    base = &g_window_gs_image_records[index].base;
+    g_display_object_gs_image_pool[index].priority = 8;
+    g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
+    base = &g_display_object_gs_image_pool[index].position;
     base->x = -0x7A;
     base->y = -0x28;
 }
@@ -902,7 +908,7 @@ void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 propo
 void proposition_recall_update(menu_stack_record_t* level) {
     s32 choice;
 
-    if (g_window_gs_image_records[level->proposition_cancel_confirm.choice_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->proposition_cancel_confirm.choice_render].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
@@ -919,9 +925,9 @@ void proposition_recall_update(menu_stack_record_t* level) {
         /* Shared tail: the target keeps this copy and the other close paths
          * jump into it; duplicated copies cross-jump into the last one. */
     close:
-        g_window_record_count -= 2;
-        g_window_render_record_count -= 2;
-        g_window_render_object_count -= 4;
+        g_display_object_animated_count -= 2;
+        g_display_object_image_count -= 2;
+        g_display_object_queue_count -= 4;
         g_menu_stack_depth--;
         proposition_active_list_open();
         return;
@@ -930,8 +936,8 @@ void proposition_recall_update(menu_stack_record_t* level) {
     if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
         choice = level->proposition_cancel_confirm.choice ^ 1;
         level->proposition_cancel_confirm.choice = choice;
-        g_window_records[level->proposition_cancel_confirm.cursor_window].position.y
-            = g_window_gs_image_records[level->proposition_cancel_confirm.choice_render].base.y
+        g_display_object_animated_pool[level->proposition_cancel_confirm.cursor_window].position.y
+            = g_display_object_gs_image_pool[level->proposition_cancel_confirm.choice_render].position.y
             - -(choice * 0x10 + 0xE);
         sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     }
@@ -952,7 +958,7 @@ void proposition_recall_update(menu_stack_record_t* level) {
     thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_ACCEPTED, 0);
     level->proposition_cancel_confirm.confirmed = 1;
     g_proposition_active[level->proposition_cancel_confirm.proposition].flags |= PROPOSITION_PROGRESS_RECALLED;
-    g_window_records[level->proposition_cancel_confirm.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_records[level->proposition_cancel_confirm.frame_window].flags |= DISPLAY_OBJECT_HIDDEN;
-    g_window_gs_image_records[level->proposition_cancel_confirm.choice_render].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[level->proposition_cancel_confirm.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_animated_pool[level->proposition_cancel_confirm.frame_window].flags |= DISPLAY_OBJECT_HIDDEN;
+    g_display_object_gs_image_pool[level->proposition_cancel_confirm.choice_render].flags |= DISPLAY_OBJECT_HIDDEN;
 }

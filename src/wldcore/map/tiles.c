@@ -1,10 +1,10 @@
 /* The captured world-map frame and the tile atlas, projection, culling and clamped map scrolling. */
 
 #include "fft/calendar.h"
+#include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/location.h"
 #include "fft/system.h"
-#include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -29,7 +29,7 @@ typedef struct world_map_projected_tile {
 } world_map_projected_tile_t;
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 
-/* g_system_flags as saved by world_map_backdrop_mode_set (system_flags_e). */
+/* g_world_map_flags as saved by world_map_backdrop_mode_set (world_map_flags_e). */
 extern u32 g_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[];
 
@@ -50,7 +50,7 @@ static SVECTOR g_world_map_projection_rotation = { 0 };
  * menu frame over it; then it saves the system flags and hides the map and
  * root menu windows and everything the map pass draws (routes, display
  * objects, context value, date and marker). With `capture` 0 the two windows
- * are shown again and the saved flags come back with SYSTEM_FLAG_DRAW_MAP
+ * are shown again and the saved flags come back with WORLD_MAP_FLAG_DRAW_MAP
  * set, so the next frame redraws the map. */
 void world_map_backdrop_mode_set(s32 capture) {
     RECT display_rect;
@@ -62,9 +62,9 @@ void world_map_backdrop_mode_set(s32 capture) {
 
         map_window_index = g_world_map_window_index;
         menu_window_index = g_world_map_cursor_window;
-        g_window_records[map_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_system_flags = g_world_map_saved_system_flags | SYSTEM_FLAG_DRAW_MAP;
-        g_window_records[menu_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_display_object_animated_pool[map_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
+        g_world_map_flags = g_world_map_saved_system_flags | WORLD_MAP_FLAG_DRAW_MAP;
+        g_display_object_animated_pool[menu_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         return;
     }
 
@@ -85,10 +85,10 @@ void world_map_backdrop_mode_set(s32 capture) {
     hud_value_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_date_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_label_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    window_dispatch_gs_record_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index],
-        g_window_aux_render_object_queue, g_window_aux_render_object_count);
-    window_dispatch_gs_record_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index],
-        g_window_render_object_queue, g_window_render_object_count);
+    display_object_gs_list_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+        g_display_object_aux_queue_count);
+    display_object_gs_list_draw(
+        &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     world_map_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
@@ -105,23 +105,24 @@ void world_map_backdrop_mode_set(s32 capture) {
         s32 menu_window_index;
         u32 saved_system_flags;
 
-        saved_system_flags = g_system_flags;
+        saved_system_flags = g_world_map_flags;
         menu_window_index = g_world_map_cursor_window;
         map_window_index = g_world_map_window_index;
         g_world_map_saved_system_flags = saved_system_flags;
-        g_window_records[map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        g_system_flags = saved_system_flags | SYSTEM_FLAG_HIDE_MAP_ROUTES | SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS
-            | SYSTEM_FLAG_HIDE_CONTEXT_VALUE | SYSTEM_FLAG_HIDE_CALENDAR_DATE | SYSTEM_FLAG_HIDE_LOCATION_LABEL;
-        g_window_records[menu_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        window_dispatch_gs_record_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index],
-            g_window_render_object_queue, g_window_render_object_count);
+        g_display_object_animated_pool[map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        g_world_map_flags = saved_system_flags | WORLD_MAP_FLAG_HIDE_MAP_ROUTES | WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS
+            | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
+            | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
+        g_display_object_animated_pool[menu_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
+        display_object_gs_list_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue,
+            g_display_object_queue_count);
     }
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
 }
 
 /* World-map tile atlas setup, run once from subsystems_init between
- * window_record_pools_init() and
+ * display_object_pools_init() and
  * world_map_menu_state_init(). Because the allocation counters were just
  * reset, the two append calls here return records 0 and 1.
  *
@@ -189,7 +190,7 @@ void world_map_tile_atlas_init(void) {
     g_world_map_projection_rotation.vz = 0;
 
     descriptor = g_world_map_tile_descriptors;
-    if (!(g_system_flags & SYSTEM_FLAG_RESTART)) {
+    if (!(g_world_map_flags & WORLD_MAP_FLAG_RESTART)) {
         y = -192;
         k = 0;
         i = 0;
@@ -220,27 +221,27 @@ void world_map_tile_atlas_init(void) {
         }
     }
 
-    map_window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    map_window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_world_map_window_index = map_window_index;
-    g_window_records[map_window_index].sequence = WINDOW_ANIM_MAP_FRAME;
-    g_window_records[map_window_index].priority = 13;
-    wpos = &g_window_records[map_window_index].position;
-    rec = &g_window_records[map_window_index];
+    g_display_object_animated_pool[map_window_index].sequence = DISPLAY_OBJECT_ANIM_MAP_FRAME;
+    g_display_object_animated_pool[map_window_index].priority = 13;
+    wpos = &g_display_object_animated_pool[map_window_index].position;
+    rec = &g_display_object_animated_pool[map_window_index];
     wpos->x = 0;
     wpos->y = 8;
     rec->anim_counter = 0;
-    g_window_records[map_window_index].frame_index = 0;
+    g_display_object_animated_pool[map_window_index].frame_index = 0;
 
-    menu_window_index = window_append_animated_record(g_window_render_object_queue, &g_window_render_object_count);
+    menu_window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
     g_world_map_cursor_window = menu_window_index;
-    g_window_records[menu_window_index].sequence = WINDOW_ANIM_ROOT_MENU_FRAME;
-    g_window_records[menu_window_index].priority = 13;
-    wpos2 = &g_window_records[menu_window_index].position;
-    rec2 = &g_window_records[menu_window_index];
+    g_display_object_animated_pool[menu_window_index].sequence = DISPLAY_OBJECT_ANIM_ROOT_MENU_FRAME;
+    g_display_object_animated_pool[menu_window_index].priority = 13;
+    wpos2 = &g_display_object_animated_pool[menu_window_index].position;
+    rec2 = &g_display_object_animated_pool[menu_window_index];
     wpos2->x = -4;
     wpos2->y = 8;
     rec2->anim_counter = 0;
-    g_window_records[menu_window_index].frame_index = 0;
+    g_display_object_animated_pool[menu_window_index].frame_index = 0;
 
     world_map_project_tiles();
 }

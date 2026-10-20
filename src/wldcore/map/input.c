@@ -28,7 +28,7 @@ typedef char world_map_input_repeat_size_must_be_36[sizeof(world_map_input_repea
 static world_map_input_repeat_t g_world_map_input_repeat = { 0 };
 
 /* WLDCORE's per-frame pad poll: reads pad 0 and publishes the held buttons
- * and the newly pressed ones (both 0 while SYSTEM_FLAG_INPUT_BLOCKED is
+ * and the newly pressed ones (both 0 while WORLD_MAP_FLAG_INPUT_BLOCKED is
  * set). Exactly L1 + R1 + Select + Start restores the sound volumes and
  * resets the game. */
 void world_map_pad_read(void) {
@@ -39,7 +39,7 @@ void world_map_pad_read(void) {
     input = PadRead(0);
     g_input_polled_buttons = input;
 
-    if (g_system_flags & SYSTEM_FLAG_INPUT_BLOCKED) {
+    if (g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) {
         g_world_map_input_new_button_presses = 0;
         g_input_current_buttons = 0;
     } else {

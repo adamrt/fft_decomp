@@ -49,7 +49,7 @@ static u16 g_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BA
     BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW,
     BATTLE_MAP_WEATHER_COMMAND_SNOW, BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW };
 
-static void state_from_script_variables_load(void);
+static void camera_from_script_variables_load(void);
 static void pending_requests_process(void);
 
 /* While a tutorial scripts the input, hold wait_value in the tutorial wait
@@ -288,7 +288,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
         g_script_input_suppression_frames--;
     }
 
-    state_from_script_variables_load();
+    camera_from_script_variables_load();
     g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {
@@ -351,7 +351,7 @@ void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
 
 /* Advance the retained map-destruction wait state from 1 to 2.
  * This program's empty request hook does not advance it further. */
-void script_specialized_map_destroyed_set(void) {
+void script_map_destruction_signal(void) {
     if (g_battle_map_destruction_wait_state == 1) {
         g_battle_map_destruction_wait_state = g_battle_map_destruction_wait_state + 1;
     }
@@ -362,7 +362,7 @@ static void pending_requests_process(void) {
 }
 
 /* This program retains the camera-load hook as an empty function. */
-static void state_from_script_variables_load(void) {
+static void camera_from_script_variables_load(void) {
 }
 
 /* This program retains the camera-store hook as an empty function. */

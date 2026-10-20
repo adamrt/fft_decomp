@@ -4,6 +4,7 @@
 #include "fft/battle_map_light.h"
 #include "fft/battle_map_mesh.h"
 #include "fft/battle_map_palette.h"
+#include "fft/battle_state.h"
 #include "fft/brave_story.h"
 #include "fft/calendar.h"
 #include "fft/camera.h"
@@ -28,7 +29,6 @@
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/text.h"
@@ -262,7 +262,7 @@ restart_script:
                 script_variable_set(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT) {
-                script_specialized_map_destroyed_set();
+                script_map_destruction_signal();
                 if (g_battle_map_destruction_wait_state != 0) {
                     do {
                         thread_yield();
@@ -353,7 +353,7 @@ restart_script:
                 gfx_screen_overlay_fade_out();
                 g_game_options = g_game_options_saved;
                 script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
-                state_enter_close_battle_to_world(0x20);
+                battle_state_enter_close_battle_to_world(0x20);
             }
             if (g_menu_input_mode == MENU_INPUT_PLAYER) {
                 for (work_index = 2; work_index < 0xE; work_index++) {
@@ -455,7 +455,7 @@ restart_script:
             /* Windows are allocated in pairs; resume the first dialog with this selector that awaits text. */
             for (work_index = 0; work_index < 6; work_index += 2) {
                 operand_2 = g_menu_window_buffers[work_index].thread_id;
-                if ((g_menu_window_buffers[work_index].dialogue_selector == operand_1)
+                if ((g_menu_window_buffers[work_index].dialog_selector == operand_1)
                     && (thread_is_running_asm(operand_2) == 1)
                     && (g_thread_contexts[operand_2].task_id == THREAD_TASK_DIALOG_AWAIT_TEXT)) {
                     operand_1 = script_s16_read(

@@ -172,11 +172,11 @@ void unit_panel_equipment_ability_thread(void) {
         }
 
 #if defined(FFT_WORLD) || defined(FFT_EVENT_BUNIT)
-        /* A g_frame_arg (field y) of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0
+        /* A g_menu_framebuffer_y (field y) of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0
          * into the upper half. */
-        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
-        menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame, g_frame_arg, &thread->position);
+        g_gfx_draw_offset_y = g_menu_framebuffer_y != 0xf0 ? 0xf0 : 0;
+        menu_build_scaled_draw_area_packets(&screen->portrait, &g_unit_panel_character_status_draw_area_rect, frame,
+            g_menu_framebuffer_y, &thread->position);
 #else
         /* The other overlays derive the field offset from screen polarity. */
         field_y = g_gfx_screen_polarity * 0xf0;

@@ -4,6 +4,7 @@
 #include "fft/gfx.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -89,7 +90,7 @@ s32 equipment_update_item_actions(void) {
  * the other slots another. Returns
  * MENU_ITEM_LIST_STATE_SORT_ORDER while the sub-menu thread runs and
  * MENU_ITEM_LIST_STATE_ACTION once it closes. */
-s32 equipment_run_type_order_mode(void) {
+s32 equipment_type_order_update(void) {
     s16 names[8];
     s32 i;
     s32 picked;

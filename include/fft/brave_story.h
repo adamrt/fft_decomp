@@ -146,10 +146,10 @@ typedef char brave_story_propositions_level_size_must_be_60[sizeof(brave_story_p
  * three column-header windows over one render record listing each active proposition's name, participant count and
  * remaining days. */
 typedef struct brave_story_advancing_level {
-    s32 cursor_window; /* 0x00; WINDOW_ANIM_CURSOR_IDLE, moved to the cursor row */
-    s32 title_window;  /* 0x04; WINDOW_ANIM_PROPOSITION_TITLE_LABEL */
-    s32 count_window;  /* 0x08; WINDOW_ANIM_PROPOSITION_COUNT_LABEL */
-    s32 days_window;   /* 0x0c; WINDOW_ANIM_PROPOSITION_DAYS_LABEL */
+    s32 cursor_window; /* 0x00; DISPLAY_OBJECT_ANIM_CURSOR_IDLE, moved to the cursor row */
+    s32 title_window;  /* 0x04; DISPLAY_OBJECT_ANIM_PROPOSITION_TITLE_LABEL */
+    s32 count_window;  /* 0x08; DISPLAY_OBJECT_ANIM_PROPOSITION_COUNT_LABEL */
+    s32 days_window;   /* 0x0c; DISPLAY_OBJECT_ANIM_PROPOSITION_DAYS_LABEL */
     s32 render_index;  /* 0x10 */
     u8 _unused_14[8];
     s32 cursor; /* 0x1c; initial row from g_brave_story_advancing_saved_cursor */

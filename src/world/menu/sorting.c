@@ -3,8 +3,10 @@
 
 #include "fft/formation.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
+#include "fft/unit_panel.h"
 #include "fft/unit_party.h"
 #include "psx/libc.h"
 #include "psx/stddef.h"
@@ -202,7 +204,7 @@ void item_id_list_sort(s32 mode, s16* list) {
  * order entry: both must be multi-set variables for the target's register
  * choice (a1/v0) and load order.
  */
-void formation_sort_roster(s32 index) {
+void formation_roster_sort(s32 index) {
     s8 egg_indices[PARTY_ROSTER_SLOT_COUNT];
     s8* keys;
     s32 i;

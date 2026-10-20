@@ -84,7 +84,7 @@ s32 job_list_mastered_calculate(s32 index) {
  * caches the job's id, generic index and JP figures and returns
  * MENU_JOB_LIST_STEP_ABILITIES; otherwise the list script runs and the
  * result is MENU_JOB_LIST_STEP_JOBS. */
-s32 job_list_run(void) {
+s32 job_list_update(void) {
     s16 selected;
     s16 scroll;
     s32 mask;

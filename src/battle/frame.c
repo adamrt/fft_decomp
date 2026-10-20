@@ -1,5 +1,6 @@
 /* Battle and deployment input polling, display setup and frame submission. */
 
+#include "fft/battle_state.h"
 #include "fft/command.h"
 #include "fft/deploy.h"
 #include "fft/gfx.h"
@@ -7,7 +8,6 @@
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
-#include "fft/state.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
@@ -27,7 +27,7 @@ extern u32 g_input_previous_copy_3;
 /* Read pad 1 for the battle loop: derive the pressed and released buttons and the stable-frame
  * count, keeping last frame's values in the input copies. Triangle requests the status menu on a
  * turn the player does not control; Start+Select+L1+R1 resets the game. Always returns 1. */
-s32 state_update_controller_input(void) {
+s32 battle_input_update(void) {
     u32 pressed;
     u32 previous;
     u32 current;
@@ -61,7 +61,7 @@ s32 state_update_controller_input(void) {
     }
 
     g_input_previous_buttons = g_input_current_buttons;
-    if ((g_input_pressed_buttons & PSX_PAD_TRIANGLE) != 0 && g_game_state != GAME_STATE_EVENT) {
+    if ((g_input_pressed_buttons & PSX_PAD_TRIANGLE) != 0 && g_battle_state != BATTLE_STATE_EVENT) {
         unit = unit_source_get();
         if (g_menu_status_enabled != 0 && g_menu_status_requested == 0
             && (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0) {
@@ -78,8 +78,8 @@ s32 state_update_controller_input(void) {
 
 /* Read pad 1 for the deployment screen and derive the pressed and released
  * buttons; the reset button combination resets the game. Always returns 1, so the
- * -1 that map_load_run tests for does not occur. */
-s32 deploy_update_controller_input(void) {
+ * -1 that battle_entrypoint tests for does not occur. */
+s32 deploy_input_update(void) {
     u32 previous;
     u32 current = PadRead(1);
 
@@ -103,8 +103,8 @@ s32 deploy_update_controller_input(void) {
  * dithering is on and the automatic background clear is off. The fixed
  * 256 x 480 area is cleared to black and, when font printing is
  * enabled, debug_font_load loads the print font again.
- * map_load_run calls this with 256 x 240 and projection 0x200. */
-void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue) {
+ * battle_entrypoint calls this with 256 x 240 and projection 0x200. */
+void battle_display_init(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue) {
     RECT clear_rect = { 0, 0, 256, 480 };
     s32 second_y = height != 480 ? 240 : 0;
 
@@ -142,7 +142,7 @@ void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green
  * is 16 or more), with the timer counting down each frame, and g_system_min_vsync_interval
  * replaces it when larger. The test for a g_system_min_vsync_interval of 1 cannot succeed,
  * since the value it is compared with is at least 2. */
-s32 state_sync_frame(u32* ordering_table) {
+s32 battle_frame_submit(u32* ordering_table) {
     s32 wait;
     s32 sync_wait;
     s32 timer;
@@ -153,7 +153,7 @@ s32 state_sync_frame(u32* ordering_table) {
         sync_result = VSync(0);
     } else {
         DrawSync(0);
-        if (g_game_state == GAME_STATE_EFFECT || g_game_state == GAME_STATE_ACTION_EXECUTE) {
+        if (g_battle_state == BATTLE_STATE_EFFECT || g_battle_state == BATTLE_STATE_ACTION_EXECUTE) {
             timer = g_system_frame_pacing_timer;
             if (timer >= 0x10) {
                 wait = 4;
@@ -188,7 +188,7 @@ s32 state_sync_frame(u32* ordering_table) {
 /* End a frame of the deployment screen: wait for drawing and one vertical blank,
  * flip the display and draw environments and draw the ordering table. Returns
  * VSync's hsync count. */
-s32 deploy_sync_and_submit_frame(u32* ordering_table) {
+s32 deploy_frame_submit(u32* ordering_table) {
     s32 sync_result;
 
     DrawSync(0);

@@ -87,7 +87,7 @@ extern s32 g_menu_stack_ot_offset;
  * (list levels withhold every button, window levels dim their windows); resume undoes that when the level above
  * closes. */
 void menu_stack_reset(void);
-void menu_stack_dispatch_idle(void);
+void menu_stack_dispatch_update(void);
 void menu_stack_dispatch_suspend(void);
 void menu_stack_dispatch_resume(void);
 

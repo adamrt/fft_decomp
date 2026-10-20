@@ -182,7 +182,7 @@ s32 thread_slot_resolve(s32 requested_thread_id);
 s32 thread_next_slot_resolve(s32 requested_thread_id);
 
 /* The menu callers' running-flag accessor. WORLD links this separately from thread_is_running. */
-s32 menu_thread_running_check(s32 thread_id);
+s32 menu_thread_is_running(s32 thread_id);
 
 /* REQUIRE's own call through to thread_current_exit. */
 void thread_exit_current_wrapper(void);

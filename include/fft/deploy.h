@@ -17,9 +17,9 @@ extern s32 g_deploy_finished;
 extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
 
 s32 deploy_run_frame_and_check(u32* ot, u32 buttons);
-void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);
-s32 deploy_sync_and_submit_frame(u32* ordering_table);
-s32 deploy_update_controller_input(void);
+void battle_display_init(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);
+s32 deploy_frame_submit(u32* ordering_table);
+s32 deploy_input_update(void);
 void deploy_mark_finished(void);
 void deploy_sprite_load_init(void);
 s32 deploy_build_units(unit_deployment_coordinates_t* formation, s32 unused_1);

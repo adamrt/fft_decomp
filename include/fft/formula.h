@@ -229,7 +229,7 @@ s32 formula_accuracy_calculate_magic(void);
 s32 formula_accuracy_calculate_physical(void);
 s32 formula_accuracy_calculate_physical_status(void);
 
-/* elements and faith */
+/* elements and Faith */
 void formula_element_apply(void);
 void formula_element_apply_absorption(void);
 s32 formula_element_apply_absorption_and_status(void);
