@@ -26,7 +26,9 @@ void system_game_reset(void);
 void system_stack_pointer_store(u32* destination);
 void system_game_loop_stack_restore(u32* source);
 
-/* Empty (nop, jr ra): every main loop and every blocking wait calls it once per frame. */
+/* Empty (nop, jr ra): every main loop and every blocking wait calls it once per frame.
+ * No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/main.yaml (C cannot emit the leading nop); a port supplies an empty body. */
 void system_frame_stub(void);
 
 /* frame timing */
@@ -118,7 +120,9 @@ void boot_sceap_logo_show(void);
 void boot_squaresoft_logo_fade_in(void);
 void boot_squaresoft_logo_fade_out(void);
 
-/* 4 KB of zero words after the C start-up, run as no-ops; returns at once. */
+/* 4 KB of zero words after the C start-up, run as no-ops; returns at once.
+ * No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/main.yaml; a port supplies an empty body. */
 void system_zero_padding(void);
 
 /* Now Loading */

@@ -146,6 +146,9 @@ enum { CAMERA_FUSION_HOLD_SENTINEL = 0x2710 };
 void camera_fusion_thread(void);
 
 /* fixed-point math */
+/* No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/battle.yaml and target/world.yaml (a 64-round signed divide and a fixed-point multiply with overflow check); a
+ * port supplies both bodies. QUIRKS.md records their rounding and carry bugs. */
 s32 mul_div_s64(s32 a, s32 b, s32 c);
 s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 

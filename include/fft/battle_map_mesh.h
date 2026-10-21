@@ -259,6 +259,10 @@ typedef enum battle_map_effect_data_command {
 
 void battle_map_mesh_reset_render_state(void);
 void battle_map_mesh_weather_draw(MATRIX* camera_matrix);
+
+/* The four primitive queues have no C source: hand-written MIPS in the original; the GTE routines are kept as original
+ * bytes through the `regions:` rows of target/battle.yaml (each returns from its prologue and keeps its body after the
+ * jr ra); a port supplies the bodies. */
 void battle_map_queue_textured_quads(u32* otag, POLY_GT4* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_textured_triangles(u32* otag, POLY_GT3* prims, s32 yaw, s32* unused_count);
 void battle_map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_count);

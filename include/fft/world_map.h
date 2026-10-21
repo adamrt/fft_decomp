@@ -113,6 +113,9 @@ world_map_result_e wldcore_entrypoint(void);
 
 /* MAIN loads WLDCORE and, when requested, WORLD, then enters the map. */
 world_map_result_e overlay_world_run(s32 load_world);
+
+/* No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/wldcore.yaml (the switch assigns sp, which C cannot; the restore is its tail); a port supplies both bodies. */
 void world_map_switch_to_stack(void*);
 void world_map_restore_previous_stack(void);
 void world_map_menu_state_init(void);

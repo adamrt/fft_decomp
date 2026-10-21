@@ -826,6 +826,64 @@ written that way.
   the sound rows, which begin at `0x8009ec1c` for sound id 1: its row 0 is the
   eighth 32-bit entry of `g_tutorial_battle_event_ids`, whose eight entries
   `tutorial_battle_list_input_update` indexes.
+- Alias labels: the target binds a second name at the address of an object
+  that already has one, or inside it, so that a function reloads the value
+  instead of keeping it in a register. The byte-exact build needs both names;
+  a port must map every alias onto its owner, because two definitions would
+  silently stop sharing the storage. Same address, two names: `g_move_find_result_flags`
+  over the static `g_tile_pickup_result` (`0x8018f8a8`, BATTLE),
+  `g_action_work` and `g_action_work_view` (`0x801938c0`, BATTLE),
+  `g_screen_input_state` and `g_screen_new_buttons` (`0x801aed44`, WORLD),
+  `g_screen_input_frame_state` over the static `g_screen_input_frame_new`
+  (`0x801c0528`, WORLD), `g_location_script_flags` and `g_location_script_state`
+  (`0x800d4644`, WLDCORE), `g_sound_novel_countdown_frames` and
+  `g_sound_novel_countdown_frames_reset` (`0x800bb4f8`, WLDCORE),
+  `g_input_event` and `g_unit_list_input_event_state` (`0x801e3c44`, BUNIT),
+  `g_unit_list_help_nodes` and `g_unit_list_help_nodes_reload` (`0x801ec900`,
+  BUNIT), `g_unit_list_help_node_index` with its `_reload` and `_reload_2`
+  twins (`0x801ec904`, BUNIT), `g_ability_list_selected_ability_data` and
+  `g_ability_list_selected_ability_secondary_data` (`0x801f0050`, JOBSTTS),
+  `g_unit_panel_status_display_origin_x` over
+  `g_unit_panel_status_display_thread_params` (`0x801d007c`, REQUIRE),
+  `g_unit_panel_numbers_origin_x` over `g_unit_panel_numbers_thread_params`
+  (`0x801d0090`, REQUIRE), `g_unit_panel_character_status_origin_x` over
+  `g_unit_panel_character_status_frame_config` (`0x801d00a4`, REQUIRE), and
+  `g_gfx_poly_gt4_flat_pool` over `g_gfx_poly_gt4_buffers` (`0x8004c6c8`, MAIN).
+- Alias labels inside another object: `g_controller_selected_options` is
+  `g_controller_records` + 0x1c, read with a hand-computed 25-word stride
+  (OPEN); `g_ending_script_byte_offset` is `g_ending_script_state` + 0x2c
+  (OPEN); `g_item_secondary_data_ids` is `g_item_primary_data` + 4, stepped by
+  `sizeof(item_data_t)` (MAIN); `g_formation_sort_order` is the `formation`
+  member of `g_menu_sort_orders` (+12, MAIN); `g_world_map_fade_color` is
+  `g_world_map_fade` + 36, `g_world_map_pan_progress` and
+  `g_world_map_pan_target_x` are `g_world_map_pan` + 8 and + 28,
+  `g_sound_novel_state`, `g_sound_novel_state_flags`,
+  `g_sound_novel_counter_delta` and `g_sound_novel_history_0`, `_1`, `_2` are
+  `g_sound_novel_reading` + 8, + 12, + 18, + 32, + 34 and + 36,
+  `g_window_panel_scroll_offset` is `g_window_panel_render_state` + 0x3a,
+  `g_brave_story_saved_cursor` and `g_brave_story_propositions_saved_cursor`
+  are slots 9 and 13 of `g_menu_stack_cursor_states` (WLDCORE);
+  `g_screen_grid_cell_23_text_offset` and `g_screen_grid_cell_24_text_offset`
+  are `g_screen_grid_default_cells` + 372 and + 388 (WORLD);
+  `g_status_screen_numbers_panel_records` and `g_status_screen_frames` are
+  `g_unit_view_stats_panel_pages` + 1496 and + 3740 (BATTLE and WORLD);
+  `g_sprite_sheet_ids_by_vram_slot` is byte 1 of `g_sprite_sheet_slots[0]`
+  (BATTLE); `g_unit_list_help_node_23_help_base` is
+  `g_unit_list_help_nodes_unit_browse` + 372 (BUNIT);
+  `g_war_trophy_item_count` is byte 21 of the static
+  `g_war_trophy_search_result` (REQUIRE); `g_unit_editor_hp_max` is
+  `g_unit_editor_values` + 4 (DEBUGCHR).
+- Overlaps with no second label: the sprite primitive ring is
+  `g_unit_slot_states + UNIT_RUNTIME_SLOT_COUNT`, 10,240 bytes past the
+  declared array that no label names (`0x800bb704`, BATTLE);
+  `g_world_map_projection_view` is one 40-byte record in `world_map.h` but two
+  statics (`g_world_map_projection_scale`, `g_world_map_projection_rotation`)
+  plus the origin label in `src/wldcore/map/tiles.c`, rebuilt with a negative
+  `offsetof`; `origin_targetable_mask_build` reads
+  `g_origin_range_row_masks[8..15]` on purpose into the following static
+  `g_status_priority_weights` (`src/battle/ai/evaluation.c`);
+  `g_system_work_buffer_0` is an unsized `u8[]` that OPEN views as `u32*`,
+  `s32*` and `u16*`.
 
 ## Duplicated code
 

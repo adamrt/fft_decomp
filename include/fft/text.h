@@ -275,6 +275,10 @@ extern glyph_blit_t g_text_glyph_source;
 extern glyph_blit_t g_text_glyph_dest;
 
 void menu_set_text_origin(s32 x, s32 y);
+
+/* No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/battle.yaml and target/world.yaml; a port supplies a body. menu_clear_render_buffer is a word zero-fill; the
+ * two glyph routines blit through the scratchpad frame. */
 void menu_clear_render_buffer(void* buffer, u32 bytes);
 void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
 void text_set_blit_destination(s16 destination_x, s16 destination_y);

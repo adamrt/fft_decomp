@@ -203,7 +203,9 @@ s32 thread_is_running_asm(s32 thread_id);
 
 /* scheduling */
 /* Yield to the next active context in the resident scene scheduler.
- * BATTLE scans 16 slots; WORLD scans 17. Each keeps its own frame hook. */
+ * BATTLE scans 16 slots; WORLD scans 17. Each keeps its own frame hook.
+ * No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/battle.yaml and target/world.yaml (a context switch through k0/k1/gp/sp/fp); a port supplies a body. */
 void thread_yield(void);
 void thread_frames_wait(s32 count);
 void thread_inactive_wait(s32 thread_id);
@@ -225,7 +227,10 @@ void* thread_current_global_pointer_get(void);
 /* Main-stack callback dispatch, bound to the resident BATTLE or WORLD scheduler.
  * It forwards a0-a3 unchanged and switches to thread 0's stack when necessary;
  * arguments beyond those registers are not copied across the stack switch.
- * The argument list stays unspecified because callback signatures differ. */
+ * The argument list stays unspecified because callback signatures differ.
+ * No C source: hand-written MIPS in the original, kept as original bytes through the `regions:` rows of
+ * target/battle.yaml and target/world.yaml (the dispatcher changes sp and saves ra globally); a port supplies a body.
+ */
 extern void (*g_thread_call_target)(void);
 s32 thread_call_on_main_stack();
 
