@@ -1,0 +1,115 @@
+#!/bin/sh
+# Show everything known about one global or function name:
+#   - where src/ and include/ declare, define and use it
+#   - its address in each program (target/*.yaml)
+#   - other names bound to the same address in that program, and where they are used
+#   - the labels just before and after it, with byte offsets, to spot a name
+#     that points inside another variable
+#   - the unit whose data/bss rows own those bytes, if any
+#
+#   tools/lookup g_name
+set -eu
+
+[ $# -eq 1 ] || { echo "usage: tools/lookup name" >&2; exit 2; }
+name=$1
+printf '%s\n' "$name" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$' || { echo "tools/lookup: not an identifier: $name" >&2; exit 2; }
+cd "$(dirname "$0")/.."
+
+uses() {
+    # Files that spell $1, with the declaring or defining lines first.
+    grep -rnw --include='*.c' --include='*.h' --include='*.s' -e "$1" src include 2>/dev/null |
+        awk -F: -v n="$1" '
+            { file=$1; text=$0; sub(/^[^:]*:[^:]*:/, "", text) }
+            text ~ "^(extern|static|const|[A-Za-z_][A-Za-z0-9_ *]*[ *])" n "[ \t]*[[;=(]" && text !~ /^[ \t]/ {
+                print "    " $1 ":" $2 ": " text; next }
+            { count[file]++ }
+            END { for (f in count) printf "    %s (%d use%s)\n", f, count[f], count[f] == 1 ? "" : "s" }' |
+        sort
+}
+
+echo "== $name in the source"
+out=$(uses "$name")
+if [ -n "$out" ]; then printf '%s\n' "$out"; else echo "    not spelled anywhere in src/ or include/"; fi
+
+awk -v want="$name" '
+    function hex(s,    i, c, v) {
+        v = 0
+        for (i = 3; i <= length(s); i++) { c = index("0123456789abcdef", substr(s, i, 1)) - 1; v = v * 16 + c }
+        return v
+    }
+    /^module: / { module = $2 }
+    /^[a-z_]+:/ { section = $1 }
+    # Program-level labels: data rows without a function scope.
+    section == "data:" && /^  - \{addr: / && !/function:/ {
+        match($0, /addr: 0x[0-9a-f]+/); a = substr($0, RSTART + 6, RLENGTH - 6)
+        match($0, /name: [A-Za-z0-9_]+/); n = substr($0, RSTART + 6, RLENGTH - 6)
+        labels[module, ++count[module]] = a " " n
+    }
+    section == "functions:" && $0 ~ ("name: " want ",") {
+        match($0, /addr: 0x[0-9a-f]+/); fa = substr($0, RSTART + 6, RLENGTH - 6)
+        match($0, /size: [0-9]+/); fs = substr($0, RSTART + 6, RLENGTH - 6)
+        print "function " module " " fa " " fs
+    }
+    # Owned bytes: unit rows with data:/bss: ranges.
+    section == "units:" && /^  - \{name: / {
+        match($0, /name: [a-z0-9_]+/); u = substr($0, RSTART + 6, RLENGTH - 6)
+        match($0, /source: [^,}]+/); src = substr($0, RSTART + 8, RLENGTH - 8)
+        rest = $0
+        while (match(rest, /(data|bss): \[[^]]*\]/)) {
+            block = substr(rest, RSTART, RLENGTH); kind = substr(block, 1, index(block, ":") - 1)
+            rest = substr(rest, RSTART + RLENGTH)
+            b = block
+            while (match(b, /addr: 0x[0-9a-f]+, size: [0-9]+/)) {
+                row = substr(b, RSTART, RLENGTH); b = substr(b, RSTART + RLENGTH)
+                split(row, f, /[ ,]+/)
+                owned[module, ++owns[module]] = f[2] " " f[4] " " kind " " u " " src
+            }
+        }
+    }
+    END {
+        for (m in count) {
+            for (i = 1; i <= count[m]; i++) {
+                split(labels[m, i], p, " ")
+                if (p[2] != want) continue
+                at = hex(p[1])
+                print "label " m " " p[1]
+                for (j = 1; j <= count[m]; j++) {
+                    split(labels[m, j], q, " ")
+                    d = hex(q[1]) - at
+                    if (q[2] == want) continue
+                    if (d == 0) print "same " m " " q[2]
+                    else if (d >= -64 && d <= 64) print "near " m " " d " " q[2]
+                }
+                for (j = 1; j <= owns[m]; j++) {
+                    split(owned[m, j], o, " ")
+                    if (at >= hex(o[1]) && at < hex(o[1]) + o[2]) print "owner " m " " o[4] " " o[5] " " o[3] " " o[1] " " o[2]
+                }
+            }
+        }
+    }' target/*.yaml | sort -k1,1 -k2,2 -k3,3n > "${TMPDIR:-/tmp}/lookup.$$"
+
+if [ ! -s "${TMPDIR:-/tmp}/lookup.$$" ]; then
+    echo
+    echo "== $name is not bound in target/*.yaml"
+    rm -f "${TMPDIR:-/tmp}/lookup.$$"
+    exit 0
+fi
+
+for program in $(awk '{print $2}' "${TMPDIR:-/tmp}/lookup.$$" | sort -u); do
+    echo
+    echo "== $program"
+    awk -v p="$program" '$2 == p && $1 == "function" { print "    function at " $3 ", " $4 " bytes" }
+                         $2 == p && $1 == "label" { print "    label at " $3 }
+                         $2 == p && $1 == "owner" { print "    bytes owned by unit " $3 " (" $4 "), " $5 " row at " $6 ", " $7 " bytes" }' "${TMPDIR:-/tmp}/lookup.$$"
+    if ! awk -v p="$program" '$2 == p && $1 == "owner" { found = 1 } END { exit !found }' "${TMPDIR:-/tmp}/lookup.$$" &&
+        awk -v p="$program" '$2 == p && $1 == "label" { found = 1 } END { exit !found }' "${TMPDIR:-/tmp}/lookup.$$"; then
+        echo "    no unit owns these bytes: the name is only an address label"
+    fi
+    for other in $(awk -v p="$program" '$2 == p && $1 == "same" { print $3 }' "${TMPDIR:-/tmp}/lookup.$$"); do
+        echo "    SAME ADDRESS: $other"
+        out=$(uses "$other")
+        if [ -n "$out" ]; then printf '%s\n' "$out" | sed 's/^/    /'; else echo "        not spelled in src/ or include/"; fi
+    done
+    awk -v p="$program" '$2 == p && $1 == "near" { printf "    nearby: %+d bytes  %s\n", $3, $4 }' "${TMPDIR:-/tmp}/lookup.$$"
+done
+rm -f "${TMPDIR:-/tmp}/lookup.$$"

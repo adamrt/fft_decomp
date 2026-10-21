@@ -210,7 +210,7 @@ type inventoryRecord struct {
 	StackSize    int    `json:"stack_size,omitempty"`
 }
 
-const usage = "usage: tools build [module|disc]|check [--module=M]|diff [--module=M] FUNC|library-diff --name=N --source=S --addr=A --size=B [--module=M] [--profile=P]|permute [--module=M] [--duration=S] [--jobs=N] FUNC|checksums|check-config|config-fmt|declarations ...|share-audit [--module=M] [--min-bytes=N] [--prefix=P]|units [--module=M] [--min-confidence=L] [--min-score=N] [--evidence=required|strong] [--max-owners=N] [--out=D]|placement [--module=M] [--min-score=N] [--out=D]|unit-check --spec=S [--module=M] [--merge]|trial --module=M --entry=E --source=S [--symbol=F] [--subst OLD=NEW]... [--define VARIANT_X=N]... | trial --batch=FILE | trial --twins=ID[,ID]...|twins [--module=M] [--min-bytes=N] [--out=D]|symbols <action> ...|compile-commands [--cc=C] [--directory=D]|decl-check|extract"
+const usage = "usage: tools build [module|disc]|check [--module=M]|diff [--module=M] FUNC|library-diff --name=N --source=S --addr=A --size=B [--module=M] [--profile=P]|permute [--module=M] [--duration=S] [--jobs=N] FUNC|checksums|check-config|config-fmt|declarations ...|share-audit [--module=M] [--min-bytes=N] [--prefix=P]|units [--module=M] [--min-confidence=L] [--min-score=N] [--evidence=required|strong] [--max-owners=N] [--out=D]|placement [--module=M] [--min-score=N] [--out=D]|unit-check --spec=S [--module=M] [--merge]|trial --module=M --entry=E --source=S [--symbol=F] [--subst OLD=NEW]... [--define VARIANT_X=N]... | trial --batch=FILE | trial --twins=ID[,ID]...|twins [--module=M] [--min-bytes=N] [--out=D]|static [--dry-run] [--size N] [--no-note] NAME|symbols <action> ...|compile-commands [--cc=C] [--directory=D]|decl-check|extract"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -229,6 +229,7 @@ func main() {
 		"placement":              true,
 		"unit-check":             true,
 		"trial":                  true,
+		"static":                 true,
 		"twins":                  true,
 		"compile-permuter-input": true,
 		"compile-commands":       true,
@@ -271,6 +272,8 @@ func main() {
 		err = p.unitCheckCommand(os.Args[2:])
 	case "trial":
 		err = p.trialCommand(os.Args[2:])
+	case "static":
+		err = p.staticCommand(os.Args[2:])
 	case "twins":
 		err = p.twinsCommand(os.Args[2:])
 	case "extract":

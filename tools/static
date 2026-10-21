@@ -1,0 +1,53 @@
+#!/bin/sh
+# Turn a file-private extern global into a static its file owns, or explain
+# why it cannot be one and what it is instead.
+#
+#   tools/static g_name              apply; undone if a check fails
+#   tools/static -n g_name           report only
+#   tools/static --size 12 g_name    give the size when it cannot be worked out
+#   tools/static --no-note g_name    do not add a `Not static:` comment
+#
+# The checks and edits are `tools static` (tools/static_global.go). This
+# wrapper runs it in the build container, then make fmt, make check for each
+# program and make check-config on the host, and restores the files if any of
+# those fail. When the name cannot be static, a one-line `/* Not static: ... */`
+# comment goes above its extern so nobody has to research it again.
+set -eu
+cd "$(dirname "$0")/.."
+
+args=
+for arg in "$@"; do
+    case $arg in
+    -n) args="$args --dry-run" ;;
+    *) args="$args $arg" ;;
+    esac
+done
+[ -n "$args" ] || { echo "usage: tools/static [-n] [--size N] [--no-note] name" >&2; exit 2; }
+name=$(printf '%s\n' $args | tail -1)
+
+log=$(mktemp)
+trap 'rm -f "$log"' EXIT
+make -s static ARGS="$args" | tee "$log"
+
+note=$(sed -n 's/^static-note: //p' "$log")
+if [ -n "$note" ]; then
+    make -s fmt FILES="$note"
+fi
+grep -q '^static-applied: ' "$log" || exit 0
+
+source=$(sed -n 's/^static-source: //p' "$log")
+modules=$(sed -n 's/^static-modules: //p' "$log")
+restore() {
+    echo "tools/static: $1 failed; putting the files back" >&2
+    make -s static ARGS="--restore --failed $name" | tee "$log"
+    note=$(sed -n 's/^static-note: //p' "$log")
+    [ -z "$note" ] || make -s fmt FILES="$note"
+    exit 1
+}
+make -s fmt FILES="$source" || restore "make fmt"
+for module in $modules; do
+    make -s check MODULE="$module" || restore "make check MODULE=$module"
+done
+make -s check-config || restore "make check-config"
+rm -rf build/static-backup
+echo "tools/static: done; $name is now static in $source"

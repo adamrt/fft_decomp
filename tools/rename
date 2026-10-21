@@ -1,0 +1,52 @@
+#!/bin/sh
+# Rename a function or global everywhere: sources, headers, target/*.yaml and
+# the backticked names in QUIRKS.md and ARCHAEOLOGY.md, then run make fmt and
+# make check.
+#
+#   tools/rename old_name new_name
+#   tools/rename -n old_name new_name    preview only
+#
+# Whether the name is a function or a global comes from target/*.yaml. Other
+# names (types, enum constants, macros, unlabeled statics) are not in target/;
+# rename those in an editor.
+set -eu
+
+usage() {
+    echo "usage: tools/rename [-n] old_name new_name" >&2
+    exit 2
+}
+
+dry_run=
+if [ "${1:-}" = "-n" ]; then
+    dry_run=--dry-run
+    shift
+fi
+[ $# -eq 2 ] || usage
+old=$1
+new=$2
+for name in "$old" "$new"; do
+    printf '%s\n' "$name" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$' || {
+        echo "tools/rename: not an identifier: $name" >&2
+        exit 2
+    }
+done
+
+cd "$(dirname "$0")/.."
+
+if grep -Eq "size: [0-9]+, name: $old,|source_symbol: $old\}" target/*.yaml; then
+    action=rename-function
+    kind=function
+elif grep -Eq "name: $old[,}]" target/*.yaml; then
+    action=rename-global
+    kind=global
+else
+    echo "tools/rename: $old is not a function or global in target/; rename it in an editor" >&2
+    exit 1
+fi
+
+echo "tools/rename: $kind $old -> $new"
+make -s symbols ACTION="$action" ARGS="--old $old --new $new $dry_run"
+[ -n "$dry_run" ] && exit 0
+
+make -s fmt
+make -s check

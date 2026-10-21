@@ -138,6 +138,10 @@ placement: image ## Report module-folder functions that link order places in a s
 twins: image ## Group byte-equivalent functions across modules under consistent renames into build/analysis/twins (MODULE=x, ARGS="...")
 	@$(TOOLS) twins $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
+.PHONY: static
+static: image ## Make a file-private extern global static, or explain why not (ARGS="[--dry-run] NAME"; tools/static wraps it with fmt and check)
+	@$(TOOLS) static $(ARGS)
+
 .PHONY: symbols
 symbols: image ## Symbol edits: ACTION=rename-function|rename-global ARGS="--old A --new B"; ACTION=unify ARGS="--new N --header fft/x.h OLD..."; ACTION=share ARGS="--to src/x/n.c MODULE:ENTRY..."; ACTION=move ARGS="--dir src/x MODULE:ENTRY..."; ACTION=unit ARGS="--name N --source src/x/N.c MODULE:ENTRY..." (members may differ per module and absorb existing units); ACTION=rename-unit ARGS="--unit OLD --name NEW"; ACTION=split ARGS="--unit N"
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }
