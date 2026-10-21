@@ -68,7 +68,7 @@ functions:
   - {addr: 0x80010a30, size: 160, name: __SN_ENTRY_POINT, hash: 179da0ce7d5e763f, source: src/platform/psyq/crt/__SN_ENTRY_POINT.c}
   - {addr: 0x80010ad0, size: 112, name: __main, hash: 1dec58075cb55f11, source: src/platform/psyq/crt/__main.c}
   - {addr: 0x80010b40, size: 104, name: __do_global_dtors, hash: 30e458972df14eda, source: src/platform/psyq/crt/__do_global_dtors.c}
-  - {addr: 0x80011bb0, size: 16, name: system_stack_pointer_store, hash: 972f7e917252ee42, source: src/main/stack_save.c}
+  - {addr: 0x80011bb0, size: 16, name: system_stack_pointer_store, hash: 972f7e917252ee42, source: src/main/stack_save.s, asm: "Stores sp for system_game_loop_stack_restore; ordinary C cannot read sp."}
   - {addr: 0x80011bc0, size: 16, name: system_game_loop_stack_restore, hash: 8b9c9cab30efada8, source: src/main/stack_restore.s, asm: "Stack-replacing ABI tail transfer to system_game_loop_run; ordinary C cannot assign sp."}
   - {addr: 0x80011bd0, size: 36, name: file_read_request_quiet, hash: 323354187cbfd5ba, unit: file_requests}
   - {addr: 0x80011bf4, size: 484, name: file_read_request, hash: 2289317868ab7dd4, unit: file_requests}
