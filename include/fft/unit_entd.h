@@ -53,10 +53,6 @@ enum {
  * persistent party_unit_t record nor a runtime unit_stats_t record. The
  * current-ENTD pointer g_encounter_current_unit selects one entry, not an
  * encounter.
- *
- * Names below are established by target SCUS initialization routines.
- * The remaining bytes intentionally retain neutral names until their runtime
- * consumers are matched.
  */
 typedef struct entd_unit {
     u8 sprite_set;  /* 0x00 */

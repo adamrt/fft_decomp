@@ -113,7 +113,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `unit_view_display_action_preview`: a skipped
   preview leaves `g_unit_view_preview_target_action` null, and its
   `attack_accuracy` is read (from kernel RAM) before the null test.
-- `formation_rebuild_unit_list`: the Soldier Office (shop
+- `formation_lists_rebuild`: the Soldier Office (shop
   0x65) lists only monsters, yet `formation_menu_state_init` stages unit
   0 even when that list is empty; with no earlier list since WORLD loaded, the
   pointer is 0, so the "restore HP/MP" stores copy kernel RAM 0x10/0x16 to
@@ -231,7 +231,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   location variable. The fur shop and soldier office pass their own ids.
 - `proposition_result_update` clears the in-progress bit with
   `& 0xFFFD` on an `s32`, which also drops the variable's high half.
-- OPENING's runtime flags 8, 0x20000 and 0x80000 are tested and never set.
+- OPEN's runtime flags 8, 0x20000 and 0x80000 are tested and never set.
 - Suzuki driver: music status bits 0x20 and 0x2000, channel flag 0x10 and
   driver flag 0x2000 are tested and never set; channel flags 0x80 and 0x4000
   and voice-attribute bits 0x7000 are set and never tested;
@@ -424,7 +424,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   REQUIRE):
   the round-to-nearest step of the sprite scale adds 1, not `ONE`, to the 4.12
   product before dividing, so it only rounds up a remainder of `ONE` - 1.
-- `state_handle_open_sp2_files` frees its 0x8000-byte buffer when
+- `battle_state_open_sp2_files_update` frees its 0x8000-byte buffer when
   `sprite_sp2_file_open` returns 0, which means the read has started, and
   keeps it on 1 (loader busy). The next frame allocates again and has its
   second request refused, so the file arrives in the kept block only because
@@ -467,8 +467,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `move_step_update_walk_to_edge` adds the destination tile's
   water lift to the current edge height rather than to the destination's, so a
   step up onto deep water can pass the height test as a plain walk.
-- `state_handle_change_map_jumping_in` sends event result 9 to
-  BATTLE and 10 to WORLD, the reverse of `state_handle_event`, and
+- `battle_state_change_map_jumping_in_update` sends event result 9 to
+  BATTLE and 10 to WORLD, the reverse of `battle_state_event_update`, and
   ignores results 11 (reset) and 19 (ending).
 - `range_unit_panels_mark` is meant to mark the panels
   under allied or enemy units, but its loop over the 21 slots never advances
@@ -523,10 +523,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `SPRITE_SHEET_ID_BOY` (74);
   `proposition_day_advance` caps waiting days above 32, and
   its only writer, `proposition_result_update`, stores 32 or 16;
-  `state_sync_frame` zeroes a `g_system_min_vsync_interval` of 1
+  `battle_frame_submit` zeroes a `g_system_min_vsync_interval` of 1
   under `wait < g_system_min_vsync_interval` with `wait` at least 2;
   `map_load_run` loops until
-  `deploy_update_controller_input` returns -1, and it always
+  `deploy_input_update` returns -1, and it always
   returns 1; the first `switch` of `move_step_apply_velocity`
   repeats the layer test that the statement before it has just made false;
   `turn_status_flags_calculate` cannot report Sleep, whose
@@ -594,7 +594,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   point 0x120 over the ground, but cover it from the unit's current height:
   a unit on ground h units up ends 0x120 + h above it. The second function's
   early exit treats the same value as an absolute altitude.
-- `state_handle_confirm_action` stores answer 7 with a unit on the
+- `battle_state_confirm_action_update` stores answer 7 with a unit on the
   cursor tile as the action's `targeting_type`, which otherwise holds
   `TARGET_TYPE_TILE` (5) or `_UNIT` (6): readers that test for UNIT
   then aim at the stored tile, the two that test for TILE at the unit. The
@@ -654,10 +654,10 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   track in `tracks[n - 1]`. The novel always uses slot 2, so the store hits
   `current_slot` (zeroed next) and `tracks[1]` keeps the unloaded id: a later
   queued play of that track switches to the empty slot without loading it.
-- `window_gs_animated_record_draw`: a part with its own palette gets
+- `display_object_gs_animated_draw`: a part with its own palette gets
   CLUT x `(clut_x + (word & 0xff0000)) >> 12`, shifting the cel's CLUT x
   origin out with the palette field; OPEN's
-  `window_draw_gpu_animated_record` adds the origin after the shift. All
+  `gpu_animated_draw` (static in src/open/display_objects.c) adds the origin after the shift. All
   141 WLDCORE cels have CLUT x 0, so nothing shows.
 - `ramza_slot_find` returns 16 (`PARTY_MEMBER_SLOT_COUNT`) when
   no formation slot holds Ramza, and the four MCBrave/MCFaith opcodes
@@ -901,12 +901,12 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `unit_add_event_offset_by_runtime_id_unused` have no caller, as does
   WORLD's unused next-event entry.
 - Overlays call both the resident `thread_is_running` and local
-  `menu_thread_running_check` entries. Keep those callees distinct even though
+  `menu_thread_is_running` entries. Keep those callees distinct even though
   their running-flag reads are identical.
 - Overlays share load addresses, so an address match is not an identity
   match. Compare bytes: REQUIRE and EQUIP both have code at `0x801c2dcc`, and
   the two routines differ.
-- `unit_panel_numbers_polarity_thread` (ATTACK, REQUIRE) points both slot branches
+- `unit_panel_numbers_thread` (ATTACK, REQUIRE) points both slot branches
   at `g_unit_panel_editor_numeric_state`, where `unit_panel_numbers_thread`
   gives the preview slot `g_unit_panel_editor_numeric_state_b`. Both overlays start it
   only in `THREAD_SCREEN_SLOT_NUMERIC_PANEL`, so the shared branch never runs.
@@ -915,7 +915,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 
 - `save_image_restore` skips a saved Unit List order if any of its first 11 keys is 11, and skips a saved Formation order if any of its first seven keys is 11. It preserves the live order, writes its final -1 terminator, and continues loading the save. Formation key 11 would read the fixed 100 CT maximum; the Order Unit menu exposes only keys 0, 1, 2, 4, 5, 7 and 9.
 - `weather_command_dispatch` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
-- `move_start_next_post_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `state_handle_post_move_events` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
+- `move_start_next_post_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `battle_state_post_move_events_update` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
 - `animation_status_set` retains two branches selecting animation 0x21 when bit 0 of `status_flags_1_4` is set. Normal status updates never set that bit. Crystal's mask 1 belongs to the separate `status_flags_5_6` word; this does not rule out animation requests from other paths.
 - `debug_font_load`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
 - `StCdInterrupt`: tracks frame numbers through the header's low `u16`, while DMA completion and OPEN retain the full `u32` frame number.
@@ -1149,10 +1149,10 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   callers, so their per-frame update routines never move anything.
 - `formula_49_unused_with_extra_steps` is a second entry to formula 0x49's
   handler, but neither the formula table nor any caller names it.
-- `state_enter_effect_playback` and
-  `state_enter_effect` are the only code that enters
-  `GAME_STATE_EFFECT`; neither has a caller, so
-  `state_handle_effect` never runs.
+- `battle_state_try_enter_effect_playback` and
+  `battle_state_effect_enter` are the only code that enters
+  `BATTLE_STATE_EFFECT`; neither has a caller, so
+  `battle_state_effect_update` never runs.
 - WORLD's `screen_fit_parent_entry_to_digits` and
   `helpmenu_after_battle_entrypoint` have no callers; their quirks above do not
   execute in retail WORLD.
@@ -1214,9 +1214,9 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   blanks otherwise.
 - Lookups whose result is discarded:
   `cursor_show_right_unit_panel`,
-  `state_handle_resume_attack_phase` and
-  `state_handle_change_turn` call `unit_source_get`;
-  `state_handle_targeting_range` (twice),
+  `battle_state_resume_attack_phase_update` and
+  `battle_state_change_turn_update` call `unit_source_get`;
+  `battle_state_targeting_range_update` (twice),
   `unit_battle_tile_center_height_get` and
   `cursor_tile_vector_normal_calculate` (the other level's tile)
   call `battle_map_tile_get_pointer`; and

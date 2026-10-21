@@ -241,6 +241,18 @@ func validateRenameIdentifier(value string) error {
 
 var sourceExtensions = map[string]bool{".c": true, ".h": true, ".ld": true, ".s": true}
 
+// documentFiles are the project documents whose backticked symbol names follow
+// a rename, so QUIRKS.md keeps pointing at code that exists.
+var documentFiles = []string{"QUIRKS.md", "ARCHAEOLOGY.md"}
+
+// renameDocumentIdentifier rewrites a symbol name inside backticks: the name
+// alone, or followed by a call, index or member suffix (`name(`, `name[`,
+// `name.`). Prose outside backticks is left alone.
+func renameDocumentIdentifier(source []byte, oldName, newName string) []byte {
+	pattern := regexp.MustCompile("`" + regexp.QuoteMeta(oldName) + "([`(\\[.])")
+	return pattern.ReplaceAll(source, []byte("`"+newName+"${1}"))
+}
+
 type sourceTextChange struct {
 	original    []byte
 	replacement []byte
@@ -335,6 +347,23 @@ func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRen
 				continue
 			}
 			return sourceIdentifierBatchPlan{}, err
+		}
+	}
+	for _, name := range documentFiles {
+		path := filepath.Join(root, name)
+		info, body, err := readRegularSymbolFile(path)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+			return sourceIdentifierBatchPlan{}, err
+		}
+		current := body
+		for _, rename := range renames {
+			current = renameDocumentIdentifier(current, rename.oldName, rename.newName)
+		}
+		if !bytes.Equal(body, current) {
+			plan.changes[path] = sourceTextChange{original: body, replacement: current, mode: info.Mode()}
 		}
 	}
 	for index, rename := range renames {

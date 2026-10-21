@@ -78,7 +78,7 @@ s32 battle_input_update(void) {
 
 /* Read pad 1 for the deployment screen and derive the pressed and released
  * buttons; the reset button combination resets the game. Always returns 1, so the
- * -1 that battle_entrypoint tests for does not occur. */
+ * -1 that map_load_run tests for does not occur. */
 s32 deploy_input_update(void) {
     u32 previous;
     u32 current = PadRead(1);

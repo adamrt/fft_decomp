@@ -77,7 +77,7 @@ extern u16 g_screen_draw_buffer_clip_y;
 extern u16 g_screen_textured_quad_capacity;          /* textured quad count */
 extern u16 g_screen_gradient_quad_capacity;          /* gradient quad count */
 extern u16 g_screen_textured_gradient_quad_capacity; /* textured gradient quad count */
-extern u16 g_screen_flat_line_capacity;              /* +0x24 line count */
+extern u16 g_screen_flat_line_capacity;              /* line count */
 extern u16 g_screen_gradient_line_capacity;          /* gradient line count */
 extern u16 g_screen_gradient_line_count;
 extern u16 g_screen_line_g3_capacity;

@@ -593,13 +593,9 @@ static file_extent_t g_disc_extents[EFFECT_FILE_ID_COUNT] = {
 };
 
 extern effect_file_header_t* g_effect_file_data_ptrs[EFFECT_FILE_ID_COUNT];
-extern u8 g_effect_load_state;
-
-/* playback_load_state_e */
+extern u8 g_effect_load_state; /* playback_load_state_e */
 extern s16 g_effect_load_countdown;
-extern s32 g_effect_playback_phase;
-
-/* effect_playback_phase_e */
+extern s32 g_effect_playback_phase; /* effect_playback_phase_e */
 
 /* State-record selection and dispatch. */
 extern s16 g_effect_current_record_index;
@@ -612,9 +608,9 @@ extern u16 g_effect_available_record_head;
 extern effect_script_result_e (*g_effect_script_instructions[120])(effect_record_t*);
 extern effect_callback_t g_effect_native_callbacks[EFFECT_NATIVE_CALLBACK_COUNT];
 extern effect_callback_t g_effect_callback_slots[];
-extern u16 g_effect_script_opcode_05_value;
 
-/* written by effect-script opcode 05; no game source reads it */
+/* Written by effect-script opcode 05; no game source reads it. */
+extern u16 g_effect_script_opcode_05_value;
 
 static void script_instance_free(s16 record_index);
 
@@ -1135,8 +1131,6 @@ s32 effect_playback_update(void) {
     }
     return 0;
 }
-
-/* written by effect-script opcode 05; no game source reads it */
 
 /* Chain state records 1-16 into the available list (record 0 is the sentinel), empty the allocated
  * list and set playback idle. */

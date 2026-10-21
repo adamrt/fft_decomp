@@ -43,8 +43,7 @@ static void location_script_opcode_28_check_ramza_faith_at_most(void);
 
 /* Scalar view of g_location_script_state.flags for the opcode handlers that
  * read-modify-write it: the member spelling there shares one base register
- * with the args/data accesses instead of the target's absolute addresses.
- * The load_* opcode handlers declare volatile views of flags/data/ip locally. */
+ * with the args/data accesses instead of the target's absolute addresses. */
 extern s32 g_location_script_flags;
 
 static void operand_pair_read(s32* out1, s32* out2);

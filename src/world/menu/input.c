@@ -25,7 +25,7 @@ static u16 g_tutorial_previous_input = 0;
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
  *
- * Twin of screen_input_pad_update (card_save.c) with its own edge latch,
+ * Twin of screen_input_pad_update (screen/pad_input.c) with its own edge latch,
  * single-button latch, activation timer, previous-state and counter arrays;
  * the secondary repeat period is two frames longer.
  *

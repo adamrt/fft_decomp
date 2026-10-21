@@ -3212,7 +3212,6 @@ void battle_state_wait_direction_update(void) {
         } else if ((g_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
             battle_state_after_command_enter();
         }
-        /* The target passes only the mode; the definition's second parameter is a matching device. */
         facing = cursor_input_direction_get(CAMERA_INPUT_PRESSED);
         if (facing != -1 && facing != g_battle_wait_direction_facing) {
             sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
@@ -3249,7 +3248,7 @@ void battle_state_wait_direction_update(void) {
 }
 
 /*
- * CrystalLearn game-state handler: apply the crystal or treasure choice
+ * BATTLE_STATE_POST_MOVE_EVENTS update: apply the crystal or treasure choice
  * (0, LEARN_ABILITIES and TAKE_TREASURE pass their value to
  * crystal_choice_apply, RESTORE_HP_MP restores HP and MP and
  * finalizes the action, and the prompt answers only close). Then, once no effect is pending, the casting unit's
@@ -3900,7 +3899,7 @@ void battle_state_resume_attack_phase_update(void) {
     }
 }
 
-/* LearnAbilityOnHit game-state handler: steps through the post-action reports (level up, job level
+/* BATTLE_STATE_POST_ACTION_REPORTS update: steps through the post-action reports (level up, job level
  * up, learn on hit).
  *
  * YES on the learn-on-hit report teaches the used ability to the unit found for it. Every answer

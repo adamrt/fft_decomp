@@ -2094,7 +2094,7 @@ void battle_map_freeze(void) {
     battle_map_data_command_dispatch(BATTLE_MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
 }
 
-/* Resume the map texture animations paused by map_freeze. */
+/* Resume the map texture animations paused by battle_map_freeze. */
 void battle_map_unfreeze(void) {
     battle_map_data_command_dispatch(BATTLE_MAP_DATA_COMMAND_RESTORE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
 }

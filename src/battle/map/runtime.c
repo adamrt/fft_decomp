@@ -104,27 +104,13 @@ extern MATRIX g_battle_map_light_matrix;
 extern SVECTOR g_battle_map_light_rotation;
 extern MATRIX g_battle_map_light_rotation_matrix;
 extern MATRIX g_battle_map_local_light_matrix;
-extern MATRIX g_battle_map_saved_light_color_matrix;
-
-/* saved color matrix (command 0x5f/0x60) */
-extern MATRIX g_battle_map_saved_light_matrix;
-
-/* saved light matrix (command 0x5f/0x60) */
-extern u16 g_battle_map_light_transition_command;
-
-/* pending per-frame light command, 0 when idle */
-extern u16 g_battle_map_light_transition_duration;
-
-/* transition duration in frames */
-extern u16 g_battle_map_light_transition_frame;
-
-/* transition frame counter */
-extern MATRIX g_battle_map_light_transition_start_color_matrix;
-
-/* transition start color matrix */
-extern MATRIX g_battle_map_light_transition_start_light_matrix;
-
-/* transition start light matrix */
+extern MATRIX g_battle_map_saved_light_color_matrix;            /* saved color matrix (command 0x5f/0x60) */
+extern MATRIX g_battle_map_saved_light_matrix;                  /* saved light matrix (command 0x5f/0x60) */
+extern u16 g_battle_map_light_transition_command;               /* pending per-frame light command, 0 when idle */
+extern u16 g_battle_map_light_transition_duration;              /* transition duration in frames */
+extern u16 g_battle_map_light_transition_frame;                 /* transition frame counter */
+extern MATRIX g_battle_map_light_transition_start_color_matrix; /* transition start color matrix */
+extern MATRIX g_battle_map_light_transition_start_light_matrix; /* transition start light matrix */
 
 /* The transition's target (command 0x66) or delta (0x68) color and light matrices. */
 extern MATRIX g_battle_map_light_transition_target_color_matrix;

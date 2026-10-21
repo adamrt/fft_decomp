@@ -89,7 +89,7 @@ preserving every original byte.
   (`unit.h`, `shop.h`, `proposition.h`, `battle_map_load.h`, `menu_stack.h`),
   each declaring one part of the game for every program that uses it. A
   large concept splits by sub-topic (`unit.h` and `unit_runtime.h`,
-  `effect.h` and `effect_geometry.h`); add folders only when size calls for
+  `effect.h` and `effect_emitter_data.h`); add folders only when size calls for
   them. Suzuki's interface belongs here too, separate from game sound and
   music services. `include/psx/`: PsyQ and PS1 hardware interfaces. Platform
   library code never includes game headers.
@@ -194,7 +194,7 @@ instead of including the record's header.
   `_padding_XX` means proven alignment/size filler. Offsets are relative to the
   member's own struct. Never access unused or padding members by name.
 - Use `ONE` for fixed-point 1.0 (4096). A name that states a fixed-point
-  format uses `qN` for N fraction bits (`battle_lerp_q8`, `value_q12_lerp`).
+  format uses `qN` for N fraction bits (`effect_lerp_q8`, `value_q12_lerp`).
   Add `const` only for genuinely read-only inputs and verify all callers
   under their historical compiler profiles.
 - Use American spelling.

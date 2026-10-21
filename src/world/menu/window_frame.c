@@ -32,7 +32,7 @@ void screen_window_frame_thread(void) {
     RECT texture;
     /* The stride pointers are locals because the target keeps each one live
      * and re-derives the descriptor base from it (addiu -8) for the glyph
-     * calls. Unlike the OPTION/WORLD twins, this copy needs no register
+     * calls. Unlike the OPTION and event-library twins, this copy needs no register
      * bindings or tied asm to match. */
     menu_panel_frame_t* prim = g_menu_scratch_buffer.panel_frames;
     s32* source_stride = &g_text_glyph_source.stride;

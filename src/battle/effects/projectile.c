@@ -720,6 +720,3 @@ void projectile_arrow_trajectory_set(s32 source_id, const SVECTOR* tile_position
     g_projectile_step_count
         = SquareRoot12((delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz) * ONE) / 8 >> 12;
 }
-
-/* Keep the secondary animation table as u8[]: another element type introduces an
- * 8-byte compiler frame and changes the load-delay and return slots. */

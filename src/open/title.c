@@ -145,7 +145,7 @@ static void opening_movie_start(s32 start_sector, s32 unused_stream_length, s32 
 }
 
 /* CONTROLLER_FFTOP_MOVIE: Start stops the opening movie; once it has stopped the controller
- * pops, blanks the display and ends OPENING with result 0. */
+ * pops, blanks the display and ends OPEN with result 0. */
 static void opening_movie_update(controller_record_t* unused_record) {
     u32 flags;
     s32 controller;
@@ -278,7 +278,7 @@ static void menu_entries_hide(title_menu_state_t* title) {
  * been idle for 601 frames it fades out and starts the next demo movie.
  * Circle or Start confirms the cursor entry: New Game, Continue and Tutorial
  * fade out and then dispatch (Continue runs the memory card screen and ends
- * OPENING with 0 or 1 for a loaded save, Tutorial ends it with 2), while
+ * OPEN with 0 or 1 for a loaded save, Tutorial ends it with 2), while
  * Sound opens the sound type menu without fading. Up and Down (and Select)
  * move the highlight between the four entries.
  */
@@ -431,7 +431,7 @@ static void main_menu_update(controller_record_t* record) {
                 return;
             }
 
-            /* A loaded save ends OPENING with 1 (the cursor) or, when it has a next scenario
+            /* A loaded save ends OPEN with 1 (the cursor) or, when it has a next scenario
              * and no formation return event, with 0. */
             g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
             if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0

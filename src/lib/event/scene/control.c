@@ -222,7 +222,7 @@ void menu_invalid_choice_thread_run(void) {
 
 /* Yields the thread at least once, then until the camera stops moving. WORLD's
  * copy calls BATTLE's camera_is_active address (0x8008e17c), which with
- * WLDCORE loaded lies inside travel_path_find. */
+ * WLDCORE loaded lies inside travel_path_find; WORLD's copy of the battle menus is dead code (QUIRKS.md). */
 void camera_idle_wait(void) {
     do {
         thread_yield();

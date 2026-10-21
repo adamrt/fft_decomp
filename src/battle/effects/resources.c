@@ -335,5 +335,3 @@ s32 effect_secondary_end_on_current_unit(void) {
     g_effect_secondary_data[secondary_id].function_id = function_id;
     return secondary_id;
 }
-
-#define PT(k) (*(VECTOR*)((u8*)scratch + (command.vertices.indices[k] << 4)))

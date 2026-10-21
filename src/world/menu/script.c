@@ -523,7 +523,7 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* ins
  * Returns the next script instruction pointer.
  *
  * Built at -O1: the unscheduled prologue and load order are the -O1 signature
- * of the menu-script handlers (see world_menu_script_* in src/world). The
+ * of the menu-script handlers (see the menu_opcode_* handlers in this file). The
  * reassigned s32 y defeats plus->ior folding (gives addu). */
 menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction) {
     s32 x = instruction->fixed_clut.x_div_16;

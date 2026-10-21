@@ -115,7 +115,8 @@ void formation_roster_names_build(void) {
     g_roster_names_revision++;
 }
 
-/* Set the formation display mode; the title script switches it between 0 and 1. */
+/* Set whether the menu cursors hold their bob: at 1 the cursor threads reset their bob state to 2 with the
+ * timer cleared every frame; the title script switches it between 0 and 1. */
 void menu_cursor_bob_hold_set(s32 mode) {
     g_menu_cursor_bob_hold = mode;
 }

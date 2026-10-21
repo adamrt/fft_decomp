@@ -195,3 +195,18 @@ func TestSymbolsCommandRejectsMalformedArguments(t *testing.T) {
 		}
 	}
 }
+
+func TestRenameFunctionRewritesDocumentNames(t *testing.T) {
+	p := validTestProject(t)
+	writeSymbolRenameFixture(t, p.root, "QUIRKS.md", "- `main_first` and `main_first(` change; `main_first_more` and main_first in prose stay.\n")
+	writeSymbolRenameFixture(t, p.root, "ARCHAEOLOGY.md", "`main_first.rodata` once.\n")
+	if err := p.symbolsCommand([]string{"rename-function", "--old", "main_first", "--new", "main_start"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := readTestFile(t, p, "QUIRKS.md"); got != "- `main_start` and `main_start(` change; `main_first_more` and main_first in prose stay.\n" {
+		t.Fatalf("QUIRKS.md = %q", got)
+	}
+	if got := readTestFile(t, p, "ARCHAEOLOGY.md"); got != "`main_start.rodata` once.\n" {
+		t.Fatalf("ARCHAEOLOGY.md = %q", got)
+	}
+}

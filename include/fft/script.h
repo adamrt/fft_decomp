@@ -133,7 +133,8 @@ void script_opcode_99_blue_remove_unit(s32 unit_id);
 s32 script_opcode_47_add_ghost_unit(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 runtime_id, s32 flags);
 
-/* Empty in WORLD, which links its own stub under this name. */
+/* The AddUnit thread body: runs the script instructions through AddUnitEnd, loading each added unit's
+ * graphics; BATTLE and WORLD share the body. */
 void script_opcode_49_add_unit_start_thread(void);
 
 /* instruction scanning */

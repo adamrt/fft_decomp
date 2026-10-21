@@ -545,7 +545,7 @@ void unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
 static const s8 g_float_bob_offsets[24];
 
 /* This updater needs a signed 16-bit result view. Changing the public return type
- * instead alters the arithmetic callers in unit_motion.c. */
+ * instead alters the arithmetic callers in animation_motion.c. */
 typedef s16 (*unit_height_s16_fn_t)(unit_runtime_t* unit);
 
 /* Raise a floating unit's height offset, or lower it back to the ground.
