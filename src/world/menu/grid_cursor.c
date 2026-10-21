@@ -18,7 +18,7 @@
 
 /* banner menu state */
 extern menu_entry_t g_formation_banner_menu;
-static s8 g_formation_banner_state;
+static s8 s_formation_banner_state;
 
 /* banner state: 0 idle, 1 finishing, else countdown */
 
@@ -144,23 +144,23 @@ void screen_grid_cursor_update(s16 alternate) {
 s32 formation_banner_countdown(s32 message_id, s32 frames) {
     s8 current;
 
-    if (g_formation_banner_state == 0) {
-        g_formation_banner_state = frames;
+    if (s_formation_banner_state == 0) {
+        s_formation_banner_state = frames;
         g_formation_banner_menu.text_id = message_id;
         thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_banner_menu.thread_entry);
         thread_parameters_set(THREAD_SCREEN_SLOT_MENU, (s32)&g_formation_banner_menu, 0, 0);
         g_formation_banner_active = 1;
     }
-    current = g_formation_banner_state;
+    current = s_formation_banner_state;
     if (current == 1) {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_MENU);
         if (thread_is_running(THREAD_SCREEN_SLOT_MENU) == 0) {
             g_formation_banner_active = 0;
-            g_formation_banner_state = 0;
+            s_formation_banner_state = 0;
             return 0;
         }
         return 1;
     }
-    g_formation_banner_state = current - 1;
+    s_formation_banner_state = current - 1;
     return 1;
 }

@@ -111,7 +111,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   before it clears `mount_state`, so a runtime slot last held by a rider looks up
   a mount that is gone and reads its world coordinates through NULL (kernel RAM).
 - `unit_view_display_action_preview`: a skipped
-  preview leaves `g_unit_view_preview_target_action` null, and its
+  preview leaves `s_unit_view_preview_target_action` null, and its
   `attack_accuracy` is read (from kernel RAM) before the null test.
 - `formation_lists_rebuild`: the Soldier Office (shop
   0x65) lists only monsters, yet `formation_menu_state_init` stages unit
@@ -294,7 +294,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   then start the text thread anyway, relying on close not returning.
 - `heap_free`: the clearing loop stops at the first page byte that differs
   from the allocation id, not at the end of the 64-entry
-  `g_heap_game_allocator_table`; an allocation that reaches the last page
+  `s_heap_game_allocator_table`; an allocation that reaches the last page
   reads on into `g_gfx_draw_envs` and clears its bytes while they match.
 - `battle_map_load_data`: the four texture quarter files load at
   `buffer + 0x8000 * (n + 1)`, while `battle_map_gns_resource_dispatch` uploads
@@ -334,7 +334,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   strips from its own copy only. It never equals the SPU's mode, so there is
   no early return, and the reloaded value is treated as a mode of 10 or more.
   The 100 music files all hold mode 4.
-- `g_suzuki_smd_opcode_lengths`: the 37 unassigned opcodes have length 0, so
+- `s_suzuki_smd_opcode_lengths`: the 37 unassigned opcodes have length 0, so
   the look-ahead of `suzuki_smd_read_instructions` would never step past one,
   and 0x9D has three parameter bytes there while `suzuki_smd_stop_sfx` consumes
   two. No retail sequence uses any of them.
@@ -553,9 +553,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   one holds 0 and the other 2, but their only writer,
   `menu_build_window_sprites`, stores 0.
 - `message_for_unit_queue` tests the 16-record
-  capacity of `g_post_effect_messages` once, before it walks the
+  capacity of `s_post_effect_messages` once, before it walks the
   unit's 11 reportable outcomes: a unit reached with 15 records queued can
-  append ten more past the array, over `g_sprite_compressed_nibble_phase`
+  append ten more past the array, over `s_sprite_compressed_nibble_phase`
   and the globals after it.
 - `origin_self_target_evaluate` and
   `origin_reflected_evaluate` run
@@ -691,7 +691,7 @@ written that way.
   `unit_height_calculate_from_world_coords`, as it does to
   `unit_height_calculate_with_caller_coords`;
   `distortion_jump_to_own_tile` does not.
-- `g_suzuki_smd_modulator_waveforms` entries 8-15 call the void
+- `s_suzuki_smd_modulator_waveforms` entries 8-15 call the void
   `suzuki_smd_modulator_deactivate`; `suzuki_smd_update_modulators` adds the
   leftover `$v0` (the cleared modulator flags) to the channel output.
 - `music_tunes_update` passes `current_music` to `suzuki_smd_is_music_playing`
@@ -817,25 +817,25 @@ written that way.
 - BUNIT, EQUIP and WORLD use the 236-byte `menu_gfx_context_t`. JOBSTTS omits the draw-mode pool pointer at 0x60 and uses a
   244-byte stride.
 - WLDCORE's `g_calendar_zodiac_start_dates` uses `calendar_date_t`
-  records; OPEN's `g_birthday_zodiac_start_dates[24]` stores the same
+  records; OPEN's `s_birthday_zodiac_start_dates[24]` stores the same
   `{month, day}` pairs as bytes.
 - `g_item_location_flags` (`0x80059414`): only the first 64 bytes (512
   Move-Find bits) are proven; the next 64-byte block is saved with it but has no
   known meaning.
 - `g_sound_novel_sound_quads` (`0x8009ec18`) starts one row before
   the sound rows, which begin at `0x8009ec1c` for sound id 1: its row 0 is the
-  eighth 32-bit entry of `g_tutorial_battle_event_ids`, whose eight entries
+  eighth 32-bit entry of `s_tutorial_battle_event_ids`, whose eight entries
   `tutorial_battle_list_input_update` indexes.
 - Alias labels: the target binds a second name at the address of an object
   that already has one, or inside it, so that a function reloads the value
   instead of keeping it in a register. The byte-exact build needs both names;
   a port must map every alias onto its owner, because two definitions would
   silently stop sharing the storage. Same address, two names: `g_move_find_result_flags`
-  over the static `g_tile_pickup_result` (`0x8018f8a8`, BATTLE),
-  `g_action_work` and `g_action_work_view` (`0x801938c0`, BATTLE),
+  over the static `s_tile_pickup_result` (`0x8018f8a8`, BATTLE),
+  `g_action_work` and `s_action_work_view` (`0x801938c0`, BATTLE),
   `g_screen_input_state` and `g_screen_new_buttons` (`0x801aed44`, WORLD),
-  `g_screen_input_frame_state` over the static `g_screen_input_frame_new`
-  (`0x801c0528`, WORLD), `g_location_script_flags` and `g_location_script_state`
+  `g_screen_input_frame_state` over the static `s_screen_input_frame_new`
+  (`0x801c0528`, WORLD), `s_location_script_flags` and `g_location_script_state`
   (`0x800d4644`, WLDCORE), `g_sound_novel_countdown_frames` and
   `g_sound_novel_countdown_frames_reset` (`0x800bb4f8`, WLDCORE),
   `g_input_event` and `g_unit_list_input_event_state` (`0x801e3c44`, BUNIT),
@@ -851,10 +851,10 @@ written that way.
   `g_gfx_poly_gt4_flat_pool` over `g_gfx_poly_gt4_buffers` (`0x8004c6c8`, MAIN).
 - Alias labels inside another object: `g_controller_selected_options` is
   `g_controller_records` + 0x1c, read with a hand-computed 25-word stride
-  (OPEN); `g_ending_script_byte_offset` is `g_ending_script_state` + 0x2c
+  (OPEN); `s_ending_script_byte_offset` is `g_ending_script_state` + 0x2c
   (OPEN); `g_item_secondary_data_ids` is `g_item_primary_data` + 4, stepped by
   `sizeof(item_data_t)` (MAIN); `g_formation_sort_order` is the `formation`
-  member of `g_menu_sort_orders` (+12, MAIN); `g_world_map_fade_color` is
+  member of `g_menu_sort_orders` (+12, MAIN); `s_world_map_fade_color` is
   `g_world_map_fade` + 36, `g_world_map_pan_progress` and
   `g_world_map_pan_target_x` are `g_world_map_pan` + 8 and + 28,
   `g_sound_novel_state`, `g_sound_novel_state_flags`,
@@ -871,17 +871,17 @@ written that way.
   (BATTLE); `g_unit_list_help_node_23_help_base` is
   `g_unit_list_help_nodes_unit_browse` + 372 (BUNIT);
   `g_war_trophy_item_count` is byte 21 of the static
-  `g_war_trophy_search_result` (REQUIRE); `g_unit_editor_hp_max` is
+  `s_war_trophy_search_result` (REQUIRE); `g_unit_editor_hp_max` is
   `g_unit_editor_values` + 4 (DEBUGCHR).
 - Overlaps with no second label: the sprite primitive ring is
   `g_unit_slot_states + UNIT_RUNTIME_SLOT_COUNT`, 10,240 bytes past the
   declared array that no label names (`0x800bb704`, BATTLE);
   `g_world_map_projection_view` is one 40-byte record in `world_map.h` but two
-  statics (`g_world_map_projection_scale`, `g_world_map_projection_rotation`)
+  statics (`s_world_map_projection_scale`, `s_world_map_projection_rotation`)
   plus the origin label in `src/wldcore/map/tiles.c`, rebuilt with a negative
   `offsetof`; `origin_targetable_mask_build` reads
-  `g_origin_range_row_masks[8..15]` on purpose into the following static
-  `g_status_priority_weights` (`src/battle/ai/evaluation.c`);
+  `s_origin_range_row_masks[8..15]` on purpose into the following static
+  `s_status_priority_weights` (`src/battle/ai/evaluation.c`);
   `g_system_work_buffer_0` is an unsized `u8[]` that OPEN views as `u32*`,
   `s32*` and `u16*`.
 
@@ -977,7 +977,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `suzuki_sound_get_largest_free_block`: reports the rounded gap including space needed for a new block header, rather than a directly usable payload size.
 - `vram_sheet_load`: its fixed 0x30d4-byte copy from the variable compressed SPR tail at 0x9200 extends beyond the file-sized allocation in 153 of the 154 nonempty unit sprite-table entries and includes retained heap bytes.
 - `unit_wep_eff_update`: when neither EVTCHR slot is free, one path tests `j` before setting it.
-- `g_disc_extents` (`0x801b53e8`) stores whole-sector sizes, and entry 0 repeats entry 1: effect id 0 loads E001.BIN, so E000.BIN's code is never loaded through the table.
+- `s_disc_extents` (`0x801b53e8`) stores whole-sector sizes, and entry 0 repeats entry 1: effect id 0 loads E001.BIN, so E000.BIN's code is never loaded through the table.
 - `effect_noop`: the native callback returns without setting a result; opcode 07 ignores that result.
 - E464's map-vertex particle callback accepts groups 1-12 but indexes a
   three-entry location table; all 16 shipped emitters use group 0, so the
@@ -1083,8 +1083,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   ids 0xC000 and 0xC800 + entry) are not translated: each string is the
   Japanese release's glyph codes around Latin fragments such as the composer
   tags.
-- SCUS_942.21 0x80028f94-0x80028fe7, between `g_suzuki_smd_modulator_waveforms`
-  and `g_suzuki_smd_key_octaves`, is referenced by no instruction or pointer in
+- SCUS_942.21 0x80028f94-0x80028fe7, between `s_suzuki_smd_modulator_waveforms`
+  and `s_suzuki_smd_key_octaves`, is referenced by no instruction or pointer in
   any executable: a five-byte SMD sequence (`B0 91 7F 99 90`), ten 32-bit values whose
   last nine are the LIBSPU reverb work-area sizes of modes 1-9, and a
   0x23-byte `feds` sound bank with id 0x7000.
@@ -1182,7 +1182,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   gets a closed descriptor.
 - `stage_update`: nothing stores playback phase 5 or
   `EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT` (6), nor the two start pointers the
-  restart arm rewinds to (`g_effect_frame_data_start`,
+  restart arm rewinds to (`s_effect_frame_data_start`,
   `g_effect_animation_sequences_start`), so the restart path never runs;
   phase 5 has no case and would return `result` unset.
 - `ai_target_is_untargetable`: the AI never targets a Transparent enemy

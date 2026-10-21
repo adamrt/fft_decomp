@@ -63,23 +63,23 @@ extern s32 g_effect_sprite_count_peak;
 /* Primitive arena and the frame markers maintained by this renderer. */
 
 /* The third 32-byte primitive kind has no named caller. */
-static s32 g_primitive_sizes[3] = { sizeof(POLY_FT4), sizeof(DR_MODE), 32 };
+static s32 s_primitive_sizes[3] = { sizeof(POLY_FT4), sizeof(DR_MODE), 32 };
 
-static s32 g_effect_frame_start_prim_buffer_offset;
-static s32 g_effect_prim_buffer_offset;
-static u8* g_effect_prim_buffer;
-static s32 g_effect_frame_parity;
-static MATRIX g_effect_particle_heading_matrix;
+static s32 s_effect_frame_start_prim_buffer_offset;
+static s32 s_effect_prim_buffer_offset;
+static u8* s_effect_prim_buffer;
+static s32 s_effect_frame_parity;
+static MATRIX s_effect_particle_heading_matrix;
 /* Private cursor state for the resident model decoder. */
-static const psyq_tmd_object_t* g_model_object;
+static const psyq_tmd_object_t* s_model_object;
 
-static const SVECTOR* g_model_vertices;
+static const SVECTOR* s_model_vertices;
 
-static const SVECTOR* g_model_normals;
+static const SVECTOR* s_model_normals;
 
-static const u32* g_model_commands;
+static const u32* s_model_commands;
 
-static s32 g_model_command_word_offset;
+static s32 s_model_command_word_offset;
 
 static s32 particle_sprite_state_update(effect_record_t* unused_record, effect_work_record_t* work);
 
@@ -120,7 +120,7 @@ static s16 random_s16_get(s16 minimum, s16 maximum);
  * corner starts at the same screen depth before an effect supplies geometry. */
 static void render_state_init(void) {
     g_effect_matrix.m[2][2] = ONE;
-    g_effect_frame_parity = 0;
+    s_effect_frame_parity = 0;
     g_effect_matrix.m[2][1] = 0;
     g_effect_matrix.m[2][0] = 0;
     g_effect_matrix.m[1][2] = 0;
@@ -130,9 +130,9 @@ static void render_state_init(void) {
     g_effect_corner_bottom_left.vz = EFFECT_CORNER_Z_DEFAULT;
     g_effect_corner_top_right.vz = EFFECT_CORNER_Z_DEFAULT;
     g_effect_corner_top_left.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_prim_buffer_offset = 0;
-    g_effect_frame_start_prim_buffer_offset = 0;
-    g_effect_prim_buffer = effect_heap_alloc_block(EFFECT_PRIMITIVE_BUFFER_SIZE, 0);
+    s_effect_prim_buffer_offset = 0;
+    s_effect_frame_start_prim_buffer_offset = 0;
+    s_effect_prim_buffer = effect_heap_alloc_block(EFFECT_PRIMITIVE_BUFFER_SIZE, 0);
     g_effect_sprite_count_peak = 0;
     g_effect_sprite_count = 0;
 }
@@ -154,7 +154,7 @@ void effect_render_state_reset(void) {
 
 /* Nothing in the game calls it. */
 s32 effect_render_prim_offset_get(void) {
-    return g_effect_prim_buffer_offset;
+    return s_effect_prim_buffer_offset;
 }
 
 /* Allocate the variable-length sprite block for one effect frame.
@@ -188,8 +188,8 @@ static void sprite_block_free(effect_sprite_block_t* block) {
  * The two stored values have no identified reader; allocation wraps the arena independently. */
 void effect_render_frame_start(void) {
     SetGeomOffset(0, 0);
-    g_effect_frame_parity = 1 - g_effect_frame_parity;
-    g_effect_frame_start_prim_buffer_offset = g_effect_prim_buffer_offset;
+    s_effect_frame_parity = 1 - s_effect_frame_parity;
+    s_effect_frame_start_prim_buffer_offset = s_effect_prim_buffer_offset;
 }
 
 /* Allocate one typed primitive from the effect renderer's circular arena.
@@ -203,23 +203,23 @@ static void* primitive_alloc(primitive_kind_e primitive_type) {
     register s32 size_byte_offset __asm__("$2");
     s32 remaining;
 
-    offset = g_effect_prim_buffer_offset;
+    offset = s_effect_prim_buffer_offset;
     /* Preserve the arena offset load before indexing the size table. */
     __asm__("" : "=r"(offset) : "0"(offset));
     size_byte_offset = primitive_type << 2;
     /* Byte indexing keeps the table address in $v0 before the size load. */
-    size = *(s32*)((u8*)g_primitive_sizes + size_byte_offset);
+    size = *(s32*)((u8*)s_primitive_sizes + size_byte_offset);
     /* Keep the size load ahead of the buffer-limit constant. */
     __asm__("" : "=r"(size) : "0"(size));
     remaining = EFFECT_PRIMITIVE_BUFFER_SIZE - offset;
     if (remaining < size) {
-        g_effect_prim_buffer_offset = size;
+        s_effect_prim_buffer_offset = size;
         offset = 0;
     } else {
         remaining = size + offset;
-        g_effect_prim_buffer_offset = remaining;
+        s_effect_prim_buffer_offset = remaining;
     }
-    return g_effect_prim_buffer + offset;
+    return s_effect_prim_buffer + offset;
 }
 
 /* Queues a multi-part effect sprite at a screen position: brackets the parts
@@ -391,9 +391,9 @@ static void particle_chain_init(void) {
     s32 index;
     effect_work_record_t* records;
 
-    g_effect_particle_heading_matrix.t[2] = 0;
-    g_effect_particle_heading_matrix.t[1] = 0;
-    g_effect_particle_heading_matrix.t[0] = 0;
+    s_effect_particle_heading_matrix.t[2] = 0;
+    s_effect_particle_heading_matrix.t[1] = 0;
+    s_effect_particle_heading_matrix.t[0] = 0;
     g_effect_emitter_matrix.t[2] = 0;
     g_effect_emitter_matrix.t[1] = 0;
     g_effect_emitter_matrix.t[0] = 0;
@@ -505,7 +505,7 @@ static s32 particle_sprite_state_update(effect_record_t* unused_record, effect_w
     work->data->z = work->motion.position.z >> 12;
     if (work->kind_flags & EFFECT_EMITTER_ORIENT_TO_VELOCITY) {
         SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_effect_particle_heading_matrix);
+        SetTransMatrix(&s_effect_particle_heading_matrix);
         setVector(&direction, work->motion.velocity.x >> 3, work->motion.velocity.y >> 3, work->motion.velocity.z >> 3);
         /* The 32-bit flag value lands in the output vector's 32-bit pad field; the target frame
          * has no separate flag slot. */
@@ -1370,12 +1370,12 @@ void effect_noop_3(void) {
 
 /* Select the single object's relative sections and rewind its primitive stream. */
 s32 effect_model_sections_init(const psyq_tmd_header_t* resource, s32 unused_1) {
-    g_model_object = resource->objects;
+    s_model_object = resource->objects;
     /* TMD offsets are byte counts from the object table; word indexing keeps signed rounding. */
-    g_model_vertices = (const SVECTOR*)&((const u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
-    g_model_normals = (const SVECTOR*)&((const u32*)resource->objects)[(s32)resource->objects[0].normal_offset / 4];
-    g_model_commands = &((const u32*)resource->objects)[(s32)resource->objects[0].primitive_offset / 4];
-    g_model_command_word_offset = 0;
+    s_model_vertices = (const SVECTOR*)&((const u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
+    s_model_normals = (const SVECTOR*)&((const u32*)resource->objects)[(s32)resource->objects[0].normal_offset / 4];
+    s_model_commands = &((const u32*)resource->objects)[(s32)resource->objects[0].primitive_offset / 4];
+    s_model_command_word_offset = 0;
     return resource->objects[0].primitive_count;
 }
 
@@ -1392,8 +1392,8 @@ void effect_model_command_decode(effect_decoded_model_command_t* out) {
     effect_decoded_model_command_t* dst = out;
     u32 header;
 
-    index = g_model_command_word_offset;
-    command = (const psyq_tmd_packet_t*)&g_model_commands[index];
+    index = s_model_command_word_offset;
+    command = (const psyq_tmd_packet_t*)&s_model_commands[index];
     header = command->id;
     memcpy(&out->header, &command->id, sizeof(out->header));
     /* Struct assignments use unaligned copies; memcpy preserves the 32-bit transfers.
@@ -1407,7 +1407,7 @@ void effect_model_command_decode(effect_decoded_model_command_t* out) {
         memcpy(&out->vertices.pairs[0], &command->g4.v0, sizeof(out->vertices.pairs[0]));
         /* A 32-bit load preserves the native delay-slot store; memcpy reschedules it. */
         out->vertices.pairs[1] = *(const u32*)&command->g4.v2;
-        g_model_command_word_offset = index + 7;
+        s_model_command_word_offset = index + 7;
         break;
     case EFFECT_MODEL_COMMAND_G3:
         memcpy(&out->colors[0], &command->g3.r0, sizeof(out->colors[0]));
@@ -1416,12 +1416,12 @@ void effect_model_command_decode(effect_decoded_model_command_t* out) {
         memcpy(&out->vertices.pairs[0], &command->g3.v0, sizeof(out->vertices.pairs[0]));
         /* A 32-bit load preserves the native delay-slot store; memcpy reschedules it. */
         out->vertices.pairs[1] = *(const u32*)&command->g3.v2;
-        g_model_command_word_offset = index + 6;
+        s_model_command_word_offset = index + 6;
         break;
     case EFFECT_MODEL_COMMAND_GT3_OPAQUE:
     case EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT: {
         const psyq_tmd_packet_t* extended;
-        extended = (const psyq_tmd_packet_t*)&g_model_commands[g_model_command_word_offset];
+        extended = (const psyq_tmd_packet_t*)&s_model_commands[s_model_command_word_offset];
         memcpy(&dst->colors[0], &extended->gt3.r0, sizeof(dst->colors[0]));
         memcpy(&dst->colors[1], &extended->gt3.r1, sizeof(dst->colors[1]));
         memcpy(&dst->colors[2], &extended->gt3.r2, sizeof(dst->colors[2]));
@@ -1432,11 +1432,11 @@ void effect_model_command_decode(effect_decoded_model_command_t* out) {
         memcpy(&out->texture.uv[0], &extended->gt3.tu0, sizeof(out->texture.uv[0]));
         memcpy(&out->texture.uv[1], &extended->gt3.tu1, sizeof(out->texture.uv[1]));
         memcpy(&out->texture.uv[2], &extended->gt3.tu2, sizeof(out->texture.uv[2]));
-        g_model_command_word_offset += 9;
+        s_model_command_word_offset += 9;
         break;
     }
     default:
-        g_model_command_word_offset += out->header.word_count + 1;
+        s_model_command_word_offset += out->header.word_count + 1;
         break;
     }
 }

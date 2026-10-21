@@ -16,7 +16,7 @@
 #include "psx/types.h"
 
 extern u8 g_job_list_initialized;
-static s16 g_job_list_selected_generic_index;
+static s16 s_job_list_selected_generic_index;
 
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_job_list_menu_script[217];
@@ -113,7 +113,7 @@ s32 job_list_update(void) {
     }
     if ((mask & PSX_PAD_CIRCLE) && g_unit_list_current_menu == UNIT_LIST_MENU_JOB) {
         g_job_list_selected_id = g_job_list_job_ids[g_menu_list_selected_index];
-        g_job_list_selected_generic_index = job_generic_index_get(g_job_list_selected_id);
+        s_job_list_selected_generic_index = job_generic_index_get(g_job_list_selected_id);
         job_list_level_calculate(g_menu_list_selected_index);
         job_list_calculate_jp(g_menu_list_selected_index);
         job_list_total_jp_calculate(g_menu_list_selected_index);

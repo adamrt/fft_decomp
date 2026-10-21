@@ -47,7 +47,7 @@ extern u32 g_movie_mdec_output_buffer_0[];
 extern u32 g_movie_mdec_output_buffer_1[];
 extern s32 g_movie_width;
 extern s32 g_movie_height;
-static s32 g_movie_aligned_height;
+static s32 s_movie_aligned_height;
 extern u32 g_movie_current_frame;
 extern u32 g_movie_end_frame;
 extern s32 g_movie_video_end_frame; /* -1: none */
@@ -168,7 +168,7 @@ void movie_stream_start(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_m
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | SYSTEM_RUNTIME_FLAG_RGB24;
     gfx_init_screen_environments(1);
 
-    g_movie_aligned_height = 0;
+    s_movie_aligned_height = 0;
     g_movie_width = 0;
     g_movie_current_frame = 0;
     g_movie_stream_status = MOVIE_STREAM_PLAYING;
@@ -392,12 +392,12 @@ static u32* movie_acquire_next_frame(movie_mdec_state_t* state) {
         g_movie_width = header->width;
         g_movie_height = header->height;
         /* The MDEC decodes whole 16x16 macroblocks. */
-        g_movie_aligned_height = (header->height + 15) & 0xfff0;
+        s_movie_aligned_height = (header->height + 15) & 0xfff0;
     }
 
     state->frame_rects[0].w = state->frame_rects[1].w = g_movie_width * 3 / 2;
-    state->frame_rects[0].h = state->frame_rects[1].h = g_movie_aligned_height;
-    state->output_rect.h = g_movie_aligned_height;
+    state->frame_rects[0].h = state->frame_rects[1].h = s_movie_aligned_height;
+    state->output_rect.h = s_movie_aligned_height;
     return frame_data;
 }
 

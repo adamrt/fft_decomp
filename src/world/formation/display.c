@@ -22,7 +22,7 @@
 
 extern clut_t g_formation_menu_palettes;
 
-static u32 g_status_label_image[352] = { 0x111, 0, 0x111, 0x11111110, 0, 0x10000000, 0x111110, 0x11100000, 0,
+static u32 s_status_label_image[352] = { 0x111, 0, 0x111, 0x11111110, 0, 0x10000000, 0x111110, 0x11100000, 0,
     0x10000000, 17, 0x111111, 0x11100000, 0x10000000, 17, 0, 0x11100011, 1, 0x111, 0, 0x11100, 0x111110, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0x121, 0, 0x121, 0x12222210, 0, 0, 0x152251, 0x12100000, 17, 0x10000000, 18, 0x122221, 0x12100000,
     0x10000000, 18, 0, 0x21210121, 1, 0x121, 0, 0x1f2e10, 0x162210, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x11110121,
@@ -47,7 +47,7 @@ static u32 g_status_label_image[352] = { 0x111, 0, 0x111, 0x11111110, 0, 0x10000
     0x19f71174, 0x3b3c227a, 0x14830000, 0x29067775, 0x4e2c3988, 0x18ee62d2, 0x151610d2, 0xcec157c, 0x19f71174,
     0x3b3c227a, 0x4430000, 0x10c725d0, 0x192a1509, 0x18ee1d8e, 0x151610d2, 0xcec157c, 0x19f71174, 0x3b3c227a,
     0x14610000, 0x20c545ed, 0x31482906, 0x18ee3dab, 0x151610d2, 0xcec157c, 0x19f71174, 0x3b3c227a };
-static RECT g_status_label_rect = { 384, 245, 64, 11 };
+static RECT s_status_label_rect = { 384, 245, 64, 11 };
 
 /* Set up the formation screen's display: reset the menu context, clear the screen (except when
  * entering from name entry), upload the menu glyph sheet, palettes and status label image, and
@@ -116,7 +116,7 @@ void formation_display_init(void) {
     rect.w = 0xC;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
-    gfx_load_image_and_wait(&g_status_label_rect, g_status_label_image);
+    gfx_load_image_and_wait(&s_status_label_rect, s_status_label_image);
     g_help_message_text_id = 0;
     menu_scrollable_list_core_init(0, 0, 0);
     screen_fade_in_start();

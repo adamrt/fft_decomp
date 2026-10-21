@@ -30,14 +30,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static s32 g_script_loaded_event_id = -1;
+static s32 s_script_loaded_event_id = -1;
 
-static u16 g_script_map_darkness_durations[12] = { 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 0x100, 0 };
+static u16 s_script_map_darkness_durations[12] = { 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 0x100, 0 };
 
 /* Camera yaw selection and event status staging. */
-static s32 g_camera_yaw_band;
+static s32 s_camera_yaw_band;
 
-static s16 g_camera_diagonal_yaws[4] = { 3584, 2560, 1536, 512 };
+static s16 s_camera_diagonal_yaws[4] = { 3584, 2560, 1536, 512 };
 
 extern unit_status_staging_t* g_unit_status_staging_data;
 
@@ -59,18 +59,18 @@ typedef enum unit_status_staging_mask {
     UNIT_STATUS_STAGING_MASK_COUNT = 3
 } unit_status_staging_mask_e;
 
-static u16 g_script_unit_face_slot_order[24]
+static u16 s_script_unit_face_slot_order[24]
     = { 0, 4, 8, 12, 16, 20, 1, 5, 9, 13, 17, 21, 2, 6, 10, 14, 18, 3, 7, 11, 15, 19, 0x302, 0x100 };
 
 /* Frames per facing step, indexed by the RotateUnit speed operand. */
-static u8 g_unit_rotation_speed_frames[4] = { 4, 2, 1, 0 };
+static u8 s_unit_rotation_speed_frames[4] = { 4, 2, 1, 0 };
 
 /* Camera-relative facings, indexed by camera quadrant. */
-static u8 g_unit_facing_by_camera_quadrant[4] = { 0, 3, 2, 1 };
+static u8 s_unit_facing_by_camera_quadrant[4] = { 0, 3, 2, 1 };
 
 /* Statuses removed while saving the event staging snapshot. The retail rows
  * have an eight-byte stride, although only STATUS_BYTE_COUNT bytes are read. */
-static u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8] = {
+static u8 s_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8] = {
     /* Battle started: only these statuses are removed. */
     { STATUS_BYTE_MASK(STATUS_ID_UNDEAD) | STATUS_BYTE_MASK(STATUS_ID_JUMP),
         STATUS_BYTE_MASK(STATUS_ID_PETRIFY) | STATUS_BYTE_MASK(STATUS_ID_DARKNESS)
@@ -119,11 +119,11 @@ s32 script_next_event_load(void) {
     } while (task_id != 15);
 
     event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-    if (event_id == g_script_loaded_event_id) {
+    if (event_id == s_script_loaded_event_id) {
         return 0;
     }
     script_event_load(event_id);
-    g_script_loaded_event_id = event_id;
+    s_script_loaded_event_id = event_id;
     return 1;
 }
 
@@ -376,7 +376,7 @@ void script_opcode_1a_map_darkness(void) {
     parameters = (event_unit_color_t*)thread_current_parameter_1_get();
     battle_map_ambient_start_blend(
         parameters->mode, parameters->duration, parameters->rgb.r, parameters->rgb.g, parameters->rgb.b);
-    thread_frames_wait(g_script_map_darkness_durations[parameters->duration]);
+    thread_frames_wait(s_script_map_darkness_durations[parameters->duration]);
     thread_current_exit();
 }
 
@@ -704,7 +704,7 @@ void camera_yaw_band_store(s32 value) {
 
     for (lower_bound = -0x4000; lower_bound < 0x3FF8; lower_bound += ONE) {
         if (value < lower_bound + ONE && value >= lower_bound) {
-            g_camera_yaw_band = lower_bound;
+            s_camera_yaw_band = lower_bound;
         }
     }
 }
@@ -751,7 +751,7 @@ static s16 unblocked_yaw_choose(s32 runtime_id_a, s32 runtime_id_b) {
     for (i = 0; i < 4; i++) {
         if ((s16)(bit & mask) == 0) {
             /* Distance to this diagonal directly (delta) and the other way round (wrapped). */
-            delta = g_camera_diagonal_yaws[i] - yaw;
+            delta = s_camera_diagonal_yaws[i] - yaw;
             raw = delta;
             if (delta > 0) {
                 wrapped = delta - ONE;
@@ -1230,7 +1230,7 @@ void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, 
         runtime_id = script_runtime_id_resolve(runtime_id);
         if (runtime_id != EVENT_RUNTIME_ID_NONE) {
             for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                if (unit_id_filter(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0
+                if (unit_id_filter(&unit_id, &s_script_unit_face_slot_order[i], &filter_mode) != 0
                     && runtime_id != unit_id) {
                     unit_world_coords_copy(runtime_id, &position);
                     unit_world_coords_copy(unit_id, &target);
@@ -1247,7 +1247,7 @@ void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, 
                         state = &g_unit_animation_states[runtime_id];
                         state->target_facing = facing;
                         state->rotate_mode = parameters->mode;
-                        state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
+                        state->frames_per_step = s_unit_rotation_speed_frames[parameters->speed];
                         state->step_counter = 0;
                         state->rotating = 1;
                         state->delay = parameters->delay >> 2;
@@ -1255,7 +1255,7 @@ void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, 
                     state = &g_unit_animation_states[unit_id];
                     state->target_facing = reverse;
                     state->rotate_mode = parameters->mode;
-                    state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
+                    state->frames_per_step = s_unit_rotation_speed_frames[parameters->speed];
                     state->step_counter = 0;
                     state->rotating = 1;
                     state->delay = parameters->delay * order++ / 4;
@@ -1291,20 +1291,20 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
     unit_id = script_s16_read(parameters->unit_id_le);
     if (unit_filter_prepare(&unit_id, &filter_mode) != 0) {
         for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-            if (unit_id_filter(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0) {
+            if (unit_id_filter(&unit_id, &s_script_unit_face_slot_order[i], &filter_mode) != 0) {
                 facing = parameters->facing;
                 if (facing >= EVENT_ROTATE_UNIT_FACING_RELATIVE_FIRST && facing < EVENT_ROTATE_UNIT_FACING_RESTORE) {
                     facing = facing & 0xF;
                     facing = unit_runtime_facing_sixteenth_get(unit_id) + facing * 4;
                     facing = facing & 0xF;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_CAMERA) {
-                    facing = g_unit_facing_by_camera_quadrant[(camera_yaw_wrap() & 0xC00) >> 10] * 4;
+                    facing = s_unit_facing_by_camera_quadrant[(camera_yaw_wrap() & 0xC00) >> 10] * 4;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_RESTORE) {
                     state = &g_unit_animation_states[unit_id];
                     if (state->initial_facing != 0xFF) {
                         state->rotate_mode = UNIT_ROTATE_MODE_SHORTEST;
                         state->target_facing = state->initial_facing;
-                        state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
+                        state->frames_per_step = s_unit_rotation_speed_frames[parameters->speed];
                         state->step_counter = 0;
                         state->rotating = 1;
                         state->delay = parameters->delay * order++ / 4;
@@ -1320,7 +1320,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
                 state = &g_unit_animation_states[unit_id];
                 state->target_facing = facing;
                 state->rotate_mode = parameters->mode;
-                state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
+                state->frames_per_step = s_unit_rotation_speed_frames[parameters->speed];
                 state->step_counter = 0;
                 state->rotating = 1;
                 state->delay = parameters->delay * order++ / 4;
@@ -1397,14 +1397,14 @@ s32 unit_status_staging_save(s32 battle_id) {
                     || stats->job_id == JOB_ID_WIZARD_UNDEAD || stats->job_id == JOB_ID_TIME_MAGE_UNDEAD
                     || stats->job_id == JOB_ID_ORACLE_UNDEAD || stats->job_id == JOB_ID_SUMMONER_UNDEAD) {
                     value = stats->status_sets.current[i];
-                    value &= g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD][i];
+                    value &= s_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD][i];
                     st = g_unit_status_staging_data;
                     stats->action.status_changes.removal[i] = value;
                     st->added[battle_id][i] = value;
                     st->removed[battle_id][i] = value;
                 } else {
                     value = stats->status_sets.current[i];
-                    value &= g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_PRE_BATTLE][i];
+                    value &= s_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_PRE_BATTLE][i];
                     st = g_unit_status_staging_data;
                     stats->action.status_changes.removal[i] = value;
                     st->added[battle_id][i] = value;
@@ -1412,7 +1412,7 @@ s32 unit_status_staging_save(s32 battle_id) {
                 }
             } else {
                 value = stats->status_sets.current[i];
-                value &= g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_BATTLE_STARTED][i];
+                value &= s_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_BATTLE_STARTED][i];
                 st = g_unit_status_staging_data;
                 stats->action.status_changes.removal[i] = value;
                 st->added[battle_id][i] = value;
@@ -1919,7 +1919,7 @@ void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) 
         return;
     }
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        if (unit_id_filter(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0) {
+        if (unit_id_filter(&unit_id, &s_script_unit_face_slot_order[i], &filter_mode) != 0) {
             unit_world_coords_copy(unit_id, &world_position);
             dx = tile.vx - world_position.vx;
             dy = tile.vz - world_position.vz;
@@ -1927,7 +1927,7 @@ void script_opcode_69_face_tile(const event_face_tile_parameters_t* parameters) 
             rotation_state = &g_unit_animation_states[unit_id];
             rotation_state->target_facing = facing;
             rotation_state->rotate_mode = parameters->mode;
-            rotation_state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
+            rotation_state->frames_per_step = s_unit_rotation_speed_frames[parameters->speed];
             rotation_state->step_counter = 0;
             rotation_state->rotating = 1;
             rotation_state->delay = (parameters->delay * order++) / 4;

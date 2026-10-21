@@ -17,10 +17,10 @@
 extern RECT g_formation_sheet_rect;
 extern RECT g_formation_sheet_source_rect;
 
-static RECT g_portrait_upload_rect = { 0 };
-static RECT g_portrait_palette_upload_rect = { 0 };
-static u8 g_portrait_staging[768] = { 0 };
-static u8 g_formation_sprite_staging[1152] = { 0 };
+static RECT s_portrait_upload_rect = { 0 };
+static RECT s_portrait_palette_upload_rect = { 0 };
+static u8 s_portrait_staging[768] = { 0 };
+static u8 s_formation_sprite_staging[1152] = { 0 };
 
 /* Uploads the portraits and palettes of roster slots 0-19 from EVENT/WLDFACE.BIN to VRAM,
  * plus slot 20, the scenario's special portrait (g_portrait_special_wldface_id). With
@@ -118,10 +118,10 @@ void portrait_prepare_party_textures(void) {
         col = value % 8;
         /* Copy the 32x48 cell (16 bytes by 48 rows of the sheet's 128-byte rows) into the
          * staging buffer and upload it: party slots in rows of seven from (0x100, 0x28). */
-        g_portrait_upload_rect.x = (i % 7) * 8 + 0x100;
-        g_portrait_upload_rect.y = (i / 7) * 0x30 + 0x28;
-        g_portrait_upload_rect.w = 8;
-        g_portrait_upload_rect.h = 0x30;
+        s_portrait_upload_rect.x = (i % 7) * 8 + 0x100;
+        s_portrait_upload_rect.y = (i / 7) * 0x30 + 0x28;
+        s_portrait_upload_rect.w = 8;
+        s_portrait_upload_rect.h = 0x30;
         j = 0;
         offset = row * 2;
         offset += row;
@@ -132,21 +132,21 @@ void portrait_prepare_party_textures(void) {
         src = (u8*)(sheet * WLDFACE_SHEET_SIZE + (s32)file + offset);
         for (; j < 0x30; j++) {
             for (col = 0; col < 0x10; col++) {
-                g_portrait_staging[j * 0x10 + col] = src[col];
+                s_portrait_staging[j * 0x10 + col] = src[col];
             }
             src += 0x80;
         }
         if (j <= 0) {
             j = 0;
         }
-        LoadImage(i == 20 ? &g_portrait_special_rect : &g_portrait_upload_rect, (u32*)g_portrait_staging);
+        LoadImage(i == 20 ? &g_portrait_special_rect : &s_portrait_upload_rect, (u32*)s_portrait_staging);
         /* Upload the portrait's palette, three per VRAM line from (0x100, 0): palette n is in
          * row n / 4 of the sheet's palette block; a monster's alternate palette is in its row
          * from WLDFACE_MONSTER_PALETTE_ROW, at the palette number's column. */
-        g_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
-        g_portrait_palette_upload_rect.y = i / 3;
-        g_portrait_palette_upload_rect.w = 0x10;
-        g_portrait_palette_upload_rect.h = 1;
+        s_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
+        s_portrait_palette_upload_rect.y = i / 3;
+        s_portrait_palette_upload_rect.w = 0x10;
+        s_portrait_palette_upload_rect.h = 1;
         sheet = cell / WLDFACE_PORTRAITS_PER_SHEET;
         value = cell - sheet * WLDFACE_PORTRAITS_PER_SHEET;
         row = value / 4;
@@ -163,7 +163,7 @@ void portrait_prepare_party_textures(void) {
         if (i == 20) {
             LoadImage(&g_portrait_special_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         } else {
-            LoadImage(&g_portrait_palette_upload_rect, (u32*)((u8*)&file[sheet] + pal_offset));
+            LoadImage(&s_portrait_palette_upload_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         }
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             thread_yield();
@@ -310,7 +310,7 @@ void formation_prepare_sprites(void) {
         /* Clear the 48x48 staging cell; a 24x40 cell sits in it centered and bottom-aligned. */
         cell_row = row;
         x = 0x47F;
-        pixel = &g_formation_sprite_staging[0x47F];
+        pixel = &s_formation_sprite_staging[0x47F];
         do {
             *pixel = 0;
             x--;
@@ -321,31 +321,31 @@ void formation_prepare_sprites(void) {
             palette_base = (quotient << 15) + ((column * 0x30 + cell_row * 0x3000 + 0x2800) >> 1);
             y = 0;
             source = (s32)buffer + palette_base;
-            g_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
-            g_portrait_upload_rect.y = (i / 5) * 0x30;
-            g_portrait_upload_rect.w = 0xC;
-            g_portrait_upload_rect.h = 0x30;
+            s_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
+            s_portrait_upload_rect.y = (i / 5) * 0x30;
+            s_portrait_upload_rect.w = 0xC;
+            s_portrait_upload_rect.h = 0x30;
             for (; y < 0x30; y++) {
                 for (x = 0; x < 0x18; x++) {
-                    g_formation_sprite_staging[y * 0x18 + x] = *(u8*)(y * 0x80 + (source + x));
+                    s_formation_sprite_staging[y * 0x18 + x] = *(u8*)(y * 0x80 + (source + x));
                 }
             }
-            LoadImage(&g_portrait_upload_rect, (u32*)g_formation_sprite_staging);
+            LoadImage(&s_portrait_upload_rect, (u32*)s_formation_sprite_staging);
             g_formation_sprite_tall_cell[i] = 1;
         } else {
             palette_base = (quotient << 15) + ((column * 0x18 + cell_row * 0x2800) >> 1);
             y = 8;
             source = (s32)buffer + palette_base;
-            g_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
-            g_portrait_upload_rect.y = (i / 5) * 0x30;
-            g_portrait_upload_rect.w = 0xC;
-            g_portrait_upload_rect.h = 0x30;
+            s_portrait_upload_rect.x = (i % 5) * 0xC + 0x180;
+            s_portrait_upload_rect.y = (i / 5) * 0x30;
+            s_portrait_upload_rect.w = 0xC;
+            s_portrait_upload_rect.h = 0x30;
             for (; y < 0x30; y++) {
                 for (x = 6; x < 0x12; x++) {
-                    g_formation_sprite_staging[y * 0x18 + x] = *(u8*)(x + source + ((y - 8) * 0x80 - 6));
+                    s_formation_sprite_staging[y * 0x18 + x] = *(u8*)(x + source + ((y - 8) * 0x80 - 6));
                 }
             }
-            LoadImage(&g_portrait_upload_rect, (u32*)g_formation_sprite_staging);
+            LoadImage(&s_portrait_upload_rect, (u32*)s_formation_sprite_staging);
             g_formation_sprite_tall_cell[i] = 0;
         }
 
@@ -363,11 +363,11 @@ void formation_prepare_sprites(void) {
         row = code / 4;
         column = code % 4;
         offset = (row * 0x100 + column * 0x40) / 2 + 0xF000;
-        g_portrait_palette_upload_rect.x = (i % 4) * 0x10 + 0x180;
-        g_portrait_palette_upload_rect.y = i / 4 + 0xE0;
-        g_portrait_palette_upload_rect.w = 0x10;
-        g_portrait_palette_upload_rect.h = 1;
-        LoadImage(&g_portrait_palette_upload_rect, (u32*)(buffer + offset));
+        s_portrait_palette_upload_rect.x = (i % 4) * 0x10 + 0x180;
+        s_portrait_palette_upload_rect.y = i / 4 + 0xE0;
+        s_portrait_palette_upload_rect.w = 0x10;
+        s_portrait_palette_upload_rect.h = 1;
+        LoadImage(&s_portrait_palette_upload_rect, (u32*)(buffer + offset));
 
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             thread_yield();

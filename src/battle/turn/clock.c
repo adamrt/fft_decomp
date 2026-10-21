@@ -21,7 +21,7 @@ typedef enum upkeep_result {
     STATUS_UPKEEP_DEATH_SENTENCE = 3
 } upkeep_result_e;
 
-static u8 g_turn_pending_flags[UNIT_SLOT_COUNT] = { 0 };
+static u8 s_turn_pending_flags[UNIT_SLOT_COUNT] = { 0 };
 
 static s32 turn_move_act_taken_set(s32 unit_id, s32 move_flag, s32 act_flag);
 
@@ -233,11 +233,11 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             i = 0;
             do {
                 unit = &g_unit_stats[i];
-                g_turn_pending_flags[i] = 0;
+                s_turn_pending_flags[i] = 0;
                 if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
-                    g_turn_pending_flags[i] = unit->action.attack_type;
+                    s_turn_pending_flags[i] = unit->action.attack_type;
                 }
                 /* clang-format off */
             } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_PENDING_ACTIONS;
@@ -245,8 +245,8 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             break;
         case TURN_CLOCK_STATE_RUN_PENDING_ACTIONS:
             for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                if (g_turn_pending_flags[i] != 0) {
-                    g_turn_pending_flags[i] = 0;
+                if (s_turn_pending_flags[i] != 0) {
+                    s_turn_pending_flags[i] = 0;
                     result = i | TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -341,9 +341,9 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
                 i = 0;
                 do {
                     unit = &g_unit_stats[i];
-                    g_turn_pending_flags[i] = 0;
+                    s_turn_pending_flags[i] = 0;
                     if (unit->job_id == JOB_ID_MIME && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
-                        g_turn_pending_flags[i] = 1;
+                        s_turn_pending_flags[i] = 1;
                     }
                     /* clang-format off */
                 } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_MIMES;
@@ -356,8 +356,8 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             g_action_mimic_attacker.mimic_pending = 0;
             for (i = 0; i < UNIT_SLOT_COUNT; i++) {
                 unit = &g_unit_stats[i];
-                if (g_turn_pending_flags[i] != 0 && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
-                    g_turn_pending_flags[i] = 0;
+                if (s_turn_pending_flags[i] != 0 && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
+                    s_turn_pending_flags[i] = 0;
                     ret = action_mimic_set_ability(unit);
                     if (ret == 1) {
                         result = i | TURN_EVENT_ABILITY_READY;

@@ -33,7 +33,7 @@ typedef enum menu_math_skill_list {
 
 extern s16 g_command_skillset_row_actions[];
 extern u8 g_command_skillset_disabled_flags[]; /* per-row grayed flag */
-static s16 g_command_action_slot_selected_option;
+static s16 s_command_action_slot_selected_option;
 
 /* The selected row and scroll position of an ability list. */
 typedef struct menu_list_selection {
@@ -72,7 +72,7 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-static u8 g_menu_cleared_entry_indices[11] = { MENU_COMMAND_ID_WAIT_YES_NO, MENU_COMMAND_ID_PROMPT_YES_NO,
+static u8 s_menu_cleared_entry_indices[11] = { MENU_COMMAND_ID_WAIT_YES_NO, MENU_COMMAND_ID_PROMPT_YES_NO,
     MENU_COMMAND_ID_MESSAGE_YES_NO, MENU_COMMAND_ID_TARGET_KIND, MENU_COMMAND_ID_PANEL_EXECUTE,
     MENU_COMMAND_ID_MESSAGE_TARGET_KIND, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, MENU_COMMAND_ID_AUTO_BATTLE_UNIT,
     MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, MENU_COMMAND_ID_MESSAGE_EXECUTE };
@@ -88,7 +88,7 @@ void menu_clear_entry_selections(void) {
     s32 i;
 
     for (i = 0; i < 11; i++) {
-        g_menu_thread_menu_data[g_menu_cleared_entry_indices[i]].selected_index = 0;
+        g_menu_thread_menu_data[s_menu_cleared_entry_indices[i]].selected_index = 0;
     }
 }
 
@@ -510,7 +510,7 @@ void command_ability_list_thread(void) {
         if (menu != ACTION_MENU_TYPE_MATH_SKILL) {
             thread_current_exit();
         }
-        if (g_command_action_slot_selected_option == -1) {
+        if (s_command_action_slot_selected_option == -1) {
             if (i == 2) {
                 thread_current_exit();
             }

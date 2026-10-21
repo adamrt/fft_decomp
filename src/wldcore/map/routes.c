@@ -71,7 +71,7 @@ extern s32 g_travel_search_depth;
 extern s32 g_travel_search_cost;
 extern travel_path_t g_travel_search_path;
 extern random_battle_road_t (*g_random_battle_roads)[3];
-static s32 g_random_battle_map_id;
+static s32 s_random_battle_map_id;
 extern s32 g_world_map_dot_count;
 extern u8 g_world_map_dot_pulse_direction;
 extern u8 g_world_map_dot_pulse_phase;
@@ -81,13 +81,13 @@ extern u8 g_world_map_dot_pulse_phase;
 extern world_map_route_header_t* g_world_map_route_table[WORLD_MAP_ROUTE_COUNT];
 extern u16* g_world_map_route_polyline_table[WORLD_MAP_ROUTE_COUNT];
 
-static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT];
-static location_record_t g_location_record_data[LOCATION_COUNT];
-static world_map_dot_source_t* g_world_map_dot_sources = g_world_map_dot_source_data;
-location_record_t* g_location_records = g_location_record_data;
+static world_map_dot_source_t s_world_map_dot_source_data[LOCATION_COUNT];
+static location_record_t s_location_record_data[LOCATION_COUNT];
+static world_map_dot_source_t* s_world_map_dot_sources = s_world_map_dot_source_data;
+location_record_t* g_location_records = s_location_record_data;
 
 /* Packed map positions and dot categories, in location_id_e order. */
-static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT] = {
+static world_map_dot_source_t s_world_map_dot_source_data[LOCATION_COUNT] = {
     { 0x0000fffa, 0x0000ffba },
     { 0x0000ffac, 0x0000ff95 },
     { 0x0000ff44, 0x0000ffc3 },
@@ -133,7 +133,7 @@ static world_map_dot_source_t g_world_map_dot_source_data[LOCATION_COUNT] = {
     { 0x0202008e, 0x0000ffee },
 };
 
-static location_record_t g_location_record_data[LOCATION_COUNT] = {
+static location_record_t s_location_record_data[LOCATION_COUNT] = {
     { { 0, 0 }, 1, LOCATION_MENU_TOWN },
     { { 0, 0 }, 2, LOCATION_MENU_TOWN },
     { { 0, 0 }, 3, LOCATION_MENU_TOWN },
@@ -179,8 +179,8 @@ static location_record_t g_location_record_data[LOCATION_COUNT] = {
     { { 0, 0 }, 0, LOCATION_MENU_OTHER },
 };
 
-static world_map_route_header_t** g_world_map_routes = g_world_map_route_table;
-static u16** g_world_map_route_polylines = g_world_map_route_polyline_table;
+static world_map_route_header_t** s_world_map_routes = g_world_map_route_table;
+static u16** s_world_map_route_polylines = g_world_map_route_polyline_table;
 
 static void coordinates_clamp(const SVECTOR* input, VECTOR* output);
 static s32 encounter_roll(s32 location, s32 route);
@@ -203,7 +203,7 @@ void world_map_dots_init(void) {
     /* Queue entries are built from the flags column base; &dots[i].render.flags does not match. */
     flags_base = &dots->render.flags;
     dot = dots;
-    src = g_world_map_dot_sources;
+    src = s_world_map_dot_sources;
     g_world_map_dot_pulse_direction = 0;
     g_world_map_dot_pulse_phase = 0;
     g_world_map_dot_count = 0;
@@ -544,7 +544,7 @@ void world_map_routes_draw(GsOT* ot) {
         return;
     }
 
-    table = g_world_map_route_polylines;
+    table = s_world_map_route_polylines;
     SetPolyFT4(&poly);
     SetSemiTrans(&poly, 1);
     setUV4(&poly, 0x88, 0xE0, 0x97, 0xE0, 0x88, 0xEF, 0x97, 0xEF);
@@ -623,7 +623,7 @@ static s32 travel_segment_begin(travel_t* state, u32 route, s32 step) {
     s32 flags;
 
     /* Direct indexing or separate typed locals move the table load after the route-ID store. */
-    record = (world_map_route_header_t*)g_world_map_routes;
+    record = (world_map_route_header_t*)s_world_map_routes;
     state->route_id = route & TRAVEL_PATH_ROUTE_MASK;
     flags = state->flags;
     state->flags = flags | ((route >> 7) & TRAVEL_REVERSED);
@@ -689,7 +689,7 @@ void world_map_path_animation_prepare(s32 from, s32 to) {
     s32 dy;
     s32 i;
 
-    records = g_world_map_routes;
+    records = s_world_map_routes;
     g_world_map_path_animation.flags = 0;
     for (i = 0; i < WORLD_MAP_ROUTE_COUNT; i++) {
         record = *records;
@@ -716,7 +716,7 @@ void world_map_path_animation_prepare(s32 from, s32 to) {
     g_world_map_path_animation.frame_timer = 0;
     g_world_map_path_animation.segment_index = 0;
     g_world_map_path_animation.segment_count = first;
-    data = (u16*)g_world_map_route_polylines;
+    data = (u16*)s_world_map_route_polylines;
     data = ((u16**)data)[g_world_map_path_animation.route_id];
     g_world_map_path_animation.point_count = *data;
     data++;
@@ -821,7 +821,7 @@ static void travel_path_find(s32 from, s32 to) {
         return;
     }
 
-    table = g_world_map_routes;
+    table = s_world_map_routes;
     for (route = 0; route < WORLD_MAP_ROUTE_COUNT; route++) {
         if (VSync(1) > 200) {
             file_load_poll(&g_file_cd_state);
@@ -1003,7 +1003,7 @@ void travel_step(void) {
                     g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)
                 != 0) {
                 g_world_map_flags |= WORLD_MAP_FLAG_RANDOM_BATTLE;
-                g_travel_next_map_id = g_random_battle_map_id;
+                g_travel_next_map_id = s_random_battle_map_id;
                 script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, g_random_battle_entd_id);
                 script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
                 script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_random_battle_squad_id);
@@ -1269,7 +1269,7 @@ static s32 encounter_roll(s32 location, s32 route) {
         }
         /* Typed indexing folds the base and index differently; derive the byte index from the last ENTD. */
         g_random_battle_entd_id = ((u8*)base)[offset + offsetof(random_battle_road_t, entd_ids[7]) - location];
-        g_random_battle_map_id = ENTRY_AT(offset)->battle_map_id;
+        s_random_battle_map_id = ENTRY_AT(offset)->battle_map_id;
         return 1;
     }
 

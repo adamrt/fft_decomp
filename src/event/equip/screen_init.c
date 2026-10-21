@@ -18,10 +18,10 @@
 
 extern clut_t g_equipment_palette_image;
 
-static menu_gfx_context_t g_equipment_gfx_contexts[2] = { 0 };
-static DR_MODE g_equipment_gfx_draw_mode_buffer[60] = { 0 };
-static LINE_F2 g_equipment_gfx_line_f2_buffer[20] = { 0 };
-static TILE g_equipment_gfx_tile_buffer[20] = { 0 };
+static menu_gfx_context_t s_equipment_gfx_contexts[2] = { 0 };
+static DR_MODE s_equipment_gfx_draw_mode_buffer[60] = { 0 };
+static LINE_F2 s_equipment_gfx_line_f2_buffer[20] = { 0 };
+static TILE s_equipment_gfx_tile_buffer[20] = { 0 };
 
 /* Upload the menu glyph sheet and palette image, copy two window-frame palettes into VRAM row 254
  * (each also as a 12-color copy from color 4, with color 4 cleared), then reset the screen's
@@ -111,9 +111,9 @@ void equipment_init(s32 battle_id) {
     g_gfx_sprite_capacity = 0;
     g_gfx_sprite_8_capacity = 0;
     g_gfx_sprite_16_capacity = 0;
-    equipment_gfx_init_contexts(g_equipment_gfx_contexts, g_gfx_otag_buffer, 0, 0, 0, g_gfx_poly_ft4_buffer, 0, 0, 0, 0,
-        g_equipment_gfx_line_f2_buffer, 0, 0, 0, 0, 0, g_equipment_gfx_tile_buffer, 0, 0, 0, 0, 0, 0,
-        g_gfx_draw_move_buffer, g_gfx_draw_area_buffer, g_equipment_gfx_draw_mode_buffer);
+    equipment_gfx_init_contexts(s_equipment_gfx_contexts, g_gfx_otag_buffer, 0, 0, 0, g_gfx_poly_ft4_buffer, 0, 0, 0, 0,
+        s_equipment_gfx_line_f2_buffer, 0, 0, 0, 0, 0, s_equipment_gfx_tile_buffer, 0, 0, 0, 0, 0, 0,
+        g_gfx_draw_move_buffer, g_gfx_draw_area_buffer, s_equipment_gfx_draw_mode_buffer);
     equipment_load_unit(battle_id);
     equipment_load_images();
     g_unit_panel_unit_status_panel_params.flags = battle_id;

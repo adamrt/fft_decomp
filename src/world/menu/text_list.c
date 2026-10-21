@@ -19,7 +19,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static menu_list_page_t g_text_list_pages[2] = { 0 };
+static menu_list_page_t s_text_list_pages[2] = { 0 };
 
 /* Page a three-column text screen while Square is held: Up and Down move by a page within the
  * hidden rows, and a pending redraw request also counts. When anything changed, redraw the columns
@@ -131,7 +131,7 @@ void screen_text_list_thread(void) {
     s32 span;
     s32 repeat;
 
-    page = g_text_list_pages;
+    page = s_text_list_pages;
     timer = 0;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);
@@ -158,10 +158,10 @@ void screen_text_list_thread(void) {
     texture_window.h = 0x100;
 
     for (i = 0; i < 2; i++) {
-        g_text_list_pages[i].icons.icons[0] = &icons0[i];
-        g_text_list_pages[i].icons.icons[1] = &icons1[i];
-        g_text_list_pages[i].icons.icons[2] = &icons2[i];
-        menu_build_window_sprites(&image_rect, entry, &g_text_list_pages[i].icons);
+        s_text_list_pages[i].icons.icons[0] = &icons0[i];
+        s_text_list_pages[i].icons.icons[1] = &icons1[i];
+        s_text_list_pages[i].icons.icons[2] = &icons2[i];
+        menu_build_window_sprites(&image_rect, entry, &s_text_list_pages[i].icons);
     }
 
     menu_init_scaled_draw_area_packets(&page->draw_areas);
@@ -227,11 +227,11 @@ void screen_text_list_thread(void) {
 
     /* The loop draws from the two pages alternately. The copy also took page 0's icon pointers,
      * so point each page back at its own sprites. */
-    mem_copy_bytes_nonempty(&g_text_list_pages[1], g_text_list_pages, sizeof(menu_list_page_t));
+    mem_copy_bytes_nonempty(&s_text_list_pages[1], s_text_list_pages, sizeof(menu_list_page_t));
     for (i = 0; i < 2; i++) {
-        g_text_list_pages[i].icons.icons[0] = &icons0[i];
-        g_text_list_pages[i].icons.icons[1] = &icons1[i];
-        g_text_list_pages[i].icons.icons[2] = &icons2[i];
+        s_text_list_pages[i].icons.icons[0] = &icons0[i];
+        s_text_list_pages[i].icons.icons[1] = &icons1[i];
+        s_text_list_pages[i].icons.icons[2] = &icons2[i];
     }
 
     layout = binding;
@@ -241,7 +241,7 @@ void screen_text_list_thread(void) {
     i = 0;
     *input1 = 0;
     for (;;) {
-        page = &g_text_list_pages[i & 1];
+        page = &s_text_list_pages[i & 1];
         frame = &page->frame;
 
         /* The frame thread dims its border while the thread before this one runs. */

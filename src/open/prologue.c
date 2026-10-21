@@ -75,9 +75,9 @@ typedef struct prologue_crossfade {
 typedef char prologue_crossfade_size_must_be_182[sizeof(prologue_crossfade_t) == 182 ? 1 : -1];
 
 extern prologue_crossfade_t g_prologue_crossfade;
-static u16* volatile g_prologue_crossfade_new_picture;
-static u16* g_prologue_crossfade_old_picture;
-static u16* g_prologue_crossfade_frame_pixels;
+static u16* volatile s_prologue_crossfade_new_picture;
+static u16* s_prologue_crossfade_old_picture;
+static u16* s_prologue_crossfade_frame_pixels;
 
 /* prologue_step_crossfade reloads the source pointer for every column. */
 
@@ -349,9 +349,9 @@ static void prologue_prepare_crossfade(s32 file_index) {
     file_image = g_file_destination;
     /* The 210x180 picture begins at row 43 of the 256-pixel frame image. */
     file_pixels = file_image[43];
-    g_prologue_crossfade_new_picture = copy_source;
-    g_prologue_crossfade_old_picture = copy_destination;
-    g_prologue_crossfade_frame_pixels = file_pixels;
+    s_prologue_crossfade_new_picture = copy_source;
+    s_prologue_crossfade_old_picture = copy_destination;
+    s_prologue_crossfade_frame_pixels = file_pixels;
     file_request_openbk_image(file_index + 2, g_system_work_buffer_0);
 
     row = 0;
@@ -363,10 +363,10 @@ static void prologue_prepare_crossfade(s32 file_index) {
             destination_index = source_row + column;
             source_index = source_offset + column++;
             destination_index <<= 1;
-            pixels = g_prologue_crossfade_frame_pixels;
+            pixels = s_prologue_crossfade_frame_pixels;
             value = pixels[source_index];
             /* Destination indexing hoists pointer loads; byte-pointer arithmetic changes registers. */
-            *(u16*)(destination_index + (u32)g_prologue_crossfade_old_picture) = value;
+            *(u16*)(destination_index + (u32)s_prologue_crossfade_old_picture) = value;
         }
         g_prologue_crossfade.row_steps[row] = 0;
         source_row += PROLOGUE_IMAGE_WIDTH;
@@ -425,8 +425,8 @@ static void prologue_step_crossfade(void) {
                     fade = g_prologue_crossfade.row_steps[row]++;
                     do {
                         /* An ordinary source-pointer load is hoisted and adds a saved-register frame. */
-                        source_pixel = g_prologue_crossfade_new_picture[source_row_start + column];
-                        destination_pixel = g_prologue_crossfade_old_picture[source_row_start + column];
+                        source_pixel = s_prologue_crossfade_new_picture[source_row_start + column];
+                        destination_pixel = s_prologue_crossfade_old_picture[source_row_start + column];
                         pixel = 0;
                         if (source_pixel != destination_pixel) {
                             for (component = 2; component >= 0; component--) {
@@ -448,7 +448,7 @@ static void prologue_step_crossfade(void) {
                         } else {
                             pixel = source_pixel;
                         }
-                        g_prologue_crossfade_frame_pixels[destination_row_start + column]
+                        s_prologue_crossfade_frame_pixels[destination_row_start + column]
                             = pixel | (destination_pixel & 0x8000);
                         column++;
                     } while (column < PROLOGUE_IMAGE_WIDTH);

@@ -102,10 +102,10 @@ extern u32 g_sound_novel_local_flags[];
 extern s32 g_sound_novel_wait_counter;
 extern s32 g_sound_novel_wait_frames;
 extern s32 g_sound_novel_countdown_section;
-static s32 g_sound_novel_countdown_elapsed;
+static s32 s_sound_novel_countdown_elapsed;
 
 /* Opcode-indexed dispatch, defined after its handlers below. */
-static void (*g_sound_novel_opcode_handlers[54])(void);
+static void (*s_sound_novel_opcode_handlers[54])(void);
 
 /* Sound IDs 1 through 56 select four-byte rows in the WLDCORE sound bank. */
 extern u8 g_sound_novel_sound_quads[56][4];
@@ -310,7 +310,7 @@ s32 sound_novel_script_run(void) {
             g_sound_novel_reading.word_index++;
         }
 
-        g_sound_novel_opcode_handlers[(u8)g_sound_novel_reading.instruction]();
+        s_sound_novel_opcode_handlers[(u8)g_sound_novel_reading.instruction]();
 
         flags = g_sound_novel_reading.state_flags;
         g_sound_novel_reading.state_flags = flags & ~SOUND_NOVEL_STATE_FETCHED;
@@ -462,8 +462,8 @@ static s32 choice_timer_update(void) {
     }
 
     if (g_sound_novel_countdown_frames != 0) {
-        elapsed = g_sound_novel_countdown_elapsed + 1;
-        g_sound_novel_countdown_elapsed = elapsed;
+        elapsed = s_sound_novel_countdown_elapsed + 1;
+        s_sound_novel_countdown_elapsed = elapsed;
         remaining = g_sound_novel_countdown_frames - elapsed;
         if (g_hud_value_mode == HUD_VALUE_PLAY_TIME) {
             hours = remaining / 216000;
@@ -1140,7 +1140,7 @@ static void sound_novel_opcode_2e_start_countdown_timer(void) {
     u32 instruction;
 
     instruction = g_sound_novel_reading.instruction;
-    g_sound_novel_countdown_elapsed = 0;
+    s_sound_novel_countdown_elapsed = 0;
     g_sound_novel_countdown_frames = ((instruction << 8) >> 16) * 60;
     g_sound_novel_countdown_section = instruction >> 24;
     g_sound_novel_state_flags |= SOUND_NOVEL_STATE_FETCH;
@@ -1252,7 +1252,7 @@ static void sound_novel_opcode_35_push_operand_history(void) {
 }
 
 /* Dispatch by the instruction's low-byte opcode. */
-static void (*g_sound_novel_opcode_handlers[54])(void) = {
+static void (*s_sound_novel_opcode_handlers[54])(void) = {
     sound_novel_opcode_00_end_script,
     sound_novel_opcode_01_end_section,
     sound_novel_opcode_02_nop,

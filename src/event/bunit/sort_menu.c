@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* reorder list */
-static u8 g_unit_list_reorder_list_initialized;
+static u8 s_unit_list_reorder_list_initialized;
 extern menu_entry_t g_unit_list_reorder_list_desc;
 extern s16 g_unit_list_reorder_list_entries[];
 extern s16 g_unit_list_reorder_list_redraw_request;
@@ -68,7 +68,7 @@ void unit_list_sort_menu_update(void) {
     s32 sel;
     s32 keep;
 
-    if (g_unit_list_reorder_list_initialized == 0) {
+    if (s_unit_list_reorder_list_initialized == 0) {
         g_unit_list_reorder_list_desc.selected_index = 0;
         unit_list_load_sort_order(1, g_unit_list_reorder_list_entries);
         /* The rows show text entry key + 1 of the menu section, in priority order. */
@@ -83,11 +83,11 @@ void unit_list_sort_menu_update(void) {
         } while (i < UNIT_LIST_SORT_KEY_COUNT);
         opts[UNIT_LIST_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_unit_list_text_menu_section, g_unit_list_text_reorder_list_buffer, opts, 1);
-        g_unit_list_reorder_list_initialized = 1;
+        s_unit_list_reorder_list_initialized = 1;
     }
 
     if (unit_list_update_menu_thread(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
-        g_unit_list_reorder_list_initialized = 0;
+        s_unit_list_reorder_list_initialized = 0;
         g_unit_list_current_menu = UNIT_LIST_MENU_UNIT_LIST;
     }
 

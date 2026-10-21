@@ -18,7 +18,7 @@ extern effect_sprite_section_t* g_effect_secondary_particle_frame_data_ptr;
 
 /* Secondary pool and slot-chain ownership. */
 extern effect_secondary_data_t g_effect_secondary_data[EFFECT_SECONDARY_RECORD_COUNT];
-static u16 g_effect_secondary_free_head;
+static u16 s_effect_secondary_free_head;
 extern u16 g_effect_secondary_active_tail;
 extern u8 g_effect_slot_active_head;
 extern u8 g_effect_slot_free_head;
@@ -53,7 +53,7 @@ void effect_system_init(void) {
     g_effect_secondary_data[0].previous_slot_id = 0;
     g_effect_secondary_data[EFFECT_SECONDARY_SLOT_COUNT].next_slot_id = EFFECT_SECONDARY_SLOT_COUNT - 1;
     g_effect_secondary_data[EFFECT_SECONDARY_SLOT_COUNT].own_slot_id = EFFECT_SECONDARY_SLOT_COUNT;
-    g_effect_secondary_free_head = 1;
+    s_effect_secondary_free_head = 1;
     g_effect_secondary_data[0].next_slot_id = 0;
     g_effect_secondary_data[0].own_slot_id = 0;
     g_effect_secondary_data[0].function_id = 0;
@@ -83,13 +83,13 @@ void effect_system_init(void) {
  * v0,s0` instead of a folded 0. Writing previous_slot_id before the next_slot_id
  * clear reproduces the target's early g_effect_secondary_active_tail load. */
 static u8 secondary_record_alloc(void) {
-    s32 id = (u8)g_effect_secondary_free_head;
+    s32 id = (u8)s_effect_secondary_free_head;
     s32 slot = id & 0xff;
     s32 i;
 
     if (slot != 0) {
-        g_effect_secondary_free_head = g_effect_secondary_data[slot].previous_slot_id;
-        g_effect_secondary_data[g_effect_secondary_free_head].next_slot_id = 0;
+        s_effect_secondary_free_head = g_effect_secondary_data[slot].previous_slot_id;
+        g_effect_secondary_data[s_effect_secondary_free_head].next_slot_id = 0;
         g_effect_secondary_data[slot].previous_slot_id = g_effect_secondary_active_tail;
         g_effect_secondary_data[slot].next_slot_id = 0;
         g_effect_secondary_data[g_effect_secondary_active_tail].next_slot_id = id;
@@ -131,7 +131,7 @@ void effect_secondary_remove(u8 id) {
             g_effect_secondary_active_tail = slot->previous_slot_id;
         }
         g_effect_secondary_data[g_effect_secondary_active_tail].next_slot_id = 0;
-        tail = g_effect_secondary_free_head;
+        tail = s_effect_secondary_free_head;
         if (tail != 0) {
             while (g_effect_secondary_data[tail].previous_slot_id != 0) {
                 tail = g_effect_secondary_data[tail].previous_slot_id;
@@ -139,7 +139,7 @@ void effect_secondary_remove(u8 id) {
             g_effect_secondary_data[tail].previous_slot_id = id;
             slot->next_slot_id = tail;
         } else {
-            g_effect_secondary_free_head = id;
+            s_effect_secondary_free_head = id;
             slot->next_slot_id = 0;
         }
         slot->previous_slot_id = 0;

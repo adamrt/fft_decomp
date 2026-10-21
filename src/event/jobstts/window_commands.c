@@ -8,7 +8,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static s16 g_status_screen_gfx_transition_height_percent[8] = { 5, 10, 20, 35, 60, 75, 90, 95 };
+static s16 s_status_screen_gfx_transition_height_percent[8] = { 5, 10, 20, 35, 60, 75, 90, 95 };
 
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
  * interior through menu_opcode_11_draw_background_tiles.
@@ -151,7 +151,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
         if (g_gfx_transition_frame < 3) {
             g_menu_script_input = 0;
         }
-        scale = g_status_screen_gfx_transition_height_percent[g_gfx_transition_frame];
+        scale = s_status_screen_gfx_transition_height_percent[g_gfx_transition_frame];
         rect.w = 0x100;
         rect.h = (command->window.height * scale) / 100;
         rect.x = 0;

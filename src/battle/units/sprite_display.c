@@ -13,7 +13,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static MATRIX g_sprite_display_matrix;
+static MATRIX s_sprite_display_matrix;
 extern s16 g_sprite_prim_index;
 extern s16 g_sprite_prim_frame_start_index;
 
@@ -21,28 +21,28 @@ extern s16 g_sprite_prim_frame_start_index;
 extern s16 g_sprite_unread_1;
 extern s16 g_sprite_unread_2;
 
-static SVECTOR g_gte_rtpt_vxy0 = { 0 };
+static SVECTOR s_gte_rtpt_vxy0 = { 0 };
 
-static SVECTOR g_gte_rtpt_vxy1 = { 0 };
+static SVECTOR s_gte_rtpt_vxy1 = { 0 };
 
-static SVECTOR g_gte_rtpt_vxy2 = { 0 };
+static SVECTOR s_gte_rtpt_vxy2 = { 0 };
 
-static SVECTOR g_gte_rtps_vxy0 = { 0 };
+static SVECTOR s_gte_rtps_vxy0 = { 0 };
 
 /* Reset the unit sprite renderer at battle start: the identity third row and column of
  * the sprite display matrix, depth 0x200 in the GTE projection inputs, the frame
  * counters, and the sprite primitive pool, which begins just past the unit slots. */
 void sprite_render_state_init(void) {
-    g_sprite_display_matrix.m[2][2] = ONE;
-    g_gte_rtps_vxy0.vz = 0x200;
-    g_gte_rtpt_vxy2.vz = 0x200;
-    g_gte_rtpt_vxy1.vz = 0x200;
-    g_gte_rtpt_vxy0.vz = 0x200;
-    g_sprite_display_matrix.m[2][1] = 0;
-    g_sprite_display_matrix.m[2][0] = 0;
-    g_sprite_display_matrix.m[1][2] = 0;
-    g_sprite_display_matrix.m[0][2] = 0;
-    g_sprite_display_matrix.t[2] = 0;
+    s_sprite_display_matrix.m[2][2] = ONE;
+    s_gte_rtps_vxy0.vz = 0x200;
+    s_gte_rtpt_vxy2.vz = 0x200;
+    s_gte_rtpt_vxy1.vz = 0x200;
+    s_gte_rtpt_vxy0.vz = 0x200;
+    s_sprite_display_matrix.m[2][1] = 0;
+    s_sprite_display_matrix.m[2][0] = 0;
+    s_sprite_display_matrix.m[1][2] = 0;
+    s_sprite_display_matrix.m[0][2] = 0;
+    s_sprite_display_matrix.t[2] = 0;
     g_sprite_prim_index = 0;
     g_sprite_prim_frame_start_index = 0;
     g_sprite_unread_2 = 0;
@@ -218,15 +218,15 @@ void sprite_display_construct_polygon_data(
     s16 sine;
 
     cosine = rcos(angle + display->rotation);
-    g_sprite_display_matrix.m[0][0] = ((cosine * scale->vx) >> 12) * display->scale_x >> 12;
-    g_sprite_display_matrix.m[1][1] = ((cosine * scale->vy) >> 12) * display->scale_y >> 12;
+    s_sprite_display_matrix.m[0][0] = ((cosine * scale->vx) >> 12) * display->scale_x >> 12;
+    s_sprite_display_matrix.m[1][1] = ((cosine * scale->vy) >> 12) * display->scale_y >> 12;
     sine = rsin(angle + display->rotation);
-    g_sprite_display_matrix.m[0][1] = ((-sine * scale->vy) >> 12) * display->scale_y >> 12;
-    g_sprite_display_matrix.m[1][0] = ((sine * scale->vx) >> 12) * display->scale_x >> 12;
-    g_sprite_display_matrix.t[0] = position->vx;
-    g_sprite_display_matrix.t[1] = position->vy;
-    SetRotMatrix(&g_sprite_display_matrix);
-    SetTransMatrix(&g_sprite_display_matrix);
+    s_sprite_display_matrix.m[0][1] = ((-sine * scale->vy) >> 12) * display->scale_y >> 12;
+    s_sprite_display_matrix.m[1][0] = ((sine * scale->vx) >> 12) * display->scale_x >> 12;
+    s_sprite_display_matrix.t[0] = position->vx;
+    s_sprite_display_matrix.t[1] = position->vy;
+    SetRotMatrix(&s_sprite_display_matrix);
+    SetTransMatrix(&s_sprite_display_matrix);
     for (i = start; i < end; i++) {
         part = &display->parts[i];
         flags = part->flags;
@@ -246,20 +246,20 @@ void sprite_display_construct_polygon_data(
             y = part->y_shift;
         }
         if (flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
-            g_gte_rtpt_vxy1.vx = g_gte_rtps_vxy0.vx = x;
-            g_gte_rtpt_vxy0.vx = g_gte_rtpt_vxy2.vx = x + part->width;
+            s_gte_rtpt_vxy1.vx = s_gte_rtps_vxy0.vx = x;
+            s_gte_rtpt_vxy0.vx = s_gte_rtpt_vxy2.vx = x + part->width;
         } else {
-            g_gte_rtpt_vxy0.vx = g_gte_rtpt_vxy2.vx = x;
-            g_gte_rtpt_vxy1.vx = g_gte_rtps_vxy0.vx = x + part->width;
+            s_gte_rtpt_vxy0.vx = s_gte_rtpt_vxy2.vx = x;
+            s_gte_rtpt_vxy1.vx = s_gte_rtps_vxy0.vx = x + part->width;
         }
         if (flags & SPRITE_DISPLAY_VERTICAL_FLIP) {
-            g_gte_rtpt_vxy2.vy = g_gte_rtps_vxy0.vy = y;
-            g_gte_rtpt_vxy0.vy = g_gte_rtpt_vxy1.vy = y + part->height;
+            s_gte_rtpt_vxy2.vy = s_gte_rtps_vxy0.vy = y;
+            s_gte_rtpt_vxy0.vy = s_gte_rtpt_vxy1.vy = y + part->height;
         } else {
-            g_gte_rtpt_vxy0.vy = g_gte_rtpt_vxy1.vy = y;
-            g_gte_rtpt_vxy2.vy = g_gte_rtps_vxy0.vy = y + part->height;
+            s_gte_rtpt_vxy0.vy = s_gte_rtpt_vxy1.vy = y;
+            s_gte_rtpt_vxy2.vy = s_gte_rtps_vxy0.vy = y + part->height;
         }
-        gte_ldv3_split(&g_gte_rtpt_vxy0, &g_gte_rtpt_vxy1, &g_gte_rtpt_vxy2);
+        gte_ldv3_split(&s_gte_rtpt_vxy0, &s_gte_rtpt_vxy1, &s_gte_rtpt_vxy2);
         gte_rtpt();
         if ((flags | mode) & SPRITE_DISPLAY_SEMI_TRANSPARENT) {
             prim->code |= 2;
@@ -269,7 +269,7 @@ void sprite_display_construct_polygon_data(
         prim->tpage = display->tpage | (mode & SPRITE_DISPLAY_BLEND_MASK);
         prim->clut = display->clut;
         gte_stsxy3_split(&prim->x0, &prim->x1, &prim->x2);
-        gte_ldv0(&g_gte_rtps_vxy0);
+        gte_ldv0(&s_gte_rtps_vxy0);
         gte_rtps();
         /* The retail color transfer combines red and green in one 16-bit value. */
         memcpy(&prim->r0, &display->color.r, sizeof(u16));

@@ -27,7 +27,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static s32 g_sprite_unit_graphics_load_complete;
+static s32 s_sprite_unit_graphics_load_complete;
 
 /* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
  * one at rand() / 0x2000. */
@@ -336,7 +336,7 @@ s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_runni
         if (entd_units_load_poll() != 0) {
             break;
         }
-        if (g_sprite_unit_graphics_load_complete != 0) {
+        if (s_sprite_unit_graphics_load_complete != 0) {
             sprite_load_state_clear(map_id);
             step = 7;
         } else {
@@ -346,7 +346,7 @@ s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_runni
         break;
     case 6:
         if (sprite_shp_seq_load_update() == 8) {
-            g_sprite_unit_graphics_load_complete = 1;
+            s_sprite_unit_graphics_load_complete = 1;
             sprite_load_state_clear(map_id);
             step++;
         }

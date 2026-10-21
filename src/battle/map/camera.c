@@ -9,27 +9,27 @@
 
 /* Interpolation state and saved values for camera restore commands. */
 extern u16 g_camera_real_coords_countdown;
-static VECTOR g_camera_real_coords_delta;
+static VECTOR s_camera_real_coords_delta;
 extern VECTOR g_camera_screen_offset_saved;
 extern VECTOR g_camera_screen_offset_fixed;
 extern SVECTOR g_camera_rotation_saved;
 extern VECTOR g_camera_zoom_saved;
 
-static VECTOR g_real_coords_saved = { 0 };
+static VECTOR s_real_coords_saved = { 0 };
 
-static SVECTOR g_rotation_delta = { 0 };
+static SVECTOR s_rotation_delta = { 0 };
 
-static VECTOR g_zoom_delta = { 0 };
+static VECTOR s_zoom_delta = { 0 };
 
 /* Saves the camera position for camera_real_coords_restore (effect
  * script opcodes 09 and 0a). */
 void camera_real_coords_save(void) {
-    copyVector(&g_real_coords_saved, &g_camera_real_coords);
+    copyVector(&s_real_coords_saved, &g_camera_real_coords);
 }
 
 /* Restores the camera position kept by camera_real_coords_save. */
 void camera_real_coords_restore(void) {
-    copyVector(&g_camera_real_coords, &g_real_coords_saved);
+    copyVector(&g_camera_real_coords, &s_real_coords_saved);
 }
 
 VECTOR* camera_real_coords_get(void) {
@@ -52,7 +52,7 @@ void camera_real_coords_set_delta_from_destination(const VECTOR* destination, s3
 
     g_camera_real_coords_countdown = animation_frames;
     animation_frames = g_camera_real_coords_countdown;
-    setVector(&g_camera_real_coords_delta, (destination->vx - g_camera_real_coords.vx) / animation_frames,
+    setVector(&s_camera_real_coords_delta, (destination->vx - g_camera_real_coords.vx) / animation_frames,
         (destination->vy - g_camera_real_coords.vy) / animation_frames,
         (destination->vz - g_camera_real_coords.vz) / animation_frames);
 }
@@ -64,7 +64,7 @@ void camera_real_coords_set_delta_from_values(const VECTOR* values, s32 frame_co
 
     g_camera_real_coords_countdown = animation_frames;
     animation_frames = g_camera_real_coords_countdown;
-    setVector(&g_camera_real_coords_delta, values->vx / animation_frames, values->vy / animation_frames,
+    setVector(&s_camera_real_coords_delta, values->vx / animation_frames, values->vy / animation_frames,
         values->vz / animation_frames);
 }
 
@@ -74,9 +74,9 @@ void camera_real_coords_set_delta_from_values(const VECTOR* values, s32 frame_co
 void camera_real_coords_update_animation(void) {
     if (g_camera_real_coords_countdown != 0) {
         g_camera_real_coords_countdown--;
-        g_camera_real_coords.vx += g_camera_real_coords_delta.vx;
-        g_camera_real_coords.vy += g_camera_real_coords_delta.vy;
-        g_camera_real_coords.vz += g_camera_real_coords_delta.vz;
+        g_camera_real_coords.vx += s_camera_real_coords_delta.vx;
+        g_camera_real_coords.vy += s_camera_real_coords_delta.vy;
+        g_camera_real_coords.vz += s_camera_real_coords_delta.vz;
     }
 }
 
@@ -118,7 +118,7 @@ void camera_screen_offset_start_move_uniform(const s32* destination_value, s32 f
     delta_x = *destination_value - current_x;
     g_camera_screen_offset_countdown = animation_frames;
     animation_frames = g_camera_screen_offset_countdown;
-    setVector(&g_camera_real_coords_delta, (delta_x * ONE) / animation_frames,
+    setVector(&s_camera_real_coords_delta, (delta_x * ONE) / animation_frames,
         ((*destination_value - current_y) * ONE) / animation_frames,
         ((*destination_value - current_z) * ONE) / animation_frames);
 }
@@ -135,7 +135,7 @@ void camera_screen_offset_start_move_relative(const VECTOR* values, s32 frame_co
         g_camera_screen_offset.vz * ONE);
     g_camera_screen_offset_countdown = animation_frames;
     animation_frames = g_camera_screen_offset_countdown;
-    setVector(&g_camera_real_coords_delta, (values->vx * ONE) / animation_frames, (values->vy * ONE) / animation_frames,
+    setVector(&s_camera_real_coords_delta, (values->vx * ONE) / animation_frames, (values->vy * ONE) / animation_frames,
         (values->vz * ONE) / animation_frames);
 }
 
@@ -148,10 +148,10 @@ void camera_screen_offset_update_animation(void) {
     s32 fixed_z;
 
     if (g_camera_screen_offset_countdown != 0) {
-        fixed_x = g_camera_screen_offset_fixed.vx + g_camera_real_coords_delta.vx;
+        fixed_x = g_camera_screen_offset_fixed.vx + s_camera_real_coords_delta.vx;
         g_camera_screen_offset_fixed.vx = fixed_x;
-        fixed_y = g_camera_screen_offset_fixed.vy + g_camera_real_coords_delta.vy;
-        fixed_z = g_camera_screen_offset_fixed.vz + g_camera_real_coords_delta.vz;
+        fixed_y = g_camera_screen_offset_fixed.vy + s_camera_real_coords_delta.vy;
+        fixed_z = g_camera_screen_offset_fixed.vz + s_camera_real_coords_delta.vz;
         g_camera_screen_offset_fixed.vy = fixed_y;
         g_camera_screen_offset_fixed.vz = fixed_z;
         setVector(&g_camera_screen_offset, fixed_x / ONE, fixed_y / ONE, fixed_z / ONE);
@@ -188,7 +188,7 @@ void camera_zoom_set_delta_from_value(const s32* destination_value, s32 frame_co
 
     g_camera_zoom_countdown = animation_frames;
     animation_frames = g_camera_zoom_countdown;
-    setVector(&g_zoom_delta, delta_x / animation_frames, (*destination_value - g_camera_zoom.vy) / animation_frames,
+    setVector(&s_zoom_delta, delta_x / animation_frames, (*destination_value - g_camera_zoom.vy) / animation_frames,
         (*destination_value - g_camera_zoom.vz) / animation_frames);
 }
 
@@ -202,7 +202,7 @@ void camera_zoom_set_delta_from_values(const VECTOR* values, s32 frame_count) {
     g_camera_zoom_countdown = animation_frames;
     animation_frames = g_camera_zoom_countdown;
     setVector(
-        &g_zoom_delta, values->vx / animation_frames, values->vy / animation_frames, values->vz / animation_frames);
+        &s_zoom_delta, values->vx / animation_frames, values->vy / animation_frames, values->vz / animation_frames);
 }
 
 /* Advances the zoom change by one frame while its countdown runs. Only the
@@ -212,9 +212,9 @@ void camera_zoom_set_delta_from_values(const VECTOR* values, s32 frame_count) {
 void camera_zoom_update_animation(void) {
     if (g_camera_zoom_countdown != 0) {
         g_camera_zoom_countdown--;
-        g_camera_zoom.vx += g_zoom_delta.vx;
-        g_camera_zoom.vy += g_zoom_delta.vy;
-        g_camera_zoom.vz += g_zoom_delta.vz;
+        g_camera_zoom.vx += s_zoom_delta.vx;
+        g_camera_zoom.vy += s_zoom_delta.vy;
+        g_camera_zoom.vz += s_zoom_delta.vz;
     }
 }
 
@@ -246,7 +246,7 @@ void camera_rotation_set_delta_from_value(const s16* destination_value, s32 fram
 
     g_camera_rotation_countdown = animation_frames;
     animation_frames = g_camera_rotation_countdown;
-    setVector(&g_rotation_delta, delta_x / animation_frames,
+    setVector(&s_rotation_delta, delta_x / animation_frames,
         (*destination_value - g_camera_render_state.vy) / animation_frames,
         (*destination_value - g_camera_render_state.vz) / animation_frames);
 }
@@ -260,7 +260,7 @@ void camera_rotation_set_delta_from_values(const s16* values, s32 frame_count) {
     g_camera_rotation_countdown = animation_frames;
     animation_frames = g_camera_rotation_countdown;
     setVector(
-        &g_rotation_delta, value_x / animation_frames, values[1] / animation_frames, values[2] / animation_frames);
+        &s_rotation_delta, value_x / animation_frames, values[1] / animation_frames, values[2] / animation_frames);
 }
 
 /* Advances the camera-angle move by one frame while its countdown runs. Only the
@@ -269,8 +269,8 @@ void camera_rotation_set_delta_from_values(const s16* values, s32 frame_count) {
 void camera_rotation_update_animation(void) {
     if (g_camera_rotation_countdown != 0) {
         g_camera_rotation_countdown--;
-        g_camera_render_state.vx += g_rotation_delta.vx;
-        g_camera_render_state.vy += g_rotation_delta.vy;
-        g_camera_render_state.vz += g_rotation_delta.vz;
+        g_camera_render_state.vx += s_rotation_delta.vx;
+        g_camera_render_state.vy += s_rotation_delta.vy;
+        g_camera_render_state.vz += s_rotation_delta.vz;
     }
 }

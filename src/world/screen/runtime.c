@@ -124,7 +124,7 @@ extern s16 g_world_map_tutorial_request_state; /* request_state_e */
 
 extern s16 g_world_map_debug_variable_list_request_state;
 extern s16 g_world_map_debug_party_number_request_state;
-static s16 g_formation_open_request_state; /* request_state_e */
+static s16 s_formation_open_request_state; /* request_state_e */
 
 extern s16 g_save_menu_request_state; /* request_state_e */
 
@@ -157,16 +157,16 @@ static void window_group_run(void);
 static void entry_text_sprite_init(RECT* out, const menu_entry_t* record, SPRT* primitive);
 static void entry_frame_sprites_build(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 
-static u8 g_menu_thread_snapshot[16] = { 0 };
+static u8 s_menu_thread_snapshot[16] = { 0 };
 
-static s16 g_submenu_row_text_ids[12] = { 0 };
+static s16 s_submenu_row_text_ids[12] = { 0 };
 
-static u32 g_menu_text_file_buffer[16512] = { 0 };
+static u32 s_menu_text_file_buffer[16512] = { 0 };
 
 /* 32-bit substitution values saved around the text calls. */
-static s32 g_saved_text_values[32] = { 0 };
+static s32 s_saved_text_values[32] = { 0 };
 
-static u32 g_saved_world_map_flags = 0;
+static u32 s_saved_world_map_flags = 0;
 
 /* Menu thread of the location list: list every visible location by name (row color 8
  * while its color variable is clear, 4 for the current location, which starts
@@ -247,7 +247,7 @@ void screen_submenu_page_build(void) {
     u8* src = g_screen_submenu_page_text_ids[selection];
 
     for (i = 0; i < count; i++) {
-        g_submenu_row_text_ids[i] = src[i] + 0x902B;
+        s_submenu_row_text_ids[i] = src[i] + 0x902B;
     }
     if (count < 7) {
         g_screen_submenu_page_layout.columns.row_count = count;
@@ -349,12 +349,12 @@ void screen_open_text_init(void) {
 
     menu_subsystem_pointers_init();
     g_thread_call_target = (void (*)(void))file_buffer_load_checked;
-    thread_call_on_main_stack(DISC_SECTOR_EVENT_OPEN_LZW, 0x5800, g_menu_text_file_buffer);
+    thread_call_on_main_stack(DISC_SECTOR_EVENT_OPEN_LZW, 0x5800, s_menu_text_file_buffer);
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_screen_default_entries;
     for (i = 0; i < TEXT_SECTION_COUNT; i++) {
-        g_text_section_pointers[i] = g_menu_text_file_buffer[i] + (u8*)&g_menu_text_file_buffer[TEXT_SECTION_COUNT];
+        g_text_section_pointers[i] = s_menu_text_file_buffer[i] + (u8*)&s_menu_text_file_buffer[TEXT_SECTION_COUNT];
     }
     script_variable_set(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD, 0);
     script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
@@ -378,12 +378,12 @@ void screen_world_resources_init(void) {
     graphics_load(1);
     portraits_load();
     g_thread_call_target = (void (*)(void))file_buffer_load_checked;
-    thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, g_menu_text_file_buffer);
+    thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_screen_default_entries;
     i = 0;
-    src = g_menu_text_file_buffer;
+    src = s_menu_text_file_buffer;
     base = (u8*)&src[TEXT_SECTION_COUNT];
     dst = g_text_section_pointers;
     do {
@@ -419,12 +419,12 @@ void screen_world_text_init(void) {
     menu_subsystem_pointers_init();
     graphics_load(0);
     g_thread_call_target = (void (*)(void))file_buffer_load_checked;
-    thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xe800, g_menu_text_file_buffer);
+    thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xe800, s_menu_text_file_buffer);
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
     g_menu_thread_menu_data = g_screen_default_entries;
     i = 0;
-    src = g_menu_text_file_buffer;
+    src = s_menu_text_file_buffer;
     base = (u8*)&src[TEXT_SECTION_COUNT];
     dst = g_text_section_pointers;
     do {
@@ -556,7 +556,7 @@ void screen_context_reset(void) {
     DrawSync(0);
     menu_subsystem_pointers_init();
     menu_subsystems_reset();
-    text_pointer_table_relocate(g_menu_text_file_buffer);
+    text_pointer_table_relocate(s_menu_text_file_buffer);
     formation_roster_names_build();
     DrawSync(0);
     g_menu_thread_menu_data = g_screen_default_entries;
@@ -603,13 +603,13 @@ void world_map_menu_text_window_thread(void) {
     gfx_set_draw_mode_from_origin(&record->text_draw_mode, &entry->vram_origin);
     gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     entry_frame_sprites_build(entry, record->frame_sprites, 0);
-    mem_copy_bytes_nonempty(g_saved_text_values, g_text_substitution_values, sizeof(g_saved_text_values));
+    mem_copy_bytes_nonempty(s_saved_text_values, g_text_substitution_values, sizeof(s_saved_text_values));
     text_values = entry->value;
     g_text_substitution_values[0] = text_values[0];
     text_values = entry->value;
     g_text_substitution_values[1] = text_values[1];
     text_measure(&width, &height, text_entry_find(entry->text_id));
-    mem_copy_bytes_nonempty(g_text_substitution_values, g_saved_text_values, sizeof(g_text_substitution_values));
+    mem_copy_bytes_nonempty(g_text_substitution_values, s_saved_text_values, sizeof(g_text_substitution_values));
     /* 10-pixel columns plus a 0x18 border, rounded up past the next multiple of four. */
     x = width * 10;
     pad = ((x & 2) == 0) * 4;
@@ -649,14 +649,14 @@ void world_map_menu_text_window_thread(void) {
             g_menu_window_text_pen.stride = entry->inner_width;
             menu_set_text_origin(10, 8);
             g_menu_text_palette_offset = 0;
-            mem_copy_bytes_nonempty(g_saved_text_values, g_text_substitution_values, sizeof(g_saved_text_values));
+            mem_copy_bytes_nonempty(s_saved_text_values, g_text_substitution_values, sizeof(s_saved_text_values));
             text_values = entry->value;
             g_text_substitution_values[0] = text_values[0];
             text_values = entry->value;
             g_text_substitution_values[1] = text_values[1];
             menu_display_text_entry(entry->text_id, buffer, &g_menu_window_text_pen);
             mem_copy_bytes_nonempty(
-                g_text_substitution_values, g_saved_text_values, sizeof(g_text_substitution_values));
+                g_text_substitution_values, s_saved_text_values, sizeof(g_text_substitution_values));
             LoadImage(&rect, buffer);
         }
         thread_yield();
@@ -767,7 +767,7 @@ void world_map_debug_variables_request(void) {
 /* Menu action: request the formation screen from the world map, hand the formation input
  * state to the event input and exit the thread. */
 void world_map_formation_request(void) {
-    g_formation_open_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
+    s_formation_open_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
     thread_current_exit();
@@ -786,7 +786,7 @@ void world_map_brave_story_request(void) {
  * background, display objects, context value, date and location label)
  * with the display off, for a full-screen menu. */
 static void map_layers_hide(void) {
-    g_saved_world_map_flags = g_world_map_flags;
+    s_saved_world_map_flags = g_world_map_flags;
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES | WORLD_MAP_FLAG_DISPLAY_OFF
         | WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE | WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE
         | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
@@ -794,7 +794,7 @@ static void map_layers_hide(void) {
 
 /* Restore the world-map flags saved around Formation or Save. */
 static void map_layers_restore(void) {
-    g_world_map_flags = g_saved_world_map_flags;
+    g_world_map_flags = s_saved_world_map_flags;
 }
 
 /* Debug battle setup thread: add 3 to the system flags, select the world debug battle style, clear
@@ -817,7 +817,7 @@ void debug_battle_setup_thread(void) {
  * scratch buffer and the screen, hold a few dark frames, and fade back in. Sibling of
  * save_request_update. */
 static void formation_request_update(void) {
-    s16 state = g_formation_open_request_state;
+    s16 state = s_formation_open_request_state;
     s32 i;
 
     if (state == WORLD_MAP_REQUEST_IDLE) {
@@ -826,12 +826,12 @@ static void formation_request_update(void) {
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
         world_map_fade_start(0x12, 0x10);
-        g_formation_open_request_state++;
+        s_formation_open_request_state++;
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_formation_open_request_state = state + 1;
+            s_formation_open_request_state = state + 1;
         }
         return;
     }
@@ -850,23 +850,23 @@ static void formation_request_update(void) {
         for (i = 0x77FF; i >= 0; i--) {
             g_world_map_scratch_buffer[i] = 0;
         }
-        g_formation_open_request_state++;
+        s_formation_open_request_state++;
         screen_brightness_set(0, 0, 0);
         return;
     }
     if (state < 8) {
-        g_formation_open_request_state = state + 1;
+        s_formation_open_request_state = state + 1;
         return;
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_IN) {
         map_layers_restore();
         world_map_fade_start(0x24, 0x10);
-        g_formation_open_request_state++;
+        s_formation_open_request_state++;
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_IN) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_formation_open_request_state = WORLD_MAP_REQUEST_IDLE;
+            s_formation_open_request_state = WORLD_MAP_REQUEST_IDLE;
         }
     }
 }
@@ -932,8 +932,8 @@ static void party_number_request_update(void) {
         g_world_map_screen_request = 1;
         screen_context_reset();
         g_thread_call_target = (void (*)(void))file_buffer_load_checked;
-        thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, g_menu_text_file_buffer);
-        text_pointer_table_relocate(g_menu_text_file_buffer);
+        thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
+        text_pointer_table_relocate(s_menu_text_file_buffer);
         screen_brightness_set(0x80, 0x80, 0x80);
         g_world_map_debug_party_number_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
@@ -1242,7 +1242,7 @@ s16 screen_menu_frame_update(u32* otag, u32 input) {
     }
 
     g_screen_new_buttons &= g_screen_allowed_buttons;
-    if (g_formation_open_request_state != WORLD_MAP_REQUEST_IDLE) {
+    if (s_formation_open_request_state != WORLD_MAP_REQUEST_IDLE) {
         g_screen_new_buttons = 0;
     }
     if (g_world_map_tutorial_request_state != WORLD_MAP_REQUEST_IDLE) {
@@ -1277,12 +1277,12 @@ s16 screen_menu_frame_update(u32* otag, u32 input) {
     }
 
     for (thread_id = 1; thread_id < THREAD_ID_COUNT; thread_id++) {
-        g_menu_thread_snapshot[thread_id] = thread_is_running_asm(thread_id);
+        s_menu_thread_snapshot[thread_id] = thread_is_running_asm(thread_id);
     }
 
     thread_yield();
     for (thread_id = 1; thread_id < THREAD_ID_COUNT; thread_id++) {
-        status = g_menu_thread_snapshot[thread_id];
+        status = s_menu_thread_snapshot[thread_id];
         if (status != thread_is_running_asm(thread_id)) {
             g_script_input_suppression_frames = 5;
         }

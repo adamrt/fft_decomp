@@ -37,7 +37,7 @@ extern s16 g_crystal_pickup_menu_result;
 extern s16 g_crystal_pickup_choice_result;
 
 /* AT list menu */
-static at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
+static at_entry_t s_at_list_descriptors[AT_LIST_CAPACITY];
 extern menu_entry_t g_at_list_state;
 
 /* WORLD and OPTION each define one column layout for the AT List menu. */
@@ -274,7 +274,7 @@ static void at_list_init(menu_entry_t* menu) {
     u8* text;
 
     g_thread_call_target = (void (*)(void))at_list_build;
-    thread_call_on_main_stack(g_at_list_descriptors, 0);
+    thread_call_on_main_stack(s_at_list_descriptors, 0);
 
     for (index = 0; index < 0x100; index++) {
         g_crystal_pickup_row_colors[index] = 0;
@@ -290,13 +290,13 @@ static void at_list_init(menu_entry_t* menu) {
         unit_stats_t* unit;
         s32 name_index;
 
-        if ((g_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK) == AT_END_OF_LIST) {
+        if ((s_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK) == AT_END_OF_LIST) {
             break;
         }
 
         g_at_list_indices[index] = index + 1;
-        unit = unit_stats_get(g_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK);
-        if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
+        unit = unit_stats_get(s_at_list_descriptors[index].unit_code & AT_UNIT_ID_MASK);
+        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
@@ -310,27 +310,27 @@ static void at_list_init(menu_entry_t* menu) {
             }
             text++;
         }
-        if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
+        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
         *text++ = 0xfe;
 
-        if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
+        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) != 0) {
             g_at_list_secondary_text_ids[entry_count] = index - 0x800;
         } else {
             g_at_list_primary_text_ids[entry_count] = index - 0x800;
         }
 
-        if ((g_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) == 0) {
+        if ((s_at_list_descriptors[index].unit_code & AT_ACTION_ENTRY) == 0) {
             g_at_list_secondary_text_ids[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
-            if ((g_at_list_descriptors[index].unit_code & AT_JUMP) != 0) {
+            if ((s_at_list_descriptors[index].unit_code & AT_JUMP) != 0) {
                 g_at_list_primary_text_ids[entry_count] = 0xb012;
             } else {
-                s32 value = g_at_list_descriptors[index].action_id_low;
-                if ((g_at_list_descriptors[index].unit_code & AT_ABILITY_ID_HIGH_BIT) != 0) {
+                s32 value = s_at_list_descriptors[index].action_id_low;
+                if ((s_at_list_descriptors[index].unit_code & AT_ABILITY_ID_HIGH_BIT) != 0) {
                     value += 0x100;
                 }
                 g_at_list_primary_text_ids[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;

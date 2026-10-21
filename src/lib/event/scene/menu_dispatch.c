@@ -30,8 +30,8 @@ extern s32 g_overlay_companion_executable_lbas[];
 extern s32 g_overlay_companion_executable_sizes[];
 extern s32 g_overlay_companion_executable_offsets[];
 extern s32 g_overlay_companion_data_file_request_index;
-static s32 g_overlay_companion_data_file_loading;
-static s32 g_overlay_companion_executable_loading;
+static s32 s_overlay_companion_data_file_loading;
+static s32 s_overlay_companion_executable_loading;
 extern s32 g_overlay_companion_data_file_lbas[];
 extern s32 g_overlay_companion_data_file_sizes[];
 extern u8* g_overlay_companion_data_file_buffer;
@@ -45,18 +45,18 @@ extern u8 g_command_restore_unit_id;
  * issue the read for the pending request, then poll until it completes and
  * clear the request. */
 void overlay_companion_file_poll(void) {
-    if ((g_overlay_companion_data_file_request_index != 0) && (g_overlay_companion_data_file_loading == 0)) {
+    if ((g_overlay_companion_data_file_request_index != 0) && (s_overlay_companion_data_file_loading == 0)) {
         g_thread_call_target = (void (*)(void))file_bytes_read_request;
         if (thread_call_on_main_stack(g_overlay_companion_data_file_lbas[g_overlay_companion_data_file_request_index],
                 g_overlay_companion_data_file_sizes[g_overlay_companion_data_file_request_index],
                 g_overlay_companion_data_file_buffer)
             == 0) {
-            g_overlay_companion_data_file_loading = 1;
+            s_overlay_companion_data_file_loading = 1;
         }
-    } else if ((g_overlay_companion_data_file_request_index != 0) && (g_overlay_companion_data_file_loading != 0)) {
+    } else if ((g_overlay_companion_data_file_request_index != 0) && (s_overlay_companion_data_file_loading != 0)) {
         g_thread_call_target = file_load_state_get;
         if (thread_call_on_main_stack() == 0) {
-            g_overlay_companion_data_file_loading = 0;
+            s_overlay_companion_data_file_loading = 0;
             g_overlay_companion_data_file_request_index = 0;
         }
     }
@@ -69,18 +69,18 @@ void overlay_companion_file_poll(void) {
 void overlay_companion_poll(void) {
     s32 idx = g_overlay_companion_executable_request_index;
 
-    if ((idx != 0) && (g_overlay_companion_executable_loading == 0)) {
+    if ((idx != 0) && (s_overlay_companion_executable_loading == 0)) {
         g_thread_call_target = (void (*)(void))file_bytes_read_request;
         if (thread_call_on_main_stack(g_overlay_companion_executable_lbas[idx],
                 g_overlay_companion_executable_sizes[idx],
                 g_overlay_companion_executable_offsets[idx] + (s32)g_heap_companion_overlay_load_address)
             == 0) {
-            g_overlay_companion_executable_loading = 1;
+            s_overlay_companion_executable_loading = 1;
         }
-    } else if ((g_overlay_companion_executable_request_index != 0) && (g_overlay_companion_executable_loading != 0)) {
+    } else if ((g_overlay_companion_executable_request_index != 0) && (s_overlay_companion_executable_loading != 0)) {
         g_thread_call_target = file_load_state_get;
         if (thread_call_on_main_stack() == 0) {
-            g_overlay_companion_executable_loading = 0;
+            s_overlay_companion_executable_loading = 0;
             g_overlay_companion_executable_request_index = 0;
         }
     }

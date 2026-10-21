@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 extern palette_t g_loading_palette;
-static u32 g_loading_frame_counter;
+static u32 s_loading_frame_counter;
 extern u32 g_loading_visible;
 extern POLY_FT4 g_loading_primitives[2][7];
 
@@ -25,7 +25,7 @@ void loading_message_build(u32 visible, s32 x, s32 y) {
 
     g_loading_visible = visible;
     setPolyFT4(&prims[0]);
-    g_loading_frame_counter = 0;
+    s_loading_frame_counter = 0;
     setRGB0(&prims[0], 0x80, 0x80, 0x80);
     SetSemiTrans(&prims[0], 0);
     prims[0].tpage = 0x1f;
@@ -88,11 +88,11 @@ void loading_otag_append(u32* otag) {
     int i;
 
     if (g_loading_visible != 0) {
-        if (((g_loading_frame_counter / 60) & 1) == 0) {
+        if (((s_loading_frame_counter / 60) & 1) == 0) {
             for (i = 0; i < 7; i++) {
                 AddPrim(otag, &g_loading_primitives[g_gfx_screen_polarity][i]);
             }
         }
-        g_loading_frame_counter++;
+        s_loading_frame_counter++;
     }
 }

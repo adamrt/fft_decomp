@@ -39,7 +39,7 @@ extern u8 g_unit_list_grid_stat_bar_script_bottom[12];
 /* unit grid */
 extern point16_t g_unit_list_grid_cursor_target;
 extern u8 g_unit_list_stat_mode; /* menu_unit_readout_e */
-static s16 g_unit_list_current_stat_value;
+static s16 s_unit_list_current_stat_value;
 extern s16 g_unit_list_max_stat_value;
 extern menu_sprite_cell_t g_unit_list_grid_label_tiles[8];
 extern menu_sprite_cell_t g_unit_list_grid_label_tiles_bottom[8];
@@ -135,8 +135,8 @@ static s32 grid_stat_get(s32 unit_index) {
         entry = g_unit_list_pointers[unit_index];
         value = entry->gauges[MENU_UNIT_STATUS_GAUGE_CT].value;
     }
-    g_unit_list_current_stat_value = value;
-    return g_unit_list_current_stat_value;
+    s_unit_list_current_stat_value = value;
+    return s_unit_list_current_stat_value;
 }
 
 /* Return the level of the unit in this unit list slot. */
@@ -619,7 +619,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                     bar_points[0].x = g_unit_list_grid_gauge_offsets[0] + cell.x;
                     bar_points[0].y = g_unit_list_grid_gauge_offsets[1] + top + 8;
                     if (g_unit_list_max_stat_value != 0) {
-                        width = (g_unit_list_current_stat_value << 5) / g_unit_list_max_stat_value;
+                        width = (s_unit_list_current_stat_value << 5) / g_unit_list_max_stat_value;
                     } else {
                         width = 0;
                     }

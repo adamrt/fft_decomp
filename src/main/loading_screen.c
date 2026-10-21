@@ -6,7 +6,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static u32 g_loading_otags[2][2] = { 0 };
+static u32 s_loading_otags[2][2] = { 0 };
 
 /* Called by file_load_poll on every poll of an unfinished read. Unless the
  * counter is -1 (message off), the 64th call unmasks the display and from then on
@@ -23,7 +23,7 @@ void loading_message_draw(void) {
             frame &= 1;
             PutDrawEnv(&g_gfx_draw_envs[frame]);
             PutDispEnv(&g_gfx_display_envs[frame]);
-            otag = g_loading_otags[frame];
+            otag = s_loading_otags[frame];
             ClearOTag(otag, 2);
             loading_otag_append(otag);
             DrawOTag(otag);

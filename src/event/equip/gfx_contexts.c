@@ -8,7 +8,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static menu_gfx_context_t* g_equipment_gfx_context_base;
+static menu_gfx_context_t* s_equipment_gfx_context_base;
 extern u16 g_equipment_gfx_poly_f4_count;
 extern u16 g_equipment_gfx_poly_g4_count;
 
@@ -42,7 +42,7 @@ void equipment_gfx_swap_context(s32 first_otag, s32 unused) {
     g_menu_gfx_draw_area_count = 0;
     g_menu_gfx_draw_mode_count = 0;
     GetDrawEnv(&environment);
-    buffer = g_equipment_gfx_context_base;
+    buffer = s_equipment_gfx_context_base;
     g_menu_gfx_drawenv_y = environment.clip.y;
     if (g_menu_gfx_context == buffer) {
         buffer++;
@@ -89,11 +89,11 @@ void equipment_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* p
     s32 index;
     menu_gfx_context_t* context;
 
-    g_equipment_gfx_context_base = base;
+    s_equipment_gfx_context_base = base;
     g_menu_gfx_context = base;
 
     for (index = 0; index < EQUIPMENT_GFX_CONTEXT_COUNT; index++) {
-        context = &g_equipment_gfx_context_base[index];
+        context = &s_equipment_gfx_context_base[index];
 
         context->otag = otag + g_gfx_otag_length * index;
         context->flat_triangles = poly_f3 + g_gfx_poly_f3_capacity * index;

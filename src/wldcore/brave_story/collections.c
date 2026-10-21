@@ -32,7 +32,7 @@ static void land_detail_open(s32 value);
 static s32 picture_dissolve_update(GsIMAGE* image, s32 step);
 static void reading_choice_open(s32 mode);
 
-static u8 g_dissolve_progress[16] = { 0 };
+static u8 s_dissolve_progress[16] = { 0 };
 
 /* Open the Brave Story list of unexplored lands found so far (their script flags set), up to eight
  * rows. */
@@ -619,7 +619,7 @@ static s32 picture_dissolve_update(GsIMAGE* image, s32 step) {
             buffer[i] = 0xff;
         }
         LoadTPage((u32*)buffer, 0, 0, image->px, image->py, image->pw * 4, image->ph);
-        state = &g_dissolve_progress[15];
+        state = &s_dissolve_progress[15];
         for (i = 15; i >= 0; i--) {
             *state-- = 0;
         }
@@ -641,7 +641,7 @@ static s32 picture_dissolve_update(GsIMAGE* image, s32 step) {
     }
 
     for (i = start; i < 16; i++) {
-        if (i <= step && (count = g_dissolve_progress[i]) < 32U) {
+        if (i <= step && (count = s_dissolve_progress[i]) < 32U) {
             base = (15 - i) << 10;
             /* Computed before the size check: the target copies it into j. */
             first = count * 32;
@@ -654,7 +654,7 @@ static s32 picture_dissolve_update(GsIMAGE* image, s32 step) {
                     buffer[index] = pixels[index];
                 }
             }
-            g_dissolve_progress[i]++;
+            s_dissolve_progress[i]++;
         }
         LoadTPage((u32*)buffer, 0, 0, image->px, image->py, image->pw * 4, image->ph);
     }

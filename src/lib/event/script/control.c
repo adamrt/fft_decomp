@@ -12,7 +12,7 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
-static s32 g_script_rand16_state;
+static s32 s_script_rand16_state;
 
 /* Suppress recursive write filtering while getters use comparison variable 0. */
 extern u8 g_script_variable_write_guard;
@@ -400,14 +400,14 @@ void script_opcode_7e_wait_value(const event_wait_value_parameters_t* parameters
 /* Seed the event script's 16-bit random generator (random16_next) with
  * the vertical-blank count. */
 void script_random_seed(void) {
-    g_script_rand16_state = VSync(-1);
+    s_script_rand16_state = VSync(-1);
 }
 
 /* Step the event script's random generator, state * 0x6255 + 0x3619 kept to 16
  * bits, and return the new state. script_variable_command_run calls it
  * when a variable opcode reads EVENT_SCRIPT_VAR_RANDOM_VALUE. */
 static s32 random16_next(void) {
-    return g_script_rand16_state = (g_script_rand16_state * 0x6255U + 0x3619U) & 0xffffU;
+    return s_script_rand16_state = (s_script_rand16_state * 0x6255U + 0x3619U) & 0xffffU;
 }
 
 /* Yield while the unit-ready test returns zero. */

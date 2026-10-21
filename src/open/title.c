@@ -48,7 +48,7 @@ static void opening_movie_start(s32 start_sector, s32 unused_stream_length, s32 
 
 typedef void (*controller_handler_t)(controller_record_t* record);
 /* One callback for each controller_handler_e value, 0 through 12. */
-static controller_handler_t g_controller_handlers[13] = {
+static controller_handler_t s_controller_handlers[13] = {
     logo_movie_update,
     opening_movie_update,
     main_menu_update,
@@ -93,7 +93,7 @@ void title_sequence_start(s32 use_alternate) {
 void controller_dispatch_current(void) {
     s32 controller = g_controller_depth;
 
-    g_controller_handlers[g_controller_handler_indices[controller - 1]](&g_controller_records[controller - 1]);
+    s_controller_handlers[g_controller_handler_indices[controller - 1]](&g_controller_records[controller - 1]);
 }
 
 /* Start the logo movie at CD mix level 0x76 and push handler 0, whose record

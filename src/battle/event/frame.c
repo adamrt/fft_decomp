@@ -39,8 +39,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static VECTOR g_camera_script_vector;
-static VECTOR* g_camera_published_coords_ptr;
+static VECTOR s_camera_script_vector;
+static VECTOR* s_camera_published_coords_ptr;
 extern SVECTOR* g_camera_published_rotation_ptr;
 
 /* Reset to -1 at event entry. The request processor accepts a track ID here, but no named writer queues one. */
@@ -51,7 +51,7 @@ extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
 
 /* Five rain and five snow commands; the dispatcher consumes each halfword's low byte.
  * WORLD retains this table even though it has no weather-request consumer. */
-static u16 g_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR,
+static u16 s_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR,
     BATTLE_MAP_WEATHER_COMMAND_LIGHT_RAIN, BATTLE_MAP_WEATHER_COMMAND_RAIN, BATTLE_MAP_WEATHER_COMMAND_HEAVY_RAIN,
     BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW,
     BATTLE_MAP_WEATHER_COMMAND_SNOW, BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW };
@@ -430,7 +430,7 @@ static void pending_requests_process(void) {
             if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_SNOW) {
                 g_event_weather_request = weather_id + 5;
             }
-            weather_command_dispatch(g_event_weather_commands[g_event_weather_request]);
+            weather_command_dispatch(s_event_weather_commands[g_event_weather_request]);
         }
     }
 
@@ -523,14 +523,14 @@ static void camera_from_script_variables_load(void) {
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
     camera_rotation_set(&g_camera_script_rotation);
 
-    setVector(&g_camera_script_vector, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM],
+    setVector(&s_camera_script_vector, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM]);
-    camera_zoom_set(&g_camera_script_vector);
+    camera_zoom_set(&s_camera_script_vector);
 
-    g_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
-    g_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
-    g_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
-    camera_real_coords_set(&g_camera_script_vector);
+    s_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
+    s_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
+    s_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
+    camera_real_coords_set(&s_camera_script_vector);
 }
 
 /* Publish the live camera rotation, zoom and position to the script variables.
@@ -549,13 +549,13 @@ void camera_state_to_script_variables_store(void) {
     zoom = camera_zoom_get();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vy;
-    g_camera_published_coords_ptr = zoom;
+    s_camera_published_coords_ptr = zoom;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vz;
 
     coords = camera_real_coords_get();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X] = coords->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z] = coords->vy - (g_camera_shake_z_offset * ONE);
-    g_camera_published_coords_ptr = coords;
+    s_camera_published_coords_ptr = coords;
     g_camera_shake_z_offset = 0;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y] = coords->vz;
 }

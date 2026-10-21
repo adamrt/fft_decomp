@@ -50,12 +50,12 @@ typedef struct obstacle_unit_list {
 typedef char obstacle_unit_list_size_must_be_280[sizeof(obstacle_unit_list_t) == 280 ? 1 : -1];
 
 /* Resident trajectory parameters shared by arc solving, tracing and arrow flight. */
-static s32 g_gravity_scale = 0x53a;
+static s32 s_gravity_scale = 0x53a;
 
-static s32 g_gravity_modifier = 0xa8000;
+static s32 s_gravity_modifier = 0xa8000;
 
 extern s32 g_projectile_launch_slope_q12;
-static s16 g_projectile_arctan_angle_mod;
+static s16 s_projectile_arctan_angle_mod;
 extern s32 g_projectile_source_id;
 extern SVECTOR g_projectile_origin;
 extern SVECTOR g_projectile_destination;
@@ -78,7 +78,7 @@ static s32 arc_height_term_calculate(s32 distance) {
     s32 gravity;
 
     distance >>= 6;
-    gravity = g_gravity_modifier;
+    gravity = s_gravity_modifier;
     return gravity / 2 - (distance * distance) / (gravity >> 11);
 }
 
@@ -123,11 +123,11 @@ static s32 arc_trajectory_calculate(arc_query_t* query, s32* arc_a, s32* arc_b) 
                 query->target.height = 0;
             }
         }
-        gravity = g_gravity_modifier >> 6;
+        gravity = s_gravity_modifier >> 6;
         distance = query->delta.distance >> 6;
         root = SquareRoot12((gravity - (limit >> 5)) * gravity - distance * distance);
-        *arc_a = ((root + g_gravity_modifier) << 8) / (query->delta.distance >> 4);
-        *arc_b = ((g_gravity_modifier - root) << 8) / (query->delta.distance >> 4);
+        *arc_a = ((root + s_gravity_modifier) << 8) / (query->delta.distance >> 4);
+        *arc_b = ((s_gravity_modifier - root) << 8) / (query->delta.distance >> 4);
         result = 1;
     }
     return result;
@@ -146,7 +146,7 @@ static s32 arc_trajectory_calculate(arc_query_t* query, s32* arc_a, s32* arc_b) 
  * (0xa8000).
  */
 s32 projectile_arc_trajectory_term_calculate(s32 launch_slope_q12, s32 progress) {
-    s32 divisor = (g_gravity_modifier * 2) >> 12;
+    s32 divisor = (s_gravity_modifier * 2) >> 12;
     s32 slope_sq;
     s32 progress_sq;
     s32 linear;
@@ -192,7 +192,7 @@ void projectile_trajectory_position_calculate(const VECTOR* src, s32 total, s32 
  * g_gravity_scale. With the retail values (0xa8000 and 0x53a) it is a constant,
  * about 7.4 in Q12. */
 s32 projectile_arc_launch_velocity_calculate(void) {
-    return SquareRoot12((g_gravity_modifier * g_gravity_scale) >> 12);
+    return SquareRoot12((s_gravity_modifier * s_gravity_scale) >> 12);
 }
 
 /*
@@ -313,7 +313,7 @@ static s32 arc_path_trace(const SVECTOR* origin, const s32* launch_slope_q12, co
 
     angle = ratan2(*launch_slope_q12, ONE);
     arc->vz = angle;
-    g_projectile_arctan_angle_mod = angle;
+    s_projectile_arctan_angle_mod = angle;
     progress = 0;
     velocity = projectile_arc_launch_velocity_calculate() >> 8;
     advance = (rcos(arc->vz) * velocity) >> 4;
@@ -534,18 +534,18 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
  * below -0x2aa, column 1 through 0x2aa, or column 2 above it. Arc selection
  * can restore an earlier path without restoring this angle. */
 s32 projectile_bow_animation_column_get(void) {
-    s16 angle = g_projectile_arctan_angle_mod;
+    s16 angle = s_projectile_arctan_angle_mod;
     if (angle >= 0x801) {
-        g_projectile_arctan_angle_mod = angle - ONE;
+        s_projectile_arctan_angle_mod = angle - ONE;
     }
     {
-        s16 angle_after_hi = g_projectile_arctan_angle_mod;
+        s16 angle_after_hi = s_projectile_arctan_angle_mod;
         if (angle_after_hi < -0x800) {
-            g_projectile_arctan_angle_mod = angle_after_hi + ONE;
+            s_projectile_arctan_angle_mod = angle_after_hi + ONE;
         }
     }
     {
-        s16 wrapped = g_projectile_arctan_angle_mod;
+        s16 wrapped = s_projectile_arctan_angle_mod;
         if (wrapped < 0x2AB) {
             return wrapped >= -0x2AA;
         }
@@ -677,7 +677,7 @@ s32 projectile_direct_check_to_target(s32 source_id, const SVECTOR* tile_positio
     }
     setVector(&delta, g_projectile_destination.vx - g_projectile_origin.vx,
         g_projectile_destination.vy - g_projectile_origin.vy, g_projectile_destination.vz - g_projectile_origin.vz);
-    g_projectile_arctan_angle_mod = ratan2(delta.vy, SquareRoot0(delta.vx * delta.vx + delta.vz * delta.vz)) + 0x400;
+    s_projectile_arctan_angle_mod = ratan2(delta.vy, SquareRoot0(delta.vx * delta.vx + delta.vz * delta.vz)) + 0x400;
     distance = SquareRoot12((delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz) * ONE);
     if (direct_path_trace(&delta, &g_projectile_origin, &distance, obstacles) != 0) {
         return target_id;

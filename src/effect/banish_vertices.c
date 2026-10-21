@@ -9,7 +9,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static effect_map_vertex_location_t g_effect_banish_vertex_locations[12] = {
+static effect_map_vertex_location_t s_effect_banish_vertex_locations[12] = {
     { 0, 0 },
     { 1, 0 },
     { 2, 0 },
@@ -74,8 +74,8 @@ s32 effect_banish_map_vertex_particles_update(
             if (group >= 1 && group <= 12) {
                 if (frame >= emitter->start_frame && frame < emitter->end_frame) {
                     i = group - 1;
-                    byte_offset = g_effect_banish_vertex_locations[i].vertex_index * sizeof(*vertex);
-                    byte_offset += g_effect_banish_vertex_locations[i].mesh_part_index
+                    byte_offset = s_effect_banish_vertex_locations[i].vertex_index * sizeof(*vertex);
+                    byte_offset += s_effect_banish_vertex_locations[i].mesh_part_index
                         * (EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(*vertex));
                     vertex = (VECTOR*)(work + byte_offset);
                     parent.motion.position.x = vertex->vx * ONE;
@@ -87,8 +87,8 @@ s32 effect_banish_map_vertex_particles_update(
             } else if (group == 13) {
                 if (frame >= emitter->start_frame && frame < emitter->end_frame) {
                     for (i = 0; i < 4; i++) {
-                        byte_offset = g_effect_banish_vertex_locations[i].vertex_index * sizeof(*vertex);
-                        byte_offset += g_effect_banish_vertex_locations[i].mesh_part_index
+                        byte_offset = s_effect_banish_vertex_locations[i].vertex_index * sizeof(*vertex);
+                        byte_offset += s_effect_banish_vertex_locations[i].mesh_part_index
                             * (EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(*vertex));
                         vertex = (VECTOR*)(work + byte_offset);
                         parent.motion.position.x = vertex->vx * ONE;
@@ -101,8 +101,8 @@ s32 effect_banish_map_vertex_particles_update(
             } else if (group == 14) {
                 if (frame >= emitter->start_frame && frame < emitter->end_frame) {
                     for (i = 4; i < 12; i++) {
-                        byte_offset = g_effect_banish_vertex_locations[i].vertex_index * sizeof(*vertex);
-                        byte_offset += g_effect_banish_vertex_locations[i].mesh_part_index
+                        byte_offset = s_effect_banish_vertex_locations[i].vertex_index * sizeof(*vertex);
+                        byte_offset += s_effect_banish_vertex_locations[i].mesh_part_index
                             * (EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(*vertex));
                         vertex = (VECTOR*)(work + byte_offset);
                         parent.motion.position.x = vertex->vx * ONE;

@@ -77,11 +77,11 @@ typedef enum placement_entry {
 } placement_entry_e;
 
 extern image_layout_t g_deploy_button_hint_cells[4];
-static s32 g_deploy_arrow_position_mode;
-static s32 g_deploy_menu_state; /* placement_state_e */
-static s32 g_deploy_active_cursor;
-static s32 g_deploy_grid_slide_x;
-static s32 g_deploy_grid_slide_y;
+static s32 s_deploy_arrow_position_mode;
+static s32 s_deploy_menu_state; /* placement_state_e */
+static s32 s_deploy_active_cursor;
+static s32 s_deploy_grid_slide_x;
+static s32 s_deploy_grid_slide_y;
 extern POLY_FT4* g_deploy_cursor_0_poly;
 extern s32 g_deploy_cursor_0_submitted;
 extern POLY_FT4* g_deploy_cursor_1_poly;
@@ -167,8 +167,8 @@ typedef enum prompt_thread_slot {
 } prompt_thread_slot_e;
 
 /* Row actions and windows share the deployment screen's native data block. */
-static s16 g_deploy_menu_row_actions[4] = { -1, DEPLOY_ENTRY_CONFIRM_CHOICE, -2, -2 };
-static menu_entry_t g_deploy_menu_entries[DEPLOY_ENTRY_COUNT] = {
+static s16 s_deploy_menu_row_actions[4] = { -1, DEPLOY_ENTRY_CONFIRM_CHOICE, -2, -2 };
+static menu_entry_t s_deploy_menu_entries[DEPLOY_ENTRY_COUNT] = {
     /* Two retained text windows precede the deployment dialogs. */
     { { 384, 32 }, 64, 32, { 137, 88, 64, 32 }, { { 0, 0, 64, 32 }, 0, 0 }, 0x505c, 0, 0, { 0 }, 0, 0, 0, { 0 }, 0, 0,
         0, 0 },
@@ -176,20 +176,20 @@ static menu_entry_t g_deploy_menu_entries[DEPLOY_ENTRY_COUNT] = {
         0, 0 },
     /* Notice, confirmation prompt and confirmation choices. */
     { { 384, 64 }, 0, 0, { 0, 88, 0, 0 }, { { 0, 0, 0, 0 }, 0, 0 }, (s16)0x8002, 0, 1, { 0 },
-        &g_deploy_menu_row_actions[0], menu_icon_linked_entry_thread, MENU_ICON_HEADER_CHECK, { 0 }, 0,
+        &s_deploy_menu_row_actions[0], menu_icon_linked_entry_thread, MENU_ICON_HEADER_CHECK, { 0 }, 0,
         &g_deploy_notice_result, 0, 0 },
-    { { 384, 0 }, 0, 0, { 0, 88, 0, 0 }, { { 0, 0, 0, 0 }, 0, 0 }, 0x509c, 0, 1, { 0 }, &g_deploy_menu_row_actions[1],
+    { { 384, 0 }, 0, 0, { 0, 88, 0, 0 }, { { 0, 0, 0, 0 }, 0, 0 }, 0x509c, 0, 1, { 0 }, &s_deploy_menu_row_actions[1],
         menu_icon_linked_entry_thread, MENU_ICON_HEADER_CHECK, { 0 }, 0, &g_deploy_confirm_prompt_result, 0, 0 },
     { { 384, 64 }, 40, 48, { 0, 88, 40, 48 }, { { 0, 0, 40, 48 }, 0, 0 }, 0x5012, 1, 2, { 0 },
-        &g_deploy_menu_row_actions[2], menu_run_icon_selection_loop, MENU_ICON_HEADER_NONE, { 0 }, 0,
+        &s_deploy_menu_row_actions[2], menu_run_icon_selection_loop, MENU_ICON_HEADER_NONE, { 0 }, 0,
         &g_deploy_confirm_result, 0, 0 }
 };
 
-static unit_panel_thread_t g_deploy_status_display_thread_params = { 0 };
-static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
-static unit_panel_thread_t g_deploy_character_status_frame_config = { 0 };
-static s32 g_deploy_cursor_column[2] = { 2, 2 };
-static s32 g_deploy_cursor_row[2] = { 2, 2 };
+static unit_panel_thread_t s_deploy_status_display_thread_params = { 0 };
+static unit_panel_thread_t s_deploy_numbers_thread_params = { 0 };
+static unit_panel_thread_t s_deploy_character_status_frame_config = { 0 };
+static s32 s_deploy_cursor_column[2] = { 2, 2 };
+static s32 s_deploy_cursor_row[2] = { 2, 2 };
 
 /* Deployment messages, which ATTACK binds at text id 0x9000, that the notice entry (menu entry 2)
  * shows. */
@@ -321,7 +321,7 @@ void attack_deployment_entrypoint(void) {
     u8* tiles;
     u8 cursor_unit;
 
-    g_menu_thread_menu_data = g_deploy_menu_entries;
+    g_menu_thread_menu_data = s_deploy_menu_entries;
     MoveImage(
         &g_deploy_sprite_copy_source_rect, g_deploy_sprite_copy_destination.x, g_deploy_sprite_copy_destination.y);
     LoadImage(&g_deploy_arrow_clut_rect, g_deploy_arrow_clut_data);
@@ -334,13 +334,13 @@ void attack_deployment_entrypoint(void) {
     thread_yield();
 
     /* The grid and the status panel start 0x9c pixels off screen; the first squad slides them in. */
-    g_deploy_grid_slide_y = 0x9c;
+    s_deploy_grid_slide_y = 0x9c;
     g_deploy_deployed_unit_count = 0;
     g_deploy_cleared_word = 0;
     g_deploy_selected_roster_index = 0;
-    g_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
-    g_deploy_active_cursor = 0;
-    g_deploy_status_display_thread_params.position.y = -0x9c;
+    s_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
+    s_deploy_active_cursor = 0;
+    s_deploy_status_display_thread_params.position.y = -0x9c;
     /* Prompt icon states (see unit_panel_build_status_groups): 0xff hidden,
      * 0 lit, 1 dimmed; 7 shows a press then lights, 0x11 a press then dims, 0xc0 fades in. */
     for (i = 0; i < 5; i++) {
@@ -368,7 +368,7 @@ ramza_placed:
     thread_parameters_set(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
     first_deployable_select();
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_deploy_status_display_thread_params, 0, 0);
+    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&s_deploy_status_display_thread_params, 0, 0);
 
     /* transition: 0 for the first squad, 1 after CROSS went back a squad, 2 after START moved on. */
     transition = 0;
@@ -383,8 +383,8 @@ ramza_placed:
         }
 
         g_deploy_deployed_unit_count = 0;
-        g_deploy_menu_state = DEPLOY_MENU_HIDDEN;
-        g_deploy_active_cursor = 0;
+        s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
+        s_deploy_active_cursor = 0;
         /* Count the units already on this squad's grid. */
         row = 0;
         tiles = g_deploy_roster_id_by_tile[0];
@@ -412,17 +412,17 @@ ramza_placed:
         thread_inactive_wait(DEPLOY_THREAD_SLOT_ROSTER_STEP);
         g_deploy_pending_roster_index = -1;
         /* Both cursors start on the first placed unit, else at the grid center. */
-        g_deploy_cursor_column[0] = 2;
-        g_deploy_cursor_row[0] = 2;
-        g_deploy_cursor_column[1] = 2;
-        g_deploy_cursor_row[1] = 2;
+        s_deploy_cursor_column[0] = 2;
+        s_deploy_cursor_row[0] = 2;
+        s_deploy_cursor_column[1] = 2;
+        s_deploy_cursor_row[1] = 2;
         for (row = 0; row < 5; row++) {
             for (column = 0; column < 5; column++) {
                 if (g_deploy_roster_id_by_tile[row][column] != DEPLOY_ROSTER_ID_NONE) {
-                    g_deploy_cursor_column[0] = column;
-                    g_deploy_cursor_row[0] = row;
-                    g_deploy_cursor_column[1] = column;
-                    g_deploy_cursor_row[1] = row;
+                    s_deploy_cursor_column[0] = column;
+                    s_deploy_cursor_row[0] = row;
+                    s_deploy_cursor_column[1] = column;
+                    s_deploy_cursor_row[1] = row;
                     g_deploy_pending_roster_index = g_deploy_roster_id_by_tile[row][column];
                     goto cursor_placed; /* leave both loops */
                 }
@@ -446,26 +446,26 @@ ramza_placed:
         /* Slide the new squad's grid in from the side opposite the old one's exit. */
         if (transition == 1) {
             thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
-            g_deploy_grid_slide_x = 0x100;
+            s_deploy_grid_slide_x = 0x100;
             for (i = 0; i < 5; i++) {
                 if (g_unit_panel_status_animation[i] < 2) {
                     g_unit_panel_status_animation[i] = 1;
                 }
             }
             for (i = 0; i < 0x100; i += 8) {
-                g_deploy_grid_slide_x -= 8;
+                s_deploy_grid_slide_x -= 8;
                 thread_yield();
             }
         } else if (transition == 2) {
             thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
-            g_deploy_grid_slide_x = -0x100;
+            s_deploy_grid_slide_x = -0x100;
             for (i = 0; i < 5; i++) {
                 if (g_unit_panel_status_animation[i] < 2) {
                     g_unit_panel_status_animation[i] = 1;
                 }
             }
             for (i = 0; i < 0x100; i += 8) {
-                g_deploy_grid_slide_x += 8;
+                s_deploy_grid_slide_x += 8;
                 thread_yield();
             }
         }
@@ -474,8 +474,8 @@ ramza_placed:
         if (first_pass != 0) {
             g_gfx_screen_fade = 0xff;
             while (1) {
-                if (g_deploy_status_display_thread_params.position.y != 0) {
-                    g_deploy_status_display_thread_params.position.y += 4;
+                if (s_deploy_status_display_thread_params.position.y != 0) {
+                    s_deploy_status_display_thread_params.position.y += 4;
                 }
                 if (g_gfx_screen_fade != 0) {
                     g_gfx_screen_fade -= 0x10;
@@ -484,16 +484,16 @@ ramza_placed:
                     }
                 }
                 /* Start the icon fade-in as the panel slide nears its end. */
-                if (g_deploy_status_display_thread_params.position.y == -8) {
+                if (s_deploy_status_display_thread_params.position.y == -8) {
                     for (i = 0; i < 5; i++) {
                         g_unit_panel_status_animation[i] = 0xc0;
                     }
                 }
-                if (g_deploy_grid_slide_y != 0) {
-                    g_deploy_grid_slide_y -= 4;
+                if (s_deploy_grid_slide_y != 0) {
+                    s_deploy_grid_slide_y -= 4;
                 }
-                if (g_gfx_screen_fade == 0 && g_deploy_status_display_thread_params.position.y == 0
-                    && g_deploy_grid_slide_y == 0) {
+                if (g_gfx_screen_fade == 0 && s_deploy_status_display_thread_params.position.y == 0
+                    && s_deploy_grid_slide_y == 0) {
                     break;
                 }
                 thread_yield();
@@ -511,7 +511,7 @@ ramza_placed:
         /* Placement loop, one pass per frame, until START or CROSS leaves the squad. */
         while (1) {
             thread_yield();
-            g_deploy_status_display_thread_params.style
+            s_deploy_status_display_thread_params.style
                 = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
             input = script_get_controller_input_pointer(0);
             if (*input & PSX_PAD_SELECT) {
@@ -522,8 +522,8 @@ ramza_placed:
 
             /* Update the idle icons (state below 2) for the cursor tile and the unit count. */
             if (g_unit_panel_status_animation[2] < 2) {
-                cursor_unit = g_deploy_roster_id_by_tile[g_deploy_cursor_row[g_deploy_active_cursor]]
-                                                        [g_deploy_cursor_column[g_deploy_active_cursor]];
+                cursor_unit = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
+                                                        [s_deploy_cursor_column[s_deploy_active_cursor]];
                 if (cursor_unit != DEPLOY_ROSTER_ID_NONE) {
                     g_unit_panel_status_animation[2] = 0;
                 } else {
@@ -544,67 +544,67 @@ ramza_placed:
 
             /* The grid is isometric: a higher column draws up and to the left, a higher row
              * up and to the right. */
-            cursor = g_deploy_active_cursor != 0;
+            cursor = s_deploy_active_cursor != 0;
             if (*input & PSX_PAD_LEFT) {
-                if (g_deploy_cursor_column[cursor] < 4) {
-                    g_deploy_cursor_column[cursor]++;
+                if (s_deploy_cursor_column[cursor] < 4) {
+                    s_deploy_cursor_column[cursor]++;
                     g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
             }
             if (*input & PSX_PAD_RIGHT) {
-                if (g_deploy_cursor_column[cursor] > 0) {
-                    g_deploy_cursor_column[cursor]--;
+                if (s_deploy_cursor_column[cursor] > 0) {
+                    s_deploy_cursor_column[cursor]--;
                     g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
             }
             if (*input & PSX_PAD_UP) {
-                if (g_deploy_cursor_row[cursor] < 4) {
-                    g_deploy_cursor_row[cursor]++;
+                if (s_deploy_cursor_row[cursor] < 4) {
+                    s_deploy_cursor_row[cursor]++;
                     g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
             }
             if (*input & PSX_PAD_DOWN) {
-                if (g_deploy_cursor_row[cursor] > 0) {
-                    g_deploy_cursor_row[cursor]--;
+                if (s_deploy_cursor_row[cursor] > 0) {
+                    s_deploy_cursor_row[cursor]--;
                     g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
                 }
             }
 
             /* Choose the tile menu for the cursor tile; cursor 1 carries the unit picked up
              * with cursor 0. */
-            column = g_deploy_cursor_column[cursor];
-            row = g_deploy_cursor_row[cursor];
-            if (g_deploy_active_cursor == 0) {
+            column = s_deploy_cursor_column[cursor];
+            row = s_deploy_cursor_row[cursor];
+            if (s_deploy_active_cursor == 0) {
                 tile = g_deploy_roster_id_by_tile[row][column];
                 if (tile == DEPLOY_ROSTER_ID_NONE) {
                     if (g_deploy_valid_tiles[row][column] != 0
                         && g_deploy_deployed_unit_count < g_deploy_current_squad_data->unit_limit) {
-                        g_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
+                        s_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
                     } else {
-                        g_deploy_menu_state = DEPLOY_MENU_BLOCKED_TILE;
+                        s_deploy_menu_state = DEPLOY_MENU_BLOCKED_TILE;
                     }
                 } else if (g_deploy_selected_roster_index == tile) {
-                    g_deploy_menu_state = DEPLOY_MENU_SELECTED_UNIT;
+                    s_deploy_menu_state = DEPLOY_MENU_SELECTED_UNIT;
                 } else {
-                    g_deploy_menu_state = DEPLOY_MENU_OTHER_UNIT;
+                    s_deploy_menu_state = DEPLOY_MENU_OTHER_UNIT;
                 }
-            } else if (g_deploy_active_cursor == 1) {
+            } else if (s_deploy_active_cursor == 1) {
                 tile = g_deploy_roster_id_by_tile[row][column];
                 if (tile == DEPLOY_ROSTER_ID_NONE) {
                     if (g_deploy_valid_tiles[row][column] != 0) {
-                        g_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
+                        s_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
                     } else {
-                        g_deploy_menu_state = DEPLOY_MENU_BLOCKED_TILE;
+                        s_deploy_menu_state = DEPLOY_MENU_BLOCKED_TILE;
                     }
-                } else if (g_deploy_roster_id_by_tile[g_deploy_cursor_row[0]][g_deploy_cursor_column[0]] == tile) {
+                } else if (g_deploy_roster_id_by_tile[s_deploy_cursor_row[0]][s_deploy_cursor_column[0]] == tile) {
                     if (g_deploy_selected_roster_index
-                        == g_deploy_roster_id_by_tile[g_deploy_cursor_row[0]][g_deploy_cursor_column[0]]) {
-                        g_deploy_menu_state = DEPLOY_MENU_SELECTED_UNIT;
+                        == g_deploy_roster_id_by_tile[s_deploy_cursor_row[0]][s_deploy_cursor_column[0]]) {
+                        s_deploy_menu_state = DEPLOY_MENU_SELECTED_UNIT;
                     } else {
-                        g_deploy_menu_state = DEPLOY_MENU_OTHER_UNIT;
+                        s_deploy_menu_state = DEPLOY_MENU_OTHER_UNIT;
                     }
                 } else {
-                    g_deploy_menu_state = DEPLOY_MENU_SWAP_UNIT;
+                    s_deploy_menu_state = DEPLOY_MENU_SWAP_UNIT;
                 }
             }
 
@@ -612,10 +612,10 @@ ramza_placed:
                 if (g_deploy_deployed_unit_count == 0) {
                     g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                     /* Notices reuse menu entry 2, retexted with each deployment message. */
-                    g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_NO_UNIT_PLACED;
+                    s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_NO_UNIT_PLACED;
                     thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                     thread_parameters_set(
-                        DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
+                        DEPLOY_THREAD_SLOT_NOTICE, (s32)&s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
                     thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
                 } else {
                     g_sound_pending_sfx_id = SOUND_SFX_COMPLETE;
@@ -624,7 +624,7 @@ ramza_placed:
                      * confirm the whole deployment. */
                     if (script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT) - 1 != g_deploy_current_squad
                         && g_deploy_fieldable_unit_count > g_deploy_deployed_unit_count) {
-                        g_deploy_menu_state = DEPLOY_MENU_HIDDEN;
+                        s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
                         for (i = 0; i < 5; i++) {
                             if (g_unit_panel_status_animation[i] < 2) {
                                 g_unit_panel_status_animation[i] = 1;
@@ -632,11 +632,11 @@ ramza_placed:
                         }
                         thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
                         for (i = 0; i < 0x100; i += 8) {
-                            g_deploy_grid_slide_x += 8;
+                            s_deploy_grid_slide_x += 8;
                             thread_yield();
                         }
                     } else {
-                        s32* deployed = &g_deploy_status_display_thread_params.style;
+                        s32* deployed = &s_deploy_status_display_thread_params.style;
 
                         /* Show the selected unit as deployed while the confirm menu is open; `cursor`
                          * holds the saved flag meanwhile. */
@@ -662,15 +662,15 @@ ramza_placed:
                         mem_copy_bytes_nonempty(
                             g_deploy_roster_id_by_tile, g_deploy_units_by_squad[g_deploy_current_squad + 1], 25);
                     }
-                    g_deploy_active_cursor = 0;
+                    s_deploy_active_cursor = 0;
                     transition = 2;
                     break;
                 }
             }
 
-            if ((*input & PSX_PAD_CROSS) && g_deploy_active_cursor == 0 && g_deploy_current_squad != 0) {
+            if ((*input & PSX_PAD_CROSS) && s_deploy_active_cursor == 0 && g_deploy_current_squad != 0) {
                 g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
-                g_deploy_menu_state = DEPLOY_MENU_HIDDEN;
+                s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
                 for (i = 0; i < 5; i++) {
                     if (g_unit_panel_status_animation[i] < 2) {
                         g_unit_panel_status_animation[i] = 1;
@@ -678,7 +678,7 @@ ramza_placed:
                 }
                 thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
                 for (i = 0; i < 0x100; i += 8) {
-                    g_deploy_grid_slide_x -= 8;
+                    s_deploy_grid_slide_x -= 8;
                     thread_yield();
                 }
                 mem_copy_bytes_nonempty(
@@ -687,7 +687,7 @@ ramza_placed:
                 mem_copy_bytes_nonempty(
                     g_deploy_roster_id_by_tile, g_deploy_units_by_squad[g_deploy_current_squad], 25);
                 transition = 1;
-                g_deploy_active_cursor = 0;
+                s_deploy_active_cursor = 0;
                 /* Once more, so the squad loop's increment lands on the previous squad. */
                 g_deploy_current_squad--;
                 break;
@@ -695,9 +695,9 @@ ramza_placed:
 
             /* CIRCLE with cursor 0 places the selected roster unit on an empty tile or picks
              * up the unit on an occupied one; with cursor 1 it drops the carried unit. */
-            if ((*input & PSX_PAD_CIRCLE) && g_deploy_active_cursor == 0) {
-                column = g_deploy_cursor_column[cursor];
-                row = g_deploy_cursor_row[cursor];
+            if ((*input & PSX_PAD_CIRCLE) && s_deploy_active_cursor == 0) {
+                column = s_deploy_cursor_column[cursor];
+                row = s_deploy_cursor_row[cursor];
                 if (g_deploy_valid_tiles[row][column] != 0) {
                     if (g_deploy_roster_id_by_tile[row][column] == DEPLOY_ROSTER_ID_NONE) {
                         /* A new unit needs room under the squad limit; a placed one just moves here. */
@@ -708,10 +708,10 @@ ramza_placed:
                                 g_deploy_deployed_unit_count++;
                             } else {
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
-                                g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_SQUAD_FULL;
+                                s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_SQUAD_FULL;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_parameters_set(
-                                    DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
+                                    DEPLOY_THREAD_SLOT_NOTICE, (s32)&s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
                                 thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
                             }
                         } else {
@@ -720,70 +720,70 @@ ramza_placed:
                         }
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_SELECT;
-                        g_deploy_active_cursor = 1;
-                        g_deploy_cursor_column[1] = g_deploy_cursor_column[0];
-                        g_deploy_cursor_row[1] = g_deploy_cursor_row[0];
+                        s_deploy_active_cursor = 1;
+                        s_deploy_cursor_column[1] = s_deploy_cursor_column[0];
+                        s_deploy_cursor_row[1] = s_deploy_cursor_row[0];
                     }
                 } else {
                     g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                 }
-            } else if (g_deploy_active_cursor == 1) {
-                column = g_deploy_cursor_column[cursor];
-                row = g_deploy_cursor_row[cursor];
+            } else if (s_deploy_active_cursor == 1) {
+                column = s_deploy_cursor_column[cursor];
+                row = s_deploy_cursor_row[cursor];
                 if (*input & PSX_PAD_CIRCLE) {
                     if (g_deploy_valid_tiles[row][column] != 0) {
                         /* Dropped where it was picked up: remove the unit, or put the selected roster
                          * unit in its place; a mandatory Ramza cannot leave the grid. */
-                        if (g_deploy_cursor_column[0] == g_deploy_cursor_column[1]
-                            && g_deploy_cursor_row[0] == g_deploy_cursor_row[1]) {
+                        if (s_deploy_cursor_column[0] == s_deploy_cursor_column[1]
+                            && s_deploy_cursor_row[0] == s_deploy_cursor_row[1]) {
                             if (g_deploy_roster_id_by_tile[row][column] == 0
                                 && script_variable_get(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
-                                g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_RAMZA_REQUIRED;
+                                s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_RAMZA_REQUIRED;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_parameters_set(
-                                    DEPLOY_THREAD_SLOT_NOTICE, (s32)&g_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
+                                    DEPLOY_THREAD_SLOT_NOTICE, (s32)&s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
                                 thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
-                                g_deploy_active_cursor = 0;
-                                g_deploy_cursor_column[0] = g_deploy_cursor_column[1];
-                                g_deploy_cursor_row[0] = g_deploy_cursor_row[1];
+                                s_deploy_active_cursor = 0;
+                                s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
+                                s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                             } else if (g_deploy_roster_id_by_tile[row][column] != g_deploy_selected_roster_index) {
                                 if (deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index) != 0) {
-                                    g_deploy_active_cursor = 0;
+                                    s_deploy_active_cursor = 0;
                                     g_sound_pending_sfx_id = SOUND_SFX_CAMERA_ZOOM_OUT;
                                     roster_unit_remove(g_deploy_selected_roster_index);
-                                    g_deploy_cursor_column[0] = g_deploy_cursor_column[1];
-                                    g_deploy_cursor_row[0] = g_deploy_cursor_row[1];
+                                    s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
+                                    s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                                     g_deploy_deployed_unit_count--;
                                     g_deploy_roster_id_by_tile[row][column] = g_deploy_selected_roster_index;
                                 } else {
                                     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-                                    g_deploy_active_cursor = 0;
-                                    g_deploy_cursor_column[0] = g_deploy_cursor_column[1];
-                                    g_deploy_cursor_row[0] = g_deploy_cursor_row[1];
+                                    s_deploy_active_cursor = 0;
+                                    s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
+                                    s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                                     g_deploy_roster_id_by_tile[row][column] = g_deploy_selected_roster_index;
                                 }
                             } else {
                                 g_sound_pending_sfx_id = SOUND_SFX_CAMERA_ZOOM_OUT;
-                                g_deploy_active_cursor = 0;
-                                g_deploy_cursor_column[0] = g_deploy_cursor_column[1];
-                                g_deploy_cursor_row[0] = g_deploy_cursor_row[1];
+                                s_deploy_active_cursor = 0;
+                                s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
+                                s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                                 g_deploy_deployed_unit_count--;
                                 g_deploy_roster_id_by_tile[row][column] = DEPLOY_ROSTER_ID_NONE;
                             }
                         } else {
                             roster_unit_tile_swap(column, row,
-                                g_deploy_roster_id_by_tile[g_deploy_cursor_row[0]][g_deploy_cursor_column[0]]);
+                                g_deploy_roster_id_by_tile[s_deploy_cursor_row[0]][s_deploy_cursor_column[0]]);
                             g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-                            g_deploy_active_cursor = 0;
-                            g_deploy_cursor_column[0] = g_deploy_cursor_column[1];
-                            g_deploy_cursor_row[0] = g_deploy_cursor_row[1];
+                            s_deploy_active_cursor = 0;
+                            s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
+                            s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                         }
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                     }
                 } else if (*input & PSX_PAD_CROSS) {
-                    g_deploy_active_cursor = 0;
+                    s_deploy_active_cursor = 0;
                     g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
                 }
             }
@@ -803,10 +803,10 @@ ramza_placed:
                     g_unit_panel_status_animation[4] = 1;
                 }
                 thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-                thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_deploy_numbers_thread_params, 0, 0);
+                thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&s_deploy_numbers_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
                 thread_parameters_set(
-                    THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_deploy_character_status_frame_config, 0, 0);
+                    THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&s_deploy_character_status_frame_config, 0, 0);
                 thread_start(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER, thread_wait_forever);
                 do {
                     thread_yield();
@@ -827,15 +827,15 @@ ramza_placed:
 
             /* TRIANGLE makes the unit under the cursor the selected roster unit. */
             if (*input & PSX_PAD_TRIANGLE) {
-                cursor_unit = g_deploy_roster_id_by_tile[g_deploy_cursor_row[g_deploy_active_cursor]]
-                                                        [g_deploy_cursor_column[g_deploy_active_cursor]];
+                cursor_unit = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
+                                                        [s_deploy_cursor_column[s_deploy_active_cursor]];
                 if (cursor_unit != DEPLOY_ROSTER_ID_NONE) {
                     g_unit_panel_status_animation[2] = 7;
                     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                     if (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0) {
                         g_deploy_pending_roster_index
-                            = g_deploy_roster_id_by_tile[g_deploy_cursor_row[g_deploy_active_cursor]]
-                                                        [g_deploy_cursor_column[g_deploy_active_cursor]];
+                            = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
+                                                        [s_deploy_cursor_column[s_deploy_active_cursor]];
                         if (g_deploy_selected_roster_index != g_deploy_pending_roster_index) {
                             thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread_run);
                             thread_inactive_wait(DEPLOY_THREAD_SLOT_ROSTER_STEP);
@@ -856,12 +856,12 @@ ramza_placed:
 
     /* Close the menu and slide the grid, status panel and slot columns off screen. */
     thread_frames_wait(0x20);
-    g_deploy_menu_state = DEPLOY_MENU_CLOSED;
+    s_deploy_menu_state = DEPLOY_MENU_CLOSED;
     thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
     thread_yield();
     for (i = 0; i < 0x100; i += 2) {
-        g_deploy_status_display_thread_params.position.y = -i;
-        g_deploy_grid_slide_y = i;
+        s_deploy_status_display_thread_params.position.y = -i;
+        s_deploy_grid_slide_y = i;
         g_deploy_slot_offsets[0] = -i;
         g_deploy_slot_offsets[1] = -i;
         g_deploy_slot_offsets[2] = i;
@@ -1049,7 +1049,7 @@ static void first_deployable_select(void) {
         }
         g_deploy_selected_roster_index++;
     }
-    g_deploy_status_display_thread_params.position.x = 0;
+    s_deploy_status_display_thread_params.position.x = 0;
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
 }
 
@@ -1240,11 +1240,11 @@ static void roster_next_thread_run(void) {
         } while (g_deploy_roster_unit_deployable[g_deploy_selected_roster_index] == 0);
     }
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
-    g_deploy_status_display_thread_params.redraw_request = 1;
-    g_deploy_status_display_thread_params.position.x = 0;
-    g_deploy_numbers_thread_params.redraw_request = 1;
-    g_deploy_character_status_frame_config.redraw_request = 1;
-    g_deploy_status_display_thread_params.style = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
+    s_deploy_status_display_thread_params.redraw_request = 1;
+    s_deploy_status_display_thread_params.position.x = 0;
+    s_deploy_numbers_thread_params.redraw_request = 1;
+    s_deploy_character_status_frame_config.redraw_request = 1;
+    s_deploy_status_display_thread_params.style = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_current_exit();
 }
@@ -1274,11 +1274,11 @@ static void roster_previous_thread_run(void) {
         } while (g_deploy_roster_unit_deployable[g_deploy_selected_roster_index] == 0);
     }
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
-    g_deploy_status_display_thread_params.redraw_request = 2;
-    g_deploy_status_display_thread_params.position.x = 0;
-    g_deploy_numbers_thread_params.redraw_request = 1;
-    g_deploy_character_status_frame_config.redraw_request = 1;
-    g_deploy_status_display_thread_params.style = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
+    s_deploy_status_display_thread_params.redraw_request = 2;
+    s_deploy_status_display_thread_params.position.x = 0;
+    s_deploy_numbers_thread_params.redraw_request = 1;
+    s_deploy_character_status_frame_config.redraw_request = 1;
+    s_deploy_status_display_thread_params.style = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
     thread_yield();
     thread_current_exit();
 }
@@ -1388,14 +1388,14 @@ u8 deploy_get_valid_tile(s32 column, s32 row) {
 
 /* Move the first deployment cursor to (column, row). Nothing calls it. */
 void deploy_set_cursor_tile(s32 column, s32 row) {
-    g_deploy_cursor_column[0] = column;
-    g_deploy_cursor_row[0] = row;
+    s_deploy_cursor_column[0] = column;
+    s_deploy_cursor_row[0] = row;
 }
 
 /* Choose which of the three places the tiles-only view draws its arrow (0, 1 or 2). Nothing calls
  * it; deploy_enter_tiles_view resets the mode to 0. */
 void deploy_set_arrow_position(s32 mode) {
-    g_deploy_arrow_position_mode = mode;
+    s_deploy_arrow_position_mode = mode;
 }
 
 /* Enter the deployment screen's tiles-only view: hide the menu, reset the
@@ -1403,11 +1403,11 @@ void deploy_set_arrow_position(s32 mode) {
  * deployment render thread. */
 void deploy_enter_tiles_view(void) {
     g_deploy_tiles_only_mode = 1;
-    g_deploy_menu_state = DEPLOY_MENU_HIDDEN;
-    g_deploy_active_cursor = 0;
-    g_deploy_grid_slide_x = 0;
-    g_deploy_grid_slide_y = 0;
-    g_deploy_arrow_position_mode = 0;
+    s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
+    s_deploy_active_cursor = 0;
+    s_deploy_grid_slide_x = 0;
+    s_deploy_grid_slide_y = 0;
+    s_deploy_arrow_position_mode = 0;
     valid_tiles_build(g_deploy_render_buffers[0].tiles[0]);
     thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread_run);
     thread_parameters_set(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
@@ -1466,27 +1466,27 @@ static void screen_draw_thread_run(void) {
     frame = 0;
     while (1) {
         thread_yield();
-        if (g_deploy_tiles_only_mode == 0 && g_deploy_menu_state != DEPLOY_MENU_HIDDEN) {
-            button_hint_build(frame, g_deploy_menu_state, &g_deploy_render_buffers[frame & 1]);
+        if (g_deploy_tiles_only_mode == 0 && s_deploy_menu_state != DEPLOY_MENU_HIDDEN) {
+            button_hint_build(frame, s_deploy_menu_state, &g_deploy_render_buffers[frame & 1]);
         }
         gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].draw_mode_9c4);
 
         if (g_deploy_tiles_only_mode != 0) {
-            if (g_deploy_arrow_position_mode == 0) {
+            if (s_deploy_arrow_position_mode == 0) {
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0xb9;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0xe0;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0xc2;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 0x7e;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x91;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x90;
-            } else if (g_deploy_arrow_position_mode == 1) {
+            } else if (s_deploy_arrow_position_mode == 1) {
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0x140;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0x119;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0x137;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y0 = 0x7e;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x91;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x90;
-            } else if (g_deploy_arrow_position_mode == 2) {
+            } else if (s_deploy_arrow_position_mode == 2) {
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0x140;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x1 = 0x119;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x2 = 0x137;
@@ -1508,8 +1508,8 @@ static void screen_draw_thread_run(void) {
             offset_y = g_gfx_screen_polarity == 0 ? 0xf0 : 0;
         }
 
-        g_deploy_render_buffers[frame & 1].world_position.x = g_deploy_grid_slide_x - 0x80;
-        g_deploy_render_buffers[frame & 1].world_position.y = g_deploy_grid_slide_y + offset_y;
+        g_deploy_render_buffers[frame & 1].world_position.x = s_deploy_grid_slide_x - 0x80;
+        g_deploy_render_buffers[frame & 1].world_position.y = s_deploy_grid_slide_y + offset_y;
         SetDrawOffset(
             &g_deploy_render_buffers[frame & 1].world_offset, (u16*)&g_deploy_render_buffers[frame & 1].world_position);
         g_deploy_render_buffers[frame & 1].screen_position.x = -0x80;
@@ -1536,7 +1536,7 @@ static void screen_draw_thread_run(void) {
         tile = g_deploy_render_buffers[frame & 1].tiles[0];
         g_deploy_cursor_1_submitted = 0;
         g_deploy_cursor_0_submitted = 0;
-        if (g_deploy_active_cursor == 1) {
+        if (s_deploy_active_cursor == 1) {
             g_deploy_cursor_1_poly = &g_deploy_render_buffers[frame & 1].cursor[1][0];
             g_deploy_cursor_1_submitted = 1;
             gfx_draw_or_append_gpu_primitive(g_deploy_cursor_1_poly);
@@ -1562,11 +1562,11 @@ static void screen_draw_thread_run(void) {
         gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].draw_mode_9f4);
         for (y = 0; y < 5; y++) {
             for (x = 0; x < 5; x++) {
-                if (g_deploy_cursor_column[1] == x && g_deploy_cursor_row[1] == y && g_deploy_active_cursor == 1) {
+                if (s_deploy_cursor_column[1] == x && s_deploy_cursor_row[1] == y && s_deploy_active_cursor == 1) {
                     gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].draw_mode_9d0);
                     gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].cursor[1][1]);
                 }
-                if (g_deploy_cursor_column[0] == x && g_deploy_cursor_row[0] == y) {
+                if (s_deploy_cursor_column[0] == x && s_deploy_cursor_row[0] == y) {
                     gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].draw_mode_9dc);
                     gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].cursor[0][1]);
                 }
@@ -1750,8 +1750,8 @@ static void cursors_update(s32 frame, placement_buffer_t* buffer) {
     LoadImage(&g_deploy_cursor_clut_rect, (u32*)g_deploy_cursor_clut);
 
     for (i = 0, tiles = g_deploy_valid_tiles; i < 2; i++) {
-        s32 row = g_deploy_cursor_row[i];
-        s32 column = g_deploy_cursor_column[i];
+        s32 row = s_deploy_cursor_row[i];
+        s32 column = s_deploy_cursor_column[i];
         s32 x;
         s32 y;
         s32 top;

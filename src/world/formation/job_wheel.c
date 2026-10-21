@@ -60,7 +60,7 @@ typedef enum formation_job_change_anim {
     FORMATION_JOB_CHANGE_ANIM_DISSOLVE = 1,
     FORMATION_JOB_CHANGE_ANIM_CLOSING = 2 /* the last 20 frames */
 } formation_job_change_anim_e;
-static s8 g_formation_job_change_anim_state; /* formation_job_change_anim_e */ /* formation_job_change_anim_e */
+static s8 s_formation_job_change_anim_state; /* formation_job_change_anim_e */ /* formation_job_change_anim_e */
 extern u8 g_formation_job_change_confirmed;
 extern s16 g_formation_job_change_skip_requested;
 extern rgb24_t g_formation_job_change_flash_colors[4];
@@ -69,19 +69,19 @@ extern u8* g_formation_job_change_old_sprite_image;
 extern u8* g_formation_job_change_new_sprite_image;
 extern u8* g_formation_job_change_new_sprite_source;
 
-static RECT g_formation_job_change_old_sprite_rect = { 576, 304, 6, 40 };
-static RECT g_formation_job_change_new_sprite_rect = { 582, 304, 6, 40 };
-static u8 g_formation_job_change_active = 0;
-static s16 g_formation_job_change_frame = 0;
-static rgb24_t g_formation_job_change_wave_colors[3] = { { 0, 0, 0 }, { 255, 0, 255 }, { 0, 0, 0 } };
-static u8 g_formation_job_wheel_close_frame = 255;
-static u8 g_formation_job_wheel_open_frame = 255;
-static u8 g_formation_job_wheel_closing = 0;
-static u8 g_formation_job_wheel_opening = 0;
+static RECT s_formation_job_change_old_sprite_rect = { 576, 304, 6, 40 };
+static RECT s_formation_job_change_new_sprite_rect = { 582, 304, 6, 40 };
+static u8 s_formation_job_change_active = 0;
+static s16 s_formation_job_change_frame = 0;
+static rgb24_t s_formation_job_change_wave_colors[3] = { { 0, 0, 0 }, { 255, 0, 255 }, { 0, 0, 0 } };
+static u8 s_formation_job_wheel_close_frame = 255;
+static u8 s_formation_job_wheel_open_frame = 255;
+static u8 s_formation_job_wheel_closing = 0;
+static u8 s_formation_job_wheel_opening = 0;
 
 /* One row for text_id_rows_to_vram_render, followed by its -1 terminator. */
-static s16 g_formation_job_wheel_name_text[2] = { 0, -1 };
-static oriented_quad_t g_formation_job_wheel_mastered_icon_sprite
+static s16 s_formation_job_wheel_name_text[2] = { 0, -1 };
+static oriented_quad_t s_formation_job_wheel_mastered_icon_sprite
     = { { 0, 0 }, 10, 10, { 36, 200, 10, 10, 0x7ee7, 31 } };
 
 static void wheel_choices_build(void);
@@ -200,10 +200,10 @@ void formation_job_menu_update(void) {
     }
 
     /* A job change in progress: step the flash, and apply the job once it reports done. */
-    if (g_formation_job_change_anim_state != FORMATION_JOB_CHANGE_ANIM_DONE) {
-        g_formation_job_change_anim_state
+    if (s_formation_job_change_anim_state != FORMATION_JOB_CHANGE_ANIM_DONE) {
+        s_formation_job_change_anim_state
             = job_change_update(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
-        if (g_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DONE) {
+        if (s_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DONE) {
             i = g_game_options.value & GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK;
             formation_job_change(
                 g_unit_selected_index, g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index], i == 0);
@@ -217,7 +217,7 @@ void formation_job_menu_update(void) {
 
         /* Dissolve: each corner ramps a lead channel (two for corner 3) to 0xFF; the others dim
          * until it saturates, then brighten. Closing eases every channel back to 0x80. */
-        if (g_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DISSOLVE) {
+        if (s_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DISSOLVE) {
             g_formation_job_change_flash_colors[0].r
                 = g_formation_job_change_flash_colors[0].r < 0xFE ? g_formation_job_change_flash_colors[0].r + 1 : 0xFF;
             g_formation_job_change_flash_colors[0].g = g_formation_job_change_flash_colors[0].r == 0xFF
@@ -249,7 +249,7 @@ void formation_job_menu_update(void) {
             g_formation_job_change_flash_colors[3].b = g_formation_job_change_flash_colors[3].r == 0xFF
                 ? g_formation_job_change_flash_colors[3].b + 1
                 : g_formation_job_change_flash_colors[3].b - 1;
-        } else if (g_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_CLOSING) {
+        } else if (s_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_CLOSING) {
             for (i = 0; i < 4; i++) {
                 g_formation_job_change_flash_colors[i].r = g_formation_job_change_flash_colors[i].r < 0x80
                     ? g_formation_job_change_flash_colors[i].r + 1
@@ -335,7 +335,7 @@ void formation_job_menu_update(void) {
                                 g_formation_job_change_flash_colors[i].r = g_formation_job_change_flash_colors[i].g
                                     = g_formation_job_change_flash_colors[i].b = 0x80;
                             }
-                            g_formation_job_change_anim_state = FORMATION_JOB_CHANGE_ANIM_DISSOLVE;
+                            s_formation_job_change_anim_state = FORMATION_JOB_CHANGE_ANIM_DISSOLVE;
                             g_formation_saved_banner_enabled = g_formation_unit_banner_enabled;
                             g_formation_unit_banner_enabled = 0;
                             g_formation_unit_cycle_mode = 0;
@@ -505,14 +505,14 @@ static s32 job_change_update(s32 job) {
     s32 base;
     s32 line_x;
 
-    if (g_formation_job_change_active == 0) {
+    if (s_formation_job_change_active == 0) {
         music_tune_play(MUSIC_TUNE_JOB_CHANGE);
-        g_formation_job_change_active = 1;
-        g_formation_job_change_frame = 0;
+        s_formation_job_change_active = 1;
+        s_formation_job_change_frame = 0;
         g_formation_job_change_skip_requested = 0;
         menu_input_clear_state();
         g_formation_job_change_old_sprite_image = heap_alloc(0x1e0);
-        gfx_store_image_and_wait(&g_formation_job_change_old_sprite_rect, g_formation_job_change_old_sprite_image);
+        gfx_store_image_and_wait(&s_formation_job_change_old_sprite_rect, g_formation_job_change_old_sprite_image);
         g_formation_job_change_new_sprite_image = heap_alloc(0x1e0);
         memset(g_formation_job_change_new_sprite_image, 0, 0x1e0);
         formation_job_change(FORMATION_PREVIEW_UNIT_INDEX, job, 0);
@@ -541,26 +541,26 @@ static s32 job_change_update(s32 job) {
         }
     }
     for (i = 0; i < 2; i++) {
-        n = g_formation_job_change_dissolve_order[g_formation_job_change_frame * 2 + i];
+        n = g_formation_job_change_dissolve_order[s_formation_job_change_frame * 2 + i];
         g_formation_job_change_old_sprite_image[n] = 0;
         g_formation_job_change_new_sprite_image[n] = g_formation_job_change_new_sprite_source[n];
     }
-    LoadImage(&g_formation_job_change_old_sprite_rect, (u32*)g_formation_job_change_old_sprite_image);
-    LoadImage(&g_formation_job_change_new_sprite_rect, (u32*)g_formation_job_change_new_sprite_image);
+    LoadImage(&s_formation_job_change_old_sprite_rect, (u32*)g_formation_job_change_old_sprite_image);
+    LoadImage(&s_formation_job_change_new_sprite_rect, (u32*)g_formation_job_change_new_sprite_image);
     k = 64;
     amplitude = 20;
     offset = 0;
     swing = 10;
-    if (g_formation_job_change_frame < 20) {
-        amplitude = g_formation_job_change_frame;
+    if (s_formation_job_change_frame < 20) {
+        amplitude = s_formation_job_change_frame;
         offset = (20 - amplitude) * 8;
-    } else if (g_formation_job_change_frame > 220) {
-        amplitude = 240 - g_formation_job_change_frame;
-        offset = (g_formation_job_change_frame - 220) * 8;
+    } else if (s_formation_job_change_frame > 220) {
+        amplitude = 240 - s_formation_job_change_frame;
+        offset = (s_formation_job_change_frame - 220) * 8;
     }
     scratch.points[0].y = 0;
     for (i = 0; i < 64; i++) {
-        n = (i * k + g_formation_job_change_frame * 4) % ONE;
+        n = (i * k + s_formation_job_change_frame * 4) % ONE;
         line_x = ((amplitude * rcos(n)) >> 12) + 0x80;
         scratch.points[0].x = line_x;
         scratch.points[1].x = line_x;
@@ -570,31 +570,31 @@ static s32 job_change_update(s32 job) {
         scratch.points[2].y = scratch.points[1].y = base = line_y;
         line_y -= 64;
         scratch.points[1].y = line_y - offset;
-        screen_add_gradient_line(&scratch.points[0], g_formation_job_change_wave_colors, 1, 0x38);
+        screen_add_gradient_line(&scratch.points[0], s_formation_job_change_wave_colors, 1, 0x38);
         scratch.points[1].y++;
-        screen_add_gradient_line(&scratch.points[1], g_formation_job_change_wave_colors + 1, 1, 0x38);
+        screen_add_gradient_line(&scratch.points[1], s_formation_job_change_wave_colors + 1, 1, 0x38);
     }
     menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
-    g_formation_job_change_frame++;
+    s_formation_job_change_frame++;
     if (g_formation_job_change_skip_requested != 0) {
-        if (g_formation_job_change_frame >= 40 && g_formation_job_change_frame <= 220) {
-            g_formation_job_change_frame = 220;
+        if (s_formation_job_change_frame >= 40 && s_formation_job_change_frame <= 220) {
+            s_formation_job_change_frame = 220;
             music_tune_fade_out(0x46);
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
         g_formation_job_change_skip_requested = 1;
     }
-    if (g_formation_job_change_frame < 220) {
+    if (s_formation_job_change_frame < 220) {
         return FORMATION_JOB_CHANGE_ANIM_DISSOLVE;
     }
-    if (g_formation_job_change_frame < 240) {
+    if (s_formation_job_change_frame < 240) {
         return FORMATION_JOB_CHANGE_ANIM_CLOSING;
     }
     heap_free(g_formation_job_change_old_sprite_image);
     heap_free(g_formation_job_change_new_sprite_image);
     heap_free(g_formation_job_change_new_sprite_source);
     heap_free(g_formation_job_change_dissolve_order);
-    g_formation_job_change_active = 0;
+    s_formation_job_change_active = 0;
     return FORMATION_JOB_CHANGE_ANIM_DONE;
 }
 
@@ -604,9 +604,9 @@ static void wheel_close_start(void) {
     if (g_formation_job_wheel_job_count < 2) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
     } else {
-        g_formation_job_wheel_closing = 1;
+        s_formation_job_wheel_closing = 1;
     }
-    g_formation_job_wheel_close_frame = 0;
+    s_formation_job_wheel_close_frame = 0;
     g_formation_job_wheel_unit_index = g_unit_selected_index;
 }
 
@@ -616,14 +616,14 @@ static void wheel_close_start(void) {
 static void wheel_close_update(void) {
     s32 pos;
 
-    if (g_formation_job_wheel_closing == 0) {
+    if (s_formation_job_wheel_closing == 0) {
         wheel_close_start();
     }
-    pos = g_formation_job_wheel_close_frame * 0x140 + ONE;
-    wheel_sprites_draw(((g_formation_job_wheel_close_frame + 1) << 10) / 20, pos, pos);
-    g_formation_job_wheel_close_frame++;
-    if (g_formation_job_wheel_close_frame >= 0x14) {
-        g_formation_job_wheel_closing = 0;
+    pos = s_formation_job_wheel_close_frame * 0x140 + ONE;
+    wheel_sprites_draw(((s_formation_job_wheel_close_frame + 1) << 10) / 20, pos, pos);
+    s_formation_job_wheel_close_frame++;
+    if (s_formation_job_wheel_close_frame >= 0x14) {
+        s_formation_job_wheel_closing = 0;
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
     }
 }
@@ -662,8 +662,8 @@ static void wheel_choices_build(void) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
         return;
     }
-    g_formation_job_wheel_open_frame = 0x14;
-    g_formation_job_wheel_opening = 1;
+    s_formation_job_wheel_open_frame = 0x14;
+    s_formation_job_wheel_opening = 1;
 }
 
 /* One frame of the job wheel opening: the wheel turns through the last
@@ -672,14 +672,14 @@ static void wheel_choices_build(void) {
 static void wheel_open_update(void) {
     s32 pos;
 
-    if (g_formation_job_wheel_opening == 0) {
+    if (s_formation_job_wheel_opening == 0) {
         wheel_choices_build();
     }
-    pos = g_formation_job_wheel_open_frame * 0x140 + ONE;
-    wheel_sprites_draw(((20 - g_formation_job_wheel_open_frame) << 10) / 20 + 0xC00, pos, pos);
-    g_formation_job_wheel_open_frame--;
-    if (g_formation_job_wheel_open_frame == 0) {
-        g_formation_job_wheel_opening = 0;
+    pos = s_formation_job_wheel_open_frame * 0x140 + ONE;
+    wheel_sprites_draw(((20 - s_formation_job_wheel_open_frame) << 10) / 20 + 0xC00, pos, pos);
+    s_formation_job_wheel_open_frame--;
+    if (s_formation_job_wheel_open_frame == 0) {
+        s_formation_job_wheel_opening = 0;
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
     }
 }
@@ -694,18 +694,18 @@ static void wheel_refresh(void) {
     /* The target frame is 0x30 bytes; 0x18 of unreferenced locals. */
     s32 unused[6];
 
-    if (g_formation_job_wheel_closing != 0) {
+    if (s_formation_job_wheel_closing != 0) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
-        g_formation_job_wheel_closing = 0;
+        s_formation_job_wheel_closing = 0;
         g_formation_job_wheel_unit_index = g_unit_selected_index;
     } else {
-        if (g_formation_job_wheel_opening != 0) {
-            step = g_formation_job_wheel_open_frame;
+        if (s_formation_job_wheel_opening != 0) {
+            step = s_formation_job_wheel_open_frame;
             g_formation_job_wheel_unit_index = g_unit_selected_index;
             wheel_choices_build();
-            g_formation_job_wheel_open_frame = step + g_input_secondary_repeat_period / menu_get_event_speed();
-            if (g_formation_job_wheel_open_frame >= 0x11) {
-                g_formation_job_wheel_open_frame = 0x10;
+            s_formation_job_wheel_open_frame = step + g_input_secondary_repeat_period / menu_get_event_speed();
+            if (s_formation_job_wheel_open_frame >= 0x11) {
+                s_formation_job_wheel_open_frame = 0x10;
             }
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
         } else {
@@ -753,12 +753,12 @@ static void wheel_name_build(void) {
 
     if (g_formation_job_wheel_job_count < 2) {
         text_table = g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN];
-        g_formation_job_wheel_name_text[0] = 0x1B;
+        s_formation_job_wheel_name_text[0] = 0x1B;
     } else {
         text_table = g_text_section_pointers[TEXT_SECTION_JOB_NAMES];
-        g_formation_job_wheel_name_text[0] = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
+        s_formation_job_wheel_name_text[0] = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
     }
-    text_ids = g_formation_job_wheel_name_text;
+    text_ids = s_formation_job_wheel_name_text;
     destination_rect.x = 0x24C;
     destination_rect.y = 0x130;
     destination_rect.w = 0x14;
@@ -812,9 +812,9 @@ static void mastered_star_draw(s32 x, s32 y, s32 otag_index, s32 value) {
             }
         }
     }
-    sprite = &g_formation_job_wheel_mastered_icon_sprite;
+    sprite = &s_formation_job_wheel_mastered_icon_sprite;
     sprite->position.x = x + 7;
-    g_formation_job_wheel_mastered_icon_sprite.position.y = y - 0xC;
-    g_formation_job_wheel_mastered_icon_sprite.source.u = level * 10 + 0x24;
+    s_formation_job_wheel_mastered_icon_sprite.position.y = y - 0xC;
+    s_formation_job_wheel_mastered_icon_sprite.source.u = level * 10 + 0x24;
     menu_gfx_enqueue_oriented_textured_quad(sprite, 0, TEXTURE_UV_FLIP_NONE, 0, otag_index);
 }

@@ -30,17 +30,17 @@ extern u8 g_text_slot_row_pitches[];
 #define CHANGE_DIALOG_INSTRUCTION_AT(base, offset)   ((event_change_dialog_instruction_t*)((base) + (offset)))
 
 /* Unreferenced word preceding the glyph pen; no consumer establishes a pointer meaning. */
-static u32 g_message_typewriter_prefix_word = 0;
+static u32 s_message_typewriter_prefix_word = 0;
 
-static glyph_blit_t g_message_typewriter_pen = { 0 };
+static glyph_blit_t s_message_typewriter_pen = { 0 };
 
-static RECT g_message_typewriter_vram_rect = { 0 };
+static RECT s_message_typewriter_vram_rect = { 0 };
 
-static u8 g_message_typewriter_glyph_images[3][8][0x54] = { 0 };
+static u8 s_message_typewriter_glyph_images[3][8][0x54] = { 0 };
 
-static u8 g_message_typewriter_previous_images[3][0x54] = { 0 };
+static u8 s_message_typewriter_previous_images[3][0x54] = { 0 };
 
-static u8 g_message_typewriter_column_scratch[14] = { 0 };
+static u8 s_message_typewriter_column_scratch[14] = { 0 };
 
 /* For a dialog kept open for ChangeDialog (DIALOG_TYPE_KEEP_OPEN), measure the widest text the
  * window will show: the DisplayMessage at offset and each later ChangeDialog for the same window
@@ -248,8 +248,8 @@ void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
          * `phase` is the glyph's pixel within a 4-pixel VRAM word. */
         ring = g_text_slot_glyph_counts[slot];
         phase = request->x & 3;
-        image = g_message_typewriter_glyph_images[slot][ring];
-        previous = g_message_typewriter_previous_images[slot];
+        image = s_message_typewriter_glyph_images[slot][ring];
+        previous = s_message_typewriter_previous_images[slot];
 
         /* The upload covers whole VRAM words: `pitch` pixels across, `w` words. */
         glyph = request->glyph;
@@ -257,20 +257,20 @@ void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
         if (kind == 4 || glyph == TEXT_SPACE) {
             if (phase == 2) {
                 pitch = 8;
-                g_message_typewriter_vram_rect.w = 2;
+                s_message_typewriter_vram_rect.w = 2;
             } else {
                 pitch = 4;
-                g_message_typewriter_vram_rect.w = 1;
+                s_message_typewriter_vram_rect.w = 1;
             }
         } else if (kind == 2) {
             pitch = 4;
-            g_message_typewriter_vram_rect.w = 1;
+            s_message_typewriter_vram_rect.w = 1;
         } else if (kind == 6) {
             pitch = 8;
-            g_message_typewriter_vram_rect.w = 2;
+            s_message_typewriter_vram_rect.w = 2;
         } else {
             pitch = 12;
-            g_message_typewriter_vram_rect.w = 3;
+            s_message_typewriter_vram_rect.w = 3;
         }
 
         /* At phase 2 the upload starts two pixels left of the glyph; copy those pixels from the
@@ -280,10 +280,10 @@ void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
             for (i = 0; i < 14; i++) {
                 j = offset / 2;
                 offset += g_text_slot_row_pitches[slot];
-                g_message_typewriter_column_scratch[i] = (previous + j)[g_text_slot_source_columns[slot]];
+                s_message_typewriter_column_scratch[i] = (previous + j)[g_text_slot_source_columns[slot]];
             }
             for (i = 0; i < 14; i++) {
-                image[i * pitch / 2] = g_message_typewriter_column_scratch[i];
+                image[i * pitch / 2] = s_message_typewriter_column_scratch[i];
             }
         }
 
@@ -320,18 +320,18 @@ void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
         }
 
         if (request->glyph != TEXT_SPACE) {
-            g_message_typewriter_pen.rect.x = phase;
-            g_message_typewriter_pen.rect.y = 0;
-            g_message_typewriter_pen.stride = pitch;
+            s_message_typewriter_pen.rect.x = phase;
+            s_message_typewriter_pen.rect.y = 0;
+            s_message_typewriter_pen.stride = pitch;
             script_variable_set(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT,
                 script_variable_get(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->glyph * TEXT_GLYPH_BYTES, image,
-                &g_message_typewriter_pen, request->palette);
-            g_message_typewriter_vram_rect.x
+                &s_message_typewriter_pen, request->palette);
+            s_message_typewriter_vram_rect.x
                 = (pen_x >> 2) + (s16)(script_variable_get(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);
-            g_message_typewriter_vram_rect.y = pen_y;
-            g_message_typewriter_vram_rect.h = 14;
-            LoadImage(&g_message_typewriter_vram_rect, (u32*)image);
+            s_message_typewriter_vram_rect.y = pen_y;
+            s_message_typewriter_vram_rect.h = 14;
+            LoadImage(&s_message_typewriter_vram_rect, (u32*)image);
         }
 
         g_text_slot_glyph_counts[slot] = g_text_slot_glyph_counts[slot] + 1;

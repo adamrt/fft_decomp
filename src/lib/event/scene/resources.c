@@ -27,14 +27,14 @@ typedef char portrait_image_block_size_must_be_8192[sizeof(portrait_image_block_
 
 /* The two programs reserve different menu image columns for EVTFACE. */
 #ifdef FFT_BATTLE
-static RECT g_menu_portrait_pixel_rect = { 448, 206, 64, 48 };
+static RECT s_menu_portrait_pixel_rect = { 448, 206, 64, 48 };
 
-static RECT g_menu_portrait_palette_rect = { 448, 254, 64, 2 };
+static RECT s_menu_portrait_palette_rect = { 448, 254, 64, 2 };
 
 #else
-static RECT g_menu_portrait_pixel_rect = { 320, 206, 64, 48 };
+static RECT s_menu_portrait_pixel_rect = { 320, 206, 64, 48 };
 
-static RECT g_menu_portrait_palette_rect = { 320, 254, 64, 2 };
+static RECT s_menu_portrait_palette_rect = { 320, 254, 64, 2 };
 
 #endif
 
@@ -58,8 +58,8 @@ void portrait_image_load(s32 portrait_id) {
     buffer = menu_alloc_memory(sizeof(*buffer));
     g_thread_call_target = (void (*)(void))file_buffer_load_checked;
     thread_call_on_main_stack(portrait_id * 4 + DISC_SECTOR_EVENT_EVTFACE_BIN, sizeof(*buffer), buffer);
-    LoadImage(&g_menu_portrait_pixel_rect, buffer->pixels[0][0]);
-    LoadImage(&g_menu_portrait_palette_rect, (u32*)buffer->palettes);
+    LoadImage(&s_menu_portrait_pixel_rect, buffer->pixels[0][0]);
+    LoadImage(&s_menu_portrait_palette_rect, (u32*)buffer->palettes);
     menu_free_memory(buffer);
 }
 
@@ -114,7 +114,7 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
     } while (thread_call_on_main_stack() != 0);
 
     palette = buffer->palettes;
-    mem_copy_bytes_nonempty(&rect, &g_menu_portrait_pixel_rect, sizeof(rect));
+    mem_copy_bytes_nonempty(&rect, &s_menu_portrait_pixel_rect, sizeof(rect));
     i = 0;
     pixels = buffer->pixels;
     rect.w = 8;
@@ -125,7 +125,7 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
         pixels += 1;
         i += 1;
     } while (i < 8);
-    LoadImage(&g_menu_portrait_palette_rect, (u32*)palette);
+    LoadImage(&s_menu_portrait_palette_rect, (u32*)palette);
     menu_free_memory(buffer);
     thread_yield();
 }

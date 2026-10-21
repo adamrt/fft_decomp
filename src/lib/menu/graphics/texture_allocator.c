@@ -10,9 +10,9 @@
 /* Independent 15-row, 16-column grids for BATTLE and WORLD. */
 extern u8 g_gfx_texture_allocation_grid[15][16];
 
-static s32 g_gfx_free_rect_pixels[4];
+static s32 s_gfx_free_rect_pixels[4];
 /* Texture allocator scratch rectangles, in pixels and allocation cells. */
-static s32 g_gfx_free_rect_cells[4];
+static s32 s_gfx_free_rect_cells[4];
 
 /* Free every cell of the 16 x 15 texture allocation grid that gfx_alloc_texture_rect claims from. */
 void gfx_clear_texture_allocation_grid(void) {
@@ -112,19 +112,19 @@ void gfx_free_texture_rect(RECT* rect) {
     s32 i;
     s32 value;
     if (rect->x != -1 && rect != (void*)-1) {
-        g_gfx_free_rect_pixels[0] = (rect->x - 0x1c0) * 4;
-        g_gfx_free_rect_pixels[1] = rect->y & 0xff;
-        g_gfx_free_rect_pixels[2] = rect->w * 4;
-        g_gfx_free_rect_pixels[3] = rect->h;
+        s_gfx_free_rect_pixels[0] = (rect->x - 0x1c0) * 4;
+        s_gfx_free_rect_pixels[1] = rect->y & 0xff;
+        s_gfx_free_rect_pixels[2] = rect->w * 4;
+        s_gfx_free_rect_pixels[3] = rect->h;
         for (i = 0; i < 4; i++) {
-            value = g_gfx_free_rect_pixels[i] >> 4;
-            g_gfx_free_rect_cells[i] = value;
-            if (g_gfx_free_rect_pixels[i] & 0xf) {
-                g_gfx_free_rect_cells[i] = value + 1;
+            value = s_gfx_free_rect_pixels[i] >> 4;
+            s_gfx_free_rect_cells[i] = value;
+            if (s_gfx_free_rect_pixels[i] & 0xf) {
+                s_gfx_free_rect_cells[i] = value + 1;
             }
         }
-        for (y = g_gfx_free_rect_cells[1]; y < g_gfx_free_rect_cells[1] + g_gfx_free_rect_cells[3]; y++) {
-            for (x = g_gfx_free_rect_cells[0]; x < g_gfx_free_rect_cells[0] + g_gfx_free_rect_cells[2]; x++) {
+        for (y = s_gfx_free_rect_cells[1]; y < s_gfx_free_rect_cells[1] + s_gfx_free_rect_cells[3]; y++) {
+            for (x = s_gfx_free_rect_cells[0]; x < s_gfx_free_rect_cells[0] + s_gfx_free_rect_cells[2]; x++) {
                 if (x >= 16 || y >= 15) {
                     thread_current_exit();
                 }

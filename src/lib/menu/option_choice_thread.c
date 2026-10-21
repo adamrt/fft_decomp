@@ -28,9 +28,9 @@
 extern menu_entry_t g_option_icon_thread_param;
 extern menu_icon_record_t g_option_picker_icon_records[2];
 /* Picker widths in pixels and choice counts, by option row including Initialize. */
-static s32 g_option_choice_widths[GAME_OPTION_MENU_ROW_COUNT]
+static s32 s_option_choice_widths[GAME_OPTION_MENU_ROW_COUNT]
     = { 50, 50, 50, 52, 50, 38, 38, 38, 38, 38, 38, 38, 52, 62 };
-static s32 g_option_choice_counts[GAME_OPTION_MENU_ROW_COUNT] = { 2, 3, 4, 7, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2 };
+static s32 s_option_choice_counts[GAME_OPTION_MENU_ROW_COUNT] = { 2, 3, 4, 7, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2 };
 
 /* Option-menu value picker thread for one game option.
  *
@@ -65,16 +65,16 @@ void option_choice_thread(void) {
 
     /* The 4-bit text image must span whole VRAM halfwords (4 pixels each); adding 2 aligns a
      * width of 4n + 2, but would leave an odd width unaligned. */
-    width = g_option_choice_widths[kind];
+    width = s_option_choice_widths[kind];
     if (width & 3) {
         width += 2;
     }
-    height = g_option_choice_counts[kind] * 16 + 16;
+    height = s_option_choice_counts[kind] * 16 + 16;
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     thread_frames_wait(1);
 
     g_menu_window_text_pen.stride = width;
-    for (i = 0; i < g_option_choice_counts[kind]; i++) {
+    for (i = 0; i < s_option_choice_counts[kind]; i++) {
         menu_set_text_origin(8, i * 16 + 8);
         if (i == g_option_values[kind]) {
             g_menu_text_palette_offset = 8;
@@ -151,14 +151,14 @@ void option_choice_thread(void) {
                 if (cursor != 0) {
                     cursor--;
                 } else {
-                    cursor = g_option_choice_counts[kind] - 1;
+                    cursor = s_option_choice_counts[kind] - 1;
                 }
                 g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             }
 
             if (*input & PSX_PAD_DOWN) {
                 *input = 0;
-                if (cursor == g_option_choice_counts[kind] - 1) {
+                if (cursor == s_option_choice_counts[kind] - 1) {
                     cursor = 0;
                 } else {
                     cursor++;

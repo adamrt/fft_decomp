@@ -34,7 +34,7 @@ void new_game_party_init(s32 party_mode, s32 world_load_mode) {
  * calendar_date_to_zodiac_convert indexes it flat ([i * 2], [i * 2 + 1]),
  * and it is not const: that routine reloads a day after storing through its
  * month pointer. */
-static u8 g_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2] = {
+static u8 s_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2] = {
     3,
     21,
     4,
@@ -72,18 +72,18 @@ void calendar_date_to_zodiac_convert(s32* month, s32* day) {
     s32 length;
     s32 span;
 
-    while (g_birthday_zodiac_start_dates[index * 2] != *month) {
+    while (s_birthday_zodiac_start_dates[index * 2] != *month) {
         index = (index + 1) % ZODIAC_SIGN_ORDINARY_COUNT;
     }
-    if (*day < g_birthday_zodiac_start_dates[index * 2 + 1]) {
+    if (*day < s_birthday_zodiac_start_dates[index * 2 + 1]) {
         index = (index + ZODIAC_SIGN_ORDINARY_COUNT - 1) % ZODIAC_SIGN_ORDINARY_COUNT;
         *month = index + 1;
-        length = g_calendar_month_lengths[g_birthday_zodiac_start_dates[index * 2] - 1];
-        span = g_birthday_zodiac_start_dates[index * 2 + 1];
+        length = g_calendar_month_lengths[s_birthday_zodiac_start_dates[index * 2] - 1];
+        span = s_birthday_zodiac_start_dates[index * 2 + 1];
         span = length - span + 1;
         *day += span;
         return;
     }
     *month = index + 1;
-    *day = *day - g_birthday_zodiac_start_dates[index * 2 + 1] + 1;
+    *day = *day - s_birthday_zodiac_start_dates[index * 2 + 1] + 1;
 }

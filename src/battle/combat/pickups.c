@@ -22,9 +22,9 @@ extern crystal_pickup_result_t g_crystal_pickup_result;
 /* Move-Find scratch is private to this unit. The first-byte flags alias retains
  * the target's independent address load; accessing every byte through the record
  * instead merges that load with the returned record address. */
-static move_found_item_t g_selected_item = { 0 };
+static move_found_item_t s_selected_item = { 0 };
 
-static move_find_result_data_t g_tile_pickup_result = { 0 };
+static move_find_result_data_t s_tile_pickup_result = { 0 };
 
 extern u8 g_move_find_result_flags;
 
@@ -76,10 +76,10 @@ move_found_item_t* move_find_item_determine(unit_stats_t* unit) {
     } else {
         item_id = find_result->common_item_id;
     }
-    g_selected_item.item_id = item_id;
+    s_selected_item.item_id = item_id;
     item_flag_test_or_set(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
-    g_selected_item._unknown_00 = 0;
-    return &g_selected_item;
+    s_selected_item._unknown_00 = 0;
+    return &s_selected_item;
 }
 
 /*
@@ -109,7 +109,7 @@ move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
     }
     if (i != UNIT_SLOT_COUNT) {
         g_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
-        g_tile_pickup_result.occupying_unit_id = unit;
+        s_tile_pickup_result.occupying_unit_id = unit;
     }
     for (i = 0; i < 4; i++) {
         tile = &g_move_find_current_map_data.entries[i];
@@ -118,12 +118,12 @@ move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
         }
     }
     if (i != 4) {
-        g_tile_pickup_result.entry_index = i;
+        s_tile_pickup_result.entry_index = i;
         if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
             if (item_flag_test_or_set(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
                 g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
-                g_tile_pickup_result.rare_item_id = tile->rare_item_id;
-                g_tile_pickup_result.common_item_id = tile->common_item_id;
+                s_tile_pickup_result.rare_item_id = tile->rare_item_id;
+                s_tile_pickup_result.common_item_id = tile->common_item_id;
             }
         }
         if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
@@ -138,12 +138,12 @@ move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
             }
             if (trap != MOVE_FIND_TRAP_NONE) {
                 result = &g_move_find_result_flags;
-                g_tile_pickup_result.trap_id = trap;
+                s_tile_pickup_result.trap_id = trap;
                 *result |= MOVE_FIND_RESULT_TRAP;
             }
         }
     }
-    return &g_tile_pickup_result;
+    return &s_tile_pickup_result;
 }
 
 /* Test (save == 0) or set the found flag of one of a map's four move-find item tiles.

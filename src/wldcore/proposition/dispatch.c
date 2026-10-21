@@ -30,7 +30,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static s32 g_proposition_send_unit_count;
+static s32 s_proposition_send_unit_count;
 extern s16 g_proposition_candidate_levels[];
 
 /* Scalar view of g_window_panel_render_state.select_text_table: as a
@@ -40,7 +40,7 @@ extern s16 g_window_panel_scroll_offset;
 
 static s32 candidates_build(proposition_send_unit_level_t* level);
 
-static s32 g_proposition_send_units[3] = { 0 };
+static s32 s_proposition_send_units[3] = { 0 };
 
 /* Pushes MENU_STACK_LEVEL_PROPOSITION_DISPATCH_CONFIRM, the summary of a job
  * about to be dispatched: a cursor window, a header window, the OK/NO record
@@ -105,7 +105,7 @@ void proposition_dispatch_confirm_open(void) {
     bounds.w = 0xF4;
     bounds.x = 0;
     row = size.rows + 2;
-    bounds.h = (g_proposition_send_unit_count - -row) * 0x10 + 0x10;
+    bounds.h = (s_proposition_send_unit_count - -row) * 0x10 + 0x10;
     g_text_substitution_values[1] = g_proposition_dispatch_days;
     g_text_substitution_values[0] = g_proposition_dispatch_days;
     g_text_substitution_values[2] = g_world_map_marker_state.marker.location_id + TEXT_ID_LOCATION_NAME_BASE;
@@ -120,12 +120,12 @@ void proposition_dispatch_confirm_open(void) {
     point.y = 8;
     window_display_text_entry(
         index, *location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, &g_window_image_buffer[0x200]);
-    for (i = 0; i < g_proposition_send_unit_count; i++) {
+    for (i = 0; i < s_proposition_send_unit_count; i++) {
         point.x = 0x3C;
         line = i + 2;
         point.y = (size.rows + line) * 0x10 + 8;
         window_display_text_entry(
-            index, g_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, &g_window_image_buffer[0x200]);
+            index, s_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, &g_window_image_buffer[0x200]);
     }
     window_load_render_record_image(index, &g_window_image_buffer[0x200]);
     g_display_object_gs_image_pool[index].priority = 8;
@@ -200,10 +200,10 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
             g_proposition_active[g_proposition_count].elapsed_days = 0;
             g_proposition_active[g_proposition_count].assigned_days = g_proposition_dispatch_days;
             g_proposition_active[g_proposition_count].location = g_world_map_marker_state.marker.location_id;
-            g_proposition_active[g_proposition_count].participant_count = g_proposition_send_unit_count;
-            for (i = 0; i < g_proposition_send_unit_count; i++) {
-                party_roster_unit_get(g_proposition_send_units[i])->proposition_status = 1;
-                g_proposition_active[g_proposition_count].participant_indices[i] = g_proposition_send_units[i];
+            g_proposition_active[g_proposition_count].participant_count = s_proposition_send_unit_count;
+            for (i = 0; i < s_proposition_send_unit_count; i++) {
+                party_roster_unit_get(s_proposition_send_units[i])->proposition_status = 1;
+                g_proposition_active[g_proposition_count].participant_indices[i] = s_proposition_send_units[i];
             }
             g_proposition_count++;
             script_variable_set(g_proposition_selected_row.id + (EVENT_SCRIPT_VAR_PROPOSITION_FIRST - 1),
@@ -289,7 +289,7 @@ void proposition_participants_open(void) {
 
     g_window_panel_scroll_offset = 0;
     g_window_panel_render_state.selected_index = 0;
-    g_proposition_send_unit_count = 0;
+    s_proposition_send_unit_count = 0;
     count = candidates_build(&g_menu_stack_records[g_menu_stack_depth].send_unit);
 
     layout.text_width = 0x6E;
@@ -485,12 +485,12 @@ static s32 candidates_build(proposition_send_unit_level_t* level) {
         if (unit->sprite_set < CHARACTER_IDENTITY_BOY) {
             continue;
         }
-        for (j = 0; j < g_proposition_send_unit_count; j++) {
-            if (g_proposition_send_units[j] == i) {
+        for (j = 0; j < s_proposition_send_unit_count; j++) {
+            if (s_proposition_send_units[j] == i) {
                 break;
             }
         }
-        if (j < g_proposition_send_unit_count) {
+        if (j < s_proposition_send_unit_count) {
             g_menu_stack_row_text_colors[level->unit_count] = 8;
         } else {
             g_menu_stack_row_text_colors[level->unit_count] = 0;
@@ -517,9 +517,9 @@ static void candidate_names_draw(proposition_send_unit_level_t* level) {
         g_display_object_gs_image_pool[index].bounds.h, (u16*)g_window_image_buffer);
     point.x = 8;
     point.y = 8;
-    for (i = 0; i < g_proposition_send_unit_count; i++) {
+    for (i = 0; i < s_proposition_send_unit_count; i++) {
         window_display_text_entry(
-            index, g_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, g_window_image_buffer);
+            index, s_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, g_window_image_buffer);
         point.y += 0x10;
     }
     window_load_render_record_image(index, g_window_image_buffer);
@@ -570,7 +570,7 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
     s32 unit;
 
     if ((g_display_object_gs_image_pool[level->portrait_frame].flags & DISPLAY_OBJECT_POP_IN) == 0) {
-        unit = g_proposition_send_units[level->slot] & 0x7FF;
+        unit = s_proposition_send_units[level->slot] & 0x7FF;
         if (unit != level->shown_unit) {
             level->shown_unit = unit;
             candidate_portrait_show(level, unit, level->portrait_render);
@@ -588,7 +588,7 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
     if ((buttons & PSX_PAD_CIRCLE) != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         unit = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
-        g_proposition_send_units[level->slot] = unit;
+        s_proposition_send_units[level->slot] = unit;
         candidate_names_draw(level);
         candidates_build(level);
         screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
@@ -873,7 +873,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
     }
 
     if (buttons & PSX_PAD_START) {
-        if (g_proposition_send_unit_count == 0) {
+        if (s_proposition_send_unit_count == 0) {
             sound_play_effect(SOUND_SFX_INVALID);
             return;
         }
@@ -918,12 +918,12 @@ void proposition_participants_update(menu_stack_record_t* level) {
 
     sound_play_effect(SOUND_SFX_CONFIRM);
     value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
-    for (i = 0; i < g_proposition_send_unit_count; i++) {
-        if (g_proposition_send_units[i] == value) {
+    for (i = 0; i < s_proposition_send_unit_count; i++) {
+        if (s_proposition_send_units[i] == value) {
             for (value = i + 1; value < 3; value++) {
-                g_proposition_send_units[value - 1] = g_proposition_send_units[value];
+                s_proposition_send_units[value - 1] = s_proposition_send_units[value];
             }
-            g_proposition_send_unit_count--;
+            s_proposition_send_unit_count--;
             candidate_names_draw(&level->send_unit);
             candidates_build(&level->send_unit);
             screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
@@ -931,7 +931,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
         }
     }
 
-    if (g_proposition_send_unit_count == 3) {
+    if (s_proposition_send_unit_count == 3) {
         g_display_object_animated_pool[level->send_unit.frame_window_a].palette
             = g_display_object_animated_pool[level->send_unit.frame_window_b].palette = 0xA;
         g_display_object_gs_image_pool[level->send_unit.portrait_frame].flags |= DISPLAY_OBJECT_POP_IN;
@@ -950,8 +950,8 @@ void proposition_participants_update(menu_stack_record_t* level) {
         return;
     }
 
-    g_proposition_send_units[g_proposition_send_unit_count] = value;
-    g_proposition_send_unit_count++;
+    s_proposition_send_units[s_proposition_send_unit_count] = value;
+    s_proposition_send_unit_count++;
 
     candidate_names_draw(&level->send_unit);
     candidates_build(&level->send_unit);

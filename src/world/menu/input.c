@@ -15,12 +15,12 @@
 
 /* tutorial input state */
 extern u16 g_tutorial_latched_button;
-static u8 g_tutorial_activation_timer;
+static u8 s_tutorial_activation_timer;
 extern u8 g_screen_input_triangle_latched;
 extern u8 g_screen_text_task_phase;
 
-static u32 g_tutorial_repeat_counters[16] = { 0 };
-static u16 g_tutorial_previous_input = 0;
+static u32 s_tutorial_repeat_counters[16] = { 0 };
+static u16 s_tutorial_previous_input = 0;
 
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
@@ -69,18 +69,18 @@ static void tutorial_controller_update(void) {
                 current_input = latched_input;
             } else if (current_input == 0) {
                 g_tutorial_latched_button = 0;
-                g_tutorial_activation_timer += speed;
+                s_tutorial_activation_timer += speed;
             } else {
-                if (g_tutorial_activation_timer < 4) {
+                if (s_tutorial_activation_timer < 4) {
                     u32 priority_input = current_input & PSX_PAD_DPAD_MASK;
 
                     if (priority_input != 0) {
                         current_input = priority_input;
-                        g_tutorial_activation_timer = 10;
+                        s_tutorial_activation_timer = 10;
                     }
                 }
-                if (g_tutorial_activation_timer >= 4) {
-                    g_tutorial_activation_timer = 0;
+                if (s_tutorial_activation_timer >= 4) {
+                    s_tutorial_activation_timer = 0;
                     index = 0;
                     {
                         s32 bit_base = 1;
@@ -102,27 +102,27 @@ static void tutorial_controller_update(void) {
             }
         }
         filtered_input = current_input;
-        if (g_tutorial_activation_timer >= 10) {
-            g_tutorial_activation_timer = 10;
+        if (s_tutorial_activation_timer >= 10) {
+            s_tutorial_activation_timer = 10;
         }
         g_menu_input_newly_pressed = filtered_input;
         for (index = 0; index < 16; index++) {
             s32 mask = 1U << index;
 
             if (mask & g_menu_input_newly_pressed) {
-                if (mask & g_tutorial_previous_input) {
+                if (mask & s_tutorial_previous_input) {
                     g_menu_input_newly_pressed &= ~mask;
                 } else {
-                    g_tutorial_previous_input |= mask;
+                    s_tutorial_previous_input |= mask;
                 }
             } else {
-                g_tutorial_previous_input &= ~mask;
+                s_tutorial_previous_input &= ~mask;
             }
         }
         /* Auto-repeat for the shoulder buttons (bits 0-3) and the D-pad (bits 12-15); the
          * face buttons, Select and Start (bits 4-11) skip the counters and report only new
          * presses. Bits 16-31 flag a button held past the initial delay. */
-        counter_base = g_tutorial_repeat_counters;
+        counter_base = s_tutorial_repeat_counters;
         for (index = 0; index < 16; index++) {
             if (index == 4) {
                 index = 12;

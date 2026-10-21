@@ -5,7 +5,7 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
-static ability_type_e g_ability_list_ability_type;
+static ability_type_e s_ability_list_ability_type;
 extern const ability_data_t* g_ability_list_selected_ability_data;
 extern ability_secondary_pointer_t g_ability_list_selected_ability_secondary_data;
 
@@ -17,10 +17,10 @@ s32 ability_list_is_non_action_learned(s32 index) {
     s32 result;
     u16 ability;
 
-    g_ability_list_ability_type = ability_records_get(*entry & ABILITY_LIST_ENTRY_ID_MASK,
+    s_ability_list_ability_type = ability_records_get(*entry & ABILITY_LIST_ENTRY_ID_MASK,
         &g_ability_list_selected_ability_data, &g_ability_list_selected_ability_secondary_data);
     result = 0;
-    if (g_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {
+    if (s_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {
         ability = *entry;
         result = (ability >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) == 0;
     }
@@ -33,7 +33,7 @@ s32 ability_list_is_non_action_learned(s32 index) {
 s32 ability_list_is_non_action_unlearned(s32 index) {
     s32 result = 0;
 
-    if (g_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {
+    if (s_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {
         result = (g_ability_list_ability_entries[index] >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) != 0;
     }
     return result;
@@ -42,7 +42,7 @@ s32 ability_list_is_non_action_unlearned(s32 index) {
 /* Row callback: whether the ability the learned callback cached is an action ability
  * (ABILITY_TYPE_DEFAULT); the row is ignored. */
 s32 ability_list_is_action(s32 unused_row) {
-    return g_ability_list_ability_type == ABILITY_TYPE_DEFAULT;
+    return s_ability_list_ability_type == ABILITY_TYPE_DEFAULT;
 }
 
 /* Returns the selected action ability's displayed MP cost, from the

@@ -17,7 +17,7 @@
 extern u8 g_menu_window_frame_image[];
 
 /* Texture windows of the frame pieces this thread uploads. */
-static RECT g_menu_panel_texture_windows[7] = { { 0, 0, 16, 16 }, { 0, 0, 16, 16 }, { 0, 0, 8, 16 }, { 0, 0, 16, 16 },
+static RECT s_menu_panel_texture_windows[7] = { { 0, 0, 16, 16 }, { 0, 0, 16, 16 }, { 0, 0, 8, 16 }, { 0, 0, 16, 16 },
     { 0, 0, 16, 16 }, { 0, 0, 256, 256 }, { 0, 0, 256, 256 } };
 
 /* Thread body of a window frame drawn with nine sprites until a stop request; parameter 1 is
@@ -80,14 +80,14 @@ void menu_window_frame_thread(void) {
      * and reuses it for every 16-bit and byte store below. */
     texture_v = texture.y & 0xFF;
     for (index = 0; index < 4; index++) {
-        g_menu_panel_texture_windows[index].x = (texture_u + index) * 0x10;
-        g_menu_panel_texture_windows[index].y = texture_v;
+        s_menu_panel_texture_windows[index].x = (texture_u + index) * 0x10;
+        s_menu_panel_texture_windows[index].y = texture_v;
     }
-    g_menu_panel_texture_windows[4].x = texture_u + 0x60;
-    g_menu_panel_texture_windows[4].y = texture_v;
+    s_menu_panel_texture_windows[4].x = texture_u + 0x60;
+    s_menu_panel_texture_windows[4].y = texture_v;
 
     for (index = 0; index < 7; index++) {
-        SetDrawMode(&prim->modes[index], 1, 0, GetTPage(0, 0, 0x1c0, 0), &g_menu_panel_texture_windows[index]);
+        SetDrawMode(&prim->modes[index], 1, 0, GetTPage(0, 0, 0x1c0, 0), &s_menu_panel_texture_windows[index]);
     }
 
     /* Sprite 0 fills the interior and sprites 1-4 are the right, left, top and bottom edges;

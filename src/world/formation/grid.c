@@ -30,8 +30,8 @@
 extern oriented_quad_t g_formation_cursor_sprite;
 extern oriented_quad_t g_formation_cursor_shadow_sprite;
 extern point16_t g_formation_cursor_position;
-static point16_t g_formation_cursor_target;
-static s8 g_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
+static point16_t s_formation_cursor_target;
+static s8 s_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
 extern oriented_quad_t g_formation_unit_dot_sprite;
 extern s8 g_formation_dot_glow_timer;
 extern s8 g_formation_dot_glow_direction;
@@ -90,22 +90,22 @@ typedef struct gauge_offsets {
 typedef char gauge_offsets_size_must_be_4[sizeof(gauge_offsets_t) == 4 ? 1 : -1];
 
 /* Shadow and two egg layers. Drawing updates their positions and egg palettes. */
-static oriented_quad_t g_formation_shadow_egg_sprites[3] = { { { 0, 0 }, 20, 10, { 144, 64, 20, 20, 0x7ee4, 0x1f } },
+static oriented_quad_t s_formation_shadow_egg_sprites[3] = { { { 0, 0 }, 20, 10, { 144, 64, 20, 20, 0x7ee4, 0x1f } },
     { { 0, 0 }, 18, 24, { 233, 184, 18, 24, 0, 0x65 } }, { { 0, 0 }, 16, 16, { 216, 184, 16, 16, 0, 0x65 } } };
 
-static gauge_offsets_t g_formation_gauge_bar_offsets = { 3, 1, 0, 4 };
+static gauge_offsets_t s_formation_gauge_bar_offsets = { 3, 1, 0, 4 };
 
 /* Gauge corner colors, in top-left, top-right, bottom-left, bottom-right order. */
-static rgb24_t g_formation_hp_gauge_colors[4]
+static rgb24_t s_formation_hp_gauge_colors[4]
     = { { 72, 104, 120 }, { 168, 184, 112 }, { 72, 104, 120 }, { 168, 184, 112 } };
-static rgb24_t g_formation_mp_gauge_colors[4]
+static rgb24_t s_formation_mp_gauge_colors[4]
     = { { 128, 64, 56 }, { 224, 160, 80 }, { 128, 64, 56 }, { 224, 160, 80 } };
-static rgb24_t g_formation_ct_gauge_colors[4]
+static rgb24_t s_formation_ct_gauge_colors[4]
     = { { 80, 104, 64 }, { 176, 176, 64 }, { 80, 104, 64 }, { 176, 176, 64 } };
 
 /* Equipment labels; drawing supplies their positions and texture page. */
-static oriented_quad_t g_formation_label_cant_equip = { { 0, 0 }, 38, 10, { 48, 245, 38, 10, 0x7d7c, 0x65 } };
-static oriented_quad_t g_formation_label_equipping = { { 0, 0 }, 34, 10, { 88, 245, 34, 10, 0x7d7c, 0x65 } };
+static oriented_quad_t s_formation_label_cant_equip = { { 0, 0 }, 38, 10, { 48, 245, 38, 10, 0x7d7c, 0x65 } };
+static oriented_quad_t s_formation_label_equipping = { { 0, 0 }, 34, 10, { 88, 245, 34, 10, 0x7d7c, 0x65 } };
 
 static s32 cursor_falloff_calculate(s32 x, s32 y, s32 base, s32 floor);
 static void cursor_trail_draw(point16_t* cursor);
@@ -452,7 +452,7 @@ void formation_selection_cursor_init(s16 formation_index) {
     g_menu_row_callbacks[6].value = grid_unit_brave_get;
     g_menu_row_callbacks[7].value = grid_unit_faith_get;
     g_formation_scroll_velocity = 0;
-    g_formation_scroll_unread = 0;
+    s_formation_scroll_unread = 0;
     g_unit_selected_index = formation_index;
     count = 0;
     formation_stage_selected_unit();
@@ -643,8 +643,8 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             pos.position.x = col * 62 + 6;
             pos.position.y = y;
             if (i == g_unit_selected_index) {
-                g_formation_cursor_target.x = col * 62 + 0x22;
-                g_formation_cursor_target.y = y + 0x19;
+                s_formation_cursor_target.x = col * 62 + 0x22;
+                s_formation_cursor_target.y = y + 0x19;
             }
             if (y < -0x3c || y >= 0xf0) {
                 continue;
@@ -705,18 +705,18 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
         }
     }
     screen_sprite_color_set(&g_formation_saved_sprite_color);
-    cursor_trail_draw(&g_formation_cursor_target);
+    cursor_trail_draw(&s_formation_cursor_target);
 
     /* Ease the cursor a quarter of the way to its target, snapping once within 2 pixels. */
-    g_formation_cursor_position.x = (g_formation_cursor_position.x * 3 + g_formation_cursor_target.x) / 4;
-    g_formation_cursor_position.y = (g_formation_cursor_position.y * 3 + g_formation_cursor_target.y) / 4;
-    row = g_formation_cursor_position.x - g_formation_cursor_target.x;
+    g_formation_cursor_position.x = (g_formation_cursor_position.x * 3 + s_formation_cursor_target.x) / 4;
+    g_formation_cursor_position.y = (g_formation_cursor_position.y * 3 + s_formation_cursor_target.y) / 4;
+    row = g_formation_cursor_position.x - s_formation_cursor_target.x;
     if (row >= -2 && row <= 2) {
-        g_formation_cursor_position.x = g_formation_cursor_target.x - 1;
+        g_formation_cursor_position.x = s_formation_cursor_target.x - 1;
     }
-    row = g_formation_cursor_position.y - g_formation_cursor_target.y;
+    row = g_formation_cursor_position.y - s_formation_cursor_target.y;
     if (row >= -2 && row <= 2) {
-        g_formation_cursor_position.y = g_formation_cursor_target.y - 1;
+        g_formation_cursor_position.y = s_formation_cursor_target.y - 1;
     }
     formation_background_tiles_draw(g_formation_scroll_position + g_formation_scroll_velocity, background_y);
     return 1;
@@ -1191,20 +1191,20 @@ void formation_unit_sprite_draw(s16 unit_index, point16_t* pos, rgb24_t* rgb, s3
  * hatch_countdown; the second layer is drawn only while it is below 2.
  */
 static void egg_sprite_draw(point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index) {
-    g_formation_shadow_egg_sprites[2].position.x = g_formation_shadow_egg_sprites[1].position.x = pos->x + 0x14;
-    g_formation_shadow_egg_sprites[2].position.y = g_formation_shadow_egg_sprites[1].position.y = pos->y + 0x10;
-    g_formation_shadow_egg_sprites[2].source.clut = g_formation_shadow_egg_sprites[1].source.clut
+    s_formation_shadow_egg_sprites[2].position.x = s_formation_shadow_egg_sprites[1].position.x = pos->x + 0x14;
+    s_formation_shadow_egg_sprites[2].position.y = s_formation_shadow_egg_sprites[1].position.y = pos->y + 0x10;
+    s_formation_shadow_egg_sprites[2].source.clut = s_formation_shadow_egg_sprites[1].source.clut
         = GetClut((palette % 4) * 0x10 + 0x140, 0xFF);
-    menu_gfx_enqueue_oriented_textured_quad(&g_formation_shadow_egg_sprites[1], rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index);
+    menu_gfx_enqueue_oriented_textured_quad(&s_formation_shadow_egg_sprites[1], rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index);
     if (hatch_countdown < 2) {
         menu_gfx_enqueue_oriented_textured_quad(
-            &g_formation_shadow_egg_sprites[2], rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index + 1);
+            &s_formation_shadow_egg_sprites[2], rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index + 1);
     }
-    g_formation_shadow_egg_sprites[0].position.x = pos->x + 0x13;
-    g_formation_shadow_egg_sprites[0].position.y = pos->y + 0x23;
-    g_formation_shadow_egg_sprites[0].source.tpage = GetTPage(0, 2, 0x3C0, 0x100);
+    s_formation_shadow_egg_sprites[0].position.x = pos->x + 0x13;
+    s_formation_shadow_egg_sprites[0].position.y = pos->y + 0x23;
+    s_formation_shadow_egg_sprites[0].source.tpage = GetTPage(0, 2, 0x3C0, 0x100);
     menu_gfx_enqueue_oriented_textured_quad(
-        &g_formation_shadow_egg_sprites[0], 0, TEXTURE_UV_FLIP_NONE, 1, ot_index - 1);
+        &s_formation_shadow_egg_sprites[0], 0, TEXTURE_UV_FLIP_NONE, 1, ot_index - 1);
 }
 
 /* Draw a formation unit sprite and, one ordering-table entry behind it, its
@@ -1213,15 +1213,15 @@ static void egg_sprite_draw(point16_t* pos, s32 palette, const rgb24_t* rgb, s32
 void formation_sprite_with_shadow_draw(const oriented_quad_t* pos, const rgb24_t* rgb, s32 ot_index) {
     menu_gfx_enqueue_oriented_textured_quad(pos, rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index);
     if (pos->source.w >= 0x19) {
-        g_formation_shadow_egg_sprites[0].position.x = pos->position.x + 0xC;
-        g_formation_shadow_egg_sprites[0].position.y = pos->position.y + 0x23;
+        s_formation_shadow_egg_sprites[0].position.x = pos->position.x + 0xC;
+        s_formation_shadow_egg_sprites[0].position.y = pos->position.y + 0x23;
     } else {
-        g_formation_shadow_egg_sprites[0].position.x = pos->position.x;
-        g_formation_shadow_egg_sprites[0].position.y = pos->position.y + 0x1E;
+        s_formation_shadow_egg_sprites[0].position.x = pos->position.x;
+        s_formation_shadow_egg_sprites[0].position.y = pos->position.y + 0x1E;
     }
-    g_formation_shadow_egg_sprites[0].source.tpage = GetTPage(0, 2, 0x3C0, 0x100);
+    s_formation_shadow_egg_sprites[0].source.tpage = GetTPage(0, 2, 0x3C0, 0x100);
     menu_gfx_enqueue_oriented_textured_quad(
-        &g_formation_shadow_egg_sprites[0], 0, TEXTURE_UV_FLIP_NONE, 1, ot_index - 1);
+        &s_formation_shadow_egg_sprites[0], 0, TEXTURE_UV_FLIP_NONE, 1, ot_index - 1);
 }
 
 /* Returns 1 when x and y both lie in 0..254: the number commands keep their position in bytes,
@@ -1305,28 +1305,28 @@ static void unit_readout_draw(
                 &rect, 0xB4, 0x10, color, 0, g_screen_window_tpage, g_screen_alternate_number_clut, priority);
             if (mode == MENU_UNIT_READOUT_HP) {
                 clut = g_screen_hp_gauge_clut;
-                rgb = g_formation_hp_gauge_colors;
+                rgb = s_formation_hp_gauge_colors;
             } else if (mode == MENU_UNIT_READOUT_MP) {
                 clut = g_screen_mp_gauge_clut;
-                rgb = g_formation_mp_gauge_colors;
+                rgb = s_formation_mp_gauge_colors;
             } else {
                 clut = g_screen_ct_gauge_clut;
-                rgb = g_formation_ct_gauge_colors;
+                rgb = s_formation_ct_gauge_colors;
             }
             rect.x = x;
             rect.y = top + 8;
             rect.w = 0x25;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, priority - 1);
-            xy[0].x = g_formation_gauge_bar_offsets.top_x + x;
-            xy[0].y = g_formation_gauge_bar_offsets.top_y + top + 8;
+            xy[0].x = s_formation_gauge_bar_offsets.top_x + x;
+            xy[0].y = s_formation_gauge_bar_offsets.top_y + top + 8;
             xy[3].x = xy[1].x = 0x20;
             xy[1].x += xy[0].x;
-            xy[1].y = g_formation_gauge_bar_offsets.top_y + top + 8;
-            xy[2].x = g_formation_gauge_bar_offsets.bottom_x + x;
-            xy[2].y = g_formation_gauge_bar_offsets.bottom_y + top + 8;
+            xy[1].y = s_formation_gauge_bar_offsets.top_y + top + 8;
+            xy[2].x = s_formation_gauge_bar_offsets.bottom_x + x;
+            xy[2].y = s_formation_gauge_bar_offsets.bottom_y + top + 8;
             xy[3].x += xy[2].x;
-            xy[3].y = g_formation_gauge_bar_offsets.bottom_y + top + 8;
+            xy[3].y = s_formation_gauge_bar_offsets.bottom_y + top + 8;
             gfx_enqueue_gouraud_quad(xy, rgb, 0, priority);
         } else if (g_formation_stat_display_mode == MENU_UNIT_READOUT_LEVEL_EXP) {
             s32 y40;
@@ -1422,10 +1422,10 @@ static void unit_readout_draw(
     }
     if (mode == MENU_UNIT_READOUT_EQUIP_LABEL) {
         if (get_value(unit_index) < 100) {
-            sprite = &g_formation_label_cant_equip;
+            sprite = &s_formation_label_cant_equip;
             sprite->position.x = x + 9;
         } else {
-            sprite = &g_formation_label_equipping;
+            sprite = &s_formation_label_equipping;
             sprite->position.x = x + 11;
         }
     } else if (mode == MENU_UNIT_READOUT_LEAVING && enabled != 0) {

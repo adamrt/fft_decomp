@@ -36,10 +36,10 @@ typedef enum conditions_burst_mode {
 extern conditions_burst_tile_t g_conditions_burst_tiles[12][24];
 extern POLY_F4 g_conditions_burst_flash_polys[2];
 extern DR_MODE g_conditions_burst_draw_modes[2];
-static MATRIX g_conditions_burst_matrix;
-static SVECTOR g_conditions_burst_rotation;
-static VECTOR g_conditions_burst_offset;
-static VECTOR g_conditions_burst_rotated_offset;
+static MATRIX s_conditions_burst_matrix;
+static SVECTOR s_conditions_burst_rotation;
+static VECTOR s_conditions_burst_offset;
+static VECTOR s_conditions_burst_rotated_offset;
 
 /* Call thread_current_exit. */
 void thread_exit_current_wrapper(void) {
@@ -127,16 +127,16 @@ void require_dark_screen_entrypoint(void) {
             } else {
                 dx = tile->x - 0x80;
                 dy = tile->y - 0x80;
-                g_conditions_burst_rotation.vx = 0;
-                g_conditions_burst_rotation.vy = 0;
-                g_conditions_burst_rotation.vz = 0x200;
-                RotMatrix(&g_conditions_burst_rotation, &g_conditions_burst_matrix);
-                g_conditions_burst_offset.vx = dx * ONE;
-                g_conditions_burst_offset.vy = dy * ONE;
-                g_conditions_burst_offset.vz = 0;
+                s_conditions_burst_rotation.vx = 0;
+                s_conditions_burst_rotation.vy = 0;
+                s_conditions_burst_rotation.vz = 0x200;
+                RotMatrix(&s_conditions_burst_rotation, &s_conditions_burst_matrix);
+                s_conditions_burst_offset.vx = dx * ONE;
+                s_conditions_burst_offset.vy = dy * ONE;
+                s_conditions_burst_offset.vz = 0;
                 ApplyMatrixLV(
-                    &g_conditions_burst_matrix, &g_conditions_burst_offset, &g_conditions_burst_rotated_offset);
-                dist = abs(g_conditions_burst_rotated_offset.vx / ONE);
+                    &s_conditions_burst_matrix, &s_conditions_burst_offset, &s_conditions_burst_rotated_offset);
+                dist = abs(s_conditions_burst_rotated_offset.vx / ONE);
             }
             /* The delay grows with the square of the distance. */
             dist = (dist * dist) / (divisor << 8);
@@ -168,32 +168,32 @@ void require_dark_screen_entrypoint(void) {
                     /* A started tile is a square turned by its angle: corners on its radius at
                      * angle + 45 and + 135 degrees (0x200, 0x600) and their mirror images. */
                     if (tile->delay == 0) {
-                        g_conditions_burst_rotation.vx = 0;
-                        g_conditions_burst_rotation.vy = 0;
-                        g_conditions_burst_rotation.vz = tile->angle + 0x200;
-                        RotMatrix(&g_conditions_burst_rotation, &g_conditions_burst_matrix);
-                        g_conditions_burst_offset.vx = tile->radius * ONE;
-                        g_conditions_burst_offset.vy = 0;
-                        g_conditions_burst_offset.vz = 0;
+                        s_conditions_burst_rotation.vx = 0;
+                        s_conditions_burst_rotation.vy = 0;
+                        s_conditions_burst_rotation.vz = tile->angle + 0x200;
+                        RotMatrix(&s_conditions_burst_rotation, &s_conditions_burst_matrix);
+                        s_conditions_burst_offset.vx = tile->radius * ONE;
+                        s_conditions_burst_offset.vy = 0;
+                        s_conditions_burst_offset.vz = 0;
                         ApplyMatrixLV(
-                            &g_conditions_burst_matrix, &g_conditions_burst_offset, &g_conditions_burst_rotated_offset);
-                        ox = g_conditions_burst_rotated_offset.vx / 0x4000;
-                        oy = g_conditions_burst_rotated_offset.vy / 0x4000;
+                            &s_conditions_burst_matrix, &s_conditions_burst_offset, &s_conditions_burst_rotated_offset);
+                        ox = s_conditions_burst_rotated_offset.vx / 0x4000;
+                        oy = s_conditions_burst_rotated_offset.vy / 0x4000;
                         poly->x0 = ox + tile->x + 0x80;
                         poly->y0 = oy + tile->y;
                         poly->x3 = tile->x - ox + 0x80;
                         poly->y3 = tile->y - oy;
-                        g_conditions_burst_rotation.vx = 0;
-                        g_conditions_burst_rotation.vy = 0;
-                        g_conditions_burst_rotation.vz = tile->angle + 0x600;
-                        RotMatrix(&g_conditions_burst_rotation, &g_conditions_burst_matrix);
-                        g_conditions_burst_offset.vx = tile->radius * ONE;
-                        g_conditions_burst_offset.vy = 0;
-                        g_conditions_burst_offset.vz = 0;
+                        s_conditions_burst_rotation.vx = 0;
+                        s_conditions_burst_rotation.vy = 0;
+                        s_conditions_burst_rotation.vz = tile->angle + 0x600;
+                        RotMatrix(&s_conditions_burst_rotation, &s_conditions_burst_matrix);
+                        s_conditions_burst_offset.vx = tile->radius * ONE;
+                        s_conditions_burst_offset.vy = 0;
+                        s_conditions_burst_offset.vz = 0;
                         ApplyMatrixLV(
-                            &g_conditions_burst_matrix, &g_conditions_burst_offset, &g_conditions_burst_rotated_offset);
-                        ox = g_conditions_burst_rotated_offset.vx / 0x4000;
-                        oy = g_conditions_burst_rotated_offset.vy / 0x4000;
+                            &s_conditions_burst_matrix, &s_conditions_burst_offset, &s_conditions_burst_rotated_offset);
+                        ox = s_conditions_burst_rotated_offset.vx / 0x4000;
+                        oy = s_conditions_burst_rotated_offset.vy / 0x4000;
                         poly->x1 = ox + tile->x + 0x80;
                         poly->y1 = oy + tile->y;
                         poly->x2 = tile->x - ox + 0x80;

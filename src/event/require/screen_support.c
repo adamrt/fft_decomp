@@ -31,7 +31,7 @@ typedef struct conditions_banner_file {
 } conditions_banner_file_t;
 typedef char conditions_banner_file_size_must_be_26624[sizeof(conditions_banner_file_t) == 26624 ? 1 : -1];
 
-static RECT g_conditions_banner_rect = { 384, 0, 64, 256 };
+static RECT s_conditions_banner_rect = { 384, 0, 64, 256 };
 
 /* Thread body that waits 16 frames and exits. Nothing references it. */
 void thread_stop_after_16_frames(void) {
@@ -85,7 +85,7 @@ void conditions_load_banner_image(s32 image_id) {
 
     banner = allocation;
     /* The 256-row upload includes the reserved suffix beyond the 0x6800-byte file. */
-    LoadImage(&g_conditions_banner_rect, banner->pixels[0]);
+    LoadImage(&s_conditions_banner_rect, banner->pixels[0]);
     LoadImage(&g_conditions_banner_palette_rect, (u32*)banner->palettes);
     thread_yield();
     heap_free(allocation);

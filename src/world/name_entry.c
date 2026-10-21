@@ -73,7 +73,7 @@ extern u16 g_name_entry_keyboard_text_cursor_anim;
 /* confirmation */
 extern menu_entry_t g_name_entry_confirm_menu;
 extern u8 g_name_entry_confirm_initialized;
-static u8 g_name_entry_confirm_finished;
+static u8 s_name_entry_confirm_finished;
 extern s16 g_name_entry_confirm_result;
 extern u8 g_name_entry_confirm_message_shown;
 
@@ -81,7 +81,7 @@ extern u8 g_name_entry_confirm_message_shown;
 extern u8 g_name_entry_display_script[38];
 extern u8 g_name_entry_keyboard_script[41];
 
-static u8 g_name_entry_text[17] = { 0 };
+static u8 s_name_entry_text[17] = { 0 };
 
 static void key_apply(s16 key);
 static void keyboard_init(const u8* name);
@@ -134,7 +134,7 @@ u8* name_entry_keyboard_update(const u8* list, s32 unused_1) {
         return 0;
     }
     g_name_entry_started = 0;
-    return g_name_entry_text;
+    return s_name_entry_text;
 }
 
 /*
@@ -299,7 +299,7 @@ u8* name_entry_screen_run(const u8* list, u32* image) {
     menu_set_vsync_mode_and_event_speed(2);
     screen_context_reset();
     screen_fade_disabled_set(0);
-    return g_name_entry_text;
+    return s_name_entry_text;
 }
 
 /* Open the name-entry key list: identity entry ids 0..8 plus a -1 terminator. */
@@ -445,12 +445,12 @@ static void key_apply(s16 key) {
     }
     j = 0;
     slot = 0;
-    while (g_name_entry_text[j] != TEXT_END_WAIT_FOR_CONFIRM) {
-        if (g_name_entry_text[j] < TEXT_EXTENDED_GLYPH_PREFIX_FIRST
-            || g_name_entry_text[j] > TEXT_EXTENDED_GLYPH_PREFIX_LAST) {
-            chars[slot] = g_name_entry_text[j++];
+    while (s_name_entry_text[j] != TEXT_END_WAIT_FOR_CONFIRM) {
+        if (s_name_entry_text[j] < TEXT_EXTENDED_GLYPH_PREFIX_FIRST
+            || s_name_entry_text[j] > TEXT_EXTENDED_GLYPH_PREFIX_LAST) {
+            chars[slot] = s_name_entry_text[j++];
         } else {
-            chars[slot] = (g_name_entry_text[j] << 8) + g_name_entry_text[j + 1];
+            chars[slot] = (s_name_entry_text[j] << 8) + s_name_entry_text[j + 1];
             j += 2;
         }
         slot++;
@@ -486,19 +486,19 @@ static void key_apply(s16 key) {
     /* Re-encode, then trim trailing spaces back to the terminator. */
     for (i = 0, j = 0; i < 14; i++) {
         if (chars[i] <= 0xCFFF) {
-            g_name_entry_text[j++] = chars[i];
+            s_name_entry_text[j++] = chars[i];
         } else {
-            g_name_entry_text[j] = chars[i] >> 8;
-            g_name_entry_text[j + 1] = chars[i];
+            s_name_entry_text[j] = chars[i] >> 8;
+            s_name_entry_text[j + 1] = chars[i];
             j += 2;
         }
     }
-    g_name_entry_text[j] = TEXT_END_WAIT_FOR_CONFIRM;
-    for (i = 0; g_name_entry_text[i] != TEXT_END_WAIT_FOR_CONFIRM; i++) { }
+    s_name_entry_text[j] = TEXT_END_WAIT_FOR_CONFIRM;
+    for (i = 0; s_name_entry_text[i] != TEXT_END_WAIT_FOR_CONFIRM; i++) { }
     /* Empty input also reads the byte before the buffer; retain the native backward scan. */
-    for (i--; g_name_entry_text[i] == TEXT_SPACE; i--) { }
-    g_name_entry_text[i + 1] = TEXT_END_WAIT_FOR_CONFIRM;
-    screen_text_kern(g_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
+    for (i--; s_name_entry_text[i] == TEXT_SPACE; i--) { }
+    s_name_entry_text[i + 1] = TEXT_END_WAIT_FOR_CONFIRM;
+    screen_text_kern(s_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
 }
 
 /*
@@ -514,35 +514,35 @@ void name_entry_confirm_menu(void) {
 
     if (g_name_entry_confirm_initialized == 0) {
         g_name_entry_confirm_menu.selected_index = 0;
-        if (g_name_entry_text[0] == TEXT_END_WAIT_FOR_CONFIRM) {
+        if (s_name_entry_text[0] == TEXT_END_WAIT_FOR_CONFIRM) {
             /* Sharing the flag/index temporary preserves the target's
              * initial register allocation without an explicit constraint. */
             count = 1;
             g_name_entry_used_original_name = count;
             value = g_name_entry_original_name[0];
             count = 0;
-            g_name_entry_text[0] = value;
+            s_name_entry_text[0] = value;
             while (value != TEXT_END_WAIT_FOR_CONFIRM) {
                 if (count >= 16) {
-                    g_name_entry_text[16] = TEXT_END_WAIT_FOR_CONFIRM;
+                    s_name_entry_text[16] = TEXT_END_WAIT_FOR_CONFIRM;
                     break;
                 }
                 count++;
                 value = g_name_entry_original_name[count];
-                g_name_entry_text[count] = value;
+                s_name_entry_text[count] = value;
             }
         } else {
             g_name_entry_used_original_name = 0;
         }
-        g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_name_entry_text;
+        g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = s_name_entry_text;
         g_text_substitution_values[0] = 0xc800;
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xc01a, 0);
         g_name_entry_confirm_initialized = 1;
-        g_name_entry_confirm_finished = 0;
+        s_name_entry_confirm_finished = 0;
         g_name_entry_confirm_result = -1;
         g_screen_prompt_active = 1;
     }
-    if (g_name_entry_confirm_finished != 0) {
+    if (s_name_entry_confirm_finished != 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             g_name_entry_confirm_initialized = 0;
             g_name_entry_state = NAME_ENTRY_STATE_FINISHED;
@@ -550,13 +550,13 @@ void name_entry_confirm_menu(void) {
         }
     } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
         if (g_name_entry_confirm_result == 0) {
-            g_name_entry_confirm_finished = 1;
+            s_name_entry_confirm_finished = 1;
             thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x21, -1, 0);
             return;
         }
         g_name_entry_state = g_name_entry_saved_state;
         if (g_name_entry_used_original_name != 0) {
-            g_name_entry_text[0] = TEXT_END_WAIT_FOR_CONFIRM;
+            s_name_entry_text[0] = TEXT_END_WAIT_FOR_CONFIRM;
         }
         g_name_entry_confirm_initialized = 0;
     }
@@ -577,9 +577,9 @@ static void keyboard_init(const u8* name) {
     g_text_section_pointers[SCREEN_TEXT_SECTION_NAME_ENTRY_KEYS] = g_screen_text_name_entry_keys_data;
     g_name_entry_cursor = 0;
     i = 0;
-    while ((g_name_entry_text[i] = name[i]) != TEXT_END_WAIT_FOR_CONFIRM) {
+    while ((s_name_entry_text[i] = name[i]) != TEXT_END_WAIT_FOR_CONFIRM) {
         if (i >= 16) {
-            g_name_entry_text[16] = TEXT_END_WAIT_FOR_CONFIRM;
+            s_name_entry_text[16] = TEXT_END_WAIT_FOR_CONFIRM;
             break;
         }
         i++;

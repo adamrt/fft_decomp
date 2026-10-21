@@ -20,13 +20,13 @@ typedef struct menu_allocation {
 } menu_allocation_t;
 typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
 
-static menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
+static menu_allocation_t s_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
 
 /* WORLD's g_ai_workspace pointer cell aliases bytes inside this arena. */
-static u8 g_menu_buffer_arena[VARIANT_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
+static u8 s_menu_buffer_arena[VARIANT_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
 
 /* Nonzero for each arena page in use. */
-static u8 g_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT];
+static u8 s_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT];
 
 /* Reset the menu arena allocator: every allocation slot unused (-1), every arena page free, and
  * the three typewriter glyph slots unowned. */
@@ -43,10 +43,10 @@ void menu_init_buffer_allocator(void) {
      * without pins. */
     fill = -1;
     for (slot = MENU_BUFFER_ALLOCATION_COUNT - 1; slot >= 0; slot--) {
-        g_menu_allocator_slot_records[slot].buffer = (u8*)fill;
+        s_menu_allocator_slot_records[slot].buffer = (u8*)fill;
     }
     count = VARIANT_MENU_BUFFER_PAGE_COUNT - 1;
-    byte = &g_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT - 1];
+    byte = &s_menu_buffer_allocation_map[VARIANT_MENU_BUFFER_PAGE_COUNT - 1];
     for (; count >= 0; count--) {
         *byte = 0;
         byte--;
@@ -79,25 +79,25 @@ void* menu_alloc_memory(s32 size) {
     size = (size & 0xFF) != 0 ? (size >> 8) + 1 : size >> 8;
     for (;;) {
         for (first_page = 0; first_page < VARIANT_MENU_BUFFER_PAGE_COUNT; first_page++) {
-            if (g_menu_buffer_allocation_map[first_page] == 0) {
+            if (s_menu_buffer_allocation_map[first_page] == 0) {
                 for (run_pages = 0;; run_pages++) {
                     if (run_pages + first_page >= VARIANT_MENU_BUFFER_PAGE_COUNT) {
                         /* Leaves the run and page loops for the retry wait. */
                         goto fail;
                     }
-                    if (run_pages >= size || g_menu_buffer_allocation_map[run_pages + first_page] != 0) {
+                    if (run_pages >= size || s_menu_buffer_allocation_map[run_pages + first_page] != 0) {
                         break;
                     }
                 }
                 if (run_pages >= size) {
                     for (run_pages = 0; run_pages < size; run_pages++) {
-                        g_menu_buffer_allocation_map[first_page + run_pages] = 1;
+                        s_menu_buffer_allocation_map[first_page + run_pages] = 1;
                     }
                     for (slot = 0; slot < MENU_BUFFER_ALLOCATION_COUNT; slot++) {
-                        if (g_menu_allocator_slot_records[slot].buffer == (u8*)-1) {
-                            buffer = g_menu_buffer_arena[first_page];
-                            g_menu_allocator_slot_records[slot].buffer = buffer;
-                            g_menu_allocator_slot_records[slot].page_count = run_pages;
+                        if (s_menu_allocator_slot_records[slot].buffer == (u8*)-1) {
+                            buffer = s_menu_buffer_arena[first_page];
+                            s_menu_allocator_slot_records[slot].buffer = buffer;
+                            s_menu_allocator_slot_records[slot].page_count = run_pages;
                             return buffer;
                         }
                     }
@@ -133,12 +133,12 @@ void menu_free_memory(void* buffer_pointer) {
 
     if (buffer < (u32)g_heap_companion_overlay_load_address && buffer != -1) {
         invalid_buffer = -1;
-        first_page = (buffer - (u32)g_menu_buffer_arena) >> 8;
-        allocation_grid = g_menu_buffer_allocation_map;
+        first_page = (buffer - (u32)s_menu_buffer_arena) >> 8;
+        allocation_grid = s_menu_buffer_allocation_map;
         /* A separate page-count cursor preserves the native count-field base. */
-        page_count_cursor = &g_menu_allocator_slot_records[0].page_count;
-        allocation = g_menu_allocator_slot_records;
-        page_count_end = &g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT].page_count;
+        page_count_cursor = &s_menu_allocator_slot_records[0].page_count;
+        allocation = s_menu_allocator_slot_records;
+        page_count_end = &s_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT].page_count;
         for (;;) {
             if ((u32)allocation->buffer == buffer) {
                 allocation->buffer = (u8*)invalid_buffer;

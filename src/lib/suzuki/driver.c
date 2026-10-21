@@ -30,7 +30,7 @@ extern s16 g_suzuki_unknown_80032a58;
 
 /* Output mixing and transfer state. */
 extern CdlATV g_suzuki_sound_cd_mix;           /* 0x80032a3c; written by Put Sound Type */
-static s16 g_suzuki_sound_decoded_data_result; /* last decoded-data read result */
+static s16 s_suzuki_sound_decoded_data_result; /* last decoded-data read result */
 extern s32 g_suzuki_sound_spu_event;           /* OpenEvent handle of suzuki_sound_spu_event_handler */
 
 /* Provisional: retained driver value in main RAM; no reader or SPU transfer of it has been identified. */
@@ -511,11 +511,11 @@ void suzuki_sound_transfer_spu_data(u32 spu_address, void* data, u32 size, s32 m
         break;
     case SUZUKI_SOUND_SPU_TRANSFER_READ_DECODED:
         g_suzuki_sound_driver_flags |= SUZUKI_SOUND_DRIVER_SPU_READ | SUZUKI_SOUND_DRIVER_SPU_TRANSFER;
-        g_suzuki_sound_decoded_data_result = SpuReadDecodedData(data, SPU_ALL);
+        s_suzuki_sound_decoded_data_result = SpuReadDecodedData(data, SPU_ALL);
         break;
     case SUZUKI_SOUND_SPU_TRANSFER_READ_DECODED_CD:
         g_suzuki_sound_driver_flags |= SUZUKI_SOUND_DRIVER_SPU_READ | SUZUKI_SOUND_DRIVER_SPU_TRANSFER;
-        g_suzuki_sound_decoded_data_result = SpuReadDecodedData(data, SPU_CDONLY);
+        s_suzuki_sound_decoded_data_result = SpuReadDecodedData(data, SPU_CDONLY);
         break;
     case SUZUKI_SOUND_SPU_TRANSFER_NONE:
         break;

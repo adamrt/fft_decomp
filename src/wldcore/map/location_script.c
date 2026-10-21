@@ -44,14 +44,14 @@ static void location_script_opcode_28_check_ramza_faith_at_most(void);
 /* Scalar view of g_location_script_state.flags for the opcode handlers that
  * read-modify-write it: the member spelling there shares one base register
  * with the args/data accesses instead of the target's absolute addresses. */
-static s32 g_location_script_flags;
+static s32 s_location_script_flags;
 
 static void operand_pair_read(s32* out1, s32* out2);
 static void operand_dates_read(s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
 static s32 ramza_slot_find(void);
 
 /* Opcode-indexed dispatch, defined after its handlers below. */
-static void (*g_location_script_opcodes[41])(void);
+static void (*s_location_script_opcodes[41])(void);
 
 /* Run the map script blocks of `location`'s conditional set in order, each until a condition fails
  * or it stages an action; return 1 at the first staged action with a flag in `action_mask`, else
@@ -71,7 +71,7 @@ s32 location_script_run(s32 location, s32 action_mask) {
             u16 ip = g_location_script_state.ip;
             u16 op = g_location_script_state.data[ip];
             g_location_script_state.ip = ip + 1;
-            g_location_script_opcodes[op]();
+            s_location_script_opcodes[op]();
         } while ((g_location_script_state.flags
                      & (LOCATION_SCRIPT_RESULT_ACTION_REACHED | LOCATION_SCRIPT_RESULT_CONDITION_FAILED))
             == 0);
@@ -360,14 +360,14 @@ static void location_script_opcode_21_request_erase_path(void) {
  * request. Unlike other opcodes it leaves ip on its operand, which is
  * harmless because staging the request ends the block. */
 static void location_script_opcode_22_request_draw_location(void) {
-    g_location_script_flags |= LOCATION_SCRIPT_REQUEST_DRAW_LOCATION;
+    s_location_script_flags |= LOCATION_SCRIPT_REQUEST_DRAW_LOCATION;
     g_location_script_state.args[0] = g_location_script_state.data[g_location_script_state.ip];
 }
 
 /* Map script opcode 0x23: stage the location ID for a deferred EraseLocation
  * request, leaving ip on its operand like DrawLocation. */
 static void location_script_opcode_23_request_erase_location(void) {
-    g_location_script_flags |= LOCATION_SCRIPT_REQUEST_ERASE_LOCATION;
+    s_location_script_flags |= LOCATION_SCRIPT_REQUEST_ERASE_LOCATION;
     g_location_script_state.args[0] = g_location_script_state.data[g_location_script_state.ip];
 }
 
@@ -469,7 +469,7 @@ static void location_script_opcode_28_check_ramza_faith_at_most(void) {
 }
 
 /* Original opcode table; repeated entries retain their shared skip handlers. */
-static void (*g_location_script_opcodes[41])(void) = {
+static void (*s_location_script_opcodes[41])(void) = {
     location_script_opcode_00_nop,
     location_script_opcode_01_check_var_equal,
     location_script_opcode_02_check_var_at_least,

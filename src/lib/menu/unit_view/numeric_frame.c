@@ -13,7 +13,7 @@
 extern RECT g_status_screen_numbers_texture_window; /* texture window for the menu page */
 
 /* Menu palette color of each of the numeric display frame's twelve lines. */
-static u8 g_status_screen_numbers_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
+static u8 s_status_screen_numbers_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
 
 /* Eight-byte line placements: signed endpoint offsets and width/height selectors.
  * Byte-offset indexing preserves the native loop; typed row indexing changes it. */
@@ -29,7 +29,7 @@ typedef enum menu_line_layout_offset {
     MENU_LINE_LAYOUT_SIZE = 8
 } menu_line_layout_offset_e;
 
-static s8 g_status_screen_numbers_frame_layout[12 * MENU_LINE_LAYOUT_SIZE]
+static s8 s_status_screen_numbers_frame_layout[12 * MENU_LINE_LAYOUT_SIZE]
     = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
           0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
           1, 1, 1, 2, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, -1, 1, 0, 1, 1 };
@@ -50,20 +50,20 @@ void status_screen_init_numbers_frame(RECT* box, menu_numeric_frame_t* menu) {
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
-        line->x0 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_X0] + box->x;
-        line->y0 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_Y0] + box->y;
-        line->x1 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_X1] + box->x;
-        line->y1 = g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_Y1] + box->y;
-        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
+        line->x0 = s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_X0] + box->x;
+        line->y0 = s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_Y0] + box->y;
+        line->x1 = s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_X1] + box->x;
+        line->y1 = s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_Y1] + box->y;
+        if (s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_W0] != 0) {
             line->x0 += box->w;
         }
-        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
+        if (s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_H0] != 0) {
             line->y0 += box->h;
         }
-        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
+        if (s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_W1] != 0) {
             line->x1 += box->w;
         }
-        if (g_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
+        if (s_status_screen_numbers_frame_layout[offset + MENU_LINE_LAYOUT_ADD_H1] != 0) {
             line->y1 += box->h;
         }
         offset += MENU_LINE_LAYOUT_SIZE;
@@ -98,7 +98,7 @@ void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu) {
     LINE_F2* line;
 
     for (index = 0, line = menu->lines; index < 12; index++, line++) {
-        palette_index = g_status_screen_numbers_palette_indices[index];
+        palette_index = s_status_screen_numbers_palette_indices[index];
         line->r0 = g_menu_palette_colors.colors[palette_index].red << 3;
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;
@@ -114,7 +114,7 @@ void menu_init_primitive_colors_dimmed(menu_numeric_frame_t* menu) {
     LINE_F2* line;
 
     for (index = 0, line = menu->lines; index < 12; index++, line++) {
-        palette_index = (g_status_screen_numbers_palette_indices[index] + PALETTE_COLOR_COUNT);
+        palette_index = (s_status_screen_numbers_palette_indices[index] + PALETTE_COLOR_COUNT);
         line->r0 = g_menu_palette_colors.colors[palette_index].red << 3;
         line->g0 = g_menu_palette_colors.colors[palette_index].green << 3;
         line->b0 = g_menu_palette_colors.colors[palette_index].blue << 3;

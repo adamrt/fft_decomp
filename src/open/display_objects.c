@@ -22,11 +22,11 @@ typedef char sprite_packet_size_must_be_32[sizeof(sprite_packet_t) == 32 ? 1 : -
 extern display_object_sequence_header_t* g_display_object_sequence_table[];
 extern display_object_cel_header_t* g_display_object_cel_table[];
 
-static display_object_sequence_header_t** g_display_object_sequences = g_display_object_sequence_table;
-static display_object_cel_header_t** g_display_object_cels = g_display_object_cel_table;
+static display_object_sequence_header_t** s_display_object_sequences = g_display_object_sequence_table;
+static display_object_cel_header_t** s_display_object_cels = g_display_object_cel_table;
 
 extern sprite_packet_t g_display_object_gpu_sprite_packets[2][32];
-static s32 g_display_object_gpu_sprite_count;
+static s32 s_display_object_gpu_sprite_count;
 
 static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void gpu_animated_draw(display_object_animated_t* actor, u32* ot);
@@ -38,7 +38,7 @@ void display_object_pools_init(void) {
     s32 i;
     CVECTOR* color;
 
-    g_display_object_gpu_sprite_count = 0;
+    s_display_object_gpu_sprite_count = 0;
     g_display_object_image_count = 0;
     g_display_object_animated_count = 0;
     g_display_object_queue_count = 0;
@@ -65,7 +65,7 @@ void gfx_clear_current_otag(void) {
     u32 stack_padding[2];
 
     ClearOTagR(g_gfx_otags[g_gfx_active_buffer_index], 16);
-    g_display_object_gpu_sprite_count = 0;
+    s_display_object_gpu_sprite_count = 0;
 }
 
 /* Draw visible animated and image records into the GPU ordering table. */
@@ -118,8 +118,8 @@ void display_object_gpu_list_draw(u32* otag, void** list, s32 count) {
  * and v0/v1 allocation. Separate assignments change those registers.
  */
 static void gpu_animated_draw(display_object_animated_t* actor, u32* ot) {
-    display_object_cel_header_t** sprites = g_display_object_cels;
-    display_object_sequence_header_t* anim = g_display_object_sequences[actor->sequence];
+    display_object_cel_header_t** sprites = s_display_object_cels;
+    display_object_sequence_header_t* anim = s_display_object_sequences[actor->sequence];
     display_object_cel_header_t* cel;
     u32* sprite;
     s32 value;
@@ -159,50 +159,50 @@ loop:
     clut_y = (cel->packed_clut_origin & 0xffff0000) >> 16;
 
     for (i = 0; i < part_count; i++) {
-        if (g_display_object_gpu_sprite_count >= 32) {
+        if (s_display_object_gpu_sprite_count >= 32) {
             return;
         }
         setRGB0(
-            (&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt),
+            (&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt),
             actor->color.r, actor->color.g, actor->color.b);
         SetSprt(
-            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt);
+            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt);
         value = ((part_count - i) * 2) | 1;
         SetDrawMode(
-            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].mode, 1,
+            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].mode, 1,
             0, GetTPage(PART(value)->texture_flags >> 2, PART(value)->blend_rate, tpage_x, tpage_y), 0);
         if (PART(value)->semi_transparent) {
             SetSemiTrans(
-                &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt,
+                &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt,
                 1);
         } else {
             SetSemiTrans(
-                &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt,
+                &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt,
                 0);
         }
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.x0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.x0
             = (x = actor->position.x, x + PART(value)->x_offset - 0x80);
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.y0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.y0
             = (y = actor->position.y, y + PART(value)->y_offset - 0x80);
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.u0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.u0
             = PART(value)->u;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.v0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.v0
             = PART(value)->v;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.w
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.w
             = PART(value)->width;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.h
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.h
             = PART(value)->height;
         /* A byte-field palette read shortens the native 32-bit flags load. */
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.clut
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.clut
             = GetClut(clut_x
                     + ((actor->palette == 0 || (PART(value)->use_part_palette)) ? ((sprite[value] >> 12) & 0xf0)
                                                                                 : ((actor->palette - 1) * 16)),
                 clut_y);
         AddPrim(&ot[actor->priority],
-            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt);
+            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt);
         AddPrim(&ot[actor->priority],
-            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].mode);
-        g_display_object_gpu_sprite_count++;
+            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].mode);
+        s_display_object_gpu_sprite_count++;
     }
 }
 
@@ -233,10 +233,10 @@ static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
     u16 qu;
     u16 qv;
 
-    if (g_display_object_gpu_sprite_count >= 32) {
+    if (s_display_object_gpu_sprite_count >= 32) {
         return;
     }
-    SetSprt(&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt);
+    SetSprt(&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt);
 
     if (record->palette != 0) {
         cx = record->clut.x;
@@ -245,13 +245,13 @@ static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
     } else {
         clut = record->clut;
     }
-    g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.clut
+    g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.clut
         = GetClut(clut.x, clut.y);
-    setRGB0((&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt),
+    setRGB0((&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt),
         record->color.r, record->color.g, record->color.b);
 
     /* The shift before the boolean test preserves the target's mask-and-test sequence. */
-    SetDrawMode(&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].mode,
+    SetDrawMode(&g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].mode,
         1, 0,
         GetTPage(((record->flags & DISPLAY_OBJECT_8BIT_CLUT) >> 2) != 0,
             (record->flags & DISPLAY_OBJECT_BLEND_RATE_MASK) >> 6, record->vram_position.x, record->vram_position.y),
@@ -259,27 +259,27 @@ static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
 
     if (record->flags & DISPLAY_OBJECT_SEMI_TRANSPARENT) {
         SetSemiTrans(
-            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt, 1);
+            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt, 1);
     } else {
         SetSemiTrans(
-            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt, 0);
+            &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt, 0);
     }
 
     if (record->flags & DISPLAY_OBJECT_POP_IN) {
         scaled_rectangle_calculate(record->pop_in_step / 2, &record->bounds, &scaled);
         px = record->position.x;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.x0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.x0
             = scaled.x + px;
         py = record->position.y;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.y0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.y0
             = scaled.y + py;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.u0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.u0
             = record->bounds.x + scaled.x;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.v0
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.v0
             = record->bounds.y + scaled.y;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.w
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.w
             = scaled.w;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.h
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.h
             = scaled.h;
         step = record->pop_in_step;
         if (step / 2 >= 4) {
@@ -290,24 +290,24 @@ static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
         }
     } else {
         qx = record->position.x;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.x0 = qx;
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.x0 = qx;
         qy = record->position.y;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.y0 = qy;
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.y0 = qy;
         qu = record->bounds.x;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.u0 = qu;
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.u0 = qu;
         qv = record->bounds.y;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.v0 = qv;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.w
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.v0 = qv;
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.w
             = record->bounds.w;
-        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt.h
+        g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.h
             = record->bounds.h;
     }
 
     AddPrim(&ot[record->priority],
-        &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].sprt);
+        &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt);
     AddPrim(&ot[record->priority],
-        &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][g_display_object_gpu_sprite_count].mode);
-    g_display_object_gpu_sprite_count++;
+        &g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].mode);
+    s_display_object_gpu_sprite_count++;
 }
 
 /* Appends the next free 36-byte render record to `list`, resets it and

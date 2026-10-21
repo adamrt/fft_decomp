@@ -33,7 +33,7 @@
 #include "psx/types.h"
 
 effect_context_t g_effect_context;
-static u8* g_effect_frame_data_start;
+static u8* s_effect_frame_data_start;
 
 /* g_effect_load_state: the steps of effect_file_load_update, which loads the ability's effect file
  * while its charge secondary effect plays. */
@@ -77,7 +77,7 @@ extern s16 g_effect_ability_files[];
 
 /* Disc extents for ability effects; sizes include the final sector.
  * Entry 0 deliberately uses the same file as Cure (entry 1). */
-static file_extent_t g_disc_extents[EFFECT_FILE_ID_COUNT] = {
+static file_extent_t s_disc_extents[EFFECT_FILE_ID_COUNT] = {
     { 61026, 45056 },
     { 61026, 45056 },
     { 61048, 47104 },
@@ -664,7 +664,7 @@ static void palette_init(s16 index) {
 /* Rewind g_effect_frame_data to its saved start for EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT.
  * Nothing stores the start pointer or selects that phase, so retail never runs it. */
 static void frame_data_pointer_reset(void) {
-    g_effect_frame_data = g_effect_frame_data_start;
+    g_effect_frame_data = s_effect_frame_data_start;
 }
 
 /* Rewind g_effect_animation_sequences to its saved start for
@@ -803,8 +803,8 @@ static effect_callback_t native_callback_get(s16 callback_id) {
 static void disc_extent_load(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
-    *lba = g_disc_extents[effect_id].sector;
-    *byte_length = g_disc_extents[effect_id].size;
+    *lba = s_disc_extents[effect_id].sector;
+    *byte_length = s_disc_extents[effect_id].size;
 }
 
 /* Report an effect stub and return zero. */

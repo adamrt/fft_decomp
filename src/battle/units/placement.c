@@ -25,7 +25,7 @@ unit_stats_t g_unit_stats[UNIT_SLOT_COUNT] = { 0 };
 /* Deployment placement, the acting tile and strike relocation reservations. */
 extern unit_deployment_coordinates_t* g_unit_deployed_coords;
 extern s16 g_unit_entd_spritesheet_ids[];
-static s32 g_unit_entd_spritesheet_count;
+static s32 s_unit_entd_spritesheet_count;
 
 static s32 entd_unique_spritesheet_add(s32 mode, s16 value, s32 limit);
 
@@ -342,24 +342,24 @@ static s32 entd_unique_spritesheet_add(s32 mode, s16 value, s32 limit) {
     s32 i;
 
     if (mode == 0xFF) {
-        g_unit_entd_spritesheet_count = 0;
+        s_unit_entd_spritesheet_count = 0;
         return 0;
     }
     if (mode == 0) {
-        g_unit_entd_spritesheet_count = 1;
+        s_unit_entd_spritesheet_count = 1;
         g_unit_entd_spritesheet_ids[0] = value;
         return 0;
     }
     index = 0xFF;
-    for (i = 0; i < g_unit_entd_spritesheet_count; i++) {
+    for (i = 0; i < s_unit_entd_spritesheet_count; i++) {
         if (g_unit_entd_spritesheet_ids[i] == value) {
             index = i;
             break;
         }
     }
     if (index == 0xFF) {
-        index = g_unit_entd_spritesheet_count;
-        g_unit_entd_spritesheet_count = index + 1;
+        index = s_unit_entd_spritesheet_count;
+        s_unit_entd_spritesheet_count = index + 1;
         g_unit_entd_spritesheet_ids[index] = value;
     }
     return index >= limit;

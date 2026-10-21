@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Color-tint fade state. */
-static rgb24_t g_fade_tint;
+static rgb24_t s_fade_tint;
 extern rgb24_t g_fade_tint_backup;
 extern rgb24_t g_fade_tint_target;
 extern u16 g_fade_tint_value[3];
@@ -17,24 +17,24 @@ extern RECT g_fade_tint_tex_window;
 
 /* No retail code calls it. */
 void fade_tint_clear(void) {
-    g_fade_tint.b = 0;
-    g_fade_tint.g = 0;
-    g_fade_tint.r = 0;
+    s_fade_tint.b = 0;
+    s_fade_tint.g = 0;
+    s_fade_tint.r = 0;
 }
 
 /* Saves the screen color modulation for
  * fade_tint_restore. No retail code calls either. */
 void fade_tint_copy(void) {
-    g_fade_tint_backup.r = g_fade_tint.r;
-    g_fade_tint_backup.g = g_fade_tint.g;
-    g_fade_tint_backup.b = g_fade_tint.b;
+    g_fade_tint_backup.r = s_fade_tint.r;
+    g_fade_tint_backup.g = s_fade_tint.g;
+    g_fade_tint_backup.b = s_fade_tint.b;
 }
 
 /* No retail code calls it. */
 void fade_tint_restore(void) {
-    g_fade_tint.r = g_fade_tint_backup.r;
-    g_fade_tint.g = g_fade_tint_backup.g;
-    g_fade_tint.b = g_fade_tint_backup.b;
+    s_fade_tint.r = g_fade_tint_backup.r;
+    s_fade_tint.g = g_fade_tint_backup.g;
+    s_fade_tint.b = g_fade_tint_backup.b;
 }
 
 /*
@@ -55,12 +55,12 @@ void fade_tint_fade_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 dura
         g_fade_tint_target.b = blue;
         g_fade_tint_fade_frames = frames;
         if (frames != 0) {
-            g_fade_tint_value[0] = g_fade_tint.r << 8;
-            g_fade_tint_value[1] = g_fade_tint.g << 8;
-            g_fade_tint_value[2] = g_fade_tint.b << 8;
-            g_fade_tint_step[0] = ((g_fade_tint_target.r - g_fade_tint.r) << 8) / frames;
-            g_fade_tint_step[1] = ((g_fade_tint_target.g - g_fade_tint.g) << 8) / frames;
-            g_fade_tint_step[2] = ((g_fade_tint_target.b - g_fade_tint.b) << 8) / frames;
+            g_fade_tint_value[0] = s_fade_tint.r << 8;
+            g_fade_tint_value[1] = s_fade_tint.g << 8;
+            g_fade_tint_value[2] = s_fade_tint.b << 8;
+            g_fade_tint_step[0] = ((g_fade_tint_target.r - s_fade_tint.r) << 8) / frames;
+            g_fade_tint_step[1] = ((g_fade_tint_target.g - s_fade_tint.g) << 8) / frames;
+            g_fade_tint_step[2] = ((g_fade_tint_target.b - s_fade_tint.b) << 8) / frames;
             SetDrawMode(&g_fade_tint_draw_modes[0], 0, 0, blend_mode << 5, &g_fade_tint_tex_window);
             g_fade_tint_draw_modes[1] = g_fade_tint_draw_modes[0];
         }
@@ -92,13 +92,13 @@ void fade_tint_fade_update(void) {
         g_fade_tint_value[1] = green;
         blue = g_fade_tint_value[2] + g_fade_tint_step[2];
         g_fade_tint_value[2] = blue;
-        g_fade_tint.r = red >> 8;
-        g_fade_tint.g = green >> 8;
-        g_fade_tint.b = blue >> 8;
+        s_fade_tint.r = red >> 8;
+        s_fade_tint.g = green >> 8;
+        s_fade_tint.b = blue >> 8;
         if (remaining == 0) {
-            g_fade_tint.r = g_fade_tint_target.r;
-            g_fade_tint.g = g_fade_tint_target.g;
-            g_fade_tint.b = g_fade_tint_target.b;
+            s_fade_tint.r = g_fade_tint_target.r;
+            s_fade_tint.g = g_fade_tint_target.g;
+            s_fade_tint.b = g_fade_tint_target.b;
         }
     }
 }
@@ -109,10 +109,10 @@ void fade_tint_fade_update(void) {
 void fade_tint_overlay_draw(void) {
     char unused[24];
 
-    if ((g_fade_tint.r | g_fade_tint.g | g_fade_tint.b) != 0) {
-        g_fade_tint_polygons[g_gfx_screen_polarity].r0 = g_fade_tint.r;
-        g_fade_tint_polygons[g_gfx_screen_polarity].g0 = g_fade_tint.g;
-        g_fade_tint_polygons[g_gfx_screen_polarity].b0 = g_fade_tint.b;
+    if ((s_fade_tint.r | s_fade_tint.g | s_fade_tint.b) != 0) {
+        g_fade_tint_polygons[g_gfx_screen_polarity].r0 = s_fade_tint.r;
+        g_fade_tint_polygons[g_gfx_screen_polarity].g0 = s_fade_tint.g;
+        g_fade_tint_polygons[g_gfx_screen_polarity].b0 = s_fade_tint.b;
         AddPrim(gfx_battle_otag_get(), &g_fade_tint_polygons[g_gfx_screen_polarity]);
         AddPrim(gfx_battle_otag_get(), &g_fade_tint_draw_modes[g_gfx_screen_polarity]);
     }

@@ -47,7 +47,7 @@ extern s16 g_menu_result;
 extern s16 g_menu_selected_option;
 
 /* Command selection and remembered results. */
-static u16 g_ability_list_anything_ability_id;
+static u16 s_ability_list_anything_ability_id;
 extern s16 g_menu_set_auto_battle_row_actions;
 extern s32 g_command_resolved_command;
 extern s32 g_command_used_skillset_id;
@@ -83,7 +83,7 @@ typedef struct request_entry {
 typedef char request_entry_size_must_be_20[(sizeof(request_entry_t) == 20) ? 1 : -1];
 
 /* System-menu requests: callbacks and their initial message/selection parameters. */
-static request_entry_t g_request_entries[51] = {
+static request_entry_t s_request_entries[51] = {
     { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8004, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, 0, { 0, 0 } }, /* 0 */
     { MENU_COMMAND_ID_MESSAGE, 0x800f, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
@@ -528,7 +528,7 @@ s32 command_resolve_selection(void) {
                 g_command_selected_command.data.action.ability_id = 0;
                 item = MENU_SELECTION_NONE;
             } else if (option == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING && g_command_skillset_build_result == 0) {
-                item = g_ability_list_anything_ability_id;
+                item = s_ability_list_anything_ability_id;
             } else {
                 item = g_event_work->ability_list.ids[item] & 0x1FF;
             }
@@ -557,7 +557,7 @@ static void request_thread_run(void) {
     text_init_section_pointers();
     id = g_thread_contexts[g_thread_current_id].function_parameter_1;
     if (g_game_options.fields.navigation_messages != GAME_OPTION_ON) {
-        id = g_request_entries[id].alternate_id;
+        id = s_request_entries[id].alternate_id;
     }
     thread_inactive_wait(THREAD_SLOT_MENU);
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
@@ -569,7 +569,7 @@ static void request_thread_run(void) {
         }
     }
     camera_idle_wait();
-    entry = &g_request_entries[id];
+    entry = &s_request_entries[id];
     menu_id = entry->menu_id;
     g_menu_thread_menu_data[entry->menu_entry_index].text_id = entry->text_id;
     g_menu_request_row_actions[0] = entry->row_action;
@@ -943,7 +943,7 @@ static s32 request_dispatch(
         if (g_game_options.fields.effect_messages != GAME_OPTION_ON) {
             request_thread_start(MENU_PROMPT_CLOSE);
         } else {
-            g_request_entries[MENU_PROMPT_EFFECT_MESSAGE].text_id = option;
+            s_request_entries[MENU_PROMPT_EFFECT_MESSAGE].text_id = option;
             g_text_substitution_values[0] = parameter & 0xFF;
             request_thread_start(MENU_PROMPT_EFFECT_MESSAGE);
         }
@@ -977,7 +977,7 @@ static s32 request_dispatch(
     } else if (command == MENU_REQUEST_MOVE_CONFIRM_SILENT) {
         request_thread_start(MENU_PROMPT_MOVE_CONFIRM_SILENT);
     } else if (command == MENU_REQUEST_POST_ACTION_RESULT) {
-        entry = &g_request_entries[MENU_PROMPT_POST_ACTION_RESULT];
+        entry = &s_request_entries[MENU_PROMPT_POST_ACTION_RESULT];
         flags = parameter;
         if (option >= ACTION_DISPLAY_IMAGE_CT && option <= ACTION_DISPLAY_IMAGE_LEVEL) {
             g_text_substitution_values[0] = unit_id;
@@ -1005,19 +1005,19 @@ static s32 request_dispatch(
             request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_GIL) {
             g_text_substitution_values[0] = parameter < 0 ? -parameter : parameter;
-            g_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508F;
+            s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508F;
             request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_EXP) {
             g_text_substitution_values[0] = parameter & 0x7F;
-            g_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508E;
+            s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508E;
             request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_STOLEN || option == ACTION_DISPLAY_IMAGE_BROKEN) {
             if (parameter & 0x8000) {
                 g_text_substitution_values[0] = (parameter & 0xFF) + TEXT_ID_ITEM_NAME_BASE;
-                g_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x509B;
+                s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x509B;
             } else {
                 g_text_substitution_values[0] = parameter + TEXT_ID_ITEM_NAME_BASE;
-                g_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = option + 0x5074;
+                s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = option + 0x5074;
             }
             request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
         } else {

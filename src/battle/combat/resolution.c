@@ -24,7 +24,7 @@ extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRS
 extern const u8 g_terrain_status_flags[64];
 
 /* Formula IDs are one-based; zero and invalid IDs select the weapon formula. */
-static void (*g_formulas[ABILITY_FORMULA_ID_LIMIT - 1])(void) = {
+static void (*s_formulas[ABILITY_FORMULA_ID_LIMIT - 1])(void) = {
     formula_weapon_damage,
     formula_weapon_damage_with_proc,
     formula_gun_damage,
@@ -460,7 +460,7 @@ void action_store_used_weapon(action_command_t* action) {
 /* g_action_work bound a second time. Spelling every field through one
  * symbol lets GCC share a base register between the two access groups below,
  * which changes this function's code. */
-static action_work_t g_action_work_view;
+static action_work_t s_action_work_view;
 
 /* Calculate one target's action result: load the current ability, weapon and
  * item data for the attacker/target pair, run the evasion reactions and the
@@ -488,9 +488,9 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
     g_action_target = &g_unit_stats[target_id];
     g_action_target_data = &g_unit_stats[target_id].action;
     g_action_work.post_action_message = ACTION_POST_MESSAGE_NONE;
-    g_action_work_view.attacker_id = action.actor_id;
+    s_action_work_view.attacker_id = action.actor_id;
     g_action_attacker_data = &g_action_attacker_action_data;
-    g_action_attacker = &g_unit_stats[g_action_work_view.attacker_id];
+    g_action_attacker = &g_unit_stats[s_action_work_view.attacker_id];
 
     if (g_action_context != ACTION_CONTEXT_PRIMARY && reaction_effect_apply() != 0) {
         action_store_used_weapon(&action);
@@ -502,7 +502,7 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
     }
 
     location = battle_map_tile_calculate_unit_index(g_action_target);
-    g_action_work_view.terrain = g_battle_map_tile_data[location].surface.type;
+    s_action_work_view.terrain = g_battle_map_tile_data[location].surface.type;
     if (g_action_work.strike_counter == 0) {
         id = g_action_work.primary_weapon_id;
     } else {
@@ -516,19 +516,19 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         id = ITEM_ID_NOTHING;
     }
 
-    g_action_work_view.weapon_id = id;
-    g_action_work_view.ability_id = action.ability_id;
+    s_action_work_view.weapon_id = id;
+    s_action_work_view.ability_id = action.ability_id;
     ability_id = action.ability_id;
     g_action_work.two_hands_active = 0;
-    if (g_action_work_view.ability_id > ABILITY_ID_ITEM_FIRST) {
+    if (s_action_work_view.ability_id > ABILITY_ID_ITEM_FIRST) {
         ability_id = 0;
     }
 
     /* Start from the weapon's data and formula; the menu switch below overrides them. */
     weapon = &g_item_weapon_data[id];
     mem_copy_byte_data_source_first(
-        &g_ability_range_data[ability_id], &g_action_work_view.range_data, sizeof(ability_secondary_data_t));
-    mem_copy_byte_data_source_first(weapon, &g_action_work_view.weapon_data, sizeof(weapon_data_t));
+        &g_ability_range_data[ability_id], &s_action_work_view.range_data, sizeof(ability_secondary_data_t));
+    mem_copy_byte_data_source_first(weapon, &s_action_work_view.weapon_data, sizeof(weapon_data_t));
     g_action_work.proc_id = weapon->proc_id;
     g_action_work.charge_power = 0;
     g_action_work.formula = ABILITY_FORMULA_WEAPON_DAMAGE;
@@ -540,12 +540,12 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
     g_action_work.skillset = skillset;
     menu_type = g_command_menu_types_by_skillset[skillset];
     /* A pending weapon proc resolves its spell, held in reaction_id, as a default-menu ability. */
-    if (g_action_work_view.weapon_proc_pending != 0) {
-        action.ability_id = g_action_work_view.reaction_id;
-        g_action_work_view.ability_id = action.ability_id;
+    if (s_action_work_view.weapon_proc_pending != 0) {
+        action.ability_id = s_action_work_view.reaction_id;
+        s_action_work_view.ability_id = action.ability_id;
         menu_type = ACTION_MENU_TYPE_DEFAULT;
     } else {
-        g_action_work_view.reaction_id = 0;
+        s_action_work_view.reaction_id = 0;
     }
 
     data = &g_ability_data[action.ability_id];
@@ -572,20 +572,20 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
             /* A frog strikes without its weapon. */
             if ((g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
                     & STATUS_BYTE_MASK(STATUS_ID_FROG))
-                && g_action_work_view.weapon_proc_pending == 0) {
-                g_action_work_view.weapon_id = ITEM_ID_NOTHING;
+                && s_action_work_view.weapon_proc_pending == 0) {
+                s_action_work_view.weapon_id = ITEM_ID_NOTHING;
                 mem_copy_byte_data_source_first(
-                    g_item_weapon_data, &g_action_work_view.weapon_data, sizeof(weapon_data_t));
+                    g_item_weapon_data, &s_action_work_view.weapon_data, sizeof(weapon_data_t));
             }
             ability = &g_ability_range_data[action.ability_id];
-            mem_copy_byte_data_source_first(ability, &g_action_work_view.range_data, sizeof(ability_secondary_data_t));
+            mem_copy_byte_data_source_first(ability, &s_action_work_view.range_data, sizeof(ability_secondary_data_t));
             g_action_work.proc_id = ability->status_infliction_id;
             formula = ability->formula;
             /* An ability that does not use the weapon drops it, except Draw Out. */
             if (!(g_action_work.range_data.flags_1
                     & (ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE | ABILITY_SECONDARY_FLAG_1_WEAPON_STRIKE))
                 && menu_type != ACTION_MENU_TYPE_KATANA_INVENTORY) {
-                g_action_work_view.weapon_id = ITEM_ID_NOTHING;
+                s_action_work_view.weapon_id = ITEM_ID_NOTHING;
             }
         }
         break;
@@ -593,12 +593,12 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;
         id = action.item_id;
         if (id >= ITEM_ID_CONSUMABLE_FIRST) {
-            g_action_work_view.weapon_id = id;
+            s_action_work_view.weapon_id = id;
             id += ITEM_ID_COUNT - ITEM_ID_CONSUMABLE_FIRST;
             item = &g_item_secondary_data[id];
             g_action_work.used_item_id = id;
             g_action_work.proc_id = item->status_infliction_id;
-            mem_zero(&g_action_work_view.range_data, sizeof(ability_secondary_data_t));
+            mem_zero(&s_action_work_view.range_data, sizeof(ability_secondary_data_t));
             formula = item->formula;
         }
         break;
@@ -634,19 +634,19 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         break;
     }
 
-    g_action_work_view.weapon_proc_pending = 0;
+    s_action_work_view.weapon_proc_pending = 0;
     g_action_work.knockback_flags = 0;
     if (formula == 0 || formula >= ABILITY_FORMULA_ID_LIMIT) {
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;
     }
 
     /* id now indexes the status infliction table; guns never inflict their proc (entry 0). */
-    id = g_action_work_view.proc_id;
+    id = s_action_work_view.proc_id;
     if (formula == ABILITY_FORMULA_GUN_DAMAGE) {
         id = 0;
     }
     mem_copy_byte_data_source_first(
-        &g_status_infliction_data[id], &g_action_work_view.status_infliction, sizeof(status_infliction_data_t));
+        &g_status_infliction_data[id], &s_action_work_view.status_infliction, sizeof(status_infliction_data_t));
     ability_cancellations_store();
     g_action_work.formula = formula;
 
@@ -656,13 +656,13 @@ s32 action_calculate_target_result(const action_command_t* source, u8 target_id)
         return 1;
     }
 
-    g_formulas[formula - 1]();
+    s_formulas[formula - 1]();
     /* Only the weapon formulas before Weapon Heal (1..6) go on to Poach and Train. */
     if (formula < ABILITY_FORMULA_WEAPON_HEAL) {
         formula_apply_poach_and_train();
     }
     if (formula == ABILITY_FORMULA_JUMP_DAMAGE) {
-        g_action_work_view.weapon_id = ITEM_ID_NOTHING;
+        s_action_work_view.weapon_id = ITEM_ID_NOTHING;
     }
 
     action_finalize_target_result();

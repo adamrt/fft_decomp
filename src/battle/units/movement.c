@@ -36,18 +36,18 @@ extern unit_runtime_t* g_move_step_tile_occupant;
 
 /* Height scratch record that unit_action_height_calculate fills in place. */
 extern unit_height_data_t g_move_step_tile_occupant_height;
-static s32 g_move_displacement_direction;
+static s32 s_move_displacement_direction;
 
-static u8 g_walk_to_center_phases[4] = { MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH, MOVE_STEP_PHASE_WALK_TO_CENTER_EAST,
+static u8 s_walk_to_center_phases[4] = { MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH, MOVE_STEP_PHASE_WALK_TO_CENTER_EAST,
     MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH, MOVE_STEP_PHASE_WALK_TO_CENTER_WEST };
 
-static u8 g_climb_to_center_phases[4] = { MOVE_STEP_PHASE_CLIMB_TO_CENTER_SOUTH, MOVE_STEP_PHASE_CLIMB_TO_CENTER_EAST,
+static u8 s_climb_to_center_phases[4] = { MOVE_STEP_PHASE_CLIMB_TO_CENTER_SOUTH, MOVE_STEP_PHASE_CLIMB_TO_CENTER_EAST,
     MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH, MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST };
 
-static u8 g_jump_descent_phases[4] = { MOVE_STEP_PHASE_JUMP_DESCENT_SOUTH, MOVE_STEP_PHASE_JUMP_DESCENT_EAST,
+static u8 s_jump_descent_phases[4] = { MOVE_STEP_PHASE_JUMP_DESCENT_SOUTH, MOVE_STEP_PHASE_JUMP_DESCENT_EAST,
     MOVE_STEP_PHASE_JUMP_DESCENT_NORTH, MOVE_STEP_PHASE_JUMP_DESCENT_WEST };
 
-static u8 g_jump_landing_phases[4] = { MOVE_STEP_PHASE_JUMP_LANDING_SOUTH, MOVE_STEP_PHASE_JUMP_LANDING_EAST,
+static u8 s_jump_landing_phases[4] = { MOVE_STEP_PHASE_JUMP_LANDING_SOUTH, MOVE_STEP_PHASE_JUMP_LANDING_EAST,
     MOVE_STEP_PHASE_JUMP_LANDING_NORTH, MOVE_STEP_PHASE_JUMP_LANDING_WEST };
 
 /* Clearance above a tile for height_to_headroom_clamp, in half-height
@@ -1511,7 +1511,7 @@ static void directional_unit_displace(unit_runtime_t* unit, s32 x, s32 y, s32 de
     if ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) != 0) {
         return;
     }
-    switch (g_move_displacement_direction) {
+    switch (s_move_displacement_direction) {
     case MOVE_DIRECTION_SOUTH:
         axis = y - delta;
         unit->world_coords.vz = axis;
@@ -1662,13 +1662,13 @@ static void move_step_displace_unit_at_destination_tile(unit_runtime_t* unit, s3
         next = MOVE_DIRECTION_NORTH;
         break;
     }
-    for (g_move_displacement_direction = 0; g_move_displacement_direction < 4; g_move_displacement_direction++) {
+    for (s_move_displacement_direction = 0; s_move_displacement_direction < 4; s_move_displacement_direction++) {
         if (direction == next) {
-            if ((g_move_displacement_direction != next) && (g_move_displacement_direction != (next ^ 2))) {
+            if ((s_move_displacement_direction != next) && (s_move_displacement_direction != (next ^ 2))) {
                 break;
             }
         } else {
-            if ((g_move_displacement_direction != (direction ^ 2)) && (g_move_displacement_direction != (next ^ 2))) {
+            if ((s_move_displacement_direction != (direction ^ 2)) && (s_move_displacement_direction != (next ^ 2))) {
                 break;
             }
         }
@@ -1705,11 +1705,11 @@ static void center_motion_resume(unit_runtime_t* unit) {
     switch (g_move_step_value.climb) {
     case 0:
         move_step_start_walk(unit, g_move_step_current_tile, g_move_step_destination_tile);
-        unit->step_phase = g_walk_to_center_phases[direction];
+        unit->step_phase = s_walk_to_center_phases[direction];
         break;
     case 1:
         move_step_start_climb(unit, g_move_step_current_tile, g_move_step_destination_tile);
-        unit->step_phase = g_climb_to_center_phases[direction];
+        unit->step_phase = s_climb_to_center_phases[direction];
         break;
     }
 }
@@ -1778,11 +1778,11 @@ static void move_step_update_jump_flight(unit_runtime_t* unit) {
             switch (g_move_step_value.climb) {
             case 0:
                 move_step_start_walk(unit, g_move_step_current_tile, g_move_step_destination_tile);
-                unit->step_phase = g_walk_to_center_phases[direction];
+                unit->step_phase = s_walk_to_center_phases[direction];
                 break;
             case 1:
                 move_step_start_climb(unit, g_move_step_current_tile, g_move_step_destination_tile);
-                unit->step_phase = g_climb_to_center_phases[direction];
+                unit->step_phase = s_climb_to_center_phases[direction];
                 break;
             }
             tile = battle_map_tile_get_pointer(
@@ -1799,7 +1799,7 @@ static void move_step_update_jump_flight(unit_runtime_t* unit) {
         }
         unit->velocity.vy = 0;
         unit->state_frame_counter = 2;
-        unit->step_phase = g_jump_landing_phases[direction];
+        unit->step_phase = s_jump_landing_phases[direction];
         if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
             animation_facing_store(ANIMATION_LAND, unit->facing, unit);
         }
@@ -1813,7 +1813,7 @@ static void move_step_update_jump_flight(unit_runtime_t* unit) {
     }
     unit->velocity.vy = 0;
     unit->state_frame_counter = 2;
-    unit->step_phase = g_jump_landing_phases[direction];
+    unit->step_phase = s_jump_landing_phases[direction];
     if (g_battle_state != BATTLE_STATE_ACTION_EXECUTE) {
         animation_facing_store(ANIMATION_LAND, unit->facing, unit);
     }
@@ -1839,7 +1839,7 @@ static void move_step_update_jump_ascent(unit_runtime_t* unit) {
         overlapping_unit_displace(unit, direction);
     }
     if (unit->velocity.vy >= 0) {
-        unit->step_phase = g_jump_descent_phases[direction];
+        unit->step_phase = s_jump_descent_phases[direction];
         unit->map_layer = unit->movement.destination_layer;
         if (g_move_step_value.mount) {
             occupant = unit_find_runtime_at_tile(

@@ -15,8 +15,8 @@
 
 /* Palette cycling for the cursor tile glow. */
 extern palette_t g_cursor_tile_glow_cycled_palettes[2];
-static s32 g_cursor_tile_glow_cycle_offset;
-static s32 g_cursor_tile_glow_cycle_timer;
+static s32 s_cursor_tile_glow_cycle_offset;
+static s32 s_cursor_tile_glow_cycle_timer;
 
 /* Cycles the colors of the two cursor tile glow palettes (sprite CLUTs 1 and 2).
  *
@@ -29,18 +29,18 @@ void cursor_tile_glow_palettes_update(void) {
     palette_t* palettes;
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    g_cursor_tile_glow_cycle_timer += g_system_vsync_interval;
-    if (g_cursor_tile_glow_cycle_timer >= 4) {
-        g_cursor_tile_glow_cycle_timer = 0;
-        g_cursor_tile_glow_cycle_offset++;
-        if (g_cursor_tile_glow_cycle_offset >= 15) {
-            g_cursor_tile_glow_cycle_offset = 0;
+    s_cursor_tile_glow_cycle_timer += g_system_vsync_interval;
+    if (s_cursor_tile_glow_cycle_timer >= 4) {
+        s_cursor_tile_glow_cycle_timer = 0;
+        s_cursor_tile_glow_cycle_offset++;
+        if (s_cursor_tile_glow_cycle_offset >= 15) {
+            s_cursor_tile_glow_cycle_offset = 0;
         }
-        if (g_cursor_tile_glow_cycle_offset != 0) {
+        if (s_cursor_tile_glow_cycle_offset != 0) {
             /* Bytewise rotation retains the native stores and first-color 16-bit load. */
             /* dst before src: the reverse order changes the copy loop registers. */
             dst = 2;
-            src = g_cursor_tile_glow_cycle_offset * 2 + 2;
+            src = s_cursor_tile_glow_cycle_offset * 2 + 2;
             ((u8*)g_cursor_tile_glow_cycled_palettes[0])[0] = ((u8*)g_cursor_tile_glow_palettes)[0];
             ((u8*)g_cursor_tile_glow_cycled_palettes[0])[1] = ((u8*)g_cursor_tile_glow_palettes)[1];
             ((u8*)g_cursor_tile_glow_cycled_palettes[1])[0] = *(u16*)&g_cursor_tile_glow_palettes[1][0];
@@ -50,7 +50,7 @@ void cursor_tile_glow_palettes_update(void) {
                 ((u8*)g_cursor_tile_glow_cycled_palettes[0])[dst] = ((u8*)g_cursor_tile_glow_palettes)[src];
                 ((u8*)g_cursor_tile_glow_cycled_palettes[1])[dst] = ((u8*)g_cursor_tile_glow_palettes[1])[src];
             }
-            for (src = 2, dst = 32 - g_cursor_tile_glow_cycle_offset * 2; src < g_cursor_tile_glow_cycle_offset * 2 + 2;
+            for (src = 2, dst = 32 - s_cursor_tile_glow_cycle_offset * 2; src < s_cursor_tile_glow_cycle_offset * 2 + 2;
                 src++, dst++) {
                 ((u8*)g_cursor_tile_glow_cycled_palettes[0])[dst] = ((u8*)g_cursor_tile_glow_palettes)[src];
                 ((u8*)g_cursor_tile_glow_cycled_palettes[1])[dst] = ((u8*)g_cursor_tile_glow_palettes[1])[src];

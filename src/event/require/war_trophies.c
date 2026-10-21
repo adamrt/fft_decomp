@@ -61,10 +61,10 @@ extern RECT g_war_trophy_image_rect;
 extern u8 g_war_trophy_item_count;
 
 /* The retail collector does not check these 16-entry capacities. */
-static s32 g_war_trophy_entry_count;
-static reward_war_result_t g_war_trophy_search_result = { 0 };
-static s32 g_war_trophy_entry_types[16] = { 0 };
-static s32 g_war_trophy_entry_values[16] = { 0 };
+static s32 s_war_trophy_entry_count;
+static reward_war_result_t s_war_trophy_search_result = { 0 };
+static s32 s_war_trophy_entry_types[16] = { 0 };
+static s32 s_war_trophy_entry_values[16] = { 0 };
 /*
  * Builds the war-trophy entry list and pays the trophies out.
  *
@@ -87,20 +87,20 @@ static void war_trophy_collect(void) {
     s32* entry_values;
     s32* entry_types;
 
-    g_war_trophy_entry_count = 0;
-    reward_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
+    s_war_trophy_entry_count = 0;
+    reward_find_war_trophies_and_bonus_money(&s_war_trophy_search_result);
 
     {
         s32 j;
         s32 next;
-        entry_values = g_war_trophy_entry_values;
-        entry_types = g_war_trophy_entry_types;
-        j = g_war_trophy_entry_count;
-        entry_values[j] = g_war_trophy_search_result.bonus_money;
+        entry_values = s_war_trophy_entry_values;
+        entry_types = s_war_trophy_entry_types;
+        j = s_war_trophy_entry_count;
+        entry_values[j] = s_war_trophy_search_result.bonus_money;
         entry_types[j] = WAR_TROPHY_ENTRY_BONUS_MONEY;
         if (entry_values[j] != 0) {
             next = j + 1;
-            g_war_trophy_entry_count = next;
+            s_war_trophy_entry_count = next;
         }
     }
 
@@ -113,22 +113,22 @@ static void war_trophy_collect(void) {
         s32 entry;
         s32 loop_count;
         types_base = entry_types;
-        item_count_ptr = &g_war_trophy_search_result.item_count;
+        item_count_ptr = &s_war_trophy_search_result.item_count;
         do {
-            entry = g_war_trophy_entry_count;
-            item_id = g_war_trophy_search_result.item_ids[i];
+            entry = s_war_trophy_entry_count;
+            item_id = s_war_trophy_search_result.item_ids[i];
             i++;
             values_base[entry] = item_id;
             types_base[entry] = WAR_TROPHY_ENTRY_ITEM;
             loop_count = *item_count_ptr;
-            g_war_trophy_entry_count = entry + 1;
+            s_war_trophy_entry_count = entry + 1;
         } while (i < loop_count);
     }
 
     i = 0;
-    if (g_war_trophy_entry_count > 0) {
-        s32* value_ptr = g_war_trophy_entry_values;
-        s32* type_ptr = g_war_trophy_entry_types;
+    if (s_war_trophy_entry_count > 0) {
+        s32* value_ptr = s_war_trophy_entry_values;
+        s32* type_ptr = s_war_trophy_entry_types;
         do {
             if (*type_ptr == WAR_TROPHY_ENTRY_ITEM) {
                 item_id = *value_ptr;
@@ -150,7 +150,7 @@ static void war_trophy_collect(void) {
             }
             value_ptr++;
             type_ptr++;
-        } while (++i < g_war_trophy_entry_count);
+        } while (++i < s_war_trophy_entry_count);
     }
 }
 
@@ -209,7 +209,7 @@ void war_trophy_list_thread(void) {
 
     war_trophy_collect();
 
-    if (g_war_trophy_entry_count == 0) {
+    if (s_war_trophy_entry_count == 0) {
         thread_current_exit();
     }
 
@@ -219,7 +219,7 @@ void war_trophy_list_thread(void) {
     thread_start(thread, conditions_special_thread);
     thread_parameters_set(thread, CONDITIONS_BANNER_WAR_TROPHIES, 0, 0);
 
-    for (start = 0; start < g_war_trophy_entry_count; start += 8) {
+    for (start = 0; start < s_war_trophy_entry_count; start += 8) {
         row = 0;
         /* Clear the previous page's text from the banner texture. */
         ClearImage(&g_war_trophy_clear_rect, 0, 0, 0);
@@ -246,13 +246,13 @@ void war_trophy_list_thread(void) {
             buffer = (war_trophy_primitives_t*)((frame & 1) * sizeof(war_trophy_primitives_t) + (s32)prims);
 
             if ((*g_menu_input_controller & PSX_PAD_CIRCLE) || frame == 0
-                || ((row != 7 && g_war_trophy_entry_count - 1 != last) && timer >= 0x1f)
-                || ((row == 7 || g_war_trophy_entry_count - 1 == last) && timer >= 0x79)) {
+                || ((row != 7 && s_war_trophy_entry_count - 1 != last) && timer >= 0x1f)
+                || ((row == 7 || s_war_trophy_entry_count - 1 == last) && timer >= 0x79)) {
                 if (frame != 0) {
                     row++;
                     last++;
                 }
-                if (last == g_war_trophy_entry_count || (row != 0 && (row & 7) == 0)) {
+                if (last == s_war_trophy_entry_count || (row != 0 && (row & 7) == 0)) {
                     break;
                 }
 
@@ -261,19 +261,19 @@ void war_trophy_list_thread(void) {
                 menu_clear_render_buffer(image, 0x280);
                 g_menu_window_text_pen.stride = 0x50;
                 timer = 0;
-                if (g_war_trophy_entry_types[last] == WAR_TROPHY_ENTRY_ITEM) {
+                if (s_war_trophy_entry_types[last] == WAR_TROPHY_ENTRY_ITEM) {
                     menu_set_text_origin(0, 0);
                     menu_display_text_entry(
-                        g_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image, &g_menu_window_text_pen);
+                        s_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image, &g_menu_window_text_pen);
                 } else {
                     menu_set_text_origin(0, 0);
-                    menu_draw_large_number_glyphs(g_war_trophy_entry_values[last],
-                        text_decimal_digits_count(g_war_trophy_entry_values[last]), image, &g_menu_window_text_pen);
+                    menu_draw_large_number_glyphs(s_war_trophy_entry_values[last],
+                        text_decimal_digits_count(s_war_trophy_entry_values[last]), image, &g_menu_window_text_pen);
                 }
 
                 /* Text lines go into the texture the banner sprite draws, where texture x + 0x80
                  * is screen x, so each line lands just right of its icon. */
-                if (g_war_trophy_entry_count < 5) {
+                if (s_war_trophy_entry_count < 5) {
                     g_war_trophy_image_rect.x = 0x60;
                     g_war_trophy_image_rect.y = row * 20 + 0x78;
                 } else {
@@ -298,34 +298,34 @@ void war_trophy_list_thread(void) {
             /* Quads are indexed by entry number, not by position on the page. */
             for (i = start; i <= last; i++) {
                 quad = &buffer->quads[i];
-                if (g_war_trophy_entry_types[i] == WAR_TROPHY_ENTRY_ITEM) {
-                    quad->x0 = war_trophy_get_column_x(i, g_war_trophy_entry_count);
-                    quad->y0 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count);
-                    quad->x1 = war_trophy_get_column_x(i, g_war_trophy_entry_count) + 0x10;
-                    quad->y1 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count);
-                    quad->x2 = war_trophy_get_column_x(i, g_war_trophy_entry_count);
-                    quad->y2 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count) + 0x10;
-                    quad->x3 = war_trophy_get_column_x(i, g_war_trophy_entry_count) + 0x10;
-                    quad->y3 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count) + 0x10;
-                    gfx_set_item_icon_sprite(&sprite, g_war_trophy_entry_values[i]);
+                if (s_war_trophy_entry_types[i] == WAR_TROPHY_ENTRY_ITEM) {
+                    quad->x0 = war_trophy_get_column_x(i, s_war_trophy_entry_count);
+                    quad->y0 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count);
+                    quad->x1 = war_trophy_get_column_x(i, s_war_trophy_entry_count) + 0x10;
+                    quad->y1 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count);
+                    quad->x2 = war_trophy_get_column_x(i, s_war_trophy_entry_count);
+                    quad->y2 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
+                    quad->x3 = war_trophy_get_column_x(i, s_war_trophy_entry_count) + 0x10;
+                    quad->y3 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
+                    gfx_set_item_icon_sprite(&sprite, s_war_trophy_entry_values[i]);
                     setUV4(quad, sprite.u0, sprite.v0, sprite.u0 + 0x10, sprite.v0, sprite.u0, sprite.v0 + 0x10,
                         sprite.u0 + 0x10, sprite.v0 + 0x10);
                     quad->clut = sprite.clut;
                     quad->tpage = GetTPage(0, 0, 0x380, 0x120);
                     gfx_draw_or_append_gpu_primitive(quad);
                 } else {
-                    quad->x0 = war_trophy_get_column_x(i, g_war_trophy_entry_count)
-                        + text_decimal_digits_count(g_war_trophy_entry_values[i]) * 7 + 0x12;
-                    quad->y0 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count) + 4;
-                    quad->x1 = war_trophy_get_column_x(i, g_war_trophy_entry_count)
-                        + text_decimal_digits_count(g_war_trophy_entry_values[i]) * 7 + 0x24;
-                    quad->y1 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count) + 4;
-                    quad->x2 = war_trophy_get_column_x(i, g_war_trophy_entry_count)
-                        + text_decimal_digits_count(g_war_trophy_entry_values[i]) * 7 + 0x12;
-                    quad->y2 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count) + 0xc;
-                    quad->x3 = war_trophy_get_column_x(i, g_war_trophy_entry_count)
-                        + text_decimal_digits_count(g_war_trophy_entry_values[i]) * 7 + 0x24;
-                    quad->y3 = war_trophy_get_row_y(i - start, g_war_trophy_entry_count) + 0xc;
+                    quad->x0 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
+                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x12;
+                    quad->y0 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 4;
+                    quad->x1 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
+                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x24;
+                    quad->y1 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 4;
+                    quad->x2 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
+                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x12;
+                    quad->y2 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
+                    quad->x3 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
+                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x24;
+                    quad->y3 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
                     setUV4(quad, 0x76, 0x10, 0x88, 0x10, 0x76, 0x18, 0x88, 0x18);
                     quad->clut = 0x7cbc;
                     quad->tpage = GetTPage(0, 0, 0x3c0, 0x100);
@@ -379,11 +379,11 @@ void war_trophy_run_gil_ticker(void) {
     POLY_FT4* comma;
     POLY_FT4* sign;
 
-    g_war_trophy_entry_count = 0;
-    reward_find_war_trophies_and_bonus_money(&g_war_trophy_search_result);
+    s_war_trophy_entry_count = 0;
+    reward_find_war_trophies_and_bonus_money(&s_war_trophy_search_result);
     script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS,
-        script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_war_trophy_search_result.level_sum_money);
-    money = g_war_trophy_search_result.level_sum_money;
+        script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + s_war_trophy_search_result.level_sum_money);
+    money = s_war_trophy_search_result.level_sum_money;
 
     thread_id = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, conditions_special_thread);

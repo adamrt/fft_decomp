@@ -19,7 +19,7 @@
 #include "psx/types.h"
 
 /* display-script and scrolling state */
-static u16 g_screen_clut;
+static u16 s_screen_clut;
 extern RECT g_screen_window_rect;
 extern s16 g_screen_window_right_x;
 extern u16 g_screen_texture_page;
@@ -71,12 +71,12 @@ menu_opcode_handler_t g_menu_opcode_handlers[SCREEN_SCRIPT_END] = {
 s8 g_gfx_transition_frame = 0;
 RECT g_screen_temporary_draw_area = { 0, 0, 256, 240 };
 
-static menu_sprite_command_t g_screen_script_sprite_command = { 5, 9, 1, { 0, 0, 0, 0, 0, 0 } };
-static menu_window_command_t g_screen_window_interior_command = { 17, 7, 0, 0, 0, 0, 0 };
-static s16 g_screen_window_scale_table[4] = { 10, 60, 90, 95 };
-static oriented_quad_t g_screen_number_blank_sprite = { { 0, 216 }, 7, 8, { 208, 40, 7, 8, 0x7ee7, 31 } };
-static s8 g_screen_cursor_bob_thresholds[12] = { 16, 0, 18, 1, 22, 2, 28, 3, 36, 2, 46, 1 };
-static s8 g_screen_cursor_bob_active_thresholds[12] = { 2, 0, 8, -2, 10, 1, 12, 3, 14, 5, 16, 4 };
+static menu_sprite_command_t s_screen_script_sprite_command = { 5, 9, 1, { 0, 0, 0, 0, 0, 0 } };
+static menu_window_command_t s_screen_window_interior_command = { 17, 7, 0, 0, 0, 0, 0 };
+static s16 s_screen_window_scale_table[4] = { 10, 60, 90, 95 };
+static oriented_quad_t s_screen_number_blank_sprite = { { 0, 216 }, 7, 8, { 208, 40, 7, 8, 0x7ee7, 31 } };
+static s8 s_screen_cursor_bob_thresholds[12] = { 16, 0, 18, 1, 22, 2, 28, 3, 36, 2, 46, 1 };
+static s8 s_screen_cursor_bob_active_thresholds[12] = { 2, 0, 8, -2, 10, 1, 12, 3, 14, 5, 16, 4 };
 
 /* Menu script command: run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal value, or the current list row while the list
@@ -209,7 +209,7 @@ menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instru
         color = &g_screen_sprite_color;
     }
     menu_gfx_enqueue_textured_quad(&rect, instruction->sprite.sprite.u, instruction->sprite.sprite.v, color,
-        g_menu_gfx_semitransparency, g_screen_texture_page, g_screen_clut, g_menu_gfx_otag_index);
+        g_menu_gfx_semitransparency, g_screen_texture_page, s_screen_clut, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }
 
@@ -243,16 +243,16 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
     }
     entry = handler(index);
     if (entry != 0) {
-        g_screen_script_sprite_command.sprite.x = instruction->callback_sprite.x;
-        g_screen_script_sprite_command.sprite.y = instruction->callback_sprite.y;
+        s_screen_script_sprite_command.sprite.x = instruction->callback_sprite.x;
+        s_screen_script_sprite_command.sprite.y = instruction->callback_sprite.y;
         /* The icon source stores 16-bit values; the menu script copies their low bytes. */
-        g_screen_script_sprite_command.sprite.w = entry->w;
-        g_screen_script_sprite_command.sprite.h = entry->h;
-        g_screen_script_sprite_command.sprite.u = entry->u;
-        g_screen_script_sprite_command.sprite.v = entry->v;
-        g_screen_clut = entry->clut;
+        s_screen_script_sprite_command.sprite.w = entry->w;
+        s_screen_script_sprite_command.sprite.h = entry->h;
+        s_screen_script_sprite_command.sprite.u = entry->u;
+        s_screen_script_sprite_command.sprite.v = entry->v;
+        s_screen_clut = entry->clut;
         g_screen_texture_page = entry->tpage;
-        menu_opcode_04_draw_textured_quad((menu_instruction_t*)&g_screen_script_sprite_command);
+        menu_opcode_04_draw_textured_quad((menu_instruction_t*)&s_screen_script_sprite_command);
     }
     return menu_next_instruction(instruction);
 }
@@ -304,7 +304,7 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
         full_rows = height >> 4;
         partial_height = height & 15;
     }
-    g_screen_window_interior_command.rectangle_source = instruction->window.rectangle_source;
+    s_screen_window_interior_command.rectangle_source = instruction->window.rectangle_source;
     g_screen_window_right_x = instruction->window.width + left + 5;
     v_top = 2;
     if (instruction->window.rectangle_source == 1) {
@@ -381,12 +381,12 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
         g_screen_window_rect.w = g_menu_window_rect_source->rect.w;
         g_screen_window_rect.h = g_menu_window_rect_source->rect.h;
     } else {
-        g_screen_window_interior_command.x = instruction->window.x;
-        g_screen_window_interior_command.y = instruction->window.y;
-        g_screen_window_interior_command.width = instruction->window.width;
-        g_screen_window_interior_command.height = instruction->window.height;
+        s_screen_window_interior_command.x = instruction->window.x;
+        s_screen_window_interior_command.y = instruction->window.y;
+        s_screen_window_interior_command.width = instruction->window.width;
+        s_screen_window_interior_command.height = instruction->window.height;
     }
-    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_screen_window_interior_command);
+    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&s_screen_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -434,7 +434,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
         if (g_gfx_transition_frame < 3) {
             g_menu_script_input = 0;
         }
-        scale = g_screen_window_scale_table[g_gfx_transition_frame];
+        scale = s_screen_window_scale_table[g_gfx_transition_frame];
         clip.w = instruction->window.width * scale / 100;
         clip.h = instruction->window.height * scale / 100;
         clip.x = instruction->window.x + (instruction->window.width >> 1) - (clip.w >> 1);
@@ -532,7 +532,7 @@ menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instructio
     x <<= 4;
     y = instruction->fixed_clut.y_low;
     y += instruction->fixed_clut.y_high << 8;
-    g_screen_clut = GetClut(x, y);
+    s_screen_clut = GetClut(x, y);
     return menu_next_instruction(instruction);
 }
 
@@ -542,10 +542,10 @@ menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instructio
  * menu_opcode_0c_set_texture_page. */
 menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
     if (g_screen_use_alternate_palette != 0) {
-        g_screen_clut = GetClut(instruction->clut.alternate_x_div_16 << 4,
+        s_screen_clut = GetClut(instruction->clut.alternate_x_div_16 << 4,
             instruction->clut.alternate_y_low + (instruction->clut.alternate_y_high << 8));
     } else {
-        g_screen_clut = GetClut(instruction->clut.normal_x_div_16 << 4,
+        s_screen_clut = GetClut(instruction->clut.normal_x_div_16 << 4,
             instruction->clut.normal_y_low + (instruction->clut.normal_y_high << 8));
     }
     return menu_next_instruction(instruction);
@@ -757,12 +757,12 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
     value -= blanks;
     x = instruction->number.x;
     y = instruction->number.y;
-    g_screen_number_blank_sprite.position.y = y + 4;
+    s_screen_number_blank_sprite.position.y = y + 4;
     blanks -= 1;
     while (blanks != -1) {
-        g_screen_number_blank_sprite.position.x = x;
+        s_screen_number_blank_sprite.position.x = x;
         menu_gfx_enqueue_oriented_textured_quad(
-            &g_screen_number_blank_sprite, 0, TEXTURE_UV_FLIP_NONE, 0, g_menu_gfx_otag_index);
+            &s_screen_number_blank_sprite, 0, TEXTURE_UV_FLIP_NONE, 0, g_menu_gfx_otag_index);
         blanks -= 1;
         x += 8;
     }
@@ -831,11 +831,11 @@ void screen_sliding_cursor_draw(point16_t* pos, u16* state, s32 mode) {
     }
     state_mode = alternate;
     if (state_mode != 0) {
-        for (i = 0; g_screen_cursor_bob_active_thresholds[i] < timer; i += 2) { }
-        raw_offset = g_screen_cursor_bob_active_thresholds[i + 1];
+        for (i = 0; s_screen_cursor_bob_active_thresholds[i] < timer; i += 2) { }
+        raw_offset = s_screen_cursor_bob_active_thresholds[i + 1];
     } else {
-        for (i = 0; g_screen_cursor_bob_thresholds[i] < timer; i += 2) { }
-        raw_offset = g_screen_cursor_bob_thresholds[i + 1];
+        for (i = 0; s_screen_cursor_bob_thresholds[i] < timer; i += 2) { }
+        raw_offset = s_screen_cursor_bob_thresholds[i + 1];
     }
     x_offset = raw_offset;
     timer += menu_get_event_speed();
@@ -909,11 +909,11 @@ void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) 
     }
     state_mode = active;
     if (state_mode != 0) {
-        for (i = 0; g_screen_cursor_bob_active_thresholds[i] < timer; i += 2) { }
-        bob = g_screen_cursor_bob_active_thresholds[i + 1];
+        for (i = 0; s_screen_cursor_bob_active_thresholds[i] < timer; i += 2) { }
+        bob = s_screen_cursor_bob_active_thresholds[i + 1];
     } else {
-        for (i = 0; g_screen_cursor_bob_thresholds[i] < timer; i += 2) { }
-        bob = g_screen_cursor_bob_thresholds[i + 1];
+        for (i = 0; s_screen_cursor_bob_thresholds[i] < timer; i += 2) { }
+        bob = s_screen_cursor_bob_thresholds[i + 1];
     }
     y_offset = bob;
     timer += menu_get_event_speed();

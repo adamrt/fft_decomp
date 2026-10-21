@@ -190,8 +190,8 @@ data:
   - {addr: 0x80067080, name: g_psyq_press_timeout_dma_format}
   - {addr: 0x800670a8, name: g_psyq_press_timeout_fifo_format}
   - {addr: 0x800670e0, name: g_psyq_press_timeout_format}
-  - {addr: 0x800707f8, name: g_display_object_sequences}
-  - {addr: 0x800707fc, name: g_display_object_cels}
+  - {addr: 0x800707f8, name: s_display_object_sequences}
+  - {addr: 0x800707fc, name: s_display_object_cels}
   - {addr: 0x80070800, name: g_display_object_sequence_table}
   - {addr: 0x8007096c, name: g_display_object_cel_table}
   - {addr: 0x80070cb4, name: g_prologue_entries}
@@ -200,12 +200,12 @@ data:
   - {addr: 0x80073b9c, name: g_psyq_press_vlc_limit_halfwords}
   - {addr: 0x80073f10, name: g_psyq_press_vlc_state}
   - {addr: 0x80073f34, name: g_calendar_month_lengths}
-  - {addr: 0x80073f40, name: g_birthday_zodiac_start_dates}
-  - {addr: 0x80073f58, name: g_opnbk_sector_offsets}
-  - {addr: 0x80073f78, name: g_controller_handlers}
-  - {addr: 0x80073fb4, name: g_music_test_row_actions}
-  - {addr: 0x80073fd4, name: g_music_test_music_ids}
-  - {addr: 0x80074034, name: g_ending_opcode_handlers}
+  - {addr: 0x80073f40, name: s_birthday_zodiac_start_dates}
+  - {addr: 0x80073f58, name: s_opnbk_sector_offsets}
+  - {addr: 0x80073f78, name: s_controller_handlers}
+  - {addr: 0x80073fb4, name: s_music_test_row_actions}
+  - {addr: 0x80073fd4, name: s_music_test_music_ids}
+  - {addr: 0x80074034, name: s_ending_opcode_handlers}
   - {addr: 0x80074074, name: g_memcard_slot}
   - {addr: 0x80074075, name: g_memcard_info_pending}
   - {addr: 0x80074078, name: g_psyq_press_quant_table}
@@ -234,9 +234,9 @@ data:
   - {addr: 0x80085324, name: g_controller_records}
   - {addr: 0x80085340, name: g_controller_selected_options}
   - {addr: 0x800854b4, name: g_prologue_crossfade}
-  - {addr: 0x8008556c, name: g_prologue_crossfade_new_picture}
-  - {addr: 0x80085570, name: g_prologue_crossfade_old_picture}
-  - {addr: 0x80085574, name: g_prologue_crossfade_frame_pixels}
+  - {addr: 0x8008556c, name: s_prologue_crossfade_new_picture}
+  - {addr: 0x80085570, name: s_prologue_crossfade_old_picture}
+  - {addr: 0x80085574, name: s_prologue_crossfade_frame_pixels}
   - {addr: 0x80085578, name: g_music_test_list_state}
   - {addr: 0x800855a4, name: g_input_new_button_presses}
   - {addr: 0x800855a8, name: g_file_destination}
@@ -259,20 +259,20 @@ data:
   - {addr: 0x80086430, name: g_birthday_title_image}
   - {addr: 0x80087030, name: g_birthday_window_image}
   - {addr: 0x8008e430, name: g_menu_blocked_buttons}
-  - {addr: 0x8008e434, name: g_music_test_list_entries}
+  - {addr: 0x8008e434, name: s_music_test_list_entries}
   - {addr: 0x8008e534, name: g_movie_end_frame}
   - {addr: 0x8008e538, name: g_movie_width}
   - {addr: 0x8008e53c, name: g_system_runtime_flags}
   - {addr: 0x8008e540, name: g_movie_height}
   - {addr: 0x8008e544, name: g_movie_stream_status}
   - {addr: 0x8008e548, name: g_ending_script_state}
-  - {addr: 0x8008e574, name: g_ending_script_byte_offset}
+  - {addr: 0x8008e574, name: s_ending_script_byte_offset}
   - {addr: 0x8008fbf0, name: g_controller_handler_indices}
-  - {addr: 0x8008fc00, name: g_display_object_gpu_sprite_count}
+  - {addr: 0x8008fc00, name: s_display_object_gpu_sprite_count}
   - {addr: 0x8008fc04, name: g_controller_depth}
   - {addr: 0x8008fc08, name: g_movie_video_end_frame}
   - {addr: 0x8008fc0c, name: g_music_test_selected_option}
-  - {addr: 0x8008fc10, name: g_movie_aligned_height}
+  - {addr: 0x8008fc10, name: s_movie_aligned_height}
   - {addr: 0x8008fc14, name: g_system_vsync_mode}
   - {addr: 0x8008fc18, name: g_movie_current_frame}
   - {addr: 0x8008fc1c, name: g_ending_credit_band_primitives}

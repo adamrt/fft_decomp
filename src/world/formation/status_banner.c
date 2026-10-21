@@ -40,19 +40,19 @@ extern menu_status_panel_editor_packet_t g_formation_comparison_unit_summary_pac
 extern menu_status_panel_packet_t g_formation_comparison_unit_status_packets[2];
 extern u8 g_formation_comparison_unit_stat_text_image[];
 extern u8 g_formation_comparison_unit_name_text_image[];
-static menu_unit_number_images_t g_formation_comparison_unit_number_text_images;
-static palette_t g_formation_selected_unit_portrait_palettes[2];
-static palette_t g_formation_comparison_unit_portrait_palettes[2];
+static menu_unit_number_images_t s_formation_comparison_unit_number_text_images;
+static palette_t s_formation_selected_unit_portrait_palettes[2];
+static palette_t s_formation_comparison_unit_portrait_palettes[2];
 
-static u16 g_formation_summary_value_cluts[4][2]
+static u16 s_formation_summary_value_cluts[4][2]
     = { 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
 
-static u16 g_formation_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x7f3c, 0x7f7c, 0x7f7c, 0x7ebd, 0x7efd,
+static u16 s_formation_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x7f3c, 0x7f7c, 0x7f7c, 0x7ebd, 0x7efd,
     0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
-static image_layout_t g_formation_summary_mode_row_params[4] = { { { 0, 0, 2, 2 }, 0x200, 0 },
+static image_layout_t s_formation_summary_mode_row_params[4] = { { { 0, 0, 2, 2 }, 0x200, 0 },
     { { 228, 144, 28, 10 }, -2, -4 }, { { 204, 144, 24, 10 }, -1, -3 }, { { 232, 64, 24, 8 }, 0, -4 } };
-static RECT g_formation_selected_unit_portrait_rect = { 0, 510, 16, 1 };
-static RECT g_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
+static RECT s_formation_selected_unit_portrait_rect = { 0, 510, 16, 1 };
+static RECT s_formation_comparison_unit_portrait_rect = { 32, 510, 16, 1 };
 
 /*
  * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the unit status banner
@@ -127,23 +127,23 @@ void unit_panel_banner_thread(void) {
         number_entries = g_formation_selected_unit_number_entries;
         state = &g_unit_panel_selected_unit_stat_summary;
         identity = &g_formation_selected_unit_identity;
-        transition = &g_formation_selected_unit_portrait_rect;
+        transition = &s_formation_selected_unit_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_formation_selected_unit_portrait_palettes;
+        portrait_palettes = s_formation_selected_unit_portrait_palettes;
     } else {
         panel = g_formation_comparison_unit_status_packets;
         editor = g_formation_comparison_unit_summary_packets;
         number_pixels = g_formation_comparison_unit_stat_text_image;
-        number_images = &g_formation_comparison_unit_number_text_images;
+        number_images = &s_formation_comparison_unit_number_text_images;
         name_image = g_formation_comparison_unit_name_text_image;
         number_entries = g_formation_comparison_unit_number_entries;
         state = &g_formation_comparison_unit_stat_summary;
         identity = &g_formation_comparison_unit_identity;
-        transition = &g_formation_comparison_unit_portrait_rect;
+        transition = &s_formation_comparison_unit_portrait_rect;
         panel_base = panel;
         editor_base = editor;
-        portrait_palettes = g_formation_comparison_unit_portrait_palettes;
+        portrait_palettes = s_formation_comparison_unit_portrait_palettes;
     }
     shake = 0;
 
@@ -169,10 +169,10 @@ void unit_panel_banner_thread(void) {
     }
     if (g_menu_post_battle_unit_changes_active == 0) {
         mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6],
-            &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_layout_t));
+            &s_formation_summary_mode_row_params[state->team_kind], sizeof(image_layout_t));
     } else {
         mem_copy_bytes_nonempty(
-            &g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params, sizeof(image_layout_t));
+            &g_formation_summary_label_sprite_params[6], s_formation_summary_mode_row_params, sizeof(image_layout_t));
     }
     for (frame = 0; frame < 7; frame++) {
         gfx_set_image_primitive_layout(&editor->label_sprites[frame], &g_unit_panel_texture_origin,
@@ -219,9 +219,9 @@ void unit_panel_banner_thread(void) {
         }
         if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6],
-                &g_formation_summary_mode_row_params[state->team_kind], sizeof(image_layout_t));
+                &s_formation_summary_mode_row_params[state->team_kind], sizeof(image_layout_t));
         } else {
-            mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], g_formation_summary_mode_row_params,
+            mem_copy_bytes_nonempty(&g_formation_summary_label_sprite_params[6], s_formation_summary_mode_row_params,
                 sizeof(image_layout_t));
         }
         gfx_set_image_primitive_layout(&editor->label_sprites[6], &g_unit_panel_texture_origin, &g_menu_portrait_origin,
@@ -241,10 +241,10 @@ void unit_panel_banner_thread(void) {
             dimmed = 1;
         }
         for (i = 0; i < 4; i++) {
-            editor->value_sprites[i].clut = g_formation_summary_value_cluts[i][dimmed];
+            editor->value_sprites[i].clut = s_formation_summary_value_cluts[i][dimmed];
         }
         for (i = 0; i < 7; i++) {
-            editor->label_sprites[i].clut = g_formation_summary_label_cluts[i][dimmed];
+            editor->label_sprites[i].clut = s_formation_summary_label_cluts[i][dimmed];
         }
         for (i = 0; i < 7; i++) {
             if (dimmed != 0) {

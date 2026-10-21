@@ -31,7 +31,7 @@ extern s16 g_formation_ability_learn_job_name_list[];
 extern menu_entry_t g_formation_ability_learn_confirm_menu[2];
 
 /* Nonzero while the learn-confirmation menu thread (thread 6) is running. */
-static u8 g_formation_ability_learn_confirm_prompt_state;
+static u8 s_formation_ability_learn_confirm_prompt_state;
 extern s8 g_formation_ability_view_step;
 
 /* menu_job_list_step_e */
@@ -111,7 +111,7 @@ s32 formation_ability_learn_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = reaction_tab_check;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = action_tab_check;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
-        g_formation_ability_learn_confirm_prompt_state = 0;
+        s_formation_ability_learn_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
         menu_selection_record_clear(10);
         menu_selection_record_clear(11);
@@ -139,7 +139,7 @@ s32 formation_ability_learn_list_update(void) {
             = (g_ability_list_ability_entries[g_menu_list_selected_index] & ABILITY_LIST_ENTRY_ID_MASK)
             + HELP_TEXT_ID_ABILITY_BASE;
     }
-    if (g_formation_ability_learn_confirm_prompt_state == 0) {
+    if (s_formation_ability_learn_confirm_prompt_state == 0) {
         if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_menu_list_entry_count != 0) {
             index = g_menu_list_selected_index;
             /* DISABLED in the learn list: the unit cannot pay the JP. */
@@ -148,7 +148,7 @@ s32 formation_ability_learn_list_update(void) {
             } else if (learned_flag_get(index) != 0) {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             } else {
-                g_formation_ability_learn_confirm_prompt_state
+                s_formation_ability_learn_confirm_prompt_state
                     = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_ability_learn_confirm_menu);
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 g_formation_ability_learn_confirm_menu[1].selected_index = 0;
@@ -175,9 +175,9 @@ s32 formation_ability_learn_list_update(void) {
             menu_set_window_scale_step(10);
         }
     } else {
-        g_formation_ability_learn_confirm_prompt_state
+        s_formation_ability_learn_confirm_prompt_state
             = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_ability_learn_confirm_menu);
-        if (g_formation_ability_learn_confirm_prompt_state == 0) {
+        if (s_formation_ability_learn_confirm_prompt_state == 0) {
             if (g_screen_selection_results[5] == 0) {
                 formation_ability_learn(g_unit_selected_index, g_formation_ability_learn_selected_job,
                     g_ability_list_ability_entries[g_menu_list_selected_index]);
@@ -198,7 +198,7 @@ s32 formation_ability_learn_list_update(void) {
             screen_selection_results_reset();
         }
     }
-    running = g_formation_ability_learn_confirm_prompt_state;
+    running = s_formation_ability_learn_confirm_prompt_state;
     input = 0;
     if (running == 0) {
         input = g_menu_input_primary_repeat;

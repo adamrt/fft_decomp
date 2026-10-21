@@ -24,7 +24,7 @@
 /* numeric entry and list state */
 extern s16* g_screen_entry_text_id_tables[]; /* 16-bit tables selected by entry select_text_table */
 extern s32 g_screen_number_entry_digit_steps[];
-static u32* g_screen_list_controller_input;
+static u32* s_screen_list_controller_input;
 
 static void signed_number_draw(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
 
@@ -90,7 +90,7 @@ void screen_clamped_icon_list_thread(void) {
     menu_icon_record_t* record;
     menu_icon_sprites_t* sprites;
 
-    g_screen_list_controller_input = script_get_controller_input_pointer(0);
+    s_screen_list_controller_input = script_get_controller_input_pointer(0);
     param = (menu_entry_t*)thread_current_parameter_1_get();
     cursor = param->selected_index;
     record = &records[0];
@@ -113,14 +113,14 @@ void screen_clamped_icon_list_thread(void) {
             menu_free_memory(buffer);
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
+        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
             break;
         }
         if (thread_is_previous_running() == 0) {
-            if ((*g_screen_list_controller_input & PSX_PAD_UP) && cursor != 0) {
+            if ((*s_screen_list_controller_input & PSX_PAD_UP) && cursor != 0) {
                 cursor--;
             }
-            if (!(*g_screen_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_row_index) {
+            if (!(*s_screen_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_row_index) {
                 cursor++;
             }
             menu_handle_action(param, cursor);
@@ -209,7 +209,7 @@ void screen_number_entry_thread(void) {
     POLY_FT4* shadow_quad;
     s32* stride;
 
-    g_screen_list_controller_input = script_get_controller_input_pointer(0);
+    s_screen_list_controller_input = script_get_controller_input_pointer(0);
     /* A direct pen pointer folds both member-address adjustments and changes scheduling. */
     stride = &g_menu_window_text_pen.stride;
     thread = &g_threads[g_thread_current_id];
@@ -283,16 +283,16 @@ void screen_number_entry_thread(void) {
             redraw = 0;
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
+        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
             break;
         }
 
         /* The handlers consume the input bits they act on, so a changed mask means one of them ran.
          * A cancel leaves -1 in the result, which restores the original value. */
-        input = *g_screen_list_controller_input;
+        input = *s_screen_list_controller_input;
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
-        if (input != *g_screen_list_controller_input) {
+        if (input != *s_screen_list_controller_input) {
             s16* result = param->value;
             if (*result == -1) {
                 *result = original;
@@ -308,13 +308,13 @@ void screen_number_entry_thread(void) {
         /* Digit 0 is the ones digit, so right moves the cursor toward it. Up and down step by the
          * cursor digit's place value, clamped to the range. */
         if (thread[-1].is_running == 0) {
-            if ((*g_screen_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
+            if ((*s_screen_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
                 digit--;
             }
-            if ((*g_screen_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
+            if ((*s_screen_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
                 digit++;
             }
-            if (*g_screen_list_controller_input & PSX_PAD_UP) {
+            if (*s_screen_list_controller_input & PSX_PAD_UP) {
                 if (value <= range->bounds.max - g_screen_number_entry_digit_steps[digit]) {
                     value += g_screen_number_entry_digit_steps[digit];
                 } else {
@@ -322,7 +322,7 @@ void screen_number_entry_thread(void) {
                 }
                 redraw = 1;
             }
-            if (*g_screen_list_controller_input & PSX_PAD_DOWN) {
+            if (*s_screen_list_controller_input & PSX_PAD_DOWN) {
                 if (value >= range->bounds.min + g_screen_number_entry_digit_steps[digit]) {
                     value -= g_screen_number_entry_digit_steps[digit];
                 } else {
@@ -396,7 +396,7 @@ void screen_labeled_number_entry_thread(void) {
     POLY_FT4* cursor_quad;
     POLY_FT4* shadow_quad;
 
-    g_screen_list_controller_input = script_get_controller_input_pointer(0);
+    s_screen_list_controller_input = script_get_controller_input_pointer(0);
     thread = &g_threads[g_thread_current_id];
     /* Read the first thread payload as a menu entry; using the named field
      * moves the input-pointer store after the thread and entry loads. */
@@ -470,16 +470,16 @@ void screen_labeled_number_entry_thread(void) {
             menu_free_memory(buffer);
             redraw = 0;
         }
-        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
+        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
             break;
         }
 
         /* The handlers consume the input bits they act on, so a changed mask means one of them ran.
          * A cancel leaves -1 in the result, which restores the original value. */
-        input = *g_screen_list_controller_input;
+        input = *s_screen_list_controller_input;
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
-        if (input != *g_screen_list_controller_input) {
+        if (input != *s_screen_list_controller_input) {
             s16* result = param->value;
             if (*result == -1) {
                 *result = original;
@@ -495,13 +495,13 @@ void screen_labeled_number_entry_thread(void) {
         /* Digit 0 is the ones digit, so right moves the cursor toward it. Up and down step by the
          * cursor digit's place value, clamped to the range. */
         if (thread[-1].is_running == 0) {
-            if ((*g_screen_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
+            if ((*s_screen_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
                 digit--;
             }
-            if ((*g_screen_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
+            if ((*s_screen_list_controller_input & PSX_PAD_LEFT) && digit < digits - 1) {
                 digit++;
             }
-            if (*g_screen_list_controller_input & PSX_PAD_UP) {
+            if (*s_screen_list_controller_input & PSX_PAD_UP) {
                 if (value <= range->bounds.max - g_screen_number_entry_digit_steps[digit]) {
                     value += g_screen_number_entry_digit_steps[digit];
                 } else {
@@ -509,7 +509,7 @@ void screen_labeled_number_entry_thread(void) {
                 }
                 redraw = 1;
             }
-            if (*g_screen_list_controller_input & PSX_PAD_DOWN) {
+            if (*s_screen_list_controller_input & PSX_PAD_DOWN) {
                 if (value >= range->bounds.min + g_screen_number_entry_digit_steps[digit]) {
                     value -= g_screen_number_entry_digit_steps[digit];
                 } else {
@@ -620,7 +620,7 @@ void screen_text_entry_thread(void) {
 
     prepare_binding = entry->context;
     prepare_binding->prepare();
-    g_screen_list_controller_input = script_get_controller_input_pointer(0);
+    s_screen_list_controller_input = script_get_controller_input_pointer(0);
     text_id = entry->text_id;
     second = entry->header_id;
     binding = entry->context;
@@ -629,10 +629,10 @@ void screen_text_entry_thread(void) {
     thread_start(text_thread, message_dialog_thread);
     thread_parameters_set(text_thread, second, text_id, speaker_id);
     thread_inactive_wait(text_thread);
-    *g_screen_list_controller_input = PSX_PAD_CIRCLE;
+    *s_screen_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
         menu_handle_action(entry, 0);
-        if (menu_should_close_thread(g_screen_list_controller_input) != 0) {
+        if (menu_should_close_thread(s_screen_list_controller_input) != 0) {
             break;
         }
         if ((thread - 1)->function_parameter_3 != 0) {

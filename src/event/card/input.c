@@ -9,7 +9,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static u16 g_save_input_latched_button;
+static u16 s_save_input_latched_button;
 extern u16 g_save_input_previous;
 
 /*
@@ -37,10 +37,10 @@ static void save_input_update_controller(void) {
     repeat_period = g_input_repeat_period / speed;
     secondary_repeat_period = g_input_secondary_repeat_period / speed;
     current_input = PadRead(0);
-    if (current_input & g_save_input_latched_button) {
-        current_input &= g_save_input_latched_button;
+    if (current_input & s_save_input_latched_button) {
+        current_input &= s_save_input_latched_button;
     } else if (current_input == 0) {
-        g_save_input_latched_button = 0;
+        s_save_input_latched_button = 0;
         g_input_activation_timer += speed;
     } else {
         if (g_input_activation_timer < 4 && (current_input & PSX_PAD_DPAD_MASK)) {
@@ -53,12 +53,12 @@ static void save_input_update_controller(void) {
                 bit = 1 << index;
                 if (current_input & bit) {
                     current_input &= bit;
-                    g_save_input_latched_button = bit;
+                    s_save_input_latched_button = bit;
                 }
             }
         } else {
             current_input = 0;
-            g_save_input_latched_button = 0;
+            s_save_input_latched_button = 0;
         }
     }
     filtered_input = current_input;

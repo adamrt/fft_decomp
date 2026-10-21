@@ -483,15 +483,15 @@ data:
   - {addr: 0x8008c0ac, name: unit_runtime_facing_sixteenth_get}
   - {addr: 0x80092b04, name: world_map_switch_to_stack}
   - {addr: 0x80092b1c, name: world_map_restore_previous_stack}
-  - {addr: 0x80092b2c, name: g_display_object_sequences}
-  - {addr: 0x80092b30, name: g_display_object_cels}
+  - {addr: 0x80092b2c, name: s_display_object_sequences}
+  - {addr: 0x80092b30, name: s_display_object_cels}
   - {addr: 0x80092b34, name: g_location_picture_frame_tim}
   - {addr: 0x80092b38, name: g_display_object_sequence_table}
   - {addr: 0x8009324c, name: g_display_object_cel_table}
-  - {addr: 0x80094df4, name: g_world_map_dot_sources}
+  - {addr: 0x80094df4, name: s_world_map_dot_sources}
   - {addr: 0x80094df8, name: g_location_records}
-  - {addr: 0x80095000, name: g_world_map_routes}
-  - {addr: 0x80095004, name: g_world_map_route_polylines}
+  - {addr: 0x80095000, name: s_world_map_routes}
+  - {addr: 0x80095004, name: s_world_map_route_polylines}
   - {addr: 0x80095008, name: g_world_map_route_table}
   - {addr: 0x80095fb0, name: g_world_map_route_polyline_table}
   - {addr: 0x80096a40, name: g_random_battle_roads}
@@ -504,22 +504,22 @@ data:
   - {addr: 0x80096a5c, name: g_world_map_tile_descriptors}
   - {addr: 0x80096a60, name: g_picture_dissolve_band_order}
   - {addr: 0x80097028, name: g_brave_story_birthday_table}
-  - {addr: 0x800971b0, name: g_brave_story_replay_event_table}
+  - {addr: 0x800971b0, name: s_brave_story_replay_event_table}
   - {addr: 0x8009d340, name: g_proposition_data}
-  - {addr: 0x8009e0ec, name: g_picture_sector_offsets}
-  - {addr: 0x8009e260, name: g_picture_background_sector_offsets}
-  - {addr: 0x8009e470, name: g_message_block_sector_offsets}
-  - {addr: 0x8009e634, name: g_sound_novel_script_sector_offsets}
-  - {addr: 0x8009e650, name: g_sound_novel_text_sector_offsets}
+  - {addr: 0x8009e0ec, name: s_picture_sector_offsets}
+  - {addr: 0x8009e260, name: s_picture_background_sector_offsets}
+  - {addr: 0x8009e470, name: s_message_block_sector_offsets}
+  - {addr: 0x8009e634, name: s_sound_novel_script_sector_offsets}
+  - {addr: 0x8009e650, name: s_sound_novel_text_sector_offsets}
   - {addr: 0x8009e66c, name: g_calendar_month_lengths}
   - {addr: 0x8009e678, name: g_calendar_zodiac_start_dates}
-  - {addr: 0x8009e690, name: g_level_update_handlers}
-  - {addr: 0x8009e774, name: g_level_resume_handlers}
-  - {addr: 0x8009e858, name: g_level_suspend_handlers}
+  - {addr: 0x8009e690, name: s_level_update_handlers}
+  - {addr: 0x8009e774, name: s_level_resume_handlers}
+  - {addr: 0x8009e858, name: s_level_suspend_handlers}
   - {addr: 0x8009e93c, name: g_unit_panel_help_rows}
   - {addr: 0x8009eb2c, name: g_bar_row_help_text_ids}
-  - {addr: 0x8009eb34, name: g_proposition_treasure_milestones}
-  - {addr: 0x8009eb3c, name: g_proposition_unexplored_land_milestones}
+  - {addr: 0x8009eb34, name: s_proposition_treasure_milestones}
+  - {addr: 0x8009eb3c, name: s_proposition_unexplored_land_milestones}
   - {addr: 0x8009eb44, name: g_sound_novel_quit_help_text_ids}
   - {addr: 0x8009eb48, name: g_unexplored_land_picture_sets}
   - {addr: 0x8009eb58, name: g_treasure_picture_sets}
@@ -528,12 +528,12 @@ data:
   - {addr: 0x8009ebc0, name: g_unit_panel_banner_params}
   - {addr: 0x8009ebd4, name: g_unit_panel_panel_params}
   - {addr: 0x8009ebe8, name: g_unit_panel_numbers_params}
-  - {addr: 0x8009ebfc, name: g_tutorial_battle_event_ids}
+  - {addr: 0x8009ebfc, name: s_tutorial_battle_event_ids}
   - {addr: 0x8009ec1c, name: g_sound_novel_sound_quads}
-  - {addr: 0x8009ecfc, name: g_sound_novel_opcode_handlers}
+  - {addr: 0x8009ecfc, name: s_sound_novel_opcode_handlers}
   - {addr: 0x8009edd4, name: g_location_choice_hidden_offsets}
-  - {addr: 0x8009ee30, name: g_window_panel_row_actions}
-  - {addr: 0x8009ee50, name: g_location_script_opcodes}
+  - {addr: 0x8009ee30, name: s_window_panel_row_actions}
+  - {addr: 0x8009ee50, name: s_location_script_opcodes}
   - {addr: 0x8009eef4, name: g_location_label_shade}
   - {addr: 0x8009eef8, name: g_text_window}
   - {addr: 0x8009ef6c, name: g_world_map_scroll_x}
@@ -550,14 +550,14 @@ data:
   - {addr: 0x8009f244, name: g_display_object_image_count}
   - {addr: 0x8009f248, name: g_random_battle_squad_id}
   - {addr: 0x8009f24c, name: g_world_map_marker_state}
-  - {addr: 0x8009f288, name: g_event_transition_sprite}
+  - {addr: 0x8009f288, name: s_event_transition_sprite}
   - {addr: 0x8009f2ac, name: g_hud_color}
   - {addr: 0x8009f2b0, name: g_hud_value_position}
   - {addr: 0x8009f2b8, name: g_world_map_dot_pulse_direction}
   - {addr: 0x8009f2bc, name: g_world_map_dot_pulse_phase}
   - {addr: 0x8009f2c0, name: g_world_map_projection_view}
-  - {addr: 0x8009f2d0, name: g_world_map_projection_scale}
-  - {addr: 0x8009f2e0, name: g_world_map_projection_rotation}
+  - {addr: 0x8009f2d0, name: s_world_map_projection_scale}
+  - {addr: 0x8009f2e0, name: s_world_map_projection_rotation}
   - {addr: 0x8009f2e8, name: g_input_current_buttons}
   - {addr: 0x8009f2ec, name: g_proposition_selected_row}
   - {addr: 0x8009f31c, name: g_world_map_primitive_buffers}
@@ -586,7 +586,7 @@ data:
   - {addr: 0x800bc2f0, name: g_world_map_input_new_button_presses}
   - {addr: 0x800bc2f4, name: g_message_block_buffer}
   - {addr: 0x800c72f4, name: g_world_map_scratch_buffer}
-  - {addr: 0x800c72f8, name: g_world_map_input_repeat}
+  - {addr: 0x800c72f8, name: s_world_map_input_repeat}
   - {addr: 0x800c731c, name: g_input_polled_buttons}
   - {addr: 0x800c7320, name: g_world_map_projected_tiles}
   - {addr: 0x800c87d8, name: g_window_image_buffer}
@@ -599,15 +599,15 @@ data:
   - {addr: 0x800d0980, name: g_proposition_gil_amount}
   - {addr: 0x800d0984, name: g_hud_value_mode}
   - {addr: 0x800d0988, name: g_sound_novel_countdown_section}
-  - {addr: 0x800d098c, name: g_dissolve_progress}
-  - {addr: 0x800d099c, name: g_sound_novel_countdown_elapsed}
-  - {addr: 0x800d09a0, name: g_proposition_send_units}
+  - {addr: 0x800d098c, name: s_dissolve_progress}
+  - {addr: 0x800d099c, name: s_sound_novel_countdown_elapsed}
+  - {addr: 0x800d09a0, name: s_proposition_send_units}
   - {addr: 0x800d09ac, name: g_hud_value}
   - {addr: 0x800d09b0, name: g_hud_value_secondary}
   - {addr: 0x800d09b4, name: g_hud_value_tertiary}
   - {addr: 0x800d09b8, name: g_proposition_candidate_levels}
   - {addr: 0x800d0ab8, name: g_world_map_fade}
-  - {addr: 0x800d0adc, name: g_world_map_fade_color}
+  - {addr: 0x800d0adc, name: s_world_map_fade_color}
   - {addr: 0x800d0af0, name: g_picture_loaded_set}
   - {addr: 0x800d0af4, name: g_message_block_loaded}
   - {addr: 0x800d0af8, name: g_world_map_pan}
@@ -619,7 +619,7 @@ data:
   - {addr: 0x800d0bbc, name: g_sound_novel_script}
   - {addr: 0x800d3bbc, name: g_world_map_path_animation}
   - {addr: 0x800d3c48, name: g_travel_search_path}
-  - {addr: 0x800d3c88, name: g_world_map_saved_system_flags}
+  - {addr: 0x800d3c88, name: s_world_map_saved_system_flags}
   - {addr: 0x800d3c8c, name: g_world_map_zoom}
   - {addr: 0x800d3ca8, name: g_world_map_dots}
   - {addr: 0x800d4564, name: g_sound_novel_local_flags}
@@ -628,16 +628,16 @@ data:
   - {addr: 0x800d4570, name: g_sound_novel_wait_counter}
   - {addr: 0x800d4574, name: g_window_panel_value}
   - {addr: 0x800d4578, name: g_proposition_dispatch_days}
-  - {addr: 0x800d457c, name: g_proposition_send_unit_count}
+  - {addr: 0x800d457c, name: s_proposition_send_unit_count}
   - {addr: 0x800d4580, name: g_world_map_cursor_window}
   - {addr: 0x800d4584, name: g_menu_stack_types}
   - {addr: 0x800d45a4, name: g_music_queue}
-  - {addr: 0x800d4644, name: g_location_script_flags}
   - {addr: 0x800d4644, name: g_location_script_state}
+  - {addr: 0x800d4644, name: s_location_script_flags}
   - {addr: 0x800d4674, name: g_location_script_base}
   - {addr: 0x800d4678, name: g_travel_search_cost}
   - {addr: 0x800d467c, name: g_unit_panel_unit}
-  - {addr: 0x800d483c, name: g_random_battle_map_id}
+  - {addr: 0x800d483c, name: s_random_battle_map_id}
   - {addr: 0x800d4840, name: g_sound_novel_reading}
   - {addr: 0x800d4848, name: g_sound_novel_state}
   - {addr: 0x800d484c, name: g_sound_novel_state_flags}
@@ -648,7 +648,7 @@ data:
   - {addr: 0x800d4878, name: g_world_map_window_index}
   - {addr: 0x800d487c, name: g_world_map_ot_tags}
   - {addr: 0x800d48fc, name: g_sound_novel_wait_frames}
-  - {addr: 0x800d4900, name: g_hud_saved_value_position}
+  - {addr: 0x800d4900, name: s_hud_saved_value_position}
   - {addr: 0x800d4908, name: g_world_map_aux_ot_tags}
 
 regions:

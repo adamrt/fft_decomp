@@ -119,8 +119,8 @@ extern u8 g_save_title_template[0x16];
 
 /* Save-image prefix and the additional bytes cleared with its working storage. */
 enum { SAVE_WORK_BUFFER_BYTES = 0x1e80 };
-static u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
-static s8 g_save_open_result;
+static u8 s_save_buffer[SAVE_WORK_BUFFER_BYTES];
+static s8 s_save_open_result;
 
 /* The context binder divides this flat pool into two equal frame buffers. */
 enum { SAVE_TEXTURED_QUADS_PER_BUFFER = 600 };
@@ -644,7 +644,7 @@ static void menu_state_init(void) {
     g_save_list_selected_slot = 0;
     g_save_list_cursor_index = 0;
     g_save_initial_prompt_timer = 0;
-    g_save_buffer_pointer = (save_image_t*)g_save_buffer;
+    g_save_buffer_pointer = (save_image_t*)s_save_buffer;
     memset(g_save_buffer_pointer, 0xff, SAVE_WORK_BUFFER_BYTES);
 }
 
@@ -767,8 +767,8 @@ static void card_scan_update(void) {
             return;
         }
 
-        g_save_open_result = memcard_slot_open();
-        if (g_save_open_result == MEMCARD_RESULT_COMPLETE) {
+        s_save_open_result = memcard_slot_open();
+        if (s_save_open_result == MEMCARD_RESULT_COMPLETE) {
             g_save_file_count = memcard_saves_enumerate(g_save_menu_work_buffer, 1);
             result = 0;
             /* Re-read the directory until two reads agree, at most 15 times, two vsyncs apart. */
@@ -804,7 +804,7 @@ static void card_scan_update(void) {
         return;
     }
 
-    if (g_save_open_result == MEMCARD_RESULT_NEW_CARD) {
+    if (s_save_open_result == MEMCARD_RESULT_NEW_CARD) {
         result = memcard_operation_poll();
         if (result > MEMCARD_RESULT_COMPLETE) {
             menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU);
@@ -827,7 +827,7 @@ static void card_scan_update(void) {
         return;
     }
 
-    if (g_save_open_result == MEMCARD_RESULT_ERROR || g_save_open_result == MEMCARD_RESULT_TIMEOUT) {
+    if (s_save_open_result == MEMCARD_RESULT_ERROR || s_save_open_result == MEMCARD_RESULT_TIMEOUT) {
         result = memcard_operation_poll();
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_save_card_error_prompt_descriptor);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
@@ -841,7 +841,7 @@ static void card_scan_update(void) {
         return;
     }
 
-    if (g_save_open_result == MEMCARD_RESULT_COMPLETE) {
+    if (s_save_open_result == MEMCARD_RESULT_COMPLETE) {
         menu_input_clear_state();
         if (g_save_slot_scan_index < SAVE_SLOT_COUNT) {
             status = 1;

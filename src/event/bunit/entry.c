@@ -29,7 +29,7 @@ extern s16 g_unit_list_comparison_index;
 extern u8 g_unit_list_saved_status_banner_enabled;
 extern u8 g_unit_list_saved_unit_browse_enabled;
 extern clut_t g_unit_list_clut;
-static u8 g_unit_list_initialized;
+static u8 s_unit_list_initialized;
 extern menu_entry_t g_unit_list_triangle_menu;
 extern u8 g_unit_list_triangle_menu_open;
 
@@ -295,7 +295,7 @@ static s32 unit_list_run_frame(void) {
     u8 browse_enabled;
 
     if (g_unit_list_current_menu == UNIT_LIST_MENU_UNIT_LIST) {
-        if (g_unit_list_initialized == 0) {
+        if (s_unit_list_initialized == 0) {
             g_unit_list_status_banner_enabled = g_unit_list_saved_status_banner_enabled;
             g_unit_list_browse_enabled = g_unit_list_saved_unit_browse_enabled;
             unit_list_init(g_unit_selected_index);
@@ -308,10 +308,10 @@ static s32 unit_list_run_frame(void) {
             g_unit_panel_numbers_thread_params.style = 0;
             g_unit_panel_character_status_frame_config.style = 0;
             unit_list_reset_results();
-            g_unit_list_initialized = 1;
+            s_unit_list_initialized = 1;
         }
         if (gfx_update_increasing_fade() == 0) {
-            g_unit_list_initialized = 0;
+            s_unit_list_initialized = 0;
             menu_request_thread_stop(UNIT_LIST_THREAD_SLOT_MENU);
             return 0;
         }
@@ -330,7 +330,7 @@ static s32 unit_list_run_frame(void) {
                     g_unit_list_saved_status_banner_enabled = banner_enabled;
                     g_unit_list_saved_unit_browse_enabled = browse_enabled;
                     unit_list_reset_results();
-                    g_unit_list_initialized = 0;
+                    s_unit_list_initialized = 0;
                 } else if (g_unit_list_primary_result == 1) {
                     gfx_start_increasing_fade();
                     g_unit_list_selected_battle_id = g_unit_list_pointers[g_unit_selected_index]->battle_id;
@@ -365,7 +365,7 @@ static s32 unit_list_run_frame(void) {
                 g_unit_panel_status_display_thread_params.style = 1;
                 g_unit_panel_numbers_thread_params.style = 1;
                 g_unit_panel_character_status_frame_config.style = 1;
-                g_unit_list_initialized = 0;
+                s_unit_list_initialized = 0;
                 g_unit_list_saved_unit_browse_enabled = g_unit_list_browse_enabled;
                 g_unit_list_current_menu = UNIT_LIST_MENU_JOB;
                 g_unit_list_saved_status_banner_enabled = g_unit_list_status_banner_enabled;

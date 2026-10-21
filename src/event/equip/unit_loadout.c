@@ -12,11 +12,11 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static s16 g_equipment_unit_saved_hp;
+static s16 s_equipment_unit_saved_hp;
 extern s16 g_equipment_unit_saved_mp;
 
 /* Selected unit and its editable comparison copy; published through g_equipment_unit_data. */
-static equipment_unit_preview_t g_equipment_unit_records[2] = { 0 };
+static equipment_unit_preview_t s_equipment_unit_records[2] = { 0 };
 
 /* Returns 1 when the unit holds a single weapon in two hands: exactly one of
  * the two hand slots is occupied, its item is below the throwable range, and
@@ -170,11 +170,11 @@ void equipment_load_unit(s32 battle_id) {
     u16 hp;
     u16 mp;
 
-    equipment_build_unit_preview(stats, g_equipment_unit_records);
+    equipment_build_unit_preview(stats, s_equipment_unit_records);
     unit_count = 0;
     hp = stats->hp;
     mp = stats->mp;
-    g_equipment_unit_saved_hp = hp;
+    s_equipment_unit_saved_hp = hp;
     g_equipment_unit_saved_mp = mp;
 
     for (i = 0; i < UNIT_SLOT_COUNT; i++) {
@@ -198,10 +198,10 @@ void equipment_load_unit(s32 battle_id) {
         unit_count++;
     }
 
-    g_equipment_unit_records[0].unit_count = unit_count;
-    g_equipment_unit_records[0].battle_id = battle_id;
-    g_equipment_unit_data[0] = &g_equipment_unit_records[0];
-    g_equipment_unit_data[1] = &g_equipment_unit_records[1];
+    s_equipment_unit_records[0].unit_count = unit_count;
+    s_equipment_unit_records[0].battle_id = battle_id;
+    g_equipment_unit_data[0] = &s_equipment_unit_records[0];
+    g_equipment_unit_data[1] = &s_equipment_unit_records[1];
 }
 
 /* Write the edited loadout back to the unit's battle stats and party record (a
@@ -252,7 +252,7 @@ void equipment_commit_loadout(void) {
     bcopy(stats->equipment, party_unit_get(g_equipment_unit_data[0]->party_index)->equipment, sizeof(stats->equipment));
     unit_stats_refresh(stats);
     stats = unit_stats_get(unit_id);
-    hp = g_equipment_unit_saved_hp;
+    hp = s_equipment_unit_saved_hp;
     mp = g_equipment_unit_saved_mp;
     max = stats->max_hp;
     if (hp > max) {

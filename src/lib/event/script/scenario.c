@@ -15,7 +15,7 @@ extern s32 g_script_next_event_id;
 
 /* Operand-halfword counts through condition 37. The compiler aligns the
  * following weather table; the original declared extent is unknown. */
-static u8 g_scenario_condition_param_lengths[38] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 3, 3, 2, 2, 2, 2,
+static u8 s_scenario_condition_param_lengths[38] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 3, 3, 2, 2, 2, 2,
     0, 3, 4, 2, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 };
 static event_scenario_condition_result_e condition_check(
     event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation);
@@ -87,7 +87,7 @@ s32 scenario_conditions_run(void) {
         condition = &g_scenario_condition_data[(offset + (s32)((u32)shifted_offset >> 31)) >> 1];
         do {
             result = condition_check(condition[0], condition[1], condition[2], condition[3], condition[4]);
-            condition += g_scenario_condition_param_lengths[condition[0]] + 1;
+            condition += s_scenario_condition_param_lengths[condition[0]] + 1;
         } while (result == EVENT_SCENARIO_CONDITION_RESULT_PASS);
         if (result == EVENT_SCENARIO_CONDITION_RESULT_RUN_EVENT) {
             return 1;

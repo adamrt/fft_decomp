@@ -31,9 +31,9 @@
  * so they never show. */
 extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
 
-static s32 g_cursor_selection_bob_timer;
+static s32 s_cursor_selection_bob_timer;
 /* Frame counter and frame index of the selection cursor's bob animation. */
-static s32 g_cursor_selection_bob_frame;
+static s32 s_cursor_selection_bob_frame;
 
 /* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
  * the highlighted arrow. */
@@ -42,16 +42,16 @@ extern u32 g_unit_facing_wait_arrow_blink_timer;
 /* Texture coordinates for the status bubble graphics, indexed by status bubble
  * id (0x800949dc/0x800949f4) and by a counter digit (0x80094a0c/0x80094a24).
  * Each table holds 24 bytes; the pairs are read together as one u/v. */
-static u8 g_bubble_u[24]
+static u8 s_bubble_u[24]
     = { 0, 16, 30, 44, 58, 72, 86, 100, 114, 128, 142, 0, 16, 30, 44, 58, 72, 86, 100, 86, 0, 0, 0, 0 };
 
-static u8 g_bubble_v[24] = { 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 188, 188, 188, 188, 188, 188, 188,
+static u8 s_bubble_v[24] = { 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 188, 188, 188, 188, 188, 188, 188,
     188, 200, 176, 0, 0, 0 };
 
-static u8 g_bubble_digit_u[24]
+static u8 s_bubble_digit_u[24]
     = { 142, 128, 114, 100, 86, 142, 128, 142, 128, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-static u8 g_bubble_digit_v[24]
+static u8 s_bubble_digit_v[24]
     = { 200, 200, 200, 200, 200, 188, 188, 176, 176, 176, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /* Post-action numeric and status displays. */
@@ -422,12 +422,12 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
     ((P_TAG*)prim)->len = 9;
     prim->code = 0x2c;
     if (g_menu_status_screen_selected != 1) {
-        g_cursor_selection_bob_timer += g_system_vsync_interval;
-        if (g_cursor_selection_bob_timer >= duration[g_cursor_selection_bob_frame]) {
-            g_cursor_selection_bob_frame += 1;
-            g_cursor_selection_bob_timer = 0;
-            if (g_cursor_selection_bob_frame >= 8) {
-                g_cursor_selection_bob_frame = 0;
+        s_cursor_selection_bob_timer += g_system_vsync_interval;
+        if (s_cursor_selection_bob_timer >= duration[s_cursor_selection_bob_frame]) {
+            s_cursor_selection_bob_frame += 1;
+            s_cursor_selection_bob_timer = 0;
+            if (s_cursor_selection_bob_frame >= 8) {
+                s_cursor_selection_bob_frame = 0;
             }
         }
     }
@@ -437,7 +437,7 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
     } else {
         height = 0x3c;
     }
-    base->vy -= height - bob[g_cursor_selection_bob_frame];
+    base->vy -= height - bob[s_cursor_selection_bob_frame];
     RotTrans(base, &transformed, &flag);
 
     prim->x0 = transformed.vx - g_camera_zoom.vx / 512;
@@ -542,7 +542,7 @@ void unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
 }
 
 /* Defining the samples after their reader retains the original memory copy. */
-static const s8 g_float_bob_offsets[24];
+static const s8 s_float_bob_offsets[24];
 
 /* This updater needs a signed 16-bit result view. Changing the public return type
  * instead alters the arithmetic callers in animation_motion.c. */
@@ -561,7 +561,7 @@ static void float_height_update(unit_runtime_t* unit) {
     s16 ground_y;
     u32 phase;
 
-    memcpy(wave, g_float_bob_offsets, sizeof(wave));
+    memcpy(wave, s_float_bob_offsets, sizeof(wave));
     if (unit->status_flags_5_6 & (UNIT_STATUS_JUMP | UNIT_STATUS_JUMP_HEIGHT_ACTIVE)) {
         return;
     }
@@ -595,7 +595,7 @@ static void float_height_update(unit_runtime_t* unit) {
 }
 
 /* Floating height offsets, one sample every two frames. */
-static const s8 g_float_bob_offsets[24] = { 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3 };
+static const s8 s_float_bob_offsets[24] = { 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3 };
 
 /* Advances one unit's status bubble by g_system_vsync_interval frames.
  *
@@ -735,7 +735,7 @@ static void bubble_cycle_update(unit_runtime_t* unit) {
 }
 
 /* Unit scale for status bubbles and post-action text. */
-static const SVECTOR g_identity_scale = { ONE, ONE, ONE, 0 };
+static const SVECTOR s_identity_scale = { ONE, ONE, ONE, 0 };
 
 /*
  * Queue the unit's status bubble into the ordering table.
@@ -752,7 +752,7 @@ static const SVECTOR g_identity_scale = { ONE, ONE, ONE, 0 };
  */
 void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_screen_coords) {
     SVECTOR position;
-    SVECTOR zoom = g_identity_scale;
+    SVECTOR zoom = s_identity_scale;
     VECTOR transformed;
     SVECTOR base;
     SVECTOR raised;
@@ -784,18 +784,18 @@ void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_scree
     } else if (bubble_id == STATUS_BUBBLE_DEAD) {
         table_index = unit->stats->death_counter;
         if (unit->status_flags_1_4 & UNIT_STATUS_RERAISE) {
-            display->parts[0].u = g_bubble_u[STATUS_BUBBLE_RERAISE];
-            flag_row = g_bubble_v[STATUS_BUBBLE_RERAISE];
+            display->parts[0].u = s_bubble_u[STATUS_BUBBLE_RERAISE];
+            flag_row = s_bubble_v[STATUS_BUBBLE_RERAISE];
             display->parts[0].v = flag_row;
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = flag_row + 12;
             }
         } else if (table_index != 0xFF) {
-            display->parts[0].u = g_bubble_digit_u[table_index];
-            display->parts[0].v = g_bubble_digit_v[table_index];
+            display->parts[0].u = s_bubble_digit_u[table_index];
+            display->parts[0].v = s_bubble_digit_v[table_index];
         } else {
-            display->parts[0].u = g_bubble_u[STATUS_BUBBLE_DEAD];
-            default_row = g_bubble_v[STATUS_BUBBLE_DEAD];
+            display->parts[0].u = s_bubble_u[STATUS_BUBBLE_DEAD];
+            default_row = s_bubble_v[STATUS_BUBBLE_DEAD];
             display->parts[0].v = default_row;
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = default_row + 12;
@@ -803,11 +803,11 @@ void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_scree
         }
     } else if (bubble_id == STATUS_BUBBLE_DEATH_SENTENCE) {
         table_index = unit->stats->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] & 3;
-        display->parts[0].u = g_bubble_digit_u[table_index];
-        display->parts[0].v = g_bubble_digit_v[table_index];
+        display->parts[0].u = s_bubble_digit_u[table_index];
+        display->parts[0].v = s_bubble_digit_v[table_index];
     } else {
-        display->parts[0].u = g_bubble_u[bubble_id];
-        row = g_bubble_v[bubble_id];
+        display->parts[0].u = s_bubble_u[bubble_id];
+        row = s_bubble_v[bubble_id];
         display->parts[0].v = row;
         if (bubble_id == STATUS_BUBBLE_CHARGING || bubble_id == STATUS_BUBBLE_RERAISE) {
             if (unit->status_bubble_alternate_row != 0) {
@@ -1616,9 +1616,9 @@ void result_charge_failure_queue(unit_runtime_t* unit, s32 reason) {
  * healing and gains 0x10, the words 8. */
 void result_text_animate(unit_runtime_t* unit, const SVECTOR* screen_coords) {
     SVECTOR position;
-    SVECTOR zoom_0 = g_identity_scale;
-    SVECTOR zoom_1 = g_identity_scale;
-    SVECTOR zoom_2 = g_identity_scale;
+    SVECTOR zoom_0 = s_identity_scale;
+    SVECTOR zoom_1 = s_identity_scale;
+    SVECTOR zoom_2 = s_identity_scale;
     s16 scale_0[21] = { 0, 1060, 2048, 2896, 3574, 3956, ONE, 3584, 3584, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE,
         ONE, ONE, ONE };
     s16 scale_1[21]

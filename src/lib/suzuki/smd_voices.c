@@ -11,18 +11,18 @@ extern s16 g_suzuki_sound_driver_flags;
 /* Key / 12 and key % 12 for keys 0 through 116. Both original 120-byte table
  * views end in three zero bytes; they do not continue either formula. */
 #define KEY_OCTAVE(n) n, n, n, n, n, n, n, n, n, n, n, n
-static u8 g_suzuki_smd_key_octaves[120] = { KEY_OCTAVE(0), KEY_OCTAVE(1), KEY_OCTAVE(2), KEY_OCTAVE(3), KEY_OCTAVE(4),
+static u8 s_suzuki_smd_key_octaves[120] = { KEY_OCTAVE(0), KEY_OCTAVE(1), KEY_OCTAVE(2), KEY_OCTAVE(3), KEY_OCTAVE(4),
     KEY_OCTAVE(5), KEY_OCTAVE(6), KEY_OCTAVE(7), KEY_OCTAVE(8), 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 0 };
 #undef KEY_OCTAVE
 
 #define KEY_SEMITONES 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
-static u8 g_suzuki_smd_key_semitones[120] = { KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES,
+static u8 s_suzuki_smd_key_semitones[120] = { KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES,
     KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, KEY_SEMITONES, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0 };
 #undef KEY_SEMITONES
 
 /* Octave-six SPU pitch at 1/256-semitone intervals:
  * round(8192 * 2^(i / 3072)). The runtime only indexes this table. */
-static u16 g_suzuki_smd_pitch_table[12 * 256] = {
+static u16 s_suzuki_smd_pitch_table[12 * 256] = {
 #include "suzuki_pitch.inc"
 };
 
@@ -185,8 +185,8 @@ s16 suzuki_smd_calculate_pitch(s16 key) {
     s16 pitch;
     u8 fine_step = key;
 
-    pitch = g_suzuki_smd_pitch_table[fine_step + (g_suzuki_smd_key_semitones[index] << 8)];
-    shift = 6 - g_suzuki_smd_key_octaves[index];
+    pitch = s_suzuki_smd_pitch_table[fine_step + (s_suzuki_smd_key_semitones[index] << 8)];
+    shift = 6 - s_suzuki_smd_key_octaves[index];
     if (shift >= 0)
         pitch = pitch >> shift;
     else

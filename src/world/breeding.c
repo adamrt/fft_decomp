@@ -45,7 +45,7 @@ typedef struct offspring_rule {
 } offspring_rule_t;
 typedef char offspring_rule_size_must_be_4[(sizeof(offspring_rule_t) == 4) ? 1 : -1];
 
-static const zodiac_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT] = {
+static const zodiac_limit_t s_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT] = {
     { { 1, 19 }, ZODIAC_SIGN_CAPRICORN },
     { { 2, 18 }, ZODIAC_SIGN_AQUARIUS },
     { { 3, 20 }, ZODIAC_SIGN_PISCES },
@@ -62,7 +62,7 @@ static const zodiac_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT] = {
 };
 
 /* Days per month, indexed from 1; the leading zero is outside the sum. */
-static const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+static const u8 s_breeding_month_lengths[BREEDING_MONTH_COUNT] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 /* Each three-job monster family shares common/uncommon offspring. The first
  * job's rare result stays at that job; the other two use the third job. */
@@ -70,7 +70,7 @@ static const u8 g_breeding_month_lengths[BREEDING_MONTH_COUNT] = { 0, 31, 28, 31
     { first_range, { job, job + 1, job } }, { second_range, { job, job + 1, job + 2 } }, {                             \
         third_range, { job, job + 1, job + 2 }                                                                         \
     }
-static const offspring_rule_t g_breeding_table[BREEDING_ENTRY_COUNT] = {
+static const offspring_rule_t s_breeding_table[BREEDING_ENTRY_COUNT] = {
     BREEDING_FAMILY(JOB_ID_CHOCOBO, 3, 4, 5),
     BREEDING_FAMILY(JOB_ID_GOBLIN, 3, 4, 5),
     BREEDING_FAMILY(JOB_ID_BOMB, 3, 4, 5),
@@ -100,16 +100,16 @@ static s32 birthday_zodiac_get(s32 month, s32 day) {
     s32 i;
 
     for (i = 0; i < ZODIAC_DATE_LIMIT_COUNT; i++) {
-        if (month < g_zodiac_date_limits[i].date.month) {
+        if (month < s_zodiac_date_limits[i].date.month) {
             break;
         }
-        if (month == g_zodiac_date_limits[i].date.month) {
-            if (g_zodiac_date_limits[i].date.day >= day) {
+        if (month == s_zodiac_date_limits[i].date.month) {
+            if (s_zodiac_date_limits[i].date.day >= day) {
                 break;
             }
         }
     }
-    return g_zodiac_date_limits[i].zodiac;
+    return s_zodiac_date_limits[i].zodiac;
 }
 
 /* Advance egg hatch counters, then make the daily monster-breeding roll.
@@ -154,7 +154,7 @@ void breeding_update(s32 unused) {
                     month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
                     value = 0;
                     for (n = 1; n < month; n++) {
-                        value += g_breeding_month_lengths[n];
+                        value += s_breeding_month_lengths[n];
                     }
                     value += day;
                     value |= birthday_zodiac_get(month, day) << 12;
@@ -188,9 +188,9 @@ void breeding_update(s32 unused) {
         return;
     }
     monster_count = rand() % monster_count;
-    n = g_breeding_table[party_unit_get(monsters[monster_count])->job_id - JOB_ID_CHOCOBO]
+    n = s_breeding_table[party_unit_get(monsters[monster_count])->job_id - JOB_ID_CHOCOBO]
             .offspring_job_by_rarity[n - BREEDING_RARITY_COMMON];
-    i = rand() % g_breeding_table[n - JOB_ID_CHOCOBO].hatch_range + 1;
+    i = rand() % s_breeding_table[n - JOB_ID_CHOCOBO].hatch_range + 1;
     if (i < 2) {
         i = 2;
     }

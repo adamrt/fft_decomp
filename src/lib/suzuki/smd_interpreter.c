@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Opcodes 0x80 through 0xff. */
-static suzuki_smd_handler_t g_suzuki_smd_opcode_handlers[128] = {
+static suzuki_smd_handler_t s_suzuki_smd_opcode_handlers[128] = {
     suzuki_smd_rest,                    /* 0x80 */
     suzuki_smd_fermata,                 /* 0x81 */
     suzuki_smd_no_instruction,          /* 0x82 */
@@ -140,7 +140,7 @@ static suzuki_smd_handler_t g_suzuki_smd_opcode_handlers[128] = {
 
 /* Bytes skipped by look-ahead, including the opcode. Stop SFX retains the
  * original extra parameter byte; its handler consumes only two. */
-static u8 g_suzuki_smd_opcode_lengths[128] = { 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 4, 1, 1, 1, 0, 0, 2, 1, 1, 3,
+static u8 s_suzuki_smd_opcode_lengths[128] = { 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 4, 1, 1, 1, 0, 0, 2, 1, 1, 3,
     2, 1, 1, 0, 4, 4, 4, 0, 2, 2, 3, 0, 2, 2, 2, 3, 0, 2, 2, 0, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 4, 0, 1, 1, 0, 0, 0,
     0, 1, 4, 2, 2, 2, 2, 2, 3, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 1, 2, 2, 4, 4, 1, 1, 1, 0, 0, 0, 2, 2, 3, 2, 4, 4,
     1, 1, 2, 2, 3, 2, 4, 4, 1, 1, 4, 4, 3, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 1 };
@@ -148,14 +148,14 @@ static u8 g_suzuki_smd_opcode_lengths[128] = { 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
 /* The nineteen note lengths repeat for each semitone. Zero reads an explicit
  * duration from the stream; 192 ticks is a whole note. */
 #define NOTE_DURATIONS 0, 192, 144, 96, 72, 64, 48, 36, 32, 24, 18, 16, 12, 9, 8, 6, 4, 3, 2
-static u8 g_suzuki_smd_note_durations[228]
+static u8 s_suzuki_smd_note_durations[228]
     = { NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS,
           NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS, NOTE_DURATIONS };
 #undef NOTE_DURATIONS
 
 /* Each run of nineteen note bytes names the same semitone. */
 #define NOTE_SEMITONE(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
-static u8 g_suzuki_smd_note_semitones[228] = { NOTE_SEMITONE(0), NOTE_SEMITONE(1), NOTE_SEMITONE(2), NOTE_SEMITONE(3),
+static u8 s_suzuki_smd_note_semitones[228] = { NOTE_SEMITONE(0), NOTE_SEMITONE(1), NOTE_SEMITONE(2), NOTE_SEMITONE(3),
     NOTE_SEMITONE(4), NOTE_SEMITONE(5), NOTE_SEMITONE(6), NOTE_SEMITONE(7), NOTE_SEMITONE(8), NOTE_SEMITONE(9),
     NOTE_SEMITONE(10), NOTE_SEMITONE(11) };
 #undef NOTE_SEMITONE
@@ -216,8 +216,8 @@ void suzuki_smd_read_instructions(suzuki_music_t* music, suzuki_music_channel_t*
                         }
                         channel->voice_update_flags |= SUZUKI_VOICE_UPDATE_VOLUME;
                         note = *note_data++;
-                        op = channel->key = channel->octave_base + g_suzuki_smd_note_semitones[note];
-                        note = g_suzuki_smd_note_durations[note];
+                        op = channel->key = channel->octave_base + s_suzuki_smd_note_semitones[note];
+                        note = s_suzuki_smd_note_durations[note];
                         if (note != 0) {
                             channel->event_ticks = note;
                         } else {
@@ -239,7 +239,7 @@ void suzuki_smd_read_instructions(suzuki_music_t* music, suzuki_music_channel_t*
                         }
                     } else {
                         op -= SUZUKI_SMD_OPCODE_FIRST;
-                        note_data = g_suzuki_smd_opcode_handlers[op](note_data, music, channel);
+                        note_data = s_suzuki_smd_opcode_handlers[op](note_data, music, channel);
                         if (channel->flags == 0) {
                             music->channel_mask &= ~voice_bit;
                             break;
@@ -283,7 +283,7 @@ void suzuki_smd_read_instructions(suzuki_music_t* music, suzuki_music_channel_t*
                         repeat--;
                     } else {
                         op -= SUZUKI_SMD_OPCODE_FIRST;
-                        note_data += g_suzuki_smd_opcode_lengths[op];
+                        note_data += s_suzuki_smd_opcode_lengths[op];
                     }
                 }
                 if (op < SUZUKI_SMD_OPCODE_FIRST) {

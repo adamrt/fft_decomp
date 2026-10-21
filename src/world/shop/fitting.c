@@ -78,7 +78,7 @@ extern s16 g_shop_fitting_remove_previewed_unit_index;
 /* The best-fit confirmation menu entry, followed directly by its open/closed
  * gate byte, as g_shop_fitting_sell_equipped_menu / _open are paired. */
 extern menu_entry_t g_shop_fitting_best_fit_menu;
-static s8 g_shop_fitting_best_fit_menu_open;
+static s8 s_shop_fitting_best_fit_menu_open;
 extern u8 g_shop_fitting_item_list_menu_script[213];
 extern u8 g_shop_fitting_cost_menu_script[103];
 
@@ -672,7 +672,7 @@ void shop_fitting_best_fit_update(void) {
     s32 i;
     s32 item;
 
-    if (g_shop_fitting_best_fit_menu_open == 0) {
+    if (s_shop_fitting_best_fit_menu_open == 0) {
         formation_unit_t** unit_slot;
         s16* room_base;
         s16* reserved;
@@ -701,7 +701,7 @@ void shop_fitting_best_fit_update(void) {
         formation_toggle_preview_stats_window(1);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
-        g_shop_fitting_best_fit_menu_open = 1;
+        s_shop_fitting_best_fit_menu_open = 1;
         g_formation_unit_cycle_mode = 1;
         g_sound_suppressed = 1;
     }
@@ -716,7 +716,7 @@ void shop_fitting_best_fit_update(void) {
         formation_toggle_stat_preview_panel(0);
         formation_toggle_preview_stats_window(0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
-        g_shop_fitting_best_fit_menu_open = 0;
+        s_shop_fitting_best_fit_menu_open = 0;
         g_formation_unit_cycle_mode = 2;
         if (g_screen_selection_results[5] == 0) {
             for (; i < MENU_EQUIPMENT_SLOT_ACCESSORY; i++) {

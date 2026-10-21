@@ -30,11 +30,11 @@ typedef struct world_map_projected_tile {
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 
 /* g_world_map_flags as saved by world_map_backdrop_mode_set (world_map_flags_e). */
-static u32 g_world_map_saved_system_flags;
+static u32 s_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[];
 
-static VECTOR g_world_map_projection_scale = { 0 };
-static SVECTOR g_world_map_projection_rotation = { 0 };
+static VECTOR s_world_map_projection_scale = { 0 };
+static SVECTOR s_world_map_projection_rotation = { 0 };
 
 /* The map is a grid of 12x16 tiles, projected through its 13x17 corners. */
 #define WORLD_MAP_TILE_ROWS    12
@@ -63,7 +63,7 @@ void world_map_backdrop_mode_set(s32 capture) {
         map_window_index = g_world_map_window_index;
         menu_window_index = g_world_map_cursor_window;
         g_display_object_animated_pool[map_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
-        g_world_map_flags = g_world_map_saved_system_flags | WORLD_MAP_FLAG_DRAW_MAP;
+        g_world_map_flags = s_world_map_saved_system_flags | WORLD_MAP_FLAG_DRAW_MAP;
         g_display_object_animated_pool[menu_window_index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         return;
     }
@@ -108,7 +108,7 @@ void world_map_backdrop_mode_set(s32 capture) {
         saved_system_flags = g_world_map_flags;
         menu_window_index = g_world_map_cursor_window;
         map_window_index = g_world_map_window_index;
-        g_world_map_saved_system_flags = saved_system_flags;
+        s_world_map_saved_system_flags = saved_system_flags;
         g_display_object_animated_pool[map_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_world_map_flags = saved_system_flags | WORLD_MAP_FLAG_HIDE_MAP_ROUTES | WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS
             | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
@@ -179,15 +179,15 @@ void world_map_tile_atlas_init(void) {
     s32 tpage_x;
     s32 tpage_y;
 
-    g_world_map_projection_scale.vx = ONE;
-    g_world_map_projection_scale.vy = ONE;
-    g_world_map_projection_scale.vz = ONE;
+    s_world_map_projection_scale.vx = ONE;
+    s_world_map_projection_scale.vy = ONE;
+    s_world_map_projection_scale.vz = ONE;
     g_world_map_projection_view.origin.vx = 0;
     g_world_map_projection_view.origin.vy = 0;
     g_world_map_projection_view.origin.vz = 0;
-    g_world_map_projection_rotation.vx = 0;
-    g_world_map_projection_rotation.vy = 0;
-    g_world_map_projection_rotation.vz = 0;
+    s_world_map_projection_rotation.vx = 0;
+    s_world_map_projection_rotation.vy = 0;
+    s_world_map_projection_rotation.vz = 0;
 
     descriptor = g_world_map_tile_descriptors;
     if (!(g_world_map_flags & WORLD_MAP_FLAG_RESTART)) {
@@ -264,7 +264,7 @@ void world_map_project_tiles(void) {
     s32 coordinate;
 
     /* Retail keeps the camera base at rotation; the record base changes its argument instructions. */
-    rotation = &g_world_map_projection_rotation;
+    rotation = &s_world_map_projection_rotation;
     view = (world_map_projection_view_t*)((u8*)rotation - offsetof(world_map_projection_view_t, rotation));
     RotMatrix(rotation, &matrix);
     TransMatrix(&matrix, &view->origin);

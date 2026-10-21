@@ -25,7 +25,7 @@
 #include "psx/types.h"
 
 extern u8 g_sound_novel_quit_help_text_ids[];
-static point32_t g_hud_saved_value_position;
+static point32_t s_hud_saved_value_position;
 
 /* Scalar history views retained for the Quit shuffle: direct member accesses
  * change its original loads and store scheduling. */
@@ -67,7 +67,7 @@ void sound_novel_reader_open(s32 argument) {
     /* Held from entry: with every saved register taken, reload rematerializes
      * the constant beside its one use, which is the target's la placement. */
     render_pos = &g_display_object_gs_image_pool[0].position;
-    g_hud_saved_value_position = g_hud_value_position;
+    s_hud_saved_value_position = g_hud_value_position;
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
     world_map_image_buffers_clear(1);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.treasure_id = argument;
@@ -579,7 +579,7 @@ static void hud_restore(void) {
     s32 minutes;
     s32 seconds;
 
-    g_hud_value_position = g_hud_saved_value_position;
+    g_hud_value_position = s_hud_saved_value_position;
     g_hud_value_mode = HUD_VALUE_PLAY_TIME;
     g_hud_ot_priority = 1;
     flags = g_world_map_flags;

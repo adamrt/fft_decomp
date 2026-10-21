@@ -24,12 +24,12 @@
 #include "psx/types.h"
 
 /* Provisional: written only by the uncalled action_store_acting_unit_value; never read. */
-static u8 g_action_acting_unit_value;
+static u8 s_action_acting_unit_value;
 
 /* The copy of g_action_mimic_attacker that ai_simulation_begin saves and ai_simulation_end restores. */
 extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
 
-static u8 g_ability_target_list[UNIT_RUNTIME_SLOT_COUNT] = { 0 };
+static u8 s_ability_target_list[UNIT_RUNTIME_SLOT_COUNT] = { 0 };
 
 /* Enter AI action simulation, save the current attacker and clear Hamedo state. */
 void ai_simulation_begin(void) {
@@ -347,11 +347,11 @@ void action_remove_ability_target(s32 target_battle_id) {
     s32 i;
 
     for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
-        if (g_ability_target_list[i] == (target_battle_id & 0xFF)) {
+        if (s_ability_target_list[i] == (target_battle_id & 0xFF)) {
             for (; i < UNIT_RUNTIME_SLOT_COUNT - 1; i++) {
-                g_ability_target_list[i] = g_ability_target_list[i + 1];
+                s_ability_target_list[i] = s_ability_target_list[i + 1];
             }
-            g_ability_target_list[UNIT_RUNTIME_SLOT_COUNT - 1] = 0xFF;
+            s_ability_target_list[UNIT_RUNTIME_SLOT_COUNT - 1] = 0xFF;
             return;
         }
     }
@@ -362,7 +362,7 @@ void action_store_target_ids(u8* src) {
     s32 i;
 
     for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
-        g_ability_target_list[i] = src[i];
+        s_ability_target_list[i] = src[i];
     }
 }
 
@@ -373,7 +373,7 @@ s32 action_copy_ability_targets(u8* out) {
     s32 i;
 
     for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
-        u8 target_id = g_ability_target_list[i];
+        u8 target_id = s_ability_target_list[i];
         *out++ = target_id;
         if (target_id != 0xFF) {
             count++;
@@ -386,7 +386,7 @@ s32 action_copy_ability_targets(u8* out) {
  * (non-reaction) action. */
 void action_store_acting_unit_value(s32 unit_id, s8 value) {
     if (g_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_action_actor_id) {
-        g_action_acting_unit_value = value;
+        s_action_acting_unit_value = value;
     }
 }
 

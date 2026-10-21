@@ -10,7 +10,7 @@
 #include "psx/types.h"
 
 /* controller state */
-static u16 g_screen_input_previous;
+static u16 s_screen_input_previous;
 extern u8 g_screen_input_triangle_latch;
 
 /* Return the controller buttons from PadRead(0); the argument is ignored. */
@@ -92,13 +92,13 @@ void screen_input_pad_update(void) {
             s32 mask = 1U << index;
 
             if (mask & g_menu_input_newly_pressed) {
-                if (mask & g_screen_input_previous) {
+                if (mask & s_screen_input_previous) {
                     g_menu_input_newly_pressed &= ~mask;
                 } else {
-                    g_screen_input_previous |= mask;
+                    s_screen_input_previous |= mask;
                 }
             } else {
-                g_screen_input_previous &= ~mask;
+                s_screen_input_previous &= ~mask;
             }
         }
         counter_base = g_input_repeat_counters;

@@ -17,7 +17,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static s8 g_status_screen_active_page; /* menu_job_list_step_e; each page's function returns the next one */
+static s8 s_status_screen_active_page; /* menu_job_list_step_e; each page's function returns the next one */
 extern u8 g_status_screen_initialized;
 extern u8 g_status_screen_previous_event_mode;
 extern u8 g_status_screen_menu_palette_image[];
@@ -138,15 +138,15 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
         text_section_pointers_restore();
     }
     menu_set_palette_mode(g_menu_input_lock_mode);
-    if (g_status_screen_active_page == MENU_JOB_LIST_STEP_JOBS) {
-        g_status_screen_active_page = job_list_update();
+    if (s_status_screen_active_page == MENU_JOB_LIST_STEP_JOBS) {
+        s_status_screen_active_page = job_list_update();
         if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             result = 0;
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_status_screen_initialized = 0;
         }
-    } else if (g_status_screen_active_page == MENU_JOB_LIST_STEP_ABILITIES) {
-        g_status_screen_active_page = ability_list_update();
+    } else if (s_status_screen_active_page == MENU_JOB_LIST_STEP_ABILITIES) {
+        s_status_screen_active_page = ability_list_update();
     } else {
         result = 0;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;

@@ -21,8 +21,8 @@ extern u16 g_status_screen_status_list_row_actions[8];
 
 /* Text ids of the unit's current statuses in the status panel's two columns, filled by
  * status_screen_build_status_list. */
-static s16 g_unit_panel_status_left_text_ids[20];
-static s16 g_unit_panel_status_right_text_ids[20];
+static s16 s_unit_panel_status_left_text_ids[20];
+static s16 s_unit_panel_status_right_text_ids[20];
 
 /* Return 1 when the unit has any current status (innate ones included), else 0; one of
  * the conditions under which Circle opens the status list. */
@@ -70,8 +70,8 @@ void status_screen_build_status_list(void) {
     }
     unit = unit_stats_get(g_unit_panel_selected_unit.battle_id);
     for (i = 0; i < 20; i++) {
-        g_unit_panel_status_left_text_ids[i] = TEXT_ID_ABILITY_NAME_BASE;
-        g_unit_panel_status_right_text_ids[i] = TEXT_ID_ABILITY_NAME_BASE;
+        s_unit_panel_status_left_text_ids[i] = TEXT_ID_ABILITY_NAME_BASE;
+        s_unit_panel_status_right_text_ids[i] = TEXT_ID_ABILITY_NAME_BASE;
         g_ability_list_ability_display_flags[i] = 0;
     }
     count = 0;
@@ -81,9 +81,9 @@ void status_screen_build_status_list(void) {
             if (mask & unit->status_sets.current[i]) {
                 index = i * 8 + bit;
                 if (count & 1) {
-                    g_unit_panel_status_right_text_ids[count / 2] = index + 0x8800;
+                    s_unit_panel_status_right_text_ids[count / 2] = index + 0x8800;
                 } else {
-                    g_unit_panel_status_left_text_ids[count / 2] = index + 0x8800;
+                    s_unit_panel_status_left_text_ids[count / 2] = index + 0x8800;
                 }
                 count++;
             }

@@ -28,7 +28,7 @@ extern s8 g_equipment_remove_mode_initialized;
  * started through menu_managed_thread_start, which makes it the current
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equipment_command_menu;
-static volatile u16 g_equipment_clear_all_prompt_frame;
+static volatile u16 s_equipment_clear_all_prompt_frame;
 extern s8 g_equipment_item_slot;
 extern s8 g_equipment_item_list_open;
 extern s8 g_equipment_item_list_refresh;
@@ -357,8 +357,8 @@ static s32 equipment_update_remove_all_prompt(void) {
 
     g_help_message_text_id = -1;
     gfx_set_otag_index(0x28);
-    g_equipment_clear_all_prompt_frame = g_equipment_clear_all_prompt_frame + 1;
-    if (g_equipment_clear_all_prompt_frame & 1) {
+    s_equipment_clear_all_prompt_frame = s_equipment_clear_all_prompt_frame + 1;
+    if (s_equipment_clear_all_prompt_frame & 1) {
         for (index = 0; index < 5; index++) {
             g_equipment_remove_all_cursor_position.y = 0x90 + index * 0x10;
             marker_state = 0;

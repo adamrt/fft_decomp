@@ -51,8 +51,8 @@ extern u8 g_soldier_office_hire_preview_initialized;
 extern u8 g_soldier_office_rename_prompt_initialized;
 extern u8 g_soldier_office_rename_name_entry_initialized;
 extern u8 g_soldier_office_rename_error_shown;
-static const u8* g_soldier_office_entered_name;
-static u32 g_soldier_office_fee;
+static const u8* s_soldier_office_entered_name;
+static u32 s_soldier_office_fee;
 extern unit_count_script_t g_soldier_office_unit_count_script;
 extern u8 g_soldier_office_unit_count;
 
@@ -113,13 +113,13 @@ void soldier_office_menu_update(void) {
             } else {
                 slot = formation_generate_unit(g_screen_selection_results[0]);
                 if (slot >= 0) {
-                    g_soldier_office_fee = 1000;
+                    s_soldier_office_fee = 1000;
                     /* `i` is still 0, the menu thread's result. */
                     for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                        g_soldier_office_fee
+                        s_soldier_office_fee
                             += shop_item_price_get(g_formation_unit_pointers[slot]->detail.equipment[i]);
                     }
-                    if (shop_gil_adjust(0) < g_soldier_office_fee) {
+                    if (shop_gil_adjust(0) < s_soldier_office_fee) {
                         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF823, 0);
                         party_unit_remove(g_formation_unit_pointers[slot]->identity.roster_slot);
                         g_soldier_office_hire_result_shown = 1;
@@ -225,11 +225,11 @@ void soldier_office_hire_name_update(void) {
         unit_panel_toggle_banner_thread(0);
         g_soldier_office_hire_name_entry_initialized = 1;
     }
-    g_soldier_office_entered_name
+    s_soldier_office_entered_name
         = name_entry_keyboard_update(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
-    if (g_soldier_office_entered_name != 0) {
+    if (s_soldier_office_entered_name != 0) {
         g_soldier_office_hire_name_entry_initialized = 0;
-        g_text_substitution_values[0] = g_soldier_office_fee;
+        g_text_substitution_values[0] = s_soldier_office_fee;
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF82A, 0);
         g_shop_menu_step = SHOP_STEP_HIRE_FEE_CONFIRM;
@@ -255,8 +255,8 @@ void soldier_office_hire_fee_update(void) {
         choice = g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT];
         if (choice == 0) {
             thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf82b, 0);
-            shop_gil_adjust(-g_soldier_office_fee);
-            formation_unit_name_set(g_unit_selected_index, g_soldier_office_entered_name);
+            shop_gil_adjust(-s_soldier_office_fee);
+            formation_unit_name_set(g_unit_selected_index, s_soldier_office_entered_name);
             g_soldier_office_hire_fee_message_wait = 1;
         } else if (choice == 1 || choice == -1) {
             thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf827, 0);
@@ -372,11 +372,11 @@ void soldier_office_rename_name_update(void) {
         g_soldier_office_rename_name_entry_initialized = 1;
     }
     formation_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, rename_unit_marker_get, 0);
-    g_soldier_office_entered_name
+    s_soldier_office_entered_name
         = name_entry_keyboard_update(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
-    if (g_soldier_office_entered_name != 0) {
+    if (s_soldier_office_entered_name != 0) {
         g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_REOPEN;
-        formation_unit_name_set(g_unit_selected_index, g_soldier_office_entered_name);
+        formation_unit_name_set(g_unit_selected_index, s_soldier_office_entered_name);
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF821, 0);
         g_shop_background_visible = 1;

@@ -22,7 +22,7 @@ extern s8 g_equipment_ready;
 extern s8 g_equipment_unit_banner_enabled;
 
 /* One-shot entry flag for this mode. */
-static s8 g_equipment_slot_item_browser_initialized;
+static s8 s_equipment_slot_item_browser_initialized;
 
 /* List index whose stat preview was last built; -1 forces a rebuild. */
 extern s8 g_equipment_slot_item_browser_previewed_index;
@@ -130,8 +130,8 @@ s32 formation_items_browse_update(void) {
     s32 input;
     s32 slot;
 
-    if (g_equipment_slot_item_browser_initialized == 0) {
-        g_equipment_slot_item_browser_initialized = 1;
+    if (s_equipment_slot_item_browser_initialized == 0) {
+        s_equipment_slot_item_browser_initialized = 1;
         category = g_menu_selected_slot;
         g_equipment_slot_item_browser_previewed_index = -1;
         equipment_build_item_list(g_equipment_unit_selected_index, category + 1,
@@ -157,7 +157,7 @@ s32 formation_items_browse_update(void) {
     if (input & PSX_PAD_CROSS) {
         menu_selection_record_set(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
-        g_equipment_slot_item_browser_initialized = 0;
+        s_equipment_slot_item_browser_initialized = 0;
         return MENU_ITEM_LIST_STATE_CLOSE;
     }
     slot = menu_selection_horizontal_sound_step(5, 2, input, SOUND_SFX_PAGE_SWITCH);

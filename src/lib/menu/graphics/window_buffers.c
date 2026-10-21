@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 menu_window_buffer_t g_menu_window_buffers[6];
-static menu_window_buffer_t* g_menu_window_buffer_slots[6];
+static menu_window_buffer_t* s_menu_window_buffer_slots[6];
 static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 
 /* Mark all three menu-buffer pointer pairs as unallocated. */
@@ -22,7 +22,7 @@ void menu_reset_window_buffer_slots(void) {
     s32 index;
 
     for (index = 5; index >= 0; index--) {
-        g_menu_window_buffer_slots[index] = value;
+        s_menu_window_buffer_slots[index] = value;
     }
 }
 
@@ -39,10 +39,10 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
     s32 i;
 
     for (index = 0; index < 6; index += 2) {
-        if (g_menu_window_buffer_slots[index] == (menu_window_buffer_t*)-1) {
-            g_menu_window_buffer_slots[index] = &g_menu_window_buffers[index];
-            g_menu_window_buffer_slots[index + 1] = &g_menu_window_buffers[index + 1];
-            buffer = g_menu_window_buffer_slots[index];
+        if (s_menu_window_buffer_slots[index] == (menu_window_buffer_t*)-1) {
+            s_menu_window_buffer_slots[index] = &g_menu_window_buffers[index];
+            s_menu_window_buffer_slots[index + 1] = &g_menu_window_buffers[index + 1];
+            buffer = s_menu_window_buffer_slots[index];
             for (i = 0; i < 1; i++) {
                 buffer->active = 0;
                 buffer->thread_id = g_thread_current_id;
@@ -92,7 +92,7 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
                 buffer->quads[1].tpage = GetTPage(0, 0, 0x340, 0x100);
                 buffer++;
             }
-            return g_menu_window_buffer_slots[index];
+            return s_menu_window_buffer_slots[index];
         }
     }
     thread_current_exit();
@@ -129,9 +129,9 @@ void menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
     slot = 0;
     empty = (menu_window_buffer_t*)-1;
     for (; slot < 6; slot += 2) {
-        if (g_menu_window_buffer_slots[slot] == buffer) {
-            g_menu_window_buffer_slots[slot] = empty;
-            g_menu_window_buffer_slots[slot + 1] = empty;
+        if (s_menu_window_buffer_slots[slot] == buffer) {
+            s_menu_window_buffer_slots[slot] = empty;
+            s_menu_window_buffer_slots[slot + 1] = empty;
             g_menu_window_buffers[slot].active = 0;
             g_menu_window_buffers[slot + 1].active = 0;
             g_menu_window_buffers[slot].thread_id = 0;
@@ -177,10 +177,10 @@ void menu_draw_active_window_frames(void) {
 #endif
 
     for (i = 4; i >= 0; i -= 2) {
-        if (g_menu_window_buffer_slots[i] == (menu_window_buffer_t*)-1) {
+        if (s_menu_window_buffer_slots[i] == (menu_window_buffer_t*)-1) {
             continue;
         }
-        buffer = g_menu_window_buffer_slots[i + g_menu_packet_buffer_index];
+        buffer = s_menu_window_buffer_slots[i + g_menu_packet_buffer_index];
         if (buffer->active != 1 || g_thread_contexts[buffer->thread_id].is_running == 0) {
             continue;
         }
@@ -225,11 +225,11 @@ void menu_draw_active_window_frames(void) {
         top = window->icon_sprites[0].y0 + window->icon_sprites[0].h;
         bottom -= top;
         /* Reload the pointer cell: retaining buffer removes target loads. */
-        span = (bottom - 4) * g_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->scroll_position
-            / g_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->scroll_range;
+        span = (bottom - 4) * s_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->scroll_position
+            / s_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->scroll_range;
         window->icon_sprites[2].x0 = window->quads[0].x0 + offset;
         window->icon_sprites[2].y0 = top + span;
-        flags = g_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->icon_flags;
+        flags = s_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->icon_flags;
         if (flags & MENU_WINDOW_ICON_SCROLL_UP) {
             gfx_draw_or_append_gpu_primitive(&window->icon_sprites[0]);
         }

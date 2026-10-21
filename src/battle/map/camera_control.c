@@ -23,7 +23,7 @@ extern s32 g_camera_yaw_target;
 
 /* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;
  * nothing reads it. */
-static s32 g_camera_previous_yaw;
+static s32 s_camera_previous_yaw;
 extern s32 g_camera_tilt_increment;
 extern s32 g_camera_zoom_increment;
 
@@ -106,7 +106,7 @@ void camera_pan_update(void) {
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
 static void rotation_left_destination_set(s32 target_angle) {
-    g_camera_previous_yaw = g_camera_render_state.vy & 0xfe00;
+    s_camera_previous_yaw = g_camera_render_state.vy & 0xfe00;
     g_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
         g_camera_yaw_target = target_angle + 0x200;
@@ -124,7 +124,7 @@ static void rotation_left_start(s32 target_angle) {
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
 static void rotation_right_destination_set(s32 target_angle) {
-    g_camera_previous_yaw = g_camera_render_state.vy & 0xfe00;
+    s_camera_previous_yaw = g_camera_render_state.vy & 0xfe00;
     g_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
         g_camera_yaw_target = target_angle - 0x200;

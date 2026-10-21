@@ -19,10 +19,10 @@
 
 extern POLY_FT4 g_formation_view_quads[2][30];
 
-static zodiac_draw_context_t g_zodiac_backdrop
+static zodiac_draw_context_t s_zodiac_backdrop
     = { 0, 128, 1, 8192, 8192, { 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 1, 128, 0, 0, 1, 0, 1 }, { 0, 0 } } };
 /* Portrait index per resolved sprite sheet. */
-static u16 g_portraits_by_sheet[212] = { 0, 0, 1, 2, 3, 120, 121, 4, 122, 123, 124, 125, 5, 6, 126, 7, 127, 13, 9, 10,
+static u16 s_portraits_by_sheet[212] = { 0, 0, 1, 2, 3, 120, 121, 4, 122, 123, 124, 125, 5, 6, 126, 7, 127, 13, 9, 10,
     11, 12, 19, 13, 129, 14, 15, 130, 16, 131, 23, 17, 133, 18, 19, 134, 135, 136, 137, 138, 18, 14, 20, 139, 21, 141,
     142, 20, 21, 140, 22, 0, 23, 0, 0, 0, 0, 0, 141, 142, 143, 0, 144, 0, 145, 0, 0, 146, 0, 147, 0, 0, 24, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -38,28 +38,28 @@ void formation_zodiac_backdrop_run(void) {
     s32 frame;
 
     if (g_formation_screen_active != 0) {
-        g_zodiac_backdrop.offset.position.x = 0;
-        g_zodiac_backdrop.offset.position.y = 8;
+        s_zodiac_backdrop.offset.position.x = 0;
+        s_zodiac_backdrop.offset.position.y = 8;
     } else {
-        g_zodiac_backdrop.offset.position.x = 0x100;
-        g_zodiac_backdrop.offset.position.y = 0x80;
+        s_zodiac_backdrop.offset.position.x = 0x100;
+        s_zodiac_backdrop.offset.position.y = 0x80;
     }
     if (thread_current_parameter_1_get() == 0) {
-        g_zodiac_backdrop.scale_x = 0x2000;
-        g_zodiac_backdrop.scale_y = 0x2000;
+        s_zodiac_backdrop.scale_x = 0x2000;
+        s_zodiac_backdrop.scale_y = 0x2000;
     } else {
-        g_zodiac_backdrop.scale_x = ONE;
-        g_zodiac_backdrop.scale_y = ONE;
+        s_zodiac_backdrop.scale_x = ONE;
+        s_zodiac_backdrop.scale_y = ONE;
     }
     for (frame = 0;; frame++) {
-        g_zodiac_backdrop.ot = g_formation_ordering_table;
-        if (g_zodiac_backdrop.scale_x > ONE) {
+        s_zodiac_backdrop.ot = g_formation_ordering_table;
+        if (s_zodiac_backdrop.scale_x > ONE) {
             s32 step = g_script_event_speed << 8;
-            g_zodiac_backdrop.scale_x -= step;
-            g_zodiac_backdrop.scale_y -= step;
+            s_zodiac_backdrop.scale_x -= step;
+            s_zodiac_backdrop.scale_y -= step;
         }
-        g_zodiac_backdrop.brightness = g_screen_color_red;
-        zodiac_build_primitives(&g_zodiac_backdrop, g_formation_view_quads[frame & 1]);
+        s_zodiac_backdrop.brightness = g_screen_color_red;
+        zodiac_build_primitives(&s_zodiac_backdrop, g_formation_view_quads[frame & 1]);
         thread_yield();
         if (thread_current_parameter_3_get() != 0) {
             thread_current_exit();
@@ -111,7 +111,7 @@ s32 formation_unit_palette_index_get(s32 party_index) {
     } else {
         portrait = unit->sprite_set;
     }
-    portrait = g_portraits_by_sheet[portrait];
+    portrait = s_portraits_by_sheet[portrait];
     if (unit->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
         portrait = 0;
     }
@@ -170,7 +170,7 @@ s32 portrait_party_unit_code_get(s32 party_index) {
         }
     }
 
-    portrait_code = g_portraits_by_sheet[sprite_sheet];
+    portrait_code = s_portraits_by_sheet[sprite_sheet];
     sprite_set = party_unit->sprite_set;
     if (sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
         portrait_code = 0;

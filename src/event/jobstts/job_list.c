@@ -14,7 +14,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static s32 g_job_list_menu_initialized;
+static s32 s_job_list_menu_initialized;
 
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_job_list_render_commands[216];
@@ -88,7 +88,7 @@ s32 job_list_update(void) {
     s16 scroll;
     s32 mask;
 
-    if (g_job_list_menu_initialized == 0) {
+    if (s_job_list_menu_initialized == 0) {
         g_menu_row_callbacks[0].value = job_list_level_calculate;
         g_menu_row_callbacks[2].value = job_list_calculate_jp;
         g_menu_row_callbacks[5].value = job_list_next_level_jp_calculate;
@@ -98,7 +98,7 @@ s32 job_list_update(void) {
         menu_selection_record_restore(4, &selected, &scroll, g_job_list_job_ids);
         menu_init_scrollable_list(
             g_job_list_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
-        g_job_list_menu_initialized = 1;
+        s_job_list_menu_initialized = 1;
     }
 
     g_text_selection_id = g_job_list_job_ids[g_menu_list_selected_index] + HELP_TEXT_ID_JOB_BASE;
@@ -113,7 +113,7 @@ s32 job_list_update(void) {
             job_list_next_level_jp_calculate(g_menu_list_selected_index);
         }
         menu_selection_record_set(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
-        g_job_list_menu_initialized = 0;
+        s_job_list_menu_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;
     }

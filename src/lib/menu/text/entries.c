@@ -7,17 +7,17 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static glyph_blit_t g_menu_charge_time_now_lower = { { 190, 28, 20, 4 }, 256, 0 };
-static glyph_blit_t g_menu_charge_time_now_upper = { { 168, 28, 20, 4 }, 256, 0 };
+static glyph_blit_t s_menu_charge_time_now_lower = { { 190, 28, 20, 4 }, 256, 0 };
+static glyph_blit_t s_menu_charge_time_now_upper = { { 168, 28, 20, 4 }, 256, 0 };
 
 /* Draw the ability list's "Now" charge time in two stacked halves. The caller
  * selects it for skill_ct 0 or 0xff; the pen ends on the lower half. */
 void menu_draw_charge_time_now(u8* pixels, glyph_blit_t* position) {
     position->rect.x -= 2;
     position->rect.y += 2;
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_charge_time_now_upper, position);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_charge_time_now_upper, position);
     position->rect.y += 4;
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_charge_time_now_lower, position);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_charge_time_now_lower, position);
 }
 
 /* Render text entry text_id into a 4bpp image at the pen origin, running menu_display_text

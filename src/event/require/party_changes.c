@@ -30,8 +30,8 @@
 
 extern POLY_FT4 g_unit_panel_transition_quads[2][30];
 
-static s32 g_party_affected_unit_message_args[50] = { 0 };
-static s32 g_party_affected_unit_message_ids[50] = { 0 };
+static s32 s_party_affected_unit_message_args[50] = { 0 };
+static s32 s_party_affected_unit_message_ids[50] = { 0 };
 s32 g_party_affected_battle_unit_indices[50] = { 0 };
 
 /*
@@ -166,16 +166,16 @@ static s32 party_update_brave_faith(void) {
                     brave = 72;
                 }
                 warning_index = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[warning_index] = unit->character_identity;
-                g_party_affected_unit_message_ids[warning_index] = brave + 0x818;
+                s_party_affected_unit_message_args[warning_index] = unit->character_identity;
+                s_party_affected_unit_message_ids[warning_index] = brave + 0x818;
                 g_party_affected_battle_unit_indices[warning_index] = battle_index;
                 g_party_affected_unit_count = warning_index + 1;
             } else {
                 s32 warning_index;
 
                 warning_index = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[warning_index] = unit->unit_id;
-                g_party_affected_unit_message_ids[warning_index]
+                s_party_affected_unit_message_args[warning_index] = unit->unit_id;
+                s_party_affected_unit_message_ids[warning_index]
                     = (unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) * 4 + (battle_index & 3) + 0x800;
                 g_party_affected_battle_unit_indices[warning_index] = battle_index;
                 g_party_affected_unit_count = warning_index + 1;
@@ -206,16 +206,16 @@ static s32 party_update_brave_faith(void) {
                     group_index = 72;
                 }
                 warning_index = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[warning_index] = unit->unit_id;
-                g_party_affected_unit_message_ids[warning_index] = group_index + 0x862;
+                s_party_affected_unit_message_args[warning_index] = unit->unit_id;
+                s_party_affected_unit_message_ids[warning_index] = group_index + 0x862;
                 g_party_affected_battle_unit_indices[warning_index] = battle_index;
                 g_party_affected_unit_count = warning_index + 1;
             } else {
                 s32 warning_index;
 
                 warning_index = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[warning_index] = unit->unit_id;
-                g_party_affected_unit_message_ids[warning_index]
+                s_party_affected_unit_message_args[warning_index] = unit->unit_id;
+                s_party_affected_unit_message_ids[warning_index]
                     = (unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) * 4 + (battle_index & 3) + 0x80c;
                 g_party_affected_battle_unit_indices[warning_index] = battle_index;
                 g_party_affected_unit_count = warning_index + 1;
@@ -295,8 +295,8 @@ static s32 party_find_departures(void) {
                     group = 72;
                 }
                 count = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[count] = unit->character_identity;
-                g_party_affected_unit_message_ids[count] = group + 0x1018;
+                s_party_affected_unit_message_args[count] = unit->character_identity;
+                s_party_affected_unit_message_ids[count] = group + 0x1018;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
                 party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_LOW_BRAVE);
@@ -304,8 +304,8 @@ static s32 party_find_departures(void) {
                 s32 count;
 
                 count = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[count] = unit->unit_id;
-                g_party_affected_unit_message_ids[count]
+                s_party_affected_unit_message_args[count] = unit->unit_id;
+                s_party_affected_unit_message_ids[count]
                     = (unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) * 4 + (battle_index & 3) + 0x1000;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
@@ -334,8 +334,8 @@ static s32 party_find_departures(void) {
                     group = 72;
                 }
                 count = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[count] = unit->unit_id;
-                g_party_affected_unit_message_ids[count] = group + 0x1062;
+                s_party_affected_unit_message_args[count] = unit->unit_id;
+                s_party_affected_unit_message_ids[count] = group + 0x1062;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
                 party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_HIGH_FAITH);
@@ -343,8 +343,8 @@ static s32 party_find_departures(void) {
                 s32 count;
 
                 count = g_party_affected_unit_count;
-                g_party_affected_unit_message_args[count] = unit->unit_id;
-                g_party_affected_unit_message_ids[count]
+                s_party_affected_unit_message_args[count] = unit->unit_id;
+                s_party_affected_unit_message_ids[count]
                     = (unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) * 4 + (battle_index & 3) + 0x100c;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
@@ -460,11 +460,11 @@ s32 party_update_after_battle(void) {
                     s32 count;
                     s32 script_variant;
                     unit->unit_flags &= ~(UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
-                    g_party_affected_unit_message_args[g_party_affected_unit_count] = unit->unit_id;
+                    s_party_affected_unit_message_args[g_party_affected_unit_count] = unit->unit_id;
                     script_variant = script_variable_get(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 7;
                     prompt_count++;
                     count = g_party_affected_unit_count;
-                    g_party_affected_unit_message_ids[count]
+                    s_party_affected_unit_message_ids[count]
                         = ((unit->character_identity - CHARACTER_IDENTITY_SELECTOR_FIRST) << 3) + script_variant
                         + 0x1800;
                     g_party_affected_battle_unit_indices[count] = party_index;
@@ -510,7 +510,7 @@ void party_brave_faith_report_thread(void) {
         g_text_substitution_values[0] = g_party_affected_battle_unit_indices[i];
         thread_start(unit_thread, message_dialog_thread);
         thread_parameters_set(
-            unit_thread, 0x1b, g_party_affected_unit_message_ids[i], g_party_affected_unit_message_args[i]);
+            unit_thread, 0x1b, s_party_affected_unit_message_ids[i], s_party_affected_unit_message_args[i]);
         thread_inactive_wait(unit_thread);
     }
     thread_parameters_set(main_thread, 0, 0, 2);
@@ -555,7 +555,7 @@ void party_departures_thread(void) {
         g_text_substitution_values[0] = g_party_affected_battle_unit_indices[i];
         thread_start(unit_thread, message_dialog_thread);
         thread_parameters_set(
-            unit_thread, 0x1b, g_party_affected_unit_message_ids[i], g_party_affected_unit_message_args[i]);
+            unit_thread, 0x1b, s_party_affected_unit_message_ids[i], s_party_affected_unit_message_args[i]);
         unit = unit_stats_get(g_party_affected_battle_unit_indices[i]);
         message_thread = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
         thread_start(message_thread, conditions_special_thread);

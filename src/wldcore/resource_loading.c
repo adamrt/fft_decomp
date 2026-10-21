@@ -20,7 +20,7 @@ extern s32 g_file_battle_sector;
 extern u8 g_message_block_buffer[];
 
 /* File-sector boundaries, including one terminal offset after the last payload. */
-static s32 g_picture_sector_offsets[93] = {
+static s32 s_picture_sector_offsets[93] = {
     0,
     5,
     10,
@@ -116,7 +116,7 @@ static s32 g_picture_sector_offsets[93] = {
     427,
 };
 
-static s32 g_picture_background_sector_offsets[132] = {
+static s32 s_picture_background_sector_offsets[132] = {
     0 * 60,
     1 * 60,
     2 * 60,
@@ -251,7 +251,7 @@ static s32 g_picture_background_sector_offsets[132] = {
     131 * 60,
 };
 
-static s32 g_message_block_sector_offsets[113] = {
+static s32 s_message_block_sector_offsets[113] = {
     0 * 22,
     1 * 22,
     2 * 22,
@@ -367,7 +367,7 @@ static s32 g_message_block_sector_offsets[113] = {
     112 * 22,
 };
 
-static s32 g_sound_novel_script_sector_offsets[7] = {
+static s32 s_sound_novel_script_sector_offsets[7] = {
     0 * 6,
     1 * 6,
     2 * 6,
@@ -377,7 +377,7 @@ static s32 g_sound_novel_script_sector_offsets[7] = {
     6 * 6,
 };
 
-static s32 g_sound_novel_text_sector_offsets[7] = {
+static s32 s_sound_novel_text_sector_offsets[7] = {
     0 * 20,
     1 * 20,
     2 * 20,
@@ -512,8 +512,8 @@ void picture_load_set(s32 set) {
     if (set != g_picture_loaded_set) {
         file_pending_wait();
         g_picture_loaded_set = set;
-        file_pending_read_request(&g_file_cd_state, g_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
-            g_picture_sector_offsets[set + 1] - g_picture_sector_offsets[set], g_picture_buffer);
+        file_pending_read_request(&g_file_cd_state, s_picture_sector_offsets[set] + DISC_SECTOR_WORLD_WLDPIC_BIN,
+            s_picture_sector_offsets[set + 1] - s_picture_sector_offsets[set], g_picture_buffer);
     }
 }
 
@@ -528,8 +528,8 @@ void picture_load_background_set(s32 set) {
         file_pending_wait();
         g_picture_background_loaded_set = set;
         file_pending_read_request(&g_file_cd_state,
-            g_picture_background_sector_offsets[set] + DISC_SECTOR_WORLD_WLDBK_BIN,
-            g_picture_background_sector_offsets[set + 1] - g_picture_background_sector_offsets[set],
+            s_picture_background_sector_offsets[set] + DISC_SECTOR_WORLD_WLDBK_BIN,
+            s_picture_background_sector_offsets[set + 1] - s_picture_background_sector_offsets[set],
             g_world_map_scratch_buffer);
     }
 }
@@ -544,8 +544,8 @@ void message_block_load_if_changed(s32 block) {
         file_pending_wait();
         g_message_block_loaded = block;
         file_pending_read_request(&g_file_cd_state,
-            g_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
-            g_message_block_sector_offsets[block + 1] - g_message_block_sector_offsets[block], g_message_block_buffer);
+            s_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
+            s_message_block_sector_offsets[block + 1] - s_message_block_sector_offsets[block], g_message_block_buffer);
     }
 }
 
@@ -558,13 +558,13 @@ void message_block_load_if_changed(s32 block) {
 void sound_novel_files_load(s32 chapter) {
     file_pending_wait();
     file_pending_read_request(&g_file_cd_state,
-        g_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
-        g_sound_novel_script_sector_offsets[chapter + 1] - g_sound_novel_script_sector_offsets[chapter],
+        s_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
+        s_sound_novel_script_sector_offsets[chapter + 1] - s_sound_novel_script_sector_offsets[chapter],
         &g_sound_novel_script);
     file_pending_wait();
     file_pending_read_request(&g_file_cd_state,
-        g_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
-        g_sound_novel_text_sector_offsets[chapter + 1] - g_sound_novel_text_sector_offsets[chapter],
+        s_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
+        s_sound_novel_text_sector_offsets[chapter + 1] - s_sound_novel_text_sector_offsets[chapter],
         g_message_block_buffer);
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_message_block_buffer;
     g_message_block_loaded = -1;

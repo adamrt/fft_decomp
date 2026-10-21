@@ -19,9 +19,9 @@
  * but the Reorder menu exposes only the first eleven. */
 extern s8 g_unit_list_sort_field_indices[12];
 
-static s16 g_unit_list_shown_unit_indices[22] = { 0 };
-static s16 g_unit_list_count = 0;
-static unit_list_record_t g_unit_list_records[21] = { 0 };
+static s16 s_unit_list_shown_unit_indices[22] = { 0 };
+static s16 s_unit_list_count = 0;
+static unit_list_record_t s_unit_list_records[21] = { 0 };
 
 /* Returns 1 while the unit list is scrolling, or when the selected unit lies
  * outside the three rows of four shown at the current page offset, so that
@@ -288,17 +288,17 @@ s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32
                 && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                     & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
                 total++;
-                unit_list_build_record(unit, &g_unit_list_records[shown], shown);
-                g_unit_list_shown_unit_indices[shown] = shown;
+                unit_list_build_record(unit, &s_unit_list_records[shown], shown);
+                s_unit_list_shown_unit_indices[shown] = shown;
                 shown++;
             }
         }
     }
 
     for (i = 0; i < shown; i++) {
-        g_unit_list_records[i].unit_count = total;
+        s_unit_list_records[i].unit_count = total;
     }
-    g_unit_list_count = shown;
+    s_unit_list_count = shown;
     unit_list_sort(sort_mode);
     return shown;
 }
@@ -318,13 +318,13 @@ void unit_list_sort(s32 sort_mode) {
     s32 rhs;
     s16* rec; /* Native sort keys select signed 16-bit values within the record. */
 
-    for (count = g_unit_list_count - 1; count > 0; count--) {
+    for (count = s_unit_list_count - 1; count > 0; count--) {
         for (j = 0; j < count; j++) {
             k = 0;
             do {
-                rec = (s16*)&g_unit_list_records[g_unit_list_shown_unit_indices[j]];
+                rec = (s16*)&s_unit_list_records[s_unit_list_shown_unit_indices[j]];
                 lhs = rec[g_unit_list_sort_field_indices[g_menu_sort_orders.unit_list[k]]];
-                rec = (s16*)&g_unit_list_records[g_unit_list_shown_unit_indices[j + 1]];
+                rec = (s16*)&s_unit_list_records[s_unit_list_shown_unit_indices[j + 1]];
                 rhs = rec[g_unit_list_sort_field_indices[g_menu_sort_orders.unit_list[k]]];
                 diff = rhs - lhs;
                 k++;
@@ -334,14 +334,14 @@ void unit_list_sort(s32 sort_mode) {
                 diff = -diff;
             }
             if (diff < 0) {
-                s32 swap = g_unit_list_shown_unit_indices[j];
-                g_unit_list_shown_unit_indices[j] = g_unit_list_shown_unit_indices[j + 1];
-                g_unit_list_shown_unit_indices[j + 1] = swap;
+                s32 swap = s_unit_list_shown_unit_indices[j];
+                s_unit_list_shown_unit_indices[j] = s_unit_list_shown_unit_indices[j + 1];
+                s_unit_list_shown_unit_indices[j + 1] = swap;
             }
         }
     }
-    for (j = 0; j < g_unit_list_count; j++) {
-        g_unit_list_pointers[j] = &g_unit_list_records[g_unit_list_shown_unit_indices[j]];
+    for (j = 0; j < s_unit_list_count; j++) {
+        g_unit_list_pointers[j] = &s_unit_list_records[s_unit_list_shown_unit_indices[j]];
     }
 }
 
@@ -380,7 +380,7 @@ s32 unit_list_find_by_battle_id(s16 battle_id) {
     s32 search_value;
     unit_list_record_t** units;
 
-    count = g_unit_list_count;
+    count = s_unit_list_count;
     i = 0;
     if (count > 0) {
         search_value = battle_id;

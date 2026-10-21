@@ -18,7 +18,7 @@
 #include "psx/types.h"
 
 extern s16 g_equipment_unit_initial_equipment[];
-static u8 g_equipment_text_restore_pending;
+static u8 s_equipment_text_restore_pending;
 
 /* Start the item numeric panel thread when `enable` is set and the thread is
  * idle, ask it to stop otherwise, and record the state in
@@ -133,12 +133,12 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
     if (g_menu_input_lock_mode != 0) {
         restore_text = g_equipment_text_message_thread_active == 0;
     }
-    g_equipment_text_restore_pending = restore_text;
+    s_equipment_text_restore_pending = restore_text;
     menu_input_message_state_update();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         menu_text_start_help_thread(3);
     }
-    if (g_equipment_text_restore_pending != 0) {
+    if (s_equipment_text_restore_pending != 0) {
         if (g_menu_input_lock_mode == 0) {
             text_section_pointers_restore();
         }

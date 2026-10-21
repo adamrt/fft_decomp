@@ -11,7 +11,7 @@
 
 /* Three entries, though effect_altima_transformation_map_vertex_particles_update bounds the vertex
  * group by 12 like the Banish handler: groups 4 to 12 would read past the table. */
-static effect_map_vertex_location_t g_effect_altima_transformation_vertex_locations[3] = {
+static effect_map_vertex_location_t s_effect_altima_transformation_vertex_locations[3] = {
     { 0, 2 },
     { 0, 3 },
     { 0, 4 },
@@ -63,8 +63,8 @@ s32 effect_altima_transformation_map_vertex_particles_update(
             i = emitter->vertex_group - 1;
             if (i >= 0 && i < 12 && frame >= emitter->start_frame && frame < emitter->end_frame) {
                 /* Byte accumulation preserves the vertex and mesh-part load order. */
-                byte_offset = g_effect_altima_transformation_vertex_locations[i].vertex_index * sizeof(*work);
-                byte_offset += g_effect_altima_transformation_vertex_locations[i].mesh_part_index
+                byte_offset = s_effect_altima_transformation_vertex_locations[i].vertex_index * sizeof(*work);
+                byte_offset += s_effect_altima_transformation_vertex_locations[i].mesh_part_index
                     * (EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(*work));
                 vertex = &work[byte_offset / sizeof(*work)];
                 parent.motion.position.x = vertex->vx * ONE;

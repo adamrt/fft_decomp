@@ -26,7 +26,7 @@
 /* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
 extern u32 g_tutorial_progress_masks[];
 
-static s32 g_tutorial_battle_event_ids[TUTORIAL_BATTLE_COUNT] = { EVENT_ID_TUTORIAL_FIRST, EVENT_ID_TUTORIAL_FIRST + 2,
+static s32 s_tutorial_battle_event_ids[TUTORIAL_BATTLE_COUNT] = { EVENT_ID_TUTORIAL_FIRST, EVENT_ID_TUTORIAL_FIRST + 2,
     EVENT_ID_TUTORIAL_FIRST + 4, EVENT_ID_TUTORIAL_FIRST + 6, EVENT_ID_TUTORIAL_FIRST + 8, EVENT_ID_TUTORIAL_FIRST + 10,
     EVENT_ID_TUTORIAL_FIRST + 12, EVENT_ID_TUTORIAL_FIRST + 14 };
 
@@ -492,7 +492,7 @@ void tutorial_battle_list_input_update(menu_stack_record_t* level) {
             selected = &g_window_panel_render_state.selected_index;
             bits_value_set(&g_tutorial_progress_masks[1], *selected, 1);
             script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
-            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_tutorial_battle_event_ids[*selected]);
+            script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, s_tutorial_battle_event_ids[*selected]);
             menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS);
             g_brave_story_saved_list_cursor_state = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS];
             g_world_map_flags = (g_world_map_flags | WORLD_MAP_FLAG_TUTORIAL_EVENT) ^ WORLD_MAP_FLAG_RUNNING;

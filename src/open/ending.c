@@ -74,11 +74,11 @@ extern u8* g_ending_script_initial_data_base;
 
 /* Scalar view of dispatch.cursor.byte_offset: using the member in
  * ending_opcode_02_set_scroll_speed shortens the body by four bytes. */
-static s32 g_ending_script_byte_offset;
+static s32 s_ending_script_byte_offset;
 
 /* Ending bytecode opcodes 0x00 through 0x0f. */
 typedef void (*ending_opcode_handler_t)(s16* entry);
-static ending_opcode_handler_t g_ending_opcode_handlers[16] = {
+static ending_opcode_handler_t s_ending_opcode_handlers[16] = {
     ending_opcode_00_end_script,
     ending_opcode_01_create_positioned_text_record,
     ending_opcode_02_set_scroll_speed,
@@ -218,7 +218,7 @@ static s32 ending_run_script_frame(void) {
         cursor = &state->cursor;
         do {
             entry = (s16*)ending_add_pointer_offset(cursor->data_base, cursor->byte_offset);
-            g_ending_opcode_handlers[*entry](entry);
+            s_ending_opcode_handlers[*entry](entry);
             /* Keeping the cursor base live matches retail; the direct state view is four bytes shorter. */
             flags = ((ending_script_dispatch_state_t*)((u8*)cursor - offsetof(ending_script_dispatch_state_t, cursor)))
                         ->flags;
@@ -875,12 +875,12 @@ static void ending_opcode_01_create_positioned_text_record(s16* command) {
  * Four bytes. */
 static void ending_opcode_02_set_scroll_speed(s16* command) {
     s32 value = command[1];
-    s32 next = g_ending_script_byte_offset + 4;
+    s32 next = s_ending_script_byte_offset + 4;
 
     g_ending_script_state.dispatch.scrolled_distance = 0;
     g_ending_script_state.dispatch.scroll_fraction = 0;
     g_ending_script_state.dispatch.scroll_speed = value;
-    g_ending_script_byte_offset = next;
+    s_ending_script_byte_offset = next;
 }
 
 /* Opcode 3: reveal the screen over command[1] frames, with the overlay in

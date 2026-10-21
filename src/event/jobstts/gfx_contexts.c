@@ -7,7 +7,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static status_screen_gfx_context_t* g_status_screen_gfx_context_base;
+static status_screen_gfx_context_t* s_status_screen_gfx_context_base;
 extern s16 g_status_screen_gfx_line_f2_count;
 extern s16 g_status_screen_gfx_poly_f4_count;
 extern s16 g_status_screen_gfx_poly_g4_count;
@@ -44,7 +44,7 @@ void status_screen_gfx_swap_context(s32 first_otag, s32 unused) {
     g_menu_gfx_draw_move_count = 0;
     g_menu_gfx_draw_area_count = 0;
     GetDrawEnv(&env);
-    context = g_status_screen_gfx_context_base;
+    context = s_status_screen_gfx_context_base;
     g_menu_gfx_drawenv_y = env.clip.y;
     if (g_menu_gfx_context == context) {
         context++;
@@ -85,11 +85,11 @@ void status_screen_gfx_init_contexts(status_screen_gfx_context_t* base, u32* ota
     s32 index;
     status_screen_gfx_context_t* context;
 
-    g_status_screen_gfx_context_base = base;
+    s_status_screen_gfx_context_base = base;
     g_menu_gfx_context = base;
 
     for (index = 0; index < STATUS_SCREEN_GFX_CONTEXT_COUNT; index++) {
-        context = &g_status_screen_gfx_context_base[index];
+        context = &s_status_screen_gfx_context_base[index];
 
         context->otag = otag + g_gfx_otag_length * index;
         context->poly_f3 = poly_f3 + g_gfx_poly_f3_capacity * index;

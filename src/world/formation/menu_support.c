@@ -16,7 +16,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static s32 g_roster_names_revision = 0;
+static s32 s_roster_names_revision = 0;
 
 /* WORLD's simple menu window thread: like menu_icon_list_thread, but it reads the formation
  * screen's input, ignores input while the previous thread runs and tints the window with the world
@@ -112,7 +112,7 @@ void formation_roster_names_build(void) {
             }
         }
     }
-    g_roster_names_revision++;
+    s_roster_names_revision++;
 }
 
 /* Set whether the menu cursors hold their bob: at 1 the cursor threads reset their bob state to 2 with the

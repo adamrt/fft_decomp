@@ -12,7 +12,7 @@
 
 /* OPEN only uses the card-status helpers; WORLD and CARD also open save files. */
 #if defined(FFT_WORLD) || defined(FFT_EVENT_CARD)
-static s32 g_file_descriptor = -1;
+static s32 s_file_descriptor = -1;
 #endif
 
 static void bios_events_clear(void);
@@ -340,8 +340,8 @@ s32 memcard_file_open_retry(const char* filename, s32 mode) {
     char path[128];
 
     i = 0;
-    if (g_file_descriptor >= 0) {
-        result = memcard_file_close_retry(g_file_descriptor);
+    if (s_file_descriptor >= 0) {
+        result = memcard_file_close_retry(s_file_descriptor);
         if (result == 0) {
             return -2;
         }
@@ -359,13 +359,13 @@ s32 memcard_file_open_retry(const char* filename, s32 mode) {
         if (result != MEMCARD_RESULT_COMPLETE) {
             return -2;
         }
-        g_file_descriptor = open(path, mode);
-        if (g_file_descriptor != -1) {
+        s_file_descriptor = open(path, mode);
+        if (s_file_descriptor != -1) {
             break;
         }
         i++;
     }
-    return g_file_descriptor;
+    return s_file_descriptor;
 }
 
 /* Close a memory card file, trying up to ten times; each try first waits for the pending card
@@ -385,7 +385,7 @@ s32 memcard_file_close_retry(s32 descriptor) {
             wait_success = 0;
         }
     }
-    g_file_descriptor = -1;
+    s_file_descriptor = -1;
     return wait_success;
 }
 
@@ -427,7 +427,7 @@ s32 save_file_write(const char* filename, const save_image_t* source, u32 size, 
         if (result <= -1) {
             return -1;
         } else {
-            if (memcard_file_close_retry(g_file_descriptor) == 0) {
+            if (memcard_file_close_retry(s_file_descriptor) == 0) {
                 return -1;
             }
             result = memcard_file_open_retry(filename, 2);
@@ -443,20 +443,20 @@ s32 save_file_write(const char* filename, const save_image_t* source, u32 size, 
         }
     }
 
-    error = _get_error(g_file_descriptor);
+    error = _get_error(s_file_descriptor);
     if (error != 0) {
-        memcard_file_close_retry(g_file_descriptor);
+        memcard_file_close_retry(s_file_descriptor);
         return -1;
     }
 
     total_written = 0;
     retries = 0;
     while (retries < 40) {
-        if (memcard_file_seek_retry(g_file_descriptor, total_written, 1) < 0) {
+        if (memcard_file_seek_retry(s_file_descriptor, total_written, 1) < 0) {
             break;
         }
 
-        result = write(g_file_descriptor, (const u8*)source + total_written, size - total_written);
+        result = write(s_file_descriptor, (const u8*)source + total_written, size - total_written);
         if (result != -1) {
             total_written += result;
             if (total_written >= size) {
@@ -466,7 +466,7 @@ s32 save_file_write(const char* filename, const save_image_t* source, u32 size, 
         retries++;
     }
 
-    if (memcard_file_close_retry(g_file_descriptor) == 0) {
+    if (memcard_file_close_retry(s_file_descriptor) == 0) {
         return -1;
     }
     /* This result check has no effect; it keeps `result` live across the
@@ -519,16 +519,16 @@ s32 save_file_read(const char* filename, u8* destination, u32 size) {
     if (result < 0) {
         return -1;
     }
-    if (_get_error(g_file_descriptor) != 0) {
-        memcard_file_close_retry(g_file_descriptor);
+    if (_get_error(s_file_descriptor) != 0) {
+        memcard_file_close_retry(s_file_descriptor);
         return -1;
     }
     total = 0;
     for (i = 0; i < 40; i++) {
-        if (memcard_file_seek_retry(g_file_descriptor, total, 1) < 0) {
+        if (memcard_file_seek_retry(s_file_descriptor, total, 1) < 0) {
             break;
         }
-        result = read(g_file_descriptor, destination + total, size - total);
+        result = read(s_file_descriptor, destination + total, size - total);
         if (result != -1) {
             total += result;
             if (total >= size) {
@@ -536,7 +536,7 @@ s32 save_file_read(const char* filename, u8* destination, u32 size) {
             }
         }
     }
-    if (memcard_file_close_retry(g_file_descriptor) == 0) {
+    if (memcard_file_close_retry(s_file_descriptor) == 0) {
         return -1;
     }
     /* This result check has no effect; it keeps `result` live across the

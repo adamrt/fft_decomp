@@ -24,12 +24,12 @@
 
 extern menu_entry_t g_music_test_list_params;
 extern menu_text_layout_t g_music_test_list_state;
-static s16 g_music_test_list_entries[96];
+static s16 s_music_test_list_entries[96];
 extern s16 g_music_test_list_entry_flags[96];
 extern s16 g_music_test_selected_option;
 extern struct suzuki_music* g_music_test_sound_handle; /* handle of the playing music test track */
 
-static s16 g_music_test_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+static s16 s_music_test_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE };
@@ -38,7 +38,7 @@ static s16 g_music_test_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTIO
 #define MUSIC_TEST_TRACK_IDS_16(first)                                                                                 \
     first, first + 1, first + 2, first + 3, first + 4, first + 5, first + 6, first + 7, first + 8, first + 9,          \
         first + 10, first + 11, first + 12, first + 13, first + 14, first + 15
-static u8 g_music_test_music_ids[96]
+static u8 s_music_test_music_ids[96]
     = { MUSIC_TEST_TRACK_IDS_16(1), MUSIC_TEST_TRACK_IDS_16(17), MUSIC_TEST_TRACK_IDS_16(33),
           MUSIC_TEST_TRACK_IDS_16(49), MUSIC_TEST_TRACK_IDS_16(65), MUSIC_TEST_TRACK_IDS_16(81) };
 #undef MUSIC_TEST_TRACK_IDS_16
@@ -56,7 +56,7 @@ static void music_test_start_list_thread(s32 thread_id, s32 limit, point32_t* ex
     g_music_test_list_state.x[0] = 4;
     g_music_test_list_state.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
     g_music_test_list_state.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
-    g_music_test_list_state.text_ids[0] = g_music_test_list_entries;
+    g_music_test_list_state.text_ids[0] = s_music_test_list_entries;
     g_music_test_list_state.text_colors[0] = g_music_test_list_entry_flags;
     g_music_test_list_state.mode[0] = MENU_TEXT_COLUMN_TEXT;
     g_music_test_list_params.vram_origin.x = 0x200;
@@ -76,7 +76,7 @@ static void music_test_start_list_thread(s32 thread_id, s32 limit, point32_t* ex
     g_music_test_list_params.text_id = 0;
     g_music_test_list_params.max_row_index = extent->y;
     g_music_test_list_params.thread_count = 0;
-    g_music_test_list_params.row_actions = g_music_test_row_actions;
+    g_music_test_list_params.row_actions = s_music_test_row_actions;
     g_music_test_list_params.header_id = 1;
     g_music_test_list_params.context = &g_music_test_list_state;
     g_music_test_list_params.value = &g_music_test_selected_option;
@@ -103,7 +103,7 @@ void music_test_menu_open(void) {
     file_pending_wait();
 
     for (i = 0; i < 96; i++) {
-        g_music_test_list_entries[i] = i + 0xc000;
+        s_music_test_list_entries[i] = i + 0xc000;
         g_music_test_list_entry_flags[i] = 0;
     }
 
@@ -211,7 +211,7 @@ void music_test_menu_update(controller_record_t* record) {
             } else {
                 state->delay = 1;
             }
-            state->music_id = g_music_test_music_ids[g_music_test_list_params.selected_index];
+            state->music_id = s_music_test_music_ids[g_music_test_list_params.selected_index];
         } else if (buttons & PSX_PAD_CROSS) {
             if (state->music_id != 0) {
                 music_volume_target_set(0, 0x78);

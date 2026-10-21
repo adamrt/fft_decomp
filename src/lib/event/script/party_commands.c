@@ -16,7 +16,7 @@
 #include "fft/unit_view.h"
 #include "psx/types.h"
 
-static battle_map_tile_coordinates_t g_script_warp_coords;
+static battle_map_tile_coordinates_t s_script_warp_coords;
 extern u16 g_unit_view_depth_display_suppressed;
 
 /* DismissUnit: remove the first roster member after slot 0 with this sprite set from
@@ -116,15 +116,15 @@ void script_warp_unit_display_to_paired_unit(s32 runtime_id) {
     }
     runtime_id = unit_battle_runtime_id_get(battle_id);
     if (runtime_id != -1) {
-        g_script_warp_coords.x = unit->x;
-        g_script_warp_coords.layer = unit->position.higher_elevation;
-        g_script_warp_coords.y = unit->position.y;
+        s_script_warp_coords.x = unit->x;
+        s_script_warp_coords.layer = unit->position.higher_elevation;
+        s_script_warp_coords.y = unit->position.y;
         facing = unit->position.facing << 2;
         state = &g_unit_animation_states[runtime_id];
         state->delay = 0;
         state->rotating = 0;
         state->target_facing = facing;
-        unit_place_in_new_location(runtime_id, &g_script_warp_coords, unit->position.facing);
+        unit_place_in_new_location(runtime_id, &s_script_warp_coords, unit->position.facing);
         unit_event_facing_set(runtime_id, unit->position.facing << 2);
     }
 }

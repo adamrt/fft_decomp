@@ -22,7 +22,7 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
-static s32 g_session_initialized = 0;
+static s32 s_session_initialized = 0;
 
 /* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
  * mark the shared file descriptor idle. */
@@ -80,7 +80,7 @@ void boot_startup_run(void) {
     zodiac_frame_load();
     srand(1);
     boot_squaresoft_logo_fade_out();
-    g_session_initialized = 0;
+    s_session_initialized = 0;
 }
 
 /* Prepare a fresh session before the opening runs: reset the 32-bit save values and
@@ -96,7 +96,7 @@ void boot_startup_run(void) {
 void boot_session_reset(void) {
     int frame;
 
-    if (g_session_initialized != 0) {
+    if (s_session_initialized != 0) {
         heap_game_table_clear();
         music_all_unload();
         g_save_play_time_hours = 0;
@@ -118,12 +118,12 @@ void boot_session_reset(void) {
     save_data_tables_init();
     menu_sort_tables_init();
 
-    if (g_session_initialized != 0) {
+    if (s_session_initialized != 0) {
         for (frame = 0; frame < 60; frame++) {
             VSync(0);
         }
         boot_squaresoft_logo_fade_out();
     }
 
-    g_session_initialized = 1;
+    s_session_initialized = 1;
 }

@@ -14,7 +14,7 @@
 extern RECT g_battle_map_title_image_rect;
 extern u32 g_battle_map_title_palette_data[8];
 extern RECT g_battle_map_title_palette_rect;
-static s32 g_battle_map_title_closing_past_midpoint;
+static s32 s_battle_map_title_closing_past_midpoint;
 
 /* Two buffers of the four shaded title-panel strips. */
 extern POLY_GT4 g_battle_map_title_sprites[2][4];
@@ -159,7 +159,7 @@ void attack_map_title_entrypoint(void) {
         buffer ^= 1;
         battle_map_title_build_strips(g_battle_map_title_sprites[buffer], width, 0x80, 1);
         if (width >= 0x81) {
-            g_battle_map_title_closing_past_midpoint = 1;
+            s_battle_map_title_closing_past_midpoint = 1;
         }
         width += step;
         thread_yield();

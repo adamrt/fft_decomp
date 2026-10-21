@@ -36,7 +36,7 @@ extern u8 g_formation_ability_menu_unit_index;
 extern u8 g_formation_ability_menu_slots_changed;
 extern u8 g_formation_ability_menu_saved_browse_enabled;
 extern u8 g_formation_ability_submenu_running;
-static s8 g_formation_ability_learn_menu_step; /* menu_job_list_step_e */
+static s8 s_formation_ability_learn_menu_step; /* menu_job_list_step_e */
 
 extern u8 g_formation_ability_set_unit_index;
 extern s8 g_formation_ability_set_slot; /* -1 before the first cursor update, then ability slot 1..4 */
@@ -76,7 +76,7 @@ static s32 learn_menu_update(void);
 static s32 equipment_support_change_check(s16 unit_id, s16 ability_id);
 static s32 job_jp_get(s32 index);
 
-static s16 g_formation_ability_remove_slots[5] = { 0 };
+static s16 s_formation_ability_remove_slots[5] = { 0 };
 
 /* A thread that only waits, frame after frame; it occupies the upper menu's child slot
  * while the Set or Remove ability mode runs. */
@@ -235,8 +235,8 @@ static s32 removal_menu_update(void) {
         g_formation_ability_remove_unit_index = g_unit_selected_index;
     }
     if (g_formation_ability_remove_initialized == 0) {
-        bcopy(g_formation_unit_pointers[unit_index]->detail.abilities, g_formation_ability_remove_slots,
-            sizeof(g_formation_ability_remove_slots));
+        bcopy(g_formation_unit_pointers[unit_index]->detail.abilities, s_formation_ability_remove_slots,
+            sizeof(s_formation_ability_remove_slots));
         g_formation_ability_remove_cursor = -1;
         g_formation_unit_cycle_mode = 2;
         g_formation_ability_remove_all_prompt_active = 0;
@@ -265,14 +265,14 @@ static s32 removal_menu_update(void) {
         g_formation_ability_remove_all_prompt_active = removal_prompt_update();
         if (g_formation_ability_remove_all_prompt_active == 0) {
             g_formation_ability_remove_cursor = -1;
-            bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.abilities, g_formation_ability_remove_slots,
-                sizeof(g_formation_ability_remove_slots));
+            bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.abilities, s_formation_ability_remove_slots,
+                sizeof(s_formation_ability_remove_slots));
             return 1;
         }
         return 1;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_LEFT) {
-        formation_ability_diff_movement_stats(&g_item_preview_stat_detail, g_formation_ability_remove_slots[4], 0);
+        formation_ability_diff_movement_stats(&g_item_preview_stat_detail, s_formation_ability_remove_slots[4], 0);
         formation_toggle_preview_stats_window(1);
         g_formation_ability_remove_all_prompt_active = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
@@ -298,7 +298,7 @@ static s32 removal_menu_update(void) {
         g_help_message_text_id = ability + HELP_TEXT_ID_SKILLSET_BASE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        saved_slots = g_formation_ability_remove_slots;
+        saved_slots = s_formation_ability_remove_slots;
         saved_slot = saved_slots + slot;
         sound = *saved_slot;
         if (sound == 0) {
@@ -319,7 +319,7 @@ static s32 removal_menu_update(void) {
         g_formation_ability_remove_cursor = slot;
         preview = 0;
         if (slot == 4) {
-            movement_ability = g_formation_ability_remove_slots[4];
+            movement_ability = s_formation_ability_remove_slots[4];
             if (movement_ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                 && movement_ability <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3) {
                 formation_ability_diff_movement_stats(&g_item_preview_stat_detail, movement_ability, 0);
@@ -578,7 +578,7 @@ static s32 learn_menu_update(void) {
     s32 result;
 
     if (g_formation_ability_learn_menu_initialized == 0) {
-        g_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_JOBS;
+        s_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_JOBS;
         g_formation_unit_banner_enabled = 0;
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
@@ -587,11 +587,11 @@ static s32 learn_menu_update(void) {
         menu_selection_record_clear(9);
         g_formation_ability_learn_menu_initialized = 1;
     }
-    if (g_formation_ability_learn_menu_step == MENU_JOB_LIST_STEP_JOBS) {
+    if (s_formation_ability_learn_menu_step == MENU_JOB_LIST_STEP_JOBS) {
         result = formation_ability_job_list_update();
         if (result == MENU_JOB_LIST_STEP_ABILITIES) {
             menu_scrollable_list_core_init(0, 0, 0);
-            g_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_ABILITIES;
+            s_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_ABILITIES;
         } else if (result == MENU_JOB_LIST_STEP_CLOSE) {
             g_formation_ability_learn_menu_initialized = 0;
             g_formation_unit_banner_enabled = 1;
@@ -599,7 +599,7 @@ static s32 learn_menu_update(void) {
             return 0;
         }
     } else {
-        g_formation_ability_learn_menu_step = formation_ability_learn_list_update();
+        s_formation_ability_learn_menu_step = formation_ability_learn_list_update();
     }
     return 1;
 }

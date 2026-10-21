@@ -18,12 +18,12 @@
 #include "psx/types.h"
 
 extern u8 g_ability_list_ready;
-static s8 g_ability_list_confirm_prompt_state;
+static s8 s_ability_list_confirm_prompt_state;
 extern s8 g_job_list_menu_active;
 extern s8 g_job_list_menu_phase; /* menu_job_list_step_e */
 
 /* The title is one mutable job ID followed by the text-row terminator. */
-static s16 g_ability_list_job_name_ids[2] = { 0, -1 };
+static s16 s_ability_list_job_name_ids[2] = { 0, -1 };
 
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_ability_list_menu_script[493];
@@ -108,7 +108,7 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = ability_list_is_reaction_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = ability_list_is_action_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
-        g_ability_list_confirm_prompt_state = 0;
+        s_ability_list_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
         menu_selection_record_clear(10);
         menu_selection_record_clear(11);
@@ -118,9 +118,9 @@ s32 ability_list_update(void) {
         rect.y = 0xC8;
         rect.w = 0x14;
         rect.h = 0x10;
-        g_ability_list_job_name_ids[0] = g_job_list_selected_id;
+        s_ability_list_job_name_ids[0] = g_job_list_selected_id;
         text_id_rows_to_vram_render(
-            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_ids, &rect, 0);
+            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], s_ability_list_job_name_ids, &rect, 0);
         g_ability_list_ability_category = menu_selection_horizontal_step(4, 0, 0);
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);

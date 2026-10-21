@@ -21,13 +21,13 @@
 /* Zodiac compatibility by the absolute difference of the two signs, 12 entries:
  * 3 and 9 apart are bad, 4 and 8 good, 6 (the opposite sign) depends on sex,
  * the rest neutral. Serpentarius returns before the table is read. */
-static u8 g_zodiac_compatibility_modifiers[12] = { ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_NEUTRAL,
+static u8 s_zodiac_compatibility_modifiers[12] = { ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_NEUTRAL,
     ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_BAD, ZODIAC_COMPATIBILITY_GOOD, ZODIAC_COMPATIBILITY_NEUTRAL,
     ZODIAC_COMPATIBILITY_GENDER_DEPENDENT, ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_GOOD,
     ZODIAC_COMPATIBILITY_BAD, ZODIAC_COMPATIBILITY_NEUTRAL, ZODIAC_COMPATIBILITY_NEUTRAL };
 
 /* The statuses a rider can be inflicted with, one mask per status byte. */
-static u8 g_rider_infliction_mask[STATUS_BYTE_COUNT]
+static u8 s_rider_infliction_mask[STATUS_BYTE_COUNT]
     = { STATUS_BYTE_MASK(STATUS_ID_UNNAMED_00) | STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD)
               | STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
               | STATUS_BYTE_MASK(STATUS_ID_DEFENDING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING),
@@ -346,7 +346,7 @@ void formula_apply_zodiac_compatibility(void) {
         difference = target_zodiac - attacker_zodiac;
     }
 
-    compatibility = g_zodiac_compatibility_modifiers[difference];
+    compatibility = s_zodiac_compatibility_modifiers[difference];
     if (compatibility == ZODIAC_COMPATIBILITY_GENDER_DEPENDENT) {
         u8 attacker_flags = g_action_attacker->unit_flags;
 
@@ -409,7 +409,7 @@ s32 status_modify_inflictions(s32 removal_only) {
     immortal = g_action_target->team_flags & UNIT_TEAM_FLAG_IMMORTAL;
     if (g_action_target->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            g_action_target_data->status_changes.infliction[i] &= g_rider_infliction_mask[i];
+            g_action_target_data->status_changes.infliction[i] &= s_rider_infliction_mask[i];
         }
     }
     action = g_action_target_data;

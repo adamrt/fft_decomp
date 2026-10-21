@@ -17,7 +17,7 @@ extern u16 g_screen_alternate_number_clut_alt;
 extern u16 g_screen_disabled_number_clut_normal;
 extern u16 g_screen_disabled_number_clut_alt;
 extern u16 g_screen_active_clut_front;
-static u16 g_screen_active_clut_back;
+static u16 s_screen_active_clut_back;
 
 /*
  * Select the normal or alternate menu-render palette.
@@ -52,7 +52,7 @@ void screen_palette_mode_set(s32 mode) {
         g_screen_active_clut_front = g_menu_cursor_mode0_foreground_clut;
         clut = g_menu_cursor_mode0_background_clut;
     }
-    g_screen_active_clut_back = clut;
+    s_screen_active_clut_back = clut;
 }
 
 /* Menu-script opcode: when the ordering-table index is locked (a temporary

@@ -9,7 +9,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static glyph_blit_t g_menu_decimal_glyph = { { 0, 16, 6, 10 }, 256, 0 };
+static glyph_blit_t s_menu_decimal_glyph = { { 0, 16, 6, 10 }, 256, 0 };
 
 static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
 
@@ -141,24 +141,24 @@ static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, gly
     }
     if (flags & MENU_DECIMAL_SLASH_PREFIX) {
         position->rect.x -= 2;
-        g_menu_decimal_glyph.rect.x = 0xb4;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        s_menu_decimal_glyph.rect.x = 0xb4;
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_decimal_glyph, position);
         position->rect.x += 7;
     }
     if (flags & MENU_DECIMAL_DOTS_PREFIX) {
-        g_menu_decimal_glyph.rect.x = 0x78;
-        g_menu_decimal_glyph.rect.y = 0x1a;
-        g_menu_decimal_glyph.rect.h = 4;
+        s_menu_decimal_glyph.rect.x = 0x78;
+        s_menu_decimal_glyph.rect.y = 0x1a;
+        s_menu_decimal_glyph.rect.h = 4;
         position->rect.y += 3;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_decimal_glyph, position);
         position->rect.x += 7;
         position->rect.y -= 3;
-        g_menu_decimal_glyph.rect.y = 0x10;
-        g_menu_decimal_glyph.rect.h = 0x0a;
+        s_menu_decimal_glyph.rect.y = 0x10;
+        s_menu_decimal_glyph.rect.h = 0x0a;
     }
     position->color = saved_color;
     if (flags & MENU_DECIMAL_SIGN_MINUS) {
-        g_menu_decimal_glyph.rect.x = 0xba;
+        s_menu_decimal_glyph.rect.x = 0xba;
         if (value == 0) {
             if ((flags & MENU_DECIMAL_FIELD_WIDTH_MASK) == 4) {
                 position->rect.x += 10;
@@ -166,7 +166,7 @@ static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, gly
                 position->rect.x += 5;
             }
         }
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_decimal_glyph, position);
         position->rect.x += 5;
         if (value == 0) {
             return;
@@ -174,8 +174,8 @@ static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, gly
     }
     plus = flags & MENU_DECIMAL_SIGN_PLUS;
     if (plus) {
-        g_menu_decimal_glyph.rect.x = 0xc8;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        s_menu_decimal_glyph.rect.x = 0xc8;
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_decimal_glyph, position);
         position->rect.x += 5;
     }
     digits = flags & MENU_DECIMAL_FIELD_WIDTH_MASK;
@@ -200,8 +200,8 @@ static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, gly
         position->rect.x += (digits - min_digits) * 5;
     }
     for (i = 0; i < (flags & 0xff); i++) {
-        g_menu_decimal_glyph.rect.x = value % 10 * 6 + 0x78;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        s_menu_decimal_glyph.rect.x = value % 10 * 6 + 0x78;
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &s_menu_decimal_glyph, position);
         position->rect.x -= 5;
         value /= 10;
         if (!(flags & MENU_DECIMAL_LEADING_ZEROS) && value == 0) {

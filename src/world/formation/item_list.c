@@ -23,7 +23,7 @@
 
 /* item menu state */
 extern s8 g_formation_item_menu_mode; /* menu_item_list_state_e */
-static s8 g_formation_item_category_previewed_cursor;
+static s8 s_formation_item_category_previewed_cursor;
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_item_hp_mp_bonus_window_script[88];
@@ -125,7 +125,7 @@ s32 formation_items_browse_update(void) {
     if (g_formation_item_category_menu_initialized == 0) {
         g_formation_item_category_menu_initialized = 1;
         menu_set_vsync_mode_and_event_speed(2);
-        g_formation_item_category_previewed_cursor = -1;
+        s_formation_item_category_previewed_cursor = -1;
         formation_item_list_build(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
@@ -164,7 +164,7 @@ s32 formation_items_browse_update(void) {
         formation_item_list_build(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        g_formation_item_category_previewed_cursor = -1;
+        s_formation_item_category_previewed_cursor = -1;
         menu_selection_record_restore(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -186,13 +186,13 @@ s32 formation_items_browse_update(void) {
         }
         g_sound_queued_effect_id = SOUND_SFX_INVALID;
     }
-    if (g_menu_list_selected_index != g_formation_item_category_previewed_cursor) {
+    if (g_menu_list_selected_index != s_formation_item_category_previewed_cursor) {
         if (g_menu_list_entry_count != 0) {
             slot = g_item_list_entries[g_menu_list_selected_index];
         } else {
             slot = 0;
         }
-        g_formation_item_category_previewed_cursor = g_menu_list_selected_index;
+        s_formation_item_category_previewed_cursor = g_menu_list_selected_index;
         item_stat_preview_build(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;

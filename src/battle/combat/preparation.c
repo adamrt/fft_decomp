@@ -21,7 +21,7 @@ extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT];
 extern u8 g_action_loaded_ability_flags_1;
 extern u8 g_action_actor_x;
 extern u8 g_action_actor_y;
-static u8 g_action_actor_elevation;
+static u8 s_action_actor_elevation;
 
 /* Dismount destinations reserved since the last strike setup; turn-status
  * and trap results also append. */
@@ -1118,7 +1118,7 @@ void action_store_actor_data(unit_stats_t* unit) {
     if (g_action_context == ACTION_CONTEXT_PRIMARY) {
         g_action_actor_x = unit->x;
         g_action_actor_y = unit->position.y;
-        g_action_actor_elevation = unit->position.higher_elevation;
+        s_action_actor_elevation = unit->position.higher_elevation;
     } else {
         action_command_copy(&g_action_saved_command, &unit->action_command);
         g_action_context = ACTION_CONTEXT_PRIMARY;

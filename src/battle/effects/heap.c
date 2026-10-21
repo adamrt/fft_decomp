@@ -12,16 +12,16 @@ typedef struct owner_list {
 } owner_list_t;
 
 /* Heap block lists and allocation bounds. */
-static effect_heap_node_t* g_rover;
+static effect_heap_node_t* s_rover;
 
-static owner_list_t g_owner_lists[EFFECT_HEAP_OWNER_COUNT] = { 0 };
+static owner_list_t s_owner_lists[EFFECT_HEAP_OWNER_COUNT] = { 0 };
 
-static effect_heap_node_t* g_heap_base = 0;
+static effect_heap_node_t* s_heap_base = 0;
 
-static s16 g_block_count = 0;
+static s16 s_block_count = 0;
 
 /* Lowest largest-free-block size seen, in 8-byte units. */
-static s32 g_min_largest_free_block;
+static s32 s_min_largest_free_block;
 
 /* Provisional: never written; effect_heap_print_stats prints it x4 in its "DP" line. */
 extern s32 g_effect_heap_debug_dp_words;
@@ -35,13 +35,13 @@ void effect_heap_init(effect_heap_node_t* buffer, u32 buffer_size) {
     s32 owner;
     s16 block_count = (buffer_size >> 3) - 1;
 
-    g_rover = buffer;
-    g_heap_base = buffer;
+    s_rover = buffer;
+    s_heap_base = buffer;
     buffer->size = block_count;
-    g_block_count = block_count;
+    s_block_count = block_count;
     buffer->next = buffer;
     for (owner = EFFECT_HEAP_OWNER_COUNT - 1; owner >= 0; owner--) {
-        g_owner_lists[owner].head = 0;
+        s_owner_lists[owner].head = 0;
     }
 }
 
@@ -58,7 +58,7 @@ void* effect_heap_alloc_block(u32 size, s32 owner) {
     effect_heap_node_t* node;
     u32 blocks = (size + 15) >> 3;
 
-    prev = g_rover;
+    prev = s_rover;
     node = prev->next;
     for (;;) {
         if (node->size >= blocks) {
@@ -70,9 +70,9 @@ void* effect_heap_alloc_block(u32 size, s32 owner) {
                 node->size = blocks;
             }
             node->owner = owner;
-            node->next = g_owner_lists[owner].head;
-            g_rover = prev;
-            g_owner_lists[owner].head = node;
+            node->next = s_owner_lists[owner].head;
+            s_rover = prev;
+            s_owner_lists[owner].head = node;
             return node + 1;
         }
         prev = node;
@@ -89,7 +89,7 @@ void* effect_heap_alloc_block(u32 size, s32 owner) {
  */
 void effect_heap_free_block(void* ptr) {
     effect_heap_node_t* node = (effect_heap_node_t*)ptr - 1;
-    owner_list_t* list = &g_owner_lists[node->owner];
+    owner_list_t* list = &s_owner_lists[node->owner];
     effect_heap_node_t* owned = list->head;
     effect_heap_node_t* prev;
     effect_heap_node_t* free_node;
@@ -101,7 +101,7 @@ void effect_heap_free_block(void* ptr) {
         prev->next = node->next;
     }
 
-    for (free_node = g_rover; !(node > free_node && node < free_node->next); free_node = free_node->next) {
+    for (free_node = s_rover; !(node > free_node && node < free_node->next); free_node = free_node->next) {
         if (free_node >= free_node->next && (node > free_node || node < free_node->next)) {
             break;
         }
@@ -118,7 +118,7 @@ void effect_heap_free_block(void* ptr) {
     } else {
         free_node->next = node;
     }
-    g_rover = free_node;
+    s_rover = free_node;
 }
 
 /*
@@ -138,27 +138,27 @@ void effect_heap_print_stats(void) {
     s32 used;
     s32 size;
 
-    free_node = g_rover->next;
+    free_node = s_rover->next;
     for (;;) {
         size = free_node->size;
         total += size;
         if (largest < size) {
             largest = size;
         }
-        if (free_node == g_rover) {
+        if (free_node == s_rover) {
             break;
         }
         free_node = free_node->next;
     }
     FntPrint("HEAP REMAIN %x MAX %x\n", total * 8, largest * 8);
-    if (largest < g_min_largest_free_block) {
-        g_min_largest_free_block = largest;
+    if (largest < s_min_largest_free_block) {
+        s_min_largest_free_block = largest;
     }
-    FntPrint("MIN HEAP %x ", g_min_largest_free_block * 8);
+    FntPrint("MIN HEAP %x ", s_min_largest_free_block * 8);
     FntPrint("DP %x\n", g_effect_heap_debug_dp_words * 4 + g_effect_heap_debug_dp_bytes);
     for (owner = 0; owner < 16; owner++) {
         used = 0;
-        for (node = g_owner_lists[owner].head; node != 0; node = node->next) {
+        for (node = s_owner_lists[owner].head; node != 0; node = node->next) {
             used += node->size;
         }
         if (used != 0) {

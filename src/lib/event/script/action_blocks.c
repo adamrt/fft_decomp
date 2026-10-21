@@ -22,14 +22,14 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-static s16 g_script_debug_paused;
+static s16 s_script_debug_paused;
 
 /* DebugPause event instruction (0x72): print the pause message with the debug font, yield once and
  * set g_script_debug_paused, which nothing reads. */
 void script_debug_message_print(void) {
     FntPrint("\n\nPAUSE\n\n");
     thread_yield();
-    g_script_debug_paused = 1;
+    s_script_debug_paused = 1;
 }
 
 /* WalkTo: start the unit walking to the tile at the signed speed. A terrain_cost_flag of 1 makes

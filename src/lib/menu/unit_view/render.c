@@ -147,7 +147,7 @@ extern menu_number_entry_t g_unit_view_hovered_stats_setup[10];
 extern menu_number_entry_t g_unit_view_right_stats_setup[10];
 extern menu_number_entry_t g_unit_view_attack_caster_stats_setup[8];
 extern menu_number_entry_t g_unit_view_attack_target_stats_setup[8];
-static struct action_data* g_unit_view_preview_target_action;
+static struct action_data* s_unit_view_preview_target_action;
 extern u16 g_unit_view_hovered_stats_frame_count;
 extern u8 g_unit_view_stats_first_page_by_mode[4];
 extern u16 g_unit_view_stats_bounce_step;
@@ -223,7 +223,7 @@ typedef enum menu_status_screen_line_layout_offset {
 } menu_status_screen_line_layout_offset_e;
 
 /* Numeric-side-panel image pieces and the live values drawn into its three text images. */
-static image_layout_t g_status_screen_numbers_image_params[18] = {
+static image_layout_t s_status_screen_numbers_image_params[18] = {
     { { 0, 0, 24, 8 }, 10, 6 },
     { { 0, 8, 24, 8 }, 10, 18 },
     { { 176, 144, 26, 10 }, 5, 29 },
@@ -244,7 +244,7 @@ static image_layout_t g_status_screen_numbers_image_params[18] = {
     { { 80, 0, 12, 24 }, 118, 15 },
 };
 
-static menu_number_entry_t g_status_screen_numbers_entries[15] = {
+static menu_number_entry_t s_status_screen_numbers_entries[15] = {
     { 0, 0, &g_unit_panel_selected_unit_fields.state.move, SMALL_NUMBER_DOTS_PREFIX | 1, 0 },
     { 0, 12, &g_unit_panel_selected_unit_fields.state.jump, SMALL_NUMBER_DOTS_PREFIX | 1, 0 },
     { 0, 24, &g_unit_panel_selected_unit_fields.state.speed, SMALL_NUMBER_DOTS_PREFIX | 2, 0 },
@@ -307,11 +307,11 @@ static image_layout_t s_status_screen_item_icon_layouts[5]
     = { { { 0, 0, 16, 16 }, 18, 8 }, { { 16, 0, 16, 16 }, 18, 24 }, { { 32, 16, 16, 16 }, 18, 40 },
           { { 48, 16, 16, 16 }, 18, 56 }, { { 64, 16, 16, 16 }, 18, 72 } };
 
-static u8 g_status_screen_line_layout[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
+static u8 s_status_screen_line_layout[8 * MENU_STATUS_SCREEN_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
     123, 90, 32, 32, 32, 140, 1, 140, 90, 16, 16, 16, 141, 1, 141, 90 };
 
-static u16 g_status_screen_sprite_clut_pairs[19][2]
+static u16 s_status_screen_sprite_clut_pairs[19][2]
     = { 0x7cbc, 0x7c7c, 0x7cbc, 0x7c7c, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc,
           0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7c3c, 0x7d3c, 0x7c3c,
           0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c };
@@ -514,7 +514,7 @@ static s32 unit_view_display_action_preview(
     *extra_label_x = g_menu_attack_caster_quad_image_params[1][3].x_screen_offset;
     /* A skipped preview leaves the action null, and its accuracy is read
      * (from kernel RAM) before the null test. */
-    action = g_unit_view_preview_target_action;
+    action = s_unit_view_preview_target_action;
     g_unit_panel_selected_unit_status.projected_hit_percent = action->attack_accuracy;
     target_id = g_unit_panel_comparison_unit_data.battle_id;
     if (target_id == 0xff || action == 0) {
@@ -554,8 +554,8 @@ static s32 unit_view_display_action_preview(
         panel[0].x -= 10;
         panel[0].y += 4;
         *digits_x += 2;
-    } else if ((exp = g_unit_view_preview_target_action->exp_change) != 0
-        && (g_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
+    } else if ((exp = s_unit_view_preview_target_action->exp_change) != 0
+        && (s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
         s32 number_x;
 
         image = ACTION_DISPLAY_IMAGE_EXP;
@@ -572,40 +572,40 @@ static s32 unit_view_display_action_preview(
         number_x -= 8;
         panel[0].x = number_x;
         *label_x -= 8;
-    } else if ((g_unit_view_preview_target_action->special_effect
+    } else if ((s_unit_view_preview_target_action->special_effect
                    & (ACTION_SPECIAL_EFFECT_LEVEL_UP | ACTION_SPECIAL_EFFECT_LEVEL_DOWN))
-        && (g_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
+        && (s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
         image = ACTION_DISPLAY_IMAGE_LEVEL;
         value = 1;
-        if (g_unit_view_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_LEVEL_UP) {
+        if (s_unit_view_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_LEVEL_UP) {
             panel[0].format = MENU_DECIMAL_SIGN_PLUS | 1;
         } else {
             panel[0].format = MENU_DECIMAL_SIGN_MINUS | 1;
         }
         panel[0].x += 12;
-    } else if ((g_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
-        && g_unit_view_preview_target_action->ct_change == ACTION_CT_CHANGE_QUICK) {
+    } else if ((s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
+        && s_unit_view_preview_target_action->ct_change == ACTION_CT_CHANGE_QUICK) {
         /* The three shifted-label tails are duplicated in the original and
          * merged by cross-jumping; a shared goto tail allocates differently. */
         image = ACTION_DISPLAY_IMAGE_QUICK;
         value = 0;
         panel[0].kind = 2;
         *label_x = *label_x - g_result_image_rects[ACTION_DISPLAY_IMAGE_QUICK].width + 8;
-    } else if ((g_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
-        && (g_unit_view_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM)) {
+    } else if ((s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
+        && (s_unit_view_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM)) {
         image = ACTION_DISPLAY_IMAGE_STOLEN;
         value = 0;
         panel[0].kind = 2;
         *label_x = *label_x - g_result_image_rects[ACTION_DISPLAY_IMAGE_STOLEN].width + 8;
-    } else if ((g_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
-        && (g_unit_view_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT)) {
+    } else if ((s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
+        && (s_unit_view_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT)) {
         image = ACTION_DISPLAY_IMAGE_BROKEN;
         value = 0;
         panel[0].kind = 2;
         *label_x = *label_x - g_result_image_rects[ACTION_DISPLAY_IMAGE_BROKEN].width + 8;
-    } else if (g_unit_view_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE) {
+    } else if (s_unit_view_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE) {
         g_thread_call_target = (void (*)(void))status_action_priority_find;
-        image = thread_call_on_main_stack(g_unit_view_preview_target_action);
+        image = thread_call_on_main_stack(s_unit_view_preview_target_action);
         if (image > 0) {
             if (image & STATUS_ACTION_RESULT_REMOVAL) {
                 extra = 0x1f;
@@ -635,31 +635,31 @@ static s32 unit_view_display_action_preview(
         } else {
             panel[0].kind = 2;
         }
-    } else if (g_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS) {
+    } else if (s_unit_view_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS) {
         image = ACTION_DISPLAY_IMAGE_NONE;
-        if (g_unit_view_preview_target_action->sp_change != 0) {
+        if (s_unit_view_preview_target_action->sp_change != 0) {
             image = ACTION_DISPLAY_IMAGE_SPEED;
-            value = g_unit_view_preview_target_action->sp_change;
+            value = s_unit_view_preview_target_action->sp_change;
             *label_x -= 0x26;
-        } else if (g_unit_view_preview_target_action->ct_change != 0) {
+        } else if (s_unit_view_preview_target_action->ct_change != 0) {
             image = ACTION_DISPLAY_IMAGE_CT;
-            value = g_unit_view_preview_target_action->ct_change;
+            value = s_unit_view_preview_target_action->ct_change;
             *label_x -= 0x1e;
-        } else if (g_unit_view_preview_target_action->pa_change != 0) {
+        } else if (s_unit_view_preview_target_action->pa_change != 0) {
             image = ACTION_DISPLAY_IMAGE_PHYSICAL_ATTACK;
-            value = g_unit_view_preview_target_action->pa_change;
+            value = s_unit_view_preview_target_action->pa_change;
             *label_x -= 0x14;
-        } else if (g_unit_view_preview_target_action->ma_change != 0) {
+        } else if (s_unit_view_preview_target_action->ma_change != 0) {
             image = ACTION_DISPLAY_IMAGE_MAGICAL_ATTACK;
-            value = g_unit_view_preview_target_action->ma_change;
+            value = s_unit_view_preview_target_action->ma_change;
             *label_x -= 0x14;
-        } else if (g_unit_view_preview_target_action->brave_change != 0) {
+        } else if (s_unit_view_preview_target_action->brave_change != 0) {
             image = ACTION_DISPLAY_IMAGE_BRAVE;
-            value = g_unit_view_preview_target_action->brave_change;
+            value = s_unit_view_preview_target_action->brave_change;
             *label_x -= 0x24;
-        } else if (g_unit_view_preview_target_action->faith_change != 0) {
+        } else if (s_unit_view_preview_target_action->faith_change != 0) {
             image = ACTION_DISPLAY_IMAGE_FAITH_STAT;
-            value = g_unit_view_preview_target_action->faith_change;
+            value = s_unit_view_preview_target_action->faith_change;
             *label_x -= 0x24;
         }
         if (image >= ACTION_DISPLAY_IMAGE_CT && image <= ACTION_DISPLAY_IMAGE_MAGICAL_ATTACK) {
@@ -717,12 +717,12 @@ static s32 unit_view_display_action_preview(
         return image;
     }
 
-    if ((g_unit_view_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE)
-        && g_unit_view_preview_target_action->attack_type != ACTION_TYPE_STATUS_CHANGE) {
+    if ((s_unit_view_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE)
+        && s_unit_view_preview_target_action->attack_type != ACTION_TYPE_STATUS_CHANGE) {
         prim++;
         params++;
         g_thread_call_target = (void (*)(void))status_action_priority_find;
-        image = thread_call_on_main_stack(g_unit_view_preview_target_action);
+        image = thread_call_on_main_stack(s_unit_view_preview_target_action);
         if (image > 0) {
             if (image & STATUS_ACTION_RESULT_REMOVAL) {
                 setRGB0(prim, 0x30, 0x8c, 0xdc);
@@ -1124,11 +1124,11 @@ void unit_view_preview_caster_stats(void) {
     /* Item IDs leave secondary unset before this range-flags read. */
     if (((secondary.range->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE) && action->ability_id < ABILITY_ID_ITEM_FIRST)
         || action->skillset_id == SKILLSET_ID_EQUIP_CHANGE) {
-        g_unit_view_preview_target_action = 0;
+        s_unit_view_preview_target_action = 0;
     } else {
         g_thread_call_target = (void (*)(void))action_calculate_projected_effect;
         thread_call_on_main_stack(attacker, target, action);
-        g_unit_view_preview_target_action = &target->action;
+        s_unit_view_preview_target_action = &target->action;
     }
     thread_yield();
     thread_yield();
@@ -1490,15 +1490,15 @@ void status_screen_numbers_thread(void) {
     g_menu_window_text_pen.stride = 0x14;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(
-        number_images->mobility, g_status_screen_numbers_entries, &g_menu_window_text_pen, 3);
+        number_images->mobility, s_status_screen_numbers_entries, &g_menu_window_text_pen, 3);
     g_menu_window_text_pen.stride = 0x40;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(
-        number_images->weapons, &g_status_screen_numbers_entries[3], &g_menu_window_text_pen, 4);
+        number_images->weapons, &s_status_screen_numbers_entries[3], &g_menu_window_text_pen, 4);
     g_menu_window_text_pen.stride = 0x64;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(
-        number_images->combat, &g_status_screen_numbers_entries[7], &g_menu_window_text_pen, 8);
+        number_images->combat, &s_status_screen_numbers_entries[7], &g_menu_window_text_pen, 8);
     LoadImage(&g_status_screen_numbers_text_rect_a, (u32*)number_images->mobility);
     LoadImage(&g_status_screen_numbers_text_rect_b, (u32*)number_images->weapons);
     LoadImage(&g_status_screen_numbers_text_rect_c, (u32*)number_images->combat);
@@ -1507,7 +1507,7 @@ void status_screen_numbers_thread(void) {
     for (i = 0; i < 18; i++) {
         menu_init_sprt(&record->sprites[i]);
         gfx_set_image_primitive_layout(&record->sprites[i], &g_menu_texture_origin, &g_status_screen_numbers_frame_rect,
-            &g_status_screen_numbers_image_params[i]);
+            &s_status_screen_numbers_image_params[i]);
     }
     mem_copy_bytes_nonempty(&record[1], record, sizeof(*record));
     record[0].numeric_frame = &g_status_screen_numbers_frames[0].primitives;
@@ -1615,13 +1615,13 @@ void status_screen_thread(void) {
     for (i = 0; i < 8 * MENU_STATUS_SCREEN_LINE_SIZE; i += MENU_STATUS_SCREEN_LINE_SIZE) {
         SetLineF2(line);
         SetSemiTrans(line, 1);
-        setRGB0(line, g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_R],
-            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_G],
-            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_B]);
-        setXY2(line, g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_X0] + s_status_screen_panel_rect.x,
-            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_Y0] + s_status_screen_panel_rect.y,
-            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_X1] + s_status_screen_panel_rect.x,
-            g_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_Y1] + s_status_screen_panel_rect.y);
+        setRGB0(line, s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_R],
+            s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_G],
+            s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_B]);
+        setXY2(line, s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_X0] + s_status_screen_panel_rect.x,
+            s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_Y0] + s_status_screen_panel_rect.y,
+            s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_X1] + s_status_screen_panel_rect.x,
+            s_status_screen_line_layout[i + MENU_STATUS_SCREEN_LINE_Y1] + s_status_screen_panel_rect.y);
         line++;
     }
 
@@ -1749,7 +1749,7 @@ void status_screen_thread(void) {
         /* Dim while the status list started below runs in the slot before this thread. */
         value = thread_is_running_asm(g_thread_current_id - 1);
         for (i = 0; i < 19; i++) {
-            frame_record->frame.sprites[i].clut = g_status_screen_sprite_clut_pairs[i][value];
+            frame_record->frame.sprites[i].clut = s_status_screen_sprite_clut_pairs[i][value];
         }
         for (i = 0; i < 5; i++) {
             if (value != 0) {

@@ -15,14 +15,14 @@
 
 /* The event transition's spinning screen-capture sprite, sorted with GsSortSprite by
  * event_transition_sprite_draw. */
-static GsSPRITE g_event_transition_sprite = { 0 };
+static GsSPRITE s_event_transition_sprite = { 0 };
 
 /* The byte color triple of the screen-wide fade overlay. It
  * overlaps g_world_map_fade.boxes[0].r, but the target addresses
  * it separately from the 32-bit flags: reaching it through the fade-state
  * struct makes the flags update use absolute addressing instead of a base
  * register. */
-static CVECTOR g_world_map_fade_color;
+static CVECTOR s_world_map_fade_color;
 
 /* Pushes the event transition level (MENU_STACK_LEVEL_EVENT_TRANSITION)
  * after starting the seek to BATTLE.BIN. A FADE transition freezes the map
@@ -54,24 +54,24 @@ void event_transition_open(s32 mode) {
         rect.w = 0x100;
         rect.h = 0xF0;
         ClearImage(&rect, 0, 0, 0);
-        g_event_transition_sprite.attribute = 0x42000000;
-        g_event_transition_sprite.x = 0x20;
-        g_event_transition_sprite.y = 0x20;
-        g_event_transition_sprite.tpage = GetTPage(2, 0, 0x100, 0);
-        g_event_transition_sprite.w = 0xFF;
-        g_event_transition_sprite.mx = 0xA0;
-        g_event_transition_sprite.my = 0x98;
-        g_event_transition_sprite.scaley = ONE;
-        g_event_transition_sprite.scalex = ONE;
-        g_event_transition_sprite.cy = 0;
-        g_event_transition_sprite.cx = 0;
-        g_event_transition_sprite.v = 0;
-        g_event_transition_sprite.u = 0;
-        g_event_transition_sprite.h = 0xF0;
-        g_event_transition_sprite.rotate = 0;
-        g_event_transition_sprite.r = 0x80;
-        g_event_transition_sprite.g = 0x80;
-        g_event_transition_sprite.b = 0x80;
+        s_event_transition_sprite.attribute = 0x42000000;
+        s_event_transition_sprite.x = 0x20;
+        s_event_transition_sprite.y = 0x20;
+        s_event_transition_sprite.tpage = GetTPage(2, 0, 0x100, 0);
+        s_event_transition_sprite.w = 0xFF;
+        s_event_transition_sprite.mx = 0xA0;
+        s_event_transition_sprite.my = 0x98;
+        s_event_transition_sprite.scaley = ONE;
+        s_event_transition_sprite.scalex = ONE;
+        s_event_transition_sprite.cy = 0;
+        s_event_transition_sprite.cx = 0;
+        s_event_transition_sprite.v = 0;
+        s_event_transition_sprite.u = 0;
+        s_event_transition_sprite.h = 0xF0;
+        s_event_transition_sprite.rotate = 0;
+        s_event_transition_sprite.r = 0x80;
+        s_event_transition_sprite.g = 0x80;
+        s_event_transition_sprite.b = 0x80;
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
         g_menu_stack_records[g_menu_stack_depth].event_transition.frame = 0;
         g_menu_stack_records[g_menu_stack_depth].event_transition.anim_step = 0;
@@ -94,7 +94,7 @@ void event_transition_sprite_draw(GsOT* ordering_table) {
 
     if (g_menu_stack_types[current - 1] == MENU_STACK_LEVEL_EVENT_TRANSITION
         && g_menu_stack_records[current - 1].event_transition.mode != EVENT_TRANSITION_MODE_FADE) {
-        GsSortSprite(&g_event_transition_sprite, ordering_table, 2);
+        GsSortSprite(&s_event_transition_sprite, ordering_table, 2);
     }
 }
 
@@ -140,14 +140,14 @@ void event_transition_update(menu_stack_record_t* level) {
     /* White-out: brighten the overlay by 8 a frame; at full white, toggle the running flag
      * and move the image at VRAM (0x200, 0x100) back to (0x100, 0). */
     if (level->event_transition.fade_phase == EVENT_TRANSITION_FADE_WHITE_OUT) {
-        red_sum = g_world_map_fade_color.r + 8;
-        g_world_map_fade_color.r = red_sum;
-        g_world_map_fade_color.g = g_world_map_fade_color.g + 8;
-        g_world_map_fade_color.b = g_world_map_fade_color.b + 8;
+        red_sum = s_world_map_fade_color.r + 8;
+        s_world_map_fade_color.r = red_sum;
+        s_world_map_fade_color.g = s_world_map_fade_color.g + 8;
+        s_world_map_fade_color.b = s_world_map_fade_color.b + 8;
         if (red_sum >= 0xF8) {
-            g_world_map_fade_color.b = 0xFF;
-            g_world_map_fade_color.g = 0xFF;
-            g_world_map_fade_color.r = 0xFF;
+            s_world_map_fade_color.b = 0xFF;
+            s_world_map_fade_color.g = 0xFF;
+            s_world_map_fade_color.r = 0xFF;
             rect.x = 0x200;
             rect.y = 0x100;
             rect.w = 0x80;
@@ -161,13 +161,13 @@ void event_transition_update(menu_stack_record_t* level) {
 
     /* Flash: brighten by 0x10 a frame to 0x80, then cut to black and start the white-out. */
     if (level->event_transition.fade_phase == EVENT_TRANSITION_FADE_FLASH) {
-        g_world_map_fade_color.r = g_world_map_fade_color.r + 0x10;
-        g_world_map_fade_color.g = g_world_map_fade_color.g + 0x10;
-        g_world_map_fade_color.b = g_world_map_fade_color.b + 0x10;
-        if (g_world_map_fade_color.g >= 0x80) {
-            g_world_map_fade_color.r = 0;
-            g_world_map_fade_color.g = 0;
-            g_world_map_fade_color.b = 0;
+        s_world_map_fade_color.r = s_world_map_fade_color.r + 0x10;
+        s_world_map_fade_color.g = s_world_map_fade_color.g + 0x10;
+        s_world_map_fade_color.b = s_world_map_fade_color.b + 0x10;
+        if (s_world_map_fade_color.g >= 0x80) {
+            s_world_map_fade_color.r = 0;
+            s_world_map_fade_color.g = 0;
+            s_world_map_fade_color.b = 0;
             level->event_transition.fade_phase = EVENT_TRANSITION_FADE_WHITE_OUT;
         }
     }
@@ -176,33 +176,33 @@ void event_transition_update(menu_stack_record_t* level) {
     switch (level->event_transition.phase) {
     case EVENT_TRANSITION_PHASE_SPIN_IN:
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
-            g_event_transition_sprite.x = g_event_transition_sprite.x + 1;
+            s_event_transition_sprite.x = s_event_transition_sprite.x + 1;
         } else {
-            g_event_transition_sprite.x = g_event_transition_sprite.x - 1;
+            s_event_transition_sprite.x = s_event_transition_sprite.x - 1;
         }
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
-            g_event_transition_sprite.y = g_event_transition_sprite.y + 1;
+            s_event_transition_sprite.y = s_event_transition_sprite.y + 1;
         } else {
-            g_event_transition_sprite.y = g_event_transition_sprite.y - 1;
+            s_event_transition_sprite.y = s_event_transition_sprite.y - 1;
         }
 
         if (level->event_transition.frame % 3 == 0) {
             step = level->event_transition.anim_step + 2;
             level->event_transition.anim_step = step;
-            g_event_transition_sprite.scalex = 0x1100 - (step << 7);
-            g_event_transition_sprite.scaley = 0x1100 - (level->event_transition.anim_step << 7);
+            s_event_transition_sprite.scalex = 0x1100 - (step << 7);
+            s_event_transition_sprite.scaley = 0x1100 - (level->event_transition.anim_step << 7);
             if (level->event_transition.spin_direction != 0) {
-                angle = g_event_transition_sprite.rotate + 0x2000;
+                angle = s_event_transition_sprite.rotate + 0x2000;
             } else {
-                angle = g_event_transition_sprite.rotate - 0x2000;
+                angle = s_event_transition_sprite.rotate - 0x2000;
             }
-            g_event_transition_sprite.rotate = angle;
+            s_event_transition_sprite.rotate = angle;
 
             /* Stored as a byte, -0x80 - 4 * step darkens the sprite from 0x80. */
             shade = -0x80 - (level->event_transition.anim_step * 4);
-            g_event_transition_sprite.b = shade;
-            g_event_transition_sprite.g = shade;
-            g_event_transition_sprite.r = shade;
+            s_event_transition_sprite.b = shade;
+            s_event_transition_sprite.g = shade;
+            s_event_transition_sprite.r = shade;
 
             if (level->event_transition.mode == EVENT_TRANSITION_MODE_SPIN) {
                 if (level->event_transition.anim_step == 4) {
@@ -212,10 +212,10 @@ void event_transition_update(menu_stack_record_t* level) {
                 /* Spin back out at full size, textured from the 16-bit page holding the capture. */
                 if (level->event_transition.anim_step >= 0x20) {
                     level->event_transition.phase = EVENT_TRANSITION_PHASE_SPIN_OUT;
-                    g_event_transition_sprite.attribute = 0x52000000;
-                    g_event_transition_sprite.tpage = GetTPage(2, 1, 0x100, 0);
-                    g_event_transition_sprite.scaley = ONE;
-                    g_event_transition_sprite.scalex = ONE;
+                    s_event_transition_sprite.attribute = 0x52000000;
+                    s_event_transition_sprite.tpage = GetTPage(2, 1, 0x100, 0);
+                    s_event_transition_sprite.scaley = ONE;
+                    s_event_transition_sprite.scalex = ONE;
                 }
             } else {
                 if (level->event_transition.anim_step == 4) {
@@ -225,9 +225,9 @@ void event_transition_update(menu_stack_record_t* level) {
                     level->event_transition.phase = EVENT_TRANSITION_PHASE_DONE;
                 }
                 if (level->event_transition.anim_step == 0x18) {
-                    g_world_map_fade_color.r = 0;
-                    g_world_map_fade_color.g = 0;
-                    g_world_map_fade_color.b = 0;
+                    s_world_map_fade_color.r = 0;
+                    s_world_map_fade_color.g = 0;
+                    s_world_map_fade_color.b = 0;
                     g_world_map_fade.flags[0] |= WORLD_MAP_FADE_BOX_VISIBLE;
                     level->event_transition.fade_phase = EVENT_TRANSITION_FADE_WHITE_OUT;
                 }
@@ -237,40 +237,40 @@ void event_transition_update(menu_stack_record_t* level) {
 
     case EVENT_TRANSITION_PHASE_SPIN_OUT:
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_RIGHT) {
-            g_event_transition_sprite.x = g_event_transition_sprite.x - 1;
+            s_event_transition_sprite.x = s_event_transition_sprite.x - 1;
         } else {
-            g_event_transition_sprite.x = g_event_transition_sprite.x + 1;
+            s_event_transition_sprite.x = s_event_transition_sprite.x + 1;
         }
         if (level->event_transition.drift_direction & EVENT_TRANSITION_DRIFT_DOWN) {
-            g_event_transition_sprite.y = g_event_transition_sprite.y - 1;
+            s_event_transition_sprite.y = s_event_transition_sprite.y - 1;
         } else {
-            g_event_transition_sprite.y = g_event_transition_sprite.y + 1;
+            s_event_transition_sprite.y = s_event_transition_sprite.y + 1;
         }
 
         if (level->event_transition.frame % 3 == 0) {
             step = level->event_transition.anim_step + 4;
             level->event_transition.anim_step = step;
-            g_event_transition_sprite.scalex = 0x1100 - ((0x40 - step) << 7);
-            g_event_transition_sprite.scaley = 0x1100 - ((0x40 - level->event_transition.anim_step) << 7);
-            g_event_transition_sprite.b = (level->event_transition.anim_step - 0x20) * 4;
+            s_event_transition_sprite.scalex = 0x1100 - ((0x40 - step) << 7);
+            s_event_transition_sprite.scaley = 0x1100 - ((0x40 - level->event_transition.anim_step) << 7);
+            s_event_transition_sprite.b = (level->event_transition.anim_step - 0x20) * 4;
             if (level->event_transition.spin_direction != 0) {
-                angle = g_event_transition_sprite.rotate - 0x2000;
+                angle = s_event_transition_sprite.rotate - 0x2000;
             } else {
-                angle = g_event_transition_sprite.rotate + 0x2000;
+                angle = s_event_transition_sprite.rotate + 0x2000;
             }
-            g_event_transition_sprite.rotate = angle;
+            s_event_transition_sprite.rotate = angle;
 
             if (level->event_transition.anim_step >= 0x38) {
-                g_world_map_fade_color.r = 0;
-                g_world_map_fade_color.g = 0;
-                g_world_map_fade_color.b = 0;
+                s_world_map_fade_color.r = 0;
+                s_world_map_fade_color.g = 0;
+                s_world_map_fade_color.b = 0;
                 g_world_map_fade.flags[0] |= WORLD_MAP_FADE_BOX_VISIBLE;
                 level->event_transition.fade_phase = EVENT_TRANSITION_FADE_FLASH;
             }
             if (level->event_transition.anim_step >= 0x50) {
-                g_event_transition_sprite.r = 0;
-                g_event_transition_sprite.g = 0;
-                g_event_transition_sprite.b = 0;
+                s_event_transition_sprite.r = 0;
+                s_event_transition_sprite.g = 0;
+                s_event_transition_sprite.b = 0;
                 level->event_transition.phase = EVENT_TRANSITION_PHASE_DONE;
             }
         }

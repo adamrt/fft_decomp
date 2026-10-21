@@ -11,10 +11,10 @@
 extern file_extent_t g_sprite_sp2_files[];
 extern file_extent_t g_sprite_worker8_sp2_files[];
 
-static s32 g_sprite_compressed_nibble_phase;
-static s32 g_sprite_compressed_offset;
+static s32 s_sprite_compressed_nibble_phase;
+static s32 s_sprite_compressed_offset;
 /* Cursor state for the compressed attack-image tail of a unit SPR file. */
-static const u8* g_sprite_compressed_data;
+static const u8* s_sprite_compressed_data;
 
 /* Start reading the SP2 file that holds the attack animation of the unit's SP2 ability into
  * destination. Worker 8 uses its own file table, indexed from animation 0x73. Returns -1 when the
@@ -76,14 +76,14 @@ static u32 compressed_nibble_read(void) {
     u32 nibble;
     u8 value;
 
-    if (g_sprite_compressed_nibble_phase == 0) {
-        nibble = g_sprite_compressed_data[g_sprite_compressed_offset] >> 4;
+    if (s_sprite_compressed_nibble_phase == 0) {
+        nibble = s_sprite_compressed_data[s_sprite_compressed_offset] >> 4;
     } else {
-        value = g_sprite_compressed_data[g_sprite_compressed_offset];
-        g_sprite_compressed_offset++;
+        value = s_sprite_compressed_data[s_sprite_compressed_offset];
+        s_sprite_compressed_offset++;
         nibble = value & 0xf;
     }
-    g_sprite_compressed_nibble_phase ^= 1;
+    s_sprite_compressed_nibble_phase ^= 1;
     return nibble;
 }
 
@@ -102,9 +102,9 @@ void sprite_attack_image_decompress(const u8* source, u8* destination) {
     s32 size = 0x6400;
     u8* out = destination;
 
-    g_sprite_compressed_data = source;
-    g_sprite_compressed_offset = 0;
-    g_sprite_compressed_nibble_phase = 0;
+    s_sprite_compressed_data = source;
+    s_sprite_compressed_offset = 0;
+    s_sprite_compressed_nibble_phase = 0;
     while (1) {
         value = compressed_nibble_read();
         if (value == 0) {

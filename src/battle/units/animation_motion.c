@@ -78,7 +78,7 @@ static s32 distortion_jump_to_own_tile_faded(unit_runtime_t* unit);
 static s32 distortion_jump_rise(unit_runtime_t* unit);
 
 /* One handler for each distortion id; id 0 is skipped by the dispatcher. */
-static animation_distortion_handler_t g_distortion_handlers[ANIMATION_DISTORTION_COUNT] = {
+static animation_distortion_handler_t s_distortion_handlers[ANIMATION_DISTORTION_COUNT] = {
     distortion_none,
     distortion_scale_pulse_update,
     distortion_rise,
@@ -1035,7 +1035,7 @@ void animation_distortion_dispatch(unit_runtime_t* unit) {
 
     if (distortion_id != ANIMATION_DISTORTION_NONE) {
         if (distortion_id < ANIMATION_DISTORTION_COUNT) {
-            g_distortion_handlers[distortion_id](unit);
+            s_distortion_handlers[distortion_id](unit);
         } else {
             system_error_handle(SYSTEM_ERROR_DISTORTION_ANIMATION);
         }

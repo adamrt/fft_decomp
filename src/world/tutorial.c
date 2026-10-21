@@ -24,7 +24,7 @@
 /* tutorial playback state */
 extern tutorial_state_t g_tutorial_state;
 extern s16 g_tutorial_wait_time_remaining;
-static s16 g_tutorial_highlight_brightness;
+static s16 s_tutorial_highlight_brightness;
 extern s16 g_tutorial_buttons;
 
 /* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by
@@ -72,15 +72,15 @@ typedef struct tutorial_wait_instruction {
 } tutorial_wait_instruction_t;
 typedef char tutorial_wait_instruction_size_must_be_2[sizeof(tutorial_wait_instruction_t) == 2 ? 1 : -1];
 
-static u8* g_tutorial_command_ptr = 0;
-static s32 g_tutorial_command_active = 0;
-static u32 g_tutorial_button_input = 0;
+static u8* s_tutorial_command_ptr = 0;
+static s32 s_tutorial_command_active = 0;
+static u32 s_tutorial_button_input = 0;
 /* GPU coordinate halfwords; signed circle arithmetic is truncated when stored. */
-static upoint16_t g_tutorial_highlight_corners_a[31][2] = { 0 }; /* outer/middle ring samples */
-static upoint16_t g_tutorial_highlight_corners_b[31][2] = { 0 }; /* middle/inner ring samples */
-static rgb24_t g_tutorial_highlight_colors_a[4] = { 0 };         /* first quad corner colors */
-static rgb24_t g_tutorial_highlight_colors_b[4] = { 0 };         /* second quad corner colors */
-static u8 g_tutorial_highlight_quad_count = 0;
+static upoint16_t s_tutorial_highlight_corners_a[31][2] = { 0 }; /* outer/middle ring samples */
+static upoint16_t s_tutorial_highlight_corners_b[31][2] = { 0 }; /* middle/inner ring samples */
+static rgb24_t s_tutorial_highlight_colors_a[4] = { 0 };         /* first quad corner colors */
+static rgb24_t s_tutorial_highlight_colors_b[4] = { 0 };         /* second quad corner colors */
+static u8 s_tutorial_highlight_quad_count = 0;
 
 static void highlight_update(void);
 static void highlight_draw(s32 brightness);
@@ -114,7 +114,7 @@ void tutorial_start(s32 index) {
     g_tutorial_id = index;
     if (index != 0) {
         tutorial_files_load(index, &g_tutorial_state);
-        g_tutorial_command_ptr = g_tutorial_state.script;
+        s_tutorial_command_ptr = g_tutorial_state.script;
         g_text_section_pointers[SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = g_tutorial_state.messages;
         save_screen_init();
         save_image_build(-1);
@@ -124,7 +124,7 @@ void tutorial_start(s32 index) {
         g_save_work_buffer->options.max_equip_at_job_change = g_game_options.fields.max_equip_at_job_change;
         g_save_work_buffer->options.sound_mode = g_game_options.fields.sound_mode;
         save_image_restore(1);
-        g_tutorial_command_active = 0;
+        s_tutorial_command_active = 0;
         formation_roster_names_build();
     }
 }
@@ -146,15 +146,15 @@ s32 tutorial_step(void) {
     if (g_tutorial_id == 0) {
         return 1;
     }
-    g_tutorial_button_input = PadRead(0);
-    if (g_tutorial_button_input == INPUT_RESET_BUTTONS) {
+    s_tutorial_button_input = PadRead(0);
+    if (s_tutorial_button_input == INPUT_RESET_BUTTONS) {
         screen_game_reset();
     }
-    g_tutorial_buttons = g_tutorial_button_input;
-    if (g_tutorial_highlight_brightness != 0) {
+    g_tutorial_buttons = s_tutorial_button_input;
+    if (s_tutorial_highlight_brightness != 0) {
         highlight_update();
     }
-    cmd = *g_tutorial_command_ptr;
+    cmd = *s_tutorial_command_ptr;
     if (cmd < TUTORIAL_CMD_PRESS_BUTTON_LIMIT) {
         tutorial_opcode_00_press_button();
     } else if (cmd == TUTORIAL_CMD_DISPLAY_MESSAGE) {
@@ -185,7 +185,7 @@ s32 tutorial_step(void) {
  * still holds 1 there, from the fade's running result or the stored flag, so
  * tutorial_step passes 1 on. */
 static s32 tutorial_opcode_17_end(void) {
-    if (g_tutorial_command_active != 0) {
+    if (s_tutorial_command_active != 0) {
         if (screen_fade_out_update() == 0) {
             g_tutorial_id = 0;
             heap_block_release(g_tutorial_state.messages);
@@ -199,7 +199,7 @@ static s32 tutorial_opcode_17_end(void) {
         }
     } else {
         screen_fade_out_start();
-        g_tutorial_command_active = 1;
+        s_tutorial_command_active = 1;
     }
 }
 
@@ -207,16 +207,16 @@ static s32 tutorial_opcode_17_end(void) {
  * number <command> for one frame, then wait 30 frames (counted by the VSync
  * mode) before moving to the next command. */
 static void tutorial_opcode_00_press_button(void) {
-    if (g_tutorial_command_active != 0) {
-        g_tutorial_command_active -= menu_get_event_speed();
+    if (s_tutorial_command_active != 0) {
+        s_tutorial_command_active -= menu_get_event_speed();
         g_tutorial_pressed_button = 0;
-        if (g_tutorial_command_active <= 0) {
-            g_tutorial_command_active = 0;
-            ++g_tutorial_command_ptr;
+        if (s_tutorial_command_active <= 0) {
+            s_tutorial_command_active = 0;
+            ++s_tutorial_command_ptr;
         }
     } else {
-        g_tutorial_command_active = 0x1E;
-        g_tutorial_pressed_button = 1 << *g_tutorial_command_ptr;
+        s_tutorial_command_active = 0x1E;
+        g_tutorial_pressed_button = 1 << *s_tutorial_command_ptr;
     }
 }
 
@@ -232,14 +232,14 @@ static void tutorial_opcode_00_press_button(void) {
 static void tutorial_opcode_10_display_message(void) {
     thread_start(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
     thread_parameters_set(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
-        (s32)((u8*)(*(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->text_id_le[1]) * 0x100)
-            + (*(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
+        (s32)((u8*)(*(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->text_id_le[1]) * 0x100)
+            + (*(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
         0);
     /* Direct slot/member indexing splits this address at -O0. */
     *(s32*)((u8*)g_threads
         + (u32)(&((thread_t*)0)[SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_words[DIALOG_THREAD_WORD_Y_OFFSET]))
-        = *(&((tutorial_message_instruction_t*)g_tutorial_command_ptr)->y_offset);
-    g_tutorial_command_ptr += 4;
+        = *(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->y_offset);
+    s_tutorial_command_ptr += 4;
 }
 
 /* Tutorial command: let the tutorial text continue and move on once its
@@ -247,7 +247,7 @@ static void tutorial_opcode_10_display_message(void) {
 static void tutorial_opcode_12_wait_for_message(void) {
     screen_text_printing_resume(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
     if (thread_is_running(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) == 0) {
-        g_tutorial_command_ptr++;
+        s_tutorial_command_ptr++;
     }
 }
 
@@ -263,10 +263,10 @@ static void tutorial_opcode_12_wait_for_message(void) {
 static void tutorial_opcode_11_change_dialog(void) {
     if (screen_text_printing_check(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
         thread_parameters_set(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
-            (s32)((u8*)(*(&((tutorial_dialog_instruction_t*)g_tutorial_command_ptr)->text_id_le[1]) * 0x100)
-                + (*(&((tutorial_dialog_instruction_t*)g_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
+            (s32)((u8*)(*(&((tutorial_dialog_instruction_t*)s_tutorial_command_ptr)->text_id_le[1]) * 0x100)
+                + (*(&((tutorial_dialog_instruction_t*)s_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
             0);
-        g_tutorial_command_ptr += 3;
+        s_tutorial_command_ptr += 3;
         /* Direct slot/member indexing splits this address at -O0. */
         *(s32*)((u8*)g_threads + (u32) & ((thread_t*)0)[SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_id) = THREAD_TASK_RESUME;
     }
@@ -299,9 +299,9 @@ static void tutorial_opcode_13_highlight_ring(void) {
     s32 i;
     s32 step = 0x88;
 
-    radius = *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->radius);
-    scale_x = *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->scale_x);
-    scale_y = *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->scale_y);
+    radius = *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->radius);
+    scale_x = *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->scale_x);
+    scale_y = *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->scale_y);
     for (i = 0; i < 30; i++) {
         outer_x = (radius + 8) * scale_x;
         outer_y = (radius + 8) * scale_y;
@@ -309,54 +309,54 @@ static void tutorial_opcode_13_highlight_ring(void) {
         middle_y = (radius + 4) * scale_y;
         inner_x = radius * scale_x;
         inner_y = radius * scale_y;
-        g_tutorial_highlight_corners_a[i][0].x = ((rcos(step * i + 1024) * outer_x) >> 19)
-            + *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->x);
-        g_tutorial_highlight_corners_a[i][0].y = ((rsin(step * i + 1024) * outer_y) >> 19)
-            + *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->y);
-        g_tutorial_highlight_corners_a[i][1].x = ((rcos(step * i + 1024) * middle_x) >> 19)
-            + *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->x);
-        g_tutorial_highlight_corners_a[i][1].y = ((rsin(step * i + 1024) * middle_y) >> 19)
-            + *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->y);
-        g_tutorial_highlight_corners_b[i][0].x = g_tutorial_highlight_corners_a[i][1].x;
-        g_tutorial_highlight_corners_b[i][0].y = g_tutorial_highlight_corners_a[i][1].y;
-        g_tutorial_highlight_corners_b[i][1].x = ((rcos(step * i + 1024) * inner_x) >> 19)
-            + *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->x);
-        g_tutorial_highlight_corners_b[i][1].y = ((rsin(step * i + 1024) * inner_y) >> 19)
-            + *(&((tutorial_circle_instruction_t*)g_tutorial_command_ptr)->y);
+        s_tutorial_highlight_corners_a[i][0].x = ((rcos(step * i + 1024) * outer_x) >> 19)
+            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->x);
+        s_tutorial_highlight_corners_a[i][0].y = ((rsin(step * i + 1024) * outer_y) >> 19)
+            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->y);
+        s_tutorial_highlight_corners_a[i][1].x = ((rcos(step * i + 1024) * middle_x) >> 19)
+            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->x);
+        s_tutorial_highlight_corners_a[i][1].y = ((rsin(step * i + 1024) * middle_y) >> 19)
+            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->y);
+        s_tutorial_highlight_corners_b[i][0].x = s_tutorial_highlight_corners_a[i][1].x;
+        s_tutorial_highlight_corners_b[i][0].y = s_tutorial_highlight_corners_a[i][1].y;
+        s_tutorial_highlight_corners_b[i][1].x = ((rcos(step * i + 1024) * inner_x) >> 19)
+            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->x);
+        s_tutorial_highlight_corners_b[i][1].y = ((rsin(step * i + 1024) * inner_y) >> 19)
+            + *(&((tutorial_circle_instruction_t*)s_tutorial_command_ptr)->y);
     }
 
     /* Point copies emit 32-bit transfers; retail copies the closing sample as four 16-bit values. */
     for (i = 0; i < 4; i++) {
-        (&g_tutorial_highlight_corners_a[30][0].x)[i] = (&g_tutorial_highlight_corners_a[0][0].x)[i];
-        (&g_tutorial_highlight_corners_b[30][0].x)[i] = (&g_tutorial_highlight_corners_b[0][0].x)[i];
+        (&s_tutorial_highlight_corners_a[30][0].x)[i] = (&s_tutorial_highlight_corners_a[0][0].x)[i];
+        (&s_tutorial_highlight_corners_b[30][0].x)[i] = (&s_tutorial_highlight_corners_b[0][0].x)[i];
     }
 
-    g_tutorial_highlight_brightness = 2;
-    g_tutorial_command_ptr += 6;
-    g_tutorial_highlight_quad_count = 0;
+    s_tutorial_highlight_brightness = 2;
+    s_tutorial_command_ptr += 6;
+    s_tutorial_highlight_quad_count = 0;
 }
 
 /* Draw the tutorial highlight ring each frame while it is up. Until a WAIT
  * command runs, the ring grows by one quad per VSync up to all 30, at full
  * brightness (18); WAIT then counts the brightness down to fade it out. */
 static void highlight_update(void) {
-    if (*g_tutorial_command_ptr != TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
-        g_tutorial_highlight_brightness = 0x12;
-        g_tutorial_highlight_quad_count += menu_get_event_speed();
-        if (g_tutorial_highlight_quad_count >= 0x1e) {
-            g_tutorial_highlight_quad_count = 0x1e;
+    if (*s_tutorial_command_ptr != TUTORIAL_CMD_FADE_OUT_HIGHLIGHT) {
+        s_tutorial_highlight_brightness = 0x12;
+        s_tutorial_highlight_quad_count += menu_get_event_speed();
+        if (s_tutorial_highlight_quad_count >= 0x1e) {
+            s_tutorial_highlight_quad_count = 0x1e;
         }
     }
-    highlight_draw(g_tutorial_highlight_brightness);
+    highlight_draw(s_tutorial_highlight_brightness);
 }
 
 /* Tutorial command: fade the highlight out, counting its brightness down by the
  * VSync mode, and move to the next command when it reaches zero. */
 static void tutorial_opcode_14_fade_out_highlight(void) {
-    g_tutorial_highlight_brightness -= menu_get_event_speed();
-    if (g_tutorial_highlight_brightness <= 0) {
-        g_tutorial_highlight_brightness = 0;
-        g_tutorial_command_ptr++;
+    s_tutorial_highlight_brightness -= menu_get_event_speed();
+    if (s_tutorial_highlight_brightness <= 0) {
+        s_tutorial_highlight_brightness = 0;
+        s_tutorial_command_ptr++;
     }
 }
 
@@ -371,21 +371,21 @@ static void highlight_draw(s32 brightness) {
 
     brightness = brightness * 10;
     menu_gfx_enqueue_draw_mode(1, 0, GetTPage(0, 1, 0, 0), 0, 0x3C);
-    g_tutorial_highlight_colors_a[2].r = g_tutorial_highlight_colors_a[0].r = brightness >> 1;
-    g_tutorial_highlight_colors_a[2].g = g_tutorial_highlight_colors_a[0].g = brightness >> 3;
-    g_tutorial_highlight_colors_a[2].b = g_tutorial_highlight_colors_a[0].b = brightness >> 3;
-    g_tutorial_highlight_colors_b[1].r = g_tutorial_highlight_colors_b[3].r = brightness >> 1;
-    g_tutorial_highlight_colors_b[1].g = g_tutorial_highlight_colors_b[3].g = brightness >> 3;
-    g_tutorial_highlight_colors_b[1].b = g_tutorial_highlight_colors_b[3].b = brightness >> 3;
-    g_tutorial_highlight_colors_a[3].r = g_tutorial_highlight_colors_a[1].r = brightness;
-    g_tutorial_highlight_colors_a[3].g = g_tutorial_highlight_colors_a[1].g = brightness >> 2;
-    g_tutorial_highlight_colors_a[3].b = g_tutorial_highlight_colors_a[1].b = brightness >> 2;
-    g_tutorial_highlight_colors_b[0].r = g_tutorial_highlight_colors_b[2].r = brightness;
-    g_tutorial_highlight_colors_b[0].g = g_tutorial_highlight_colors_b[2].g = brightness >> 2;
-    g_tutorial_highlight_colors_b[0].b = g_tutorial_highlight_colors_b[2].b = brightness >> 2;
-    for (i = 0; i < g_tutorial_highlight_quad_count; i++) {
-        gfx_enqueue_gouraud_quad(g_tutorial_highlight_corners_a[i], g_tutorial_highlight_colors_a, 1, 0x3D);
-        gfx_enqueue_gouraud_quad(g_tutorial_highlight_corners_b[i], g_tutorial_highlight_colors_b, 1, 0x3D);
+    s_tutorial_highlight_colors_a[2].r = s_tutorial_highlight_colors_a[0].r = brightness >> 1;
+    s_tutorial_highlight_colors_a[2].g = s_tutorial_highlight_colors_a[0].g = brightness >> 3;
+    s_tutorial_highlight_colors_a[2].b = s_tutorial_highlight_colors_a[0].b = brightness >> 3;
+    s_tutorial_highlight_colors_b[1].r = s_tutorial_highlight_colors_b[3].r = brightness >> 1;
+    s_tutorial_highlight_colors_b[1].g = s_tutorial_highlight_colors_b[3].g = brightness >> 3;
+    s_tutorial_highlight_colors_b[1].b = s_tutorial_highlight_colors_b[3].b = brightness >> 3;
+    s_tutorial_highlight_colors_a[3].r = s_tutorial_highlight_colors_a[1].r = brightness;
+    s_tutorial_highlight_colors_a[3].g = s_tutorial_highlight_colors_a[1].g = brightness >> 2;
+    s_tutorial_highlight_colors_a[3].b = s_tutorial_highlight_colors_a[1].b = brightness >> 2;
+    s_tutorial_highlight_colors_b[0].r = s_tutorial_highlight_colors_b[2].r = brightness;
+    s_tutorial_highlight_colors_b[0].g = s_tutorial_highlight_colors_b[2].g = brightness >> 2;
+    s_tutorial_highlight_colors_b[0].b = s_tutorial_highlight_colors_b[2].b = brightness >> 2;
+    for (i = 0; i < s_tutorial_highlight_quad_count; i++) {
+        gfx_enqueue_gouraud_quad(s_tutorial_highlight_corners_a[i], s_tutorial_highlight_colors_a, 1, 0x3D);
+        gfx_enqueue_gouraud_quad(s_tutorial_highlight_corners_b[i], s_tutorial_highlight_colors_b, 1, 0x3D);
     }
 }
 
@@ -393,15 +393,15 @@ static void highlight_draw(s32 brightness) {
  * (counted by the VSync mode), then step past the two-byte command. Taking the
  * address of the operand field preserves the -O0 byte-address steps. */
 static void tutorial_opcode_15_wait_time(void) {
-    if (g_tutorial_command_active != 0) {
+    if (s_tutorial_command_active != 0) {
         g_tutorial_wait_time_remaining -= menu_get_event_speed();
         if (g_tutorial_wait_time_remaining < 0) {
-            g_tutorial_command_active = 0;
-            g_tutorial_command_ptr += 2;
+            s_tutorial_command_active = 0;
+            s_tutorial_command_ptr += 2;
         }
     } else {
-        g_tutorial_command_active = 1;
-        g_tutorial_wait_time_remaining = *(&((tutorial_wait_instruction_t*)g_tutorial_command_ptr)->frames);
+        s_tutorial_command_active = 1;
+        g_tutorial_wait_time_remaining = *(&((tutorial_wait_instruction_t*)s_tutorial_command_ptr)->frames);
     }
 }
 
@@ -411,10 +411,10 @@ static void tutorial_opcode_16_wait_for_button(void) {
     s32 running = thread_is_running(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
 
     if (running == 0) {
-        if (g_tutorial_button_input != 0) {
-            g_tutorial_command_ptr++;
+        if (s_tutorial_button_input != 0) {
+            s_tutorial_command_ptr++;
         }
-    } else if (screen_text_printing_check(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1 && g_tutorial_button_input != 0) {
-        g_tutorial_command_ptr++;
+    } else if (screen_text_printing_check(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1 && s_tutorial_button_input != 0) {
+        s_tutorial_command_ptr++;
     }
 }

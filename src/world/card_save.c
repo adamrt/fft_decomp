@@ -59,7 +59,7 @@ extern u8 g_save_menu_step;
 extern u8 g_save_menu_result;
 extern u8 g_save_mode;
 extern s16 g_save_mode_select_enabled;
-static s16 g_save_active_slot;
+static s16 s_save_active_slot;
 extern RECT g_save_screen_background_tile;
 extern menu_entry_t g_save_slot_select_menu[2];
 extern u8 g_save_slot_select_running;
@@ -290,9 +290,9 @@ s32 save_screen_run(s32 mode_select_enabled) {
         } else if (step == SAVE_STEP_SELECT_MODE) {
             save_mode_update();
         } else if (step == SAVE_STEP_LOADING) {
-            load_update(g_save_active_slot);
+            load_update(s_save_active_slot);
         } else if (step == SAVE_STEP_SAVING) {
-            write_update(g_save_active_slot);
+            write_update(s_save_active_slot);
         } else if (step == SAVE_STEP_LEAVE) {
             music_volume_target_set(0, 0xf0);
             while (memcard_operation_poll() == MEMCARD_RESULT_PENDING) { }
@@ -439,7 +439,7 @@ static void save_mode_update(void) {
             g_save_list_scroll_y = 0x18;
             g_save_list_scroll_velocity = 0;
             g_save_list_first_visible_row = 0;
-            g_save_active_slot = 0;
+            s_save_active_slot = 0;
             g_save_slot_cursor_row = 0;
         }
         g_save_selectable_slot_count = selectable_slots_count();
@@ -843,7 +843,7 @@ void save_screen_init(void) {
     g_save_list_scroll_y = 0x18;
     g_save_list_scroll_velocity = 0;
     g_save_list_first_visible_row = 0;
-    g_save_active_slot = 0;
+    s_save_active_slot = 0;
     g_save_slot_cursor_row = 0;
     g_save_menu_result = 0;
     g_save_slot_select_timer = 0;
@@ -1211,7 +1211,7 @@ static s32 selectable_slots_count(void) {
     g_menu_row_callbacks[0].value = 0;
     for (i = 0, count = 0; i < 15; i++) {
         if (i == g_save_last_used_slot) {
-            g_save_active_slot = i;
+            s_save_active_slot = i;
             g_save_slot_cursor_row = count;
         }
         if (g_save_mode != 0) {
@@ -1309,7 +1309,7 @@ static void slot_list_step(s32 input) {
                     }
                 }
             }
-            g_save_active_slot = i;
+            s_save_active_slot = i;
 
             /* The confirm prompt's window y depends on the cursor's visible row. */
             i = g_save_slot_cursor_row - g_save_list_first_visible_row;
@@ -1338,7 +1338,7 @@ static void slot_list_step(s32 input) {
             }
             g_save_confirm_prompt->window.y = i;
             if (g_save_mode == 0) {
-                if (g_save_slot_file_states[g_save_active_slot] == SAVE_SLOT_OCCUPIED) {
+                if (g_save_slot_file_states[s_save_active_slot] == SAVE_SLOT_OCCUPIED) {
                     g_save_overwrite_prompt_running = 1;
                 } else {
                     g_save_menu_step = SAVE_STEP_SAVING;

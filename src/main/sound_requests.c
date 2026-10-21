@@ -11,7 +11,7 @@
 
 extern u8 g_sound_system_sed_data[];
 extern u8 g_sound_env_sed_data[];
-static s32 g_sound_background_sfx_id; /* the background sound sound_background_play started, 0 for none */
+static s32 s_sound_background_sfx_id; /* the background sound sound_background_play started, 0 for none */
 
 /* Scenario-music playback state. current_music is the Suzuki music record of
  * the playing scenario music: music_stop hands it straight
@@ -46,7 +46,7 @@ typedef char music_size_must_be_80[sizeof(music_t) == 80 ? 1 : -1];
 extern music_t g_music;
 
 /* MUSIC_00.SMD through MUSIC_99.SMD; entries 45..49 are the resident tunes. */
-static file_extent_t g_music_files[MUSIC_COUNT] = {
+static file_extent_t s_music_files[MUSIC_COUNT] = {
     { 85249, 10240 },
     { 85254, 10240 },
     { 85259, 6144 },
@@ -155,7 +155,7 @@ s32 music_slot_load(s32 music_id, s32 slot) {
     suzuki_smd_header_t* smd;
 
     if (g_music.slots.smd[slot - 1] == 0) {
-        smd = file_smd_load(g_music_files[music_id].sector, g_music_files[music_id].size);
+        smd = file_smd_load(s_music_files[music_id].sector, s_music_files[music_id].size);
         g_music.slots.smd[slot - 1] = smd;
         g_music.slots.music[slot - 1] = suzuki_smd_create_music(smd);
         return slot;
@@ -171,7 +171,7 @@ int music_free_slot_load(int music_id) {
 
     for (i = 0; i < 2; i++) {
         if (g_music.slots.smd[i] == 0) {
-            smd = file_smd_load(g_music_files[music_id].sector, g_music_files[music_id].size);
+            smd = file_smd_load(s_music_files[music_id].sector, s_music_files[music_id].size);
             g_music.slots.smd[i] = smd;
             g_music.slots.music[i] = suzuki_smd_create_music(smd);
             return i + 1;
@@ -201,10 +201,10 @@ int music_is_loading_stub(void) {
  * the SMD block stays allocated and is never freed. */
 s32 music_slot_load_start(s32 music_id, s32 slot) {
     if (g_music.slots.smd[slot - 1] == 0) {
-        suzuki_smd_header_t* data = heap_smd_alloc(g_music_files[music_id].size);
+        suzuki_smd_header_t* data = heap_smd_alloc(s_music_files[music_id].size);
 
         if (data != 0
-            && file_bytes_read_request(g_music_files[music_id].sector, g_music_files[music_id].size, data) == 0) {
+            && file_bytes_read_request(s_music_files[music_id].sector, s_music_files[music_id].size, data) == 0) {
             g_music.slots.smd[slot - 1] = data;
             set_opened_music_slot(slot);
             return slot;
@@ -227,9 +227,9 @@ int music_free_slot_load_start(int music_id) {
 
     for (i = 0; i < 2; i++) {
         if (g_music.slots.smd[i] == 0) {
-            buffer = heap_smd_alloc(g_music_files[music_id].size);
+            buffer = heap_smd_alloc(s_music_files[music_id].size);
             if (buffer != 0) {
-                if (file_bytes_read_request(g_music_files[music_id].sector, g_music_files[music_id].size, buffer)
+                if (file_bytes_read_request(s_music_files[music_id].sector, s_music_files[music_id].size, buffer)
                     == 0) {
                     g_music.slots.smd[i] = buffer;
                     g_music.slots.loading_slot = i + 1;
@@ -517,13 +517,13 @@ void sound_free_channel_sfx_play(int sound_id) {
  * g_sound_background_sfx_id, so sound_background_stop can
  * stop it and sound_background_replay can start it again. */
 void sound_background_play(int sound_id) {
-    g_sound_background_sfx_id = sound_id;
+    s_sound_background_sfx_id = sound_id;
     suzuki_sound_play_background_sfx(sound_id);
 }
 
 /* Starts the remembered background sound again. */
 void sound_background_replay(void) {
-    int sound_id = g_sound_background_sfx_id;
+    int sound_id = s_sound_background_sfx_id;
 
     if (sound_id != 0) {
         suzuki_sound_play_background_sfx(sound_id);
@@ -534,8 +534,8 @@ void sound_background_replay(void) {
  * channel velocity, and 0 stops them (and forgets a remembered background
  * sound). */
 void sound_sfx_volume_set(int sound_id, int volume) {
-    if (g_sound_background_sfx_id == sound_id && volume == 0) {
-        g_sound_background_sfx_id = 0;
+    if (s_sound_background_sfx_id == sound_id && volume == 0) {
+        s_sound_background_sfx_id = 0;
     }
     suzuki_sound_set_sfx_volume(sound_id, volume);
 }
@@ -543,15 +543,15 @@ void sound_sfx_volume_set(int sound_id, int volume) {
 /* Forgets the remembered background sound and silences every SFX channel.
  * It leaves the music alone. */
 void sound_all_sfx_stop(void) {
-    g_sound_background_sfx_id = 0;
+    s_sound_background_sfx_id = 0;
     suzuki_sound_stop_all_sfx();
 }
 
 /* Stops the SFX channels playing sound_id, forgetting it if it is the
  * remembered background sound. */
 void sound_sfx_stop(int sound_id) {
-    if (sound_id == g_sound_background_sfx_id) {
-        g_sound_background_sfx_id = 0;
+    if (sound_id == s_sound_background_sfx_id) {
+        s_sound_background_sfx_id = 0;
     }
     suzuki_sound_stop_sfx_channels(sound_id);
 }
@@ -559,7 +559,7 @@ void sound_sfx_stop(int sound_id) {
 /* Stops the remembered background sound but keeps its id, so
  * sound_background_replay can restart it. */
 void sound_background_stop(void) {
-    int sound_id = g_sound_background_sfx_id;
+    int sound_id = s_sound_background_sfx_id;
 
     if (sound_id != 0) {
         suzuki_sound_stop_sfx_channels(sound_id);
@@ -594,10 +594,10 @@ void sound_init(void) {
         g_music.slots.music[i] = 0;
     }
 
-    g_sound_background_sfx_id = 0;
-    g_music.slots.smd[2] = file_smd_load(g_music_files[45].sector, g_music_files[45].size);
-    g_music.slots.smd[3] = file_smd_load(g_music_files[46].sector, g_music_files[46].size);
-    g_music.slots.smd[4] = file_smd_load(g_music_files[47].sector, g_music_files[47].size);
-    g_music.slots.smd[5] = file_smd_load(g_music_files[48].sector, g_music_files[48].size);
-    g_music.slots.smd[6] = file_smd_load(g_music_files[49].sector, g_music_files[49].size);
+    s_sound_background_sfx_id = 0;
+    g_music.slots.smd[2] = file_smd_load(s_music_files[45].sector, s_music_files[45].size);
+    g_music.slots.smd[3] = file_smd_load(s_music_files[46].sector, s_music_files[46].size);
+    g_music.slots.smd[4] = file_smd_load(s_music_files[47].sector, s_music_files[47].size);
+    g_music.slots.smd[5] = file_smd_load(s_music_files[48].sector, s_music_files[48].size);
+    g_music.slots.smd[6] = file_smd_load(s_music_files[49].sector, s_music_files[49].size);
 }

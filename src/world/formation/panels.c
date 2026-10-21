@@ -22,11 +22,11 @@
 #include "psx/types.h"
 
 /* panel drawing data */
-static unit_panel_buffer_t g_formation_stat_preview_panel_frames[2];
+static unit_panel_buffer_t s_formation_stat_preview_panel_frames[2];
 extern RECT g_formation_ability_panel_origin;
 
-static RECT g_formation_equipment_panel_draw_area = { 132, 126, 141, 108 };
-static RECT g_formation_ability_panel_draw_area = { 247, 126, 133, 108 };
+static RECT s_formation_equipment_panel_draw_area = { 132, 126, 141, 108 };
+static RECT s_formation_ability_panel_draw_area = { 247, 126, 133, 108 };
 
 /*
  * Equipment panel thread (task THREAD_TASK_STATUS_PANEL), the equipment twin
@@ -69,10 +69,10 @@ void unit_panel_equipment_thread(void) {
         u = 0;
     } else {
         text = g_unit_panel_text_image_b;
-        screen = g_formation_stat_preview_panel_frames;
+        screen = s_formation_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
         upload = &g_unit_panel_text_upload_rect_b;
-        base = g_formation_stat_preview_panel_frames;
+        base = s_formation_stat_preview_panel_frames;
         u = 0x50;
     }
 
@@ -164,7 +164,7 @@ void unit_panel_equipment_thread(void) {
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_formation_equipment_panel_draw_area, frame, g_menu_framebuffer_y, &thread->position);
+            &screen->portrait, &s_formation_equipment_panel_draw_area, frame, g_menu_framebuffer_y, &thread->position);
         unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 
@@ -239,10 +239,10 @@ void unit_panel_ability_thread(void) {
         u = 0;
     } else {
         text = g_unit_panel_text_image_b;
-        screen = g_formation_stat_preview_panel_frames;
+        screen = s_formation_stat_preview_panel_frames;
         state = &g_item_preview_stat_detail.state;
         upload = &g_unit_panel_text_upload_rect_b;
-        base = g_formation_stat_preview_panel_frames;
+        base = s_formation_stat_preview_panel_frames;
         u = 0x50;
     }
 
@@ -334,7 +334,7 @@ void unit_panel_ability_thread(void) {
         offset.x = thread->position.x - 0x73;
         offset.y = thread->position.y;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_formation_ability_panel_draw_area, frame, g_menu_framebuffer_y, &offset);
+            &screen->portrait, &s_formation_ability_panel_draw_area, frame, g_menu_framebuffer_y, &offset);
         unit_panel_set_colors(&screen->frame, thread);
         unit_panel_select_palette(&screen->numeric_frame, thread);
 

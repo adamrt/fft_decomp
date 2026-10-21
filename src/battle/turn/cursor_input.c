@@ -22,9 +22,9 @@ typedef struct cursor_tile_position {
 typedef char cursor_tile_position_size_must_be_12[sizeof(cursor_tile_position_t) == 12 ? 1 : -1];
 
 /* Free-cursor repeat counter. */
-static u32 g_cursor_repeat_counter;
+static u32 s_cursor_repeat_counter;
 
-static cursor_tile_position_t g_cursor_previous_tile = { 0 };
+static cursor_tile_position_t s_cursor_previous_tile = { 0 };
 
 /* Map the directional buttons to a map direction (battle facing, diagonals included) for the
  * camera's yaw quadrant and the cursor input mode. source picks held, newly pressed (repeating at
@@ -534,8 +534,8 @@ s32 cursor_move_by_input(void) {
                 g_cursor_layer ^= 1;
             }
         }
-    } else if (g_cursor_repeat_counter > delay) {
-        g_cursor_repeat_counter = 0;
+    } else if (s_cursor_repeat_counter > delay) {
+        s_cursor_repeat_counter = 0;
         other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
         if (!other_level->flags.blocked) {
             direction = 1;
@@ -544,10 +544,10 @@ s32 cursor_move_by_input(void) {
     }
 
     if (direction == 0) {
-        g_cursor_repeat_counter++;
-        g_cursor_previous_tile.x = g_cursor_x;
-        g_cursor_previous_tile.layer = g_cursor_layer;
-        g_cursor_previous_tile.y = g_cursor_y;
+        s_cursor_repeat_counter++;
+        s_cursor_previous_tile.x = g_cursor_x;
+        s_cursor_previous_tile.layer = g_cursor_layer;
+        s_cursor_previous_tile.y = g_cursor_y;
 
         direction = cursor_input_direction_get(CAMERA_INPUT_PRESSED);
         switch (direction) {
@@ -648,11 +648,11 @@ s32 cursor_move_by_input(void) {
         }
     }
 
-    if (((g_cursor_x != g_cursor_previous_tile.x) | (g_cursor_layer != g_cursor_previous_tile.layer)
-            | (g_cursor_y != g_cursor_previous_tile.y))
+    if (((g_cursor_x != s_cursor_previous_tile.x) | (g_cursor_layer != s_cursor_previous_tile.layer)
+            | (g_cursor_y != s_cursor_previous_tile.y))
         != 0) {
         sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
-        g_cursor_repeat_counter = 0;
+        s_cursor_repeat_counter = 0;
         switch (g_battle_state) {
         case BATTLE_STATE_FREE_CURSOR:
         case BATTLE_STATE_SELECT_MOVE_TILE:

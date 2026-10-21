@@ -37,7 +37,7 @@ extern u8 g_shop_sell_total_shown; /* confirmation prompt shown */
 extern menu_entry_t g_fur_shop_menu_thread_data;
 extern u8 g_fur_shop_opened; /* fur shop opened */
 
-static s8 g_fur_shop_access_granted;
+static s8 s_fur_shop_access_granted;
 extern u8 g_fur_shop_has_secret_hunt; /* any unit has Secret Hunt */
 
 extern u8 g_fur_shop_has_poached_stock; /* any poached item in stock */
@@ -79,7 +79,7 @@ void fur_shop_menu_update(void) {
         menu_set_vsync_mode_and_event_speed(0);
         g_fur_shop_has_secret_hunt = 0;
         g_fur_shop_has_poached_stock = 0;
-        g_fur_shop_access_granted = 0;
+        s_fur_shop_access_granted = 0;
         g_fur_shop_waiting_message = 0;
         for (i = 0; i < g_formation_unit_count; i++) {
             if (formation_ability_has_secret_hunt(i) != 0) {
@@ -98,7 +98,7 @@ void fur_shop_menu_update(void) {
             thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF82D, 0);
             return;
         }
-        g_fur_shop_access_granted = 1;
+        s_fur_shop_access_granted = 1;
         g_fur_shop_opened = 1;
     }
     if (g_fur_shop_waiting_message != 0) {

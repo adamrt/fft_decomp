@@ -33,7 +33,7 @@
 
 /* screen dispatch state */
 extern void (*g_formation_menu_handlers[])(void);
-static s8 g_formation_main_menu_initialized;
+static s8 s_formation_main_menu_initialized;
 extern menu_entry_t g_formation_egg_triangle_menu;
 
 /* Chained after the egg triangle menu; formation_grid_menu_update only resets it. */
@@ -299,7 +299,7 @@ void screen_sound_dispatch_effect(void) {
  * "initialized" latch, the panel thread styles, the selected unit and the
  * banner and browse settings, then the menu display and the unit list. */
 void formation_menu_state_init(void) {
-    g_formation_main_menu_initialized = 0;
+    s_formation_main_menu_initialized = 0;
     g_formation_item_menu_initialized = 0;
     g_formation_item_equip_menu_initialized = 0;
     g_formation_item_best_remove_initialized = 0;
@@ -375,7 +375,7 @@ void formation_grid_menu_update(void) {
     u32 input = g_menu_input_primary_repeat;
 
     if (g_formation_current_menu == FORMATION_MENU_UNIT_GRID) {
-        if (g_formation_main_menu_initialized == 0) {
+        if (s_formation_main_menu_initialized == 0) {
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;
             g_formation_dismiss_anim_timer = 0;
             g_formation_unit_count
@@ -394,12 +394,12 @@ void formation_grid_menu_update(void) {
                 menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
                 g_formation_triangle_menu_open = 0;
             }
-            g_formation_main_menu_initialized = 1;
+            s_formation_main_menu_initialized = 1;
         }
 
         /* Leave once the fade-out that Cross starts below completes. */
         if (g_tutorial_id == 0 && screen_fade_out_update() == 0) {
-            g_formation_main_menu_initialized = 0;
+            s_formation_main_menu_initialized = 0;
             thread_suspend(THREAD_SCREEN_SLOT_MENU);
             g_formation_screen_running = 0;
             return;
@@ -414,7 +414,7 @@ void formation_grid_menu_update(void) {
                     == 0) {
                     if (g_screen_selection_results[0] == 0) {
                         formation_dismiss(g_unit_selected_index);
-                        g_formation_main_menu_initialized = 0;
+                        s_formation_main_menu_initialized = 0;
                         g_sound_queued_effect_id = SOUND_SFX_DISMISS;
                     }
                     g_formation_egg_submenu.selected_index = 0;
@@ -454,7 +454,7 @@ void formation_grid_menu_update(void) {
                             g_unit_panel_numeric_panel_params.style = 1;
                         }
                         g_formation_selection_cursor_ready = 0;
-                        g_formation_main_menu_initialized = 0;
+                        s_formation_main_menu_initialized = 0;
                         return;
                     }
                     g_formation_triangle_menu_open = 0;
@@ -495,7 +495,7 @@ void formation_grid_menu_update(void) {
                         if (g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset != 0) {
                             g_sound_queued_effect_id = SOUND_SFX_INVALID;
                         } else {
-                            g_formation_main_menu_initialized = 0;
+                            s_formation_main_menu_initialized = 0;
                             g_formation_current_menu = FORMATION_MENU_VIEW_ABILITIES;
                         }
                     }

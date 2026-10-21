@@ -40,7 +40,7 @@ typedef struct view_threads {
 } view_threads_t;
 typedef char view_threads_size_must_be_48[(sizeof(view_threads_t) == 48) ? 1 : -1];
 
-static view_threads_t g_view_threads[7] = {
+static view_threads_t s_view_threads[7] = {
     { { UNIT_VIEW_NO_THREAD, UNIT_VIEW_NO_THREAD, UNIT_VIEW_NO_THREAD, UNIT_VIEW_NO_THREAD },
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
@@ -257,7 +257,7 @@ static void views_supervise(void) {
 
     for (;;) {
         mode = thread_current_parameter_1_get();
-        set = &g_view_threads[mode];
+        set = &s_view_threads[mode];
         g_unit_view_mode = mode;
         g_thread_contexts[g_thread_current_id].function_parameter_1 = 0xff;
         for (i = 15; i >= 0; i--) {

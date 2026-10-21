@@ -1494,7 +1494,7 @@ functions:
   - {addr: 0x801c4168, size: 1908, name: effect_textured_quad_grid_update, hash: 7c4feff22928839e, source: src/effect/quad_grid.c}
 
 data:
-  - {addr: 0x801c48dc, name: g_effect_banish_vertex_locations}
+  - {addr: 0x801c48dc, name: s_effect_banish_vertex_locations}
   - {addr: 0x801c48f4, name: g_effect_polar_mesh_brightness_table}
   - {addr: 0x801c499c, name: g_effect_textured_quad_grid_brightness_table}
 ---
@@ -1651,7 +1651,7 @@ functions:
 data:
   - {addr: 0x801c4dc4, name: g_effect_dome_mesh_brightness_table}
   - {addr: 0x801c4e9c, name: g_effect_single_ring_mesh_brightness_table}
-  - {addr: 0x801c4ecc, name: g_effect_altima_transformation_vertex_locations}
+  - {addr: 0x801c4ecc, name: s_effect_altima_transformation_vertex_locations}
 ---
 module: effect-e465
 file: EFFECT/E465.BIN

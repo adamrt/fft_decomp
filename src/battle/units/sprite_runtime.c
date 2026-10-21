@@ -143,24 +143,24 @@ extern u8 g_animation_targeted_frame_front[];
 
 /* Set before allocation and read acceptance: a failed request can be skipped
  * on the next step because its ID already matches. */
-static s32 g_sprite_last_requested_seq_id;
-static s32 g_sprite_last_requested_shp_id;
+static s32 s_sprite_last_requested_seq_id;
+static s32 s_sprite_last_requested_shp_id;
 
-static file_extent_t g_seq_files[9] = { { 57037, 8192 }, { 57045, 8192 }, { 57053, 4096 }, { 57055, 6144 },
+static file_extent_t s_seq_files[9] = { { 57037, 8192 }, { 57045, 8192 }, { 57053, 4096 }, { 57055, 6144 },
     { 57058, 4096 }, { 57060, 4096 }, { 57062, 4096 }, { 57064, 4096 }, { 0, 0 } };
 
-static file_extent_t g_shp_files[9] = { { 57017, 8192 }, { 57021, 10240 }, { 57026, 8192 }, { 57030, 4096 },
+static file_extent_t s_shp_files[9] = { { 57017, 8192 }, { 57021, 10240 }, { 57026, 8192 }, { 57030, 4096 },
     { 57032, 4096 }, { 0, 0 }, { 57034, 2048 }, { 57035, 4096 }, { 0, 0 } };
 
-static file_extent_t g_weapon_seq_files[2] = { { 57072, 4096 }, { 57074, 4096 } };
+static file_extent_t s_weapon_seq_files[2] = { { 57072, 4096 }, { 57074, 4096 } };
 
-static file_extent_t g_weapon_shp_files[2] = { { 57066, 6144 }, { 57069, 6144 } };
+static file_extent_t s_weapon_shp_files[2] = { { 57066, 6144 }, { 57069, 6144 } };
 
-static file_extent_t g_effect_seq_files[2] = { { 57080, 2048 }, { 0, 0 } };
+static file_extent_t s_effect_seq_files[2] = { { 57080, 2048 }, { 0, 0 } };
 
-static file_extent_t g_effect_shp_files[2] = { { 57076, 4096 }, { 0, 0 } };
+static file_extent_t s_effect_shp_files[2] = { { 57076, 4096 }, { 0, 0 } };
 
-static file_extent_t g_sheet_files[159] = { { 0, 0 }, { 59021, 45056 }, { 59043, 45056 }, { 59065, 45056 },
+static file_extent_t s_sheet_files[159] = { { 0, 0 }, { 59021, 45056 }, { 59043, 45056 }, { 59065, 45056 },
     { 57586, 45056 }, { 57608, 45056 }, { 57630, 45056 }, { 57229, 45056 }, { 59772, 45056 }, { 57519, 45056 },
     { 58998, 47104 }, { 57913, 45056 }, { 58247, 45056 }, { 58954, 45056 }, { 57805, 45056 }, { 59087, 45056 },
     { 59839, 47104 }, { 57363, 45056 }, { 57827, 43008 }, { 59308, 47104 }, { 57935, 45056 }, { 58932, 45056 },
@@ -2420,12 +2420,12 @@ s32 sprite_shp_seq_load_update(void) {
         case SPRITE_LOAD_SHARED_SPRITE_SHP:
             index = &g_sprite_load_state.index;
             /* A failed allocation or read leaves the phase unchanged, so the next step retries. */
-            buffer = heap_alloc(g_shp_files[*index].size);
+            buffer = heap_alloc(s_shp_files[*index].size);
             g_sprite_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_shp_files[*index].sector, g_shp_files[*index].size, buffer) == 0) {
+            if (file_bytes_read_request(s_shp_files[*index].sector, s_shp_files[*index].size, buffer) == 0) {
                 g_sprite_load_state.phase++;
             } else {
                 heap_block_release(g_sprite_load_state.buffer);
@@ -2433,12 +2433,12 @@ s32 sprite_shp_seq_load_update(void) {
             break;
         case SPRITE_LOAD_SHARED_SPRITE_SEQ:
             index = &g_sprite_load_state.index;
-            buffer = heap_alloc(g_seq_files[*index].size);
+            buffer = heap_alloc(s_seq_files[*index].size);
             g_sprite_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_seq_files[*index].sector, g_seq_files[*index].size, buffer) == 0) {
+            if (file_bytes_read_request(s_seq_files[*index].sector, s_seq_files[*index].size, buffer) == 0) {
                 g_sprite_load_state.phase++;
             } else {
                 heap_block_release(g_sprite_load_state.buffer);
@@ -2446,12 +2446,12 @@ s32 sprite_shp_seq_load_update(void) {
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SHP:
             index = &g_sprite_load_state.index;
-            buffer = heap_alloc(g_weapon_shp_files[*index].size);
+            buffer = heap_alloc(s_weapon_shp_files[*index].size);
             g_sprite_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_weapon_shp_files[*index].sector, g_weapon_shp_files[*index].size, buffer)
+            if (file_bytes_read_request(s_weapon_shp_files[*index].sector, s_weapon_shp_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
@@ -2460,12 +2460,12 @@ s32 sprite_shp_seq_load_update(void) {
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SEQ:
             index = &g_sprite_load_state.index;
-            buffer = heap_alloc(g_weapon_seq_files[*index].size);
+            buffer = heap_alloc(s_weapon_seq_files[*index].size);
             g_sprite_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_weapon_seq_files[*index].sector, g_weapon_seq_files[*index].size, buffer)
+            if (file_bytes_read_request(s_weapon_seq_files[*index].sector, s_weapon_seq_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
@@ -2474,12 +2474,12 @@ s32 sprite_shp_seq_load_update(void) {
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SHP:
             index = &g_sprite_load_state.index;
-            buffer = heap_alloc(g_effect_shp_files[*index].size);
+            buffer = heap_alloc(s_effect_shp_files[*index].size);
             g_sprite_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_effect_shp_files[*index].sector, g_effect_shp_files[*index].size, buffer)
+            if (file_bytes_read_request(s_effect_shp_files[*index].sector, s_effect_shp_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
@@ -2488,12 +2488,12 @@ s32 sprite_shp_seq_load_update(void) {
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SEQ:
             index = &g_sprite_load_state.index;
-            buffer = heap_alloc(g_effect_seq_files[*index].size);
+            buffer = heap_alloc(s_effect_seq_files[*index].size);
             g_sprite_load_state.buffer = buffer;
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_effect_seq_files[*index].sector, g_effect_seq_files[*index].size, buffer)
+            if (file_bytes_read_request(s_effect_seq_files[*index].sector, s_effect_seq_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
@@ -2690,19 +2690,19 @@ s32 sprite_queued_load_update(void) {
             id = g_sprite_sheet_data[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                      .shp_id;
             /* SHP ids up to OTHER are the shared files the startup loader keeps resident. */
-            if (id <= SPRITE_SHP_OTHER || id == g_sprite_last_requested_shp_id) {
+            if (id <= SPRITE_SHP_OTHER || id == s_sprite_last_requested_shp_id) {
                 result = 2;
                 g_sprite_load_state.buffer = 0;
                 g_sprite_load_state.phase = SPRITE_LOAD_PHASE_FINISH;
                 break;
             }
 
-            g_sprite_last_requested_shp_id = id;
-            g_sprite_load_state.buffer = heap_alloc(g_shp_files[id].size);
+            s_sprite_last_requested_shp_id = id;
+            g_sprite_load_state.buffer = heap_alloc(s_shp_files[id].size);
             if (g_sprite_load_state.buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_shp_files[id].sector, g_shp_files[id].size, g_sprite_load_state.buffer)
+            if (file_bytes_read_request(s_shp_files[id].sector, s_shp_files[id].size, g_sprite_load_state.buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
@@ -2713,19 +2713,19 @@ s32 sprite_queued_load_update(void) {
             id = g_sprite_sheet_data[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                      .seq_id;
             /* SEQ ids up to OTHER are likewise resident. */
-            if (id < SPRITE_SEQ_RUKA || id == g_sprite_last_requested_seq_id) {
+            if (id < SPRITE_SEQ_RUKA || id == s_sprite_last_requested_seq_id) {
                 result = 2;
                 g_sprite_load_state.buffer = 0;
                 g_sprite_load_state.phase = SPRITE_LOAD_PHASE_FINISH;
                 break;
             }
 
-            g_sprite_last_requested_seq_id = id;
-            g_sprite_load_state.buffer = heap_alloc(g_seq_files[id].size);
+            s_sprite_last_requested_seq_id = id;
+            g_sprite_load_state.buffer = heap_alloc(s_seq_files[id].size);
             if (g_sprite_load_state.buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(g_seq_files[id].sector, g_seq_files[id].size, g_sprite_load_state.buffer)
+            if (file_bytes_read_request(s_seq_files[id].sector, s_seq_files[id].size, g_sprite_load_state.buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
@@ -2750,14 +2750,14 @@ s32 sprite_queued_load_update(void) {
             }
 
             g_sprite_load_state.buffer = heap_alloc(
-                g_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id].size);
+                s_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id].size);
             if (g_sprite_load_state.buffer == 0) {
                 break;
             }
             if (file_bytes_read_request(
-                    g_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
+                    s_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                         .sector,
-                    g_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
+                    s_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                         .size,
                     g_sprite_load_state.buffer)
                 == 0) {

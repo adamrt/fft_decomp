@@ -41,8 +41,8 @@ typedef enum proposition_participant_message_phase {
 } proposition_participant_message_phase_e;
 
 /* Collection counts that earn a milestone message. */
-static u8 g_proposition_treasure_milestones[8] = { 1, 4, 8, 12, 16, 20, 24, 31 };
-static u8 g_proposition_unexplored_land_milestones[8] = { 1, 3, 6, 8, 10, 12, 14, 16 };
+static u8 s_proposition_treasure_milestones[8] = { 1, 4, 8, 12, 16, 20, 24, 31 };
+static u8 s_proposition_unexplored_land_milestones[8] = { 1, 3, 6, 8, 10, 12, 14, 16 };
 
 static void milestone_message_advance(proposition_discovery_level_t* discovery);
 static void recall_open(s32 proposition);
@@ -566,7 +566,7 @@ s32 proposition_milestone_rank_get(void) {
             }
         }
         for (i = 0; i < 8; i++) {
-            if (g_proposition_treasure_milestones[i] == count) {
+            if (s_proposition_treasure_milestones[i] == count) {
                 break;
             }
         }
@@ -584,7 +584,7 @@ s32 proposition_milestone_rank_get(void) {
             }
         }
         for (i = 0; i < 8; i++) {
-            if (g_proposition_unexplored_land_milestones[i] == count) {
+            if (s_proposition_unexplored_land_milestones[i] == count) {
                 break;
             }
         }

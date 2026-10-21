@@ -87,7 +87,7 @@ static void party_number_open(void);
 static void party_number_update(menu_stack_record_t* level);
 
 /* Indexed by menu_stack_level_e. */
-static void (*g_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
+static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     cursor_level_update,                           /* MENU_STACK_LEVEL_WORLD_MAP */
     map_menu_return_update,                        /* MENU_STACK_LEVEL_WORLD_MENU */
     text_level_update,                             /* MENU_STACK_LEVEL_TEXT_WINDOW */
@@ -148,7 +148,7 @@ static void (*g_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
 };
 
 /* Indexed by menu_stack_level_e; zero entries preserve the original table. */
-static void (*g_level_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
+static void (*s_level_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     cursor_level_resume,                             /* MENU_STACK_LEVEL_WORLD_MAP */
     0,                                               /* MENU_STACK_LEVEL_WORLD_MENU */
     0,                                               /* MENU_STACK_LEVEL_TEXT_WINDOW */
@@ -209,7 +209,7 @@ static void (*g_level_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
 };
 
 /* Indexed by menu_stack_level_e; zero entries preserve the original table. */
-static void (*g_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
+static void (*s_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record_t*) = {
     world_map_cursor_level_suspend,                 /* MENU_STACK_LEVEL_WORLD_MAP */
     0,                                              /* MENU_STACK_LEVEL_WORLD_MENU */
     0,                                              /* MENU_STACK_LEVEL_TEXT_WINDOW */
@@ -333,7 +333,7 @@ void menu_stack_reset(void) {
 void menu_stack_dispatch_update(void) {
     s32 index = g_menu_stack_depth;
 
-    g_level_update_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
+    s_level_update_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Run the resume handler of the level now on top of the stack after the level above it closed:
@@ -341,7 +341,7 @@ void menu_stack_dispatch_update(void) {
 void menu_stack_dispatch_resume(void) {
     s32 index = g_menu_stack_depth;
 
-    g_level_resume_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
+    s_level_resume_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Run the top level's suspend handler, called just before another level opens over it: list levels
@@ -350,7 +350,7 @@ void menu_stack_dispatch_resume(void) {
 void menu_stack_dispatch_suspend(void) {
     s32 index = g_menu_stack_depth;
 
-    g_level_suspend_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
+    s_level_suspend_handlers[g_menu_stack_types[index - 1]](&g_menu_stack_records[index - 1]);
 }
 
 /* Pushes a two-window menu level: appends two window records, points the new

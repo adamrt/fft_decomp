@@ -8,7 +8,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static u8 g_text_row_image[2048] = { 0 };
+static u8 s_text_row_image[2048] = { 0 };
 
 /* Renders each text id of a -1 terminated list into its own 16 pixel line of
  * `destination`, uploading one line at a time through the scratch image at
@@ -29,10 +29,10 @@ void text_id_rows_to_vram_render(const u8* text_table, const s16* text_ids, cons
     for (; *text_ids != -1; text_ids++) {
         row_text_ids[0] = *text_ids;
         row_text_ids[1] = -1;
-        memset(g_text_row_image, 0, 0x800);
+        memset(s_text_row_image, 0, 0x800);
         menu_text_render_encoded_ids_to_image(
-            g_text_row_image, &bounds, 0xa, 0x64, text_table, row_text_ids, 0x64, 0xe7, flags);
-        gfx_load_image_and_wait(&destination_row, g_text_row_image);
+            s_text_row_image, &bounds, 0xa, 0x64, text_table, row_text_ids, 0x64, 0xe7, flags);
+        gfx_load_image_and_wait(&destination_row, s_text_row_image);
         destination_row.y += 0x10;
     }
 }

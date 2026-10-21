@@ -16,7 +16,7 @@
 
 /* Text variables $7E/$7F: the rectangle text_set_substitution_values_7e_7f stores as four 16-bit values. It
  * lies at g_text_substitution_values[0x7e]. */
-static RECT g_text_substitution_rect;
+static RECT s_text_substitution_rect;
 extern glyph_blit_t g_menu_large_number_glyph;
 
 /* BATTLE leaves the last section alone. */
@@ -106,10 +106,10 @@ void gfx_append_gpu_primitive_to_secondary_otag(void* prim) {
 
 /* Store the rectangle text variables $7E and $7F substitute. */
 void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height) {
-    g_text_substitution_rect.x = x;
-    g_text_substitution_rect.y = y;
-    g_text_substitution_rect.w = width;
-    g_text_substitution_rect.h = height;
+    s_text_substitution_rect.x = x;
+    s_text_substitution_rect.y = y;
+    s_text_substitution_rect.w = width;
+    s_text_substitution_rect.h = height;
 }
 
 /* Set the screen origin used by menu text glyphs. */

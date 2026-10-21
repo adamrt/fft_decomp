@@ -7,7 +7,7 @@
 typedef s32 (*suzuki_modulator_step_t)(suzuki_modulator_t* modulator);
 
 /* Waveform selector in the low four bits of an SMD modulation operand. */
-static suzuki_modulator_step_t g_suzuki_smd_modulator_waveforms[16] = {
+static suzuki_modulator_step_t s_suzuki_smd_modulator_waveforms[16] = {
     suzuki_smd_modulator_step_square,            /* 0x0 */
     suzuki_smd_modulator_step_alternating,       /* 0x1 */
     suzuki_smd_modulator_step_triangle,          /* 0x2 */
@@ -190,7 +190,7 @@ u8* suzuki_smd_pitch_shift_waveform(u8* note_data, suzuki_music_t* music, suzuki
         modulator->timer_reset = speed;
         modulator->delay_reset = 0;
         modulator->fade_step = 0x100;
-        modulator->step = g_suzuki_smd_modulator_waveforms[waveform];
+        modulator->step = s_suzuki_smd_modulator_waveforms[waveform];
         modulator->waveform = waveform;
         modulator->target = SUZUKI_MODULATOR_TARGET_PITCH;
         modulator->flags = flags + SUZUKI_MODULATOR_ACTIVE;
@@ -313,7 +313,7 @@ u8* suzuki_smd_tremolo_waveform(u8* note_data, suzuki_music_t* music, suzuki_mus
         modulator->timer_reset = speed;
         modulator->delay_reset = 0;
         modulator->fade_step = 0x100;
-        modulator->step = g_suzuki_smd_modulator_waveforms[waveform];
+        modulator->step = s_suzuki_smd_modulator_waveforms[waveform];
         modulator->waveform = waveform;
         modulator->target = SUZUKI_MODULATOR_TARGET_VOLUME;
         modulator->flags = flags + SUZUKI_MODULATOR_ACTIVE;
@@ -457,7 +457,7 @@ u8* suzuki_smd_pan_lfo_waveform(u8* note_data, suzuki_music_t* music, suzuki_mus
         modulator->timer_reset = speed;
         modulator->delay_reset = 0;
         modulator->fade_step = 0x100;
-        modulator->step = g_suzuki_smd_modulator_waveforms[waveform];
+        modulator->step = s_suzuki_smd_modulator_waveforms[waveform];
         modulator->waveform = waveform;
         modulator->target = SUZUKI_MODULATOR_TARGET_BALANCE;
         modulator->flags = flags + SUZUKI_MODULATOR_ACTIVE;
@@ -490,7 +490,7 @@ u8* suzuki_smd_modulator_select(u8* note_data, suzuki_music_t* music, suzuki_mus
     modulator = &channel->modulators[channel->modulator_index];
     param = note_data[1];
     modulator->waveform = param & SUZUKI_MODULATOR_INPUT_WAVEFORM_MASK;
-    modulator->step = g_suzuki_smd_modulator_waveforms[modulator->waveform];
+    modulator->step = s_suzuki_smd_modulator_waveforms[modulator->waveform];
     if ((param & SUZUKI_MODULATOR_INPUT_NO_KEY_ON_RESTART) == 0) {
         modulator->flags = SUZUKI_MODULATOR_RESTART_ON_KEY_ON;
     } else {

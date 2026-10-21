@@ -48,7 +48,7 @@ extern u8 g_shop_item_category;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u8 g_shop_quantity_menu_running;
 extern s8 g_shop_buy_list_initialized;
-static s8 g_shop_buy_equip_check_pending;
+static s8 s_shop_buy_equip_check_pending;
 extern s16 g_shop_buy_message_wait;
 extern s16 g_shop_buy_item;
 extern s32 g_shop_buy_unit_price;
@@ -89,7 +89,7 @@ static s32 buy_quantity_update(void);
 static s32 sell_quantity_update(void);
 
 /* shop_step_e indexes the original 28-entry screen dispatcher. */
-static void (*g_shop_step_handlers[])(void) = {
+static void (*s_shop_step_handlers[])(void) = {
     shop_menu_update,
     buy_list_update,
     buy_confirm_update,
@@ -121,21 +121,21 @@ static void (*g_shop_step_handlers[])(void) = {
 };
 
 /* Backdrop and VRAM rectangles, followed by the main menu and exit gates. */
-static RECT g_shop_background_rect = { 0, 64, 255, 128 };
+static RECT s_shop_background_rect = { 0, 64, 255, 128 };
 
-static RECT g_shop_backdrop_tile_rect = { 0, 0, 256, 240 };
+static RECT s_shop_backdrop_tile_rect = { 0, 0, 256, 240 };
 
-static RECT g_shop_edge_tile_rect = { 255, 0, 1, 240 };
+static RECT s_shop_edge_tile_rect = { 255, 0, 1, 240 };
 
-static RECT g_shop_background_vram_rect = { 768, 0, 256, 128 };
+static RECT s_shop_background_vram_rect = { 768, 0, 256, 128 };
 
-static RECT g_shop_vram_backup_rect = { 0, 0, 256, 128 };
+static RECT s_shop_vram_backup_rect = { 0, 0, 256, 128 };
 
-static u8 g_shop_main_menu_running = 0;
+static u8 s_shop_main_menu_running = 0;
 
-static u8 g_shop_exit_fade_started = 0;
+static u8 s_shop_exit_fade_started = 0;
 
-static u8 g_shop_exit_step_initialized = 0;
+static u8 s_shop_exit_step_initialized = 0;
 
 /* Run a shop screen (item shop, Fur Shop or Soldier Office): set the primitive budgets,
  * load the town's backdrop and the shop music, then run frames through the step handlers
@@ -152,7 +152,7 @@ void shop_screen_run(s32 shop_type) {
     u32 otags[2 * 64];
     menu_gfx_context_t buffers[2];
     u32* tim;
-    RECT* tile_box = &g_shop_edge_tile_rect;
+    RECT* tile_box = &s_shop_edge_tile_rect;
     s32 buttons;
     s32 ot_index;
     s32 disabled;
@@ -210,10 +210,10 @@ void shop_screen_run(s32 shop_type) {
     /* After the backdrop is in VRAM, the TIM buffer is reused for a VRAM backup that the exit loads back. */
     SetDispMask(0);
     while (DrawSync(1) != 0) { }
-    gfx_move_image_and_wait(&g_shop_background_vram_rect, 0, 0);
+    gfx_move_image_and_wait(&s_shop_background_vram_rect, 0, 0);
     tim = shop_background_load(tim_index + buttons);
-    gfx_load_image_and_wait(&g_shop_background_vram_rect, tim + 5);
-    gfx_store_image_and_wait(&g_shop_vram_backup_rect, tim);
+    gfx_load_image_and_wait(&s_shop_background_vram_rect, tim + 5);
+    gfx_store_image_and_wait(&s_shop_vram_backup_rect, tim);
 
     screen_packet_buffers_init(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads, textured_gradient_quads,
         flat_lines, 0, 0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
@@ -246,8 +246,8 @@ void shop_screen_run(s32 shop_type) {
         screen_palette_mode_set(g_menu_input_lock_mode);
 
         if (g_shop_background_visible != 0) {
-            menu_gfx_enqueue_textured_quad(&g_shop_background_rect, 0, 0, 0, 0, 0x14C, 0, 1);
-            gfx_enqueue_tile(&g_shop_backdrop_tile_rect, &g_screen_black_tile_color, 0, 0);
+            menu_gfx_enqueue_textured_quad(&s_shop_background_rect, 0, 0, 0, 0, 0x14C, 0, 1);
+            gfx_enqueue_tile(&s_shop_backdrop_tile_rect, &g_screen_black_tile_color, 0, 0);
             gfx_enqueue_tile(tile_box, &g_screen_black_tile_color, 0, g_screen_ot_length - 1);
         }
 
@@ -281,7 +281,7 @@ void shop_screen_run(s32 shop_type) {
                 MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xC, buttons & PSX_PAD_R1, disabled, SOUND_SFX_PAGE_SWITCH);
         }
 
-        g_shop_step_handlers[g_shop_menu_step]();
+        s_shop_step_handlers[g_shop_menu_step]();
         if (g_shop_menu_step != SHOP_STEP_RENAME_NAME_ENTRY && g_shop_menu_step != SHOP_STEP_HIRE_NAME_ENTRY
             && g_shop_menu_step != SHOP_STEP_FITTING_ROOM_REMOVE) {
             formation_selection_stage_update();
@@ -316,7 +316,7 @@ void shop_screen_run(s32 shop_type) {
     formation_save_records();
     menu_set_vsync_mode_and_event_speed(0);
     screen_context_reset();
-    gfx_load_image_and_wait(&g_shop_background_vram_rect, tim);
+    gfx_load_image_and_wait(&s_shop_background_vram_rect, tim);
     heap_free(tim);
 }
 
@@ -330,12 +330,12 @@ void shop_noop_callback(void) {
 static void shop_menu_update(void) {
     u8 running;
 
-    if (g_shop_main_menu_running == 0) {
+    if (s_shop_main_menu_running == 0) {
         g_formation_unit_cycle_mode = 0;
         g_menu_list_selected_index = 0;
     }
     running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_main_menu_thread_data);
-    g_shop_main_menu_running = running;
+    s_shop_main_menu_running = running;
     if (running == 0) {
         menu_selection_records_clear();
         if (g_screen_selection_results[0] == 0) {
@@ -360,20 +360,20 @@ static void shop_menu_update(void) {
  * face buttons (0xf0) is pressed start the fade-out with a music fade, then
  * wait for the fade to complete before releasing the screen (g_shop_menu_step = -1). */
 static void shop_exit_update(void) {
-    if (g_shop_exit_step_initialized == 0) {
-        g_shop_exit_fade_started = 0;
-        g_shop_exit_step_initialized = 1;
+    if (s_shop_exit_step_initialized == 0) {
+        s_shop_exit_fade_started = 0;
+        s_shop_exit_step_initialized = 1;
     }
-    if (g_shop_exit_fade_started != 0) {
+    if (s_shop_exit_fade_started != 0) {
         if (screen_fade_out_update() == 0) {
             g_shop_menu_step = SHOP_STEP_EXIT;
-            g_shop_exit_step_initialized = 0;
+            s_shop_exit_step_initialized = 0;
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
         screen_fade_out_start();
         music_volume_target_set(0, 0xF0);
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
-        g_shop_exit_fade_started = 1;
+        s_shop_exit_fade_started = 1;
     }
     shop_gil_draw();
     if (g_screen_context_id == SCREEN_CONTEXT_SOLDIER_OFFICE) {
@@ -503,13 +503,13 @@ static void buy_list_update(void) {
         g_menu_row_callbacks[4].value = shop_buy_price_get;
         g_menu_row_callbacks[5].value = shop_buy_equipped_count_get;
         g_menu_row_callbacks[6].value = shop_buy_owned_count_get;
-        g_shop_buy_equip_check_pending = 0;
+        s_shop_buy_equip_check_pending = 0;
     }
     menu_set_vsync_mode_and_event_speed(2);
-    if (g_shop_buy_equip_check_pending != 0) {
+    if (s_shop_buy_equip_check_pending != 0) {
         thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         result = thread_is_running(THREAD_SCREEN_SLOT_MESSAGE);
-        g_shop_buy_equip_check_pending = result;
+        s_shop_buy_equip_check_pending = result;
         if (result == 0) {
             g_shop_buy_list_initialized = 0;
             menu_selection_record_set(
@@ -526,7 +526,7 @@ static void buy_list_update(void) {
             thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
         } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0
             && g_shop_item_category != ITEM_MENU_TAB_OTHER) {
-            g_shop_buy_equip_check_pending = 1;
+            s_shop_buy_equip_check_pending = 1;
         } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count == 0) {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;

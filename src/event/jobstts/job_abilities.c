@@ -13,7 +13,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static status_screen_unit_jobs_t g_status_screen_unit_job_data = { 0 };
+static status_screen_unit_jobs_t s_status_screen_unit_job_data = { 0 };
 
 /* Copy the battle unit's job data into the compact job-screen working record.
  *
@@ -65,8 +65,8 @@ static void status_screen_copy_unit_jobs(unit_stats_t* unit, status_screen_unit_
 /* Copy battle unit `unit_id`'s job data into the overlay's single unit
  * record and make it unit 0. */
 void status_screen_init_unit_jobs(s32 unit_id) {
-    status_screen_copy_unit_jobs(unit_stats_get(unit_id), &g_status_screen_unit_job_data);
-    g_status_screen_unit_data[0] = &g_status_screen_unit_job_data;
+    status_screen_copy_unit_jobs(unit_stats_get(unit_id), &s_status_screen_unit_job_data);
+    g_status_screen_unit_data[0] = &s_status_screen_unit_job_data;
 }
 
 /* The job that heads a unit's job list: a monster's own job, Squire for a

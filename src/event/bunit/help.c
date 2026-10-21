@@ -25,7 +25,7 @@ extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
 extern u8 g_unit_list_help_node_index;
-static u16 g_unit_list_help_cursor_anim_state;
+static u16 s_unit_list_help_cursor_anim_state;
 extern u8 g_unit_list_help_cursor_initialized;
 
 /* Aliases of g_unit_list_help_nodes/g_unit_list_help_node_index; the target reloads them at each use
@@ -165,10 +165,10 @@ void unit_list_update_help_cursor(s16 mode) {
     pos.y = y;
     if (node->vertical_cursor != 0) {
         pos.y = y + 1;
-        menu_update_and_draw_bouncing_cursor(&pos, &g_unit_list_help_cursor_anim_state, running);
+        menu_update_and_draw_bouncing_cursor(&pos, &s_unit_list_help_cursor_anim_state, running);
     } else {
         pos.x = x - 2;
         pos.y = y + 6;
-        menu_update_and_draw_sliding_cursor(&pos, &g_unit_list_help_cursor_anim_state, running);
+        menu_update_and_draw_sliding_cursor(&pos, &s_unit_list_help_cursor_anim_state, running);
     }
 }

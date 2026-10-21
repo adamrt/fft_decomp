@@ -37,25 +37,25 @@ typedef struct facing_tile_offsets {
     u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
 } facing_tile_offsets_t;
 
-static s32 g_ai_origin_self_target_stage;
+static s32 s_ai_origin_self_target_stage;
 /* Origin masks, Math Skill iteration and facing offsets. */
-static s32 g_ai_math_skillset_index;
-static s32 g_ai_math_ability_index;
-static s32 g_ai_math_skillset_id;
-static u16* g_ai_math_ability_list;
+static s32 s_ai_math_skillset_index;
+static s32 s_ai_math_ability_index;
+static s32 s_ai_math_skillset_id;
+static u16* s_ai_math_ability_list;
 
 /* borrowed from main's temporary skillset list */
 
 /* Diamond rows centered on map column 7, for radii 0 through 7.
  * The unchecked reader also reaches the following status weights for radii 8..15. */
-static u16 g_origin_range_row_masks[] = { 0x0100, 0x0380, 0x07c0, 0x0fe0, 0x1ff0, 0x3ff8, 0x7ffc, 0xfffe };
+static u16 s_origin_range_row_masks[] = { 0x0100, 0x0380, 0x07c0, 0x0fe0, 0x1ff0, 0x3ff8, 0x7ffc, 0xfffe };
 
 /* Signed scoring weights, indexed by status ID. */
-static s16 g_status_priority_weights[STATUS_COUNT]
+static s16 s_status_priority_weights[STATUS_COUNT]
     = { 0, -192, -192, -39, 0, 0, 0, 0, -116, -231, -64, -64, -90, -116, 0, -192, -7, 12, 51, 38, -39, -26, -52, -32,
           -26, 25, 25, 25, 19, -39, -90, 64, 6, -7, -64, -39, -39, -64, 25, -103 };
 
-static facing_tile_offsets_t g_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 }, { 0, 1 }, { 1, 0 } } };
+static facing_tile_offsets_t s_facing_tile_offsets = { { { 0, 0xff }, { 0xff, 0 }, { 0, 1 }, { 1, 0 } } };
 
 static void origin_monster_skill_mask_build(void);
 
@@ -184,9 +184,9 @@ s32 ai_wait_facing_choose(void) {
     ai_unit_coordinates_copy(ai->acting_unit_id, &ai->acting_unit_coords);
     for (direction = 0; direction < AI_CARDINAL_DIRECTION_COUNT; direction++) {
         work.target_coords.fields.x
-            = ai->acting_unit_coords.fields.x + g_facing_tile_offsets.by_direction[direction][0];
+            = ai->acting_unit_coords.fields.x + s_facing_tile_offsets.by_direction[direction][0];
         work.target_coords.fields.y
-            = ai->acting_unit_coords.fields.y + g_facing_tile_offsets.by_direction[direction][1];
+            = ai->acting_unit_coords.fields.y + s_facing_tile_offsets.by_direction[direction][1];
         work.target_coords.fields.layer = 0;
         if (facing_is_tile_blocked(&ai->acting_unit_coords, &work.target_coords) != 0) {
             work.viability.by_direction[direction] = 0;
@@ -479,7 +479,7 @@ static s32 origin_self_target_evaluate(void) {
 
     if (g_ai_workspace_storage.resume_pending) {
         /* Resume: re-enter the step that suspended. */
-        if (g_ai_origin_self_target_stage == 0)
+        if (s_ai_origin_self_target_stage == 0)
             goto evaluate_map;
         goto evaluate_targets;
     }
@@ -494,12 +494,12 @@ static s32 origin_self_target_evaluate(void) {
         g_ai_workspace_storage.current_action.command.target_id = g_ai_workspace_storage.acting_unit_id;
     evaluate_map:
         if (ai_move_origins_evaluate() == -1) {
-            g_ai_origin_self_target_stage = 0;
+            s_ai_origin_self_target_stage = 0;
             return -1;
         }
     }
     ai->current_action.command.targeting_type = TARGET_TYPE_TILE;
-    g_ai_origin_self_target_stage = 0;
+    s_ai_origin_self_target_stage = 0;
     ai->current_action.act_before_move = 1;
     memcpy(&ai->considered_unit_coords, &ai->acting_unit_coords, sizeof(ai_coords_t));
 prepare_origin:
@@ -514,14 +514,14 @@ prepare_origin:
     evaluate_targets:
         if (origin_aim_tiles_evaluate() == -1) {
             /* A first-origin suspension skips the moved-origin pass on resume. */
-            g_ai_origin_self_target_stage = 1;
+            s_ai_origin_self_target_stage = 1;
             return -1;
         }
     }
-    if (g_ai_origin_self_target_stage == 0) {
+    if (s_ai_origin_self_target_stage == 0) {
         ai->current_action.act_before_move = 0;
         ai->considered_unit_coords = ai->current_action.coords;
-        g_ai_origin_self_target_stage++;
+        s_ai_origin_self_target_stage++;
         /* A goto retry, not a loop: GCC's loop pass would move the suspend
          * exit out of line. */
         goto prepare_origin;
@@ -765,24 +765,24 @@ static s32 math_targets_evaluate(void) {
     if (!ai_origin_is_allowed(&ai->acting_unit_coords))
         return 0;
     g_ai_workspace_storage.current_action.act_before_move = 1;
-    for (g_ai_math_skillset_index = 0; g_ai_math_skillset_index < AI_MATH_SOURCE_SKILLSET_COUNT;
-        g_ai_math_skillset_index++) {
-        g_ai_math_skillset_id = g_ai_math_source_skillsets[g_ai_math_skillset_index];
-        g_ai_math_ability_list = ability_skillset_list_build(g_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
-        for (g_ai_math_ability_index = 0; g_ai_math_ability_index < HUMAN_SKILLSET_ACTION_SLOT_COUNT;
-            g_ai_math_ability_index++) {
+    for (s_ai_math_skillset_index = 0; s_ai_math_skillset_index < AI_MATH_SOURCE_SKILLSET_COUNT;
+        s_ai_math_skillset_index++) {
+        s_ai_math_skillset_id = g_ai_math_source_skillsets[s_ai_math_skillset_index];
+        s_ai_math_ability_list = ability_skillset_list_build(s_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
+        for (s_ai_math_ability_index = 0; s_ai_math_ability_index < HUMAN_SKILLSET_ACTION_SLOT_COUNT;
+            s_ai_math_ability_index++) {
             /* Math targeting reads only the low byte of each 16-bit ID. */
-            ai->math_ability_id = g_ai_math_ability_list[g_ai_math_ability_index];
+            ai->math_ability_id = s_ai_math_ability_list[s_ai_math_ability_index];
             if (ai->math_ability_id == 0)
                 continue;
             if (!(g_ability_range_data[ai->math_ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE))
                 continue;
-            if (!ai_ability_is_known(ai->acting_unit_id, g_ai_math_skillset_id, g_ai_math_ability_index))
+            if (!ai_ability_is_known(ai->acting_unit_id, s_ai_math_skillset_id, s_ai_math_ability_index))
                 continue;
             /* The extra known-bit call's result is ignored. */
             for (i = 0; i < AI_MATH_EXTRA_KNOWN_ABILITY_COUNT; i++) {
                 if (ai->math_ability_id == special_abilities[i])
-                    ai_ability_is_known(ai->acting_unit_id, g_ai_math_skillset_id, g_ai_math_ability_index + 1);
+                    ai_ability_is_known(ai->acting_unit_id, s_ai_math_skillset_id, s_ai_math_ability_index + 1);
             }
             ai_mem_copy_u16_values(&ai->considered_ability.ai_flags, &g_ability_data[ai->math_ability_id].ai_flags, 4);
             ai_mem_copy_bytes(ai->considered_ability.parameters.fields.status_infliction,
@@ -1134,17 +1134,17 @@ static void origin_targetable_mask_build(tile_mask_mode_e mode, s32 radius) {
         if (y - i < 0)
             break;
         if (x < 8)
-            ai->targetable_tiles[0][y - i] = g_origin_range_row_masks[radius - i] << (7 - x);
+            ai->targetable_tiles[0][y - i] = s_origin_range_row_masks[radius - i] << (7 - x);
         else
-            ai->targetable_tiles[0][y - i] = g_origin_range_row_masks[radius - i] >> (x - 7);
+            ai->targetable_tiles[0][y - i] = s_origin_range_row_masks[radius - i] >> (x - 7);
     }
     for (i = 1; i <= radius; i++) {
         if (y + i >= ai->terrain_depth)
             break;
         if (x < 8)
-            ai->targetable_tiles[0][y + i] = g_origin_range_row_masks[radius - i] << (7 - x);
+            ai->targetable_tiles[0][y + i] = s_origin_range_row_masks[radius - i] << (7 - x);
         else
-            ai->targetable_tiles[0][y + i] = g_origin_range_row_masks[radius - i] >> (x - 7);
+            ai->targetable_tiles[0][y + i] = s_origin_range_row_masks[radius - i] >> (x - 7);
     }
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_LINEAR_TRAJECTORY) {
         for (y = 0; y < ai->terrain_depth; y++) {
@@ -1201,10 +1201,10 @@ static void origin_monster_skill_mask_build(void) {
             + unit->position.y * ai->terrain_width + unit->x]
                      .height;
         for (direction = 0; direction < AI_CARDINAL_DIRECTION_COUNT; direction++) {
-            x = unit->x + g_facing_tile_offsets.by_direction[direction][0];
+            x = unit->x + s_facing_tile_offsets.by_direction[direction][0];
             if (x < 0 || x >= ai->terrain_width)
                 continue;
-            y = unit->position.y + g_facing_tile_offsets.by_direction[direction][1];
+            y = unit->position.y + s_facing_tile_offsets.by_direction[direction][1];
             if (y < 0 || y >= ai->terrain_depth)
                 continue;
             for (level = 0; level <= 0; level++) {
@@ -1632,7 +1632,7 @@ score_state:
                 if (!((unit->status_sets.current[status / 8] << (status % 8)) & 0x80))
                     continue;
                 /* Indexing the s16 table changes register allocation; retain the byte cursor. */
-                weight = *(s16*)((u8*)g_status_priority_weights + weight_offset);
+                weight = *(s16*)((u8*)s_status_priority_weights + weight_offset);
                 /* A confused, blood-sucked or charmed unit gets no credit for positive status weights. */
                 if (((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
                          & (STATUS_BYTE_MASK(STATUS_ID_CONFUSION) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)))

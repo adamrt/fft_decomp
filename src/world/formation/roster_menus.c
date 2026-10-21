@@ -22,7 +22,7 @@ extern menu_text_binding_t g_formation_selected_unit_text_binding;
 extern menu_entry_t g_formation_dismiss_prompt;
 extern menu_entry_t g_formation_dismiss_confirm_menu[4];
 extern menu_entry_t g_formation_dismiss_confirm_menu_scrolled[4];
-static menu_entry_t* g_formation_dismiss_menu_data;
+static menu_entry_t* s_formation_dismiss_menu_data;
 extern u8 g_formation_dismiss_step;
 extern menu_entry_t g_formation_order_menu;
 extern u8 g_formation_order_saved_browse_enabled;
@@ -42,7 +42,7 @@ typedef struct dismiss_profile {
     s16 variable_id; /* EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST range */
 } dismiss_profile_t;
 
-static dismiss_profile_t g_dismiss_profiles[] = { { CHARACTER_IDENTITY_AGRIAS_JOIN, 0x3ce },
+static dismiss_profile_t s_dismiss_profiles[] = { { CHARACTER_IDENTITY_AGRIAS_JOIN, 0x3ce },
     { CHARACTER_IDENTITY_AGRIAS_GUEST, 0x3ce }, { CHARACTER_IDENTITY_ORLANDU, 0x3cf },
     { CHARACTER_IDENTITY_BEOWULF, 0x3d6 }, { CHARACTER_IDENTITY_REIS_HUMAN, 0x3d8 },
     { CHARACTER_IDENTITY_REIS_DRAGON, 0x3d8 }, { CHARACTER_IDENTITY_RAFA_JOIN, 0x3dc },
@@ -163,10 +163,10 @@ void formation_dismiss_menu_update(void) {
         if ((g_formation_dismiss_anim_timer & 0xFF) < 0x11) {
             return;
         }
-        for (i = 0; g_dismiss_profiles[i].character_identity != -1; i++) {
+        for (i = 0; s_dismiss_profiles[i].character_identity != -1; i++) {
             if (g_formation_unit_pointers[g_unit_selected_index]->sprite_set
-                == g_dismiss_profiles[i].character_identity) {
-                script_variable_set(g_dismiss_profiles[i].variable_id, 0xC);
+                == s_dismiss_profiles[i].character_identity) {
+                script_variable_set(s_dismiss_profiles[i].variable_id, 0xC);
             }
         }
         formation_dismiss(g_unit_selected_index);
@@ -216,7 +216,7 @@ void formation_dismiss_menu_update(void) {
             /* A refusal is a plain prompt; a dismissable unit gets the yes/no menu with its farewell. */
             if (g_formation_dismiss_step == FORMATION_DISMISS_REFUSED) {
                 g_sound_suppressed = 1;
-                g_formation_dismiss_menu_data = &g_formation_dismiss_prompt;
+                s_formation_dismiss_menu_data = &g_formation_dismiss_prompt;
                 if (g_formation_unit_banner_at_bottom != 0) {
                     value = 0x19;
                 } else {
@@ -229,7 +229,7 @@ void formation_dismiss_menu_update(void) {
                 if (g_formation_unit_banner_at_bottom != 0) {
                     menu = g_formation_dismiss_confirm_menu_scrolled;
                 }
-                g_formation_dismiss_menu_data = menu;
+                s_formation_dismiss_menu_data = menu;
                 menu[1].selected_index = 0;
                 menu[3].selected_index = 0;
                 menu[2].text_id = text_id;
@@ -249,7 +249,7 @@ void formation_dismiss_menu_update(void) {
         return;
     }
 
-    running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_dismiss_menu_data);
+    running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, s_formation_dismiss_menu_data);
     step = g_formation_dismiss_step;
     g_formation_dismiss_prompt_running = running;
     if (step != FORMATION_DISMISS_REFUSED) {

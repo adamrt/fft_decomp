@@ -13,9 +13,9 @@
 extern s16 g_unit_list_gfx_line_f2_count;
 
 /* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
-static menu_gfx_context_t* g_unit_list_gfx_context_base;
+static menu_gfx_context_t* s_unit_list_gfx_context_base;
 
-static s16 g_unit_list_gfx_poly_f4_count = 0;
+static s16 s_unit_list_gfx_poly_f4_count = 0;
 
 /*
  * Submit the finished bunit frame and swap to the other graphics context.
@@ -31,7 +31,7 @@ void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
     system_frame_stub();
     g_gfx_poly_f3_count = 0;
     g_gfx_poly_ft3_count = 0;
-    g_unit_list_gfx_poly_f4_count = 0;
+    s_unit_list_gfx_poly_f4_count = 0;
     g_menu_gfx_poly_ft4_count = 0;
     g_gfx_poly_g3_count = 0;
     g_gfx_poly_gt3_count = 0;
@@ -55,7 +55,7 @@ void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
     g_menu_gfx_draw_mode_count = 0;
     while (DrawSync(1) != 0) { }
     VSync(g_menu_event_speed);
-    context = g_unit_list_gfx_context_base;
+    context = s_unit_list_gfx_context_base;
     if (g_menu_gfx_context == context) {
         context++;
     }
@@ -165,43 +165,43 @@ void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes) {
     s32 i;
 
-    g_unit_list_gfx_context_base = buffers;
+    s_unit_list_gfx_context_base = buffers;
     g_menu_gfx_context = buffers;
     for (i = 0; i < 2; i++) {
-        g_unit_list_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
-        g_unit_list_gfx_context_base[i].flat_triangles = flat_triangles + g_gfx_poly_f3_capacity * i;
-        g_unit_list_gfx_context_base[i].textured_triangles = textured_triangles + g_gfx_poly_ft3_capacity * i;
-        g_unit_list_gfx_context_base[i].flat_quads = flat_quads + g_gfx_poly_f4_capacity * i;
-        g_unit_list_gfx_context_base[i].textured_quads = textured_quads + g_gfx_poly_ft4_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_triangles = gouraud_triangles + g_gfx_poly_g3_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_textured_triangles
+        s_unit_list_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
+        s_unit_list_gfx_context_base[i].flat_triangles = flat_triangles + g_gfx_poly_f3_capacity * i;
+        s_unit_list_gfx_context_base[i].textured_triangles = textured_triangles + g_gfx_poly_ft3_capacity * i;
+        s_unit_list_gfx_context_base[i].flat_quads = flat_quads + g_gfx_poly_f4_capacity * i;
+        s_unit_list_gfx_context_base[i].textured_quads = textured_quads + g_gfx_poly_ft4_capacity * i;
+        s_unit_list_gfx_context_base[i].gouraud_triangles = gouraud_triangles + g_gfx_poly_g3_capacity * i;
+        s_unit_list_gfx_context_base[i].gouraud_textured_triangles
             = gouraud_textured_triangles + g_gfx_poly_gt3_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_quads = gouraud_quads + g_gfx_poly_g4_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_textured_quads = gouraud_textured_quads + g_gfx_poly_gt4_capacity * i;
-        g_unit_list_gfx_context_base[i].flat_lines = flat_lines + g_gfx_line_f2_capacity * i;
-        g_unit_list_gfx_context_base[i].flat_lines_3 = flat_lines_3 + g_gfx_line_f3_capacity * i;
-        g_unit_list_gfx_context_base[i].flat_lines_4 = flat_lines_4 + g_gfx_line_f4_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_lines = gouraud_lines + g_unit_list_gfx_line_g2_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_lines_3 = gouraud_lines_3 + g_unit_list_gfx_line_g3_capacity * i;
-        g_unit_list_gfx_context_base[i].gouraud_lines_4 = gouraud_lines_4 + g_gfx_line_g4_capacity * i;
-        g_unit_list_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
-        g_unit_list_gfx_context_base[i].tiles_1 = tiles_1 + g_gfx_tile_1_capacity * i;
-        g_unit_list_gfx_context_base[i].tiles_8 = tiles_8 + g_gfx_tile_8_capacity * i;
-        g_unit_list_gfx_context_base[i].tiles_16 = tiles_16 + g_gfx_tile_16_capacity * i;
-        g_unit_list_gfx_context_base[i].sprites = sprites + g_gfx_sprite_capacity * i;
-        g_unit_list_gfx_context_base[i].sprites_8 = sprites_8 + g_gfx_sprite_8_capacity * i;
-        g_unit_list_gfx_context_base[i].sprites_16 = sprites_16 + g_gfx_sprite_16_capacity * i;
-        g_unit_list_gfx_context_base[i].draw_moves = draw_moves + g_unit_list_gfx_draw_move_capacity * i;
-        g_unit_list_gfx_context_base[i].draw_areas = draw_areas + g_unit_list_gfx_draw_area_capacity * i;
-        g_unit_list_gfx_context_base[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
-        unit_list_gfx_init_packet_pools(&g_unit_list_gfx_context_base[i]);
+        s_unit_list_gfx_context_base[i].gouraud_quads = gouraud_quads + g_gfx_poly_g4_capacity * i;
+        s_unit_list_gfx_context_base[i].gouraud_textured_quads = gouraud_textured_quads + g_gfx_poly_gt4_capacity * i;
+        s_unit_list_gfx_context_base[i].flat_lines = flat_lines + g_gfx_line_f2_capacity * i;
+        s_unit_list_gfx_context_base[i].flat_lines_3 = flat_lines_3 + g_gfx_line_f3_capacity * i;
+        s_unit_list_gfx_context_base[i].flat_lines_4 = flat_lines_4 + g_gfx_line_f4_capacity * i;
+        s_unit_list_gfx_context_base[i].gouraud_lines = gouraud_lines + g_unit_list_gfx_line_g2_capacity * i;
+        s_unit_list_gfx_context_base[i].gouraud_lines_3 = gouraud_lines_3 + g_unit_list_gfx_line_g3_capacity * i;
+        s_unit_list_gfx_context_base[i].gouraud_lines_4 = gouraud_lines_4 + g_gfx_line_g4_capacity * i;
+        s_unit_list_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
+        s_unit_list_gfx_context_base[i].tiles_1 = tiles_1 + g_gfx_tile_1_capacity * i;
+        s_unit_list_gfx_context_base[i].tiles_8 = tiles_8 + g_gfx_tile_8_capacity * i;
+        s_unit_list_gfx_context_base[i].tiles_16 = tiles_16 + g_gfx_tile_16_capacity * i;
+        s_unit_list_gfx_context_base[i].sprites = sprites + g_gfx_sprite_capacity * i;
+        s_unit_list_gfx_context_base[i].sprites_8 = sprites_8 + g_gfx_sprite_8_capacity * i;
+        s_unit_list_gfx_context_base[i].sprites_16 = sprites_16 + g_gfx_sprite_16_capacity * i;
+        s_unit_list_gfx_context_base[i].draw_moves = draw_moves + g_unit_list_gfx_draw_move_capacity * i;
+        s_unit_list_gfx_context_base[i].draw_areas = draw_areas + g_unit_list_gfx_draw_area_capacity * i;
+        s_unit_list_gfx_context_base[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
+        unit_list_gfx_init_packet_pools(&s_unit_list_gfx_context_base[i]);
         /* Buffer 0 draws at y 0 while showing y 0xf0, buffer 1 the reverse. Both are 255
          * pixels wide, as in WORLD (CARD uses 256). */
-        SetDefDrawEnv(&g_unit_list_gfx_context_base[i].draw_env, 0, i * 0xf0, 0xff, 0xf0);
-        SetDefDispEnv(&g_unit_list_gfx_context_base[i].disp_env, 0, i == 0 ? 0xf0 : 0, 0xff, 0xf0);
-        g_unit_list_gfx_context_base[i].draw_env.isbg = 0;
-        setRGB0(&g_unit_list_gfx_context_base[i].draw_env, 0, 0, 0);
-        g_unit_list_gfx_context_base[i].draw_env.ofs[0] = -0x80;
+        SetDefDrawEnv(&s_unit_list_gfx_context_base[i].draw_env, 0, i * 0xf0, 0xff, 0xf0);
+        SetDefDispEnv(&s_unit_list_gfx_context_base[i].disp_env, 0, i == 0 ? 0xf0 : 0, 0xff, 0xf0);
+        s_unit_list_gfx_context_base[i].draw_env.isbg = 0;
+        setRGB0(&s_unit_list_gfx_context_base[i].draw_env, 0, 0, 0);
+        s_unit_list_gfx_context_base[i].draw_env.ofs[0] = -0x80;
     }
     unit_list_gfx_submit_frame(0, -1);
     unit_list_gfx_submit_frame(0, -1);

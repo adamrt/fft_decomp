@@ -17,7 +17,7 @@ typedef struct shop_item_availability {
 } shop_item_availability_t;
 
 /* One big-endian town mask per item ID, including the Random/None slots. */
-static shop_item_availability_t g_shop_item_availability[ITEM_ID_COUNT] = {
+static shop_item_availability_t s_shop_item_availability[ITEM_ID_COUNT] = {
     { 0x00, 0x00 },
     { 0xFE, 0x01 },
     { 0xFE, 0x01 },
@@ -356,7 +356,7 @@ s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
             }
-            if (!((g_shop_item_availability[item_id].low | (g_shop_item_availability[item_id].high << 8))
+            if (!((s_shop_item_availability[item_id].low | (s_shop_item_availability[item_id].high << 8))
                     & shop_mask)) {
                 continue;
             }

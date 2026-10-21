@@ -121,7 +121,7 @@ extern MATRIX g_battle_map_light_transition_target_light_matrix;
 extern battle_map_background_gradient_colors_t g_battle_map_background_gradient_colors;
 extern CVECTOR g_battle_map_saved_background_gradient_first;
 extern CVECTOR g_battle_map_saved_background_gradient_second;
-static rgb24_t g_battle_map_ambient_polygon_color;
+static rgb24_t s_battle_map_ambient_polygon_color;
 extern render_buffer_t* g_battle_map_ambient_restored_buffer;
 extern CVECTOR g_battle_map_current_darkness_color;
 extern u8 g_battle_map_back_color_disabled;
@@ -159,9 +159,9 @@ extern s32 g_battle_map_untextured_fixed_ot_index;
 extern s32 g_battle_map_untextured_otz_mask;
 
 /* Default rotation and scale copied when mesh parts or map resources are initialized. */
-static const SVECTOR g_zero_svector;
+static const SVECTOR s_zero_svector;
 
-static const VECTOR g_unit_scale_vector;
+static const VECTOR s_unit_scale_vector;
 
 extern u32 g_gfx_battle_otags[2][0x180];
 
@@ -183,16 +183,16 @@ typedef char back_color_size_must_be_12[sizeof(back_color_t) == 12 ? 1 : -1];
 extern back_color_t g_battle_map_back_color;
 extern back_color_t g_battle_map_saved_back_color;
 
-static u8 g_saved_texture_modes[72] = { 0 };
+static u8 s_saved_texture_modes[72] = { 0 };
 
-static MATRIX g_map_camera_matrix = { 0 };
+static MATRIX s_map_camera_matrix = { 0 };
 
-static DR_MOVE g_texture_animation_moves[BATTLE_MAP_TEXTURE_ANIMATION_COUNT] = { 0 };
+static DR_MOVE s_texture_animation_moves[BATTLE_MAP_TEXTURE_ANIMATION_COUNT] = { 0 };
 
 /* Provisional: these two GNS work arrays are cleared but have no identified reader. */
-static u8 g_unread_gns_load_infos[150][14] = { 0 };
+static u8 s_unread_gns_load_infos[150][14] = { 0 };
 
-static u8 g_unread_gns_record_flags[150] = { 0 };
+static u8 s_unread_gns_record_flags[150] = { 0 };
 
 static void weather_particles_init(weather_command_e command);
 
@@ -216,31 +216,31 @@ static void polygon_flags_dispatch(s32 command) {
     case BATTLE_MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT:
         for (i = 0; i < g_battle_map_textured_triangle_count; i++) {
             if (!(g_battle_map_textured_triangle_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT)) {
-                (g_render_current_buffer->gt3 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt3 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt3 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                (g_render_current_buffer->gt3 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt3 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt3 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                (g_render_current_buffer->gt3 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt3 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt3 + i)->b2 = g_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt3 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt3 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt3 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt3 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt3 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt3 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt3 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt3 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt3 + i)->b2 = s_battle_map_ambient_polygon_color.b;
             }
         }
         for (i = 0; i < g_battle_map_textured_quad_count; i++) {
             if (!(g_battle_map_textured_quad_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT)) {
-                (g_render_current_buffer->gt4 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt4 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt4 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                (g_render_current_buffer->gt4 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt4 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt4 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                (g_render_current_buffer->gt4 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt4 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt4 + i)->b2 = g_battle_map_ambient_polygon_color.b;
-                (g_render_current_buffer->gt4 + i)->r3 = g_battle_map_ambient_polygon_color.r;
-                (g_render_current_buffer->gt4 + i)->g3 = g_battle_map_ambient_polygon_color.g;
-                (g_render_current_buffer->gt4 + i)->b3 = g_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt4 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt4 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt4 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt4 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt4 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt4 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt4 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt4 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt4 + i)->b2 = s_battle_map_ambient_polygon_color.b;
+                (g_render_current_buffer->gt4 + i)->r3 = s_battle_map_ambient_polygon_color.r;
+                (g_render_current_buffer->gt4 + i)->g3 = s_battle_map_ambient_polygon_color.g;
+                (g_render_current_buffer->gt4 + i)->b3 = s_battle_map_ambient_polygon_color.b;
             }
         }
         g_battle_map_ambient_restored_buffer = g_render_current_buffer;
@@ -1141,31 +1141,31 @@ void battle_map_mesh_weather_draw(MATRIX* camera) {
         if (g_battle_map_ambient_restored_buffer != g_render_current_buffer) {
             for (i = 0; i < g_battle_map_textured_triangle_count; i++) {
                 if (!(g_battle_map_textured_triangle_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT)) {
-                    (g_render_current_buffer->gt3 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt3 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt3 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                    (g_render_current_buffer->gt3 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt3 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt3 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                    (g_render_current_buffer->gt3 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt3 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt3 + i)->b2 = g_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt3 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt3 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt3 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt3 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt3 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt3 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt3 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt3 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt3 + i)->b2 = s_battle_map_ambient_polygon_color.b;
                 }
             }
             for (i = 0; i < g_battle_map_textured_quad_count; i++) {
                 if (!(g_battle_map_textured_quad_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT)) {
-                    (g_render_current_buffer->gt4 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt4 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt4 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                    (g_render_current_buffer->gt4 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt4 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt4 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                    (g_render_current_buffer->gt4 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt4 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt4 + i)->b2 = g_battle_map_ambient_polygon_color.b;
-                    (g_render_current_buffer->gt4 + i)->r3 = g_battle_map_ambient_polygon_color.r;
-                    (g_render_current_buffer->gt4 + i)->g3 = g_battle_map_ambient_polygon_color.g;
-                    (g_render_current_buffer->gt4 + i)->b3 = g_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt4 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt4 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt4 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt4 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt4 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt4 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt4 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt4 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt4 + i)->b2 = s_battle_map_ambient_polygon_color.b;
+                    (g_render_current_buffer->gt4 + i)->r3 = s_battle_map_ambient_polygon_color.r;
+                    (g_render_current_buffer->gt4 + i)->g3 = s_battle_map_ambient_polygon_color.g;
+                    (g_render_current_buffer->gt4 + i)->b3 = s_battle_map_ambient_polygon_color.b;
                 }
             }
         }
@@ -1539,15 +1539,15 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
                     if (g_battle_map_textured_triangle_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT) {
                         g_battle_map_textured_triangle_positions[i].polygon_flags |= BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
                     } else {
-                        (g_render_current_buffer->gt3 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt3 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt3 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt3 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt3 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt3 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt3 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt3 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt3 + i)->b2 = g_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt3 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt3 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt3 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt3 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt3 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt3 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt3 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt3 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt3 + i)->b2 = s_battle_map_ambient_polygon_color.b;
                     }
                 }
             }
@@ -1567,18 +1567,18 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
                     if (g_battle_map_textured_quad_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT) {
                         g_battle_map_textured_quad_positions[i].polygon_flags |= BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
                     } else {
-                        (g_render_current_buffer->gt4 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt4 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt4 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b2 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt4 + i)->r3 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g3 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b3 = g_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b2 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r3 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g3 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b3 = s_battle_map_ambient_polygon_color.b;
                     }
                 }
             }
@@ -1666,15 +1666,15 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
                     if (g_battle_map_textured_triangle_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT) {
                         g_battle_map_textured_triangle_positions[i].polygon_flags |= BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
                     } else {
-                        (g_render_current_buffer->gt3 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt3 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt3 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt3 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt3 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt3 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt3 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt3 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt3 + i)->b2 = g_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt3 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt3 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt3 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt3 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt3 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt3 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt3 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt3 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt3 + i)->b2 = s_battle_map_ambient_polygon_color.b;
                     }
                 }
             }
@@ -1694,18 +1694,18 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
                     if (g_battle_map_textured_quad_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT) {
                         g_battle_map_textured_quad_positions[i].polygon_flags |= BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
                     } else {
-                        (g_render_current_buffer->gt4 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt4 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt4 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b2 = g_battle_map_ambient_polygon_color.b;
-                        (g_render_current_buffer->gt4 + i)->r3 = g_battle_map_ambient_polygon_color.r;
-                        (g_render_current_buffer->gt4 + i)->g3 = g_battle_map_ambient_polygon_color.g;
-                        (g_render_current_buffer->gt4 + i)->b3 = g_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b2 = s_battle_map_ambient_polygon_color.b;
+                        (g_render_current_buffer->gt4 + i)->r3 = s_battle_map_ambient_polygon_color.r;
+                        (g_render_current_buffer->gt4 + i)->g3 = s_battle_map_ambient_polygon_color.g;
+                        (g_render_current_buffer->gt4 + i)->b3 = s_battle_map_ambient_polygon_color.b;
                     }
                 }
             }
@@ -1796,15 +1796,15 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
                             g_battle_map_textured_triangle_positions[i].polygon_flags
                                 |= BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
                         } else {
-                            (g_render_current_buffer->gt3 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt3 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt3 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                            (g_render_current_buffer->gt3 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt3 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt3 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                            (g_render_current_buffer->gt3 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt3 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt3 + i)->b2 = g_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt3 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt3 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt3 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt3 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt3 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt3 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt3 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt3 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt3 + i)->b2 = s_battle_map_ambient_polygon_color.b;
                         }
                     } else {
                         g_render_current_buffer->gt3[i].r0 = 0x60;
@@ -1837,18 +1837,18 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
                         if (g_battle_map_textured_quad_positions[i].polygon_flags & BATTLE_MAP_POLYGON_FLAG_LIT) {
                             g_battle_map_textured_quad_positions[i].polygon_flags |= BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
                         } else {
-                            (g_render_current_buffer->gt4 + i)->r0 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt4 + i)->g0 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt4 + i)->b0 = g_battle_map_ambient_polygon_color.b;
-                            (g_render_current_buffer->gt4 + i)->r1 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt4 + i)->g1 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt4 + i)->b1 = g_battle_map_ambient_polygon_color.b;
-                            (g_render_current_buffer->gt4 + i)->r2 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt4 + i)->g2 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt4 + i)->b2 = g_battle_map_ambient_polygon_color.b;
-                            (g_render_current_buffer->gt4 + i)->r3 = g_battle_map_ambient_polygon_color.r;
-                            (g_render_current_buffer->gt4 + i)->g3 = g_battle_map_ambient_polygon_color.g;
-                            (g_render_current_buffer->gt4 + i)->b3 = g_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt4 + i)->r0 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt4 + i)->g0 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt4 + i)->b0 = s_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt4 + i)->r1 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt4 + i)->g1 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt4 + i)->b1 = s_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt4 + i)->r2 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt4 + i)->g2 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt4 + i)->b2 = s_battle_map_ambient_polygon_color.b;
+                            (g_render_current_buffer->gt4 + i)->r3 = s_battle_map_ambient_polygon_color.r;
+                            (g_render_current_buffer->gt4 + i)->g3 = s_battle_map_ambient_polygon_color.g;
+                            (g_render_current_buffer->gt4 + i)->b3 = s_battle_map_ambient_polygon_color.b;
                         }
                     } else {
                         g_render_current_buffer->gt4[i].r0 = 0x60;
@@ -1874,9 +1874,9 @@ void target_tile_mark_colors_set(s32 mode, s32 unused) {
     }
 }
 
-static const SVECTOR g_zero_svector = { 0, 0, 0, 0 };
+static const SVECTOR s_zero_svector = { 0, 0, 0, 0 };
 
-static const VECTOR g_unit_scale_vector = { ONE, ONE, ONE, 0 };
+static const VECTOR s_unit_scale_vector = { ONE, ONE, ONE, 0 };
 
 /* Initializes both battle render buffers: every primitive in each pool gets its
  * GPU command code, the full-screen Gouraud overlay gets its corners and two
@@ -1949,8 +1949,8 @@ void render_buffers_init(void) {
  * polygon lit, ambient color 0x80 gray, weather and lightning off, texture and mesh part
  * animations stopped, GNS resource records cleared. */
 void battle_map_mesh_reset_render_state(void) {
-    SVECTOR zero_vector = g_zero_svector;
-    VECTOR unit_scale = g_unit_scale_vector;
+    SVECTOR zero_vector = s_zero_svector;
+    VECTOR unit_scale = s_unit_scale_vector;
     s32 i;
     s16 no_tile;
     s32 j;
@@ -1965,9 +1965,9 @@ void battle_map_mesh_reset_render_state(void) {
     g_battle_map_gns_dispatch_held = 0;
     for (i = 0; i < 150; i++) {
         for (j = 0; j < 14; j++) {
-            g_unread_gns_load_infos[i][j] = 0;
+            s_unread_gns_load_infos[i][j] = 0;
         }
-        g_unread_gns_record_flags[i] = 0;
+        s_unread_gns_record_flags[i] = 0;
     }
     for (i = 0; i < GNS_RESOURCE_TABLE_COUNT; i++) {
         bzero(g_battle_map_loaded_gns_records[i].load_info.bytes, sizeof(battle_map_gns_load_info_t));
@@ -1982,9 +1982,9 @@ void battle_map_mesh_reset_render_state(void) {
     SetDrawMode(&g_render_buffers[1].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[1].overlay_modes[0], 0, 1, 0, 0);
-    g_battle_map_ambient_polygon_color.r = 0x80;
-    g_battle_map_ambient_polygon_color.g = 0x80;
-    g_battle_map_ambient_polygon_color.b = 0x80;
+    s_battle_map_ambient_polygon_color.r = 0x80;
+    s_battle_map_ambient_polygon_color.g = 0x80;
+    s_battle_map_ambient_polygon_color.b = 0x80;
     for (i = 0; i < RENDER_TEXTURED_TRIANGLE_COUNT; i++) {
         g_battle_map_textured_triangle_positions[i].polygon_flags
             = BATTLE_MAP_POLYGON_FLAG_LIT | BATTLE_MAP_POLYGON_FLAG_LIT_ACTIVE;
@@ -2059,14 +2059,14 @@ void camera_matrices_update(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* sc
     RotMatrix(rotation, camera_matrix);
     TransMatrix(camera_matrix, screen_offset);
     ScaleMatrix(camera_matrix, &g_battle_map_camera_zoom);
-    RotMatrix(rotation, &g_map_camera_matrix);
+    RotMatrix(rotation, &s_map_camera_matrix);
     SetRotMatrix(camera_matrix);
     SetTransMatrix(camera_matrix);
-    RotTrans(&g_camera_integer_coords, (VECTOR*)g_map_camera_matrix.t, &result);
-    ScaleMatrix(&g_map_camera_matrix, &g_battle_map_camera_zoom);
+    RotTrans(&g_camera_integer_coords, (VECTOR*)s_map_camera_matrix.t, &result);
+    ScaleMatrix(&s_map_camera_matrix, &g_battle_map_camera_zoom);
 
-    *camera_matrix = g_map_camera_matrix;
-    g_battle_map_mesh_parts[0].matrix = g_map_camera_matrix;
+    *camera_matrix = s_map_camera_matrix;
+    g_battle_map_mesh_parts[0].matrix = s_map_camera_matrix;
     RotMatrix(&g_battle_map_light_rotation, &g_battle_map_light_rotation_matrix);
 }
 
@@ -2794,19 +2794,19 @@ s32 battle_map_data_command_dispatch(battle_map_data_command_e command, u32 inde
         break;
     case BATTLE_MAP_DATA_COMMAND_START_TEXTURE_ANIMATION:
         if (g_battle_map_texture_animations[index].mode == BATTLE_MAP_TEXTURE_ANIMATION_MODE_NONE) {
-            if (g_saved_texture_modes[index] != 0) {
-                g_battle_map_texture_animations[index].mode = g_saved_texture_modes[index];
+            if (s_saved_texture_modes[index] != 0) {
+                g_battle_map_texture_animations[index].mode = s_saved_texture_modes[index];
             }
         }
         switch (g_battle_map_texture_animations[index].mode) {
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_LOOP ... BATTLE_MAP_TEXTURE_ANIMATION_MODE_COLOR_CYCLE:
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK ... BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_PLAYING:
-            g_texture_animation_moves[index].sx = g_battle_map_texture_animations[index].frame_x;
-            g_texture_animation_moves[index].sy = g_battle_map_texture_animations[index].frame_y;
-            g_texture_animation_moves[index].w = g_battle_map_texture_animations[index].width;
-            g_texture_animation_moves[index].h = g_battle_map_texture_animations[index].height;
-            g_texture_animation_moves[index].x0 = g_battle_map_texture_animations[index].canvas_x;
-            g_texture_animation_moves[index].y0 = g_battle_map_texture_animations[index].canvas_y;
+            s_texture_animation_moves[index].sx = g_battle_map_texture_animations[index].frame_x;
+            s_texture_animation_moves[index].sy = g_battle_map_texture_animations[index].frame_y;
+            s_texture_animation_moves[index].w = g_battle_map_texture_animations[index].width;
+            s_texture_animation_moves[index].h = g_battle_map_texture_animations[index].height;
+            s_texture_animation_moves[index].x0 = g_battle_map_texture_animations[index].canvas_x;
+            s_texture_animation_moves[index].y0 = g_battle_map_texture_animations[index].canvas_y;
             g_battle_map_texture_animations[index].active = 1;
             g_battle_map_texture_animations[index].timer = 0x7e;
             g_battle_map_texture_animations[index].frame = 0;
@@ -2867,24 +2867,24 @@ s32 battle_map_data_command_dispatch(battle_map_data_command_e command, u32 inde
         break;
     case BATTLE_MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS:
         for (i = 0; i < BATTLE_MAP_TEXTURE_ANIMATION_COUNT; i++) {
-            g_saved_texture_modes[i] = g_battle_map_texture_animations[i].mode;
+            s_saved_texture_modes[i] = g_battle_map_texture_animations[i].mode;
             g_battle_map_texture_animations[i].mode = BATTLE_MAP_TEXTURE_ANIMATION_MODE_NONE;
         }
         break;
     case BATTLE_MAP_DATA_COMMAND_RESTORE_ALL_TEXTURE_ANIMATIONS:
         for (i = 0; i < BATTLE_MAP_TEXTURE_ANIMATION_COUNT; i++) {
-            g_battle_map_texture_animations[i].mode = g_saved_texture_modes[i];
+            g_battle_map_texture_animations[i].mode = s_saved_texture_modes[i];
         }
         break;
     case BATTLE_MAP_DATA_COMMAND_DISABLE_TEXTURE_ANIMATION:
         if (index < BATTLE_MAP_TEXTURE_ANIMATION_COUNT) {
-            g_saved_texture_modes[index] = g_battle_map_texture_animations[index].mode;
+            s_saved_texture_modes[index] = g_battle_map_texture_animations[index].mode;
             g_battle_map_texture_animations[index].mode = BATTLE_MAP_TEXTURE_ANIMATION_MODE_NONE;
         }
         break;
     case BATTLE_MAP_DATA_COMMAND_RESTORE_TEXTURE_ANIMATION:
         if (index < BATTLE_MAP_TEXTURE_ANIMATION_COUNT) {
-            g_battle_map_texture_animations[index].mode = g_saved_texture_modes[index];
+            g_battle_map_texture_animations[index].mode = s_saved_texture_modes[index];
         }
         break;
     case BATTLE_MAP_DATA_COMMAND_SET_TEXTURE_ANIMATION_DURATION:
@@ -2933,26 +2933,26 @@ static void texture_animations_update(void) {
             g_battle_map_texture_animations[i].frame++;
             g_battle_map_texture_animations[i].column++;
             /* Past the right edge of the 64-wide texture page, continue at the start of the next row. */
-            if (g_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width * 2
+            if (s_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width * 2
                 > g_battle_map_texture_animations[i].frame_x / 64 * 64 + 0x3F) {
                 g_battle_map_texture_animations[i].column = 0;
                 g_battle_map_texture_animations[i].row++;
-                g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2
+                s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2
                     - g_battle_map_texture_animations[i].width;
             }
             if (g_battle_map_texture_animations[i].frame_count - 1 < g_battle_map_texture_animations[i].frame) {
                 g_battle_map_texture_animations[i].frame = 0;
                 g_battle_map_texture_animations[i].column = 0;
                 g_battle_map_texture_animations[i].row = 0;
-                g_texture_animation_moves[i].sx
+                s_texture_animation_moves[i].sx
                     = g_battle_map_texture_animations[i].frame_x - g_battle_map_texture_animations[i].width;
             }
 
             /* Aim the DR_MOVE at the new frame and queue its copy onto the canvas. */
-            g_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
-            g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
+            s_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
+            s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
                 + g_battle_map_texture_animations[i].height * g_battle_map_texture_animations[i].row;
-            AddPrim(g_render_current_buffer->otag, &g_texture_animation_moves[i]);
+            AddPrim(g_render_current_buffer->otag, &s_texture_animation_moves[i]);
             break;
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG:
             g_battle_map_texture_animations[i].timer += g_system_vsync_interval;
@@ -2960,21 +2960,21 @@ static void texture_animations_update(void) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame++;
                 g_battle_map_texture_animations[i].column++;
-                if (g_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width * 2
+                if (s_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width * 2
                     > g_battle_map_texture_animations[i].frame_x / 64 * 64 + 0x3F) {
                     g_battle_map_texture_animations[i].column = 0;
                     g_battle_map_texture_animations[i].row++;
-                    g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2
+                    s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2
                         - g_battle_map_texture_animations[i].width;
                 }
                 if (g_battle_map_texture_animations[i].frame_count - 2 < g_battle_map_texture_animations[i].frame) {
                     g_battle_map_texture_animations[i].mode = BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK;
                 }
 
-                g_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
-                g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
+                s_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
+                s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
                     + g_battle_map_texture_animations[i].height * g_battle_map_texture_animations[i].row;
-                AddPrim(g_render_current_buffer->otag, &g_texture_animation_moves[i]);
+                AddPrim(g_render_current_buffer->otag, &s_texture_animation_moves[i]);
             }
             break;
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG_BACK:
@@ -2984,23 +2984,23 @@ static void texture_animations_update(void) {
                 g_battle_map_texture_animations[i].frame--;
                 g_battle_map_texture_animations[i].column--;
                 /* Before the page's left edge, go back to the last column of the previous row. */
-                if (g_texture_animation_moves[i].sx - g_battle_map_texture_animations[i].width
+                if (s_texture_animation_moves[i].sx - g_battle_map_texture_animations[i].width
                     < g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2) {
                     g_battle_map_texture_animations[i].column
                         = (0x40 - (g_battle_map_texture_animations[i].frame_x % 64))
                         / g_battle_map_texture_animations[i].width;
                     g_battle_map_texture_animations[i].row--;
-                    g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x
+                    s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x
                         + g_battle_map_texture_animations[i].column * g_battle_map_texture_animations[i].width;
                 }
                 if (g_battle_map_texture_animations[i].frame == 0) {
                     g_battle_map_texture_animations[i].mode = BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_PING_PONG;
                 }
 
-                g_texture_animation_moves[i].sx -= g_battle_map_texture_animations[i].width;
-                g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
+                s_texture_animation_moves[i].sx -= g_battle_map_texture_animations[i].width;
+                s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
                     + g_battle_map_texture_animations[i].height * g_battle_map_texture_animations[i].row;
-                AddPrim(g_render_current_buffer->otag, &g_texture_animation_moves[i]);
+                AddPrim(g_render_current_buffer->otag, &s_texture_animation_moves[i]);
             }
             break;
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_PALETTE_LOOP:
@@ -3059,15 +3059,15 @@ static void texture_animations_update(void) {
             g_battle_map_texture_animations[i].frame = 0;
             while (g_battle_map_texture_animations[i].frame < g_battle_map_texture_animations[i].frame_count) {
                 g_battle_map_texture_animations[i].column++;
-                if (g_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width * 2
+                if (s_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width * 2
                     > g_battle_map_texture_animations[i].frame_x / 64 * 64 + 0x3F) {
                     g_battle_map_texture_animations[i].column = 0;
                     g_battle_map_texture_animations[i].row++;
-                    g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2
+                    s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2
                         - g_battle_map_texture_animations[i].width;
                 }
-                g_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
-                g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
+                s_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
+                s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
                     + g_battle_map_texture_animations[i].height * g_battle_map_texture_animations[i].row;
                 g_battle_map_texture_animations[i].frame++;
             }
@@ -3081,7 +3081,7 @@ static void texture_animations_update(void) {
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame--;
                 g_battle_map_texture_animations[i].column--;
-                if (g_texture_animation_moves[i].sx - g_battle_map_texture_animations[i].width
+                if (s_texture_animation_moves[i].sx - g_battle_map_texture_animations[i].width
                     < g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2) {
                     g_battle_map_texture_animations[i].column
                         = (0x40 - (g_battle_map_texture_animations[i].frame_x % 64))
@@ -3094,11 +3094,11 @@ static void texture_animations_update(void) {
                     g_battle_map_texture_animations[i].mode = BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_REVERSE_ONCE_0;
                 }
 
-                g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x
+                s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x
                     + g_battle_map_texture_animations[i].width * g_battle_map_texture_animations[i].column;
-                g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
+                s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y
                     + g_battle_map_texture_animations[i].height * g_battle_map_texture_animations[i].row;
-                AddPrim(g_render_current_buffer->otag, &g_texture_animation_moves[i]);
+                AddPrim(g_render_current_buffer->otag, &s_texture_animation_moves[i]);
             }
             break;
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_ONCE_0:
@@ -3112,17 +3112,17 @@ static void texture_animations_update(void) {
             g_battle_map_texture_animations[i].timer += g_system_vsync_interval;
             if (g_battle_map_texture_animations[i].timer > g_battle_map_texture_animations[i].duration) {
                 if (g_battle_map_texture_animations[i].column != 0) {
-                    g_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
+                    s_texture_animation_moves[i].sx += g_battle_map_texture_animations[i].width;
                 }
                 g_battle_map_texture_animations[i].timer = 0;
                 g_battle_map_texture_animations[i].frame++;
                 g_battle_map_texture_animations[i].column++;
-                if (g_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width
+                if (s_texture_animation_moves[i].sx + g_battle_map_texture_animations[i].width
                     > g_battle_map_texture_animations[i].frame_x / 64 * 64 + 0x3F) {
                     g_battle_map_texture_animations[i].column = 0;
                     g_battle_map_texture_animations[i].row++;
-                    g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2;
-                    g_texture_animation_moves[i].sy
+                    s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x / 64 * 64 + 2;
+                    s_texture_animation_moves[i].sy
                         += g_battle_map_texture_animations[i].height * g_battle_map_texture_animations[i].row;
                 }
 
@@ -3131,11 +3131,11 @@ static void texture_animations_update(void) {
                     g_battle_map_texture_animations[i].column = 0;
                     g_battle_map_texture_animations[i].row = 0;
                     g_battle_map_texture_animations[i].active = 0;
-                    g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x;
-                    g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y;
+                    s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x;
+                    s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y;
                     break;
                 }
-                AddPrim(g_render_current_buffer->otag, &g_texture_animation_moves[i]);
+                AddPrim(g_render_current_buffer->otag, &s_texture_animation_moves[i]);
             }
             break;
         case BATTLE_MAP_TEXTURE_ANIMATION_MODE_PALETTE_ONCE_0:
@@ -3320,8 +3320,8 @@ s32 battle_map_gns_resource_dispatch(u8 resource_type, battle_map_resource_t* da
     u8 green;
     u8 blue;
 
-    zero_vector = g_zero_svector;
-    unit_scale = g_unit_scale_vector;
+    zero_vector = s_zero_svector;
+    unit_scale = s_unit_scale_vector;
 
     /* Let queued drawing finish before a resource replaces data the GPU may still be reading. */
     while (DrawSync(1) != 0) { }
@@ -3601,13 +3601,13 @@ s32 battle_map_gns_resource_dispatch(u8 resource_type, battle_map_resource_t* da
         for (i = 0; i < BATTLE_MAP_TEXTURE_ANIMATION_COUNT; i++) {
             g_battle_map_texture_animation_cycle_handles[i] = 0;
             g_battle_map_texture_animations[i] = source[i];
-            SetDrawMove(&g_texture_animation_moves[i]);
-            g_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x;
-            g_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y;
-            g_texture_animation_moves[i].w = g_battle_map_texture_animations[i].width;
-            g_texture_animation_moves[i].h = g_battle_map_texture_animations[i].height;
-            g_texture_animation_moves[i].x0 = g_battle_map_texture_animations[i].canvas_x;
-            g_texture_animation_moves[i].y0 = g_battle_map_texture_animations[i].canvas_y;
+            SetDrawMove(&s_texture_animation_moves[i]);
+            s_texture_animation_moves[i].sx = g_battle_map_texture_animations[i].frame_x;
+            s_texture_animation_moves[i].sy = g_battle_map_texture_animations[i].frame_y;
+            s_texture_animation_moves[i].w = g_battle_map_texture_animations[i].width;
+            s_texture_animation_moves[i].h = g_battle_map_texture_animations[i].height;
+            s_texture_animation_moves[i].x0 = g_battle_map_texture_animations[i].canvas_x;
+            s_texture_animation_moves[i].y0 = g_battle_map_texture_animations[i].canvas_y;
             /* Play-once modes wait for battle_map_data_command_dispatch to start them; the rest run at once. */
             if (g_battle_map_texture_animations[i].mode >= BATTLE_MAP_TEXTURE_ANIMATION_MODE_UV_ONCE_0
                 && g_battle_map_texture_animations[i].mode < BATTLE_MAP_TEXTURE_ANIMATION_MODE_COLOR_CYCLE) {

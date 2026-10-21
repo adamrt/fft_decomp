@@ -18,7 +18,7 @@
 
 extern struct screen_number_range g_window_panel_number_state;
 
-static s16 g_window_panel_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
+static s16 s_window_panel_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE };
@@ -194,7 +194,7 @@ void window_panel_state_init(s32 unused, s32 extent, window_panel_layout_t* layo
     g_window_panel_render_state.text_id = 0;
     g_window_panel_render_state.max_row_index = layout->visible_rows;
     g_window_panel_render_state.thread_count = 0;
-    g_window_panel_render_state.row_actions = g_window_panel_row_actions;
+    g_window_panel_render_state.row_actions = s_window_panel_row_actions;
     g_window_panel_render_state.header_id = 1;
     g_window_panel_render_state.context = &g_window_panel_label_state; /* a column layout */
     g_window_panel_render_state.value = &g_window_panel_value;

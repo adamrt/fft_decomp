@@ -16,8 +16,8 @@
 extern display_object_sequence_header_t* g_display_object_sequence_table[];
 extern display_object_cel_header_t* g_display_object_cel_table[];
 
-static display_object_sequence_header_t** g_display_object_sequences = g_display_object_sequence_table;
-static display_object_cel_header_t** g_display_object_cels = g_display_object_cel_table;
+static display_object_sequence_header_t** s_display_object_sequences = g_display_object_sequence_table;
+static display_object_cel_header_t** s_display_object_cels = g_display_object_cel_table;
 
 static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void gs_image_draw(display_object_gs_image_t* object, GsOT* ot);
@@ -125,13 +125,13 @@ void display_object_gs_animated_draw(display_object_animated_t* object, GsOT* ot
     s32 palette;
     s32 px;
 
-    sequence = g_display_object_sequences[object->sequence];
+    sequence = s_display_object_sequences[object->sequence];
     sprite.my = 0;
     sprite.mx = 0;
     sprite.scaley = ONE;
     sprite.scalex = ONE;
     sprite.rotate = 0;
-    cels = g_display_object_cels;
+    cels = s_display_object_cels;
     if (object->flags & DISPLAY_OBJECT_UNTINTED) {
         color = object->color;
     } else {

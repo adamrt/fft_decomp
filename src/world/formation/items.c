@@ -32,7 +32,7 @@ extern u8 g_formation_item_menu_unit_index;
 extern u8 g_formation_item_menu_saved_browse_enabled;
 extern u8 g_formation_item_submenu_exit_pending;
 extern u16 g_formation_item_equip_item_cursor_anim;
-static point16_t g_formation_item_equip_item_cursor_point;
+static point16_t s_formation_item_equip_item_cursor_point;
 extern menu_entry_t g_formation_item_best_fit_confirm_menu;
 extern s8 g_formation_item_remove_unit_index;
 extern u16 g_formation_item_remove_cursor_anim;
@@ -324,12 +324,12 @@ static s32 equipment_menu_update(void) {
     }
 
     formation_toggle_preview_stats_window(g_formation_item_preview_active);
-    cursor_y = &g_formation_item_equip_item_cursor_point.y;
+    cursor_y = &s_formation_item_equip_item_cursor_point.y;
     *cursor_y = g_formation_item_slot * 16 + 0x90;
     gfx_set_otag_index(0x28);
     /* The mode is an argument expression so &g_formation_item_equip_item_cursor_point is formed before its
      * branches and derived from cursor_y (addiu a0,s0,-2), as in the target. */
-    screen_sliding_cursor_draw(&g_formation_item_equip_item_cursor_point, &g_formation_item_equip_item_cursor_anim,
+    screen_sliding_cursor_draw(&s_formation_item_equip_item_cursor_point, &g_formation_item_equip_item_cursor_anim,
         g_formation_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;
 }

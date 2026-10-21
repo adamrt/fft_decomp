@@ -23,7 +23,7 @@ extern oriented_quad_t g_equipment_secondary_slot_marker;
 extern u8 g_equipment_slot_marker_x[];
 extern u8 g_equipment_item_list_has_multiple_entries;
 extern s8 g_equipment_item_action_menu_active;
-static menu_entry_t* g_equipment_item_action_active_menu;
+static menu_entry_t* s_equipment_item_action_active_menu;
 extern menu_entry_t g_equipment_item_action_menu_single_item;
 extern s16 g_equipment_text_redraw_flag;
 extern s16 g_equipment_item_type_order[];
@@ -60,14 +60,14 @@ s32 equipment_update_item_actions(void) {
             menu = &g_equipment_item_action_menu_single_item;
             g_equipment_item_list_has_multiple_entries = 0;
         }
-        g_equipment_item_action_active_menu = menu;
+        s_equipment_item_action_active_menu = menu;
         g_equipment_item_action_menu_active = 1;
     }
 
     /* Each row's help text, from entry 0x2f of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
-    g_help_message_text_id = g_equipment_item_action_active_menu->selected_index + 0x102F;
+    g_help_message_text_id = s_equipment_item_action_active_menu->selected_index + 0x102F;
     g_equipment_item_action_menu_active
-        = menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, g_equipment_item_action_active_menu);
+        = menu_managed_thread_start(EQUIPMENT_THREAD_SLOT_POPUP_MENU, s_equipment_item_action_active_menu);
     if (g_equipment_item_action_menu_active == 0) {
         return MENU_ITEM_LIST_STATE_BROWSE;
     }

@@ -20,7 +20,7 @@
 
 /* Resident title route flag, consumed and cleared during ATTACK's scenario setup. */
 u8 g_system_go_straight_to_battle = 1;
-static u32 g_system_game_loop_stack_pointer;
+static u32 s_system_game_loop_stack_pointer;
 
 /* Let the GPU finish, blank the display and shut down the sound driver and the SPU. */
 static void display_audio_stop(void) {
@@ -35,7 +35,7 @@ static void display_audio_stop(void) {
  * on the stack pointer main saved. */
 void system_game_reset(void) {
     display_audio_stop();
-    system_game_loop_stack_restore(&g_system_game_loop_stack_pointer);
+    system_game_loop_stack_restore(&s_system_game_loop_stack_pointer);
 }
 
 /* Run MAIN's no-op region and return to the BATTLE loader. */
@@ -126,7 +126,7 @@ void system_game_loop_run(void) {
  * pad and callback shutdown below it never runs. */
 void main(void) {
     boot_startup_run();
-    system_stack_pointer_store(&g_system_game_loop_stack_pointer);
+    system_stack_pointer_store(&s_system_game_loop_stack_pointer);
     system_game_loop_run();
     PadStop();
     StopCallback();

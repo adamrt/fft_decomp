@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* Set by the retail range tests in mul_div_s64 and fixed_cross_product_q12. */
-static s32 g_camera_arithmetic_overflow;
+static s32 s_camera_arithmetic_overflow;
 
 /* CameraFusion key: cumulative Camera duration and component value. */
 typedef struct track_key {
@@ -263,7 +263,7 @@ static s32 track_step(camera_track_t* track, s32 component) {
         }
 
         flag = 0;
-        g_camera_arithmetic_overflow = 0;
+        s_camera_arithmetic_overflow = 0;
         value1 = value[1];
         value0 = value[0];
         time3 = time[3];
@@ -297,7 +297,7 @@ static s32 track_step(camera_track_t* track, s32 component) {
 
         /* A zero divisor or a helper range flag selects the track's stored value. */
 
-        if (g_camera_arithmetic_overflow != 0 || flag != 0) {
+        if (s_camera_arithmetic_overflow != 0 || flag != 0) {
             result = track->prev_value;
         }
     }

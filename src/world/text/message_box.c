@@ -23,18 +23,18 @@
 
 /* message glyphs and staging slots */
 extern text_glyph_state_t g_message_box_glyph;
-static glyph_blit_t g_message_box_state;
-static RECT g_message_box_vram_rect;
-static u8 g_message_box_glyph_images[3][8][84];
-static u8 g_message_box_previous_images[3][84];
-static u8 g_message_box_column_scratch[14];
+static glyph_blit_t s_message_box_state;
+static RECT s_message_box_vram_rect;
+static u8 s_message_box_glyph_images[3][8][84];
+static u8 s_message_box_previous_images[3][84];
+static u8 s_message_box_column_scratch[14];
 
-static s32 g_message_box_digit_divisors[9] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
-static s32 g_message_box_slot_threads[3] = { 0 };
-static s32 g_message_box_slot_glyph_counters[3] = { 0 };
-static s32 g_message_box_glyph_delay = 2;
-static u8 g_message_box_slot_carry_offset[3] = { 0 };
-static u8 g_message_box_slot_prev_width[3] = { 0 };
+static s32 s_message_box_digit_divisors[9] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
+static s32 s_message_box_slot_threads[3] = { 0 };
+static s32 s_message_box_slot_glyph_counters[3] = { 0 };
+static s32 s_message_box_glyph_delay = 2;
+static u8 s_message_box_slot_carry_offset[3] = { 0 };
+static u8 s_message_box_slot_prev_width[3] = { 0 };
 
 /* Render a message box's lines into its window image with the pen at (8, 8) and upload it; a
  * portrait box builds its tailed window image first, and centered boxes are skipped. */
@@ -64,9 +64,9 @@ static void box_slot_release(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        if (g_thread_current_id == g_message_box_slot_threads[i]) {
-            g_message_box_slot_threads[i] = 0;
-            g_message_box_slot_glyph_counters[i] = 0;
+        if (g_thread_current_id == s_message_box_slot_threads[i]) {
+            s_message_box_slot_threads[i] = 0;
+            s_message_box_slot_glyph_counters[i] = 0;
             return;
         }
     }
@@ -100,19 +100,19 @@ static void box_glyph_draw(s32 x, s32 y, s32 wait) {
     for (;;) {
         slot = 0x10;
         for (i = 0; i < 3; i++) {
-            if (g_thread_current_id == g_message_box_slot_threads[i]) {
+            if (g_thread_current_id == s_message_box_slot_threads[i]) {
                 slot = i;
-                g_message_box_slot_threads[i] = g_thread_current_id;
+                s_message_box_slot_threads[i] = g_thread_current_id;
                 break;
             }
         }
         if (i == 3) {
             for (j = 0; j < 3; j++) {
-                if (g_message_box_slot_threads[j] == 0) {
+                if (s_message_box_slot_threads[j] == 0) {
                     slot = j;
-                    g_message_box_slot_threads[j] = g_thread_current_id;
-                    g_message_box_slot_carry_offset[slot] = 0;
-                    g_message_box_slot_prev_width[slot] = 0;
+                    s_message_box_slot_threads[j] = g_thread_current_id;
+                    s_message_box_slot_carry_offset[slot] = 0;
+                    s_message_box_slot_prev_width[slot] = 0;
                     break;
                 }
             }
@@ -123,69 +123,69 @@ static void box_glyph_draw(s32 x, s32 y, s32 wait) {
         thread_yield();
     }
 
-    ring = g_message_box_slot_glyph_counters[slot];
+    ring = s_message_box_slot_glyph_counters[slot];
     phase = g_message_box_glyph.x & 3;
-    dst = g_message_box_glyph_images[slot][ring];
-    src = g_message_box_previous_images[slot];
+    dst = s_message_box_glyph_images[slot][ring];
+    src = s_message_box_previous_images[slot];
 
     /* VRAM x counts 4-pixel words: upload enough of them to cover the glyph from its phase in the first. */
     if (g_text_glyph_widths[g_message_box_glyph.glyph] == 4 || g_message_box_glyph.glyph == TEXT_SPACE) {
         if (phase == 2) {
             width = 8;
-            g_message_box_vram_rect.w = 2;
+            s_message_box_vram_rect.w = 2;
         } else {
             width = 4;
-            g_message_box_vram_rect.w = 1;
+            s_message_box_vram_rect.w = 1;
         }
     } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 2) {
         width = 4;
-        g_message_box_vram_rect.w = 1;
+        s_message_box_vram_rect.w = 1;
     } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 6) {
         width = 8;
-        g_message_box_vram_rect.w = 2;
+        s_message_box_vram_rect.w = 2;
     } else {
         width = 12;
-        g_message_box_vram_rect.w = 3;
+        s_message_box_vram_rect.w = 3;
     }
 
     /* At phase 2 the first word is shared with the previous glyph: carry its byte over. */
     if (phase == 2) {
         for (i = 0; i < 14; i++) {
-            g_message_box_column_scratch[i]
-                = *(src + (i * g_message_box_slot_prev_width[slot]) / 2 + g_message_box_slot_carry_offset[slot]);
+            s_message_box_column_scratch[i]
+                = *(src + (i * s_message_box_slot_prev_width[slot]) / 2 + s_message_box_slot_carry_offset[slot]);
         }
         for (i = 0; i < 14; i++) {
-            dst[i * width / 2] = g_message_box_column_scratch[i];
+            dst[i * width / 2] = s_message_box_column_scratch[i];
         }
     }
 
     /* Record which byte of this image the next glyph will carry over. */
     if (g_text_glyph_widths[g_message_box_glyph.glyph] == 4 || g_message_box_glyph.glyph == TEXT_SPACE) {
         if (phase == 2) {
-            g_message_box_slot_carry_offset[slot] = 2;
+            s_message_box_slot_carry_offset[slot] = 2;
         } else {
-            g_message_box_slot_carry_offset[slot] = 1;
+            s_message_box_slot_carry_offset[slot] = 1;
         }
     } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 2) {
         if (phase == 2) {
-            g_message_box_slot_carry_offset[slot] = 1;
+            s_message_box_slot_carry_offset[slot] = 1;
         } else {
-            g_message_box_slot_carry_offset[slot] = 0;
+            s_message_box_slot_carry_offset[slot] = 0;
         }
     } else if (g_text_glyph_widths[g_message_box_glyph.glyph] == 6) {
         if (phase == 2) {
-            g_message_box_slot_carry_offset[slot] = 3;
+            s_message_box_slot_carry_offset[slot] = 3;
         } else {
-            g_message_box_slot_carry_offset[slot] = 2;
+            s_message_box_slot_carry_offset[slot] = 2;
         }
     } else {
         if (phase == 2) {
-            g_message_box_slot_carry_offset[slot] = 5;
+            s_message_box_slot_carry_offset[slot] = 5;
         } else {
-            g_message_box_slot_carry_offset[slot] = 4;
+            s_message_box_slot_carry_offset[slot] = 4;
         }
     }
-    g_message_box_slot_prev_width[slot] = width;
+    s_message_box_slot_prev_width[slot] = width;
 
     /* Fill the rest of the image with background pixels from the glyph sheet, or zero in mode 0. */
     for (j = 0; j < 14; j++) {
@@ -201,45 +201,45 @@ static void box_glyph_draw(s32 x, s32 y, s32 wait) {
     }
 
     if (g_message_box_glyph.glyph != TEXT_SPACE) {
-        g_message_box_state.rect.x = phase;
-        g_message_box_state.rect.y = 0;
-        g_message_box_state.stride = width;
+        s_message_box_state.rect.x = phase;
+        s_message_box_state.rect.y = 0;
+        s_message_box_state.stride = width;
         text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + g_message_box_glyph.glyph * TEXT_GLYPH_BYTES, dst,
-            &g_message_box_state, g_message_box_glyph.palette);
-        g_message_box_vram_rect.x = (x >> 2) + 0x1c0;
-        g_message_box_vram_rect.y = y;
-        g_message_box_vram_rect.h = 14;
-        LoadImage(&g_message_box_vram_rect, (u32*)dst);
+            &s_message_box_state, g_message_box_glyph.palette);
+        s_message_box_vram_rect.x = (x >> 2) + 0x1c0;
+        s_message_box_vram_rect.y = y;
+        s_message_box_vram_rect.h = 14;
+        LoadImage(&s_message_box_vram_rect, (u32*)dst);
     }
     /* Keep this image (14 rows of up to 12 pixels) for the next glyph's carry. */
-    g_message_box_slot_glyph_counters[slot]++;
+    s_message_box_slot_glyph_counters[slot]++;
     mem_copy_bytes_nonempty(src, dst, 84);
 
     /* Wait 0 only syncs; 2 or more waits that many steps; 1 pauses after every few glyphs as the
      * message speed option sets (holding Circle counts as fast). */
     if (wait == 0) {
         DrawSync(0);
-        g_message_box_slot_glyph_counters[slot] = 0;
+        s_message_box_slot_glyph_counters[slot] = 0;
     } else if (wait >= 2) {
         for (i = 0; i < wait * (3 - g_script_event_speed); i++) {
             thread_frames_wait(1);
         }
-        g_message_box_slot_glyph_counters[slot] = 0;
+        s_message_box_slot_glyph_counters[slot] = 0;
     } else {
         if (PadRead(1) & PSX_PAD_CIRCLE) {
-            g_message_box_glyph_delay = 8;
+            s_message_box_glyph_delay = 8;
         } else if (g_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_FAST) {
-            g_message_box_glyph_delay = 8;
+            s_message_box_glyph_delay = 8;
         } else if (g_game_options.fields.message_display_speed == GAME_MESSAGE_DISPLAY_SPEED_REGULAR) {
-            g_message_box_glyph_delay = 2;
+            s_message_box_glyph_delay = 2;
         } else {
-            g_message_box_glyph_delay = 1;
+            s_message_box_glyph_delay = 1;
         }
-        if (g_message_box_slot_glyph_counters[slot] >= g_message_box_glyph_delay) {
+        if (s_message_box_slot_glyph_counters[slot] >= s_message_box_glyph_delay) {
             for (i = 0; i < 3 - g_script_event_speed; i++) {
                 thread_frames_wait(1);
             }
-            g_message_box_slot_glyph_counters[slot] = 0;
+            s_message_box_slot_glyph_counters[slot] = 0;
         }
     }
 
@@ -818,12 +818,12 @@ void message_box_thread(void) {
                     width_override = no_value;
                 }
                 for (i = digits - 1; i >= 0; i--) {
-                    code = value / g_message_box_digit_divisors[i];
-                    if (value < g_message_box_digit_divisors[i] && i != 0 && started == 0) {
+                    code = value / s_message_box_digit_divisors[i];
+                    if (value < s_message_box_digit_divisors[i] && i != 0 && started == 0) {
                         code = TEXT_SPACE;
                     } else {
                         started = 1;
-                        value -= code * g_message_box_digit_divisors[i];
+                        value -= code * s_message_box_digit_divisors[i];
                     }
                     g_message_box_glyph.glyph = code;
                     g_message_box_glyph.x = cursor_x;

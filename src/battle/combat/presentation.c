@@ -22,7 +22,7 @@
 
 /* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
  * crossbows, NONE for the rest. */
-static u8 g_weapon_projectile_animations[32]
+static u8 s_weapon_projectile_animations[32]
     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
@@ -126,7 +126,7 @@ void effect_secondary_projectile_start(unit_runtime_t* unit) {
         if ((ability_id != ABILITY_ID_THROW_SHURIKEN)
             && ((u32)(unit->used_ability_id - ABILITY_ID_ITEM_FIRST)
                 >= (ABILITY_ID_JUMP_FIRST - ABILITY_ID_ITEM_FIRST))) {
-            animation_id = g_weapon_projectile_animations[unit->equipped_weapon_type];
+            animation_id = s_weapon_projectile_animations[unit->equipped_weapon_type];
         }
     }
     effect_secondary_projectile_init(animation_id, &secondary_init);

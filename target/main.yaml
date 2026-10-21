@@ -1001,14 +1001,14 @@ data:
   - {addr: 0x80028ae8, name: g_psyq_crt_heap_base}
   - {addr: 0x80028aec, name: g_psyq_crt_heap_size}
   - {addr: 0x80028b08, name: g_loading_display_frame_counter}
-  - {addr: 0x80028b0c, name: g_suzuki_smd_opcode_handlers}
-  - {addr: 0x80028d0c, name: g_suzuki_smd_opcode_lengths}
-  - {addr: 0x80028d8c, name: g_suzuki_smd_note_durations}
-  - {addr: 0x80028e70, name: g_suzuki_smd_note_semitones}
-  - {addr: 0x80028f54, name: g_suzuki_smd_modulator_waveforms}
-  - {addr: 0x80028fe8, name: g_suzuki_smd_key_octaves}
-  - {addr: 0x80029060, name: g_suzuki_smd_key_semitones}
-  - {addr: 0x800290d8, name: g_suzuki_smd_pitch_table}
+  - {addr: 0x80028b0c, name: s_suzuki_smd_opcode_handlers}
+  - {addr: 0x80028d0c, name: s_suzuki_smd_opcode_lengths}
+  - {addr: 0x80028d8c, name: s_suzuki_smd_note_durations}
+  - {addr: 0x80028e70, name: s_suzuki_smd_note_semitones}
+  - {addr: 0x80028f54, name: s_suzuki_smd_modulator_waveforms}
+  - {addr: 0x80028fe8, name: s_suzuki_smd_key_octaves}
+  - {addr: 0x80029060, name: s_suzuki_smd_key_semitones}
+  - {addr: 0x800290d8, name: s_suzuki_smd_pitch_table}
   - {addr: 0x8002a8d8, name: _spu_EVdma}
   - {addr: 0x8002a8dc, name: _spu_keystat}
   - {addr: 0x8002a8e0, name: _spu_trans_mode}
@@ -1173,7 +1173,7 @@ data:
   - {addr: 0x80032a34, name: g_suzuki_unknown_80032a34}
   - {addr: 0x80032a38, name: g_suzuki_sound_heap_size}
   - {addr: 0x80032a3c, name: g_suzuki_sound_cd_mix}
-  - {addr: 0x80032a40, name: g_suzuki_sound_decoded_data_result}
+  - {addr: 0x80032a40, name: s_suzuki_sound_decoded_data_result}
   - {addr: 0x80032a44, name: g_suzuki_sound_waveset_list}
   - {addr: 0x80032a48, name: g_suzuki_sound_spu_event}
   - {addr: 0x80032a4c, name: g_suzuki_sound_voice_update_requests}
@@ -1183,7 +1183,7 @@ data:
   - {addr: 0x80032a5c, name: g_suzuki_sound_root_counter_2_event}
   - {addr: 0x80032a60, name: g_suzuki_sound_sfx_music}
   - {addr: 0x80032a64, name: g_suzuki_sound_heap_end}
-  - {addr: 0x80032a68, name: g_loading_otags}
+  - {addr: 0x80032a68, name: s_loading_otags}
   - {addr: 0x80032a78, name: g_psyq_etc_pad_buttons}
   - {addr: 0x80032a7c, name: g_psyq_cd_sync_result}
   - {addr: 0x80032a84, name: g_psyq_cd_ready_result}
@@ -1260,7 +1260,7 @@ data:
   - {addr: 0x80045990, name: g_system_frame_pacing_suppressed}
   - {addr: 0x80045994, name: g_frame_counter}
   - {addr: 0x80045998, name: g_system_min_vsync_interval}
-  - {addr: 0x8004599c, name: g_sound_background_sfx_id}
+  - {addr: 0x8004599c, name: s_sound_background_sfx_id}
   - {addr: 0x800459a0, name: g_deploy_deployed_unit_map_coordinates}
   - {addr: 0x800459b8, name: g_save_play_time_frames}
   - {addr: 0x800459bc, name: g_save_play_time_seconds}
@@ -1273,7 +1273,7 @@ data:
   - {addr: 0x800459dc, name: g_encounter_selection_mode}
   - {addr: 0x800459e0, name: g_loading_palette}
   - {addr: 0x80045a00, name: g_boot_squaresoft_logo_image_words}
-  - {addr: 0x80047080, name: g_music_files}
+  - {addr: 0x80047080, name: s_music_files}
   - {addr: 0x800473a0, name: g_system_go_straight_to_battle}
   - {addr: 0x800473a1, name: g_input_repeat_initial_delay}
   - {addr: 0x800473a2, name: g_input_repeat_period}
@@ -1284,19 +1284,19 @@ data:
   - {addr: 0x800473a7, name: g_menu_scroll_unread_setting}
   - {addr: 0x800473a8, name: g_menu_common_graphics_loaded}
   - {addr: 0x800473ac, name: g_game_options}
-  - {addr: 0x800473b0, name: g_game_options_defaults}
+  - {addr: 0x800473b0, name: s_game_options_defaults}
   - {addr: 0x800473b4, name: g_zodiac_screen_position}
   - {addr: 0x800473bc, name: g_zodiac_texture_page_origin}
   - {addr: 0x800473c4, name: g_zodiac_sprite_frames}
   - {addr: 0x80047520, name: g_zodiac_sprite_scales}
   - {addr: 0x80047595, name: g_zodiac_sprite_count}
-  - {addr: 0x80047598, name: g_gfx_frame_image_rect}
-  - {addr: 0x800475a0, name: g_gfx_frame_palette_rect}
-  - {addr: 0x800475a8, name: g_gfx_frame_palette_tail_rect}
+  - {addr: 0x80047598, name: s_gfx_frame_image_rect}
+  - {addr: 0x800475a0, name: s_gfx_frame_palette_rect}
+  - {addr: 0x800475a8, name: s_gfx_frame_palette_tail_rect}
   - {addr: 0x800475e0, name: g_scenario_condition_offsets}
   - {addr: 0x80047600, name: g_encounter_current_id}
   - {addr: 0x80047604, name: g_encounter_set}
-  - {addr: 0x80047608, name: g_system_game_loop_stack_pointer}
+  - {addr: 0x80047608, name: s_system_game_loop_stack_pointer}
   - {addr: 0x8004760c, name: g_loading_visible}
   - {addr: 0x80047610, name: g_sound_system_sed_data}
   - {addr: 0x80049a10, name: g_brave_story_saved_list_cursor_state}
@@ -1305,7 +1305,7 @@ data:
   - {addr: 0x80049d5c, name: g_zodiac_primitives}
   - {addr: 0x8004a6bc, name: g_script_event_block_buffer}
   - {addr: 0x8004c6bc, name: g_tutorial_progress_masks}
-  - {addr: 0x8004c6c4, name: g_system_error_hook_word}
+  - {addr: 0x8004c6c4, name: s_system_error_hook_word}
   - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_buffers}
   - {addr: 0x8004c6c8, name: g_gfx_poly_gt4_flat_pool}
   - {addr: 0x8004d720, name: g_loading_primitives}
@@ -1315,14 +1315,14 @@ data:
   - {addr: 0x8004d95c, name: g_music}
   - {addr: 0x8004d9ac, name: g_portrait_special_wldface_id}
   - {addr: 0x8004d9b0, name: g_brave_story_saved_weather_variable}
-  - {addr: 0x8004d9b4, name: g_session_initialized}
+  - {addr: 0x8004d9b4, name: s_session_initialized}
   - {addr: 0x8004d9b8, name: g_sound_env_sed_data}
-  - {addr: 0x8004e5b8, name: g_loading_frame_counter}
+  - {addr: 0x8004e5b8, name: s_loading_frame_counter}
   - {addr: 0x8004e5bc, name: g_gfx_active_buffer_index}
-  - {addr: 0x8004e5c0, name: g_heap_smd_allocator_table}
+  - {addr: 0x8004e5c0, name: s_heap_smd_allocator_table}
   - {addr: 0x8004e5d0, name: g_scenario_event_finish_operations}
   - {addr: 0x8004e9d0, name: g_brave_story_replay_story_event_index}
-  - {addr: 0x8004e9d4, name: g_heap_game_allocator_table}
+  - {addr: 0x8004e9d4, name: s_heap_game_allocator_table}
   - {addr: 0x8004ea14, name: g_gfx_draw_envs}
   - {addr: 0x8004eacc, name: g_gfx_display_envs}
   - {addr: 0x8004eaf4, name: g_file_cd_state}
@@ -1399,15 +1399,15 @@ data:
   - {addr: 0x80066198, name: g_ability_calculator_primes}
   - {addr: 0x800661ce, name: g_calendar_month_start_day_offsets}
   - {addr: 0x800661e8, name: g_zodiac_day_limits}
-  - {addr: 0x80066200, name: g_names_use_world_text}
-  - {addr: 0x80066204, name: g_skillset_abilities}
+  - {addr: 0x80066200, name: s_names_use_world_text}
+  - {addr: 0x80066204, name: s_skillset_abilities}
   - {addr: 0x80066234, name: g_unit_deployed_coords}
   - {addr: 0x80066238, name: g_encounter_current_unit}
   - {addr: 0x8006623c, name: g_crystal_pickup_result}
   - {addr: 0x80066254, name: g_crystal_learnable_abilities}
   - {addr: 0x8006628e, name: g_crystal_treasure_item_id}
   - {addr: 0x800662d0, name: g_status_check_sets}
-  - {addr: 0x80066308, name: g_party_highest_level}
+  - {addr: 0x80066308, name: s_party_highest_level}
   - {addr: 0x800670f0, name: open_title_entrypoint}
   - {addr: 0x8006720c, name: open_ending_entrypoint}
   - {addr: 0x800672f8, name: wldcore_entrypoint}

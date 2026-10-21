@@ -46,7 +46,7 @@ typedef struct at_list_work {
 typedef char at_list_work_size_must_be_1824[(sizeof(at_list_work_t) == 1824) ? 1 : -1];
 
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
-static s16 g_auto_battle_row_actions[8]
+static s16 s_auto_battle_row_actions[8]
     = { 1000, MENU_COMMAND_ID_AUTO_BATTLE_TARGET, MENU_COMMAND_ID_AUTO_BATTLE_TARGET,
           MENU_COMMAND_ID_AUTO_BATTLE_TARGET, MENU_COMMAND_ID_AUTO_BATTLE_TARGET, 0, -3, -3 };
 
@@ -135,13 +135,13 @@ void auto_battle_settings_thread(void) {
                     color[4] = 0;
                     color[selected] = 8;
                 }
-                g_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                g_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                g_auto_battle_row_actions[3] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
-                g_auto_battle_row_actions[4] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[3] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
+                s_auto_battle_row_actions[4] = MENU_COMMAND_ID_AUTO_BATTLE_CONFIRM;
                 if (cursor == previous) {
-                    g_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
-                    g_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
+                    s_auto_battle_row_actions[1] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
+                    s_auto_battle_row_actions[2] = MENU_COMMAND_ID_AUTO_BATTLE_TARGET;
                 }
                 previous = cursor;
                 g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE_TARGET].selected_index = 0;

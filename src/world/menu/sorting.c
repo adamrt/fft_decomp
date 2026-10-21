@@ -14,7 +14,7 @@
 
 /* Signed-halfword indices selected by formation_sort_key_e. Unselectable keys
  * retain their retail entries, including CT max at index 11. */
-static s8 g_sort_field_indices[12] = { offsetof(formation_unit_t, identity.roster_slot) / sizeof(s16),
+static s8 s_sort_field_indices[12] = { offsetof(formation_unit_t, identity.roster_slot) / sizeof(s16),
     offsetof(formation_unit_t, status.level) / sizeof(s16), offsetof(formation_unit_t, identity.job_id) / sizeof(s16),
     0, offsetof(formation_unit_t, identity.brave) / sizeof(s16),
     offsetof(formation_unit_t, identity.faith) / sizeof(s16), 0,
@@ -223,9 +223,9 @@ void formation_roster_sort(s32 index) {
             k = 0;
             do {
                 rec = (s16*)&g_formation_unit_records[g_formation_record_order[i]];
-                lhs = rec[g_sort_field_indices[keys[k]]];
+                lhs = rec[s_sort_field_indices[keys[k]]];
                 rec = (s16*)&g_formation_unit_records[g_formation_record_order[i + 1]];
-                swap = rec[g_sort_field_indices[keys[k]]];
+                swap = rec[s_sort_field_indices[keys[k]]];
                 diff = swap - lhs;
                 k++;
             } while (diff == 0);

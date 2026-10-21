@@ -30,7 +30,7 @@
 
 /* Replay setup events in Record-list order. The existing
  * g_brave_story_event_ids pointer cell points at this table. */
-static u16 g_brave_story_replay_event_table[EVENT_SCRIPT_VAR_STORY_EVENT_COUNT] = {
+static u16 s_brave_story_replay_event_table[EVENT_SCRIPT_VAR_STORY_EVENT_COUNT] = {
     0x7,
     0xd,
     0x18,

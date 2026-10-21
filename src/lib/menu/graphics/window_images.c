@@ -12,9 +12,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static glyph_blit_t g_menu_window_sprite_glyph = { { 0, 0, 16, 16 }, 256, 0 };
+static glyph_blit_t s_menu_window_sprite_glyph = { { 0, 0, 16, 16 }, 256, 0 };
 
-static glyph_blit_t g_menu_window_sprite_position = { { 0, 0, 16, 16 }, 0, 0 };
+static glyph_blit_t s_menu_window_sprite_position = { { 0, 0, 16, 16 }, 0, 0 };
 
 /* Build a dialog window image with menu_build_window_image and upload it to `rect`,
  * freeing the image a frame later. */
@@ -80,40 +80,40 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
         menu_build_window_image_row(src, row, words, src_index);
     }
     if (kind != DIALOG_OPTIONS_NO_TAIL) {
-        g_menu_window_sprite_glyph.rect.x = 0x58;
-        g_menu_window_sprite_glyph.rect.y = 0;
+        s_menu_window_sprite_glyph.rect.x = 0x58;
+        s_menu_window_sprite_glyph.rect.y = 0;
         if ((mode & DIALOG_TYPE_OPTIONS_MASK) == DIALOG_OPTIONS_ALTERNATE_TAIL) {
-            g_menu_window_sprite_glyph.rect.x = 0x68;
+            s_menu_window_sprite_glyph.rect.x = 0x68;
         }
         if ((mode & DIALOG_TYPE_POSITION_MASK) == DIALOG_POSITION_TOP) {
-            g_menu_window_sprite_glyph.rect.y = 0x10;
+            s_menu_window_sprite_glyph.rect.y = 0x10;
         }
-        g_menu_window_sprite_position.rect.x = (width >> 1) + tail_offset - 8;
+        s_menu_window_sprite_position.rect.x = (width >> 1) + tail_offset - 8;
         if ((mode & DIALOG_TYPE_POSITION_MASK) != DIALOG_POSITION_BOTTOM) {
-            g_menu_window_sprite_position.rect.y = 0x38;
+            s_menu_window_sprite_position.rect.y = 0x38;
         } else {
-            g_menu_window_sprite_position.rect.y = 0;
+            s_menu_window_sprite_position.rect.y = 0;
         }
-        g_menu_window_sprite_position.stride = words * 4;
+        s_menu_window_sprite_position.stride = words * 4;
         /* i doubles as the mirror flag; a separate local changes the register allocation. */
         i = g_threads[g_thread_current_id].task_words[DIALOG_THREAD_WORD_WINDOW_OPTIONS] & 0xF0;
         if (i != 0) {
             if ((mode & DIALOG_TYPE_POSITION_MASK) == DIALOG_POSITION_TOP) {
-                g_menu_window_sprite_position.rect.x -= 0x10;
+                s_menu_window_sprite_position.rect.x -= 0x10;
             } else {
-                g_menu_window_sprite_position.rect.x += 0x10;
+                s_menu_window_sprite_position.rect.x += 0x10;
             }
         }
-        if (g_menu_window_sprite_position.rect.x < 0x10) {
-            g_menu_window_sprite_position.rect.x = 0x10;
+        if (s_menu_window_sprite_position.rect.x < 0x10) {
+            s_menu_window_sprite_position.rect.x = 0x10;
         }
-        if (width - 0x10 < g_menu_window_sprite_position.rect.x) {
-            g_menu_window_sprite_position.rect.x = width - 0x10;
+        if (width - 0x10 < s_menu_window_sprite_position.rect.x) {
+            s_menu_window_sprite_position.rect.x = width - 0x10;
         }
         text_blit_glyph(
-            g_menu_glyph_sheet->pixels, (u8*)buf, &g_menu_window_sprite_glyph, &g_menu_window_sprite_position);
+            g_menu_glyph_sheet->pixels, (u8*)buf, &s_menu_window_sprite_glyph, &s_menu_window_sprite_position);
         if (i != 0) {
-            gfx_mirror_4bpp_rect((u8*)buf, &g_menu_window_sprite_position);
+            gfx_mirror_4bpp_rect((u8*)buf, &s_menu_window_sprite_position);
         }
     }
     if (keep != 0) {

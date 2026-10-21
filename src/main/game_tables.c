@@ -24,7 +24,7 @@ extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_M
 extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
 
 /* Scratch list filled by ability_skillset_list_build. */
-static u16 g_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
+static u16 s_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
 
 /* Return the ability id in one slot of a skillset, or 0 for a slot or skillset
  * out of range.
@@ -100,14 +100,14 @@ u16* ability_skillset_list_build(s32 skillset_id, s32 filters) {
         if (keep == 0) {
             ability_id = 0;
         }
-        g_skillset_abilities[output_count++] = ability_id;
+        s_skillset_abilities[output_count++] = ability_id;
     }
 
     while (output_count < SKILLSET_ABILITY_LIST_COUNT) {
-        g_skillset_abilities[output_count] = 0;
+        s_skillset_abilities[output_count] = 0;
         output_count += 1;
     }
-    return g_skillset_abilities;
+    return s_skillset_abilities;
 }
 
 /* Classify an ability id and return pointers to its two table records.

@@ -11,7 +11,7 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-static s32 g_at_list_cursor;
+static s32 s_at_list_cursor;
 
 /* Show the map cursor and its tile glow again; the counterpart of
  * cursor_hide. */
@@ -108,9 +108,9 @@ void sprite_palette_tint_all_by_team(void) {
 
 /* Advance the AT list cursor, wrapping after the list's 40 entries. */
 static void at_list_cursor_advance(void) {
-    g_at_list_cursor++;
-    if (g_at_list_cursor >= AT_LIST_CAPACITY) {
-        g_at_list_cursor = 0;
+    s_at_list_cursor++;
+    if (s_at_list_cursor >= AT_LIST_CAPACITY) {
+        s_at_list_cursor = 0;
     }
 }
 
@@ -125,7 +125,7 @@ void at_list_show_next_entry(void) {
     unit_runtime_t* unit;
 
     for (;;) {
-        id = at_list_get_entry_unit_id(g_at_list_cursor);
+        id = at_list_get_entry_unit_id(s_at_list_cursor);
         if (id >= 0) {
             unit = unit_battle_get(id & AT_LIST_ENTRY_BATTLE_ID_MASK);
             if ((id & AT_LIST_ENTRY_CHARGED_ACTION) != 0) {
@@ -148,14 +148,14 @@ void at_list_show_next_entry(void) {
 void menu_status_open(void) {
     if (g_menu_status_open == 0) {
         g_menu_status_open = 1;
-        g_at_list_cursor = 0;
+        s_at_list_cursor = 0;
     }
 }
 
 /* Restart the AT list cursor at entry 0, so the free cursor's next Start press shows the first
  * entry. */
 void at_list_reset_cursor(void) {
-    g_at_list_cursor = 0;
+    s_at_list_cursor = 0;
 }
 
 /* Drop a pending status-menu request (Triangle during a unit's turn the player does not control)

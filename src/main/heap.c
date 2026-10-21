@@ -3,8 +3,8 @@
 #include "fft/memory.h"
 #include "psx/types.h"
 
-static u8 g_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT] = { 0 };
-static u8 g_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT];
+static u8 s_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT] = { 0 };
+static u8 s_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT];
 extern u8 g_heap_smd_base[HEAP_SMD_PAGE_COUNT * HEAP_PAGE_SIZE];
 
 /* Allocate size bytes from the music heap: 16 pages of 0x800 bytes at
@@ -23,7 +23,7 @@ void* heap_smd_alloc(u32 size) {
     for (index = 0; index < HEAP_SMD_PAGE_COUNT; index++) {
         u32 cell;
 
-        cell = g_heap_smd_allocator_table[index];
+        cell = s_heap_smd_allocator_table[index];
         if (cell == 0) {
             if (run == 0) {
                 start = index;
@@ -41,7 +41,7 @@ void* heap_smd_alloc(u32 size) {
     }
     if (run >= needed) {
         for (index = 0; index < run; index++) {
-            g_heap_smd_allocator_table[start + index] = tag;
+            s_heap_smd_allocator_table[start + index] = tag;
         }
         return &g_heap_smd_base[start << HEAP_PAGE_SHIFT];
     }
@@ -51,13 +51,13 @@ void* heap_smd_alloc(u32 size) {
 /* Free the music-heap block that starts at ptr; the rules are heap_free's. */
 s32 heap_smd_free(void* ptr) {
     u32 index = (u32)((u8*)ptr - g_heap_smd_base) >> HEAP_PAGE_SHIFT;
-    s32 tag = g_heap_smd_allocator_table[index];
+    s32 tag = s_heap_smd_allocator_table[index];
     u8* entry;
 
-    if (((index == 0) | (tag != g_heap_smd_allocator_table[index - 1])) == 0) {
+    if (((index == 0) | (tag != s_heap_smd_allocator_table[index - 1])) == 0) {
         return 0;
     }
-    entry = &g_heap_smd_allocator_table[index];
+    entry = &s_heap_smd_allocator_table[index];
     do {
         *entry++ = 0;
     } while (*entry == tag);
@@ -67,7 +67,7 @@ s32 heap_smd_free(void* ptr) {
 /* Mark every page of the music (SMD) heap free. */
 void heap_smd_table_clear(void) {
     int index = HEAP_SMD_PAGE_COUNT - 1;
-    u8* entry = &g_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT - 1];
+    u8* entry = &s_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT - 1];
 
     for (; index >= 0; index--, entry--) {
         *entry = 0;
@@ -93,7 +93,7 @@ void* heap_alloc(u32 size) {
         needed++;
     }
     for (index = 0; index < HEAP_GAME_PAGE_COUNT; index++) {
-        u32 cell = g_heap_game_allocator_table[index];
+        u32 cell = s_heap_game_allocator_table[index];
 
         if (cell == 0) {
             if (run == 0) {
@@ -112,7 +112,7 @@ void* heap_alloc(u32 size) {
     }
     if (run >= needed) {
         for (index = 0; index < run; index++) {
-            g_heap_game_allocator_table[start + index] = tag;
+            s_heap_game_allocator_table[start + index] = tag;
         }
         return (start << HEAP_PAGE_SHIFT) + g_heap_high_overlay_load_address;
     }
@@ -142,7 +142,7 @@ void* heap_reserve_at(void* allocation, u32 size) {
     if (addr < base + HEAP_GAME_PAGE_COUNT * HEAP_PAGE_SIZE) {
         do {
             for (i = 0; i < HEAP_GAME_PAGE_COUNT; i++) {
-                if (g_heap_game_allocator_table[i] == id) {
+                if (s_heap_game_allocator_table[i] == id) {
                     id += 1;
                     break;
                 }
@@ -150,13 +150,13 @@ void* heap_reserve_at(void* allocation, u32 size) {
         } while (i != HEAP_GAME_PAGE_COUNT);
 
         for (i = start; i < start + nblocks; i++) {
-            if (g_heap_game_allocator_table[i] != 0) {
+            if (s_heap_game_allocator_table[i] != 0) {
                 break;
             }
         }
         if (i == start + nblocks) {
             for (j = 0; j < nblocks; j++) {
-                g_heap_game_allocator_table[start + j] = id;
+                s_heap_game_allocator_table[start + j] = id;
             }
             return ((start << HEAP_PAGE_SHIFT) + g_heap_high_overlay_load_address);
         }
@@ -172,11 +172,11 @@ void* heap_reserve_at(void* allocation, u32 size) {
  * it. For page 0 the test also reads the byte before the table. */
 s32 heap_free(void* pointer) {
     u32 page_index = (u32)((u8*)pointer - g_heap_high_overlay_load_address) >> HEAP_PAGE_SHIFT;
-    s32 allocation_id = g_heap_game_allocator_table[page_index];
-    s32 previous_id = g_heap_game_allocator_table[page_index - 1];
+    s32 allocation_id = s_heap_game_allocator_table[page_index];
+    s32 previous_id = s_heap_game_allocator_table[page_index - 1];
 
     if ((page_index < 1) | (allocation_id != previous_id)) {
-        u8* entry = &g_heap_game_allocator_table[page_index];
+        u8* entry = &s_heap_game_allocator_table[page_index];
 
         do {
             *entry++ = 0;
@@ -189,7 +189,7 @@ s32 heap_free(void* pointer) {
 /* Mark every page of the game heap free; startup and each later game reset call it. */
 void heap_game_table_clear(void) {
     int index = HEAP_GAME_PAGE_COUNT - 1;
-    u8* entry = &g_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT - 1];
+    u8* entry = &s_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT - 1];
 
     for (; index >= 0; index--, entry--) {
         *entry = 0;

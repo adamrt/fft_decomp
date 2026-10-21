@@ -55,14 +55,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static s32 g_battle_help_active;
+static s32 s_battle_help_active;
 extern s32 g_battle_wait_direction_facing;
 
 extern move_found_item_t g_move_find_display_item;
 
-static s32 g_post_effect_message_count = 0;
+static s32 s_post_effect_message_count = 0;
 
-static action_post_effect_msg_t g_post_effect_messages[ACTION_POST_EFFECT_MSG_CAPACITY] = { 0 };
+static action_post_effect_msg_t s_post_effect_messages[ACTION_POST_EFFECT_MSG_CAPACITY] = { 0 };
 
 /* Effect message texts (MENU_REQUEST_EFFECT_MESSAGE). An ability's message is the base plus
  * the text_display entry of its animation data; the others have fixed ids. */
@@ -188,7 +188,7 @@ void battle_state_free_cursor_enter(void) {
     g_system_vsync_interval = 1;
     camera_pan_disable();
     g_battle_state = BATTLE_STATE_FREE_CURSOR;
-    g_battle_help_active = 0;
+    s_battle_help_active = 0;
     cursor_show_hovered_unit_panel();
     cursor_show();
     unit = unit_source_get();
@@ -201,7 +201,7 @@ void battle_state_free_cursor_enter(void) {
 void battle_state_free_cursor_help_enter(void) {
     camera_pan_disable();
     g_battle_state = BATTLE_STATE_FREE_CURSOR_HELP;
-    g_battle_help_active = 1;
+    s_battle_help_active = 1;
     help_menu_thread_start();
 }
 
@@ -514,7 +514,7 @@ void menu_action_dispatch(void) {
 void battle_state_action_help_menu_enter(void) {
     camera_pan_disable();
     g_battle_state = BATTLE_STATE_ACTION_HELP_MENU;
-    g_battle_help_active = 1;
+    s_battle_help_active = 1;
     help_menu_thread_start();
 }
 
@@ -560,7 +560,7 @@ void battle_state_return_to_mini_menu(void) {
 void battle_state_mini_menu_help_enter(void) {
     camera_pan_disable();
     g_battle_state = BATTLE_STATE_MINI_MENU_HELP;
-    g_battle_help_active = 1;
+    s_battle_help_active = 1;
     help_menu_thread_start();
 }
 
@@ -1362,12 +1362,12 @@ s32 action_message_show_next(void) {
     g_battle_state = BATTLE_STATE_RESUME_ATTACK_PHASE;
     g_system_vsync_interval = 1;
     unit_casting_get(); /* result unused */
-    index = g_post_effect_message_count;
+    index = s_post_effect_message_count;
     if (index != 0) {
         index -= 1;
-        g_post_effect_message_count = index;
-        menu_request_dispatch(MENU_REQUEST_POST_ACTION_RESULT, g_post_effect_messages[index].code,
-            g_post_effect_messages[index].unit, g_post_effect_messages[index].value, 1);
+        s_post_effect_message_count = index;
+        menu_request_dispatch(MENU_REQUEST_POST_ACTION_RESULT, s_post_effect_messages[index].code,
+            s_post_effect_messages[index].unit, s_post_effect_messages[index].value, 1);
         g_battle_window_closed = 0;
         return 1;
     }
@@ -1403,7 +1403,7 @@ static void message_for_unit_queue(unit_runtime_t* unit) {
     if (unit->stats == 0) {
         return;
     }
-    if (g_post_effect_message_count >= ACTION_POST_EFFECT_MSG_CAPACITY) {
+    if (s_post_effect_message_count >= ACTION_POST_EFFECT_MSG_CAPACITY) {
         return;
     }
     action = &unit->stats->action;
@@ -1416,76 +1416,76 @@ static void message_for_unit_queue(unit_runtime_t* unit) {
         switch (i) {
         case 0:
             if (action->sp_change != 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_SPEED;
-                g_post_effect_messages[g_post_effect_message_count].value = action->sp_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_SPEED;
+                s_post_effect_messages[s_post_effect_message_count].value = action->sp_change;
                 queued = 1;
             }
             break;
         case 1:
             if (action->ct_change != 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_CT;
-                g_post_effect_messages[g_post_effect_message_count].value = action->ct_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_CT;
+                s_post_effect_messages[s_post_effect_message_count].value = action->ct_change;
                 queued = 1;
             }
             break;
         case 2:
             if (action->brave_change != 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_BRAVE;
-                g_post_effect_messages[g_post_effect_message_count].value = action->brave_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_BRAVE;
+                s_post_effect_messages[s_post_effect_message_count].value = action->brave_change;
                 queued = 1;
             }
             break;
         case 3:
             if (action->faith_change != 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_FAITH_STAT;
-                g_post_effect_messages[g_post_effect_message_count].value = action->faith_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_FAITH_STAT;
+                s_post_effect_messages[s_post_effect_message_count].value = action->faith_change;
                 queued = 1;
             }
             break;
         case 4:
             if (action->pa_change != 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_PHYSICAL_ATTACK;
-                g_post_effect_messages[g_post_effect_message_count].value = action->pa_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_PHYSICAL_ATTACK;
+                s_post_effect_messages[s_post_effect_message_count].value = action->pa_change;
                 queued = 1;
             }
             break;
         case 5:
             if (action->ma_change != 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_MAGICAL_ATTACK;
-                g_post_effect_messages[g_post_effect_message_count].value = action->ma_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_MAGICAL_ATTACK;
+                s_post_effect_messages[s_post_effect_message_count].value = action->ma_change;
                 queued = 1;
             }
             break;
         case 6:
             if (action->gil_change > 0) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_GIL;
-                g_post_effect_messages[g_post_effect_message_count].value = action->gil_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_GIL;
+                s_post_effect_messages[s_post_effect_message_count].value = action->gil_change;
                 queued = 1;
             }
             break;
         case 7:
             if (action->exp_change & ACTION_EXP_CHANGE_LOSS) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_EXP;
-                g_post_effect_messages[g_post_effect_message_count].value = action->exp_change;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_EXP;
+                s_post_effect_messages[s_post_effect_message_count].value = action->exp_change;
                 queued = 1;
             }
             break;
         case 8:
             if (action->special_effect & (ACTION_SPECIAL_EFFECT_LEVEL_UP | ACTION_SPECIAL_EFFECT_LEVEL_DOWN)) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_LEVEL;
-                g_post_effect_messages[g_post_effect_message_count].value = action->special_effect;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_LEVEL;
+                s_post_effect_messages[s_post_effect_message_count].value = action->special_effect;
                 queued = 1;
             }
             break;
         case 9:
             if (action->special_effect
                 & (ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT | ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN)) {
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_BROKEN;
-                index = g_post_effect_message_count;
-                g_post_effect_messages[index].value = action->item_lost;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_BROKEN;
+                index = s_post_effect_message_count;
+                s_post_effect_messages[index].value = action->item_lost;
                 if (action->special_effect & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN) {
                     /* Bit 15 marks a katana that broke drawing out its power. */
-                    g_post_effect_messages[index].value = action->item_lost | 0x8000;
+                    s_post_effect_messages[index].value = action->item_lost | 0x8000;
                 }
                 queued = 1;
             }
@@ -1493,14 +1493,14 @@ static void message_for_unit_queue(unit_runtime_t* unit) {
         case 10:
             if (action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM) {
                 queued = 1;
-                g_post_effect_messages[g_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_STOLEN;
-                g_post_effect_messages[g_post_effect_message_count].value = action->item_lost;
+                s_post_effect_messages[s_post_effect_message_count].code = ACTION_DISPLAY_IMAGE_STOLEN;
+                s_post_effect_messages[s_post_effect_message_count].value = action->item_lost;
             }
             break;
         }
         if (queued != 0) {
-            g_post_effect_messages[g_post_effect_message_count].unit = unit->stats->battle_id;
-            g_post_effect_message_count += 1;
+            s_post_effect_messages[s_post_effect_message_count].unit = unit->stats->battle_id;
+            s_post_effect_message_count += 1;
         }
     }
 }
@@ -1511,7 +1511,7 @@ static void message_for_targets_queue(void) {
     unit_runtime_t* caster;
     s32 i;
 
-    g_post_effect_message_count = 0;
+    s_post_effect_message_count = 0;
     caster = unit_casting_get();
     for (i = 0; i < caster->strike.target_count; i++) {
         message_for_unit_queue(unit_battle_get(caster->strike.target_list[i]));
@@ -1526,7 +1526,7 @@ void action_message_show_for_caster(void) {
 
     message_for_unit_queue(unit);
     if (g_game_options.fields.effect_messages != GAME_OPTION_ON) {
-        g_post_effect_message_count = 0;
+        s_post_effect_message_count = 0;
     }
     if (action_message_show_next() == 0) {
         menu_request_dispatch(MENU_REQUEST_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
@@ -2076,7 +2076,7 @@ void battle_state_commence_attack_phase_enter(void) {
 void battle_state_ability_preview_help_enter(void) {
     camera_pan_disable();
     g_battle_state = BATTLE_STATE_ABILITY_PREVIEW_HELP;
-    g_battle_help_active = 1;
+    s_battle_help_active = 1;
     help_menu_thread_start();
 }
 
@@ -2496,7 +2496,7 @@ void battle_state_free_cursor_update(void) {
  * free cursor. */
 void battle_state_free_cursor_help_update(void) {
     if (menu_thread_activity_get() != 2) {
-        g_battle_help_active = 0;
+        s_battle_help_active = 0;
         battle_state_free_cursor_enter();
     }
     battle_scene_update();
@@ -2774,7 +2774,7 @@ void battle_state_action_help_menu_update(void) {
     unit_runtime_t* unit;
 
     if (menu_thread_activity_get() != 2) {
-        g_battle_help_active = 0;
+        s_battle_help_active = 0;
         unit = unit_casting_get();
         if (unit != 0) {
             if (unit->runtime_id == g_unit_source_runtime_id) {
@@ -2827,7 +2827,7 @@ void battle_state_mini_menu_update(void) {
  * menu. */
 void battle_state_mini_menu_help_update(void) {
     if (menu_thread_activity_get() != 2) {
-        g_battle_help_active = 0;
+        s_battle_help_active = 0;
         battle_state_mini_menu_enter();
     }
     battle_scene_update();
@@ -3438,7 +3438,7 @@ void battle_state_illegal_range_update(void) {
  * ability preview with map panning. */
 void battle_state_ability_preview_help_update(void) {
     if (menu_thread_activity_get() != 2) {
-        g_battle_help_active = 0;
+        s_battle_help_active = 0;
         camera_pan_enable();
         g_battle_state = BATTLE_STATE_ABILITY_PREVIEW_HANDLING;
     }

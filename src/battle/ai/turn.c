@@ -32,7 +32,7 @@ typedef enum destination_order {
 
 typedef enum rank_order { AI_RANK_BELOW = 0, AI_RANK_EQUAL = 1, AI_RANK_ABOVE = 2 } rank_order_e;
 
-static turn_command_t g_ai_command_history[2];
+static turn_command_t s_ai_command_history[2];
 
 static s32 scenarios_build(void);
 
@@ -218,8 +218,8 @@ preserve:
     ai_acting_unit_place(&ai->acting_unit_coords);
     /* Shift the two-entry command history: the previous command moves to entry 0
      * and this one becomes entry 1. */
-    ai_mem_copy_u16_values(&g_ai_command_history[0], &g_ai_command_history[1], sizeof(turn_command_t));
-    ai_mem_copy_u16_values(&g_ai_command_history[1], command, sizeof(turn_command_t));
+    ai_mem_copy_u16_values(&s_ai_command_history[0], &s_ai_command_history[1], sizeof(turn_command_t));
+    ai_mem_copy_u16_values(&s_ai_command_history[1], command, sizeof(turn_command_t));
     return 0;
 }
 
@@ -1131,20 +1131,20 @@ copy_status:
 }
 
 /* Movement-scenario branch decisions survive a suspended tile-scoring pass. */
-static s32 g_target_in_reach = 0; /* range reaches the target, or a reflected action is charging */
-static s32 g_target_reach = 0;    /* reach, possibly halved before destination selection */
-static s32 g_unit_index = 0;      /* unit/row scan index or Stay Near occupant id */
-static s32 g_target_distance = 0;
-static s32 g_stay_near_destination_fixed = 0;
+static s32 s_target_in_reach = 0; /* range reaches the target, or a reflected action is charging */
+static s32 s_target_reach = 0;    /* reach, possibly halved before destination selection */
+static s32 s_unit_index = 0;      /* unit/row scan index or Stay Near occupant id */
+static s32 s_target_distance = 0;
+static s32 s_stay_near_destination_fixed = 0;
 
-static s32 g_protect_allies_status_retry = 0; /* skip status pass after one failed attempt */
-static s32 g_protect_allies_status_index = 0; /* status-list cursor preserved for resume */
+static s32 s_protect_allies_status_retry = 0; /* skip status pass after one failed attempt */
+static s32 s_protect_allies_status_index = 0; /* status-list cursor preserved for resume */
 /* Cancellation-search accounting survives suspension. */
-static s32 g_status_candidate_count = 0;
-static s32 g_status_insufficient_mp = 0;
-static s32 g_status_sufficient_mp = 0;
-static s32 g_retreat_policy_stage = 0; /* ai_retreat_stage_e */
-static ai_move_retreat_stage_e g_retreat_move_stage = 0;
+static s32 s_status_candidate_count = 0;
+static s32 s_status_insufficient_mp = 0;
+static s32 s_status_sufficient_mp = 0;
+static s32 s_retreat_policy_stage = 0; /* ai_retreat_stage_e */
+static ai_move_retreat_stage_e s_retreat_move_stage = 0;
 
 /*
  * Initialize and dispatch the AI action-selection passes.
@@ -1455,12 +1455,12 @@ static s32 scenarios_build(void) {
         if ((decision->targeting_flags_2 & (AI_TARGET_HP_BELOW_HALF | AI_TARGET_MP_CONSTRAINED))
             && !(ai->acting_unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEATH_SENTENCE)]
                 & STATUS_BYTE_MASK(STATUS_ID_DEATH_SENTENCE))) {
-            for (g_unit_index = 0; g_unit_index < UNIT_SLOT_COUNT; g_unit_index++) {
-                unit = &g_unit_stats[g_unit_index];
+            for (s_unit_index = 0; s_unit_index < UNIT_SLOT_COUNT; s_unit_index++) {
+                unit = &g_unit_stats[s_unit_index];
                 if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
                     && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                         & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))) {
-                    ai_unit_coordinates_copy(g_unit_index, &ai->considered_unit_coords);
+                    ai_unit_coordinates_copy(s_unit_index, &ai->considered_unit_coords);
                     ai->tile_target_distance[ai->considered_unit_coords.fields.layer]
                                             [ai->considered_unit_coords.fields.y][ai->considered_unit_coords.fields.x]
                         = 1;
@@ -1468,26 +1468,26 @@ static s32 scenarios_build(void) {
             }
         }
     }
-    g_target_distance = ai->tile_target_distance[ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
+    s_target_distance = ai->tile_target_distance[ai->acting_unit_coords.fields.layer][ai->acting_unit_coords.fields.y]
                                                 [ai->acting_unit_coords.fields.x];
-    g_target_reach = target_reach_get();
-    limit = g_target_distance;
-    g_stay_near_destination_fixed = 0;
-    if (g_target_reach >= limit || (decision->targeting_flags_1 & AI_TARGETING_FLAG_1_REFLECTED_ACTION)) {
-        g_target_in_reach = 1;
+    s_target_reach = target_reach_get();
+    limit = s_target_distance;
+    s_stay_near_destination_fixed = 0;
+    if (s_target_reach >= limit || (decision->targeting_flags_1 & AI_TARGETING_FLAG_1_REFLECTED_ACTION)) {
+        s_target_in_reach = 1;
         if ((decision->flags & AI_DECISION_STAY_NEAR_COORDINATES)
-            && ((g_unit_index = ai_tile_unit_find(&decision->target)) == ai->acting_unit_id
-                || g_unit_index == UNIT_ID_NONE)
+            && ((s_unit_index = ai_tile_unit_find(&decision->target)) == ai->acting_unit_id
+                || s_unit_index == UNIT_ID_NONE)
             && (ai->reachable_tiles[0][decision->target.fields.layer][decision->target.fields.y]
                 & (0x8000 >> decision->target.fields.x))) {
             ai->candidate_coords[ai->movement_scenario] = decision->target;
             candidate_actor_reachability_set();
-            g_stay_near_destination_fixed = 1;
+            s_stay_near_destination_fixed = 1;
         } else {
-            target_distance_tiles_filter(ai->acting_unit_move + g_target_distance);
+            target_distance_tiles_filter(ai->acting_unit_move + s_target_distance);
         }
     } else {
-        g_target_in_reach = 0;
+        s_target_in_reach = 0;
         target_distance_tiles_filter(limit - 1);
     }
 score_tiles:
@@ -1495,29 +1495,29 @@ score_tiles:
         ai->movement_decision_state = AI_MOVEMENT_SCORE_TILES;
         return -1;
     }
-    if (!g_stay_near_destination_fixed) {
-        if (g_target_in_reach) {
+    if (!s_stay_near_destination_fixed) {
+        if (s_target_in_reach) {
             destination_select(0x7fffffff, AI_DESTINATION_PRIORITY_FIRST);
         } else {
             if (ai->acting_unit_team && rand() % 7 == 0)
-                g_target_reach /= 2;
-            destination_with_nearest_fallback_select(g_target_reach);
+                s_target_reach /= 2;
+            destination_with_nearest_fallback_select(s_target_reach);
         }
     }
     /* Scenario 2: the reachable tiles outside scenario 1. The XOR is that
      * difference because scenario 1 is filtered from scenario 0. */
     ai->movement_scenario = 2;
-    for (g_unit_index = 0; g_unit_index < ai->terrain_depth; g_unit_index++) {
-        low = ai->reachable_tiles[0][0][g_unit_index] ^ ai->reachable_tiles[1][0][g_unit_index];
-        high = ai->reachable_tiles[0][1][g_unit_index] ^ ai->reachable_tiles[1][1][g_unit_index];
-        ai->reachable_tiles[2][0][g_unit_index] = low;
-        ai->reachable_tiles[2][1][g_unit_index] = high;
+    for (s_unit_index = 0; s_unit_index < ai->terrain_depth; s_unit_index++) {
+        low = ai->reachable_tiles[0][0][s_unit_index] ^ ai->reachable_tiles[1][0][s_unit_index];
+        high = ai->reachable_tiles[0][1][s_unit_index] ^ ai->reachable_tiles[1][1][s_unit_index];
+        ai->reachable_tiles[2][0][s_unit_index] = low;
+        ai->reachable_tiles[2][1][s_unit_index] = high;
     }
     ai->candidate_coords[2] = ai->candidate_coords[1];
     ai->movement_scenario = 0;
-    if (!ai->acting_unit->action_taken && (decision->flags & AI_DECISION_FOCUS_TARGET) && g_target_in_reach
+    if (!ai->acting_unit->action_taken && (decision->flags & AI_DECISION_FOCUS_TARGET) && s_target_in_reach
         && !(decision->targeting_flags_1 & AI_TARGETING_FLAG_1_REFLECTED_ACTION)) {
-        destination_with_range_floor_select(g_target_distance - 1);
+        destination_with_range_floor_select(s_target_distance - 1);
     } else {
         ai->candidate_coords[0] = ai->candidate_coords[1];
     }
@@ -2619,7 +2619,7 @@ score_tiles:
         ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_SCORE_TILES;
         return -1;
     }
-    g_protect_allies_status_retry = 0;
+    s_protect_allies_status_retry = 0;
     if (((ai->unit_decisions[target].targeting_flags_2 >> 4) & (AI_TARGET_UNTARGETABLE >> 4))
         || ai->unit_decisions[target].enemy_flag) {
     retarget:
@@ -2635,15 +2635,15 @@ movement:
     ai->movement_scenario = 2;
     rank_baseline_seed();
     ai->movement_scenario = 0;
-    if (!g_protect_allies_status_retry
+    if (!s_protect_allies_status_retry
         && !((ai->unit_decisions[target].targeting_flags_2 >> 6) & (AI_TARGET_DEAD_WITH_RERAISE >> 6))) {
-        g_protect_allies_status_index = 0;
+        s_protect_allies_status_index = 0;
         do {
             u32 status_flags
-                = g_unit_stats[target].status_sets.current[(status = statuses[g_protect_allies_status_index]) >> 3];
+                = g_unit_stats[target].status_sets.current[(status = statuses[s_protect_allies_status_index]) >> 3];
             if (status_flags & (0x80 >> (status & 7))) {
             cancel_status:
-                result = status_cancellation_evaluate(target, statuses[g_protect_allies_status_index]);
+                result = status_cancellation_evaluate(target, statuses[s_protect_allies_status_index]);
                 if (result == -1) {
                     ai->action_selection_phase = AI_PROTECT_ALLIES_SELECTION_CANCEL_STATUS;
                     return -1;
@@ -2654,12 +2654,12 @@ movement:
                     /* Retry target selection once, then skip further
                      * status-cancel attempts; the retry re-enters the
                      * retarget block above. */
-                    g_protect_allies_status_retry = 1;
+                    s_protect_allies_status_retry = 1;
                     goto retarget;
                 }
             }
-            g_protect_allies_status_index++;
-        } while (g_protect_allies_status_index < AI_PROTECT_ALLIES_STATUS_COUNT);
+            s_protect_allies_status_index++;
+        } while (s_protect_allies_status_index < AI_PROTECT_ALLIES_STATUS_COUNT);
     }
     ai->movement_scenario = 1;
 charging:
@@ -2727,9 +2727,9 @@ static s32 status_cancellation_evaluate(s32 unit_id, s32 status_id) {
     }
 
     decision = &ai->unit_decisions[unit_id];
-    g_status_candidate_count = 0;
-    g_status_insufficient_mp = 0;
-    g_status_sufficient_mp = 0;
+    s_status_candidate_count = 0;
+    s_status_insufficient_mp = 0;
+    s_status_sufficient_mp = 0;
 
     switch (status_id) {
     case STATUS_ID_DEAD:
@@ -2773,10 +2773,10 @@ static s32 status_cancellation_evaluate(s32 unit_id, s32 status_id) {
                 continue;
 
             if (ai->acting_unit->mp < ai->considered_ability.mp_cost)
-                g_status_insufficient_mp = 1;
+                s_status_insufficient_mp = 1;
             else
-                g_status_sufficient_mp = 1;
-            g_status_candidate_count++;
+                s_status_sufficient_mp = 1;
+            s_status_candidate_count++;
 
         evaluate_ability:
             if (ai_ability_outcome_evaluate() == -1)
@@ -2788,9 +2788,9 @@ static s32 status_cancellation_evaluate(s32 unit_id, s32 status_id) {
         ai_mem_copy_u16_values(&ai->selected_action, &ai->ranked_actions[0], sizeof(ai_action_data_t));
         return 2;
     }
-    if (g_status_candidate_count == 0)
+    if (s_status_candidate_count == 0)
         return 0;
-    if (g_status_insufficient_mp != 0 && ai->has_mp_recovery_ability == 0 && g_status_sufficient_mp == 0)
+    if (s_status_insufficient_mp != 0 && ai->has_mp_recovery_ability == 0 && s_status_sufficient_mp == 0)
         return 0;
     return 1;
 }
@@ -2930,7 +2930,7 @@ static s32 retreat_select(void) {
 
     if (g_ai_workspace_storage.resume_pending) {
         /* Resume: re-enter the step that suspended. */
-        switch (g_retreat_policy_stage) {
+        switch (s_retreat_policy_stage) {
         case AI_RETREAT_MOVEMENT:
             goto movement;
         case AI_RETREAT_SELF_ABILITIES:
@@ -2944,7 +2944,7 @@ static s32 retreat_select(void) {
     decision_target_focus(ai_target_find_nearest(AI_NEAREST_HEALER_OR_CRYSTAL));
 movement:
     if (retreat_build() == -1) {
-        g_retreat_policy_stage = AI_RETREAT_MOVEMENT;
+        s_retreat_policy_stage = AI_RETREAT_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 1;
@@ -2952,7 +2952,7 @@ movement:
     if (target_active_units_select(AI_UNIT_FILTER_SPECIFIC, ai->acting_unit_id)) {
     self_abilities:
         if (ability_list_evaluate() == -1) {
-            g_retreat_policy_stage = AI_RETREAT_SELF_ABILITIES;
+            s_retreat_policy_stage = AI_RETREAT_SELF_ABILITIES;
             return -1;
         }
     }
@@ -2962,7 +2962,7 @@ charging:
     result = keep_charging_select();
     switch (result) {
     case -1:
-        g_retreat_policy_stage = AI_RETREAT_CHARGING;
+        s_retreat_policy_stage = AI_RETREAT_CHARGING;
         return -1;
     case 1:
         return 0;
@@ -2979,7 +2979,7 @@ charging:
     if (target_active_units_select(AI_UNIT_FILTER_ANY, 255)) {
     other_abilities:
         if (ability_list_evaluate() == -1) {
-            g_retreat_policy_stage = AI_RETREAT_OTHER_ABILITIES;
+            s_retreat_policy_stage = AI_RETREAT_OTHER_ABILITIES;
             return -1;
         }
         if (ranked_select())
@@ -2998,7 +2998,7 @@ static s32 retreat_build(void) {
 
     if (g_ai_workspace_storage.resume_pending != 0) {
         /* Resume: re-enter the step that suspended. */
-        state = g_retreat_move_stage;
+        state = s_retreat_move_stage;
         if (state == AI_MOVE_RETREAT_SCORE_TILES) {
             goto score_tiles;
         }
@@ -3009,12 +3009,12 @@ static s32 retreat_build(void) {
     g_ai_workspace_storage.movement_scenario = 0;
 score_tiles:
     if (reachable_tiles_score() == -1) {
-        g_retreat_move_stage = AI_MOVE_RETREAT_SCORE_TILES;
+        s_retreat_move_stage = AI_MOVE_RETREAT_SCORE_TILES;
         return -1;
     }
 fill_target_distance:
     if (target_distance_grid_fill(&ai->acting_unit_decision->target) == -1) {
-        g_retreat_move_stage = AI_MOVE_RETREAT_TARGET_DISTANCE;
+        s_retreat_move_stage = AI_MOVE_RETREAT_TARGET_DISTANCE;
         return -1;
     }
     destination_select(0xff, AI_DESTINATION_PRIORITY_FIRST);

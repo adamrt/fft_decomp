@@ -29,7 +29,7 @@ extern u16 g_battle_map_palette_modified_colors[][BATTLE_MAP_CLUT_ROW_COLOR_COUN
 /* [battle_map_clut_row_e][color] */
 
 /* Base colors saved by the ambient and darkness animation commands. */
-static CVECTOR g_battle_map_ambient_base_color;
+static CVECTOR s_battle_map_ambient_base_color;
 extern CVECTOR g_battle_map_darkness_base_color;
 
 /* Runtime color fades stepped by battle_map_update_color_animations:
@@ -131,10 +131,10 @@ extern clut_cycle_state_t g_battle_map_clut_cycle_states[BATTLE_MAP_CLUT_CYCLE_S
         ROW(28), ROW(29), ROW(30), ROW(31)
 
 /* Per-frame channel steps for the 32-frame and the 8-frame blends. */
-static s8 g_palette_blend_steps_32[BATTLE_MAP_PALETTE_DELTA_COUNT][BATTLE_MAP_PALETTE_BLEND_STEP_COUNT]
+static s8 s_palette_blend_steps_32[BATTLE_MAP_PALETTE_DELTA_COUNT][BATTLE_MAP_PALETTE_BLEND_STEP_COUNT]
     = { PALETTE_BLEND_ROWS(PALETTE_BLEND_ROW_32) };
 
-static s8 g_palette_blend_steps_8[BATTLE_MAP_PALETTE_DELTA_COUNT][BATTLE_MAP_PALETTE_FAST_BLEND_STEP_COUNT]
+static s8 s_palette_blend_steps_8[BATTLE_MAP_PALETTE_DELTA_COUNT][BATTLE_MAP_PALETTE_FAST_BLEND_STEP_COUNT]
     = { PALETTE_BLEND_ROWS(PALETTE_BLEND_ROW_8) };
 
 /* Decode one CLUT's sixteen colors for a map CLUT row. Mode 0 sets them as the components and
@@ -902,7 +902,7 @@ static void ambient_transition(s32 frame_duration, const CVECTOR* color) {
  * BATTLE_MAP_COLOR_MODE_BASE modes and RESTORE start from. */
 void battle_map_ambient_transition_and_store(s32 frame_duration, const CVECTOR* color) {
     ambient_transition(frame_duration, color);
-    g_battle_map_ambient_base_color = *color;
+    s_battle_map_ambient_base_color = *color;
 }
 
 /* As background_color_blend, for the ambient light color. Event MapDarkness
@@ -944,38 +944,38 @@ static void ambient_color_blend(s32 mode, s32 frame_duration, s32 red, s32 green
         break;
     case BATTLE_MAP_COLOR_MODE_BASE:
     case BATTLE_MAP_COLOR_MODE_BASE_REPEAT:
-        target_red = (g_battle_map_ambient_base_color.r + red) << 16;
-        target_green = (g_battle_map_ambient_base_color.g + green) << 16;
-        target_blue = (g_battle_map_ambient_base_color.b + blue) << 16;
+        target_red = (s_battle_map_ambient_base_color.r + red) << 16;
+        target_green = (s_battle_map_ambient_base_color.g + green) << 16;
+        target_blue = (s_battle_map_ambient_base_color.b + blue) << 16;
         break;
     case BATTLE_MAP_COLOR_MODE_BASE_HALF:
         /* The base color is unsigned, so the halved 16.16 value is a shift. */
-        target_red = (g_battle_map_ambient_base_color.r << 15) + (red << 16);
-        target_green = (g_battle_map_ambient_base_color.g << 15) + (green << 16);
-        target_blue = (g_battle_map_ambient_base_color.b << 15) + (blue << 16);
+        target_red = (s_battle_map_ambient_base_color.r << 15) + (red << 16);
+        target_green = (s_battle_map_ambient_base_color.g << 15) + (green << 16);
+        target_blue = (s_battle_map_ambient_base_color.b << 15) + (blue << 16);
         break;
     case BATTLE_MAP_COLOR_MODE_BASE_GRAY:
-        base_red = g_battle_map_ambient_base_color.r << 16;
-        base_green = g_battle_map_ambient_base_color.g << 16;
-        base_blue = g_battle_map_ambient_base_color.b << 16;
+        base_red = s_battle_map_ambient_base_color.r << 16;
+        base_green = s_battle_map_ambient_base_color.g << 16;
+        base_blue = s_battle_map_ambient_base_color.b << 16;
         gray = (base_red * 2 + base_green * 3 + base_blue) / 6;
         target_red = gray + (red << 16);
         target_green = gray + (green << 16);
         target_blue = gray + (blue << 16);
         break;
     case BATTLE_MAP_COLOR_MODE_BASE_GRAY_HALF:
-        base_red = g_battle_map_ambient_base_color.r << 16;
-        base_green = g_battle_map_ambient_base_color.g << 16;
-        base_blue = g_battle_map_ambient_base_color.b << 16;
+        base_red = s_battle_map_ambient_base_color.r << 16;
+        base_green = s_battle_map_ambient_base_color.g << 16;
+        base_blue = s_battle_map_ambient_base_color.b << 16;
         gray = (base_red * 2 + base_green * 3 + base_blue) / 12;
         target_red = gray + (red << 16);
         target_green = gray + (green << 16);
         target_blue = gray + (blue << 16);
         break;
     case BATTLE_MAP_COLOR_MODE_RESTORE:
-        target_red = g_battle_map_ambient_base_color.r << 16;
-        target_green = g_battle_map_ambient_base_color.g << 16;
-        target_blue = g_battle_map_ambient_base_color.b << 16;
+        target_red = s_battle_map_ambient_base_color.r << 16;
+        target_green = s_battle_map_ambient_base_color.g << 16;
+        target_blue = s_battle_map_ambient_base_color.b << 16;
         break;
     case BATTLE_MAP_COLOR_MODE_STOP_REPEAT:
         g_battle_map_ambient_transition.repeat = BATTLE_MAP_COLOR_REPEAT_OFF;
@@ -1517,11 +1517,11 @@ void battle_map_update_color_animations(void) {
                              * so a color never becomes the transparent value 0. */
                             if (component[j].color.r + component[j].color.g + component[j].color.b != 0) {
                                 red = component[j].color.r
-                                    + g_palette_blend_steps_32[component[j].delta_biased.r][step];
+                                    + s_palette_blend_steps_32[component[j].delta_biased.r][step];
                                 green = component[j].color.g
-                                    + g_palette_blend_steps_32[component[j].delta_biased.g][step];
+                                    + s_palette_blend_steps_32[component[j].delta_biased.g][step];
                                 blue = component[j].color.b
-                                    + g_palette_blend_steps_32[component[j].delta_biased.b][step];
+                                    + s_palette_blend_steps_32[component[j].delta_biased.b][step];
                                 if ((red | green | blue) == 0) {
                                     blue = 1;
                                 }
@@ -1560,9 +1560,9 @@ void battle_map_update_color_animations(void) {
                     component = &g_battle_map_palette_state.clut_rows[i].components[k * BATTLE_MAP_CLUT_COLOR_COUNT];
                     for (j = 0; j < BATTLE_MAP_CLUT_COLOR_COUNT; j++) {
                         if (component[j].color.r + component[j].color.g + component[j].color.b != 0) {
-                            red = component[j].color.r + g_palette_blend_steps_8[component[j].delta_biased.r][step];
-                            green = component[j].color.g + g_palette_blend_steps_8[component[j].delta_biased.g][step];
-                            blue = component[j].color.b + g_palette_blend_steps_8[component[j].delta_biased.b][step];
+                            red = component[j].color.r + s_palette_blend_steps_8[component[j].delta_biased.r][step];
+                            green = component[j].color.g + s_palette_blend_steps_8[component[j].delta_biased.g][step];
+                            blue = component[j].color.b + s_palette_blend_steps_8[component[j].delta_biased.b][step];
                             if ((red | green | blue) == 0) {
                                 blue = 1;
                             }
@@ -1607,9 +1607,9 @@ void battle_map_update_color_animations(void) {
                     component = g_battle_map_palette_state.clut_rows[i].components;
                     for (j = 0; j < BATTLE_MAP_CLUT_ROW_COLOR_COUNT; j++) {
                         if (component[j].color.r + component[j].color.g + component[j].color.b != 0) {
-                            red = component[j].color.r + g_palette_blend_steps_32[component[j].delta_biased.r][step];
-                            green = component[j].color.g + g_palette_blend_steps_32[component[j].delta_biased.g][step];
-                            blue = component[j].color.b + g_palette_blend_steps_32[component[j].delta_biased.b][step];
+                            red = component[j].color.r + s_palette_blend_steps_32[component[j].delta_biased.r][step];
+                            green = component[j].color.g + s_palette_blend_steps_32[component[j].delta_biased.g][step];
+                            blue = component[j].color.b + s_palette_blend_steps_32[component[j].delta_biased.b][step];
                             if ((red | green | blue) == 0) {
                                 blue = 1;
                             }
@@ -1650,9 +1650,9 @@ void battle_map_update_color_animations(void) {
                 component = g_battle_map_palette_state.clut_rows[i].components;
                 for (j = 0; j < BATTLE_MAP_CLUT_ROW_COLOR_COUNT; j++) {
                     if (component[j].color.r + component[j].color.g + component[j].color.b != 0) {
-                        red = component[j].color.r + g_palette_blend_steps_8[component[j].delta_biased.r][step];
-                        green = component[j].color.g + g_palette_blend_steps_8[component[j].delta_biased.g][step];
-                        blue = component[j].color.b + g_palette_blend_steps_8[component[j].delta_biased.b][step];
+                        red = component[j].color.r + s_palette_blend_steps_8[component[j].delta_biased.r][step];
+                        green = component[j].color.g + s_palette_blend_steps_8[component[j].delta_biased.g][step];
+                        blue = component[j].color.b + s_palette_blend_steps_8[component[j].delta_biased.b][step];
                         if ((red | green | blue) == 0) {
                             blue = 1;
                         }
@@ -2004,7 +2004,7 @@ void battle_map_ambient_init(void) {
     CVECTOR* color;
 
     color = battle_map_light_state_command(BATTLE_MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR, color);
-    g_battle_map_ambient_base_color = *color;
+    s_battle_map_ambient_base_color = *color;
     g_battle_map_ambient_transition.channels.red = color->r << 16;
     g_battle_map_ambient_transition.channels.green = color->g << 16;
     g_battle_map_ambient_transition.channels.blue = color->b << 16;

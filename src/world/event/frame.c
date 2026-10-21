@@ -33,18 +33,18 @@
 #include "psx/types.h"
 
 /* event input state */
-static u32 g_script_current_input;
-static u32 g_script_previous_input;
-static u32 g_script_initial_repeat_counter;
-static u32 g_script_repeat_counter;
-static u32 g_script_secondary_repeat_counter;
+static u32 s_script_current_input;
+static u32 s_script_previous_input;
+static u32 s_script_initial_repeat_counter;
+static u32 s_script_repeat_counter;
+static u32 s_script_secondary_repeat_counter;
 
 /* The event frame compares slots 1..15 across its yield, including in WORLD. */
 extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
 
 /* Five rain and five snow commands; the dispatcher consumes each halfword's low byte.
  * WORLD retains this table even though it has no weather-request consumer. */
-static u16 g_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR,
+static u16 s_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR,
     BATTLE_MAP_WEATHER_COMMAND_LIGHT_RAIN, BATTLE_MAP_WEATHER_COMMAND_RAIN, BATTLE_MAP_WEATHER_COMMAND_HEAVY_RAIN,
     BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW,
     BATTLE_MAP_WEATHER_COMMAND_SNOW, BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW };
@@ -91,32 +91,32 @@ void script_route_event_input(void) {
     }
     input = tutorial_buttons_get();
     if (input == 0) {
-        g_script_initial_repeat_counter = 0;
-        g_script_repeat_counter = 0;
-        g_script_secondary_repeat_counter = 0;
+        s_script_initial_repeat_counter = 0;
+        s_script_repeat_counter = 0;
+        s_script_secondary_repeat_counter = 0;
     }
 
-    previous_input = g_script_current_input;
-    g_script_current_input = input;
+    previous_input = s_script_current_input;
+    s_script_current_input = input;
     g_script_event_current_input = input;
     g_script_event_input = 0;
-    g_script_previous_input = previous_input;
+    s_script_previous_input = previous_input;
 
     if (previous_input != input || (input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK)) == 0) {
         g_script_event_input = ~previous_input & input;
-        g_script_initial_repeat_counter = 0;
+        s_script_initial_repeat_counter = 0;
     } else {
         initial_delay = g_input_repeat_initial_delay / g_script_event_speed;
-        counter = ++g_script_initial_repeat_counter;
+        counter = ++s_script_initial_repeat_counter;
         if (counter == initial_delay) {
             g_script_event_input = input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK);
         }
         if (counter >= initial_delay) {
             repeat_delay = g_input_repeat_period / g_script_event_speed;
-            counter = ++g_script_repeat_counter;
-            g_script_secondary_repeat_counter++;
+            counter = ++s_script_repeat_counter;
+            s_script_secondary_repeat_counter++;
             if (counter >= repeat_delay) {
-                g_script_repeat_counter = 0;
+                s_script_repeat_counter = 0;
                 if ((input & PSX_PAD_SQUARE) != 0) {
                     g_script_event_input = input & (PSX_PAD_RIGHT | PSX_PAD_LEFT);
                 } else {
@@ -124,18 +124,18 @@ void script_route_event_input(void) {
                 }
             }
             secondary_repeat_delay = g_input_secondary_repeat_period / g_script_event_speed;
-            if (g_script_secondary_repeat_counter >= secondary_repeat_delay) {
-                g_script_secondary_repeat_counter = 0;
-                if ((g_script_current_input & PSX_PAD_SQUARE) != 0) {
+            if (s_script_secondary_repeat_counter >= secondary_repeat_delay) {
+                s_script_secondary_repeat_counter = 0;
+                if ((s_script_current_input & PSX_PAD_SQUARE) != 0) {
                     g_script_event_input
-                        |= g_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
+                        |= s_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_UP | PSX_PAD_DOWN);
                 } else {
-                    g_script_event_input |= g_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1);
+                    g_script_event_input |= s_script_current_input & (PSX_PAD_L1 | PSX_PAD_R1);
                 }
             }
         } else {
-            g_script_repeat_counter = 0;
-            g_script_secondary_repeat_counter = 0;
+            s_script_repeat_counter = 0;
+            s_script_secondary_repeat_counter = 0;
         }
     }
 }

@@ -25,7 +25,7 @@ typedef struct world_map_input_repeat {
 } world_map_input_repeat_t;
 typedef char world_map_input_repeat_size_must_be_36[sizeof(world_map_input_repeat_t) == 36 ? 1 : -1];
 
-static world_map_input_repeat_t g_world_map_input_repeat = { 0 };
+static world_map_input_repeat_t s_world_map_input_repeat = { 0 };
 
 /* WLDCORE's per-frame pad poll: reads pad 0 and publishes the held buttons
  * and the newly pressed ones (both 0 while WORLD_MAP_FLAG_INPUT_BLOCKED is
@@ -104,15 +104,15 @@ void world_map_scroll_axis_update(world_map_scroll_axis_t* axis, s32 direction) 
 /* Clear the six auto-repeat counters and copy the repeat delay and periods from MAIN's input
  * settings. */
 void world_map_input_repeat_init(void) {
-    g_world_map_input_repeat.counter_l1 = 0;
-    g_world_map_input_repeat.counter_r1 = 0;
-    g_world_map_input_repeat.counter_right = 0;
-    g_world_map_input_repeat.counter_left = 0;
-    g_world_map_input_repeat.counter_down = 0;
-    g_world_map_input_repeat.counter_up = 0;
-    g_world_map_input_repeat.initial_delay = g_input_repeat_initial_delay;
-    g_world_map_input_repeat.period = g_input_repeat_period;
-    g_world_map_input_repeat.secondary_period = g_input_secondary_repeat_period;
+    s_world_map_input_repeat.counter_l1 = 0;
+    s_world_map_input_repeat.counter_r1 = 0;
+    s_world_map_input_repeat.counter_right = 0;
+    s_world_map_input_repeat.counter_left = 0;
+    s_world_map_input_repeat.counter_down = 0;
+    s_world_map_input_repeat.counter_up = 0;
+    s_world_map_input_repeat.initial_delay = g_input_repeat_initial_delay;
+    s_world_map_input_repeat.period = g_input_repeat_period;
+    s_world_map_input_repeat.secondary_period = g_input_secondary_repeat_period;
 }
 
 /* Return the newly pressed buttons in `buttons`, or else the first held button
@@ -126,104 +126,104 @@ u32 world_map_input_repeat_update(u32 buttons) {
 
     pressed &= buttons;
     if (pressed != 0) {
-        g_world_map_input_repeat.counter_right = 0;
-        g_world_map_input_repeat.counter_left = 0;
-        g_world_map_input_repeat.counter_down = 0;
-        g_world_map_input_repeat.counter_up = 0;
+        s_world_map_input_repeat.counter_right = 0;
+        s_world_map_input_repeat.counter_left = 0;
+        s_world_map_input_repeat.counter_down = 0;
+        s_world_map_input_repeat.counter_up = 0;
         return pressed;
     }
 
     if ((buttons & PSX_PAD_UP) != 0) {
         if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
-            s32* counter = &g_world_map_input_repeat.counter_up;
+            s32* counter = &s_world_map_input_repeat.counter_up;
 
             next = *counter + 1;
             *counter = next;
-            if (g_world_map_input_repeat.initial_delay < next) {
-                *counter = next - g_world_map_input_repeat.period;
+            if (s_world_map_input_repeat.initial_delay < next) {
+                *counter = next - s_world_map_input_repeat.period;
                 return PSX_PAD_UP;
             }
         } else {
-            g_world_map_input_repeat.counter_up = 0;
+            s_world_map_input_repeat.counter_up = 0;
         }
     }
 
     if ((buttons & PSX_PAD_DOWN) != 0) {
         if ((g_input_current_buttons & PSX_PAD_DOWN) != 0) {
-            s32* counter = &g_world_map_input_repeat.counter_down;
+            s32* counter = &s_world_map_input_repeat.counter_down;
 
             next = *counter + 1;
             *counter = next;
-            if (g_world_map_input_repeat.initial_delay < next) {
-                *counter = next - g_world_map_input_repeat.period;
+            if (s_world_map_input_repeat.initial_delay < next) {
+                *counter = next - s_world_map_input_repeat.period;
                 return PSX_PAD_DOWN;
             }
         } else {
-            g_world_map_input_repeat.counter_down = 0;
+            s_world_map_input_repeat.counter_down = 0;
         }
     }
 
     if ((buttons & PSX_PAD_RIGHT) != 0) {
         if ((g_input_current_buttons & PSX_PAD_RIGHT) != 0) {
-            s32* counter = &g_world_map_input_repeat.counter_right;
+            s32* counter = &s_world_map_input_repeat.counter_right;
 
             next = *counter + 1;
             *counter = next;
-            if (g_world_map_input_repeat.initial_delay < next) {
-                *counter = next - g_world_map_input_repeat.period;
+            if (s_world_map_input_repeat.initial_delay < next) {
+                *counter = next - s_world_map_input_repeat.period;
                 return PSX_PAD_RIGHT;
             }
         } else {
-            g_world_map_input_repeat.counter_right = 0;
+            s_world_map_input_repeat.counter_right = 0;
         }
     }
 
     if ((buttons & PSX_PAD_LEFT) != 0) {
         if ((g_input_current_buttons & PSX_PAD_LEFT) != 0) {
-            s32* counter = &g_world_map_input_repeat.counter_left;
+            s32* counter = &s_world_map_input_repeat.counter_left;
 
             next = *counter + 1;
             *counter = next;
-            if (g_world_map_input_repeat.initial_delay < next) {
-                *counter = next - g_world_map_input_repeat.period;
+            if (s_world_map_input_repeat.initial_delay < next) {
+                *counter = next - s_world_map_input_repeat.period;
                 return PSX_PAD_LEFT;
             }
         } else {
-            g_world_map_input_repeat.counter_left = 0;
+            s_world_map_input_repeat.counter_left = 0;
         }
     }
 
     if ((buttons & PSX_PAD_R1) != 0) {
         if ((g_input_current_buttons & PSX_PAD_R1) != 0) {
-            s32* counter = &g_world_map_input_repeat.counter_r1;
+            s32* counter = &s_world_map_input_repeat.counter_r1;
 
             next = *counter + 1;
             *counter = next;
-            if (g_world_map_input_repeat.initial_delay < next) {
-                *counter = next - g_world_map_input_repeat.secondary_period;
+            if (s_world_map_input_repeat.initial_delay < next) {
+                *counter = next - s_world_map_input_repeat.secondary_period;
                 return PSX_PAD_R1;
             }
         } else {
-            g_world_map_input_repeat.counter_r1 = 0;
+            s_world_map_input_repeat.counter_r1 = 0;
         }
     }
 
     if ((buttons & PSX_PAD_L1) != 0) {
         if ((g_input_current_buttons & PSX_PAD_L1) != 0) {
-            s32* counter = &g_world_map_input_repeat.counter_l1;
+            s32* counter = &s_world_map_input_repeat.counter_l1;
             s32 old_counter;
             s32 last_next;
 
             /* Spelled apart from the other arms: separate old and next values
              * give this last arm the retail register assignment. */
             old_counter = *counter;
-            if (g_world_map_input_repeat.initial_delay < (*counter = last_next = old_counter + 1)) {
-                old_counter = last_next - g_world_map_input_repeat.secondary_period;
+            if (s_world_map_input_repeat.initial_delay < (*counter = last_next = old_counter + 1)) {
+                old_counter = last_next - s_world_map_input_repeat.secondary_period;
                 *counter = old_counter;
                 return PSX_PAD_L1;
             }
         } else {
-            g_world_map_input_repeat.counter_l1 = 0;
+            s_world_map_input_repeat.counter_l1 = 0;
         }
     }
 

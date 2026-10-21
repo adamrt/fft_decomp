@@ -15,9 +15,9 @@
 #include "psx/types.h"
 
 extern u16 g_save_gfx_texture_page;
-static u16 g_save_gfx_draw_clut;
+static u16 s_save_gfx_draw_clut;
 
-static s16 g_save_menu_window_right_x = 0;
+static s16 s_save_menu_window_right_x = 0;
 
 /* Stream command: draw a textured quad of size (command[5], command[6]) at
  * (command[3], command[4]) with texture origin (command[7], command[8]), in the
@@ -37,7 +37,7 @@ u8* menu_draw_textured_quad(u8* command) {
         color = 0;
     }
     menu_gfx_enqueue_textured_quad(&rect, command[7], command[8], color, g_menu_gfx_semitransparency,
-        g_save_gfx_texture_page, g_save_gfx_draw_clut, g_menu_gfx_otag_index);
+        g_save_gfx_texture_page, s_save_gfx_draw_clut, g_menu_gfx_otag_index);
     return command + command[1];
 }
 
@@ -87,7 +87,7 @@ menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
         partial_height = height & 15;
     }
     g_cmd_window_interior_command.rectangle_source = command->rectangle_source;
-    g_save_menu_window_right_x = command->width + left + 5;
+    s_save_menu_window_right_x = command->width + left + 5;
     v_top = 2;
     if (command->rectangle_source == 1) {
         u_left = 0xDA;

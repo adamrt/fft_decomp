@@ -27,9 +27,9 @@
  * register and misses the byte-exact match. */
 extern u8 g_item_secondary_data_ids[];
 extern job_data_t g_job_data[JOB_ID_COUNT];
-static u8 g_party_highest_level;
+static u8 s_party_highest_level;
 extern u16 g_calendar_month_start_day_offsets[13];
-static u32 g_names_use_world_text = 0;
+static u32 s_names_use_world_text = 0;
 static s32 unlocked_job_choose(const unit_stats_t* unit);
 static void build_finish(unit_stats_t* unit);
 static void encounter_abilities_set(unit_stats_t* unit, const entd_unit_t* entd);
@@ -51,7 +51,7 @@ static void ramza_identity_set(unit_stats_t* unit);
 s32 unit_party_slot_init(unit_stats_t* unit, s32 slot, s32 use_world_text) {
     party_unit_t* party_unit;
 
-    g_names_use_world_text = use_world_text;
+    s_names_use_world_text = use_world_text;
     party_unit = party_unit_get(slot);
     if (party_unit == 0) {
         return -1;
@@ -80,7 +80,7 @@ s32 unit_party_slot_init(unit_stats_t* unit, s32 slot, s32 use_world_text) {
  * UNIT_ENTD_INIT_TRANSFORM is the transformed-monster recalculation path
  * and preserves the existing runtime/ENTD-derived state. */
 s32 unit_encounter_init(unit_stats_t* unit, const entd_unit_t* entd, u32 use_world_text, s32 kind) {
-    g_names_use_world_text = use_world_text;
+    s_names_use_world_text = use_world_text;
     if (kind != UNIT_ENTD_INIT_TRANSFORM) {
         unit_battle_state_reset(unit);
         if (encounter_data_set(unit, entd) != 0) {
@@ -240,12 +240,12 @@ static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
 
     value = entd->level;
     if (value == 0 || value == ENTD_VALUE_RANDOM) {
-        number = g_party_highest_level;
+        number = s_party_highest_level;
         level_range = (number >> 3) + 1;
         level_base = number - (number >> 3);
         value = level_base + (level_range * rand()) / 0x8000;
     } else if (value >= 100) {
-        level_bonus = g_party_highest_level - 100;
+        level_bonus = s_party_highest_level - 100;
         value += level_bonus;
     }
     level = value;
@@ -304,7 +304,7 @@ static s32 encounter_party_member_init(unit_stats_t* unit, const entd_unit_t* en
     s32 slot = party_sprite_slot_find(entd_unit->sprite_set);
 
     if (slot != -1) {
-        unit_party_slot_init(unit, slot, g_names_use_world_text);
+        unit_party_slot_init(unit, slot, s_names_use_world_text);
         /* Keep the party unit's kind flags and take the two persistence
          * controls from the ENTD definition. */
         unit->unit_flags &= ~(UNIT_FLAG_JOIN_AFTER_EVENT | UNIT_FLAG_SAVE_FORMATION);
@@ -1218,7 +1218,7 @@ static void names_store(unit_stats_t* unit) {
     const unit_name_id_fields_t* name_id_record;
 
     prepare_text = battle_text_find_entry;
-    if (g_names_use_world_text != 0) {
+    if (s_names_use_world_text != 0) {
         prepare_text = world_text_find_entry;
     }
     if (unit->formation_index == PARTY_ID_NONE) {
@@ -1301,6 +1301,6 @@ u8 party_highest_level_calculate(void) {
     if (highest > UNIT_LEVEL_MAX) {
         highest = UNIT_LEVEL_MAX;
     }
-    g_party_highest_level = highest;
+    s_party_highest_level = highest;
     return highest;
 }

@@ -18,10 +18,10 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static u8 g_owned_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER_WEAPON, ITEM_LIST_FILTER_SHIELD,
+static u8 s_owned_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER_WEAPON, ITEM_LIST_FILTER_SHIELD,
     ITEM_LIST_FILTER_HEADGEAR, ITEM_LIST_FILTER_BODY_ARMOR, ITEM_LIST_FILTER_ACCESSORY };
 
-static u8 g_shop_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER_WEAPON, ITEM_LIST_FILTER_SHIELD,
+static u8 s_shop_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER_WEAPON, ITEM_LIST_FILTER_SHIELD,
     ITEM_LIST_FILTER_HEADGEAR, ITEM_LIST_FILTER_BODY_ARMOR, ITEM_LIST_FILTER_ACCESSORY };
 
 /* Choose the best-ranked owned items for each equipment slot into `equipment`, keeping
@@ -58,14 +58,14 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
     held_weapon = ITEM_ID_NOTHING;
     if (two_swords) {
         held_weapon = right_hand;
-        g_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
+        s_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
         held_off_hand = left_hand;
         if (held_weapon == ITEM_ID_NOTHING) {
             held_weapon = left_hand;
             held_off_hand = ITEM_ID_NOTHING;
         }
     } else {
-        g_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+        s_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
         if (right_hand >= ITEM_ID_THROWABLE_FIRST)
             held_off_hand = right_hand;
         else if (right_hand != ITEM_ID_NOTHING)
@@ -77,8 +77,8 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
     }
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
-        category = g_owned_slot_categories[slot];
-        count = formation_item_list_build(unit_index, ITEM_SORT_ORDER_BEST_FIT, g_owned_slot_categories[slot], list,
+        category = s_owned_slot_categories[slot];
+        count = formation_item_list_build(unit_index, ITEM_SORT_ORDER_BEST_FIT, s_owned_slot_categories[slot], list,
             ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY);
         length = count;
         if (category == ITEM_LIST_FILTER_WEAPON) {
@@ -101,7 +101,7 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
                 retry = 0;
                 for (i = 0;; i++) {
                     if (list[i] == -1) {
-                        g_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+                        s_owned_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
                         if (slot == MENU_EQUIPMENT_SLOT_LEFT_HAND) {
                             retry = 1;
                             slot--;
@@ -220,7 +220,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
 
     if (dual) {
         second = left;
-        g_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
+        s_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
         /* Written last so it is the instruction immediately before the test:
          * reorg scans backward from the branch and takes it into the delay
          * slot, which is where the target has `sw s8,328(sp)`. */
@@ -230,7 +230,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
             second = ITEM_ID_NOTHING;
         }
     } else {
-        g_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+        s_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
         if (right >= ITEM_ID_THROWABLE_FIRST)
             second = right;
         else if (right != ITEM_ID_NOTHING)
@@ -242,7 +242,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
     }
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
-        category = g_shop_slot_categories[slot];
+        category = s_shop_slot_categories[slot];
         count = shop_stock_list_build(unit_index, shop_id, category, list, ITEM_LIST_MODE_EQUIPPABLE);
         length = count;
 
@@ -272,7 +272,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
                 retry = 0;
                 for (i = 0;; i++) {
                     if (list[i] == -1) {
-                        g_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
+                        s_shop_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_SHIELD;
                         if (slot == MENU_EQUIPMENT_SLOT_LEFT_HAND) {
                             retry = 1;
                             slot--;
