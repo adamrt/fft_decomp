@@ -138,7 +138,7 @@ instead of including the record's header.
   group `owner_draw_thing` operations. Do not reorder words mechanically or
   turn a status-returning operation into a boolean-sounding predicate.
   Static functions use concise contextual names without redundant owner
-  prefixes or a private-name marker; local variables and private types/state
+  prefixes or a private-name marker; local variables and private types
   likewise use their enclosing context.
   Retain enough qualification to distinguish roles and avoid target-symbol
   collisions. The concept is the game's own US term where the player
@@ -173,6 +173,11 @@ instead of including the record's header.
   handler shared by several opcodes takes the lowest. Use "opcode" only for
   an instruction stream that a dispatcher decodes; request codes and
   single records are commands.
+- File-scope `static` variables use `s_` where globals use `g_`
+  (`s_rover`), so a reader sees that only that file reaches them; `g_` marks
+  a variable other files or programs reach, through a C definition with a
+  header declaration or an address label. `tools/static` converts an
+  address-bound global its file alone uses and renames it.
 - Globals follow the same rule (`g_shop_`, `g_unit_`, `g_menu_stack_`); a
   name that shared code binds to a different definition in each program
   carries a comment saying which programs define it. Materially different

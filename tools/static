@@ -1,5 +1,6 @@
 #!/bin/sh
-# Turn a file-private extern global into a static its file owns, or explain
+# Turn a file-private extern global into a static its file owns (g_name becomes
+# s_name in the source, target/ and QUIRKS.md), or explain
 # why it cannot be one and what it is instead.
 #
 #   tools/static g_name              apply; undone if a check fails
@@ -65,4 +66,4 @@ for module in $modules; do
 done
 make -s check-config || restore "make check-config"
 rm -rf build/static-backup
-echo "tools/static: done; $name is now static in $source"
+echo "tools/static: done; $(sed -n 's/^static-applied: //p' "$log" | head -1) in $source"

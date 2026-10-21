@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -12,7 +13,8 @@ import (
 )
 
 // The static command turns a file-private extern global into a static that its
-// file owns, or explains why it cannot be one and what it is instead.
+// file owns, renamed from g_ to s_, or explains why it cannot be one and what it
+// is instead.
 //
 //	tools static [--dry-run] [--size N] [--no-note] NAME
 //	tools static --restore [--failed] NAME
@@ -132,12 +134,12 @@ func (p project) staticCommand(args []string) error {
 		return nil
 	}
 
-	newLine := fmt.Sprintf("static %s %s%s%s;%s", declaration.typeText, name, strings.TrimRight(declaration.dimensions, " "), plans[0].init, declaration.trailing)
+	newLine := fmt.Sprintf("static %s %s%s%s;%s", declaration.typeText, staticName(name), strings.TrimRight(declaration.dimensions, " "), plans[0].init, declaration.trailing)
 	fmt.Println("static: can be static: " + strings.TrimSpace(newLine))
 	if *dryRun {
 		return nil
 	}
-	return p.staticApply(config, declaration, newLine, plans, byteSize)
+	return p.staticApply(config, declaration, name, newLine, plans, byteSize)
 }
 
 // staticAnalysis is the outcome of every check for one name.
@@ -185,6 +187,16 @@ func (p project) staticAnalyze(config *projectConfig, name string, size int) (*s
 	if len(declarations) == 1 {
 		declaration = &declarations[0]
 		report.ok("declared as `%s`", strings.TrimSpace(declaration.text[declaration.start:declaration.end]))
+		if newName := staticName(name); newName != name {
+			taken, err := staticFilesSpelling(p.root, newName)
+			if err != nil {
+				return nil, err
+			}
+			_, labeled := staticLabelAnywhere(config, newName)
+			if len(taken) != 0 || labeled {
+				report.no(fmt.Sprintf("its static name %s is already taken", newName), "%s is already used", newName)
+			}
+		}
 	} else if len(declarations) == 0 {
 		report.no("declared in a header, not as a file-scope extern in one .c file", "no file-scope `extern` line in a .c file")
 	} else {
@@ -597,9 +609,27 @@ func staticHeaderHint(files []string) string {
 	return ""
 }
 
-func (p project) staticApply(config *projectConfig, declaration *staticDeclaration, newLine string, plans []staticPlan, size int) error {
+// staticName is the name a converted global takes: file-scope statics use s_
+// where globals use g_.
+func staticName(name string) string {
+	if strings.HasPrefix(name, "g_") {
+		return "s_" + strings.TrimPrefix(name, "g_")
+	}
+	return name
+}
+
+func (p project) staticApply(config *projectConfig, declaration *staticDeclaration, name, newLine string, plans []staticPlan, size int) error {
+	newName := staticName(name)
 	return p.withTargetLock(func() error {
 		changed := map[string]bool{declaration.path: true}
+		var documents []string
+		for _, document := range documentFiles {
+			if data, err := os.ReadFile(filepath.Join(p.root, document)); err == nil &&
+				!bytes.Equal(data, renameDocumentIdentifier(data, name, newName)) {
+				changed[document] = true
+				documents = append(documents, document)
+			}
+		}
 		for _, plan := range plans {
 			changed[plan.module.path] = true
 		}
@@ -635,7 +665,22 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 				sort.Slice(plan.unit.Bss, func(i, j int) bool { return plan.unit.Bss[i].Addr < plan.unit.Bss[j].Addr })
 			}
 		}
+		if newName != name {
+			if err := renameConfigData(config, name, newName); err != nil {
+				return err
+			}
+		}
 		transaction := newSymbolFileTransaction()
+		for _, document := range documents {
+			full := filepath.Join(p.root, document)
+			info, original, err := readRegularSymbolFile(full)
+			if err != nil {
+				return err
+			}
+			if err := transaction.addExistingSnapshot(full, original, renameDocumentIdentifier(original, name, newName), info.Mode()); err != nil {
+				return err
+			}
+		}
 		for path, data := range renderConfigFiles(config) {
 			full := filepath.Join(p.root, filepath.FromSlash(path))
 			info, original, err := readRegularSymbolFile(full)
@@ -664,6 +709,9 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 				updated = removed[:at] + newLine + "\n" + removed[at:]
 				break
 			}
+		}
+		if newName != name {
+			updated = regexp.MustCompile(`\b`+regexp.QuoteMeta(name)+`\b`).ReplaceAllLiteralString(updated, newName)
 		}
 		full := filepath.Join(p.root, declaration.path)
 		info, original, err := readRegularSymbolFile(full)
@@ -1041,6 +1089,15 @@ func staticInitializer(bytes []byte, typeText, dimensions string, count, element
 	return " = { " + strings.Join(values, ", ") + " }", nil
 }
 
+func staticLabelAnywhere(config *projectConfig, name string) (uint32, bool) {
+	for _, m := range config.Modules {
+		if addr, ok := staticLabel(m, name); ok {
+			return addr, true
+		}
+	}
+	return 0, false
+}
+
 func staticLabel(m *moduleSpec, name string) (uint32, bool) {
 	for _, symbol := range append(append([]symbolSpec(nil), m.Data...), m.Imports...) {
 		if symbol.Name == name {
@@ -1184,10 +1241,10 @@ func (p project) staticSurvey(apply bool) error {
 				converted++
 				if apply {
 					declaration := analysis.declaration
-					newLine := fmt.Sprintf("static %s %s%s%s;%s", declaration.typeText, name, strings.TrimRight(declaration.dimensions, " "),
+					newLine := fmt.Sprintf("static %s %s%s%s;%s", declaration.typeText, staticName(name), strings.TrimRight(declaration.dimensions, " "),
 						analysis.plans[0].init, declaration.trailing)
 					// staticApply records the row in the unit, so later rounds see it.
-					if err := p.staticApply(config, declaration, newLine, analysis.plans, analysis.size); err != nil {
+					if err := p.staticApply(config, declaration, name, newLine, analysis.plans, analysis.size); err != nil {
 						return fmt.Errorf("%s: %w", name, err)
 					}
 					continue
