@@ -69,6 +69,11 @@ type staticPlan struct {
 	kind   string // "data" or "bss"
 	init   string // C initializer, including " = ", or empty
 	hash   string
+	// anchor is the variable the new row sits next to; the definition goes
+	// right after it (after) or right before it, because a unit's rows follow
+	// the order of its definitions. Empty for a unit's first bss row.
+	anchor string
+	after  bool
 }
 
 func (p project) staticCommand(args []string) error {
@@ -78,11 +83,19 @@ func (p project) staticCommand(args []string) error {
 	noNote := flags.Bool("no-note", false, "do not add a `Not static:` comment when it cannot be static")
 	restore := flags.Bool("restore", false, "put back the files the last apply changed")
 	failed := flags.Bool("failed", false, "with --restore: also note that the static did not match")
+	survey := flags.Bool("survey", false, "check every file-scope extern in src/ (no NAME); change no files")
+	batch := flags.Bool("batch", false, "convert every name the survey finds, round by round (no NAME); no checks, no notes")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
+	if *survey || *batch {
+		if flags.NArg() != 0 {
+			return fmt.Errorf("usage: tools static --survey | --batch")
+		}
+		return p.staticSurvey(*batch)
+	}
 	if flags.NArg() != 1 {
-		return fmt.Errorf("usage: tools static [--dry-run] [--size N] [--no-note] NAME | --restore [--failed] NAME")
+		return fmt.Errorf("usage: tools static [--dry-run] [--size N] [--no-note] NAME | --restore [--failed] NAME | --survey")
 	}
 	name := flags.Arg(0)
 	if err := validateRenameIdentifier(name); err != nil {
@@ -95,91 +108,12 @@ func (p project) staticCommand(args []string) error {
 	if err != nil {
 		return err
 	}
-	report := &staticReport{}
 	fmt.Println("static: " + name)
-	files, err := staticFilesSpelling(p.root, name)
+	analysis, err := p.staticAnalyze(config, name, *size)
 	if err != nil {
 		return err
 	}
-	if len(files) == 0 {
-		return fmt.Errorf("%s is not spelled in src/ or include/", name)
-	}
-	headers, err := staticHeaderText(p.root)
-	if err != nil {
-		return err
-	}
-
-	// Who uses the name, and the one declaration to rewrite.
-	var sources []string
-	for _, path := range files {
-		if strings.HasSuffix(path, ".c") {
-			sources = append(sources, path)
-		}
-	}
-	source := ""
-	if len(files) == 1 && len(sources) == 1 {
-		source = sources[0]
-		report.ok("only %s uses it", source)
-	} else {
-		report.no(fmt.Sprintf("%d files use it (%s)", len(files), strings.Join(files, ", ")), "used in %s", strings.Join(files, ", "))
-	}
-	declarations, err := staticExternDeclarations(p.root, sources, name)
-	if err != nil {
-		return err
-	}
-	var declaration *staticDeclaration
-	if len(declarations) == 1 {
-		declaration = &declarations[0]
-		report.ok("declared as `%s`", strings.TrimSpace(declaration.text[declaration.start:declaration.end]))
-	} else if len(declarations) == 0 {
-		report.no("declared in a header, not as a file-scope extern in one .c file", "no file-scope `extern` line in a .c file")
-	} else {
-		report.no("declared as an extern in several .c files", "%d file-scope `extern` lines in .c files", len(declarations))
-	}
-
-	// Size.
-	byteSize, count, element := *size, 0, 0
-	if declaration != nil {
-		count, element = staticTypeSize(declaration.typeText, declaration.dimensions, headers, declaration.text)
-		if byteSize == 0 && count > 0 && element > 0 {
-			byteSize = count * element
-		}
-		if byteSize == 0 {
-			report.no("its size is unknown (pass --size N)", "size of `%s %s%s` unknown", declaration.typeText, name, strings.TrimSpace(declaration.dimensions))
-		} else {
-			report.ok("%d bytes", byteSize)
-			if count == 0 && element > 0 {
-				count = byteSize / element
-			}
-		}
-	}
-
-	// Per program.
-	var plans []staticPlan
-	if source != "" && declaration != nil && byteSize > 0 {
-		plans, err = p.staticPrograms(config, report, name, source, declaration, byteSize, count, element)
-		if err != nil {
-			return err
-		}
-	}
-	if len(report.reasons) == 0 && len(plans) == 0 {
-		report.no("no program compiles it", "no program compiles %s as a unit", source)
-	}
-	if len(report.reasons) == 0 {
-		for _, plan := range plans[1:] {
-			if plan.init != plans[0].init {
-				report.no("the programs that compile it need different initial values", "the programs compiling %s need different initializers", source)
-				break
-			}
-		}
-	}
-	if len(report.reasons) != 0 {
-		alternativeSize := byteSize
-		if alternativeSize == 0 {
-			alternativeSize = staticDeclaredSize(p.root, files, name, headers)
-		}
-		p.staticAlternatives(config, report, name, alternativeSize, files)
-	}
+	report, declaration, plans, byteSize := analysis.report, analysis.declaration, analysis.plans, analysis.size
 	fmt.Println(strings.Join(report.lines, "\n"))
 
 	if len(report.reasons) != 0 {
@@ -204,6 +138,103 @@ func (p project) staticCommand(args []string) error {
 		return nil
 	}
 	return p.staticApply(config, declaration, newLine, plans, byteSize)
+}
+
+// staticAnalysis is the outcome of every check for one name.
+type staticAnalysis struct {
+	report      *staticReport
+	declaration *staticDeclaration
+	plans       []staticPlan
+	files       []string
+	size        int
+}
+
+func (p project) staticAnalyze(config *projectConfig, name string, size int) (*staticAnalysis, error) {
+	report := &staticReport{}
+	files, err := staticFilesSpelling(p.root, name)
+	if err != nil {
+		return nil, err
+	}
+	if len(files) == 0 {
+		return nil, fmt.Errorf("%s is not spelled in src/ or include/", name)
+	}
+	headers, err := staticHeaderText(p.root)
+	if err != nil {
+		return nil, err
+	}
+
+	// Who uses the name, and the one declaration to rewrite.
+	var sources []string
+	for _, path := range files {
+		if strings.HasSuffix(path, ".c") {
+			sources = append(sources, path)
+		}
+	}
+	source := ""
+	if len(files) == 1 && len(sources) == 1 {
+		source = sources[0]
+		report.ok("only %s uses it", source)
+	} else {
+		report.no(fmt.Sprintf("%d files use it (%s)", len(files), strings.Join(files, ", ")), "used in %s", strings.Join(files, ", "))
+	}
+	declarations, err := staticExternDeclarations(p.root, sources, name)
+	if err != nil {
+		return nil, err
+	}
+	var declaration *staticDeclaration
+	if len(declarations) == 1 {
+		declaration = &declarations[0]
+		report.ok("declared as `%s`", strings.TrimSpace(declaration.text[declaration.start:declaration.end]))
+	} else if len(declarations) == 0 {
+		report.no("declared in a header, not as a file-scope extern in one .c file", "no file-scope `extern` line in a .c file")
+	} else {
+		report.no("declared as an extern in several .c files", "%d file-scope `extern` lines in .c files", len(declarations))
+	}
+
+	// Size.
+	byteSize, count, element := size, 0, 0
+	if declaration != nil {
+		count, element = staticTypeSize(declaration.typeText, declaration.dimensions, headers, declaration.text)
+		if byteSize == 0 && count > 0 && element > 0 {
+			byteSize = count * element
+		}
+		if byteSize == 0 {
+			report.no("its size is unknown (pass --size N)", "size of `%s %s%s` unknown", declaration.typeText, name, strings.TrimSpace(declaration.dimensions))
+		} else {
+			report.ok("%d bytes", byteSize)
+			if count == 0 && element > 0 {
+				count = byteSize / element
+			}
+		}
+	}
+
+	// Per program.
+	var plans []staticPlan
+	if source != "" && declaration != nil && byteSize > 0 {
+		plans, err = p.staticPrograms(config, report, name, source, declaration, byteSize, count, element)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if len(report.reasons) == 0 && len(plans) == 0 {
+		report.no("no program compiles it", "no program compiles %s as a unit", source)
+	}
+	if len(report.reasons) == 0 {
+		for _, plan := range plans[1:] {
+			if plan.init != plans[0].init {
+				report.no("the programs that compile it need different initial values", "the programs compiling %s need different initializers", source)
+				break
+			}
+		}
+	}
+	if len(report.reasons) != 0 {
+		alternativeSize := byteSize
+		if alternativeSize == 0 {
+			alternativeSize = staticDeclaredSize(p.root, files, name, headers)
+		}
+		p.staticAlternatives(config, report, name, alternativeSize, files)
+	}
+	return &staticAnalysis{report, declaration, plans, files, byteSize}, nil
 }
 
 func (p project) staticPrograms(config *projectConfig, report *staticReport, name, source string, declaration *staticDeclaration, size, count, element int) ([]staticPlan, error) {
@@ -247,7 +278,7 @@ func (p project) staticPrograms(config *projectConfig, report *staticReport, nam
 				"  0x%08x is inside unit %s's %s row at 0x%08x (%d bytes)", addr, owner.Name, kind, row.Addr, row.Size)
 			continue
 		}
-		image, err := p.readModuleImage(m)
+		image, err := p.staticImage(m)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w (run `make extract`)", m.ID, err)
 		}
@@ -262,21 +293,30 @@ func (p project) staticPrograms(config *projectConfig, report *staticReport, nam
 		dataEnd, haveData := staticEnd(unit.Data)
 		bssStart, bssEnd, haveBss := staticSpan(unit.Bss)
 		switch {
-		case haveData && addr >= dataEnd && addr-dataEnd < 8:
+		case haveData && addr == staticAlignUp(dataEnd, staticAlignment(element, size)):
 			init, err := staticInitializer(bytes, declaration.typeText, declaration.dimensions, count, element)
 			if err != nil {
 				report.no("its original value needs a hand-written initializer", "  continues the data block, but %v", err)
 				continue
 			}
 			report.ok("  continues the unit's data block (ends 0x%08x): data row, initializer `%s`", dataEnd, strings.TrimPrefix(init, " = "))
-			plans = append(plans, staticPlan{m, unit, addr, "data", init, shortHash(bytes)})
-		case zero && (!haveBss || addr == bssEnd || addr+uint32(size) == bssStart):
+			plans = append(plans, staticPlan{m, unit, addr, "data", init, shortHash(bytes), staticLastLabel(m, unit.Data, name), true})
+		case zero && (!haveBss || addr == staticAlignUp(bssEnd, staticAlignment(element, size)) || addr+uint32(size) == bssStart):
 			if haveBss {
 				report.ok("  zero, and continues the unit's bss block: bss row")
 			} else {
 				report.ok("  zero, and the unit has no bss yet: bss row")
 			}
-			plans = append(plans, staticPlan{m, unit, addr, "bss", "", shortHash(bytes)})
+			plan := staticPlan{module: m, unit: unit, addr: addr, kind: "bss", hash: shortHash(bytes)}
+			if haveBss && addr != bssStart && addr+uint32(size) != bssStart {
+				plan.anchor, plan.after = staticLastLabel(m, unit.Bss, name), true
+			} else if haveBss {
+				plan.anchor = staticLabelAt(m, bssStart, name)
+			}
+			plans = append(plans, plan)
+		case !zero && haveData && addr > dataEnd && addr-dataEnd < 8:
+			report.no(fmt.Sprintf("%d unknown byte(s) sit between unit %s's data and it in %s", addr-dataEnd, unit.Name, m.ID),
+				"  not zero, and %d byte(s) after the data block (ends 0x%08x) that its alignment does not explain", addr-dataEnd, dataEnd)
 		case !zero:
 			report.no(fmt.Sprintf("its original bytes in %s are not zero and do not follow unit %s's data", m.ID, unit.Name),
 				"  not zero, and not right after the unit's data block")
@@ -435,6 +475,94 @@ func staticModuleCompilesAny(m *moduleSpec, files []string) bool {
 	return false
 }
 
+// staticAlignment is the alignment GCC gives a variable: its element size
+// for numbers and pointers, and for a record the largest power of two up to
+// 4 that divides its size.
+func staticAlignment(element, size int) int {
+	unit := element
+	if unit <= 0 {
+		unit = size
+	}
+	for _, alignment := range []int{4, 2} {
+		if unit%alignment == 0 {
+			return alignment
+		}
+	}
+	return 1
+}
+
+func staticAlignUp(addr uint32, alignment int) uint32 {
+	mask := uint32(alignment - 1)
+	return (addr + mask) &^ mask
+}
+
+// staticLastLabel is the label with the highest address inside rows.
+func staticLastLabel(m *moduleSpec, rows []rodataSpec, except string) string {
+	best, bestAddr := "", uint32(0)
+	for _, symbol := range m.Data {
+		if symbol.Name == except {
+			continue
+		}
+		for _, row := range rows {
+			if symbol.Addr >= row.Addr && symbol.Addr < row.Addr+uint32(row.Size) && (best == "" || symbol.Addr > bestAddr) {
+				best, bestAddr = symbol.Name, symbol.Addr
+			}
+		}
+	}
+	return best
+}
+
+func staticLabelAt(m *moduleSpec, addr uint32, except string) string {
+	for _, symbol := range m.Data {
+		if symbol.Addr == addr && symbol.Name != except {
+			return symbol.Name
+		}
+	}
+	return ""
+}
+
+// staticDefinitionEdge finds the file-scope definition of name in text and
+// returns the offset just after its statement's line (after) or the start of
+// its first line, including a comment block directly above it (before).
+func staticDefinitionEdge(text, name string, after bool) (int, bool) {
+	pattern := regexp.MustCompile(`(?m)^[A-Za-z_][^;(\n]*\b` + regexp.QuoteMeta(name) + `\b\s*(?:\[[^\]\n]*\]\s*)*(?:=|;)`)
+	for _, match := range pattern.FindAllStringIndex(text, -1) {
+		line := text[match[0]:match[1]]
+		if strings.HasPrefix(line, "extern") || strings.HasPrefix(line, "typedef") {
+			continue
+		}
+		if !after {
+			start := match[0]
+			for {
+				previous := staticPreviousLine(text, start)
+				trimmed := strings.TrimSpace(previous.text)
+				if previous.text == "" || !(strings.HasPrefix(trimmed, "/*") || strings.HasPrefix(trimmed, "*")) {
+					break
+				}
+				start = previous.start
+			}
+			return start, true
+		}
+		depth := 0
+		for index := match[0]; index < len(text); index++ {
+			switch text[index] {
+			case '{':
+				depth++
+			case '}':
+				depth--
+			case ';':
+				if depth == 0 {
+					if newline := strings.IndexByte(text[index:], '\n'); newline >= 0 {
+						return index + newline + 1, true
+					}
+					return len(text), true
+				}
+			}
+		}
+	}
+	return 0, false
+}
+
 func staticHeaderHint(files []string) string {
 	if len(files) > 1 {
 		return ", and declare it extern in a header for the other users"
@@ -449,15 +577,20 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 			changed[plan.module.path] = true
 		}
 		backup := filepath.Join(p.root, "build", "static-backup")
-		if err := os.RemoveAll(backup); err != nil {
-			return err
+		if !staticBatching {
+			if err := os.RemoveAll(backup); err != nil {
+				return err
+			}
 		}
 		for path := range changed {
+			target := filepath.Join(backup, path)
+			if _, err := os.Stat(target); err == nil {
+				continue // a batch keeps each file as it was before the batch
+			}
 			data, err := os.ReadFile(filepath.Join(p.root, path))
 			if err != nil {
 				return err
 			}
-			target := filepath.Join(backup, path)
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return err
 			}
@@ -491,7 +624,18 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 		if previous := staticPreviousLine(text, start); strings.HasPrefix(strings.TrimSpace(previous.text), staticNote) {
 			start = previous.start
 		}
-		updated := text[:start] + newLine + text[declaration.end:]
+		end := declaration.end
+		if end < len(text) && text[end] == '\n' {
+			end++
+		}
+		updated := text[:start] + newLine + "\n" + text[end:]
+		if anchor := plans[0].anchor; anchor != "" {
+			// Remove the extern, then define the static beside its neighbor.
+			removed := text[:start] + text[end:]
+			if at, ok := staticDefinitionEdge(removed, anchor, plans[0].after); ok {
+				updated = removed[:at] + newLine + "\n" + removed[at:]
+			}
+		}
 		full := filepath.Join(p.root, declaration.path)
 		info, original, err := readRegularSymbolFile(full)
 		if err != nil {
@@ -588,7 +732,29 @@ func staticPreviousLine(text string, start int) staticLine {
 	return staticLine{begin, text[begin:end]}
 }
 
+// The survey checks every name in one run, so it fills these caches once.
+var (
+	staticBatching      bool // --batch: keep the first backup of every file across applies
+	staticSpellingIndex map[string][]string
+	staticHeaderCache   *string
+	staticImageCache    = map[string][]byte{}
+)
+
+func (p project) staticImage(m *moduleSpec) ([]byte, error) {
+	if image, ok := staticImageCache[m.ID]; ok {
+		return image, nil
+	}
+	image, err := p.readModuleImage(m)
+	if err == nil {
+		staticImageCache[m.ID] = image
+	}
+	return image, err
+}
+
 func staticFilesSpelling(root, name string) ([]string, error) {
+	if staticSpellingIndex != nil {
+		return staticSpellingIndex[name], nil
+	}
 	pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(name) + `\b`)
 	var found []string
 	for _, directory := range []string{"src", "include"} {
@@ -618,6 +784,9 @@ func staticFilesSpelling(root, name string) ([]string, error) {
 }
 
 func staticHeaderText(root string) (string, error) {
+	if staticHeaderCache != nil {
+		return *staticHeaderCache, nil
+	}
 	var builder strings.Builder
 	for _, directory := range []string{"include/fft", "include/psx"} {
 		entries, err := os.ReadDir(filepath.Join(root, directory))
@@ -635,7 +804,9 @@ func staticHeaderText(root string) (string, error) {
 			}
 		}
 	}
-	return builder.String(), nil
+	text := builder.String()
+	staticHeaderCache = &text
+	return text, nil
 }
 
 func staticExternPattern(name string) *regexp.Regexp {
@@ -898,4 +1069,206 @@ func staticHex(bytes []byte) string {
 		parts = append(parts, fmt.Sprintf("%02x", value))
 	}
 	return strings.Join(parts, " ")
+}
+
+// staticSurvey runs every check on every file-scope extern in a game .c file
+// and writes build/static-survey.yaml. It changes no source or target file.
+// A name that becomes possible only after a neighbor is converted (its block
+// then reaches it) is counted in a later round.
+func (p project) staticSurvey(apply bool) error {
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		return err
+	}
+	if apply {
+		if err := os.RemoveAll(filepath.Join(p.root, "build", "static-backup")); err != nil {
+			return err
+		}
+		staticBatching = true
+		defer func() { staticBatching = false }()
+	}
+	index := make(map[string][]string)
+	externs := make(map[string]bool)
+	identifier := regexp.MustCompile(`[A-Za-z_][A-Za-z0-9_]*`)
+	declaration := regexp.MustCompile(`(?m)^extern\s+[^;=()\n]*?\b([A-Za-z_][A-Za-z0-9_]*)\s*(?:\[[^\]\n]*\]\s*)*;`)
+	for _, directory := range []string{"src", "include"} {
+		err := filepath.WalkDir(filepath.Join(p.root, directory), func(path string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil || entry.IsDir() || !sourceExtensions[filepath.Ext(path)] {
+				return walkErr
+			}
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			relative, err := filepath.Rel(p.root, path)
+			if err != nil {
+				return err
+			}
+			relative = filepath.ToSlash(relative)
+			seen := make(map[string]bool)
+			for _, token := range identifier.FindAllString(string(data), -1) {
+				if !seen[token] {
+					seen[token] = true
+					index[token] = append(index[token], relative)
+				}
+			}
+			if strings.HasSuffix(path, ".c") && !strings.HasPrefix(relative, "src/platform/") {
+				for _, match := range declaration.FindAllStringSubmatch(string(data), -1) {
+					externs[match[1]] = true
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+	}
+	for name := range index {
+		sort.Strings(index[name])
+	}
+	staticSpellingIndex = index
+	defer func() { staticSpellingIndex = nil }()
+
+	var names []string
+	for name := range externs {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	type outcome struct {
+		name, category, reason, source, kind string
+		round                                int
+	}
+	results := make(map[string]*outcome)
+	pending := names
+	for round := 1; len(pending) != 0; round++ {
+		var next []string
+		converted := 0
+		for _, name := range pending {
+			analysis, err := p.staticAnalyze(config, name, 0)
+			if err != nil {
+				results[name] = &outcome{name: name, category: "error", reason: err.Error()}
+				continue
+			}
+			if len(analysis.report.reasons) == 0 {
+				result := &outcome{name: name, category: "can be static", source: analysis.declaration.path, kind: analysis.plans[0].kind, round: round}
+				results[name] = result
+				converted++
+				if apply {
+					declaration := analysis.declaration
+					newLine := fmt.Sprintf("static %s %s%s%s;%s", declaration.typeText, name, strings.TrimRight(declaration.dimensions, " "),
+						analysis.plans[0].init, declaration.trailing)
+					// staticApply records the row in the unit, so later rounds see it.
+					if err := p.staticApply(config, declaration, newLine, analysis.plans, analysis.size); err != nil {
+						return fmt.Errorf("%s: %w", name, err)
+					}
+					continue
+				}
+				// Later rounds see the unit's block grown by this row.
+				for _, plan := range analysis.plans {
+					row := rodataSpec{Addr: plan.addr, Size: analysis.size, Hash: plan.hash}
+					if plan.kind == "data" {
+						plan.unit.Data = append(plan.unit.Data, row)
+					} else {
+						plan.unit.Bss = append(plan.unit.Bss, row)
+					}
+				}
+				continue
+			}
+			reason := analysis.report.reasons[0]
+			results[name] = &outcome{name: name, category: staticCategory(reason), reason: reason}
+			if strings.Contains(reason, "not next to") {
+				next = append(next, name)
+			}
+		}
+		if converted == 0 {
+			break
+		}
+		pending = next
+	}
+
+	counts := make(map[string]int)
+	rounds := make(map[int]int)
+	for _, result := range results {
+		counts[result.category]++
+		if result.category == "can be static" {
+			rounds[result.round]++
+		}
+	}
+	var categories []string
+	for category := range counts {
+		categories = append(categories, category)
+	}
+	sort.Slice(categories, func(i, j int) bool {
+		if counts[categories[i]] != counts[categories[j]] {
+			return counts[categories[i]] > counts[categories[j]]
+		}
+		return categories[i] < categories[j]
+	})
+	var out strings.Builder
+	fmt.Fprintf(&out, "# tools static --survey: every file-scope extern in a game .c file, checked against the current tree.\n")
+	fmt.Fprintf(&out, "# Nothing was changed. Round 2+ names become possible once round 1 names are converted.\nexterns: %d\nsummary:\n", len(names))
+	for _, category := range categories {
+		fmt.Fprintf(&out, "  %q: %d\n", category, counts[category])
+	}
+	fmt.Println(fmt.Sprintf("static: surveyed %d file-scope externs in game sources", len(names)))
+	for _, category := range categories {
+		fmt.Printf("  %5d  %s\n", counts[category], category)
+	}
+	var roundList []int
+	for round := range rounds {
+		roundList = append(roundList, round)
+	}
+	sort.Ints(roundList)
+	for _, round := range roundList {
+		fmt.Printf("         round %d: %d can be static\n", round, rounds[round])
+	}
+	for _, category := range categories {
+		fmt.Fprintf(&out, "%s:\n", strings.ReplaceAll(category, " ", "_"))
+		for _, name := range names {
+			result := results[name]
+			if result.category != category {
+				continue
+			}
+			if category == "can be static" {
+				fmt.Fprintf(&out, "  - {name: %s, source: %s, row: %s, round: %d}\n", name, result.source, result.kind, result.round)
+			} else {
+				fmt.Fprintf(&out, "  - {name: %s, why: %q}\n", name, result.reason)
+			}
+		}
+	}
+	path := filepath.Join(p.root, "build", "static-survey.yaml")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(path, []byte(out.String()), 0o644); err != nil {
+		return err
+	}
+	fmt.Println("static: details in build/static-survey.yaml")
+	return nil
+}
+
+func staticCategory(reason string) string {
+	switch {
+	case strings.Contains(reason, "files use it"), strings.Contains(reason, "declared in a header"), strings.Contains(reason, "several .c files"):
+		return "used by more than one file"
+	case strings.Contains(reason, "second name"):
+		return "alias of bytes another variable owns"
+	case strings.Contains(reason, "outside"):
+		return "lives in another program's memory"
+	case strings.Contains(reason, "not next to"):
+		return "zero, but no unit block reaches it"
+	case strings.Contains(reason, "unknown byte"):
+		return "unknown bytes between it and the unit's data"
+	case strings.Contains(reason, "not zero"):
+		return "nonzero, and not after the unit's data"
+	case strings.Contains(reason, "not one unit"), strings.Contains(reason, "not a unit"), strings.Contains(reason, "no program compiles"):
+		return "file is not compiled as one unit"
+	case strings.Contains(reason, "size is unknown"):
+		return "size unknown"
+	case strings.Contains(reason, "no address label"):
+		return "no address label"
+	case strings.Contains(reason, "initializer"), strings.Contains(reason, "initial values"):
+		return "needs a hand-written initializer"
+	}
+	return "other"
 }

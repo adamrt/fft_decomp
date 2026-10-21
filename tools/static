@@ -6,6 +6,7 @@
 #   tools/static -n g_name           report only
 #   tools/static --size 12 g_name    give the size when it cannot be worked out
 #   tools/static --no-note g_name    do not add a `Not static:` comment
+#   tools/static --all               convert everything `make static ARGS=--survey` finds
 #
 # The checks and edits are `tools static` (tools/static_global.go). This
 # wrapper runs it in the build container, then make fmt, make check for each
@@ -14,6 +15,20 @@
 # comment goes above its extern so nobody has to research it again.
 set -eu
 cd "$(dirname "$0")/.."
+
+# tools/static --all: convert every name the survey finds, then check once.
+if [ "${1:-}" = "--all" ]; then
+    make -s static ARGS="--batch" | grep -E '^static(-applied)?: ' | grep -v '^static: [a-z_0-9]*$' || true
+    make -s fmt
+    if make -s check && make -s check-config; then
+        rm -rf build/static-backup
+        echo "tools/static: done; every name the survey found is static"
+        exit 0
+    fi
+    echo "tools/static: a check failed; the converted files are left in place and their originals are in build/static-backup" >&2
+    echo "tools/static: put everything back with: make -s static ARGS=\"--restore all\"" >&2
+    exit 1
+fi
 
 args=
 for arg in "$@"; do
