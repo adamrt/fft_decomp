@@ -72,8 +72,8 @@ type staticPlan struct {
 	// anchor is the variable the new row sits next to; the definition goes
 	// right after it (after) or right before it, because a unit's rows follow
 	// the order of its definitions. Empty for a unit's first bss row.
-	anchor string
-	after  bool
+	anchors []string // nearest first
+	after   bool
 }
 
 func (p project) staticCommand(args []string) error {
@@ -262,6 +262,11 @@ func (p project) staticPrograms(config *projectConfig, report *staticReport, nam
 			continue
 		}
 		compiled = true
+		if profile, ok := compilerProfileNamed(staticUnitProfile(m, unit)); ok && profile.smallDataLimit != 0 {
+			report.no(fmt.Sprintf("unit %s uses gp-relative small data, where a new static changes the code", unit.Name),
+				"%s: unit %s compiles with small data (%s)", m.ID, unit.Name, profile.name)
+			continue
+		}
 		report.info("%s (unit %s):", m.ID, unit.Name)
 		addr, ok := staticLabel(m, name)
 		if !ok {
@@ -300,20 +305,25 @@ func (p project) staticPrograms(config *projectConfig, report *staticReport, nam
 				continue
 			}
 			report.ok("  continues the unit's data block (ends 0x%08x): data row, initializer `%s`", dataEnd, strings.TrimPrefix(init, " = "))
-			plans = append(plans, staticPlan{m, unit, addr, "data", init, shortHash(bytes), staticLastLabel(m, unit.Data, name), true})
-		case zero && (!haveBss || addr == staticAlignUp(bssEnd, staticAlignment(element, size)) || addr+uint32(size) == bssStart):
+			plans = append(plans, staticPlan{m, unit, addr, "data", init, shortHash(bytes), staticLabelsInRows(m, unit.Data, name, true), true})
+		// bss rows must touch exactly (the config check allows no padding), and
+		// this compiler starts every bss variable on a 4-byte boundary.
+		case zero && addr%4 == 0 && (!haveBss || addr == bssEnd || addr+uint32(size) == bssStart):
 			if haveBss {
 				report.ok("  zero, and continues the unit's bss block: bss row")
 			} else {
 				report.ok("  zero, and the unit has no bss yet: bss row")
 			}
 			plan := staticPlan{module: m, unit: unit, addr: addr, kind: "bss", hash: shortHash(bytes)}
-			if haveBss && addr != bssStart && addr+uint32(size) != bssStart {
-				plan.anchor, plan.after = staticLastLabel(m, unit.Bss, name), true
+			if haveBss && addr+uint32(size) != bssStart {
+				plan.anchors, plan.after = staticLabelsInRows(m, unit.Bss, name, true), true
 			} else if haveBss {
-				plan.anchor = staticLabelAt(m, bssStart, name)
+				plan.anchors = staticLabelsInRows(m, unit.Bss, name, false)
 			}
 			plans = append(plans, plan)
+		case zero && addr%4 != 0:
+			report.no(fmt.Sprintf("it is at 0x%08x in %s, not 4-aligned, and this compiler 4-aligns every bss variable", addr, m.ID),
+				"  zero, but 0x%08x is not 4-aligned, so it cannot be a bss row", addr)
 		case !zero && haveData && addr > dataEnd && addr-dataEnd < 8:
 			report.no(fmt.Sprintf("%d unknown byte(s) sit between unit %s's data and it in %s", addr-dataEnd, unit.Name, m.ID),
 				"  not zero, and %d byte(s) after the data block (ends 0x%08x) that its alignment does not explain", addr-dataEnd, dataEnd)
@@ -475,6 +485,20 @@ func staticModuleCompilesAny(m *moduleSpec, files []string) bool {
 	return false
 }
 
+// staticUnitProfile is the profile a unit compiles with: its own, or its
+// members' (the first member's when they agree, as the build requires).
+func staticUnitProfile(m *moduleSpec, unit *unitDef) string {
+	if unit.Profile != "" {
+		return unit.Profile
+	}
+	for index := range m.Functions {
+		if m.Functions[index].Unit == unit.Name {
+			return m.profileOf(&m.Functions[index])
+		}
+	}
+	return m.Profile
+}
+
 // staticAlignment is the alignment GCC gives a variable: its element size
 // for numbers and pointers, and for a record the largest power of two up to
 // 4 that divides its size.
@@ -496,29 +520,32 @@ func staticAlignUp(addr uint32, alignment int) uint32 {
 	return (addr + mask) &^ mask
 }
 
-// staticLastLabel is the label with the highest address inside rows.
-func staticLastLabel(m *moduleSpec, rows []rodataSpec, except string) string {
-	best, bestAddr := "", uint32(0)
+// staticLabelsInRows lists the labels inside rows, highest address first
+// (descending) or lowest first.
+func staticLabelsInRows(m *moduleSpec, rows []rodataSpec, except string, descending bool) []string {
+	var found []symbolSpec
 	for _, symbol := range m.Data {
 		if symbol.Name == except {
 			continue
 		}
 		for _, row := range rows {
-			if symbol.Addr >= row.Addr && symbol.Addr < row.Addr+uint32(row.Size) && (best == "" || symbol.Addr > bestAddr) {
-				best, bestAddr = symbol.Name, symbol.Addr
+			if symbol.Addr >= row.Addr && symbol.Addr < row.Addr+uint32(row.Size) {
+				found = append(found, symbol)
+				break
 			}
 		}
 	}
-	return best
-}
-
-func staticLabelAt(m *moduleSpec, addr uint32, except string) string {
-	for _, symbol := range m.Data {
-		if symbol.Addr == addr && symbol.Name != except {
-			return symbol.Name
+	sort.Slice(found, func(i, j int) bool {
+		if descending {
+			return found[i].Addr > found[j].Addr
 		}
+		return found[i].Addr < found[j].Addr
+	})
+	var names []string
+	for _, symbol := range found {
+		names = append(names, symbol.Name)
 	}
-	return ""
+	return names
 }
 
 // staticDefinitionEdge finds the file-scope definition of name in text and
@@ -629,11 +656,13 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 			end++
 		}
 		updated := text[:start] + newLine + "\n" + text[end:]
-		if anchor := plans[0].anchor; anchor != "" {
-			// Remove the extern, then define the static beside its neighbor.
-			removed := text[:start] + text[end:]
+		// Remove the extern, then define the static beside the nearest
+		// neighbor this file defines (an alias label has no definition).
+		removed := text[:start] + text[end:]
+		for _, anchor := range plans[0].anchors {
 			if at, ok := staticDefinitionEdge(removed, anchor, plans[0].after); ok {
 				updated = removed[:at] + newLine + "\n" + removed[at:]
+				break
 			}
 		}
 		full := filepath.Join(p.root, declaration.path)
@@ -1257,6 +1286,10 @@ func staticCategory(reason string) string {
 		return "lives in another program's memory"
 	case strings.Contains(reason, "not next to"):
 		return "zero, but no unit block reaches it"
+	case strings.Contains(reason, "not 4-aligned"):
+		return "zero, but not 4-aligned for a bss row"
+	case strings.Contains(reason, "small data"):
+		return "unit uses gp-relative small data"
 	case strings.Contains(reason, "unknown byte"):
 		return "unknown bytes between it and the unit's data"
 	case strings.Contains(reason, "not zero"):
