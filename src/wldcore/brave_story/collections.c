@@ -13,7 +13,6 @@
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
-#include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/window.h"

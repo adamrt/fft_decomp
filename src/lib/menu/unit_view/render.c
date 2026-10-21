@@ -21,7 +21,6 @@
 #include "fft/portrait.h"
 #include "fft/result.h"
 #include "fft/script.h"
-#include "fft/script_instruction.h"
 #include "fft/skillset.h"
 #include "fft/sound.h"
 #include "fft/sprite_sheet.h"

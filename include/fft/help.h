@@ -4,9 +4,7 @@
 /* Help windows: the help text sections, the help cursor's navigation records and grid ids, and the battle and
  * after-battle help menus. */
 
-#include "fft/battle_map.h"
 #include "fft/text.h"
-#include "fft/unit_panel.h"
 #include "psx/types.h"
 
 /* help text */

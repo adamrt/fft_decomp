@@ -10,7 +10,6 @@
 #include "fft/script.h"
 #include "fft/text.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

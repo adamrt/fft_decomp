@@ -1,7 +1,6 @@
 /* The scrolling three-column ability list thread, with nested lists, blinking CLUTs and AT list previews. */
 
 #include "fft/ability_list.h"
-#include "fft/ai.h"
 #include "fft/at_list.h"
 #include "fft/command.h"
 #include "fft/gfx.h"

@@ -10,7 +10,6 @@
 #include "fft/music.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
-#include "fft/system.h"
 #include "fft/text.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"

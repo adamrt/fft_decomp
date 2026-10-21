@@ -1,7 +1,6 @@
 /* Formation changes learned abilities and builds the unit and job sprite sources used by its menus. */
 
 #include "fft/ability.h"
-#include "fft/calendar.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
 #include "fft/formation_item.h"

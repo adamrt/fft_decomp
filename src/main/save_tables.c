@@ -4,7 +4,6 @@
 #include "fft/proposition.h"
 #include "fft/save.h"
 #include "fft/sound_novel.h"
-#include "fft/system.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"
 #include "psx/types.h"

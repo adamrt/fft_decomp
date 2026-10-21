@@ -4,9 +4,7 @@
 /* Ability lists: the scrolling ability list of the battle action menus, and the ability page that the Unit List, the
  * Status screen and Formation show, with its packed entries, list building and row values. */
 
-#include "fft/ability.h"
 #include "fft/menu_list.h"
-#include "fft/menu_script.h"
 #include "psx/types.h"
 
 /* scrolling ability list */

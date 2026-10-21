@@ -1,6 +1,5 @@
 /* Status ability page and its row callbacks. */
 
-#include "fft/ability.h"
 #include "fft/ability_list.h"
 #include "fft/help.h"
 #include "fft/job_list.h"

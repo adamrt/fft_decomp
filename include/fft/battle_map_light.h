@@ -6,7 +6,6 @@
 
 #include "fft/battle_map.h"
 #include "fft/gfx.h"
-#include "fft/render.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

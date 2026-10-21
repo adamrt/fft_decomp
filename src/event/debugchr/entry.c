@@ -3,13 +3,11 @@
 
 #include "fft/ability.h"
 #include "fft/command.h"
-#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"

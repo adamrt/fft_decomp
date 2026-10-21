@@ -11,7 +11,6 @@
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
 #include "fft/weather.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;

@@ -5,7 +5,6 @@
  * knockback, Move-Find items and traps, and the events after a move. */
 
 #include "fft/battle_map.h"
-#include "fft/target.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 

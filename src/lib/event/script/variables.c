@@ -1,6 +1,5 @@
 /* Read and write the event variable bank through its native variable commands. */
 
-#include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
 #include "psx/types.h"

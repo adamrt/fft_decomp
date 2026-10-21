@@ -1,7 +1,6 @@
 /* Remembered command selections, Act and ability lists, and the turn-menu threads. */
 
 #include "fft/ability_list.h"
-#include "fft/ai.h"
 #include "fft/command.h"
 #include "fft/equipment.h"
 #include "fft/item.h"

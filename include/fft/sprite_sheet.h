@@ -4,7 +4,6 @@
 /* BATTLE spritesheets: spritesheet ids, the loaded frame and sequence tables, item
  * graphics, the VRAM slots that hold sheets and EVTCHR images, and the loader that fills them. */
 
-#include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/sprite.h"
 #include "psx/libgpu.h"

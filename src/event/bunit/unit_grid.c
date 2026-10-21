@@ -13,7 +13,6 @@
 #include "fft/menu_selection.h"
 #include "fft/sound.h"
 #include "fft/sprite.h"
-#include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_list.h"

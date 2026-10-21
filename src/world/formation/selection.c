@@ -1,7 +1,6 @@
 /* Cycle the formation roster selection with L1 and R1, skipping egg units. */
 
 #include "fft/formation.h"
-#include "fft/menu_selection.h"
 #include "fft/sound.h"
 #include "fft/unit.h"
 #include "psx/pad.h"

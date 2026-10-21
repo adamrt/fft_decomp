@@ -8,7 +8,6 @@
 #include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
-#include "fft/menu_list.h"
 #include "fft/menu_stack.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"

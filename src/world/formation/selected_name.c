@@ -1,7 +1,6 @@
 /* The selected party unit's name id, combined with its name class. */
 
 #include "fft/formation.h"
-#include "fft/menu.h"
 #include "fft/party.h"
 #include "fft/unit.h"
 #include "psx/types.h"

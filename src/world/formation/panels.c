@@ -2,7 +2,6 @@
  * layout while keeping separate draw-area packets. */
 
 #include "fft/formation.h"
-#include "fft/formation_ability.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"

@@ -8,7 +8,6 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
-#include "fft/save.h"
 #include "fft/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"

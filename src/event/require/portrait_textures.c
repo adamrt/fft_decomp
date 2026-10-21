@@ -3,7 +3,6 @@
 #include "fft/file.h"
 #include "fft/job.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
 #include "fft/party.h"
 #include "fft/portrait.h"
 #include "fft/script.h"

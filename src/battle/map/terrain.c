@@ -5,7 +5,6 @@
 #include "fft/move.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

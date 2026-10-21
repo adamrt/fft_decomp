@@ -13,7 +13,6 @@
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
 #include "fft/suzuki.h"
-#include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/window.h"

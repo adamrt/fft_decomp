@@ -4,7 +4,6 @@
 #include "fft/at_list.h"
 #include "fft/item.h"
 #include "fft/job.h"
-#include "fft/menu.h"
 #include "fft/menu_sort.h"
 #include "fft/skillset.h"
 #include "fft/status.h"

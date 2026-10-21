@@ -4,11 +4,7 @@
 /* The Formation screen's ability menu in WORLD: a unit's ability slots and checks, the Learn Abilities job and ability
  * lists with their view-only copy, and the Set and Remove ability steps. */
 
-#include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_list.h"
 #include "fft/unit_panel.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* ability slots */

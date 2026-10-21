@@ -5,7 +5,6 @@
 
 #include "fft/unit.h"
 #include "fft/unit_party.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* BATTLE's side */

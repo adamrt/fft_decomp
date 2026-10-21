@@ -4,7 +4,6 @@
 /* The Tutorial: the world map's Tutorial menu and lists (WLDCORE), WORLD's tutorial player that drives the screens with
  * scripted button presses, and the event library's tutorial checks. */
 
-#include "fft/menu_selection.h"
 #include "fft/menu_stack.h"
 #include "fft/save.h"
 #include "psx/types.h"

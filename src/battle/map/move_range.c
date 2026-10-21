@@ -1,17 +1,11 @@
 /* Movement range spreading, pathfinding, teleport chances and path encoding. */
 
-#include "fft/ability.h"
-#include "fft/action.h"
 #include "fft/ai_decision.h"
 #include "fft/battle_map.h"
-#include "fft/command.h"
-#include "fft/item.h"
 #include "fft/job.h"
 #include "fft/memory.h"
 #include "fft/move.h"
-#include "fft/projectile.h"
 #include "fft/random.h"
-#include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/target.h"
 #include "fft/unit.h"

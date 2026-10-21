@@ -2,7 +2,6 @@
 
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"
-#include "fft/battle_map_load.h"
 #include "fft/battle_map_mesh.h"
 #include "fft/battle_map_palette.h"
 #include "fft/battle_state.h"

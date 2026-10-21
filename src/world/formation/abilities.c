@@ -8,7 +8,6 @@
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
-#include "fft/item.h"
 #include "fft/item_menu.h"
 #include "fft/job.h"
 #include "fft/job_list.h"

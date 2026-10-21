@@ -1,8 +1,6 @@
 /* The scrolling three-column ability list thread. */
 
 #include "fft/ability_list.h"
-#include "fft/ai.h"
-#include "fft/formation_ability.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
@@ -14,7 +12,6 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/text.h"

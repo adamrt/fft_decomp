@@ -2,7 +2,6 @@
  * access, movement tasks and staged status changes coordinate with the program's
  * event interpreter; this unit does not run the main opcode loop. */
 
-#include "fft/ai.h"
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_light.h"

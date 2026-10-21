@@ -24,7 +24,6 @@
 #include "fft/unit_panel.h"
 #include "fft/unit_party.h"
 #include "fft/unit_runtime.h"
-#include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

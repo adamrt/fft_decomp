@@ -3,7 +3,6 @@
 
 /* The job page that the Unit List, the Status screen and Formation show: building the list and its row values. */
 
-#include "fft/menu_script.h"
 #include "psx/types.h"
 
 /* job list */

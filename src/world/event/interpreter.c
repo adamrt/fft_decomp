@@ -22,7 +22,6 @@
 #include "fft/option.h"
 #include "fft/overlay.h"
 #include "fft/party.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
@@ -40,7 +39,6 @@
 #include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
-#include "fft/world_map.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

@@ -9,13 +9,9 @@
 #include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_script.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_party.h"
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* unit records */

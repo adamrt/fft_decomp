@@ -7,7 +7,6 @@
 #include "fft/save.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
-#include "fft/system.h"
 
 /* Resident event variables survive overlay loads and are preserved in save images. */
 s32 g_script_variable_storage[0x100];

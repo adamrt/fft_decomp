@@ -5,7 +5,6 @@
 #include "fft/ability.h"
 #include "fft/ability_list.h"
 #include "fft/action.h"
-#include "fft/ai.h"
 #include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"

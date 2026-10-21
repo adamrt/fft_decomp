@@ -4,7 +4,6 @@
 /* Action result displays: the numbers and words that pop up over a unit, their selectors, images and digit zoom
  * curves, the projected-action display's images, and queuing and building each display. */
 
-#include "fft/gfx.h"
 #include "fft/sprite.h"
 #include "fft/status.h"
 #include "fft/unit.h"

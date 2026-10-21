@@ -12,7 +12,6 @@
 #include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/suzuki.h"
-#include "fft/system.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
 #include "fft/world_map.h"

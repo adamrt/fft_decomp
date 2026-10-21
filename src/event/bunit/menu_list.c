@@ -1,6 +1,5 @@
 /* Menu list rendering, formatted numbers and animated selection cursors. */
 
-#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"

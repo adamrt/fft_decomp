@@ -8,8 +8,6 @@
 #include "fft/effect_timeline.h"
 #include "fft/memory.h"
 #include "fft/system.h"
-#include "fft/unit_runtime.h"
-#include "psx/gte_inline.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

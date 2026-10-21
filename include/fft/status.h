@@ -4,7 +4,6 @@
 /* Status effects: the status IDs and sets, the status data and check sets, changing a unit's statuses and the per-turn
  * upkeep, and the display flags and bubbles a status shows. */
 
-#include "fft/gfx.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

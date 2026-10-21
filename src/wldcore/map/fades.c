@@ -4,7 +4,6 @@
 #include "fft/gfx.h"
 #include "fft/music.h"
 #include "fft/screen.h"
-#include "fft/system.h"
 #include "fft/world_map.h"
 #include "psx/libgs.h"
 #include "psx/types.h"

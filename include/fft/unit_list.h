@@ -4,13 +4,9 @@
 /* The Unit List screen, EVENT/BUNIT.OUT (a BATTLE overlay): its unit records and sorting, the unit grid, the reorder
  * list, the job page, the status banner, help, cursors, graphics, input and text. */
 
-#include "fft/gfx.h"
-#include "fft/help.h"
 #include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_script.h"
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

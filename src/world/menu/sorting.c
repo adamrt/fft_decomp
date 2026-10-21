@@ -9,7 +9,6 @@
 #include "fft/unit_panel.h"
 #include "fft/unit_party.h"
 #include "psx/libc.h"
-#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* Signed-halfword indices selected by formation_sort_key_e. Unselectable keys

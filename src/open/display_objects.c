@@ -6,7 +6,6 @@
 #include "fft/gfx.h"
 #include "fft/system.h"
 #include "psx/libgpu.h"
-#include "psx/libgs.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

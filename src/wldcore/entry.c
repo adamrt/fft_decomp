@@ -16,7 +16,6 @@
 #include "fft/music.h"
 #include "fft/party.h"
 #include "fft/script_variable.h"
-#include "fft/sound.h"
 #include "fft/sound_novel.h"
 #include "fft/system.h"
 #include "fft/text.h"

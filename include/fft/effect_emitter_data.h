@@ -4,7 +4,6 @@
 /* Emitter records of the effect particle-system section and each native renderer's view of them. */
 
 #include "fft/gfx.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* placement */

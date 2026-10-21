@@ -2,7 +2,6 @@
  * ordering table, switches draw/display environments and resets the primitive
  * pools for the next frame. Setup binds both buffers to their packet storage. */
 
-#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
 #include "fft/screen.h"

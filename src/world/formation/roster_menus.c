@@ -2,11 +2,9 @@
 
 #include "fft/formation.h"
 #include "fft/help.h"
-#include "fft/item.h"
 #include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_list.h"
-#include "fft/menu_script.h"
 #include "fft/message_box.h"
 #include "fft/screen.h"
 #include "fft/script_variable.h"

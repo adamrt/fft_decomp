@@ -23,12 +23,10 @@
 #include "fft/system.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
-#include "fft/unit_entd.h"
 #include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "fft/weather.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

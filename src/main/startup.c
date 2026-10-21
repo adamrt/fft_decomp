@@ -4,7 +4,6 @@
 
 #include "fft/file.h"
 #include "fft/gfx.h"
-#include "fft/item.h"
 #include "fft/memcard.h"
 #include "fft/memory.h"
 #include "fft/menu_sort.h"

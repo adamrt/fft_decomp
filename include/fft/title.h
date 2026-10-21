@@ -4,7 +4,6 @@
 /* OPEN's title screen: its main loop, the title menu and the controllers it pushes (sound type, card warning, new game,
  * birthday, music test). */
 
-#include "fft/menu.h"
 #include "psx/types.h"
 
 struct suzuki_music;

@@ -4,9 +4,7 @@
 /* Equip: EQUIP's battle Equip screen, and the equipment previews, item list rows and item icons it shares with
  * Formation's item menu. */
 
-#include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/menu_script.h"
 #include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

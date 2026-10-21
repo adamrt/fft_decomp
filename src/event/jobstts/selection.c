@@ -1,10 +1,6 @@
 /* Remember and wrap JOBSTTS's horizontal menu selection. */
 
-#include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
 #include "fft/status_screen.h"
-#include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

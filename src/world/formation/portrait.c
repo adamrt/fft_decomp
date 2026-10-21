@@ -2,9 +2,7 @@
 
 #include "fft/portrait.h"
 #include "fft/job.h"
-#include "fft/menu.h"
 #include "fft/party.h"
-#include "fft/screen.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
 #include "psx/libgpu.h"

@@ -3,7 +3,6 @@
 
 #include "fft/file.h"
 #include "fft/music.h"
-#include "fft/system.h"
 #include "fft/world_map.h"
 #include "psx/libetc.h"
 #include "psx/types.h"

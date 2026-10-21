@@ -4,9 +4,7 @@
 /* The Formation screen's item menu in WORLD: equipping, best fit and removing items, the item action and sort menus,
  * the category tabs and icon strips, and the item list. */
 
-#include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/screen.h"
 #include "psx/types.h"
 
 /* item menu */

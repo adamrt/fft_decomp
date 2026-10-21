@@ -6,7 +6,6 @@
 #include "fft/effect_math.h"
 #include "fft/effect_timeline.h"
 #include "fft/unit_runtime.h"
-#include "psx/gte_inline.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

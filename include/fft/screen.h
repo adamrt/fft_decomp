@@ -8,10 +8,8 @@
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
-#include "fft/menu_list.h"
 #include "fft/menu_script.h"
 #include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 struct menu_gfx_context;

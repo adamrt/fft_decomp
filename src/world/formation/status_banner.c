@@ -9,7 +9,6 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/portrait.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/status_screen.h"
 #include "fft/text.h"

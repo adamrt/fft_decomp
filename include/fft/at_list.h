@@ -3,7 +3,6 @@
 
 /* The AT List: BATTLE builds and previews it, and OPTION's and WORLD's AT List window shows it. */
 
-#include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/unit.h"
 #include "psx/types.h"

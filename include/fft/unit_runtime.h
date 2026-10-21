@@ -7,7 +7,6 @@
 #include "fft/action.h"
 #include "fft/animation.h"
 #include "fft/battle_map.h"
-#include "fft/gfx.h"
 #include "fft/move.h"
 #include "fft/result.h"
 #include "fft/sprite.h"

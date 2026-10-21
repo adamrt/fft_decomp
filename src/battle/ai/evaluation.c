@@ -16,7 +16,6 @@
 #include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
-#include "psx/stddef.h"
 #include "psx/types.h"
 
 typedef enum tile_mask_mode {

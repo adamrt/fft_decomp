@@ -1,7 +1,6 @@
 /* The change banner and stat preview panel thread toggles. */
 
 #include "fft/formation.h"
-#include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/screen.h"
 #include "fft/thread.h"

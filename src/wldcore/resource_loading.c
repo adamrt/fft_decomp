@@ -3,16 +3,13 @@
  * Frame-buffer rectangles support the screens that display those resources. */
 
 #include "fft/file.h"
-#include "fft/gfx.h"
 #include "fft/location.h"
 #include "fft/message.h"
-#include "fft/screen.h"
 #include "fft/sound_novel.h"
 #include "fft/system.h"
 #include "fft/text.h"
 #include "fft/world_map.h"
 #include "psx/libcd.h"
-#include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

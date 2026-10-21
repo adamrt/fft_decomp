@@ -3,7 +3,6 @@
 #include "fft/sprite_sheet.h"
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
-#include "psx/gte_inline.h"
 #include "psx/types.h"
 
 /* The runtime record of the casting unit (g_unit_casting_runtime_id), or 0. It is the source

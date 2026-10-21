@@ -4,7 +4,6 @@
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/job.h"
-#include "fft/menu.h"
 #include "fft/menu_list.h"
 #include "fft/party.h"
 #include "fft/portrait.h"

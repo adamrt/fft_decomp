@@ -5,7 +5,6 @@
 #include "fft/menu_stack_records.h"
 #include "fft/music.h"
 #include "fft/sound.h"
-#include "fft/system.h"
 #include "fft/world_map.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"

@@ -7,7 +7,6 @@
 #include "fft/calendar.h"
 #include "fft/gfx.h"
 #include "fft/item.h"
-#include "fft/menu.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
@@ -15,7 +14,6 @@
 #include "fft/sound_novel.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
-#include "psx/kernel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

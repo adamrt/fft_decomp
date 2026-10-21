@@ -4,10 +4,6 @@
 /* Battle map weather: the weather values and commands, rain and snow particles, lightning, E458's timed particle
  * transform and the weather sounds. */
 
-#include "fft/battle_map.h"
-#include "fft/gfx.h"
-#include "psx/libgpu.h"
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 /* weather */

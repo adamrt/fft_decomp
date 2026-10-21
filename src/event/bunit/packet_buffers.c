@@ -1,6 +1,5 @@
 /* Frame submission and packet buffer swaps and init. */
 
-#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"

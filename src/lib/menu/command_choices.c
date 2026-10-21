@@ -1,7 +1,6 @@
 /* Icon primitives, the auto battle setting, icon selection and ability preview AT lists. */
 
 #include "fft/ability_list.h"
-#include "fft/ai.h"
 #include "fft/at_list.h"
 #include "fft/command.h"
 #include "fft/gfx.h"
@@ -11,9 +10,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/script.h"
-#include "fft/sound.h"
 #include "fft/target.h"
 #include "fft/text.h"
 #include "fft/thread.h"

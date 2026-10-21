@@ -7,8 +7,6 @@
 
 #include "fft/menu.h"
 #include "fft/turn_command.h"
-#include "fft/unit.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* battle menu ids */

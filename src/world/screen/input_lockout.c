@@ -1,6 +1,5 @@
 /* Input lockout while the Formation status panels move or compare units. */
 
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/screen.h"
 #include "fft/thread.h"

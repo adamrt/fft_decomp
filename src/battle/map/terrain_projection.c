@@ -10,7 +10,6 @@
 #include "fft/unit.h"
 #include "fft/unit_runtime.h"
 #include "fft/vector.h"
-#include "psx/gte_inline.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

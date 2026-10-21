@@ -20,7 +20,6 @@
 #include "fft/unit_runtime.h"
 #include "fft/weather.h"
 #include "psx/libc.h"
-#include "psx/stddef.h"
 #include "psx/types.h"
 
 /* Provisional: written only by the uncalled action_store_acting_unit_value; never read. */

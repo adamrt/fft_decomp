@@ -4,8 +4,6 @@
 /* BATTLE effect playback: file loading, playback stages, the script record pool and the script interpreter. */
 
 #include "fft/effect.h"
-#include "fft/effect_file.h"
-#include "fft/file.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

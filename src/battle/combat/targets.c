@@ -6,13 +6,11 @@
 #include "fft/command.h"
 #include "fft/item.h"
 #include "fft/job.h"
-#include "fft/memory.h"
 #include "fft/projectile.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/target.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 

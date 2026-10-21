@@ -4,7 +4,6 @@
 #include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/location.h"
-#include "fft/system.h"
 #include "fft/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

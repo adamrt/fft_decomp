@@ -4,7 +4,6 @@
 /* The crystal or treasure chest a fallen unit leaves: what picking it up yields, the panel that offers the choice, and
  * applying the choice. */
 
-#include "fft/menu.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
