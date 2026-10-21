@@ -18,25 +18,25 @@ units:
   - {name: calendar, source: src/wldcore/calendar.c}
   - {name: calendar_advance_days, source: src/wldcore/calendar_advance_days.c, data: [{addr: 0x80096a48, size: 4, hash: b687ec89faf1bf8a}]}
   - {name: calendar_day_index, source: src/lib/calendar.c}
-  - {name: event_transition, source: src/wldcore/map/event_transition.c, data: [{addr: 0x8009f288, size: 36, hash: 6db65fd59fd356f6}]}
+  - {name: event_transition, source: src/wldcore/map/event_transition.c, data: [{addr: 0x8009f288, size: 36, hash: 6db65fd59fd356f6}], bss: [{addr: 0x800d0adc, size: 4, hash: df3f619804a92fdb}]}
   - {name: file_wait, source: src/lib/file/pending.c}
   - {name: hud, source: src/wldcore/map/hud.c}
   - {name: input, source: src/wldcore/map/input.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
-  - {name: location_script, source: src/wldcore/map/location_script.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}]}
+  - {name: location_script, source: src/wldcore/map/location_script.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}], bss: [{addr: 0x800d4644, size: 4, hash: df3f619804a92fdb}]}
   - {name: map_buffers, source: src/wldcore/map/buffers.c}
   - {name: map_fades, source: src/wldcore/map/fades.c}
-  - {name: map_routes, source: src/wldcore/map/routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}, {addr: 0x80095000, size: 8, hash: 5c609baa7c039742}]}
-  - {name: map_tiles, source: src/wldcore/map/tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}
+  - {name: map_routes, source: src/wldcore/map/routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}, {addr: 0x80095000, size: 8, hash: 5c609baa7c039742}], bss: [{addr: 0x800d483c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: map_tiles, source: src/wldcore/map/tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}], bss: [{addr: 0x800d3c88, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}], bss: [{addr: 0x800d4584, size: 32, hash: 66687aadf862bd77}]}
   - {name: music_queue, source: src/wldcore/music_queue.c, data: [{addr: 0x800d45a4, size: 160, hash: b393978842a0fa3d}]}
   - {name: proposition_data, source: src/wldcore/proposition/data.c}
-  - {name: proposition_dispatch, source: src/wldcore/proposition/dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
+  - {name: proposition_dispatch, source: src/wldcore/proposition/dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
   - {name: proposition_report, source: src/wldcore/proposition/report.c}
   - {name: proposition_results, source: src/wldcore/proposition/results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
   - {name: resource_loading, source: src/wldcore/resource_loading.c, data: [{addr: 0x8009e0ec, size: 1408, hash: 697848efa3c9d262}]}
   - {name: screen_transition, source: src/wldcore/screen_transition.c}
-  - {name: sound_novel, source: src/wldcore/sound_novel/script.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}]}
-  - {name: sound_novel_menus, source: src/wldcore/sound_novel/menus.c}
+  - {name: sound_novel, source: src/wldcore/sound_novel/script.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}], bss: [{addr: 0x800d099c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: sound_novel_menus, source: src/wldcore/sound_novel/menus.c, bss: [{addr: 0x800d4900, size: 8, hash: af5570f5a1810b7a}]}
   - {name: sound_novel_progress, source: src/wldcore/sound_novel/progress.c}
   - {name: startup, source: src/wldcore/entry.c}
   - {name: tutorial_menus, source: src/wldcore/tutorial_menus.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}

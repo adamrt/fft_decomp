@@ -76,11 +76,12 @@ typedef enum placement_entry {
     DEPLOY_ENTRY_COUNT = 5
 } placement_entry_e;
 
-extern s32 g_deploy_menu_state; /* placement_state_e */
 extern image_layout_t g_deploy_button_hint_cells[4];
-extern s32 g_deploy_active_cursor;
-extern s32 g_deploy_cursor_row[2];
-extern s32 g_deploy_cursor_column[2];
+static s32 g_deploy_arrow_position_mode;
+static s32 g_deploy_menu_state; /* placement_state_e */
+static s32 g_deploy_active_cursor;
+static s32 g_deploy_grid_slide_x;
+static s32 g_deploy_grid_slide_y;
 extern POLY_FT4* g_deploy_cursor_0_poly;
 extern s32 g_deploy_cursor_0_submitted;
 extern POLY_FT4* g_deploy_cursor_1_poly;
@@ -126,11 +127,8 @@ typedef struct placement_buffer {
 typedef char placement_buffer_size_must_be_2604[(sizeof(placement_buffer_t) == 2604) ? 1 : -1];
 
 extern placement_buffer_t g_deploy_render_buffers[2];
-extern s32 g_deploy_arrow_position_mode;
 extern u32 g_deploy_arrow_clut_data[];
 extern RECT g_deploy_arrow_clut_rect;
-extern s32 g_deploy_grid_slide_x;
-extern s32 g_deploy_grid_slide_y;
 extern rgba5551_t g_deploy_tile_clut_buffer[48];
 extern const palette_t g_deploy_tile_clut_data[3];
 extern RECT g_deploy_tile_clut_rect;
@@ -190,6 +188,8 @@ static menu_entry_t g_deploy_menu_entries[DEPLOY_ENTRY_COUNT] = {
 static unit_panel_thread_t g_deploy_status_display_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_numbers_thread_params = { 0 };
 static unit_panel_thread_t g_deploy_character_status_frame_config = { 0 };
+static s32 g_deploy_cursor_column[2] = { 2, 2 };
+static s32 g_deploy_cursor_row[2] = { 2, 2 };
 
 /* Deployment messages, which ATTACK binds at text id 0x9000, that the notice entry (menu entry 2)
  * shows. */

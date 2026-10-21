@@ -23,7 +23,7 @@ extern oriented_quad_t g_equipment_secondary_slot_marker;
 extern u8 g_equipment_slot_marker_x[];
 extern u8 g_equipment_item_list_has_multiple_entries;
 extern s8 g_equipment_item_action_menu_active;
-extern menu_entry_t* g_equipment_item_action_active_menu;
+static menu_entry_t* g_equipment_item_action_active_menu;
 extern menu_entry_t g_equipment_item_action_menu_single_item;
 extern s16 g_equipment_text_redraw_flag;
 extern s16 g_equipment_item_type_order[];

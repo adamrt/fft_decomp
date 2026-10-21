@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* Set by the retail range tests in mul_div_s64 and fixed_cross_product_q12. */
-extern s32 g_camera_arithmetic_overflow;
+static s32 g_camera_arithmetic_overflow;
 
 /* CameraFusion key: cumulative Camera duration and component value. */
 typedef struct track_key {

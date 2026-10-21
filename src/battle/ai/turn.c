@@ -32,7 +32,7 @@ typedef enum destination_order {
 
 typedef enum rank_order { AI_RANK_BELOW = 0, AI_RANK_EQUAL = 1, AI_RANK_ABOVE = 2 } rank_order_e;
 
-extern turn_command_t g_ai_command_history[2];
+static turn_command_t g_ai_command_history[2];
 
 static s32 scenarios_build(void);
 

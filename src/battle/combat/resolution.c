@@ -460,7 +460,7 @@ void action_store_used_weapon(action_command_t* action) {
 /* g_action_work bound a second time. Spelling every field through one
  * symbol lets GCC share a base register between the two access groups below,
  * which changes this function's code. */
-extern action_work_t g_action_work_view;
+static action_work_t g_action_work_view;
 
 /* Calculate one target's action result: load the current ability, weapon and
  * item data for the attacker/target pair, run the evasion reactions and the

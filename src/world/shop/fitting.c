@@ -78,7 +78,7 @@ extern s16 g_shop_fitting_remove_previewed_unit_index;
 /* The best-fit confirmation menu entry, followed directly by its open/closed
  * gate byte, as g_shop_fitting_sell_equipped_menu / _open are paired. */
 extern menu_entry_t g_shop_fitting_best_fit_menu;
-extern s8 g_shop_fitting_best_fit_menu_open;
+static s8 g_shop_fitting_best_fit_menu_open;
 extern u8 g_shop_fitting_item_list_menu_script[213];
 extern u8 g_shop_fitting_cost_menu_script[103];
 

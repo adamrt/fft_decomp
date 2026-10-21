@@ -19,8 +19,8 @@ extern s32 g_effect_camera_rotation_duration;
 extern s32 g_effect_camera_rotation_frame;
 
 /* reset by camera_angle_command_execute */
-extern s32 g_effect_camera_position_duration;
-extern s32 g_effect_camera_position_frame;
+static s32 g_effect_camera_position_duration;
+static s32 g_effect_camera_position_frame;
 extern s32 g_effect_camera_zoom_duration;
 extern s32 g_effect_camera_zoom_frame;
 

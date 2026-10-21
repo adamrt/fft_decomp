@@ -55,7 +55,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s32 g_battle_help_active;
+static s32 g_battle_help_active;
 extern s32 g_battle_wait_direction_facing;
 
 extern move_found_item_t g_move_find_display_item;

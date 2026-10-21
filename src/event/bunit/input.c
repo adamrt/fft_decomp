@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 /* controller input */
-extern u16 g_unit_list_input_latched_button;
+static u16 g_unit_list_input_latched_button;
 extern u16 g_unit_list_input_previous;
 
 /* help text */

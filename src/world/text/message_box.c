@@ -22,12 +22,12 @@
 #include "psx/types.h"
 
 /* message glyphs and staging slots */
-extern glyph_blit_t g_message_box_state;
 extern text_glyph_state_t g_message_box_glyph;
-extern RECT g_message_box_vram_rect;
-extern u8 g_message_box_glyph_images[3][8][84];
-extern u8 g_message_box_previous_images[3][84];
-extern u8 g_message_box_column_scratch[14];
+static glyph_blit_t g_message_box_state;
+static RECT g_message_box_vram_rect;
+static u8 g_message_box_glyph_images[3][8][84];
+static u8 g_message_box_previous_images[3][84];
+static u8 g_message_box_column_scratch[14];
 
 static s32 g_message_box_digit_divisors[9] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
 static s32 g_message_box_slot_threads[3] = { 0 };

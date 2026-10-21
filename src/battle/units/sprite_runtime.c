@@ -143,8 +143,8 @@ extern u8 g_animation_targeted_frame_front[];
 
 /* Set before allocation and read acceptance: a failed request can be skipped
  * on the next step because its ID already matches. */
-extern s32 g_sprite_last_requested_shp_id;
-extern s32 g_sprite_last_requested_seq_id;
+static s32 g_sprite_last_requested_seq_id;
+static s32 g_sprite_last_requested_shp_id;
 
 static file_extent_t g_seq_files[9] = { { 57037, 8192 }, { 57045, 8192 }, { 57053, 4096 }, { 57055, 6144 },
     { 57058, 4096 }, { 57060, 4096 }, { 57062, 4096 }, { 57064, 4096 }, { 0, 0 } };

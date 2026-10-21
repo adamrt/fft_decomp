@@ -29,7 +29,7 @@ extern u16 g_battle_map_palette_modified_colors[][BATTLE_MAP_CLUT_ROW_COLOR_COUN
 /* [battle_map_clut_row_e][color] */
 
 /* Base colors saved by the ambient and darkness animation commands. */
-extern CVECTOR g_battle_map_ambient_base_color;
+static CVECTOR g_battle_map_ambient_base_color;
 extern CVECTOR g_battle_map_darkness_base_color;
 
 /* Runtime color fades stepped by battle_map_update_color_animations:

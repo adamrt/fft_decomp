@@ -8,7 +8,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern s16 g_screen_fade_intensity;
+static s16 g_screen_fade_intensity;
 
 /* Fade tile RGB channels, set to equal levels by the fade updaters. */
 extern rgb24_t g_screen_fade_tile_color;

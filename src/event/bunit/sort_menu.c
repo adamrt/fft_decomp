@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* reorder list */
-extern u8 g_unit_list_reorder_list_initialized;
+static u8 g_unit_list_reorder_list_initialized;
 extern menu_entry_t g_unit_list_reorder_list_desc;
 extern s16 g_unit_list_reorder_list_entries[];
 extern s16 g_unit_list_reorder_list_redraw_request;

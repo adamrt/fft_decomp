@@ -10,14 +10,14 @@ links: [battle]
 
 units:
   - {name: deploy_panel_primitives, source: src/event/attack/deploy_panel_primitives.c}
-  - {name: deployment, source: src/event/attack/entry_deployment.c, data: [{addr: 0x801cd0dc, size: 368, hash: 66f4ed506159f631}]}
+  - {name: deployment, source: src/event/attack/entry_deployment.c, data: [{addr: 0x801cd0dc, size: 368, hash: 66f4ed506159f631}, {addr: 0x801cd24c, size: 8, hash: 41d805e613efbe1a}, {addr: 0x801cd254, size: 8, hash: 41d805e613efbe1a}], bss: [{addr: 0x801cd06c, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd070, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd074, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd078, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd07c, size: 4, hash: df3f619804a92fdb}]}
   - {name: deployment_help, source: src/event/attack/deployment_help.c}
   - {name: equipment_panel_threads, source: src/lib/menu/unit_view/equipment_panels.c}
   - {name: fieldable_units, source: src/event/attack/fieldable_units.c, data: [{addr: 0x801cd2b0, size: 128, hash: be9437aede4160e0}]}
   - {name: file_load_sync, source: src/lib/file/synchronous.c}
   - {name: gfx_set_formation_icon_uv, source: src/lib/menu/graphics/formation_icon.c}
-  - {name: map_title, source: src/event/attack/entry_map_title.c}
-  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801ca054, size: 32, hash: 66687aadf862bd77}]}
+  - {name: map_title, source: src/event/attack/entry_map_title.c, bss: [{addr: 0x801cd054, size: 4, hash: df3f619804a92fdb}]}
+  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801ca054, size: 32, hash: 66687aadf862bd77}], bss: [{addr: 0x801d6010, size: 1264, hash: e448b18d634ce66c}]}
   - {name: music_tracks, source: src/lib/sound/tracks.c}
   - {name: panel_text, source: src/lib/menu/unit_view/text.c, data: [{addr: 0x801cabc4, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_textures, source: src/event/attack/roster_textures.c, data: [{addr: 0x801dd2d4, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2dc, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801dd2e4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x801dd5e4, size: 1152, hash: 4cf9816ed1062189}]}
@@ -304,38 +304,38 @@ links: [battle]
 defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16}
 
 units:
-  - {name: ability_page, source: src/event/bunit/ability_page.c, data: [{addr: 0x801e373c, size: 4, hash: b7d1b3a1104cc86b}]}
-  - {name: bits, source: src/event/bunit/bits.c}
+  - {name: ability_page, source: src/event/bunit/ability_page.c, data: [{addr: 0x801e373c, size: 4, hash: b7d1b3a1104cc86b}], bss: [{addr: 0x801ec978, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: bits, source: src/event/bunit/bits.c, bss: [{addr: 0x801ec908, size: 4, hash: df3f619804a92fdb}]}
   - {name: draw_commands, source: src/lib/menu/graphics/commands.c}
   - {name: draw_state, source: src/lib/menu/graphics/state.c}
-  - {name: entry, source: src/event/bunit/entry.c}
+  - {name: entry, source: src/event/bunit/entry.c, bss: [{addr: 0x801cf550, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: equipment_panel_threads, source: src/lib/menu/unit_view/equipment_panels.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/graphics/image_transfer.c}
-  - {name: help, source: src/event/bunit/help.c}
-  - {name: input, source: src/event/bunit/input.c}
+  - {name: help, source: src/event/bunit/help.c, bss: [{addr: 0x801e345c, size: 2, hash: 96a296d224f285c6}]}
+  - {name: input, source: src/event/bunit/input.c, bss: [{addr: 0x801e3468, size: 2, hash: 96a296d224f285c6}]}
   - {name: job_abilities, source: src/event/bunit/job_abilities.c}
-  - {name: job_list, source: src/event/bunit/job_list.c}
-  - {name: menu_ability_display_values, source: src/lib/menu/ability_rows.c}
+  - {name: job_list, source: src/event/bunit/job_list.c, bss: [{addr: 0x801ec980, size: 2, hash: 96a296d224f285c6}]}
+  - {name: menu_ability_display_values, source: src/lib/menu/ability_rows.c, bss: [{addr: 0x801ec9f8, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_list, source: src/event/bunit/menu_list.c, data: [{addr: 0x801cf98c, size: 112, hash: 5d1929456ef9e73d}]}
-  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801ce8d0, size: 32, hash: 66687aadf862bd77}]}
+  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801ce8d0, size: 32, hash: 66687aadf862bd77}], bss: [{addr: 0x801e374c, size: 1264, hash: e448b18d634ce66c}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801ecb70, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_timing, source: src/lib/menu/menu_timing.c}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
-  - {name: packet_buffers, source: src/event/bunit/packet_buffers.c, data: [{addr: 0x801eca28, size: 2, hash: 96a296d224f285c6}]}
+  - {name: packet_buffers, source: src/event/bunit/packet_buffers.c, data: [{addr: 0x801eca28, size: 2, hash: 96a296d224f285c6}], bss: [{addr: 0x801ecb4c, size: 4, hash: df3f619804a92fdb}]}
   - {name: panel_text, source: src/lib/menu/unit_view/text.c, data: [{addr: 0x801cf440, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/unit_view/portraits.c, data: [{addr: 0x801cecfc, size: 16, hash: ed44f3f59883c72d}]}
   - {name: scaled_draw_area, source: src/lib/menu/graphics/scaled_draw_area.c}
-  - {name: screen_fade, source: src/lib/menu/graphics/screen_fade.c}
+  - {name: screen_fade, source: src/lib/menu/graphics/screen_fade.c, bss: [{addr: 0x801e3740, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: scrollable_list_setup, source: src/lib/menu/scrollable_list_setup.c}
   - {name: selection_movement, source: src/lib/menu/selection_movement.c}
   - {name: selection_records, source: src/lib/menu/selection_records.c, data: [{addr: 0x801eb22c, size: 84, hash: 4fea5e6a3ec5f547}]}
   - {name: selection_values, source: src/lib/menu/selection_values.c}
-  - {name: sort_menu, source: src/event/bunit/sort_menu.c}
+  - {name: sort_menu, source: src/event/bunit/sort_menu.c, bss: [{addr: 0x801cf940, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: status_thread_toggles, source: src/lib/menu/unit_view/threads.c}
   - {name: text_id_lists, source: src/lib/menu/text/id_lists.c}
   - {name: texture_commands, source: src/lib/menu/graphics/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/graphics/textured_quads.c}
-  - {name: unit_grid, source: src/event/bunit/unit_grid.c, data: [{addr: 0x801cf89c, size: 32, hash: 8f0e786721820ee8}]}
+  - {name: unit_grid, source: src/event/bunit/unit_grid.c, data: [{addr: 0x801cf89c, size: 32, hash: 8f0e786721820ee8}], bss: [{addr: 0x801eb204, size: 2, hash: 96a296d224f285c6}]}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_view/primitives.c}
   - {name: unit_records, source: src/event/bunit/unit_records.c, data: [{addr: 0x801eb280, size: 44, hash: 85759b3811ff7dc4}, {addr: 0x801eb2ac, size: 2, hash: 96a296d224f285c6}, {addr: 0x801eb2b0, size: 5628, hash: 660b974630c79796}]}
   - {name: window_state, source: src/lib/menu/graphics/window_state.c}
@@ -886,16 +886,16 @@ links: [battle]
 units:
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: draw_state, source: src/lib/menu/graphics/state.c}
-  - {name: drawing_commands, source: src/event/card/menu_draw.c, data: [{addr: 0x801d91e4, size: 2, hash: 96a296d224f285c6}]}
+  - {name: drawing_commands, source: src/event/card/menu_draw.c, data: [{addr: 0x801d91e4, size: 2, hash: 96a296d224f285c6}], bss: [{addr: 0x801d91f4, size: 2, hash: 96a296d224f285c6}]}
   - {name: gfx_contexts, source: src/event/card/gfx_contexts.c}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/graphics/image_transfer.c}
   - {name: graphic_thread, source: src/event/card/backdrop.c, data: [{addr: 0x801d8874, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801d91d4, size: 4, hash: df3f619804a92fdb}]}
-  - {name: input, source: src/event/card/input.c}
+  - {name: input, source: src/event/card/input.c, bss: [{addr: 0x801d925c, size: 2, hash: 96a296d224f285c6}]}
   - {name: managed_threads, source: src/lib/menu/managed_threads.c}
   - {name: memcard, source: src/lib/memcard.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801ca888, size: 4, hash: ad95131bc0b799c0}]}
   - {name: menu_timing, source: src/lib/menu/menu_timing.c}
-  - {name: save_screen, source: src/event/card/entry.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801c9910, size: 46, hash: 072f2816247853a7}]}
-  - {name: screen_fade, source: src/lib/menu/graphics/screen_fade.c}
+  - {name: save_screen, source: src/event/card/entry.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801c9910, size: 46, hash: 072f2816247853a7}], bss: [{addr: 0x801ca968, size: 7808, hash: b77ee6575e6146ff}, {addr: 0x801cc7e8, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: screen_fade, source: src/lib/menu/graphics/screen_fade.c, bss: [{addr: 0x801ca954, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: text_id_lists, source: src/lib/menu/text/id_lists.c}
   - {name: text_threads, source: src/lib/menu/text/dialog_threads.c}
   - {name: textured_quads, source: src/lib/menu/graphics/textured_quads.c}
@@ -1167,9 +1167,9 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: editor, source: src/event/debugchr/entry.c, rodata: [{addr: 0x801c5ee4, size: 352, hash: c3896812912ae940}], data: [{addr: 0x801ce2e4, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801cec44, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cec94, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cece4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cece8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cecec, size: 4, hash: df3f619804a92fdb}]}
+  - {name: editor, source: src/event/debugchr/entry.c, rodata: [{addr: 0x801c5ee4, size: 352, hash: c3896812912ae940}], data: [{addr: 0x801ce2e4, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801cec44, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cec94, size: 80, hash: 5b6fb58e61fa4759}, {addr: 0x801cece4, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cece8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cecec, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cecf0, size: 4, hash: df3f619804a92fdb}], bss: [{addr: 0x801c68a8, size: 20, hash: de47c9b27eb8d300}]}
   - {name: equipment_panel_threads, source: src/lib/menu/unit_view/equipment_panels.c}
-  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801c52b0, size: 32, hash: 66687aadf862bd77}]}
+  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801c52b0, size: 32, hash: 66687aadf862bd77}], bss: [{addr: 0x801c68fc, size: 1264, hash: e448b18d634ce66c}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: panel_text, source: src/lib/menu/unit_view/text.c, data: [{addr: 0x801c5e20, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/unit_view/portraits.c, data: [{addr: 0x801c56dc, size: 16, hash: ed44f3f59883c72d}]}
@@ -1344,23 +1344,23 @@ units:
   - {name: draw_commands, source: src/lib/menu/graphics/commands.c}
   - {name: draw_state, source: src/lib/menu/graphics/state.c}
   - {name: drawing, source: src/event/equip/current_ot_quad.c}
-  - {name: entry, source: src/event/equip/entry.c}
-  - {name: equip_modes, source: src/event/equip/equipment_menu.c, data: [{addr: 0x801ce1d0, size: 24, hash: fe787faeec6222bc}]}
+  - {name: entry, source: src/event/equip/entry.c, bss: [{addr: 0x801d87dc, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: equip_modes, source: src/event/equip/equipment_menu.c, data: [{addr: 0x801ce1d0, size: 24, hash: fe787faeec6222bc}], bss: [{addr: 0x801e8d10, size: 2, hash: 96a296d224f285c6}]}
   - {name: equipment_items, source: src/event/equip/equipment_items.c}
   - {name: equipment_panel_threads, source: src/lib/menu/unit_view/equipment_panels.c}
   - {name: equipment_panels, source: src/event/equip/equipment_panels.c}
   - {name: equipment_rows, source: src/lib/menu/equipment_rows.c, data: [{addr: 0x801e8cc4, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801e8cd0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: equipment_stats, source: src/lib/menu/equipment_stats.c}
-  - {name: gfx_contexts, source: src/event/equip/gfx_contexts.c}
+  - {name: gfx_contexts, source: src/event/equip/gfx_contexts.c, bss: [{addr: 0x801e92ec, size: 4, hash: df3f619804a92fdb}]}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/graphics/image_transfer.c}
   - {name: inventory_totals, source: src/event/equip/inventory_totals.c}
-  - {name: item_actions, source: src/event/equip/item_actions.c}
-  - {name: item_menu, source: src/event/equip/item_menu.c}
+  - {name: item_actions, source: src/event/equip/item_actions.c, bss: [{addr: 0x801e8d88, size: 4, hash: df3f619804a92fdb}]}
+  - {name: item_menu, source: src/event/equip/item_menu.c, bss: [{addr: 0x801cf864, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: item_order, source: src/lib/menu/item_order.c}
   - {name: item_sort_id_list, source: src/event/equip/item_sort.c, rodata: [{addr: 0x801cfb44, size: 24, hash: a787439a26721345}]}
   - {name: item_types, source: src/lib/menu/item_types.c}
   - {name: managed_threads, source: src/lib/menu/managed_threads.c}
-  - {name: menu_input, source: src/event/equip/menu_input.c}
+  - {name: menu_input, source: src/event/equip/menu_input.c, bss: [{addr: 0x801d86ac, size: 2, hash: 96a296d224f285c6}]}
   - {name: menu_list, source: src/event/equip/menu_list.c, data: [{addr: 0x801d8700, size: 100, hash: fb40569aa0008599}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801e930c, size: 64, hash: f5a5fd42d16a2030}]}
   - {name: menu_timing, source: src/lib/menu/menu_timing.c}
@@ -1380,7 +1380,7 @@ units:
   - {name: texture_commands, source: src/lib/menu/graphics/texture_commands.c}
   - {name: textured_quads, source: src/lib/menu/graphics/textured_quads.c}
   - {name: unit_comparison, source: src/event/equip/unit_comparison.c}
-  - {name: unit_loadout, source: src/event/equip/unit_loadout.c, data: [{addr: 0x801e8db4, size: 244, hash: b33e76357c515a25}]}
+  - {name: unit_loadout, source: src/event/equip/unit_loadout.c, data: [{addr: 0x801e8db4, size: 244, hash: b33e76357c515a25}], bss: [{addr: 0x801e8dac, size: 2, hash: 96a296d224f285c6}]}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_view/primitives.c}
   - {name: window_state, source: src/lib/menu/graphics/window_state.c}
 
@@ -1915,7 +1915,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
-  - {name: help_overlay, source: src/lib/menu/help_overlay.c, data: [{addr: 0x801e0b30, size: 128, hash: 37edf2b26225cbea}]}
+  - {name: help_overlay, source: src/lib/menu/help_overlay.c, data: [{addr: 0x801e0b30, size: 128, hash: 37edf2b26225cbea}], bss: [{addr: 0x801f74f8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801f74fc, size: 4, hash: df3f619804a92fdb}]}
 
 functions:
   - {addr: 0x801df000, size: 80, name: help_close, hash: af74553ec4c059ff, unit: help_overlay}
@@ -1952,16 +1952,16 @@ links: [battle]
 defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 8}
 
 units:
-  - {name: ability_page, source: src/event/jobstts/ability_page.c, data: [{addr: 0x801e5500, size: 4, hash: b7d1b3a1104cc86b}]}
+  - {name: ability_page, source: src/event/jobstts/ability_page.c, data: [{addr: 0x801e5500, size: 4, hash: b7d1b3a1104cc86b}], bss: [{addr: 0x801e54fc, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: bit_streams, source: src/lib/bits.c}
   - {name: draw_commands, source: src/lib/menu/graphics/commands.c}
   - {name: draw_state, source: src/lib/menu/graphics/state.c}
-  - {name: entry, source: src/event/jobstts/entry.c}
-  - {name: gfx_contexts, source: src/event/jobstts/gfx_contexts.c}
+  - {name: entry, source: src/event/jobstts/entry.c, bss: [{addr: 0x801e522c, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: gfx_contexts, source: src/event/jobstts/gfx_contexts.c, bss: [{addr: 0x801fa7fc, size: 4, hash: df3f619804a92fdb}]}
   - {name: gfx_image_transfer_wait, source: src/lib/menu/graphics/image_transfer.c}
   - {name: job_abilities, source: src/event/jobstts/job_abilities.c, data: [{addr: 0x801fa5c8, size: 158, hash: 16c2ccb55f996c1f}]}
-  - {name: job_list, source: src/event/jobstts/job_list.c}
-  - {name: menu_ability_display_values, source: src/lib/menu/ability_rows.c}
+  - {name: job_list, source: src/event/jobstts/job_list.c, bss: [{addr: 0x801e530c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: menu_ability_display_values, source: src/lib/menu/ability_rows.c, bss: [{addr: 0x801fa5c4, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_list, source: src/event/jobstts/menu_list.c}
   - {name: menu_script, source: src/event/jobstts/menu_script.c, data: [{addr: 0x801eff9c, size: 88, hash: 22fa9b7c282d8045}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801fa81c, size: 64, hash: f5a5fd42d16a2030}]}
@@ -2252,7 +2252,7 @@ links: [battle]
 defines: {VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 256, VARIANT_MENU_CHOICE_VRAM_X: 448, VARIANT_MENU_CHOICE_WINDOW_CENTER_Y: 160, VARIANT_MENU_CHOICE_WINDOW_RIGHT_X: 368}
 
 units:
-  - {name: at_list_threads, source: src/lib/menu/at_list_and_pickups.c}
+  - {name: at_list_threads, source: src/lib/menu/at_list_and_pickups.c, bss: [{addr: 0x801cb6fc, size: 160, hash: b393978842a0fa3d}]}
   - {name: menu_window_frame_thread, source: src/lib/menu/menu_window_frame_thread.c, data: [{addr: 0x801c34c8, size: 56, hash: 5ecfc8aa956f1209}]}
   - {name: option_choice_thread, source: src/lib/menu/option_choice_thread.c, data: [{addr: 0x801c3994, size: 56, hash: 363145519a4b87be}, {addr: 0x801c39cc, size: 56, hash: 968d38035e40a07d}]}
   - {name: scaled_draw_area, source: src/lib/menu/graphics/scaled_draw_area.c}
@@ -2334,23 +2334,23 @@ links: [battle]
 
 units:
   - {name: conditions, source: src/event/require/conditions.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {name: conditions_burst, source: src/event/require/entry_dark_screen.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: conditions_burst, source: src/event/require/entry_dark_screen.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, bss: [{addr: 0x801ddd3c, size: 32, hash: 66687aadf862bd77}, {addr: 0x801ddd5c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x801ddd64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801ddd74, size: 16, hash: 374708fff7719dd5}]}
   - {name: entry, source: src/event/require/entry_conditions.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: equipment_panel_threads, source: src/lib/menu/unit_view/equipment_panels.c}
   - {name: file_load_sync, source: src/lib/file/synchronous.c}
   - {name: gfx_set_formation_icon_uv, source: src/lib/menu/graphics/formation_icon.c}
   - {name: helpers, source: src/event/require/screen_support.c, data: [{addr: 0x801d0068, size: 8, hash: 4bf4d677f323ee13}]}
-  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801cb2f0, size: 32, hash: 66687aadf862bd77}]}
+  - {name: menu_panel_backdrops, source: src/lib/menu/unit_view/backdrops.c, data: [{addr: 0x801cb2f0, size: 32, hash: 66687aadf862bd77}], bss: [{addr: 0x801d1b9c, size: 1264, hash: e448b18d634ce66c}]}
   - {name: menu_window_threads, source: src/lib/menu/menu_window_threads.c}
   - {name: music_tracks, source: src/lib/sound/tracks.c}
   - {name: panel_text, source: src/lib/menu/unit_view/text.c, data: [{addr: 0x801cbe60, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: portrait_transitions, source: src/lib/menu/unit_view/portraits.c, data: [{addr: 0x801cb71c, size: 16, hash: ed44f3f59883c72d}]}
   - {name: post_battle_party, source: src/event/require/party_changes.c, rodata: [{addr: 0x801bf000, size: 25, hash: f71a695df31c3f94}], data: [{addr: 0x801d71f8, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d72c0, size: 200, hash: 6d9c54dee5660c46}, {addr: 0x801d7388, size: 200, hash: 6d9c54dee5660c46}]}
-  - {name: recruitment, source: src/event/require/recruitment.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1024, hash: 5f70bf18a0860070}]}
+  - {name: recruitment, source: src/event/require/recruitment.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8304, size: 1024, hash: 5f70bf18a0860070}], bss: [{addr: 0x801d71ec, size: 2, hash: 96a296d224f285c6}]}
   - {name: scaled_draw_area, source: src/lib/menu/graphics/scaled_draw_area.c}
   - {name: status_billboard, source: src/lib/menu/unit_view/billboard.c}
   - {name: unit_panel_primitives, source: src/lib/menu/unit_view/primitives.c}
-  - {name: war_trophies, source: src/event/require/war_trophies.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8704, size: 36, hash: 6db65fd59fd356f6}]}
+  - {name: war_trophies, source: src/event/require/war_trophies.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801d8704, size: 36, hash: 6db65fd59fd356f6}, {addr: 0x801d8728, size: 64, hash: f5a5fd42d16a2030}, {addr: 0x801d8768, size: 64, hash: f5a5fd42d16a2030}], bss: [{addr: 0x801d87a8, size: 4, hash: df3f619804a92fdb}]}
   - {name: zodiac_primitives, source: src/lib/menu/unit_view/zodiac_primitives.c}
 
 functions:

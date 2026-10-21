@@ -30,7 +30,7 @@ typedef struct world_map_projected_tile {
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 
 /* g_world_map_flags as saved by world_map_backdrop_mode_set (world_map_flags_e). */
-extern u32 g_world_map_saved_system_flags;
+static u32 g_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[];
 
 static VECTOR g_world_map_projection_scale = { 0 };

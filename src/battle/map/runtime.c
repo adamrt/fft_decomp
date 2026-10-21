@@ -121,7 +121,7 @@ extern MATRIX g_battle_map_light_transition_target_light_matrix;
 extern battle_map_background_gradient_colors_t g_battle_map_background_gradient_colors;
 extern CVECTOR g_battle_map_saved_background_gradient_first;
 extern CVECTOR g_battle_map_saved_background_gradient_second;
-extern rgb24_t g_battle_map_ambient_polygon_color;
+static rgb24_t g_battle_map_ambient_polygon_color;
 extern render_buffer_t* g_battle_map_ambient_restored_buffer;
 extern CVECTOR g_battle_map_current_darkness_color;
 extern u8 g_battle_map_back_color_disabled;

@@ -22,7 +22,7 @@ typedef struct cursor_tile_position {
 typedef char cursor_tile_position_size_must_be_12[sizeof(cursor_tile_position_t) == 12 ? 1 : -1];
 
 /* Free-cursor repeat counter. */
-extern u32 g_cursor_repeat_counter;
+static u32 g_cursor_repeat_counter;
 
 static cursor_tile_position_t g_cursor_previous_tile = { 0 };
 

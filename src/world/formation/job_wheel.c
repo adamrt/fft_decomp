@@ -60,7 +60,7 @@ typedef enum formation_job_change_anim {
     FORMATION_JOB_CHANGE_ANIM_DISSOLVE = 1,
     FORMATION_JOB_CHANGE_ANIM_CLOSING = 2 /* the last 20 frames */
 } formation_job_change_anim_e;
-extern s8 g_formation_job_change_anim_state; /* formation_job_change_anim_e */ /* formation_job_change_anim_e */
+static s8 g_formation_job_change_anim_state; /* formation_job_change_anim_e */ /* formation_job_change_anim_e */
 extern u8 g_formation_job_change_confirmed;
 extern s16 g_formation_job_change_skip_requested;
 extern rgb24_t g_formation_job_change_flash_colors[4];

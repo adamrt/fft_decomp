@@ -61,10 +61,10 @@ extern RECT g_war_trophy_image_rect;
 extern u8 g_war_trophy_item_count;
 
 /* The retail collector does not check these 16-entry capacities. */
-extern s32 g_war_trophy_entry_types[16];
-extern s32 g_war_trophy_entry_values[16];
-extern s32 g_war_trophy_entry_count;
+static s32 g_war_trophy_entry_count;
 static reward_war_result_t g_war_trophy_search_result = { 0 };
+static s32 g_war_trophy_entry_types[16] = { 0 };
+static s32 g_war_trophy_entry_values[16] = { 0 };
 /*
  * Builds the war-trophy entry list and pays the trophies out.
  *

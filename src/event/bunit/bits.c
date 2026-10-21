@@ -4,7 +4,7 @@
 #include "psx/types.h"
 
 /* bit reader */
-extern const u8* g_unit_list_bits_cursor;
+static const u8* g_unit_list_bits_cursor;
 extern s32 g_unit_list_bits_index;
 extern u8 g_unit_list_bits_reader_reset;
 

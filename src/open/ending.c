@@ -74,7 +74,7 @@ extern u8* g_ending_script_initial_data_base;
 
 /* Scalar view of dispatch.cursor.byte_offset: using the member in
  * ending_opcode_02_set_scroll_speed shortens the body by four bytes. */
-extern s32 g_ending_script_byte_offset;
+static s32 g_ending_script_byte_offset;
 
 /* Ending bytecode opcodes 0x00 through 0x0f. */
 typedef void (*ending_opcode_handler_t)(s16* entry);

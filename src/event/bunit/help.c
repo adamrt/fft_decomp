@@ -25,7 +25,7 @@ extern help_navigation_record_t g_unit_list_help_nodes_unit_browse[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
 extern u8 g_unit_list_help_node_index;
-extern u16 g_unit_list_help_cursor_anim_state;
+static u16 g_unit_list_help_cursor_anim_state;
 extern u8 g_unit_list_help_cursor_initialized;
 
 /* Aliases of g_unit_list_help_nodes/g_unit_list_help_node_index; the target reloads them at each use

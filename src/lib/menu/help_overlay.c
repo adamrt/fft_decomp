@@ -25,12 +25,12 @@
 /* help text, navigation and display state */
 extern u8* g_text_saved_pointers[32];
 extern u16* const g_help_menu_text_id_tables[23];
-extern u16* g_help_topic_text_ids;
 extern help_navigation_record_t g_help_after_battle_navigation[];
 extern help_navigation_record_t g_help_terrain_navigation[];
 extern help_navigation_record_t g_help_unit_box_navigation[];
 extern help_navigation_record_t g_help_attack_preview_navigation[];
-extern u32* g_help_controller_state_ptr;
+static u32* g_help_controller_state_ptr;
+static u16* g_help_topic_text_ids;
 extern u8 g_help_data_base[];
 extern unit_panel_summary_t g_help_active_banner;
 extern unit_panel_unit_t g_help_active_unit_data;

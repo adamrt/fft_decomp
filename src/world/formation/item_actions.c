@@ -23,7 +23,6 @@
 #include "psx/types.h"
 
 /* item-action menus and category graphics */
-extern u16 g_formation_item_saved_selected_unit_index;
 extern screen_number_range_t g_formation_item_action_quantity_range;
 extern s16 g_formation_item_action_option_states[3];
 extern menu_entry_t g_formation_item_quantity_change_menu;
@@ -35,7 +34,8 @@ extern oriented_quad_t g_formation_item_category_tab_cursor_sprite;
 /* The two item-category icon strips; the active one is kept in g_formation_item_category_icon_strip. */
 extern menu_entry_t g_formation_item_category_icon_strip_a;
 extern menu_entry_t g_formation_item_category_icon_strip_b;
-extern menu_entry_t* g_formation_item_category_icon_strip;
+static menu_entry_t* g_formation_item_category_icon_strip;
+static u16 g_formation_item_saved_selected_unit_index;
 extern s16 g_formation_item_category_strip_text_ids[]; /* option text ids of the active strip, -1 terminated */
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */

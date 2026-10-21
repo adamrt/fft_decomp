@@ -73,7 +73,7 @@ extern u16 g_name_entry_keyboard_text_cursor_anim;
 /* confirmation */
 extern menu_entry_t g_name_entry_confirm_menu;
 extern u8 g_name_entry_confirm_initialized;
-extern u8 g_name_entry_confirm_finished;
+static u8 g_name_entry_confirm_finished;
 extern s16 g_name_entry_confirm_result;
 extern u8 g_name_entry_confirm_message_shown;
 

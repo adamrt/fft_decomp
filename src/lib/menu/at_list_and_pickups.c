@@ -37,7 +37,7 @@ extern s16 g_crystal_pickup_menu_result;
 extern s16 g_crystal_pickup_choice_result;
 
 /* AT list menu */
-extern at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
+static at_entry_t g_at_list_descriptors[AT_LIST_CAPACITY];
 extern menu_entry_t g_at_list_state;
 
 /* WORLD and OPTION each define one column layout for the AT List menu. */

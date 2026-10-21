@@ -5,7 +5,7 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
-extern ability_type_e g_ability_list_ability_type;
+static ability_type_e g_ability_list_ability_type;
 extern const ability_data_t* g_ability_list_selected_ability_data;
 extern ability_secondary_pointer_t g_ability_list_selected_ability_secondary_data;
 

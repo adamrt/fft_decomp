@@ -32,7 +32,7 @@ extern u8 g_formation_item_menu_unit_index;
 extern u8 g_formation_item_menu_saved_browse_enabled;
 extern u8 g_formation_item_submenu_exit_pending;
 extern u16 g_formation_item_equip_item_cursor_anim;
-extern point16_t g_formation_item_equip_item_cursor_point;
+static point16_t g_formation_item_equip_item_cursor_point;
 extern menu_entry_t g_formation_item_best_fit_confirm_menu;
 extern s8 g_formation_item_remove_unit_index;
 extern u16 g_formation_item_remove_cursor_anim;

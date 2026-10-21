@@ -33,7 +33,6 @@ extern s32 g_effect_camera_unread_2;
 
 /* Particle transforms, gravity and inertia used by the emitter integrator. */
 extern MATRIX g_effect_emitter_matrix;
-extern MATRIX g_effect_particle_heading_matrix;
 
 /* Particle gravity and inertia threshold, and their saved copies: the secondary handlers save both while their slots
  * run under a gravity of (0, ONE, 0) and EFFECT_SECONDARY_INERTIA_THRESHOLD. */
@@ -62,14 +61,15 @@ extern s32 g_effect_sprite_count;
 extern s32 g_effect_sprite_count_peak;
 
 /* Primitive arena and the frame markers maintained by this renderer. */
-extern s32 g_effect_frame_parity;
-extern u8* g_effect_prim_buffer;
-extern s32 g_effect_prim_buffer_offset;
-extern s32 g_effect_frame_start_prim_buffer_offset;
 
 /* The third 32-byte primitive kind has no named caller. */
 static s32 g_primitive_sizes[3] = { sizeof(POLY_FT4), sizeof(DR_MODE), 32 };
 
+static s32 g_effect_frame_start_prim_buffer_offset;
+static s32 g_effect_prim_buffer_offset;
+static u8* g_effect_prim_buffer;
+static s32 g_effect_frame_parity;
+static MATRIX g_effect_particle_heading_matrix;
 /* Private cursor state for the resident model decoder. */
 static const psyq_tmd_object_t* g_model_object;
 

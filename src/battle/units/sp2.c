@@ -11,10 +11,10 @@
 extern file_extent_t g_sprite_sp2_files[];
 extern file_extent_t g_sprite_worker8_sp2_files[];
 
+static s32 g_sprite_compressed_nibble_phase;
+static s32 g_sprite_compressed_offset;
 /* Cursor state for the compressed attack-image tail of a unit SPR file. */
-extern const u8* g_sprite_compressed_data;
-extern s32 g_sprite_compressed_nibble_phase;
-extern s32 g_sprite_compressed_offset;
+static const u8* g_sprite_compressed_data;
 
 /* Start reading the SP2 file that holds the attack animation of the unit's SP2 ability into
  * destination. Worker 8 uses its own file table, indexed from animation 0x73. Returns -1 when the

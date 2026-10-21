@@ -55,7 +55,7 @@ static s32 g_gravity_scale = 0x53a;
 static s32 g_gravity_modifier = 0xa8000;
 
 extern s32 g_projectile_launch_slope_q12;
-extern s16 g_projectile_arctan_angle_mod;
+static s16 g_projectile_arctan_angle_mod;
 extern s32 g_projectile_source_id;
 extern SVECTOR g_projectile_origin;
 extern SVECTOR g_projectile_destination;

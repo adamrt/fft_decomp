@@ -33,6 +33,7 @@
 #include "psx/types.h"
 
 effect_context_t g_effect_context;
+static u8* g_effect_frame_data_start;
 
 /* g_effect_load_state: the steps of effect_file_load_update, which loads the ability's effect file
  * while its charge secondary effect plays. */
@@ -52,7 +53,6 @@ extern u8 g_effect_sound_call_counts[];
 
 extern effect_palette_section_t* g_effect_palette_ptr;
 extern const u8* g_effect_script;
-extern u8* g_effect_frame_data_start;
 extern u8* g_effect_animation_sequences_start;
 extern const effect_timing_curves_t* g_effect_timing_curves;
 

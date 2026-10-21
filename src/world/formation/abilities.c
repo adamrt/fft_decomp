@@ -36,7 +36,7 @@ extern u8 g_formation_ability_menu_unit_index;
 extern u8 g_formation_ability_menu_slots_changed;
 extern u8 g_formation_ability_menu_saved_browse_enabled;
 extern u8 g_formation_ability_submenu_running;
-extern s8 g_formation_ability_learn_menu_step; /* menu_job_list_step_e */
+static s8 g_formation_ability_learn_menu_step; /* menu_job_list_step_e */
 
 extern u8 g_formation_ability_set_unit_index;
 extern s8 g_formation_ability_set_slot; /* -1 before the first cursor update, then ability slot 1..4 */

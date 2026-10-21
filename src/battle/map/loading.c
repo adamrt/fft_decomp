@@ -42,8 +42,8 @@ typedef enum mesh_load_state { BATTLE_MAP_MESH_LOAD_IDLE = 0, BATTLE_MAP_MESH_LO
 /* Pending map resources and the loader phases. */
 extern char g_battle_map_directory_path[];
 extern battle_map_resource_t* g_battle_map_mesh_load_buffer;
-extern resource_load_state_e g_battle_map_resource_load_state;
-extern gns_load_phase_e g_battle_map_gns_load_phase;
+static gns_load_phase_e g_battle_map_gns_load_phase;
+static resource_load_state_e g_battle_map_resource_load_state;
 extern mesh_load_state_e g_battle_map_mesh_load_state;
 extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
 

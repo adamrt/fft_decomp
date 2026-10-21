@@ -12,7 +12,7 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
-extern s32 g_script_rand16_state;
+static s32 g_script_rand16_state;
 
 /* Suppress recursive write filtering while getters use comparison variable 0. */
 extern u8 g_script_variable_write_guard;

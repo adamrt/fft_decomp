@@ -16,7 +16,7 @@
 #include "fft/unit_view.h"
 #include "psx/types.h"
 
-extern battle_map_tile_coordinates_t g_script_warp_coords;
+static battle_map_tile_coordinates_t g_script_warp_coords;
 extern u16 g_unit_view_depth_display_suppressed;
 
 /* DismissUnit: remove the first roster member after slot 0 with this sprite set from

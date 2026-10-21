@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Color-tint fade state. */
-extern rgb24_t g_fade_tint;
+static rgb24_t g_fade_tint;
 extern rgb24_t g_fade_tint_backup;
 extern rgb24_t g_fade_tint_target;
 extern u16 g_fade_tint_value[3];

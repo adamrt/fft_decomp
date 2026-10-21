@@ -36,13 +36,13 @@ extern menu_status_panel_packet_t g_formation_selected_unit_status_packets[2];
 extern u8 g_formation_selected_unit_stat_text_image[];
 extern u8 g_formation_selected_unit_name_text_image[];
 extern menu_unit_number_images_t g_formation_selected_unit_number_text_images;
-extern palette_t g_formation_selected_unit_portrait_palettes[2];
 extern menu_status_panel_editor_packet_t g_formation_comparison_unit_summary_packets[2];
 extern menu_status_panel_packet_t g_formation_comparison_unit_status_packets[2];
 extern u8 g_formation_comparison_unit_stat_text_image[];
 extern u8 g_formation_comparison_unit_name_text_image[];
-extern menu_unit_number_images_t g_formation_comparison_unit_number_text_images;
-extern palette_t g_formation_comparison_unit_portrait_palettes[2];
+static menu_unit_number_images_t g_formation_comparison_unit_number_text_images;
+static palette_t g_formation_selected_unit_portrait_palettes[2];
+static palette_t g_formation_comparison_unit_portrait_palettes[2];
 
 static u16 g_formation_summary_value_cluts[4][2]
     = { 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */

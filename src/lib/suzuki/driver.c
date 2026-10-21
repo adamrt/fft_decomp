@@ -30,7 +30,7 @@ extern s16 g_suzuki_unknown_80032a58;
 
 /* Output mixing and transfer state. */
 extern CdlATV g_suzuki_sound_cd_mix;           /* 0x80032a3c; written by Put Sound Type */
-extern s16 g_suzuki_sound_decoded_data_result; /* last decoded-data read result */
+static s16 g_suzuki_sound_decoded_data_result; /* last decoded-data read result */
 extern s32 g_suzuki_sound_spu_event;           /* OpenEvent handle of suzuki_sound_spu_event_handler */
 
 /* Provisional: retained driver value in main RAM; no reader or SPU transfer of it has been identified. */

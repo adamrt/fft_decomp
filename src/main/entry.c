@@ -20,7 +20,7 @@
 
 /* Resident title route flag, consumed and cleared during ATTACK's scenario setup. */
 u8 g_system_go_straight_to_battle = 1;
-extern u32 g_system_game_loop_stack_pointer;
+static u32 g_system_game_loop_stack_pointer;
 
 /* Let the GPU finish, blank the display and shut down the sound driver and the SPU. */
 static void display_audio_stop(void) {

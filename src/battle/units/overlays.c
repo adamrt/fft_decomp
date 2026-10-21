@@ -31,9 +31,9 @@
  * so they never show. */
 extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
 
+static s32 g_cursor_selection_bob_timer;
 /* Frame counter and frame index of the selection cursor's bob animation. */
-extern s32 g_cursor_selection_bob_timer;
-extern s32 g_cursor_selection_bob_frame;
+static s32 g_cursor_selection_bob_frame;
 
 /* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
  * the highlighted arrow. */

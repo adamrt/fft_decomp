@@ -24,7 +24,7 @@
 /* tutorial playback state */
 extern tutorial_state_t g_tutorial_state;
 extern s16 g_tutorial_wait_time_remaining;
-extern s16 g_tutorial_highlight_brightness;
+static s16 g_tutorial_highlight_brightness;
 extern s16 g_tutorial_buttons;
 
 /* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by

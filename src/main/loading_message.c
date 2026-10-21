@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 extern palette_t g_loading_palette;
-extern u32 g_loading_frame_counter;
+static u32 g_loading_frame_counter;
 extern u32 g_loading_visible;
 extern POLY_FT4 g_loading_primitives[2][7];
 

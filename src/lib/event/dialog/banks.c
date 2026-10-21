@@ -5,7 +5,7 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
-extern u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
+static u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
 extern s32 g_text_section_backup_active;
 
 /* Bind writable sections of a text bank; Formation rebuilds the roster-name section in place.

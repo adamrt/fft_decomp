@@ -11,21 +11,21 @@ links: [world]
 units:
   - {name: card_checks, source: src/open/card_checks.c}
   - {name: card_warning, source: src/open/card_warning.c}
-  - {name: ending, source: src/open/ending.c, data: [{addr: 0x80074034, size: 64, hash: afec11e3b0e0d793}]}
+  - {name: ending, source: src/open/ending.c, data: [{addr: 0x80074034, size: 64, hash: afec11e3b0e0d793}], bss: [{addr: 0x8008e574, size: 4, hash: df3f619804a92fdb}]}
   - {name: file_wait, source: src/lib/file/pending.c}
   - {name: graphics_loading, source: src/open/graphics_loading.c, rodata: [{addr: 0x80073f58, size: 32, hash: f203b21866f47f5b}]}
   - {name: init, source: src/open/screen_setup.c, data: [{addr: 0x800851c0, size: 224, hash: 6eb69e26de2a26ed}]}
   - {name: input_repeat, source: src/open/input_repeat.c}
   - {name: memcard, source: src/lib/memcard.c}
-  - {name: music_test, source: src/open/music_test.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}, {addr: 0x80073fd4, size: 96, hash: 9244268b09d6a718}]}
+  - {name: music_test, source: src/open/music_test.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}, {addr: 0x80073fd4, size: 96, hash: 9244268b09d6a718}], bss: [{addr: 0x8008e434, size: 192, hash: 5d89f056865052bc}]}
   - {name: music_test_frame, source: src/open/music_test_frame.c}
   - {name: new_game, source: src/open/new_game.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: overlay_fade, source: src/open/overlay_fade.c}
-  - {name: prologue, source: src/open/prologue.c}
-  - {name: runtime, source: src/open/entry.c}
+  - {name: prologue, source: src/open/prologue.c, bss: [{addr: 0x8008556c, size: 4, hash: df3f619804a92fdb}, {addr: 0x80085570, size: 4, hash: df3f619804a92fdb}, {addr: 0x80085574, size: 4, hash: df3f619804a92fdb}]}
+  - {name: runtime, source: src/open/entry.c, bss: [{addr: 0x8008fc10, size: 4, hash: df3f619804a92fdb}]}
   - {name: title, source: src/open/title.c, data: [{addr: 0x80073f78, size: 52, hash: 575c40dd2e37f4bc}]}
   - {name: title_demo, source: src/open/title_demo.c}
-  - {name: window_records, source: src/open/display_objects.c, data: [{addr: 0x800707f8, size: 8, hash: 16ca3f8a47677229}]}
+  - {name: window_records, source: src/open/display_objects.c, data: [{addr: 0x800707f8, size: 8, hash: 16ca3f8a47677229}], bss: [{addr: 0x8008fc00, size: 4, hash: df3f619804a92fdb}]}
   - {name: window_render, source: src/open/window_render.c}
 
 libraries:

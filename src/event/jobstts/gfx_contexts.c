@@ -7,7 +7,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern status_screen_gfx_context_t* g_status_screen_gfx_context_base;
+static status_screen_gfx_context_t* g_status_screen_gfx_context_base;
 extern s16 g_status_screen_gfx_line_f2_count;
 extern s16 g_status_screen_gfx_poly_f4_count;
 extern s16 g_status_screen_gfx_poly_g4_count;

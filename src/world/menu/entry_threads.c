@@ -24,7 +24,7 @@
 /* numeric entry and list state */
 extern s16* g_screen_entry_text_id_tables[]; /* 16-bit tables selected by entry select_text_table */
 extern s32 g_screen_number_entry_digit_steps[];
-extern u32* g_screen_list_controller_input;
+static u32* g_screen_list_controller_input;
 
 static void signed_number_draw(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
 

@@ -71,7 +71,7 @@ extern s32 g_travel_search_depth;
 extern s32 g_travel_search_cost;
 extern travel_path_t g_travel_search_path;
 extern random_battle_road_t (*g_random_battle_roads)[3];
-extern s32 g_random_battle_map_id;
+static s32 g_random_battle_map_id;
 extern s32 g_world_map_dot_count;
 extern u8 g_world_map_dot_pulse_direction;
 extern u8 g_world_map_dot_pulse_phase;

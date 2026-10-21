@@ -27,7 +27,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern s32 g_sprite_unit_graphics_load_complete;
+static s32 g_sprite_unit_graphics_load_complete;
 
 /* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
  * one at rand() / 0x2000. */

@@ -9,7 +9,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern u16 g_save_input_latched_button;
+static u16 g_save_input_latched_button;
 extern u16 g_save_input_previous;
 
 /*

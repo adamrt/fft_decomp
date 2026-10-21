@@ -36,7 +36,7 @@ extern unit_runtime_t* g_move_step_tile_occupant;
 
 /* Height scratch record that unit_action_height_calculate fills in place. */
 extern unit_height_data_t g_move_step_tile_occupant_height;
-extern s32 g_move_displacement_direction;
+static s32 g_move_displacement_direction;
 
 static u8 g_walk_to_center_phases[4] = { MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH, MOVE_STEP_PHASE_WALK_TO_CENTER_EAST,
     MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH, MOVE_STEP_PHASE_WALK_TO_CENTER_WEST };

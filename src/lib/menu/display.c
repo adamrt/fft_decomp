@@ -16,7 +16,7 @@
 
 /* Text variables $7E/$7F: the rectangle text_set_substitution_values_7e_7f stores as four 16-bit values. It
  * lies at g_text_substitution_values[0x7e]. */
-extern RECT g_text_substitution_rect;
+static RECT g_text_substitution_rect;
 extern glyph_blit_t g_menu_large_number_glyph;
 
 /* BATTLE leaves the last section alone. */

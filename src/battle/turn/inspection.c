@@ -11,7 +11,7 @@
 #include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-extern s32 g_at_list_cursor;
+static s32 g_at_list_cursor;
 
 /* Show the map cursor and its tile glow again; the counterpart of
  * cursor_hide. */

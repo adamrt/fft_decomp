@@ -39,7 +39,7 @@ extern u8 g_unit_list_grid_stat_bar_script_bottom[12];
 /* unit grid */
 extern point16_t g_unit_list_grid_cursor_target;
 extern u8 g_unit_list_stat_mode; /* menu_unit_readout_e */
-extern s16 g_unit_list_current_stat_value;
+static s16 g_unit_list_current_stat_value;
 extern s16 g_unit_list_max_stat_value;
 extern menu_sprite_cell_t g_unit_list_grid_label_tiles[8];
 extern menu_sprite_cell_t g_unit_list_grid_label_tiles_bottom[8];

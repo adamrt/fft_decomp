@@ -10,7 +10,7 @@
 #include "psx/types.h"
 
 /* controller state */
-extern u16 g_screen_input_previous;
+static u16 g_screen_input_previous;
 extern u8 g_screen_input_triangle_latch;
 
 /* Return the controller buttons from PadRead(0); the argument is ignored. */

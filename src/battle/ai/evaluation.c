@@ -37,14 +37,14 @@ typedef struct facing_tile_offsets {
     u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
 } facing_tile_offsets_t;
 
+static s32 g_ai_origin_self_target_stage;
 /* Origin masks, Math Skill iteration and facing offsets. */
-extern s32 g_ai_origin_self_target_stage;
-extern s32 g_ai_math_ability_index;
-extern u16* g_ai_math_ability_list;
+static s32 g_ai_math_skillset_index;
+static s32 g_ai_math_ability_index;
+static s32 g_ai_math_skillset_id;
+static u16* g_ai_math_ability_list;
 
 /* borrowed from main's temporary skillset list */
-extern s32 g_ai_math_skillset_id;
-extern s32 g_ai_math_skillset_index;
 
 /* Diamond rows centered on map column 7, for radii 0 through 7.
  * The unchecked reader also reaches the following status weights for radii 8..15. */

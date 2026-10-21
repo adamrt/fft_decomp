@@ -75,11 +75,11 @@ typedef struct prologue_crossfade {
 typedef char prologue_crossfade_size_must_be_182[sizeof(prologue_crossfade_t) == 182 ? 1 : -1];
 
 extern prologue_crossfade_t g_prologue_crossfade;
-extern u16* g_prologue_crossfade_frame_pixels;
-extern u16* g_prologue_crossfade_old_picture;
+static u16* volatile g_prologue_crossfade_new_picture;
+static u16* g_prologue_crossfade_old_picture;
+static u16* g_prologue_crossfade_frame_pixels;
 
 /* prologue_step_crossfade reloads the source pointer for every column. */
-extern u16* volatile g_prologue_crossfade_new_picture;
 
 /* Arm the new-game prologue sequence: start before entry 0 of entry_table with NEXT_ENTRY set, end
  * at entry target, draw its text in ordering-table entries ot_layer and ot_layer + 1, at full

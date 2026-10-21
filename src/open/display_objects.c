@@ -26,7 +26,7 @@ static display_object_sequence_header_t** g_display_object_sequences = g_display
 static display_object_cel_header_t** g_display_object_cels = g_display_object_cel_table;
 
 extern sprite_packet_t g_display_object_gpu_sprite_packets[2][32];
-extern s32 g_display_object_gpu_sprite_count;
+static s32 g_display_object_gpu_sprite_count;
 
 static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
 static void gpu_animated_draw(display_object_animated_t* actor, u32* ot);

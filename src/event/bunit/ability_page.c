@@ -18,7 +18,7 @@
 #include "psx/types.h"
 
 extern u8 g_ability_list_ready;
-extern s8 g_ability_list_confirm_prompt_state;
+static s8 g_ability_list_confirm_prompt_state;
 extern s8 g_job_list_menu_active;
 extern s8 g_job_list_menu_phase; /* menu_job_list_step_e */
 

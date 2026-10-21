@@ -25,7 +25,7 @@
 #include "psx/types.h"
 
 extern u8 g_sound_novel_quit_help_text_ids[];
-extern point32_t g_hud_saved_value_position;
+static point32_t g_hud_saved_value_position;
 
 /* Scalar history views retained for the Quit shuffle: direct member accesses
  * change its original loads and store scheduling. */

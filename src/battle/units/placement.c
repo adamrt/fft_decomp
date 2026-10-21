@@ -25,7 +25,7 @@ unit_stats_t g_unit_stats[UNIT_SLOT_COUNT] = { 0 };
 /* Deployment placement, the acting tile and strike relocation reservations. */
 extern unit_deployment_coordinates_t* g_unit_deployed_coords;
 extern s16 g_unit_entd_spritesheet_ids[];
-extern s32 g_unit_entd_spritesheet_count;
+static s32 g_unit_entd_spritesheet_count;
 
 static s32 entd_unique_spritesheet_add(s32 mode, s16 value, s32 limit);
 

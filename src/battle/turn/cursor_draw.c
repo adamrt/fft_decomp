@@ -15,8 +15,8 @@
 
 /* Palette cycling for the cursor tile glow. */
 extern palette_t g_cursor_tile_glow_cycled_palettes[2];
-extern s32 g_cursor_tile_glow_cycle_offset;
-extern s32 g_cursor_tile_glow_cycle_timer;
+static s32 g_cursor_tile_glow_cycle_offset;
+static s32 g_cursor_tile_glow_cycle_timer;
 
 /* Cycles the colors of the two cursor tile glow palettes (sprite CLUTs 1 and 2).
  *

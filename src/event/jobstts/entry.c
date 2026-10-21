@@ -17,7 +17,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s8 g_status_screen_active_page; /* menu_job_list_step_e; each page's function returns the next one */
+static s8 g_status_screen_active_page; /* menu_job_list_step_e; each page's function returns the next one */
 extern u8 g_status_screen_initialized;
 extern u8 g_status_screen_previous_event_mode;
 extern u8 g_status_screen_menu_palette_image[];

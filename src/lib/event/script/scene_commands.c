@@ -35,7 +35,7 @@ static s32 g_script_loaded_event_id = -1;
 static u16 g_script_map_darkness_durations[12] = { 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 0x100, 0 };
 
 /* Camera yaw selection and event status staging. */
-extern s32 g_camera_yaw_band;
+static s32 g_camera_yaw_band;
 
 static s16 g_camera_diagonal_yaws[4] = { 3584, 2560, 1536, 512 };
 

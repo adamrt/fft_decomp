@@ -17,7 +17,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern SVECTOR g_unit_runtime_coords; /* the position unit_scratch_coords_copy returns */
+static SVECTOR g_unit_runtime_coords; /* the position unit_scratch_coords_copy returns */
 
 /* Window interpolation fractions; ONE ends each curve. The first two overshoot
  * the final size, while the last curve also drives the closing fade. */

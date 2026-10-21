@@ -87,7 +87,6 @@ extern s8 g_save_format_prompt_active;
 extern u8 g_save_overwrite_prompt_active;
 
 /* scan and write */
-extern s8 g_save_open_result;
 extern s8 g_save_listed_slot_count;
 extern s8 g_save_scan_setup_step;
 extern u8 g_save_write_phase;
@@ -120,7 +119,8 @@ extern u8 g_save_title_template[0x16];
 
 /* Save-image prefix and the additional bytes cleared with its working storage. */
 enum { SAVE_WORK_BUFFER_BYTES = 0x1e80 };
-extern u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
+static u8 g_save_buffer[SAVE_WORK_BUFFER_BYTES];
+static s8 g_save_open_result;
 
 /* The context binder divides this flat pool into two equal frame buffers. */
 enum { SAVE_TEXTURED_QUADS_PER_BUFFER = 600 };

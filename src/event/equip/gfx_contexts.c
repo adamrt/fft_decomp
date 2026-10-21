@@ -8,7 +8,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern menu_gfx_context_t* g_equipment_gfx_context_base;
+static menu_gfx_context_t* g_equipment_gfx_context_base;
 extern u16 g_equipment_gfx_poly_f4_count;
 extern u16 g_equipment_gfx_poly_g4_count;
 

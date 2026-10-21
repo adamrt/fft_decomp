@@ -59,7 +59,7 @@ extern u8 g_save_menu_step;
 extern u8 g_save_menu_result;
 extern u8 g_save_mode;
 extern s16 g_save_mode_select_enabled;
-extern s16 g_save_active_slot;
+static s16 g_save_active_slot;
 extern RECT g_save_screen_background_tile;
 extern menu_entry_t g_save_slot_select_menu[2];
 extern u8 g_save_slot_select_running;

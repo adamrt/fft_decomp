@@ -115,8 +115,7 @@ static const unit_editor_field_range_t g_unit_editor_monster_field_ranges[UNIT_E
 /* The status browser stores battle IDs here; the editor reuses the slots as availability flags. */
 extern u8 g_unit_editor_unit_slots[UNIT_SLOT_COUNT];
 extern help_navigation_record_t g_unit_editor_fields[UNIT_EDITOR_FIELD_COUNT];
-extern s32 g_unit_editor_field_edit_active;
-extern unit_panel_thread_t g_unit_editor_status_display_thread_params;
+static unit_panel_thread_t g_unit_editor_status_display_thread_params;
 
 /* Views of g_unit_panel_selected_unit_status.gauges[i].value (values[3 * i])
  * and gauges[i].max (the *_max 16-bit values): debug_unit_editor_apply_values
@@ -133,6 +132,7 @@ static POLY_FT4 g_unit_editor_cursor_shade_polys[2] = { 0 };
 static help_navigation_record_t* g_unit_editor_field_table = 0;
 static help_navigation_record_t* g_unit_editor_current_field = 0;
 static s32 g_unit_editor_selected_unit_slot = 0;
+static s32 g_unit_editor_field_edit_active = 0;
 
 /* Write the editor's values back to battle unit `unit_id`: HP, MP and CT
  * (each first capped at its maximum), level, experience, Brave, Faith, the

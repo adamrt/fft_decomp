@@ -14,7 +14,7 @@
 extern RECT g_battle_map_title_image_rect;
 extern u32 g_battle_map_title_palette_data[8];
 extern RECT g_battle_map_title_palette_rect;
-extern s32 g_battle_map_title_closing_past_midpoint;
+static s32 g_battle_map_title_closing_past_midpoint;
 
 /* Two buffers of the four shaded title-panel strips. */
 extern POLY_GT4 g_battle_map_title_sprites[2][4];

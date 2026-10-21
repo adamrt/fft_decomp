@@ -28,7 +28,7 @@ extern s8 g_equipment_remove_mode_initialized;
  * started through menu_managed_thread_start, which makes it the current
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equipment_command_menu;
-extern volatile u16 g_equipment_clear_all_prompt_frame;
+static volatile u16 g_equipment_clear_all_prompt_frame;
 extern s8 g_equipment_item_slot;
 extern s8 g_equipment_item_list_open;
 extern s8 g_equipment_item_list_refresh;

@@ -26,12 +26,12 @@
 #include "psx/types.h"
 
 /* Overlay load bookkeeping and disc tables. */
-extern s32 g_overlay_companion_executable_loading;
 extern s32 g_overlay_companion_executable_lbas[];
 extern s32 g_overlay_companion_executable_sizes[];
 extern s32 g_overlay_companion_executable_offsets[];
 extern s32 g_overlay_companion_data_file_request_index;
-extern s32 g_overlay_companion_data_file_loading;
+static s32 g_overlay_companion_data_file_loading;
+static s32 g_overlay_companion_executable_loading;
 extern s32 g_overlay_companion_data_file_lbas[];
 extern s32 g_overlay_companion_data_file_sizes[];
 extern u8* g_overlay_companion_data_file_buffer;

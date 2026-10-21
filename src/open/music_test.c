@@ -24,7 +24,7 @@
 
 extern menu_entry_t g_music_test_list_params;
 extern menu_text_layout_t g_music_test_list_state;
-extern s16 g_music_test_list_entries[96];
+static s16 g_music_test_list_entries[96];
 extern s16 g_music_test_list_entry_flags[96];
 extern s16 g_music_test_selected_option;
 extern struct suzuki_music* g_music_test_sound_handle; /* handle of the playing music test track */

@@ -22,7 +22,7 @@ extern menu_text_binding_t g_formation_selected_unit_text_binding;
 extern menu_entry_t g_formation_dismiss_prompt;
 extern menu_entry_t g_formation_dismiss_confirm_menu[4];
 extern menu_entry_t g_formation_dismiss_confirm_menu_scrolled[4];
-extern menu_entry_t* g_formation_dismiss_menu_data;
+static menu_entry_t* g_formation_dismiss_menu_data;
 extern u8 g_formation_dismiss_step;
 extern menu_entry_t g_formation_order_menu;
 extern u8 g_formation_order_saved_browse_enabled;

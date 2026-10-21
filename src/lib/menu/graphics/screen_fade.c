@@ -11,7 +11,7 @@ extern u8 g_gfx_increasing_fade_active;
 extern s16 g_gfx_fade_intensity;
 extern RECT g_gfx_fade_rect;
 extern rgb24_t g_gfx_fade_color;
-extern u8 g_gfx_decreasing_fade_active;
+static u8 g_gfx_decreasing_fade_active;
 
 /* Return the active screen fades as bits: 1 while fading in (decreasing), 2 while fading out
  * (increasing), 0 when neither runs. */

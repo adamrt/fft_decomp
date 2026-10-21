@@ -124,7 +124,7 @@ extern s16 g_world_map_tutorial_request_state; /* request_state_e */
 
 extern s16 g_world_map_debug_variable_list_request_state;
 extern s16 g_world_map_debug_party_number_request_state;
-extern s16 g_formation_open_request_state; /* request_state_e */
+static s16 g_formation_open_request_state; /* request_state_e */
 
 extern s16 g_save_menu_request_state; /* request_state_e */
 

@@ -4,7 +4,7 @@
 #include "psx/types.h"
 
 static u8 g_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT] = { 0 };
-extern u8 g_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT];
+static u8 g_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT];
 extern u8 g_heap_smd_base[HEAP_SMD_PAGE_COUNT * HEAP_PAGE_SIZE];
 
 /* Allocate size bytes from the music heap: 16 pages of 0x800 bytes at

@@ -9,7 +9,7 @@
 
 /* Interpolation state and saved values for camera restore commands. */
 extern u16 g_camera_real_coords_countdown;
-extern VECTOR g_camera_real_coords_delta;
+static VECTOR g_camera_real_coords_delta;
 extern VECTOR g_camera_screen_offset_saved;
 extern VECTOR g_camera_screen_offset_fixed;
 extern SVECTOR g_camera_rotation_saved;

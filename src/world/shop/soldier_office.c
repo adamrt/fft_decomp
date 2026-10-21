@@ -51,8 +51,8 @@ extern u8 g_soldier_office_hire_preview_initialized;
 extern u8 g_soldier_office_rename_prompt_initialized;
 extern u8 g_soldier_office_rename_name_entry_initialized;
 extern u8 g_soldier_office_rename_error_shown;
-extern const u8* g_soldier_office_entered_name;
-extern u32 g_soldier_office_fee;
+static const u8* g_soldier_office_entered_name;
+static u32 g_soldier_office_fee;
 extern unit_count_script_t g_soldier_office_unit_count_script;
 extern u8 g_soldier_office_unit_count;
 

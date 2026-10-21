@@ -10,7 +10,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s16 g_equipment_input_unread_value;
+static s16 g_equipment_input_unread_value;
 
 /* Store a value in g_equipment_input_unread_value. Nothing calls it and nothing reads that variable. */
 void equipment_set_unread_input_value(s32 value) {

@@ -11,7 +11,7 @@
 
 extern u8 g_sound_system_sed_data[];
 extern u8 g_sound_env_sed_data[];
-extern s32 g_sound_background_sfx_id; /* the background sound sound_background_play started, 0 for none */
+static s32 g_sound_background_sfx_id; /* the background sound sound_background_play started, 0 for none */
 
 /* Scenario-music playback state. current_music is the Suzuki music record of
  * the playing scenario music: music_stop hands it straight

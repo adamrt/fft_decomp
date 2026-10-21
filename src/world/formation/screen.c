@@ -33,7 +33,7 @@
 
 /* screen dispatch state */
 extern void (*g_formation_menu_handlers[])(void);
-extern s8 g_formation_main_menu_initialized;
+static s8 g_formation_main_menu_initialized;
 extern menu_entry_t g_formation_egg_triangle_menu;
 
 /* Chained after the egg triangle menu; formation_grid_menu_update only resets it. */

@@ -147,7 +147,7 @@ extern menu_number_entry_t g_unit_view_hovered_stats_setup[10];
 extern menu_number_entry_t g_unit_view_right_stats_setup[10];
 extern menu_number_entry_t g_unit_view_attack_caster_stats_setup[8];
 extern menu_number_entry_t g_unit_view_attack_target_stats_setup[8];
-extern struct action_data* g_unit_view_preview_target_action;
+static struct action_data* g_unit_view_preview_target_action;
 extern u16 g_unit_view_hovered_stats_frame_count;
 extern u8 g_unit_view_stats_first_page_by_mode[4];
 extern u16 g_unit_view_stats_bounce_step;

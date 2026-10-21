@@ -13,7 +13,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern MATRIX g_sprite_display_matrix;
+static MATRIX g_sprite_display_matrix;
 extern s16 g_sprite_prim_index;
 extern s16 g_sprite_prim_frame_start_index;
 

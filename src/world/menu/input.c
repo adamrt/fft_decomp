@@ -15,7 +15,7 @@
 
 /* tutorial input state */
 extern u16 g_tutorial_latched_button;
-extern u8 g_tutorial_activation_timer;
+static u8 g_tutorial_activation_timer;
 extern u8 g_screen_input_triangle_latched;
 extern u8 g_screen_text_task_phase;
 

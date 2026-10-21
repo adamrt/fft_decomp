@@ -23,7 +23,7 @@ extern s32 g_camera_yaw_target;
 
 /* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;
  * nothing reads it. */
-extern s32 g_camera_previous_yaw;
+static s32 g_camera_previous_yaw;
 extern s32 g_camera_tilt_increment;
 extern s32 g_camera_zoom_increment;
 

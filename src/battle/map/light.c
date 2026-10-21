@@ -4,7 +4,7 @@
 #include "fft/gfx.h"
 #include "psx/types.h"
 
-extern rgb24_t g_battle_map_light_back_color_backup;
+static rgb24_t g_battle_map_light_back_color_backup;
 
 static rgb24_t g_current_back_color = { 128, 128, 128 };
 

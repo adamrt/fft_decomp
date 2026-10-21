@@ -22,7 +22,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern s16 g_script_debug_paused;
+static s16 g_script_debug_paused;
 
 /* DebugPause event instruction (0x72): print the pause message with the debug font, yield once and
  * set g_script_debug_paused, which nothing reads. */

@@ -36,10 +36,10 @@ typedef enum conditions_burst_mode {
 extern conditions_burst_tile_t g_conditions_burst_tiles[12][24];
 extern POLY_F4 g_conditions_burst_flash_polys[2];
 extern DR_MODE g_conditions_burst_draw_modes[2];
-extern MATRIX g_conditions_burst_matrix;
-extern SVECTOR g_conditions_burst_rotation;
-extern VECTOR g_conditions_burst_offset;
-extern VECTOR g_conditions_burst_rotated_offset;
+static MATRIX g_conditions_burst_matrix;
+static SVECTOR g_conditions_burst_rotation;
+static VECTOR g_conditions_burst_offset;
+static VECTOR g_conditions_burst_rotated_offset;
 
 /* Call thread_current_exit. */
 void thread_exit_current_wrapper(void) {

@@ -21,7 +21,7 @@ extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT];
 extern u8 g_action_loaded_ability_flags_1;
 extern u8 g_action_actor_x;
 extern u8 g_action_actor_y;
-extern u8 g_action_actor_elevation;
+static u8 g_action_actor_elevation;
 
 /* Dismount destinations reserved since the last strike setup; turn-status
  * and trap results also append. */

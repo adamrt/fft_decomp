@@ -27,7 +27,7 @@
  * register and misses the byte-exact match. */
 extern u8 g_item_secondary_data_ids[];
 extern job_data_t g_job_data[JOB_ID_COUNT];
-extern u8 g_party_highest_level;
+static u8 g_party_highest_level;
 extern u16 g_calendar_month_start_day_offsets[13];
 static u32 g_names_use_world_text = 0;
 static s32 unlocked_job_choose(const unit_stats_t* unit);

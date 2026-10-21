@@ -39,9 +39,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern VECTOR* g_camera_published_coords_ptr;
+static VECTOR g_camera_script_vector;
+static VECTOR* g_camera_published_coords_ptr;
 extern SVECTOR* g_camera_published_rotation_ptr;
-extern VECTOR g_camera_script_vector;
 
 /* Reset to -1 at event entry. The request processor accepts a track ID here, but no named writer queues one. */
 extern s16 g_sound_music_set_track_request;

@@ -63,7 +63,7 @@ typedef enum recruitment_entry {
 extern menu_entry_t g_after_battle_menu_entries[AFTER_BATTLE_MENU_ENTRY_COUNT];
 
 /* The join prompt's unused message result. */
-extern s16 g_after_battle_message_menu_result;
+static s16 g_after_battle_message_menu_result;
 
 /* Member access reschedules a summary-field store in party_apply_post_battle_changes. */
 extern s32 g_unit_panel_character_status_redraw_request;

@@ -21,8 +21,8 @@ extern u16 g_status_screen_status_list_row_actions[8];
 
 /* Text ids of the unit's current statuses in the status panel's two columns, filled by
  * status_screen_build_status_list. */
-extern s16 g_unit_panel_status_left_text_ids[20];
-extern s16 g_unit_panel_status_right_text_ids[20];
+static s16 g_unit_panel_status_left_text_ids[20];
+static s16 g_unit_panel_status_right_text_ids[20];
 
 /* Return 1 when the unit has any current status (innate ones included), else 0; one of
  * the conditions under which Circle opens the status list. */

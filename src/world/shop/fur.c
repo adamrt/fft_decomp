@@ -37,7 +37,7 @@ extern u8 g_shop_sell_total_shown; /* confirmation prompt shown */
 extern menu_entry_t g_fur_shop_menu_thread_data;
 extern u8 g_fur_shop_opened; /* fur shop opened */
 
-extern s8 g_fur_shop_access_granted;
+static s8 g_fur_shop_access_granted;
 extern u8 g_fur_shop_has_secret_hunt; /* any unit has Secret Hunt */
 
 extern u8 g_fur_shop_has_poached_stock; /* any poached item in stock */

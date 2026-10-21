@@ -33,11 +33,11 @@
 #include "psx/types.h"
 
 /* event input state */
-extern u32 g_script_current_input;
-extern u32 g_script_previous_input;
-extern u32 g_script_initial_repeat_counter;
-extern u32 g_script_repeat_counter;
-extern u32 g_script_secondary_repeat_counter;
+static u32 g_script_current_input;
+static u32 g_script_previous_input;
+static u32 g_script_initial_repeat_counter;
+static u32 g_script_repeat_counter;
+static u32 g_script_secondary_repeat_counter;
 
 /* The event frame compares slots 1..15 across its yield, including in WORLD. */
 extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];

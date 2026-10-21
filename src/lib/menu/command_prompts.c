@@ -47,7 +47,7 @@ extern s16 g_menu_result;
 extern s16 g_menu_selected_option;
 
 /* Command selection and remembered results. */
-extern u16 g_ability_list_anything_ability_id;
+static u16 g_ability_list_anything_ability_id;
 extern s16 g_menu_set_auto_battle_row_actions;
 extern s32 g_command_resolved_command;
 extern s32 g_command_used_skillset_id;

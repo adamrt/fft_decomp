@@ -47,7 +47,7 @@ extern u32 g_movie_mdec_output_buffer_0[];
 extern u32 g_movie_mdec_output_buffer_1[];
 extern s32 g_movie_width;
 extern s32 g_movie_height;
-extern s32 g_movie_aligned_height;
+static s32 g_movie_aligned_height;
 extern u32 g_movie_current_frame;
 extern u32 g_movie_end_frame;
 extern s32 g_movie_video_end_frame; /* -1: none */

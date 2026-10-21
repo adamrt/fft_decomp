@@ -227,7 +227,7 @@ extern effect_secondary_callback_t g_effect_secondary_handlers[23];
  * (g_projectile_*): heading, launch pitch, distance along the arc, steps left and the yaw rotation matrix. */
 extern s32 g_effect_arrow_arc_length;
 extern u16 g_effect_arrow_arc_yaw;
-extern s16 g_effect_arrow_arc_caster_relative_yaw;
+static s16 g_effect_arrow_arc_caster_relative_yaw;
 extern s32 g_effect_arrow_launch_slope_q12;
 extern s16 g_effect_arrow_arc_launch_angle;
 extern s32 g_effect_arrow_arc_distance;

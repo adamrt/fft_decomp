@@ -22,7 +22,7 @@ static GsSPRITE g_event_transition_sprite = { 0 };
  * it separately from the 32-bit flags: reaching it through the fade-state
  * struct makes the flags update use absolute addressing instead of a base
  * register. */
-extern CVECTOR g_world_map_fade_color;
+static CVECTOR g_world_map_fade_color;
 
 /* Pushes the event transition level (MENU_STACK_LEVEL_EVENT_TRANSITION)
  * after starting the seek to BATTLE.BIN. A FADE transition freezes the map

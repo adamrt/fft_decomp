@@ -30,7 +30,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s32 g_proposition_send_unit_count;
+static s32 g_proposition_send_unit_count;
 extern s16 g_proposition_candidate_levels[];
 
 /* Scalar view of g_window_panel_render_state.select_text_table: as a

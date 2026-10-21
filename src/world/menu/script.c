@@ -19,7 +19,7 @@
 #include "psx/types.h"
 
 /* display-script and scrolling state */
-extern u16 g_screen_clut;
+static u16 g_screen_clut;
 extern RECT g_screen_window_rect;
 extern s16 g_screen_window_right_x;
 extern u16 g_screen_texture_page;

@@ -102,7 +102,7 @@ extern u32 g_sound_novel_local_flags[];
 extern s32 g_sound_novel_wait_counter;
 extern s32 g_sound_novel_wait_frames;
 extern s32 g_sound_novel_countdown_section;
-extern s32 g_sound_novel_countdown_elapsed;
+static s32 g_sound_novel_countdown_elapsed;
 
 /* Opcode-indexed dispatch, defined after its handlers below. */
 static void (*g_sound_novel_opcode_handlers[54])(void);

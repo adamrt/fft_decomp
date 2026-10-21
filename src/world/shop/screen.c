@@ -48,7 +48,7 @@ extern u8 g_shop_item_category;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u8 g_shop_quantity_menu_running;
 extern s8 g_shop_buy_list_initialized;
-extern s8 g_shop_buy_equip_check_pending;
+static s8 g_shop_buy_equip_check_pending;
 extern s16 g_shop_buy_message_wait;
 extern s16 g_shop_buy_item;
 extern s32 g_shop_buy_unit_price;

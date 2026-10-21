@@ -15,7 +15,7 @@
 #include "psx/types.h"
 
 extern u16 g_save_gfx_texture_page;
-extern u16 g_save_gfx_draw_clut;
+static u16 g_save_gfx_draw_clut;
 
 static s16 g_save_menu_window_right_x = 0;
 

@@ -232,7 +232,7 @@ extern u8 g_move_config_unknown_1a_value;
 extern u8 g_move_path_team;
 extern u8 g_move_path_ignore_terrain;
 extern s32 g_move_path_unit_record_count;
-extern s32 g_ai_move_propagation_resume_pass;
+static s32 g_ai_move_propagation_resume_pass;
 
 static void path_selected_candidate_apply(spread_work_t* state);
 

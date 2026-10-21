@@ -10,9 +10,9 @@
 /* Independent 15-row, 16-column grids for BATTLE and WORLD. */
 extern u8 g_gfx_texture_allocation_grid[15][16];
 
+static s32 g_gfx_free_rect_pixels[4];
 /* Texture allocator scratch rectangles, in pixels and allocation cells. */
-extern s32 g_gfx_free_rect_pixels[4];
-extern s32 g_gfx_free_rect_cells[4];
+static s32 g_gfx_free_rect_cells[4];
 
 /* Free every cell of the 16 x 15 texture allocation grid that gfx_alloc_texture_rect claims from. */
 void gfx_clear_texture_allocation_grid(void) {

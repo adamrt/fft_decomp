@@ -30,8 +30,8 @@
 extern oriented_quad_t g_formation_cursor_sprite;
 extern oriented_quad_t g_formation_cursor_shadow_sprite;
 extern point16_t g_formation_cursor_position;
-extern point16_t g_formation_cursor_target;
-extern s8 g_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
+static point16_t g_formation_cursor_target;
+static s8 g_formation_scroll_unread; /* cleared with the formation scroll velocity; never read */
 extern oriented_quad_t g_formation_unit_dot_sprite;
 extern s8 g_formation_dot_glow_timer;
 extern s8 g_formation_dot_glow_direction;

@@ -12,7 +12,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-extern s16 g_equipment_unit_saved_hp;
+static s16 g_equipment_unit_saved_hp;
 extern s16 g_equipment_unit_saved_mp;
 
 /* Selected unit and its editable comparison copy; published through g_equipment_unit_data. */

@@ -23,7 +23,7 @@
 
 /* item menu state */
 extern s8 g_formation_item_menu_mode; /* menu_item_list_state_e */
-extern s8 g_formation_item_category_previewed_cursor;
+static s8 g_formation_item_category_previewed_cursor;
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_item_hp_mp_bonus_window_script[88];

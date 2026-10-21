@@ -18,7 +18,7 @@ extern effect_sprite_section_t* g_effect_secondary_particle_frame_data_ptr;
 
 /* Secondary pool and slot-chain ownership. */
 extern effect_secondary_data_t g_effect_secondary_data[EFFECT_SECONDARY_RECORD_COUNT];
-extern u16 g_effect_secondary_free_head;
+static u16 g_effect_secondary_free_head;
 extern u16 g_effect_secondary_active_tail;
 extern u8 g_effect_slot_active_head;
 extern u8 g_effect_slot_free_head;
