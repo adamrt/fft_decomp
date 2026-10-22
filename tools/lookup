@@ -9,6 +9,9 @@
 #
 #   tools/lookup g_name
 set -eu
+# Byte order for sort, so macOS and Linux list files the same way.
+LC_ALL=C
+export LC_ALL
 
 [ $# -eq 1 ] || { echo "usage: tools/lookup name" >&2; exit 2; }
 name=$1
@@ -23,7 +26,7 @@ uses() {
             text ~ "^(extern|static|const|[A-Za-z_][A-Za-z0-9_ *]*[ *])" n "[ \t]*[[;=(]" && text !~ /^[ \t]/ {
                 print "    " $1 ":" $2 ": " text; next }
             { count[file]++ }
-            END { for (f in count) printf "    %s (%d use%s)\n", f, count[f], count[f] == 1 ? "" : "s" }' |
+            END { for (f in count) printf "    %s (%d use%s)\n", f, count[f], (count[f] == 1 ? "" : "s") }' |
         sort
 }
 
