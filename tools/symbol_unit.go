@@ -12,18 +12,22 @@ import (
 )
 
 // unitMemberBody is one member's text as one module compiles it: the
-// per-function file, or its piece of an existing unit file.
+// per-function file, or its piece of an existing unit file. Preludes are the
+// text an absorbed unit kept ahead of the member for another set of modules.
 type unitMemberBody struct {
 	key      string // identity of the text: the file, or unit file + member
 	includes []string
 	text     string
+	preludes []unitPieceText
 }
 
 // unitSymbolsCommand merges the listed entries' sources into one unit source
 // and makes the entries members of a unit of that name in each of their
 // modules. Members may be per-function files or members of existing units,
-// which the new unit absorbs whole. The members of one module must follow
-// one another in address order and the modules' orders must agree. A member
+// which the new unit absorbs whole, program conditionals included when they
+// wrap whole members. The members of one module must follow one another in
+// address order and the modules' orders must agree: functions that change
+// their order between programs were not one source and stay apart. A member
 // that only some of the unit's modules compile, or whose body differs per
 // module, is wrapped in the program macros of the modules that compile that
 // body, so each module still defines exactly its own members in order.
@@ -82,10 +86,38 @@ func (p project) unitSymbolsCommand(args []string) error {
 			}
 			byModule[m] = append(byModule[m], f)
 		}
-		// Absorbed units must come whole, and old unit files must be plain
-		// (no conditionals) so their pieces can be cut per member.
+		// Absorbed units must come whole. An old unit file that keeps program
+		// conditionals is cut per member as each of its modules compiles it.
 		absorbed := map[string]*unitDef{} // "module:unit" -> def
 		unitTexts := map[string]unitPieces{}
+		// Every module that compiles an absorbed unit file, marked when its
+		// unit is absorbed here: a file with program conditionals is cut as
+		// the listed modules see it.
+		absorbing := map[string]bool{} // "module:unit"
+		for _, m := range order {
+			for _, f := range byModule[m] {
+				if f.Unit != "" {
+					absorbing[m.ID+":"+f.Unit] = true
+				}
+			}
+		}
+		unitOwners := func(source string) []unitPieceOwner {
+			var owners []unitPieceOwner
+			for _, other := range config.Modules {
+				for index := range other.Units {
+					unit := &other.Units[index]
+					if unit.Source != source {
+						continue
+					}
+					owner := unitPieceOwner{id: other.ID, macros: other.macros(), listed: absorbing[other.ID+":"+unit.Name]}
+					for _, member := range other.unitMembers(unit.Name) {
+						owner.members = append(owner.members, member.Name)
+					}
+					owners = append(owners, owner)
+				}
+			}
+			return owners
+		}
 		for _, m := range order {
 			if existing := m.unit(*name); existing != nil {
 				// The name may be reused when that unit is absorbed whole.
@@ -109,7 +141,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 				if _, done := unitTexts[unitSource]; done {
 					continue
 				}
-				pieces, err := readUnitPieces(p.root, m, f.Unit)
+				pieces, err := readUnitPieces(p.root, m, f.Unit, unitOwners(unitSource))
 				if err != nil {
 					return err
 				}
@@ -370,22 +402,30 @@ func (p project) unitSymbolsCommand(args []string) error {
 	return nil
 }
 
-// unitPieces is an existing unit file cut per member.
+// unitPieces is an existing unit file cut per member. A file that keeps
+// program conditionals has a cut instead of pieces: each definition of a
+// member with the modules that compile it.
 type unitPieces struct {
 	includes []string
 	pieces   map[string]string
+	cut      *unitConditionalCut
 }
 
 // readUnitPieces cuts a module's existing unit file into one piece per
-// member. A file with conditionals cannot be cut reliably.
-func readUnitPieces(root string, m *moduleSpec, unitName string) (unitPieces, error) {
+// member. A file with program conditionals is cut for the listed modules
+// that compile it, so a member keeps the modules its conditional names.
+func readUnitPieces(root string, m *moduleSpec, unitName string, owners []unitPieceOwner) (unitPieces, error) {
 	unit := m.unit(unitName)
 	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(unit.Source)))
 	if err != nil {
 		return unitPieces{}, err
 	}
-	if number := programConditionalLine(string(data)); number > 0 {
-		return unitPieces{}, fmt.Errorf("%s:%d: unit %s has program conditionals; split it by hand before merging", unit.Source, number, unitName)
+	if programConditionalLine(string(data)) > 0 {
+		cut, err := cutConditionalUnit(string(data), owners)
+		if err != nil {
+			return unitPieces{}, fmt.Errorf("%s: unit %s has program conditionals the merge cannot carry over: %w", unit.Source, unitName, err)
+		}
+		return unitPieces{includes: cut.includes, cut: &cut}, nil
 	}
 	var names []string
 	for _, f := range m.unitMembers(unitName) {
@@ -460,6 +500,17 @@ func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]un
 	if f.Unit != "" {
 		unit := m.unit(f.Unit)
 		pieces := units[unit.Source]
+		if pieces.cut != nil {
+			for index, variant := range pieces.cut.variants[f.Name] {
+				if variant.modules[m.ID] {
+					// Modules that compile one definition share its key, so it
+					// is written once under their program macros.
+					return &unitMemberBody{key: fmt.Sprintf("%s#%s#%d", unit.Source, f.Name, index), includes: pieces.includes,
+						text: variant.text, preludes: pieces.cut.preludes[f.Name]}, nil
+				}
+			}
+			return nil, fmt.Errorf("%s: %s defines no %s for this module", m.ID, unit.Source, f.Name)
+		}
 		return &unitMemberBody{key: unit.Source + "#" + f.Name, includes: pieces.includes, text: pieces.pieces[f.Name]}, nil
 	}
 	source := m.sourceOf(f)
@@ -565,6 +616,33 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 		sort.Slice(keys, func(i, j int) bool {
 			return moduleIndex[bodyModules[name][keys[i]][0]] < moduleIndex[bodyModules[name][keys[j]][0]]
 		})
+		// Text an absorbed unit kept ahead of this member for other modules
+		// than the member's comes first, under those modules' macros.
+		var preludes []unitPieceText
+		for _, key := range keys {
+			if preludes = bodies[name][key].preludes; len(preludes) > 0 {
+				break
+			}
+		}
+		for _, prelude := range preludes {
+			var modules []*moduleSpec
+			for _, m := range order {
+				if prelude.modules[m.ID] {
+					modules = append(modules, m)
+				}
+			}
+			if len(modules) == 0 {
+				continue
+			}
+			text, err := dropRepeatedConstants(prelude.text, seenConstant, modules)
+			if err != nil {
+				return nil, 0, fmt.Errorf("text before %s: %w", name, err)
+			}
+			if strings.TrimSpace(text) == "" {
+				continue
+			}
+			blocks = append(blocks, programGuarded(text, modules, order))
+		}
 		for _, key := range keys {
 			body := bodies[name][key]
 			addIncludes(body.includes)
@@ -578,15 +656,7 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 				continue
 			}
 			conditional++
-			var tests []string
-			for _, m := range modules {
-				tests = append(tests, "defined("+moduleMacro(m.ID)+")")
-			}
-			guard := "#if " + strings.Join(tests, " || ")
-			if len(modules) == 1 {
-				guard = "#ifdef " + moduleMacro(modules[0].ID)
-			}
-			blocks = append(blocks, guard+"\n"+text+"\n#endif")
+			blocks = append(blocks, programGuarded(text, modules, order))
 		}
 		if filler := fillers[name]; filler != "" {
 			blocks = append(blocks, filler)
@@ -597,6 +667,41 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 		text = strings.Join(includes, "\n") + "\n\n" + text
 	}
 	return []byte(text), conditional, nil
+}
+
+// programGuarded wraps text in the program macros of the modules that compile
+// it, or returns it as it is when every module of the unit does. When fewer
+// modules leave the text out than compile it, the guard names those instead.
+func programGuarded(text string, modules, order []*moduleSpec) string {
+	if len(modules) == len(order) {
+		return text
+	}
+	compiles := map[*moduleSpec]bool{}
+	for _, m := range modules {
+		compiles[m] = true
+	}
+	var tests []string
+	guard := ""
+	if excluded := len(order) - len(modules); excluded < len(modules) {
+		for _, m := range order {
+			if !compiles[m] {
+				tests = append(tests, "!defined("+moduleMacro(m.ID)+")")
+			}
+		}
+		guard = "#if " + strings.Join(tests, " && ")
+		if excluded == 1 {
+			guard = "#ifndef " + strings.TrimSuffix(strings.TrimPrefix(tests[0], "!defined("), ")")
+		}
+	} else {
+		for _, m := range modules {
+			tests = append(tests, "defined("+moduleMacro(m.ID)+")")
+		}
+		guard = "#if " + strings.Join(tests, " || ")
+		if len(modules) == 1 {
+			guard = "#ifdef " + moduleMacro(modules[0].ID)
+		}
+	}
+	return guard + "\n" + text + "\n#endif"
 }
 
 // ownedRodataTables finds the module's data rows that lie among the members'

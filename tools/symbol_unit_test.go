@@ -235,12 +235,32 @@ func TestUnitSymbolsCommandAbsorbsUnitsAndWrapsModuleBodies(t *testing.T) {
 	if !strings.HasPrefix(text, "#ifdef FFT_BATTLE\nextern int g_c_table[];\nint text_c1(void) { return g_c_table[0]; }\n#endif\n\n#ifdef FFT_WORLD\nextern int g_c_table[];\nint text_c1(void) { return g_c_table[1]; }\n#endif\n\nint text_c2(void)") {
 		t.Fatalf("per-module bodies not wrapped in module order:\n%s", text)
 	}
-	// A unit with conditionals cannot be split or absorbed mechanically.
+	// A unit with conditionals cannot be split mechanically.
 	if err := p.splitSymbolsCommand([]string{"--unit", "text_c"}); err == nil || !strings.Contains(err.Error(), "program conditionals") {
 		t.Fatalf("split error = %v", err)
 	}
-	if err := p.unitSymbolsCommand([]string{"--name", "text_more", "--source", "src/text/text_more.c", "battle:text_c1", "battle:text_c2", "battle:text_c3", "world:text_c1", "world:text_c2", "world:text_c3"}); err == nil || !strings.Contains(err.Error(), "program conditionals") {
-		t.Fatalf("absorb error = %v", err)
+	// It can be absorbed: its conditionals wrap whole members, so each body
+	// keeps the module that compiles it.
+	if err := p.unitSymbolsCommand([]string{"--name", "text_more", "--source", "src/text/text_more.c", "battle:text_c1", "battle:text_c2", "battle:text_c3", "world:text_c1", "world:text_c2", "world:text_c3"}); err != nil {
+		t.Fatalf("absorbing a unit with conditionals: %v", err)
+	}
+	data, err = os.ReadFile(filepath.Join(p.root, "src", "text", "text_more.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text = string(data)
+	if !strings.HasPrefix(text, "#ifdef FFT_BATTLE\nextern int g_c_table[];\nint text_c1(void) { return g_c_table[0]; }\n#endif\n\n#ifdef FFT_WORLD\nextern int g_c_table[];\nint text_c1(void) { return g_c_table[1]; }\n#endif\n\nint text_c2(void)") ||
+		strings.Count(text, "#if") != 2 || !strings.Contains(text, "text_c3(void)") {
+		t.Fatalf("absorbed conditional unit:\n%s", text)
+	}
+	if _, err := os.Stat(filepath.Join(p.root, "src", "text", "text_c.c")); !os.IsNotExist(err) {
+		t.Fatal("absorbed conditional unit file should be removed")
+	}
+	if config, err = p.loadCheckedConfig(); err != nil {
+		t.Fatalf("checked config after absorbing conditionals: %v", err)
+	}
+	if config.byID["battle"].function("text_c3").Unit != "text_more" || config.byID["world"].unit("text_c") != nil {
+		t.Fatalf("text_more not bound: %+v", config.byID["world"].Units)
 	}
 	if order, err := mergeMemberOrders([][]string{{"a", "b", "c"}, {"a", "c", "d"}, {"x", "b"}}); err != nil || strings.Join(order, " ") != "a x b c d" {
 		t.Fatalf("merged order = %v, %v", order, err)
