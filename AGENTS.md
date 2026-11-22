@@ -85,6 +85,9 @@ preserving every original byte.
   interface. A name prefix is never boundary evidence.
   Existing single-function files are not evidence of original boundaries;
   different function orders can reflect separate objects or edited source copies.
+  Functions that keep one order in every program can share a file under
+  program conditionals; functions that change order between programs were
+  copied and stay in separate files (`make order` reports both).
 - `include/fft/`: one flat folder of game headers named by concept
   (`unit.h`, `shop.h`, `proposition.h`, `battle_map_load.h`, `menu_stack.h`),
   each declaring one part of the game for every program that uses it. A
@@ -233,6 +236,7 @@ make library-diff ARGS="..."      # measure a scratch library candidate
 make compile-commands            # refresh editor metadata after source moves
 make symbols ACTION=unit ARGS="--name N --source src/x/N.c M:E..."  # merge entries (or whole units) into a unit
 make units ARGS="--evidence=required|strong"  # unit map from binary evidence only
+make order                       # where programs order shared functions differently; same names in different files
 ```
 
 `MODULE` accepts module IDs, overlay aliases, lists, `event` or `effect`.

@@ -138,6 +138,10 @@ placement: image ## Report module-folder functions that link order places in a s
 twins: image ## Group byte-equivalent functions across modules under consistent renames into build/analysis/twins (MODULE=x, ARGS="...")
 	@$(TOOLS) twins $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
+.PHONY: order
+order: image ## Report where modules order their shared functions differently, and same-named functions in different files, into build/analysis/order (MODULE=x, ARGS="...")
+	@$(TOOLS) order $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
+
 .PHONY: static
 static: image ## Make a file-private extern global static, or explain why not (ARGS="[--dry-run] NAME"; tools/static wraps it with fmt and check)
 	@$(TOOLS) static $(ARGS)
