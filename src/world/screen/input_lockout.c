@@ -6,29 +6,22 @@
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 
-/* Countdown maintained by screen_input_lockout_update. Volatile:
- * that routine reloads it after the zero test and again before the running
- * check instead of reusing the first load. */
-extern volatile u8 g_screen_input_lockout_timer;
+/* Countdown maintained by screen_input_lockout_update. */
+extern u8 g_screen_input_lockout_timer;
 
 /* Count g_screen_input_lockout_timer down while thread 7 (the comparison status panel) is idle
  * and no status panel slides, and reset it to 10 otherwise. While it is nonzero, the menu input
- * masks are cleared (menu_input_clear_state). */
+ * masks are cleared (menu_input_clear_state). Compiled at -O1 with the rest of the Formation
+ * screen: the reloads of the timer are that level's code, not a volatile variable. */
 void screen_input_lockout_update(void) {
-    s32 value;
-
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
-        value = 10;
+        g_screen_input_lockout_timer = 10;
     } else if (g_unit_panel_status_display_thread_params.flags
         & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
-        value = 10;
-    } else {
-        if (g_screen_input_lockout_timer == 0) {
-            return;
-        }
-        value = g_screen_input_lockout_timer - 1;
+        g_screen_input_lockout_timer = 10;
+    } else if (g_screen_input_lockout_timer != 0) {
+        g_screen_input_lockout_timer--;
     }
-    g_screen_input_lockout_timer = value;
     if (g_screen_input_lockout_timer != 0) {
         menu_input_clear_state();
     }

@@ -93,7 +93,7 @@ units:
   - {name: scene_menus, source: src/lib/event/scene/menu_sessions.c, data: [{addr: 0x801564d0, size: 336, hash: aee19a4a8c26100e}]}
   - {name: screen_buffers, source: src/world/screen/buffers.c}
   - {name: screen_fades, source: src/world/screen/fades.c, data: [{addr: 0x8018e494, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e495, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e496, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e498, size: 8, hash: 311ffc6bfd5bdbb3}], bss: [{addr: 0x801ca760, size: 2, hash: 96a296d224f285c6}]}
-  - {name: screen_input_lockout, source: src/world/screen/input_lockout.c}
+  - {name: screen_input_lockout, source: src/world/screen/input_lockout.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: screen_pad_input, source: src/world/screen/pad_input.c, bss: [{addr: 0x801cc7c8, size: 2, hash: 96a296d224f285c6}]}
   - {name: screen_text_pages, source: src/world/menu/text_list.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801bfda4, size: 616, hash: f9d54bbe3ccaf085}]}
   - {name: script_action_threads, source: src/lib/event/script/action_blocks.c, rodata: [{addr: 0x800e0070, size: 34, hash: dbebc117ae93fad8}], bss: [{addr: 0x801532d8, size: 2, hash: 96a296d224f285c6}]}
