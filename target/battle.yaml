@@ -1075,7 +1075,7 @@ functions:
   - {addr: 0x80143b80, size: 40, name: script_event_thread_run, hash: 5f28a3f8beb0666a, source: src/lib/event/script/event_thread.c}
   - {addr: 0x80143ba8, size: 40, name: script_run_next_event_unused, hash: 5f28a3f8beb0666a, source: src/lib/event/script/event_thread.c, source_symbol: script_event_thread_run}
   - {addr: 0x80143bd0, size: 8, name: script_opcode_45_add_unit, hash: 6d64edf91449c1b1, source: src/lib/event/script/add_unit_stub.c}
-  - {addr: 0x80143bd8, size: 9120, name: script_execute_event, hash: f5e240270b084a49, source: src/battle/event/interpreter.c}
+  - {addr: 0x80143bd8, size: 9120, name: script_execute_event, hash: f5e240270b084a49, source: src/lib/event/script/interpreter.c}
   - {addr: 0x80145f78, size: 140, name: script_next_event_load, hash: 86e825112a99969c, unit: script_scene_commands}
   - {addr: 0x80146004, size: 116, name: unit_is_moving, hash: eddabf1eb74277bd, unit: script_scene_commands}
   - {addr: 0x80146078, size: 28, name: script_s16_read, hash: 7f613d531c790362, unit: script_scene_commands}

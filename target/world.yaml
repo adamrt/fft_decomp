@@ -452,7 +452,7 @@ functions:
   - {addr: 0x800f6ec8, size: 40, name: script_event_thread_run, hash: 7bcd75fff235e2a0, source: src/lib/event/script/event_thread.c}
   - {addr: 0x800f6ef0, size: 40, name: script_run_next_event_unused, hash: 7bcd75fff235e2a0, source: src/lib/event/script/event_thread.c, source_symbol: script_event_thread_run}
   - {addr: 0x800f6f18, size: 8, name: script_opcode_45_add_unit, hash: 6d64edf91449c1b1, source: src/lib/event/script/add_unit_stub.c}
-  - {addr: 0x800f6f20, size: 9088, name: script_execute_event, hash: 21ced132f429744a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/world/event/interpreter.c}
+  - {addr: 0x800f6f20, size: 9088, name: script_execute_event, hash: 21ced132f429744a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/lib/event/script/interpreter.c}
   - {addr: 0x800f92a0, size: 140, name: script_next_event_load, hash: d45e2f3e6f0fd4c5, unit: script_scene_commands}
   - {addr: 0x800f932c, size: 116, name: unit_is_moving, hash: ed75e6a8a8e26ab2, unit: script_scene_commands}
   - {addr: 0x800f93a0, size: 28, name: script_s16_read, hash: 7f613d531c790362, unit: script_scene_commands}
@@ -1226,13 +1226,13 @@ data:
   - {addr: 0x80153294, name: g_script_opcode_dc_value}
   - {addr: 0x80153298, name: g_sound_pending_sfx_id}
   - {addr: 0x801532a0, name: g_sound_suppressed}
-  - {addr: 0x801532a4, name: g_screen_sound_music_volume_transition_request}
+  - {addr: 0x801532a4, name: g_sound_music_volume_transition_request}
   - {addr: 0x801532a8, name: g_menu_post_battle_unit_changes_active}
-  - {addr: 0x801532ac, name: g_screen_sound_music_switch_request}
-  - {addr: 0x801532ae, name: g_screen_sound_music_unload_slot_request}
+  - {addr: 0x801532ac, name: g_sound_music_switch_request}
+  - {addr: 0x801532ae, name: g_sound_music_unload_slot_request}
   - {addr: 0x801532b8, name: g_sound_music_track_1_id}
   - {addr: 0x801532ba, name: g_sound_music_track_2_id}
-  - {addr: 0x801532bc, name: g_screen_sound_current_music_track_index}
+  - {addr: 0x801532bc, name: g_sound_current_music_track_index}
   - {addr: 0x801532be, name: g_script_attack_entry_mode}
   - {addr: 0x801532c0, name: g_camera_position_locked}
   - {addr: 0x801532c2, name: g_event_map_reload_state}
@@ -2345,7 +2345,8 @@ data:
   - {addr: 0x801cd1e0, name: PSDOFSY}
   - {addr: 0x801cd1ec, name: g_save_work_buffer}
   - {addr: 0x801cd1f8, name: g_screen_alternate_number_clut}
-  - {addr: 0x801cd1fc, name: g_script_map_command_83_args}
+  - {addr: 0x801cd1fc, name: g_event_map_command_83_arg1}
+  - {addr: 0x801cd1fe, name: g_event_map_command_83_arg2}
   - {addr: 0x801cd200, name: g_event_pending_map_jump_out_2_id}
   - {addr: 0x801cd204, name: g_command_skillsets}
   - {addr: 0x801cd20c, name: g_menu_list_selected_index}
@@ -2375,7 +2376,8 @@ data:
   - {addr: 0x801cd538, name: g_script_light_scale}
   - {addr: 0x801cd548, name: g_screen_music_slot}
   - {addr: 0x801cd54c, name: g_menu_scroll_base_index}
-  - {addr: 0x801cd550, name: g_script_map_command_80_args}
+  - {addr: 0x801cd550, name: g_event_3d_object_id}
+  - {addr: 0x801cd552, name: g_event_3d_object_state}
   - {addr: 0x801cd554, name: g_gfx_tile_1_capacity}
   - {addr: 0x801cd558, name: g_formation_menu_text_buffer}
   - {addr: 0x801cd5d8, name: g_screen_window_clut}
@@ -2428,7 +2430,8 @@ data:
   - {addr: 0x801cd81c, name: g_event_pending_evtchr_save_slot}
   - {addr: 0x801cd820, name: g_event_pending_saved_evtchr_clear_slot}
   - {addr: 0x801cd824, name: g_menu_list_entry_count}
-  - {addr: 0x801cd828, name: g_script_music_switch}
+  - {addr: 0x801cd828, name: g_event_music_switch_volume}
+  - {addr: 0x801cd82a, name: g_event_music_switch_fade}
   - {addr: 0x801cd82c, name: s_camera_arithmetic_overflow}
   - {addr: 0x801cd830, name: g_menu_glyph_sheet}
   - {addr: 0x801cd838, name: g_menu_input_newly_pressed}

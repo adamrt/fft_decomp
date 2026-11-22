@@ -43,8 +43,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* BATTLE event-script interpreter: the body of the event thread
- * (THREAD_SLOT_EVENT), entered from script_event_thread_run once
+/* The event-script interpreter of BATTLE and WORLD: the body of the event
+ * thread (THREAD_SLOT_EVENT), entered from script_event_thread_run once
  * script_next_event_load has read the event block.
  *
  * Setup: with player input it waits for thread slots 2..13 and the camera to
@@ -69,14 +69,12 @@
  * facings and exits the thread. An opcode outside the chain, or a
  * ForwardTargetExit reached in sequence, also ends the thread.
  *
- * The chain order is retail's compare order. WORLD links its own body
- * under the same name. BATTLE differs in five places: WalkTo
- * starts the unit's movement and Arrow sets an arrow trajectory (WORLD
- * recognizes both and does nothing), DarkScreen's thread opens REQUIRE and
- * runs its image burst (WORLD's only takes the task id), the two ChangeMap
- * instructions reset the script camera transform, and the thread scans of
- * ResumeWaitingDialog and WaitForInstruction cover slots 1..15 where WORLD's
- * cover 1..16.
+ * The chain order is retail's compare order. The two programs compile this
+ * body with three differences: WalkTo starts the unit's movement and Arrow
+ * sets an arrow trajectory only in BATTLE (WORLD recognizes both and does
+ * nothing), and the thread scans of ResumeWaitingDialog and
+ * WaitForInstruction cover the program's thread table, slots 1..15 in BATTLE
+ * and 1..16 in WORLD.
  *
  * thread_call_on_main_stack is declared without a parameter list: it
  * forwards whatever arguments its current call target takes. */
@@ -572,7 +570,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_PAUSE) {
             script_opcode_16_pause();
         } else if (opcode == EVENT_OPCODE_RESUME_WAITING_DIALOG) {
-            for (work_index = 1; work_index < THREAD_ID_COUNT; work_index++) {
+            for (work_index = 1; work_index < VARIANT_THREAD_TABLE_SLOT_COUNT; work_index++) {
                 thread = &g_thread_contexts[work_index];
                 if (thread->is_running != 0 && thread->task_id == THREAD_TASK_WAIT_FOR_RESUME
                     && thread->function_parameter_2 == first_operand) {
@@ -635,8 +633,11 @@ restart_script:
         }
         /* ---- Unit movement and facing ---- */
         else if (opcode == EVENT_OPCODE_WALK_TO) {
+#ifdef FFT_BATTLE
+            /* WORLD recognizes WalkTo and does nothing. */
             g_thread_call_target = (void (*)(void))script_opcode_28_walk_to;
             thread_call_on_main_stack(parameters);
+#endif
         } else if (opcode == EVENT_OPCODE_JUMP) {
             script_opcode_70_jump((const event_jump_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_WALK) {
@@ -947,19 +948,19 @@ restart_script:
         else if (opcode == EVENT_OPCODE_WAIT_FOR_INSTRUCTION) {
             /* Yield until no thread runs the named task. The outer wait stays
              * a label loop: as a C loop its notes change the operand register
-             * allocation (see the WORLD twin). */
+             * allocation. */
             operand_3 = (operand_2 << 8) + operand_1;
             threads = g_thread_contexts;
         wait_matching_task:
             thread_yield();
-            for (work_index = 1; work_index < 0x10; work_index++) {
+            for (work_index = 1; work_index < VARIANT_THREAD_TABLE_SLOT_COUNT; work_index++) {
                 /* Typed indexing reverses the target addu operands; keep the 32-bit address sum. */
                 thread = (thread_t*)((work_index * sizeof(thread_t)) + (u32)threads);
                 if (thread->is_running != 0 && thread->task_id == operand_3) {
                     break;
                 }
             }
-            if (work_index != 0x10) {
+            if (work_index != VARIANT_THREAD_TABLE_SLOT_COUNT) {
                 goto wait_matching_task;
             }
         } else if (opcode == EVENT_OPCODE_YIELD) {
@@ -1021,8 +1022,11 @@ restart_script:
                     = script_runtime_id_resolve(script_s16_read(instruction_offset + ((u8*)g_script_event_block) + 3));
                 if (arrow_shooter_runtime_id != EVENT_RUNTIME_ID_NONE) {
                     arrow_shooter_battle_id = unit_runtime_battle_id_get(arrow_shooter_runtime_id);
+#ifdef FFT_BATTLE
+                    /* WORLD resolves both units and stops here. */
                     g_thread_call_target = (void (*)(void))projectile_arrow_trajectory_set;
                     thread_call_on_main_stack(arrow_shooter_battle_id, &g_unit_scratch_coords, operand_1);
+#endif
                 }
             }
         } else if (opcode == EVENT_OPCODE_MAP_FREEZE) {
