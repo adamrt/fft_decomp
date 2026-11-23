@@ -535,7 +535,7 @@ void animation_set_status(map_unit_t* unit) {
  * sequence, with the wait cleared so that the sequence starts at once.
  */
 void animation_update_status_changes(map_unit_t* unit) {
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
 
     if (unit->statuses_to_add_5_6 & UNIT_STATUS_CHICKEN) {
         animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
@@ -553,13 +553,13 @@ void animation_update_status_changes(map_unit_t* unit) {
             effect_secondary_start_death_smoke(unit);
         }
         if (g_battle_state != BATTLE_STATE_EVENT) {
-            stats = unit->battle_unit;
-            if (stats != 0) {
-                if (stats->unit_flags & UNIT_FLAG_MALE) {
+            battle_unit = unit->battle_unit;
+            if (battle_unit != 0) {
+                if (battle_unit->unit_flags & UNIT_FLAG_MALE) {
                     map_unit_play_sfx(unit, SOUND_SFX_DEATH_MALE);
-                } else if (stats->unit_flags & UNIT_FLAG_FEMALE) {
+                } else if (battle_unit->unit_flags & UNIT_FLAG_FEMALE) {
                     map_unit_play_sfx(unit, SOUND_SFX_DEATH_FEMALE);
-                } else if (stats->unit_flags & UNIT_FLAG_MONSTER) {
+                } else if (battle_unit->unit_flags & UNIT_FLAG_MONSTER) {
                     map_unit_play_sfx(unit, SOUND_SFX_DEATH_MONSTER);
                 }
             }
@@ -734,18 +734,18 @@ void animation_set_status_after_action(map_unit_t* unit) {
  * attacker's unarmed, swing or thrust animation with its recoil at the same
  * height. Only the TYPE1 and TYPE2 sheets have the recoils. */
 void animation_set_shield_block_attacker(map_unit_t* attacker, map_unit_t* target) {
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     s32 miss_type;
     s32 anim;
 
-    stats = target->battle_unit;
-    if (stats == 0) {
+    battle_unit = target->battle_unit;
+    if (battle_unit == 0) {
         return;
     }
     if (g_sprite_sheet_data[attacker->spritesheet_id].shp_id >= SPRITE_SHP_CYOKO) {
         return;
     }
-    miss_type = stats->action.miss_type;
+    miss_type = battle_unit->action.miss_type;
     anim = 0;
     if (miss_type >= ACTION_MISS_TYPE_RIGHT_HAND_EVADE
         && (miss_type < ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD || miss_type == ACTION_MISS_TYPE_GOLEM_GUARD)) {
@@ -799,7 +799,7 @@ void animation_set_shield_block_attacker(map_unit_t* attacker, map_unit_t* targe
  * here, and a broken or stolen item rebuilds the target's AI ability data.
  */
 void action_start_target_response(map_unit_t* attacker, map_unit_t* target) {
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     action_data_t* action;
     s32 animation;
     s32 difference;
@@ -819,9 +819,9 @@ void action_start_target_response(map_unit_t* attacker, map_unit_t* target) {
     water_depth = get_water_mode(target);
     animation = ANIMATION_SUBMERGED_IDLE;
     if (water_depth < 2) {
-        stats = target->battle_unit;
-        if (stats != 0) {
-            action = &stats->action;
+        battle_unit = target->battle_unit;
+        if (battle_unit != 0) {
+            action = &battle_unit->action;
             animation = ANIMATION_STAND;
             switch (action->miss_type) {
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:

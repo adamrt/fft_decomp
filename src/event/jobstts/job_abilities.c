@@ -71,7 +71,7 @@ void status_screen_init_unit_jobs(s32 unit_id) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-static s32 job_list_get_base(s16 unit_id) {
+static s32 get_base_job(s16 unit_id) {
     status_screen_unit_jobs_t* unit = g_status_screen_unit_data[unit_id];
     u32 job_id = unit->character_identity;
 
@@ -106,7 +106,7 @@ s32 job_list_build(u8 unit_id, s16* job_ids, s32 unused) {
 
     slot = &unit_table[unit_index];
     bits_primary_init_reader((*slot)->career.unlocked_jobs);
-    job_ids[0] = job_list_get_base(unit_id);
+    job_ids[0] = get_base_job(unit_id);
     if ((job_is_special_monster((*slot)->job_id) != 0) || ((*slot)->character_identity == CHARACTER_IDENTITY_MONSTER)) {
         job_ids[1] = -1;
         return 1;

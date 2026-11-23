@@ -25,7 +25,7 @@ static s32 calculate_friendly_magic_accuracy(void) {
 
 /* XA * YA with Magic Attack Up and zodiac compatibility only: the healing
  * formulas ignore the target's defenses. */
-static void formula_calculate_magical_xa_times_ya(void) {
+static void calculate_magical_xa_times_ya(void) {
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();
     formula_store_xa_times_ya_damage();
@@ -58,7 +58,7 @@ static s32 calculate_golem_accuracy(void) {
 
 /* Magical damage without Faith: elemental strengthen, magical modifiers, XA *
  * YA with weather and element, absorption, 19% status. */
-static void formula_calculate_magical_damage_without_faith(void) {
+static void calculate_magical_damage_without_faith(void) {
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
     if (formula_calculate_elemental_xa_times_ya() == 0) {
@@ -67,13 +67,13 @@ static void formula_calculate_magical_damage_without_faith(void) {
 }
 
 /* Damage MA * (MA + Y) / 2 without Faith: stores XA and YA, then runs the magical
- * damage chain of formula_calculate_magical_damage_without_faith. */
-static void formula_calculate_truth_damage(void) {
+ * damage chain of calculate_magical_damage_without_faith. */
+static void calculate_truth_damage(void) {
     formula_store_ma_and_ma_plus_y_divided_by_two();
-    formula_calculate_magical_damage_without_faith();
+    calculate_magical_damage_without_faith();
 }
 
-/* formula_accuracy_calculate_magic without the elemental strengthen. */
+/* calculate_magic_accuracy without the elemental strengthen. */
 static s32 calculate_magic_accuracy_without_strengthen(void) {
     formula_store_ma_and_x();
     formula_apply_magical_modifiers();
@@ -85,7 +85,7 @@ static s32 calculate_magic_accuracy_without_strengthen(void) {
 
 /* Hit chance F(MA+X)%: elemental strengthen and the magical modifiers on MA,
  * zodiac compatibility on both terms, then Faith. Returns 1 on a miss. */
-static s32 formula_accuracy_calculate_magic(void) {
+static s32 calculate_magic_accuracy(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
@@ -95,8 +95,8 @@ static s32 formula_accuracy_calculate_magic(void) {
     return g_action_target_data->hit == 0;
 }
 
-/* formula_accuracy_calculate_magic without the Faith step: hit (MA+X)%. */
-static s32 formula_accuracy_calculate_magic_without_faith(void) {
+/* calculate_magic_accuracy without the Faith step: hit (MA+X)%. */
+static s32 calculate_magic_accuracy_without_faith(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
@@ -107,7 +107,7 @@ static s32 formula_accuracy_calculate_magic_without_faith(void) {
 
 /* The physical modifiers on XA without the attacker supports: Berserk or Frog,
  * Defense Up, the target's statuses, zodiac compatibility. */
-static void formula_apply_physical_modifiers_without_supports(void) {
+static void apply_physical_modifiers_without_supports(void) {
     formula_apply_attacker_berserk_frog();
     formula_apply_defense_up();
     formula_apply_target_physical_statuses();
@@ -117,9 +117,9 @@ static void formula_apply_physical_modifiers_without_supports(void) {
 /* Hit chance (XA+YA)% with Attack Up, Martial Arts, Berserk or Frog, Defense
  * Up, the target's statuses and zodiac compatibility on XA. Returns 1 on a
  * miss. */
-static s32 formula_accuracy_calculate_physical_status(void) {
+static s32 calculate_physical_status_accuracy(void) {
     formula_apply_attack_up_and_martial_arts();
-    formula_apply_physical_modifiers_without_supports();
+    apply_physical_modifiers_without_supports();
     formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
@@ -229,7 +229,7 @@ void formula_magical_damage(void) {
  * 19% status. */
 void formula_magic_hp_percent_damage(void) {
     if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic() == 0) {
+        if (calculate_magic_accuracy() == 0) {
             formula_calculate_hp_percent_damage();
             formula_element_apply_weather();
             formula_element_apply();
@@ -244,7 +244,7 @@ void formula_magic_hp_percent_damage(void) {
 
 /* Formula 0x0A: status, hit F(MA+X)%; magic evade. */
 void formula_hit_faith_ma_x_percent(void) {
-    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy() == 0) {
         formula_apply_status_to_action();
     }
 }
@@ -263,7 +263,7 @@ void formula_friendly_magic_accuracy(void) {
 void formula_magical_heal(void) {
     formula_store_ma_and_y();
     formula_element_apply_strengthen();
-    formula_calculate_magical_xa_times_ya();
+    calculate_magical_xa_times_ya();
     formula_calculate_faith();
     formula_apply_undead_reversal();
 }
@@ -421,7 +421,7 @@ void formula_destroy_sword_stat_ruin(void) {
 /* Formula 0x1B (Magic Ruin): MP damage (Y)% of max MP, hit F(MA+X)%; magic evade. */
 void formula_magic_ruin(void) {
     if (formula_evade_calculate_magical() == 0) {
-        if (formula_accuracy_calculate_magic() == 0) {
+        if (calculate_magic_accuracy() == 0) {
             formula_calculate_mp_percent_damage();
         }
     }
@@ -456,7 +456,7 @@ void formula_dance(void) {
  * (init_strike_data). */
 void formula_multihit_truth_magic(void) {
     if (formula_evade_calculate_magical() == 0) {
-        formula_calculate_truth_damage();
+        calculate_truth_damage();
     }
 }
 
@@ -505,7 +505,7 @@ void formula_un_truth(void) {
 void formula_draw_out_damage(void) {
     formula_calculate_katana_break();
     formula_store_ma_and_y();
-    formula_calculate_magical_damage_without_faith();
+    calculate_magical_damage_without_faith();
 }
 
 /* Formula 0x21 (Bizen Boat): Draw Out MP damage (MA * Y); katana break roll. */
@@ -542,7 +542,7 @@ void formula_murasame(void) {
 void formula_elemental(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_store_ma_and_pa_plus_y_divided_by_two();
-        formula_calculate_magical_damage_without_faith();
+        calculate_magical_damage_without_faith();
     }
 }
 
@@ -589,7 +589,7 @@ void formula_steal_equipment(void) {
         return;
     }
     formula_store_speed_and_x();
-    if (formula_accuracy_calculate_physical_status() != 0) {
+    if (calculate_physical_status_accuracy() != 0) {
         return;
     }
     formula_apply_maintenance();
@@ -604,7 +604,7 @@ void formula_steal_equipment(void) {
 void formula_steal_gil(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_speed_and_x();
-        if (formula_accuracy_calculate_physical_status() == 0) {
+        if (calculate_physical_status_accuracy() == 0) {
             formula_calculate_stolen_gil();
         }
     }
@@ -764,7 +764,7 @@ void formula_damage_pa_plus_y_half_times_pa(void) {
         formula_store_pa_and_pa_plus_y_divided_by_two();
         formula_element_apply_strengthen();
         formula_apply_attack_up_and_martial_arts();
-        formula_apply_physical_modifiers_without_supports();
+        apply_physical_modifiers_without_supports();
         formula_calculate_critical_hit();
         formula_store_xa_times_ya_damage();
         formula_element_apply_weather();
@@ -791,7 +791,7 @@ void formula_repeating_fist(void) {
         return;
     formula_store_pa_and_pa_plus_y_divided_by_two();
     formula_apply_attack_up_and_martial_arts();
-    formula_apply_physical_modifiers_without_supports();
+    apply_physical_modifiers_without_supports();
     formula_calculate_critical_hit();
     formula_store_xa_plus_ya();
     rnd = formula_get_random();
@@ -853,14 +853,14 @@ void formula_damage_random_y_times_pa(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_pa_and_y();
         formula_apply_attack_up_and_martial_arts();
-        formula_apply_physical_modifiers_without_supports();
+        apply_physical_modifiers_without_supports();
         formula_apply_damage_and_knockback();
     }
 }
 
 /* Formula 0x3D: status, hit (MA+X)%; magic evade. */
 void formula_hit_ma_x_percent_magical_evade(void) {
-    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_faith() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_faith() == 0) {
         formula_apply_status_to_action();
     }
 }
@@ -900,7 +900,7 @@ void formula_seal_evil(void) {
 
 /* Formula 0x41: hit (MA+X)%; forced miss when caster and target share a zodiac sign. */
 void formula_galaxy_stop(void) {
-    if (formula_accuracy_calculate_magic_without_faith() == 0) {
+    if (calculate_magic_accuracy_without_faith() == 0) {
         if (g_action_target->birthday.zodiac == g_action_attacker->birthday.zodiac) {
             formula_force_attack_miss();
         } else {
@@ -980,7 +980,7 @@ void formula_phoenix_down(void) {
 /* Formula 0x4C: heal (MA * Y) HP. */
 void formula_heal_ma_times_y(void) {
     formula_store_ma_and_y();
-    formula_calculate_magical_xa_times_ya();
+    calculate_magical_xa_times_ya();
     formula_apply_undead_reversal();
 }
 
@@ -990,7 +990,7 @@ void formula_absorb_hp_y_percent_hit_ma_x_percent(void) {
         return;
     }
     formula_store_ma_and_x();
-    if (formula_accuracy_calculate_physical_status() != 0) {
+    if (calculate_physical_status_accuracy() != 0) {
         return;
     }
     formula_calculate_hp_percent_damage();
@@ -1001,7 +1001,7 @@ void formula_absorb_hp_y_percent_hit_ma_x_percent(void) {
 void formula_damage_ma_times_y(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_store_ma_and_y();
-        formula_calculate_magical_damage_without_faith();
+        calculate_magical_damage_without_faith();
     }
 }
 
@@ -1010,7 +1010,7 @@ void formula_damage_ma_times_y(void) {
 void formula_goblin_punch(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_ma_and_x();
-        if (formula_accuracy_calculate_physical_status() == 0) {
+        if (calculate_physical_status_accuracy() == 0) {
             formula_damage_caster_missing_hp();
         }
     }
@@ -1020,7 +1020,7 @@ void formula_goblin_punch(void) {
 void formula_hit_ma_x_percent_physical_evade(void) {
     if (formula_evade_calculate_physical() == 0) {
         formula_store_ma_and_x();
-        if (formula_accuracy_calculate_physical_status() == 0) {
+        if (calculate_physical_status_accuracy() == 0) {
             formula_apply_status_to_action();
         }
     }
@@ -1066,7 +1066,7 @@ void formula_damage_y_percent_hit_ma_x_percent(void) {
     if (formula_evade_calculate_magical() != 0) {
         return;
     }
-    if (formula_accuracy_calculate_magic_without_faith() != 0) {
+    if (calculate_magic_accuracy_without_faith() != 0) {
         return;
     }
     formula_calculate_hp_percent_damage();
@@ -1080,13 +1080,13 @@ void formula_damage_y_percent_hit_ma_x_percent(void) {
 /* Formula 0x54: heal (MA * Y) MP. */
 void formula_magic_spirit(void) {
     formula_store_ma_and_y();
-    formula_calculate_magical_xa_times_ya();
+    calculate_magical_xa_times_ya();
     formula_convert_hp_damage_to_mp_recovery();
 }
 
 /* Formula 0x55: -PA (Y), hit (MA+X)%. */
 void formula_beaking(void) {
-    if (formula_evade_calculate_magical() != 0 || formula_accuracy_calculate_magic_without_faith() != 0) {
+    if (formula_evade_calculate_magical() != 0 || calculate_magic_accuracy_without_faith() != 0) {
         return;
     }
     g_action_target_data->pa_change = g_action_work.range_data.y & ACTION_STAT_CHANGE_VALUE_MASK;
@@ -1095,7 +1095,7 @@ void formula_beaking(void) {
 
 /* Formula 0x56: -MA (Y), hit (MA+X)%. */
 void formula_circle(void) {
-    if (formula_evade_calculate_magical() != 0 || formula_accuracy_calculate_magic_without_faith() != 0) {
+    if (formula_evade_calculate_magical() != 0 || calculate_magic_accuracy_without_faith() != 0) {
         return;
     }
     g_action_target_data->ma_change = g_action_work.range_data.y & ACTION_STAT_CHANGE_VALUE_MASK;
@@ -1172,7 +1172,7 @@ void formula_moldball_virus(void) {
 void formula_level_blast(void) {
     action_data_t* action;
 
-    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_faith() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_faith() == 0) {
         if (g_action_target->level < 2) {
             formula_force_attack_miss();
         }
@@ -1221,7 +1221,7 @@ void formula_dragon_level_up(void) {
  * evade. init_strike_data runs X+1 strikes; this handler calculates one. */
 void formula_fixed_multihit_magic(void) {
     if (formula_evade_calculate_magical() == 0) {
-        formula_calculate_truth_damage();
+        calculate_truth_damage();
     }
 }
 
@@ -1229,25 +1229,25 @@ void formula_fixed_multihit_magic(void) {
  * evade. */
 void formula_nanoflare(void) {
     if (formula_evade_calculate_magical() == 0) {
-        formula_calculate_truth_damage();
+        calculate_truth_damage();
     }
 }
 
 /* Formula 0x60: damage ((MA + Y) / 2 * MA) with element, 19% status; no evade. */
 void formula_damage_ma_plus_y_half_times_ma_status(void) {
-    formula_calculate_truth_damage();
+    calculate_truth_damage();
 }
 
 /* Formula 0x61: -Brave (Y), hit F(MA+X)%; magic evade. */
 void formula_lower_brave_y(void) {
-    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy() == 0) {
         formula_set_brave_loss_y();
     }
 }
 
 /* Formula 0x62: -Brave (Y), hit (MA+X)%; magic evade. */
 void formula_look_of_fright(void) {
-    if (formula_evade_calculate_magical() == 0 && formula_accuracy_calculate_magic_without_faith() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_faith() == 0) {
         formula_set_brave_loss_y();
     }
 }
@@ -1264,7 +1264,7 @@ void formula_throw_damage(void) {
     }
     g_action_work.xa = g_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED];
     g_action_work.ya = g_action_work.weapon_data.power;
-    formula_apply_physical_modifiers_without_supports();
+    apply_physical_modifiers_without_supports();
     formula_store_xa_times_ya_damage();
     formula_element_modify_weapon_damage();
     if (g_action_target_data->hit == 0) {
@@ -1277,6 +1277,6 @@ void formula_throw_damage(void) {
  * (PA * (PA * Brave / 100)). No evade roll here. */
 void formula_jump_damage(void) {
     formula_store_jump_xa_ya();
-    formula_apply_physical_modifiers_without_supports();
+    apply_physical_modifiers_without_supports();
     formula_store_xa_times_ya_damage();
 }

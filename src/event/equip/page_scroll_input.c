@@ -4,7 +4,6 @@
 #include "fft/menu/menu.h"
 #include "fft/menu/menu_input.h"
 #include "fft/menu/menu_script.h"
-#include "fft/party/equipment.h"
 #include "fft/sys/input.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"

@@ -187,7 +187,7 @@ void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode) {
 
 /* Skip a command plus, for group opcodes 1 and 2, the child commands it counts;
  * return the command that follows. */
-static menu_instruction_t* menu_script_skip_group(menu_instruction_t* command) {
+static menu_instruction_t* skip_script_group(menu_instruction_t* command) {
     s32 count;
 
     if (command->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {
@@ -321,7 +321,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     if (g_menu_list_entry_count <= 0) {
         count = command->list.skip_count + 1;
         while (--count != -1) {
-            command = menu_script_skip_group(command);
+            command = skip_script_group(command);
         }
         return command;
     }

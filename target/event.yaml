@@ -414,7 +414,7 @@ functions:
   - {addr: 0x801c7148, size: 96, name: unit_list_find_by_battle_unit_id, hash: aeb870b2fb0d661f, unit: unit_records}
   - {addr: 0x801c71a8, size: 44, name: job_get_generic_index, hash: 39c0e32433f9234e, unit: job_abilities}
   - {addr: 0x801c71d4, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, unit: job_abilities}
-  - {addr: 0x801c722c, size: 76, name: job_list_get_base, hash: 0fb085973a10550b, unit: job_abilities}
+  - {addr: 0x801c722c, size: 76, name: get_base_job, hash: 0fb085973a10550b, unit: job_abilities}
   - {addr: 0x801c7278, size: 72, name: job_calculate_and_store_unlocks, hash: 79ecd32bffad7458, unit: job_abilities}
   - {addr: 0x801c72c0, size: 352, name: unit_list_build_job_list, hash: 0372cf84313e0cb9, unit: job_abilities}
   - {addr: 0x801c7420, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, unit: job_abilities}
@@ -446,7 +446,7 @@ functions:
   - {addr: 0x801c9b4c, size: 424, name: menu_opcode_17_draw_right_aligned_number, hash: fbd03bb0cdf31870, unit: menu_list}
   - {addr: 0x801c9cf4, size: 652, name: menu_draw_sliding_cursor, hash: 48df7a46e058abc1, unit: menu_list}
   - {addr: 0x801c9f80, size: 864, name: menu_draw_bouncing_cursor, hash: 8fec6593004c6ff0, unit: menu_list}
-  - {addr: 0x801ca2e0, size: 108, name: menu_script_skip_group, hash: a7fc8159f10402de, unit: menu_list}
+  - {addr: 0x801ca2e0, size: 108, name: skip_script_group, hash: a7fc8159f10402de, unit: menu_list}
   - {addr: 0x801ca34c, size: 672, name: menu_scrollable_list_refresh, hash: c454dc9d46c8694d, unit: menu_list}
   - {addr: 0x801ca5ec, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d, unit: menu_list}
   - {addr: 0x801ca61c, size: 52, name: menu_scrollable_list_open_at_scroll_base, hash: 35dc1f5825a6e10d, unit: menu_list}
@@ -482,11 +482,11 @@ functions:
   - {addr: 0x801cc6dc, size: 164, name: menu_selection_step_horizontal, hash: cb38c38746c32f7f, unit: selection_movement}
   - {addr: 0x801cc780, size: 104, name: menu_selection_step_horizontal_with_sound, hash: 54c85e2ccf804088, unit: selection_movement}
   - {addr: 0x801cc7e8, size: 32, name: menu_input_clear_state, hash: c3b917b4bb4be9ca, source: src/lib/menu/input_masks.c}
-  - {addr: 0x801cc808, size: 128, name: job_list_calculate_level, hash: 6792aa8905ba14f8, unit: job_list}
+  - {addr: 0x801cc808, size: 128, name: calculate_level, hash: 6792aa8905ba14f8, unit: job_list}
   - {addr: 0x801cc888, size: 96, name: calculate_job_list_jp, hash: 9be830d1dea82b7c, unit: job_list}
-  - {addr: 0x801cc8e8, size: 96, name: job_list_calculate_total_jp, hash: 7788884e757641be, unit: job_list}
-  - {addr: 0x801cc948, size: 128, name: job_list_calculate_next_level_jp, hash: 6953427c216412ff, unit: job_list}
-  - {addr: 0x801cc9c8, size: 80, name: job_list_calculate_mastered, hash: 9e34c8881455e7b9, unit: job_list}
+  - {addr: 0x801cc8e8, size: 96, name: calculate_total_jp, hash: 7788884e757641be, unit: job_list}
+  - {addr: 0x801cc948, size: 128, name: calculate_next_level_jp, hash: 6953427c216412ff, unit: job_list}
+  - {addr: 0x801cc9c8, size: 80, name: calculate_mastered, hash: 9e34c8881455e7b9, unit: job_list}
   - {addr: 0x801cca18, size: 532, name: job_list_update, hash: 9f6d31e244a4b13e, unit: job_list}
   - {addr: 0x801ccc2c, size: 16, name: job_list_get_jp, hash: 37bd825c7c410897, unit: job_list}
   - {addr: 0x801ccc3c, size: 16, name: job_list_get_level, hash: c00599d9d4da1832, unit: job_list}
@@ -1461,7 +1461,7 @@ functions:
   - {addr: 0x801c7980, size: 84, name: is_in_category_list, hash: 51620ec7a2e5446b, unit: item_order}
   - {addr: 0x801c79d4, size: 104, name: prepend_to_category_list, hash: ea719a53cf244b40, unit: item_order}
   - {addr: 0x801c7a3c, size: 128, name: remove_from_category_list, hash: 71937d05d6e62d46, unit: item_order}
-  - {addr: 0x801c7abc, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, unit: equipment_stats}
+  - {addr: 0x801c7abc, size: 72, name: clear_stat_preview, hash: 740a9e32a9c766bb, unit: equipment_stats}
   - {addr: 0x801c7b04, size: 552, name: item_list_build_stat_preview, hash: 0ac56f16113047c1, unit: equipment_stats}
   - {addr: 0x801c7d2c, size: 188, name: equipment_calculate_swap_delta, hash: b8cc1a11e7a4d8e7, unit: equipment_stats}
   - {addr: 0x801c7de8, size: 424, name: subtract_scaled_stat_preview, hash: 7621477fabb93d49, unit: equipment_stats}
@@ -1495,7 +1495,7 @@ functions:
   - {addr: 0x801c9604, size: 36, name: menu_selection_clear_values, hash: 8592e44c9c9b0dea, unit: selection_values}
   - {addr: 0x801c9628, size: 32, name: menu_selection_set_value, hash: b6f0c63d5e77263b, unit: selection_values}
   - {addr: 0x801c9648, size: 32, name: menu_selection_init_value, hash: b6f0c63d5e77263b, unit: selection_values}
-  - {addr: 0x801c9668, size: 164, name: menu_selection_step_vertical, hash: 61020c2f22b0321c, unit: selection_movement}
+  - {addr: 0x801c9668, size: 164, name: step_vertical_selection, hash: 61020c2f22b0321c, unit: selection_movement}
   - {addr: 0x801c970c, size: 104, name: menu_selection_step_vertical_with_sound, hash: 1f1b001e88f556f0, unit: selection_movement}
   - {addr: 0x801c9774, size: 164, name: menu_selection_step_horizontal, hash: 46f4d2bb5ca95d72, unit: selection_movement}
   - {addr: 0x801c9818, size: 104, name: menu_selection_step_horizontal_with_sound, hash: 308db0791e6f9542, unit: selection_movement}
@@ -1536,7 +1536,7 @@ functions:
   - {addr: 0x801cbd48, size: 1076, name: menu_opcode_0d_draw_formatted_number, hash: 66875582960ce0d8, unit: menu_list}
   - {addr: 0x801cc17c, size: 428, name: menu_opcode_17_draw_right_aligned_number, hash: 325db0fd2794a02d, unit: menu_list}
   - {addr: 0x801cc328, size: 660, name: menu_draw_sliding_cursor, hash: 3938e60d49f17206, unit: menu_list}
-  - {addr: 0x801cc5bc, size: 108, name: menu_script_skip_group, hash: e3dba406e3887731, unit: menu_list}
+  - {addr: 0x801cc5bc, size: 108, name: skip_script_group, hash: e3dba406e3887731, unit: menu_list}
   - {addr: 0x801cc628, size: 672, name: menu_scrollable_list_refresh, hash: b2d0e76db3f4d7ef, unit: menu_list}
   - {addr: 0x801cc8c8, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9, unit: menu_list}
   - {addr: 0x801cc8f8, size: 2492, name: menu_opcode_10_draw_scrollable_list, hash: 94ee93a645f6dd65, unit: menu_list}
@@ -1979,11 +1979,11 @@ functions:
   - {addr: 0x801df4a4, size: 60, name: menu_selection_clear_record, hash: 2bb5b087e1621ebe, unit: selection_records}
   - {addr: 0x801df4e0, size: 76, name: menu_selection_set_record, hash: 21d529d3737f9365, unit: selection_records}
   - {addr: 0x801df52c, size: 176, name: menu_selection_restore_record, hash: 0db7da1324171bf7, unit: selection_records}
-  - {addr: 0x801df5dc, size: 108, name: job_list_calculate_level, hash: b5f033f5213a365d, unit: job_list}
+  - {addr: 0x801df5dc, size: 108, name: calculate_level, hash: b5f033f5213a365d, unit: job_list}
   - {addr: 0x801df648, size: 76, name: calculate_job_list_jp, hash: 7a7626e0618d8ab0, unit: job_list}
-  - {addr: 0x801df694, size: 76, name: job_list_calculate_total_jp, hash: 0df03e32871d265e, unit: job_list}
-  - {addr: 0x801df6e0, size: 128, name: job_list_calculate_next_level_jp, hash: a4c0646e2fecc0cc, unit: job_list}
-  - {addr: 0x801df760, size: 76, name: job_list_calculate_mastered, hash: 21d6ba91698660e1, unit: job_list}
+  - {addr: 0x801df694, size: 76, name: calculate_total_jp, hash: 0df03e32871d265e, unit: job_list}
+  - {addr: 0x801df6e0, size: 128, name: calculate_next_level_jp, hash: a4c0646e2fecc0cc, unit: job_list}
+  - {addr: 0x801df760, size: 76, name: calculate_mastered, hash: 21d6ba91698660e1, unit: job_list}
   - {addr: 0x801df7ac, size: 440, name: job_list_update, hash: 46b52dabd5fe68f5, unit: job_list}
   - {addr: 0x801df964, size: 16, name: job_list_get_jp, hash: 51fde6eb69508838, unit: job_list}
   - {addr: 0x801df974, size: 16, name: job_list_get_level, hash: f6c5f24af18727bf, unit: job_list}
@@ -2005,7 +2005,7 @@ functions:
   - {addr: 0x801dffa0, size: 32, name: job_is_special_monster, hash: f4362856b8ecd185, source: src/lib/job.c}
   - {addr: 0x801dffc0, size: 360, name: copy_unit_jobs, hash: 8549998d0529a4c8, unit: job_abilities}
   - {addr: 0x801e0128, size: 64, name: status_screen_init_unit_jobs, hash: 2f5b68b9627401dd, unit: job_abilities}
-  - {addr: 0x801e0168, size: 76, name: job_list_get_base, hash: 56e2d800265d4c96, unit: job_abilities}
+  - {addr: 0x801e0168, size: 76, name: get_base_job, hash: 56e2d800265d4c96, unit: job_abilities}
   - {addr: 0x801e01b4, size: 352, name: job_list_build, hash: 3883f26eb277dc3a, unit: job_abilities}
   - {addr: 0x801e0314, size: 88, name: job_find_first_for_skillset, hash: 0e69ad31124150c2, unit: job_abilities}
   - {addr: 0x801e036c, size: 36, name: job_get_skillset, hash: 72f6f53360f055dc, unit: job_abilities}
@@ -2047,7 +2047,7 @@ functions:
   - {addr: 0x801e30ac, size: 44, name: menu_opcode_0f_set_draw_priority_if_unlocked, hash: 2bdd2ff580aa0d01, unit: texture_commands}
   - {addr: 0x801e30d8, size: 704, name: menu_opcode_0d_draw_formatted_number, hash: a7c4288fdb526bef, unit: menu_list}
   - {addr: 0x801e3398, size: 660, name: menu_draw_sliding_cursor, hash: 1820d09644d45f32, unit: menu_list}
-  - {addr: 0x801e362c, size: 108, name: menu_script_skip_group, hash: 68ca8c4bcbe84a81, unit: menu_list}
+  - {addr: 0x801e362c, size: 108, name: skip_script_group, hash: 68ca8c4bcbe84a81, unit: menu_list}
   - {addr: 0x801e3698, size: 672, name: menu_scrollable_list_refresh, hash: e44d487c3819b679, unit: menu_list}
   - {addr: 0x801e3938, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 461e97c53dac7c63, unit: menu_list}
   - {addr: 0x801e3968, size: 2512, name: menu_opcode_10_draw_scrollable_list, hash: 8765fb678224aca4, unit: menu_list}

@@ -71,7 +71,7 @@ void auto_battle_settings_thread(void) {
     menu_icon_record_t records[2];
     s32 cursor;
     s32 previous;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     menu_entry_t* param;
     u8* buffer;
     s32 i;
@@ -85,14 +85,14 @@ void auto_battle_settings_thread(void) {
 
     param = (menu_entry_t*)thread_current_get_parameter_1();
     cursor = param->selected_index;
-    stats = unit_panel_get_selected_battle_unit();
-    if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
+    battle_unit = unit_panel_get_selected_battle_unit();
+    if (battle_unit->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
         cursor = 0;
-    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_FIGHT_FOR_LIFE) {
+    } else if (battle_unit->auto_battle_setting == AI_AUTOBATTLE_FIGHT_FOR_LIFE) {
         cursor = 1;
-    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_PROTECT_ALLIES) {
+    } else if (battle_unit->auto_battle_setting == AI_AUTOBATTLE_PROTECT_ALLIES) {
         cursor = 2;
-    } else if (stats->auto_battle_setting == AI_AUTOBATTLE_FADING_LIFE) {
+    } else if (battle_unit->auto_battle_setting == AI_AUTOBATTLE_FADING_LIFE) {
         cursor = 3;
     } else {
         cursor = 4;
@@ -112,7 +112,7 @@ void auto_battle_settings_thread(void) {
                 selected = cursor;
                 if (selected == 0) {
                     before = command_get_menu_id_by_battle_unit_id(g_unit_panel_selected_unit.battle_unit_id);
-                    stats->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
+                    battle_unit->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
                     g_command_pending_selection[0] = 0x12;
                     color[0] = 8;
                     color[1] = 4;
@@ -236,7 +236,7 @@ void menu_icon_selection_thread(void) {
 static void build_ability_preview(void) {
     at_list_work_t* work;
     menu_entry_t* entry;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     u8* text;
     action_command_t* action;
     u8* published;
@@ -265,9 +265,9 @@ static void build_ability_preview(void) {
 
     action = &g_command_selected_command.data.action;
     action->actor_id = g_unit_panel_selected_unit.battle_unit_id;
-    stats = unit_panel_get_selected_battle_unit();
+    battle_unit = unit_panel_get_selected_battle_unit();
     g_thread_call_target = (void (*)(void))at_list_preview;
-    turn = thread_call_on_main_stack(stats, action, work->entries);
+    turn = thread_call_on_main_stack(battle_unit, action, work->entries);
     /* An item preview marks the first entry as the item action; the loop below names it
      * from the item text. */
     if (staged_item != 0) {
@@ -308,14 +308,14 @@ static void build_ability_preview(void) {
             break;
         }
         work->entry_numbers[index] = index + 1;
-        stats = battle_unit_get(slot->unit_code & AT_UNIT_ID_MASK);
+        battle_unit = battle_unit_get(slot->unit_code & AT_UNIT_ID_MASK);
         /* Action rows wrap the unit name in the 0xd9be/0xd9bf glyph pair. */
         if ((slot->unit_code & AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
         for (name_index = 0; name_index < UNIT_NAME_SIZE; name_index++) {
-            u8 character = stats->name[name_index];
+            u8 character = battle_unit->name[name_index];
             *text = character;
             if ((character & 0xfe) == 0xfe) {
                 break;
@@ -359,7 +359,7 @@ static void build_ability_preview(void) {
             work->primary_text_ids[count] = action_text_id;
         }
 
-        if ((stats->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
+        if ((battle_unit->initial_team_flags & UNIT_TEAM_MASK) != UNIT_TEAM_BLUE) {
             work->secondary_colors[count] = 8;
         }
         count++;

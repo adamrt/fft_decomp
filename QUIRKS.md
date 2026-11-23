@@ -91,7 +91,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   once.
 - `menu_screen_open_entry_window` receives requested x/y origins but always
   opens at its fixed default origin.
-- `result_build_next_display`: the CT-zero
+- `build_next_result_display`: the CT-zero
   display case reads `y_shift` without setting it; only the HP/MP and
   stat-change cases assign it, so the sprite row depends on the leftover value.
 - `sprite_update_queued_load` replaces sheet ids from 0xa0
@@ -760,7 +760,7 @@ written that way.
   it assigns before reading.
 - `map_calculate_slope_height` masks its terrain layer to a byte; two callers
   pass the 16-bit `action_command.target_position.vy` unmasked.
-- `move_start_next_post_event` passes x/layer/y to `ai_store_triggered_trap_coords`,
+- `start_next_post_move_event` passes x/layer/y to `ai_store_triggered_trap_coords`,
   whose byte stores expect x/y/layer. The argument-order disagreement is preserved.
 - WLDCORE passes its 8-byte records by value:
   `RECT` to the three render-record builders and
@@ -915,7 +915,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 
 - `save_image_restore` skips a saved Unit List order if any of its first 11 keys is 11, and skips a saved Formation order if any of its first seven keys is 11. It preserves the live order, writes its final -1 terminator, and continues loading the save. Formation key 11 would read the fixed 100 CT maximum; the Order Unit menu exposes only keys 0, 1, 2, 4, 5, 7 and 9.
 - `weather_dispatch_command` selects precipitation from the raw script weather and snow flag. The rain and snow drawing paths do not test `MAP_WEATHER_FLAG_IGNORE_WEATHER`: that indoor flag suppresses elemental and movement weather rules through `weather_get_effective`, but does not itself suppress the particles.
-- `move_start_next_post_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `battle_state_post_move_events_update` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
+- `start_next_post_move_event` handles `MOVE_POST_EVENT_SOURCE_DISPLAY` (0x200), and `battle_state_post_move_events_update` clears it, but the normal producer chain through `move_get_post_events` and `move_get_ability_events` never sets it.
 - `animation_set_status` retains two branches selecting animation 0x21 when bit 0 of `status_flags_1_4` is set. Normal status updates never set that bit. Crystal's mask 1 belongs to the separate `status_flags_5_6` word; this does not rule out animation requests from other paths.
 - `gfx_load_debug_font`: patches the low immediate byte of `FntLoad` at `0x80022f5c`, changing its font CLUT placement from `y + 128` to `y + 127`.
 - `StCdInterrupt`: tracks frame numbers through the header's low `u16`, while DMA completion and OPEN retain the full `u32` frame number.
@@ -1193,8 +1193,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   is read from the operand.
 - `move_find_get_result` repeats the same `battle_unit_find_at_tile`
   call up to 21 times: its occupant loop never uses the counter.
-- `turn_start_next_event` calls
-  `map_unit_store_team_flags` twice, around
+- `start_next_turn_event` calls
+  `store_team_flags` twice, around
   `command_reset_unit_record`, which leaves team flags alone; the first call
   reads `unit->battle_unit` before the null test that guards the second.
 - `effect_secondary_start_projectile` tests Throw Shuriken (382)

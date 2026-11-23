@@ -614,7 +614,7 @@ static s32 distortion_fall_to_target(map_unit_t* unit) {
     SVECTOR unused_18;
     VECTOR velocity;
     map_unit_t* other;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     s32 timer;
     s32 x;
     s32 y;
@@ -648,11 +648,11 @@ static s32 distortion_fall_to_target(map_unit_t* unit) {
                 vector_set_short(&coords, other->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), other->map_layer,
                     other->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
             } else {
-                stats = unit->battle_unit;
+                battle_unit = unit->battle_unit;
                 vector_set_short(&coords,
-                    stats->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2),
-                    stats->action_command.target_position.vy,
-                    stats->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+                    battle_unit->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2),
+                    battle_unit->action_command.target_position.vy,
+                    battle_unit->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
             }
             coords.vy = map_unit_calculate_height_with_caller_coords(unit, &coords);
         }

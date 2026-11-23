@@ -154,7 +154,7 @@ static void update_party_number_request(void);
 static void update_save_request(void);
 static void update_brave_story_request(void);
 static void start_window_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y);
-static void window_group_thread(void);
+static void dispatch_window_group_thread(void);
 static void init_entry_text_sprite(RECT* out, const menu_entry_t* record, SPRT* primitive);
 static void build_entry_frame_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 
@@ -1047,7 +1047,7 @@ static void start_window_group(s32 parameter, s32 location_id, s32 window_x, s32
         g_menu_screen_default_entries[2].text_id = location_id + TEXT_ID_LOCATION_NAME_BASE;
         g_menu_screen_default_entries[2].window.x = window_x;
         g_menu_screen_default_entries[2].window.y = window_y;
-        thread_start(MENU_SCREEN_THREAD_SLOT_MENU_GROUP, window_group_thread);
+        thread_start(MENU_SCREEN_THREAD_SLOT_MENU_GROUP, dispatch_window_group_thread);
         thread_set_parameters(MENU_SCREEN_THREAD_SLOT_MENU_GROUP, parameter, 0, 0);
     }
 }
@@ -1057,7 +1057,7 @@ static void start_window_group(s32 parameter, s32 location_id, s32 window_x, s32
  * others are signaled to finish (state 1) and awaited. Finished or idle members
  * with callbacks are started with the matching menu entry and task id; a -1
  * callback starts no replacement. The thread exits once no request is pending. */
-static void window_group_thread(void) {
+static void dispatch_window_group_thread(void) {
     s32 state[16];
     menu_group_t* group;
     s32 index;

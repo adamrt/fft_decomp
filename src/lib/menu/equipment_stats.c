@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* Clear the HP/MP preview bonuses and equipment-detail stats. */
-static void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail) {
+static void clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail) {
     summary->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = 0;
     summary->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = 0;
     detail->state.move = 0;
@@ -42,7 +42,7 @@ static void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_pan
 static void build_movement_bonus(s16 ability, unit_panel_record_t* out) {
     unit_panel_summary_t summary;
 
-    equipment_clear_stat_preview(&summary, out);
+    clear_stat_preview(&summary, out);
     if (ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1 && ability <= ABILITY_ID_MOVEMENT_MOVE_PLUS_3) {
         out->state.move = ability - (ABILITY_ID_MOVEMENT_MOVE_PLUS_1 - 1);
     } else {
@@ -63,7 +63,7 @@ void formation_ability_calculate_movement_delta(unit_panel_record_t* stat_diff, 
     unit_panel_record_t old_stats;
     unit_panel_record_t new_stats;
 
-    equipment_clear_stat_preview(&summary, stat_diff);
+    clear_stat_preview(&summary, stat_diff);
     build_movement_bonus(old_ability, &old_stats);
     build_movement_bonus(new_ability, &new_stats);
     stat_diff->state.move = new_stats.state.move - old_stats.state.move;
@@ -89,7 +89,7 @@ void item_list_build_stat_preview(
     s32 power;
     s32 evade;
 
-    equipment_clear_stat_preview(summary, detail);
+    clear_stat_preview(summary, detail);
     item_id = raw_item & ITEM_ENTRY_ID_MASK;
     if (item_id > 0
 #ifdef FFT_WORLD
@@ -185,7 +185,7 @@ void equipment_calculate_loadout_delta(unit_panel_record_t* detail_total, unit_p
     unit_panel_record_t unused; /* unreferenced in the target; needed for the frame size */
     s32 i;
 
-    equipment_clear_stat_preview(summary_total, detail_total);
+    clear_stat_preview(summary_total, detail_total);
 
     for (i = 0; i < 5; i++) {
         equipment_calculate_swap_delta(&detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);

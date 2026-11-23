@@ -629,7 +629,7 @@ s32 menu_input_get_lock_mode(s32 unused_0) {
 
 /* Job level of the selected unit in the Learn Abilities menu's `index`th
  * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
-static s32 job_list_calculate_level(s32 index) {
+static s32 calculate_level(s32 index) {
     s32 job_index = job_get_generic_index(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_formation_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
@@ -651,7 +651,7 @@ static s32 calculate_job_list_jp(s32 index) {
 /* Caches and returns the selected unit's total JP for the Learn Abilities
  * menu's `index`th unlocked job; the job list's menu script reads it as a
  * number callback. */
-static s32 job_list_calculate_total_jp(s32 index) {
+static s32 calculate_total_jp(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_formation_ability_learn_job_total_jp
@@ -662,7 +662,7 @@ static s32 job_list_calculate_total_jp(s32 index) {
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
  * `index`th job is looked up but its result is not used. */
-static s32 job_list_calculate_next_level_jp(s32 index) {
+static s32 calculate_next_level_jp(s32 index) {
     s32 level;
 
     job_get_generic_index(g_job_list_job_ids[index]);
@@ -677,7 +677,7 @@ static s32 job_list_calculate_next_level_jp(s32 index) {
 
 /* Caches and returns whether the `index`th job's skillset has nothing left
  * for the selected unit to learn (no unlearned ability counted). */
-static s32 job_list_calculate_mastered(s32 index) {
+static s32 calculate_mastered(s32 index) {
     g_job_current_mastered = ability_list_build(g_unit_selected_index, g_job_list_job_ids[index],
                                  MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
         == 0;
@@ -697,11 +697,11 @@ s32 job_list_update(void) {
     if (g_formation_ability_learn_job_list_initialized == 0) {
         menu_set_event_speed(2);
         job_list_build(g_unit_selected_index, g_job_list_job_ids, 0);
-        g_menu_row_callbacks[0].value = job_list_calculate_level;
+        g_menu_row_callbacks[0].value = calculate_level;
         g_menu_row_callbacks[2].value = calculate_job_list_jp;
-        g_menu_row_callbacks[5].value = job_list_calculate_next_level_jp;
-        g_menu_row_callbacks[6].value = job_list_calculate_total_jp;
-        g_menu_row_callbacks[13].value = job_list_calculate_mastered;
+        g_menu_row_callbacks[5].value = calculate_next_level_jp;
+        g_menu_row_callbacks[6].value = calculate_total_jp;
+        g_menu_row_callbacks[13].value = calculate_mastered;
         menu_selection_restore_record(9, &x, &y, g_job_list_job_ids);
         menu_scrollable_list_init(g_job_list_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_formation_ability_learn_job_list_initialized = 1;
@@ -715,15 +715,15 @@ s32 job_list_update(void) {
     }
     /* A mastered job has nothing left to learn, so only View Abilities may open it. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        if (job_list_calculate_mastered(g_menu_list_selected_index) == 0
+        if (calculate_mastered(g_menu_list_selected_index) == 0
             || g_formation_current_menu == FORMATION_MENU_VIEW_ABILITIES) {
             g_formation_ability_learn_selected_job = g_job_list_job_ids[g_menu_list_selected_index];
             g_formation_ability_learn_selected_job_index
                 = job_get_generic_index(g_formation_ability_learn_selected_job);
-            job_list_calculate_level(g_menu_list_selected_index);
+            calculate_level(g_menu_list_selected_index);
             calculate_job_list_jp(g_menu_list_selected_index);
-            job_list_calculate_total_jp(g_menu_list_selected_index);
-            job_list_calculate_next_level_jp(g_menu_list_selected_index);
+            calculate_total_jp(g_menu_list_selected_index);
+            calculate_next_level_jp(g_menu_list_selected_index);
             menu_selection_set_record(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
             g_formation_ability_learn_job_list_initialized = 0;
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;

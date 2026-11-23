@@ -66,17 +66,17 @@ void script_process_status_commands(void) {
  * ANIMATION_SEQUENCE_EVTCHR_SLOT_0 up are always played as requested. */
 void map_unit_set_event_animation(s32 map_unit_id, u32 animation) {
     s32 battle_unit_id;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     s32 depth;
 
     if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0
         && script_variable_get(EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY) != 0) {
         battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
         if (battle_unit_id >= 0 && animation < ANIMATION_SEQUENCE_EVTCHR_SLOT_0) {
-            stats = battle_unit_get(battle_unit_id);
+            battle_unit = battle_unit_get(battle_unit_id);
             depth = map_get_tile_value(
-                MAP_TILE_DATA_DEPTH, stats->x, stats->position.y, stats->position.higher_elevation);
-            if ((stats->mount_info & UNIT_MOUNT_INFO_ROLE_MASK) != 0) {
+                MAP_TILE_DATA_DEPTH, battle_unit->x, battle_unit->position.y, battle_unit->position.higher_elevation);
+            if ((battle_unit->mount_info & UNIT_MOUNT_INFO_ROLE_MASK) != 0) {
                 g_thread_call_target = (void (*)(void))animation_map_unit_set_status;
             } else if ((depth & 0xFF) >= 2) {
                 g_thread_call_target = (void (*)(void))animation_map_unit_set_stand;
@@ -96,15 +96,15 @@ void map_unit_set_event_animation(s32 map_unit_id, u32 animation) {
  * suppresses the partner's update. */
 void map_unit_set_event_facing(s32 map_unit_id, s32 facing) {
     s32 battle_unit_id;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
 
     if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
         battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
         if (battle_unit_id >= 0) {
-            stats = battle_unit_get(battle_unit_id);
-            if (stats->mount_info != 0) {
+            battle_unit = battle_unit_get(battle_unit_id);
+            if (battle_unit->mount_info != 0) {
                 map_unit_set_facing_sixteenth(
-                    map_unit_get_id_by_battle_unit_id(stats->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK),
+                    map_unit_get_id_by_battle_unit_id(battle_unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK),
                     facing & 0xFFFF);
             }
         }

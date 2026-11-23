@@ -583,10 +583,10 @@ s32 map_unit_get_battle_unit_id(u32 map_unit_id) {
     map_unit_t* unit = map_unit_get(map_unit_id);
 
     if (unit != 0) {
-        battle_unit_t* stats = unit->battle_unit;
+        battle_unit_t* battle_unit = unit->battle_unit;
 
-        if (stats != 0) {
-            return stats->battle_unit_id;
+        if (battle_unit != 0) {
+            return battle_unit->battle_unit_id;
         }
     } else {
         system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
@@ -599,9 +599,9 @@ s32 map_unit_get_id_by_battle_unit_id(u32 battle_unit_id) {
     map_unit_t* unit = g_map_unit_list_head;
 
     while (unit != 0) {
-        battle_unit_t* stats = unit->battle_unit;
+        battle_unit_t* battle_unit = unit->battle_unit;
 
-        if (stats != 0 && stats->battle_unit_id == battle_unit_id) {
+        if (battle_unit != 0 && battle_unit->battle_unit_id == battle_unit_id) {
             return unit->map_unit_id;
         }
         unit = unit->previous;
@@ -614,9 +614,9 @@ s32 map_unit_get_sprite_sheet_slot_by_battle_unit_id(u32 battle_unit_id) {
     map_unit_t* unit = g_map_unit_list_head;
 
     while (unit != 0) {
-        battle_unit_t* stats = unit->battle_unit;
+        battle_unit_t* battle_unit = unit->battle_unit;
 
-        if (stats != 0 && stats->battle_unit_id == battle_unit_id) {
+        if (battle_unit != 0 && battle_unit->battle_unit_id == battle_unit_id) {
             return unit->spritesheet_vram_slot;
         }
         unit = unit->previous;
@@ -715,14 +715,14 @@ s32 sprite_poll_unit_graphics_load(void) {
  * Returns 0 when no record has the map unit id. */
 s32 map_unit_show(u32 map_unit_id) {
     map_unit_t* unit = map_unit_get(map_unit_id);
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
 
     if (unit != 0) {
-        stats = unit->battle_unit;
+        battle_unit = unit->battle_unit;
         unit->draw_enabled = 1;
         unit->animation.trigger = 1;
-        if (stats != 0) {
-            battle_unit_put_on_field(stats->battle_unit_id);
+        if (battle_unit != 0) {
+            battle_unit_put_on_field(battle_unit->battle_unit_id);
         }
         return 1;
     }

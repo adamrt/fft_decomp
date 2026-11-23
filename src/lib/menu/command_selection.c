@@ -162,12 +162,12 @@ void command_reset_unit_records(void) {
 /* Clear one unit's remembered menu rows, as command_reset_unit_records does for all (byte 1 back to
  * 0xff), but only for a unit under manual control. The test sits inside the byte loop. */
 void command_reset_unit_record(s32 battle_unit_id) {
-    battle_unit_t* stats = battle_unit_get(battle_unit_id);
+    battle_unit_t* battle_unit = battle_unit_get(battle_unit_id);
     menu_unit_selection_record_t* records = g_menu_unit_selection_records;
     s32 i;
 
     for (i = 0; i < MENU_UNIT_SELECTION_RECORD_BYTES; i++) {
-        if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
+        if (battle_unit->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
             ((u8*)&records[battle_unit_id])[i] = 0;
             g_menu_unit_selection_records[battle_unit_id]._unknown_01 = 0xFF;
         }

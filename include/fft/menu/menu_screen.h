@@ -19,7 +19,7 @@ struct menu_gfx_context;
 /* Slots that the WORLD screens use for threads of their own; thread.h has the maps shared with BATTLE, world_map.h
  * the WLDCORE ones and music.h OPEN's music test slot. */
 typedef enum menu_screen_thread_slot {
-    MENU_SCREEN_THREAD_SLOT_MENU_GROUP = 2,           /* window_group_thread */
+    MENU_SCREEN_THREAD_SLOT_MENU_GROUP = 2,           /* dispatch_window_group_thread */
     MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL = 10, /* the equipment (change banner) or the ability panel */
     MENU_SCREEN_THREAD_SLOT_PREVIEW_STATS = 11,       /* the numeric panel thread of the preview stats window */
     MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD = 14,    /* the child of the menu in slot 15, or a wait-forever thread

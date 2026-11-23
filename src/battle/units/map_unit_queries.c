@@ -122,7 +122,7 @@ map_unit_t* map_unit_find_pickup_at_tile(s32 map_x, s32 map_y, s32 layer) {
 
 /* The first unit drawn with the chocobo sprite sheet at (x, y) on the specified layer that is
  * neither the source nor the casting unit, or 0: the chocobo a unit arriving on
- * the tile mounts (map_unit_mount_onto_pending). The candidate array
+ * the tile mounts (mount_onto_pending). The candidate array
  * holds 16 entries and is filled without a bound check. */
 map_unit_t* map_unit_find_other_chocobo_at_tile(s32 x, s32 y, s32 layer) {
     map_unit_t* unit;
@@ -170,15 +170,15 @@ map_unit_t* map_unit_find_other_chocobo_at_tile(s32 x, s32 y, s32 layer) {
 map_unit_t* map_unit_find_overlapping_at_tile(map_unit_t* self, s32 x, s32 y, s32 layer) {
     map_unit_t* list[MAP_UNIT_SLOT_COUNT];
     map_unit_t* unit;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     s32 count;
     s32 i;
 
     count = 0;
     for (unit = g_map_unit_list_head; unit != 0; unit = unit->previous) {
         if (unit != self && unit->map_x == x && unit->map_y == y && unit->map_layer == layer) {
-            stats = unit->battle_unit;
-            if (stats != 0 && stats->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
+            battle_unit = unit->battle_unit;
+            if (battle_unit != 0 && battle_unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
                 if (self->mount_state == UNIT_MOUNT_STATE_NONE
                     || unit->map_unit_id != self->mount_partner_map_unit_id) {
                     list[count] = unit;

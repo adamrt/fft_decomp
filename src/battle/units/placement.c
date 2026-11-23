@@ -383,16 +383,16 @@ s32 battle_unit_disable(s32 battle_unit_id) {
  * Returns 0, also for a unit already present, or -1 when the slot is empty in any
  * state other than off-field. */
 s32 battle_unit_put_on_field(u32 battle_unit_id) {
-    battle_unit_t* stats = &g_battle_units[battle_unit_id];
+    battle_unit_t* battle_unit = &g_battle_units[battle_unit_id];
 
-    if (stats->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+    if (battle_unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
         return 0;
-    if (stats->existence != UNIT_EXISTENCE_OFF_FIELD)
+    if (battle_unit->existence != UNIT_EXISTENCE_OFF_FIELD)
         return -1;
-    stats->active_battle_unit_id = battle_unit_id;
-    stats->existence = UNIT_EXISTENCE_ACTIVE;
-    if (stats->team_flags & UNIT_TEAM_MASK) {
-        reward_count_enemy_level(stats);
+    battle_unit->active_battle_unit_id = battle_unit_id;
+    battle_unit->existence = UNIT_EXISTENCE_ACTIVE;
+    if (battle_unit->team_flags & UNIT_TEAM_MASK) {
+        reward_count_enemy_level(battle_unit);
     }
     return 0;
 }

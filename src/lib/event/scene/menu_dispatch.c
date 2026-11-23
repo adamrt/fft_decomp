@@ -96,7 +96,7 @@ void overlay_companion_stub(void) {
 /* Menu-building thread: once the previous menu, the camera and the target panel are done
  * (and a tutorial slot has started its next event), open menu parameter 1, the egg menu for
  * an egg, and reopen the skillset and ability lists when restoring the same unit's menu. */
-static void menu_building_thread(void) {
+static void build_menu_thread(void) {
     s32 menu_id = thread_current_get_parameter_1();
     s32 restore_depth;
 
@@ -160,7 +160,7 @@ enum { IDLE_ACTION_MENU_ENTRY_COUNT = 0x34 };
 
 /* Open an idle action menu (command_menu_e) for the active-turn unit: place the
  * entry windows beside the unit, restore the row the unit last chose and start
- * the menu-building thread on menu_building_thread.
+ * the menu-building thread on build_menu_thread.
  *
  * Nothing happens while menu input is blocked. The menu is also skipped while the
  * menus are suspended, a help window is open,
@@ -208,7 +208,7 @@ void command_open_menu(s32 menu_id) {
             *selected_index = 0;
             g_status_screen_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();
-            thread_start(THREAD_SLOT_MENU_BUILDING, menu_building_thread);
+            thread_start(THREAD_SLOT_MENU_BUILDING, build_menu_thread);
             thread_set_parameters(THREAD_SLOT_MENU_BUILDING, menu_id, 0, 0);
         }
         g_menu_building_thread_started = 0;

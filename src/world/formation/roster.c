@@ -8,7 +8,6 @@
 #include "fft/menu/menu.h"
 #include "fft/party/equipment.h"
 #include "fft/party/formation.h"
-#include "fft/party/formation_item.h"
 #include "fft/text/text.h"
 #include "psx/types.h"
 

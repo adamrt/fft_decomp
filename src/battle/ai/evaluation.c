@@ -62,9 +62,9 @@ static void build_monster_skill_mask(void);
 
 static void build_origin_targetable_mask(tile_mask_mode_e mode, s32 radius);
 
-static s32 status_can_cancellation_affect_turn(const battle_unit_t* unit, s32 status);
+static s32 can_status_cancellation_affect_turn(const battle_unit_t* unit, s32 status);
 
-static s32 unit_can_move_by_charge_deadline(s32 unit_index);
+static s32 can_unit_move_by_charge_deadline(s32 unit_index);
 
 static s32 origin_can_use_elemental(const ai_coords_t* coords);
 
@@ -90,7 +90,7 @@ static s32 find_unit_on_target_panel(void);
 
 static s32 facing_is_tile_blocked(const ai_coords_t* source, const ai_coords_t* target);
 
-static s32 unit_can_move_after_delay(s32 limit, s32 unit_id);
+static s32 can_unit_move_after_delay(s32 limit, s32 unit_id);
 
 static void restore_simulation_unit_state(snapshot_mode_e mode);
 
@@ -420,7 +420,7 @@ s32 ai_evaluate_ability_outcome(void) {
              * original eligibility list. The overlapping flag byte stays intact. */
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 ai->targetability.snapshot.unit_targetable_saved[i] = ai->targetability.live.unit_targetable[i];
-                if (ai->targetability.live.unit_targetable[i] && !unit_can_move_by_charge_deadline(i))
+                if (ai->targetability.live.unit_targetable[i] && !can_unit_move_by_charge_deadline(i))
                     ai->targetability.live.unit_targetable[i] = 0;
             }
             ai->targetability.live.target_setting_flags |= AI_TARGET_SETTING_CONSUME_EVALUATED_AIM_TILES;
@@ -431,7 +431,7 @@ s32 ai_evaluate_ability_outcome(void) {
             }
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++)
                 if (ai->targetability.snapshot.unit_targetable_saved[i]) {
-                    if (unit_can_move_by_charge_deadline(i))
+                    if (can_unit_move_by_charge_deadline(i))
                         ai->targetability.live.unit_targetable[i] = 0;
                     else
                         ai->targetability.live.unit_targetable[i] = 1;
@@ -657,7 +657,7 @@ static s32 evaluate_reflected_origins(void) {
             continue;
         if (!ai_status_is_active_through_delay(ai->considered_ability.ct, reflector, STATUS_ID_REFLECT))
             continue;
-        if (unit_can_move_by_charge_deadline(ai->reflector_unit_index))
+        if (can_unit_move_by_charge_deadline(ai->reflector_unit_index))
             continue;
         if (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE) {
             ct = ai->considered_ability.ct;
@@ -679,7 +679,7 @@ static s32 evaluate_reflected_origins(void) {
                 continue;
             if (ai->reflected_target_unit_index == ai->acting_unit_id)
                 continue;
-            if (unit_can_move_by_charge_deadline(ai->reflected_target_unit_index))
+            if (can_unit_move_by_charge_deadline(ai->reflected_target_unit_index))
                 continue;
             if (ai_classify_target_ability_effect(ai->reflected_target_unit_index, 0) != AI_ABILITY_EFFECT_USEFUL)
                 continue;
@@ -1558,7 +1558,7 @@ s32 ai_simulate_and_score_action(void) {
             unit->inflicted_status[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)]
                 &= ~(STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
         } else if (status == TURN_EVENT_UNIT_READY) {
-            if (unit_can_move_after_delay(0, unit_index))
+            if (can_unit_move_after_delay(0, unit_index))
                 ai->unit_had_move_opportunity[unit_index] = 1;
             unit->has_turn = 0;
         }
@@ -2124,7 +2124,7 @@ ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 check_ref
         } else {
             /* i now flags a Charm that lasts until the ability resolves and whose removal matters. */
             if (ai_status_is_active_through_delay(ct, unit, STATUS_ID_CHARM)
-                && status_can_cancellation_affect_turn(unit, STATUS_ID_CHARM))
+                && can_status_cancellation_affect_turn(unit, STATUS_ID_CHARM))
                 i = 1;
             else
                 i = 0;
@@ -2271,7 +2271,7 @@ ai_ability_effect_e ai_classify_target_ability_effect(s32 unit_id, s32 check_ref
                             if (mask & flag) {
                                 status = i * 8 + bit;
                                 if (!ai_status_is_active_through_delay(ct, unit, status)
-                                    || !status_can_cancellation_affect_turn(unit, status))
+                                    || !can_status_cancellation_affect_turn(unit, status))
                                     mask ^= flag;
                             }
                         }
@@ -2347,7 +2347,7 @@ s32 ai_status_is_active_through_delay(s32 delay, const battle_unit_t* unit, s32 
  * Only Charm, Don't Move, and Don't Act are filtered; other IDs return true.
  * Equality counts as lasting through the turn. This does not test presence.
  */
-static s32 status_can_cancellation_affect_turn(const battle_unit_t* unit, s32 status) {
+static s32 can_status_cancellation_affect_turn(const battle_unit_t* unit, s32 status) {
     if (status == STATUS_ID_CHARM || (status - STATUS_ID_DONT_MOVE) < 2U) {
         if (ai_calculate_unit_turn_delay(unit) > unit->status_ct[STATUS_CT_INDEX(status)]) {
             return 0;
@@ -2371,7 +2371,7 @@ static s32 exclude_target_enemies_with_move_opportunity(void) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
             if ((ai->considered_ability.ai_flags.word & AI_ABILITY_TARGET_ENEMIES)
                 && (walk[offsetof(ai_workspace_t, unit_decisions[0].enemy_flag)] != 0)
-                && (unit_can_move_by_charge_deadline(i) != 0)) {
+                && (can_unit_move_by_charge_deadline(i) != 0)) {
                 ai->targetability.live.unit_targetable[i] = 0;
             } else {
                 result = 1;
@@ -2383,7 +2383,7 @@ static s32 exclude_target_enemies_with_move_opportunity(void) {
 
 /* 1 when the unit gets a turn by the considered ability's charge deadline
  * and is eligible to move by then; 0 for an instant ability. */
-static s32 unit_can_move_by_charge_deadline(s32 unit_index) {
+static s32 can_unit_move_by_charge_deadline(s32 unit_index) {
     s32 min_ct;
     u8 ct;
 
@@ -2392,7 +2392,7 @@ static s32 unit_can_move_by_charge_deadline(s32 unit_index) {
         min_ct = ai_calculate_unit_turn_delay(&g_battle_units[unit_index]);
         if (min_ct != 0x7FFFFFFF) {
             if (ct >= min_ct) {
-                return unit_can_move_after_delay(ct, unit_index);
+                return can_unit_move_after_delay(ct, unit_index);
             }
         }
     }
@@ -2402,7 +2402,7 @@ static s32 unit_can_move_by_charge_deadline(s32 unit_index) {
 /* 1 when the unit is eligible to move limit clockticks from now: present, Speed above 0,
  * not crystal, petrified or treasure, with no Stop, Don't Move or Sleep that
  * lasts that long, and alive, or dead with Reraise and due a turn by then. */
-static s32 unit_can_move_after_delay(s32 limit, s32 unit_id) {
+static s32 can_unit_move_after_delay(s32 limit, s32 unit_id) {
     battle_unit_t* unit = &g_battle_units[unit_id];
 
     if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {

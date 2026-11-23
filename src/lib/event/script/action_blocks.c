@@ -81,18 +81,18 @@ void script_opcode_70_jump(const event_jump_parameters_t* parameters) {
     SVECTOR vec;
     s32 map_unit_id = script_resolve_map_unit_id(script_read_s16(parameters->unit_id_le));
     const SVECTOR* coords;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     u8 saved;
 
     if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
         coords = map_unit_get_event_offset(map_unit_id);
         setVector(&vec, -coords->vx, -coords->vy, -coords->vz);
         map_unit_add_event_offset(map_unit_id, &vec);
-        stats = battle_unit_get(map_unit_get_battle_unit_id(map_unit_id));
-        saved = stats->jump;
-        stats->jump = 6;
+        battle_unit = battle_unit_get(map_unit_get_battle_unit_id(map_unit_id));
+        saved = battle_unit->jump;
+        battle_unit->jump = 6;
         move_start_jump(map_unit_id, parameters->direction, parameters->length_plus_one - 1);
-        stats->jump = saved;
+        battle_unit->jump = saved;
     }
 }
 

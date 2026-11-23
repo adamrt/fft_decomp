@@ -171,13 +171,13 @@ instead of including the record's header.
   `menu_thread_is_running`, `calendar_date_to_day_index` and
   `effect_vector_add_random_offsets`. Decide owners family by family; do not
   reorder words mechanically or turn a status-returning operation into a
-  boolean-sounding predicate. Paired state-machine handlers keep the state
-  before the role so each pair sorts together
-  (`battle_state_free_cursor_enter`, `battle_state_free_cursor_update`).
-  Static functions drop the owner and start with the verb (`read_pad`,
-  `enter_ai_command`), without a private-name marker or a `_cb`/`_func`
-  suffix; local variables and private types likewise use their enclosing
-  context.
+  boolean-sounding predicate. A public state-machine handler names its
+  state before its role so a state's handlers sort together
+  (`battle_state_free_cursor_update`). Static functions, state handlers
+  included, drop the owner and start with the verb (`read_pad`,
+  `enter_ai_command`, `enter_free_cursor`), without a private-name marker
+  (`s_` is for static variables only) or a `_cb`/`_func` suffix; local
+  variables and private types likewise use their enclosing context.
   Retain enough qualification to distinguish roles and avoid target-symbol
   collisions. The concept is the game's own US term where the player
   sees one (bar, rumor, proposition, Brave Story, sound novel, formation,

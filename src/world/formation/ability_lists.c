@@ -42,33 +42,31 @@ extern s16 g_formation_ability_view_job_names[];
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];
 
-static s32 ability_list_update(void);
-
 /* Ability-list menu-script callback 13: 1 while the list shows the Action category. The
  * row argument is ignored. */
-static s32 ability_list_is_action_tab(s32 unused_row) {
+s32 ability_list_is_action_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_ACTION;
 }
 
 /* Ability-list menu-script callback 12: 1 while the list shows the Reaction category. */
-static s32 ability_list_is_reaction_tab(s32 unused_row) {
+s32 ability_list_is_reaction_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_REACTION;
 }
 
 /* Ability-list menu-script callback 11: 1 while the list shows the Support category. */
-static s32 ability_list_is_support_tab(s32 unused_row) {
+s32 ability_list_is_support_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_SUPPORT;
 }
 
 /* Ability-list menu-script callback 10: 1 while the list shows the Movement category. */
-static s32 ability_list_is_movement_tab(s32 unused_row) {
+s32 ability_list_is_movement_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_MOVEMENT;
 }
 
 /* Report whether ability entry `index` counts as already learned: the learned
  * flag in the learn menu (FORMATION_MENU_ABILITY_LEARN), otherwise the
  * inverse of the disabled flag. */
-static s32 ability_list_is_learned(s32 index) {
+s32 ability_list_is_learned(s32 index) {
     if (g_formation_current_menu == FORMATION_MENU_ABILITY_LEARN) {
         return g_ability_list_ability_entries[index] & ABILITY_LIST_ENTRY_LEARNED;
     }
@@ -259,7 +257,7 @@ void job_page_update(void) {
  * the job list) and confirm MENU_JOB_LIST_STEP_CLOSE, otherwise
  * MENU_JOB_LIST_STEP_ABILITIES.
  */
-static s32 ability_list_update(void) {
+s32 ability_list_update(void) {
     s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
     s16 selected_index;

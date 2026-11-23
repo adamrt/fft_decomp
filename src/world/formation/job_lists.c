@@ -45,7 +45,7 @@ s32 job_find_first_for_skillset(s32 skillset) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-static s32 job_list_get_base(s16 unit_id) {
+static s32 get_base_job(s16 unit_id) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_id];
     u32 job = unit->sprite_set;
 
@@ -101,9 +101,9 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
     s32 unlocked;
 
     bits_primary_init_reader(g_formation_unit_pointers[unit_index]->unlocked_jobs);
-    /* job_list_get_base is declared s32: the target uses its result without the
+    /* get_base_job is declared s32: the target uses its result without the
      * re-extension an s16 return would make GCC emit (the callee already extends). */
-    job = job_list_get_base(unit_index);
+    job = get_base_job(unit_index);
     if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
         && job == g_formation_unit_pointers[unit_index]->identity.job_id) {
         job |= FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
@@ -322,8 +322,7 @@ s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out) {
     s32 last;
     s16 job_id = g_formation_unit_pointers[unit_index]->identity.job_id;
 
-    count = ability_list_build(
-        unit_index, job_list_get_base(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
+    count = ability_list_build(unit_index, get_base_job(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
         count += ability_list_build(
             unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], ABILITY_LIST_MODE_LEARNED_ONLY);

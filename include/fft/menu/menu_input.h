@@ -12,7 +12,7 @@ typedef enum menu_input_mode {
     MENU_INPUT_PLAYER = 0,  /* the controller */
     MENU_INPUT_BLOCKED = 1, /* the event frame returns early and no idle action menu is built;
                                no code stores this value */
-    MENU_INPUT_TUTORIAL = 2 /* a tutorial event supplies the input; set by menu_building_thread */
+    MENU_INPUT_TUTORIAL = 2 /* a tutorial event supplies the input; set by build_menu_thread */
 } menu_input_mode_e;
 
 extern u16 g_menu_input_mode; /* menu_input_mode_e */

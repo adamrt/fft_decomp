@@ -1,6 +1,5 @@
 /* Yielding the current thread forever. */
 
-#include "fft/menu/menu_screen.h"
 #include "fft/sys/thread.h"
 
 /* Yield to the next WORLD thread, forever. */

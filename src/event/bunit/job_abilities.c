@@ -41,7 +41,7 @@ s32 job_find_first_for_skillset(s32 skillset) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-static s32 job_list_get_base(s16 unit_id) {
+static s32 get_base_job(s16 unit_id) {
     unit_list_record_t* unit = g_unit_list_pointers[unit_id];
     u32 job_id = unit->character_identity;
 
@@ -87,7 +87,7 @@ s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
     unit = *slot;
     job_ids_output = job_ids;
     bits_primary_init_reader(unit->unlocked_jobs);
-    job_ids_output[0] = job_list_get_base(saved_unit_id & 0xff);
+    job_ids_output[0] = get_base_job(saved_unit_id & 0xff);
     job_count = 1;
     if (job_is_special_monster((*slot)->job_id) || (*slot)->uses_monster_skillset != 0) {
         job_ids_output[1] = -1;

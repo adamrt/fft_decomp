@@ -86,7 +86,7 @@ typedef enum script_tutorial_wait_value {
     SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST = 0xfc,
     SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS = 0xfd,
     SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe, /* the Triangle menu */
-    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* menu_building_thread opened a menu */
+    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* build_menu_thread opened a menu */
 } script_tutorial_wait_value_e;
 
 s32 tutorial_is_current_event(void);

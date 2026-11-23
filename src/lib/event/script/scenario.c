@@ -29,7 +29,7 @@ static event_scenario_condition_result_e check_condition(
  * 0x78..0x7c). */
 static battle_unit_t* get_condition_battle_unit(s32 unit_id) {
     s32 index;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
 
     battle_unit_find_by_unit_id(unit_id, &index);
     if (index < 0) {
@@ -38,9 +38,10 @@ static battle_unit_t* get_condition_battle_unit(s32 unit_id) {
         }
         index = battle_unit_find_id_by_character_identity(unit_id);
         if (index >= 0) {
-            stats = battle_unit_get(index);
-            if (stats->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && stats->unit_id < EVENT_UNIT_ID_DEPLOYED_END) {
-                return stats;
+            battle_unit = battle_unit_get(index);
+            if (battle_unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST
+                && battle_unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END) {
+                return battle_unit;
             }
         }
         return (battle_unit_t*)-1;

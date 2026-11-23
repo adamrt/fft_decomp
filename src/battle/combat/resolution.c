@@ -1674,18 +1674,18 @@ static void update_attacker_exp(s32 outcome) {
  * Returns that routine's result, or -1 for an invalid or empty slot. A result
  * that is not a hit is marked as canceled. */
 s32 action_apply_attacker_result(s32 unit_id) {
-    battle_unit_t* stats = &g_battle_units[unit_id];
+    battle_unit_t* battle_unit = &g_battle_units[unit_id];
     action_data_t* action;
     s32 result;
 
-    g_action_target = stats;
+    g_action_target = battle_unit;
     if (unit_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
     }
     action = &g_battle_units[unit_id].action;
     g_action_work.target_id = unit_id;
     g_action_target_data = action;
-    if (stats->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
+    if (battle_unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return -1;
     }
     mem_copy_byte_data_source_first(&g_action_attacker_action_data, action, sizeof(action_data_t));

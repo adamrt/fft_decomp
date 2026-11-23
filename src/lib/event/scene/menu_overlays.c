@@ -211,7 +211,7 @@ void command_mini_menu_thread(void) {
 }
 
 /* Run BUNIT, release its high-overlay memory, then restore the unit view. */
-static void unit_list_return_thread(void) {
+static void return_from_unit_list_thread(void) {
     s32 i;
     s32 unused[2]; /* keeps the original 0x28 frame */
 
@@ -244,8 +244,8 @@ static void unit_list_return_thread(void) {
 }
 
 /* Fade the screen out, close the menu and unit view panels, load both halves of BUNIT, then
- * start unit_list_return_thread, which runs the unit list and comes back. */
-static void unit_list_transition_thread(void) {
+ * start return_from_unit_list_thread, which runs the unit list and comes back. */
+static void open_unit_list_thread(void) {
     s32 level;
 
     for (level = 0; level < 0x100; level += 0x10) {
@@ -265,14 +265,14 @@ static void unit_list_transition_thread(void) {
     overlay_companion_request(COMPANION_OVERLAY_BUNIT_SECOND_HALF);
     thread_wait_frames(2);
     g_help_open = 1;
-    thread_start(THREAD_BORROWED_SLOT_FADE_OUT, unit_list_return_thread);
+    thread_start(THREAD_BORROWED_SLOT_FADE_OUT, return_from_unit_list_thread);
     thread_current_exit();
 }
 
 /* Start the unit-list transition in a child slot and wait for it to finish. */
 void unit_list_thread(void) {
     menu_open_modal();
-    thread_start(g_thread_current_id - 1, unit_list_transition_thread);
+    thread_start(g_thread_current_id - 1, open_unit_list_thread);
     thread_wait_inactive(g_thread_current_id - 1);
     thread_current_exit();
 }

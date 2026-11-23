@@ -116,7 +116,7 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
     s32 result;
     s32 i;
     u8 restore_text;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
 
     if (g_equipment_screen_state == EQUIPMENT_STATE_INIT) {
         equipment_init(unit);
@@ -163,13 +163,13 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
             break;
         }
     }
-    stats = battle_unit_get(unit);
-    if (stats->max_hp < stats->hp) {
-        stats->hp = stats->max_hp;
+    battle_unit = battle_unit_get(unit);
+    if (battle_unit->max_hp < battle_unit->hp) {
+        battle_unit->hp = battle_unit->max_hp;
     }
-    if (stats->max_mp < stats->mp) {
-        stats->mp = stats->max_mp;
+    if (battle_unit->max_mp < battle_unit->mp) {
+        battle_unit->mp = battle_unit->max_mp;
     }
-    battle_unit_refresh_stats(stats);
+    battle_unit_refresh_stats(battle_unit);
     return i < 5;
 }

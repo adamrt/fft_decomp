@@ -136,7 +136,6 @@ extern const u8 g_save_text_location_name[];
 
 static void build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void build_slot_description(s32 mode, u8* destination);
-static void save_init_screen(void);
 static s32 init_slot_cursor(void);
 static void render_slot_text(s32 slot);
 static void update_slot_list(u16 input);
@@ -639,7 +638,7 @@ void save_image_build(s32 slot) {
 
 /* Reset the save list's scroll and cursor state and fill the 0x1e80-byte
  * save buffer with 0xff. */
-static void save_init_screen(void) {
+void save_init_screen(void) {
     g_save_list_scroll_base_y = 0x18;
     g_save_list_scroll_anim_offset = 0;
     g_save_list_top_row = 0;

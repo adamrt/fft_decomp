@@ -39,9 +39,9 @@ static s32 build_targeted_scenarios(void);
 
 static s32 calculate_origin_ability_range(void);
 
-static s32 status_can_cancel_current(const battle_unit_t* unit, s32 status_bit);
+static s32 can_cancel_current_status(const battle_unit_t* unit, s32 status_bit);
 
-static s32 target_is_out_of_play(s32 unit_id);
+static s32 is_target_out_of_play(s32 unit_id);
 
 static rank_order_e compare_ranks(const ai_action_rank_t* first, const ai_action_rank_t* second);
 
@@ -109,7 +109,7 @@ static void set_candidate_actor_reachability(void);
 
 static s32 build_reachable_tiles(s32 movement_taken);
 
-static s32 target_is_excluded_from_imminent_enemies(s32 unit_id);
+static s32 is_target_excluded_from_imminent_enemies(s32 unit_id);
 
 static s32 take_random_tile(u16 tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT], ai_coords_t* coordinates, s32 count);
 
@@ -346,7 +346,7 @@ static void refresh_team_targeting_flags(void) {
     enemy_count = 0;
     impaired_ally_count = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (target_is_out_of_play(i)) {
+        if (is_target_out_of_play(i)) {
             continue;
         }
         if (ai->unit_decisions[i].enemy_flag) {
@@ -412,7 +412,7 @@ static void init_target_consideration(void) {
                 return;
             if (flags & AI_DECISION_FOCUS_TARGET) {
                 ai_copy_unit_coordinates(decision->main_target_id, &decision->target);
-                target = target_is_out_of_play(decision->main_target_id);
+                target = is_target_out_of_play(decision->main_target_id);
             } else {
                 target = ai->single_enemy_remaining;
             }
@@ -642,7 +642,7 @@ static void set_ability_considerations(s32 action_taken) {
     /* First pass: mark every in-play unit's usable abilities and count what the enemy team can do. */
     unit_id = 0;
     do {
-        if (target_is_out_of_play(unit_id) == 0) {
+        if (is_target_out_of_play(unit_id) == 0) {
             decision = &ai->unit_decisions[unit_id];
             unit = &g_battle_units[unit_id];
             unit_harmful = 0;
@@ -1667,7 +1667,7 @@ static s32 filter_target_distance_tiles(s32 distance_limit) {
 
 /* 1 when the unit is untargetable or dead without Reraise per its AI decision
  * record, or petrified (Petrify is the top bit of status byte 1). */
-static s32 target_is_out_of_play(s32 unit_id) {
+static s32 is_target_out_of_play(s32 unit_id) {
     u8 flags = g_ai_workspace_storage.unit_decisions[unit_id].targeting_flags_2;
 
     if (((flags >> 4) & (AI_TARGET_UNTARGETABLE >> 4)) || ((flags >> 5) & (AI_TARGET_DEAD_WITHOUT_RERAISE >> 5))) {
@@ -1947,7 +1947,7 @@ static s32 select_status_imposed_action(void) {
         if (select_active_target_units(AI_UNIT_FILTER_ANY, 255)) {
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 ai->targetability.live.unit_targetable[i] = 0;
-                if (!target_is_out_of_play(i))
+                if (!is_target_out_of_play(i))
                     ai->targetability.live.unit_targetable[i] = ai->targetability.live.unit_active[i];
             }
             /* The aligned skillset/usage 16-bit value preserves target LHU/SH;
@@ -2431,7 +2431,7 @@ static s32 select_fight_for_life_action(void) {
             goto other_abilities;
         }
     }
-    if (target_is_out_of_play(target) || !ai->unit_decisions[target].enemy_flag) {
+    if (is_target_out_of_play(target) || !ai->unit_decisions[target].enemy_flag) {
         g_ai_workspace_storage.acting_unit_decision->flags &= ~AI_DECISION_SPECIAL_BEHAVIOR;
         unit = &g_battle_units[target];
         if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
@@ -2824,7 +2824,7 @@ static s32 select_target_in_peril(void) {
         distance_score = 255 - ai_calculate_unit_distance(ai->acting_unit, unit);
         missing_hp = 128 - ((unit->hp << 7) / unit->max_hp);
         team_bits = unit->team_flags & UNIT_TEAM_IMPORTANCE_MASK;
-        if (status_can_cancel_current(unit, STATUS_ID_DEAD)
+        if (can_cancel_current_status(unit, STATUS_ID_DEAD)
             && (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE)) {
             status_score = 0x78;
         } else if ((ai->acting_unit_decision->targeting_flags_1 & AI_TARGETING_FLAG_1_CAN_HEAL_ALLIES)
@@ -2832,13 +2832,13 @@ static s32 select_target_in_peril(void) {
                 || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)]
                     & STATUS_BYTE_MASK(STATUS_ID_CRITICAL)))) {
             status_score = 0x77;
-        } else if (status_can_cancel_current(unit, STATUS_ID_BLOOD_SUCK)) {
+        } else if (can_cancel_current_status(unit, STATUS_ID_BLOOD_SUCK)) {
             status_score = 0x76;
-        } else if (status_can_cancel_current(unit, STATUS_ID_PETRIFY)) {
+        } else if (can_cancel_current_status(unit, STATUS_ID_PETRIFY)) {
             status_score = 0x75;
-        } else if (status_can_cancel_current(unit, STATUS_ID_CONFUSION)) {
+        } else if (can_cancel_current_status(unit, STATUS_ID_CONFUSION)) {
             status_score = 0x74;
-        } else if (status_can_cancel_current(unit, STATUS_ID_FROG)) {
+        } else if (can_cancel_current_status(unit, STATUS_ID_FROG)) {
             status_score = 0x73;
         } else {
             status_score = 0;
@@ -2873,7 +2873,7 @@ static s32 select_target_in_peril(void) {
  * Innate statuses are excluded. The cancellation mask aggregates the actor's
  * usable ability list; it does not describe only the considered ability.
  */
-static s32 status_can_cancel_current(const battle_unit_t* unit, s32 status_bit) {
+static s32 can_cancel_current_status(const battle_unit_t* unit, s32 status_bit) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
     s32 byte_off;
     s32 bit;
@@ -3063,7 +3063,7 @@ s32 ai_find_nearest_target(ai_nearest_target_mode_e mode) {
             case AI_NEAREST_IMMINENT_ENEMY:
                 if (!ai->targetability.live.unit_targetable[i])
                     continue;
-                if (target_is_excluded_from_imminent_enemies(i))
+                if (is_target_excluded_from_imminent_enemies(i))
                     continue;
                 if (ai_calculate_unit_distance(ai->acting_unit, unit) < 2
                     && ai_calculate_height_difference(&ai->acting_unit_coords, unit) < -2)
@@ -3249,7 +3249,7 @@ static void fill_foe_proximity_grid(void) {
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         ai->targetability.live.unit_targetable[i] = 0;
-        if (target_is_out_of_play(i) == 0 && target_is_excluded_from_imminent_enemies(i) == 0) {
+        if (is_target_out_of_play(i) == 0 && is_target_excluded_from_imminent_enemies(i) == 0) {
             ai->targetability.live.unit_targetable[i] = 1;
         }
     }
@@ -3294,7 +3294,7 @@ static void fill_foe_proximity_grid(void) {
  *
  * The unit must be an enemy that acts no later than the acting unit and will
  * no longer be disabled by Stop, Don't Act, Sleep, Chicken, or Charm then. */
-static s32 target_is_excluded_from_imminent_enemies(s32 unit_id) {
+static s32 is_target_excluded_from_imminent_enemies(s32 unit_id) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
     battle_unit_t* unit;
     s32 limit;

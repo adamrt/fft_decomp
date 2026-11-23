@@ -11,7 +11,6 @@
 #include "fft/party/equipment.h"
 #include "fft/party/formation.h"
 #include "fft/party/formation_ability.h"
-#include "fft/party/formation_item.h"
 #include "fft/party/item_list.h"
 #include "fft/party/shop.h"
 #include "fft/sys/sound.h"

@@ -736,15 +736,15 @@ s32 map_unit_calculate_height_from_tile(map_unit_t* unit) {
  * offset. */
 s32 map_unit_calculate_height_from_battle_tile(map_unit_t* unit) {
     SVECTOR coord;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     map_unit_t* mount = get_mount(unit);
     s32 adjusted_world_height;
     s32 world_height;
 
-    stats = mount->battle_unit;
-    coord.vx = stats->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-    stats = mount->battle_unit;
-    coord.vz = stats->position.y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    battle_unit = mount->battle_unit;
+    coord.vx = battle_unit->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    battle_unit = mount->battle_unit;
+    coord.vz = battle_unit->position.y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     coord.vy = mount->map_layer;
     world_height = calculate_coords_height(mount, &coord);
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {

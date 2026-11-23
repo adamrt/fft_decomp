@@ -442,12 +442,12 @@ void unit_panel_banner_thread(void) {
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
-                battle_unit_t* stats;
+                battle_unit_t* battle_unit;
                 menu_text_set_origin(0, 0);
                 /* Only battle unit ids from 0x10 up get a number: the formation slot + 1, with no slot shown as 1. */
-                stats = battle_unit_get(unit_info->battle_unit_id);
+                battle_unit = battle_unit_get(unit_info->battle_unit_id);
                 if (unit_info->battle_unit_id >= 0x10) {
-                    s32 id = stats->formation_index;
+                    s32 id = battle_unit->formation_index;
                     if (id == UNIT_FORMATION_INDEX_NONE) {
                         id = 0;
                     }

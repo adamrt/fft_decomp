@@ -2142,7 +2142,7 @@ static void copy_other_spr_palettes(const other_spr_file_t* archive) {
  * stats uses the stats' palette; palettes past 5 become 0, and nonzero `flags` starts the unit
  * hidden. */
 static map_unit_t* init_map_unit(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id, s16 palette,
-    s16 requested_map_unit_id, battle_unit_t* stats, u32 flags, const unit_spr_file_t* data) {
+    s16 requested_map_unit_id, battle_unit_t* battle_unit, u32 flags, const unit_spr_file_t* data) {
     map_unit_t* unit;
     union {
         animation_state_t* animation;
@@ -2173,8 +2173,8 @@ static map_unit_t* init_map_unit(s32 map_x, s32 map_y, s32 map_level, s16 facing
         return 0;
     }
 
-    if (id >= SPRITE_SHEET_ID_JOB_FIRST && id < SPRITE_SHEET_ID_CHOCOBO && stats != 0) {
-        palette = stats->sprite_palette;
+    if (id >= SPRITE_SHEET_ID_JOB_FIRST && id < SPRITE_SHEET_ID_CHOCOBO && battle_unit != 0) {
+        palette = battle_unit->sprite_palette;
     }
     if (palette >= 6) {
         palette = 0;
@@ -2205,7 +2205,7 @@ static map_unit_t* init_map_unit(s32 map_x, s32 map_y, s32 map_level, s16 facing
     }
 
     unit->standing_on_battle_unit_id_plus_one = 0;
-    unit->battle_unit = stats;
+    unit->battle_unit = battle_unit;
     unit->requested_animation = 0;
     unit->facing = facing * UNIT_FACING_QUARTER_TURN;
     unit->camera_facing_sixteenth = unit->camera_facing_quadrant = unit->attack_facing = -1;

@@ -11,8 +11,8 @@
 
 /* display flags */
 /* Pending post-action displays are queued as one little-endian 32-bit value in
- * map_unit_t.action_display_flags (0x1b8). result_build_next_display and
- * result_build_next_special_display consume one bit at a time in ascending
+ * map_unit_t.action_display_flags (0x1b8). build_next_result_display and
+ * build_next_special_result_display consume one bit at a time in ascending
  * order. */
 typedef enum action_display_flag {
     ACTION_DISPLAY_FLAG_HP_DAMAGE = 0x00000001,
@@ -122,7 +122,7 @@ enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
 /* numeric display */
 /* Block view of the numeric display fields at map unit data 0x2bc..0x2cf,
  * taken as one pointer by the action result display builders
- * (result_build_next_display, result_build_next_special_display
+ * (build_next_result_display, build_next_special_result_display
  * and result_animate_text). */
 typedef struct action_result_display {
     u8 active;                     /* 0x00 */

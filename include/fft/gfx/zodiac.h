@@ -25,7 +25,7 @@ s32 zodiac_calculate_sign(u16 birthday);
 /* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
 typedef struct zodiac_draw_context {
     u32* ot;             /* 0x00: ordering table entry the primitives link into */
-    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_screen_color_red */
+    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_menu_screen_brightness_red */
     s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
     s16 scale_x;         /* 0x0c: signed scale with 12 fractional bits; ONE = 1.0 */
     s16 scale_y;         /* 0x0e: signed scale with 12 fractional bits; ONE = 1.0 */

@@ -23,7 +23,7 @@ static s32 s_cursor_tile_glow_cycle_timer;
  * Every fourth animation tick the offset advances through 0..14 and the palettes
  * are uploaded again with colors 1..15 rotated down by that many places; color
  * 0 stays in place, and offset 0 uploads the palettes as stored. */
-static void cursor_update_tile_glow_palettes(void) {
+static void update_tile_glow_palettes(void) {
     s32 dst;
     s32 src;
     palette_t* palettes;
@@ -71,7 +71,7 @@ void cursor_project_tile(VECTOR* projected, SVECTOR* position, SVECTOR* raised) 
     map_tile_t* tile;
     s32 flag;
 
-    cursor_update_tile_glow_palettes();
+    update_tile_glow_palettes();
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
     vector_set_short(position, g_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
@@ -90,7 +90,7 @@ void cursor_project_tile(VECTOR* projected, SVECTOR* position, SVECTOR* raised) 
 }
 
 /* Project the cursor tile and draw the map cursor over it with the glow quad on the tile surface;
- * cursor_update calls it while g_cursor_visible is set. The tile's
+ * update_cursor calls it while g_cursor_visible is set. The tile's
  * untargetable flag picks the glow's palette. */
 void cursor_draw_tile_glow(void) {
     SVECTOR position;

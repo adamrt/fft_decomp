@@ -948,8 +948,8 @@ void sprite_item_display_draw(map_unit_t* unit) {
  * a stat change, then level down or up, stolen, broken, Quick, CT 0, missed, guarded, caught, then
  * the queued status images. Sets the digit sprites (values over 999 show 999) and the color.
  * Returns 0 when nothing is pending. */
-static s32 result_build_next_display(map_unit_t* unit) {
-    battle_unit_t* stats;
+static s32 build_next_result_display(map_unit_t* unit) {
+    battle_unit_t* battle_unit;
     u32 scan_flags;
     s32 flags;
     action_result_display_t* display;
@@ -969,33 +969,33 @@ static s32 result_build_next_display(map_unit_t* unit) {
     u8 status;
 
     flags = unit->action_display_flags;
-    stats = unit->battle_unit;
+    battle_unit = unit->battle_unit;
     display = &unit->numeric_display;
 
     if ((flags & ACTION_DISPLAY_NUMERIC_FLAGS_MASK) != 0) {
-        g_result_display_values[RESULT_DISPLAY_HP_DAMAGE] = stats->action.hp_damage;
-        g_result_display_values[RESULT_DISPLAY_HP_HEALING] = stats->action.hp_healing;
-        g_result_display_values[RESULT_DISPLAY_MP_DAMAGE] = stats->action.mp_damage;
-        g_result_display_values[RESULT_DISPLAY_MP_HEALING] = stats->action.mp_healing;
+        g_result_display_values[RESULT_DISPLAY_HP_DAMAGE] = battle_unit->action.hp_damage;
+        g_result_display_values[RESULT_DISPLAY_HP_HEALING] = battle_unit->action.hp_healing;
+        g_result_display_values[RESULT_DISPLAY_MP_DAMAGE] = battle_unit->action.mp_damage;
+        g_result_display_values[RESULT_DISPLAY_MP_HEALING] = battle_unit->action.mp_healing;
         /* A stat's gain and damage slots share one magnitude; the pending flag picks which shows. */
-        change = stats->action.sp_change & ACTION_STAT_CHANGE_VALUE_MASK;
+        change = battle_unit->action.sp_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_SPEED_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_SPEED_DAMAGE] = change;
-        change = stats->action.ct_change & 0x7f;
+        change = battle_unit->action.ct_change & 0x7f;
         g_result_display_values[RESULT_DISPLAY_CT_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_CT_DAMAGE] = change;
-        change = stats->action.brave_change & ACTION_STAT_CHANGE_VALUE_MASK;
+        change = battle_unit->action.brave_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_BRAVE_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_BRAVE_DAMAGE] = change;
-        change = stats->action.faith_change & ACTION_STAT_CHANGE_VALUE_MASK;
+        change = battle_unit->action.faith_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_FAITH_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_FAITH_DAMAGE] = change;
         flag = 1;
-        change = stats->action.pa_change & ACTION_STAT_CHANGE_VALUE_MASK;
+        change = battle_unit->action.pa_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_PA_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_PA_DAMAGE] = change;
         index = 0;
-        change = stats->action.ma_change & ACTION_STAT_CHANGE_VALUE_MASK;
+        change = battle_unit->action.ma_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_MA_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_MA_DAMAGE] = change;
 
@@ -1281,7 +1281,7 @@ static s32 result_build_next_display(map_unit_t* unit) {
  * marked 0x80); a miss queues MISSED, GUARDED or CAUGHT by miss type. The
  * first display is built immediately unless a numeric display is active. */
 void result_prepare_display(map_unit_t* unit) {
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     action_data_t* action;
     s32 i;
     s32 j;
@@ -1292,8 +1292,8 @@ void result_prepare_display(map_unit_t* unit) {
 
     unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
         = unit->numeric_display.displays[2]->tpage = SPRITE_TPAGE_FRAME;
-    stats = unit->battle_unit;
-    action = &stats->action;
+    battle_unit = unit->battle_unit;
+    action = &battle_unit->action;
     if (action->hit != 0) {
         if (action->attack_type & ACTION_TYPE_HP_DAMAGE) {
             unit->action_display_flags |= ACTION_DISPLAY_FLAG_HP_DAMAGE;
@@ -1320,7 +1320,7 @@ void result_prepare_display(map_unit_t* unit) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_QUICK;
                 } else if (action->ct_change == ACTION_CT_CHANGE_ZERO) {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_CT_ZERO;
-                } else if (action->ct_change & 0x80) { /* the top bit marks a gain, as for the stats */
+                } else if (action->ct_change & 0x80) { /* the top bit marks a gain, as for the stat changes */
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_CT_GAIN;
                 } else {
                     unit->action_display_flags |= ACTION_DISPLAY_FLAG_CT_DAMAGE;
@@ -1419,7 +1419,7 @@ void result_prepare_display(map_unit_t* unit) {
     }
     if (unit->numeric_display.active == 0) {
         unit->numeric_display.progress = 0;
-        result_build_next_display(unit);
+        build_next_result_display(unit);
     }
 }
 
@@ -1427,11 +1427,11 @@ void result_prepare_display(map_unit_t* unit) {
  * then no target, silenced or not enough MP, clearing that flag. A number shows
  * its last two digits (a value over 999 shows 99).
  *
- * The companion of result_build_next_display for flags
+ * The companion of build_next_result_display for flags
  * 0x02000000 and above. Returns 0 when no flag is pending. Reading the
  * flags into a block-local before clearing keeps the target's and operand
  * order. */
-static s32 result_build_next_special_display(map_unit_t* unit) {
+static s32 build_next_special_result_display(map_unit_t* unit) {
     action_result_display_t* display;
     sprite_display_t* display_0;
     sprite_display_t* display_1;
@@ -1568,7 +1568,7 @@ void result_queue_exp_jp_display(map_unit_t* unit) {
         }
         if (unit->numeric_display.active == 0) {
             unit->numeric_display.progress = 0;
-            result_build_next_special_display(unit);
+            build_next_special_result_display(unit);
         }
     }
 }
@@ -1600,7 +1600,7 @@ void result_queue_charge_failure(map_unit_t* unit, s32 reason) {
     }
     if (unit->numeric_display.active == 0) {
         unit->numeric_display.progress = 0;
-        result_build_next_special_display(unit);
+        build_next_special_result_display(unit);
     }
 }
 
@@ -1666,10 +1666,10 @@ void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
             }
         }
     } else if (progress >= 50 && unit->numeric_display.progress < 50) {
-        if (result_build_next_display(unit) != 0) {
+        if (build_next_result_display(unit) != 0) {
             return;
         }
-        if (result_build_next_special_display(unit) != 0) {
+        if (build_next_special_result_display(unit) != 0) {
             return;
         }
         unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
@@ -1679,10 +1679,10 @@ void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
         sprite_display_set_part_semi_transparent(display_1, 0, 1);
         sprite_display_set_part_semi_transparent(display_2, 0, 1);
     } else if (progress >= 61) {
-        if (result_build_next_display(unit) != 0) {
+        if (build_next_result_display(unit) != 0) {
             return;
         }
-        if (result_build_next_special_display(unit) != 0) {
+        if (build_next_special_result_display(unit) != 0) {
             return;
         }
         unit->numeric_display.active = 0;

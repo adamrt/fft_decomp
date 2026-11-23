@@ -408,7 +408,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
     s32 arc_a;
     s32 arc_b;
     map_tile_t* tile;
-    battle_unit_t* stats;
+    battle_unit_t* battle_unit;
     battle_unit_t* other;
     s32 hit;
     s32 second_hit;
@@ -477,10 +477,10 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
             launch_slope_q12 = arc_a;
             result = target_id;
         } else {
-            stats = battle_unit_get(source_id);
+            battle_unit = battle_unit_get(source_id);
             if (first_unit != -1
                 && (other = battle_unit_get(first_unit),
-                    (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
+                    (battle_unit->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 g_projectile_step = first_step;
                 g_projectile_position = first_position;
                 launch_slope_q12 = arc_b;
@@ -489,7 +489,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
                 g_projectile_step_count = first_count;
             } else if (second_unit != -1
                 && (other = battle_unit_get(second_unit),
-                    (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
+                    (battle_unit->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 launch_slope_q12 = arc_a;
                 g_projectile_step_count = second_count;
                 g_projectile_hit_unit_id = second_unit;

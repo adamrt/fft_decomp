@@ -616,9 +616,9 @@ void auto_battle_confirm_thread(void) {
 /* Store a unit's auto-battle target together with the resolved menu command as
  * its auto-battle setting. */
 void auto_battle_store_target(s32 target_id, s32 battle_unit_id) {
-    battle_unit_t* stats = battle_unit_get(battle_unit_id);
-    stats->auto_battle_target = target_id;
-    stats->auto_battle_setting = g_command_resolved_command;
+    battle_unit_t* battle_unit = battle_unit_get(battle_unit_id);
+    battle_unit->auto_battle_target = target_id;
+    battle_unit->auto_battle_setting = g_command_resolved_command;
 }
 
 /* Choose how an ability is announced: with the caster's spell quote, or with its name.
@@ -704,11 +704,11 @@ s32 command_dispatch_request(s32 type, s32 option, s32 unit_id, s32 parameter, s
  * keep its record in g_crystal_pickup_context and return the treasure item for
  * CRYSTAL_PICKUP_TREASURE, otherwise -1. */
 s32 crystal_pickup_resolve(s32 battle_unit_id) {
-    battle_unit_t* stats = battle_unit_get(battle_unit_id);
+    battle_unit_t* battle_unit = battle_unit_get(battle_unit_id);
     crystal_pickup_result_t* result;
 
     g_thread_call_target = (void (*)(void))crystal_pickup_build_result;
-    result = (crystal_pickup_result_t*)thread_call_on_main_stack(stats);
+    result = (crystal_pickup_result_t*)thread_call_on_main_stack(battle_unit);
     g_crystal_pickup_context = result;
     if (result->result == CRYSTAL_PICKUP_NONE || result->result == CRYSTAL_PICKUP_NOTHING) {
         system_report_stub(0x11, 7);

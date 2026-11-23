@@ -27,7 +27,7 @@
 /* primitive_type of alloc_primitive: an index into g_primitive_sizes. */
 typedef enum primitive_kind { EFFECT_PRIMITIVE_FT4 = 0, EFFECT_PRIMITIVE_DR_MODE = 1 } primitive_kind_e;
 
-static inline effect_sequence_instruction_t* effect_get_current_sequence_instruction(effect_list_node_t* node) {
+static inline effect_sequence_instruction_t* get_current_sequence_instruction(effect_list_node_t* node) {
     return (effect_sequence_instruction_t*)(node->sequence_data + node->sequence_offset);
 }
 
@@ -1946,8 +1946,8 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
                     node->sprite_frame_index = op;
                     node->kind |= EFFECT_LIST_NODE_FRAME_CHANGED;
                 }
-                node->frame_timer = effect_get_current_sequence_instruction(node)->frame.hold;
-                node->depth_mode = effect_get_current_sequence_instruction(node)->frame.depth_mode;
+                node->frame_timer = get_current_sequence_instruction(node)->frame.hold;
+                node->depth_mode = get_current_sequence_instruction(node)->frame.depth_mode;
                 /* A hold of 0 keeps the script on this frame for good. */
                 if (node->frame_timer != 0) {
                     node->sequence_offset += 3;
@@ -1959,15 +1959,15 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
                 node->sequence_offset = 0;
                 break;
             case EFFECT_SEQUENCE_OP_SET_OFFSET:
-                node->sprite_offset_x = effect_get_current_sequence_instruction(node)->set_offset.x_le[0]
-                    + (effect_get_current_sequence_instruction(node)->set_offset.x_le[1] << 8);
-                node->sprite_offset_y = effect_get_current_sequence_instruction(node)->set_offset.y_le[0]
-                    + (effect_get_current_sequence_instruction(node)->set_offset.y_le[1] << 8);
+                node->sprite_offset_x = get_current_sequence_instruction(node)->set_offset.x_le[0]
+                    + (get_current_sequence_instruction(node)->set_offset.x_le[1] << 8);
+                node->sprite_offset_y = get_current_sequence_instruction(node)->set_offset.y_le[0]
+                    + (get_current_sequence_instruction(node)->set_offset.y_le[1] << 8);
                 node->sequence_offset += 5;
                 break;
             case EFFECT_SEQUENCE_OP_ADD_OFFSET:
-                node->sprite_offset_x += effect_get_current_sequence_instruction(node)->add_offset.x;
-                node->sprite_offset_y += effect_get_current_sequence_instruction(node)->add_offset.y;
+                node->sprite_offset_x += get_current_sequence_instruction(node)->add_offset.x;
+                node->sprite_offset_y += get_current_sequence_instruction(node)->add_offset.y;
                 node->sequence_offset += 3;
                 break;
             }

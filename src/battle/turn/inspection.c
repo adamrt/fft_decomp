@@ -20,7 +20,7 @@ void cursor_show(void) {
 }
 
 /* Hide the map cursor and its tile glow: the flag is read only by
- * cursor_update. */
+ * update_cursor. */
 void cursor_hide(void) {
     g_cursor_visible = 0;
 }
@@ -38,16 +38,16 @@ void cursor_move_to_unit(const map_unit_t* unit) {
 /* Move the cursor to the target of the unit's stored action: the target tile, or
  * the tile of the target unit. */
 void cursor_move_to_action_target(const map_unit_t* unit) {
-    battle_unit_t* stats = unit->battle_unit;
+    battle_unit_t* battle_unit = unit->battle_unit;
 
-    if (stats->action_command.targeting_type == TARGET_TYPE_TILE) {
+    if (battle_unit->action_command.targeting_type == TARGET_TYPE_TILE) {
         /* The retail code reloads unit->battle_unit for the elevation and y reads. */
-        g_cursor_x = stats->action_command.target_position.vx;
+        g_cursor_x = battle_unit->action_command.target_position.vx;
         g_cursor_layer = unit->battle_unit->action_command.target_position.vy;
         g_cursor_y = unit->battle_unit->action_command.target_position.vz;
         return;
     }
-    cursor_move_to_unit(map_unit_get_by_battle_unit_id(stats->action_command.target_id));
+    cursor_move_to_unit(map_unit_get_by_battle_unit_id(battle_unit->action_command.target_id));
 }
 
 /* Stop every running color animation on the unit CLUT row and restore those palettes

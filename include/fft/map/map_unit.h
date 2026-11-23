@@ -137,7 +137,7 @@ struct map_unit {
     s32 sp2_ability_id;                    /* 0x170: ability whose SP2 file sprite_open_sp2_file loads */
     target_panels_e ability_preview_phase; /* 0x174 */
     /* 0x178; target_set_area_for_action result stored by
-     * target_select_tile: 0/1 preview, 2 stop, -1 back to the menu. */
+     * select_target_tile: 0/1 preview, 2 stop, -1 back to the menu. */
     s32 target_select_result;
     action_preparation_e attack_phase_state; /* 0x17c */
     s32 pending_attack_result;               /* 0x180: attack result code; -1 signals death */

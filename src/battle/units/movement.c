@@ -1429,13 +1429,13 @@ static void get_step_tiles(map_unit_t* unit, map_tile_t** out_current, map_tile_
  * tests the unit's stats rather than the result's, so the second
  * battle_unit_set_tile_position call repeats the first for the same unit. */
 static void settle_on_tile(map_unit_t* unit) {
-    battle_unit_t* stats = unit->battle_unit;
+    battle_unit_t* battle_unit = unit->battle_unit;
     map_unit_t* partner;
 
-    if (stats != 0) {
+    if (battle_unit != 0) {
         /* facing is read signed (lh) here. */
-        battle_unit_set_tile_position(
-            stats->battle_unit_id, unit->map_x, unit->map_y, unit->map_layer, unit->facing / UNIT_FACING_QUARTER_TURN);
+        battle_unit_set_tile_position(battle_unit->battle_unit_id, unit->map_x, unit->map_y, unit->map_layer,
+            unit->facing / UNIT_FACING_QUARTER_TURN);
         if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
             partner = map_unit_get(unit->map_unit_id);
             if (unit->battle_unit != 0) {
@@ -1457,7 +1457,7 @@ static void settle_on_tile(map_unit_t* unit) {
  * chocobo already stands on the unit's tile, and failing that the unit is
  * itself the mount for a rider recorded at mount_partner_map_unit_id.
  */
-static void map_unit_mount_onto_pending(map_unit_t* unit) {
+static void mount_onto_pending(map_unit_t* unit) {
     map_unit_t* other;
 
     settle_on_tile(unit);
@@ -2414,7 +2414,7 @@ void move_update_step(map_unit_t* unit) {
             unit->path.pending_mount = 0;
             ai_reset_selected_action();
         } else if (count == 0) {
-            map_unit_mount_onto_pending(unit);
+            mount_onto_pending(unit);
         } else if (unit->movement_path_offset < count) {
             if (unit->movement_path_offset == count - 1) {
                 set_mount_flag(unit);
@@ -2442,7 +2442,7 @@ void move_update_step(map_unit_t* unit) {
                 }
             }
         } else {
-            map_unit_mount_onto_pending(unit);
+            mount_onto_pending(unit);
         }
     }
 }
