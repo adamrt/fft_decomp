@@ -52,7 +52,7 @@ Two shared collections are especially visible:
 
 Reuse extends beyond those two collections. OPEN and WLDCORE share window-record and file helpers; OPEN also shares memory-card routines with WORLD and CARD. Shared code is compiled into each program, while calls to resident services use a single implementation already in memory.
 
-Program settings leave readable traces. BATTLE has sixteen 1 KB thread slots; WORLD has seventeen, with tutorial text in the extra slot. Reset routines clear only the first sixteen, allowing that tutorial thread to survive screen changes. The menu work buffer has 53 pages of 256 bytes in BATTLE and 112 in WORLD. Shared menu interpreters also use different opcode-table limits and selection capacities. See [thread.h](include/fft/thread.h) and the target `defines` maps.
+Program settings leave readable traces. BATTLE has sixteen 1 KB thread slots; WORLD has seventeen, with tutorial text in the extra slot. Reset routines clear only the first sixteen, allowing that tutorial thread to survive screen changes. The menu work buffer has 53 pages of 256 bytes in BATTLE and 112 in WORLD. Shared menu interpreters also use different opcode-table limits and selection capacities. See [thread.h](include/fft/sys/thread.h) and the target `defines` maps.
 
 The sound system has a separate division. Suzuki's 222 functions occupy a contiguous resident block immediately before PsyQ's SPU library. FFT's music requests and sound wrappers occur later, outside that block. The sequencing engine, game-facing requests and hardware library are distinct layers. WORLD additionally links PsyQ graphics objects, and OPEN links movie decompression objects; those libraries are not all resident in the main executable.
 
@@ -73,5 +73,12 @@ There are also traces of imperfect integration. WORLD retains calls to BATTLE-on
 ## How much can be recovered
 
 Compiler-profile changes, intervening assembly or library objects, jump-table alignment and noncontiguous read-only data constrain original object boundaries. Different function orders are useful clues, but cannot alone distinguish separately linked objects from edited source copies.
+
+Data layout is a further fingerprint where the linker keeps each object's `.data` and `.bss` together (WORLD, the EVENT overlays and probably WLDCORE and OPEN; BATTLE's data is not laid out per object, and small-data variables are pooled). Variables of two files that interleave in one block were defined in one object. Two runs found this way are single objects whose middle file is shared code compiled inside them:
+
+- BATTLE and WORLD: `lib/event/scene/menu_dispatch.c`, `lib/sound/tracks.c` and `menu_sessions.c` are contiguous in the same order, share one profile, and the outer files' variables interleave. ATTACK and REQUIRE compile `tracks.c` on its own.
+- WORLD: `formation/abilities.c`, `lib/menu/ability_rows.c` and `formation/ability_lists.c` likewise; BUNIT and JOBSTTS compile `ability_rows.c` on its own.
+
+The shared files stay separate here because the original's mechanism (copied source, an included file or another arrangement) is unknown, and one shared source keeps every program's copy identical. Many uninitialized globals are spaced one per 4-byte slot after an object's `.bss` even when they are one or two bytes wide, the layout of COMMON symbols: the original declared them as plain non-static globals. The build does not produce COMMON symbols, so they remain address labels.
 
 Matching bytes alone cannot recover a source-file boundary. Adjacent objects can sometimes be rebuilt as one file without changing their output. Conversely, identical instructions can operate on different record layouts. The evidence supports shared event/menu components and program-specific implementations, but not exact original filenames, directory names or every translation unit. Our source organization is a reconstruction of those constraints.
