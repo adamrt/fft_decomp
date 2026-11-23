@@ -3,11 +3,11 @@
 #include "fft/deploy.h"
 #include "fft/encounter.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Indices in this name file's directory, distinct from the runtime text section slots. */

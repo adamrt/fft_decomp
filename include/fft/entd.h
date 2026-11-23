@@ -1,5 +1,5 @@
-#ifndef UNIT_ENTD_H
-#define UNIT_ENTD_H
+#ifndef ENTD_H
+#define ENTD_H
 
 /* ENTD records: the static unit definitions of each encounter, which the unit initializers read from the ENTD#.ENT
  * files. */

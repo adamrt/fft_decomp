@@ -2,6 +2,7 @@
 
 #include "fft/bits.h"
 #include "fft/brave_story.h"
+#include "fft/character_identity.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
@@ -21,6 +22,7 @@
 #include "fft/music.h"
 #include "fft/option.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/proposition.h"
 #include "fft/save.h"
 #include "fft/screen.h"
@@ -31,8 +33,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
-#include "fft/unit_identity.h"
-#include "fft/unit_party.h"
 #include "fft/zodiac.h"
 #include "psx/kernel.h"
 #include "psx/libc.h"
@@ -163,7 +163,7 @@ static u8 g_save_title_template[0x16]
 /*
  * Per-frame input update of the memory card screen: the body of
  * menu_input_update_message_state written a second time, reading
- * the pad through update_controller instead of the tutorial
+ * the pad through menu_input_update_controller instead of the tutorial
  * reader.
  *
  * Clears the 32-bit input masks during steps 1..3 of the window scale
@@ -178,7 +178,7 @@ static void update_input_message_state(void) {
     s32 step;
     u8 value;
 
-    update_controller();
+    menu_input_update_controller();
     step = menu_window_get_scale_step();
     if (step >= 1 && step <= 3) {
         menu_input_clear_state();

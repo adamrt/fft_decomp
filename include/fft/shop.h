@@ -5,7 +5,7 @@
  * and the item prices and stock they use. */
 
 #include "fft/menu.h"
-#include "fft/unit_party.h"
+#include "fft/party_unit.h"
 #include "psx/types.h"
 
 /* shop screen */

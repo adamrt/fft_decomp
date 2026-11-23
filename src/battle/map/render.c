@@ -1,5 +1,6 @@
 /* Render the battle terrain and weather, apply map resource records and advance mesh and texture animations. */
 
+#include "fft/render.h"
 #include "fft/camera.h"
 #include "fft/effect_particle.h"
 #include "fft/gfx.h"
@@ -8,7 +9,6 @@
 #include "fft/map_load.h"
 #include "fft/map_mesh.h"
 #include "fft/map_palette.h"
-#include "fft/render.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/suzuki.h"

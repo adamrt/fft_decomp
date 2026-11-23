@@ -61,7 +61,7 @@ extern u32 g_previous_input;
 void menu_input_update_event_state(u32* otag, u32 input, s32 count_frame);
 
 /* menu controller */
-/* update_controller publishes the newly pressed buttons and two repeat rates for the menus, with
+/* menu_input_update_controller publishes the newly pressed buttons and two repeat rates for the menus, with
  * one repeat counter per button. */
 extern u32* g_menu_input_controller;
 extern u16 g_menu_input_newly_pressed;
@@ -71,7 +71,7 @@ extern u32 g_menu_input_secondary_repeat;
 /* Buttons OPEN and WLDCORE keep from their menus, -1 for all. */
 extern s32 g_menu_blocked_buttons;
 
-void update_controller(void);
+void menu_input_update_controller(void);
 void menu_input_clear_state(void);
 
 /* EQUIP, JOBSTTS and WORLD each build a separate body. */

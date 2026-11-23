@@ -1,5 +1,6 @@
-/* The thread drawing the character editor and status panels. */
+/* The status banner thread, drawing the unit status panels. */
 
+#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
@@ -17,37 +18,55 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: REQUIRE's character status panels. This copy uses
- * the thread's y position without a slide animation, draws full-width gauge bars and puts two
- * entries in the second number image. The third small-number cell shows battle unit id + 1, or stays
- * blank during post-battle unit changes. */
+extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
+
+/*
+ * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. EQUIP's
+ * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIPMENT_THREAD_SLOT_UNIT_STATUS selects the
+ * first packet set. While the item preview panel is open (g_equipment_item_numeric_thread_enabled)
+ * the first numeric block is drawn as five separate entries, two of them signed. The third
+ * small-number cell shows the roster slot + 1, or stays blank during post-battle unit changes.
+ *
+ * The packet, state and thread layouts are the shared fft/unit_panel.h records: the editor packets
+ * at g_unit_panel_selected_editor_packets / g_unit_panel_comparison_editor_packets, the status-panel
+ * packets at g_unit_panel_selected_packets / g_unit_panel_comparison_packets, the editor states
+ * g_unit_panel_selected_unit_stat_summary / g_unit_panel_comparison_unit_status, and the per-thread display
+ * record. g_unit_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar.
+ */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* number_pixels;
-    menu_status_panel_editor_packet_t* editor_base;
-    menu_number_entry_t* number_entries;
-    unit_panel_summary_t* state;
-    s32 portrait_arg;
-    const RECT* transition;
-    palette_t* portrait_palettes;
-    u8* value_pixels;
-    u8* name_image;
-    menu_status_panel_packet_t* panel_base;
-    unit_panel_unit_t* unit_info;
-    unit_panel_thread_t* thread;
-    s32 frame;
-    s32 dimmed;
-    s32 suppress;
+    u8* number_pixels;                              /* sp60 */
+    menu_status_panel_editor_packet_t* editor_base; /* sp68 */
+    menu_number_entry_t* number_entries;            /* sp70 */
+    unit_panel_summary_t* state;                    /* sp78 */
+    s32 portrait_arg;                               /* sp80 */
+    const RECT* transition;                         /* sp88 */
+    palette_t* portrait_palettes;                   /* sp90 */
+    u8* value_pixels;                               /* sp98 */
+    u8* name_image;                                 /* spA0 */
+    menu_status_panel_packet_t* panel_base;         /* spA8 */
+    menu_unit_status_identity_t* unit_data;         /* spB0 */
+    unit_panel_thread_t* thread;                    /* spB8 */
+    s32 shake;                                      /* spC0 */
+    s32 dimmed;                                     /* spC8 */
+    s32 suppress;                                   /* spD0 */
 
     s32 thread_id;
+    s32 frame;
     s32 i;
-    s32* pen_stride;
     s32 panel_x;
+    s32 panel_shake_y;
     s32 editor_x;
+    s32 editor_shake_y;
+    s32* pen_stride;
+    s32 panel_y_a;
+    s32 panel_y_b;
+    s32 editor_y_a;
+    s32 editor_y_b;
     s16 zodiac;
     glyph_blit_t* text_pen;
     menu_status_panel_packet_t* panel;
@@ -65,15 +84,15 @@ void unit_panel_banner_thread(void) {
     thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
 
     /* One body serves two thread slots: the status slot draws the selected unit, the other the comparison unit. */
-    if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
+    if (thread_id == EQUIPMENT_THREAD_SLOT_UNIT_STATUS) {
         panel = g_unit_panel_selected_packets;
         editor = g_unit_panel_selected_editor_packets;
         number_pixels = g_unit_panel_selected_number_image;
         value_pixels = g_unit_panel_selected_small_number_image;
         name_image = g_unit_panel_selected_name_image;
         number_entries = g_unit_panel_selected_numeric_entries;
-        state = &g_unit_panel_selected_unit_status;
-        unit_info = &g_unit_panel_selected_unit;
+        state = &g_unit_panel_selected_unit_stat_summary;
+        unit_data = &g_equipment_selected_unit_data;
         transition = &g_unit_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -86,12 +105,13 @@ void unit_panel_banner_thread(void) {
         name_image = g_unit_panel_comparison_name_image;
         number_entries = g_unit_panel_comparison_numeric_entries;
         state = &g_unit_panel_comparison_unit_status;
-        unit_info = &g_unit_panel_comparison_unit_data;
+        unit_data = &g_equipment_comparison_unit_data;
         transition = &g_unit_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_palettes = g_unit_panel_comparison_portrait_palettes;
     }
+    shake = 0;
 
     /* Build the editor packets once; the second buffer gets a copy of them below. */
     menu_numeric_frame_init(&g_menu_portrait_origin, &editor->numeric_frame);
@@ -237,23 +257,62 @@ void unit_panel_banner_thread(void) {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
 
-        /* Offset a moves each block to the thread's position; offset b restores the plain offset after it. */
-        panel_x = (u16)thread->position.x;
-        panel->draw_offset_a.position.x = panel_x - 0x80;
         /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
         g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
-        panel->draw_offset_a.position.y = thread->position.y + g_gfx_draw_offset_y;
+
+        /* A slide advances every other frame through the down or up half of the curve,
+         * then clears every flag but HIDDEN. */
+        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
+            shake = 1;
+        }
+        if (thread->flags & MENU_STATUS_PANEL_SLIDE_UP) {
+            if (shake == 0) {
+                shake = 0xB;
+            }
+        }
+        if (shake != 0) {
+            if (shake < 0xA) {
+                thread->position.y = g_unit_panel_slide_y[0][shake - 1];
+                if (frame & 1) {
+                    shake += 1;
+                }
+                if (shake >= 7) {
+                    shake = 0;
+                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+                }
+            } else if (shake >= 0xB) {
+                thread->position.y = g_unit_panel_slide_y[1][shake - 11];
+                if (frame & 1) {
+                    shake += 1;
+                }
+                if (shake >= 0x11) {
+                    shake = 0;
+                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
+                }
+            }
+        }
+
+        /* Offset a moves each block to the thread's position; offset b restores the plain offset after it. */
+        panel_x = (u16)thread->position.x;
+        panel_y_a = g_gfx_draw_offset_y;
+        panel->draw_offset_a.position.x = panel_x - 0x80;
+        panel_shake_y = (u16)thread->position.y;
+        panel->draw_offset_a.position.y = panel_shake_y + panel_y_a;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
+        panel_y_b = g_gfx_draw_offset_y;
         panel->draw_offset_b.position.x = -0x80;
-        panel->draw_offset_b.position.y = g_gfx_draw_offset_y;
+        panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
 
         editor_x = (u16)thread->position.x;
+        editor_y_a = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = editor_x - 0x80;
-        editor->draw_offset_a.position.y = thread->position.y + g_gfx_draw_offset_y;
+        editor_shake_y = (u16)thread->position.y;
+        editor->draw_offset_a.position.y = editor_shake_y + editor_y_a;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
+        editor_y_b = g_gfx_draw_offset_y;
         editor->draw_offset_b.position.x = -0x80;
-        editor->draw_offset_b.position.y = g_gfx_draw_offset_y;
+        editor->draw_offset_b.position.y = editor_y_b;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
 
         /* Transition steps: 0 still portrait, 2-3 CLUT capture, 4-9 wipe. Past the wipe, return to a still portrait;
@@ -285,29 +344,36 @@ void unit_panel_banner_thread(void) {
         portrait_build_transition(
             transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
 
-        /* Gauge bars (HP, MP, CT) as Gouraud quads with four vertex colors each.
-         * This copy draws every bar at its full 32 pixels. */
+        /* Gauge bars (HP, MP, CT) as Gouraud quads with four vertex colors each. */
         {
             CVECTOR* color;
+            menu_unit_status_gauge_t* bar;
 
             color = g_unit_panel_gauge_bar_colors;
+            bar = state->gauges;
             for (i = 0; i < 3; i++) {
                 s32 x0;
-                s32 x1;
+                s32 w;
                 s32 y;
 
                 SetPolyG4(&editor->bars[i]);
-                x1 = g_menu_portrait_origin.x;
-                x0 = x1 + 0x2F;
-                x1 += 0x4F;
+                x0 = g_menu_portrait_origin.x + 0x2F;
+                if (bar->max == 0) {
+                    w = 4;
+                } else {
+                    w = (bar->value << 5) / bar->max;
+                }
+                if (w == 0) {
+                    x0 = 0;
+                }
                 editor->bars[i].x0 = x0;
                 y = i * 0xB + 0x18;
                 editor->bars[i].y0 = g_menu_portrait_origin.y + y;
-                editor->bars[i].x1 = x1;
+                editor->bars[i].x1 = x0 + w;
                 editor->bars[i].y1 = g_menu_portrait_origin.y + y;
                 editor->bars[i].x2 = x0;
                 editor->bars[i].y2 = g_menu_portrait_origin.y + y + 3;
-                editor->bars[i].x3 = x1;
+                editor->bars[i].x3 = x0 + w;
                 editor->bars[i].y3 = g_menu_portrait_origin.y + y + 3;
                 /* Shift the bottom edge 3 pixels left to slant the bar. */
                 editor->bars[i].x2 -= 3;
@@ -333,12 +399,13 @@ void unit_panel_banner_thread(void) {
                     setRGB3(&editor->bars[i], color->r, color->g, color->b);
                     color++;
                 }
+                bar++;
             }
         }
 
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
-        panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
-        zodiac = unit_info->zodiac;
+        panel->sprites[6].u0 = (unit_data->zodiac % 7) * 0x18;
+        zodiac = unit_data->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
         panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
@@ -352,44 +419,59 @@ void unit_panel_banner_thread(void) {
                 number_entries[6].format = 2;
             }
             menu_clear_render_buffer(number_pixels, 0x700);
+            /* With the item preview panel open, the first block shows entries 10-13 and 4-5 (10 and 12 signed). */
+            {
+                s32* stride;
+                glyph_blit_t* position;
+                stride = &g_menu_window_text_pen.stride;
+                *stride = 0x38;
+                if (g_equipment_item_numeric_thread_enabled == 0) {
+                    menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
+                } else {
+                    position = &g_menu_window_text_pen;
+                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], position, 1);
+                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], position, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[11], position, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[13], position, 1);
+                    menu_draw_numeric_display_entries(number_pixels, &number_entries[4], position, 2);
+                }
+            }
+            LoadImage(&rects[0], number_pixels);
+
             pen_stride = &g_menu_window_text_pen.stride;
             text_pen = &g_menu_window_text_pen;
-            *pen_stride = 0x38;
-            menu_draw_numeric_display_entries(number_pixels, number_entries, text_pen, 6);
-            LoadImage(&rects[0], (u32*)number_pixels);
-
             number_pixels_b = number_pixels + 0x400;
             *pen_stride = 0x60;
-            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[8], text_pen, 2);
-            LoadImage(&rects[1], (u32*)number_pixels_b);
+            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_pen, 4);
+            LoadImage(&rects[1], number_pixels_b);
             thread->redraw_request = 0;
 
             menu_clear_render_buffer(name_image, 0x580);
             *pen_stride = 0x58;
             menu_text_set_origin(0, 0);
-            menu_display_text_entry(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
+            menu_display_text_entry(unit_data->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
             menu_text_set_origin(0, 0x10);
-            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
-            LoadImage(&rects[2], (u32*)name_image);
+            menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
+            LoadImage(&rects[2], name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
             *pen_stride = 0x10;
             menu_text_set_origin(0, 0);
-            text_draw_small_number_glyphs(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
-            LoadImage(&rects[3], (u32*)value_pixels);
+            text_draw_small_number_glyphs(unit_data->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
+            LoadImage(&rects[3], value_pixels);
             menu_text_set_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_small_number_glyphs(unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
-            LoadImage(&rects[4], (u32*)value_pixels_b);
+            text_draw_small_number_glyphs(unit_data->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
+            LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_text_set_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
-                text_draw_small_number_glyphs(unit_info->battle_unit_id + 1, 0x4002, value_pixels_c, text_pen);
-                LoadImage(&rects[5], (u32*)value_pixels_c);
+                text_draw_small_number_glyphs(unit_data->roster_slot + 1, 0x4002, value_pixels_c, text_pen);
+                LoadImage(&rects[5], value_pixels_c);
             } else {
-                LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));
+                LoadImage(&rects[5], value_pixels + 0xA0);
             }
         }
 
@@ -441,7 +523,7 @@ void unit_panel_banner_thread(void) {
         if (thread_current_get_parameter_3() != 0) {
             break;
         }
-        frame += 1;
+        frame++;
     }
 
     thread_yield();

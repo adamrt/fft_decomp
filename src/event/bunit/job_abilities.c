@@ -3,13 +3,13 @@
 #include "fft/ability.h"
 #include "fft/ability_list.h"
 #include "fft/bits.h"
+#include "fft/character_identity.h"
 #include "fft/job.h"
 #include "fft/job_list.h"
+#include "fft/party_unit.h"
 #include "fft/skillset.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "fft/unit_list.h"
-#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */

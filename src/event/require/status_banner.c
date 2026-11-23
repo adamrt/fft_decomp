@@ -1,10 +1,8 @@
-/* The thread drawing the character editor and status panels, with fixed-width gauge bars and a party slot
- * number. */
+/* The status banner thread, drawing the unit status panels. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
-#include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -19,43 +17,37 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. ATTACK draws
- * full-width gauge bars and two entries in the second number image. The third small-number cell
- * shows the party slot + 1 (stored in battle_unit_id), or stays blank during post-battle unit changes. */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: REQUIRE's character status panels. This copy uses
+ * the thread's y position without a slide animation, draws full-width gauge bars and puts two
+ * entries in the second number image. The third small-number cell shows battle unit id + 1, or stays
+ * blank during post-battle unit changes. */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* number_pixels;                              /* sp60 */
-    menu_status_panel_editor_packet_t* editor_base; /* sp68 */
-    menu_number_entry_t* number_entries;            /* sp70 */
-    unit_panel_summary_t* state;                    /* sp78 */
-    s32 portrait_arg;                               /* sp80 */
-    const RECT* transition;                         /* sp88 */
-    palette_t* portrait_palettes;                   /* sp90 */
-    u8* value_pixels;                               /* sp98 */
-    u8* name_image;                                 /* spA0 */
-    menu_status_panel_packet_t* panel_base;         /* spA8 */
-    unit_panel_unit_t* unit_info;                   /* spB0 */
-    unit_panel_thread_t* thread;                    /* spB8 */
-    s32 shake;                                      /* spC0 */
-    s32 dimmed;                                     /* spC8 */
-    s32 suppress;                                   /* spD0 */
+    u8* number_pixels;
+    menu_status_panel_editor_packet_t* editor_base;
+    menu_number_entry_t* number_entries;
+    unit_panel_summary_t* state;
+    s32 portrait_arg;
+    const RECT* transition;
+    palette_t* portrait_palettes;
+    u8* value_pixels;
+    u8* name_image;
+    menu_status_panel_packet_t* panel_base;
+    unit_panel_unit_t* unit_info;
+    unit_panel_thread_t* thread;
+    s32 frame;
+    s32 dimmed;
+    s32 suppress;
 
     s32 thread_id;
-    s32 frame;
     s32 i;
-    s32 panel_x;
-    s32 panel_shake_y;
-    s32 editor_x;
-    s32 editor_shake_y;
     s32* pen_stride;
-    s32 panel_y_a;
-    s32 panel_y_b;
-    s32 editor_y_a;
-    s32 editor_y_b;
+    s32 panel_x;
+    s32 editor_x;
     s16 zodiac;
     glyph_blit_t* text_pen;
     menu_status_panel_packet_t* panel;
@@ -68,7 +60,7 @@ void unit_panel_banner_thread(void) {
 
     suppress = 0;
     thread_current_set_task(THREAD_TASK_UNIT_STATUS_BANNER);
-    g_input_controller = script_get_controller_input_pointer(0) + 1;
+    g_menu_input_controller = script_get_controller_input_pointer(0) + 1;
     thread_id = g_thread_current_id;
     thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
 
@@ -100,7 +92,6 @@ void unit_panel_banner_thread(void) {
         editor_base = editor;
         portrait_palettes = g_unit_panel_comparison_portrait_palettes;
     }
-    shake = 0;
 
     /* Build the editor packets once; the second buffer gets a copy of them below. */
     menu_numeric_frame_init(&g_menu_portrait_origin, &editor->numeric_frame);
@@ -159,10 +150,11 @@ void unit_panel_banner_thread(void) {
     mem_copy_bytes_nonempty(panel + 1, panel, sizeof(menu_status_panel_packet_t));
 
     /* Both portrait slots start on the current unit, so no transition runs until it changes. */
+    frame = 0;
     anim_state = 0;
     prev_unit = state->unit_index;
     cur_unit = state->unit_index;
-    for (frame = 0;; frame++) {
+    for (;;) {
         /* Alternate packet copies each frame so the GPU reads one while the other is rebuilt. */
         s32 parity = frame & 1;
         panel = panel_base + parity;
@@ -245,62 +237,23 @@ void unit_panel_banner_thread(void) {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
 
-        /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
-        g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
-
-        /* A slide advances every other frame through the down or up half of the curve,
-         * then clears every flag but HIDDEN. */
-        if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
-            shake = 1;
-        }
-        if (thread->flags & MENU_STATUS_PANEL_SLIDE_UP) {
-            if (shake == 0) {
-                shake = 0xB;
-            }
-        }
-        if (shake != 0) {
-            if (shake < 0xA) {
-                thread->position.y = g_unit_panel_slide_y[0][shake - 1];
-                if (frame & 1) {
-                    shake += 1;
-                }
-                if (shake >= 7) {
-                    shake = 0;
-                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
-                }
-            } else if (shake >= 0xB) {
-                thread->position.y = g_unit_panel_slide_y[1][shake - 11];
-                if (frame & 1) {
-                    shake += 1;
-                }
-                if (shake >= 0x11) {
-                    shake = 0;
-                    thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
-                }
-            }
-        }
-
         /* Offset a moves each block to the thread's position; offset b restores the plain offset after it. */
         panel_x = (u16)thread->position.x;
-        panel_y_a = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = panel_x - 0x80;
-        panel_shake_y = (u16)thread->position.y;
-        panel->draw_offset_a.position.y = panel_shake_y + panel_y_a;
+        /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
+        g_gfx_draw_offset_y = ((g_gfx_screen_polarity * 0xF0) != 0xF0) ? 0xF0 : 0;
+        panel->draw_offset_a.position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
-        panel_y_b = g_gfx_draw_offset_y;
         panel->draw_offset_b.position.x = -0x80;
-        panel->draw_offset_b.position.y = panel_y_b;
+        panel->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
 
         editor_x = (u16)thread->position.x;
-        editor_y_a = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = editor_x - 0x80;
-        editor_shake_y = (u16)thread->position.y;
-        editor->draw_offset_a.position.y = editor_shake_y + editor_y_a;
+        editor->draw_offset_a.position.y = thread->position.y + g_gfx_draw_offset_y;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
-        editor_y_b = g_gfx_draw_offset_y;
         editor->draw_offset_b.position.x = -0x80;
-        editor->draw_offset_b.position.y = editor_y_b;
+        editor->draw_offset_b.position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
 
         /* Transition steps: 0 still portrait, 2-3 CLUT capture, 4-9 wipe. Past the wipe, return to a still portrait;
@@ -340,18 +293,21 @@ void unit_panel_banner_thread(void) {
             color = g_unit_panel_gauge_bar_colors;
             for (i = 0; i < 3; i++) {
                 s32 x0;
+                s32 x1;
                 s32 y;
 
                 SetPolyG4(&editor->bars[i]);
-                x0 = g_menu_portrait_origin.x + 0x2F;
+                x1 = g_menu_portrait_origin.x;
+                x0 = x1 + 0x2F;
+                x1 += 0x4F;
                 editor->bars[i].x0 = x0;
                 y = i * 0xB + 0x18;
                 editor->bars[i].y0 = g_menu_portrait_origin.y + y;
-                editor->bars[i].x1 = x0 + 0x20;
+                editor->bars[i].x1 = x1;
                 editor->bars[i].y1 = g_menu_portrait_origin.y + y;
                 editor->bars[i].x2 = x0;
                 editor->bars[i].y2 = g_menu_portrait_origin.y + y + 3;
-                editor->bars[i].x3 = x0 + 0x20;
+                editor->bars[i].x3 = x1;
                 editor->bars[i].y3 = g_menu_portrait_origin.y + y + 3;
                 /* Shift the bottom edge 3 pixels left to slant the bar. */
                 editor->bars[i].x2 -= 3;
@@ -400,42 +356,40 @@ void unit_panel_banner_thread(void) {
             text_pen = &g_menu_window_text_pen;
             *pen_stride = 0x38;
             menu_draw_numeric_display_entries(number_pixels, number_entries, text_pen, 6);
-            LoadImage(&rects[0], number_pixels);
+            LoadImage(&rects[0], (u32*)number_pixels);
 
             number_pixels_b = number_pixels + 0x400;
             *pen_stride = 0x60;
             menu_draw_numeric_display_entries(number_pixels_b, &number_entries[8], text_pen, 2);
-            LoadImage(&rects[1], number_pixels_b);
+            LoadImage(&rects[1], (u32*)number_pixels_b);
             thread->redraw_request = 0;
 
             menu_clear_render_buffer(name_image, 0x580);
             *pen_stride = 0x58;
             menu_text_set_origin(0, 0);
-            /* ATTACK's unit names are the party name list deploy_find_fieldable_units writes to
-             * TEXT_SECTION_PARTY_UNIT_NAMES (section 11, text id 0x5800). */
-            menu_display_text_entry(unit_info->name_id + 0x5800, name_image, text_pen);
+            menu_display_text_entry(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
             menu_text_set_origin(0, 0x10);
             menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
-            LoadImage(&rects[2], name_image);
+            LoadImage(&rects[2], (u32*)name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
             *pen_stride = 0x10;
             menu_text_set_origin(0, 0);
             text_draw_small_number_glyphs(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
-            LoadImage(&rects[3], value_pixels);
+            LoadImage(&rects[3], (u32*)value_pixels);
             menu_text_set_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
             text_draw_small_number_glyphs(unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
-            LoadImage(&rects[4], value_pixels_b);
+            LoadImage(&rects[4], (u32*)value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_text_set_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
                 text_draw_small_number_glyphs(unit_info->battle_unit_id + 1, 0x4002, value_pixels_c, text_pen);
-                LoadImage(&rects[5], value_pixels_c);
+                LoadImage(&rects[5], (u32*)value_pixels_c);
             } else {
-                LoadImage(&rects[5], value_pixels + 0xA0);
+                LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));
             }
         }
 
@@ -487,6 +441,7 @@ void unit_panel_banner_thread(void) {
         if (thread_current_get_parameter_3() != 0) {
             break;
         }
+        frame += 1;
     }
 
     thread_yield();

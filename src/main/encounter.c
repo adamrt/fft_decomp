@@ -1,10 +1,10 @@
 /* Resident ENTD loading and roster construction from an encounter. */
 
 #include "fft/encounter.h"
+#include "fft/entd.h"
 #include "fft/file.h"
 #include "fft/memory.h"
 #include "fft/party.h"
-#include "fft/unit_entd.h"
 #include "psx/libetc.h"
 
 /* Start loading the ENTD file that holds g_encounter_current_id into a new

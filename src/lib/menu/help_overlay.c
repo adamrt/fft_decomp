@@ -1,4 +1,5 @@
-/* Menu close, battle and after-battle help runners and the first running menu thread. */
+/* The HELPMENU overlay's unit, also linked into WORLD: battle help and the after-battle help cursor,
+ * its two entrances. */
 
 #include "fft/ability.h"
 #include "fft/command.h"

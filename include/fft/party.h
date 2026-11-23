@@ -3,9 +3,9 @@
 
 /* The party roster: resident routines that build, save, level and remove its units and monster eggs. */
 
+#include "fft/entd.h"
+#include "fft/party_unit.h"
 #include "fft/unit.h"
-#include "fft/unit_entd.h"
-#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* roster */

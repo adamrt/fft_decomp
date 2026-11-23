@@ -1,5 +1,6 @@
 /* Formation lets the player reorder units and dismiss a unit after its farewell prompt. */
 
+#include "fft/character_identity.h"
 #include "fft/formation.h"
 #include "fft/help.h"
 #include "fft/item_menu.h"
@@ -12,7 +13,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

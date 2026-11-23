@@ -2,17 +2,17 @@
  * The paired-unit warp and tile-depth switches support scripted scene changes. */
 
 #include "fft/calendar.h"
+#include "fft/character_identity.h"
 #include "fft/item.h"
 #include "fft/map.h"
 #include "fft/map_unit.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
+#include "fft/script_unit.h"
 #include "fft/script_variable.h"
 #include "fft/unit.h"
-#include "fft/unit_event.h"
-#include "fft/unit_identity.h"
-#include "fft/unit_party.h"
 #include "fft/unit_view.h"
 #include "psx/types.h"
 

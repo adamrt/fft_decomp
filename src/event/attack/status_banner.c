@@ -1,9 +1,10 @@
-/* The thread drawing the character editor and status panels. */
+/* The status banner thread, drawing the unit status panels with fixed-width gauge bars and a party slot
+ * number. */
 
-#include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
+#include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -18,21 +19,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
-
-/*
- * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. EQUIP's
- * body (DEBUGCHR, ATTACK and BUNIT have their own): EQUIPMENT_THREAD_SLOT_UNIT_STATUS selects the
- * first packet set. While the item preview panel is open (g_equipment_item_numeric_thread_enabled)
- * the first numeric block is drawn as five separate entries, two of them signed. The third
- * small-number cell shows the roster slot + 1, or stays blank during post-battle unit changes.
- *
- * The packet, state and thread layouts are the shared fft/unit_panel.h records: the editor packets
- * at g_unit_panel_selected_editor_packets / g_unit_panel_comparison_editor_packets, the status-panel
- * packets at g_unit_panel_selected_packets / g_unit_panel_comparison_packets, the editor states
- * g_unit_panel_selected_unit_stat_summary / g_unit_panel_comparison_unit_status, and the per-thread display
- * record. g_unit_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar.
- */
+/* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. ATTACK draws
+ * full-width gauge bars and two entries in the second number image. The third small-number cell
+ * shows the party slot + 1 (stored in battle_unit_id), or stays blank during post-battle unit changes. */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -49,7 +38,7 @@ void unit_panel_banner_thread(void) {
     u8* value_pixels;                               /* sp98 */
     u8* name_image;                                 /* spA0 */
     menu_status_panel_packet_t* panel_base;         /* spA8 */
-    menu_unit_status_identity_t* unit_data;         /* spB0 */
+    unit_panel_unit_t* unit_info;                   /* spB0 */
     unit_panel_thread_t* thread;                    /* spB8 */
     s32 shake;                                      /* spC0 */
     s32 dimmed;                                     /* spC8 */
@@ -79,20 +68,20 @@ void unit_panel_banner_thread(void) {
 
     suppress = 0;
     thread_current_set_task(THREAD_TASK_UNIT_STATUS_BANNER);
-    g_menu_input_controller = script_get_controller_input_pointer(0) + 1;
+    g_input_controller = script_get_controller_input_pointer(0) + 1;
     thread_id = g_thread_current_id;
     thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
 
     /* One body serves two thread slots: the status slot draws the selected unit, the other the comparison unit. */
-    if (thread_id == EQUIPMENT_THREAD_SLOT_UNIT_STATUS) {
+    if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
         panel = g_unit_panel_selected_packets;
         editor = g_unit_panel_selected_editor_packets;
         number_pixels = g_unit_panel_selected_number_image;
         value_pixels = g_unit_panel_selected_small_number_image;
         name_image = g_unit_panel_selected_name_image;
         number_entries = g_unit_panel_selected_numeric_entries;
-        state = &g_unit_panel_selected_unit_stat_summary;
-        unit_data = &g_equipment_selected_unit_data;
+        state = &g_unit_panel_selected_unit_status;
+        unit_info = &g_unit_panel_selected_unit;
         transition = &g_unit_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -105,7 +94,7 @@ void unit_panel_banner_thread(void) {
         name_image = g_unit_panel_comparison_name_image;
         number_entries = g_unit_panel_comparison_numeric_entries;
         state = &g_unit_panel_comparison_unit_status;
-        unit_data = &g_equipment_comparison_unit_data;
+        unit_info = &g_unit_panel_comparison_unit_data;
         transition = &g_unit_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -170,11 +159,10 @@ void unit_panel_banner_thread(void) {
     mem_copy_bytes_nonempty(panel + 1, panel, sizeof(menu_status_panel_packet_t));
 
     /* Both portrait slots start on the current unit, so no transition runs until it changes. */
-    frame = 0;
     anim_state = 0;
     prev_unit = state->unit_index;
     cur_unit = state->unit_index;
-    for (;;) {
+    for (frame = 0;; frame++) {
         /* Alternate packet copies each frame so the GPU reads one while the other is rebuilt. */
         s32 parity = frame & 1;
         panel = panel_base + parity;
@@ -344,36 +332,26 @@ void unit_panel_banner_thread(void) {
         portrait_build_transition(
             transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
 
-        /* Gauge bars (HP, MP, CT) as Gouraud quads with four vertex colors each. */
+        /* Gauge bars (HP, MP, CT) as Gouraud quads with four vertex colors each.
+         * This copy draws every bar at its full 32 pixels. */
         {
             CVECTOR* color;
-            menu_unit_status_gauge_t* bar;
 
             color = g_unit_panel_gauge_bar_colors;
-            bar = state->gauges;
             for (i = 0; i < 3; i++) {
                 s32 x0;
-                s32 w;
                 s32 y;
 
                 SetPolyG4(&editor->bars[i]);
                 x0 = g_menu_portrait_origin.x + 0x2F;
-                if (bar->max == 0) {
-                    w = 4;
-                } else {
-                    w = (bar->value << 5) / bar->max;
-                }
-                if (w == 0) {
-                    x0 = 0;
-                }
                 editor->bars[i].x0 = x0;
                 y = i * 0xB + 0x18;
                 editor->bars[i].y0 = g_menu_portrait_origin.y + y;
-                editor->bars[i].x1 = x0 + w;
+                editor->bars[i].x1 = x0 + 0x20;
                 editor->bars[i].y1 = g_menu_portrait_origin.y + y;
                 editor->bars[i].x2 = x0;
                 editor->bars[i].y2 = g_menu_portrait_origin.y + y + 3;
-                editor->bars[i].x3 = x0 + w;
+                editor->bars[i].x3 = x0 + 0x20;
                 editor->bars[i].y3 = g_menu_portrait_origin.y + y + 3;
                 /* Shift the bottom edge 3 pixels left to slant the bar. */
                 editor->bars[i].x2 -= 3;
@@ -399,13 +377,12 @@ void unit_panel_banner_thread(void) {
                     setRGB3(&editor->bars[i], color->r, color->g, color->b);
                     color++;
                 }
-                bar++;
             }
         }
 
         /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A. */
-        panel->sprites[6].u0 = (unit_data->zodiac % 7) * 0x18;
-        zodiac = unit_data->zodiac;
+        panel->sprites[6].u0 = (unit_info->zodiac % 7) * 0x18;
+        zodiac = unit_info->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
         panel->sprites[6].v0 = (zodiac / 7) * 0x14 + 0x2A;
@@ -419,56 +396,43 @@ void unit_panel_banner_thread(void) {
                 number_entries[6].format = 2;
             }
             menu_clear_render_buffer(number_pixels, 0x700);
-            /* With the item preview panel open, the first block shows entries 10-13 and 4-5 (10 and 12 signed). */
-            {
-                s32* stride;
-                glyph_blit_t* position;
-                stride = &g_menu_window_text_pen.stride;
-                *stride = 0x38;
-                if (g_equipment_item_numeric_thread_enabled == 0) {
-                    menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
-                } else {
-                    position = &g_menu_window_text_pen;
-                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], position, 1);
-                    menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], position, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[11], position, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[13], position, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[4], position, 2);
-                }
-            }
-            LoadImage(&rects[0], number_pixels);
-
             pen_stride = &g_menu_window_text_pen.stride;
             text_pen = &g_menu_window_text_pen;
+            *pen_stride = 0x38;
+            menu_draw_numeric_display_entries(number_pixels, number_entries, text_pen, 6);
+            LoadImage(&rects[0], number_pixels);
+
             number_pixels_b = number_pixels + 0x400;
             *pen_stride = 0x60;
-            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_pen, 4);
+            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[8], text_pen, 2);
             LoadImage(&rects[1], number_pixels_b);
             thread->redraw_request = 0;
 
             menu_clear_render_buffer(name_image, 0x580);
             *pen_stride = 0x58;
             menu_text_set_origin(0, 0);
-            menu_display_text_entry(unit_data->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
+            /* ATTACK's unit names are the party name list deploy_find_fieldable_units writes to
+             * TEXT_SECTION_PARTY_UNIT_NAMES (section 11, text id 0x5800). */
+            menu_display_text_entry(unit_info->name_id + 0x5800, name_image, text_pen);
             menu_text_set_origin(0, 0x10);
-            menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
+            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
             LoadImage(&rects[2], name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
             *pen_stride = 0x10;
             menu_text_set_origin(0, 0);
-            text_draw_small_number_glyphs(unit_data->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
+            text_draw_small_number_glyphs(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
             LoadImage(&rects[3], value_pixels);
             menu_text_set_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_small_number_glyphs(unit_data->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
+            text_draw_small_number_glyphs(unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
             LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_text_set_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
-                text_draw_small_number_glyphs(unit_data->roster_slot + 1, 0x4002, value_pixels_c, text_pen);
+                text_draw_small_number_glyphs(unit_info->battle_unit_id + 1, 0x4002, value_pixels_c, text_pen);
                 LoadImage(&rects[5], value_pixels_c);
             } else {
                 LoadImage(&rects[5], value_pixels + 0xA0);
@@ -523,7 +487,6 @@ void unit_panel_banner_thread(void) {
         if (thread_current_get_parameter_3() != 0) {
             break;
         }
-        frame++;
     }
 
     thread_yield();

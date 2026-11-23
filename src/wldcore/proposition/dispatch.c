@@ -1,6 +1,7 @@
 /* The bar dispatches propositions by choosing participants and confirming their assignment; day counters track their
  * return. */
 
+#include "fft/character_identity.h"
 #include "fft/display_object.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
@@ -10,6 +11,7 @@
 #include "fft/menu_stack_records.h"
 #include "fft/message_box.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/portrait.h"
 #include "fft/proposition.h"
 #include "fft/screen.h"
@@ -18,9 +20,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_party.h"
 #include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/libgpu.h"

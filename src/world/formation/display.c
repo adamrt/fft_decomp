@@ -1,4 +1,4 @@
-/* Formation menu display init, unit list rebuilds, the map busy check and unit messages with sound. */
+/* Formation menu display init, unit list rebuilds, the menu busy check and unit messages with sound. */
 
 #include "fft/formation.h"
 #include "fft/gfx.h"

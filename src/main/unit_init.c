@@ -1,21 +1,21 @@
-/* Build battle and formation stats from a party slot or ENTD unit. Equipment, abilities,
- * job data and the selected name provider are applied to the same map unit record. */
+/* Build a battle unit record, for a battle or Formation, from a party slot or ENTD unit. Equipment,
+ * abilities, job data and the selected name provider are applied to that record. */
 
 #include "fft/ability.h"
+#include "fft/character_identity.h"
 #include "fft/encounter.h"
+#include "fft/entd.h"
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/screen.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_entd.h"
-#include "fft/unit_identity.h"
-#include "fft/unit_party.h"
 #include "fft/zodiac.h"
 #include "psx/libc.h"
 #include "psx/types.h"

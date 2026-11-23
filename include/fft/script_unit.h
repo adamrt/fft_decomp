@@ -1,5 +1,5 @@
-#ifndef UNIT_EVENT_H
-#define UNIT_EVENT_H
+#ifndef SCRIPT_UNIT_H
+#define SCRIPT_UNIT_H
 
 /* The event library's units in BATTLE and WORLD: status staging records and operations, facing and pending
  * animations, and unit lookups and coordinates. */

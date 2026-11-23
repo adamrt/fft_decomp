@@ -20,11 +20,10 @@ units:
   - {name: loading_draw_message, source: src/main/loading_screen.c, data: [{addr: 0x80032a68, size: 16, hash: 374708fff7719dd5}]}
   - {name: loading_message, source: src/main/loading_message.c, bss: [{addr: 0x8004e5b8, size: 4, hash: df3f619804a92fdb}]}
   - {name: memcard_events, source: src/main/memcard_events.c, data: [{addr: 0x800596c0, size: 32, hash: 66687aadf862bd77}]}
-  - {name: menu_sort_init, source: src/main/menu_sort_init.c}
+  - {name: menu_sort_defaults, source: src/main/menu_sort_defaults.c}
   - {name: new_game, source: src/main/new_game.c}
   - {name: new_game_caption, source: src/main/new_game_caption.c}
   - {name: open_overlay, source: src/main/open_overlay.c}
-  - {name: overlay_loading, source: src/main/overlay_loading.c}
   - {name: party, source: src/main/party.c}
   - {name: save_init_data_tables, source: src/main/save_tables.c, profile: gcc-2.6.3_O2_aspsx-2.21, data: [{addr: 0x80059594, size: 280, hash: 1f6c9de2e555d5d5}]}
   - {name: save_state, source: src/main/save_state.c, rodata: [{addr: 0x800473b0, size: 4, hash: 27d9bda8887f41f6}], bss: [{addr: 0x8005771c, size: 1024, hash: 5f70bf18a0860070}]}
@@ -51,6 +50,7 @@ units:
   - {name: unit_state, source: src/main/unit_state.c}
   - {name: unit_stats, source: src/main/unit_stats.c}
   - {name: vector, source: src/main/vector.c}
+  - {name: world_overlay, source: src/main/world_overlay.c}
   - {name: zodiac_primitives, source: src/lib/menu/unit_view/zodiac_primitives.c}
 
 libraries:
@@ -140,7 +140,7 @@ functions:
   - {addr: 0x80014148, size: 56, name: suzuki_smd_set_flags_all_channels, hash: a707cd18a9d0bfd7, unit: suzuki_smd_records}
   - {addr: 0x80014180, size: 132, name: suzuki_smd_get_instrument_attr, hash: e62ca444c99c2166, unit: suzuki_smd_records}
   - {addr: 0x80014204, size: 8, name: suzuki_sound_return_zero_1, hash: 207819bf4ebe3078, source: src/lib/suzuki/suzuki_sound_return_zero_1.c}
-  - {addr: 0x8001420c, size: 48, name: suzuki_sound_sum_resource_words, hash: 8eadc6f1c70f6a75, source: src/lib/suzuki/suzuki_sound_sum_resource_words.c}
+  - {addr: 0x8001420c, size: 48, name: suzuki_sound_sum_resource_words, hash: 8eadc6f1c70f6a75, source: src/lib/suzuki/resource_sum.c}
   - {addr: 0x8001423c, size: 60, name: suzuki_sound_init_heap, hash: 34064af7b82b9b40, unit: suzuki_heap}
   - {addr: 0x80014278, size: 224, name: suzuki_sound_alloc, hash: ce530b24cb2e1a41, unit: suzuki_heap}
   - {addr: 0x80014358, size: 84, name: suzuki_sound_free, hash: 11a2caca3233143e, unit: suzuki_heap}
@@ -296,7 +296,7 @@ functions:
   - {addr: 0x80018510, size: 8, name: suzuki_sound_spu_event_handler, hash: 207819bf4ebe3078, unit: suzuki_driver}
   - {addr: 0x80018518, size: 316, name: suzuki_sound_transfer_spu_data, hash: 05f8d8da327ae08d, unit: suzuki_driver, rodata: [{addr: 0x80010030, size: 20, hash: 70cca047fa34bab7}]}
   - {addr: 0x80018654, size: 8, name: suzuki_sound_noop_1, hash: 6d64edf91449c1b1, unit: suzuki_driver}
-  - {addr: 0x8001865c, size: 96, name: suzuki_sound_wait_for_spu_transfer, hash: 30625f6e920b4684, source: src/lib/suzuki/suzuki_sound_wait_for_spu_transfer.c}
+  - {addr: 0x8001865c, size: 96, name: suzuki_sound_wait_for_spu_transfer, hash: 30625f6e920b4684, source: src/lib/suzuki/spu_transfer_wait.c}
   - {addr: 0x800186bc, size: 8, name: suzuki_sound_noop_2, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_sound_noop_2.c}
   - {addr: 0x800186c4, size: 32, name: SpuInit, hash: 88a4657274163f46, source: src/platform/psyq/libspu/SpuInit.c}
   - {addr: 0x800186e4, size: 248, name: _SpuInit, hash: 75c2d5909458014e, source: src/platform/psyq/libspu/_SpuInit.c}
@@ -791,11 +791,11 @@ functions:
   - {addr: 0x80044e80, size: 692, name: zodiac_build_primitives, hash: 26ab908a528421ce, unit: zodiac_primitives}
   - {addr: 0x80045134, size: 32, name: zodiac_build_resident_primitives, hash: 3e5255b795ac3b4e, unit: frame_graphics}
   - {addr: 0x80045154, size: 120, name: gfx_load_frame_texture, hash: 3d0e02e92a4b71b7, unit: frame_graphics}
-  - {addr: 0x800451cc, size: 104, name: overlay_run_world, hash: 9de0809817ea03b9, unit: overlay_loading}
-  - {addr: 0x80045234, size: 52, name: overlay_load_world, hash: f0dc6ce1683e216e, unit: overlay_loading}
-  - {addr: 0x80045268, size: 132, name: load_disc_sectors, hash: 061eb9238379898e, unit: overlay_loading}
+  - {addr: 0x800451cc, size: 104, name: overlay_run_world, hash: 9de0809817ea03b9, unit: world_overlay}
+  - {addr: 0x80045234, size: 52, name: overlay_load_world, hash: f0dc6ce1683e216e, unit: world_overlay}
+  - {addr: 0x80045268, size: 132, name: load_disc_sectors, hash: 061eb9238379898e, unit: world_overlay}
   - {addr: 0x800452ec, size: 480, name: save_init_data_tables, hash: 13bfa79a2bc689e1, unit: save_init_data_tables}
-  - {addr: 0x80045514, size: 524, name: menu_init_sort_tables, hash: d7bbcb00c4fad7e9, unit: menu_sort_init}
+  - {addr: 0x80045514, size: 524, name: menu_init_sort_tables, hash: d7bbcb00c4fad7e9, unit: menu_sort_defaults}
   - {addr: 0x80045720, size: 408, name: memcard_init_events, hash: c3df9151b2bf6647, unit: memcard_events}
   - {addr: 0x800458b8, size: 72, name: overlay_run_title, hash: ec2d3c302ca9b1f1, unit: open_overlay}
   - {addr: 0x80045900, size: 60, name: overlay_run_ending, hash: 47240d2c7733c304, unit: open_overlay}

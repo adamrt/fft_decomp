@@ -806,7 +806,7 @@ written that way.
 ## Declaration leads
 
 - Suzuki's driver-status word at `0x80032a54` retains different qualifier
-  views: `suzuki_sound_wait_for_spu_transfer.c` declares it volatile, while
+  views: `spu_transfer_wait.c` declares it volatile, while
   `driver.c`, `sfx.c` and `smd_voices.c` use ordinary declarations. Uniform
   qualification and local volatile-pointer rewrites change the original code.
   Keeping these declarations in their source files avoids a contradictory

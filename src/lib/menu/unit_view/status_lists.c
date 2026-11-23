@@ -7,12 +7,12 @@
 #include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
+#include "fft/script_unit.h"
 #include "fft/sound.h"
 #include "fft/status.h"
 #include "fft/status_screen.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_event.h"
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 

@@ -10,10 +10,10 @@
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
+#include "fft/party_unit.h"
 #include "fft/proposition.h"
 #include "fft/sound_novel.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

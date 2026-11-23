@@ -32,7 +32,7 @@ void menu_input_update_message_state(void) {
     u8 state;
     s32 delay;
 
-    update_controller();
+    menu_input_update_controller();
     frame = menu_window_get_scale_step();
     if (frame >= 1 && frame <= 3) {
         menu_input_clear_state();

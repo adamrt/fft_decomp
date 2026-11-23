@@ -14,15 +14,15 @@ extern s32 g_menu_input_repeat_counters[16];
 /*
  * Publish newly pressed buttons and two repeat rates for menus.
  *
- * Same latch/activation/repeat logic as menu_input_controller_update and
- * menu_input_controller_update, with the frame-speed divisor fixed at 2.
+ * Same latch/activation/repeat logic as WORLD's copy (world/screen/pad_input.c)
+ * and the BUNIT and CARD statics, with the frame-speed divisor fixed at 2.
  * The divisor stays a variable: the target divides by a register holding 2
  * rather than shifting. Counter slots 4..11 are skipped: only the shoulder
  * buttons and the d-pad (bits 0-3 and 12-15) repeat, while the face buttons,
  * Select and Start report only new presses. Bits 16-31 of the primary mask
  * flag repeating buttons held past the initial delay.
  */
-void update_controller(void) {
+void menu_input_update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;

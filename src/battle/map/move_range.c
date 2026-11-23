@@ -1,6 +1,7 @@
 /* Movement range spreading, pathfinding, teleport chances and path encoding. */
 
 #include "fft/ai_decision.h"
+#include "fft/character_identity.h"
 #include "fft/job.h"
 #include "fft/map.h"
 #include "fft/map_unit.h"
@@ -10,7 +11,6 @@
 #include "fft/status.h"
 #include "fft/target.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "fft/weather.h"
 #include "psx/libetc.h"
 #include "psx/types.h"

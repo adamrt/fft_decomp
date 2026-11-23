@@ -2,12 +2,12 @@
  * Matching blocks choose the operation that finishes the current event. */
 
 #include "fft/battle_state.h"
+#include "fft/character_identity.h"
 #include "fft/map_unit.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "psx/types.h"
 
 /* Spell announcements and scenario handoff. */

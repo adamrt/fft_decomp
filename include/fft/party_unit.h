@@ -1,5 +1,5 @@
-#ifndef UNIT_PARTY_H
-#define UNIT_PARTY_H
+#ifndef PARTY_UNIT_H
+#define PARTY_UNIT_H
 
 /* Party records: the persistent roster of party_unit_t records and its slots. */
 

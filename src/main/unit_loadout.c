@@ -2,14 +2,14 @@
  * unlocked jobs and permitted skillsets before final stats are built. */
 
 #include "fft/ability.h"
+#include "fft/character_identity.h"
+#include "fft/entd.h"
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/memory.h"
 #include "fft/random.h"
 #include "fft/skillset.h"
 #include "fft/unit.h"
-#include "fft/unit_entd.h"
-#include "fft/unit_identity.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

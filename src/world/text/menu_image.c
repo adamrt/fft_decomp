@@ -2,10 +2,10 @@
 
 #include "fft/gfx.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

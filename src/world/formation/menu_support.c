@@ -1,4 +1,5 @@
-/* The formation icon list thread, unit name strings, the display mode and the ordering table pointer. */
+/* The formation icon list thread, roster name strings, the menu cursor bob hold and the zodiac backdrop's ordering
+ * table. */
 
 #include "fft/formation.h"
 #include "fft/memory.h"
@@ -8,11 +9,11 @@
 #include "fft/menu_list.h"
 #include "fft/menu_window.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/screen.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "fft/zodiac.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

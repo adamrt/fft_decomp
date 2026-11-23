@@ -5,12 +5,12 @@
 #include "fft/formation.h"
 #include "fft/job.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/save.h"
 #include "fft/script_variable.h"
 #include "fft/skillset.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

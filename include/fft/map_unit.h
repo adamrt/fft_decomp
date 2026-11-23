@@ -6,6 +6,7 @@
 
 #include "fft/action.h"
 #include "fft/animation.h"
+#include "fft/entd.h"
 #include "fft/map.h"
 #include "fft/move.h"
 #include "fft/result.h"
@@ -13,7 +14,6 @@
 #include "fft/target.h"
 #include "fft/turn_command.h"
 #include "fft/unit.h"
-#include "fft/unit_entd.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

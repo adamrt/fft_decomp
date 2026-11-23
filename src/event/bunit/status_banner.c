@@ -1,4 +1,4 @@
-/* The thread drawing the character editor and status panels. */
+/* The status banner thread, drawing the unit status panels. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"

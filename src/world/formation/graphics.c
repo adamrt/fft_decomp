@@ -1,17 +1,17 @@
 /* Formation draws its zodiac backdrop and resolves the party sprites and portraits used by menu panels. The scrolling
  * text thread also exposes its redraw request here. */
 
+#include "fft/character_identity.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/menu_list.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/portrait.h"
 #include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/thread.h"
-#include "fft/unit_identity.h"
-#include "fft/unit_party.h"
 #include "fft/zodiac.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

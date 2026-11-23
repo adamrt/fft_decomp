@@ -1,5 +1,6 @@
 /* The Soldier Office previews recruits, collects hire fees and renames existing party members. */
 
+#include "fft/character_identity.h"
 #include "fft/formation.h"
 #include "fft/help.h"
 #include "fft/menu.h"
@@ -9,16 +10,15 @@
 #include "fft/message_box.h"
 #include "fft/name_entry.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/screen.h"
 #include "fft/shop.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "fft/unit_list.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_party.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

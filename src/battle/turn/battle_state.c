@@ -1,13 +1,13 @@
 /* Drive player and AI turns from command selection through movement, targeting, action playback, rewards and scene
  * transitions. Entry operations precede frame handlers in the original program order. */
 
+#include "fft/battle_state.h"
 #include "fft/ability.h"
 #include "fft/action.h"
 #include "fft/ai.h"
 #include "fft/ai_decision.h"
 #include "fft/animation.h"
 #include "fft/at_list.h"
-#include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/crystal.h"

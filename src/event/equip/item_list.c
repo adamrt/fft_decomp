@@ -1,11 +1,11 @@
 /* Equipment item browser and its menu state transitions. */
 
-#include "fft/item_menu.h"
 #include "fft/equipment.h"
 #include "fft/gfx_image.h"
 #include "fft/help.h"
 #include "fft/input.h"
 #include "fft/item.h"
+#include "fft/item_menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"

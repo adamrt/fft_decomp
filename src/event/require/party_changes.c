@@ -2,6 +2,7 @@
  * departures, join candidates, the bugged ready condition, selection waits and the JOBSTTS overlay open. */
 
 #include "fft/after_battle.h"
+#include "fft/character_identity.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/input.h"
@@ -13,6 +14,7 @@
 #include "fft/music.h"
 #include "fft/overlay.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/status.h"
@@ -20,9 +22,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_party.h"
 #include "fft/unit_view.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

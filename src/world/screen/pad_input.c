@@ -29,7 +29,7 @@ static s32 read_pad_buttons(s32 unused) {
  * are skipped; those buttons use only the newly pressed mask, and bits 16-31
  * flag a button held past the initial delay.
  */
-void update_controller(void) {
+void menu_input_update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;

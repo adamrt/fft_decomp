@@ -2,15 +2,15 @@
  * stats, names and job history that survive battles and program loads. */
 
 #include "fft/party.h"
+#include "fft/character_identity.h"
 #include "fft/encounter.h"
+#include "fft/entd.h"
 #include "fft/job.h"
 #include "fft/memory.h"
+#include "fft/party_unit.h"
 #include "fft/screen.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_entd.h"
-#include "fft/unit_identity.h"
-#include "fft/unit_party.h"
 #include "fft/zodiac.h"
 #include "psx/libc.h"
 #include "psx/types.h"

@@ -6,6 +6,7 @@
 #include "fft/memory.h"
 #include "fft/music.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/portrait.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
@@ -13,7 +14,6 @@
 #include "fft/system.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/unit_party.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

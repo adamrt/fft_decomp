@@ -1,4 +1,4 @@
-/* Find resident unit records by id or occupied tile and maintain their iteration order. */
+/* Find map unit records by id or occupied tile and maintain their iteration order. */
 
 #include "fft/map_unit.h"
 #include "fft/sprite_sheet.h"

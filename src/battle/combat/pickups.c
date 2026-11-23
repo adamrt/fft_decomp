@@ -2,6 +2,7 @@
 
 #include "fft/ability.h"
 #include "fft/action.h"
+#include "fft/character_identity.h"
 #include "fft/crystal.h"
 #include "fft/item.h"
 #include "fft/job.h"
@@ -13,7 +14,6 @@
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

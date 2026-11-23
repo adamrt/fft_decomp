@@ -3,8 +3,8 @@
 
 /* Deployment before a battle: BATTLE's side of it and ATTACK's placement screen. */
 
+#include "fft/party_unit.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* BATTLE's side */

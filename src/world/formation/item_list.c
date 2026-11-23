@@ -1,4 +1,4 @@
-/* Equipment updates and the item category menu. */
+/* The Formation Items screen: its per-frame update and its browse state. */
 
 #include "fft/equipment.h"
 #include "fft/formation.h"

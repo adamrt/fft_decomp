@@ -3,8 +3,8 @@
 
 #include "fft/job.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Compute a unit's unlocked-job bitset (Squire in bit 23, always set) from its packed job levels:

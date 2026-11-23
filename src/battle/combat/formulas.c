@@ -3,13 +3,13 @@
 
 #include "fft/ability.h"
 #include "fft/action.h"
+#include "fft/character_identity.h"
 #include "fft/formula.h"
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/reaction.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "psx/types.h"
 
 /* Hit chance F(XA+YA)% for magic on allies: Magic Attack Up and zodiac

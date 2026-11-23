@@ -1,7 +1,7 @@
-#ifndef UNIT_IDENTITY_H
-#define UNIT_IDENTITY_H
+#ifndef CHARACTER_IDENTITY_H
+#define CHARACTER_IDENTITY_H
 
-/* Character identities: the sprite-set selectors that ENTD entries, party records and battle stats share. */
+/* Character identities: the sprite-set selectors that ENTD entries, party records and battle unit records share. */
 
 /*
  * ENTD/party sprite_set and battle character_identity share this byte domain.

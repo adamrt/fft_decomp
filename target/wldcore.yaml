@@ -10,7 +10,7 @@ links: [world]
 
 units:
   - {name: bar, source: src/wldcore/bar.c}
-  - {name: bits_flags, source: src/wldcore/bits_flags.c}
+  - {name: bit_arrays, source: src/wldcore/bit_arrays.c}
   - {name: brave_story, source: src/wldcore/brave_story/menu.c, data: [{addr: 0x800971b0, size: 128, hash: 6fb86c0f90df7048}]}
   - {name: brave_story_collections, source: src/wldcore/brave_story/collections.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
   - {name: brave_story_facts, source: src/wldcore/brave_story/facts.c}
@@ -21,9 +21,9 @@ units:
   - {name: event_transition, source: src/wldcore/map/event_transition.c, data: [{addr: 0x8009f288, size: 36, hash: 6db65fd59fd356f6}], bss: [{addr: 0x800d0adc, size: 4, hash: df3f619804a92fdb}]}
   - {name: file_wait, source: src/lib/file/pending.c}
   - {name: hud, source: src/wldcore/map/hud.c}
+  - {name: image_buffers, source: src/wldcore/map/image_buffers.c}
   - {name: input, source: src/wldcore/map/input.c, data: [{addr: 0x800c72f8, size: 36, hash: 6db65fd59fd356f6}]}
   - {name: location_script, source: src/wldcore/map/location_script.c, data: [{addr: 0x8009ee50, size: 164, hash: 04a7b8a5a7222edf}], bss: [{addr: 0x800d4644, size: 4, hash: df3f619804a92fdb}]}
-  - {name: map_buffers, source: src/wldcore/map/buffers.c}
   - {name: map_fades, source: src/wldcore/map/fades.c}
   - {name: map_routes, source: src/wldcore/map/routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}, {addr: 0x80095000, size: 8, hash: 5c609baa7c039742}], bss: [{addr: 0x800d483c, size: 4, hash: df3f619804a92fdb}]}
   - {name: map_tiles, source: src/wldcore/map/tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}], bss: [{addr: 0x800d3c88, size: 4, hash: df3f619804a92fdb}]}
@@ -87,7 +87,7 @@ functions:
   - {addr: 0x80069e38, size: 32, name: party_get_roster_unit, hash: 94137dd4e32ea227, unit: calendar}
   - {addr: 0x80069e58, size: 172, name: calendar_write_date, hash: a100a01dd3458fa8, unit: calendar}
   - {addr: 0x80069f04, size: 276, name: calendar_read_date, hash: 337a6e03c2eb3680, unit: calendar}
-  - {addr: 0x8006a018, size: 148, name: world_map_clear_image_buffers, hash: 6d07a88a3d3e8359, unit: map_buffers}
+  - {addr: 0x8006a018, size: 148, name: world_map_clear_image_buffers, hash: 6d07a88a3d3e8359, unit: image_buffers}
   - {addr: 0x8006a0ac, size: 76, name: calendar_date_to_day_index, hash: efdeb3089d1c7472, unit: calendar_day_index}
   - {addr: 0x8006a0f8, size: 72, name: calendar_day_index_to_date, hash: 65bc42f96d71e765, unit: calendar_day_index}
   - {addr: 0x8006a140, size: 1100, name: world_map_set_backdrop_mode, hash: 78cf845743021b10, unit: map_tiles}
@@ -468,8 +468,8 @@ functions:
   - {addr: 0x80091f74, size: 124, name: location_script_opcode_26_check_ramza_brave_at_most, hash: 8ad6ea6f5047346d, unit: location_script}
   - {addr: 0x80091ff0, size: 124, name: location_script_opcode_27_check_ramza_faith_at_least, hash: 4b093efef959c7f5, unit: location_script}
   - {addr: 0x8009206c, size: 124, name: location_script_opcode_28_check_ramza_faith_at_most, hash: ad3113bd42ed67db, unit: location_script}
-  - {addr: 0x800920e8, size: 96, name: bits_set_value, hash: 56450a38fe0bff9f, unit: bits_flags}
-  - {addr: 0x80092148, size: 56, name: bits_test, hash: 822830daaa9c0843, unit: bits_flags}
+  - {addr: 0x800920e8, size: 96, name: bits_set_value, hash: 56450a38fe0bff9f, unit: bit_arrays}
+  - {addr: 0x80092148, size: 56, name: bits_test, hash: 822830daaa9c0843, unit: bit_arrays}
   - {addr: 0x80092180, size: 136, name: sound_novel_calculate_read_percent, hash: 0ecc0e3f3f1d9117, unit: sound_novel_progress}
   - {addr: 0x80092208, size: 516, name: brave_story_open_fact_list, hash: 53ae90c287d3c5a4, unit: brave_story_facts}
   - {addr: 0x8009240c, size: 20, name: brave_story_resume_fact_list, hash: 7e9ed99f23ab0769, unit: brave_story_facts}

@@ -1,10 +1,10 @@
 /* Location scripts test story conditions and request world-map events, choices and visible routes. */
 
+#include "fft/character_identity.h"
 #include "fft/location.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/script_variable.h"
-#include "fft/unit_identity.h"
-#include "fft/unit_party.h"
 #include "fft/world_map.h"
 #include "psx/types.h"
 

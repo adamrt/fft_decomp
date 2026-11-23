@@ -1,4 +1,4 @@
-/* Two-handed weapon checks and unit data built from, loaded from and committed to stats. */
+/* Two-handed weapon checks and unit data built from, loaded from and committed to the battle unit record. */
 
 #include "fft/at_list.h"
 #include "fft/equipment.h"

@@ -1,6 +1,7 @@
 /* Formation changes learned abilities and builds the unit and job sprite sources used by its menus. */
 
 #include "fft/ability.h"
+#include "fft/character_identity.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
 #include "fft/formation_item.h"
@@ -10,7 +11,6 @@
 #include "fft/menu.h"
 #include "fft/skillset.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

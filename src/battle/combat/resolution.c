@@ -3,6 +3,7 @@
 #include "fft/ability.h"
 #include "fft/action.h"
 #include "fft/ai.h"
+#include "fft/character_identity.h"
 #include "fft/command.h"
 #include "fft/formula.h"
 #include "fft/item.h"
@@ -17,7 +18,6 @@
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "fft/unit_identity.h"
 #include "psx/types.h"
 
 extern item_poach_t g_item_poach_table[JOB_ID_MONSTER_LAST - JOB_ID_MONSTER_FIRST + 1];

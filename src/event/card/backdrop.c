@@ -1,4 +1,4 @@
-/* The render ordering table and the save menu graphic thread. */
+/* The save screen's zodiac backdrop thread and the ordering-table entry it draws into. */
 
 #include "fft/formation.h"
 #include "fft/save.h"

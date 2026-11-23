@@ -1,4 +1,5 @@
-/* The thread drawing the numeric panel until its task requests a stop. */
+/* ATTACK and REQUIRE's numeric panel thread: its draw offset follows the screen polarity and both
+ * slots share one set of primitive buffers. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"

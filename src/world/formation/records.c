@@ -9,10 +9,10 @@
 #include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/skillset.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_party.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

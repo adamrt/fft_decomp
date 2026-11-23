@@ -22,7 +22,7 @@ void menu_input_update_message_state(void) {
     s32 running = 0;
     s32 frame;
 
-    update_controller();
+    menu_input_update_controller();
     frame = menu_window_get_scale_step();
     if (frame < 1 || frame > 7) {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);

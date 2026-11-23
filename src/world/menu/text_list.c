@@ -1,4 +1,4 @@
-/* Text page redraws on scroll and AT list building for the screen. */
+/* The menu library's scrolling three-column text list thread and its page scrolling. */
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"

@@ -11,7 +11,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/script_instruction.h"
-#include "fft/unit_event.h"
+#include "fft/script_unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

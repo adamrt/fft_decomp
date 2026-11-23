@@ -5,10 +5,10 @@
 #include "fft/brave_story.h"
 #include "fft/formation.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/proposition.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
-#include "fft/unit_party.h"
 #include "psx/types.h"
 
 /* Twelve {month, day} pairs, Aries first. */

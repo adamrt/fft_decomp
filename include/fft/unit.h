@@ -2,7 +2,7 @@
 #define UNIT_H
 
 /* Unit records: the battle unit record every program builds and the types it shares with the ENTD entries
- * (unit_entd.h) and party records (unit_party.h), unit height and motion records, and MAIN's unit graphics queue,
+ * (entd.h) and party records (party_unit.h), unit height and motion records, and MAIN's unit graphics queue,
  * unit generation and stat building. */
 
 #include "fft/job.h"

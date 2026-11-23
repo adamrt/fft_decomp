@@ -4,7 +4,7 @@
 /* The current encounter: its ENTD identifier, the loaded file and the entry a unit is being built from,
  * and the MAIN routines that load the file and fill the party roster from it. */
 
-#include "fft/unit_entd.h"
+#include "fft/entd.h"
 #include "psx/types.h"
 
 /* g_encounter_selection_mode: which ENTD start_entd_open opens. */

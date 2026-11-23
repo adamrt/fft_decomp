@@ -4,8 +4,8 @@
 #include "fft/equipment.h"
 #include "fft/item.h"
 #include "fft/party.h"
+#include "fft/party_unit.h"
 #include "fft/unit.h"
-#include "fft/unit_party.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
