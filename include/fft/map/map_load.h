@@ -179,6 +179,13 @@ typedef enum map_mesh_animation_record_type {
     MAP_MESH_ANIMATION_RECORD_PART_PROPERTIES = 3
 } map_mesh_animation_record_type_e;
 
+/* One PART_PROPERTIES entry of a map state record. */
+typedef struct map_mesh_part_property {
+    u8 parent;
+    u8 _unknown_01[3];
+} map_mesh_part_property_t;
+typedef char map_mesh_part_property_size_must_be_4[sizeof(map_mesh_part_property_t) == 4 ? 1 : -1];
+
 /* Animation record header. END occupies only the four-byte type word; the other
  * types add a count or packed dimensions followed by a variable payload. */
 typedef struct map_state_record {

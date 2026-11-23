@@ -69,7 +69,7 @@ void help_start_text(s32 thread_data) {
         return;
     }
     text_save_section_pointers();
-    text_relocate_pointer_table(g_help_text_table);
+    text_relocate_pointer_table(&g_help_text_bank);
     thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, thread_data + 0x38, g_text_selection_id, 0);
     g_menu_input_lock_mode = 1;

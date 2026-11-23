@@ -171,6 +171,12 @@ typedef enum text_section {
     TEXT_SECTION_AT_LIST = 31               /* the AT list's text, built when the list opens */
 } text_section_e;
 
+/* A text bank file: section offsets measured from the end of the table, then the text. */
+typedef struct text_bank {
+    u32 section_offsets[TEXT_SECTION_COUNT];
+    u8 text[0];
+} text_bank_t;
+
 extern u32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
 extern u8* g_text_section_pointers[TEXT_SECTION_COUNT];
 
@@ -188,7 +194,7 @@ u8* text_find_entry(u32 text_id);
 const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 
 /* Bind writable sections of a text bank beginning with its offset table. */
-void text_relocate_pointer_table(u32* offsets);
+void text_relocate_pointer_table(text_bank_t* bank);
 
 /* battle name text */
 /* SMALL.OUT's entrypoint: bind its battle name text and clear the deployment unit limit. */

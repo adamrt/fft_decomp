@@ -1468,7 +1468,7 @@ data:
   - {addr: 0x8016ed8c, name: g_menu_screen_item_palette_rect}
   - {addr: 0x8016ed94, name: g_menu_screen_unit_image_rect_a}
   - {addr: 0x8016ed9c, name: g_menu_screen_unit_image_rect_b}
-  - {addr: 0x8016ee68, name: g_menu_screen_text_section_offsets}
+  - {addr: 0x8016ee68, name: g_menu_screen_text_bank}
   - {addr: 0x80173cbc, name: g_unit_view_height_display_pages}
   - {addr: 0x8017403c, name: g_command_skillset_disabled_flags}
   - {addr: 0x80174048, name: g_event_work}

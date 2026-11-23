@@ -558,6 +558,38 @@ typedef struct event_color_unit_parameters {
 } event_color_unit_parameters_t;
 typedef char event_color_unit_parameters_size_must_be_7[sizeof(event_color_unit_parameters_t) == 7 ? 1 : -1];
 
+typedef struct event_background_parameters {
+    rgb24_t top;
+    rgb24_t bottom;
+    u8 duration;
+    u8 keep_stored; /* 0 also stores the gradient */
+} event_background_parameters_t;
+
+typedef struct event_tile_camera_block_parameters {
+    u8 x;
+    u8 y;
+    u8 layer;
+    u8 mask;
+} event_tile_camera_block_parameters_t;
+
+typedef struct event_tile_height_parameters {
+    u8 x;
+    u8 y;
+    u8 layer;
+    u8 height;
+    u8 untargetable;
+} event_tile_height_parameters_t;
+
+/* AddGhostUnit's bytes after its spritesheet id operand. */
+typedef struct event_add_ghost_unit_parameters {
+    u8 slot;
+    u8 x;
+    u8 y;
+    u8 level;
+    u8 facing;
+    u8 flags;
+} event_add_ghost_unit_parameters_t;
+
 typedef struct event_movement_effect_parameters {
     u8 unit_id_le[2];
     u8 suppressed;

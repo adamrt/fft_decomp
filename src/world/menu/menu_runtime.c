@@ -557,7 +557,7 @@ void menu_screen_reset_context(void) {
     DrawSync(0);
     menu_init_subsystem_pointers();
     menu_subsystems_reset();
-    text_relocate_pointer_table(s_menu_text_file_buffer);
+    text_relocate_pointer_table((text_bank_t*)s_menu_text_file_buffer);
     formation_roster_build_names();
     DrawSync(0);
     g_menu_thread_menu_data = g_menu_screen_default_entries;
@@ -936,7 +936,7 @@ static void update_party_number_request(void) {
         menu_screen_reset_context();
         g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
-        text_relocate_pointer_table(s_menu_text_file_buffer);
+        text_relocate_pointer_table((text_bank_t*)s_menu_text_file_buffer);
         menu_screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_debug_party_number_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;

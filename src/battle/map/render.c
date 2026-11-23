@@ -3089,17 +3089,17 @@ static map_state_record_t* load_animation_record(map_state_record_t* record) {
         break;
     }
     case MAP_MESH_ANIMATION_RECORD_PART_PROPERTIES: {
-        u8* src = record->data;
+        map_mesh_part_property_t* src = (map_mesh_part_property_t*)record->data;
 
         count++;
         for (i = 1; i < count; i++) {
             if (i >= 9) {
                 break;
             }
-            g_map_mesh_parts[i].parent = *src;
+            g_map_mesh_parts[i].parent = src->parent;
             g_map_mesh_parts[i].duration = 0;
             g_map_mesh_parts[i].elapsed = 2;
-            src += 4;
+            src++;
             if (g_map_mesh_animation_instructions[i].states[0][1].next != 0) {
                 g_map_mesh_part_animation_states[i] = 1;
             } else {
@@ -3119,7 +3119,7 @@ static map_state_record_t* load_animation_record(map_state_record_t* record) {
                 = g_map_mesh_animation_keyframes[g_map_mesh_animation_instructions[i].states[0][1].keyframe].scale.vz;
         }
         for (; i < count; i++) {
-            src += 4;
+            src++;
         }
         next = (map_state_record_t*)src;
         break;

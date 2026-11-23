@@ -684,7 +684,7 @@ data:
   - {addr: 0x801cfc74, name: g_unit_list_help_nodes_banner_top}
   - {addr: 0x801cfd34, name: g_unit_list_help_nodes_banner_bottom}
   - {addr: 0x801cfdf4, name: g_unit_list_thread_running}
-  - {addr: 0x801cfdf8, name: g_help_text_table}
+  - {addr: 0x801cfdf8, name: g_help_text_bank}
   - {addr: 0x801e345c, name: s_unit_list_help_cursor_anim_state}
   - {addr: 0x801e345e, name: g_unit_list_help_cursor_initialized}
   - {addr: 0x801e3460, name: g_unit_list_bits_reader_reset}
@@ -1669,7 +1669,7 @@ data:
   - {addr: 0x801cfb70, name: g_item_type_icon_origins}
   - {addr: 0x801cfbb8, name: g_equipment_text_message_thread_active}
   - {addr: 0x801cfbd4, name: s_menu_managed_thread_state}
-  - {addr: 0x801cfbd8, name: g_help_text_table}
+  - {addr: 0x801cfbd8, name: g_help_text_bank}
   - {addr: 0x801d86a8, name: g_menu_input_latched_button}
   - {addr: 0x801d86aa, name: g_menu_input_activation_timer}
   - {addr: 0x801d86ac, name: s_equipment_input_unread_value}
@@ -2081,7 +2081,7 @@ data:
   - {addr: 0x801e5310, name: g_ability_list_render_commands}
   - {addr: 0x801e54fc, name: s_ability_list_initialized}
   - {addr: 0x801e5500, name: s_ability_list_job_name_ids}
-  - {addr: 0x801e5508, name: g_help_text_table}
+  - {addr: 0x801e5508, name: g_help_text_bank}
   - {addr: 0x801eff60, name: g_menu_input_latched_button}
   - {addr: 0x801eff62, name: g_menu_input_activation_timer}
   - {addr: 0x801eff63, name: g_text_thread_running_state}

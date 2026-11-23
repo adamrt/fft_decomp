@@ -224,7 +224,7 @@ typedef enum menu_screen_text_section {
 
 enum { TEXT_ID_FORMATION_TEXT_BASE = MENU_SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
 
-extern u32 g_menu_screen_text_section_offsets[];
+extern text_bank_t g_menu_screen_text_bank;
 
 u8* menu_screen_text_get_resident(menu_screen_text_data_e index);
 u8* menu_screen_text_bind_section(u32 index);

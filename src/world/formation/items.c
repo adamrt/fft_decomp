@@ -44,7 +44,7 @@ extern s16 g_formation_item_remove_saved_primary_input;
 extern s16 g_formation_item_remove_saved_secondary_input;
 extern u16 g_formation_item_remove_saved_newly_pressed;
 extern point16_t g_formation_item_remove_all_cursor_point;
-extern volatile u16 g_formation_item_remove_all_blink_counter;
+extern u16 g_formation_item_remove_all_blink_counter;
 
 /* The formation item menu's copy of the EQUIP screen's item-list state. */
 extern s8 g_formation_item_list_open;
@@ -540,7 +540,7 @@ static s32 update_remove_all_prompt(void) {
     g_help_message_text_id = -1;
     gfx_set_otag_index(0x28);
     g_formation_item_remove_all_blink_counter = g_formation_item_remove_all_blink_counter + 1;
-    if (g_formation_item_remove_all_blink_counter & 1) {
+    if (g_formation_item_remove_all_blink_counter % 2) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             g_formation_item_remove_all_cursor_point.y = i * 0x10 + 0x90;
             value = 0;

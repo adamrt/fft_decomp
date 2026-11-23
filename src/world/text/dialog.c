@@ -131,11 +131,11 @@ void message_dialog_thread(void) {
     /* Help text is read through WORLD's text sections; the saved pointers come back at `end`. */
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && rec.options == 0xC) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
+        text_relocate_pointer_table(&g_menu_screen_text_bank);
     }
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
+        text_relocate_pointer_table(&g_menu_screen_text_bank);
         /* Message 0x807 shows the selected party unit's name in a portrait box instead. */
         if (thread->function_parameter_2 == 0x807) {
             i = formation_get_selected_unit_name_id();

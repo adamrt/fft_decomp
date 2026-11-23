@@ -115,7 +115,7 @@ void script_execute_event(void) {
     /* One unit pointer, one thread pointer and one index serve every handler;
      * separate ones per handler change the saved-register allocation. */
     battle_unit_t* unit;
-    u8* ghost_parameters;
+    event_add_ghost_unit_parameters_t* ghost;
     u8* instruction;
     map_tile_t* tile;
     battle_unit_t* copy_destination;
@@ -716,17 +716,21 @@ restart_script:
         }
         /* ---- Background, palettes, and terrain ---- */
         else if (opcode == EVENT_OPCODE_BACKGROUND) {
-            mem_copy_bytes_nonempty(&g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_TOP], parameters, 3);
+            event_background_parameters_t* background = (event_background_parameters_t*)parameters;
+
             mem_copy_bytes_nonempty(
-                &g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM], parameters + 3, 3);
-            if (parameters[7] == 0) {
-                map_light_transition_and_store_background(parameters[6], &g_event_background_colors);
+                &g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_TOP], &background->top, 3);
+            mem_copy_bytes_nonempty(
+                &g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM], &background->bottom, 3);
+            if (background->keep_stored == 0) {
+                map_light_transition_and_store_background(background->duration, &g_event_background_colors);
             } else {
-                map_light_set_background(parameters[6], &g_event_background_colors);
+                map_light_set_background(background->duration, &g_event_background_colors);
             }
         } else if (opcode == EVENT_OPCODE_COLOR_BG_BETA) {
-            map_light_modify_background(
-                parameters[0], parameters[4], ((s8)parameters[1]), ((s8)parameters[2]), ((s8)parameters[3]));
+            map_light_modify_background(((event_unit_color_t*)parameters)->mode,
+                ((event_unit_color_t*)parameters)->duration, ((event_unit_color_t*)parameters)->rgb.r,
+                ((event_unit_color_t*)parameters)->rgb.g, ((event_unit_color_t*)parameters)->rgb.b);
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_opcode_32_color_unit((const event_color_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_RESUME_UNIT_PALETTE_UPDATES) {
@@ -734,20 +738,24 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_SUPPRESS_UNIT_PALETTE_UPDATES) {
             script_suppress_unit_palette_updates((u16)first_operand, 1);
         } else if (opcode == EVENT_OPCODE_COLOR_FIELD) {
-            map_palette_color_field(
-                parameters[0], parameters[4], ((s8)parameters[1]), ((s8)parameters[2]), ((s8)parameters[3]));
+            map_palette_color_field(((event_unit_color_t*)parameters)->mode,
+                ((event_unit_color_t*)parameters)->duration, ((event_unit_color_t*)parameters)->rgb.r,
+                ((event_unit_color_t*)parameters)->rgb.g, ((event_unit_color_t*)parameters)->rgb.b);
         } else if (opcode == EVENT_OPCODE_STORE_MODIFIED_MAP_PALETTE) {
             map_palette_store_modified_colors(0, 0, 1);
         } else if (opcode == EVENT_OPCODE_SET_TILE_CAMERA_BLOCK) {
-            map_set_tile_value(
-                MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, parameters[0], parameters[1], parameters[2], parameters[3]);
+            event_tile_camera_block_parameters_t* block = (event_tile_camera_block_parameters_t*)parameters;
+
+            map_set_tile_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, block->x, block->y, block->layer, block->mask);
         } else if (opcode == EVENT_OPCODE_SET_TILE_HEIGHT) {
-            tile = map_get_tile(parameters[0], parameters[1], parameters[2]);
+            event_tile_height_parameters_t* change = (event_tile_height_parameters_t*)parameters;
+
+            tile = map_get_tile(change->x, change->y, change->layer);
             if ((tile->surface.type - MAP_SURFACE_GRASSLAND) >= 2U) {
                 tile->surface.type = MAP_SURFACE_STONE_FLOOR;
             }
-            tile->height = parameters[3];
-            tile->flags.untargetable = parameters[4];
+            tile->height = change->height;
+            tile->flags.untargetable = change->untargetable;
             tile->flags.blocked = 0;
         }
         /* ---- Event speed, dark screen, conditions, and graphics ---- */
@@ -865,7 +873,7 @@ restart_script:
                 map_unit_hide(erased_map_unit_id);
             }
         } else if (opcode == EVENT_OPCODE_ADD_GHOST_UNIT) {
-            ghost_parameters = instruction_offset + ((u8*)g_script_event_block) + 3;
+            ghost = (event_add_ghost_unit_parameters_t*)(instruction_offset + ((u8*)g_script_event_block) + 3);
             /* The search scans IDs 0..20 although map unit slots are 0..15.
              * With all slots occupied it queues ID 16, whose later allocation fails. */
             ghost_map_unit_id = 3;
@@ -874,13 +882,13 @@ restart_script:
             } while (ghost_map_unit_id >= 0);
             for (ghost_map_unit_id = 0; ghost_map_unit_id < BATTLE_UNIT_SLOT_COUNT; ghost_map_unit_id++) {
                 if (map_unit_exists(ghost_map_unit_id) == 0) {
-                    g_script_unit_slots[ghost_parameters[0]] = ghost_map_unit_id;
+                    g_script_unit_slots[ghost->slot] = ghost_map_unit_id;
                     break;
                 }
             }
             if (ghost_map_unit_id != BATTLE_UNIT_SLOT_COUNT) {
-                script_opcode_47_add_ghost_unit(ghost_parameters[1], ghost_parameters[2], ghost_parameters[3],
-                    ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]], ghost_parameters[5]);
+                script_opcode_47_add_ghost_unit(ghost->x, ghost->y, ghost->level, ghost->facing, first_operand,
+                    g_script_unit_slots[ghost->slot], ghost->flags);
                 g_unit_graphics_load_pending = 1U;
             } else {
                 /* All 21 IDs found: retry without yielding. Ordinary allocation

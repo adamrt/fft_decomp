@@ -243,8 +243,10 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_COLOR_UNIT) {
             map_unit_id = script_resolve_map_unit_id(first_halfword);
             if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
+                const event_unit_color_t* color = &((const event_color_unit_parameters_t*)(script + 1))->color;
+
                 sprite_palette_apply_modulation_to_units(
-                    script[3], script[7], map_unit_id, (s8)script[4], (s8)script[5], (s8)script[6]);
+                    color->mode, color->duration, map_unit_id, color->rgb.r, color->rgb.g, color->rgb.b);
             }
         }
         script += 1 + g_script_event_instruction_sizes[script[0]];

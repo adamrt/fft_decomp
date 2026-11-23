@@ -61,7 +61,7 @@ extern s8 g_formation_ability_remove_cursor;
 extern u16 g_formation_ability_remove_cursor_anim;
 extern point16_t g_formation_ability_remove_cursor_point;
 extern s8 g_formation_ability_remove_all_prompt_active;
-extern volatile u16 g_formation_ability_remove_all_blink_counter;
+extern u16 g_formation_ability_remove_all_blink_counter;
 extern point16_t g_formation_ability_remove_all_cursor_point;
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
@@ -346,7 +346,7 @@ static s32 update_removal_prompt(void) {
     g_help_message_text_id = -1;
     gfx_set_otag_index(0x28);
     g_formation_ability_remove_all_blink_counter = g_formation_ability_remove_all_blink_counter + 1;
-    if (g_formation_ability_remove_all_blink_counter & 1) {
+    if (g_formation_ability_remove_all_blink_counter % 2) {
         for (i = 1; i < 5; i++) {
             g_formation_ability_remove_all_cursor_point.y = i * 0x10 + 0x90;
             value = 0;

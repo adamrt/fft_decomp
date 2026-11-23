@@ -10,15 +10,14 @@
  * quarter notes a minute (the default 0x66 is 119.5). Handlers receive the
  * note-data pointer, the MUS record and the channel; this one only touches
  * the MUS record.
- * `volatile` keeps the redundant `andi 0xff` after the `lbu`. */
+ * Reading through `*data++` keeps the redundant `andi 0xff` after the `lbu`. */
 u8* suzuki_smd_tempo(u8* data, suzuki_music_t* music, suzuki_music_channel_t* unused_channel) {
-    volatile u8* note_data = data;
     u8 tempo;
 
-    tempo = note_data[0] & 0xff;
+    tempo = *data++;
     music->tempo = tempo << 16;
     music->scaled_tempo = tempo * (music->tempo_scale.value >> 16);
-    return data + 1;
+    return data;
 }
 
 /* SMD opcode 0xA1 "Accelerando": adds a signed tempo delta but clears scaled_tempo.

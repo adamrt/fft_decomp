@@ -238,7 +238,7 @@ static void start_text_message(s32 parameter, s32 use_world_text) {
     }
     if (use_world_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
+        text_relocate_pointer_table(&g_menu_screen_text_bank);
     }
 
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);

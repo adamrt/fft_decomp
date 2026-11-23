@@ -1069,7 +1069,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
 /* Pushes the self-sizing message window (MENU_STACK_LEVEL_TEXT_WINDOW), the
  * windowed sibling of menu_stack_open_message. It stores the reload
  * flag and, when set, re-points the text formatter at
- * g_menu_screen_text_section_offsets; appends the window's label record (priority
+ * g_menu_screen_text_bank; appends the window's label record (priority
  * 1); measures the entry, clamped to three rows; fills the shared scrollable
  * window and centers it and the label on the measured box; then saves
  * g_menu_blocked_buttons in the level, blocks every button, plays
@@ -1099,7 +1099,7 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
+        text_relocate_pointer_table(&g_menu_screen_text_bank);
     }
 
     index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -1182,7 +1182,7 @@ void menu_stack_open_message(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
+        text_relocate_pointer_table(&g_menu_screen_text_bank);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
     if (g_world_map_flags & WORLD_MAP_FLAG_UNIT_PANEL_THREADS) {

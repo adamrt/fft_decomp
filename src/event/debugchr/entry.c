@@ -197,34 +197,19 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     /* Shared by the R1 and L1 blocks: set twice in the loop, the address is
      * not a loop invariant candidate and is rebuilt in each block. */
     s16* unit_type_ptr;
-    /* The target stores the unit id and re-reads it three times through one
-     * address register; only a volatile view keeps CSE from merging the
-     * loads. */
-    volatile u8* unit_ids;
 
     thread_current_set_task(THREAD_TASK_MOUNTED_STATUS_SCREEN);
     g_debug_unit_editor_active = 0;
     g_unit_panel_button_prompt_count = 2;
 
-    /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. */
+    /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. The store to slot 1 makes
+     * the target re-read slot 0 for each of the three fields. */
     unit = battle_unit_get(unit_id);
-    unit_ids = g_unit_editor_unit_slots;
-    unit_ids[0] = unit_id;
-    {
-        s32 partner_id;
-        s32 selected_id;
-        s32 comparison_id;
-        s32 type_id;
-
-        partner_id = unit->mount_info;
-        selected_id = unit_ids[0];
-        comparison_id = unit_ids[0];
-        type_id = unit_ids[0];
-        unit_ids[1] = partner_id & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
-        g_unit_panel_selected_unit.battle_unit_id = selected_id;
-        g_unit_panel_selected_unit.name_id = comparison_id;
-        g_unit_panel_selected_unit_status.unit_index = type_id;
-    }
+    g_unit_editor_unit_slots[0] = unit_id;
+    g_unit_editor_unit_slots[1] = unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
+    g_unit_panel_selected_unit.battle_unit_id = g_unit_editor_unit_slots[0];
+    g_unit_panel_selected_unit.name_id = g_unit_editor_unit_slots[0];
+    g_unit_panel_selected_unit_status.unit_index = g_unit_editor_unit_slots[0];
     unit_panel_load_selected();
     s_unit_editor_selected_unit_slot = 0;
 
