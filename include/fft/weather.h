@@ -27,6 +27,9 @@ enum { WEATHER_SNOW_OFFSET = 3 };
 /* Bits of g_weather_flags ("weather palette mods"). */
 typedef enum weather_flags { MAP_WEATHER_FLAG_SNOW = 0x01, MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02 } weather_flags_e;
 
+/* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
+enum { MAP_WEATHER_MODIFIER_SHIFT = 7, MAP_WEATHER_LOW_FLAGS_MASK = 0x7f };
+
 /* Commands of weather_dispatch_command and init_weather_particles. */
 typedef enum weather_command {
     MAP_WEATHER_COMMAND_SNOW = 0x53,
@@ -80,9 +83,5 @@ extern u8 g_weather_sfx_enabled;
 
 void weather_start_sfx(void);
 s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
-
-/* palette modifier encoding */
-/* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
-enum { MAP_WEATHER_MODIFIER_SHIFT = 7, MAP_WEATHER_LOW_FLAGS_MASK = 0x7f };
 
 #endif

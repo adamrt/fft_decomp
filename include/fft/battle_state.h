@@ -4,8 +4,6 @@
 /* BATTLE's game state machine: the frame loop, the handler and entry function of each game state, map jumps,
  * battle outcomes and the battle's close. */
 
-#include "fft/system.h"
-#include "fft/unit.h"
 #include "psx/types.h"
 
 /* game state */
@@ -86,9 +84,9 @@ extern s32 g_battle_animation_wait_state;
 
 /* Run BATTLE's deployment and game-state loop until control returns to MAIN. */
 void battle_entrypoint(void);
+void battle_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);
 s32 battle_submit_frame(u32* ordering_table);
 s32 battle_update_input(void);
-void battle_update_scene(void);
 s32 battle_animation_get_wait_state(void);
 
 /* state handlers */
@@ -156,42 +154,6 @@ void battle_state_close_battle_update(void);
 /* entering a state */
 extern s32 g_battle_window_closed;
 
-/* Each sets up a state and switches g_battle_state to it. */
-void battle_state_free_cursor_enter(void);
-void battle_state_free_cursor_help_enter(void);
-void battle_state_highlight_units_enter(void);
-void battle_state_open_action_menus_enter(void);
-void battle_state_action_help_menu_enter(void);
-void battle_state_display_move_area_enter(void);
-void battle_state_mini_menu_enter(void);
-void battle_state_mini_menu_return_enter(void);
-void battle_state_mini_menu_help_enter(void);
-void battle_state_status_execute_enter(void);
-void battle_state_unit_move_enter(void);
-void battle_state_select_move_tile_enter(void);
-void battle_state_illegal_move_menu_enter(void);
-void battle_state_unit_moving_setup_enter(void);
-void battle_state_unit_moving_enter(void);
-void battle_state_move_confirm_menu_enter(void);
-void battle_state_wait_direction_enter(void);
-void battle_state_wait_menu_enter(void);
-void battle_state_targeting_prompt_enter(void);
-void battle_state_illegal_range_enter(void);
-void battle_state_confirm_action_enter(void);
-void battle_state_pre_attack_animation_enter(void);
-void battle_state_action_cast_enter(void);
-void battle_state_commence_attack_phase_enter(void);
-void battle_state_target_select_enter(void);
-void battle_state_target_select_denied_enter(void);
-void battle_state_target_select_confirm_enter(void);
-void battle_state_target_display_enter(void);
-void battle_state_after_command_enter(void);
-void battle_state_continue_turn_enter(void);
-void battle_state_post_action_reports_enter(void);
-void battle_state_open_sp2_files_enter(void);
-void battle_state_action_execute_enter(void);
-void battle_state_battle_message_display_enter(void);
-void battle_state_event_enter(void);
 void battle_state_battle_start_event_enter(void);
 
 /* map jumps and closing the battle */
@@ -200,12 +162,7 @@ void battle_state_change_map_jumping_out_start(s32 map_id, s32 duration);
 void battle_state_change_map_jumping_in_start(s32 duration);
 void battle_state_close_battle_to_world_enter(s32 duration);
 
-/* Queues CLOSE_BATTLE; the callers always pass transition step 8. */
-void battle_state_close_battle_enter(s32 transition_step, system_game_flow_e close_flow_state);
-
-/* event outcomes and scenarios */
-
+/* battle outcome */
 s32 battle_check_outcome(void);
-s32 battle_state_event_try_enter(map_unit_t* unit);
 
 #endif

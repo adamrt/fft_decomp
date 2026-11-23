@@ -1,6 +1,5 @@
 /* Run the resident weapon-hit, projectile, charge and other secondary animations. */
 
-#include "fft/action.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
@@ -27,6 +26,30 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+typedef s32 (*effect_secondary_callback_t)(void);
+
+/* Index into s_secondary_particle_configs: the particle groups of the secondary effect
+ * handlers, named after the handler that spawns each. */
+typedef enum effect_particle_group {
+    /* effect_secondary_weapon_hit_handler: its first slot set */
+    EFFECT_PARTICLE_GROUP_WEAPON_HIT_A = 0,
+    EFFECT_PARTICLE_GROUP_WEAPON_HIT_B = 1, /* its second slot set */
+    EFFECT_PARTICLE_GROUP_ZODIAC_POOF = 3,
+    EFFECT_PARTICLE_GROUP_DEATH_POOF = 4,
+    EFFECT_PARTICLE_GROUP_LEVEL_UP = 5,
+    EFFECT_PARTICLE_GROUP_FALL_DUST = 6,
+    EFFECT_PARTICLE_GROUP_SPLASH = 7,
+    EFFECT_PARTICLE_GROUP_TRAP = 8,
+    EFFECT_PARTICLE_GROUP_WEAPON_HIT_B_MISSED = 9, /* the second slot set of a missed hit */
+    EFFECT_PARTICLE_GROUP_RED_ORBS = 10,
+    EFFECT_PARTICLE_GROUP_EQUIP_BREAK = 11,
+    EFFECT_PARTICLE_GROUP_SPELL_CHARGE = 12,
+    EFFECT_PARTICLE_GROUP_SPELL_CHARGE_13 = 13, /* given the height of group 12; nothing spawns it */
+    EFFECT_PARTICLE_GROUP_SUMMON_CHARGE = 14,
+    EFFECT_PARTICLE_GROUP_TELEPORT = 15,
+    EFFECT_PARTICLE_GROUP_GOLEM = 16
+} effect_particle_group_e;
 
 /* CLUT of the zodiac poof's particles, an index in the weapons row, for each
  * sprite palette (the secondary effect's parameter). */
@@ -100,12 +123,6 @@ static effect_emitter_values_t s_secondary_particle_configs[17] = {
  * the address instead reserves an unused 8-byte frame in
  * init_slot_secondary_animation. */
 extern u8 g_effect_secondary_particle_animation_data[];
-extern s32 g_projectile_launch_slope_q12;
-extern SVECTOR g_projectile_origin;
-extern SVECTOR g_projectile_destination;
-extern s32 g_projectile_step_count;
-
-extern s32 g_projectile_hit_unit_id;
 
 /* Secondary handler work state. */
 /* Per-secondary-slot spawn state for the two-particle death poof. */

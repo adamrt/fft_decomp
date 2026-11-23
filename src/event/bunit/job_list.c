@@ -24,7 +24,7 @@ extern u8 g_job_list_menu_script[217];
 /* Job level of the selected unit in the job list's `index`th job, also left
  * in g_job_list_job_current_level; levels are packed two per byte (odd jobs in
  * the low nibble). */
-s32 job_list_calculate_level(s32 index) {
+static s32 job_list_calculate_level(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_unit_list_pointers[g_unit_selected_index]->job_levels[generic_job >> 1];
@@ -44,7 +44,7 @@ static s32 calculate_job_list_jp(s32 index) {
 }
 
 /* Also returns the value: callers read it through g_menu_row_callbacks. */
-s32 job_list_calculate_total_jp(s32 index) {
+static s32 job_list_calculate_total_jp(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_job_current_total_jp = g_unit_list_pointers[g_unit_selected_index]->job_points.total.values[generic_job];
@@ -54,7 +54,7 @@ s32 job_list_calculate_total_jp(s32 index) {
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
  * `index`th job is looked up but its result is not used. */
-s32 job_list_calculate_next_level_jp(s32 index) {
+static s32 job_list_calculate_next_level_jp(s32 index) {
     s32 level;
 
     job_get_generic_index(g_job_list_job_ids[index]);
@@ -69,7 +69,7 @@ s32 job_list_calculate_next_level_jp(s32 index) {
 
 /* Caches and returns whether the `index`th job's skillset has nothing left
  * for the selected unit to learn (no unlearned ability counted). */
-s32 job_list_calculate_mastered(s32 index) {
+static s32 job_list_calculate_mastered(s32 index) {
     g_job_current_mastered = ability_list_build(g_unit_selected_index, g_job_list_job_ids[index],
                                  MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
         == 0;

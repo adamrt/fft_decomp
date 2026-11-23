@@ -46,6 +46,9 @@ void unit_view_attack_target_stats_thread(void);
 void unit_view_summary_thread(void);
 
 /* selected-tile display */
+/* Nonzero while unit_view_hide_tile_depth keeps the tile info panel from drawing the depth number. */
+extern u16 g_unit_view_depth_display_suppressed;
+
 void unit_view_tile_info_thread(void);
 
 /* BATTLE's effect playback suppresses the tile's depth number for the length of an ability effect. */

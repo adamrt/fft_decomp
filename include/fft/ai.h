@@ -8,22 +8,8 @@
 #include "fft/map.h"
 #include "fft/status.h"
 #include "fft/turn.h"
-#include "fft/turn_command.h"
 #include "fft/unit.h"
 #include "psx/types.h"
-
-/* turn decisions */
-/* ai_workspace_t.main_ai_state: the stage ai_build_command resumes at after it ran out of frame
- * time. */
-typedef enum ai_command_build_stage {
-    AI_COMMAND_BUILD_REFRESH = 0,
-    AI_COMMAND_BUILD_MOVEMENT = 1,
-    AI_COMMAND_BUILD_CHOOSE_ACTION = 2
-} ai_command_build_stage_e;
-
-/* Returns -1 while the decision is still running (it resumes on the next call), else 0 with
- * command filled. */
-s32 ai_build_command(s32 unit_id, turn_command_t* command);
 
 /* workspace capacities */
 /* Fixed workspace capacities and tile-grid storage, independent of map bounds. */
@@ -113,9 +99,6 @@ enum {
     AI_ABILITY_ALLIES_ONLY = 0x40000000
 };
 
-/* The high bit is an unsigned mask; C89 enumerators must fit int. */
-#define AI_ABILITY_USABLE_BY_AI 0x80000000U
-
 /* Ability AI behavior flags 1..4. Consumers read the 32-bit value, two 16-bit values,
  * or individual bytes; use the corresponding masks above for each view. */
 typedef union ai_ability_flags {
@@ -143,10 +126,6 @@ typedef union ai_ability_parameters {
         u32 status_tail;
     } packed;
 } ai_ability_parameters_t;
-
-/* Pack canonical status IDs 8..39 into the aligned 32-bit value covering status
- * bytes 1..4 of ai_ability_parameters_t. */
-#define AI_STATUS_TAIL_PACKED_MASK(id) ((u32)STATUS_BYTE_MASK(id) << ((STATUS_BYTE_INDEX(id) - 1) * 8))
 
 /* The ability being considered (ai_workspace_t.considered_ability). */
 typedef struct ai_considered_ability {
@@ -363,7 +342,7 @@ typedef union ai_targetability {
 typedef char ai_targetability_size_must_be_64[(sizeof(ai_targetability_t) == 64) ? 1 : -1];
 
 /* The whole AI state, kept across the frames a decision is suspended over. The stage bytes hold
- * the resume points of the AI's passes (turn_command.h, ai_decision.h). */
+ * the resume points of the AI's passes (ai_command_build_stage_e above, and ai_decision.h). */
 typedef struct ai_workspace {
     ai_considered_ability_t considered_ability;                                                /* 0x0000 */
     ai_action_data_t current_action;                                                           /* 0x0014 */

@@ -13,7 +13,7 @@ void sound_init(void);
  * carries them out once per event frame; -1 means no request. The switch request is a trigger,
  * not a track: it toggles g_sound_current_music_track_index and starts the track in that slot
  * (g_sound_music_track_1_id or _2_id) with the volume and fade of
- * g_event_music_switch_volume and g_event_music_switch_fade (script.h). */
+ * g_event_music_switch_volume and g_event_music_switch_fade. */
 extern s16 g_sound_music_switch_request;
 extern s16 g_sound_music_unload_slot_request;
 
@@ -25,6 +25,10 @@ extern u16 g_sound_current_music_track_index; /* zero-based music slot */
 /* The scenario's music tracks in main music slots 1 and 2; 0 is none. */
 extern u16 g_sound_music_track_1_id;
 extern u16 g_sound_music_track_2_id;
+
+/* The volume and fade of a music switch. */
+extern u16 g_event_music_switch_fade;   /* the consumer multiplies it by 4 */
+extern u16 g_event_music_switch_volume; /* scaled 0..96 to 0..127 */
 
 /* sound effects */
 /* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
@@ -175,9 +179,6 @@ void sound_play_sfx(s32 sound_id);
 void sound_play_effect(s32 sound_id);
 void sound_play_sfx_on_free_channel(s32 sound_id);
 void sound_set_sfx_volume(int sound_id, int volume);
-void sound_play_background(s32 sound_id);
-void sound_replay_background(void);
-void sound_stop_background(void);
 void sound_stop_all_sfx(void);
 
 /* map_update_init_sequence calls this without loading $a0, but the body reads sound_id. */
@@ -193,7 +194,10 @@ void sound_queue_confirm(void);
 void sound_queue_cursor(void);
 void sound_queue_invalid(void);
 
-/* background sound threads */
+/* background sounds */
+void sound_play_background(s32 sound_id);
+void sound_replay_background(void);
+void sound_stop_background(void);
 void sound_background_fade_thread(void);
 void sound_background_thread(void);
 

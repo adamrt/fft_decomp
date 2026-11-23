@@ -2,7 +2,7 @@
 
 #include "fft/animation.h"
 #include "fft/camera.h"
-#include "fft/gfx_primitive.h"
+#include "fft/fade.h"
 #include "fft/input.h"
 #include "fft/map.h"
 #include "fft/map_unit.h"

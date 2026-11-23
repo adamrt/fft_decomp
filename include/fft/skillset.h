@@ -197,6 +197,8 @@ typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_ALL = 0x0f
 } skillset_ability_filter_e;
 
+s32 skillset_get_ability_id(s32 skillset_id, s32 ability_index);
+
 /* action menu lists */
 s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
 s32 skillset_get_unit_ability_data(

@@ -6,7 +6,6 @@
 #include "fft/effect.h"
 #include "fft/effect_file.h"
 #include "fft/gfx.h"
-#include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -70,8 +69,6 @@ typedef struct effect_secondary_data {
 } effect_secondary_data_t;
 typedef char effect_secondary_data_size_must_be_84[(sizeof(effect_secondary_data_t) == 84) ? 1 : -1];
 
-typedef s32 (*effect_secondary_callback_t)(void);
-
 extern struct effect_secondary_data* g_effect_secondary_current;
 
 /* Set by effect_secondary_update each frame: the ordering table the secondary effects add their primitives to, and
@@ -89,7 +86,7 @@ void effect_secondary_remove(u8 id);
 /* animations */
 /* Index into g_effect_secondary_animations: the secondary effects resident in BATTLE.BIN. Those
  * the code does not start by number come from two tables: the weapon type's projectile
- * (g_weapon_projectile_animations) and the ability's charge animation set
+ * (s_weapon_projectile_animations) and the ability's charge animation set
  * (g_effect_secondary_by_charge_animation). */
 typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_NONE = 0,
@@ -129,12 +126,12 @@ typedef struct effect_secondary_animation {
 } effect_secondary_animation_t;
 typedef char effect_secondary_animation_size_must_be_4[(sizeof(effect_secondary_animation_t) == 4) ? 1 : -1];
 
-/* Secondary animation parameters and particle resources. */
-extern effect_secondary_animation_t g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_COUNT];
-
 /* The secondary animation parameter that makes the projectile handler draw the thrown item's own
  * graphic instead of a model. */
 enum { EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC = -1 };
+
+/* Secondary animation parameters and particle resources. */
+extern effect_secondary_animation_t g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_COUNT];
 
 /* elements */
 /* What effect_get_element_index makes of an element mask: the position of its first element in
@@ -156,30 +153,8 @@ typedef enum effect_element_index {
 s32 effect_get_element_index(s32 elements);
 
 /* particle groups */
-/* Index into g_secondary_particle_configs: the particle groups of the secondary effect
- * handlers, named after the handler that spawns each. */
-typedef enum effect_particle_group {
-    /* effect_secondary_weapon_hit_handler: its first slot set */
-    EFFECT_PARTICLE_GROUP_WEAPON_HIT_A = 0,
-    EFFECT_PARTICLE_GROUP_WEAPON_HIT_B = 1, /* its second slot set */
-    EFFECT_PARTICLE_GROUP_ZODIAC_POOF = 3,
-    EFFECT_PARTICLE_GROUP_DEATH_POOF = 4,
-    EFFECT_PARTICLE_GROUP_LEVEL_UP = 5,
-    EFFECT_PARTICLE_GROUP_FALL_DUST = 6,
-    EFFECT_PARTICLE_GROUP_SPLASH = 7,
-    EFFECT_PARTICLE_GROUP_TRAP = 8,
-    EFFECT_PARTICLE_GROUP_WEAPON_HIT_B_MISSED = 9, /* the second slot set of a missed hit */
-    EFFECT_PARTICLE_GROUP_RED_ORBS = 10,
-    EFFECT_PARTICLE_GROUP_EQUIP_BREAK = 11,
-    EFFECT_PARTICLE_GROUP_SPELL_CHARGE = 12,
-    EFFECT_PARTICLE_GROUP_SPELL_CHARGE_13 = 13, /* given the height of group 12; nothing spawns it */
-    EFFECT_PARTICLE_GROUP_SUMMON_CHARGE = 14,
-    EFFECT_PARTICLE_GROUP_TELEPORT = 15,
-    EFFECT_PARTICLE_GROUP_GOLEM = 16
-} effect_particle_group_e;
-
 /* One particle group of the secondary effects: a 0x2e-byte record of
- * g_secondary_particle_configs. Its leading bytes schedule the
+ * s_secondary_particle_configs. Its leading bytes schedule the
  * group's effect slots (spawn_particle_group); the rest is a fixed
  * emitter, from which effect_slot_init_motion draws each slot's
  * motion as the effect file emitter does a particle's. */
@@ -258,35 +233,9 @@ s32 effect_slot_update(s32 id);
 void effect_slot_free(u8 id);
 s32 effect_slot_alloc(void);
 
-/* handlers */
-s32 effect_secondary_none_handler(void);
-s32 effect_secondary_arrow_arc_handler(void);
-s32 effect_secondary_weapon_hit_handler(void);
-s32 effect_secondary_golem_handler(void);
-s32 effect_secondary_spell_charge_handler(void);
-s32 effect_secondary_null_handler(void);
-s32 effect_secondary_red_orbs_handler(void);
-s32 effect_secondary_unused_07_handler(void);
-s32 effect_secondary_fall_dust_handler(void);
-s32 effect_secondary_splash_handler(void);
-s32 effect_secondary_unused_0a_handler(void);
-s32 effect_secondary_unused_0b_handler(void);
-s32 effect_secondary_trap_handler(void);
-s32 effect_secondary_level_up_handler(void);
-s32 effect_secondary_unused_0e_handler(void);
-s32 effect_secondary_death_poof_handler(void);
-s32 effect_secondary_unused_10_handler(void);
-s32 effect_secondary_zodiac_poof_handler(void);
-s32 effect_secondary_reflect_handler(void);
-s32 effect_secondary_teleport_handler(void);
-s32 effect_secondary_linear_projectile_handler(void);
-s32 effect_secondary_equip_break_handler(void);
-s32 effect_secondary_summon_charge_handler(void);
-
 /* starting secondary effects */
 s32 effect_secondary_init_projectile(s32 animation, const struct effect_context* source);
 s32 effect_secondary_init_weapon_hit(s32 elements, const effect_context_t* source, s32 unused_is_bow);
-s32 effect_secondary_init_fall_dust(const effect_context_t* source, const VECTOR* position);
 void effect_secondary_build_init(struct map_unit* unit, struct effect_context* effect);
 void effect_secondary_start_weapon_hit(struct map_unit* unit, s32 is_bow);
 void effect_secondary_start_projectile(map_unit_t* unit);

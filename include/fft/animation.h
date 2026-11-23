@@ -7,7 +7,6 @@
 #include "psx/types.h"
 
 struct sprite_display;
-struct sprite_block;
 struct sprite_unit_seq_table;
 struct sprite_unit_shp_frame_tables;
 struct map_unit;
@@ -247,6 +246,8 @@ enum { ANIMATION_ABILITY_COUNT = 454, ANIMATION_CHARGE_SET_COUNT = 20, ANIMATION
 
 /* Selectors in attack_animation; other values are animation_e IDs. */
 enum { ANIMATION_ATTACK_USE_WEAPON = 0, ANIMATION_ATTACK_USE_ITEM = 1 };
+
+extern animation_ability_data_t g_ability_animation_data[ANIMATION_ABILITY_COUNT];
 
 void animation_start_ability_charge(struct map_unit* unit);
 void animation_start_ability_charge_hold(struct map_unit* unit);

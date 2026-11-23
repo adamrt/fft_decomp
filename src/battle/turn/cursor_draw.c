@@ -23,7 +23,7 @@ static s32 s_cursor_tile_glow_cycle_timer;
  * Every fourth animation tick the offset advances through 0..14 and the palettes
  * are uploaded again with colors 1..15 rotated down by that many places; color
  * 0 stays in place, and offset 0 uploads the palettes as stored. */
-void cursor_update_tile_glow_palettes(void) {
+static void cursor_update_tile_glow_palettes(void) {
     s32 dst;
     s32 src;
     palette_t* palettes;

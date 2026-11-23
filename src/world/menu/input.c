@@ -2,7 +2,7 @@
  * withheld while text, Help or a screen transition owns the input. */
 
 #include "fft/input.h"
-#include "fft/gfx_primitive.h"
+#include "fft/fade.h"
 #include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

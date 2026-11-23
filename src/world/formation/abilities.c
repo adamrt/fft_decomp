@@ -25,11 +25,12 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+extern s32 g_formation_ability_learn_job_total_jp;
 
 /* ability-menu state */
 extern menu_entry_t g_formation_ability_menu;
@@ -311,7 +312,7 @@ static s32 update_removal_menu(void) {
             g_formation_ability_menu_slots_changed = 1;
             *saved_slot = 0;
             g_formation_ability_remove_cursor = -1;
-            stage_selected_unit();
+            formation_stage_selected_unit();
             sound = SOUND_SFX_UNEQUIP;
         }
         g_sound_queued_effect_id = sound;
@@ -366,7 +367,7 @@ static s32 update_removal_prompt(void) {
                     check_equipment_support_change(g_unit_selected_index, unit->detail.abilities[i]));
             }
         }
-        stage_selected_unit();
+        formation_stage_selected_unit();
         if (changed == 0) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
         } else {
@@ -511,7 +512,7 @@ static s32 update_slot_menu(void) {
                     g_sound_queued_effect_id = SOUND_SFX_EQUIP;
                     g_formation_ability_menu_slots_changed = 1;
                     g_formation_ability_set_list_close_pending = 1;
-                    stage_selected_unit();
+                    formation_stage_selected_unit();
                 }
             }
         } else {
@@ -628,7 +629,7 @@ s32 menu_input_get_lock_mode(s32 unused_0) {
 
 /* Job level of the selected unit in the Learn Abilities menu's `index`th
  * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
-s32 job_list_calculate_level(s32 index) {
+static s32 job_list_calculate_level(s32 index) {
     s32 job_index = job_get_generic_index(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_formation_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
@@ -650,7 +651,7 @@ static s32 calculate_job_list_jp(s32 index) {
 /* Caches and returns the selected unit's total JP for the Learn Abilities
  * menu's `index`th unlocked job; the job list's menu script reads it as a
  * number callback. */
-s32 job_list_calculate_total_jp(s32 index) {
+static s32 job_list_calculate_total_jp(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_formation_ability_learn_job_total_jp
@@ -661,7 +662,7 @@ s32 job_list_calculate_total_jp(s32 index) {
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
  * `index`th job is looked up but its result is not used. */
-s32 job_list_calculate_next_level_jp(s32 index) {
+static s32 job_list_calculate_next_level_jp(s32 index) {
     s32 level;
 
     job_get_generic_index(g_job_list_job_ids[index]);
@@ -676,7 +677,7 @@ s32 job_list_calculate_next_level_jp(s32 index) {
 
 /* Caches and returns whether the `index`th job's skillset has nothing left
  * for the selected unit to learn (no unlearned ability counted). */
-s32 job_list_calculate_mastered(s32 index) {
+static s32 job_list_calculate_mastered(s32 index) {
     g_job_current_mastered = ability_list_build(g_unit_selected_index, g_job_list_job_ids[index],
                                  MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
         == 0;

@@ -13,7 +13,6 @@
 
 struct map_selected_tile;
 struct battle_unit;
-union menu_stack_record;
 
 /* status values */
 /* Name, job and identity values copied into WORLD and EQUIP status panels.
@@ -166,7 +165,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index);
  * participant detail level draws. */
 void unit_panel_prepare_party_unit(s32 party_index);
 
-/* The battle unit stats of g_unit_panel_selected_unit. */
+/* The battle unit record of g_unit_panel_selected_unit. */
 struct battle_unit* menu_get_selected_battle_unit(void);
 
 /* panel threads */
@@ -215,8 +214,8 @@ void unit_panel_toggle_comparison_thread(s32 enable);
 void unit_panel_toggle_numbers_thread(s32 enable);
 void unit_panel_toggle_preview_stats_thread(s32 flag);
 void unit_panel_toggle_equipment_threads(s32 enable);
-void redraw_unit_panels(void);
-void unit_panels_stop(void);
+void unit_panel_redraw_all(void);
+void unit_panel_stop_all(void);
 
 /* The unit status panel thread; each program that shows the panel links its own body. */
 void unit_panel_banner_thread(void);
@@ -326,6 +325,7 @@ void menu_numeric_frame_submit(menu_numeric_frame_t* display);
 void menu_numeric_frame_set_normal_colors(menu_numeric_frame_t* menu);
 void menu_numeric_frame_set_dimmed_colors(menu_numeric_frame_t* menu);
 
+/* Writes the panel's draw modes, backdrop tiles and frame lines and leaves its sprites untouched. */
 void unit_panel_init_primitives(unit_panel_frame_t* menu);
 
 /* The dimmed frame colors for style 1 or while the input lock mode is 1, otherwise the normal ones. */
@@ -354,9 +354,9 @@ extern RECT g_menu_portrait_origin;
 extern palette_t g_unit_panel_selected_portrait_palettes[2];
 extern palette_t g_unit_panel_comparison_portrait_palettes[2];
 
-/* thread status indicators */
-/* g_menu_panel_backdrop_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two translucent
- * panels menu_draw_status_panel_backdrops draws behind the unit status banners. */
+/* status panel backdrops */
+/* backdrops.c's s_menu_panel_backdrop_state[] (and EQUIP's g_equipment_indicator_state[]): state of each of the two
+ * translucent panels menu_draw_status_panel_backdrops draws behind the unit status banners. */
 typedef enum menu_indicator_state {
     MENU_INDICATOR_STATE_HIDDEN = 0,    /* not drawn */
     MENU_INDICATOR_STATE_FADING_IN = 1, /* brightness rises by 0xc a frame up to 0x78 and holds */

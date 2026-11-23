@@ -1458,7 +1458,7 @@ static void settle_on_tile(map_unit_t* unit) {
  * chocobo already stands on the unit's tile, and failing that the unit is
  * itself the mount for a rider recorded at mount_partner_map_unit_id.
  */
-void map_unit_mount_onto_pending(map_unit_t* unit) {
+static void map_unit_mount_onto_pending(map_unit_t* unit) {
     map_unit_t* other;
 
     settle_on_tile(unit);

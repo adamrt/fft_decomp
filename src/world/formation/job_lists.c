@@ -45,7 +45,7 @@ s32 job_find_first_for_skillset(s32 skillset) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-s32 job_list_get_base(s16 unit_id) {
+static s32 job_list_get_base(s16 unit_id) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_id];
     u32 job = unit->sprite_set;
 

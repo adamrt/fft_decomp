@@ -28,7 +28,7 @@ enum {
 
 /* section table */
 /* Section table at the start of an effect file's header section: byte offsets from the table itself, each read by
- * its section's binder in src/battle/effects/playback.c (the effect_file_set_*_pointer binders and the flags, sound and
+ * its section's binder in src/battle/effects/playback.c (the set_*_pointer and bind_* binders and the flags, sound and
  * palette loaders). */
 typedef struct effect_file_header {
     s32 frame_data;          /* 0x00: the binder skips the section's leading 32-bit value */

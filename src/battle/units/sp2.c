@@ -1,6 +1,6 @@
 /* Load SP2 attack images and expand their nibble-compressed spritesheet data. */
 
-#include "fft/ability.h"
+#include "fft/animation.h"
 #include "fft/file.h"
 #include "fft/map_unit.h"
 #include "fft/sprite_sheet.h"

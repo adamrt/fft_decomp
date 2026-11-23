@@ -38,7 +38,7 @@ typedef char tutorial_menu_level_size_must_be_68[sizeof(tutorial_menu_level_t) =
 
 void tutorial_open_topic_list(void);
 void tutorial_open_menu(s32 selected_entry, s32 reset);
-void tutorial_build_menu_panel(struct tutorial_menu_level* panel);
+void tutorial_build_menu_panel(tutorial_menu_level_t* panel);
 void tutorial_open_formation_list(void);
 void tutorial_open_battle_list(void);
 void tutorial_update_topic_list_input(menu_stack_record_t* level);
@@ -76,6 +76,19 @@ s32 tutorial_update(void);
 s32 tutorial_get_buttons(void);
 
 /* tutorial events */
+/* The values tutorial_pulse_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
+ * screen opens, so that a tutorial script can wait for it. A system function pulses its own id
+ * instead. */
+typedef enum script_tutorial_wait_value {
+    SCRIPT_TUTORIAL_WAIT_AT_LIST = 0xf9,
+    SCRIPT_TUTORIAL_WAIT_ABILITY_AT_LIST = 0xfa, /* the AT list preview of the highlighted ability */
+    SCRIPT_TUTORIAL_WAIT_ABILITY_LIST = 0xfb,
+    SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST = 0xfc,
+    SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS = 0xfd,
+    SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe, /* the Triangle menu */
+    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* menu_building_thread opened a menu */
+} script_tutorial_wait_value_e;
+
 s32 tutorial_is_current_event(void);
 void tutorial_pulse_wait_value(s32 value);
 

@@ -148,13 +148,6 @@ void menu_stack_open_message(s32 text, s32 reload_text);
 void menu_stack_open_text_window(s32 text, s32 reload_text);
 void menu_stack_open_scrollable_text(s32 text_id);
 
-/* menu levels */
-/* A window record and a render record handled together (proposition_suspend_detail). */
-typedef struct window_render_pair {
-    s32 window_index;
-    s32 render_index;
-} window_render_pair_t;
-
 /* remembered cursors */
 /* Slots of g_menu_stack_cursor_states: the remembered row and scroll offset.
  * Slot 6 is cleared at startup but has no menu reader. */

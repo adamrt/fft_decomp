@@ -216,11 +216,11 @@ void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused
     s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles, s32 unused_17, s32 unused_18,
     s32 unused_19, s32 unused_20, s32 unused_21, s32 unused_22, s32 unused_23, s32 unused_24);
 
-/* CARD input, text and sound */
+/* CARD input */
 void save_update_input(void);
 
 /* WORLD memory card screen */
-void init_save_screen(void);
+void save_init_screen(void);
 s32 save_run_screen(s32 mode_select_enabled);
 void save_close_stub(void);
 

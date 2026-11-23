@@ -7,8 +7,22 @@
 #include "fft/ai.h"
 #include "fft/map.h"
 #include "fft/status.h"
+#include "fft/turn_command.h"
 #include "fft/unit.h"
 #include "psx/types.h"
+
+/* turn command */
+/* ai_workspace_t.main_ai_state: the stage ai_build_command resumes at after it ran out of frame
+ * time. */
+typedef enum ai_command_build_stage {
+    AI_COMMAND_BUILD_REFRESH = 0,
+    AI_COMMAND_BUILD_MOVEMENT = 1,
+    AI_COMMAND_BUILD_CHOOSE_ACTION = 2
+} ai_command_build_stage_e;
+
+/* Returns -1 while the decision is still running (it resumes on the next call), else 0 with
+ * command filled. */
+s32 ai_build_command(s32 unit_id, turn_command_t* command);
 
 /* frame budget */
 /* Scanlines since vertical blank at which each search yields. */

@@ -27,6 +27,10 @@
 /* primitive_type of alloc_primitive: an index into g_primitive_sizes. */
 typedef enum primitive_kind { EFFECT_PRIMITIVE_FT4 = 0, EFFECT_PRIMITIVE_DR_MODE = 1 } primitive_kind_e;
 
+static inline effect_sequence_instruction_t* effect_get_current_sequence_instruction(effect_list_node_t* node) {
+    return (effect_sequence_instruction_t*)(node->sequence_data + node->sequence_offset);
+}
+
 /* Cleared with the effect camera modes; nothing reads them. */
 extern s32 g_effect_camera_unread_1;
 extern s32 g_effect_camera_unread_2;
@@ -2093,6 +2097,14 @@ static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 gree
         break;
     }
 }
+
+/* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.
+ * Neither the full record nor the individual bit meanings are known. */
+typedef struct effect_flag_prefix {
+    u8 _unused_00[6];
+    u16 flags;
+} effect_flag_prefix_t;
+typedef char effect_flag_prefix_size_must_be_8[(sizeof(effect_flag_prefix_t) == 8) ? 1 : -1];
 
 /* The two flag meanings remain unknown. */
 enum { EFFECT_REPLACED_FLAGS_MASK = 0x0006 };

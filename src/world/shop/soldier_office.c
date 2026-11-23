@@ -126,7 +126,7 @@ void soldier_office_update_menu(void) {
                         g_soldier_office_hire_result_shown = 1;
                     } else {
                         g_unit_selected_index = slot;
-                        stage_selected_unit();
+                        formation_stage_selected_unit();
                         g_formation_unit_banner_at_bottom = 0;
                         g_formation_unit_banner_at_bottom_latch = 0;
                         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF824, 0);

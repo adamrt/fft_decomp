@@ -6,7 +6,6 @@
 
 #include "psx/types.h"
 
-struct suzuki_music;
 union controller_record;
 
 /* title screen */
@@ -74,6 +73,12 @@ typedef struct title_sound_type_menu {
 } title_sound_type_menu_t;
 typedef char title_sound_type_menu_size_must_be_36[sizeof(title_sound_type_menu_t) == 36 ? 1 : -1];
 
+extern s32 g_title_demo_movie_index;
+
+void title_push_menu(s32 argument);
+void title_start_new_game(void);
+
+/* card warning */
 /* 32-bit state of the no-memory-card warning controller (title_update_card_warning). */
 typedef enum title_card_warning_step {
     TITLE_CARD_WARNING_INPUT = 0,
@@ -86,10 +91,6 @@ typedef struct title_card_warning_state {
     s32 state; /* title_card_warning_step_e */
 } title_card_warning_state_t;
 
-extern s32 g_title_demo_movie_index;
-
-void title_push_menu(s32 argument);
-void title_start_new_game(void);
 void title_update_card_warning(union controller_record* record);
 
 /* new game */

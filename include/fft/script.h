@@ -7,8 +7,7 @@
 
 #include "fft/command.h"
 #include "fft/gfx.h"
-#include "fft/map.h"
-#include "fft/menu_input.h"
+#include "fft/map_light.h"
 #include "fft/menu_list.h"
 #include "fft/script_instruction.h"
 #include "fft/script_unit.h"
@@ -16,6 +15,7 @@
 #include "psx/types.h"
 
 struct evtchr_file_record;
+struct menu_input_state;
 
 /* overlay workspace */
 /* Provisional work block at *g_event_work: the menus build their
@@ -84,9 +84,9 @@ extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
 extern s16 g_scenario_event_active;
 extern s16 g_script_threads_idle;
+extern s32 g_event_frame_counter; /* BATTLE only: counts the frames the event interpreter runs */
 
 void script_event_thread(void);
-void script_run_next_event_unused(void);
 void script_start_current_event_thread(void);
 s32 script_update_event_frame(u32* ot, u32 buttons);
 void script_frame_after_requests_stub(void);
@@ -192,6 +192,10 @@ extern s16 g_event_pending_map_jump_out_2_id;
 extern s16 g_event_pending_map_state; /* script variable 0x24 */
 extern s16 g_event_weather_request;
 
+/* BATTLE and WORLD each define the map reload requests; WORLD has no pending-request consumer. */
+extern u16 g_event_map_reload_state; /* 1 starts, 2 polls, >=3 is reset by the outer update */
+extern u16 g_event_map_append_state;
+
 /* The gradient colors of the Background instruction. */
 extern map_background_gradient_colors_t g_event_background_colors;
 
@@ -204,6 +208,22 @@ extern MATRIX g_script_light_base_color_matrix;
 void script_signal_map_destruction(void);
 void script_dark_screen_thread(void);
 
+/* map object requests */
+/* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
+ * operands; process_pending_requests passes them to map_set_object_state
+ * and map_start_texture_animation, and the matching wait instructions poll until
+ * the object is done. Provisional: the operands' value domains. The consumer reads the u16
+ * requests and operands with lhu; every other access is a store. BATTLE and WORLD each define
+ * these; WORLD stores the requests but has no pending-request consumer. */
+extern u16 g_3d_object_wait_status;
+extern u16 g_field_object_wait_status;
+extern u16 g_event_3d_object_use_request;
+extern u16 g_event_field_object_use_request;
+extern u16 g_event_3d_object_id;
+extern u16 g_event_3d_object_state;
+extern u16 g_event_map_command_83_arg1; /* the field object's texture animation id */
+extern u16 g_event_map_command_83_arg2;
+
 /* effects and graphics */
 /* BATTLE and WORLD each define these request cells. The Effect instruction stores the tile coordinates,
  * but the request handoff uses only the map unit ID and mode. */
@@ -211,8 +231,6 @@ extern s16 g_event_pending_effect_id;
 extern u16 g_event_effect_target_map_unit_id;
 extern s16 g_event_effect_target_mode;
 extern point16_t g_event_effect_target_position;
-extern u16 g_3d_object_wait_status;
-extern u16 g_field_object_wait_status;
 
 void script_play_effect_and_wait(void);
 void script_graphic_show_thread(void);
@@ -239,19 +257,6 @@ typedef enum script_attack_entry_mode {
 extern u16 g_script_attack_entry_mode; /* script_attack_entry_mode_e */
 
 /* controller input */
-/* The values tutorial_pulse_wait_value holds in EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE as a menu
- * screen opens, so that a tutorial script can wait for it. A system function pulses its own id
- * instead. */
-typedef enum script_tutorial_wait_value {
-    SCRIPT_TUTORIAL_WAIT_AT_LIST = 0xf9,
-    SCRIPT_TUTORIAL_WAIT_ABILITY_AT_LIST = 0xfa, /* the AT list preview of the highlighted ability */
-    SCRIPT_TUTORIAL_WAIT_ABILITY_LIST = 0xfb,
-    SCRIPT_TUTORIAL_WAIT_SKILLSET_LIST = 0xfc,
-    SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS = 0xfd,
-    SCRIPT_TUTORIAL_WAIT_MINI_MENU = 0xfe, /* the Triangle menu */
-    SCRIPT_TUTORIAL_WAIT_MENU_ENTRY = 0xff /* menu_building_thread opened a menu */
-} script_tutorial_wait_value_e;
-
 extern u32 g_script_unfiltered_controller_input;
 extern u32 g_script_event_input;
 extern u32 g_script_event_current_input;
@@ -261,6 +266,9 @@ extern u32 g_script_event_repeat_counter;
 extern u32 g_script_event_secondary_repeat_counter;
 extern u16 g_script_input_suppression_frames;
 
+/* Event input held while a script runs; BATTLE and WORLD each define it. */
+extern u32 g_event_saved_input;
+
 void script_filter_controller_input(u32* input);
 u32* script_get_controller_input_pointer(s32 use_current);
 u32 script_get_event_initial_repeat_counter(void);
@@ -269,7 +277,7 @@ void script_set_current_otag_entry_and_update_input(u32* entry, s32 input);
 /* Called by each program's native thread scheduler to route event input. */
 void script_route_event_input(void);
 void script_update_event_input(u32 buttons);
-void script_load_event_input_state(const menu_input_state_t* saved);
+void script_load_event_input_state(const struct menu_input_state* saved);
 
 /* debug */
 extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
@@ -277,45 +285,7 @@ extern s16 g_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothi
 void script_print_debug_message(void);
 
 /* stubs */
-void script_noop_1(void);
-void script_noop_2(void);
-void script_noop_3(void);
-void script_noop_4(void);
-void script_noop_5(void);
-void script_noop_6(void);
-void script_noop_7(void);
-void script_noop_8(void);
-void script_noop_9(void);
-void script_noop_10(void);
-
 /* MAIN's overlay_call_battle_return_zero wrapper calls BATTLE's copy. */
 s32 script_return_zero_1(void);
-
-/* event requests */
-/* BATTLE and WORLD each define these input and request records. WORLD stores the
- * map/object requests but has no pending-request consumer. */
-extern u32 g_event_saved_input;      /* event input held while a script runs */
-extern u16 g_event_map_reload_state; /* 1 starts, 2 polls, >=3 is reset by the outer update */
-extern u16 g_event_map_append_state;
-extern u16 g_event_3d_object_use_request;
-extern u16 g_event_field_object_use_request;
-
-/* battle event state */
-extern s32 g_event_frame_counter; /* counts the frames the event interpreter runs */
-
-/* EVENT_OPCODE_USE_3D_OBJECT and EVENT_OPCODE_USE_FIELD_OBJECT set a request with their two
- * operands; process_pending_requests passes them to map_set_object_state
- * and map_start_texture_animation, and the matching wait instructions poll until
- * the object is done. Provisional: the operands' value domains. The consumer reads the u16
- * requests and operands with lhu; every other access is a store. */
-extern u16 g_event_3d_object_id;
-extern u16 g_event_3d_object_state;
-extern u16 g_event_map_command_83_arg1; /* the field object's texture animation id */
-extern u16 g_event_map_command_83_arg2;
-
-/* The volume and fade of a music switch; the switch itself and the other music requests are in
- * sound.h. */
-extern u16 g_event_music_switch_fade;   /* the consumer multiplies it by 4 */
-extern u16 g_event_music_switch_volume; /* scaled 0..96 to 0..127 */
 
 #endif

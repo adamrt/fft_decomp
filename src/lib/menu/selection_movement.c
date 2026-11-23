@@ -8,7 +8,7 @@
 #if !defined(FFT_EVENT_BUNIT)
 /* WORLD and EQUIP have the vertical pair before the horizontal pair. */
 /* Apply the vertical-pad direction to one of the menu selection values, wrapping it within [0, entry_count). */
-s16 menu_selection_step_vertical(u16 entry_count, u8 selection_index, s32 input_mask) {
+static s16 menu_selection_step_vertical(u16 entry_count, u8 selection_index, s32 input_mask) {
     if (input_mask & PSX_PAD_UP) {
         g_menu_selection_values[selection_index] = (g_menu_selection_values[selection_index] == 0)
             ? entry_count - 1

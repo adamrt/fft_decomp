@@ -25,7 +25,7 @@ static s32 calculate_friendly_magic_accuracy(void) {
 
 /* XA * YA with Magic Attack Up and zodiac compatibility only: the healing
  * formulas ignore the target's defenses. */
-void formula_calculate_magical_xa_times_ya(void) {
+static void formula_calculate_magical_xa_times_ya(void) {
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();
     formula_store_xa_times_ya_damage();
@@ -58,7 +58,7 @@ static s32 calculate_golem_accuracy(void) {
 
 /* Magical damage without Faith: elemental strengthen, magical modifiers, XA *
  * YA with weather and element, absorption, 19% status. */
-void formula_calculate_magical_damage_without_faith(void) {
+static void formula_calculate_magical_damage_without_faith(void) {
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
     if (formula_calculate_elemental_xa_times_ya() == 0) {
@@ -68,7 +68,7 @@ void formula_calculate_magical_damage_without_faith(void) {
 
 /* Damage MA * (MA + Y) / 2 without Faith: stores XA and YA, then runs the magical
  * damage chain of formula_calculate_magical_damage_without_faith. */
-void formula_calculate_truth_damage(void) {
+static void formula_calculate_truth_damage(void) {
     formula_store_ma_and_ma_plus_y_divided_by_two();
     formula_calculate_magical_damage_without_faith();
 }
@@ -85,7 +85,7 @@ static s32 calculate_magic_accuracy_without_strengthen(void) {
 
 /* Hit chance F(MA+X)%: elemental strengthen and the magical modifiers on MA,
  * zodiac compatibility on both terms, then Faith. Returns 1 on a miss. */
-s32 formula_accuracy_calculate_magic(void) {
+static s32 formula_accuracy_calculate_magic(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
@@ -96,7 +96,7 @@ s32 formula_accuracy_calculate_magic(void) {
 }
 
 /* formula_accuracy_calculate_magic without the Faith step: hit (MA+X)%. */
-s32 formula_accuracy_calculate_magic_without_faith(void) {
+static s32 formula_accuracy_calculate_magic_without_faith(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
     formula_apply_magical_modifiers();
@@ -107,7 +107,7 @@ s32 formula_accuracy_calculate_magic_without_faith(void) {
 
 /* The physical modifiers on XA without the attacker supports: Berserk or Frog,
  * Defense Up, the target's statuses, zodiac compatibility. */
-void formula_apply_physical_modifiers_without_supports(void) {
+static void formula_apply_physical_modifiers_without_supports(void) {
     formula_apply_attacker_berserk_frog();
     formula_apply_defense_up();
     formula_apply_target_physical_statuses();
@@ -117,7 +117,7 @@ void formula_apply_physical_modifiers_without_supports(void) {
 /* Hit chance (XA+YA)% with Attack Up, Martial Arts, Berserk or Frog, Defense
  * Up, the target's statuses and zodiac compatibility on XA. Returns 1 on a
  * miss. */
-s32 formula_accuracy_calculate_physical_status(void) {
+static s32 formula_accuracy_calculate_physical_status(void) {
     formula_apply_attack_up_and_martial_arts();
     formula_apply_physical_modifiers_without_supports();
     formula_store_xa_plus_ya();

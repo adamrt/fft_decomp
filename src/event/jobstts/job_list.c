@@ -21,7 +21,7 @@ extern u8 g_job_list_render_commands[216];
 /* Job level of the unit in the job list's `index`th job, also left in
  * g_job_list_job_current_level; levels are packed two per byte (odd jobs in
  * the low nibble). */
-s32 job_list_calculate_level(s32 index) {
+static s32 job_list_calculate_level(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_status_screen_unit_data[0]->career.job_levels[generic_job >> 1];
@@ -41,7 +41,7 @@ static s32 calculate_job_list_jp(s32 index) {
 }
 
 /* Also returns the value: callers read it through g_menu_row_callbacks. */
-s32 job_list_calculate_total_jp(s32 index) {
+static s32 job_list_calculate_total_jp(s32 index) {
     s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_job_current_total_jp = g_status_screen_unit_data[0]->career.job_points.total.values[generic_job];
@@ -51,7 +51,7 @@ s32 job_list_calculate_total_jp(s32 index) {
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
  * `index`th job is looked up but its result is not used. */
-s32 job_list_calculate_next_level_jp(s32 index) {
+static s32 job_list_calculate_next_level_jp(s32 index) {
     s32 level;
 
     job_get_generic_index(g_job_list_job_ids[index]);
@@ -66,7 +66,7 @@ s32 job_list_calculate_next_level_jp(s32 index) {
 
 /* JOBSTTS builds the unlearned list; its final argument is Boolean,
  * so the original 2 requests unlearned abilities only. */
-s32 job_list_calculate_mastered(s32 index) {
+static s32 job_list_calculate_mastered(s32 index) {
     s16 ability_list[24];
 
     g_job_current_mastered

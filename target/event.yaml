@@ -744,7 +744,7 @@ data:
   - {addr: 0x801eb204, name: s_unit_list_current_stat_value}
   - {addr: 0x801eb208, name: g_unit_list_max_stat_value}
   - {addr: 0x801eb20c, name: g_unit_list_cursor_trail_points}
-  - {addr: 0x801eb22c, name: g_menu_selection_records}
+  - {addr: 0x801eb22c, name: s_menu_selection_records}
   - {addr: 0x801eb280, name: s_unit_list_shown_unit_indices}
   - {addr: 0x801eb2ac, name: s_unit_list_count}
   - {addr: 0x801eb2b0, name: s_unit_list_records}
@@ -887,7 +887,7 @@ units:
   - {name: gfx_image_transfer_wait, source: src/lib/menu/graphics/image_transfer.c}
   - {name: graphic_thread, source: src/event/card/backdrop.c, data: [{addr: 0x801d8874, size: 2400, hash: a0ee989ed2a0a2e3}, {addr: 0x801d91d4, size: 4, hash: df3f619804a92fdb}]}
   - {name: input, source: src/event/card/input.c, bss: [{addr: 0x801d925c, size: 2, hash: 96a296d224f285c6}]}
-  - {name: managed_threads, source: src/lib/menu/managed_threads.c}
+  - {name: managed_threads, source: src/lib/menu/managed_threads.c, bss: [{addr: 0x801ca93c, size: 4, hash: df3f619804a92fdb}]}
   - {name: memcard, source: src/lib/memcard.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801ca888, size: 4, hash: ad95131bc0b799c0}]}
   - {name: menu_timing, source: src/lib/menu/menu_timing.c}
   - {name: save_screen, source: src/event/card/entry.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801c9910, size: 46, hash: 072f2816247853a7}], bss: [{addr: 0x801ca968, size: 7808, hash: b77ee6575e6146ff}, {addr: 0x801cc7e8, size: 1, hash: 6e340b9cffb37a98}]}
@@ -906,7 +906,7 @@ functions:
   - {addr: 0x801bfbd8, size: 520, name: update_scan_result, hash: cf8b28ac678c041a, unit: save_screen}
   - {addr: 0x801bfde0, size: 972, name: update_write, hash: d56e168b34803142, unit: save_screen}
   - {addr: 0x801c01ac, size: 2056, name: save_image_build, hash: bfe14a0517ecc7ac, unit: save_screen}
-  - {addr: 0x801c09b4, size: 132, name: init_save_screen, hash: 6c86263b53a6fbe9, unit: save_screen}
+  - {addr: 0x801c09b4, size: 132, name: save_init_screen, hash: 6c86263b53a6fbe9, unit: save_screen}
   - {addr: 0x801c0a38, size: 544, name: set_slot_playtime, hash: 8096fa74ff7c2f74, unit: save_screen}
   - {addr: 0x801c0c58, size: 3016, name: update_card_scan, hash: 622eaf8505e39a23, unit: save_screen}
   - {addr: 0x801c1820, size: 1288, name: build_slot_description, hash: b3ddcca4afe44418, unit: save_screen}
@@ -1072,7 +1072,7 @@ data:
   - {addr: 0x801ca910, name: g_cmd_window_interior_command}
   - {addr: 0x801ca918, name: g_menu_cursor_forward_offset_keyframes}
   - {addr: 0x801ca924, name: g_menu_cursor_reverse_offset_keyframes}
-  - {addr: 0x801ca93c, name: g_menu_managed_thread_state}
+  - {addr: 0x801ca93c, name: s_menu_managed_thread_state}
   - {addr: 0x801ca940, name: g_bits_primary_reset}
   - {addr: 0x801ca941, name: g_bits_secondary_reset}
   - {addr: 0x801ca944, name: g_bits_primary_read_index}
@@ -1355,7 +1355,7 @@ units:
   - {name: item_order, source: src/lib/menu/item_order.c}
   - {name: item_sort_id_list, source: src/event/equip/item_sort.c, rodata: [{addr: 0x801cfb44, size: 24, hash: a787439a26721345}]}
   - {name: item_types, source: src/lib/menu/item_types.c}
-  - {name: managed_threads, source: src/lib/menu/managed_threads.c}
+  - {name: managed_threads, source: src/lib/menu/managed_threads.c, bss: [{addr: 0x801cfbd4, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_input, source: src/event/equip/menu_input.c, bss: [{addr: 0x801d86ac, size: 2, hash: 96a296d224f285c6}]}
   - {name: menu_list, source: src/event/equip/menu_list.c, data: [{addr: 0x801d8700, size: 100, hash: fb40569aa0008599}]}
   - {name: menu_script_core, source: src/lib/menu/menu_script_core.c, data: [{addr: 0x801e930c, size: 64, hash: f5a5fd42d16a2030}]}
@@ -1388,7 +1388,7 @@ functions:
   - {addr: 0x801bf4ac, size: 100, name: unit_panel_toggle_numbers_thread, hash: c87287dc70d17dac, source: src/lib/menu/unit_view/numeric_toggle.c}
   - {addr: 0x801bf510, size: 128, name: unit_panel_toggle_preview_stats_thread, hash: 7f5a28473a44bd57, unit: entry}
   - {addr: 0x801bf590, size: 44, name: redraw_unit_panels, hash: 91f17a9247dbec09, unit: entry}
-  - {addr: 0x801bf5bc, size: 72, name: unit_panels_stop, hash: c256a1db309301e7, unit: entry}
+  - {addr: 0x801bf5bc, size: 72, name: unit_panel_stop_all, hash: c256a1db309301e7, unit: entry}
   - {addr: 0x801bf604, size: 336, name: equipment_refresh_selected_unit, hash: a4726c20fc7a9d20, unit: entry}
   - {addr: 0x801bf754, size: 40, name: equipment_reset_selection_results, hash: d85652e4ca0ab453, unit: entry}
   - {addr: 0x801bf77c, size: 100, name: message_box_show_with_sound, hash: 2d3c0e2daf08dc59, unit: entry}
@@ -1668,7 +1668,7 @@ data:
   - {addr: 0x801cfb5c, name: g_item_category_lists}
   - {addr: 0x801cfb70, name: g_item_type_icon_origins}
   - {addr: 0x801cfbb8, name: g_equipment_text_message_thread_active}
-  - {addr: 0x801cfbd4, name: g_menu_managed_thread_state}
+  - {addr: 0x801cfbd4, name: s_menu_managed_thread_state}
   - {addr: 0x801cfbd8, name: g_help_text_table}
   - {addr: 0x801d86a8, name: g_menu_input_latched_button}
   - {addr: 0x801d86aa, name: g_menu_input_activation_timer}
@@ -1719,7 +1719,7 @@ data:
   - {addr: 0x801e0d74, name: s_equipment_gfx_draw_mode_buffer}
   - {addr: 0x801e1044, name: s_equipment_gfx_line_f2_buffer}
   - {addr: 0x801e1184, name: s_equipment_gfx_tile_buffer}
-  - {addr: 0x801e12c4, name: g_menu_selection_records}
+  - {addr: 0x801e12c4, name: s_menu_selection_records}
   - {addr: 0x801e12e4, name: g_equipment_thread_indicator_packets}
   - {addr: 0x801e17d4, name: g_menu_input_controller}
   - {addr: 0x801e17f0, name: g_gfx_draw_offset_y}
@@ -2125,7 +2125,7 @@ data:
   - {addr: 0x801fa058, name: g_gfx_draw_area_buffer}
   - {addr: 0x801fa148, name: g_gfx_otag_buffer}
   - {addr: 0x801fa348, name: g_status_screen_gfx_contexts}
-  - {addr: 0x801fa530, name: g_menu_selection_records}
+  - {addr: 0x801fa530, name: s_menu_selection_records}
   - {addr: 0x801fa550, name: g_job_list_job_ids}
   - {addr: 0x801fa57c, name: g_ability_list_ability_entries}
   - {addr: 0x801fa5b0, name: g_job_list_job_current_level}

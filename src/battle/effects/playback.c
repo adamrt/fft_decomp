@@ -14,7 +14,6 @@
 #include "fft/effect_timeline.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
-#include "fft/map.h"
 #include "fft/map_light.h"
 #include "fft/map_mesh.h"
 #include "fft/map_palette.h"
@@ -43,6 +42,23 @@ typedef enum playback_load_state {
     EFFECT_LOAD_COUNTDOWN = 2,       /* wait out the 60 frames given to a charge secondary effect */
     EFFECT_LOAD_ENDING_SECONDARY = 3 /* wait for the charge secondary effect to end */
 } playback_load_state_e;
+
+/* What an opcode handler returns to run_script_block. */
+typedef enum effect_script_result {
+    EFFECT_SCRIPT_RESULT_YIELD = 0,    /* stop for this frame */
+    EFFECT_SCRIPT_RESULT_CONTINUE = 1, /* run the next instruction */
+    EFFECT_SCRIPT_RESULT_ABORT = 2     /* the script has ended: free the record */
+} effect_script_result_e;
+
+/* pc is a signed byte offset into the shared, 16-bit-aligned script stream. */
+static inline const effect_script_instruction_t* effect_get_current_script_instruction(effect_record_t* record) {
+    return (const effect_script_instruction_t*)(record->script + record->pc);
+}
+
+static inline u16 effect_get_current_script_header(effect_record_t* record) {
+    /* Loading the 16-bit value here preserves the retail base/offset register order. */
+    return *(const u16*)(record->script + record->pc);
+}
 
 /* Loaded effect sections and their saved starting positions. */
 extern struct suzuki_sound_resource* g_effect_sound_section_ptr;

@@ -160,6 +160,5 @@ extern menu_window_rect_source_t* g_menu_window_rect_source;
 extern menu_scratch_buffer_t g_menu_scratch_buffer;
 
 void menu_window_frame_thread(void);
-void menu_thin_window_frame_thread(void);
 
 #endif

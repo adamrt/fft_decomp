@@ -35,16 +35,21 @@ void system_frame_stub(void);
 /* Resettable VBlank counter used by CD waits and the title exit. */
 extern s32 g_system_wait_frames;
 extern s32 g_system_vsync_interval;
+
+/* Advanced once per frame by BATTLE's frame loop and by WORLD's event and menu frames. MAIN and WORLD each define
+ * one. */
+extern s32 g_frame_counter;
+
+void system_draw_sync_callback(void);
+void system_vsync_callback(void);
+
+/* BATTLE frame pacing */
 extern s32 g_system_min_vsync_interval;
 extern s32 g_system_saved_vsync_interval;
 extern s32 g_system_frame_pacing_suppressed;
 extern s32 g_system_frame_pacing_timer;
 extern s32 g_system_battle_frame_hsync_count;
 
-void system_draw_sync_callback(void);
-void system_vsync_callback(void);
-
-/* BATTLE frame pacing */
 s32 system_get_vsync_interval(void);
 s32 system_set_vsync_interval(s32 speed);
 void system_set_min_vsync_interval(s32 value);
@@ -133,7 +138,7 @@ void loading_message_build_offset(u32 visible);
 void loading_message_append_to_otag(u32* otag);
 void loading_message_draw(void);
 
-/* runtime flags */
+/* OPEN main loop */
 /* Bits of g_system_runtime_flags. */
 typedef enum system_runtime_flag {
     SYSTEM_RUNTIME_FLAG_RUNNING = 0x00001,          /* the OPEN main loop runs while set */

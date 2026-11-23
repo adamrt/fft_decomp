@@ -4,7 +4,6 @@
 /* Ability effects shared by BATTLE and the effect overlays (EFFECT/E###.BIN): the effect context and its targets,
  * native callbacks, particles, script records, and the overlays' native handlers with their work records. */
 
-#include "fft/effect_file.h"
 #include "fft/effect_timeline.h"
 #include "fft/gfx.h"
 #include "fft/unit.h"
@@ -34,9 +33,6 @@ typedef enum effect_callback_phase {
     EFFECT_CALLBACK_PHASE_UPDATE = 2,
     EFFECT_CALLBACK_PHASE_DESTROY = 3
 } effect_callback_phase_e;
-
-/* Native callback at 0x801c44a0 in E000 (catalog ids 0, 24, 73, 92, 121); does nothing and leaves the result unset. */
-s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_emitter_index, s32 unused_frame);
 
 /* targets */
 enum {
@@ -86,7 +82,7 @@ typedef struct effect_context {
     u8 spectator_count; /* 0x02; entries in spectator_ids */
     u8 math_skill_flag; /* 0x03; enables the effect flags' spawn_delay_override */
     effect_target_t targets[EFFECT_TARGET_COUNT_MAX + 1]; /* 0x04; caster at EFFECT_CASTER_ENTRY */
-    /* 0xae; at most 15 units with stats, excluding targets and the caster. */
+    /* 0xae; at most 15 battle units, excluding targets and the caster. */
     u8 spectator_ids[MAP_UNIT_SLOT_COUNT - 1];
     u8 _unused_bd;
     SVECTOR target_tile; /* 0xbe; post-action destination tile, x/layer/y */
@@ -97,8 +93,6 @@ typedef char effect_context_size_must_be_200[(sizeof(effect_context_t) == 200) ?
 extern effect_context_t g_effect_context;
 
 void effect_copy_unit_world_vector(u32 map_unit_id, VECTOR* destination);
-void effect_get_unit_world_coords(
-    s32 adjust_for_tile_height, u32 battle_unit_id, const effect_context_t* effect_coordinates, SVECTOR* destination);
 void effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, const effect_context_t* coord_data, SVECTOR* out);
 
@@ -170,10 +164,6 @@ typedef struct effect_list_node {
 } effect_list_node_t;
 typedef char effect_list_node_size_must_be_36[sizeof(effect_list_node_t) == 36 ? 1 : -1];
 
-static inline effect_sequence_instruction_t* effect_get_current_sequence_instruction(effect_list_node_t* node) {
-    return (effect_sequence_instruction_t*)(node->sequence_data + node->sequence_offset);
-}
-
 /* 0x58-byte particle on an effect record's work list. The emitter initializes
  * its motion, homing and child-emitter state; the integrator advances it. */
 typedef struct effect_work_record {
@@ -235,41 +225,9 @@ typedef struct effect_record {
 } effect_record_t;
 typedef char effect_record_size_must_be_248[sizeof(effect_record_t) == 248 ? 1 : -1];
 
-/* pc is a signed byte offset into the shared, 16-bit-aligned script stream. */
-static inline const effect_script_instruction_t* effect_get_current_script_instruction(effect_record_t* record) {
-    return (const effect_script_instruction_t*)(record->script + record->pc);
-}
-
-static inline u16 effect_get_current_script_header(effect_record_t* record) {
-    /* Loading the 16-bit value here preserves the retail base/offset register order. */
-    return *(const u16*)(record->script + record->pc);
-}
-
-/* map control */
-s32 effect_freeze_map(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_unfreeze_map(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_set_map_3d_objects_state_1(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_set_map_3d_objects_state_2(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_set_map_3d_objects_state_3(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_set_map_timed_transform_duration(
-    s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-
 /* texture pages */
 /* Fixed texture-page bits shared by the native effect renderers. */
 enum { EFFECT_RENDER_TEXTURE_PAGE_BASE = 0x86, EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT = 5 };
-
-/* particle ribbon */
-/* The homing ribbon renderer has short 9-point trails and long 17-point trails. */
-enum {
-    EFFECT_PARTICLE_RIBBON_SHORT_SLOTS = 8,
-    EFFECT_PARTICLE_RIBBON_SHORT_POINTS = 9,
-    EFFECT_PARTICLE_RIBBON_LONG_SLOTS = 4,
-    EFFECT_PARTICLE_RIBBON_LONG_POINTS = 17
-};
-
-s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* polar mesh */
 enum {
@@ -298,10 +256,6 @@ typedef struct effect_polar_mesh_work {
 typedef char effect_polar_mesh_work_size_must_be_8444[sizeof(effect_polar_mesh_work_t) == 8444 ? 1 : -1];
 
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-
-/* textured quad grids */
-s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 unused_frame);
 
 /* ring and tube meshes */
 enum {
@@ -326,22 +280,6 @@ typedef struct effect_radial_mesh_work {
 typedef char effect_radial_mesh_work_size_must_be_6684[sizeof(effect_radial_mesh_work_t) == 6684 ? 1 : -1];
 
 s32 effect_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-
-/* dome mesh */
-/* Lattice of the spinning dome renderer: eight rows of sixteen segments. */
-enum {
-    DOME_MESH_ROWS = 8,
-    DOME_MESH_SEGMENTS = 16,
-    DOME_MESH_LATTICE_COMPONENTS = 3,
-    DOME_MESH_QUAD_COUNT = DOME_MESH_ROWS * DOME_MESH_SEGMENTS,
-    DOME_MESH_LATTICE_POINT_BYTES = sizeof(vec3s16_t),
-    DOME_MESH_LATTICE_ROW_BYTES = (DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_POINT_BYTES
-};
-
-s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* map vertex particles */
 typedef struct effect_map_vertex_location {
@@ -357,15 +295,7 @@ enum {
     EFFECT_MAP_VERTEX_WORK_BYTES = EFFECT_MAP_VERTEX_PART_COUNT * EFFECT_MAP_VERTEX_COUNT_PER_PART * sizeof(VECTOR)
 };
 
-s32 effect_banish_map_vertex_particles_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
-s32 effect_altima_transformation_map_vertex_particles_update(
-    s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 frame);
-
-/* tentacle mesh */
-s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-
-/* wave mesh */
-s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
+/* Vertex work allocated by Banish/Altima and filled by the map renderer. */
+extern VECTOR* g_effect_map_vertices;
 
 #endif

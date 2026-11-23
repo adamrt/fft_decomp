@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* Clear the HP/MP preview bonuses and equipment-detail stats. */
-void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail) {
+static void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail) {
     summary->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = 0;
     summary->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = 0;
     detail->state.move = 0;

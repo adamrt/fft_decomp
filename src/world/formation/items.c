@@ -23,7 +23,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
@@ -64,7 +63,7 @@ static s32 update_remove_menu(void);
 /* The formation screen's Item menu, run each frame: slide the grid in or out, keep the
  * icon menu running, enter Equip, Best Fit, Remove (all refused for a locked unit) or the
  * item list, and come back to the icon menu when that submenu ends. */
-void update_item_menu(void) {
+void formation_item_update_menu(void) {
     s32 state = g_formation_current_menu;
     s8 running;
     u8 saved;
@@ -174,7 +173,7 @@ void update_item_menu(void) {
     }
     if (done == 0) {
         g_formation_item_menu_unit_index = 0xFF;
-        stage_selected_unit();
+        formation_stage_selected_unit();
         g_formation_current_menu = FORMATION_MENU_ITEM;
         g_formation_item_submenu_exit_pending = 1;
     }
@@ -282,7 +281,7 @@ static s32 update_equip_menu(void) {
                     message_box_show_with_sound(0xc003, SOUND_SFX_ERROR_MESSAGE);
                 } else if (equipment_set_slot_item(g_unit_selected_index, g_formation_item_slot, equip) == 1) {
                     item_adjust_inventory_count(equip, -1);
-                    stage_selected_unit();
+                    formation_stage_selected_unit();
                     g_formation_item_list_refresh = 1;
                     g_sound_queued_effect_id = SOUND_SFX_EQUIP;
                 } else {
@@ -389,7 +388,7 @@ static s32 update_best_fit_menu(void) {
                 item_adjust_inventory_count(g_item_preview_stat_detail.state.equipment[i], -1);
             }
             formation_save_records();
-            stage_selected_unit();
+            formation_stage_selected_unit();
         }
         thread_resume(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         g_sound_suppressed = 0;
@@ -422,7 +421,7 @@ static s32 update_remove_menu(void) {
         g_menu_input_secondary_repeat = g_formation_item_remove_saved_secondary_input;
         g_menu_input_primary_repeat = g_formation_item_remove_saved_primary_input;
         g_menu_input_newly_pressed = g_formation_item_remove_saved_newly_pressed;
-        update_unit_grid_selection();
+        unit_grid_update_selection();
         menu_input_clear_state();
     }
     g_formation_item_remove_saved_secondary_input = g_menu_input_secondary_repeat;
@@ -497,7 +496,7 @@ static s32 update_remove_menu(void) {
             equipment_set_slot_item(g_unit_selected_index, slot, ITEM_ID_NOTHING);
             bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment, items,
                 sizeof(g_equipment_remove_item_equipment));
-            stage_selected_unit();
+            formation_stage_selected_unit();
             g_sound_queued_effect_id = SOUND_SFX_UNEQUIP;
             g_equipment_remove_item_previewed_slot = -2;
         }
@@ -559,7 +558,7 @@ static s32 update_remove_all_prompt(void) {
                 equipment_set_slot_item(g_unit_selected_index, i, ITEM_ID_NOTHING);
             }
         }
-        stage_selected_unit();
+        formation_stage_selected_unit();
         if (changed == 0) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
         } else {

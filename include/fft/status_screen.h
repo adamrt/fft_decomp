@@ -4,15 +4,14 @@
 /* The Status screen: its equipment and ability panel, numbers panel and status list (event library, in BATTLE and
  * WORLD), JOBSTTS's job pages, and DEBUGCHR's read-only view. */
 
-#include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/menu_list.h"
-#include "fft/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* status panel */
-void status_screen_thread(void);
+/* selection */
+void status_screen_enter_selection(void);
+void status_screen_leave_selection(void);
 
 /* numbers panel */
 void status_screen_numbers_thread(void);
@@ -22,6 +21,7 @@ void status_screen_numbers_thread(void);
 extern menu_scroll_text_layout_t g_status_screen_status_list_layout;
 
 void status_screen_status_list_thread(void);
+s32 battle_unit_has_any_current_status(s32 battle_unit_id);
 
 /* overlay screens */
 void status_screen_jobs_thread(void);               /* runs JOBSTTS while its state is nonzero */
@@ -49,8 +49,6 @@ void status_screen_init_unit_jobs(s32 unit_id);
 /* menu display (JOBSTTS) */
 /* The opcode that ends a JOBSTTS menu display stream. */
 enum { STATUS_SCREEN_SCRIPT_END = 0x16 };
-
-enum { STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6 };
 
 /* Window right edge; WORLD's twin stores it to g_menu_screen_window_right_x. */
 extern s16 g_status_screen_menu_window_right_x;
@@ -101,7 +99,5 @@ void status_screen_gfx_init_contexts(status_screen_gfx_context_t* base, u32* ota
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas);
-void menu_gfx_enqueue_oriented_textured_quad_rect(
-    RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index);
 
 #endif

@@ -33,6 +33,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
+ * then the no-reward name, the unexplored lands and the treasures, each by reward_index. */
+enum {
+    TEXT_ID_REWARD_NONE = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6,
+    TEXT_ID_REWARD_LAND_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1b,
+    TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e
+};
+
 static void open_report(s32 argument);
 static void open_result(s32 proposition);
 static void prepare_report(s32 proposition_index);

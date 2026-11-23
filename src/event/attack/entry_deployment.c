@@ -3,7 +3,7 @@
 
 #include "fft/ability.h"
 #include "fft/deploy.h"
-#include "fft/formation.h"
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"

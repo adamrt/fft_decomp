@@ -13,6 +13,7 @@
 #include "fft/map_load.h"
 #include "fft/map_unit.h"
 #include "fft/projectile.h"
+#include "fft/status_screen.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/vector.h"

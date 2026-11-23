@@ -17,7 +17,6 @@
 #include "psx/types.h"
 
 static map_tile_coordinates_t s_script_warp_coords;
-extern u16 g_unit_view_depth_display_suppressed;
 
 /* DismissUnit: remove the first roster member after slot 0 with this sprite set from
  * the party, returning its equipment to the inventory. Nothing happens if none matches. */

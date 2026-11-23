@@ -2,8 +2,8 @@
 #define LOCATION_H
 
 /* A town, castle or battlefield on the World Map: its menu (Bar, Shop, Fur Shop, Soldier Office), name label and
- * picture, route travel between locations, random and Deep Dungeon battles, and location_script_, the world map's own
- * script machine that decides what happens at a location (events, choices, paths), with its opcode handlers. */
+ * picture, route travel between locations, random battles, and location_script_, the world map's own script machine
+ * that decides what happens at a location (events, choices, paths). */
 
 #include "fft/menu_stack.h"
 #include "psx/libgs.h"

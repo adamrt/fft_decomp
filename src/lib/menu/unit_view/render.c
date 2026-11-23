@@ -22,7 +22,6 @@
 #include "fft/portrait.h"
 #include "fft/result.h"
 #include "fft/script.h"
-#include "fft/script_unit.h"
 #include "fft/skillset.h"
 #include "fft/sound.h"
 #include "fft/sprite_sheet.h"
@@ -72,7 +71,6 @@ extern image_layout_t g_menu_sprite_page_image_params[5];
 extern point16_t g_unit_view_quad_origin;
 extern RECT g_unit_view_tile_info_image_location;
 extern image_layout_t g_unit_view_tile_info_image_params[2];
-extern u16 g_unit_view_depth_display_suppressed;
 
 static s32 build_height_pieces(s32 group, POLY_GT4* poly);
 

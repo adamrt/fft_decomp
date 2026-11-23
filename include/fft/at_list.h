@@ -51,7 +51,6 @@ s32 at_list_find_unit(const battle_unit_t* unit);
 u8 at_list_count_turns_to_resolve(s32 battle_unit_id, s32 ct, const at_entry_t* entries);
 s32 at_list_preview(battle_unit_t* unit, action_command_t* action, at_entry_t* at_list);
 void at_list_reset_cursor(void);
-void at_list_show_entry(s32 at_index);
 void at_list_show_next_entry(void);
 
 /* list window */
@@ -60,7 +59,6 @@ extern menu_list_page_t g_at_list_pages[2];
 /* Releases at_list_select_unit_thread once a unit picked from the list has been viewed. */
 extern u16 g_at_list_selection_finished;
 
-void at_list_open(void);
 void at_list_finish_selection(void);
 
 /* Runs the g_at_list_state menu two thread slots below and waits for it to finish. */

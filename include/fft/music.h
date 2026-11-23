@@ -38,29 +38,22 @@ typedef enum music_id {
 /* loading */
 s32 music_load_into_slot(s32 music_id, s32 slot);
 s32 music_load_into_free_slot(s32 music_id);
-s32 music_start_load_into_slot(s32 music_id, s32 slot);
 s32 music_start_load_into_free_slot(s32 music_id);
 s32 music_poll_scenario_load(void);
-s32 music_load_scenario_and_wait(s32 music_id);
 s32 music_is_loading_stub(void);
 void music_unload_current_scenario(void);
 s32 music_unload_scenario_slot(s32 slot);
 void music_unload_all(void);
 
 /* playback */
-struct suzuki_music* music_get_handle(s32 slot);
 struct suzuki_music* music_switch_track(s32 slot, s32 volume, s32 fade);
-s32 music_get_current_slot(void);
 void music_set_track(s32 music_id);
 
-/* set_volume fades temporarily; set_volume_target also remembers the volume
+/* set_volume fades temporarily; set_target_volume also remembers the volume
  * that restore_volume returns to. */
 s32 music_set_target_volume(s32 volume, s32 time);
 s32 music_set_volume(s32 volume, s32 time);
 s32 music_restore_volume(s32 time);
-s32 music_fade_balance_shift(s32 value, s32 time);
-s32 music_fade_pitch_shift(s32 value, s32 time);
-s32 music_fade_tempo_scale(s32 value, s32 time);
 s32 music_stop(void);
 
 /* tunes */

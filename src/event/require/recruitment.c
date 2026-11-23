@@ -4,7 +4,7 @@
 #include "fft/ability.h"
 #include "fft/after_battle.h"
 #include "fft/character_identity.h"
-#include "fft/gfx_primitive.h"
+#include "fft/fade.h"
 #include "fft/input.h"
 #include "fft/item.h"
 #include "fft/map_unit.h"

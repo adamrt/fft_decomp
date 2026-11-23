@@ -9,6 +9,7 @@
 #include "fft/menu_input.h"
 #include "fft/script.h"
 #include "fft/sound.h"
+#include "fft/system.h"
 #include "fft/thread.h"
 #include "fft/unit_panel.h"
 #include "psx/pad.h"

@@ -1,14 +1,15 @@
 #ifndef MENU_SCREEN_H
 #define MENU_SCREEN_H
 
-/* WORLD's menu-screen framework, used by every WORLD screen and by WLDCORE and OPEN: screen threads, the per-frame menu
- * step and its input, packet buffers, fades, palettes and window frames, the main menu entries, the display script's
- * lists, cursors, grid menus, number entries, text sections and sound requests. */
+/* WORLD's menu-screen framework, used by every WORLD screen and by WLDCORE and OPEN: screen threads and setup, the
+ * per-frame menu step and its input, packet buffers, fades and brightness, palettes and window frames, the main menu
+ * entries, the display script's lists, cursors, grid menus, entry threads, text sections and sound requests. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
+#include "fft/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -33,6 +34,16 @@ enum { MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15 };
 void menu_screen_thread_request_redraw(s32 thread_id);
 void menu_screen_thread_request_stop(s32 thread_id);
 
+/* setup */
+/* Set up the WORLD menus with EVENT/WORLD.LZW from the main thread. */
+void menu_screen_init_world_text(void);
+
+/* Set up the WORLD menus with EVENT/WORLD.LZW and the WLDFACE portraits. */
+void menu_screen_init_world_resources(void);
+
+/* Set up the menus with EVENT/OPEN.LZW for the new-game prologue. */
+void menu_screen_init_open_text(void);
+
 /* menu frame */
 /* Ordinary shop screens use a town's location_id_e. These values
  * identify the other screens that reuse the formation menu framework. */
@@ -54,17 +65,16 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input);
 void menu_screen_reset_context(void);
 void menu_screen_set_allowed_buttons(u32 mask);
 s32 menu_screen_check_busy(void);
-void screen_reset_game(void);
+void menu_screen_reset_game(void);
 
 /* controller input */
-extern u16 g_menu_screen_input_latched_button;
-extern u32 g_menu_screen_input_primary_repeat;
 extern s32 g_menu_screen_input_primary_repeat_latched;
 extern s32 g_menu_screen_input_secondary_repeat_latched;
 
 s32 menu_screen_filter_buttons(void);
 s32 menu_screen_get_input_lockout(void);
 void menu_screen_update_input_lockout(void);
+s32 menu_screen_read_buttons(s32 unused_0);
 
 /* packet buffers */
 extern struct menu_gfx_context* g_menu_screen_packet_buffers;
@@ -93,37 +103,17 @@ void menu_screen_add_gradient_line(point16_t* endpoints, rgb24_t* colors, s32 se
 /* draw areas and blits */
 extern RECT g_menu_screen_temporary_draw_area;
 
-/* A full-screen texture window (x=0, y=0, w=0x100, h=0x100), copied verbatim into a menu record's DR_MODE by
- * menu_screen_init_scaled_draw_area_packets; the formation view reads the same bytes as a zero screen point.
- * Same 8-byte RECT shape as g_gfx_texture_window, whose reset sibling is byte-for-byte identical. */
-extern const RECT g_menu_screen_full_texture_window;
-
 void menu_screen_set_blit_destination(s32 x, s32 y);
 void menu_screen_set_blit_source_rect(s16 x, s16 y, s16 width, s16 height);
 
-/* fades */
-/* Separate decreasing/increasing RGB-intensity flags.
- * The getter packs them into bits 0/1 and returns 0 when disabled. */
-typedef enum screen_fade_state {
-    SCREEN_FADE_STATE_NONE = 0,
-    SCREEN_FADE_STATE_DECREASING = 1,
-    SCREEN_FADE_STATE_INCREASING = 2
-} screen_fade_state_e;
-
+/* fades and brightness */
 extern rgb24_t g_menu_screen_black_tile_color;
+extern s32 g_screen_color_red;
+extern s32 g_screen_color_green;
+extern s32 g_screen_color_blue;
 
 void screen_set_fade_disabled(u8 disabled);
-
-/* graphics resources */
-/* Texture-page 7 uses a grid of 16-pixel square allocation cells. */
-enum {
-    MENU_SCREEN_TPAGE7_GRID_ROWS = 15,
-    MENU_SCREEN_TPAGE7_GRID_COLUMNS = 16,
-    MENU_SCREEN_TPAGE7_CELL_PIXELS = 16,
-    MENU_SCREEN_TPAGE7_CELL_PIXEL_SHIFT = 4,
-    MENU_SCREEN_TPAGE7_CELL_PIXEL_MASK = 0x0f,
-    MENU_SCREEN_TPAGE7_GRID_OCCUPIED = 0xff
-};
+void screen_set_brightness(s32 red, s32 green, s32 blue);
 
 /* palettes and colors */
 extern u16 g_menu_screen_window_tpage;
@@ -133,16 +123,9 @@ extern u16 g_menu_screen_alternate_number_clut;
 extern u16 g_menu_screen_alternate_number_clut_normal;
 extern u16 g_menu_screen_disabled_number_clut;
 extern u8 g_menu_screen_use_alternate_palette;
-extern s32 g_screen_color_red;
-extern s32 g_screen_color_green;
-extern s32 g_screen_color_blue;
 extern rgb24_t g_menu_screen_sprite_color;
 
-void screen_set_brightness(s32 red, s32 green, s32 blue);
-
 /* window frames */
-extern RECT g_menu_screen_thin_panel_texture_windows[7];
-
 s32 menu_screen_build_window_frame_image(s32 width, s32 height, u16* destination);
 void menu_screen_build_window_image_row(const u16* source, u16* dest, s32 count, s32 offset);
 void menu_screen_window_frame_thread(void);
@@ -153,24 +136,10 @@ extern s32 g_menu_screen_thread_result;
 extern s32 g_menu_screen_dialog_waiting;
 
 void menu_screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
-void menu_screen_set_default_entry_0_text(u32 text_index, u32 value);
-void menu_screen_set_default_entry_1_text(s32 value);
 void menu_screen_set_entry_4_cursor(s32 index);
 s32 menu_screen_is_dialog_waiting(void);
-void menu_screen_text_list_thread(void);
 
-/* Set up the WORLD menus with EVENT/WORLD.LZW from the main thread. */
-void menu_screen_init_world_text(void);
-
-/* Set up the WORLD menus with EVENT/WORLD.LZW and the WLDFACE portraits. */
-void menu_screen_init_world_resources(void);
-
-/* Set up the menus with EVENT/OPEN.LZW for the new-game prologue. */
-void menu_screen_init_open_text(void);
-
-/* display script commands */
-typedef char LINE_F2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
-
+/* display script */
 enum { MENU_SCREEN_SCRIPT_END = 0x1c };
 
 /* scrollable lists */
@@ -184,7 +153,7 @@ void menu_scrollable_list_open(const s16* values, s32 selected_index, u8* text_t
 void menu_scrollable_list_load_layout(const menu_instruction_t* script);
 void menu_screen_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 
-/* cursors, selections and input */
+/* cursors and selections */
 /* Result slots the shop menus share. */
 enum {
     MENU_SCREEN_SELECTION_SHOP_QUANTITY = 3, /* chosen purchase/sale quantity */
@@ -209,7 +178,6 @@ extern u8 g_menu_screen_prompt_active;
 extern s16 g_menu_screen_selection_results[16];
 
 void menu_screen_reset_selection_results(void);
-s32 menu_screen_read_buttons(s32 unused_0);
 void menu_screen_update_dialog_input(void);
 
 /* grid menus */
@@ -217,7 +185,7 @@ extern s32 g_menu_screen_grid_id; /* help_grid_id_e */
 
 void menu_screen_update_grid_cursor(s16 alternate);
 
-/* number entries */
+/* entry threads */
 /* Value range of a numeric menu entry (menu_screen_number_entry_thread and
  * menu_screen_labeled_number_entry_thread). The callback runs when the entry is
  * confirmed, including when the value is unchanged. */
@@ -230,7 +198,7 @@ typedef struct menu_screen_number_range {
 void menu_screen_number_entry_thread(void);
 void menu_screen_labeled_number_entry_thread(void);
 void menu_screen_help_text_thread(void);
-void menu_screen_fit_child_entry_to_digits(void);
+void menu_screen_text_list_thread(void);
 
 /* text sections */
 /* Resident text resource indices, used by menu_screen_text_get_resident and
@@ -246,10 +214,6 @@ typedef enum menu_screen_text_data {
     MENU_SCREEN_TEXT_DATA_SHOP_DIALOGUE = 8 /* MENU_SCREEN_TEXT_SECTION_SHOP_DIALOGUE */
 } menu_screen_text_data_e;
 
-/* WORLD text files materialize 32 section pointers after their 0x80-byte
- * offset/header area. The same table is saved and restored around overlays. */
-enum { MENU_SCREEN_TEXT_SECTION_TABLE_BYTES = 128, MENU_SCREEN_TEXT_FILE_HEADER_BYTES = 128 };
-
 /* The text sections WORLD's screens bind while they are up (text_section_e
  * has the resident ones). */
 typedef enum menu_screen_text_section {
@@ -261,6 +225,8 @@ typedef enum menu_screen_text_section {
     MENU_SCREEN_TEXT_SECTION_SHOP_DIALOGUE = 31 /* the shopkeeper's lines */
 } menu_screen_text_section_e;
 
+enum { TEXT_ID_FORMATION_TEXT_BASE = MENU_SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
+
 extern u32 g_menu_screen_text_section_offsets[];
 
 u8* menu_screen_text_get_resident(menu_screen_text_data_e index);
@@ -268,14 +234,11 @@ u8* menu_screen_text_bind_section(u32 index);
 const u8* menu_screen_text_advance_chars(const u8* text, s32 count);
 s16 menu_screen_text_get_char_at(const u8* table, s16 index, s32 position);
 
-/* MAIN selects the WORLD address of text_find_entry through this existing alias. */
-u8* world_text_find_entry(u32 text_id);
-
 /* text images */
 void menu_screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags);
 s32 menu_screen_text_measure_width(const u8* entry);
 
-/* message box */
+/* text printing */
 s32 menu_screen_text_check_printing(s32 thread_id);
 void menu_screen_text_resume_printing(s32 thread_id);
 

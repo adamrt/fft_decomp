@@ -176,7 +176,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
             }
             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_ENTD, 0);
-            g_encounter_selection_mode = UNIT_ENTD_SELECTION_MAP_ID;
+            g_encounter_selection_mode = ENCOUNTER_SELECTION_MAP_ID;
             return SCRIPT_EVENT_FRAME_TO_WORLD;
         }
         g_script_threads_idle = 0;

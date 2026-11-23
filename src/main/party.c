@@ -7,7 +7,6 @@
 #include "fft/entd.h"
 #include "fft/job.h"
 #include "fft/memory.h"
-#include "fft/menu_screen.h"
 #include "fft/party_unit.h"
 #include "fft/text.h"
 #include "fft/unit.h"

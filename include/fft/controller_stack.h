@@ -8,7 +8,8 @@
 #include "fft/title.h"
 #include "psx/types.h"
 
-/* Rows of g_controller_handlers: the value a push stores in
+/* handlers */
+/* Rows of s_controller_handlers: the value a push stores in
  * g_controller_handler_indices. */
 typedef enum controller_handler {
     CONTROLLER_FFTST_MOVIE = 0,           /* update_logo_movie */
@@ -26,6 +27,7 @@ typedef enum controller_handler {
     CONTROLLER_TITLE_CARD_WARNING = 12    /* title_update_card_warning */
 } controller_handler_e;
 
+/* state records */
 /* Text message controller state (handler 8). */
 typedef struct controller_text_message_state {
     s32 use_world_text;
@@ -47,6 +49,7 @@ typedef union controller_record {
 } controller_record_t;
 typedef char controller_record_size_must_be_100[(sizeof(controller_record_t) == 100) ? 1 : -1];
 
+/* stack */
 enum { CONTROLLER_STACK_CAPACITY = 4 };
 
 extern s32 g_controller_handler_indices[CONTROLLER_STACK_CAPACITY]; /* controller_handler_e */

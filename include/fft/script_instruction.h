@@ -596,24 +596,6 @@ typedef struct event_earthquake_parameters {
 } event_earthquake_parameters_t;
 typedef char event_earthquake_parameters_size_must_be_4[sizeof(event_earthquake_parameters_t) == 4 ? 1 : -1];
 
-typedef struct event_color_screen_parameters {
-    u8 mode;
-    struct {
-        rgb24_t start;
-        rgb24_t end;
-    } colors;
-    u8 duration_le[2];
-} event_color_screen_parameters_t;
-typedef char event_color_screen_parameters_size_must_be_9[sizeof(event_color_screen_parameters_t) == 9 ? 1 : -1];
-
-/* Six byte-aligned 16-bit lighting targets, followed by the frame duration. */
-typedef struct event_map_light_parameters {
-    u8 target_rotation_le[3][2];
-    u8 target_scale_le[3][2];
-    u8 duration_le[2];
-} event_map_light_parameters_t;
-typedef char event_map_light_parameters_size_must_be_14[sizeof(event_map_light_parameters_t) == 14 ? 1 : -1];
-
 typedef struct event_wait_value_parameters {
     u8 variable_id_le[2];
     u8 test_value_le[2];

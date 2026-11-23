@@ -1,6 +1,7 @@
 /* Initialize the resident effect pools and allocate secondary-effect records and slots. */
 
 #include "fft/effect.h"
+#include "fft/effect_file.h"
 #include "fft/effect_model.h"
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"

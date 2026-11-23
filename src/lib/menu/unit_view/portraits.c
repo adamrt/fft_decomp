@@ -2,7 +2,6 @@
 
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
 #include "fft/memory.h"
 #include "fft/portrait.h"
 #include "fft/script.h"

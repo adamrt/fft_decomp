@@ -275,7 +275,7 @@ void shop_fitting_update_equipment_menu(void) {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             } else {
                 equip = item;
-                result = check_equipment_slot_item(g_unit_selected_index, g_shop_fitting_equip_slot, equip);
+                result = equipment_check_slot_item(g_unit_selected_index, g_shop_fitting_equip_slot, equip);
                 if (result < 0) {
                     g_sound_queued_effect_id = SOUND_SFX_INVALID;
                 } else {
@@ -869,7 +869,7 @@ void shop_fitting_update_inventory_sale(void) {
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
         g_formation_unit_browse_enabled = 0;
         g_formation_unit_banner_enabled = 0;
-        unit_panels_stop();
+        unit_panel_stop_all();
         g_formation_unit_cycle_mode = 0;
         g_shop_fitting_sell_step = SHOP_STEP_SELL_LIST;
         menu_selection_clear_record(5);
@@ -940,7 +940,7 @@ static void remove_trial_item(s16 formation_index, s16 equipment_index) {
             return;
         }
         if (reserved_item != ITEM_ID_NOTHING
-            && check_equipment_slot_item(g_unit_selected_index, equipment_index, reserved_item) == 1) {
+            && equipment_check_slot_item(g_unit_selected_index, equipment_index, reserved_item) == 1) {
             g_formation_unit_pointers[formation_index]->detail.equipment[equipment_index] = reserved_item;
             g_shop_fitting_items[formation_index][equipment_index] = ITEM_ID_NOTHING;
         }

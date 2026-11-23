@@ -13,9 +13,6 @@
 /* The particle updater reserves -1 for animation-driven lifetime. */
 enum { EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN = -1 };
 
-/* Vertex work allocated by Banish/Altima and filled by the map renderer. */
-extern VECTOR* g_effect_map_vertices;
-
 void effect_set_gravity(const vec3s32_t* src);
 void effect_save_gravity(void);
 void effect_restore_gravity(void);
@@ -37,8 +34,6 @@ void effect_particle_integrate_motion(effect_work_record_t* list);
 s32 effect_emitter_spawn_particles(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent);
 
 /* particle pools */
-
-effect_work_record_t* effect_particle_get_record(s16 record_index, s16 requested_index);
 void effect_particle_free_record(s16 record_index, effect_work_record_t* work);
 
 /* rendering */
@@ -72,17 +67,5 @@ extern SVECTOR g_effect_corner_bottom_left __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_right __attribute__((aligned(4)));
 void effect_render_init_frame(void);
 void effect_render_reset_state(void);
-s32 effect_render_get_prim_offset(void);
-
-/* flag prefix */
-/* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.
- * Neither the full record nor the individual bit meanings are known. */
-typedef struct effect_flag_prefix {
-    u8 _unused_00[6];
-    u16 flags;
-} effect_flag_prefix_t;
-typedef char effect_flag_prefix_size_must_be_8[(sizeof(effect_flag_prefix_t) == 8) ? 1 : -1];
-
-void effect_replace_flags_0006(struct effect_flag_prefix* object, s32 value);
 
 #endif

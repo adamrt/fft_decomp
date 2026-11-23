@@ -152,6 +152,12 @@ void proposition_resume_returned_list(menu_stack_record_t* level);
 void proposition_suspend_returned_list(menu_stack_record_t* unused_level);
 
 /* detail and recall */
+/* A window record and a render record handled together (proposition_suspend_detail). */
+typedef struct window_render_pair {
+    s32 window_index;
+    s32 render_index;
+} window_render_pair_t;
+
 /* The offered proposition's description image. The leading word belongs to
  * the previous level at this depth and is not used by the detail level. */
 typedef struct proposition_detail_level {
@@ -183,6 +189,7 @@ typedef struct proposition_recall_level {
 } proposition_recall_level_t;
 
 void proposition_open_detail(s32 value);
+void proposition_update_detail(menu_stack_record_t* level);
 void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode);
 void proposition_suspend_detail(menu_stack_record_t* level);
 void proposition_resume_detail(menu_stack_record_t* level);
@@ -260,7 +267,6 @@ extern s32 g_proposition_gil_amount;
 extern s32 g_proposition_dispatch_days;
 
 void proposition_open_participants(void);
-void proposition_update_detail(menu_stack_record_t* level);
 void proposition_update_accept_panel(menu_stack_record_t* level);
 void proposition_update_participants(menu_stack_record_t* level);
 void proposition_suspend_participants(menu_stack_record_t* level);

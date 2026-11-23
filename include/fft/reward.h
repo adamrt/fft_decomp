@@ -4,7 +4,6 @@
 /* Battle rewards: the EXP, JP, level ups and war funds an action earns and the reports that show them, and the war
  * trophies and bonus money of the battle's units. */
 
-#include "fft/action.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
@@ -13,17 +12,15 @@
  * and ends within 1..99. */
 enum { REWARD_EXP_SUCCESS_BASE = 10, REWARD_EXP_KILL_BASE = 20, REWARD_EXP_MAX = 99 };
 
-/* g_reward_report_phase: the reports shown one after another once an action
- * has resolved. The post-movement reports use the first two. */
-typedef enum reward_report_phase {
-    REWARD_REPORT_LEVEL_UP = 0,
-    REWARD_REPORT_JOB_LEVEL_UP = 1,
-    REWARD_REPORT_LEARN_ON_HIT = 2
-} reward_report_phase_e;
+/* The experience and JP an action earned and the levels it raised, for the result display. */
+typedef struct action_reward_display {
+    u8 earned_experience;     /* +0x0 */
+    u8 earned_jp;             /* +0x1 */
+    u8 level_for_display;     /* +0x2; nonzero selects the "Level UP!" display */
+    u8 job_level_for_display; /* +0x3 */
+} action_reward_display_t;
+typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_t) == 4) ? 1 : -1];
 
-extern s32 g_reward_report_phase; /* reward_report_phase_e */
-
-void reward_grant(void);
 s32 reward_apply_action(s32 unit_index, action_reward_display_t* display);
 s32 reward_apply_result_and_collect(battle_unit_t* unit, action_reward_display_t* rewards);
 void reward_apply_exp_change(battle_unit_t* unit, u8 amount);
@@ -34,8 +31,8 @@ s32 reward_add_war_funds(battle_unit_t* unit, s32 total, u8 item_id);
 
 /* war trophies and bonus money */
 /* War trophies and bonus money of the battle's units, filled by
- * reward_find_war_trophies_and_bonus_money; REQUIRE fills
- * g_war_trophy_search_result with it for the war trophy screen. */
+ * reward_find_war_trophies_and_bonus_money; REQUIRE fills its own copy
+ * (event/require/war_trophies.c) with it for the war trophy screen. */
 typedef struct reward_war_result {
     u8 item_ids[BATTLE_UNIT_SLOT_COUNT]; /* 0x00 */
     u8 item_count;                       /* 0x15 */

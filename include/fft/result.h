@@ -5,13 +5,13 @@
  * curves, the projected-action display's images, and queuing and building each display. */
 
 #include "fft/sprite.h"
-#include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Pending post-action displays are queued as one little-endian 32-bit value in runtime
- * Unit Data 0x1b8..0x1bb. result_build_next_display and
+/* display flags */
+/* Pending post-action displays are queued as one little-endian 32-bit value in
+ * map_unit_t.action_display_flags (0x1b8). result_build_next_display and
  * result_build_next_special_display consume one bit at a time in ascending
  * order. */
 typedef enum action_display_flag {
@@ -50,6 +50,7 @@ typedef enum action_display_flag {
 /* Numeric values correspond to the first sixteen action display flags. */
 enum { ACTION_DISPLAY_VALUE_COUNT = 16, ACTION_DISPLAY_NUMERIC_FLAGS_MASK = 0x0000ffff };
 
+/* result images */
 /* Image IDs used by the projected-action display. These index the 49-entry
  * g_result_image_rects; they are not battle status IDs. */
 typedef enum action_display_image_id {
@@ -109,12 +110,16 @@ typedef struct action_display_image_rect {
 } action_display_image_rect_t;
 typedef char action_display_image_rect_size_must_be_4[(sizeof(action_display_image_rect_t) == 4) ? 1 : -1];
 
+extern action_display_image_rect_t g_result_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
+
+/* status list */
 /* Packed image IDs in the action-result status list. */
 enum { ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f, ACTION_STATUS_DISPLAY_REMOVAL = 0x80 };
 
 /* Entries of map_unit_t.status_display_image_list. */
 enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
 
+/* numeric display */
 /* Block view of the numeric display fields at map unit data 0x2bc..0x2cf,
  * taken as one pointer by the action result display builders
  * (result_build_next_display, result_build_next_special_display
@@ -170,12 +175,9 @@ typedef enum result_display_selector {
 /* Encoding in action_result_display_t.selector. */
 enum { RESULT_DISPLAY_SELECTOR_MASK = 0x1ff, RESULT_DISPLAY_MODIFIER_CRITICAL = 0x200 };
 
-extern action_display_image_rect_t g_result_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
-
+/* building displays */
 void result_prepare_display(map_unit_t* unit);
 s32 result_map_unit_prepare_display(s32 map_unit_id);
-s32 result_build_next_display(map_unit_t* unit);
-s32 result_build_next_special_display(map_unit_t* unit);
 void result_queue_exp_jp_display(struct map_unit* unit);
 void result_queue_charge_failure(map_unit_t* unit, s32 reason);
 void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords);

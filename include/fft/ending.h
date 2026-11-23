@@ -2,12 +2,13 @@
 #define ENDING_H
 
 /* OPEN's ending: the sequence that plays it and the scrolling ending script, with its fonts, text records, interpreter
- * state, XA audio, OPNTEX picture sequence and opcode handlers. */
+ * state, XA audio and OPNTEX picture sequence. */
 
-#include "fft/controller_stack.h"
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+union controller_record;
 
 /* ending sequence */
 /* Run OPEN's ending movie and script, then restore graphics state. */
@@ -98,6 +99,6 @@ typedef char ending_script_state_size_must_be_5800[(sizeof(ending_script_state_t
 extern ending_script_state_t g_ending_script_state;
 
 /* The ending script's controller handler (CONTROLLER_SCRIPT). */
-void ending_update_script(controller_record_t* unused_record);
+void ending_update_script(union controller_record* unused_record);
 
 #endif

@@ -22,15 +22,22 @@ typedef enum zodiac_compatibility {
 s32 zodiac_calculate_sign(u16 birthday);
 
 /* zodiac pictures */
-extern upoint16_t g_zodiac_screen_position;
+/* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
+typedef struct zodiac_draw_context {
+    u32* ot;             /* 0x00: ordering table entry the primitives link into */
+    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_screen_color_red */
+    s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
+    s16 scale_x;         /* 0x0c: signed scale with 12 fractional bits; ONE = 1.0 */
+    s16 scale_y;         /* 0x0e: signed scale with 12 fractional bits; ONE = 1.0 */
+    u8 _unused_10[8];
+    sprite_draw_offset_t offset; /* 0x18 */
+} zodiac_draw_context_t;
 
 void zodiac_load_frame(void);
 
 /* The scaled zodiac sprites and their backdrop. */
 void zodiac_build_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
 void zodiac_build_resident_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
-void zodiac_build_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
-    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
 
 /* backdrop */
 /* The scrolling zodiac backdrop behind the Formation and save screens. */

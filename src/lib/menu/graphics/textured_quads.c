@@ -1,6 +1,7 @@
 /* POLY_FT4 quad enqueue, single and list. */
 
 #include "fft/gfx.h"
+#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/save.h"
 #include "fft/status_screen.h"

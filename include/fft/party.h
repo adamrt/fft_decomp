@@ -3,10 +3,11 @@
 
 /* The party roster: resident routines that build, save, level and remove its units and monster eggs. */
 
-#include "fft/entd.h"
 #include "fft/party_unit.h"
 #include "fft/unit.h"
 #include "psx/types.h"
+
+struct entd_encounter;
 
 /* roster */
 /* Initial roster used by OPEN before the name/birthday screens or Continue. */
@@ -23,7 +24,7 @@ void party_init_new_game(s32 mode);
 party_unit_t* party_unit_get(s32 party_index);
 s32 party_find_free_slot(s32 save_formation, u8* palette);
 s32 party_unit_save(const battle_unit_t* unit, s32 allow_guest);
-s32 party_save_encounter_unit(const entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text);
+s32 party_save_encounter_unit(const struct entd_encounter* entd, s32 unit_id, s32 allow_guest, s32 use_world_text);
 void party_unit_remove(u32 index);
 s32 party_find_slot_by_sprite_set(s32 sprite_set);
 s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color);

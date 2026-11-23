@@ -193,13 +193,12 @@ void formation_grid_init_cursor(s32 formation_index);
 void formation_init_selection_cursor(s16 formation_index);
 s32 formation_grid_update_transition(s32 mode);
 s32 formation_grid_update_return(s32 mode);
+void unit_grid_update_selection(void);
+void formation_stage_selected_unit(void);
 
 /* unit sprites and portraits */
 extern u8 g_formation_monster_sprite_table[20]; /* indexed by sprite code - 0x3f */
-extern u8 g_formation_sprite_tall_cell[];
 
-void deploy_prepare_sprites(void);
-void deploy_build_sprites(void);
 s32 formation_get_party_unit_palette_index(s32 roster_slot);
 void formation_unit_build_sprite_source(s16 formation_index, texture_source_t* destination, s32 unused);
 void formation_job_build_sprite_source(s32 job_id, s16 is_female, texture_source_t* destination);

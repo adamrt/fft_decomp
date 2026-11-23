@@ -1,6 +1,6 @@
 /* Graded menu-panel fades and the full-screen additive or subtractive fade overlay. */
 
-#include "fft/gfx.h"
+#include "fft/fade.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/memory.h"

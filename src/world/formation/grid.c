@@ -3,6 +3,7 @@
  * or departure labels. This also coordinates the selected-unit panels while browsing
  * or comparing units. */
 
+#include "fft/fade.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
 #include "fft/gfx.h"
@@ -176,7 +177,7 @@ void formation_open_equipment_panel(s32 enabled) {
 }
 
 /* Request a redraw from all eight formation panel threads. */
-void redraw_unit_panels(void) {
+void unit_panel_redraw_all(void) {
     g_unit_panel_status_display_thread_params.redraw_request = 1;
     g_unit_panel_comparison_display_thread_params.redraw_request = 1;
     g_formation_equipment_panel_thread_params.redraw_request = 1;
@@ -190,7 +191,7 @@ void redraw_unit_panels(void) {
 /* Ask the formation screen's panel threads to stop (both status banners, the
  * equipment/ability panel, the numeric panel and the two preview windows)
  * and clear the panel styles. */
-void unit_panels_stop(void) {
+void unit_panel_stop_all(void) {
     menu_thread_request_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
     menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
     menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
@@ -456,7 +457,7 @@ void formation_init_selection_cursor(s16 formation_index) {
     s_formation_scroll_unread = 0;
     g_unit_selected_index = formation_index;
     count = 0;
-    stage_selected_unit();
+    formation_stage_selected_unit();
     do {
         update_grid_scroll(&g_formation_scroll_velocity, &g_formation_scroll_position);
         if (g_formation_scroll_velocity == 0) {

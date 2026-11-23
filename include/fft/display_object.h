@@ -117,8 +117,6 @@ typedef struct display_object_gpu_image {
 typedef char display_object_gpu_image_size_must_be_56[sizeof(display_object_gpu_image_t) == 56 ? 1 : -1];
 
 extern display_object_gpu_image_t g_display_object_gpu_image_pool[DISPLAY_OBJECT_GPU_POOL_CAPACITY];
-void display_object_init_gpu_image(
-    s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags);
 void display_object_draw_gpu_list(u32* otag, void** records, s32 count);
 
 /* libgs image records */
@@ -146,7 +144,7 @@ void display_object_draw_gs_list(GsOT* otag, void** records, s32 count);
 void display_object_draw_animated(display_object_animated_t* object, GsOT* ot);
 
 /* animation catalog (WLDCORE) */
-/* Rows of g_display_object_sequences that the code selects: the animation
+/* Rows of s_display_object_sequences that the code selects: the animation
  * a window record plays. The CURSOR and *_PRESS sequences other than
  * CURSOR_IDLE end on a pinned frame. */
 typedef enum display_object_animation {

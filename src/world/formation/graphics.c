@@ -3,7 +3,6 @@
 
 #include "fft/character_identity.h"
 #include "fft/formation.h"
-#include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/menu_list.h"
 #include "fft/menu_screen.h"

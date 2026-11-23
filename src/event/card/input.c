@@ -1,7 +1,7 @@
 /* Controller input, suppressed during fades. */
 
 #include "fft/input.h"
-#include "fft/gfx_primitive.h"
+#include "fft/fade.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/save.h"

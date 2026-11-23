@@ -74,9 +74,4 @@ s32 target_find_unit_at_tile(s32 x, s32 y, s32 level);
 s32 target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index);
 s32 target_validate_for_weapon(const action_command_t* source);
 
-/* tile selection */
-target_panels_e target_start_tile_selection(void);
-void target_select_tile(void);
-void map_set_tile_mark_colors(s32 mode, s32 unused);
-
 #endif

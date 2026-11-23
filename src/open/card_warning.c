@@ -3,6 +3,7 @@
 
 #include "fft/controller_stack.h"
 #include "fft/display_object.h"
+#include "fft/fade.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"

@@ -4,15 +4,13 @@
 /* Battle map lighting: the light matrices and their transitions, the background gradient, ambient and darkness colors
  * and their fades, and the GTE back color. */
 
-#include "fft/gfx.h"
-#include "fft/map.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
 /* light matrices */
 /* Commands of map_light_dispatch_matrix_command. A START queues its STEP in
  * g_map_light_transition_command, which the map draw loop issues every frame. */
-typedef enum map_light_dispatch_matrix_command {
+typedef enum map_light_matrix_command {
     MAP_LIGHT_MATRIX_COMMAND_SET = 0x5e,
     MAP_LIGHT_MATRIX_COMMAND_SAVE = 0x5f,
     MAP_LIGHT_MATRIX_COMMAND_RESTORE = 0x60,
@@ -28,6 +26,20 @@ MATRIX* map_light_dispatch_matrix_command(
     map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration);
 
 /* map colors */
+/* Map backgrounds use two four-byte runtime color slots. The fourth byte
+ * is copied with each CVECTOR but is not an alpha channel; mesh-file RGB
+ * triples have a separate three-byte layout. */
+typedef enum map_background_gradient_color {
+    MAP_BACKGROUND_GRADIENT_TOP = 0,
+    MAP_BACKGROUND_GRADIENT_BOTTOM = 1,
+    MAP_BACKGROUND_GRADIENT_COLOR_COUNT = 2
+} map_background_gradient_color_e;
+
+typedef struct map_background_gradient_colors {
+    CVECTOR colors[MAP_BACKGROUND_GRADIENT_COLOR_COUNT];
+} map_background_gradient_colors_t;
+typedef char map_background_gradient_colors_size_must_be_8[(sizeof(map_background_gradient_colors_t) == 8) ? 1 : -1];
+
 /* Commands for the map's background gradient, ambient and darkness colors. */
 typedef enum map_light_command {
     MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT = 0x56,
@@ -64,14 +76,13 @@ typedef enum map_light_back_color_command {
     MAP_LIGHT_BACK_COLOR_RESTORE = 12
 } map_light_back_color_command_e;
 
-void map_light_save_back_color(void);
-void map_light_restore_back_color(void);
-rgb24_t* map_light_get_back_color(void);
-void map_light_set_back_color(s32 red, s32 green, s32 blue);
-void map_light_adjust_back_color(s16 red_delta, s16 green_delta, s16 blue_delta);
-
 /* Only SET/GET define a result (stored RGB pointer, or null for SET while
  * disabled). Other command paths leave the target return register unspecified. */
 s32* map_light_dispatch_back_color_command(s32 command, s32 red, s32 green, s32 blue);
+
+/* script lighting */
+/* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
+void map_light_thread(void);
+void map_light_reset_script_light(void);
 
 #endif

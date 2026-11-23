@@ -8,8 +8,6 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-struct menu_icon_source;
-
 /* primitives */
 /* An off-screen quad with neutral shading, the allocated-image texture page and the normal menu CLUT. */
 void menu_init_default_poly_ft4(POLY_FT4* poly);
@@ -96,6 +94,7 @@ extern s32 g_menu_packet_buffer_index;
 extern rgb24_t g_menu_text_color;
 
 rgb24_t* gfx_get_draw_color(void);
+void gfx_set_draw_color(const rgb24_t* color);
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 idx);
 void menu_gfx_enqueue_draw_mode(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
 void menu_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index);
@@ -103,10 +102,6 @@ void menu_gfx_enqueue_oriented_textured_quad(
     const oriented_quad_t* descriptor, const rgb24_t* color, s32 orientation, s32 semitrans, s32 otag_index);
 void menu_gfx_enqueue_textured_quad(
     const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans, u16 texture_page, u16 clut, s32 otag_index);
-void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
-    u16 texture_page, u16 clut, s32 unused_priority);
-void menu_gfx_enqueue_textured_quad_rect(
-    RECT* rect, struct menu_icon_source* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
 
 /* Draws count cells at one ordering-table entry; a null color leaves the texture unshaded. */
 void menu_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const rgb24_t* color, s32 semitrans,

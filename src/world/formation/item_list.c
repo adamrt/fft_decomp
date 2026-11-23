@@ -28,7 +28,7 @@ static s8 s_formation_item_category_previewed_cursor;
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_item_hp_mp_bonus_window_script[88];
 
-/* Runs one frame of the formation Items screen (menu 9 of update_item_menu's
+/* Runs one frame of the formation Items screen (menu 9 of formation_item_update_menu's
  * switch). The first call puts the tab cursor on its first tab, suspends the upper menu and
  * stops the side panels. Each frame then dispatches on g_formation_item_menu_mode to the browse,
  * rearrange, action, sort order or equipped-by sub-menus, and draws the Triangle (equipped-by)

@@ -1,7 +1,7 @@
 /* BUNIT's pad latch and repeat masks feed its per-frame help and fade input lock. */
 
 #include "fft/input.h"
-#include "fft/gfx_primitive.h"
+#include "fft/fade.h"
 #include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

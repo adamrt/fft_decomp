@@ -1,8 +1,8 @@
 /* Run native event instructions for walking, sprite changes, effect playback and scripted unit creation. */
 
 #include "fft/battle_state.h"
+#include "fft/deploy.h"
 #include "fft/effect_script.h"
-#include "fft/formation.h"
 #include "fft/map.h"
 #include "fft/map_unit.h"
 #include "fft/move.h"

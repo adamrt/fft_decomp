@@ -6,6 +6,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* render buffers */
 /* Primitive pool sizes of a render buffer. The map mesh's position records (map_mesh.h)
  * parallel the four map polygon pools; the weather sprites are the flat-textured triangles. */
 enum {

@@ -95,12 +95,12 @@ s32 script_map_unit_is_moving(s32 map_unit_id);
 extern SVECTOR g_unit_scratch_coords; /* a unit's map coordinates or projected screen position */
 
 s32 battle_unit_get_id_by_event_unit_id(s32 event_unit_id);
-SVECTOR* map_unit_copy_world_coords_static(u32 map_unit_id);
 void map_unit_copy_world_coords(u32 map_unit_id, SVECTOR* world_coords);
 void map_unit_copy_world_vector(u32 map_unit_id, VECTOR* destination);
 void map_unit_project_screen_position(u32 map_unit_id, SVECTOR* screen_coordinates);
 void map_unit_copy_map_coords(u32 map_unit_id, SVECTOR* coords);
-s32 battle_unit_has_any_current_status(s32 battle_unit_id);
+
+/* unit commands */
 void battle_unit_increase_blue_team_brave_by_10(void);
 
 #endif

@@ -6,7 +6,6 @@
 #include "fft/ai_decision.h"
 #include "fft/command.h"
 #include "fft/map.h"
-#include "fft/map_unit.h"
 #include "fft/projectile.h"
 #include "fft/reaction.h"
 #include "fft/skillset.h"
@@ -17,6 +16,10 @@
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
+
+/* Pack canonical status IDs 8..39 into the aligned 32-bit value covering status
+ * bytes 1..4 of ai_ability_parameters_t. */
+#define AI_STATUS_TAIL_PACKED_MASK(id) ((u32)STATUS_BYTE_MASK(id) << ((STATUS_BYTE_INDEX(id) - 1) * 8))
 
 typedef enum tile_mask_mode {
     AI_TILE_MASK_RANGE = 0,
@@ -343,7 +346,7 @@ s32 ai_evaluate_ability_outcome(void) {
     {
         s32 flags = ai->considered_ability.ai_flags.word;
         ai->resume_pending = 0;
-        /* The sign bit is AI_ABILITY_USABLE_BY_AI. A random-use ability goes on only when
+        /* The sign bit marks an ability the AI may use. A random-use ability goes on only when
          * a roll of 0..127 does not exceed random_use_threshold. */
         if (flags >= 0)
             return 0;

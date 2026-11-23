@@ -2,7 +2,7 @@
 #define GFX_PRIMITIVE_H
 
 /* Primitive submission: the event library's ordering-table hooks, the menu library's ordering table and primitive
- * pools, draw areas, the enqueue helpers, polygon builders and screen fades. */
+ * pools, draw areas, the enqueue helpers and polygon builders. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -85,7 +85,6 @@ void gfx_build_scaled_draw_area_pair_swapped(
 /* enqueue helpers */
 extern oriented_quad_t g_gfx_blank_cell_rect;
 
-void gfx_set_draw_color(const rgb24_t* color);
 void gfx_enqueue_tile(const RECT* rect, const rgb24_t* color, u8 semi, s32 idx);
 void gfx_enqueue_line_f2(const point16_t endpoints[2], const rgb24_t* color, u8 semitrans, s32 otag_index);
 void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
@@ -99,22 +98,6 @@ void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page,
 void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
 void gfx_flip_quad_negative_uv(POLY_FT4* primitive, s32 direction);
-void portrait_build_party_poly(POLY_FT4* poly, s32 index);
 void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
-
-/* screen fades */
-/* Gray level the screen-covering fade tile subtracts: 0 is clear, 255 is black. */
-extern s32 g_gfx_screen_fade;
-
-void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
-void gfx_fade_out_screen_overlay(void);
-void gfx_fade_in_screen_overlay(void);
-
-/* The menu library's fades, which BUNIT and CARD run. */
-void screen_start_fade_out(void);
-s32 screen_update_fade_out(void);
-void screen_start_fade_in(void);
-s32 screen_update_fade_in(void);
-s32 screen_get_fade_state(void);
 
 #endif

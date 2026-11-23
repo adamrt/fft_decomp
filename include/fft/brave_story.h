@@ -45,6 +45,10 @@ extern s32 g_brave_story_saved_cursor[];
 void brave_story_open_menu(void);
 void brave_story_update_menu(menu_stack_record_t* level);
 
+/* Dim, tint or restore the windows owned by the current menu level. */
+void brave_story_suspend_menu(menu_stack_record_t* level);
+void brave_story_resume_menu(menu_stack_record_t* level);
+
 /* detail levels */
 /* brave_story_detail_level_t.phase, shared by the person,
  * treasure and unexplored-land detail steps. */
@@ -189,24 +193,19 @@ typedef struct brave_story_participant_level {
  * preserves the target's load order. */
 extern s32 g_brave_story_propositions_saved_cursor[];
 
-void brave_story_update_participant_list_input(menu_stack_record_t* level);
-void brave_story_update_propositions_input(menu_stack_record_t* level);
-void brave_story_update_advancing_list_input(menu_stack_record_t* level);
-void brave_story_update_participant_detail_input(menu_stack_record_t* level);
-void brave_story_update_work_history_input(menu_stack_record_t* level);
-void brave_story_update_work_history_entry(menu_stack_record_t* level);
-
-/* level window state */
-/* Dim, tint or restore the windows owned by the current menu level. */
-void brave_story_suspend_menu(menu_stack_record_t* level);
-void brave_story_resume_menu(menu_stack_record_t* level);
 void brave_story_open_propositions_level(void);
 void brave_story_resume_propositions_level(menu_stack_record_t* level);
 void brave_story_suspend_propositions_level(menu_stack_record_t* level);
+void brave_story_update_propositions_input(menu_stack_record_t* level);
 void brave_story_resume_advancing_list(menu_stack_record_t* level);
 void brave_story_suspend_advancing_list(menu_stack_record_t* level);
+void brave_story_update_advancing_list_input(menu_stack_record_t* level);
+void brave_story_update_participant_list_input(menu_stack_record_t* level);
+void brave_story_update_participant_detail_input(menu_stack_record_t* level);
 void brave_story_resume_participant_detail(menu_stack_record_t* level);
 void brave_story_suspend_participant_detail(menu_stack_record_t* level);
+void brave_story_update_work_history_input(menu_stack_record_t* level);
+void brave_story_update_work_history_entry(menu_stack_record_t* level);
 void brave_story_suspend_work_history(menu_stack_record_t* level);
 void brave_story_resume_work_history(menu_stack_record_t* level);
 

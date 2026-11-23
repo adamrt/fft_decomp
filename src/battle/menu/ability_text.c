@@ -1,5 +1,6 @@
 /* Three-column ability-list text, page redraws and repeat timing. */
 
+#include "fft/ability_list.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

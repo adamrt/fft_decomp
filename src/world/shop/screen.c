@@ -2,10 +2,10 @@
 
 #include "fft/ability.h"
 #include "fft/equipment.h"
+#include "fft/fade.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
 #include "fft/formation_item.h"
-#include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
@@ -28,7 +28,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -349,7 +348,7 @@ static void update_shop_menu(void) {
         } else if (g_menu_screen_selection_results[0] == 2) {
             g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
             g_unit_selected_index = 0;
-            stage_selected_unit();
+            formation_stage_selected_unit();
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF818, 0);
         } else {
             g_shop_menu_step = SHOP_STEP_EXIT_FADE;
@@ -730,7 +729,7 @@ void shop_buy_update_unit_preview(void) {
     }
     if (g_formation_unit_browse_enabled != 0) {
         if (g_unit_selected_index != g_shop_buy_equip_last_unit) {
-            stage_selected_unit();
+            formation_stage_selected_unit();
             i = 0;
             equipped = 0;
             g_shop_buy_equip_last_unit = g_unit_selected_index;

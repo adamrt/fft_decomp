@@ -7,7 +7,6 @@
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/map.h"
-#include "fft/map_unit.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/unit.h"

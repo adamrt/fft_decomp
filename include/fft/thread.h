@@ -45,7 +45,7 @@ typedef char thread_size_must_be_1024[(sizeof(thread_t) == 1024) ? 1 : -1];
  * VARIANT_THREAD_TABLE_SLOT_COUNT slots:
  * 16 in BATTLE, 17 in WORLD, whose slot 16 runs tutorial text; the scheduler
  * and the slot searches scan it, but reset does not clear it. */
-enum { THREAD_ID_COUNT = 16, THREAD_STRIDE = 1024 };
+enum { THREAD_ID_COUNT = 16 };
 
 /* BATTLE and WORLD each define the backing array, slot pointer and current id.
  * EVENT overlays use the resident BATTLE scheduler. */
@@ -110,6 +110,9 @@ typedef enum thread_borrowed_slot {
     THREAD_BORROWED_SLOT_AT_LIST_MENU = 10,
     THREAD_BORROWED_SLOT_FADE_OUT = 13 /* the fade-out thread that follows the unit list overlay */
 } thread_borrowed_slot_e;
+
+s32 thread_resolve_slot(s32 requested_thread_id);
+s32 thread_resolve_next_slot(s32 requested_thread_id);
 
 /* tasks */
 /* task_id values shared by the BATTLE and WORLD schedulers. Each named id is
@@ -177,9 +180,6 @@ void thread_suspend(s32 thread_id);
 void thread_current_exit(void);
 s32 thread_is_running(s32 thread_id);
 void thread_reset_scheduler(void);
-s32 thread_find_task(s32 task_id);
-s32 thread_resolve_slot(s32 requested_thread_id);
-s32 thread_resolve_next_slot(s32 requested_thread_id);
 
 /* The menu callers' running-flag accessor. WORLD links this separately from thread_is_running. */
 s32 menu_thread_is_running(s32 thread_id);
@@ -192,6 +192,7 @@ void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
 void thread_set_four_parameters(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
 s32 thread_current_get_task(void);
 void thread_current_set_task(s32 task_id);
+s32 thread_find_task(s32 task_id);
 
 /* Original assembly accessors: BATTLE adds the record offset with addu,
  * WORLD with the trapping add. */
@@ -213,13 +214,6 @@ void thread_wait_forever(void);
 void thread_wait_forever_by_frames(void);
 
 /* context capture */
-/* Named relocations preserve the assembled helpers' $at load sequence. */
-#define THREAD_LOAD_GLOBAL(result, global)                                                                             \
-    __asm__("lui $1, %%hi(%1)\naddu $1,$1,$zero\nlw %0, %%lo(%1)($1)"                                                  \
-        : "=r"(result)                                                                                                 \
-        : "i"(&(global)), "m"(global)                                                                                  \
-        : "$1")
-
 /* Read the running CPU's $gp when seeding a native thread context. */
 void* thread_current_get_global_pointer(void);
 

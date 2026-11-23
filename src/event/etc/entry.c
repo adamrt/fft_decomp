@@ -1,5 +1,6 @@
 /* Fullscreen graphics for the chapter title and game over screens. */
 
+#include "fft/fade.h"
 #include "fft/file.h"
 #include "fft/fullscreen_graphic.h"
 #include "fft/gfx.h"

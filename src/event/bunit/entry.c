@@ -1,11 +1,13 @@
 /* BUNIT entry, including VRAM init and fade, the input lock timer, pad reading, menu results and the unit browser
  * frame. */
 
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/input.h"
+#include "fft/job_list.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"

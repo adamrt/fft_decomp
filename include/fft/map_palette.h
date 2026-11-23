@@ -82,7 +82,7 @@ typedef char map_palette_color_components_size_must_be_7[(sizeof(map_palette_col
 
 typedef struct map_palette_animation_state {
     u8 active;
-    u8 blend_step;    /* 0x01; index into g_palette_blend_steps_32/_8 */
+    u8 blend_step;    /* 0x01; index into s_palette_blend_steps_32/_8 (battle/map/palettes.c) */
     u8 delay_counter; /* 0x02; one blend step each time it reaches mode >> 2 */
     u8 mode;
     u8 repeat;            /* 0x04; map_color_repeat_e */
@@ -97,7 +97,7 @@ typedef char map_palette_animation_state_size_must_be_8[(sizeof(map_palette_anim
  * both; map_palette_upload_clut_rows uploads the staging and clears upload_pending. */
 typedef struct map_clut_row_state {
     u8 blend_as_row;  /* nonzero: one animation for all 256 colors; zero: one per 16-color CLUT */
-    u8 load_disabled; /* blocks palette_load_data; tint and blend operations still run */
+    u8 load_disabled; /* blocks map_palette_load_data; tint and blend operations still run */
     map_palette_animation_state_t animations[MAP_CLUTS_PER_ROW];
     map_palette_color_components_t components[MAP_CLUT_ROW_COLOR_COUNT];
     u16 packed_colors[MAP_CLUT_ROW_COLOR_COUNT];
@@ -119,9 +119,6 @@ extern map_palette_state_t g_map_palette_state;
 void map_palette_init_state(void);
 void map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);
 void map_palette_set_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
-void map_palette_set_unit_colors(s32 mode, s32 clut_index, const palette_t* color_data);
-void map_palette_set_map_colors(s32 mode, const clut_t color_data);
-void map_palette_set_and_store_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
 void map_palette_set_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
     s16 green, s16 blue, s32 update_current_colors);
 void map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,

@@ -5,6 +5,7 @@
 #include "fft/brave_story.h"
 #include "fft/calendar.h"
 #include "fft/character_identity.h"
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
@@ -134,7 +135,7 @@ extern const u8 g_save_text_location_name[];
 
 static void build_file_header(s32 slot, s32 level, save_file_header_t* header);
 static void build_slot_description(s32 mode, u8* destination);
-static void init_save_screen(void);
+static void save_init_screen(void);
 static s32 init_slot_cursor(void);
 static void render_slot_text(s32 slot);
 static void update_slot_list(u16 input);
@@ -266,7 +267,7 @@ void card_entrypoint(s32 unused) {
     music_switch_track(music_slot, 0x7f, 0);
     memcard_clear_events();
     g_save_menu_work_buffer = save_buffer;
-    init_save_screen();
+    save_init_screen();
     thread_start(THREAD_BORROWED_SLOT_CARD_BACKDROP, zodiac_backdrop_thread);
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, 0, 0);
     g_save_initial_prompt_timer = 0;
@@ -638,7 +639,7 @@ void save_image_build(s32 slot) {
 
 /* Reset the save list's scroll and cursor state and fill the 0x1e80-byte
  * save buffer with 0xff. */
-static void init_save_screen(void) {
+static void save_init_screen(void) {
     g_save_list_scroll_base_y = 0x18;
     g_save_list_scroll_anim_offset = 0;
     g_save_list_top_row = 0;

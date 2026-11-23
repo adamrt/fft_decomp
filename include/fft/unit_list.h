@@ -5,13 +5,8 @@
  * list, the job page, the status banner, help, cursors, graphics, input and text. */
 
 #include "fft/job.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
 #include "fft/unit_panel.h"
-#include "psx/libgpu.h"
 #include "psx/types.h"
-
-struct menu_gfx_context;
 
 /* screen */
 /* g_unit_list_current_menu: what bunit_entrypoint runs. */
@@ -21,18 +16,12 @@ typedef enum unit_list_menu {
     UNIT_LIST_MENU_JOB = 2           /* job_page_update: the selected unit's jobs and abilities */
 } unit_list_menu_e;
 
-enum { UNIT_LIST_SELECTION_RECORD_COUNT = 14 };
-
 extern s32 g_unit_list_current_menu; /* unit_list_menu_e */
 
 /* Run BUNIT's Unit List loop until it closes and return the chosen battle unit. */
 s32 bunit_entrypoint(s32 unused_unit, void* unused_otag);
 void unit_list_reset_results(void);
 s32 unit_list_is_busy(void);
-
-/* The event library's thread entry for the menu row that opens the Unit List: it runs the screen's transition in a
- * child thread slot and waits for it. */
-void unit_list_thread(void);
 
 /* menu threads */
 /* Slots of the unit list screen's own menus; thread_screen_slot_e
@@ -138,9 +127,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     s16 stat_mode, s16 buttons, s16 locked);
 
 /* The grid shared with WORLD's Formation screen. */
-void update_unit_grid_selection(void);
 s32 unit_grid_check_scroll(void);
-void stage_selected_unit(void);
 
 /* reorder list */
 extern s16 g_unit_list_reorder_result;
@@ -153,7 +140,6 @@ void unit_list_load_sort_order(s32 unused, s16* entries);
 void unit_list_store_sort_order(s32 unused, const s16* entries);
 
 /* job page */
-void job_page_update(void);
 s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2);
 
 /* status banner */

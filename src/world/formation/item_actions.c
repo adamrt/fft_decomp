@@ -19,7 +19,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -332,7 +331,7 @@ s32 formation_item_update_equipped_units(void) {
         unit_panel_toggle_preview_stats_thread(0);
         s_formation_item_saved_selected_unit_index = g_unit_selected_index;
         g_unit_selected_index = 0;
-        stage_selected_unit();
+        formation_stage_selected_unit();
         g_formation_item_equipping_units_initialized = 1;
         menu_set_event_speed(0);
         g_formation_unit_cycle_mode = 2;
@@ -344,7 +343,7 @@ s32 formation_item_update_equipped_units(void) {
             g_formation_unit_count
                 = formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
             g_unit_selected_index = s_formation_item_saved_selected_unit_index;
-            stage_selected_unit();
+            formation_stage_selected_unit();
             menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
             menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
             menu_thread_request_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);

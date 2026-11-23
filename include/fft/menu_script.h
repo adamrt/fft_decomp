@@ -271,7 +271,6 @@ extern u32 g_menu_script_input;
  * JOBSTTS builds its own body. */
 void menu_script_run(void* script, s32 flags);
 void menu_script_run_with_palette_mode(void* script, s32 flags, s32 event_mode);
-menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
 static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);
 }
@@ -279,9 +278,6 @@ static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* inst
 static inline const menu_instruction_t* menu_next_const_instruction(const menu_instruction_t* instruction) {
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
-
-/* instruction drawing */
-menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_command_t* command);
 
 /* opcode handlers */
 extern s16 g_menu_window_right_x;
@@ -301,6 +297,7 @@ menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* instruction);
+menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_command_t* command);
 menu_instruction_t* menu_opcode_0e_set_semi_trans(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
@@ -319,6 +316,7 @@ menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instr
 /* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of a
  * list record (menu_list_record_t). Each program draws the rows with its own menu_opcode_10_draw_scrollable_list. */
+
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {
     MENU_VERTICAL_SCROLL_UP = -1,
@@ -357,8 +355,6 @@ void menu_scrollable_list_init_core(const s16* entries, s32 selected_index, u8* 
 void menu_scrollable_list_refresh(const menu_instruction_t* script);
 void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
 

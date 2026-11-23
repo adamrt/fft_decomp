@@ -7,6 +7,8 @@
 #include "fft/status.h"
 #include "psx/types.h"
 
+struct party_unit;
+
 /* job records */
 /* The jump value and the stepping-stone flag of job_data_t.jump. */
 enum { JOB_JUMP_VALUE_MASK = 0x7f, JOB_JUMP_STEPPING_STONE = 0x80 };
@@ -43,7 +45,12 @@ typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 extern job_data_t* g_job_data_pointer;
 
 const job_data_t* job_get_data(s32 job_id);
-s32 job_find_by_skillset(u8 skillset_id);
+
+/* WORLD and the EVENT overlays compile these lookups with their job screens. */
+s32 job_find_first_for_skillset(s32 skillset);
+s32 job_get_generic_index(s32 job_id);
+s32 job_get_skillset(s32 job_id);
+s32 job_is_special_monster(s32 job_id);
 
 /* job ids */
 /* Job ids index the 160 records of g_job_data. A name is the job's name
@@ -339,19 +346,13 @@ extern const u16 g_job_jp_requirements_by_level[UNIT_JOB_LEVEL_MAX + 1];
 extern const u8 g_job_unlock_requirements[UNIT_CAREER_JOB_COUNT - 1][UNIT_JOB_LEVEL_BYTE_COUNT];
 
 u32 job_calculate_level(u16 job_jp);
+void job_calculate_levels_from_jp(
+    const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
 u32 job_calculate_unlocks(const u8* packed_job_levels, u32 gender_flags);
 void job_store_unlocks(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
 s32 job_add_proposition_jp(u32 party_index, s32 jp);
 
-/* menu library helpers */
-struct party_unit;
-
-/* The menu library's job helpers (src/lib/menu), compiled into WORLD and the
- * EVENT overlays. */
+/* WORLD and the EVENT overlays compile this with their job screens. */
 void job_calculate_and_store_unlocks(struct party_unit* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]);
-s32 job_find_first_for_skillset(s32 skillset);
-s32 job_get_generic_index(s32 job_id);
-s32 job_get_skillset(s32 job_id);
-s32 job_is_special_monster(s32 job_id);
 
 #endif

@@ -24,7 +24,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -208,7 +207,7 @@ void formation_job_update_menu(void) {
             i = g_game_options.value & GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK;
             formation_job_change(
                 g_unit_selected_index, g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index], i == 0);
-            stage_selected_unit();
+            formation_stage_selected_unit();
             job_list_build(
                 g_unit_selected_index, g_formation_job_wheel_jobs, FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS);
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;

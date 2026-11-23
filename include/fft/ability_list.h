@@ -4,7 +4,9 @@
 /* Ability lists: the scrolling ability list of the battle action menus, and the ability page that the Unit List, the
  * Status screen and Formation show, with its packed entries, list building and row values. */
 
+#include "fft/menu.h"
 #include "fft/menu_list.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* scrolling ability list */
@@ -14,6 +16,10 @@ extern u16 g_ability_list_ability_display_flags[80];
 
 /* BATTLE and WORLD each build their own body. */
 void ability_list_scrolling_thread(void);
+void ability_list_draw_text(menu_entry_t* entry, s32* row_offset, u8* buffer);
+
+/* Shared with the per-program event interpreter and dialog thread. */
+u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
 
 /* ability page */
 /* Packed entries shared by the WORLD, BUNIT, and JOBSTTS ability menus. The
@@ -47,6 +53,9 @@ typedef enum ability_list_mode {
     ABILITY_LIST_MODE_COUNT_UNLEARNED = 3
 } ability_list_mode_e;
 
+extern s16 g_ability_list_ability_category;  /* menu_ability_category_e; BUNIT and JOBSTTS tab selection */
+extern s16 g_ability_list_ability_entries[]; /* Packed ability IDs/flags; -1 terminates the list. */
+
 s32 ability_list_update(void);
 
 /* BUNIT and WORLD take ability_list_mode_e. JOBSTTS treats mode as a Boolean:
@@ -77,9 +86,6 @@ typedef enum ability_page_row_callback {
 
 /* Row callbacks of the ability lists: predicates that pick a row's icon or color, and its displayed costs. The
  * lookups cache the listed ability's data for the panel. */
-extern s16 g_ability_list_ability_category;  /* menu_ability_category_e; BUNIT and JOBSTTS tab selection */
-extern s16 g_ability_list_ability_entries[]; /* Packed ability IDs/flags; -1 terminates the list. */
-
 s32 ability_list_is_learned(s32 index); /* 1 unless the entry's disabled bit (0x4000) is set */
 s32 ability_list_is_action(s32 unused_row);
 s32 ability_list_is_non_action_enabled(s32 index);

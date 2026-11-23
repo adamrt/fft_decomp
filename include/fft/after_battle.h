@@ -100,6 +100,5 @@ typedef enum after_battle_thread_slot {
 } after_battle_thread_slot_e;
 
 extern s32 g_after_battle_thread_suspended_id;
-extern u8 g_after_battle_work[]; /* no named access */
 
 #endif

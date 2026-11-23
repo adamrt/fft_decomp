@@ -947,7 +947,7 @@ void sprite_item_display_draw(map_unit_t* unit) {
  * a stat change, then level down or up, stolen, broken, Quick, CT 0, missed, guarded, caught, then
  * the queued status images. Sets the digit sprites (values over 999 show 999) and the color.
  * Returns 0 when nothing is pending. */
-s32 result_build_next_display(map_unit_t* unit) {
+static s32 result_build_next_display(map_unit_t* unit) {
     battle_unit_t* stats;
     u32 scan_flags;
     s32 flags;
@@ -1430,7 +1430,7 @@ void result_prepare_display(map_unit_t* unit) {
  * 0x02000000 and above. Returns 0 when no flag is pending. Reading the
  * flags into a block-local before clearing keeps the target's and operand
  * order. */
-s32 result_build_next_special_display(map_unit_t* unit) {
+static s32 result_build_next_special_display(map_unit_t* unit) {
     action_result_display_t* display;
     sprite_display_t* display_0;
     sprite_display_t* display_1;

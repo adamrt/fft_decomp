@@ -2,9 +2,8 @@
 #define MAP_H
 
 /* The battle map: map ids, the terrain tiles and their lookups, the terrain tables, the selected tile, tile marks,
- * background gradient colors, the map data commands and title card, and the event library's map routines. */
+ * the map data commands and title card, and the event library's map routines. */
 
-#include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -356,10 +355,6 @@ extern map_tile_t g_map_tile_data[MAP_TILE_COUNT];
 map_tile_t* map_get_tile(s32 x, s32 y, u32 layer);
 s32 map_get_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
 s32 map_set_tile_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value);
-s32 battle_unit_get_tile_index(const battle_unit_t* unit);
-map_tile_t* map_unit_get_tile_by_battle_unit_id(u32 battle_unit_id);
-map_tile_t* map_unit_get_tile(u32 map_unit_id);
-map_tile_t* map_unit_get_world_tile(u32 map_unit_id);
 s32 map_calculate_slope_height(const SVECTOR* coords, s32 layer);
 void map_store_dimensions(SVECTOR* destination);
 
@@ -429,20 +424,7 @@ typedef enum map_tile_mark_mode {
     MAP_TILE_MARK_TARGETS_SHOWN = 12
 } map_tile_mark_mode_e;
 
-/* background */
-/* Map backgrounds use two four-byte runtime color slots. The fourth byte
- * is copied with each CVECTOR but is not an alpha channel; mesh-file RGB
- * triples have a separate three-byte layout. */
-typedef enum map_background_gradient_color {
-    MAP_BACKGROUND_GRADIENT_TOP = 0,
-    MAP_BACKGROUND_GRADIENT_BOTTOM = 1,
-    MAP_BACKGROUND_GRADIENT_COLOR_COUNT = 2
-} map_background_gradient_color_e;
-
-typedef struct map_background_gradient_colors {
-    CVECTOR colors[MAP_BACKGROUND_GRADIENT_COLOR_COUNT];
-} map_background_gradient_colors_t;
-typedef char map_background_gradient_colors_size_must_be_8[(sizeof(map_background_gradient_colors_t) == 8) ? 1 : -1];
+void map_set_tile_mark_colors(s32 mode, s32 unused);
 
 /* map data commands */
 /* Commands of map_dispatch_data_command, which switches on command
@@ -484,17 +466,8 @@ extern s16 g_map_destruction_wait_state;
 extern u16 g_map_refresh_pending;
 
 void map_wait_refresh(void);
-s32 map_return_zero_1(void); /* unreferenced stub */
 
 /* The raw weather script variable, before indoor and snow flags apply. */
 s32 map_get_weather(void);
-
-/* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
-void deploy_skip_thread(void);
-
-/* script lighting */
-/* Interpolates the script light transform (g_script_light_* in script.h) each frame. */
-void map_light_thread(void);
-void map_light_reset_script_light(void);
 
 #endif

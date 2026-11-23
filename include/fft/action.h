@@ -2,15 +2,15 @@
 #define ACTION_H
 
 /* Acting with an ability or attack: preparing it, resolving each strike against its targets, the action result
- * fields, Mimic, effect messages and weapon sounds. */
+ * fields, Mimic and weapon sounds. */
 
 #include "fft/ability.h"
 #include "fft/item.h"
+#include "fft/move.h"
+#include "fft/reward.h"
 #include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/types.h"
-
-struct action_data;
 
 /* preparation */
 /* Result of action_prepare, kept in map_unit_t.attack_phase_state. */
@@ -26,6 +26,7 @@ void action_command_copy(const action_command_t* source, action_command_t* desti
 action_preparation_e action_prepare(const action_command_t* source, action_command_t* dest, s32 phase);
 void action_prepare_in_place(action_command_t* action);
 action_preparation_e action_commit_preparation(const action_command_t* command);
+s32 action_check_and_cancel_charge(struct battle_unit* unit, s32 cancel);
 
 /* action results */
 /* Bitset in action_data_t.attack_type; one result can affect HP and MP. */
@@ -128,15 +129,6 @@ typedef enum action_rejection {
     ACTION_REJECTION_DEEP_WATER = 8
 } action_rejection_e;
 
-/* g_action_phase: which unit's action the attack phase is announcing. */
-typedef enum action_phase {
-    ACTION_PHASE_PRE_ACTION = 0,   /* a reaction that pre-empts the pending action (Hamedo) */
-    ACTION_PHASE_ACTING_UNIT = 1,  /* the acting unit's own action */
-    ACTION_PHASE_REACTING_UNIT = 2 /* the reactions it provoked */
-} action_phase_e;
-
-enum { ACTION_PHASE_COUNT = 3 };
-
 /* The target's four evade chances, cleared together by statuses and supports.
  * Each hand uses its shield, or Weapon Guard for a physical attack. */
 typedef struct action_evades {
@@ -210,15 +202,6 @@ typedef enum action_post_message {
     ACTION_POST_MESSAGE_TRAINED = 9
 } action_post_message_e;
 
-/* The experience and JP an action earned and the levels it raised, for the result display. */
-typedef struct action_reward_display {
-    u8 earned_experience;     /* +0x0 */
-    u8 earned_jp;             /* +0x1 */
-    u8 level_for_display;     /* +0x2; nonzero selects the "Level UP!" display */
-    u8 job_level_for_display; /* +0x3 */
-} action_reward_display_t;
-typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_t) == 4) ? 1 : -1];
-
 /* The strike work record, embedded in map_unit_t.strike (+0x18c)
  * and used as a standalone AI work record. Reaction targeting writes its
  * redirected tile at +0x1c..+0x1e before the strike is processed. */
@@ -236,18 +219,17 @@ typedef struct action_strike_work {
     s16 reaction_id;
     move_tile_coordinates_t target_tile; /* 0x1c */
     u8 used_weapon_id;
-    s16 reaction_ability_id; /* 0x20; runtime 0x1ac */
-    /* 0x22; runtime 0x1ae. g_action_work.knockback_flags & 0x7f, stored with
+    s16 reaction_ability_id; /* 0x20; map unit 0x1ac */
+    /* 0x22; map unit 0x1ae. g_action_work.knockback_flags & 0x7f, stored with
      * the knockback destination. */
     u8 knockback_flags;
     u8 can_earn_experience;
-    action_reward_display_t action_rewards; /* 0x24; runtime 0x1b0..0x1b3 */
+    action_reward_display_t action_rewards; /* 0x24; map unit 0x1b0..0x1b3 */
 } action_strike_work_t;
 typedef char action_strike_work_size_must_be_40[sizeof(action_strike_work_t) == 40 ? 1 : -1];
 
 extern action_state_e g_action_state;
 extern action_context_e g_action_context;
-extern s32 g_action_phase;
 extern action_work_t g_action_work;
 extern battle_unit_t* g_action_attacker;
 extern action_data_t* g_action_attacker_data;
@@ -268,15 +250,12 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work);
 void action_store_used_weapon(action_command_t* action);
 s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
 void action_switch_ability_to_default_attack(void);
-void action_start_next_strike(void);
 void action_start_target_response(map_unit_t* attacker, map_unit_t* target);
 s32 action_map_unit_start_target_response(s32 map_unit_id);
-void projectile_map_unit_start_hit_response(u16 attacker_id, u16 target_id);
 void action_store_target_ids(u8* src);
 s32 action_copy_ability_targets(u8* out);
 void action_remove_ability_target(s32 target_battle_unit_id);
 void action_post_action_facing_stub(battle_unit_t* unused_unit, s32 unused_facing);
-void action_end_command(map_unit_t* unit);
 
 /* Preview action calculation entry run on the main stack. */
 s32 action_calculate_projected_effect(battle_unit_t* attacker, battle_unit_t* target, action_command_t* command);
@@ -302,23 +281,6 @@ extern action_mimic_attacker_t g_action_mimic_attacker;
 
 void action_mimic_record(battle_unit_t* unit);
 s32 action_mimic_set_ability(battle_unit_t* unit);
-
-/* effect messages */
-/* Queue of post-action "effect message" popups (g_post_effect_messages), filled by
- * queue_messages_for_unit and drained newest first by
- * action_show_next_message. */
-typedef struct action_post_effect_msg {
-    u8 code;           /* 0x00 action_display_image_id_e of the popup */
-    u8 unit;           /* 0x01 battle unit id of the reported unit */
-    u8 _padding_02[2]; /* 0x02; aligns value */
-    s32 value;         /* 0x04 reported amount */
-} action_post_effect_msg_t;
-typedef char action_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_msg_t) == 8) ? 1 : -1];
-
-enum { ACTION_POST_EFFECT_MSG_CAPACITY = 16 };
-
-void action_show_message_for_caster(void);
-s32 action_show_next_message(void);
 
 /* weapon sounds */
 void action_play_weapon_sfx(struct map_unit* unit, s32 hit);

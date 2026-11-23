@@ -21,12 +21,12 @@ extern s8 g_formation_item_action_menu_initialized;
 extern s8 g_formation_item_sort_order_initialized;
 extern s8 g_formation_item_equipping_units_initialized;
 
-void update_item_menu(void);
+void formation_item_update_menu(void);
 
 /* equipping */
 extern s8 g_formation_item_equip_menu_initialized;
 
-s32 check_equipment_slot_item(s16 unit_index, s16 slot, s16 item_id);
+s32 equipment_check_slot_item(s16 unit_index, s16 slot, s16 item_id);
 menu_equipment_slot_e formation_item_select_slot(s16 unit_index, s32 item_id);
 void formation_item_build_best_fit(s16 unit_index, s16* equipment);
 

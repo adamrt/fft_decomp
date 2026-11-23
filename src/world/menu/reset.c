@@ -4,6 +4,6 @@
 #include "fft/system.h"
 
 /* Reset the game (soft reset). */
-void screen_reset_game(void) {
+void menu_screen_reset_game(void) {
     system_reset_game();
 }

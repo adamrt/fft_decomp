@@ -7,7 +7,6 @@
 #include "fft/script_variable.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
-#include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
 #include "fft/weather.h"

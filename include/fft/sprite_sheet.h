@@ -12,22 +12,9 @@
 struct map_unit;
 struct battle_unit;
 
-/* One of the 137 fixed-size blocks in EVTCHR.BIN. No native pointer tables
- * or widened 32-bit unit-animation headers are present in the file. */
-typedef struct evtchr_file_record {
-    u8 sequence_offsets[0x40][4]; /* 0x0000; signed 32-bit offsets, -1 resolves to zero */
-    u8 sequence_data[0x400];      /* 0x0100 */
-    u8 frame_offsets[0x28][4];    /* 0x0500; signed 32-bit offsets, -1 resolves to zero */
-    u8 frame_data[0x1e0];         /* 0x05a0; copied into both native frame sets */
-    u8 cluts[16 * 16 * 2];        /* 0x0780; 16 palettes of 16 little-endian colors */
-    u8 pixels[200 * 128];         /* 0x0980; 256x200, 4bpp */
-    u8 _unused_6d80[0xa80];       /* unread tail of the 0x7800-byte block */
-} evtchr_file_record_t;
-typedef char evtchr_file_record_size_must_be_30720[sizeof(evtchr_file_record_t) == 30720 ? 1 : -1];
-
 /* spritesheets */
 /* Spritesheet ids index g_sprite_sheet_data and
- * g_sheet_files. An id below 0x80 is the character_identity_e
+ * s_sheet_files. An id below 0x80 is the character_identity_e
  * value it is loaded for (resolve_sprite_identity returns those
  * unchanged) and has that identity's name; a numbered name loads the file of
  * the sheet with the plain name. From 0x60 the sheets are the generic jobs',
@@ -213,7 +200,7 @@ typedef struct sprite_sheet_data {
 typedef char sprite_sheet_data_size_must_be_4[(sizeof(sprite_sheet_data_t) == 4) ? 1 : -1];
 
 /* sprite_sheet_data_t.shp_id: index of the sheet's frame table file in
- * g_shp_files (BATTLE/TYPE1.SHP ...). Id 5 has no file. */
+ * s_shp_files (BATTLE/TYPE1.SHP ...). Id 5 has no file. */
 typedef enum sprite_shp_type {
     SPRITE_SHP_TYPE1 = 0,
     SPRITE_SHP_TYPE2 = 1,
@@ -225,7 +212,7 @@ typedef enum sprite_shp_type {
 } sprite_shp_type_e;
 
 /* sprite_sheet_data_t.seq_id: index of the sheet's animation file in
- * g_seq_files (BATTLE/TYPE1.SEQ ...). */
+ * s_seq_files (BATTLE/TYPE1.SEQ ...). */
 typedef enum sprite_seq_type {
     SPRITE_SEQ_TYPE1 = 0,
     SPRITE_SEQ_TYPE3 = 1,
@@ -243,6 +230,7 @@ s32 sprite_sheet_is_loaded(s16 spritesheet_id);
 u32 sprite_sheet_get_flying_flag(u32 spritesheet_id);
 s32 sprite_sheet_map_unit_get_height(u32 map_unit_id);
 s32 map_unit_get_sprite_height_by_battle_unit_id(u32 battle_unit_id);
+void sprite_sheet_apply_status_change(struct map_unit* unit, s32 tile_effect_level);
 
 /* WEP.SPR weapon/item graphics: palette rows and texture-row placement. */
 typedef struct sprite_item_graphic {
@@ -317,6 +305,19 @@ enum {
     SPRITE_SHP_FRAME_EVTCHR_FIRST = 210 /* frame 0 of an EVTCHR slot */
 };
 
+/* One of the 137 fixed-size blocks in EVTCHR.BIN. No native pointer tables
+ * or widened 32-bit unit-animation headers are present in the file. */
+typedef struct evtchr_file_record {
+    u8 sequence_offsets[0x40][4]; /* 0x0000; signed 32-bit offsets, -1 resolves to zero */
+    u8 sequence_data[0x400];      /* 0x0100 */
+    u8 frame_offsets[0x28][4];    /* 0x0500; signed 32-bit offsets, -1 resolves to zero */
+    u8 frame_data[0x1e0];         /* 0x05a0; copied into both native frame sets */
+    u8 cluts[16 * 16 * 2];        /* 0x0780; 16 palettes of 16 little-endian colors */
+    u8 pixels[200 * 128];         /* 0x0980; 256x200, 4bpp */
+    u8 _unused_6d80[0xa80];       /* unread tail of the 0x7800-byte block */
+} evtchr_file_record_t;
+typedef char evtchr_file_record_size_must_be_30720[sizeof(evtchr_file_record_t) == 30720 ? 1 : -1];
+
 /* The SHP frames of an EVTCHR slot, laid out as sprite_unit_shp_frame_tables_t
  * so that frame ids from SPRITE_SHP_FRAME_EVTCHR_FIRST up index it
  * (select_unit_shp_frame). The file has 0x28 frames; their data
@@ -369,12 +370,6 @@ typedef enum sprite_evtchr_slot_buffer_marker {
 /* Other positive buffer values are upload countdowns decremented each frame. */
 enum { SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES = 2 };
 
-/* Per-slot summary written by sprite_evtchr_get_slot_summary. */
-typedef struct sprite_evtchr_slot_summary {
-    u8 spritesheet_id; /* 0xff free, 0xfe saved, 0xfd no unit, else owner's sheet */
-    u8 evtchr_state;   /* 0xff none, 0xfe saved, 0xfd loaded */
-} sprite_evtchr_slot_summary_t;
-
 enum { SPRITE_EVTCHR_SLOT_COUNT = 2 };
 
 extern sprite_evtchr_slot_t g_sprite_evtchr_slots[SPRITE_EVTCHR_SLOT_COUNT];
@@ -385,7 +380,6 @@ s32 sprite_evtchr_save_slot(s32 slot_index);
 s32 sprite_evtchr_clear_loaded_slot(s32 slot_index);
 s32 sprite_evtchr_clear_saved_slot(s32 slot_index);
 s32 sprite_evtchr_release_reserved_slot(s32 slot_index);
-s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary);
 void sprite_evtchr_invalidate_sp2(struct map_unit* unit);
 
 /* loading */

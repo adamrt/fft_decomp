@@ -89,12 +89,7 @@ typedef enum command_menu {
     MENU_COMMAND_ID_CRYSTAL_PICKUP = 105          /* crystal or treasure options */
 } command_menu_e;
 
-extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
-
-void menu_action_dispatch(void);
 command_menu_e menu_get_action_menu_id(s32 battle_unit_id);
-void menu_action_open_active_unit(void);
-void menu_action_open_non_active_unit(void);
 
 /* turn menu */
 extern s32 g_command_current_id; /* command_menu_e */
@@ -105,15 +100,6 @@ extern menu_entry_t g_command_idle_action_entries[56];
 /* Opens an idle action menu (command_menu_e) for the active-turn unit beside it and restores the row it last
  * chose. WORLD's body only clears g_menu_building_thread_started. */
 void command_open_menu(s32 menu_id);
-
-/* Thread entry of the turn menus: the icon selection loop, then the chosen row remembered for the unit. */
-void command_turn_menu_thread(void);
-
-/* Thread entry of the Move row: refuses a unit that cannot move, otherwise confirms the command. */
-void command_move_thread(void);
-
-/* Thread entry of the Wait menu. */
-void command_wait_thread(void);
 
 /* act menu */
 /* Per-skillset menu behavior (g_command_menu_types_by_skillset). Values select specialized
@@ -144,7 +130,8 @@ typedef enum action_menu_type {
 typedef enum action_menu_pseudo_skillset { ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188 } action_menu_pseudo_skillset_e;
 
 extern u8 g_command_menu_types_by_skillset[0xe0];
-extern u8 g_command_skillsets[]; /* SKILLSET_ID_NONE terminates the rows. */
+extern u8 g_command_skillsets[];   /* SKILLSET_ID_NONE terminates the rows. */
+extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
 extern s32 g_command_selected_skill_ct;
 extern s16 g_command_action_type_modes[][2];
 
@@ -153,9 +140,6 @@ extern s32 g_command_skillset_build_result;
 
 /* Builds the skillset list, then waits for its submenu or runs the icon selection. */
 void command_act_menu_thread(void);
-
-/* Checks the chosen ability (MP, blocking statuses, per-menu restrictions) and shows why it cannot be used. */
-void command_validate_ability_thread(void);
 
 /* ability lists */
 /* Packed menu attributes; the source ability record uses different bit positions. */
@@ -224,19 +208,10 @@ void command_record_unit_selection(void);
 /* Clears one unit's records, only for a unit under manual control. */
 void command_reset_unit_record(s32 battle_unit_id);
 
-/* Calls command_reset_unit_records; nothing calls it. */
-void command_reset_unit_records_unused(void);
-
 /* Restores the selected unit's command row after Move or Act changes the available choices. */
 void command_restore_unit_selection(s32 menu_id);
 
 /* Auto-Battle */
-/* The five-policy auto-battle menu. */
-void auto_battle_settings_thread(void);
-
-/* Confirms the current row, recording the auto-battle mode it selects. */
-void auto_battle_confirm_thread(void);
-
 /* Stores a unit's auto-battle target with the resolved command as its setting. */
 void auto_battle_store_target(s32 target_id, s32 battle_unit_id);
 
@@ -248,9 +223,6 @@ void mini_menu_thread(void);
 
 /* Posts the close command after two frames under the mini-menu task id. */
 void menu_request_close_thread(void);
-
-/* Queues the confirm sound and holds the mini-menu task id for 16 frames. */
-void mini_menu_confirm_delay_thread(void);
 
 /* system functions */
 /* First argument of menu_dispatch_request and
@@ -306,7 +278,8 @@ typedef enum menu_request_result {
     MENU_REQUEST_RESULT_EVENT = 2            /* SCENARIO_CHECK started an event, or queued it for option 2 */
 } menu_request_result_e;
 
-/* Indices of g_request_entries that the dispatcher names; the rest are message variants. */
+/* Rows of the system-function table (s_request_entries in lib/menu/command_prompts.c) that the dispatcher names;
+ * the rest are message variants. */
 typedef enum menu_prompt_id {
     MENU_PROMPT_WAIT_MENU = 1,
     MENU_PROMPT_CLOSE = 8,
@@ -336,7 +309,5 @@ extern s32 g_menu_status_open;
 
 void menu_status_open(void);
 void menu_status_clear(void);
-void status_screen_enter_selection(void);
-void status_screen_leave_selection(void);
 
 #endif

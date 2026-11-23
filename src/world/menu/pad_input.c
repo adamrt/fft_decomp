@@ -8,6 +8,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+extern u16 g_menu_screen_input_latched_button;
+
 /* controller state */
 static u16 s_screen_input_previous;
 extern u8 g_menu_screen_input_triangle_latch;

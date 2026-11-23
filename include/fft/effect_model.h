@@ -8,9 +8,6 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Projectile rotation shared by the flight handlers and emitter transform. */
-extern MATRIX g_effect_projectile_matrix;
-
 /* models */
 /* Resident models of g_effect_model_files: three projectiles and the Reflect shield. */
 typedef enum effect_model {
@@ -79,5 +76,9 @@ s32 effect_model_init_sections(const psyq_tmd_header_t* resource, s32 unused_1);
 void effect_model_decode_command(effect_decoded_model_command_t* out);
 void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter);
 void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle);
+
+/* projectile transform */
+/* Projectile rotation shared by the flight handlers and emitter transform. */
+extern MATRIX g_effect_projectile_matrix;
 
 #endif

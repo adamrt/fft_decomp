@@ -1,6 +1,7 @@
 /* Tutorial buttons, tutorial start and the tutorial command handlers with highlight rings and quads. */
 
 #include "fft/tutorial.h"
+#include "fft/fade.h"
 #include "fft/file.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
@@ -116,7 +117,7 @@ void tutorial_start(s32 index) {
         tutorial_load_files(index, &g_tutorial_state);
         s_tutorial_command_ptr = g_tutorial_state.script;
         g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = g_tutorial_state.messages;
-        init_save_screen();
+        save_init_screen();
         save_image_build(-1);
         bcopy(g_save_work_buffer, &g_tutorial_state.saved_game, sizeof(g_tutorial_state.saved_game));
         file_load_into_buffer_checked(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_save_work_buffer);
@@ -148,7 +149,7 @@ s32 tutorial_update(void) {
     }
     s_tutorial_button_input = PadRead(0);
     if (s_tutorial_button_input == INPUT_RESET_BUTTONS) {
-        screen_reset_game();
+        menu_screen_reset_game();
     }
     g_tutorial_buttons = s_tutorial_button_input;
     if (s_tutorial_highlight_brightness != 0) {

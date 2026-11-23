@@ -6,10 +6,10 @@
  * slots and the menu text threads. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+struct menu_number_entry;
 
 /* font */
 /* The font, EVENT/FONT.BIN: 2200 glyphs of 14 rows of 10 two-bit pixels. A
@@ -150,16 +150,6 @@ typedef enum text_id_base {
 /* Shared menu symbols. */
 enum { TEXT_ID_ABILITY_REFLECTABLE_MARKER = 0x5088, TEXT_ID_INFINITY = 0x509d };
 
-/* Reward names in the TEXT_ID_PROPOSITION_REWARD_NAME_BASE section: the random bonuses from the base,
- * then the no-reward name, the unexplored lands and the treasures, each by reward_index. */
-enum {
-    TEXT_ID_REWARD_NONE = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 6,
-    TEXT_ID_REWARD_LAND_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x1b,
-    TEXT_ID_REWARD_TREASURE_FIRST = TEXT_ID_PROPOSITION_REWARD_NAME_BASE + 0x2e
-};
-
-enum { TEXT_ID_FORMATION_TEXT_BASE = MENU_SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
-
 /* Index into g_text_section_pointers: a text id's top five bits. Only the sections the code binds or reads by a
  * fixed role are named. A screen rebinds a slot to its own text while it is up: help_text_section_e,
  * menu_screen_text_section_e and after_battle_text_section_e map those bindings. */
@@ -193,8 +183,9 @@ void text_init_section_pointers(void);
 void text_save_section_pointers(void);
 void text_restore_section_pointers(void);
 
-/* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
+/* MAIN selects the BATTLE or WORLD address of text_find_entry through these existing aliases. */
 u8* battle_text_find_entry(u32 text_id);
+u8* world_text_find_entry(u32 text_id);
 u8* text_find_entry(u32 text_id);
 const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2);
@@ -212,8 +203,6 @@ extern u8 g_text_player_name_buffer[20];
 
 /* Values $00-$1F; indexed substitutions can read past the named 32 entries. */
 extern s32 g_text_substitution_values[32];
-
-void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
 
 /* The text id a substitution code (text_format_code_e) prints for value. */
 s32 text_resolve_format_id(s32 format_code, s32 value);
@@ -289,7 +278,6 @@ void menu_display_text_string(u8* image, glyph_blit_t* origin, const u8* text);
 void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
 void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text);
-void ability_list_draw_text(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void menu_text_render_encoded_ids_to_image(u8* image, const text_image_bounds_t* bounds, s32 unused, s32 max_chars,
     const u8* text_table, const s16* text_ids, s32 count, s16 glyph, s32 unused_flags);
 void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags);
@@ -363,9 +351,11 @@ void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
 void menu_draw_charge_time_now(u8* pixels, glyph_blit_t* position);
 void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin);
 void menu_draw_numeric_display_entries(
-    u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
-void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
-void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
+    u8* buffer, const struct menu_number_entry* entries, glyph_blit_t* position, s32 count);
+void menu_text_render_decimal_entry_list(
+    u8* pixels, const struct menu_number_entry* entries, glyph_blit_t* out, s32 count);
+void menu_text_render_signed_decimal_entries(
+    u8* pixels, struct menu_number_entry* entries, glyph_blit_t* out, s32 count);
 
 /* BATTLE and WORLD each have their own body. */
 void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos);
@@ -486,10 +476,5 @@ extern u8 g_text_thread_running_state;
 
 /* Start a dialog only when its scheduler slot is idle. */
 void menu_text_thread_start_if_idle(s32 thread_id, s32 dialog_type, s32 text_id, s32 speaker_id);
-
-/* Acknowledge a matching pending text ID when this slot is idle (return 0).
- * Otherwise start a dialog when no ID is pending (return 1), or return the
- * slot's running flag. The pending ID is shared across slots. */
-s32 menu_text_thread_start_or_poll(s32 thread_id, s32 dialog_type, s32 text_id, s32 speaker_id, s32 y_offset);
 
 #endif

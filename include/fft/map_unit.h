@@ -6,7 +6,6 @@
 
 #include "fft/action.h"
 #include "fft/animation.h"
-#include "fft/entd.h"
 #include "fft/map.h"
 #include "fft/move.h"
 #include "fft/result.h"
@@ -16,6 +15,8 @@
 #include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+struct entd_encounter;
 
 /* unit record */
 /* Manual targeting and BATTLE_STATE_WAIT_DIRECTION reuse the AI command storage.
@@ -32,7 +33,7 @@ typedef union unit_command_state {
 typedef char unit_command_state_size_must_be_24[sizeof(unit_command_state_t) == 24 ? 1 : -1];
 
 /* Live on-map units own movement, animation, commands and displays.
- * map_unit_id indexes the allocation slots; stats optionally links combat stats. */
+ * map_unit_id indexes the allocation slots; battle_unit links the battle unit record (null for an event ghost). */
 struct map_unit {
     struct map_unit* previous; /* 0x000; previous unit in the map unit list */
     u8 map_unit_id;            /* 0x004; map unit slot ID */
@@ -218,7 +219,7 @@ typedef enum unit_mount_state {
 /* Renderer-side map unit status mirror. These packed masks do not use the
  * canonical status_id_e byte order. */
 typedef enum unit_status_flags_1_4 {
-    /* runtime +0x140. Bit 0x00000001 is tested for animation 0x21 and never set. */
+    /* map unit +0x140. Bit 0x00000001 is tested for animation 0x21 and never set. */
     UNIT_STATUS_CONFUSION = 0x00000080,
     UNIT_STATUS_SLEEP = 0x00000040,
     UNIT_STATUS_PETRIFY = 0x00000020,
@@ -227,7 +228,7 @@ typedef enum unit_status_flags_1_4 {
     UNIT_STATUS_DEAD = 0x00000004,
     UNIT_STATUS_MOUNTED = 0x00000002,
 
-    /* runtime +0x141. */
+    /* map unit +0x141. */
     UNIT_STATUS_FAITH = 0x00008000,
     UNIT_STATUS_BERSERK = 0x00004000,
     UNIT_STATUS_UNNAMED_0E = 0x00002000,
@@ -237,7 +238,7 @@ typedef enum unit_status_flags_1_4 {
     UNIT_STATUS_CHARGING = 0x00000200,
     UNIT_STATUS_PERFORMING = 0x00000100,
 
-    /* runtime +0x142. */
+    /* map unit +0x142. */
     UNIT_STATUS_OIL = 0x00800000,
     UNIT_STATUS_POISON = 0x00400000,
     UNIT_STATUS_PROTECT = 0x00200000,
@@ -247,7 +248,7 @@ typedef enum unit_status_flags_1_4 {
     UNIT_STATUS_BLOOD_SUCK = 0x00020000,
     UNIT_STATUS_INNOCENT = 0x00010000,
 
-    /* runtime +0x143. Bit 0x80000000 remains unknown. */
+    /* map unit +0x143. Bit 0x80000000 remains unknown. */
     UNIT_STATUS_UNDEAD = 0x40000000,
     UNIT_STATUS_REGEN = 0x20000000,
     UNIT_STATUS_RERAISE = 0x10000000,
@@ -263,7 +264,7 @@ typedef enum unit_status_flags_1_4 {
 } unit_status_flags_1_4_e;
 
 typedef enum unit_status_flags_5_6 {
-    /* runtime +0x144. */
+    /* map unit +0x144. */
     UNIT_STATUS_CRYSTAL = 0x00000001,
     UNIT_STATUS_CHICKEN = 0x00000002,
     UNIT_STATUS_FROG = 0x00000004,
@@ -273,7 +274,7 @@ typedef enum unit_status_flags_5_6 {
     UNIT_STATUS_JUMP = 0x00000040,
     UNIT_STATUS_POACHED = 0x00000080,
 
-    /* runtime +0x145. Other bits remain unknown. */
+    /* map unit +0x145. Other bits remain unknown. */
     UNIT_STATUS_MORBOL = 0x00000100,
     UNIT_STATUS_JUMP_HEIGHT_ACTIVE = 0x00000200,
 
@@ -288,7 +289,7 @@ typedef struct map_unit_slot {
 } map_unit_slot_t;
 typedef char map_unit_slot_size_must_be_1088[(sizeof(map_unit_slot_t) == 1088) ? 1 : -1];
 
-/* Results of battle_unit_find_id_by_character_identity that are not a stats slot. */
+/* Results of battle_unit_find_id_by_character_identity that are not a battle unit id. */
 typedef enum unit_character_slot {
     UNIT_CHARACTER_SLOT_SELECTOR = -1, /* the identity is a selector value, not a character */
     UNIT_CHARACTER_SLOT_OFF_FIELD = -2,
@@ -297,13 +298,11 @@ typedef enum unit_character_slot {
     UNIT_CHARACTER_SLOT_ABSENT = -5
 } unit_character_slot_e;
 
-/* BATTLE defines these slots; resident MAIN accesses the same storage. Indexed by battle unit id. */
-extern battle_unit_t g_battle_units[BATTLE_UNIT_SLOT_COUNT];
-
 /* The live units, chained through map_unit_t.previous. */
 extern map_unit_t* g_map_unit_list_head;
 extern map_unit_slot_t g_map_unit_slots[MAP_UNIT_SLOT_COUNT];
 extern s32 g_unit_source_map_unit_id; /* the acting unit, which map_unit_get_source finds; 0xff for none */
+extern s32 g_unit_casting_map_unit_id;
 
 map_unit_t* map_unit_get(u16 map_unit_id);
 map_unit_t* map_unit_get_by_battle_unit_id(u16 battle_unit_id);
@@ -319,10 +318,8 @@ battle_unit_t* battle_unit_find_with_turn(void);
 s32 battle_unit_find_id_by_character_identity(u32 character_identity);
 map_unit_t* map_unit_get_source(void);
 map_unit_t* map_unit_get_casting(void);
-action_command_t* battle_unit_get_action_command(s32 battle_unit_id);
 action_command_t* map_unit_get_action_command_by_battle_unit_id(u32 battle_unit_id);
 s32 map_unit_move_to_list_head(u32 map_unit_id);
-s32 map_unit_show(u32 map_unit_id);
 s32 battle_unit_take_off_field(s32 battle_unit_id);
 s32 battle_unit_disable(s32 battle_unit_id);
 void map_unit_remove(map_unit_t* unit);
@@ -330,6 +327,19 @@ s32 map_unit_remove_by_id(u32 map_unit_id);
 void map_unit_clear_all(void);
 
 /* tile queries */
+/* Seven result bytes; assigning elevation preserves the unassigned high bit. */
+typedef struct unit_height_data {
+    u8 x;
+    u8 y;
+    u8 elevation : 7;
+    u8 _unused_02 : 1; /* not read or assigned */
+    u8 unit_flags;
+    u8 unit_height;
+    u8 walking_height;
+    u8 total_height;
+} unit_height_data_t;
+typedef char unit_height_data_size_must_be_7[sizeof(unit_height_data_t) == 7 ? 1 : -1];
+
 /* unit_height_data_t.unit_flags: the unit id in the low bits and these flags, set by
  * battle_unit_calculate_action_height. */
 typedef enum unit_height_flags {
@@ -349,6 +359,10 @@ typedef enum unit_tile_filter {
     UNIT_TILE_STATUS_FILTERS = UNIT_TILE_FILTER_TREASURE | UNIT_TILE_FILTER_TRANSPARENT | UNIT_TILE_FILTER_CRYSTAL
 } unit_tile_filter_e;
 
+s32 battle_unit_get_tile_index(const battle_unit_t* unit);
+map_tile_t* map_unit_get_tile_by_battle_unit_id(u32 battle_unit_id);
+map_tile_t* map_unit_get_tile(u32 map_unit_id);
+map_tile_t* map_unit_get_world_tile(u32 map_unit_id);
 s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
 map_unit_t* map_unit_find_overlapping_at_tile(map_unit_t* self, s32 x, s32 y, s32 layer);
 map_unit_t* map_unit_find_at_tile(s32 map_x, s32 map_y, s32 layer);
@@ -387,7 +401,6 @@ void map_unit_rider_dismount_and_update_display(map_unit_t* rider);
 void map_unit_rider_seat(map_unit_t* rider, map_unit_t* mount);
 void map_unit_dismount_dead_rider(map_unit_t* unit);
 unit_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const battle_unit_t* unit);
-void map_unit_mount_onto_pending(map_unit_t* unit);
 unit_action_restriction_e battle_unit_get_action_restriction(const battle_unit_t* unit);
 
 /* facing */
@@ -414,14 +427,14 @@ enum {
     UNIT_POSITION_FACING_EAST = 0x0300
 };
 
-void map_unit_facing_set_cardinal(map_unit_t* unit, s32 facing);
-void map_unit_facing_turn_to_cursor(map_unit_t* unit);
 void map_unit_facing_turn_to_target(map_unit_t* unit, map_unit_t* target);
 s16 map_unit_get_facing_quadrant(u32 map_unit_id);
 s16 map_unit_get_camera_facing_by_battle_unit_id(u32 battle_unit_id);
 s32 map_unit_get_facing_sixteenth(u32 map_unit_id);
 s32 map_unit_set_facing_sixteenth(u32 map_unit_id, s32 facing_nibble);
 void map_unit_facing_snap_to_quadrants(void);
+void map_unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
+void map_unit_facing_draw_wait_direction(void);
 
 /* animation and display */
 void map_unit_update_animations(void);
@@ -429,6 +442,8 @@ void map_unit_update_target_displays(map_unit_t* unit);
 void map_unit_update_display(s32 map_unit_id);
 void map_unit_update_graphics(u32 map_unit_id);
 void map_unit_update_float_height(map_unit_t* unit);
+void map_unit_update_float_and_status_bubble(map_unit_t* unit);
+void map_unit_play_sfx(struct map_unit* unit, s32 sound_id);
 
 /* Set and clear the unit_motion_flags_e that suppress a unit's facing, movement-effect and
  * palette updates. */
@@ -441,24 +456,22 @@ void map_unit_clear_palette_update_suppression(u32 map_unit_id);
 
 /* coordinates */
 SVECTOR* map_unit_get_world_coords(u32 map_unit_id);
-SVECTOR* map_unit_get_world_coords_by_battle_unit_id(u32 battle_unit_id);
 void map_unit_set_real_coords_from_world_coords(struct map_unit* unit);
 void map_unit_set_world_coords_from_real_coords(struct map_unit* unit);
 void map_unit_set_move_and_world_coords(map_unit_t* unit);
 s32 battle_unit_set_tile_position(s32 battle_unit_id, u8 map_x, u8 map_y, u8 layer, u8 facing);
 s32 map_unit_get_map_coords(u32 map_unit_id, SVECTOR* coords);
 s32 map_unit_get_tile_center_height_by_battle_unit_id(u32 battle_unit_id, SVECTOR* coords);
-void map_unit_copy_draw_coords(SVECTOR* destination, const map_unit_t* runtime);
+void map_unit_copy_draw_coords(SVECTOR* destination, const map_unit_t* map_unit);
 const SVECTOR* map_unit_get_event_offset(u32 map_unit_id);
 s32 map_unit_add_event_offset(u32 map_unit_id, const SVECTOR* amount);
 
 /* encounters and deployment */
 battle_unit_t* battle_unit_find_by_unit_id(s32 unit_id, s32* out_battle_unit_id);
-void battle_unit_load_entd(const entd_encounter_t* entd_data, s32 unused_mode);
+void battle_unit_load_entd(const struct entd_encounter* entd_data, s32 unused_mode);
 s32 battle_unit_put_on_field(u32 battle_unit_id);
 s32 map_unit_place_in_new_location(u32 map_unit_id, const map_tile_coordinates_t* tile, s32 facing);
 s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* destination);
-void map_unit_store_team_flags(map_unit_t* unit);
 
 /* crystals, treasure and transformations */
 s32 map_unit_count_crystals(void);
@@ -466,18 +479,12 @@ map_unit_t* map_unit_find_pickup_at_tile(s32 map_x, s32 map_y, s32 layer);
 void map_unit_apply_poach_or_morbol(map_unit_t* unit);
 void battle_unit_transform_into_morbol(battle_unit_t* unit);
 
-/* visibility and facing arrows */
+/* visibility and fade-outs */
 void map_unit_hide_jumping(void);
+s32 map_unit_show(u32 map_unit_id);
 s32 map_unit_hide(u32 map_unit_id);
 void map_unit_start_fade_out(s32 map_unit_id, s32 fade_step, s16 red, s16 green, s16 blue);
 void map_unit_start_red_fade_out(s32 map_unit_id);
 void map_unit_start_event_fade_out(s32 map_unit_id, s32 fade_step, s16 red, s16 green, s16 blue);
-void map_unit_update_float_and_status_bubble(map_unit_t* unit);
-void map_unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
-void map_unit_facing_draw_wait_direction(void);
-void map_unit_play_sfx(struct map_unit* unit, s32 sound_id);
-
-/* action relocation */
-extern s32 g_unit_casting_map_unit_id;
 
 #endif

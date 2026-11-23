@@ -31,9 +31,6 @@ typedef struct menu_selection_record {
 } menu_selection_record_t;
 typedef char menu_selection_record_size_must_be_6[sizeof(menu_selection_record_t) == 6 ? 1 : -1];
 
-/* VARIANT_MENU_SELECTION_RECORD_COUNT records: 14 in BUNIT and WORLD, 5 in EQUIP and JOBSTTS. */
-extern menu_selection_record_t g_menu_selection_records[];
-
 void menu_selection_set_record(s32 index, s32 selected_index, s32 scroll_base_index, const s16* entries);
 void menu_selection_restore_record(s32 index, s16* selected_index, s16* scroll_base_index, const s16* entries);
 void menu_selection_clear_record(s32 index);
@@ -56,7 +53,6 @@ s32 menu_selection_init_value(u8 index, s16 value);
  * it moves. The grid stepper moves a grid index instead. */
 s16 menu_selection_step_horizontal(u16 entry_count, u8 selection_index, s32 input_mask);
 s32 menu_selection_step_horizontal_with_sound(u16 entry_count, u8 selection_index, s32 input_mask, u8 sound_id);
-s16 menu_selection_step_vertical(u16 entry_count, u8 selection_index, s32 input_mask);
 s32 menu_selection_step_vertical_with_sound(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
 s32 menu_step_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);
 

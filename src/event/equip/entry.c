@@ -47,7 +47,7 @@ static void redraw_unit_panels(void) {
 
 /* Ask the unit status, equipment list, numeric panel and item numeric
  * panel threads to stop and clear the two panel styles. */
-void unit_panels_stop(void) {
+void unit_panel_stop_all(void) {
     menu_thread_request_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
     menu_thread_request_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);
     menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);

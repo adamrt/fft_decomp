@@ -1,10 +1,11 @@
 #ifndef MENU_H
 #define MENU_H
 
-/* Shared menu entries, scene state, equipment and unit-grid choices, generic icon/number records and drawing. */
+/* The shared menu core: menu entries and their context records, menu frame timing and scene state, the menu arena,
+ * equipment-slot and unit-grid readout choices, icon and number records, and common panel drawing (gradient panels,
+ * scaled draw areas, panel fades). */
 
 #include "fft/gfx.h"
-#include "fft/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -152,9 +153,6 @@ extern u8 g_menu_common_graphics_loaded;
  * frame-buffer half. */
 extern u16 g_menu_framebuffer_y;
 
-/* Advanced once per frame by the menu frame update. */
-extern s32 g_frame_counter;
-
 /* 0: normal, 1: companion/editor transition, 2: AT-list selection. */
 extern u16 g_menu_overlay_state;
 
@@ -168,22 +166,15 @@ void menu_init_palette_text(s32 unused_0);
 void menu_init_subsystem_pointers(void);
 void menu_subsystems_init(void);
 
+/* Empty; menu_subsystems_init calls it between the palette and text setup and the subsystem reset. */
+void menu_init_stub(void);
+
 /* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
 void menu_subsystems_reset(void);
 
 /* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
  * g_menu_transition_state when it is set. */
 s32 menu_thread_get_activity(void);
-
-/* unreferenced stubs */
-/* Empty functions that nothing on the disc calls or points at; the names are neutral placeholders. */
-void menu_noop_1(void);
-void menu_noop_2(void);
-void menu_noop_3(void);
-void menu_noop_4(void);
-void menu_noop_5(void);
-void menu_noop_6(void);
-void menu_noop_7(void);
 
 /* equipment slots */
 /* The five equipment slots in the order the equipment screens list them (not
@@ -228,9 +219,8 @@ typedef char menu_gradient_panel_prims_size_must_be_316[(sizeof(menu_gradient_pa
 
 /* scaled draw areas */
 /* A panel that zooms open draws through a pair of draw areas: the panel's rectangle at the thread's position,
- * cropped about its center to g_menu_draw_area_scale_percent[scale_index] percent, and the frame buffer's own
- * area. */
-extern const u16 g_menu_draw_area_scale_percent[12];
+ * cropped about its center to the percentage scaled_draw_area.c's scale table gives for scale_index, and the frame
+ * buffer's own area. */
 extern RECT g_menu_draw_area_template;
 
 /* Nonzero upper_half selects the buffer at y 0; zero selects the one at y 240. */

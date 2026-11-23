@@ -14,9 +14,6 @@
 /* Each scene keeps its own current table; event screens save and restore it. */
 extern menu_entry_t* g_menu_thread_menu_data;
 
-/* Whether the thread a screen manages is still running, as menu_thread_start_or_poll last saw it. */
-extern s32 g_menu_managed_thread_state;
-
 /* Starts thread_id on the entry's thread and returns 1 on the first call; later calls return whether the
  * thread still runs. */
 s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor);
@@ -26,9 +23,6 @@ void menu_managed_thread_stop(s32 thread_id);
 /* Requests a stop and runs input-update frames until the thread has ended. */
 void menu_thread_stop_and_wait(s32 thread_id);
 void menu_thread_start_or_poll(s32 thread_id, menu_entry_t* descriptor);
-
-/* Empty; menu_subsystems_init calls it between the palette and text setup and the subsystem reset. */
-void menu_init_stub(void);
 
 /* Acts on Circle for a row: starts the row's entry one thread slot below, clears the selection, or (for a
  * negative action -n) closes n menu threads; stores the row as the entry's result. */
@@ -41,9 +35,6 @@ void menu_update_row_cursor(menu_entry_t* bounds, s32* cursor);
 
 /* An entry with nothing to draw: handles Circle on row 0 and cancel with the menu sounds muted. */
 void menu_input_thread(void);
-
-/* A refused command: queues the invalid-choice sound and exits. */
-void menu_invalid_choice_thread(void);
 
 /* A simple menu window: its text in the frame, a wrapping cursor and an animated cursor icon. */
 void menu_icon_list_thread(void);
@@ -82,12 +73,9 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 /* Applies scroll input, rebuilds the entry's text image and uploads the rows that changed. */
 u8* menu_text_update_page_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 
-/* Shared with the per-program event interpreter and dialog thread. */
-u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
-
 /* list pages */
 /* One of the two 0x134-byte packet pages a scrolling text list alternates between frames
- * (g_formation_ability_list_pages, g_at_list_pages, g_text_list_pages). Provisional. */
+ * (g_formation_ability_list_pages, g_at_list_pages and text_list.c's s_text_list_pages). Provisional. */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
     SPRT arrows[2];                     /* 0x14: scroll arrows */

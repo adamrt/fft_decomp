@@ -116,8 +116,6 @@ typedef enum option_screen {
     MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2 /* crystal and treasure panel */
 } option_screen_e;
 
-void option_menu_thread(void);
-
 /* Dispatch Game Options, AT List or crystal pickup; OPTION and WORLD each build their own body. */
 void option_entrypoint(s32 menu_type);
 
@@ -153,10 +151,5 @@ extern s32 g_option_value_text_id_bases[GAME_OPTION_MENU_ROW_COUNT];
 
 void option_game_options_thread(void);
 void option_choice_thread(void); /* the value picker thread of one game option */
-
-/* WORLD's copy of menu_init_scaled_draw_area_packets for the options screen, and the draw area it installs. */
-extern const RECT g_option_draw_area_template;
-
-void option_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 
 #endif

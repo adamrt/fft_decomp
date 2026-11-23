@@ -1,13 +1,24 @@
 #ifndef SOUND_NOVEL_H
 #define SOUND_NOVEL_H
 
-/* The Sound Novels: reading, the history, quit and restart, and the sound novel script machine with its opcode
- * handlers. */
+/* The Sound Novels: reading, the history, quit and restart, and the sound novel script machine. */
 
 #include "fft/menu_stack.h"
 #include "psx/types.h"
 
 struct suzuki_sound_resource;
+
+/* script files */
+/* Section byte offsets at the start of a loaded sound-novel script. */
+typedef struct sound_novel_script_file {
+    u32 _unused_00;
+    u32 offsets[0]; /* 0x04; variable-length section byte-offset table */
+} sound_novel_script_file_t;
+
+/* The loaded sound-novel script (sound_novel_load_files). */
+extern sound_novel_script_file_t g_sound_novel_script;
+
+void sound_novel_load_files(s32 chapter);
 
 /* readings */
 /* Opcode 0x21 selects which pending script sounds a reading consumes.
@@ -17,15 +28,13 @@ typedef enum sound_novel_sound_mode {
     SOUND_NOVEL_SOUND_MODE_EFFECTS_AND_MUSIC = 1
 } sound_novel_sound_mode_e;
 
-struct sound_novel_script_file;
-
 /* A saved sound-novel reading state (g_sound_novel_saved_readings, 0x38 bytes each).
  * sound_novel_reset_selected_reading establishes the stride and
  * reset_reading resets fields selectively; meanings beyond
  * those stores remain provisional. */
 typedef struct sound_novel_reading {
     /* 0x00: loaded sound-novel script, including its section-offset table. */
-    struct sound_novel_script_file* buffer;
+    sound_novel_script_file_t* buffer;
     u32* script_words;        /* 0x04 */
     u32 instruction;          /* 0x08 */
     u16 state_flags;          /* 0x0c; sound_novel_state_flag_e */
@@ -63,18 +72,6 @@ extern s16 g_sound_novel_selected;
 void sound_novel_reset_selected_reading(s32 unused);
 void sound_novel_restore_reading(s32 render_index);
 
-/* script files */
-/* Section byte offsets at the start of a loaded sound-novel script. */
-typedef struct sound_novel_script_file {
-    u32 _unused_00;
-    u32 offsets[0]; /* 0x04; variable-length section byte-offset table */
-} sound_novel_script_file_t;
-
-/* The loaded sound-novel script (sound_novel_load_files). */
-extern struct sound_novel_script_file g_sound_novel_script;
-
-void sound_novel_load_files(s32 chapter);
-
 /* interpreter */
 /* Interpreter state of the sound-novel script (sound_novel_reading_t.state_flags),
  * stepped by sound_novel_run_script. */
@@ -90,7 +87,6 @@ typedef enum sound_novel_state_flag {
 } sound_novel_state_flag_e;
 
 s32 sound_novel_run_script(void);
-u32 sound_novel_find_section_instruction(s32 section, s32 opcode);
 
 /* text history */
 /* Unsigned scalar view of text_history[1] used by both history shifters.

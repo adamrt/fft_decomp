@@ -51,15 +51,4 @@ extern effect_record_t g_effect_state_records[EFFECT_STATE_RECORD_CAPACITY + 1];
 
 void effect_script_init_instances(void);
 
-/* script */
-/* What an opcode handler returns to run_script_block. */
-typedef enum effect_script_result {
-    EFFECT_SCRIPT_RESULT_YIELD = 0,    /* stop for this frame */
-    EFFECT_SCRIPT_RESULT_CONTINUE = 1, /* run the next instruction */
-    EFFECT_SCRIPT_RESULT_ABORT = 2     /* the script has ended: free the record */
-} effect_script_result_e;
-
-effect_script_result_e effect_script_opcode_04_end(effect_record_t* unused_record);
-effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record);
-
 #endif

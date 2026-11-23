@@ -13,7 +13,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/script.h"
-#include "fft/script_unit.h"
+#include "fft/skillset.h"
 #include "fft/sound.h"
 #include "fft/status_screen.h"
 #include "fft/thread.h"

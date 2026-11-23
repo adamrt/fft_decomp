@@ -8,6 +8,7 @@
 #include "psx/libgs.h"
 #include "psx/types.h"
 
+/* dates */
 /* Calendar month and day, stored as separate bytes. */
 typedef struct calendar_date {
     u8 month;

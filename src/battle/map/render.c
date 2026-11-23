@@ -2,7 +2,7 @@
 
 #include "fft/render.h"
 #include "fft/camera.h"
-#include "fft/effect_particle.h"
+#include "fft/effect.h"
 #include "fft/gfx.h"
 #include "fft/map.h"
 #include "fft/map_light.h"
@@ -13,12 +13,19 @@
 #include "fft/sound.h"
 #include "fft/suzuki.h"
 #include "fft/system.h"
-#include "fft/target.h"
 #include "fft/weather.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+/* The four primitive queues have no C source: hand-written MIPS in the original; the GTE routines are kept as original
+ * bytes through the `regions:` rows of target/battle.yaml (each returns from its prologue and keeps its body after the
+ * jr ra); a port supplies the bodies. */
+void map_queue_textured_quads(u32* otag, POLY_GT4* prims, s32 yaw, s32* unused_count);
+void map_queue_textured_triangles(u32* otag, POLY_GT3* prims, s32 yaw, s32* unused_count);
+void map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_count);
+void map_queue_untextured_triangles(u32* otag, POLY_F3* prims, s32 yaw, s32* unused_count);
 
 /* Weather particles of g_weather_particles: snow
  * (MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES) uses all 64, rain

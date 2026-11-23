@@ -2,7 +2,7 @@
 #define FORMULA_H
 
 /* Ability formulas: the handler of each formula id and the steps they share to work out an action's damage, accuracy,
- * elements and statuses. They take no arguments and work on g_action_work and the target's action data
+ * elements and statuses. Most take no arguments and work on g_action_work and the target's action data
  * (action.h). */
 
 #include "psx/types.h"
@@ -160,9 +160,6 @@ void formula_look_of_fright(void);
 void formula_throw_damage(void);
 void formula_jump_damage(void);
 
-/* A second entry to formula 0x49's handler that the table does not point to and nothing calls. */
-void formula_49_unused_with_extra_steps(void);
-
 /* damage and stat modifiers */
 void formula_apply_attack_up_and_martial_arts(void);
 void formula_apply_attacker_berserk_frog(void);
@@ -179,12 +176,9 @@ void formula_set_brave_loss_y(void);
 void formula_calculate_base_xa(void);
 void formula_calculate_damage_leaving_one_hp(void);
 void formula_calculate_hp_percent_damage(void);
-void formula_calculate_magical_xa_times_ya(void);
 void formula_calculate_mp_percent_damage(void);
 void formula_calculate_physical_damage(void);
 void formula_calculate_stolen_gil(void);
-void formula_calculate_truth_damage(void);
-void formula_calculate_magical_damage_without_faith(void);
 void formula_convert_hp_damage_to_mp_recovery(void);
 void formula_set_exp_stolen(void);
 void formula_store_ma_and_ma_plus_y_divided_by_two(void);
@@ -215,7 +209,6 @@ void formula_calculate_critical_hit(void);
 void formula_evade_calculate_dark_confuse(void);
 void formula_evade_calculate_facing(void);
 void formula_evade_calculate_final_hit_percent(void);
-s32 formula_accuracy_calculate_magic_without_faith(void);
 s32 formula_evade_calculate_magical(void);
 s32 formula_evade_calculate_physical(void);
 void formula_evade_calculate_transparent(void);
@@ -225,9 +218,7 @@ void formula_use_hp_damage_as_action_hit_percent(void);
 void formula_apply_zodiac_compatibility(void);
 void formula_evade_store_physical(void);
 s32 formula_calculate_dance_song_hit(void);
-s32 formula_accuracy_calculate_magic(void);
 s32 formula_accuracy_calculate_physical(void);
-s32 formula_accuracy_calculate_physical_status(void);
 
 /* elements and Faith */
 void formula_element_apply(void);
@@ -249,7 +240,6 @@ s32 formula_calculate_elemental_xa_times_ya(void);
 /* statuses */
 void formula_apply_dance_abilities(void);
 void formula_apply_magical_modifiers(void);
-void formula_apply_physical_modifiers_without_supports(void);
 void formula_apply_physical_modifiers(void);
 void formula_apply_quick_effect(void);
 void formula_apply_song_abilities(void);

@@ -4,6 +4,7 @@
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_input.h"
 #include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/portrait.h"

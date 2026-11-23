@@ -19,7 +19,7 @@ s32 menu_screen_read_buttons(s32 unused_0) {
     }
     if (input == INPUT_RESET_BUTTONS) {
         save_close_stub();
-        screen_reset_game();
+        menu_screen_reset_game();
     }
     return input;
 }

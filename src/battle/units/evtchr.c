@@ -8,6 +8,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Per-slot summary written by sprite_evtchr_get_slot_summary. */
+typedef struct sprite_evtchr_slot_summary {
+    u8 spritesheet_id; /* 0xff free, 0xfe saved, 0xfd no unit, else owner's sheet */
+    u8 evtchr_state;   /* 0xff none, 0xfe saved, 0xfd loaded */
+} sprite_evtchr_slot_summary_t;
+
 /* Unpack a loaded block of EVTCHR.BIN into an EVTCHR slot whose image
  * buffer is free; returns 0 when it is not.
  *

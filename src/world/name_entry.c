@@ -2,6 +2,7 @@
  * confirmation menu. */
 
 #include "fft/name_entry.h"
+#include "fft/fade.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"

@@ -21,6 +21,13 @@ __asm__(".set noat");
 #    define THREAD_ADD_RECORD "addu"
 #endif
 
+/* Named relocations preserve the assembled helpers' $at load sequence. */
+#define THREAD_LOAD_GLOBAL(result, global)                                                                             \
+    __asm__("lui $1, %%hi(%1)\naddu $1,$1,$zero\nlw %0, %%lo(%1)($1)"                                                  \
+        : "=r"(result)                                                                                                 \
+        : "i"(&(global)), "m"(global)                                                                                  \
+        : "$1")
+
 /* Return parameter 1 of the current thread's record. */
 s32 thread_current_get_parameter_1(void) {
     register s32 thread_offset __asm__("$8");

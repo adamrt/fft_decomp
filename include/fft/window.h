@@ -1,7 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-/* Framed text images, paged text windows and menu panels. */
+/* WLDCORE's and OPEN's window records: framed text images, the paged text window and menu panels. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -17,8 +17,6 @@ void window_load_render_record_image(s32 index, u32* image);
 void window_init_text_record(s32 record_index, RECT quad, s32 image_placement, s32 combined_text_index, u32* image);
 void window_display_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u32* image);
 
-/* OPEN measures character columns; WLDCORE measures proportional pixel widths. */
-void window_measure_text_image(s32 combined_text_index, size32_t* dimensions);
 void window_draw_centered_text(s32 window_index, s32 text_id);
 
 /* text window */

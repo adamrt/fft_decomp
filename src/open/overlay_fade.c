@@ -1,5 +1,6 @@
 /* Full-screen subtractive fades shared by the title menus, prologue and ending. */
 
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/system.h"
 #include "psx/libgpu.h"

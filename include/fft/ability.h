@@ -4,8 +4,6 @@
 /* Abilities: their ids, records and secondary data, the skillset rows that list them, the Math Skill flags, elements,
  * learning abilities and the Two Swords and Two Hands checks. */
 
-#include "fft/animation.h"
-#include "fft/skillset.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
@@ -585,7 +583,6 @@ typedef struct ability_data {
 typedef char ability_data_size_must_be_8[(sizeof(ability_data_t) == 8) ? 1 : -1];
 
 extern ability_data_t g_ability_data[ABILITY_ID_COUNT];
-extern animation_ability_data_t g_ability_animation_data[ANIMATION_ABILITY_COUNT];
 
 /* secondary records */
 /* Four flag bytes of ability_secondary_data_t, with only confirmed meanings named. */
@@ -633,7 +630,8 @@ typedef enum ability_secondary_flags_4 {
 } ability_secondary_flags_4_e;
 
 /* One-based formula IDs of abilities, weapons and items: BATTLE resolves an
- * action through g_formulas[id - 1]. Only IDs tested by the
+ * action through the formula table of action resolution (s_formulas in
+ * battle/combat/resolution.c), indexed by id - 1. Only IDs tested by the
  * code are named. */
 typedef enum ability_formula {
     ABILITY_FORMULA_WEAPON_DAMAGE = 1, /* also stands in for 0 and for ids past the table */
@@ -728,7 +726,6 @@ typedef enum rsm_ability_filter {
     RSM_ABILITY_FILTER_MOVEMENT = 0x08
 } rsm_ability_filter_e;
 
-s32 skillset_get_ability_id(s32 skillset_id, s32 ability_index);
 u16* ability_build_skillset_list(s32 skillset, s32 flags);
 
 /* The Elemental ability that the surface type of the unit's tile selects. */
@@ -786,8 +783,6 @@ typedef enum elemental_affinity_index {
 enum { ELEMENTAL_AFFINITY_COUNT = 5 };
 
 /* learning */
-extern s32 g_ability_learn_on_hit_unit_id;
-
 u32 ability_get_learned(const battle_unit_t* unit, u32 job_index);
 s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id);
 void ability_learn_used(battle_unit_t* unit);

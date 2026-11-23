@@ -184,9 +184,15 @@ sprite_display_t* sprite_display_init_status_bubble(s32 map_unit_id);
 void sprite_display_release_unit_stub(sprite_display_t* unused_display);
 void sprite_display_set_part(
     sprite_display_t* display, s32 index, s16 x_shift, s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags);
-void sprite_item_display_set(struct map_unit* unit, u32 item_id);
-void sprite_display_set_part_flip(sprite_display_t* display, s32 part_index, u32 flags);
 void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 part_index, s32 enabled);
+
+/* item display */
+void sprite_item_display_set(struct map_unit* unit, u32 item_id);
+void sprite_item_display_draw(struct map_unit* unit);
+
+/* status bubbles */
+void sprite_status_bubble_update_active(struct map_unit* unit);
+void sprite_status_bubble_draw(struct map_unit* unit, const DVECTOR* unused_screen_coords);
 
 /* sprite blocks */
 /* graphic_type of a unit's sprite blocks: which sheet the block animates. */
@@ -225,6 +231,9 @@ typedef struct sprite_block {
 } sprite_block_t;
 typedef char sprite_block_size_must_be_48[(sizeof(sprite_block_t) == 48) ? 1 : -1];
 
+void sprite_set_weapon_graphic(s32 item_id, struct map_unit* unit);
+void sprite_map_unit_set_weapon_graphic(u32 item_id, u32 map_unit_id);
+
 /* unit sprites */
 /* Sprite lookup result filled in by sprite_map_unit_get_frame_vram_ids. */
 typedef struct sprite_unit_query {
@@ -241,8 +250,6 @@ const sprite_frame_t* sprite_map_unit_get_frame_vram_ids(u32 map_unit_id, sprite
 void sprite_map_unit_set_horizontal_flip(u32 map_unit_id);
 void sprite_map_unit_clear_horizontal_flip(u32 map_unit_id);
 void sprite_update_transparency(struct map_unit* unit);
-void sprite_sheet_apply_status_change(struct map_unit* unit, s32 tile_effect_level);
-void sprite_item_display_draw(struct map_unit* unit);
 void sprite_project_units(void);
 void sprite_update_units_display(void);
 
@@ -277,8 +284,6 @@ void sprite_palette_tint_unit(struct map_unit* unit, s32 level, s32 update_curre
 void sprite_palette_tint_by_team(struct map_unit* unit, s32 amount);
 void sprite_palette_tint_all_by_team(void);
 void sprite_palette_apply_modulation_to_units(s32 mode, s32 amount, s32 map_unit_id, s16 red, s16 green, s16 blue);
-void sprite_set_weapon_graphic(s32 item_id, struct map_unit* unit);
-void sprite_map_unit_set_weapon_graphic(u32 item_id, u32 map_unit_id);
 void sprite_evtchr_map_unit_set_palette(s32 map_unit_id, s32 slot_index, s32 clut_index);
 
 #endif

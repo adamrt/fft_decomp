@@ -51,7 +51,7 @@ void script_graphic_show_thread(void) {
 void script_noop_3(void) {
 }
 
-/* Upload one EVTFACE.BIN block as a single image, followed by its palette rows. */
+/* Upload one EVTFACE.BIN block as a single image, followed by its palette rows. Unreferenced in both programs. */
 void portrait_load_image(s32 portrait_id) {
     portrait_image_block_t* buffer;
 

@@ -239,7 +239,7 @@ s32 scenario_load_setup(void) {
         script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, 0);
     }
 
-    g_encounter_selection_mode = UNIT_ENTD_SELECTION_SCRIPT_VARIABLE;
+    g_encounter_selection_mode = ENCOUNTER_SELECTION_SCRIPT_VARIABLE;
     script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, count);
     script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
 

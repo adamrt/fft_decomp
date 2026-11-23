@@ -4,25 +4,25 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Each menu program keeps its own remembered list positions. */
-menu_selection_record_t g_menu_selection_records[VARIANT_MENU_SELECTION_RECORD_COUNT] = { 0 };
+/* Each menu program keeps its own remembered list positions: 14 in BUNIT and WORLD, 5 in EQUIP and JOBSTTS. */
+static menu_selection_record_t s_menu_selection_records[VARIANT_MENU_SELECTION_RECORD_COUNT] = { 0 };
 
 /* Clear every menu selection record. */
 void menu_selection_clear_records(void) {
-    memset(g_menu_selection_records, 0, sizeof(g_menu_selection_records));
+    memset(s_menu_selection_records, 0, sizeof(s_menu_selection_records));
 }
 
 /* Clear the 6-byte selection record at `index`. */
 void menu_selection_clear_record(s32 index) {
-    memset(&g_menu_selection_records[index], 0, sizeof(menu_selection_record_t));
+    memset(&s_menu_selection_records[index], 0, sizeof(menu_selection_record_t));
 }
 
 /* Save a list's cursor row and scroll base in selection record `index`,
  * together with the id (low ten bits) of the entry under the cursor. */
 void menu_selection_set_record(s32 index, s32 selected_index, s32 scroll_base_index, const s16* entries) {
-    g_menu_selection_records[index].selected_index = selected_index;
-    g_menu_selection_records[index].scroll_base_index = scroll_base_index;
-    g_menu_selection_records[index].entry_id = entries[selected_index] & 0x3FF;
+    s_menu_selection_records[index].selected_index = selected_index;
+    s_menu_selection_records[index].scroll_base_index = scroll_base_index;
+    s_menu_selection_records[index].entry_id = entries[selected_index] & 0x3FF;
 }
 
 /* Keep the saved cursor when it still names the same entry; otherwise find
@@ -35,9 +35,9 @@ void menu_selection_restore_record(s32 index, s16* selected_index, s16* scroll_b
 #endif
     s32 i;
 
-    *selected_index = g_menu_selection_records[index].selected_index;
-    *scroll_base_index = g_menu_selection_records[index].scroll_base_index;
-    entry_id = g_menu_selection_records[index].entry_id;
+    *selected_index = s_menu_selection_records[index].selected_index;
+    *scroll_base_index = s_menu_selection_records[index].scroll_base_index;
+    entry_id = s_menu_selection_records[index].entry_id;
 
 #if defined(FFT_EVENT_EQUIP) || defined(FFT_WORLD)
     found_end = 0;

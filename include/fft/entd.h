@@ -7,19 +7,7 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
-/* Each ENTD#.ENT file holds 128 encounters of 16 entries; an ENTD id at or
- * above ENTDn_FIRST_ENCOUNTER is in file n. */
-enum {
-    ENTD_UNITS_PER_ENCOUNTER = 16,
-    ENTD_ENCOUNTERS_PER_FILE = 128,
-    ENTD2_FIRST_ENCOUNTER = ENTD_ENCOUNTERS_PER_FILE,
-    ENTD3_FIRST_ENCOUNTER = 2 * ENTD_ENCOUNTERS_PER_FILE,
-    ENTD4_FIRST_ENCOUNTER = 3 * ENTD_ENCOUNTERS_PER_FILE
-};
-
-/* The ENTD slots precede the five deployed-party slots in battle storage. */
-enum { DEPLOY_UNIT_SLOT_FIRST = ENTD_UNITS_PER_ENCOUNTER, DEPLOY_UNIT_SLOT_COUNT = 5 };
-
+/* entries */
 /* Y, facing and tile-layer fields of an entry; unit_position_t has a
  * wider facing field. */
 typedef struct entd_unit_position {
@@ -83,6 +71,17 @@ typedef struct entd_unit {
     unit_ai_setup_t ai;                      /* 0x21 */
 } entd_unit_t;
 typedef char entd_unit_size_must_be_40[(sizeof(entd_unit_t) == 40) ? 1 : -1];
+
+/* encounters and files */
+/* Each ENTD#.ENT file holds 128 encounters of 16 entries; an ENTD id at or
+ * above ENTDn_FIRST_ENCOUNTER is in file n. */
+enum {
+    ENTD_UNITS_PER_ENCOUNTER = 16,
+    ENTD_ENCOUNTERS_PER_FILE = 128,
+    ENTD2_FIRST_ENCOUNTER = ENTD_ENCOUNTERS_PER_FILE,
+    ENTD3_FIRST_ENCOUNTER = 2 * ENTD_ENCOUNTERS_PER_FILE,
+    ENTD4_FIRST_ENCOUNTER = 3 * ENTD_ENCOUNTERS_PER_FILE
+};
 
 typedef struct entd_encounter {
     entd_unit_t units[ENTD_UNITS_PER_ENCOUNTER];

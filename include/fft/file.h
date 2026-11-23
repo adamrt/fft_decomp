@@ -47,11 +47,11 @@ typedef enum disc_sector {
     DISC_SECTOR_BATTLE_ZODIAC_BIN = 0xec61,
     DISC_SECTOR_MENU_FFTSAVE_DAT = 0x11a7f,
     DISC_SECTOR_WORLD_WLDTEX_TM2 = 0x11d28,
-    DISC_SECTOR_WORLD_WLDPIC_BIN = 0x11dae,  /* by g_picture_sector_offsets */
-    DISC_SECTOR_WORLD_WLDMES_BIN = 0x11f59,  /* by g_message_block_sector_offsets */
-    DISC_SECTOR_WORLD_SNPLBIN_BIN = 0x128f9, /* by g_sound_novel_script_sector_offsets */
-    DISC_SECTOR_WORLD_SNPLMES_BIN = 0x1291d, /* by g_sound_novel_text_sector_offsets */
-    DISC_SECTOR_WORLD_WLDBK_BIN = 0x12995,   /* by g_picture_background_sector_offsets */
+    DISC_SECTOR_WORLD_WLDPIC_BIN = 0x11dae,  /* by s_picture_sector_offsets */
+    DISC_SECTOR_WORLD_WLDMES_BIN = 0x11f59,  /* by s_message_block_sector_offsets */
+    DISC_SECTOR_WORLD_SNPLBIN_BIN = 0x128f9, /* by s_sound_novel_script_sector_offsets */
+    DISC_SECTOR_WORLD_SNPLMES_BIN = 0x1291d, /* by s_sound_novel_text_sector_offsets */
+    DISC_SECTOR_WORLD_WLDBK_BIN = 0x12995,   /* by s_picture_background_sector_offsets */
     DISC_SECTOR_WORLD_WLDCORE_BIN = 0x14849,
     DISC_SECTOR_WORLD_WORLD_BIN = 0x14925,
     DISC_SECTOR_SOUND_ENV_SED = 0x14c08,

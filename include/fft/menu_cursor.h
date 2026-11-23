@@ -1,8 +1,8 @@
 #ifndef MENU_CURSOR_H
 #define MENU_CURSOR_H
 
-/* Menu cursors: the bobbing finger cursor of menu windows, the 16x16 markers that slide with a shadow, and the cursor
- * frame that zooms in. */
+/* Menu cursors: the bobbing finger cursor of menu windows, the 16x16 markers that slide or bounce with a shadow,
+ * and the cursor frame that zooms in. */
 
 #include "fft/gfx.h"
 #include "psx/libgpu.h"
@@ -25,7 +25,7 @@ void menu_set_cursor_bob_hold(s32 mode);
 /* The vertical offset of the current thread's cursor this frame. */
 s32 menu_get_cursor_bob_offset(s32 mode);
 
-/* sliding markers */
+/* markers */
 /* Signed (last frame, offset) pairs; the two curves end at frames 46 and 36. */
 extern s8 g_menu_cursor_forward_offset_keyframes[6 * 2];
 extern s8 g_menu_cursor_reverse_offset_keyframes[10 * 2];
@@ -40,10 +40,10 @@ extern u16 g_menu_cursor_mode1_foreground_clut;
 /* Both markers keep their state in a u16: the active flag in bit 15 and the frame counter in bits 0-6. Mode 0
  * cancels the active curve and an odd mode starts it. */
 void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode);
+void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 
 /* cursor zoom */
 /* Scales the sprite about its center, keeping its position and texture coordinates even. */
 void menu_zoom_sprite(const void* unused_source, SPRT* sprite, s32 step);
-void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 
 #endif

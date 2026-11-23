@@ -341,7 +341,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
 }
 
 /* Install an item into a formation unit's equipment slot and return 1, or the
- * negative check_equipment_slot_item result.
+ * negative equipment_check_slot_item result.
  *
  * For a roster unit the slot's old item goes back to the inventory and the
  * records are saved to the party; the preview unit only has its record
@@ -359,7 +359,7 @@ s32 equipment_set_slot_item(s16 unit, s16 slot, s16 item_id) {
 
     item_id &= ITEM_ENTRY_ID_MASK;
     item = item_id;
-    status = check_equipment_slot_item(unit, slot, item_id);
+    status = equipment_check_slot_item(unit, slot, item_id);
     if (status < 0) {
         return status;
     }
@@ -417,7 +417,7 @@ s32 equipment_check_item_compatibility(s16 unit_index, s16 item_id) {
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id; an s32 id folds them into one register.
  */
-s32 check_equipment_slot_item(s16 unit_index, s16 slot, s16 item_id) {
+s32 equipment_check_slot_item(s16 unit_index, s16 slot, s16 item_id) {
     s32 result = formation_unit_get_lock(unit_index);
     s16 id;
     s16 new_item;
@@ -528,7 +528,7 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
 /*
  * Drop equipment and abilities a formation unit can no longer use.
  *
- * Items check_equipment_slot_item refuses (0, -1 or the Mime
+ * Items equipment_check_slot_item refuses (0, -1 or the Mime
  * lock) and a second hand weapon without Two Swords are removed, returning
  * items to inventory except for the preview record.
  * Mime clears every ability slot, jobs with an innate support ability drop
@@ -541,7 +541,7 @@ void formation_remove_invalid_loadout(s16 unit_id) {
     s32 status;
 
     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-        status = check_equipment_slot_item(unit_id, i, g_formation_unit_pointers[unit_id]->detail.equipment[i]);
+        status = equipment_check_slot_item(unit_id, i, g_formation_unit_pointers[unit_id]->detail.equipment[i]);
         if (status == -1 || status == 0 || status == FORMATION_UNIT_LOCK_MIME) {
             if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
                 item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);

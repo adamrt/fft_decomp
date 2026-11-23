@@ -2,6 +2,7 @@
  * description for the selected track while the title controller waits. */
 
 #include "fft/controller_stack.h"
+#include "fft/fade.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"

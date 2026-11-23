@@ -2,8 +2,7 @@
 #define UNIT_H
 
 /* Unit records: the battle unit record every program builds and the types it shares with the ENTD entries
- * (entd.h) and party records (party_unit.h), unit height and motion records, and MAIN's unit graphics queue,
- * unit generation and stat building. */
+ * (entd.h) and party records (party_unit.h), and MAIN's unit graphics queue, unit generation and stat building. */
 
 #include "fft/job.h"
 #include "fft/status.h"
@@ -11,9 +10,8 @@
 #include "psx/types.h"
 
 struct entd_unit;
-struct battle_unit;
 
-/* BATTLE's unit record, defined in map_unit.h; headers that only pass units around need just this name. */
+/* BATTLE's map unit record, defined in map_unit.h; headers that only pass units around need just this name. */
 typedef struct map_unit map_unit_t;
 
 /* names */
@@ -309,7 +307,7 @@ typedef enum unit_attribute_index {
 /* CT points needed for a unit turn; speed supplies points each clocktick. */
 enum { UNIT_TURN_CT_THRESHOLD = 100 };
 
-/* battle_unit_t.equipment_stats (Battle Stats 0x3c-0x46), filled by
+/* battle_unit_t.equipment_stats (0x03c-0x046), filled by
  * battle_unit_set_equipment_stats: each hand's weapon power and weapon evade
  * (which battle counts only under Weapon Guard), then the physical evades of
  * the accessory, each hand's shield and the class, then the magic evades of
@@ -355,27 +353,11 @@ typedef enum unit_formation_index {
     UNIT_FORMATION_INDEX_NONE = 255
 } unit_formation_index_e;
 
-/* Deployment records share the byte written by ATTACK and read by BATTLE. */
-typedef struct unit_deployment_flags {
-    u8 facing : 4;
-    u8 off_field : 1;
-    u8 _unused_00_bit5 : 2;
-    u8 upper_level : 1;
-} unit_deployment_flags_t;
-
-typedef struct unit_deployment_coordinates {
-    u8 party_id;
-    u8 x;
-    u8 y;
-    unit_deployment_flags_t flags;
-} unit_deployment_coordinates_t;
-typedef char unit_deployment_coordinates_size_must_be_4[(sizeof(unit_deployment_coordinates_t) == 4) ? 1 : -1];
-
 /* teams and control */
 /* Team bits select one of four independently tracked battle teams. */
 enum { UNIT_TEAM_COUNT = 4, UNIT_TEAM_SHIFT = 4, UNIT_TEAM_INDEX_MASK = 0x03 };
 
-/* Battle Stats 0x05 and map unit record 0x13d share this byte. */
+/* battle_unit_t.team_flags (0x005) and map_unit_t.team_flags (0x13d) share this byte. */
 typedef enum unit_team_flags {
     UNIT_TEAM_MASK = 0x30,
     UNIT_TEAM_OR_PLAYER_CONTROL_MASK = 0x38,
@@ -405,7 +387,7 @@ typedef enum ai_autobattle_mode {
 } ai_autobattle_mode_e;
 
 /* actions */
-/* The 20-byte action command shared by unit stats, AI candidates and menus.
+/* The 20-byte action command shared by battle units, AI candidates and menus.
  * Targeting reads coordinates as signed or unsigned 16-bit values. */
 typedef struct action_command {
     u8 actor_id;               /* 0x00 */
@@ -481,7 +463,7 @@ typedef enum action_miss_display_flags {
     ACTION_MISS_DISPLAY_DODGE_ANIMATION = 0x80 /* the ability's evade-with-motion bit */
 } action_miss_display_flags_e;
 
-/* battle stats */
+/* battle unit record */
 /* The battle simulation owns 21 unit records. Battle-slot search routines use
  * the first value beyond that array as their no-unit sentinel. */
 enum {
@@ -490,7 +472,7 @@ enum {
     UNIT_ID_NONE = BATTLE_UNIT_SLOT_COUNT
 };
 
-/* Battle Stats 0x182 links the two simulation records in a mounted pair. */
+/* battle_unit_t.mount_info (0x182) links the two simulation records in a mounted pair. */
 typedef enum unit_mount_info_flags {
     UNIT_MOUNT_INFO_PARTNER_ID_MASK = 0x1f,
     UNIT_MOUNT_INFO_FLAG_MOUNT = 0x40,
@@ -498,7 +480,7 @@ typedef enum unit_mount_info_flags {
     UNIT_MOUNT_INFO_ROLE_MASK = 0xc0
 } unit_mount_info_flags_e;
 
-/* Lifecycle states stored in Battle Stats 0x183. */
+/* Lifecycle states stored in battle_unit_t.existence (0x183). */
 typedef enum unit_existence_state {
     UNIT_EXISTENCE_OFF_FIELD = 0, /* defined but not placed; AddUnit can use the slot */
     UNIT_EXISTENCE_ACTIVE = 1,
@@ -534,7 +516,7 @@ typedef char unit_ai_setup_size_must_be_7[(sizeof(unit_ai_setup_t) == UNIT_AI_SE
 
 /* Current and calculated unit attributes, also built for WORLD menus. BATTLE
  * keeps BATTLE_UNIT_SLOT_COUNT of them in g_battle_units; a live
- * map_unit_t points to its stats through the member at 0x134. */
+ * map_unit_t points to it through map_unit_t.battle_unit (0x134). */
 typedef struct battle_unit {
     u8 character_identity;                   /* 0x000 */
     u8 active_battle_unit_id;                /* 0x001; active battle slot, or 0xff; not an ENTD definition index */
@@ -619,47 +601,15 @@ typedef struct battle_unit {
 } battle_unit_t;
 typedef char battle_unit_size_must_be_448[(sizeof(battle_unit_t) == 448) ? 1 : -1];
 
+/* BATTLE defines these slots; resident MAIN accesses the same storage. Indexed by battle unit id. */
+extern battle_unit_t g_battle_units[BATTLE_UNIT_SLOT_COUNT];
+
 /* battle_unit_t.ability_outcome. */
 typedef enum unit_ability_outcome {
     UNIT_ABILITY_OUTCOME_TARGETED = 0x01,     /* target of a primary action */
     UNIT_ABILITY_OUTCOME_AFFECTED = 0x02,     /* that action changed the unit */
     UNIT_ABILITY_OUTCOME_LEARN_CHECKED = 0x04 /* the learn-on-hit pass consumed AFFECTED */
 } unit_ability_outcome_e;
-
-/* unit heights (BATTLE) */
-/* Seven result bytes; assigning elevation preserves the unassigned high bit. */
-typedef struct unit_height_data {
-    u8 x;
-    u8 y;
-    u8 elevation : 7;
-    u8 _unused_02 : 1; /* not read or assigned */
-    u8 unit_flags;
-    u8 unit_height;
-    u8 walking_height;
-    u8 total_height;
-} unit_height_data_t;
-typedef char unit_height_data_size_must_be_7[sizeof(unit_height_data_t) == 7 ? 1 : -1];
-
-/* unit display (BATTLE) */
-/* Masks of the motion flags in the 32-bit view of map_unit_t.movement (move_destination_t),
- * whose high byte is runtime-unit +0x83. */
-typedef enum unit_motion_flags {
-    UNIT_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
-    UNIT_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS = 0x02000000,
-    UNIT_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
-    UNIT_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
-    UNIT_MOTION_FLAG_FLOAT = 0x10000000,
-    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000 /* set with each stored animation request */
-} unit_motion_flags_e;
-
-/* action state (BATTLE) */
-/* Three-byte tile coordinates for paths, relocation and action targets. */
-typedef struct move_tile_coordinates {
-    u8 x;
-    u8 y;
-    u8 layer;
-} move_tile_coordinates_t;
-typedef char move_tile_coordinates_size_must_be_3[(sizeof(move_tile_coordinates_t) == 3) ? 1 : -1];
 
 /* unit graphics queue */
 /* One queued unit: where it stands, how it faces and which graphics it uses. */
@@ -709,8 +659,6 @@ s32 battle_unit_init_from_encounter(battle_unit_t* unit, const struct entd_unit*
 s32 battle_unit_init_from_party_slot(battle_unit_t* unit, s32 slot, s32 use_world_text);
 void battle_unit_generate_raw_stats(battle_unit_t* unit);
 void battle_unit_copy_job_growths(battle_unit_t* unit);
-void job_calculate_levels_from_jp(
-    const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
 void battle_unit_init_status_and_rewards(battle_unit_t* unit, s32 clear_rewards);
 void battle_unit_init_position_and_rewards(battle_unit_t* unit, const struct entd_unit* entd);
 void battle_unit_learn_job_abilities(battle_unit_t* unit, s32 job_id, const struct entd_unit* entd);

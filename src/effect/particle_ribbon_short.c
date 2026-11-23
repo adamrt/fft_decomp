@@ -18,6 +18,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* The short ribbon variant: 9-point trails, up to 8 per spawn. */
+enum { EFFECT_PARTICLE_RIBBON_SHORT_SLOTS = 8, EFFECT_PARTICLE_RIBBON_SHORT_POINTS = 9 };
+
 extern u32 g_effect_particle_ribbon_short_brightness_table[][EFFECT_PARTICLE_RIBBON_SHORT_POINTS];
 
 /* One short ribbon: a particle and the double-buffered quad strip drawn along

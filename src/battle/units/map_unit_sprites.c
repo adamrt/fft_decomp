@@ -13,7 +13,6 @@
 #include "fft/map_palette.h"
 #include "fft/map_unit.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
 #include "fft/move.h"
 #include "fft/move_step.h"
 #include "fft/result.h"

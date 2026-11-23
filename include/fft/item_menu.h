@@ -38,8 +38,8 @@ typedef enum item_menu_category {
     ITEM_MENU_CATEGORY_OTHER = 5
 } item_menu_category_e;
 
-/* The category argument of equipment_build_item_list,
- * shop_build_stock_list and equipment_build_item_list. 0 to 4
+/* The category argument of equipment_build_item_list (WORLD's and EQUIP's
+ * bodies) and shop_build_stock_list. 0 to 4
  * select what fits that equipment slot. The item menus pass their tab + 1 for
  * the first four tabs and OTHER for the fifth; the best-fit builders pass
  * WEAPON or SHIELD for the left hand. */

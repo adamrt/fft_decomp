@@ -4,12 +4,10 @@
 /* Status effects: the status IDs and sets, the status data and check sets, changing a unit's statuses and the per-turn
  * upkeep, and the display flags and bubbles a status shows. */
 
-#include "psx/libgte.h"
 #include "psx/types.h"
 
 struct action_data;
 struct battle_unit;
-struct map_unit;
 
 /* status IDs */
 enum {
@@ -70,7 +68,6 @@ typedef enum status_id {
 
 /* Event infliction helpers number bits LSB-first, unlike stored status IDs. */
 #define STATUS_LSB_INDEX(id) (((id) & ~7) | (7 - ((id) & 7)))
-#define STATUS_LSB_MASK(id)  ((u8)(1U << ((id) & 7)))
 
 /* The special-status callback table reserves index 0; timed slots begin at Poison. */
 #define STATUS_HANDLER_INDEX(id) ((id) + 1)
@@ -224,7 +221,6 @@ void status_init_unit(struct battle_unit* unit);
 void status_set_action_state(struct battle_unit* unit, u8 action_state);
 void status_clear_action_state(struct battle_unit* unit);
 s32 status_inflict_defending(s32 unit_id);
-s32 action_check_and_cancel_charge(struct battle_unit* unit, s32 cancel);
 s32 status_find_action_priority(const struct action_data* action);
 s32 status_modify_inflictions(s32 removal_only);
 s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
@@ -262,8 +258,5 @@ typedef enum status_bubble {
     STATUS_BUBBLE_SOURCE_UNIT = 21,    /* the source unit's marker, not a status */
     STATUS_BUBBLE_COUNT = 22
 } status_bubble_e;
-
-void sprite_status_bubble_update_active(struct map_unit* unit);
-void sprite_status_bubble_draw(struct map_unit* unit, const DVECTOR* unused_screen_coords);
 
 #endif

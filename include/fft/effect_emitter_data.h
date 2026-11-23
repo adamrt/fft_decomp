@@ -150,7 +150,7 @@ enum {
 };
 
 /* particle emitter */
-/* The spawn block at 0x14-0x4b of an emitter record, as the effect_interpolate_emitter_* helpers read it; the native
+/* The spawn block at 0x14-0x4b of an emitter record, as the effect_emitter_interpolate_* helpers read it; the native
  * renderers that spawn like the particle emitter embed it. The spread is the ellipsoid or box half-extent around the
  * spawn position and the velocity spread randomizes the base angles. */
 typedef struct effect_emitter_geometry_view {
@@ -307,7 +307,7 @@ typedef struct effect_particle_ribbon_geometry_view {
     u32 spawn_curve_bindings;                         /* 0x08 */
     u32 target_curve_bindings;                        /* 0x0c */
     u32 color_curves;                                 /* 0x10 */
-    effect_emitter_geometry_view_t emitter;           /* 0x14: read by effect_interpolate_emitter_* */
+    effect_emitter_geometry_view_t emitter;           /* 0x14: read by effect_emitter_interpolate_* */
     effect_texture_page_config_t texture_page_config; /* 0x4c */
     s16 brightness_row;                               /* 0x4e */
     u8 _unused_50[0x04];
@@ -540,7 +540,7 @@ typedef struct effect_tentacle_mesh_geometry_view {
     u32 spawn_curve_bindings;                         /* 0x08 */
     u32 tip_curve_bindings;                           /* 0x0c */
     u32 color_curves;                                 /* 0x10 */
-    effect_emitter_geometry_view_t emitter;           /* 0x14: read by effect_interpolate_emitter_* */
+    effect_emitter_geometry_view_t emitter;           /* 0x14: read by effect_emitter_interpolate_* */
     effect_texture_page_config_t texture_page_config; /* 0x4c */
     s16 brightness_row;                               /* 0x4e */
     u8 _unused_50[0x04];

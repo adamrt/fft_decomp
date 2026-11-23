@@ -2,17 +2,18 @@
 #define WORLD_MAP_H
 
 /* The World Map the player travels on (the game's own term, not the WORLD program): its entry and display frame, fades,
- * value display, pictures, tiles, camera and scrolling, map dots and routes, the menu stack levels and transitions it
- * pushes, and WORLD's world map menu. */
+ * value display, pictures, tiles, camera and scrolling, map dots and routes, and the menu stack levels and transitions
+ * it pushes. */
 
 #include "fft/display_object.h"
-#include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/menu_stack.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+struct file_load_descriptor;
 
 /* map loop flags */
 /* Bits of g_world_map_flags, the 32-bit control flags of the WLDCORE world-map
@@ -83,6 +84,9 @@ typedef enum world_map_flags {
 
 extern u32 g_world_map_flags; /* world_map_flags_e bits; cleared by save_init_data_tables */
 
+/* g_world_map_flags as update_backdrop last saw it (world_map_flags_e). */
+extern u32 g_world_map_previous_flags;
+
 /* entry */
 /* g_system_frontend_world_result: why wldcore_entrypoint returned, which tells BATTLE.BIN what
  * to run next. */
@@ -94,18 +98,8 @@ typedef enum world_map_result {
     WORLD_MAP_RESULT_TITLE = 5 /* back to the title, skipping the opening movie */
 } world_map_result_e;
 
-/* Slots that the WLDCORE screens use for threads of their own. */
-typedef enum world_map_thread_slot {
-    WORLD_MAP_THREAD_SLOT_TRANSITION = 4,    /* the zoom thread of a screen transition */
-    WORLD_MAP_THREAD_SLOT_WINDOW_PANEL = 12, /* a list or number panel */
-    WORLD_MAP_THREAD_SLOT_MESSAGE = 14       /* the message box and script text */
-} world_map_thread_slot_e;
-
 /* MAIN saves WLDCORE's return value here for BATTLE's setup. */
 extern world_map_result_e g_system_frontend_world_result;
-
-/* g_world_map_flags as update_backdrop last saw it (world_map_flags_e). */
-extern u32 g_world_map_previous_flags;
 
 /* Run WLDCORE's world-map loop and return a world_map_result_e. */
 world_map_result_e wldcore_entrypoint(void);
@@ -117,10 +111,17 @@ world_map_result_e overlay_run_world(s32 load_world);
  * target/wldcore.yaml (the switch assigns sp, which C cannot; the restore is its tail); a port supplies both bodies. */
 void world_map_switch_to_stack(void*);
 void world_map_restore_previous_stack(void);
-void world_map_init_menu_state(void);
 
 /* Empty; init_subsystems calls it between the map dot and location marker setup. */
 void world_map_stub_init(void);
+
+/* thread slots */
+/* Slots that the WLDCORE screens use for threads of their own. */
+typedef enum world_map_thread_slot {
+    WORLD_MAP_THREAD_SLOT_TRANSITION = 4,    /* the zoom thread of a screen transition */
+    WORLD_MAP_THREAD_SLOT_WINDOW_PANEL = 12, /* a list or number panel */
+    WORLD_MAP_THREAD_SLOT_MESSAGE = 14       /* the message box and script text */
+} world_map_thread_slot_e;
 
 /* input */
 extern u32 g_world_map_input_new_button_presses;
@@ -225,7 +226,7 @@ void picture_load_set(s32 value);
 extern s32* g_world_map_tile_descriptors;
 
 void world_map_load_texture(void);
-void world_map_update_texture_stream(file_load_descriptor_t* stream);
+void world_map_update_texture_stream(struct file_load_descriptor* stream);
 void world_map_init_tile_atlas(void);
 void world_map_project_tiles(void);
 void world_map_draw_tiles(GsOT* ot);
@@ -271,7 +272,6 @@ extern world_map_pan_t g_world_map_pan;
 /* Provisional: flags bit 0 runs the zoom, bit 1 selects the zoomed-out direction. */
 extern world_map_zoom_t g_world_map_zoom;
 
-void world_map_update_marker(void);
 s32 world_map_update_pan(void);
 s32 world_map_start_pan(const point32_t* point, const SVECTOR* coordinates);
 s32 world_map_point_needs_pan(const point32_t* point);
@@ -339,6 +339,7 @@ typedef struct world_map_marker_state {
 extern world_map_dot_t g_world_map_dots[];
 extern world_map_marker_state_t g_world_map_marker_state;
 
+void world_map_update_marker(void);
 void world_map_init_dots(void);
 void world_map_init_marker_and_camera(void);
 void world_map_project_dots(void);
@@ -378,48 +379,7 @@ void world_map_draw_routes(GsOT* ot);
 void world_map_prepare_path_animation(s32 from, s32 to);
 void world_map_draw_path_animation(GsOT* ot);
 
-/* menu levels */
-/* Provisional: the WORLD_MENU level that closes the world map, pushed by world_map_open_menu_level.
- * update_map_menu_return is its only reader: delay counts down the frames the fade needs and pending latches
- * while WORLD_MAP_FLAG_SCREEN_CLEARED is up. */
-typedef struct world_map_menu_level {
-    s32 delay;
-    s32 pending; /* 0x04 */
-} world_map_menu_level_t;
-
-/* Provisional: the world-map cursor level (ROOT) stepped by update_cursor_level. */
-typedef struct world_map_cursor_level {
-    s32 window_index;     /* 0x00; the map cursor window */
-    s32 alt_window_index; /* 0x04; the wide-view window swapped in by 0x80 */
-    s32 wide_view;        /* 0x08; non-zero while the wide view is shown */
-    s32 snap_hit;         /* 0x0c; dot index returned by the snap probe */
-    s32 pending_mode;     /* 0x10 */
-} world_map_cursor_level_t;
-
-/* The WORLD_MAP_LOCATION_VISIBILITY level pushed by open_visibility_level and stepped by
- * update_visibility_level; only the first four fields are known. */
-typedef struct world_map_visibility_level {
-    s32 dot_index;     /* 0x00; map dot, and script variable 0x200 + dot_index */
-    s32 erase;         /* 0x04; nonzero clears visibility instead of revealing the dot */
-    s32 delay;         /* 0x08; frames the step handler waits, 0x10 here */
-    s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
-    u8 _unused_10[0x4c];
-} world_map_visibility_level_t;
-typedef char world_map_visibility_level_size_must_be_92[sizeof(world_map_visibility_level_t) == 92 ? 1 : -1];
-
-/* Provisional: the WORLD_MAP_PATH level pushed by open_path_level, decoded from the four fields it
- * writes. Its step handler update_path_level reads only the last two. The first two are the script's
- * path arguments, which location_script_dispatch_requests passes from g_location_script_state.args. Only
- * the first four fields of the slot are known. */
-typedef struct world_map_path_level {
-    s32 from_location; /* 0x00; g_location_script_state.args[0] */
-    s32 to_location;   /* 0x04; g_location_script_state.args[1] */
-    s32 erase;         /* 0x08; step handler walks the path backwards when set */
-    s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
-    u8 _unused_10[0x4c];
-} world_map_path_level_t;
-typedef char world_map_path_level_size_must_be_92[sizeof(world_map_path_level_t) == 92 ? 1 : -1];
-
+/* menu text */
 /* The text ids of TEXT_ID_WORLD_MENU_BASE that the code names: the bar, the
  * Brave Story, the tutorial and the location menu. The first five entries are
  * the bar's rows, TEXT_ID_WORLD_MENU_BASE + bar_row_e. */
@@ -485,14 +445,57 @@ typedef enum world_map_text_id {
     TEXT_ID_LAND_FOUND_FIRST = 0xb904      /* the same for an unexplored land, to "Master Adventurer" */
 } world_map_text_id_e;
 
+/* menu levels */
+/* Provisional: the WORLD_MENU level that closes the world map, pushed by world_map_open_menu_level.
+ * update_map_menu_return is its only reader: delay counts down the frames the fade needs and pending latches
+ * while WORLD_MAP_FLAG_SCREEN_CLEARED is up. */
+typedef struct world_map_menu_level {
+    s32 delay;
+    s32 pending; /* 0x04 */
+} world_map_menu_level_t;
+
+/* Provisional: the world-map cursor level (ROOT) stepped by update_cursor_level. */
+typedef struct world_map_cursor_level {
+    s32 window_index;     /* 0x00; the map cursor window */
+    s32 alt_window_index; /* 0x04; the wide-view window swapped in by 0x80 */
+    s32 wide_view;        /* 0x08; non-zero while the wide view is shown */
+    s32 snap_hit;         /* 0x0c; dot index returned by the snap probe */
+    s32 pending_mode;     /* 0x10 */
+} world_map_cursor_level_t;
+
+/* The WORLD_MAP_LOCATION_VISIBILITY level pushed by open_visibility_level and stepped by
+ * update_visibility_level; only the first four fields are known. */
+typedef struct world_map_visibility_level {
+    s32 dot_index;     /* 0x00; map dot, and script variable 0x200 + dot_index */
+    s32 erase;         /* 0x04; nonzero clears visibility instead of revealing the dot */
+    s32 delay;         /* 0x08; frames the step handler waits, 0x10 here */
+    s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
+    u8 _unused_10[0x4c];
+} world_map_visibility_level_t;
+typedef char world_map_visibility_level_size_must_be_92[sizeof(world_map_visibility_level_t) == 92 ? 1 : -1];
+
+/* Provisional: the WORLD_MAP_PATH level pushed by open_path_level, decoded from the four fields it
+ * writes. Its step handler update_path_level reads only the last two. The first two are the script's
+ * path arguments, which location_script_dispatch_requests passes from g_location_script_state.args. Only
+ * the first four fields of the slot are known. */
+typedef struct world_map_path_level {
+    s32 from_location; /* 0x00; g_location_script_state.args[0] */
+    s32 to_location;   /* 0x04; g_location_script_state.args[1] */
+    s32 erase;         /* 0x08; step handler walks the path backwards when set */
+    s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
+    u8 _unused_10[0x4c];
+} world_map_path_level_t;
+typedef char world_map_path_level_size_must_be_92[sizeof(world_map_path_level_t) == 92 ? 1 : -1];
+
 extern s32 g_world_map_window_index;
 extern s32 g_world_map_cursor_window;
 
+void world_map_init_menu_state(void);
 void world_map_update_menus(GsOT* context);
 void world_map_open_menu_level(void);
 void world_map_suspend_cursor_level(menu_stack_record_t* level);
 
-/* screen and event transitions */
+/* menu screen and event transitions */
 /* Provisional: the MENU_SCREEN_TRANSITION level pushed by menu_screen_transition_open and stepped by
  * menu_screen_transition_update. */
 typedef struct menu_screen_transition_level {
@@ -557,10 +560,5 @@ void event_transition_open(s32 mode);
 void event_transition_update(menu_stack_record_t* level);
 void event_transition_draw_sprite(GsOT* ot);
 void event_transition_seek_battle_bin(void);
-
-/* world map menu (WORLD) */
-void world_map_confirm_destination(void);
-void world_map_menu_text_window_thread(void);
-void world_map_destination_list_thread(void);
 
 #endif

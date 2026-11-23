@@ -221,7 +221,6 @@ enum { MAP_LOAD_RESULT_HELD = 0x9b };
 
 extern s32 g_map_loaded_id;
 extern map_resource_t* g_map_data_load_buffer;
-extern s32 g_map_deep_dungeon_load_in_progress;
 
 s32 map_update_load(s32 map_id, map_load_command_e command);
 s32 map_start_load(void);

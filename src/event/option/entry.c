@@ -6,7 +6,6 @@
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/option.h"
-#include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"
 #include "fft/unit_panel.h"

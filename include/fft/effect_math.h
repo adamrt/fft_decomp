@@ -7,7 +7,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* vector math */
+/* vectors */
 void effect_vector_load(const vec3s16_t* src, VECTOR* dst);
 void effect_vector_load_svector(const vec3s16_t* src, SVECTOR* dst);
 void effect_vector_add(const VECTOR* first, const VECTOR* second, VECTOR* out);
@@ -24,8 +24,11 @@ void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVEC
 void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst);
 void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst);
 void effect_vector_mask_low_12_bits(const SVECTOR* src, SVECTOR* dst);
-s16 effect_s16_select_larger_magnitude(s16 first, s16 second);
+
+/* magnitudes */
 s16 effect_s16_select_largest_magnitude(s16 first, s16 second, s16 third);
+
+/* interpolation */
 s32 effect_s32_interpolate_cos(s32 start, s32 end, s32 duration, s32 current);
 void effect_svector_interpolate_linear(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
 void effect_svector_interpolate_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);

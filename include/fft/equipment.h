@@ -9,8 +9,6 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-struct menu_gfx_context;
-
 /* screen */
 /* g_equipment_screen_state: the index of the screen's handler in
  * g_equipment_screen_state_handlers. The command menu enters its picked row
@@ -37,7 +35,7 @@ void equipment_init(s32 battle_unit_id);
 void equipment_reset_selection_results(void);
 
 /* unit preview */
-/* What check_equipment_slot_item finds for an item in an equipment slot. */
+/* What equipment_check_slot_item finds for an item in an equipment slot. */
 typedef enum equipment_slot_result {
     EQUIPMENT_SLOT_ITEM_CURRENT_LOCKED = -2,
     EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP = -1,
@@ -107,8 +105,6 @@ extern s8 g_equipment_remove_all_equipment_prompt_active;
 extern s16 g_equipment_remove_item_equipment[5];
 extern s8 g_equipment_remove_item_previewed_slot;
 
-void item_list_draw_tabs(s32 unused, s32 slot, s32 override);
-
 /* stat previews */
 s32 equipment_get_preview_hp_bonus(s32 unused_row);
 s32 equipment_get_preview_mp_bonus(s32 unused_row);
@@ -116,9 +112,6 @@ s32 equipment_get_preview_mp_bonus(s32 unused_row);
 /* Row callbacks: the previewed HP or MP bonus, or MENU_NUMBER_VALUE_DASHES when it is 0. */
 s32 equipment_preview_get_hp_bonus_display(s32 unused_row);
 s32 equipment_preview_get_mp_bonus_display(s32 unused_row);
-
-/* Clears the HP and MP preview bonuses and the equipment-detail stats. */
-void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail);
 
 /* Sums weapon power and equipment evade from five items; other detail fields are unchanged. */
 void equipment_build_weapon_evade_totals(unit_panel_record_t* total, const u16* equipment);
@@ -136,6 +129,7 @@ void equipment_calculate_loadout_delta(
 extern u8 g_equipment_item_inventory_totals[];
 
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
+void item_list_draw_tabs(s32 unused, s32 slot, s32 override);
 
 /* EQUIP and WORLD each build their own bodies of these two. */
 s32 item_list_update(void);
@@ -158,8 +152,6 @@ extern u16 g_equipment_gfx_draw_move_capacity;
 /* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in menu_gfx_init_contexts. */
 extern volatile u16 g_equipment_gfx_line_g2_capacity;
 extern volatile u16 g_equipment_gfx_line_g3_capacity;
-
-/* input */
 
 /* menu commands */
 /* The opcode that ends an EQUIP menu display stream. */

@@ -7,6 +7,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+extern const u16 g_menu_draw_area_scale_percent[12];
+
 /*
  * Build the double-buffered draw-area pair of a window's open/close zoom.
  *

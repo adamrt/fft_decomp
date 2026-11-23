@@ -5,7 +5,7 @@
 
 #include "psx/types.h"
 
-/* byte copies */
+/* byte copies and reads */
 s16 mem_load_unaligned_s16(const u8* ptr);
 
 /* Source-first byte copies; nonpositive counts leave the destination unchanged. */

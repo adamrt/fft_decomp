@@ -16,6 +16,16 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Lattice of the spinning dome renderer: eight rows of sixteen segments. */
+enum {
+    DOME_MESH_ROWS = 8,
+    DOME_MESH_SEGMENTS = 16,
+    DOME_MESH_LATTICE_COMPONENTS = 3,
+    DOME_MESH_QUAD_COUNT = DOME_MESH_ROWS * DOME_MESH_SEGMENTS,
+    DOME_MESH_LATTICE_POINT_BYTES = sizeof(vec3s16_t),
+    DOME_MESH_LATTICE_ROW_BYTES = (DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_POINT_BYTES
+};
+
 /* Overlay-local vertex brightness rows (12-bit fixed): brightness_row selects
  * the row, the lattice row (0-8) the column. */
 extern u32 g_effect_dome_mesh_brightness_table[][9];

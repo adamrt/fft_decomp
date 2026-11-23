@@ -6,7 +6,7 @@
 #include "fft/command.h"
 #include "fft/crystal.h"
 #include "fft/equipment.h"
-#include "fft/gfx_primitive.h"
+#include "fft/fade.h"
 #include "fft/help.h"
 #include "fft/map_unit.h"
 #include "fft/memory.h"

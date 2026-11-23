@@ -7,7 +7,6 @@
 #include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/script_unit.h"
 #include "fft/sound.h"
 #include "fft/status.h"
 #include "fft/status_screen.h"

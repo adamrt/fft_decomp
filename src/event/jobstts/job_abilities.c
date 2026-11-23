@@ -72,7 +72,7 @@ void status_screen_init_unit_jobs(s32 unit_id) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-s32 job_list_get_base(s16 unit_id) {
+static s32 job_list_get_base(s16 unit_id) {
     status_screen_unit_jobs_t* unit = g_status_screen_unit_data[unit_id];
     u32 job_id = unit->character_identity;
 

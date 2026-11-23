@@ -1,6 +1,7 @@
 /* Party portrait textures and formation sprites. */
 
 #include "fft/character_identity.h"
+#include "fft/deploy.h"
 #include "fft/file.h"
 #include "fft/formation.h"
 #include "fft/job.h"

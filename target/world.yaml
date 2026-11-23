@@ -64,7 +64,7 @@ units:
   - {name: job_wheel, source: src/world/formation/job_wheel.c, data: [{addr: 0x8018c91c, size: 60, hash: c99fca10dd48a58a}], bss: [{addr: 0x801c83c0, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: lifecycle, source: src/lib/event/scene/lifecycle.c}
   - {name: list_threads, source: src/world/formation/panels.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}], bss: [{addr: 0x801c453c, size: 1968, hash: ad03396ba1f4627e}]}
-  - {name: managed_threads, source: src/lib/menu/managed_threads.c}
+  - {name: managed_threads, source: src/lib/menu/managed_threads.c, bss: [{addr: 0x8018e430, size: 4, hash: df3f619804a92fdb}]}
   - {name: memcard, source: src/lib/memcard.c, data: [{addr: 0x80194fd8, size: 4, hash: ad95131bc0b799c0}]}
   - {name: menu_ability_display_values, source: src/lib/menu/ability_rows.c, bss: [{addr: 0x801c85d8, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_actions, source: src/lib/menu/menu_actions.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
@@ -718,8 +718,8 @@ functions:
   - {addr: 0x80113f00, size: 392, name: formation_init_menu_state, hash: 7e29a1534a367821, unit: formation_screen}
   - {addr: 0x80114088, size: 52, name: menu_screen_reset_selection_results, hash: c90839a76394f4a5, unit: formation_screen}
   - {addr: 0x801140bc, size: 1692, name: update_unit_grid_menu, hash: 8a1d21ff46662df6, unit: formation_screen}
-  - {addr: 0x80114758, size: 1136, name: update_unit_grid_selection, hash: ff9a951ef4b49382, unit: formation_screen}
-  - {addr: 0x80114bc8, size: 388, name: stage_selected_unit, hash: 62b0f0d0838db139, unit: formation_screen}
+  - {addr: 0x80114758, size: 1136, name: unit_grid_update_selection, hash: ff9a951ef4b49382, unit: formation_screen}
+  - {addr: 0x80114bc8, size: 388, name: formation_stage_selected_unit, hash: 62b0f0d0838db139, unit: formation_screen}
   - {addr: 0x80114d4c, size: 1100, name: formation_update_selection_stage, hash: fe69bad5f09d2f26, unit: formation_screen}
   - {addr: 0x80115198, size: 712, name: formation_refresh_selected_stats, hash: 8537b0e65bf69f8c, unit: formation_screen}
   - {addr: 0x80115460, size: 100, name: unit_panel_toggle_banner_thread, hash: 4aef2b35a80ac815, unit: banner_toggles}
@@ -730,8 +730,8 @@ functions:
   - {addr: 0x801156b4, size: 156, name: unit_panel_toggle_preview_stats_thread, hash: 88fb43527677df34, unit: formation_grid}
   - {addr: 0x80115750, size: 156, name: formation_toggle_ability_panel, hash: 6c48f97c5cbb8f4a, unit: formation_grid}
   - {addr: 0x801157ec, size: 140, name: formation_open_equipment_panel, hash: 73537ed8ef09deb4, unit: formation_grid}
-  - {addr: 0x80115878, size: 76, name: redraw_unit_panels, hash: ce717e1aa4bae479, unit: formation_grid}
-  - {addr: 0x801158c4, size: 104, name: unit_panels_stop, hash: 02ad132fa1c066b7, unit: formation_grid}
+  - {addr: 0x80115878, size: 76, name: unit_panel_redraw_all, hash: ce717e1aa4bae479, unit: formation_grid}
+  - {addr: 0x801158c4, size: 104, name: unit_panel_stop_all, hash: 02ad132fa1c066b7, unit: formation_grid}
   - {addr: 0x8011592c, size: 128, name: get_grid_stat, hash: 2adbbff274ecbc12, unit: formation_grid}
   - {addr: 0x801159ac, size: 32, name: get_grid_level, hash: ff6790670fac78da, unit: formation_grid}
   - {addr: 0x801159cc, size: 32, name: get_grid_experience, hash: 42a86975cc653832, unit: formation_grid}
@@ -784,7 +784,7 @@ functions:
   - {addr: 0x8011a9d8, size: 92, name: equipment_row_get_equipped_count, hash: 49c6e60b38d5b05d, unit: equipment_rows}
   - {addr: 0x8011aa34, size: 112, name: item_build_type_icon_source, hash: fc1261165929b61f, unit: equipment_rows}
   - {addr: 0x8011aaa4, size: 68, name: equipment_row_get_icon_source, hash: 61705fb5a73d961f, unit: equipment_rows}
-  - {addr: 0x8011aae8, size: 1124, name: update_item_menu, hash: 48444ba79d6a947a, unit: formation_item_menu}
+  - {addr: 0x8011aae8, size: 1124, name: formation_item_update_menu, hash: 48444ba79d6a947a, unit: formation_item_menu}
   - {addr: 0x8011af4c, size: 1544, name: update_equip_menu, hash: c1af2f118c836d72, unit: formation_item_menu}
   - {addr: 0x8011b554, size: 576, name: update_best_fit_menu, hash: 391f6a57ff1cc7ef, unit: formation_item_menu}
   - {addr: 0x8011b794, size: 1208, name: update_remove_menu, hash: c36aaf3c1aecb88f, unit: formation_item_menu}
@@ -895,7 +895,7 @@ functions:
   - {addr: 0x80123dd8, size: 1616, name: shop_fitting_build_best_fit, hash: 698d425d171ded90, unit: equipment_slots}
   - {addr: 0x80124428, size: 340, name: equipment_set_slot_item, hash: 376284c7903fa575, unit: equipment_slots}
   - {addr: 0x8012457c, size: 152, name: equipment_check_item_compatibility, hash: aed6d3aa90927a9d, unit: equipment_slots}
-  - {addr: 0x80124614, size: 468, name: check_equipment_slot_item, hash: 52d5e61091cff26f, unit: equipment_slots}
+  - {addr: 0x80124614, size: 468, name: equipment_check_slot_item, hash: 52d5e61091cff26f, unit: equipment_slots}
   - {addr: 0x801247e8, size: 436, name: formation_job_change, hash: 99619d927a10cf2d, unit: equipment_slots}
   - {addr: 0x8012499c, size: 696, name: formation_remove_invalid_loadout, hash: 87f3d9e5c399eba5, unit: equipment_slots}
   - {addr: 0x80124c54, size: 704, name: equipment_build_item_list, hash: 4b7869eaf2c81375, unit: equipment_slots}
@@ -998,7 +998,7 @@ functions:
   - {addr: 0x8012bb88, size: 396, name: menu_step_grid_selection, hash: 02e8a16cf787cd89, source: src/lib/menu/grid_selection.c}
   - {addr: 0x8012bd14, size: 104, name: menu_screen_read_buttons, hash: b7ae4cb3cff53d07, source: src/world/menu/buttons.c}
   - {addr: 0x8012bd7c, size: 32, name: menu_input_clear_state, hash: 1d40a8afb9ba0b8b, source: src/lib/menu/input_masks.c}
-  - {addr: 0x8012bd9c, size: 32, name: screen_reset_game, hash: 0002116356e621bf, source: src/world/menu/reset.c}
+  - {addr: 0x8012bd9c, size: 32, name: menu_screen_reset_game, hash: 0002116356e621bf, source: src/world/menu/reset.c}
   - {addr: 0x8012bdbc, size: 256, name: gfx_enqueue_tile, hash: 9f150427cc8f609b, source: src/lib/menu/graphics/tiles.c}
   - {addr: 0x8012bebc, size: 344, name: menu_screen_append_poly_f4, hash: 7a9732f67b0bc603, source: src/world/menu/flat_quad.c}
   - {addr: 0x8012c014, size: 460, name: gfx_enqueue_gouraud_quad, hash: 40fb9a0164d41558, source: src/lib/menu/graphics/gouraud_quads.c}
@@ -1049,7 +1049,7 @@ functions:
   - {addr: 0x8012fb40, size: 664, name: update_write, hash: 3c7091e533e6538b, unit: card_save}
   - {addr: 0x8012fdd8, size: 1376, name: save_image_build, hash: d69432919b8efe18, unit: card_save}
   - {addr: 0x80130338, size: 1376, name: save_image_restore, hash: f255787294524672, unit: card_save}
-  - {addr: 0x80130898, size: 116, name: init_save_screen, hash: fe0806c686515e32, unit: card_save}
+  - {addr: 0x80130898, size: 116, name: save_init_screen, hash: fe0806c686515e32, unit: card_save}
   - {addr: 0x8013090c, size: 40, name: free_work_buffer, hash: 4f1094619cc1d943, unit: card_save}
   - {addr: 0x80130934, size: 260, name: set_slot_playtime, hash: da630cc263716185, unit: card_save}
   - {addr: 0x80130a38, size: 2160, name: update_card_scan, hash: 4fb75e9d4d762199, unit: card_save}
@@ -1798,7 +1798,7 @@ data:
   - {addr: 0x8018e240, name: g_menu_screen_grid_cell_24_text_offset}
   - {addr: 0x8018e2ac, name: g_menu_screen_grid_shop_cells}
   - {addr: 0x8018e36c, name: g_menu_screen_grid_shop_scrolled_cells}
-  - {addr: 0x8018e430, name: g_menu_managed_thread_state}
+  - {addr: 0x8018e430, name: s_menu_managed_thread_state}
   - {addr: 0x8018e434, name: g_menu_screen_grid_cursor_anim}
   - {addr: 0x8018e436, name: g_menu_screen_grid_initialized}
   - {addr: 0x8018e43c, name: g_formation_banner_menu}
@@ -2127,7 +2127,7 @@ data:
   - {addr: 0x801c8338, name: s_formation_cursor_target}
   - {addr: 0x801c833c, name: s_formation_scroll_unread}
   - {addr: 0x801c8344, name: g_formation_cursor_trail}
-  - {addr: 0x801c8364, name: g_menu_selection_records}
+  - {addr: 0x801c8364, name: s_menu_selection_records}
   - {addr: 0x801c83b8, name: g_formation_job_wheel_spin_progress}
   - {addr: 0x801c83bc, name: g_formation_job_wheel_spin_direction}
   - {addr: 0x801c83c0, name: s_formation_job_change_anim_state}

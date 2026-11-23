@@ -3,6 +3,7 @@
 #include "fft/bits.h"
 #include "fft/brave_story.h"
 #include "fft/character_identity.h"
+#include "fft/fade.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
@@ -266,7 +267,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
     music_switch_track(music_handle, 0x7f, 0);
     memcard_clear_events();
     g_save_directory_buffer = directory_buffer;
-    init_save_screen();
+    save_init_screen();
     thread_start(THREAD_BORROWED_SLOT_CARD_BACKDROP, zodiac_backdrop_thread);
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, 0, 0);
     while (screen_update_fade_out() != 0) {
@@ -839,7 +840,7 @@ s32 save_image_restore(s32 partial_load) {
 
 /* Resets the memory card menu state and allocates the 0x2000-byte load
  * buffer; also used by "Open tutorial files". */
-void init_save_screen(void) {
+void save_init_screen(void) {
     save_image_t* buffer;
 
     g_save_list_scroll_y = 0x18;
@@ -854,7 +855,7 @@ void init_save_screen(void) {
     memset(buffer, 0xFF, 0x1E80);
 }
 
-/* Free the memory card menu's load buffer from init_save_screen. */
+/* Free the memory card menu's load buffer from save_init_screen. */
 static void free_work_buffer(void) {
     heap_free(g_save_work_buffer);
 }

@@ -1,5 +1,6 @@
 /* Overlay screen fade state and steps. */
 
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"

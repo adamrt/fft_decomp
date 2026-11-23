@@ -26,7 +26,7 @@ typedef enum turn_command_kind {
     TURN_COMMAND_AUTOBATTLE_PROTECT_ALLIES_DISPLAY = 15,
     TURN_COMMAND_AUTOBATTLE_FADING_LIFE = 16,
     TURN_COMMAND_AUTOBATTLE_RETREAT = 17,
-    TURN_COMMAND_REFRESH_CONTROL = 18, /* copy the control flag back from the stats */
+    TURN_COMMAND_REFRESH_CONTROL = 18, /* copy the control flag back from the battle unit */
     TURN_COMMAND_MOVE_SELF = 25,       /* MOVE that never redirects to the unit's mount */
     TURN_COMMAND_UNRESOLVED_FE = 0xfe,
     TURN_COMMAND_UNRESOLVED_FF = 0xff

@@ -1,9 +1,9 @@
 /* Formation menu display init, unit list rebuilds, the menu busy check and unit messages with sound. */
 
+#include "fft/fade.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item_menu.h"
 #include "fft/menu.h"

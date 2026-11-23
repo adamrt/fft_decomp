@@ -15,7 +15,6 @@
 #include "fft/map_mesh.h"
 #include "fft/map_palette.h"
 #include "fft/map_unit.h"
-#include "fft/menu.h"
 #include "fft/music.h"
 #include "fft/option.h"
 #include "fft/render.h"

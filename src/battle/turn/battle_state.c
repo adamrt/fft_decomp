@@ -55,10 +55,49 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* g_action_phase: which unit's action the attack phase is announcing. */
+typedef enum action_phase {
+    ACTION_PHASE_PRE_ACTION = 0,   /* a reaction that pre-empts the pending action (Hamedo) */
+    ACTION_PHASE_ACTING_UNIT = 1,  /* the acting unit's own action */
+    ACTION_PHASE_REACTING_UNIT = 2 /* the reactions it provoked */
+} action_phase_e;
+
+enum { ACTION_PHASE_COUNT = 3 };
+
+/* Queue of post-action "effect message" popups (s_post_effect_messages), filled by
+ * queue_messages_for_unit and drained newest first by
+ * action_show_next_message. */
+typedef struct action_post_effect_msg {
+    u8 code;           /* 0x00 action_display_image_id_e of the popup */
+    u8 unit;           /* 0x01 battle unit id of the reported unit */
+    u8 _padding_02[2]; /* 0x02; aligns value */
+    s32 value;         /* 0x04 reported amount */
+} action_post_effect_msg_t;
+typedef char action_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_msg_t) == 8) ? 1 : -1];
+
+enum { ACTION_POST_EFFECT_MSG_CAPACITY = 16 };
+
+/* g_reward_report_phase: the reports shown one after another once an action
+ * has resolved. The post-movement reports use the first two. */
+typedef enum reward_report_phase {
+    REWARD_REPORT_LEVEL_UP = 0,
+    REWARD_REPORT_JOB_LEVEL_UP = 1,
+    REWARD_REPORT_LEARN_ON_HIT = 2
+} reward_report_phase_e;
+
 static s32 s_battle_help_active;
 extern s32 g_battle_wait_direction_facing;
 
 extern move_found_item_t g_move_find_display_item;
+extern s32 g_ability_learn_on_hit_unit_id;
+extern s32 g_action_phase; /* action_phase_e */
+extern s32 g_cursor_input_mode_saved;
+extern s32 g_map_deep_dungeon_load_in_progress;
+extern s32 g_reward_report_phase; /* reward_report_phase_e */
+extern s32 g_turn_event_type;     /* turn_event_e */
+
+/* Pending move_post_event_flags_e bits, dispatched in priority order. */
+extern s32 g_move_post_events;
 
 static s32 s_post_effect_message_count = 0;
 
@@ -81,7 +120,7 @@ enum {
 /* Hand the battle over to an event script: enter the event state at animation
  * speed 2, reset the jump graphics and the event state, disable the status menu
  * and clear the casting and source unit ids (0xff). */
-void battle_state_event_enter(void) {
+static void battle_state_event_enter(void) {
     g_system_vsync_interval = 2;
     g_battle_state = BATTLE_STATE_EVENT;
     map_unit_hide_jumping();
@@ -106,7 +145,7 @@ void battle_state_battle_start_event_enter(void) {
  * Returns 1 when the check whose result is kept (for a non-Ramza unit after a successful test,
  * the test itself) dispatched an event, after saving the game state and handing the battle to
  * it. */
-s32 battle_state_event_try_enter(map_unit_t* unit) {
+static s32 battle_state_event_try_enter(map_unit_t* unit) {
     s32 result;
 
     if (g_turn_event_type == TURN_EVENT_UNIT_READY || g_turn_event_type == TURN_EVENT_NONE) {
@@ -142,7 +181,7 @@ s32 battle_state_event_try_enter(map_unit_t* unit) {
 /* Copy the team flags from the unit's battle stats into its map unit record,
  * dropping UNIT_TEAM_FLAG_PLAYER_CONTROLLED unless its auto-battle setting is
  * manual. A mounted unit's partner gets the same treatment. */
-void map_unit_store_team_flags(map_unit_t* unit) {
+static void map_unit_store_team_flags(map_unit_t* unit) {
     u8 entd_flags = unit->battle_unit->team_flags;
     u8 mount_entd_flags;
     map_unit_t* mount;
@@ -164,7 +203,7 @@ void map_unit_store_team_flags(map_unit_t* unit) {
 /* Return to the source unit's action menus: set the cursor-visible flag, run the
  * scenario check, and unless it starts an event enter the open-action-menus state
  * and turn the camera when the casting unit's tile is hidden. */
-void battle_state_open_action_menus_enter(void) {
+static void battle_state_open_action_menus_enter(void) {
     map_unit_t* casting_unit;
     map_unit_t* unit;
 
@@ -182,7 +221,7 @@ void battle_state_open_action_menus_enter(void) {
 
 /* Return to the free-cursor state at vsync interval 1: show the panel for the
  * cursor tile and refresh the source unit's control flags from its ENTD flags. */
-void battle_state_free_cursor_enter(void) {
+static void battle_state_free_cursor_enter(void) {
     map_unit_t* unit;
 
     g_system_vsync_interval = 1;
@@ -198,7 +237,7 @@ void battle_state_free_cursor_enter(void) {
 }
 
 /* Select in the free cursor: enter the free-cursor help state and start building the help window. */
-void battle_state_free_cursor_help_enter(void) {
+static void battle_state_free_cursor_help_enter(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_FREE_CURSOR_HELP;
     s_battle_help_active = 1;
@@ -335,7 +374,7 @@ static void take_next_turn_event(void) {
  * scenario check runs and, unless it starts an event, the change-turn state
  * begins with the tile panel and the status menu enabled. Without battle data
  * the free cursor returns. */
-void turn_start_next_event(void) {
+static void turn_start_next_event(void) {
     map_unit_t* unit;
 
     if (try_enter_deep_dungeon_mesh_load() != 0) {
@@ -384,7 +423,7 @@ void turn_start_next_event(void) {
  * message for one second and kneels the unit; otherwise a queued Crystal or Treasure
  * transformation shows its message for three seconds (any other result closes the window), and
  * the unit's queued statuses and post-action display are applied. */
-void battle_state_status_execute_enter(void) {
+static void battle_state_status_execute_enter(void) {
     map_unit_t* unit;
     u32 statuses;
 
@@ -433,7 +472,7 @@ static void enter_ai_command(void) {
 
 /* Enter the highlight-units state: tint every unit by its team, save the cursor
  * input mode and switch to the free cursor with map panning. */
-void battle_state_highlight_units_enter(void) {
+static void battle_state_highlight_units_enter(void) {
     camera_enable_pan();
     g_battle_state = BATTLE_STATE_HIGHLIGHT_UNITS;
     g_cursor_input_mode_saved = g_cursor_input_mode;
@@ -445,7 +484,7 @@ void battle_state_highlight_units_enter(void) {
 /* Open the source unit's own action menu: the unit becomes the casting unit, the
  * cursor returns to it, the idling-action-menus state begins with the unit
  * summary panel, and the menu for its remaining move and action is built. */
-void menu_action_open_active_unit(void) {
+static void menu_action_open_active_unit(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -463,7 +502,7 @@ void menu_action_open_active_unit(void) {
 /* Open the idle action menu of the unit under the cursor when it is not the
  * acting unit, or while the status menu is open; there the player and other
  * unit menus switch to their inspect variants. An empty tile does nothing. */
-void menu_action_open_non_active_unit(void) {
+static void menu_action_open_non_active_unit(void) {
     map_unit_t* unit = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     battle_unit_t* stats;
     s32 menu_id;
@@ -492,7 +531,7 @@ void menu_action_open_non_active_unit(void) {
  * The source unit, with the status menu closed, gets its own turn menu when the
  * player controls it and otherwise restarts the AI-command state. Any
  * other unit gets the non-active-unit menu. An empty tile does nothing. */
-void menu_action_dispatch(void) {
+static void menu_action_dispatch(void) {
     map_unit_t* unit = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
 
     if (unit == 0) {
@@ -511,7 +550,7 @@ void menu_action_dispatch(void) {
 }
 
 /* Select in the idle action menus: enter the action-help state and start building the help window. */
-void battle_state_action_help_menu_enter(void) {
+static void battle_state_action_help_menu_enter(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_ACTION_HELP_MENU;
     s_battle_help_active = 1;
@@ -521,7 +560,7 @@ void battle_state_action_help_menu_enter(void) {
 /* Cross on a unit in the free cursor: show the casting unit's reachable tiles and enter the
  * display-move-area state with map panning, saving the cursor input mode for the Cross press that
  * ends it. */
-void battle_state_display_move_area_enter(void) {
+static void battle_state_display_move_area_enter(void) {
     map_unit_t* unit;
     battle_unit_t* stats;
     s32 previous_mode;
@@ -540,7 +579,7 @@ void battle_state_display_move_area_enter(void) {
 
 /* Triangle in the free cursor, or the end of the mini-menu help: enter the mini-menu state and
  * start the mini menu. */
-void battle_state_mini_menu_enter(void) {
+static void battle_state_mini_menu_enter(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_MINI_MENU;
     mini_menu_start();
@@ -549,7 +588,7 @@ void battle_state_mini_menu_enter(void) {
 /* Leave the view of a unit picked from the AT list: enter the mini-menu state,
  * remove the tile marks and release OPTION.OUT's AT list thread, which waits on
  * g_at_list_selection_finished. */
-void battle_state_mini_menu_return_enter(void) {
+static void battle_state_mini_menu_return_enter(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_MINI_MENU;
     map_set_tile_mark_colors(MAP_TILE_MARK_NONE, 3);
@@ -557,7 +596,7 @@ void battle_state_mini_menu_return_enter(void) {
 }
 
 /* Select in the mini menu: enter the mini-menu help state and start building the help window. */
-void battle_state_mini_menu_help_enter(void) {
+static void battle_state_mini_menu_help_enter(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_MINI_MENU_HELP;
     s_battle_help_active = 1;
@@ -566,7 +605,7 @@ void battle_state_mini_menu_help_enter(void) {
 
 /* Show the AT-list entry picked in the mini menu: put the cursor on its unit or, for a
  * charging action, on that action's target with the target tiles marked. */
-void at_list_show_entry(s32 at_index) {
+static void at_list_show_entry(s32 at_index) {
     s32 id;
     map_unit_t* unit;
 
@@ -589,7 +628,7 @@ void at_list_show_entry(s32 at_index) {
 }
 
 /* Enter the unit-move state and show the source unit's targeting prompt. */
-void battle_state_unit_move_enter(void) {
+static void battle_state_unit_move_enter(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -616,7 +655,7 @@ static void enter_move_range_exception(void) {
  * tiles, show them and enter the select-move-tile state with the cursor unit's
  * panel. With no reachable tile the move-range exception state is entered
  * instead. The cursor-visible flag follows whether the player controls the unit. */
-void battle_state_select_move_tile_enter(void) {
+static void battle_state_select_move_tile_enter(void) {
     map_unit_t* unit;
     map_unit_t* casting;
 
@@ -642,7 +681,7 @@ void battle_state_select_move_tile_enter(void) {
 
 /* Enter the illegal-move state and show move feedback that rejects the chosen
  * destination. */
-void battle_state_illegal_move_menu_enter(void) {
+static void battle_state_illegal_move_menu_enter(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -655,7 +694,7 @@ void battle_state_illegal_move_menu_enter(void) {
 /* Enter the unit-moving-setup state for the chosen destination and start the source unit's move
  * feedback: confirm a pending mount or a step onto a crystal, otherwise close. A teleport (path count 0xfe or 0xff, the
  * u8 count + 2 < 2 test) asks for move confirmation instead when navigation messages are on. */
-void battle_state_unit_moving_setup_enter(void) {
+static void battle_state_unit_moving_setup_enter(void) {
     map_unit_t* source;
     map_unit_t* casting;
     map_unit_t* at_tile;
@@ -718,7 +757,7 @@ static void save_previous_state(map_unit_t* unit) {
 /* Enter the unit-moving state: save the casting unit's tile, facing and mount
  * state for an undo (and its partner's when it is a mount) and start its path
  * from the first step at speed 0x2000. */
-void battle_state_unit_moving_enter(void) {
+static void battle_state_unit_moving_enter(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -745,7 +784,7 @@ void battle_state_unit_moving_enter(void) {
  * confirmation. Other movement tints the unit by team and asks for confirmation,
  * silently when navigation messages are off. The cursor-visible flag follows
  * whether the player controls the unit. */
-void battle_state_move_confirm_menu_enter(void) {
+static void battle_state_move_confirm_menu_enter(void) {
     map_unit_t* source;
     map_unit_t* caster;
 
@@ -782,7 +821,7 @@ void battle_state_move_confirm_menu_enter(void) {
 
 /* Enter the after-command state at vsync interval 1: clear the window-closed flag, put the cursor
  * back on the source unit and close the system function window. */
-void battle_state_after_command_enter(void) {
+static void battle_state_after_command_enter(void) {
     g_system_vsync_interval = 1;
     g_battle_state = BATTLE_STATE_AFTER_COMMAND;
     g_battle_window_closed = 0;
@@ -792,7 +831,7 @@ void battle_state_after_command_enter(void) {
 
 /* Turn a unit to one of the four cardinal facings and restart its animation.
  * A diagonal or any other angle leaves it as it is. */
-void map_unit_facing_set_cardinal(map_unit_t* unit, s32 facing) {
+static void map_unit_facing_set_cardinal(map_unit_t* unit, s32 facing) {
     switch (facing) {
     case UNIT_FACING_NORTH:
         if (unit->facing == UNIT_FACING_NORTH) {
@@ -877,7 +916,7 @@ static s32 report_job_level_up(map_unit_t* unit) {
  * its mount partner. Returns 1 when a step was started; otherwise refreshes
  * both units, re-enters the after-command state unless the Deep Dungeon map
  * refresh takes over, and returns 0. */
-s32 move_start_next_post_event(void) {
+static s32 move_start_next_post_event(void) {
     map_unit_t* source = map_unit_get_source();
     map_unit_t* casting = map_unit_get_casting();
     map_unit_t* target;
@@ -1015,7 +1054,7 @@ s32 move_start_next_post_event(void) {
  * g_move_post_events (0 for a unit without battle data), and the
  * post-action display starts at the level-up report. When any step is pending the
  * map cursor and its tile glow are hidden. */
-void move_start_post_events(void) {
+static void move_start_post_events(void) {
     battle_unit_t* stats;
 
     camera_disable_pan();
@@ -1035,7 +1074,7 @@ void move_start_post_events(void) {
 
 /* Enter the wait-direction state for the source unit, starting from its current facing. A rider
  * first turns to its mount's facing; an AI unit picks its wait facing now. */
-void battle_state_wait_direction_enter(void) {
+static void battle_state_wait_direction_enter(void) {
     map_unit_t* mounted_unit;
     map_unit_t* unit;
     s32 facing;
@@ -1068,7 +1107,7 @@ void battle_state_wait_direction_enter(void) {
  * straight to the between-turn events. Otherwise the wait-menu state opens with
  * the cursor unit's panel. The cursor-visible flag follows whether the player
  * controls the unit. */
-void battle_state_wait_menu_enter(void) {
+static void battle_state_wait_menu_enter(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -1104,7 +1143,7 @@ void battle_state_wait_menu_enter(void) {
  * Subtracting half a tile from the unit instead of adding it to the tile edge
  * gives the same vector. ratan2 returns 4096 per turn: taking off an eighth of
  * a turn and masking to quarter turns picks one of the four cardinal facings. */
-void map_unit_facing_turn_to_cursor(map_unit_t* unit) {
+static void map_unit_facing_turn_to_cursor(map_unit_t* unit) {
     VECTOR difference;
     s32 unit_x;
     s32 unit_y;
@@ -1265,7 +1304,7 @@ static void restore_all_facings_after_attack(void) {
 
 /* Enter the continue-turn state at vsync interval 1 and restart the source unit's
  * state frame counter. */
-void battle_state_continue_turn_enter(void) {
+static void battle_state_continue_turn_enter(void) {
     map_unit_t* unit;
 
     g_system_vsync_interval = 1;
@@ -1278,7 +1317,7 @@ void battle_state_continue_turn_enter(void) {
 
 /* Ends a unit's command: the cursor returns to the unit, its display is updated
  * and the game enters the after-command state. */
-void action_end_command(map_unit_t* unit) {
+static void action_end_command(map_unit_t* unit) {
     cursor_move_to_unit(unit);
     map_unit_update_display(unit->map_unit_id);
     battle_state_after_command_enter();
@@ -1290,7 +1329,7 @@ void action_end_command(map_unit_t* unit) {
  * no tile (TARGET_PANELS_NONE), MENU_TARGETING_PROMPT_DEFAULT otherwise. The cursor-visible flag then follows whether
  * the player controls the unit.
  */
-void battle_state_targeting_prompt_enter(void) {
+static void battle_state_targeting_prompt_enter(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -1318,7 +1357,7 @@ void battle_state_targeting_prompt_enter(void) {
  * Every other ability plays at vsync interval 2 with the tracked sound effects
  * paused; an item effect is held back until the unit shows its hold-item
  * animation. The cursor-visible flag is cleared on every path. */
-void battle_state_action_execute_enter(void) {
+static void battle_state_action_execute_enter(void) {
     map_unit_t* unit;
     s32 ability;
 
@@ -1362,7 +1401,7 @@ void battle_state_action_execute_enter(void) {
  * message, if any, as a post-action result; the queue therefore shows in
  * reverse order. Returns 1 after showing a message and 0 when the queue is
  * empty. */
-s32 action_show_next_message(void) {
+static s32 action_show_next_message(void) {
     s32 index;
 
     g_battle_state = BATTLE_STATE_RESUME_ATTACK_PHASE;
@@ -1527,7 +1566,7 @@ static void queue_messages_for_targets(void) {
 /* Queue the casting unit's own post-effect messages and show the first one. With
  * effect messages turned off, or nothing to report, an effect message with text
  * id 0 is requested instead. */
-void action_show_message_for_caster(void) {
+static void action_show_message_for_caster(void) {
     map_unit_t* unit = map_unit_get_casting();
 
     queue_messages_for_unit(unit);
@@ -1563,7 +1602,7 @@ static void apply_attacker_result(map_unit_t* unit) {
  * by TEXT_ID_BATTLE_MESSAGE_BASE; message 6 also plays the item-found tune, and
  * messages 6 and 0x2b name the first hit target as well as the caster. Without a
  * message the window closes (text id 0). */
-void battle_state_battle_message_display_enter(void) {
+static void battle_state_battle_message_display_enter(void) {
     map_unit_t* unit;
     map_unit_t* target;
     animation_ability_data_t* animation;
@@ -1625,7 +1664,7 @@ void battle_state_battle_message_display_enter(void) {
  *
  * Phase 0 reports a level up, phase 1 a job level up, and phase 2 looks for a
  * unit that learns the used ability on hit; without one the phase advances. */
-void battle_state_post_action_reports_enter(void) {
+static void battle_state_post_action_reports_enter(void) {
     map_unit_t* unit;
     map_unit_t* learner;
     u16 ability_id;
@@ -1662,7 +1701,7 @@ void battle_state_post_action_reports_enter(void) {
  * unit's EXP and JP rewards (clearing the display values when nothing is
  * awarded), start the earned EXP/JP display and enter the level-up phase of
  * battle_state_post_action_reports_enter. */
-void reward_grant(void) {
+static void reward_grant(void) {
     map_unit_t* unit = map_unit_get_source();
     battle_unit_t* stats;
 
@@ -1950,7 +1989,7 @@ static void apply_strike_results(void) {
  * knockback strike or an ability without an effect file, the attack animation
  * starts directly. Otherwise the game enters the effect-file-open state with the
  * targets and their result animations stored for the effect. */
-void action_start_next_strike(void) {
+static void action_start_next_strike(void) {
     map_unit_t* unit;
     u16 attack_id;
     s32 ability;
@@ -1976,7 +2015,7 @@ void action_start_next_strike(void) {
 
 /* Enter the OpenSp2Files game state at vsync interval 1, with no SP2 buffer yet, so its
  * handler starts a fresh load. */
-void battle_state_open_sp2_files_enter(void) {
+static void battle_state_open_sp2_files_enter(void) {
     g_system_vsync_interval = 1;
     g_battle_state = BATTLE_STATE_OPEN_SP2_FILES;
     g_sprite_sp2_data = 0;
@@ -1985,7 +2024,7 @@ void battle_state_open_sp2_files_enter(void) {
 /* Enter the pre-attack animation state: clear the tile marks and start the used
  * ability's charge animation, or the standing animation when the ability has no
  * charge animation set. */
-void battle_state_pre_attack_animation_enter(void) {
+static void battle_state_pre_attack_animation_enter(void) {
     map_unit_t* unit;
     u16 ability;
 
@@ -2005,7 +2044,7 @@ void battle_state_pre_attack_animation_enter(void) {
 
 /* Enter the action-cast state for the source unit, unless the scenario check
  * starts an event first; the camera turns when the unit's tile is hidden. */
-void battle_state_action_cast_enter(void) {
+static void battle_state_action_cast_enter(void) {
     map_unit_t* unit;
 
     camera_disable_pan();
@@ -2060,7 +2099,7 @@ static void execute_ability(void) {
 /* Enter the commence-attack phase for the source unit: copy the action command stored in its
  * battle stats into its runtime action, mark it acted and start the charge-hold animation when it
  * uses an ability. */
-void battle_state_commence_attack_phase_enter(void) {
+static void battle_state_commence_attack_phase_enter(void) {
     battle_unit_t* stats;
     map_unit_t* unit;
 
@@ -2097,7 +2136,7 @@ void battle_state_ability_preview_help_enter(void) {
  * the pre-attack animation, and -1 (an invalid action) returns to the idle action
  * menu.
  */
-void target_select_tile(void) {
+static void target_select_tile(void) {
     map_unit_t* unit = map_unit_get_source();
     s32 result;
     s32 saved_input_mode;
@@ -2142,7 +2181,7 @@ void target_select_tile(void) {
 
 /* Enter the illegal-range state, reached when the chosen tile lacks the
  * ability-range mark: opens action-confirm option 5 for the source unit. */
-void battle_state_illegal_range_enter(void) {
+static void battle_state_illegal_range_enter(void) {
     map_unit_t* unit;
     battle_unit_t* stats;
 
@@ -2161,7 +2200,7 @@ void battle_state_illegal_range_enter(void) {
  * range tiles shown and the cursor unit as preview target. An action without
  * targeting selects its tile at once. With no valid panels the idle action menu
  * reopens. */
-target_panels_e target_start_tile_selection(void) {
+static target_panels_e target_start_tile_selection(void) {
     map_unit_t* unit = map_unit_get_source();
 
     unit->state_frame_counter = 0;
@@ -2195,7 +2234,7 @@ target_panels_e target_start_tile_selection(void) {
  * option depends on how the target is chosen and on whether a unit stands on the cursor tile: 1
  * for a unit an ability can follow, 4 for a unit under a tile-only ability, 3 for a unit with a
  * self-centered action, 2 for an empty tile and 0 otherwise. */
-void battle_state_confirm_action_enter(void) {
+static void battle_state_confirm_action_enter(void) {
     map_unit_t* unit;
     map_unit_t* target;
 
@@ -2290,7 +2329,7 @@ static void enter_target_selection_start(void) {
 /* Enter the target-select state: show the panel for the cursor tile and tint the
  * units the casting unit's selection command may pick, the other teams' red for a
  * targeted selection and its own team's blue for a recovery selection. */
-void battle_state_target_select_enter(void) {
+static void battle_state_target_select_enter(void) {
     camera_disable_pan();
     g_battle_state = BATTLE_STATE_TARGET_SELECT;
     cursor_show_hovered_unit_panel();
@@ -2304,7 +2343,7 @@ void battle_state_target_select_enter(void) {
  * Option 3 is used for an empty tile, 1 for a targeted auto-battle selection and
  * 2 for a recovery selection. Any other selection command over a unit opens no
  * prompt. */
-void battle_state_target_select_denied_enter(void) {
+static void battle_state_target_select_denied_enter(void) {
     map_unit_t* occupant;
     map_unit_t* caster;
     battle_unit_t* stats;
@@ -2336,7 +2375,7 @@ void battle_state_target_select_denied_enter(void) {
 
 /* Enter the target-select-confirm state: show the summary of the unit under the
  * cursor and open the target-confirm prompt (option 0) for the casting unit. */
-void battle_state_target_select_confirm_enter(void) {
+static void battle_state_target_select_confirm_enter(void) {
     map_unit_t* unit;
     battle_unit_t* stats;
 
@@ -2368,7 +2407,7 @@ static void enter_target_display_start(void) {
 /* Enter the target-display state: move the cursor to the casting unit's
  * auto-battle target, turn the camera when its tile is hidden and show its
  * summary panel. */
-void battle_state_target_display_enter(void) {
+static void battle_state_target_display_enter(void) {
     battle_unit_t* caster_stats;
     map_unit_t* target;
     battle_unit_t* target_stats;
@@ -2410,7 +2449,7 @@ void battle_state_map_jumping_in_enter(void) {
 }
 
 /* Queue the CloseBattle game state; callers always pass transition step 8. */
-void battle_state_close_battle_enter(s32 transition_step, system_game_flow_e close_flow_state) {
+static void battle_state_close_battle_enter(s32 transition_step, system_game_flow_e close_flow_state) {
     g_system_vsync_interval = 2;
     g_battle_state = BATTLE_STATE_CLOSE_BATTLE;
     g_fade_step = transition_step;
@@ -2419,7 +2458,7 @@ void battle_state_close_battle_enter(s32 transition_step, system_game_flow_e clo
 
 /* Project the cursor tile to the screen; while g_cursor_visible is set, also draw
  * the map cursor and its tile glow. */
-void cursor_update(void) {
+static void cursor_update(void) {
     SVECTOR position;
     SVECTOR raised;
     VECTOR projected;
@@ -2437,7 +2476,7 @@ void cursor_update(void) {
  * updates the status bubbles and unit graphics, and projects the cursor tile,
  * drawing the map cursor and tile glow while g_cursor_visible is
  * set. */
-void battle_update_scene(void) {
+static void battle_update_scene(void) {
     sprite_project_units();
     if (g_menu_status_screen_selected != 1) {
         map_unit_update_animations();

@@ -4,9 +4,11 @@
 /* Moving a unit: the movement records and paths, movement classes and terrain costs, pathfinding, walks and jumps,
  * knockback, Move-Find items and traps, and the events after a move. */
 
-#include "fft/map.h"
 #include "fft/unit.h"
 #include "psx/types.h"
+
+struct map_tile;
+struct map_tile_coordinates;
 
 /* movement records */
 /* Destination x/y/layer bytes and motion flags share one 32-bit movement record. */
@@ -23,6 +25,25 @@ typedef struct move_destination {
     u32 : 2;
 } move_destination_t;
 typedef char move_destination_size_must_be_4[sizeof(move_destination_t) == 4 ? 1 : -1];
+
+/* Masks of the motion flags in the 32-bit view of map_unit_t.movement (move_destination_t),
+ * whose high byte is map unit +0x83. */
+typedef enum unit_motion_flags {
+    UNIT_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
+    UNIT_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS = 0x02000000,
+    UNIT_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
+    UNIT_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
+    UNIT_MOTION_FLAG_FLOAT = 0x10000000,
+    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000 /* set with each stored animation request */
+} unit_motion_flags_e;
+
+/* Three-byte tile coordinates for paths, relocation and action targets. */
+typedef struct move_tile_coordinates {
+    u8 x;
+    u8 y;
+    u8 layer;
+} move_tile_coordinates_t;
+typedef char move_tile_coordinates_size_must_be_3[(sizeof(move_tile_coordinates_t) == 3) ? 1 : -1];
 
 /* move_step_t.direction. */
 typedef enum move_step_direction {
@@ -108,7 +129,7 @@ typedef enum move_effective_flags {
 
 move_effective_flags_e move_get_effective_flags(const battle_unit_t* unit);
 s32 move_get_ability_events(const battle_unit_t* unit);
-s32 move_get_water_standing_offset(map_unit_t* unit, map_tile_t* tile);
+s32 move_get_water_standing_offset(map_unit_t* unit, struct map_tile* tile);
 
 /* pathfinding */
 /* Generic pathfinding flags, distinct from movement ability bytes. */
@@ -141,8 +162,6 @@ typedef enum move_frontier_mode {
 extern move_path_t g_move_path;
 
 s32 move_build_range(s32 unit_id, s32 unused_map_x, s32 unused_map_y, s32 unused_map_layer);
-void move_path_calculate_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
-    s32 target_level, s32 initialize, s32* suspended);
 move_path_t* move_path_calculate_walk_to(
     s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y, s32 target_level);
 move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
@@ -150,7 +169,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
 /* walks and jumps */
 extern s32 g_move_jump_gravity;
 
-s32 move_start_walk_to(s32 map_unit_id, const map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
+s32 move_start_walk_to(s32 map_unit_id, const struct map_tile_coordinates* destination, s32 flags, s32 jump, s32 speed);
 s32 move_start_jump(u32 map_unit_id, s32 direction, s32 jump_length);
 s32 move_map_unit_is_moving(u32 map_unit_id);
 
@@ -253,12 +272,7 @@ typedef enum move_post_event_flags {
     MOVE_POST_EVENT_MOUNT_STATUS_CHANGE = 0x0400
 } move_post_event_flags_e;
 
-/* Pending move_post_event_flags_e bits, dispatched in priority order. */
-extern s32 g_move_post_events;
-
 u32 move_get_post_events(battle_unit_t* unit);
-void move_start_post_events(void);
-s32 move_start_next_post_event(void);
 s32 move_prepare_ability_benefit(battle_unit_t* unit);
 
 #endif

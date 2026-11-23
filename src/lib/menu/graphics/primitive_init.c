@@ -1,6 +1,7 @@
 /* Default off-screen menu quads and sprites, initialized before a window supplies
  * its image, placement and palette. */
 
+#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

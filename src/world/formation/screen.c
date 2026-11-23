@@ -2,11 +2,11 @@
  * state, frame processing and unit selection staging. */
 
 #include "fft/equipment.h"
+#include "fft/fade.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
 #include "fft/formation_item.h"
 #include "fft/formation_job.h"
-#include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item.h"
@@ -196,7 +196,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
             }
 
             if (g_formation_current_menu != FORMATION_MENU_ITEM_REMOVE) {
-                update_unit_grid_selection();
+                unit_grid_update_selection();
             }
             if (g_formation_unit_slide_pending != 0) {
                 update_selection_slide();
@@ -255,7 +255,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
         music_unload_scenario_slot(g_menu_screen_music_slot);
     }
     formation_save_records();
-    unit_panels_stop();
+    unit_panel_stop_all();
     menu_set_event_speed(0);
     menu_screen_reset_context();
 }
@@ -431,7 +431,7 @@ void update_unit_grid_menu(void) {
                     == 0) {
                     if (g_menu_screen_selection_results[0] == 0) {
                         g_formation_current_menu = FORMATION_MENU_ITEM_ENTER;
-                        update_item_menu();
+                        formation_item_update_menu();
                     } else if (g_menu_screen_selection_results[0] == 1) {
                         g_formation_current_menu = FORMATION_MENU_ABILITY_ENTER;
                         formation_ability_update_menu();
@@ -523,9 +523,9 @@ void update_unit_grid_menu(void) {
  * On a new selection this snapshots the unit's display data, starts the
  * status-banner slide (g_formation_banner_slide_step), and records the scroll direction in
  * g_unit_panel_status_display_thread_params.redraw_request; it then toggles the per-menu windows and advances the
- * slide. Compiled at O1 like its stage_selected_unit neighbor.
+ * slide. Compiled at O1 like its formation_stage_selected_unit neighbor.
  */
-void update_unit_grid_selection(void) {
+void unit_grid_update_selection(void) {
     s32 saved;
     s32 previous;
     s32* flags;
@@ -559,7 +559,7 @@ void update_unit_grid_selection(void) {
             }
         }
         previous = g_formation_selected_unit_index_latch;
-        stage_selected_unit();
+        formation_stage_selected_unit();
         if ((g_menu_input_primary_repeat & PSX_PAD_RIGHT) || (g_menu_input_secondary_repeat & PSX_PAD_R1)) {
             g_unit_panel_status_display_thread_params.redraw_request = 1;
         } else if ((g_menu_input_primary_repeat & PSX_PAD_LEFT) || (g_menu_input_secondary_repeat & PSX_PAD_L1)) {
@@ -622,7 +622,7 @@ void update_unit_grid_selection(void) {
  * snapshot. O1 preserves the target's load/store order and direct array
  * reference in the final branch; O2 emits 364 bytes instead of 388.
  */
-void stage_selected_unit(void) {
+void formation_stage_selected_unit(void) {
     /* Preserve the target's unused 128-byte stack area. */
     u8 unused[128];
     formation_unit_t** units;
@@ -649,7 +649,7 @@ void stage_selected_unit(void) {
             ? MENU_STATUS_PANEL_HIDDEN
             : 0;
     }
-    redraw_unit_panels();
+    unit_panel_redraw_all();
 }
 
 /*
@@ -658,7 +658,7 @@ void stage_selected_unit(void) {
  *
  * On a change, the previous unit's display snapshot is kept for the slide
  * (g_formation_comparison_unit_stat_summary/g_formation_comparison_unit_identity, the second slot after
- * stage_selected_unit's copies) and g_unit_panel_status_display_thread_params.redraw_request records the
+ * formation_stage_selected_unit's copies) and g_unit_panel_status_display_thread_params.redraw_request records the
  * direction: 1 for Right or R1 or a forward move, 2 otherwise. g_formation_banner_slide_step counts the
  * 16-frame banner slide in either direction, driving the banner y positions in
  * g_unit_panel_status_display_thread_params.position.y/g_unit_panel_comparison_display_thread_params.position.y.
@@ -699,7 +699,7 @@ void formation_update_selection_stage(void) {
         if (g_shop_menu_step >= SHOP_STEP_FITTING_ROOM && g_shop_menu_step <= SHOP_STEP_FITTING_ROOM_CHECKOUT) {
             formation_refresh_selected_stats();
         } else {
-            stage_selected_unit();
+            formation_stage_selected_unit();
         }
         if ((g_menu_input_primary_repeat & PSX_PAD_RIGHT) || (g_menu_input_secondary_repeat & PSX_PAD_R1)) {
             g_unit_panel_status_display_thread_params.redraw_request = 1;
@@ -757,7 +757,7 @@ void formation_update_selection_stage(void) {
  * equipment, then refresh the three display snapshots.
  *
  * Shields in either hand go to the battle record's shield slots. Like
- * stage_selected_unit, this needs O1 for the
+ * formation_stage_selected_unit, this needs O1 for the
  * target's store order and unreduced loop addressing.
  */
 void formation_refresh_selected_stats(void) {
@@ -817,5 +817,5 @@ void formation_refresh_selected_stats(void) {
     equipment_build_weapon_evade_totals(
         &g_formation_selected_unit_stat_detail, g_formation_unit_pointers[g_unit_selected_index]->detail.equipment);
     formation_unit_copy_to_temp(g_unit_selected_index, FORMATION_PREVIEW_UNIT_INDEX);
-    redraw_unit_panels();
+    unit_panel_redraw_all();
 }

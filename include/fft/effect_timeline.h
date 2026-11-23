@@ -7,8 +7,6 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-struct effect_record;
-
 /* timeline shape */
 /* Particle channels and sound tracks of each timeline phase. */
 enum { EFFECT_PARTICLE_CHANNEL_COUNT = 5, EFFECT_SOUND_TRACK_COUNT = 3 };
@@ -301,7 +299,7 @@ typedef struct effect_record_timeline {
 } effect_record_timeline_t;
 typedef char effect_record_timeline_size_must_be_170[sizeof(effect_record_timeline_t) == 170 ? 1 : -1];
 
-/* camera */
+/* effect camera */
 /* The effect camera's rotation, position and zoom tracks: each has its current value, the start and target of the
  * running move, its mode (effect_camera_mode_e), duration and frame counter, and the copy that
  * EFFECT_CAMERA_SOURCE_SAVED reads. */
@@ -323,8 +321,6 @@ extern VECTOR g_effect_camera_zoom_saved;
 
 void effect_camera_init(void);
 void effect_camera_seed_tracks(void);
-
-/* camera playback */
 void effect_camera_start_parent_keyframe_moves(s16 frame);
 void effect_camera_start_child_keyframe_moves(s16 frame);
 void effect_camera_update_tracks(void);

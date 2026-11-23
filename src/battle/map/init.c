@@ -6,6 +6,7 @@
 #include "fft/deploy.h"
 #include "fft/encounter.h"
 #include "fft/entd.h"
+#include "fft/gfx.h"
 #include "fft/map.h"
 #include "fft/map_light.h"
 #include "fft/map_load.h"
@@ -103,13 +104,13 @@ static s32 start_entd_open(void) {
     current_encounter_id = &g_encounter_current_id;
     *current_encounter_id = encounter_id;
 
-    if (selection_mode == UNIT_ENTD_SELECTION_ENTD_250) {
+    if (selection_mode == ENCOUNTER_SELECTION_ENTD_250) {
         *current_encounter_id = 250;
-    } else if (selection_mode == UNIT_ENTD_SELECTION_RANDOM_75_TO_79) {
+    } else if (selection_mode == ENCOUNTER_SELECTION_RANDOM_75_TO_79) {
         *current_encounter_id = (rand() * 5) / 0x8000 + 75;
-    } else if (selection_mode == UNIT_ENTD_SELECTION_RANDOM_1_TO_59) {
+    } else if (selection_mode == ENCOUNTER_SELECTION_RANDOM_1_TO_59) {
         *current_encounter_id = (rand() * 59) / 0x8000 + 1;
-    } else if ((selection_mode == UNIT_ENTD_SELECTION_MAP_ID) && (g_map_id != 0)) {
+    } else if ((selection_mode == ENCOUNTER_SELECTION_MAP_ID) && (g_map_id != 0)) {
         *current_encounter_id = g_map_id;
     }
 

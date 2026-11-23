@@ -7,6 +7,5 @@
 
 u8* name_entry_run_screen(const u8* list, u32* image);
 u8* name_entry_update_keyboard(const u8* list, s32 unused_1);
-void name_entry_update_confirm(void);
 
 #endif

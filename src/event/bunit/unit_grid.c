@@ -1,6 +1,7 @@
 /* Browse the Unit List’s battle-unit grid and draw its readouts, shaded
  * rows, trailing cursor and animated unit sprites from the same grid state. */
 
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"

@@ -1,5 +1,6 @@
 /* Screen fade state, fade starts and per-tile fade updates. */
 
+#include "fft/fade.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"

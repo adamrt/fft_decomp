@@ -41,7 +41,6 @@ void formation_ability_update_menu(void);
 /* learning */
 extern s8 g_formation_ability_learn_menu_initialized;
 extern s8 g_formation_ability_learn_job_list_initialized;
-extern s32 g_formation_ability_learn_job_total_jp;
 extern s8 g_formation_ability_learn_ability_list_open;
 extern s16 g_formation_ability_learn_selected_job;
 extern s16 g_formation_ability_learn_selected_job_index;

@@ -2,7 +2,7 @@
 #define GFX_H
 
 /* Graphics records shared across programs (colors, points and rectangles, textures, sprites and glyphs, primitive
- * buffers), the resident and OPEN display buffers, FRAME.BIN, REQUIRE's quads and fade, OPEN's overlay fade and OPNTEX.
+ * buffers), the resident and OPEN display buffers, FRAME.BIN, REQUIRE's quads and OPNTEX.
  * The primitive and image routines are in gfx_primitive.h and gfx_image.h. */
 
 #include "psx/libgpu.h"
@@ -216,17 +216,6 @@ typedef struct sprite_draw_offset {
 } sprite_draw_offset_t;
 typedef char sprite_draw_offset_size_must_be_12[sizeof(sprite_draw_offset_t) == 12 ? 1 : -1];
 
-/* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
-typedef struct zodiac_draw_context {
-    u32* ot;             /* 0x00: ordering table entry the primitives link into */
-    s32 brightness;      /* 0x04: low byte is r0/g0/b0 of every sprite; WORLD stores g_screen_color_red */
-    s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
-    s16 scale_x;         /* 0x0c: signed scale with 12 fractional bits; ONE = 1.0 */
-    s16 scale_y;         /* 0x0e: signed scale with 12 fractional bits; ONE = 1.0 */
-    u8 _unused_10[8];
-    sprite_draw_offset_t offset; /* 0x18 */
-} zodiac_draw_context_t;
-
 /* The 0x10-byte glyph blit descriptor used by the window frame threads and filled
  * by menu_screen_set_blit_source_rect, text_set_blit_source_rect and
  * text_set_blit_destination. The stride is the surface width in pixels. */
@@ -247,14 +236,6 @@ typedef struct scaled_draw_area_pair {
 } scaled_draw_area_pair_t;
 typedef char scaled_draw_area_pair_size_must_be_40[sizeof(scaled_draw_area_pair_t) == 40 ? 1 : -1];
 
-/* Full-screen fade primitive pair: a TILE followed by the DR_MODE that
- * selects its texture page and window. */
-typedef struct fade_overlay {
-    TILE tile;    /* 0x00 */
-    DR_MODE mode; /* 0x10 */
-} fade_overlay_t;
-typedef char fade_overlay_size_must_be_28[(sizeof(fade_overlay_t) == 28) ? 1 : -1];
-
 /* resident display */
 /* BATTLE's draw areas begin 0x80 pixels left of the displayed area, so the left edge of the battle
  * screen is draw x GFX_BATTLE_SCREEN_X. */
@@ -269,7 +250,7 @@ u32* gfx_get_battle_otag(void);
 void gfx_swap_battle_otag(void);
 void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 
-/* screen environments */
+/* OPEN screen environments */
 /* Double-buffered draw/display environments, one pair per frame buffer (0x70
  * bytes each); gfx_init_screen_environments fills both and the movie
  * presenter flips between them. */
@@ -299,37 +280,9 @@ typedef char gfx_frame_bin_size_must_be_38912[(sizeof(gfx_frame_bin_t) == 38912)
 void gfx_load_frame_texture(void);
 void gfx_restore_frame_bin_page(void);
 
-/* after-battle quads and fade */
+/* after-battle quads */
 /* Two buffers of 40 POLY_GT4s for REQUIRE's gradient grid and reward images. */
 extern POLY_GT4 g_gfx_poly_gt4_buffers[2][40];
-
-/* overlay fade */
-/* gfx_overlay_fade_t.flags. */
-typedef enum gfx_overlay_fade_flag {
-    GFX_OVERLAY_FADE_OUT = 0x01,   /* the overlay clears */
-    GFX_OVERLAY_FADE_IN = 0x02,    /* the overlay darkens the screen */
-    GFX_OVERLAY_FADE_ACTIVE = 0x04 /* the overlay is drawn; cleared when either fade ends */
-} gfx_overlay_fade_flag_e;
-
-/* The screen overlay fade: one record, since gfx_update_overlay_fade
- * reaches flags..rect and the tiles/modes from a single base. */
-typedef struct gfx_overlay_fade {
-    /* 0x00 */ u32 flags; /* gfx_overlay_fade_flag_e */
-    /* 0x04 */ s32 frame;
-    /* 0x08 */ s32 duration;
-    /* 0x0c */ s32 level;
-    /* 0x10 */ s32 abr;
-    /* 0x14 */ s32 ot_index;
-    /* 0x18 */ RECT rect;
-    /* 0x20 */ TILE tiles[2];
-    /* 0x40 */ DR_MODE modes[2];
-} gfx_overlay_fade_t;
-
-extern gfx_overlay_fade_t g_gfx_overlay_fade;
-
-void gfx_start_overlay_fade_in(u32 duration);
-void gfx_start_overlay_fade_out(u32 duration);
-void gfx_update_overlay_fade(u32* otag);
 
 /* OPNTEX */
 extern u32* g_gfx_opntex_data;
