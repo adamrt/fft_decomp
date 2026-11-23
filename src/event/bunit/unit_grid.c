@@ -4,6 +4,7 @@
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
+#include "fft/map_unit.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
@@ -17,7 +18,6 @@
 #include "fft/unit.h"
 #include "fft/unit_list.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -80,7 +80,7 @@ extern oriented_quad_t g_unit_list_cursor_sprite;
 extern oriented_quad_t g_unit_list_cursor_shadow_sprite;
 
 /* Rhombus-cursor trail, oldest point first; x == -1 marks an empty slot
- * (cursor_trail_init clears all eight). */
+ * (init_cursor_trail clears all eight). */
 extern point16_t g_unit_list_cursor_trail_points[8];
 extern u8 g_unit_list_cursor_trail_brightness[];
 
@@ -90,9 +90,9 @@ extern u16 g_unit_list_gfx_background_tile_layout[2][8]; /* per row parity: four
 extern s16 g_unit_list_gfx_falloff_focus_x;
 extern s16 g_unit_list_gfx_falloff_focus_y;
 
-static void unit_sprite_draw(s16 unit, s32 x, s32 y);
-static void cursor_trail_init(void);
-static void cursor_trail_update(point16_t* target);
+static void draw_unit_sprite(s16 unit, s32 x, s32 y);
+static void init_cursor_trail(void);
+static void update_cursor_trail(point16_t* target);
 
 /* With `enable`, start the equipment/ability panel and numeric panel threads unless
  * the status panel is sliding or the panel thread already runs; without it, ask both
@@ -107,19 +107,19 @@ void unit_panel_toggle_equipment_and_numbers(s32 enable) {
             return;
         }
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-        thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_unit_panel_character_status_frame_config, 0, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_unit_panel_character_status_frame_config, 0, 0);
         thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-        thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, &g_unit_panel_numbers_thread_params, 0, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, &g_unit_panel_numbers_thread_params, 0, 0);
     } else {
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
 
 /* Return the listed unit's current HP, MP, or CT value, as
  * g_unit_list_stat_mode selects. For any other mode the value returned is
  * never assigned. */
-static s32 grid_stat_get(s32 unit_index) {
+static s32 get_grid_stat(s32 unit_index) {
     menu_unit_readout_e mode = g_unit_list_stat_mode;
     unit_list_record_t* entry;
     s32 value;
@@ -139,27 +139,27 @@ static s32 grid_stat_get(s32 unit_index) {
 }
 
 /* Return the level of the unit in this unit list slot. */
-static s32 grid_level_get(s32 unit_id) {
+static s32 get_grid_level(s32 unit_id) {
     return g_unit_list_pointers[unit_id]->level;
 }
 
 /* Return the experience of the unit in this unit list slot. */
-static s32 grid_experience_get(s32 unit_id) {
+static s32 get_grid_experience(s32 unit_id) {
     return g_unit_list_pointers[unit_id]->experience;
 }
 
 /* Return the Brave of the unit in this unit list slot. */
-static s32 grid_brave_get(s32 unit_id) {
+static s32 get_grid_brave(s32 unit_id) {
     return g_unit_list_pointers[unit_id]->brave;
 }
 
 /* Return the Faith of the unit in this unit list slot. */
-static s32 grid_faith_get(s32 unit_id) {
+static s32 get_grid_faith(s32 unit_id) {
     return g_unit_list_pointers[unit_id]->faith;
 }
 
 /* Return the selected unit's maximum HP, MP, or CT value. */
-static s32 grid_stat_max_get(s32 unit_index) {
+static s32 get_grid_stat_max(s32 unit_index) {
     s32 value;
 
     if (g_unit_list_stat_mode == MENU_UNIT_READOUT_HP) {
@@ -176,7 +176,7 @@ static s32 grid_stat_max_get(s32 unit_index) {
 /* Returns 1 when the selected unit is in the two upper visible rows of the list at
  * `page_offset` (after the scroll in progress), which puts the status banner at the bottom
  * of the screen. Returns 0 while browsing units. */
-static s32 upper_row_selection_check(s32 page_offset) {
+static s32 check_banner_at_bottom(s32 page_offset) {
     s32 in_upper_rows;
     s8 offset = page_offset;
     s32 scroll_step;
@@ -217,7 +217,7 @@ static s32 upper_row_selection_check(s32 page_offset) {
  * if the selected unit lies outside the page shown at the current offset
  * (0, -0x3C, -0x78 = pages of four units); once a step reaches +/-0x3C,
  * commit it to the offset and stop. */
-static void grid_scroll_update(s8* step, s8* offset) {
+static void update_grid_scroll(s8* step, s8* offset) {
     s8 cur = *step;
     s8 next;
 
@@ -270,7 +270,7 @@ static void grid_scroll_update(s8* step, s8* offset) {
  * active the sprite is drawn one pixel lower with CLUT g_menu_button_clut. abs()
  * matters: GCC expands it to the single-insn abssi2, which keeps the entry
  * loop body one basic block as in the target. */
-static void button_draw(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
+static void draw_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
     oriented_quad_t desc;
     /* Eight untouched bytes plus descriptor alignment retain the target frame. */
     s16 unused_tail[4];
@@ -341,15 +341,15 @@ static void button_draw(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound
 void unit_list_init(s32 unused_selected_index) {
     s32 ret;
 
-    menu_scrollable_list_core_init(0, 0, 0);
-    g_menu_row_callbacks[0].value = grid_stat_get;
-    g_menu_row_callbacks[1].value = grid_stat_max_get;
-    g_menu_row_callbacks[4].value = grid_level_get;
-    g_menu_row_callbacks[5].value = grid_experience_get;
-    g_menu_row_callbacks[6].value = grid_brave_get;
-    g_menu_row_callbacks[7].value = grid_faith_get;
-    menu_set_vsync_mode_and_event_speed(0);
-    ret = upper_row_selection_check(g_unit_list_page_offset);
+    menu_scrollable_list_init_core(0, 0, 0);
+    g_menu_row_callbacks[0].value = get_grid_stat;
+    g_menu_row_callbacks[1].value = get_grid_stat_max;
+    g_menu_row_callbacks[4].value = get_grid_level;
+    g_menu_row_callbacks[5].value = get_grid_experience;
+    g_menu_row_callbacks[6].value = get_grid_brave;
+    g_menu_row_callbacks[7].value = get_grid_faith;
+    menu_set_event_speed(0);
+    ret = check_banner_at_bottom(g_unit_list_page_offset);
     g_unit_list_status_banner_at_bottom = ret;
     g_unit_list_status_banner_at_bottom_latch = ret;
     if (g_unit_list_status_banner_at_bottom != 0) {
@@ -357,7 +357,7 @@ void unit_list_init(s32 unused_selected_index) {
     } else {
         g_unit_panel_status_display_thread_params.position.y = 0;
     }
-    cursor_trail_init();
+    init_cursor_trail();
 }
 
 /*
@@ -367,13 +367,13 @@ void unit_list_init(s32 unused_selected_index) {
  * two numbers and gauge; 3 and 4 two labeled numbers), then ease the cursor
  * trail toward the selected cell.
  *
- * Twin of WORLD's formation_grid_update with unit_readout_draw's panel
+ * Twin of WORLD's formation_grid_update with draw_unit_readout's panel
  * body written inline. Details the target needs:
  * - `unit` is also the early "enabled" flag, `row` also the stat tile index
  *   and cursor delta, and `top` the button y, highlight flag and panel y, as
  *   in the target's shared registers and stack slots. The cell x is not a
  *   variable: loop.c strength-reduces `col * 62` into the last stack slot.
- * - The busy argument of button_draw is an inline `||` each time.
+ * - The busy argument of draw_button is an inline `||` each time.
  * - number_y*, label_y* are single-set narrow copies of `top` assigned
  *   before a call; local-alloc sinks each to its use (the target's
  *   `move v0,s2` before the store). Their modes must differ from each other
@@ -472,7 +472,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     }
     /* SQUARE shows or hides the status banner. */
     if (allow_banner_toggle != 0 && g_unit_list_browse_enabled == 0 && (buttons & PSX_PAD_SQUARE)
-        && unit_list_is_scroll_needed() == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
+        && unit_grid_check_scroll() == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
         && !(g_unit_panel_status_display_thread_params.flags
             & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
@@ -480,12 +480,12 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
         g_unit_list_status_banner_enabled = g_unit_list_status_banner_enabled == 0;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_unit_list_help_screen_id == MENU_GRID_HELP_NONE
-        && gfx_get_fade_state() == 0) {
-        g_unit_list_grid_selected_cell = menu_grid_selection_step(
+        && screen_get_fade_state() == 0) {
+        g_unit_list_grid_selected_cell = menu_step_grid_selection(
             4, 5, g_unit_list_reorderable_count - 1, g_unit_list_grid_selected_cell, buttons);
         g_unit_selected_index = g_unit_list_reorderable_indices[g_unit_list_grid_selected_cell];
     }
-    grid_scroll_update(&g_unit_list_scroll_step, &g_unit_list_page_offset);
+    update_grid_scroll(&g_unit_list_scroll_step, &g_unit_list_page_offset);
     /* While browsing, L1 and R1 step through every listed unit, mounts included. */
     if (g_unit_list_browse_enabled != 0) {
         if (buttons & PSX_PAD_L1) {
@@ -496,9 +496,9 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                 = g_unit_selected_index != g_unit_list_visible_count - 1 ? g_unit_selected_index + 1 : 0;
         }
         g_unit_list_grid_selected_cell = g_unit_list_index_map[g_unit_selected_index];
-        button_draw(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
+        draw_button(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
-        button_draw(MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1,
+        draw_button(MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
     }
     /* The stat-mode bar on the side away from the banner, with its L2 and R2 buttons and the
@@ -514,11 +514,11 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
             menu = g_unit_list_grid_stat_bar_script_bottom;
             quads = g_unit_list_grid_label_tiles_bottom;
         }
-        button_draw(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,
+        draw_button(MENU_PRESSABLE_BUTTON_L2, 0x26, top, buttons & PSX_PAD_L2,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
-        button_draw(MENU_PRESSABLE_BUTTON_R2, 0xC2, top, buttons & PSX_PAD_R2,
+        draw_button(MENU_PRESSABLE_BUTTON_R2, 0xC2, top, buttons & PSX_PAD_R2,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(menu, 0, 0);
+        menu_script_run_with_palette_mode(menu, 0, 0);
         menu_gfx_enqueue_textured_quad_list(quads, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_2_mode0, 0xB, 8);
         mode = g_unit_list_stat_mode;
         if (mode < 3) {
@@ -537,13 +537,13 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     /* The grid: up to five rows of four cells, 0x3c apart; rows under the banner are dimmed.
      * Each cell shows the stat readout, the unit's sprite and plate, and a rider's mount. */
     row = 0;
-    g_unit_list_status_banner_at_bottom = upper_row_selection_check(g_unit_list_page_offset);
+    g_unit_list_status_banner_at_bottom = check_banner_at_bottom(g_unit_list_page_offset);
     y = 0x24 + g_unit_list_page_offset + g_unit_list_scroll_step;
     cell.w = 0x38;
     cell.h = 0x30;
     gfx_set_otag_index(8);
     unit = 0;
-    color = menu_gfx_get_draw_color();
+    color = gfx_get_draw_color();
     saved_color.r = color->r;
     saved_color.g = color->g;
     saved_color.b = color->b;
@@ -706,18 +706,18 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                         menu_opcode_0d_draw_formatted_number((menu_instruction_t*)&g_unit_list_grid_faith_number);
                 }
             }
-            unit_sprite_draw(g_unit_list_reorderable_indices[unit], cell.x, cell.y);
+            draw_unit_sprite(g_unit_list_reorderable_indices[unit], cell.x, cell.y);
             if (g_unit_list_pointers[g_unit_list_reorderable_indices[unit]]->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
-                unit_sprite_draw(
-                    unit_list_find_by_battle_id(g_unit_list_pointers[g_unit_list_reorderable_indices[unit]]->mount_info
-                        - UNIT_MOUNT_INFO_FLAG_RIDER),
+                draw_unit_sprite(unit_list_find_by_battle_unit_id(
+                                     g_unit_list_pointers[g_unit_list_reorderable_indices[unit]]->mount_info
+                                     - UNIT_MOUNT_INFO_FLAG_RIDER),
                     cell.x, cell.y);
             }
         }
     }
     /* The cursor trail and the background's light ease toward the selected cell. */
     gfx_set_draw_color(&saved_color);
-    cursor_trail_update(&g_unit_list_grid_cursor_target);
+    update_cursor_trail(&g_unit_list_grid_cursor_target);
     focus = &g_unit_list_gfx_falloff_focus_x;
     cursor_x = g_unit_list_grid_cursor_target.x;
     *focus = (*focus * 3 + cursor_x) >> 2;
@@ -740,7 +740,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
  * Vertical distance is doubled before the Euclidean distance calculation,
  * matching the menu renderer's non-square coordinate scale. `dx` also holds
  * the result. */
-static s32 brightness_falloff_calculate(s32 x, s32 y, s32 base_value, s32 minimum) {
+static s32 calculate_brightness_falloff(s32 x, s32 y, s32 base_value, s32 minimum) {
     s32 dx = abs(g_unit_list_gfx_falloff_focus_x - x);
     s32 dy;
 
@@ -778,7 +778,7 @@ void unit_list_draw_shaded_rows(s32 y) {
     rect.y = y;
     for (i = 0; y < 0x101; y += 0x20, i++) {
         for (col = 0; col < 5; col++) {
-            brightness = brightness_falloff_calculate(col << 6, y, 0xFF, 0x50);
+            brightness = calculate_brightness_falloff(col << 6, y, 0xFF, 0x50);
             if (brightness > 0xDC) {
                 brightness = 0xDC;
             }
@@ -806,7 +806,7 @@ void unit_list_draw_shaded_rows(s32 y) {
 
 /* Empty the eight cursor trail points (x = -1) and set the texture pages of
  * the cursor sprite and its shadow. */
-static void cursor_trail_init(void) {
+static void init_cursor_trail(void) {
     s16 term = -1;
     s32 i = 7;
     do {
@@ -825,7 +825,7 @@ static void cursor_trail_init(void) {
  * quads per cursor layer, faded by g_unit_list_cursor_trail_brightness except for the newest point.
  * abs() matters: GCC expands it to the single-insn abssi2, which keeps each
  * loop body one basic block as in the target. */
-static void cursor_trail_update(point16_t* target) {
+static void update_cursor_trail(point16_t* target) {
     rgb24_t rgb;
     s32 i;
     s32 last;
@@ -909,7 +909,7 @@ static void cursor_trail_update(point16_t* target) {
  * selected unit's plate also pulses. The target keeps two short-lived values
  * in the loop counter and OT-index registers (the falloff result in `i`, the
  * facing quadrant in `value`), so the source reuses those variables. */
-static void unit_sprite_draw(s16 unit, s32 x, s32 y) {
+static void draw_unit_sprite(s16 unit, s32 x, s32 y) {
     rgb24_t rgb;
     /* The query writes clut/tpage into the quad and two extra 16-bit values after it. */
     struct {
@@ -933,11 +933,11 @@ static void unit_sprite_draw(s16 unit, s32 x, s32 y) {
     s32 value;
     s32 size;
 
-    i = brightness_falloff_calculate(x, y, 0xC8, 0x50);
+    i = calculate_brightness_falloff(x, y, 0xC8, 0x50);
     rgb.r = rgb.g = rgb.b = i > 0x80 ? 0x80 : i;
-    frame = sprite_unit_frame_vram_ids_get(g_unit_list_pointers[unit]->runtime_id, &quad.query);
+    frame = sprite_map_unit_get_frame_vram_ids(g_unit_list_pointers[unit]->map_unit_id, &quad.query);
     base_y = (quad.query.graphic_height >> 1) + 0x16;
-    /* Retail tests -1, although an absent runtime unit returns 0 and leaves the query unset. */
+    /* Retail tests -1, although an absent map unit returns 0 and leaves the query unset. */
     if (frame == (const sprite_frame_t*)-1) {
         return;
     }
@@ -946,7 +946,7 @@ static void unit_sprite_draw(s16 unit, s32 x, s32 y) {
         size = (cells[i].attributes >> 10) & (SPRITE_SHP_PART_SIZE_MASK >> 10);
         quad.uw = quad.w = s_unit_list_sprite_cell_sizes[size].width;
         quad.vh = quad.h = s_unit_list_sprite_cell_sizes[size].height;
-        value = unit_battle_camera_facing_get(g_unit_list_pointers[unit]->battle_id);
+        value = map_unit_get_camera_facing_by_battle_unit_id(g_unit_list_pointers[unit]->battle_unit_id);
         dx = cells[i].x_shift;
         orientation = TEXTURE_UV_FLIP_NONE;
         if (value >= 2) {

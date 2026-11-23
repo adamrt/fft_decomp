@@ -25,7 +25,7 @@ static menu_list_page_t s_text_list_pages[2] = { 0 };
  * hidden rows, and a pending redraw request also counts. When anything changed, redraw the columns
  * into a new image, upload it (resetting the image ring to its first row) and return it; otherwise
  * return 0. */
-static u8* text_page_scroll_update(menu_entry_t* entry, s32* row_offset, s32* ring, s32* unused_cursor) {
+static u8* update_text_page_scroll(menu_entry_t* entry, s32* row_offset, s32* ring, s32* unused_cursor) {
     menu_text_layout_t* layout = entry->context;
     u32* input0;
     u32* input1;
@@ -93,7 +93,7 @@ static u8* text_page_scroll_update(menu_entry_t* entry, s32* row_offset, s32* ri
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row
  * scroll whose new row is drawn into the image ring; page scrolling is left
- * to text_page_scroll_update, and the scroll-bar thumb tracks
+ * to update_text_page_scroll, and the scroll-bar thumb tracks
  * entry->selected_index. The list layout is read into `binding` for sizing and
  * copied to `layout` before the loop: with one variable the allocator gives
  * the image buffer the last callee-saved register instead of the layout.
@@ -138,7 +138,7 @@ void screen_text_list_thread(void) {
     row_offset = 0;
     cursor = 0;
 
-    entry = (menu_entry_t*)thread_current_parameter_1_get();
+    entry = (menu_entry_t*)thread_current_get_parameter_1();
     binding = entry->context;
     entry->window.h = binding->row_count * 16 + 0x1C;
     entry->inner_height = binding->row_count * 16 + 0x1C;
@@ -209,7 +209,7 @@ void screen_text_list_thread(void) {
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(SCREEN_THREAD_SLOT_AT_LIST_FRAME, screen_window_frame_thread);
-    thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
     screen_draw_text_columns(entry, &row_offset, buffer);
@@ -246,13 +246,13 @@ void screen_text_list_thread(void) {
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
+            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
         } else {
-            thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
-            /* Square with up or down pages through the list instead (text_page_scroll_update). */
+            /* Square with up or down pages through the list instead (update_text_page_scroll). */
             if ((*input0 & PSX_PAD_UP) && !(*input1 & PSX_PAD_SQUARE)) {
                 if (cursor != 0) {
                     cursor--;
@@ -299,7 +299,7 @@ void screen_text_list_thread(void) {
 
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + delta;
-                    menu_set_text_origin(layout->x[column], 0);
+                    menu_text_set_origin(layout->x[column], 0);
                     if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                         g_menu_text_palette_offset = layout->text_colors[column][index];
                     }
@@ -334,7 +334,7 @@ void screen_text_list_thread(void) {
             redraw_pending = 0;
         }
         if (delta == 0 && menu_can_accept_input() != 0) {
-            buffer = text_page_scroll_update(entry, &row_offset, &ring, &cursor);
+            buffer = update_text_page_scroll(entry, &row_offset, &ring, &cursor);
             /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
@@ -351,7 +351,7 @@ void screen_text_list_thread(void) {
         }
         menu_handle_cancel_input(entry);
 
-        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
+        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step;
@@ -367,7 +367,7 @@ void screen_text_list_thread(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = script_event_initial_repeat_counter_get();
+            repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -423,7 +423,7 @@ void screen_text_list_thread(void) {
     }
 
     /* A nonzero third parameter ends the frame thread. */
-    thread_parameters_set(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
+    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     /* A row scroll still under way owns its row buffer. */
     if (accum & 0xF) {

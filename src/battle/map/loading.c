@@ -1,10 +1,10 @@
 /* Map data and mesh loading, mesh render record init, and weather sound effects. */
 
-#include "fft/battle_map.h"
-#include "fft/battle_map_load.h"
-#include "fft/battle_map_mesh.h"
-#include "fft/battle_map_palette.h"
 #include "fft/file.h"
+#include "fft/map.h"
+#include "fft/map_load.h"
+#include "fft/map_mesh.h"
+#include "fft/map_palette.h"
 #include "fft/memory.h"
 #include "fft/render.h"
 #include "fft/script_variable.h"
@@ -16,36 +16,36 @@
 
 extern s32 g_weather_timed_transform_unread;
 
-/* weather_transform_duration_set stores 0x95; nothing reads it */
+/* weather_set_transform_duration stores 0x95; nothing reads it */
 
-/* g_battle_map_resource_load_state; these are not the loader's normal return values. */
+/* g_map_resource_load_state; these are not the loader's normal return values. */
 typedef enum resource_load_state {
-    BATTLE_MAP_LOAD_STATE_IDLE = 0x00,
-    BATTLE_MAP_LOAD_STATE_GNS_FILE = 0x74, /* also accepted as a no-op input command */
-    BATTLE_MAP_LOAD_STATE_DONE = 0x77,
-    BATTLE_MAP_LOAD_STATE_RESOURCE_FILE = 0x78,
-    BATTLE_MAP_LOAD_STATE_MESH_RECORDS = 0x79, /* rebuild render records once per buffer */
-    BATTLE_MAP_LOAD_STATE_MESH_RECORDS_SECOND = 0x91,
-    BATTLE_MAP_LOAD_STATE_APPLY_LIGHTING = 0x92,
-    BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE = 0x93
+    MAP_LOAD_STATE_IDLE = 0x00,
+    MAP_LOAD_STATE_GNS_FILE = 0x74, /* also accepted as a no-op input command */
+    MAP_LOAD_STATE_DONE = 0x77,
+    MAP_LOAD_STATE_RESOURCE_FILE = 0x78,
+    MAP_LOAD_STATE_MESH_RECORDS = 0x79, /* rebuild render records once per buffer */
+    MAP_LOAD_STATE_MESH_RECORDS_SECOND = 0x91,
+    MAP_LOAD_STATE_APPLY_LIGHTING = 0x92,
+    MAP_LOAD_STATE_APPLY_TEXTURE = 0x93
 } resource_load_state_e;
 
-/* g_battle_map_gns_load_phase and the normal return of battle_map_load_data. */
+/* g_map_gns_load_phase and the normal return of map_update_load. */
 typedef enum gns_load_phase {
-    BATTLE_MAP_GNS_LOAD_PHASE_IDLE = 0,
-    BATTLE_MAP_GNS_LOAD_PHASE_RESOURCES = 1, /* loading the pending resource files one by one */
-    BATTLE_MAP_GNS_LOAD_PHASE_START = 15     /* choose the resources once the GNS is in */
+    MAP_GNS_LOAD_PHASE_IDLE = 0,
+    MAP_GNS_LOAD_PHASE_RESOURCES = 1, /* loading the pending resource files one by one */
+    MAP_GNS_LOAD_PHASE_START = 15     /* choose the resources once the GNS is in */
 } gns_load_phase_e;
 
-typedef enum mesh_load_state { BATTLE_MAP_MESH_LOAD_IDLE = 0, BATTLE_MAP_MESH_LOAD_WAITING = 0x8d } mesh_load_state_e;
+typedef enum mesh_load_state { MAP_MESH_LOAD_IDLE = 0, MAP_MESH_LOAD_WAITING = 0x8d } mesh_load_state_e;
 
 /* Pending map resources and the loader phases. */
-extern char g_battle_map_directory_path[];
-extern battle_map_resource_t* g_battle_map_mesh_load_buffer;
-static gns_load_phase_e s_battle_map_gns_load_phase;
-static resource_load_state_e s_battle_map_resource_load_state;
-extern mesh_load_state_e g_battle_map_mesh_load_state;
-extern battle_map_gns_record_t g_battle_map_selected_mesh_record;
+extern char g_map_directory_path[];
+extern map_resource_t* g_map_mesh_load_buffer;
+static gns_load_phase_e s_map_gns_load_phase;
+static resource_load_state_e s_map_resource_load_state;
+extern mesh_load_state_e g_map_mesh_load_state;
+extern map_gns_record_t g_map_selected_mesh_record;
 
 static render_buffer_t* s_last_render_buffer = 0;
 
@@ -57,12 +57,12 @@ static s32 s_untextured_triangle_count = 0;
 
 static s32 s_untextured_quad_count = 0;
 
-static void mesh_render_records_init(const battle_map_mesh_geometry_t* geometry_data);
+static void init_mesh_render_records(const map_mesh_geometry_t* geometry_data);
 
 /* Map loader: takes a command between loads, then advances the load of a map's
  * files by one step per call.
  *
- * Commands, read only while g_battle_map_gns_load_phase is idle: START and
+ * Commands, read only while g_map_gns_load_phase is idle: START and
  * START_HELD allocate the 0x20000-byte load buffer, read the map's GNS (and reset
  * the mesh state) only when map_id is not the loaded map, and go on to choose
  * resources. LOAD_GNS always reads the GNS; no caller issues it. Any other
@@ -70,37 +70,37 @@ static void mesh_render_records_init(const battle_map_mesh_geometry_t* geometry_
  *
  * Steps:
  * - GNS file: once read, its first 150 rows are copied to
- *   g_battle_map_gns_records.
- * - Selection: fill g_battle_map_pending_gns_records, indexed by resource type.
+ *   g_map_gns_records.
+ * - Selection: fill g_map_pending_gns_records, indexed by resource type.
  *   A row's comparison is tested against the low 12 bits of its script
  *   variable with the weather in bits 12-14 and the time of day in bit 15. A row
  *   is taken when its file bytes differ from the row last loaded for its type.
  *   Four passes: primary meshes, override meshes, the default texture, then
  *   every other row whose comparison holds.
  * - Resources: read the pending rows one file at a time in type order and hand
- *   each to battle_map_gns_resource_dispatch. Types 0x12-0x17 come last: 0x12
- *   reports error 0x3cb (to the empty system_error_report), the texture
+ *   each to map_gns_dispatch_resource. Types 0x12-0x17 come last: 0x12
+ *   reports error 0x3cb (to the empty system_report_error), the texture
  *   quarters load without being applied
  *   here, and the texture is followed by the pending lighting, the texture
  *   upload and the pending palettes.
- * - Mesh records: battle_map_mesh_append_geometry requests them; the render
+ * - Mesh records: map_mesh_append_geometry requests them; the render
  *   records of the nine mesh parts are rebuilt once in each render buffer.
  * - End: run the command records after the file rows, apply the script
  *   weather, free the buffer.
  *
- * Returns g_battle_map_gns_load_phase: nonzero while loading, 0 when done or
+ * Returns g_map_gns_load_phase: nonzero while loading, 0 when done or
  * idle. A command that cannot start because a file read is in progress also
- * returns 0, and a loaded file held by START_HELD returns BATTLE_MAP_LOAD_RESULT_HELD
- * until BATTLE_MAP_DATA_COMMAND_RELEASE_GNS_HOLD. A failed buffer allocation is only
+ * returns 0, and a loaded file held by START_HELD returns MAP_LOAD_RESULT_HELD
+ * until MAP_DATA_COMMAND_RELEASE_GNS_HOLD. A failed buffer allocation is only
  * reported (to the same empty hook) and the load goes on with a null buffer.
  *
- * Texture rows are never copied to g_battle_map_loaded_gns_records, so a selected
+ * Texture rows are never copied to g_map_loaded_gns_records, so a selected
  * texture is read again on every start. The fourth pass does not exclude the
  * filler rows (type 0x31): one whose comparison holds reads and writes entry 49
  * of the two 49-entry tables. Quarter n loads at buffer + 0x8000 * (n + 1), one
  * quarter above where the dispatcher uploads it from, and quarter 3 lies past the
  * end of the buffer; retail GNS files hold no quarter rows. */
-s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
+s32 map_update_load(s32 map_id, map_load_command_e command) {
     s32 i;
     s32 r;
     s32 j;
@@ -108,93 +108,92 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
     u8 diff;
 
     /* A command is taken only between loads. */
-    if (s_battle_map_gns_load_phase == BATTLE_MAP_GNS_LOAD_PHASE_IDLE) {
+    if (s_map_gns_load_phase == MAP_GNS_LOAD_PHASE_IDLE) {
         switch (command) {
-        case BATTLE_MAP_LOAD_COMMAND_LOAD_GNS:
-            if (file_load_state_get() != 0) {
+        case MAP_LOAD_COMMAND_LOAD_GNS:
+            if (file_get_load_state() != 0) {
                 return 0;
             }
 
-            g_battle_map_data_load_buffer = heap_alloc(0x20000);
-            if (g_battle_map_data_load_buffer == 0) {
-                system_error_report(2, 0x3c2);
+            g_map_data_load_buffer = heap_alloc(0x20000);
+            if (g_map_data_load_buffer == 0) {
+                system_report_error(2, 0x3c2);
             }
 
-            battle_map_gns_move_find_load(map_id & 0xffff);
-            s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_GNS_FILE;
-            g_battle_map_loaded_id = map_id;
-            s_battle_map_gns_load_phase = BATTLE_MAP_GNS_LOAD_PHASE_START;
-            battle_map_mesh_reset_render_state();
+            map_load_gns_and_move_find(map_id & 0xffff);
+            s_map_resource_load_state = MAP_LOAD_STATE_GNS_FILE;
+            g_map_loaded_id = map_id;
+            s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_START;
+            map_mesh_reset_render_state();
             break;
-        case BATTLE_MAP_LOAD_COMMAND_START_HELD:
-            g_battle_map_gns_dispatch_held = 1;
+        case MAP_LOAD_COMMAND_START_HELD:
+            g_map_gns_dispatch_held = 1;
             /* fall through */
-        case BATTLE_MAP_LOAD_COMMAND_START:
-            if (file_load_state_get() != 0) {
+        case MAP_LOAD_COMMAND_START:
+            if (file_get_load_state() != 0) {
                 return 0;
             }
 
-            g_battle_map_data_load_buffer = heap_alloc(0x20000);
-            if (g_battle_map_data_load_buffer == 0) {
-                system_error_report(2, 0x3c2);
+            g_map_data_load_buffer = heap_alloc(0x20000);
+            if (g_map_data_load_buffer == 0) {
+                system_report_error(2, 0x3c2);
             }
 
-            g_battle_map_texture_quarter_0_pending = 0;
-            g_battle_map_texture_quarter_1_pending = 0;
-            g_battle_map_texture_quarter_2_pending = 0;
-            g_battle_map_texture_quarter_3_pending = 0;
-            g_battle_map_texture_pending = 0;
-            g_battle_map_palette_pending = 0;
-            g_battle_map_lighting_pending = 0;
+            g_map_texture_quarter_0_pending = 0;
+            g_map_texture_quarter_1_pending = 0;
+            g_map_texture_quarter_2_pending = 0;
+            g_map_texture_quarter_3_pending = 0;
+            g_map_texture_pending = 0;
+            g_map_palette_pending = 0;
+            g_map_lighting_pending = 0;
 
-            if (map_id != g_battle_map_loaded_id) {
-                if (battle_map_gns_move_find_load(map_id & 0xffff) != g_battle_map_gns_records) {
+            if (map_id != g_map_loaded_id) {
+                if (map_load_gns_and_move_find(map_id & 0xffff) != g_map_gns_records) {
                     return 0;
                 }
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_GNS_FILE;
-                g_battle_map_loaded_id = map_id;
-                s_battle_map_gns_load_phase = BATTLE_MAP_GNS_LOAD_PHASE_START;
-                battle_map_mesh_reset_render_state();
+                s_map_resource_load_state = MAP_LOAD_STATE_GNS_FILE;
+                g_map_loaded_id = map_id;
+                s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_START;
+                map_mesh_reset_render_state();
             } else {
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_IDLE;
-                s_battle_map_gns_load_phase = BATTLE_MAP_GNS_LOAD_PHASE_START;
+                s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
+                s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_START;
             }
             break;
-        case BATTLE_MAP_LOAD_STATE_GNS_FILE:
-        case BATTLE_MAP_LOAD_COMMAND_POLL_HELD:
+        case MAP_LOAD_STATE_GNS_FILE:
+        case MAP_LOAD_COMMAND_POLL_HELD:
             break;
         }
     }
 
-    if (s_battle_map_resource_load_state == BATTLE_MAP_LOAD_STATE_IDLE) {
-        if (s_battle_map_gns_load_phase != BATTLE_MAP_GNS_LOAD_PHASE_RESOURCES) {
+    if (s_map_resource_load_state == MAP_LOAD_STATE_IDLE) {
+        if (s_map_gns_load_phase != MAP_GNS_LOAD_PHASE_RESOURCES) {
             /* Selection: fill the pending table, indexed by resource type. */
-            if (s_battle_map_gns_load_phase == BATTLE_MAP_GNS_LOAD_PHASE_START) {
-                g_battle_map_gns_record_cursor = 0;
-                s_battle_map_gns_load_phase = BATTLE_MAP_GNS_LOAD_PHASE_RESOURCES;
+            if (s_map_gns_load_phase == MAP_GNS_LOAD_PHASE_START) {
+                g_map_gns_record_cursor = 0;
+                s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_RESOURCES;
                 {
                     s32 k;
 
                     for (k = 0; k < GNS_RESOURCE_TABLE_COUNT; k++) {
-                        g_battle_map_pending_gns_records[k].resource_type = GNS_RECORD_NONE;
+                        g_map_pending_gns_records[k].resource_type = GNS_RECORD_NONE;
                     }
                 }
 
                 /* Pass 1: primary meshes. A row whose comparison holds forgets
                  * what is loaded for its type, so it is always read again. */
-                for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_battle_map_gns_records[r].resource_type == BATTLE_MAP_RESOURCE_MESH_PRIMARY) {
-                        state = script_variable_get(g_battle_map_gns_records[r].script_variable_id) & 0xfff;
+                for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
+                    if (g_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_PRIMARY) {
+                        state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
-                        if (battle_map_gns_record_matches_state(g_battle_map_gns_records[r].map_state_comparison,
-                                g_battle_map_gns_records[r].map_state, state)) {
+                        if (map_gns_record_matches_state(
+                                g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
                             /* No braces: a braced body's block note lengthens this loop by one
                              * luid, and loop.c then hoists the 0x48 out of the record loop. */
                             j = 0;
                             do
-                                g_battle_map_loaded_gns_records[g_battle_map_gns_records[r].resource_type]
-                                    .load_info.bytes[j] = 0x48;
+                                g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[j] = 0x48;
                             while (++j < 14);
                         }
 
@@ -203,30 +202,27 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
 
                             diff = 0;
                             for (k = 0; k < 14; k++) {
-                                diff |= g_battle_map_loaded_gns_records[g_battle_map_gns_records[r].resource_type]
-                                            .load_info.bytes[k]
-                                    ^ g_battle_map_gns_records[r].load_info.bytes[k];
+                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                    ^ g_map_gns_records[r].load_info.bytes[k];
                             }
                         }
                         if (diff) {
-                            g_battle_map_pending_gns_records[g_battle_map_gns_records[r].resource_type]
-                                = g_battle_map_gns_records[r];
+                            g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
                         }
                     }
                 }
 
                 /* Pass 2: override meshes, by the same rule. */
-                for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_battle_map_gns_records[r].resource_type == BATTLE_MAP_RESOURCE_MESH_OVERRIDE) {
-                        state = script_variable_get(g_battle_map_gns_records[r].script_variable_id) & 0xfff;
+                for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
+                    if (g_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_OVERRIDE) {
+                        state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
-                        if (battle_map_gns_record_matches_state(g_battle_map_gns_records[r].map_state_comparison,
-                                g_battle_map_gns_records[r].map_state, state)) {
+                        if (map_gns_record_matches_state(
+                                g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
                             j = 0;
                             do
-                                g_battle_map_loaded_gns_records[g_battle_map_gns_records[r].resource_type]
-                                    .load_info.bytes[j] = 0x48;
+                                g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[j] = 0x48;
                             while (++j < 14);
                         }
 
@@ -235,70 +231,65 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
 
                             diff = 0;
                             for (k = 0; k < 14; k++) {
-                                diff |= g_battle_map_loaded_gns_records[g_battle_map_gns_records[r].resource_type]
-                                            .load_info.bytes[k]
-                                    ^ g_battle_map_gns_records[r].load_info.bytes[k];
+                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                    ^ g_map_gns_records[r].load_info.bytes[k];
                             }
                         }
                         if (diff) {
-                            g_battle_map_pending_gns_records[g_battle_map_gns_records[r].resource_type]
-                                = g_battle_map_gns_records[r];
+                            g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
                         }
                     }
                 }
 
                 /* Pass 3: the default texture (state 0 of the two map variables). */
-                for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_battle_map_gns_records[r].resource_type == BATTLE_MAP_RESOURCE_TEXTURE
-                        && (g_battle_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_WEATHER_AND_TIME
-                            || g_battle_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_MAP_ARRANGEMENT)
-                        && g_battle_map_gns_records[r].map_state == 0) {
+                for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
+                    if (g_map_gns_records[r].resource_type == MAP_RESOURCE_TEXTURE
+                        && (g_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_WEATHER_AND_TIME
+                            || g_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_MAP_ARRANGEMENT)
+                        && g_map_gns_records[r].map_state == 0) {
                         {
                             s32 k;
 
                             diff = 0;
                             for (k = 0; k < 14; k++) {
-                                diff |= g_battle_map_loaded_gns_records[g_battle_map_gns_records[r].resource_type]
-                                            .load_info.bytes[k]
-                                    ^ g_battle_map_gns_records[r].load_info.bytes[k];
+                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                    ^ g_map_gns_records[r].load_info.bytes[k];
                             }
                         }
                         if (diff) {
-                            g_battle_map_pending_gns_records[g_battle_map_gns_records[r].resource_type]
-                                = g_battle_map_gns_records[r];
+                            g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
                         }
                     }
                 }
 
                 /* Pass 4: every other row whose comparison holds replaces the
                  * choice for its type, or cancels it when that file is loaded. */
-                for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
-                    if (g_battle_map_gns_records[r].resource_type != GNS_RECORD_NONE
-                        && (g_battle_map_gns_records[r].script_variable_id != EVENT_SCRIPT_VAR_WEATHER_AND_TIME
-                            || g_battle_map_gns_records[r].map_state != 0)
-                        && (g_battle_map_gns_records[r].script_variable_id != EVENT_SCRIPT_VAR_MAP_ARRANGEMENT
-                            || g_battle_map_gns_records[r].map_state != 0)) {
-                        state = script_variable_get(g_battle_map_gns_records[r].script_variable_id) & 0xfff;
+                for (r = 0; g_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
+                    if (g_map_gns_records[r].resource_type != GNS_RECORD_NONE
+                        && (g_map_gns_records[r].script_variable_id != EVENT_SCRIPT_VAR_WEATHER_AND_TIME
+                            || g_map_gns_records[r].map_state != 0)
+                        && (g_map_gns_records[r].script_variable_id != EVENT_SCRIPT_VAR_MAP_ARRANGEMENT
+                            || g_map_gns_records[r].map_state != 0)) {
+                        state = script_variable_get(g_map_gns_records[r].script_variable_id) & 0xfff;
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
-                        if (battle_map_gns_record_matches_state(g_battle_map_gns_records[r].map_state_comparison,
-                                g_battle_map_gns_records[r].map_state, state)) {
+                        if (map_gns_record_matches_state(
+                                g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
                             {
                                 s32 k;
 
                                 diff = 0;
                                 for (k = 0; k < 14; k++) {
-                                    diff |= g_battle_map_loaded_gns_records[g_battle_map_gns_records[r].resource_type]
+                                    diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type]
                                                 .load_info.bytes[k]
-                                        ^ g_battle_map_gns_records[r].load_info.bytes[k];
+                                        ^ g_map_gns_records[r].load_info.bytes[k];
                                 }
                             }
                             if (diff) {
-                                g_battle_map_pending_gns_records[g_battle_map_gns_records[r].resource_type]
-                                    = g_battle_map_gns_records[r];
+                                g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
                             } else {
-                                g_battle_map_pending_gns_records[g_battle_map_gns_records[r].resource_type]
-                                    .resource_type = GNS_RECORD_NONE;
+                                g_map_pending_gns_records[g_map_gns_records[r].resource_type].resource_type
+                                    = GNS_RECORD_NONE;
                             }
                         }
                     }
@@ -307,110 +298,97 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
         } else {
             /* Resources: start the next pending file. Types 0x12-0x17 are
              * passed over here and taken after the others. */
-            if (file_load_state_get() == 0) {
-                while (
-                    (g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].resource_type == GNS_RECORD_NONE
-                        && g_battle_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT)
-                    || (g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].resource_type >= 0x12
-                        && g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].resource_type <= 0x17)) {
-                    g_battle_map_gns_record_cursor++;
+            if (file_get_load_state() == 0) {
+                while ((g_map_pending_gns_records[g_map_gns_record_cursor].resource_type == GNS_RECORD_NONE
+                           && g_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT)
+                    || (g_map_pending_gns_records[g_map_gns_record_cursor].resource_type >= 0x12
+                        && g_map_pending_gns_records[g_map_gns_record_cursor].resource_type <= 0x17)) {
+                    g_map_gns_record_cursor++;
                 }
 
-                if (g_battle_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT) {
+                if (g_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT) {
                     /* Clear the 32 20-byte entries the dispatcher copies, so a shorter file leaves the rest zero. */
-                    if (g_battle_map_gns_record_cursor == BATTLE_MAP_RESOURCE_TEXTURE_ANIMATIONS) {
-                        bzero(g_battle_map_data_load_buffer, 0x280);
+                    if (g_map_gns_record_cursor == MAP_RESOURCE_TEXTURE_ANIMATIONS) {
+                        bzero(g_map_data_load_buffer, 0x280);
                     }
-                    battle_map_file_load_start(g_battle_map_directory_path,
-                        &g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].load_info,
-                        g_battle_map_data_load_buffer, g_battle_map_gns_record_cursor);
-                    s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_RESOURCE_FILE;
-                } else if (g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_UNSUPPORTED_12].resource_type
-                    != GNS_RECORD_NONE) {
-                    system_error_report(2, 0x3cb);
-                    g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_UNSUPPORTED_12].resource_type
-                        = GNS_RECORD_NONE;
-                } else if (g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type
-                    != GNS_RECORD_NONE) {
-                    g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type
-                        = GNS_RECORD_NONE;
-                    battle_map_file_load_start(g_battle_map_directory_path,
-                        &g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_0].load_info,
-                        g_battle_map_data_load_buffer->bytes + 0x8000, BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_0);
-                    g_battle_map_texture_quarter_0_pending = 1;
-                    g_battle_map_texture_pending = 1;
-                } else if (g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_1].resource_type
-                    != GNS_RECORD_NONE) {
-                    g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_1].resource_type
-                        = GNS_RECORD_NONE;
-                    battle_map_file_load_start(g_battle_map_directory_path,
-                        &g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_1].load_info,
-                        g_battle_map_data_load_buffer->bytes + 0x10000, BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_1);
-                    g_battle_map_texture_quarter_1_pending = 1;
-                    g_battle_map_texture_pending = 1;
-                } else if (g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_2].resource_type
-                    != GNS_RECORD_NONE) {
-                    g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_2].resource_type
-                        = GNS_RECORD_NONE;
-                    battle_map_file_load_start(g_battle_map_directory_path,
-                        &g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_2].load_info,
-                        g_battle_map_data_load_buffer->bytes + 0x18000, BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_2);
-                    g_battle_map_texture_quarter_2_pending = 1;
-                    g_battle_map_texture_pending = 1;
-                } else if (g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_3].resource_type
-                    != GNS_RECORD_NONE) {
-                    g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_3].resource_type
-                        = GNS_RECORD_NONE;
-                    battle_map_file_load_start(g_battle_map_directory_path,
-                        &g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_3].load_info,
-                        g_battle_map_data_load_buffer->bytes + 0x20000, BATTLE_MAP_RESOURCE_TEXTURE_QUARTER_3);
-                    g_battle_map_texture_quarter_3_pending = 1;
-                    g_battle_map_texture_pending = 1;
-                } else if (g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE].resource_type
-                    != GNS_RECORD_NONE) {
-                    g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE].resource_type = GNS_RECORD_NONE;
-                    battle_map_file_load_start(g_battle_map_directory_path,
-                        &g_battle_map_pending_gns_records[BATTLE_MAP_RESOURCE_TEXTURE].load_info,
-                        g_battle_map_data_load_buffer, BATTLE_MAP_RESOURCE_TEXTURE);
-                    g_battle_map_texture_quarter_0_pending = 1;
-                    g_battle_map_texture_quarter_1_pending = 1;
-                    g_battle_map_texture_quarter_2_pending = 1;
-                    g_battle_map_texture_quarter_3_pending = 1;
-                    g_battle_map_texture_pending = 1;
-                    s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_APPLY_LIGHTING;
+                    map_start_file_load(g_map_directory_path,
+                        &g_map_pending_gns_records[g_map_gns_record_cursor].load_info, g_map_data_load_buffer,
+                        g_map_gns_record_cursor);
+                    s_map_resource_load_state = MAP_LOAD_STATE_RESOURCE_FILE;
+                } else if (g_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type != GNS_RECORD_NONE) {
+                    system_report_error(2, 0x3cb);
+                    g_map_pending_gns_records[MAP_RESOURCE_UNSUPPORTED_12].resource_type = GNS_RECORD_NONE;
+                } else if (g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type != GNS_RECORD_NONE) {
+                    g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].resource_type = GNS_RECORD_NONE;
+                    map_start_file_load(g_map_directory_path,
+                        &g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_0].load_info,
+                        g_map_data_load_buffer->bytes + 0x8000, MAP_RESOURCE_TEXTURE_QUARTER_0);
+                    g_map_texture_quarter_0_pending = 1;
+                    g_map_texture_pending = 1;
+                } else if (g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_1].resource_type != GNS_RECORD_NONE) {
+                    g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_1].resource_type = GNS_RECORD_NONE;
+                    map_start_file_load(g_map_directory_path,
+                        &g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_1].load_info,
+                        g_map_data_load_buffer->bytes + 0x10000, MAP_RESOURCE_TEXTURE_QUARTER_1);
+                    g_map_texture_quarter_1_pending = 1;
+                    g_map_texture_pending = 1;
+                } else if (g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_2].resource_type != GNS_RECORD_NONE) {
+                    g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_2].resource_type = GNS_RECORD_NONE;
+                    map_start_file_load(g_map_directory_path,
+                        &g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_2].load_info,
+                        g_map_data_load_buffer->bytes + 0x18000, MAP_RESOURCE_TEXTURE_QUARTER_2);
+                    g_map_texture_quarter_2_pending = 1;
+                    g_map_texture_pending = 1;
+                } else if (g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_3].resource_type != GNS_RECORD_NONE) {
+                    g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_3].resource_type = GNS_RECORD_NONE;
+                    map_start_file_load(g_map_directory_path,
+                        &g_map_pending_gns_records[MAP_RESOURCE_TEXTURE_QUARTER_3].load_info,
+                        g_map_data_load_buffer->bytes + 0x20000, MAP_RESOURCE_TEXTURE_QUARTER_3);
+                    g_map_texture_quarter_3_pending = 1;
+                    g_map_texture_pending = 1;
+                } else if (g_map_pending_gns_records[MAP_RESOURCE_TEXTURE].resource_type != GNS_RECORD_NONE) {
+                    g_map_pending_gns_records[MAP_RESOURCE_TEXTURE].resource_type = GNS_RECORD_NONE;
+                    map_start_file_load(g_map_directory_path,
+                        &g_map_pending_gns_records[MAP_RESOURCE_TEXTURE].load_info, g_map_data_load_buffer,
+                        MAP_RESOURCE_TEXTURE);
+                    g_map_texture_quarter_0_pending = 1;
+                    g_map_texture_quarter_1_pending = 1;
+                    g_map_texture_quarter_2_pending = 1;
+                    g_map_texture_quarter_3_pending = 1;
+                    g_map_texture_pending = 1;
+                    s_map_resource_load_state = MAP_LOAD_STATE_APPLY_LIGHTING;
                 } else {
                     /* Nothing left: run the command records that follow the
                      * row ending the file rows, then finish. */
-                    for (i = 0; g_battle_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
-                        if (g_battle_map_gns_records[i].resource_type == GNS_RECORD_NONE) {
+                    for (i = 0; g_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
+                        if (g_map_gns_records[i].resource_type == GNS_RECORD_NONE) {
                             break;
                         }
                     }
                     i++;
-                    g_battle_map_gns_record_cursor = (s32)&g_battle_map_gns_records[i];
-                    while (((battle_map_resource_t*)g_battle_map_gns_record_cursor)->command.resource_type
-                        != GNS_RECORD_NONE) {
-                        battle_map_gns_apply_command(2, (battle_map_resource_t*)g_battle_map_gns_record_cursor);
+                    g_map_gns_record_cursor = (s32)&g_map_gns_records[i];
+                    while (((map_resource_t*)g_map_gns_record_cursor)->command.resource_type != GNS_RECORD_NONE) {
+                        map_gns_apply_command(2, (map_resource_t*)g_map_gns_record_cursor);
                     }
 
-                    s_battle_map_gns_load_phase = BATTLE_MAP_GNS_LOAD_PHASE_IDLE;
-                    s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_DONE;
-                    weather_command_dispatch(BATTLE_MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
-                    heap_free(g_battle_map_data_load_buffer);
+                    s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_IDLE;
+                    s_map_resource_load_state = MAP_LOAD_STATE_DONE;
+                    weather_dispatch_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
+                    heap_free(g_map_data_load_buffer);
                 }
             }
         }
     } else {
-        switch (s_battle_map_resource_load_state) {
-        case BATTLE_MAP_LOAD_STATE_GNS_FILE:
-            if (file_load_state_get() == 0) {
-                battle_map_gns_record_t* source;
-                battle_map_gns_record_t* destination;
+        switch (s_map_resource_load_state) {
+        case MAP_LOAD_STATE_GNS_FILE:
+            if (file_get_load_state() == 0) {
+                map_gns_record_t* source;
+                map_gns_record_t* destination;
 
                 i = 0;
-                source = g_battle_map_data_load_buffer->gns_records;
-                destination = g_battle_map_gns_records;
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_IDLE;
+                source = g_map_data_load_buffer->gns_records;
+                destination = g_map_gns_records;
+                s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
                 do {
                     *destination = *source;
                     destination++;
@@ -419,43 +397,40 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
                 } while (i < 150);
             }
             break;
-        case BATTLE_MAP_LOAD_STATE_RESOURCE_FILE:
-            if (file_load_state_get() == 0) {
-                if (g_battle_map_gns_dispatch_held != 0) {
-                    return BATTLE_MAP_LOAD_RESULT_HELD;
+        case MAP_LOAD_STATE_RESOURCE_FILE:
+            if (file_get_load_state() == 0) {
+                if (g_map_gns_dispatch_held != 0) {
+                    return MAP_LOAD_RESULT_HELD;
                 }
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_IDLE;
-                battle_map_gns_resource_dispatch(
-                    g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].resource_type,
-                    g_battle_map_data_load_buffer);
-                g_battle_map_loaded_gns_records[g_battle_map_gns_record_cursor]
-                    = g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor];
-                g_battle_map_gns_record_cursor++;
+                s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
+                map_gns_dispatch_resource(
+                    g_map_pending_gns_records[g_map_gns_record_cursor].resource_type, g_map_data_load_buffer);
+                g_map_loaded_gns_records[g_map_gns_record_cursor] = g_map_pending_gns_records[g_map_gns_record_cursor];
+                g_map_gns_record_cursor++;
             }
             break;
-        case BATTLE_MAP_LOAD_STATE_APPLY_LIGHTING:
-            if (file_load_state_get() == 0) {
-                if (g_battle_map_lighting_pending != 0) {
-                    battle_map_gns_resource_dispatch(
-                        BATTLE_MAP_RESOURCE_APPLY_LIGHTING, (battle_map_resource_t*)g_battle_map_pending_lighting_data);
+        case MAP_LOAD_STATE_APPLY_LIGHTING:
+            if (file_get_load_state() == 0) {
+                if (g_map_lighting_pending != 0) {
+                    map_gns_dispatch_resource(
+                        MAP_RESOURCE_APPLY_LIGHTING, (map_resource_t*)g_map_pending_lighting_data);
                 }
-                g_battle_map_lighting_pending = 0;
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE;
+                g_map_lighting_pending = 0;
+                s_map_resource_load_state = MAP_LOAD_STATE_APPLY_TEXTURE;
             }
             break;
-        case BATTLE_MAP_LOAD_STATE_APPLY_TEXTURE:
-            if (g_battle_map_texture_pending != 0) {
-                battle_map_gns_resource_dispatch(BATTLE_MAP_RESOURCE_TEXTURE, g_battle_map_data_load_buffer);
+        case MAP_LOAD_STATE_APPLY_TEXTURE:
+            if (g_map_texture_pending != 0) {
+                map_gns_dispatch_resource(MAP_RESOURCE_TEXTURE, g_map_data_load_buffer);
             }
-            if (g_battle_map_palette_pending != 0) {
-                battle_map_gns_resource_dispatch(
-                    BATTLE_MAP_RESOURCE_APPLY_PALETTES, (battle_map_resource_t*)g_battle_map_pending_palette_data);
+            if (g_map_palette_pending != 0) {
+                map_gns_dispatch_resource(MAP_RESOURCE_APPLY_PALETTES, (map_resource_t*)g_map_pending_palette_data);
             }
-            s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_IDLE;
+            s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
             break;
         /* Rebuild the mesh render records once in each render buffer: each
          * state waits until the current buffer is not the one last written. */
-        case BATTLE_MAP_LOAD_STATE_MESH_RECORDS:
+        case MAP_LOAD_STATE_MESH_RECORDS:
             if (s_last_render_buffer != g_render_current_buffer) {
                 s_textured_triangle_count = 0;
                 s_textured_quad_count = 0;
@@ -463,18 +438,18 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
                 s_untextured_quad_count = 0;
 
                 for (i = 0; i < 9; i++) {
-                    if (g_battle_map_mesh_part_geometry[i] != 0) {
-                        mesh_render_records_init(g_battle_map_mesh_part_geometry[i]);
+                    if (g_map_mesh_part_geometry[i] != 0) {
+                        init_mesh_render_records(g_map_mesh_part_geometry[i]);
                     }
-                    s_textured_triangle_count += g_battle_map_mesh_parts[i].textured_triangle_count;
-                    s_textured_quad_count += g_battle_map_mesh_parts[i].textured_quad_count;
-                    s_untextured_triangle_count += g_battle_map_mesh_parts[i].untextured_triangle_count;
-                    s_untextured_quad_count += g_battle_map_mesh_parts[i].untextured_quad_count;
+                    s_textured_triangle_count += g_map_mesh_parts[i].textured_triangle_count;
+                    s_textured_quad_count += g_map_mesh_parts[i].textured_quad_count;
+                    s_untextured_triangle_count += g_map_mesh_parts[i].untextured_triangle_count;
+                    s_untextured_quad_count += g_map_mesh_parts[i].untextured_quad_count;
                 }
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_MESH_RECORDS_SECOND;
+                s_map_resource_load_state = MAP_LOAD_STATE_MESH_RECORDS_SECOND;
             }
             break;
-        case BATTLE_MAP_LOAD_STATE_MESH_RECORDS_SECOND:
+        case MAP_LOAD_STATE_MESH_RECORDS_SECOND:
             if (s_last_render_buffer != g_render_current_buffer) {
                 s_textured_triangle_count = 0;
                 s_textured_quad_count = 0;
@@ -482,88 +457,88 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
                 s_untextured_quad_count = 0;
 
                 for (i = 0; i < 9; i++) {
-                    if (g_battle_map_mesh_part_geometry[i] != 0) {
-                        mesh_render_records_init(g_battle_map_mesh_part_geometry[i]);
+                    if (g_map_mesh_part_geometry[i] != 0) {
+                        init_mesh_render_records(g_map_mesh_part_geometry[i]);
                     }
-                    g_battle_map_mesh_part_geometry[i] = 0;
-                    s_textured_triangle_count += g_battle_map_mesh_parts[i].textured_triangle_count;
-                    s_textured_quad_count += g_battle_map_mesh_parts[i].textured_quad_count;
-                    s_untextured_triangle_count += g_battle_map_mesh_parts[i].untextured_triangle_count;
-                    s_untextured_quad_count += g_battle_map_mesh_parts[i].untextured_quad_count;
+                    g_map_mesh_part_geometry[i] = 0;
+                    s_textured_triangle_count += g_map_mesh_parts[i].textured_triangle_count;
+                    s_textured_quad_count += g_map_mesh_parts[i].textured_quad_count;
+                    s_untextured_triangle_count += g_map_mesh_parts[i].untextured_triangle_count;
+                    s_untextured_quad_count += g_map_mesh_parts[i].untextured_quad_count;
                 }
-                s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_IDLE;
+                s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
             }
             break;
         }
     }
-    return s_battle_map_gns_load_phase;
+    return s_map_gns_load_phase;
 }
 
 /* Selects the last primary-mesh record, then substitutes an alternate whose
  * layout/weather/time comparison matches, and loads the selected record's
  * file into a temporary 0x20000-byte buffer. The loader's fourth argument is
- * the resource type, as at its other call sites; battle_map_file_load_start
+ * the resource type, as at its other call sites; map_start_file_load
  * does not read it. `palette_mode` is the animation mode the alternate mesh's
- * palette is applied with (battle_map_palette_update_colors). Returns the load
+ * palette is applied with (map_palette_set_colors). Returns the load
  * state, nonzero until the palette has been applied.
  *
  * Retail bug: the second step applies the palette and frees the buffer while
  * the read is still in progress, and waits forever once it has finished. The
- * only caller runs while g_battle_map_refresh_pending is set, which nothing sets. */
-s32 battle_map_mesh_palette_load(s32 palette_mode) {
+ * only caller runs while g_map_refresh_pending is set, which nothing sets. */
+s32 map_mesh_load_palette(s32 palette_mode) {
     s32 i;
     s16 state;
 
-    switch (g_battle_map_mesh_load_state) {
-    case BATTLE_MAP_MESH_LOAD_IDLE:
-        for (i = 0; g_battle_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
-            if (g_battle_map_gns_records[i].resource_type == BATTLE_MAP_RESOURCE_MESH_PRIMARY) {
-                g_battle_map_selected_mesh_record = g_battle_map_gns_records[i];
+    switch (g_map_mesh_load_state) {
+    case MAP_MESH_LOAD_IDLE:
+        for (i = 0; g_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
+            if (g_map_gns_records[i].resource_type == MAP_RESOURCE_MESH_PRIMARY) {
+                g_map_selected_mesh_record = g_map_gns_records[i];
             }
         }
-        for (i = 0; g_battle_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
-            if (g_battle_map_gns_records[i].resource_type == BATTLE_MAP_RESOURCE_MESH_ALTERNATE) {
-                state = script_variable_get(g_battle_map_gns_records[i].script_variable_id) & 0xfff;
+        for (i = 0; g_map_gns_records[i].resource_type < GNS_RECORD_COMMAND_SEPARATOR; i++) {
+            if (g_map_gns_records[i].resource_type == MAP_RESOURCE_MESH_ALTERNATE) {
+                state = script_variable_get(g_map_gns_records[i].script_variable_id) & 0xfff;
                 state |= (script_variable_get(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12;
                 state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
-                if (battle_map_gns_record_matches_state(g_battle_map_gns_records[i].map_state_comparison,
-                        g_battle_map_gns_records[i].map_state, state)) {
-                    g_battle_map_selected_mesh_record = g_battle_map_gns_records[i];
+                if (map_gns_record_matches_state(
+                        g_map_gns_records[i].map_state_comparison, g_map_gns_records[i].map_state, state)) {
+                    g_map_selected_mesh_record = g_map_gns_records[i];
                 }
             }
         }
-        g_battle_map_mesh_load_buffer = heap_alloc(0x20000);
-        if (g_battle_map_mesh_load_buffer == 0) {
-            system_error_report(2, 0x3c9);
+        g_map_mesh_load_buffer = heap_alloc(0x20000);
+        if (g_map_mesh_load_buffer == 0) {
+            system_report_error(2, 0x3c9);
         }
-        battle_map_file_load_start(g_battle_map_directory_path, &g_battle_map_selected_mesh_record.load_info,
-            g_battle_map_mesh_load_buffer, BATTLE_MAP_RESOURCE_MESH_ALTERNATE);
-        g_battle_map_mesh_load_state = BATTLE_MAP_MESH_LOAD_WAITING;
+        map_start_file_load(g_map_directory_path, &g_map_selected_mesh_record.load_info, g_map_mesh_load_buffer,
+            MAP_RESOURCE_MESH_ALTERNATE);
+        g_map_mesh_load_state = MAP_MESH_LOAD_WAITING;
         break;
 
-    case BATTLE_MAP_MESH_LOAD_WAITING:
-        if (file_load_state_get() != 0) {
+    case MAP_MESH_LOAD_WAITING:
+        if (file_get_load_state() != 0) {
             s32 mesh_data_offset;
-            battle_map_resource_t* mesh_data;
+            map_resource_t* mesh_data;
 
-            mesh_data = g_battle_map_mesh_load_buffer;
+            mesh_data = g_map_mesh_load_buffer;
             /* Retail scales this byte offset as a 32-bit-element index. */
-            mesh_data_offset = mesh_data->mesh_file[BATTLE_MAP_RESOURCE_PALETTES] * 4;
-            mesh_data = (battle_map_resource_t*)(mesh_data->bytes + mesh_data_offset);
-            battle_map_palette_update_colors(palette_mode, BATTLE_MAP_CLUT_ROW_MARKED_TILES, 0, 1, mesh_data->clut);
-            heap_free(g_battle_map_mesh_load_buffer);
-            g_battle_map_mesh_load_state = BATTLE_MAP_MESH_LOAD_IDLE;
+            mesh_data_offset = mesh_data->mesh_file[MAP_RESOURCE_PALETTES] * 4;
+            mesh_data = (map_resource_t*)(mesh_data->bytes + mesh_data_offset);
+            map_palette_set_colors(palette_mode, MAP_CLUT_ROW_MARKED_TILES, 0, 1, mesh_data->clut);
+            heap_free(g_map_mesh_load_buffer);
+            g_map_mesh_load_state = MAP_MESH_LOAD_IDLE;
         }
         break;
     }
-    return g_battle_map_mesh_load_state;
+    return g_map_mesh_load_state;
 }
 
 /*
  * Append one mesh part's polygons to the map's polygon tables: the vertex
  * positions of all four polygon classes, and the normals and terrain-tile
  * locations of the textured ones. `metadata` receives the part's first index
- * and count per class. Also asks battle_map_load_data to rebuild the render
+ * and count per class. Also asks map_update_load to rebuild the render
  * records over the next two frames.
  *
  * The geometry block starts with four polygon counts, then stores positions
@@ -573,13 +548,12 @@ s32 battle_map_mesh_palette_load(s32 palette_mode) {
  * a spare 16-bit value.  The first position vector's spare 16-bit value holds the
  * polygon's packed terrain-tile location.
  * Target 0x800f4dd4 is the geometry pass for primary and animated meshes;
- * mesh_render_records_init performs the separate packet
+ * init_mesh_render_records performs the separate packet
  * pass. Count order is textured triangles/quads, then untextured
  * triangles/quads. The mesh metadata keeps the starting indices and the
  * incoming counts; the persistent totals advance at the end.
  */
-void battle_map_mesh_append_geometry(
-    const battle_map_mesh_geometry_t* geometry_data, battle_map_mesh_part_t* metadata) {
+void map_mesh_append_geometry(const map_mesh_geometry_t* geometry_data, map_mesh_part_t* metadata) {
     /* Named count loads fold the retail four 16-bit cursor advances. */
     const u16* source = &geometry_data->textured_triangle_count;
     s32 i;
@@ -588,7 +562,7 @@ void battle_map_mesh_append_geometry(
     s32 untextured_triangle_count;
     s32 untextured_quad_count;
 
-    s_battle_map_resource_load_state = BATTLE_MAP_LOAD_STATE_MESH_RECORDS;
+    s_map_resource_load_state = MAP_LOAD_STATE_MESH_RECORDS;
     s_last_render_buffer = g_render_current_buffer;
 
     textured_triangle_count = *source++;
@@ -596,116 +570,112 @@ void battle_map_mesh_append_geometry(
     untextured_triangle_count = *source++;
     untextured_quad_count = *source++;
 
-    metadata->textured_triangle_start = g_battle_map_textured_triangle_count;
-    metadata->textured_quad_start = g_battle_map_textured_quad_count;
-    metadata->untextured_triangle_start = g_battle_map_untextured_triangle_count;
-    metadata->untextured_quad_start = g_battle_map_untextured_quad_count;
+    metadata->textured_triangle_start = g_map_textured_triangle_count;
+    metadata->textured_quad_start = g_map_textured_quad_count;
+    metadata->untextured_triangle_start = g_map_untextured_triangle_count;
+    metadata->untextured_quad_start = g_map_untextured_quad_count;
     metadata->textured_triangle_count = textured_triangle_count;
     metadata->textured_quad_count = textured_quad_count;
     metadata->untextured_triangle_count = untextured_triangle_count;
     metadata->untextured_quad_count = untextured_quad_count;
 
-    for (i = g_battle_map_textured_triangle_count; i < g_battle_map_textured_triangle_count + textured_triangle_count;
-        i++) {
-        g_battle_map_textured_triangle_positions[i].x0 = *source++;
-        g_battle_map_textured_triangle_positions[i].y0 = *source++;
-        g_battle_map_textured_triangle_positions[i].z0 = *source++;
-        g_battle_map_textured_triangle_positions[i].x1 = *source++;
-        g_battle_map_textured_triangle_positions[i].y1 = *source++;
-        g_battle_map_textured_triangle_positions[i].z1 = *source++;
-        g_battle_map_textured_triangle_positions[i].x2 = *source++;
-        g_battle_map_textured_triangle_positions[i].y2 = *source++;
-        g_battle_map_textured_triangle_positions[i].z2 = *source++;
+    for (i = g_map_textured_triangle_count; i < g_map_textured_triangle_count + textured_triangle_count; i++) {
+        g_map_textured_triangle_positions[i].x0 = *source++;
+        g_map_textured_triangle_positions[i].y0 = *source++;
+        g_map_textured_triangle_positions[i].z0 = *source++;
+        g_map_textured_triangle_positions[i].x1 = *source++;
+        g_map_textured_triangle_positions[i].y1 = *source++;
+        g_map_textured_triangle_positions[i].z1 = *source++;
+        g_map_textured_triangle_positions[i].x2 = *source++;
+        g_map_textured_triangle_positions[i].y2 = *source++;
+        g_map_textured_triangle_positions[i].z2 = *source++;
     }
 
-    for (i = g_battle_map_textured_quad_count; i < g_battle_map_textured_quad_count + textured_quad_count; i++) {
-        g_battle_map_textured_quad_positions[i].x0 = *source++;
-        g_battle_map_textured_quad_positions[i].y0 = *source++;
-        g_battle_map_textured_quad_positions[i].z0 = *source++;
-        g_battle_map_textured_quad_positions[i].x1 = *source++;
-        g_battle_map_textured_quad_positions[i].y1 = *source++;
-        g_battle_map_textured_quad_positions[i].z1 = *source++;
-        g_battle_map_textured_quad_positions[i].x2 = *source++;
-        g_battle_map_textured_quad_positions[i].y2 = *source++;
-        g_battle_map_textured_quad_positions[i].z2 = *source++;
-        g_battle_map_textured_quad_positions[i].x3 = *source++;
-        g_battle_map_textured_quad_positions[i].y3 = *source++;
-        g_battle_map_textured_quad_positions[i].z3 = *source++;
+    for (i = g_map_textured_quad_count; i < g_map_textured_quad_count + textured_quad_count; i++) {
+        g_map_textured_quad_positions[i].x0 = *source++;
+        g_map_textured_quad_positions[i].y0 = *source++;
+        g_map_textured_quad_positions[i].z0 = *source++;
+        g_map_textured_quad_positions[i].x1 = *source++;
+        g_map_textured_quad_positions[i].y1 = *source++;
+        g_map_textured_quad_positions[i].z1 = *source++;
+        g_map_textured_quad_positions[i].x2 = *source++;
+        g_map_textured_quad_positions[i].y2 = *source++;
+        g_map_textured_quad_positions[i].z2 = *source++;
+        g_map_textured_quad_positions[i].x3 = *source++;
+        g_map_textured_quad_positions[i].y3 = *source++;
+        g_map_textured_quad_positions[i].z3 = *source++;
     }
 
-    for (i = g_battle_map_untextured_triangle_count;
-        i < g_battle_map_untextured_triangle_count + untextured_triangle_count; i++) {
-        g_battle_map_untextured_triangle_positions[i].x0 = *source++;
-        g_battle_map_untextured_triangle_positions[i].y0 = *source++;
-        g_battle_map_untextured_triangle_positions[i].z0 = *source++;
-        g_battle_map_untextured_triangle_positions[i].x1 = *source++;
-        g_battle_map_untextured_triangle_positions[i].y1 = *source++;
-        g_battle_map_untextured_triangle_positions[i].z1 = *source++;
-        g_battle_map_untextured_triangle_positions[i].x2 = *source++;
-        g_battle_map_untextured_triangle_positions[i].y2 = *source++;
-        g_battle_map_untextured_triangle_positions[i].z2 = *source++;
+    for (i = g_map_untextured_triangle_count; i < g_map_untextured_triangle_count + untextured_triangle_count; i++) {
+        g_map_untextured_triangle_positions[i].x0 = *source++;
+        g_map_untextured_triangle_positions[i].y0 = *source++;
+        g_map_untextured_triangle_positions[i].z0 = *source++;
+        g_map_untextured_triangle_positions[i].x1 = *source++;
+        g_map_untextured_triangle_positions[i].y1 = *source++;
+        g_map_untextured_triangle_positions[i].z1 = *source++;
+        g_map_untextured_triangle_positions[i].x2 = *source++;
+        g_map_untextured_triangle_positions[i].y2 = *source++;
+        g_map_untextured_triangle_positions[i].z2 = *source++;
     }
 
-    for (i = g_battle_map_untextured_quad_count; i < g_battle_map_untextured_quad_count + untextured_quad_count; i++) {
-        g_battle_map_untextured_quad_positions[i].x0 = *source++;
-        g_battle_map_untextured_quad_positions[i].y0 = *source++;
-        g_battle_map_untextured_quad_positions[i].z0 = *source++;
-        g_battle_map_untextured_quad_positions[i].x1 = *source++;
-        g_battle_map_untextured_quad_positions[i].y1 = *source++;
-        g_battle_map_untextured_quad_positions[i].z1 = *source++;
-        g_battle_map_untextured_quad_positions[i].x2 = *source++;
-        g_battle_map_untextured_quad_positions[i].y2 = *source++;
-        g_battle_map_untextured_quad_positions[i].z2 = *source++;
-        g_battle_map_untextured_quad_positions[i].x3 = *source++;
-        g_battle_map_untextured_quad_positions[i].y3 = *source++;
-        g_battle_map_untextured_quad_positions[i].z3 = *source++;
+    for (i = g_map_untextured_quad_count; i < g_map_untextured_quad_count + untextured_quad_count; i++) {
+        g_map_untextured_quad_positions[i].x0 = *source++;
+        g_map_untextured_quad_positions[i].y0 = *source++;
+        g_map_untextured_quad_positions[i].z0 = *source++;
+        g_map_untextured_quad_positions[i].x1 = *source++;
+        g_map_untextured_quad_positions[i].y1 = *source++;
+        g_map_untextured_quad_positions[i].z1 = *source++;
+        g_map_untextured_quad_positions[i].x2 = *source++;
+        g_map_untextured_quad_positions[i].y2 = *source++;
+        g_map_untextured_quad_positions[i].z2 = *source++;
+        g_map_untextured_quad_positions[i].x3 = *source++;
+        g_map_untextured_quad_positions[i].y3 = *source++;
+        g_map_untextured_quad_positions[i].z3 = *source++;
     }
 
-    for (i = g_battle_map_textured_triangle_count; i < g_battle_map_textured_triangle_count + textured_triangle_count;
-        i++) {
-        g_battle_map_textured_triangle_normals[i].vertex[0].vx = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[0].vy = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[0].vz = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[1].vx = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[1].vy = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[1].vz = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[2].vx = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[2].vy = *source++;
-        g_battle_map_textured_triangle_normals[i].vertex[2].vz = *source++;
+    for (i = g_map_textured_triangle_count; i < g_map_textured_triangle_count + textured_triangle_count; i++) {
+        g_map_textured_triangle_normals[i].vertex[0].vx = *source++;
+        g_map_textured_triangle_normals[i].vertex[0].vy = *source++;
+        g_map_textured_triangle_normals[i].vertex[0].vz = *source++;
+        g_map_textured_triangle_normals[i].vertex[1].vx = *source++;
+        g_map_textured_triangle_normals[i].vertex[1].vy = *source++;
+        g_map_textured_triangle_normals[i].vertex[1].vz = *source++;
+        g_map_textured_triangle_normals[i].vertex[2].vx = *source++;
+        g_map_textured_triangle_normals[i].vertex[2].vy = *source++;
+        g_map_textured_triangle_normals[i].vertex[2].vz = *source++;
     }
 
-    for (i = g_battle_map_textured_quad_count; i < g_battle_map_textured_quad_count + textured_quad_count; i++) {
-        g_battle_map_textured_quad_normals[i].vertex[0].vx = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[0].vy = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[0].vz = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[1].vx = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[1].vy = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[1].vz = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[2].vx = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[2].vy = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[2].vz = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[3].vx = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[3].vy = *source++;
-        g_battle_map_textured_quad_normals[i].vertex[3].vz = *source++;
+    for (i = g_map_textured_quad_count; i < g_map_textured_quad_count + textured_quad_count; i++) {
+        g_map_textured_quad_normals[i].vertex[0].vx = *source++;
+        g_map_textured_quad_normals[i].vertex[0].vy = *source++;
+        g_map_textured_quad_normals[i].vertex[0].vz = *source++;
+        g_map_textured_quad_normals[i].vertex[1].vx = *source++;
+        g_map_textured_quad_normals[i].vertex[1].vy = *source++;
+        g_map_textured_quad_normals[i].vertex[1].vz = *source++;
+        g_map_textured_quad_normals[i].vertex[2].vx = *source++;
+        g_map_textured_quad_normals[i].vertex[2].vy = *source++;
+        g_map_textured_quad_normals[i].vertex[2].vz = *source++;
+        g_map_textured_quad_normals[i].vertex[3].vx = *source++;
+        g_map_textured_quad_normals[i].vertex[3].vy = *source++;
+        g_map_textured_quad_normals[i].vertex[3].vz = *source++;
     }
 
     /* Skip texture records (10/12 bytes) and untextured records (4 bytes). */
     source += textured_triangle_count * 5 + textured_quad_count * 6 + untextured_triangle_count * 2
         + untextured_quad_count * 2;
 
-    for (i = g_battle_map_textured_triangle_count; i < g_battle_map_textured_triangle_count + textured_triangle_count;
-        i++) {
-        g_battle_map_textured_triangle_positions[i].terrain_tile = *source++;
+    for (i = g_map_textured_triangle_count; i < g_map_textured_triangle_count + textured_triangle_count; i++) {
+        g_map_textured_triangle_positions[i].terrain_tile = *source++;
     }
 
-    for (i = g_battle_map_textured_quad_count; i < g_battle_map_textured_quad_count + textured_quad_count; i++) {
-        g_battle_map_textured_quad_positions[i].terrain_tile = *source++;
+    for (i = g_map_textured_quad_count; i < g_map_textured_quad_count + textured_quad_count; i++) {
+        g_map_textured_quad_positions[i].terrain_tile = *source++;
     }
 
-    g_battle_map_textured_triangle_count += textured_triangle_count;
-    g_battle_map_textured_quad_count += textured_quad_count;
-    g_battle_map_untextured_triangle_count += untextured_triangle_count;
-    g_battle_map_untextured_quad_count += untextured_quad_count;
+    g_map_textured_triangle_count += textured_triangle_count;
+    g_map_textured_quad_count += textured_quad_count;
+    g_map_untextured_triangle_count += untextured_triangle_count;
+    g_map_untextured_quad_count += untextured_quad_count;
 }
 
 /*
@@ -713,7 +683,7 @@ void battle_map_mesh_append_geometry(
  * records already filled this pass. Runtime polygon records interleave GPU
  * packet fields with renderer state.
  * This pass skips the geometry and normal vectors consumed by
- * battle_map_mesh_append_geometry, then appends UV coordinates, CLUT commands,
+ * map_mesh_append_geometry, then appends UV coordinates, CLUT commands,
  * texture-page commands, and the initial state of untextured records.
  * Target 0x800f5578 reads textured triangles of five 16-bit values and textured quads
  * of six 16-bit values. 16-bit CLUT values keep their low six bits (the CLUT) and gain the map CLUT row;
@@ -721,7 +691,7 @@ void battle_map_mesh_append_geometry(
  * textured triangles/quads and 0x14/0x18 for untextured triangles/quads.
  * Untextured POLY_F3/POLY_F4 packets start with color 0/0/1.
  */
-static void mesh_render_records_init(const battle_map_mesh_geometry_t* geometry_data) {
+static void init_mesh_render_records(const map_mesh_geometry_t* geometry_data) {
     /* Named count loads fold the retail four 16-bit cursor advances. */
     const u16* source = &geometry_data->textured_triangle_count;
     s32 polygon_index;
@@ -769,8 +739,7 @@ static void mesh_render_records_init(const battle_map_mesh_geometry_t* geometry_
         g_render_current_buffer->gt3[polygon_index].v0 = v0;
         g_render_current_buffer->gt3[polygon_index].v1 = v1;
         g_render_current_buffer->gt3[polygon_index].v2 = v2;
-        g_render_current_buffer->gt3[polygon_index].clut
-            = (clut_data & 0x3f) | BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_MAP, 0);
+        g_render_current_buffer->gt3[polygon_index].clut = (clut_data & 0x3f) | MAP_CLUT(MAP_CLUT_ROW_MAP, 0);
         g_render_current_buffer->gt3[polygon_index].tpage = texture_page;
     }
 
@@ -800,8 +769,7 @@ static void mesh_render_records_init(const battle_map_mesh_geometry_t* geometry_
         g_render_current_buffer->gt4[polygon_index].v1 = v1;
         g_render_current_buffer->gt4[polygon_index].v2 = v2;
         g_render_current_buffer->gt4[polygon_index].v3 = v3;
-        g_render_current_buffer->gt4[polygon_index].clut
-            = (clut_data & 0x3f) | BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_MAP, 0);
+        g_render_current_buffer->gt4[polygon_index].clut = (clut_data & 0x3f) | MAP_CLUT(MAP_CLUT_ROW_MAP, 0);
         g_render_current_buffer->gt4[polygon_index].tpage = texture_page;
     }
 
@@ -822,15 +790,15 @@ static void mesh_render_records_init(const battle_map_mesh_geometry_t* geometry_
 
 /* Stop the weather sound effects and every color rotation the 32 map texture
  * animations hold a handle for. Always returns 0. */
-s32 battle_map_stop_clut_cycles_and_weather_sfx(void) {
+s32 map_stop_clut_cycles_and_weather_sfx(void) {
     s32 index;
 
-    weather_sfx_stop();
+    weather_stop_sfx();
 
-    for (index = 0; index < BATTLE_MAP_TEXTURE_ANIMATION_COUNT; index++) {
-        if (g_battle_map_texture_animation_cycle_handles[index] != 0) {
-            battle_map_clut_stop_cycle(g_battle_map_texture_animation_cycle_handles[index]);
-            g_battle_map_texture_animation_cycle_handles[index] = 0;
+    for (index = 0; index < MAP_TEXTURE_ANIMATION_COUNT; index++) {
+        if (g_map_texture_animation_cycle_handles[index] != 0) {
+            map_palette_stop_clut_cycle(g_map_texture_animation_cycle_handles[index]);
+            g_map_texture_animation_cycle_handles[index] = 0;
         }
     }
 
@@ -839,47 +807,47 @@ s32 battle_map_stop_clut_cycles_and_weather_sfx(void) {
 }
 
 /* Enable the weather sounds and start rain when its sound ID is stored. */
-void weather_sfx_start(void) {
+void weather_start_sfx(void) {
     s32 sound_id = g_weather_rain_sfx_id;
 
     g_weather_sfx_enabled = 1;
     if (sound_id != 0) {
-        sound_background_play(sound_id);
+        sound_play_background(sound_id);
     }
 }
 
 /* Start map weather effect mode 0x96 for `value` frames, from frame 0; effect
  * E458 passes the frames left of its timeline. An id other than 0x96 does
  * nothing. g_weather_timed_transform_unread receives 0x95 and no code reads it. */
-void weather_transform_duration_set(s32 id, s32 value) {
-    if (id == BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
+void weather_set_transform_duration(s32 id, s32 value) {
+    if (id == MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
         g_weather_timed_transform_unread = 0x95;
         g_weather_timed_transform_duration = value;
         g_weather_timed_transform_frame = 0;
-        g_weather_effect_mode = BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM;
+        g_weather_effect_mode = MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM;
     }
 }
 
 /* Stop the rain sound and the two thunder sounds and forget their ids. The result
  * is an unset local; no caller reads it. */
-s32 weather_sfx_stop(void) {
+s32 weather_stop_sfx(void) {
     s32 result;
     s32 sound_id = g_weather_rain_sfx_id;
 
     if (sound_id != 0) {
-        sound_sfx_stop(sound_id);
+        sound_stop_sfx(sound_id);
         g_weather_rain_sfx_id = 0;
     }
 
     sound_id = g_weather_thunder_a_sfx_id;
     if (sound_id != 0) {
-        sound_sfx_stop(sound_id);
+        sound_stop_sfx(sound_id);
         g_weather_thunder_a_sfx_id = 0;
     }
 
     sound_id = g_weather_thunder_b_sfx_id;
     if (sound_id != 0) {
-        sound_sfx_stop(sound_id);
+        sound_stop_sfx(sound_id);
         g_weather_thunder_b_sfx_id = 0;
     }
 

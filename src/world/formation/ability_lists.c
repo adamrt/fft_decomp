@@ -41,33 +41,33 @@ extern s16 g_formation_ability_view_job_names[];
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_list_script[493];
 
-static s32 view_list_update(void);
+static s32 ability_list_update(void);
 
 /* Ability-list menu-script callback 13: 1 while the list shows the Action category. The
  * row argument is ignored. */
-static s32 action_tab_check(s32 unused_row) {
+static s32 ability_list_is_action_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_ACTION;
 }
 
 /* Ability-list menu-script callback 12: 1 while the list shows the Reaction category. */
-static s32 reaction_tab_check(s32 unused_row) {
+static s32 ability_list_is_reaction_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_REACTION;
 }
 
 /* Ability-list menu-script callback 11: 1 while the list shows the Support category. */
-static s32 support_tab_check(s32 unused_row) {
+static s32 ability_list_is_support_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_SUPPORT;
 }
 
 /* Ability-list menu-script callback 10: 1 while the list shows the Movement category. */
-static s32 movement_tab_check(s32 unused_row) {
+static s32 ability_list_is_movement_tab(s32 unused_row) {
     return g_formation_ability_category == MENU_ABILITY_CATEGORY_MOVEMENT;
 }
 
 /* Report whether ability entry `index` counts as already learned: the learned
  * flag in the learn menu (FORMATION_MENU_ABILITY_LEARN), otherwise the
  * inverse of the disabled flag. */
-static s32 learned_flag_get(s32 index) {
+static s32 ability_list_is_learned(s32 index) {
     if (g_formation_current_menu == FORMATION_MENU_ABILITY_LEARN) {
         return g_ability_list_ability_entries[index] & ABILITY_LIST_ENTRY_LEARNED;
     }
@@ -77,14 +77,14 @@ static s32 learned_flag_get(s32 index) {
 /*
  * Run the learn-abilities list for the job chosen in the learn-menu job list.
  *
- * Learn-menu twin of view_list_update. Confirming an unlearned
+ * Learn-menu twin of ability_list_update. Confirming an unlearned
  * ability opens the confirmation menu thread; when it closes with choice 0
  * the ability is learned and its JP cost deducted from the unit's JP in the
  * job. Category tabs keep their own cursor (selection records 10-13). Cancel
  * returns MENU_JOB_LIST_STEP_JOBS (back to the job list), otherwise
  * MENU_JOB_LIST_STEP_ABILITIES.
  */
-s32 formation_ability_learn_list_update(void) {
+s32 formation_ability_update_learn_list(void) {
     s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
     s16 selected_index;
@@ -96,38 +96,38 @@ s32 formation_ability_learn_list_update(void) {
     s16 index;
 
     if (g_formation_ability_learn_ability_list_open == 0) {
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_LEVEL].value = formation_ability_chosen_job_level_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = formation_ability_chosen_job_total_jp_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = formation_ability_chosen_job_next_jp_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = formation_ability_chosen_job_jp_get;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_LEVEL].value = job_list_get_level;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = job_list_get_total_jp;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = job_list_get_next_level_jp;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = job_list_get_jp;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_enabled;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = formation_ability_is_chosen_job_mastered;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = learned_flag_get;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = job_list_is_mastered;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = ability_list_is_learned;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_MP_COST].value = ability_list_get_mp_cost;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_CHARGE_TIME].value = ability_list_get_ct;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_JP_COST].value = ability_list_get_jp_cost;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_MOVEMENT_TAB].value = movement_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = support_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = reaction_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = action_tab_check;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_MOVEMENT_TAB].value = ability_list_is_movement_tab;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = ability_list_is_support_tab;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = ability_list_is_reaction_tab;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = ability_list_is_action_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_disabled;
         s_formation_ability_learn_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
-        menu_selection_record_clear(10);
-        menu_selection_record_clear(11);
-        menu_selection_record_clear(12);
-        menu_selection_record_clear(13);
-        g_formation_ability_category = menu_selection_horizontal_step(4, SCREEN_CURSOR_ABILITY_TAB, 0);
+        menu_selection_clear_record(10);
+        menu_selection_clear_record(11);
+        menu_selection_clear_record(12);
+        menu_selection_clear_record(13);
+        g_formation_ability_category = menu_selection_step_horizontal(4, SCREEN_CURSOR_ABILITY_TAB, 0);
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
-        menu_scrollable_list_core_init(
+        menu_scrollable_list_init_core(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         rect.x = 0x240;
         rect.y = 0x1c8;
         rect.w = 0x14;
         rect.h = 0x10;
         g_formation_ability_learn_job_name_list[0] = g_formation_ability_learn_selected_job;
-        text_id_rows_to_vram_render(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_formation_ability_learn_job_name_list, &rect, 0);
         g_formation_ability_learn_ability_list_open = 1;
         g_formation_cursor_ot_override = 0x3c;
@@ -145,7 +145,7 @@ s32 formation_ability_learn_list_update(void) {
             /* DISABLED in the learn list: the unit cannot pay the JP. */
             if (g_ability_list_ability_entries[index] >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
                 message_box_show_with_sound(0xc009, SOUND_SFX_ERROR_MESSAGE);
-            } else if (learned_flag_get(index) != 0) {
+            } else if (ability_list_is_learned(index) != 0) {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             } else {
                 s_formation_ability_learn_confirm_prompt_state
@@ -160,19 +160,19 @@ s32 formation_ability_learn_list_update(void) {
             g_formation_cursor_ot_override = 0;
             return MENU_JOB_LIST_STEP_JOBS;
         }
-        category = menu_selection_horizontal_sound_step(
+        category = menu_selection_step_horizontal_with_sound(
             4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, SOUND_SFX_PAGE_SWITCH);
         if (category != g_formation_ability_category) {
-            menu_selection_record_set(g_formation_ability_category + 10, g_menu_list_selected_index,
+            menu_selection_set_record(g_formation_ability_category + 10, g_menu_list_selected_index,
                 g_menu_scroll_base_index, g_ability_list_ability_entries);
             g_formation_ability_category = category;
             ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job,
                 g_formation_ability_category, g_ability_list_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
-            menu_selection_record_restore(
+            menu_selection_restore_record(
                 g_formation_ability_category + 10, &selected_index, &scroll_base_index, g_ability_list_ability_entries);
-            menu_init_scrollable_list(g_ability_list_ability_entries, selected_index, scroll_base_index,
+            menu_scrollable_list_init(g_ability_list_ability_entries, selected_index, scroll_base_index,
                 g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-            menu_set_window_scale_step(10);
+            menu_window_set_scale_step(10);
         }
     } else {
         s_formation_ability_learn_confirm_prompt_state
@@ -185,17 +185,17 @@ s32 formation_ability_learn_list_update(void) {
                 category = g_ability_data[g_ability_list_ability_entries[g_menu_list_selected_index]].jp_cost;
                 g_formation_unit_pointers[g_unit_selected_index]
                     ->job_points.current.values[g_formation_ability_learn_selected_job_index] -= category;
-                sound_free_channel_sfx_play(SOUND_SFX_ABILITY_LEARNED);
+                sound_play_sfx_on_free_channel(SOUND_SFX_ABILITY_LEARNED);
             } else if (g_screen_selection_results[5] == 1) {
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             }
             g_sound_suppressed = 0;
             ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job,
                 g_formation_ability_category, g_ability_list_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
-            menu_scrollable_list_core_init(g_ability_list_ability_entries, g_menu_list_selected_index,
+            menu_scrollable_list_init_core(g_ability_list_ability_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-            menu_set_window_scale_step(10);
-            screen_selection_results_reset();
+            menu_window_set_scale_step(10);
+            screen_reset_selection_results();
         }
     }
     running = s_formation_ability_learn_confirm_prompt_state;
@@ -207,7 +207,7 @@ s32 formation_ability_learn_list_update(void) {
     if (g_menu_input_lock_mode != 0 || running != 0) {
         mode = 1;
     }
-    menu_run_script_with_palette_mode(g_formation_ability_list_script, input, mode);
+    menu_script_run_with_palette_mode(g_formation_ability_list_script, input, mode);
     rect.x = 0x26;
     rect.y = 0x2d;
     rect.w = 0x50;
@@ -216,11 +216,11 @@ s32 formation_ability_learn_list_update(void) {
     return MENU_JOB_LIST_STEP_ABILITIES;
 }
 
-/* The formation screen's view-abilities menu, run each frame (sibling of learn_menu_update):
+/* The formation screen's view-abilities menu, run each frame (sibling of update_learn_menu):
  * sets up on first entry, runs the job list (MENU_JOB_LIST_STEP_JOBS) or the chosen job's
  * ability list (MENU_JOB_LIST_STEP_ABILITIES), and returns to the unit grid on
  * MENU_JOB_LIST_STEP_CLOSE. */
-void formation_ability_view_menu_update(void) {
+void job_page_update(void) {
     if (g_formation_ability_view_initialized == 0) {
         g_formation_ability_view_initialized = 1;
         g_formation_unit_cycle_mode = 1;
@@ -228,14 +228,14 @@ void formation_ability_view_menu_update(void) {
         g_unit_panel_status_display_thread_params.style = 1;
         g_unit_panel_numeric_panel_params.style = 1;
         g_formation_equipment_panel_thread_params.style = 1;
-        screen_cursor_position_init(SCREEN_CURSOR_ABILITY_TAB, 0);
-        menu_selection_records_clear();
+        menu_selection_set_value(SCREEN_CURSOR_ABILITY_TAB, 0);
+        menu_selection_clear_records();
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (g_formation_ability_view_step == MENU_JOB_LIST_STEP_JOBS) {
-        g_formation_ability_view_step = formation_ability_job_list_update();
+        g_formation_ability_view_step = job_list_update();
     } else if (g_formation_ability_view_step == MENU_JOB_LIST_STEP_ABILITIES) {
-        g_formation_ability_view_step = view_list_update();
+        g_formation_ability_view_step = ability_list_update();
     }
     if (g_formation_ability_view_step == MENU_JOB_LIST_STEP_CLOSE) {
         g_unit_panel_numeric_panel_params.style = 0;
@@ -258,7 +258,7 @@ void formation_ability_view_menu_update(void) {
  * the job list) and confirm MENU_JOB_LIST_STEP_CLOSE, otherwise
  * MENU_JOB_LIST_STEP_ABILITIES.
  */
-static s32 view_list_update(void) {
+static s32 ability_list_update(void) {
     s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
     s16 selected_index;
@@ -267,38 +267,38 @@ static s32 view_list_update(void) {
     s32 category;
 
     if (g_formation_ability_view_list_initialized == 0) {
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_LEVEL].value = formation_ability_chosen_job_level_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = formation_ability_chosen_job_total_jp_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = formation_ability_chosen_job_next_jp_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = formation_ability_chosen_job_jp_get;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_LEVEL].value = job_list_get_level;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = job_list_get_total_jp;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = job_list_get_next_level_jp;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = job_list_get_jp;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_enabled;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = formation_ability_is_chosen_job_mastered;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = learned_flag_get;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = job_list_is_mastered;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = ability_list_is_learned;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_MP_COST].value = ability_list_get_mp_cost;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_CHARGE_TIME].value = ability_list_get_ct;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_JP_COST].value = ability_list_get_jp_cost;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_MOVEMENT_TAB].value = movement_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = support_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = reaction_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = action_tab_check;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_MOVEMENT_TAB].value = ability_list_is_movement_tab;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = ability_list_is_support_tab;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = ability_list_is_reaction_tab;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = ability_list_is_action_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_disabled;
         g_formation_ability_view_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
-        menu_selection_record_clear(10);
-        menu_selection_record_clear(11);
-        menu_selection_record_clear(12);
-        menu_selection_record_clear(13);
+        menu_selection_clear_record(10);
+        menu_selection_clear_record(11);
+        menu_selection_clear_record(12);
+        menu_selection_clear_record(13);
         rect.x = 0x240;
         rect.y = 0x1c8;
         rect.w = 0x14;
         rect.h = 0x10;
         g_formation_ability_view_job_names[0] = g_formation_ability_learn_selected_job;
-        text_id_rows_to_vram_render(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_formation_ability_view_job_names, &rect, 0);
-        g_formation_ability_category = menu_selection_horizontal_step(4, SCREEN_CURSOR_ABILITY_TAB, 0);
+        g_formation_ability_category = menu_selection_step_horizontal(4, SCREEN_CURSOR_ABILITY_TAB, 0);
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_scrollable_list_core_init(
+        menu_scrollable_list_init_core(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_formation_ability_view_list_initialized = 1;
     }
@@ -318,21 +318,21 @@ static s32 view_list_update(void) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
-    category = menu_selection_horizontal_sound_step(
+    category = menu_selection_step_horizontal_with_sound(
         4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (category != g_formation_ability_category) {
-        menu_selection_record_set(g_formation_ability_category + 10, g_menu_list_selected_index,
+        menu_selection_set_record(g_formation_ability_category + 10, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_ability_list_ability_entries);
         g_formation_ability_category = category;
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_selection_record_restore(
+        menu_selection_restore_record(
             g_formation_ability_category + 10, &selected_index, &scroll_base_index, g_ability_list_ability_entries);
-        menu_init_scrollable_list(g_ability_list_ability_entries, selected_index, scroll_base_index,
+        menu_scrollable_list_init(g_ability_list_ability_entries, selected_index, scroll_base_index,
             g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        menu_set_window_scale_step(10);
+        menu_window_set_scale_step(10);
     }
-    menu_run_script_with_palette_mode(
+    menu_script_run_with_palette_mode(
         g_formation_ability_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     rect.x = 0x26;
     rect.y = 0x2d;

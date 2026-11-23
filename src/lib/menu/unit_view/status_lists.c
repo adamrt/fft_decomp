@@ -2,8 +2,9 @@
  * a selected unit back to the resident event display. */
 
 #include "fft/ability_list.h"
-#include "fft/battle_map.h"
 #include "fft/command.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
@@ -13,21 +14,20 @@
 #include "fft/unit.h"
 #include "fft/unit_event.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 /* current-status list */
 extern u16 g_status_screen_status_list_row_actions[8];
 
 /* Text ids of the unit's current statuses in the status panel's two columns, filled by
- * status_screen_build_status_list. */
+ * status_screen_status_list_thread. */
 static s16 s_unit_panel_status_left_text_ids[20];
 static s16 s_unit_panel_status_right_text_ids[20];
 
 /* Return 1 when the unit has any current status (innate ones included), else 0; one of
  * the conditions under which Circle opens the status list. */
-s32 unit_has_any_current_status(s32 battle_id) {
-    unit_stats_t* unit = unit_stats_get(battle_id);
+s32 battle_unit_has_any_current_status(s32 battle_unit_id) {
+    battle_unit_t* unit = battle_unit_get(battle_unit_id);
     s32 index;
 
     for (index = 0; index < STATUS_BYTE_COUNT; index++) {
@@ -45,8 +45,8 @@ s32 unit_has_any_current_status(s32 battle_id) {
  * The flag reads go through local pointers so they are reloaded each
  * iteration as the target does; the columns are s16 so `index + 0x8800`
  * stays a 32-bit addition with the constant hoisted into a register. */
-void status_screen_build_status_list(void) {
-    unit_stats_t* unit;
+void status_screen_status_list_thread(void) {
+    battle_unit_t* unit;
     u16 i;
     u16 bit;
     u16 count;
@@ -68,7 +68,7 @@ void status_screen_build_status_list(void) {
             g_status_screen_status_list_row_actions[i] = MENU_ROW_ACTION_SILENT | MENU_COMMAND_ID_JOBSTTS;
         }
     }
-    unit = unit_stats_get(g_unit_panel_selected_unit.battle_id);
+    unit = battle_unit_get(g_unit_panel_selected_unit.battle_unit_id);
     for (i = 0; i < 20; i++) {
         s_unit_panel_status_left_text_ids[i] = TEXT_ID_ABILITY_NAME_BASE;
         s_unit_panel_status_right_text_ids[i] = TEXT_ID_ABILITY_NAME_BASE;
@@ -90,7 +90,7 @@ void status_screen_build_status_list(void) {
             mask >>= 1;
         }
     }
-    sound_confirm_queue();
+    sound_queue_confirm();
     if (count == 0) {
         status_screen_jobs_thread();
     }
@@ -109,11 +109,11 @@ void status_screen_build_status_list(void) {
 
 /* Copy the selected panel and tile records into four caller-owned buffers. */
 void unit_panel_copy_billboard_out(unit_panel_summary_t* banner, unit_panel_unit_t* unit,
-    unit_panel_record_t* billboard, battle_map_selected_tile_t* cursor_tile) {
+    unit_panel_record_t* billboard, map_selected_tile_t* cursor_tile) {
     mem_copy_bytes_nonempty(banner, &g_unit_panel_selected_unit_status, sizeof(g_unit_panel_selected_unit_status));
     mem_copy_bytes_nonempty(unit, &g_unit_panel_selected_unit, sizeof(g_unit_panel_selected_unit));
     mem_copy_bytes_nonempty(billboard, &g_unit_panel_selected_unit_fields, sizeof(g_unit_panel_selected_unit_fields));
-    mem_copy_bytes_nonempty(cursor_tile, &g_battle_map_selected_tile_data, sizeof(g_battle_map_selected_tile_data));
+    mem_copy_bytes_nonempty(cursor_tile, &g_map_selected_tile_data, sizeof(g_map_selected_tile_data));
 }
 
 /* Load the active-turn banner, the active-turn unit record and the billboard data

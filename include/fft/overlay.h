@@ -7,8 +7,8 @@
 #include "psx/types.h"
 
 /* programs */
-void overlay_ending_run(void);
-void overlay_world_load(s32 mode);
+void overlay_run_ending(void);
+void overlay_load_world(s32 mode);
 
 /* companion overlays */
 /* Companion overlay requests: index into the overlay LBA, size and load offset
@@ -59,7 +59,7 @@ void overlay_companion_request(s32 request_index);
 /* The per-frame drivers of the executable and data file requests: they start the disc read on the main stack,
  * poll until it finishes and clear the request. */
 void overlay_companion_poll(void);
-void overlay_companion_file_poll(void);
+void overlay_companion_poll_file(void);
 
 /* Requests SMALL.OUT without waiting; overlay_small_poll drives the load during map initialization and returns
  * 1 while it is pending. */

@@ -22,7 +22,7 @@
  * g_system_work_buffer_0 and blanked, animation 0x12 is shown on the black screen
  * and the title-exit controller (handler 12) is pushed: Cross returns to the
  * title menu, Circle or Start starts the prologue anyway. */
-void title_select_new_game(void) {
+void title_start_new_game(void) {
     s32* source;
     s32* destination;
     s32 index;
@@ -49,7 +49,7 @@ void title_select_new_game(void) {
     }
 
     gfx_start_overlay_fade_out(0x10);
-    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_display_object_animated_pool[record].sequence = 0x12;
     g_display_object_animated_pool[record].anim_counter = 0;
     g_display_object_animated_pool[record].frame_index = 0;
@@ -94,7 +94,7 @@ void title_update_card_warning(controller_record_t* record) {
             for (index = 0; index < PROLOGUE_FRAME_IMAGE_WORDS; index++) {
                 destination[index] = source[index];
             }
-            title_menu_push(0);
+            title_push_menu(0);
         } else if (state == TITLE_CARD_WARNING_CONFIRM) {
             prologue_start();
         }
@@ -103,11 +103,11 @@ void title_update_card_warning(controller_record_t* record) {
 
     buttons = g_input_new_button_presses;
     if ((buttons & PSX_PAD_CROSS) != 0) {
-        sound_sfx_play(SOUND_SFX_CANCEL);
+        sound_play_sfx(SOUND_SFX_CANCEL);
         gfx_start_overlay_fade_in(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CANCEL;
     } else if ((buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) != 0) {
-        sound_sfx_play(SOUND_SFX_CONFIRM);
+        sound_play_sfx(SOUND_SFX_CONFIRM);
         gfx_start_overlay_fade_in(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CONFIRM;
     }

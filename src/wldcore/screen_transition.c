@@ -15,12 +15,13 @@
 #include "fft/thread.h"
 #include "fft/tutorial.h"
 #include "fft/world_map.h"
+#include "fft/zodiac.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-static void parent_windows_hide(void);
-static void parent_tutorial_menu_hide(void);
+static void hide_parent_windows(void);
+static void hide_parent_tutorial_menu(void);
 
 /* Push a screen transition into `destination_level` (a menu level type): clear the map, hide date, location label and
  * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
@@ -31,23 +32,23 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
     s32 i;
     s32 depth;
 
-    world_map_clear_screen_and_set_clip_rect(1);
+    world_map_clear_screen(1);
     g_world_map_flags
         |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
-    world_map_fade_start(0, 0x10);
+    world_map_start_fade(0, 0x10);
     switch (destination_level) {
     case MENU_STACK_LEVEL_BRAVE_STORY:
-        display_object_queues_set_enabled(0);
+        display_object_set_queues_enabled(0);
         music_queue_wait_until_empty();
-        music_queue_track_start(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_EVENTS:
-        display_object_queues_set_enabled(0);
-        screen_entry_4_cursor_set(2);
+        display_object_set_queues_enabled(0);
+        screen_set_entry_4_cursor(2);
         count = 0;
         music_queue_wait_until_empty();
-        music_queue_track_start(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
-        world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         if (script_variable_get(EVENT_SCRIPT_VAR_FACTS_ENABLED) != 0) {
             for (i = 0; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
                 if (script_variable_get(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
@@ -60,37 +61,37 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
         } else {
             g_brave_story_saved_cursor[0] = 0;
         }
-        brave_story_menu_open();
+        brave_story_open_menu();
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
-        parent_windows_hide();
-        message_block_load_if_changed(MESSAGE_BLOCK_STORY_EVENTS);
-        file_pending_wait();
+        hide_parent_windows();
+        message_load_block_if_changed(MESSAGE_BLOCK_STORY_EVENTS);
+        file_wait_pending();
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_EVENTS] = g_brave_story_saved_list_cursor_state;
         break;
     case MENU_STACK_LEVEL_TUTORIAL:
-        display_object_queues_set_enabled(0);
+        display_object_set_queues_enabled(0);
         music_queue_wait_until_empty();
-        music_queue_track_start(MUSIC_QUEUE_TRACK(2, MUSIC_TUTORIAL));
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_TUTORIAL));
         break;
     case MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST:
-        tutorial_menu_panel_build(&g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu);
-        parent_tutorial_menu_hide();
+        tutorial_build_menu_panel(&g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu);
+        hide_parent_tutorial_menu();
         break;
     case MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST:
-        display_object_queues_set_enabled(0);
-        screen_entry_4_cursor_set(3);
-        world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
-        tutorial_menu_open(1, 0);
-        parent_tutorial_menu_hide();
+        display_object_set_queues_enabled(0);
+        screen_set_entry_4_cursor(3);
+        world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
+        tutorial_open_menu(1, 0);
+        hide_parent_tutorial_menu();
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS] = g_brave_story_saved_list_cursor_state;
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_TREASURE:
-        parent_windows_hide();
-        message_block_load_if_changed(MESSAGE_BLOCK_TREASURES);
-        file_pending_wait();
+        hide_parent_windows();
+        message_load_block_if_changed(MESSAGE_BLOCK_TREASURES);
+        file_wait_pending();
         music_queue_wait_until_empty();
         suzuki_sound_set_master_volume(0x3FFF, 1);
-        music_queue_track_start(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
+        music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
         break;
     default:
         break;
@@ -108,9 +109,9 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
         clear--;
     }
 
-    screen_brightness_set(0, 0, 0);
-    thread_start(WORLD_MAP_THREAD_SLOT_TRANSITION, formation_zodiac_backdrop_run);
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 0);
+    screen_set_brightness(0, 0, 0);
+    thread_start(WORLD_MAP_THREAD_SLOT_TRANSITION, zodiac_backdrop_thread);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 0);
     g_menu_stack_records[g_menu_stack_depth].screen_transition.delay = 0x14;
     g_menu_stack_records[g_menu_stack_depth].screen_transition.phase = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_SCREEN_TRANSITION;
@@ -121,7 +122,7 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
  * main window goes to palette 10 (sequence, frame_index and anim_counter
  * cleared), the side window to palette 6, the frame and content render
  * records to palette 2, and the completion stars to palette 5, each hidden. */
-static void parent_windows_hide(void) {
+static void hide_parent_windows(void) {
     s32 index = g_menu_stack_depth - 1;
 
     g_display_object_animated_pool[g_menu_stack_records[index].brave_story.cursor_window].palette = 10;
@@ -150,7 +151,7 @@ static void parent_windows_hide(void) {
  * window goes to palette 10 (sequence, frame_index and anim_counter cleared),
  * the side window to palette 6 and the frame render record to palette 2, each
  * hidden. */
-static void parent_tutorial_menu_hide(void) {
+static void hide_parent_tutorial_menu(void) {
     s32 index = g_menu_stack_depth - 1;
 
     g_display_object_animated_pool[g_menu_stack_records[index].tutorial_menu.cursor_window].palette = 10;
@@ -194,7 +195,7 @@ void screen_transition_update(menu_stack_record_t* level) {
             StoreImage(&rect, g_world_map_scratch_buffer);
             DrawSync(0);
             VSync(0);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 1);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 1);
             g_picture_background_loaded_set = -1;
             level->screen_transition.phase++;
             return;
@@ -206,45 +207,45 @@ void screen_transition_update(menu_stack_record_t* level) {
         switch (level->screen_transition.destination_level) {
         case MENU_STACK_LEVEL_BRAVE_STORY:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
-            brave_story_menu_open();
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
+            brave_story_open_menu();
             break;
         case MENU_STACK_LEVEL_BRAVE_STORY_EVENTS:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
-            brave_story_event_level_open(g_brave_story_replay_story_event_index);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
+            brave_story_open_event_detail(g_brave_story_replay_story_event_index);
             break;
         case MENU_STACK_LEVEL_TUTORIAL:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
-            tutorial_menu_open(level->screen_transition.param_a, level->screen_transition.param_b);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
+            tutorial_open_menu(level->screen_transition.param_a, level->screen_transition.param_b);
             break;
         case MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
             g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu.cursor_window]
                 .flags &= ~DISPLAY_OBJECT_HIDDEN;
             g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu.label_window]
                 .flags &= ~DISPLAY_OBJECT_HIDDEN;
             g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu.rows_image].flags
                 &= ~DISPLAY_OBJECT_HIDDEN;
-            tutorial_formation_list_open();
+            tutorial_open_formation_list();
             break;
         case MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
             g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu.cursor_window]
                 .flags &= ~DISPLAY_OBJECT_HIDDEN;
             g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu.label_window]
                 .flags &= ~DISPLAY_OBJECT_HIDDEN;
             g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu.rows_image].flags
                 &= ~DISPLAY_OBJECT_HIDDEN;
-            tutorial_battle_list_open();
+            tutorial_open_battle_list();
             break;
         case MENU_STACK_LEVEL_BRAVE_STORY_TREASURE:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
-            brave_story_treasure_level_open(level->screen_transition.param_a);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
+            brave_story_open_treasure_detail(level->screen_transition.param_a);
             break;
         }
     } else {

@@ -24,7 +24,7 @@ extern s32 g_save_play_time_minutes;
 extern s32 g_save_play_time_hours;
 
 /* save image */
-/* PlayStation memory-card save-file header block (256 bytes), as built by file_header_build, which CARD and
+/* PlayStation memory-card save-file header block (256 bytes), as built by build_file_header, which CARD and
  * WORLD each define. */
 typedef struct save_file_header {
     u8 magic0;           /* 0x00: 'S' */
@@ -122,8 +122,8 @@ typedef struct save_icon {
  * Its purpose is unknown; the original MAIN and tutorial images contain 0xc5. */
 extern u8 g_save_unknown_byte;
 
-void save_data_tables_init(void);
-void save_state_init(void);
+void save_init_data_tables(void);
+void save_init_state(void);
 
 /* save slots */
 /* The scanner initializes 15 file states, then allocates available card
@@ -177,7 +177,6 @@ void save_image_build(s32 slot);
 /* CARD save menu */
 /* Run CARD's save-menu loop until it closes. */
 void card_entrypoint(s32 unused);
-void save_backdrop_thread(void);
 
 /* CARD and WORLD each define the rectangle used for a save-slot row. */
 extern menu_window_rect_source_t g_save_slot_window;
@@ -189,7 +188,7 @@ extern menu_window_rect_source_t g_save_slot_window;
  *
  * The 0xf4 stride is established twice by the matching code:
  * save_gfx_init_contexts steps its per-buffer offset by 0xf4, and
- * save_gfx_submit_frame toggles the active pointer by the
+ * menu_gfx_present_frame toggles the active pointer by the
  * same 0xf4. The field offsets come from the accesses in those routines and
  * in the enqueue helpers: the ordering table at 0x00, the POLY_FT4 pool at
  * 0x10, the tile pool at 0x3c, and the Psy-Q environments at 0x60/0xbc/0xd0
@@ -216,20 +215,18 @@ void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
     s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles, s32 unused_17, s32 unused_18,
     s32 unused_19, s32 unused_20, s32 unused_21, s32 unused_22, s32 unused_23, s32 unused_24);
-void save_gfx_set_render_otag(u32* otag);
-void save_gfx_submit_frame(s32 first_otag, s32 draw_otag);
 
 /* CARD input, text and sound */
 void save_update_input(void);
 
 /* WORLD memory card screen */
-void save_screen_init(void);
-s32 save_screen_run(s32 mode_select_enabled);
+void init_save_screen(void);
+s32 save_run_screen(s32 mode_select_enabled);
 void save_close_stub(void);
 
 /* card file transfers */
-s32 save_file_read(const char* filename, u8* destination, u32 size);
-s32 save_file_write(const char* filename, const save_image_t* source, u32 size, s32 create_file);
+s32 save_read_file(const char* filename, u8* destination, u32 size);
+s32 save_write_file(const char* filename, const save_image_t* source, u32 size, s32 create_file);
 
 /* WORLD save image */
 extern save_image_t* g_save_work_buffer;

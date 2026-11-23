@@ -4,6 +4,7 @@
 #include "fft/after_battle.h"
 #include "fft/help.h"
 #include "fft/input.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/overlay.h"
 #include "fft/script_instruction.h"
@@ -12,7 +13,6 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 /*
@@ -31,43 +31,43 @@ void require_conditions_entrypoint(void) {
     s32 parameter;
     s32 thread;
 
-    thread_current_task_set(THREAD_TASK_CONDITION_DISPATCH);
-    condition = thread_current_parameter_1_get();
-    parameter = thread_current_parameter_2_get();
+    thread_current_set_task(THREAD_TASK_CONDITION_DISPATCH);
+    condition = thread_current_get_parameter_1();
+    parameter = thread_current_get_parameter_2();
     if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST)
-        conditions_show_general(parameter);
-    thread = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
+        conditions_show_general_banner(parameter);
+    thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
 
     if (condition == EVENT_DISPLAY_CONDITION_SPECIAL_CASES) {
         thread_start(thread, conditions_special_thread);
-        thread_parameters_set(thread, CONDITIONS_BANNER_READY, 0, 0);
+        thread_set_parameters(thread, CONDITIONS_BANNER_READY, 0, 0);
         input_wait_frames_or_skip(parameter);
-        thread_parameters_set(thread, 0, 0, 2);
-        thread_inactive_wait(thread);
+        thread_set_parameters(thread, 0, 0, 2);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_SHOW_READY_BUGGED) {
-        thread_start(thread, conditions_show_ready_bugged);
-        thread_parameters_set(thread, 0, 0, 0);
-        thread_inactive_wait(thread);
+        thread_start(thread, conditions_ready_bugged_thread);
+        thread_set_parameters(thread, 0, 0, 0);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS) {
         thread_start(thread, victory_congratulations_thread);
-        thread_parameters_set(thread, 0, 0, 0);
-        thread_inactive_wait(thread);
+        thread_set_parameters(thread, 0, 0, 0);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_GIL_REWARD) {
-        thread_start(thread, war_trophy_run_gil_ticker);
-        thread_parameters_set(thread, 0, 0, 0);
-        thread_inactive_wait(thread);
+        thread_start(thread, war_trophy_gil_ticker_thread);
+        thread_set_parameters(thread, 0, 0, 0);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_WAR_TROPHIES) {
         thread_start(thread, war_trophy_list_thread);
-        thread_parameters_set(thread, 0, 0, 0);
-        thread_inactive_wait(thread);
+        thread_set_parameters(thread, 0, 0, 0);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES) {
         thread_start(thread, party_brave_faith_report_thread);
-        thread_parameters_set(thread, 0, 0, 0);
-        thread_inactive_wait(thread);
+        thread_set_parameters(thread, 0, 0, 0);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS) {
         thread_start(thread, party_departures_thread);
-        thread_parameters_set(thread, 0, 0, 0);
-        thread_inactive_wait(thread);
+        thread_set_parameters(thread, 0, 0, 0);
+        thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES) {
         party_apply_post_battle_changes();
     }
@@ -78,10 +78,10 @@ void require_conditions_entrypoint(void) {
  * until 0x10000 bytes can be reserved at the high overlay address, loads the
  * overlay and runs helpmenu_after_battle_entrypoint in the first idle slot,
  * with the panel's two animation flags set while it runs. */
-void help_open_after_battle(void) {
+void help_after_battle_thread(void) {
     s32 thread_id;
 
-    thread_current_task_set(THREAD_TASK_HELP_MENU);
+    thread_current_set_task(THREAD_TASK_HELP_MENU);
     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
     g_unit_panel_button_prompt_animation[0] = 1;
     g_unit_panel_button_prompt_animation[1] = 1;
@@ -89,9 +89,9 @@ void help_open_after_battle(void) {
         thread_yield();
     }
     overlay_companion_request(COMPANION_OVERLAY_HELPMENU);
-    thread_id = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
+    thread_id = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, helpmenu_after_battle_entrypoint);
-    thread_inactive_wait(thread_id);
+    thread_wait_inactive(thread_id);
     g_unit_panel_button_prompt_animation[0] = 0;
     g_unit_panel_button_prompt_animation[1] = 0;
     thread_current_exit();
@@ -104,8 +104,8 @@ void text_build_battle_unit_names(void) {
     u8* output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     s32 unit_id;
 
-    for (unit_id = 0; unit_id < UNIT_SLOT_COUNT; unit_id++) {
-        unit_stats_t* unit = unit_stats_get(unit_id);
+    for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
+        battle_unit_t* unit = battle_unit_get(unit_id);
         s32 length = 0;
 
         do {

@@ -3,30 +3,30 @@
 #include "fft/ability.h"
 #include "fft/ai.h"
 #include "fft/ai_decision.h"
-#include "fft/battle_map.h"
 #include "fft/command.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count);
+static s32 add_usable_abilities_from_skillset(s32 unit_id, s32 skillset, s32 count);
 
-static void usable_abilities_build(s32 unit_id);
+static void build_usable_abilities(s32 unit_id);
 
-static s32 ratio_q2_calculate(s32 divisor, s32 dividend);
+static s32 calculate_ratio_q2(s32 divisor, s32 dividend);
 
-static void ability_weapon_attack_data_store(ai_weapon_data_t* out, s32 item_id, s32* flags_out);
+static void store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out);
 
 /*
  * Initialize AI workspace defaults and present-unit indexing.
  *
  * Average maximum HP includes all present slots and is capped at 255.
  */
-void ai_workspace_init(void) {
+void ai_init_workspace(void) {
     s32 i = 0;
     s32 present_count = 0;
     s32 total_max_hp = 0;
@@ -44,15 +44,15 @@ void ai_workspace_init(void) {
     ai->hardcoded_status_abilities[1].packed_id = ABILITY_ID_FROG_ATTACK;
     ai->hardcoded_status_abilities[1].usage.flags = AI_ABILITY_ENTRY_USABLE | AI_ABILITY_ENTRY_EXHAUSTIVE_ORIGIN_SCAN;
     ai->present_unit_average_max_hp = 0;
-    ai->terrain_width = g_battle_map_terrain_width;
-    ai->terrain_depth = g_battle_map_terrain_depth;
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+    ai->terrain_width = g_map_terrain_width;
+    ai->terrain_depth = g_map_terrain_depth;
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         ai->unit_compact_indices[i] = 0xff;
-        if (g_unit_stats[i].active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
+        if (g_battle_units[i].active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             ai->unit_compact_indices[i] = present_count;
-            ai_unit_abilities_init(i);
+            ai_init_unit_abilities(i);
             present_count++;
-            total_max_hp += g_unit_stats[i].max_hp;
+            total_max_hp += g_battle_units[i].max_hp;
         }
     }
     if (present_count != 0) {
@@ -83,9 +83,9 @@ void ai_workspace_init(void) {
  * target under TARGETED (another initial team) or RECOVERY (the same team).
  * A focus target not on the field clears the special behavior.
  */
-void ai_unit_abilities_init(s32 unit_id) {
+void ai_init_unit_abilities(s32 unit_id) {
     ai_workspace_t* ai = &g_ai_workspace_storage;
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+    battle_unit_t* unit = &g_battle_units[unit_id];
     ai_unit_decision_t* decision;
     ai_ability_entry_t* entry;
     s32 ability_count;
@@ -94,11 +94,11 @@ void ai_unit_abilities_init(s32 unit_id) {
     s32 evade_count;
     s32 i;
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
         || ai->unit_compact_indices[unit_id] >= AI_COMPACT_UNIT_COUNT) {
         return;
     }
-    usable_abilities_build(unit_id);
+    build_usable_abilities(unit_id);
     ability_count = 0;
     mp_count = 0;
     silence_count = 0;
@@ -111,7 +111,7 @@ void ai_unit_abilities_init(s32 unit_id) {
         if (entry->skillset == SKILLSET_ID_NONE) {
             break;
         }
-        ai_ability_entry_load(entry);
+        ai_load_ability_entry(entry);
         ability_count++;
         /* The target reads and updates skillset/usage as one 16-bit value. */
         if (!entry->usage.policy.requires_monster_skill) {
@@ -156,9 +156,9 @@ void ai_unit_abilities_init(s32 unit_id) {
             }
         }
     }
-    decision->silence_mod = ratio_q2_calculate(ability_count, silence_count);
-    decision->mp_ability_mod = ratio_q2_calculate(ability_count, mp_count);
-    decision->evade_mod = ratio_q2_calculate(ability_count, evade_count);
+    decision->silence_mod = calculate_ratio_q2(ability_count, silence_count);
+    decision->mp_ability_mod = calculate_ratio_q2(ability_count, mp_count);
+    decision->evade_mod = calculate_ratio_q2(ability_count, evade_count);
     /* The five ENTD AI bytes become flags, main target, both targeting flag bytes and
      * the enemy flag; the stay-near tile's level is the top bit of the first. */
     ai_mem_copy_bytes(&decision->flags, &unit->ai.fields.flags, 5);
@@ -176,9 +176,9 @@ void ai_unit_abilities_init(s32 unit_id) {
     if (!(decision->flags & AI_DECISION_FOCUS_TARGET)) {
         return;
     }
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        if (g_unit_stats[i].active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE
-            || g_unit_stats[i].unit_id != decision->main_target_id) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        if (g_battle_units[i].active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
+            || g_battle_units[i].unit_id != decision->main_target_id) {
             continue;
         }
         decision->main_target_id = i;
@@ -186,7 +186,7 @@ void ai_unit_abilities_init(s32 unit_id) {
             return;
         }
         unit->auto_battle_target = i;
-        if ((g_unit_stats[i].initial_team_flags & UNIT_TEAM_MASK) != (unit->initial_team_flags & UNIT_TEAM_MASK)) {
+        if ((g_battle_units[i].initial_team_flags & UNIT_TEAM_MASK) != (unit->initial_team_flags & UNIT_TEAM_MASK)) {
             ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_FIGHT_FOR_LIFE;
         } else {
             ai->unit_autobattle_modes[unit_id] = AI_AUTOBATTLE_PROTECT_ALLIES;
@@ -198,7 +198,7 @@ void ai_unit_abilities_init(s32 unit_id) {
 
 /* dividend * 4 / divisor, or 0 for a zero divisor: a share in quarters, such
  * as how many of a unit's abilities Silence stops. */
-static s32 ratio_q2_calculate(s32 divisor, s32 dividend) {
+static s32 calculate_ratio_q2(s32 divisor, s32 dividend) {
     if (divisor == 0) {
         return 0;
     }
@@ -220,8 +220,8 @@ typedef char ability_entry_byte_view_size_must_be_4[sizeof(ability_entry_byte_vi
  * Non-monster skillsets include Attack and a secondary skillset. Frog Attack
  * is appended for every unit; a terminator is written only if space remains.
  */
-static void usable_abilities_build(s32 unit_id) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+static void build_usable_abilities(s32 unit_id) {
+    battle_unit_t* unit = &g_battle_units[unit_id];
     ai_workspace_t* ai = &g_ai_workspace_storage;
     ai_weapon_data_t* weapon;
     s32 list_id = ai->unit_compact_indices[unit_id];
@@ -239,10 +239,8 @@ static void usable_abilities_build(s32 unit_id) {
         weapon->fields.flags_3 |= AI_ABILITY_FLAG_3_PHYSICAL_ATTACK;
         weapon_flags = AI_WEAPON_FORMULA_NONE;
         if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
-            ability_weapon_attack_data_store(
-                weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], &weapon_flags);
-            ability_weapon_attack_data_store(
-                weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON], &weapon_flags);
+            store_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], &weapon_flags);
+            store_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON], &weapon_flags);
         }
         switch (weapon_flags) {
         case AI_WEAPON_FORMULA_NONE:
@@ -262,9 +260,9 @@ static void usable_abilities_build(s32 unit_id) {
         }
         count++;
     }
-    count = ability_usable_from_skillset_add(unit_id, unit->primary_skillset, count);
+    count = add_usable_abilities_from_skillset(unit_id, unit->primary_skillset, count);
     if (unit->primary_skillset < SKILLSET_ID_MONSTER_FIRST) {
-        count = ability_usable_from_skillset_add(unit_id, unit->secondary_skillset, count);
+        count = add_usable_abilities_from_skillset(unit_id, unit->secondary_skillset, count);
     }
     ai->ability_lists[list_id][count].skillset = SKILLSET_ID_FROG_ATTACK;
     ai->ability_lists[list_id][count].packed_id = (unit_id << AI_ABILITY_ENTRY_UNIT_SHIFT) + ABILITY_ID_FROG_ATTACK;
@@ -283,7 +281,7 @@ static void usable_abilities_build(s32 unit_id) {
  * Range and weapon ID are replaced; elements and trajectory/formula flags
  * accumulate. Calling for the left hand last gives its range precedence.
  */
-static void ability_weapon_attack_data_store(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
+static void store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
     weapon_data_t* weapon;
     s32 flags;
     s32 formula;
@@ -332,7 +330,7 @@ static void ability_weapon_attack_data_store(ai_weapon_data_t* out, s32 item_id,
  * there and GCC 2.6.3 keeps source block order. The per-loop temporaries,
  * ai as a local and the int max_mp reproduce the target's allocation, loop
  * set-up order and signed comparison. */
-static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count) {
+static s32 add_usable_abilities_from_skillset(s32 unit_id, s32 skillset, s32 count) {
     s32 jump_found;
     ai_workspace_t* ai = &g_ai_workspace_storage;
     u16* abilities;
@@ -342,7 +340,7 @@ static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count
     ai_ability_entry_t* entry;
     ai_ability_entry_t* slot;
     ai_ability_entry_t* row;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 ability_id;
     s32 unit_bits;
     u8 mp_cost;
@@ -353,7 +351,7 @@ static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count
         return count;
     }
     jump_found = 0;
-    abilities = ability_skillset_list_build(skillset, SKILLSET_ABILITY_FILTER_ACTION);
+    abilities = ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ACTION);
     menu = g_command_menu_types_by_skillset[skillset];
     list_id = ai->unit_compact_indices[unit_id];
     if (menu == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
@@ -397,7 +395,7 @@ static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count
             return count;
         }
     }
-    unit = &g_unit_stats[unit_id];
+    unit = &g_battle_units[unit_id];
     for (i = 0; i < HUMAN_SKILLSET_ACTION_SLOT_COUNT; i++) {
         ability_id = abilities[i];
         if (ability_id == 0) {
@@ -470,7 +468,7 @@ static s32 ability_usable_from_skillset_add(s32 unit_id, s32 skillset, s32 count
  * Job skillsets 5..23 map to learned_abilities rows 0..18; the unit's own
  * primary or base-job skillset maps to row 0. */
 s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+    battle_unit_t* unit = &g_battle_units[unit_id];
     s32 byte;
     u8* row;
 

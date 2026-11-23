@@ -36,7 +36,7 @@ const u8* text_advance_cursor_with_separate_backreference_state(
 }
 
 /* Append value and value + 1 to the active Psy-Q font stream. */
-void text_debug_value_print(s32 value) {
+void text_print_debug_value(s32 value) {
     FntPrint("%d", value);
     value++;
     FntPrint("%d", value);

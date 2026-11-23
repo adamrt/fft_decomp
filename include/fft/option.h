@@ -116,7 +116,7 @@ typedef enum option_screen {
     MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2 /* crystal and treasure panel */
 } option_screen_e;
 
-void option_open(void);
+void option_menu_thread(void);
 
 /* Dispatch Game Options, AT List or crystal pickup; OPTION and WORLD each build their own body. */
 void option_entrypoint(s32 menu_type);

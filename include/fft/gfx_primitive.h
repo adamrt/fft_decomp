@@ -98,7 +98,7 @@ void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page,
     const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
 void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_quad_negative_uv_flip(POLY_FT4* primitive, s32 direction);
+void gfx_flip_quad_negative_uv(POLY_FT4* primitive, s32 direction);
 void portrait_build_party_poly(POLY_FT4* poly, s32 index);
 void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 
@@ -107,14 +107,14 @@ void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 extern s32 g_gfx_screen_fade;
 
 void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
-void gfx_screen_overlay_fade_out(void);
-void gfx_screen_overlay_fade_in(void);
+void gfx_fade_out_screen_overlay(void);
+void gfx_fade_in_screen_overlay(void);
 
 /* The menu library's fades, which BUNIT and CARD run. */
-void gfx_start_increasing_fade(void);
-s32 gfx_update_increasing_fade(void);
-void gfx_start_decreasing_fade(void);
-s32 gfx_update_decreasing_fade(void);
-s32 gfx_get_fade_state(void);
+void screen_start_fade_out(void);
+s32 screen_update_fade_out(void);
+void screen_start_fade_in(void);
+s32 screen_update_fade_in(void);
+s32 screen_get_fade_state(void);
 
 #endif

@@ -52,16 +52,16 @@ extern u32 g_movie_current_frame;
 extern u32 g_movie_end_frame;
 extern s32 g_movie_video_end_frame; /* -1: none */
 
-static void input_update_with_soft_reset(void);
-static u32* movie_acquire_next_frame(movie_mdec_state_t* state);
-static s32 movie_decode_next_frame(movie_mdec_state_t* state);
-static void movie_handle_mdec_slice(void);
-static void movie_init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1);
-static void movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback);
-static void frame_present(void);
-static void movie_start_cd_read(const CdlLOC* location);
-static void movie_update_stream_frame(void);
-static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
+static void update_input_with_soft_reset(void);
+static u32* acquire_next_frame(movie_mdec_state_t* state);
+static s32 decode_next_frame(movie_mdec_state_t* state);
+static void upload_mdec_slice(void);
+static void init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1);
+static void init_stream(s32 sector, psyq_interrupt_callback_t output_callback);
+static void present_frame(void);
+static void start_cd_read(const CdlLOC* location);
+static void update_stream_frame(void);
+static void wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
 
 /* Each graphics buffer's ordering table holds 16 32-bit entries. */
 #define CONTROLLER_OTAG_BUFFER_BYTES 64
@@ -69,7 +69,7 @@ static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
 /* Entry point of OPEN.BIN for the title sequence. Runs until a controller clears
  * SYSTEM_RUNTIME_FLAG_RUNNING and returns g_title_result: 0 for a new
  * game, or a loaded save with a next scenario and no formation return event,
- * which system_game_loop_run takes straight into BATTLE; 1 for any other
+ * which system_run_game_loop takes straight into BATTLE; 1 for any other
  * loaded save and 2 for the tutorial, which go to WORLD.
  *
  * skip_movie starts at the title menu instead of the FFTST.STR logo movie. Each
@@ -80,7 +80,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
     u32* otag_0;
     u32* otag_1;
 
-    title_sequence_init(skip_movie);
+    title_init_sequence(skip_movie);
     if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
         otag_0 = g_gfx_otags[0];
         otag_1 = g_gfx_otags[1];
@@ -88,24 +88,24 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
             s32 graphics_buffer_index;
             u32* current_otag;
 
-            file_load_poll(&g_file_cd_state);
-            gfx_frame_begin();
-            movie_update_stream_frame();
-            music_test_menu_frame_run();
+            file_poll_load(&g_file_cd_state);
+            gfx_begin_frame();
+            update_stream_frame();
+            music_test_update_menu_frame();
             controller_dispatch_current();
 
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_0);
-            display_object_gpu_list_draw(current_otag, g_display_object_queue, g_display_object_queue_count);
+            display_object_draw_gpu_list(current_otag, g_display_object_queue, g_display_object_queue_count);
 
             graphics_buffer_index = g_gfx_active_buffer_index;
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             DrawSync(0);
-            input_update_with_soft_reset();
+            update_input_with_soft_reset();
             VSync(0);
-            frame_present();
+            present_frame();
             system_frame_stub();
         } while ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
     }
@@ -122,7 +122,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
  * queues the script's primitives, runs the current controller, reads the pad and
  * calls VSync with g_system_vsync_mode (0 during the movie, 2 while the
  * script runs). The ordering table is drawn after the buffer flip, on top of the
- * background movie_present_frame has just put into the new draw buffer. On
+ * background present_frame has just put into the new draw buffer. On
  * exit the VRAM page saved by ending_init is restored, the
  * display is blanked and the CD audio returns to mix level 0xc0. */
 void open_ending_entrypoint(void) {
@@ -137,18 +137,18 @@ void open_ending_entrypoint(void) {
             s32 graphics_buffer_index;
             u32* current_otag;
 
-            file_load_poll(&g_file_cd_state);
-            gfx_frame_begin();
-            movie_update_stream_frame();
+            file_poll_load(&g_file_cd_state);
+            gfx_begin_frame();
+            update_stream_frame();
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_0);
             ending_draw_text_records(current_otag, graphics_buffer_index);
             controller_dispatch_current();
             DrawSync(0);
-            input_update_with_soft_reset();
+            update_input_with_soft_reset();
             VSync(g_system_vsync_mode);
-            frame_present();
+            present_frame();
             current_otag = (u32*)((g_gfx_active_buffer_index ^ 1) * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             system_frame_stub();
@@ -162,7 +162,7 @@ void open_ending_entrypoint(void) {
 
 /* Starts streaming a movie. The stream stops with the CD audio paused at end_frame, and
  * without touching the audio at video_end_frame (-1: none). */
-void movie_stream_start(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_mix_level) {
+void movie_start_stream(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_mix_level) {
     sound_set_cd_mix_and_volume(0, 1);
     suzuki_sound_set_type(suzuki_sound_get_type());
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | SYSTEM_RUNTIME_FLAG_RGB24;
@@ -174,15 +174,15 @@ void movie_stream_start(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_m
     g_movie_stream_status = MOVIE_STREAM_PLAYING;
     g_movie_end_frame = end_frame;
     g_movie_video_end_frame = video_end_frame;
-    movie_init_mdec_state(&g_movie_mdec_stream_state, 0, 8, 0, 0xf8);
+    init_mdec_state(&g_movie_mdec_stream_state, 0, 8, 0, 0xf8);
 
     for (;;) {
-        movie_init_stream(sector, movie_handle_mdec_slice);
+        init_stream(sector, upload_mdec_slice);
         while (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeRT | CdlModeSize1) == 0) { }
-        if (movie_decode_next_frame(&g_movie_mdec_stream_state) != 0) {
+        if (decode_next_frame(&g_movie_mdec_stream_state) != 0) {
             break;
         }
-        file_cd_subsystems_reset();
+        file_reset_cd_subsystems();
     }
 
     sound_set_cd_mix_and_volume(cd_mix_level, 0x20);
@@ -202,7 +202,7 @@ void movie_stream_start(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_m
  * the next frame's bitstream is decoded, and the routine waits for the picture to
  * be complete. The stream stops when the frame header reached end_frame (pausing
  * the CD audio) or video_end_frame (leaving it playing). */
-static void movie_update_stream_frame(void) {
+static void update_stream_frame(void) {
     CdlLOC position;
     s16 free_sectors;
     s16 read_sectors;
@@ -215,7 +215,7 @@ static void movie_update_stream_frame(void) {
     StRingStatus(&free_sectors, &read_sectors);
     if (free_sectors < 16) {
         StSetMask(1, StGetBackloc(&position), -1);
-        movie_start_cd_read(&position);
+        start_cd_read(&position);
     }
 
     DecDCTin(g_movie_mdec_stream_state.vlc_buffers[g_movie_mdec_stream_state.vlc_buffer_index],
@@ -223,27 +223,27 @@ static void movie_update_stream_frame(void) {
     words = g_movie_mdec_stream_state.output_rect.w;
     words *= g_movie_mdec_stream_state.output_rect.h;
     DecDCTout(g_movie_mdec_stream_state.output_buffers[g_movie_mdec_stream_state.output_buffer_index], words / 2);
-    movie_decode_next_frame(&g_movie_mdec_stream_state);
-    movie_wait_for_mdec_output(&g_movie_mdec_stream_state, 0);
+    decode_next_frame(&g_movie_mdec_stream_state);
+    wait_for_mdec_output(&g_movie_mdec_stream_state, 0);
 
     if (g_movie_stream_status == MOVIE_STREAM_STOP_AND_PAUSE_AUDIO) {
-        movie_stream_stop(1);
+        movie_stop_stream(1);
     }
     if (g_movie_stream_status == MOVIE_STREAM_STOP) {
-        movie_stream_stop(0);
+        movie_stop_stream(0);
     }
 }
 
 /* Stop the movie stream: wait for drawing, remove the MDEC output callback, release the CD ring,
  * pause the CD audio when pause_cd_audio is set, and clear
  * SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING. */
-void movie_stream_stop(s32 pause_cd_audio) {
+void movie_stop_stream(s32 pause_cd_audio) {
     DrawSync(0);
     DecDCToutCallback(0);
     StUnSetRing();
 
     if (pause_cd_audio != 0) {
-        movie_cd_audio_pause();
+        movie_pause_cd_audio();
     }
 
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING;
@@ -251,7 +251,7 @@ void movie_stream_stop(s32 pause_cd_audio) {
 
 /* While the CD audio plays: drop its volume to 0, pause the drive, wait four
  * vertical blanks and clear SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING. */
-void movie_cd_audio_pause(void) {
+void movie_pause_cd_audio(void) {
     if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) != 0) {
         sound_set_cd_mix_and_volume(0, 1);
 
@@ -266,7 +266,7 @@ void movie_cd_audio_pause(void) {
 
 /* Sets the two VLC and image buffers and the two frame positions. Retail
  * stores the slice width into the global state, not through `state`. */
-static void movie_init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1) {
+static void init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1) {
     state->vlc_buffers[0] = (u32*)g_system_work_buffer_0;
     state->vlc_buffers[1] = (u32*)g_system_work_buffer_1;
     state->vlc_buffer_index = 0;
@@ -288,15 +288,15 @@ static void movie_init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32
  * it: a one-sector read with no destination makes the file loader seek to
  * `sector` and leaves its position in the loader descriptor, which is then
  * set as the read location. */
-static void movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
+static void init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
     DecDCTReset(0);
     DecDCToutCallback(output_callback);
     StSetRing(g_movie_cd_stream_ring_buffer, 0x30);
     StSetStream(1, 0, -1, 0, 0); /* 24-bit mode, from frame 0, no end frame, no callbacks */
 
-    file_read_request_quiet(&g_file_cd_state, sector, 1, 0);
+    file_request_read_quiet(&g_file_cd_state, sector, 1, 0);
     while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
-        file_load_poll(&g_file_cd_state);
+        file_poll_load(&g_file_cd_state);
         VSync(0);
     }
 
@@ -310,7 +310,7 @@ static void movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callb
  * from the rectangle address. The slice size is built in one variable: its
  * sign extension, product and halving then share the second argument register.
  */
-static void movie_handle_mdec_slice(void) {
+static void upload_mdec_slice(void) {
     RECT* rect;
     s32 size;
 
@@ -341,8 +341,8 @@ static void movie_handle_mdec_slice(void) {
 
 /* Fetch the next movie frame and decode its bitstream into the other VLC buffer,
  * releasing the frame's ring sectors. Returns 0 when no frame arrived. */
-static s32 movie_decode_next_frame(movie_mdec_state_t* state) {
-    u32* frame_data = movie_acquire_next_frame(state);
+static s32 decode_next_frame(movie_mdec_state_t* state) {
+    u32* frame_data = acquire_next_frame(state);
 
     if (frame_data == 0) {
         return 0;
@@ -359,7 +359,7 @@ static s32 movie_decode_next_frame(movie_mdec_state_t* state) {
  * stream position, adopt a changed frame size (clearing the screen), and size
  * the decode rectangles: 24-bit rows take three 16-bit values per two pixels.
  * Returns the frame data, or NULL on timeout. */
-static u32* movie_acquire_next_frame(movie_mdec_state_t* state) {
+static u32* acquire_next_frame(movie_mdec_state_t* state) {
     u32* frame_data;
     StHEADER* header;
     s32 attempts = 0;
@@ -405,7 +405,7 @@ static u32* movie_acquire_next_frame(movie_mdec_state_t* state) {
  * (output_ready), then clear the flag. After 0x800000 passes without it the frame
  * is taken as complete and the output rectangle moves to the other frame buffer.
  * The second argument is not read. */
-static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused) {
+static void wait_for_mdec_output(movie_mdec_state_t* state, s32 unused) {
     /* The timeout is read and written on the stack each iteration. */
     volatile s32 timeout = 0x800000;
 
@@ -423,8 +423,8 @@ static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused) {
 
 /* Set the read location and start the streaming read (stream, double speed and
  * 2340-byte sectors), repeating both until the read is accepted. Unlike the first
- * read in movie_stream_start, this mode leaves out CdlModeRT. */
-static void movie_start_cd_read(const CdlLOC* location) {
+ * read in movie_start_stream, this mode leaves out CdlModeRT. */
+static void start_cd_read(const CdlLOC* location) {
     for (;;) {
         while (CdControl(CdlSetloc, (u8*)location, 0) == 0) { }
         if (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeSize1) != 0) {
@@ -443,7 +443,7 @@ static void movie_start_cd_read(const CdlLOC* location) {
  * enabled unless SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED is set.
  *
  * Nothing in OPEN.BIN sets SYSTEM_RUNTIME_FLAG_CLEAR_FRAME. */
-static void frame_present(void) {
+static void present_frame(void) {
     RECT image_rect;
     RECT move_rect;
     s32 display_index = g_gfx_active_buffer_index ^ 1;
@@ -491,7 +491,7 @@ static void frame_present(void) {
  * SYSTEM_RUNTIME_FLAG_INPUT_DISABLED is set. L1, R1, Select and Start held
  * with nothing else reset the game. SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED
  * would prevent that; no code in OPEN.BIN sets it. */
-static void input_update_with_soft_reset(void) {
+static void update_input_with_soft_reset(void) {
     u32 input;
     u32 previous;
 
@@ -514,6 +514,6 @@ static void input_update_with_soft_reset(void) {
         suzuki_sound_set_master_volume(0x3fff, 1);
         suzuki_sound_put_type(0xc0);
         sound_set_cd_mix_and_volume(0, 1);
-        system_game_reset();
+        system_reset_game();
     }
 }

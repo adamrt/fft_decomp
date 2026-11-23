@@ -15,7 +15,7 @@
  *
  * Sequential transitions use ++ because explicit enum assignments replace the
  * target's increment instructions and do not match. */
-void file_load_poll(file_load_descriptor_t* header) {
+void file_poll_load(file_load_descriptor_t* header) {
     u8 mode;
     s32 result;
 
@@ -45,7 +45,7 @@ void file_load_poll(file_load_descriptor_t* header) {
                 header->state = FILE_LOAD_STATE_IDLE;
             }
         } else if (result == CdlDiskError) {
-            file_cd_subsystems_reset();
+            file_reset_cd_subsystems();
             header->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
             header->error_count++;
         }
@@ -67,7 +67,7 @@ void file_load_poll(file_load_descriptor_t* header) {
             if (g_system_wait_frames > 0x100) {
                 g_system_wait_frames = 0;
                 header->wait_frames = 0;
-                file_cd_subsystems_reset();
+                file_reset_cd_subsystems();
                 header->state = FILE_LOAD_STATE_SET_DOUBLE_SPEED;
                 header->error_count++;
             } else {

@@ -86,8 +86,8 @@ extern s32 g_location_label_shade;
 /* The location whose name label is drawn over its map dot: location id + 1, or zero for none. */
 extern s32 g_location_selected;
 
-s32 location_picture_load(s32 index);
-void location_label_draw(GsOT* ot);
+s32 location_load_picture(s32 index);
+void location_draw_label(GsOT* ot);
 
 /* location menu */
 /* The LOCATION level's cursor and picture records, fade, and choice list. */
@@ -101,11 +101,11 @@ typedef struct location_menu_level {
 } location_menu_level_t;
 typedef char location_menu_level_size_must_be_92[sizeof(location_menu_level_t) == 92 ? 1 : -1];
 
-s32 location_menu_entries_build(s32 location_id, s32* out);
-void location_menu_open(s32 menu);
+s32 location_build_menu_entries(s32 location_id, s32* out);
+void location_open_menu(s32 menu);
 
 /* travel */
-/* Provisional: the level a route travel runs under. travel_step uses the leading window index,
+/* Provisional: the level a route travel runs under. travel_update uses the leading window index,
  * the location id, the pending result, and the choice text ids it collects when the travel ends. */
 typedef struct travel_level {
     s32 window_index; /* 0x00 */
@@ -135,14 +135,14 @@ typedef enum travel_flag {
 } travel_flag_e;
 
 /* Provisional: the route travel state (g_travel), filled by the route search
- * travel_path_find, staged per route leg by travel_segment_begin and stepped by
- * travel_step. The vertices are SVECTORs: their 2-byte alignment is what makes
+ * find_path, staged per route leg by begin_segment and stepped by
+ * travel_update. The vertices are SVECTORs: their 2-byte alignment is what makes
  * `previous_position = position` take GCC's unaligned block-move path (lwl/lwr, swl/swr) that the target emits. */
 typedef struct travel {
     s32 flags;                 /* 0x00; travel_flag_e */
     s32 route_id;              /* 0x04; route & 0xff, index into g_world_map_routes */
-    s32 segment_index;         /* 0x08; current segment of the leg, the step for travel_segment_begin */
-    s32 segment_count;         /* 0x0c; travel_segment_begin result (record count - 1) */
+    s32 segment_index;         /* 0x08; current segment of the leg, the step for begin_segment */
+    s32 segment_count;         /* 0x0c; begin_segment result (record count - 1) */
     s32 segment_frame;         /* 0x10; frames into the segment, interpolation numerator */
     s32 segment_frames;        /* 0x14; point distance * 2, interpolation denominator */
     travel_path_t route_path;  /* 0x18; best path found */
@@ -166,7 +166,7 @@ extern travel_t g_travel;
 extern s32 g_travel_next_map_id;
 
 s32 travel_start(s32 from_location, s32 to_location);
-void travel_step(void);
+void travel_update(void);
 
 /* random battles */
 extern s32 g_random_battle_entd_id;
@@ -236,6 +236,6 @@ extern u16* g_location_script_base;
 extern location_script_state_t g_location_script_state;
 
 s32 location_script_run(s32 location, s32 action_mask);
-void location_script_requests_dispatch(void);
+void location_script_dispatch_requests(void);
 
 #endif

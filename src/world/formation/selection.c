@@ -9,7 +9,7 @@
 /* Steps the formation roster cursor one slot backwards (L1) or forwards (R1),
  * wrapping at either end and skipping over egg units. Plays the page-switch
  * sound on either move. */
-void formation_selected_unit_cycle(s16 pad_buttons) {
+void formation_cycle_selected_unit(s16 pad_buttons) {
     u16 index;
 
     if (pad_buttons & PSX_PAD_L1) {

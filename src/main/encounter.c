@@ -13,7 +13,7 @@
  *
  * Returns 1 once the read is queued, and also for encounter 0, which loads nothing.
  * Returns 0 with the block freed when the loader is busy; the caller retries. */
-int encounter_file_open(void) {
+int encounter_start_file_load(void) {
     int lba;
     entd_file_t* entd_set;
 
@@ -36,8 +36,8 @@ int encounter_file_open(void) {
             lba = DISC_SECTOR_BATTLE_ENTD4_ENT;
         }
 
-        if (file_bytes_read_request(lba, sizeof(entd_file_t), entd_set) != 0) {
-            heap_block_release(g_encounter_set);
+        if (file_request_read_bytes(lba, sizeof(entd_file_t), entd_set) != 0) {
+            heap_release_block(g_encounter_set);
             return 0;
         }
     }
@@ -48,14 +48,14 @@ int encounter_file_open(void) {
  * is no selected encounter, NULL while the file is still loading. Encounter ids 0-127
  * index the file directly; each further range of 128 ids (the last one
  * open-ended) indexes it from its own base. */
-const entd_encounter_t* encounter_current_get(void) {
+const entd_encounter_t* encounter_get_current(void) {
     int* encounter_id = &g_encounter_current_id;
     int id;
 
     if (*encounter_id == 0) {
         return (const entd_encounter_t*)-1;
     }
-    if (file_load_state_get() == 0) {
+    if (file_get_load_state() == 0) {
         id = *encounter_id;
         if (id < ENTD2_FIRST_ENCOUNTER) {
             return &g_encounter_set->encounters[id];
@@ -68,32 +68,32 @@ const entd_encounter_t* encounter_current_get(void) {
 }
 
 /* Rebuild the party roster from an ENTD encounter: load its file (blocking),
- * empty the roster, save its 16 unit slots through party_encounter_unit_save,
+ * empty the roster, save its 16 unit slots through party_save_encounter_unit,
  * and free the file. */
-void encounter_party_init(int encounter_id) {
+void encounter_init_party(int encounter_id) {
     const entd_encounter_t* entd;
     int unit_id;
 
     g_encounter_current_id = encounter_id;
-    while (encounter_file_open() == 0) {
+    while (encounter_start_file_load() == 0) {
         VSync(0);
-        file_load_poll(&g_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
 
     for (;;) {
-        entd = encounter_current_get();
+        entd = encounter_get_current();
         if (entd == (const entd_encounter_t*)-1) {
             break;
         }
         if (entd != 0) {
             party_clear();
             for (unit_id = 0; unit_id < ENTD_UNITS_PER_ENCOUNTER; unit_id++) {
-                party_encounter_unit_save(entd, unit_id, 0, 1);
+                party_save_encounter_unit(entd, unit_id, 0, 1);
             }
-            heap_block_release(g_encounter_set);
+            heap_release_block(g_encounter_set);
             break;
         }
         VSync(0);
-        file_load_poll(&g_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
 }

@@ -19,7 +19,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Packed eight-byte source row used by world_map_dots_init.
+/* Packed eight-byte source row used by world_map_init_dots.
  * The low 16 bits of the first 32-bit value hold x; its high bytes select the animation. */
 typedef struct world_map_dot_source {
     s32 position_and_kind;
@@ -64,7 +64,7 @@ typedef struct random_battle_road {
 } random_battle_road_t;
 
 /* Per location choice, its offset from EVENT_SCRIPT_VAR_LOCATION_CHOICE_HIDDEN_FIRST: a set variable hides the
- * choice from the location menu (location_menu_entries_build). */
+ * choice from the location menu (location_build_menu_entries). */
 extern u8 g_location_choice_hidden_offsets[];
 extern s32 g_travel_search_depth;
 extern s32 g_travel_search_cost;
@@ -181,14 +181,14 @@ static location_record_t s_location_record_data[LOCATION_COUNT] = {
 static world_map_route_header_t** s_world_map_routes = g_world_map_route_table;
 static u16** s_world_map_route_polylines = g_world_map_route_polyline_table;
 
-static void coordinates_clamp(const SVECTOR* input, VECTOR* output);
-static s32 encounter_roll(s32 location, s32 route);
-static void edge_scroll_apply(point32_t* delta);
+static void clamp_coordinates(const SVECTOR* input, VECTOR* output);
+static s32 roll_encounter(s32 location, s32 route);
+static void apply_edge_scroll(point32_t* delta);
 
 /* Build the world-map location dots from their packed source rows and queue them for
  * drawing. Kind-2 locations use the next dot sequence; a set color variable selects the town or
  * field palette, and a clear visibility variable hides the dot. */
-void world_map_dots_init(void) {
+void world_map_init_dots(void) {
     world_map_dot_source_t* src;
     world_map_dot_t* dots = g_world_map_dots;
     world_map_dot_t* dot;
@@ -339,7 +339,7 @@ void world_map_pulse_dots(void) {
  *
  * The point is passed by value in a0/a1; the target reads both members back
  * from the incoming argument home slots. */
-s32 world_map_dot_find(point32_t point) {
+s32 world_map_find_dot(point32_t point) {
     s32 best = 0xFFFFFF;
     s32 i;
     s32 hit = 0;
@@ -375,14 +375,14 @@ s32 world_map_dot_find(point32_t point) {
  *
  * The point is passed by value in a0/a1; the target reads both members back
  * from the incoming argument home slots. */
-s32 world_map_dot_snap_get(point32_t point, s32* step_x, s32* step_y) {
+s32 world_map_get_dot_snap(point32_t point, s32* step_x, s32* step_y) {
     s32 hit;
     s32 dot_x;
     s32 dot_y;
 
     *step_x = 0;
     *step_y = 0;
-    hit = world_map_dot_find(point);
+    hit = world_map_find_dot(point);
     if (hit != 0) {
         dot_x = g_world_map_dots[hit - 1].render.position.x;
         dot_y = g_world_map_dots[hit - 1].render.position.y - 4;
@@ -428,7 +428,7 @@ s32 world_map_dot_snap_get(point32_t point, s32* step_x, s32* step_y) {
  * Dorter, Warjilis and Zarghidas once EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED is
  * set. Other locations offer nothing.
  */
-s32 location_menu_entries_build(s32 location_id, s32* out) {
+s32 location_build_menu_entries(s32 location_id, s32* out) {
     s32 count;
     s32 i;
 
@@ -459,7 +459,7 @@ s32 location_menu_entries_build(s32 location_id, s32* out) {
 /* Fill `out` with the map-name text ids of the current location's Choice destinations and return
  * how many: -1 at Murond Death City, 0 when the location's color variable is set or no Choice
  * applies; a single destination is taken as is, otherwise list those whose hidden flag is clear. */
-static s32 location_choices_collect(s32 location_id, s32* out) {
+static s32 collect_location_choices(s32 location_id, s32* out) {
     s32 available;
     s32 i;
     s32 written;
@@ -501,7 +501,7 @@ static s32 location_choices_collect(s32 location_id, s32* out) {
     return written;
 }
 
-/* Empty. subsystems_init calls it between drawing the map dots and placing the location marker. */
+/* Empty. init_subsystems calls it between drawing the map dots and placing the location marker. */
 void world_map_stub_init(void) {
 }
 
@@ -523,7 +523,7 @@ void world_map_stub_init(void) {
  * of it so the base spills to 0x80 as in the target. The 2-byte alignment of
  * SVECTOR makes `verts[0] = verts[2]` take GCC's unaligned block-move path
  * (lwl/lwr, swl/swr) as in the target. */
-void world_map_routes_draw(GsOT* ot) {
+void world_map_draw_routes(GsOT* ot) {
     s32 flags[4];
     SVECTOR verts[4];
     SVECTOR in;
@@ -612,7 +612,7 @@ void world_map_routes_draw(GsOT* ot) {
  * target's register choice for both index computations. The packed 32-bit position values supply x in the low
  * 16 bits and y in the high 16 bits; the `flags` local gives the
  * target's `or` operand order. */
-static s32 travel_segment_begin(travel_t* state, u32 route, s32 step) {
+static s32 begin_segment(travel_t* state, u32 route, s32 step) {
     s32 unused[8];
     world_map_route_header_t* record;
     s32 index;
@@ -677,7 +677,7 @@ static s32 travel_segment_begin(travel_t* state, u32 route, s32 step) {
  * start point first: that makes the start of the point array the loop's base
  * register, from which the other three coordinates are addressed. The unused
  * local reproduces the target's frame size. */
-void world_map_path_animation_prepare(s32 from, s32 to) {
+void world_map_prepare_path_animation(s32 from, s32 to) {
     world_map_route_header_t** records;
     u16* data;
     world_map_route_header_t* record;
@@ -742,7 +742,7 @@ void world_map_path_animation_prepare(s32 from, s32 to) {
  * the current segment's far edge is interpolated by frame_timer / segment_frames so
  * it unrolls over the segment's time. A negative segment_index or one equal
  * to segment_count stops the animation instead. */
-void world_map_path_animation_draw(GsOT* ot) {
+void world_map_draw_path_animation(GsOT* ot) {
     SVECTOR verts[4];
     SVECTOR in;
     POLY_FT4 poly;
@@ -804,7 +804,7 @@ void world_map_path_animation_draw(GsOT* ot) {
  * responsive while searching: past 200 vsyncs the world frame is redrawn.
  *
  * `unused` keeps 16 frame bytes the target reserves and never touches. */
-static void travel_path_find(s32 from, s32 to) {
+static void find_path(s32 from, s32 to) {
     s32 unused[4];
     s32 cost;
     s32 route;
@@ -823,10 +823,10 @@ static void travel_path_find(s32 from, s32 to) {
     table = s_world_map_routes;
     for (route = 0; route < WORLD_MAP_ROUTE_COUNT; route++) {
         if (VSync(1) > 200) {
-            file_load_poll(&g_file_cd_state);
-            music_queue_process();
+            file_poll_load(&g_file_cd_state);
+            music_queue_update();
             world_map_pulse_dots();
-            world_map_frame_draw();
+            world_map_draw_frame();
             buffer_index = GsGetActiveBuff();
             g_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
@@ -872,14 +872,14 @@ static void travel_path_find(s32 from, s32 to) {
             g_travel_search_path.routes[g_travel_search_depth] = route;
             g_travel_search_depth++;
             g_travel_search_cost += cost;
-            travel_path_find(end, to);
+            find_path(end, to);
             g_travel_search_depth--;
             g_travel_search_cost -= cost;
         } else if (from == end) {
             g_travel_search_path.routes[g_travel_search_depth] = route | TRAVEL_PATH_REVERSED;
             g_travel_search_depth++;
             g_travel_search_cost += cost;
-            travel_path_find(start, to);
+            find_path(start, to);
             g_travel_search_depth--;
             g_travel_search_cost -= cost;
         }
@@ -890,7 +890,7 @@ static void travel_path_find(s32 from, s32 to) {
  * map script stages LoadEvent, that event becomes
  * EVENT_SCRIPT_VAR_CURRENT_EVENT and the event transition level is pushed;
  * returns 0. Otherwise a staged SetVar2 is applied and
- * travel_path_find searches the cheapest path; when there is
+ * find_path searches the cheapest path; when there is
  * one, its first leg starts: the marker turns to the leg's heading, the menu
  * window is hidden, the view pans when the marker is off screen and the
  * destination's picture starts loading. Returns 1.
@@ -919,7 +919,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
     g_travel_search_depth = 0;
     g_travel.best_cost = g_travel.best_length_bound = 99999;
     g_travel.flags = 0;
-    travel_path_find(from_location, to_location);
+    find_path(from_location, to_location);
     if (!(g_travel.flags & TRAVEL_ACTIVE)) {
         return 1;
     }
@@ -927,17 +927,17 @@ s32 travel_start(s32 from_location, s32 to_location) {
     if (g_travel.best_path_length == 0) {
         return 1;
     }
-    g_travel.segment_count = travel_segment_begin(&g_travel, g_travel.route_path.routes[0], 0);
+    g_travel.segment_count = begin_segment(&g_travel, g_travel.route_path.routes[0], 0);
     g_travel.segment_index = 0;
     g_world_map_marker_state.angle = g_travel.heading;
     depth = g_menu_stack_depth - 1;
     g_travel.menu_level = depth;
     g_display_object_animated_pool[g_menu_stack_records[depth].window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-    if (world_map_pan_start(&g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
+    if (world_map_start_pan(&g_world_map_marker_state.marker.render.position, &g_world_map_marker_state.marker.position)
         == 0) {
         g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
     }
-    g_world_map_marker_state.marker.picture_id = location_picture_load(to_location);
+    g_world_map_marker_state.marker.picture_id = location_load_picture(to_location);
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     return 1;
 }
@@ -954,7 +954,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
  * them into the single shared tail the target has, and only per-path CSE of
  * each copy keeps the target's direct g_world_map_marker_state accesses and the &state
  * base register in the flags update. */
-void travel_step(void) {
+void travel_update(void) {
     point32_t delta;
     SVECTOR previous;
     s32 dx;
@@ -966,7 +966,7 @@ void travel_step(void) {
     }
 
     if (g_world_map_pan.flags & WORLD_MAP_PAN_ACTIVE) {
-        if (world_map_pan_update() == 0) {
+        if (world_map_update_pan() == 0) {
             g_world_map_marker_state.flags
                 |= WORLD_MAP_MARKER_UPDATE_DIRECTION | WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
         }
@@ -976,7 +976,7 @@ void travel_step(void) {
 
     if (g_travel.segment_frame >= g_travel.segment_frames) {
         if (++g_travel.segment_index >= g_travel.segment_count) {
-            calendar_day_advance();
+            calendar_advance_day();
             g_world_map_marker_state.marker.position = g_travel.target_position;
             g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION | WORLD_MAP_MARKER_UPDATE_DIRECTION;
             g_world_map_marker_state.marker.location_id = g_travel.leg_end_location;
@@ -998,7 +998,7 @@ void travel_step(void) {
                 != 0) {
                 script_variable_set(g_location_script_state.args[0], g_location_script_state.args[1]);
             }
-            if (encounter_roll(g_travel.leg_end_location,
+            if (roll_encounter(g_travel.leg_end_location,
                     g_travel.route_path.routes[g_travel.route_index - 1] & TRAVEL_PATH_ROUTE_MASK)
                 != 0) {
                 g_world_map_flags |= WORLD_MAP_FLAG_RANDOM_BATTLE;
@@ -1018,8 +1018,7 @@ void travel_step(void) {
             sound_play_effect(SOUND_SFX_WORLD_MAP_ARRIVE);
             if (g_travel.route_index < g_travel.best_path_length) {
                 g_travel.flags &= ~TRAVEL_REVERSED;
-                g_travel.segment_count
-                    = travel_segment_begin(&g_travel, g_travel.route_path.routes[g_travel.route_index], 0);
+                g_travel.segment_count = begin_segment(&g_travel, g_travel.route_path.routes[g_travel.route_index], 0);
                 g_travel.segment_index = 0;
                 g_world_map_marker_state.angle = g_travel.heading;
                 return;
@@ -1032,22 +1031,22 @@ void travel_step(void) {
                 .position.y = g_world_map_marker_state.marker.render.position.y - 4;
             g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
             g_location_selected = g_world_map_marker_state.marker.location_id + 1;
-            file_pending_wait();
+            file_wait_pending();
             g_world_map_marker_state.angle = 0;
             g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
             g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
             g_menu_stack_records[g_travel.menu_level].location_transition.location_id
                 = g_world_map_marker_state.marker.location_id;
-            result = location_choices_collect(g_world_map_marker_state.marker.location_id,
+            result = collect_location_choices(g_world_map_marker_state.marker.location_id,
                 g_menu_stack_records[g_menu_stack_depth].location_transition.choice_text_ids);
             if (result != -1 && result > 0) {
                 g_menu_stack_records[g_menu_stack_depth].location_transition.pending_result = result;
                 menu_stack_dispatch_suspend();
-                location_menu_open(g_world_map_marker_state.marker.location_id);
+                location_open_menu(g_world_map_marker_state.marker.location_id);
             }
             return;
         } else {
-            travel_segment_begin(&g_travel, g_travel.route_id, g_travel.segment_index);
+            begin_segment(&g_travel, g_travel.route_id, g_travel.segment_index);
             g_world_map_marker_state.angle = g_travel.heading;
             g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_DIRECTION;
         }
@@ -1064,7 +1063,7 @@ void travel_step(void) {
     g_world_map_marker_state.marker.position.vy = delta.y;
     delta.x -= previous.vx;
     delta.y -= previous.vy;
-    edge_scroll_apply(&delta);
+    apply_edge_scroll(&delta);
     g_world_map_marker_state.flags |= WORLD_MAP_MARKER_UPDATE_POSITION;
 }
 
@@ -1072,7 +1071,7 @@ void travel_step(void) {
  *
  * The motion record snapshots the current origin and stores the target
  * distance in the same 8-bit fractional scale used by its progress field. */
-s32 world_map_pan_start(const point32_t* point, const SVECTOR* coordinates) {
+s32 world_map_start_pan(const point32_t* point, const SVECTOR* coordinates) {
     s32 dx;
     s32 dy;
 
@@ -1080,7 +1079,7 @@ s32 world_map_pan_start(const point32_t* point, const SVECTOR* coordinates) {
         return 0;
     }
 
-    coordinates_clamp(coordinates, &g_world_map_pan.target);
+    clamp_coordinates(coordinates, &g_world_map_pan.target);
     g_world_map_pan.flags |= WORLD_MAP_PAN_ACTIVE;
     g_world_map_pan.origin = g_world_map_projection_view.origin;
 
@@ -1107,7 +1106,7 @@ s32 world_map_point_needs_pan(const point32_t* point) {
 }
 
 /* Negate and clamp a signed coordinate pair to the world-scroll limits. */
-static void coordinates_clamp(const SVECTOR* input, VECTOR* output) {
+static void clamp_coordinates(const SVECTOR* input, VECTOR* output) {
     s32 x = -input->vx;
     s32 y = -input->vy;
 
@@ -1133,7 +1132,7 @@ extern s32 g_world_map_pan_progress;
 extern s32 g_world_map_pan_target_x;
 
 /* Advance one frame of the camera pan started by
- * world_map_pan_start.
+ * world_map_start_pan.
  *
  * Interpolates the live projection origin between the snapshotted origin and
  * the clamped target by progress/distance. While progress is still short of
@@ -1142,7 +1141,7 @@ extern s32 g_world_map_pan_target_x;
  * returned.
  *
  * The final snap copies the target VECTOR's four 32-bit fields. */
-s32 world_map_pan_update(void) {
+s32 world_map_update_pan(void) {
     s32 progress;
     s32 distance;
     s32 target_x = g_world_map_pan_target_x;
@@ -1169,17 +1168,17 @@ s32 world_map_pan_update(void) {
 /* Applies a scroll delta to the projection origin when the resulting window
  * origin would leave [-64, 72] horizontally or [-64, 64] vertically, and
  * sets WORLD_MAP_FLAG_DRAW_MAP if the origin's x or y changed. */
-static void edge_scroll_apply(point32_t* delta) {
+static void apply_edge_scroll(point32_t* delta) {
     point32_t position;
     VECTOR saved = g_world_map_projection_view.origin;
 
     position.x = g_world_map_marker_state.marker.render.position.x + delta->x;
     position.y = g_world_map_marker_state.marker.render.position.y + delta->y;
     if ((delta->x < 0 && position.x < -0x40) || (delta->x > 0 && position.x >= 0x49)) {
-        world_map_horizontal_scroll_apply(&delta->x, &g_world_map_projection_view.origin.vx);
+        world_map_apply_horizontal_scroll(&delta->x, &g_world_map_projection_view.origin.vx);
     }
     if ((delta->y < 0 && position.y < -0x40) || (delta->y > 0 && position.y >= 0x41)) {
-        world_map_vertical_scroll_apply(delta, &g_world_map_projection_view.origin);
+        world_map_apply_vertical_scroll(delta, &g_world_map_projection_view.origin);
     }
     if (saved.vx != g_world_map_projection_view.origin.vx || saved.vy != g_world_map_projection_view.origin.vy) {
         g_world_map_flags |= WORLD_MAP_FLAG_DRAW_MAP;
@@ -1197,7 +1196,7 @@ static void edge_scroll_apply(point32_t* delta) {
  * which is chance + 1 in 100. One of the ENTDs enabled in the tier's mask is
  * then drawn evenly. Returns 1 with the ENTD and map ids set; the squad id is
  * set as soon as the road is found. */
-static s32 encounter_roll(s32 location, s32 route) {
+static s32 roll_encounter(s32 location, s32 route) {
     random_battle_road_t(*base)[3];
     s32 offset;
     random_battle_road_t* row;
@@ -1281,7 +1280,7 @@ static s32 encounter_roll(s32 location, s32 route) {
  *
  * The map-dot position is copied as one SVECTOR, which reproduces the
  * target's unaligned lwl/lwr 32-bit transfers. */
-void world_map_marker_and_camera_init(void) {
+void world_map_init_marker_and_camera(void) {
     VECTOR unused; /* unreferenced; reproduces the target's 0x38-byte frame */
     world_map_marker_t* marker;
     s32 location_id = script_variable_get(EVENT_SCRIPT_VAR_LOCATION);
@@ -1314,9 +1313,9 @@ void world_map_marker_and_camera_init(void) {
         g_world_map_marker_state.marker.render.palette = 3;
     }
     marker->position = g_world_map_dots[marker->location_id].position;
-    coordinates_clamp(&g_world_map_marker_state.marker.position, &g_world_map_projection_view.origin);
+    clamp_coordinates(&g_world_map_marker_state.marker.position, &g_world_map_projection_view.origin);
     world_map_project_tiles();
-    world_map_marker_update();
+    world_map_update_marker();
 }
 
 /* Apply pending direction and GTE projection updates to the player marker.
@@ -1325,7 +1324,7 @@ void world_map_marker_and_camera_init(void) {
  * one of eight marker sequences from DISPLAY_OBJECT_ANIM_MARKER_FIRST, or from
  * DISPLAY_OBJECT_ANIM_MARKER_ALTERNATE_FIRST for the alternate set. The
  * marker's position is projected with RotTrans into its render position. */
-void world_map_marker_update(void) {
+void world_map_update_marker(void) {
     VECTOR output;
     world_map_marker_state_t* state = &g_world_map_marker_state;
     s32 transform_flag;

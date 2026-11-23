@@ -3,19 +3,19 @@
 #include "fft/ability.h"
 #include "fft/at_list.h"
 #include "fft/item.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/skillset.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output);
+static void fill_billboard(battle_unit_t* unit, unit_panel_summary_t* output);
 
 /* Fill a 16-byte text field with terminators. */
-static void text_fill_field_with_terminators(u8* text) {
+static void fill_text_field_with_terminators(u8* text) {
     u8 value = TEXT_END_WAIT_FOR_CONFIRM;
     s32 index;
 
@@ -26,7 +26,7 @@ static void text_fill_field_with_terminators(u8* text) {
 
 /* Fill the unit's level, team and HP/MP/CT gauges. BATTLE and DEBUGCHR also report AT-list position; WORLD counts
  * active units without an AT-list lookup, and REQUIRE leaves the list fields empty. */
-static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* output) {
+static void fill_billboard(battle_unit_t* unit, unit_panel_summary_t* output) {
 #ifndef FFT_EVENT_REQUIRE
     s32 resolved_id;
     s32 count;
@@ -72,13 +72,13 @@ static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* 
 #ifndef FFT_EVENT_REQUIRE
     if (output->list_index >= 0)
         output->list_index++;
-    output->unit_count = UNIT_SLOT_COUNT;
+    output->unit_count = BATTLE_UNIT_SLOT_COUNT;
     count = 0;
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        if (unit_has_runtime_id(i) != 0) {
-            unit_id = unit_runtime_battle_id_get(i);
-            unit = unit_stats_get(unit_id);
-            unit = unit_entd_find_stats(unit->unit_id, &resolved_id);
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        if (map_unit_exists(i) != 0) {
+            unit_id = map_unit_get_battle_unit_id(i);
+            unit = battle_unit_get(unit_id);
+            unit = battle_unit_find_by_unit_id(unit->unit_id, &resolved_id);
             if (resolved_id >= 0 && unit_id == resolved_id && unit->unit_id != 0) {
                 count++;
             }
@@ -91,7 +91,7 @@ static void unit_panel_fill_billboard(unit_stats_t* unit, unit_panel_summary_t* 
 /* Fill the comparison and selected-unit billboards, stats, equipment and ability rows.
  * Empty secondary skillsets mark byte 1 of the name buffer before the names are copied. */
 void unit_panel_load_selected(void) {
-    unit_stats_t* unit = unit_stats_get(g_unit_panel_comparison_unit_data.battle_id);
+    battle_unit_t* unit = battle_unit_get(g_unit_panel_comparison_unit_data.battle_unit_id);
     menu_status_panel_slot_state_t* fields = &g_unit_panel_selected_unit_fields.state;
     u16* ability_ids;
     const item_data_t* item;
@@ -103,13 +103,13 @@ void unit_panel_load_selected(void) {
     s16 list_value;
 
     if (unit != 0) {
-        unit_panel_fill_billboard(unit, &g_unit_panel_comparison_unit_status);
+        fill_billboard(unit, &g_unit_panel_comparison_unit_status);
     }
 
-    unit = unit_stats_get(g_unit_panel_selected_unit.battle_id);
+    unit = battle_unit_get(g_unit_panel_selected_unit.battle_unit_id);
     if (unit == 0)
         return;
-    unit_panel_fill_billboard(unit, &g_unit_panel_selected_unit_status);
+    fill_billboard(unit, &g_unit_panel_selected_unit_status);
 
     g_unit_panel_selected_unit.job_id = unit->job_id;
     g_unit_panel_selected_unit.brave = unit->brave;
@@ -166,7 +166,7 @@ void unit_panel_load_selected(void) {
         fields->generic_monster = 1;
 
     if (fields->generic_monster != 0) {
-        ability_ids = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        ability_ids = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
             fields->ability_ids[i] = *ability_ids++;
@@ -175,7 +175,7 @@ void unit_panel_load_selected(void) {
 
         /* The fourth ability (index 3) stays only when the monster skill check passes; the
          * check runs on the main stack. */
-        g_thread_call_target = skillset_monster_count_supporters;
+        g_thread_call_target = skillset_count_monster_supporters;
         if (thread_call_on_main_stack(unit) == 0)
             fields->ability_ids[3] = 0;
 
@@ -219,7 +219,7 @@ void unit_panel_load_selected(void) {
     }
 
     if (item_id != ITEM_ID_NOTHING) {
-        item = item_data_get(item_id);
+        item = item_get_data(item_id);
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
@@ -229,10 +229,10 @@ void unit_panel_load_selected(void) {
         }
     }
 
-    text_fill_field_with_terminators(g_unit_panel_billboard_unit_name);
-    text_fill_field_with_terminators(g_unit_panel_billboard_job_name);
-    text_fill_field_with_terminators(g_unit_panel_billboard_skillset_name);
-    text_fill_field_with_terminators(g_unit_panel_billboard_secondary_skillset_name);
+    fill_text_field_with_terminators(g_unit_panel_billboard_unit_name);
+    fill_text_field_with_terminators(g_unit_panel_billboard_job_name);
+    fill_text_field_with_terminators(g_unit_panel_billboard_skillset_name);
+    fill_text_field_with_terminators(g_unit_panel_billboard_secondary_skillset_name);
     /* Each panel uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
     mem_copy_bytes_nonempty(g_unit_panel_billboard_unit_name, unit->name, 0x10);

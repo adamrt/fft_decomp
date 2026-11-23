@@ -14,7 +14,7 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
-            result = memcard_bios_event_wait();
+            result = memcard_wait_bios_event();
             if (result == MEMCARD_RESULT_COMPLETE)
                 break;
         } else {
@@ -28,7 +28,7 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-memcard_result_e memcard_operation_poll(void) {
+memcard_result_e memcard_poll_operation(void) {
     s32 status;
     memcard_result_e result;
 
@@ -38,7 +38,7 @@ memcard_result_e memcard_operation_poll(void) {
     }
 
     status = _card_status(g_memcard_slot) & 1;
-    result = memcard_bios_event_poll();
+    result = memcard_poll_bios_event();
     if (status != 0 && result == MEMCARD_RESULT_PENDING) {
         g_memcard_info_pending = 0;
     }
@@ -57,14 +57,14 @@ memcard_result_e memcard_operation_poll(void) {
 /* Probe the selected slot until three probes in a row complete, and return
  * complete. Any other settled result counts against retry_limit and is returned
  * when the limit is reached. A nonpositive limit leaves the result unset. */
-static memcard_result_e memcard_poll_info_until_stable(s32 retry_limit) {
+static memcard_result_e poll_card_info_until_stable(s32 retry_limit) {
     s32 attempts = 0;
     s32 consecutive_successes = 0;
     memcard_result_e result;
 
     while (attempts < retry_limit) {
         do {
-            result = memcard_operation_poll();
+            result = memcard_poll_operation();
         } while (result == MEMCARD_RESULT_PENDING);
 
         if (result == MEMCARD_RESULT_COMPLETE) {
@@ -88,16 +88,16 @@ s32 title_check_card_slots(void) {
     s32 card_present = 0;
     memcard_result_e result;
 
-    memcard_events_clear();
+    memcard_clear_events();
 
-    memcard_slot_set(1);
-    result = memcard_poll_info_until_stable(3);
+    memcard_set_slot(1);
+    result = poll_card_info_until_stable(3);
     if (result == MEMCARD_RESULT_COMPLETE || result == MEMCARD_RESULT_NEW_CARD) {
         card_present = 1;
     }
 
-    memcard_slot_set(0);
-    result = memcard_poll_info_until_stable(3);
+    memcard_set_slot(0);
+    result = poll_card_info_until_stable(3);
     if (result == MEMCARD_RESULT_COMPLETE || result == MEMCARD_RESULT_NEW_CARD) {
         card_present = 1;
     }

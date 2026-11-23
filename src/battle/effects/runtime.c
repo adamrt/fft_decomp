@@ -1,8 +1,6 @@
 /* Manage effect primitives, emitters and particle state, with the curves, model decoding and geometry used to advance
  * and draw them. */
 
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
@@ -15,16 +13,18 @@
 #include "fft/effect_secondary.h"
 #include "fft/effect_timeline.h"
 #include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/random.h"
 #include "fft/system.h"
-#include "fft/unit_runtime.h"
 #include "psx/gte_inline_split.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* primitive_type of primitive_alloc: an index into g_primitive_sizes. */
+/* primitive_type of alloc_primitive: an index into g_primitive_sizes. */
 typedef enum primitive_kind { EFFECT_PRIMITIVE_FT4 = 0, EFFECT_PRIMITIVE_DR_MODE = 1 } primitive_kind_e;
 
 /* Cleared with the effect camera modes; nothing reads them. */
@@ -81,44 +81,44 @@ static const u32* s_model_commands;
 
 static s32 s_model_command_word_offset;
 
-static s32 particle_sprite_state_update(effect_record_t* unused_record, effect_work_record_t* work);
+static s32 update_particle_sprite_state(effect_record_t* unused_record, effect_work_record_t* work);
 
-static void mixed_vector_add(const SVECTOR* first, const VECTOR* second, VECTOR* out);
+static void add_mixed_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
 
-static effect_list_node_t* sprite_state_alloc(s16 kind);
+static effect_list_node_t* alloc_sprite_state(s16 kind);
 
-static void sprite_state_free(effect_list_node_t* node);
+static void free_sprite_state(effect_list_node_t* node);
 
-static s32 random_s32_get(s32 value_a, s32 value_b);
+static s32 get_random_s32(s32 value_a, s32 value_b);
 
-static void sprite_sequence_init(effect_list_node_t* state, s32 frame_group, s16 animation_index);
+static void init_sprite_sequence(effect_list_node_t* state, s32 frame_group, s16 animation_index);
 
-static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
+static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
 
 /* The four sprite work kinds share one updater; heap-block work has no entry. */
 s32 (*g_effect_particle_render_handlers[4])(effect_record_t* record, effect_work_record_t* work)
-    = { particle_sprite_state_update, particle_sprite_state_update, particle_sprite_state_update,
-          particle_sprite_state_update };
+    = { update_particle_sprite_state, update_particle_sprite_state, update_particle_sprite_state,
+          update_particle_sprite_state };
 
-static void render_state_init(void);
+static void init_render_state(void);
 
-static effect_sprite_block_t* sprite_block_alloc(u8 sprite_count);
+static effect_sprite_block_t* alloc_sprite_block(u8 sprite_count);
 
-static void sprite_block_free(effect_sprite_block_t* block);
+static void free_sprite_block(effect_sprite_block_t* block);
 
-static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot);
+static void submit_sprite_block(effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot);
 
-static void billboard_sprite_draw(effect_slot_t* slot);
+static void draw_billboard_sprite(effect_slot_t* slot);
 
-static void particle_chain_init(void);
+static void init_particle_chain(void);
 
-static s16 random_s16_get(s16 minimum, s16 maximum);
+static s16 get_random_s16(s16 minimum, s16 maximum);
 
 /* Initialize the effect renderer's transform, depth, and primitive state.
  *
  * The rotation terms form the identity matrix's third row and column. Every
  * corner starts at the same screen depth before an effect supplies geometry. */
-static void render_state_init(void) {
+static void init_render_state(void) {
     g_effect_matrix.m[2][2] = ONE;
     s_effect_frame_parity = 0;
     g_effect_matrix.m[2][1] = 0;
@@ -137,9 +137,9 @@ static void render_state_init(void) {
     g_effect_sprite_count = 0;
 }
 
-/* The subset of render_state_init that does not touch the
+/* The subset of init_render_state that does not touch the
  * prim buffer or the sprite counters. */
-void effect_render_state_reset(void) {
+void effect_render_reset_state(void) {
     g_effect_matrix.m[2][2] = ONE;
     g_effect_matrix.m[2][1] = 0;
     g_effect_matrix.m[2][0] = 0;
@@ -153,7 +153,7 @@ void effect_render_state_reset(void) {
 }
 
 /* Nothing in the game calls it. */
-s32 effect_render_prim_offset_get(void) {
+s32 effect_render_get_prim_offset(void) {
     return s_effect_prim_buffer_offset;
 }
 
@@ -161,7 +161,7 @@ s32 effect_render_prim_offset_get(void) {
  *
  * The eight-byte prefix is followed by one pointer per sprite part. The renderer tracks
  * both current and peak occupancy for the shared effect pool. */
-static effect_sprite_block_t* sprite_block_alloc(u8 sprite_count) {
+static effect_sprite_block_t* alloc_sprite_block(u8 sprite_count) {
     effect_sprite_block_t* block;
     s32 total_count;
 
@@ -179,14 +179,14 @@ static effect_sprite_block_t* sprite_block_alloc(u8 sprite_count) {
 }
 
 /* Release an effect-frame sprite block and update the live sprite count. */
-static void sprite_block_free(effect_sprite_block_t* block) {
+static void free_sprite_block(effect_sprite_block_t* block) {
     g_effect_sprite_count -= block->header.sprite_count;
     effect_heap_free_block(block);
 }
 
 /* Reset the projection center and store frame parity and the arena's current offset.
  * The two stored values have no identified reader; allocation wraps the arena independently. */
-void effect_render_frame_start(void) {
+void effect_render_init_frame(void) {
     SetGeomOffset(0, 0);
     s_effect_frame_parity = 1 - s_effect_frame_parity;
     s_effect_frame_start_prim_buffer_offset = s_effect_prim_buffer_offset;
@@ -196,7 +196,7 @@ void effect_render_frame_start(void) {
  *
  * The original renderer wraps before an allocation that would cross the
  * 0x8000-byte arena boundary; callers consume the result immediately. */
-static void* primitive_alloc(primitive_kind_e primitive_type) {
+static void* alloc_primitive(primitive_kind_e primitive_type) {
     /* These registers retain the arena offset and primitive size across the wrap test. */
     s32 offset;
     register s32 size __asm__("$4");
@@ -226,7 +226,7 @@ static void* primitive_alloc(primitive_kind_e primitive_type) {
  * with two draw-mode primitives, builds the 2D rotation (optionally scaled by
  * `zoom`) into the effect matrix, and projects each part's corners through the
  * GTE into a POLY_FT4 linked into `ot`. */
-static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot) {
+static void submit_sprite_block(effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot) {
     DR_MODE* draw_mode;
     POLY_FT4* quad;
     effect_sprite_part_t* frame;
@@ -237,7 +237,7 @@ static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s
     s32 clut;
     s32 code;
 
-    draw_mode = primitive_alloc(EFFECT_PRIMITIVE_DR_MODE);
+    draw_mode = alloc_primitive(EFFECT_PRIMITIVE_DR_MODE);
     SetDrawMode(draw_mode, 1, 1, 1, 0);
     addPrim(ot, draw_mode);
     g_effect_matrix.t[0] = position->vx;
@@ -267,7 +267,7 @@ static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s
         gte_ldv3_split(&g_effect_corner_top_left, &g_effect_corner_top_right, &g_effect_corner_bottom_left);
         gte_rtpt_split();
         memcpy(&g_effect_corner_bottom_right, &frame->corners[3], sizeof(frame->corners[3]));
-        quad = primitive_alloc(EFFECT_PRIMITIVE_FT4);
+        quad = alloc_primitive(EFFECT_PRIMITIVE_FT4);
         /* The fourth copied byte is the part count; code overwrites it. */
         memcpy(&quad->r0, &set->header, sizeof(set->header));
         setlen(quad, 9);
@@ -281,9 +281,9 @@ static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s
         quad->tpage = frame->tpage;
         value = frame->flags & EFFECT_SPRITE_PART_CLUT_MASK;
         if (frame->flags & EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW) {
-            clut = value + BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT_SECOND, 0);
+            clut = value + MAP_CLUT(MAP_CLUT_ROW_EFFECT_SECOND, 0);
         } else {
-            clut = value + BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+            clut = value + MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
         }
         quad->clut = clut;
         quad->u0 = quad->u2 = frame->u;
@@ -293,7 +293,7 @@ static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s
         gte_stsxy_split(&quad->x3);
         addPrim(ot, quad);
     }
-    draw_mode = primitive_alloc(EFFECT_PRIMITIVE_DR_MODE);
+    draw_mode = alloc_primitive(EFFECT_PRIMITIVE_DR_MODE);
     SetDrawMode(draw_mode, 1, 0, 1, 0);
     addPrim(ot, draw_mode);
 }
@@ -303,7 +303,7 @@ static void sprite_block_submit(effect_sprite_block_t* set, DVECTOR* position, s
  * slot angle, transforms the frame's four corners into the slot's
  * double-buffered POLY_FT4, and adds that quad between the slot's two draw-mode
  * primitives. */
-static void billboard_sprite_draw(effect_slot_t* slot) {
+static void draw_billboard_sprite(effect_slot_t* slot) {
     SVECTOR local;
     VECTOR position;
     s32 sxy;
@@ -387,7 +387,7 @@ static void billboard_sprite_draw(effect_slot_t* slot) {
 
 /* Allocate the 256 effect work records and chain them all into the free list.
  * Also clears the translation of the particle heading and emitter matrices. */
-static void particle_chain_init(void) {
+static void init_particle_chain(void) {
     s32 index;
     effect_work_record_t* records;
 
@@ -415,7 +415,7 @@ static void particle_chain_init(void) {
 
 /*
  * Take a work record from the free chain and attach it to state record
- * record_index; the inverse of effect_particle_record_free.
+ * record_index; the inverse of effect_particle_free_record.
  *
  * Bits 12-15 of kind select the effect list node type allocated as the
  * record's data (0x0000-0x3000 map to list kinds 0, 2, 4 and 6); other kinds
@@ -423,7 +423,7 @@ static void particle_chain_init(void) {
  * With the free chain empty it only passes code 0x3e to the empty report hook
  * and then reads the next link through the null head.
  */
-static effect_work_record_t* particle_record_alloc(s16 record_index, s16 kind) {
+static effect_work_record_t* alloc_particle_record(s16 record_index, s16 kind) {
     effect_work_record_t* work = g_effect_free_work_record_head;
     effect_record_t* owner;
 
@@ -438,16 +438,16 @@ static effect_work_record_t* particle_record_alloc(s16 record_index, s16 kind) {
     g_effect_free_work_record_head = work->next;
     switch (kind & EFFECT_WORK_KIND_MASK) {
     case EFFECT_WORK_KIND_SPRITE_WORLD:
-        work->data = sprite_state_alloc(EFFECT_LIST_NODE_WORLD);
+        work->data = alloc_sprite_state(EFFECT_LIST_NODE_WORLD);
         break;
     case EFFECT_WORK_KIND_SPRITE_SCREEN_OFFSET:
-        work->data = sprite_state_alloc(EFFECT_LIST_NODE_SCREEN_OFFSET);
+        work->data = alloc_sprite_state(EFFECT_LIST_NODE_SCREEN_OFFSET);
         break;
     case EFFECT_WORK_KIND_SPRITE_WORLD_UNSCALED:
-        work->data = sprite_state_alloc(EFFECT_LIST_NODE_WORLD_UNSCALED);
+        work->data = alloc_sprite_state(EFFECT_LIST_NODE_WORLD_UNSCALED);
         break;
     case EFFECT_WORK_KIND_SPRITE_SCREEN:
-        work->data = sprite_state_alloc(EFFECT_LIST_NODE_SCREEN);
+        work->data = alloc_sprite_state(EFFECT_LIST_NODE_SCREEN);
         break;
     }
     work->prev = 0;
@@ -462,7 +462,7 @@ static effect_work_record_t* particle_record_alloc(s16 record_index, s16 kind) {
 
 /* Unlinks work from state record record_index, releases its data according
  * to the kind in kind_flags, and returns it to the free chain. */
-void effect_particle_record_free(s16 record_index, effect_work_record_t* work) {
+void effect_particle_free_record(s16 record_index, effect_work_record_t* work) {
     effect_record_t* owner = &g_effect_state_records[record_index];
 
     if (work->next != 0) {
@@ -479,7 +479,7 @@ void effect_particle_record_free(s16 record_index, effect_work_record_t* work) {
     case EFFECT_WORK_KIND_SPRITE_SCREEN_OFFSET:
     case EFFECT_WORK_KIND_SPRITE_WORLD_UNSCALED:
     case EFFECT_WORK_KIND_SPRITE_SCREEN:
-        sprite_state_free(work->data);
+        free_sprite_state(work->data);
         break;
     case EFFECT_WORK_KIND_HEAP_BLOCK:
         effect_heap_free_block(work->data);
@@ -496,7 +496,7 @@ void effect_particle_record_free(s16 record_index, effect_work_record_t* work) {
  * screen heading stored on the node. Color-curve records take each channel
  * from its animation curve at the record's curve frame; others use neutral
  * 0x80. */
-static s32 particle_sprite_state_update(effect_record_t* unused_record, effect_work_record_t* work) {
+static s32 update_particle_sprite_state(effect_record_t* unused_record, effect_work_record_t* work) {
     SVECTOR direction;
     VECTOR rotated;
 
@@ -513,11 +513,11 @@ static s32 particle_sprite_state_update(effect_record_t* unused_record, effect_w
         work->data->screen_rotation_angle = ratan2(rotated.vy, rotated.vx);
     }
     if (work->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-        particle_sprite_draw(work->data, g_effect_animation_curve_data->curves[work->color_curves.r][work->curve_frame],
+        draw_particle_sprite(work->data, g_effect_animation_curve_data->curves[work->color_curves.r][work->curve_frame],
             g_effect_animation_curve_data->curves[work->color_curves.g][work->curve_frame],
             g_effect_animation_curve_data->curves[work->color_curves.b][work->curve_frame]);
     } else {
-        particle_sprite_draw(work->data, 0x80, 0x80, 0x80);
+        draw_particle_sprite(work->data, 0x80, 0x80, 0x80);
     }
 }
 
@@ -533,7 +533,7 @@ void effect_noop_2(void) {
  * record (0 when out of range). The loop follows work_count links from the
  * head instead of requested_index, which runs off the end of the
  * null-terminated list, so it always returns 0. Nothing in the game calls it. */
-effect_work_record_t* effect_particle_record_get(s16 record_index, s16 requested_index) {
+effect_work_record_t* effect_particle_get_record(s16 record_index, s16 requested_index) {
     effect_record_t* record = &g_effect_state_records[record_index];
     effect_work_record_t* node = 0;
     s16 node_count;
@@ -564,7 +564,7 @@ effect_work_record_t* effect_particle_record_get(s16 record_index, s16 requested
  *
  * Positions have 12 fractional bits; initial speed values scale into velocity by eight.
  * The lerps of the pair at 0x4c and the target's facing quadrant are discarded. */
-s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent) {
+s32 effect_emitter_spawn_particles(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent) {
     SVECTOR rotation;
     VECTOR out;
     SVECTOR caster;
@@ -616,7 +616,7 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
     u8 color_r;
     u8 color_g;
     u8 color_b;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
 
     entry = &g_effect_geometry_table->entries[emitter_index];
     time = frame;
@@ -634,44 +634,43 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
     SetTransMatrix(&g_effect_emitter_matrix);
     target_index = g_effect_state_records[record_index].timeline.target_index;
     rotate = (behavior_flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
-    effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+    effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
         EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &caster);
     if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-        facing = ((unit_runtime_facing_quadrant_get(g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id)
-                      + 1)
-                     & 3)
+        facing
+            = ((map_unit_get_facing_quadrant(g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id) + 1)
+                  & 3)
             << 10;
         rotation.vz = 0;
         rotation.vx = 0;
         rotation.vy = facing;
         RotMatrix(&rotation, &matrix);
     }
-    effect_target_world_coords_resolve(
+    effect_resolve_target_world_coords(
         g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index, &g_effect_context, &target);
     if (g_effect_context.targets[target_index].target_type == EFFECT_TARGET_TYPE_UNIT) {
-        unit_runtime_facing_quadrant_get(g_effect_context.targets[target_index].data.unit.runtime_id);
-        unit_event_offset
-            = unit_get_event_offset_by_runtime_id(g_effect_context.targets[target_index].data.unit.runtime_id);
+        map_unit_get_facing_quadrant(g_effect_context.targets[target_index].data.unit.map_unit_id);
+        unit_event_offset = map_unit_get_event_offset(g_effect_context.targets[target_index].data.unit.map_unit_id);
     }
-    tile = battle_map_tile_get_pointer(
+    tile = map_get_tile(
         g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
 
     EFFECT_READ_CURVE(curve, factor,
         (entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT) & 0xf, frame);
     count = effect_lerp_q8(entry->emitter.particle_count_start, entry->emitter.particle_count_end, factor);
     for (i = 0; i < count; i++) {
-        particle = particle_record_alloc(record_index, (placement_flags & EFFECT_WORK_KIND_MASK));
+        particle = alloc_particle_record(record_index, (placement_flags & EFFECT_WORK_KIND_MASK));
         particle->kind_flags = placement_flags;
         particle->flags = behavior_flags;
         particle->curve_frame = 0;
-        sprite_sequence_init(particle->data, entry->emitter.animation_frame_group, entry->emitter.animation_index);
+        init_sprite_sequence(particle->data, entry->emitter.animation_frame_group, entry->emitter.animation_index);
     }
     /* Each record is pushed at the head of the owner's list, so the last one
      * allocated leads the batch and `next` walks the rest of it. */
     head = particle;
 
     EFFECT_READ_CURVE(curve, factor, entry->emitter.spawn_bindings.position, frame);
-    effect_emitter_spawn_position_interpolate(entry, factor, &spawn);
+    effect_emitter_interpolate_spawn_position(entry, factor, &spawn);
     if (rotate) {
         SetRotMatrix(&matrix);
         copyVector(&rotation, &spawn);
@@ -681,15 +680,15 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
     case EFFECT_EMITTER_ORIGIN_WORLD:
         break;
     case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-        spawn.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        spawn.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        spawn.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
+        spawn.vx += g_effect_context.target_tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        spawn.vz += g_effect_context.target_tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        spawn.vy -= tile->height * MAP_HEIGHT_STEP;
         break;
     case EFFECT_EMITTER_ORIGIN_CASTER:
-        mixed_vector_add(&caster, &spawn, &spawn);
+        add_mixed_vector(&caster, &spawn, &spawn);
         break;
     case EFFECT_EMITTER_ORIGIN_TARGET:
-        mixed_vector_add(&target, &spawn, &spawn);
+        add_mixed_vector(&target, &spawn, &spawn);
         break;
     case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
         if (parent != 0) {
@@ -699,9 +698,9 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
         }
         break;
     case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-        battle_map_dimensions_store(&map_max);
-        spawn.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
-        spawn.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
+        map_store_dimensions(&map_max);
+        spawn.vx += map_max.vx * (MAP_TILE_SIZE / 2);
+        spawn.vz += map_max.vz * (MAP_TILE_SIZE / 2);
         break;
     case EFFECT_EMITTER_ORIGIN_TRACKED_ENTITY:
         spawn.vx += target.vx + unit_event_offset->vx;
@@ -712,7 +711,7 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
 
     selector = entry->emitter.spawn_bindings.spread;
     EFFECT_READ_CURVE(curve, factor, selector, frame);
-    effect_emitter_spawn_spread_interpolate(entry, factor, &spread);
+    effect_emitter_interpolate_spawn_spread(entry, factor, &spread);
     if (rotate) {
         SetRotMatrix(&matrix);
         copyVector(&rotation, &spread);
@@ -727,7 +726,7 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
             particle = particle->next;
         }
     } else {
-        scale = effect_s16_largest_magnitude_select(spread.vx, spread.vy, spread.vz);
+        scale = effect_s16_select_largest_magnitude(spread.vx, spread.vy, spread.vz);
         for (i = 0; i < count; i++) {
             if (scale != 0) {
                 setVector(&rotation, rand(), rand(), rand());
@@ -777,7 +776,7 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
     }
     selector = entry->emitter.spawn_bindings.velocity_angle;
     EFFECT_READ_CURVE(curve, factor, selector, frame);
-    effect_emitter_velocity_angles_interpolate(entry, factor, &angle);
+    effect_emitter_interpolate_velocity_angles(entry, factor, &angle);
 
     particle = head;
     switch (behavior_flags & EFFECT_EMITTER_VELOCITY_MASK) {
@@ -933,10 +932,10 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
         }
         break;
     case EFFECT_EMITTER_HOMING_MAP_CENTER:
-        battle_map_dimensions_store(&map_max);
+        map_store_dimensions(&map_max);
         for (i = 0; i < count; i++) {
-            particle->target.x = map_max.vx * (BATTLE_MAP_TILE_SIZE / 2) + target_offset.vx;
-            particle->target.z = map_max.vz * (BATTLE_MAP_TILE_SIZE / 2) + target_offset.vz;
+            particle->target.x = map_max.vx * (MAP_TILE_SIZE / 2) + target_offset.vx;
+            particle->target.z = map_max.vz * (MAP_TILE_SIZE / 2) + target_offset.vz;
             particle->target.y = target_offset.vy;
             particle = particle->next;
         }
@@ -958,9 +957,9 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
         }
         break;
     case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-        tile_anchor.vx = g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        tile_anchor.vz = g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        tile_anchor.vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
+        tile_anchor.vx = g_effect_context.target_tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        tile_anchor.vz = g_effect_context.target_tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        tile_anchor.vy = -(tile->height * MAP_HEIGHT_STEP);
         for (i = 0; i < count; i++) {
             particle->target.x = tile_anchor.vx + target_offset.vx;
             particle->target.y = tile_anchor.vy + target_offset.vy;
@@ -1016,8 +1015,8 @@ s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_inde
  * particle lifetime.
  *
  * The caster and target blocks use an effect context record, as in the
- * secondary initializers; effect_target_world_coords_resolve reads the same layout. */
-s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motion_t* motion) {
+ * secondary initializers; effect_resolve_target_world_coords reads the same layout. */
+s32 effect_slot_init_motion(const effect_emitter_values_t* values, effect_motion_t* motion) {
     MATRIX anchor_matrix;
     MATRIX rotation;
     SVECTOR anchor_angle;
@@ -1038,16 +1037,15 @@ s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motio
     s16 speed;
 
     init.targets[EFFECT_CASTER_ENTRY] = g_effect_secondary_current->caster;
-    effect_target_world_coords_resolve(0, EFFECT_TARGET_INDEX_CASTER, &init, &origin);
+    effect_resolve_target_world_coords(0, EFFECT_TARGET_INDEX_CASTER, &init, &origin);
     init.targets[0] = g_effect_secondary_current->target.record;
-    effect_target_world_coords_resolve(0, 0, &init, &target);
+    effect_resolve_target_world_coords(0, 0, &init, &target);
     oriented = 0;
     SetTransMatrix(&g_effect_projectile_matrix);
     if ((values->motion_flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING) {
         oriented = 1;
         anchor_angle.vy
-            = ((unit_runtime_facing_quadrant_get(g_effect_secondary_current->caster.data.unit.runtime_id) + 1) & 3)
-            << 10;
+            = ((map_unit_get_facing_quadrant(g_effect_secondary_current->caster.data.unit.map_unit_id) + 1) & 3) << 10;
         anchor_angle.vz = 0;
         anchor_angle.vx = 0;
         RotMatrix(&anchor_angle, &anchor_matrix);
@@ -1087,7 +1085,7 @@ s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motio
         copyVector(&vector, &spread);
         RotTrans(&vector, &spread, &direction.pad);
     }
-    scale = effect_s16_largest_magnitude_select(spread.vx, spread.vy, spread.vz);
+    scale = effect_s16_select_largest_magnitude(spread.vx, spread.vy, spread.vz);
     setVector(&vector, rand(), rand(), rand());
     RotMatrix(&vector, &rotation);
     SetRotMatrix(&rotation);
@@ -1107,14 +1105,14 @@ s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motio
     case EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED:
     case EFFECT_EMITTER_VELOCITY_TOWARD_TARGET:
     case EFFECT_EMITTER_VELOCITY_CASTER_FACING:
-        setVector(&vector, angle.vx + random_s32_get(half_spread.vx, -half_spread.vx),
-            angle.vy + random_s32_get(half_spread.vy, -half_spread.vy),
-            angle.vz + random_s32_get(half_spread.vz, -half_spread.vz));
+        setVector(&vector, angle.vx + get_random_s32(half_spread.vx, -half_spread.vx),
+            angle.vy + get_random_s32(half_spread.vy, -half_spread.vy),
+            angle.vz + get_random_s32(half_spread.vz, -half_spread.vz));
         RotMatrix(&vector, &rotation);
         SetRotMatrix(&rotation);
         vector.vz = 0;
         vector.vx = 0;
-        vector.vy = random_s32_get(speed_min, speed_max);
+        vector.vy = get_random_s32(speed_min, speed_max);
         RotTrans(&vector, &direction, &direction.pad);
         if (oriented) {
             copyVector(&vector, &direction);
@@ -1128,7 +1126,7 @@ s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motio
     case EFFECT_EMITTER_VELOCITY_INWARD:
         setVector(&direction, position.vx - (motion->position.x >> 12), position.vy - (motion->position.y >> 12),
             position.vz - (motion->position.z >> 12));
-        speed = random_s32_get(speed_min, speed_max);
+        speed = get_random_s32(speed_min, speed_max);
         if (direction.vx != 0 || direction.vy != 0 || direction.vz != 0) {
             VectorNormal(&direction, &direction);
             motion->velocity.x = (speed * direction.vx) >> 9;
@@ -1144,8 +1142,8 @@ s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motio
     motion->acceleration.x = motion->acceleration.y = motion->acceleration.z = motion->acceleration_step.x
         = motion->acceleration_step.y = motion->acceleration_step.z = 0;
     motion->inertia = ONE;
-    motion->weight = random_s32_get(values->weight.min, values->weight.max);
-    return random_s32_get(values->lifetime_min, values->lifetime_max);
+    motion->weight = get_random_s32(values->weight.min, values->weight.max);
+    return get_random_s32(values->lifetime_min, values->lifetime_max);
 }
 
 /* Calls the empty system_report_stub with (1, 0x50). No code calls it. */
@@ -1154,7 +1152,7 @@ void effect_report_0x50(void) {
 }
 
 /* Return a signed 16-bit value in the half-open interval between two bounds. */
-static s16 random_s16_get(s16 minimum, s16 maximum) {
+static s16 get_random_s16(s16 minimum, s16 maximum) {
     s16 result;
 
     if (minimum == maximum) {
@@ -1171,7 +1169,7 @@ static s16 random_s16_get(s16 minimum, s16 maximum) {
 /* Return the original component with the largest signed-16 magnitude.
  *
  * Strict comparisons make earlier arguments win ties. */
-s16 effect_s16_largest_magnitude_select(s16 first, s16 second, s16 third) {
+s16 effect_s16_select_largest_magnitude(s16 first, s16 second, s16 third) {
     s16 first_magnitude = first < 0 ? -first : first;
     s16 second_magnitude = second < 0 ? -second : second;
     s16 third_magnitude = third < 0 ? -third : third;
@@ -1197,7 +1195,7 @@ s16 effect_s16_largest_magnitude_select(s16 first, s16 second, s16 third) {
  * The strict comparison makes the first argument win ties. Negating -32768
  * wraps back to -32768 when stored as s16, matching the target's edge case.
  */
-s16 effect_s16_larger_magnitude_select(s16 first, s16 second) {
+s16 effect_s16_select_larger_magnitude(s16 first, s16 second) {
     s16 first_magnitude = first < 0 ? -first : first;
     s16 second_magnitude = second < 0 ? -second : second;
     s16 result;
@@ -1211,8 +1209,8 @@ s16 effect_s16_larger_magnitude_select(s16 first, s16 second) {
 }
 
 /* Cosine-eased interpolation from start to end at current/duration; the same
- * curve as effect_svector_cos_interpolate, on a single s32. */
-s32 effect_s32_cos_interpolate(s32 start, s32 end, s32 duration, s32 current) {
+ * curve as effect_svector_interpolate_cos, on a single s32. */
+s32 effect_s32_interpolate_cos(s32 start, s32 end, s32 duration, s32 current) {
     s32 difference = end - start;
     s32 scaled_difference = difference * (ONE - rcos((current << 11) / duration));
 
@@ -1220,70 +1218,70 @@ s32 effect_s32_cos_interpolate(s32 start, s32 end, s32 duration, s32 current) {
 }
 
 /* t ranges from 0 at from to 2 * ONE at to. */
-static void s16_interpolate(s16 from, s16 to, s32 t, s16* out) {
+static void interpolate_s16(s16 from, s16 to, s32 t, s16* out) {
     *out = from + (((to - from) * t) / (2 * ONE));
 }
 
-/* Interpolate each component with s16_interpolate: t runs from 0 at from to 2 * ONE
+/* Interpolate each component with interpolate_s16: t runs from 0 at from to 2 * ONE
  * at to. */
-static void svector_interpolate(const SVECTOR* from, const SVECTOR* to, s32 t, SVECTOR* out) {
-    s16_interpolate(from->vx, to->vx, t, &out->vx);
-    s16_interpolate(from->vy, to->vy, t, &out->vy);
-    s16_interpolate(from->vz, to->vz, t, &out->vz);
+static void interpolate_svector(const SVECTOR* from, const SVECTOR* to, s32 t, SVECTOR* out) {
+    interpolate_s16(from->vx, to->vx, t, &out->vx);
+    interpolate_s16(from->vy, to->vy, t, &out->vy);
+    interpolate_s16(from->vz, to->vz, t, &out->vz);
 }
 
 /* Eased interpolation of three 16-bit values: the factor follows half a cosine wave
  * over duration, so the value leaves from slowly, and arrives at to slowly when
  * current reaches duration. */
-void effect_svector_cos_interpolate(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out) {
-    svector_interpolate(from, to, ONE - rcos((current << 11) / duration), out);
+void effect_svector_interpolate_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out) {
+    interpolate_svector(from, to, ONE - rcos((current << 11) / duration), out);
 }
 
 /* Out-and-back interpolation of three 16-bit values: the factor follows a whole
  * cosine wave over duration, so the value reaches to at half the duration and is
  * back at from when current reaches duration. */
-void effect_svector_cos_out_back_interpolate(
+void effect_svector_interpolate_cos_out_back(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out) {
-    svector_interpolate(from, to, ONE - rcos((current * ONE) / duration), out);
+    interpolate_svector(from, to, ONE - rcos((current * ONE) / duration), out);
 }
 
-/* Linear counterpart of effect_svector_cos_interpolate: t = current/duration in q13. */
-void effect_svector_linear_interpolate(
+/* Linear counterpart of effect_svector_interpolate_cos: t = current/duration in q13. */
+void effect_svector_interpolate_linear(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out) {
-    svector_interpolate(from, to, (current << 13) / duration, out);
+    interpolate_svector(from, to, (current << 13) / duration, out);
 }
 
-/* The 32-bit counterpart of s16_interpolate: t runs from 0 at from to 2 * ONE at to. */
-static void component_q13_lerp(s32 from, s32 to, s32 t, s32* out) {
+/* The 32-bit counterpart of interpolate_s16: t runs from 0 at from to 2 * ONE at to. */
+static void lerp_component_q13(s32 from, s32 to, s32 t, s32* out) {
     *out = from + (to - from) * t / (2 * ONE);
 }
 
-/* Interpolate each VECTOR component with component_q13_lerp. */
-static void vector_q13_interpolate(const VECTOR* from, const VECTOR* to, s32 t, VECTOR* out) {
-    component_q13_lerp(from->vx, to->vx, t, &out->vx);
-    component_q13_lerp(from->vy, to->vy, t, &out->vy);
-    component_q13_lerp(from->vz, to->vz, t, &out->vz);
+/* Interpolate each VECTOR component with lerp_component_q13. */
+static void interpolate_vector_q13(const VECTOR* from, const VECTOR* to, s32 t, VECTOR* out) {
+    lerp_component_q13(from->vx, to->vx, t, &out->vx);
+    lerp_component_q13(from->vy, to->vy, t, &out->vy);
+    lerp_component_q13(from->vz, to->vz, t, &out->vz);
 }
 
 /* Eased interpolation of three 32-bit components: the factor follows half a cosine wave over
  * duration, so the value leaves from slowly, and arrives at to slowly when
  * current reaches duration. */
-void effect_vector_q13_cos_interpolate(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
-    vector_q13_interpolate(from, to, ONE - rcos((current << 11) / duration), out);
+void effect_vector_interpolate_cos_q13(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
+    interpolate_vector_q13(from, to, ONE - rcos((current << 11) / duration), out);
 }
 
 /* Out-and-back interpolation of three 32-bit components: the factor follows a whole cosine
  * wave over duration, so the value reaches to at half the duration and is back at
  * from when current reaches duration. */
-void effect_vector_q13_cos_out_back_interpolate(
+void effect_vector_interpolate_cos_out_back_q13(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
-    vector_q13_interpolate(from, to, ONE - rcos((current * ONE) / duration), out);
+    interpolate_vector_q13(from, to, ONE - rcos((current * ONE) / duration), out);
 }
 
-/* Linear counterpart of effect_vector_q13_cos_interpolate: t = current/duration in q13. */
-void effect_vector_q13_linear_interpolate(
+/* Linear counterpart of effect_vector_interpolate_cos_q13: t = current/duration in q13. */
+void effect_vector_interpolate_linear_q13(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
-    vector_q13_interpolate(from, to, (current << 13) / duration, out);
+    interpolate_vector_q13(from, to, (current << 13) / duration, out);
 }
 
 /* Linear interpolation with an eight-bit fractional factor (256 = 1.0).
@@ -1294,7 +1292,7 @@ s32 effect_lerp_q8(s32 start, s32 end, s32 factor) {
 
 /* Store and return the interpolation with an eight-bit fractional factor.
  * The arithmetic right shift rounds negative products down. */
-static s32 q8_lerp_store(s32 start, s32 end, s32 factor, s32* out) {
+static s32 store_q8_lerp(s32 start, s32 end, s32 factor, s32* out) {
     s32 result = ((end - start) * factor >> 8) + start;
 
     *out = result;
@@ -1303,48 +1301,48 @@ static s32 q8_lerp_store(s32 start, s32 end, s32 factor, s32* out) {
 
 /* Lerp the emitter's spawn position from its start to its end triple by an animation-curve factor
  * (256 = end) into out. */
-void effect_emitter_spawn_position_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
+void effect_emitter_interpolate_spawn_position(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
 
-    q8_lerp_store(entry->spawn.spawn_position_start.x, entry->spawn.spawn_position_end.x, factor, &out->vx);
-    q8_lerp_store(entry->spawn.spawn_position_start.y, entry->spawn.spawn_position_end.y, factor, &out->vy);
-    q8_lerp_store(entry->spawn.spawn_position_start.z, entry->spawn.spawn_position_end.z, factor, &out->vz);
+    store_q8_lerp(entry->spawn.spawn_position_start.x, entry->spawn.spawn_position_end.x, factor, &out->vx);
+    store_q8_lerp(entry->spawn.spawn_position_start.y, entry->spawn.spawn_position_end.y, factor, &out->vy);
+    store_q8_lerp(entry->spawn.spawn_position_start.z, entry->spawn.spawn_position_end.z, factor, &out->vz);
 }
 
 /* Lerp the emitter's spawn spread (the random offset range around the spawn position) from its
  * start to its end triple by an animation-curve factor (256 = end) into out. */
-void effect_emitter_spawn_spread_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
+void effect_emitter_interpolate_spawn_spread(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
 
-    q8_lerp_store(entry->spawn.spawn_spread_start.x, entry->spawn.spawn_spread_end.x, factor, &out->vx);
-    q8_lerp_store(entry->spawn.spawn_spread_start.y, entry->spawn.spawn_spread_end.y, factor, &out->vy);
-    q8_lerp_store(entry->spawn.spawn_spread_start.z, entry->spawn.spawn_spread_end.z, factor, &out->vz);
+    store_q8_lerp(entry->spawn.spawn_spread_start.x, entry->spawn.spawn_spread_end.x, factor, &out->vx);
+    store_q8_lerp(entry->spawn.spawn_spread_start.y, entry->spawn.spawn_spread_end.y, factor, &out->vy);
+    store_q8_lerp(entry->spawn.spawn_spread_start.z, entry->spawn.spawn_spread_end.z, factor, &out->vz);
 }
 
 /* Lerp the emitter's velocity base angles from their start to their end triple by an animation-
  * curve factor (256 = end) into out. */
-void effect_emitter_velocity_angles_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
+void effect_emitter_interpolate_velocity_angles(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
 
-    q8_lerp_store(entry->spawn.velocity_base_angle_start.x, entry->spawn.velocity_base_angle_end.x, factor, &out->vx);
-    q8_lerp_store(entry->spawn.velocity_base_angle_start.y, entry->spawn.velocity_base_angle_end.y, factor, &out->vy);
-    q8_lerp_store(entry->spawn.velocity_base_angle_start.z, entry->spawn.velocity_base_angle_end.z, factor, &out->vz);
+    store_q8_lerp(entry->spawn.velocity_base_angle_start.x, entry->spawn.velocity_base_angle_end.x, factor, &out->vx);
+    store_q8_lerp(entry->spawn.velocity_base_angle_start.y, entry->spawn.velocity_base_angle_end.y, factor, &out->vy);
+    store_q8_lerp(entry->spawn.velocity_base_angle_start.z, entry->spawn.velocity_base_angle_end.z, factor, &out->vz);
 }
 
 /* Lerp the emitter's velocity direction spread (the random cone around the base angles) from its
  * start to its end triple by an animation-curve factor (256 = end) into out. */
-void effect_emitter_velocity_spread_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
+void effect_emitter_interpolate_velocity_spread(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
 
-    q8_lerp_store(entry->spawn.velocity_spread_start.x, entry->spawn.velocity_spread_end.x, factor, &out->vx);
-    q8_lerp_store(entry->spawn.velocity_spread_start.y, entry->spawn.velocity_spread_end.y, factor, &out->vy);
-    q8_lerp_store(entry->spawn.velocity_spread_start.z, entry->spawn.velocity_spread_end.z, factor, &out->vz);
+    store_q8_lerp(entry->spawn.velocity_spread_start.x, entry->spawn.velocity_spread_end.x, factor, &out->vx);
+    store_q8_lerp(entry->spawn.velocity_spread_start.y, entry->spawn.velocity_spread_end.y, factor, &out->vy);
+    store_q8_lerp(entry->spawn.velocity_spread_start.z, entry->spawn.velocity_spread_end.z, factor, &out->vz);
 }
 
 /* Random integer between the two arguments, given in either order: at least the
  * smaller and less than the larger. Equal arguments return that value without
  * drawing a random number. */
-static s32 random_s32_get(s32 value_a, s32 value_b) {
+static s32 get_random_s32(s32 value_a, s32 value_b) {
     s32 remainder;
     s32 random_value;
     s32 result;
@@ -1369,7 +1367,7 @@ void effect_noop_3(void) {
 }
 
 /* Select the single object's relative sections and rewind its primitive stream. */
-s32 effect_model_sections_init(const psyq_tmd_header_t* resource, s32 unused_1) {
+s32 effect_model_init_sections(const psyq_tmd_header_t* resource, s32 unused_1) {
     s_model_object = resource->objects;
     /* TMD offsets are byte counts from the object table; word indexing keeps signed rounding. */
     s_model_vertices = (const SVECTOR*)&((const u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
@@ -1386,7 +1384,7 @@ s32 effect_model_sections_init(const psyq_tmd_header_t* resource, s32 unused_1) 
  *
  * The 0x35/0x37 stream uses variable-length commands, so its index is a 32-bit-element
  * offset rather than a psyq_tmd_packet_t array index. */
-void effect_model_command_decode(effect_decoded_model_command_t* out) {
+void effect_model_decode_command(effect_decoded_model_command_t* out) {
     const psyq_tmd_packet_t* command;
     s32 index;
     effect_decoded_model_command_t* dst = out;
@@ -1448,69 +1446,65 @@ void effect_model_command_decode(effect_decoded_model_command_t* out) {
  * onto it (y grows downward). A tile target uses the tile center
  * (x * 28 + 14, y * 28 + 14) and takes its height from the tile record,
  * adding the depth when add_depth is set. */
-void effect_target_world_coords_resolve(
+void effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, const effect_context_t* coord_data, SVECTOR* out) {
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
 
     if (target_index == EFFECT_TARGET_INDEX_CASTER) {
         if (coord_data->targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            *out = *unit_runtime_world_coords_get(coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+            *out = *map_unit_get_world_coords(coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id);
             if (add_depth != 0) {
                 s32 height;
-                tile = battle_map_runtime_unit_tile_get(coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
-                height = -((tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP);
+                tile = map_unit_get_tile(coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id);
+                height = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
                 if (height < out->vy) {
                     out->vy = height;
                 }
             }
         } else {
-            tile = battle_map_tile_get_pointer(coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx,
+            tile = map_get_tile(coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx,
                 coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vz,
                 coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vy);
-            out->vx = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx * BATTLE_MAP_TILE_SIZE
-                + (BATTLE_MAP_TILE_SIZE / 2);
-            out->vz = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vz * BATTLE_MAP_TILE_SIZE
-                + (BATTLE_MAP_TILE_SIZE / 2);
+            out->vx = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            out->vz = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             if (add_depth != 0) {
-                out->vy = -((tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP);
+                out->vy = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
             } else {
-                out->vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
+                out->vy = -(tile->height * MAP_HEIGHT_STEP);
             }
         }
     } else {
         if (coord_data->targets[target_index].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            *out = *unit_runtime_world_coords_get(coord_data->targets[target_index].data.unit.runtime_id);
+            *out = *map_unit_get_world_coords(coord_data->targets[target_index].data.unit.map_unit_id);
             if (add_depth != 0) {
                 s32 height;
-                tile = battle_map_runtime_unit_tile_get(coord_data->targets[target_index].data.unit.runtime_id);
-                height = -((tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP);
+                tile = map_unit_get_tile(coord_data->targets[target_index].data.unit.map_unit_id);
+                height = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
                 if (height < out->vy) {
                     out->vy = height;
                 }
             }
         } else {
-            tile = battle_map_tile_get_pointer(coord_data->targets[target_index].data.tile.vx,
+            tile = map_get_tile(coord_data->targets[target_index].data.tile.vx,
                 coord_data->targets[target_index].data.tile.vz, coord_data->targets[target_index].data.tile.vy);
-            out->vx
-                = coord_data->targets[target_index].data.tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-            out->vz
-                = coord_data->targets[target_index].data.tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+            out->vx = coord_data->targets[target_index].data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            out->vz = coord_data->targets[target_index].data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             if (add_depth != 0) {
-                out->vy = -((tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP);
+                out->vy = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
             } else {
-                out->vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
+                out->vy = -(tile->height * MAP_HEIGHT_STEP);
             }
         }
     }
 }
 
-/* Meant to resolve a battle id's world coordinates, but it passes the unit's
- * runtime id where effect_target_world_coords_resolve expects an index
+/* Meant to resolve a battle unit id's world coordinates, but it passes the unit's
+ * map unit id where effect_resolve_target_world_coords expects an index
  * into the effect's target list. Nothing in the game calls it. */
-void effect_unit_world_coords_get(
-    s32 adjust_for_tile_height, u32 battle_id, const effect_context_t* effect_coordinates, SVECTOR* destination) {
-    effect_target_world_coords_resolve(
-        adjust_for_tile_height, unit_battle_runtime_id_get(battle_id), effect_coordinates, destination);
+void effect_get_unit_world_coords(
+    s32 adjust_for_tile_height, u32 battle_unit_id, const effect_context_t* effect_coordinates, SVECTOR* destination) {
+    effect_resolve_target_world_coords(
+        adjust_for_tile_height, map_unit_get_id_by_battle_unit_id(battle_unit_id), effect_coordinates, destination);
 }
 
 /* Widen a packed 16-bit x, y, z triple (as the effect timeline stores them) into a
@@ -1565,7 +1559,7 @@ void effect_vector_add_svectors(const SVECTOR* first, const SVECTOR* second, SVE
 }
 
 /* out = first + second, widening the SVECTOR's components. */
-static void mixed_vector_add(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
+static void add_mixed_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
@@ -1576,13 +1570,13 @@ static void mixed_vector_add(const SVECTOR* first, const VECTOR* second, VECTOR*
 void effect_vector_add_random_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
     u16 range = ranges->vx;
 
-    destination->vx = source->vx + random_s16_get(-range, range);
+    destination->vx = source->vx + get_random_s16(-range, range);
 
     range = ranges->vy;
-    destination->vy = source->vy + random_s16_get(-range, range);
+    destination->vy = source->vy + get_random_s16(-range, range);
 
     range = ranges->vz;
-    destination->vz = source->vz + random_s16_get(-range, range);
+    destination->vz = source->vz + get_random_s16(-range, range);
 }
 
 /* As effect_vector_add_random_offsets, then convert each result to 20.12 fixed point. */
@@ -1590,13 +1584,13 @@ void effect_vector_add_random_offsets_and_store_q12(const VECTOR* source, const 
     u16 range;
 
     range = ranges->vx;
-    destination->vx = (source->vx + random_s16_get(-range, range)) * ONE;
+    destination->vx = (source->vx + get_random_s16(-range, range)) * ONE;
 
     range = ranges->vy;
-    destination->vy = (source->vy + random_s16_get(-range, range)) * ONE;
+    destination->vy = (source->vy + get_random_s16(-range, range)) * ONE;
 
     range = ranges->vz;
-    destination->vz = (source->vz + random_s16_get(-range, range)) * ONE;
+    destination->vz = (source->vz + get_random_s16(-range, range)) * ONE;
 }
 
 /* Add delta into value and store the sum in 20.12 fixed point in out. */
@@ -1613,13 +1607,13 @@ void effect_vector_add_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR*
 void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination) {
     u16 range = ranges->vx;
 
-    destination->vx = source->vx + random_s16_get(-range, range);
+    destination->vx = source->vx + get_random_s16(-range, range);
 
     range = ranges->vy;
-    destination->vy = source->vy + random_s16_get(-range, range);
+    destination->vy = source->vy + get_random_s16(-range, range);
 
     range = ranges->vz;
-    destination->vz = source->vz + random_s16_get(-range, range);
+    destination->vz = source->vz + get_random_s16(-range, range);
 }
 
 enum { CAMERA_ROTATION_Q12_MASK = 0x0FFF };
@@ -1687,42 +1681,42 @@ void effect_vector_add_to_svector_rot_y_90(const VECTOR* left, const VECTOR* rig
 
 /* Set the gravity vector that every motion step adds to a particle's velocity, scaled by the
  * particle's weight. The effect script loads it from the particle-system header. */
-void effect_gravity_set(const vec3s32_t* src) {
+void effect_set_gravity(const vec3s32_t* src) {
     g_effect_gravity = *src;
 }
 
 /* Set the damping term of particle motion: each step keeps (inertia - threshold) / inertia of a
  * particle's velocity. */
-void effect_inertia_threshold_set(s32 threshold) {
+void effect_set_inertia_threshold(s32 threshold) {
     g_effect_inertia_threshold = threshold;
 }
 
-/* Save the gravity for effect_gravity_restore: secondary-effect handlers set their own
+/* Save the gravity for effect_restore_gravity: secondary-effect handlers set their own
  * gravity around their slot updates. */
-void effect_gravity_save(void) {
+void effect_save_gravity(void) {
     g_effect_saved_gravity = g_effect_gravity;
 }
 
-/* Restore the gravity kept by effect_gravity_save. */
-void effect_gravity_restore(void) {
+/* Restore the gravity kept by effect_save_gravity. */
+void effect_restore_gravity(void) {
     g_effect_gravity = g_effect_saved_gravity;
 }
 
-/* Save the damping term for effect_inertia_threshold_restore; secondary-effect handlers set
+/* Save the damping term for effect_restore_inertia_threshold; secondary-effect handlers set
  * their own around their slot updates. */
-void effect_inertia_threshold_save(void) {
+void effect_save_inertia_threshold(void) {
     g_effect_saved_inertia_threshold = g_effect_inertia_threshold;
 }
 
-/* Restore the damping term kept by effect_inertia_threshold_save. */
-void effect_inertia_threshold_restore(void) {
+/* Restore the damping term kept by effect_save_inertia_threshold. */
+void effect_restore_inertia_threshold(void) {
     g_effect_inertia_threshold = g_effect_saved_inertia_threshold;
 }
 
 /* Advance an effect slot's motion state by one frame: move by the velocity,
  * then damp the velocity by the inertia threshold, add the acceleration and
  * the weighted gravity, and step the acceleration. */
-static void slot_motion_step(effect_motion_t* motion) {
+static void step_slot_motion(effect_motion_t* motion) {
     s32 unused[4]; /* The target reserves an unused 16-byte frame. */
 
     motion->position.x += motion->velocity.x;
@@ -1821,7 +1815,7 @@ void effect_particle_integrate_motion(effect_work_record_t* list) {
  * the free-list head.  The GetClut result is computed and discarded in the
  * target.
  */
-static void sprite_free_list_init(void) {
+static void init_sprite_free_list(void) {
     s32 i;
 
     GetClut(0, 0x1f0);
@@ -1846,8 +1840,8 @@ static void sprite_free_list_init(void) {
  *
  * The free list is not tested for exhaustion: with none free the sentinel node 0
  * would be handed out. There are as many nodes as work records, and
- * particle_record_alloc is the only caller. */
-static effect_list_node_t* sprite_state_alloc(s16 kind) {
+ * alloc_particle_record is the only caller. */
+static effect_list_node_t* alloc_sprite_state(s16 kind) {
     u16* free_head = &g_effect_free_list_node_head;
     u16* list_head = &g_effect_active_list_node_head;
     u16 index = *free_head;
@@ -1859,7 +1853,7 @@ static effect_list_node_t* sprite_state_alloc(s16 kind) {
     node->next = *list_head;
     node->prev = 0;
     *list_head = index;
-    node->sprite_block = sprite_block_alloc(1);
+    node->sprite_block = alloc_sprite_block(1);
     node->screen_rotation_angle = 0;
     node->frame_timer = 0;
     node->sequence_data = 0;
@@ -1872,13 +1866,13 @@ static effect_list_node_t* sprite_state_alloc(s16 kind) {
     return node;
 }
 
-/* Release a sprite work record's list node, the reverse of sprite_state_alloc:
+/* Release a sprite work record's list node, the reverse of alloc_sprite_state:
  * free its sprite block, unlink it from the active list and push it on the free list. */
-static void sprite_state_free(effect_list_node_t* node) {
+static void free_sprite_state(effect_list_node_t* node) {
     u16* free_head;
 
     if (node->sprite_block != 0) {
-        sprite_block_free(node->sprite_block);
+        free_sprite_block(node->sprite_block);
         node->sprite_block = 0;
     }
     if (node->prev != 0) {
@@ -1896,7 +1890,7 @@ static void sprite_state_free(effect_list_node_t* node) {
 /* Point a sprite animation node at parameter set animation_index and restart
  * it: clear the sequence position and hold time, store frame_group doubled and
  * set kind bit 0 to mark the frame dirty. */
-static void sprite_sequence_init(effect_list_node_t* state, s32 frame_group, s16 animation_index) {
+static void init_sprite_sequence(effect_list_node_t* state, s32 frame_group, s16 animation_index) {
     u8* sequences = g_effect_animation_sequences;
     u8* entry;
     s16 offset;
@@ -1921,7 +1915,7 @@ static void sprite_sequence_init(effect_list_node_t* state, s32 frame_group, s16
  * 0x83 adds a signed 8-bit x/y delta. kind bit 0 marks the frame dirty; bits
  * 1-2 select camera projection or a screen-space position, with or without
  * the camera zoom. The oversized frame is reproduced with unused locals. */
-static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 green, s32 blue) {
+static void draw_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue) {
     effect_list_node_t* node;
     SVECTOR input;
     SVECTOR unused_20;
@@ -1986,8 +1980,8 @@ static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 gree
             + g_effect_frame_data);
         count = frame->count;
         if (block->header.sprite_count != count) {
-            sprite_block_free(block);
-            block = sprite_block_alloc(count);
+            free_sprite_block(block);
+            block = alloc_sprite_block(count);
             node->sprite_block = block;
         }
         for (i = 0; i < count; i++) {
@@ -2036,7 +2030,7 @@ static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 gree
         }
         position.vx = output.vx;
         position.vy = output.vy;
-        sprite_block_submit(
+        submit_sprite_block(
             node->sprite_block, &position, node->screen_rotation_angle, &g_camera_zoom, g_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_SCREEN_OFFSET:
@@ -2049,7 +2043,7 @@ static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 gree
         if (depth > EFFECT_SPRITE_OT_DEPTH_MAX) {
             depth = EFFECT_SPRITE_OT_DEPTH_MAX;
         }
-        sprite_block_submit(
+        submit_sprite_block(
             node->sprite_block, &position, node->screen_rotation_angle, &g_camera_zoom, g_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_WORLD_UNSCALED:
@@ -2083,7 +2077,7 @@ static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 gree
         }
         position.vx = output.vx;
         position.vy = output.vy;
-        sprite_block_submit(node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
+        submit_sprite_block(node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_SCREEN:
         position.vx = node->x + node->sprite_offset_x;
@@ -2095,7 +2089,7 @@ static void particle_sprite_draw(effect_list_node_t* particle, s32 red, s32 gree
         if (depth > EFFECT_SPRITE_OT_DEPTH_MAX) {
             depth = EFFECT_SPRITE_OT_DEPTH_MAX;
         }
-        sprite_block_submit(node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
+        submit_sprite_block(node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
         break;
     }
 }
@@ -2119,7 +2113,7 @@ s32 effect_slot_update(s32 id) {
     s32 wrapped;
     s32 result;
 
-    slot_motion_step(&slot->motion);
+    step_slot_motion(&slot->motion);
     wrapped = 0;
     if (--slot->hold <= 0) {
         slot->frame = slot->script->step[slot->step_index].frame;
@@ -2130,7 +2124,7 @@ s32 effect_slot_update(s32 id) {
             slot->step_index = 0;
         }
     }
-    billboard_sprite_draw(slot);
+    draw_billboard_sprite(slot);
     result = 1;
     if (slot->life < 0) {
         result = wrapped == 0;
@@ -2141,17 +2135,17 @@ s32 effect_slot_update(s32 id) {
 }
 
 /* Initialize fresh render, script, work-record and sprite-node pools at setup/restart. */
-void effect_subsystems_reset(void) {
-    render_state_init();
-    effect_script_instances_init();
-    particle_chain_init();
-    sprite_free_list_init();
+void effect_reset_subsystems(void) {
+    init_render_state();
+    effect_script_init_instances();
+    init_particle_chain();
+    init_sprite_free_list();
 }
 
 /* Seed the effect camera's current, target, start and saved values from the battle camera: its
  * rotation wrapped to one turn, its position in whole units (real coordinates >> 12) and its zoom. */
-void effect_camera_tracks_seed(void) {
-    SVECTOR* rotation = camera_rotation_get();
+void effect_camera_seed_tracks(void) {
+    SVECTOR* rotation = camera_get_rotation();
     VECTOR* coords;
 
     g_effect_camera_rotation_saved.vx = g_effect_camera_rotation_start.vx = g_effect_camera_rotation_target.vx
@@ -2160,7 +2154,7 @@ void effect_camera_tracks_seed(void) {
         = g_effect_camera_rotation_current.vy = rotation->vy & 0xfff;
     g_effect_camera_rotation_saved.vz = g_effect_camera_rotation_start.vz = g_effect_camera_rotation_target.vz
         = g_effect_camera_rotation_current.vz = rotation->vz & 0xfff;
-    coords = camera_real_coords_get();
+    coords = camera_get_real_coords();
     g_effect_camera_position_saved.vx = g_effect_camera_position_start.vx = g_effect_camera_position_target.vx
         = g_effect_camera_position_current.vx = coords->vx >> 12;
     g_effect_camera_position_saved.vy = g_effect_camera_position_start.vy = g_effect_camera_position_target.vy
@@ -2168,7 +2162,7 @@ void effect_camera_tracks_seed(void) {
     g_effect_camera_position_saved.vz = g_effect_camera_position_start.vz = g_effect_camera_position_target.vz
         = g_effect_camera_position_current.vz = coords->vz >> 12;
     g_effect_camera_zoom_saved = g_effect_camera_zoom_start = g_effect_camera_zoom_target = g_effect_camera_zoom_current
-        = *camera_zoom_get();
+        = *camera_get_zoom();
 }
 
 /* Set the effect camera's rotation, position and zoom tracks idle, clear two unknown globals and
@@ -2180,6 +2174,6 @@ void effect_camera_init(void) {
     g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
     g_effect_camera_unread_2 = 0;
     g_effect_camera_unread_1 = 0;
-    effect_camera_tracks_seed();
+    effect_camera_seed_tracks();
     (void)pad;
 }

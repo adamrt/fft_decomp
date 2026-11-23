@@ -6,11 +6,11 @@
 #include "fft/ai_decision.h"
 #include "fft/at_list.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/turn.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -21,17 +21,17 @@ typedef enum upkeep_result {
     STATUS_UPKEEP_DEATH_SENTENCE = 3
 } upkeep_result_e;
 
-static u8 s_turn_pending_flags[UNIT_SLOT_COUNT] = { 0 };
+static u8 s_turn_pending_flags[BATTLE_UNIT_SLOT_COUNT] = { 0 };
 
-static s32 turn_move_act_taken_set(s32 unit_id, s32 move_flag, s32 act_flag);
+static s32 set_move_act_taken(s32 unit_id, s32 move_flag, s32 act_flag);
 
-static s32 turn_should_end(const unit_stats_t* unit);
+static s32 should_end(const battle_unit_t* unit);
 
-static s32 at_list_entry_insert(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list);
+static s32 insert_entry(s32 battle_unit_id, s32 mode, s32 sort_key, at_entry_t* list);
 
-static upkeep_result_e upkeep_action_build(s32 unit_id, unit_stats_t* unit);
+static upkeep_result_e build_upkeep_action(s32 unit_id, battle_unit_t* unit);
 
-static s32 unit_is_excluded_from_at_list(const unit_stats_t* unit);
+static s32 is_excluded_from_at_list(const battle_unit_t* unit);
 
 /* The clocktick loop between turns. RESET clears every unit's CT and turn state; FIND_ACTIVE_UNIT
  * returns 0xd000 | the first unit not Dead, Crystal, Jumping, Petrified or Treasure (0xdf00 if
@@ -40,8 +40,8 @@ static s32 unit_is_excluded_from_at_list(const unit_stats_t* unit);
  * with TURN_EVENT_NONE after 1201 steps.
  * Keep the four phase stores on their loop-closing lines: splitting those lines
  * changes GCC 2.6.3's loop-exit code. */
-s32 turn_clock_run(turn_clock_mode_e mode) {
-    unit_stats_t* unit;
+s32 turn_run_clock(turn_clock_mode_e mode) {
+    battle_unit_t* unit;
     s32 result = 0;
     s32 count = 0;
     s32 i;
@@ -61,8 +61,8 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         }
         g_action_mimic_attacker.mimic_pending = 0;
 
-        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-            unit = &g_unit_stats[i];
+        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+            unit = &g_battle_units[i];
             unit->ct = 0;
             unit->has_turn = 0;
             unit->ability_outcome = 0;
@@ -74,9 +74,9 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
     }
 
     if (mode == TURN_CLOCK_MODE_FIND_ACTIVE_UNIT) {
-        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-            unit = &g_unit_stats[i];
-            if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
+        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+            unit = &g_battle_units[i];
+            if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
                 if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                         & (STATUS_BYTE_MASK(STATUS_ID_CRYSTAL) | STATUS_BYTE_MASK(STATUS_ID_DEAD)
                             | STATUS_BYTE_MASK(STATUS_ID_JUMP)))) {
@@ -93,9 +93,9 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
     while (result == 0) {
         switch (g_turn_clock_state) {
         case TURN_CLOCK_STATE_ADD_CT:
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                unit = &g_unit_stats[i];
-                flags = turn_status_flags_calculate(unit);
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                unit = &g_battle_units[i];
+                flags = turn_calculate_status_flags(unit);
                 if (!(flags & TURN_STATUS_CT_FROZEN)) {
                     speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
                     if (flags & TURN_STATUS_SLOW) {
@@ -117,9 +117,9 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         case TURN_CLOCK_STATE_PICK_UNIT:
             max_ct = UNIT_TURN_CT_THRESHOLD - 1;
             best = 0xff;
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                unit = &g_unit_stats[i];
-                flags = turn_status_flags_calculate(unit);
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                unit = &g_battle_units[i];
+                flags = turn_calculate_status_flags(unit);
                 if (!(flags & TURN_STATUS_CT_FROZEN)) {
                     if (max_ct < unit->ct) {
                         best = i;
@@ -129,7 +129,7 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             }
 
             if (best != 0xff) {
-                unit = &g_unit_stats[best];
+                unit = &g_battle_units[best];
                 /* A jumping unit waits at 99 CT, ready to act once it lands; pick again. */
                 if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP)) {
                     unit->ct = UNIT_TURN_CT_THRESHOLD - 1;
@@ -143,21 +143,21 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
                     unit->ct = max_ct % UNIT_TURN_CT_THRESHOLD;
                 }
 
-                ret = upkeep_action_build(best, unit);
+                ret = build_upkeep_action(best, unit);
                 if (ret != STATUS_UPKEEP_NONE) {
                     result = best | TURN_EVENT_ACTION_RESULT;
                     /* A crystal or treasure (1) or an expired Death Sentence (3) ends here without
                      * a turn; only the first counts as a casualty. */
                     if (ret & 1) {
                         if (ret == STATUS_UPKEEP_CRYSTAL_OR_TREASURE) {
-                            unit_casualties_count(unit);
+                            battle_unit_count_casualties(unit);
                         }
                         return result;
                     }
                 }
 
                 /* A staged revival or other change (2) gets its turn even when the unit can't act. */
-                flags = turn_status_flags_calculate(unit);
+                flags = turn_calculate_status_flags(unit);
                 if (!(flags & (TURN_STATUS_CT_FROZEN | TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD))
                     || ret == STATUS_UPKEEP_CHANGE) {
                     unit->has_turn = 1;
@@ -180,8 +180,8 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         case TURN_CLOCK_STATE_TICK_CHARGES:
             i = 0;
             do {
-                unit = &g_unit_stats[i];
-                flags = turn_status_flags_calculate(unit);
+                unit = &g_battle_units[i];
+                flags = turn_calculate_status_flags(unit);
                 if (!(flags & TURN_STATUS_BLOCKS_WAIT_MENU_MASK)) {
                     charge_ct = unit->charged_ability_ct;
                     if (charge_ct != 0xff && charge_ct != 0) {
@@ -190,18 +190,18 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
                     }
                 }
                 /* clang-format off */
-            } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RESOLVE_CHARGE;
+            } while (++i < BATTLE_UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RESOLVE_CHARGE;
             /* clang-format on */
             break;
         case TURN_CLOCK_STATE_RESOLVE_CHARGE:
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                unit = &g_unit_stats[i];
-                flags = turn_status_flags_calculate(unit);
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                unit = &g_battle_units[i];
+                flags = turn_calculate_status_flags(unit);
                 if (!(flags & TURN_STATUS_BLOCKS_WAIT_MENU_MASK) && unit->charged_ability_ct == 0) {
                     /* A performer's song or dance starts charging again instead of ending. */
                     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                         & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
-                        unit_ability_ct_set(unit);
+                        battle_unit_set_ability_ct(unit);
                         unit->charged_ability_ct = unit->ability_ct;
                     } else {
                         unit->charged_ability_ct = 0xff;
@@ -217,14 +217,14 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         case TURN_CLOCK_STATE_EXPIRE_STATUSES:
             i = 0;
             do {
-                unit = &g_unit_stats[i];
-                if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
+                unit = &g_battle_units[i];
+                if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
                     status_update_expiring(i);
                 }
                 /* clang-format off */
-            } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_COLLECT_PENDING_ACTIONS;
+            } while (++i < BATTLE_UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_COLLECT_PENDING_ACTIONS;
             /* clang-format on */
             break;
         case TURN_CLOCK_STATE_COLLECT_PENDING_ACTIONS:
@@ -232,19 +232,19 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
              * action result to apply; MARK_MIMES reuses them for Mimes. */
             i = 0;
             do {
-                unit = &g_unit_stats[i];
+                unit = &g_battle_units[i];
                 s_turn_pending_flags[i] = 0;
-                if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
+                if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
                     s_turn_pending_flags[i] = unit->action.attack_type;
                 }
                 /* clang-format off */
-            } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_PENDING_ACTIONS;
+            } while (++i < BATTLE_UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_PENDING_ACTIONS;
             /* clang-format on */
             break;
         case TURN_CLOCK_STATE_RUN_PENDING_ACTIONS:
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 if (s_turn_pending_flags[i] != 0) {
                     s_turn_pending_flags[i] = 0;
                     result = i | TURN_EVENT_ACTION_RESULT;
@@ -258,18 +258,18 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             /* Only a Quick target (CT 0xFF, above the tick's 0xFE cap) takes its turn here. */
             max_ct = 0xfe;
             best = 0xff;
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                flags = turn_status_flags_calculate(&g_unit_stats[i]);
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                flags = turn_calculate_status_flags(&g_battle_units[i]);
                 if (!(flags & TURN_STATUS_CT_FROZEN)) {
-                    if (max_ct < g_unit_stats[i].ct) {
+                    if (max_ct < g_battle_units[i].ct) {
                         best = i;
-                        max_ct = g_unit_stats[i].ct;
+                        max_ct = g_battle_units[i].ct;
                     }
                 }
             }
 
             if (best != 0xff) {
-                unit = &g_unit_stats[best];
+                unit = &g_battle_units[best];
                 unit->has_turn = 1;
                 unit->transparent_removal_flag = 1;
                 unit->ct = 0;
@@ -286,14 +286,14 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             g_turn_clock_state = TURN_CLOCK_STATE_MARK_MIMES;
             break;
         case TURN_CLOCK_STATE_UNIT_TURN:
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                unit = &g_unit_stats[i];
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                unit = &g_battle_units[i];
                 if (unit->has_turn != 0) {
                     turn_status_flags_e unit_status;
                     s32 end_turn;
 
-                    unit_status = turn_status_flags_calculate(unit);
-                    end_turn = turn_should_end(unit);
+                    unit_status = turn_calculate_status_flags(unit);
+                    end_turn = should_end(unit);
                     if ((unit_status & TURN_STATUS_CT_FROZEN) || end_turn != 0) {
                         turn_end(i);
                         unit->has_turn = 0;
@@ -309,7 +309,7 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         case TURN_CLOCK_STATE_POISON_AND_REGEN:
             g_turn_clock_state = TURN_CLOCK_STATE_TERRAIN_POISON;
             if (g_turn_unit_id != -1) {
-                unit = &g_unit_stats[g_turn_unit_id];
+                unit = &g_battle_units[g_turn_unit_id];
                 if (status_prepare_poison_and_regen(unit)) {
                     result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
@@ -319,7 +319,7 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         case TURN_CLOCK_STATE_TERRAIN_POISON:
             g_turn_clock_state = TURN_CLOCK_STATE_REMOVE_TRANSPARENT;
             if (g_turn_unit_id != -1) {
-                unit = &g_unit_stats[g_turn_unit_id];
+                unit = &g_battle_units[g_turn_unit_id];
                 if (status_prepare_terrain_poison(unit)) {
                     result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
@@ -329,7 +329,7 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
         case TURN_CLOCK_STATE_REMOVE_TRANSPARENT:
             g_turn_clock_state = TURN_CLOCK_STATE_MARK_MIMES;
             if (g_turn_unit_id != -1) {
-                unit = &g_unit_stats[g_turn_unit_id];
+                unit = &g_battle_units[g_turn_unit_id];
                 if (status_prepare_transparent_removal(unit)) {
                     result = g_turn_unit_id | TURN_EVENT_ACTION_RESULT;
                     return result;
@@ -340,13 +340,13 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             if (g_action_mimic_attacker.mimic_pending != 0) {
                 i = 0;
                 do {
-                    unit = &g_unit_stats[i];
+                    unit = &g_battle_units[i];
                     s_turn_pending_flags[i] = 0;
-                    if (unit->job_id == JOB_ID_MIME && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
+                    if (unit->job_id == JOB_ID_MIME && unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
                         s_turn_pending_flags[i] = 1;
                     }
                     /* clang-format off */
-                } while (++i < UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_MIMES;
+                } while (++i < BATTLE_UNIT_SLOT_COUNT); g_turn_clock_state = TURN_CLOCK_STATE_RUN_MIMES;
                 /* clang-format on */
             } else {
                 g_turn_clock_state = g_turn_clock_resume_state;
@@ -354,9 +354,9 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
             break;
         case TURN_CLOCK_STATE_RUN_MIMES:
             g_action_mimic_attacker.mimic_pending = 0;
-            for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                unit = &g_unit_stats[i];
-                if (s_turn_pending_flags[i] != 0 && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
+            for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                unit = &g_battle_units[i];
+                if (s_turn_pending_flags[i] != 0 && unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
                     s_turn_pending_flags[i] = 0;
                     ret = action_mimic_set_ability(unit);
                     if (ret == 1) {
@@ -396,7 +396,7 @@ s32 turn_clock_run(turn_clock_mode_e mode) {
  * runs out revives on a coin flip with 1 to max HP. Outside the execute action
  * state (previews and AI simulations) a dead unit's counter does not move.
  */
-static upkeep_result_e upkeep_action_build(s32 unit_id, unit_stats_t* unit) {
+static upkeep_result_e build_upkeep_action(s32 unit_id, battle_unit_t* unit) {
     action_data_t* action = &unit->action;
     s32 roll;
     s32 mask;
@@ -487,16 +487,16 @@ static upkeep_result_e upkeep_action_build(s32 unit_id, unit_stats_t* unit) {
  * a ridden mount; INCAPACITATED | DEAD for a dead unit; otherwise INCAPACITATED |
  * SLEEP for Sleep plus the HASTE and SLOW bits. The retail status data puts Sleep
  * in the freeze-CT set, which leaves the SLEEP result unreachable. */
-turn_status_flags_e turn_status_flags_calculate(const unit_stats_t* unit) {
+turn_status_flags_e turn_calculate_status_flags(const battle_unit_t* unit) {
     s32 status1;
     s32 status4;
     s32 status5;
     turn_status_flags_e flags;
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return TURN_STATUS_CT_FROZEN;
     }
-    if (status_unit_set_test(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
+    if (status_has_any_in_check_set(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
         return TURN_STATUS_CT_FROZEN;
     }
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
@@ -528,19 +528,19 @@ turn_status_flags_e turn_status_flags_calculate(const unit_stats_t* unit) {
  * loss decides the battle) that is disabled or lost decides it at once:
  * defeat for a player-team unit, victory for any other. Otherwise the side
  * left with no unit free of the KO status set loses, the player side first. */
-s32 battle_outcome_check(void) {
+s32 battle_check_outcome(void) {
     s32 player_unit_count = 0;
     s32 enemy_unit_count = 0;
     s32 unit_index;
     s32 selected;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
 
-    for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
-        unit = &g_unit_stats[unit_index];
+    for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        unit = &g_battle_units[unit_index];
         if ((unit->initial_team_flags & UNIT_TEAM_IMPORTANCE_MASK) == UNIT_TEAM_IMPORTANCE_MASK) {
             if (unit->existence != UNIT_EXISTENCE_NONE) {
                 selected = unit->existence == UNIT_EXISTENCE_DISABLED;
-                selected += status_unit_set_test(unit, STATUS_CHECK_SET_UNIT_LOST);
+                selected += status_has_any_in_check_set(unit, STATUS_CHECK_SET_UNIT_LOST);
                 if (selected != 0) {
                     if (unit->initial_team_flags & UNIT_TEAM_MASK) {
                         enemy_unit_count++;
@@ -559,11 +559,11 @@ s32 battle_outcome_check(void) {
         return 0;
     }
 
-    for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
-        unit = &g_unit_stats[unit_index];
-        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
+    for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        unit = &g_battle_units[unit_index];
+        if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             selected = unit->initial_team_flags & UNIT_TEAM_MASK;
-            if (status_unit_set_test(unit, STATUS_CHECK_SET_KO) == 0) {
+            if (status_has_any_in_check_set(unit, STATUS_CHECK_SET_KO) == 0) {
                 if (selected != 0) {
                     enemy_unit_count++;
                 } else {
@@ -584,21 +584,21 @@ s32 battle_outcome_check(void) {
  * Returns -1 for an empty slot, -3 for a unit the AT list leaves out (Dead,
  * Crystal, Petrify, Treasure or a ridden mount) and -2 when the unit is not on
  * the list. */
-s32 at_list_find_unit(const unit_stats_t* unit) {
+s32 at_list_find_unit(const battle_unit_t* unit) {
     at_entry_t at_list[AT_LIST_CAPACITY];
     s32 i;
     at_entry_t* entry;
-    u8 battle_id;
+    u8 battle_unit_id;
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
         return -1;
-    if (unit_is_excluded_from_at_list(unit) != 0)
+    if (is_excluded_from_at_list(unit) != 0)
         return -3;
-    battle_id = unit->battle_id;
+    battle_unit_id = unit->battle_unit_id;
     at_list_build(at_list, AT_LIST_MODE_TURNS_ONLY);
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
         entry = &at_list[i];
-        if ((entry->unit_code & AT_UNIT_ID_MASK) == battle_id) {
+        if ((entry->unit_code & AT_UNIT_ID_MASK) == battle_unit_id) {
             return i;
         }
     }
@@ -628,8 +628,8 @@ s32 at_list_get_entry_unit_id(s32 at_index) {
 }
 
 /* Return 1 when the unit cannot participate in the AT list. */
-static s32 unit_is_excluded_from_at_list(const unit_stats_t* unit) {
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+static s32 is_excluded_from_at_list(const battle_unit_t* unit) {
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return 1;
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -651,7 +651,7 @@ static s32 unit_is_excluded_from_at_list(const unit_stats_t* unit) {
  * Runs the attack preparation for action in the preview state, rebuilds
  * at_list and counts the turns until the action resolves, then restores the
  * unit's action data, CT, move/act flags and statuses. */
-s32 at_list_preview(unit_stats_t* unit, action_command_t* action, at_entry_t* at_list) {
+s32 at_list_preview(battle_unit_t* unit, action_command_t* action, at_entry_t* at_list) {
     action_command_t saved_action;
     action_command_t* action_data = &unit->action_command;
     s32 old_state;
@@ -673,13 +673,13 @@ s32 at_list_preview(unit_stats_t* unit, action_command_t* action, at_entry_t* at
     }
     turns = at_list_build(at_list, AT_LIST_MODE_PREVIEW);
     if (turns != -1) {
-        turns = at_list_count_turns_to_resolve(unit->battle_id, unit->charged_ability_ct, at_list);
+        turns = at_list_count_turns_to_resolve(unit->battle_unit_id, unit->charged_ability_ct, at_list);
     }
     g_action_state = old_state;
     unit->movement_taken = old_movement_taken;
     unit->action_taken = old_action_taken;
     unit->inflicted_status[0] = old_inflicted_status;
-    status_current_update(unit);
+    status_refresh_current(unit);
     unit->charged_ability_ct = old_charged_ability_ct;
     action_command_copy(&saved_action, action_data);
     return turns;
@@ -699,7 +699,7 @@ s32 at_list_preview(unit_stats_t* unit, action_command_t* action, at_entry_t* at
  * and lands after the a1 load. The 0x50-byte array is the unreferenced frame
  * area the target reserves. */
 s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     u8 unused[0x50];
     s32 placed;
     s32 slot;
@@ -728,15 +728,15 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
 
     if (mode != AT_LIST_MODE_ACTIONS_ONLY) {
         /* The unit taking its turn heads the list with key 0. */
-        unit = unit_find_with_turn();
+        unit = battle_unit_find_with_turn();
         if (unit != 0) {
-            at_list_entry_insert(unit->battle_id, 0, 0, list);
+            insert_entry(unit->battle_unit_id, 0, 0, list);
         }
     }
 
-    for (slot = 0; slot < UNIT_SLOT_COUNT; slot++) {
-        unit = &g_unit_stats[slot];
-        if (unit_is_excluded_from_at_list(unit) != 0) {
+    for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
+        unit = &g_battle_units[slot];
+        if (is_excluded_from_at_list(unit) != 0) {
             continue;
         }
 
@@ -758,13 +758,13 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
             if (value != 0 || unit->has_turn == 0 || mode != AT_LIST_MODE_PREVIEW) {
                 tick += phase_tick;
             }
-            placed += at_list_entry_insert(slot, 1, (tick << 8) & 0xff00, list);
+            placed += insert_entry(slot, 1, (tick << 8) & 0xff00, list);
 
             /* A performer repeats its song or dance every ability_ct ticks while the tick fits
              * the key's high byte. */
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                 & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
-                unit_ability_ct_set(unit);
+                battle_unit_set_ability_ct(unit);
                 for (turns = 0; turns < AT_LIST_CAPACITY - 1; turns++) {
                     tick += unit->ability_ct;
                     key = tick;
@@ -772,7 +772,7 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
                         break;
                     }
                     key <<= 8;
-                    placed += at_list_entry_insert(slot, 1, key & 0xff00, list);
+                    placed += insert_entry(slot, 1, key & 0xff00, list);
                 }
             }
         }
@@ -849,7 +849,7 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
             remainder %= UNIT_TURN_CT_THRESHOLD;
             ct = remainder;
             /* Within a tick, the unit that overshoots 100 CT further sorts first. */
-            added = at_list_entry_insert(slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
+            added = insert_entry(slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
             if (added == 0) {
                 break;
             }
@@ -861,14 +861,14 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
 }
 
 /* Insert an entry into the 40-entry AT list ahead of the first one with a
- * larger key; the last entry drops off. Mode 0 is a unit's turn (the battle ID).
- * Mode 1 is a charged ability landing: battle ID + AT_ACTION_ENTRY with
- * the ability id's low byte in action_id_low, or battle ID + AT_ACTION_ENTRY
+ * larger key; the last entry drops off. Mode 0 is a unit's turn (the battle unit ID).
+ * Mode 1 is a charged ability landing: battle unit ID + AT_ACTION_ENTRY with
+ * the ability id's low byte in action_id_low, or battle unit ID + AT_ACTION_ENTRY
  * + AT_JUMP for Jump. For an ability id of 0x100 or more the code is battle
- * ID - 0x40, which as a byte is battle ID + 0xc0: the action entry plus
+ * ID - 0x40, which as a byte is battle unit ID + 0xc0: the action entry plus
  * AT_ABILITY_ID_HIGH_BIT. Returns 1 when the entry was placed. */
-static s32 at_list_entry_insert(s32 battle_id, s32 mode, s32 sort_key, at_entry_t* list) {
-    unit_stats_t* unit;
+static s32 insert_entry(s32 battle_unit_id, s32 mode, s32 sort_key, at_entry_t* list) {
+    battle_unit_t* unit;
     s32 i;
     s32 j;
     s32 unit_code;
@@ -877,25 +877,25 @@ static s32 at_list_entry_insert(s32 battle_id, s32 mode, s32 sort_key, at_entry_
     s32 cmp;
     u16 key = sort_key;
 
-    unit = &g_unit_stats[battle_id];
+    unit = &g_battle_units[battle_unit_id];
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
         cmp = key < list[i].sort_key;
-        ability_code = battle_id + AT_ACTION_ENTRY;
+        ability_code = battle_unit_id + AT_ACTION_ENTRY;
         if (cmp) {
             for (j = AT_LIST_CAPACITY - 1; j > i; j--) {
                 list[j] = list[j - 1];
             }
-            unit_code = battle_id;
+            unit_code = battle_unit_id;
             list[i].sort_key = key;
             if (mode != 0) {
                 unit_code = ability_code;
                 if (unit->action_command.skillset_id == SKILLSET_ID_JUMP) {
-                    unit_code = battle_id + (AT_ACTION_ENTRY | AT_JUMP);
+                    unit_code = battle_unit_id + (AT_ACTION_ENTRY | AT_JUMP);
                 } else {
                     ability_id = unit->action_command.ability_id;
                     list[i].action_id_low = ability_id;
                     if (ability_id >= 0x100) {
-                        unit_code = battle_id - AT_ACTION_ENTRY;
+                        unit_code = battle_unit_id - AT_ACTION_ENTRY;
                     }
                 }
             }
@@ -908,23 +908,23 @@ static s32 at_list_entry_insert(s32 battle_id, s32 mode, s32 sort_key, at_entry_
 
 /* Mark the unit's action as taken (its move flag is left as is) and end its turn if nothing is
  * left to do. */
-void turn_act_taken_set(s32 unit_id) {
-    turn_move_act_taken_set(unit_id, 0, 1);
+void turn_set_act_taken(s32 unit_id) {
+    set_move_act_taken(unit_id, 0, 1);
 }
 
 /* Mark the unit's move as taken (its action flag is left as is) and end its turn if nothing is
  * left to do. */
-void turn_move_taken_set(s32 unit_id) {
-    turn_move_act_taken_set(unit_id, 1, 0);
+void turn_set_move_taken(s32 unit_id) {
+    set_move_act_taken(unit_id, 1, 0);
 }
 
 /* Mark the unit's move and/or action as taken and end its turn once nothing is
  * left to do. -1 for an absent unit, 1 when the turn ended, otherwise 0. */
-static s32 turn_move_act_taken_set(s32 unit_id, s32 move_flag, s32 act_flag) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+static s32 set_move_act_taken(s32 unit_id, s32 move_flag, s32 act_flag) {
+    battle_unit_t* unit = &g_battle_units[unit_id];
     s32 ret;
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
         return -1;
     if (move_flag != 0) {
         unit->movement_taken = 1;
@@ -932,7 +932,7 @@ static s32 turn_move_act_taken_set(s32 unit_id, s32 move_flag, s32 act_flag) {
     if (act_flag != 0) {
         unit->action_taken = 1;
     }
-    ret = turn_should_end(unit);
+    ret = should_end(unit);
     if (ret != 0) {
         ret = turn_end(unit_id);
     }
@@ -945,13 +945,13 @@ static s32 turn_move_act_taken_set(s32 unit_id, s32 move_flag, s32 act_flag) {
  * 80 with the move or the action unused, or 60 with both unused, and never
  * leaves more than 60. Always returns 1. */
 s32 turn_end(s32 unit_id) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+    battle_unit_t* unit = &g_battle_units[unit_id];
     u16 ct;
     u8 status5;
     u8 movement_check;
     u8 action_check;
 
-    if (g_unit_stats[unit_id].active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
+    if (g_battle_units[unit_id].active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
         return 1;
     if (unit->has_turn == 0)
         return 1;
@@ -976,8 +976,8 @@ s32 turn_end(s32 unit_id) {
 /* Return 1 when the unit's turn should end: it can no longer move (moved, or
  * Don't Move) nor act (acted, or an action restriction), and it has used at
  * least one of the two. */
-static s32 turn_should_end(const unit_stats_t* unit) {
-    s32 cannot_act = unit_get_action_restriction(unit);
+static s32 should_end(const battle_unit_t* unit) {
+    s32 cannot_act = battle_unit_get_action_restriction(unit);
     u8 no_move;
     u8 no_action;
     u8 taken;
@@ -993,13 +993,13 @@ static s32 turn_should_end(const unit_stats_t* unit) {
 }
 
 /* 1 when the unit's turn is over. A status that blocks turns
- * (turn_status_flags_calculate) ends it here. */
+ * (turn_calculate_status_flags) ends it here. */
 s32 turn_is_over(s32 unit_id) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+    battle_unit_t* unit = &g_battle_units[unit_id];
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return 1;
     }
-    if (!(turn_status_flags_calculate(unit) & TURN_STATUS_BLOCKS_TURN_MASK)) {
+    if (!(turn_calculate_status_flags(unit) & TURN_STATUS_BLOCKS_TURN_MASK)) {
         return unit->has_turn == 0;
     }
     unit->has_turn = 0;
@@ -1007,29 +1007,29 @@ s32 turn_is_over(s32 unit_id) {
 }
 
 /* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
- * (action state none). Same body as combat/pickups.c's static charge_cancel. */
-void status_clear_action_state(unit_stats_t* unit) {
-    status_action_state_set(unit, STATUS_ACTION_STATE_NONE);
+ * (action state none). Same body as combat/pickups.c's static clear_action_state. */
+void status_clear_action_state(battle_unit_t* unit) {
+    status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }
 
 /* Put the unit in the Defending action state, which ends Charging, Jump and Performing and drops
  * any charged ability. Used by the Defend command and the AI's simulation of it; always returns 0. */
 s32 status_inflict_defending(s32 unit_id) {
-    status_action_state_set(&g_unit_stats[unit_id], STATUS_ACTION_STATE_DEFENDING);
+    status_set_action_state(&g_battle_units[unit_id], STATUS_ACTION_STATE_DEFENDING);
     return 0;
 }
 
 /* Marks a present unit that has a formation index for removal: the slot is
  * emptied and its existence set to pending removal. Returns -1 when the slot is
  * empty or has no formation index, else 0. No retail code calls it. */
-s32 unit_mark_pending_removal(s32 unit_id) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+s32 battle_unit_mark_pending_removal(s32 unit_id) {
+    battle_unit_t* unit = &g_battle_units[unit_id];
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE)
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
         return -1;
     if (unit->formation_index == UNIT_FORMATION_INDEX_NONE)
         return -1;
-    unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+    unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
     unit->existence = UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;
 }

@@ -34,10 +34,10 @@ menu_opcode_handler_t g_menu_opcode_handlers[EQUIPMENT_SCRIPT_END] = {
     menu_opcode_0e_set_semi_trans,            /* 0x0e */
     menu_opcode_0f_set_draw_priority,         /* 0x0f */
     menu_opcode_10_draw_scrollable_list,      /* 0x10 */
-    menu_opcode_11_draw_tiled_rectangle,      /* 0x11 */
+    menu_opcode_11_draw_background_tiles,     /* 0x11 */
     menu_opcode_12_draw_opening_window_frame, /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
-    menu_opcode_14_set_draw_area_if_unlocked, /* 0x14 */
+    menu_opcode_14_set_draw_area,             /* 0x14 */
     menu_opcode_15_restore_draw_area,         /* 0x15 */
     menu_opcode_16_advance_window_scale_step, /* 0x16 */
     menu_opcode_17_draw_right_aligned_number, /* 0x17 */
@@ -213,7 +213,7 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
  * the forward keyframes (looping every 0x2F frames) or, while active, the reverse keyframes
  * (holding at frame 0x24). The copy before each active test preserves the original register
  * allocation. */
-void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s32 mode) {
+void menu_draw_sliding_cursor(const point16_t* anchor, u16* state, s32 mode) {
     RECT rect;
     s32 active = *state >> 15;
     s32 active_test = active;
@@ -314,7 +314,7 @@ menu_instruction_t* menu_script_skip_group(menu_instruction_t* command) {
  * the list and, with a text table set, the visible rows' text is redrawn into VRAM at
  * (0x100, 0x30).
  */
-void menu_draw_scrollable_list(const menu_instruction_t* script) {
+void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     RECT rect;
     s16 row_ids[20];
     s32 i;
@@ -374,7 +374,7 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
         rect.y = 0x30;
         rect.w = g_menu_list_vram_width;
         rect.h = g_menu_list_row_height;
-        text_id_rows_to_vram_render(g_menu_list_text_table, row_ids, &rect, 0);
+        text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
     }
 
     g_menu_list_scroll_direction = 0;
@@ -384,8 +384,8 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
 /* Set up a scrollable list without a scroll base and draw it with the given menu script. */
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
-    menu_scrollable_list_core_init(entries, selected_index, text_table);
-    menu_draw_scrollable_list(script);
+    menu_scrollable_list_init_core(entries, selected_index, text_table);
+    menu_scrollable_list_refresh(script);
 }
 
 /* Scrollable-list body command.
@@ -432,10 +432,10 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     previous_selected = g_menu_list_selected_index;
     speed = 2;
     if (g_menu_list_redraw_pending != 0) {
-        menu_draw_scrollable_list(command);
+        menu_scrollable_list_refresh(command);
     }
     if (g_menu_list_scroll_direction == 0) {
-        j = equipment_input_read_page_scroll_direction();
+        j = menu_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);
@@ -455,7 +455,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
                             *row_ids = text_id;
-                            text_id_rows_to_vram_render(g_menu_list_text_table, row_ids, &rect, 0);
+                            text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
                         }
                     }
                 } else if (input & PSX_PAD_UP) {
@@ -475,7 +475,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
-                            text_id_rows_to_vram_render(g_menu_list_text_table, entry_ids, &rect, 0);
+                            text_render_id_rows_to_vram(g_menu_list_text_table, entry_ids, &rect, 0);
                         }
                     }
                 } else if (g_menu_list_selected_index < g_menu_list_entry_count - 1 && (input & PSX_PAD_DOWN)) {
@@ -582,7 +582,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_animated_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+        menu_draw_sliding_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;

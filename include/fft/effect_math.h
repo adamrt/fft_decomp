@@ -24,16 +24,16 @@ void effect_vector_add_random_rotation_offsets(const SVECTOR* source, const SVEC
 void effect_vector_scale_q12(const VECTOR* src, VECTOR* dst);
 void effect_vector_shift_right_12(const VECTOR* src, VECTOR* dst);
 void effect_vector_mask_low_12_bits(const SVECTOR* src, SVECTOR* dst);
-s16 effect_s16_larger_magnitude_select(s16 first, s16 second);
-s16 effect_s16_largest_magnitude_select(s16 first, s16 second, s16 third);
-s32 effect_s32_cos_interpolate(s32 start, s32 end, s32 duration, s32 current);
-void effect_svector_linear_interpolate(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_svector_cos_interpolate(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_svector_cos_out_back_interpolate(
+s16 effect_s16_select_larger_magnitude(s16 first, s16 second);
+s16 effect_s16_select_largest_magnitude(s16 first, s16 second, s16 third);
+s32 effect_s32_interpolate_cos(s32 start, s32 end, s32 duration, s32 current);
+void effect_svector_interpolate_linear(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
+void effect_svector_interpolate_cos(const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
+void effect_svector_interpolate_cos_out_back(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void effect_vector_q13_linear_interpolate(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_vector_q13_cos_interpolate(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void effect_vector_q13_cos_out_back_interpolate(
+void effect_vector_interpolate_linear_q13(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
+void effect_vector_interpolate_cos_q13(const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
+void effect_vector_interpolate_cos_out_back_q13(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
 
 /* start + (end - start) * factor / 256, the division an arithmetic shift. */

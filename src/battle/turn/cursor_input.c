@@ -1,14 +1,14 @@
 /* Interpret directional input for the free cursor and show the hovered unit and action panels. */
 
-#include "fft/battle_map.h"
 #include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/input.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/option.h"
 #include "fft/sound.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -30,7 +30,7 @@ static cursor_tile_position_t s_cursor_previous_tile = { 0 };
  * camera's yaw quadrant and the cursor input mode. source picks held, newly pressed (repeating at
  * the cursor repeat speed) or released buttons; returns -1 for no direction or when a face button,
  * Select or Start was just pressed. */
-s32 cursor_input_direction_get(s32 source) {
+s32 cursor_get_input_direction(s32 source) {
     s32 direction = -1;
     u32 input;
     u32 previous;
@@ -109,7 +109,7 @@ s32 cursor_input_direction_get(s32 source) {
                     input = PSX_PAD_RIGHT | PSX_PAD_DOWN;
                 }
             } else if (g_input_pressed_copy_1 & PSX_PAD_UP) {
-                /* battle_input_update stores last frame's presses in both copy_0 and
+                /* battle_update_input stores last frame's presses in both copy_0 and
                  * copy_1, so these lone-direction tests never pass: a lone direction registers only
                  * through the auto-repeat below. */
                 if (!((pressed | g_input_pressed_copy_0) & PSX_PAD_UP) && (previous & PSX_PAD_UP)) {
@@ -409,13 +409,13 @@ s32 cursor_input_direction_get(s32 source) {
 /* Start the hovered-unit stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
 void cursor_show_hovered_unit_panel(void) {
-    unit_runtime_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
+    map_unit_t* unit = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     s32 mode;
     s32 unit_id;
 
     if (unit != 0) {
         mode = UNIT_VIEW_MODE_HOVERED_UNIT;
-        unit_id = unit->stats->battle_id;
+        unit_id = unit->battle_unit->battle_unit_id;
     } else {
         mode = UNIT_VIEW_MODE_TILE_INFO;
         unit_id = 0xFF;
@@ -426,12 +426,12 @@ void cursor_show_hovered_unit_panel(void) {
 /* Start the right-side stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
 void cursor_show_right_unit_panel(void) {
-    unit_runtime_t* unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
+    map_unit_t* unit = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
 
     /* Retail looks up the source unit here and ignores it. */
-    unit_source_get();
+    map_unit_get_source();
     if (unit != 0) {
-        unit_view_start(UNIT_VIEW_MODE_RIGHT_UNIT, 0xFF, unit->stats->battle_id);
+        unit_view_start(UNIT_VIEW_MODE_RIGHT_UNIT, 0xFF, unit->battle_unit->battle_unit_id);
     } else {
         unit_view_start(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
     }
@@ -441,13 +441,14 @@ void cursor_show_right_unit_panel(void) {
  * source unit against the unit on the cursor tile, or the source unit's own stats
  * when the tile is empty. */
 void cursor_show_attack_preview_panel(void) {
-    unit_runtime_t* target = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
-    unit_runtime_t* source = unit_source_get();
+    map_unit_t* target = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
+    map_unit_t* source = map_unit_get_source();
 
     if (target != 0) {
-        unit_view_start(UNIT_VIEW_MODE_ATTACK_PREVIEW, source->stats->battle_id, target->stats->battle_id);
+        unit_view_start(
+            UNIT_VIEW_MODE_ATTACK_PREVIEW, source->battle_unit->battle_unit_id, target->battle_unit->battle_unit_id);
     } else {
-        unit_view_start(UNIT_VIEW_MODE_HOVERED_UNIT, source->stats->battle_id, 0xFF);
+        unit_view_start(UNIT_VIEW_MODE_HOVERED_UNIT, source->battle_unit->battle_unit_id, 0xFF);
     }
 }
 
@@ -457,7 +458,7 @@ void cursor_show_attack_preview_panel(void) {
  * When the cursor tile changes, the unit panels are refreshed for the current
  * game state: the cursor unit's panel in the free-cursor, select-move-tile and
  * target-select states, the preview target's panel in the targeting-range state. */
-void cursor_move_to_selection(const unit_runtime_t* unit, const unit_runtime_t* selected_unit) {
+void cursor_move_to_selection(const map_unit_t* unit, const map_unit_t* selected_unit) {
     s32 old_x = g_cursor_x;
     s32 old_layer = g_cursor_layer;
     s32 old_y = g_cursor_y;
@@ -502,10 +503,10 @@ s32 cursor_move_by_input(void) {
     game_options_t options = g_game_options;
     u32 delay;
     s32 direction;
-    battle_map_tile_t* current;
-    battle_map_tile_t* stepped;
-    battle_map_tile_t* opposite;
-    battle_map_tile_t* other_level;
+    map_tile_t* current;
+    map_tile_t* stepped;
+    map_tile_t* opposite;
+    map_tile_t* other_level;
     s8 stepped_rise;
     s8 opposite_rise;
 
@@ -525,10 +526,10 @@ s32 cursor_move_by_input(void) {
     } while (0);
 
     direction = 0;
-    current = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer);
+    current = map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (g_game_options.fields.multi_height_cursor_speed == GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP) {
         if (g_input_pressed_buttons & PSX_PAD_START) {
-            other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
+            other_level = map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
             if (!other_level->flags.blocked) {
                 direction = 1;
                 g_cursor_layer ^= 1;
@@ -536,7 +537,7 @@ s32 cursor_move_by_input(void) {
         }
     } else if (s_cursor_repeat_counter > delay) {
         s_cursor_repeat_counter = 0;
-        other_level = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
+        other_level = map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
         if (!other_level->flags.blocked) {
             direction = 1;
             g_cursor_layer ^= 1;
@@ -549,7 +550,7 @@ s32 cursor_move_by_input(void) {
         s_cursor_previous_tile.layer = g_cursor_layer;
         s_cursor_previous_tile.y = g_cursor_y;
 
-        direction = cursor_input_direction_get(CAMERA_INPUT_PRESSED);
+        direction = cursor_get_input_direction(CAMERA_INPUT_PRESSED);
         switch (direction) {
         case UNIT_FACING_NORTH:
             g_cursor_y++;
@@ -583,21 +584,21 @@ s32 cursor_move_by_input(void) {
 
         /* Keep the cursor on the map: a step past the edge goes back, and a step below 0
          * compares as a large unsigned value and resets to 0. */
-        if (g_cursor_x == g_battle_map_terrain_width) {
+        if (g_cursor_x == g_map_terrain_width) {
             g_cursor_x--;
-        } else if ((u32)g_cursor_x > g_battle_map_terrain_width) {
+        } else if ((u32)g_cursor_x > g_map_terrain_width) {
             g_cursor_x = 0;
         }
-        if (g_cursor_y == g_battle_map_terrain_depth) {
-            g_cursor_y = g_battle_map_terrain_depth - 1;
+        if (g_cursor_y == g_map_terrain_depth) {
+            g_cursor_y = g_map_terrain_depth - 1;
         }
-        if ((u32)g_cursor_y > g_battle_map_terrain_depth) {
+        if ((u32)g_cursor_y > g_map_terrain_depth) {
             g_cursor_y = 0;
         }
 
         /* The tile stepped onto at the cursor's level and the tile on the other level. */
-        stepped = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer);
-        opposite = battle_map_tile_get_pointer(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
+        stepped = map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
+        opposite = map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer ^ 1);
         if (stepped->flags.blocked) {
             if (opposite->flags.blocked) {
                 switch (direction) {
@@ -651,7 +652,7 @@ s32 cursor_move_by_input(void) {
     if (((g_cursor_x != s_cursor_previous_tile.x) | (g_cursor_layer != s_cursor_previous_tile.layer)
             | (g_cursor_y != s_cursor_previous_tile.y))
         != 0) {
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
         s_cursor_repeat_counter = 0;
         switch (g_battle_state) {
         case BATTLE_STATE_FREE_CURSOR:

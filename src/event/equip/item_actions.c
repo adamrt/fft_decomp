@@ -40,7 +40,7 @@ extern u8 g_equipment_slot_marker_window[121];
  * MENU_ITEM_LIST_STATE_BROWSE once the menu closes or when the list is empty, and
  * MENU_ITEM_LIST_STATE_ACTION otherwise. The row test reads g_item_action_menu even when
  * the single-entry menu is the one running. */
-s32 equipment_update_item_actions(void) {
+s8 item_list_update_action_menu(void) {
     menu_entry_t* menu;
 
     if (g_equipment_item_action_menu_active == 0) {
@@ -50,7 +50,7 @@ s32 equipment_update_item_actions(void) {
         g_item_action_menu.selected_index = 0;
         g_equipment_item_action_menu_single_item.selected_index = 0;
         g_help_message_text_id = 0;
-        equipment_reset_selection();
+        equipment_reset_selection_results();
         g_unit_panel_preview_stats_thread_params.style = 0;
         if (g_item_list_entries[1] != -1) {
             g_equipment_item_list_has_multiple_entries = 1;
@@ -89,7 +89,7 @@ s32 equipment_update_item_actions(void) {
  * the other slots another. Returns
  * MENU_ITEM_LIST_STATE_SORT_ORDER while the sub-menu thread runs and
  * MENU_ITEM_LIST_STATE_ACTION once it closes. */
-s32 equipment_type_order_update(void) {
+s8 item_list_update_sort_menu(void) {
     s16 names[8];
     s32 i;
     s32 picked;
@@ -133,7 +133,7 @@ s32 equipment_type_order_update(void) {
             g_equipment_item_type_order[i + 1] = g_equipment_item_type_order[i];
         }
         g_equipment_item_type_order[0] = first;
-        equipment_reset_selection();
+        equipment_reset_selection_results();
         item_store_type_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
         for (i = 0; (names[i] = g_equipment_item_type_order[i]) != -1; i++) {
             names[i] += 3;
@@ -145,10 +145,10 @@ s32 equipment_type_order_update(void) {
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
-        menu_scrollable_list_core_init(
+        menu_scrollable_list_init_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        menu_set_window_scale_step(10);
-        item_stat_preview_build(g_item_list_entries[g_menu_list_selected_index],
+        menu_window_set_scale_step(10);
+        item_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
             &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
@@ -173,22 +173,22 @@ enum {
  * branch instead of the target's `li`/`sltiu`/`subu`. Assigning it before the
  * window call also keeps the constant load after the marker address arithmetic.
  *
- * Structurally identical to screen_item_tabs_draw, which draws
+ * Structurally identical to item_list_draw_tabs, which draws
  * the same window/marker pair for the world-map menu.
  */
-void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override) {
+void item_list_draw_tabs(s32 unused, s32 slot, s32 override) {
     s16 x = g_equipment_slot_marker_x[slot];
     s16 base_y = 0x40;
     oriented_quad_t* marker;
     oriented_quad_t* secondary;
     s32 secondary_x;
 
-    menu_run_script_with_palette_mode(g_equipment_slot_marker_window, EQUIPMENT_SLOT_MARKER_WINDOW_STATE, override);
+    menu_script_run_with_palette_mode(g_equipment_slot_marker_window, EQUIPMENT_SLOT_MARKER_WINDOW_STATE, override);
     marker = &g_equipment_slot_marker_rects[slot];
     marker->position.x = x;
     marker->position.y = base_y - (slot == 0);
     menu_gfx_enqueue_oriented_textured_quad(
-        marker, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, EQUIPMENT_SLOT_MARKER_FIRST_OTAG);
+        marker, gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, EQUIPMENT_SLOT_MARKER_FIRST_OTAG);
     secondary = &g_equipment_secondary_slot_marker;
     secondary_x = x + 9;
     if (slot == 3) {

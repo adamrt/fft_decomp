@@ -2,13 +2,13 @@
  * panels, and return the completed coordinates to the battle loader. */
 
 #include "fft/ability.h"
-#include "fft/battle_map.h"
 #include "fft/deploy.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/item.h"
+#include "fft/map.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
@@ -58,7 +58,7 @@ extern s32 g_deploy_cleared_word;
 
 /* menu and cursors */
 /* g_deploy_menu_state: what the deployment cursor is over. It selects
- * the button hint button_hint_build draws. */
+ * the button hint build_button_hint draws. */
 typedef enum placement_state {
     DEPLOY_MENU_CLOSED = -1,       /* attack_deployment_entrypoint is done */
     DEPLOY_MENU_EMPTY_TILE = 0,    /* a unit can be placed here */
@@ -152,11 +152,11 @@ extern RECT g_deploy_semitrans_tile_clut_rect;
  * thread_screen_slot_e slots (unit status 8, character status 9,
  * numeric panel 12). */
 typedef enum placement_thread_slot {
-    DEPLOY_THREAD_SLOT_HELP_CURSOR = 3,      /* deploy_run_help_cursor */
-    DEPLOY_THREAD_SLOT_ROSTER_STEP = 4,      /* roster_next_thread_run and _previous_roster_unit */
+    DEPLOY_THREAD_SLOT_HELP_CURSOR = 3,      /* deploy_help_cursor_thread */
+    DEPLOY_THREAD_SLOT_ROSTER_STEP = 4,      /* roster_next_thread and _previous_roster_unit */
     DEPLOY_THREAD_SLOT_NOTICE = 13,          /* the notice shown for an invalid deployment input */
-    DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS = 14, /* labels_draw_thread_run, then the map title */
-    DEPLOY_THREAD_SLOT_DEPLOY_RENDER = 15    /* screen_draw_thread_run */
+    DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS = 14, /* labels_draw_thread, then the map title */
+    DEPLOY_THREAD_SLOT_DEPLOY_RENDER = 15    /* screen_draw_thread */
 } placement_thread_slot_e;
 
 /* The same slots while the confirm prompt or the unit detail view is up. */
@@ -181,7 +181,7 @@ static menu_entry_t s_deploy_menu_entries[DEPLOY_ENTRY_COUNT] = {
     { { 384, 0 }, 0, 0, { 0, 88, 0, 0 }, { { 0, 0, 0, 0 }, 0, 0 }, 0x509c, 0, 1, { 0 }, &s_deploy_menu_row_actions[1],
         menu_icon_linked_entry_thread, MENU_ICON_HEADER_CHECK, { 0 }, 0, &g_deploy_confirm_prompt_result, 0, 0 },
     { { 384, 64 }, 40, 48, { 0, 88, 40, 48 }, { { 0, 0, 40, 48 }, 0, 0 }, 0x5012, 1, 2, { 0 },
-        &s_deploy_menu_row_actions[2], menu_run_icon_selection_loop, MENU_ICON_HEADER_NONE, { 0 }, 0,
+        &s_deploy_menu_row_actions[2], menu_icon_selection_thread, MENU_ICON_HEADER_NONE, { 0 }, 0,
         &g_deploy_confirm_result, 0, 0 }
 };
 
@@ -199,17 +199,17 @@ enum {
     DEPLOY_NOTICE_RAMZA_REQUIRED = 0x900d
 };
 
-static void unit_quads_build(s32 column, s32 row, s32 index, POLY_FT4* poly);
-static void roster_input_update(void);
-static void cursors_init(void);
-static void valid_tiles_build(SPRT* sprites);
-static void screen_draw_thread_run(void);
-static void roster_next_thread_run(void);
-static void roster_previous_thread_run(void);
-static void first_deployable_select(void);
-static void cursors_update(s32 frame, placement_buffer_t* buffer);
-static void labels_draw_thread_run(void);
-static void unit_quads_init(void);
+static void build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
+static void update_roster_input(void);
+static void init_cursors(void);
+static void build_valid_tiles(SPRT* sprites);
+static void screen_draw_thread(void);
+static void roster_next_thread(void);
+static void roster_previous_thread(void);
+static void select_first_deployable(void);
+static void update_cursors(s32 frame, placement_buffer_t* buffer);
+static void labels_draw_thread(void);
+static void init_unit_quads(void);
 
 /* Return 1 when the roster unit stands on one of the current squad's 5x5 deployment tiles.
  * ATTACK also links this body as deploy_is_roster_unit_deployed before the shared thread wait helper. */
@@ -229,7 +229,7 @@ s32 deploy_has_roster_unit_on_tiles(s32 roster_id) {
 
 /* Take roster unit `roster_id` off the 5x5 deployment grid by clearing the first tile
  * that holds it. */
-static void roster_unit_remove(s32 roster_id) {
+static void remove_roster_unit(s32 roster_id) {
     s32 row;
     s32 column;
 
@@ -246,7 +246,7 @@ static void roster_unit_remove(s32 roster_id) {
 /* Move roster unit `roster_id` to deployment tile (column, row), swapping it
  * with whatever that tile held. Does nothing when the unit is not on the
  * grid. */
-static void roster_unit_tile_swap(s32 column, s32 row, s32 roster_id) {
+static void swap_roster_unit_tile(s32 column, s32 row, s32 roster_id) {
     s32 scan_row;
     s32 scan_column;
     s32 old_value;
@@ -264,7 +264,7 @@ static void roster_unit_tile_swap(s32 column, s32 row, s32 roster_id) {
 
 /* Empty the deployment tables: the 5x5 grid of roster ids by tile and the
  * four squads' 25-entry unit lists. */
-static void placement_tables_clear(void) {
+static void clear_placement_tables(void) {
     s32 row = 0;
     s32 column;
 
@@ -329,7 +329,7 @@ void attack_deployment_entrypoint(void) {
 
     g_deploy_current_squad_id = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_deploy_current_squad_data = &g_deploy_squad_data[g_deploy_current_squad_id];
-    script_event_speed_set(1);
+    script_set_event_speed(1);
     g_gfx_screen_fade = 0xff;
     thread_yield();
 
@@ -348,8 +348,8 @@ void attack_deployment_entrypoint(void) {
     }
 
     mem_copy_bytes_nonempty(g_deploy_cursor_palette_cycle, g_deploy_cursor_palette_source, 0x40);
-    placement_tables_clear();
-    valid_tiles_build(g_deploy_render_buffers[0].tiles[0]);
+    clear_placement_tables();
+    build_valid_tiles(g_deploy_render_buffers[0].tiles[0]);
 
     /* When Ramza (roster id 0) must deploy, place him on the first valid tile. */
     if (script_variable_get(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) != 0) {
@@ -364,11 +364,11 @@ void attack_deployment_entrypoint(void) {
     }
 
 ramza_placed:
-    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread_run);
-    thread_parameters_set(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
-    first_deployable_select();
+    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread);
+    thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
+    select_first_deployable();
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&s_deploy_status_display_thread_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&s_deploy_status_display_thread_params, 0, 0);
 
     /* transition: 0 for the first squad, 1 after CROSS went back a squad, 2 after START moved on. */
     transition = 0;
@@ -409,7 +409,7 @@ ramza_placed:
             goto count_row;
         }
 
-        thread_inactive_wait(DEPLOY_THREAD_SLOT_ROSTER_STEP);
+        thread_wait_inactive(DEPLOY_THREAD_SLOT_ROSTER_STEP);
         g_deploy_pending_roster_index = -1;
         /* Both cursors start on the first placed unit, else at the grid center. */
         s_deploy_cursor_column[0] = 2;
@@ -440,12 +440,12 @@ ramza_placed:
             && (g_deploy_roster_unit_deployable[g_deploy_selected_roster_index] != 1
                 || g_deploy_pending_roster_index != -1)
             && g_deploy_pending_roster_index != g_deploy_selected_roster_index) {
-            thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread_run);
+            thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread);
         }
 
         /* Slide the new squad's grid in from the side opposite the old one's exit. */
         if (transition == 1) {
-            thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
+            thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
             s_deploy_grid_slide_x = 0x100;
             for (i = 0; i < 5; i++) {
                 if (g_unit_panel_button_prompt_animation[i] < 2) {
@@ -457,7 +457,7 @@ ramza_placed:
                 thread_yield();
             }
         } else if (transition == 2) {
-            thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
+            thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
             s_deploy_grid_slide_x = -0x100;
             for (i = 0; i < 5; i++) {
                 if (g_unit_panel_button_prompt_animation[i] < 2) {
@@ -505,8 +505,8 @@ ramza_placed:
             g_unit_panel_button_prompt_animation[3] = 0;
         }
 
-        thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, labels_draw_thread_run);
-        thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
+        thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, labels_draw_thread);
+        thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
 
         /* Placement loop, one pass per frame, until START or CROSS leaves the squad. */
         while (1) {
@@ -515,9 +515,9 @@ ramza_placed:
                 = deploy_is_roster_unit_deployed(g_deploy_selected_roster_index);
             input = script_get_controller_input_pointer(0);
             if (*input & PSX_PAD_SELECT) {
-                thread_start(DEPLOY_THREAD_SLOT_HELP_CURSOR, deploy_run_help_cursor);
-                thread_parameters_set(DEPLOY_THREAD_SLOT_HELP_CURSOR, 1, 0, 0);
-                thread_inactive_wait(DEPLOY_THREAD_SLOT_HELP_CURSOR);
+                thread_start(DEPLOY_THREAD_SLOT_HELP_CURSOR, deploy_help_cursor_thread);
+                thread_set_parameters(DEPLOY_THREAD_SLOT_HELP_CURSOR, 1, 0, 0);
+                thread_wait_inactive(DEPLOY_THREAD_SLOT_HELP_CURSOR);
             }
 
             /* Update the idle icons (state below 2) for the cursor tile and the unit count. */
@@ -614,9 +614,9 @@ ramza_placed:
                     /* Notices reuse menu entry 2, retexted with each deployment message. */
                     s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_NO_UNIT_PLACED;
                     thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
-                    thread_parameters_set(
+                    thread_set_parameters(
                         DEPLOY_THREAD_SLOT_NOTICE, (s32)&s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
-                    thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
+                    thread_wait_inactive(DEPLOY_THREAD_SLOT_NOTICE);
                 } else {
                     g_sound_pending_sfx_id = SOUND_SFX_COMPLETE;
                     g_unit_panel_button_prompt_animation[4] = 7;
@@ -630,7 +630,7 @@ ramza_placed:
                                 g_unit_panel_button_prompt_animation[i] = 1;
                             }
                         }
-                        thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
+                        thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
                         for (i = 0; i < 0x100; i += 8) {
                             s_deploy_grid_slide_x += 8;
                             thread_yield();
@@ -643,10 +643,10 @@ ramza_placed:
                         cursor = *deployed;
                         *deployed = 1;
                         thread_start(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU, menu_icon_linked_entry_thread);
-                        thread_parameters_set(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU,
+                        thread_set_parameters(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU,
                             (s32)&g_menu_thread_menu_data[DEPLOY_ENTRY_CONFIRM_PROMPT], 0, 0);
-                        thread_inactive_wait(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU);
-                        thread_inactive_wait(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU_CHILD);
+                        thread_wait_inactive(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU);
+                        thread_wait_inactive(DEPLOY_PROMPT_THREAD_SLOT_CONFIRM_MENU_CHILD);
                         *deployed = cursor;
                         if (g_deploy_confirm_result != 0) {
                             continue;
@@ -676,7 +676,7 @@ ramza_placed:
                         g_unit_panel_button_prompt_animation[i] = 1;
                     }
                 }
-                thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
+                thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
                 for (i = 0; i < 0x100; i += 8) {
                     s_deploy_grid_slide_x -= 8;
                     thread_yield();
@@ -710,13 +710,13 @@ ramza_placed:
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                                 s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_SQUAD_FULL;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
-                                thread_parameters_set(
+                                thread_set_parameters(
                                     DEPLOY_THREAD_SLOT_NOTICE, (s32)&s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
-                                thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
+                                thread_wait_inactive(DEPLOY_THREAD_SLOT_NOTICE);
                             }
                         } else {
                             g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-                            roster_unit_tile_swap(column, row, g_deploy_selected_roster_index);
+                            swap_roster_unit_tile(column, row, g_deploy_selected_roster_index);
                         }
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_SELECT;
@@ -741,9 +741,9 @@ ramza_placed:
                                 g_sound_pending_sfx_id = SOUND_SFX_INVALID;
                                 s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE].text_id = DEPLOY_NOTICE_RAMZA_REQUIRED;
                                 thread_start(DEPLOY_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
-                                thread_parameters_set(
+                                thread_set_parameters(
                                     DEPLOY_THREAD_SLOT_NOTICE, (s32)&s_deploy_menu_entries[DEPLOY_ENTRY_NOTICE], 0, 0);
-                                thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
+                                thread_wait_inactive(DEPLOY_THREAD_SLOT_NOTICE);
                                 s_deploy_active_cursor = 0;
                                 s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
                                 s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
@@ -751,7 +751,7 @@ ramza_placed:
                                 if (deploy_has_roster_unit_on_tiles(g_deploy_selected_roster_index) != 0) {
                                     s_deploy_active_cursor = 0;
                                     g_sound_pending_sfx_id = SOUND_SFX_CAMERA_ZOOM_OUT;
-                                    roster_unit_remove(g_deploy_selected_roster_index);
+                                    remove_roster_unit(g_deploy_selected_roster_index);
                                     s_deploy_cursor_column[0] = s_deploy_cursor_column[1];
                                     s_deploy_cursor_row[0] = s_deploy_cursor_row[1];
                                     g_deploy_deployed_unit_count--;
@@ -772,7 +772,7 @@ ramza_placed:
                                 g_deploy_roster_id_by_tile[row][column] = DEPLOY_ROSTER_ID_NONE;
                             }
                         } else {
-                            roster_unit_tile_swap(column, row,
+                            swap_roster_unit_tile(column, row,
                                 g_deploy_roster_id_by_tile[s_deploy_cursor_row[0]][s_deploy_cursor_column[0]]);
                             g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                             s_deploy_active_cursor = 0;
@@ -788,11 +788,11 @@ ramza_placed:
                 }
             }
 
-            roster_input_update();
+            update_roster_input();
 
             if (*input & PSX_PAD_SQUARE) {
                 g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
-                script_event_speed_set(2);
+                script_set_event_speed(2);
                 if (g_unit_panel_button_prompt_animation[2] < 2) {
                     g_unit_panel_button_prompt_animation[2] = 1;
                 }
@@ -803,26 +803,26 @@ ramza_placed:
                     g_unit_panel_button_prompt_animation[4] = 1;
                 }
                 thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-                thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&s_deploy_numbers_thread_params, 0, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&s_deploy_numbers_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-                thread_parameters_set(
+                thread_set_parameters(
                     THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&s_deploy_character_status_frame_config, 0, 0);
                 thread_start(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER, thread_wait_forever);
                 do {
                     thread_yield();
                     if (*input & PSX_PAD_SELECT) {
-                        thread_start(DEPLOY_THREAD_SLOT_HELP_CURSOR, deploy_run_help_cursor);
-                        thread_parameters_set(DEPLOY_THREAD_SLOT_HELP_CURSOR, 0, 0, 0);
-                        thread_inactive_wait(DEPLOY_THREAD_SLOT_HELP_CURSOR);
+                        thread_start(DEPLOY_THREAD_SLOT_HELP_CURSOR, deploy_help_cursor_thread);
+                        thread_set_parameters(DEPLOY_THREAD_SLOT_HELP_CURSOR, 0, 0, 0);
+                        thread_wait_inactive(DEPLOY_THREAD_SLOT_HELP_CURSOR);
                     }
-                    roster_input_update();
+                    update_roster_input();
                 } while (!(*input & PSX_PAD_CROSS));
                 g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
-                thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
-                thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
-                thread_inactive_wait(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-                thread_inactive_wait(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-                script_event_speed_set(1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
+                thread_wait_inactive(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+                thread_wait_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+                script_set_event_speed(1);
             }
 
             /* TRIANGLE makes the unit under the cursor the selected roster unit. */
@@ -837,8 +837,8 @@ ramza_placed:
                             = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
                                                         [s_deploy_cursor_column[s_deploy_active_cursor]];
                         if (g_deploy_selected_roster_index != g_deploy_pending_roster_index) {
-                            thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread_run);
-                            thread_inactive_wait(DEPLOY_THREAD_SLOT_ROSTER_STEP);
+                            thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread);
+                            thread_wait_inactive(DEPLOY_THREAD_SLOT_ROSTER_STEP);
                         } else {
                             g_deploy_pending_roster_index = -1;
                         }
@@ -855,9 +855,9 @@ ramza_placed:
     }
 
     /* Close the menu and slide the grid, status panel and slot columns off screen. */
-    thread_frames_wait(0x20);
+    thread_wait_frames(0x20);
     s_deploy_menu_state = DEPLOY_MENU_CLOSED;
-    thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
+    thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
     thread_yield();
     for (i = 0; i < 0x100; i += 2) {
         s_deploy_status_display_thread_params.position.y = -i;
@@ -873,7 +873,7 @@ ramza_placed:
         }
     }
 
-    thread_frames_wait(0x3c);
+    thread_wait_frames(0x3c);
     g_deploy_unit_map_coordinates[0].party_id = DEPLOY_ROSTER_ID_NONE;
     g_deploy_unit_map_coordinates[1].party_id = DEPLOY_ROSTER_ID_NONE;
     g_deploy_unit_map_coordinates[2].party_id = DEPLOY_ROSTER_ID_NONE;
@@ -975,12 +975,12 @@ ramza_placed:
     deploy_mark_finished();
     script_variable_set(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
     thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_title_entrypoint);
-    thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
-    thread_inactive_wait(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS);
+    thread_set_parameters(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
+    thread_wait_inactive(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS);
 
     /* Fade the music to volume 0 (low half) over fade time 0x1e (high half). */
     g_sound_music_volume_transition_request = 0x1e0000;
-    thread_frames_wait(0x20);
+    thread_wait_frames(0x20);
     g_gfx_screen_fade = 0;
     do {
         thread_yield();
@@ -988,13 +988,13 @@ ramza_placed:
     } while (g_gfx_screen_fade < 0x100);
 
     /* A third parameter of 1 asks each display thread to finish. */
-    thread_parameters_set(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 1);
-    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-    thread_parameters_set(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
-    thread_frames_wait(3);
+    thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 1);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
+    thread_set_parameters(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
+    thread_wait_frames(3);
     g_gfx_screen_fade = 0;
-    script_event_speed_set(1);
-    music_all_unload();
+    script_set_event_speed(1);
+    music_unload_all();
     thread_current_exit();
 }
 
@@ -1020,25 +1020,25 @@ s32 deploy_return_zero_1(void) {
 
 /* L1 and R1 on the deployment screen: start the previous- or next-unit
  * thread in the roster step slot, unless one is still running. */
-static void roster_input_update(void) {
+static void update_roster_input(void) {
     u32* flags = script_get_controller_input_pointer(0);
 
     if ((*flags & PSX_PAD_L1) && (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0)) {
         g_unit_panel_button_prompt_animation[0] = 7;
         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-        thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_previous_thread_run);
+        thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_previous_thread);
     }
     if ((*flags & PSX_PAD_R1) && (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0)) {
         g_unit_panel_button_prompt_animation[1] = 7;
         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-        thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread_run);
+        thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread);
     }
 }
 
 /* Move the roster cursor forward (wrapping at 20) to the first unit the
  * current squad may still deploy and load it into the status panels. The
  * search has no exit when no slot is deployable, so the screen would hang. */
-static void first_deployable_select(void) {
+static void select_first_deployable(void) {
     deploy_find_deployable_units();
     while (1) {
         if (g_deploy_selected_roster_index >= PARTY_ROSTER_SLOT_COUNT) {
@@ -1053,10 +1053,10 @@ static void first_deployable_select(void) {
     unit_panel_load_party_unit(1, g_deploy_selected_roster_index);
 }
 
-/* ATTACK twin of unit_panel_load_party_unit. Load a party roster unit into the ATTACK status/editor display.
+/* ATTACK's own copy of the party unit loader. Load a party roster unit into the ATTACK status/editor display.
  *
  * Party counterpart of unit_panel_load_selected: the unit is
- * rebuilt from the roster into a scratch unit_stats_t, shown at full HP/MP
+ * rebuilt from the roster into a scratch battle_unit_t, shown at full HP/MP
  * and CT, and without the monster-skill or name-text refresh.
  *
  * team_kind (0 player-controlled, 1 another team, 2 the player's team without player
@@ -1064,7 +1064,7 @@ static void first_deployable_select(void) {
  * field's address in a register across the three stores (4 bytes longer than the
  * target). */
 void unit_panel_load_party_unit(s32 unused, s32 party_index) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     menu_status_panel_slot_state_t* editor;
     u16* abilities;
     const item_data_t* item;
@@ -1076,13 +1076,13 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     u16 maximum_mp;
     unit_panel_summary_t* gauges;
 
-    unit_party_slot_init(&g_unit_panel_editor_party_unit_stats, party_index, 0);
+    battle_unit_init_from_party_slot(&g_unit_panel_editor_battle_unit, party_index, 0);
     editor = &g_unit_panel_selected_unit_fields.state;
-    unit = &g_unit_panel_editor_party_unit_stats;
+    unit = &g_unit_panel_editor_battle_unit;
     gauges = &g_unit_panel_selected_unit_status;
 
     g_unit_panel_selected_unit.name_id = party_index;
-    g_unit_panel_selected_unit.battle_id = party_index;
+    g_unit_panel_selected_unit.battle_unit_id = party_index;
     gauges->team_kind = 0;
     g_unit_panel_selected_unit.job_id = unit->job_id;
     g_unit_panel_selected_unit.brave = unit->brave;
@@ -1172,7 +1172,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
         editor->generic_monster = 1;
 
     if (editor->generic_monster != 0) {
-        abilities = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         i = 0;
         do {
             editor->ability_ids[i] = *abilities++;
@@ -1208,7 +1208,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
     }
 
     if (item_id != 0) {
-        item = item_data_get(item_id);
+        item = item_get_data(item_id);
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_item_weapon_data[item_id].flags;
             if ((item_flags & WEAPON_FLAG_FORCED_TWO_HANDS)
@@ -1223,7 +1223,7 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index) {
  * unit, wrapping over the 20 slots (or jump to the pending index when one is
  * set), load that unit into the panels and request their redraw with slide
  * direction 1. */
-static void roster_next_thread_run(void) {
+static void roster_next_thread(void) {
     s32 pending;
 
     deploy_find_deployable_units();
@@ -1257,7 +1257,7 @@ void deploy_noop_2(void) {
  * unit, wrapping over the 20 slots (or jump to the pending index when one is
  * set), load that unit into the panels and request their redraw with slide
  * direction 2. */
-static void roster_previous_thread_run(void) {
+static void roster_previous_thread(void) {
     s32 pending;
 
     deploy_find_deployable_units();
@@ -1285,7 +1285,7 @@ static void roster_previous_thread_run(void) {
 
 /* Build the textured deployment banner and its two arrowhead triangles.
  * The banner fields are written in libgpu setRGB0/setXY4/setUV4 order. */
-static void banner_arrow_build(void) {
+static void build_banner_arrow(void) {
     SetPolyFT4(&g_deploy_render_buffers[0].screen_arrow.poly);
     SetSemiTrans(&g_deploy_render_buffers[0].screen_arrow.poly, 1);
     SetShadeTex(&g_deploy_render_buffers[0].screen_arrow.poly, 0);
@@ -1323,7 +1323,7 @@ static void banner_arrow_build(void) {
 /* Build and submit the button hint for the cursor tile's menu state `mode`: hint 0 on an
  * empty tile (dimmed on a blocked one), hint 1 on the selected unit, hints 0 and 1 on
  * another unit and hints 2 and 3 for a swap, the pair dimming in turn every 32 frames. */
-static void button_hint_build(s32 frame, u32 mode, placement_buffer_t* render_buffer) {
+static void build_button_hint(s32 frame, u32 mode, placement_buffer_t* render_buffer) {
     s32 i;
     s32 palette;
     POLY_FT4* ptr;
@@ -1393,7 +1393,7 @@ void deploy_set_cursor_tile(s32 column, s32 row) {
 }
 
 /* Choose which of the three places the tiles-only view draws its arrow (0, 1 or 2). Nothing calls
- * it; deploy_enter_tiles_view resets the mode to 0. */
+ * it; deploy_start_tiles_view resets the mode to 0. */
 void deploy_set_arrow_position(s32 mode) {
     s_deploy_arrow_position_mode = mode;
 }
@@ -1401,16 +1401,16 @@ void deploy_set_arrow_position(s32 mode) {
 /* Enter the deployment screen's tiles-only view: hide the menu, reset the
  * cursor and grid slide, prepare the valid-tile primitives and start the
  * deployment render thread. */
-void deploy_enter_tiles_view(void) {
+void deploy_start_tiles_view(void) {
     g_deploy_tiles_only_mode = 1;
     s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
     s_deploy_active_cursor = 0;
     s_deploy_grid_slide_x = 0;
     s_deploy_grid_slide_y = 0;
     s_deploy_arrow_position_mode = 0;
-    valid_tiles_build(g_deploy_render_buffers[0].tiles[0]);
-    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread_run);
-    thread_parameters_set(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
+    build_valid_tiles(g_deploy_render_buffers[0].tiles[0]);
+    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread);
+    thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
 }
 
 /* Deployment-screen render thread: builds the double-buffered primitive block,
@@ -1421,7 +1421,7 @@ void deploy_enter_tiles_view(void) {
  * computation; cross-jumping merges them, which keeps the polarity offset
  * chain at the top of the joined block as in the target. The offset has its
  * own variable rather than reusing `x`. */
-static void screen_draw_thread_run(void) {
+static void screen_draw_thread(void) {
     s32 frame;
     s32 i;
     s32 x;
@@ -1430,9 +1430,9 @@ static void screen_draw_thread_run(void) {
     SPRT* tile;
     s32 offset_y;
 
-    cursors_init();
-    banner_arrow_build();
-    unit_quads_init();
+    init_cursors();
+    build_banner_arrow();
+    init_unit_quads();
     menu_init_sprite_array(g_deploy_render_buffers[0].tiles[0], 0x19, 0x7ebc);
 
     LoadImage(&g_deploy_tile_clut_rect, (u32*)g_deploy_tile_clut_data);
@@ -1440,7 +1440,7 @@ static void screen_draw_thread_run(void) {
     StoreImage(&g_deploy_unit_marker_clut_source_rect, (u32*)g_deploy_unit_marker_clut_buffer);
     /* Let the readbacks finish, then upload semi-transparent copies of both CLUTs:
      * every color but entry 0 gets the STP bit, and entry 0 becomes transparent black. */
-    thread_frames_wait(1);
+    thread_wait_frames(1);
     for (i = 1; i < 48; i++) {
         g_deploy_tile_clut_buffer[i].semi_transparent = 1;
     }
@@ -1460,14 +1460,14 @@ static void screen_draw_thread_run(void) {
     SetDrawMode(&g_deploy_render_buffers[0].draw_mode_9e8, 0, 0, GetTPage(0, 1, 0x100, 0), &g_menu_draw_area_template);
     SetDrawMode(
         &g_deploy_render_buffers[0].draw_mode_9f4, 0, 0, GetTPage(0, 1, 0x3c0, 0x100), &g_menu_draw_area_template);
-    valid_tiles_build(g_deploy_render_buffers[0].tiles[0]);
+    build_valid_tiles(g_deploy_render_buffers[0].tiles[0]);
     mem_copy_bytes_nonempty(&g_deploy_render_buffers[1], &g_deploy_render_buffers[0], sizeof(placement_buffer_t));
 
     frame = 0;
     while (1) {
         thread_yield();
         if (g_deploy_tiles_only_mode == 0 && s_deploy_menu_state != DEPLOY_MENU_HIDDEN) {
-            button_hint_build(frame, s_deploy_menu_state, &g_deploy_render_buffers[frame & 1]);
+            build_button_hint(frame, s_deploy_menu_state, &g_deploy_render_buffers[frame & 1]);
         }
         gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].draw_mode_9c4);
 
@@ -1501,10 +1501,10 @@ static void screen_draw_thread_run(void) {
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y1 = 0x49;
                 g_deploy_render_buffers[frame & 1].screen_arrow.tri[0].y2 = 0x4a;
             }
-            valid_tiles_build(g_deploy_render_buffers[frame & 1].tiles[0]);
+            build_valid_tiles(g_deploy_render_buffers[frame & 1].tiles[0]);
             offset_y = g_gfx_screen_polarity == 0 ? 0xf0 : 0;
         } else {
-            valid_tiles_build(g_deploy_render_buffers[frame & 1].tiles[0]);
+            build_valid_tiles(g_deploy_render_buffers[frame & 1].tiles[0]);
             offset_y = g_gfx_screen_polarity == 0 ? 0xf0 : 0;
         }
 
@@ -1517,7 +1517,7 @@ static void screen_draw_thread_run(void) {
         SetDrawOffset(&g_deploy_render_buffers[frame & 1].screen_offset,
             (u16*)&g_deploy_render_buffers[frame & 1].screen_position);
 
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
 
@@ -1527,7 +1527,7 @@ static void screen_draw_thread_run(void) {
             unit_panel_build_button_prompts(g_deploy_render_buffers[frame & 1].status);
         }
         gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].screen_offset);
-        cursors_update(frame, &g_deploy_render_buffers[frame & 1]);
+        update_cursors(frame, &g_deploy_render_buffers[frame & 1]);
         if (g_deploy_tiles_only_mode == 0) {
             gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].screen_arrow.poly);
         }
@@ -1549,7 +1549,7 @@ static void screen_draw_thread_run(void) {
         for (y = 0; y < 5; y++) {
             for (x = 0; x < 5; x++) {
                 if (g_deploy_tiles_only_mode == 0 && g_deploy_roster_id_by_tile[y][x] != DEPLOY_ROSTER_ID_NONE) {
-                    unit_quads_build(
+                    build_unit_quads(
                         x, y, g_deploy_roster_id_by_tile[y][x], &g_deploy_render_buffers[frame & 1].unit_quads[count]);
                     gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].unit_quads[count]);
                     count++;
@@ -1607,7 +1607,7 @@ static void screen_draw_thread_run(void) {
             g_deploy_zodiac_draw_context.scale_y -= 0x100;
         }
         if (g_deploy_tiles_only_mode == 0) {
-            zodiac_resident_primitives_build(&g_deploy_zodiac_draw_context, g_zodiac_primitives[frame & 1]);
+            zodiac_build_resident_primitives(&g_deploy_zodiac_draw_context, g_zodiac_primitives[frame & 1]);
         }
         frame++;
     }
@@ -1620,7 +1620,7 @@ static void screen_draw_thread_run(void) {
  *
  * The y0 assignment is written out in both arms: the target's shared
  * subtract/add tail comes from cross-jumping those identical arm tails. */
-static void valid_tiles_build(SPRT* sprites) {
+static void build_valid_tiles(SPRT* sprites) {
     s32 x;
     s32 y;
     s32 bit = 1;
@@ -1704,8 +1704,8 @@ static void valid_tiles_build(SPRT* sprites) {
 }
 
 /* Upload the cursor texture and build both deployment cursors' marker and
- * tile-highlight quads; cursors_update positions them each frame. */
-static void cursors_init(void) {
+ * tile-highlight quads; update_cursors positions them each frame. */
+static void init_cursors(void) {
     s32 i;
     s32 j;
 
@@ -1737,7 +1737,7 @@ static void cursors_init(void) {
  * arrays at g_deploy_cursor_row/column. The ternary with the full
  * expression in each arm and the separate height variable reproduce the
  * target's cross-jumped arm tails and its unfolded lift + 10 addition. */
-static void cursors_update(s32 frame, placement_buffer_t* buffer) {
+static void update_cursors(s32 frame, placement_buffer_t* buffer) {
     thread_t* thread = &g_threads[g_thread_current_id];
     s32 bob = menu_get_cursor_bob_offset(0);
     s32 i;
@@ -1778,7 +1778,7 @@ static void cursors_update(s32 frame, placement_buffer_t* buffer) {
 /* Initialize the five unit-sprite/marker pairs: an opaque quad on the texture
  * page at (0x140, 0) and a semi-transparent one on the page at
  * (0x3c0, 0x100). */
-static void unit_quads_init(void) {
+static void init_unit_quads(void) {
     s32 i;
 
     for (i = 0; i < 10; i += 2) {
@@ -1795,12 +1795,12 @@ static void unit_quads_init(void) {
  * The first quad is a 48x48 cell of the formation sprite sheet (five cells per
  * row, CLUT selected by index % 4 and index / 4) placed over the isometric tile
  * at (column, row), using the same screen projection as
- * cursors_update; a nonzero
+ * update_cursors; a nonzero
  * g_formation_sprite_tall_cell[index] draws it four pixels lower. The
  * second quad squeezes the 20x20 texel cell at (0x90, 0x40) into a 20x10
  * marker under it. Each quad is written in libgpu setXYWH/setUVWH field order,
  * which the target's store order and constant offsets follow. */
-static void unit_quads_build(s32 column, s32 row, s32 index, POLY_FT4* poly) {
+static void build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
     s32 u = (index % 5) * 0x30;
     s32 v = (index / 5) * 0x30;
     s32 x;
@@ -1843,7 +1843,7 @@ static void unit_quads_build(s32 column, s32 row, s32 index, POLY_FT4* poly) {
  * parameter pointer, which is the target's induction-register order. The
  * equivalent g_deploy_text_polys[parity][i] (or a flat index) form reduces a second
  * copy of the offset after the join below and changes the loop increments. */
-static void labels_draw_thread_run(void) {
+static void labels_draw_thread(void) {
     s32 i;
     s32 parity = 0;
     s32 squad;
@@ -1873,7 +1873,7 @@ static void labels_draw_thread_run(void) {
         for (i = 0; i < 9; i++) {
             off = parity * sizeof(g_deploy_text_polys[0]) + i * sizeof(POLY_FT4);
             if ((g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count - 1 < 0 && i >= 6)
-                || thread_current_parameter_3_get() != 0) {
+                || thread_current_get_parameter_3() != 0) {
                 if (g_deploy_current_squad_data->unit_limit - g_deploy_deployed_unit_count - 1 < 0) {
                     g_deploy_text_graphic_params[7].source.x = 0xd0;
                 }
@@ -1910,7 +1910,7 @@ static void labels_draw_thread_run(void) {
             gfx_draw_or_append_gpu_primitive(&g_deploy_text_polys[parity][i]);
         }
         thread_yield();
-        if (thread_current_parameter_3_get() == 0) {
+        if (thread_current_get_parameter_3() == 0) {
             continue;
         }
         for (i = 8; i >= 0; i--) {
@@ -1924,12 +1924,12 @@ static void labels_draw_thread_run(void) {
     thread_current_exit();
 }
 
-/* Call formation_prepare_sprites. */
-void formation_build_sprites(void) {
-    formation_prepare_sprites();
+/* Call deploy_prepare_sprites. */
+void deploy_build_sprites(void) {
+    deploy_prepare_sprites();
 }
 
-/* Call portrait_prepare_party_textures. */
-void portrait_load_party(void) {
-    portrait_prepare_party_textures();
+/* Call portrait_party_prepare_textures. */
+void portrait_party_load(void) {
+    portrait_party_prepare_textures();
 }

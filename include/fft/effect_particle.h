@@ -16,16 +16,16 @@ enum { EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN = -1 };
 /* Vertex work allocated by Banish/Altima and filled by the map renderer. */
 extern VECTOR* g_effect_map_vertices;
 
-void effect_gravity_set(const vec3s32_t* src);
-void effect_gravity_save(void);
-void effect_gravity_restore(void);
-void effect_inertia_threshold_set(s32 threshold);
-void effect_inertia_threshold_save(void);
-void effect_inertia_threshold_restore(void);
-void effect_emitter_spawn_position_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
-void effect_emitter_spawn_spread_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
-void effect_emitter_velocity_angles_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
-void effect_emitter_velocity_spread_interpolate(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_set_gravity(const vec3s32_t* src);
+void effect_save_gravity(void);
+void effect_restore_gravity(void);
+void effect_set_inertia_threshold(s32 threshold);
+void effect_save_inertia_threshold(void);
+void effect_restore_inertia_threshold(void);
+void effect_emitter_interpolate_spawn_position(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_emitter_interpolate_spawn_spread(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_emitter_interpolate_velocity_angles(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
+void effect_emitter_interpolate_velocity_spread(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
 void effect_particle_integrate_motion(effect_work_record_t* list);
 
 /* parent is the particle a child emitter spawns from, read only for the
@@ -34,12 +34,12 @@ void effect_particle_integrate_motion(effect_work_record_t* list);
  * their stack that holds a position, and the timeline none. The emitter index
  * arrives as a full 32-bit value. The function is declared with an int result it
  * never sets and no caller reads; a void declaration changes the effect script interpreter's code. */
-s32 effect_emitter_particles_spawn(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent);
+s32 effect_emitter_spawn_particles(s16 record_index, s32 frame, s32 emitter_index, const effect_work_record_t* parent);
 
 /* particle pools */
 
-effect_work_record_t* effect_particle_record_get(s16 record_index, s16 requested_index);
-void effect_particle_record_free(s16 record_index, effect_work_record_t* work);
+effect_work_record_t* effect_particle_get_record(s16 record_index, s16 requested_index);
+void effect_particle_free_record(s16 record_index, effect_work_record_t* work);
 
 /* rendering */
 /* Ordering-table depth clamp shared by the EFFECT renderers: a depth below MIN
@@ -51,7 +51,7 @@ enum {
     EFFECT_SPRITE_OT_DEPTH_MAX = 382 /* the farthest depth of a particle sprite */
 };
 
-/* Size of the per-effect arena used by primitive_alloc. */
+/* Size of the per-effect arena used by alloc_primitive. */
 enum { EFFECT_PRIMITIVE_BUFFER_SIZE = 32768 };
 
 /* Initial Z coordinate of each particle sprite's four corner vectors. */
@@ -70,9 +70,9 @@ extern SVECTOR g_effect_corner_top_left __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_top_right __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_left __attribute__((aligned(4)));
 extern SVECTOR g_effect_corner_bottom_right __attribute__((aligned(4)));
-void effect_render_frame_start(void);
-void effect_render_state_reset(void);
-s32 effect_render_prim_offset_get(void);
+void effect_render_init_frame(void);
+void effect_render_reset_state(void);
+s32 effect_render_get_prim_offset(void);
 
 /* flag prefix */
 /* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.

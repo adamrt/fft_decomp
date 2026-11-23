@@ -20,7 +20,7 @@ extern input_directional_repeat_t g_input_directional_repeat;
 
 /* Clear the direction repeat counters and take the repeat delay and period from
  * MAIN's input timings. */
-void input_init_directional_state(void) {
+void input_init_repeat(void) {
     s32 first_limit = g_input_repeat_initial_delay;
     s32 second_limit = g_input_repeat_period;
 

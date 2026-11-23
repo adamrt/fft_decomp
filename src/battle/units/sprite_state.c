@@ -1,30 +1,30 @@
 /* Resolve loaded spritesheets and update unit palettes, transparency and height. */
 
 #include "fft/animation.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/script_variable.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "fft/weather.h"
 #include "psx/types.h"
 
 /* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;
  * the request is dropped when that sequence is already playing in the same view. The request
  * is stored as the animation plus one, so 0 means none. */
-void animation_facing_store(u32 animation, s32 facing, unit_runtime_t* unit) {
+void animation_store_with_facing(u32 animation, s32 facing, map_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
     unit->facing = facing;
 }
 
-/* animation_facing_store with the force flag: the animation
+/* animation_store_with_facing with the force flag: the animation
  * starts on the next update, from its beginning even when it is playing. */
-void animation_facing_force(s32 animation, s32 facing, unit_runtime_t* unit) {
+void animation_force_with_facing(s32 animation, s32 facing, map_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
     unit->facing = facing;
@@ -84,29 +84,29 @@ u32 sprite_sheet_get_flying_flag(u32 spritesheet_id) {
 
 /* Center the unit on its map tile: its move destination becomes its tile, its world position the
  * tile center at its standing height, and its real position follows. */
-void unit_set_move_and_world_coords(unit_runtime_t* unit) {
+void map_unit_set_move_and_world_coords(map_unit_t* unit) {
     unit->movement.destination_x = unit->map_x;
     unit->movement.destination_y = unit->map_y;
     unit->movement.destination_layer = unit->map_layer;
-    unit->world_coords.vx = unit->map_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    unit->world_coords.vz = unit->map_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    unit->world_coords.vy = unit_height_calculate_from_world_coords(unit);
-    unit_set_real_coords_from_world_coords(unit);
+    unit->world_coords.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    unit->world_coords.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    unit->world_coords.vy = map_unit_calculate_height_from_world_coords(unit);
+    map_unit_set_real_coords_from_world_coords(unit);
 }
 
 /* Moves a rider killed on its mount (pending_attack_result set) off it: the pair
  * is unlinked, the unit takes the relocation tile in dismount as its map position
  * and screen position, its battle stats follow, and the pending result is
  * cleared. */
-void unit_dismount_dead_rider(unit_runtime_t* unit) {
+void map_unit_dismount_dead_rider(map_unit_t* unit) {
     /* pending_attack_result is -1 when the action killed a rider on its mount. */
     if (unit->pending_attack_result != 0) {
-        unit_rider_dismount_display_update(unit);
+        map_unit_rider_dismount_and_update_display(unit);
         unit->map_x = unit->dismount.x;
         unit->map_y = unit->dismount.y;
         unit->map_layer = unit->dismount.layer;
-        unit_set_move_and_world_coords(unit);
-        unit_set_tile_position(unit->stats->battle_id, unit->map_x, unit->map_y, unit->map_layer,
+        map_unit_set_move_and_world_coords(unit);
+        battle_unit_set_tile_position(unit->battle_unit->battle_unit_id, unit->map_x, unit->map_y, unit->map_layer,
             (unit->facing / UNIT_FACING_QUARTER_TURN));
         unit->pending_attack_result = 0;
     }
@@ -150,7 +150,7 @@ s32 sprite_sheet_claim_slot(s16 spritesheet_id) {
         }
     }
     if (slot >= SPRITE_SHEET_SLOT_COUNT) {
-        system_error_handle(SYSTEM_ERROR_NO_SPRITESHEET_SLOT);
+        system_handle_error(SYSTEM_ERROR_NO_SPRITESHEET_SLOT);
         return 0xFFFF;
     }
     return found;
@@ -171,7 +171,7 @@ s32 sprite_sheet_claim_slot(s16 spritesheet_id) {
  * cross-jumping merges them only after register allocation, so the extra
  * references still rank clut_index above unit in global allocation. The two snow
  * (weather bit 0) branches are identical. */
-void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_current_colors) {
+void sprite_palette_tint_unit(map_unit_t* unit, s32 level, s32 update_current_colors) {
     s32 clut_index;
     s32 stored_palette;
     s32 slot = unit->spritesheet_vram_slot;
@@ -182,34 +182,33 @@ void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_curren
     s16 standing_world_y;
 
     stored_palette = unit->stored_palette;
-    clut_index = unit->runtime_id;
+    clut_index = unit->map_unit_id;
 
     /* The second CLUT row comes from the upper eight palettes: the unit's own for job and
      * monster sheets, the first one for the rest. */
     if (g_sprite_sheet_slots[slot].spritesheet_id >= SPRITE_SHEET_ID_JOB_FIRST
         && g_sprite_sheet_slots[slot].spritesheet_id <= SPRITE_SHEET_ID_STEEL_GIANT) {
-        battle_map_palette_load_data(
-            &g_sprite_sheet_slots[slot].clut[stored_palette + 8], BATTLE_MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
+        map_palette_load_data(
+            &g_sprite_sheet_slots[slot].clut[stored_palette + 8], MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
     } else {
-        battle_map_palette_load_data(
-            &g_sprite_sheet_slots[slot].clut[8], BATTLE_MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
+        map_palette_load_data(&g_sprite_sheet_slots[slot].clut[8], MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
     }
 
     blue = 0;
     green = 0;
     red = 0;
     switch (level) {
-    case BATTLE_MAP_TILE_SHADING_DARK:
+    case MAP_TILE_SHADING_DARK:
         blue = -4;
         green = -4;
         red = -4;
         break;
-    case BATTLE_MAP_TILE_SHADING_DARKER:
+    case MAP_TILE_SHADING_DARKER:
         blue = -8;
         green = -8;
         red = -8;
         break;
-    case BATTLE_MAP_TILE_SHADING_DARKEST:
+    case MAP_TILE_SHADING_DARKEST:
         blue = -0xc;
         green = -0xc;
         red = -0xc;
@@ -219,12 +218,12 @@ void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_curren
     {
         const s32* weather_flags = &g_weather_flags;
 
-        if (!(*weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+        if (!(*weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
             weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
             /* Weather cools the tint (less red, more blue); at night the shift is stronger and
              * applies in clear weather too. The snow branches match the plain ones. */
             if (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) == TIME_OF_DAY_DAY) {
-                if (*weather_flags & BATTLE_MAP_WEATHER_FLAG_SNOW) {
+                if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
                     switch (weather) {
                     case WEATHER_NONE:
                     case WEATHER_NONE_ALT:
@@ -260,7 +259,7 @@ void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_curren
                     }
                 }
             } else {
-                if (*weather_flags & BATTLE_MAP_WEATHER_FLAG_SNOW) {
+                if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
                     switch (weather) {
                     case WEATHER_NONE:
                     case WEATHER_NONE_ALT:
@@ -308,9 +307,8 @@ void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_curren
     }
 
     /* y grows downward: a unit more than 0x30 above the ground at its position stays untinted. */
-    standing_world_y = unit_height_calculate_from_world_coords(unit);
-    if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)
-        && standing_world_y - 0x30 > unit->world_coords.vy) {
+    standing_world_y = map_unit_calculate_height_from_world_coords(unit);
+    if (!(g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) && standing_world_y - 0x30 > unit->world_coords.vy) {
         blue = 0;
         green = 0;
         red = 0;
@@ -319,24 +317,24 @@ void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_curren
     /* Crystal, chicken, frog and treasure sheets tint fixed RAM palettes instead of the slot's. */
     switch (unit->spritesheet_id) {
     case SPRITE_SHEET_ID_CRYSTAL:
-        battle_map_palette_update_from_other(g_sprite_other_palettes.crystal[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, update_current_colors);
+        map_palette_set_from_other(g_sprite_other_palettes.crystal[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+            red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
-        battle_map_palette_update_from_other(g_sprite_other_palettes.chicken[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, update_current_colors);
+        map_palette_set_from_other(g_sprite_other_palettes.chicken[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+            red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_FROG:
-        battle_map_palette_update_from_other(g_sprite_other_palettes.frog[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, update_current_colors);
+        map_palette_set_from_other(g_sprite_other_palettes.frog[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0, red,
+            green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_TREASURE:
-        battle_map_palette_update_from_other(g_sprite_other_palettes.treasure[stored_palette],
-            BATTLE_MAP_CLUT_ROW_UNITS, clut_index, 0, red, green, blue, update_current_colors);
+        map_palette_set_from_other(g_sprite_other_palettes.treasure[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+            red, green, blue, update_current_colors);
         break;
     default:
-        battle_map_palette_update_from_other(g_sprite_sheet_slots[slot].clut[stored_palette], BATTLE_MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, update_current_colors);
+        map_palette_set_from_other(g_sprite_sheet_slots[slot].clut[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
+            red, green, blue, update_current_colors);
         break;
     }
 }
@@ -348,7 +346,7 @@ void sprite_palette_tint_unit(unit_runtime_t* unit, s32 level, s32 update_curren
  * must remain s16 to preserve the target's register allocation and tail
  * sharing.
  */
-static void palette_unit_modify(unit_runtime_t* unit, s32 mode, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
+static void modify_unit_palette(map_unit_t* unit, s32 mode, s32 clut_row, s32 clut_index, s32 all_colors, s16 red,
     s16 green, s16 blue, s32 update_current_colors) {
     s32 slot;
     s32 sheet;
@@ -359,24 +357,24 @@ static void palette_unit_modify(unit_runtime_t* unit, s32 mode, s32 clut_row, s3
     palette = unit->stored_palette;
     switch (sheet) {
     case SPRITE_SHEET_ID_CRYSTAL:
-        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.crystal[palette], clut_row, clut_index,
-            all_colors, red, green, blue, update_current_colors);
+        map_palette_modify_from_other(mode, g_sprite_other_palettes.crystal[palette], clut_row, clut_index, all_colors,
+            red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_CHICKEN:
-        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.chicken[palette], clut_row, clut_index,
-            all_colors, red, green, blue, update_current_colors);
+        map_palette_modify_from_other(mode, g_sprite_other_palettes.chicken[palette], clut_row, clut_index, all_colors,
+            red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_FROG:
-        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.frog[palette], clut_row, clut_index,
-            all_colors, red, green, blue, update_current_colors);
+        map_palette_modify_from_other(mode, g_sprite_other_palettes.frog[palette], clut_row, clut_index, all_colors,
+            red, green, blue, update_current_colors);
         break;
     case SPRITE_SHEET_ID_TREASURE:
-        battle_map_palette_modify_from_other(mode, g_sprite_other_palettes.treasure[palette], clut_row, clut_index,
-            all_colors, red, green, blue, update_current_colors);
+        map_palette_modify_from_other(mode, g_sprite_other_palettes.treasure[palette], clut_row, clut_index, all_colors,
+            red, green, blue, update_current_colors);
         break;
     default:
-        battle_map_palette_modify_from_other(mode, g_sprite_sheet_slots[slot].clut[palette], clut_row, clut_index,
-            all_colors, red, green, blue, update_current_colors);
+        map_palette_modify_from_other(mode, g_sprite_sheet_slots[slot].clut[palette], clut_row, clut_index, all_colors,
+            red, green, blue, update_current_colors);
         break;
     }
 }
@@ -387,7 +385,7 @@ static void palette_unit_modify(unit_runtime_t* unit, s32 mode, s32 clut_row, s3
  * first matching renderer status (mode/RGB pairs below; Undead skips Skeleton
  * and Ghoul spritesheets); otherwise, or with no tinting status, it falls back
  * to sprite_palette_tint_unit. */
-static void palette_unit_status_update(unit_runtime_t* unit, s32 tile_effect_level, s32 update_current_colors) {
+static void update_unit_status_palette(map_unit_t* unit, s32 tile_effect_level, s32 update_current_colors) {
     u32 status;
     s32 unit_id;
 
@@ -395,33 +393,33 @@ static void palette_unit_status_update(unit_runtime_t* unit, s32 tile_effect_lev
         return;
     }
     status = unit->status_flags_1_4;
-    unit_id = unit->runtime_id;
+    unit_id = unit->map_unit_id;
     if (status & UNIT_STATUS_PALETTE_MOD_MASK) {
         if (status & UNIT_STATUS_PETRIFY) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE_GRAY, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 0,
-                update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE_GRAY, MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 0, update_current_colors);
         } else if (status & UNIT_STATUS_BLOOD_SUCK) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE_GRAY, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 3, -1, 8,
-                update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE_GRAY, MAP_CLUT_ROW_UNITS, unit_id, 0, 3, -1, 8, update_current_colors);
         } else if (status & UNIT_STATUS_BERSERK) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 8, 0, 0,
-                update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE, MAP_CLUT_ROW_UNITS, unit_id, 0, 8, 0, 0, update_current_colors);
         } else if (status & UNIT_STATUS_POISON) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 8, 0,
-                update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE_HALF, MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 8, 0, update_current_colors);
         } else if (status & UNIT_STATUS_REGEN) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 8,
-                update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE, MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 8, update_current_colors);
         } else if (status & UNIT_STATUS_OIL) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, -4, -4,
-                -4, update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE_HALF, MAP_CLUT_ROW_UNITS, unit_id, 0, -4, -4, -4, update_current_colors);
         } else if (status & UNIT_STATUS_UNNAMED_0E) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, -8, -8,
-                -8, update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE_HALF, MAP_CLUT_ROW_UNITS, unit_id, 0, -8, -8, -8, update_current_colors);
         } else if ((status & UNIT_STATUS_UNDEAD) && unit->spritesheet_id != SPRITE_SHEET_ID_SKELETON
             && unit->spritesheet_id != SPRITE_SHEET_ID_GHOUL) {
-            palette_unit_modify(unit, BATTLE_MAP_COLOR_MODE_BASE_HALF, BATTLE_MAP_CLUT_ROW_UNITS, unit_id, 0, 4, 0, 5,
-                update_current_colors);
+            modify_unit_palette(
+                unit, MAP_COLOR_MODE_BASE_HALF, MAP_CLUT_ROW_UNITS, unit_id, 0, 4, 0, 5, update_current_colors);
         } else {
             sprite_palette_tint_unit(unit, tile_effect_level, update_current_colors);
         }
@@ -431,16 +429,16 @@ static void palette_unit_status_update(unit_runtime_t* unit, s32 tile_effect_lev
 }
 
 /* Refresh the status palette of a unit and of its mount partner, unless suppressed. */
-void sprite_palette_update(unit_runtime_t* unit, s32 tile_effect_level, s32 update_current_colors) {
-    unit_runtime_t* partner;
+void sprite_palette_update(map_unit_t* unit, s32 tile_effect_level, s32 update_current_colors) {
+    map_unit_t* partner;
 
     if (!(unit->movement.suppress_palette_update)) {
-        palette_unit_status_update(unit, tile_effect_level, update_current_colors);
+        update_unit_status_palette(unit, tile_effect_level, update_current_colors);
     }
     if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
-        partner = unit_runtime_get(unit->mount_partner_runtime_id);
+        partner = map_unit_get(unit->mount_partner_map_unit_id);
         if (partner != 0 && !(partner->movement.suppress_palette_update)) {
-            palette_unit_status_update(partner, tile_effect_level, update_current_colors);
+            update_unit_status_palette(partner, tile_effect_level, update_current_colors);
         }
     }
 }
@@ -448,8 +446,8 @@ void sprite_palette_update(unit_runtime_t* unit, s32 tile_effect_level, s32 upda
 /* Enables the status bubble, restarting its timer, for a unit with a status that
  * shows a bubble (UNIT_STATUS_BUBBLE_MASK) and for the acting unit;
  * disables it for any other unit. */
-void sprite_status_bubble_active_update(unit_runtime_t* unit) {
-    if ((unit->status_flags_1_4 & UNIT_STATUS_BUBBLE_MASK) != 0 || unit->runtime_id == g_unit_source_runtime_id) {
+void sprite_status_bubble_update_active(map_unit_t* unit) {
+    if ((unit->status_flags_1_4 & UNIT_STATUS_BUBBLE_MASK) != 0 || unit->map_unit_id == g_unit_source_map_unit_id) {
         unit->status_bubble_active = 1;
         unit->status_bubble_timer = 0;
     } else {
@@ -459,7 +457,7 @@ void sprite_status_bubble_active_update(unit_runtime_t* unit) {
 
 /* Draws a unit with the Transparent status semi-transparent with averaging blend
  * (the blend bits cleared), and any other unit opaque. */
-void sprite_transparency_update(unit_runtime_t* unit) {
+void sprite_update_transparency(map_unit_t* unit) {
     if ((unit->status_flags_5_6 & UNIT_STATUS_TRANSPARENT) != 0) {
         unit->sprite_display_flags
             = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK) | SPRITE_DISPLAY_SEMI_TRANSPARENT;
@@ -471,7 +469,7 @@ void sprite_transparency_update(unit_runtime_t* unit) {
 /* Mirror the Float status into movement.floating and, unless the unit is in the air for Jump
  * (Jump, its height flag, or a Jump being removed), set it to its standing height and refresh its
  * real position. */
-void unit_float_height_update(unit_runtime_t* unit) {
+void map_unit_update_float_height(map_unit_t* unit) {
     if (unit->status_flags_5_6 & UNIT_STATUS_FLOAT) {
         unit->movement.floating = 1;
     } else {
@@ -479,7 +477,7 @@ void unit_float_height_update(unit_runtime_t* unit) {
     }
     if ((unit->status_flags_5_6 & (UNIT_STATUS_JUMP | UNIT_STATUS_JUMP_HEIGHT_ACTIVE)) == 0
         && (unit->statuses_to_remove_5_6 & UNIT_STATUS_JUMP) == 0) {
-        unit->world_coords.vy = unit_height_calculate_from_world_coords(unit);
-        unit_set_real_coords_from_world_coords(unit);
+        unit->world_coords.vy = map_unit_calculate_height_from_world_coords(unit);
+        map_unit_set_real_coords_from_world_coords(unit);
     }
 }

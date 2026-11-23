@@ -11,7 +11,7 @@
  * row's column, and Right at a row's end wraps to its start. R1 and L1 move sequentially
  * through the list; changing the selection queues the cursor-move sound.
  */
-s32 menu_grid_selection_step(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input) {
+s32 menu_step_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input) {
     s32 index = old_index;
 
     if (input & PSX_PAD_UP) {

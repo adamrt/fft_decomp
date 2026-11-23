@@ -29,7 +29,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[STATUS_SCREEN_SCRIPT_END] = {
     menu_opcode_11_draw_background_tiles,         /* 0x11 */
     menu_opcode_12_draw_opening_window_frame,     /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area,     /* 0x13 */
-    menu_opcode_14_set_draw_area_if_unlocked,     /* 0x14 */
+    menu_opcode_14_set_draw_area,                 /* 0x14 */
     menu_opcode_15_restore_draw_area,             /* 0x15 */
 };
 
@@ -53,7 +53,7 @@ void menu_script_run(void* script, s32 flags) {
 }
 
 /* Select the palette set for `event_mode` and run the command stream. */
-void menu_run_script_with_palette_mode(void* script, s32 flags, s32 event_mode) {
-    menu_set_palette_mode(event_mode);
+void menu_script_run_with_palette_mode(void* script, s32 flags, s32 event_mode) {
+    menu_palette_set_mode(event_mode);
     menu_script_run(script, flags);
 }

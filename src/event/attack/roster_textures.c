@@ -29,7 +29,7 @@ static u8 s_formation_sprite_staging[1152] = { 0 };
  * so the pixel-row counter is a separate variable `j`. The never-taken `j <= 0` test after the row loop only
  * adds one reference to `j`, raising its global-allocation priority above the
  * source pointer's so the counter gets $a3 as in the target. */
-void portrait_prepare_party_textures(void) {
+void portrait_party_prepare_textures(void) {
     portrait_sheet_t* file;
     s32 offset;
     s32 pal_offset;
@@ -52,7 +52,7 @@ void portrait_prepare_party_textures(void) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE, file);
         } else {
-            g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+            g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE, file);
         }
     } else {
@@ -89,7 +89,7 @@ void portrait_prepare_party_textures(void) {
                         value = base + 0x5f;
                     }
                 } else {
-                    g_portrait_job_data = job_data_get(unit->job_id);
+                    g_portrait_job_data = job_get_data(unit->job_id);
                     value = g_portrait_job_data->spritesheet_id;
                 }
                 job_id = unit->job_id;
@@ -170,7 +170,7 @@ void portrait_prepare_party_textures(void) {
             DrawSync(0);
         }
     }
-    heap_block_release(file);
+    heap_release_block(file);
 }
 
 /* Loads EVENT/UNIT.BIN (0x10000 bytes) via the entry-mode load paths and uploads its
@@ -190,7 +190,7 @@ void portrait_prepare_party_textures(void) {
  * order. The palette offset's `/ 2` of an even sum compiles to the target's
  * plain `sra` and its allocation order; it also adds an 8-byte compiler
  * stack slot, so `unused` covers only the remaining 16 bytes. */
-void formation_prepare_sprites(void) {
+void deploy_prepare_sprites(void) {
     u8 unused[0x10];
     u8* buffer;
     s32 i;
@@ -217,7 +217,7 @@ void formation_prepare_sprites(void) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         } else {
-            g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+            g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         }
     } else {
@@ -251,7 +251,7 @@ void formation_prepare_sprites(void) {
                     code = base + 0x5F;
                 }
             } else {
-                g_portrait_job_data = job_data_get(party->job_id);
+                g_portrait_job_data = job_get_data(party->job_id);
                 code = g_portrait_job_data->spritesheet_id;
             }
             if (party->job_id == JOB_ID_BARD) {
@@ -374,5 +374,5 @@ void formation_prepare_sprites(void) {
             DrawSync(0);
         }
     }
-    heap_block_release(buffer);
+    heap_release_block(buffer);
 }

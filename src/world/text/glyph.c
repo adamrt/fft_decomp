@@ -13,7 +13,7 @@
  * An odd x starts mid-byte: the first pixel fills the high nibble of the
  * existing byte, and the row's last byte is stored whole, clearing the pixel
  * to the right of the glyph. */
-s32 menu_text_glyph_to_4bpp_image_render(s32 glyph, u8* image, const text_image_position_t* target, s32 palette) {
+s32 menu_text_render_glyph_to_4bpp_image(s32 glyph, u8* image, const text_image_position_t* target, s32 palette) {
     s32 row;
     s32 col;
     u8* dst;
@@ -23,7 +23,7 @@ s32 menu_text_glyph_to_4bpp_image_render(s32 glyph, u8* image, const text_image_
 
     /* The font pointer goes through a local for the exact match. */
     font = g_text_glyph_bitmap_data;
-    bits_primary_reader_init(font + glyph * TEXT_GLYPH_BYTES);
+    bits_primary_init_reader(font + glyph * TEXT_GLYPH_BYTES);
     row = 0;
     if ((target->x & 1) == 0) {
         for (; row < 14; row++) {

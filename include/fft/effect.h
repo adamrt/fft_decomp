@@ -40,9 +40,9 @@ s32 effect_noop(s32 unused_record_index, s32 unused_callback_slot, s32 unused_em
 
 /* targets */
 enum {
-    EFFECT_TARGET_COUNT_MAX = UNIT_RUNTIME_SLOT_COUNT,
+    EFFECT_TARGET_COUNT_MAX = MAP_UNIT_SLOT_COUNT,
     EFFECT_CASTER_ENTRY = EFFECT_TARGET_COUNT_MAX, /* index of the caster's record in effect_context_t.targets */
-    /* the target index that makes effect_target_world_coords_resolve resolve the caster */
+    /* the target index that makes effect_resolve_target_world_coords resolve the caster */
     EFFECT_TARGET_INDEX_CASTER = -1
 };
 
@@ -50,14 +50,14 @@ enum {
 typedef enum effect_target_type { EFFECT_TARGET_TYPE_UNIT = 0, EFFECT_TARGET_TYPE_TILE = 1 } effect_target_type_e;
 
 /* Ten-byte target records of g_effect_context.targets.
- * Unit targets store a runtime id at 0x02; tile targets reuse that 16-bit value for X
+ * Unit targets store a map unit id at 0x02; tile targets reuse that 16-bit value for X
  * and carry map Z/Y at 0x04/0x06. Entry EFFECT_CASTER_ENTRY is the
  * caster. */
 typedef struct effect_target {
     u16 target_type; /* 0x00; effect_target_type_e */
     union {
         struct {
-            u8 runtime_id;
+            u8 map_unit_id;
             u8 result_animation; /* effect_hit_result_e */
         } unit;
         SVECTOR tile; /* x, layer, y */
@@ -66,8 +66,8 @@ typedef struct effect_target {
 typedef char effect_target_size_must_be_10[(sizeof(effect_target_t) == 10) ? 1 : -1];
 
 /* result_animation of a target in an effect init record. The records built by
- * action_effect_start use the first four; the weapon-hit
- * records (action_secondary_init_build) use all but REFLECTED. */
+ * start_action_effect use the first four; the weapon-hit
+ * records (build_action_secondary_init) use all but REFLECTED. */
 typedef enum effect_hit_result {
     EFFECT_HIT_NORMAL = 0,
     EFFECT_HIT_CRITICAL = 1,
@@ -87,7 +87,7 @@ typedef struct effect_context {
     u8 math_skill_flag; /* 0x03; enables the effect flags' spawn_delay_override */
     effect_target_t targets[EFFECT_TARGET_COUNT_MAX + 1]; /* 0x04; caster at EFFECT_CASTER_ENTRY */
     /* 0xae; at most 15 units with stats, excluding targets and the caster. */
-    u8 spectator_ids[UNIT_RUNTIME_SLOT_COUNT - 1];
+    u8 spectator_ids[MAP_UNIT_SLOT_COUNT - 1];
     u8 _unused_bd;
     SVECTOR target_tile; /* 0xbe; post-action destination tile, x/layer/y */
     u16 used_weapon_id;  /* 0xc6 */
@@ -96,16 +96,16 @@ typedef char effect_context_size_must_be_200[(sizeof(effect_context_t) == 200) ?
 
 extern effect_context_t g_effect_context;
 
-void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-void effect_unit_world_coords_get(
-    s32 adjust_for_tile_height, u32 battle_id, const effect_context_t* effect_coordinates, SVECTOR* destination);
-void effect_target_world_coords_resolve(
+void effect_copy_unit_world_vector(u32 map_unit_id, VECTOR* destination);
+void effect_get_unit_world_coords(
+    s32 adjust_for_tile_height, u32 battle_unit_id, const effect_context_t* effect_coordinates, SVECTOR* destination);
+void effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, const effect_context_t* coord_data, SVECTOR* out);
 
 /* particles */
 /* Motion state of an effect slot (effect_slot_t +0x98) and of a
  * particle (effect_work_record_t +0x08), stepped once a frame by
- * slot_motion_step and effect_particle_integrate_motion:
+ * step_slot_motion and effect_particle_integrate_motion:
  * position gains velocity; velocity keeps (inertia -
  * g_effect_inertia_threshold) / inertia of itself, gains
  * acceleration * ONE / inertia and gains g_effect_gravity scaled by
@@ -120,7 +120,7 @@ typedef struct effect_motion {
 } effect_motion_t;
 typedef char effect_motion_size_must_be_52[(sizeof(effect_motion_t) == 52) ? 1 : -1];
 
-/* effect_list_node_t.kind: how particle_sprite_draw places the sprite, and the
+/* effect_list_node_t.kind: how draw_particle_sprite places the sprite, and the
  * FRAME_CHANGED bit it sets when the sequence picks another frame. */
 enum { EFFECT_LIST_NODE_FRAME_CHANGED = 0x1, EFFECT_LIST_NODE_PLACEMENT_MASK = 0x6 };
 
@@ -132,7 +132,7 @@ typedef enum effect_list_node_placement {
     EFFECT_LIST_NODE_SCREEN = 0x6          /* screen position as stored, no zoom */
 } effect_list_node_placement_e;
 
-/* A sprite node's heap block (sprite_block_alloc): an eight-byte prefix, then one
+/* A sprite node's heap block (alloc_sprite_block): an eight-byte prefix, then one
  * pointer for each sprite part. */
 typedef struct effect_sprite_block {
     struct {
@@ -158,7 +158,7 @@ typedef struct effect_list_node {
     s16 x;                               /* 0x0c: from the owning work record's position */
     s16 y;                               /* 0x0e */
     s16 z;                               /* 0x10 */
-    s16 screen_rotation_angle;           /* 0x12: particle_sprite_state_update stores the velocity heading here */
+    s16 screen_rotation_angle;           /* 0x12: update_particle_sprite_state stores the velocity heading here */
     u8 depth_mode;                       /* 0x14: effect_sprite_depth_mode_e */
     u8 _padding_15;                      /* aligns frame_timer */
     s16 frame_timer;                     /* 0x16: counts down by 2; the next opcode runs at <= 0 */
@@ -246,14 +246,13 @@ static inline u16 effect_get_current_script_header(effect_record_t* record) {
 }
 
 /* map control */
-s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_freeze_map(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_unfreeze_map(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_map_set_3d_objects_state_1(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_map_set_3d_objects_state_2(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_map_split_mesh_and_set_3d_objects_state_3(
-    s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
-s32 effect_map_set_timed_transform_duration(
+s32 effect_set_map_3d_objects_state_1(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_set_map_3d_objects_state_2(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_set_map_3d_objects_state_3(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
+s32 effect_set_map_timed_transform_duration(
     s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
 
 /* texture pages */

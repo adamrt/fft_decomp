@@ -45,7 +45,7 @@ extern u8 g_conditions_special_quad_ranges[12];
 /* 0x14-byte vertex-color records, one per quad. */
 extern conditions_colors_t g_conditions_special_vertex_colors[81];
 /* Scale each vertex color by scale / 128. */
-static void gfx_scale_poly_gt4_colors(const conditions_colors_t* colors, s32 scale, POLY_GT4* poly) {
+static void scale_poly_gt4_colors(const conditions_colors_t* colors, s32 scale, POLY_GT4* poly) {
     s32 r;
     s32 g;
     s32 b;
@@ -71,7 +71,7 @@ static void gfx_scale_poly_gt4_colors(const conditions_colors_t* colors, s32 sca
 /* Initialize the first 32 semi-transparent POLY_GT4s of buffer 0
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
-static void gfx_init_poly_gt4_array_32(s32 x, s32 y) {
+static void init_poly_gt4_array_32(s32 x, s32 y) {
     s32 count = 0;
     s32 one = 1;
     s16* palette_origin;
@@ -98,7 +98,7 @@ static void gfx_init_poly_gt4_array_32(s32 x, s32 y) {
 /* Initialize the final 8 semi-transparent POLY_GT4s of buffer 0
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
-static void gfx_init_poly_gt4_array_8(s32 x, s32 y) {
+static void init_poly_gt4_array_8(s32 x, s32 y) {
     s32 count = 0;
     s32 one = 1;
     s16* palette_origin;
@@ -205,7 +205,7 @@ static void gfx_init_poly_gt4_array_8(s32 x, s32 y) {
 /* Show a general condition banner (DisplayConditions 8 and up) from its BONUS.BIN image: wipe in
  * the lower three pieces and then the upper three over 20 frames, hold for hold_frames, then wipe
  * it out over 10. Circle ends it at once. */
-void conditions_show_general(s32 hold_frames) {
+void conditions_show_general_banner(s32 hold_frames) {
     sprite_sheet_frame_t* quads;
     u8* range = g_conditions_general_quad_ranges;
     conditions_colors_t* colors = g_conditions_general_vertex_colors;
@@ -220,13 +220,13 @@ void conditions_show_general(s32 hold_frames) {
     s32 hide_offset;
     u32* input;
 
-    conditions_load_banner_image(thread_current_parameter_1_get() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
+    conditions_load_banner_image(thread_current_get_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
     {
         u8* parameters = &range[condition];
 
         quad_count = parameters[1] - parameters[0];
     }
-    gfx_init_poly_gt4_array_32(0, 1);
+    init_poly_gt4_array_32(0, 1);
     quads = g_conditions_general_quads;
 
     for (index = 0; index < quad_count; index++) {
@@ -280,7 +280,7 @@ void conditions_show_general(s32 hold_frames) {
                 if (QUAD(index).source.h < reveal_offset_top)
                     reveal_offset_top = QUAD(index).source.h;
                 STORE_QUAD_REVEAL(poly, index, reveal_offset_top);
-                gfx_scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
+                scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             }
         }
@@ -290,7 +290,7 @@ void conditions_show_general(s32 hold_frames) {
             if (QUAD(index).source.h < reveal_offset_bottom)
                 reveal_offset_bottom = QUAD(index).source.h;
             STORE_QUAD_REVEAL(poly, index, reveal_offset_bottom);
-            gfx_scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
+            scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
             gfx_draw_or_append_gpu_primitive(poly);
         }
 
@@ -323,7 +323,7 @@ void conditions_show_general(s32 hold_frames) {
             for (index = quad_count - 1; index >= 0; index--) {
                 POLY_GT4* poly = &g_gfx_poly_gt4_buffers[buffer][index];
                 u8* parameters = &range[condition];
-                gfx_scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
+                scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             }
             frame++;
@@ -343,7 +343,7 @@ void conditions_show_general(s32 hold_frames) {
             if (QUAD(index).source.h < hide_offset)
                 hide_offset = QUAD(index).source.h;
             STORE_QUAD_HIDE(poly, index, hide_offset);
-            gfx_scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
+            scale_poly_gt4_colors(VERTEX_COLORS(index), 0x80, poly);
             gfx_draw_or_append_gpu_primitive(poly);
         }
         hide_offset += 8;
@@ -384,8 +384,8 @@ void conditions_special_thread(void) {
     u8* table = g_conditions_special_quad_ranges;
     conditions_colors_t* color_table = g_conditions_special_vertex_colors;
 
-    banner_id = thread_current_parameter_1_get();
-    use_small_array = thread_current_parameter_2_get();
+    banner_id = thread_current_get_parameter_1();
+    use_small_array = thread_current_get_parameter_2();
     {
         u8* parameters = &g_conditions_special_quad_ranges[banner_id];
 
@@ -393,9 +393,9 @@ void conditions_special_thread(void) {
         quad_count = parameters[1] - parameters[0];
     }
     if (use_small_array == 0) {
-        gfx_init_poly_gt4_array_32(0x20, 0);
+        init_poly_gt4_array_32(0x20, 0);
     } else {
-        gfx_init_poly_gt4_array_8(0x20, 0);
+        init_poly_gt4_array_8(0x20, 0);
     }
 
     for (quad_index = 0; quad_index < quad_count; quad_index++) {
@@ -416,10 +416,10 @@ void conditions_special_thread(void) {
     /* Parameter 3 selects the next phase at any frame: 2 jumps from the
        fade-in past the hold loop to the fade-out, 1 ends the thread. */
     while (scale < 0x80) {
-        if (thread_current_parameter_3_get() == 2) {
+        if (thread_current_get_parameter_3() == 2) {
             goto fade_out;
         }
-        if (thread_current_parameter_3_get() == 1) {
+        if (thread_current_get_parameter_3() == 1) {
             thread_yield();
             thread_current_exit();
             return;
@@ -433,12 +433,12 @@ void conditions_special_thread(void) {
             if (use_small_array == 0) {
                 POLY_GT4* poly = &(g_gfx_poly_gt4_flat_pool + buffer * 40)[quad_index];
 
-                gfx_scale_poly_gt4_colors(vertex_colors, scale, poly);
+                scale_poly_gt4_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             } else {
                 POLY_GT4* poly = &polys[quad_index];
 
-                gfx_scale_poly_gt4_colors(vertex_colors, scale, poly);
+                scale_poly_gt4_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             }
         }
@@ -446,10 +446,10 @@ void conditions_special_thread(void) {
         scale += 8;
     }
     for (;;) {
-        if (thread_current_parameter_3_get() == 2) {
+        if (thread_current_get_parameter_3() == 2) {
             break;
         }
-        if (thread_current_parameter_3_get() == 1) {
+        if (thread_current_get_parameter_3() == 1) {
             thread_yield();
             thread_current_exit();
             return;
@@ -463,12 +463,12 @@ void conditions_special_thread(void) {
             if (use_small_array == 0) {
                 POLY_GT4* poly = &(g_gfx_poly_gt4_flat_pool + buffer * 40)[quad_index];
 
-                gfx_scale_poly_gt4_colors(vertex_colors, 0x80, poly);
+                scale_poly_gt4_colors(vertex_colors, 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             } else {
                 POLY_GT4* poly = &polys[quad_index];
 
-                gfx_scale_poly_gt4_colors(vertex_colors, 0x80, poly);
+                scale_poly_gt4_colors(vertex_colors, 0x80, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             }
         }
@@ -477,7 +477,7 @@ void conditions_special_thread(void) {
 fade_out:
     scale = 0x80;
     do {
-        if (thread_current_parameter_3_get() == 1) {
+        if (thread_current_get_parameter_3() == 1) {
             break;
         }
         buffer ^= 1;
@@ -489,12 +489,12 @@ fade_out:
             if (use_small_array == 0) {
                 POLY_GT4* poly = &(g_gfx_poly_gt4_flat_pool + buffer * 40)[quad_index];
 
-                gfx_scale_poly_gt4_colors(vertex_colors, scale, poly);
+                scale_poly_gt4_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             } else {
                 POLY_GT4* poly = &polys[quad_index];
 
-                gfx_scale_poly_gt4_colors(vertex_colors, scale, poly);
+                scale_poly_gt4_colors(vertex_colors, scale, poly);
                 gfx_draw_or_append_gpu_primitive(poly);
             }
         }

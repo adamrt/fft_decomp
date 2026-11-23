@@ -77,7 +77,7 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* des
 
 #ifdef FFT_EVENT_EQUIP
 /* Tile the command rectangle, or the shared rectangle when source is 2. */
-menu_instruction_t* menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* command) {
     RECT rect;
     s32 base_x;
     s32 base_y;

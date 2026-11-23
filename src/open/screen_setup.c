@@ -20,7 +20,7 @@
 /* Draw/display environments rebuilt for title and ending screen modes. */
 gfx_screen_environment_t g_gfx_screen_environments[2] = { 0 };
 
-static void system_init_runtime_state(void);
+static void init_runtime_state(void);
 
 /* Fades the CD audio (movie streams and XA) in or out over duration ticks.
  * A non-zero cd_mix_level is the CdMix attenuation suzuki_sound_put_type sets
@@ -41,14 +41,14 @@ void sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration) {
 
 /* Set up the title sequence: reset the runtime state, load the title graphics and
  * start the FFTST.STR logo movie, or the title menu when skip_movie is set. */
-void title_sequence_init(s32 skip_movie) {
-    music_all_unload();
-    system_init_runtime_state();
-    title_graphics_load();
+void title_init_sequence(s32 skip_movie) {
+    music_unload_all();
+    init_runtime_state();
+    title_load_graphics();
     gfx_init_screen_environments(1);
-    display_object_pools_init();
-    input_init_directional_state();
-    title_sequence_start(skip_movie);
+    display_object_init_pools();
+    input_init_repeat();
+    title_start_sequence(skip_movie);
 }
 
 /* Set up the ending: reset the runtime state, park FRAME.BIN's 64x256 VRAM page
@@ -56,8 +56,8 @@ void title_sequence_init(s32 skip_movie) {
 void ending_init(void) {
     RECT source;
 
-    music_all_unload();
-    system_init_runtime_state();
+    music_unload_all();
+    init_runtime_state();
 
     source.x = 0x3c0;
     source.y = 0x100;
@@ -67,10 +67,10 @@ void ending_init(void) {
     DrawSync(0);
 
     g_system_vsync_mode = 0;
-    ending_graphics_load();
+    ending_load_graphics();
     gfx_init_screen_environments(1);
-    display_object_pools_init();
-    movie_ending_start();
+    display_object_init_pools();
+    movie_start_ending();
 }
 
 /* Copy FRAME.BIN's 64x256 VRAM page (the window frames and UI sprites) back
@@ -186,7 +186,7 @@ void gfx_init_screen_environments(s32 clear_first) {
  * the frame image buffer at 0x801d0000 and the OPNTEX data buffer at 0x80140000;
  * no OPNBK image read; the overlay fade subtractive in ordering-table entry 2; no
  * buttons, no script and the first title demo movie next. */
-static void system_init_runtime_state(void) {
+static void init_runtime_state(void) {
     g_system_runtime_flags
         = SYSTEM_RUNTIME_FLAG_RUNNING | SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED | SYSTEM_RUNTIME_FLAG_WIDE_SCREEN;
     g_file_destination = (u8*)0x801d0000;
@@ -204,7 +204,7 @@ static void system_init_runtime_state(void) {
 }
 
 /* Start a frame: clear the active ordering table and queue the overlay fade. */
-void gfx_frame_begin(void) {
+void gfx_begin_frame(void) {
     gfx_clear_current_otag();
     gfx_update_overlay_fade(g_gfx_otags[g_gfx_active_buffer_index]);
 }

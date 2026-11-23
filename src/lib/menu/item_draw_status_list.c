@@ -32,14 +32,14 @@ void item_draw_status_list(s16 item_id) {
     s32 x;
     s32 y;
 
-    bits_primary_reader_init(g_item_attributes[attribute].immunity);
+    bits_primary_init_reader(g_item_attributes[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (bits_primary_read(1) != 0) {
             count++;
         }
     }
-    bits_primary_reader_init(g_item_attributes[attribute].innate);
-    bits_secondary_reader_init(g_item_attributes[attribute].starting);
+    bits_primary_init_reader(g_item_attributes[attribute].innate);
+    bits_secondary_init_reader(g_item_attributes[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
         bit = bits_primary_read(1);
         bit |= bits_secondary_read(1);
@@ -59,7 +59,7 @@ void item_draw_status_list(s16 item_id) {
     tpage = GetTPage(0, 0, 0x180, 0);
     drawn = 0;
     icon_tpage = g_menu_cursor_texture_page;
-    bits_primary_reader_init(g_item_attributes[attribute].immunity);
+    bits_primary_init_reader(g_item_attributes[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (drawn >= count) {
             break;
@@ -80,8 +80,8 @@ void item_draw_status_list(s16 item_id) {
             drawn++;
         }
     }
-    bits_primary_reader_init(g_item_attributes[attribute].innate);
-    bits_secondary_reader_init(g_item_attributes[attribute].starting);
+    bits_primary_init_reader(g_item_attributes[attribute].innate);
+    bits_secondary_init_reader(g_item_attributes[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
         if (drawn >= count) {
             break;

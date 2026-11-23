@@ -16,7 +16,7 @@ extern POLY_FT4 g_loading_primitives[2][7];
  * the CLUT loaded to VRAM (0x70, 0x1e2), one copy per display buffer, the text
  * starting at (x + 0xa0, y + 0xc8).
  *
- * visible is stored for loading_otag_append, which blinks the
+ * visible is stored for loading_message_append_to_otag, which blinks the
  * message, and the blink counter restarts. */
 void loading_message_build(u32 visible, s32 x, s32 y) {
     POLY_FT4* prims = g_loading_primitives[0];
@@ -84,7 +84,7 @@ void loading_message_build_offset(u32 visible) {
 
 /* Link the "Now Loading" quads of the current display buffer into otag while the
  * message is visible. It blinks: 60 calls shown, 60 calls hidden. */
-void loading_otag_append(u32* otag) {
+void loading_message_append_to_otag(u32* otag) {
     int i;
 
     if (g_loading_visible != 0) {

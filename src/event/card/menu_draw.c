@@ -18,37 +18,36 @@ static u16 s_save_gfx_draw_clut;
 
 static s16 s_save_menu_window_right_x = 0;
 
-/* Stream command: draw a textured quad of size (command[5], command[6]) at
- * (command[3], command[4]) with texture origin (command[7], command[8]), in the
- * current sprite color or, for MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. Returns the next command. */
-u8* menu_draw_textured_quad(u8* command) {
+/* Draw the command's textured quad at its literal position, in the current sprite color or, for
+ * MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. CARD's copy has no list rows. Returns the next command. */
+menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* command) {
     RECT rect;
     const rgb24_t* color;
-    s32 x = command[3];
-    s32 y = command[4];
+    s32 x = command->sprite.sprite.x;
+    s32 y = command->sprite.sprite.y;
 
     rect.x = x;
     rect.y = y;
-    rect.w = command[5];
-    rect.h = command[6];
+    rect.w = command->sprite.sprite.w;
+    rect.h = command->sprite.sprite.h;
     color = &g_menu_text_color;
-    if (command[0] == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
+    if (command->header.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
         color = 0;
     }
-    menu_gfx_enqueue_textured_quad(&rect, command[7], command[8], color, g_menu_gfx_semitransparency,
-        g_save_gfx_texture_page, s_save_gfx_draw_clut, g_menu_gfx_otag_index);
-    return command + command[1];
+    menu_gfx_enqueue_textured_quad(&rect, command->sprite.sprite.u, command->sprite.sprite.v, color,
+        g_menu_gfx_semitransparency, g_save_gfx_texture_page, s_save_gfx_draw_clut, g_menu_gfx_otag_index);
+    return menu_next_instruction(command);
 }
 
 /*
  * Draw a menu window's 5x9/5x7 border pieces around its rectangle and tile
- * the interior through menu_opcode_11_draw_tiled_rectangle.
+ * the interior through menu_opcode_11_draw_background_tiles.
  *
  * Source 2 takes the signed rectangle from the shared window record, other sources use the command's
  * byte operands, and source 1 selects the alternate border texture
  * coordinates. Returns the command that follows.
  */
-menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction) {
     RECT rect;
     s32 left;
     s32 top;
@@ -66,7 +65,7 @@ menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
     s32 column;
     s32 row;
 
-    if (command->rectangle_source == 2) {
+    if (instruction->window.rectangle_source == 2) {
         left = g_menu_window_rect_source->rect.x - 5;
         top = g_menu_window_rect_source->rect.y - 9;
         full_columns = g_menu_window_rect_source->rect.w / 16;
@@ -76,19 +75,19 @@ menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
     } else {
         u8 width;
         u8 height;
-        left = command->x - 5;
-        top = command->y - 9;
-        width = command->width;
+        left = instruction->window.x - 5;
+        top = instruction->window.y - 9;
+        width = instruction->window.width;
         full_columns = width >> 4;
         partial_width = width & 15;
-        height = command->height;
+        height = instruction->window.height;
         full_rows = height >> 4;
         partial_height = height & 15;
     }
-    g_cmd_window_interior_command.rectangle_source = command->rectangle_source;
-    s_save_menu_window_right_x = command->width + left + 5;
+    g_cmd_window_interior_command.rectangle_source = instruction->window.rectangle_source;
+    s_save_menu_window_right_x = instruction->window.width + left + 5;
     v_top = 2;
-    if (command->rectangle_source == 1) {
+    if (instruction->window.rectangle_source == 1) {
         u_left = 0xDA;
         v_top = 3;
         u_middle = 0xDF;
@@ -158,18 +157,18 @@ menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
             &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     }
 
-    if (command->rectangle_source == 2) {
+    if (instruction->window.rectangle_source == 2) {
         g_gfx_tiled_rect.x = g_menu_window_rect_source->rect.x;
         g_gfx_tiled_rect.y = g_menu_window_rect_source->rect.y;
         g_gfx_tiled_rect.w = g_menu_window_rect_source->rect.w;
         g_gfx_tiled_rect.h = g_menu_window_rect_source->rect.h;
     } else {
-        g_cmd_window_interior_command.x = command->x;
-        g_cmd_window_interior_command.y = command->y;
-        g_cmd_window_interior_command.width = command->width;
-        g_cmd_window_interior_command.height = command->height;
+        g_cmd_window_interior_command.x = instruction->window.x;
+        g_cmd_window_interior_command.y = instruction->window.y;
+        g_cmd_window_interior_command.width = instruction->window.width;
+        g_cmd_window_interior_command.height = instruction->window.height;
     }
-    menu_opcode_11_draw_tiled_rectangle((menu_instruction_t*)&g_cmd_window_interior_command);
+    menu_opcode_11_draw_background_tiles((menu_instruction_t*)&g_cmd_window_interior_command);
 
     /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
@@ -199,12 +198,12 @@ menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command) {
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
         &rect, u_right - 5, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
-    command = (menu_window_command_t*)((u8*)command + command->length);
-    return command;
+    instruction = menu_next_instruction(instruction);
+    return instruction;
 }
 
 /* Tile the command rectangle, or the shared rectangle when source is 2. */
-menu_instruction_t* menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* command) {
+menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* command) {
     RECT rect;
     s32 base_x;
     s32 base_y;
@@ -276,25 +275,24 @@ menu_instruction_t* menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* comm
     return command;
 }
 
-/* Stream command: set the texture page from the command (color mode
- * data[4], x data[3] * 16, y data[2] * 256, blend rate 0) and return the
- * next command. */
-const u8* menu_set_texture_page(const u8* data) {
-    g_save_gfx_texture_page = GetTPage(data[4], 0, data[3] << 4, data[2] << 8);
-    return data + data[1];
+/* Set CARD's texture page from the command. Unlike the shared handler it ignores the blend bits and uses
+ * blend rate 0. Returns the next command. */
+menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* data) {
+    g_save_gfx_texture_page
+        = GetTPage(data->texture_page.depth, 0, data->texture_page.x_div_16 << 4, data->texture_page.y_blend << 8);
+    return menu_next_instruction(data);
 }
 
-/* Menu script command: select the ordering-table slot later primitives go to (byte 3) and return
- * the next command (byte 1 holds this command's length). */
-const u8* menu_set_draw_priority(const u8* data) {
-    g_menu_gfx_otag_index = data[3];
-    return data + data[1];
+/* Select the ordering-table slot later primitives go to and return the next command. */
+menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* data) {
+    g_menu_gfx_otag_index = data->draw_state.value;
+    return menu_next_instruction(data);
 }
 
 /* Draw the command's literal value as `width` zero-padded digit glyphs from (x, y),
  * `spacing` pixels apart, tinted with the menu text color. A style of 2 or more draws
  * nothing. Returns the next command. */
-menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command) {
+menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_command_t* command) {
     s8 text[16];
     menu_digit_glyph_t glyph;
     RECT unused_minus_rect; /* Preserves the original frame size. */
@@ -339,9 +337,9 @@ menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t*
 
 /* Advances the animated cursor at `pos` and draws it, sliding horizontally,
  * with its semi-transparent shadow. `mode` bit 0 starts the reverse curve;
- * mode 0 cancels it. The same routine as menu_update_and_draw_animated_cursor, except
+ * mode 0 cancels it. The same routine as WORLD's copy, except
  * that it draws at the fixed ordering-table entries 0x3C and 0x3B. */
-void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
+void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     s32 active;
     s32 active_bit = *state >> 15;

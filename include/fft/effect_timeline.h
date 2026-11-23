@@ -30,7 +30,7 @@ typedef struct effect_keyframe_table {
 typedef char effect_keyframe_table_size_must_be_128[(sizeof(effect_keyframe_table_t) == 128) ? 1 : -1];
 
 /* A particle channel keyframe's 16-bit action value (effect_keyframe_table_t.action), run by
- * keyframe_actions_run when the keyframe is entered. Bit 7 is set in a few retail
+ * run_keyframe_actions when the keyframe is entered. Bit 7 is set in a few retail
  * files and read by nothing. */
 enum {
     EFFECT_KEYFRAME_ACTION_CALLBACK_MASK = 0x0007,
@@ -48,7 +48,7 @@ enum { EFFECT_PALETTE_TRACK_KEYFRAMES = 33 };
 
 /* The preset byte of a color track keyframe. */
 enum {
-    EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map color mode (BATTLE_MAP_COLOR_MODE_*) the color is applied in */
+    EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map color mode (MAP_COLOR_MODE_*) the color is applied in */
     EFFECT_COLOR_KEYFRAME_APPLY = 0x80      /* clear on the unit tracks: the keyframe only waits */
 };
 
@@ -157,7 +157,7 @@ typedef struct effect_camera_keyframes_21 {
     s16 last_keyframe_index;
 } effect_camera_keyframes_21_t;
 
-/* The camera table camera_active_keyframe_find found its keyframe in: the high half of the
+/* The camera table find_parent_keyframe found its keyframe in: the high half of the
  * index it reports. */
 enum { EFFECT_CAMERA_TABLE_PHASE1 = 0, EFFECT_CAMERA_TABLE_CHILD = 1, EFFECT_CAMERA_TABLE_PHASE2 = 2 };
 
@@ -322,7 +322,7 @@ extern u32 g_effect_camera_zoom_mode;
 extern VECTOR g_effect_camera_zoom_saved;
 
 void effect_camera_init(void);
-void effect_camera_tracks_seed(void);
+void effect_camera_seed_tracks(void);
 
 /* camera playback */
 void effect_camera_start_parent_keyframe_moves(s16 frame);

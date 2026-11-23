@@ -10,7 +10,7 @@ thread_t g_thread_contexts[VARIANT_THREAD_TABLE_SLOT_COUNT] = { 0 };
 s32 g_thread_current_id;
 
 /* Wait count frames by yielding count times. */
-void thread_frames_wait(s32 count) {
+void thread_wait_frames(s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -20,7 +20,7 @@ void thread_frames_wait(s32 count) {
 
 /* Initialize the slot stack, code and task state; parameters 1-3 are retained. */
 void thread_start(s32 thread_id, void (*function)(void)) {
-    void* global_pointer = thread_current_global_pointer_get();
+    void* global_pointer = thread_current_get_global_pointer();
     thread_t* thread = &g_threads[thread_id];
 
     thread->global_pointer = global_pointer;
@@ -58,7 +58,7 @@ void thread_current_exit(void) {
 
 /* Zeroes the first 16 thread records (16 * 0x400 bytes), makes thread 0 the current
  * thread and marks it running. */
-void thread_scheduler_reset(void) {
+void thread_reset_scheduler(void) {
     u32* word;
     s32 index = (THREAD_ID_COUNT * sizeof(thread_t) / sizeof(u32)) - 1;
 
@@ -73,7 +73,7 @@ void thread_scheduler_reset(void) {
 }
 
 /* Yield until thread_id's slot is idle. It yields before the first test. */
-void thread_inactive_wait(s32 thread_id) {
+void thread_wait_inactive(s32 thread_id) {
     do {
         thread_yield();
     } while (g_threads[thread_id].is_running != 0);
@@ -85,9 +85,9 @@ s32 thread_is_running(s32 thread_id) {
 }
 
 /* Store parameters 1-3 in a slot's record, which the thread reads with
- * thread_current_parameter_1_get..3. thread_start keeps them, and callers also use it to pass new
+ * thread_current_get_parameter_1..3. thread_start keeps them, and callers also use it to pass new
  * values to a running thread. */
-void thread_parameters_set(s32 thread_id, s32 parameter_1, s32 parameter_2, s32 parameter_3) {
+void thread_set_parameters(s32 thread_id, s32 parameter_1, s32 parameter_2, s32 parameter_3) {
     thread_t* thread = &g_threads[thread_id];
     thread->function_parameter_1 = parameter_1;
     thread->function_parameter_2 = parameter_2;
@@ -96,7 +96,7 @@ void thread_parameters_set(s32 thread_id, s32 parameter_1, s32 parameter_2, s32 
 
 /* Store parameters 1-4 in a slot's record. thread_start clears parameter 4, so callers set them
  * after starting the thread. */
-void thread_four_parameters_set(s32 slot, s32 first, s32 second, s32 third, s32 fourth) {
+void thread_set_four_parameters(s32 slot, s32 first, s32 second, s32 third, s32 fourth) {
     thread_t* thread = &g_threads[slot];
     thread->function_parameter_1 = first;
     thread->function_parameter_2 = second;

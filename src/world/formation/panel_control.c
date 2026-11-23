@@ -9,21 +9,21 @@
 
 /* Open or close the equipment-change panel and its numeric stats panel. While the status panel
  * slides, an open request does nothing, so per-frame callers open it once the slide ends. */
-void formation_toggle_change_panel(s32 enable) {
+void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         enable = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
             if (thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
                 thread_start(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_equipment_thread);
-                thread_parameters_set(
+                thread_set_parameters(
                     SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_change_banner_thread_params, 0, 0);
             }
             unit_panel_toggle_numbers_thread(enable);
         }
     } else {
-        menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
 
@@ -37,12 +37,12 @@ void formation_toggle_preview_equipment_panel(s32 enable) {
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
             thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_thread);
-            thread_parameters_set(
+            thread_set_parameters(
                 THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_formation_stat_preview_panel_thread_params, 0, 0);
         }
         enable = 1;
     } else {
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
     }
     g_formation_change_banner_thread_params.style = enable;
 }

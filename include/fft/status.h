@@ -8,8 +8,8 @@
 #include "psx/types.h"
 
 struct action_data;
-struct unit_stats;
-struct unit_runtime;
+struct battle_unit;
+struct map_unit;
 
 /* status IDs */
 enum {
@@ -78,7 +78,7 @@ typedef enum status_id {
 
 /* status sets */
 /* A unit's innate, immunity and current statuses, STATUS_BYTE_COUNT bytes
- * each. job_data_copy copies the three sets as one 15-byte block, so
+ * each. copy_job_data copies the three sets as one 15-byte block, so
  * they stay one aggregate that a whole-block byte copy can span; status readers
  * use the named sets. */
 typedef struct status_sets {
@@ -131,7 +131,7 @@ typedef enum status_effect_flags_2 {
     STATUS_EFFECT_FLAG_2_PREVENT_REACTION = 0x80
 } status_effect_flags_2_e;
 
-/* Rows of g_status_check_sets. status_check_data_init builds rows 0
+/* Rows of g_status_check_sets. status_init_check_data builds rows 0
  * to 9 from the flag bytes of g_status_effect_data and writes row 10
  * itself. Each enumerator's comment lists the statuses its row holds in this
  * release, then what the row is used for. */
@@ -191,15 +191,15 @@ extern status_infliction_data_t g_status_infliction_data[];
 /* Built status masks, indexed by status_check_set_e. */
 extern u8 g_status_check_sets[STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUNT];
 
-void status_check_data_init(void);
-s32 status_unit_set_test(const struct unit_stats* unit, status_check_set_e status_set);
+void status_init_check_data(void);
+s32 status_has_any_in_check_set(const struct battle_unit* unit, status_check_set_e status_set);
 
 /* status changes */
-/* How status_unit_change changes inflicted_status: OR, AND-not or
+/* How status_change_unit_flag changes inflicted_status: OR, AND-not or
  * replacement. It then merges status_sets.innate into status_sets.current. */
 typedef enum status_change { STATUS_ADD = 0, STATUS_REMOVE = 1, STATUS_REPLACE = 2 } status_change_e;
 
-/* Values accepted by status_action_state_set. */
+/* Values accepted by status_set_action_state. */
 typedef enum status_action_state {
     STATUS_ACTION_STATE_NONE = 0,
     STATUS_ACTION_STATE_CHARGING = 5,
@@ -217,26 +217,26 @@ enum {
     STATUS_ACTION_RESULT_SCRIPT_FILTER_EXCLUDED = 0x100
 };
 
-void status_unit_change(struct unit_stats* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
-void status_current_update(struct unit_stats* unit);
-s32 status_ct_set(struct unit_stats* unit, s32 status_id, s32 removing);
-void status_unit_init(struct unit_stats* unit);
-void status_action_state_set(struct unit_stats* unit, u8 action_state);
-void status_clear_action_state(struct unit_stats* unit);
+void status_change_unit_flag(struct battle_unit* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
+void status_refresh_current(struct battle_unit* unit);
+s32 status_set_ct(struct battle_unit* unit, s32 status_id, s32 removing);
+void status_init_unit(struct battle_unit* unit);
+void status_set_action_state(struct battle_unit* unit, u8 action_state);
+void status_clear_action_state(struct battle_unit* unit);
 s32 status_inflict_defending(s32 unit_id);
-s32 action_charge_check_and_cancel(struct unit_stats* unit, s32 cancel);
-s32 status_action_priority_find(const struct action_data* action);
+s32 action_check_and_cancel_charge(struct battle_unit* unit, s32 cancel);
+s32 status_find_action_priority(const struct action_data* action);
 s32 status_modify_inflictions(s32 removal_only);
 s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
-void status_apply_unit_action_removal(struct unit_stats* unit);
-s32 status_prepare_transparent_removal(struct unit_stats* unit);
-void status_remove_transparent_if_jump_used(struct unit_stats* unit);
-void status_clear_all(struct unit_stats* unit);
+void status_apply_unit_action_removal(struct battle_unit* unit);
+s32 status_prepare_transparent_removal(struct battle_unit* unit);
+void status_remove_transparent_if_jump_used(struct battle_unit* unit);
+void status_clear_all(struct battle_unit* unit);
 
 /* per-turn upkeep */
 void status_update_expiring(s32 unit_id);
-s32 status_prepare_terrain_poison(struct unit_stats* unit);
-s32 status_prepare_poison_and_regen(struct unit_stats* unit);
+s32 status_prepare_terrain_poison(struct battle_unit* unit);
+s32 status_prepare_poison_and_regen(struct battle_unit* unit);
 
 /* status display */
 /* Requests for the renderer's pending status flags. */
@@ -246,13 +246,13 @@ typedef enum status_display_change {
     STATUS_DISPLAY_CHANGE_KEEP = 2 /* leave pending changes untouched */
 } status_display_change_e;
 
-s32 status_init_display_flags(s32 battle_id);
-s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 battle_id);
-void status_queue_display_flag_change_if_executing(s32 status_id, s32 change_type, s32 battle_id);
-void status_current_graphics_queue(s32 battle_id, s32 change_type);
+s32 status_init_display_flags(s32 battle_unit_id);
+s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 battle_unit_id);
+void status_queue_display_flag_change_if_executing(s32 status_id, s32 change_type, s32 battle_unit_id);
+void status_queue_current_graphics(s32 battle_unit_id, s32 change_type);
 
 /* status bubbles */
-/* unit_runtime_t.status_bubble_id: the bubbles the code names. The others follow the statuses of
+/* map_unit_t.status_bubble_id: the bubbles the code names. The others follow the statuses of
  * g_status_bubble_status_masks. */
 typedef enum status_bubble {
     STATUS_BUBBLE_DEAD = 0, /* the death counter, or the RERAISE image under Reraise */
@@ -263,7 +263,7 @@ typedef enum status_bubble {
     STATUS_BUBBLE_COUNT = 22
 } status_bubble_e;
 
-void sprite_status_bubble_active_update(struct unit_runtime* unit);
-void sprite_status_bubble_draw(struct unit_runtime* unit, const DVECTOR* unused_screen_coords);
+void sprite_status_bubble_update_active(struct map_unit* unit);
+void sprite_status_bubble_draw(struct map_unit* unit, const DVECTOR* unused_screen_coords);
 
 #endif

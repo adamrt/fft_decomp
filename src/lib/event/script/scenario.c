@@ -2,12 +2,12 @@
  * Matching blocks choose the operation that finishes the current event. */
 
 #include "fft/battle_state.h"
+#include "fft/map_unit.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 /* Spell announcements and scenario handoff. */
@@ -17,7 +17,7 @@ extern s32 g_script_next_event_id;
  * following weather table; the original declared extent is unknown. */
 static u8 s_scenario_condition_param_lengths[38] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 3, 3, 2, 2, 2, 2,
     0, 3, 4, 2, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 };
-static event_scenario_condition_result_e condition_check(
+static event_scenario_condition_result_e check_condition(
     event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation);
 
 /* Resolves an event unit id to battle stats for the scenario conditions; returns
@@ -27,28 +27,28 @@ static event_scenario_condition_result_e condition_check(
  * Otherwise an id in the special-character identity range is looked up by
  * character identity and accepted only for a deployed party member (unit id
  * 0x78..0x7c). */
-static unit_stats_t* scenario_unit_stats_get(s32 unit_id) {
+static battle_unit_t* get_condition_battle_unit(s32 unit_id) {
     s32 index;
-    unit_stats_t* stats;
+    battle_unit_t* stats;
 
-    unit_entd_find_stats(unit_id, &index);
+    battle_unit_find_by_unit_id(unit_id, &index);
     if (index < 0) {
         if (unit_id < CHARACTER_IDENTITY_RAMZA_CHAPTER_1 || unit_id >= CHARACTER_IDENTITY_GENERIC_FIRST) {
-            return (unit_stats_t*)-1;
+            return (battle_unit_t*)-1;
         }
-        index = unit_find_slot_by_identity(unit_id);
+        index = battle_unit_find_id_by_character_identity(unit_id);
         if (index >= 0) {
-            stats = unit_stats_get(index);
+            stats = battle_unit_get(index);
             if (stats->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && stats->unit_id < EVENT_UNIT_ID_DEPLOYED_END) {
                 return stats;
             }
         }
-        return (unit_stats_t*)-1;
+        return (battle_unit_t*)-1;
     }
-    if (unit_battle_runtime_id_get(index) >= 0) {
-        return unit_stats_get(index);
+    if (map_unit_get_id_by_battle_unit_id(index) >= 0) {
+        return battle_unit_get(index);
     }
-    return (unit_stats_t*)-1;
+    return (battle_unit_t*)-1;
 }
 
 /* Walk the scenario's condition chains and report whether one selects an event.
@@ -64,7 +64,7 @@ static unit_stats_t* scenario_unit_stats_get(s32 unit_id) {
  * The checker always receives the five 16-bit values at the record, whatever the
  * type's length. Called at EventEnd and by the scenario-check command of
  * the scene's menu system-function dispatcher. */
-s32 scenario_conditions_run(void) {
+s32 scenario_run_conditions(void) {
     s16* condition;
     s32 i;
     s32 shifted_offset;
@@ -86,7 +86,7 @@ s32 scenario_conditions_run(void) {
         }
         condition = &g_scenario_condition_data[(offset + (s32)((u32)shifted_offset >> 31)) >> 1];
         do {
-            result = condition_check(condition[0], condition[1], condition[2], condition[3], condition[4]);
+            result = check_condition(condition[0], condition[1], condition[2], condition[3], condition[4]);
             condition += s_scenario_condition_param_lengths[condition[0]] + 1;
         } while (result == EVENT_SCENARIO_CONDITION_RESULT_PASS);
         if (result == EVENT_SCENARIO_CONDITION_RESULT_RUN_EVENT) {
@@ -97,14 +97,14 @@ s32 scenario_conditions_run(void) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * scenario_conditions_run and condition_check. Nothing
+ * scenario_run_conditions and check_condition. Nothing
  * on the disc calls it or points at it; the name is a neutral placeholder
  * until a reference turns up. */
 void script_noop_9(void) {
 }
 
 /* Evaluate one scenario condition record for
- * scenario_conditions_run.
+ * scenario_run_conditions.
  *
  * The record's 16-bit values arrive as type (event_scenario_condition_e), id and
  * value; the two tile conditions also read a y and an elevation, with value as
@@ -113,17 +113,17 @@ void script_noop_9(void) {
  * RESULT_FAIL otherwise, including for every type that has no test here.
  *
  * ACTING_UNIT looks at the unit the check runs for
- * (g_scenario_condition_unit_battle_id): it passes when that unit's unit id
+ * (g_scenario_condition_unit_battle_unit_id): it passes when that unit's unit id
  * is id, or when it is a deployed unit whose character identity is id and id is a
- * named (non-generic) identity. While the battle id is 0xff the condition fails.
+ * named (non-generic) identity. While the battle unit id is 0xff the condition fails.
  * ITEM_EQUIPPED searches the seven equipment slots of the units with unit ids 1
  * to 3. The HP percentage is hp * 100 / (max_hp + 1). The casualty conditions
  * compare with id, not value.
  *
  * Keep the two unit-id range comparisons: retail reloads the byte. */
-static event_scenario_condition_result_e condition_check(
+static event_scenario_condition_result_e check_condition(
     event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 i;
     s32 j; /* equipment slot, then battle index: one variable (a0 in both loops) */
 
@@ -134,8 +134,8 @@ static event_scenario_condition_result_e condition_check(
     if (type == EVENT_SCENARIO_CONDITION_VARIABLE_AT_MOST && value >= script_variable_get(id))
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type >= EVENT_SCENARIO_CONDITION_UNIT_PRESENT && type <= EVENT_SCENARIO_CONDITION_UNIT_MP_AT_MOST) {
-        unit = scenario_unit_stats_get(id);
-        if (unit != (unit_stats_t*)-1) {
+        unit = get_condition_battle_unit(id);
+        if (unit != (battle_unit_t*)-1) {
             if (type == EVENT_SCENARIO_CONDITION_UNIT_PRESENT)
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
             if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_AT_LEAST && unit->hp >= value)
@@ -154,8 +154,8 @@ static event_scenario_condition_result_e condition_check(
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
         }
     }
-    if (type == EVENT_SCENARIO_CONDITION_ACTING_UNIT && g_scenario_condition_unit_battle_id != 0xff) {
-        unit = unit_stats_get(g_scenario_condition_unit_battle_id);
+    if (type == EVENT_SCENARIO_CONDITION_ACTING_UNIT && g_scenario_condition_battle_unit_id != 0xff) {
+        unit = battle_unit_get(g_scenario_condition_battle_unit_id);
         if (unit->unit_id == id
             || (unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END
                 && unit->character_identity == id && id >= 0 && id < CHARACTER_IDENTITY_GENERIC_FIRST
@@ -165,8 +165,8 @@ static event_scenario_condition_result_e condition_check(
     }
     if (type == EVENT_SCENARIO_CONDITION_ITEM_EQUIPPED) {
         for (i = 1; i < 4; i++) {
-            unit = scenario_unit_stats_get(i);
-            if (unit != (unit_stats_t*)-1) {
+            unit = get_condition_battle_unit(i);
+            if (unit != (battle_unit_t*)-1) {
                 for (j = 0; j < 7; j++) {
                     if (unit->equipment[j] == id)
                         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
@@ -194,20 +194,20 @@ static event_scenario_condition_result_e condition_check(
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES))
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_outcome_check() == 0)
+    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_check_outcome() == 0)
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_UNIT_AT_TILE) {
-        unit = scenario_unit_stats_get(id);
-        if (unit != (unit_stats_t*)-1 && unit->x == value && unit->position.y == tile_y
+        unit = get_condition_battle_unit(id);
+        if (unit != (battle_unit_t*)-1 && unit->x == value && unit->position.y == tile_y
             && unit->position.higher_elevation == elevation)
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     }
     if (type == EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE) {
-        for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-            if (unit_has_runtime_id(i)) {
-                j = unit_runtime_battle_id_get(i);
+        for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+            if (map_unit_exists(i)) {
+                j = map_unit_get_battle_unit_id(i);
                 if (j != -1) {
-                    unit = unit_stats_get(j);
+                    unit = battle_unit_get(j);
                     if (unit->x == value && unit->position.y == tile_y && unit->position.higher_elevation == elevation
                         && unit->sprite_palette == id)
                         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
@@ -225,7 +225,7 @@ static event_scenario_condition_result_e condition_check(
 /* Return the current event's 16-bit finish-operation value, or 0 while no scenario event
  * is active. Bits 0-7 and 10-11 hold the next scenario id and the remaining bits
  * the after-event code. */
-s32 scenario_finish_operation_get(void) {
+s32 scenario_get_finish_operation(void) {
     if (g_scenario_event_active == 0) {
         return 0;
     }
@@ -235,6 +235,6 @@ s32 scenario_finish_operation_get(void) {
 /* Return the after-event code of the pending event (g_script_next_event_id): bits
  * 8-9 and 12-15 of its 16-bit finish-operation value, shifted down by 8. Zero means the
  * event has none. */
-u32 script_event_finish_operation_get(void) {
+u32 script_get_event_finish_operation(void) {
     return (g_scenario_event_finish_operations[g_script_next_event_id] & 0xF300) >> 8;
 }

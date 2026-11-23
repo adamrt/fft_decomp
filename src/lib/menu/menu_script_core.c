@@ -42,11 +42,11 @@ void menu_script_run(void* script, s32 flags) {
 
 /* Run a menu display script with palette mode `mode` (nonzero dims it); a dimmed script also gets
  * no input. */
-void menu_run_script_with_palette_mode(void* script, s32 input, s32 mode) {
+void menu_script_run_with_palette_mode(void* script, s32 input, s32 mode) {
     if (mode != 0) {
         input = 0;
     }
-    menu_set_palette_mode(mode);
+    menu_palette_set_mode(mode);
     menu_script_run(script, input);
 }
 #endif

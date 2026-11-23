@@ -5,6 +5,7 @@
 #include "fft/crystal.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/random.h"
@@ -13,7 +14,6 @@
 #include "fft/status.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
-#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -28,24 +28,24 @@ static move_find_result_data_t s_tile_pickup_result = { 0 };
 
 extern u8 g_move_find_result_flags;
 
-static s32 item_flag_test_or_set(s32 map_id, s32 tile_index, s32 save);
+static s32 test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save);
 
-static void charge_cancel(unit_stats_t* unit);
+static void clear_action_state(battle_unit_t* unit);
 
-static u8 crystal_treasure_item_generate(unit_stats_t* unit);
+static u8 generate_treasure_item(battle_unit_t* unit);
 
 /* 1 when the unit, or its rider when it is a mount, is charging an attack of
  * the Charge skillset; with cancel set, that unit's charge is also canceled
- * (charge_cancel). A move or a knockback cancels a Charge
+ * (clear_action_state). A move or a knockback cancels a Charge
  * through this test. */
-s32 action_charge_check_and_cancel(unit_stats_t* unit, s32 cancel) {
+s32 action_check_and_cancel_charge(battle_unit_t* unit, s32 cancel) {
     u8 mount_info;
 
     for (;;) {
         if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)] & STATUS_BYTE_MASK(STATUS_ID_CHARGING))
             && unit->charged_ability_ct != 0xFF && unit->action_command.skillset_id == SKILLSET_ID_CHARGE) {
             if (cancel != 0) {
-                charge_cancel(unit);
+                clear_action_state(unit);
             }
             return 1;
         }
@@ -53,22 +53,22 @@ s32 action_charge_check_and_cancel(unit_stats_t* unit, s32 cancel) {
         if (!(mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             break;
         }
-        unit = &g_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+        unit = &g_battle_units[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
     }
     return 0;
 }
 
 /* Clears the unit's Charging, Jump, Defending and Performing statuses (action state none). */
-static void charge_cancel(unit_stats_t* unit) {
-    status_action_state_set(unit, STATUS_ACTION_STATE_NONE);
+static void clear_action_state(battle_unit_t* unit) {
+    status_set_action_state(unit, STATUS_ACTION_STATE_NONE);
 }
 
 /* Pick the rare or common move-find item on the unit's tile and mark the tile found.
  *
  * The rare item is chosen with a (100 - Brave)% chance. */
-move_found_item_t* move_find_item_determine(unit_stats_t* unit) {
+move_found_item_t* move_find_determine_item(battle_unit_t* unit) {
     move_find_result_data_t* find_result
-        = move_find_result_get(unit->x, unit->position.y, unit->position.higher_elevation);
+        = move_find_get_result(unit->x, unit->position.y, unit->position.higher_elevation);
     u8 item_id;
 
     if (random_roll_pass_fail(100, 100 - unit->brave) == 0) {
@@ -77,7 +77,7 @@ move_found_item_t* move_find_item_determine(unit_stats_t* unit) {
         item_id = find_result->common_item_id;
     }
     s_selected_item.item_id = item_id;
-    item_flag_test_or_set(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
+    test_or_set_item_flag(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
     s_selected_item._unknown_00 = 0;
     return &s_selected_item;
 }
@@ -93,7 +93,7 @@ move_found_item_t* move_find_item_determine(unit_stats_t* unit) {
  * repeats the same search up to 21 times. The final flag update must go
  * through a pointer to keep the target's register address.
  */
-move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
+move_find_result_data_t* move_find_get_result(s32 x, u8 y, u8 layer) {
     move_find_entry_t* tile;
     s32 unit;
     s32 i;
@@ -101,13 +101,13 @@ move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
     u8* result;
 
     g_move_find_result_flags = 0;
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = unit_find_at_tile((u8)x, y, layer, UNIT_TILE_FILTER_TRANSPARENT);
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = battle_unit_find_at_tile((u8)x, y, layer, UNIT_TILE_FILTER_TRANSPARENT);
         if (unit >= 0) {
             break;
         }
     }
-    if (i != UNIT_SLOT_COUNT) {
+    if (i != BATTLE_UNIT_SLOT_COUNT) {
         g_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
         s_tile_pickup_result.occupying_unit_id = unit;
     }
@@ -119,21 +119,21 @@ move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
     }
     if (i != 4) {
         s_tile_pickup_result.entry_index = i;
-        if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
-            if (item_flag_test_or_set(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
+        if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
+            if (test_or_set_item_flag(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
                 g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
                 s_tile_pickup_result.rare_item_id = tile->rare_item_id;
                 s_tile_pickup_result.common_item_id = tile->common_item_id;
             }
         }
-        if (!(tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
-            if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR) {
+        if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
+            if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_DEGENERATOR) {
                 trap = MOVE_FIND_TRAP_DEGENERATOR;
-            } else if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP) {
+            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_DEATHTRAP) {
                 trap = MOVE_FIND_TRAP_DEATHTRAP;
-            } else if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS) {
+            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_SLEEPING_GAS) {
                 trap = MOVE_FIND_TRAP_SLEEPING_GAS;
-            } else if (tile->flags & BATTLE_MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE) {
+            } else if (tile->flags & MAP_MOVE_FIND_ENTRY_TRAP_STEEL_NEEDLE) {
                 trap = MOVE_FIND_TRAP_STEEL_NEEDLE;
             }
             if (trap != MOVE_FIND_TRAP_NONE) {
@@ -150,7 +150,7 @@ move_find_result_data_t* move_find_result_get(s32 x, u8 y, u8 layer) {
  *
  * Each flag byte holds two maps, four tiles each, MSB first with the even map in
  * the high nibble; the test returns 1 while the item is still unfound. */
-static s32 item_flag_test_or_set(s32 map_id, s32 tile_index, s32 save) {
+static s32 test_or_set_item_flag(s32 map_id, s32 tile_index, s32 save) {
     s32 byte_index = map_id / 2;
     s32 bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
 
@@ -166,7 +166,7 @@ static s32 item_flag_test_or_set(s32 map_id, s32 tile_index, s32 save) {
  * when neither unit is a monster, each action ability the crystal knows and the mover does not (in
  * the mover's unlocked jobs, and the special job only for the same character) is learned on a roll
  * against its learn rate, adding LEARNED when any is. */
-crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
+crystal_pickup_result_t* crystal_pickup_build_result(battle_unit_t* mover) {
     u8 gained[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 known[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 offered[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
@@ -176,7 +176,7 @@ crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
     s32 mover_flags;
     s32 crystal_flags;
     s32 unlocked_jobs_mask;
-    unit_stats_t* crystal;
+    battle_unit_t* crystal;
     s32 crystal_index;
     s32 job_id;
     s32 job_index;
@@ -187,7 +187,7 @@ crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
     s32 ability;
     u16 ability_id;
 
-    crystal_index = unit_find_at_tile(mover->x, mover->position.y, mover->position.higher_elevation,
+    crystal_index = battle_unit_find_at_tile(mover->x, mover->position.y, mover->position.higher_elevation,
         UNIT_TILE_FILTER_CRYSTAL | UNIT_TILE_FILTER_TREASURE);
     if (crystal_index < 0) {
         g_crystal_pickup_result.result = CRYSTAL_PICKUP_NONE;
@@ -195,10 +195,10 @@ crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
     }
     g_crystal_pickup_result.result = CRYSTAL_PICKUP_NOTHING;
     g_crystal_pickup_result.unit_index = crystal_index;
-    crystal = &g_unit_stats[crystal_index];
+    crystal = &g_battle_units[crystal_index];
     if (crystal->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
         g_crystal_pickup_result.result = CRYSTAL_PICKUP_TREASURE;
-        g_crystal_pickup_result.treasure_item = crystal_treasure_item_generate(crystal);
+        g_crystal_pickup_result.treasure_item = generate_treasure_item(crystal);
     } else {
         /* The empty loops are measured residue: without them the code differs. */
         do {
@@ -246,7 +246,7 @@ crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
                     byte_index = j / 8;
                     mask = 0x80 >> (j - byte_index * 8);
                     if (!(known[byte_index] & mask) && (offered[byte_index] & mask)) {
-                        ability = skillset_ability_id_get(skillset, j);
+                        ability = skillset_get_ability_id(skillset, j);
                         ability_id = ability;
                         if (ability_id != 0 && random_roll_pass_fail(100, g_ability_data[ability_id].learn_rate) == 0) {
                             gained[byte_index] = mask | gained[byte_index];
@@ -279,7 +279,7 @@ crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
  * that heals the missing HP and MP. LEARN_ABILITIES ORs
  * the result's per-job learned bits into the unit's learned-ability bits. These
  * return 0. */
-s32 crystal_choice_apply(unit_stats_t* unit, s32 flags) {
+s32 crystal_pickup_apply_choice(battle_unit_t* unit, s32 flags) {
     s32 i;
     u8* dst;
     u8* src;
@@ -307,9 +307,9 @@ s32 crystal_choice_apply(unit_stats_t* unit, s32 flags) {
         src = g_crystal_pickup_result.learned[0];
         dst = (u8*)unit;
         do {
-            learned = dst + offsetof(unit_stats_t, career.learned_abilities);
+            learned = dst + offsetof(battle_unit_t, career.learned_abilities);
             crystal_bits = src;
-            end = dst + offsetof(unit_stats_t, career.learned_abilities) + UNIT_LEARNED_ABILITY_BYTES_PER_JOB;
+            end = dst + offsetof(battle_unit_t, career.learned_abilities) + UNIT_LEARNED_ABILITY_BYTES_PER_JOB;
             do {
                 *learned |= *crystal_bits;
                 learned++;
@@ -328,7 +328,7 @@ s32 crystal_choice_apply(unit_stats_t* unit, s32 flags) {
  * or with nothing equipped one of the thirteen consumables other than Elixir.
  * Decided only when executing; in any other state the function returns without
  * a value. */
-static u8 crystal_treasure_item_generate(unit_stats_t* unit) {
+static u8 generate_treasure_item(battle_unit_t* unit) {
     u8 candidates[UNIT_EQUIPMENT_SLOT_COUNT];
     s32 count;
     s32 i;

@@ -37,27 +37,27 @@ extern prologue_entry_t** g_prologue_entries;
 extern u8 g_birthday_title_image[];
 extern u8 g_birthday_window_image[];
 
-static void logo_movie_update(controller_record_t* record);
-static void opening_movie_update(controller_record_t* record);
-static void main_menu_update(controller_record_t* record);
-static void sound_menu_update(controller_record_t* record);
-static void new_game_update(controller_record_t* record);
-static void birthday_menu_update(controller_record_t* record);
-static void birthday_confirmation_update(controller_record_t* record);
-static void opening_movie_start(s32 start_sector, s32 unused_stream_length, s32 end_frame);
+static void update_logo_movie(controller_record_t* record);
+static void update_opening_movie(controller_record_t* record);
+static void update_main_menu(controller_record_t* record);
+static void update_sound_menu(controller_record_t* record);
+static void update_new_game(controller_record_t* record);
+static void update_birthday_menu(controller_record_t* record);
+static void update_birthday_confirmation(controller_record_t* record);
+static void start_opening_movie(s32 start_sector, s32 unused_stream_length, s32 end_frame);
 
 typedef void (*controller_handler_t)(controller_record_t* record);
 /* One callback for each controller_handler_e value, 0 through 12. */
 static controller_handler_t s_controller_handlers[13] = {
-    logo_movie_update,
-    opening_movie_update,
-    main_menu_update,
-    sound_menu_update,
-    new_game_update,
-    birthday_menu_update,
-    birthday_confirmation_update,
-    music_test_menu_update,
-    controller_wait_text_message,
+    update_logo_movie,
+    update_opening_movie,
+    update_main_menu,
+    update_sound_menu,
+    update_new_game,
+    update_birthday_menu,
+    update_birthday_confirmation,
+    music_test_update_menu,
+    controller_update_text_message,
     movie_update_fftend,
     ending_update_script,
     movie_update_title_demo,
@@ -65,25 +65,25 @@ static controller_handler_t s_controller_handlers[13] = {
 };
 
 /* Interior sound-menu fields at +0x1c, with a 25-word controller stride.
- * Direct member stores shrink sound_menu_push's frame by eight bytes. */
+ * Direct member stores shrink push_sound_menu's frame by eight bytes. */
 extern s32 g_controller_selected_options[];
 
-static void birthday_text_build(birthday_date_state_t* menu);
-static void birthday_confirmation_push(void);
-static void birthday_menu_push(void);
-static void sound_menu_push(void);
+static void build_birthday_text(birthday_date_state_t* menu);
+static void push_birthday_confirmation(void);
+static void push_birthday_menu(void);
+static void push_sound_menu(void);
 
 /* First controller of the title sequence: the FFTST.STR logo movie (sector
  * 0x153d6, 0x278a sectors; the stream ends at frame 0x3df and the video alone at
  * frame 0x2de, so its CD audio plays on under the title menu), or the title
  * menu at once when use_alternate is set. */
-void title_sequence_start(s32 use_alternate) {
+void title_start_sequence(s32 use_alternate) {
     g_controller_depth = 0;
     if (use_alternate == 0) {
         g_gfx_active_buffer_index = 0;
-        movie_logo_start(DISC_SECTOR_OPEN_FFTST_STR, 0x278A, 0x3DF, 0x2DE);
+        movie_start_logo(DISC_SECTOR_OPEN_FFTST_STR, 0x278A, 0x3DF, 0x2DE);
     } else {
-        title_menu_push(0);
+        title_push_menu(0);
     }
 }
 
@@ -99,10 +99,10 @@ void controller_dispatch_current(void) {
 /* Start the logo movie at CD mix level 0x76 and push handler 0, whose record
  * keeps the stream's first sector and length for the title menu's CD end
  * position. */
-void movie_logo_start(s32 start_sector, s32 stream_length, s32 end_frame, s32 video_end_frame) {
+void movie_start_logo(s32 start_sector, s32 stream_length, s32 end_frame, s32 video_end_frame) {
     s32 controller;
 
-    movie_stream_start(start_sector, end_frame, video_end_frame, 0x76);
+    movie_start_stream(start_sector, end_frame, video_end_frame, 0x76);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     controller = g_controller_depth;
     g_controller_records[controller].movie.start_sector = start_sector;
@@ -116,28 +116,28 @@ void movie_logo_start(s32 start_sector, s32 stream_length, s32 end_frame, s32 vi
  * the controller is replaced by the title menu. The menu is given the sector just
  * past the stream, from the record's start sector and length, as the place to
  * stop the CD audio. */
-static void logo_movie_update(controller_record_t* record) {
+static void update_logo_movie(controller_record_t* record) {
     if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) {
         if (!(g_input_new_button_presses & PSX_PAD_START)) {
             return;
         }
 
-        movie_stream_stop(0);
+        movie_stop_stream(0);
         SetDispMask(0);
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     }
 
     g_controller_depth--;
-    title_menu_push(record->movie.start_sector + record->movie.stream_length);
+    title_push_menu(record->movie.start_sector + record->movie.stream_length);
 }
 
 /* Start the opening movie (the one caller passes the sector of OPEN/FFTOP.STR) with its CD audio
  * at mix level 0x94, and push its controller. */
-static void opening_movie_start(s32 start_sector, s32 unused_stream_length, s32 end_frame) {
+static void start_opening_movie(s32 start_sector, s32 unused_stream_length, s32 end_frame) {
     s32 controller;
 
     (void)unused_stream_length;
-    movie_stream_start(start_sector, end_frame, -1, 0x94);
+    movie_start_stream(start_sector, end_frame, -1, 0x94);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     controller = g_controller_depth;
     g_controller_handler_indices[controller] = CONTROLLER_FFTOP_MOVIE;
@@ -146,7 +146,7 @@ static void opening_movie_start(s32 start_sector, s32 unused_stream_length, s32 
 
 /* CONTROLLER_FFTOP_MOVIE: Start stops the opening movie; once it has stopped the controller
  * pops, blanks the display and ends OPEN with result 0. */
-static void opening_movie_update(controller_record_t* unused_record) {
+static void update_opening_movie(controller_record_t* unused_record) {
     u32 flags;
     s32 controller;
 
@@ -165,7 +165,7 @@ static void opening_movie_update(controller_record_t* unused_record) {
     }
 
     if (g_input_new_button_presses & PSX_PAD_START) {
-        movie_stream_stop(1);
+        movie_stop_stream(1);
     }
 }
 
@@ -176,7 +176,7 @@ static void opening_movie_update(controller_record_t* unused_record) {
  * entry and field: each is referenced again later in the function, so CSE
  * keeps them as the canonical copies, and local allocation then rewrites
  * their remaining setup uses to records and positions. */
-void title_menu_push(s32 argument) {
+void title_push_menu(s32 argument) {
     RECT rect;
     s32 unused[4];
     s32 i;
@@ -201,7 +201,7 @@ void title_menu_push(s32 argument) {
     LoadImage(&rect, g_file_destination);
     DrawSync(0);
 
-    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     entry = g_display_object_animated_pool;
     records = entry;
     field = &records->position.x;
@@ -215,7 +215,7 @@ void title_menu_push(s32 argument) {
     positions[record].y = 0x64;
 
     for (i = 0, y = 0x1e; i < 4; i++) {
-        record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+        record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
         g_controller_records[g_controller_depth].title.render_indices[i + 1] = record;
         g_display_object_animated_pool[record].sequence = i + 3;
         g_display_object_animated_pool[record].priority = 4;
@@ -226,7 +226,7 @@ void title_menu_push(s32 argument) {
         positions[record].x = -0x18;
     }
 
-    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].title.cursor_record = record;
     entry = &g_display_object_animated_pool[record];
     entry->sequence = 0x13;
@@ -256,7 +256,7 @@ void title_menu_push(s32 argument) {
 }
 
 /* Show the four title menu entries. */
-static void menu_entries_show(title_menu_state_t* title) {
+static void show_menu_entries(title_menu_state_t* title) {
     g_display_object_animated_pool[title->render_indices[1]].flags &= ~DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[title->render_indices[2]].flags &= ~DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[title->render_indices[3]].flags &= ~DISPLAY_OBJECT_HIDDEN;
@@ -264,7 +264,7 @@ static void menu_entries_show(title_menu_state_t* title) {
 }
 
 /* Hide the four title menu entries. */
-static void menu_entries_hide(title_menu_state_t* title) {
+static void hide_menu_entries(title_menu_state_t* title) {
     g_display_object_animated_pool[title->render_indices[1]].flags |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[title->render_indices[2]].flags |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[title->render_indices[3]].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -282,7 +282,7 @@ static void menu_entries_hide(title_menu_state_t* title) {
  * Sound opens the sound type menu without fading. Up and Down (and Select)
  * move the highlight between the four entries.
  */
-static void main_menu_update(controller_record_t* record) {
+static void update_main_menu(controller_record_t* record) {
     title_menu_state_t* state = &record->title;
     u8 loc[8];
     s32 status;
@@ -371,7 +371,7 @@ static void main_menu_update(controller_record_t* record) {
             break;
         }
 
-        movie_title_demo_start(start_sector, stream_length, end_frame, cd_mix_level);
+        movie_start_title_demo(start_sector, stream_length, end_frame, cd_mix_level);
         g_title_demo_movie_index++;
         if (g_title_demo_movie_index >= 3) {
             g_title_demo_movie_index = 0;
@@ -381,8 +381,8 @@ static void main_menu_update(controller_record_t* record) {
 
     if (state->state == TITLE_STATE_SOUND_MENU) {
         state->state = TITLE_STATE_MENU;
-        menu_entries_hide(state);
-        sound_menu_push();
+        hide_menu_entries(state);
+        push_sound_menu();
         return;
     }
 
@@ -396,7 +396,7 @@ static void main_menu_update(controller_record_t* record) {
         }
 
         g_system_runtime_flags = flags ^ SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
-        movie_cd_audio_pause();
+        movie_pause_cd_audio();
         g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_WIDE_SCREEN;
         gfx_init_screen_environments(1);
         cursor = state->cursor;
@@ -407,27 +407,27 @@ static void main_menu_update(controller_record_t* record) {
             g_display_object_animated_count -= 6;
             g_display_object_queue_count -= 6;
             g_controller_depth--;
-            title_select_new_game();
+            title_start_new_game();
             return;
 
         case TITLE_MENU_CONTINUE:
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-            new_game_party_init(PARTY_NEW_GAME_EMPTY, 1);
+            new_game_init_party(PARTY_NEW_GAME_EMPTY, 1);
             DrawSync(0);
             VSync(0);
             SetDispMask(1);
 
             /* Nothing was loaded: rebuild the title screen and its menu controller. */
-            if (save_screen_run(0) == 0) {
+            if (save_run_screen(0) == 0) {
                 g_file_current_openbk_image_id = -1;
-                file_request_openbk_image(0, g_file_destination);
-                file_pending_wait();
+                file_request_opnbk_image(0, g_file_destination);
+                file_wait_pending();
                 g_display_object_animated_count -= 6;
                 g_display_object_queue_count -= 6;
                 g_controller_depth--;
                 SetDispMask(0);
                 g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-                title_menu_push(0);
+                title_push_menu(0);
                 return;
             }
 
@@ -443,7 +443,7 @@ static void main_menu_update(controller_record_t* record) {
             return;
 
         case TITLE_MENU_TUTORIAL:
-            new_game_party_init(PARTY_NEW_GAME_RAMZA, 1);
+            new_game_init_party(PARTY_NEW_GAME_RAMZA, 1);
             g_title_result = TITLE_RESULT_TUTORIAL;
             g_display_object_animated_count -= 6;
             g_display_object_queue_count -= 6;
@@ -469,7 +469,7 @@ static void main_menu_update(controller_record_t* record) {
         sound_set_cd_mix_and_volume(0, 0x64);
         state->exit_timer = 0x32;
         state->exiting = 1;
-        sound_sfx_play(SOUND_SFX_CONFIRM);
+        sound_play_sfx(SOUND_SFX_CONFIRM);
 
         /* These three fade out first; the dispatch above runs once the fade ends. */
         switch (state->cursor) {
@@ -496,7 +496,7 @@ static void main_menu_update(controller_record_t* record) {
         }
         g_display_object_animated_pool[state->render_indices[state->cursor + 1]].palette
             = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (input_update_repeat(PSX_PAD_DOWN) != 0 || (g_input_new_button_presses & PSX_PAD_SELECT)) {
@@ -508,7 +508,7 @@ static void main_menu_update(controller_record_t* record) {
         }
         g_display_object_animated_pool[state->render_indices[state->cursor + 1]].palette
             = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
 
@@ -520,7 +520,7 @@ static void main_menu_update(controller_record_t* record) {
  * selected render-record index is likewise read through the controller
  * record, while sound_mode_selection and step are addressed through
  * g_controller_selected_options. */
-static void sound_menu_push(void) {
+static void push_sound_menu(void) {
     s32 i;
     s32 record;
     /* Pin required: unpinned, the controller index and the stream base swap
@@ -532,7 +532,7 @@ static void sound_menu_push(void) {
     title_sound_type_menu_t* menu;
 
     for (i = 0; i < TITLE_SOUND_MENU_ENTRY_COUNT; i++) {
-        record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+        record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
         g_controller_records[g_controller_depth].sound_menu.entry_render_indices[i] = record;
         g_display_object_animated_pool[record].priority = 4;
         g_display_object_animated_pool[record].sequence = i + 7;
@@ -567,7 +567,7 @@ static void sound_menu_push(void) {
  * pops the controller, shows the title menu's four entries again and zeroes the
  * title controller's idle timer. Up, and Down or Select, move the highlight and
  * wrap around. */
-static void sound_menu_update(controller_record_t* record) {
+static void update_sound_menu(controller_record_t* record) {
     title_sound_type_menu_t* menu = &record->sound_menu;
     s32 render_record;
 
@@ -575,7 +575,7 @@ static void sound_menu_update(controller_record_t* record) {
         g_display_object_animated_count -= TITLE_SOUND_MENU_ENTRY_COUNT;
         g_display_object_queue_count -= TITLE_SOUND_MENU_ENTRY_COUNT;
         g_controller_depth -= 1;
-        menu_entries_show(&g_controller_records[g_controller_depth - 1].title);
+        show_menu_entries(&g_controller_records[g_controller_depth - 1].title);
         /* The title menu underneath, addressed from the pushed-record base. */
         g_controller_records[g_controller_depth - 1].title.idle_timer = 0;
         return;
@@ -584,12 +584,12 @@ static void sound_menu_update(controller_record_t* record) {
     if (g_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_START)) {
         suzuki_sound_set_type(menu->sound_mode_selection);
         g_game_options.fields.sound_mode = menu->sound_mode_selection;
-        sound_sfx_play(SOUND_SFX_CONFIRM);
+        sound_play_sfx(SOUND_SFX_CONFIRM);
         menu->step = 2;
         return;
     }
     if (g_input_new_button_presses & PSX_PAD_CROSS) {
-        sound_sfx_play(SOUND_SFX_CANCEL);
+        sound_play_sfx(SOUND_SFX_CANCEL);
         menu->step = 2;
         return;
     }
@@ -603,7 +603,7 @@ static void sound_menu_update(controller_record_t* record) {
         }
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_display_object_animated_pool[render_record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
     if (input_update_repeat(PSX_PAD_DOWN) != 0 || (g_input_new_button_presses & PSX_PAD_SELECT) != 0) {
@@ -615,7 +615,7 @@ static void sound_menu_update(controller_record_t* record) {
         }
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_display_object_animated_pool[render_record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
 
@@ -629,11 +629,11 @@ void prologue_start(void) {
     s32 stack_padding[4];
 
     suzuki_sound_set_master_volume(0, 1);
-    music_track_set(MUSIC_NEW_GAME);
+    music_set_track(MUSIC_NEW_GAME);
     suzuki_sound_set_master_volume(0x3fff, 5);
-    prologue_text_pages_load();
-    file_request_openbk_image(1, g_file_destination);
-    file_pending_wait();
+    prologue_load_text_pages();
+    file_request_opnbk_image(1, g_file_destination);
+    file_wait_pending();
     prologue_init_sequence(12, 3, g_prologue_entries);
     gfx_start_overlay_fade_out(0x20);
 
@@ -654,7 +654,7 @@ void prologue_start(void) {
  *
  * Step 5 unloads the music and starts the music test controller. Nothing in
  * OPEN.BIN stores 5 in step. */
-static void new_game_update(controller_record_t* record) {
+static void update_new_game(controller_record_t* record) {
     new_game_state_t* state = &record->new_game;
     RECT rect;
     u8* name;
@@ -664,15 +664,15 @@ static void new_game_update(controller_record_t* record) {
         if (g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) {
             return;
         }
-        music_current_scenario_unload();
+        music_unload_current_scenario();
         g_controller_depth -= 1;
-        music_test_menu_open();
+        music_test_open_menu();
         return;
     }
 
     if (state->step == 4) {
-        new_game_party_init(PARTY_NEW_GAME_RAMZA, 0);
-        screen_open_text_init();
+        new_game_init_party(PARTY_NEW_GAME_RAMZA, 0);
+        screen_init_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
         if (g_gfx_active_buffer_index != 0) {
@@ -704,11 +704,11 @@ static void new_game_update(controller_record_t* record) {
         DrawSync(0);
 
         g_file_current_openbk_image_id = -1;
-        name = name_entry_screen_run(text_entry_find(TEXT_ID_UNIT_NAME_SPECIAL_BASE), g_file_destination);
+        name = name_entry_run_screen(text_find_entry(TEXT_ID_UNIT_NAME_SPECIAL_BASE), g_file_destination);
         party = party_unit_get(0);
         memcpy(party->name, name, sizeof(party->name));
         g_controller_depth -= 1;
-        birthday_menu_push();
+        push_birthday_menu();
         return;
     }
 
@@ -723,10 +723,10 @@ static void new_game_update(controller_record_t* record) {
 }
 
 /* Pushes the birthday date-entry controller (handler 5,
- * birthday_menu_update) with its cursor record and the date prompt
+ * update_birthday_menu) with its cursor record and the date prompt
  * record, then seeds month/day to 1 and builds the menu text.
  *
- * Shaped like birthday_confirmation_push: the controller record
+ * Shaped like push_birthday_confirmation: the controller record
  * is reached through g_controller_records[g_controller_depth]
  * on every use (the target reloads the index after each call rather than
  * keeping it in a local), and the prompt record's position is written through
@@ -739,7 +739,7 @@ static void new_game_update(controller_record_t* record) {
  * before the position stores, which hoists the `lhu` of quad.w into the
  * load-delay slot instead of emitting a nop.
  */
-static void birthday_menu_push(void) {
+static void push_birthday_menu(void) {
     RECT quad;
     s32 unused[4];
     s32 record;
@@ -747,20 +747,20 @@ static void birthday_menu_push(void) {
     s32 half_width;
     point32_t* position;
 
-    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].birthday_date.cursor_record = record;
     g_display_object_animated_pool[record].sequence = 0xC;
     g_display_object_animated_pool[record].priority = 4;
     g_display_object_animated_pool[record].anim_counter = 0;
     g_display_object_animated_pool[record].frame_index = 0;
 
-    record = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].birthday_date.title_image = record;
     quad.x = 0;
     quad.y = 0;
     quad.w = 0x80;
     quad.h = 0x40;
-    window_text_record_init(record, quad, 0, 0xB800, g_birthday_title_image);
+    window_init_text_record(record, quad, 0, 0xB800, g_birthday_title_image);
     position = &g_display_object_gpu_image_pool[0].position;
     position = (point32_t*)((u8*)position + record * sizeof(display_object_gpu_image_t));
     half_width = quad.w / 2;
@@ -769,7 +769,7 @@ static void birthday_menu_push(void) {
     g_display_object_gpu_image_pool[record].priority = 4;
     g_controller_records[g_controller_depth].birthday_date.month = 1;
     g_controller_records[g_controller_depth].birthday_date.day = 1;
-    birthday_text_build(&g_controller_records[g_controller_depth].birthday_date);
+    build_birthday_text(&g_controller_records[g_controller_depth].birthday_date);
 
     controller = g_controller_depth;
     g_display_object_gpu_image_pool[g_controller_records[controller].birthday_date.window_image].flags
@@ -789,12 +789,12 @@ static void birthday_menu_push(void) {
  *
  * The month label is centered from its measured width; both entries are drawn
  * into one scratch image before it is uploaded to VRAM. */
-static void birthday_text_build(birthday_date_state_t* menu) {
+static void build_birthday_text(birthday_date_state_t* menu) {
     RECT quad;
     point32_t position;
     s16 width;
     s16 rows;
-    s32 index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    s32 index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     s32 text_id;
     point32_t* translation;
     s32* substitution;
@@ -809,7 +809,7 @@ static void birthday_text_build(birthday_date_state_t* menu) {
     /* The month names are text entries 0xB803 (January) to 0xB80E. Entry 0xB801
      * prints the substituted month name and 0xB802 the substituted day. */
     text_id = menu->month + 0xB802;
-    text_pixels_measure(&width, &rows, text_entry_find(text_id));
+    text_measure_pixels(&width, &rows, text_find_entry(text_id));
 
     position.x = 0x1C - width / 2;
     position.y = 8;
@@ -833,10 +833,10 @@ static void birthday_text_build(birthday_date_state_t* menu) {
 }
 
 /* Restore the date-selection records after leaving the confirmation prompt. */
-static void birthday_menu_restore(birthday_date_state_t* menu) {
+static void restore_birthday_menu(birthday_date_state_t* menu) {
     display_object_gpu_image_t* images = g_display_object_gpu_image_pool;
     /* The target reserves a 24-byte frame it never touches, as in the twin
-     * birthday_confirmation_build. */
+     * dim_birthday_menu. */
     s32 unused_scratch[6];
     s32 cursor;
     s32 cursor_last;
@@ -868,7 +868,7 @@ static void birthday_menu_restore(birthday_date_state_t* menu) {
  *
  * The target reserves a 24-byte frame it never touches (the stack adjustment
  * is even scheduled into the last load-delay slot), retained here as an unused local. */
-static void birthday_menu_dim(birthday_date_state_t* state) {
+static void dim_birthday_menu(birthday_date_state_t* state) {
     s32 unused_scratch[6];
 
     g_display_object_animated_pool[state->cursor_record].sequence = 10;
@@ -900,16 +900,16 @@ static void birthday_menu_dim(birthday_date_state_t* state) {
  *
  * February has 28 days in g_calendar_month_lengths, so 29 February cannot be
  * entered. */
-static void birthday_menu_update(controller_record_t* record) {
+static void update_birthday_menu(controller_record_t* record) {
     birthday_date_state_t* menu = &record->birthday_date;
     if (g_display_object_gpu_image_pool[menu->window_image].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
     if (g_input_new_button_presses & (PSX_PAD_START | PSX_PAD_CIRCLE)) {
-        sound_sfx_play(SOUND_SFX_CONFIRM);
-        birthday_menu_dim(menu);
-        birthday_confirmation_push();
+        sound_play_sfx(SOUND_SFX_CONFIRM);
+        dim_birthday_menu(menu);
+        push_birthday_confirmation();
         return;
     }
 
@@ -934,8 +934,8 @@ static void birthday_menu_update(controller_record_t* record) {
         }
         g_display_object_queue_count -= 1;
         g_display_object_image_count -= 1;
-        birthday_text_build(menu);
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        build_birthday_text(menu);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
         if (menu->selecting_month == 0) {
             menu->day -= 1;
@@ -957,25 +957,25 @@ static void birthday_menu_update(controller_record_t* record) {
         }
         g_display_object_queue_count -= 1;
         g_display_object_image_count -= 1;
-        birthday_text_build(menu);
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        build_birthday_text(menu);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
     if ((g_input_new_button_presses & PSX_PAD_LEFT) && menu->selecting_month == 0) {
         menu->selecting_month = 1;
         g_display_object_animated_pool[menu->cursor_record].position.x -= BIRTHDAY_CURSOR_STEP;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
     if ((g_input_new_button_presses & PSX_PAD_RIGHT) && menu->selecting_month != 0) {
         menu->selecting_month = 0;
         g_display_object_animated_pool[menu->cursor_record].position.x += BIRTHDAY_CURSOR_STEP;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
 
 /* Pushes the birthday confirmation controller (handler 6,
- * birthday_confirmation_update) with its two cursor records and
+ * update_birthday_confirmation) with its two cursor records and
  * the confirmation prompt window.
  *
  * The pushed record is written member by member through the record array:
@@ -984,34 +984,34 @@ static void birthday_menu_update(controller_record_t* record) {
  * images x/y view, which sets the base register before the index scale.
  * The unused array reproduces the target's 0x70-byte frame.
  */
-static void birthday_confirmation_push(void) {
+static void push_birthday_confirmation(void) {
     RECT quad;
     s32 unused[12];
     s32 record;
     s32 controller;
     point32_t* position;
 
-    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].birthday_confirmation.cursor_record = record;
     g_display_object_animated_pool[record].sequence = 2;
     g_display_object_animated_pool[record].priority = 3;
     g_display_object_animated_pool[record].anim_counter = 0;
     g_display_object_animated_pool[record].frame_index = 0;
 
-    record = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].birthday_confirmation.label_record = record;
     g_display_object_animated_pool[record].sequence = 0xE;
     g_display_object_animated_pool[record].priority = 3;
     g_display_object_animated_pool[record].anim_counter = 0;
     g_display_object_animated_pool[record].frame_index = 0;
 
-    record = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    record = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_controller_records[g_controller_depth].birthday_confirmation.menu_image = record;
     quad.x = 0;
     quad.y = 0x60;
     quad.w = 0x28;
     quad.h = 0x30;
-    window_text_record_init(record, quad, 0, 0xB80F, g_birthday_title_image);
+    window_init_text_record(record, quad, 0, 0xB80F, g_birthday_title_image);
     controller = g_controller_depth;
     position = &g_display_object_gpu_image_pool[0].position;
     position = (point32_t*)((u8*)position + record * sizeof(display_object_gpu_image_t));
@@ -1040,7 +1040,7 @@ static void birthday_confirmation_push(void) {
  * The zodiac byte holds bit 8 of the day of the year in bit 0 and the sign (0 = Aries) in the high
  * nibble.
  */
-static void birthday_confirmation_update(controller_record_t* record) {
+static void update_birthday_confirmation(controller_record_t* record) {
     birthday_confirmation_state_t* menu = &record->birthday_confirmation;
     s32 month;
     s32 day;
@@ -1052,19 +1052,19 @@ static void birthday_confirmation_update(controller_record_t* record) {
         && !(g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE)) {
         /* Release both birthday controllers and their six render records. */
         g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
-        music_current_scenario_unload();
+        music_unload_current_scenario();
         g_gfx_active_buffer_index = 1;
         g_display_object_image_count -= 3;
         g_display_object_animated_count -= 3;
         g_display_object_queue_count -= 6;
         g_controller_depth -= 2;
-        opening_movie_start(DISC_SECTOR_OPEN_FFTOP_STR, 0x64D8, 0x9E4);
+        start_opening_movie(DISC_SECTOR_OPEN_FFTOP_STR, 0x64D8, 0x9E4);
         return;
     }
 
     buttons = g_input_new_button_presses;
     if (buttons & PSX_PAD_CIRCLE) {
-        sound_sfx_play(SOUND_SFX_CONFIRM);
+        sound_play_sfx(SOUND_SFX_CONFIRM);
         if (menu->selected_option == 0) {
             /* The date controller sits below this one on the controller stack. */
             month = g_controller_records[g_controller_depth - 2].birthday_date.month;
@@ -1072,12 +1072,12 @@ static void birthday_confirmation_update(controller_record_t* record) {
             script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, month);
             script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
             value = calendar_date_to_day_index(month, day);
-            calendar_date_to_zodiac_convert(&month, &day);
+            calendar_date_to_zodiac(&month, &day);
             member = party_unit_get(0);
             member->birthday_day = value;
             member->zodiac
                 = ((value & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) | ((month - 1) << PARTY_ZODIAC_SHIFT);
-            music_volume_target_set(0, 0x60);
+            music_set_target_volume(0, 0x60);
             gfx_start_overlay_fade_in(0x20);
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;
@@ -1087,17 +1087,17 @@ static void birthday_confirmation_update(controller_record_t* record) {
         g_display_object_image_count -= 1;
         g_display_object_animated_count -= 2;
         g_controller_depth -= 1;
-        birthday_menu_restore(&g_controller_records[g_controller_depth - 1].birthday_date);
+        restore_birthday_menu(&g_controller_records[g_controller_depth - 1].birthday_date);
         return;
     }
     if (buttons & PSX_PAD_CROSS) {
-        sound_sfx_play(SOUND_SFX_CANCEL);
+        sound_play_sfx(SOUND_SFX_CANCEL);
         /* Same cancel path as above; GCC cross-jumps the two copies into this one. */
         g_display_object_queue_count -= 3;
         g_display_object_image_count -= 1;
         g_display_object_animated_count -= 2;
         g_controller_depth -= 1;
-        birthday_menu_restore(&g_controller_records[g_controller_depth - 1].birthday_date);
+        restore_birthday_menu(&g_controller_records[g_controller_depth - 1].birthday_date);
         return;
     }
 
@@ -1106,6 +1106,6 @@ static void birthday_confirmation_update(controller_record_t* record) {
         /* Adding 12 before the option offset keeps the target's (option * 16 + 12) + y evaluation. */
         g_display_object_animated_pool[menu->cursor_record].position.y
             = g_display_object_gpu_image_pool[menu->menu_image].position.y + 12 + menu->selected_option * 16;
-        sound_sfx_play(SOUND_SFX_CURSOR_MOVE);
+        sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }

@@ -21,18 +21,18 @@ void status_screen_numbers_thread(void);
 /* The status panel's list of the unit's current statuses, in two columns. */
 extern menu_scroll_text_layout_t g_status_screen_status_list_layout;
 
-void status_screen_build_status_list(void);
+void status_screen_status_list_thread(void);
 
 /* overlay screens */
 void status_screen_jobs_thread(void);               /* runs JOBSTTS while its state is nonzero */
-void status_screen_mounted_unit_open(void);         /* DEBUGCHR's view of a selected rider or mount */
+void status_screen_open_mounted_unit(void);         /* DEBUGCHR's view of a selected rider or mount */
 void debugchr_mounted_unit_entrypoint(s32 unit_id); /* DEBUGCHR's read-only rider/mount Status loop */
 
 /* job pages (JOBSTTS) */
 /* Job and ability data copied into JOBSTTS.OUT for the selected unit. */
 typedef struct status_screen_unit_jobs {
     s16 job_id;                /* 0x00 */
-    s16 active_battle_id;      /* 0x02 */
+    s16 active_battle_unit_id; /* 0x02 */
     u16 primary_skillset;      /* 0x04 */
     u8 unit_flags;             /* 0x06 */
     u8 character_identity;     /* 0x07 */
@@ -101,7 +101,6 @@ void status_screen_gfx_init_contexts(status_screen_gfx_context_t* base, u32* ota
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas);
-void status_screen_gfx_swap_context(s32 first_otag, s32 unused);
 void menu_gfx_enqueue_oriented_textured_quad_rect(
     RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index);
 

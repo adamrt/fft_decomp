@@ -37,14 +37,14 @@ extern s16 g_screen_grid_cell_24_text_offset;
 
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
-void screen_help_text_start(s32 position) {
+void menu_start_help_text(s32 position) {
     if (g_help_message_text_id > 0x1ffff) {
         g_screen_grid_id = g_help_message_text_id;
         return;
     }
     if (g_help_message_text_id > 0) {
         thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
-        thread_parameters_set(THREAD_SCREEN_SLOT_TEXT, position + (DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL),
+        thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, position + (DIALOG_BOX_TYPE_HELP | DIALOG_OPTIONS_NO_TAIL),
             g_help_message_text_id, 0);
         g_menu_input_lock_mode = 1;
     }
@@ -58,7 +58,7 @@ void screen_help_text_start(s32 position) {
  * Cross latches the menu id as the description text and closes the grid;
  * Circle opens the cell's description (its text id plus the cell's offset),
  * except for empty cells 18-27. */
-void screen_grid_cursor_update(s16 alternate) {
+void screen_update_grid_cursor(s16 alternate) {
     point16_t cursor;
     s32 busy;
     s32 cell;
@@ -100,7 +100,7 @@ void screen_grid_cursor_update(s16 alternate) {
                 /* This grid adds the base as an unsigned 16-bit text ID. */
                 g_help_message_text_id
                     = text_id + (u16)g_screen_grid_active_cells[g_screen_grid_selected_cell].help_base;
-                screen_help_text_start(DIALOG_POSITION_CENTER);
+                menu_start_help_text(DIALOG_POSITION_CENTER);
             }
         } else if (input & PSX_PAD_UP) {
             cell = g_screen_grid_active_cells[cell].destination[0];
@@ -130,11 +130,11 @@ void screen_grid_cursor_update(s16 alternate) {
     gfx_set_otag_index(0x3C);
     if (g_screen_grid_active_cells[g_screen_grid_selected_cell].vertical_cursor != 0) {
         cursor.y++;
-        menu_update_and_draw_bouncing_cursor(&cursor, &g_screen_grid_cursor_anim, busy);
+        menu_draw_bouncing_cursor(&cursor, &g_screen_grid_cursor_anim, busy);
     } else {
         cursor.x -= 2;
         cursor.y += 6;
-        screen_sliding_cursor_draw(&cursor, &g_screen_grid_cursor_anim, busy);
+        menu_draw_sliding_cursor(&cursor, &g_screen_grid_cursor_anim, busy);
     }
 }
 
@@ -148,12 +148,12 @@ s32 formation_banner_countdown(s32 message_id, s32 frames) {
         s_formation_banner_state = frames;
         g_formation_banner_menu.text_id = message_id;
         thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_banner_menu.thread_entry);
-        thread_parameters_set(THREAD_SCREEN_SLOT_MENU, (s32)&g_formation_banner_menu, 0, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MENU, (s32)&g_formation_banner_menu, 0, 0);
         g_formation_banner_active = 1;
     }
     current = s_formation_banner_state;
     if (current == 1) {
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_MENU);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_MENU);
         if (thread_is_running(THREAD_SCREEN_SLOT_MENU) == 0) {
             g_formation_banner_active = 0;
             s_formation_banner_state = 0;

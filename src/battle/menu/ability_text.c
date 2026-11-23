@@ -14,7 +14,7 @@
 
 /* Draw three-column text 8 pixels narrower than the entry, adding ability
  * reflection and charge-time markers where requested. */
-void ability_list_text_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
+void ability_list_draw_text(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
     s32 column;
@@ -28,7 +28,7 @@ void ability_list_text_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             if (layout->mode[column] == MENU_TEXT_COLUMN_HIDDEN) {
                 continue;
             }
-            menu_set_text_origin(layout->x[column], row * 0x10);
+            menu_text_set_origin(layout->x[column], row * 0x10);
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }
@@ -44,7 +44,7 @@ void ability_list_text_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
                     && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                     g_menu_text_palette_offset = layout->text_colors[column][index];
                     /* 32-bit x and y, as above. */
-                    menu_set_text_origin(layout->x[column] + 0x50, row * 0x10);
+                    menu_text_set_origin(layout->x[column] + 0x50, row * 0x10);
                     menu_display_text_entry(TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                 }
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
@@ -76,8 +76,7 @@ void ability_list_text_draw(menu_entry_t* entry, s32* row_offset, u8* buffer) {
 }
 
 /* Redraw a scrolled page, using the companion overlay buffer at nesting depth 2. */
-u8* menu_redraw_text_page_on_scroll_in_rect(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
+u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* pressed;
     u32* held;
@@ -125,7 +124,7 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-            ability_list_text_draw(entry, row_offset, buffer);
+            ability_list_draw_text(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);
             /* Clear the two VRAM rows above the image, wrapping within its 256-row page. */
@@ -143,6 +142,6 @@ u8* menu_redraw_text_page_on_scroll_in_rect(
 
 /* Frames the current repeatable buttons have been held unchanged (0 after a change);
  * the scrolling lists pace and repeat their scrolling by it. */
-u32 script_event_initial_repeat_counter_get(void) {
+u32 script_get_event_initial_repeat_counter(void) {
     return g_script_event_initial_repeat_counter;
 }

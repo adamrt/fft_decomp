@@ -49,7 +49,7 @@ static u8 s_message_typewriter_column_scratch[14] = { 0 };
  *
  * Every access re-reads g_script_event_block as retail does; instruction pointer
  * temporaries make the function 16 bytes shorter. */
-void message_window_width_measure(s32 offset, s32 flags, s32* out_width) {
+void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
     s16 width;
     s16 height;
     s32 max_width;
@@ -58,15 +58,15 @@ void message_window_width_measure(s32 offset, s32 flags, s32* out_width) {
 
     if (flags & DIALOG_TYPE_KEEP_OPEN) {
         flags &= DIALOG_TYPE_POSITION_MASK;
-        text_pixels_measure(&width, &height,
-            text_entry_find(((DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
+        text_measure_pixels(&width, &height,
+            text_find_entry(((DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
                                 + DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0])
                 - 1));
         max_width = width;
         next = offset + 1;
         size = g_script_event_instruction_sizes[EVENT_OPCODE_DISPLAY_MESSAGE];
         offset = next + size;
-        while ((offset = script_instruction_offset_find(offset, EVENT_OPCODE_CHANGE_DIALOG)) != 0) {
+        while ((offset = script_find_instruction_offset(offset, EVENT_OPCODE_CHANGE_DIALOG)) != 0) {
             if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->opcode == EVENT_OPCODE_CHANGE_DIALOG) {
                 if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0] == 0xFF
                     && CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] == 0xFF
@@ -76,8 +76,8 @@ void message_window_width_measure(s32 offset, s32 flags, s32* out_width) {
                 }
                 if ((CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->window_selector & flags)
                     == flags) {
-                    text_pixels_measure(&width, &height,
-                        text_entry_find(
+                    text_measure_pixels(&width, &height,
+                        text_find_entry(
                             ((CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[1] << 8)
                                 + CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0])
                             - 1));
@@ -100,7 +100,7 @@ void message_window_width_measure(s32 offset, s32 flags, s32* out_width) {
  * the shared initial/repeat/secondary key-repeat delays. During a tutorial
  * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the
  * repeat counters restart. */
-void screen_dialog_input_update(void) {
+void screen_update_dialog_input(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -166,7 +166,7 @@ void screen_dialog_input_update(void) {
 
 /* Free the typewriter slot (one of three) the current thread owns, if any, and reset its
  * glyph count; a closing dialog thread calls it. */
-void message_typewriter_slot_release(void) {
+void message_release_typewriter_slot(void) {
     s32 index = 0;
     s32 current_thread_id = g_thread_current_id;
     s32* owner_thread_id;
@@ -189,7 +189,7 @@ void message_typewriter_slot_release(void) {
 }
 
 /* The running thread's task id; loops that may be cut short poll it for THREAD_TASK_STOP_REQUEST. */
-s32 thread_current_task_get(void) {
+s32 thread_current_get_task(void) {
     return g_thread_contexts[g_thread_current_id].task_id;
 }
 
@@ -197,7 +197,7 @@ s32 thread_current_task_get(void) {
  * three per-thread staging slots, then pace the message: delay 0 waits for the draw, 2 or more
  * waits that many steps per glyph, and 1 follows the message speed option (Circle held or Fast
  * shows 8 glyphs per wait). Queues the text sound unless muted. */
-void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
+void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
     s32 slot;
     s32 i;
     s32 j;
@@ -343,10 +343,10 @@ void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
             g_text_slot_glyph_counts[slot] = 0;
         } else if (delay >= 2) {
             for (i = 0; i < delay * (3 - g_script_event_speed); i++) {
-                if (thread_current_task_get() == THREAD_TASK_STOP_REQUEST) {
+                if (thread_current_get_task() == THREAD_TASK_STOP_REQUEST) {
                     break;
                 }
-                thread_frames_wait(1);
+                thread_wait_frames(1);
             }
             g_text_slot_glyph_counts[slot] = 0;
         } else {
@@ -361,10 +361,10 @@ void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay) {
             }
             if (g_text_slot_glyph_counts[slot] >= g_text_glyphs_per_wait) {
                 for (i = 0; i < 3 - g_script_event_speed; i++) {
-                    if (thread_current_task_get() == THREAD_TASK_STOP_REQUEST) {
+                    if (thread_current_get_task() == THREAD_TASK_STOP_REQUEST) {
                         break;
                     }
-                    thread_frames_wait(1);
+                    thread_wait_frames(1);
                 }
                 g_text_slot_glyph_counts[slot] = 0;
             }

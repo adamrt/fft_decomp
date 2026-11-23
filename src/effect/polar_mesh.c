@@ -1,6 +1,5 @@
 /* A four-fold polar mesh built from radius and angle curves, drawn with a drifting center and scrolling texture. */
 
-#include "fft/battle_map_palette.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
 #include "fft/effect_file.h"
@@ -9,6 +8,7 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
+#include "fft/map_palette.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -79,7 +79,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
     effect_polar_mesh_scratch_t* scratch = (effect_polar_mesh_scratch_t*)getScratchAddr(0);
     effect_record_t* record = &g_effect_state_records[state_index];
     const effect_geometry_record_t* entry = &g_effect_geometry_table->entries[emitter_index];
-    u32* ot = gfx_battle_otag_get();
+    u32* ot = gfx_get_battle_otag();
     effect_polar_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* inner;
@@ -115,7 +115,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
             SetPolyGT4(quad);
             setSemiTrans(quad, scratch->translucent);
             quad->tpage = scratch->tpage;
-            quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+            quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             work->quads[1][i] = *quad;
         }
 
@@ -175,7 +175,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
 
         /* The center moves by velocity from ring to ring, and velocity changes by acceleration. */
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.center, work->frame);
-        effect_emitter_spawn_position_interpolate(entry, i, &scratch->center);
+        effect_emitter_interpolate_spawn_position(entry, i, &scratch->center);
 
         selector = entry->polar_mesh.curve_bindings.velocity;
         EFFECT_READ_CURVE(j, i, selector, work->frame);

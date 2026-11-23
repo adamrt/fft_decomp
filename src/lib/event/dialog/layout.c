@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 /* Convert a text-format substitution opcode into its string-table ID. */
-s32 text_format_id_resolve(s32 format_code, s32 value) {
+s32 text_resolve_format_id(s32 format_code, s32 value) {
     if (format_code == TEXT_FORMAT_RAMZA_NAME) {
         return TEXT_ID_UNIT_NAME_BASE;
     }
@@ -94,7 +94,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
         } else if (state->command == TEXT_PRINT_NEXT_VALUE) {
             state->value = *state->value_cursor;
             if (state->pending_width == 0xFFFF) {
-                state->column += text_decimal_digits_count(state->value);
+                state->column += text_count_decimal_digits(state->value);
             } else {
                 state->column += state->pending_width;
                 state->pending_width = 0xFFFF;
@@ -104,7 +104,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
             cursor = text_advance_cursor_with_backreferences(state, cursor);
             state->value = g_text_substitution_values[*cursor];
             if (state->pending_width == 0xFFFF) {
-                state->column += text_decimal_digits_count(state->value);
+                state->column += text_count_decimal_digits(state->value);
             } else {
                 state->column += state->pending_width;
                 state->pending_width = 0xFFFF;
@@ -116,13 +116,13 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
                 state, text_advance_cursor_with_backreferences(state, cursor));
             continue;
         }
-        state->value = text_format_id_resolve(state->command, *state->value_cursor);
+        state->value = text_resolve_format_id(state->command, *state->value_cursor);
         if (state->value != -1) {
             state->return_cursor = cursor + 1;
             if (state->command == TEXT_FORMAT_RAMZA_NAME) {
                 cursor = g_text_player_name_buffer;
             } else {
-                cursor = text_entry_find(state->value);
+                cursor = text_find_entry(state->value);
             }
             state->value_cursor++;
             continue;
@@ -150,7 +150,7 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
 /* Measure a text entry in pixels, recording each line's width and returning
  * the widest line and line count. Spaces are 4 pixels and numeric digits 6;
  * other glyphs use their prefix page's width table. */
-void text_pixels_measure(s16* width, s16* rows, const u8* text) {
+void text_measure_pixels(s16* width, s16* rows, const u8* text) {
     const text_backref_t* backref;
     party_unit_t* party;
     const u8* cursor;
@@ -208,7 +208,7 @@ void text_pixels_measure(s16* width, s16* rows, const u8* text) {
         } else if (state->command == TEXT_PRINT_NEXT_VALUE) {
             state->value = *state->value_cursor;
             if (state->pending_width == 0xFFFF) {
-                state->column += text_decimal_digits_count(state->value) * 6;
+                state->column += text_count_decimal_digits(state->value) * 6;
             } else {
                 state->column += state->pending_width * 6;
                 state->pending_width = 0xFFFF;
@@ -218,7 +218,7 @@ void text_pixels_measure(s16* width, s16* rows, const u8* text) {
             cursor = text_advance_cursor_with_backreferences(state, cursor);
             state->value = g_text_substitution_values[*cursor];
             if (state->pending_width == 0xFFFF) {
-                state->column += text_decimal_digits_count(state->value) * 6;
+                state->column += text_count_decimal_digits(state->value) * 6;
             } else {
                 state->column += state->pending_width * 6;
                 state->pending_width = 0xFFFF;
@@ -230,13 +230,13 @@ void text_pixels_measure(s16* width, s16* rows, const u8* text) {
                 state, text_advance_cursor_with_backreferences(state, cursor));
             continue;
         }
-        state->value = text_format_id_resolve(state->command, *state->value_cursor);
+        state->value = text_resolve_format_id(state->command, *state->value_cursor);
         if (state->value != -1) {
             state->return_cursor = cursor + 1;
             if (state->command == TEXT_FORMAT_RAMZA_NAME) {
                 cursor = g_text_player_name_buffer;
             } else {
-                cursor = text_entry_find(state->value);
+                cursor = text_find_entry(state->value);
             }
             state->value_cursor++;
             continue;
@@ -274,7 +274,7 @@ void text_pixels_measure(s16* width, s16* rows, const u8* text) {
  * A portrait dialog gets the window with its tail, every other type the plain
  * frame; a centered box is skipped. The thread yields once between the upload and
  * the free. */
-void message_record_image_render(text_dialog_record_t* record) {
+void message_render_record_image(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
             record->buffer = menu_build_window_image(

@@ -1,8 +1,8 @@
 /* Scenario battle setup, music and darkness, and deployment availability. */
 
-#include "fft/battle_map_light.h"
 #include "fft/deploy.h"
 #include "fft/encounter.h"
+#include "fft/map_light.h"
 #include "fft/memory.h"
 #include "fft/music.h"
 #include "fft/party.h"
@@ -50,7 +50,7 @@ typedef char scenario_setup_size_must_be_24[sizeof(scenario_setup_t) == 24 ? 1 :
  * current scenario's map, music, ENTD, squads and condition script are copied
  * into the script variables. Returns 1 when the scenario has no first squad.
  */
-s32 scenario_load_conditionals(void) {
+s32 scenario_load_setup(void) {
     /* sp+0x10 squad 1, sp+0x14 squad 2, sp+0x1c story ENTD; [2] is unused.
      * The story ENTD lives in the array: as a scalar it would take a
      * callee-saved register instead of the target's stack slot. */
@@ -274,7 +274,7 @@ void scenario_restore_music_and_darkness(void) {
     if (g_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
         if (g_sound_music_track_1_id == 0 && g_sound_music_track_2_id == 0) {
             g_sound_current_music_track_index = 0;
-            music_tracks_play(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
+            music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
         } else {
             if (g_sound_current_music_track_index == 0) {
                 playing = g_sound_music_track_1_id;
@@ -286,13 +286,13 @@ void scenario_restore_music_and_darkness(void) {
 
             if (playing != g_event_scenario_music_1_id && playing != g_event_scenario_music_2_id) {
                 g_sound_current_music_track_index = 0;
-                music_tracks_play(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
+                music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);
             } else {
-                g_thread_call_target = (void (*)(void))music_scenario_slot_unload;
+                g_thread_call_target = (void (*)(void))music_unload_scenario_slot;
                 thread_call_on_main_stack((g_sound_current_music_track_index ^ 1) + 1);
-                g_thread_call_target = (void (*)(void))music_slot_load;
+                g_thread_call_target = (void (*)(void))music_load_into_slot;
                 thread_call_on_main_stack(replacement, (g_sound_current_music_track_index ^ 1) + 1);
-                music_load_wait();
+                music_wait_load();
             }
         }
 
@@ -300,7 +300,7 @@ void scenario_restore_music_and_darkness(void) {
         g_sound_music_track_2_id = g_event_scenario_music_2_id;
     }
 
-    battle_map_light_state_command(BATTLE_MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
+    map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
     text_build_unit_name_list();
 }
 

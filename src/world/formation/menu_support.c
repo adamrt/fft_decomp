@@ -13,6 +13,7 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
+#include "fft/zodiac.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -30,7 +31,7 @@ void screen_icon_list_thread(void) {
     s32 i;
     menu_icon_sprites_t* record;
 
-    param = (menu_entry_t*)thread_current_parameter_1_get();
+    param = (menu_entry_t*)thread_current_get_parameter_1();
     record = &records[0].base;
     cursor = param->selected_index;
     if (cursor == -1) {
@@ -45,7 +46,7 @@ void screen_icon_list_thread(void) {
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = param->inner_width;
-    menu_set_text_origin(8, 9);
+    menu_text_set_origin(8, 9);
     g_menu_text_palette_offset = 0;
     menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
@@ -66,7 +67,7 @@ void screen_icon_list_thread(void) {
             break;
         }
         if (thread_is_previous_running() == 0) {
-            menu_row_cursor_update(param, &cursor);
+            menu_update_row_cursor(param, &cursor);
             menu_handle_action(param, cursor);
             menu_handle_cancel_input(param);
         }
@@ -84,7 +85,7 @@ void screen_icon_list_thread(void) {
  * terminated name per roster slot, empty for a vacant slot, with a terminator
  * appended to a name that fills all 16 bytes. A 0xFF byte also ends a name
  * and is copied as its terminator. Bumps the name string revision. */
-void formation_roster_names_build(void) {
+void formation_roster_build_names(void) {
     u8* out = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     party_unit_t* unit;
     s32 i;
@@ -117,11 +118,11 @@ void formation_roster_names_build(void) {
 
 /* Set whether the menu cursors hold their bob: at 1 the cursor threads reset their bob state to 2 with the
  * timer cleared every frame; the title script switches it between 0 and 1. */
-void menu_cursor_bob_hold_set(s32 mode) {
+void menu_set_cursor_bob_hold(s32 mode) {
     g_menu_cursor_bob_hold = mode;
 }
 
 /* Set the ordering table the formation view zoom thread draws into. */
-void formation_backdrop_otag_set(u32* ordering_table) {
+void zodiac_backdrop_set_otag(u32* ordering_table) {
     g_formation_ordering_table = ordering_table;
 }

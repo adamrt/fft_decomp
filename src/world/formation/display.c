@@ -3,6 +3,7 @@
 #include "fft/formation.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
+#include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item_menu.h"
 #include "fft/menu.h"
@@ -51,12 +52,12 @@ static RECT s_status_label_rect = { 384, 245, 64, 11 };
 /* Set up the formation screen's display: reset the menu context, clear the screen (except when
  * entering from name entry), upload the menu glyph sheet, palettes and status label image, and
  * copy two window-frame palettes into VRAM row 510 with colors 4, 8 and 12 cleared. */
-void formation_display_init(void) {
+void formation_init_display(void) {
     RECT rect;
     palette_t palette;
 
-    screen_context_reset();
-    menu_set_vsync_mode_and_event_speed(0);
+    screen_reset_context();
+    menu_set_event_speed(0);
     if (g_screen_context_id != SCREEN_CONTEXT_NAME_ENTRY) {
         rect.x = 0;
         rect.y = 0;
@@ -117,15 +118,15 @@ void formation_display_init(void) {
     gfx_load_image_and_wait(&rect, &palette[4]);
     gfx_load_image_and_wait(&s_status_label_rect, s_status_label_image);
     g_help_message_text_id = 0;
-    menu_scrollable_list_core_init(0, 0, 0);
-    screen_fade_in_start();
-    menu_selection_values_clear();
+    menu_scrollable_list_init_core(0, 0, 0);
+    screen_start_fade_in();
+    menu_selection_clear_values();
     g_formation_unit_cycle_mode = 0;
-    screen_selection_results_reset();
-    screen_text_section_bind(SCREEN_TEXT_DATA_SKILLSET_NAMES);
-    screen_text_section_bind(SCREEN_TEXT_DATA_JOB_NAMES);
-    screen_text_section_bind(SCREEN_TEXT_DATA_ABILITY_NAMES);
-    screen_text_section_bind(SCREEN_TEXT_DATA_FORMATION_MESSAGES);
+    screen_reset_selection_results();
+    screen_text_bind_section(SCREEN_TEXT_DATA_SKILLSET_NAMES);
+    screen_text_bind_section(SCREEN_TEXT_DATA_JOB_NAMES);
+    screen_text_bind_section(SCREEN_TEXT_DATA_ABILITY_NAMES);
+    screen_text_bind_section(SCREEN_TEXT_DATA_FORMATION_MESSAGES);
     g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_formation_menu_text_buffer;
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_formation_menu_text_table;
     g_formation_cursor_ot_override = 0;
@@ -136,7 +137,7 @@ void formation_display_init(void) {
  * formation screen, the monsters at the soldier office and the available
  * humans in the other shops. Also reconciles the five item category lists
  * and resets the cursor and scroll. */
-void formation_lists_rebuild(void) {
+void formation_rebuild_lists(void) {
     formation_record_list_mode_e mode;
 
     if (g_screen_context_id == SCREEN_CONTEXT_FORMATION) {
@@ -147,20 +148,20 @@ void formation_lists_rebuild(void) {
             mode = FORMATION_RECORD_LIST_AVAILABLE_HUMANS;
         }
     }
-    g_formation_unit_count = formation_record_list_build(0, g_formation_unit_pointers, mode);
+    g_formation_unit_count = formation_build_record_list(0, g_formation_unit_pointers, mode);
     item_rebuild_category_list(0);
     item_rebuild_category_list(1);
     item_rebuild_category_list(2);
     item_rebuild_category_list(3);
     item_rebuild_category_list(4);
-    formation_grid_cursor_init(0);
+    formation_grid_init_cursor(0);
     g_formation_screen_running = 1;
 }
 
 /* Reports whether the screen is busy: the grid help is up (g_screen_grid_id),
  * a menu runs in the upper menu or screen menu thread slot, or menu input is
  * locked (g_menu_input_lock_mode). */
-s32 screen_busy_check(void) {
+s32 screen_check_busy(void) {
     return g_screen_grid_id != MENU_GRID_HELP_NONE || thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU) != 0
         || g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0;
 }
@@ -168,15 +169,15 @@ s32 screen_busy_check(void) {
 /* Show message `message_id` in the text thread (dialog type 0x2B), play
  * `sound_id` at once and lock menu input while the message is up. */
 void message_box_show_with_sound(s32 message_id, s32 sound_id) {
-    menu_text_start_thread_if_idle(THREAD_SCREEN_SLOT_TEXT, 0x2B, message_id, 0);
+    menu_text_thread_start_if_idle(THREAD_SCREEN_SLOT_TEXT, 0x2B, message_id, 0);
     g_screen_sound_release_held_loop = 1;
-    sound_free_channel_sfx_play(sound_id);
+    sound_play_sfx_on_free_channel(sound_id);
     g_menu_input_lock_mode = 1;
 }
 
 /* Show `message_id` in the text thread (dialog type 0x1B) with the formation
  * unit's roster slot as speaker, unless the thread is busy. */
-void formation_show_unit_message(s16 unit_index, s32 message_id) {
-    menu_text_start_thread_if_idle(
+void formation_unit_show_message(s16 unit_index, s32 message_id) {
+    menu_text_thread_start_if_idle(
         THREAD_SCREEN_SLOT_TEXT, 0x1B, message_id, g_formation_unit_pointers[unit_index]->identity.roster_slot);
 }

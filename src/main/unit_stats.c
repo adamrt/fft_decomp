@@ -11,29 +11,29 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static void status_timers_init(unit_stats_t* unit);
+static void init_timers(battle_unit_t* unit);
 
-static void statuses_reconcile(unit_stats_t* unit);
+static void reconcile_statuses(battle_unit_t* unit);
 
-static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initializing);
+static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initializing);
 
 /* Seed inflicted_status with the current statuses the unit does not have
- * innately, then set up the status CTs (status_timers_init) and reconcile the
+ * innately, then set up the status CTs (init_timers) and reconcile the
  * status flags. */
-void status_unit_init(unit_stats_t* unit) {
+void status_init_unit(battle_unit_t* unit) {
     s32 status_set;
 
     for (status_set = 0; status_set < STATUS_BYTE_COUNT; status_set++) {
         unit->inflicted_status[status_set]
             = unit->status_sets.current[status_set] & ~unit->status_sets.innate[status_set];
     }
-    status_timers_init(unit);
-    statuses_reconcile(unit);
+    init_timers(unit);
+    reconcile_statuses(unit);
 }
 
 /* Clear the timed-status CTs and start the death counter at 3, or at 0xff for
  * an immortal unit and for one with a save- or load-formation flag. */
-static void status_timers_init(unit_stats_t* unit) {
+static void init_timers(battle_unit_t* unit) {
     mem_zero(unit->status_ct, sizeof(unit->status_ct));
     if ((unit->team_flags & UNIT_TEAM_FLAG_IMMORTAL)
         || (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION))) {
@@ -44,7 +44,7 @@ static void status_timers_init(unit_stats_t* unit) {
 }
 
 /* Apply Float and reconcile the unit's status flags and status CT. */
-static void statuses_reconcile(unit_stats_t* unit) {
+static void reconcile_statuses(battle_unit_t* unit) {
     s32 status;
     u8 immunity;
 
@@ -65,28 +65,28 @@ static void statuses_reconcile(unit_stats_t* unit) {
 
         if ((unit->inflicted_status[status_byte] & (0x80 >> status_bit))
             && unit->status_ct[STATUS_CT_INDEX(status)] == 0) {
-            status_ct_set(unit, status, 0);
+            status_set_ct(unit, status, 0);
         }
     }
 }
 
-/* stats_refresh with skip_status_check set: stats
+/* refresh_stats with skip_status_check set: stats
  * are re-derived without the critical and status notifications. */
-void unit_formation_stats_refresh(unit_stats_t* unit) {
-    stats_refresh(unit, 1, 0);
+void battle_unit_refresh_formation_stats(battle_unit_t* unit) {
+    refresh_stats(unit, 1, 0);
 }
 
-/* stats_refresh with both flags clear: stats are
+/* refresh_stats with both flags clear: stats are
  * re-derived and the status notifications run. */
-void unit_stats_refresh(unit_stats_t* unit) {
-    stats_refresh(unit, 0, 0);
+void battle_unit_refresh_stats(battle_unit_t* unit) {
+    refresh_stats(unit, 0, 0);
 }
 
-/* stats_refresh in its initializing form: the
+/* refresh_stats in its initializing form: the
  * inflicted statuses are seeded from the current ones and their CTs cleared.
  * Nothing in the tree calls it. */
-void unit_stats_init(unit_stats_t* unit) {
-    stats_refresh(unit, 0, 1);
+void battle_unit_init(battle_unit_t* unit) {
+    refresh_stats(unit, 0, 1);
 }
 
 /* Re-derives the job-dependent stats (move/jump, equippable categories,
@@ -94,7 +94,7 @@ void unit_stats_init(unit_stats_t* unit) {
  * equipment bonuses), then reconciles the status bits.  `skip_status_check`
  * leaves the critical/status notifications alone; `initializing` seeds the
  * inflicted statuses from the current ones and clears their CTs. */
-static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initializing) {
+static void refresh_stats(battle_unit_t* unit, s32 skip_status_check, s32 initializing) {
     u8 saved_inflicted[STATUS_BYTE_COUNT];
     u8 saved_current[STATUS_BYTE_COUNT];
     s32 i;
@@ -102,12 +102,12 @@ static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initial
     s32 mask;
     s32 byte_index;
     s32 current_bit;
-    s32 battle_id = unit->battle_id;
+    s32 battle_unit_id = unit->battle_unit_id;
     s32 saved_bit;
     u8 formation_index;
     job_data_t* job;
 
-    status_current_update(unit);
+    status_refresh_current(unit);
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         saved_current[i] = unit->status_sets.current[i];
         saved_inflicted[i] = unit->inflicted_status[i];
@@ -120,11 +120,11 @@ static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initial
     mem_copy_bytes_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
     mem_copy_bytes_source_first(job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
     unit->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN] = 0;
-    unit_rsm_flags_enable(unit);
-    unit_move_jump_calculate(unit, 1);
-    unit_equipment_stats_set(unit);
-    unit_equipment_attributes_set(unit, 0);
-    unit_equippable_items_set(unit);
+    battle_unit_enable_rsm_flags(unit);
+    battle_unit_calculate_move_and_jump(unit, 1);
+    battle_unit_set_equipment_stats(unit);
+    battle_unit_set_equipment_attributes(unit, 0);
+    battle_unit_set_equippable_items(unit);
 
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         if (initializing) {
@@ -136,9 +136,9 @@ static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initial
 
     formation_index = unit->formation_index;
     unit->formation_index = UNIT_FORMATION_INDEX_NONE;
-    statuses_reconcile(unit);
+    reconcile_statuses(unit);
     unit->formation_index = formation_index;
-    status_current_update(unit);
+    status_refresh_current(unit);
 
     if (skip_status_check != 0) {
         return;
@@ -148,7 +148,7 @@ static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initial
     } else {
         unit->inflicted_status[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)] &= ~STATUS_BYTE_MASK(STATUS_ID_CRITICAL);
     }
-    status_current_update(unit);
+    status_refresh_current(unit);
 
     for (i = 0, status_id = STATUS_HANDLER_INDEX(STATUS_ID_UNNAMED_00); i < STATUS_COUNT; i++, status_id++) {
         byte_index = i / 8;
@@ -158,11 +158,11 @@ static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initial
         if (initializing != 0 || saved_bit != current_bit) {
             if (current_bit != 0) {
                 if (initializing != 0) {
-                    status_ct_set(unit, i, 0);
+                    status_set_ct(unit, i, 0);
                 }
-                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_unit_id);
             } else {
-                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_unit_id);
             }
         }
     }
@@ -171,7 +171,7 @@ static void stats_refresh(unit_stats_t* unit, s32 skip_status_check, s32 initial
 /* Level up at 100 EXP: one level of growth, and EXP goes back to 0 (the excess
  * is lost). At level 99 EXP is held at 99 instead. Returns 1 when the level
  * rose. */
-s32 unit_level_up_check(unit_stats_t* unit) {
+s32 battle_unit_check_level_up(battle_unit_t* unit) {
     u8 level;
 
     if (unit->experience < UNIT_LEVEL_UP_EXPERIENCE) {
@@ -184,7 +184,7 @@ s32 unit_level_up_check(unit_stats_t* unit) {
         return 0;
     }
 
-    unit_level_growth_apply(unit, 0);
+    battle_unit_apply_level_growth(unit, 0);
     unit->experience = 0;
     unit->level = level + 1;
     return 1;
@@ -193,7 +193,7 @@ s32 unit_level_up_check(unit_stats_t* unit) {
 /* Raises a roster unit by `level_delta` levels (capped at 99), growing each
  * 24-bit raw stat by raw / (level + growth) per level, and returns the new
  * level.  The growth table is the job's stat_growths pairs. */
-u32 party_levels_gain(party_unit_t* party_unit, s32 level_delta) {
+u32 party_unit_gain_levels(party_unit_t* party_unit, s32 level_delta) {
     u32 current_level = party_unit->level;
     u32 level = current_level + level_delta;
     job_stat_growth_t* growth_table;
@@ -238,7 +238,7 @@ u32 party_levels_gain(party_unit_t* party_unit, s32 level_delta) {
 /* Applies one level of growth (or its inverse for a level down) to each
  * 24-bit raw stat: raw +/- raw / (growth + level), a zero growth counting as
  * 1, capped at 0xffffff; then refreshes the derived stats and clamps HP/MP. */
-void unit_level_growth_apply(unit_stats_t* unit, s32 level_down) {
+void battle_unit_apply_level_growth(battle_unit_t* unit, s32 level_down) {
     unit_raw_stat_t* raw_stats = unit->raw_stats;
     job_stat_growth_t* growth = unit->stat_growths;
     u32 value;
@@ -270,7 +270,7 @@ void unit_level_growth_apply(unit_stats_t* unit, s32 level_down) {
         raw_stats[i].high = value >> 16;
     }
 
-    unit_stats_refresh(unit);
+    battle_unit_refresh_stats(unit);
     if (unit->hp > unit->max_hp) {
         unit->hp = unit->max_hp;
     }
@@ -284,7 +284,7 @@ void unit_level_growth_apply(unit_stats_t* unit, s32 level_down) {
  * 0xff for an immortal unit and for one with a save- or load-formation flag.
  * Returns -1 when Death Sentence is already counting, so a second one does not
  * restart it; otherwise 0. */
-s32 status_ct_set(unit_stats_t* unit, s32 status_id, s32 removing) {
+s32 status_set_ct(battle_unit_t* unit, s32 status_id, s32 removing) {
     u32 ct_index;
     s32 stored_index;
 

@@ -13,8 +13,8 @@
 extern s8 g_menu_event_speed;
 
 s32 menu_get_event_speed(void);
-void menu_set_vsync_mode_and_event_speed(s32 speed);
-s32 menu_event_frame_update(u32* otag, s32 controller_input);
+void menu_set_event_speed(s32 speed);
+s32 menu_update_event_frame(u32* otag, s32 controller_input);
 
 /* menu arena */
 void* menu_alloc_memory(s32 bytes);
@@ -85,20 +85,20 @@ typedef enum menu_icon_header {
 /* One menu window, shared by BATTLE, WORLD and the overlays; g_menu_thread_menu_data points at the scene's
  * current table. The icon threads read vram_origin and the inner size as the text image's upload rectangle and
  * window.x/y as the icon origin (the icon list thread clears bit 0 of window.y);
- * menu_row_cursor_update wraps the cursor at max_row_index. */
+ * menu_update_row_cursor wraps the cursor at max_row_index. */
 typedef struct menu_entry {
     point16_t vram_origin; /* 0x00: text-image VRAM origin passed to the draw-mode helpers */
     s16 inner_width;       /* 0x04: text-image width; RECT.w = inner_width >> 2 (4bpp) */
-    s16 inner_height;      /* 0x06: text-image height (menu_size_entry_to_text) */
+    s16 inner_height;      /* 0x06: text-image height (size_entry_to_text) */
     RECT window;           /* 0x08: screen position and extent passed to image and draw-area helpers */
     /* 0x10: text sprite placement (menu_build_window_sprites). width/height are set with the
      * inner and window sizes; the load origin and screen offsets are cleared
      * with them. */
     image_layout_t text_image;
-    s16 text_id;                 /* 0x1c: passed to text_entry_find */
-    s16 max_row_index;           /* 0x1e: row count - 1 (command_build_act_menu) */
+    s16 text_id;                 /* 0x1c: passed to text_find_entry */
+    s16 max_row_index;           /* 0x1e: row count - 1 (build_act_menu) */
     s16 thread_count;            /* 0x20: threads menu_handle_cancel_input stops, -1 when there is no thread
-                                    group; set from the system-function table by request_thread_run */
+                                    group; set from the system-function table by request_thread */
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24: each row's action, indexed by selected_index */
     void (*thread_entry)(void);  /* 0x28 */
@@ -148,7 +148,7 @@ typedef char menu_number_entry_size_must_be_12[(sizeof(menu_number_entry_t) == 1
 extern s32 g_menu_post_battle_unit_changes_active;
 extern u8 g_menu_common_graphics_loaded;
 
-/* The field y (0 or 0xf0) handed to menu_input_event_state_update each frame; the panels draw into the other
+/* The field y (0 or 0xf0) handed to menu_input_update_event_state each frame; the panels draw into the other
  * frame-buffer half. */
 extern u16 g_menu_framebuffer_y;
 
@@ -162,10 +162,10 @@ extern u16 g_menu_overlay_state;
 extern u16 g_menu_transition_state;
 
 /* Loads the default menu palettes and rebuilds the text section pointers. */
-void menu_palette_text_init(s32 unused_0);
+void menu_init_palette_text(s32 unused_0);
 
 /* Binds the scene's working pointers and clears its menu-session flags. */
-void menu_subsystem_pointers_init(void);
+void menu_init_subsystem_pointers(void);
 void menu_subsystems_init(void);
 
 /* Frees every window buffer pair, the tpage-7 VRAM grid and the menu arena, and resets the thread scheduler. */
@@ -173,7 +173,7 @@ void menu_subsystems_reset(void);
 
 /* 2 while a menu is being built, 4 while a menu thread runs, 0 when idle; BATTLE's body first returns
  * g_menu_transition_state when it is set. */
-s32 menu_thread_activity_get(void);
+s32 menu_thread_get_activity(void);
 
 /* unreferenced stubs */
 /* Empty functions that nothing on the disc calls or points at; the names are neutral placeholders. */
@@ -199,7 +199,7 @@ typedef enum menu_equipment_slot {
 } menu_equipment_slot_e;
 
 /* unit grid readouts */
-/* What the unit grids draw below a unit (unit_readout_draw,
+/* What the unit grids draw below a unit (draw_unit_readout,
  * unit_list_update_grid). L2/R2 step g_formation_stat_display_mode and
  * g_unit_list_stat_mode through the first five, wrapping between HP and
  * BRAVE_FAITH; WORLD picks the others per unit. */

@@ -22,6 +22,6 @@ typedef struct menu_sort_orders {
 extern menu_sort_orders_t g_menu_sort_orders;
 
 /* Restore default orders, empty item-page lists and clear poached-item counts. */
-void menu_sort_tables_init(void);
+void menu_init_sort_tables(void);
 
 #endif

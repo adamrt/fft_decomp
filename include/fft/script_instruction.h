@@ -18,16 +18,16 @@ enum {
     EVENT_UNIT_SELECTOR_IMPORTANT_UNIT = 0x68,
     EVENT_UNIT_SELECTOR_ACTIVE_TURN = 0x69,
     /* First unit-group selector. The instructions that take a unit group pass
-     * selector - 0xfe to unit_id_filter as its mode (2 up);
+     * selector - 0xfe to filter_unit_id as its mode (2 up);
      * unit id 0 selects mode 1, every unit. */
     EVENT_UNIT_GROUP_FIRST = 0x100,
     /* Five ordinary deployed-unit IDs; the end value is exclusive. */
     EVENT_UNIT_ID_DEPLOYED_FIRST = 0x78,
     EVENT_UNIT_ID_DEPLOYED_END = 0x7d,
-    /* script_runtime_id_resolve result for an absent unit. */
-    EVENT_RUNTIME_ID_NONE = 2000,
-    /* unit_event_battle_id_get result for an absent unit: the same value. */
-    EVENT_BATTLE_ID_NONE = EVENT_RUNTIME_ID_NONE,
+    /* script_resolve_map_unit_id result for an absent unit. */
+    EVENT_MAP_UNIT_ID_NONE = 2000,
+    /* battle_unit_get_id_by_event_unit_id result for an absent unit: the same value. */
+    EVENT_BATTLE_UNIT_ID_NONE = EVENT_MAP_UNIT_ID_NONE,
     /* g_script_unit_slots[] entry with no ghost unit assigned. */
     EVENT_UNIT_SLOT_EMPTY = 1000
 };
@@ -47,9 +47,9 @@ enum {
  * Each comment gives the encoded operand byte count, then the operands in the
  * order the handler reads them. A plain name is one unsigned byte, (s8) a
  * signed byte, (u16) or (s16) a 16-bit value, and "unread" a byte no handler
- * reads. A "unit id" names one unit (script_runtime_id_resolve); a "unit group"
+ * reads. A "unit id" names one unit (script_resolve_map_unit_id); a "unit group"
  * is a unit id, 0 for every unit, or a team selector from
- * EVENT_UNIT_GROUP_FIRST (unit_filter_prepare).
+ * EVENT_UNIT_GROUP_FIRST (prepare_unit_filter).
  *
  * UNKNOWN values are explicit dispatch cases, not guesses for otherwise
  * unrecognized byte values. UNHANDLED values have a length in the table but
@@ -329,7 +329,7 @@ typedef enum event_rotate_unit_facing {
 } event_rotate_unit_facing_e;
 
 /* First 16-bit value of a scenario condition record, as
- * condition_check tests it. The record's next 16-bit values are
+ * check_condition tests it. The record's next 16-bit values are
  * called id and value below; the two tile conditions also read a y and an
  * elevation. Other types fail. */
 typedef enum event_scenario_condition {
@@ -353,7 +353,7 @@ typedef enum event_scenario_condition {
     EVENT_SCENARIO_CONDITION_DATE_ON_OR_AFTER = 17,    /* month id, day value */
     EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST = 18, /* compares with id, not value */
     EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST = 19,  /* compares with id, not value */
-    EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED = 22,    /* event_check_battle_outcome returns 0 */
+    EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED = 22,    /* battle_check_outcome returns 0 */
     EVENT_SCENARIO_CONDITION_UNIT_AT_TILE = 24,        /* unit id stands on x value, the y and the elevation */
     /* Stores id as the current event; the result is always RUN_EVENT. */
     EVENT_SCENARIO_CONDITION_RUN_EVENT = 25,
@@ -361,8 +361,8 @@ typedef enum event_scenario_condition {
     EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE = 37
 } event_scenario_condition_e;
 
-/* Result of condition_check for one condition record.
- * scenario_conditions_run walks a chain of records while they pass,
+/* Result of check_condition for one condition record.
+ * scenario_run_conditions walks a chain of records while they pass,
  * drops the chain at the first failure and reports an event to run when it
  * reaches the record (type 25) that stores the event id. */
 typedef enum event_scenario_condition_result {
@@ -388,11 +388,11 @@ typedef enum event_inflict_status {
 } event_inflict_status_e;
 
 /* event file */
-/* event_file_block_t.text_offset_or_marker once script_event_load has processed the block. */
+/* event_file_block_t.text_offset_or_marker once script_load_event has processed the block. */
 #define EVENT_TEXT_OFFSET_PROCESSED 0xf2f2f2f2U
 
 /* EVENT/TEST.EVT record. The first 32-bit value is relative to the block base, not
- * data[]. script_event_load converts it to a text pointer, then overwrites
+ * data[]. script_load_event converts it to a text pointer, then overwrites
  * it with EVENT_TEXT_OFFSET_PROCESSED. This is not a decoded instruction
  * array or a native scheduler context. The interpreter starts at byte zero:
  * the processed header is four one-byte 0xf2 NOPs before data[]. */
@@ -456,7 +456,7 @@ typedef struct event_unit_placement {
 /* Direct battle-slot placement bypasses the renderer update performed by WarpUnit. */
 typedef struct event_set_battle_unit_position_instruction {
     u8 opcode;
-    u8 battle_id;
+    u8 battle_unit_id;
     u8 _unused_02;
     event_unit_placement_t placement;
 } event_set_battle_unit_position_instruction_t;

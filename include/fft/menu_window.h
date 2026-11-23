@@ -50,21 +50,21 @@ typedef enum menu_window_icon_flags {
  * DisplayMessage the text threads store the dialog type's box nibble (& 0x70), the portrait unit and the scroll
  * state, which menu_draw_active_window_frames reads. */
 typedef struct menu_window_buffer {
-    s32 active;             /* 0x00: 1 once the text thread has built the window; the frame
-                               drawers skip the pair otherwise; cleared on allocation and close */
-    s32 thread_id;          /* 0x04 */
-    s32 message_id;         /* 0x08: active/change-dialog text entry ID */
-    s32 portrait_code;      /* 0x0c: portrait texture/CLUT descriptor, -1 when unused */
-    s32 portrait_battle_id; /* 0x10: battle id of the DisplayMessage unit (box type 0x10),
+    s32 active;                  /* 0x00: 1 once the text thread has built the window; the frame
+                                    drawers skip the pair otherwise; cleared on allocation and close */
+    s32 thread_id;               /* 0x04 */
+    s32 message_id;              /* 0x08: active/change-dialog text entry ID */
+    s32 portrait_code;           /* 0x0c: portrait texture/CLUT descriptor, -1 when unused */
+    s32 portrait_battle_unit_id; /* 0x10: battle unit id of the DisplayMessage unit (box type 0x10),
                                drawn as the portrait when portrait_code == -1 */
-    s32 dialog_selector;    /* 0x14 */
-    s32 box_type;           /* 0x18: dialog type & 0x70; 0x10 is the portrait box */
-    s32 portrait_flipped;   /* 0x1c: 1 when the tail offset is negative; event
-                               instruction 0x37 toggles it */
-    s32 icon_flags;         /* 0x20: menu_window_icon_flags_e */
-    s32 scroll_range;       /* 0x24: scrollable lines (line - lines); 1 when freshly allocated */
-    s32 scroll_position;    /* 0x28: first drawn line; the scroll marker sits at
-                               scroll_position / scroll_range of its span; 1 when freshly allocated */
+    s32 dialog_selector;         /* 0x14 */
+    s32 box_type;                /* 0x18: dialog type & 0x70; 0x10 is the portrait box */
+    s32 portrait_flipped;        /* 0x1c: 1 when the tail offset is negative; event
+                                    instruction 0x37 toggles it */
+    s32 icon_flags;              /* 0x20: menu_window_icon_flags_e */
+    s32 scroll_range;            /* 0x24: scrollable lines (line - lines); 1 when freshly allocated */
+    s32 scroll_position;         /* 0x28: first drawn line; the scroll marker sits at
+                                    scroll_position / scroll_range of its span; 1 when freshly allocated */
     /* Primitive payload set up by menu_alloc_window_buffer_pair:
      * draw mode, four window sprites, three icon sprites, two quads and a
      * trailing color. */
@@ -92,10 +92,10 @@ void menu_draw_active_window_frames(void);
  * in its script runner and uses height scales for steps 0..7. Callers set 10 to skip the opening animation. */
 extern s8 g_gfx_transition_frame;
 
-void menu_set_window_scale_step(s32 value);
-s32 menu_get_window_scale_step(void);
-void menu_window_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
-void menu_window_quads_tween(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
+void menu_window_set_scale_step(s32 value);
+s32 menu_window_get_scale_step(void);
+void menu_window_animate_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
+void menu_window_tween_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 
 /* window icons */
 /* Icon packet head: two DR_MODE packets at +0x00/+0x0c and four SPRT packets

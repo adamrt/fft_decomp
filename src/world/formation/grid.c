@@ -19,6 +19,7 @@
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -46,7 +47,7 @@ extern u8 g_formation_grid_transition_frame;
 extern u8 g_formation_grid_return_frame;
 extern u8 g_formation_grid_return_done;
 
-/* Cursor trail position history, reset by cursor_graphics_init; entry 7 is the newest and
+/* Cursor trail position history, reset by init_cursor_trail; entry 7 is the newest and
  * x is -1 in an unused entry. */
 extern point16_t g_formation_cursor_trail[8];
 extern u8 g_formation_cursor_trail_brightness[8];
@@ -107,28 +108,28 @@ static rgb24_t s_formation_ct_gauge_colors[4]
 static oriented_quad_t s_formation_label_cant_equip = { { 0, 0 }, 38, 10, { 48, 245, 38, 10, 0x7d7c, 0x65 } };
 static oriented_quad_t s_formation_label_equipping = { { 0, 0 }, 34, 10, { 88, 245, 34, 10, 0x7d7c, 0x65 } };
 
-static s32 cursor_falloff_calculate(s32 x, s32 y, s32 base, s32 floor);
-static void cursor_trail_draw(point16_t* cursor);
-static void egg_sprite_draw(point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index);
-static void unit_readout_draw(
+static s32 calculate_brightness_falloff(s32 x, s32 y, s32 base, s32 floor);
+static void update_cursor_trail(point16_t* cursor);
+static void draw_egg_sprite(point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index);
+static void draw_unit_readout(
     s16 unit_index, s32 mode, s32 x, s32 y, rgb24_t* color, s32 (*get_value)(s32), s32 enabled, s32 priority);
-static void cursor_graphics_init(void);
+static void init_cursor_trail(void);
 
 /* Show the stat preview window (starting its thread unless the status panel is sliding
  * or the thread already runs) or ask it to close, and record the state as the numeric
  * panel style. */
-void formation_toggle_preview_stats_window(s32 flag) {
+void unit_panel_toggle_preview_stats_thread(s32 flag) {
     if (flag != 0) {
         flag = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(SCREEN_THREAD_SLOT_PREVIEW_STATS) == 0) {
             thread_start(SCREEN_THREAD_SLOT_PREVIEW_STATS, unit_panel_numbers_thread);
-            thread_parameters_set(
+            thread_set_parameters(
                 SCREEN_THREAD_SLOT_PREVIEW_STATS, (s32)&g_unit_panel_preview_stats_thread_params, 0, 0);
         }
     } else {
-        menu_request_thread_stop(SCREEN_THREAD_SLOT_PREVIEW_STATS);
+        menu_thread_request_stop(SCREEN_THREAD_SLOT_PREVIEW_STATS);
     }
     g_unit_panel_numeric_panel_params.style = flag;
     g_formation_preview_stats_window_active = flag;
@@ -144,20 +145,20 @@ void formation_toggle_ability_panel(s32 enable) {
         if (thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
             thread_start(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_ability_thread);
-            thread_parameters_set(
+            thread_set_parameters(
                 SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_ability_panel_thread_params, 0, 0);
         }
         g_formation_unit_banner_enabled = 1;
         unit_panel_toggle_numbers_thread(enable);
     } else {
-        menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
 
 /* With enabled set, open the equipment/ability panel (unless the status panel is sliding or a
  * panel thread already runs) and the numeric panel; enabled 0 does nothing. */
-void formation_equipment_panel_open(s32 enabled) {
+void formation_open_equipment_panel(s32 enabled) {
     if (enabled == 0) {
         return;
     }
@@ -168,14 +169,14 @@ void formation_equipment_panel_open(s32 enabled) {
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
         && thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-        thread_parameters_set(
+        thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_formation_equipment_panel_thread_params, 0, 0);
     }
     unit_panel_toggle_numbers_thread(enabled);
 }
 
 /* Request a redraw from all eight formation panel threads. */
-void formation_redraw_panels(void) {
+void redraw_unit_panels(void) {
     g_unit_panel_status_display_thread_params.redraw_request = 1;
     g_unit_panel_comparison_display_thread_params.redraw_request = 1;
     g_formation_equipment_panel_thread_params.redraw_request = 1;
@@ -189,12 +190,12 @@ void formation_redraw_panels(void) {
 /* Ask the formation screen's panel threads to stop (both status banners, the
  * equipment/ability panel, the numeric panel and the two preview windows)
  * and clear the panel styles. */
-void formation_panels_stop(void) {
-    menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
-    menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
-    menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-    menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-    formation_toggle_preview_stats_window(0);
+void unit_panels_stop(void) {
+    menu_thread_request_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
+    menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
+    menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+    menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+    unit_panel_toggle_preview_stats_thread(0);
     formation_toggle_preview_equipment_panel(0);
     g_unit_panel_preview_stats_thread_params.style = 0;
     g_formation_stat_preview_panel_thread_params.style = 0;
@@ -203,7 +204,7 @@ void formation_panels_stop(void) {
 }
 
 /* Pick the formation unit's stat by the current stat-select mode; `value` is unset for any other mode. */
-static s32 readout_stat_get(s32 unit_index) {
+static s32 get_grid_stat(s32 unit_index) {
     s32 value;
 
     if (g_formation_stat_display_mode == MENU_UNIT_READOUT_HP) {
@@ -217,28 +218,28 @@ static s32 readout_stat_get(s32 unit_index) {
 }
 
 /* Menu callback: return the formation unit's level. */
-static s32 grid_unit_level_get(s32 unit_id) {
+static s32 get_grid_level(s32 unit_id) {
     return g_formation_unit_pointers[unit_id]->status.level;
 }
 
 /* Menu callback: return the formation unit's experience. */
-static s32 grid_unit_experience_get(s32 unit_id) {
+static s32 get_grid_experience(s32 unit_id) {
     return g_formation_unit_pointers[unit_id]->status.experience;
 }
 
 /* Menu callback: return the formation unit's Brave. */
-static s32 grid_unit_brave_get(s32 unit_id) {
+static s32 get_grid_brave(s32 unit_id) {
     return g_formation_unit_pointers[unit_id]->identity.brave;
 }
 
 /* Menu callback: return the formation unit's Faith. */
-static s32 grid_unit_faith_get(s32 unit_id) {
+static s32 get_grid_faith(s32 unit_id) {
     return g_formation_unit_pointers[unit_id]->identity.faith;
 }
 
 /* Menu callback: an egg's hatch progress, its total hatch time (high nibble of the birthday
  * byte) minus the days it still has to wait (low nibble). */
-static s32 egg_hatch_progress_get(s32 unit_id) {
+static s32 get_egg_hatch_progress(s32 unit_id) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_id];
     s32 low = unit->birthday & 0xF;
 
@@ -247,14 +248,14 @@ static s32 egg_hatch_progress_get(s32 unit_id) {
 
 /* Menu callback: return an egg's total hatch time, kept in the high nibble of its birthday byte
  * (the low nibble counts down). */
-static s32 egg_hatch_total_get(s32 unit_id) {
+static s32 get_egg_hatch_total(s32 unit_id) {
     return g_formation_unit_pointers[unit_id]->birthday >> 4;
 }
 
 /* Returns 1 when the selected unit is in the two upper visible rows of the grid at
  * `scroll_position` (after the scroll in progress), which puts the unit banner at the bottom
  * of the screen. Returns 0 while browsing a unit that is not an egg. */
-static s32 banner_position_get(s8 scroll_position) {
+static s32 check_banner_at_bottom(s8 scroll_position) {
     s32 result = 1;
 
     if (g_formation_unit_browse_enabled == 0
@@ -290,7 +291,7 @@ static s32 banner_position_get(s8 scroll_position) {
 
 /* Step the unit grid's page scroll: at rest, start moving 4 pixels per frame toward the page that
  * holds the selected unit; while moving, accelerate by 4 and settle on the next 60-pixel page. */
-static void formation_scroll_update(s8* velocity, s8* position) {
+static void update_grid_scroll(s8* velocity, s8* position) {
     s8 next;
 
     if (*velocity == 0) {
@@ -332,7 +333,7 @@ static void formation_scroll_update(s8* velocity, s8* position) {
 
 /* Returns 1 while the unit grid is scrolling, or when the selected unit lies outside the
  * three rows shown at the current page offset, so that the grid has to scroll. */
-s32 formation_grid_scroll_check(void) {
+s32 unit_grid_check_scroll(void) {
     s32 result = 0;
 
     if (g_formation_scroll_velocity != 0) {
@@ -369,7 +370,7 @@ s32 formation_grid_scroll_check(void) {
  * g_menu_button_piece_starts[index]..g_menu_button_piece_starts[index + 1] are drawn at OT depth 50 upward.
  * Compiled at -O1 like the other formation/shop sprite drawers.
  */
-void menu_pressable_button_draw(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id) {
+void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id) {
     oriented_quad_t sprite;
     menu_button_piece_t* piece;
     s32 speed = g_menu_event_speed;
@@ -437,32 +438,32 @@ void menu_pressable_button_draw(s16 index, s32 x, s16 y, s16 pressed, s16 disabl
  * The scroll update must report 10 stationary iterations before the cursor
  * coordinates are finalized. The four-column layout uses signed coordinates.
  */
-void formation_selection_cursor_init(s16 formation_index) {
+void formation_init_selection_cursor(s16 formation_index) {
     point16_t* cursor;
     s32 count;
     s16 x;
 
-    menu_scrollable_list_core_init(0, 0, 0);
-    g_menu_row_callbacks[0].value = readout_stat_get;
-    g_menu_row_callbacks[1].value = readout_stat_get;
-    g_menu_row_callbacks[2].value = egg_hatch_progress_get;
-    g_menu_row_callbacks[3].value = egg_hatch_total_get;
-    g_menu_row_callbacks[4].value = grid_unit_level_get;
-    g_menu_row_callbacks[5].value = grid_unit_experience_get;
-    g_menu_row_callbacks[6].value = grid_unit_brave_get;
-    g_menu_row_callbacks[7].value = grid_unit_faith_get;
+    menu_scrollable_list_init_core(0, 0, 0);
+    g_menu_row_callbacks[0].value = get_grid_stat;
+    g_menu_row_callbacks[1].value = get_grid_stat;
+    g_menu_row_callbacks[2].value = get_egg_hatch_progress;
+    g_menu_row_callbacks[3].value = get_egg_hatch_total;
+    g_menu_row_callbacks[4].value = get_grid_level;
+    g_menu_row_callbacks[5].value = get_grid_experience;
+    g_menu_row_callbacks[6].value = get_grid_brave;
+    g_menu_row_callbacks[7].value = get_grid_faith;
     g_formation_scroll_velocity = 0;
     s_formation_scroll_unread = 0;
     g_unit_selected_index = formation_index;
     count = 0;
-    formation_stage_selected_unit();
+    stage_selected_unit();
     do {
-        formation_scroll_update(&g_formation_scroll_velocity, &g_formation_scroll_position);
+        update_grid_scroll(&g_formation_scroll_velocity, &g_formation_scroll_position);
         if (g_formation_scroll_velocity == 0) {
             count++;
         }
     } while (count < 10);
-    g_formation_unit_banner_at_bottom = banner_position_get(g_formation_scroll_position);
+    g_formation_unit_banner_at_bottom = check_banner_at_bottom(g_formation_scroll_position);
     x = formation_index % 4;
     cursor = &g_formation_cursor_position;
     cursor->x = x * 62 + 34;
@@ -470,13 +471,13 @@ void formation_selection_cursor_init(s16 formation_index) {
     x = g_formation_scroll_position;
     cursor->y = x + (formation_index >> 2) * 60 + 61;
     g_formation_selection_cursor_ready = 1;
-    cursor_graphics_init();
+    init_cursor_trail();
 }
 
 /* Place the grid cursor on a formation slot, show HP under the units, and enable the unit banner
  * at the top or bottom where it last was. */
-void formation_grid_cursor_init(s32 formation_index) {
-    formation_selection_cursor_init(formation_index);
+void formation_grid_init_cursor(s32 formation_index) {
+    formation_init_selection_cursor(formation_index);
     g_formation_stat_display_mode = MENU_UNIT_READOUT_HP;
     g_formation_unit_banner_at_bottom_latch = g_formation_unit_banner_at_bottom;
     if (g_formation_unit_banner_at_bottom != 0) {
@@ -538,7 +539,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     enabled = 1;
     if (g_formation_triangle_menu_open == 0 && g_formation_banner_slide_step == 0 && g_formation_scroll_velocity == 0
         && g_formation_triangle_menu_running == 0) {
-        if (allow_browse != 0 && screen_input_lockout_get() == 0 && formation_grid_scroll_check() == 0) {
+        if (allow_browse != 0 && screen_get_input_lockout() == 0 && unit_grid_check_scroll() == 0) {
             if (input & PSX_PAD_CIRCLE) {
                 if (g_formation_unit_browse_enabled == 0) {
                     if (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
@@ -552,12 +553,12 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
                 g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                 enabled = 0;
                 g_formation_unit_browse_enabled = 0;
-                menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-                menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+                menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+                menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
             }
         }
         if (toggle_banner != 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
-            && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0 && formation_grid_scroll_check() == 0
+            && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0 && unit_grid_check_scroll() == 0
             && (g_menu_input_primary_repeat & PSX_PAD_SQUARE)) {
             g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
             g_formation_unit_banner_enabled = g_formation_unit_banner_enabled == 0;
@@ -569,14 +570,14 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
         input &= 0xff0;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_screen_grid_id == MENU_GRID_HELP_NONE
-        && screen_fade_state_get() == SCREEN_FADE_STATE_NONE) {
+        && screen_get_fade_state() == SCREEN_FADE_STATE_NONE) {
         g_unit_selected_index
-            = menu_grid_selection_step(4, 5, g_formation_unit_count - 1, g_unit_selected_index, input);
+            = menu_step_grid_selection(4, 5, g_formation_unit_count - 1, g_unit_selected_index, input);
     }
-    formation_scroll_update(&g_formation_scroll_velocity, &g_formation_scroll_position);
+    update_grid_scroll(&g_formation_scroll_velocity, &g_formation_scroll_position);
 
     /* The readout bar beside the banner: the L2/R2 buttons and the current readout's labels. */
-    if (g_formation_banner_slide_step == 0 && screen_input_lockout_get() == 0 && enabled != 0 && get_mode == NULL
+    if (g_formation_banner_slide_step == 0 && screen_get_input_lockout() == 0 && enabled != 0 && get_mode == NULL
         && g_formation_unit_banner_enabled != 0 && g_formation_unit_browse_enabled == 0
         && g_formation_selection_cursor_ready != 0 && g_formation_current_menu != FORMATION_MENU_DISMISS_UNIT) {
         value = 0xf;
@@ -593,11 +594,11 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             row = g_formation_current_menu == FORMATION_MENU_UNIT_GRID;
         }
         row |= g_menu_input_lock_mode != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE;
-        menu_pressable_button_draw(
+        menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_L2, 0x26, value, input & PSX_PAD_L2, row, SOUND_SFX_PAGE_SWITCH);
-        menu_pressable_button_draw(
+        menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R2, 0xc2, value, input & PSX_PAD_R2, row, SOUND_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(window, 0, 0);
+        menu_script_run_with_palette_mode(window, 0, 0);
         menu_gfx_enqueue_textured_quad_list(
             cells, 0, 0, g_menu_cursor_texture_page, g_screen_palette_clut_normal, 0xb, 8);
         if (g_formation_stat_display_mode < 3) {
@@ -614,14 +615,14 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             &cells[row], 0, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut_normal, 0xc, col);
     }
     if (toggle_banner != 0) {
-        g_formation_unit_banner_at_bottom = banner_position_get(g_formation_scroll_position);
+        g_formation_unit_banner_at_bottom = check_banner_at_bottom(g_formation_scroll_position);
     }
     pos.w = 0x38;
     pos.h = 0x30;
     y = 0x24 + g_formation_scroll_position + g_formation_scroll_velocity;
     gfx_set_otag_index(8);
     i = 0;
-    color = screen_get_draw_color();
+    color = gfx_get_draw_color();
     g_formation_saved_sprite_color.r = color->r;
     g_formation_saved_sprite_color.g = color->g;
     g_formation_saved_sprite_color.b = color->b;
@@ -635,7 +636,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
                 value = 1;
             }
         }
-        screen_sprite_color_set(value ? &g_formation_dimmed_sprite_color : &g_formation_normal_sprite_color);
+        gfx_set_draw_color(value ? &g_formation_dimmed_sprite_color : &g_formation_normal_sprite_color);
         for (col = 0; col < 4; col++, i++) {
             if (i >= g_formation_unit_count) {
                 break;
@@ -661,7 +662,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
                 } else {
                     mode = g_formation_stat_display_mode;
                 }
-                unit_readout_draw(i, mode, pos.position.x, pos.position.y, color, get_shade, 0, 8);
+                draw_unit_readout(i, mode, pos.position.x, pos.position.y, color, get_shade, 0, 8);
             }
             /* Units brighten toward the cursor; a unit away on a proposition stays dim. */
             value = 0x50;
@@ -669,7 +670,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
                 if (get_shade != NULL) {
                     value = get_shade(i);
                 } else {
-                    value = cursor_falloff_calculate(pos.position.x, pos.position.y, 0xc8, 0x50);
+                    value = calculate_brightness_falloff(pos.position.x, pos.position.y, 0xc8, 0x50);
                     if (value > 0x80) {
                         value = 0x80;
                     }
@@ -681,9 +682,9 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             rgb.r = rgb_value;
             unit = g_formation_unit_pointers[i];
             if (unit->gender_flags & UNIT_FLAG_EGG) {
-                egg_sprite_draw(&pos.position, unit->egg_color, &rgb, unit->birthday & 0xf, 6);
+                draw_egg_sprite(&pos.position, unit->egg_color, &rgb, unit->birthday & 0xf, 6);
             } else {
-                formation_unit_sprite_draw(i, &pos.position, &rgb, 6);
+                formation_unit_draw_sprite(i, &pos.position, &rgb, 6);
             }
             g_formation_unit_dot_sprite.position.x = pos.position.x;
             g_formation_unit_dot_sprite.position.y = pos.position.y;
@@ -704,8 +705,8 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             menu_gfx_enqueue_oriented_textured_quad(&g_formation_unit_dot_sprite, &rgb, TEXTURE_UV_FLIP_NONE, 1, 8);
         }
     }
-    screen_sprite_color_set(&g_formation_saved_sprite_color);
-    cursor_trail_draw(&s_formation_cursor_target);
+    gfx_set_draw_color(&g_formation_saved_sprite_color);
+    update_cursor_trail(&s_formation_cursor_target);
 
     /* Ease the cursor a quarter of the way to its target, snapping once within 2 pixels. */
     g_formation_cursor_position.x = (g_formation_cursor_position.x * 3 + s_formation_cursor_target.x) / 4;
@@ -718,14 +719,14 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     if (row >= -2 && row <= 2) {
         g_formation_cursor_position.y = s_formation_cursor_target.y - 1;
     }
-    formation_background_tiles_draw(g_formation_scroll_position + g_formation_scroll_velocity, background_y);
+    formation_draw_background_tiles(g_formation_scroll_position + g_formation_scroll_velocity, background_y);
     return 1;
 }
 
 /* Distance-based falloff: `base` minus the (y-stretched) distance from the
  * formation cursor to (x, y), clamped so it never drops below `floor`.
  * `dx` also holds the result. */
-static s32 cursor_falloff_calculate(s32 x, s32 y, s32 base, s32 floor) {
+static s32 calculate_brightness_falloff(s32 x, s32 y, s32 base, s32 floor) {
     s32 dx = abs(g_formation_cursor_position.x - x);
     s32 dy;
 
@@ -750,7 +751,7 @@ static s32 cursor_falloff_calculate(s32 x, s32 y, s32 base, s32 floor) {
  * optimizer never treats a hard register as invariant, while a pseudo lets it
  * hoist that product and the shade-row addresses.
  */
-void formation_background_tiles_draw(s32 y, s32 unused_1) {
+void formation_draw_background_tiles(s32 y, s32 unused_1) {
     textured_rect_source_t rect;
     /* Unused local bytes and RGB alignment retain the target frame. */
     u8 unused_frame[8];
@@ -772,7 +773,7 @@ void formation_background_tiles_draw(s32 y, s32 unused_1) {
     rect.v = 0xD8;
     for (row = 0; y < 0x101; row++) {
         for (col = 0; col < 5; col++) {
-            shade = cursor_falloff_calculate(col << 6, y, 0xFF, 0x50);
+            shade = calculate_brightness_falloff(col << 6, y, 0xFF, 0x50);
             shades[row][col] = (shade >= 0xDD) ? 0xDC : shade;
         }
         y += 0x20;
@@ -800,7 +801,7 @@ void formation_background_tiles_draw(s32 y, s32 unused_1) {
 
 /* Empty the eight cursor trail points (x = -1) and set the texture pages of
  * the cursor sprite and its shadow. */
-static void cursor_graphics_init(void) {
+static void init_cursor_trail(void) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -823,7 +824,7 @@ static void cursor_graphics_init(void) {
  * struct-pointer and s16-pointer accesses to the newest point selects the
  * target's address registers.
  */
-static void cursor_trail_draw(point16_t* cursor) {
+static void update_cursor_trail(point16_t* cursor) {
     rgb24_t rgb;
     s32 i;
     s32 delta;
@@ -912,7 +913,7 @@ static void cursor_trail_draw(point16_t* cursor) {
 
 /* Draw the formation units and the backdrop or egg decoration for each
  * visible slot. */
-static void unit_slots_draw(point16_t* positions, s32 shade) {
+static void draw_unit_slots(point16_t* positions, s32 shade) {
     rgb24_t sprite_rgb;
     rgb24_t backdrop_rgb;
     s32 i;
@@ -944,16 +945,16 @@ static void unit_slots_draw(point16_t* positions, s32 shade) {
                     }
                 }
             }
-            unit_readout_draw(i, palette, positions[i].x, positions[i].y, &backdrop_rgb, 0, 0, 9);
+            draw_unit_readout(i, palette, positions[i].x, positions[i].y, &backdrop_rgb, 0, 0, 9);
             ot_index = 8;
         } else {
             ot_index = 10;
         }
         unit = g_formation_unit_pointers[i];
         if (unit->gender_flags & UNIT_FLAG_EGG) {
-            egg_sprite_draw(&positions[i], unit->egg_color, 0, unit->birthday & 0xF, ot_index);
+            draw_egg_sprite(&positions[i], unit->egg_color, 0, unit->birthday & 0xF, ot_index);
         } else {
-            brightness = cursor_falloff_calculate(positions[i].x, positions[i].y, 0xC8, 0x50);
+            brightness = calculate_brightness_falloff(positions[i].x, positions[i].y, 0xC8, 0x50);
             if (brightness > 0x80) {
                 brightness = 0x80;
             }
@@ -961,7 +962,7 @@ static void unit_slots_draw(point16_t* positions, s32 shade) {
             sprite_rgb.b = rgb_value;
             sprite_rgb.g = rgb_value;
             sprite_rgb.r = rgb_value;
-            formation_unit_sprite_draw(i, &positions[i], &sprite_rgb, ot_index);
+            formation_unit_draw_sprite(i, &positions[i], &sprite_rgb, ot_index);
         }
     }
 }
@@ -973,7 +974,7 @@ static void unit_slots_draw(point16_t* positions, s32 shade) {
  * other units drift sideways by frame^2/2 (alternating direction per row)
  * while the backdrop shade fades. Returns the frame counter, which wraps to
  * 0 and clears g_formation_unit_banner_at_bottom when the transition ends. Compiled at -O1. */
-s32 formation_grid_transition_update(s32 mode) {
+s32 formation_grid_update_transition(s32 mode) {
     point16_t positions[20];
     u8 frame;
     s32 spread;
@@ -1026,20 +1027,20 @@ s32 formation_grid_transition_update(s32 mode) {
         g_formation_grid_transition_frame = 0;
         g_formation_unit_banner_at_bottom = 0;
     }
-    unit_slots_draw(positions, shade);
+    draw_unit_slots(positions, shade);
     return g_formation_grid_transition_frame;
 }
 
 /*
  * Step the 24-frame return of the selected sprite to the unit grid.
  *
- * This reverses formation_grid_transition_update: the frame counter runs
+ * This reverses formation_grid_update_transition: the frame counter runs
  * down from 24, sliding the selected unit from its rest point back to its
  * grid cell while the other rows close in. Returns 1 while animating and 0 on
  * the call after the last frame. The unused array reproduces the
  * original 16-byte gap below positions. Compiled at -O1.
  */
-s32 formation_grid_return_update(s32 mode) {
+s32 formation_grid_update_return(s32 mode) {
     point16_t unused[4];
     point16_t positions[20];
     u8 frame;
@@ -1058,7 +1059,7 @@ s32 formation_grid_return_update(s32 mode) {
         return 0;
     }
     if (g_formation_grid_return_frame == 0) {
-        formation_selection_cursor_init(g_unit_selected_index);
+        formation_init_selection_cursor(g_unit_selected_index);
         g_formation_grid_return_done = 0;
         g_formation_grid_return_frame = 24;
     }
@@ -1099,13 +1100,13 @@ s32 formation_grid_return_update(s32 mode) {
     if (g_formation_grid_return_frame == 0) {
         g_formation_grid_return_done = 1;
     }
-    unit_slots_draw(positions, shade);
+    draw_unit_slots(positions, shade);
     return 1;
 }
 
 /* Interpolates the sprite position from (0x61, 0x63) to (0x8b, 0x9e) over 24
  * steps and advances the step counter, wrapping back to zero. */
-u8 formation_sprite_slide_update(void) {
+u8 formation_sprite_update_slide(void) {
     point16_t pos;
     s32 to_x = 0x8b;
     s32 to_y = 0x9e;
@@ -1120,7 +1121,7 @@ u8 formation_sprite_slide_update(void) {
     pos.y = (remaining * from_y + step * to_y) / 24;
     g_formation_cursor_position.x = pos.x + 0x1c;
     g_formation_cursor_position.y = pos.y + 0x19;
-    formation_unit_sprite_draw(g_unit_selected_index, &pos, 0, 0x32);
+    formation_unit_draw_sprite(g_unit_selected_index, &pos, 0, 0x32);
     g_formation_sprite_slide_frame++;
     if (g_formation_sprite_slide_frame == 24) {
         g_formation_sprite_slide_frame = 0;
@@ -1129,12 +1130,12 @@ u8 formation_sprite_slide_update(void) {
 }
 
 /* Draw a formation unit's sprite at its resting position (0x8B, 0x9E). */
-void formation_sprite_at_rest_draw(s16 unit_index) {
+void formation_sprite_draw_at_rest(s16 unit_index) {
     point16_t pos;
 
     pos.x = 0x8B;
     pos.y = 0x9E;
-    formation_unit_sprite_draw(unit_index, &pos, 0, 6);
+    formation_unit_draw_sprite(unit_index, &pos, 0, 6);
 }
 
 /* Draws one formation unit sprite centered on pos.
@@ -1144,14 +1145,14 @@ void formation_sprite_at_rest_draw(s16 unit_index) {
  * get a palette 9/11 backdrop first and the sprite is drawn with its shadow.
  * Compiled at -O1; the (s16) casts keep the centering offset from being
  * reassociated onto pos. */
-void formation_unit_sprite_draw(s16 unit_index, point16_t* pos, rgb24_t* rgb, s32 ot_index) {
+void formation_unit_draw_sprite(s16 unit_index, point16_t* pos, rgb24_t* rgb, s32 ot_index) {
     oriented_quad_t sprite;
     s32 scale;
     s32 w;
     s32 h;
     rgb24_t* backdrop_rgb;
 
-    formation_unit_sprite_source_build(unit_index, &sprite.source, 0);
+    formation_unit_build_sprite_source(unit_index, &sprite.source, 0);
     if (g_formation_dismiss_anim_timer != 0 && (g_formation_dismiss_anim_timer >> 8) == unit_index) {
         scale = (g_formation_dismiss_anim_timer & 0xFF) + 1;
         w = sprite.source.w / scale;
@@ -1171,26 +1172,26 @@ void formation_unit_sprite_draw(s16 unit_index, point16_t* pos, rgb24_t* rgb, s3
         if (unit_index == g_unit_selected_index) {
             backdrop_rgb = &g_formation_normal_sprite_color;
         } else {
-            backdrop_rgb = screen_get_draw_color();
+            backdrop_rgb = gfx_get_draw_color();
         }
-        unit_readout_draw(unit_index,
+        draw_unit_readout(unit_index,
             g_formation_unit_pointers[unit_index]->proposition_status == FORMATION_UNIT_PROPOSITION_LEAVING
                 ? MENU_UNIT_READOUT_LEAVING
                 : MENU_UNIT_READOUT_MISSING,
             pos->x, pos->y, backdrop_rgb, 0, 1, ot_index + 2);
         rgb = &g_formation_away_unit_color;
     }
-    formation_sprite_with_shadow_draw(&sprite, rgb, ot_index);
+    formation_sprite_draw_with_shadow(&sprite, rgb, ot_index);
 }
 
 /*
  * Draw an egg unit's two layered egg sprites and their shadow at pos.
  *
  * Callers pass the unit's egg_color as palette and the low nibble of birthday
- * (hatch countdown; see egg_hatch_progress_get) as
+ * (hatch countdown; see get_egg_hatch_progress) as
  * hatch_countdown; the second layer is drawn only while it is below 2.
  */
-static void egg_sprite_draw(point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index) {
+static void draw_egg_sprite(point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index) {
     s_formation_shadow_egg_sprites[2].position.x = s_formation_shadow_egg_sprites[1].position.x = pos->x + 0x14;
     s_formation_shadow_egg_sprites[2].position.y = s_formation_shadow_egg_sprites[1].position.y = pos->y + 0x10;
     s_formation_shadow_egg_sprites[2].source.clut = s_formation_shadow_egg_sprites[1].source.clut
@@ -1210,7 +1211,7 @@ static void egg_sprite_draw(point16_t* pos, s32 palette, const rgb24_t* rgb, s32
 /* Draw a formation unit sprite and, one ordering-table entry behind it, its
  * semi-transparent ground shadow: under the feet of a normal sprite, or
  * lower and further right for a sprite wider than 24 texels. */
-void formation_sprite_with_shadow_draw(const oriented_quad_t* pos, const rgb24_t* rgb, s32 ot_index) {
+void formation_sprite_draw_with_shadow(const oriented_quad_t* pos, const rgb24_t* rgb, s32 ot_index) {
     menu_gfx_enqueue_oriented_textured_quad(pos, rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index);
     if (pos->source.w >= 0x19) {
         s_formation_shadow_egg_sprites[0].position.x = pos->position.x + 0xC;
@@ -1226,7 +1227,7 @@ void formation_sprite_with_shadow_draw(const oriented_quad_t* pos, const rgb24_t
 
 /* Returns 1 when x and y both lie in 0..254: the number commands keep their position in bytes,
  * so readouts that would not fit are skipped. */
-static s32 readout_position_check(s32 x, s32 y) {
+static s32 check_readout_position(s32 x, s32 y) {
     if (x >= 0 && x < 0xff) {
         return y >= 0 && y < 0xff;
     }
@@ -1245,7 +1246,7 @@ static s32 readout_position_check(s32 x, s32 y) {
  * before color as the target's register assignment requires. top is reused
  * for y + 45 in layouts 3 and 4 so it shares s4 as in the target.
  */
-static void unit_readout_draw(
+static void draw_unit_readout(
     s16 unit_index, s32 mode, s32 x, s32 y, rgb24_t* color, s32 (*get_value)(s32), s32 enabled, s32 priority) {
     RECT unused_rect;
     RECT rect;
@@ -1264,7 +1265,7 @@ static void unit_readout_draw(
     do {
         gfx_set_otag_index(priority);
     } while (0);
-    screen_sprite_color_set(color);
+    gfx_set_draw_color(color);
     if (mode < 7) {
         do {
             top = y + 40;
@@ -1283,7 +1284,7 @@ static void unit_readout_draw(
                 color, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
             num_x = x + 40;
             num_y = y + 45;
-            if (readout_position_check(num_x, num_y)) {
+            if (check_readout_position(num_x, num_y)) {
                 g_formation_gauge_max_number.x = num_x;
                 g_formation_gauge_max_number.y = num_y;
                 g_formation_gauge_max_number.value = unit_index;
@@ -1291,7 +1292,7 @@ static void unit_readout_draw(
             }
             num_x = x + 20;
             num_y = top;
-            if (readout_position_check(num_x, num_y)) {
+            if (check_readout_position(num_x, num_y)) {
                 g_formation_gauge_value_number.x = num_x;
                 g_formation_gauge_value_number.y = num_y;
                 g_formation_gauge_value_number.value = unit_index;
@@ -1348,7 +1349,7 @@ static void unit_readout_draw(
                 g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
             num_x = x + 13;
             num_y = y40;
-            if (readout_position_check(num_x, num_y)) {
+            if (check_readout_position(num_x, num_y)) {
                 g_formation_level_number.x = num_x;
                 g_formation_level_number.y = num_y;
                 g_formation_level_number.value = unit_index;
@@ -1356,7 +1357,7 @@ static void unit_readout_draw(
             }
             num_x = x + 45;
             num_y = top;
-            if (readout_position_check(num_x, num_y)) {
+            if (check_readout_position(num_x, num_y)) {
                 g_formation_experience_number.x = num_x;
                 g_formation_experience_number.y = num_y;
                 g_formation_experience_number.value = unit_index;
@@ -1393,7 +1394,7 @@ static void unit_readout_draw(
             menu_gfx_enqueue_textured_quad(
                 &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
             num_x = x + 13;
-            if (readout_position_check(num_x - 3, (s16)y40)) {
+            if (check_readout_position(num_x - 3, (s16)y40)) {
                 g_formation_brave_number.x = num_x;
                 g_formation_brave_number_wide.y = g_formation_brave_number.y = y40;
                 g_formation_brave_number_wide.value = g_formation_brave_number.value = unit_index;
@@ -1406,7 +1407,7 @@ static void unit_readout_draw(
             }
             num_x = x + 45;
             num_y = top;
-            if (readout_position_check(num_x - 5, num_y)) {
+            if (check_readout_position(num_x - 5, num_y)) {
                 g_formation_faith_number.x = num_x;
                 g_formation_faith_number_wide.y = g_formation_faith_number.y = num_y;
                 g_formation_faith_number_wide.value = g_formation_faith_number.value = unit_index;

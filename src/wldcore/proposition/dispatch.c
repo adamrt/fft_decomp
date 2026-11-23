@@ -36,7 +36,7 @@ extern s16 g_proposition_candidate_levels[];
  * the target stores it by symbol. */
 extern s16 g_window_panel_scroll_offset;
 
-static s32 candidates_build(proposition_send_unit_level_t* level);
+static s32 build_candidates(proposition_send_unit_level_t* level);
 
 static s32 s_proposition_send_units[3] = { 0 };
 
@@ -51,7 +51,7 @@ static s32 s_proposition_send_units[3] = { 0 };
  * `unused` reproduces the target's 0x78-byte frame. The row offset uses its
  * own local: reusing `row` (then set twice) schedules the loop's `addiu v1`
  * ahead of `move a0`. */
-void proposition_dispatch_confirm_open(void) {
+void proposition_open_dispatch_confirm(void) {
     RECT bounds;
     point32_t point;
     text_dimensions_t size;
@@ -65,40 +65,40 @@ void proposition_dispatch_confirm_open(void) {
     s32 row;
     s32 line;
 
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CONFIRM_CONDITIONS, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CONFIRM_CONDITIONS, 0);
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.header_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CHOICE_PANEL_HEADER;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
-    window_text_record_init(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 8;
     position = &g_display_object_gs_image_pool[index].position;
     position->x = 0x48;
     position->y = 0x20;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.row = index;
     location = &g_proposition_selected_row.name_text;
-    text_pixels_measure(
-        &size.width, &size.rows, text_entry_find(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
+    text_measure_pixels(
+        &size.width, &size.rows, text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     bounds.y = 0x60;
     bounds.w = 0xF4;
     bounds.x = 0;
@@ -154,7 +154,7 @@ void proposition_dispatch_confirm_open(void) {
  * records it in the next g_proposition_active slot with its
  * participants (each marked busy), and closes the panel. Either way the
  * propositions list reopens. */
-void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
+void proposition_update_dispatch_confirm(menu_stack_record_t* level) {
     s32 row;
     s32 i;
 
@@ -172,11 +172,11 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
         g_display_object_image_count -= 2;
         g_display_object_queue_count -= 4;
         g_menu_stack_depth -= 1;
-        proposition_available_list_open();
+        proposition_open_available_list();
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
         row = level->dispatch_confirm.row ^ 1;
         level->dispatch_confirm.row = row;
         g_display_object_animated_pool[level->dispatch_confirm.cursor_window].position.y
@@ -200,7 +200,7 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
             g_proposition_active[g_proposition_count].location = g_world_map_marker_state.marker.location_id;
             g_proposition_active[g_proposition_count].participant_count = s_proposition_send_unit_count;
             for (i = 0; i < s_proposition_send_unit_count; i++) {
-                party_roster_unit_get(s_proposition_send_units[i])->proposition_status = 1;
+                party_get_roster_unit(s_proposition_send_units[i])->proposition_status = 1;
                 g_proposition_active[g_proposition_count].participant_indices[i] = s_proposition_send_units[i];
             }
             g_proposition_count++;
@@ -220,7 +220,7 @@ void proposition_dispatch_confirm_update(menu_stack_record_t* level) {
  * assigned days or it was recalled. Each proposition's days until it is
  * offered again drop by one, from at most 32, keeping its failure bits.
  */
-void proposition_day_advance(void) {
+void proposition_advance_day(void) {
     s32 i;
     u8* counter;
 
@@ -277,7 +277,7 @@ s32 proposition_count_returned(s32 location) {
  * record's x/y pair is written through a block-local pointer so the pointer
  * shares the index product's register, and the chained frame_index/anim_counter
  * store keeps anim_counter's base in a register as in the target. */
-void proposition_participants_open(void) {
+void proposition_open_participants(void) {
     window_panel_layout_t layout;
     point32_t origin;
     RECT bounds;
@@ -288,13 +288,13 @@ void proposition_participants_open(void) {
     g_window_panel_scroll_offset = 0;
     g_window_panel_render_state.selected_index = 0;
     s_proposition_send_unit_count = 0;
-    count = candidates_build(&g_menu_stack_records[g_menu_stack_depth].send_unit);
+    count = build_candidates(&g_menu_stack_records[g_menu_stack_depth].send_unit);
 
     layout.text_width = 0x6E;
     layout.visible_rows = count;
     origin.x = 8;
     origin.y = 0x50;
-    window_panel_state_init(0xC, g_menu_stack_records[g_menu_stack_depth].send_unit.unit_count, &layout, &origin);
+    window_init_panel_state(0xC, g_menu_stack_records[g_menu_stack_depth].send_unit.unit_count, &layout, &origin);
 
     /* The initializer hides label column 1; show it with each candidate's level as digits. */
     g_window_panel_label_state.mode[1] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
@@ -306,9 +306,9 @@ void proposition_participants_open(void) {
     g_window_panel_render_state.selected_index = 0;
     g_window_panel_scroll_offset = 0;
     thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_frame.window_index = index;
     {
         point32_t* position = &g_display_object_animated_pool[index].position;
@@ -319,20 +319,20 @@ void proposition_participants_open(void) {
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_PROPOSITION_COUNT_LABEL;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 9;
     g_display_object_animated_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_frame.render_index = index;
     bounds.x = 0x80;
     bounds.y = 0;
     bounds.w = 0x6C;
     bounds.h = 0x40;
-    window_text_record_init(index, bounds, 0, 0, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
     {
         point32_t* base = &g_display_object_gs_image_pool[index].position;
@@ -341,7 +341,7 @@ void proposition_participants_open(void) {
     }
     DrawSync(0);
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.frame_window_a = index;
     {
         point32_t* position = &g_display_object_animated_pool[index].position;
@@ -352,7 +352,7 @@ void proposition_participants_open(void) {
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SEND_UNIT_FRAME_A;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.frame_window_b = index;
     {
         point32_t* position = &g_display_object_animated_pool[index].position;
@@ -363,7 +363,7 @@ void proposition_participants_open(void) {
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SEND_UNIT_FRAME_B;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.preview_render = index;
     g_display_object_gs_image_pool[index].priority = 9;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -373,13 +373,13 @@ void proposition_participants_open(void) {
         base->y = 0x18;
     }
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.list_render = index;
     bounds.x = 0x80;
     bounds.y = 0x40;
     bounds.w = 0x30;
     bounds.h = 0x3B;
-    window_text_record_init(index, bounds, 0, 0, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
     {
         point32_t* base = &g_display_object_gs_image_pool[index].position;
@@ -388,7 +388,7 @@ void proposition_participants_open(void) {
     }
     DrawSync(0);
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_render = index;
     g_display_object_gs_image_pool[index].priority = 9;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -398,13 +398,13 @@ void proposition_participants_open(void) {
         base->y = 0x18;
     }
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_frame = index;
     bounds.x = 0x80;
     bounds.y = 0x40;
     bounds.w = 0x30;
     bounds.h = 0x3B;
-    window_text_record_init(index, bounds, 0, 0, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, 0, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 9;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
     {
@@ -413,7 +413,7 @@ void proposition_participants_open(void) {
         base->y = 0x14;
     }
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.portrait_window = index;
     {
         point32_t* position = &g_display_object_animated_pool[index].position;
@@ -425,7 +425,7 @@ void proposition_participants_open(void) {
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SEND_UNIT_PORTRAIT;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.left_arrow = index;
     {
         point32_t* position = &g_display_object_animated_pool[index].position;
@@ -437,7 +437,7 @@ void proposition_participants_open(void) {
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_L1_BUTTON;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].send_unit.right_arrow = index;
     {
         point32_t* position = &g_display_object_animated_pool[index].position;
@@ -450,7 +450,7 @@ void proposition_participants_open(void) {
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON;
     g_display_object_animated_pool[index].frame_index = g_display_object_animated_pool[index].anim_counter = 0;
 
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
 
     depth = g_menu_stack_depth;
     g_menu_stack_records[depth].send_unit.shown_preview = -1;
@@ -463,14 +463,14 @@ void proposition_participants_open(void) {
  *
  * Units already assigned to a proposition, absent roster entries, monsters,
  * and special-character sprite sets are excluded. */
-static s32 candidates_build(proposition_send_unit_level_t* level) {
+static s32 build_candidates(proposition_send_unit_level_t* level) {
     s32 i = 0;
     s32 j;
     party_unit_t* unit;
 
     level->unit_count = 0;
     for (; i < PARTY_MEMBER_SLOT_COUNT; i++) {
-        unit = party_roster_unit_get(i);
+        unit = party_get_roster_unit(i);
         if (unit->proposition_status != 0) {
             continue;
         }
@@ -506,12 +506,12 @@ static s32 candidates_build(proposition_send_unit_level_t* level) {
 }
 
 /* Redraw the send-unit list window: the empty frame, then one name row per unit chosen so far. */
-static void participant_names_draw(proposition_send_unit_level_t* level) {
+static void draw_participant_names(proposition_send_unit_level_t* level) {
     point32_t point;
     s32 index = level->list_frame.render_index;
     s32 i;
 
-    screen_window_frame_image_build(g_display_object_gs_image_pool[index].bounds.w,
+    screen_build_window_frame_image(g_display_object_gs_image_pool[index].bounds.w,
         g_display_object_gs_image_pool[index].bounds.h, (u16*)g_window_image_buffer);
     point.x = 8;
     point.y = 8;
@@ -528,14 +528,14 @@ static void participant_names_draw(proposition_send_unit_level_t* level) {
  * x 0x280 + 0x40 per 40 portraits + 16 * (code % 4), y 0x1F0 +
  * (code % 40) / 4), at full brightness, and show the record. The first
  * argument is not read. */
-static void candidate_portrait_show(proposition_send_unit_level_t* unused, s32 party_index, s32 index) {
+static void show_candidate_portrait(proposition_send_unit_level_t* unused, s32 party_index, s32 index) {
     POLY_FT4 poly;
     s32 code;
     s32 cell;
     CVECTOR* color;
     RECT* bounds;
 
-    code = portrait_party_unit_code_get(party_index);
+    code = portrait_get_party_unit_code(party_index);
     cell = code;
     portrait_build_wldface_poly(&poly, code);
     g_display_object_gs_image_pool[index].clut.x = (code / 40 << 6) + 0x280 + cell % 4 * 16;
@@ -562,7 +562,7 @@ static void candidate_portrait_show(proposition_send_unit_level_t* unused, s32 p
  *
  * The target's frame holds two 32-bit values no instruction touches, reproduced by
  * the unused point. */
-static void participant_slots_update(proposition_send_unit_level_t* level) {
+static void update_participant_slots(proposition_send_unit_level_t* level) {
     point32_t unused;
     u32 buttons;
     s32 unit;
@@ -571,7 +571,7 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
         unit = s_proposition_send_units[level->slot] & 0x7FF;
         if (unit != level->shown_unit) {
             level->shown_unit = unit;
-            candidate_portrait_show(level, unit, level->portrait_render);
+            show_candidate_portrait(level, unit, level->portrait_render);
         }
     }
 
@@ -587,9 +587,9 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         unit = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         s_proposition_send_units[level->slot] = unit;
-        participant_names_draw(level);
-        candidates_build(level);
-        screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
+        draw_participant_names(level);
+        build_candidates(level);
+        screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
     close:
         g_display_object_animated_pool[level->frame_window_a].palette
             = g_display_object_animated_pool[level->frame_window_b].palette = 0;
@@ -602,13 +602,13 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->slot == 0) {
             level->slot = 2;
         } else {
             level->slot--;
         }
-    } else if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
         if (level->slot == 2) {
             level->slot = 0;
         } else {
@@ -628,28 +628,28 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
 /* Build the status panel data of party member `party_index` and start the
  * three unit panel threads on it (status banner, numeric panel, equipment
  * and ability panel), raising WORLD_MAP_FLAG_UNIT_PANEL_THREADS. */
-static void participant_panels_start(s32 party_index) {
+static void start_participant_panels(s32 party_index) {
     unit_panel_thread_t* thread8;
 
-    unit_panel_party_unit_prepare(party_index);
+    unit_panel_prepare_party_unit(party_index);
     thread8 = &g_unit_panel_banner_params;
     g_unit_panel_numbers_params.position.y = 0;
     g_unit_panel_panel_params.position.y = 0;
     g_unit_panel_banner_params.position.y = 0;
     thread8->position.x = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
     g_world_map_flags |= WORLD_MAP_FLAG_UNIT_PANEL_THREADS;
 }
 
 /* Status view of the send-unit level: once the panel threads stop it opens the unit's status
  * screens; L1 and R1 page through the candidates with wraparound, Select opens the layout window,
  * Circle or Cross close the view and return to 'So, who you wanna send?'. */
-static void participant_status_update(proposition_send_unit_level_t* level) {
+static void update_participant_status(proposition_send_unit_level_t* level) {
     u32 buttons;
     s32 selected;
     s32 direction;
@@ -666,7 +666,7 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
         g_display_object_animated_pool[level->right_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
         level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS;
         menu_selected_index = &g_window_panel_render_state.selected_index;
-        participant_panels_start(g_menu_stack_entry_values[*menu_selected_index] & TEXT_ID_ENTRY_MASK);
+        start_participant_panels(g_menu_stack_entry_values[*menu_selected_index] & TEXT_ID_ENTRY_MASK);
         level->slot = *menu_selected_index;
     } else if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS) {
         buttons = g_world_map_input_new_button_presses;
@@ -674,16 +674,16 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
             g_display_object_animated_pool[level->left_arrow].flags |= DISPLAY_OBJECT_HIDDEN;
             g_display_object_animated_pool[level->right_arrow].flags |= DISPLAY_OBJECT_HIDDEN;
             level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE;
-            thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-            thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
-            thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
             return;
         }
         if (buttons & PSX_PAD_SELECT) {
             g_display_object_animated_pool[level->left_arrow].palette
                 = g_display_object_animated_pool[level->right_arrow].palette = 0xA;
             sound_play_effect(SOUND_SFX_CONFIRM);
-            unit_panel_help_open();
+            unit_panel_open_help();
             return;
         }
         if (!(g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1))) {
@@ -694,7 +694,7 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
                 = g_display_object_animated_pool[level->right_arrow].frame_index
                 = g_display_object_animated_pool[level->right_arrow].anim_counter = 0;
         }
-        if (world_map_input_repeat_update(PSX_PAD_R1) != 0
+        if (input_update_repeat(PSX_PAD_R1) != 0
             && g_display_object_animated_pool[level->left_arrow].sequence != DISPLAY_OBJECT_ANIM_L1_BUTTON_PRESS) {
             g_display_object_animated_pool[level->right_arrow].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS;
             g_display_object_animated_pool[level->right_arrow].frame_index
@@ -712,7 +712,7 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
             }
             direction = 1;
         } else {
-            if (world_map_input_repeat_update(PSX_PAD_L1) == 0
+            if (input_update_repeat(PSX_PAD_L1) == 0
                 || g_display_object_animated_pool[level->right_arrow].sequence == DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS) {
                 return;
             }
@@ -730,7 +730,7 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
             direction = 2;
         }
         g_unit_panel_banner_params.redraw_request = direction;
-        unit_panel_party_unit_prepare(g_menu_stack_entry_values[level->slot] & TEXT_ID_ENTRY_MASK);
+        unit_panel_prepare_party_unit(g_menu_stack_entry_values[level->slot] & TEXT_ID_ENTRY_MASK);
         g_unit_panel_panel_params.redraw_request = 1;
         g_unit_panel_numbers_params.redraw_request = 1;
     done:
@@ -748,9 +748,9 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
         level->mode = PROPOSITION_SEND_UNIT_MODE_SELECT;
         g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_UNIT_PANEL_THREADS);
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
         thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
         g_display_object_animated_pool[level->list_frame.window_index].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_display_object_gs_image_pool[level->list_frame.render_index].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_display_object_animated_pool[level->frame_window_a].flags ^= DISPLAY_OBJECT_HIDDEN;
@@ -760,9 +760,9 @@ static void participant_status_update(proposition_send_unit_level_t* level) {
     }
 }
 
-/* Undo proposition_participants_suspend when a sub-level closes:
+/* Undo proposition_suspend_participants when a sub-level closes:
  * default palettes on the send-unit windows and a neutral preview portrait. */
-void proposition_participants_resume(menu_stack_record_t* level) {
+void proposition_resume_participants(menu_stack_record_t* level) {
     CVECTOR* color;
 
     g_display_object_animated_pool[level->send_unit.list_frame.window_index].palette
@@ -782,8 +782,8 @@ void proposition_participants_resume(menu_stack_record_t* level) {
 
 /* Gray out the send-unit windows (palettes 6, 10 and 2) and tint the preview
  * portrait blue (0x40, 0x50, 0x70) while a sub-level runs over them; undone by
- * proposition_participants_resume. */
-void proposition_participants_suspend(menu_stack_record_t* level) {
+ * proposition_resume_participants. */
+void proposition_suspend_participants(menu_stack_record_t* level) {
     s32 pad[4];
 
     g_display_object_animated_pool[level->send_unit.list_frame.window_index].palette = 6;
@@ -800,8 +800,8 @@ void proposition_participants_suspend(menu_stack_record_t* level) {
  *
  * CANCEL and ACCEPT wait for the panel thread to close and then pop the level,
  * ACCEPT continuing into the proposition detail level and its days panel; the
- * STATUS modes run participant_status_update and REPLACE runs
- * participant_slots_update.
+ * STATUS modes run update_participant_status and REPLACE runs
+ * update_participant_slots.
  *
  * Otherwise (SELECT) the highlighted unit's portrait is shown in the preview
  * record once the list has popped in, then the new button presses are
@@ -815,7 +815,7 @@ void proposition_participants_suspend(menu_stack_record_t* level) {
  * 16-byte array reproduces that frame. The removal and addition paths each
  * end in their own redraw calls, which jump2 cross-jumps from the count
  * store onward. */
-void proposition_participants_update(menu_stack_record_t* level) {
+void proposition_update_participants(menu_stack_record_t* level) {
     s32 buttons;
     s32 value;
     s32 i;
@@ -826,7 +826,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
             g_menu_blocked_buttons = 0;
             g_world_map_flags &= ~WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
-            proposition_available_list_open();
+            proposition_open_available_list();
         }
         return;
     }
@@ -836,9 +836,9 @@ void proposition_participants_update(menu_stack_record_t* level) {
             g_menu_blocked_buttons = 0;
             g_world_map_flags &= ~WORLD_MAP_FLAG_INPUT_BLOCKED;
             g_menu_stack_depth--;
-            proposition_detail_level_open(g_proposition_selected_row.id - 1);
-            proposition_detail_level_suspend(level);
-            proposition_days_open();
+            proposition_open_detail(g_proposition_selected_row.id - 1);
+            proposition_suspend_detail(level);
+            proposition_open_days_panel();
         }
         return;
     }
@@ -846,12 +846,12 @@ void proposition_participants_update(menu_stack_record_t* level) {
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN
         || level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS
         || level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_STATUS_CLOSE) {
-        participant_status_update(&level->send_unit);
+        update_participant_status(&level->send_unit);
         return;
     }
 
     if (level->send_unit.mode == PROPOSITION_SEND_UNIT_MODE_REPLACE) {
-        participant_slots_update(&level->send_unit);
+        update_participant_slots(&level->send_unit);
         return;
     }
 
@@ -859,14 +859,14 @@ void proposition_participants_update(menu_stack_record_t* level) {
         value = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         if (value != level->send_unit.shown_preview) {
             level->send_unit.shown_preview = value;
-            candidate_portrait_show(&level->send_unit, value, level->send_unit.preview_render);
+            show_candidate_portrait(&level->send_unit, value, level->send_unit.preview_render);
         }
     }
 
     buttons = g_world_map_input_new_button_presses;
     if (buttons & PSX_PAD_SELECT) {
-        proposition_participants_suspend(level);
-        menu_stack_message_open(0x109A, 1);
+        proposition_suspend_participants(level);
+        menu_stack_open_message(0x109A, 1);
         return;
     }
 
@@ -888,7 +888,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->send_unit.mode = PROPOSITION_SEND_UNIT_MODE_CANCEL;
     suspend:
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_display_object_animated_count -= 7;
         g_display_object_image_count -= 5;
         g_display_object_queue_count -= 0xC;
@@ -897,8 +897,8 @@ void proposition_participants_update(menu_stack_record_t* level) {
     }
 
     if (buttons & PSX_PAD_SQUARE) {
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_display_object_animated_pool[level->send_unit.list_frame.window_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_display_object_gs_image_pool[level->send_unit.list_frame.render_index].flags |= DISPLAY_OBJECT_HIDDEN;
         g_display_object_animated_pool[level->send_unit.frame_window_a].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -922,9 +922,9 @@ void proposition_participants_update(menu_stack_record_t* level) {
                 s_proposition_send_units[value - 1] = s_proposition_send_units[value];
             }
             s_proposition_send_unit_count--;
-            participant_names_draw(&level->send_unit);
-            candidates_build(&level->send_unit);
-            screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
+            draw_participant_names(&level->send_unit);
+            build_candidates(&level->send_unit);
+            screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
             return;
         }
     }
@@ -951,7 +951,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
     s_proposition_send_units[s_proposition_send_unit_count] = value;
     s_proposition_send_unit_count++;
 
-    participant_names_draw(&level->send_unit);
-    candidates_build(&level->send_unit);
-    screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
+    draw_participant_names(&level->send_unit);
+    build_candidates(&level->send_unit);
+    screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
 }

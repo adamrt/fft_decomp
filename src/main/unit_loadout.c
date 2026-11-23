@@ -28,8 +28,8 @@ void mem_copy_bytes_source_first(const void* source, void* destination, int coun
  * its level, optionally limited to one item type and to weapons with a flag in weapon_flag_mask.
  * Returns ENTD_VALUE_RANDOM when nothing fits. The candidate list restarts only when an item with
  * a higher required level appears, so items scanned after it with a lower level still join it. */
-s32 unit_random_equipment_generate(
-    const unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
+s32 battle_unit_generate_random_equipment(
+    const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
     u8 candidates[128];
     s32 first;
     s32 last;
@@ -116,7 +116,7 @@ s32 unit_random_equipment_generate(
  * Two scratch locals preserve the native register reuse: `i` doubles as the
  * unlocked-job mask and `scratch` holds both those bits and the learn chance;
  * separate locals change the register allocation. */
-void unit_job_abilities_learn(unit_stats_t* unit, s32 job_id, const entd_unit_t* entd) {
+void battle_unit_learn_job_abilities(battle_unit_t* unit, s32 job_id, const entd_unit_t* entd) {
     s32 job_index = job_id - JOB_ID_SQUIRE;
     s32 skillset;
     s32 auto_learn = 0;
@@ -165,7 +165,7 @@ void unit_job_abilities_learn(unit_stats_t* unit, s32 job_id, const entd_unit_t*
     }
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         learned = 0;
-        ability_id = skillset_ability_id_get(skillset, i);
+        ability_id = skillset_get_ability_id(skillset, i);
         if (ability_id != 0) {
             ability = &g_ability_data[ability_id];
             scratch = ability->learn_rate;
@@ -191,7 +191,7 @@ void unit_job_abilities_learn(unit_stats_t* unit, s32 job_id, const entd_unit_t*
 /* Picks a random reaction/support/movement ability (selected by `flags` from
  * rsm_ability_filter_e) from the abilities the unit has learned
  * across its unlocked jobs, or returns `ability_id` when it is not random. */
-u16 unit_rsm_select(const unit_stats_t* unit, u16 ability_id, s32 flags, const entd_unit_t* entd) {
+u16 battle_unit_select_rsm(const battle_unit_t* unit, u16 ability_id, s32 flags, const entd_unit_t* entd) {
     u16 candidates[RSM_CANDIDATE_COUNT];
     u16 innate[4];
     u8 known;
@@ -267,7 +267,7 @@ u16 unit_rsm_select(const unit_stats_t* unit, u16 ability_id, s32 flags, const e
                 }
             }
             keep = 0;
-            id = skillset_ability_id_get(skillset, j);
+            id = skillset_get_ability_id(skillset, j);
             checked_id = id;
             if (checked_id == ABILITY_ID_REACTION_SUNKEN_STATE)
                 continue;

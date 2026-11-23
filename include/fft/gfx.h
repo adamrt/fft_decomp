@@ -228,7 +228,7 @@ typedef struct zodiac_draw_context {
 } zodiac_draw_context_t;
 
 /* The 0x10-byte glyph blit descriptor used by the window frame threads and filled
- * by screen_blit_source_rect_set, text_set_blit_source_rect and
+ * by screen_set_blit_source_rect, text_set_blit_source_rect and
  * text_set_blit_destination. The stride is the surface width in pixels. */
 typedef struct glyph_blit {
     RECT rect;  /* 0x00 */
@@ -265,9 +265,9 @@ extern DRAWENV g_gfx_draw_envs[2];
 extern s32 g_gfx_active_buffer_index;
 extern s32 g_gfx_screen_polarity;
 
-u32* gfx_battle_otag_get(void);
-void gfx_battle_otag_swap(void);
-void gfx_display_reset(int width, int height, int projection, u8 red, u8 green, u8 blue);
+u32* gfx_get_battle_otag(void);
+void gfx_swap_battle_otag(void);
+void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 
 /* screen environments */
 /* Double-buffered draw/display environments, one pair per frame buffer (0x70
@@ -283,7 +283,7 @@ extern u32 g_gfx_otags[2][16];
 
 void gfx_init_screen_environments(s32 clear_first);
 void gfx_clear_current_otag(void);
-void gfx_frame_begin(void);
+void gfx_begin_frame(void);
 
 /* FRAME.BIN */
 /* EVENT/FRAME.BIN: 256x288 pixels at 4bpp and 22 palettes, sector rounded.
@@ -296,7 +296,7 @@ typedef struct gfx_frame_bin {
 } gfx_frame_bin_t;
 typedef char gfx_frame_bin_size_must_be_38912[(sizeof(gfx_frame_bin_t) == 38912) ? 1 : -1];
 
-void gfx_frame_texture_load(void);
+void gfx_load_frame_texture(void);
 void gfx_restore_frame_bin_page(void);
 
 /* after-battle quads and fade */

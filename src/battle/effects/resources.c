@@ -24,7 +24,7 @@ extern u8 g_effect_slot_free_head;
 /* Reset the effect system for a battle: the effect slot chains (slot 0 the sentinel, 1-32 free),
  * the 16 secondary effect records (all on the free chain, their slot lists empty), the projectile
  * matrix translation, the render state and the effect camera. */
-void effect_system_init(void) {
+void effect_init_system(void) {
     s32 i;
     s32 j;
 
@@ -67,7 +67,7 @@ void effect_system_init(void) {
             g_effect_secondary_data[i].slot_ids[j] = 0;
         }
     }
-    effect_render_state_reset();
+    effect_render_reset_state();
     effect_camera_init();
 }
 
@@ -80,7 +80,7 @@ void effect_system_init(void) {
  * storing and returning the raw id ($s0), which keeps the error path's `move
  * v0,s0` instead of a folded 0. Writing previous_slot_id before the next_slot_id
  * clear reproduces the target's early g_effect_secondary_active_tail load. */
-static u8 secondary_record_alloc(void) {
+static u8 alloc_secondary_record(void) {
     s32 id = (u8)s_effect_secondary_free_head;
     s32 slot = id & 0xff;
     s32 i;
@@ -105,7 +105,7 @@ static u8 secondary_record_alloc(void) {
 /* Take secondary effect record id (1-16) off the active chain, free its work
  * block and append it to the end of the free chain headed by
  * g_effect_secondary_free_head: the inverse of
- * secondary_record_alloc. An id outside 1-16 only reaches the
+ * alloc_secondary_record. An id outside 1-16 only reaches the
  * empty report hook with code 0x67.
  *
  * Both chains are walked through previous_slot_id. A record removed from the
@@ -149,7 +149,7 @@ void effect_secondary_remove(u8 id) {
 
 /* Return the phase of secondary effect record secondary_id; ENDED once the record has been
  * removed. */
-effect_secondary_phase_e effect_secondary_phase_get(u8 secondary_id) {
+effect_secondary_phase_e effect_secondary_get_phase(u8 secondary_id) {
     return g_effect_secondary_data[secondary_id].phase;
 }
 
@@ -204,7 +204,7 @@ void effect_slot_free(u8 id) {
  * init record and return its id. parameter is the animation's own: an
  * element mask, a sprite palette or a duration. */
 s32 effect_secondary_init(s32 animation_id, s32 parameter, const effect_context_t* source) {
-    s32 secondary_id = secondary_record_alloc();
+    s32 secondary_id = alloc_secondary_record();
 
     g_effect_secondary_data[secondary_id].animation_id = animation_id;
     g_effect_secondary_data[secondary_id].timer = 0;
@@ -222,8 +222,8 @@ s32 effect_secondary_init(s32 animation_id, s32 parameter, const effect_context_
  * animation selects the animation id (and its function id), the high half is
  * stored alongside it. Returns its id; phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
-s32 effect_secondary_projectile_init(s32 animation, const effect_context_t* source) {
-    u8 secondary_id = secondary_record_alloc();
+s32 effect_secondary_init_projectile(s32 animation, const effect_context_t* source) {
+    u8 secondary_id = alloc_secondary_record();
 
     g_effect_secondary_data[secondary_id].animation_id = animation;
     g_effect_secondary_data[secondary_id].timer = 0;
@@ -241,7 +241,7 @@ s32 effect_secondary_projectile_init(s32 animation, const effect_context_t* sour
 /* Returns the effect_element_index_e of an element mask: 0 for no
  * element, otherwise the position of the first table mask it meets (9 when it
  * meets none). */
-s32 effect_element_index_get(s32 elements) {
+s32 effect_get_element_index(s32 elements) {
     s32 i;
 
     if (elements != 0) {
@@ -262,12 +262,12 @@ s32 effect_element_index_get(s32 elements) {
  * keeps the slot's animation. The parameter
  * is the element effect index for the weapon's element mask. Returns its id,
  * or 0 when the init record has no targets. */
-s32 effect_secondary_weapon_hit_init(s32 elements, const effect_context_t* source, s32 unused_is_bow) {
+s32 effect_secondary_init_weapon_hit(s32 elements, const effect_context_t* source, s32 unused_is_bow) {
     u8 secondary_id;
 
     if (source->target_count != 0) {
-        elements = effect_element_index_get(elements);
-        secondary_id = secondary_record_alloc();
+        elements = effect_get_element_index(elements);
+        secondary_id = alloc_secondary_record();
         switch (source->targets[0].data.unit.result_animation) {
         case EFFECT_HIT_NORMAL:
         case EFFECT_HIT_CRITICAL:
@@ -299,8 +299,8 @@ s32 effect_secondary_weapon_hit_init(s32 elements, const effect_context_t* sourc
 /* Start the current effect target's fall-dust secondary effect at the
  * given position and return its id. Phase 1 is
  * EFFECT_SECONDARY_PHASE_INITIALIZING. */
-s32 effect_secondary_fall_dust_init(const effect_context_t* source, const VECTOR* position) {
-    s32 secondary_id = secondary_record_alloc();
+s32 effect_secondary_init_fall_dust(const effect_context_t* source, const VECTOR* position) {
+    s32 secondary_id = alloc_secondary_record();
 
     g_effect_secondary_data[secondary_id].timer = 0;
     g_effect_secondary_data[secondary_id].animation_id = EFFECT_SECONDARY_ANIMATION_FALL_DUST;
@@ -319,8 +319,8 @@ s32 effect_secondary_fall_dust_init(const effect_context_t* source, const VECTOR
  * record and return its id. Its null handler only steps through the phases, so
  * the record lasts two more frames. The arrow handler starts it when the arrow
  * lands without a hit. */
-s32 effect_secondary_ending_init(void) {
-    s32 secondary_id = secondary_record_alloc();
+s32 effect_secondary_init_ending(void) {
+    s32 secondary_id = alloc_secondary_record();
     s32 record_offset = secondary_id * sizeof(effect_secondary_data_t);
     u8 function_id;
 

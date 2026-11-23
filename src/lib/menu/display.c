@@ -112,7 +112,7 @@ void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height) {
 }
 
 /* Set the screen origin used by menu text glyphs. */
-void menu_set_text_origin(s32 x, s32 y) {
+void menu_text_set_origin(s32 x, s32 y) {
     g_menu_window_text_pen.rect.x = x;
     g_menu_window_text_pen.rect.y = y;
 }
@@ -198,7 +198,7 @@ void gfx_set_image_primitive_layout(
 }
 
 /* Draw count positioned number entries into an image buffer: kind 0 in the small glyphs
- * (text_small_number_glyphs_draw), kind 1 in the large ones (menu_draw_large_number_glyphs); other kinds
+ * (text_draw_small_number_glyphs), kind 1 in the large ones (menu_draw_large_number_glyphs); other kinds
  * draw nothing. */
 void menu_draw_numeric_display_entries(
     u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
@@ -208,7 +208,7 @@ void menu_draw_numeric_display_entries(
         position->rect.x = entries->x;
         position->rect.y = entries->y;
         if (entries->kind == 0) {
-            text_small_number_glyphs_draw(*entries->value, entries->format, buffer, position);
+            text_draw_small_number_glyphs(*entries->value, entries->format, buffer, position);
         } else if (entries->kind == 1) {
             menu_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
         }

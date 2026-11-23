@@ -20,7 +20,7 @@ extern u16 g_portrait_code_by_sprite_sheet_id[];
  * sprite sheet, with the job's portrait palette added from bit 10. An empty
  * slot (no sprite set) gets code 0.
  */
-void portrait_poly_build(s32 roster_slot, POLY_FT4* poly) {
+void portrait_build_poly(s32 roster_slot, POLY_FT4* poly) {
     party_unit_t* party = party_unit_get(roster_slot);
     const job_data_t* job;
     u32 sprite = party->sprite_set;
@@ -44,7 +44,7 @@ void portrait_poly_build(s32 roster_slot, POLY_FT4* poly) {
                 sprite = offset + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
             }
         } else {
-            job = job_data_get(party->job_id);
+            job = job_get_data(party->job_id);
             sprite = job->spritesheet_id;
         }
         current_job = party->job_id;

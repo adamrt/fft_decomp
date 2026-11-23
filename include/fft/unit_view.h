@@ -28,7 +28,7 @@ extern s32 g_unit_view_mode;
 void unit_view_start(s32 mode, s32 unit_a, s32 unit_b);
 
 /* Yields until the four panel threads (hovered and right unit stats, unit summary, tile info) have stopped. */
-void unit_view_panels_wait(void);
+void unit_view_wait_panels(void);
 
 /* unit stats panels */
 extern RECT g_unit_view_hovered_stats_rect;
@@ -39,8 +39,8 @@ extern RECT g_unit_view_attack_target_stats_rect;
 /* Each reloads its unit and redraws its panel; a negative list index draws dashes. */
 void unit_view_hovered_stats_thread(void);
 void unit_view_right_stats_thread(void);
-void unit_view_preview_caster_stats(void);
-void unit_view_preview_target_stats(void);
+void unit_view_attack_caster_stats_thread(void);
+void unit_view_attack_target_stats_thread(void);
 
 /* unit summary */
 void unit_view_summary_thread(void);

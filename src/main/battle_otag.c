@@ -6,13 +6,13 @@
 
 /* Return the ordering table of BATTLE's current render buffer; the pointer is a BATTLE.BIN global,
  * so this only works while BATTLE is loaded. */
-u32* gfx_battle_otag_get(void) {
+u32* gfx_get_battle_otag(void) {
     return g_render_current_buffer->otag;
 }
 
 /* Make the other of BATTLE's two render buffers the current one and clear its
  * 0x180-entry ordering table. */
-void gfx_battle_otag_swap(void) {
+void gfx_swap_battle_otag(void) {
     render_buffer_t* buffer = g_render_buffers;
     u32* otag;
 

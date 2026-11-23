@@ -1,5 +1,6 @@
 /* The fitting room previews equipment, tracks the bill and commits or undoes the chosen loadout. */
 
+#include "fft/ability.h"
 #include "fft/equipment.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
@@ -10,6 +11,7 @@
 #include "fft/item.h"
 #include "fft/item_menu.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"
@@ -21,6 +23,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
@@ -28,7 +31,7 @@
 
 extern u8 g_shop_background_visible;
 
-/* Result of checkout_prompt_update. */
+/* Result of update_checkout_prompt. */
 typedef enum checkout_result {
     SHOP_FITTING_CHECKOUT_DONE = -1,    /* bought, or left without buying: back to the shop's main menu */
     SHOP_FITTING_CHECKOUT_CANCELED = 0, /* back to the fitting room */
@@ -82,21 +85,21 @@ static s8 s_shop_fitting_best_fit_menu_open;
 extern u8 g_shop_fitting_item_list_menu_script[213];
 extern u8 g_shop_fitting_cost_menu_script[103];
 
-static void fitting_cost_draw(void);
-static s32 checkout_prompt_update(void);
-static void fitting_undo(void);
-static void equipped_item_return(s16 unit_index, s16 equipment_index);
-static void trial_item_remove(s16 formation_index, s16 equipment_index);
-static void fitting_purchase_commit(void);
+static void draw_fitting_cost(void);
+static s32 update_checkout_prompt(void);
+static void undo_fitting(void);
+static void return_equipped_item(s16 unit_index, s16 equipment_index);
+static void remove_trial_item(s16 formation_index, s16 equipment_index);
+static void commit_fitting_purchase(void);
 
 /* Menu callback: add `delta` to the fitting room's running cost and return
  * the new total. */
-static s32 fitting_cost_add(s32 delta) {
+static s32 add_fitting_cost(s32 delta) {
     return g_shop_fitting_cost = delta + g_shop_fitting_cost;
 }
 
 /* Menu callback: no marker (-1) for any unit. */
-static s32 fitting_unit_marker_get(s32 unused_unit_index) {
+static s32 get_fitting_unit_marker(s32 unused_unit_index) {
     return -1;
 }
 
@@ -104,21 +107,21 @@ static s32 fitting_unit_marker_get(s32 unused_unit_index) {
  * then either browse the formation (Circle or Triangle opens the fitting menu for the unit, Cross
  * goes to the checkout) or run the fitting menu thread and dispatch its selection to the next
  * shop step. */
-void shop_fitting_menu_update(void) {
+void shop_fitting_update_menu(void) {
     s32 busy;
 
     if (g_shop_fitting_initialized == 0) {
         if (g_menu_input_newly_pressed == 0) {
-            shop_gil_draw();
+            shop_draw_gil();
             return;
         }
-        formation_grid_cursor_init(0);
+        formation_grid_init_cursor(0);
         memset(g_shop_fitting_items, 0, sizeof(g_shop_fitting_items));
         /* Subtract the running cost from itself: back to 0. */
-        fitting_cost_add(-fitting_cost_add(0));
+        add_fitting_cost(-add_fitting_cost(0));
         g_shop_fitting_unit_chosen = 0;
         g_shop_fitting_cost_visible = 0;
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_shop_fitting_initialized = 1;
         return;
     }
@@ -130,8 +133,8 @@ void shop_fitting_menu_update(void) {
         } else {
             g_help_message_text_id = 0;
         }
-        busy = screen_input_lockout_get();
-        busy += formation_grid_scroll_check();
+        busy = screen_get_input_lockout();
+        busy += unit_grid_check_scroll();
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) && busy == 0) {
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_formation_unit_banner_enabled = 0;
@@ -145,10 +148,10 @@ void shop_fitting_menu_update(void) {
             g_shop_fitting_cost_visible = 1;
             g_shop_fitting_menu_thread_data[0].selected_index = 0;
             g_shop_fitting_menu_thread_data[1].selected_index = 0;
-            menu_selection_records_clear();
+            menu_selection_clear_records();
         } else {
             formation_grid_update(
-                1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, fitting_unit_marker_get, 0);
+                1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, get_fitting_unit_marker, 0);
         }
     } else {
         g_shop_background_visible = 1;
@@ -168,7 +171,7 @@ void shop_fitting_menu_update(void) {
                 }
             } else {
                 g_shop_fitting_unit_chosen = 0;
-                formation_selection_cursor_init(g_unit_selected_index);
+                formation_init_selection_cursor(g_unit_selected_index);
                 g_formation_unit_cycle_mode = 0;
                 g_formation_unit_browse_enabled = 0;
                 g_shop_fitting_cost_visible = 0;
@@ -177,16 +180,16 @@ void shop_fitting_menu_update(void) {
                     g_shop_menu_step = SHOP_STEP_FITTING_ROOM_CHECKOUT;
                 }
             }
-            menu_selection_value_init(SCREEN_CURSOR_REMOVE_SLOT, 0);
-            menu_selection_value_init(SCREEN_CURSOR_EQUIP_SLOT, 0);
+            menu_selection_init_value(SCREEN_CURSOR_REMOVE_SLOT, 0);
+            menu_selection_init_value(SCREEN_CURSOR_EQUIP_SLOT, 0);
         }
     }
     if (g_shop_fitting_cost_visible != 0) {
-        fitting_cost_draw();
+        draw_fitting_cost();
     }
 }
 
-/* Shop fitting-room equipment step, the shop twin of equipment_menu_update.
+/* Shop fitting-room equipment step, the shop twin of update_equip_menu.
  *
  * With the slot list active, steps the equipment-slot cursor and shows the
  * equipped item's description; confirming opens the shop item list for the
@@ -195,7 +198,7 @@ void shop_fitting_menu_update(void) {
  * unpaid), adds its price to the fitting-room cost and recalculates stats,
  * while moving the cursor previews the stat change. Cancel leaves the list,
  * or from the slot list goes back to the fitting room's unit grid. */
-void shop_fitting_equipment_update(void) {
+void shop_fitting_update_equipment_menu(void) {
     s16 selected_index;
     s16 scroll_base_index;
     s32 prev;
@@ -223,7 +226,7 @@ void shop_fitting_equipment_update(void) {
         }
     } else if (g_shop_fitting_item_list_open == 0) {
         prev = g_shop_fitting_equip_slot;
-        g_shop_fitting_equip_slot = menu_selection_vertical_sound_step(
+        g_shop_fitting_equip_slot = menu_selection_step_vertical_with_sound(
             MENU_EQUIPMENT_SLOT_COUNT, SCREEN_CURSOR_EQUIP_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
         if (prev != g_shop_fitting_equip_slot) {
             g_menu_list_selected_index = 0;
@@ -246,7 +249,7 @@ void shop_fitting_equipment_update(void) {
             g_shop_fitting_previewed_cursor = -1;
             g_shop_fitting_cost_visible = 0;
             g_formation_change_banner_thread_params.style = 1;
-            shop_stock_list_build(g_unit_selected_index, g_screen_context_id, g_shop_fitting_equip_slot,
+            shop_build_stock_list(g_unit_selected_index, g_screen_context_id, g_shop_fitting_equip_slot,
                 g_item_list_entries, ITEM_LIST_MODE_MARK_UNEQUIPPABLE);
 
             /* Both hand slots share selection record 0, so the record is the slot less one. */
@@ -254,15 +257,15 @@ void shop_fitting_equipment_update(void) {
             if (g_shop_fitting_equip_slot != 0) {
                 slot = g_shop_fitting_equip_slot - 1;
             }
-            menu_selection_record_restore(slot, &selected_index, &scroll_base_index, g_item_list_entries);
-            menu_init_scrollable_list(g_item_list_entries, selected_index, scroll_base_index,
+            menu_selection_restore_record(slot, &selected_index, &scroll_base_index, g_item_list_entries);
+            menu_scrollable_list_init(g_item_list_entries, selected_index, scroll_base_index,
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-            g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
-            g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+            g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
+            g_menu_row_callbacks[1].value = equipment_row_get_item_count;
             g_menu_row_callbacks[2].icon = item_build_type_icon_source;
-            g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
-            g_menu_row_callbacks[4].value = shop_buy_price_get;
-            menu_set_vsync_mode_and_event_speed(2);
+            g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
+            g_menu_row_callbacks[4].value = shop_buy_get_price;
+            menu_set_event_speed(2);
         }
     } else {
         item = g_item_list_entries[g_menu_list_selected_index];
@@ -272,21 +275,21 @@ void shop_fitting_equipment_update(void) {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             } else {
                 equip = item;
-                result = formation_item_slot_check(g_unit_selected_index, g_shop_fitting_equip_slot, equip);
+                result = check_equipment_slot_item(g_unit_selected_index, g_shop_fitting_equip_slot, equip);
                 if (result < 0) {
                     g_sound_queued_effect_id = SOUND_SFX_INVALID;
                 } else {
-                    equipped_item_return(g_unit_selected_index, g_shop_fitting_equip_slot);
+                    return_equipped_item(g_unit_selected_index, g_shop_fitting_equip_slot);
                     g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[g_shop_fitting_equip_slot]
                         = item | SHOP_FITTING_ITEM;
-                    fitting_cost_add(shop_item_price_get(equip));
+                    add_fitting_cost(shop_get_item_price(equip));
                     /* 0: the item clashes with the other hand, which goes back to the fitting room too. */
                     if (result != 1) {
-                        equipped_item_return(g_unit_selected_index, g_shop_fitting_equip_slot == 0);
+                        return_equipped_item(g_unit_selected_index, g_shop_fitting_equip_slot == 0);
                     }
                     g_shop_fitting_item_list_close = 1;
                     g_sound_queued_effect_id = SOUND_SFX_EQUIP;
-                    formation_selected_stats_refresh();
+                    formation_refresh_selected_stats();
                 }
             }
         }
@@ -294,23 +297,23 @@ void shop_fitting_equipment_update(void) {
         /* Try the item on the preview unit, take the stat delta, then restore the preview unit's equipment. */
         if (g_menu_list_entry_count != 0 && g_shop_fitting_previewed_cursor != g_menu_list_selected_index) {
             g_shop_fitting_previewed_cursor = g_menu_list_selected_index;
-            result = formation_item_equip(FORMATION_PREVIEW_UNIT_INDEX, g_shop_fitting_equip_slot, item);
+            result = equipment_set_slot_item(FORMATION_PREVIEW_UNIT_INDEX, g_shop_fitting_equip_slot, item);
             if (result == 1) {
-                formation_toggle_preview_stats_window(1);
+                unit_panel_toggle_preview_stats_thread(1);
                 g_unit_panel_preview_stats_thread_params.redraw_request = result;
-                equipment_loadout_delta_calculate(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
+                equipment_calculate_loadout_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
                     g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
                     g_formation_temp_unit->detail.equipment);
                 bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
                     g_formation_temp_unit->detail.equipment, sizeof(g_formation_temp_unit->detail.equipment));
             } else {
-                formation_toggle_preview_stats_window(0);
+                unit_panel_toggle_preview_stats_thread(0);
             }
             g_unit_panel_status_display_thread_params.redraw_request = 1;
         }
 
-        menu_run_script_with_palette_mode(
-            g_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, screen_busy_check());
+        menu_script_run_with_palette_mode(
+            g_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, screen_check_busy());
         g_help_message_text_id = g_menu_list_entry_count != 0
             ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
@@ -322,37 +325,37 @@ void shop_fitting_equipment_update(void) {
         g_formation_change_banner_thread_params.style = 0;
         g_shop_fitting_item_list_open = 0;
         g_formation_unit_cycle_mode = 2;
-        menu_set_vsync_mode_and_event_speed(0);
-        formation_toggle_preview_stats_window(0);
+        menu_set_event_speed(0);
+        unit_panel_toggle_preview_stats_thread(0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         slot = 0;
         if (g_shop_fitting_equip_slot != 0) {
             slot = g_shop_fitting_equip_slot - 1;
         }
-        menu_selection_record_set(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
+        menu_selection_set_record(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
     }
 
     g_shop_fitting_slot_cursor_point.y = g_shop_fitting_equip_slot * 16 + 0x90;
     gfx_set_otag_index(0x3d);
-    screen_sliding_cursor_draw(&g_shop_fitting_slot_cursor_point, &g_shop_fitting_slot_cursor_anim,
+    menu_draw_sliding_cursor(&g_shop_fitting_slot_cursor_point, &g_shop_fitting_slot_cursor_anim,
         g_shop_fitting_item_list_open != 0 || g_menu_input_lock_mode != 0);
     if (g_shop_fitting_cost_visible != 0) {
-        fitting_cost_draw();
+        draw_fitting_cost();
     }
 }
 
 /* Row callback: the war funds left after paying for the items being tried on; the row is ignored. */
-static s32 remaining_gil_get(s32 unused_row) {
-    s32 gil = shop_gil_adjust(0);
+static s32 get_remaining_gil(s32 unused_row) {
+    s32 gil = shop_adjust_gil(0);
 
-    return gil - fitting_cost_add(0);
+    return gil - add_fitting_cost(0);
 }
 
 /* Report whether menu input is locked or the screen menu slot's thread still runs.
  *
  * Its only caller passes 0, but the body never reads that argument: `$a0` is
  * overwritten with 6 before any use and the result starts from zero. */
-static s32 fitting_menu_busy_check(s32 unused) {
+static s32 check_fitting_menu_busy(s32 unused) {
     s32 result = 0;
 
     if (g_menu_input_lock_mode != 0) {
@@ -366,25 +369,25 @@ static s32 fitting_menu_busy_check(s32 unused) {
 /* Run the fitting room's cost display script with its three menu value
  * callbacks installed (gil, fitting cost, gil minus cost); the script gets
  * no input while a menu is busy. */
-static void fitting_cost_draw(void) {
-    g_menu_row_callbacks[0].value = shop_gil_adjust;
-    g_menu_row_callbacks[1].value = fitting_cost_add;
-    g_menu_row_callbacks[2].value = remaining_gil_get;
-    menu_run_script_with_palette_mode(
-        g_shop_fitting_cost_menu_script, g_menu_input_primary_repeat, fitting_menu_busy_check(0));
+static void draw_fitting_cost(void) {
+    g_menu_row_callbacks[0].value = shop_adjust_gil;
+    g_menu_row_callbacks[1].value = add_fitting_cost;
+    g_menu_row_callbacks[2].value = get_remaining_gil;
+    menu_script_run_with_palette_mode(
+        g_shop_fitting_cost_menu_script, g_menu_input_primary_repeat, check_fitting_menu_busy(0));
 }
 
-/* Fitting-room counterpart of unequip_menu_update: takes one equipment
+/* Fitting-room counterpart of update_remove_menu: takes one equipment
  * slot off the selected unit, refunding a shop item's price from the fitting
  * room cost, and previews the stat change of the slot under the cursor
  * against the unit's own item held in the fitting room.
  *
  * The prologue's $a0 is not an argument register here. The callee,
- * formation_selection_stage_update, takes no arguments; $a0 simply holds the copy of the selected-unit index that
+ * formation_update_selection_stage, takes no arguments; $a0 simply holds the copy of the selected-unit index that
  * the store to g_shop_fitting_remove_previewed_unit_index consumes, while the compare keeps the load in $v1. A
  * one-argument prototype would pull the load pseudo into $a0 and push the copy into $v1; pins and launders cannot
  * compensate, because the target's copy sits in the beq's delay slot and a tied asm is never a delay-slot candidate. */
-void shop_fitting_remove_update(void) {
+void shop_fitting_update_remove_menu(void) {
     /* The target reserves 64 local bytes whose contents are not accessed;
      * saved registers sit at 0x60..0x70 under a -0x78 frame. */
     s32 unused[16];
@@ -398,7 +401,7 @@ void shop_fitting_remove_update(void) {
         unit = g_unit_selected_index;
         g_shop_fitting_remove_previewed_unit_index = unit;
         g_shop_fitting_remove_preview_initialized = 0;
-        formation_selection_stage_update();
+        formation_update_selection_stage();
         menu_input_clear_state();
     }
     if (g_shop_fitting_remove_preview_initialized == 0) {
@@ -406,13 +409,13 @@ void shop_fitting_remove_update(void) {
         g_shop_fitting_remove_preview_initialized = 1;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        formation_toggle_preview_stats_window(0);
+        unit_panel_toggle_preview_stats_thread(0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
         g_shop_fitting_remove_preview_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
     }
-    slot = menu_selection_vertical_sound_step(
+    slot = menu_selection_step_vertical_with_sound(
         MENU_EQUIPMENT_SLOT_COUNT, SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[(u8)slot] != ITEM_ID_NOTHING) {
         value = (g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[(u8)slot] & ITEM_ENTRY_ID_MASK)
@@ -423,17 +426,17 @@ void shop_fitting_remove_update(void) {
     g_help_message_text_id = value;
     g_shop_fitting_remove_cursor_point.y = (u8)slot * 16 + 0x90;
     gfx_set_otag_index(0x3D);
-    screen_sliding_cursor_draw(
-        &g_shop_fitting_remove_cursor_point, &g_shop_fitting_remove_cursor_anim, menu_input_lock_mode_get(0));
+    menu_draw_sliding_cursor(
+        &g_shop_fitting_remove_cursor_point, &g_shop_fitting_remove_cursor_anim, menu_input_get_lock_mode(0));
     /* Only a tried-on shop item (bit 15) can be taken off here; its price comes off the cost. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         equipped_item = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[(u8)slot];
         if ((equipped_item >> 15) == 0) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
         } else {
-            fitting_cost_add(-shop_item_price_get(equipped_item & ITEM_ENTRY_ID_MASK));
-            trial_item_remove(g_unit_selected_index, slot & 0xFF);
-            formation_selected_stats_refresh();
+            add_fitting_cost(-shop_get_item_price(equipped_item & ITEM_ENTRY_ID_MASK));
+            remove_trial_item(g_unit_selected_index, slot & 0xFF);
+            formation_refresh_selected_stats();
             g_sound_queued_effect_id = SOUND_SFX_UNEQUIP;
             g_shop_fitting_remove_previewed_equip_slot = -1;
         }
@@ -443,17 +446,17 @@ void shop_fitting_remove_update(void) {
         equipped_item = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[index];
         g_shop_fitting_remove_previewed_equip_slot = slot;
         if ((equipped_item >> 15) != 0) {
-            formation_toggle_preview_stats_window(1);
-            equipment_swap_delta_calculate(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
+            unit_panel_toggle_preview_stats_thread(1);
+            equipment_calculate_swap_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
                 equipped_item, g_shop_fitting_items[g_unit_selected_index][index], index);
             g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         } else {
-            formation_toggle_preview_stats_window(0);
+            unit_panel_toggle_preview_stats_thread(0);
         }
         g_unit_panel_status_display_thread_params.redraw_request = 1;
     }
     if (g_shop_fitting_cost_visible != 0) {
-        fitting_cost_draw();
+        draw_fitting_cost();
     }
 }
 
@@ -464,30 +467,30 @@ void shop_fitting_remove_update(void) {
  * 0xf802); canceled shows message 0xf818 until any face button, which
  * returns to the fitting room with the unit's stats recalculated.
  */
-void shop_fitting_checkout_update(void) {
+void shop_fitting_update_checkout(void) {
     s32 result;
 
     g_shop_background_visible = 1;
     if (g_shop_fitting_checkout_complete != 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
             g_shop_fitting_checkout_complete = 0;
             g_formation_unit_banner_enabled = 1;
-            formation_selected_stats_refresh();
+            formation_refresh_selected_stats();
         }
     } else {
-        result = checkout_prompt_update();
+        result = update_checkout_prompt();
         if (result == SHOP_FITTING_CHECKOUT_DONE) {
             g_shop_menu_step = SHOP_STEP_MAIN_MENU;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf802, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf802, 0);
             g_shop_fitting_initialized = 0;
         } else if (result == SHOP_FITTING_CHECKOUT_CANCELED) {
             g_shop_fitting_checkout_complete = 1;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf818, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf818, 0);
         }
     }
-    shop_gil_draw();
+    shop_draw_gil();
 }
 
 /*
@@ -496,9 +499,9 @@ void shop_fitting_checkout_update(void) {
  * Opens the pay prompt when the party can afford the fitting-room cost and
  * the "not enough gil" prompt otherwise; an empty cart is bought
  * immediately. Returns 1 while a prompt is open; 0 and -1 are the two
- * closing outcomes shop_fitting_checkout_update dispatches on.
+ * closing outcomes shop_fitting_update_checkout dispatches on.
  */
-static s32 checkout_prompt_update(void) {
+static s32 update_checkout_prompt(void) {
     s32 balance;
     s32 cost;
 
@@ -509,20 +512,20 @@ static s32 checkout_prompt_update(void) {
         g_shop_fitting_checkout_confirm_menu.selected_index = 0;
         g_shop_fitting_checkout_short_gil_menu.selected_index = 0;
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-        balance = shop_gil_adjust(0) - (cost = fitting_cost_add(0));
+        balance = shop_adjust_gil(0) - (cost = add_fitting_cost(0));
         if (cost == 0) {
-            fitting_purchase_commit();
+            commit_fitting_purchase();
             return SHOP_FITTING_CHECKOUT_DONE;
         }
         if (balance >= 0) {
             g_sound_suppressed = 1;
             g_shop_fitting_checkout_prompt_menu = &g_shop_fitting_checkout_confirm_menu;
             g_text_substitution_values[0] = cost;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf819, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf819, 0);
             g_shop_fitting_checkout_insufficient_gil = 0;
         } else {
             g_shop_fitting_checkout_prompt_menu = &g_shop_fitting_checkout_short_gil_menu;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf81a, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf81a, 0);
             g_shop_fitting_checkout_insufficient_gil = 1;
         }
         g_shop_fitting_checkout_prompt_initialized = 1;
@@ -538,10 +541,10 @@ static s32 checkout_prompt_update(void) {
         if (g_shop_fitting_checkout_insufficient_gil == 0) {
             g_sound_suppressed = 0;
             if (g_shop_fitting_checkout_prompt_result == 0) {
-                balance = -fitting_cost_add(0);
-                shop_gil_adjust(balance);
-                fitting_cost_add(balance);
-                fitting_purchase_commit();
+                balance = -add_fitting_cost(0);
+                shop_adjust_gil(balance);
+                add_fitting_cost(balance);
+                commit_fitting_purchase();
                 formation_save_records();
                 g_sound_queued_effect_id = SOUND_SFX_SHOP_TRANSACTION;
                 item_rebuild_category_list(0);
@@ -555,15 +558,15 @@ static s32 checkout_prompt_update(void) {
             if (g_shop_fitting_checkout_prompt_result == 1) {
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             }
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf81c, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf81c, 0);
             return SHOP_FITTING_CHECKOUT_PROMPT_OPEN;
         }
         if (g_shop_fitting_checkout_prompt_result != 1) {
-            fitting_undo();
+            undo_fitting();
             g_shop_fitting_checkout_prompt_initialized = 0;
             return SHOP_FITTING_CHECKOUT_DONE;
         }
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_shop_fitting_checkout_prompt_initialized = 0;
         return SHOP_FITTING_CHECKOUT_CANCELED;
     }
@@ -573,19 +576,19 @@ static s32 checkout_prompt_update(void) {
     g_shop_fitting_checkout_prompt_initialized = 0;
     if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] != 1) {
         if (g_shop_fitting_checkout_prompt_result != 0) {
-            fitting_undo();
+            undo_fitting();
             return SHOP_FITTING_CHECKOUT_DONE;
         }
         return SHOP_FITTING_CHECKOUT_DONE;
     }
-    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
     return SHOP_FITTING_CHECKOUT_CANCELED;
 }
 
 /* Undo the fitting room: give every unit back the items it set aside there and clear the
  * reservations. A slot holding a tried-on shop item (bit 14 or 15 set) is restored even when
  * nothing was set aside, which empties it. */
-static void fitting_undo(void) {
+static void undo_fitting(void) {
     s32 i;
     s32 j;
 
@@ -606,7 +609,7 @@ static void fitting_undo(void) {
  *
  * On entry it stages the selected unit's four weapon/armor slots, fills any
  * slot already taken from the shop with that slot's fitting-room reservation,
- * asks shop_fitting_best_fit_build for a suggested set,
+ * asks shop_fitting_build_best_fit for a suggested set,
  * restores the staged slots and previews
  * the resulting stat delta. It then runs the confirmation menu; on confirm it
  * commits the suggested set slot by slot, returning each displaced item to the
@@ -662,7 +665,7 @@ static void fitting_undo(void) {
  * each time. Its address stays in one register across the calls and the last
  * read is scheduled ahead of the two byte stores that precede it in source.
  */
-void shop_fitting_best_fit_update(void) {
+void shop_fitting_update_best_fit(void) {
     /* The target reserves vars the code never touches: args 16 + vars 88 +
      * 6 saves 24 = the frame of 128, while only the 8-byte staging buffer at
      * sp+80 is accessed. */
@@ -687,18 +690,18 @@ void shop_fitting_best_fit_update(void) {
                 (*unit_slot)->detail.equipment[i] = *reserved;
             }
         }
-        shop_fitting_best_fit_build(
+        shop_fitting_build_best_fit(
             g_unit_selected_index, g_screen_context_id, g_item_preview_stat_detail.state.equipment);
         g_item_preview_stat_detail.state.equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
             = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
         bcopy(staged, g_formation_unit_pointers[g_unit_selected_index]->detail.equipment, sizeof(staged));
-        equipment_loadout_delta_calculate(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
+        equipment_calculate_loadout_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
             g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
             (u16*)g_item_preview_stat_detail.state.equipment);
-        g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
-            g_item_preview_stat_detail.state.equipment, formation_ability_has_two_hands(g_unit_selected_index));
+        g_item_preview_stat_detail.state.two_hands = equipment_is_two_handing_weapon(
+            g_item_preview_stat_detail.state.equipment, ability_has_two_hands(g_unit_selected_index));
         formation_toggle_preview_equipment_panel(1);
-        formation_toggle_preview_stats_window(1);
+        unit_panel_toggle_preview_stats_thread(1);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         s_shop_fitting_best_fit_menu_open = 1;
@@ -714,7 +717,7 @@ void shop_fitting_best_fit_update(void) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         }
         formation_toggle_preview_equipment_panel(0);
-        formation_toggle_preview_stats_window(0);
+        unit_panel_toggle_preview_stats_thread(0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         s_shop_fitting_best_fit_menu_open = 0;
         g_formation_unit_cycle_mode = 2;
@@ -729,28 +732,28 @@ void shop_fitting_best_fit_update(void) {
                  * (`lhu` / `sll 16` / `sra 16`, then `bgez` on the shift), and
                  * it loads the unit's own slot ONCE at the loop head -- the
                  * `sra ,0xf` lands in the `bgez` delay slot and the same
-                 * register is sign-extended again for shop_item_price_get. */
+                 * register is sign-extended again for shop_get_item_price. */
                 suggested = g_item_preview_stat_detail.state.equipment[i];
                 shifted = suggested << 16;
                 item = shifted >> 16;
                 current = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[i];
                 if (item == 0 || shifted < 0) {
-                    equipped_item_return(g_unit_selected_index, i);
-                    fitting_cost_add(shop_item_price_get(item));
+                    return_equipped_item(g_unit_selected_index, i);
+                    add_fitting_cost(shop_get_item_price(item));
                 } else if ((current >> 15) != 0) {
-                    fitting_cost_add(-shop_item_price_get(current));
+                    add_fitting_cost(-shop_get_item_price(current));
                     g_shop_fitting_items[g_unit_selected_index][i] = ITEM_ID_NOTHING;
                 }
                 g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[i] = item;
             }
-            formation_selected_stats_refresh();
+            formation_refresh_selected_stats();
         }
         g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
         g_sound_suppressed = 0;
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
     }
     if (g_shop_fitting_cost_visible != 0) {
-        fitting_cost_draw();
+        draw_fitting_cost();
     }
 }
 
@@ -762,7 +765,7 @@ void shop_fitting_best_fit_update(void) {
  * for half the item's price and, on acceptance, credits the gil and clears
  * the slot. Cross returns to the fitting room's unit grid.
  */
-void shop_fitting_equipped_sale_update(void) {
+void shop_fitting_update_equipped_sale(void) {
     s32 close = 0;
     u32 item;
     s32 text_id;
@@ -771,7 +774,7 @@ void shop_fitting_equipped_sale_update(void) {
     if (g_shop_fitting_sell_equipped_menu_open == 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80c, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80c, 0);
             g_shop_fitting_sell_equipped_prompt_active = 0;
             g_formation_unit_cycle_mode = 1;
             g_shop_fitting_sell_equipped_menu_open = 1;
@@ -781,11 +784,11 @@ void shop_fitting_equipped_sale_update(void) {
         if (g_shop_fitting_sell_equipped_result_shown != 0) {
             if (g_menu_input_primary_repeat
                 & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_DPAD_MASK)) {
-                thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80d, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80d, 0);
                 g_shop_fitting_sell_equipped_result_shown = 0;
             }
         } else if (g_shop_fitting_sell_equipped_prompt_active == 0) {
-            g_shop_fitting_sell_equipped_slot = menu_selection_vertical_sound_step(MENU_EQUIPMENT_SLOT_COUNT,
+            g_shop_fitting_sell_equipped_slot = menu_selection_step_vertical_with_sound(MENU_EQUIPMENT_SLOT_COUNT,
                 SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
             if (g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[g_shop_fitting_sell_equipped_slot]
                 != ITEM_ID_NOTHING) {
@@ -807,8 +810,8 @@ void shop_fitting_equipped_sale_update(void) {
                     g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                     g_shop_fitting_sell_equipped_prompt_active = 1;
                     g_shop_fitting_sell_equipped_menu.selected_index = 0;
-                    g_text_substitution_values[0] = shop_item_half_price_get(item);
-                    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf810, 0);
+                    g_text_substitution_values[0] = shop_get_item_half_price(item);
+                    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf810, 0);
                 }
             } else if (input & PSX_PAD_CROSS) {
                 close = 1;
@@ -819,17 +822,17 @@ void shop_fitting_equipped_sale_update(void) {
                 = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_sell_equipped_menu);
             if (g_shop_fitting_sell_equipped_prompt_active == 0) {
                 if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 0) {
-                    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf811, 0);
-                    shop_gil_adjust(g_text_substitution_values[0]);
+                    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf811, 0);
+                    shop_adjust_gil(g_text_substitution_values[0]);
                     g_formation_unit_pointers[g_unit_selected_index]
                         ->detail.equipment[g_shop_fitting_sell_equipped_slot] = ITEM_ID_NOTHING;
-                    formation_selected_stats_refresh();
+                    formation_refresh_selected_stats();
                     g_sound_queued_effect_id = SOUND_SFX_SHOP_TRANSACTION;
                 } else {
                     if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 1) {
                         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                     }
-                    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80a, 0);
+                    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80a, 0);
                 }
                 g_shop_fitting_sell_equipped_result_shown = 1;
             }
@@ -839,14 +842,14 @@ void shop_fitting_equipped_sale_update(void) {
             g_formation_unit_cycle_mode = 2;
             g_shop_fitting_sell_equipped_menu_open = 0;
             g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
         g_shop_fitting_sell_equipped_cursor_point.y = g_shop_fitting_sell_equipped_slot * 16 + 0x90;
         gfx_set_otag_index(0x3d);
-        screen_sliding_cursor_draw(&g_shop_fitting_sell_equipped_cursor_point,
-            &g_shop_fitting_sell_equipped_cursor_anim, menu_input_lock_mode_get(0));
+        menu_draw_sliding_cursor(&g_shop_fitting_sell_equipped_cursor_point, &g_shop_fitting_sell_equipped_cursor_anim,
+            menu_input_get_lock_mode(0));
     }
-    fitting_cost_draw();
+    draw_fitting_cost();
 }
 
 /*
@@ -858,7 +861,7 @@ void shop_fitting_equipped_sale_update(void) {
  * the sub-step and the shop step put back to FITTING_ROOM_SELL, except that
  * leaving for the main menu returns to the fitting room's unit grid instead.
  */
-void shop_fitting_inventory_sale_update(void) {
+void shop_fitting_update_inventory_sale(void) {
     if (g_shop_fitting_sell_initialized == 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
             return;
@@ -866,32 +869,32 @@ void shop_fitting_inventory_sale_update(void) {
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
         g_formation_unit_browse_enabled = 0;
         g_formation_unit_banner_enabled = 0;
-        formation_panels_stop();
+        unit_panels_stop();
         g_formation_unit_cycle_mode = 0;
         g_shop_fitting_sell_step = SHOP_STEP_SELL_LIST;
-        menu_selection_record_clear(5);
-        menu_selection_record_clear(6);
-        menu_selection_record_clear(7);
-        menu_selection_record_clear(8);
-        menu_selection_record_clear(9);
+        menu_selection_clear_record(5);
+        menu_selection_clear_record(6);
+        menu_selection_clear_record(7);
+        menu_selection_clear_record(8);
+        menu_selection_clear_record(9);
         g_shop_fitting_sell_initialized = 1;
     }
     g_shop_menu_step = g_shop_fitting_sell_step;
     if (g_shop_fitting_sell_step == SHOP_STEP_SELL_LIST) {
-        shop_sell_list_update();
+        shop_sell_update_list();
         if (g_shop_fitting_sell_step != g_shop_menu_step) {
-            screen_selection_results_reset();
+            screen_reset_selection_results();
         }
     } else if (g_shop_fitting_sell_step == SHOP_STEP_SELL_CONFIRM) {
-        shop_sell_confirm_update();
+        shop_sell_update_confirm();
     }
     if (g_shop_menu_step == SHOP_STEP_MAIN_MENU) {
         g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
         g_formation_unit_cycle_mode = 2;
         g_shop_fitting_sell_initialized = 0;
         g_formation_unit_browse_enabled = 1;
-        menu_set_vsync_mode_and_event_speed(2);
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        menu_set_event_speed(2);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         return;
     }
     g_shop_fitting_sell_step = g_shop_menu_step;
@@ -901,14 +904,14 @@ void shop_fitting_inventory_sale_update(void) {
 /* Clears one equipment slot of a formation unit.  An item the unit owned goes
  * back to the fitting room reserve; an item taken from the shop (bit 15 set)
  * is refunded from the fitting room cost instead. */
-static void equipped_item_return(s16 unit_index, s16 equipment_index) {
+static void return_equipped_item(s16 unit_index, s16 equipment_index) {
     s32 equipped_item = g_formation_unit_pointers[unit_index]->detail.equipment[equipment_index];
 
     if (equipped_item != ITEM_ID_NOTHING) {
         if ((equipped_item >> 15) == 0)
             g_shop_fitting_items[unit_index][equipment_index] = equipped_item;
         else
-            fitting_cost_add(-shop_item_price_get(equipped_item & ITEM_ENTRY_ID_MASK));
+            add_fitting_cost(-shop_get_item_price(equipped_item & ITEM_ENTRY_ID_MASK));
         g_formation_unit_pointers[unit_index]->detail.equipment[equipment_index] = ITEM_ID_NOTHING;
     }
 }
@@ -918,7 +921,7 @@ static void equipped_item_return(s16 unit_index, s16 equipment_index) {
  * own reserved item if it fits beside the other hand; any other slot always gets its reserved
  * item (possibly nothing) back. The fit check uses g_unit_selected_index, which is what every
  * caller passes as formation_index. */
-static void trial_item_remove(s16 formation_index, s16 equipment_index) {
+static void remove_trial_item(s16 formation_index, s16 equipment_index) {
     u16 reserved_item;
 
     g_formation_unit_pointers[formation_index]->detail.equipment[equipment_index] = ITEM_ID_NOTHING;
@@ -937,7 +940,7 @@ static void trial_item_remove(s16 formation_index, s16 equipment_index) {
             return;
         }
         if (reserved_item != ITEM_ID_NOTHING
-            && formation_item_slot_check(g_unit_selected_index, equipment_index, reserved_item) == 1) {
+            && check_equipment_slot_item(g_unit_selected_index, equipment_index, reserved_item) == 1) {
             g_formation_unit_pointers[formation_index]->detail.equipment[equipment_index] = reserved_item;
             g_shop_fitting_items[formation_index][equipment_index] = ITEM_ID_NOTHING;
         }
@@ -950,7 +953,7 @@ static void trial_item_remove(s16 formation_index, s16 equipment_index) {
 /* Complete a fitting-room purchase: every tried-on item (entry bits 14-15
  * set) becomes the unit's own, and the equipment it displaced, kept in
  * g_shop_fitting_items, goes back to the inventory. */
-static void fitting_purchase_commit(void) {
+static void commit_fitting_purchase(void) {
     s32 i;
     s32 j;
 
@@ -960,7 +963,7 @@ static void fitting_purchase_commit(void) {
             if ((equipped_item >> 14) != 0) {
                 g_formation_unit_pointers[i]->detail.equipment[j] &= ITEM_ENTRY_ID_MASK;
             }
-            item_inventory_count_adjust(g_shop_fitting_items[i][j], 1);
+            item_adjust_inventory_count(g_shop_fitting_items[i][j], 1);
             g_shop_fitting_items[i][j] = ITEM_ID_NOTHING;
         }
     }

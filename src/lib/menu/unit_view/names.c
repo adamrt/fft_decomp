@@ -1,8 +1,8 @@
 /* Two value return stubs and the unit name list. */
 
+#include "fft/map_unit.h"
 #include "fft/text.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 #ifdef FFT_WORLD
@@ -28,15 +28,15 @@ s32 text_return_argument_2(s32 value) {
 void text_build_unit_name_list(void) {
     u8* output;
     s32 unit_id;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 length;
 
     text_init_section_pointers();
     unit_id = 0;
     output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
-    for (; unit_id < UNIT_SLOT_COUNT; unit_id++) {
-        unit = unit_stats_get(unit_id);
-        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+    for (; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
+        unit = battle_unit_get(unit_id);
+        if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             *output++ = 0xfe;
         } else {
             length = 0;

@@ -2,6 +2,7 @@
  * withheld while text, Help or a screen transition owns the input. */
 
 #include "fft/input.h"
+#include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
@@ -24,7 +25,7 @@ static u16 s_tutorial_previous_input = 0;
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
  *
- * Twin of screen_input_pad_update (screen/pad_input.c) with its own edge latch,
+ * Twin of update_controller (screen/pad_input.c) with its own edge latch,
  * single-button latch, activation timer, previous-state and counter arrays;
  * the secondary repeat period is two frames longer.
  *
@@ -34,7 +35,7 @@ static u16 s_tutorial_previous_input = 0;
  * the activation timer reaches 4 (VSyncs), except a D-pad press, which counts
  * at once.
  */
-static void tutorial_controller_update(void) {
+static void update_tutorial_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -49,7 +50,7 @@ static void tutorial_controller_update(void) {
     initial_delay = g_input_repeat_initial_delay / speed;
     repeat_period = g_input_repeat_period / speed;
     secondary_repeat_period = g_input_secondary_repeat_period / speed + 2;
-    current_input = screen_buttons_read(0);
+    current_input = screen_read_buttons(0);
     if (current_input & PSX_PAD_TRIANGLE) {
         if (g_screen_input_triangle_latched != 0) {
             menu_input_clear_state();
@@ -168,13 +169,13 @@ static void tutorial_controller_update(void) {
  * thread is not running, the input lock and the held-loop sound release are
  * cleared.
  */
-void menu_input_message_state_update(void) {
+void menu_input_update_message_state(void) {
     s32 running = 0;
     s32 step;
     u8 value;
 
-    tutorial_controller_update();
-    step = menu_get_window_scale_step();
+    update_tutorial_controller();
+    step = menu_window_get_scale_step();
     if (step >= 1 && step <= 3) {
         menu_input_clear_state();
     } else {
@@ -190,7 +191,7 @@ void menu_input_message_state_update(void) {
             } else {
                 g_screen_text_task_phase = 0;
             }
-        } else if (g_screen_text_task_phase != 0 || screen_fade_state_get() != SCREEN_FADE_STATE_NONE) {
+        } else if (g_screen_text_task_phase != 0 || screen_get_fade_state() != SCREEN_FADE_STATE_NONE) {
             g_screen_text_task_phase = 0;
             menu_input_clear_state();
         }

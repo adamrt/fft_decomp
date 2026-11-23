@@ -17,7 +17,7 @@ extern u8 g_menu_scroll_unread_setting;
 
 /* Clear the 32-bit script/save values and restore the new-game calendar, input
  * timings and packed game options. */
-void save_state_init(void) {
+void save_init_state(void) {
     int i;
     u32 value;
 

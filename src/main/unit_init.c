@@ -1,10 +1,11 @@
 /* Build battle and formation stats from a party slot or ENTD unit. Equipment, abilities,
- * job data and the selected name provider are applied to the same runtime record. */
+ * job data and the selected name provider are applied to the same map unit record. */
 
 #include "fft/ability.h"
 #include "fft/encounter.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/party.h"
 #include "fft/screen.h"
@@ -15,13 +16,12 @@
 #include "fft/unit_entd.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/unit_runtime.h"
 #include "fft/zodiac.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
 /* &g_item_primary_data[0].secondary_data_id viewed as a stride-12 byte
- * array. unit_equipment_stats_set reads the secondary id through its own
+ * array. battle_unit_set_equipment_stats reads the secondary id through its own
  * %lo(g_item_primary_data+4) address while the type_flags test uses a
  * record pointer; reading both through item_data_t folds them onto one base
  * register and misses the byte-exact match. */
@@ -30,25 +30,25 @@ extern job_data_t g_job_data[JOB_ID_COUNT];
 static u8 s_party_highest_level;
 extern u16 g_calendar_month_start_day_offsets[13];
 static u32 s_names_use_world_text = 0;
-static s32 unlocked_job_choose(const unit_stats_t* unit);
-static void build_finish(unit_stats_t* unit);
-static void encounter_abilities_set(unit_stats_t* unit, const entd_unit_t* entd);
-static void initial_stats_calculate(unit_stats_t* unit, s32 mode);
-static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd);
-static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd);
-static void encounter_jobs_set(unit_stats_t* unit, const entd_unit_t* entd);
-static void job_data_copy(unit_stats_t* unit);
-static void party_record_copy(unit_stats_t* unit, const party_unit_t* party);
-static s32 encounter_party_member_init(unit_stats_t* unit, const entd_unit_t* entd_unit);
-static void rsm_flag_set(unit_stats_t* unit, u32 ability_id);
-static void names_store(unit_stats_t* unit);
-static void ramza_identity_set(unit_stats_t* unit);
+static s32 choose_unlocked_job(const battle_unit_t* unit);
+static void finish_build(battle_unit_t* unit);
+static void set_encounter_abilities(battle_unit_t* unit, const entd_unit_t* entd);
+static void calculate_initial_stats(battle_unit_t* unit, s32 mode);
+static s32 set_encounter_data(battle_unit_t* unit, const entd_unit_t* entd);
+static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd);
+static void set_encounter_jobs(battle_unit_t* unit, const entd_unit_t* entd);
+static void copy_job_data(battle_unit_t* unit);
+static void copy_party_record(battle_unit_t* unit, const party_unit_t* party);
+static s32 init_encounter_party_member(battle_unit_t* unit, const entd_unit_t* entd_unit);
+static void set_rsm_flag(battle_unit_t* unit, u32 ability_id);
+static void store_names(battle_unit_t* unit);
+static void set_ramza_identity(battle_unit_t* unit);
 
-/* Rebuild one runtime unit from its persistent party slot.
+/* Rebuild one map unit from its persistent party slot.
  *
  * use_world_text selects the name-text provider used by the shared final
  * setup. Returns -1 when the requested party slot is unavailable. */
-s32 unit_party_slot_init(unit_stats_t* unit, s32 slot, s32 use_world_text) {
+s32 battle_unit_init_from_party_slot(battle_unit_t* unit, s32 slot, s32 use_world_text) {
     party_unit_t* party_unit;
 
     s_names_use_world_text = use_world_text;
@@ -59,36 +59,36 @@ s32 unit_party_slot_init(unit_stats_t* unit, s32 slot, s32 use_world_text) {
     if (party_unit->party_id == PARTY_ID_NONE) {
         return -1;
     }
-    unit_job_levels_init(&party_unit->career.job_points.total, party_unit->career.job_levels);
-    job_unlocks_store(party_unit->career.unlocked_jobs,
-        job_unlocks_calculate(party_unit->career.job_levels, party_unit->gender_flags));
-    unit_battle_state_reset(unit);
+    job_calculate_levels_from_jp(&party_unit->career.job_points.total, party_unit->career.job_levels);
+    job_store_unlocks(party_unit->career.unlocked_jobs,
+        job_calculate_unlocks(party_unit->career.job_levels, party_unit->gender_flags));
+    battle_unit_reset_state(unit);
     unit->formation_index = slot;
-    party_record_copy(unit, party_unit);
-    job_data_copy(unit);
-    unit_rsm_flags_enable(unit);
-    initial_stats_calculate(unit, 0);
-    unit_equippable_items_set(unit);
-    build_finish(unit);
+    copy_party_record(unit, party_unit);
+    copy_job_data(unit);
+    battle_unit_enable_rsm_flags(unit);
+    calculate_initial_stats(unit, 0);
+    battle_unit_set_equippable_items(unit);
+    finish_build(unit);
     return 0;
 }
 
-/* Build one runtime unit from an ENTD definition.
+/* Build one map unit from an ENTD definition.
  *
  * use_world_text selects the WORLD name provider during the shared final
  * setup. A temporary formation index enables level growth for generated units.
  * UNIT_ENTD_INIT_TRANSFORM is the transformed-monster recalculation path
  * and preserves the existing runtime/ENTD-derived state. */
-s32 unit_encounter_init(unit_stats_t* unit, const entd_unit_t* entd, u32 use_world_text, s32 kind) {
+s32 battle_unit_init_from_encounter(battle_unit_t* unit, const entd_unit_t* entd, u32 use_world_text, s32 kind) {
     s_names_use_world_text = use_world_text;
     if (kind != UNIT_ENTD_INIT_TRANSFORM) {
-        unit_battle_state_reset(unit);
-        if (encounter_data_set(unit, entd) != 0) {
+        battle_unit_reset_state(unit);
+        if (set_encounter_data(unit, entd) != 0) {
             return -1;
         }
     }
     /* For a new unit, a load-formation unit and a Ramza without a birth month came whole
-     * from the roster in encounter_data_set. */
+     * from the roster in set_encounter_data. */
     if (kind == UNIT_ENTD_INIT_NEW) {
         if ((entd->unit_flags & UNIT_FLAG_LOAD_FORMATION) != 0) {
             return 0;
@@ -99,41 +99,41 @@ s32 unit_encounter_init(unit_stats_t* unit, const entd_unit_t* entd, u32 use_wor
             }
         }
     }
-    encounter_jobs_set(unit, entd);
-    encounter_abilities_set(unit, entd);
-    unit_rsm_flags_enable(unit);
-    unit_raw_stats_generate(unit);
-    unit_job_growths_copy(unit);
+    set_encounter_jobs(unit, entd);
+    set_encounter_abilities(unit, entd);
+    battle_unit_enable_rsm_flags(unit);
+    battle_unit_generate_raw_stats(unit);
+    battle_unit_copy_job_growths(unit);
     if (unit->formation_index == UNIT_FORMATION_INDEX_NONE) {
         unit->formation_index = UNIT_FORMATION_INDEX_GENERATED_UNIT;
     }
-    initial_stats_calculate(unit, 0);
+    calculate_initial_stats(unit, 0);
     if (unit->formation_index == UNIT_FORMATION_INDEX_GENERATED_UNIT) {
         unit->formation_index = UNIT_FORMATION_INDEX_NONE;
     }
-    unit_equippable_items_set(unit);
+    battle_unit_set_equippable_items(unit);
     if (kind != UNIT_ENTD_INIT_TRANSFORM) {
         if (unit->formation_index >= PARTY_ROSTER_SLOT_COUNT) {
-            encounter_equipment_set(unit, entd);
+            set_encounter_equipment(unit, entd);
         }
     }
-    build_finish(unit);
-    ramza_identity_set(unit);
+    finish_build(unit);
+    set_ramza_identity(unit);
     return 0;
 }
 
 /* The shared last steps of building a unit from a party slot or from ENTD data: apply
  * its equipment stats and attributes, work out Move and Jump, and store its names. */
-static void build_finish(unit_stats_t* unit) {
-    unit_equipment_stats_set(unit);
-    unit_equipment_attributes_set(unit, 1);
-    unit_move_jump_calculate(unit, 0);
-    names_store(unit);
+static void finish_build(battle_unit_t* unit) {
+    battle_unit_set_equipment_stats(unit);
+    battle_unit_set_equipment_attributes(unit, 1);
+    battle_unit_calculate_move_and_jump(unit, 0);
+    store_names(unit);
 }
 
 /* For a unit with one of Ramza's three identities, copy the name, birthday and
  * zodiac sign from the first roster record that has one of them. */
-static void ramza_identity_set(unit_stats_t* unit) {
+static void set_ramza_identity(battle_unit_t* unit) {
     s32 slot;
     party_unit_t* party;
 
@@ -155,7 +155,7 @@ static void ramza_identity_set(unit_stats_t* unit) {
     }
 }
 
-/* Initialize the ENTD-controlled portion of a runtime unit.
+/* Initialize the ENTD-controlled portion of a map unit.
  *
  * Formation-loading entries reuse their persistent party unit; other entries
  * derive identity, level, birthday, position, rewards, and AI fields from the
@@ -167,7 +167,7 @@ static void ramza_identity_set(unit_stats_t* unit) {
  * birthday whose month is outside 1..12 or day outside 1..31 becomes a random
  * day of the year. Brave and Faith above 100 are rolled in 45..74, and
  * experience of 100 or more in 0..99. */
-static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
+static s32 set_encounter_data(battle_unit_t* unit, const entd_unit_t* entd) {
     const job_data_t* ramza_jobs;
     party_unit_t* party_unit;
     s32 party_slot;
@@ -201,7 +201,7 @@ static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
      * unit. */
     value = entd->unit_flags;
     if (value & UNIT_FLAG_LOAD_FORMATION) {
-        party_slot = encounter_party_member_init(unit, entd);
+        party_slot = init_encounter_party_member(unit, entd);
     } else if (entd->sprite_set < CHARACTER_IDENTITY_RAMZA_END && entd->birth_month == 0) {
         for (party_index = 0, ramza_jobs = &g_job_data[1]; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
             party_unit = party_unit_get(party_index);
@@ -221,7 +221,7 @@ static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
                 || skillset == ramza_jobs[2].skillset) {
                 party_unit->secondary_skillset = g_job_data[entd->sprite_set].skillset;
             }
-            party_slot = encounter_party_member_init(unit, entd);
+            party_slot = init_encounter_party_member(unit, entd);
             value = UNIT_FLAG_LOAD_FORMATION;
         }
     }
@@ -269,7 +269,7 @@ static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
     unit->birthday.birthday = year_day;
     /* Preserve the target's explicit 16-bit normalization before packing the
      * zodiac nibble into the 16-bit birthday value. */
-    zodiac = zodiac_sign_calculate(year_day) & 0xFFFF;
+    zodiac = zodiac_calculate_sign(year_day) & 0xFFFF;
     unit->birthday.zodiac = zodiac;
     if (entd->job_id == JOB_ID_SERPENTARIUS) {
         unit->birthday.zodiac = ZODIAC_SIGN_SERPENTARIUS;
@@ -300,11 +300,11 @@ static s32 encounter_data_set(unit_stats_t* unit, const entd_unit_t* entd) {
  *
  * Preserve the party unit's kind flags while taking the ENTD persistence
  * controls and team assignment. Returns -1 when no matching party slot exists. */
-static s32 encounter_party_member_init(unit_stats_t* unit, const entd_unit_t* entd_unit) {
-    s32 slot = party_sprite_slot_find(entd_unit->sprite_set);
+static s32 init_encounter_party_member(battle_unit_t* unit, const entd_unit_t* entd_unit) {
+    s32 slot = party_find_slot_by_sprite_set(entd_unit->sprite_set);
 
     if (slot != -1) {
-        unit_party_slot_init(unit, slot, s_names_use_world_text);
+        battle_unit_init_from_party_slot(unit, slot, s_names_use_world_text);
         /* Keep the party unit's kind flags and take the two persistence
          * controls from the ENTD definition. */
         unit->unit_flags &= ~(UNIT_FLAG_JOIN_AFTER_EVENT | UNIT_FLAG_SAVE_FORMATION);
@@ -322,7 +322,7 @@ static s32 encounter_party_member_init(unit_stats_t* unit, const entd_unit_t* en
  * (the whole UNIT_TEAM_IMPORTANCE_MASK), so losing him decides the battle. A
  * roster member (slot below 16) gets palette 0, while a guest keeps its saved palette.
  */
-static void party_record_copy(unit_stats_t* unit, const party_unit_t* party) {
+static void copy_party_record(battle_unit_t* unit, const party_unit_t* party) {
     s32 team = UNIT_TEAM_BLUE | UNIT_TEAM_FLAG_PLAYER_CONTROLLED;
     s32 i;
     s32 value;
@@ -379,7 +379,7 @@ static void party_record_copy(unit_stats_t* unit, const party_unit_t* party) {
  * or when it matches the primary. With a null entd the unit keeps its job
  * record, loses its secondary skillset and unlocked jobs, and becomes a
  * monster. */
-static void encounter_jobs_set(unit_stats_t* unit, const entd_unit_t* entd) {
+static void set_encounter_jobs(battle_unit_t* unit, const entd_unit_t* entd) {
     s32 i;
     u32 unlocked;
     u32 flags;
@@ -390,10 +390,10 @@ static void encounter_jobs_set(unit_stats_t* unit, const entd_unit_t* entd) {
     mem_zero(unit->career.job_levels, UNIT_JOB_LEVEL_BYTE_COUNT);
     unlocked = 0;
     if (!entd) {
-        job_data_copy(unit);
+        copy_job_data(unit);
         unit->secondary_skillset = 0;
         unit->unit_flags = UNIT_FLAG_MONSTER;
-        job_unlocks_store(unit->career.unlocked_jobs, 0);
+        job_store_unlocks(unit->career.unlocked_jobs, 0);
     } else {
         flags = entd->unit_flags;
         if (!(flags & UNIT_FLAG_MONSTER)) {
@@ -423,12 +423,12 @@ static void encounter_jobs_set(unit_stats_t* unit, const entd_unit_t* entd) {
                         &= UNIT_JOB_LEVEL_HIGH_NIBBLE_MASK;
                 if (flags & UNIT_FLAG_MALE)
                     unit->career.job_levels[UNIT_JOB_LEVEL_BYTE_INDEX_DANCER_MIME] &= UNIT_JOB_LEVEL_LOW_NIBBLE_MASK;
-                unlocked = job_unlocks_calculate(unit->career.job_levels, flags);
+                unlocked = job_calculate_unlocks(unit->career.job_levels, flags);
             }
         }
-        job_unlocks_store(unit->career.unlocked_jobs, unlocked);
+        job_store_unlocks(unit->career.unlocked_jobs, unlocked);
         unit->job_id = entd->job_id;
-        job_data_copy(unit);
+        copy_job_data(unit);
         selected = entd->primary_skillset;
         if (selected != SKILLSET_ID_NONE && selected != 0) {
             unit->primary_skillset = selected;
@@ -440,7 +440,7 @@ static void encounter_jobs_set(unit_stats_t* unit, const entd_unit_t* entd) {
                 unit->secondary_skillset = 0;
             else {
                 /* The job-level temporary holds the random job id here. */
-                levels = unlocked_job_choose(unit);
+                levels = choose_unlocked_job(unit);
                 if (levels)
                     skillset = g_job_data_pointer[levels].skillset;
                 else
@@ -459,7 +459,7 @@ enum { RANDOM_JOB_COUNT = JOB_ID_MIME - JOB_ID_GENERIC_FIRST };
 /* Return a random unlocked generic job ID below Mime, or 0 when none are unlocked.
  *
  * The ENTD caller explicitly normalizes the zero-extended job byte. */
-static s32 unlocked_job_choose(const unit_stats_t* unit) {
+static s32 choose_unlocked_job(const battle_unit_t* unit) {
     u8 candidates[RANDOM_JOB_COUNT];
     s32 job_mask = UNIT_UNLOCKED_JOB_SQUIRE;
     s32 candidate_count = 0;
@@ -504,7 +504,7 @@ static s32 unlocked_job_choose(const unit_stats_t* unit) {
  * also has a save- or load-formation flag gains the immunity check sets 5 and 6;
  * the tests inside that loop repeat the outer condition. The strengthened
  * elements are cleared. */
-static void job_data_copy(unit_stats_t* unit) {
+static void copy_job_data(battle_unit_t* unit) {
     job_data_t* job;
     s32 i;
     s32 immortal;
@@ -555,23 +555,23 @@ static void job_data_copy(unit_stats_t* unit) {
 /* Rebuilds the unit's active reaction/support/movement bitfields
  * (0x8b..0x95) from its four innate abilities and equipped R/S/M
  * abilities. */
-void unit_rsm_flags_enable(unit_stats_t* unit) {
+void battle_unit_enable_rsm_flags(battle_unit_t* unit) {
     s32 i;
 
     mem_zero(&unit->ability_flags, sizeof(unit->ability_flags));
     for (i = 0; i < 4; i++) {
-        rsm_flag_set(unit, unit->innate_abilities[i]);
+        set_rsm_flag(unit, unit->innate_abilities[i]);
     }
-    rsm_flag_set(unit, unit->abilities.reaction);
-    rsm_flag_set(unit, unit->abilities.support);
-    rsm_flag_set(unit, unit->abilities.movement);
+    set_rsm_flag(unit, unit->abilities.reaction);
+    set_rsm_flag(unit, unit->abilities.support);
+    set_rsm_flag(unit, unit->abilities.movement);
 }
 
 /* Mark an R/S/M ability active and select reaction abilities.
  *
  * IDs 0x1a6..0x1fd map contiguously into the unit's MSB-first active flags.
  * A reaction ID also becomes the unit's currently equipped reaction ability. */
-static void rsm_flag_set(unit_stats_t* unit, u32 ability_id) {
+static void set_rsm_flag(battle_unit_t* unit, u32 ability_id) {
     u16 index = ability_id - ABILITY_ID_REACTION_FIRST;
     u16 original_ability_id = ability_id;
     u8* rsm_flags;
@@ -595,7 +595,7 @@ static void rsm_flag_set(unit_stats_t* unit, u32 ability_id) {
  * Mode 0 also fills HP and MP and, for a generated unit, first replays the
  * growth of levels 2 to its level (raw += raw / (growth + level - 1) for
  * each). A mode with bit 0 set leaves Speed, PA and MA as they are. */
-static void initial_stats_calculate(unit_stats_t* unit, s32 mode) {
+static void calculate_initial_stats(battle_unit_t* unit, s32 mode) {
     u32 value;
     u32 multiplier;
     s32 hp_mp_divisor = 100;
@@ -692,7 +692,7 @@ static void initial_stats_calculate(unit_stats_t* unit, s32 mode) {
  * Random JP for a job level: g_job_jp_requirements_by_level[level] (the
  * JP needed to reach it; 0x80066182, entry 0 is 0) plus rand(0..99), or
  * 100 + rand(0..99) for level 0. */
-static void encounter_abilities_set(unit_stats_t* unit, const entd_unit_t* entd) {
+static void set_encounter_abilities(battle_unit_t* unit, const entd_unit_t* entd) {
     u8 job_id = unit->job_id;
     u8 gender = unit->unit_flags;
     u8 byte;
@@ -726,7 +726,7 @@ static void encounter_abilities_set(unit_stats_t* unit, const entd_unit_t* entd)
             }
             unit->career.job_points.total.values[i * 2] = value;
             unit->career.job_points.current.values[i * 2] = value;
-            unit_job_abilities_learn(unit, i * 2 + JOB_ID_SQUIRE, entd);
+            battle_unit_learn_job_abilities(unit, i * 2 + JOB_ID_SQUIRE, entd);
 
             level = byte & 0xf;
             if (i == UNIT_JOB_LEVEL_BYTE_COUNT - 2 && (gender & UNIT_FLAG_FEMALE)) {
@@ -741,7 +741,7 @@ static void encounter_abilities_set(unit_stats_t* unit, const entd_unit_t* entd)
             if (i == UNIT_JOB_LEVEL_BYTE_COUNT - 1) {
                 break; /* Mime's JP is initialized, but its learning call is skipped. */
             }
-            unit_job_abilities_learn(unit, i * 2 + JOB_ID_SQUIRE + 1, entd);
+            battle_unit_learn_job_abilities(unit, i * 2 + JOB_ID_SQUIRE + 1, entd);
         }
 
         if (entd->primary_skillset != 0 && entd->primary_skillset != SKILLSET_ID_NONE) {
@@ -759,13 +759,15 @@ static void encounter_abilities_set(unit_stats_t* unit, const entd_unit_t* entd)
         unit->equipment_categories[i] = g_job_data_pointer[job_id].equipment_categories[i];
     }
 
-    unit->abilities.reaction = unit_rsm_select(unit, entd->abilities.reaction, RSM_ABILITY_FILTER_REACTION, entd);
-    unit->abilities.support = unit_rsm_select(unit, entd->abilities.support, RSM_ABILITY_FILTER_SUPPORT, entd);
-    unit->abilities.movement = unit_rsm_select(unit, entd->abilities.movement, RSM_ABILITY_FILTER_MOVEMENT, entd);
+    unit->abilities.reaction
+        = battle_unit_select_rsm(unit, entd->abilities.reaction, RSM_ABILITY_FILTER_REACTION, entd);
+    unit->abilities.support = battle_unit_select_rsm(unit, entd->abilities.support, RSM_ABILITY_FILTER_SUPPORT, entd);
+    unit->abilities.movement
+        = battle_unit_select_rsm(unit, entd->abilities.movement, RSM_ABILITY_FILTER_MOVEMENT, entd);
 }
 
 /* Map ENTD's five equipment bytes into the seven simulation slots. */
-static void monster_equipment_set(unit_stats_t* unit, const entd_unit_t* entd) {
+static void set_monster_equipment(battle_unit_t* unit, const entd_unit_t* entd) {
     unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = entd->equipment[ENTD_EQUIPMENT_SLOT_RIGHT_HAND];
     unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
     unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = entd->equipment[ENTD_EQUIPMENT_SLOT_LEFT_HAND];
@@ -778,7 +780,7 @@ static void monster_equipment_set(unit_stats_t* unit, const entd_unit_t* entd) {
 /* Fill a battle unit's seven equipment slots from its ENTD record, rolling a
  * random item for each slot the record marks ENTD_VALUE_RANDOM.
  *
- * A monster takes monster_equipment_set instead. The random right
+ * A monster takes set_monster_equipment instead. The random right
  * hand tries, in order, a Two Hands weapon, a Two Swords weapon, then the type of
  * each Equip weapon support the unit has (sword, katana, crossbow, spear, axe,
  * gun), then any weapon. The left hand is emptied when the right-hand weapon
@@ -789,14 +791,14 @@ static void monster_equipment_set(unit_stats_t* unit, const entd_unit_t* entd) {
  * that finds nothing leaves the slot empty, and item 0 is stored as ITEM_ID_NONE.
  *
  * The body-armor preference tests Equip Shield, not Equip Armor. */
-static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd) {
+static void set_encounter_equipment(battle_unit_t* unit, const entd_unit_t* entd) {
     u8 item;
     u8 flags;
     s32 i;
     u8 right_weapon;
 
     if (unit->unit_flags & UNIT_FLAG_MONSTER) {
-        monster_equipment_set(unit, entd);
+        set_monster_equipment(unit, entd);
         return;
     }
 
@@ -805,11 +807,11 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
     flags = unit->ability_flags.support[2];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & UNIT_SUPPORT_SET_3_TWO_HANDS) {
-            item = unit_random_equipment_generate(
+            item = battle_unit_generate_random_equipment(
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_HANDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
         if (item == ENTD_VALUE_RANDOM && (flags & UNIT_SUPPORT_SET_3_TWO_SWORDS)) {
-            item = unit_random_equipment_generate(
+            item = battle_unit_generate_random_equipment(
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
     }
@@ -818,30 +820,31 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & UNIT_SUPPORT_SET_1_EQUIP_SWORD) {
-            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SWORD);
+            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SWORD);
         }
         if (item == ENTD_VALUE_RANDOM) {
             if (flags & UNIT_SUPPORT_SET_1_EQUIP_KATANA) {
-                item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_KATANA);
+                item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_KATANA);
             }
             if (item == ENTD_VALUE_RANDOM) {
                 if (flags & UNIT_SUPPORT_SET_1_EQUIP_CROSSBOW) {
-                    item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_CROSSBOW);
+                    item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_CROSSBOW);
                 }
                 if (item == ENTD_VALUE_RANDOM) {
                     if (flags & UNIT_SUPPORT_SET_1_EQUIP_SPEAR) {
-                        item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SPEAR);
+                        item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SPEAR);
                     }
                     if (item == ENTD_VALUE_RANDOM) {
                         if (flags & UNIT_SUPPORT_SET_1_EQUIP_AXE) {
-                            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_AXE);
+                            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_AXE);
                         }
                         if (item == ENTD_VALUE_RANDOM) {
                             if (flags & UNIT_SUPPORT_SET_1_EQUIP_GUN) {
-                                item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_GUN);
+                                item = battle_unit_generate_random_equipment(
+                                    unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_GUN);
                             }
                             if (item == ENTD_VALUE_RANDOM) {
-                                item = unit_random_equipment_generate(
+                                item = battle_unit_generate_random_equipment(
                                     unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_FILTER_ANY);
                                 if (item == ENTD_VALUE_RANDOM) {
                                     item = ITEM_ID_NONE;
@@ -874,13 +877,13 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
 
     flags = unit->ability_flags.support[2];
     if (item == ENTD_VALUE_RANDOM && (flags & UNIT_SUPPORT_SET_3_TWO_SWORDS)) {
-        item = unit_random_equipment_generate(
+        item = battle_unit_generate_random_equipment(
             unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
     }
     flags = unit->equipment_categories[EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(ITEM_TYPE_SHIELD)];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & EQUIPPABLE_ITEM_TYPE_BYTE_MASK(ITEM_TYPE_SHIELD)) {
-            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_SHIELD, 0, ITEM_TYPE_FILTER_ANY);
+            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_SHIELD, 0, ITEM_TYPE_FILTER_ANY);
         } else {
             item = ITEM_ID_NONE;
         }
@@ -899,10 +902,10 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & UNIT_SUPPORT_SET_1_EQUIP_ARMOR) {
-            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_HELMET);
+            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_HELMET);
         }
         if (item == ENTD_VALUE_RANDOM) {
-            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_FILTER_ANY);
+            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_FILTER_ANY);
             if (item == ENTD_VALUE_RANDOM) {
                 item = ITEM_ID_NONE;
             }
@@ -916,10 +919,10 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
         /* The target reuses Equip Shield here while requesting random Armor;
          * preserve this native equipment-generation quirk. */
         if (flags & UNIT_SUPPORT_SET_1_EQUIP_SHIELD) {
-            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_ARMOR);
+            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_ARMOR);
         }
         if (item == ENTD_VALUE_RANDOM) {
-            item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_FILTER_ANY);
+            item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_FILTER_ANY);
             if (item == ENTD_VALUE_RANDOM) {
                 item = ITEM_ID_NONE;
             }
@@ -930,7 +933,7 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
     /* Accessory */
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_ACCESSORY];
     if (item == ENTD_VALUE_RANDOM) {
-        item = unit_random_equipment_generate(unit, ITEM_TYPE_FLAG_ACCESSORY, 0, ITEM_TYPE_FILTER_ANY);
+        item = battle_unit_generate_random_equipment(unit, ITEM_TYPE_FLAG_ACCESSORY, 0, ITEM_TYPE_FILTER_ANY);
         if (item == ENTD_VALUE_RANDOM) {
             item = ITEM_ID_NONE;
         }
@@ -948,7 +951,7 @@ static void encounter_equipment_set(unit_stats_t* unit, const entd_unit_t* entd)
 /* Add to the unit's equippable item types those its Equip support abilities grant
  * (Equip Armor covers helmets and armor), and the ribbon, bag and perfume types
  * for a female unit. */
-void unit_equippable_items_set(unit_stats_t* unit) {
+void battle_unit_set_equippable_items(battle_unit_t* unit) {
     s32 support = unit->ability_flags.support[0];
 
     if (support & UNIT_SUPPORT_SET_1_EQUIP_ARMOR) {
@@ -986,7 +989,7 @@ void unit_equippable_items_set(unit_stats_t* unit) {
  * accessory's and each shield's physical and magic evade, and each weapon's power
  * and evade. A slot whose item is not of the expected kind leaves zeros, and a
  * monster gets only the class evade. */
-void unit_equipment_stats_set(unit_stats_t* unit) {
+void battle_unit_set_equipment_stats(battle_unit_t* unit) {
     item_data_t* item;
     item_evade_t* shield;
     weapon_data_t* weapon;
@@ -1042,7 +1045,7 @@ void unit_equipment_stats_set(unit_stats_t* unit) {
  * MP bonuses (max 999). A monster takes nothing from equipment. HP and MP are
  * clamped to the new maxima, and the actual PA and MA are base + bonus capped
  * at 99, Speed at 50. Also sets the Materia Blade and sword equipped flags. */
-void unit_equipment_attributes_set(unit_stats_t* unit, s32 level_up_check) {
+void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_check) {
     s32 i;
     s32 j;
     u32 value;
@@ -1057,7 +1060,7 @@ void unit_equipment_attributes_set(unit_stats_t* unit, s32 level_up_check) {
 
     mem_zero(unit->equipment_attributes, sizeof(unit->equipment_attributes));
     cap = UNIT_HP_MP_MAX;
-    initial_stats_calculate(unit, level_up_check + 1);
+    calculate_initial_stats(unit, level_up_check + 1);
     unit->equipped_flags = 0;
     if ((unit->unit_flags & UNIT_FLAG_MONSTER) == 0) {
         bonus = unit->equipment_attributes;
@@ -1151,7 +1154,7 @@ void unit_equipment_attributes_set(unit_stats_t* unit, s32 level_up_check) {
 /* Add the Move +1/+2/+3 and Jump +1/+2/+3 abilities to Move and Jump; Move is
  * capped at 0xFC and Jump at 7. With keep_hp_mp 0, HP and MP are refilled
  * first. */
-void unit_move_jump_calculate(unit_stats_t* unit, s32 keep_hp_mp) {
+void battle_unit_calculate_move_and_jump(battle_unit_t* unit, s32 keep_hp_mp) {
     u16 move;
     u16 jump;
     u8 flags;
@@ -1198,9 +1201,9 @@ enum { NAME_GENDER_MASK = UNIT_FLAG_MALE | UNIT_FLAG_FEMALE | UNIT_FLAG_MONSTER 
  * roster unit keeps its saved name. Any other unit takes the special-character
  * name quote_name_id selects, or, when that is 0xff, a random generic name of
  * its kind that no roster member or battle unit of the same kind has, drawn as
- * in party_record_generate (index 255 is never drawn). The action's
+ * in generate_record (index 255 is never drawn). The action's
  * status changes are cleared too. */
-static void names_store(unit_stats_t* unit) {
+static void store_names(battle_unit_t* unit) {
     /* Removing this unused array reduces the native stack frame by 0x100. */
     u8 unused[0x100];
     u8* (*prepare_text)(u32 text_id);
@@ -1214,7 +1217,7 @@ static void names_store(unit_stats_t* unit) {
     s32 i;
     u8* text;
     party_unit_t* party;
-    unit_stats_t* other;
+    battle_unit_t* other;
     const unit_name_id_fields_t* name_id_record;
 
     prepare_text = battle_text_find_entry;
@@ -1256,8 +1259,8 @@ static void names_store(unit_stats_t* unit) {
                         }
                     }
                 }
-                for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-                    other = &g_unit_stats[i];
+                for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+                    other = &g_battle_units[i];
                     if (gender == (other->unit_flags & NAME_GENDER_MASK)
                         && other->quote_name_id.value == name_id.value) {
                         name_available = 0;
@@ -1287,7 +1290,7 @@ static void names_store(unit_stats_t* unit) {
 
 /* Return the highest level in the roster, capped at 99, and store it in
  * g_party_highest_level. */
-u8 party_highest_level_calculate(void) {
+u8 party_calculate_highest_level(void) {
     u8 highest = 0;
     s32 i;
     party_unit_t* unit;

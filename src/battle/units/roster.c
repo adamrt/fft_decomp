@@ -1,7 +1,8 @@
 /* Find battle-stat records and manage unit availability, status display, enemy levels and war trophies. */
 
-#include "fft/battle_map.h"
 #include "fft/item.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/party.h"
 #include "fft/reward.h"
@@ -9,16 +10,15 @@
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-/* The battle stats in a unit slot, occupied or not; 0 for a battle_id past the last
+/* The battle stats in a unit slot, occupied or not; 0 for a battle_unit_id past the last
  * slot. */
-unit_stats_t* unit_stats_get(u32 battle_id) {
-    if (battle_id >= UNIT_SLOT_COUNT) {
+battle_unit_t* battle_unit_get(u32 battle_unit_id) {
+    if (battle_unit_id >= BATTLE_UNIT_SLOT_COUNT) {
         return 0;
     }
-    return &g_unit_stats[battle_id];
+    return &g_battle_units[battle_unit_id];
 }
 
 /*
@@ -30,8 +30,8 @@ unit_stats_t* unit_stats_get(u32 battle_id) {
  * The two status tests must be separate `if`s with their own `return -3`: an
  * `||` lets the delay-slot pass steal `li v0,-3` into the first branch.
  */
-s32 unit_find_slot_by_identity(u32 character_identity) {
-    unit_stats_t* unit;
+s32 battle_unit_find_id_by_character_identity(u32 character_identity) {
+    battle_unit_t* unit;
     party_unit_t* party;
     s32 i;
     u8* status;
@@ -41,9 +41,9 @@ s32 unit_find_slot_by_identity(u32 character_identity) {
         return UNIT_CHARACTER_SLOT_SELECTOR;
     }
     identity = character_identity;
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = &g_unit_stats[i];
-        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && unit->character_identity == identity) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = &g_battle_units[i];
+        if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE && unit->character_identity == identity) {
             status = unit->status_sets.current;
             if (status[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL)) {
                 return UNIT_CHARACTER_SLOT_UNAVAILABLE;
@@ -54,9 +54,9 @@ s32 unit_find_slot_by_identity(u32 character_identity) {
             return i;
         }
     }
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = &g_unit_stats[i];
-        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE && unit->character_identity == identity
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = &g_battle_units[i];
+        if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE && unit->character_identity == identity
             && unit->existence != UNIT_EXISTENCE_NONE) {
             if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
                 return UNIT_CHARACTER_SLOT_OFF_FIELD;
@@ -82,53 +82,53 @@ s32 unit_find_slot_by_identity(u32 character_identity) {
  * state: off field gives -2, disabled -3 and pending removal -6. Otherwise
  * returns 0 with -3. Both loops compare against (unit_id & 0xff): the (u8) cast
  * adds a loop insn and stops loop.c hoisting the constant 2 in the second loop.
- * The second loop's test of existence against active_battle_id, just found to be
- * UNIT_ACTIVE_BATTLE_ID_NONE, is a test against UNIT_EXISTENCE_NONE (both
+ * The second loop's test of existence against active_battle_unit_id, just found to be
+ * UNIT_ACTIVE_BATTLE_UNIT_ID_NONE, is a test against UNIT_EXISTENCE_NONE (both
  * 0xff). */
-unit_stats_t* unit_entd_find_stats(s32 unit_id, s32* out_battle_id) {
-    unit_stats_t* unit;
+battle_unit_t* battle_unit_find_by_unit_id(s32 unit_id, s32* out_battle_unit_id) {
+    battle_unit_t* unit;
     s32 i;
 
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = &g_unit_stats[i];
-        if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && unit->unit_id == (unit_id & 0xff)) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = &g_battle_units[i];
+        if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE && unit->unit_id == (unit_id & 0xff)) {
             if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))
                 || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                     & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
-                *out_battle_id = -3;
+                *out_battle_unit_id = -3;
                 return unit;
             }
-            *out_battle_id = i;
+            *out_battle_unit_id = i;
             return unit;
         }
     }
 
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = &g_unit_stats[i];
-        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE && unit->unit_id == (unit_id & 0xff)
-            && unit->existence != unit->active_battle_id) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = &g_battle_units[i];
+        if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE && unit->unit_id == (unit_id & 0xff)
+            && unit->existence != unit->active_battle_unit_id) {
             if (unit->existence == UNIT_EXISTENCE_OFF_FIELD) {
-                *out_battle_id = -2;
+                *out_battle_unit_id = -2;
                 return unit;
             }
             if (unit->existence == UNIT_EXISTENCE_DISABLED) {
-                *out_battle_id = -3;
+                *out_battle_unit_id = -3;
                 return unit;
             }
             if (unit->existence == UNIT_EXISTENCE_PENDING_REMOVAL) {
-                *out_battle_id = -6;
+                *out_battle_unit_id = -6;
                 return unit;
             }
         }
     }
 
-    *out_battle_id = -3;
+    *out_battle_unit_id = -3;
     return 0;
 }
 
 /* Count a unit of any team but blue into the enemy level statistics: its level
  * is added to g_reward_enemy_level_sum and raises g_reward_highest_enemy_level. */
-void reward_count_enemy_level(unit_stats_t* unit) {
+void reward_count_enemy_level(battle_unit_t* unit) {
     u8 level;
 
     if (unit->team_flags & UNIT_TEAM_MASK) {
@@ -152,11 +152,11 @@ void reward_find_war_trophies_and_bonus_money(reward_war_result_t* result) {
     s32 money = 0;
     u8 lowest = UNIT_LEVEL_MAX;
     s32 i;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     u8 value;
 
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = &g_unit_stats[i];
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = &g_battle_units[i];
         if (unit->existence != UNIT_EXISTENCE_NONE && unit->existence != UNIT_EXISTENCE_OFF_FIELD) {
             value = unit->war_trophy;
             if (value != ITEM_ID_NOTHING) {
@@ -173,7 +173,7 @@ void reward_find_war_trophies_and_bonus_money(reward_war_result_t* result) {
         }
     }
     result->item_count = count;
-    for (i = count; i < UNIT_SLOT_COUNT; i++) {
+    for (i = count; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         result->item_ids[i] = ITEM_ID_NOTHING;
     }
     result->bonus_money = money;
@@ -188,15 +188,15 @@ void reward_find_war_trophies_and_bonus_money(reward_war_result_t* result) {
 /* Strip a unit of every status: queue each current status's display flag off, then zero the
  * innate, immunity and current sets with the 16 status CTs that follow them (one 0x1F-byte clear
  * from status_sets) and the inflicted statuses. Used before a Morbol transformation. */
-void status_clear_all(unit_stats_t* unit) {
+void status_clear_all(battle_unit_t* unit) {
     s32 i;
-    s32 battle_id = unit->battle_id;
+    s32 battle_unit_id = unit->battle_unit_id;
 
     for (i = 0; i < STATUS_COUNT; i++) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_REMOVE, battle_unit_id);
         }
     }
     mem_zero(unit->status_sets.innate, 0x1F);
@@ -205,39 +205,39 @@ void status_clear_all(unit_stats_t* unit) {
 
 /* Enable the renderer status flags for each of a unit's current statuses.
  * Returns -1 for an empty unit slot, otherwise 0. */
-s32 status_init_display_flags(s32 battle_id) {
-    unit_stats_t* unit = &g_unit_stats[battle_id];
+s32 status_init_display_flags(s32 battle_unit_id) {
+    battle_unit_t* unit = &g_battle_units[battle_unit_id];
     s32 i;
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return -1;
     }
     for (i = 0; i < STATUS_COUNT; i++) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, battle_id);
+            status_queue_display_flag_change(STATUS_HANDLER_INDEX(i), STATUS_DISPLAY_CHANGE_ADD, battle_unit_id);
         }
     }
     return 0;
 }
 
-/* Index of the unit's tile in g_battle_map_tile_data: layer * 256 + y * map width
+/* Index of the unit's tile in g_map_tile_data: layer * 256 + y * map width
  * + x, with the layer in bit 15 of the packed position. */
-s32 battle_map_tile_calculate_unit_index(const unit_stats_t* unit) {
+s32 battle_unit_get_tile_index(const battle_unit_t* unit) {
     u8 y = unit->position.y;
     u16 elevation = unit->position.higher_elevation;
     u8 x = unit->x;
-    return (elevation << 8) + (y * g_battle_map_terrain_width) + x;
+    return (elevation << 8) + (y * g_map_terrain_width) + x;
 }
 
 /* The battle stats of an occupied unit slot, or 0 for an empty slot or an id past
  * the last slot. */
-unit_stats_t* unit_present_stats_get(u32 battle_id) {
-    unit_stats_t* unit = 0;
-    if (battle_id < UNIT_SLOT_COUNT) {
-        unit = &g_unit_stats[battle_id];
-        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+battle_unit_t* battle_unit_get_if_present(u32 battle_unit_id) {
+    battle_unit_t* unit = 0;
+    if (battle_unit_id < BATTLE_UNIT_SLOT_COUNT) {
+        unit = &g_battle_units[battle_unit_id];
+        if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             unit = 0;
         }
     }
@@ -245,10 +245,10 @@ unit_stats_t* unit_present_stats_get(u32 battle_id) {
 }
 
 /* The first unit whose has_turn is set (the unit taking its turn), or 0. */
-unit_stats_t* unit_find_with_turn(void) {
+battle_unit_t* battle_unit_find_with_turn(void) {
     s32 i = 0;
-    unit_stats_t* unit = g_unit_stats;
-    for (; i < UNIT_SLOT_COUNT; i++, unit++) {
+    battle_unit_t* unit = g_battle_units;
+    for (; i < BATTLE_UNIT_SLOT_COUNT; i++, unit++) {
         if (unit->has_turn != 0) {
             return unit;
         }

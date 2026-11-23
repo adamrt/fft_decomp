@@ -1,10 +1,10 @@
 /* Manage attack-image slots and query the unit frame and spritesheet dimensions. */
 
-#include "fft/battle_map_palette.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -115,8 +115,8 @@ s32 sprite_evtchr_clear_loaded_slot(s32 slot_index) {
  * free buffer, upload it and give the slot to the unit. Returns 0 when the
  * slot is in another state or no buffer is free. The buffer marked as
  * uploading is the slot's own, whichever one was used. */
-s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot) {
-    unit_runtime_t* unit = unit_runtime_get(runtime_id);
+s32 sprite_evtchr_map_unit_load_attack_image(s32 map_unit_id, s32 slot) {
+    map_unit_t* unit = map_unit_get(map_unit_id);
     s32 i;
     u8* image_data;
     RECT rect;
@@ -125,7 +125,7 @@ s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot) {
         for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
             if (g_sprite_evtchr_slots[i].image_buffer_state == SPRITE_EVTCHR_SLOT_BUFFER_FREE) {
                 image_data = g_sprite_evtchr_slots[i].image_data;
-                sprite_attack_image_decompress(
+                sprite_decompress_attack_image(
                     g_sprite_sheet_slots[unit->spritesheet_vram_slot].compressed_attack_image, image_data);
                 LoadImage(&g_sprite_evtchr_slots[slot].image_rect, (u32*)image_data);
                 /* The unit's 64x32 block in the spritesheet area (its sheet rows below the
@@ -136,7 +136,7 @@ s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot) {
                 rect.h = SPRITE_SHEET_STRIP_HEIGHT;
                 MoveImage(
                     &rect, g_sprite_evtchr_slots[slot].image_rect.x, g_sprite_evtchr_slots[slot].image_rect.y + 200);
-                g_sprite_evtchr_slots[slot].owner = runtime_id + SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE;
+                g_sprite_evtchr_slots[slot].owner = map_unit_id + SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE;
                 g_sprite_evtchr_slots[slot].image_buffer_state = SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES;
                 g_sprite_evtchr_slots[slot].evtchr_load_state = 1;
                 return 1;
@@ -184,7 +184,7 @@ s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary) {
     s32 i;
     u32 owner;
     u32 marker;
-    unit_runtime_t* unit;
+    map_unit_t* unit;
 
     for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
         owner = g_sprite_evtchr_slots[i].owner;
@@ -193,8 +193,8 @@ s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary) {
         } else if (owner == SPRITE_EVTCHR_SLOT_OWNER_EVTCHR) {
             summary[i].spritesheet_id = 0xfe;
         } else if (owner & SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE) {
-            /* Rereads owner, as retail does; the low seven bits are the runtime id. */
-            unit = unit_runtime_get(g_sprite_evtchr_slots[i].owner & 0x7f);
+            /* Rereads owner, as retail does; the low seven bits are the map unit id. */
+            unit = map_unit_get(g_sprite_evtchr_slots[i].owner & 0x7f);
             summary[i].spritesheet_id = g_sprite_sheet_slots[unit->spritesheet_vram_slot].spritesheet_id;
         } else {
             summary[i].spritesheet_id = 0xfd;
@@ -214,11 +214,10 @@ s32 sprite_evtchr_get_slot_summary(sprite_evtchr_slot_summary_t* summary) {
 
 /* Give a unit CLUT `clut_index` of a slot's EVTCHR block, and the one eight
  * after it as its second. */
-void sprite_evtchr_set_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32 clut_index) {
-    battle_map_palette_load_data(
-        &g_sprite_evtchr_slots[slot_index].clut[clut_index], BATTLE_MAP_CLUT_ROW_UNITS, runtime_id, 0);
-    battle_map_palette_load_data(
-        &g_sprite_evtchr_slots[slot_index].clut[clut_index + 8], BATTLE_MAP_CLUT_ROW_UNITS_SECOND, runtime_id, 0);
+void sprite_evtchr_map_unit_set_palette(s32 map_unit_id, s32 slot_index, s32 clut_index) {
+    map_palette_load_data(&g_sprite_evtchr_slots[slot_index].clut[clut_index], MAP_CLUT_ROW_UNITS, map_unit_id, 0);
+    map_palette_load_data(
+        &g_sprite_evtchr_slots[slot_index].clut[clut_index + 8], MAP_CLUT_ROW_UNITS_SECOND, map_unit_id, 0);
 }
 
 /*
@@ -226,8 +225,8 @@ void sprite_evtchr_set_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32
  * the SHP frame it is showing: the submerged one for a rider. The crystal
  * and later status sheets share the OTHER texture page.
  */
-const sprite_frame_t* sprite_unit_frame_vram_ids_get(u32 runtime_id, sprite_unit_query_t* out) {
-    unit_runtime_t* unit = unit_runtime_get(runtime_id);
+const sprite_frame_t* sprite_map_unit_get_frame_vram_ids(u32 map_unit_id, sprite_unit_query_t* out) {
+    map_unit_t* unit = map_unit_get(map_unit_id);
 
     if (unit == 0) {
         return 0;
@@ -251,7 +250,7 @@ const sprite_frame_t* sprite_unit_frame_vram_ids_get(u32 runtime_id, sprite_unit
 
 /* The sprite height of the unit's sheet, or 0 for an absent, dead, crystal or
  * treasure unit. */
-static u32 spritesheet_height_get(unit_runtime_t* unit) {
+static u32 get_spritesheet_height(map_unit_t* unit) {
     if (unit == 0) {
         return 0;
     }
@@ -264,14 +263,14 @@ static u32 spritesheet_height_get(unit_runtime_t* unit) {
     return g_sprite_sheet_data[unit->spritesheet_id].graphic_height;
 }
 
-/* The sprite height of the unit with this runtime id, 0 when it is absent, dead,
+/* The sprite height of the unit with this map unit id, 0 when it is absent, dead,
  * crystal or treasure. */
-s32 sprite_runtime_sheet_height_get(u32 runtime_id) {
-    return spritesheet_height_get(unit_runtime_get(runtime_id));
+s32 sprite_sheet_map_unit_get_height(u32 map_unit_id) {
+    return get_spritesheet_height(map_unit_get(map_unit_id));
 }
 
-/* The sprite height of the unit with this battle id, 0 when it is absent, dead,
+/* The sprite height of the unit with this battle unit id, 0 when it is absent, dead,
  * crystal or treasure. */
-s32 sprite_battle_sheet_height_get(u32 battle_id) {
-    return spritesheet_height_get(unit_battle_get(battle_id));
+s32 map_unit_get_sprite_height_by_battle_unit_id(u32 battle_unit_id) {
+    return get_spritesheet_height(map_unit_get_by_battle_unit_id(battle_unit_id));
 }

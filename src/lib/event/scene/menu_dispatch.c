@@ -1,11 +1,12 @@
 /* Poll companion overlay requests and dispatch command-menu and help threads. */
 
-#include "fft/battle_map.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/deploy.h"
 #include "fft/file.h"
 #include "fft/help.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
@@ -21,7 +22,6 @@
 #include "fft/unit.h"
 #include "fft/unit_event.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -44,9 +44,9 @@ extern u8 g_command_restore_unit_id;
 /* Non-blocking two-step file load driven by g_thread_call_target:
  * issue the read for the pending request, then poll until it completes and
  * clear the request. */
-void overlay_companion_file_poll(void) {
+void overlay_companion_poll_file(void) {
     if ((g_overlay_companion_data_file_request_index != 0) && (s_overlay_companion_data_file_loading == 0)) {
-        g_thread_call_target = (void (*)(void))file_bytes_read_request;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
         if (thread_call_on_main_stack(g_overlay_companion_data_file_lbas[g_overlay_companion_data_file_request_index],
                 g_overlay_companion_data_file_sizes[g_overlay_companion_data_file_request_index],
                 g_overlay_companion_data_file_buffer)
@@ -54,7 +54,7 @@ void overlay_companion_file_poll(void) {
             s_overlay_companion_data_file_loading = 1;
         }
     } else if ((g_overlay_companion_data_file_request_index != 0) && (s_overlay_companion_data_file_loading != 0)) {
-        g_thread_call_target = file_load_state_get;
+        g_thread_call_target = file_get_load_state;
         if (thread_call_on_main_stack() == 0) {
             s_overlay_companion_data_file_loading = 0;
             g_overlay_companion_data_file_request_index = 0;
@@ -70,7 +70,7 @@ void overlay_companion_poll(void) {
     s32 idx = g_overlay_companion_executable_request_index;
 
     if ((idx != 0) && (s_overlay_companion_executable_loading == 0)) {
-        g_thread_call_target = (void (*)(void))file_bytes_read_request;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
         if (thread_call_on_main_stack(g_overlay_companion_executable_lbas[idx],
                 g_overlay_companion_executable_sizes[idx],
                 g_overlay_companion_executable_offsets[idx] + (s32)g_heap_companion_overlay_load_address)
@@ -78,7 +78,7 @@ void overlay_companion_poll(void) {
             s_overlay_companion_executable_loading = 1;
         }
     } else if ((g_overlay_companion_executable_request_index != 0) && (s_overlay_companion_executable_loading != 0)) {
-        g_thread_call_target = file_load_state_get;
+        g_thread_call_target = file_get_load_state;
         if (thread_call_on_main_stack() == 0) {
             s_overlay_companion_executable_loading = 0;
             g_overlay_companion_executable_request_index = 0;
@@ -87,7 +87,7 @@ void overlay_companion_poll(void) {
 }
 
 /* Call command_reset_unit_records; nothing in BATTLE or WORLD calls this wrapper. */
-void command_unit_records_reset(void) {
+void command_reset_unit_records_unused(void) {
     command_reset_unit_records();
 }
 
@@ -98,16 +98,16 @@ void overlay_companion_stub(void) {
 /* Menu-building thread: once the previous menu, the camera and the target panel are done
  * (and a tutorial slot has started its next event), open menu parameter 1, the egg menu for
  * an egg, and reopen the skillset and ability lists when restoring the same unit's menu. */
-static void entry_thread_start(void) {
-    s32 menu_id = thread_current_parameter_1_get();
+static void menu_building_thread(void) {
+    s32 menu_id = thread_current_get_parameter_1();
     s32 restore_depth;
 
-    thread_inactive_wait(THREAD_SLOT_MENU);
+    thread_wait_inactive(THREAD_SLOT_MENU);
     if (g_menu_overlay_state != 0) {
         thread_current_exit();
     }
-    camera_idle_wait();
-    while (thread_task_find(THREAD_TASK_ATTACK_TARGET_STATS) != 0) {
+    camera_wait_idle();
+    while (thread_find_task(THREAD_TASK_ATTACK_TARGET_STATS) != 0) {
         thread_yield();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
@@ -115,45 +115,45 @@ static void entry_thread_start(void) {
             g_menu_input_mode = MENU_INPUT_TUTORIAL;
             script_variable_set(
                 EVENT_SCRIPT_VAR_CURRENT_EVENT, script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) + 1);
-            script_current_event_thread_start();
-            thread_frames_wait(0x1E);
+            script_start_current_event_thread();
+            thread_wait_frames(0x1E);
         }
         if (g_menu_input_mode != MENU_INPUT_PLAYER) {
-            thread_frames_wait(2);
+            thread_wait_frames(2);
         }
     } else {
-        thread_frames_wait(2);
+        thread_wait_frames(2);
     }
     tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_MENU_ENTRY);
     if (menu_id == MENU_COMMAND_ID_OTHER_UNIT || menu_id == MENU_COMMAND_ID_OTHER_UNIT_INSPECT) {
-        if (menu_selected_unit_stats_get()->unit_flags & UNIT_FLAG_EGG) {
+        if (menu_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG) {
             menu_id = MENU_COMMAND_ID_EGG;
         }
     }
     thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[menu_id].thread_entry);
-    thread_parameters_set(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[menu_id], 0, 0);
+    thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[menu_id], 0, 0);
     restore_depth = g_menu_restore_depth;
     g_script_event_input = 0;
-    if (g_menu_restore_pending != 0 && g_command_restore_unit_id == g_unit_panel_selected_unit.battle_id) {
+    if (g_menu_restore_pending != 0 && g_command_restore_unit_id == g_unit_panel_selected_unit.battle_unit_id) {
         g_help_open = 1;
-        thread_frames_wait(2);
+        thread_wait_frames(2);
         if (restore_depth > 0) {
             thread_start(THREAD_SLOT_MENU_CHILD, command_act_menu_thread);
-            thread_parameters_set(
+            thread_set_parameters(
                 THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST], 0, 0);
         }
-        thread_frames_wait(2);
+        thread_wait_frames(2);
         if (restore_depth >= 2) {
             thread_start(THREAD_SLOT_MENU_GRANDCHILD, command_ability_list_thread);
-            thread_parameters_set(
+            thread_set_parameters(
                 THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST], 0, 0);
         }
-        thread_frames_wait(2);
+        thread_wait_frames(2);
         g_menu_restore_pending = 0;
         g_help_open = 0;
     } else {
         g_menu_restore_depth = 0;
-        g_command_restore_unit_id = g_unit_panel_selected_unit.battle_id;
+        g_command_restore_unit_id = g_unit_panel_selected_unit.battle_unit_id;
     }
     thread_current_exit();
 }
@@ -162,7 +162,7 @@ enum { IDLE_ACTION_MENU_ENTRY_COUNT = 0x34 };
 
 /* Open an idle action menu (command_menu_e) for the active-turn unit: place the
  * entry windows beside the unit, restore the row the unit last chose and start
- * the menu-building thread on entry_thread_start.
+ * the menu-building thread on menu_building_thread.
  *
  * Nothing happens while menu input is blocked. The menu is also skipped while the
  * menus are suspended, a help window is open,
@@ -173,7 +173,7 @@ enum { IDLE_ACTION_MENU_ENTRY_COUNT = 0x34 };
  * 0x80 less than the screen x; the second is used when the unit's projected x is
  * 0x101 or more, and a zero byte leaves the entry's x unchanged. WORLD only
  * clears the menu-building-started flag and does not read the menu id. */
-void command_menu_open(s32 menu_id) {
+void command_open_menu(s32 menu_id) {
 #ifdef FFT_BATTLE
     SVECTOR screen_position;
     s32 i;
@@ -187,8 +187,8 @@ void command_menu_open(s32 menu_id) {
             && (menu_id != MENU_COMMAND_ID_NONE)) {
             g_command_current_id = menu_id;
             g_menu_thread_menu_data = g_command_idle_action_entries;
-            unit_screen_position_project(
-                unit_battle_runtime_id_get(g_unit_panel_selected_unit.battle_id), &screen_position);
+            map_unit_project_screen_position(
+                map_unit_get_id_by_battle_unit_id(g_unit_panel_selected_unit.battle_unit_id), &screen_position);
             i = 0;
             entry = g_menu_thread_menu_data;
             window_x_table = g_menu_idle_action_window_x;
@@ -210,8 +210,8 @@ void command_menu_open(s32 menu_id) {
             *selected_index = 0;
             g_status_screen_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();
-            thread_start(THREAD_SLOT_MENU_BUILDING, entry_thread_start);
-            thread_parameters_set(THREAD_SLOT_MENU_BUILDING, menu_id, 0, 0);
+            thread_start(THREAD_SLOT_MENU_BUILDING, menu_building_thread);
+            thread_set_parameters(THREAD_SLOT_MENU_BUILDING, menu_id, 0, 0);
         }
         g_menu_building_thread_started = 0;
     }
@@ -224,7 +224,7 @@ void command_menu_open(s32 menu_id) {
  * open, the camera moves, a companion overlay is busy or that slot runs. While a menu other than
  * the mini menu is up it also sets g_menu_building_thread_started, so the next idle action menu is
  * skipped. */
-void help_menu_thread_start(void) {
+void help_menu_start_thread(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0 || thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         if (g_command_current_id != MENU_COMMAND_ID_MINI_MENU) {
             g_menu_building_thread_started = 1;
@@ -247,7 +247,7 @@ void help_menu_thread_start(void) {
     }
     g_help_open = 1;
     thread_start(THREAD_SLOT_MENU_BUILDING, help_menu_thread);
-    thread_parameters_set(THREAD_SLOT_MENU_BUILDING, 0, 0, 0);
+    thread_set_parameters(THREAD_SLOT_MENU_BUILDING, 0, 0, 0);
 }
 
 /* Request SMALL.OUT as the companion executable without waiting; overlay_small_poll drives the
@@ -272,10 +272,10 @@ s32 overlay_small_poll(void) {
 }
 
 /* Returns 0 in BATTLE and WORLD; in BATTLE it sits between
- * overlay_small_poll and battle_map_skip_deployment_thread. Nothing on the disc
+ * overlay_small_poll and deploy_skip_thread. Nothing on the disc
  * calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
-s32 battle_map_return_zero_1(void) {
+s32 map_return_zero_1(void) {
     return 0;
 }
 

@@ -45,7 +45,7 @@ static menu_cursor_bob_entry_t s_menu_cursor_bob_thresholds[8]
     = { { 46, 0 }, { 16, 0 }, { 18, 1 }, { 22, 2 }, { 28, 3 }, { 36, 2 }, { 46, 1 }, { 0, 0 } };
 static menu_cursor_bob_entry_t s_menu_cursor_bob_active_thresholds[13] = { { 38, 0 }, { 2, 0 }, { 8, -2 }, { 10, 1 },
     { 12, 3 }, { 14, 5 }, { 16, 4 }, { 18, 3 }, { 24, 2 }, { 34, 1 }, { 36, 0 }, { 38, 0 }, { 0, 0 } };
-static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
+static void copy_sprite_layout(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
 
 /* Publish the icon strip's text-image upload rectangle to the caller, build
  * the four menu sprites of the icon record, and place the icon sprites that
@@ -59,7 +59,7 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
     /* Eight untouched bytes preserve the original 0x40-byte stack frame. */
     u8 unused_scratch[8];
 
-    thread_current_task_set(THREAD_TASK_MENU_WINDOW_BUILD);
+    thread_current_set_task(THREAD_TASK_MENU_WINDOW_BUILD);
     rect->x = param->vram_origin.x;
     rect->y = param->vram_origin.y;
     rect->w = param->inner_width >> 2;
@@ -245,12 +245,12 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
     if (g_script_event_speed == 2) {
         frame *= 2;
     }
-    menu_copy_sprite_position_uv_and_size(param, &record->sprites[0], frame);
-    menu_sprite_zoom(param, &record->sprites[0], frame);
+    copy_sprite_layout(param, &record->sprites[0], frame);
+    menu_zoom_sprite(param, &record->sprites[0], frame);
 }
 
 /* Copy a menu entry's window position and text-image UV and size to its sprite. */
-static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame) {
+static void copy_sprite_layout(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame) {
     sprite->x0 = entry->window.x;
     sprite->y0 = entry->window.y;
     sprite->u0 = (entry->vram_origin.x & 0x3f) * 4;
@@ -261,7 +261,7 @@ static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPR
 
 /* Scale the sprite about its center by the percentage of zoom step `step` (0-11; later steps
  * leave it alone), keeping position, texture coordinates and size even. */
-void menu_sprite_zoom(const void* unused_source, SPRT* sprite, s32 step) {
+void menu_zoom_sprite(const void* unused_source, SPRT* sprite, s32 step) {
     s32 scale;
     s32 offset;
     if (step < 12) {

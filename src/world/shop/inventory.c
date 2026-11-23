@@ -10,7 +10,7 @@
 /* Report whether the party has any items: mode 0 asks for inventory or equipped items, mode 1
  * for inventory only, other modes for equipped items only.
  */
-s32 formation_inventory_check(s32 mode) {
+s32 formation_check_inventory(s32 mode) {
     s32 has_inventory = 0;
     s32 has_equipment = 0;
     s32 i;
@@ -40,12 +40,12 @@ s32 formation_inventory_check(s32 mode) {
 }
 
 /* Return an item's price from the item data table; only the item id bits of the entry are used. */
-s32 shop_item_price_get(s16 item_id) {
+s32 shop_get_item_price(s16 item_id) {
     return g_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price;
 }
 
 /* Return half of the item-table price, clamped to at least 1. */
-s32 shop_item_half_price_get(s16 item_id) {
+s32 shop_get_item_half_price(s16 item_id) {
     u32 value = g_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price >> 1;
 
     if (value == 0) {
@@ -58,7 +58,7 @@ s32 shop_item_half_price_get(s16 item_id) {
  *
  * The comparison uses the stored 16-bit equipment value as-is; only the requested
  * ID is masked. */
-s32 item_equipped_count_get(s32 item_id) {
+s32 item_get_equipped_count(s32 item_id) {
     s32 count = 0;
     s32 unit_index;
     s32 slot;
@@ -80,14 +80,14 @@ s32 item_equipped_count_get(s32 item_id) {
 }
 
 /* Inventory quantity plus the copies equipped by the party. */
-s32 item_total_count_get(s16 item_id) {
+s32 item_get_total_count(s16 item_id) {
     item_id &= ITEM_ENTRY_ID_MASK;
-    return item_inventory_count_adjust(item_id, 0) + item_equipped_count_get(item_id);
+    return item_adjust_inventory_count(item_id, 0) + item_get_equipped_count(item_id);
 }
 
 /* Add delta to the count of a poached item held for the Fur Shop, keeping it within 0..255, and
  * return the new count; callers pass 0 to read it. */
-s32 fur_shop_stock_adjust(s16 item_id, s32 delta) {
+s32 fur_shop_adjust_stock(s16 item_id, s32 delta) {
     s32 slot = item_id & ITEM_ENTRY_ID_MASK;
     s32 value = g_item_poached_quantities[slot] + delta;
 

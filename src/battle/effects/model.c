@@ -83,7 +83,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
         copyVector(&point, &scratch[i]);
         gte_RotTrans(&point, &scratch[i], &scratch[i].pad);
     }
-    command_count = effect_model_sections_init(model, 0);
+    command_count = effect_model_init_sections(model, 0);
     gt3_index = 0;
     g4_index = 0;
     g3_index = 0;
@@ -95,7 +95,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
 
         work = g_effect_secondary_current->allocation;
         for (i = 0; i < command_count;) {
-            effect_model_command_decode(&command);
+            effect_model_decode_command(&command);
             if (command.header.opcode == EFFECT_MODEL_COMMAND_G4) {
                 quad = &work->g4[g_effect_buffer_index][g4_index];
                 setRGB0(quad, command.colors[0].r, command.colors[0].g, command.colors[0].b);
@@ -151,7 +151,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
         work = g_effect_secondary_current->allocation;
         j = 0;
         for (i = 0; i < command_count;) {
-            effect_model_command_decode(&command);
+            effect_model_decode_command(&command);
             i++;
             if (command.header.opcode == EFFECT_MODEL_COMMAND_G3) {
                 tri = &work->g3[g_effect_buffer_index][j];
@@ -187,7 +187,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
             g4_index = command_count;
         }
         for (i = 0; i < g4_index;) {
-            effect_model_command_decode(&command);
+            effect_model_decode_command(&command);
             i++;
             if (command.header.opcode == EFFECT_MODEL_COMMAND_GT3_SEMITRANSPARENT) {
                 tri = &work->prims[g_effect_buffer_index][gt3_index];
@@ -225,7 +225,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
         work = g_effect_secondary_current->allocation;
         j = 0;
         for (i = 0; i < command_count;) {
-            effect_model_command_decode(&command);
+            effect_model_decode_command(&command);
             i++;
             if (command.header.opcode == EFFECT_MODEL_COMMAND_G3) {
                 tri = &work->g3[g_effect_buffer_index][j];
@@ -259,7 +259,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
  * matrix from the sprite angle, and transforms the four quad corners into the
  * slot's double-buffered primitive before adding it to the ordering table.
  */
-void effect_thrown_item_sprite_draw(VECTOR* origin, s32 item_id, s32 angle) {
+void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     SPRT sprite;
     SVECTOR local;
     VECTOR position;

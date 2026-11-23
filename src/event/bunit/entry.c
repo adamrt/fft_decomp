@@ -24,7 +24,7 @@
 #include "psx/types.h"
 
 extern s16 g_unit_list_primary_result;
-extern s8 g_unit_list_selected_battle_id;
+extern s8 g_unit_list_selected_battle_unit_id;
 extern s16 g_unit_list_comparison_index;
 extern u8 g_unit_list_saved_status_banner_enabled;
 extern u8 g_unit_list_saved_unit_browse_enabled;
@@ -33,9 +33,9 @@ static u8 s_unit_list_initialized;
 extern menu_entry_t g_unit_list_triangle_menu;
 extern u8 g_unit_list_triangle_menu_open;
 
-static s32 unit_list_run_frame(void);
-static void unit_list_update_browser(void);
-static void unit_list_copy_selected(void);
+static s32 update_unit_grid_menu(void);
+static void update_unit_grid_selection(void);
+static void stage_selected_unit(void);
 
 /*
  * Load the BUNIT screen's VRAM images and start the fade-in.
@@ -49,14 +49,14 @@ static void unit_list_copy_selected(void);
  * 0x200-byte menu palette image is copied to the stack before it is uploaded to
  * (0x100, 0xfa).
  */
-static void unit_list_init_vram_and_fade(void) {
+static void init_graphics(void) {
     RECT rect;
     u16 palette[16];
     clut_t block;
 
     memcpy(block, g_unit_list_clut, sizeof(block));
 
-    menu_set_vsync_mode_and_event_speed(0);
+    menu_set_event_speed(0);
     g_text_section_pointers[TEXT_SECTION_EVENT_MESSAGES] = g_unit_list_text_menu_section;
     g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_unit_list_text_reorder_list_buffer;
     rect.x = 0x100;
@@ -103,13 +103,13 @@ static void unit_list_init_vram_and_fade(void) {
     gfx_load_image_and_wait(&rect, block);
     g_text_selection_id = 0;
     g_unit_list_help_screen_id = MENU_GRID_HELP_NONE;
-    gfx_start_decreasing_fade();
+    screen_start_fade_in();
 }
 
 /* Hold the menu input masks at zero while the comparison banner thread runs,
  * a status banner slide is requested or the unit list has to scroll, and for
  * nine further calls after the last of those. */
-static void unit_list_update_input_lock(void) {
+static void update_input_lock(void) {
     s32 timer;
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
@@ -118,7 +118,7 @@ static void unit_list_update_input_lock(void) {
                    & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
         != 0) {
         timer = 0xA;
-    } else if (unit_list_is_scroll_needed() != 0) {
+    } else if (unit_grid_check_scroll() != 0) {
         timer = 0xA;
     } else {
         timer = g_input_lock_timer;
@@ -141,7 +141,7 @@ s32 unit_list_get_input_lock(void) {
 }
 
 /* Return the pad-1 input, or 0 while the input lock timer is active. */
-static s32 unit_list_read_pad(void) {
+static s32 read_pad(void) {
     u32 input = PadRead(0);
 
     if (unit_list_get_input_lock() != 0) {
@@ -199,44 +199,44 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     g_unit_list_gfx_draw_move_capacity = 0x1e;
     g_unit_list_gfx_draw_area_capacity = 0x1e;
     g_gfx_draw_mode_capacity = 0x1e;
-    unit_list_gfx_init_buffers(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gouraud_quads, gouraud_textured_quads, 0,
-        0, 0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
+    menu_gfx_init_contexts(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gouraud_quads, gouraud_textured_quads, 0, 0,
+        0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
     running = 1;
-    unit_list_init_vram_and_fade();
+    init_graphics();
     unit_list_init(g_unit_selected_index);
     do {
-        unit_list_gfx_submit_frame(0, 0);
+        menu_gfx_present_frame(0, 0);
         previous_mode = g_menu_input_lock_mode;
-        unit_list_update_input();
-        unit_list_update_input_lock();
-        gfx_update_decreasing_fade();
+        menu_input_update_message_state();
+        update_input_lock();
+        screen_update_fade_in();
         if (g_menu_input_newly_pressed & PSX_PAD_SELECT) {
-            unit_list_start_text_thread(3);
+            menu_start_help_text(3);
         }
         if (g_unit_list_help_screen_id != MENU_GRID_HELP_NONE) {
             unit_list_update_help_cursor(g_unit_list_pointers[g_unit_selected_index]->uses_monster_skillset);
         }
         if (previous_mode != 0 && g_menu_input_lock_mode == 0) {
-            text_section_pointers_restore();
+            text_restore_section_pointers();
         }
-        menu_set_palette_mode(g_menu_input_lock_mode);
+        menu_palette_set_mode(g_menu_input_lock_mode);
         if (g_unit_list_current_menu == UNIT_LIST_MENU_JOB) {
-            unit_list_update_job_page();
+            job_page_update();
             /* The target also passes a1 = 0 to this one-argument callee. */
             ((void (*)(s32, s32))unit_list_draw_shaded_rows)(g_unit_list_page_offset + g_unit_list_scroll_step, 0);
         } else {
-            running = unit_list_run_frame();
+            running = update_unit_grid_menu();
             unit_list_update_grid(1, 1, 1, 1, 0,
                 g_unit_list_help_screen_id == MENU_GRID_HELP_NONE ? g_unit_list_input_secondary_repeat : 0,
                 unit_list_is_busy());
         }
-        unit_list_update_browser();
+        update_unit_grid_selection();
 
         /* Window frames, event input, then this frame's sound: a cursor or cancel sound is kept
          * as the queued effect, and the error message sound takes a free channel. */
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 0x3d;
         menu_draw_active_window_frames();
-        menu_input_event_state_update(g_menu_gfx_context->otag + 9, unit_list_read_pad(), g_menu_gfx_drawenv_y);
+        menu_input_update_event_state(g_menu_gfx_context->otag + 9, read_pad(), g_menu_gfx_drawenv_y);
         sound_request = g_sound_pending_sfx_id;
         if (sound_request == SOUND_SFX_CURSOR_MOVE || sound_request == SOUND_SFX_CANCEL) {
             g_sound_queued_effect_id = g_sound_pending_sfx_id;
@@ -249,9 +249,9 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
             sound_id = g_sound_queued_effect_id;
         }
         if (sound_id == SOUND_SFX_ERROR_MESSAGE) {
-            sound_free_channel_sfx_play(SOUND_SFX_ERROR_MESSAGE);
+            sound_play_sfx_on_free_channel(SOUND_SFX_ERROR_MESSAGE);
         } else if (sound_id != SOUND_SFX_NONE) {
-            sound_sfx_play(sound_id);
+            sound_play_sfx(sound_id);
         }
         g_sound_queued_effect_id = SOUND_SFX_NONE;
         g_sound_pending_sfx_id = SOUND_SFX_NONE;
@@ -260,7 +260,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     unit_panel_toggle_banner_thread(0);
     while (DrawSync(1) != 0) { }
     VSync(0);
-    return g_unit_list_selected_battle_id;
+    return g_unit_list_selected_battle_unit_id;
 }
 
 /* Clear the unit list's primary and reorder results to -1 (nothing chosen). */
@@ -285,10 +285,10 @@ s32 unit_list_is_busy(void) {
  *
  * The first frame rebuilds the unit tables and the panels' data. TRIANGLE or START
  * opens the triangle menu, whose rows choose the reorder list (0) or the highlighted
- * unit (1, which fades out and returns its battle id). CIRCLE while browsing opens the
+ * unit (1, which fades out and returns its battle unit id). CIRCLE while browsing opens the
  * job menu, refused for a unit on a monster skillset or off the player's team; CROSS
  * outside browsing fades the screen out. */
-static s32 unit_list_run_frame(void) {
+static s32 update_unit_grid_menu(void) {
     s32 input = g_menu_input_primary_repeat;
     unit_list_record_t* unit;
     u8 banner_enabled;
@@ -303,23 +303,23 @@ static s32 unit_list_run_frame(void) {
             g_unit_list_reorderable_count = unit_list_build_grid_cells();
             unit_list_build_index_map();
             g_unit_list_grid_selected_cell = g_unit_list_index_map[g_unit_selected_index];
-            unit_list_copy_selected();
+            stage_selected_unit();
             g_unit_panel_status_display_thread_params.style = 0;
             g_unit_panel_numbers_thread_params.style = 0;
             g_unit_panel_character_status_frame_config.style = 0;
             unit_list_reset_results();
             s_unit_list_initialized = 1;
         }
-        if (gfx_update_increasing_fade() == 0) {
+        if (screen_update_fade_out() == 0) {
             s_unit_list_initialized = 0;
-            menu_request_thread_stop(UNIT_LIST_THREAD_SLOT_MENU);
+            menu_thread_request_stop(UNIT_LIST_THREAD_SLOT_MENU);
             return 0;
         }
         if (g_unit_list_triangle_menu_open != 0) {
             /* Help for the highlighted row, from HELP_TEXT_SECTION_MENU_COMMANDS (0x1000). */
             g_text_selection_id = g_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
             if ((g_unit_list_triangle_menu_open
-                    = unit_list_update_menu_thread(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
+                    = menu_managed_thread_start(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
                 == 0) {
                 if (g_unit_list_primary_result == 0) {
                     banner_enabled = g_unit_list_status_banner_enabled;
@@ -332,8 +332,8 @@ static s32 unit_list_run_frame(void) {
                     unit_list_reset_results();
                     s_unit_list_initialized = 0;
                 } else if (g_unit_list_primary_result == 1) {
-                    gfx_start_increasing_fade();
-                    g_unit_list_selected_battle_id = g_unit_list_pointers[g_unit_selected_index]->battle_id;
+                    screen_start_fade_out();
+                    g_unit_list_selected_battle_unit_id = g_unit_list_pointers[g_unit_selected_index]->battle_unit_id;
                 }
                 g_unit_panel_character_status_frame_config.style = 0;
                 g_unit_panel_numbers_thread_params.style = 0;
@@ -371,10 +371,10 @@ static s32 unit_list_run_frame(void) {
                 g_unit_list_saved_status_banner_enabled = g_unit_list_status_banner_enabled;
             }
         } else if (g_unit_list_browse_enabled == 0 && (input & PSX_PAD_CROSS)) {
-            gfx_start_increasing_fade();
+            screen_start_fade_out();
         }
     } else if (g_unit_list_current_menu == UNIT_LIST_MENU_REORDER_LIST) {
-        unit_list_sort_menu_update();
+        unit_list_update_sort_menu();
     }
     return 1;
 }
@@ -385,7 +385,7 @@ static s32 unit_list_run_frame(void) {
  * record, restarts the slide animation, and reports the scroll direction in
  * g_unit_panel_status_display_thread_params.redraw_request; otherwise it advances the
  * g_unit_list_status_banner_slide_step slide and stops the comparison banner thread once the slide completes. */
-static void unit_list_update_browser(void) {
+static void update_unit_grid_selection(void) {
     s32 index;
     s32 enable;
     s8 slide;
@@ -422,7 +422,7 @@ static void unit_list_update_browser(void) {
             }
         }
         index = g_unit_list_comparison_index;
-        unit_list_copy_selected();
+        stage_selected_unit();
         if ((g_menu_input_primary_repeat & PSX_PAD_RIGHT) || (g_menu_input_secondary_repeat & PSX_PAD_R1)) {
             g_unit_panel_status_display_thread_params.redraw_request = 1;
         } else if ((g_menu_input_primary_repeat & PSX_PAD_LEFT) || (g_menu_input_secondary_repeat & PSX_PAD_L1)) {
@@ -459,21 +459,21 @@ static void unit_list_update_browser(void) {
         g_unit_panel_comparison_display_thread_params.position.y = slide * 8;
         if (--g_unit_list_status_banner_slide_step < -0xF) {
             g_unit_list_status_banner_slide_step = 0;
-            menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
+            menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     } else if (slide > 0) {
         g_unit_panel_status_display_thread_params.position.y = slide * 8 - 0x78;
         g_unit_panel_comparison_display_thread_params.position.y = slide * 8 + 0x90;
         if (++g_unit_list_status_banner_slide_step >= 0x10) {
             g_unit_list_status_banner_slide_step = 0;
-            menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
+            menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     }
 }
 
 /* Copy the selected unit's stat summary, identity and stat detail blocks
  * into the panel records and request a redraw of all four panels. */
-static void unit_list_copy_selected(void) {
+static void stage_selected_unit(void) {
     unit_list_record_t* comparison;
 
     g_unit_list_comparison_index = g_unit_selected_index;

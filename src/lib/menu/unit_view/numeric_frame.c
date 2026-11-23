@@ -45,7 +45,7 @@ void menu_numeric_frame_init(RECT* box, menu_numeric_frame_t* menu) {
         SetLineF2(line);
         line++;
     }
-    menu_init_primitive_colors_normal(menu);
+    menu_numeric_frame_set_normal_colors(menu);
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
@@ -91,7 +91,7 @@ void menu_numeric_frame_submit(menu_numeric_frame_t* display) {
 
 /* Give the twelve frame lines the colors of the normal menu palette (the first
  * sixteen of the menu palette colors) and the sprite the normal menu CLUT, GetClut(0x3c0, 0x1f0). */
-void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu) {
+void menu_numeric_frame_set_normal_colors(menu_numeric_frame_t* menu) {
     s32 index;
     s32 palette_index;
     LINE_F2* line;
@@ -107,7 +107,7 @@ void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu) {
 
 /* Give the twelve frame lines the colors of the dimmed menu palette (the second
  * sixteen of the menu palette colors) and the sprite the dimmed menu CLUT, GetClut(0x3c0, 0x1f4). */
-void menu_init_primitive_colors_dimmed(menu_numeric_frame_t* menu) {
+void menu_numeric_frame_set_dimmed_colors(menu_numeric_frame_t* menu) {
     s32 index;
     s32 palette_index;
     LINE_F2* line;

@@ -43,14 +43,14 @@ extern s16 g_unit_list_help_node_24_help_base;
  * g_unit_list_thread_running is clear) publish it as g_menu_thread_menu_data and start
  * its thread there, unless the slot is busy. Returns 1 while that thread runs and 0 once
  * it has finished, also kept in g_unit_list_thread_running. */
-s32 unit_list_update_menu_thread(s32 id, menu_entry_t* desc) {
+s32 menu_managed_thread_start(s32 id, menu_entry_t* desc) {
     if (g_unit_list_thread_running == 0) {
         if (thread_is_running(id) != 0) {
             return 1;
         }
         g_menu_thread_menu_data = desc;
         thread_start(id, desc->thread_entry);
-        thread_parameters_set(id, (s32)g_menu_thread_menu_data, 0, 0);
+        thread_set_parameters(id, (s32)g_menu_thread_menu_data, 0, 0);
         g_unit_list_thread_running = 1;
     }
     g_unit_list_thread_running = thread_is_running(id);
@@ -59,8 +59,8 @@ s32 unit_list_update_menu_thread(s32 id, menu_entry_t* desc) {
 
 /* Start the text thread for g_text_selection_id (ids above 0x1FFFF are
  * stashed in g_unit_list_help_screen_id instead); thread_data + 0x38 is the text
- * thread's dialog type, as in menu_text_start_help_thread. */
-void unit_list_start_text_thread(s32 thread_data) {
+ * thread's dialog type, as in menu_start_help_text. */
+void menu_start_help_text(s32 thread_data) {
     if (g_text_selection_id > 0x1FFFF) {
         g_unit_list_help_screen_id = g_text_selection_id;
         return;
@@ -68,10 +68,10 @@ void unit_list_start_text_thread(s32 thread_data) {
     if (g_text_selection_id <= 0) {
         return;
     }
-    text_section_pointers_save();
-    text_pointer_table_relocate(g_help_text_table);
+    text_save_section_pointers();
+    text_relocate_pointer_table(g_help_text_table);
     thread_start(THREAD_SCREEN_SLOT_TEXT, message_dialog_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_TEXT, thread_data + 0x38, g_text_selection_id, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, thread_data + 0x38, g_text_selection_id, 0);
     g_menu_input_lock_mode = 1;
 }
 
@@ -133,7 +133,7 @@ void unit_list_update_help_cursor(s16 mode) {
                 /* The target zero-extends help_base here (lhu): a -0x6800 base adds HELP_TEXT_ID_SKILLSET_BASE. */
                 g_text_selection_id
                     = text_id + (u16)g_unit_list_help_nodes_reload[g_unit_list_help_node_index_reload_2].help_base;
-                unit_list_start_text_thread(3);
+                menu_start_help_text(3);
             }
         } else if (flags & PSX_PAD_UP) {
             node_index = g_unit_list_help_nodes[node_index].destination[0];
@@ -165,10 +165,10 @@ void unit_list_update_help_cursor(s16 mode) {
     pos.y = y;
     if (node->vertical_cursor != 0) {
         pos.y = y + 1;
-        menu_update_and_draw_bouncing_cursor(&pos, &s_unit_list_help_cursor_anim_state, running);
+        menu_draw_bouncing_cursor(&pos, &s_unit_list_help_cursor_anim_state, running);
     } else {
         pos.x = x - 2;
         pos.y = y + 6;
-        menu_update_and_draw_sliding_cursor(&pos, &s_unit_list_help_cursor_anim_state, running);
+        menu_draw_sliding_cursor(&pos, &s_unit_list_help_cursor_anim_state, running);
     }
 }

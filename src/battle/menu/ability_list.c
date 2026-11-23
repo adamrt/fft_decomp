@@ -98,7 +98,7 @@ void ability_list_scrolling_thread(void) {
     toggle = 0;
     g_menu_scrolling_list_depth++;
 
-    entry = (menu_entry_t*)thread_current_parameter_1_get();
+    entry = (menu_entry_t*)thread_current_get_parameter_1();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
@@ -191,7 +191,7 @@ void ability_list_scrolling_thread(void) {
         cursor = 0;
     }
 
-    ability_list_text_draw(entry, &row_offset, buffer);
+    ability_list_draw_text(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
 
@@ -234,9 +234,9 @@ void ability_list_scrolling_thread(void) {
                 && layout->columns.mode[1] != MENU_TEXT_COLUMN_HIDDEN && i != 0
                 && layout->columns.text_ids[0][entry->selected_index] != 0x7000) {
                 thread_yield();
-                sound_cursor_queue();
+                sound_queue_cursor();
                 thread_start(g_thread_current_id - 1, at_list_ability_preview_thread);
-                thread_parameters_set(g_thread_current_id - 1,
+                thread_set_parameters(g_thread_current_id - 1,
                     (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_PREVIEW_AT_LIST], 0, 0);
                 /* Blink CLUTs 1 and 2 (24 and 6 frames of every 30) until the preview thread ends,
                  * then restore CLUT 3. `column` serves as the frame counter. */
@@ -262,25 +262,25 @@ void ability_list_scrolling_thread(void) {
                  * after the yield). The cursor wraps only when the whole list fits. */
                 if (cursor != 0) {
                     cursor--;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (row_offset != 0) {
                     scroll_delta = -1;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (layout->columns.hidden_rows == 0) {
                     cursor = layout->columns.row_count - 1;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 }
             } else if ((g_script_event_input & PSX_PAD_DOWN)
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != layout->columns.row_count - 1) {
                     cursor++;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (row_offset != layout->columns.hidden_rows) {
                     scroll_delta++;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (row_offset == 0) {
                     cursor = 0;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 }
             } else {
                 hold_time = 0;
@@ -303,7 +303,7 @@ void ability_list_scrolling_thread(void) {
 
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;
-                    menu_set_text_origin(layout->columns.x[column], 0);
+                    menu_text_set_origin(layout->columns.x[column], 0);
                     if (layout->columns.mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                     }
@@ -317,7 +317,7 @@ void ability_list_scrolling_thread(void) {
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
                             && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
-                            menu_set_text_origin(layout->columns.x[column] + 0x50, 0);
+                            menu_text_set_origin(layout->columns.x[column] + 0x50, 0);
                             menu_display_text_entry(
                                 TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                         }
@@ -394,7 +394,7 @@ void ability_list_scrolling_thread(void) {
         }
 
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
-            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.source);
+            buffer = ability_list_update_page_scroll(entry, &row_offset, &ring, &cursor, &window.source);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
@@ -443,7 +443,7 @@ void ability_list_scrolling_thread(void) {
 
         /* Advance the scroll: at speed 1 only on even repeat counts, with the fast step
          * once the hold passes the acceleration delay. */
-        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
+        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (hold_time < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step;
@@ -459,7 +459,7 @@ void ability_list_scrolling_thread(void) {
         if (scroll_accum < -0xF || scroll_accum > 0xF) {
             ring += scroll_delta;
             row_offset += scroll_delta;
-            repeat = script_event_initial_repeat_counter_get();
+            repeat = script_get_event_initial_repeat_counter();
             scroll_accum = 0;
             scroll_delta = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -475,7 +475,7 @@ void ability_list_scrolling_thread(void) {
         /* The window zooms open over its first 12 frames. */
         if (i * g_script_event_speed < 12) {
             gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
-            menu_sprite_zoom(entry, frame, i * g_script_event_speed);
+            menu_zoom_sprite(entry, frame, i * g_script_event_speed);
         }
 
         /* The cursor sprites move to column 1 while the toggle selects it. */
@@ -523,7 +523,7 @@ void ability_list_scrolling_thread(void) {
     g_menu_scrolling_list_depth--;
     /* Callers run the list as a function; a nonzero parameter 2 returns to them
      * instead of exiting the thread. */
-    if (thread_current_parameter_2_get() == 0) {
+    if (thread_current_get_parameter_2() == 0) {
         thread_current_exit();
     }
 }

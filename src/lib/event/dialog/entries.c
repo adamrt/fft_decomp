@@ -9,7 +9,7 @@
  * The retail helper uses trapping arithmetic and fixed $t0-$t2 scratch
  * registers. The inline sequence preserves those instruction choices and the
  * deliberately empty branch delay slots. */
-const u8* text_entry_skip(const u8* text, s32 entry_index) {
+const u8* text_skip_to_entry(const u8* text, s32 entry_index) {
     const u8* result;
     const u8* cursor = text;
     s32 index = entry_index;

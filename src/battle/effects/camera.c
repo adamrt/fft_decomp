@@ -1,11 +1,11 @@
 /* Evaluate effect camera keyframes and start their angle, position and zoom moves. */
 
 #include "fft/camera.h"
-#include "fft/battle_map.h"
 #include "fft/effect.h"
 #include "fft/effect_math.h"
 #include "fft/effect_timeline.h"
-#include "fft/unit_runtime.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -17,20 +17,20 @@ extern u8 g_camera_quadrant_block_directions[4];
 extern s32 g_effect_camera_rotation_duration;
 extern s32 g_effect_camera_rotation_frame;
 
-/* reset by camera_angle_command_execute */
+/* reset by execute_rotation_command */
 static s32 s_effect_camera_position_duration;
 static s32 s_effect_camera_position_frame;
 extern s32 g_effect_camera_zoom_duration;
 extern s32 g_effect_camera_zoom_frame;
 
 /* World position of a tile's center (x, layer, y in the SVECTOR): x and z are tile * 28 + 14 and y
- * is the tile surface, -(height * BATTLE_MAP_HEIGHT_STEP), without the depth. */
-static void tile_coords_to_world_coords_convert(SVECTOR* in, VECTOR* out) {
-    battle_map_tile_t* tile = battle_map_tile_get_pointer(in->vx, in->vz, in->vy);
+ * is the tile surface, -(height * MAP_HEIGHT_STEP), without the depth. */
+static void convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
+    map_tile_t* tile = map_get_tile(in->vx, in->vz, in->vy);
 
-    out->vx = in->vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    out->vz = in->vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-    out->vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
+    out->vx = in->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    out->vz = in->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+    out->vy = -(tile->height * MAP_HEIGHT_STEP);
 }
 
 /* Copies the camera rotation with its yaw cut to a multiple of 0x200 (an
@@ -40,20 +40,19 @@ static void tile_coords_to_world_coords_convert(SVECTOR* in, VECTOR* out) {
  * Only the half-turn result is wrapped to 0-0xfff. The camera angles are read
  * as an SVECTOR: the quadrant is a signed short division, which unsigned
  * 16-bit values do not emit. */
-static void camera_unblocked_rotation_for_tile_choose(const SVECTOR* tile_coords, SVECTOR* rotation_out) {
-    battle_map_tile_t* tile = battle_map_tile_get_pointer(tile_coords->vx, tile_coords->vz, tile_coords->vy);
+static void choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out) {
+    map_tile_t* tile = map_get_tile(tile_coords->vx, tile_coords->vz, tile_coords->vy);
     SVECTOR* rotation;
-    s32 mask = tile->camera_block_masks & BATTLE_MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK;
+    s32 mask = tile->camera_block_masks & MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK;
     s32 quadrant;
     s32 yaw;
 
-    rotation = camera_rotation_get();
+    rotation = camera_get_rotation();
     rotation_out->vx = rotation->vx;
     rotation_out->vz = rotation->vz;
     quadrant = (rotation->vy & 0xfff) / 0x400;
     yaw = rotation->vy & 0xe00;
-    if ((g_camera_quadrant_block_directions[quadrant] & mask) == 0
-        || mask == BATTLE_MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK) {
+    if ((g_camera_quadrant_block_directions[quadrant] & mask) == 0 || mask == MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK) {
         rotation_out->vy = yaw;
         return;
     }
@@ -76,15 +75,15 @@ void effect_camera_noop_1(s32 ignored_1, s32 ignored_2) {
 
 /* Writes the map center as the effect camera target: x = max x * 14 and
  * z = max y * 14 (half of a 28-unit tile per tile), with the height (vy) 0. */
-static void camera_map_center_coordinates_store(VECTOR* destination) {
+static void store_map_center_coordinates(VECTOR* destination) {
     SVECTOR map_max;
     s32 max_y;
 
-    battle_map_dimensions_store(&map_max);
-    destination->vx = map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
+    map_store_dimensions(&map_max);
+    destination->vx = map_max.vx * (MAP_TILE_SIZE / 2);
     max_y = map_max.vz;
     destination->vy = 0;
-    destination->vz = max_y * (BATTLE_MAP_TILE_SIZE / 2);
+    destination->vz = max_y * (MAP_TILE_SIZE / 2);
 }
 
 /* Timeline track 1 handler: sets the effect camera angle target and duration.
@@ -99,7 +98,7 @@ static void camera_map_center_coordinates_store(VECTOR* destination) {
  *
  * Mode 0x40 keeps its own `current` pointer: sharing `rotation` with the other
  * modes changes that case's register allocation. */
-static void camera_angle_command_execute(s32 command, s32 target, s32 duration, const SVECTOR* angles) {
+static void execute_rotation_command(s32 command, s32 target, s32 duration, const SVECTOR* angles) {
     SVECTOR coords;
     SVECTOR* rotation;
     SVECTOR* current;
@@ -108,17 +107,17 @@ static void camera_angle_command_execute(s32 command, s32 target, s32 duration, 
     switch (command & EFFECT_CAMERA_SOURCE_MASK) {
     case EFFECT_CAMERA_SOURCE_TARGET:
         if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            unit_runtime_map_coords_get(g_effect_context.targets[target].data.unit.runtime_id, &coords);
+            map_unit_get_map_coords(g_effect_context.targets[target].data.unit.map_unit_id, &coords);
         } else {
             coords = g_effect_context.targets[target].data.tile;
         }
-        camera_unblocked_rotation_for_tile_choose(&coords, &g_effect_camera_rotation_target);
+        choose_unblocked_rotation_for_tile(&coords, &g_effect_camera_rotation_target);
         if (angles) {
             effect_vector_add_svectors(angles, &g_effect_camera_rotation_target, &g_effect_camera_rotation_target);
         }
         break;
     case EFFECT_CAMERA_SOURCE_GIVEN:
-        current = camera_rotation_get();
+        current = camera_get_rotation();
         delta = angles->vy - current->vy;
         if (delta < -0x800) {
             delta += ONE;
@@ -131,7 +130,7 @@ static void camera_angle_command_execute(s32 command, s32 target, s32 duration, 
         g_effect_camera_rotation_frame = 0;
         return;
     case EFFECT_CAMERA_SOURCE_CURRENT:
-        rotation = camera_rotation_get();
+        rotation = camera_get_rotation();
         copyVector(&g_effect_camera_rotation_target, rotation);
         if (angles) {
             effect_vector_add_svectors(angles, &g_effect_camera_rotation_target, &g_effect_camera_rotation_target);
@@ -152,31 +151,31 @@ static void camera_angle_command_execute(s32 command, s32 target, s32 duration, 
         break;
     case EFFECT_CAMERA_SOURCE_CASTER:
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            unit_runtime_map_coords_get(g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id, &coords);
+            map_unit_get_map_coords(g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id, &coords);
         } else {
             coords = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.tile;
         }
-        camera_unblocked_rotation_for_tile_choose(&coords, &g_effect_camera_rotation_target);
+        choose_unblocked_rotation_for_tile(&coords, &g_effect_camera_rotation_target);
         if (angles) {
             effect_vector_add_svectors(angles, &g_effect_camera_rotation_target, &g_effect_camera_rotation_target);
         }
         break;
     case EFFECT_CAMERA_SOURCE_CURSOR_TILE:
         coords = g_effect_context.target_tile;
-        camera_unblocked_rotation_for_tile_choose(&coords, &g_effect_camera_rotation_target);
+        choose_unblocked_rotation_for_tile(&coords, &g_effect_camera_rotation_target);
         if (angles) {
             effect_vector_add_svectors(angles, &g_effect_camera_rotation_target, &g_effect_camera_rotation_target);
         }
         break;
     case EFFECT_CAMERA_SOURCE_CURRENT_YAW_ROLL:
-        rotation = camera_rotation_get();
+        rotation = camera_get_rotation();
         if (angles) {
             setVector(
                 &g_effect_camera_rotation_target, angles->vx, rotation->vy + angles->vy, rotation->vz + angles->vz);
         }
         break;
     case EFFECT_CAMERA_SOURCE_SAVED_PITCH:
-        rotation = camera_rotation_get();
+        rotation = camera_get_rotation();
         setVector(&g_effect_camera_rotation_target, g_effect_camera_rotation_saved.vx, rotation->vy, rotation->vz);
         if (angles) {
             effect_vector_add_svectors(angles, &g_effect_camera_rotation_target, &g_effect_camera_rotation_target);
@@ -207,13 +206,13 @@ void effect_camera_execute_position_command(s32 command, s32 target, s32 duratio
     switch (command & EFFECT_CAMERA_SOURCE_MASK) {
     case EFFECT_CAMERA_SOURCE_TARGET:
         if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            effect_copy_unit_world_coords_to_vector(
-                g_effect_context.targets[target].data.unit.runtime_id, &g_effect_camera_position_target);
+            effect_copy_unit_world_vector(
+                g_effect_context.targets[target].data.unit.map_unit_id, &g_effect_camera_position_target);
         } else {
-            tile_coords_to_world_coords_convert(
+            convert_tile_coords_to_world_coords(
                 &g_effect_context.targets[target].data.tile, &g_effect_camera_position_target);
         }
-        coords = camera_real_coords_get();
+        coords = camera_get_real_coords();
         effect_vector_shift_right_12(coords, &g_effect_camera_position_start);
         if (offset) {
             effect_vector_add(offset, &g_effect_camera_position_target, &g_effect_camera_position_target);
@@ -223,13 +222,13 @@ void effect_camera_execute_position_command(s32 command, s32 target, s32 duratio
         g_effect_camera_position_target = *offset;
         break;
     case EFFECT_CAMERA_SOURCE_MAP_CENTER:
-        camera_map_center_coordinates_store(&g_effect_camera_position_target);
+        store_map_center_coordinates(&g_effect_camera_position_target);
         if (offset) {
             effect_vector_add(offset, &g_effect_camera_position_target, &g_effect_camera_position_target);
         }
         break;
     case EFFECT_CAMERA_SOURCE_CURRENT:
-        coords = camera_real_coords_get();
+        coords = camera_get_real_coords();
         setVector(&g_effect_camera_position_target, coords->vx >> 12, coords->vy >> 12, coords->vz >> 12);
         if (offset) {
             effect_vector_add(offset, &g_effect_camera_position_target, &g_effect_camera_position_target);
@@ -243,10 +242,10 @@ void effect_camera_execute_position_command(s32 command, s32 target, s32 duratio
         break;
     case EFFECT_CAMERA_SOURCE_CASTER:
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            effect_copy_unit_world_coords_to_vector(
-                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id, &g_effect_camera_position_target);
+            effect_copy_unit_world_vector(
+                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id, &g_effect_camera_position_target);
         } else {
-            tile_coords_to_world_coords_convert(
+            convert_tile_coords_to_world_coords(
                 &g_effect_context.targets[EFFECT_CASTER_ENTRY].data.tile, &g_effect_camera_position_target);
         }
         if (offset) {
@@ -259,7 +258,7 @@ void effect_camera_execute_position_command(s32 command, s32 target, s32 duratio
         setVector(&sum, 0, 0, 0);
         for (i = 0; i < g_effect_context.target_count; i++) {
             if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                world = unit_runtime_world_coords_get(g_effect_context.targets[i].data.unit.runtime_id);
+                world = map_unit_get_world_coords(g_effect_context.targets[i].data.unit.map_unit_id);
                 sum.vx += world->vx;
                 sum.vy += world->vy;
                 sum.vz += world->vz;
@@ -273,7 +272,7 @@ void effect_camera_execute_position_command(s32 command, s32 target, s32 duratio
         }
         break;
     case EFFECT_CAMERA_SOURCE_CURSOR_TILE:
-        tile_coords_to_world_coords_convert(&g_effect_context.target_tile, &g_effect_camera_position_target);
+        convert_tile_coords_to_world_coords(&g_effect_context.target_tile, &g_effect_camera_position_target);
         if (offset) {
             effect_vector_add(offset, &g_effect_camera_position_target, &g_effect_camera_position_target);
         }
@@ -302,7 +301,7 @@ void effect_camera_execute_zoom_command(s32 command, s32 unused, s32 duration, c
         g_effect_camera_zoom_target = *zoom;
         break;
     case EFFECT_CAMERA_SOURCE_CURRENT:
-        g_effect_camera_zoom_target = *camera_zoom_get();
+        g_effect_camera_zoom_target = *camera_get_zoom();
         if (zoom) {
             effect_vector_add(zoom, &g_effect_camera_zoom_target, &g_effect_camera_zoom_target);
         }
@@ -336,7 +335,7 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_IDLE:
         break;
     case EFFECT_CAMERA_MODE_SNAP:
-        camera_rotation_set(&g_effect_camera_rotation_target);
+        camera_set_rotation(&g_effect_camera_rotation_target);
         g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
         g_effect_camera_rotation_start.vx = g_effect_camera_rotation_current.vx
             = g_effect_camera_rotation_target.vx & 0xfff;
@@ -349,23 +348,23 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_COSINE:
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
-            effect_svector_cos_interpolate(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
+            effect_svector_interpolate_cos(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &g_effect_camera_rotation_current);
-            camera_rotation_set(&g_effect_camera_rotation_current);
+            camera_set_rotation(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             effect_vector_mask_low_12_bits(&g_effect_camera_rotation_target, &g_effect_camera_rotation_start);
             g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
-            camera_rotation_set(&g_effect_camera_rotation_start);
+            camera_set_rotation(&g_effect_camera_rotation_start);
         }
         break;
     /* An out-and-back move ends where it began, so the start stays as it is. */
     case EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK:
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
-            effect_svector_cos_out_back_interpolate(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
+            effect_svector_interpolate_cos_out_back(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &g_effect_camera_rotation_current);
-            camera_rotation_set(&g_effect_camera_rotation_current);
+            camera_set_rotation(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -374,14 +373,14 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_LINEAR:
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
-            effect_svector_linear_interpolate(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
+            effect_svector_interpolate_linear(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &g_effect_camera_rotation_current);
-            camera_rotation_set(&g_effect_camera_rotation_current);
+            camera_set_rotation(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             effect_vector_mask_low_12_bits(&g_effect_camera_rotation_target, &g_effect_camera_rotation_start);
             g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
-            camera_rotation_set(&g_effect_camera_rotation_start);
+            camera_set_rotation(&g_effect_camera_rotation_start);
         }
         break;
     /* The ADD modes treat the target as a per-frame step: ramped up from zero, constant, or
@@ -390,11 +389,11 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
             rotation.vx = rotation.vy = rotation.vz = 0;
-            effect_svector_linear_interpolate(&rotation, &g_effect_camera_rotation_target,
+            effect_svector_interpolate_linear(&rotation, &g_effect_camera_rotation_target,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &rotation_delta);
             effect_vector_add_rotations_mod_q12(
                 &g_effect_camera_rotation_current, &rotation_delta, &g_effect_camera_rotation_current);
-            camera_rotation_set(&g_effect_camera_rotation_current);
+            camera_set_rotation(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_target = g_effect_camera_rotation_current;
@@ -407,7 +406,7 @@ void effect_camera_update_tracks(void) {
             g_effect_camera_rotation_frame++;
             effect_vector_add_rotations_mod_q12(
                 &g_effect_camera_rotation_current, &g_effect_camera_rotation_target, &g_effect_camera_rotation_current);
-            camera_rotation_set(&g_effect_camera_rotation_current);
+            camera_set_rotation(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_target = g_effect_camera_rotation_current;
@@ -419,11 +418,11 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
             rotation.vx = rotation.vy = rotation.vz = 0;
-            effect_svector_linear_interpolate(&g_effect_camera_rotation_target, &rotation,
+            effect_svector_interpolate_linear(&g_effect_camera_rotation_target, &rotation,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &rotation_delta);
             effect_vector_add_rotations_mod_q12(
                 &g_effect_camera_rotation_current, &rotation_delta, &g_effect_camera_rotation_current);
-            camera_rotation_set(&g_effect_camera_rotation_current);
+            camera_set_rotation(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_target = g_effect_camera_rotation_current;
@@ -436,10 +435,10 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
             rotation.vx = rotation.vy = rotation.vz = 0;
-            effect_svector_linear_interpolate(&rotation, &g_effect_camera_rotation_target,
+            effect_svector_interpolate_linear(&rotation, &g_effect_camera_rotation_target,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &rotation_delta);
             effect_vector_add_random_rotation_offsets(&g_effect_camera_rotation_start, &rotation_delta, &rotation);
-            camera_rotation_set(&rotation);
+            camera_set_rotation(&rotation);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -450,7 +449,7 @@ void effect_camera_update_tracks(void) {
             g_effect_camera_rotation_frame++;
             effect_vector_add_random_rotation_offsets(
                 &g_effect_camera_rotation_start, &g_effect_camera_rotation_target, &rotation);
-            camera_rotation_set(&rotation);
+            camera_set_rotation(&rotation);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -460,10 +459,10 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
             rotation.vx = rotation.vy = rotation.vz = 0;
-            effect_svector_linear_interpolate(&g_effect_camera_rotation_target, &rotation,
+            effect_svector_interpolate_linear(&g_effect_camera_rotation_target, &rotation,
                 g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &rotation_delta);
             effect_vector_add_random_rotation_offsets(&g_effect_camera_rotation_start, &rotation_delta, &rotation);
-            camera_rotation_set(&rotation);
+            camera_set_rotation(&rotation);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -477,7 +476,7 @@ void effect_camera_update_tracks(void) {
         break;
     case EFFECT_CAMERA_MODE_SNAP:
         effect_vector_scale_q12(&g_effect_camera_position_target, &position);
-        camera_real_coords_set(&position);
+        camera_set_real_coords(&position);
         g_effect_camera_position_current = g_effect_camera_position_target;
         g_effect_camera_position_start = g_effect_camera_position_current;
         g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -486,10 +485,10 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_COSINE:
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
-            effect_vector_q13_cos_interpolate(&g_effect_camera_position_start, &g_effect_camera_position_target,
+            effect_vector_interpolate_cos_q13(&g_effect_camera_position_start, &g_effect_camera_position_target,
                 s_effect_camera_position_duration, s_effect_camera_position_frame, &g_effect_camera_position_current);
             effect_vector_scale_q12(&g_effect_camera_position_current, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_start = g_effect_camera_position_target;
@@ -499,11 +498,11 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK:
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
-            effect_vector_q13_cos_out_back_interpolate(&g_effect_camera_position_start,
+            effect_vector_interpolate_cos_out_back_q13(&g_effect_camera_position_start,
                 &g_effect_camera_position_target, s_effect_camera_position_duration, s_effect_camera_position_frame,
                 &g_effect_camera_position_current);
             effect_vector_scale_q12(&g_effect_camera_position_current, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -512,10 +511,10 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_LINEAR:
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
-            effect_vector_q13_linear_interpolate(&g_effect_camera_position_start, &g_effect_camera_position_target,
+            effect_vector_interpolate_linear_q13(&g_effect_camera_position_start, &g_effect_camera_position_target,
                 s_effect_camera_position_duration, s_effect_camera_position_frame, &g_effect_camera_position_current);
             effect_vector_scale_q12(&g_effect_camera_position_current, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_start = g_effect_camera_position_target;
@@ -526,10 +525,10 @@ void effect_camera_update_tracks(void) {
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&position, &g_effect_camera_position_target,
+            effect_vector_interpolate_linear_q13(&position, &g_effect_camera_position_target,
                 s_effect_camera_position_duration, s_effect_camera_position_frame, &delta);
             effect_vector_add_and_store_q12(&delta, &g_effect_camera_position_current, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_target = g_effect_camera_position_current;
@@ -542,7 +541,7 @@ void effect_camera_update_tracks(void) {
             s_effect_camera_position_frame++;
             effect_vector_add_and_store_q12(
                 &g_effect_camera_position_target, &g_effect_camera_position_current, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_target = g_effect_camera_position_current;
@@ -554,10 +553,10 @@ void effect_camera_update_tracks(void) {
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&g_effect_camera_position_target, &position,
+            effect_vector_interpolate_linear_q13(&g_effect_camera_position_target, &position,
                 s_effect_camera_position_duration, s_effect_camera_position_frame, &delta);
             effect_vector_add_and_store_q12(&delta, &g_effect_camera_position_current, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_target = g_effect_camera_position_current;
@@ -569,10 +568,10 @@ void effect_camera_update_tracks(void) {
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&position, &g_effect_camera_position_target,
+            effect_vector_interpolate_linear_q13(&position, &g_effect_camera_position_target,
                 s_effect_camera_position_duration, s_effect_camera_position_frame, &delta);
             effect_vector_add_random_offsets_and_store_q12(&g_effect_camera_position_start, &delta, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -583,7 +582,7 @@ void effect_camera_update_tracks(void) {
             s_effect_camera_position_frame++;
             effect_vector_add_random_offsets_and_store_q12(
                 &g_effect_camera_position_start, &g_effect_camera_position_target, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -593,10 +592,10 @@ void effect_camera_update_tracks(void) {
         if (s_effect_camera_position_duration > s_effect_camera_position_frame) {
             s_effect_camera_position_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&g_effect_camera_position_target, &position,
+            effect_vector_interpolate_linear_q13(&g_effect_camera_position_target, &position,
                 s_effect_camera_position_duration, s_effect_camera_position_frame, &delta);
             effect_vector_add_random_offsets_and_store_q12(&g_effect_camera_position_start, &delta, &position);
-            camera_real_coords_set(&position);
+            camera_set_real_coords(&position);
         }
         if (s_effect_camera_position_duration == s_effect_camera_position_frame) {
             g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -609,7 +608,7 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_IDLE:
         break;
     case EFFECT_CAMERA_MODE_SNAP:
-        camera_zoom_set(&g_effect_camera_zoom_target);
+        camera_set_zoom(&g_effect_camera_zoom_target);
         g_effect_camera_zoom_current = g_effect_camera_zoom_target;
         g_effect_camera_zoom_start = g_effect_camera_zoom_current;
         g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -618,9 +617,9 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_COSINE:
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
-            effect_vector_q13_cos_interpolate(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
+            effect_vector_interpolate_cos_q13(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
                 g_effect_camera_zoom_duration, g_effect_camera_zoom_frame, &g_effect_camera_zoom_current);
-            camera_zoom_set(&g_effect_camera_zoom_current);
+            camera_set_zoom(&g_effect_camera_zoom_current);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_start = g_effect_camera_zoom_target;
@@ -630,9 +629,9 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK:
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
-            effect_vector_q13_cos_out_back_interpolate(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
+            effect_vector_interpolate_cos_out_back_q13(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
                 g_effect_camera_zoom_duration, g_effect_camera_zoom_frame, &g_effect_camera_zoom_current);
-            camera_zoom_set(&g_effect_camera_zoom_current);
+            camera_set_zoom(&g_effect_camera_zoom_current);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -641,9 +640,9 @@ void effect_camera_update_tracks(void) {
     case EFFECT_CAMERA_MODE_LINEAR:
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
-            effect_vector_q13_linear_interpolate(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
+            effect_vector_interpolate_linear_q13(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
                 g_effect_camera_zoom_duration, g_effect_camera_zoom_frame, &g_effect_camera_zoom_current);
-            camera_zoom_set(&g_effect_camera_zoom_current);
+            camera_set_zoom(&g_effect_camera_zoom_current);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_start = g_effect_camera_zoom_target;
@@ -654,10 +653,10 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&position, &g_effect_camera_zoom_target, g_effect_camera_zoom_duration,
+            effect_vector_interpolate_linear_q13(&position, &g_effect_camera_zoom_target, g_effect_camera_zoom_duration,
                 g_effect_camera_zoom_frame, &delta);
             effect_vector_add(&delta, &g_effect_camera_zoom_current, &g_effect_camera_zoom_current);
-            camera_zoom_set(&g_effect_camera_zoom_current);
+            camera_set_zoom(&g_effect_camera_zoom_current);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_target = g_effect_camera_zoom_current;
@@ -670,7 +669,7 @@ void effect_camera_update_tracks(void) {
             g_effect_camera_zoom_frame++;
             effect_vector_add(
                 &g_effect_camera_zoom_target, &g_effect_camera_zoom_current, &g_effect_camera_zoom_current);
-            camera_zoom_set(&g_effect_camera_zoom_current);
+            camera_set_zoom(&g_effect_camera_zoom_current);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_target = g_effect_camera_zoom_current;
@@ -682,10 +681,10 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&g_effect_camera_zoom_target, &position, g_effect_camera_zoom_duration,
+            effect_vector_interpolate_linear_q13(&g_effect_camera_zoom_target, &position, g_effect_camera_zoom_duration,
                 g_effect_camera_zoom_frame, &delta);
             effect_vector_add(&delta, &g_effect_camera_zoom_current, &g_effect_camera_zoom_current);
-            camera_zoom_set(&g_effect_camera_zoom_current);
+            camera_set_zoom(&g_effect_camera_zoom_current);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_target = g_effect_camera_zoom_current;
@@ -697,10 +696,10 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&position, &g_effect_camera_zoom_target, g_effect_camera_zoom_duration,
+            effect_vector_interpolate_linear_q13(&position, &g_effect_camera_zoom_target, g_effect_camera_zoom_duration,
                 g_effect_camera_zoom_frame, &delta);
             effect_vector_add_random_offsets(&g_effect_camera_zoom_start, &delta, &position);
-            camera_zoom_set(&position);
+            camera_set_zoom(&position);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -710,7 +709,7 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
             effect_vector_add_random_offsets(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target, &position);
-            camera_zoom_set(&position);
+            camera_set_zoom(&position);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -720,10 +719,10 @@ void effect_camera_update_tracks(void) {
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
             position.vx = position.vy = position.vz = 0;
-            effect_vector_q13_linear_interpolate(&g_effect_camera_zoom_target, &position, g_effect_camera_zoom_duration,
+            effect_vector_interpolate_linear_q13(&g_effect_camera_zoom_target, &position, g_effect_camera_zoom_duration,
                 g_effect_camera_zoom_frame, &delta);
             effect_vector_add_random_offsets(&g_effect_camera_zoom_start, &delta, &position);
-            camera_zoom_set(&position);
+            camera_set_zoom(&position);
         }
         if (g_effect_camera_zoom_duration == g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
@@ -735,8 +734,8 @@ void effect_camera_update_tracks(void) {
 /* Find the first child-table camera keyframe whose command moves a track in mask and whose end
  * frame is still ahead of frame; report its index and end frame and return 1. Returns 0 at or past
  * the child duration, or when none is left. The single-table form of
- * camera_active_keyframe_find, with no target in the end frame's high half. */
-static s32 camera_next_keyframe_find(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
+ * find_parent_keyframe, with no target in the end frame's high half. */
+static s32 find_child_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
     effect_timeline_t* data = g_effect_timeline;
     s32 i;
 
@@ -767,7 +766,7 @@ static s32 camera_next_keyframe_find(s16 frame, s16 mask, s32* out_index, s32* o
  *
  * The conditional-expression header reads keep the entry block from caching
  * the unit-data pointer. */
-static s32 camera_active_keyframe_find(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
+static s32 find_parent_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
     s32 phase1 = g_effect_timeline->phase1_duration;
     s32 spawn_delay;
     s32 child_duration;
@@ -874,19 +873,19 @@ void effect_camera_start_child_keyframe_moves(s16 frame) {
     s32 keyframe;
 
     if (g_effect_camera_rotation_mode == EFFECT_CAMERA_MODE_IDLE
-        && camera_next_keyframe_find(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &keyframe) != 0) {
+        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &keyframe) != 0) {
         effect_vector_load_svector(&g_effect_timeline->rotation[index], &rotation);
-        camera_angle_command_execute(
+        execute_rotation_command(
             g_effect_timeline->command[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &rotation);
     }
     if (g_effect_camera_position_mode == EFFECT_CAMERA_MODE_IDLE
-        && camera_next_keyframe_find(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &keyframe) != 0) {
+        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &keyframe) != 0) {
         effect_vector_load(&g_effect_timeline->position[index], &vector);
         effect_camera_execute_position_command(
             g_effect_timeline->command[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &vector);
     }
     if (g_effect_camera_zoom_mode == EFFECT_CAMERA_MODE_IDLE
-        && camera_next_keyframe_find(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &keyframe) != 0) {
+        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &keyframe) != 0) {
         effect_vector_load(&g_effect_timeline->zoom[index], &vector);
         effect_camera_execute_zoom_command(
             g_effect_timeline->command[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &vector);
@@ -895,7 +894,7 @@ void effect_camera_start_child_keyframe_moves(s16 frame) {
 
 /* Starts the parent timeline's camera moves for this frame: each of the
  * rotation, position and zoom tracks that is idle takes its next keyframe
- * from the table camera_active_keyframe_find reports (phase 1, child
+ * from the table find_parent_keyframe reports (phase 1, child
  * or phase 2). The three-table form of
  * effect_camera_start_child_keyframe_moves. */
 void effect_camera_start_parent_keyframe_moves(s16 frame) {
@@ -906,28 +905,28 @@ void effect_camera_start_parent_keyframe_moves(s16 frame) {
     s32 k;
 
     if (g_effect_camera_rotation_mode == EFFECT_CAMERA_MODE_IDLE
-        && camera_active_keyframe_find(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &keyframe) != 0) {
+        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &keyframe) != 0) {
         k = index & 0xffff;
         switch (index / 0x10000) {
         case EFFECT_CAMERA_TABLE_PHASE1:
             effect_vector_load_svector(&g_effect_timeline->phase1_camera.rotation[k], &rotation);
-            camera_angle_command_execute(g_effect_timeline->phase1_camera.command[k], keyframe / 0x10000,
+            execute_rotation_command(g_effect_timeline->phase1_camera.command[k], keyframe / 0x10000,
                 (keyframe & 0xffff) - frame, &rotation);
             break;
         case EFFECT_CAMERA_TABLE_CHILD:
             effect_vector_load_svector(&g_effect_timeline->rotation[k], &rotation);
-            camera_angle_command_execute(
+            execute_rotation_command(
                 g_effect_timeline->command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &rotation);
             break;
         case EFFECT_CAMERA_TABLE_PHASE2:
             effect_vector_load_svector(&g_effect_timeline->phase2_camera.rotation[k], &rotation);
-            camera_angle_command_execute(g_effect_timeline->phase2_camera.command[k], keyframe / 0x10000,
+            execute_rotation_command(g_effect_timeline->phase2_camera.command[k], keyframe / 0x10000,
                 (keyframe & 0xffff) - frame, &rotation);
             break;
         }
     }
     if (g_effect_camera_position_mode == EFFECT_CAMERA_MODE_IDLE
-        && camera_active_keyframe_find(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &keyframe) != 0) {
+        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &keyframe) != 0) {
         k = index & 0xffff;
         switch (index / 0x10000) {
         case EFFECT_CAMERA_TABLE_PHASE1:
@@ -948,7 +947,7 @@ void effect_camera_start_parent_keyframe_moves(s16 frame) {
         }
     }
     if (g_effect_camera_zoom_mode == EFFECT_CAMERA_MODE_IDLE
-        && camera_active_keyframe_find(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &keyframe) != 0) {
+        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &keyframe) != 0) {
         k = index & 0xffff;
         switch (index / 0x10000) {
         case EFFECT_CAMERA_TABLE_PHASE1:

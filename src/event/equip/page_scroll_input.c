@@ -14,7 +14,7 @@
  * menu_vertical_scroll_direction_e value, UP or DOWN on the first held frame and on each
  * repeat, WAIT on the held frames in between, NONE when nothing is held, page scrolling is
  * disabled or input is locked. */
-s32 equipment_input_read_page_scroll_direction(void) {
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
     s32 direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;

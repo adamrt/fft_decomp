@@ -1,12 +1,12 @@
 /* Calculate and trace curved and direct projectile trajectories against units and terrain. */
 
 #include "fft/projectile.h"
-#include "fft/battle_map.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/sprite_sheet.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -29,21 +29,21 @@ typedef struct arc_delta {
     s32 distance;
 } arc_delta_t;
 
-/* Query read by arc_trajectory_calculate: the offset to the target and both endpoints. */
+/* Query read by calculate_arc_trajectory: the offset to the target and both endpoints. */
 typedef struct arc_query {
     arc_delta_t delta;
     arc_endpoint_t source;
     arc_endpoint_t target;
 } arc_query_t;
 
-/* Unit list built in the scratchpad at 0x1f800000 by obstacle_units_list and read by the obstacle tests. */
+/* Unit list built in the scratchpad at 0x1f800000 by list_obstacle_units and read by the obstacle tests. */
 typedef struct obstacle_unit_list {
-    s32 count;                           /* 0x00 */
-    u8 battle_ids[UNIT_SLOT_COUNT];      /* 0x04 */
-    u8 _padding_19;                      /* 0x19; aligns the position vectors */
-    SVECTOR positions[UNIT_SLOT_COUNT];  /* 0x1a; tile center and height */
-    u8 _padding_c2[2];                   /* 0xc2; aligns the sprite heights */
-    s32 sprite_heights[UNIT_SLOT_COUNT]; /* 0xc4 */
+    s32 count;                                  /* 0x00 */
+    u8 battle_unit_ids[BATTLE_UNIT_SLOT_COUNT]; /* 0x04 */
+    u8 _padding_19;                             /* 0x19; aligns the position vectors */
+    SVECTOR positions[BATTLE_UNIT_SLOT_COUNT];  /* 0x1a; tile center and height */
+    u8 _padding_c2[2];                          /* 0xc2; aligns the sprite heights */
+    s32 sprite_heights[BATTLE_UNIT_SLOT_COUNT]; /* 0xc4 */
 } obstacle_unit_list_t;
 typedef char obstacle_unit_list_size_must_be_280[sizeof(obstacle_unit_list_t) == 280 ? 1 : -1];
 
@@ -66,13 +66,13 @@ extern VECTOR g_projectile_step;
 extern SVECTOR g_projectile_position;
 
 extern s32 g_projectile_hit_unit_id;
-extern battle_map_tile_coordinates_t g_projectile_tile;
+extern map_tile_coordinates_t g_projectile_tile;
 extern s32 g_projectile_tile_flags;
 
 /* Quadratic height term used by the projectile trajectory calculation;
  * this is not the complete trajectory.
  * distance is the attacker-to-target distance scaled by ONE. */
-static s32 arc_height_term_calculate(s32 distance) {
+static s32 calculate_arc_height_term(s32 distance) {
     s32 gravity;
 
     distance >>= 6;
@@ -86,8 +86,8 @@ static s32 arc_height_term_calculate(s32 distance) {
  * sprite height until both the arc apex and the target tile floor clear it,
  * storing the chosen height back into the target endpoint. Returns 0 when the
  * target is at zero distance or no height clears. */
-static s32 arc_trajectory_calculate(arc_query_t* query, s32* arc_a, s32* arc_b) {
-    battle_map_tile_t* tile;
+static s32 calculate_arc_trajectory(arc_query_t* query, s32* arc_a, s32* arc_b) {
+    map_tile_t* tile;
     s32 tile_height;
     s32 floor;
     s32 peak;
@@ -98,11 +98,11 @@ static s32 arc_trajectory_calculate(arc_query_t* query, s32* arc_a, s32* arc_b) 
     s32 distance;
     s32 result = 0;
 
-    tile = battle_map_unit_tile_data_get(query->target.unit_id);
+    tile = map_unit_get_tile_by_battle_unit_id(query->target.unit_id);
     tile_height = tile->height + tile->depth_half_height.depth;
-    /* The tile surface, tile_height * BATTLE_MAP_HEIGHT_STEP, in 20.12. */
+    /* The tile surface, tile_height * MAP_HEIGHT_STEP, in 20.12. */
     floor = (tile_height * 3) << 14;
-    peak = arc_height_term_calculate(query->delta.distance);
+    peak = calculate_arc_height_term(query->delta.distance);
     if (query->delta.distance != 0) {
         height = query->target.height / 2;
         limit = (height + query->delta.y) * ONE;
@@ -143,7 +143,7 @@ static s32 arc_trajectory_calculate(arc_query_t* query, s32* arc_a, s32* arc_b) 
  * g_gravity_modifier is the trajectory gravity modifier
  * (0xa8000).
  */
-s32 projectile_arc_trajectory_term_calculate(s32 launch_slope_q12, s32 progress) {
+s32 projectile_arc_calculate_trajectory_term(s32 launch_slope_q12, s32 progress) {
     s32 divisor = (s_gravity_modifier * 2) >> 12;
     s32 slope_sq;
     s32 progress_sq;
@@ -178,7 +178,7 @@ s32 projectile_arc_trajectory_term_calculate(s32 launch_slope_q12, s32 progress)
 
 /* Offset of a point current along a straight path of length total: dst is src,
  * the whole path's delta, scaled by current / total (a Q12 fraction). */
-void projectile_trajectory_position_calculate(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
+void projectile_calculate_trajectory_position(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
     s32 progress = (current << 8) / (total >> 4);
 
     dst->vx = (progress * src->vx) >> 12;
@@ -189,7 +189,7 @@ void projectile_trajectory_position_calculate(const VECTOR* src, s32 total, s32 
 /* Launch speed of every arcing projectile: SquareRoot12 of g_gravity_modifier times
  * g_gravity_scale. With the retail values (0xa8000 and 0x53a) it is a constant,
  * about 7.4 in Q12. */
-s32 projectile_arc_launch_velocity_calculate(void) {
+s32 projectile_arc_calculate_launch_velocity(void) {
     return SquareRoot12((s_gravity_modifier * s_gravity_scale) >> 12);
 }
 
@@ -198,25 +198,25 @@ s32 projectile_arc_launch_velocity_calculate(void) {
  * and is not a mount carrying a rider, with its tile center and height and its
  * sprite height, into a record at the start of the scratchpad returned via `out`.
  */
-static void obstacle_units_list(s32 first, s32 second, obstacle_unit_list_t** out) {
+static void list_obstacle_units(s32 first, s32 second, obstacle_unit_list_t** out) {
     SVECTOR position;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 i;
     s32 slot;
 
     *out = (obstacle_unit_list_t*)getScratchAddr(0);
     (*out)->count = 0;
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = unit_stats_get(i);
-        if (unit->active_battle_id != first && unit->active_battle_id != second
-            && unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = battle_unit_get(i);
+        if (unit->active_battle_unit_id != first && unit->active_battle_unit_id != second
+            && unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
             && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP))
             && !(unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
             slot = (*out)->count++;
-            (*out)->battle_ids[slot] = unit->active_battle_id;
-            unit_battle_tile_center_height_get(unit->active_battle_id, &position);
+            (*out)->battle_unit_ids[slot] = unit->active_battle_unit_id;
+            map_unit_get_tile_center_height_by_battle_unit_id(unit->active_battle_unit_id, &position);
             (*out)->positions[slot] = position;
-            (*out)->sprite_heights[slot] = sprite_battle_sheet_height_get(unit->active_battle_id);
+            (*out)->sprite_heights[slot] = map_unit_get_sprite_height_by_battle_unit_id(unit->active_battle_unit_id);
         }
     }
 }
@@ -226,21 +226,21 @@ static void obstacle_units_list(s32 first, s32 second, obstacle_unit_list_t** ou
  *
  * Fills `tile_ref` with the map tile under `position` and returns 1 when the
  * position is inside that tile's solid column (either map layer) or inside a
- * listed unit's sprite box; the blocking unit's battle id is reported through
+ * listed unit's sprite box; the blocking unit's battle unit id is reported through
  * `out_unit`, which is otherwise left at -1.
  */
-static s32 position_for_obstacle_test(
-    const obstacle_unit_list_t* list, const VECTOR* position, s32* out_unit, battle_map_tile_coordinates_t* tile_ref) {
-    battle_map_tile_t* tile;
+static s32 test_position_for_obstacle(
+    const obstacle_unit_list_t* list, const VECTOR* position, s32* out_unit, map_tile_coordinates_t* tile_ref) {
+    map_tile_t* tile;
     s32 ceiling;
     s32 height;
     s32 y;
     s32 i;
 
     *out_unit = -1;
-    tile_ref->x = position->vx / BATTLE_MAP_TILE_SIZE;
-    tile_ref->y = position->vz / BATTLE_MAP_TILE_SIZE;
-    tile = battle_map_tile_get_pointer(tile_ref->x, tile_ref->y, 0);
+    tile_ref->x = position->vx / MAP_TILE_SIZE;
+    tile_ref->y = position->vz / MAP_TILE_SIZE;
+    tile = map_get_tile(tile_ref->x, tile_ref->y, 0);
     if (tile->ceiling_depth_and_marks.ceiling_depth == 0) {
         ceiling = tile->height;
     } else {
@@ -248,20 +248,20 @@ static s32 position_for_obstacle_test(
     }
     height = tile->height;
     y = position->vy;
-    if (y >= -(height * BATTLE_MAP_HEIGHT_STEP) && y < -((height - ceiling) * BATTLE_MAP_HEIGHT_STEP)) {
+    if (y >= -(height * MAP_HEIGHT_STEP) && y < -((height - ceiling) * MAP_HEIGHT_STEP)) {
         tile_ref->layer = 0;
         g_projectile_tile_flags = tile->flags._unknown_00;
         return 1;
     }
 
-    tile = battle_map_tile_get_pointer(tile_ref->x, tile_ref->y, 1);
+    tile = map_get_tile(tile_ref->x, tile_ref->y, 1);
     ceiling = 1;
     if (tile->ceiling_depth_and_marks.ceiling_depth != 0) {
         ceiling = tile->ceiling_depth_and_marks.ceiling_depth;
     }
     height = tile->height;
     y = position->vy;
-    if (y >= -(height * BATTLE_MAP_HEIGHT_STEP) && y < -((height - ceiling) * BATTLE_MAP_HEIGHT_STEP)) {
+    if (y >= -(height * MAP_HEIGHT_STEP) && y < -((height - ceiling) * MAP_HEIGHT_STEP)) {
         tile_ref->layer = 1;
         g_projectile_tile_flags = tile->flags._unknown_00;
         return 1;
@@ -272,7 +272,7 @@ static s32 position_for_obstacle_test(
             && list->sprite_heights[i] != 0 && list->positions[i].vx - 8 < position->vx
             && position->vx < list->positions[i].vx + 8 && list->positions[i].vz - 8 < position->vz
             && position->vz < list->positions[i].vz + 8) {
-            *out_unit = list->battle_ids[i];
+            *out_unit = list->battle_unit_ids[i];
             return 1;
         }
     }
@@ -286,14 +286,14 @@ static s32 position_for_obstacle_test(
  * component of the gravity impulse. Each step rotates the local (progress,
  * -trajectory term) offset into world space through the yaw matrix and tests
  * the result against the obstacle list, exactly as
- * direct_path_trace does for straight shots. On a clear
+ * trace_direct_path does for straight shots. On a clear
  * path g_projectile_step_count holds the full step count and the result is 1; on a hit it
  * holds the steps taken and the result is 0.
  *
  * `hit` is deliberately left uninitialized: the target reads $s6 after a
  * zero-step loop without ever writing it.
  */
-static s32 arc_path_trace(const SVECTOR* origin, const s32* launch_slope_q12, const s32* distance, SVECTOR* arc,
+static s32 trace_arc_path(const SVECTOR* origin, const s32* launch_slope_q12, const s32* distance, SVECTOR* arc,
     const obstacle_unit_list_t* obstacles) {
     SVECTOR rotation;
     SVECTOR step;
@@ -313,7 +313,7 @@ static s32 arc_path_trace(const SVECTOR* origin, const s32* launch_slope_q12, co
     arc->vz = angle;
     s_projectile_arctan_angle_mod = angle;
     progress = 0;
-    velocity = projectile_arc_launch_velocity_calculate() >> 8;
+    velocity = projectile_arc_calculate_launch_velocity() >> 8;
     advance = (rcos(arc->vz) * velocity) >> 4;
     if (advance != 0) {
         steps = ((advance + *distance) - 1) / advance;
@@ -336,11 +336,11 @@ static s32 arc_path_trace(const SVECTOR* origin, const s32* launch_slope_q12, co
     for (; i < steps; i++) {
         previous = position;
         progress += advance;
-        term = projectile_arc_trajectory_term_calculate(*launch_slope_q12, progress);
+        term = projectile_arc_calculate_trajectory_term(*launch_slope_q12, progress);
         step.vx = progress >> 12;
         step.vy = -term >> 12;
         RotTrans(&step, &position, &position.pad);
-        hit = position_for_obstacle_test(obstacles, &position, &g_projectile_hit_unit_id, &g_projectile_tile);
+        hit = test_position_for_obstacle(obstacles, &position, &g_projectile_hit_unit_id, &g_projectile_tile);
         if (hit != 0) {
             break;
         }
@@ -359,7 +359,7 @@ static s32 arc_path_trace(const SVECTOR* origin, const s32* launch_slope_q12, co
 /* Test whether either arcing projectile path reaches the target unit.
  *
  * The arc counterpart of projectile_direct_check_between_units: the
- * source is raised by two thirds of its sprite height, arc_trajectory_calculate yields
+ * source is raised by two thirds of its sprite height, calculate_arc_trajectory yields
  * the two candidate arcs for the offset, and each is traced against the
  * other units' positions. Returns 1 when an arc is clear. */
 s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
@@ -371,20 +371,20 @@ s32 projectile_arc_check_between_units(u8 source_id, u8 target_id) {
 
     query.source.unit_id = source_id;
     query.target.unit_id = target_id;
-    query.source.height = sprite_battle_sheet_height_get(source_id) * 2 / 3;
-    query.target.height = sprite_battle_sheet_height_get(target_id);
-    obstacle_units_list(source_id, target_id, &obstacles);
-    unit_battle_tile_center_height_get(source_id, &query.source.position);
+    query.source.height = map_unit_get_sprite_height_by_battle_unit_id(source_id) * 2 / 3;
+    query.target.height = map_unit_get_sprite_height_by_battle_unit_id(target_id);
+    list_obstacle_units(source_id, target_id, &obstacles);
+    map_unit_get_tile_center_height_by_battle_unit_id(source_id, &query.source.position);
     query.source.position.vy -= query.source.height;
-    unit_battle_tile_center_height_get(target_id, &query.target.position);
+    map_unit_get_tile_center_height_by_battle_unit_id(target_id, &query.target.position);
     query.delta.x = query.target.position.vx - query.source.position.vx;
     query.delta.z = query.target.position.vz - query.source.position.vz;
     query.delta.y = query.source.position.vy - query.target.position.vy;
     query.delta.distance = SquareRoot12((query.delta.x * query.delta.x + query.delta.z * query.delta.z) * ONE);
     rotation.vy = ratan2(-query.delta.z, query.delta.x);
-    if (arc_trajectory_calculate(&query, &arc_a, &arc_b) != 0
-        && (arc_path_trace(&query.source.position, &arc_a, &query.delta.distance, &rotation, obstacles) != 0
-            || arc_path_trace(&query.source.position, &arc_b, &query.delta.distance, &rotation, obstacles) != 0)) {
+    if (calculate_arc_trajectory(&query, &arc_a, &arc_b) != 0
+        && (trace_arc_path(&query.source.position, &arc_a, &query.delta.distance, &rotation, obstacles) != 0
+            || trace_arc_path(&query.source.position, &arc_b, &query.delta.distance, &rotation, obstacles) != 0)) {
         return 1;
     }
     return 0;
@@ -413,9 +413,9 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
     obstacle_unit_list_t* obstacles;
     s32 arc_a;
     s32 arc_b;
-    battle_map_tile_t* tile;
-    unit_stats_t* stats;
-    unit_stats_t* other;
+    map_tile_t* tile;
+    battle_unit_t* stats;
+    battle_unit_t* other;
     s32 hit;
     s32 second_hit;
     s32 first_unit;
@@ -430,34 +430,34 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
     g_projectile_source_id = source_id;
     query.source.unit_id = source_id;
     query.target.unit_id = target_id;
-    query.source.height = sprite_battle_sheet_height_get(source_id) * 2 / 3;
+    query.source.height = map_unit_get_sprite_height_by_battle_unit_id(source_id) * 2 / 3;
     if (target_id != -1) {
-        query.target.height = sprite_battle_sheet_height_get(target_id);
+        query.target.height = map_unit_get_sprite_height_by_battle_unit_id(target_id);
     } else {
         query.target.height = 0;
     }
-    obstacle_units_list(source_id, -1, &obstacles);
-    unit_battle_tile_center_height_get(source_id, &g_projectile_origin);
+    list_obstacle_units(source_id, -1, &obstacles);
+    map_unit_get_tile_center_height_by_battle_unit_id(source_id, &g_projectile_origin);
     g_projectile_origin.vy -= query.source.height;
     if (target_id == -1) {
-        tile = battle_map_tile_get_pointer(tile_position->vx, tile_position->vz, tile_position->vy);
-        g_projectile_destination.vx = tile_position->vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        g_projectile_destination.vz = tile_position->vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        g_projectile_destination.vy = -((tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP);
+        tile = map_get_tile(tile_position->vx, tile_position->vz, tile_position->vy);
+        g_projectile_destination.vx = tile_position->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        g_projectile_destination.vz = tile_position->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        g_projectile_destination.vy = -((tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP);
     } else {
-        unit_battle_tile_center_height_get(target_id, &g_projectile_destination);
+        map_unit_get_tile_center_height_by_battle_unit_id(target_id, &g_projectile_destination);
     }
     query.delta.x = g_projectile_destination.vx - g_projectile_origin.vx;
     query.delta.z = g_projectile_destination.vz - g_projectile_origin.vz;
     query.delta.y = g_projectile_origin.vy - g_projectile_destination.vy;
     query.delta.distance = SquareRoot12((query.delta.x * query.delta.x + query.delta.z * query.delta.z) * ONE);
     arc.vy = ratan2(-query.delta.z, query.delta.x);
-    if (arc_trajectory_calculate(&query, &arc_a, &arc_b) == 0) {
+    if (calculate_arc_trajectory(&query, &arc_a, &arc_b) == 0) {
         arc_b = ONE;
         arc_a = ONE;
     }
 
-    hit = arc_path_trace(&g_projectile_origin, &arc_b, &query.delta.distance, &arc, obstacles);
+    hit = trace_arc_path(&g_projectile_origin, &arc_b, &query.delta.distance, &arc, obstacles);
     first_unit = g_projectile_hit_unit_id;
     first_step = g_projectile_step;
     first_position = g_projectile_position;
@@ -470,7 +470,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
         launch_slope_q12 = arc_b;
         result = target_id;
     } else {
-        second_hit = arc_path_trace(&g_projectile_origin, &arc_a, &query.delta.distance, &arc, obstacles);
+        second_hit = trace_arc_path(&g_projectile_origin, &arc_a, &query.delta.distance, &arc, obstacles);
         second_unit = g_projectile_hit_unit_id;
         second_step = g_projectile_step;
         second_position = g_projectile_position;
@@ -483,9 +483,9 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
             launch_slope_q12 = arc_a;
             result = target_id;
         } else {
-            stats = unit_stats_get(source_id);
+            stats = battle_unit_get(source_id);
             if (first_unit != -1
-                && (other = unit_stats_get(first_unit),
+                && (other = battle_unit_get(first_unit),
                     (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 g_projectile_step = first_step;
                 g_projectile_position = first_position;
@@ -494,7 +494,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
                 result = first_unit;
                 g_projectile_step_count = first_count;
             } else if (second_unit != -1
-                && (other = unit_stats_get(second_unit),
+                && (other = battle_unit_get(second_unit),
                     (stats->team_flags & UNIT_TEAM_MASK) != (other->initial_team_flags & UNIT_TEAM_MASK))) {
                 launch_slope_q12 = arc_a;
                 g_projectile_step_count = second_count;
@@ -531,7 +531,7 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
  * Wrap g_projectile_arctan_angle_mod into [-0x800, 0x800]: return column 0
  * below -0x2aa, column 1 through 0x2aa, or column 2 above it. Arc selection
  * can restore an earlier path without restoring this angle. */
-s32 projectile_bow_animation_column_get(void) {
+s32 projectile_get_bow_animation_column(void) {
     s16 angle = s_projectile_arctan_angle_mod;
     if (angle >= 0x801) {
         s_projectile_arctan_angle_mod = angle - ONE;
@@ -559,7 +559,7 @@ s32 projectile_bow_animation_column_get(void) {
  * an obstacle stopped it. The `step` variable keeps the target's register
  * divide; a literal 0x2000 folds to a shift.
  */
-static s32 direct_path_trace(
+static s32 trace_direct_path(
     const VECTOR* delta, const SVECTOR* origin, const s32* distance, const obstacle_unit_list_t* obstacles) {
     VECTOR position;
     VECTOR previous;
@@ -580,11 +580,11 @@ static s32 direct_path_trace(
     for (; i < steps; i++) {
         previous = position;
         progress += step;
-        projectile_trajectory_position_calculate(delta, *distance, progress, &position);
+        projectile_calculate_trajectory_position(delta, *distance, progress, &position);
         position.vx += origin->vx;
         position.vy += origin->vy;
         position.vz += origin->vz;
-        hit = position_for_obstacle_test(obstacles, &position, &g_projectile_hit_unit_id, &g_projectile_tile);
+        hit = test_position_for_obstacle(obstacles, &position, &g_projectile_hit_unit_id, &g_projectile_tile);
         if (hit != 0) {
             break;
         }
@@ -617,19 +617,19 @@ s32 projectile_direct_check_between_units(u8 source_id, u8 target_id) {
     s32 source_height;
     s32 target_height;
 
-    source_height = sprite_battle_sheet_height_get(source_id) * 2 / 3;
-    target_height = sprite_battle_sheet_height_get(target_id) * 2 / 3;
+    source_height = map_unit_get_sprite_height_by_battle_unit_id(source_id) * 2 / 3;
+    target_height = map_unit_get_sprite_height_by_battle_unit_id(target_id) * 2 / 3;
     if (target_height == 0) {
         target_height = 12;
     }
-    obstacle_units_list(source_id, target_id, &obstacles);
-    unit_battle_tile_center_height_get(source_id, &origin);
+    list_obstacle_units(source_id, target_id, &obstacles);
+    map_unit_get_tile_center_height_by_battle_unit_id(source_id, &origin);
     origin.vy -= source_height;
-    unit_battle_tile_center_height_get(target_id, &destination);
+    map_unit_get_tile_center_height_by_battle_unit_id(target_id, &destination);
     destination.vy -= target_height;
     setVector(&delta, destination.vx - origin.vx, destination.vy - origin.vy, destination.vz - origin.vz);
     distance = SquareRoot12((delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz) * ONE);
-    return direct_path_trace(&delta, &origin, &distance, obstacles);
+    return trace_direct_path(&delta, &origin, &distance, obstacles);
 }
 
 /*
@@ -639,7 +639,7 @@ s32 projectile_direct_check_between_units(u8 source_id, u8 target_id) {
  * Both endpoints are raised by two thirds of their sprite height (12 when the
  * target has none), as in projectile_direct_check_between_units;
  * the tile case instead centers on the tile at tile_position (x, layer, y) and
- * sits on its surface, as in projectile_arrow_trajectory_set.  The extra
+ * sits on its surface, as in projectile_set_arrow_trajectory.  The extra
  * work over those two is the launch angle: ratan2 of the vertical delta
  * against the horizontal distance, biased by 0x400 (a quarter turn) into
  * g_projectile_arctan_angle_mod.  Returns target_id when the path is clear
@@ -647,37 +647,37 @@ s32 projectile_direct_check_between_units(u8 source_id, u8 target_id) {
  */
 s32 projectile_direct_check_to_target(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
     VECTOR delta;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
     obstacle_unit_list_t* obstacles;
     s32 distance;
     s32 source_height;
     s32 target_height;
 
     g_projectile_source_id = source_id;
-    source_height = sprite_battle_sheet_height_get(source_id) * 2 / 3;
+    source_height = map_unit_get_sprite_height_by_battle_unit_id(source_id) * 2 / 3;
     if (target_id != -1) {
-        target_height = sprite_battle_sheet_height_get(target_id) * 2 / 3;
+        target_height = map_unit_get_sprite_height_by_battle_unit_id(target_id) * 2 / 3;
         if (target_height == 0) {
             target_height = 12;
         }
     }
-    obstacle_units_list(source_id, -1, &obstacles);
-    unit_battle_tile_center_height_get(source_id, &g_projectile_origin);
+    list_obstacle_units(source_id, -1, &obstacles);
+    map_unit_get_tile_center_height_by_battle_unit_id(source_id, &g_projectile_origin);
     g_projectile_origin.vy -= source_height;
     if (target_id == -1) {
-        tile = battle_map_tile_get_pointer(tile_position->vx, tile_position->vz, tile_position->vy);
-        g_projectile_destination.vx = tile_position->vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        g_projectile_destination.vz = tile_position->vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        g_projectile_destination.vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
+        tile = map_get_tile(tile_position->vx, tile_position->vz, tile_position->vy);
+        g_projectile_destination.vx = tile_position->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        g_projectile_destination.vz = tile_position->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        g_projectile_destination.vy = -(tile->height * MAP_HEIGHT_STEP);
     } else {
-        unit_battle_tile_center_height_get(target_id, &g_projectile_destination);
+        map_unit_get_tile_center_height_by_battle_unit_id(target_id, &g_projectile_destination);
         g_projectile_destination.vy -= target_height;
     }
     setVector(&delta, g_projectile_destination.vx - g_projectile_origin.vx,
         g_projectile_destination.vy - g_projectile_origin.vy, g_projectile_destination.vz - g_projectile_origin.vz);
     s_projectile_arctan_angle_mod = ratan2(delta.vy, SquareRoot0(delta.vx * delta.vx + delta.vz * delta.vz)) + 0x400;
     distance = SquareRoot12((delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz) * ONE);
-    if (direct_path_trace(&delta, &g_projectile_origin, &distance, obstacles) != 0) {
+    if (trace_direct_path(&delta, &g_projectile_origin, &distance, obstacles) != 0) {
         return target_id;
     }
     return g_projectile_hit_unit_id;
@@ -690,27 +690,27 @@ s32 projectile_direct_check_to_target(s32 source_id, const SVECTOR* tile_positio
  * quarters of its height, or, when target_id is -1, to the center of the tile
  * at tile_position (x, layer, y) on its surface. g_projectile_step_count receives the
  * flight duration derived from the distance, as in
- * projectile_direct_check_between_units / direct_path_trace.
+ * projectile_direct_check_between_units / trace_direct_path.
  * `delta` reproduces the target's stores to an otherwise unused stack vector.
  */
-void projectile_arrow_trajectory_set(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
+void projectile_set_arrow_trajectory(s32 source_id, const SVECTOR* tile_position, s32 target_id) {
     VECTOR delta;
-    battle_map_tile_t* tile;
-    s32 source_height = sprite_battle_sheet_height_get(source_id) * 2 / 3;
+    map_tile_t* tile;
+    s32 source_height = map_unit_get_sprite_height_by_battle_unit_id(source_id) * 2 / 3;
     s32 target_height;
 
     if (target_id != -1) {
-        target_height = sprite_battle_sheet_height_get(target_id) * 3 / 4;
+        target_height = map_unit_get_sprite_height_by_battle_unit_id(target_id) * 3 / 4;
     }
-    unit_battle_tile_center_height_get(source_id, &g_projectile_origin);
+    map_unit_get_tile_center_height_by_battle_unit_id(source_id, &g_projectile_origin);
     g_projectile_origin.vy -= source_height;
     if (target_id == -1) {
-        tile = battle_map_tile_get_pointer(tile_position->vx, tile_position->vz, tile_position->vy);
-        g_projectile_destination.vx = tile_position->vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        g_projectile_destination.vz = tile_position->vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-        g_projectile_destination.vy = -(tile->height * BATTLE_MAP_HEIGHT_STEP);
+        tile = map_get_tile(tile_position->vx, tile_position->vz, tile_position->vy);
+        g_projectile_destination.vx = tile_position->vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        g_projectile_destination.vz = tile_position->vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        g_projectile_destination.vy = -(tile->height * MAP_HEIGHT_STEP);
     } else {
-        unit_battle_tile_center_height_get(target_id, &g_projectile_destination);
+        map_unit_get_tile_center_height_by_battle_unit_id(target_id, &g_projectile_destination);
         g_projectile_destination.vy -= target_height;
     }
     setVector(&delta, g_projectile_destination.vx - g_projectile_origin.vx,

@@ -22,7 +22,7 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             if ((layout->text_ids[column][index] & 0x7FF) == 0x7FF) {
                 continue;
             }
-            menu_set_text_origin(layout->x[column], row * 0x10);
+            menu_text_set_origin(layout->x[column], row * 0x10);
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }

@@ -9,7 +9,7 @@
 
 /* Empty the inventory, then stock the new-game consumables: five Potions, two each of Hi-Potion,
  * Eye Drop and Phoenix Down, and one of each other basic restorative. */
-void item_new_game_inventory_init(void) {
+void item_init_new_game_inventory(void) {
     s32 remaining;
     u8* quantity;
 
@@ -39,16 +39,16 @@ enum { STARTING_ENCOUNTER_ID = 254, STARTING_WAR_FUNDS = 2000 };
 /* Start a new roster: empty it, then generate Ramza alone (mode 0) or load the
  * party from ENTD encounter 254 (mode 2); any other mode leaves it empty. The
  * inventory is reset to the new-game stock and the war funds to 2000. */
-void party_new_game_init(int mode) {
-    screen_world_text_init();
+void party_init_new_game(int mode) {
+    screen_init_world_text();
     party_clear();
 
     if (mode == PARTY_NEW_GAME_RAMZA) {
         party_unit_generate(UNIT_TYPE_RAMZA);
     } else if (mode == PARTY_NEW_GAME_ENCOUNTER) {
-        encounter_party_init(STARTING_ENCOUNTER_ID);
+        encounter_init_party(STARTING_ENCOUNTER_ID);
     }
 
-    item_new_game_inventory_init();
+    item_init_new_game_inventory();
     script_variable_set(EVENT_SCRIPT_VAR_WAR_FUNDS, STARTING_WAR_FUNDS);
 }

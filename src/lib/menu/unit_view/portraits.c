@@ -23,7 +23,7 @@ enum { PORTRAIT_FORMATION_ICON = 0x100 };
 #    endif
 
 /* Other menu overlays leave the quad alone when either suppress bit is set. */
-void portrait_poly_build(s32 portrait_id, POLY_FT4* poly) {
+void portrait_build_poly(s32 portrait_id, POLY_FT4* poly) {
     if ((portrait_id & PORTRAIT_CODE_SUPPRESS_MASK) == 0) {
         portrait_build_unit_poly(poly, portrait_id);
     }
@@ -37,7 +37,7 @@ void portrait_poly_build(s32 portrait_id, POLY_FT4* poly) {
 
 /* Narrow a portrait quad by amount pixels from its right edge, moving its texture start to keep
  * the image aligned (along v for a rotated texture). */
-static void portrait_clip_from_right(POLY_FT4* poly, s32 amount) {
+static void clip_from_right(POLY_FT4* poly, s32 amount) {
     if (poly->u0 != poly->u1) {
         poly->u0 += amount;
         poly->u2 += amount;
@@ -51,7 +51,7 @@ static void portrait_clip_from_right(POLY_FT4* poly, s32 amount) {
 
 /* Narrow a portrait quad by amount pixels from its left edge, trimming its texture end to keep
  * the image aligned (along v for a rotated texture). */
-static void portrait_clip_from_left(POLY_FT4* poly, s32 amount) {
+static void clip_from_left(POLY_FT4* poly, s32 amount) {
     poly->x0 += amount;
     poly->x2 += amount;
     if (poly->u0 != poly->u1) {
@@ -91,19 +91,19 @@ void portrait_build_transition(const RECT* texture_rect, s32* transition, const 
     }
 
     if (*transition == 0) {
-        portrait_poly_build(*first_portrait, poly);
+        portrait_build_poly(*first_portrait, poly);
         return;
     }
     if (*transition == 1) {
-        portrait_poly_build(*second_portrait, poly);
+        portrait_build_poly(*second_portrait, poly);
         *transition += 1;
         return;
     }
     if (*transition < 4) {
-        portrait_poly_build(*second_portrait, poly);
+        portrait_build_poly(*second_portrait, poly);
         gfx_set_clut_rect_from_id(&second_rect, poly->clut);
         poly++;
-        portrait_poly_build(*first_portrait, poly);
+        portrait_build_poly(*first_portrait, poly);
         gfx_set_clut_rect_from_id(&first_rect, poly->clut);
         StoreImage(&first_rect, (u32*)palettes[0]);
         StoreImage(&second_rect, (u32*)palettes[1]);
@@ -121,45 +121,45 @@ void portrait_build_transition(const RECT* texture_rect, s32* transition, const 
         }
 
         i = *transition - 4;
-        portrait_poly_build(*second_portrait, poly);
+        portrait_build_poly(*second_portrait, poly);
         if (direction == 1) {
-            portrait_clip_from_right(poly, s_unit_panel_portrait_transition_offsets[i]);
+            clip_from_right(poly, s_unit_panel_portrait_transition_offsets[i]);
         } else {
-            portrait_clip_from_left(poly, s_unit_panel_portrait_transition_offsets[i]);
+            clip_from_left(poly, s_unit_panel_portrait_transition_offsets[i]);
         }
         poly++;
 
-        portrait_poly_build(*first_portrait, poly);
+        portrait_build_poly(*first_portrait, poly);
         if (direction == 1) {
-            portrait_clip_from_left(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i]);
+            clip_from_left(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i]);
         } else {
-            portrait_clip_from_right(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i]);
+            clip_from_right(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i]);
         }
         poly++;
 
         /* The wipe edges blend additively (texture page blend rate 1) through the captured
          * CLUTs, whose colors now carry the semi-transparency bit. */
-        portrait_poly_build(*second_portrait, poly);
+        portrait_build_poly(*second_portrait, poly);
         poly->tpage = (poly->tpage & 0xff9f) | 0x20;
         poly->clut = GetClut(second_rect.x, second_rect.y);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
         if (direction == 1) {
-            portrait_clip_from_right(poly, s_unit_panel_portrait_transition_offsets[i + 8]);
+            clip_from_right(poly, s_unit_panel_portrait_transition_offsets[i + 8]);
         } else {
-            portrait_clip_from_left(poly, s_unit_panel_portrait_transition_offsets[i + 8]);
+            clip_from_left(poly, s_unit_panel_portrait_transition_offsets[i + 8]);
         }
         poly++;
 
-        portrait_poly_build(*first_portrait, poly);
+        portrait_build_poly(*first_portrait, poly);
         poly->tpage = (poly->tpage & 0xff9f) | 0x20;
         poly->clut = GetClut(first_rect.x, first_rect.y);
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
         if (direction == 1) {
-            portrait_clip_from_left(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i + 8]);
+            clip_from_left(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i + 8]);
         } else {
-            portrait_clip_from_right(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i + 8]);
+            clip_from_right(poly, 0x1f - s_unit_panel_portrait_transition_offsets[i + 8]);
         }
         *transition += g_script_event_speed;
     }

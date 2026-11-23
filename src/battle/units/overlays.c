@@ -3,14 +3,15 @@
 
 #include "fft/action.h"
 #include "fft/animation.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
 #include "fft/cursor.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/move_step.h"
 #include "fft/option.h"
 #include "fft/result.h"
@@ -19,7 +20,6 @@
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "fft/vector.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -27,7 +27,7 @@
 #include "psx/types.h"
 
 /* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
- * tested separately by bubble_cycle_update; bubbles 8 and 11 hold 0 too,
+ * tested separately by update_bubble_cycle; bubbles 8 and 11 hold 0 too,
  * so they never show. */
 extern s32 g_status_bubble_status_masks[STATUS_BUBBLE_SOURCE_UNIT];
 
@@ -79,26 +79,26 @@ extern u8 g_result_status_image_ids[STATUS_BYTE_COUNT][8];
  * recalculated on every call.
  *
  * `unused` reproduces the target's 0x58-byte frame. */
-void sprite_shadow_draw(unit_runtime_t* unit, u32* ot) {
+void sprite_draw_shadow(map_unit_t* unit, u32* ot) {
     VECTOR transformed;
     SVECTOR position;
     SVECTOR offset;
     SVECTOR unused;
     s32 flag;
     POLY_FT4* prim;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
     SVECTOR* corners;
     u32* packet;
     s32 depth;
     u32 frame;
 
     if ((unit->shadow_dirty |= 1) != 0) {
-        sprite_shadow_build_quad(unit);
+        sprite_build_shadow_quad(unit);
         unit->shadow_dirty ^= 1;
     }
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
-    prim = g_sprite_prim_pool + sprite_primitive_take();
+    prim = g_sprite_prim_pool + sprite_take_primitive();
     corners = unit->shadow_quad;
     ((P_TAG*)prim)->len = 9;
     prim->code = 0x2c;
@@ -115,14 +115,14 @@ void sprite_shadow_draw(unit_runtime_t* unit, u32* ot) {
     prim->x3 = transformed.vx;
     prim->y3 = transformed.vy;
     prim->code |= 2;
-    tile = battle_map_tile_get_pointer((unit->world_coords.vx / BATTLE_MAP_TILE_SIZE),
-        (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
+    tile = map_get_tile(
+        (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_layer);
     if (tile->depth_half_height.depth
-        && -(tile->height + tile->depth_half_height.depth) * BATTLE_MAP_HEIGHT_STEP < unit->world_coords.vy) {
+        && -(tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP < unit->world_coords.vy) {
         unit->shadow_counter += g_system_vsync_interval;
         frame = unit->shadow_counter;
         prim->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
-        prim->clut = unit->clut + 0x40; /* the unit's CLUT of BATTLE_MAP_CLUT_ROW_UNIT_SHADOWS */
+        prim->clut = unit->clut + 0x40; /* the unit's CLUT of MAP_CLUT_ROW_UNIT_SHADOWS */
         prim->r0 = prim->g0 = prim->b0 = 0x80;
         switch (frame & 0x30) {
         case 0:
@@ -152,38 +152,37 @@ void sprite_shadow_draw(unit_runtime_t* unit, u32* ot) {
         }
     } else {
         prim->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_SUBTRACT;
-        prim->clut = unit->clut + 0x40; /* the unit's CLUT of BATTLE_MAP_CLUT_ROW_UNIT_SHADOWS */
+        prim->clut = unit->clut + 0x40; /* the unit's CLUT of MAP_CLUT_ROW_UNIT_SHADOWS */
         prim->r0 = prim->g0 = prim->b0 = 0x80;
         prim->u0 = prim->u2 = 0x90;
         prim->u1 = prim->u3 = 0xa3;
         prim->v0 = prim->v1 = 0x40;
         prim->v2 = prim->v3 = 0x53;
     }
-    vector_short_set(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
+    vector_set_short(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
         unit->world_coords.vz + unit->event_offset.vz + unit->seq_offset.vz);
-    position.vy = battle_map_slope_height_calculate(&position, unit->map_layer);
+    position.vy = map_calculate_slope_height(&position, unit->map_layer);
     if (unit->world_coords.vy >= position.vy) {
         packet = ot;
     } else {
-        tile = battle_map_tile_get_pointer(
-            (position.vx / BATTLE_MAP_TILE_SIZE), (position.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
-        position.vy -= tile->depth_half_height.depth * BATTLE_MAP_HEIGHT_STEP;
+        tile = map_get_tile((position.vx / MAP_TILE_SIZE), (position.vz / MAP_TILE_SIZE), unit->map_layer);
+        position.vy -= tile->depth_half_height.depth * MAP_HEIGHT_STEP;
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if (tile->surface.depth_bias) {
-                camera_get_step_depth_point_biased(&position, &offset);
+                camera_get_biased_step_depth_point(&position, &offset);
             } else {
-                camera_get_step_depth_point_unbiased(&position, &offset);
+                camera_get_unbiased_step_depth_point(&position, &offset);
             }
         } else if (tile->surface.depth_bias) {
-            camera_get_tile_depth_point_biased(&position, &offset);
+            camera_get_biased_tile_depth_point(&position, &offset);
         } else {
-            camera_get_tile_depth_point_unbiased(&position, &offset);
+            camera_get_unbiased_tile_depth_point(&position, &offset);
         }
         SetRotMatrix(&g_camera_matrix);
         SetTransMatrix(&g_camera_matrix);
         RotTrans(&offset, &transformed, &flag);
         depth = transformed.vz / 4;
-        packet = gfx_battle_otag_get() + depth;
+        packet = gfx_get_battle_otag() + depth;
     }
     AddPrim(packet, prim);
 }
@@ -200,7 +199,7 @@ void sprite_shadow_draw(unit_runtime_t* unit, u32* ot) {
  * only when the first three projected vertices face the camera. Every
  * primitive takes a POLY_FT4-sized slot of the pool.
  */
-void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
+void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
     VECTOR screen;
     MATRIX unused_matrix; /* unreferenced; reserves the target frame's 0x20-byte gap at sp+0x20 */
     s32 flag;
@@ -215,8 +214,8 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
     SetTransMatrix(&g_camera_matrix);
     switch (shape) {
     case 0:
-        quad = g_sprite_prim_pool + sprite_primitive_take();
-        quad_glow = g_sprite_prim_pool + sprite_primitive_take();
+        quad = g_sprite_prim_pool + sprite_take_primitive();
+        quad_glow = g_sprite_prim_pool + sprite_take_primitive();
         ((P_TAG*)quad)->len = 9;
         quad->code = 0x2c;
         RotTrans(v0, &screen, &flag);
@@ -233,7 +232,7 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         quad->y3 = screen.vy;
         quad->code |= 2;
         quad->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
-        quad->clut = GetClut(palette * 16 + 16, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        quad->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         quad->r0 = quad->g0 = quad->b0 = 0x80;
         quad->u2 = 0;
         quad->u0 = 0;
@@ -245,7 +244,7 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         quad->v2 = 0xad;
         *quad_glow = *quad;
         quad_glow->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_AVERAGE;
-        quad_glow->clut = GetClut(0x50, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        quad_glow->clut = GetClut(0x50, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         quad_glow->u2 = 0xc;
         quad_glow->u0 = 0xc;
         quad_glow->u3 = 0xc;
@@ -260,10 +259,10 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         }
         return;
     case 1:
-        tri_a = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
-        tri_b = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
-        tri_a_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
-        tri_b_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
+        tri_a = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
+        tri_b = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
+        tri_a_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
+        tri_b_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
         ((P_TAG*)tri_a)->len = 7;
         tri_a->code = 0x24;
         ((P_TAG*)tri_b)->len = 7;
@@ -283,7 +282,7 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         tri_a->code |= 2;
         tri_b->code |= 2;
         tri_a->tpage = tri_b->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
-        tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b->r0 = tri_b->g0 = tri_b->b0 = 0x80;
         tri_a->r0 = tri_a->g0 = tri_a->b0 = 0x80;
         tri_b->u2 = 0;
@@ -301,7 +300,7 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         *tri_a_glow = *tri_a;
         *tri_b_glow = *tri_b;
         tri_a_glow->tpage = tri_b_glow->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_AVERAGE;
-        tri_a_glow->clut = tri_b_glow->clut = GetClut(0x50, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        tri_a_glow->clut = tri_b_glow->clut = GetClut(0x50, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b_glow->u2 = 0xc;
         tri_a_glow->u2 = 0xc;
         tri_a_glow->u0 = 0xc;
@@ -326,10 +325,10 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         }
         break;
     case 2:
-        tri_a = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
-        tri_b = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
-        tri_a_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
-        tri_b_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_primitive_take());
+        tri_a = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
+        tri_b = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
+        tri_a_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
+        tri_b_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
         ((P_TAG*)tri_a)->len = 7;
         tri_a->code = 0x24;
         ((P_TAG*)tri_b)->len = 7;
@@ -349,7 +348,7 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         tri_a->code |= 2;
         tri_b->code |= 2;
         tri_a->tpage = tri_b->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
-        tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b->r0 = tri_b->g0 = tri_b->b0 = 0x80;
         tri_a->r0 = tri_a->g0 = tri_a->b0 = 0x80;
         tri_b->u2 = 0;
@@ -367,7 +366,7 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         *tri_a_glow = *tri_a;
         *tri_b_glow = *tri_b;
         tri_a_glow->tpage = tri_b_glow->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_AVERAGE;
-        tri_a_glow->clut = tri_b_glow->clut = GetClut(0x50, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        tri_a_glow->clut = tri_b_glow->clut = GetClut(0x50, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b_glow->u2 = 0xc;
         tri_a_glow->u2 = 0xc;
         tri_a_glow->u0 = 0xc;
@@ -407,18 +406,18 @@ void cursor_tile_glow_build(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
  * The two initialized locals occupy 64 bytes of .rodata at 0x80067798: the bob
  * offsets and their durations in frames.
  */
-void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
+void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
     VECTOR transformed;
     SVECTOR screen;
     s32 bob[8] = { 0, 1, 2, 3, 5, 3, 2, 1 };
     s32 duration[8] = { 16, 8, 2, 2, 6, 4, 4, 10 };
     s32 flag;
     POLY_FT4* prim;
-    unit_runtime_t* unit;
+    map_unit_t* unit;
     s32 height;
     s32 half_height;
 
-    prim = g_sprite_prim_pool + sprite_primitive_take();
+    prim = g_sprite_prim_pool + sprite_take_primitive();
     ((P_TAG*)prim)->len = 9;
     prim->code = 0x2c;
     if (g_menu_status_screen_selected != 1) {
@@ -431,7 +430,7 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
             }
         }
     }
-    unit = unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
+    unit = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
     if (unit != 0) {
         height = g_sprite_sheet_data[unit->spritesheet_id].graphic_height * g_camera_zoom.vy / ONE + 0x18;
     } else {
@@ -455,7 +454,7 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
         prim->y3 = screen_y + half_height;
     }
     prim->code |= 2;
-    prim->clut = GetClut(0x40, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+    prim->clut = GetClut(0x40, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
     prim->r0 = prim->g0 = prim->b0 = 0x80;
     prim->u2 = 0x40;
     prim->u0 = 0x40;
@@ -465,7 +464,7 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
     prim->v0 = 0x80;
     prim->v3 = 0x98;
     prim->v2 = 0x98;
-    camera_get_tile_depth_point_unbiased(base, &screen);
+    camera_get_unbiased_tile_depth_point(base, &screen);
     RotTrans(&screen, &transformed, &flag);
     AddPrim(ot + (transformed.vz / 4), prim);
 }
@@ -474,7 +473,7 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
  * Queue the four wait-direction arrows around a unit's feet. The arrow of the
  * source unit's facing quadrant blinks between two lit images every 32 timer
  * counts; the others show the unlit image. Called from
- * unit_facing_draw_wait_direction with the unit's base position and the
+ * map_unit_facing_draw_wait_direction with the unit's base position and the
  * ordering-table slot for its depth.
  *
  * The two initialized locals occupy 32 bytes of .rodata at 0x800677d8; the
@@ -484,33 +483,33 @@ void cursor_map_selection_draw(SVECTOR* base, u32* ot) {
  * into saved registers, which only happens with more than one use apiece;
  * cross-jumping merges the repeats back into one tail.
  */
-void unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
+void map_unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
     SVECTOR position;
     VECTOR transformed;
     s32 dx[4] = { 0, -14, 0, 14 };
     s32 dz[4] = { -14, 0, 14, 0 };
     s32 flag;
-    unit_runtime_t* unit;
+    map_unit_t* unit;
     POLY_FT4* prim;
     /* Signed 16-bit value: the target's division emits the `bgez`/`addiu 0x3ff`
      * correction, so the quadrant bits are not held in an unsigned type. */
     s16 facing_bits;
     s32 i;
 
-    unit = unit_source_get();
+    unit = map_unit_get_source();
     g_unit_facing_wait_arrow_blink_timer += g_system_vsync_interval;
     for (i = 0; i < 4; i++) {
-        prim = g_sprite_prim_pool + sprite_primitive_take();
+        prim = g_sprite_prim_pool + sprite_take_primitive();
         ((P_TAG*)prim)->len = 9;
         prim->code = 0x2e;
         prim->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
-        vector_short_set(&position, base->vx + dx[i], base->vy - 48, base->vz + dz[i]);
+        vector_set_short(&position, base->vx + dx[i], base->vy - 48, base->vz + dz[i]);
         RotTrans(&position, &transformed, &flag);
         prim->x0 = prim->x2 = transformed.vx - 7;
         prim->x1 = prim->x3 = transformed.vx + 7;
         prim->y0 = prim->y1 = transformed.vy - 7;
         prim->y2 = prim->y3 = transformed.vy + 7;
-        prim->clut = GetClut(0x30, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_SPRITES);
+        prim->clut = GetClut(0x30, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         prim->r0 = prim->g0 = prim->b0 = 0x80;
         facing_bits = unit->facing & 0xc00;
         if (i == facing_bits / 0x400) {
@@ -546,7 +545,7 @@ static const s8 s_float_bob_offsets[24];
 
 /* This updater needs a signed 16-bit result view. Changing the public return type
  * instead alters the arithmetic callers in animation_motion.c. */
-typedef s16 (*unit_height_s16_fn_t)(unit_runtime_t* unit);
+typedef s16 (*unit_height_s16_fn_t)(map_unit_t* unit);
 
 /* Raise a floating unit's height offset, or lower it back to the ground.
  *
@@ -556,7 +555,7 @@ typedef s16 (*unit_height_s16_fn_t)(unit_runtime_t* unit);
  * post-move event state. The unit's world and real y are then raised to the
  * recalculated ground height when they lie below it. Jumping units whose
  * height is controlled by their jump animation are left untouched. */
-static void float_height_update(unit_runtime_t* unit) {
+static void update_float_height(map_unit_t* unit) {
     s8 wave[24];
     s16 ground_y;
     u32 phase;
@@ -580,14 +579,14 @@ static void float_height_update(unit_runtime_t* unit) {
             if (unit->depth_height_offset < 0) {
                 unit->depth_height_offset = 0;
             }
-            ground_y = ((unit_height_s16_fn_t)unit_height_calculate_from_world_coords)(unit);
+            ground_y = ((unit_height_s16_fn_t)map_unit_calculate_height_from_world_coords)(unit);
             unit->world_coords.vy = ground_y;
             unit->real.vy = ground_y * ONE;
         } else {
             unit->float_bob_offset = 0;
         }
     }
-    ground_y = ((unit_height_s16_fn_t)unit_height_calculate_from_world_coords)(unit);
+    ground_y = ((unit_height_s16_fn_t)map_unit_calculate_height_from_world_coords)(unit);
     if (unit->world_coords.vy > ground_y) {
         unit->world_coords.vy = ground_y;
         unit->real.vy = ground_y * ONE;
@@ -612,7 +611,7 @@ static const s8 s_float_bob_offsets[24] = { 4, 4, 4, 4, 3, 3, 3, 2, 2, 1, 1, 1, 
  * The block-scoped bubble_mask keeps GCC from rotating the loop's leading exit
  * tests to the bottom, and indexing g_status_bubble_status_masks inside the loop lets loop.c
  * strength-reduce it into the target's pointer walk. */
-static void bubble_cycle_update(unit_runtime_t* unit) {
+static void update_bubble_cycle(map_unit_t* unit) {
     s32 frame;
     s32 bubble;
     u32 status_flags;
@@ -628,7 +627,7 @@ static void bubble_cycle_update(unit_runtime_t* unit) {
 
         if ((unit->status_bubble_timer & 0xF) == 0) {
             status_flags = unit->status_flags_1_4;
-            if (((status_flags & UNIT_STATUS_BUBBLE_MASK) == 0) && (unit->runtime_id != g_unit_source_runtime_id)) {
+            if (((status_flags & UNIT_STATUS_BUBBLE_MASK) == 0) && (unit->map_unit_id != g_unit_source_map_unit_id)) {
                 unit->status_bubble_active = 0;
                 return;
             }
@@ -657,7 +656,7 @@ static void bubble_cycle_update(unit_runtime_t* unit) {
                     if (status_flags & bubble_mask) {
                         break;
                     }
-                } else if (unit->runtime_id == g_unit_source_runtime_id) {
+                } else if (unit->map_unit_id == g_unit_source_map_unit_id) {
                     break;
                 }
             }
@@ -684,7 +683,7 @@ static void bubble_cycle_update(unit_runtime_t* unit) {
                 break;
             case SPRITE_SHP_TYPE1:
             case SPRITE_SHP_TYPE2:
-                if (battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer)->depth_half_height.depth) {
+                if (map_get_tile(unit->map_x, unit->map_y, unit->map_layer)->depth_half_height.depth) {
                     switch (unit->animation.sequence_id >> 1) {
                     case ANIMATION_DEAD:
                     case ANIMATION_DEATH:
@@ -750,7 +749,7 @@ static const SVECTOR s_identity_scale = { ONE, ONE, ONE, 0 };
  * while bit 4 of the timer is set, and sorted at the depth of a point 12 units
  * below its base.
  */
-void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_screen_coords) {
+void sprite_status_bubble_draw(map_unit_t* unit, const DVECTOR* unused_screen_coords) {
     SVECTOR position;
     SVECTOR zoom = s_identity_scale;
     VECTOR transformed;
@@ -782,7 +781,7 @@ void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_scree
             display->parts[0].v = 0xBC;
         }
     } else if (bubble_id == STATUS_BUBBLE_DEAD) {
-        table_index = unit->stats->death_counter;
+        table_index = unit->battle_unit->death_counter;
         if (unit->status_flags_1_4 & UNIT_STATUS_RERAISE) {
             display->parts[0].u = s_bubble_u[STATUS_BUBBLE_RERAISE];
             flag_row = s_bubble_v[STATUS_BUBBLE_RERAISE];
@@ -802,7 +801,7 @@ void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_scree
             }
         }
     } else if (bubble_id == STATUS_BUBBLE_DEATH_SENTENCE) {
-        table_index = unit->stats->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] & 3;
+        table_index = unit->battle_unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] & 3;
         display->parts[0].u = s_bubble_digit_u[table_index];
         display->parts[0].v = s_bubble_digit_v[table_index];
     } else {
@@ -818,7 +817,7 @@ void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_scree
 
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
-    vector_short_set(&base, unit->world_coords.vx + unit->event_offset.vx,
+    vector_set_short(&base, unit->world_coords.vx + unit->event_offset.vx,
         unit->world_coords.vy + unit->event_offset.vy + unit->status_bubble_y,
         unit->world_coords.vz + unit->event_offset.vz);
     RotTrans(&base, &transformed, &unit->gte_flag);
@@ -828,38 +827,38 @@ void sprite_status_bubble_draw(unit_runtime_t* unit, const DVECTOR* unused_scree
     if (unit->status_bubble_timer & 0x10) {
         position.vy = y - 1;
     }
-    camera_get_tile_depth_point_unbiased(&base, &raised);
+    camera_get_unbiased_tile_depth_point(&base, &raised);
     raised.vy += 12;
     RotTrans(&raised, &transformed, &flag);
     display = unit->status_bubble_display;
-    otag = gfx_battle_otag_get();
+    otag = gfx_get_battle_otag();
     depth = transformed.vz / 4;
-    sprite_display_construct_polygon_data(display, display->part_count, 0, &position, 0, 0, &zoom, otag + depth);
+    sprite_display_draw_parts(display, display->part_count, 0, &position, 0, 0, &zoom, otag + depth);
 }
 
 /* Per-frame float and status-bubble update of one unit: adjusts its float height
  * except during the four float-jump step phases, then advances its status bubble
  * when one is active. */
-void unit_float_status_bubble_update(unit_runtime_t* unit) {
+void map_unit_update_float_and_status_bubble(map_unit_t* unit) {
     u8 phase = unit->step_phase;
 
     if (phase != MOVE_STEP_PHASE_FLOAT_JUMP_SOUTH && phase != MOVE_STEP_PHASE_FLOAT_JUMP_EAST
         && phase != MOVE_STEP_PHASE_FLOAT_JUMP_WEST && phase != MOVE_STEP_PHASE_FLOAT_JUMP_NORTH) {
-        float_height_update(unit);
+        update_float_height(unit);
     }
     if (unit->status_bubble_active != 0) {
-        bubble_cycle_update(unit);
+        update_bubble_cycle(unit);
     }
 }
 
 /* Start the unit's afterimage trail: enable position_copies and seed all six at its world
  * position. Jump launches and SEQ opcode 0xbf start it. */
-void sprite_afterimage_init(unit_runtime_t* unit) {
+void sprite_afterimage_init(map_unit_t* unit) {
     s32 i;
 
     unit->position_copies_active = 1;
     for (i = 0; i < 6; i++) {
-        vector_short_set(
+        vector_set_short(
             &unit->position_copies[i], unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     }
 }
@@ -873,7 +872,7 @@ void sprite_afterimage_init(unit_runtime_t* unit) {
  * blend bits cleared (half blend). The camera matrices are rebuilt for every
  * copy.
  */
-void sprite_afterimage_draw(unit_runtime_t* unit) {
+void sprite_afterimage_draw(map_unit_t* unit) {
     SVECTOR position;
     SVECTOR zoom;
     VECTOR transformed;
@@ -884,7 +883,7 @@ void sprite_afterimage_draw(unit_runtime_t* unit) {
     s16 flags;
 
     for (i = 0; i < 6; i++) {
-        camera_matrices_update(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
+        camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
         SetRotMatrix(&g_camera_matrix);
         SetTransMatrix(&g_camera_matrix);
         RotTrans(&unit->position_copies[i], &transformed, &flag);
@@ -895,37 +894,37 @@ void sprite_afterimage_draw(unit_runtime_t* unit) {
             | SPRITE_DISPLAY_SEMI_TRANSPARENT;
         copyVector(&zoom, &g_camera_zoom);
         display = unit->animation.display;
-        sprite_display_construct_polygon_data(
-            display, display->part_count, 0, &position, 0, flags, &zoom, gfx_battle_otag_get() + depth);
+        sprite_display_draw_parts(
+            display, display->part_count, 0, &position, 0, flags, &zoom, gfx_get_battle_otag() + depth);
     }
 }
 
 /* Advances the unit's position trail: each copy takes the next newer one and copy
  * 0 the unit's current position. */
-void sprite_afterimage_shift_and_fill(unit_runtime_t* unit) {
+void sprite_afterimage_shift_and_fill(map_unit_t* unit) {
     s32 index;
 
     for (index = 5; index > 0; index--) {
         unit->position_copies[index] = unit->position_copies[index - 1];
     }
-    unit_draw_coords_copy(unit->position_copies, unit);
+    map_unit_copy_draw_coords(unit->position_copies, unit);
 }
 
 /* Make the unit's item display show an item's 16x16 icon, centered on the
  * display's origin. */
-void sprite_display_store_item(unit_runtime_t* unit, u32 item_id) {
+void sprite_item_display_set(map_unit_t* unit, u32 item_id) {
     SPRT data;
 
     gfx_set_item_icon_sprite(&data, item_id);
     unit->item_display->clut = data.clut;
-    sprite_display_store_data(
+    sprite_display_set_part(
         unit->item_display, 0, (16 - data.w) / 2 - 8, (16 - data.h) / 2 - 8, data.u0, data.v0, data.w, data.h, 0);
 }
 
 /* Queues the unit's item icon at its item display offset from the unit's screen
  * position, at the unit's ordering-table depth and scale ONE. The x offset is
  * negated unless the sprite is flipped horizontally. */
-void sprite_item_display_draw(unit_runtime_t* unit) {
+void sprite_item_display_draw(map_unit_t* unit) {
     SVECTOR position;
     SVECTOR zoom;
     u32* otag;
@@ -938,19 +937,18 @@ void sprite_item_display_draw(unit_runtime_t* unit) {
     position.vy = unit->item_display_y_offset;
     position.vx += unit->camera_relative_x;
     position.vy += unit->camera_relative_y;
-    vector_short_set(&zoom, ONE, ONE, ONE);
-    otag = gfx_battle_otag_get();
+    vector_set_short(&zoom, ONE, ONE, ONE);
+    otag = gfx_get_battle_otag();
     otag += unit->otag_depth_index;
-    sprite_display_construct_polygon_data(
-        unit->item_display, unit->item_display->part_count, 0, &position, 0, 0, &zoom, otag);
+    sprite_display_draw_parts(unit->item_display, unit->item_display->part_count, 0, &position, 0, 0, &zoom, otag);
 }
 
 /* Load the unit's next pending action result into its numeric display and clear its pending flag:
  * a stat change, then level down or up, stolen, broken, Quick, CT 0, missed, guarded, caught, then
  * the queued status images. Sets the digit sprites (values over 999 show 999) and the color.
  * Returns 0 when nothing is pending. */
-s32 result_next_display_build(unit_runtime_t* unit) {
-    unit_stats_t* stats;
+s32 result_build_next_display(map_unit_t* unit) {
+    battle_unit_t* stats;
     u32 scan_flags;
     s32 flags;
     action_result_display_t* display;
@@ -970,7 +968,7 @@ s32 result_next_display_build(unit_runtime_t* unit) {
     u8 status;
 
     flags = unit->action_display_flags;
-    stats = unit->stats;
+    stats = unit->battle_unit;
     display = &unit->numeric_display;
 
     if ((flags & ACTION_DISPLAY_NUMERIC_FLAGS_MASK) != 0) {
@@ -1072,7 +1070,7 @@ s32 result_next_display_build(unit_runtime_t* unit) {
         return 0;
     }
 
-    if (unit->stats->action.critical != 0) {
+    if (unit->battle_unit->action.critical != 0) {
         display->selector |= RESULT_DISPLAY_MODIFIER_CRITICAL;
     } else {
         display->selector &= ~RESULT_DISPLAY_MODIFIER_CRITICAL;
@@ -1154,8 +1152,8 @@ s32 result_next_display_build(unit_runtime_t* unit) {
     display_2 = display->displays[2];
 
     /* Empty displays 0 and 1; each case below fills only the sprites it uses. */
-    sprite_display_store_data(display_0, 0, 0, -32, 0, 0, 0, 0, 0);
-    sprite_display_store_data(display_1, 0, 0, -32, 0, 0, 0, 0, 0);
+    sprite_display_set_part(display_0, 0, 0, -32, 0, 0, 0, 0, 0);
+    sprite_display_set_part(display_1, 0, 0, -32, 0, 0, 0, 0, 0);
 
     switch (display->selector & RESULT_DISPLAY_SELECTOR_MASK) {
     case RESULT_DISPLAY_HP_DAMAGE:
@@ -1167,17 +1165,17 @@ s32 result_next_display_build(unit_runtime_t* unit) {
         if ((display->selector & 1) == 0) {
             y_shift = 16;
         }
-        sprite_display_store_data(display_1, 0, -14, y_shift, 0, 0, 0, 0, 0);
-        sprite_display_store_data(display_2, 0, -21, y_shift, 0, 0, 0, 0, 0);
+        sprite_display_set_part(display_1, 0, -14, y_shift, 0, 0, 0, 0, 0);
+        sprite_display_set_part(display_2, 0, -21, y_shift, 0, 0, 0, 0, 0);
         if ((digits[2] | digits[1]) == 0) {
-            sprite_display_store_data(display_0, 0, -21, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -21, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
         } else if (digits[2] == 0) {
-            sprite_display_store_data(display_0, 0, -14, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
-            sprite_display_store_data(display_1, 0, -21, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -14, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_1, 0, -21, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         } else {
-            sprite_display_store_data(display_0, 0, -7, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
-            sprite_display_store_data(display_1, 0, -14, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
-            sprite_display_store_data(display_2, 0, -21, y_shift, 0xa8 + digits[2] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -7, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_1, 0, -14, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_2, 0, -21, y_shift, 0xa8 + digits[2] * 8, 0x30, 8, 16, 0);
         }
         break;
 
@@ -1198,80 +1196,80 @@ s32 result_next_display_build(unit_runtime_t* unit) {
             y_shift = 16;
         }
         if (digits[1] == 0) {
-            sprite_display_store_data(display_0, 0, -14, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -14, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
         } else {
-            sprite_display_store_data(display_0, 0, -14, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
-            sprite_display_store_data(display_1, 0, -21, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -14, y_shift, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_1, 0, -21, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         }
 
         /* Masking bit 0 lets each damage case also label the matching gain. */
         switch (display->selector & 0x0e) {
         case RESULT_DISPLAY_SPEED_DAMAGE:
-            sprite_display_store_data(display_2, 0, -7, y_shift, 0x9c, 0xc2, 0x18, 0x0a, 0);
+            sprite_display_set_part(display_2, 0, -7, y_shift, 0x9c, 0xc2, 0x18, 0x0a, 0);
             break;
         case RESULT_DISPLAY_CT_DAMAGE:
-            sprite_display_store_data(display_2, 0, -7, y_shift, 0xc2, 0xc2, 0x0e, 0x0a, 0);
+            sprite_display_set_part(display_2, 0, -7, y_shift, 0xc2, 0xc2, 0x0e, 0x0a, 0);
             break;
         case RESULT_DISPLAY_BRAVE_DAMAGE:
-            sprite_display_store_data(display_2, 0, -7, y_shift, 0xa8, 0xb8, 0x0b, 0x0a, 0);
+            sprite_display_set_part(display_2, 0, -7, y_shift, 0xa8, 0xb8, 0x0b, 0x0a, 0);
             break;
         case RESULT_DISPLAY_FAITH_DAMAGE:
-            sprite_display_store_data(display_2, 0, -7, y_shift, 0x9c, 0xb8, 0x0c, 0x0a, 0);
+            sprite_display_set_part(display_2, 0, -7, y_shift, 0x9c, 0xb8, 0x0c, 0x0a, 0);
             break;
         case RESULT_DISPLAY_PA_DAMAGE:
-            sprite_display_store_data(display_2, 0, -7, y_shift, 0x40, 0, 0x0c, 0x0d, 0);
+            sprite_display_set_part(display_2, 0, -7, y_shift, 0x40, 0, 0x0c, 0x0d, 0);
             break;
         case RESULT_DISPLAY_MA_DAMAGE:
-            sprite_display_store_data(display_2, 0, -7, y_shift, 0x40, 0x0d, 0x0b, 0x0a, 0);
+            sprite_display_set_part(display_2, 0, -7, y_shift, 0x40, 0x0d, 0x0b, 0x0a, 0);
             break;
         }
         break;
 
     case RESULT_DISPLAY_MISSED:
-        sprite_display_store_data(display_2, 0, -21, -32, 0xbe, 0x48, 0x1b, 8, 0);
+        sprite_display_set_part(display_2, 0, -21, -32, 0xbe, 0x48, 0x1b, 8, 0);
         break;
     case RESULT_DISPLAY_GUARDED:
-        sprite_display_store_data(display_2, 0, -21, -32, 0xb8, 0x60, 0x1e, 8, 0);
+        sprite_display_set_part(display_2, 0, -21, -32, 0xb8, 0x60, 0x1e, 8, 0);
         break;
     case RESULT_DISPLAY_CAUGHT:
-        sprite_display_store_data(display_2, 0, -21, -32, 0x30, 0xe6, 0x1a, 0x0a, 0);
+        sprite_display_set_part(display_2, 0, -21, -32, 0x30, 0xe6, 0x1a, 0x0a, 0);
         break;
     case RESULT_DISPLAY_STATUS_INFLICTED:
     case RESULT_DISPLAY_STATUS_REMOVED:
         image_id = status;
-        sprite_display_store_data(display_2, 0, -21, -32, g_result_image_rects[image_id].u,
+        sprite_display_set_part(display_2, 0, -21, -32, g_result_image_rects[image_id].u,
             g_result_image_rects[image_id].v, g_result_image_rects[image_id].width,
             g_result_image_rects[image_id].height, 0);
         break;
     case RESULT_DISPLAY_LEVEL_DOWN:
         /* The fall-through overwrites both sprites, so level down places them like level up. */
-        sprite_display_store_data(display_1, 0, -7, 16, 0xb0, 0x30, 8, 16, 0);
-        sprite_display_store_data(display_2, 0, 0, 16, 0xb4, 0xc1, 0x0e, 0x0a, 0);
+        sprite_display_set_part(display_1, 0, -7, 16, 0xb0, 0x30, 8, 16, 0);
+        sprite_display_set_part(display_2, 0, 0, 16, 0xb4, 0xc1, 0x0e, 0x0a, 0);
         /* fall through */
     case RESULT_DISPLAY_LEVEL_UP:
-        sprite_display_store_data(display_1, 0, -7, -32, 0xb0, 0x30, 8, 16, 0);
-        sprite_display_store_data(display_2, 0, 0, -32, 0xb4, 0xc1, 0x0e, 0x0a, 0);
+        sprite_display_set_part(display_1, 0, -7, -32, 0xb0, 0x30, 8, 16, 0);
+        sprite_display_set_part(display_2, 0, 0, -32, 0xb4, 0xc1, 0x0e, 0x0a, 0);
         break;
     case RESULT_DISPLAY_STOLEN:
         image = &g_result_image_rects[ACTION_DISPLAY_IMAGE_STOLEN];
-        sprite_display_store_data(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
+        sprite_display_set_part(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
     case RESULT_DISPLAY_BROKEN:
         image = &g_result_image_rects[ACTION_DISPLAY_IMAGE_BROKEN];
-        sprite_display_store_data(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
+        sprite_display_set_part(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
     case RESULT_DISPLAY_QUICK:
         image = &g_result_image_rects[ACTION_DISPLAY_IMAGE_QUICK];
-        sprite_display_store_data(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
+        sprite_display_set_part(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
     case RESULT_DISPLAY_CT_ZERO:
         /* y_shift is never set on this path; its stale value picks the row (QUIRKS.md). */
-        sprite_display_store_data(display_1, 0, -16, y_shift, 0xc2, 0xc2, 0x0e, 8, 0);
-        sprite_display_store_data(display_2, 0, 0, y_shift, 0xa8, 0x34, 8, 8, 0);
+        sprite_display_set_part(display_1, 0, -16, y_shift, 0xc2, 0xc2, 0x0e, 8, 0);
+        sprite_display_set_part(display_2, 0, 0, y_shift, 0xa8, 0x34, 8, 8, 0);
         break;
     }
 
-    battle_map_palette_load_data(&g_result_palette, BATTLE_MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
+    map_palette_load_data(&g_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0);
     return 1;
 }
 
@@ -1281,8 +1279,8 @@ s32 result_next_display_build(unit_runtime_t* unit) {
  * break result and lists the inflicted/removed status images (removals
  * marked 0x80); a miss queues MISSED, GUARDED or CAUGHT by miss type. The
  * first display is built immediately unless a numeric display is active. */
-void result_display_prepare(unit_runtime_t* unit) {
-    unit_stats_t* stats;
+void result_prepare_display(map_unit_t* unit) {
+    battle_unit_t* stats;
     action_data_t* action;
     s32 i;
     s32 j;
@@ -1293,7 +1291,7 @@ void result_display_prepare(unit_runtime_t* unit) {
 
     unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
         = unit->numeric_display.displays[2]->tpage = SPRITE_TPAGE_FRAME;
-    stats = unit->stats;
+    stats = unit->battle_unit;
     action = &stats->action;
     if (action->hit != 0) {
         if (action->attack_type & ACTION_TYPE_HP_DAMAGE) {
@@ -1420,7 +1418,7 @@ void result_display_prepare(unit_runtime_t* unit) {
     }
     if (unit->numeric_display.active == 0) {
         unit->numeric_display.progress = 0;
-        result_next_display_build(unit);
+        result_build_next_display(unit);
     }
 }
 
@@ -1428,11 +1426,11 @@ void result_display_prepare(unit_runtime_t* unit) {
  * then no target, silenced or not enough MP, clearing that flag. A number shows
  * its last two digits (a value over 999 shows 99).
  *
- * The companion of result_next_display_build for flags
+ * The companion of result_build_next_display for flags
  * 0x02000000 and above. Returns 0 when no flag is pending. Reading the
  * flags into a block-local before clearing keeps the target's and operand
  * order. */
-s32 result_next_special_display_build(unit_runtime_t* unit) {
+s32 result_build_next_special_display(map_unit_t* unit) {
     action_result_display_t* display;
     sprite_display_t* display_0;
     sprite_display_t* display_1;
@@ -1504,52 +1502,52 @@ s32 result_next_special_display_build(unit_runtime_t* unit) {
     display_2 = display->displays[2];
 
     /* Empty displays 1 and 2; each case below fills only the sprites it uses. */
-    sprite_display_store_data(display_2, 0, -21, 16, 0, 0, 0, 0, 0);
-    sprite_display_store_data(display_1, 0, -21, 16, 0, 0, 0, 0, 0);
+    sprite_display_set_part(display_2, 0, -21, 16, 0, 0, 0, 0, 0);
+    sprite_display_set_part(display_1, 0, -21, 16, 0, 0, 0, 0, 0);
 
     switch (display->selector & RESULT_DISPLAY_SELECTOR_MASK) {
     case RESULT_DISPLAY_GAINED_EXP:
         if (digits[1] == 0) {
-            sprite_display_store_data(display_0, 0, -7, -24, 0xc0, 0xb8, 0x12, 9, 0);
-            sprite_display_store_data(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -7, -24, 0xc0, 0xb8, 0x12, 9, 0);
+            sprite_display_set_part(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
         } else {
-            sprite_display_store_data(display_0, 0, -7, -24, 0xc0, 0xb8, 0x12, 9, 0);
-            sprite_display_store_data(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
-            sprite_display_store_data(display_2, 0, -21, -32, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -7, -24, 0xc0, 0xb8, 0x12, 9, 0);
+            sprite_display_set_part(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_2, 0, -21, -32, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         }
         break;
     case RESULT_DISPLAY_GAINED_JP:
         if (digits[1] == 0) {
-            sprite_display_store_data(display_0, 0, -7, -24, 0xb4, 0xb8, 0x0c, 9, 0);
-            sprite_display_store_data(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -7, -24, 0xb4, 0xb8, 0x0c, 9, 0);
+            sprite_display_set_part(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
         } else {
-            sprite_display_store_data(display_0, 0, -7, -24, 0xb4, 0xb8, 0x0c, 9, 0);
-            sprite_display_store_data(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
-            sprite_display_store_data(display_2, 0, -21, -32, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_0, 0, -7, -24, 0xb4, 0xb8, 0x0c, 9, 0);
+            sprite_display_set_part(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
+            sprite_display_set_part(display_2, 0, -21, -32, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         }
         break;
     case RESULT_DISPLAY_NO_TARGET:
         display->displays[0]->color.r = display->displays[0]->color.g = display->displays[0]->color.b = 128;
-        sprite_display_store_data(display_0, 0, -14, -24, 0x1a, 0xdb, 0x25, 10, 0);
+        sprite_display_set_part(display_0, 0, -14, -24, 0x1a, 0xdb, 0x25, 10, 0);
         break;
     case RESULT_DISPLAY_SILENCED:
         display->displays[0]->color.r = display->displays[0]->color.g = display->displays[0]->color.b = 128;
-        sprite_display_store_data(display_0, 0, -14, -24, 0xd8, 0xe9, 0x1e, 8, 0);
+        sprite_display_set_part(display_0, 0, -14, -24, 0xd8, 0xe9, 0x1e, 8, 0);
         break;
     case RESULT_DISPLAY_NO_MP:
         display->displays[0]->color.r = display->displays[0]->color.g = display->displays[0]->color.b = 128;
-        sprite_display_store_data(display_0, 0, -14, -24, 0x64, 0x20, 0x1a, 9, 0);
+        sprite_display_set_part(display_0, 0, -14, -24, 0x64, 0x20, 0x1a, 9, 0);
         break;
     }
 
-    battle_map_palette_load_data(&g_result_palette, BATTLE_MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
+    map_palette_load_data(&g_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0);
     return 1;
 }
 
 /* Queues the gained Exp and JP displays after an action, when the Display Gained
  * Exp/JP option is on and the amount is not 0. The first display is built at once
  * unless one is already running. */
-void result_exp_jp_display_init(unit_runtime_t* unit) {
+void result_queue_exp_jp_display(map_unit_t* unit) {
     sprite_display_t* display_0;
     sprite_display_t* display_1;
     sprite_display_t* display_2;
@@ -1569,7 +1567,7 @@ void result_exp_jp_display_init(unit_runtime_t* unit) {
         }
         if (unit->numeric_display.active == 0) {
             unit->numeric_display.progress = 0;
-            result_next_special_display_build(unit);
+            result_build_next_special_display(unit);
         }
     }
 }
@@ -1580,7 +1578,7 @@ void result_exp_jp_display_init(unit_runtime_t* unit) {
  *
  * The three numeric displays are pointed at the FRAME.BIN page, and the first
  * display is built at once unless one is already running. */
-void result_charge_failure_queue(unit_runtime_t* unit, s32 reason) {
+void result_queue_charge_failure(map_unit_t* unit, s32 reason) {
     sprite_display_t* display_0 = unit->numeric_display.displays[0];
     sprite_display_t* display_1 = unit->numeric_display.displays[1];
     sprite_display_t* display_2 = unit->numeric_display.displays[2];
@@ -1601,7 +1599,7 @@ void result_charge_failure_queue(unit_runtime_t* unit, s32 reason) {
     }
     if (unit->numeric_display.active == 0) {
         unit->numeric_display.progress = 0;
-        result_next_special_display_build(unit);
+        result_build_next_special_display(unit);
     }
 }
 
@@ -1614,7 +1612,7 @@ void result_charge_failure_queue(unit_runtime_t* unit, s32 reason) {
  * and its parts turn semi-transparent. After frame 61 it retires unless another
  * result follows. Damage draws 0x30 pixels above the unit's screen position,
  * healing and gains 0x10, the words 8. */
-void result_text_animate(unit_runtime_t* unit, const SVECTOR* screen_coords) {
+void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
     SVECTOR position;
     SVECTOR zoom_0 = s_identity_scale;
     SVECTOR zoom_1 = s_identity_scale;
@@ -1643,48 +1641,47 @@ void result_text_animate(unit_runtime_t* unit, const SVECTOR* screen_coords) {
     display = &unit->numeric_display;
     if (progress < 21) {
         if (unit->numeric_display.selector & RESULT_DISPLAY_MODIFIER_CRITICAL) {
-            vector_short_set(
+            vector_set_short(
                 &zoom_0, critical_scale_0[progress], critical_scale_0[progress], critical_scale_0[progress]);
-            vector_short_set(
+            vector_set_short(
                 &zoom_1, critical_scale_1[progress], critical_scale_1[progress], critical_scale_1[progress]);
-            vector_short_set(
+            vector_set_short(
                 &zoom_2, critical_scale_2[progress], critical_scale_2[progress], critical_scale_2[progress]);
         } else {
             switch (unit->numeric_display.selector & RESULT_DISPLAY_SELECTOR_MASK) {
             case RESULT_DISPLAY_HP_DAMAGE ... RESULT_DISPLAY_MA_GAIN:
-                vector_short_set(&zoom_0, scale_0[progress], scale_0[progress], scale_0[progress]);
-                vector_short_set(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
-                vector_short_set(&zoom_2, scale_2[progress], scale_2[progress], scale_2[progress]);
+                vector_set_short(&zoom_0, scale_0[progress], scale_0[progress], scale_0[progress]);
+                vector_set_short(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_short(&zoom_2, scale_2[progress], scale_2[progress], scale_2[progress]);
                 break;
             case RESULT_DISPLAY_MISSED:
             case RESULT_DISPLAY_GUARDED:
             case RESULT_DISPLAY_GAINED_EXP:
             case RESULT_DISPLAY_GAINED_JP:
-                vector_short_set(&zoom_0, scale_1[progress], scale_1[progress], scale_1[progress]);
-                vector_short_set(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
-                vector_short_set(&zoom_2, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_short(&zoom_0, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_short(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
+                vector_set_short(&zoom_2, scale_1[progress], scale_1[progress], scale_1[progress]);
                 break;
             }
         }
     } else if (progress >= 50 && unit->numeric_display.progress < 50) {
-        if (result_next_display_build(unit) != 0) {
+        if (result_build_next_display(unit) != 0) {
             return;
         }
-        if (result_next_special_display_build(unit) != 0) {
+        if (result_build_next_special_display(unit) != 0) {
             return;
         }
         unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
             = unit->numeric_display.displays[2]->tpage = SPRITE_TPAGE_FRAME | SPRITE_DISPLAY_BLEND_ADD;
-        battle_map_palette_modify(
-            BATTLE_MAP_COLOR_MODE_BASE, 2, BATTLE_MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0, -31, -31, -31);
+        map_palette_modify(MAP_COLOR_MODE_BASE, 2, MAP_CLUT_ROW_ACTION_RESULTS, unit->map_unit_id, 0, -31, -31, -31);
         sprite_display_set_part_semi_transparent(display_0, 0, 1);
         sprite_display_set_part_semi_transparent(display_1, 0, 1);
         sprite_display_set_part_semi_transparent(display_2, 0, 1);
     } else if (progress >= 61) {
-        if (result_next_display_build(unit) != 0) {
+        if (result_build_next_display(unit) != 0) {
             return;
         }
-        if (result_next_special_display_build(unit) != 0) {
+        if (result_build_next_special_display(unit) != 0) {
             return;
         }
         unit->numeric_display.active = 0;
@@ -1718,11 +1715,8 @@ void result_text_animate(unit_runtime_t* unit, const SVECTOR* screen_coords) {
     case RESULT_DISPLAY_GAINED_JP:
         break;
     }
-    sprite_display_construct_polygon_data(
-        display_0, display_0->part_count, 0, &position, 0, 0, &zoom_0, gfx_battle_otag_get() + 1);
-    sprite_display_construct_polygon_data(
-        display_1, display_1->part_count, 0, &position, 0, 0, &zoom_1, gfx_battle_otag_get() + 1);
-    sprite_display_construct_polygon_data(
-        display_2, display_2->part_count, 0, &position, 0, 0, &zoom_2, gfx_battle_otag_get() + 1);
+    sprite_display_draw_parts(display_0, display_0->part_count, 0, &position, 0, 0, &zoom_0, gfx_get_battle_otag() + 1);
+    sprite_display_draw_parts(display_1, display_1->part_count, 0, &position, 0, 0, &zoom_1, gfx_get_battle_otag() + 1);
+    sprite_display_draw_parts(display_2, display_2->part_count, 0, &position, 0, 0, &zoom_2, gfx_get_battle_otag() + 1);
     display->progress += g_system_vsync_interval;
 }

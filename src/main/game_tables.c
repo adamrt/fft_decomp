@@ -9,7 +9,7 @@
 
 extern job_data_t g_job_data[JOB_ID_COUNT];
 
-/* Packed skillset rows decoded by ability_skillset_id_get. */
+/* Packed skillset rows decoded by skillset_get_ability_id. */
 typedef struct ability_human_skillset {
     u8 high_id_bits[3];
     u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
@@ -23,7 +23,7 @@ typedef struct ability_monster_skillset {
 extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
 extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];
 
-/* Scratch list filled by ability_skillset_list_build. */
+/* Scratch list filled by ability_build_skillset_list. */
 static u16 s_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
 
 /* Return the ability id in one slot of a skillset, or 0 for a slot or skillset
@@ -32,7 +32,7 @@ static u16 s_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
  * A human skillset (below SKILLSET_ID_MONSTER_FIRST) has 22 slots, a monster
  * skillset 4. Each record stores the low byte of every id; bit 8 of slot n comes
  * from the high_id_bits bytes, most significant bit first. */
-s32 skillset_ability_id_get(s32 skillset_id, s32 ability_index) {
+s32 skillset_get_ability_id(s32 skillset_id, s32 ability_index) {
     if (skillset_id < SKILLSET_ID_MONSTER_FIRST) {
         ability_human_skillset_t* table_base;
         ability_human_skillset_t* skillset;
@@ -75,7 +75,7 @@ s32 skillset_ability_id_get(s32 skillset_id, s32 ability_index) {
 /* Fill g_skillset_abilities with the skillset's 24 ability ids and return
  * it. An id whose class (skillset_ability_filter_e) is not selected in filters
  * is written as 0. Skillset ids from 0x100 up read skillset 0. */
-u16* ability_skillset_list_build(s32 skillset_id, s32 filters) {
+u16* ability_build_skillset_list(s32 skillset_id, s32 filters) {
     s32 output_count;
     s32 ability_index;
     u16 ability_id;
@@ -86,7 +86,7 @@ u16* ability_skillset_list_build(s32 skillset_id, s32 filters) {
     }
     output_count = 0;
     for (ability_index = 0; ability_index < SKILLSET_ABILITY_LIST_COUNT; ability_index++) {
-        ability_id = skillset_ability_id_get(skillset_id, ability_index);
+        ability_id = skillset_get_ability_id(skillset_id, ability_index);
         if (ability_id < ABILITY_ID_REACTION_FIRST) {
             keep = filters & SKILLSET_ABILITY_FILTER_ACTION;
         } else if (ability_id < ABILITY_ID_SUPPORT_FIRST) {
@@ -117,7 +117,7 @@ u16* ability_skillset_list_build(s32 skillset_id, s32 filters) {
  * ability, the item id of an Item ability, the item type of a Throw ability, the
  * Jump or Charge record, or the one-byte record shared by Math, reaction, support
  * and movement abilities. The result is the matching ability_type_e. */
-ability_type_e ability_records_get(
+ability_type_e ability_get_records(
     s32 ability_id, const ability_data_t** out_ability_data, ability_secondary_pointer_t* out_secondary_data) {
     ability_id &= ABILITY_ID_MASK;
     /* 0x8005ebf0: Ability Data 1, 8 bytes each. */
@@ -159,12 +159,12 @@ ability_type_e ability_records_get(
 }
 
 /* Return an item's primary data record; the id is masked to its low byte, so it never fails. */
-const item_data_t* item_data_get(s32 item_id) {
+const item_data_t* item_get_data(s32 item_id) {
     return &g_item_primary_data[item_id & ITEM_ID_MASK];
 }
 
 /* Return a job's data record, or NULL for ids at or past JOB_ID_COUNT. */
-const job_data_t* job_data_get(s32 job_id) {
+const job_data_t* job_get_data(s32 job_id) {
     if (job_id < JOB_ID_COUNT) {
         return &g_job_data[job_id];
     }

@@ -50,7 +50,7 @@ enum {
 /*
  * An ENTD entry is the static 0x28-byte encounter definition read from an
  * ENTD#.ENT file. It is input to the SCUS unit initializers; it is neither a
- * persistent party_unit_t record nor a runtime unit_stats_t record. The
+ * persistent party_unit_t record nor a runtime battle_unit_t record. The
  * current-ENTD pointer g_encounter_current_unit selects one entry, not an
  * encounter.
  */
@@ -77,8 +77,8 @@ typedef struct entd_unit {
     entd_unit_position_t position;           /* 0x1a */
     u8 experience;                           /* 0x1c; 100 and above: random 0..99 */
     u8 primary_skillset;                     /* 0x1d; 0 or 0xff: the job's own */
-    u8 war_trophy;                           /* 0x1e; copied to unit_stats_t.war_trophy */
-    u8 bonus_money_modifier;                 /* 0x1f; copied to unit_stats_t.bonus_money_modifier */
+    u8 war_trophy;                           /* 0x1e; copied to battle_unit_t.war_trophy */
+    u8 bonus_money_modifier;                 /* 0x1f; copied to battle_unit_t.bonus_money_modifier */
     u8 unit_id;                              /* 0x20 */
     unit_ai_setup_t ai;                      /* 0x21 */
 } entd_unit_t;

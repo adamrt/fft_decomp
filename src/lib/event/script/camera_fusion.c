@@ -36,8 +36,8 @@ typedef struct camera_track {
     s32 finished;         /* 0xa0 */
 } camera_track_t;
 typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
-static s32 track_step(camera_track_t* track, s32 component);
-static s32 range_q12_interpolate(s32 start, s32 end, s32 frame, s32 duration);
+static s32 step_track(camera_track_t* track, s32 component);
+static s32 interpolate_range_q12(s32 start, s32 end, s32 frame, s32 duration);
 
 /* CameraFusion thread: take the CAMERA instructions up to the end marker as keyframes (key 0 is
  * the current camera; Focus, RelativeCamera and FocusSpeed between them adjust the values), then
@@ -57,9 +57,9 @@ void camera_fusion_thread(void) {
     s32 component;
     s32 opcode;
 
-    thread_current_task_set(THREAD_TASK_CAMERA);
+    thread_current_set_task(THREAD_TASK_CAMERA);
     tracks = menu_alloc_memory(sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
-    script = (u8*)thread_current_parameter_1_get();
+    script = (u8*)thread_current_get_parameter_1();
     menu_clear_render_buffer(tracks, sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
 
     /* One key per CAMERA instruction up to the end marker, plus the starting key. */
@@ -78,7 +78,7 @@ void camera_fusion_thread(void) {
     key_count++;
 
     cursor = script;
-    camera_yaw_band_store(g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]);
+    camera_store_yaw_band(g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]);
 
     /* Key 0 is the camera as it stands. Each later key is the next CAMERA
      * instruction, after the Focus, RelativeCamera and FocusSpeed instructions
@@ -100,14 +100,14 @@ void camera_fusion_thread(void) {
                 if (*cursor == EVENT_OPCODE_FOCUS) {
                     script_focus((event_focus_parameters_t*)(cursor + 1));
                 } else if (*cursor == EVENT_OPCODE_RELATIVE_CAMERA) {
-                    script_relative_camera_apply((event_camera_values_t*)(cursor + 1), values);
+                    script_apply_relative_camera((event_camera_values_t*)(cursor + 1), values);
                 } else if (*cursor == EVENT_OPCODE_FOCUS_SPEED) {
                     script_focus_speed(cursor + 1, values, values + EVENT_CAMERA_COMPONENT_TILT);
                 } else if (*cursor == EVENT_OPCODE_CAMERA) {
                     for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
                         /* Indexed field access replaces retail's two additions with a shift. */
                         value
-                            = script_s16_read(cursor + i + i + offsetof(event_camera_instruction_t, parameters.values));
+                            = script_read_s16(cursor + i + i + offsetof(event_camera_instruction_t, parameters.values));
                         if (value == CAMERA_FUSION_HOLD_SENTINEL) {
                             if (i < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                                 value = values[i] / 1024;
@@ -117,7 +117,7 @@ void camera_fusion_thread(void) {
                         }
                         key = &tracks[i].keys[key_index];
                         key->value = value;
-                        key->time = script_s16_read(((event_camera_instruction_t*)cursor)->parameters.duration_le);
+                        key->time = script_read_s16(((event_camera_instruction_t*)cursor)->parameters.duration_le);
                         key->time += tracks[i].keys[key_index - 1].time;
                         component = key->value;
                         values[i] = component;
@@ -125,7 +125,7 @@ void camera_fusion_thread(void) {
                             values[i] = component << 10;
                         }
                         if (i == EVENT_CAMERA_COMPONENT_YAW) {
-                            camera_yaw_band_store(key->value);
+                            camera_store_yaw_band(key->value);
                         }
                     }
                     break;
@@ -141,16 +141,16 @@ void camera_fusion_thread(void) {
         track = tracks;
         for (key_index = 0; key_index < EVENT_CAMERA_POSITION_COMPONENT_COUNT; key_index++, track++) {
             if (g_camera_position_locked == 0) {
-                g_script_variables[g_camera_script_variable_indices[key_index]] = track_step(track, key_index);
+                g_script_variables[g_camera_script_variable_indices[key_index]] = step_track(track, key_index);
             }
         }
         for (key_index = EVENT_CAMERA_COMPONENT_TILT; key_index < EVENT_CAMERA_COMPONENT_COUNT; key_index++, track++) {
-            g_script_variables[g_camera_script_variable_indices[key_index]] = track_step(track, key_index);
+            g_script_variables[g_camera_script_variable_indices[key_index]] = step_track(track, key_index);
         }
         if (tracks[EVENT_CAMERA_COMPONENT_TILT].finished == 1) {
             break;
         }
-        camera_zoom_flag_clear();
+        camera_clear_zoom_flag();
         thread_yield();
     }
 
@@ -166,7 +166,7 @@ void camera_fusion_thread(void) {
  * operations, and moves the value along the resulting control point. Both helpers
  * can set the shared arithmetic flag. The locals span, frame and lead are reused
  * across the stages, as the target's register map requires. */
-static s32 track_step(camera_track_t* track, s32 component) {
+static s32 step_track(camera_track_t* track, s32 component) {
     s32 time[4];  /* line 0: time[0]->time[1]; line 1: time[2]->time[3] */
     s32 value[4]; /* matching values for the two sampled lines */
     s32 value_delta0;
@@ -238,16 +238,16 @@ static s32 track_step(camera_track_t* track, s32 component) {
             frame = i + track->segment_frame;
             /* After the first segment, the first interval is sampled from its midpoint. */
             if (track->segment == 0) {
-                time[i * 2] = range_q12_interpolate(track->keys[track->segment].time,
+                time[i * 2] = interpolate_range_q12(track->keys[track->segment].time,
                     track->keys[track->segment + 1].time, frame, track->segment_duration);
-                value[i * 2] = range_q12_interpolate(track->keys[track->segment].value,
+                value[i * 2] = interpolate_range_q12(track->keys[track->segment].value,
                     track->keys[track->segment + 1].value, frame, track->segment_duration);
             } else {
-                time[i * 2] = range_q12_interpolate(track->keys[track->segment].time,
+                time[i * 2] = interpolate_range_q12(track->keys[track->segment].time,
                                   track->keys[track->segment + 1].time, frame, track->segment_duration * 2)
                     - track->keys[track->segment].time
                     + (track->keys[track->segment + 1].time - track->keys[track->segment].time) / 2;
-                value[i * 2] = range_q12_interpolate(track->keys[track->segment].value,
+                value[i * 2] = interpolate_range_q12(track->keys[track->segment].value,
                                    track->keys[track->segment + 1].value, frame, track->segment_duration * 2)
                     - track->keys[track->segment].value
                     + (track->keys[track->segment + 1].value - track->keys[track->segment].value) / 2;
@@ -256,9 +256,9 @@ static s32 track_step(camera_track_t* track, s32 component) {
             if (track->segment != track->key_count - 3) {
                 span *= 2;
             }
-            time[i * 2 + 1] = range_q12_interpolate(
+            time[i * 2 + 1] = interpolate_range_q12(
                 track->keys[track->segment + 1].time, track->keys[track->segment + 2].time, frame, span);
-            value[i * 2 + 1] = range_q12_interpolate(
+            value[i * 2 + 1] = interpolate_range_q12(
                 track->keys[track->segment + 1].value, track->keys[track->segment + 2].value, frame, span);
         }
 
@@ -326,6 +326,6 @@ static s32 track_step(camera_track_t* track, s32 component) {
 }
 
 /* Interpolate from start to end at frame / duration, returning a Q12 value. */
-static s32 range_q12_interpolate(s32 start, s32 end, s32 frame, s32 duration) {
+static s32 interpolate_range_q12(s32 start, s32 end, s32 frame, s32 duration) {
     return mul_div_s64(end - start, frame * ONE, duration) + (start * ONE);
 }

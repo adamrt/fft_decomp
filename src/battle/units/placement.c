@@ -1,9 +1,10 @@
 /* Populate battle slots from party and ENTD records and validate unit placement. */
 
 #include "fft/action.h"
-#include "fft/battle_map.h"
 #include "fft/deploy.h"
 #include "fft/encounter.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/move.h"
 #include "fft/party.h"
 #include "fft/reward.h"
@@ -15,37 +16,36 @@
 #include "fft/unit_entd.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
 /* Battle slots populated from party and ENTD records by the deployment routines below. */
-unit_stats_t g_unit_stats[UNIT_SLOT_COUNT] = { 0 };
+battle_unit_t g_battle_units[BATTLE_UNIT_SLOT_COUNT] = { 0 };
 
 /* Deployment placement, the acting tile and strike relocation reservations. */
 extern unit_deployment_coordinates_t* g_unit_deployed_coords;
 extern s16 g_unit_entd_spritesheet_ids[];
 static s32 s_unit_entd_spritesheet_count;
 
-static s32 entd_unique_spritesheet_add(s32 mode, s16 value, s32 limit);
+static s32 add_entd_unique_spritesheet(s32 mode, s16 value, s32 limit);
 
-static s32 placement_set_and_validate(s32 battle_id, unit_deployment_coordinates_t* src);
+static s32 set_and_validate_placement(s32 battle_unit_id, unit_deployment_coordinates_t* src);
 
-static s32 placement_validate(s32 battle_id);
+static s32 validate_placement(s32 battle_unit_id);
 
 /* Build battle slot unit_index from the party member named by g_unit_deployed_coords: rebuild it
  * from the party record, then clear its war trophy and bonus money and initialize its statuses. -1
  * when that party slot is unavailable. The target reads the slot from incoming a2; no caller contract
  * is known, so preserve the two preceding unused argument slots. */
 s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index) {
-    unit_stats_t* unit = &g_unit_stats[unit_index];
+    battle_unit_t* unit = &g_battle_units[unit_index];
     s32 party_id = g_unit_deployed_coords->party_id;
 
-    unit->battle_id = unit_index;
-    if (unit_party_slot_init(unit, party_id, 0) != 0) {
+    unit->battle_unit_id = unit_index;
+    if (battle_unit_init_from_party_slot(unit, party_id, 0) != 0) {
         return -1;
     }
-    unit_status_rewards_init(unit, 1);
+    battle_unit_init_status_and_rewards(unit, 1);
     return 0;
 }
 
@@ -59,7 +59,7 @@ s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index) {
  * PARTY_UNIT_LOAD or PARTY_PLACEMENT plus the slot. The target reloads each
  * row from g_unit_deployed_coords at its distinct uses.
  */
-static s32 units_init(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
+static s32 init_units(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
     s32 failures = 0;
     s32 failure_bit = 1;
     s32 i;
@@ -79,21 +79,21 @@ static s32 units_init(unit_deployment_coordinates_t* formation, s32 is_red_team_
         slot_start = DEPLOY_UNIT_SLOT_FIRST;
     }
     for (i = 0; i < DEPLOY_UNIT_SLOT_COUNT; i++, failure_bit *= 2) {
-        s32 battle_id = i + slot_start;
-        unit_stats_t* unit = &g_unit_stats[battle_id];
+        s32 battle_unit_id = i + slot_start;
+        battle_unit_t* unit = &g_battle_units[battle_unit_id];
         u8 sprite;
         u32 identity;
 
-        unit->battle_id = battle_id;
+        unit->battle_unit_id = battle_unit_id;
         if (g_unit_deployed_coords[i].party_id != PARTY_ID_NONE) {
-            unit->active_battle_id = battle_id;
+            unit->active_battle_unit_id = battle_unit_id;
             unit->existence = UNIT_EXISTENCE_ACTIVE;
-            if (unit_party_slot_init(unit, g_unit_deployed_coords[i].party_id, 0) != 0) {
-                system_battle_load_exception_handle(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD);
-            } else if (placement_set_and_validate(battle_id, &g_unit_deployed_coords[i]) != 0) {
-                system_battle_load_exception_handle(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT);
+            if (battle_unit_init_from_party_slot(unit, g_unit_deployed_coords[i].party_id, 0) != 0) {
+                system_handle_battle_load_exception(battle_unit_id + SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_UNIT_LOAD);
+            } else if (set_and_validate_placement(battle_unit_id, &g_unit_deployed_coords[i]) != 0) {
+                system_handle_battle_load_exception(battle_unit_id + SYSTEM_BATTLE_LOAD_EXCEPTION_PARTY_PLACEMENT);
             } else {
-                sprite = unit_sprite_identity_set(unit, &palette);
+                sprite = battle_unit_set_sprite_identity(unit, &palette);
                 identity = unit->character_identity;
                 if ((identity & 0xff) == 0 || (identity & 0xff) >= 4) {
                     identity = next_generated_unit_id;
@@ -107,53 +107,53 @@ static s32 units_init(unit_deployment_coordinates_t* formation, s32 is_red_team_
                 }
                 if (g_unit_deployed_coords[i].flags.off_field) {
                     unit->existence = UNIT_EXISTENCE_OFF_FIELD;
-                    unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+                    unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
                 } else {
-                    sprite_unit_graphics_load_queue(unit->x, unit->position.y, unit->position.higher_elevation,
+                    sprite_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
                         unit->position.facing, sprite, palette, 0xff, unit, 0);
-                    unit_status_rewards_init(unit, 1);
+                    battle_unit_init_status_and_rewards(unit, 1);
                     unit->existence = UNIT_EXISTENCE_ACTIVE;
                 }
                 continue;
             }
             failures += failure_bit;
         }
-        unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+        unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
         unit->existence = UNIT_EXISTENCE_NONE;
     }
     if (is_red_team_debug) {
         for (i = DEPLOY_UNIT_SLOT_COUNT; i < ENTD_UNITS_PER_ENCOUNTER; i++) {
-            unit_stats_t* unit = &g_unit_stats[i];
-            unit->battle_id = i;
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+            battle_unit_t* unit = &g_battle_units[i];
+            unit->battle_unit_id = i;
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
         }
     }
     return failures;
 }
 
-/* Clears g_reward_enemy_level_sum, then runs units_init
+/* Clears g_reward_enemy_level_sum, then runs init_units
  * as the red team's debug deployment. The second argument is ignored. */
-void deploy_init_units_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1) {
+void deploy_init_debug_red_team_units(unit_deployment_coordinates_t* formation, s32 unused_1) {
     g_reward_enemy_level_sum = 0;
-    units_init(formation, 1);
+    init_units(formation, 1);
 }
 
-/* units_init for a normal deployment. The second
+/* init_units for a normal deployment. The second
  * argument is ignored. */
-s32 deploy_build_units(unit_deployment_coordinates_t* formation, s32 unused_1) {
-    return units_init(formation, 0);
+s32 deploy_init_units(unit_deployment_coordinates_t* formation, s32 unused_1) {
+    return init_units(formation, 0);
 }
 
 /* Store the deployment position and return its placement validation result. */
-static s32 placement_set_and_validate(s32 battle_id, unit_deployment_coordinates_t* src) {
-    unit_stats_t* unit = &g_unit_stats[battle_id];
+static s32 set_and_validate_placement(s32 battle_unit_id, unit_deployment_coordinates_t* src) {
+    battle_unit_t* unit = &g_battle_units[battle_unit_id];
 
     unit->position.higher_elevation = src->flags.upper_level;
     unit->position.y = src->y;
     unit->x = src->x;
     unit->position.facing = src->flags.facing;
-    return placement_validate(battle_id);
+    return validate_placement(battle_unit_id);
 }
 
 /* Validate a unit's placement tile.
@@ -161,10 +161,10 @@ static s32 placement_set_and_validate(s32 battle_id, unit_deployment_coordinates
  * Returns -1 when the position is off the map, the tile is unwalkable, too
  * steep or deep for the unit's movement abilities, lava or an obstacle, or
  * already occupied by an earlier unit slot at the same elevation; 0 otherwise. */
-static s32 placement_validate(s32 battle_id) {
-    unit_stats_t* unit = &g_unit_stats[battle_id];
-    unit_stats_t* other;
-    battle_map_tile_t* tile;
+static s32 validate_placement(s32 battle_unit_id) {
+    battle_unit_t* unit = &g_battle_units[battle_unit_id];
+    battle_unit_t* other;
+    map_tile_t* tile;
     u8 x;
     u8 y;
     u8 higher_elevation;
@@ -173,15 +173,15 @@ static s32 placement_validate(s32 battle_id) {
     x = unit->x;
     y = unit->position.y;
     higher_elevation = unit->position.higher_elevation;
-    if (x >= g_battle_map_terrain_width) {
+    if (x >= g_map_terrain_width) {
         return -1;
     }
-    if (y >= g_battle_map_terrain_depth) {
+    if (y >= g_map_terrain_depth) {
         return -1;
     }
-    tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)];
+    tile = &g_map_tile_data[battle_unit_get_tile_index(unit)];
     /* A byte collision test retains the original single-mask branch. */
-    if (((*(u8*)&tile->flags) & BATTLE_MAP_TILE_COLLISION_MASK)) {
+    if (((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK)) {
         return -1;
     }
     if (tile->depth_half_height.half_height >= 3) {
@@ -197,12 +197,12 @@ static s32 placement_validate(s32 battle_id) {
                 | UNIT_MOVEMENT_SET_3_MOVE_UNDERWATER | UNIT_MOVEMENT_SET_3_FLOAT))) {
         return -1;
     }
-    if (tile->surface.type == BATTLE_MAP_SURFACE_LAVA || tile->surface.type == BATTLE_MAP_SURFACE_OBSTACLE) {
+    if (tile->surface.type == MAP_SURFACE_LAVA || tile->surface.type == MAP_SURFACE_OBSTACLE) {
         return -1;
     }
-    for (i = 0; i < battle_id; i++) {
-        other = &g_unit_stats[i];
-        if (other->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE && other->x == x && other->position.y == y
+    for (i = 0; i < battle_unit_id; i++) {
+        other = &g_battle_units[i];
+        if (other->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE && other->x == x && other->position.y == y
             && other->position.higher_elevation == higher_elevation) {
             return -1;
         }
@@ -222,9 +222,9 @@ static s32 placement_validate(s32 battle_id) {
  * exception reports use the error bases 600, 300, 100 and 200 plus the slot.
  * `status` holds both the initialization result and the graphics descriptor's
  * not-deployed flag: sharing the one variable is what gives the flag enough
- * uses to win s1 ahead of battle_id. */
-void unit_entd_load(const entd_encounter_t* entd_data, s32 unused_mode) {
-    s32 battle_id;
+ * uses to win s1 ahead of battle_unit_id. */
+void battle_unit_load_entd(const entd_encounter_t* entd_data, s32 unused_mode) {
+    s32 battle_unit_id;
     s32 entd_unit_count;
     s32 free_spritesheets;
     s32 entd_unit_limit;
@@ -236,37 +236,37 @@ void unit_entd_load(const entd_encounter_t* entd_data, s32 unused_mode) {
     u8 spritesheet_id;
     s32 unit_id;
     u8 presence;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     const entd_unit_t* entd;
     const entd_unit_t* entd_list = entd_data->units;
 
     g_reward_player_unit_fallen = 0;
     g_reward_enemy_level_sum = 0;
     g_reward_highest_enemy_level = 0;
-    party_highest_level_calculate();
+    party_calculate_highest_level();
     free_spritesheets = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT);
     free_spritesheets = (free_spritesheets < 10) ? 9 - free_spritesheets : 0;
     entd_unit_limit = free_spritesheets + 7;
     entd_unit_count = 0;
-    entd_unique_spritesheet_add(0xff, 0, 0);
-    for (battle_id = 0, entd = entd_list; battle_id < ENTD_UNITS_PER_ENCOUNTER; entd++, battle_id++) {
-        unit = &g_unit_stats[battle_id];
-        unit->battle_id = battle_id;
+    add_entd_unique_spritesheet(0xff, 0, 0);
+    for (battle_unit_id = 0, entd = entd_list; battle_unit_id < ENTD_UNITS_PER_ENCOUNTER; entd++, battle_unit_id++) {
+        unit = &g_battle_units[battle_unit_id];
+        unit->battle_unit_id = battle_unit_id;
         g_encounter_current_unit = entd;
         if (entd->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
             continue;
         }
 
-        unit->active_battle_id = battle_id;
+        unit->active_battle_unit_id = battle_unit_id;
         unit->existence = UNIT_EXISTENCE_ACTIVE;
-        status = unit_encounter_init(unit, g_encounter_current_unit, 0, UNIT_ENTD_INIT_NEW);
+        status = battle_unit_init_from_encounter(unit, g_encounter_current_unit, 0, UNIT_ENTD_INIT_NEW);
         if (status != 0) {
-            system_battle_load_exception_handle(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT);
+            system_handle_battle_load_exception(battle_unit_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_UNIT_INIT);
         }
-        spritesheet_id = unit_sprite_identity_set(unit, &palette_id);
-        unit_status_rewards_init(unit, 0);
+        spritesheet_id = battle_unit_set_sprite_identity(unit, &palette_id);
+        battle_unit_init_status_and_rewards(unit, 0);
         /* s32 so the fallback id is zero-extended once here and passed on
          * unmasked, like the target. */
         unit_id = g_encounter_current_unit->unit_id;
@@ -277,53 +277,53 @@ void unit_entd_load(const entd_encounter_t* entd_data, s32 unused_mode) {
 
         presence = unit->team_flags & UNIT_TEAM_PRESENCE_MASK;
         if (presence == 0 || (presence == UNIT_TEAM_FLAG_RANDOMLY_PRESENT && (rand() & 1))) {
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_OFF_FIELD;
-            unit_position_rewards_init(unit, g_encounter_current_unit);
+            battle_unit_init_position_and_rewards(unit, g_encounter_current_unit);
             continue;
         }
 
-        unit_position_rewards_init(unit, g_encounter_current_unit);
-        if (placement_validate(battle_id) != 0) {
-            system_battle_load_exception_handle(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT);
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+        battle_unit_init_position_and_rewards(unit, g_encounter_current_unit);
+        if (validate_placement(battle_unit_id) != 0) {
+            system_handle_battle_load_exception(battle_unit_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENTD_PLACEMENT);
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
             continue;
         }
-        if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+        if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             continue;
         }
-        if (entd_unique_spritesheet_add(battle_id, spritesheet_id, free_spritesheets) != 0) {
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+        if (add_entd_unique_spritesheet(battle_unit_id, spritesheet_id, free_spritesheets) != 0) {
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_OFF_FIELD;
             if (spritesheet_limit_reported != 0) {
                 continue;
             }
-            system_battle_load_exception_handle(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT);
+            system_handle_battle_load_exception(battle_unit_id + SYSTEM_BATTLE_LOAD_EXCEPTION_NO_SPRITESHEET_SLOT);
             spritesheet_limit_reported = 1;
             continue;
         }
 
         if (presence != UNIT_TEAM_PRESENCE_MASK && entd_unit_count >= entd_unit_limit) {
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_NONE;
             if (limit_message_shown != 0) {
                 continue;
             }
-            system_battle_load_exception_handle(battle_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENEMY_LIMIT);
+            system_handle_battle_load_exception(battle_unit_id + SYSTEM_BATTLE_LOAD_EXCEPTION_ENEMY_LIMIT);
             limit_message_shown = 1;
             entd_unit_count++;
             continue;
         }
         if (presence == UNIT_TEAM_PRESENCE_MASK) {
-            unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+            unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
             unit->existence = UNIT_EXISTENCE_OFF_FIELD;
             status = 1;
         } else {
             status = 0;
             reward_count_enemy_level(unit);
         }
-        sprite_unit_graphics_load_queue(unit->x, unit->position.y, unit->position.higher_elevation,
+        sprite_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
             unit->position.facing, spritesheet_id, palette_id, unit_id, unit, status);
         if (presence != UNIT_TEAM_PRESENCE_MASK) {
             entd_unit_count++;
@@ -337,7 +337,7 @@ void unit_entd_load(const entd_encounter_t* entd_data, s32 unused_mode) {
  * (the unit's slot) adds value when it is not listed yet. Returns 1 when value's
  * position in the list is limit or more (no spritesheet is left for it), else 0.
  * As slot 0 restarts the list, the first ENTD unit's sheet is always listed. */
-static s32 entd_unique_spritesheet_add(s32 mode, s16 value, s32 limit) {
+static s32 add_entd_unique_spritesheet(s32 mode, s16 value, s32 limit) {
     s32 index;
     s32 i;
 
@@ -367,11 +367,11 @@ static s32 entd_unique_spritesheet_add(s32 mode, s16 value, s32 limit) {
 
 /* Take a present unit out of the battle: the slot is emptied and its existence
  * set to UNIT_EXISTENCE_DISABLED. Always returns 0. */
-s32 unit_disable(s32 battle_id) {
-    unit_stats_t* unit = &g_unit_stats[battle_id];
+s32 battle_unit_disable(s32 battle_unit_id) {
+    battle_unit_t* unit = &g_battle_units[battle_unit_id];
 
-    if (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE) {
-        unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+    if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
+        unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
         unit->existence = UNIT_EXISTENCE_DISABLED;
     }
     return 0;
@@ -383,14 +383,14 @@ s32 unit_disable(s32 battle_id) {
  *
  * Returns 0, also for a unit already present, or -1 when the slot is empty in any
  * state other than off-field. */
-s32 unit_put_on_field(u32 battle_id) {
-    unit_stats_t* stats = &g_unit_stats[battle_id];
+s32 battle_unit_put_on_field(u32 battle_unit_id) {
+    battle_unit_t* stats = &g_battle_units[battle_unit_id];
 
-    if (stats->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)
+    if (stats->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
         return 0;
     if (stats->existence != UNIT_EXISTENCE_OFF_FIELD)
         return -1;
-    stats->active_battle_id = battle_id;
+    stats->active_battle_unit_id = battle_unit_id;
     stats->existence = UNIT_EXISTENCE_ACTIVE;
     if (stats->team_flags & UNIT_TEAM_MASK) {
         reward_count_enemy_level(stats);
@@ -400,20 +400,20 @@ s32 unit_put_on_field(u32 battle_id) {
 
 /* Empty a unit slot and mark it off the field (defined but not placed). Always
  * returns 0. */
-s32 unit_set_off_field(s32 battle_id) {
-    unit_stats_t* unit = &g_unit_stats[battle_id];
+s32 battle_unit_take_off_field(s32 battle_unit_id) {
+    battle_unit_t* unit = &g_battle_units[battle_unit_id];
 
-    unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+    unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
     unit->existence = UNIT_EXISTENCE_OFF_FIELD;
     return 0;
 }
 
 /* Empty a unit slot and set its existence to pending removal, without testing
  * whether the unit is present. No retail code calls it. */
-s32 unit_set_pending_removal(s32 unit_id) {
-    unit_stats_t* unit = &g_unit_stats[unit_id];
+s32 battle_unit_set_pending_removal(s32 unit_id) {
+    battle_unit_t* unit = &g_battle_units[unit_id];
 
-    unit->active_battle_id = UNIT_ACTIVE_BATTLE_ID_NONE;
+    unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
     unit->existence = UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;
 }
@@ -425,23 +425,23 @@ s32 unit_set_pending_removal(s32 unit_id) {
  * A unit that is not a mount drops its old link first; a mount carries its rider
  * along. Returns -1 without moving anything when the destination tile is blocked
  * or untargetable, 0 otherwise. */
-s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 layer, u8 facing) {
-    unit_stats_t* unit;
-    unit_stats_t* partner;
+s32 battle_unit_set_tile_position(s32 battle_unit_id, u8 x, u8 y, u8 layer, u8 facing) {
+    battle_unit_t* unit;
+    battle_unit_t* partner;
     s32 occupant;
     u8 mount_id;
     s32 has_mount = 0;
     u8 mount_info;
-    battle_map_tile_flags_t tile_flags;
+    map_tile_flags_t tile_flags;
 
-    unit = &g_unit_stats[battle_id];
-    occupant = unit_find_at_tile(x, y, layer, UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO);
-    if (occupant >= 0 && occupant != battle_id) {
+    unit = &g_battle_units[battle_unit_id];
+    occupant = battle_unit_find_at_tile(x, y, layer, UNIT_TILE_FILTER_MOUNTABLE_CHOCOBO);
+    if (occupant >= 0 && occupant != battle_unit_id) {
         mount_id = occupant;
         has_mount = 1;
     }
 
-    tile_flags = g_battle_map_tile_data[(layer << 8) + y * g_battle_map_terrain_width + x].flags;
+    tile_flags = g_map_tile_data[(layer << 8) + y * g_map_terrain_width + x].flags;
     if (tile_flags.blocked) {
         return -1;
     }
@@ -453,13 +453,13 @@ s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 layer, u8 facing) {
     if (!(mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
         unit->mount_info = 0;
         if (mount_info != 0) {
-            partner = &g_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+            partner = &g_battle_units[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
             partner->mount_info = 0;
         }
     }
     if (has_mount != 0) {
         unit->mount_info = mount_id + UNIT_MOUNT_INFO_FLAG_RIDER;
-        g_unit_stats[mount_id].mount_info = battle_id + UNIT_MOUNT_INFO_FLAG_MOUNT;
+        g_battle_units[mount_id].mount_info = battle_unit_id + UNIT_MOUNT_INFO_FLAG_MOUNT;
     }
 
     unit->position.y = y;
@@ -468,7 +468,7 @@ s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 layer, u8 facing) {
     unit->position.facing = facing;
 
     if (mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
-        partner = &g_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+        partner = &g_battle_units[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         partner->position.y = y;
         partner->x = x;
         partner->position.higher_elevation = layer;
@@ -481,8 +481,8 @@ s32 unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 layer, u8 facing) {
  * crystal or treasure on its tile; for a rider, the mount-removal statuses applied to its mount; a
  * Move-Find Item find (the mount's ability when riding) or else a trap; a canceled Charge; and the
  * Move-HP/MP Up and Move-Get EXP/JP flags. */
-u32 move_get_post_events(unit_stats_t* unit) {
-    unit_stats_t* target;
+u32 move_get_post_events(battle_unit_t* unit) {
+    battle_unit_t* target;
     u32 flags;
     s32 i;
     s32 find_item;
@@ -490,14 +490,14 @@ u32 move_get_post_events(unit_stats_t* unit) {
 
     /* Synthesize CRYSTAL_OR_TREASURE when the filtered tile search returns a
      * non-negative unit ID. The explicit sign test keeps the target nor/srl. */
-    flags = (~unit_find_at_tile(unit->x, unit->position.y, unit->position.higher_elevation,
+    flags = (~battle_unit_find_at_tile(unit->x, unit->position.y, unit->position.higher_elevation,
                  UNIT_TILE_FILTER_CRYSTAL | UNIT_TILE_FILTER_TREASURE)
                 >> 31)
         & 1;
     if (!(unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER)) {
         target = unit;
     } else {
-        target = &g_unit_stats[unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+        target = &g_battle_units[unit->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
         g_action_target = target;
         g_action_target_data = &target->action;
         action_clear_current_data(&target->action);
@@ -506,18 +506,18 @@ u32 move_get_post_events(unit_stats_t* unit) {
         }
         if (status_modify_inflictions(0) != 0) {
             g_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
-            status_resolve_unit_changes(target->battle_id, 0);
+            status_resolve_unit_changes(target->battle_unit_id, 0);
             flags |= MOVE_POST_EVENT_MOUNT_STATUS_CHANGE;
         }
     }
     find_item = target->ability_flags.movement[2] & UNIT_MOVEMENT_SET_3_MOVE_FIND_ITEM;
-    tile = move_find_result_get(unit->x, unit->position.y, unit->position.higher_elevation);
+    tile = move_find_get_result(unit->x, unit->position.y, unit->position.higher_elevation);
     if (find_item && (tile->flags & MOVE_FIND_RESULT_ITEM)) {
         flags |= MOVE_POST_EVENT_ITEM_FOUND;
     } else if (tile->flags & MOVE_FIND_RESULT_TRAP) {
         flags |= MOVE_POST_EVENT_TRAP_TRIGGERED;
     }
-    if (action_charge_check_and_cancel(unit, 0) != 0) {
+    if (action_check_and_cancel_charge(unit, 0) != 0) {
         flags |= MOVE_POST_EVENT_CHARGING_CANCEL;
     }
     flags |= move_get_ability_events(unit);
@@ -526,7 +526,7 @@ u32 move_get_post_events(unit_stats_t* unit) {
 
 /* Post-move benefits of the unit's movement abilities: Move-HP Up, Move-MP Up,
  * Move-Get EXP and Move-Get JP, each with the common benefit bit. */
-s32 move_get_ability_events(const unit_stats_t* unit) {
+s32 move_get_ability_events(const battle_unit_t* unit) {
     u8 flags = unit->ability_flags.movement[1];
     s32 post_event_flags = (0 - (unit->ability_flags.movement[0] & UNIT_MOVEMENT_SET_1_MOVE_HP_UP))
         & (MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_HP_UP);

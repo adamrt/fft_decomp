@@ -61,8 +61,8 @@ typedef struct effect_secondary_data {
     } target;           /* 0x1a */
     s32 used_weapon_id; /* 0x24; init record used_weapon_id */
     s32 target_count;   /* 0x28; init record target_count (projectile setup) */
-    /* 0x2c; live effect slots of its particle group: secondary_group_start counts them up and
-     * secondary_active_slots_update down; the handlers finish at 0. */
+    /* 0x2c; live effect slots of its particle group: spawn_particle_group counts them up and
+     * update_particle_group down; the handlers finish at 0. */
     s16 active_count;
     s16 finish_timer;               /* 0x2e; counts frames after the last slot finished */
     u8 slot_ids[EFFECT_SLOT_COUNT]; /* 0x30; its effect slots, 0 for none; cleared when the record is allocated */
@@ -81,9 +81,9 @@ extern s32 g_effect_buffer_index;
 
 s32 effect_secondary_init(s32 animation_id, s32 parameter, const struct effect_context* source);
 s32 effect_secondary_update(void);
-effect_secondary_phase_e effect_secondary_phase_get(u8 secondary_id);
+effect_secondary_phase_e effect_secondary_get_phase(u8 secondary_id);
 void effect_secondary_finalize(u8 secondary_id);
-s32 effect_secondary_ending_init(void);
+s32 effect_secondary_init_ending(void);
 void effect_secondary_remove(u8 id);
 
 /* animations */
@@ -137,7 +137,7 @@ extern effect_secondary_animation_t g_effect_secondary_animations[EFFECT_SECONDA
 enum { EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC = -1 };
 
 /* elements */
-/* What effect_element_index_get makes of an element mask: the position of its first element in
+/* What effect_get_element_index makes of an element mask: the position of its first element in
  * g_effect_element_masks, 0 for no element. It picks the CLUT of the weapon hit and
  * spell charge particles and the effect of a thrown ball. */
 typedef enum effect_element_index {
@@ -153,7 +153,7 @@ typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_COUNT = 9
 } effect_element_index_e;
 
-s32 effect_element_index_get(s32 elements);
+s32 effect_get_element_index(s32 elements);
 
 /* particle groups */
 /* Index into g_secondary_particle_configs: the particle groups of the secondary effect
@@ -180,8 +180,8 @@ typedef enum effect_particle_group {
 
 /* One particle group of the secondary effects: a 0x2e-byte record of
  * g_secondary_particle_configs. Its leading bytes schedule the
- * group's effect slots (secondary_group_start); the rest is a fixed
- * emitter, from which effect_slot_motion_start draws each slot's
+ * group's effect slots (spawn_particle_group); the rest is a fixed
+ * emitter, from which effect_slot_init_motion draws each slot's
  * motion as the effect file emitter does a particle's. */
 typedef struct effect_emitter_values {
     u8 animation_id;        /* 0x00; secondary groups: index into g_effect_secondary_particle_animation_data */
@@ -210,7 +210,7 @@ typedef char effect_emitter_values_size_must_be_46[(sizeof(effect_emitter_values
  * (0, ONE, 0); an effect file's script sets its own pair (opcode 27). */
 enum { EFFECT_SECONDARY_INERTIA_THRESHOLD = 560 };
 
-s32 effect_slot_motion_start(const effect_emitter_values_t* values, effect_motion_t* motion);
+s32 effect_slot_init_motion(const effect_emitter_values_t* values, effect_motion_t* motion);
 
 /* effect slots */
 /* One playback step of the animation script referenced by an effect slot:
@@ -230,7 +230,7 @@ typedef char effect_anim_script_size_must_be_2[sizeof(effect_anim_script_t) == 2
 /* 0xcc-byte effect slots of g_effect_slots, chained through the leading next/prev
  * byte pair; slot 0 is the null sentinel. g_effect_slot_active_head heads the active chain
  * and g_effect_slot_free_head the free chain. RGB and the frame byte
- * are copied together by the billboard renderer; slot_secondary_animation_init resets
+ * are copied together by the billboard renderer; init_slot_secondary_animation resets
  * the color and writes the 16-bit values at 0x88 and 0x8e. */
 typedef struct effect_slot {
     u8 next;                            /* 0x00 */
@@ -284,19 +284,19 @@ s32 effect_secondary_equip_break_handler(void);
 s32 effect_secondary_summon_charge_handler(void);
 
 /* starting secondary effects */
-s32 effect_secondary_projectile_init(s32 animation, const struct effect_context* source);
-s32 effect_secondary_weapon_hit_init(s32 elements, const effect_context_t* source, s32 unused_is_bow);
-s32 effect_secondary_fall_dust_init(const effect_context_t* source, const VECTOR* position);
-void effect_secondary_init_build(struct unit_runtime* unit, struct effect_context* effect);
-void effect_secondary_weapon_hit_start(struct unit_runtime* unit, s32 is_bow);
-void effect_secondary_projectile_start(unit_runtime_t* unit);
-void effect_secondary_zodiac_poof_start(unit_runtime_t* unit);
-void effect_secondary_death_smoke_start(unit_runtime_t* unit);
-void effect_secondary_level_up_start(struct unit_runtime* unit);
-void effect_secondary_trap_start(unit_runtime_t* unit);
-void effect_secondary_splash_start(struct unit_runtime* unit);
-void effect_secondary_fall_dust_start(struct unit_runtime* unit);
-void effect_secondary_teleport_start(struct unit_runtime* unit);
-s32 effect_secondary_unit_teleport_start(u32 runtime_id);
+s32 effect_secondary_init_projectile(s32 animation, const struct effect_context* source);
+s32 effect_secondary_init_weapon_hit(s32 elements, const effect_context_t* source, s32 unused_is_bow);
+s32 effect_secondary_init_fall_dust(const effect_context_t* source, const VECTOR* position);
+void effect_secondary_build_init(struct map_unit* unit, struct effect_context* effect);
+void effect_secondary_start_weapon_hit(struct map_unit* unit, s32 is_bow);
+void effect_secondary_start_projectile(map_unit_t* unit);
+void effect_secondary_start_zodiac_poof(map_unit_t* unit);
+void effect_secondary_start_death_smoke(map_unit_t* unit);
+void effect_secondary_start_level_up(struct map_unit* unit);
+void effect_secondary_start_trap(map_unit_t* unit);
+void effect_secondary_start_splash(struct map_unit* unit);
+void effect_secondary_start_fall_dust(struct map_unit* unit);
+void effect_secondary_start_teleport(struct map_unit* unit);
+s32 effect_secondary_map_unit_start_teleport(u32 map_unit_id);
 
 #endif

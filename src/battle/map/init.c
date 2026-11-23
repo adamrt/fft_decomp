@@ -1,14 +1,15 @@
 /* Load ENTD units and advance map and deployment initialization. */
 
 #include "fft/ai.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_light.h"
-#include "fft/battle_map_load.h"
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/deploy.h"
 #include "fft/encounter.h"
+#include "fft/map.h"
+#include "fft/map_light.h"
+#include "fft/map_load.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/music.h"
 #include "fft/overlay.h"
@@ -19,7 +20,6 @@
 #include "fft/turn.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
-#include "fft/unit_runtime.h"
 #include "fft/vector.h"
 #include "fft/weather.h"
 #include "fft/world_map.h"
@@ -31,40 +31,40 @@ static s32 s_sprite_unit_graphics_load_complete;
 
 /* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
  * one at rand() / 0x2000. */
-extern u8 g_battle_map_random_battle_music_tracks[];
+extern u8 g_map_random_battle_music_tracks[];
 extern palette_t g_weather_particle_palette;
 
 /* Resets the camera for a new map: screen offset (0x100, 0xa0, 0x280), zoom ONE,
  * pitch 0x12e (the low tilt), yaw 0xe00, position at the origin, cursor on tile
  * (0, 0), no acting or casting unit, no rotation, tilt or zoom in progress and
  * directional panning off. */
-static void camera_defaults_init(void) {
-    vector_long_set(&g_camera_screen_offset, 0x100, 0xA0, 0x280);
-    vector_long_set(&g_camera_zoom, ONE, ONE, ONE);
-    vector_short_set(&g_camera_render_state, 0x12E, 0xE00, 0);
-    vector_long_set(&g_camera_real_coords, 0, 0, 0);
+static void init_camera_defaults(void) {
+    vector_set_long(&g_camera_screen_offset, 0x100, 0xA0, 0x280);
+    vector_set_long(&g_camera_zoom, ONE, ONE, ONE);
+    vector_set_short(&g_camera_render_state, 0x12E, 0xE00, 0);
+    vector_set_long(&g_camera_real_coords, 0, 0, 0);
 
-    g_unit_casting_runtime_id = 0xFF;
-    g_unit_source_runtime_id = 0xFF;
+    g_unit_casting_map_unit_id = 0xFF;
+    g_unit_source_map_unit_id = 0xFF;
     g_cursor_y = 0;
     g_cursor_layer = 0;
     g_cursor_x = 0;
     g_camera_rotation_action = CAMERA_ROTATION_NONE;
     g_camera_zoom_action = CAMERA_STEP_NONE;
-    g_camera_zoom_target = BATTLE_MAP_ZOOM_IN;
+    g_camera_zoom_target = MAP_ZOOM_IN;
     g_camera_tilt_action = CAMERA_STEP_NONE;
-    g_camera_tilt_target = BATTLE_MAP_TILT_LOW;
+    g_camera_tilt_target = MAP_TILT_LOW;
     g_camera_pan_enabled = 0;
 }
 
 /* Appends one unit to the graphics load queue that
- * sprite_queued_load_update works through.
+ * sprite_update_queued_load works through.
  *
  * A spritesheet id of SPRITE_SHEET_ID_COUNT or more is replaced by
  * Ramza's chapter 1 sheet. The count stops at 16, the size of the
  * queue, so a seventeenth call writes the record one past its end. */
-void sprite_unit_graphics_load_queue(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
-    s16 palette_id, s16 runtime_id, unit_stats_t* unit, u32 flags) {
+void sprite_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,
+    s16 palette_id, s16 map_unit_id, battle_unit_t* unit, u32 flags) {
     g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_x = map_x;
     g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_y = map_y;
     g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_level = map_level;
@@ -75,10 +75,10 @@ void sprite_unit_graphics_load_queue(s32 map_x, s32 map_y, s32 map_level, s16 fa
             = SPRITE_SHEET_ID_RAMZA_CHAPTER_1;
     }
     g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].palette_id = palette_id;
-    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].runtime_id = runtime_id;
-    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].stats = unit;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].map_unit_id = map_unit_id;
+    g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].battle_unit = unit;
     g_unit_graphics_load_queue.descriptors[g_unit_graphics_load_queue.count].flags = flags;
-    if (g_unit_graphics_load_queue.count < UNIT_RUNTIME_SLOT_COUNT) {
+    if (g_unit_graphics_load_queue.count < MAP_UNIT_SLOT_COUNT) {
         g_unit_graphics_load_queue.count++;
     }
 }
@@ -92,8 +92,8 @@ s32 unit_return_zero_1(void) {
  *
  * The id is script variable EVENT_SCRIPT_VAR_CURRENT_ENTD unless
  * g_encounter_selection_mode overrides it: 250, a random id 75..79, a random id
- * 1..59, or the map id when that is not 0. Returns encounter_file_open's result. */
-static s32 entd_open_start(void) {
+ * 1..59, or the map id when that is not 0. Returns encounter_start_file_load's result. */
+static s32 start_entd_open(void) {
     volatile s32* current_encounter_id;
     s32 encounter_id;
     s32 selection_mode;
@@ -109,25 +109,25 @@ static s32 entd_open_start(void) {
         *current_encounter_id = (rand() * 5) / 0x8000 + 75;
     } else if (selection_mode == UNIT_ENTD_SELECTION_RANDOM_1_TO_59) {
         *current_encounter_id = (rand() * 59) / 0x8000 + 1;
-    } else if ((selection_mode == UNIT_ENTD_SELECTION_MAP_ID) && (g_battle_map_id != 0)) {
-        *current_encounter_id = g_battle_map_id;
+    } else if ((selection_mode == UNIT_ENTD_SELECTION_MAP_ID) && (g_map_id != 0)) {
+        *current_encounter_id = g_map_id;
     }
 
-    return encounter_file_open();
+    return encounter_start_file_load();
 }
 
 /* Loads the encounter's ENTD units once the ENTD file has arrived, then frees the
  * file. Returns 1 while the file is still loading, else 0 (also when there is no
  * current encounter). */
-static s32 entd_units_load_poll(void) {
-    const entd_encounter_t* entd_data = encounter_current_get();
+static s32 poll_entd_units_load(void) {
+    const entd_encounter_t* entd_data = encounter_get_current();
 
     if (entd_data != (const entd_encounter_t*)-1) {
         if (entd_data == 0) {
             return 1;
         }
-        unit_entd_load(entd_data, 0);
-        heap_block_release(g_encounter_set);
+        battle_unit_load_entd(entd_data, 0);
+        heap_release_block(g_encounter_set);
     }
     return 0;
 }
@@ -142,7 +142,7 @@ enum { WEATHER_CALENDAR_PERIOD_COUNT = 4, WEATHER_RANDOM_VARIANT_COUNT = 10 };
  * current weather strength before it is clamped to none..strong storm. One
  * battle in three takes place at night.
  */
-static void weather_randomize_from_calendar(void) {
+static void randomize_weather_from_calendar(void) {
     u8 period_end_month[WEATHER_CALENDAR_PERIOD_COUNT] = { 2, 5, 7, 11 };
     u8 period_end_day[WEATHER_CALENDAR_PERIOD_COUNT] = { 19, 21, 23, 23 };
     u8 weather_period[WEATHER_CALENDAR_PERIOD_COUNT + 1] = { 3, 0, 2, 1, 3 };
@@ -201,18 +201,18 @@ static void weather_randomize_from_calendar(void) {
  * unreferenced frame slot at sp+0x18.
  *
  * Jump table: .rodata 0x80068260, 13 32-bit addresses. */
-s32 battle_map_init_update(s32 map_id, s32 step) {
+s32 map_update_init_sequence(s32 map_id, s32 step) {
     s32 result;
     u8 unused_18[4];
 
     switch (step) {
     case 0:
         /* No sound id is loaded: the callee receives map_id, still in $a0. */
-        sound_sfx_stop(map_id);
+        sound_stop_sfx(map_id);
         step++;
-        camera_defaults_init();
-        battle_map_palette_init_state();
-        battle_map_palette_load_data(&g_weather_particle_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 0, 0);
+        init_camera_defaults();
+        map_palette_init_state();
+        map_palette_load_data(&g_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
         g_unit_graphics_load_queue.count = 0;
         overlay_small_request();
         break;
@@ -222,39 +222,39 @@ s32 battle_map_init_update(s32 map_id, s32 step) {
         }
         break;
     case 2:
-        if (battle_map_load_data(map_id, BATTLE_MAP_LOAD_COMMAND_START) != 0) {
+        if (map_update_load(map_id, MAP_LOAD_COMMAND_START) != 0) {
             step++;
         }
         break;
     case 3:
-        if (battle_map_load_data(map_id, BATTLE_MAP_LOAD_COMMAND_POLL) == 0) {
+        if (map_update_load(map_id, MAP_LOAD_COMMAND_POLL) == 0) {
             step++;
         }
         break;
     case 4:
-        if (entd_open_start() != 0) {
+        if (start_entd_open() != 0) {
             step++;
         }
         break;
     case 5:
-        if (entd_units_load_poll() == 0) {
+        if (poll_entd_units_load() == 0) {
             step++;
         }
         break;
     case 6:
-        sprite_load_state_clear(map_id);
+        sprite_clear_load_state(map_id);
         step++;
         break;
     case 7:
         do {
-            result = sprite_queued_load_update();
+            result = sprite_update_queued_load();
         } while (result == 2);
         if (result == 0) {
             step++;
         }
         break;
     case 8:
-        deploy_build_units(g_deploy_deployed_unit_map_coordinates, 0);
+        deploy_init_units(g_deploy_deployed_unit_map_coordinates, 0);
         step++;
         break;
     case 9:
@@ -264,23 +264,23 @@ s32 battle_map_init_update(s32 map_id, s32 step) {
     case 11:
         if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE
             || script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-            music_current_scenario_unload();
+            music_unload_current_scenario();
             /* Called with no argument: the sound id is whatever
-             * music_current_scenario_unload left in $a0. */
-            ((void (*)(void))sound_sfx_stop)();
-            music_track_set(g_battle_map_random_battle_music_tracks[rand() / 0x2000]);
+             * music_unload_current_scenario left in $a0. */
+            ((void (*)(void))sound_stop_sfx)();
+            music_set_track(g_map_random_battle_music_tracks[rand() / 0x2000]);
         }
         step++;
         break;
     case 12:
-        weather_sfx_start();
+        weather_start_sfx();
         /* Seed the three color fades from the colors the loaded map set. */
-        battle_map_background_init();
-        battle_map_ambient_init();
-        battle_map_darkness_init();
-        battle_map_clut_upload_rows();
-        turn_clock_run(TURN_CLOCK_MODE_RESET);
-        ai_workspace_init();
+        map_light_init_background();
+        map_light_init_ambient();
+        map_light_init_darkness();
+        map_palette_upload_clut_rows();
+        turn_run_clock(TURN_CLOCK_MODE_RESET);
+        ai_init_workspace();
         step++;
         break;
     }
@@ -290,13 +290,13 @@ s32 battle_map_init_update(s32 map_id, s32 step) {
 /* Runs one step of the battle-entry map initialization, which the deployment
  * loop drives, and returns the next step (13 when done).
  *
- * Unlike battle_map_init_update it randomizes a random battle's weather,
+ * Unlike map_update_init_sequence it randomizes a random battle's weather,
  * loads the shared SHP and SEQ data once (skipped when already loaded), waits
- * at step 8 until the deployment screen or battle_map_skip_deployment_thread
+ * at step 8 until the deployment screen or deploy_skip_thread
  * releases it (deploy_mark_finished), and at step 10 waits for
  * deployment to end before restoring the scenario music and darkness. Loader
  * steps retain their current state while work is pending. */
-s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_running) {
+s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running) {
     s32 result;
     u8 unused_18[4];
 
@@ -304,50 +304,50 @@ s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_runni
     case 0:
         /* Called with no argument: the callee receives map_id, still in $a0
          * (passing it explicitly changes the register allocation). */
-        ((void (*)(void))sound_sfx_stop)();
-        camera_defaults_init();
-        battle_map_palette_init_state();
+        ((void (*)(void))sound_stop_sfx)();
+        init_camera_defaults();
+        map_palette_init_state();
         if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE) {
-            weather_randomize_from_calendar();
+            randomize_weather_from_calendar();
         }
         step++;
-        battle_map_palette_load_data(&g_weather_particle_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 0, 0);
+        map_palette_load_data(&g_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
         g_unit_graphics_load_queue.count = 0;
         break;
     case 1:
         step++;
         break;
     case 2:
-        if (battle_map_load_data(map_id, BATTLE_MAP_LOAD_COMMAND_START) != 0) {
+        if (map_update_load(map_id, MAP_LOAD_COMMAND_START) != 0) {
             step++;
         }
         break;
     case 3:
-        if (battle_map_load_data(map_id, BATTLE_MAP_LOAD_COMMAND_POLL) == 0) {
+        if (map_update_load(map_id, MAP_LOAD_COMMAND_POLL) == 0) {
             step++;
         }
         break;
     case 4:
-        if (entd_open_start() != 0) {
+        if (start_entd_open() != 0) {
             step++;
         }
         break;
     case 5:
-        if (entd_units_load_poll() != 0) {
+        if (poll_entd_units_load() != 0) {
             break;
         }
         if (s_sprite_unit_graphics_load_complete != 0) {
-            sprite_load_state_clear(map_id);
+            sprite_clear_load_state(map_id);
             step = 7;
         } else {
             step++;
-            sprite_load_state_reset();
+            sprite_reset_load_state();
         }
         break;
     case 6:
-        if (sprite_shp_seq_load_update() == 8) {
+        if (sprite_update_shp_seq_load() == 8) {
             s_sprite_unit_graphics_load_complete = 1;
-            sprite_load_state_clear(map_id);
+            sprite_clear_load_state(map_id);
             step++;
         }
         break;
@@ -357,7 +357,7 @@ s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_runni
             break;
         }
         do {
-            result = sprite_queued_load_update();
+            result = sprite_update_queued_load();
         } while (result == 2);
         if (result == 0) {
             step++;
@@ -366,13 +366,13 @@ s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_runni
     case 8:
         if (g_deploy_finished != 0) {
             step++;
-            deploy_sprite_load_init();
+            deploy_init_sprite_load();
             g_deploy_skipped = 0;
         }
         break;
     case 9:
         do {
-            result = sprite_queued_load_update();
+            result = sprite_update_queued_load();
         } while (result == 2);
         if (result == 0) {
             step++;
@@ -387,23 +387,23 @@ s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_runni
     case 11:
         if (g_system_frontend_world_result == WORLD_MAP_RESULT_RANDOM_BATTLE
             || script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
-            music_current_scenario_unload();
+            music_unload_current_scenario();
             /* Called with no argument: the sound id is whatever
-             * music_current_scenario_unload left in $a0. */
-            ((void (*)(void))sound_sfx_stop)();
-            music_track_set(g_battle_map_random_battle_music_tracks[rand() / 0x2000]);
+             * music_unload_current_scenario left in $a0. */
+            ((void (*)(void))sound_stop_sfx)();
+            music_set_track(g_map_random_battle_music_tracks[rand() / 0x2000]);
         }
         step++;
         break;
     case 12:
-        weather_sfx_start();
+        weather_start_sfx();
         /* Seed the three color fades from the colors the loaded map set. */
-        battle_map_background_init();
-        battle_map_ambient_init();
-        battle_map_darkness_init();
-        battle_map_clut_upload_rows();
-        turn_clock_run(TURN_CLOCK_MODE_RESET);
-        ai_workspace_init();
+        map_light_init_background();
+        map_light_init_ambient();
+        map_light_init_darkness();
+        map_palette_upload_clut_rows();
+        turn_run_clock(TURN_CLOCK_MODE_RESET);
+        ai_init_workspace();
         step++;
         break;
     }

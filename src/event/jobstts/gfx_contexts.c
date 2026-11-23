@@ -16,7 +16,7 @@ extern s16 g_status_screen_gfx_tile_count;
 /* Reset every primitive count, record the draw environment's y, switch to the
  * other packet buffer and clear its ordering table from entry `first_otag`
  * to the end. The second argument is not read. */
-void status_screen_gfx_swap_context(s32 first_otag, s32 unused) {
+void menu_gfx_swap_context(s32 first_otag, s32 unused) {
     DRAWENV env;
     status_screen_gfx_context_t* context;
 
@@ -54,7 +54,7 @@ void status_screen_gfx_swap_context(s32 first_otag, s32 unused) {
 }
 
 /* Initialize the POLY_FT4, TILE and DR_MOVE primitive headers of one graphics context. */
-static void status_screen_gfx_init_primitive_buffers(status_screen_gfx_context_t* context) {
+static void init_primitive_buffers(status_screen_gfx_context_t* context) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_ft4_capacity; i++) {
@@ -73,7 +73,7 @@ static void status_screen_gfx_init_primitive_buffers(status_screen_gfx_context_t
 
 /* Partition each primitive pool across the two graphics contexts.
  *
- * JOBSTTS twin of equipment_gfx_init_contexts: each pointer uses its pool's
+ * JOBSTTS twin of EQUIP's menu_gfx_init_contexts: each pointer uses its pool's
  * 16-bit capacity and the context index. The capacities are read as
  * unsigned 16-bit values; the LINE_G2/LINE_G3 ones are volatile so their loads
  * stay in field order. */
@@ -116,9 +116,9 @@ void status_screen_gfx_init_contexts(status_screen_gfx_context_t* base, u32* ota
         context->draw_moves = draw_moves + g_status_screen_gfx_draw_move_capacity * index;
         context->draw_areas = draw_areas + g_status_screen_gfx_draw_area_capacity * index;
 
-        status_screen_gfx_init_primitive_buffers(context);
+        init_primitive_buffers(context);
     }
 
-    status_screen_gfx_swap_context(0, -1);
-    status_screen_gfx_swap_context(0, -1);
+    menu_gfx_swap_context(0, -1);
+    menu_gfx_swap_context(0, -1);
 }

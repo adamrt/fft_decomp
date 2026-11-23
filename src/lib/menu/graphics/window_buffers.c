@@ -14,7 +14,7 @@
 
 menu_window_buffer_t g_menu_window_buffers[6];
 static menu_window_buffer_t* s_menu_window_buffer_slots[6];
-static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
+static void clear_window_buffer_pair_by_thread(s32 thread_id);
 
 /* Mark all three menu-buffer pointer pairs as unallocated. */
 void menu_reset_window_buffer_slots(void) {
@@ -101,7 +101,7 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
 /* Clear the pair whose first record's thread matches; the target forms one
  * 0x118-biased induction value across both records (compare 0x800e27f4).
  * BATTLE's copy is empty and never called. */
-static void menu_clear_window_buffer_pair_by_thread(s32 thread_id) {
+static void clear_window_buffer_pair_by_thread(s32 thread_id) {
 #ifdef FFT_WORLD
     s32 index;
 
@@ -144,7 +144,7 @@ void menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
 }
 
 /* Set the color in a GPU primitive's common header to one gray level. */
-static void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness) {
+static void set_primitive_brightness(P_TAG* primitive, s32 brightness) {
     setRGB0(primitive, brightness, brightness, brightness);
 }
 
@@ -185,12 +185,12 @@ void menu_draw_active_window_frames(void) {
             continue;
         }
         window = buffer;
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[0], WINDOW_BRIGHTNESS);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[1], WINDOW_BRIGHTNESS);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[2], WINDOW_BRIGHTNESS);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[3], WINDOW_BRIGHTNESS);
-        gfx_set_primitive_brightness((P_TAG*)&window->quads[0], WINDOW_BRIGHTNESS);
-        gfx_set_primitive_brightness((P_TAG*)&window->quads[1], WINDOW_BRIGHTNESS);
+        set_primitive_brightness((P_TAG*)&window->sprites[0], WINDOW_BRIGHTNESS);
+        set_primitive_brightness((P_TAG*)&window->sprites[1], WINDOW_BRIGHTNESS);
+        set_primitive_brightness((P_TAG*)&window->sprites[2], WINDOW_BRIGHTNESS);
+        set_primitive_brightness((P_TAG*)&window->sprites[3], WINDOW_BRIGHTNESS);
+        set_primitive_brightness((P_TAG*)&window->quads[0], WINDOW_BRIGHTNESS);
+        set_primitive_brightness((P_TAG*)&window->quads[1], WINDOW_BRIGHTNESS);
 #ifdef FFT_WORLD
         if (window->is_message_box != 0) {
             if (g_menu_input_lock_mode != 0) {
@@ -258,9 +258,9 @@ void menu_draw_active_window_frames(void) {
         }
 #ifdef FFT_BATTLE
         else {
-            portrait_build_unit_poly(&window->quads[1], window->portrait_battle_id);
+            portrait_build_unit_poly(&window->quads[1], window->portrait_battle_unit_id);
         }
-        gfx_quad_negative_uv_flip(&window->quads[1], -window->portrait_flipped);
+        gfx_flip_quad_negative_uv(&window->quads[1], -window->portrait_flipped);
 #endif
         gfx_draw_or_append_gpu_primitive(&window->quads[1]);
         gfx_draw_or_append_gpu_primitive(&window->quads[0]);

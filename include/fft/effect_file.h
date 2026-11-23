@@ -74,7 +74,7 @@ typedef char effect_flags_section_size_must_be_24[(sizeof(effect_flags_section_t
 
 /* The effect_flags_section_t.flags bits the engine reads. */
 enum {
-    /* caster and target anchors take the tile's surface height: effect_target_world_coords_resolve */
+    /* caster and target anchors take the tile's surface height: effect_resolve_target_world_coords */
     EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST = 0x08,
     EFFECT_FLAG_QUIET_MUSIC = 0x10,         /* lower the music while the effect loads and plays */
     EFFECT_FLAG_TIMING_CURVE_PHASE1 = 0x20, /* phase 1 of the parent timeline sets the time scale from its curve */
@@ -179,7 +179,7 @@ typedef char effect_sprite_section_size_must_be_4[sizeof(effect_sprite_section_t
 /* flags of a sprite part (effect_sprite_part_t, effect_sprite_frameset_t). */
 enum {
     EFFECT_SPRITE_PART_CLUT_MASK = 0x000f,
-    EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010, /* the CLUT is of BATTLE_MAP_CLUT_ROW_EFFECT_SECOND */
+    EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010, /* the CLUT is of MAP_CLUT_ROW_EFFECT_SECOND */
     EFFECT_SPRITE_PART_TPAGE_MODE_MASK = 0x00e0,      /* the tpage's blend rate and 8-bit color bits */
     EFFECT_SPRITE_PART_FLAG_SEMI_TRANSPARENT = 0x0200 /* draw it semi-transparent */
 };

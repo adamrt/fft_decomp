@@ -24,6 +24,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -53,7 +54,7 @@ extern textured_rect_source_t g_formation_job_wheel_sprite_quad;
 extern textured_rect_source_t g_formation_job_wheel_new_sprite_quad;
 
 /* job-change animation */
-/* Result of job_change_update, kept in
+/* Result of update_job_change, kept in
  * g_formation_job_change_anim_state: the phase of the job-change dissolve. */
 typedef enum formation_job_change_anim {
     FORMATION_JOB_CHANGE_ANIM_DONE = 0,
@@ -79,25 +80,25 @@ static u8 s_formation_job_wheel_open_frame = 255;
 static u8 s_formation_job_wheel_closing = 0;
 static u8 s_formation_job_wheel_opening = 0;
 
-/* One row for text_id_rows_to_vram_render, followed by its -1 terminator. */
+/* One row for text_render_id_rows_to_vram, followed by its -1 terminator. */
 static s16 s_formation_job_wheel_name_text[2] = { 0, -1 };
 static oriented_quad_t s_formation_job_wheel_mastered_icon_sprite
     = { { 0, 0 }, 10, 10, { 36, 200, 10, 10, 0x7ee7, 31 } };
 
-static void wheel_choices_build(void);
-static void wheel_name_build(void);
-static void wheel_sprites_draw(s32 angle, s32 radius_x, s32 radius_y);
-static void wheel_sprite_prepare(void);
-static s32 job_change_update(s32 job);
-static void wheel_close_update(void);
-static void wheel_open_update(void);
-static void wheel_refresh(void);
-static void mastered_star_draw(s32 x, s32 y, s32 otag_index, s32 value);
+static void build_wheel_choices(void);
+static void build_wheel_name(void);
+static void draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y);
+static void prepare_wheel_sprite(void);
+static s32 update_job_change(s32 job);
+static void update_wheel_close(void);
+static void update_wheel_open(void);
+static void refresh_wheel(void);
+static void draw_mastered_star(s32 x, s32 y, s32 otag_index, s32 value);
 
 /* Job wheel menu-script callback 0: the selected unit's level in the job under the
  * wheel cursor, from its packed pair of 4-bit levels. The row argument is ignored. */
-static s32 wheel_level_get(s32 unused_row) {
-    s32 index = job_generic_index_get(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
+static s32 get_wheel_level(s32 unused_row) {
+    s32 index = job_get_generic_index(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
     s32 level = g_formation_unit_pointers[g_unit_selected_index]->job_levels[index >> 1];
 
     if ((index & 1) == 0) {
@@ -110,7 +111,7 @@ static s32 wheel_level_get(s32 unused_row) {
 
 /* Menu callback: 1 when the job under the wheel cursor can be chosen; 0 for
  * an unavailable job or a wheel with fewer than two jobs. */
-static s32 wheel_choice_check(s32 unused_row) {
+static s32 check_wheel_choice(s32 unused_row) {
     if (g_formation_job_wheel_job_count < 2) {
         return 0;
     }
@@ -120,7 +121,7 @@ static s32 wheel_choice_check(s32 unused_row) {
 /* Index of a job's entry in the job description and requirement texts: the
  * generic jobs come first (Squire is 0), and the special jobs below Squire
  * follow from index 19 + job id. */
-static s32 job_text_index_get(s16 job_id) {
+static s32 get_job_text_index(s16 job_id) {
     if (job_id < JOB_ID_SQUIRE) {
         return (s16)(job_id + 19);
     }
@@ -129,7 +130,7 @@ static s32 job_text_index_get(s16 job_id) {
 
 /*
  * Per-frame handler of the formation screen's job wheel, called by
- * formation_grid_menu_update for the job-wheel menu values.
+ * update_unit_grid_menu for the job-wheel menu values.
  *
  * The first call binds the job descriptions, stops the two detail panels and
  * installs the wheel's menu-script callbacks. Menu value
@@ -139,7 +140,7 @@ static s32 job_text_index_get(s16 job_id) {
  *  - Left/Right start a spin of 36 progress units (2 a frame with fewer than
  *    four jobs, 3 otherwise) that moves the cursor one job and wraps;
  *  - Circle on an available job starts the job-change flash
- *    (job_change_update), after which the job is changed,
+ *    (update_job_change), after which the job is changed,
  *    with replacement equipment chosen when Max Equip at Job Change is On
  *    (its option field reads 0), and the job list rebuilt; on an unavailable job other
  *    than the unit's own it shows that job's text with the error sound;
@@ -147,7 +148,7 @@ static s32 job_text_index_get(s16 job_id) {
  *    cycle units while it is hidden) and Cross leaves.
  * With fewer than two jobs the wheel is not drawn and Circle is refused.
  */
-void formation_job_menu_update(void) {
+void formation_job_update_menu(void) {
     u8 unused[0x28];
     s32 i;
     u8 banner;
@@ -158,14 +159,14 @@ void formation_job_menu_update(void) {
 
     if (g_formation_job_wheel_initialized == 0) {
         g_formation_job_wheel_spin_progress = 0;
-        screen_text_section_bind(SCREEN_TEXT_DATA_JOB_DESCRIPTIONS);
+        screen_text_bind_section(SCREEN_TEXT_DATA_JOB_DESCRIPTIONS);
         g_formation_job_wheel_saved_browse_enabled = g_formation_unit_browse_enabled;
         g_formation_unit_browse_enabled = 0;
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-        menu_scrollable_list_core_init(0, 0, 0);
-        g_menu_row_callbacks[0].value = wheel_level_get;
-        g_menu_row_callbacks[1].value = wheel_choice_check;
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_scrollable_list_init_core(0, 0, 0);
+        g_menu_row_callbacks[0].value = get_wheel_level;
+        g_menu_row_callbacks[1].value = check_wheel_choice;
         g_formation_job_wheel_job_selected = 0;
         g_formation_job_change_confirmed = 0;
         g_formation_job_wheel_initialized = 1;
@@ -174,11 +175,11 @@ void formation_job_menu_update(void) {
 
     i = g_formation_current_menu;
     if (i == FORMATION_MENU_JOB_WHEEL_ENTER) {
-        if (formation_grid_transition_update(2) == 0) {
-            wheel_refresh();
-            wheel_name_build();
+        if (formation_grid_update_transition(2) == 0) {
+            refresh_wheel();
+            build_wheel_name();
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
-            wheel_choices_build();
+            build_wheel_choices();
         }
         return;
     }
@@ -186,13 +187,13 @@ void formation_job_menu_update(void) {
     /* The close animation ends by storing JOB_WHEEL_OPENING; that is its done signal here. */
     if (i == FORMATION_MENU_JOB_WHEEL_LEAVE) {
         if (g_formation_job_wheel_job_selected != 0) {
-            wheel_close_update();
-            formation_unit_sprite_draw(g_unit_selected_index, &g_formation_job_wheel_unit_sprite_position, 0, 0x32);
+            update_wheel_close();
+            formation_unit_draw_sprite(g_unit_selected_index, &g_formation_job_wheel_unit_sprite_position, 0, 0x32);
             if (g_formation_current_menu == FORMATION_MENU_JOB_WHEEL_OPENING) {
                 g_formation_job_wheel_job_selected = 0;
                 g_formation_current_menu = i;
             }
-        } else if (formation_grid_return_update(2) == 0) {
+        } else if (formation_grid_update_return(2) == 0) {
             g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
             g_formation_job_wheel_initialized = 0;
         }
@@ -202,16 +203,16 @@ void formation_job_menu_update(void) {
     /* A job change in progress: step the flash, and apply the job once it reports done. */
     if (s_formation_job_change_anim_state != FORMATION_JOB_CHANGE_ANIM_DONE) {
         s_formation_job_change_anim_state
-            = job_change_update(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
+            = update_job_change(g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index]);
         if (s_formation_job_change_anim_state == FORMATION_JOB_CHANGE_ANIM_DONE) {
             i = g_game_options.value & GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK;
             formation_job_change(
                 g_unit_selected_index, g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index], i == 0);
-            formation_stage_selected_unit();
+            stage_selected_unit();
             job_list_build(
                 g_unit_selected_index, g_formation_job_wheel_jobs, FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS);
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;
-            wheel_sprite_prepare();
+            prepare_wheel_sprite();
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
         }
 
@@ -267,7 +268,7 @@ void formation_job_menu_update(void) {
             &g_formation_job_wheel_sprite_quad, g_formation_job_change_flash_colors, 0, 0x33);
         gfx_enqueue_gouraud_textured_quad(
             &g_formation_job_wheel_new_sprite_quad, g_formation_job_change_flash_colors, 0, 0x33);
-        wheel_sprites_draw(0, ONE, ONE);
+        draw_wheel_sprites(0, ONE, ONE);
     } else {
         banner = g_formation_unit_banner_enabled;
         if (banner != 0) {
@@ -287,17 +288,17 @@ void formation_job_menu_update(void) {
 
         /* Rebuild the wheel when L1/R1 picked another unit on an earlier frame. */
         if (g_unit_selected_index != g_formation_job_wheel_unit_index) {
-            wheel_refresh();
+            refresh_wheel();
         }
         if (g_formation_unit_banner_enabled == 0) {
-            formation_selected_unit_cycle(g_menu_input_secondary_repeat);
+            formation_cycle_selected_unit(g_menu_input_secondary_repeat);
         }
-        formation_unit_sprite_draw(g_unit_selected_index, &g_formation_job_wheel_unit_sprite_position, 0, 0x32);
+        formation_unit_draw_sprite(g_unit_selected_index, &g_formation_job_wheel_unit_sprite_position, 0, 0x32);
 
         if (g_formation_current_menu == FORMATION_MENU_JOB_WHEEL_CLOSING) {
-            wheel_close_update();
+            update_wheel_close();
         } else if (g_formation_current_menu == FORMATION_MENU_JOB_WHEEL_OPENING) {
-            wheel_open_update();
+            update_wheel_open();
         } else {
             job = g_formation_job_wheel_jobs[g_formation_job_wheel_cursor_index];
             if (g_formation_job_wheel_spin_progress == 0) {
@@ -305,8 +306,8 @@ void formation_job_menu_update(void) {
                 if (pad & PSX_PAD_CROSS) {
                     /* Rebuild the full record list and keep the selection on the same roster slot. */
                     i = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
-                    formation_record_list_build(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-                    g_unit_selected_index = formation_roster_slot_find(i);
+                    formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
+                    g_unit_selected_index = formation_unit_find_by_roster_slot(i);
                     g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                     g_formation_job_wheel_job_selected = 1;
                     g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_LEAVE;
@@ -343,7 +344,7 @@ void formation_job_menu_update(void) {
                         } else if ((job & FORMATION_JOB_LIST_ENTRY_ID_MASK)
                             != g_formation_unit_pointers[g_unit_selected_index]->identity.job_id) {
                             /* The first call bound the formation text section to the job texts. */
-                            message_box_show_with_sound(job_text_index_get(job & FORMATION_JOB_LIST_ENTRY_ID_MASK)
+                            message_box_show_with_sound(get_job_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK)
                                     + TEXT_ID_FORMATION_TEXT_BASE,
                                 SOUND_SFX_ERROR_MESSAGE);
                             g_unit_panel_status_display_thread_params.style = 1;
@@ -354,7 +355,7 @@ void formation_job_menu_update(void) {
 
                     if (g_menu_input_secondary_repeat & PSX_PAD_SELECT) {
                         if (g_formation_job_wheel_job_count >= 2) {
-                            i = job_text_index_get(job & FORMATION_JOB_LIST_ENTRY_ID_MASK);
+                            i = get_job_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK);
                             if (i >= 0) {
                                 message_box_show_with_sound(i + TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
                                 g_unit_panel_status_display_thread_params.style = 1;
@@ -379,7 +380,7 @@ void formation_job_menu_update(void) {
                     } else if (g_formation_job_wheel_job_count == g_formation_job_wheel_cursor_index) {
                         g_formation_job_wheel_cursor_index = 0;
                     }
-                    wheel_name_build();
+                    build_wheel_name();
                 }
             }
 
@@ -388,7 +389,7 @@ void formation_job_menu_update(void) {
                 angle = ((g_formation_job_wheel_spin_direction << 12) * g_formation_job_wheel_spin_progress
                             / g_formation_job_wheel_job_count)
                     / 36 % ONE;
-                wheel_sprites_draw(angle, ONE, ONE);
+                draw_wheel_sprites(angle, ONE, ONE);
             }
             if (g_menu_input_lock_mode == 0) {
                 g_unit_panel_status_display_thread_params.style = 0;
@@ -398,7 +399,7 @@ void formation_job_menu_update(void) {
 
     menu_gfx_enqueue_textured_quad(
         &g_formation_job_wheel_name_rect, 0x30, 0x30, 0, 0, g_screen_window_tpage, g_screen_window_clut, 0x33);
-    menu_run_script_with_palette_mode(g_formation_job_wheel_script, 0, g_menu_input_lock_mode);
+    menu_script_run_with_palette_mode(g_formation_job_wheel_script, 0, g_menu_input_lock_mode);
 }
 
 /*
@@ -410,7 +411,7 @@ void formation_job_menu_update(void) {
  * 0x4000 are tinted and those with a nonzero g_formation_job_wheel_mastered_jobs entry get the
  * twinkling mastered star. Needs at least two jobs.
  */
-static void wheel_sprites_draw(s32 angle, s32 radius_x, s32 radius_y) {
+static void draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
     oriented_quad_t sprite;
     u8 unused_sprite_tail[0x10]; /* Preserve the original 0x24-byte stack allocation. */
     s32 step;
@@ -448,7 +449,7 @@ static void wheel_sprites_draw(s32 angle, s32 radius_x, s32 radius_y) {
             ot_index++;
         }
         job = index;
-        formation_job_sprite_source_build(g_formation_job_wheel_jobs[job] & FORMATION_JOB_LIST_ENTRY_ID_MASK,
+        formation_job_build_sprite_source(g_formation_job_wheel_jobs[job] & FORMATION_JOB_LIST_ENTRY_ID_MASK,
             g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_FEMALE, &sprite.source);
         sprite.position.x = g_formation_job_wheel_center_x + ((scaled_x * rcos(theta)) >> 12) - 8;
         sprite.position.y = g_formation_job_wheel_center_y + ((scaled_y * rsin(theta)) >> 12) - 0x14;
@@ -457,9 +458,9 @@ static void wheel_sprites_draw(s32 angle, s32 radius_x, s32 radius_y) {
             rgb = &g_formation_dimmed_sprite_color;
         }
         if (g_formation_job_wheel_mastered_jobs[job] != 0) {
-            mastered_star_draw(sprite.position.x, sprite.position.y, ot_index, g_formation_job_wheel_animation_counter);
+            draw_mastered_star(sprite.position.x, sprite.position.y, ot_index, g_formation_job_wheel_animation_counter);
         }
-        formation_sprite_with_shadow_draw(&sprite, rgb, ot_index);
+        formation_sprite_draw_with_shadow(&sprite, rgb, ot_index);
         if (job == 0) {
             next = g_formation_job_wheel_job_count - 1;
         } else {
@@ -486,7 +487,7 @@ static void wheel_sprites_draw(s32 angle, s32 radius_x, s32 radius_y) {
  * `i * k` with `k` holding the step: splitting any of them, or keeping a
  * separate phase accumulator, changes the target's register assignment.
  */
-static s32 job_change_update(s32 job) {
+static s32 update_job_change(s32 job) {
     /* The phases reuse one stack slot. Separate locals, even in disjoint scopes,
      * enlarge the original 88-byte frame to 104 bytes with this compiler. */
     union {
@@ -506,7 +507,7 @@ static s32 job_change_update(s32 job) {
     s32 line_x;
 
     if (s_formation_job_change_active == 0) {
-        music_tune_play(MUSIC_TUNE_JOB_CHANGE);
+        music_play_tune(MUSIC_TUNE_JOB_CHANGE);
         s_formation_job_change_active = 1;
         s_formation_job_change_frame = 0;
         g_formation_job_change_skip_requested = 0;
@@ -516,7 +517,7 @@ static s32 job_change_update(s32 job) {
         g_formation_job_change_new_sprite_image = heap_alloc(0x1e0);
         memset(g_formation_job_change_new_sprite_image, 0, 0x1e0);
         formation_job_change(FORMATION_PREVIEW_UNIT_INDEX, job, 0);
-        formation_unit_sprite_source_build(FORMATION_PREVIEW_UNIT_INDEX, &scratch.entry, 0);
+        formation_unit_build_sprite_source(FORMATION_PREVIEW_UNIT_INDEX, &scratch.entry, 0);
         g_formation_job_change_new_sprite_source = heap_alloc(0x1e0);
         if (scratch.entry.tpage == 100) {
             rect.x = (scratch.entry.u >> 2) + 0x100;
@@ -579,7 +580,7 @@ static s32 job_change_update(s32 job) {
     if (g_formation_job_change_skip_requested != 0) {
         if (s_formation_job_change_frame >= 40 && s_formation_job_change_frame <= 220) {
             s_formation_job_change_frame = 220;
-            music_tune_fade_out(0x46);
+            music_fade_out_tune(0x46);
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
         g_formation_job_change_skip_requested = 1;
@@ -600,7 +601,7 @@ static s32 job_change_update(s32 job) {
 
 /* Begin the job wheel's close animation; with fewer than two jobs there is
  * no wheel and FORMATION_MENU_JOB_WHEEL_OPENING is set at once. */
-static void wheel_close_start(void) {
+static void start_wheel_close(void) {
     if (g_formation_job_wheel_job_count < 2) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_OPENING;
     } else {
@@ -613,14 +614,14 @@ static void wheel_close_start(void) {
 /* One frame of the job wheel closing: over 20 frames the wheel turns a
  * quarter turn while its radius grows from 1.0 by 0x140 a frame. It ends by
  * setting the menu value FORMATION_MENU_JOB_WHEEL_OPENING. */
-static void wheel_close_update(void) {
+static void update_wheel_close(void) {
     s32 pos;
 
     if (s_formation_job_wheel_closing == 0) {
-        wheel_close_start();
+        start_wheel_close();
     }
     pos = s_formation_job_wheel_close_frame * 0x140 + ONE;
-    wheel_sprites_draw(((s_formation_job_wheel_close_frame + 1) << 10) / 20, pos, pos);
+    draw_wheel_sprites(((s_formation_job_wheel_close_frame + 1) << 10) / 20, pos, pos);
     s_formation_job_wheel_close_frame++;
     if (s_formation_job_wheel_close_frame >= 0x14) {
         s_formation_job_wheel_closing = 0;
@@ -634,7 +635,7 @@ static void wheel_close_update(void) {
  * Units away on propositions have no choices. Fewer than 2 choices bypass
  * the wheel; otherwise its opening animation starts at 20 frames.
  */
-static void wheel_choices_build(void) {
+static void build_wheel_choices(void) {
     s32 i;
     s16 unit;
     u16 entry;
@@ -657,7 +658,7 @@ static void wheel_choices_build(void) {
         g_formation_job_wheel_job_count = 0;
     }
     g_formation_job_wheel_cursor_index = 0;
-    wheel_name_build();
+    build_wheel_name();
     if (g_formation_job_wheel_job_count < 2) {
         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL;
         return;
@@ -669,14 +670,14 @@ static void wheel_choices_build(void) {
 /* One frame of the job wheel opening: the wheel turns through the last
  * quarter turn into place while its radius shrinks by 0x140 a frame to 1.0.
  * It ends by setting the menu value FORMATION_MENU_JOB_WHEEL. */
-static void wheel_open_update(void) {
+static void update_wheel_open(void) {
     s32 pos;
 
     if (s_formation_job_wheel_opening == 0) {
-        wheel_choices_build();
+        build_wheel_choices();
     }
     pos = s_formation_job_wheel_open_frame * 0x140 + ONE;
-    wheel_sprites_draw(((20 - s_formation_job_wheel_open_frame) << 10) / 20 + 0xC00, pos, pos);
+    draw_wheel_sprites(((20 - s_formation_job_wheel_open_frame) << 10) / 20 + 0xC00, pos, pos);
     s_formation_job_wheel_open_frame--;
     if (s_formation_job_wheel_open_frame == 0) {
         s_formation_job_wheel_opening = 0;
@@ -689,7 +690,7 @@ static void wheel_open_update(void) {
  * opening; an opening wheel rebuilds its jobs for the new unit and adds the secondary repeat
  * period (divided by the event speed) to its remaining open frames, capped at 16. Lays the
  * portrait out again. */
-static void wheel_refresh(void) {
+static void refresh_wheel(void) {
     s32 step;
     /* The target frame is 0x30 bytes; 0x18 of unreferenced locals. */
     s32 unused[6];
@@ -702,7 +703,7 @@ static void wheel_refresh(void) {
         if (s_formation_job_wheel_opening != 0) {
             step = s_formation_job_wheel_open_frame;
             g_formation_job_wheel_unit_index = g_unit_selected_index;
-            wheel_choices_build();
+            build_wheel_choices();
             s_formation_job_wheel_open_frame = step + g_input_secondary_repeat_period / menu_get_event_speed();
             if (s_formation_job_wheel_open_frame >= 0x11) {
                 s_formation_job_wheel_open_frame = 0x10;
@@ -712,19 +713,19 @@ static void wheel_refresh(void) {
             g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_CLOSING;
         }
     }
-    wheel_sprite_prepare();
+    prepare_wheel_sprite();
 }
 
 /* Center the two job-wheel sprite quads on (0x80, 0x7b) for the selected
  * unit's formation graphic and queue a VRAM move of that graphic to
  * (0x240, 0x130), where g_formation_job_wheel_sprite_quad samples it. */
-static void wheel_sprite_prepare(void) {
+static void prepare_wheel_sprite(void) {
     texture_source_t entry;
     RECT rect;
     s16 x;
     s16 y;
 
-    formation_unit_sprite_source_build(g_unit_selected_index, &entry, 0);
+    formation_unit_build_sprite_source(g_unit_selected_index, &entry, 0);
     x = 0x80 - (entry.w >> 1);
     y = 0x7b - (entry.h >> 1);
     g_formation_job_wheel_sprite_quad.y = y;
@@ -745,7 +746,7 @@ static void wheel_sprite_prepare(void) {
 
 /* Render the job wheel's centered job name ("Can't change" when fewer than two
  * jobs are listed). */
-static void wheel_name_build(void) {
+static void build_wheel_name(void) {
     RECT destination_rect;
     const u8* text_table;
     const s16* text_ids;
@@ -763,8 +764,8 @@ static void wheel_name_build(void) {
     destination_rect.y = 0x130;
     destination_rect.w = 0x14;
     destination_rect.h = 0x10;
-    text_id_rows_to_vram_render(text_table, text_ids, &destination_rect, 0);
-    pixel_width = screen_text_width_measure(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
+    text_render_id_rows_to_vram(text_table, text_ids, &destination_rect, 0);
+    pixel_width = screen_text_measure_width(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
     g_formation_job_wheel_name_rect.x = ((0x50 - pixel_width) >> 1) + 0x58;
     g_formation_job_wheel_name_rect.y = 0xD7;
     g_formation_job_wheel_name_rect.w = pixel_width;
@@ -779,7 +780,7 @@ static void wheel_name_build(void) {
  * 0x5E (frame 4 from 0x64 on); otherwise it shows frame 0. Frames are 10
  * texels apart from u 0x24.
  */
-static void mastered_star_draw(s32 x, s32 y, s32 otag_index, s32 value) {
+static void draw_mastered_star(s32 x, s32 y, s32 otag_index, s32 value) {
     s32 level;
     oriented_quad_t* sprite;
 

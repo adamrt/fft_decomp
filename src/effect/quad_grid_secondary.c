@@ -1,7 +1,6 @@
 /* E230's second textured quad grid: a 4x4 copy of effect_textured_quad_grid_update linked after its 8x8 build,
  * with its own name, work block and brightness table. */
 
-#include "fft/battle_map_palette.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
 #include "fft/effect_file.h"
@@ -10,6 +9,7 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
+#include "fft/map_palette.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -81,7 +81,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
     u8 u;
     u8 v;
 
-    ot = gfx_battle_otag_get();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
@@ -110,7 +110,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = texture_page;
-                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
                 quad->x0 = quad->x2 = column * QUAD_GRID_CELL + GFX_BATTLE_SCREEN_X;
                 quad->y0 = quad->y1 = row * QUAD_GRID_CELL;
                 quad->x1 = quad->x3 = column * QUAD_GRID_CELL + GFX_BATTLE_SCREEN_X + QUAD_GRID_CELL;

@@ -22,6 +22,6 @@ enum {
 enum { FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS = 2 };
 
 extern s8 g_formation_job_wheel_initialized;
-void formation_job_menu_update(void);
+void formation_job_update_menu(void);
 
 #endif

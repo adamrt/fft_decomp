@@ -97,14 +97,14 @@ static ending_opcode_handler_t s_ending_opcode_handlers[16] = {
     ending_opcode_0f_start_opntex_sequence,
 };
 
-static void ending_update_opntex_sequence(void);
-static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame);
-static u8* ending_add_pointer_offset(u8* base, s32 byte_offset);
-static void ending_start_script(void);
-static void ending_update_opntex_fade(void);
-static void ending_scroll_text(void);
-static void ending_update_xa_audio(void);
-static s32 ending_decode_hex_digit(s32 character);
+static void update_opntex_sequence(void);
+static void start_fftend_movie(s32 start_sector, s32 unused, s32 end_frame);
+static u8* add_pointer_offset(u8* base, s32 byte_offset);
+static void start_script(void);
+static void update_opntex_fade(void);
+static void update_text_scroll(void);
+static void update_xa_audio(void);
+static s32 decode_hex_digit(s32 character);
 
 /* Each OPNTEX frame occupies 23 * 0x800 bytes of the loaded data. */
 #define TITLE_OPNTEX_FRAME_SECTORS 23
@@ -113,7 +113,7 @@ static s32 ending_decode_hex_digit(s32 character);
  * VRAM under them, reset the dispatch state and point its cursor at the start of the script data,
  * clear the 16 text records, and build the two semi-transparent edge bands and the two picture
  * quads. */
-static void ending_init_script(void) {
+static void init_script(void) {
     RECT rect;
     s32 i;
     s32 j;
@@ -199,17 +199,17 @@ static void ending_init_script(void) {
  * g_ending_opcode_handlers. A handler advances byte_offset itself; one that has to
  * wait clears ENDING_SCRIPT_DISPATCH_CONTINUE to end the frame and is entered again
  * on the next, and opcode 0 clears ENDING_SCRIPT_DISPATCH_RUNNING. */
-static s32 ending_run_script_frame(void) {
+static s32 update_script_frame(void) {
     ending_script_dispatch_state_t* state;
     ending_script_cursor_t* cursor;
     s32 result;
     s16* entry;
     u32 flags;
 
-    ending_scroll_text();
-    ending_update_xa_audio();
-    ending_update_opntex_sequence();
-    ending_update_opntex_fade();
+    update_text_scroll();
+    update_xa_audio();
+    update_opntex_sequence();
+    update_opntex_fade();
 
     state = &g_ending_script_state.dispatch;
     result = state->flags | ENDING_SCRIPT_DISPATCH_CONTINUE;
@@ -217,7 +217,7 @@ static s32 ending_run_script_frame(void) {
     if (result & ENDING_SCRIPT_DISPATCH_CONTINUE) {
         cursor = &state->cursor;
         do {
-            entry = (s16*)ending_add_pointer_offset(cursor->data_base, cursor->byte_offset);
+            entry = (s16*)add_pointer_offset(cursor->data_base, cursor->byte_offset);
             s_ending_opcode_handlers[*entry](entry);
             /* Keeping the cursor base live matches retail; the direct state view is four bytes shorter. */
             flags = ((ending_script_dispatch_state_t*)((u8*)cursor - offsetof(ending_script_dispatch_state_t, cursor)))
@@ -232,7 +232,7 @@ static s32 ending_run_script_frame(void) {
 
 /* base advanced by byte_offset bytes. Retail keeps this as a call: the
  * dispatcher and opcode 1 reach script data through it. */
-static u8* ending_add_pointer_offset(u8* base, s32 byte_offset) {
+static u8* add_pointer_offset(u8* base, s32 byte_offset) {
     return base + byte_offset;
 }
 
@@ -300,7 +300,7 @@ void ending_draw_text_records(u32* otag, s32 graphics_buffer_index) {
  * (s3, ahead of the loop counter). The second metrics pointer is a separate
  * variable so the first stays in a0.
  */
-static s32 ending_build_text_record(u8* text) {
+static s32 build_text_record(u8* text) {
     s32 index;
     s32 i;
     s32 drawn;
@@ -342,37 +342,37 @@ static s32 ending_build_text_record(u8* text) {
         }
         if (ch == '$') {
             text++;
-            value = ending_decode_hex_digit(*text++);
+            value = decode_hex_digit(*text++);
             g_ending_script_state.dispatch.font_index = value;
             i--;
         } else if (ch == '^') {
             text++;
-            value = ending_decode_hex_digit(*text++);
+            value = decode_hex_digit(*text++);
             g_ending_script_state.dispatch.clut = GetClut(value * 16, 0x1e0);
             i--;
         } else if (ch == '<') {
             text++;
-            value = ending_decode_hex_digit(*text++);
+            value = decode_hex_digit(*text++);
             pen -= value;
             i--;
         } else if (ch == '>') {
             text++;
-            value = ending_decode_hex_digit(*text++);
+            value = decode_hex_digit(*text++);
             pen += value;
             i--;
         } else if (ch == '/') {
             text++;
-            value = ending_decode_hex_digit(*text++);
+            value = decode_hex_digit(*text++);
             g_ending_script_state.dispatch.skew = value;
             i--;
         } else if (ch == '*') {
             text++;
-            value = ending_decode_hex_digit(*text++);
+            value = decode_hex_digit(*text++);
             g_ending_script_state.dispatch.wide_glyphs = value;
             i--;
         } else if (ch == '+') {
             text++;
-            pen = ending_decode_hex_digit(*text++) * 20;
+            pen = decode_hex_digit(*text++) * 20;
             i--;
         } else {
             value = (ch - 0x20) * 8 + g_ending_script_state.dispatch.font_index * 0x380;
@@ -440,7 +440,7 @@ static s32 ending_build_text_record(u8* text) {
  * The whole pixels moved are added to the y of every active text record and, as a
  * distance, to the scrolled distance opcode 6 waits on. A record that leaves y
  * 0x10..0x100 is released. */
-static void ending_scroll_text(void) {
+static void update_text_scroll(void) {
     s32 step = g_ending_script_state.dispatch.scroll_speed;
     s32 work;
     s32 index;
@@ -482,7 +482,7 @@ static void ending_scroll_text(void) {
  * 2340-byte sectors at single speed), seeks to ENDING.XA, sets the filter to
  * file 1 and the channel in control_parameter (command 0xd, CdlSetfilter),
  * starts a streaming read and waits for it to be acknowledged; control_state
- * counts the steps and file_get_cd_sync_state_delta advances it past
+ * counts the steps and file_cd_poll_sync advances it past
  * each command and back one step on a disc error. A seek (step 5) still
  * unfinished after 120 frames resets the CD subsystem and starts over.
  * Playing: from two seconds in, restarts the sequence if the drive stopped
@@ -490,7 +490,7 @@ static void ending_scroll_text(void) {
  * file's last sector.
  * Stopping: pauses the drive, restores double speed and brings the CD
  * volume back for the streams. */
-static void ending_update_xa_audio(void) {
+static void update_xa_audio(void) {
     u8 result[8];
     CdlFILTER filter;
     u8 mode;
@@ -511,7 +511,7 @@ static void ending_update_xa_audio(void) {
             break;
 
         case 5: {
-            s32 delta = file_get_cd_sync_state_delta();
+            s32 delta = file_cd_poll_sync();
             s32* state = &g_ending_script_state.control_state;
             s32 value = *state;
 
@@ -519,7 +519,7 @@ static void ending_update_xa_audio(void) {
 
             /* The frame counter was cleared when the seek was issued. */
             if (g_system_wait_frames >= 0x79 && *state == 5) {
-                file_cd_subsystems_reset();
+                file_reset_cd_subsystems();
                 *state = 0;
             }
         } break;
@@ -533,7 +533,7 @@ static void ending_update_xa_audio(void) {
 
         case 1:
         case 7: {
-            s32 delta = file_get_cd_sync_state_delta();
+            s32 delta = file_cd_poll_sync();
             s32* state = &g_ending_script_state.control_state;
             s32 value = *state;
 
@@ -546,7 +546,7 @@ static void ending_update_xa_audio(void) {
             break;
 
         case 9:
-            if (file_get_cd_sync_state_delta() == 1) {
+            if (file_cd_poll_sync() == 1) {
                 u32* control = &g_ending_script_state.dispatch.flags;
 
                 g_ending_script_state.xa_wait_frames = 0;
@@ -600,7 +600,7 @@ static void ending_update_xa_audio(void) {
 
         case 1:
         case 3: {
-            s32 delta = file_get_cd_sync_state_delta();
+            s32 delta = file_cd_poll_sync();
             s32* state = &g_ending_script_state.control_state;
             s32 value = *state;
 
@@ -621,7 +621,7 @@ static void ending_update_xa_audio(void) {
 }
 
 /* Value of a hexadecimal digit character, or 0 for any other character. */
-static s32 ending_decode_hex_digit(s32 character) {
+static s32 decode_hex_digit(s32 character) {
     u32 value = character - '0';
 
     if (value < 10) {
@@ -643,7 +643,7 @@ static s32 ending_decode_hex_digit(s32 character) {
  * Advance the script-controlled screen fade and tint the active fade quad.
  * Block-local control pointers retain the original materialized flag addresses.
  */
-static void ending_update_opntex_fade(void) {
+static void update_opntex_fade(void) {
     s32 intensity;
 
     {
@@ -697,7 +697,7 @@ static void ending_update_opntex_fade(void) {
 /* Advance the OPNTEX sequence: run down the fade delay of the frame on
  * screen, and when the frame countdown expires load the next frame and start
  * its fade (or stop the sequence after the last frame). */
-static void ending_update_opntex_sequence(void) {
+static void update_opntex_sequence(void) {
     s32 frame;
     u32* source;
 
@@ -740,19 +740,19 @@ static void ending_update_opntex_sequence(void) {
 
 /* Start FFTEND.STR (sector 0x21908, ending at frame 0x571) as the first
  * controller. */
-void movie_ending_start(void) {
+void movie_start_ending(void) {
     g_controller_depth = 0;
     g_gfx_active_buffer_index = 0;
-    movie_stream_fftend(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
+    start_fftend_movie(DISC_SECTOR_OPEN_FFTEND_STR, 0x3858, 0x571);
 }
 
 /* Start the ending movie at CD mix level 0x7e and push handler 9. The second
  * argument, the stream's length in sectors, is not read. */
-static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
+static void start_fftend_movie(s32 start_sector, s32 unused, s32 end_frame) {
     s32 controller;
 
     (void)unused;
-    movie_stream_start(start_sector, end_frame, -1, 0x7e);
+    movie_start_stream(start_sector, end_frame, -1, 0x7e);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     controller = g_controller_depth;
     g_controller_handler_indices[controller] = CONTROLLER_FFTEND_MOVIE;
@@ -774,12 +774,12 @@ void movie_update_fftend(controller_record_t* unused_record) {
         controller--;
         g_system_runtime_flags = flags;
         g_controller_depth = controller;
-        ending_start_script();
+        start_script();
         return;
     }
 
     if (g_input_new_button_presses & PSX_PAD_START) {
-        movie_stream_stop(1);
+        movie_stop_stream(1);
     }
 }
 
@@ -787,13 +787,13 @@ void movie_update_fftend(controller_record_t* unused_record) {
  * frame's background the picture copied from VRAM
  * (SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM), reset the script state, which sets
  * up the 512-pixel screen, select VSync mode 2 and push handler 10. */
-static void ending_start_script(void) {
+static void start_script(void) {
     s32 controller;
 
     g_system_runtime_flags &= ~(SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | SYSTEM_RUNTIME_FLAG_RGB24);
     gfx_init_screen_environments(1);
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM;
-    ending_init_script();
+    init_script();
 
     controller = g_controller_depth;
     g_system_vsync_mode = 2;
@@ -804,7 +804,7 @@ static void ending_start_script(void) {
 /* Handler 10: run the ending script for a frame. When it ends, VSync mode 0 is
  * restored, the controller is popped and OPEN.BIN's loop ends. */
 void ending_update_script(controller_record_t* unused_record) {
-    if (ending_run_script_frame() == 0) {
+    if (update_script_frame() == 0) {
         g_system_vsync_mode = 0;
         g_controller_depth--;
         g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_RUNNING;
@@ -838,8 +838,7 @@ static void ending_opcode_01_create_positioned_text_record(s16* command) {
     command++;
     x = *command++;
     y = *command++;
-    index = ending_build_text_record(
-        ending_add_pointer_offset(g_ending_script_state.dispatch.cursor.data_base, *command));
+    index = build_text_record(add_pointer_offset(g_ending_script_state.dispatch.cursor.data_base, *command));
     if (index != 0) {
         index--;
         if (x == -1) {
@@ -947,7 +946,7 @@ static void ending_opcode_06_wait_for_scroll(s16* entry) {
 }
 
 /* Opcode 7: start channel command[1] of ENDING.XA and wait until the start
- * sequence of ending_update_xa_audio has finished. The CD volume is dropped
+ * sequence of update_xa_audio has finished. The CD volume is dropped
  * to 0 first. The opcode is skipped when XA audio is already playing, starting or
  * stopping. Four bytes. */
 static void ending_opcode_07_start_xa_audio(s16* command) {
@@ -1000,7 +999,7 @@ static void ending_opcode_09_start_sound_fade_out(s16* command) {
 }
 
 /* Opcode 10: stop the XA audio and wait until the stop sequence of
- * ending_update_xa_audio has finished. The opcode is skipped when XA audio
+ * update_xa_audio has finished. The opcode is skipped when XA audio
  * is neither playing nor starting. Two bytes. */
 static void ending_opcode_0a_stop_xa_audio(s16* unused_entry) {
     u32 state = g_ending_script_state.dispatch.flags;

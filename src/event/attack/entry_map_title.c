@@ -1,9 +1,9 @@
 /* Load the selected map title and animate its shaded strips after deployment
  * while the battle map finishes loading. */
 
-#include "fft/battle_map.h"
 #include "fft/file.h"
 #include "fft/gfx_primitive.h"
+#include "fft/map.h"
 #include "fft/menu.h"
 #include "fft/script_variable.h"
 #include "fft/thread.h"
@@ -11,13 +11,13 @@
 #include "psx/types.h"
 
 /* Map-title texture and its 16-color palette, transferred as eight GPU words. */
-extern RECT g_battle_map_title_image_rect;
-extern u32 g_battle_map_title_palette_data[8];
-extern RECT g_battle_map_title_palette_rect;
-static s32 s_battle_map_title_closing_past_midpoint;
+extern RECT g_map_title_image_rect;
+extern u32 g_map_title_palette_data[8];
+extern RECT g_map_title_palette_rect;
+static s32 s_map_title_closing_past_midpoint;
 
 /* Two buffers of the four shaded title-panel strips. */
-extern POLY_GT4 g_battle_map_title_sprites[2][4];
+extern POLY_GT4 g_map_title_sprites[2][4];
 
 /*
  * Builds and submits a 2x2 set of shaded POLY_GT4 panel strips at the current
@@ -32,12 +32,12 @@ extern POLY_GT4 g_battle_map_title_sprites[2][4];
  * its branch: that keeps the target's loop hoisting, where
  * `x + (0x80 + width)` is recomputed once per row instead of leaving both loops.
  */
-static void battle_map_title_build_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse) {
+static void build_title_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse) {
     POLY_GT4* poly;
     s32 row;
     s32 rest;
-    s32 x = thread_current_parameter_1_get();
-    s32 y = thread_current_parameter_2_get();
+    s32 x = thread_current_get_parameter_1();
+    s32 y = thread_current_get_parameter_2();
     s32 col;
     s32 dx;
     s32 dy;
@@ -130,7 +130,7 @@ static void battle_map_title_build_strips(POLY_GT4* polys, s32 width, s32 shade,
  * primitives: widen it by the thread's step, hold it, then sweep it again
  * with `reverse` set. The hold phase reuses `width` as its frame counter. */
 void attack_map_title_entrypoint(void) {
-    s32 step = thread_current_parameter_3_get();
+    s32 step = thread_current_get_parameter_3();
     s32 buffer = 0;
     s32 width;
 
@@ -141,7 +141,7 @@ void attack_map_title_entrypoint(void) {
     width = 8;
     do {
         buffer ^= 1;
-        battle_map_title_build_strips(g_battle_map_title_sprites[buffer], width, 0x80, 0);
+        build_title_strips(g_map_title_sprites[buffer], width, 0x80, 0);
         width += step;
         thread_yield();
     } while (width < 0xf8);
@@ -149,7 +149,7 @@ void attack_map_title_entrypoint(void) {
     width = 0;
     do {
         buffer ^= 1;
-        battle_map_title_build_strips(g_battle_map_title_sprites[buffer], 0xf8, 0x80, 0);
+        build_title_strips(g_map_title_sprites[buffer], 0xf8, 0x80, 0);
         width += step;
         thread_yield();
     } while (width < 0x6e);
@@ -157,9 +157,9 @@ void attack_map_title_entrypoint(void) {
     width = 8;
     do {
         buffer ^= 1;
-        battle_map_title_build_strips(g_battle_map_title_sprites[buffer], width, 0x80, 1);
+        build_title_strips(g_map_title_sprites[buffer], width, 0x80, 1);
         if (width >= 0x81) {
-            s_battle_map_title_closing_past_midpoint = 1;
+            s_map_title_closing_past_midpoint = 1;
         }
         width += step;
         thread_yield();
@@ -176,7 +176,7 @@ void attack_map_title_entrypoint(void) {
  * 0x100 no file is read and the freshly allocated buffer is uploaded as it
  * is.
  */
-void battle_map_title_load_graphic(void) {
+void map_load_title_graphic(void) {
     s32 group;
     u8* image = menu_alloc_memory(0x2800);
     s32 title = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
@@ -191,11 +191,11 @@ void battle_map_title_load_graphic(void) {
 
     if (adjusted != 0xff) {
         title = group_input * 5 + DISC_SECTOR_EVENT_MAPTITLE_BIN;
-        g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+        g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
         thread_call_on_main_stack(title, 0x2800, image);
     }
 
-    LoadImage(&g_battle_map_title_image_rect, (u32*)(image + group * 0xa00));
-    LoadImage(&g_battle_map_title_palette_rect, g_battle_map_title_palette_data);
+    LoadImage(&g_map_title_image_rect, (u32*)(image + group * 0xa00));
+    LoadImage(&g_map_title_palette_rect, g_map_title_palette_data);
     menu_free_memory(image);
 }

@@ -13,13 +13,13 @@ static u16 s_screen_input_previous;
 extern u8 g_screen_input_triangle_latch;
 
 /* Return the controller buttons from PadRead(0); the argument is ignored. */
-static s32 pad_buttons_read(s32 unused) {
+static s32 read_pad_buttons(s32 unused) {
     return PadRead(0);
 }
 
 /*
  * Publish newly pressed buttons and two repeat rates for WORLD menus, reading
- * pad 0 (tutorial_controller_update is the tutorial twin).
+ * pad 0 (update_tutorial_controller is the tutorial twin).
  *
  * Triangle reports one press and nothing while held. Otherwise one button is
  * reported at a time: of several, the lowest button bit is latched and
@@ -29,7 +29,7 @@ static s32 pad_buttons_read(s32 unused) {
  * are skipped; those buttons use only the newly pressed mask, and bits 16-31
  * flag a button held past the initial delay.
  */
-void screen_input_pad_update(void) {
+void update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -44,7 +44,7 @@ void screen_input_pad_update(void) {
     initial_delay = g_input_repeat_initial_delay / speed;
     repeat_period = g_input_repeat_period / speed;
     secondary_repeat_period = g_input_secondary_repeat_period / speed;
-    current_input = pad_buttons_read(0);
+    current_input = read_pad_buttons(0);
     if (current_input & PSX_PAD_TRIANGLE) {
         if (g_screen_input_triangle_latch != 0) {
             menu_input_clear_state();

@@ -14,17 +14,17 @@
 /* Twelve {month, day} pairs, Aries first. */
 extern calendar_date_t g_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT];
 
-static void birthdays_advance(void);
+static void advance_birthdays(void);
 
 /*
  * Advance the calendar by 1 day and run the daily updates.
  *
  * EVENT_SCRIPT_VAR_UNKNOWN_67 increases on 21 March (the start of Aries) and
- * is capped at 99; calendar_days_advance raises it at the year's end
+ * is capped at 99; calendar_advance_days raises it at the year's end
  * instead, without the cap. The target does not validate the incoming month
  * or day.
  */
-void calendar_day_advance(void) {
+void calendar_advance_day(void) {
     s32 month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
     s32 day = script_variable_get(EVENT_SCRIPT_VAR_DAY) + 1;
 
@@ -44,15 +44,15 @@ void calendar_day_advance(void) {
         }
         script_variable_set(EVENT_SCRIPT_VAR_UNKNOWN_67, value);
     }
-    proposition_day_advance();
-    birthdays_advance();
+    proposition_advance_day();
+    advance_birthdays();
     breeding_update(1);
 }
 
 /* Converts a calendar date in place into a zodiac sign number (1 = Aries) and
  * the day within that sign. An invalid date plays SOUND_SFX_INVALID and
  * becomes 1/1. */
-void calendar_date_to_zodiac_convert(s32* month_ptr, s32* day_ptr) {
+void calendar_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
     s32 index = 0;
     s32 delta;
     s32 previous_month;
@@ -88,7 +88,7 @@ void calendar_date_to_zodiac_convert(s32* month_ptr, s32* day_ptr) {
 }
 
 /*
- * The daily birthday sweep, run by calendar_day_advance after the
+ * The daily birthday sweep, run by calendar_advance_day after the
  * calendar rolls over: every Brave-story character whose stored birthday is
  * today gets a year older, capped at 99.
  *
@@ -104,7 +104,7 @@ void calendar_date_to_zodiac_convert(s32* month_ptr, s32* day_ptr) {
  * loop's base materializes as g_brave_story_character_ages + 1; entry 0
  * is the only absolute access to the array.
  */
-static void birthdays_advance(void) {
+static void advance_birthdays(void) {
     const calendar_date_t* birthdays = g_brave_story_birthdays;
     s32 day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
     s32 month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
@@ -130,20 +130,20 @@ static void birthdays_advance(void) {
 }
 
 /* WLDCORE's wrapper for party_unit_get: the roster record of slot `party_index`. */
-party_unit_t* party_roster_unit_get(s32 party_index) {
+party_unit_t* party_get_roster_unit(s32 party_index) {
     return party_unit_get(party_index);
 }
 
 /* Writes one nine-bit record: bits 0-4 from source->day, bits 5-8 from
  * source->month. Records are packed nine bits apart in the bit array. */
-void calendar_date_write(u32* bits, s32 record, calendar_date_t* source) {
+void calendar_write_date(u32* bits, s32 record, calendar_date_t* source) {
     s32 base = record * 9;
     s32 mask;
     s32 i;
 
     mask = 1;
     for (i = 0; i < 5; i++) {
-        bits_value_set(bits, base + i, source->day & mask);
+        bits_set_value(bits, base + i, source->day & mask);
         mask <<= 1;
     }
     mask = 1;
@@ -152,16 +152,16 @@ void calendar_date_write(u32* bits, s32 record, calendar_date_t* source) {
          * base + (i + 5) in one expression hoists base + 5 out of the loop. */
         s32 index = i + 5;
 
-        bits_value_set(bits, base + index, source->month & mask);
+        bits_set_value(bits, base + index, source->month & mask);
         mask <<= 1;
     }
 }
 
 /* Reads one nine-bit record: bits 0-4 into dest->day, bits 5-8 into dest->month.
  * Records are packed nine bits apart in the bit array, matching
- * calendar_date_write. A field that decodes to zero or beyond its
+ * calendar_write_date. A field that decodes to zero or beyond its
  * range falls back to 1. */
-void calendar_date_read(u32* bits, s32 record, calendar_date_t* dest) {
+void calendar_read_date(u32* bits, s32 record, calendar_date_t* dest) {
     s32 base = record * 9;
     s32 mask;
     s32 i;

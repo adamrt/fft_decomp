@@ -13,8 +13,8 @@ struct action_command;
 extern u16 g_message_speaker_swap_unit_a;
 extern u16 g_message_speaker_swap_unit_b;
 
-void message_record_image_render(text_dialog_record_t* record);
-void message_window_width_measure(s32 offset, s32 flags, s32* out_width);
+void message_render_record_image(text_dialog_record_t* record);
+void message_measure_window_width(s32 offset, s32 flags, s32* out_width);
 
 /* BATTLE and WORLD each have their own body. */
 void message_dialog_thread(void);
@@ -23,11 +23,11 @@ void message_dialog_thread(void);
 extern text_glyph_state_t g_message_typewriter_glyph;
 
 /* Frees the slot the current thread owns; a closing dialog thread calls it. */
-void message_typewriter_slot_release(void);
+void message_release_typewriter_slot(void);
 
 /* Draws g_message_typewriter_glyph into VRAM, then paces the message: delay 0 waits for the draw, 2 or more waits
  * that many steps per glyph and 1 follows the message speed option. */
-void message_glyph_draw_timed(s32 pen_x, s32 pen_y, s32 delay);
+void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay);
 
 /* timed messages */
 void message_set_duration(u16 frames);
@@ -39,7 +39,7 @@ void announcement_spell_quote_thread(void);
 void announcement_select(struct action_command* action, s32 unit_id, s32 enabled);
 
 /* message file */
-/* Blocks of the message file WLDMES.BIN (message_block_load_if_changed). */
+/* Blocks of the message file WLDMES.BIN (message_load_block_if_changed). */
 typedef enum message_block {
     MESSAGE_BLOCK_RUMORS = 0,
     MESSAGE_BLOCK_PROPOSITIONS = 1,
@@ -54,6 +54,6 @@ typedef enum message_block {
 
 extern s32 g_message_block_loaded; /* the block in g_message_block_buffer */
 
-void message_block_load_if_changed(s32 block);
+void message_load_block_if_changed(s32 block);
 
 #endif

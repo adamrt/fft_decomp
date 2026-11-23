@@ -21,33 +21,33 @@ static SVECTOR s_rotation_delta = { 0 };
 
 static VECTOR s_zoom_delta = { 0 };
 
-/* Saves the camera position for camera_real_coords_restore (effect
+/* Saves the camera position for camera_restore_real_coords (effect
  * script opcodes 09 and 0a). */
-void camera_real_coords_save(void) {
+void camera_save_real_coords(void) {
     copyVector(&s_real_coords_saved, &g_camera_real_coords);
 }
 
-/* Restores the camera position kept by camera_real_coords_save. */
-void camera_real_coords_restore(void) {
+/* Restores the camera position kept by camera_save_real_coords. */
+void camera_restore_real_coords(void) {
     copyVector(&g_camera_real_coords, &s_real_coords_saved);
 }
 
-VECTOR* camera_real_coords_get(void) {
+VECTOR* camera_get_real_coords(void) {
     return &g_camera_real_coords;
 }
 
 /* Sets the camera position (20.12 real coordinates) at once. */
-void camera_real_coords_set(const VECTOR* coords) {
+void camera_set_real_coords(const VECTOR* coords) {
     copyVector(&g_camera_real_coords, coords);
 }
 
 /* Starts a linear move of the camera position to `destination` (20.12) over
  * frame_count frames (divided by the vsync interval), applied by
- * camera_real_coords_update_animation. No retail code calls it.
+ * camera_update_real_coords_move. No retail code calls it.
  *
  * Like every move starter here, it divides by the frame count as read back from
  * the 16-bit countdown, so the step always matches the frames actually run. */
-void camera_real_coords_set_delta_from_destination(const VECTOR* destination, s32 frame_count) {
+void camera_start_real_coords_move(const VECTOR* destination, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
 
     g_camera_real_coords_countdown = animation_frames;
@@ -59,7 +59,7 @@ void camera_real_coords_set_delta_from_destination(const VECTOR* destination, s3
 
 /* Starts a linear move of the camera position by the vector `values` (20.12) over
  * frame_count frames (divided by the vsync interval). No retail code calls it. */
-void camera_real_coords_set_delta_from_values(const VECTOR* values, s32 frame_count) {
+void camera_start_relative_real_coords_move(const VECTOR* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
 
     g_camera_real_coords_countdown = animation_frames;
@@ -71,7 +71,7 @@ void camera_real_coords_set_delta_from_values(const VECTOR* values, s32 frame_co
 /* Advances the camera-position move by one frame while its countdown runs. Only
  * the uncalled camera_real_coords_set_delta_* routines start the countdown,
  * so nothing moves in retail. */
-void camera_real_coords_update_animation(void) {
+void camera_update_real_coords_move(void) {
     if (g_camera_real_coords_countdown != 0) {
         g_camera_real_coords_countdown--;
         g_camera_real_coords.vx += s_camera_real_coords_delta.vx;
@@ -81,32 +81,32 @@ void camera_real_coords_update_animation(void) {
 }
 
 /* No retail code calls it. */
-void camera_screen_offset_save(void) {
+void camera_save_screen_offset(void) {
     copyVector(&g_camera_screen_offset_saved, &g_camera_screen_offset);
 }
 
 /* No retail code calls it. */
-void camera_screen_offset_restore(void) {
+void camera_restore_screen_offset(void) {
     copyVector(&g_camera_screen_offset, &g_camera_screen_offset_saved);
 }
 
 /* No retail code calls it. */
-VECTOR* camera_screen_offset_get(void) {
+VECTOR* camera_get_screen_offset(void) {
     return &g_camera_screen_offset;
 }
 
 /* No retail code calls it. */
-void camera_screen_offset_set(const VECTOR* coords) {
+void camera_set_screen_offset(const VECTOR* coords) {
     copyVector(&g_camera_screen_offset, coords);
 }
 
 /* Starts a linear move of all three screen-offset components to the one value
  * *destination_value over frame_count frames (divided by the vsync interval).
- * camera_screen_offset_update_animation applies it.
+ * camera_update_screen_offset_move applies it.
  *
  * The per-frame step is stored in g_camera_real_coords_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
-void camera_screen_offset_start_move_uniform(const s32* destination_value, s32 frame_count) {
+void camera_start_uniform_screen_offset_move(const s32* destination_value, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
     s32 current_x = g_camera_screen_offset.vx;
     s32 current_y = g_camera_screen_offset.vy;
@@ -128,7 +128,7 @@ void camera_screen_offset_start_move_uniform(const s32* destination_value, s32 f
  *
  * The per-frame step is stored in g_camera_real_coords_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
-void camera_screen_offset_start_move_relative(const VECTOR* values, s32 frame_count) {
+void camera_start_relative_screen_offset_move(const VECTOR* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
 
     setVector(&g_camera_screen_offset_fixed, g_camera_screen_offset.vx * ONE, g_camera_screen_offset.vy * ONE,
@@ -140,9 +140,9 @@ void camera_screen_offset_start_move_relative(const VECTOR* values, s32 frame_co
 }
 
 /* Advances the screen-offset move by one frame while its countdown runs. Only the
- * uncalled camera_screen_offset_start_move_uniform and _relative routines
+ * uncalled camera_start_uniform_screen_offset_move and _relative routines
  * start the countdown, so nothing moves in retail. */
-void camera_screen_offset_update_animation(void) {
+void camera_update_screen_offset_move(void) {
     s32 fixed_x;
     s32 fixed_y;
     s32 fixed_z;
@@ -159,30 +159,30 @@ void camera_screen_offset_update_animation(void) {
     }
 }
 
-/* Saves the camera zoom for camera_zoom_restore (effect script opcodes 0f
+/* Saves the camera zoom for camera_restore_zoom (effect script opcodes 0f
  * and 24). */
-void camera_zoom_save(void) {
+void camera_save_zoom(void) {
     copyVector(&g_camera_zoom_saved, &g_camera_zoom);
 }
 
-/* Restores the camera zoom kept by camera_zoom_save. */
-void camera_zoom_restore(void) {
+/* Restores the camera zoom kept by camera_save_zoom. */
+void camera_restore_zoom(void) {
     copyVector(&g_camera_zoom, &g_camera_zoom_saved);
 }
 
-VECTOR* camera_zoom_get(void) {
+VECTOR* camera_get_zoom(void) {
     return &g_camera_zoom;
 }
 
 /* Sets the camera's three zoom scales at once. */
-void camera_zoom_set(const VECTOR* zoom) {
+void camera_set_zoom(const VECTOR* zoom) {
     copyVector(&g_camera_zoom, zoom);
 }
 
 /* Starts a linear change of all three zoom scales to the one value
  * *destination_value over frame_count frames (divided by the vsync interval),
- * applied by camera_zoom_update_animation. No retail code calls it. */
-void camera_zoom_set_delta_from_value(const s32* destination_value, s32 frame_count) {
+ * applied by camera_update_zoom_move. No retail code calls it. */
+void camera_start_uniform_zoom_move(const s32* destination_value, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
     s32 delta_x = *destination_value - g_camera_zoom.vx;
 
@@ -194,9 +194,9 @@ void camera_zoom_set_delta_from_value(const s32* destination_value, s32 frame_co
 
 /* Starts a linear change of the zoom scales by the vector `values` over
  * frame_count frames (divided by the vsync interval), applied by
- * camera_zoom_update_animation. No retail code calls it. The body repeats
- * camera_real_coords_set_delta_from_values with the zoom globals. */
-void camera_zoom_set_delta_from_values(const VECTOR* values, s32 frame_count) {
+ * camera_update_zoom_move. No retail code calls it. The body repeats
+ * camera_start_relative_real_coords_move with the zoom globals. */
+void camera_start_relative_zoom_move(const VECTOR* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
 
     g_camera_zoom_countdown = animation_frames;
@@ -208,8 +208,8 @@ void camera_zoom_set_delta_from_values(const VECTOR* values, s32 frame_count) {
 /* Advances the zoom change by one frame while its countdown runs. Only the
  * uncalled camera_zoom_set_delta_* routines start the countdown, so the
  * zoom never animates here in retail. The body repeats
- * camera_real_coords_update_animation with the zoom globals. */
-void camera_zoom_update_animation(void) {
+ * camera_update_real_coords_move with the zoom globals. */
+void camera_update_zoom_move(void) {
     if (g_camera_zoom_countdown != 0) {
         g_camera_zoom_countdown--;
         g_camera_zoom.vx += s_zoom_delta.vx;
@@ -218,29 +218,29 @@ void camera_zoom_update_animation(void) {
     }
 }
 
-/* Saves the camera rotation for camera_rotation_restore (effect script opcodes 0c and 0d). */
-void camera_rotation_save(void) {
+/* Saves the camera rotation for camera_restore_rotation (effect script opcodes 0c and 0d). */
+void camera_save_rotation(void) {
     copyVector(&g_camera_rotation_saved, &g_camera_render_state);
 }
 
-/* Restores the camera rotation kept by camera_rotation_save. */
-void camera_rotation_restore(void) {
+/* Restores the camera rotation kept by camera_save_rotation. */
+void camera_restore_rotation(void) {
     copyVector(&g_camera_render_state, &g_camera_rotation_saved);
 }
 
-SVECTOR* camera_rotation_get(void) {
+SVECTOR* camera_get_rotation(void) {
     return &g_camera_render_state;
 }
 
 /* Sets the camera's three rotation angles at once. */
-void camera_rotation_set(const SVECTOR* rotation) {
+void camera_set_rotation(const SVECTOR* rotation) {
     copyVector(&g_camera_render_state, rotation);
 }
 
 /* Starts a linear turn of all three camera angles to the one value
  * *destination_value over frame_count frames (divided by the vsync interval),
- * applied by camera_rotation_update_animation. No retail code calls it. */
-void camera_rotation_set_delta_from_value(const s16* destination_value, s32 frame_count) {
+ * applied by camera_update_rotation_move. No retail code calls it. */
+void camera_start_uniform_rotation_move(const s16* destination_value, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
     s32 delta_x = *destination_value - g_camera_render_state.vx;
 
@@ -253,7 +253,7 @@ void camera_rotation_set_delta_from_value(const s16* destination_value, s32 fram
 
 /* Starts a linear turn of the camera angles by values[0..2] over frame_count
  * frames (divided by the vsync interval). No retail code calls it. */
-void camera_rotation_set_delta_from_values(const s16* values, s32 frame_count) {
+void camera_start_relative_rotation_move(const s16* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_system_vsync_interval;
     s32 value_x = values[0];
 
@@ -266,7 +266,7 @@ void camera_rotation_set_delta_from_values(const s16* values, s32 frame_count) {
 /* Advances the camera-angle move by one frame while its countdown runs. Only the
  * uncalled camera_rotation_set_delta_* routines start the countdown, so
  * nothing moves in retail. */
-void camera_rotation_update_animation(void) {
+void camera_update_rotation_move(void) {
     if (g_camera_rotation_countdown != 0) {
         g_camera_rotation_countdown--;
         g_camera_render_state.vx += s_rotation_delta.vx;

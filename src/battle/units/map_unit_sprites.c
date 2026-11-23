@@ -3,14 +3,15 @@
 #include "fft/ability.h"
 #include "fft/action.h"
 #include "fft/animation.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/deploy.h"
 #include "fft/effect_secondary.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/move.h"
@@ -22,7 +23,6 @@
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -127,7 +127,7 @@ extern clut_t g_sprite_weapon_clut;
 /* Trail CLUT copied from WEP.SPR at offset 0x8200. */
 extern clut_t g_sprite_trail_clut;
 
-/* The 24 orders in which unit_layers_draw queues a unit's
+/* The 24 orders in which draw_layers queues a unit's
  * four layers: 0 is the unit's own sprite, n its sprite block n - 1. */
 extern s32 g_animation_layer_priorities[24][4];
 
@@ -183,54 +183,54 @@ static file_extent_t s_sheet_files[159] = { { 0, 0 }, { 59021, 45056 }, { 59043,
     { 57674, 47104 }, { 57697, 47104 }, { 57430, 45056 }, { 58223, 49152 }, { 57674, 47104 }, { 57563, 47104 },
     { 59443, 47104 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
 
-static unit_runtime_t* runtime_slot_claim(s16 requested_runtime_id);
+static map_unit_t* claim_map_unit_slot(s16 requested_map_unit_id);
 
-static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 advance);
+static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance);
 
-static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 index, s32 advance);
+static void run_weapon_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance);
 
 /*
- * Claim a unit runtime record slot and stamp its runtime ID.
+ * Claim a map unit record slot and stamp its map unit ID.
  *
  * Ids below 16 take their own slot, failing if another in-use slot already
  * carries that id or the slot is taken. Larger ids take the first free slot,
- * whose index becomes the stored runtime ID; exhausting all 16 raises
- * SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT. Returns 0 on failure.
+ * whose index becomes the stored map unit ID; exhausting all 16 raises
+ * SYSTEM_ERROR_NO_MAP_UNIT_SLOT. Returns 0 on failure.
  */
-static unit_runtime_t* runtime_slot_claim(s16 requested_runtime_id) {
+static map_unit_t* claim_map_unit_slot(s16 requested_map_unit_id) {
     s32 i;
 
-    if (requested_runtime_id < UNIT_RUNTIME_SLOT_COUNT) {
-        for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
-            if (g_unit_slot_states[i].in_use != 0 && g_unit_slot_states[i].unit.runtime_id == requested_runtime_id) {
+    if (requested_map_unit_id < MAP_UNIT_SLOT_COUNT) {
+        for (i = 0; i < MAP_UNIT_SLOT_COUNT; i++) {
+            if (g_map_unit_slots[i].in_use != 0 && g_map_unit_slots[i].unit.map_unit_id == requested_map_unit_id) {
                 break;
             }
         }
-        if (i < UNIT_RUNTIME_SLOT_COUNT) {
+        if (i < MAP_UNIT_SLOT_COUNT) {
             return 0;
         }
-        if (g_unit_slot_states[requested_runtime_id].in_use != 0) {
+        if (g_map_unit_slots[requested_map_unit_id].in_use != 0) {
             return 0;
         }
-        g_unit_slot_states[requested_runtime_id].in_use = 1;
-        g_unit_slot_states[requested_runtime_id].unit.runtime_id = requested_runtime_id;
-        return &g_unit_slot_states[requested_runtime_id].unit;
+        g_map_unit_slots[requested_map_unit_id].in_use = 1;
+        g_map_unit_slots[requested_map_unit_id].unit.map_unit_id = requested_map_unit_id;
+        return &g_map_unit_slots[requested_map_unit_id].unit;
     }
-    for (i = 0; i < UNIT_RUNTIME_SLOT_COUNT; i++) {
-        if (g_unit_slot_states[i].in_use == 0) {
-            g_unit_slot_states[i].in_use = 1;
-            g_unit_slot_states[i].unit.runtime_id = i;
-            return &g_unit_slot_states[i].unit;
+    for (i = 0; i < MAP_UNIT_SLOT_COUNT; i++) {
+        if (g_map_unit_slots[i].in_use == 0) {
+            g_map_unit_slots[i].in_use = 1;
+            g_map_unit_slots[i].unit.map_unit_id = i;
+            return &g_map_unit_slots[i].unit;
         }
     }
-    system_error_handle(SYSTEM_ERROR_NO_UNIT_RUNTIME_SLOT);
+    system_handle_error(SYSTEM_ERROR_NO_MAP_UNIT_SLOT);
     return 0;
 }
 
 /* Fill a sprite display from SHP frame `src`: each part takes its shift, a texture position in
  * 8-pixel tiles, its size from g_sprite_part_sizes and its flip bits; the frame's blend bits
  * are merged into texture page `tpage`. */
-static void frame_parts_load(unit_runtime_t* unit, sprite_display_t* display, const sprite_frame_t* src, s32 tpage) {
+static void load_frame_parts(map_unit_t* unit, sprite_display_t* display, const sprite_frame_t* src, s32 tpage) {
     const sprite_frame_part_t* part;
     u32 i;
     u32 count;
@@ -256,7 +256,7 @@ static void frame_parts_load(unit_runtime_t* unit, sprite_display_t* display, co
         tile = attr & SPRITE_SHP_PART_TILE_MASK;
         u = (tile & 0x1f) * 8;
         v = (tile >> 5) * 8;
-        sprite_display_store_data(display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8,
+        sprite_display_set_part(display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8,
             (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                 | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
     }
@@ -273,17 +273,17 @@ static void frame_parts_load(unit_runtime_t* unit, sprite_display_t* display, co
  * treasure keep the plain table, and a chicken or a frog changes at 4.
  * Higher frame ids index the SHP of an EVTCHR slot: slot 0 for the sequences
  * below 600 and slot 1 for the rest, the submerged table on a water tile. */
-static void frame_unit_shp_select(unit_runtime_t* unit, animation_state_t* state, u16 frame, u16 sequence_id,
+static void select_unit_shp_frame(map_unit_t* unit, animation_state_t* state, u16 frame, u16 sequence_id,
     const sprite_unit_shp_frame_tables_t** out_table, const sprite_frame_t** out_frame) {
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
     const sprite_unit_shp_frame_tables_t* table;
     const sprite_frame_t* selected;
     s32 flags;
     s32 water_height;
     s32 unit_height;
 
-    tile = battle_map_tile_get_pointer((unit->world_coords.vx / BATTLE_MAP_TILE_SIZE),
-        (unit->world_coords.vz / BATTLE_MAP_TILE_SIZE), unit->map_layer);
+    tile = map_get_tile(
+        (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_layer);
     if (frame < SPRITE_SHP_FRAME_EVTCHR_FIRST) {
         table = state->shp;
         if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
@@ -293,8 +293,8 @@ static void frame_unit_shp_select(unit_runtime_t* unit, animation_state_t* state
                 selected = table->submerged_frames[frame];
             }
         } else if (tile->depth_half_height.depth) {
-            if (unit->stats != 0) {
-                flags = move_get_effective_flags(unit->stats);
+            if (unit->battle_unit != 0) {
+                flags = move_get_effective_flags(unit->battle_unit);
                 /* The combined test keeps the table pointer's reference count
                  * low enough for the target's s0/s1 allocation. */
                 if (unit->status_flags_5_6 & UNIT_STATUS_FLOAT) {
@@ -364,7 +364,7 @@ static void frame_unit_shp_select(unit_runtime_t* unit, animation_state_t* state
  * A 48x48 part from a spritesheet slot ends the frame: it is stored as two
  * 48x24 halves, the upper one flagged to draw nearer the camera. The two
  * Altima sheets keep theirs whole. */
-void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 frame, u16 sequence_id) {
+void sprite_load_unit_frame(map_unit_t* unit, animation_state_t* state, u16 frame, u16 sequence_id) {
     const sprite_unit_shp_frame_tables_t* frame_table;
     const sprite_frame_t* frame_data;
     sprite_display_t* display;
@@ -383,16 +383,16 @@ void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 
     y_offset = unit->special_graphic_y_offset;
     /* The unpackers never store the -1 tested here, and three bits
      * of part count cannot pass 8. */
-    frame_unit_shp_select(unit, state, frame, sequence_id, &frame_table, &frame_data);
+    select_unit_shp_frame(unit, state, frame, sequence_id, &frame_table, &frame_data);
     if (frame_data == (const sprite_frame_t*)-1) {
-        system_error_handle(SYSTEM_ERROR_SHP_FRAME);
+        system_handle_error(SYSTEM_ERROR_SHP_FRAME);
     }
     display = state->display;
     count = display->part_count = (frame_data->part_count_and_rotation & 7) + 1;
     display->rotation = g_sprite_y_rotations[frame_data->part_count_and_rotation >> 3];
     if (count > 8) {
         count = 8;
-        system_error_handle(SYSTEM_ERROR_FRAME_PART_COUNT);
+        system_handle_error(SYSTEM_ERROR_FRAME_PART_COUNT);
     }
     flags = frame_data->flags;
     if (unit->spritesheet_id >= SPRITE_SHEET_ID_CRYSTAL) {
@@ -413,8 +413,7 @@ void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 
                 tile = attr & SPRITE_SHP_PART_TILE_MASK;
                 part_u = (tile & 0x1f) * 8;
                 part_v = y_offset + (tile >> 5) * 8;
-                sprite_display_store_data(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
-                    height * 8,
+                sprite_display_set_part(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8, height * 8,
                     (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
             }
@@ -441,7 +440,7 @@ void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 
                         part_v = y_offset + (tile >> 5) * 8;
                         width = g_sprite_part_sizes[size].width;
                         height = g_sprite_part_sizes[size].height;
-                        sprite_display_store_data(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
+                        sprite_display_set_part(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
                             height * 8,
                             (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                                 | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
@@ -451,9 +450,9 @@ void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 
                         row = tile_index >> 5;
                         part_flags = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                             | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13);
-                        sprite_display_store_data(
+                        sprite_display_set_part(
                             display, i, part->x_shift, part->y_shift + 0x18, u, row * 8 + 0x18, 0x30, 0x18, part_flags);
-                        sprite_display_store_data(display, i + 1, part->x_shift, part->y_shift, u, row * 8, 0x30, 0x18,
+                        sprite_display_set_part(display, i + 1, part->x_shift, part->y_shift, u, row * 8, 0x30, 0x18,
                             part_flags | SPRITE_DISPLAY_NEARER);
                         display->part_count++;
                         return;
@@ -469,7 +468,7 @@ void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 
                     tile = attr & SPRITE_SHP_PART_TILE_MASK;
                     part_u = (tile & 0x1f) * 8;
                     part_v = y_offset + (tile >> 5) * 8;
-                    sprite_display_store_data(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
+                    sprite_display_set_part(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
                         height * 8,
                         (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                             | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
@@ -477,22 +476,22 @@ void sprite_unit_frame_load(unit_runtime_t* unit, animation_state_t* state, u16 
             } while (++i < count);
         }
     } else if (frame < SPRITE_SHP_FRAME_EVTCHR_FIRST) {
-        if ((g_sprite_evtchr_slots[0].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id) {
-            frame_parts_load(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_0);
-        } else if ((g_sprite_evtchr_slots[1].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id) {
-            frame_parts_load(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_1);
+        if ((g_sprite_evtchr_slots[0].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->map_unit_id) {
+            load_frame_parts(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_0);
+        } else if ((g_sprite_evtchr_slots[1].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->map_unit_id) {
+            load_frame_parts(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_1);
         }
     } else if (sequence_id < ANIMATION_SEQUENCE_EVTCHR_SLOT_1) {
-        frame_parts_load(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_0);
+        load_frame_parts(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_0);
     } else {
-        frame_parts_load(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_1);
+        load_frame_parts(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_1);
     }
 }
 
 /* SEQ script step: moves the sprite offset by delta across the unit's facing: +x
  * facing north, -x facing south, +z facing west, -z facing east. A diagonal
  * facing matches no case. */
-static void seq_lateral_shift(unit_runtime_t* unit, s8 delta) {
+static void shift_seq_lateral(map_unit_t* unit, s8 delta) {
     switch (unit->facing & (UNIT_FACING_EAST | UNIT_FACING_NORTH)) {
     case UNIT_FACING_NORTH:
         unit->seq_offset.vx += delta;
@@ -511,13 +510,13 @@ static void seq_lateral_shift(unit_runtime_t* unit, s8 delta) {
 
 /* SEQ script step: moves the sprite offset by delta along the height axis;
  * positive is down. */
-static void seq_height_shift(unit_runtime_t* unit, s8 delta) {
+static void shift_seq_height(map_unit_t* unit, s8 delta) {
     unit->seq_offset.vy += delta;
 }
 
 /* SEQ script step: moves the sprite offset by delta along the unit's facing
  * (north is +z, east is +x). A diagonal facing matches no case. */
-static void seq_forward_shift(unit_runtime_t* unit, s8 delta) {
+static void shift_seq_forward(map_unit_t* unit, s8 delta) {
     switch (unit->facing & (UNIT_FACING_EAST | UNIT_FACING_NORTH)) {
     case UNIT_FACING_NORTH:
         unit->seq_offset.vz += delta;
@@ -548,10 +547,10 @@ static void seq_forward_shift(unit_runtime_t* unit, s8 delta) {
  * g_animation_targeted_frame_front or _back frame with a wait of 0. The
  * unpackers resolve a missing sequence to the start of the sequence data,
  * never to -1, so the SYSTEM_ERROR_SEQ_ANIMATION test cannot fire. */
-static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 advance) {
+static void run_unit_seq(map_unit_t* unit, animation_state_t* state, s32 advance) {
     sprite_unit_seq_table_t* seq;
     sprite_block_t* block;
-    unit_runtime_t* target;
+    map_unit_t* target;
     u16 sequence_id;
     u16 index;
     u16 frame;
@@ -582,7 +581,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
         pos -= 2;
     }
     if (seq->sequences[index] == (u8*)-1) {
-        system_error_handle(SYSTEM_ERROR_SEQ_ANIMATION);
+        system_handle_error(SYSTEM_ERROR_SEQ_ANIMATION);
     }
 
     for (;;) {
@@ -616,7 +615,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                     unit->seq_offset.vz = 0;
                     unit->seq_offset.vy = 0;
                     unit->seq_offset.vx = 0;
-                    sprite_unit_frame_load(unit, state, frame, sequence_id);
+                    sprite_load_unit_frame(unit, state, frame, sequence_id);
                 }
                 state->wait = 0;
                 return;
@@ -642,19 +641,19 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                     || (attack_id >= ABILITY_ID_JUMP_FIRST && attack_id < ABILITY_ID_MATH_FIRST)) {
                     if (unit->strike.target_count != 0) {
                         for (i = 0; i < unit->strike.target_count; i++) {
-                            target = unit_battle_get(unit->strike.target_list[i]);
+                            target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
                             if (target != 0) {
                                 action_start_target_response(unit, target);
-                                animation_shield_block_attacker_set(unit, target);
-                                result_runtime_display_prepare(target->runtime_id);
-                                effect_secondary_weapon_hit_start(unit, 0);
+                                animation_set_shield_block_attacker(unit, target);
+                                result_map_unit_prepare_display(target->map_unit_id);
+                                effect_secondary_start_weapon_hit(unit, 0);
                             }
                         }
                     }
                 }
                 break;
             case ANIMATION_SEQ_OP_LAUNCH_PROJECTILE:
-                effect_secondary_projectile_start(unit);
+                effect_secondary_start_projectile(unit);
                 /* fallthrough: the command's two operand bytes are skipped like the unknowns' */
             case ANIMATION_SEQ_OP_UNKNOWN_C7:
             case ANIMATION_SEQ_OP_UNKNOWN_C8:
@@ -691,16 +690,16 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 break;
             case ANIMATION_SEQ_OP_PLAY_SOUND:
                 value = seq->sequences[index][pos++];
-                unit_sfx_play(unit, value);
+                map_unit_play_sfx(unit, value);
                 break;
             case ANIMATION_SEQ_OP_MOVE_UNIT_RL:
-                seq_lateral_shift(unit, seq->sequences[index][pos++]);
+                shift_seq_lateral(unit, seq->sequences[index][pos++]);
                 break;
             case ANIMATION_SEQ_OP_MOVE_UNIT_DU:
-                seq_height_shift(unit, seq->sequences[index][pos++]);
+                shift_seq_height(unit, seq->sequences[index][pos++]);
                 break;
             case ANIMATION_SEQ_OP_MOVE_UNIT_FB:
-                seq_forward_shift(unit, seq->sequences[index][pos++]);
+                shift_seq_forward(unit, seq->sequences[index][pos++]);
                 break;
             case ANIMATION_SEQ_OP_SET_WAIT_BIAS:
                 state->wait_bias = (s8)seq->sequences[index][pos++];
@@ -729,7 +728,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 block_id = seq->sequences[index][pos++];
                 block_sequence = seq->sequences[index][pos++];
                 if (block_id == 0) {
-                    system_error_handle(SYSTEM_ERROR_SEQ_OPCODE);
+                    system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 }
                 block = &unit->sprite_blocks[block_id - 1];
                 block->wait = 1;
@@ -763,36 +762,36 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 state->display->rotation = value;
                 break;
             case ANIMATION_SEQ_OP_MOVE_UNIT:
-                seq_lateral_shift(unit, seq->sequences[index][pos++]);
-                seq_height_shift(unit, seq->sequences[index][pos++]);
-                seq_forward_shift(unit, seq->sequences[index][pos++]);
+                shift_seq_lateral(unit, seq->sequences[index][pos++]);
+                shift_seq_height(unit, seq->sequences[index][pos++]);
+                shift_seq_forward(unit, seq->sequences[index][pos++]);
                 break;
             case ANIMATION_SEQ_OP_UNKNOWN_F7:
                 pos += 3;
                 break;
             case ANIMATION_SEQ_OP_MOVE_FORWARD_1:
-                seq_forward_shift(unit, 1);
+                shift_seq_forward(unit, 1);
                 break;
             case ANIMATION_SEQ_OP_MOVE_FORWARD_2:
-                seq_forward_shift(unit, 2);
+                shift_seq_forward(unit, 2);
                 break;
             case ANIMATION_SEQ_OP_MOVE_DOWN_1:
-                seq_height_shift(unit, 1);
+                shift_seq_height(unit, 1);
                 break;
             case ANIMATION_SEQ_OP_MOVE_DOWN_2:
-                seq_height_shift(unit, 2);
+                shift_seq_height(unit, 2);
                 break;
             case ANIMATION_SEQ_OP_MOVE_BACKWARD_1:
-                seq_forward_shift(unit, -1);
+                shift_seq_forward(unit, -1);
                 break;
             case ANIMATION_SEQ_OP_MOVE_BACKWARD_2:
-                seq_forward_shift(unit, -2);
+                shift_seq_forward(unit, -2);
                 break;
             case ANIMATION_SEQ_OP_MOVE_UP_1:
-                seq_height_shift(unit, -1);
+                shift_seq_height(unit, -1);
                 break;
             case ANIMATION_SEQ_OP_MOVE_UP_2:
-                seq_height_shift(unit, -2);
+                shift_seq_height(unit, -2);
                 break;
             case ANIMATION_SEQ_OP_SHOW_ITEM:
                 unit->item_display_active = 1;
@@ -862,7 +861,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
                 pos++;
                 break;
             default:
-                system_error_handle(SYSTEM_ERROR_SEQ_OPCODE);
+                system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 break;
             }
         } else {
@@ -877,7 +876,7 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
             } else {
                 pos++;
             }
-            sprite_unit_frame_load(unit, state, frame, sequence_id);
+            sprite_load_unit_frame(unit, state, frame, sequence_id);
             state->script_pos = pos;
             state->frame = frame;
             state->sequence_id = sequence_id;
@@ -887,16 +886,16 @@ static void unit_seq_run(unit_runtime_t* unit, animation_state_t* state, s32 adv
 }
 
 /* Rebuilds the casting unit's sprite parts for its current animation and frame. */
-static void frame_casting_unit_load(void) {
-    unit_runtime_t* unit = unit_casting_get();
+static void load_casting_unit_frame(void) {
+    map_unit_t* unit = map_unit_get_casting();
 
     if (unit != 0) {
-        sprite_unit_frame_load(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+        sprite_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
 }
 
 /* Run a weapon or effect sprite block's sequence up to its next frame
- * instruction, or to its end, as unit_seq_run does for the
+ * instruction, or to its end, as run_unit_seq does for the
  * unit's own sprite. The unit-only commands are errors here, the ones that
  * move a unit only skip their operands, and ANIMATION_SEQ_OP_STRIKE_TARGETS and
  * the two shadow commands do nothing.
@@ -914,7 +913,7 @@ static void frame_casting_unit_load(void) {
  * function-scope (global allocation) while the other part temporaries are
  * block-local and `mode` is single-set, which gives the target's register
  * ties and schedule. */
-static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 index, s32 advance) {
+static void run_weapon_seq(map_unit_t* unit, sprite_block_t* sprite, s32 index, s32 advance) {
     const sprite_weapon_shp_t* shp;
     u8** seq;
     u8 op;
@@ -945,10 +944,10 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
         pos -= 2;
     }
     if (sequence_id > 0x100) {
-        system_error_handle(SYSTEM_ERROR_SEQ_ANIMATION);
+        system_handle_error(SYSTEM_ERROR_SEQ_ANIMATION);
     }
     if (seq[sequence_id] == (u8*)-1) {
-        system_error_handle(SYSTEM_ERROR_SEQ_ANIMATION);
+        system_handle_error(SYSTEM_ERROR_SEQ_ANIMATION);
     }
     for (;;) {
         data = seq[sequence_id];
@@ -976,7 +975,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                 sprite->display->rotation = 0;
                 break;
             case ANIMATION_SEQ_OP_LAUNCH_PROJECTILE:
-                effect_secondary_projectile_start(unit);
+                effect_secondary_start_projectile(unit);
                 /* fallthrough: the command's two operand bytes are skipped like the unknowns' */
             case ANIMATION_SEQ_OP_UNKNOWN_E6:
             case ANIMATION_SEQ_OP_UNKNOWN_E7:
@@ -1004,7 +1003,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                 break;
             case ANIMATION_SEQ_OP_PLAY_SOUND:
                 value = seq[sequence_id][pos++];
-                unit_sfx_play(unit, value);
+                map_unit_play_sfx(unit, value);
                 break;
             case ANIMATION_SEQ_OP_SET_WAIT_BIAS:
                 sprite->wait_bias = (s8)seq[sequence_id][pos++];
@@ -1038,7 +1037,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                 block_id = seq[sequence_id][pos++];
                 block_sequence = seq[sequence_id][pos++];
                 if (block_id == 0) {
-                    system_error_handle(SYSTEM_ERROR_SEQ_OPCODE);
+                    system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 }
                 block = &unit->sprite_blocks[block_id - 1];
                 block->sequence_id = block_sequence;
@@ -1088,7 +1087,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
             case ANIMATION_SEQ_OP_SHOW_SHADOW:
                 break;
             default:
-                system_error_handle(SYSTEM_ERROR_SEQ_OPCODE);
+                system_handle_error(SYSTEM_ERROR_SEQ_OPCODE);
                 break;
             }
         } else {
@@ -1100,10 +1099,10 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
             }
             src = shp->frames[frame];
             if (frame > 0x200) {
-                system_error_handle(SYSTEM_ERROR_SHP_FRAME);
+                system_handle_error(SYSTEM_ERROR_SHP_FRAME);
             }
             if (src == (const sprite_frame_t*)-1) {
-                system_error_handle(SYSTEM_ERROR_SHP_FRAME);
+                system_handle_error(SYSTEM_ERROR_SHP_FRAME);
             }
             display = sprite->display;
             parts = display->part_count = (src->part_count_and_rotation & 7) + 1;
@@ -1118,7 +1117,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
             switch (sprite->graphic_type) {
             case SPRITE_GRAPHIC_WEAPON:
                 display->tpage = (flags & SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_WEAPON;
-                display->clut = unit->clut + index * 64 + 0x80; /* BATTLE_MAP_CLUT_ROW_ITEM_A or _B */
+                display->clut = unit->clut + index * 64 + 0x80; /* MAP_CLUT_ROW_ITEM_A or _B */
                 for (i = 0; i < parts; i++) {
                     u32 size;
                     u32 tile;
@@ -1138,13 +1137,13 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                     v = (tile >> 5) * 8 + graphic_v;
                     mode = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13);
-                    sprite_display_store_data(
+                    sprite_display_set_part(
                         display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8, mode);
                 }
                 break;
             case SPRITE_GRAPHIC_EFFECT:
                 display->tpage = (flags & SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_EFFECT;
-                display->clut = unit->clut + index * 64 + 0x80; /* BATTLE_MAP_CLUT_ROW_ITEM_A or _B */
+                display->clut = unit->clut + index * 64 + 0x80; /* MAP_CLUT_ROW_ITEM_A or _B */
                 for (i = 0; i < parts; i++) {
                     u32 size;
                     u32 tile;
@@ -1164,7 +1163,7 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
                     v = (tile >> 5) * 8;
                     mode = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13);
-                    sprite_display_store_data(
+                    sprite_display_set_part(
                         display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8, mode);
                 }
                 break;
@@ -1183,13 +1182,13 @@ static void weapon_seq_run(unit_runtime_t* unit, sprite_block_t* sprite, s32 ind
  * image buffer and uploaded to `slot`'s rectangle; the unit's 64x32 VRAM
  * block (column spritesheet slot / 8, row spritesheet slot % 8 of the
  * SPRITE_SHEET_STRIP_VRAM_X/Y area) is copied 200 lines below it. `slot` is then owned by the unit's attack
- * image (runtime id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE), and the image
+ * image (map unit id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE), and the image
  * buffer stays busy for SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES frames while the
  * upload completes. */
-static void evtchr_unit_load(unit_runtime_t* unit, s32 slot, s32 image_slot) {
+static void load_unit_evtchr(map_unit_t* unit, s32 slot, s32 image_slot) {
     RECT rect;
 
-    sprite_attack_image_decompress(g_sprite_sheet_slots[unit->spritesheet_vram_slot].compressed_attack_image,
+    sprite_decompress_attack_image(g_sprite_sheet_slots[unit->spritesheet_vram_slot].compressed_attack_image,
         g_sprite_evtchr_slots[image_slot].image_data);
     LoadImage(&g_sprite_evtchr_slots[slot].image_rect, (u32*)g_sprite_evtchr_slots[image_slot].image_data);
     rect.x = (unit->spritesheet_vram_slot >> 3) * SPRITE_SHEET_STRIP_WIDTH + SPRITE_SHEET_STRIP_VRAM_X;
@@ -1197,7 +1196,7 @@ static void evtchr_unit_load(unit_runtime_t* unit, s32 slot, s32 image_slot) {
     rect.w = SPRITE_SHEET_STRIP_WIDTH;
     rect.h = SPRITE_SHEET_STRIP_HEIGHT;
     MoveImage(&rect, g_sprite_evtchr_slots[slot].image_rect.x, g_sprite_evtchr_slots[slot].image_rect.y + 200);
-    g_sprite_evtchr_slots[slot].owner = unit->runtime_id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE;
+    g_sprite_evtchr_slots[slot].owner = unit->map_unit_id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE;
     g_system_frame_pacing_suppressed = 1;
     g_sprite_evtchr_slots[image_slot].image_buffer_state = SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES;
     g_sprite_evtchr_slots[slot].evtchr_load_state = 1;
@@ -1205,14 +1204,14 @@ static void evtchr_unit_load(unit_runtime_t* unit, s32 slot, s32 image_slot) {
 
 /* Free the EVTCHR slots whose page holds the unit's attack image. One that
  * holds its SP2 image stays. */
-static void evtchr_unit_release(unit_runtime_t* unit) {
+static void release_unit_evtchr(map_unit_t* unit) {
     s32 i;
     s32 slot_id;
 
     for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
         slot_id = g_sprite_evtchr_slots[i].owner;
         if (slot_id != SPRITE_EVTCHR_SLOT_OWNER_EVTCHR && slot_id != SPRITE_EVTCHR_SLOT_OWNER_NONE
-            && (slot_id & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id
+            && (slot_id & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->map_unit_id
             && (slot_id & SPRITE_EVTCHR_SLOT_OWNER_SP2) == 0) {
             g_sprite_evtchr_slots[i].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
             g_sprite_evtchr_slots[i].evtchr_load_state = 0;
@@ -1238,15 +1237,15 @@ static void evtchr_unit_release(unit_runtime_t* unit) {
  *
  * unit is initialized in its declaration so its copy precedes the table
  * copies, and the unread unused_10 sizes the target's frame. */
-static void unit_wep_eff_update(unit_runtime_t* unit_data) {
-    unit_runtime_t* unit = unit_data;
+static void update_animation(map_unit_t* unit_data) {
+    map_unit_t* unit = unit_data;
     s16 unused_10[4]; /* Unread; occupies sp+0x10 like the target. */
     /* The flip tables hold SPRITE_DISPLAY_HORIZONTAL_FLIP for the views drawn mirrored. */
     s16 flip_by_quadrant[4] = { 0, 0, 2, 2 };
     s16 back_by_quadrant[4] = { 0, 1, 1, 0 };
     s16 flip_by_direction[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0 };
     s16 stand_by_direction[16] = { 1, 2, 2, 3, 3, 4, 4, 5, 5, 4, 4, 3, 3, 2, 2, 1 };
-    unit_runtime_t* other;
+    map_unit_t* other;
     sprite_unit_seq_table_t* seq;
     s32 direction;
     s16 quadrant;
@@ -1298,10 +1297,10 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
             unit->animation.repeat_count = 0;
             unit->animation.flags = 0;
 
-            unit_seq_run(unit, &unit->animation, 1);
+            run_unit_seq(unit, &unit->animation, 1);
             unit->requested_animation = 0;
-            evtchr_unit_release(unit);
-        } else if (unit->requested_animation >= 12 || (unit->runtime_id & 3) == g_frame_counter % 4
+            release_unit_evtchr(unit);
+        } else if (unit->requested_animation >= 12 || (unit->map_unit_id & 3) == g_frame_counter % 4
             || (unit->movement.force_animation_update)) {
             /* An animation below 11 waits for the unit's frame in four. */
             ok = 1;
@@ -1317,7 +1316,7 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                              * image buffer. */
                             for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
                                 if ((g_sprite_evtchr_slots[i].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK)
-                                    == unit->runtime_id) {
+                                    == unit->map_unit_id) {
                                     break;
                                 }
                             }
@@ -1327,7 +1326,7 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                                         for (j = 0; j < SPRITE_EVTCHR_SLOT_COUNT; j++) {
                                             if (g_sprite_evtchr_slots[j].image_buffer_state
                                                 == SPRITE_EVTCHR_SLOT_BUFFER_FREE) {
-                                                evtchr_unit_load(unit, i, j);
+                                                load_unit_evtchr(unit, i, j);
                                                 break;
                                             }
                                         }
@@ -1346,7 +1345,7 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                                  * its owner on its rest frame. */
                                 if (ok == 0) {
                                     if (g_sprite_evtchr_slots[1].owner - SPRITE_EVTCHR_SLOT_OWNER_EVTCHR >= 2) {
-                                        other = unit_runtime_get(
+                                        other = map_unit_get(
                                             g_sprite_evtchr_slots[1].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK);
                                         if (other != 0) {
                                             if (other->animation.sequence_id & 1) {
@@ -1359,17 +1358,17 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                                             other->seq_offset.vz = 0;
                                             other->seq_offset.vy = 0;
                                             other->seq_offset.vx = 0;
-                                            sprite_unit_frame_load(other, &other->animation, other->animation.frame,
+                                            sprite_load_unit_frame(other, &other->animation, other->animation.frame,
                                                 other->animation.sequence_id);
                                             ok = 1;
                                             unit->animation.wait = 0;
-                                            evtchr_unit_load(unit, 1, 1);
+                                            load_unit_evtchr(unit, 1, 1);
                                         }
                                     }
                                 }
                             }
                         } else {
-                            evtchr_unit_release(unit);
+                            release_unit_evtchr(unit);
                         }
                     }
                 }
@@ -1406,17 +1405,17 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                     unit->animation.repeat_count = 0;
                     unit->animation.flags = 0;
 
-                    unit_seq_run(unit, &unit->animation, 1);
+                    run_unit_seq(unit, &unit->animation, 1);
                     unit->movement.force_animation_update = 0;
                     unit->requested_animation = 0;
 
                     /* A mount restarts its rider's sequence along with its own. */
                     if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
-                        other = unit_runtime_get(unit->mount_partner_runtime_id);
+                        other = map_unit_get(unit->mount_partner_map_unit_id);
                         if (other != 0) {
                             other->animation.script_pos = 0;
                             other->animation.wait = 0;
-                            unit_seq_run(other, &other->animation, 1);
+                            run_unit_seq(other, &other->animation, 1);
                         }
                     }
                 } else if (unit->animation.wait != 0) {
@@ -1425,7 +1424,7 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                         if (unit->animation.wait != 0) {
                             unit->animation.wait--;
                             if (unit->animation.wait == 0) {
-                                unit_seq_run(unit, &unit->animation, 1);
+                                run_unit_seq(unit, &unit->animation, 1);
                             }
                         }
                     }
@@ -1455,16 +1454,16 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
             }
             unit->camera_facing_quadrant = quadrant;
             unit->camera_facing_sixteenth = sixteenth;
-            unit_seq_run(unit, &unit->animation, 0);
+            run_unit_seq(unit, &unit->animation, 0);
         } else if (unit->animation.wait != 0) {
             for (i = 0; i < g_system_vsync_interval; i++) {
                 if (unit->animation.wait != 0) {
                     unit->animation.wait--;
                     if (unit->animation.wait == 0) {
-                        unit_seq_run(unit, &unit->animation, 1);
+                        run_unit_seq(unit, &unit->animation, 1);
                     }
                 }
-                animation_distortion_dispatch(unit);
+                animation_dispatch_distortion(unit);
             }
         }
     } else if (unit->animation.wait != 0) {
@@ -1473,10 +1472,10 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
             if (unit->animation.wait != 0) {
                 unit->animation.wait--;
                 if (unit->animation.wait == 0) {
-                    unit_seq_run(unit, &unit->animation, 1);
+                    run_unit_seq(unit, &unit->animation, 1);
                 }
             }
-            animation_distortion_dispatch(unit);
+            animation_dispatch_distortion(unit);
         }
     }
 
@@ -1487,7 +1486,7 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
                 if (unit->sprite_blocks[i].wait != 0) {
                     unit->sprite_blocks[i].wait--;
                     if (unit->sprite_blocks[i].wait == 0) {
-                        weapon_seq_run(unit, &unit->sprite_blocks[i], i, 1);
+                        run_weapon_seq(unit, &unit->sprite_blocks[i], i, 1);
                     }
                 }
             }
@@ -1501,7 +1500,7 @@ static void unit_wep_eff_update(unit_runtime_t* unit_data) {
  * and y -0x1f..0x10f, the ordering-table depth within 1..0x17f,
  * animation.trigger is set, the unit is not a mount carrying its rider and
  * status_bubble_active is set. */
-static void bubble_display_update(unit_runtime_t* unit) {
+static void update_bubble_display(map_unit_t* unit) {
     DVECTOR screen_coords;
 
     /* The camera-relative position is read unsigned (lhu) here. */
@@ -1541,11 +1540,11 @@ static void bubble_display_update(unit_runtime_t* unit) {
  * reload, but the duplicated RTL makes the mount loop large enough that
  * loop.c leaves `row * 16 + g_animation_layer_priorities` inside it, which is why the target
  * recomputes the table address each iteration and spills `row`. */
-static void unit_layers_draw(unit_runtime_t* unit) {
+static void draw_layers(map_unit_t* unit) {
     SVECTOR position;
     SVECTOR rider_position;
     SVECTOR zoom = { ONE, ONE, ONE };
-    unit_runtime_t* rider;
+    map_unit_t* rider;
     sprite_display_t* display;
     sprite_display_t* rider_display;
     s32 row;
@@ -1566,7 +1565,7 @@ static void unit_layers_draw(unit_runtime_t* unit) {
         return;
     }
     if (unit->numeric_display.active) {
-        result_text_animate(unit, &position);
+        result_animate_text(unit, &position);
     }
     if (!((position.vx >= 0x61 && position.vx <= 0x19f) && (position.vy >= -0x1f && position.vy <= 0x10f))
         && unit->spritesheet_id != SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
@@ -1592,13 +1591,13 @@ static void unit_layers_draw(unit_runtime_t* unit) {
                         continue;
                     }
                     display = unit->sprite_blocks[entry - 1].display;
-                    sprite_display_construct_polygon_data(display, display->part_count, 0, &position, angle, flags,
-                        &zoom, gfx_battle_otag_get() + unit->otag_depth_index);
+                    sprite_display_draw_parts(display, display->part_count, 0, &position, angle, flags, &zoom,
+                        gfx_get_battle_otag() + unit->otag_depth_index);
                 } else {
                     display = unit->animation.display;
-                    sprite_display_construct_polygon_data(
-                        display, 3, 0, &position, angle, flags, &zoom, gfx_battle_otag_get() + unit->otag_depth_index);
-                    rider = unit_runtime_get(unit->mount_partner_runtime_id);
+                    sprite_display_draw_parts(
+                        display, 3, 0, &position, angle, flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
+                    rider = map_unit_get(unit->mount_partner_map_unit_id);
                     if (rider != 0 && rider->draw_enabled != 0) {
                         rider_position.vx = rider->camera_relative_x;
                         rider_position.vy = rider->camera_relative_y;
@@ -1611,23 +1610,21 @@ static void unit_layers_draw(unit_runtime_t* unit) {
                                     continue;
                                 }
                                 rider_display = rider->sprite_blocks[entry - 1].display;
-                                sprite_display_construct_polygon_data(rider_display, rider_display->part_count, 0,
-                                    &rider_position, angle, rider_flags, &zoom,
-                                    gfx_battle_otag_get() + unit->otag_depth_index);
+                                sprite_display_draw_parts(rider_display, rider_display->part_count, 0, &rider_position,
+                                    angle, rider_flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
                             } else {
                                 rider_display = rider->animation.display;
-                                sprite_display_construct_polygon_data(rider_display, rider_display->part_count, 0,
-                                    &rider_position, angle, rider_flags, &zoom,
-                                    gfx_battle_otag_get() + unit->otag_depth_index);
+                                sprite_display_draw_parts(rider_display, rider_display->part_count, 0, &rider_position,
+                                    angle, rider_flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
                             }
                         }
                     }
-                    sprite_display_construct_polygon_data(display, display->part_count, 3, &position, angle, flags,
-                        &zoom, gfx_battle_otag_get() + unit->otag_depth_index);
+                    sprite_display_draw_parts(display, display->part_count, 3, &position, angle, flags, &zoom,
+                        gfx_get_battle_otag() + unit->otag_depth_index);
                 }
             }
             if (unit->shadow_graphic_trigger) {
-                sprite_shadow_draw(unit, gfx_battle_otag_get() + unit->otag_depth_index);
+                sprite_draw_shadow(unit, gfx_get_battle_otag() + unit->otag_depth_index);
             }
         }
     } else {
@@ -1638,16 +1635,16 @@ static void unit_layers_draw(unit_runtime_t* unit) {
                     continue;
                 }
                 display = unit->sprite_blocks[entry - 1].display;
-                sprite_display_construct_polygon_data(display, display->part_count, 0, &position, angle, flags, &zoom,
-                    gfx_battle_otag_get() + unit->otag_depth_index);
+                sprite_display_draw_parts(display, display->part_count, 0, &position, angle, flags, &zoom,
+                    gfx_get_battle_otag() + unit->otag_depth_index);
             } else {
                 display = unit->animation.display;
-                sprite_display_construct_polygon_data(display, display->part_count, 0, &position, angle,
-                    flags ^ unit->animation.flags, &zoom, gfx_battle_otag_get() + unit->otag_depth_index);
+                sprite_display_draw_parts(display, display->part_count, 0, &position, angle,
+                    flags ^ unit->animation.flags, &zoom, gfx_get_battle_otag() + unit->otag_depth_index);
             }
         }
         if (unit->shadow_graphic_trigger) {
-            sprite_shadow_draw(unit, gfx_battle_otag_get() + unit->otag_depth_index);
+            sprite_draw_shadow(unit, gfx_get_battle_otag() + unit->otag_depth_index);
         }
     }
     if (unit->position_copies_active) {
@@ -1665,21 +1662,21 @@ static void unit_layers_draw(unit_runtime_t* unit) {
  * depth at the water surface, 12 units per depth level above its feet; In
  * Water moves it up one level only on a water tile, and Float and Walk on
  * Water not at all. */
-void sprite_units_project(void) {
+void sprite_project_units(void) {
     VECTOR transformed;
     SVECTOR screen;
     SVECTOR adjusted;
     s32 gte_flag;
-    unit_runtime_t* unit;
-    battle_map_tile_t* tile;
+    map_unit_t* unit;
+    map_tile_t* tile;
     move_effective_flags_e movement_flags;
 
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
 
-    unit = g_unit_list_head;
+    unit = g_map_unit_list_head;
     while (unit != 0) {
-        unit_draw_coords_copy(&screen, unit);
+        map_unit_copy_draw_coords(&screen, unit);
         RotTrans(&screen, &transformed, &unit->gte_flag);
 
         if ((unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) != 0) {
@@ -1693,22 +1690,22 @@ void sprite_units_project(void) {
             unit->camera_relative_y = transformed.vy + unit->screen_offset.vy;
         }
 
-        tile = battle_map_tile_get_pointer(unit->world_coords.vx / BATTLE_MAP_TILE_SIZE,
-            unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_layer);
+        tile = map_get_tile(
+            unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_layer);
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if ((tile->surface.depth_bias) != 0) {
-                camera_get_step_depth_point_biased(&screen, &adjusted);
+                camera_get_biased_step_depth_point(&screen, &adjusted);
             } else {
-                camera_get_step_depth_point_unbiased(&screen, &adjusted);
+                camera_get_unbiased_step_depth_point(&screen, &adjusted);
             }
         } else if ((tile->surface.depth_bias) != 0) {
-            camera_get_tile_depth_point_biased(&screen, &adjusted);
+            camera_get_biased_tile_depth_point(&screen, &adjusted);
         } else {
-            camera_get_tile_depth_point_unbiased(&screen, &adjusted);
+            camera_get_unbiased_tile_depth_point(&screen, &adjusted);
         }
 
-        if (unit->stats != 0) {
-            movement_flags = move_get_effective_flags(unit->stats);
+        if (unit->battle_unit != 0) {
+            movement_flags = move_get_effective_flags(unit->battle_unit);
             if ((movement_flags & MOVE_EFFECTIVE_IN_WATER) != 0) {
                 if (tile->depth_half_height.depth != 0) {
                     adjusted.vy -= 12;
@@ -1735,8 +1732,8 @@ void sprite_units_project(void) {
  * its bubble. Every state then reloads the casting unit's frame parts and
  * draws every unit record's sprite layers.
  */
-void sprite_units_display_update(void) {
-    unit_runtime_t* unit;
+void sprite_update_units_display(void) {
+    map_unit_t* unit;
 
     switch (g_battle_state) {
     case BATTLE_STATE_FREE_CURSOR:
@@ -1760,8 +1757,8 @@ void sprite_units_display_update(void) {
                     g_status_bubble_delay = 0;
                 }
             } else {
-                for (unit = g_unit_list_head; unit != 0; unit = unit->previous) {
-                    bubble_display_update(unit);
+                for (unit = g_map_unit_list_head; unit != 0; unit = unit->previous) {
+                    update_bubble_display(unit);
                 }
             }
         } else {
@@ -1769,32 +1766,31 @@ void sprite_units_display_update(void) {
         }
         break;
     }
-    frame_casting_unit_load();
-    for (unit = g_unit_list_head; unit != 0; unit = unit->previous) {
-        unit_layers_draw(unit);
+    load_casting_unit_frame();
+    for (unit = g_map_unit_list_head; unit != 0; unit = unit->previous) {
+        draw_layers(unit);
     }
 }
 
-/* Unlink a unit record from the unit list and free its runtime slot; its spritesheet VRAM slot is
+/* Unlink a unit record from the unit list and free its map unit slot; its spritesheet VRAM slot is
  * freed too unless another live unit still uses it. */
-void unit_remove(unit_runtime_t* unit) {
-    unit_runtime_t* it;
+void map_unit_remove(map_unit_t* unit) {
+    map_unit_t* it;
     s32 shared = 0;
 
     sprite_display_release_unit_stub(unit->animation.display);
-    g_unit_slot_states[unit->runtime_id].in_use = 0;
+    g_map_unit_slots[unit->map_unit_id].in_use = 0;
     /* The 32-bit list-head pointer doubles as a sentinel record (previous is at 0x000);
      * reading the first link through that view keeps the target's addressing. */
-    for (it = ((unit_runtime_t*)&g_unit_list_head)->previous; it != 0; it = it->previous) {
-        if (it->spritesheet_vram_slot == unit->spritesheet_vram_slot
-            && g_unit_slot_states[it->runtime_id].in_use != 0) {
+    for (it = ((map_unit_t*)&g_map_unit_list_head)->previous; it != 0; it = it->previous) {
+        if (it->spritesheet_vram_slot == unit->spritesheet_vram_slot && g_map_unit_slots[it->map_unit_id].in_use != 0) {
             shared = 1;
         }
     }
     if (shared == 0) {
         g_sprite_sheet_slots[unit->spritesheet_vram_slot].in_use = 0;
     }
-    for (it = (unit_runtime_t*)&g_unit_list_head; it != 0; it = it->previous) {
+    for (it = (map_unit_t*)&g_map_unit_list_head; it != 0; it = it->previous) {
         if (it->previous == unit) {
             it->previous = unit->previous;
             return;
@@ -1803,12 +1799,12 @@ void unit_remove(unit_runtime_t* unit) {
 }
 
 /* Remove every unit record. The walk reads each record's link after removing it, which works
- * because unit_remove leaves that link in place. */
-void unit_all_clear(void) {
-    unit_runtime_t* unit = g_unit_list_head;
+ * because map_unit_remove leaves that link in place. */
+void map_unit_clear_all(void) {
+    map_unit_t* unit = g_map_unit_list_head;
 
     while (unit != 0) {
-        unit_remove(unit);
+        map_unit_remove(unit);
         unit = unit->previous;
     }
 }
@@ -1817,32 +1813,32 @@ void unit_all_clear(void) {
  * animation to end.
  *
  * FLASH starts the fade to black and moves to DARKEN. DARKEN then disables the
- * battle unit slot, removes the runtime record and returns 1; for the source unit it
+ * battle unit slot, removes the map unit record and returns 1; for the source unit it
  * only hides the unit. Every other path returns 0. */
-static s32 fade_out_removal_update(unit_runtime_t* unit) {
+static s32 update_fade_out_removal(map_unit_t* unit) {
     u8 phase = unit->fade_out_phase;
 
     if (phase == UNIT_FADE_OUT_NONE) {
         return 0;
     }
-    if (g_battle_map_palette_state.clut_rows[BATTLE_MAP_CLUT_ROW_UNITS].animations[unit->runtime_id].active != 0) {
+    if (g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].animations[unit->map_unit_id].active != 0) {
         return 0;
     }
     switch (phase) {
     case UNIT_FADE_OUT_FLASH:
         unit->fade_out_phase = UNIT_FADE_OUT_DARKEN;
-        sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, 4, unit->runtime_id, -0x1f, -0x1f, -0x1f);
+        sprite_palette_apply_modulation_to_units(MAP_COLOR_MODE_BASE, 4, unit->map_unit_id, -0x1f, -0x1f, -0x1f);
         return 0;
     case UNIT_FADE_OUT_DARKEN:
-        if (unit->runtime_id != g_unit_source_runtime_id) {
+        if (unit->map_unit_id != g_unit_source_map_unit_id) {
             unit->fade_out_phase = UNIT_FADE_OUT_REMOVED;
-            if (unit->stats != 0) {
-                unit_disable(unit->stats->battle_id);
+            if (unit->battle_unit != 0) {
+                battle_unit_disable(unit->battle_unit->battle_unit_id);
             }
-            unit_remove(unit);
+            map_unit_remove(unit);
             return 1;
         }
-        unit_runtime_hide(unit->runtime_id);
+        map_unit_hide(unit->map_unit_id);
         return 0;
     }
     return 0;
@@ -1850,13 +1846,13 @@ static s32 fade_out_removal_update(unit_runtime_t* unit) {
 
 /* Per-frame update of every unit record: its animation with the weapon and effect
  * sprites, its status bubble and its fade-out removal. */
-void unit_animations_update(void) {
-    unit_runtime_t* unit = g_unit_list_head;
+void map_unit_update_animations(void) {
+    map_unit_t* unit = g_map_unit_list_head;
 
     while (unit != 0) {
-        unit_wep_eff_update(unit);
-        unit_float_status_bubble_update(unit);
-        fade_out_removal_update(unit);
+        update_animation(unit);
+        map_unit_update_float_and_status_bubble(unit);
+        update_fade_out_removal(unit);
         unit = unit->previous;
     }
 }
@@ -1864,7 +1860,7 @@ void unit_animations_update(void) {
 /* Unpack a unit SEQ file: copy its first attack and SP2 sequence numbers, turn its 256 sequence
  * offsets into pointers and append the sequence data at g_sprite_seq_data_cursor. An offset of
  * -1 resolves to the start of that data. */
-static void unit_seq_data_unpack(sprite_native_unit_seq_table_t* destination, const unit_seq_file_t* source) {
+static void unpack_unit_seq_data(sprite_native_unit_seq_table_t* destination, const unit_seq_file_t* source) {
     const unit_seq_file_t* header;
     const u8(*entry)[4];
     u32 cursor;
@@ -1907,7 +1903,7 @@ static void unit_seq_data_unpack(sprite_native_unit_seq_table_t* destination, co
  * used for the entry base and the payload address), which only a second
  * variable reproduces; and it reserves an 8-byte frame that no instruction
  * touches, which only a declared local aggregate reproduces. */
-static void packed_offset_table_resolve(u8** entries, const packed_seq_file_t* record) {
+static void resolve_packed_offset_table(u8** entries, const packed_seq_file_t* record) {
     const u8(*entry)[4];
     u32 index;
     u32 payload_size;
@@ -1950,7 +1946,7 @@ static void packed_offset_table_resolve(u8** entries, const packed_seq_file_t* r
  * a 16-bit count and that many bytes, appended at
  * g_sprite_shp_frame_data_cursor.
  */
-static void unit_shp_data_unpack(sprite_unit_shp_frame_tables_t* dst, const unit_shp_file_t* src) {
+static void unpack_unit_shp_data(sprite_unit_shp_frame_tables_t* dst, const unit_shp_file_t* src) {
     u32 i;
     u32 j;
     s32 offset;
@@ -2018,7 +2014,7 @@ static void unit_shp_data_unpack(sprite_unit_shp_frame_tables_t* dst, const unit
  * The header loops read through `data` while the blob copy indexes `src`;
  * using one name for both loses the target's separate copy of the argument.
  */
-static void shp_frames_copy(sprite_weapon_shp_t* dst, const weapon_shp_file_t* src) {
+static void copy_shp_frames(sprite_weapon_shp_t* dst, const weapon_shp_file_t* src) {
     u32 i;
     u32 j;
     s32 offset;
@@ -2061,14 +2057,14 @@ static void shp_frames_copy(sprite_weapon_shp_t* dst, const weapon_shp_file_t* s
  * body strip to the SPRITE_SHEET_STRIP_VRAM_X/Y area (column
  * index / 8, row index % 8). The
  * compressed attack image is copied into the slot for
- * evtchr_unit_load to expand later; its fixed length
+ * load_unit_evtchr to expand later; its fixed length
  * overruns most files (QUIRKS.md). A null file loads nothing, and `unused`
  * and `unused_palette` are not read.
  *
  * Indexed byte copies preserve the original loop scheduling. Three RECT
  * locals preserve the 0x50-byte frame and its otherwise unused x/y stores. */
-static void vram_sheet_load(
-    const unit_spr_file_t* source, u32 index, s32 unused, unit_runtime_t* unit, s16 unused_palette) {
+static void load_vram_sheet(
+    const unit_spr_file_t* source, u32 index, s32 unused, map_unit_t* unit, s16 unused_palette) {
     const u8* data;
     u32 column;
     u8* clut_bytes;
@@ -2107,7 +2103,7 @@ static void vram_sheet_load(
 
 /* Upload WEP.SPR's weapon, trail and particle images. Keep weapon and trail
  * CLUTs in their CPU tables; the particle CLUTs use the map palette manager. */
-static void wep_spr_data_load(weapon_spr_file_t* archive) {
+static void load_wep_spr_data(weapon_spr_file_t* archive) {
     s32 i;
     u8* cursor = (u8*)archive->weapon_clut;
 
@@ -2119,12 +2115,12 @@ static void wep_spr_data_load(weapon_spr_file_t* archive) {
         ((u8*)g_sprite_trail_clut)[i] = *cursor++;
     }
     LoadTPage((u32*)archive->trail_pixels, 0, 0, 0x200, 0, 0x100, 0x100);
-    battle_map_palette_load_data(archive->particle_clut, BATTLE_MAP_CLUT_ROW_WEAPONS, 0, 1);
+    map_palette_load_data(archive->particle_clut, MAP_CLUT_ROW_WEAPONS, 0, 1);
     LoadTPage((u32*)archive->particle_pixels, 0, 0, 0x200, 0x70, 0x100, 0x90);
 }
 
 /* Copy the first 21 OTHER.SPR palettes, setting STP on all but color zero. */
-static void other_spr_palette_copy(const other_spr_file_t* archive) {
+static void copy_other_spr_palettes(const other_spr_file_t* archive) {
     s32 i = 0;
     s32 one = 1; /* held in a local: a literal changes the setup schedule */
     u8* dst = (u8*)&g_sprite_other_palettes;
@@ -2142,40 +2138,40 @@ static void other_spr_palette_copy(const other_spr_file_t* archive) {
     } while (i < (s32)sizeof(g_sprite_other_palettes));
 }
 
-/* Create a unit record on a map tile: claim a runtime slot and a spritesheet VRAM slot (0 when
+/* Create a unit record on a map tile: claim a map unit slot and a spritesheet VRAM slot (0 when
  * either is exhausted), load its sheet and palette, reset its motion, display and animation state,
  * set up its weapon and effect blocks and link it at the head of the unit list. A job sheet with
  * stats uses the stats' palette; palettes past 5 become 0, and nonzero `flags` starts the unit
  * hidden. */
-static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id,
-    s16 palette, s16 requested_runtime_id, unit_stats_t* stats, u32 flags, const unit_spr_file_t* data) {
-    unit_runtime_t* unit;
+static map_unit_t* init_map_unit(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id, s16 palette,
+    s16 requested_map_unit_id, battle_unit_t* stats, u32 flags, const unit_spr_file_t* data) {
+    map_unit_t* unit;
     union {
         animation_state_t* animation;
         sprite_block_t* block;
     } cursor;
-    battle_map_tile_t* tile;
-    s32 runtime_id;
+    map_tile_t* tile;
+    s32 map_unit_id;
     s32 slot;
     u16 id;
     s32 i;
-    unit_runtime_t** head;
+    map_unit_t** head;
     u8 tile_x;
     u8 tile_y;
     u8 tile_layer;
 
     id = spritesheet_id;
-    unit = runtime_slot_claim(requested_runtime_id);
+    unit = claim_map_unit_slot(requested_map_unit_id);
     if (unit == 0) {
         return 0;
     }
-    runtime_id = unit->runtime_id;
+    map_unit_id = unit->map_unit_id;
     unit->spritesheet_id = id;
     /* slot reads the claim back through the u8 field, so a failed claim
      * (0xffff) arrives as 0xff and this test never holds (QUIRKS.md). */
     slot = unit->spritesheet_vram_slot = sprite_sheet_claim_slot(spritesheet_id);
     if (slot == 0xffff) {
-        g_unit_slot_states[unit->runtime_id].in_use = 0;
+        g_map_unit_slots[unit->map_unit_id].in_use = 0;
         return 0;
     }
 
@@ -2194,12 +2190,12 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
     unit->status_flags_5_6 = 0;
     unit->status_flags_1_4 = 0;
 
-    vram_sheet_load(data, slot, runtime_id, unit, palette);
-    tile = battle_map_tile_get_pointer(map_x, map_y, map_level);
+    load_vram_sheet(data, slot, map_unit_id, unit, palette);
+    tile = map_get_tile(map_x, map_y, map_level);
     /* The tint runs before mount_state is reset below (QUIRKS.md). */
     sprite_palette_update(unit, tile->flags.shading, 1);
-    battle_map_palette_load_data(&g_sprite_shadow_palette, BATTLE_MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0);
-    unit->clut = GetClut(runtime_id << 4, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_UNITS);
+    map_palette_load_data(&g_sprite_shadow_palette, MAP_CLUT_ROW_UNIT_SHADOWS, map_unit_id, 0);
+    unit->clut = GetClut(map_unit_id << 4, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_UNITS);
     unit->tpage = slot + SPRITE_TPAGE_SPRITESHEET_SLOT_0;
 
     if (flags == 0) {
@@ -2210,8 +2206,8 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
         unit->animation.trigger = 0;
     }
 
-    unit->standing_on_battle_id_plus_one = 0;
-    unit->stats = stats;
+    unit->standing_on_battle_unit_id_plus_one = 0;
+    unit->battle_unit = stats;
     unit->requested_animation = 0;
     unit->facing = facing * UNIT_FACING_QUARTER_TURN;
     unit->camera_facing_sixteenth = unit->camera_facing_quadrant = unit->attack_facing = -1;
@@ -2243,7 +2239,7 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
     unit->movement.destination_x = tile_x;
     unit->movement.destination_y = tile_y;
     unit->movement.destination_layer = tile_layer;
-    unit_set_move_and_world_coords(unit);
+    map_unit_set_move_and_world_coords(unit);
 
     cursor.animation = &unit->animation;
     unit->velocity.vz = 0;
@@ -2267,9 +2263,9 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
     unit->numeric_display.active = 0;
     unit->numeric_display.selector = RESULT_DISPLAY_HP_DAMAGE;
     unit->numeric_display.progress = 0;
-    unit->numeric_display.displays[0] = sprite_display_init_numeric(runtime_id, 0);
-    unit->numeric_display.displays[1] = sprite_display_init_numeric(runtime_id, 1);
-    unit->numeric_display.displays[2] = sprite_display_init_numeric(runtime_id, 2);
+    unit->numeric_display.displays[0] = sprite_display_init_numeric(map_unit_id, 0);
+    unit->numeric_display.displays[1] = sprite_display_init_numeric(map_unit_id, 1);
+    unit->numeric_display.displays[2] = sprite_display_init_numeric(map_unit_id, 2);
     unit->numeric_display.displays[0]->scale_x = unit->numeric_display.displays[0]->scale_y
         = unit->numeric_display.displays[1]->scale_x = unit->numeric_display.displays[1]->scale_y
         = unit->numeric_display.displays[2]->scale_x = unit->numeric_display.displays[2]->scale_y = ONE;
@@ -2277,19 +2273,19 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
         = unit->numeric_display.displays[2]->tpage = SPRITE_TPAGE_FRAME;
     unit->numeric_display.displays[0]->clut = unit->numeric_display.displays[1]->clut
         = unit->numeric_display.displays[2]->clut
-        = unit->clut + 0x100; /* the unit's CLUT of BATTLE_MAP_CLUT_ROW_ACTION_RESULTS */
+        = unit->clut + 0x100; /* the unit's CLUT of MAP_CLUT_ROW_ACTION_RESULTS */
     unit->numeric_display.displays[0]->part_count = unit->numeric_display.displays[1]->part_count
         = unit->numeric_display.displays[2]->part_count = 1;
 
     unit->status_bubble_active = 0;
     unit->status_bubble_id = 0;
     unit->status_bubble_timer = 0;
-    unit->status_bubble_display = sprite_display_init_status_bubble(runtime_id);
+    unit->status_bubble_display = sprite_display_init_status_bubble(map_unit_id);
     unit->item_display_active = 0;
-    unit->item_display = sprite_display_init_item(runtime_id);
+    unit->item_display = sprite_display_init_item(map_unit_id);
     unit->position_copies_active = 0;
 
-    unit->animation.display = sprite_display_init_unit(runtime_id);
+    unit->animation.display = sprite_display_init_unit(map_unit_id);
     cursor.animation->graphic_type = SPRITE_GRAPHIC_UNIT;
     unit->animation.shp = unit->animation.saved_shp = sprite_sheet_get_unit_shp(id);
     unit->animation.seq = unit->animation.saved_seq = sprite_sheet_get_unit_seq(id);
@@ -2305,13 +2301,13 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
     unit->animation.display->scale_x = ONE;
     unit->animation.display->scale_y = ONE;
     unit->animation.display->rotation = 0;
-    animation_status_set(unit);
-    unit_seq_run(unit, cursor.animation, 1);
+    animation_set_status(unit);
+    run_unit_seq(unit, cursor.animation, 1);
 
     /* Block 0 draws the weapon sheet, blocks 1 and 2 the effect sheet. */
     for (i = 0; i < 3; i++) {
         cursor.block = &unit->sprite_blocks[i];
-        cursor.block->display = sprite_display_init_weapon(runtime_id, i);
+        cursor.block->display = sprite_display_init_weapon(map_unit_id, i);
         if (i == 0) {
             cursor.block->graphic_type = SPRITE_GRAPHIC_WEAPON;
             cursor.block->shp = sprite_sheet_get_weapon_shp(id);
@@ -2337,25 +2333,25 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
          * blocks wait for their first sequence command. */
         if ((s16)id < SPRITE_SHEET_ID_CHOCOBO && (s16)id < SPRITE_SHEET_ID_VELIUS && (s16)id >= SPRITE_SHEET_ID_BOY
             && (s16)id != SPRITE_SHEET_ID_DAMI) {
-            weapon_seq_run(unit, &unit->sprite_blocks[i], i, 1);
+            run_weapon_seq(unit, &unit->sprite_blocks[i], i, 1);
         }
     }
 
-    head = &g_unit_list_head;
+    head = &g_map_unit_list_head;
     unit->previous = *head;
     *head = unit;
-    sprite_weapon_graphic_set(unit->stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], unit);
-    status_init_display_flags(unit->stats->battle_id);
+    sprite_set_weapon_graphic(unit->battle_unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], unit);
+    status_init_display_flags(unit->battle_unit->battle_unit_id);
     /* Settle the new unit's display and pose without landing sounds or effects. */
     unit->movement.suppress_sfx_and_landing_effects = 1;
-    unit_runtime_display_update(unit->runtime_id);
-    animation_status_set(unit);
+    map_unit_update_display(unit->map_unit_id);
+    animation_set_status(unit);
     unit->movement.suppress_sfx_and_landing_effects = 0;
     return unit;
 }
 
 /* Reset the unit graphics for a new battle: empty the unit list, free the
- * runtime slots, the nine spritesheet slots and both EVTCHR slots (whose
+ * map unit slots, the nine spritesheet slots and both EVTCHR slots (whose
  * image rectangles are 64x200 at 0x100,0 and 0x140,0), rewind the SEQ and SHP
  * data cursors and restart the shared-file loader.
  *
@@ -2363,14 +2359,13 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
  * walk leaves GCC with both the index and the scaled address as induction
  * variables, adding an `addiu`/`li` pair to each loop; the byte offset is what
  * reproduces the target's single `bgez` on the address offset. */
-void sprite_load_state_reset(void) {
+void sprite_reset_load_state(void) {
     s32 i;
     s32 offset;
 
-    g_unit_list_head = 0;
-    for (offset = (UNIT_RUNTIME_SLOT_COUNT - 1) * sizeof(unit_slot_state_t); offset >= 0;
-        offset -= sizeof(unit_slot_state_t)) {
-        ((unit_slot_state_t*)((u8*)g_unit_slot_states + offset))->in_use = 0;
+    g_map_unit_list_head = 0;
+    for (offset = (MAP_UNIT_SLOT_COUNT - 1) * sizeof(map_unit_slot_t); offset >= 0; offset -= sizeof(map_unit_slot_t)) {
+        ((map_unit_slot_t*)((u8*)g_map_unit_slots + offset))->in_use = 0;
     }
     for (offset = (SPRITE_SHEET_SLOT_COUNT - 1) * sizeof(sprite_sheet_slot_t); offset >= 0;
         offset -= sizeof(sprite_sheet_slot_t)) {
@@ -2402,7 +2397,7 @@ void sprite_load_state_reset(void) {
  * single-assignment pointer local reproduces that (a plain `g++` folds %lo into
  * each access), and a block-scoped one per case also lets the scheduler hoist
  * the g_sprite_load_state.file_kind load above the counter store, as the target does. */
-s32 sprite_shp_seq_load_update(void) {
+s32 sprite_update_shp_seq_load(void) {
     s32* phase;
     s32* index;
     void** slot;
@@ -2420,10 +2415,10 @@ s32 sprite_shp_seq_load_update(void) {
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_shp_files[*index].sector, s_shp_files[*index].size, buffer) == 0) {
+            if (file_request_read_bytes(s_shp_files[*index].sector, s_shp_files[*index].size, buffer) == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_SHARED_SPRITE_SEQ:
@@ -2433,10 +2428,10 @@ s32 sprite_shp_seq_load_update(void) {
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_seq_files[*index].sector, s_seq_files[*index].size, buffer) == 0) {
+            if (file_request_read_bytes(s_seq_files[*index].sector, s_seq_files[*index].size, buffer) == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SHP:
@@ -2446,11 +2441,11 @@ s32 sprite_shp_seq_load_update(void) {
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_weapon_shp_files[*index].sector, s_weapon_shp_files[*index].size, buffer)
+            if (file_request_read_bytes(s_weapon_shp_files[*index].sector, s_weapon_shp_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SEQ:
@@ -2460,11 +2455,11 @@ s32 sprite_shp_seq_load_update(void) {
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_weapon_seq_files[*index].sector, s_weapon_seq_files[*index].size, buffer)
+            if (file_request_read_bytes(s_weapon_seq_files[*index].sector, s_weapon_seq_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SHP:
@@ -2474,11 +2469,11 @@ s32 sprite_shp_seq_load_update(void) {
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_effect_shp_files[*index].sector, s_effect_shp_files[*index].size, buffer)
+            if (file_request_read_bytes(s_effect_shp_files[*index].sector, s_effect_shp_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SEQ:
@@ -2488,11 +2483,11 @@ s32 sprite_shp_seq_load_update(void) {
             if (buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_effect_seq_files[*index].sector, s_effect_seq_files[*index].size, buffer)
+            if (file_request_read_bytes(s_effect_seq_files[*index].sector, s_effect_seq_files[*index].size, buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SPR:
@@ -2500,10 +2495,10 @@ s32 sprite_shp_seq_load_update(void) {
             if (*slot == 0) {
                 break;
             }
-            if (file_bytes_read_request(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, *slot) == 0) {
+            if (file_request_read_bytes(DISC_SECTOR_BATTLE_WEP_SPR, 0x15000, *slot) == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(*slot);
+                heap_release_block(*slot);
             }
             break;
         case SPRITE_LOAD_SHARED_OTHER_SPR:
@@ -2511,16 +2506,16 @@ s32 sprite_shp_seq_load_update(void) {
             if (*slot == 0) {
                 break;
             }
-            if (file_bytes_read_request(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, *slot) == 0) {
+            if (file_request_read_bytes(DISC_SECTOR_BATTLE_OTHER_SPR, 0x8800, *slot) == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(*slot);
+                heap_release_block(*slot);
             }
             break;
         }
         break;
     case SPRITE_LOAD_PHASE_WAIT:
-        if (file_load_state_get() != 0) {
+        if (file_get_load_state() != 0) {
             break;
         }
         (*phase)++;
@@ -2528,31 +2523,31 @@ s32 sprite_shp_seq_load_update(void) {
     case SPRITE_LOAD_PHASE_INSTALL:
         switch (g_sprite_load_state.file_kind) {
         case SPRITE_LOAD_SHARED_SPRITE_SHP:
-            unit_shp_data_unpack(
+            unpack_unit_shp_data(
                 &g_sprite_unit_shp_frame_tables[g_sprite_load_state.index], g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_SPRITE_SEQ:
-            unit_seq_data_unpack(&g_sprite_unit_seq_tables[g_sprite_load_state.index], g_sprite_load_state.buffer);
+            unpack_unit_seq_data(&g_sprite_unit_seq_tables[g_sprite_load_state.index], g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SHP:
-            shp_frames_copy(&g_sprite_weapon_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
+            copy_shp_frames(&g_sprite_weapon_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SEQ:
-            packed_offset_table_resolve(
+            resolve_packed_offset_table(
                 g_sprite_weapon_graphics[g_sprite_load_state.index].seq, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SHP:
-            shp_frames_copy(&g_sprite_effect_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
+            copy_shp_frames(&g_sprite_effect_graphics[g_sprite_load_state.index].shp, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_EFFECT_SEQ:
-            packed_offset_table_resolve(
+            resolve_packed_offset_table(
                 g_sprite_effect_graphics[g_sprite_load_state.index].seq, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_WEAPON_SPR:
-            wep_spr_data_load(g_sprite_load_state.buffer);
+            load_wep_spr_data(g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_SHARED_OTHER_SPR:
-            other_spr_palette_copy(g_sprite_load_state.buffer);
+            copy_other_spr_palettes(g_sprite_load_state.buffer);
             break;
         }
         {
@@ -2562,7 +2557,7 @@ s32 sprite_shp_seq_load_update(void) {
         }
         break;
     case SPRITE_LOAD_PHASE_FINISH:
-        heap_block_release(g_sprite_load_state.buffer);
+        heap_release_block(g_sprite_load_state.buffer);
         *phase = SPRITE_LOAD_PHASE_START_READ;
         /* Five sprite SHP and SEQ files, two weapon, one effect, then each SPR file once. */
         switch (g_sprite_load_state.file_kind) {
@@ -2621,18 +2616,18 @@ s32 sprite_shp_seq_load_update(void) {
 
 /* Run the per-frame unit update three times; the queued graphics loader calls it right after it
  * creates a unit. */
-static void initial_frames_run(void) {
+static void run_initial_frames(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        unit_animations_update();
+        map_unit_update_animations();
     }
 }
 
 /* Rewinds the unit graphics loader (g_sprite_load_state) to its
  * first file kind, the start-read phase, index 0 and no buffer. The argument is
  * not read. */
-void sprite_load_state_clear(s32 unused_map_id) {
+void sprite_clear_load_state(s32 unused_map_id) {
     g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
     g_sprite_load_state.index = 0;
@@ -2646,11 +2641,11 @@ void sprite_load_state_clear(s32 unused_map_id) {
  * g_deploy_deployed_unit_map_coordinates; otherwise the coordinate slots of the
  * deployment screen are used, and in the debug battle style the red team is set
  * up from them first. */
-void deploy_sprite_load_init(void) {
+void deploy_init_sprite_load(void) {
     g_unit_graphics_load_queue.count = 0;
     if (script_variable_get(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) == 0) {
         if (g_deploy_skipped != 0) {
-            deploy_build_units(g_deploy_deployed_unit_map_coordinates, 0);
+            deploy_init_units(g_deploy_deployed_unit_map_coordinates, 0);
             g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
             g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
             g_sprite_load_state.index = 0;
@@ -2658,9 +2653,9 @@ void deploy_sprite_load_init(void) {
             return;
         }
     } else {
-        deploy_init_units_for_debug_red_team(deploy_get_coordinate_slots(), 0);
+        deploy_init_debug_red_team_units(deploy_get_coordinate_slots(), 0);
     }
-    deploy_build_units(deploy_get_coordinate_slots(), 0);
+    deploy_init_units(deploy_get_coordinate_slots(), 0);
     g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
     g_sprite_load_state.index = 0;
@@ -2674,7 +2669,7 @@ void deploy_sprite_load_init(void) {
  * heap buffer. Shared SHP/SEQ ids or the last requested id skip the read, as
  * does an already loaded spritesheet. Returns 0 once every
  * descriptor is done, otherwise 1 inside a step and 2 after a step boundary. */
-s32 sprite_queued_load_update(void) {
+s32 sprite_update_queued_load(void) {
     s32 result = 1;
     s32 id;
 
@@ -2697,11 +2692,11 @@ s32 sprite_queued_load_update(void) {
             if (g_sprite_load_state.buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_shp_files[id].sector, s_shp_files[id].size, g_sprite_load_state.buffer)
+            if (file_request_read_bytes(s_shp_files[id].sector, s_shp_files[id].size, g_sprite_load_state.buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_QUEUED_SEQ:
@@ -2720,11 +2715,11 @@ s32 sprite_queued_load_update(void) {
             if (g_sprite_load_state.buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(s_seq_files[id].sector, s_seq_files[id].size, g_sprite_load_state.buffer)
+            if (file_request_read_bytes(s_seq_files[id].sector, s_seq_files[id].size, g_sprite_load_state.buffer)
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         case SPRITE_LOAD_QUEUED_SPR:
@@ -2749,7 +2744,7 @@ s32 sprite_queued_load_update(void) {
             if (g_sprite_load_state.buffer == 0) {
                 break;
             }
-            if (file_bytes_read_request(
+            if (file_request_read_bytes(
                     s_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                         .sector,
                     s_sheet_files[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
@@ -2758,13 +2753,13 @@ s32 sprite_queued_load_update(void) {
                 == 0) {
                 g_sprite_load_state.phase++;
             } else {
-                heap_block_release(g_sprite_load_state.buffer);
+                heap_release_block(g_sprite_load_state.buffer);
             }
             break;
         }
         break;
     case SPRITE_LOAD_PHASE_WAIT:
-        if (!file_load_state_get()) {
+        if (!file_get_load_state()) {
             g_sprite_load_state.phase++;
         }
         break;
@@ -2773,30 +2768,30 @@ s32 sprite_queued_load_update(void) {
         case SPRITE_LOAD_QUEUED_SHP:
             /* Queued SHP and SEQ data share one boss table each, so each load replaces the last. */
             g_sprite_shp_frame_data_cursor = g_sprite_fallback_shp_frame_data;
-            unit_shp_data_unpack(&g_sprite_boss_shp_frame_tables, g_sprite_load_state.buffer);
+            unpack_unit_shp_data(&g_sprite_boss_shp_frame_tables, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_QUEUED_SEQ:
             g_sprite_seq_data_cursor = g_sprite_fallback_seq_data;
-            unit_seq_data_unpack(&g_sprite_boss_seq_tables, g_sprite_load_state.buffer);
+            unpack_unit_seq_data(&g_sprite_boss_seq_tables, g_sprite_load_state.buffer);
             break;
         case SPRITE_LOAD_QUEUED_SPR:
-            runtime_unit_init(g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].map_x,
+            init_map_unit(g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].map_x,
                 g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].map_y,
                 g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].map_level,
                 g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].facing,
                 g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id,
                 g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].palette_id,
-                g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].runtime_id,
-                g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].stats,
+                g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].map_unit_id,
+                g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].battle_unit,
                 g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].flags, g_sprite_load_state.buffer);
-            initial_frames_run();
+            run_initial_frames();
             break;
         }
         g_sprite_load_state.phase++;
         break;
     case SPRITE_LOAD_PHASE_FINISH:
         if (g_sprite_load_state.buffer != 0) {
-            heap_block_release(g_sprite_load_state.buffer);
+            heap_release_block(g_sprite_load_state.buffer);
         }
         g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
         switch (g_sprite_load_state.file_kind) {

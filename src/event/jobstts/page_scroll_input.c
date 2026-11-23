@@ -14,7 +14,7 @@
  * The first held frame is accepted immediately. Further input is suppressed
  * until the scaled initial delay, then accepted at the scaled repeat period.
  */
-menu_vertical_scroll_direction_e menu_input_page_scroll_direction_read(void) {
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
     menu_vertical_scroll_direction_e page_direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input = PadRead(0);
     s32 initial_delay;

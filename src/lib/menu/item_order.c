@@ -9,9 +9,9 @@
  * other: the menu category minus one), byte lists ending in a terminator. */
 extern u8* g_item_category_lists[];
 
-static s32 item_is_in_category_list(s32 item_id, s32 category_index);
-static void item_prepend_to_category_list(s32 item_id, s32 category_index);
-static void item_remove_from_category_list(s32 item_id, s32 category_index);
+static s32 is_in_category_list(s32 item_id, s32 category_index);
+static void prepend_to_category_list(s32 item_id, s32 category_index);
+static void remove_from_category_list(s32 item_id, s32 category_index);
 
 /* Copy a sort-key order into destination as halfwords, including its -1
  * terminator. WORLD slot 0 holds Formation keys; slots 1..5 hold item keys. */
@@ -98,25 +98,25 @@ void item_rebuild_category_list(s32 category) {
 
     for (i = 1; i < ITEM_ID_END; i++) {
         item = i;
-        type = item_menu_category_get(item);
+        type = item_get_menu_category(item);
         cat = 0;
         if (type != ITEM_MENU_CATEGORY_WEAPON) {
             cat = type - 1;
         }
         if (category == cat) {
-            if (item_total_count_get(item) != 0) {
-                if (item_is_in_category_list(i, category) == 0) {
-                    item_prepend_to_category_list(i, category);
+            if (item_get_total_count(item) != 0) {
+                if (is_in_category_list(i, category) == 0) {
+                    prepend_to_category_list(i, category);
                 }
             } else {
-                item_remove_from_category_list(i, category);
+                remove_from_category_list(i, category);
             }
         }
     }
 }
 
 /* Returns whether an item occurs in a 0xFF-terminated category list. */
-static s32 item_is_in_category_list(s32 item_id, s32 category_index) {
+static s32 is_in_category_list(s32 item_id, s32 category_index) {
     u8* item;
 
     for (item = g_item_category_lists[category_index]; *item != ITEM_LIST_END; item++) {
@@ -130,7 +130,7 @@ static s32 item_is_in_category_list(s32 item_id, s32 category_index) {
 /* Prepend an item to the selected category list.
  *
  * The existing entries and their terminator move one byte to the right. */
-static void item_prepend_to_category_list(s32 item_id, s32 category_index) {
+static void prepend_to_category_list(s32 item_id, s32 category_index) {
     u8* list = g_item_category_lists[category_index];
     s32 i = 0;
 
@@ -144,7 +144,7 @@ static void item_prepend_to_category_list(s32 item_id, s32 category_index) {
 }
 
 /* Remove the first matching item from a category list. */
-static void item_remove_from_category_list(s32 item_id, s32 category_index) {
+static void remove_from_category_list(s32 item_id, s32 category_index) {
     u8* list = g_item_category_lists[category_index];
     s32 i;
 

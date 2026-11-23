@@ -28,26 +28,26 @@ extern u8 g_formation_sprite_index_by_identity[];
  * preview unit and not a Mime is then given its best-fit equipment: the old
  * items return to the inventory before the replacement set is taken from it,
  * and the auto-equip banner (0xD811) shows for 30 frames. Return 1 on success
- * and -2 when the unit is locked (see formation_unit_lock_get).
+ * and -2 when the unit is locked (see formation_unit_get_lock).
  */
-s32 formation_ability_slot_set(s16 unit_id, s16 slot, s16 ability, s32 update_equipment) {
+s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_equipment) {
     s16 equipment[MENU_EQUIPMENT_SLOT_COUNT];
     s32 i;
 
-    if (formation_unit_lock_get(unit_id) == FORMATION_UNIT_UNLOCKED) {
+    if (formation_unit_get_lock(unit_id) == FORMATION_UNIT_UNLOCKED) {
         formation_unit_t* unit = g_formation_unit_pointers[unit_id];
         unit->detail.abilities[slot] = ability;
         formation_save_records();
-        formation_invalid_loadout_remove(unit_id);
+        formation_remove_invalid_loadout(unit_id);
         if (update_equipment != 0 && unit_id != FORMATION_PREVIEW_UNIT_INDEX
             && g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
-            formation_item_best_fit_build(unit_id, equipment);
+            formation_item_build_best_fit(unit_id, equipment);
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-                item_inventory_count_adjust(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
+                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
             }
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 g_formation_unit_pointers[unit_id]->detail.equipment[i] = equipment[i];
-                item_inventory_count_adjust(equipment[i], -1);
+                item_adjust_inventory_count(equipment[i], -1);
             }
             formation_save_records();
             formation_banner_countdown(0xD811, 0x1E);
@@ -60,7 +60,7 @@ s32 formation_ability_slot_set(s16 unit_id, s16 slot, s16 ability, s32 update_eq
 /* Why a formation unit cannot use a menu, as a FORMATION_UNIT_LOCK_*
  * value: away on a proposition, a monster, an egg or a Mime, tested in that
  * order; FORMATION_UNIT_UNLOCKED otherwise. */
-s32 formation_unit_lock_get(s32 unit_id) {
+s32 formation_unit_get_lock(s32 unit_id) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_id];
 
     if (unit->proposition_status != 0)
@@ -79,9 +79,9 @@ s32 formation_unit_lock_get(s32 unit_id) {
 /* Mark an ability learned for a job: find its position in the job's skillset list and set that
  * bit, most significant first, in the unit's learned-ability bytes for the job. */
 void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
-    s32 skillset = job_skillset_get(job_id);
-    s16 generic_job = job_generic_index_get(job_id);
-    s16* list = (s16*)ability_skillset_list_build(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    s32 skillset = job_get_skillset(job_id);
+    s16 generic_job = job_get_generic_index(job_id);
+    s16* list = (s16*)ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
     s32 i = 0;
     s32 byte;
     s32 bit;
@@ -107,7 +107,7 @@ void formation_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
  * Special jobs use fixed sprite entries; generic humans derive theirs from
  * job and gender. The third argument is retained because all known callers
  * pass it even though this function does not consume it. */
-void formation_unit_sprite_source_build(s16 formation_index, texture_source_t* destination, s32 unused) {
+void formation_unit_build_sprite_source(s16 formation_index, texture_source_t* destination, s32 unused) {
     formation_unit_t* unit = g_formation_unit_pointers[formation_index];
     s16 job_id;
     s32 index;
@@ -134,11 +134,12 @@ void formation_unit_sprite_source_build(s16 formation_index, texture_source_t* d
     } else if (unit->sprite_set < CHARACTER_IDENTITY_BOY) {
         index = g_formation_sprite_index_by_identity[unit->sprite_set];
     } else {
-        formation_job_sprite_source_build(job_id, unit->gender_flags & UNIT_FLAG_FEMALE, destination);
+        formation_job_build_sprite_source(job_id, unit->gender_flags & UNIT_FLAG_FEMALE, destination);
         return;
     }
     bcopy(&g_formation_sprite_sources[index], destination, sizeof(*destination));
-    palette = (s16)formation_unit_palette_index_get(g_formation_unit_pointers[formation_index]->identity.roster_slot);
+    palette
+        = (s16)formation_get_party_unit_palette_index(g_formation_unit_pointers[formation_index]->identity.roster_slot);
     clut_x = (palette % 4) * 0x10 + 0x140;
     job_id = palette / 4;
     destination->clut = GetClut(clut_x, job_id + 0xE0);
@@ -148,7 +149,7 @@ void formation_unit_sprite_source_build(s16 formation_index, texture_source_t* d
  *
  * Narrow the requested slot to s16. On a miss, return the number of entries searched.
  */
-s32 formation_roster_slot_find(s16 roster_slot) {
+s32 formation_unit_find_by_roster_slot(s16 roster_slot) {
     s32 index;
 
     for (index = 0; index < g_formation_record_count; index++) {
@@ -163,7 +164,7 @@ s32 formation_roster_slot_find(s16 roster_slot) {
  * character identity lookup; of the rest, Bard and Dancer have fixed entries
  * (0x3a, 0x3b), while Mime uses 0x3c and the others job * 2 - 0x7c, both
  * plus one for a female unit. */
-void formation_job_sprite_source_build(s32 job_id, s16 is_female, texture_source_t* destination) {
+void formation_job_build_sprite_source(s32 job_id, s16 is_female, texture_source_t* destination) {
     s16 id = job_id;
     s16 idx;
 
@@ -192,6 +193,6 @@ void formation_job_sprite_source_build(s32 job_id, s16 is_female, texture_source
  * The snapshot caller supplies the preview index as a second argument; this
  * routine ignores it and always uses g_formation_temp_unit.
  */
-void formation_unit_to_temp_copy(s16 index, s32 unused_slot) {
+void formation_unit_copy_to_temp(s16 index, s32 unused_slot) {
     bcopy(g_formation_unit_pointers[index], g_formation_temp_unit, sizeof(formation_unit_t));
 }

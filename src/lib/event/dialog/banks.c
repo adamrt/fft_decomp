@@ -10,7 +10,7 @@ extern s32 g_text_section_backup_active;
 
 /* Bind writable sections of a text bank; Formation rebuilds the roster-name section in place.
  * The bank starts with TEXT_SECTION_COUNT offsets measured from the end of that table. */
-void text_pointer_table_relocate(u32* offsets) {
+void text_relocate_pointer_table(u32* offsets) {
     s32 index = 0;
     u8* text_data = (u8*)offsets + sizeof(u32) * TEXT_SECTION_COUNT;
 
@@ -21,7 +21,7 @@ void text_pointer_table_relocate(u32* offsets) {
 }
 
 /* Back up the text section pointer table once. */
-void text_section_pointers_save(void) {
+void text_save_section_pointers(void) {
     if (g_text_section_backup_active == 0) {
         mem_copy_bytes_nonempty(
             s_text_saved_section_pointers, g_text_section_pointers, sizeof(s_text_saved_section_pointers));
@@ -30,7 +30,7 @@ void text_section_pointers_save(void) {
 }
 
 /* Restore the text section pointer table and clear the backup flag. */
-void text_section_pointers_restore(void) {
+void text_restore_section_pointers(void) {
     mem_copy_bytes_nonempty(g_text_section_pointers, s_text_saved_section_pointers, sizeof(g_text_section_pointers));
     g_text_section_backup_active = 0;
 }

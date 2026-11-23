@@ -2,44 +2,44 @@
 
 #include "fft/ability.h"
 #include "fft/at_list.h"
-#include "fft/battle_map.h"
 #include "fft/command.h"
 #include "fft/item.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/reaction.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/turn.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
-static s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
+static s32 collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
 
-static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset);
+static u16 get_elemental_ability(s32 unit_id, u8 skillset);
 
-static s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
+static s32 collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
 
-static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
+static s32 collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
 
-static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit);
+static command_menu_e get_unit_menu_id(const battle_unit_t* unit);
 
-static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu);
+static s32 probe_abilities(s32 unit_id, u8 skillset, u8 menu);
 
-static s32 math_flagged_abilities_collect(s32 unit_id, u8 skillset, s16* out, u8 mask);
+static s32 collect_math_flagged_abilities(s32 unit_id, u8 skillset, s16* out, u8 mask);
 
 static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
 
-/* The idle action menu for a unit id: menu_action_unit_menu_id_get, with
+/* The idle action menu for a unit id: get_unit_menu_id, with
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
  * MENU_COMMAND_ID_NONE for an empty slot. */
-command_menu_e menu_action_get_menu_id(s32 battle_id) {
-    unit_stats_t* unit = unit_present_stats_get(battle_id);
+command_menu_e menu_get_action_menu_id(s32 battle_unit_id) {
+    battle_unit_t* unit = battle_unit_get_if_present(battle_unit_id);
     s32 menu;
 
     if (unit == 0) {
         return MENU_COMMAND_ID_NONE;
     }
-    menu = menu_action_unit_menu_id_get(unit);
+    menu = get_unit_menu_id(unit);
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) != 0) {
         switch (menu) {
         case MENU_COMMAND_ID_TURN:
@@ -70,8 +70,8 @@ command_menu_e menu_action_get_menu_id(s32 battle_id) {
  * restriction), and any other unit gets PLAYER_UNIT or OTHER_UNIT.
  *
  */
-static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit) {
-    unit_stats_t* active;
+static command_menu_e get_unit_menu_id(const battle_unit_t* unit) {
+    battle_unit_t* active;
     s32 inspect_only = 0;
     s32 player_controlled;
     s32 player_flag;
@@ -80,7 +80,7 @@ static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit) {
     u8 moved;
     u8 acted;
 
-    active = unit_find_with_turn();
+    active = battle_unit_find_with_turn();
     if (active != 0) {
         if ((active->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0
             || active->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
@@ -96,7 +96,7 @@ static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit) {
         return MENU_COMMAND_ID_OTHER_UNIT_INSPECT;
     }
     dont_move = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
-    restriction = unit_get_action_restriction(unit);
+    restriction = battle_unit_get_action_restriction(unit);
     moved = unit->movement_taken | (dont_move & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
     acted = unit->action_taken | restriction;
     if (unit->has_turn != 0) {
@@ -122,7 +122,7 @@ static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit) {
  * CANNOT_ACT for Don't Act or a ridden mount. DEEP_WATER on a tile of depth 2 or
  * more, unless the unit has Float, Chicken or Frog, one of the Move in Water,
  * Walk on Water or Float movement abilities, or is a rider. */
-unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) {
+unit_action_restriction_e battle_unit_get_action_restriction(const battle_unit_t* unit) {
     s32 depth;
 
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
@@ -132,7 +132,7 @@ unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) 
     if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
         return UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
-    depth = g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)].depth_half_height.depth;
+    depth = g_map_tile_data[battle_unit_get_tile_index(unit)].depth_half_height.depth;
     if (depth < 2) {
         return UNIT_ACTION_RESTRICTION_NONE;
     }
@@ -155,7 +155,7 @@ unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) 
  * entry's abilities.
  *
  * `menu_types` receives each entry's low-nibble menu type and `empty` is set
- * to 1 where ability_table_load returned 0. A monster skillset in either
+ * to 1 where probe_abilities returned 0. A monster skillset in either
  * slot yields a single unloaded primary entry and returns 1; a unit that cannot
  * act or is carrying a rider gets an empty list. Returns -1 when the unit does
  * not exist, otherwise 0.
@@ -165,7 +165,7 @@ unit_action_restriction_e unit_get_action_restriction(const unit_stats_t* unit) 
  * the incremented pointer instead of offsets from the saved base. `supports`
  * is declared first so it wins the allocation tie with `primary`. */
 s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types) {
-    unit_stats_t* unit = unit_present_stats_get(unit_id);
+    battle_unit_t* unit = battle_unit_get_if_present(unit_id);
     u8* list;
     u8 supports;
     u8 primary;
@@ -218,7 +218,7 @@ s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types
         }
         menu_type = g_command_menu_types_by_skillset[id] & 0xf;
         menu_types[i] = menu_type;
-        if (abilities_probe(unit_id, id, menu_type) == 0) {
+        if (probe_abilities(unit_id, id, menu_type) == 0) {
             empty[i] = 1;
         } else {
             empty[i] = 0;
@@ -232,7 +232,7 @@ s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types
  * A frog only keeps the default, blank, monster and attack menus. Returns the
  * menu loader's result, or whether the menu type is below 15 for menus without
  * a loader. */
-static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu) {
+static s32 probe_abilities(s32 unit_id, u8 skillset, u8 menu) {
     u8 items[0x58];
     s16 abilities[0x44];
     u8 mp_costs[0x18];
@@ -241,7 +241,7 @@ static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu) {
     u8 turns[0x18];
     s32 result;
 
-    if ((g_unit_stats[unit_id].status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
+    if ((g_battle_units[unit_id].status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
             & STATUS_BYTE_MASK(STATUS_ID_FROG))
         && menu != ACTION_MENU_TYPE_DEFAULT && menu != ACTION_MENU_TYPE_MONSTER && menu != ACTION_MENU_TYPE_ATTACK
         && menu != ACTION_MENU_TYPE_BLANK_05) {
@@ -252,22 +252,22 @@ static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu) {
         return skillset_get_unit_ability_data(
             unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
-        return skillset_collect_item_abilities(unit_id, skillset, items);
+        return collect_item_abilities(unit_id, skillset, items);
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
-        return skillset_collect_throwable_items(unit_id, skillset, items);
+        return collect_throwable_items(unit_id, skillset, items);
     case ACTION_MENU_TYPE_MATH_SKILL:
-        result = skillset_math_load_attributes(unit_id, skillset, abilities);
+        result = skillset_load_math_attributes(unit_id, skillset, abilities);
         if (result != 0) {
-            result = skillset_math_load_multiples(unit_id, skillset, abilities);
+            result = skillset_load_math_multiples(unit_id, skillset, abilities);
             if (result != 0) {
-                result = skillset_math_collect_calculator_abilities(unit_id, skillset, abilities);
+                result = skillset_collect_math_calculator_abilities(unit_id, skillset, abilities);
             }
         }
         return result;
     case ACTION_MENU_TYPE_ELEMENTS:
-        return skillset_get_elemental_ability(unit_id, skillset);
+        return get_elemental_ability(unit_id, skillset);
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
-        return skillset_collect_draw_out_katanas(unit_id, skillset, items);
+        return collect_draw_out_katanas(unit_id, skillset, items);
     case ACTION_MENU_TYPE_CHARGE:
         return skillset_load_charge_ability_ids(unit_id, skillset, abilities);
     default:
@@ -275,14 +275,14 @@ static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu) {
     }
 }
 
-/* Count the AT-list entries that resolve before an action by battle_id
+/* Count the AT-list entries that resolve before an action by battle_unit_id
  * charging for ct; returns 0xff when no such position exists within 40.
  *
  * Keys hold the tick in their high byte. On an equal key the action resolves
- * after only another unit's charged action with a lower battle id. Between the
+ * after only another unit's charged action with a lower battle unit id. Between the
  * charge pass and the next tick (PICK_UNIT_AFTER_CHARGE) a nonzero charge lands
  * one tick later. */
-u8 at_list_count_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries) {
+u8 at_list_count_turns_to_resolve(s32 battle_unit_id, s32 ct, const at_entry_t* entries) {
     s32 count;
 
     if (g_turn_clock_resume_state == TURN_CLOCK_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
@@ -300,9 +300,9 @@ u8 at_list_count_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entri
         if (entry_ct >= ct) {
             if (ct != entry_ct)
                 return count;
-            if (battle_id == entry_unit && is_action != 0)
+            if (battle_unit_id == entry_unit && is_action != 0)
                 return count;
-            if (entry_unit >= battle_id)
+            if (entry_unit >= battle_unit_id)
                 return count;
             if (is_action == 0)
                 return count;
@@ -328,7 +328,7 @@ u8 at_list_count_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entri
 s32 skillset_get_unit_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out) {
     at_entry_t at_list[AT_LIST_CAPACITY];
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     ability_secondary_data_t* secondary;
     s32 known;
     s16 ability;
@@ -353,7 +353,7 @@ s32 skillset_get_unit_ability_data(
     charge = 0;
     half_mp = 0;
     frog = 0;
-    unit = unit_present_stats_get(unit_id);
+    unit = battle_unit_get_if_present(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -387,14 +387,14 @@ s32 skillset_get_unit_ability_data(
     if (skillset_index == -1) {
         known = 0xffffff;
     } else {
-        known = ability_learned_get(unit, skillset_index);
+        known = ability_get_learned(unit, skillset_index);
     }
     /* The learned bits run MSB first from bit 23; only the 16 action slots are listed. */
     for (i = 0; i < 16; i++) {
         if (!(known & (0x800000 >> i))) {
             continue;
         }
-        ability = skillset_ability_id_get(skillset, i);
+        ability = skillset_get_ability_id(skillset, i);
         if (frog && ability != ABILITY_ID_BLACK_MAGIC_FROG) {
             continue;
         }
@@ -446,10 +446,10 @@ s32 skillset_get_unit_ability_data(
     return count;
 }
 
-/* Load the unit's Item skillset entries through skillset_collect_item_abilities and return the
+/* Load the unit's Item skillset entries through collect_item_abilities and return the
  * low byte of its result (the entry count). */
 s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return skillset_collect_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+    return collect_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /*
@@ -463,8 +463,8 @@ s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
  * masked `id + 0xfe90` sum the range test already holds (the two differ only
  * above bit 15); spelled as one expression it is one instruction short.
  */
-static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
-    unit_stats_t* unit;
+static s32 collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
+    battle_unit_t* unit;
     u16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 ability_ct[0x18];
@@ -477,7 +477,7 @@ static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_ite
     s16 item_index;
 
     found = 0;
-    unit = unit_present_stats_get(unit_id);
+    unit = battle_unit_get_if_present(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -505,10 +505,10 @@ static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_ite
     return found + 0x100;
 }
 
-/* The number of items skillset_collect_throwable_items lists in out_item_ids:
+/* The number of items collect_throwable_items lists in out_item_ids:
  * its result without the 0x100 marker. */
 s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return skillset_collect_throwable_items(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+    return collect_throwable_items(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /* Collect the item ids the unit may throw into `out`, terminated with
@@ -519,14 +519,14 @@ s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
  * a selected type that is throwable and in stock is listed (item_decrement_party_quantity:
  * only a player-team unit can run out).
  */
-static s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
+static s32 collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     u16 abilities[0x14];
     u8 item_types[0x14];
     u8 mp_costs[0x14];
     u8 charge_times[0x14];
     u8 ability_flags[0x14];
     u8 turn_counts[0x14];
-    struct unit_stats* unit;
+    struct battle_unit* unit;
     s32 count;
     s32 ability_count;
     s32 i;
@@ -539,7 +539,7 @@ static s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
     u8 item_id;
 
     count = 0;
-    unit = unit_present_stats_get(unit_id);
+    unit = battle_unit_get_if_present(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -584,20 +584,20 @@ static s32 skillset_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
 
 /* Collect the unit's learned Math Skill attribute abilities (CT, Level, Exp,
  * Height) into out_ability_ids. */
-s32 skillset_math_load_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids) {
-    return math_flagged_abilities_collect(unit_id, skillset, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
+s32 skillset_load_math_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids) {
+    return collect_math_flagged_abilities(unit_id, skillset, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
 }
 
 /* Collect the unit's learned Math Skill divisor abilities (Prime, 5, 4, 3)
  * into out_ability_ids. */
-s32 skillset_math_load_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids) {
-    return math_flagged_abilities_collect(unit_id, skillset, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
+s32 skillset_load_math_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids) {
+    return collect_math_flagged_abilities(unit_id, skillset, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
 }
 
 /* Collect the unit's learned Math Skill abilities whose
  * g_ability_math_rsm_data flags intersect mask into out, -1-terminated,
  * and return the count. An empty list writes no terminator. */
-static s32 math_flagged_abilities_collect(s32 unit_id, u8 skillset, s16* out, u8 mask) {
+static s32 collect_math_flagged_abilities(s32 unit_id, u8 skillset, s16* out, u8 mask) {
     u16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 charge_times[0x18];
@@ -611,7 +611,7 @@ static s32 math_flagged_abilities_collect(s32 unit_id, u8 skillset, s16* out, u8
     u8 flag_bits;
 
     count = 0;
-    if (unit_present_stats_get(unit_id) == 0) {
+    if (battle_unit_get_if_present(unit_id) == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_MATH_SKILL) {
@@ -646,7 +646,7 @@ static s32 math_flagged_abilities_collect(s32 unit_id, u8 skillset, s16* out, u8
  * The record pointer must be taken inside the inner loop: hoisting the table
  * base into a local before the loop swaps the two preheader address setups.
  */
-s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out) {
+s32 skillset_collect_math_calculator_abilities(s32 unit_id, u8 skillset, s16* out) {
     s16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 charge_times[0x18];
@@ -661,7 +661,7 @@ s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* ou
     s16 ability;
     ability_secondary_data_t* secondary;
 
-    if (unit_present_stats_get(unit_id) == 0) {
+    if (battle_unit_get_if_present(unit_id) == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_MATH_SKILL) {
@@ -688,8 +688,8 @@ s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* ou
 
 /* Return the Elemental (Geomancy) ability for the surface under the unit when
  * the unit knows and can use it, otherwise 0. */
-static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
-    unit_stats_t* unit;
+static u16 get_elemental_ability(s32 unit_id, u8 skillset) {
+    battle_unit_t* unit;
     s16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 ability_ct[0x18];
@@ -699,7 +699,7 @@ static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
     s32 i;
     s16 terrain_ability;
 
-    unit = unit_present_stats_get(unit_id);
+    unit = battle_unit_get_if_present(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -711,8 +711,7 @@ static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
     if (count == 0) {
         return 0;
     }
-    terrain_ability
-        = g_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_tile_calculate_unit_index(unit)].surface.type];
+    terrain_ability = g_terrain_geomancy_abilities[g_map_tile_data[battle_unit_get_tile_index(unit)].surface.type];
     for (i = 0; i < count; i++) {
         if (abilities[i] == terrain_ability) {
             return terrain_ability;
@@ -737,8 +736,8 @@ static u16 skillset_get_elemental_ability(s32 unit_id, u8 skillset) {
  * carries the value the `sh` store writes and is shared with the Frog arm's
  * Frog Attack.
  */
-s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out) {
-    unit_stats_t* unit;
+s32 skillset_collect_monster_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out) {
+    battle_unit_t* unit;
     s32 count = 3;
     s32 frog = 0;
     s32 i;
@@ -746,7 +745,7 @@ s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 u
     s16 ability;
     u8 flags;
 
-    unit = unit_present_stats_get(unit_id);
+    unit = battle_unit_get_if_present(unit_id);
     if (unit == 0) {
         return 0;
     }
@@ -762,11 +761,11 @@ s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 u
         *out = ability;
         out++;
     }
-    if (skillset_monster_count_supporters(unit) != 0) {
+    if (skillset_count_monster_supporters(unit) != 0) {
         count = MONSTER_SKILLSET_ABILITY_COUNT;
     }
     for (i = 0; i < count; i++) {
-        id = skillset_ability_id_get(skillset, i);
+        id = skillset_get_ability_id(skillset, i);
         ability = id;
         if ((frog == 0 || id == ABILITY_ID_BLACK_MAGIC_FROG) && id != 0 && id >= 1 && id < ABILITY_ID_ITEM_FIRST) {
             flags = g_ability_range_data[id].flags_3;
@@ -781,7 +780,7 @@ s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 u
 /* Monster Skill check: the number of the four tiles adjacent to the unit that
  * hold a same-team Monster Skill supporter within 5 of the unit's total
  * height. Returns 0 for an empty slot. */
-s32 skillset_monster_count_supporters(const unit_stats_t* unit) {
+s32 skillset_count_monster_supporters(const battle_unit_t* unit) {
     unit_height_data_t height_data;
     s32 team;
     s32 x;
@@ -789,10 +788,10 @@ s32 skillset_monster_count_supporters(const unit_stats_t* unit) {
     s32 height;
     s32 sum;
 
-    if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE) {
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return 0;
     }
-    unit_action_height_calculate(&height_data, unit->battle_id);
+    battle_unit_calculate_action_height(&height_data, unit->battle_unit_id);
     team = unit->team_flags;
     x = unit->x;
     y = unit->position.y;
@@ -811,26 +810,26 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
     s32 unit_index;
     s32 unit_team_flags = team_flags;
 
-    if (x < 0 || x >= g_battle_map_terrain_width) {
+    if (x < 0 || x >= g_map_terrain_width) {
         return 0;
     }
     if (y >= 0) {
-        if (y >= g_battle_map_terrain_depth) {
+        if (y >= g_map_terrain_depth) {
             return 0;
         }
 
         unit_index = 0;
         reference_height = total_height;
-        for (; unit_index < UNIT_SLOT_COUNT; unit_index++) {
-            unit_stats_t* unit = &g_unit_stats[unit_index];
+        for (; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+            battle_unit_t* unit = &g_battle_units[unit_index];
 
-            if (unit->active_battle_id == UNIT_ACTIVE_BATTLE_ID_NONE || unit->x != x || unit->position.y != y
+            if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE || unit->x != x || unit->position.y != y
                 || reaction_is_prevented(unit) != 0
                 || !(unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_MONSTER_SKILL)
                 || ((unit->team_flags ^ unit_team_flags) & UNIT_TEAM_MASK)) {
                 continue;
             }
-            unit_action_height_calculate(&height, unit->battle_id);
+            battle_unit_calculate_action_height(&height, unit->battle_unit_id);
             if ((reference_height - height.total_height) >= -5 && (reference_height - height.total_height) <= 5) {
                 return 1;
             }
@@ -840,17 +839,17 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
     return 0;
 }
 
-/* The number of katanas skillset_collect_draw_out_katanas lists in
+/* The number of katanas collect_draw_out_katanas lists in
  * out_item_ids: its result without the 0x100 marker. */
 s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return skillset_collect_draw_out_katanas(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+    return collect_draw_out_katanas(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /* Collect the katana item id of each of the unit's learned Draw Out abilities
  * into out_item_ids, terminated by ITEM_ID_NONE, and return 0x100 plus their
  * count (0 when the unit or skillset is wrong or the list is empty). Draw Out
  * abilities run in the same order as their katanas. */
-static s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
+static s32 collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids) {
     u16 abilities[0x10];
     u8 mp_costs[0x10];
     u8 ability_flags[0x10];
@@ -863,7 +862,7 @@ static s32 skillset_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_i
     u32 item_id;
 
     count = 0;
-    if (unit_present_stats_get(unit_id) == 0) {
+    if (battle_unit_get_if_present(unit_id) == 0) {
         return 0;
     }
     if (skillset != SKILLSET_ID_DRAW_OUT) {

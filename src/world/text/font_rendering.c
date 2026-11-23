@@ -13,7 +13,7 @@ static u8 s_text_row_image[2048] = { 0 };
 /* Renders each text id of a -1 terminated list into its own 16 pixel line of
  * `destination`, uploading one line at a time through the scratch image at
  * g_text_row_image. */
-void text_id_rows_to_vram_render(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags) {
+void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, const RECT* destination, s32 flags) {
     text_image_bounds_t bounds;
     RECT destination_row;
     s16 row_text_ids[4];
@@ -43,7 +43,7 @@ void text_id_rows_to_vram_render(const u8* text_table, const s16* text_ids, cons
  * The pen advances by the glyph's width plus kerning pads chosen by that
  * width (2: two pixels before and after, 3: one before and two after, 4: one
  * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
- * as the text table for text_id_rows_to_vram_render, with the
+ * as the text table for text_render_id_rows_to_vram, with the
  * caller's text ids, destination and flags passed through unchanged. */
 void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags) {
     u8 buf[0x78];
@@ -110,13 +110,13 @@ void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destinati
         } while (glyph != TEXT_END_WAIT_FOR_CONFIRM);
     }
     buf[len] = TEXT_END_WAIT_FOR_CONFIRM;
-    text_id_rows_to_vram_render(buf, text_ids, destination, flags);
+    text_render_id_rows_to_vram(buf, text_ids, destination, flags);
 }
 
 /* Renders one encoded glyph (either a direct id or a 0xD?-prefixed
  * two-byte code) into a 0x78-byte 4bpp image and uploads it at (x, y).
  * Single-byte codes from 0xD0 up (prefixes and control codes) draw nothing. */
-void screen_font_upload_glyph(u16 code, s32 x, s32 y, s32 style) {
+void screen_upload_font_glyph(u16 code, s32 x, s32 y, s32 style) {
     u8 image[0x78];
     RECT rect;
     u32 glyph;
@@ -136,7 +136,7 @@ void screen_font_upload_glyph(u16 code, s32 x, s32 y, s32 style) {
         glyph = code;
     }
     /* The rect doubles as the glyph's image position: x and y 0, a row stride of w. */
-    menu_text_glyph_to_4bpp_image_render(glyph, image, (const text_image_position_t*)&rect, style);
+    menu_text_render_glyph_to_4bpp_image(glyph, image, (const text_image_position_t*)&rect, style);
     rect.x = x;
     rect.y = y;
     LoadImage(&rect, image);
@@ -145,7 +145,7 @@ void screen_font_upload_glyph(u16 code, s32 x, s32 y, s32 style) {
 
 /* Advance over count characters of a 0xFE-terminated text entry; bytes
  * TEXT_EXTENDED_GLYPH_PREFIX_FIRST..TEXT_EXTENDED_GLYPH_PREFIX_LAST carry a one-byte operand. */
-const u8* screen_text_chars_advance(const u8* text, s32 count) {
+const u8* screen_text_advance_chars(const u8* text, s32 count) {
     s32 i;
     s32 offset = 0;
     const u8* cursor;

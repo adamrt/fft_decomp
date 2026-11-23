@@ -57,7 +57,7 @@ extern RECT g_war_trophy_money_clip_rect_1;
 extern RECT g_war_trophy_image_rect;
 
 /* Same byte as g_war_trophy_search_result.item_count (+0x15); member access here shortens
- * war_trophy_collect by 4 bytes. */
+ * collect_entries by 4 bytes. */
 extern u8 g_war_trophy_item_count;
 
 /* The retail collector does not check these 16-entry capacities. */
@@ -74,7 +74,7 @@ static s32 s_war_trophy_entry_values[16] = { 0 };
  * inventory, unless 99 are already held or equipped: the item is then sold
  * for a quarter of its price, rounded toward zero.
  */
-static void war_trophy_collect(void) {
+static void collect_entries(void) {
     s32 i;
     s32 item_id;
     s32 quantity;
@@ -132,9 +132,9 @@ static void war_trophy_collect(void) {
         do {
             if (*type_ptr == WAR_TROPHY_ENTRY_ITEM) {
                 item_id = *value_ptr;
-                quantity = item_total_quantity_get(item_id, 1);
+                quantity = item_get_total_quantity(item_id, 1);
                 if (quantity == 99) {
-                    item = item_data_get(*value_ptr);
+                    item = item_get_data(*value_ptr);
                     price = item->price;
                     price /= 4;
                     funds = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
@@ -156,7 +156,7 @@ static void war_trophy_collect(void) {
 
 /* Screen x for an entry: one column at 0xd0 when the total entry count is
  * below five, otherwise 0x9c for even entry indices and 0x104 for odd ones. */
-static s32 war_trophy_get_column_x(s32 entry_index, s32 entry_count) {
+static s32 get_column_x(s32 entry_index, s32 entry_count) {
     s32 result = 0xd0;
 
     if (entry_count >= 5) {
@@ -173,7 +173,7 @@ static s32 war_trophy_get_column_x(s32 entry_index, s32 entry_count) {
 /* Screen y for a page-relative entry index, starting at 0x78: 20 pixels
  * per entry in one column or per pair in two. The total entry count selects
  * the layout, so a short final page still uses two columns. */
-static s32 war_trophy_get_row_y(s32 page_entry_index, s32 entry_count) {
+static s32 get_row_y(s32 page_entry_index, s32 entry_count) {
     if (entry_count < 5) {
         return page_entry_index * 20 + 0x78;
     }
@@ -183,7 +183,7 @@ static s32 war_trophy_get_row_y(s32 page_entry_index, s32 entry_count) {
 /*
  * Thread body of the post-battle "war trophies" list.
  *
- * Collects the entries (war_trophy_collect)
+ * Collects the entries (collect_entries)
  * and exits at once when there are none. Otherwise it starts the banner
  * thread and reveals the entries eight to a page: a new entry appears every
  * 0x1f frames or on Circle, and the last entry of a page stays for 0x79
@@ -207,17 +207,17 @@ void war_trophy_list_thread(void) {
     s32 timer;
     s32 thread;
 
-    war_trophy_collect();
+    collect_entries();
 
     if (s_war_trophy_entry_count == 0) {
         thread_current_exit();
     }
 
     prims = g_war_trophy_primitives;
-    thread = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
+    thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     last = 0;
     thread_start(thread, conditions_special_thread);
-    thread_parameters_set(thread, CONDITIONS_BANNER_WAR_TROPHIES, 0, 0);
+    thread_set_parameters(thread, CONDITIONS_BANNER_WAR_TROPHIES, 0, 0);
 
     for (start = 0; start < s_war_trophy_entry_count; start += 8) {
         row = 0;
@@ -262,13 +262,13 @@ void war_trophy_list_thread(void) {
                 g_menu_window_text_pen.stride = 0x50;
                 timer = 0;
                 if (s_war_trophy_entry_types[last] == WAR_TROPHY_ENTRY_ITEM) {
-                    menu_set_text_origin(0, 0);
+                    menu_text_set_origin(0, 0);
                     menu_display_text_entry(
                         s_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image, &g_menu_window_text_pen);
                 } else {
-                    menu_set_text_origin(0, 0);
+                    menu_text_set_origin(0, 0);
                     menu_draw_large_number_glyphs(s_war_trophy_entry_values[last],
-                        text_decimal_digits_count(s_war_trophy_entry_values[last]), image, &g_menu_window_text_pen);
+                        text_count_decimal_digits(s_war_trophy_entry_values[last]), image, &g_menu_window_text_pen);
                 }
 
                 /* Text lines go into the texture the banner sprite draws, where texture x + 0x80
@@ -299,14 +299,14 @@ void war_trophy_list_thread(void) {
             for (i = start; i <= last; i++) {
                 quad = &buffer->quads[i];
                 if (s_war_trophy_entry_types[i] == WAR_TROPHY_ENTRY_ITEM) {
-                    quad->x0 = war_trophy_get_column_x(i, s_war_trophy_entry_count);
-                    quad->y0 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count);
-                    quad->x1 = war_trophy_get_column_x(i, s_war_trophy_entry_count) + 0x10;
-                    quad->y1 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count);
-                    quad->x2 = war_trophy_get_column_x(i, s_war_trophy_entry_count);
-                    quad->y2 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
-                    quad->x3 = war_trophy_get_column_x(i, s_war_trophy_entry_count) + 0x10;
-                    quad->y3 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
+                    quad->x0 = get_column_x(i, s_war_trophy_entry_count);
+                    quad->y0 = get_row_y(i - start, s_war_trophy_entry_count);
+                    quad->x1 = get_column_x(i, s_war_trophy_entry_count) + 0x10;
+                    quad->y1 = get_row_y(i - start, s_war_trophy_entry_count);
+                    quad->x2 = get_column_x(i, s_war_trophy_entry_count);
+                    quad->y2 = get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
+                    quad->x3 = get_column_x(i, s_war_trophy_entry_count) + 0x10;
+                    quad->y3 = get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
                     gfx_set_item_icon_sprite(&sprite, s_war_trophy_entry_values[i]);
                     setUV4(quad, sprite.u0, sprite.v0, sprite.u0 + 0x10, sprite.v0, sprite.u0, sprite.v0 + 0x10,
                         sprite.u0 + 0x10, sprite.v0 + 0x10);
@@ -314,18 +314,18 @@ void war_trophy_list_thread(void) {
                     quad->tpage = GetTPage(0, 0, 0x380, 0x120);
                     gfx_draw_or_append_gpu_primitive(quad);
                 } else {
-                    quad->x0 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
-                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x12;
-                    quad->y0 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 4;
-                    quad->x1 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
-                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x24;
-                    quad->y1 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 4;
-                    quad->x2 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
-                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x12;
-                    quad->y2 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
-                    quad->x3 = war_trophy_get_column_x(i, s_war_trophy_entry_count)
-                        + text_decimal_digits_count(s_war_trophy_entry_values[i]) * 7 + 0x24;
-                    quad->y3 = war_trophy_get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
+                    quad->x0 = get_column_x(i, s_war_trophy_entry_count)
+                        + text_count_decimal_digits(s_war_trophy_entry_values[i]) * 7 + 0x12;
+                    quad->y0 = get_row_y(i - start, s_war_trophy_entry_count) + 4;
+                    quad->x1 = get_column_x(i, s_war_trophy_entry_count)
+                        + text_count_decimal_digits(s_war_trophy_entry_values[i]) * 7 + 0x24;
+                    quad->y1 = get_row_y(i - start, s_war_trophy_entry_count) + 4;
+                    quad->x2 = get_column_x(i, s_war_trophy_entry_count)
+                        + text_count_decimal_digits(s_war_trophy_entry_values[i]) * 7 + 0x12;
+                    quad->y2 = get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
+                    quad->x3 = get_column_x(i, s_war_trophy_entry_count)
+                        + text_count_decimal_digits(s_war_trophy_entry_values[i]) * 7 + 0x24;
+                    quad->y3 = get_row_y(i - start, s_war_trophy_entry_count) + 0xc;
                     setUV4(quad, 0x76, 0x10, 0x88, 0x10, 0x76, 0x18, 0x88, 0x18);
                     quad->clut = 0x7cbc;
                     quad->tpage = GetTPage(0, 0, 0x3c0, 0x100);
@@ -343,8 +343,8 @@ void war_trophy_list_thread(void) {
         }
     }
 
-    thread_parameters_set(thread, 0, 0, 1);
-    thread_inactive_wait(thread);
+    thread_set_parameters(thread, 0, 0, 1);
+    thread_wait_inactive(thread);
     thread_current_exit();
 }
 
@@ -363,7 +363,7 @@ void war_trophy_list_thread(void) {
  * to a single pointer induction variable. `pass` doubles as the fade level,
  * which the target's register allocation reflects.
  */
-void war_trophy_run_gil_ticker(void) {
+void war_trophy_gil_ticker_thread(void) {
     DR_AREA areas[4];
     s32 thread_id;
     s32 money;
@@ -385,9 +385,9 @@ void war_trophy_run_gil_ticker(void) {
         script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) + s_war_trophy_search_result.level_sum_money);
     money = s_war_trophy_search_result.level_sum_money;
 
-    thread_id = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
+    thread_id = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, conditions_special_thread);
-    thread_parameters_set(thread_id, CONDITIONS_BANNER_BONUS_MONEY, 0, 0);
+    thread_set_parameters(thread_id, CONDITIONS_BANNER_BONUS_MONEY, 0, 0);
     g_menu_input_controller = script_get_controller_input_pointer(0);
 
     /* `i = 0` here (not before the script calls) lets sched1 keep
@@ -397,10 +397,10 @@ void war_trophy_run_gil_ticker(void) {
         g_war_trophy_money_digit_settling[i] = 0;
     }
 
-    digits = text_decimal_digits_count(money);
+    digits = text_count_decimal_digits(money);
     /* There are six digit strips; a longer amount is reported and shows as 0. */
     if (digits >= 7) {
-        system_error_report(7, 0);
+        system_report_error(7, 0);
         money = 0;
         digits = 1;
     }
@@ -604,7 +604,7 @@ skipped:
     }
 
     /* Stop the banner thread and fade the amount out; `pass` now holds the color level. */
-    thread_parameters_set(thread_id, 0, 0, 1);
+    thread_set_parameters(thread_id, 0, 0, 1);
     i++;
     pass = 0x80;
     do {
@@ -637,6 +637,6 @@ skipped:
         pass -= 12;
         i++;
     } while (pass >= 0x30);
-    thread_inactive_wait(thread_id);
+    thread_wait_inactive(thread_id);
     thread_current_exit();
 }

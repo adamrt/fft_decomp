@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /* Clear the HP/MP preview bonuses and equipment-detail stats. */
-void equipment_stat_preview_clear(unit_panel_summary_t* summary, unit_panel_record_t* detail) {
+void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail) {
     summary->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = 0;
     summary->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = 0;
     detail->state.move = 0;
@@ -39,10 +39,10 @@ void equipment_stat_preview_clear(unit_panel_summary_t* summary, unit_panel_reco
  * IDs 0x1E6-0x1E8 grant Move +1/+2/+3; 0x1E9-0x1EB grant Jump +1/+2/+3.
  * Other abilities leave both bonuses at 0.
  */
-static void movement_bonus_build(s16 ability, unit_panel_record_t* out) {
+static void build_movement_bonus(s16 ability, unit_panel_record_t* out) {
     unit_panel_summary_t summary;
 
-    equipment_stat_preview_clear(&summary, out);
+    equipment_clear_stat_preview(&summary, out);
     if (ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1 && ability <= ABILITY_ID_MOVEMENT_MOVE_PLUS_3) {
         out->state.move = ability - (ABILITY_ID_MOVEMENT_MOVE_PLUS_1 - 1);
     } else {
@@ -58,14 +58,14 @@ static void movement_bonus_build(s16 ability, unit_panel_record_t* out) {
 /* Stat preview for swapping one movement ability for another: clears
  * `stat_diff` and stores the difference in the Move and Jump bonuses the two
  * abilities give. */
-void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability) {
+void formation_calculate_ability_movement_delta(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability) {
     unit_panel_summary_t summary;
     unit_panel_record_t old_stats;
     unit_panel_record_t new_stats;
 
-    equipment_stat_preview_clear(&summary, stat_diff);
-    movement_bonus_build(old_ability, &old_stats);
-    movement_bonus_build(new_ability, &new_stats);
+    equipment_clear_stat_preview(&summary, stat_diff);
+    build_movement_bonus(old_ability, &old_stats);
+    build_movement_bonus(new_ability, &new_stats);
     stat_diff->state.move = new_stats.state.move - old_stats.state.move;
     stat_diff->state.jump = new_stats.state.jump - old_stats.state.jump;
 }
@@ -81,14 +81,14 @@ void formation_ability_diff_movement_stats(unit_panel_record_t* stat_diff, s32 o
  * attribute set's Move, Jump, Speed, PA and MA bonuses. WORLD requires an
  * item ID in the item table; EQUIP accepts every positive low-ten-bit ID.
  */
-void item_stat_preview_build(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
+void item_build_stat_preview(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
     s32 item_id;
     s32 attribute;
     s32 secondary;
     s32 power;
     s32 evade;
 
-    equipment_stat_preview_clear(summary, detail);
+    equipment_clear_stat_preview(summary, detail);
     item_id = raw_item & ITEM_ENTRY_ID_MASK;
     if (item_id > 0
 #ifdef FFT_WORLD
@@ -132,29 +132,29 @@ void item_stat_preview_build(s16 raw_item, unit_panel_summary_t* summary, unit_p
     }
 }
 
-static void stat_preview_subtract_scaled(
+static void subtract_scaled_stat_preview(
     unit_panel_record_t* out, const unit_panel_record_t* scaled, const unit_panel_record_t* base, s32 scale);
 
 /* Compute the stat changes of swapping item_before for item_after in a slot: the HP and MP bonus
  * differences into delta and the equipment-detail differences into output. */
-void equipment_swap_delta_calculate(
+void equipment_calculate_swap_delta(
     unit_panel_record_t* output, unit_panel_summary_t* delta, s16 item_before, s16 item_after, s32 slot) {
     unit_panel_summary_t summary_before;
     unit_panel_summary_t summary_after;
     unit_panel_record_t detail_before;
     unit_panel_record_t detail_after;
 
-    item_stat_preview_build(item_before, &summary_before, &detail_before, slot);
-    item_stat_preview_build(item_after, &summary_after, &detail_after, slot);
+    item_build_stat_preview(item_before, &summary_before, &detail_before, slot);
+    item_build_stat_preview(item_after, &summary_after, &detail_after, slot);
     delta->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
     delta->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;
-    stat_preview_subtract_scaled(output, &detail_before, &detail_after, 1);
+    subtract_scaled_stat_preview(output, &detail_before, &detail_after, 1);
 }
 
 /* Store base minus scaled detail stats; inputs may alias the output. */
-static void stat_preview_subtract_scaled(
+static void subtract_scaled_stat_preview(
     unit_panel_record_t* out, const unit_panel_record_t* scaled, const unit_panel_record_t* base, s32 scale) {
     out->state.move = base->state.move - (scale * scaled->state.move);
     out->state.speed = base->state.speed - (scale * scaled->state.speed);
@@ -177,18 +177,18 @@ static void stat_preview_subtract_scaled(
 }
 
 /* Sum the stat changes of swapping each of the five equipment slots from `from_items` to `to_items`. */
-void equipment_loadout_delta_calculate(unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total,
+void equipment_calculate_loadout_delta(unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total,
     const u16* from_items, const u16* to_items) {
     unit_panel_summary_t summary_delta;
     unit_panel_record_t detail_delta;
     unit_panel_record_t unused; /* unreferenced in the target; needed for the frame size */
     s32 i;
 
-    equipment_stat_preview_clear(summary_total, detail_total);
+    equipment_clear_stat_preview(summary_total, detail_total);
 
     for (i = 0; i < 5; i++) {
-        equipment_swap_delta_calculate(&detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
-        stat_preview_subtract_scaled(detail_total, detail_total, &detail_delta, -1);
+        equipment_calculate_swap_delta(&detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
+        subtract_scaled_stat_preview(detail_total, detail_total, &detail_delta, -1);
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;
     }
@@ -196,7 +196,7 @@ void equipment_loadout_delta_calculate(unit_panel_record_t* detail_total, unit_p
 
 /* Sum weapon power and weapon, shield and accessory evade from the five equipped items.
  * Other fields in total are unchanged. */
-void equipment_weapon_evade_totals_build(unit_panel_record_t* total, const u16* equipment) {
+void equipment_build_weapon_evade_totals(unit_panel_record_t* total, const u16* equipment) {
     unit_panel_summary_t summary;
     unit_panel_record_t detail;
     unit_panel_record_t unused; /* unreferenced in the target; needed for the frame size */
@@ -211,7 +211,7 @@ void equipment_weapon_evade_totals_build(unit_panel_record_t* total, const u16* 
     total->state.magical_shield_evade = 0;
     total->state.magical_accessory_evade = 0;
     for (i = 0; i < 5; i++) {
-        item_stat_preview_build(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
+        item_build_stat_preview(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
         total->state.right_weapon_power += detail.state.right_weapon_power;
         total->state.left_weapon_power += detail.state.left_weapon_power;
         total->state.right_weapon_evade += detail.state.right_weapon_evade;

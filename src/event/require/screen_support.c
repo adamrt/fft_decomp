@@ -35,8 +35,8 @@ static RECT s_conditions_banner_rect = { 384, 0, 64, 256 };
 
 /* Thread body that waits 16 frames and exits. Nothing references it. */
 void thread_stop_after_16_frames(void) {
-    thread_frames_wait(0x10);
-    thread_exit_current_wrapper();
+    thread_wait_frames(0x10);
+    thread_current_exit_wrapper();
 }
 
 /* Update the character's Brave Story biography state through its script variable. */
@@ -75,12 +75,12 @@ void conditions_load_banner_image(s32 image_id) {
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_bytes_read_request;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(image_id * 13 + DISC_SECTOR_EVENT_BONUS_BIN, sizeof(*banner), allocation) != 0);
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_load_state_get;
+        g_thread_call_target = (void (*)(void))file_get_load_state;
     } while (thread_call_on_main_stack() != 0);
 
     banner = allocation;

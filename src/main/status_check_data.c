@@ -6,7 +6,7 @@
 
 /* At boot, clear the item location flags and build g_status_check_sets: rows 0 to 9
  * from each status's effect flags, and the unmountable row from a fixed status list. */
-void status_check_data_init(void) {
+void status_init_check_data(void) {
     int status;
     u8 flags_1;
     u8 flags_2;

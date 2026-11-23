@@ -24,8 +24,8 @@ typedef enum conditions_banner {
     CONDITIONS_BANNER_JOIN_UP = 10
 } conditions_banner_e;
 
-void conditions_show_ready_bugged(void);
-void conditions_show_general(s32 hold_frames);
+void conditions_ready_bugged_thread(void);
+void conditions_show_general_banner(s32 hold_frames);
 void conditions_special_thread(void);
 void victory_congratulations_thread(void);
 
@@ -66,11 +66,11 @@ extern u8 g_after_battle_gfx_fade_rgb[3];
 
 void gfx_fade_rgb_31_frames(s32 target_red, s32 target_green, s32 target_blue);
 void menu_wait_selection_threads(void);
-void help_open_after_battle(void);
+void help_after_battle_thread(void);
 
 /* war trophies */
 void war_trophy_list_thread(void);
-void war_trophy_run_gil_ticker(void);
+void war_trophy_gil_ticker_thread(void);
 
 /* text */
 /* Character identities grouped by their warning, departure and dismissal text. */

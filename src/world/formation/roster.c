@@ -1,5 +1,6 @@
 /* Dismissing units, generating units and setting unit names. */
 
+#include "fft/equipment.h"
 #include "fft/formation.h"
 #include "fft/formation_item.h"
 #include "fft/item.h"
@@ -31,7 +32,7 @@ void formation_dismiss(s16 formation_idx) {
 
     if (formation_can_dismiss(formation_idx) != 0) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            formation_item_equip(formation_idx, i, ITEM_ID_NOTHING);
+            equipment_set_slot_item(formation_idx, i, ITEM_ID_NOTHING);
         }
         party_unit_remove(g_formation_unit_pointers[formation_idx]->identity.roster_slot);
     }
@@ -44,7 +45,7 @@ void formation_dismiss(s16 formation_idx) {
  * the new unit's secondary skillset and reaction, support, and movement slots.
  * Return -1 if generation fails; otherwise rebuild the formation workspace.
  */
-s32 formation_generate_unit(s16 unit_type) {
+s32 formation_unit_generate(s16 unit_type) {
     u8** name_buffer = &g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     u8* saved_names;
     s32 roster_slot;
@@ -66,8 +67,8 @@ s32 formation_generate_unit(s16 unit_type) {
     party->support_ability.high = 0;
     party->movement_ability.low = 0;
     party->movement_ability.high = 0;
-    formation_record_list_build(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-    return formation_roster_slot_find(roster_slot);
+    formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
+    return formation_unit_find_by_roster_slot(roster_slot);
 }
 
 /*
@@ -77,7 +78,7 @@ s32 formation_generate_unit(s16 unit_type) {
  * a terminator. The remaining name bytes and name ID are left unchanged.
  * Rebuild the menu's name strings after updating both records.
  */
-void formation_unit_name_set(s16 formation_index, const u8* name) {
+void formation_unit_set_name(s16 formation_index, const u8* name) {
     party_unit_t* party = party_unit_get(g_formation_unit_pointers[formation_index]->identity.roster_slot);
     s32 i;
     u8 character;
@@ -91,5 +92,5 @@ void formation_unit_name_set(s16 formation_index, const u8* name) {
         }
         name++;
     }
-    formation_roster_names_build();
+    formation_roster_build_names();
 }

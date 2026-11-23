@@ -117,9 +117,9 @@ typedef struct display_object_gpu_image {
 typedef char display_object_gpu_image_size_must_be_56[sizeof(display_object_gpu_image_t) == 56 ? 1 : -1];
 
 extern display_object_gpu_image_t g_display_object_gpu_image_pool[DISPLAY_OBJECT_GPU_POOL_CAPACITY];
-void display_object_gpu_image_init(
+void display_object_init_gpu_image(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags);
-void display_object_gpu_list_draw(u32* otag, void** records, s32 count);
+void display_object_draw_gpu_list(u32* otag, void** records, s32 count);
 
 /* libgs image records */
 enum { DISPLAY_OBJECT_GS_POOL_CAPACITY = 32 };
@@ -141,9 +141,9 @@ typedef struct display_object_gs_image {
 typedef char display_object_gs_image_size_must_be_52[sizeof(display_object_gs_image_t) == 52 ? 1 : -1];
 
 extern display_object_gs_image_t g_display_object_gs_image_pool[DISPLAY_OBJECT_GS_POOL_CAPACITY];
-void display_object_gs_image_init(s32 index, RECT bounds, point32_t clut, s32 flags);
-void display_object_gs_list_draw(GsOT* otag, void** records, s32 count);
-void display_object_gs_animated_draw(display_object_animated_t* object, GsOT* ot);
+void display_object_init_gs_image(s32 index, RECT bounds, point32_t clut, s32 flags);
+void display_object_draw_gs_list(GsOT* otag, void** records, s32 count);
+void display_object_draw_animated(display_object_animated_t* object, GsOT* ot);
 
 /* animation catalog (WLDCORE) */
 /* Rows of g_display_object_sequences that the code selects: the animation
@@ -199,15 +199,15 @@ extern s32 g_display_object_animated_count;
 extern s32 g_display_object_image_count;
 
 /* Claim a pool entry, append its pointer to the supplied queue and return its pool index. */
-s32 display_object_animated_append(void** list, s32* count);
-s32 display_object_image_append(void** list, s32* count);
-void display_object_pools_init(void);
+s32 display_object_append_animated(void** list, s32* count);
+s32 display_object_append_image(void** list, s32* count);
+void display_object_init_pools(void);
 
 /* display object queues */
 /* OPEN and WLDCORE each publish their display objects to this queue. Every entry points at the leading flags of a
  * display object, and the flags select the routine: DISPLAY_OBJECT_ANIMATED for a
  * display_object_animated_t, DISPLAY_OBJECT_IMAGE for that program's image record.
- * display_object_queues_set_enabled toggles DISPLAY_OBJECT_BLANK through them. */
+ * display_object_set_queues_enabled toggles DISPLAY_OBJECT_BLANK through them. */
 extern void* g_display_object_queue[];
 extern s32 g_display_object_queue_count;
 
@@ -215,6 +215,6 @@ extern s32 g_display_object_queue_count;
 extern void* g_display_object_aux_queue[];
 extern s32 g_display_object_aux_queue_count;
 
-void display_object_queues_set_enabled(s32 enabled);
+void display_object_set_queues_enabled(s32 enabled);
 
 #endif

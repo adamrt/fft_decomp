@@ -61,7 +61,7 @@ typedef enum effect_work_kind {
  * 0x10) and align_to_unit_facing bit (byte 0x07 mask 0x04) of the emitter's
  * 16-bit child/velocity flags. ANGLE_DIRECTED scatters around the base angles, INWARD aims at
  * the spawn origin, CASTER_FACING rotates those angles by the caster's facing, and
- * TOWARD_TARGET (effect_slot_motion_start) rotates it along the
+ * TOWARD_TARGET (effect_slot_init_motion) rotates it along the
  * caster-to-target direction. */
 typedef enum effect_emitter_velocity {
     EFFECT_EMITTER_VELOCITY_ANGLE_DIRECTED = 0x000,
@@ -380,7 +380,7 @@ typedef struct effect_polar_mesh_geometry_view {
     u16 flags;                                    /* 0x06: bit 6 = per-channel color curves */
     effect_polar_curve_bindings_t curve_bindings; /* 0x08 */
     u32 color_curves;                             /* 0x10: nibbles 0-2 = r/g/b */
-    vec3s16_t center_start; /* 0x14: spawn position, read by effect_emitter_spawn_position_interpolate */
+    vec3s16_t center_start; /* 0x14: spawn position, read by effect_emitter_interpolate_spawn_position */
     vec3s16_t center_end;   /* 0x1a */
     s16 radius_start;       /* 0x20: spawn spread x */
     u8 _unused_22[0x04];
@@ -620,7 +620,7 @@ typedef struct effect_geometry_table {
     u16 _unused_00;        /* 2, or 1 in seven shipped files */
     u16 entry_count;       /* 0x02 */
     vec3s32_t gravity;     /* 0x04: copied to g_effect_gravity by effect script opcode 0x27 */
-    s32 inertia_threshold; /* 0x10: passed to effect_inertia_threshold_set by opcode 0x27 */
+    s32 inertia_threshold; /* 0x10: passed to effect_set_inertia_threshold by opcode 0x27 */
     /* One 0xc4-byte record per emitter or mesh. The slots keep their curve
      * bindings, but each native EFFECT renderer gives them its own meanings,
      * so a record is read through the member of the renderer that owns it. */

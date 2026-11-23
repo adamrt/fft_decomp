@@ -30,7 +30,7 @@ extern s32 g_screen_scrolling_list_depth;
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row
  * scroll whose new row is drawn into the image ring at row `ring * 16`;
- * menu_redraw_text_page_on_scroll_in_rect handles page scrolling, and
+ * ability_list_update_page_scroll handles page scrolling, and
  * the scroll-bar thumb tracks entry->selected_index. Right/Left toggle the
  * third column's text when the first two columns are text. Parameter 2 keeps
  * the thread alive after the list closes.
@@ -75,7 +75,7 @@ void ability_list_scrolling_thread(void) {
 
     toggle = 0;
     page = g_formation_ability_list_pages[g_thread_current_id];
-    entry = (menu_entry_t*)thread_current_parameter_1_get();
+    entry = (menu_entry_t*)thread_current_get_parameter_1();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
@@ -164,7 +164,7 @@ void ability_list_scrolling_thread(void) {
     }
 
     /* The first page's buffer is freed after the first yield, once its upload has run. */
-    ability_list_text_draw(entry, &row_offset, buffer);
+    ability_list_draw_text(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.source.x / 4 + entry->vram_origin.x;
@@ -204,25 +204,25 @@ void ability_list_scrolling_thread(void) {
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
                     cursor--;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (row_offset != 0) {
                     scroll_delta = -1;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (layout->columns.hidden_rows == 0) {
                     cursor = layout->columns.row_count - 1;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 }
             } else if ((g_script_event_input & PSX_PAD_DOWN)
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != layout->columns.row_count - 1) {
                     cursor++;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (row_offset != layout->columns.hidden_rows) {
                     scroll_delta++;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 } else if (row_offset == 0) {
                     cursor = 0;
-                    sound_cursor_queue();
+                    sound_queue_cursor();
                 }
             } else {
                 hold_time = 0;
@@ -244,7 +244,7 @@ void ability_list_scrolling_thread(void) {
 
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;
-                    menu_set_text_origin(layout->columns.x[column], 0);
+                    menu_text_set_origin(layout->columns.x[column], 0);
                     if (layout->columns.mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                     }
@@ -258,7 +258,7 @@ void ability_list_scrolling_thread(void) {
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
                             && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
-                            menu_set_text_origin(layout->columns.x[column] + 0x50, 0);
+                            menu_text_set_origin(layout->columns.x[column] + 0x50, 0);
                             menu_display_text_entry(
                                 TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                         }
@@ -308,7 +308,7 @@ void ability_list_scrolling_thread(void) {
             redraw_pending = 0;
         }
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
-            buffer = menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.source);
+            buffer = ability_list_update_page_scroll(entry, &row_offset, &ring, &cursor, &window.source);
             /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
@@ -355,7 +355,7 @@ void ability_list_scrolling_thread(void) {
 
         /* Advance a row scroll every other frame at speed 1 and every frame at speed 2, faster once
          * the button has been held past the acceleration delay. */
-        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
+        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (hold_time < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step;
@@ -371,7 +371,7 @@ void ability_list_scrolling_thread(void) {
         if (scroll_accum < -0xF || scroll_accum > 0xF) {
             ring += scroll_delta;
             row_offset += scroll_delta;
-            repeat = script_event_initial_repeat_counter_get();
+            repeat = script_get_event_initial_repeat_counter();
             scroll_accum = 0;
             scroll_delta = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -385,7 +385,7 @@ void ability_list_scrolling_thread(void) {
         /* The frame zooms open over the first 12 ticks. */
         if (i * g_script_event_speed < 12) {
             gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
-            menu_sprite_zoom(entry, frame, i * g_script_event_speed);
+            menu_zoom_sprite(entry, frame, i * g_script_event_speed);
         }
         if (layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT && toggle == 1) {
             menu_text_layout_t* columns = entry->context;
@@ -421,7 +421,7 @@ void ability_list_scrolling_thread(void) {
     }
     thread_yield();
     g_screen_scrolling_list_depth--;
-    if (thread_current_parameter_2_get() == 0) {
+    if (thread_current_get_parameter_2() == 0) {
         thread_current_exit();
     }
 }

@@ -13,7 +13,7 @@
 struct action_data;
 
 /* preparation */
-/* Result of action_prepare, kept in unit_runtime_t.attack_phase_state. */
+/* Result of action_prepare, kept in map_unit_t.attack_phase_state. */
 typedef enum action_preparation {
     ACTION_PREPARATION_INVALID = -1,
     ACTION_PREPARATION_CHARGE = 0, /* the action has a charge time; also Defend */
@@ -73,7 +73,7 @@ typedef enum action_special_effect {
     ACTION_SPECIAL_EFFECT_GOLEM_GUARD = 0x8000
 } action_special_effect_e;
 
-/* Bit order mirrors the seven serialized unit_stats_t equipment slots. */
+/* Bit order mirrors the seven serialized battle_unit_t equipment slots. */
 typedef enum action_equipment_slot_mask {
     ACTION_EQUIPMENT_SLOT_HEAD = 0x80,
     ACTION_EQUIPMENT_SLOT_BODY = 0x40,
@@ -99,7 +99,7 @@ enum { ACTION_VALUE_MAX = 999 };
 
 void action_clear_current_data(action_data_t* action);
 void action_finalize_target_result(void);
-s32 action_apply_target_result(s32 battle_id);
+s32 action_apply_target_result(s32 battle_unit_id);
 s32 action_apply_attacker_result(s32 unit_id);
 
 /* strikes */
@@ -113,7 +113,7 @@ typedef enum action_state {
     ACTION_STATE_PREVIEW = 2
 } action_state_e;
 
-/* Why action_init_current_data rejects an action; result_charge_failure_queue
+/* Why action_init_current_data rejects an action; result_queue_charge_failure
  * shows a pop-up for the codes below 4. */
 typedef enum action_rejection {
     ACTION_REJECTION_NONE = 0,
@@ -186,7 +186,7 @@ typedef struct action_work {
     u8 defaulted_to_attack;                     /* 0x29 */
     u8 random_damage_factor;                    /* 0x2a */
     u8 mp_cost;                                 /* 0x2b: effective cost recorded before the MP checks of
-                                                 * mp_check_and_consume; reaction
+                                                 * check_and_consume_mp; reaction
                                                  * eligibility reads it even when no MP was subtracted */
     u8 target_count;                            /* 0x2c */
     u8 knockback_flags;                         /* 0x2d */
@@ -203,7 +203,7 @@ typedef struct action_work {
 typedef char action_work_size_must_be_80[(sizeof(action_work_t) == 80) ? 1 : -1];
 
 /* action_work_t.post_action_message, copied to the strike work and
- * the runtime unit record: the message the post-action state opens. */
+ * the map unit record: the message the post-action state opens. */
 typedef enum action_post_message {
     ACTION_POST_MESSAGE_NONE = 0,
     ACTION_POST_MESSAGE_POACHED = 6,
@@ -219,13 +219,13 @@ typedef struct action_reward_display {
 } action_reward_display_t;
 typedef char action_reward_display_size_must_be_4[(sizeof(action_reward_display_t) == 4) ? 1 : -1];
 
-/* The strike work record, embedded in unit_runtime_t.strike (+0x18c)
+/* The strike work record, embedded in map_unit_t.strike (+0x18c)
  * and used as a standalone AI work record. Reaction targeting writes its
  * redirected tile at +0x1c..+0x1e before the strike is processed. */
 typedef struct action_strike_work {
     u8 actor_id;
     u8 target_count;
-    u8 target_list[UNIT_RUNTIME_SLOT_COUNT];
+    u8 target_list[MAP_UNIT_SLOT_COUNT];
     u8 skip_empty_tile_effect;
     u8 math_skill_flag;
     s16 last_attack_id; /* 0x14 */
@@ -249,10 +249,10 @@ extern action_state_e g_action_state;
 extern action_context_e g_action_context;
 extern s32 g_action_phase;
 extern action_work_t g_action_work;
-extern unit_stats_t* g_action_attacker;
+extern battle_unit_t* g_action_attacker;
 extern action_data_t* g_action_attacker_data;
 extern action_data_t g_action_attacker_action_data;
-extern unit_stats_t* g_action_target;
+extern battle_unit_t* g_action_target;
 extern action_data_t* g_action_target_data;
 extern u8 g_action_canceled_statuses[];
 extern action_command_t g_action_saved_command;
@@ -263,23 +263,23 @@ extern s16 g_action_actor_used_ability_id;
 extern u16 g_action_team_golem[UNIT_TEAM_COUNT];
 
 s32 action_init_current_data(s32 unit_id);
-void action_store_actor_data(unit_stats_t* unit);
-s32 action_resolve_strike(s32 battle_id, action_strike_work_t* work);
+void action_store_actor_data(battle_unit_t* unit);
+s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work);
 void action_store_used_weapon(action_command_t* action);
 s32 action_calculate_target_result(const action_command_t* source, u8 target_id);
 void action_switch_ability_to_default_attack(void);
 void action_start_next_strike(void);
-void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* target);
-s32 action_start_target_response_by_runtime_id(s32 runtime_id);
-void action_start_projectile_hit_response_by_runtime_id(u16 attacker_id, u16 target_id);
+void action_start_target_response(map_unit_t* attacker, map_unit_t* target);
+s32 action_map_unit_start_target_response(s32 map_unit_id);
+void projectile_map_unit_start_hit_response(u16 attacker_id, u16 target_id);
 void action_store_target_ids(u8* src);
 s32 action_copy_ability_targets(u8* out);
-void action_remove_ability_target(s32 target_battle_id);
-void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
-void action_end_command(unit_runtime_t* unit);
+void action_remove_ability_target(s32 target_battle_unit_id);
+void action_post_action_facing_stub(battle_unit_t* unused_unit, s32 unused_facing);
+void action_end_command(map_unit_t* unit);
 
 /* Preview action calculation entry run on the main stack. */
-s32 action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_t* target, action_command_t* command);
+s32 action_calculate_projected_effect(battle_unit_t* attacker, battle_unit_t* target, action_command_t* command);
 
 /* mimic */
 /* g_action_mimic_attacker, filled by action_mimic_record and read
@@ -294,22 +294,22 @@ typedef struct action_mimic_attacker {
     u8 _padding_05;          /* 0x05; aligns target_delta_x */
     s16 target_delta_x;      /* 0x06 */
     s16 target_delta_y;      /* 0x08 */
-    action_command_t action; /* 0x0a: copy of unit_stats_t +0x16e */
+    action_command_t action; /* 0x0a: copy of battle_unit_t +0x16e */
 } action_mimic_attacker_t;
 typedef char action_mimic_attacker_size_must_be_30[(sizeof(action_mimic_attacker_t) == 30) ? 1 : -1];
 
 extern action_mimic_attacker_t g_action_mimic_attacker;
 
-void action_mimic_record(unit_stats_t* unit);
-s32 action_mimic_set_ability(unit_stats_t* unit);
+void action_mimic_record(battle_unit_t* unit);
+s32 action_mimic_set_ability(battle_unit_t* unit);
 
 /* effect messages */
 /* Queue of post-action "effect message" popups (g_post_effect_messages), filled by
- * message_for_unit_queue and drained newest first by
- * action_message_show_next. */
+ * queue_messages_for_unit and drained newest first by
+ * action_show_next_message. */
 typedef struct action_post_effect_msg {
     u8 code;           /* 0x00 action_display_image_id_e of the popup */
-    u8 unit;           /* 0x01 battle id of the reported unit */
+    u8 unit;           /* 0x01 battle unit id of the reported unit */
     u8 _padding_02[2]; /* 0x02; aligns value */
     s32 value;         /* 0x04 reported amount */
 } action_post_effect_msg_t;
@@ -317,10 +317,10 @@ typedef char action_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_ms
 
 enum { ACTION_POST_EFFECT_MSG_CAPACITY = 16 };
 
-void action_message_show_for_caster(void);
-s32 action_message_show_next(void);
+void action_show_message_for_caster(void);
+s32 action_show_next_message(void);
 
 /* weapon sounds */
-void action_play_weapon_sfx(struct unit_runtime* unit, s32 hit);
+void action_play_weapon_sfx(struct map_unit* unit, s32 hit);
 
 #endif

@@ -15,7 +15,7 @@
  * BATTLE draws a dash prefix under SMALL_NUMBER_DASH. Hidden numeric values
  * replace every digit with a question mark and suppress width adjustments.
  * WORLD has its own body with different dash and hidden-value behavior. */
-void text_small_number_glyphs_draw(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
+void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src = &g_text_small_number_glyph_rect;

@@ -13,10 +13,10 @@
 
 /* Start one of the title screen's demo movies (FFTPRE, FFTPR or FFTUNIT.STR) at cd_mix_level with
  * no separate video end frame, and push handler 11 with the stream's start sector and length. */
-void movie_title_demo_start(s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level) {
+void movie_start_title_demo(s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level) {
     s32 controller;
 
-    movie_stream_start(start_sector, end_frame, -1, cd_mix_level);
+    movie_start_stream(start_sector, end_frame, -1, cd_mix_level);
     g_system_runtime_flags &= ~SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
     controller = g_controller_depth;
     g_controller_records[controller].movie.start_sector = start_sector;
@@ -35,8 +35,8 @@ void movie_update_title_demo(controller_record_t* unused_record) {
         g_gfx_active_buffer_index = 1;
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
         g_controller_depth--;
-        movie_logo_start(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
+        movie_start_logo(DISC_SECTOR_OPEN_FFTST_STR, 0x278a, 0x3df, 0x2de);
     } else if ((g_input_new_button_presses & PSX_PAD_START) != 0) {
-        movie_stream_stop(1);
+        movie_stop_stream(1);
     }
 }

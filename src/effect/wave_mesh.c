@@ -1,6 +1,5 @@
 /* An 8x8 textured quad grid distorted by horizontal and vertical sine waves. */
 
-#include "fft/battle_map_palette.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
 #include "fft/effect_file.h"
@@ -9,6 +8,7 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
+#include "fft/map_palette.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -96,7 +96,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     scratch = (effect_wave_mesh_scratch_t*)getScratchAddr(0);
     record = &g_effect_state_records[state_index];
     geometry = &g_effect_geometry_table->entries[emitter_index];
-    ot = gfx_battle_otag_get();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
@@ -122,7 +122,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = texture_page;
-                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
                 work->quads[1][row * 8 + column] = *quad;
             }
         }
@@ -237,7 +237,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         /* The vertical wave's phase speeds are read through the spawn-spread interpolator (x and y). */
         phase_selector = geometry->textured_quad.scroll_curves.wave_y_phase_speed;
         EFFECT_READ_CURVE(row, column, phase_selector, frame);
-        effect_emitter_spawn_spread_interpolate(geometry, column, &spread);
+        effect_emitter_interpolate_spawn_spread(geometry, column, &spread);
         work->wave_y_phase += spread.vx;
         work->wave_y_amplitude_phase += spread.vy;
 

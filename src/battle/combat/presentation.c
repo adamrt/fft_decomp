@@ -5,18 +5,18 @@
 #include "fft/action.h"
 #include "fft/ai.h"
 #include "fft/animation.h"
-#include "fft/battle_map.h"
 #include "fft/battle_state.h"
 #include "fft/cursor.h"
 #include "fft/effect.h"
 #include "fft/effect_secondary.h"
 #include "fft/item.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/result.h"
 #include "fft/sprite.h"
 #include "fft/status.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -30,36 +30,36 @@ extern const u32 g_status_mask_by_handler_index[STATUS_COUNT + 1];
 /* Fill an init record for a secondary effect that one unit both casts and
  * receives: the caster and the single target are the unit. Every other field of
  * the record is left as the caller's stack held it. */
-void effect_secondary_init_build(unit_runtime_t* unit, effect_context_t* effect) {
+void effect_secondary_build_init(map_unit_t* unit, effect_context_t* effect) {
     effect->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
-    effect->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id = unit->runtime_id;
+    effect->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = unit->map_unit_id;
     effect->target_count = 1;
     effect->targets[0].target_type = EFFECT_TARGET_TYPE_UNIT;
-    effect->targets[0].data.unit.runtime_id = unit->runtime_id;
+    effect->targets[0].data.unit.map_unit_id = unit->map_unit_id;
 }
 
 /* Fill a secondary-effect init record with the unit's current action: the
  * caster entry, the used weapon and one entry per strike target.
  *
- * Each target entry records the target's runtime id and a result animation
+ * Each target entry records the target's map unit id and a result animation
  * read from its action data: a miss, no effect, a Golem block, an equipment
  * break, a critical or a normal hit. With no targets the first entry instead
  * holds the cursor tile. */
-static void action_secondary_init_build(unit_runtime_t* unit, effect_context_t* init) {
-    unit_runtime_t* target;
+static void build_action_secondary_init(map_unit_t* unit, effect_context_t* init) {
+    map_unit_t* target;
     action_data_t* action;
     s32 i;
 
     init->target_count = unit->strike.target_count;
     init->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
-    init->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id = unit->runtime_id;
+    init->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = unit->map_unit_id;
     init->used_weapon_id = unit->strike.used_weapon_id;
     if (init->target_count != 0) {
         for (i = 0; i < init->target_count; i++) {
-            target = unit_battle_get(unit->strike.target_list[i]);
+            target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
             init->targets[i].target_type = EFFECT_TARGET_TYPE_UNIT;
-            init->targets[i].data.unit.runtime_id = target->runtime_id;
-            action = &target->stats->action;
+            init->targets[i].data.unit.map_unit_id = target->map_unit_id;
+            action = &target->battle_unit->action;
             switch (action->miss_type) {
             case ACTION_MISS_TYPE_ACCESSORY_EVADE:
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
@@ -99,12 +99,12 @@ static void action_secondary_init_build(unit_runtime_t* unit, effect_context_t* 
 
 /* Start the weapon-hit secondary effect of the unit's action, in the element
  * of the used weapon. `is_bow` is 1 from the projectile-hit path and 0
- * otherwise; effect_secondary_weapon_hit_init ignores it. */
-void effect_secondary_weapon_hit_start(unit_runtime_t* unit, s32 is_bow) {
+ * otherwise; effect_secondary_init_weapon_hit ignores it. */
+void effect_secondary_start_weapon_hit(map_unit_t* unit, s32 is_bow) {
     effect_context_t secondary_init;
 
-    action_secondary_init_build(unit, &secondary_init);
-    effect_secondary_weapon_hit_init(g_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
+    build_action_secondary_init(unit, &secondary_init);
+    effect_secondary_init_weapon_hit(g_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
 }
 
 /* Start the projectile secondary effect of the unit's action: the stone for
@@ -112,12 +112,12 @@ void effect_secondary_weapon_hit_start(unit_runtime_t* unit, s32 is_bow) {
  * anything else the animation of the equipped weapon's type (an arrow for
  * bows and crossbows, none for the rest). The retail code tests Throw
  * Shuriken on its own before the Item/Throw span, which already holds it. */
-void effect_secondary_projectile_start(unit_runtime_t* unit) {
+void effect_secondary_start_projectile(map_unit_t* unit) {
     effect_context_t secondary_init;
     u16 ability_id;
     u8 animation_id;
 
-    action_secondary_init_build(unit, &secondary_init);
+    build_action_secondary_init(unit, &secondary_init);
     ability_id = unit->used_ability_id;
     if (ability_id == ABILITY_ID_BASIC_SKILL_THROW_STONE) {
         animation_id = EFFECT_SECONDARY_ANIMATION_THROWN_STONE;
@@ -129,148 +129,148 @@ void effect_secondary_projectile_start(unit_runtime_t* unit) {
             animation_id = s_weapon_projectile_animations[unit->equipped_weapon_type];
         }
     }
-    effect_secondary_projectile_init(animation_id, &secondary_init);
+    effect_secondary_init_projectile(animation_id, &secondary_init);
 }
 
 /* Start a secondary effect on a unit as both its caster and its target, with the
  * unit's sprite palette as the effect's parameter. A unit without battle data
  * starts nothing.
  *
- * The init record is a stack local of which effect_secondary_init_build
+ * The init record is a stack local of which effect_secondary_build_init
  * sets five fields; effect_secondary_init copies the rest of its caster
  * and target blocks and its used_weapon_id as the stack left them. */
-static void unit_secondary_start(unit_runtime_t* unit, s32 effect_type) {
+static void start_unit_secondary(map_unit_t* unit, s32 effect_type) {
     effect_context_t data;
 
-    effect_secondary_init_build(unit, &data);
-    if (unit->stats != 0) {
-        effect_secondary_init(effect_type, unit->stats->sprite_palette, &data);
+    effect_secondary_build_init(unit, &data);
+    if (unit->battle_unit != 0) {
+        effect_secondary_init(effect_type, unit->battle_unit->sprite_palette, &data);
     }
 }
 
 /* Start the puff a unit gives off as it turns to crystal or treasure. */
-void effect_secondary_zodiac_poof_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_ZODIAC_POOF);
+void effect_secondary_start_zodiac_poof(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_ZODIAC_POOF);
 }
 
 /* Start the smoke of a chocobo or monster unit dying. */
-void effect_secondary_death_smoke_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_DEATH_SMOKE);
+void effect_secondary_start_death_smoke(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_DEATH_SMOKE);
 }
 
 /* Start the level-up effect on a unit, for both level and job level ups. */
-void effect_secondary_level_up_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_LEVEL_UP);
+void effect_secondary_start_level_up(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_LEVEL_UP);
 }
 
 /* Start the trap effect on a unit that stepped on a tile trap; every trap kind uses
  * this one effect. */
-void effect_secondary_trap_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_TRAP);
+void effect_secondary_start_trap(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_TRAP);
 }
 
 /* Start the splash of a unit landing in swamp, marsh or open water. */
-void effect_secondary_splash_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_SPLASH);
+void effect_secondary_start_splash(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_SPLASH);
 }
 
 /* Start the dust of a unit landing on hard ground, a floor or a structure. */
-void effect_secondary_fall_dust_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_FALL_DUST);
+void effect_secondary_start_fall_dust(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_FALL_DUST);
 }
 
 /* Start the teleport effect on a unit, used both as it leaves and as it arrives. */
-void effect_secondary_teleport_start(unit_runtime_t* unit) {
-    unit_secondary_start(unit, EFFECT_SECONDARY_ANIMATION_TELEPORT);
+void effect_secondary_start_teleport(map_unit_t* unit) {
+    start_unit_secondary(unit, EFFECT_SECONDARY_ANIMATION_TELEPORT);
 }
 
-/* Start the reaction animation of the unit with this runtime id to the casting unit's action, for
+/* Start the reaction animation of the unit with this map unit id to the casting unit's action, for
  * effect keyframe actions. Always returns 1. */
-s32 action_start_target_response_by_runtime_id(s32 runtime_id) {
-    unit_runtime_t* target = unit_runtime_get(runtime_id);
-    unit_runtime_t* caster = unit_casting_get();
+s32 action_map_unit_start_target_response(s32 map_unit_id) {
+    map_unit_t* target = map_unit_get(map_unit_id);
+    map_unit_t* caster = map_unit_get_casting();
 
     action_start_target_response(caster, target);
     return 1;
 }
 
-/* Starts the reaction animation of the unit in slot battle_id to the casting
+/* Starts the reaction animation of the unit in slot battle_unit_id to the casting
  * unit's action. Always returns 1. No retail code calls it. */
-s32 action_start_target_response_by_battle_id(u16 battle_id) {
-    unit_runtime_t* target = unit_battle_get(battle_id);
-    unit_runtime_t* caster = unit_casting_get();
+s32 action_battle_unit_start_target_response(u16 battle_unit_id) {
+    map_unit_t* target = map_unit_get_by_battle_unit_id(battle_unit_id);
+    map_unit_t* caster = map_unit_get_casting();
 
     action_start_target_response(caster, target);
     return 1;
 }
 
-/* result_display_prepare for a runtime id. An absent unit raises
+/* result_prepare_display for a map unit id. An absent unit raises
  * a pointer exception and returns 0. */
-s32 result_runtime_display_prepare(s32 runtime_id) {
-    unit_runtime_t* unit = unit_runtime_get(runtime_id);
+s32 result_map_unit_prepare_display(s32 map_unit_id) {
+    map_unit_t* unit = map_unit_get(map_unit_id);
     if (unit != 0) {
-        result_display_prepare(unit);
+        result_prepare_display(unit);
         return 1;
     }
-    system_pointer_exception_handle(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
+    system_handle_pointer_exception(SYSTEM_POINTER_EXCEPTION_NO_UNIT);
     return 0;
 }
 
 /* Lands a projectile strike on its target: the weapon hit sound, the target's
  * reaction animation, its post-action display and the evade and weapon-element
  * effect data. Does nothing when either unit is missing. */
-static void projectile_hit_response_start(unit_runtime_t* attacker, unit_runtime_t* target) {
+static void start_projectile_hit_response(map_unit_t* attacker, map_unit_t* target) {
     if ((attacker != 0) && (target != 0)) {
         action_play_weapon_sfx(attacker, 1);
         action_start_target_response(attacker, target);
-        result_runtime_display_prepare(target->runtime_id);
-        effect_secondary_weapon_hit_start(attacker, 1);
+        result_map_unit_prepare_display(target->map_unit_id);
+        effect_secondary_start_weapon_hit(attacker, 1);
     }
 }
 
-/* projectile_hit_response_start for two battle ids. No retail code calls it. */
-void action_start_projectile_hit_response_by_battle_id(u16 attacker_id, u16 target_id) {
-    unit_runtime_t* attacker = unit_battle_get(attacker_id);
-    unit_runtime_t* target = unit_battle_get(target_id);
+/* start_projectile_hit_response for two battle unit ids. No retail code calls it. */
+void projectile_battle_unit_start_hit_response(u16 attacker_id, u16 target_id) {
+    map_unit_t* attacker = map_unit_get_by_battle_unit_id(attacker_id);
+    map_unit_t* target = map_unit_get_by_battle_unit_id(target_id);
 
-    projectile_hit_response_start(attacker, target);
+    start_projectile_hit_response(attacker, target);
 }
 
-/* projectile_hit_response_start for two runtime ids: called by the arrow-arc
+/* start_projectile_hit_response for two map unit ids: called by the arrow-arc
  * and linear projectile effects for the unit the projectile hits. */
-void action_start_projectile_hit_response_by_runtime_id(u16 attacker_id, u16 target_id) {
-    unit_runtime_t* attacker = unit_runtime_get(attacker_id);
-    unit_runtime_t* target = unit_runtime_get(target_id);
+void projectile_map_unit_start_hit_response(u16 attacker_id, u16 target_id) {
+    map_unit_t* attacker = map_unit_get(attacker_id);
+    map_unit_t* target = map_unit_get(target_id);
 
-    projectile_hit_response_start(attacker, target);
+    start_projectile_hit_response(attacker, target);
 }
 
 /* Apply a unit's queued status changes (removals, then additions) and refresh everything that
  * shows them: position after death or dismount, transparency, status bubble, tile and status
  * palette, transformations, status animations, spritesheet and float height. Then clear the queues
  * and the item display flag. */
-static void display_update(unit_runtime_t* unit) {
-    battle_map_tile_t* tile;
+static void update_display(map_unit_t* unit) {
+    map_tile_t* tile;
 
     if (unit != 0) {
-        tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
+        tile = map_get_tile(unit->map_x, unit->map_y, unit->map_layer);
         unit->status_flags_1_4 &= ~unit->statuses_to_remove_1_4;
         unit->status_flags_5_6 &= ~unit->statuses_to_remove_5_6;
         unit->status_flags_1_4 |= unit->statuses_to_add_1_4;
         unit->status_flags_5_6 |= unit->statuses_to_add_5_6;
-        unit_dismount_dead_rider(unit);
-        sprite_transparency_update(unit);
-        sprite_status_bubble_active_update(unit);
+        map_unit_dismount_dead_rider(unit);
+        sprite_update_transparency(unit);
+        sprite_status_bubble_update_active(unit);
         if (g_battle_animation_wait_state != 0) {
             sprite_palette_update(unit, tile->flags.shading, 0);
         } else {
             sprite_palette_update(unit, tile->flags.shading, 1);
         }
-        unit_apply_poach_morbol_transformation(unit);
-        animation_status_set(unit);
-        animation_status_changes_update(unit);
+        map_unit_apply_poach_or_morbol(unit);
+        animation_set_status(unit);
+        animation_update_status_changes(unit);
         sprite_sheet_apply_status_change(unit, tile->flags.shading);
-        unit_float_height_update(unit);
+        map_unit_update_float_height(unit);
         unit->statuses_to_remove_5_6 = 0;
         unit->statuses_to_remove_1_4 = 0;
         unit->statuses_to_add_5_6 = 0;
@@ -279,15 +279,15 @@ static void display_update(unit_runtime_t* unit) {
     }
 }
 
-/* display_update for the unit with this runtime id; an id without a unit does nothing. */
-void unit_runtime_display_update(s32 runtime_id) {
-    display_update(unit_runtime_get(runtime_id));
+/* update_display for the unit with this map unit id; an id without a unit does nothing. */
+void map_unit_update_display(s32 map_unit_id) {
+    update_display(map_unit_get(map_unit_id));
 }
 
-/* display_update for the unit in slot battle_id. No retail code calls
+/* update_display for the unit in slot battle_unit_id. No retail code calls
  * it. */
-void unit_battle_display_update(u16 battle_id) {
-    display_update(unit_battle_get(battle_id));
+void map_unit_update_display_by_battle_unit_id(u16 battle_unit_id) {
+    update_display(map_unit_get_by_battle_unit_id(battle_unit_id));
 }
 
 /*
@@ -299,8 +299,8 @@ void unit_battle_display_update(u16 battle_id) {
  * data when Frog changes keeps its usable-ability list synchronized with the
  * graphics transition.
  */
-s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 battle_id) {
-    unit_runtime_t* unit = unit_battle_get(battle_id);
+s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 battle_unit_id) {
+    map_unit_t* unit = map_unit_get_by_battle_unit_id(battle_unit_id);
 
     if (unit == 0) {
         return 0;
@@ -316,7 +316,7 @@ s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 bat
         case STATUS_HANDLER_INDEX(STATUS_ID_FROG):
             unit->statuses_to_remove_5_6 |= UNIT_STATUS_FROG;
             unit->statuses_to_add_5_6 &= ~UNIT_STATUS_FROG;
-            ai_unit_abilities_init(battle_id);
+            ai_init_unit_abilities(battle_unit_id);
             return 1;
         case STATUS_HANDLER_INDEX(STATUS_ID_JUMP):
         case STATUS_HANDLER_INDEX(STATUS_ID_FLOAT):
@@ -348,7 +348,7 @@ s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 bat
         case STATUS_HANDLER_INDEX(STATUS_ID_FROG):
             unit->statuses_to_add_5_6 |= UNIT_STATUS_FROG;
             unit->statuses_to_remove_5_6 &= ~UNIT_STATUS_FROG;
-            ai_unit_abilities_init(battle_id);
+            ai_init_unit_abilities(battle_unit_id);
             return 1;
         case STATUS_HANDLER_INDEX(STATUS_ID_TREASURE):
             unit->statuses_to_add_5_6 |= UNIT_STATUS_TREASURE;
@@ -378,72 +378,72 @@ s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 bat
     return 1;
 }
 
-/* sprite_thrown_item_palette_set for the unit in slot battle_id. No
+/* sprite_set_weapon_graphic for the unit in slot battle_unit_id. No
  * retail code calls it. */
-void sprite_battle_thrown_item_palette_set(s32 item_id, u16 battle_id) {
-    sprite_weapon_graphic_set(item_id, unit_battle_get(battle_id));
+void sprite_battle_unit_set_weapon_graphic(s32 item_id, u16 battle_unit_id) {
+    sprite_set_weapon_graphic(item_id, map_unit_get_by_battle_unit_id(battle_unit_id));
 }
 
 /* Seat the rider on the mount: link both records, copy the mount's facing,
  * position and map coordinates to the rider and raise the rider 10 world units
  * above it (negative y is up), then refresh both units' display. */
-void unit_rider_seat(unit_runtime_t* rider, unit_runtime_t* mount) {
+void map_unit_rider_seat(map_unit_t* rider, map_unit_t* mount) {
     rider->mount_state = UNIT_MOUNT_STATE_RIDER;
-    rider->mount_partner_runtime_id = mount->runtime_id;
+    rider->mount_partner_map_unit_id = mount->map_unit_id;
     mount->mount_state = UNIT_MOUNT_STATE_MOUNT;
-    mount->mount_partner_runtime_id = rider->runtime_id;
+    mount->mount_partner_map_unit_id = rider->map_unit_id;
     rider->facing = mount->facing;
     rider->camera_facing_quadrant = mount->camera_facing_quadrant;
     rider->camera_facing_sixteenth = mount->camera_facing_sixteenth;
     rider->world_coords = mount->world_coords;
     rider->world_coords.vy -= 10;
     rider->real = mount->real;
-    rider->standing_on_battle_id_plus_one = 0;
+    rider->standing_on_battle_unit_id_plus_one = 0;
     rider->real.vy -= 10 * ONE; /* the same raise in 20.12 fixed point */
     rider->map_x = mount->map_x;
     rider->map_y = mount->map_y;
     rider->map_layer = mount->map_layer;
     rider->status_flags_1_4 |= UNIT_STATUS_MOUNTED;
-    animation_status_set(rider);
+    animation_set_status(rider);
     rider->animation.script_pos = mount->animation.script_pos;
-    unit_runtime_display_update(rider->runtime_id);
-    unit_runtime_display_update(mount->runtime_id);
+    map_unit_update_display(rider->map_unit_id);
+    map_unit_update_display(mount->map_unit_id);
 }
 
 /* Unlinks a rider from its mount: both records return to the unmounted state and
  * the rider loses its mounted display flag. Does nothing for a unit that is not a
  * rider. */
-void unit_rider_dismount(unit_runtime_t* unit) {
-    unit_runtime_t* mount;
+void map_unit_rider_dismount(map_unit_t* unit) {
+    map_unit_t* mount;
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
-        mount = unit_runtime_get(unit->mount_partner_runtime_id);
-        unit->standing_on_battle_id_plus_one = 0;
+        mount = map_unit_get(unit->mount_partner_map_unit_id);
+        unit->standing_on_battle_unit_id_plus_one = 0;
         unit->mount_state = UNIT_MOUNT_STATE_NONE;
-        unit->mount_partner_runtime_id = 0;
+        unit->mount_partner_map_unit_id = 0;
         unit->status_flags_1_4 &= ~UNIT_STATUS_MOUNTED;
         if (mount != 0) {
             mount->mount_state = UNIT_MOUNT_STATE_NONE;
-            mount->mount_partner_runtime_id = 0;
+            mount->mount_partner_map_unit_id = 0;
         }
     }
 }
 
-/* unit_rider_dismount, followed by a display update of the rider and of
+/* map_unit_rider_dismount, followed by a display update of the rider and of
  * the mount. */
-void unit_rider_dismount_display_update(unit_runtime_t* rider) {
-    unit_runtime_t* mount;
+void map_unit_rider_dismount_and_update_display(map_unit_t* rider) {
+    map_unit_t* mount;
 
     if (rider->mount_state == UNIT_MOUNT_STATE_RIDER) {
-        mount = unit_runtime_get(rider->mount_partner_runtime_id);
-        rider->standing_on_battle_id_plus_one = 0;
+        mount = map_unit_get(rider->mount_partner_map_unit_id);
+        rider->standing_on_battle_unit_id_plus_one = 0;
         rider->mount_state = UNIT_MOUNT_STATE_NONE;
-        rider->mount_partner_runtime_id = 0;
+        rider->mount_partner_map_unit_id = 0;
         rider->status_flags_1_4 &= ~UNIT_STATUS_MOUNTED;
-        unit_runtime_display_update(rider->runtime_id);
+        map_unit_update_display(rider->map_unit_id);
         if (mount != 0) {
             mount->mount_state = UNIT_MOUNT_STATE_NONE;
-            mount->mount_partner_runtime_id = 0;
-            unit_runtime_display_update(mount->runtime_id);
+            mount->mount_partner_map_unit_id = 0;
+            map_unit_update_display(mount->map_unit_id);
         }
     }
 }

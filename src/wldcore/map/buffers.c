@@ -7,7 +7,7 @@
 
 /* Clear both frame buffers (256 x 480 at the VRAM origin) to black and, when
  * asked, blank the 256x240 backdrop image in g_world_map_scratch_buffer. */
-void world_map_image_buffers_clear(s32 clear_scratch) {
+void world_map_clear_image_buffers(s32 clear_scratch) {
     RECT image_rect;
     s32 i;
 

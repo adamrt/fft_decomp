@@ -16,7 +16,7 @@
  * input), and NONE when nothing is held, page scrolling is disabled or input is
  * locked.
  */
-menu_vertical_scroll_direction_e menu_input_page_scroll_direction_read(void) {
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
     menu_vertical_scroll_direction_e direction = MENU_VERTICAL_SCROLL_NONE;
     s32 input;
     s32 initial_delay;

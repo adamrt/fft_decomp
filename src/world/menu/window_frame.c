@@ -47,7 +47,7 @@ void screen_window_frame_thread(void) {
     s32 index;
     s32 frame;
 
-    menu = (urect16_t*)thread_current_parameter_1_get();
+    menu = (urect16_t*)thread_current_get_parameter_1();
     pixels = menu_alloc_memory(0x400);
 
     menu_clear_render_buffer(pixels, 0x400);
@@ -59,16 +59,16 @@ void screen_window_frame_thread(void) {
 
     /* Copy the border pieces from the menu glyph sheet into one 128x16 image and upload it. */
     text_set_blit_source_rect(8, 8, 0x20, 0x10);
-    screen_set_blit_dest_position(0, 0);
+    screen_set_blit_destination(0, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0, 8, 8, 0x10);
-    screen_set_blit_dest_position(0x20, 0);
+    screen_set_blit_destination(0x20, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0xd8, 0, 0x28, 0x10);
-    screen_set_blit_dest_position(0x28, 0);
+    screen_set_blit_destination(0x28, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
     text_set_blit_source_rect(0xd8, 0x10, 0x28, 0x10);
-    screen_set_blit_dest_position(0x58, 0);
+    screen_set_blit_destination(0x58, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_text_glyph_dest);
 
     LoadImage(&texture, (u32*)pixels);
@@ -149,13 +149,13 @@ void screen_window_frame_thread(void) {
         &g_menu_scratch_buffer.panel_frames[1], &g_menu_scratch_buffer.panel_frames[0], sizeof(menu_panel_frame_t));
 
     frame = 0;
-    while (thread_current_parameter_3_get() == 0) {
+    while (thread_current_get_parameter_3() == 0) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(&prim->draw_areas, (const RECT*)menu, frame, g_gfx_active_buffer_index);
 
         /* texture_u is reused for the border CLUT: dimmed while parameter 2 is set or input is locked. */
         texture_u = MENU_CLUT_DIMMED;
-        if (thread_current_parameter_2_get() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_current_get_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
             texture_u = MENU_CLUT_NORMAL;
         }
         for (index = 8; index >= 0; index--) {

@@ -23,9 +23,9 @@ extern s32 g_reaction_distribute_target_count;
 
 s32 reaction_prepare_hamedo(s32 id, s16* out_ability);
 s32 reaction_prepare_next(s16* out_ability);
-s32 reaction_fails_brave_roll(const unit_stats_t* unit);
-s32 reaction_is_blocked(const unit_stats_t* unit);
-s32 reaction_is_prevented(const unit_stats_t* unit);
+s32 reaction_fails_brave_roll(const battle_unit_t* unit);
+s32 reaction_is_blocked(const battle_unit_t* unit);
+s32 reaction_is_prevented(const battle_unit_t* unit);
 void reaction_try_finger_guard(void);
 void reaction_try_catch(void);
 

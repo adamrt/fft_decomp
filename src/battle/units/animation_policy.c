@@ -4,18 +4,18 @@
 #include "fft/action.h"
 #include "fft/ai.h"
 #include "fft/animation.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/battle_state.h"
 #include "fft/effect_secondary.h"
 #include "fft/item.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/move.h"
 #include "fft/projectile.h"
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 /* sound_sfx_e by the weapon's item_type_e (0x20 entries each): the swing, the
@@ -29,7 +29,7 @@ extern clut_t g_sprite_weapon_clut;
  * the one held while the unit charges or performs; 0 for none. */
 extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
 
-/* Three animation_e variants per item_type_e; animation_weapon_attack_select chooses the column. */
+/* Three animation_e variants per item_type_e; animation_select_weapon_attack chooses the column. */
 extern u8 g_animation_weapon_attacks[][3];
 
 /* Play the weapon swing sound (`hit` 0) or the sound of each strike target's
@@ -42,9 +42,9 @@ extern u8 g_animation_weapon_attacks[][3];
  * nullified, missed or canceled action none; anything else (a hit or a
  * reflection) the weapon's hit sound or, when critical, SOUND_SFX_CRITICAL_HIT.
  * A target without battle stats is skipped. */
-void action_play_weapon_sfx(unit_runtime_t* unit, s32 hit) {
-    unit_runtime_t* target;
-    s32 weapon_type = item_data_get(unit->strike.used_weapon_id)->type;
+void action_play_weapon_sfx(map_unit_t* unit, s32 hit) {
+    map_unit_t* target;
+    s32 weapon_type = item_get_data(unit->strike.used_weapon_id)->type;
     s32 i;
 
     if (weapon_type >= ITEM_TYPE_SHURIKEN) {
@@ -52,36 +52,36 @@ void action_play_weapon_sfx(unit_runtime_t* unit, s32 hit) {
     }
     switch (hit) {
     case 0:
-        unit_sfx_play(unit, g_action_weapon_swing_sfx_ids[weapon_type]);
+        map_unit_play_sfx(unit, g_action_weapon_swing_sfx_ids[weapon_type]);
         break;
     case 1:
         for (i = 0; i < unit->strike.target_count; i++) {
-            target = unit_battle_get(unit->strike.target_list[i]);
-            if (target == 0 || target->stats == 0) {
+            target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
+            if (target == 0 || target->battle_unit == 0) {
                 continue;
             }
-            switch (target->stats->action.miss_type) {
+            switch (target->battle_unit->action.miss_type) {
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
             case ACTION_MISS_TYPE_GOLEM_GUARD:
-                unit_sfx_play(unit, g_action_shield_deflect_sfx_ids[weapon_type]);
+                map_unit_play_sfx(unit, g_action_shield_deflect_sfx_ids[weapon_type]);
                 break;
             case ACTION_MISS_TYPE_ACCESSORY_EVADE:
             case ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD:
             case ACTION_MISS_TYPE_FORCED_FAILURE:
             case ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD:
             case ACTION_MISS_TYPE_CATCH:
-                unit_sfx_play(unit, SOUND_SFX_ERROR_MESSAGE);
+                map_unit_play_sfx(unit, SOUND_SFX_ERROR_MESSAGE);
                 break;
             case ACTION_MISS_TYPE_NULLIFIED:
             case ACTION_MISS_TYPE_ACCURACY_MISS:
             case ACTION_MISS_TYPE_CANCELED:
                 break;
             default:
-                if (target->stats->action.critical != 0) {
-                    unit_sfx_play(unit, SOUND_SFX_CRITICAL_HIT);
+                if (target->battle_unit->action.critical != 0) {
+                    map_unit_play_sfx(unit, SOUND_SFX_CRITICAL_HIT);
                 } else {
-                    unit_sfx_play(unit, g_action_weapon_hit_sfx_ids[weapon_type]);
+                    map_unit_play_sfx(unit, g_action_weapon_hit_sfx_ids[weapon_type]);
                 }
                 break;
             }
@@ -93,15 +93,14 @@ void action_play_weapon_sfx(unit_runtime_t* unit, s32 hit) {
 /* The depth of water the unit stands in, which picks its animations: 0 on the surface (ON_WATER
  * movement, Float, a crystal), 1 for a chicken, frog or treasure and for IN_WATER movement,
  * otherwise the depth of its tile. */
-static u8 water_mode_get(unit_runtime_t* unit) {
-    battle_map_tile_t* tile;
+static u8 get_water_mode(map_unit_t* unit) {
+    map_tile_t* tile;
     s32 movement;
     u32 statuses;
 
-    tile = battle_map_tile_get_pointer(
-        unit->world_coords.vx / BATTLE_MAP_TILE_SIZE, unit->world_coords.vz / BATTLE_MAP_TILE_SIZE, unit->map_layer);
-    if (unit->stats != 0) {
-        movement = move_get_effective_flags(unit->stats);
+    tile = map_get_tile(unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_layer);
+    if (unit->battle_unit != 0) {
+        movement = move_get_effective_flags(unit->battle_unit);
         if (movement & MOVE_EFFECTIVE_ON_WATER) {
             return 0;
         }
@@ -130,7 +129,7 @@ static u8 water_mode_get(unit_runtime_t* unit) {
  * the first animation and one 12 or more below the third. A Golem or Blade
  * Grasp guard always takes the first, and the sheets from the crystal up
  * always play the unarmed level attack. */
-void animation_weapon_attack_select(unit_runtime_t* attacker, unit_runtime_t* target) {
+void animation_select_weapon_attack(map_unit_t* attacker, map_unit_t* target) {
     s32 miss_type;
     s16 attacker_center;
     s16 target_center;
@@ -141,20 +140,21 @@ void animation_weapon_attack_select(unit_runtime_t* attacker, unit_runtime_t* ta
     }
     if (target != 0) {
         if (attacker->spritesheet_id >= SPRITE_SHEET_ID_CRYSTAL) {
-            animation_facing_force(g_animation_weapon_attacks[0][1], attacker->facing, attacker);
+            animation_force_with_facing(g_animation_weapon_attacks[0][1], attacker->facing, attacker);
             return;
         }
         if (attacker->equipped_weapon_type == ITEM_TYPE_BOW) {
-            animation_facing_force(g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_bow_animation_column_get()],
-                attacker->facing, attacker);
+            animation_force_with_facing(
+                g_animation_weapon_attacks[ITEM_TYPE_BOW][projectile_get_bow_animation_column()], attacker->facing,
+                attacker);
             return;
         }
-        miss_type = target->stats->action.miss_type;
+        miss_type = target->battle_unit->action.miss_type;
         if (miss_type != ACTION_MISS_TYPE_HIT) {
             if (miss_type >= ACTION_MISS_TYPE_REFLECTED) {
                 if (miss_type < ACTION_MISS_TYPE_BUGGED_REFLECTION) {
                     if (miss_type >= ACTION_MISS_TYPE_GOLEM_GUARD) {
-                        animation_facing_force(
+                        animation_force_with_facing(
                             g_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
                         return;
                     }
@@ -162,30 +162,31 @@ void animation_weapon_attack_select(unit_runtime_t* attacker, unit_runtime_t* ta
             }
         }
         /* The target loads the attacker's world_coords.vy zero-extended (lhu). */
-        attacker_center = sprite_runtime_sheet_height_get(attacker->runtime_id) / 2 - attacker->world_coords.vy;
-        target_center = sprite_runtime_sheet_height_get(target->runtime_id) / 2 - target->world_coords.vy;
+        attacker_center = sprite_sheet_map_unit_get_height(attacker->map_unit_id) / 2 - attacker->world_coords.vy;
+        target_center = sprite_sheet_map_unit_get_height(target->map_unit_id) / 2 - target->world_coords.vy;
         difference = attacker_center - target_center;
         if (difference < -11) {
-            animation_facing_force(
+            animation_force_with_facing(
                 g_animation_weapon_attacks[attacker->equipped_weapon_type][0], attacker->facing, attacker);
             return;
         }
         if (difference >= 12) {
-            animation_facing_force(
+            animation_force_with_facing(
                 g_animation_weapon_attacks[attacker->equipped_weapon_type][2], attacker->facing, attacker);
             return;
         }
     }
-    animation_facing_force(g_animation_weapon_attacks[attacker->equipped_weapon_type][1], attacker->facing, attacker);
+    animation_force_with_facing(
+        g_animation_weapon_attacks[attacker->equipped_weapon_type][1], attacker->facing, attacker);
 }
 
 /* Start the animation of an item ability: the item held up for a target on
  * the unit's own tile or beside it, thrown for one further away. */
-static void item_ability_animation_set(unit_runtime_t* unit, unit_runtime_t* target) {
+static void set_item_ability_animation(map_unit_t* unit, map_unit_t* target) {
     s32 dx;
     s32 dy;
 
-    sprite_display_store_item(unit, unit->used_item_or_weapon_id);
+    sprite_item_display_set(unit, unit->used_item_or_weapon_id);
     if (target != 0) {
         dx = target->map_x - unit->map_x;
         dy = target->map_y - unit->map_y;
@@ -201,83 +202,83 @@ static void item_ability_animation_set(unit_runtime_t* unit, unit_runtime_t* tar
     }
     /* facing is read signed (lh). */
     if ((dx <= 0 && dy <= 0) || (dx < 2 && dy == 0) || (dx == 0 && dy < 2)) {
-        animation_facing_store(ANIMATION_HOLD_ITEM, unit->facing, unit);
+        animation_store_with_facing(ANIMATION_HOLD_ITEM, unit->facing, unit);
     } else {
         unit->item_display_active = 0;
-        animation_facing_force(ANIMATION_THROW_ITEM, unit->facing, unit);
+        animation_force_with_facing(ANIMATION_THROW_ITEM, unit->facing, unit);
     }
 }
 
 /* Start the first animation of the used ability's charge set, if it has one. */
-void animation_ability_charge_start(unit_runtime_t* unit) {
+void animation_start_ability_charge(map_unit_t* unit) {
     u8 set_id = g_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
     u8 animation = g_animation_ability_charge_sets[set_id][0];
 
     if (animation != 0) {
-        animation_facing_store(animation, unit->facing, unit);
+        animation_store_with_facing(animation, unit->facing, unit);
     }
 }
 
 /* Start the second animation of the used ability's charge set, the one held
  * while charging or performing; the submerged idle in water two or more deep. */
-void animation_ability_charge_hold_start(unit_runtime_t* unit) {
+void animation_start_ability_charge_hold(map_unit_t* unit) {
     u8 set_id = g_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
     u8 animation = g_animation_ability_charge_sets[set_id][1];
     u8 water_depth;
     s32 selected_animation;
 
     if (animation != 0) {
-        water_depth = water_mode_get(unit);
+        water_depth = get_water_mode(unit);
         selected_animation = ANIMATION_SUBMERGED_IDLE;
         if (water_depth < 2) {
             selected_animation = animation;
         }
-        animation_facing_store(selected_animation, unit->facing, unit);
+        animation_store_with_facing(selected_animation, unit->facing, unit);
     }
 }
 
 /* Start the attacker's animation for the ability it uses: the cast for the
  * RUKA, ARUTE and KANZEN sequences, else the ability table's attack
  * animation, which may ask for the weapon's attack or the item animation. */
-void animation_ability_attack_select(unit_runtime_t* attacker, unit_runtime_t* target) {
+void animation_select_ability_attack(map_unit_t* attacker, map_unit_t* target) {
     s32 animation;
     s32 seq_type = g_sprite_sheet_data[attacker->spritesheet_id].seq_id;
 
     if (seq_type <= SPRITE_SEQ_KANZEN) {
         if (seq_type >= SPRITE_SEQ_RUKA) {
-            animation_facing_store(ANIMATION_CAST, attacker->facing, attacker);
+            animation_store_with_facing(ANIMATION_CAST, attacker->facing, attacker);
             return;
         }
     }
 
     animation = g_ability_animation_data[attacker->used_ability_id].attack_animation;
     if (animation == ANIMATION_ATTACK_USE_WEAPON) {
-        animation_weapon_attack_select(attacker, target);
+        animation_select_weapon_attack(attacker, target);
         return;
     }
     if (animation == ANIMATION_ATTACK_USE_ITEM) {
-        item_ability_animation_set(attacker, target);
+        set_item_ability_animation(attacker, target);
         return;
     }
-    animation_facing_store(animation, attacker->facing, attacker);
+    animation_store_with_facing(animation, attacker->facing, attacker);
 }
 
 /* Start a unit's level-up animation: the jump on dry land, the hops for a
  * rider and in water one deep, the submerged idle in water two deep. */
-void animation_level_up_set(unit_runtime_t* unit) {
+void animation_set_level_up(map_unit_t* unit) {
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
-        animation_facing_store(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
+        animation_store_with_facing(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
         return;
     }
-    switch (water_mode_get(unit)) {
+    switch (get_water_mode(unit)) {
     case 0:
-        animation_facing_store(ANIMATION_LEVEL_UP, unit->facing, unit);
+        animation_store_with_facing(ANIMATION_LEVEL_UP, unit->facing, unit);
         break;
     case 1:
-        animation_facing_store(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
+        animation_store_with_facing(ANIMATION_LEVEL_UP_HOP, unit->facing, unit);
         break;
     case 2:
-        animation_facing_store(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+        animation_store_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         break;
     }
 }
@@ -286,22 +287,22 @@ void animation_level_up_set(unit_runtime_t* unit) {
  * the submerged idle in water two or more deep; a mount on land also puts
  * its rider back in the riding animation. The depth is a byte, so its
  * negative test never holds. */
-void animation_stand_set(unit_runtime_t* unit) {
+void animation_set_stand(map_unit_t* unit) {
     s32 anim = ANIMATION_RIDING;
     s32 selected;
     s32 water_depth;
-    unit_runtime_t* other;
+    map_unit_t* other;
 
     if (unit->mount_state != UNIT_MOUNT_STATE_RIDER) {
-        water_depth = water_mode_get(unit);
+        water_depth = get_water_mode(unit);
         if (water_depth < 0) {
             selected = ANIMATION_SUBMERGED_IDLE;
         } else if (water_depth < 2) {
             selected = ANIMATION_STAND;
             if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
-                other = unit_runtime_get(unit->mount_partner_runtime_id);
+                other = map_unit_get(unit->mount_partner_map_unit_id);
                 if (other != 0) {
-                    animation_facing_store(ANIMATION_RIDING, unit->facing, other);
+                    animation_store_with_facing(ANIMATION_RIDING, unit->facing, other);
                 }
             }
         } else {
@@ -312,7 +313,7 @@ void animation_stand_set(unit_runtime_t* unit) {
         }
         anim = selected;
     }
-    animation_facing_store(anim, unit->facing, unit);
+    animation_store_with_facing(anim, unit->facing, unit);
 }
 
 /*
@@ -321,16 +322,16 @@ void animation_stand_set(unit_runtime_t* unit) {
  * submerged idle of that speed in water two or more deep. A mount on land
  * also puts its rider in the riding animation.
  */
-void animation_walk_set(unit_runtime_t* unit) {
+void animation_set_walk(map_unit_t* unit) {
     s32 anim;
     s32 walk_speed;
-    unit_runtime_t* rider;
+    map_unit_t* rider;
 
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
-        animation_facing_store(ANIMATION_RIDING, unit->facing, unit);
+        animation_store_with_facing(ANIMATION_RIDING, unit->facing, unit);
         return;
     }
-    switch (water_mode_get(unit)) {
+    switch (get_water_mode(unit)) {
     case 0:
     case 1:
         walk_speed = unit->walk_speed;
@@ -343,9 +344,9 @@ void animation_walk_set(unit_runtime_t* unit) {
             }
         }
         if (unit->mount_state == UNIT_MOUNT_STATE_MOUNT) {
-            rider = unit_runtime_get(unit->mount_partner_runtime_id);
+            rider = map_unit_get(unit->mount_partner_map_unit_id);
             if (rider != 0) {
-                animation_facing_store(ANIMATION_RIDING, unit->facing, rider);
+                animation_store_with_facing(ANIMATION_RIDING, unit->facing, rider);
             }
         }
         break;
@@ -363,7 +364,7 @@ void animation_walk_set(unit_runtime_t* unit) {
         break;
     }
     if (anim != 0) {
-        animation_facing_store(anim, unit->facing, unit);
+        animation_store_with_facing(anim, unit->facing, unit);
     }
 }
 
@@ -383,9 +384,9 @@ void animation_walk_set(unit_runtime_t* unit) {
  * The two animation 0x21 branches test bit 0 of status_flags_1_4, which normal
  * status updates never set. Crystal's bit 0 belongs to status_flags_5_6.
  */
-void animation_status_set(unit_runtime_t* unit) {
+void animation_set_status(map_unit_t* unit) {
     s32 animation;
-    u8 water_depth = water_mode_get(unit);
+    u8 water_depth = get_water_mode(unit);
     u8 spritesheet_id;
 
     animation = 0;
@@ -415,11 +416,11 @@ void animation_status_set(unit_runtime_t* unit) {
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_CONFUSION) {
                     animation = ANIMATION_CONFUSION;
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_PERFORMING) {
-                    unit->used_ability_id = unit->stats->action_command.ability_id;
-                    animation_ability_charge_hold_start(unit);
+                    unit->used_ability_id = unit->battle_unit->action_command.ability_id;
+                    animation_start_ability_charge_hold(unit);
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_CHARGING) {
-                    unit->used_ability_id = unit->stats->action_command.ability_id;
-                    animation_ability_charge_hold_start(unit);
+                    unit->used_ability_id = unit->battle_unit->action_command.ability_id;
+                    animation_start_ability_charge_hold(unit);
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_DEFENDING) {
                     animation = ANIMATION_DEFEND;
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_SLOW) {
@@ -459,11 +460,11 @@ void animation_status_set(unit_runtime_t* unit) {
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_CONFUSION) {
                     animation = ANIMATION_CONFUSION;
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_PERFORMING) {
-                    unit->used_ability_id = unit->stats->action_command.ability_id;
-                    animation_ability_charge_hold_start(unit);
+                    unit->used_ability_id = unit->battle_unit->action_command.ability_id;
+                    animation_start_ability_charge_hold(unit);
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_CHARGING) {
-                    unit->used_ability_id = unit->stats->action_command.ability_id;
-                    animation_ability_charge_hold_start(unit);
+                    unit->used_ability_id = unit->battle_unit->action_command.ability_id;
+                    animation_start_ability_charge_hold(unit);
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_DEFENDING) {
                     animation = ANIMATION_DEFEND;
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_SLOW) {
@@ -516,7 +517,7 @@ void animation_status_set(unit_runtime_t* unit) {
         break;
     }
     if (animation != 0) {
-        animation_facing_store(animation, unit->facing, unit);
+        animation_store_with_facing(animation, unit->facing, unit);
     }
 }
 
@@ -533,70 +534,70 @@ void animation_status_set(unit_runtime_t* unit) {
  * events too, the unit is put straight into its dead or its submerged idle
  * sequence, with the wait cleared so that the sequence starts at once.
  */
-void animation_status_changes_update(unit_runtime_t* unit) {
-    unit_stats_t* stats;
+void animation_update_status_changes(map_unit_t* unit) {
+    battle_unit_t* stats;
 
     if (unit->statuses_to_add_5_6 & UNIT_STATUS_CHICKEN) {
-        animation_facing_force(ANIMATION_IDLE, unit->facing, unit);
+        animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_CHICKEN) {
-        animation_status_set(unit);
+        animation_set_status(unit);
     }
     if (unit->statuses_to_add_5_6 & UNIT_STATUS_FROG) {
-        animation_facing_force(ANIMATION_IDLE, unit->facing, unit);
+        animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
     } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_FROG) {
-        animation_status_set(unit);
+        animation_set_status(unit);
     }
     if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
         if (g_sprite_sheet_data[unit->spritesheet_id].seq_id == SPRITE_SEQ_CYOKO
             || g_sprite_sheet_data[unit->spritesheet_id].seq_id == SPRITE_SEQ_MON) {
-            effect_secondary_death_smoke_start(unit);
+            effect_secondary_start_death_smoke(unit);
         }
         if (g_battle_state != BATTLE_STATE_EVENT) {
-            stats = unit->stats;
+            stats = unit->battle_unit;
             if (stats != 0) {
                 if (stats->unit_flags & UNIT_FLAG_MALE) {
-                    unit_sfx_play(unit, SOUND_SFX_DEATH_MALE);
+                    map_unit_play_sfx(unit, SOUND_SFX_DEATH_MALE);
                 } else if (stats->unit_flags & UNIT_FLAG_FEMALE) {
-                    unit_sfx_play(unit, SOUND_SFX_DEATH_FEMALE);
+                    map_unit_play_sfx(unit, SOUND_SFX_DEATH_FEMALE);
                 } else if (stats->unit_flags & UNIT_FLAG_MONSTER) {
-                    unit_sfx_play(unit, SOUND_SFX_DEATH_MONSTER);
+                    map_unit_play_sfx(unit, SOUND_SFX_DEATH_MONSTER);
                 }
             }
         }
     }
     if (unit->statuses_to_add_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) {
-        effect_secondary_zodiac_poof_start(unit);
+        effect_secondary_start_zodiac_poof(unit);
     }
     if (g_battle_state == BATTLE_STATE_EVENT) {
         if (unit->statuses_to_add_5_6 & UNIT_STATUS_JUMP) {
-            animation_facing_force(ANIMATION_JUMP_DEPART, unit->facing, unit);
+            animation_force_with_facing(ANIMATION_JUMP_DEPART, unit->facing, unit);
         } else if (unit->statuses_to_remove_5_6 & UNIT_STATUS_JUMP) {
-            unit_runtime_show(unit->runtime_id);
-            animation_facing_force(ANIMATION_JUMP_LAND, unit->facing, unit);
+            map_unit_show(unit->map_unit_id);
+            animation_force_with_facing(ANIMATION_JUMP_LAND, unit->facing, unit);
         }
-        if (water_mode_get(unit) >= 2) {
+        if (get_water_mode(unit) >= 2) {
             if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-                animation_facing_force(ANIMATION_DEAD, unit->facing, unit);
+                animation_force_with_facing(ANIMATION_DEAD, unit->facing, unit);
                 unit->animation.sequence_id = ANIMATION_DEAD << 1;
                 unit->animation.wait = 0;
             } else if (unit->statuses_to_remove_1_4 & UNIT_STATUS_DEAD) {
-                animation_facing_force(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+                animation_force_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
                 unit->animation.sequence_id = ANIMATION_SUBMERGED_IDLE << 1;
                 unit->animation.wait = 0;
             }
         }
-    } else if (water_mode_get(unit) < 2) {
+    } else if (get_water_mode(unit) < 2) {
         if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-            animation_facing_store(ANIMATION_DEATH, unit->facing, unit);
+            animation_store_with_facing(ANIMATION_DEATH, unit->facing, unit);
         } else if (unit->statuses_to_remove_1_4 & UNIT_STATUS_DEAD) {
-            animation_facing_store(ANIMATION_REVIVE, unit->facing, unit);
+            animation_store_with_facing(ANIMATION_REVIVE, unit->facing, unit);
         }
     } else if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-        animation_facing_force(ANIMATION_DEAD, unit->facing, unit);
+        animation_force_with_facing(ANIMATION_DEAD, unit->facing, unit);
         unit->animation.sequence_id = ANIMATION_DEAD << 1;
         unit->animation.wait = 0;
     } else if (unit->statuses_to_remove_1_4 & UNIT_STATUS_DEAD) {
-        animation_facing_force(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+        animation_force_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         unit->animation.sequence_id = ANIMATION_SUBMERGED_IDLE << 1;
         unit->animation.wait = 0;
     }
@@ -606,20 +607,20 @@ void animation_status_changes_update(unit_runtime_t* unit) {
  * clears it; Poached is tested first and only one is handled per call.
  *
  * Poached configures the unit's palette modulation
- * (unit_fade_out_start_red). Morbol swaps the sprite
+ * (map_unit_start_red_fade_out). Morbol swaps the sprite
  * for the Morbol spritesheet (VRAM slot, SHP, SEQ, texture page), refreshes the
  * tile palette and the idle animation, then rewrites the battle stats as a Morbol
  * and reinitializes the unit's AI ability data. */
-void unit_apply_poach_morbol_transformation(unit_runtime_t* unit) {
+void map_unit_apply_poach_or_morbol(map_unit_t* unit) {
     u32 flags = unit->status_flags_5_6;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
 
     if ((flags & (UNIT_STATUS_POACHED | UNIT_STATUS_MORBOL)) == 0) {
         return;
     }
     if (flags & UNIT_STATUS_POACHED) {
         unit->status_flags_5_6 = flags & ~UNIT_STATUS_POACHED;
-        unit_fade_out_start_red(unit->runtime_id);
+        map_unit_start_red_fade_out(unit->map_unit_id);
         return;
     }
     if ((flags & UNIT_STATUS_MORBOL) == 0) {
@@ -633,17 +634,17 @@ void unit_apply_poach_morbol_transformation(unit_runtime_t* unit) {
     unit->animation.seq = sprite_sheet_get_unit_seq(SPRITE_SHEET_ID_MORBOL);
     unit->stored_palette = 0;
     unit->tpage = unit->spritesheet_vram_slot + SPRITE_TPAGE_SPRITESHEET_SLOT_0;
-    tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
+    tile = map_get_tile(unit->map_x, unit->map_y, unit->map_layer);
     sprite_palette_update(unit, tile->flags.shading, 1);
-    animation_facing_force(ANIMATION_IDLE, unit->facing, unit);
-    unit_transform_into_morbol(unit->stats);
-    ai_unit_abilities_init(unit->stats->battle_id);
+    animation_force_with_facing(ANIMATION_IDLE, unit->facing, unit);
+    battle_unit_transform_into_morbol(unit->battle_unit);
+    ai_init_unit_abilities(unit->battle_unit->battle_unit_id);
 }
 
 /* Swap the unit's sheet for its first transformation status (Crystal, Treasure, Chicken, Frog),
  * saving its own SHP and SEQ unless it already shows one; Crystal and Treasure also clear every
  * other status. Without such a status, a swapped unit gets back the sheet of its VRAM slot. */
-void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_level) {
+void sprite_sheet_apply_status_change(map_unit_t* unit, s32 tile_effect_level) {
     u32 flags = unit->status_flags_5_6;
     u16 spritesheet_id;
     u8 original_id;
@@ -654,13 +655,13 @@ void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_leve
             unit->special_graphic_y_offset = 0x60;
             unit->status_flags_5_6 = UNIT_STATUS_CRYSTAL;
             unit->status_flags_1_4 = 0;
-            animation_facing_store(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
+            animation_store_with_facing(ANIMATION_SUBMERGED_IDLE, unit->facing, unit);
         } else if (flags & UNIT_STATUS_TREASURE) {
             spritesheet_id = SPRITE_SHEET_ID_TREASURE;
             unit->special_graphic_y_offset = 0;
             unit->status_flags_5_6 = UNIT_STATUS_TREASURE;
             unit->status_flags_1_4 = 0;
-            animation_facing_store(ANIMATION_TREASURE, unit->facing, unit);
+            animation_store_with_facing(ANIMATION_TREASURE, unit->facing, unit);
         } else if (flags & UNIT_STATUS_CHICKEN) {
             spritesheet_id = SPRITE_SHEET_ID_CHICKEN;
             unit->special_graphic_y_offset = 0;
@@ -677,8 +678,8 @@ void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_leve
             unit->animation.seq = sprite_sheet_get_unit_seq(spritesheet_id);
             unit->spritesheet_id = spritesheet_id;
             sprite_palette_tint_unit(unit, tile_effect_level, 1);
-            animation_status_set(unit);
-            sprite_unit_frame_load(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+            animation_set_status(unit);
+            sprite_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
         }
     } else if (unit->spritesheet_id != g_sprite_sheet_slots[unit->spritesheet_vram_slot].spritesheet_id) {
         unit->special_graphic_y_offset = 0;
@@ -687,8 +688,8 @@ void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_leve
         unit->animation.seq = unit->animation.saved_seq;
         unit->spritesheet_id = original_id;
         sprite_palette_update(unit, tile_effect_level, 1);
-        animation_status_set(unit);
-        sprite_unit_frame_load(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+        animation_set_status(unit);
+        sprite_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
 }
 
@@ -698,7 +699,7 @@ void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_leve
  * CLUTs of the ITEM_A and ITEM_B rows, and its type selects the frame set of
  * the weapon SHP; a thrown weapon, any Throw ability and Throw Stone use
  * set 0x15. */
-void sprite_weapon_graphic_set(s32 item_id, unit_runtime_t* unit) {
+void sprite_set_weapon_graphic(s32 item_id, map_unit_t* unit) {
     const item_data_t* item;
     u32 weapon_type;
     s32 clut_index;
@@ -707,37 +708,37 @@ void sprite_weapon_graphic_set(s32 item_id, unit_runtime_t* unit) {
      * the two reads into one. */
     u16 ability_id;
 
-    item = item_data_get(item_id);
+    item = item_get_data(item_id);
     weapon_type = item->type;
     if ((weapon_type >= ITEM_TYPE_SHURIKEN)
         || ((u32)(unit->used_ability_id - ABILITY_ID_THROW_FIRST) < ABILITY_ID_JUMP_FIRST - ABILITY_ID_THROW_FIRST)
         || (ability_id = unit->used_ability_id) == ABILITY_ID_BASIC_SKILL_THROW_STONE) {
         weapon_type = 0x15;
     }
-    clut_index = unit->runtime_id;
-    battle_map_palette_load_data(&g_sprite_weapon_clut[g_sprite_item_graphic_data[item_id].palettes >> 4],
-        BATTLE_MAP_CLUT_ROW_ITEM_A, clut_index, 0);
-    battle_map_palette_load_data(&g_sprite_weapon_clut[g_sprite_item_graphic_data[item_id].palettes & 0xF],
-        BATTLE_MAP_CLUT_ROW_ITEM_B, clut_index, 0);
+    clut_index = unit->map_unit_id;
+    map_palette_load_data(
+        &g_sprite_weapon_clut[g_sprite_item_graphic_data[item_id].palettes >> 4], MAP_CLUT_ROW_ITEM_A, clut_index, 0);
+    map_palette_load_data(
+        &g_sprite_weapon_clut[g_sprite_item_graphic_data[item_id].palettes & 0xF], MAP_CLUT_ROW_ITEM_B, clut_index, 0);
     unit->used_item_or_weapon_id = item_id;
     unit->equipped_weapon_type = weapon_type;
 }
 
-/* A plain call through to animation_status_set. Provisional: named for its
+/* A plain call through to animation_set_status. Provisional: named for its
  * two callers, the battle states that resume after an action. */
-void animation_status_set_after_action(unit_runtime_t* unit) {
-    animation_status_set(unit);
+void animation_set_status_after_action(map_unit_t* unit) {
+    animation_set_status(unit);
 }
 
 /* When the target blocked with a hand or a golem took the blow, replace the
  * attacker's unarmed, swing or thrust animation with its recoil at the same
  * height. Only the TYPE1 and TYPE2 sheets have the recoils. */
-void animation_shield_block_attacker_set(unit_runtime_t* attacker, unit_runtime_t* target) {
-    unit_stats_t* stats;
+void animation_set_shield_block_attacker(map_unit_t* attacker, map_unit_t* target) {
+    battle_unit_t* stats;
     s32 miss_type;
     s32 anim;
 
-    stats = target->stats;
+    stats = target->battle_unit;
     if (stats == 0) {
         return;
     }
@@ -779,7 +780,7 @@ void animation_shield_block_attacker_set(unit_runtime_t* attacker, unit_runtime_
         }
     }
     if (anim != 0) {
-        animation_facing_force(anim, attacker->facing, attacker);
+        animation_force_with_facing(anim, attacker->facing, attacker);
     }
 }
 
@@ -791,14 +792,14 @@ void animation_shield_block_attacker_set(unit_runtime_t* attacker, unit_runtime_
  * takes the submerged idle, and a target without battle stats the hurt
  * animation. Otherwise the miss type decides: a hand guard turns to the
  * attacker and parries at the attacker's relative height (the same 12-unit
- * thresholds as animation_weapon_attack_select), an evasion with
+ * thresholds as animation_select_weapon_attack), an evasion with
  * the dodge display flag dodges, Blade Grasp and catches raise the hands, and
  * a hit hurts on damage or raises the hands on healing. The sheets from the
  * crystal up play only the hurt animation. Knockback, Poach and Morbol start
  * here, and a broken or stolen item rebuilds the target's AI ability data.
  */
-void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* target) {
-    unit_stats_t* stats;
+void action_start_target_response(map_unit_t* attacker, map_unit_t* target) {
+    battle_unit_t* stats;
     action_data_t* action;
     s32 animation;
     s32 difference;
@@ -815,20 +816,21 @@ void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* targ
     if ((target->animation.sequence_id >> 1) == ANIMATION_DEATH) {
         return;
     }
-    water_depth = water_mode_get(target);
+    water_depth = get_water_mode(target);
     animation = ANIMATION_SUBMERGED_IDLE;
     if (water_depth < 2) {
-        stats = target->stats;
+        stats = target->battle_unit;
         if (stats != 0) {
             action = &stats->action;
             animation = ANIMATION_STAND;
             switch (action->miss_type) {
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
-                unit_facing_turn_to_target(target, attacker);
-                sprite_weapon_graphic_set(action->item_lost, target);
-                attacker_center = sprite_runtime_sheet_height_get(attacker->runtime_id) / 2 - attacker->world_coords.vy;
-                target_center = sprite_runtime_sheet_height_get(target->runtime_id) / 2 - target->world_coords.vy;
+                map_unit_facing_turn_to_target(target, attacker);
+                sprite_set_weapon_graphic(action->item_lost, target);
+                attacker_center
+                    = sprite_sheet_map_unit_get_height(attacker->map_unit_id) / 2 - attacker->world_coords.vy;
+                target_center = sprite_sheet_map_unit_get_height(target->map_unit_id) / 2 - target->world_coords.vy;
                 difference = attacker_center - target_center;
                 if (difference < -11) {
                     animation = ANIMATION_WEAPON_GUARD_LOW;
@@ -845,13 +847,13 @@ void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* targ
             case ACTION_MISS_TYPE_ACCURACY_MISS:
             case ACTION_MISS_TYPE_FORCED_FAILURE:
                 if (action->miss_display_flags & ACTION_MISS_DISPLAY_DODGE_ANIMATION) {
-                    unit_facing_turn_to_target(target, attacker);
+                    map_unit_facing_turn_to_target(target, attacker);
                     animation = ANIMATION_DODGE;
                 }
                 break;
             case ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD:
             case ACTION_MISS_TYPE_CATCH:
-                unit_facing_turn_to_target(target, attacker);
+                map_unit_facing_turn_to_target(target, attacker);
                 animation = ANIMATION_RAISE_HANDS;
                 break;
             case ACTION_MISS_TYPE_CANCELED:
@@ -871,13 +873,13 @@ void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* targ
 
             if (animation != 0) {
                 if (target->spritesheet_id < SPRITE_SHEET_ID_CRYSTAL) {
-                    animation_facing_force(animation, target->facing, target);
+                    animation_force_with_facing(animation, target->facing, target);
                 } else if (animation == ANIMATION_HURT) {
-                    animation_facing_force(ANIMATION_HURT, target->facing, target);
+                    animation_force_with_facing(ANIMATION_HURT, target->facing, target);
                 }
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_KNOCKBACK) {
-                move_knockback_start(attacker, target);
+                move_start_knockback(attacker, target);
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_POACH) {
                 target->status_flags_5_6 |= UNIT_STATUS_POACHED;
@@ -886,28 +888,28 @@ void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* targ
                 target->status_flags_5_6 |= UNIT_STATUS_MORBOL;
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT) {
-                ai_unit_abilities_init(target->stats->battle_id);
+                ai_init_unit_abilities(target->battle_unit->battle_unit_id);
             }
             if (action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM) {
-                ai_unit_abilities_init(target->stats->battle_id);
+                ai_init_unit_abilities(target->battle_unit->battle_unit_id);
             }
             return;
         }
         animation = ANIMATION_HURT;
     }
-    animation_facing_store(animation, target->facing, target);
+    animation_store_with_facing(animation, target->facing, target);
 }
 
 /* Refresh the display of every unit in the strike's target list. */
-void unit_target_displays_update(unit_runtime_t* unit) {
+void map_unit_update_target_displays(map_unit_t* unit) {
     s32 i;
-    unit_runtime_t* target;
+    map_unit_t* target;
 
     if (unit->strike.target_count != 0) {
         for (i = 0; i < unit->strike.target_count; i++) {
-            target = unit_battle_get(unit->strike.target_list[i]);
+            target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
             if (target != 0) {
-                unit_runtime_display_update(target->runtime_id);
+                map_unit_update_display(target->map_unit_id);
             }
         }
     }

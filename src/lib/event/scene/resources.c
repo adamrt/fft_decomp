@@ -39,24 +39,24 @@ static RECT s_menu_portrait_palette_rect = { 320, 254, 64, 2 };
 #endif
 
 /* Thread body of the ShowGraphic event instruction: load the ETC overlay and show its graphic. */
-void script_graphic_show(void) {
-    thread_current_task_set(THREAD_TASK_SHOW_GRAPHIC);
+void script_graphic_show_thread(void) {
+    thread_current_set_task(THREAD_TASK_SHOW_GRAPHIC);
     overlay_companion_request(COMPANION_OVERLAY_ETC);
     etc_entrypoint();
 }
 
-/* Empty in BATTLE and WORLD; in BATTLE it sits between script_graphic_show and
- * portrait_image_load. Nothing on the disc calls it or points at it; the
+/* Empty in BATTLE and WORLD; in BATTLE it sits between script_graphic_show_thread and
+ * portrait_load_image. Nothing on the disc calls it or points at it; the
  * name is a neutral placeholder until a reference turns up. */
 void script_noop_3(void) {
 }
 
 /* Upload one EVTFACE.BIN block as a single image, followed by its palette rows. */
-void portrait_image_load(s32 portrait_id) {
+void portrait_load_image(s32 portrait_id) {
     portrait_image_block_t* buffer;
 
     buffer = menu_alloc_memory(sizeof(*buffer));
-    g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+    g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(portrait_id * 4 + DISC_SECTOR_EVENT_EVTFACE_BIN, sizeof(*buffer), buffer);
     LoadImage(&s_menu_portrait_pixel_rect, buffer->pixels[0][0]);
     LoadImage(&s_menu_portrait_palette_rect, (u32*)buffer->palettes);
@@ -72,19 +72,19 @@ void portrait_image_load(s32 portrait_id) {
  * WORLD retains this loader, but its per-frame request hook is empty.
  */
 void gfx_load_evtchr_thread(void) {
-    s32 slot = thread_current_parameter_1_get();
-    s32 block = thread_current_parameter_2_get();
+    s32 slot = thread_current_get_parameter_1();
+    s32 block = thread_current_get_parameter_2();
     evtchr_file_record_t* buffer;
 
-    thread_current_task_set(THREAD_TASK_LOAD_EVTCHR);
+    thread_current_set_task(THREAD_TASK_LOAD_EVTCHR);
     buffer = heap_alloc(0x7800);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_bytes_read_request;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack((block * 15) + DISC_SECTOR_EVENT_EVTCHR_BIN, 0x7800, buffer) != 0);
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_load_state_get;
+        g_thread_call_target = (void (*)(void))file_get_load_state;
     } while (thread_call_on_main_stack() != 0);
     g_script_pending_loaded_evtchr_slot = slot;
     g_script_loaded_evtchr_buffer = buffer;
@@ -106,11 +106,11 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
     buffer = menu_alloc_memory(sizeof(*buffer));
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_bytes_read_request;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(portrait_id * 4 + DISC_SECTOR_EVENT_EVTFACE_BIN, sizeof(*buffer), buffer) != 0);
     do {
         thread_yield();
-        g_thread_call_target = file_load_state_get;
+        g_thread_call_target = file_get_load_state;
     } while (thread_call_on_main_stack() != 0);
 
     palette = buffer->palettes;
@@ -139,20 +139,20 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
  * one-byte NOP opcodes. A block whose first 32-bit value already holds that marker leaves
  * the section pointer alone. Both the read request and the load poll run on the
  * main stack. */
-void script_event_load(s32 id) {
+void script_load_event(s32 id) {
     event_file_block_t* block;
     u32 off;
 
     do {
         thread_yield();
-        g_thread_call_target = (void (*)(void))file_bytes_read_request;
+        g_thread_call_target = (void (*)(void))file_request_read_bytes;
     } while (thread_call_on_main_stack(
                  id * EVENT_BLOCK_SECTORS + DISC_SECTOR_EVENT_TEST_EVT, EVENT_BLOCK_BYTES, &g_script_event_block_buffer)
         != 0);
 
     do {
         thread_yield();
-        g_thread_call_target = file_load_state_get;
+        g_thread_call_target = file_get_load_state;
     } while (thread_call_on_main_stack() != 0);
 
     block = g_script_event_block;
@@ -166,7 +166,7 @@ void script_event_load(s32 id) {
 
 /* Copy a normal and a dimmed menu palette (16 colors each) into g_menu_palette_colors, which the
  * panel frame lines take their colors from. */
-void menu_palette_colors_set(const menu_palette_pair_t* source) {
+void menu_palette_set_colors(const menu_palette_pair_t* source) {
     rgba5551_t* destination = g_menu_palette_colors.colors;
 
     mem_copy_bytes_nonempty(destination, source->colors, sizeof(palette_t));
@@ -174,13 +174,13 @@ void menu_palette_colors_set(const menu_palette_pair_t* source) {
 }
 
 /* Load the default menu palettes and rebuild the text section pointers. */
-void menu_palette_text_init(s32 unused_0) {
-    menu_palette_colors_set(&g_menu_glyph_image_data.palette);
+void menu_init_palette_text(s32 unused_0) {
+    menu_palette_set_colors(&g_menu_glyph_image_data.palette);
     text_init_section_pointers();
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * menu_palette_text_init and overlay_companion_file_poll. Nothing on the
+ * menu_init_palette_text and overlay_companion_poll_file. Nothing on the
  * disc calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 void menu_noop_4(void) {

@@ -4,7 +4,7 @@
 #include "fft/thread.h"
 
 /* Yield to the next WORLD thread, forever. */
-void screen_thread_yield_forever(void) {
+void thread_wait_forever(void) {
     for (;;) {
         thread_yield();
     }

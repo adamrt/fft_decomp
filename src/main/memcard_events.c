@@ -11,7 +11,7 @@ s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT] = { 0 };
 
 /* Opens and enables the eight memory-card BIOS events (SwCARD then HwCARD,
  * each with IOE, ERROR, TIMOUT and NEW) once. */
-void memcard_events_init(void) {
+void memcard_init_events(void) {
     s32 i;
 
     if (g_memcard_bios_events_opened != 0) {

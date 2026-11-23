@@ -1,7 +1,6 @@
 /* A grid of textured quads with a scrolling texture window and tints from color curves. Each effect overlay that
  * links the renderer builds this source with its grid size: VARIANT_QUAD_GRID_SIZE quads on a side (2, 4 or 8). */
 
-#include "fft/battle_map_palette.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
 #include "fft/effect_file.h"
@@ -10,6 +9,7 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
+#include "fft/map_palette.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -91,7 +91,7 @@ s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 em
     u8 u;
     u8 v;
 
-    ot = gfx_battle_otag_get();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
@@ -120,7 +120,7 @@ s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 em
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = texture_page;
-                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
                 quad->x0 = quad->x2 = column * QUAD_GRID_CELL + GFX_BATTLE_SCREEN_X;
                 quad->y0 = quad->y1 = row * QUAD_GRID_CELL;
                 quad->x1 = quad->x3 = column * QUAD_GRID_CELL + GFX_BATTLE_SCREEN_X + QUAD_GRID_CELL;

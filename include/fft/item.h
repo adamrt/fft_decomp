@@ -414,14 +414,14 @@ typedef enum weapon_flag {
 } weapon_flag_e;
 
 /* Weapon record selected by item_data_t.secondary_data_id. Offsets are fixed
- * by unit_equipment_stats_set and encounter_equipment_set. */
+ * by battle_unit_set_equipment_stats and set_encounter_equipment. */
 typedef struct weapon_data {
     u8 range;      /* 0x00 */
     u8 flags;      /* 0x01; weapon_flag_e */
     u8 formula;    /* 0x02; ability_formula_e */
     u8 _unused_03; /* 0x03 */
-    u8 power;      /* 0x04; copied to unit_stats_t equipment-stat slots 0x3c/0x3d */
-    u8 evade;      /* 0x05; copied to unit_stats_t 0x3e/0x3f */
+    u8 power;      /* 0x04; copied to battle_unit_t equipment-stat slots 0x3c/0x3d */
+    u8 evade;      /* 0x05; copied to battle_unit_t 0x3e/0x3f */
     u8 element;    /* 0x06 */
     u8 proc_id;    /* 0x07; status-infliction or spell ID copied to the active ability */
 } weapon_data_t;
@@ -446,12 +446,12 @@ typedef struct item_evade {
 typedef char item_evade_size_must_be_2[(sizeof(item_evade_t) == 2) ? 1 : -1];
 
 typedef struct armor_data {
-    u8 hp_bonus; /* 0x00; added to unit_stats_t.max_hp */
-    u8 mp_bonus; /* 0x01; added to unit_stats_t.max_mp */
+    u8 hp_bonus; /* 0x00; added to battle_unit_t.max_hp */
+    u8 mp_bonus; /* 0x01; added to battle_unit_t.max_mp */
 } armor_data_t;
 
 /* 25-byte item Attribute record (g_item_attributes). MAIN applies these
- * bonuses to battle units; WORLD's item_stat_preview_build reads the same
+ * bonuses to battle units; WORLD's item_build_stat_preview reads the same
  * first five bytes for equipment previews. */
 typedef struct item_attribute {
     u8 attributes[UNIT_ATTRIBUTE_COUNT]; /* 0x00; unit_attribute_index_e */
@@ -485,8 +485,8 @@ extern item_evade_t
 extern item_attribute_t g_item_attributes[];
 extern u8 g_item_ability_item_ids[14];
 
-const item_data_t* item_data_get(s32 item_id);
-s32 item_type_get(s32 item_id);
+const item_data_t* item_get_data(s32 item_id);
+s32 item_get_type(s32 item_id);
 
 /* inventory */
 extern u8 g_item_quantities[ITEM_ID_COUNT];
@@ -496,15 +496,15 @@ extern u8 g_item_poached_quantities[ITEM_ID_COUNT];
  * identified. Both halves are initialized and serialized as one block. */
 extern u8 g_item_location_flags[0x80];
 
-void item_new_game_inventory_init(void);
-s32 item_total_quantity_get(u8 item_id, s32 include_battle);
-s32 item_give(unit_stats_t* unit, u8 item);
-s32 item_decrement_party_quantity(unit_stats_t* unit, s32 item_id, s32 spend);
+void item_init_new_game_inventory(void);
+s32 item_get_total_quantity(u8 item_id, s32 include_battle);
+s32 item_give(battle_unit_t* unit, u8 item);
+s32 item_decrement_party_quantity(battle_unit_t* unit, s32 item_id, s32 spend);
 void item_build_inventory_totals(void);
 
 /* EQUIP and WORLD each build their own bodies of the first two. */
-s32 item_total_count_get(s16 item_id);
-s32 item_equipped_count_get(s32 item_entry);
-s32 item_inventory_count_adjust(s16 item_entry, s32 delta);
+s32 item_get_total_count(s16 item_id);
+s32 item_get_equipped_count(s32 item_entry);
+s32 item_adjust_inventory_count(s16 item_entry, s32 delta);
 
 #endif

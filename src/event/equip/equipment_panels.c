@@ -46,7 +46,7 @@ void unit_panel_equipment_thread(void) {
     s32 i;
     s32 item_id;
 
-    thread_current_task_set(THREAD_TASK_STATUS_PANEL);
+    thread_current_set_task(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
@@ -114,7 +114,7 @@ void unit_panel_equipment_thread(void) {
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
             g_menu_window_text_pen.stride = 0x50;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             for (i = 0; i < 5; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                     /* The entry's top two bits pick the name's text palette. */
@@ -185,7 +185,7 @@ void unit_panel_equipment_thread(void) {
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
         frame++;
@@ -213,7 +213,7 @@ void unit_panel_ability_thread(void) {
     s32 i;
     s32 id;
 
-    thread_current_task_set(THREAD_TASK_STATUS_PANEL);
+    thread_current_set_task(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) {
@@ -284,7 +284,7 @@ void unit_panel_ability_thread(void) {
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
             g_menu_window_text_pen.stride = 0x50;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             for (i = 0; i < 2; i++) {
                 id = state->ability_ids[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
                 if (state->generic_monster != 0) {
@@ -343,7 +343,7 @@ void unit_panel_ability_thread(void) {
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
         frame++;

@@ -26,7 +26,7 @@ extern u8 g_unit_list_help_text_state;
  * (period + 2) and a soft reset on L1+R1+Start+Select. Both masks are
  * also mirrored to g_unit_list_input_primary_repeat/g_unit_list_input_secondary_repeat.
  */
-static void input_update_controller(void) {
+static void update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -39,7 +39,7 @@ static void input_update_controller(void) {
     secondary_repeat_period = g_input_secondary_repeat_period / speed + 2;
     current_input = PadRead(0);
     if (current_input == (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_SELECT | PSX_PAD_START)) {
-        system_game_reset();
+        system_reset_game();
     }
     if (current_input & s_unit_list_input_latched_button) {
         current_input &= s_unit_list_input_latched_button;
@@ -125,10 +125,10 @@ static void input_update_controller(void) {
  * The help text state goes 1 on the text thread's first frame (which queues
  * the window-open sound), 2 after it and 0 otherwise.
  */
-void unit_list_update_input(void) {
+void menu_input_update_message_state(void) {
     s32 running;
 
-    input_update_controller();
+    update_controller();
     running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
 
     if (running != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE) {
@@ -138,7 +138,7 @@ void unit_list_update_input(void) {
         } else {
             g_unit_list_help_text_state = 0;
         }
-    } else if (g_unit_list_help_text_state != 0 || gfx_get_fade_state() != 0) {
+    } else if (g_unit_list_help_text_state != 0 || screen_get_fade_state() != 0) {
         g_unit_list_help_text_state = 0;
         menu_input_clear_state();
     }

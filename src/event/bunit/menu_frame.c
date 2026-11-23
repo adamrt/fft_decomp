@@ -22,7 +22,7 @@ extern menu_input_state_t g_unit_list_input_event_state;
  * status-panel backdrops after the yield. Needs the _divcheck profile for the
  * three repeat-period divisions.
  */
-void menu_input_event_state_update(u32* otag, u32 input, s32 framebuffer_y) {
+void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;

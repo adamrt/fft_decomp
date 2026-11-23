@@ -41,11 +41,11 @@ extern u32 g_input_pressed_copy_1;
 extern u32 g_input_previous_copy_0;
 extern u32 g_input_stable_frames;
 
-/* Volatile: sound_menu_update reloads it (lui/lw) for every
+/* Volatile: update_sound_menu reloads it (lui/lw) for every
  * test; readers that test it twice from one load take a local copy. */
 extern volatile u32 g_input_new_button_presses;
 
-void input_init_directional_state(void);
+void input_init_repeat(void);
 u32 input_update_repeat(u32 buttons);
 
 #endif

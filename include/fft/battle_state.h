@@ -77,19 +77,19 @@ typedef enum battle_state {
 
 extern s32 g_battle_state;
 extern s32 g_battle_state_previous;
-extern s32 g_battle_map_init_step;
+extern s32 g_map_init_step;
 
 /* Nonzero while the action's effect is pending: 1 while its file loads, 2 while it plays, with
  * the knockback targets' step phases ORed in. SEQ ops 0xd3 and 0xd6 and
- * script_effect_wait wait on it. */
+ * script_play_effect_and_wait wait on it. */
 extern s32 g_battle_animation_wait_state;
 
 /* Run BATTLE's deployment and game-state loop until control returns to MAIN. */
 void battle_entrypoint(void);
-s32 battle_frame_submit(u32* ordering_table);
-s32 battle_input_update(void);
-void battle_scene_update(void);
-s32 battle_animation_wait_state_get(void);
+s32 battle_submit_frame(u32* ordering_table);
+s32 battle_update_input(void);
+void battle_update_scene(void);
+s32 battle_animation_get_wait_state(void);
 
 /* state handlers */
 /* Per-frame handlers of battle_state_e, in state order. */
@@ -164,7 +164,7 @@ void battle_state_open_action_menus_enter(void);
 void battle_state_action_help_menu_enter(void);
 void battle_state_display_move_area_enter(void);
 void battle_state_mini_menu_enter(void);
-void battle_state_return_to_mini_menu(void);
+void battle_state_mini_menu_return_enter(void);
 void battle_state_mini_menu_help_enter(void);
 void battle_state_status_execute_enter(void);
 void battle_state_unit_move_enter(void);
@@ -192,20 +192,20 @@ void battle_state_open_sp2_files_enter(void);
 void battle_state_action_execute_enter(void);
 void battle_state_battle_message_display_enter(void);
 void battle_state_event_enter(void);
-void battle_state_enter_event_at_battle_start(void);
+void battle_state_battle_start_event_enter(void);
 
 /* map jumps and closing the battle */
-void battle_state_start_map_jump_out(s32 map_id, s32 duration);
-void battle_state_start_change_map_jump_out(s32 map_id, s32 duration);
-void battle_state_start_change_map_jump_in(s32 duration);
-void battle_state_enter_close_battle_to_world(s32 duration);
+void battle_state_map_jumping_out_start(s32 map_id, s32 duration);
+void battle_state_change_map_jumping_out_start(s32 map_id, s32 duration);
+void battle_state_change_map_jumping_in_start(s32 duration);
+void battle_state_close_battle_to_world_enter(s32 duration);
 
 /* Queues CLOSE_BATTLE; the callers always pass transition step 8. */
 void battle_state_close_battle_enter(s32 transition_step, system_game_flow_e close_flow_state);
 
 /* event outcomes and scenarios */
 
-s32 battle_outcome_check(void);
-s32 event_try_enter_scenario(unit_runtime_t* unit);
+s32 battle_check_outcome(void);
+s32 battle_state_event_try_enter(map_unit_t* unit);
 
 #endif

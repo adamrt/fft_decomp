@@ -9,14 +9,14 @@ extern s32* g_proposition_data; /* byte-offset directory of the embedded proposi
 
 /* Return the address of proposition data record `record`: the data block starts with a table of
  * byte offsets from its own start. */
-void* proposition_data_get(proposition_data_record_e record) {
+void* proposition_get_data(proposition_data_record_e record) {
     return (u8*)g_proposition_data + g_proposition_data[record];
 }
 
 /* Expand one 23-byte proposition row into 16-bit fields, then remap the
  * two fee fields through the 16-bit table of record 1. */
 void proposition_unpack_row(proposition_fields_t* out, s32 index) {
-    u8* rows = proposition_data_get(PROPOSITION_DATA_ROWS);
+    u8* rows = proposition_get_data(PROPOSITION_DATA_ROWS);
     u16* field_lookup;
     s32 i;
     u16* fields = &out->category_index;
@@ -24,7 +24,7 @@ void proposition_unpack_row(proposition_fields_t* out, s32 index) {
     for (i = 0; i < 23; i++) {
         fields[i] = rows[index * 23 + i];
     }
-    field_lookup = proposition_data_get(PROPOSITION_DATA_FEES);
+    field_lookup = proposition_get_data(PROPOSITION_DATA_FEES);
     out->fee_a = field_lookup[out->fee_a];
     out->fee_b = field_lookup[out->fee_b];
 }
@@ -51,7 +51,7 @@ s32 proposition_is_available_at(s32 index, s32 location) {
     if (entry.condition_flags & PROPOSITION_CONDITION_ZODIAC_SIGN) {
         month = script_variable_get(EVENT_SCRIPT_VAR_MONTH);
         day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
-        calendar_date_to_zodiac_convert(&month, &day);
+        calendar_date_to_zodiac(&month, &day);
         if (month != entry.condition_value) {
             return 0;
         }

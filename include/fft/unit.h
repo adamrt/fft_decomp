@@ -1,7 +1,7 @@
 #ifndef UNIT_H
 #define UNIT_H
 
-/* Unit records: the battle stats record every program builds and the types it shares with the ENTD entries
+/* Unit records: the battle unit record every program builds and the types it shares with the ENTD entries
  * (unit_entd.h) and party records (unit_party.h), unit height and motion records, and MAIN's unit graphics queue,
  * unit generation and stat building. */
 
@@ -11,10 +11,10 @@
 #include "psx/types.h"
 
 struct entd_unit;
-struct unit_stats;
+struct battle_unit;
 
-/* BATTLE's unit record, defined in unit_runtime.h; headers that only pass units around need just this name. */
-typedef struct unit_runtime unit_runtime_t;
+/* BATTLE's unit record, defined in map_unit.h; headers that only pass units around need just this name. */
+typedef struct map_unit map_unit_t;
 
 /* names */
 /* The persistent name ID's index and text-page class bytes. */
@@ -24,7 +24,7 @@ typedef struct unit_name_id_fields {
 } unit_name_id_fields_t;
 typedef char unit_name_id_fields_size_must_be_2[(sizeof(unit_name_id_fields_t) == 2) ? 1 : -1];
 
-/* A packed runtime unit-name ID and its component bytes. */
+/* A packed map unit-name ID and its component bytes. */
 typedef union unit_name_id {
     u16 value;
     unit_name_id_fields_t fields;
@@ -64,7 +64,7 @@ typedef struct unit_abilities {
 } unit_abilities_t;
 typedef char unit_abilities_size_must_be_6[(sizeof(unit_abilities_t) == 6) ? 1 : -1];
 
-/* Active reaction abilities occupy four MSB-first bytes in unit_stats_t. */
+/* Active reaction abilities occupy four MSB-first bytes in battle_unit_t. */
 typedef enum unit_reaction_set_1 {
     UNIT_REACTION_SET_1_BRAVE_UP = 0x01,
     UNIT_REACTION_SET_1_REGENERATOR = 0x02,
@@ -109,7 +109,7 @@ typedef enum unit_reaction_set_4 {
     UNIT_REACTION_SET_4_DAMAGE_SPLIT = 0x80
 } unit_reaction_set_4_e;
 
-/* Active support abilities occupy four MSB-first bitsets in unit_stats_t
+/* Active support abilities occupy four MSB-first bitsets in battle_unit_t
  * at +0x08f..+0x092. WORLD copies them to formation_unit_t at +0x124;
  * these masks name the shared byte domain, not ability IDs. */
 typedef enum unit_support_set_1 {
@@ -153,7 +153,7 @@ typedef enum unit_support_set_4 {
     UNIT_SUPPORT_SET_4_MONSTER_SKILL = 0x80
 } unit_support_set_4_e;
 
-/* Active movement abilities occupy three MSB-first bytes in unit_stats_t.
+/* Active movement abilities occupy three MSB-first bytes in battle_unit_t.
  * MAIN reads these when calculating move, jump and Float behavior. */
 typedef enum unit_movement_set_1 {
     UNIT_MOVEMENT_SET_1_MOVE_HP_UP = 0x01,
@@ -189,7 +189,7 @@ typedef enum unit_movement_set_3 {
 } unit_movement_set_3_e;
 
 /* equipment */
-/* The four bytes of unit_stats_t.equipment_categories: one bit per equippable
+/* The four bytes of battle_unit_t.equipment_categories: one bit per equippable
  * item type, MSB first (EQUIPPABLE_ITEM_TYPE_BYTE_MASK). Only the bits the code
  * tests are named. */
 typedef enum unit_equipment_categories_1 {
@@ -215,7 +215,7 @@ typedef enum unit_equipment_categories_3 {
 typedef enum unit_equipment_categories_4 { UNIT_EQUIPMENT_SET_4_PERFUME = 0x01 } unit_equipment_categories_4_e;
 
 /*
- * Seven-slot equipment order serialized by party_unit_t and unit_stats_t.
+ * Seven-slot equipment order serialized by party_unit_t and battle_unit_t.
  * This differs from the five-slot right-hand-first order used by menu records.
  */
 typedef enum unit_equipment_slot {
@@ -229,7 +229,7 @@ typedef enum unit_equipment_slot {
     UNIT_EQUIPMENT_SLOT_COUNT = 7
 } unit_equipment_slot_e;
 
-s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support);
+s32 equipment_is_two_handing_weapon(const s16* slots, s32 two_hands_support);
 
 /* birthday and zodiac */
 /* Unshifted zodiac IDs. Party and battle records store these in the high
@@ -309,8 +309,8 @@ typedef enum unit_attribute_index {
 /* CT points needed for a unit turn; speed supplies points each clocktick. */
 enum { UNIT_TURN_CT_THRESHOLD = 100 };
 
-/* unit_stats_t.equipment_stats (Battle Stats 0x3c-0x46), filled by
- * unit_equipment_stats_set: each hand's weapon power and weapon evade
+/* battle_unit_t.equipment_stats (Battle Stats 0x3c-0x46), filled by
+ * battle_unit_set_equipment_stats: each hand's weapon power and weapon evade
  * (which battle counts only under Weapon Guard), then the physical evades of
  * the accessory, each hand's shield and the class, then the magic evades of
  * the accessory and each hand's shield. RIGHT_SHIELD comes from
@@ -349,7 +349,7 @@ typedef struct unit_position {
 typedef char unit_position_size_must_be_2[(sizeof(unit_position_t) == 2) ? 1 : -1];
 
 /* deployment */
-/* unit_stats_t.formation_index values that name no party roster slot. */
+/* battle_unit_t.formation_index values that name no party roster slot. */
 typedef enum unit_formation_index {
     UNIT_FORMATION_INDEX_GENERATED_UNIT = 254,
     UNIT_FORMATION_INDEX_NONE = 255
@@ -375,7 +375,7 @@ typedef char unit_deployment_coordinates_size_must_be_4[(sizeof(unit_deployment_
 /* Team bits select one of four independently tracked battle teams. */
 enum { UNIT_TEAM_COUNT = 4, UNIT_TEAM_SHIFT = 4, UNIT_TEAM_INDEX_MASK = 0x03 };
 
-/* Battle Stats 0x05 and unit runtime record 0x13d share this byte. */
+/* Battle Stats 0x05 and map unit record 0x13d share this byte. */
 typedef enum unit_team_flags {
     UNIT_TEAM_MASK = 0x30,
     UNIT_TEAM_OR_PLAYER_CONTROL_MASK = 0x38,
@@ -394,7 +394,7 @@ typedef enum unit_team_flags {
     UNIT_TEAM_PRESENCE_MASK = 0xc0
 } unit_team_flags_e;
 
-/* unit_stats_t.auto_battle_setting and the AI copies of it. The BATTLE and
+/* battle_unit_t.auto_battle_setting and the AI copies of it. The BATTLE and
  * WORLD auto-battle menus store it and the AI reads it. */
 typedef enum ai_autobattle_mode {
     AI_AUTOBATTLE_MANUAL = 0, /* the player gives the orders */
@@ -436,7 +436,7 @@ typedef struct unit_action_status_changes {
 typedef char unit_action_status_changes_size_must_be_10[(sizeof(unit_action_status_changes_t) == 10) ? 1 : -1];
 
 /*
- * Temporary action results, 0x2c bytes at unit_stats_t+0x18c (0x18c..0x1b7).
+ * Temporary action results, 0x2c bytes at battle_unit_t+0x18c (0x18c..0x1b7).
  * The action target/attacker pointers address this block directly.
  * status_changes.infliction/removal mirror the five status_sets.current bytes.
  */
@@ -468,7 +468,7 @@ typedef struct action_data {
     u8 exp_change;                               /* 0x28; Steal EXP */
     u8 jp_change;                                /* 0x29; Move-JP Up / JP stolen */
     /* Written as a 16-bit value everywhere (formula_apply_status lhu/sh,
-     * arrow_guard_try, reaction_try_catch,
+     * try_arrow_guard, reaction_try_catch,
      * formula_force_attack_miss). */
     s16 attack_accuracy; /* 0x2a */
 } action_data_t;
@@ -485,9 +485,9 @@ typedef enum action_miss_display_flags {
 /* The battle simulation owns 21 unit records. Battle-slot search routines use
  * the first value beyond that array as their no-unit sentinel. */
 enum {
-    UNIT_RUNTIME_SLOT_COUNT = 16, /* simultaneously present units, including event ghosts */
-    UNIT_SLOT_COUNT = 21,
-    UNIT_ID_NONE = UNIT_SLOT_COUNT
+    MAP_UNIT_SLOT_COUNT = 16, /* simultaneously present units, including event ghosts */
+    BATTLE_UNIT_SLOT_COUNT = 21,
+    UNIT_ID_NONE = BATTLE_UNIT_SLOT_COUNT
 };
 
 /* Battle Stats 0x182 links the two simulation records in a mounted pair. */
@@ -507,14 +507,14 @@ typedef enum unit_existence_state {
     UNIT_EXISTENCE_NONE = 255 /* empty slot */
 } unit_existence_state_e;
 
-/* unit_stats_t.equipped_flags: equipment that some abilities require. */
+/* battle_unit_t.equipped_flags: equipment that some abilities require. */
 typedef enum unit_equipped_flags {
     UNIT_EQUIPPED_FLAG_MATERIA_BLADE = 0x04,
     UNIT_EQUIPPED_FLAG_SWORD = 0x08
 } unit_equipped_flags_e;
 
-/* active_battle_id marks absence independently of the persistent battle_id. */
-enum { UNIT_ACTIVE_BATTLE_ID_NONE = 0xff };
+/* active_battle_unit_id marks absence independently of the persistent battle_unit_id. */
+enum { UNIT_ACTIVE_BATTLE_UNIT_ID_NONE = 0xff };
 
 /* Seven encounter AI bytes copied together into the unit record. */
 enum { UNIT_AI_SETUP_BYTE_COUNT = 7 };
@@ -533,11 +533,11 @@ typedef union unit_ai_setup {
 typedef char unit_ai_setup_size_must_be_7[(sizeof(unit_ai_setup_t) == UNIT_AI_SETUP_BYTE_COUNT) ? 1 : -1];
 
 /* Current and calculated unit attributes, also built for WORLD menus. BATTLE
- * keeps UNIT_SLOT_COUNT of them in g_unit_stats; a live
- * unit_runtime_t points to its stats through the member at 0x134. */
-typedef struct unit_stats {
+ * keeps BATTLE_UNIT_SLOT_COUNT of them in g_battle_units; a live
+ * map_unit_t points to its stats through the member at 0x134. */
+typedef struct battle_unit {
     u8 character_identity;                   /* 0x000 */
-    u8 active_battle_id;                     /* 0x001; active battle slot, or 0xff; not an ENTD definition index */
+    u8 active_battle_unit_id;                /* 0x001; active battle slot, or 0xff; not an ENTD definition index */
     u8 formation_index;                      /* 0x002 */
     u8 job_id;                               /* 0x003 */
     u8 sprite_palette;                       /* 0x004 */
@@ -583,7 +583,7 @@ typedef struct unit_stats {
         u8 movement[3];        /* 0x08; unit_movement_set_N_e */
     } ability_flags;           /* 0x08b */
     unit_career_data_t career; /* 0x096; unlocked jobs, learned abilities, levels and JP */
-    /* names_store copies 16/16/8/8 bytes to these four
+    /* store_names copies 16/16/8/8 bytes to these four
      * destinations. All names use the game's encoding. */
     u8 name[UNIT_NAME_SIZE];         /* 0x12c */
     u8 job_name[16];                 /* 0x13c */
@@ -609,17 +609,17 @@ typedef struct unit_stats {
     u8 movement_taken;      /* 0x187 */
     u8 action_taken;        /* 0x188 */
     u8 ability_outcome;     /* 0x189 */
-    u8 battle_id;           /* 0x18a; index in g_unit_stats */
+    u8 battle_unit_id;      /* 0x18a; index in g_battle_units */
     u8 ability_ct;          /* 0x18b */
     action_data_t action;   /* 0x18c through 0x1b7 */
     u8 auto_battle_setting; /* 0x1b8; ai_autobattle_mode_e */
     u8 auto_battle_target;  /* 0x1b9 */
     u8 initial_team_flags;  /* 0x1ba */
     u8 inflicted_status[5]; /* 0x1bb */
-} unit_stats_t;
-typedef char unit_stats_size_must_be_448[(sizeof(unit_stats_t) == 448) ? 1 : -1];
+} battle_unit_t;
+typedef char battle_unit_size_must_be_448[(sizeof(battle_unit_t) == 448) ? 1 : -1];
 
-/* unit_stats_t.ability_outcome. */
+/* battle_unit_t.ability_outcome. */
 typedef enum unit_ability_outcome {
     UNIT_ABILITY_OUTCOME_TARGETED = 0x01,     /* target of a primary action */
     UNIT_ABILITY_OUTCOME_AFFECTED = 0x02,     /* that action changed the unit */
@@ -641,7 +641,7 @@ typedef struct unit_height_data {
 typedef char unit_height_data_size_must_be_7[sizeof(unit_height_data_t) == 7 ? 1 : -1];
 
 /* unit display (BATTLE) */
-/* Masks of the motion flags in the 32-bit view of unit_runtime_t.movement (move_destination_t),
+/* Masks of the motion flags in the 32-bit view of map_unit_t.movement (move_destination_t),
  * whose high byte is runtime-unit +0x83. */
 typedef enum unit_motion_flags {
     UNIT_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
@@ -671,16 +671,16 @@ typedef struct unit_graphics_load_descriptor {
     u16 facing;     /* a quarter turn per unit */
     s16 spritesheet_id;
     u16 palette_id;
-    u16 runtime_id;
-    unit_stats_t* stats;
+    u16 map_unit_id;
+    battle_unit_t* battle_unit;
     u32 flags; /* nonzero: the unit starts undrawn */
 } unit_graphics_load_descriptor_t;
 typedef char unit_graphics_load_descriptor_size_must_be_20[(sizeof(unit_graphics_load_descriptor_t) == 20) ? 1 : -1];
 
 /* Resident unit-graphics queue, filled and consumed by the BATTLE loader. */
 typedef struct unit_graphics_load_queue {
-    s32 count;                                                            /* 0x00 */
-    unit_graphics_load_descriptor_t descriptors[UNIT_RUNTIME_SLOT_COUNT]; /* 0x04 */
+    s32 count;                                                        /* 0x00 */
+    unit_graphics_load_descriptor_t descriptors[MAP_UNIT_SLOT_COUNT]; /* 0x04 */
 } unit_graphics_load_queue_t;
 typedef char unit_graphics_load_queue_size_must_be_324[(sizeof(unit_graphics_load_queue_t) == 324) ? 1 : -1];
 
@@ -697,7 +697,7 @@ typedef enum unit_generation_type {
 } unit_generation_type_e;
 
 /* stat building and growth */
-/* unit_encounter_init kinds. */
+/* battle_unit_init_from_encounter kinds. */
 typedef enum unit_entd_init_kind {
     UNIT_ENTD_INIT_NEW = 0, /* reset the unit and build it from its ENTD entry */
     /* Rebuild a transformed unit's stats for its new job in place: no reset, no ENTD data and no
@@ -705,30 +705,31 @@ typedef enum unit_entd_init_kind {
     UNIT_ENTD_INIT_TRANSFORM = 0x82
 } unit_entd_init_kind_e;
 
-s32 unit_encounter_init(unit_stats_t* unit, const struct entd_unit* entd, u32 use_world_text, s32 kind);
-s32 unit_party_slot_init(unit_stats_t* unit, s32 slot, s32 use_world_text);
-void unit_raw_stats_generate(unit_stats_t* unit);
-void unit_job_growths_copy(unit_stats_t* unit);
-void unit_job_levels_init(const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
-void unit_status_rewards_init(unit_stats_t* unit, s32 clear_rewards);
-void unit_position_rewards_init(unit_stats_t* unit, const struct entd_unit* entd);
-void unit_job_abilities_learn(unit_stats_t* unit, s32 job_id, const struct entd_unit* entd);
-void unit_battle_state_reset(unit_stats_t* unit);
-void unit_stats_refresh(unit_stats_t* unit);
-void unit_formation_stats_refresh(unit_stats_t* unit);
-void unit_equipment_attributes_set(unit_stats_t* unit, s32 level_up_check);
-void unit_equipment_stats_set(unit_stats_t* unit);
-void unit_equippable_items_set(unit_stats_t* unit);
-s32 unit_random_equipment_generate(
-    const unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
-void unit_move_jump_calculate(unit_stats_t* unit, s32 keep_hp_mp);
-u8 unit_sprite_identity_set(unit_stats_t* unit, u8* palette);
-u16 unit_rsm_select(const unit_stats_t* unit, u16 ability_id, s32 flags, const struct entd_unit* entd);
-void unit_rsm_flags_enable(unit_stats_t* unit);
-void unit_ability_ct_set(unit_stats_t* unit);
-s32 unit_level_up_check(unit_stats_t* unit);
-void unit_level_growth_apply(unit_stats_t* unit, s32 level_down);
-void unit_casualties_count(const unit_stats_t* unit);
+s32 battle_unit_init_from_encounter(battle_unit_t* unit, const struct entd_unit* entd, u32 use_world_text, s32 kind);
+s32 battle_unit_init_from_party_slot(battle_unit_t* unit, s32 slot, s32 use_world_text);
+void battle_unit_generate_raw_stats(battle_unit_t* unit);
+void battle_unit_copy_job_growths(battle_unit_t* unit);
+void job_calculate_levels_from_jp(
+    const unit_job_point_table_t* unit_job_jp, u8 unit_job_levels[UNIT_JOB_LEVEL_BYTE_COUNT]);
+void battle_unit_init_status_and_rewards(battle_unit_t* unit, s32 clear_rewards);
+void battle_unit_init_position_and_rewards(battle_unit_t* unit, const struct entd_unit* entd);
+void battle_unit_learn_job_abilities(battle_unit_t* unit, s32 job_id, const struct entd_unit* entd);
+void battle_unit_reset_state(battle_unit_t* unit);
+void battle_unit_refresh_stats(battle_unit_t* unit);
+void battle_unit_refresh_formation_stats(battle_unit_t* unit);
+void battle_unit_set_equipment_attributes(battle_unit_t* unit, s32 level_up_check);
+void battle_unit_set_equipment_stats(battle_unit_t* unit);
+void battle_unit_set_equippable_items(battle_unit_t* unit);
+s32 battle_unit_generate_random_equipment(
+    const battle_unit_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type);
+void battle_unit_calculate_move_and_jump(battle_unit_t* unit, s32 keep_hp_mp);
+u8 battle_unit_set_sprite_identity(battle_unit_t* unit, u8* palette);
+u16 battle_unit_select_rsm(const battle_unit_t* unit, u16 ability_id, s32 flags, const struct entd_unit* entd);
+void battle_unit_enable_rsm_flags(battle_unit_t* unit);
+void battle_unit_set_ability_ct(battle_unit_t* unit);
+s32 battle_unit_check_level_up(battle_unit_t* unit);
+void battle_unit_apply_level_growth(battle_unit_t* unit, s32 level_down);
+void battle_unit_count_casualties(const battle_unit_t* unit);
 
 /* menus and panels */
 extern s16 g_unit_selected_index; /* the unit the unit-list screens have selected */

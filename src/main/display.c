@@ -18,7 +18,7 @@ extern u32 g_boot_squaresoft_logo_image_words[];
 /* Install EFC_FNT.TIM as the debug print font: load the built-in font at VRAM (0x280, 0) with its
  * CLUT moved to row 0x7f, overwrite both with EFC_FNT.TIM (retrying until it reads) and open a
  * 512-character print stream at (0x88, 0x10) as the dump font. */
-void debug_font_load(void) {
+void gfx_load_debug_font(void) {
     TIM_IMAGE image;
     u32* data;
     int loaded = 0;
@@ -27,17 +27,17 @@ void debug_font_load(void) {
     FntLoad(0x280, 0);
 
     while (!loaded) {
-        data = file_heap_load_checked(DISC_SECTOR_BATTLE_EFC_FNT_TIM, 0x8800);
+        data = file_load_into_heap_checked(DISC_SECTOR_BATTLE_EFC_FNT_TIM, 0x8800);
         if (data != 0) {
             if (OpenTIM(data) == 0 && ReadTIM(&image) != 0) {
                 LoadTPage(image.paddr, 0, 0, 0x280, 0, image.prect->w * 4, image.prect->h);
                 loaded = 1;
                 LoadClut2(image.caddr, 0x280, 0x7f);
             }
-            heap_block_release(data);
+            heap_release_block(data);
         } else {
             VSync(0);
-            file_load_poll(&g_file_cd_state);
+            file_poll_load(&g_file_cd_state);
         }
     }
 
@@ -50,7 +50,7 @@ void debug_font_load(void) {
  * the second buffer sits 240 lines below the first (a 480-line mode uses one),
  * both draw environments clear to the given color, and the display is masked
  * until the caller turns it on. image_rect is not used. */
-static void gfx_display_setup(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+static void set_up_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
 
@@ -75,7 +75,7 @@ static void gfx_display_setup(int width, int height, int projection, u8 red, u8 
 /* Present one frame of the Squaresoft logo fade: swap the display buffers after VSync, upload the
  * 180x16 logo at (70, 112) of the new draw buffer and draw the caller's fade list over it. Returns
  * VSync's result. */
-static int squaresoft_logo_draw(u32* otag, u32* image) {
+static int draw_squaresoft_logo(u32* otag, u32* image) {
     RECT destination;
     int elapsed;
 
@@ -101,10 +101,10 @@ static int squaresoft_logo_draw(u32* otag, u32* image) {
  * (g_boot_squaresoft_logo_image_words).
  *
  * A full-screen subtractive quad steps from 248 to 0 in 32 frames while
- * squaresoft_logo_draw uploads the logo each frame. The logo stays on
- * screen while the caller loads its files; boot_squaresoft_logo_fade_out
+ * draw_squaresoft_logo uploads the logo each frame. The logo stays on
+ * screen while the caller loads its files; boot_fade_out_squaresoft_logo
  * removes it. */
-void boot_squaresoft_logo_fade_in(void) {
+void boot_fade_in_squaresoft_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -114,7 +114,7 @@ void boot_squaresoft_logo_fade_in(void) {
     int frame;
     int buffer;
 
-    gfx_display_setup(320, 240, 512, 0, 0, 0);
+    set_up_display(320, 240, 512, 0, 0, 0);
 
     SetPolyF4(&polygons[0]);
     setRGB0(&polygons[0], 0, 0, 0);
@@ -144,7 +144,7 @@ void boot_squaresoft_logo_fade_in(void) {
         setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
         AddPrim(otags[buffer], &polygons[g_gfx_screen_polarity]);
         AddPrim(otags[buffer], &draw_modes[g_gfx_screen_polarity]);
-        squaresoft_logo_draw(otags[buffer], g_boot_squaresoft_logo_image_words);
+        draw_squaresoft_logo(otags[buffer], g_boot_squaresoft_logo_image_words);
         intensity -= 8;
     }
 
@@ -152,10 +152,10 @@ void boot_squaresoft_logo_fade_in(void) {
     DrawSync(0);
 }
 
-/* Fade out the Squaresoft logo that boot_squaresoft_logo_fade_in left
+/* Fade out the Squaresoft logo that boot_fade_in_squaresoft_logo left
  * on screen: the subtractive quad steps from 0 to 255 in 32 frames, then both
  * display buffers are cleared. */
-void boot_squaresoft_logo_fade_out(void) {
+void boot_fade_out_squaresoft_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -185,7 +185,7 @@ void boot_squaresoft_logo_fade_out(void) {
         setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
         AddPrim(otag_base + buffer * 2, &polygons[g_gfx_screen_polarity]);
         AddPrim(otag_base + buffer * 2, &draw_modes[g_gfx_screen_polarity]);
-        squaresoft_logo_draw(otag_base + buffer * 2, g_boot_squaresoft_logo_image_words);
+        draw_squaresoft_logo(otag_base + buffer * 2, g_boot_squaresoft_logo_image_words);
         intensity += 8;
     }
 
@@ -201,7 +201,7 @@ void boot_squaresoft_logo_fade_out(void) {
 /* Present one frame of the SCEAP.DAT fade: swap the display buffers after VSync,
  * upload the 320x32 strip at line 104 of the new draw buffer and draw the
  * caller's fade list over it. Returns VSync's result. */
-static int sceap_logo_draw(u32* otag, u32* image) {
+static int draw_sceap_logo(u32* otag, u32* image) {
     RECT destination;
     int elapsed;
 
@@ -229,8 +229,8 @@ static int sceap_logo_draw(u32* otag, u32* image) {
  * and switches to a 320x240 display. A full-screen subtractive black quad fades
  * the strip in over 32 frames, it stays for 180 frames, and the same quad fades
  * it out over 32; each frame uploads the image again through
- * sceap_logo_draw. Both display buffers are cleared before and after. */
-void boot_sceap_logo_show(void) {
+ * draw_sceap_logo. Both display buffers are cleared before and after. */
+void boot_show_sceap_logo(void) {
     POLY_F4 polygons[2];
     DR_MODE draw_modes[2];
     u32 otags[2][2];
@@ -240,8 +240,8 @@ void boot_sceap_logo_show(void) {
     s16 intensity;
     int frame;
 
-    gfx_display_setup(320, 240, 512, 0, 0, 0);
-    file_buffer_load_checked(DISC_SECTOR_SCEAP_DAT, 0x5000, g_heap_high_overlay_load_address);
+    set_up_display(320, 240, 512, 0, 0, 0);
+    file_load_into_buffer_checked(DISC_SECTOR_SCEAP_DAT, 0x5000, g_heap_high_overlay_load_address);
     frame = 0;
 
     SetPolyF4(&polygons[0]);
@@ -272,7 +272,7 @@ void boot_sceap_logo_show(void) {
         setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
         AddPrim(current_otag, &polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
-        sceap_logo_draw(current_otag, (u32*)g_heap_high_overlay_load_address);
+        draw_sceap_logo(current_otag, (u32*)g_heap_high_overlay_load_address);
         intensity -= 8;
     }
 
@@ -291,7 +291,7 @@ void boot_sceap_logo_show(void) {
         setRGB0(&g_gfx_screen_polarity[polygons], intensity, intensity, intensity);
         AddPrim(current_otag, &polygons[g_gfx_screen_polarity]);
         AddPrim(current_otag, &draw_modes[g_gfx_screen_polarity]);
-        sceap_logo_draw(current_otag, (u32*)g_heap_high_overlay_load_address);
+        draw_sceap_logo(current_otag, (u32*)g_heap_high_overlay_load_address);
         intensity += 8;
     }
 
@@ -307,10 +307,10 @@ void boot_sceap_logo_show(void) {
 /* Restart the GPU and set up double-buffered drawing at width x height with the
  * second buffer 240 lines below the first (an interlaced 480-line mode uses one).
  *
- * Unlike gfx_display_setup this also calls ResetGraph(0) and InitGeom, clears
+ * Unlike set_up_display this also calls ResetGraph(0) and InitGeom, clears
  * the whole 1024x512 VRAM, loads the debug font at (640, 0) and opens a print
  * stream, and leaves background clearing off. The display stays masked. */
-void gfx_display_reset(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
     int font_stream;

@@ -31,9 +31,9 @@ static u8 s_shop_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { ITEM_LIST_FILTER
  * there, sorted by the best-fit key list. Two Hands prefers a weapon that can be held
  * two-handed and then leaves the off hand empty; Two Swords (without Two Hands) fills the off
  * hand with a second weapon, the same one only when the unit has two copies.
- * shop_fitting_best_fit_build is the shop's sibling.
+ * shop_fitting_build_best_fit is the shop's sibling.
  */
-void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
+void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
     s16 list[0x90];
     s32 right_hand;
     s16 two_swords;
@@ -52,7 +52,7 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
     right_hand = g_formation_unit_pointers[unit_index]->detail.equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND];
     left_hand = g_formation_unit_pointers[unit_index]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND];
     if (ability_has_two_swords(unit_index)) {
-        two_swords = formation_ability_has_two_hands(unit_index) == 0;
+        two_swords = ability_has_two_hands(unit_index) == 0;
     }
     held_off_hand = ITEM_ID_NOTHING;
     held_weapon = ITEM_ID_NOTHING;
@@ -78,7 +78,7 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
         category = s_owned_slot_categories[slot];
-        count = formation_item_list_build(unit_index, ITEM_SORT_ORDER_BEST_FIT, s_owned_slot_categories[slot], list,
+        count = equipment_build_item_list(unit_index, ITEM_SORT_ORDER_BEST_FIT, s_owned_slot_categories[slot], list,
             ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY);
         length = count;
         if (category == ITEM_LIST_FILTER_WEAPON) {
@@ -87,8 +87,8 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
             if (held_off_hand < ITEM_ID_THROWABLE_FIRST)
                 list[length++] = held_off_hand;
             list[length] = -1;
-            item_id_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
-            if (formation_ability_has_two_hands(unit_index)) {
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+            if (ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
                     if (g_item_weapon_data[item_id].flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE) {
@@ -113,7 +113,7 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
                             list[0] = list[i];
                             break;
                         }
-                        owned = item_inventory_count_adjust(list[i], 0);
+                        owned = item_adjust_inventory_count(list[i], 0);
                         if (held_weapon == list[i])
                             owned++;
                         if (held_off_hand == list[i])
@@ -128,7 +128,7 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
                     continue;
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
-            if ((formation_ability_has_two_hands(unit_index)
+            if ((ability_has_two_hands(unit_index)
                     && (g_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                         & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))
                 || (g_item_weapon_data[equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
@@ -138,12 +138,12 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
                 if (held_off_hand >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = held_off_hand;
                 list[length] = -1;
-                item_id_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
+                item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
             list[length++] = g_formation_unit_pointers[unit_index]->detail.equipment[slot];
             list[length] = -1;
-            item_id_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
         }
         if (list[0] <= ITEM_ID_NOTHING)
             equipment[slot] = ITEM_ID_NOTHING;
@@ -178,7 +178,7 @@ void formation_item_best_fit_build(s16 unit_index, s16* equipment) {
 /* Choose fitting-room equipment through the body slot, then mark newly reserved
  * shop items. The accessory slot is left to the caller.
  */
-void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
+void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
     s16 list[0x90];
     s32 right;
     /* Declaration order decides the reload slots: the target spills `first` to
@@ -215,7 +215,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
     first = ITEM_ID_NOTHING;
     dual = 0;
     if (ability_has_two_swords(unit_index)) {
-        dual = formation_ability_has_two_hands(unit_index) == 0;
+        dual = ability_has_two_hands(unit_index) == 0;
     }
 
     if (dual) {
@@ -243,7 +243,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
 
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
         category = s_shop_slot_categories[slot];
-        count = shop_stock_list_build(unit_index, shop_id, category, list, ITEM_LIST_MODE_EQUIPPABLE);
+        count = shop_build_stock_list(unit_index, shop_id, category, list, ITEM_LIST_MODE_EQUIPPABLE);
         length = count;
 
         if (category == ITEM_LIST_FILTER_WEAPON) {
@@ -258,8 +258,8 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
                 list[length++] = (second < ITEM_ID_THROWABLE_FIRST) ? second : ITEM_ID_NOTHING;
             }
             list[length] = -1;
-            item_id_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
-            if (formation_ability_has_two_hands(unit_index)) {
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+            if (ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
                     if (g_item_weapon_data[item_id].flags & WEAPON_FLAG_TWO_HANDS_COMPATIBLE) {
@@ -288,7 +288,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
                     continue;
             }
         } else if (category == ITEM_LIST_FILTER_SHIELD) {
-            if ((formation_ability_has_two_hands(unit_index)
+            if ((ability_has_two_hands(unit_index)
                     && (g_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags
                         & WEAPON_FLAG_TWO_HANDS_COMPATIBLE))
                 || (g_item_weapon_data[out[MENU_EQUIPMENT_SLOT_RIGHT_HAND]].flags & WEAPON_FLAG_FORCED_TWO_HANDS)) {
@@ -297,12 +297,12 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
                 if (second >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = second;
                 list[length] = -1;
-                item_id_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
+                item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
             list[length++] = g_formation_unit_pointers[unit_index]->detail.equipment[slot] & ITEM_ENTRY_ID_MASK;
             list[length] = -1;
-            item_id_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
+            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
         }
 
         if (list[0] <= ITEM_ID_NOTHING)
@@ -341,7 +341,7 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
 }
 
 /* Install an item into a formation unit's equipment slot and return 1, or the
- * negative formation_item_slot_check result.
+ * negative check_equipment_slot_item result.
  *
  * For a roster unit the slot's old item goes back to the inventory and the
  * records are saved to the party; the preview unit only has its record
@@ -352,24 +352,24 @@ void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out) {
  * reused for both the call argument and the stored value is copy-propagated and
  * swaps which of the two ends up in the callee-saved register.
  */
-s32 formation_item_equip(s16 unit, s16 slot, s16 item_id) {
+s32 equipment_set_slot_item(s16 unit, s16 slot, s16 item_id) {
     s32 status;
     s32 other;
     u16 item;
 
     item_id &= ITEM_ENTRY_ID_MASK;
     item = item_id;
-    status = formation_item_slot_check(unit, slot, item_id);
+    status = check_equipment_slot_item(unit, slot, item_id);
     if (status < 0) {
         return status;
     }
     if (unit != FORMATION_PREVIEW_UNIT_INDEX) {
-        item_inventory_count_adjust(g_formation_unit_pointers[unit]->detail.equipment[slot], 1);
+        item_adjust_inventory_count(g_formation_unit_pointers[unit]->detail.equipment[slot], 1);
     }
     if (slot < 2 && status != 1) {
         other = slot == 0;
         if (unit != FORMATION_PREVIEW_UNIT_INDEX) {
-            item_inventory_count_adjust(g_formation_unit_pointers[unit]->detail.equipment[other], 1);
+            item_adjust_inventory_count(g_formation_unit_pointers[unit]->detail.equipment[other], 1);
         }
         g_formation_unit_pointers[unit]->detail.equipment[other] = ITEM_ID_NOTHING;
     }
@@ -384,18 +384,18 @@ s32 formation_item_equip(s16 unit, s16 slot, s16 item_id) {
  * type bit is set in the unit's equippable-types bitfield, -1 for an item
  * of the "other" menu category or a type the unit cannot use. The low ten
  * bits of the entry are the item id. */
-s32 equipment_item_compatibility_check(s16 unit_index, s16 item_id) {
+s32 equipment_check_item_compatibility(s16 unit_index, s16 item_id) {
     s32 id = item_id & ITEM_ENTRY_ID_MASK;
     s32 result;
 
     if (id == ITEM_ID_NOTHING) {
         return 1;
     }
-    if (item_menu_category_get(id) == ITEM_MENU_CATEGORY_OTHER) {
+    if (item_get_menu_category(id) == ITEM_MENU_CATEGORY_OTHER) {
         return -1;
     }
-    bits_primary_reader_init(g_formation_unit_pointers[unit_index]->equippable_item_types);
-    bits_primary_read(item_type_get(id));
+    bits_primary_init_reader(g_formation_unit_pointers[unit_index]->equippable_item_types);
+    bits_primary_read(item_get_type(id));
     if (bits_primary_read(1) == 0) {
         result = -1;
     } else {
@@ -417,8 +417,8 @@ s32 equipment_item_compatibility_check(s16 unit_index, s16 item_id) {
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id; an s32 id folds them into one register.
  */
-s32 formation_item_slot_check(s16 unit_index, s16 slot, s16 item_id) {
-    s32 result = formation_unit_lock_get(unit_index);
+s32 check_equipment_slot_item(s16 unit_index, s16 slot, s16 item_id) {
+    s32 result = formation_unit_get_lock(unit_index);
     s16 id;
     s16 new_item;
     s32 other;
@@ -439,7 +439,7 @@ s32 formation_item_slot_check(s16 unit_index, s16 slot, s16 item_id) {
     if (id == ITEM_ID_NOTHING) {
         return 1;
     }
-    result = equipment_item_compatibility_check(unit_index, id);
+    result = equipment_check_item_compatibility(unit_index, id);
     if (slot < MENU_EQUIPMENT_SLOT_HEAD) {
         if (result != 1) {
             return result;
@@ -489,7 +489,7 @@ s32 formation_item_slot_check(s16 unit_index, s16 slot, s16 item_id) {
  * Change the unit's job and optionally select replacement equipment.
  *
  * Mime removes all equipment. Whatever the new job cannot use is dropped
- * (formation_invalid_loadout_remove). With `update_equipment`, a
+ * (formation_remove_invalid_loadout). With `update_equipment`, a
  * roster unit that is not a Mime gets its best-fit equipment and the
  * auto-equip banner. The preview record does not exchange inventory items;
  * ordinary slots return their old equipment before reserving replacements.
@@ -502,22 +502,22 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
     if (job_id == JOB_ID_MIME) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
-                item_inventory_count_adjust(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
+                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
             }
             g_formation_unit_pointers[unit_id]->detail.equipment[i] = ITEM_ID_NOTHING;
         }
     }
     formation_save_records();
-    formation_invalid_loadout_remove(unit_id);
+    formation_remove_invalid_loadout(unit_id);
     if (update_equipment != 0 && unit_id != FORMATION_PREVIEW_UNIT_INDEX
         && g_formation_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
-        formation_item_best_fit_build(unit_id, equipment);
+        formation_item_build_best_fit(unit_id, equipment);
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-            item_inventory_count_adjust(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
+            item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
         }
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             g_formation_unit_pointers[unit_id]->detail.equipment[i] = equipment[i];
-            item_inventory_count_adjust(equipment[i], -1);
+            item_adjust_inventory_count(equipment[i], -1);
         }
         formation_save_records();
         formation_banner_countdown(0xD811, 0x1E);
@@ -528,7 +528,7 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
 /*
  * Drop equipment and abilities a formation unit can no longer use.
  *
- * Items formation_item_slot_check refuses (0, -1 or the Mime
+ * Items check_equipment_slot_item refuses (0, -1 or the Mime
  * lock) and a second hand weapon without Two Swords are removed, returning
  * items to inventory except for the preview record.
  * Mime clears every ability slot, jobs with an innate support ability drop
@@ -536,15 +536,15 @@ s32 formation_job_change(s16 unit_id, s16 job_id, s32 update_equipment) {
  * cleared. The loop counter and status locals are reused for the two hand
  * items, which keeps the original register assignment.
  */
-void formation_invalid_loadout_remove(s16 unit_id) {
+void formation_remove_invalid_loadout(s16 unit_id) {
     s32 i;
     s32 status;
 
     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
-        status = formation_item_slot_check(unit_id, i, g_formation_unit_pointers[unit_id]->detail.equipment[i]);
+        status = check_equipment_slot_item(unit_id, i, g_formation_unit_pointers[unit_id]->detail.equipment[i]);
         if (status == -1 || status == 0 || status == FORMATION_UNIT_LOCK_MIME) {
             if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
-                item_inventory_count_adjust(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
+                item_adjust_inventory_count(g_formation_unit_pointers[unit_id]->detail.equipment[i], 1);
             }
             g_formation_unit_pointers[unit_id]->detail.equipment[i] = ITEM_ID_NOTHING;
         }
@@ -554,7 +554,7 @@ void formation_invalid_loadout_remove(s16 unit_id) {
     if (i < ITEM_ID_THROWABLE_FIRST && i != ITEM_ID_NOTHING && status < ITEM_ID_THROWABLE_FIRST
         && status != ITEM_ID_NOTHING && ability_has_two_swords(unit_id) == 0) {
         if (unit_id != FORMATION_PREVIEW_UNIT_INDEX) {
-            item_inventory_count_adjust(
+            item_adjust_inventory_count(
                 g_formation_unit_pointers[unit_id]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND], 1);
         }
         g_formation_unit_pointers[unit_id]->detail.equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
@@ -601,10 +601,10 @@ void formation_invalid_loadout_remove(s16 unit_id) {
  * Unequippable is not On. Categories 0-4 and 7 with sort modes 1-5 keep the
  * tab's stored order (item_sort_list_by_category_order, which returns the new
  * count); otherwise (another category, or a sort mode such as one with bit
- * 0x80 set) the list is sorted by item_id_list_sort key list
+ * 0x80 set) the list is sorted by item_sort_id_list key list
  * `sort_mode & 0xF`.
  */
-s32 formation_item_list_build(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode) {
+s32 equipment_build_item_list(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode) {
     s32 count;
     s32 item;
     s32 entry;
@@ -620,14 +620,14 @@ s32 formation_item_list_build(s16 unit_id, s16 sort_mode, s8 category, s16* entr
     for (; item < ITEM_ID_END; item++) {
         entry = item;
         if (mode == ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY) {
-            result = item_inventory_count_adjust(item, 0);
+            result = item_adjust_inventory_count(item, 0);
         } else {
-            result = item_total_count_get(item);
+            result = item_get_total_count(item);
         }
         if (result == 0) {
             continue;
         }
-        type = item_menu_category_get(entry);
+        type = item_get_menu_category(entry);
         result = 0;
         if (category < 2) {
             result = type < 2;
@@ -660,7 +660,7 @@ s32 formation_item_list_build(s16 unit_id, s16 sort_mode, s8 category, s16* entr
             continue;
         }
         if (mode != ITEM_LIST_MODE_ALL) {
-            result = equipment_item_compatibility_check(unit_id, entry);
+            result = equipment_check_item_compatibility(unit_id, entry);
             if (mode >= 2 && result == -1) {
                 continue;
             }
@@ -683,7 +683,7 @@ s32 formation_item_list_build(s16 unit_id, s16 sort_mode, s8 category, s16* entr
     if (list_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(list_index, entries);
     } else {
-        item_id_list_sort(sort_mode & 0xF, entries);
+        item_sort_id_list(sort_mode & 0xF, entries);
     }
     return count;
 }

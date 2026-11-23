@@ -31,7 +31,7 @@ formation_unit_t g_formation_unit_records[FORMATION_UNIT_RECORD_COUNT] = { 0 };
  * One scratch variable `i` also carries the monster flag, the second evade
  * operand and the unlocked-job mask; separate locals reallocate a0/v1.
  */
-void formation_unit_record_build(const unit_stats_t* unit, formation_unit_t* record, const party_unit_t* party) {
+void formation_unit_build_record(const battle_unit_t* unit, formation_unit_t* record, const party_unit_t* party) {
     s16* abilities;
     s32 i;
     u32 evade;
@@ -94,7 +94,7 @@ void formation_unit_record_build(const unit_stats_t* unit, formation_unit_t* rec
         s32 count;
 
         /* The signed view keeps the original single-load copy loop. */
-        abilities = (s16*)ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 3; i++) {
             if (abilities[i] != 0) {
@@ -134,7 +134,7 @@ void formation_unit_record_build(const unit_stats_t* unit, formation_unit_t* rec
     if (job_is_special_monster(unit->job_id) != 0 || record->detail.uses_monster_skillset != 0) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
-        i = job_unlocks_calculate(unit->career.job_levels, unit->unit_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
+        i = job_calculate_unlocks(unit->career.job_levels, unit->unit_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
         record->unlocked_jobs[0] = i >> 16;
         record->unlocked_jobs[1] = i >> 8;
         record->unlocked_jobs[2] = i;
@@ -160,7 +160,7 @@ void formation_unit_record_build(const unit_stats_t* unit, formation_unit_t* rec
     record->monster_graphic = unit->monster_graphic;
     record->birthday = unit->birthday.birthday;
     record->egg_color = party->egg_color;
-    record->detail.two_handed = unit_is_two_handing_weapon(
+    record->detail.two_handed = equipment_is_two_handing_weapon(
         (s16*)record->detail.equipment, record->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
 }
 
@@ -173,8 +173,8 @@ void formation_unit_record_build(const unit_stats_t* unit, formation_unit_t* rec
  * record count. The list argument is unused here;
  * formation_roster_sort fills g_formation_unit_pointers.
  */
-s16 formation_record_list_build(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode) {
-    unit_stats_t unit;
+s16 formation_build_record_list(s32 item_id, formation_unit_t** unused_list, formation_record_list_mode_e mode) {
+    battle_unit_t unit;
     s32 slot = 0;
     s32 count = 0;
     s32 id = item_id & ITEM_ENTRY_ID_MASK;
@@ -182,10 +182,10 @@ s16 formation_record_list_build(s32 item_id, formation_unit_t** unused_list, for
     s32 i;
 
     for (; slot < PARTY_ROSTER_SLOT_COUNT; slot++) {
-        if (unit_party_slot_init(&unit, slot, 1) != 0) {
+        if (battle_unit_init_from_party_slot(&unit, slot, 1) != 0) {
             continue;
         }
-        formation_unit_record_build(&unit, &g_formation_unit_records[count], party_unit_get(slot));
+        formation_unit_build_record(&unit, &g_formation_unit_records[count], party_unit_get(slot));
         if (mode == FORMATION_RECORD_LIST_AVAILABLE_HUMANS) {
             if (g_formation_unit_records[count].proposition_status != 0) {
                 continue;
@@ -235,7 +235,7 @@ s16 formation_record_list_build(s32 item_id, formation_unit_t** unused_list, for
  * abilities, and JP. Shields go to the hand's shield byte.
  */
 void formation_save_records(void) {
-    unit_stats_t unit;
+    battle_unit_t unit;
     party_unit_t* party;
     s32 i;
     s16 slot;
@@ -301,7 +301,7 @@ void formation_save_records(void) {
             bcopy(&g_formation_unit_pointers[i]->job_points.total, &party->career.job_points.total,
                 sizeof(party->career.job_points.total));
         }
-        unit_party_slot_init(&unit, slot, 1);
-        formation_unit_record_build(&unit, g_formation_unit_pointers[i], party);
+        battle_unit_init_from_party_slot(&unit, slot, 1);
+        formation_unit_build_record(&unit, g_formation_unit_pointers[i], party);
     }
 }

@@ -31,10 +31,10 @@ static point32_t s_hud_saved_value_position;
 extern s16 g_sound_novel_history_0;
 extern u16 g_sound_novel_history_2;
 
-static void quit_menu_open(void);
-static void hud_restore(void);
-static void history_open(void);
-static void history_entry_draw(sound_novel_history_level_t* level, s32 index);
+static void open_quit_menu(void);
+static void restore_hud(void);
+static void open_history(void);
+static void draw_history_entry(sound_novel_history_level_t* level, s32 index);
 
 /*
  * Pushes the sound-novel menu level (MENU_STACK_LEVEL_SOUND_NOVEL).
@@ -46,10 +46,10 @@ static void history_entry_draw(sound_novel_history_level_t* level, s32 index);
  * appends the level's display objects, all hidden: the two button prompts,
  * the VRAM strip record and the overlay. It then appends the novel's sound
  * effect data, restores any saved reading state into the first render record
- * (sound_novel_reading_restore), blocks Cross, Square and Select
+ * (sound_novel_restore_reading), blocks Cross, Square and Select
  * for the menu and starts the screen fade.
  */
-void sound_novel_reader_open(s32 argument) {
+void sound_novel_open_reader(s32 argument) {
     RECT bounds;
     point32_t origin;
     display_object_animated_t* window1;
@@ -68,12 +68,12 @@ void sound_novel_reader_open(s32 argument) {
     render_pos = &g_display_object_gs_image_pool[0].position;
     s_hud_saved_value_position = g_hud_value_position;
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
-    world_map_image_buffers_clear(1);
+    world_map_clear_image_buffers(1);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.treasure_id = argument;
 
-    bar_render = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    bar_render = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.quit_prompt_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_START_BUTTON;
     window1 = &g_display_object_animated_pool[index];
@@ -86,7 +86,7 @@ void sound_novel_reader_open(s32 argument) {
     pos1->y = 0x60;
     g_display_object_animated_pool[index].palette = 0xA;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.history_prompt_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_SQUARE_BUTTON;
     g_display_object_animated_pool[index].priority = 0xA;
@@ -99,7 +99,7 @@ void sound_novel_reader_open(s32 argument) {
     pos2->y = 0x60;
     g_display_object_animated_pool[index].palette = 0xA;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.brightness_image = index;
     bounds.x = 0x1E4;
     bounds.y = 0x1E8;
@@ -107,14 +107,14 @@ void sound_novel_reader_open(s32 argument) {
     bounds.h = 8;
     origin.x = 0x20;
     origin.y = 0x1E8;
-    display_object_gs_image_init(index, bounds, origin, 0);
+    display_object_init_gs_image(index, bounds, origin, 0);
     pos3 = (point32_t*)((u8*)render_pos + index * sizeof(display_object_gs_image_t));
     pos3->x = 0x34;
     pos3->y = 0x55;
     g_display_object_gs_image_pool[index].priority = 8;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_UNTINTED;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel.brightness_overlay_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_OVERLAY;
     g_display_object_animated_pool[index].priority = 8;
@@ -128,7 +128,7 @@ void sound_novel_reader_open(s32 argument) {
     g_display_object_animated_pool[index].palette = 0;
 
     suzuki_sound_append_resource(g_sound_novel_sound_resource);
-    sound_novel_reading_restore(bar_render);
+    sound_novel_restore_reading(bar_render);
     g_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
     g_menu_stack_ot_offset = 9;
     g_world_map_fade.priorities[0] = 8;
@@ -139,17 +139,17 @@ void sound_novel_reader_open(s32 argument) {
     g_menu_stack_records[g_menu_stack_depth].sound_novel.phase = SOUND_NOVEL_PHASE_RUN;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_SOUND_NOVEL;
     g_menu_stack_depth++;
-    world_map_fade_start(0, 0x10);
+    world_map_start_fade(0, 0x10);
 }
 
 /* Resume handler of the sound novel level: reload the saved background set, show the picture again
  * (and the side windows when the script left them visible) and resume the message thread. */
-void sound_novel_reader_resume(menu_stack_record_t* level) {
+void sound_novel_resume_reader(menu_stack_record_t* level) {
     s16 set = g_sound_novel_reading.background_set;
 
     if (set != -1) {
         picture_load_background_set(set);
-        file_pending_wait();
+        file_wait_pending();
     }
     g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].flags &= ~DISPLAY_OBJECT_BLANK;
     if (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_PARENT_WINDOWS_VISIBLE) {
@@ -160,13 +160,13 @@ void sound_novel_reader_resume(menu_stack_record_t* level) {
 }
 
 /* The g_level_suspend_handlers entry of MENU_STACK_LEVEL_SOUND_NOVEL: nothing to suspend. */
-void sound_novel_reader_suspend(menu_stack_record_t* unused_level) {
+void sound_novel_suspend_reader(menu_stack_record_t* unused_level) {
 }
 
 /*
  * Per-frame step of the sound novel (MENU_STACK_LEVEL_SOUND_NOVEL).
  *
- * It runs the novel's script until it yields (sound_novel_script_run).
+ * It runs the novel's script until it yields (sound_novel_run_script).
  * L1 and R1 raise and lower the screen brightness, showing the brightness bar
  * for 60 frames. While the message box waits for a button: Select opens help
  * message 0x1036, Start (with the side windows up) opens the Quit/Continue
@@ -177,7 +177,7 @@ void sound_novel_reader_suspend(menu_stack_record_t* unused_level) {
  *
  * The unused array reproduces the target's 0x40-byte frame.
  */
-void sound_novel_reader_update(menu_stack_record_t* level) {
+void sound_novel_update_reader(menu_stack_record_t* level) {
     s32 unused[2];
     u16* state_flags;
     world_map_fade_t* fade;
@@ -192,7 +192,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
         case SOUND_NOVEL_PHASE_OPEN_HISTORY:
             if (level->sound_novel.countdown == 0) {
                 g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
-                history_open();
+                open_history();
                 return;
             }
             level->sound_novel.countdown--;
@@ -203,7 +203,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
             }
             g_menu_blocked_buttons = 0;
             g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
-            hud_restore();
+            restore_hud();
             fade = &g_world_map_fade;
             g_world_map_fade.priorities[0] = 0xF;
             g_world_map_fade.flags[1] = 0;
@@ -212,9 +212,9 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
             g_display_object_queue_count -= 5;
             g_menu_stack_depth--;
             fade->flags[0] = (fade->flags[0] & ~WORLD_MAP_FADE_BOX_VISIBLE) | WORLD_MAP_FADE_OUT;
-            sound_all_sfx_stop();
+            sound_stop_all_sfx();
             suzuki_sound_remove_resource(g_sound_novel_sound_resource);
-            sound_novel_selected_reading_reset(g_sound_novel_selected);
+            sound_novel_reset_selected_reading(g_sound_novel_selected);
             g_sound_novel_countdown_frames = 0;
             screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, level->sound_novel.treasure_id, 0);
             return;
@@ -226,7 +226,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
         return;
     }
 
-    if (sound_novel_script_run() != 0) {
+    if (sound_novel_run_script() != 0) {
         if (g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1)) {
             if (g_input_current_buttons & PSX_PAD_L1) {
                 if (g_sound_novel_reading.brightness < 0xFF) {
@@ -266,7 +266,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
             g_display_object_animated_pool[level->sound_novel.quit_prompt_window].palette
                 = g_display_object_animated_pool[level->sound_novel.history_prompt_window].palette = 0;
             if (buttons & PSX_PAD_SELECT) {
-                menu_stack_message_open(0x1036, 1);
+                menu_stack_open_message(0x1036, 1);
                 return;
             }
             if ((buttons & PSX_PAD_START)
@@ -280,7 +280,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
                 g_display_object_gs_image_pool[level->sound_novel.brightness_image].flags |= DISPLAY_OBJECT_HIDDEN;
                 g_display_object_animated_pool[level->sound_novel.brightness_overlay_window].flags
                     |= DISPLAY_OBJECT_HIDDEN;
-                quit_menu_open();
+                open_quit_menu();
                 return;
             }
             if ((g_input_current_buttons & PSX_PAD_SQUARE)
@@ -308,11 +308,11 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
             screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
         }
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
-        sound_all_sfx_stop();
+        sound_stop_all_sfx();
         level->sound_novel.phase = SOUND_NOVEL_PHASE_END;
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         if (!(*state_flags & SOUND_NOVEL_STATE_WHITE_OVERLAY)) {
-            world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
+            world_map_start_fade(WORLD_MAP_FADE_OUT, 0x10);
         }
     }
 }
@@ -328,7 +328,7 @@ void sound_novel_reader_update(menu_stack_record_t* level) {
  * fade state is written through a pointer, which keeps the
  * target's register base for the offset-0 32-bit flags. The unused array
  * preserves the target's 0x68-byte frame. */
-static void quit_menu_open(void) {
+static void open_quit_menu(void) {
     RECT bounds;
     u8 unused[0x28];
     point32_t* base;
@@ -336,25 +336,25 @@ static void quit_menu_open(void) {
     s32 depth;
     world_map_fade_t* fade;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_quit.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_quit.second_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_LIST_SIDE_LABEL;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_quit.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x3C;
     bounds.h = 0x30;
     bounds.y = 0;
-    window_text_record_init(index, bounds, 0, TEXT_ID_QUIT_CONTINUE, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, TEXT_ID_QUIT_CONTINUE, g_window_image_buffer);
     base = &g_display_object_gs_image_pool[index].position;
     g_display_object_gs_image_pool[index].priority = 8;
     depth = g_menu_stack_depth;
@@ -384,7 +384,7 @@ static void quit_menu_open(void) {
 
 /* Resume handler of the Quit/Continue menu: default palettes and the idle
  * cursor again. */
-void sound_novel_quit_resume(menu_stack_record_t* level) {
+void sound_novel_resume_quit_menu(menu_stack_record_t* level) {
     s32 first = level->sound_novel_quit.cursor_window;
     s32 second = level->sound_novel_quit.second_window;
     s32 index;
@@ -402,7 +402,7 @@ void sound_novel_quit_resume(menu_stack_record_t* level) {
 
 /* Gray out the Quit/Continue menu (palettes 10, 6 and 2) and still its cursor
  * while a help message opens over it. */
-void sound_novel_quit_suspend(menu_stack_record_t* level) {
+void sound_novel_suspend_quit_menu(menu_stack_record_t* level) {
     s32 index;
 
     g_display_object_animated_pool[level->sound_novel_quit.cursor_window].palette = 10;
@@ -433,7 +433,7 @@ void sound_novel_quit_suspend(menu_stack_record_t* level) {
  * update needs the window pointer, the base_y local and a separate offset
  * local: that keeps base_y as the first `addu` operand and stops fold from
  * reassociating the +0xe. */
-void sound_novel_quit_update(menu_stack_record_t* level) {
+void sound_novel_update_quit_menu(menu_stack_record_t* level) {
     u32 flags;
     u32 buttons;
     s32 value;
@@ -512,7 +512,7 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
         g_sound_novel_reading.text_history[3] = g_sound_novel_history_2;
         g_sound_novel_history_2 = g_sound_novel_history_1;
         g_sound_novel_history_1 = first;
-        hud_restore();
+        restore_hud();
         g_world_map_fade.priorities[0] = 0xF;
         g_world_map_fade.flags[1] = 0;
         g_display_object_animated_count -= 3;
@@ -532,12 +532,12 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        sound_novel_quit_suspend(level);
-        menu_stack_text_window_open(g_sound_novel_quit_help_text_ids[level->sound_novel_quit.choice] | 0x1000, 1);
+        sound_novel_suspend_quit_menu(level);
+        menu_stack_open_text_window(g_sound_novel_quit_help_text_ids[level->sound_novel_quit.choice] | 0x1000, 1);
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
         value = level->sound_novel_quit.choice ^ 1;
         level->sound_novel_quit.choice = value;
         record = &g_display_object_animated_pool[level->sound_novel_quit.cursor_window];
@@ -562,7 +562,7 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
                 screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
             }
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
-            sound_all_sfx_stop();
+            sound_stop_all_sfx();
             sound_play_effect(SOUND_SFX_CONFIRM);
             return;
         }
@@ -572,7 +572,7 @@ void sound_novel_quit_update(menu_stack_record_t* level) {
 
 /* Restore the saved HUD position and play-time fields, leaving the display hidden.
  * Cache the flags and time before publishing the display fields. */
-static void hud_restore(void) {
+static void restore_hud(void) {
     u32 flags;
     s32 hours;
     s32 minutes;
@@ -602,7 +602,7 @@ static void hud_restore(void) {
  * when there is no older entry.
  *
  * The level is written through the sound_novel_history member of the
- * stack-record union (as in quit_menu_open).
+ * stack-record union (as in open_quit_menu).
  *
  * Several spellings are load-bearing. `windows` holds the record base in a
  * saved register: the window positions are derived from it and the second
@@ -613,7 +613,7 @@ static void hud_restore(void) {
  * references, so the scheduler keeps each load after the preceding level
  * store. `top` and `depth` are separate locals for the target's register
  * assignment, and `unused` preserves the 0x50-byte frame. */
-static void history_open(void) {
+static void open_history(void) {
     RECT bounds;
     u8 unused[8];
     display_object_animated_t* windows;
@@ -629,7 +629,7 @@ static void history_open(void) {
 
     windows = g_display_object_animated_pool;
     positions = (display_object_position_stride_t*)&windows->position;
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.upper_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_HISTORY_UPPER;
     g_display_object_animated_pool[index].priority = 9;
@@ -638,7 +638,7 @@ static void history_open(void) {
     positions[index].x = 0;
     positions[index].y = -0x6A;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.lower_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_SOUND_NOVEL_HISTORY_LOWER;
     g_display_object_animated_pool[index].priority = 9;
@@ -648,7 +648,7 @@ static void history_open(void) {
     positions[index].x = 0;
     positions[index].y = 0x5E;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].sound_novel_history.render_index = index;
     bounds.w = 0xF8;
     bounds.h = 0xB0;
@@ -662,7 +662,7 @@ static void history_open(void) {
     position->y = -0x64;
     g_display_object_gs_image_pool[index].clut.x = 0x3C0;
     g_display_object_gs_image_pool[index].clut.y = 0x1F2;
-    window_centered_text_draw(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
+    window_draw_centered_text(index, *newest + TEXT_ID_WORLD_MESSAGE_BASE);
 
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].sound_novel.quit_prompt_window].palette
         = 0xA;
@@ -716,7 +716,7 @@ static void history_open(void) {
  * cases (a global pseudo, as in the target's $a2); the text box position is
  * read into `x`/`y` so the s32 point is loaded with `lw`; `unused` preserves
  * the 0x58-byte frame. */
-void sound_novel_history_update(menu_stack_record_t* level) {
+void sound_novel_update_history(menu_stack_record_t* level) {
     glyph_blit_t box;
     point32_t point;
     u8 unused[0x20];
@@ -816,10 +816,10 @@ void sound_novel_history_update(menu_stack_record_t* level) {
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->sound_novel_history.scroll < 3
             && level->sound_novel_history.text_ids[level->sound_novel_history.scroll] != -1) {
-            history_entry_draw(&level->sound_novel_history, 4);
+            draw_history_entry(&level->sound_novel_history, 4);
             level->sound_novel_history.scroll = level->sound_novel_history.scroll + 1;
             if (level->sound_novel_history.scroll == 3
                 || level->sound_novel_history.text_ids[level->sound_novel_history.scroll] == -1) {
@@ -831,8 +831,8 @@ void sound_novel_history_update(menu_stack_record_t* level) {
         }
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0 && level->sound_novel_history.scroll != 0) {
-        history_entry_draw(&level->sound_novel_history, 2);
+    if (input_update_repeat(PSX_PAD_DOWN) != 0 && level->sound_novel_history.scroll != 0) {
+        draw_history_entry(&level->sound_novel_history, 2);
         level->sound_novel_history.scroll = level->sound_novel_history.scroll - 1;
         if (level->sound_novel_history.scroll == 0) {
             g_display_object_animated_pool[level->sound_novel_history.lower_window].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -850,11 +850,11 @@ void sound_novel_history_update(menu_stack_record_t* level) {
 /* Draw the history entry at 32-bit slot `index + scroll` of the level (counted
  * from the level's start) centered in the panel; an empty entry (-1) draws
  * nothing. */
-static void history_entry_draw(sound_novel_history_level_t* level, s32 index) {
+static void draw_history_entry(sound_novel_history_level_t* level, s32 index) {
     /* Named text-array access reverses the final address-add operands. */
     s32 text_id = ((s32*)level)[index + level->scroll];
 
     if (text_id != -1) {
-        window_centered_text_draw(level->render_index, text_id + TEXT_ID_WORLD_MESSAGE_BASE);
+        window_draw_centered_text(level->render_index, text_id + TEXT_ID_WORLD_MESSAGE_BASE);
     }
 }

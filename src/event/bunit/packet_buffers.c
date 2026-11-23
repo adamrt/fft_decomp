@@ -18,9 +18,9 @@ static s16 s_unit_list_gfx_poly_f4_count = 0;
 
 /*
  * Submit the finished bunit frame and swap to the other graphics context.
- * Twin of save_gfx_submit_frame over the BUNIT globals.
+ * Twin of CARD's menu_gfx_present_frame over the BUNIT globals.
  */
-void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
+void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     u32* previous_otag = g_menu_gfx_context->otag;
     menu_gfx_context_t* context;
     /* Preserve the target's unused 0x60-byte stack area (0x80-byte frame,
@@ -71,8 +71,8 @@ void unit_list_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
 /* Initializes every primitive pool of one frame buffer with its libgpu
  * constructor; polygons additionally get texture shading enabled.
  *
- * BUNIT twin of packet_pools_init. */
-static void unit_list_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
+ * BUNIT twin of init_packet_pools. */
+static void init_primitive_buffers(menu_gfx_context_t* buffer) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_f3_capacity; i++) {
@@ -154,9 +154,9 @@ static void unit_list_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
 /* Bind both frame buffers' primitive pools, set up their draw/display
  * environments and present twice to establish the active pair.
  *
- * BUNIT twin of screen_packet_buffers_init: one pool argument per
+ * BUNIT copy of WORLD's menu_gfx_init_contexts: one pool argument per
  * frame-buffer pointer, each advanced by its capacity for the second buffer. */
-void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
+void menu_gfx_init_contexts(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
     POLY_GT3* gouraud_textured_triangles, POLY_G4* gouraud_quads, POLY_GT4* gouraud_textured_quads, LINE_F2* flat_lines,
     LINE_F3* flat_lines_3, LINE_F4* flat_lines_4, LINE_G2* gouraud_lines, LINE_G3* gouraud_lines_3,
@@ -193,7 +193,7 @@ void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3
         s_unit_list_gfx_context_base[i].draw_moves = draw_moves + g_unit_list_gfx_draw_move_capacity * i;
         s_unit_list_gfx_context_base[i].draw_areas = draw_areas + g_unit_list_gfx_draw_area_capacity * i;
         s_unit_list_gfx_context_base[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
-        unit_list_gfx_init_packet_pools(&s_unit_list_gfx_context_base[i]);
+        init_primitive_buffers(&s_unit_list_gfx_context_base[i]);
         /* Buffer 0 draws at y 0 while showing y 0xf0, buffer 1 the reverse. Both are 255
          * pixels wide, as in WORLD (CARD uses 256). */
         SetDefDrawEnv(&s_unit_list_gfx_context_base[i].draw_env, 0, i * 0xf0, 0xff, 0xf0);
@@ -202,6 +202,6 @@ void unit_list_gfx_init_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3
         setRGB0(&s_unit_list_gfx_context_base[i].draw_env, 0, 0, 0);
         s_unit_list_gfx_context_base[i].draw_env.ofs[0] = -0x80;
     }
-    unit_list_gfx_submit_frame(0, -1);
-    unit_list_gfx_submit_frame(0, -1);
+    menu_gfx_present_frame(0, -1);
+    menu_gfx_present_frame(0, -1);
 }

@@ -13,7 +13,7 @@
 /* Point the scrollable list menu at a new -1 terminated entry list and reset
  * its render state. The scroll base is reset only when the selected index
  * is 0. */
-void menu_scrollable_list_core_init(const s16* entries, s32 selected_index, u8* text_table) {
+void menu_scrollable_list_init_core(const s16* entries, s32 selected_index, u8* text_table) {
     s32 first;
 
     g_menu_list_entries = entries;
@@ -52,17 +52,17 @@ void menu_scrollable_list_core_init(const s16* entries, s32 selected_index, u8* 
 
 /* Point the scrollable list menu at a new -1 terminated entry list with the
  * given cursor row and scroll base. */
-void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table) {
-    menu_scrollable_list_core_init(entries, selected_index, text_table);
+void menu_scrollable_list_init(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table) {
+    menu_scrollable_list_init_core(entries, selected_index, text_table);
     g_menu_scroll_base_index = scroll_base_index;
 }
 
 #if defined(FFT_EVENT_EQUIP) || defined(FFT_EVENT_JOBSTTS)
 /* EQUIP and JOBSTTS keep the draw-on-initialize helper beside list setup. */
 /* Set up a scrollable list at a scroll base and draw it with the given menu script. */
-void menu_init_and_draw_scrollable_list(
+void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
-    menu_init_scrollable_list(entries, selected_index, scroll_base_index, text_table);
-    menu_draw_scrollable_list(script);
+    menu_scrollable_list_init(entries, selected_index, scroll_base_index, text_table);
+    menu_scrollable_list_refresh(script);
 }
 #endif

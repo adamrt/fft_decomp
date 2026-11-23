@@ -7,6 +7,7 @@
 #include "fft/file.h"
 #include "fft/formation.h"
 #include "fft/gfx.h"
+#include "fft/input.h"
 #include "fft/location.h"
 #include "fft/menu_input.h"
 #include "fft/menu_selection.h"
@@ -35,15 +36,15 @@ extern struct suzuki_sound_resource* g_sound_novel_default_sound_resource;
 extern GsOT_TAG g_world_map_ot_tags[2][16];
 extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
 
-static void map_loop_finish(void);
-static void map_frame_draw(void);
-static void map_graphics_init(void);
-static s32 formation_return_handle(void);
-static void map_screen_init(void);
-static void subsystems_init(void);
-static void map_state_init(void);
-static void entry_level_restore(void);
-static void backdrop_update(void);
+static void finish_map_loop(void);
+static void draw_map_frame(void);
+static void init_map_graphics(void);
+static s32 handle_formation_return(void);
+static void init_map_screen(void);
+static void init_subsystems(void);
+static void init_map_state(void);
+static void restore_entry_level(void);
+static void update_backdrop(void);
 
 /* Run world-map frames until a menu level stops the loop, then return why as a
  * world_map_result_e. A pending Formation return reopens WORLD's Formation screen
@@ -53,29 +54,29 @@ world_map_result_e wldcore_entrypoint(void) {
     s32 buffer_index;
 
     for (;;) {
-        if (formation_return_handle() != 0) {
+        if (handle_formation_return() != 0) {
             return 0;
         }
-        subsystems_init();
-        world_map_fade_start(0, 0x10);
+        init_subsystems();
+        world_map_start_fade(0, 0x10);
         for (;;) {
             if ((g_world_map_flags & WORLD_MAP_FLAG_RUNNING) == 0) {
                 break;
             }
-            file_load_poll(&g_file_cd_state);
-            music_queue_process();
+            file_poll_load(&g_file_cd_state);
+            music_queue_update();
             /* Each display buffer has its own 0xE000-byte GS packet area. */
             buffer_index = GsGetActiveBuff();
             g_gfx_active_buffer_index = buffer_index;
             GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
-            world_map_fade_update();
+            world_map_update_fade();
             world_map_pulse_dots();
             menu_stack_dispatch_update();
-            backdrop_update();
+            update_backdrop();
             if (g_world_map_flags & WORLD_MAP_FLAG_DRAW_MAP) {
-                map_frame_draw();
+                draw_map_frame();
             } else {
-                world_map_frame_draw();
+                world_map_draw_frame();
             }
             if (g_world_map_flags & WORLD_MAP_FLAG_DISPLAY_OFF) {
                 SetDispMask(0);
@@ -87,7 +88,7 @@ world_map_result_e wldcore_entrypoint(void) {
         if (g_world_map_flags & WORLD_MAP_FLAG_RESTART) {
             continue;
         }
-        map_loop_finish();
+        finish_map_loop();
         {
             s32 flags = g_world_map_flags;
 
@@ -118,21 +119,21 @@ world_map_result_e wldcore_entrypoint(void) {
 }
 
 /* When WORLD_MAP_FLAG_DRAW_MAP goes from set to clear, capture the map
- * backdrop again (world_map_backdrop_capture) for the frames that no longer redraw the
+ * backdrop again (world_map_capture_backdrop) for the frames that no longer redraw the
  * map. */
-static void backdrop_update(void) {
+static void update_backdrop(void) {
     if ((g_world_map_flags & WORLD_MAP_FLAG_DRAW_MAP) == 0
         && (g_world_map_previous_flags & WORLD_MAP_FLAG_DRAW_MAP) != 0) {
-        world_map_backdrop_capture();
+        world_map_capture_backdrop();
     }
     g_world_map_previous_flags = g_world_map_flags;
 }
 
 /* Capture the map backdrop: draw the map tiles, routes, dots and auxiliary
  * records once, store the drawn image in g_world_map_scratch_buffer (which
- * world_map_frame_draw uploads behind each later frame), then draw
+ * world_map_draw_frame uploads behind each later frame), then draw
  * the menu frame over it. */
-void world_map_backdrop_capture(void) {
+void world_map_capture_backdrop(void) {
     RECT rect;
     s32 buffer_index;
 
@@ -143,30 +144,30 @@ void world_map_backdrop_capture(void) {
     g_gfx_active_buffer_index = buffer_index;
     GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
     GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
-    event_transition_sprite_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    event_transition_draw_sprite(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     /* The map passes run with the stack moved into the 1 KB scratchpad, starting
      * at its last word. */
     world_map_switch_to_stack(getScratchAddr(255));
-    world_map_tiles_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_routes_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    display_object_gs_list_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+    display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
         g_display_object_aux_queue_count);
     world_map_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    world_map_display_rect_set(g_gfx_active_buffer_index, &rect);
+    world_map_set_display_rect(g_gfx_active_buffer_index, &rect);
     StoreImage(&rect, g_world_map_scratch_buffer);
     DrawSync(0);
     g_picture_background_loaded_set = -1;
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_marker_update();
-    world_map_menus_update(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    hud_value_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    calendar_date_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    location_label_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_gs_list_draw(
+    world_map_update_marker();
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    display_object_draw_gs_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
@@ -177,34 +178,34 @@ void world_map_backdrop_capture(void) {
  * map dots and menus into the main one, then sorts the auxiliary table's
  * clear, draws both tables and clears WORLD_MAP_FLAG_DRAW_MAP. The map and
  * HUD passes run on the scratchpad stack. Sibling of
- * world_map_frame_draw. */
-static void map_frame_draw(void) {
+ * world_map_draw_frame. */
+static void draw_map_frame(void) {
     GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    event_transition_sprite_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    event_transition_draw_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     world_map_project_tiles();
-    world_map_tiles_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_restore_previous_stack();
-    travel_step();
+    travel_update();
     world_map_switch_to_stack(getScratchAddr(255));
-    world_map_routes_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_path_animation_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_path_animation(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    world_map_marker_update();
+    world_map_update_marker();
     world_map_restore_previous_stack();
-    world_map_menus_update(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
-    hud_value_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    calendar_date_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    location_label_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_gs_list_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
         g_display_object_aux_queue_count);
-    display_object_gs_list_draw(
+    display_object_draw_gs_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     world_map_restore_previous_stack();
     DrawSync(0);
-    world_map_pad_read();
+    world_map_read_pad();
     VSync(0);
     GsSwapDispBuff();
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
@@ -218,27 +219,27 @@ static void map_frame_draw(void) {
  * VSync and, unless WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE is set, uploads the
  * captured map backdrop to the new draw buffer before drawing the ordering
  * table over it. */
-void world_map_frame_draw(void) {
+void world_map_draw_frame(void) {
     RECT rect;
 
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    event_transition_sprite_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_menus_update(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    event_transition_draw_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
-    hud_value_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    calendar_date_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    location_label_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_gs_list_draw(
+    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    display_object_draw_gs_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
-    world_map_fade_boxes_draw();
+    world_map_draw_fade_boxes();
     world_map_restore_previous_stack();
     DrawSync(0);
-    world_map_pad_read();
+    world_map_read_pad();
     VSync(0);
     GsSwapDispBuff();
     if (!(g_world_map_flags & WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE)) {
-        world_map_display_rect_set(g_gfx_active_buffer_index == 0, &rect);
+        world_map_set_display_rect(g_gfx_active_buffer_index == 0, &rect);
         LoadImage(&rect, g_world_map_scratch_buffer);
     }
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
@@ -246,27 +247,27 @@ void world_map_frame_draw(void) {
 
 /* Initialize the WLDCORE subsystems before entering the world loop, ending
  * with the menu level the world entry opens. */
-static void subsystems_init(void) {
+static void init_subsystems(void) {
     SetDispMask(0);
-    map_state_init();
-    world_map_input_repeat_init();
+    init_map_state();
+    input_init_repeat();
     world_map_load_texture();
-    map_graphics_init();
-    display_object_pools_init();
-    world_map_tile_atlas_init();
-    world_map_menu_state_init();
-    world_map_dots_init();
+    init_map_graphics();
+    display_object_init_pools();
+    world_map_init_tile_atlas();
+    world_map_init_menu_state();
+    world_map_init_dots();
     world_map_stub_init();
-    world_map_marker_and_camera_init();
+    world_map_init_marker_and_camera();
     menu_stack_reset();
-    map_screen_init();
-    entry_level_restore();
+    init_map_screen();
+    restore_entry_level();
 }
 
 /* Clear the whole 256x480 frame buffer, then install the draw-clip rectangle
  * for the requested world-map layout: mode 0 leaves an 8-pixel top margin and
  * a 252x228 area, any other mode uses the full 256x238 screen. */
-void world_map_clear_screen_and_set_clip_rect(s32 mode) {
+void world_map_clear_screen(s32 mode) {
     RECT rect;
 
     rect.x = 0;
@@ -298,13 +299,13 @@ void world_map_clear_screen_and_set_clip_rect(s32 mode) {
  * length is a power of two: the auxiliary tables have 4 entries and the main
  * tables 16.
  */
-static void map_graphics_init(void) {
+static void init_map_graphics(void) {
     SetDispMask(0);
     GsInitGraph2(256, 240, 4, 0, 0);
     GsDefDispBuff(0, 0, 0, 240);
     GsInit3D();
     SetGeomOffset(0, 0);
-    world_map_clear_screen_and_set_clip_rect(0);
+    world_map_clear_screen(0);
 
     g_world_map_aux_ordering_tables[1].length = 2;
     g_world_map_aux_ordering_tables[0].length = 2;
@@ -322,7 +323,7 @@ static void map_graphics_init(void) {
  * The target derives each fade box's 32-bit attribute through the record base
  * while it walks the rectangle fields separately.
  */
-static void map_state_init(void) {
+static void init_map_state(void) {
     menu_cursor_state_t* cursor;
     GsBOXF* box;
     party_unit_t* party;
@@ -387,7 +388,7 @@ static void map_state_init(void) {
     g_location_selected = 0;
 
     if (!(g_world_map_flags & WORLD_MAP_FLAG_TUTORIAL_EVENT)) {
-        music_all_unload();
+        music_unload_all();
     }
 
     g_music_queue.volume = 0x7f;
@@ -425,11 +426,11 @@ static void map_state_init(void) {
             date.day = 1;
             for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
                 script_variable_set(EVENT_SCRIPT_VAR_TREASURE_FIRST + i, 1);
-                calendar_date_write(g_brave_story_treasure_acquisition_date_bits, i, &date);
+                calendar_write_date(g_brave_story_treasure_acquisition_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
                 script_variable_set(EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST + i, 1);
-                calendar_date_write(g_brave_story_land_discovery_date_bits, i, &date);
+                calendar_write_date(g_brave_story_land_discovery_date_bits, i, &date);
             }
             for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++)
                 script_variable_set(EVENT_SCRIPT_VAR_PROPOSITION_FIRST + i, 4);
@@ -445,7 +446,7 @@ static void map_state_init(void) {
         script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, 1);
         script_variable_set(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
         day_of_year = calendar_date_to_day_index(month, day);
-        calendar_date_to_zodiac_convert(&month, &day);
+        calendar_date_to_zodiac(&month, &day);
         party = party_unit_get(0);
         party->birthday_day = day_of_year;
         /* The separate s32 temp keeps the `month` reload a full 32-bit value: folding
@@ -456,13 +457,13 @@ static void map_state_init(void) {
 }
 
 /* Finalize one WLDCORE loop pass and publish the world status. */
-static void map_loop_finish(void) {
+static void finish_map_loop(void) {
     DrawSync(0);
     VSync(0);
     SetDispMask(0);
     music_queue_wait_until_empty();
     if ((g_world_map_flags & WORLD_MAP_FLAG_TUTORIAL_EVENT) == 0) {
-        music_all_unload();
+        music_unload_all();
     }
     script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, g_travel_next_map_id);
 }
@@ -470,22 +471,22 @@ static void map_loop_finish(void) {
 /* Load the picture for the marker's location, capture the first map backdrop,
  * then reset the GPU, clear both ordering tables and VRAM, and swap buffers
  * with the display still off. */
-static void map_screen_init(void) {
+static void init_map_screen(void) {
     s32 reserved_stack_words[2];
     s32 buffer_index;
 
     SetDispMask(0);
-    g_world_map_marker_state.marker.picture_id = location_picture_load(g_world_map_marker_state.marker.location_id);
-    file_pending_wait();
+    g_world_map_marker_state.marker.picture_id = location_load_picture(g_world_map_marker_state.marker.location_id);
+    file_wait_pending();
     buffer_index = GsGetActiveBuff();
     g_gfx_active_buffer_index = buffer_index;
     GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
-    world_map_backdrop_capture();
+    world_map_capture_backdrop();
     VSync(0);
     ResetGraph(1);
     GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_image_buffers_clear(0);
+    world_map_clear_image_buffers(0);
     GsSwapDispBuff();
     SetDispMask(0);
 }
@@ -504,7 +505,7 @@ static void map_screen_init(void) {
  * list it was chosen from (the tutorial with its two music tracks queued). The
  * title's tutorial and Brave Story requests open those screens. These all go
  * through screen_transition_open. */
-static void entry_level_restore(void) {
+static void restore_entry_level(void) {
     s32 flags = g_world_map_flags & ~WORLD_MAP_FLAG_RESTART;
 
     g_world_map_flags = flags;
@@ -513,10 +514,10 @@ static void entry_level_restore(void) {
                 | WORLD_MAP_FLAG_TITLE_BRAVE_STORY))
         == 0) {
         if (location_script_run(g_world_map_marker_state.marker.location_id, LOCATION_SCRIPT_ACTION_TEXT) != 0) {
-            world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
-            menu_stack_scrollable_text_open(g_location_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
+            world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
+            menu_stack_open_scrollable_text(g_location_script_state.args[0] + TEXT_ID_WORLD_HELP_MESSAGE_BASE);
         } else {
-            location_script_requests_dispatch();
+            location_script_dispatch_requests();
         }
         music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 4);
@@ -543,10 +544,10 @@ static void entry_level_restore(void) {
 /* Called at the top of wldcore_entrypoint's loop. A nonzero
  * EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT clears WORLD_MAP_FLAG_RESTART,
  * restores WORLD's formation menu and makes the entrypoint return 0. */
-static s32 formation_return_handle(void) {
+static s32 handle_formation_return(void) {
     if (script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_world_map_flags &= ~WORLD_MAP_FLAG_RESTART;
-        formation_world_map_return_run();
+        formation_run_world_map_return();
         return 1;
     }
 

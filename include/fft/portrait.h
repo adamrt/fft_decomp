@@ -30,7 +30,7 @@ typedef struct portrait_sheet {
 typedef char portrait_sheet_size_must_be_32768[(sizeof(portrait_sheet_t) == 32768) ? 1 : -1];
 
 /* Unreferenced in both programs: uploads one EVTFACE.BIN block and its palettes. */
-void portrait_image_load(s32 portrait_id);
+void portrait_load_image(s32 portrait_id);
 
 /* party portraits */
 struct job_data;
@@ -47,14 +47,14 @@ extern RECT g_portrait_special_palette_rect;
 extern u8 g_portrait_special_unit_id;
 
 /* WLDFACE portrait for portrait slot 20: ATTACK sets it from the scenario
- * record and portrait_prepare_party_textures uploads it before the
+ * record and portrait_party_prepare_textures uploads it before the
  * battle; BATTLE never reads it. */
 extern u8 g_portrait_special_wldface_id;
 
 /* WORLD resolves the party record to a WLDFACE portrait code with palette bits. */
-s32 portrait_party_unit_code_get(s32 party_index);
-void portrait_load_party(void);
-void portrait_prepare_party_textures(void);
+s32 portrait_get_party_unit_code(s32 party_index);
+void portrait_party_load(void);
+void portrait_party_prepare_textures(void);
 
 /* portrait quads */
 /* Either bit skips the unit portrait; ATTACK and REQUIRE may draw a Formation icon instead. */
@@ -64,10 +64,10 @@ void portrait_build_transition(const RECT* texture_rect, s32* transition, const 
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
 
 /* ATTACK, REQUIRE, WORLD and the EVENT library each build their own body. */
-void portrait_poly_build(s32 portrait_id, POLY_FT4* poly);
+void portrait_build_poly(s32 portrait_id, POLY_FT4* poly);
 
 /* Texture a battle unit's portrait from its loaded sprite sheet. */
-void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_id);
+void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_unit_id);
 
 /* Texture a WLDFACE.BIN portrait: low byte is the portrait index, bits 10-11 the monster palette. */
 void portrait_build_wldface_poly(POLY_FT4* poly, s32 code);

@@ -1,6 +1,5 @@
 /* A four-fold polar mesh drawn around an effect target with per-ring colors. */
 
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
@@ -10,7 +9,8 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
-#include "fft/unit_runtime.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -79,7 +79,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
     effect_anchored_polar_mesh_scratch_t* scratch = (effect_anchored_polar_mesh_scratch_t*)getScratchAddr(0);
     effect_record_t* record = &g_effect_state_records[state_index];
     const effect_geometry_record_t* entry = &g_effect_geometry_table->entries[emitter_index];
-    u32* ot = gfx_battle_otag_get();
+    u32* ot = gfx_get_battle_otag();
     effect_polar_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* inner;
@@ -115,7 +115,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             SetPolyGT4(quad);
             setSemiTrans(quad, scratch->translucent);
             quad->tpage = scratch->tpage;
-            quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+            quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             work->quads[1][i] = *quad;
         }
 
@@ -137,10 +137,10 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         /* The anchor: the target's position plus its unit's event offset, projected to the screen.
          * The record array is indexed again rather than read through record, as the target does. */
         scratch->target_index = g_effect_state_records[state_index].timeline.target_index;
-        effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+        effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
             scratch->target_index, &g_effect_context, &scratch->position);
         scratch->unit_event_offset
-            = unit_get_event_offset_by_runtime_id(g_effect_context.targets[scratch->target_index].data.unit.runtime_id);
+            = map_unit_get_event_offset(g_effect_context.targets[scratch->target_index].data.unit.map_unit_id);
         scratch->position.vx += scratch->unit_event_offset->vx;
         scratch->position.vy += scratch->unit_event_offset->vy;
         scratch->position.vz += scratch->unit_event_offset->vz;
@@ -190,7 +190,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         /* The center moves by velocity from ring to ring, and velocity changes by acceleration.
          * Its curve position is an offset from the projected anchor. */
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.center, work->frame);
-        effect_emitter_spawn_position_interpolate(entry, i, &scratch->center);
+        effect_emitter_interpolate_spawn_position(entry, i, &scratch->center);
         scratch->center.vx += scratch->screen.vx;
         scratch->center.vy += scratch->screen.vy;
 

@@ -2,13 +2,13 @@
  * lengths support scanners as well as the interpreter, while task IDs coordinate
  * the cooperative threads started by event instructions. */
 
+#include "fft/map_unit.h"
 #include "fft/menu_window.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/thread.h"
-#include "fft/unit_runtime.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 
@@ -42,9 +42,9 @@ u8 g_script_event_instruction_sizes[0xf4] = {
 
 static s32 random16_next(void);
 
-static s32 variable_shift_get(s32 value);
+static s32 get_variable_shift(s32 value);
 
-static s32* variable_word_get(s32 variable_id);
+static s32* get_variable_word(s32 variable_id);
 
 /* Event instruction 0x37 (unused by the scenario scripts): toggles bit 0 of
  * portrait_flipped of the menu window buffer whose message_id matches the
@@ -55,7 +55,7 @@ static s32* variable_word_get(s32 variable_id);
 void script_opcode_37_flip_message_portrait(const u8* parameters) {
     s32 i;
     s32 record_index;
-    s16 record_id = script_s16_read(parameters);
+    s16 record_id = script_read_s16(parameters);
     menu_window_buffer_t* record;
 
     for (i = 0; i < 6; i++) {
@@ -76,7 +76,7 @@ void script_opcode_74_unknown(const u8* unused_parameters) {
  * otherwise (THREAD_SLOT_FIRST_IDLE) the first idle slot from 1 up. With
  * every slot busy the calling thread exits, and the function has no return value
  * for that path. */
-s32 thread_slot_resolve(s32 requested_thread_id) {
+s32 thread_resolve_slot(s32 requested_thread_id) {
     s32 i;
 
     if (requested_thread_id < THREAD_ID_COUNT) {
@@ -92,9 +92,9 @@ s32 thread_slot_resolve(s32 requested_thread_id) {
     thread_current_exit();
 }
 
-/* As thread_slot_resolve, but the search for an idle slot starts above the
+/* As thread_resolve_slot, but the search for an idle slot starts above the
  * current thread's slot. */
-s32 thread_next_slot_resolve(s32 thread_id) {
+s32 thread_resolve_next_slot(s32 thread_id) {
     s32 index;
 
     if (thread_id < THREAD_ID_COUNT) {
@@ -118,7 +118,7 @@ s32 thread_next_slot_resolve(s32 thread_id) {
 
 /* Return the id of another running thread whose 32-bit current task value equals
  * task_id, or 0 when none matches. Skips slot 0 and the caller's own thread. */
-s32 thread_task_find(s32 task_id) {
+s32 thread_find_task(s32 task_id) {
     s32 thread_id;
 
     for (thread_id = 1; thread_id < VARIANT_THREAD_TABLE_SLOT_COUNT; thread_id++) {
@@ -130,8 +130,8 @@ s32 thread_task_find(s32 task_id) {
     return 0;
 }
 
-/* Tag the running thread with task_id, the value thread_task_find looks up. */
-void thread_current_task_set(s32 task_id) {
+/* Tag the running thread with task_id, the value thread_find_task looks up. */
+void thread_current_set_task(s32 task_id) {
     g_thread_contexts[g_thread_current_id].task_id = task_id;
 }
 
@@ -139,7 +139,7 @@ void thread_current_task_set(s32 task_id) {
  * event start to limit_offset and keeps the last matching BackTarget not followed by a barrier
  * (0xd9) or a same-id ForwardTarget; otherwise it scans forward from limit_offset to EventEnd for
  * target_opcode or alternate_opcode. With no target the thread exits. */
-s32 script_jump_target_find(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id) {
+s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id) {
     u8* base;
     s32 offset;
     s32 found = -1;
@@ -177,7 +177,7 @@ s32 script_jump_target_find(s32 limit_offset, event_opcode_e target_opcode, s32 
 
 /* Returns the byte offset of the next `opcode` instruction at or after
  * `offset`, or 0 when EventEnd comes first. */
-s32 script_instruction_offset_find(s32 offset, s32 opcode) {
+s32 script_find_instruction_offset(s32 offset, s32 opcode) {
     /* Bytecode offsets are relative to the complete file block. */
     u8* base = (u8*)g_script_event_block;
     s32 operands_offset;
@@ -197,7 +197,7 @@ s32 script_instruction_offset_find(s32 offset, s32 opcode) {
  * variable 0) with the truth value of comparing it against the operand variable (variable
  * 1), using <=, >=, ==, !=, < and > in opcode order. Any other opcode changes
  * nothing. */
-void script_condition_run(event_opcode_e opcode) {
+void script_run_condition(event_opcode_e opcode) {
     if (opcode == EVENT_OPCODE_COMPARE_LESS_EQUAL) {
         g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT] = g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_RESULT]
             <= g_script_variables[EVENT_SCRIPT_VAR_COMPARISON_OPERAND];
@@ -240,7 +240,7 @@ void script_condition_run(event_opcode_e opcode) {
  * RNG, not its ordinary storage. ZERO never reads the uninitialized operand.
  * Keep the target's arithmetic edge behavior: only division explicitly stops
  * on zero; modulo has no such check, and signed overflow is not normalized. */
-void script_variable_command_run(s32 opcode, s32 destination_id, s32 source, s32 unused) {
+void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32 unused) {
     s32* source_word;
     s32* destination_word;
     s32 write_allowed;
@@ -259,8 +259,8 @@ void script_variable_command_run(s32 opcode, s32 destination_id, s32 source, s32
         } else if (source == EVENT_SCRIPT_VAR_RANDOM_VALUE) {
             operand = random16_next();
         } else {
-            source_word = variable_word_get(source);
-            source_bit = variable_shift_get(source);
+            source_word = get_variable_word(source);
+            source_bit = get_variable_shift(source);
             if (source_bit >= 0) {
                 mask = 1;
                 if (source >= EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
@@ -273,8 +273,8 @@ void script_variable_command_run(s32 opcode, s32 destination_id, s32 source, s32
         }
     }
     preserve_mask = -1;
-    destination_word = variable_word_get(destination_id);
-    destination_bit = variable_shift_get(destination_id);
+    destination_word = get_variable_word(destination_id);
+    destination_bit = get_variable_shift(destination_id);
     if (destination_bit >= 0) {
         mask = 1;
         if (destination_id >= EVENT_SCRIPT_VAR_PACKED_NIBBLE_FIRST) {
@@ -354,7 +354,7 @@ void script_variable_command_run(s32 opcode, s32 destination_id, s32 source, s32
  * 0x80 own a whole 32-bit value; 0x80..0x35F pack 32 flags per 32-bit value starting at element
  * 0x80, and 0x360..0x3FF pack eight nibbles per 32-bit value starting at element 0x97.
  * Ids at or above 0x400 stop the calling thread; the result is unset if it returns. */
-static s32* variable_word_get(s32 variable_id) {
+static s32* get_variable_word(s32 variable_id) {
     s32* word;
 
     if (variable_id < EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) {
@@ -372,7 +372,7 @@ static s32* variable_word_get(s32 variable_id) {
 }
 
 /* Return the packed variable field position, or -1 for a full word; invalid ids exit the thread. */
-static s32 variable_shift_get(s32 value) {
+static s32 get_variable_shift(s32 value) {
     s32 result = -1;
 
     if (value >= EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) {
@@ -389,8 +389,8 @@ static s32 variable_shift_get(s32 value) {
 
 /* Wait until the variable reaches the signed 16-bit test value. */
 void script_opcode_7e_wait_value(const event_wait_value_parameters_t* parameters) {
-    s32 variable_id = script_s16_read(parameters->variable_id_le);
-    s32 test_value = script_s16_read(parameters->test_value_le);
+    s32 variable_id = script_read_s16(parameters->variable_id_le);
+    s32 test_value = script_read_s16(parameters->test_value_le);
 
     while (script_variable_get(variable_id) < test_value) {
         thread_yield();
@@ -399,20 +399,20 @@ void script_opcode_7e_wait_value(const event_wait_value_parameters_t* parameters
 
 /* Seed the event script's 16-bit random generator (random16_next) with
  * the vertical-blank count. */
-void script_random_seed(void) {
+void script_seed_random(void) {
     s_script_rand16_state = VSync(-1);
 }
 
 /* Step the event script's random generator, state * 0x6255 + 0x3619 kept to 16
- * bits, and return the new state. script_variable_command_run calls it
+ * bits, and return the new state. script_run_variable_command calls it
  * when a variable opcode reads EVENT_SCRIPT_VAR_RANDOM_VALUE. */
 static s32 random16_next(void) {
     return s_script_rand16_state = (s_script_rand16_state * 0x6255U + 0x3619U) & 0xffffU;
 }
 
 /* Yield while the unit-ready test returns zero. */
-void script_unit_ready_wait(s32 runtime_id) {
-    while (unit_is_ready(runtime_id) == 0) {
+void script_wait_unit_ready(s32 map_unit_id) {
+    while (map_unit_is_ready(map_unit_id) == 0) {
         thread_yield();
     }
 }

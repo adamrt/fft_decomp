@@ -19,7 +19,7 @@ typedef enum world_map_tile_flag {
 } world_map_tile_flag_e;
 
 /* Provisional: an entry of the projected-tile table (g_world_map_projected_tiles), filled by
- * world_map_tile_atlas_init and projected by the RotTrans pass of world_map_project_tiles. */
+ * world_map_init_tile_atlas and projected by the RotTrans pass of world_map_project_tiles. */
 typedef struct world_map_projected_tile {
     s32 flags;        /* 0x00; world_map_tile_flag_e */
     s32 texture;      /* 0x04; packed texture rectangle: u << 24 | v << 16 | w << 8 | h */
@@ -28,7 +28,7 @@ typedef struct world_map_projected_tile {
 } world_map_projected_tile_t;
 typedef char world_map_projected_tile_size_must_be_24[sizeof(world_map_projected_tile_t) == 24 ? 1 : -1];
 
-/* g_world_map_flags as saved by world_map_backdrop_mode_set (world_map_flags_e). */
+/* g_world_map_flags as saved by world_map_set_backdrop_mode (world_map_flags_e). */
 static u32 s_world_map_saved_system_flags;
 extern world_map_projected_tile_t g_world_map_projected_tiles[];
 
@@ -51,7 +51,7 @@ static SVECTOR s_world_map_projection_rotation = { 0 };
  * objects, context value, date and marker). With `capture` 0 the two windows
  * are shown again and the saved flags come back with WORLD_MAP_FLAG_DRAW_MAP
  * set, so the next frame redraws the map. */
-void world_map_backdrop_mode_set(s32 capture) {
+void world_map_set_backdrop_mode(s32 capture) {
     RECT display_rect;
     s32 buffer_index;
 
@@ -77,28 +77,28 @@ void world_map_backdrop_mode_set(s32 capture) {
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     world_map_project_tiles();
-    world_map_tiles_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_routes_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
-    world_map_marker_update();
-    hud_value_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    calendar_date_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    location_label_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    display_object_gs_list_draw(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
+    world_map_update_marker();
+    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
         g_display_object_aux_queue_count);
-    display_object_gs_list_draw(
+    display_object_draw_gs_list(
         &g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue, g_display_object_queue_count);
     world_map_restore_previous_stack();
     GsSortClear(0, 0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    world_map_display_rect_set(g_gfx_active_buffer_index, &display_rect);
+    world_map_set_display_rect(g_gfx_active_buffer_index, &display_rect);
     StoreImage(&display_rect, g_world_map_scratch_buffer);
     DrawSync(0);
     g_picture_background_loaded_set = -1;
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    world_map_menus_update(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     {
         s32 map_window_index;
         s32 menu_window_index;
@@ -113,16 +113,16 @@ void world_map_backdrop_mode_set(s32 capture) {
             | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_HIDE_CALENDAR_DATE
             | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         g_display_object_animated_pool[menu_window_index].flags |= DISPLAY_OBJECT_HIDDEN;
-        display_object_gs_list_draw(&g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue,
+        display_object_draw_gs_list(&g_world_map_ordering_tables[g_gfx_active_buffer_index], g_display_object_queue,
             g_display_object_queue_count);
     }
     GsDrawOt(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
 }
 
-/* World-map tile atlas setup, run once from subsystems_init between
- * display_object_pools_init() and
- * world_map_menu_state_init(). Because the allocation counters were just
+/* World-map tile atlas setup, run once from init_subsystems between
+ * display_object_init_pools() and
+ * world_map_init_menu_state(). Because the allocation counters were just
  * reset, the two append calls here return records 0 and 1.
  *
  * Layout:
@@ -156,7 +156,7 @@ void world_map_backdrop_mode_set(s32 capture) {
  *  - `y` is initialized before `k` and `i`: the target emits `li t3,-192`
  *    first in the outer preheader.
  */
-void world_map_tile_atlas_init(void) {
+void world_map_init_tile_atlas(void) {
     s32* descriptor;
     point32_t* wpos;
     point32_t* wpos2;
@@ -220,7 +220,7 @@ void world_map_tile_atlas_init(void) {
         }
     }
 
-    map_window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    map_window_index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_world_map_window_index = map_window_index;
     g_display_object_animated_pool[map_window_index].sequence = DISPLAY_OBJECT_ANIM_MAP_FRAME;
     g_display_object_animated_pool[map_window_index].priority = 13;
@@ -231,7 +231,7 @@ void world_map_tile_atlas_init(void) {
     rec->anim_counter = 0;
     g_display_object_animated_pool[map_window_index].frame_index = 0;
 
-    menu_window_index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    menu_window_index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_world_map_cursor_window = menu_window_index;
     g_display_object_animated_pool[menu_window_index].sequence = DISPLAY_OBJECT_ANIM_ROOT_MENU_FRAME;
     g_display_object_animated_pool[menu_window_index].priority = 13;
@@ -307,7 +307,7 @@ void world_map_project_tiles(void) {
  * `addiu at,at,<offset>` under 2.21 and lose it under 2.34. Each tile reads
  * its own entry and the next one's .screen.x, so the accesses are written
  * against `index` and `index + 1`. */
-void world_map_tiles_draw(GsOT* ot) {
+void world_map_draw_tiles(GsOT* ot) {
     POLY_FT4 poly;
     CVECTOR color;
     s32 row;
@@ -318,7 +318,7 @@ void world_map_tiles_draw(GsOT* ot) {
     color.r = 0x80;
     color.g = 0x80;
     color.b = 0x80;
-    world_map_fade_tint_color(&color, &color);
+    world_map_tint_fade_color(&color, &color);
     setRGB0(&poly, color.r, color.g, color.b);
     poly.clut = GetClut(0, WORLD_MAP_TILE_CLUT_Y);
 
@@ -365,15 +365,15 @@ void world_map_tiles_draw(GsOT* ot) {
 
 /* Scroll `position` by `amount` on both axes within the scroll limits, leaving
  * the part that could not be applied in `amount`. */
-void world_map_scroll_apply(point32_t* amount, VECTOR* position) {
-    world_map_horizontal_scroll_apply(&amount->x, &position->vx);
-    world_map_vertical_scroll_apply(amount, position);
+void world_map_apply_scroll(point32_t* amount, VECTOR* position) {
+    world_map_apply_horizontal_scroll(&amount->x, &position->vx);
+    world_map_apply_vertical_scroll(amount, position);
 }
 
 /* Apply a (negated) scroll amount to a position clamped to [-116, 128] (the
- * same x range coordinates_clamp clamps to) and leave the unapplied
+ * same x range clamp_coordinates clamps to) and leave the unapplied
  * remainder in *amount. */
-void world_map_horizontal_scroll_apply(s32* amount, s32* position) {
+void world_map_apply_horizontal_scroll(s32* amount, s32* position) {
     s32 delta = -*amount;
     s32 old_position;
     s32 value;
@@ -402,10 +402,10 @@ void world_map_horizontal_scroll_apply(s32* amount, s32* position) {
     *amount = -*amount;
 }
 
-/* Vertical counterpart of world_map_horizontal_scroll_apply: the
+/* Vertical counterpart of world_map_apply_horizontal_scroll: the
  * same shape applied to the vertical amount and projection origin,
- * clamped to [-64, 80], the y range coordinates_clamp uses. */
-void world_map_vertical_scroll_apply(point32_t* amount, VECTOR* position) {
+ * clamped to [-64, 80], the y range clamp_coordinates uses. */
+void world_map_apply_vertical_scroll(point32_t* amount, VECTOR* position) {
     s32 delta = -amount->y;
     s32 old_position;
     s32 value;

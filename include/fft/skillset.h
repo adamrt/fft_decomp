@@ -187,7 +187,7 @@ enum {
     SKILLSET_ABILITY_LIST_COUNT = 24
 };
 
-/* Ability classes ability_skillset_list_build collects from a
+/* Ability classes ability_build_skillset_list collects from a
  * skillset; the random R/S/M selector uses rsm_ability_filter_e instead. */
 typedef enum skillset_ability_filter {
     SKILLSET_ABILITY_FILTER_ACTION = 0x01,
@@ -203,11 +203,11 @@ s32 skillset_get_unit_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);
 s32 skillset_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 s32 skillset_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-s32 skillset_math_load_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
-s32 skillset_math_load_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
-s32 skillset_math_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
-s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
-s32 skillset_monster_count_supporters(const unit_stats_t* unit);
+s32 skillset_load_math_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
+s32 skillset_load_math_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
+s32 skillset_collect_math_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
+s32 skillset_collect_monster_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
+s32 skillset_count_monster_supporters(const battle_unit_t* unit);
 s32 skillset_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 s32 skillset_load_charge_ability_ids(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 skillset_load_charge_abilities(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns);

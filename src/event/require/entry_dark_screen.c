@@ -42,7 +42,7 @@ static VECTOR s_conditions_burst_offset;
 static VECTOR s_conditions_burst_rotated_offset;
 
 /* Call thread_current_exit. */
-void thread_exit_current_wrapper(void) {
+void thread_current_exit_wrapper(void) {
     thread_current_exit();
 }
 
@@ -93,7 +93,7 @@ void require_dark_screen_entrypoint(void) {
     }
 
     /* Named operand loads fold the three native cursor advances. */
-    params = thread_current_parameter_2_get();
+    params = thread_current_get_parameter_2();
     /* Script parameter bytes: 1 mode, 2 delay divisor, 3-4 angle step (little-endian), 5 radius step. */
     params++;
     mode = *params;
@@ -266,7 +266,7 @@ void require_dark_screen_entrypoint(void) {
             &g_conditions_burst_flash_polys[1], &g_conditions_burst_flash_polys[0], sizeof(POLY_F4));
         frame++;
         /* The controlling thread ends the hold by switching this task to THREAD_TASK_DARK_SCREEN. */
-        thread_current_task_set(THREAD_TASK_DARK_SCREEN_HOLD);
+        thread_current_set_task(THREAD_TASK_DARK_SCREEN_HOLD);
         for (;;) {
             thread_yield();
             g_conditions_burst_flash_polys[frame & 1].r0 = g_after_battle_gfx_fade_rgb[0];
@@ -290,6 +290,6 @@ void require_dark_screen_entrypoint(void) {
         }
     }
 
-    thread_frames_wait(1);
+    thread_wait_frames(1);
     thread_current_exit();
 }

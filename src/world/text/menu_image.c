@@ -41,7 +41,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
     }
 
     if (text == 0 || text == (const u8*)1) {
-        cursor = text_entry_find(text_id);
+        cursor = text_find_entry(text_id);
     } else {
         cursor = text;
     }
@@ -123,7 +123,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                     i = state->pending_width - 1;
                     if (state->pending_width == 0xFFFF) {
                         started = 0;
-                        i = text_decimal_digits_count(state->value) - 1;
+                        i = text_count_decimal_digits(state->value) - 1;
                     } else {
                         state->pending_width = 0xFFFF;
                         started = 0;
@@ -149,13 +149,13 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
 
                 /* Every command above also reaches these tests; only a format code, a backreference
                  * or an end byte matches one. */
-                state->value = text_format_id_resolve(state->command, *state->value_cursor);
+                state->value = text_resolve_format_id(state->command, *state->value_cursor);
                 if (state->value != -1) {
                     state->return_cursor = cursor + 1;
                     if (state->command == TEXT_FORMAT_RAMZA_NAME) {
                         cursor = g_text_player_name_buffer;
                     } else {
-                        cursor = text_entry_find(state->value);
+                        cursor = text_find_entry(state->value);
                     }
                     state->value_cursor++;
                     continue;

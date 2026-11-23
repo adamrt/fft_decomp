@@ -6,13 +6,13 @@
 #include "fft/formula.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/random.h"
 #include "fft/reaction.h"
 #include "fft/status.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "fft/weather.h"
 #include "psx/types.h"
 
@@ -90,7 +90,7 @@ void formula_sacrifice_hp_to_heal(void) {
 
 /* Formula 0x43: damage equal to the caster's missing HP (max HP - HP). */
 void formula_damage_caster_missing_hp(void) {
-    unit_stats_t* unit = g_action_attacker;
+    battle_unit_t* unit = g_action_attacker;
     action_data_t* action = g_action_target_data;
     u16 max_hp = unit->max_hp;
     u16 hp = unit->hp;
@@ -110,7 +110,7 @@ void formula_difference(void) {
 
 /* Formula 0x45: damage equal to the target's missing HP (max HP - HP). */
 void formula_climhazzard(void) {
-    unit_stats_t* unit = g_action_target;
+    battle_unit_t* unit = g_action_target;
     action_data_t* action = g_action_target_data;
 
     action->hp_damage = unit->max_hp - unit->hp;
@@ -161,7 +161,7 @@ void formula_element_modify_weapon_damage(void) {
 void formula_element_apply(void) {
     u8 element;
     action_data_t* action;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 mount_info;
 
     element = g_action_work.range_data.element;
@@ -179,7 +179,7 @@ void formula_element_apply(void) {
     unit = g_action_target;
     mount_info = unit->mount_info;
     if (mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
-        unit = &g_unit_stats[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
+        unit = &g_battle_units[mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK];
     }
     /* Float nullifies earth. */
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
@@ -300,7 +300,7 @@ void formula_apply_undead_reversal(void) {
  * receives none of the statuses of the first status byte (Dead among them); a
  * target immune to Dead is missed; anyone else takes it as HP damage. */
 void formula_apply_undead_absorb_attack(void) {
-    unit_stats_t* unit = g_action_target;
+    battle_unit_t* unit = g_action_target;
 
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)] & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
         u16 amount;
@@ -409,7 +409,7 @@ void formula_apply_maintenance(void) {
 
 /* When executing, a roll of 0..99 below FORMULA_ADDED_EFFECT_CHANCE (19)
  * sets ACTION_SPECIAL_EFFECT_ADDED_EFFECT. */
-static void conditional_status_proc_roll_inner(void) {
+static void roll_conditional_status_proc_inner(void) {
     if (g_action_state == ACTION_STATE_EXECUTE && random_roll_pass_fail(100, FORMULA_ADDED_EFFECT_CHANCE) == 0) {
         action_data_t* action = g_action_target_data;
         /* The 16-bit read-modify-write sets the added-effect flag. */
@@ -423,7 +423,7 @@ void formula_queue_weapon_spell(void) {
     g_action_work.weapon_proc_pending = 1;
     g_action_work.reaction_id = g_action_work.proc_id;
     g_action_work.post_action_target_id = g_action_work.target_id;
-    move_knockback_cancel();
+    move_cancel_knockback();
 }
 
 /* Magic gun: select the Fire line for a fire gun, else Bolt for lightning, else
@@ -497,7 +497,7 @@ void formula_determine_reduced_stat(void) {
 /* Draw Out: the used katana breaks when a roll of 0..99 is below its weapon
  * power. The roll is made only when executing; any other state records it as
  * broken. A Mime's katana is not touched. */
-void formula_roll_katana_break(void) {
+void formula_calculate_katana_break(void) {
     if (g_action_attacker->job_id == JOB_ID_MIME) {
         return;
     }
@@ -598,7 +598,7 @@ s32 formula_select_targeted_equipment(void) {
  * attacker inflict Invite. */
 void formula_apply_poach_and_train(void) {
     action_data_t* action = g_action_target_data;
-    unit_stats_t* target;
+    battle_unit_t* target;
     s32 remaining;
 
     if (!(action->attack_type & ACTION_TYPE_HP_DAMAGE)) {
@@ -628,7 +628,7 @@ void formula_apply_poach_and_train(void) {
         if (target->job_id < JOB_ID_MONSTER_FIRST || target->job_id > JOB_ID_MONSTER_LAST) {
             return;
         }
-        move_knockback_cancel();
+        move_cancel_knockback();
         formula_clear_pending_proc();
         g_action_target_data->special_effect |= ACTION_SPECIAL_EFFECT_POACH;
         g_action_work.post_action_message = ACTION_POST_MESSAGE_POACHED;
@@ -773,7 +773,7 @@ void formula_ether(void) {
  * formula_apply_undead_reversal, which turns the HP part into healing
  * (damage for an undead target). */
 void formula_apply_full_hp_mp_heal(void) {
-    unit_stats_t* unit = g_action_target;
+    battle_unit_t* unit = g_action_target;
     action_data_t* action = g_action_target_data;
 
     action->hp_damage = unit->max_hp;
@@ -785,7 +785,7 @@ void formula_apply_full_hp_mp_heal(void) {
  * roll succeeds. The shown accuracy becomes 100 - Brave, and a Brave of 100
  * always guards, even outside execution. */
 void reaction_try_finger_guard(void) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 chance;
 
     if (reaction_is_blocked(g_action_target) != 0)
@@ -811,7 +811,7 @@ void reaction_try_finger_guard(void) {
  * as reaction_try_finger_guard decides it; the caught weapon goes in
  * last_received_attack. A Mime attacker's throw is never caught. */
 void reaction_try_catch(void) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     action_data_t* action;
     /* Loaded through a pointer so GCC keeps it between the struct stores
      * (a plain scalar load is assumed not to alias them and floats). */
@@ -845,7 +845,7 @@ void reaction_try_catch(void) {
 
 /* Roll the evades (formula_evade_calculate_final_hit_percent). Returns 1 when
  * the attack was evaded. */
-static s32 evade_roll(void) {
+static s32 roll_evade(void) {
     formula_evade_calculate_final_hit_percent();
     return g_action_target_data->hit == 0;
 }
@@ -855,7 +855,7 @@ static s32 evade_roll(void) {
  * FORMULA_ADDED_EFFECT_CHANCE (19); a preview always shows it; the AI
  * simulation never counts it. */
 s32 formula_roll_conditional_status_proc(void) {
-    conditional_status_proc_roll_inner();
+    roll_conditional_status_proc_inner();
     if (g_action_state == ACTION_STATE_PREVIEW) {
         return 0;
     }
@@ -876,7 +876,7 @@ s32 formula_evade_calculate_physical(void) {
     formula_evade_apply_target_statuses();
     formula_evade_apply_weather_on_bows();
     formula_evade_calculate_facing();
-    return evade_roll();
+    return roll_evade();
 }
 
 /* formula_evade_calculate_physical without the bow weather penalty. */
@@ -887,7 +887,7 @@ s32 formula_evade_calculate_physical_without_weather(void) {
     formula_evade_calculate_abandon();
     formula_evade_apply_target_statuses();
     formula_evade_calculate_facing();
-    return evade_roll();
+    return roll_evade();
 }
 
 /* Magic evade step: load the target's magic evades, then a Transparent
@@ -898,7 +898,7 @@ s32 formula_evade_calculate_magical(void) {
     formula_evade_calculate_transparent();
     formula_evade_calculate_abandon();
     formula_evade_apply_target_statuses();
-    return evade_roll();
+    return roll_evade();
 }
 
 /* Physical modifiers on XA, in order: attacker supports (Two Hands, Attack Up,

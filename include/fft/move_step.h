@@ -4,9 +4,9 @@
 /* Movement steps: the step phases, and the routines that carry a unit from one tile to the next by walking, climbing,
  * jumping, flying, floating or teleporting. */
 
-struct unit_runtime;
+struct map_unit;
 
-/* Travel direction of the step in progress, as move_step_get_direction derives it from the
+/* Travel direction of the step in progress, as get_step_direction derives it from the
  * unit's tile and its destination tile. */
 typedef enum move_direction {
     MOVE_DIRECTION_SOUTH = 0, /* -y */
@@ -15,7 +15,7 @@ typedef enum move_direction {
     MOVE_DIRECTION_WEST = 3   /* -x */
 } move_direction_e;
 
-/* unit_runtime_t.step_phase: the stage of the movement step in progress. Every stage has one
+/* map_unit_t.step_phase: the stage of the movement step in progress. Every stage has one
  * value per move_direction_e direction, in that order. The handlers dispatch on the stage and
  * take the direction from the unit's coordinates, and the stores that change stage in the middle of
  * a step write the NORTH value whatever the direction. */
@@ -83,7 +83,7 @@ typedef enum move_step_phase {
     MOVE_STEP_PHASE_TELEPORT_ANIMATION = 60
 } move_step_phase_e;
 
-void move_units_update(void);
-void move_step_update(struct unit_runtime* unit);
+void move_update_units(void);
+void move_update_step(struct map_unit* unit);
 
 #endif

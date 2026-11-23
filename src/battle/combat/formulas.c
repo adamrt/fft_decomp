@@ -14,7 +14,7 @@
 
 /* Hit chance F(XA+YA)% for magic on allies: Magic Attack Up and zodiac
  * compatibility, none of the target's defenses. Returns 1 on a miss. */
-static s32 friendly_magic_accuracy_calculate(void) {
+static s32 calculate_friendly_magic_accuracy(void) {
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();
     formula_store_xa_plus_ya();
@@ -34,7 +34,7 @@ void formula_calculate_magical_xa_times_ya(void) {
 /* Golem's hit chance: (MA with Magic Attack Up + X) * caster Faith / 100, the
  * Faith status counting as 100 and Innocent as 0. No zodiac compatibility and
  * no target Faith. Returns 1 on a miss. */
-static s32 golem_accuracy_calculate(void) {
+static s32 calculate_golem_accuracy(void) {
     action_data_t* action;
 
     formula_store_ma_and_x();
@@ -74,7 +74,7 @@ void formula_calculate_truth_damage(void) {
 }
 
 /* formula_accuracy_calculate_magic without the elemental strengthen. */
-static s32 magic_accuracy_without_strengthen_calculate(void) {
+static s32 calculate_magic_accuracy_without_strengthen(void) {
     formula_store_ma_and_x();
     formula_apply_magical_modifiers();
     formula_store_xa_plus_ya();
@@ -254,7 +254,7 @@ void formula_hit_faith_ma_x_percent(void) {
 void formula_friendly_magic_accuracy(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
-    if (friendly_magic_accuracy_calculate() == 0) {
+    if (calculate_friendly_magic_accuracy() == 0) {
         formula_apply_status_to_action();
     }
 }
@@ -274,7 +274,7 @@ void formula_magical_heal(void) {
 void formula_heal_y_percent_faith(void) {
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
-    if (friendly_magic_accuracy_calculate() != 0) {
+    if (calculate_friendly_magic_accuracy() != 0) {
         return;
     }
     if (formula_apply_status_and_check_undead() == 0) {
@@ -320,7 +320,7 @@ void formula_damage_hp_percent_hit_faith_ma_x_percent(void) {
 
 /* Formula 0x0F: absorb (Y)% of max MP, hit F(MA+X)%; magic evade. */
 void formula_absorb_mp_y_percent(void) {
-    if (formula_evade_calculate_magical() != 0 || magic_accuracy_without_strengthen_calculate() != 0) {
+    if (formula_evade_calculate_magical() != 0 || calculate_magic_accuracy_without_strengthen() != 0) {
         return;
     }
     formula_calculate_mp_percent_damage();
@@ -331,7 +331,7 @@ void formula_absorb_mp_y_percent(void) {
 
 /* Formula 0x10: absorb (Y)% of max HP, hit F(MA+X)%; magic evade. */
 void formula_magic_hp_absorb(void) {
-    if (formula_evade_calculate_magical() == 0 && magic_accuracy_without_strengthen_calculate() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_strengthen() == 0) {
         formula_calculate_hp_percent_damage();
         formula_apply_hp_absorption();
     }
@@ -344,7 +344,7 @@ void formula_11_unused(void) {
 /* Formula 0x12: Quick, hit F(MA+X)%; no evade. */
 void formula_set_quick(void) {
     formula_store_ma_and_x();
-    if (friendly_magic_accuracy_calculate() == 0) {
+    if (calculate_friendly_magic_accuracy() == 0) {
         formula_apply_quick_effect();
     }
 }
@@ -355,7 +355,7 @@ void formula_13_unused(void) {
 
 /* Formula 0x14: Golem, hit ((MA+X) * caster Faith / 100)%. */
 void formula_set_golem(void) {
-    if (golem_accuracy_calculate() == 0) {
+    if (calculate_golem_accuracy() == 0) {
         /* The 16-bit store clears all other special-effect flags. */
         g_action_target_data->special_effect = ACTION_SPECIAL_EFFECT_SET_GOLEM;
         g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
@@ -364,7 +364,7 @@ void formula_set_golem(void) {
 
 /* Formula 0x15 (Return 2): CT to 0, hit F(MA+X)%; magic evade. */
 void formula_return_2(void) {
-    if (formula_evade_calculate_magical() == 0 && magic_accuracy_without_strengthen_calculate() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_strengthen() == 0) {
         g_action_target_data->ct_change = ACTION_CT_CHANGE_ZERO;
         g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
     }
@@ -376,7 +376,7 @@ void formula_mute(void) {
     action_data_t* action;
     u16 mp;
 
-    if (formula_evade_calculate_magical() == 0 && magic_accuracy_without_strengthen_calculate() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_strengthen() == 0) {
         action = g_action_target_data;
         mp = g_action_target->mp;
         action->attack_type = ACTION_TYPE_MP_DAMAGE;
@@ -387,7 +387,7 @@ void formula_mute(void) {
 /* Formula 0x17 (Gravi 2): damage equal to the target's current HP - 1, hit F(MA+X)%;
  * magic evade. */
 void formula_gravi_2(void) {
-    if (formula_evade_calculate_magical() == 0 && magic_accuracy_without_strengthen_calculate() == 0) {
+    if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_strengthen() == 0) {
         formula_calculate_damage_leaving_one_hp();
     }
 }
@@ -453,7 +453,7 @@ void formula_dance(void) {
 
 /* Formula 0x1E: damage ((MA + Y) / 2 * MA) with element; magic evade; 19%
  * status. Strikes rnd(1..X) times
- * (strike_data_init). */
+ * (init_strike_data). */
 void formula_multihit_truth_magic(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_calculate_truth_damage();
@@ -464,7 +464,7 @@ void formula_multihit_truth_magic(void) {
  * caster Faith) and (100 - target Faith) over 10000, the Faith status counting
  * as 0 and Innocent as 100, so Faith on either side keeps that side's full
  * factor and Innocent zeroes the damage; magic evade; 19% status. Strikes
- * rnd(1..X) times (strike_data_init). */
+ * rnd(1..X) times (init_strike_data). */
 void formula_un_truth(void) {
     action_data_t* action;
 
@@ -503,7 +503,7 @@ void formula_un_truth(void) {
 /* Formula 0x20: Draw Out damage (MA * Y) with element; no evade; 19% status;
  * katana break roll. */
 void formula_draw_out_damage(void) {
-    formula_roll_katana_break();
+    formula_calculate_katana_break();
     formula_store_ma_and_y();
     formula_calculate_magical_damage_without_faith();
 }
@@ -513,7 +513,7 @@ void formula_bizen_boat(void) {
     s16 damage;
     action_data_t* action;
 
-    formula_roll_katana_break();
+    formula_calculate_katana_break();
     formula_store_ma_and_y();
     formula_apply_magical_modifiers();
     damage = g_action_work.xa * g_action_work.ya;
@@ -524,14 +524,14 @@ void formula_bizen_boat(void) {
 
 /* Formula 0x22: Draw Out status, 100%; katana break roll. */
 void formula_draw_out_status(void) {
-    formula_roll_katana_break();
+    formula_calculate_katana_break();
     formula_apply_status_to_action();
 }
 
 /* Formula 0x23 (Murasame): Draw Out heal (MA * Y) HP with no modifiers (damage to
  * undead); katana break roll. */
 void formula_murasame(void) {
-    formula_roll_katana_break();
+    formula_calculate_katana_break();
     formula_store_ma_and_y();
     formula_store_xa_times_ya_damage();
     formula_apply_undead_reversal();
@@ -963,7 +963,7 @@ void formula_elixir(void) {
 /* Formula 0x4B (Phoenix Down): heal rnd(1..Z) HP once its status applies; an undead target
  * takes its current HP as damage instead. */
 void formula_phoenix_down(void) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
 
     if (formula_apply_status_and_check_undead() == 0)
         return;
@@ -1044,7 +1044,7 @@ void formula_hit_ma_x_percent_no_evade(void) {
  * current HP as damage and no status. */
 void formula_self_destruct(void) {
     if (g_action_target != g_action_attacker) {
-        unit_stats_t* caster = g_action_attacker;
+        battle_unit_t* caster = g_action_attacker;
         action_data_t* action = g_action_target_data;
 
         action->hp_damage = caster->max_hp - caster->hp;
@@ -1107,9 +1107,9 @@ void formula_circle(void) {
  * overwritten by the level change's. */
 void formula_please_eat(void) {
     action_data_t* action;
-    unit_stats_t* saved_unit;
+    battle_unit_t* saved_unit;
     action_data_t* saved_action;
-    unit_stats_t* attacker;
+    battle_unit_t* attacker;
     action_data_t* attacker_action;
 
     formula_apply_full_hp_mp_heal();
@@ -1143,7 +1143,7 @@ void formula_please_eat(void) {
  * one already of the Morbol family, is a forced miss. */
 void formula_moldball_virus(void) {
     action_data_t* action;
-    unit_stats_t* target;
+    battle_unit_t* target;
 
     formula_store_ma_and_x();
     formula_element_apply_strengthen();
@@ -1218,7 +1218,7 @@ void formula_dragon_level_up(void) {
 }
 
 /* Formula 0x5E: damage ((MA + Y) / 2 * MA) with element, 19% status; magic
- * evade. strike_data_init runs X+1 strikes; this handler calculates one. */
+ * evade. init_strike_data runs X+1 strikes; this handler calculates one. */
 void formula_fixed_multihit_magic(void) {
     if (formula_evade_calculate_magical() == 0) {
         formula_calculate_truth_damage();

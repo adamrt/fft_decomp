@@ -12,6 +12,7 @@
 #include "fft/job.h"
 #include "fft/job_list.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/menu_script.h"
@@ -24,6 +25,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
@@ -67,21 +69,21 @@ extern u8 g_formation_ability_set_window_script[67];
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_formation_ability_learn_job_list_script[217];
 
-static void idle_thread_run(void);
-static s32 removal_menu_update(void);
-static s32 removal_prompt_update(void);
-static s32 slot_menu_update(void);
-static s32 learn_menu_update(void);
-static s32 equipment_support_change_check(s16 unit_id, s16 ability_id);
-static s32 job_jp_get(s32 index);
+static void idle_thread(void);
+static s32 update_removal_menu(void);
+static s32 update_removal_prompt(void);
+static s32 update_slot_menu(void);
+static s32 update_learn_menu(void);
+static s32 check_equipment_support_change(s16 unit_id, s16 ability_id);
+static s32 calculate_job_list_jp(s32 index);
 
 static s16 s_formation_ability_remove_slots[5] = { 0 };
 
 /* A thread that only waits, frame after frame; it occupies the upper menu's child slot
  * while the Set or Remove ability mode runs. */
-static void idle_thread_run(void) {
+static void idle_thread(void) {
     for (;;) {
-        thread_frames_wait(1);
+        thread_wait_frames(1);
     }
 }
 
@@ -91,7 +93,7 @@ static void idle_thread_run(void) {
  * Refresh the ordered unit list when a submenu closes, preserving selection
  * by roster slot. Mimes may enter the learn submenu but cannot set abilities.
  */
-void formation_ability_menu_update(void) {
+void formation_ability_update_menu(void) {
     s32 state;
     s8 running;
     u8 saved;
@@ -108,14 +110,14 @@ void formation_ability_menu_update(void) {
             g_formation_unit_banner_at_bottom = 0;
             g_formation_unit_browse_enabled = 0;
             g_formation_ability_menu_saved_browse_enabled = saved;
-            menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+            menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
             g_formation_ability_menu_initialized = 1;
             g_formation_ability_menu_slots_changed = 0;
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_ENTER) {
-            g_formation_ability_menu_initialized = formation_grid_transition_update(1);
+            g_formation_ability_menu_initialized = formation_grid_update_transition(1);
         } else {
-            g_formation_ability_menu_initialized = formation_sprite_slide_update();
+            g_formation_ability_menu_initialized = formation_sprite_update_slide();
         }
         if (g_formation_ability_menu_initialized == 0) {
             g_formation_current_menu = FORMATION_MENU_ABILITY;
@@ -123,7 +125,7 @@ void formation_ability_menu_update(void) {
         return;
     }
     if (state == FORMATION_MENU_ABILITY_LEAVE) {
-        running = formation_grid_return_update(1);
+        running = formation_grid_update_return(1);
         g_formation_ability_menu_initialized = running;
         if (running == 0) {
             g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
@@ -131,15 +133,15 @@ void formation_ability_menu_update(void) {
         return;
     }
     if (g_formation_ability_menu_initialized == 0) {
-        menu_selection_records_clear();
+        menu_selection_clear_records();
         g_formation_ability_menu.selected_index = 0;
         g_formation_ability_menu_unit_index = 0xff;
     }
     if (g_formation_current_menu < FORMATION_MENU_ABILITY_LEARN) {
-        formation_sprite_at_rest_draw(g_unit_selected_index);
+        formation_sprite_draw_at_rest(g_unit_selected_index);
     }
     if (g_formation_ability_menu_unit_index != g_unit_selected_index) {
-        value = formation_unit_lock_get(g_unit_selected_index);
+        value = formation_unit_get_lock(g_unit_selected_index);
         g_formation_ability_menu_unit_index = g_unit_selected_index;
         if (value == FORMATION_UNIT_LOCK_MIME) {
             g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_MIME;
@@ -164,7 +166,7 @@ void formation_ability_menu_update(void) {
         }
         selection = &g_screen_selection_results[8];
         if (*selection != -1) {
-            value = formation_unit_lock_get(g_unit_selected_index);
+            value = formation_unit_get_lock(g_unit_selected_index);
             allowed = 0;
             if (value == FORMATION_UNIT_LOCK_MIME) {
                 allowed = *selection == 2;
@@ -176,34 +178,34 @@ void formation_ability_menu_update(void) {
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 g_formation_current_menu = *selection + FORMATION_MENU_ABILITY_SET;
                 if (g_formation_current_menu != FORMATION_MENU_ABILITY_LEARN) {
-                    thread_start(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, idle_thread_run);
-                    menu_selection_value_init(SCREEN_CURSOR_SET_ABILITY_SLOT, 0);
-                    menu_selection_value_init(SCREEN_CURSOR_REMOVE_ABILITY_SLOT, 0);
+                    thread_start(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, idle_thread);
+                    menu_selection_init_value(SCREEN_CURSOR_SET_ABILITY_SLOT, 0);
+                    menu_selection_init_value(SCREEN_CURSOR_REMOVE_ABILITY_SLOT, 0);
                 } else {
                     menu_managed_thread_stop(SCREEN_THREAD_SLOT_UPPER_MENU);
                 }
             } else {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             }
-            screen_selection_results_reset();
+            screen_reset_selection_results();
         }
     } else {
         if (g_formation_ability_submenu_running == 0) {
             g_formation_current_menu = FORMATION_MENU_ABILITY;
             thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD);
             value = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
-            formation_record_list_build(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
-            g_unit_selected_index = formation_roster_slot_find(value);
+            formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
+            g_unit_selected_index = formation_unit_find_by_roster_slot(value);
             g_formation_ability_submenu_running = 1;
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_SET) {
-            g_formation_ability_submenu_running = slot_menu_update();
+            g_formation_ability_submenu_running = update_slot_menu();
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_REMOVE) {
-            g_formation_ability_submenu_running = removal_menu_update();
+            g_formation_ability_submenu_running = update_removal_menu();
         }
         if (g_formation_current_menu == FORMATION_MENU_ABILITY_LEARN) {
-            g_formation_ability_submenu_running = learn_menu_update();
+            g_formation_ability_submenu_running = update_learn_menu();
         }
     }
 }
@@ -216,7 +218,7 @@ void formation_ability_menu_update(void) {
  * slot, and Left opens the remove-all prompt. Highlighting a Move+/Jump+
  * movement ability previews losing it.
  */
-static s32 removal_menu_update(void) {
+static s32 update_removal_menu(void) {
     s16 unit_index = g_unit_selected_index;
     u8 lock_state;
     u8 slot;
@@ -242,26 +244,26 @@ static s32 removal_menu_update(void) {
         g_formation_ability_remove_initialized = 1;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        formation_toggle_preview_stats_window(0);
+        unit_panel_toggle_preview_stats_thread(0);
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         g_formation_ability_remove_initialized = 0;
         g_formation_ability_remove_unit_index = -1;
         return 0;
     }
-    lock_state = formation_unit_lock_get(g_unit_selected_index);
+    lock_state = formation_unit_get_lock(g_unit_selected_index);
     if (lock_state == FORMATION_UNIT_UNLOCKED) {
         lock_state = 0;
     }
     if (lock_state != 0) {
         g_help_message_text_id = 0;
-        formation_toggle_preview_stats_window(0);
+        unit_panel_toggle_preview_stats_thread(0);
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
         }
         return 1;
     }
     if (g_formation_ability_remove_all_prompt_active != 0) {
-        g_formation_ability_remove_all_prompt_active = removal_prompt_update();
+        g_formation_ability_remove_all_prompt_active = update_removal_prompt();
         if (g_formation_ability_remove_all_prompt_active == 0) {
             g_formation_ability_remove_cursor = -1;
             bcopy(g_formation_unit_pointers[g_unit_selected_index]->detail.abilities, s_formation_ability_remove_slots,
@@ -271,20 +273,20 @@ static s32 removal_menu_update(void) {
         return 1;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_LEFT) {
-        formation_ability_diff_movement_stats(&g_item_preview_stat_detail, s_formation_ability_remove_slots[4], 0);
-        formation_toggle_preview_stats_window(1);
+        formation_calculate_ability_movement_delta(&g_item_preview_stat_detail, s_formation_ability_remove_slots[4], 0);
+        unit_panel_toggle_preview_stats_thread(1);
         g_formation_ability_remove_all_prompt_active = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
-    slot = menu_selection_vertical_sound_step(
+    slot = menu_selection_step_vertical_with_sound(
                4, SCREEN_CURSOR_REMOVE_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
         + 1;
     cursor_y = &g_formation_ability_remove_cursor_point.y;
     slot_index = slot;
     *cursor_y = slot_index * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    screen_sliding_cursor_draw(
+    menu_draw_sliding_cursor(
         &g_formation_ability_remove_cursor_point, &g_formation_ability_remove_cursor_anim, g_menu_input_lock_mode);
     /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
     ability = g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[slot_index];
@@ -303,13 +305,13 @@ static s32 removal_menu_update(void) {
         if (sound == 0) {
             sound = SOUND_SFX_INVALID;
         } else {
-            formation_ability_slot_set(g_unit_selected_index, slot, 0,
-                equipment_support_change_check(
+            formation_ability_set_slot(g_unit_selected_index, slot, 0,
+                check_equipment_support_change(
                     g_unit_selected_index, g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[slot]));
             g_formation_ability_menu_slots_changed = 1;
             *saved_slot = 0;
             g_formation_ability_remove_cursor = -1;
-            formation_stage_selected_unit();
+            stage_selected_unit();
             sound = SOUND_SFX_UNEQUIP;
         }
         g_sound_queued_effect_id = sound;
@@ -321,19 +323,19 @@ static s32 removal_menu_update(void) {
             movement_ability = s_formation_ability_remove_slots[4];
             if (movement_ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                 && movement_ability <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3) {
-                formation_ability_diff_movement_stats(&g_item_preview_stat_detail, movement_ability, 0);
+                formation_calculate_ability_movement_delta(&g_item_preview_stat_detail, movement_ability, 0);
                 g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 preview = 1;
             }
         }
-        formation_toggle_preview_stats_window(preview);
+        unit_panel_toggle_preview_stats_thread(preview);
     }
     return 1;
 }
 
 /* One frame of the remove-all-abilities prompt: blink the cursors on the four ability
  * slots; Circle empties them all and Right backs out, both returning 0, else 1. */
-static s32 removal_prompt_update(void) {
+static s32 update_removal_prompt(void) {
     formation_unit_t* unit;
     u16 value;
     s32 unused[16];
@@ -347,7 +349,7 @@ static s32 removal_prompt_update(void) {
         for (i = 1; i < 5; i++) {
             g_formation_ability_remove_all_cursor_point.y = i * 0x10 + 0x90;
             value = 0;
-            screen_sliding_cursor_draw(&g_formation_ability_remove_all_cursor_point, &value, g_menu_input_lock_mode);
+            menu_draw_sliding_cursor(&g_formation_ability_remove_all_cursor_point, &value, g_menu_input_lock_mode);
         }
     }
     if (g_menu_input_primary_repeat & PSX_PAD_RIGHT) {
@@ -360,11 +362,11 @@ static s32 removal_prompt_update(void) {
             unit = g_formation_unit_pointers[g_unit_selected_index];
             if (unit->detail.abilities[i] != 0) {
                 changed = 1;
-                formation_ability_slot_set(g_unit_selected_index, i, 0,
-                    equipment_support_change_check(g_unit_selected_index, unit->detail.abilities[i]));
+                formation_ability_set_slot(g_unit_selected_index, i, 0,
+                    check_equipment_support_change(g_unit_selected_index, unit->detail.abilities[i]));
             }
         }
-        formation_stage_selected_unit();
+        stage_selected_unit();
         if (changed == 0) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
         } else {
@@ -380,7 +382,7 @@ static s32 removal_prompt_update(void) {
  *
  * Return 0 when canceled and 1 while active. With the list closed the cursor
  * picks an ability slot and opens its candidate list (ability_list_build for the
- * secondary skillset, formation_ability_rsm_list_build otherwise);
+ * secondary skillset, formation_ability_build_rsm_list otherwise);
  * with it open, the chosen ability is written to the slot and the Move+N
  * stat preview is refreshed.
  *
@@ -389,7 +391,7 @@ static s32 removal_prompt_update(void) {
  * `(u16)` casts keep the Move+N range checks in unsigned-short arithmetic
  * (`li 0xfe1a` / `addu` / `andi 0xffff`).
  */
-static s32 slot_menu_update(void) {
+static s32 update_slot_menu(void) {
     s32 unused[2]; /* never referenced; reproduces the 0x40 frame */
     s16 x;
     s16 y;
@@ -406,7 +408,7 @@ static s32 slot_menu_update(void) {
         g_formation_ability_set_unit_index = g_unit_selected_index;
     }
     if (g_formation_ability_set_initialized == 0) {
-        menu_selection_records_clear();
+        menu_selection_clear_records();
         g_formation_ability_set_slot = -1;
         g_formation_ability_set_initialized = 1;
         g_formation_ability_set_cursor = 0xFF;
@@ -423,19 +425,19 @@ static s32 slot_menu_update(void) {
         if (g_formation_ability_set_list_open == 0) {
             thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
             g_formation_ability_set_initialized = 0;
-            screen_selection_results_reset();
+            screen_reset_selection_results();
             return 0;
         }
         g_formation_ability_set_list_close_pending = 1;
     }
 
     /* UNLOCKED is 1, so fold it to 0: any other nonzero result is a locked unit. */
-    lock_state = formation_unit_lock_get(g_unit_selected_index);
+    lock_state = formation_unit_get_lock(g_unit_selected_index);
     if (lock_state == FORMATION_UNIT_UNLOCKED) {
         lock_state = 0;
     }
     if (lock_state != 0) {
-        formation_toggle_preview_stats_window(0);
+        unit_panel_toggle_preview_stats_thread(0);
         g_help_message_text_id = 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
@@ -459,7 +461,7 @@ static s32 slot_menu_update(void) {
             g_help_message_text_id = current + HELP_TEXT_ID_SKILLSET_BASE;
         }
 
-        slot = menu_selection_vertical_sound_step(
+        slot = menu_selection_step_vertical_with_sound(
                    4, SCREEN_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
             + 1;
         g_formation_ability_set_slot = slot;
@@ -471,21 +473,21 @@ static s32 slot_menu_update(void) {
                     g_item_list_entries, slot);
             } else {
                 g_formation_ability_set_entry_count
-                    = formation_ability_rsm_list_build(g_unit_selected_index, slot - 1, g_item_list_entries);
+                    = formation_ability_build_rsm_list(g_unit_selected_index, slot - 1, g_item_list_entries);
             }
 
-            menu_set_vsync_mode_and_event_speed(2);
+            menu_set_event_speed(2);
             g_formation_unit_cycle_mode = 1;
             g_formation_ability_set_list_open = 1;
             thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU);
             g_formation_ability_panel_thread_params.style = 1;
             g_formation_ability_set_cursor = 0xFF;
-            menu_selection_record_restore(g_formation_ability_set_slot + 4, &x, &y, g_item_list_entries);
+            menu_selection_restore_record(g_formation_ability_set_slot + 4, &x, &y, g_item_list_entries);
             value = TEXT_SECTION_ABILITY_NAMES;
             if (g_formation_ability_set_slot == 1) {
                 value = TEXT_SECTION_SKILLSET_NAMES;
             }
-            menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[value]);
+            menu_scrollable_list_init(g_item_list_entries, x, y, g_text_section_pointers[value]);
         }
     } else {
         if (g_menu_list_entry_count != 0) {
@@ -501,15 +503,15 @@ static s32 slot_menu_update(void) {
                     message_box_show_with_sound(0xD81D, SOUND_SFX_ERROR_MESSAGE);
                 } else {
                     /* Revalidate equipment when either the new or the replaced ability is an equip support. */
-                    value = equipment_support_change_check(g_unit_selected_index, selected);
+                    value = check_equipment_support_change(g_unit_selected_index, selected);
                     current = g_formation_unit_pointers[g_unit_selected_index]
                                   ->detail.abilities[g_formation_ability_set_slot];
-                    formation_ability_slot_set(g_unit_selected_index, g_formation_ability_set_slot, selected,
-                        value | equipment_support_change_check(g_unit_selected_index, current));
+                    formation_ability_set_slot(g_unit_selected_index, g_formation_ability_set_slot, selected,
+                        value | check_equipment_support_change(g_unit_selected_index, current));
                     g_sound_queued_effect_id = SOUND_SFX_EQUIP;
                     g_formation_ability_menu_slots_changed = 1;
                     g_formation_ability_set_list_close_pending = 1;
-                    formation_stage_selected_unit();
+                    stage_selected_unit();
                 }
             }
         } else {
@@ -532,7 +534,7 @@ static s32 slot_menu_update(void) {
                              ->detail.abilities[g_formation_ability_set_slot]
                        - ABILITY_ID_MOVEMENT_MOVE_PLUS_1)
                     < 6) {
-                formation_ability_diff_movement_stats(&g_item_preview_stat_detail,
+                formation_calculate_ability_movement_delta(&g_item_preview_stat_detail,
                     g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[g_formation_ability_set_slot],
                     g_item_list_entries[g_menu_list_selected_index]);
                 g_unit_panel_preview_stats_thread_params.redraw_request = 1;
@@ -541,55 +543,55 @@ static s32 slot_menu_update(void) {
                 g_formation_ability_set_show_stat_preview = 0;
             }
         }
-        menu_run_script_with_palette_mode(
-            g_formation_ability_set_window_script, g_menu_input_primary_repeat, menu_input_lock_mode_get(0));
+        menu_script_run_with_palette_mode(
+            g_formation_ability_set_window_script, g_menu_input_primary_repeat, menu_input_get_lock_mode(0));
     }
 
     if (g_formation_ability_set_list_close_pending != 0) {
-        menu_set_window_scale_step(0);
+        menu_window_set_scale_step(0);
         g_formation_ability_panel_thread_params.style = 0;
         g_formation_ability_set_list_open = 0;
         g_formation_unit_cycle_mode = 2;
-        menu_set_vsync_mode_and_event_speed(0);
+        menu_set_event_speed(0);
         g_formation_ability_set_show_stat_preview = 0;
         g_unit_panel_status_display_thread_params.redraw_request = 1;
-        menu_selection_record_set(g_formation_ability_set_slot + 4, g_menu_list_selected_index,
+        menu_selection_set_record(g_formation_ability_set_slot + 4, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_item_list_entries);
         thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
         g_formation_ability_set_list_close_pending = 0;
     }
 
     busy = 0;
-    formation_toggle_preview_stats_window(g_formation_ability_set_show_stat_preview);
+    unit_panel_toggle_preview_stats_thread(g_formation_ability_set_show_stat_preview);
     g_formation_ability_set_cursor_point.y = g_formation_ability_set_slot * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    if (menu_input_lock_mode_get(0) != 0 || g_formation_ability_set_list_open != 0) {
+    if (menu_input_get_lock_mode(0) != 0 || g_formation_ability_set_list_open != 0) {
         busy = 1;
     }
-    screen_sliding_cursor_draw(&g_formation_ability_set_cursor_point, &g_formation_ability_set_cursor_anim, busy);
+    menu_draw_sliding_cursor(&g_formation_ability_set_cursor_point, &g_formation_ability_set_cursor_anim, busy);
     return 1;
 }
 
 /* Learn menu processing: opens the menu on first entry, then runs either the job list
  * (MENU_JOB_LIST_STEP_JOBS) or the chosen job's ability list (MENU_JOB_LIST_STEP_ABILITIES).
  * Returns 0 once the menu has been closed, saving the records to the party. */
-static s32 learn_menu_update(void) {
+static s32 update_learn_menu(void) {
     s32 result;
 
     if (g_formation_ability_learn_menu_initialized == 0) {
         s_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_JOBS;
         g_formation_unit_banner_enabled = 0;
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-        menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_formation_unit_cycle_mode = 0;
-        screen_cursor_position_init(SCREEN_CURSOR_ABILITY_TAB, 0);
-        menu_selection_record_clear(9);
+        menu_selection_set_value(SCREEN_CURSOR_ABILITY_TAB, 0);
+        menu_selection_clear_record(9);
         g_formation_ability_learn_menu_initialized = 1;
     }
     if (s_formation_ability_learn_menu_step == MENU_JOB_LIST_STEP_JOBS) {
-        result = formation_ability_job_list_update();
+        result = job_list_update();
         if (result == MENU_JOB_LIST_STEP_ABILITIES) {
-            menu_scrollable_list_core_init(0, 0, 0);
+            menu_scrollable_list_init_core(0, 0, 0);
             s_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_ABILITIES;
         } else if (result == MENU_JOB_LIST_STEP_CLOSE) {
             g_formation_ability_learn_menu_initialized = 0;
@@ -598,7 +600,7 @@ static s32 learn_menu_update(void) {
             return 0;
         }
     } else {
-        s_formation_ability_learn_menu_step = formation_ability_learn_list_update();
+        s_formation_ability_learn_menu_step = formation_ability_update_learn_list();
     }
     return 1;
 }
@@ -608,7 +610,7 @@ static s32 learn_menu_update(void) {
  * The preview record is excluded. With Max Equip at Job Change enabled, the
  * eight equip-type supports, Martial Arts, Two Hands and Two Swords can
  * invalidate the current loadout. */
-static s32 equipment_support_change_check(s16 unit_id, s16 ability_id) {
+static s32 check_equipment_support_change(s16 unit_id, s16 ability_id) {
     if (unit_id == FORMATION_PREVIEW_UNIT_INDEX || g_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
         return 0;
     if (ability_id >= ABILITY_ID_SUPPORT_EQUIP_ARMOR && ability_id < ABILITY_ID_SUPPORT_EQUIP_ARMOR + 8)
@@ -620,14 +622,14 @@ static s32 equipment_support_change_check(s16 unit_id, s16 ability_id) {
 
 /* Return the menu input lock mode; nonzero while another window holds the input. The argument is
  * ignored. */
-s32 menu_input_lock_mode_get(s32 unused_0) {
+s32 menu_input_get_lock_mode(s32 unused_0) {
     return g_menu_input_lock_mode;
 }
 
 /* Job level of the selected unit in the Learn Abilities menu's `index`th
  * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
-s32 job_list_level_calculate(s32 index) {
-    s32 job_index = job_generic_index_get(g_job_list_job_ids[index]);
+s32 job_list_calculate_level(s32 index) {
+    s32 job_index = job_get_generic_index(g_job_list_job_ids[index]);
 
     g_job_list_job_current_level = g_formation_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
     if (job_index & 1) {
@@ -639,8 +641,8 @@ s32 job_list_level_calculate(s32 index) {
 }
 
 /* JP the selected unit has in the Learn Abilities menu's `index`th unlocked job. */
-static s32 job_jp_get(s32 index) {
-    s32 job_index = job_generic_index_get(g_job_list_job_ids[index]);
+static s32 calculate_job_list_jp(s32 index) {
+    s32 job_index = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_formation_unit_pointers[g_unit_selected_index]->job_points.current.values[job_index];
 }
@@ -648,8 +650,8 @@ static s32 job_jp_get(s32 index) {
 /* Caches and returns the selected unit's total JP for the Learn Abilities
  * menu's `index`th unlocked job; the job list's menu script reads it as a
  * number callback. */
-s32 job_list_total_jp_calculate(s32 index) {
-    s32 generic_job = job_generic_index_get(g_job_list_job_ids[index]);
+s32 job_list_calculate_total_jp(s32 index) {
+    s32 generic_job = job_get_generic_index(g_job_list_job_ids[index]);
 
     return g_formation_ability_learn_job_total_jp
         = g_formation_unit_pointers[g_unit_selected_index]->job_points.total.values[generic_job];
@@ -659,10 +661,10 @@ s32 job_list_total_jp_calculate(s32 index) {
  * the current-level callback last cached: the table entry for levels
  * below 8, otherwise the previous value with the dashes flag set. The
  * `index`th job is looked up but its result is not used. */
-s32 job_list_next_level_jp_calculate(s32 index) {
+s32 job_list_calculate_next_level_jp(s32 index) {
     s32 level;
 
-    job_generic_index_get(g_job_list_job_ids[index]);
+    job_get_generic_index(g_job_list_job_ids[index]);
     level = g_job_list_job_current_level & 0xf;
     if (level >= UNIT_JOB_LEVEL_MAX) {
         g_job_list_job_next_level_jp_requirement |= MENU_NUMBER_VALUE_DASHES;
@@ -674,7 +676,7 @@ s32 job_list_next_level_jp_calculate(s32 index) {
 
 /* Caches and returns whether the `index`th job's skillset has nothing left
  * for the selected unit to learn (no unlearned ability counted). */
-s32 job_list_mastered_calculate(s32 index) {
+s32 job_list_calculate_mastered(s32 index) {
     g_job_current_mastered = ability_list_build(g_unit_selected_index, g_job_list_job_ids[index],
                                  MENU_ABILITY_CATEGORY_ALL, 0, ABILITY_LIST_MODE_COUNT_UNLEARNED)
         == 0;
@@ -687,48 +689,48 @@ s32 job_list_mastered_calculate(s32 index) {
  * level/JP menu-script callbacks. Returns -1 when canceled, 1 when a job
  * with learnable abilities is confirmed (caching its id and generic job
  * index), and 0 while the list is still open. */
-s32 formation_ability_job_list_update(void) {
+s32 job_list_update(void) {
     s16 x;
     s16 y;
 
     if (g_formation_ability_learn_job_list_initialized == 0) {
-        menu_set_vsync_mode_and_event_speed(2);
+        menu_set_event_speed(2);
         job_list_build(g_unit_selected_index, g_job_list_job_ids, 0);
-        g_menu_row_callbacks[0].value = job_list_level_calculate;
-        g_menu_row_callbacks[2].value = job_jp_get;
-        g_menu_row_callbacks[5].value = job_list_next_level_jp_calculate;
-        g_menu_row_callbacks[6].value = job_list_total_jp_calculate;
-        g_menu_row_callbacks[13].value = job_list_mastered_calculate;
-        menu_selection_record_restore(9, &x, &y, g_job_list_job_ids);
-        menu_init_scrollable_list(g_job_list_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
+        g_menu_row_callbacks[0].value = job_list_calculate_level;
+        g_menu_row_callbacks[2].value = calculate_job_list_jp;
+        g_menu_row_callbacks[5].value = job_list_calculate_next_level_jp;
+        g_menu_row_callbacks[6].value = job_list_calculate_total_jp;
+        g_menu_row_callbacks[13].value = job_list_calculate_mastered;
+        menu_selection_restore_record(9, &x, &y, g_job_list_job_ids);
+        menu_scrollable_list_init(g_job_list_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_formation_ability_learn_job_list_initialized = 1;
     }
     g_help_message_text_id = g_job_list_job_ids[g_menu_list_selected_index] + 0x6000;
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        menu_set_vsync_mode_and_event_speed(0);
+        menu_set_event_speed(0);
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         g_formation_ability_learn_job_list_initialized = 0;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
     /* A mastered job has nothing left to learn, so only View Abilities may open it. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        if (job_list_mastered_calculate(g_menu_list_selected_index) == 0
+        if (job_list_calculate_mastered(g_menu_list_selected_index) == 0
             || g_formation_current_menu == FORMATION_MENU_VIEW_ABILITIES) {
             g_formation_ability_learn_selected_job = g_job_list_job_ids[g_menu_list_selected_index];
             g_formation_ability_learn_selected_job_index
-                = job_generic_index_get(g_formation_ability_learn_selected_job);
-            job_list_level_calculate(g_menu_list_selected_index);
-            job_jp_get(g_menu_list_selected_index);
-            job_list_total_jp_calculate(g_menu_list_selected_index);
-            job_list_next_level_jp_calculate(g_menu_list_selected_index);
-            menu_selection_record_set(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
+                = job_get_generic_index(g_formation_ability_learn_selected_job);
+            job_list_calculate_level(g_menu_list_selected_index);
+            calculate_job_list_jp(g_menu_list_selected_index);
+            job_list_calculate_total_jp(g_menu_list_selected_index);
+            job_list_calculate_next_level_jp(g_menu_list_selected_index);
+            menu_selection_set_record(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
             g_formation_ability_learn_job_list_initialized = 0;
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             return MENU_JOB_LIST_STEP_ABILITIES;
         }
         message_box_show_with_sound(0xC007, SOUND_SFX_ERROR_MESSAGE);
     }
-    menu_run_script_with_palette_mode(
+    menu_script_run_with_palette_mode(
         g_formation_ability_learn_job_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }
@@ -742,28 +744,28 @@ void formation_ability_learn_prompt_thread(void) {
 
 /* Menu callback: the selected formation unit's JP in the job chosen in the
  * learn menu. The row argument is not read. */
-s32 formation_ability_chosen_job_jp_get(s32 unused_row) {
+s32 job_list_get_jp(s32 unused_row) {
     return g_formation_unit_pointers[g_unit_selected_index]
         ->job_points.current.values[g_formation_ability_learn_selected_job_index];
 }
 
 /* Row callback: return the cached level of the job chosen in the learn menu; the row is ignored. */
-s32 formation_ability_chosen_job_level_get(s32 unused_row) {
+s32 job_list_get_level(s32 unused_row) {
     return g_job_list_job_current_level;
 }
 
 /* Row callback: return the cached JP the chosen job needs for its next level; the row is ignored. */
-s32 formation_ability_chosen_job_next_jp_get(s32 unused_row) {
+s32 job_list_get_next_level_jp(s32 unused_row) {
     return g_job_list_job_next_level_jp_requirement;
 }
 
 /* Row callback: return the cached total JP earned in the chosen job; the row is ignored. */
-s32 formation_ability_chosen_job_total_jp_get(s32 unused_row) {
+s32 job_list_get_total_jp(s32 unused_row) {
     return g_formation_ability_learn_job_total_jp;
 }
 
 /* Row callback: return whether the chosen job is mastered (nothing left to learn); the row is
  * ignored. */
-s32 formation_ability_is_chosen_job_mastered(s32 unused_row) {
+s32 job_list_is_mastered(s32 unused_row) {
     return g_job_current_mastered;
 }

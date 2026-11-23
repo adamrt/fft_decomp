@@ -8,7 +8,7 @@
  * the two hand slots is occupied, its item is below the throwable range, and
  * the weapon either forces two hands or allows them while `two_hands_support`
  * (the Two Hands support ability) is set. */
-s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
+s32 equipment_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
     s32 result = 0;
     s32 item_id = 0;
 

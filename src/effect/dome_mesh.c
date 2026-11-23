@@ -1,7 +1,5 @@
 /* Spinning dome mesh vertex load and update shared by twelve effect overlays. */
 
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
@@ -11,6 +9,8 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -35,7 +35,7 @@ typedef char effect_dome_mesh_work_size_must_be_13340[sizeof(effect_dome_mesh_wo
 
 /* Read lattice point `point` of dome row `group` from the scratchpad and add `offset`
  * to give a vertex ready for projection. */
-static void dome_vertex_load(s32 group, s32 point, const VECTOR* offset, SVECTOR* output) {
+static void load_dome_vertex(s32 group, s32 point, const VECTOR* offset, SVECTOR* output) {
     int point_element = point * DOME_MESH_LATTICE_COMPONENTS;
     int element = group * ((DOME_MESH_SEGMENTS + 1) * DOME_MESH_LATTICE_COMPONENTS) + point_element;
     /* Typed point indexing caches the scratchpad base and changes the bytes. */
@@ -72,7 +72,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     POLY_GT4* quad;
     POLY_GT4* other;
     vec3s16_t* lattice_point;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
     u8* lattice_bytes;
     u16 placement = entry->placement_flags;
     u8 target_index;
@@ -89,7 +89,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     s32 v;
     s32 u_span;
     s32 v_span;
-    u32* ot = gfx_battle_otag_get();
+    u32* ot = gfx_get_battle_otag();
     s32 i;
     u32 red;
     u32 green;
@@ -123,7 +123,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = tpage;
-                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             }
         }
 
@@ -141,7 +141,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         target_index = g_effect_state_records[state_index].timeline.target_index;
         work = record->work_slots[callback_slot];
 
-        /* effect_emitter_spawn_position_interpolate's lerp, done inline on the same fields. */
+        /* effect_emitter_interpolate_spawn_position's lerp, done inline on the same fields. */
         EFFECT_READ_CURVE(j, i, entry->motion_curves.origin, frame);
         origin.vx = effect_lerp_q8(entry->origin_start.x, entry->origin_end.x, i);
         origin.vy = effect_lerp_q8(entry->origin_start.y, entry->origin_end.y, i);
@@ -151,30 +151,30 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
             break;
         case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-            tile = battle_map_tile_get_pointer(
+            tile = map_get_tile(
                 g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
-            origin.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-            origin.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
-            origin.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+            origin.vx += g_effect_context.target_tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            origin.vy -= tile->height * MAP_HEIGHT_STEP;
+            origin.vz += g_effect_context.target_tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             break;
         case EFFECT_EMITTER_ORIGIN_CASTER:
-            effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
                 EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &vertex);
             origin.vx += vertex.vx;
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
             break;
         case EFFECT_EMITTER_ORIGIN_TARGET:
-            effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
                 target_index, &g_effect_context, &vertex);
             origin.vx += vertex.vx;
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
             break;
         case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-            battle_map_dimensions_store(&map_max);
-            origin.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
-            origin.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
+            map_store_dimensions(&map_max);
+            origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
+            origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
             break;
         }
 
@@ -234,23 +234,23 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         SetTransMatrix(&g_camera_matrix);
 
         /* Row 0: quad column j - 1 takes lattice rows 1 (x0/x1) and 0 (x2/x3). */
-        dome_vertex_load(0, 0, &origin, &vertex);
+        load_dome_vertex(0, 0, &origin, &vertex);
         RotTrans(&vertex, &screen[2], &screen[2].pad);
         quad = &work->quads[work->buffer][0];
         quad->x2 = screen[2].vx;
         quad->y2 = screen[2].vy;
         depth[0][0] = screen[2].vz;
-        dome_vertex_load(0, 1, &origin, &vertex);
+        load_dome_vertex(0, 1, &origin, &vertex);
         RotTrans(&vertex, &screen[3], &screen[3].pad);
         quad->x3 = screen[3].vx;
         quad->y3 = screen[3].vy;
         depth[0][1] = screen[3].vz;
-        dome_vertex_load(1, 0, &origin, &vertex);
+        load_dome_vertex(1, 0, &origin, &vertex);
         RotTrans(&vertex, &screen[0], &screen[0].pad);
         quad->x0 = screen[0].vx;
         quad->y0 = screen[0].vy;
         depth[1][0] = screen[0].vz;
-        dome_vertex_load(1, 1, &origin, &vertex);
+        load_dome_vertex(1, 1, &origin, &vertex);
         RotTrans(&vertex, &screen[1], &screen[1].pad);
         quad->x1 = screen[1].vx;
         quad->y1 = screen[1].vy;
@@ -263,12 +263,12 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y0 = screen[1].vy;
             quad->x2 = screen[3].vx;
             quad->y2 = screen[3].vy;
-            dome_vertex_load(0, j, &origin, &vertex);
+            load_dome_vertex(0, j, &origin, &vertex);
             RotTrans(&vertex, &screen[3], &screen[3].pad);
             quad->x3 = screen[3].vx;
             quad->y3 = screen[3].vy;
             depth[0][j] = screen[3].vz;
-            dome_vertex_load(1, j, &origin, &vertex);
+            load_dome_vertex(1, j, &origin, &vertex);
             RotTrans(&vertex, &screen[1], &screen[1].pad);
             quad->x1 = screen[1].vx;
             quad->y1 = screen[1].vy;
@@ -280,13 +280,13 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         for (i = 1; i < DOME_MESH_ROWS; i++) {
             n = i + 1;
 
-            dome_vertex_load(n, 0, &origin, &vertex);
+            load_dome_vertex(n, 0, &origin, &vertex);
             RotTrans(&vertex, &screen[0], &screen[0].pad);
             quad = &work->quads[work->buffer][i * DOME_MESH_SEGMENTS];
             quad->x0 = screen[0].vx;
             quad->y0 = screen[0].vy;
             depth[n][0] = screen[0].vz;
-            dome_vertex_load(n, 1, &origin, &vertex);
+            load_dome_vertex(n, 1, &origin, &vertex);
             RotTrans(&vertex, &screen[1], &screen[1].pad);
             quad->x1 = screen[1].vx;
             quad->y1 = screen[1].vy;
@@ -305,7 +305,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 quad->y2 = other->y0;
                 quad->x3 = other->x1;
                 quad->y3 = other->y1;
-                dome_vertex_load(n, j, &origin, &vertex);
+                load_dome_vertex(n, j, &origin, &vertex);
                 RotTrans(&vertex, &screen[1], &screen[1].pad);
                 quad->x1 = screen[1].vx;
                 quad->y1 = screen[1].vy;

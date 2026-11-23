@@ -1,7 +1,7 @@
 #ifndef MESSAGE_BOX_H
 #define MESSAGE_BOX_H
 
-/* WORLD's typewriter message-box thread and sound-assisted display. */
+/* WORLD's typewriter message-box thread, and the sound-assisted display WORLD and EQUIP each define. */
 
 #include "psx/types.h"
 

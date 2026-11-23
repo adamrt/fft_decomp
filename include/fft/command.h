@@ -13,7 +13,7 @@
 /* g_command_current_id: the open battle menu,
  * and the index of its entry in g_command_idle_action_entries, which is also what a row action from 0 to
  * 0xff opens. The unit menus are picked by
- * menu_action_get_menu_id. A system function
+ * menu_get_action_menu_id. A system function
  * (request_entry_t) shows its text in MESSAGE or in one of the
  * choice entries and sets the current id itself; ids from 0x62 exist only
  * there and have no entry.
@@ -74,7 +74,7 @@ typedef enum command_menu {
     MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT = 41, /* Attack, Quit under MESSAGE */
     MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT = 42, /* Defend, Quit under MESSAGE */
     MENU_COMMAND_ID_EFFECT_MESSAGE = 43,      /* MENU_PROMPT_EFFECT_MESSAGE's entry */
-    MENU_COMMAND_ID_DEBUG_UNIT_EDITOR = 44,   /* debug_unit_editor_open */
+    MENU_COMMAND_ID_DEBUG_UNIT_EDITOR = 44,   /* debug_unit_editor_thread */
     MENU_COMMAND_ID_MESSAGE_EXECUTE = 45,     /* Execute, Quit under MESSAGE */
     MENU_COMMAND_ID_RIDER_TURN = 46,          /* the TURN menus of a mounted unit, with a Stop ride row */
     MENU_COMMAND_ID_RIDER_TURN_MOVED = 47,
@@ -92,7 +92,7 @@ typedef enum command_menu {
 extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
 
 void menu_action_dispatch(void);
-command_menu_e menu_action_get_menu_id(s32 battle_id);
+command_menu_e menu_get_action_menu_id(s32 battle_unit_id);
 void menu_action_open_active_unit(void);
 void menu_action_open_non_active_unit(void);
 
@@ -104,7 +104,7 @@ extern menu_entry_t g_command_idle_action_entries[56];
 
 /* Opens an idle action menu (command_menu_e) for the active-turn unit beside it and restores the row it last
  * chose. WORLD's body only clears g_menu_building_thread_started. */
-void command_menu_open(s32 menu_id);
+void command_open_menu(s32 menu_id);
 
 /* Thread entry of the turn menus: the icon selection loop, then the chosen row remembered for the unit. */
 void command_turn_menu_thread(void);
@@ -222,10 +222,10 @@ void command_reset_unit_records(void);
 void command_record_unit_selection(void);
 
 /* Clears one unit's records, only for a unit under manual control. */
-void command_reset_unit_record(s32 battle_id);
+void command_reset_unit_record(s32 battle_unit_id);
 
 /* Calls command_reset_unit_records; nothing calls it. */
-void command_unit_records_reset(void);
+void command_reset_unit_records_unused(void);
 
 /* Restores the selected unit's command row after Move or Act changes the available choices. */
 void command_restore_unit_selection(s32 menu_id);
@@ -238,13 +238,13 @@ void auto_battle_settings_thread(void);
 void auto_battle_confirm_thread(void);
 
 /* Stores a unit's auto-battle target with the resolved command as its setting. */
-void auto_battle_store_target(s32 target_id, s32 battle_id);
+void auto_battle_store_target(s32 target_id, s32 battle_unit_id);
 
 /* mini menu */
 void mini_menu_start(void);
 
 /* Waits for the camera and the menu transition, then runs the Triangle mini menu. */
-void mini_menu_select(void);
+void mini_menu_thread(void);
 
 /* Posts the close command after two frames under the mini-menu task id. */
 void menu_request_close_thread(void);
@@ -253,8 +253,8 @@ void menu_request_close_thread(void);
 void mini_menu_confirm_delay_thread(void);
 
 /* system functions */
-/* First argument of menu_request_dispatch and
- * request_dispatch; `option` selects the variant. */
+/* First argument of menu_dispatch_request and
+ * dispatch_request; `option` selects the variant. */
 typedef enum menu_request {
     MENU_REQUEST_TARGETING_PROMPT = 1, /* prompt for the resolved menu command */
     MENU_REQUEST_MOVE_FEEDBACK = 2,    /* option: menu_move_feedback_option_e */
@@ -298,8 +298,8 @@ typedef enum menu_scenario_check_option {
     MENU_SCENARIO_CHECK_TEST = 2   /* only record the event in g_script_next_event_id */
 } menu_scenario_check_option_e;
 
-/* Result of request_dispatch (and of
- * menu_request_dispatch, which returns it). */
+/* Result of dispatch_request (and of
+ * menu_dispatch_request, which returns it). */
 typedef enum menu_request_result {
     MENU_REQUEST_RESULT_UNKNOWN_COMMAND = 0, /* the CLOSE function was started instead */
     MENU_REQUEST_RESULT_DONE = 1,            /* a system function was started, or nothing had to run */
@@ -326,7 +326,7 @@ typedef enum menu_prompt_id {
 extern s32 g_menu_request_busy;
 
 /* Runs a system function (menu_request_e) for unit_id. */
-s32 menu_request_dispatch(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
+s32 menu_dispatch_request(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 
 /* status screen */
 extern s32 g_menu_status_enabled;
@@ -336,7 +336,7 @@ extern s32 g_menu_status_open;
 
 void menu_status_open(void);
 void menu_status_clear(void);
-void menu_enter_status_screen_selection(void);
-void menu_leave_status_screen_selection(void);
+void status_screen_enter_selection(void);
+void status_screen_leave_selection(void);
 
 #endif

@@ -109,22 +109,22 @@ static void (*s_sound_novel_opcode_handlers[54])(void);
 /* Sound IDs 1 through 56 select four-byte rows in the WLDCORE sound bank. */
 extern u8 g_sound_novel_sound_quads[56][4];
 
-static void choice_branch(s32 branch_if_equal);
-static void local_flag_branch(s32 expected);
-static void saved_flag_branch(s32 expected);
-static void section_read_branch(s32 expected);
-static void reading_reset(sound_novel_reading_t* record);
-static void reading_music_change(s32 music_id);
-static s32 choice_timer_update(void);
-static void pending_sounds_play(s32 sound_id, s32 weather_sound_id, s32 track);
-static void background_sound_play(s32 sound_id);
-static void sound_quad_play(s32 sound_id);
+static void branch_on_choice(s32 branch_if_equal);
+static void branch_on_local_flag(s32 expected);
+static void branch_on_saved_flag(s32 expected);
+static void branch_on_section_read(s32 expected);
+static void reset_reading(sound_novel_reading_t* record);
+static void change_reading_music(s32 music_id);
+static s32 update_choice_timer(void);
+static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track);
+static void play_background_sound(s32 sound_id);
+static void play_sound_quad(s32 sound_id);
 
 /* Resume the selected sound novel from its saved reading record (a reset one for
  * indexes past the five saved slots): restore its picture, background, music, sound, windows,
  * value display and brightness, load its files and resume at the saved section, or
  * flag a branch when there is none. */
-void sound_novel_reading_restore(s32 render_record) {
+void sound_novel_restore_reading(s32 render_record) {
     u32* word;
     s32 i;
     s32 picture_id;
@@ -137,7 +137,7 @@ void sound_novel_reading_restore(s32 render_record) {
     if (g_sound_novel_selected < 5) {
         g_sound_novel_reading = g_sound_novel_saved_readings[g_sound_novel_selected];
     } else {
-        reading_reset(&g_sound_novel_reading);
+        reset_reading(&g_sound_novel_reading);
     }
 
     g_sound_novel_reading.picture_render_index = render_record;
@@ -171,7 +171,7 @@ void sound_novel_reading_restore(s32 render_record) {
     }
 
     if (g_sound_novel_reading.music_selection & 0xFF) {
-        music_queue_track_start(g_sound_novel_reading.music_selection);
+        music_queue_start_track(g_sound_novel_reading.music_selection);
     } else {
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x10);
         music_queue_add(MUSIC_QUEUE_COMMAND_UNLOAD, 2);
@@ -183,9 +183,9 @@ void sound_novel_reading_restore(s32 render_record) {
     sound = g_sound_novel_reading.sound_id;
     if (sound != 0) {
         if (sound & 0x4000) {
-            background_sound_play((sound ^ 0x4000));
+            play_background_sound((sound ^ 0x4000));
         } else {
-            sound_quad_play(sound);
+            play_sound_quad(sound);
         }
     }
 
@@ -212,8 +212,8 @@ void sound_novel_reading_restore(s32 render_record) {
     g_world_map_fade.boxes[1].b = tint;
     g_world_map_fade.priorities[1] = 0xB;
     music_queue_wait_until_empty();
-    sound_novel_files_load(g_sound_novel_selected);
-    file_pending_wait();
+    sound_novel_load_files(g_sound_novel_selected);
+    file_wait_pending();
     section = g_sound_novel_reading.section;
     if (section != 0) {
         /* The 32-bit view preserves register order; the named offset field swaps the index and base. */
@@ -230,13 +230,13 @@ void sound_novel_reading_restore(s32 render_record) {
 
 /* Reset the selected sound novel's saved record so the next reading starts from the beginning; the
  * argument is unused. */
-void sound_novel_selected_reading_reset(s32 unused) {
-    reading_reset(&g_sound_novel_saved_readings[g_sound_novel_selected]);
+void sound_novel_reset_selected_reading(s32 unused) {
+    reset_reading(&g_sound_novel_saved_readings[g_sound_novel_selected]);
 }
 
 /* Reset a sound-novel record to the start of a reading: no text history, no
  * picture or background, no sound, section 0 and brightness 0x30. */
-static void reading_reset(sound_novel_reading_t* record) {
+static void reset_reading(sound_novel_reading_t* record) {
     record->text_history[3] = -1;
     record->text_history[2] = -1;
     record->text_history[1] = -1;
@@ -270,11 +270,11 @@ static void reading_reset(sound_novel_reading_t* record) {
  *   the opcode byte then selects a handler from g_sound_novel_opcode_handlers.
  *
  * The turn loop ends once a handler sets YIELD or END. Returns 0 when the
- * script has ended, which is how sound_novel_reader_update tests
+ * script has ended, which is how sound_novel_update_reader tests
  * it; it also clears YIELD on the way out.
  *
  * The record holds the loaded script's section-offset table. */
-s32 sound_novel_script_run(void) {
+s32 sound_novel_run_script(void) {
     s32 sound_id;
     s32 weather_sound_id;
     u32 section_byte_offset;
@@ -284,11 +284,11 @@ s32 sound_novel_script_run(void) {
     do {
         sound_id = script_variable_get(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT);
         weather_sound_id = script_variable_get(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND);
-        pending_sounds_play(sound_id, weather_sound_id, script_variable_get(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK));
-        choice_timer_update();
+        play_pending_sounds(sound_id, weather_sound_id, script_variable_get(EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK));
+        update_choice_timer();
 
         if (g_sound_novel_reading.state_flags & SOUND_NOVEL_STATE_BRANCH) {
-            bits_value_set(
+            bits_set_value(
                 g_sound_novel_read_section_bits, (g_sound_novel_selected << 8) + g_sound_novel_reading.section, 1);
             g_sound_novel_reading.state_flags &= ~SOUND_NOVEL_STATE_BRANCH;
             section_byte_offset = g_sound_novel_reading.buffer->offsets[g_sound_novel_reading.section];
@@ -321,7 +321,7 @@ s32 sound_novel_script_run(void) {
 }
 
 /* Find an opcode in a sound-novel script section; return its whole instruction or zero. */
-u32 sound_novel_section_instruction_find(s32 section, s32 opcode) {
+u32 sound_novel_find_section_instruction(s32 section, s32 opcode) {
     u32* word = &((u32*)&g_sound_novel_script)[g_sound_novel_reading.buffer->offsets[section] / sizeof(u32)];
     s32 i;
 
@@ -341,13 +341,13 @@ u32 sound_novel_section_instruction_find(s32 section, s32 opcode) {
 /* Clear a render record's text image, draw text `text_id` centered
  * horizontally in it (nothing for id 0) and upload it. Also clears the
  * three pending sound script variables. */
-void window_centered_text_draw(s32 window_index, s32 text_id) {
+void window_draw_centered_text(s32 window_index, s32 text_id) {
     point32_t point;
     s16 text_width;
     s16 text_height;
     s32 i;
 
-    text_pixels_measure(&text_width, &text_height, text_entry_find(text_id));
+    text_measure_pixels(&text_width, &text_height, text_find_entry(text_id));
     point.x = (((g_display_object_gs_image_pool[window_index].bounds.w - text_width) / 2) & 0xfffe) + 8;
     point.y = 10;
     for (i = 0; i < g_display_object_gs_image_pool[window_index].bounds.w
@@ -367,7 +367,7 @@ void window_centered_text_draw(s32 window_index, s32 text_id) {
 /* Consume the three pending audio script variables according to the reading's
  * sound mode, then clear them. The interpreter calls this before dispatching
  * each instruction, including repeated calls to a yielding handler. */
-static void pending_sounds_play(s32 sound_id, s32 weather_sound_id, s32 track) {
+static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
     s32* music_flags;
 
     if ((sound_id | weather_sound_id | track) == 0) {
@@ -379,7 +379,7 @@ static void pending_sounds_play(s32 sound_id, s32 weather_sound_id, s32 track) {
             sound_play_effect(sound_id);
         }
         if (weather_sound_id != 0) {
-            sound_quad_play(weather_sound_id);
+            play_sound_quad(weather_sound_id);
         }
         break;
     case SOUND_NOVEL_SOUND_MODE_EFFECTS_AND_MUSIC:
@@ -387,15 +387,15 @@ static void pending_sounds_play(s32 sound_id, s32 weather_sound_id, s32 track) {
             sound_play_effect(sound_id);
         }
         if (weather_sound_id != 0) {
-            sound_quad_play(weather_sound_id);
+            play_sound_quad(weather_sound_id);
         }
         if (track != 0) {
             if ((g_sound_novel_reading.music_selection & 0xFF) != track) {
-                reading_music_change(track);
+                change_reading_music(track);
                 music_flags = &g_music_queue.music.flags;
                 *music_flags |= MUSIC_QUEUE_PLAYING;
-                music_track_switch(g_sound_novel_reading.music_selection >> 8, 0, 0);
-                music_volume_target_set(g_music_queue.volume, 0x28);
+                music_switch_track(g_sound_novel_reading.music_selection >> 8, 0, 0);
+                music_set_target_volume(g_music_queue.volume, 0x28);
             }
         }
         break;
@@ -411,11 +411,11 @@ enum { SOUND_QUAD_COMMAND_COUNT = 4, SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(S
  * g_sound_novel_sound_quads: four sounds of the sound novel's
  * resource, one on each SFX channel pair. A zero byte selects that
  * resource's empty sound 0, which only stops its channel pair. */
-static void sound_quad_play(s32 sound_id) {
+static void play_sound_quad(s32 sound_id) {
     s32 values[SOUND_QUAD_COMMAND_COUNT];
     s32 i;
 
-    sound_all_sfx_stop();
+    sound_stop_all_sfx();
     for (i = 0; i < SOUND_QUAD_COMMAND_COUNT; i++) {
         values[i] = g_sound_novel_sound_quads[sound_id - 1][i] + SOUND_QUAD_COMMAND_BASE;
     }
@@ -424,9 +424,9 @@ static void sound_quad_play(s32 sound_id) {
 
 /* Stop all sound effects and play environment sound `sound_id` as the
  * background sound. */
-static void background_sound_play(s32 sound_id) {
-    sound_all_sfx_stop();
-    sound_background_play(sound_id + SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0));
+static void play_background_sound(s32 sound_id) {
+    sound_stop_all_sfx();
+    sound_play_background(sound_id + SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0));
 }
 
 /* Same 32-bit value as g_sound_novel_countdown_frames; the target stores 0 through
@@ -443,7 +443,7 @@ extern s32 g_sound_novel_countdown_frames_reset;
  * countdown becomes -1; once that thread has ended the script branches to
  * g_sound_novel_countdown_section.
  */
-static s32 choice_timer_update(void) {
+static s32 update_choice_timer(void) {
     s32 elapsed;
     s32 remaining;
     s32 minutes;
@@ -479,7 +479,7 @@ static s32 choice_timer_update(void) {
     return 0;
 }
 
-/* Sound-novel opcode 0x00: end the script; sound_novel_script_run then returns 0. */
+/* Sound-novel opcode 0x00: end the script; sound_novel_run_script then returns 0. */
 static void sound_novel_opcode_00_end_script(void) {
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_END;
 }
@@ -507,7 +507,7 @@ static void sound_novel_opcode_03_start_text_thread_and_push_history(void) {
     s32 operand = (u8)(g_sound_novel_reading.instruction >> 8);
 
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_dialog_thread);
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     history_1 = g_sound_novel_reading.text_history[1];
     history_2 = g_sound_novel_reading.text_history[2];
     history_3 = g_sound_novel_reading.text_history[3];
@@ -538,7 +538,7 @@ static void sound_novel_opcode_05_load_background_set(void) {
         DrawSync(0);
         g_sound_novel_reading.background_set = value;
         picture_load_background_set(value);
-        file_pending_wait();
+        file_wait_pending();
     }
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -552,13 +552,13 @@ static void sound_novel_opcode_06_branch_to_section(void) {
 /* Sound-novel opcode 0x07: branch to the section in byte 1 when the chosen dialog option equals
  * byte 2. */
 static void sound_novel_opcode_07_branch_if_dialog_option_equal(void) {
-    choice_branch(1);
+    branch_on_choice(1);
 }
 
 /* Branches the sound-novel script to section byte 1 when the selected dialog
  * option equals byte 2 (or differs from it, when `branch_if_equal` is 0);
  * otherwise fetches the next instruction. */
-static void choice_branch(s32 branch_if_equal) {
+static void branch_on_choice(s32 branch_if_equal) {
     u8 operand = (g_sound_novel_reading.instruction >> 16);
 
     if ((operand == script_variable_get(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION)) == branch_if_equal) {
@@ -572,7 +572,7 @@ static void choice_branch(s32 branch_if_equal) {
 /* Sound-novel opcode 0x08: branch to the section in byte 1 when the chosen dialog option differs
  * from byte 2. */
 static void sound_novel_opcode_08_branch_if_dialog_option_not_equal(void) {
-    choice_branch(0);
+    branch_on_choice(0);
 }
 
 /* Sound-novel opcode 0x09: yield every frame until the frame counter passes byte 1, then fetch the
@@ -619,7 +619,7 @@ static void sound_novel_opcode_0a_load_picture(void) {
     g_sound_novel_reading.picture_x = x;
     g_sound_novel_reading.picture_y = y;
     picture_load_set(picture);
-    file_pending_wait();
+    file_wait_pending();
     g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].position.x = x - 0x80;
     g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].position.y = y - 0x78;
     GsGetTimInfo(g_picture_buffer + 1, &image);
@@ -631,7 +631,7 @@ static void sound_novel_opcode_0a_load_picture(void) {
     clut_position.y = image.cy;
     LoadTPage(image.pixel, 0, 0, bounds.x, bounds.y, bounds.w * 4, bounds.h);
     LoadClut(image.clut, clut_position.x, clut_position.y);
-    display_object_gs_image_init(
+    display_object_init_gs_image(
         g_sound_novel_reading.picture_render_index, bounds, clut_position, DISPLAY_OBJECT_8BIT_CLUT);
     g_display_object_gs_image_pool[g_sound_novel_reading.picture_render_index].pop_in_step = 0;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
@@ -669,7 +669,7 @@ static void sound_novel_opcode_0d_start_text_thread(void) {
     s32 operand = (u8)(g_sound_novel_reading.instruction >> 8);
 
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_dialog_thread);
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 9, operand | TEXT_ID_WORLD_MESSAGE_BASE, 0);
     g_sound_novel_reading.text_id = operand;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -695,15 +695,15 @@ static void sound_novel_opcode_0e_branch_to_random_section(void) {
 
 /* Sound-novel opcode 0x0F: branch to the section in byte 3 when section byte 2 of novel byte 1 has
  * been reached, i.e. bit (byte 1 << 8 | byte 2) of g_sound_novel_read_section_bits that
- * sound_novel_script_run sets on each branch. */
+ * sound_novel_run_script sets on each branch. */
 static void sound_novel_opcode_0f_branch_if_section_read(void) {
-    section_read_branch(1);
+    branch_on_section_read(1);
 }
 
 /* Branch to section byte 3 when bit (byte 1 << 8 | byte 2) of
  * g_sound_novel_read_section_bits equals `expected`; otherwise fetch the next
  * instruction. */
-static void section_read_branch(s32 expected) {
+static void branch_on_section_read(s32 expected) {
     u32* instruction = &g_sound_novel_reading.instruction;
     u16 flags;
 
@@ -720,18 +720,18 @@ static void section_read_branch(s32 expected) {
 /* Sound-novel opcode 0x10: branch to the section in byte 3 when section byte 2 of novel byte 1 has
  * not been reached. */
 static void sound_novel_opcode_10_branch_if_section_unread(void) {
-    section_read_branch(0);
+    branch_on_section_read(0);
 }
 
 /* Sound-novel opcode 0x11: branch to the section in byte 2 when saved flag byte 1
  * (g_sound_novel_saved_flags) is set. */
 static void sound_novel_opcode_11_branch_if_saved_flag_set(void) {
-    saved_flag_branch(1);
+    branch_on_saved_flag(1);
 }
 
 /* Branch to section byte 2 when bit byte 1 of g_sound_novel_saved_flags
  * equals `expected`; otherwise fetch the next instruction. */
-static void saved_flag_branch(s32 expected) {
+static void branch_on_saved_flag(s32 expected) {
     u32* instruction = &g_sound_novel_reading.instruction;
     u16 flags;
 
@@ -747,18 +747,18 @@ static void saved_flag_branch(s32 expected) {
 
 /* Sound-novel opcode 0x12: branch to the section in byte 2 when saved flag byte 1 is clear. */
 static void sound_novel_opcode_12_branch_if_saved_flag_clear(void) {
-    saved_flag_branch(0);
+    branch_on_saved_flag(0);
 }
 
 /* Sound-novel opcode 0x13: branch to the section in byte 2 when local flag byte 1 is set; the
  * local flags are cleared whenever a reading starts or resumes. */
 static void sound_novel_opcode_13_branch_if_local_flag_set(void) {
-    local_flag_branch(1);
+    branch_on_local_flag(1);
 }
 
 /* Branch to section byte 2 when bit byte 1 of g_sound_novel_local_flags
  * equals `expected`; otherwise fetch the next instruction. */
-static void local_flag_branch(s32 expected) {
+static void branch_on_local_flag(s32 expected) {
     u32* instruction = &g_sound_novel_reading.instruction;
     u16 flags;
 
@@ -773,30 +773,30 @@ static void local_flag_branch(s32 expected) {
 
 /* Sound-novel opcode 0x14: branch to the section in byte 2 when local flag byte 1 is clear. */
 static void sound_novel_opcode_14_branch_if_local_flag_clear(void) {
-    local_flag_branch(0);
+    branch_on_local_flag(0);
 }
 
 /* Sound-novel opcode 0x15: set saved flag byte 1 (g_sound_novel_saved_flags). */
 static void sound_novel_opcode_15_set_saved_flag(void) {
-    bits_value_set(g_sound_novel_saved_flags, (u8)(g_sound_novel_reading.instruction >> 8), 1);
+    bits_set_value(g_sound_novel_saved_flags, (u8)(g_sound_novel_reading.instruction >> 8), 1);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode 0x16: clear saved flag byte 1. */
 static void sound_novel_opcode_16_clear_saved_flag(void) {
-    bits_value_set(g_sound_novel_saved_flags, (u8)(g_sound_novel_reading.instruction >> 8), 0);
+    bits_set_value(g_sound_novel_saved_flags, (u8)(g_sound_novel_reading.instruction >> 8), 0);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode 0x17: set local flag byte 1 (kept only for the current reading). */
 static void sound_novel_opcode_17_set_local_flag(void) {
-    bits_value_set(g_sound_novel_local_flags, (u8)(g_sound_novel_reading.instruction >> 8), 1);
+    bits_set_value(g_sound_novel_local_flags, (u8)(g_sound_novel_reading.instruction >> 8), 1);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode 0x18: clear local flag byte 1. */
 static void sound_novel_opcode_18_clear_local_flag(void) {
-    bits_value_set(g_sound_novel_local_flags, (u8)(g_sound_novel_reading.instruction >> 8), 0);
+    bits_set_value(g_sound_novel_local_flags, (u8)(g_sound_novel_reading.instruction >> 8), 0);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -838,7 +838,7 @@ static void sound_novel_opcode_1c_show_value_display(void) {
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH | SOUND_NOVEL_STATE_VALUE_DISPLAY;
 }
 
-/* Opcode 29: take the numeric value display down again (sound_novel_opcode_1c_start_pending_value_transition
+/* Opcode 29: take the numeric value display down again (sound_novel_opcode_1c_show_value_display
  * puts it up) and fetch the next instruction. */
 static void sound_novel_opcode_1d_hide_value_display(void) {
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
@@ -867,13 +867,13 @@ static void sound_novel_opcode_1e_apply_counter_delta(void) {
 
 /* Sound-novel opcode 0x1F: play sound effect byte 1 on a free channel. */
 static void sound_novel_opcode_1f_play_sound(void) {
-    sound_free_channel_sfx_play((u8)(g_sound_novel_reading.instruction >> 8));
+    sound_play_sfx_on_free_channel((u8)(g_sound_novel_reading.instruction >> 8));
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode 0x20: switch the novel's music to track byte 1. */
 static void sound_novel_opcode_20_load_music(void) {
-    reading_music_change((u8)(g_sound_novel_reading.instruction >> 8));
+    change_reading_music((u8)(g_sound_novel_reading.instruction >> 8));
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -881,7 +881,7 @@ static void sound_novel_opcode_20_load_music(void) {
  * unload its slot (slot 2 is used when none is loaded) and start the new
  * track; the load-wait loop after it polls a stub that always returns 0. The saved record keeps the slot in the high
  * byte and the music id in the low byte. */
-static void reading_music_change(s32 music_id) {
+static void change_reading_music(s32 music_id) {
     s16 packed = g_sound_novel_reading.music_selection;
     s32 slot = packed >> 8;
 
@@ -889,12 +889,12 @@ static void reading_music_change(s32 music_id) {
         music_stop();
     }
     if (slot != 0) {
-        music_scenario_slot_unload(slot);
+        music_unload_scenario_slot(slot);
     } else {
         slot = 2;
     }
     VSync(2);
-    music_slot_load(music_id, slot);
+    music_load_into_slot(music_id, slot);
     g_sound_novel_reading.music_selection = (slot << 8) | music_id;
     while (music_is_loading_stub() != 0) {
         VSync(0);
@@ -1009,7 +1009,7 @@ static void sound_novel_opcode_26_fade_out_music(void) {
 
     g_music_queue.music.flags &= ~MUSIC_QUEUE_PLAYING;
     operand = (u8)(g_sound_novel_reading.instruction >> 8);
-    music_volume_target_set(0, operand * 3);
+    music_set_target_volume(0, operand * 3);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
     g_sound_novel_reading.music_selection &= 0xFF00;
 }
@@ -1025,18 +1025,18 @@ static void sound_novel_opcode_27_switch_music_track(void) {
         state = &g_music_queue.music.flags;
         *state |= MUSIC_QUEUE_PLAYING;
         operand = (u8)(g_sound_novel_reading.instruction >> 8);
-        music_track_switch(track >> 8, 0, 0);
-        music_volume_target_set(g_music_queue.volume, operand * 3);
+        music_switch_track(track >> 8, 0, 0);
+        music_set_target_volume(g_music_queue.volume, operand * 3);
     }
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: fade the screen out over operand 0 frames. The
- * fade-out bit is cleared first so that world_map_fade_start always
+ * fade-out bit is cleared first so that world_map_start_fade always
  * starts the fade; the box-visible bit set here is replaced by it. */
 static void sound_novel_opcode_28_fade_screen_out(void) {
     g_world_map_fade.flags[0] = (g_world_map_fade.flags[0] & ~WORLD_MAP_FADE_OUT) | WORLD_MAP_FADE_BOX_VISIBLE;
-    world_map_fade_start(WORLD_MAP_FADE_OUT, (u8)(g_sound_novel_reading.instruction >> 8));
+    world_map_start_fade(WORLD_MAP_FADE_OUT, (u8)(g_sound_novel_reading.instruction >> 8));
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -1048,7 +1048,7 @@ static void sound_novel_opcode_29_fade_screen_in(void) {
 
     *state |= WORLD_MAP_FADE_OUT;
     *flags &= ~SOUND_NOVEL_STATE_WHITE_OVERLAY;
-    world_map_fade_start(0, (u8)(g_sound_novel_reading.instruction >> 8));
+    world_map_start_fade(0, (u8)(g_sound_novel_reading.instruction >> 8));
     *flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -1058,7 +1058,7 @@ static void sound_novel_opcode_29_fade_screen_in(void) {
  * menus blacked out), or otherwise takes it down again (box black and hidden,
  * menus back to neutral 0x80 brightness). Yields for the frame.
  *
- * The screen_brightness_set call and the 0xc store are written once per
+ * The screen_set_brightness call and the 0xc store are written once per
  * arm; jump.c cross-jumps the common tail from the g_sound_novel_reading.state_flags store
  * onward, leaving only the three argument constants in the arms.
  */
@@ -1076,7 +1076,7 @@ static void sound_novel_opcode_2a_set_white_screen_overlay(void) {
         g_world_map_flags &= ~WORLD_MAP_FLAG_FADING;
         *state = (*state & ~(WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_OUT)) | WORLD_MAP_FADE_BOX_VISIBLE;
         g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_WHITE_OVERLAY;
-        screen_brightness_set(0, 0, 0);
+        screen_set_brightness(0, 0, 0);
     } else {
         u32* state = &g_world_map_fade.flags[0];
 
@@ -1086,7 +1086,7 @@ static void sound_novel_opcode_2a_set_white_screen_overlay(void) {
         g_world_map_flags &= ~WORLD_MAP_FLAG_FADING;
         *state &= ~(WORLD_MAP_FADE_RUNNING | WORLD_MAP_FADE_OUT | WORLD_MAP_FADE_BOX_VISIBLE);
         g_sound_novel_reading.state_flags &= ~SOUND_NOVEL_STATE_WHITE_OVERLAY;
-        screen_brightness_set(0x80, 0x80, 0x80);
+        screen_set_brightness(0x80, 0x80, 0x80);
     }
     flags = &g_sound_novel_reading.state_flags;
     *flags = *flags | (SOUND_NOVEL_STATE_FETCH | SOUND_NOVEL_STATE_YIELD);
@@ -1121,13 +1121,13 @@ static void sound_novel_opcode_2c_play_sound_effect_quad(void) {
     if (g_sound_novel_state.instruction & 0xFF0000) {
         g_sound_novel_reading.sound_id = sound_id;
     }
-    sound_quad_play(sound_id);
+    play_sound_quad(sound_id);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: stop all sound effects and clear the recorded sound. */
 static void sound_novel_opcode_2d_stop_sound_effects(void) {
-    sound_all_sfx_stop();
+    sound_stop_all_sfx();
     g_sound_novel_reading.sound_id = 0;
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -1156,7 +1156,7 @@ static void sound_novel_opcode_2f_play_background_sound(void) {
     if (g_sound_novel_state.instruction & 0xFF0000) {
         g_sound_novel_reading.sound_id = sound_id | 0x4000;
     }
-    background_sound_play(sound_id);
+    play_background_sound(sound_id);
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
 
@@ -1188,8 +1188,8 @@ static void sound_novel_opcode_31_unload_music(void) {
         state = &g_music_queue.music;
         state->flags &= ~MUSIC_QUEUE_PLAYING;
         music_stop();
-        music_scenario_slot_unload(*music >> 8);
-        /* Retail bug: reading_music_change records the track at
+        music_unload_scenario_slot(*music >> 8);
+        /* Retail bug: change_reading_music records the track at
          * tracks[slot - 1], but this clears tracks[slot], one entry past it. */
         tracks = state->tracks;
         tracks[*music >> 8] = 0;
@@ -1201,7 +1201,7 @@ static void sound_novel_opcode_31_unload_music(void) {
 
 /* Sound-novel opcode 0x32: set WORLD's menu brightness to red, green and blue bytes 1-3. */
 static void sound_novel_opcode_32_set_menu_brightness(void) {
-    screen_brightness_set((u8)(g_sound_novel_reading.instruction >> 8), (u8)(g_sound_novel_reading.instruction >> 16),
+    screen_set_brightness((u8)(g_sound_novel_reading.instruction >> 8), (u8)(g_sound_novel_reading.instruction >> 16),
         (g_sound_novel_reading.instruction >> 24));
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }

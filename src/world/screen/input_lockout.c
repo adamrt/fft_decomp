@@ -6,14 +6,14 @@
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 
-/* Countdown maintained by screen_input_lockout_update. */
+/* Countdown maintained by screen_update_input_lockout. */
 extern u8 g_screen_input_lockout_timer;
 
 /* Count g_screen_input_lockout_timer down while thread 7 (the comparison status panel) is idle
  * and no status panel slides, and reset it to 10 otherwise. While it is nonzero, the menu input
  * masks are cleared (menu_input_clear_state). Compiled at -O1 with the rest of the Formation
  * screen: the reloads of the timer are that level's code, not a volatile variable. */
-void screen_input_lockout_update(void) {
+void screen_update_input_lockout(void) {
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
         g_screen_input_lockout_timer = 10;
     } else if (g_unit_panel_status_display_thread_params.flags
@@ -27,8 +27,8 @@ void screen_input_lockout_update(void) {
     }
 }
 
-/* Countdown maintained by screen_input_lockout_update; while it is nonzero the formation
+/* Countdown maintained by screen_update_input_lockout; while it is nonzero the formation
  * screen's per-frame handler returns before reading controller input. */
-s32 screen_input_lockout_get(void) {
+s32 screen_get_input_lockout(void) {
     return g_screen_input_lockout_timer;
 }

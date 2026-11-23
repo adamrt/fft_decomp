@@ -15,15 +15,15 @@ extern s32 g_deploy_skipped;
 extern s32 g_deploy_finished;
 extern unit_deployment_coordinates_t g_deploy_deployed_unit_map_coordinates[6];
 
-s32 deploy_run_frame_and_check(u32* ot, u32 buttons);
-void battle_display_init(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);
-s32 deploy_frame_submit(u32* ordering_table);
-s32 deploy_input_update(void);
+s32 deploy_update_frame(u32* ot, u32 buttons);
+void battle_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);
+s32 deploy_submit_frame(u32* ordering_table);
+s32 deploy_update_input(void);
 void deploy_mark_finished(void);
-void deploy_sprite_load_init(void);
-s32 deploy_build_units(unit_deployment_coordinates_t* formation, s32 unused_1);
+void deploy_init_sprite_load(void);
+s32 deploy_init_units(unit_deployment_coordinates_t* formation, s32 unused_1);
 s32 deploy_init_party_member(s32 unused0, s32 unused1, s32 unit_index);
-void deploy_init_units_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1);
+void deploy_init_debug_red_team_units(unit_deployment_coordinates_t* formation, s32 unused_1);
 
 /* Loads ATTACK.OUT with its scenario conditions and graphics and starts the deployment screen (returns 0), or
  * starts the thread that releases the deployment gate when skipped (returns 1).
@@ -72,7 +72,7 @@ s32 deploy_has_roster_unit_on_tiles(s32 roster_id);
 unit_deployment_coordinates_t* deploy_get_coordinate_slots(void);
 
 /* deployment help */
-void deploy_run_help_cursor(void);
-void deploy_build_strings(void);
+void deploy_help_cursor_thread(void);
+void deploy_build_help_strings(void);
 
 #endif

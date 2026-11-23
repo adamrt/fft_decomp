@@ -11,6 +11,7 @@
 #include "fft/crystal.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
@@ -29,7 +30,6 @@
 #include "fft/tutorial.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -66,8 +66,8 @@ extern s32 g_menu_request_command;
 extern s32 g_menu_request_option;
 extern u16 g_menu_request_row_actions[];
 
-/* One row of g_request_entries (request_thread_run,
- * request_dispatch). Provisional. */
+/* One row of g_request_entries (request_thread,
+ * dispatch_request). Provisional. */
 typedef struct request_entry {
     s16 menu_id;                /* 0x00; copied to g_command_current_id */
     u16 text_id;                /* 0x02; menu entry text id */
@@ -87,10 +87,10 @@ static request_entry_t s_request_entries[51] = {
         menu_icon_linked_entry_thread, 0, { 0, 0 } }, /* 0 */
     { MENU_COMMAND_ID_MESSAGE, 0x800f, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 1 */
-    { MENU_COMMAND_ID_TARGET_KIND, 0x5056, MENU_COMMAND_ID_TARGET_KIND, 0xffff, 1, { 0, 0 },
-        menu_run_icon_selection_loop, 2, { 0, 0 } }, /* 2 */
+    { MENU_COMMAND_ID_TARGET_KIND, 0x5056, MENU_COMMAND_ID_TARGET_KIND, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread,
+        2, { 0, 0 } }, /* 2 */
     { MENU_COMMAND_ID_PANEL_EXECUTE, 0x5058, MENU_COMMAND_ID_PANEL_EXECUTE, 0xffff, 1, { 0, 0 },
-        menu_run_icon_selection_loop, 3, { 0, 0 } }, /* 3 */
+        menu_icon_selection_thread, 3, { 0, 0 } }, /* 3 */
     { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 4 */
     { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
@@ -101,7 +101,7 @@ static request_entry_t s_request_entries[51] = {
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 7 */
     { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 8 */
-    { MENU_COMMAND_ID_EXECUTE, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 9,
+    { MENU_COMMAND_ID_EXECUTE, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 9,
         { 0, 0 } }, /* 9 */
     { MENU_COMMAND_ID_MESSAGE, 0x5062, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_PROMPT_ABILITY_ANNOUNCEMENT, { 0, 0 } }, /* 10 */
@@ -129,9 +129,9 @@ static request_entry_t s_request_entries[51] = {
     { 99, 0x1014, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 22, { 0, 0 } }, /* 22 */
     { 99, 0x1016, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 23, { 0, 0 } }, /* 23 */
     { MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0x506e, MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
-        menu_run_icon_selection_loop, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 24 */
+        menu_icon_selection_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 24 */
     { MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0x506f, MENU_COMMAND_ID_AUTO_BATTLE_UNIT, 0xffff, 1, { 0, 0 },
-        menu_run_icon_selection_loop, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 25 */
+        menu_icon_selection_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 25 */
     { 103, 0x800d, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT, 1, { 0, 0 },
         menu_icon_linked_entry_thread, 24, { 0, 0 } }, /* 26 */
     { 104, 0x800e, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT, 1, { 0, 0 },
@@ -163,8 +163,8 @@ static request_entry_t s_request_entries[51] = {
         MENU_PROMPT_MOVE_CONFIRM_SILENT, { 0, 0 } },                                                           /* 40 */
     { 99, 0x100a, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 41, { 0, 0 } }, /* 41 */
     { 106, 0x800c, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
-        43, { 0, 0 } },                                                                                       /* 42 */
-    { 98, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 43, { 0, 0 } }, /* 43 */
+        43, { 0, 0 } },                                                                                     /* 42 */
+    { 98, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 43, { 0, 0 } }, /* 43 */
     { MENU_COMMAND_ID_MESSAGE, 0x5089, MENU_COMMAND_ID_ANNOUNCEMENT, 0xffff, 1, { 0, 0 }, menu_icon_timed_thread,
         MENU_PROMPT_MATH_SKILL_ANNOUNCEMENT, { 0, 0 } }, /* 44 */
     { 101, 0x8012, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_PANEL_EXECUTE, 1, { 0, 0 },
@@ -180,10 +180,10 @@ static request_entry_t s_request_entries[51] = {
         MENU_PROMPT_POST_ACTION_RESULT, { 0, 0 } }, /* 50 */
 };
 
-static s32 request_dispatch(s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
+static s32 dispatch_request(s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
 
 /* Queue the confirm sound unless a menu restore is replaying selections. */
-static void confirm_sound_queue(void) {
+static void queue_confirm_sound(void) {
     if (g_menu_restore_pending == 0) {
         g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
     }
@@ -191,7 +191,7 @@ static void confirm_sound_queue(void) {
 
 /* Runs the menu's action handler on a simulated, silent Circle press with
  * option 0 selected, then clears the injected input. */
-static void action_confirm_silently(menu_entry_t* menu) {
+static void confirm_action_silently(menu_entry_t* menu) {
     g_sound_suppressed = 1;
     g_script_event_input = PSX_PAD_CIRCLE;
     menu_handle_action(menu, 0);
@@ -201,11 +201,11 @@ static void action_confirm_silently(menu_entry_t* menu) {
 
 /* Menu-opening thread 6: the Wait menu. */
 void command_wait_thread(void) {
-    menu_entry_t* menu = (menu_entry_t*)thread_current_parameter_1_get();
+    menu_entry_t* menu = (menu_entry_t*)thread_current_get_parameter_1();
 
     g_command_wait_row_actions[0] = -2;
     g_command_wait_row_actions[1] = -2;
-    action_confirm_silently(menu);
+    confirm_action_silently(menu);
     thread_current_exit();
 }
 
@@ -217,15 +217,15 @@ void command_wait_thread(void) {
  * is confirmed at once, as a silent Circle press. */
 void command_move_thread(void) {
     s16* stored_actions;
-    menu_entry_t* entry = (menu_entry_t*)thread_current_parameter_1_get();
+    menu_entry_t* entry = (menu_entry_t*)thread_current_get_parameter_1();
     s32 menu;
 
     stored_actions = &g_command_confirm_stored_unit_row_actions;
     *stored_actions = -2;
-    if (menu_selected_unit_stats_get()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
+    if (menu_get_selected_battle_unit()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
         & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE)) {
         *stored_actions = -1;
-        sound_invalid_queue();
+        sound_queue_invalid();
         menu_icon_linked_entry_thread();
         thread_current_exit();
     }
@@ -233,11 +233,11 @@ void command_move_thread(void) {
     if (menu == MENU_COMMAND_ID_TURN_MOVED || menu == MENU_COMMAND_ID_TURN_MOVED_ACTED
         || menu == MENU_COMMAND_ID_TURN_NO_ACT_MOVED || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED
         || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED || menu == MENU_COMMAND_ID_RIDER_TURN_NO_ACT_MOVED) {
-        sound_invalid_queue();
+        sound_queue_invalid();
         thread_current_exit();
     }
-    confirm_sound_queue();
-    action_confirm_silently(entry);
+    queue_confirm_sound();
+    confirm_action_silently(entry);
     thread_current_exit();
 }
 
@@ -251,18 +251,18 @@ void command_move_thread(void) {
  */
 void command_check_restrictions(void) {
     s32 message = 0;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 menu;
     s32 result;
     s32 mode;
 
-    unit = menu_selected_unit_stats_get();
+    unit = menu_get_selected_battle_unit();
     menu = g_command_current_id;
     if (menu == MENU_COMMAND_ID_TURN_ACTED || menu == MENU_COMMAND_ID_TURN_MOVED_ACTED
         || menu == MENU_COMMAND_ID_RIDER_TURN_ACTED || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED) {
-        result = unit_get_action_restriction(unit);
+        result = battle_unit_get_action_restriction(unit);
         if (result == UNIT_ACTION_RESTRICTION_NONE) {
-            sound_invalid_queue();
+            sound_queue_invalid();
             thread_current_exit();
         }
         if (result == UNIT_ACTION_RESTRICTION_CANNOT_ACT) {
@@ -290,20 +290,20 @@ void command_check_restrictions(void) {
     if (message != 0) {
         mode = g_game_options.value & GAME_OPTIONS_NAVIGATION_MESSAGES_MASK;
         if (mode == GAME_OPTIONS_NAVIGATION_MESSAGES_OFF_BITS && (message & 0xff00) == mode) {
-            confirm_sound_queue();
+            queue_confirm_sound();
         } else if (g_menu_restore_pending == 0) {
-            sound_invalid_queue();
+            sound_queue_invalid();
             g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_parameters_set(g_thread_current_id - 1,
+            thread_set_parameters(g_thread_current_id - 1,
                 (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
-            thread_inactive_wait(g_thread_current_id - 1);
+            thread_wait_inactive(g_thread_current_id - 1);
         }
         if (message == 0x1002 || message == 0x1003) {
             thread_current_exit();
         }
     } else {
-        confirm_sound_queue();
+        queue_confirm_sound();
     }
 }
 
@@ -315,15 +315,15 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
     s32 mode;
     s32 message;
     menu_entry_t* parameter;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
 
     g_menu_active_menu = menu;
-    parameter = (menu_entry_t*)thread_current_parameter_1_get();
+    parameter = (menu_entry_t*)thread_current_get_parameter_1();
     mode = 0;
     message = 0;
-    unit = menu_selected_unit_stats_get();
+    unit = menu_get_selected_battle_unit();
     if (check_unit != 0) {
-        if (unit_get_action_restriction(unit) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
+        if (battle_unit_get_action_restriction(unit) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
             message = 0x1003;
             mode = 2;
         } else {
@@ -344,13 +344,13 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
         if (g_game_options.fields.navigation_messages != GAME_OPTION_OFF || (message & 0xff00) != 0x8000) {
             g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_parameters_set(g_thread_current_id - 1,
+            thread_set_parameters(g_thread_current_id - 1,
                 (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
         }
         if (mode == 2) {
-            sound_invalid_queue();
+            sound_queue_invalid();
             if (g_game_options.fields.navigation_messages == GAME_OPTION_ON) {
-                thread_inactive_wait(g_thread_current_id - 1);
+                thread_wait_inactive(g_thread_current_id - 1);
             }
             thread_current_exit();
         }
@@ -359,7 +359,7 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
             [g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]][0];
         if (mode < 0) {
             g_command_action_slot_row_actions[0] = mode;
-            action_confirm_silently(parameter);
+            confirm_action_silently(parameter);
             thread_current_exit();
         }
     }
@@ -371,13 +371,13 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
  * message before ending the thread. */
 void command_validate_ability_thread(void) {
     s32 skill = g_menu_thread_menu_data[MENU_COMMAND_ID_ABILITY_LIST].selected_index;
-    menu_entry_t* parameter = (menu_entry_t*)thread_current_parameter_1_get();
+    menu_entry_t* parameter = (menu_entry_t*)thread_current_get_parameter_1();
     s32 ct;
     s32 entry;
     s32 mp_cost;
     s32 message;
     s32 blocked;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     menu_ability_list_t* skill_tables = &g_event_work->ability_list;
 
     ct = skill_tables->skill_ct[skill];
@@ -388,7 +388,7 @@ void command_validate_ability_thread(void) {
     }
     message = 0;
     blocked = skill_tables->flags[skill] & MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE;
-    unit = menu_selected_unit_stats_get();
+    unit = menu_get_selected_battle_unit();
     if (g_menu_active_menu == ACTION_MENU_TYPE_DEFAULT && unit->mp - mp_cost < 0) {
         message = 0x800A;
         if (ct == 0) {
@@ -420,32 +420,32 @@ void command_validate_ability_thread(void) {
     g_menu_result = -4;
     if (message != 0) {
         if (g_game_options.fields.navigation_messages == GAME_OPTION_OFF) {
-            confirm_sound_queue();
+            queue_confirm_sound();
         } else {
             g_menu_modal_open = 1;
             g_menu_selected_option = 0;
             g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
-            thread_parameters_set(g_thread_current_id - 1,
+            thread_set_parameters(g_thread_current_id - 1,
                 (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
-            sound_invalid_queue();
-            thread_inactive_wait(g_thread_current_id - 1);
+            sound_queue_invalid();
+            thread_wait_inactive(g_thread_current_id - 1);
             g_menu_modal_open = 0;
         }
         if ((message != 0x800A && message != 0x8013) || g_menu_selected_option == -1) {
             g_menu_result = -1;
         }
     } else {
-        confirm_sound_queue();
+        queue_confirm_sound();
     }
-    action_confirm_silently(parameter);
+    confirm_action_silently(parameter);
     thread_current_exit();
 }
 
 /* 1 when the skillset is in g_announcement_spell_quote_exception_skillsets (ended by SKILLSET_ID_NONE).
  * announcement_select shows no spell quote and no ability name for such skillsets,
  * except Item and Throw, whose names still show. */
-static s32 quote_exception_check(s32 skillset_id) {
+static s32 check_quote_exception(s32 skillset_id) {
     s32 i;
     s32 found = 0;
 
@@ -547,7 +547,7 @@ s32 command_resolve_selection(void) {
 }
 
 /* Wait for menu/event threads, then start the selected system-function entry. */
-static void request_thread_run(void) {
+static void request_thread(void) {
     s32 id;
     s32 menu_id;
     request_entry_t* entry;
@@ -558,7 +558,7 @@ static void request_thread_run(void) {
     if (g_game_options.fields.navigation_messages != GAME_OPTION_ON) {
         id = s_request_entries[id].alternate_id;
     }
-    thread_inactive_wait(THREAD_SLOT_MENU);
+    thread_wait_inactive(THREAD_SLOT_MENU);
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
         while (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
             if (g_thread_contexts[THREAD_SLOT_EVENT].task_id == THREAD_TASK_EXECUTE_EVENT) {
@@ -567,7 +567,7 @@ static void request_thread_run(void) {
             thread_yield();
         }
     }
-    camera_idle_wait();
+    camera_wait_idle();
     entry = &s_request_entries[id];
     menu_id = entry->menu_id;
     g_menu_thread_menu_data[entry->menu_entry_index].text_id = entry->text_id;
@@ -575,33 +575,33 @@ static void request_thread_run(void) {
     g_command_current_id = menu_id;
     g_menu_thread_menu_data[entry->menu_entry_index].thread_count = entry->thread_count;
     if (id == MENU_PROMPT_CRYSTAL_OR_TREASURE) {
-        thread_start(THREAD_SLOT_MENU, crystal_pickup_panel_open);
-        thread_parameters_set(THREAD_SLOT_MENU, 0, g_crystal_pickup_panel_parameter, 0);
+        thread_start(THREAD_SLOT_MENU, crystal_pickup_panel_thread);
+        thread_set_parameters(THREAD_SLOT_MENU, 0, g_crystal_pickup_panel_parameter, 0);
         thread_current_exit();
     }
     if (id != MENU_PROMPT_CLOSE) {
         tutorial_pulse_wait_value(id);
     }
     thread_start(THREAD_SLOT_MENU, entry->thread_entry);
-    thread_four_parameters_set(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[entry->menu_entry_index], 0, 0, 0);
+    thread_set_four_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[entry->menu_entry_index], 0, 0, 0);
     g_menu_request_busy = 0;
     thread_current_exit();
 }
 
 /* Clear menu selections and start the system-function worker. */
-static void request_thread_start(s32 system_function) {
+static void start_request_thread(s32 system_function) {
     menu_clear_entry_selections();
-    thread_start(THREAD_SLOT_SYSTEM_FUNCTION, request_thread_run);
-    thread_parameters_set(THREAD_SLOT_SYSTEM_FUNCTION, system_function, 0, 0);
+    thread_start(THREAD_SLOT_SYSTEM_FUNCTION, request_thread);
+    thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, system_function, 0, 0);
 }
 
 /* Confirm the current menu action, recording the auto-battle mode it selects. */
 void auto_battle_confirm_thread(void) {
-    unit_stats_t* attacker;
+    battle_unit_t* attacker;
     s32 menu;
-    menu_entry_t* parameter = (menu_entry_t*)thread_current_parameter_1_get();
+    menu_entry_t* parameter = (menu_entry_t*)thread_current_get_parameter_1();
 
-    attacker = menu_selected_unit_stats_get();
+    attacker = menu_get_selected_battle_unit();
     menu = g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE].selected_index;
     if (menu == 3) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_FADING_LIFE;
@@ -609,14 +609,14 @@ void auto_battle_confirm_thread(void) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_RETREAT;
     }
     g_menu_set_auto_battle_row_actions = -3;
-    action_confirm_silently(parameter);
+    confirm_action_silently(parameter);
     thread_current_exit();
 }
 
 /* Store a unit's auto-battle target together with the resolved menu command as
  * its auto-battle setting. */
-void auto_battle_store_target(s32 target_id, s32 battle_id) {
-    unit_stats_t* stats = unit_stats_get(battle_id);
+void auto_battle_store_target(s32 target_id, s32 battle_unit_id) {
+    battle_unit_t* stats = battle_unit_get(battle_unit_id);
     stats->auto_battle_target = target_id;
     stats->auto_battle_setting = g_command_resolved_command;
 }
@@ -633,13 +633,13 @@ void auto_battle_store_target(s32 target_id, s32 battle_id) {
 void announcement_select(action_command_t* action, s32 unit_id, s32 enabled) {
     const ability_data_t* ability;
     ability_secondary_pointer_t secondary;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 known;
 
-    ability_records_get(action->ability_id & ABILITY_ID_MASK, &ability, &secondary);
-    unit = unit_stats_get(unit_id);
+    ability_get_records(action->ability_id & ABILITY_ID_MASK, &ability, &secondary);
+    unit = battle_unit_get(unit_id);
     if (action->skillset_id != 0) {
-        known = quote_exception_check(action->skillset_id);
+        known = check_quote_exception(action->skillset_id);
     } else {
         known = 1;
     }
@@ -660,20 +660,20 @@ void announcement_select(action_command_t* action, s32 unit_id, s32 enabled) {
         && g_game_options.fields.ability_names == GAME_OPTION_ON
         && (script_variable_get(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 0xF) < 4) {
         g_announcement_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
-        request_dispatch(MENU_REQUEST_SPELL_QUOTE, 0, unit_id, 0, enabled, action);
+        dispatch_request(MENU_REQUEST_SPELL_QUOTE, 0, unit_id, 0, enabled, action);
         return;
     }
     if (action->skillset_id != 0) {
-        known = quote_exception_check(action->skillset_id);
+        known = check_quote_exception(action->skillset_id);
     } else {
         known = 0;
     }
     if ((known == 0 && (ability->type_flags & ABILITY_TYPE_FLAG_SHOW_NAME)
             && g_game_options.fields.ability_names == GAME_OPTION_ON)
         || action->skillset_id == SKILLSET_ID_ITEM || action->skillset_id == SKILLSET_ID_THROW) {
-        request_dispatch(MENU_REQUEST_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, enabled, action);
+        dispatch_request(MENU_REQUEST_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, enabled, action);
     } else {
-        request_dispatch(MENU_REQUEST_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, 0, action);
+        dispatch_request(MENU_REQUEST_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, 0, action);
     }
 }
 
@@ -682,32 +682,32 @@ void announcement_select(action_command_t* action, s32 unit_id, s32 enabled) {
  *
  * SPELL_QUOTE goes to announcement_select, a void routine whose
  * leftover v0 is returned. ABILITY_ANNOUNCEMENT drops option, parameter and
- * enabled. Everything else returns request_dispatch's result;
+ * enabled. Everything else returns dispatch_request's result;
  * for SCENARIO_CHECK and CLOSE the action pointer passed on is unset. */
-s32 menu_request_dispatch(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled) {
+s32 menu_dispatch_request(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled) {
     action_command_t* action;
 
     if (type != MENU_REQUEST_SCENARIO_CHECK && type != MENU_REQUEST_CLOSE) {
-        action = unit_battle_action_command_get(unit_id);
+        action = map_unit_get_action_command_by_battle_unit_id(unit_id);
         if (type == MENU_REQUEST_SPELL_QUOTE) {
             /* The target returns the void callee's leftover $v0. */
             return ((s32 (*)(action_command_t*, s32, s32))announcement_select)(action, unit_id, enabled);
         }
         if (type == MENU_REQUEST_ABILITY_ANNOUNCEMENT) {
-            return request_dispatch(MENU_REQUEST_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, 0, action);
+            return dispatch_request(MENU_REQUEST_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, 0, action);
         }
     }
-    return request_dispatch(type, option, unit_id, parameter, enabled, action);
+    return dispatch_request(type, option, unit_id, parameter, enabled, action);
 }
 
-/* Run crystal_pickup_result_build for the unit on the main stack,
+/* Run crystal_pickup_build_result for the unit on the main stack,
  * keep its record in g_crystal_pickup_context and return the treasure item for
  * CRYSTAL_PICKUP_TREASURE, otherwise -1. */
-s32 crystal_resolve_pickup(s32 battle_id) {
-    unit_stats_t* stats = unit_stats_get(battle_id);
+s32 crystal_pickup_resolve(s32 battle_unit_id) {
+    battle_unit_t* stats = battle_unit_get(battle_unit_id);
     crystal_pickup_result_t* result;
 
-    g_thread_call_target = (void (*)(void))crystal_pickup_result_build;
+    g_thread_call_target = (void (*)(void))crystal_pickup_build_result;
     result = (crystal_pickup_result_t*)thread_call_on_main_stack(stats);
     g_crystal_pickup_context = result;
     if (result->result == CRYSTAL_PICKUP_NONE || result->result == CRYSTAL_PICKUP_NOTHING) {
@@ -725,9 +725,9 @@ s32 crystal_resolve_pickup(s32 battle_id) {
  * with MENU_SCENARIO_CHECK_TEST it only records the event to run next (g_script_next_event_id). Each other
  * command starts one system function thread, a message or menu, after setting its text values.
  * Returns a MENU_SYSTEM_DISPATCH_* result and remembers the command and option. */
-static s32 request_dispatch(
+static s32 dispatch_request(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 value;
     s32 count;
     s32 i;
@@ -739,53 +739,53 @@ static s32 request_dispatch(
     g_menu_thread_menu_data = g_command_idle_action_entries;
     g_command_current_id = MENU_COMMAND_ID_NONE;
     g_menu_restore_pending = 0;
-    unit = unit_stats_get(unit_id);
+    unit = battle_unit_get(unit_id);
     if (command == MENU_REQUEST_SCENARIO_CHECK) {
         value = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if (value >= EVENT_ID_TUTORIAL_FIRST && value <= EVENT_ID_TUTORIAL_LAST) {
             if (option != MENU_SCENARIO_CHECK_TEST) {
-                request_thread_start(MENU_PROMPT_CLOSE);
+                start_request_thread(MENU_PROMPT_CLOSE);
             }
             return MENU_REQUEST_RESULT_DONE;
         } else if (g_menu_input_mode != MENU_INPUT_PLAYER) {
             if (option != MENU_SCENARIO_CHECK_TEST) {
-                request_thread_start(MENU_PROMPT_CLOSE);
+                start_request_thread(MENU_PROMPT_CLOSE);
             }
             return MENU_REQUEST_RESULT_DONE;
         } else if (option != MENU_SCENARIO_CHECK_SKIP) {
             if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
                 system_report_stub(7, 3);
                 if (option != MENU_SCENARIO_CHECK_TEST) {
-                    request_thread_start(MENU_PROMPT_CLOSE);
+                    start_request_thread(MENU_PROMPT_CLOSE);
                 }
                 return MENU_REQUEST_RESULT_DONE;
             } else {
                 count = 0;
-                g_scenario_condition_unit_battle_id = unit_id;
+                g_scenario_condition_battle_unit_id = unit_id;
                 for (i = 0; i < 3; i++) {
-                    if (unit_find_slot_by_identity(i + 1) == UNIT_CHARACTER_SLOT_UNAVAILABLE) {
+                    if (battle_unit_find_id_by_character_identity(i + 1) == UNIT_CHARACTER_SLOT_UNAVAILABLE) {
                         count++;
                     }
                 }
-                if ((battle_outcome_check() < 0 || count != 0)
+                if ((battle_check_outcome() < 0 || count != 0)
                     && script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
                         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         g_scenario_event_active = 1;
-                        script_current_event_thread_start();
+                        script_start_current_event_thread();
                     } else {
                         g_script_next_event_id = EVENT_ID_GAME_OVER;
                     }
                     return MENU_REQUEST_RESULT_EVENT;
                 }
                 if (g_scenario_event_active != 0) {
-                    if (scenario_conditions_run() != 0) {
+                    if (scenario_run_conditions() != 0) {
                         if (option != MENU_SCENARIO_CHECK_TEST) {
                             unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                             g_menu_overlay_state = 1;
-                            script_current_event_thread_start();
+                            script_start_current_event_thread();
                         } else {
                             g_script_next_event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
                             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, value);
@@ -793,7 +793,7 @@ static s32 request_dispatch(
                         return MENU_REQUEST_RESULT_EVENT;
                     }
                     if (option != MENU_SCENARIO_CHECK_TEST) {
-                        request_thread_start(MENU_PROMPT_CLOSE);
+                        start_request_thread(MENU_PROMPT_CLOSE);
                     }
                     return MENU_REQUEST_RESULT_DONE;
                 } else if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
@@ -805,35 +805,35 @@ static s32 request_dispatch(
                         } else {
                             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_START);
                         }
-                        script_current_event_thread_start();
+                        script_start_current_event_thread();
                     } else {
                         g_script_next_event_id = EVENT_ID_BATTLE_START;
                     }
                     return MENU_REQUEST_RESULT_EVENT;
-                } else if (battle_outcome_check() == 0) {
+                } else if (battle_check_outcome() == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
                         g_scenario_event_active = 1;
-                        script_current_event_thread_start();
+                        script_start_current_event_thread();
                     } else {
                         g_script_next_event_id = EVENT_ID_BATTLE_WON;
                     }
                     return MENU_REQUEST_RESULT_EVENT;
                 } else {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
-                        request_thread_start(MENU_PROMPT_CLOSE);
+                        start_request_thread(MENU_PROMPT_CLOSE);
                     }
                     return MENU_REQUEST_RESULT_DONE;
                 }
             }
         }
-        request_thread_start(MENU_PROMPT_CLOSE);
+        start_request_thread(MENU_PROMPT_CLOSE);
         return MENU_REQUEST_RESULT_DONE;
     }
     if (enabled == 0) {
-        request_thread_start(MENU_PROMPT_CLOSE);
+        start_request_thread(MENU_PROMPT_CLOSE);
         return MENU_REQUEST_RESULT_DONE;
     }
     if (command == MENU_REQUEST_TARGETING_PROMPT) {
@@ -856,24 +856,24 @@ static s32 request_dispatch(
         } else if (g_command_used_skillset_id == SKILLSET_ID_DEFEND) {
             value = 0x1C;
         }
-        request_thread_start(value);
+        start_request_thread(value);
     } else if (command == MENU_REQUEST_MOVE_FEEDBACK) {
-        sound_confirm_queue();
+        sound_queue_confirm();
         if (option == MENU_MOVE_FEEDBACK_CLOSE) {
-            request_thread_start(MENU_PROMPT_CLOSE);
+            start_request_thread(MENU_PROMPT_CLOSE);
         } else if (option == MENU_MOVE_FEEDBACK_MOUNT) {
-            request_thread_start(0);
+            start_request_thread(0);
         } else if (option == MENU_MOVE_FEEDBACK_CRYSTAL) {
-            request_thread_start(0x30);
+            start_request_thread(0x30);
         } else {
-            sound_invalid_queue();
-            request_thread_start(option + 0xD);
+            sound_queue_invalid();
+            start_request_thread(option + 0xD);
         }
     } else if (command == MENU_REQUEST_WAIT_MENU) {
         if (g_menu_request_command == MENU_REQUEST_MOVE_FEEDBACK && g_menu_request_option == MENU_MOVE_FEEDBACK_MOUNT) {
-            request_thread_start(MENU_PROMPT_CLOSE);
+            start_request_thread(MENU_PROMPT_CLOSE);
         } else {
-            request_thread_start(MENU_PROMPT_WAIT_MENU);
+            start_request_thread(MENU_PROMPT_WAIT_MENU);
         }
     } else if (command == MENU_REQUEST_ACTION_CONFIRM) {
         value = 0x2F;
@@ -896,18 +896,18 @@ static s32 request_dispatch(
             }
         }
         g_menu_restore_pending = 1;
-        request_thread_start(value);
+        start_request_thread(value);
     } else if (command == MENU_REQUEST_SPELL_QUOTE) {
         g_announcement_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
         thread_start(THREAD_SLOT_SYSTEM_FUNCTION, announcement_spell_quote_thread);
-        thread_parameters_set(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_announcement_spell_quote_last_ability_id, 0);
+        thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_announcement_spell_quote_last_ability_id, 0);
     } else if (command == MENU_REQUEST_ABILITY_ANNOUNCEMENT) {
         message_set_duration(60);
         if (g_command_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_MATH_SKILL) {
             g_text_substitution_values[1] = unit->action_command.calculator_multiplier + TEXT_ID_ABILITY_NAME_BASE;
             g_text_substitution_values[0] = unit->action_command.calculator_type + TEXT_ID_ABILITY_NAME_BASE;
             g_text_substitution_values[2] = unit->action_command.ability_id + TEXT_ID_ABILITY_NAME_BASE;
-            request_thread_start(MENU_PROMPT_MATH_SKILL_ANNOUNCEMENT);
+            start_request_thread(MENU_PROMPT_MATH_SKILL_ANNOUNCEMENT);
         } else {
             if (action->skillset_id == SKILLSET_ID_ITEM || action->skillset_id == SKILLSET_ID_THROW) {
                 item_id = action->item_id;
@@ -920,10 +920,10 @@ static s32 request_dispatch(
                     g_text_substitution_values[0] = value + TEXT_ID_ABILITY_NAME_BASE;
                 }
             }
-            request_thread_start(MENU_PROMPT_ABILITY_ANNOUNCEMENT);
+            start_request_thread(MENU_PROMPT_ABILITY_ANNOUNCEMENT);
         }
     } else if (command == MENU_REQUEST_CLOSE) {
-        request_thread_start(MENU_PROMPT_CLOSE);
+        start_request_thread(MENU_PROMPT_CLOSE);
     } else if (command == MENU_REQUEST_TARGET_CONFIRM) {
         value = 8;
         if (option == 1) {
@@ -937,44 +937,44 @@ static s32 request_dispatch(
         } else if (g_command_resolved_command == 0xE) {
             value = 0x1B;
         }
-        request_thread_start(value);
+        start_request_thread(value);
     } else if (command == MENU_REQUEST_EFFECT_MESSAGE) {
         if (g_game_options.fields.effect_messages != GAME_OPTION_ON) {
-            request_thread_start(MENU_PROMPT_CLOSE);
+            start_request_thread(MENU_PROMPT_CLOSE);
         } else {
             s_request_entries[MENU_PROMPT_EFFECT_MESSAGE].text_id = option;
             g_text_substitution_values[0] = parameter & 0xFF;
-            request_thread_start(MENU_PROMPT_EFFECT_MESSAGE);
+            start_request_thread(MENU_PROMPT_EFFECT_MESSAGE);
         }
     } else if (command == MENU_REQUEST_ABILITY_LEARNED) {
         g_text_substitution_values[0] = option + TEXT_ID_ABILITY_NAME_BASE;
-        request_thread_start(MENU_PROMPT_ABILITY_LEARNED);
+        start_request_thread(MENU_PROMPT_ABILITY_LEARNED);
     } else if (command == MENU_REQUEST_CRYSTAL_OR_TREASURE) {
-        request_thread_start(MENU_PROMPT_CRYSTAL_OR_TREASURE);
+        start_request_thread(MENU_PROMPT_CRYSTAL_OR_TREASURE);
     } else if (command == MENU_REQUEST_MOVE_CONFIRM) {
-        request_thread_start(MENU_PROMPT_MOVE_CONFIRM);
+        start_request_thread(MENU_PROMPT_MOVE_CONFIRM);
     } else if (command == MENU_REQUEST_TRAP_RESULT) {
-        request_thread_start(option + MENU_PROMPT_TRAP_RESULT_FIRST);
+        start_request_thread(option + MENU_PROMPT_TRAP_RESULT_FIRST);
     } else if (command == MENU_REQUEST_MOVE_FIND_ITEM) {
         /* With 99 already held, the found item is sold for a quarter of its price instead. The
          * discarded data pointer lookups are retail. */
-        if (item_total_quantity_get(option, 1) == 0x63) {
-            item_data_get(option);
+        if (item_get_total_quantity(option, 1) == 0x63) {
+            item_get_data(option);
             g_text_substitution_values[0] = option;
             g_text_substitution_values[1] = option;
-            item = item_data_get(option);
+            item = item_get_data(option);
             g_text_substitution_values[2] = item->price >> 2;
             script_variable_set(
                 EVENT_SCRIPT_VAR_WAR_FUNDS, (item->price >> 2) + script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS));
-            request_thread_start(MENU_PROMPT_MOVE_FIND_ITEM_SOLD);
+            start_request_thread(MENU_PROMPT_MOVE_FIND_ITEM_SOLD);
         } else {
-            item_data_get(option);
+            item_get_data(option);
             g_text_substitution_values[0] = option;
             g_item_quantities[option]++;
-            request_thread_start(MENU_PROMPT_MOVE_FIND_ITEM);
+            start_request_thread(MENU_PROMPT_MOVE_FIND_ITEM);
         }
     } else if (command == MENU_REQUEST_MOVE_CONFIRM_SILENT) {
-        request_thread_start(MENU_PROMPT_MOVE_CONFIRM_SILENT);
+        start_request_thread(MENU_PROMPT_MOVE_CONFIRM_SILENT);
     } else if (command == MENU_REQUEST_POST_ACTION_RESULT) {
         entry = &s_request_entries[MENU_PROMPT_POST_ACTION_RESULT];
         flags = parameter;
@@ -1001,15 +1001,15 @@ static s32 request_dispatch(
                     entry->text_id = 0x5099;
                 }
             }
-            request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
+            start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_GIL) {
             g_text_substitution_values[0] = parameter < 0 ? -parameter : parameter;
             s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508F;
-            request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
+            start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_EXP) {
             g_text_substitution_values[0] = parameter & 0x7F;
             s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = 0x508E;
-            request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
+            start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else if (option == ACTION_DISPLAY_IMAGE_STOLEN || option == ACTION_DISPLAY_IMAGE_BROKEN) {
             if (parameter & 0x8000) {
                 g_text_substitution_values[0] = (parameter & 0xFF) + TEXT_ID_ITEM_NAME_BASE;
@@ -1018,13 +1018,13 @@ static s32 request_dispatch(
                 g_text_substitution_values[0] = parameter + TEXT_ID_ITEM_NAME_BASE;
                 s_request_entries[MENU_PROMPT_POST_ACTION_RESULT].text_id = option + 0x5074;
             }
-            request_thread_start(MENU_PROMPT_POST_ACTION_RESULT);
+            start_request_thread(MENU_PROMPT_POST_ACTION_RESULT);
         } else {
-            request_thread_start(MENU_PROMPT_CLOSE);
+            start_request_thread(MENU_PROMPT_CLOSE);
         }
     } else {
         system_report_stub(7, 5);
-        request_thread_start(MENU_PROMPT_CLOSE);
+        start_request_thread(MENU_PROMPT_CLOSE);
         g_menu_request_command = command;
         g_menu_request_option = option;
         return MENU_REQUEST_RESULT_UNKNOWN_COMMAND;

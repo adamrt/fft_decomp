@@ -2,9 +2,9 @@
 
 #include "fft/ability.h"
 #include "fft/file.h"
+#include "fft/map_unit.h"
 #include "fft/sprite_sheet.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/gte_inline.h"
 #include "psx/types.h"
 
@@ -19,7 +19,7 @@ static const u8* s_sprite_compressed_data;
 /* Start reading the SP2 file that holds the attack animation of the unit's SP2 ability into
  * destination. Worker 8 uses its own file table, indexed from animation 0x73. Returns -1 when the
  * animation is in the SP1 range or has no file, else whether the read was queued. */
-s32 sprite_sp2_file_open(unit_runtime_t* unit, u32* destination) {
+s32 sprite_open_sp2_file(map_unit_t* unit, u32* destination) {
     s32 spritesheet_id;
     u8 animation_id;
     s32 index;
@@ -37,7 +37,7 @@ s32 sprite_sp2_file_open(unit_runtime_t* unit, u32* destination) {
         }
         if (animation_id >= unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_sprite_worker8_sp2_files[index].size;
-            return file_bytes_read_request(lba, byte_length, destination) != 0;
+            return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     } else {
         lba = g_sprite_sp2_files[spritesheet_id].sector;
@@ -46,14 +46,14 @@ s32 sprite_sp2_file_open(unit_runtime_t* unit, u32* destination) {
         }
         if (animation_id >= unit->animation.seq->first_sp2_sequence >> 1) {
             byte_length = g_sprite_sp2_files[spritesheet_id].size;
-            return file_bytes_read_request(lba, byte_length, destination) != 0;
+            return file_request_read_bytes(lba, byte_length, destination) != 0;
         }
     }
     return -1;
 }
 
 /* Free the EVTCHR slots whose page holds the unit's SP2 image. */
-void sprite_evtchr_invalidate_sp2(unit_runtime_t* unit) {
+void sprite_evtchr_invalidate_sp2(map_unit_t* unit) {
     u32 invalid; /* loaded before the loop, as in the target */
     sprite_evtchr_slot_t* slot;
     s32 count = 0;
@@ -63,7 +63,7 @@ void sprite_evtchr_invalidate_sp2(unit_runtime_t* unit) {
     for (; count < SPRITE_EVTCHR_SLOT_COUNT; count++, slot++) {
         u32 descriptor = slot->owner;
 
-        if (((descriptor & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id)
+        if (((descriptor & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->map_unit_id)
             && ((descriptor & SPRITE_EVTCHR_SLOT_OWNER_SP2) != 0)) {
             slot->owner = invalid;
         }
@@ -72,7 +72,7 @@ void sprite_evtchr_invalidate_sp2(unit_runtime_t* unit) {
 
 /* The next nibble of the compressed spritesheet stream, the high nibble of each
  * byte first. */
-static u32 compressed_nibble_read(void) {
+static u32 read_compressed_nibble(void) {
     u32 nibble;
     u8 value;
 
@@ -94,7 +94,7 @@ static u32 compressed_nibble_read(void) {
  * takes the length from one more nibble, and 7 and 8 from two or three more,
  * low nibble first. Output packs the first pixel into the high nibble.
  * Decoding stops when the output is full. */
-void sprite_attack_image_decompress(const u8* source, u8* destination) {
+void sprite_decompress_attack_image(const u8* source, u8* destination) {
     s32 high = 0;
     s32 count = 0;
     s32 value;
@@ -106,21 +106,21 @@ void sprite_attack_image_decompress(const u8* source, u8* destination) {
     s_sprite_compressed_offset = 0;
     s_sprite_compressed_nibble_phase = 0;
     while (1) {
-        value = compressed_nibble_read();
+        value = read_compressed_nibble();
         if (value == 0) {
-            value = compressed_nibble_read();
+            value = read_compressed_nibble();
             switch (value) {
             case 0:
-                value = compressed_nibble_read();
+                value = read_compressed_nibble();
                 break;
             case 7:
-                value = compressed_nibble_read();
-                value |= compressed_nibble_read() << 4;
+                value = read_compressed_nibble();
+                value |= read_compressed_nibble() << 4;
                 break;
             case 8:
-                value = compressed_nibble_read();
-                value |= compressed_nibble_read() << 4;
-                value |= compressed_nibble_read() << 8;
+                value = read_compressed_nibble();
+                value |= read_compressed_nibble() << 4;
+                value |= read_compressed_nibble() << 8;
                 break;
             }
             for (i = 0; i < value; i++) {

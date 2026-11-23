@@ -30,8 +30,8 @@ s32 script_variable_get(s32 variable_id) {
         weather <<= 12;
         script_variable_set(EVENT_SCRIPT_VAR_WEATHER_AND_TIME, time_of_day | weather);
     }
-    script_variable_command_run(EVENT_OPCODE_ZERO_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, 0, 0);
-    script_variable_command_run(EVENT_OPCODE_ADD_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, variable_id, 0);
+    script_run_variable_command(EVENT_OPCODE_ZERO_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, 0, 0);
+    script_run_variable_command(EVENT_OPCODE_ADD_VARIABLE, EVENT_SCRIPT_VAR_COMPARISON_RESULT, variable_id, 0);
     value = *g_script_variables;
     *g_script_variables = saved_current_variable;
     return value;
@@ -47,7 +47,7 @@ void script_variable_set(s32 variable_id, s32 value) {
     if (variable_id == EVENT_SCRIPT_VAR_WAR_FUNDS && value > EVENT_WAR_FUNDS_MAX) {
         value = EVENT_WAR_FUNDS_MAX;
     }
-    script_variable_command_run(EVENT_OPCODE_ZERO_VARIABLE, variable_id, 0, 0);
-    script_variable_command_run(EVENT_OPCODE_ADD_IMMEDIATE, variable_id, value, 0);
+    script_run_variable_command(EVENT_OPCODE_ZERO_VARIABLE, variable_id, 0, 0);
+    script_run_variable_command(EVENT_OPCODE_ADD_IMMEDIATE, variable_id, value, 0);
     *g_script_variables = saved_current_variable;
 }

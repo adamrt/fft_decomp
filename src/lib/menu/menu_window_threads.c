@@ -28,7 +28,7 @@ void menu_icon_list_thread(void) {
     s16* redraw;
 
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    state = (menu_entry_t*)thread_current_parameter_1_get();
+    state = (menu_entry_t*)thread_current_get_parameter_1();
     state->window.y &= ~1;
     cursor = state->selected_index;
     record = &records[0];
@@ -47,7 +47,7 @@ void menu_icon_list_thread(void) {
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             image_pending_free = 1;
             g_menu_window_text_pen.stride = state->inner_width;
-            menu_set_text_origin(8, 9);
+            menu_text_set_origin(8, 9);
             g_menu_text_palette_offset = 0;
             menu_display_text_entry(state->text_id, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, (u32*)buffer);
@@ -62,7 +62,7 @@ void menu_icon_list_thread(void) {
         if (menu_should_close_thread(g_menu_input_controller) != 0) {
             break;
         }
-        menu_row_cursor_update(state, &cursor);
+        menu_update_row_cursor(state, &cursor);
         menu_handle_action(state, cursor);
         menu_handle_cancel_input(state);
         menu_select_icon_cluts(&record->base);
@@ -104,9 +104,9 @@ void menu_text_entry_wait_thread(void) {
     *input = PSX_PAD_CIRCLE;
     menu_handle_action(entry, 0);
     thread_start(text_thread_id, message_dialog_thread);
-    thread_four_parameters_set(text_thread_id, header_id, text_id, speaker_id, speaker_id);
-    thread_inactive_wait(g_thread_current_id - 1);
-    thread_inactive_wait(text_thread_id);
+    thread_set_four_parameters(text_thread_id, header_id, text_id, speaker_id, speaker_id);
+    thread_wait_inactive(g_thread_current_id - 1);
+    thread_wait_inactive(text_thread_id);
     thread_current_exit();
 }
 
@@ -123,7 +123,7 @@ void menu_icon_strip_thread(void) {
     menu_icon_record_t* record;
 
     input = 0;
-    state = (menu_entry_t*)thread_current_parameter_1_get();
+    state = (menu_entry_t*)thread_current_get_parameter_1();
     record = &records[0];
     menu_build_window_sprites(&rect, state, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
@@ -133,7 +133,7 @@ void menu_icon_strip_thread(void) {
             image_pending_free = 1;
             buffer = menu_build_and_upload_window_frame_image(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            menu_set_text_origin(8, 9);
+            menu_text_set_origin(8, 9);
             g_menu_window_text_pen.stride = state->inner_width;
             menu_display_text_entry(state->text_id, buffer, &g_menu_window_text_pen);
             LoadImage(&rect, (u32*)buffer);

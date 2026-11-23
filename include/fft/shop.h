@@ -13,7 +13,7 @@
  * g_shop_step_handlers. The ordinary shop starts at MAIN_MENU, the
  * fur shop at FUR_MENU and the soldier office at SOLDIER_OFFICE_MENU. */
 typedef enum shop_step {
-    SHOP_STEP_EXIT = -1, /* shop_screen_run leaves its loop */
+    SHOP_STEP_EXIT = -1, /* shop_run_screen leaves its loop */
     SHOP_STEP_MAIN_MENU = 0,
     SHOP_STEP_BUY_LIST = 1,
     SHOP_STEP_BUY_CONFIRM = 2,
@@ -46,59 +46,59 @@ typedef enum shop_step {
 
 extern s16 g_shop_menu_step; /* shop_step_e */
 
-void shop_screen_run(s32 shop_type);
-u32* shop_background_load(s32 index);
-void shop_gil_draw(void);
+void shop_run_screen(s32 shop_type);
+u32* shop_load_background(s32 index);
+void shop_draw_gil(void);
 void shop_switch_item_tab(s32 input);
 
 /* buying and selling */
-s32 shop_buy_owned_count_get(s32 unused_row);
-s32 shop_buy_equipped_count_get(s32 unused_row);
-s32 shop_buy_price_get(s32 entry_index);
-void shop_buy_unit_preview_update(void);
-s32 shop_sell_price_get(s32 unused_row);
-void shop_sell_list_update(void);
-void shop_sell_confirm_update(void);
+s32 shop_buy_get_owned_count(s32 unused_row);
+s32 shop_buy_get_equipped_count(s32 unused_row);
+s32 shop_buy_get_price(s32 entry_index);
+void shop_buy_update_unit_preview(void);
+s32 shop_sell_get_price(s32 unused_row);
+void shop_sell_update_list(void);
+void shop_sell_update_confirm(void);
 
 /* prices and stock */
 /* The half price is clamped to at least one; the fur shop's stock to a byte. */
-s32 shop_item_price_get(s16 item_id);
-s32 shop_item_half_price_get(s16 item_id);
-s32 fur_shop_stock_adjust(s16 item_id, s32 delta);
-s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode);
+s32 shop_get_item_price(s16 item_id);
+s32 shop_get_item_half_price(s16 item_id);
+s32 fur_shop_adjust_stock(s16 item_id, s32 delta);
+s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode);
 void shop_cash_out_excess_items(void);
-s32 shop_gil_adjust(s32 delta);
+s32 shop_adjust_gil(s32 delta);
 
 /* fitting room */
 extern s16 g_shop_fitting_items[PARTY_ROSTER_SLOT_COUNT][MENU_EQUIPMENT_SLOT_COUNT];
 
-void shop_fitting_best_fit_build(s16 unit_index, s16 shop_id, s16* out);
-void shop_fitting_menu_update(void);
-void shop_fitting_equipment_update(void);
-void shop_fitting_remove_update(void);
-void shop_fitting_checkout_update(void);
-void shop_fitting_best_fit_update(void);
-void shop_fitting_equipped_sale_update(void);
-void shop_fitting_inventory_sale_update(void);
+void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out);
+void shop_fitting_update_menu(void);
+void shop_fitting_update_equipment_menu(void);
+void shop_fitting_update_remove_menu(void);
+void shop_fitting_update_checkout(void);
+void shop_fitting_update_best_fit(void);
+void shop_fitting_update_equipped_sale(void);
+void shop_fitting_update_inventory_sale(void);
 
 /* fur shop */
-void fur_shop_menu_update(void);
-void fur_shop_sell_list_update(void);
-void fur_shop_sell_confirm_update(void);
-void fur_shop_buy_list_update(void);
-void fur_shop_buy_confirm_update(void);
-void fur_shop_buy_unit_preview_update(void);
+void fur_shop_update_menu(void);
+void fur_shop_sell_update_list(void);
+void fur_shop_sell_update_confirm(void);
+void fur_shop_buy_update_list(void);
+void fur_shop_buy_update_confirm(void);
+void fur_shop_buy_update_unit_preview(void);
 
 /* soldier office */
-void soldier_office_menu_update(void);
-void soldier_office_hire_preview_update(void);
-void soldier_office_hire_confirm_update(void);
-void soldier_office_hire_name_update(void);
-void soldier_office_hire_fee_update(void);
-void soldier_office_menu_reopen(void);
-void soldier_office_rename_unit_update(void);
-void soldier_office_rename_name_update(void);
-void soldier_office_fee_draw(void);
-void soldier_office_unit_count_draw(void);
+void soldier_office_update_menu(void);
+void soldier_office_hire_update_preview(void);
+void soldier_office_hire_update_confirm(void);
+void soldier_office_hire_update_name(void);
+void soldier_office_hire_update_fee(void);
+void soldier_office_reopen_menu(void);
+void soldier_office_rename_update_unit(void);
+void soldier_office_rename_update_name(void);
+void soldier_office_draw_fee(void);
+void soldier_office_draw_unit_count(void);
 
 #endif

@@ -57,9 +57,9 @@ typedef char prologue_size_must_be_56[(sizeof(prologue_t) == 56) ? 1 : -1];
 
 extern prologue_t g_prologue;
 extern POLY_GT4 g_prologue_line_primitives[2][14];
-static void prologue_prepare_crossfade(s32 file_index);
-static void prologue_draw_text_lines(s32 intensity);
-static void prologue_step_crossfade(void);
+static void prepare_crossfade(s32 file_index);
+static void draw_text_lines(s32 intensity);
+static void update_crossfade(void);
 /* The new-game prologue's pictures are 210x180, at rows 43 to 222 of the
  * 256-pixel-wide frame image. */
 #define PROLOGUE_IMAGE_WIDTH      210
@@ -79,7 +79,7 @@ static u16* volatile s_prologue_crossfade_new_picture;
 static u16* s_prologue_crossfade_old_picture;
 static u16* s_prologue_crossfade_frame_pixels;
 
-/* prologue_step_crossfade reloads the source pointer for every column. */
+/* update_crossfade reloads the source pointer for every column. */
 
 /* Arm the new-game prologue sequence: start before entry 0 of entry_table with NEXT_ENTRY set, end
  * at entry target, draw its text in ordering-table entries ot_layer and ot_layer + 1, at full
@@ -93,7 +93,7 @@ void prologue_init_sequence(s32 target, s32 ot_layer, prologue_entry_t** entry_t
     g_prologue.intensity = 0x80;
 }
 
-/* Empty. new_game_update calls it once the prologue has finished. */
+/* Empty. update_new_game calls it once the prologue has finished. */
 void prologue_finished_stub(void) {
 }
 
@@ -118,17 +118,17 @@ s32 prologue_update(void) {
     prologue_entry_t* entry;
     s32 image_command;
 
-    prologue_step_crossfade();
+    update_crossfade();
     if (!(g_prologue.flags & PROLOGUE_SKIP)) {
         if (g_input_new_button_presses & PSX_PAD_START) {
-            sound_sfx_play(SOUND_SFX_COMPLETE);
+            sound_play_sfx(SOUND_SFX_COMPLETE);
             g_prologue.flags |= PROLOGUE_SKIP;
         }
         flags = g_prologue.flags;
         if (!(flags & PROLOGUE_SKIP)) {
             if (flags & PROLOGUE_DIM) {
                 g_prologue.intensity -= 2;
-                prologue_draw_text_lines(g_prologue.intensity);
+                draw_text_lines(g_prologue.intensity);
                 if (g_prologue.intensity == 0) {
                     g_prologue.intensity = 0x80;
                     g_prologue.flags = (g_prologue.flags ^ PROLOGUE_DIM) | PROLOGUE_NEXT_ENTRY;
@@ -140,7 +140,7 @@ s32 prologue_update(void) {
                     g_prologue.flags = (flags ^ PROLOGUE_WAIT_CIRCLE) | PROLOGUE_DIM;
                     g_prologue.intensity = 0x80;
                 }
-                prologue_draw_text_lines(g_prologue.intensity);
+                draw_text_lines(g_prologue.intensity);
                 return 1;
             }
             if (flags & PROLOGUE_NEXT_ENTRY) {
@@ -159,10 +159,10 @@ s32 prologue_update(void) {
                 image_command = (u8)(entry->header >> 16);
                 switch (image_command & PROLOGUE_IMAGE_OPERATION_MASK) {
                 case PROLOGUE_PREPARE_IMAGE:
-                    prologue_prepare_crossfade(image_command & PROLOGUE_IMAGE_INDEX_MASK);
+                    prepare_crossfade(image_command & PROLOGUE_IMAGE_INDEX_MASK);
                     break;
                 case PROLOGUE_START_CROSSFADE:
-                    file_pending_wait();
+                    file_wait_pending();
                     g_prologue_crossfade.active = 1;
                     break;
                 }
@@ -182,7 +182,7 @@ s32 prologue_update(void) {
         /* Every line is out: the page waits for Circle. */
         if (g_prologue.step == g_prologue.step_count) {
             g_prologue.flags = (flags ^ PROLOGUE_NEXT_STEP) | (PROLOGUE_NEXT_ENTRY | PROLOGUE_WAIT_CIRCLE);
-            prologue_draw_text_lines(g_prologue.intensity);
+            draw_text_lines(g_prologue.intensity);
             return 1;
         }
         /* Byte indexing preserves the retail address-add order and entry reloads. */
@@ -214,7 +214,7 @@ s32 prologue_update(void) {
         }
     }
 
-    prologue_draw_text_lines(g_prologue.intensity);
+    draw_text_lines(g_prologue.intensity);
     return 1;
 }
 
@@ -236,7 +236,7 @@ s32 prologue_update(void) {
  * The coordinates are written in setXY4 order (x0, y0, x1, y1, ...) per
  * primitive, and width + 1 goes through its own variable (the target adds left
  * afterwards). */
-static void prologue_draw_text_lines(s32 intensity) {
+static void draw_text_lines(s32 intensity) {
     POLY_GT4* prims;
     s32 i;
     s32 prim_index;
@@ -330,7 +330,7 @@ static void prologue_draw_text_lines(s32 intensity) {
  * packed 210 pixels per row. It clears the per-row fade steps, the running flag
  * and the blend band's end row; image operation 0x20 of a later prologue entry waits for
  * the read and sets the running flag. */
-static void prologue_prepare_crossfade(s32 file_index) {
+static void prepare_crossfade(s32 file_index) {
     u16* copy_source;
     u16* copy_destination;
     u16* file_pixels;
@@ -352,7 +352,7 @@ static void prologue_prepare_crossfade(s32 file_index) {
     s_prologue_crossfade_new_picture = copy_source;
     s_prologue_crossfade_old_picture = copy_destination;
     s_prologue_crossfade_frame_pixels = file_pixels;
-    file_request_openbk_image(file_index + 2, g_system_work_buffer_0);
+    file_request_opnbk_image(file_index + 2, g_system_work_buffer_0);
 
     row = 0;
     source_row = 0;
@@ -393,7 +393,7 @@ static void prologue_prepare_crossfade(s32 file_index) {
  * target. The s16 components are copied for the compare and the difference,
  * while the sums use the originals.
  */
-static void prologue_step_crossfade(void) {
+static void update_crossfade(void) {
     s32 row;
     s32 last_row;
     s32 reverse_row;

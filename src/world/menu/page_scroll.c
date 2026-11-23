@@ -13,15 +13,15 @@
 
 extern u16 g_screen_scroll_hold_counter;
 
-/* Return the sprite modulation color menus draw with (set by screen_palette_mode_set). */
-rgb24_t* screen_get_draw_color(void) {
+/* Return the sprite modulation color menus draw with (set by menu_palette_set_mode). */
+rgb24_t* gfx_get_draw_color(void) {
     return &g_screen_sprite_color;
 }
 
 /* Move the list viewport by one visible page (dir -1 up, 1 down), keeping the selected row's
  * offset within the page and clamping it on a short last page. WORLD's body reloads the list
  * layout and plays the cursor sound when the page moves. */
-void screen_scroll_list_page(menu_vertical_scroll_direction_e dir, const menu_instruction_t* menu) {
+void menu_scroll_list_by_page(menu_vertical_scroll_direction_e dir, const menu_instruction_t* menu) {
     s32 old;
     s16 delta;
     s32 unused[2]; /* 8 frame bytes no menu uses */
@@ -41,7 +41,7 @@ void screen_scroll_list_page(menu_vertical_scroll_direction_e dir, const menu_in
         }
     }
     g_menu_list_selected_index = g_menu_scroll_base_index;
-    screen_list_layout_load(menu);
+    menu_scrollable_list_load_layout(menu);
     g_menu_list_selected_index = delta + g_menu_scroll_base_index;
     if (g_menu_list_selected_index >= g_menu_list_entry_count) {
         g_menu_list_selected_index = g_menu_list_entry_count - 1;
@@ -59,7 +59,7 @@ void screen_scroll_list_page(menu_vertical_scroll_direction_e dir, const menu_in
  * delay or a repeat period runs, and NONE otherwise. Ignored (NONE) while a
  * prompt is open, input is locked or a tutorial runs.
  */
-menu_vertical_scroll_direction_e menu_input_page_scroll_direction_read(void) {
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void) {
     s32 result = MENU_VERTICAL_SCROLL_NONE;
     s32 value;
     s32 delay;
@@ -67,7 +67,7 @@ menu_vertical_scroll_direction_e menu_input_page_scroll_direction_read(void) {
     u16 counter;
 
     if (g_screen_prompt_active == 0 && g_menu_input_lock_mode == 0 && g_tutorial_id == 0) {
-        value = screen_buttons_read(0);
+        value = screen_read_buttons(0);
         if ((value & PSX_PAD_UP) && (value & PSX_PAD_SQUARE)) {
             g_screen_scroll_hold_counter++;
             result = MENU_VERTICAL_SCROLL_UP;

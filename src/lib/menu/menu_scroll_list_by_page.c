@@ -38,7 +38,7 @@ void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const 
     }
 
     g_menu_list_selected_index = g_menu_scroll_base_index;
-    menu_draw_scrollable_list(menu);
+    menu_scrollable_list_refresh(menu);
     g_menu_list_selected_index = row_offset + g_menu_scroll_base_index;
     count = g_menu_list_entry_count;
     if (g_menu_list_selected_index >= count) {

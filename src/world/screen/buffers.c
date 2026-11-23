@@ -18,7 +18,7 @@
  * draw_otag (-1 skips submission) and clears the new buffer's table from
  * first_otag onward.
  */
-void screen_frame_present(s32 first_otag, s32 draw_otag) {
+void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     DRAWENV env;
     DRAWENV* envp;
     menu_gfx_context_t* context;
@@ -57,7 +57,7 @@ void screen_frame_present(s32 first_otag, s32 draw_otag) {
 
 /* Initializes every primitive pool of a packet buffer with its libgpu
  * constructor; quads additionally get texture shading enabled. */
-static void packet_pools_init(menu_gfx_context_t* buffer) {
+static void init_packet_pools(menu_gfx_context_t* buffer) {
     s32 i;
 
     for (i = 0; i < g_screen_textured_quad_capacity; i++) {
@@ -89,11 +89,12 @@ static void packet_pools_init(menu_gfx_context_t* buffer) {
 /* Binds the primitive pools for both WORLD packet buffers, initializes their
  * draw/display environments, and presents twice to establish the active pair.
  */
-void screen_packet_buffers_init(menu_gfx_context_t* buffers, u32* otags, void* unused_2, void* unused_3, void* unused_4,
-    POLY_FT4* textured_quads, void* unused_6, void* unused_7, POLY_G4* gradient_quads,
-    POLY_GT4* textured_gradient_quads, LINE_F2* flat_lines, void* unused_11, void* unused_12, LINE_G2* gradient_lines,
-    void* unused_14, void* unused_15, TILE* tiles, void* unused_17, void* unused_18, void* unused_19, void* unused_20,
-    void* unused_21, void* unused_22, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes) {
+void menu_gfx_init_contexts(menu_gfx_context_t* buffers, u32* otags, POLY_F3* unused_2, POLY_FT3* unused_3,
+    POLY_F4* unused_4, POLY_FT4* textured_quads, POLY_G3* unused_6, POLY_GT3* unused_7, POLY_G4* gradient_quads,
+    POLY_GT4* textured_gradient_quads, LINE_F2* flat_lines, LINE_F3* unused_11, LINE_F4* unused_12,
+    LINE_G2* gradient_lines, LINE_G3* unused_14, LINE_G4* unused_15, TILE* tiles, TILE_1* unused_17, TILE_8* unused_18,
+    TILE_16* unused_19, SPRT* unused_20, SPRT_8* unused_21, SPRT_16* unused_22, DR_MOVE* draw_moves,
+    DR_AREA* draw_areas, DR_MODE* draw_modes) {
     s32 i;
 
     g_screen_packet_buffers = buffers;
@@ -110,7 +111,7 @@ void screen_packet_buffers_init(menu_gfx_context_t* buffers, u32* otags, void* u
         g_screen_packet_buffers[i].draw_moves = draw_moves + g_screen_draw_move_capacity * i;
         g_screen_packet_buffers[i].draw_areas = draw_areas + g_screen_draw_area_capacity * i;
         g_screen_packet_buffers[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
-        packet_pools_init(&g_screen_packet_buffers[i]);
+        init_packet_pools(&g_screen_packet_buffers[i]);
         SetDefDrawEnv(&g_screen_packet_buffers[i].draw_env, 0, i * 240, 255, 240);
         SetDefDispEnv(&g_screen_packet_buffers[i].disp_env, 0, i == 0 ? 240 : 0, 255, 240);
         g_screen_packet_buffers[i].draw_env.isbg = 0;
@@ -118,6 +119,6 @@ void screen_packet_buffers_init(menu_gfx_context_t* buffers, u32* otags, void* u
         setRGB0(&g_screen_packet_buffers[i].draw_env, 0, 0, 0);
         g_screen_packet_buffers[i].draw_env.ofs[0] = -128;
     }
-    screen_frame_present(0, -1);
-    screen_frame_present(0, -1);
+    menu_gfx_present_frame(0, -1);
+    menu_gfx_present_frame(0, -1);
 }

@@ -4,7 +4,7 @@
 #include "psx/types.h"
 
 /* Set or clear one flag in a 32-bit-word bitmap. */
-static void flag_assign(u32* bits, s32 index, s32 set) {
+static void assign_flag(u32* bits, s32 index, s32 set) {
     s32 word = index / 32;
     u32 mask = 1U << (index & 0x1F);
 
@@ -22,13 +22,13 @@ void script_opcode_85_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
     u8 mask = 1;
 
     for (i = 0; i < 5; i++) {
-        flag_assign(bits, base + i, day & mask);
+        assign_flag(bits, base + i, day & mask);
         mask <<= 1;
     }
     mask = 1;
     for (i = 0; i < 4; i++) {
         s32 bit = i + 5;
-        flag_assign(bits, base + bit, month & mask);
+        assign_flag(bits, base + bit, month & mask);
         mask <<= 1;
     }
 }

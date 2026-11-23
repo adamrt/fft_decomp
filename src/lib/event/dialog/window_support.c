@@ -4,6 +4,7 @@
 #include "fft/camera.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
+#include "fft/map_unit.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_window.h"
@@ -11,13 +12,12 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit_event.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static SVECTOR s_unit_runtime_coords; /* the position unit_scratch_coords_copy returns */
+static SVECTOR s_map_unit_coords; /* the position map_unit_copy_world_coords_static returns */
 
 /* Window interpolation fractions; ONE ends each curve. The first two overshoot
  * the final size, while the last curve also drives the closing fade. */
@@ -32,17 +32,17 @@ static u16* s_menu_window_tween_easing_tables[5]
     = { s_menu_window_tween_small_overshoot, s_menu_window_tween_large_overshoot, s_menu_window_tween_linear,
           s_menu_window_tween_ease_out, s_menu_window_tween_fade };
 
-static void rectangle_quad_lerp(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor);
+static void lerp_rectangle_quad(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor);
 
 /* Return the start of text entry text_id: its section field picks the section pointer and its
  * entry field the entry within that section. */
-u8* text_entry_find(u32 text_id) {
-    return (u8*)text_entry_skip(g_text_section_pointers[(text_id & TEXT_ID_SECTION_MASK) >> TEXT_ID_SECTION_SHIFT],
+u8* text_find_entry(u32 text_id) {
+    return (u8*)text_skip_to_entry(g_text_section_pointers[(text_id & TEXT_ID_SECTION_MASK) >> TEXT_ID_SECTION_SHIFT],
         text_id & TEXT_ID_ENTRY_MASK);
 }
 
 /* Counts magnitude digits (at least one), not a minus sign. */
-s32 text_decimal_digits_count(s32 value) {
+s32 text_count_decimal_digits(s32 value) {
     s32 digits;
 
     value /= 10;
@@ -56,7 +56,7 @@ s32 text_decimal_digits_count(s32 value) {
 
 /* For a negative direction, mirror the quad's texture: swap u0/u1 and u2/u3, or the matching v
  * values when the texture runs vertically (u0 == u1). */
-void gfx_quad_negative_uv_flip(POLY_FT4* primitive, s32 direction) {
+void gfx_flip_quad_negative_uv(POLY_FT4* primitive, s32 direction) {
     u8 temp;
 
     if (direction < 0) {
@@ -79,9 +79,9 @@ void gfx_quad_negative_uv_flip(POLY_FT4* primitive, s32 direction) {
 }
 
 /* Zoom the current packet buffer's window quad open: for crop levels 0-11, stepping by the
- * event speed with one frame each, menu_zoom_cursor_frame crops rect around its center and
+ * event speed with one frame each, menu_zoom_sprite crops rect around its center and
  * the quad's corners and UVs follow the crop, 2 pixels narrower. */
-void menu_window_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
+void menu_window_animate_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
     void* source; /* never assigned; the target passes an uninitialized $s5 */
     s32 level;
@@ -96,7 +96,7 @@ void menu_window_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* u
         sprite.y0 = rect->y;
         sprite.w = rect->w;
         sprite.h = rect->h;
-        menu_sprite_zoom(source, &sprite, level);
+        menu_zoom_sprite(source, &sprite, level);
         setXY4(&buffers[g_menu_packet_buffer_index].quads[0], sprite.x0, sprite.y0, sprite.x0 + (sprite.w - 2),
             sprite.y0, sprite.x0, sprite.y0 + sprite.h, sprite.x0 + (sprite.w - 2), sprite.y0 + sprite.h);
         setUV4(&buffers[g_menu_packet_buffer_index].quads[0], sprite.u0, sprite.v0, sprite.u0 + (sprite.w - 2),
@@ -109,7 +109,7 @@ void menu_window_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* u
  * when to2->x is nonzero) along easing table `table`, whose 12-bit fractions end at ONE.
  * Each step lasts 3 - event speed frames. Table 4 also fades the window color with the
  * easing, from 128 toward 0. */
-void menu_window_quads_tween(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table) {
+void menu_window_tween_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table) {
     RECT from;
     RECT from2;
     u16* easing;
@@ -145,31 +145,31 @@ void menu_window_quads_tween(menu_window_buffer_t* buffers, RECT* to, RECT* to2,
                 buffers[buffer_index].color.g = fade;
                 buffers[buffer_index].color.r = fade;
             }
-            rectangle_quad_lerp(&buffers[g_menu_packet_buffer_index].quads[0], &from, to, step);
+            lerp_rectangle_quad(&buffers[g_menu_packet_buffer_index].quads[0], &from, to, step);
             if (to2->x != 0) {
-                rectangle_quad_lerp(&buffers[g_menu_packet_buffer_index].quads[1], &from2, to2, step);
+                lerp_rectangle_quad(&buffers[g_menu_packet_buffer_index].quads[1], &from2, to2, step);
             }
         }
     } while (*easing++ != ONE);
     thread_yield();
-    rectangle_quad_lerp(&buffers[g_menu_packet_buffer_index].quads[0], &from, to, step);
+    lerp_rectangle_quad(&buffers[g_menu_packet_buffer_index].quads[0], &from, to, step);
     if (to2->x != 0) {
-        rectangle_quad_lerp(&buffers[g_menu_packet_buffer_index].quads[1], &from2, to2, step);
+        lerp_rectangle_quad(&buffers[g_menu_packet_buffer_index].quads[1], &from2, to2, step);
     }
 }
 
 /* Interpolate with a 20.12 factor; ONE reaches end. Division truncates toward zero. */
-static s32 value_q12_lerp(s32 start, s32 end, s32 factor) {
+static s32 lerp_value_q12(s32 start, s32 end, s32 factor) {
     return ((end - start) * factor) / ONE + start;
 }
 
 /* Set a quad's corners to the rectangle interpolated between from and to by a 12-bit fraction. */
-static void rectangle_quad_lerp(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor) {
-    setXY4(poly, value_q12_lerp(from->x, to->x, factor), value_q12_lerp(from->y, to->y, factor),
-        value_q12_lerp(from->x + from->w, to->x + to->w, factor), value_q12_lerp(from->y, to->y, factor),
-        value_q12_lerp(from->x, to->x, factor), value_q12_lerp(from->y + from->h, to->y + to->h, factor),
-        value_q12_lerp(from->x + from->w, to->x + to->w, factor),
-        value_q12_lerp(from->y + from->h, to->y + to->h, factor));
+static void lerp_rectangle_quad(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor) {
+    setXY4(poly, lerp_value_q12(from->x, to->x, factor), lerp_value_q12(from->y, to->y, factor),
+        lerp_value_q12(from->x + from->w, to->x + to->w, factor), lerp_value_q12(from->y, to->y, factor),
+        lerp_value_q12(from->x, to->x, factor), lerp_value_q12(from->y + from->h, to->y + to->h, factor),
+        lerp_value_q12(from->x + from->w, to->x + to->w, factor),
+        lerp_value_q12(from->y + from->h, to->y + to->h, factor));
 }
 
 /* Pause: yield until Select, Cross or Circle is pressed, or until the thread's
@@ -177,24 +177,24 @@ static void rectangle_quad_lerp(POLY_FT4* poly, const RECT* from, const RECT* to
 void script_opcode_16_pause(void) {
     do {
         thread_yield();
-        if (thread_current_task_get() == THREAD_TASK_STOP_REQUEST) {
+        if (thread_current_get_task() == THREAD_TASK_STOP_REQUEST) {
             return;
         }
     } while ((g_script_event_input & (PSX_PAD_SELECT | PSX_PAD_CROSS | PSX_PAD_CIRCLE)) == 0);
 }
 
-/* Copy a unit's integer world position into the file's s_unit_runtime_coords and return it. Like
- * unit_world_coords_copy it tests for -1, but a missing unit returns 0, so the copy then reads
+/* Copy a unit's integer world position into the file's s_map_unit_coords and return it. Like
+ * map_unit_copy_world_coords it tests for -1, but a missing unit returns 0, so the copy then reads
  * address 0. */
-SVECTOR* unit_world_coords_static_copy(u32 runtime_id) {
-    SVECTOR* source = unit_runtime_world_coords_get(runtime_id);
+SVECTOR* map_unit_copy_world_coords_static(u32 map_unit_id) {
+    SVECTOR* source = map_unit_get_world_coords(map_unit_id);
     SVECTOR* dest;
 
     if (source != (SVECTOR*)-1) {
-        dest = &s_unit_runtime_coords;
+        dest = &s_map_unit_coords;
         dest->vx = source->vx;
-        s_unit_runtime_coords.vy = source->vy;
-        s_unit_runtime_coords.vz = source->vz;
+        s_map_unit_coords.vy = source->vy;
+        s_map_unit_coords.vz = source->vz;
         return dest;
     }
     return (SVECTOR*)-1;
@@ -203,10 +203,10 @@ SVECTOR* unit_world_coords_static_copy(u32 runtime_id) {
 /* Projects a unit's position to display coordinates (x, then y).
  *
  * The missing-unit test compares with -1, but
- * unit_runtime_world_coords_get returns 0 for a missing unit, so the
+ * map_unit_get_world_coords returns 0 for a missing unit, so the
  * projection then reads address 0. */
-void unit_screen_position_project(u32 runtime_id, SVECTOR* screen_coords) {
-    SVECTOR* world_coords = unit_runtime_world_coords_get(runtime_id);
+void map_unit_project_screen_position(u32 map_unit_id, SVECTOR* screen_coords) {
+    SVECTOR* world_coords = map_unit_get_world_coords(map_unit_id);
 
     if (world_coords != (SVECTOR*)-1) {
         camera_project_world_coords_to_screen(world_coords, screen_coords);
@@ -216,10 +216,10 @@ void unit_screen_position_project(u32 runtime_id, SVECTOR* screen_coords) {
 /* Copies a unit's integer world position as three 16-bit values.
  *
  * The missing-unit test compares with -1, but
- * unit_runtime_world_coords_get returns 0 for a missing unit, so the
+ * map_unit_get_world_coords returns 0 for a missing unit, so the
  * copy then reads address 0. */
-void unit_world_coords_copy(u32 runtime_id, SVECTOR* world_coords) {
-    SVECTOR* source = unit_runtime_world_coords_get(runtime_id);
+void map_unit_copy_world_coords(u32 map_unit_id, SVECTOR* world_coords) {
+    SVECTOR* source = map_unit_get_world_coords(map_unit_id);
 
     if (source != (SVECTOR*)-1) {
         world_coords->vx = source->vx;

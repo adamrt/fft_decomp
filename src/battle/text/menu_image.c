@@ -39,7 +39,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
     party_unit_get(0);
 
     if (text == 0 || text == (const u8*)1) {
-        cursor = text_entry_find(text_id);
+        cursor = text_find_entry(text_id);
     } else {
         cursor = text;
     }
@@ -123,7 +123,7 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                     width = state->pending_width;
                     if (width == 0xFFFF) {
                         started = 0;
-                        digit = text_decimal_digits_count(state->value) - 1;
+                        digit = text_count_decimal_digits(state->value) - 1;
                     } else {
                         state->pending_width = 0xFFFF;
                         digit = width - 1;
@@ -156,13 +156,13 @@ void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* t
                 }
 
                 /* Every control code then reaches the substitution, back-reference and end checks. */
-                state->value = text_format_id_resolve(state->command, *state->value_cursor);
+                state->value = text_resolve_format_id(state->command, *state->value_cursor);
                 if (state->value != -1) {
                     state->return_cursor = cursor + 1;
                     if (state->command == TEXT_FORMAT_RAMZA_NAME) {
                         cursor = g_text_player_name_buffer;
                     } else {
-                        cursor = text_entry_find(state->value);
+                        cursor = text_find_entry(state->value);
                     }
                     state->value_cursor++;
                     continue;

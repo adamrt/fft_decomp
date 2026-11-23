@@ -39,7 +39,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[UNIT_LIST_SCRIPT_END] = {
     menu_opcode_11_draw_background_tiles,     /* 0x11 */
     menu_opcode_12_draw_opening_window_frame, /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area, /* 0x13 */
-    menu_opcode_14_set_draw_area_if_unlocked, /* 0x14 */
+    menu_opcode_14_set_draw_area,             /* 0x14 */
     menu_opcode_15_restore_draw_area,         /* 0x15 */
     menu_opcode_16_advance_window_scale_step, /* 0x16 */
     menu_opcode_17_draw_right_aligned_number, /* 0x17 */
@@ -234,9 +234,9 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
 
 /* Advances the animated cursor at `pos` and draws it, sliding horizontally,
  * with its semi-transparent shadow. `mode` bit 0 starts the reverse curve;
- * mode 0 cancels it. The same routine as menu_update_and_draw_animated_cursor, except
+ * mode 0 cancels it. The same routine as WORLD's copy, except
  * that it draws at the fixed ordering-table entries 0x3C and 0x3B. */
-void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
+void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     s32 active;
     s32 active_bit = *state >> 15;
@@ -319,10 +319,10 @@ void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
 /* Advances the animated cursor at `pos` and draws it, bouncing vertically,
  * with its semi-transparent shadow through the shared sprite descriptor.
  *
- * Same state machine and curves as menu_update_and_draw_sliding_cursor; the
+ * Same state machine and curves as menu_draw_sliding_cursor; the
  * curve offset moves the quad's y edges instead of its x origin.
  */
-void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
+void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     u16 unused[4]; /* Retains the original 0x38-byte stack frame. */
     s32 bottom;
     s32 active;
@@ -433,7 +433,7 @@ menu_instruction_t* menu_script_skip_group(menu_instruction_t* command) {
  * the list and, with a text table set, the visible rows' text is redrawn into VRAM at
  * (0x100, 0x30).
  */
-void menu_draw_scrollable_list(const menu_instruction_t* script) {
+void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     RECT rect;
     s16 row_ids[20];
     s32 i;
@@ -493,7 +493,7 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
         rect.y = 0x30;
         rect.w = g_menu_list_vram_width;
         rect.h = g_menu_list_row_height;
-        text_id_rows_to_vram_render(g_menu_list_text_table, row_ids, &rect, 0);
+        text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
     }
 
     g_menu_list_scroll_direction = 0;
@@ -503,15 +503,15 @@ void menu_draw_scrollable_list(const menu_instruction_t* script) {
 /* Set up a scrollable list without a scroll base and draw it with the given menu script. */
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script) {
-    menu_scrollable_list_core_init(entries, selected_index, text_table);
-    menu_draw_scrollable_list(script);
+    menu_scrollable_list_init_core(entries, selected_index, text_table);
+    menu_scrollable_list_refresh(script);
 }
 
 /* Set up a scrollable list at a scroll base and draw it with the given menu script. */
-void menu_init_and_draw_scrollable_list(
+void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
-    menu_init_scrollable_list(entries, selected_index, scroll_base_index, text_table);
-    menu_draw_scrollable_list(script);
+    menu_scrollable_list_init(entries, selected_index, scroll_base_index, text_table);
+    menu_scrollable_list_refresh(script);
 }
 
 /* Scrollable-list body command.
@@ -557,11 +557,11 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     speed = menu_get_event_speed();
     g_menu_list_row_mode = 1;
     if (g_menu_list_redraw_pending != 0) {
-        menu_draw_scrollable_list(command);
+        menu_scrollable_list_refresh(command);
     }
     previous_selected = g_menu_list_selected_index;
     if (g_menu_list_scroll_direction == 0) {
-        j = menu_input_page_scroll_direction_read();
+        j = menu_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);
@@ -581,7 +581,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
                             *row_ids = text_id;
-                            text_id_rows_to_vram_render(g_menu_list_text_table, row_ids, &rect, 0);
+                            text_render_id_rows_to_vram(g_menu_list_text_table, row_ids, &rect, 0);
                         }
                     }
                 } else if (input & PSX_PAD_UP) {
@@ -601,7 +601,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
                             rect.w = g_menu_list_vram_width;
                             rect.h = g_menu_list_row_height;
-                            text_id_rows_to_vram_render(g_menu_list_text_table, entry_ids, &rect, 0);
+                            text_render_id_rows_to_vram(g_menu_list_text_table, entry_ids, &rect, 0);
                         }
                     }
                 } else if (g_menu_list_selected_index < g_menu_list_entry_count - 1 && (input & PSX_PAD_DOWN)) {
@@ -708,7 +708,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
+        menu_draw_sliding_cursor(&marker, &g_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;

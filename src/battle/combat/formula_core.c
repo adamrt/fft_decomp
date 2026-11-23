@@ -2,9 +2,10 @@
 
 #include "fft/ability.h"
 #include "fft/action.h"
-#include "fft/battle_map.h"
 #include "fft/formula.h"
 #include "fft/item.h"
+#include "fft/map.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/random.h"
@@ -12,7 +13,6 @@
 #include "fft/status.h"
 #include "fft/target.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "fft/weather.h"
 #include "fft/zodiac.h"
 #include "psx/libc.h"
@@ -48,7 +48,7 @@ enum {
     KNOCKBACK_DIRECTION_EAST = 3   /* +x */
 };
 
-static s32 knockback_destination_check(s32 direction, s32 x, s32 y);
+static s32 check_knockback_destination(s32 direction, s32 x, s32 y);
 
 /* Fail the action on this target outright: no hit, the forced-failure miss type and 0 accuracy.
  * Used when an ability cannot work on the target (nothing to steal, wrong target type, level
@@ -96,10 +96,10 @@ s32 formula_calculate_dance_song_hit(void) {
  *
  * abs() is the builtin: its MIPS abssi2 pattern emits the target's
  * bgez/move/negu sequence. */
-static void knockback_calculate(void) {
-    unit_stats_t* target;
-    unit_stats_t* attacker;
-    battle_map_tile_t* tile;
+static void calculate_knockback(void) {
+    battle_unit_t* target;
+    battle_unit_t* attacker;
+    map_tile_t* tile;
     u8 surface;
     s32 dx;
     s32 dy;
@@ -153,11 +153,11 @@ static void knockback_calculate(void) {
             y--;
         }
     }
-    level = knockback_destination_check(direction, x, y);
+    level = check_knockback_destination(direction, x, y);
     if (level < 0) {
         return;
     }
-    tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_terrain_width + x];
+    tile = &g_map_tile_data[(level << 8) + y * g_map_terrain_width + x];
     surface = tile->surface.type;
     if (tile->flags.untargetable) {
         return;
@@ -168,7 +168,7 @@ static void knockback_calculate(void) {
     if (tile->depth_half_height.half_height >= 3) {
         return;
     }
-    if (surface == BATTLE_MAP_SURFACE_LAVA || surface == BATTLE_MAP_SURFACE_OBSTACLE) {
+    if (surface == MAP_SURFACE_LAVA || surface == MAP_SURFACE_OBSTACLE) {
         return;
     }
     if (!(move_get_effective_flags(g_action_target) & MOVE_EFFECTIVE_FLY)) {
@@ -199,10 +199,10 @@ static void knockback_calculate(void) {
  * g_action_work.knockback_fall_height and the ability target ID to
  * g_action_work.post_action_target_id, and the destination
  * layer is returned; -1 means off-map, blocked or occupied. */
-static s32 knockback_destination_check(s32 direction, s32 x, s32 y) {
-    battle_map_tile_t* tile;
-    battle_map_tile_t* lower;
-    battle_map_tile_t* upper;
+static s32 check_knockback_destination(s32 direction, s32 x, s32 y) {
+    map_tile_t* tile;
+    map_tile_t* lower;
+    map_tile_t* upper;
     s32 source_shift;
     s32 destination_shift;
     s32 height;
@@ -213,7 +213,7 @@ static s32 knockback_destination_check(s32 direction, s32 x, s32 y) {
     s32 index;
     s32 upper_index;
 
-    if (x < 0 || y < 0 || x >= g_battle_map_terrain_width || y >= g_battle_map_terrain_depth) {
+    if (x < 0 || y < 0 || x >= g_map_terrain_width || y >= g_map_terrain_depth) {
         return -1;
     }
     switch (direction) {
@@ -234,12 +234,12 @@ static s32 knockback_destination_check(s32 direction, s32 x, s32 y) {
         destination_shift = 6;
         break;
     }
-    tile = &g_battle_map_tile_data[battle_map_tile_calculate_unit_index(g_action_target)];
+    tile = &g_map_tile_data[battle_unit_get_tile_index(g_action_target)];
     height = TILE_EDGE_HEIGHT(tile, source_shift);
-    index = y * g_battle_map_terrain_width + x;
-    upper_index = index + BATTLE_MAP_TILES_PER_LAYER;
-    lower = &g_battle_map_tile_data[index];
-    upper = &g_battle_map_tile_data[upper_index];
+    index = y * g_map_terrain_width + x;
+    upper_index = index + MAP_TILES_PER_LAYER;
+    lower = &g_map_tile_data[index];
+    upper = &g_map_tile_data[upper_index];
     if (lower->flags.blocked) {
         lower_height = 0xff;
     } else {
@@ -288,7 +288,7 @@ static s32 knockback_destination_check(s32 direction, s32 x, s32 y) {
  * base hit). The random roll is always
  * drawn, but only while executing does an evade clear the hit, record the miss
  * type and the item that blocked, and return 1; a preview or AI pass returns 0. */
-static s32 evade_source_roll(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
+static s32 roll_evade_source(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
     if (random_roll_pass_fail(denominator, numerator) != 0) {
         return 0;
     }
@@ -317,8 +317,8 @@ static s32 evade_source_roll(u16 numerator, u16 denominator, u8 miss_type, u8 it
  * distinct comparison copy without a compiler constraint.
  */
 void formula_apply_zodiac_compatibility(void) {
-    unit_stats_t* attacker;
-    unit_stats_t* target;
+    battle_unit_t* attacker;
+    battle_unit_t* target;
     u16 attacker_zodiac;
     u32 attacker_zodiac_compare;
     u16 target_zodiac;
@@ -485,14 +485,14 @@ void formula_nullify_action(void) {
     target_data->special_effect = 0;
     target_data_reload->attack_type = 0;
     formula_clear_pending_proc();
-    move_knockback_cancel();
+    move_cancel_knockback();
 }
 
 /* Target affinities on the stored HP damage: absorb flags the action, nullify
  * cancels it, half halves, weak doubles. Half and weak both apply. */
 void formula_element_modify_damage(s32 element) {
     u8 element_mask = element;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     action_data_t* absorb_action;
     action_data_t* half_action;
     action_data_t* weak_action;
@@ -548,7 +548,7 @@ void formula_evade_store_physical(void) {
     u8 weapon_secondary;
 
     if ((g_action_target->ability_flags.reaction[3] & UNIT_REACTION_SET_4_WEAPON_GUARD) != 0) {
-        weapon_guard = unit_get_action_restriction(g_action_target) == UNIT_ACTION_RESTRICTION_NONE;
+        weapon_guard = battle_unit_get_action_restriction(g_action_target) == UNIT_ACTION_RESTRICTION_NONE;
     }
     g_action_work.base_hit = 100;
     g_action_work.evades.accessory = 0;
@@ -598,7 +598,7 @@ void formula_evade_store_physical(void) {
 /* Reset the base hit to 100 and load the target's accessory and shield
  * magic evades; monsters get no equipment evade. */
 void formula_evade_store_magical(void) {
-    unit_stats_t* target = g_action_target;
+    battle_unit_t* target = g_action_target;
     item_data_t* items;
     item_data_t* item;
     s32 secondary;
@@ -652,7 +652,7 @@ void formula_evade_calculate_dark_confuse(void) {
 void formula_evade_calculate_abandon(void) {
     u8* base_hit;
 
-    if ((unit_get_action_restriction(g_action_target) == UNIT_ACTION_RESTRICTION_NONE)
+    if ((battle_unit_get_action_restriction(g_action_target) == UNIT_ACTION_RESTRICTION_NONE)
         && (g_action_target->ability_flags.reaction[3] & UNIT_REACTION_SET_4_ABANDON)) {
         base_hit = &g_action_work.base_hit;
         *base_hit = *base_hit >> 1;
@@ -664,7 +664,7 @@ void formula_evade_calculate_abandon(void) {
  * or Performing clear all four; Defending halves the base hit, which doubles
  * them. */
 void formula_evade_apply_target_statuses(void) {
-    unit_stats_t* target = g_action_target;
+    battle_unit_t* target = g_action_target;
     u8 flag;
     u8* base_hit;
 
@@ -831,7 +831,7 @@ void formula_evade_calculate_final_hit_percent(void) {
                   * ((hit - evade) * 100 / hit) / 1000000)
             * g_action_target_data->attack_accuracy / 100;
     }
-    if (evade_source_roll(g_action_work.evades.accessory, hit, ACTION_MISS_TYPE_ACCESSORY_EVADE,
+    if (roll_evade_source(g_action_work.evades.accessory, hit, ACTION_MISS_TYPE_ACCESSORY_EVADE,
             g_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY])
         != 0) {
         return;
@@ -840,17 +840,17 @@ void formula_evade_calculate_final_hit_percent(void) {
     if (item == ITEM_ID_NONE) {
         item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
     }
-    if (evade_source_roll(g_action_work.evades.right_hand, hit, ACTION_MISS_TYPE_RIGHT_HAND_EVADE, item) != 0) {
+    if (roll_evade_source(g_action_work.evades.right_hand, hit, ACTION_MISS_TYPE_RIGHT_HAND_EVADE, item) != 0) {
         return;
     }
     item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
     if (item == ITEM_ID_NONE) {
         item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
     }
-    if (evade_source_roll(g_action_work.evades.left_hand, hit, ACTION_MISS_TYPE_LEFT_HAND_EVADE, item) != 0) {
+    if (roll_evade_source(g_action_work.evades.left_hand, hit, ACTION_MISS_TYPE_LEFT_HAND_EVADE, item) != 0) {
         return;
     }
-    evade_source_roll(g_action_work.evades.job, hit, ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD, ITEM_ID_NONE);
+    roll_evade_source(g_action_work.evades.job, hit, ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD, ITEM_ID_NONE);
 }
 
 /* Set XA and YA from the current weapon's item type.
@@ -1108,7 +1108,7 @@ void formula_apply_magic_defense_up(void) {
  * Chicken or Frog * 3/2. Sleep and Charging share one step: inflicting Sleep
  * cancels Charging (and Jump, Defending and Performing). */
 void formula_apply_target_physical_statuses(void) {
-    unit_stats_t* target;
+    battle_unit_t* target;
 
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PROTECT)]
         & STATUS_BYTE_MASK(STATUS_ID_PROTECT)) {
@@ -1151,7 +1151,7 @@ void formula_calculate_critical_hit(void) {
         rnd = formula_get_random();
         base_xa = g_action_work.xa;
         g_action_work.xa = base_xa + rnd * base_xa / 32768;
-        knockback_calculate();
+        calculate_knockback();
     }
 }
 
@@ -1215,7 +1215,7 @@ void formula_calculate_damage_leaving_one_hp(void) {
  * is on the player team. Nothing to take is a forced miss. The attacker's
  * action data records the gain and the target's the loss. */
 void formula_calculate_stolen_gil(void) {
-    unit_stats_t* attacker = g_action_attacker;
+    battle_unit_t* attacker = g_action_attacker;
     action_data_t* action;
     action_data_t* target_action;
     action_data_t* other;
@@ -1296,7 +1296,7 @@ void formula_apply_damage_and_knockback(void) {
     }
     roll = (formula_get_random() * g_action_attacker->brave) / 32768;
     if (random_roll_pass_fail(g_action_target->brave, roll) == 0) {
-        knockback_calculate();
+        calculate_knockback();
     }
 }
 

@@ -33,7 +33,7 @@ static u16 s_portraits_by_sheet[212] = { 0, 0, 1, 2, 3, 120, 121, 4, 122, 123, 1
 /* Thread that draws the zodiac backdrop each frame, zooming it from double size down to normal
  * (1/16 per VSync of the event speed) unless parameter 1 starts it at normal size, until
  * parameter 3 asks it to stop. */
-void formation_zodiac_backdrop_run(void) {
+void zodiac_backdrop_thread(void) {
     s32 frame;
 
     if (g_formation_screen_active != 0) {
@@ -43,7 +43,7 @@ void formation_zodiac_backdrop_run(void) {
         s_zodiac_backdrop.offset.position.x = 0x100;
         s_zodiac_backdrop.offset.position.y = 0x80;
     }
-    if (thread_current_parameter_1_get() == 0) {
+    if (thread_current_get_parameter_1() == 0) {
         s_zodiac_backdrop.scale_x = 0x2000;
         s_zodiac_backdrop.scale_y = 0x2000;
     } else {
@@ -60,7 +60,7 @@ void formation_zodiac_backdrop_run(void) {
         s_zodiac_backdrop.brightness = g_screen_color_red;
         zodiac_build_primitives(&s_zodiac_backdrop, g_formation_view_quads[frame & 1]);
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             thread_current_exit();
         }
     }
@@ -71,13 +71,13 @@ void formation_zodiac_backdrop_run(void) {
  * turns it into the CLUT at (0x140 + (index % 4) * 16, 0xe0 + index / 4).
  *
  * Generic male/female identities derive their sheet from the job (the same
- * sheet numbering portrait_poly_build uses); other selectors take the
+ * sheet numbering portrait_build_poly uses); other selectors take the
  * job's spritesheet. Monster sprites from 0x3e on have three palettes each,
  * and the job's portrait palette picks one. `job` is only loaded for
  * selectors other than the generic humans, so this step assumes no other
  * unit's sprite reaches 0x3e.
  */
-s32 formation_unit_palette_index_get(s32 party_index) {
+s32 formation_get_party_unit_palette_index(s32 party_index) {
     party_unit_t* unit = party_unit_get(party_index);
     const job_data_t* job;
     s32 portrait;
@@ -98,7 +98,7 @@ s32 formation_unit_palette_index_get(s32 party_index) {
                 portrait = base + JOB_SHEET_GENERIC_FEMALE_MIME_BASE;
             }
         } else {
-            job = job_data_get(unit->job_id);
+            job = job_get_data(unit->job_id);
             portrait = job->spritesheet_id;
         }
         if (unit->job_id == JOB_ID_BARD) {
@@ -137,7 +137,7 @@ s32 formation_unit_palette_index_get(s32 party_index) {
 
 /* Resolve a party member's portrait code: bits 0-9 select the portrait,
  * and for monsters bits 10-11 carry the job's portrait palette. */
-s32 portrait_party_unit_code_get(s32 party_index) {
+s32 portrait_get_party_unit_code(s32 party_index) {
     party_unit_t* party_unit = party_unit_get(party_index);
     const job_data_t* job_data;
     u32 sprite_set;
@@ -158,7 +158,7 @@ s32 portrait_party_unit_code_get(s32 party_index) {
                 sprite_sheet -= 2;
             }
         } else {
-            job_data = job_data_get(party_unit->job_id);
+            job_data = job_get_data(party_unit->job_id);
             sprite_sheet = job_data->spritesheet_id;
         }
         if (party_unit->job_id == JOB_ID_BARD) {
@@ -181,6 +181,6 @@ s32 portrait_party_unit_code_get(s32 party_index) {
 }
 
 /* Ask the scrolling text list thread in thread_id to redraw its page. */
-void screen_thread_redraw_request(s32 thread_id) {
+void screen_thread_request_redraw(s32 thread_id) {
     g_threads[thread_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 1;
 }

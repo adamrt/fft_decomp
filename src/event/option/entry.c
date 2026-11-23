@@ -22,7 +22,7 @@
  * The values pulsed for tutorial scripts (0xfd options, 0xf9 AT list) are the same
  * screen codes WORLD's option entry pulses. */
 void option_entrypoint(s32 menu_type) {
-    menu_entry_t* menu = (menu_entry_t*)thread_current_parameter_1_get();
+    menu_entry_t* menu = (menu_entry_t*)thread_current_get_parameter_1();
     s32 index;
     game_options_fields_t options = g_game_options.fields;
 
@@ -48,14 +48,14 @@ void option_entrypoint(s32 menu_type) {
     }
 
     if (menu_type != MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
-        thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
-        thread_parameters_set(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
-        thread_parameters_set(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
-        thread_parameters_set(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
-        thread_inactive_wait(THREAD_SLOT_TILE_INFO_PANEL);
-        thread_inactive_wait(THREAD_SLOT_UNIT_SUMMARY_PANEL);
-        thread_inactive_wait(THREAD_SLOT_RIGHT_UNIT_STATS);
-        thread_inactive_wait(THREAD_SLOT_HOVERED_UNIT_STATS);
+        thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
+        thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
+        thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
+        thread_set_parameters(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
+        thread_wait_inactive(THREAD_SLOT_TILE_INFO_PANEL);
+        thread_wait_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);
+        thread_wait_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
+        thread_wait_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
     }
 
     g_menu_modal_open = 0;
@@ -65,8 +65,8 @@ void option_entrypoint(s32 menu_type) {
         thread_start(g_thread_current_id - 1, option_game_options_thread);
         menu->select_text_table = 1;
         menu->context = &g_option_entry_table;
-        thread_parameters_set(g_thread_current_id - 1, menu, 0, 0);
-        thread_inactive_wait(g_thread_current_id - 1);
+        thread_set_parameters(g_thread_current_id - 1, menu, 0, 0);
+        thread_wait_inactive(g_thread_current_id - 1);
         thread_current_exit();
     }
     if (menu_type == MENU_OPTION_TYPE_AT_LIST) {
@@ -74,6 +74,6 @@ void option_entrypoint(s32 menu_type) {
         at_list_start_thread();
     }
     if (menu_type == MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
-        crystal_pickup_menus_run();
+        crystal_pickup_run_menus();
     }
 }

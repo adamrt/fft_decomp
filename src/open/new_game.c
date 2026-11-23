@@ -11,13 +11,13 @@
 
 /* Load WORLD if needed, then prepare Ramza's roster or the empty Continue
  * roster. Remember the party mode so repeated calls do not rebuild it. */
-void new_game_party_init(s32 party_mode, s32 world_load_mode) {
+void new_game_init_party(s32 party_mode, s32 world_load_mode) {
     u32 flags;
     u32 party_mode_flag;
 
     if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED) == 0) {
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED;
-        overlay_world_load(world_load_mode);
+        overlay_load_world(world_load_mode);
     }
 
     party_mode_flag = NEW_GAME_PARTY_MODE_FLAG_BASE << party_mode;
@@ -25,13 +25,13 @@ void new_game_party_init(s32 party_mode, s32 world_load_mode) {
     if ((flags & SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN) == 0 || (flags & party_mode_flag) == 0) {
         g_system_runtime_flags
             = ((flags | SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN) & ~NEW_GAME_PARTY_MODE_FLAG_MASK) | party_mode_flag;
-        party_new_game_init(party_mode);
-        formation_roster_names_build();
+        party_init_new_game(party_mode);
+        formation_roster_build_names();
     }
 }
 
 /* Start date of each ordinary sign as {month, day} byte pairs, Aries first.
- * calendar_date_to_zodiac_convert indexes it flat ([i * 2], [i * 2 + 1]),
+ * calendar_date_to_zodiac indexes it flat ([i * 2], [i * 2 + 1]),
  * and it is not const: that routine reloads a day after storing through its
  * month pointer. */
 static u8 s_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2] = {
@@ -67,7 +67,7 @@ static u8 s_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2] = {
  * `span` first holds the previous sign's start day and then the number of
  * days from it to the end of its month; computing it in two steps keeps GCC
  * from folding the `+ 1` into the sum with `*day`. */
-void calendar_date_to_zodiac_convert(s32* month, s32* day) {
+void calendar_date_to_zodiac(s32* month, s32* day) {
     s32 index = 0;
     s32 length;
     s32 span;

@@ -21,7 +21,7 @@ extern u8* g_brave_story_ages_source;
  * Assembled with ASPSX < 2.30: the slot loop keeps five 4-instruction
  * `lui $at / addiu $at / addu $at,idx / sh 0($at)` forms, so this function
  * carries the per-function gcc-2.6.3_O2_aspsx-2.21 profile. */
-void save_data_tables_init(void) {
+void save_init_data_tables(void) {
     s32 i;
     sound_novel_reading_t* record;
 

@@ -3,7 +3,7 @@
 
 /* The turn command: the next thing a unit does, built by the AI or taken from a player's menu choice. */
 
-#include "fft/battle_map.h"
+#include "fft/map.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 
@@ -32,13 +32,13 @@ typedef enum turn_command_kind {
     TURN_COMMAND_UNRESOLVED_FF = 0xff
 } turn_command_kind_e;
 
-/* A unit's command, kept in its unit_runtime_t. ACT carries the action of the AI's selected action
+/* A unit's command, kept in its map_unit_t. ACT carries the action of the AI's selected action
  * (ai_action_data_t.command); MOVE writes only the destination's x, layer and y, and END_TURN leaves
  * the payload as it was. */
 typedef struct turn_command {
     s32 kind; /* TURN_COMMAND_*, or the current menu's targeting/crystal choice. */
     union {
-        battle_map_tile_coordinates_t move;
+        map_tile_coordinates_t move;
         action_command_t action;
     } data;
 } turn_command_t;

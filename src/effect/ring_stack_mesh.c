@@ -1,7 +1,5 @@
 /* A spinning stack of eight textured rings with scrolling texture and brightness by row. */
 
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
@@ -11,6 +9,8 @@
 #include "fft/effect_particle.h"
 #include "fft/effect_script.h"
 #include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
 #include "psx/gte_inline.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -88,12 +88,12 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
     u32 blue;
     u32 green;
     u32 red;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
 
     record = &g_effect_state_records[state_index];
     entry = &g_effect_geometry_table->entries[emitter_index];
     placement = entry->radial_mesh.placement_flags;
-    ot = gfx_battle_otag_get();
+    ot = gfx_get_battle_otag();
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
@@ -118,7 +118,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = tpage;
-                quad->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_EFFECT, 0);
+                quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             }
         }
 
@@ -137,26 +137,26 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         target_index = g_effect_state_records[state_index].timeline.target_index;
 
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
-        effect_emitter_spawn_position_interpolate(entry, j, &origin);
+        effect_emitter_interpolate_spawn_position(entry, j, &origin);
         switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
         case EFFECT_EMITTER_ORIGIN_WORLD:
             break;
         case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-            tile = battle_map_tile_get_pointer(
+            tile = map_get_tile(
                 g_effect_context.target_tile.vx, g_effect_context.target_tile.vz, g_effect_context.target_tile.vy);
-            origin.vx += g_effect_context.target_tile.vx * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
-            origin.vy -= tile->height * BATTLE_MAP_HEIGHT_STEP;
-            origin.vz += g_effect_context.target_tile.vz * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2);
+            origin.vx += g_effect_context.target_tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            origin.vy -= tile->height * MAP_HEIGHT_STEP;
+            origin.vz += g_effect_context.target_tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             break;
         case EFFECT_EMITTER_ORIGIN_CASTER:
-            effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
                 EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &vertex);
             origin.vx += vertex.vx;
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
             break;
         case EFFECT_EMITTER_ORIGIN_TARGET:
-            effect_target_world_coords_resolve(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
                 target_index, &g_effect_context, &vertex);
             origin.vx += vertex.vx;
             origin.vy += vertex.vy;
@@ -165,9 +165,9 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
             break;
         case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-            battle_map_dimensions_store(&map_max);
-            origin.vx += map_max.vx * (BATTLE_MAP_TILE_SIZE / 2);
-            origin.vz += map_max.vz * (BATTLE_MAP_TILE_SIZE / 2);
+            map_store_dimensions(&map_max);
+            origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
+            origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
             break;
         }
 

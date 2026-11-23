@@ -89,9 +89,9 @@ preserving every original byte.
   program conditionals; functions that change order between programs were
   copied and stay in separate files (`make order` reports both).
 - `include/fft/`: one flat folder of game headers named by concept
-  (`unit.h`, `shop.h`, `proposition.h`, `battle_map_load.h`, `menu_stack.h`),
+  (`unit.h`, `shop.h`, `proposition.h`, `map_load.h`, `menu_stack.h`),
   each declaring one part of the game for every program that uses it. A
-  large concept splits by sub-topic (`unit.h` and `unit_runtime.h`,
+  large concept splits by sub-topic (`unit.h` and `map_unit.h`,
   `effect.h` and `effect_emitter_data.h`); add folders only when size calls for
   them. Suzuki's interface belongs here too, separate from game sound and
   music services. `include/psx/`: PsyQ and PS1 hardware interfaces. Platform
@@ -108,7 +108,7 @@ functions; order sections so a type comes before its first use. Plain
 declarations run together without blank lines, a size assert follows its type
 directly, and blank lines separate type blocks and come before a commented
 declaration. Headers include their own dependencies and compile alone; a
-header that only passes a record around names it by its tag (`struct unit_runtime*`)
+header that only passes a record around names it by its tag (`struct map_unit*`)
 instead of including the record's header.
 
 ## Code style
@@ -130,19 +130,43 @@ instead of including the record's header.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
-- Name public functions with a stable concept owner followed by a natural
-  operation phrase: `<owner>_<operation>`. Build the owner from broad to
-  specific (`unit_stats_refresh`, `formation_roster_sort`,
-  `world_map_save_request`, `party_levels_gain`). The owner is the game
-  concept, not the executable. Prefer noun then verb for a focused operation,
-  but keep readable predicates, conversions and phrases such as
-  `unit_find_at_tile`, `menu_thread_is_running`, `calendar_date_to_day_index`
-  and `effect_vector_add_random_offsets`. A drawing API may consistently
-  group `owner_draw_thing` operations. Do not reorder words mechanically or
-  turn a status-returning operation into a boolean-sounding predicate.
-  Static functions use concise contextual names without redundant owner
-  prefixes or a private-name marker; local variables and private types
-  likewise use their enclosing context.
+- Name public functions `<owner>_<verb>_<object>`: the owner is the game
+  concept, then the operation as it reads in English
+  (`battle_unit_refresh_stats`, `party_unit_gain_levels`, `world_map_request_save`,
+  `camera_get_zoom`, `map_palette_set_colors`). The owner is usually
+  the module and its noun at once (`at_list_advance_cursor`); a sub-noun
+  joins the owner only when it is a family of its own, with several
+  operations and usually its own record (`menu_selection_clear_records`,
+  `effect_slot_free`, `formation_roster_sort`), or when it is a mode the
+  player picks (`shop_buy_`, `shop_fitting_`, `soldier_office_hire_`). A
+  parent subsystem leads only when the noun would be ambiguous without it
+  (`map_unit_get_tile`, but `map_mesh_` and `map_palette_`). `map_` is the
+  battle map as a level: terrain, mesh, tiles, files, color tables
+  (`map_palette_`) and lighting (`map_light_`); `world_map_` is the world
+  map. A function on a unit record takes the record as its owner
+  (`battle_unit_`, `map_unit_`, `party_unit_`); `unit_panel_`,
+  `unit_list_` and `unit_view_` are screens. An operation with no object
+  ends at its verb. A lookup by an id names its key last with
+  `by_<key>`, spelled like the field (`map_unit_get_by_battle_unit_id`
+  returns the record, `map_unit_get_id_by_battle_unit_id` the id); a lookup
+  by the record's own id needs no key (`map_unit_get`), unless a version
+  taking the record pointer has the same name: the pointer version keeps it
+  and the id version adds `_by_id` (`map_unit_remove(map_unit_t*)`,
+  `map_unit_remove_by_id(map_unit_id)`). When the noun after
+  a subsystem is a record, the function takes that record's id, so the
+  noun replaces the key (`animation_map_unit_set_walk(map_unit_id)` beside
+  `animation_set_walk(map_unit_t*)`). Keep readable
+  predicates, conversions and phrases such as `map_unit_find_at_tile`,
+  `menu_thread_is_running`, `calendar_date_to_day_index` and
+  `effect_vector_add_random_offsets`. Decide owners family by family; do not
+  reorder words mechanically or turn a status-returning operation into a
+  boolean-sounding predicate. Paired state-machine handlers keep the state
+  before the role so each pair sorts together
+  (`battle_state_free_cursor_enter`, `battle_state_free_cursor_update`).
+  Static functions drop the owner and start with the verb (`read_pad`,
+  `enter_ai_command`), without a private-name marker or a `_cb`/`_func`
+  suffix; local variables and private types likewise use their enclosing
+  context.
   Retain enough qualification to distinguish roles and avoid target-symbol
   collisions. The concept is the game's own US term where the player
   sees one (bar, rumor, proposition, Brave Story, sound novel, formation,
@@ -159,6 +183,11 @@ instead of including the record's header.
 - Name execution roles consistently: `_init` sets up state or resources,
   `_run` completes a loop or operation, `_update` advances one step,
   `_start` launches scheduled work, and `_dispatch` selects a behavior.
+  A role word is the verb and comes before the thing it acts on
+  (`shop_run_screen`, `deploy_init_units`). When the object would make the
+  name misleading, name what is stepped (`item_list_update_sort_menu`,
+  `update_teleport_start_phase`) rather than adding `_frame`. Thread bodies
+  end in `_thread`.
 - Program entrypoints are the naming exception: use `<program>_entrypoint`,
   or `<program>_<role>_entrypoint` for independent entrances to one overlay
   (`small_entrypoint`, `open_title_entrypoint`, `open_ending_entrypoint`).
@@ -186,6 +215,14 @@ instead of including the record's header.
   carries a comment saying which programs define it. Materially different
   record layouts take distinct types; similar roles do not justify hiding
   different representations behind one conditional typedef.
+- A unit has three records. `party_unit_t` is the roster member the player
+  keeps and saves. `battle_unit_t` is a unit in the current battle, built
+  from a party unit or an ENTD entry: its computed stats, gear, statuses,
+  CT, team, AI and current action, indexed by `battle_unit_id`.
+  `map_unit_t` is its piece on the battle map: position, path, sprites,
+  animation and facing, indexed by `map_unit_id`; an event ghost has a map
+  unit and no battle unit. Comments may still say "unit" where the player
+  would.
 - Preserve game terminology. Name an unknown by what the code shows it
   doing, and mark a name that rests on thin evidence `Provisional:` in its
   comment; keep an address in a name only when nothing else is known.
@@ -202,7 +239,7 @@ instead of including the record's header.
   `_padding_XX` means proven alignment/size filler. Offsets are relative to the
   member's own struct. Never access unused or padding members by name.
 - Use `ONE` for fixed-point 1.0 (4096). A name that states a fixed-point
-  format uses `qN` for N fraction bits (`effect_lerp_q8`, `value_q12_lerp`).
+  format uses `qN` for N fraction bits (`effect_lerp_q8`, `lerp_value_q12`).
   Add `const` only for genuinely read-only inputs and verify all callers
   under their historical compiler profiles.
 - Use American spelling.

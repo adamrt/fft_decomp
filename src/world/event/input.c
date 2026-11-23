@@ -33,7 +33,7 @@ static u32 s_screen_input_frame_secondary_repeat_counter;
  * (g_screen_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
-void menu_input_event_state_update(u32* otag, u32 input, s32 framebuffer_y) {
+void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;

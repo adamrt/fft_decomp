@@ -12,9 +12,9 @@ void unit_panel_toggle_numbers_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_NUMERIC_PANEL) == 0) {
             thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-            thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_numeric_panel_params, 0, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_numeric_panel_params, 0, 0);
         }
     } else {
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }

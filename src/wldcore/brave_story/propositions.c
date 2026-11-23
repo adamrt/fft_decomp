@@ -30,17 +30,17 @@
 #include "psx/types.h"
 
 /* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING. A scalar declaration changes
- * the load order in brave_story_advancing_list_input_update. */
+ * the load order in brave_story_update_advancing_list_input. */
 extern s32 g_brave_story_advancing_saved_cursor[];
 
-/* The unit unit_panel_party_unit_prepare loads from a party slot for the status panels. */
-extern unit_stats_t g_unit_panel_unit;
+/* The unit unit_panel_prepare_party_unit loads from a party slot for the status panels. */
+extern battle_unit_t g_unit_panel_unit;
 
-static void advancing_list_open(void);
-static void participant_list_open(s32 proposition);
-static void participant_detail_open(s32 proposition, s32 participant);
-static void work_history_open(void);
-static void work_history_entry_open(s32 value);
+static void open_advancing_list(void);
+static void open_participant_list(s32 proposition);
+static void open_participant_detail(s32 proposition, s32 participant);
+static void open_work_history(void);
+static void open_work_history_entry(s32 value);
 
 /* Push the Brave Story's job category menu (MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS).
  *
@@ -54,7 +54,7 @@ static void work_history_entry_open(s32 value);
  * multi-set variable it is left to global allocation, which gives the
  * target's v1/v0 assignment in the tail. `unused` reproduces the 0x58 frame.
  */
-void brave_story_propositions_level_open(void) {
+void brave_story_open_propositions_level(void) {
     point32_t point;
     RECT bounds;
     s32 unused[4];
@@ -65,7 +65,7 @@ void brave_story_propositions_level_open(void) {
     s32 depth;
     s32 value;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 9;
@@ -92,7 +92,7 @@ void brave_story_propositions_level_open(void) {
         g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.entry_count++;
     }
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].brave_story_propositions.rows_image = index;
     bounds.x = 0x80;
     bounds.y = 0x80;
@@ -142,9 +142,9 @@ void brave_story_propositions_level_open(void) {
 }
 
 /* The proposition-category level's resume handler, undoing
- * brave_story_propositions_level_suspend: default palettes, the idle cursor, and the
+ * brave_story_suspend_propositions_level: default palettes, the idle cursor, and the
  * list content record shown again (popping in) if the transition hid it. */
-void brave_story_propositions_level_resume(menu_stack_record_t* level) {
+void brave_story_resume_propositions_level(menu_stack_record_t* level) {
     g_display_object_animated_pool[level->brave_story_propositions.cursor_window].palette
         = g_display_object_gs_image_pool[level->brave_story_propositions.rows_image].palette
         = g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 2].brave_story.casualty_image]
@@ -167,7 +167,7 @@ void brave_story_propositions_level_resume(menu_stack_record_t* level) {
  * palette 10 and its render record palette 2, the window's three 32-bit scratch fields are
  * cleared, and the current menu level's list content render record is hidden
  * while the transition runs. */
-void brave_story_propositions_level_suspend(menu_stack_record_t* level) {
+void brave_story_suspend_propositions_level(menu_stack_record_t* level) {
     g_display_object_animated_pool[level->brave_story_propositions.cursor_window].palette = 10;
     g_display_object_gs_image_pool[level->brave_story_propositions.rows_image].palette = 2;
     g_display_object_animated_pool[level->brave_story_propositions.cursor_window].sequence
@@ -184,12 +184,12 @@ void brave_story_propositions_level_suspend(menu_stack_record_t* level) {
  * Refreshes the displayed play time each frame, then, once the menu has
  * popped in: Select opens the highlighted row's help (message 0x105a + row),
  * Cross pops the level, Circle opens the active jobs list
- * (advancing_list_open) or the completed jobs list
- * (work_history_open), and Up and Down wrap the
+ * (open_advancing_list) or the completed jobs list
+ * (open_work_history), and Up and Down wrap the
  * cursor, moving the cursor window by 16 pixels a row. The wrap-around move
  * is spelled as a subtraction of a negative step to keep the window's y as
  * the first addition operand. */
-void brave_story_propositions_input_update(menu_stack_record_t* level) {
+void brave_story_update_propositions_input(menu_stack_record_t* level) {
     s32 window;
     s32 entry;
     s32 count;
@@ -215,7 +215,7 @@ void brave_story_propositions_input_update(menu_stack_record_t* level) {
         window = level->brave_story_propositions.cursor_window;
         g_display_object_animated_pool[window].anim_counter = 0;
         g_display_object_animated_pool[window].frame_index = 0;
-        menu_stack_message_open(
+        menu_stack_open_message(
             level->brave_story_propositions.entries[level->brave_story_propositions.selected_entry] + 0x105A, 1);
         return;
     }
@@ -237,21 +237,21 @@ void brave_story_propositions_input_update(menu_stack_record_t* level) {
         entry = level->brave_story_propositions.entries[level->brave_story_propositions.selected_entry];
         switch (entry) {
         case BRAVE_STORY_PROPOSITION_ROW_ADVANCING:
-            brave_story_propositions_level_suspend(level);
+            brave_story_suspend_propositions_level(level);
             g_display_object_animated_pool[level->brave_story_propositions.cursor_window].sequence
                 = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
-            advancing_list_open();
+            open_advancing_list();
             break;
         case BRAVE_STORY_PROPOSITION_ROW_WORK_HISTORY:
-            brave_story_propositions_level_suspend(level);
+            brave_story_suspend_propositions_level(level);
             g_display_object_animated_pool[level->brave_story_propositions.cursor_window].sequence = entry;
-            work_history_open();
+            open_work_history();
             break;
         }
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->brave_story_propositions.entry_count >= 2) {
             if (level->brave_story_propositions.selected_entry != 0) {
                 g_display_object_animated_pool[level->brave_story_propositions.cursor_window].position.y -= 0x10;
@@ -265,7 +265,7 @@ void brave_story_propositions_input_update(menu_stack_record_t* level) {
         }
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_DOWN) != 0) {
         count = level->brave_story_propositions.entry_count;
         if (count >= 2) {
             count = count - 1;
@@ -305,7 +305,7 @@ void brave_story_propositions_input_update(menu_stack_record_t* level) {
  * hoisted bound copy the target keeps in $a0.  The cursor row is folded as
  * base_y - row * -16 + 14 to keep base_y as the first addu operand.
  */
-static void advancing_list_open(void) {
+static void open_advancing_list(void) {
     point32_t point;
     RECT bounds;
     point32_t* base;
@@ -315,7 +315,7 @@ static void advancing_list_open(void) {
     s32 temp;
     s32 dead_locals[20];
 
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
 
     if (g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.rows_image]
             .flags
@@ -329,7 +329,7 @@ static void advancing_list_open(void) {
             .flags |= DISPLAY_OBJECT_POP_IN;
     }
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_list.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 8;
@@ -337,21 +337,21 @@ static void advancing_list_open(void) {
     g_display_object_animated_pool[index].frame_index = 0;
 
     i = 0;
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_list.title_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_PROPOSITION_TITLE_LABEL;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_list.count_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_PROPOSITION_COUNT_LABEL;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_list.days_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_PROPOSITION_DAYS_LABEL;
     g_display_object_animated_pool[index].priority = 8;
@@ -368,7 +368,7 @@ static void advancing_list_open(void) {
     }
 
     i = 0;
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_list.render_index = index;
     bounds.y = 0x40;
     bounds.x = 0;
@@ -451,8 +451,8 @@ static void advancing_list_open(void) {
 }
 
 /* Resume handler of the active-proposition list: restore the palettes of its four windows and
- * render record and idle the cursor, undoing brave_story_advancing_list_suspend. */
-void brave_story_advancing_list_resume(menu_stack_record_t* level) {
+ * render record and idle the cursor, undoing brave_story_suspend_advancing_list. */
+void brave_story_resume_advancing_list(menu_stack_record_t* level) {
     g_display_object_animated_pool[level->proposition_list.cursor_window].palette
         = g_display_object_animated_pool[level->proposition_list.title_window].palette
         = g_display_object_animated_pool[level->proposition_list.count_window].palette
@@ -464,7 +464,7 @@ void brave_story_advancing_list_resume(menu_stack_record_t* level) {
 }
 
 /* Select the palettes for the active-proposition list and its four windows. */
-void brave_story_advancing_list_suspend(menu_stack_record_t* level) {
+void brave_story_suspend_advancing_list(menu_stack_record_t* level) {
     g_display_object_animated_pool[level->proposition_list.cursor_window].palette = 10;
     g_display_object_animated_pool[level->proposition_list.title_window].palette
         = g_display_object_animated_pool[level->proposition_list.count_window].palette
@@ -477,7 +477,7 @@ void brave_story_advancing_list_suspend(menu_stack_record_t* level) {
  * chosen job's participant list. The wrap-around move is spelled as
  * a subtraction of a negative step: that keeps the window's y operand first
  * in the addition, as the target's register assignment requires. */
-void brave_story_advancing_list_input_update(menu_stack_record_t* level) {
+void brave_story_update_advancing_list_input(menu_stack_record_t* level) {
     u32 buttons;
     s32 count;
     s32 window;
@@ -493,8 +493,8 @@ void brave_story_advancing_list_input_update(menu_stack_record_t* level) {
         window = level->proposition_list.cursor_window;
         g_display_object_animated_pool[window].anim_counter = 0;
         g_display_object_animated_pool[window].frame_index = 0;
-        brave_story_advancing_list_suspend(level);
-        menu_stack_message_open(0x105A, 1);
+        brave_story_suspend_advancing_list(level);
+        menu_stack_open_message(0x105A, 1);
         return;
     }
 
@@ -516,11 +516,11 @@ void brave_story_advancing_list_input_update(menu_stack_record_t* level) {
         g_display_object_image_count -= 1;
         g_display_object_queue_count -= 5;
         g_menu_stack_depth -= 1;
-        participant_list_open(level->proposition_list.entries[level->proposition_list.cursor]);
+        open_participant_list(level->proposition_list.entries[level->proposition_list.cursor]);
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->proposition_list.entry_count >= 2) {
             if (level->proposition_list.cursor != 0) {
                 g_display_object_animated_pool[level->proposition_list.cursor_window].position.y -= 0x10;
@@ -534,7 +534,7 @@ void brave_story_advancing_list_input_update(menu_stack_record_t* level) {
         }
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_DOWN) != 0) {
         count = level->proposition_list.entry_count;
         if (count >= 2) {
             count = count - 1;
@@ -553,14 +553,14 @@ void brave_story_advancing_list_input_update(menu_stack_record_t* level) {
 /* Pushes the participant list (MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANTS) of
  * g_proposition_active[proposition]: hides the job list underneath,
  * draws the job's detail panel with its units
- * (proposition_detail_panel_build) and says
+ * (proposition_build_detail_panel) and says
  * TEXT_ID_BRAVE_STORY_ENTRY_INFO with the job's name. The cursor
  * starts at the saved participant row.
  *
  * The 0x40 frame needs 32 bytes of locals the body never uses. The `- -`
  * spellings keep the target's operand order (render-record base first) that a
  * plain `+` of a loaded field loses to expand_binop's commutative swap. */
-static void participant_list_open(s32 proposition) {
+static void open_participant_list(s32 proposition) {
     /* Target frame evidence establishes 32 bytes of otherwise unused locals. */
     u8 stack_scratch[32];
     s32 depth;
@@ -572,15 +572,15 @@ static void participant_list_open(s32 proposition) {
         .flags |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.rows_image]
         .flags |= DISPLAY_OBJECT_HIDDEN;
-    window = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    window = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].participant_list.cursor_window = window;
     g_display_object_animated_pool[window].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[window].priority = 8;
     g_display_object_animated_pool[window].anim_counter = 0;
     g_display_object_animated_pool[window].frame_index = 0;
-    proposition_detail_panel_build(&g_menu_stack_records[g_menu_stack_depth].proposition_detail_panel, proposition, 1);
+    proposition_build_detail_panel(&g_menu_stack_records[g_menu_stack_depth].proposition_detail_panel, proposition, 1);
     g_text_substitution_values[0] = g_proposition_active[proposition].proposition_id | TEXT_ID_PROPOSITION_NAME_BASE;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
     depth = g_menu_stack_depth;
     g_display_object_animated_pool[g_menu_stack_records[depth].participant_list.cursor_window].position.x
         = g_display_object_gs_image_pool[g_menu_stack_records[depth].participant_list.render_index].position.x + 0x38;
@@ -605,14 +605,14 @@ static void participant_list_open(s32 proposition) {
  * Nothing happens while the panel pops in. Cross tears the level down and
  * returns to the active jobs list; Circle saves the participant-list cursor and
  * closes the message box. Once it has gone, the level hands the row to
- * participant_detail_open. Both release the cursor window
+ * open_participant_detail. Both release the cursor window
  * and the panel. Up/down wrap the cursor and slide the cursor window by one
  * 16-pixel row, and do nothing when there are fewer than two rows.
  *
- * The two directional blocks mirror brave_story_advancing_list_input_update: the up wrap is spelled as
+ * The two directional blocks mirror brave_story_update_advancing_list_input: the up wrap is spelled as
  * a subtraction of a negative step so the window's y stays the first addend,
  * and the down block decrements its own count in place. */
-void brave_story_participant_list_input_update(menu_stack_record_t* level) {
+void brave_story_update_participant_list_input(menu_stack_record_t* level) {
     s32 count;
 
     if (g_display_object_gs_image_pool[level->participant_list.render_index].flags & DISPLAY_OBJECT_POP_IN) {
@@ -622,7 +622,7 @@ void brave_story_participant_list_input_update(menu_stack_record_t* level) {
     if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
         g_menu_stack_depth--;
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
-        participant_detail_open(level->participant_list.proposition, level->participant_list.cursor);
+        open_participant_detail(level->participant_list.proposition, level->participant_list.cursor);
         return;
     }
 
@@ -633,7 +633,7 @@ void brave_story_participant_list_input_update(menu_stack_record_t* level) {
         g_display_object_image_count--;
         g_display_object_queue_count -= 2;
         g_menu_stack_depth--;
-        advancing_list_open();
+        open_advancing_list();
         return;
     }
 
@@ -643,12 +643,12 @@ void brave_story_participant_list_input_update(menu_stack_record_t* level) {
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_PARTICIPANTS].selected_index = level->participant_list.cursor;
         g_display_object_image_count--;
         g_display_object_queue_count -= 2;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->participant_list.entry_count >= 2) {
             if (level->participant_list.cursor != 0) {
                 g_display_object_animated_pool[level->participant_list.cursor_window].position.y -= 0x10;
@@ -662,7 +662,7 @@ void brave_story_participant_list_input_update(menu_stack_record_t* level) {
         }
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_DOWN) != 0) {
         count = level->participant_list.entry_count;
         if (count >= 2) {
             count = count - 1;
@@ -688,7 +688,7 @@ void brave_story_participant_list_input_update(menu_stack_record_t* level) {
  * pointer: a single-set pointer keeps its address computation beside its
  * first use.
  */
-static void participant_detail_open(s32 proposition, s32 participant) {
+static void open_participant_detail(s32 proposition, s32 participant) {
     RECT rect;
     display_object_animated_t* window1;
     display_object_animated_t* window2;
@@ -706,7 +706,7 @@ static void participant_detail_open(s32 proposition, s32 participant) {
     g_menu_stack_records[g_menu_stack_depth].participant.proposition = proposition;
     g_menu_stack_records[g_menu_stack_depth].participant.participant = participant;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].participant.left_window = index;
     g_display_object_animated_pool[index].priority = 8;
     pos1 = &g_display_object_animated_pool[index].position;
@@ -717,7 +717,7 @@ static void participant_detail_open(s32 proposition, s32 participant) {
     window1->anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].participant.right_window = index;
     g_display_object_animated_pool[index].priority = 8;
     pos2 = &g_display_object_animated_pool[index].position;
@@ -728,18 +728,18 @@ static void participant_detail_open(s32 proposition, s32 participant) {
     window2->anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    unit_panel_party_unit_prepare(g_proposition_active[proposition].participant_indices[participant]);
+    unit_panel_prepare_party_unit(g_proposition_active[proposition].participant_indices[participant]);
 
     g_unit_panel_banner_params.position.x = 0;
     g_unit_panel_banner_params.position.y = 0;
     g_unit_panel_panel_params.position.y = 0;
     g_unit_panel_numbers_params.position.y = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_unit_panel_banner_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_unit_panel_banner_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_panel_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_numbers_params, 0, 0);
     g_world_map_flags |= WORLD_MAP_FLAG_UNIT_PANEL_THREADS;
 
     depth = g_menu_stack_depth;
@@ -754,8 +754,8 @@ static void participant_detail_open(s32 proposition, s32 participant) {
  * Empty hand slots fall back to the shield; empty equipment reads as -1 and
  * a zero ability id is decremented to -1. Monsters show their primary
  * skillset's first five abilities instead of their equipped ability set. */
-void unit_panel_party_unit_prepare(s32 party_index) {
-    unit_stats_t* unit;
+void unit_panel_prepare_party_unit(s32 party_index) {
+    battle_unit_t* unit;
     unit_panel_summary_t* gauges;
     menu_unit_status_identity_t* identity;
     menu_status_panel_slot_state_t* detail;
@@ -765,7 +765,7 @@ void unit_panel_party_unit_prepare(s32 party_index) {
     u16 maximum_hp;
     u16 maximum_mp;
 
-    if (unit_party_slot_init(&g_unit_panel_unit, party_index, 1) == -1) {
+    if (battle_unit_init_from_party_slot(&g_unit_panel_unit, party_index, 1) == -1) {
         return;
     }
 
@@ -862,7 +862,7 @@ void unit_panel_party_unit_prepare(s32 party_index) {
 
     detail->generic_monster = unit->unit_flags & UNIT_FLAG_MONSTER;
     if (detail->generic_monster != 0) {
-        abilities = ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         for (i = 0; i < 5; i++) {
             detail->ability_ids[i] = *abilities++;
         }
@@ -882,7 +882,7 @@ void unit_panel_party_unit_prepare(s32 party_index) {
 }
 
 /* Restore the participant detail windows' palettes. */
-void brave_story_participant_level_resume(menu_stack_record_t* level) {
+void brave_story_resume_participant_detail(menu_stack_record_t* level) {
     s32 second = level->participant.left_window;
 
     g_display_object_animated_pool[level->participant.right_window].palette = 0;
@@ -890,7 +890,7 @@ void brave_story_participant_level_resume(menu_stack_record_t* level) {
 }
 
 /* The g_level_suspend_handlers entry of MENU_STACK_LEVEL_BRAVE_STORY_PARTICIPANT: nothing to suspend. */
-void brave_story_participant_level_suspend(menu_stack_record_t* unused_level) {
+void brave_story_suspend_participant_detail(menu_stack_record_t* unused_level) {
 }
 
 /*
@@ -907,7 +907,7 @@ void brave_story_participant_level_suspend(menu_stack_record_t* unused_level) {
  * pressed sequence while held, and one button is ignored while the other's
  * pressed sequence is showing.
  */
-void brave_story_participant_input_update(menu_stack_record_t* level) {
+void brave_story_update_participant_detail_input(menu_stack_record_t* level) {
     RECT rect;
     u32 buttons;
     s32 count;
@@ -926,8 +926,8 @@ void brave_story_participant_input_update(menu_stack_record_t* level) {
         g_text_substitution_values[0]
             = g_proposition_active[level->participant.proposition].proposition_id | TEXT_ID_PROPOSITION_NAME_BASE;
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
-        participant_list_open(level->participant.proposition);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
+        open_participant_list(level->participant.proposition);
         return;
     }
 
@@ -937,9 +937,9 @@ void brave_story_participant_input_update(menu_stack_record_t* level) {
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_display_object_animated_count -= 2;
         g_display_object_queue_count -= 2;
-        thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-        thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
-        thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
+        thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
+        thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
+        thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
         return;
     }
 
@@ -947,7 +947,7 @@ void brave_story_participant_input_update(menu_stack_record_t* level) {
         g_display_object_animated_pool[level->participant.left_window].palette
             = g_display_object_animated_pool[level->participant.right_window].palette = 0xA;
         sound_play_effect(SOUND_SFX_CONFIRM);
-        unit_panel_help_open();
+        unit_panel_open_help();
         return;
     }
 
@@ -960,7 +960,7 @@ void brave_story_participant_input_update(menu_stack_record_t* level) {
             = g_display_object_animated_pool[level->participant.right_window].anim_counter = 0;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_R1) != 0
+    if (input_update_repeat(PSX_PAD_R1) != 0
         && g_display_object_animated_pool[level->participant.left_window].sequence
             != DISPLAY_OBJECT_ANIM_L1_BUTTON_PRESS) {
         g_display_object_animated_pool[level->participant.right_window].sequence = DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS;
@@ -981,7 +981,7 @@ void brave_story_participant_input_update(menu_stack_record_t* level) {
         }
         direction = 1;
     } else {
-        if (world_map_input_repeat_update(PSX_PAD_L1) == 0
+        if (input_update_repeat(PSX_PAD_L1) == 0
             || g_display_object_animated_pool[level->participant.right_window].sequence
                 == DISPLAY_OBJECT_ANIM_R1_BUTTON_PRESS) {
             return;
@@ -1001,7 +1001,7 @@ void brave_story_participant_input_update(menu_stack_record_t* level) {
     }
 
     g_unit_panel_banner_params.redraw_request = direction;
-    unit_panel_party_unit_prepare(
+    unit_panel_prepare_party_unit(
         g_proposition_active[level->participant.proposition].participant_indices[level->participant.participant]);
     g_unit_panel_panel_params.redraw_request = 1;
     g_unit_panel_numbers_params.redraw_request = 1;
@@ -1012,7 +1012,7 @@ done:
 /* Push the Brave Story list of completed propositions: show its intro message, list each
  * completed proposition's name in a panel of up to 8 visible rows at its saved cursor,
  * and hide the parent list's content while it is open. */
-static void work_history_open(void) {
+static void open_work_history(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -1021,7 +1021,7 @@ static void work_history_open(void) {
     s32 i;
     s32 record_index;
 
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
     count = 0;
     i = 0;
     colors = g_menu_stack_row_text_colors;
@@ -1045,8 +1045,8 @@ static void work_history_open(void) {
     origin.x = 0x4C;
     layout.visible_rows = i;
     origin.y = 0x50;
-    menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_WORK_HISTORY, count, i);
-    window_panel_thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
+    menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_WORK_HISTORY, count, i);
+    window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_menu_stack_ot_offset = 8;
@@ -1059,20 +1059,20 @@ static void work_history_open(void) {
 }
 
 /* The g_level_resume_handlers entry of MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY: nothing to restore. */
-void brave_story_work_history_resume(menu_stack_record_t* unused_level) {
+void brave_story_resume_work_history(menu_stack_record_t* unused_level) {
 }
 
 /* The g_level_suspend_handlers entry of MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY: nothing to suspend. */
-void brave_story_work_history_suspend(menu_stack_record_t* unused_level) {
+void brave_story_suspend_work_history(menu_stack_record_t* unused_level) {
 }
 
 /* Input step of the completed jobs list opened by
- * work_history_open: twin of
- * brave_story_unexplored_land_list_input_update with help message 0x105b and no
+ * open_work_history: twin of
+ * brave_story_update_unexplored_land_list_input with help message 0x105b and no
  * file-loading gate. Closing without a selection pops in the image index retained at +0x0c
  * in the category slot before resuming the category menu; a
- * confirmed entry goes to work_history_entry_open. */
-void brave_story_work_history_input_update(menu_stack_record_t* level) {
+ * confirmed entry goes to open_work_history_entry. */
+void brave_story_update_work_history_input(menu_stack_record_t* level) {
     s32 depth;
 
     if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
@@ -1083,34 +1083,34 @@ void brave_story_work_history_input_update(menu_stack_record_t* level) {
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth = depth - 1;
         if (level->panel.result != 0) {
-            menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_WORK_HISTORY);
-            work_history_entry_open(
+            menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_WORK_HISTORY);
+            open_work_history_entry(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
         g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].brave_story_propositions.retained_image_index]
             .flags |= DISPLAY_OBJECT_POP_IN;
-        menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_WORK_HISTORY);
+        menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_WORK_HISTORY);
         menu_stack_dispatch_resume();
         return;
     }
     if (g_world_map_input_new_button_presses & PSX_PAD_CROSS) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
-        menu_stack_message_open(0x105B, 1);
+        menu_stack_open_message(0x105B, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     }
 }
 
 /* Pushes MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY, the text of a
- * completed job; brave_story_wait_work_history_then_pop closes it.
+ * completed job; brave_story_update_work_history_entry closes it.
  * Records the entry on the new level, reads the date the job was last done
  * from g_proposition_last_attempt_date_bits, and sets up
  * g_text_window on the job's text
@@ -1125,14 +1125,14 @@ void brave_story_work_history_input_update(menu_stack_record_t* level) {
  *
  * `unused` reproduces eight bytes of locals below the date bytes that the
  * target never touches. */
-static void work_history_entry_open(s32 value) {
+static void open_work_history_entry(s32 value) {
     s32 coordinate_mode = 1;
     u8 unused[8];
     calendar_date_t date;
 
-    file_pending_wait();
+    file_wait_pending();
     g_menu_stack_records[g_menu_stack_depth].work_history_entry = value;
-    calendar_date_read(g_proposition_last_attempt_date_bits, value, &date);
+    calendar_read_date(g_proposition_last_attempt_date_bits, value, &date);
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
     case 0:
@@ -1159,7 +1159,7 @@ static void work_history_entry_open(s32 value) {
     g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.rows_image]
         .flags |= DISPLAY_OBJECT_HIDDEN;
     g_text_substitution_values[0] = value + TEXT_ID_COMPLETED_PROPOSITION_NAME_BASE;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_ENTRY_INFO, 0);
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_BRAVE_STORY_WORK_HISTORY_ENTRY;
     g_menu_stack_depth = g_menu_stack_depth + 1;
 }
@@ -1168,8 +1168,8 @@ static void work_history_entry_open(s32 value) {
  * text_window_update reports it closed: show the category
  * menu's window and frame again (replaying the frame's pop-in), pop the
  * stack and reopen the completed jobs list. Mirrors
- * text_level_update. */
-void brave_story_wait_work_history_then_pop(menu_stack_record_t* unused_level) {
+ * update_text_level. */
+void brave_story_update_work_history_entry(menu_stack_record_t* unused_level) {
     s32* index = &g_text_window.render_record_index;
     s32 depth;
 
@@ -1187,5 +1187,5 @@ void brave_story_wait_work_history_then_pop(menu_stack_record_t* unused_level) {
     g_menu_stack_depth = depth - 1;
     g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].brave_story_propositions.rows_image].flags
         |= DISPLAY_OBJECT_POP_IN;
-    work_history_open();
+    open_work_history();
 }

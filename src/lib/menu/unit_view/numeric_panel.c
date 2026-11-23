@@ -37,7 +37,7 @@ void unit_panel_numbers_thread(void) {
     s32 field_y;
     s32 use_offset;
 
-    thread_current_task_set(THREAD_TASK_STATUS_PANEL);
+    thread_current_set_task(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0) + 1;
 
@@ -95,7 +95,7 @@ void unit_panel_numbers_thread(void) {
             menu_clear_render_buffer(number_images, sizeof(*number_images));
             /* Each pen stride is its image's width in 4-bit pixels (four per 16-bit VRAM unit). */
             g_menu_window_text_pen.stride = 0x14;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_window_text_pen, 3);
             } else {
@@ -103,7 +103,7 @@ void unit_panel_numbers_thread(void) {
             }
 
             g_menu_window_text_pen.stride = 0x40;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(
                     number_images->weapons, entries + 3, &g_menu_window_text_pen, 4);
@@ -112,7 +112,7 @@ void unit_panel_numbers_thread(void) {
             }
 
             g_menu_window_text_pen.stride = 0x64;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_window_text_pen, 8);
             } else {
@@ -185,7 +185,7 @@ void unit_panel_numbers_thread(void) {
         }
 
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
     }

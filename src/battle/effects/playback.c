@@ -3,10 +3,6 @@
 #include "fft/ability.h"
 #include "fft/action.h"
 #include "fft/animation.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_light.h"
-#include "fft/battle_map_mesh.h"
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/effect.h"
 #include "fft/effect_emitter_data.h"
@@ -18,13 +14,17 @@
 #include "fft/effect_timeline.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/map_light.h"
+#include "fft/map_mesh.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/music.h"
 #include "fft/result.h"
 #include "fft/sprite.h"
 #include "fft/suzuki.h"
 #include "fft/system.h"
-#include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "fft/weather.h"
 #include "psx/gte_inline.h"
@@ -35,7 +35,7 @@
 effect_context_t g_effect_context;
 static u8* s_effect_frame_data_start;
 
-/* g_effect_load_state: the steps of effect_file_load_update, which loads the ability's effect file
+/* g_effect_load_state: the steps of effect_update_file_load, which loads the ability's effect file
  * while its charge secondary effect plays. */
 typedef enum playback_load_state {
     EFFECT_LOAD_START = 0,           /* start reading the file */
@@ -612,22 +612,22 @@ extern effect_callback_t g_effect_callback_slots[];
 /* Written by effect-script opcode 05; no game source reads it. */
 extern u16 g_effect_script_opcode_05_value;
 
-static void script_instance_free(s16 record_index);
+static void free_script_instance(s16 record_index);
 
-static s32 script_block_run(s16 index);
+static s32 run_script_block(s16 index);
 
-static s16 script_instance_start(const u8* script, s16 start_pc, s16 parent_index);
+static s16 start_script_instance(const u8* script, s16 start_pc, s16 parent_index);
 
-static s32 parent_timing_curve_evaluate(effect_record_t* record);
+static s32 evaluate_parent_timing_curve(effect_record_t* record);
 
-static s32 child_timing_curve_evaluate(effect_record_t* record);
+static s32 evaluate_child_timing_curve(effect_record_t* record);
 
-static effect_callback_t native_callback_get(s16 callback_id);
+static effect_callback_t get_native_callback(s16 callback_id);
 
 /* Upload effect file `index`'s two CLUTs to the effect CLUT rows and its texture to
  * VRAM x 0x180, 0x80 bytes a row or 0x100 for a wide image. The section's address is
  * kept in g_effect_palette_ptr, where the effect heap later starts. */
-static void palette_init(s16 index) {
+static void init_palette(s16 index) {
     RECT rect;
     effect_file_header_t* base = g_effect_file_data_ptrs[index];
     effect_palette_section_t* data = (effect_palette_section_t*)((u8*)base + base->palette_and_texture);
@@ -636,8 +636,8 @@ static void palette_init(s16 index) {
     s32 height;
 
     g_effect_palette_ptr = data;
-    battle_map_palette_load_data(data->primary_clut, BATTLE_MAP_CLUT_ROW_EFFECT, 0, 1);
-    battle_map_palette_load_data(data->secondary_clut, BATTLE_MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
+    map_palette_load_data(data->primary_clut, MAP_CLUT_ROW_EFFECT, 0, 1);
+    map_palette_load_data(data->secondary_clut, MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
     /* The image size is a 24-bit little-endian byte count; the rows follow from the width. */
     raw_size = data->image_size[0] + (data->image_size[1] << 8);
     raw_size = (data->image_size[2] << 16) + raw_size;
@@ -663,20 +663,20 @@ static void palette_init(s16 index) {
 
 /* Rewind g_effect_frame_data to its saved start for EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT.
  * Nothing stores the start pointer or selects that phase, so retail never runs it. */
-static void frame_data_pointer_reset(void) {
+static void reset_frame_data_pointer(void) {
     g_effect_frame_data = s_effect_frame_data_start;
 }
 
 /* Rewind g_effect_animation_sequences to its saved start for
  * EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT, a path retail never takes (see
- * frame_data_pointer_reset). */
-static void animation_sequences_pointer_reset(void) {
+ * reset_frame_data_pointer). */
+static void reset_animation_sequences_pointer(void) {
     g_effect_animation_sequences = g_effect_animation_sequences_start;
 }
 
 /* Point g_effect_frame_data at the sprite group table of effect file effect_id's frame
  * section, past the section's 4-byte group count. */
-static void frame_data_pointer_set(s16 effect_id) {
+static void set_frame_data_pointer(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
     effect_sprite_section_t* section = (effect_sprite_section_t*)((u8*)header + header->frame_data);
 
@@ -685,14 +685,14 @@ static void frame_data_pointer_set(s16 effect_id) {
 
 /* Point g_effect_animation_sequences 4 bytes into effect file effect_id's animation
  * sequence section, past its leading 32-bit value. */
-static void animation_sequences_pointer_set(s16 effect_id) {
+static void set_animation_sequences_pointer(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
 }
 
 /* Bind effect file effect_id's script section as g_effect_script. */
-static void script_pointer_set(s16 effect_id) {
+static void set_script_pointer(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_script = (const u8*)header + header->script;
@@ -700,7 +700,7 @@ static void script_pointer_set(s16 effect_id) {
 
 /* Bind effect file effect_id's animation curve table as
  * g_effect_animation_curve_data. */
-static void animation_curves_bind(s16 effect_id) {
+static void bind_animation_curves(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_animation_curve_data = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
@@ -708,7 +708,7 @@ static void animation_curves_bind(s16 effect_id) {
 
 /* Bind effect file effect_id's particle-system section (gravity, inertia threshold and the emitter
  * records) as g_effect_geometry_table. */
-static void emitters_bind(s16 effect_id) {
+static void bind_emitters(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
@@ -716,7 +716,7 @@ static void emitters_bind(s16 effect_id) {
 
 /* Bind effect file effect_id's timeline section as g_effect_timeline and its embedded child
  * timeline as g_effect_child_timeline. */
-static void timeline_sections_bind(s16 effect_id) {
+static void bind_timeline_sections(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
     effect_timeline_t* timeline;
 
@@ -728,7 +728,7 @@ static void timeline_sections_bind(s16 effect_id) {
 /* Replace the effect sounds: unregister the sound resource of the previous effect
  * file, then register this file's sound section and take its id as the base for
  * the effect's sound ids. A file without a sound section clears both globals. */
-static void sound_section_load(s16 index) {
+static void load_sound_section(s16 index) {
     effect_file_header_t* base;
     s32 offset;
 
@@ -749,7 +749,7 @@ static void sound_section_load(s16 index) {
 }
 
 /* Bind effect file effect_id's flags section as g_effect_flags_section. */
-static void flags_section_pointer_init(s16 effect_id) {
+static void init_flags_section_pointer(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
@@ -758,7 +758,7 @@ static void flags_section_pointer_init(s16 effect_id) {
 /* Bind effect file effect_id's timing-curve section as
  * g_effect_timing_curves; a zero section offset binds the file header
  * itself. */
-static void timing_curves_pointer_set(s16 effect_id) {
+static void set_timing_curves_pointer(s16 effect_id) {
     effect_file_header_t* header = g_effect_file_data_ptrs[effect_id];
 
     g_effect_timing_curves = (const effect_timing_curves_t*)((u8*)header + header->timing_curves);
@@ -767,7 +767,7 @@ static void timing_curves_pointer_set(s16 effect_id) {
 /* Time scale of the parent timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-static s32 parent_timing_curve_evaluate(effect_record_t* record) {
+static s32 evaluate_parent_timing_curve(effect_record_t* record) {
     s16 packed_index = record->timeline.frame;
     s32 packed_value;
     s32 offset = packed_index / 2;
@@ -782,7 +782,7 @@ static s32 parent_timing_curve_evaluate(effect_record_t* record) {
 /* Time scale of the child timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-static s32 child_timing_curve_evaluate(effect_record_t* record) {
+static s32 evaluate_child_timing_curve(effect_record_t* record) {
     s16 packed_index = record->timeline.frame;
     s32 offset = packed_index / 2;
     s32 packed_value = g_effect_timing_curves->child_timeline[offset];
@@ -794,13 +794,13 @@ static s32 child_timing_curve_evaluate(effect_record_t* record) {
 }
 
 /* Look up a native overlay callback by its resident catalog index. */
-static effect_callback_t native_callback_get(s16 callback_id) {
+static effect_callback_t get_native_callback(s16 callback_id) {
     return g_effect_native_callbacks[callback_id];
 }
 
 /* Read effect file effect_id's disc sector and byte length from g_disc_extents; a
  * length of 0 means the file is missing. */
-static void disc_extent_get(s32 effect_id, s32* lba, s32* byte_length) {
+static void get_disc_extent(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
     *lba = s_disc_extents[effect_id].sector;
@@ -827,19 +827,19 @@ void effect_report_0x320_2(void) {
 
 /* Seek the CD to the effect file of g_effect_id: the read request
  * has no destination, so the loader only seeks. An effect whose file has no size
- * is replaced by the Cure effect, as in effect_file_load_update's first
+ * is replaced by the Cure effect, as in effect_update_file_load's first
  * state, which requests the same file with a destination. Nothing in the game
  * calls it. */
-void effect_file_seek_request(void) {
+void effect_request_file_seek(void) {
     s32 lba;
     s32 byte_length;
 
-    disc_extent_get(g_effect_id, &lba, &byte_length);
+    get_disc_extent(g_effect_id, &lba, &byte_length);
     if (byte_length == 0) {
         g_effect_id = EFFECT_FILE_CURE;
-        disc_extent_get(EFFECT_FILE_CURE, &lba, &byte_length);
+        get_disc_extent(EFFECT_FILE_CURE, &lba, &byte_length);
     }
-    file_bytes_read_request(lba, byte_length, 0);
+    file_request_read_bytes(lba, byte_length, 0);
 }
 
 /*
@@ -852,7 +852,7 @@ void effect_file_seek_request(void) {
  * work remains. A load state outside 0-3 leaves `result` unset: the test then
  * reads whatever the caller left in $a0.
  */
-s32 effect_file_load_update(void) {
+s32 effect_update_file_load(void) {
     s32 result;
     s32 lba;
     s32 byte_length;
@@ -866,19 +866,19 @@ s32 effect_file_load_update(void) {
             } else {
                 g_effect_load_countdown = 0;
             }
-            disc_extent_get(g_effect_id, &lba, &byte_length);
+            get_disc_extent(g_effect_id, &lba, &byte_length);
             if (byte_length == 0) {
                 g_effect_id = EFFECT_FILE_CURE;
-                disc_extent_get(EFFECT_FILE_CURE, &lba, &byte_length);
+                get_disc_extent(EFFECT_FILE_CURE, &lba, &byte_length);
             }
-            result = file_bytes_read_request(lba, byte_length, destination);
+            result = file_request_read_bytes(lba, byte_length, destination);
             if (result == 0) {
                 g_effect_load_state = EFFECT_LOAD_READING;
                 result = 1;
             }
             break;
         case EFFECT_LOAD_READING:
-            result = file_load_state_get();
+            result = file_get_load_state();
             if (result == 0) {
                 g_effect_load_state = EFFECT_LOAD_COUNTDOWN;
                 result = 1;
@@ -893,15 +893,15 @@ s32 effect_file_load_update(void) {
                 effect_secondary_finalize(g_effect_secondary_charge_id);
             }
             g_effect_load_state = EFFECT_LOAD_ENDING_SECONDARY;
-            flags_section_pointer_init(g_effect_id);
+            init_flags_section_pointer(g_effect_id);
             /* An `lw` of the section's leading 32-bit value, not a byte test. */
             if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
-                music_volume_set(0x40, 0xF0);
+                music_set_volume(0x40, 0xF0);
             }
             result = 1;
             break;
         case EFFECT_LOAD_ENDING_SECONDARY:
-            result = effect_secondary_phase_get(g_effect_secondary_charge_id) != EFFECT_SECONDARY_PHASE_ENDED;
+            result = effect_secondary_get_phase(g_effect_secondary_charge_id) != EFFECT_SECONDARY_PHASE_ENDED;
             break;
         }
         if (g_effect_load_countdown > 0) {
@@ -929,7 +929,7 @@ void effect_playback_request(u32 packed, s32 ability, const effect_context_t* so
     g_effect_load_state = EFFECT_LOAD_START;
     if (ability < ABILITY_ID_COUNT) {
         if (ability == ABILITY_ID_THROW_BALL) {
-            s32 ball = effect_element_index_get(packed >> 16);
+            s32 ball = effect_get_element_index(packed >> 16);
             if (ball == EFFECT_ELEMENT_INDEX_FIRE)
                 g_effect_id = EFFECT_FILE_FIRE;
             else if (ball == EFFECT_ELEMENT_INDEX_WATER)
@@ -997,7 +997,7 @@ s32 effect_is_item_ability(s32 ability_id) {
     return (entry & EFFECT_ABILITY_FLAG_ITEM) > 0;
 }
 
-/* Releases a requested effect: stage_update starts it on its
+/* Releases a requested effect: update_stage starts it on its
  * next frame. */
 void effect_playback_start(void) {
     if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
@@ -1006,14 +1006,14 @@ void effect_playback_start(void) {
 }
 
 /* Drops a requested effect that has not been released. */
-void effect_playback_request_cancel(void) {
+void effect_playback_cancel_request(void) {
     if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
     }
 }
 
 /* The current effect playback phase (effect_playback_phase_e). */
-s32 effect_playback_phase_get(void) {
+s32 effect_playback_get_phase(void) {
     return g_effect_playback_phase;
 }
 
@@ -1027,7 +1027,7 @@ s32 effect_playback_phase_get(void) {
  * the effect is over when none is left. Phase 5 has no case and would return
  * `result` unset, but nothing stores 5 or RESTART_SCRIPT (6), so the restart
  * path is dead in retail. */
-static s32 stage_update(void) {
+static s32 update_stage(void) {
     s32 result;
     s32 id = g_effect_allocated_record_head;
     s32 next;
@@ -1040,29 +1040,29 @@ static s32 stage_update(void) {
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_INIT_PALETTE:
-        battle_map_freeze();
+        map_freeze();
         unit_view_hide_tile_depth();
-        palette_init(g_effect_id);
+        init_palette(g_effect_id);
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
         g_effect_script_opcode_05_value = 0;
-        system_frame_pacing_reset();
+        system_reset_frame_pacing();
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_START_SCRIPT:
         effect_heap_init(
             (effect_heap_node_t*)g_effect_palette_ptr, g_heap_battle_end_address - (u32)g_effect_palette_ptr);
-        effect_subsystems_reset();
-        effect_camera_tracks_seed();
-        system_min_vsync_interval_clear();
-        frame_data_pointer_set(g_effect_id);
-        animation_sequences_pointer_set(g_effect_id);
-        script_pointer_set(g_effect_id);
-        animation_curves_bind(g_effect_id);
-        emitters_bind(g_effect_id);
-        timeline_sections_bind(g_effect_id);
-        sound_section_load(g_effect_id);
-        flags_section_pointer_init(g_effect_id);
-        timing_curves_pointer_set(g_effect_id);
+        effect_reset_subsystems();
+        effect_camera_seed_tracks();
+        system_clear_min_vsync_interval();
+        set_frame_data_pointer(g_effect_id);
+        set_animation_sequences_pointer(g_effect_id);
+        set_script_pointer(g_effect_id);
+        bind_animation_curves(g_effect_id);
+        bind_emitters(g_effect_id);
+        bind_timeline_sections(g_effect_id);
+        load_sound_section(g_effect_id);
+        init_flags_section_pointer(g_effect_id);
+        set_timing_curves_pointer(g_effect_id);
         if (g_effect_context.math_skill_flag != 0) {
             if (g_effect_flags_section->spawn_delay_override != 0) {
                 g_effect_timeline->spawn_delay = g_effect_flags_section->spawn_delay_override;
@@ -1070,20 +1070,20 @@ static s32 stage_update(void) {
                 g_effect_timeline->spawn_delay = 100;
             }
         }
-        g_effect_root_record_index = script_instance_start(g_effect_script, 0, 0);
+        g_effect_root_record_index = start_script_instance(g_effect_script, 0, 0);
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
-        battle_map_effect_data_state_set(BATTLE_MAP_EFFECT_DATA_BEGIN);
+        map_set_effect_data_state(MAP_EFFECT_DATA_BEGIN);
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_RUNNING:
-        g_effect_otag = gfx_battle_otag_get();
-        effect_render_frame_start();
+        g_effect_otag = gfx_get_battle_otag();
+        effect_render_init_frame();
         while (id != 0) {
             next = g_effect_state_records[id].next_index;
             g_effect_current_record_index = id;
             g_effect_state_records[id].frame_counter++;
-            if (script_block_run(id) == 0) {
-                script_instance_free(id);
+            if (run_script_block(id) == 0) {
+                free_script_instance(id);
             }
             id = next;
         }
@@ -1091,16 +1091,16 @@ static s32 stage_update(void) {
             result = 1;
         } else {
             if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
-                music_volume_restore(0x78);
+                music_restore_volume(0x78);
             }
             if (g_effect_sound_section_ptr != 0) {
                 suzuki_sound_remove_resource(g_effect_sound_section_ptr);
                 g_effect_sound_section_ptr = 0;
             }
-            battle_map_effect_data_state_set(BATTLE_MAP_EFFECT_DATA_END);
-            battle_map_unfreeze();
+            map_set_effect_data_state(MAP_EFFECT_DATA_END);
+            map_unfreeze();
             unit_view_show_tile_depth();
-            system_min_vsync_interval_clear();
+            system_clear_min_vsync_interval();
             g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;
         }
@@ -1108,10 +1108,10 @@ static s32 stage_update(void) {
     case EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT:
         effect_heap_init(
             (effect_heap_node_t*)g_effect_palette_ptr, g_heap_battle_end_address - (u32)g_effect_palette_ptr);
-        effect_subsystems_reset();
-        frame_data_pointer_reset();
-        animation_sequences_pointer_reset();
-        g_effect_root_record_index = script_instance_start(g_effect_script, 0, 0);
+        effect_reset_subsystems();
+        reset_frame_data_pointer();
+        reset_animation_sequences_pointer();
+        g_effect_root_record_index = start_script_instance(g_effect_script, 0, 0);
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
         return 1;
     }
@@ -1121,7 +1121,7 @@ static s32 stage_update(void) {
 /* The effect system's frame: the effect file, the secondary effects and the
  * effect camera moves. Returns 1 while an effect of either kind runs. */
 s32 effect_playback_update(void) {
-    s32 stage_result = stage_update();
+    s32 stage_result = update_stage();
     s32 related_result = effect_secondary_update();
 
     effect_camera_update_tracks();
@@ -1134,7 +1134,7 @@ s32 effect_playback_update(void) {
 
 /* Chain state records 1-16 into the available list (record 0 is the sentinel), empty the allocated
  * list and set playback idle. */
-void effect_script_instances_init(void) {
+void effect_script_init_instances(void) {
     s32 i;
 
     g_effect_state_records[0].next_index = 0;
@@ -1152,7 +1152,7 @@ void effect_script_instances_init(void) {
 }
 
 /* Allocate one effect record and link it into the in-use list. */
-static s16 script_instance_alloc(void) {
+static s16 alloc_script_instance(void) {
     u16* available = &g_effect_available_record_head;
     s16* allocated;
     s16 index = *available;
@@ -1172,11 +1172,11 @@ static s16 script_instance_alloc(void) {
  *
  * Frees every work record on its list, releases the four handler work slots,
  * clears the spawning record's reference to it, then unlinks it from the
- * allocated list; the inverse of script_instance_alloc. The
+ * allocated list; the inverse of alloc_script_instance. The
  * separate `particle` copy keeps the call's work argument loaded at the loop
  * edges, as in the target, and the list-head pointers keep the target's
  * materialized global address. */
-static void script_instance_free(s16 record_index) {
+static void free_script_instance(s16 record_index) {
     effect_work_record_t* work;
     effect_work_record_t* particle;
     s16 head;
@@ -1192,7 +1192,7 @@ static void script_instance_free(s16 record_index) {
      * list with no free records), so an effect's records must be gone before
      * its script ends. */
     while (work != 0) {
-        effect_particle_record_free(record_index, particle);
+        effect_particle_free_record(record_index, particle);
         particle = work = work->next;
     }
     for (i = 0; i < EFFECT_RECORD_CALLBACK_SLOT_COUNT; i++) {
@@ -1233,7 +1233,7 @@ static void script_instance_free(s16 record_index) {
 
 /* Clears a record's child-timeline state and sets the effect target it plays
  * on. */
-static void child_timeline_reset(effect_record_t* record, s16 target_index) {
+static void reset_child_timeline(effect_record_t* record, s16 target_index) {
     s32 index;
 
     for (index = 0; index < EFFECT_CHILD_TRACK_RESET_SLOT_COUNT; index++) {
@@ -1246,7 +1246,7 @@ static void child_timeline_reset(effect_record_t* record, s16 target_index) {
 }
 
 /* Clear all 26 16-bit values in each bank, including the extra reset slots. */
-static void parent_timeline_reset(effect_record_t* record) {
+static void reset_parent_timeline(effect_record_t* record) {
     s32 index;
 
     for (index = 0; index < EFFECT_PARENT_TRACK_RESET_SLOT_COUNT; index++) {
@@ -1261,8 +1261,8 @@ static void parent_timeline_reset(effect_record_t* record) {
 
 /* Allocate an effect state record for a script and reset its per-handler state.
  * Returns the record index, or 0 when none is available. */
-static s16 script_instance_start(const u8* script, s16 start_pc, s16 parent_index) {
-    s16 index = script_instance_alloc();
+static s16 start_script_instance(const u8* script, s16 start_pc, s16 parent_index) {
+    s16 index = alloc_script_instance();
     s16 i;
     effect_record_t* record;
 
@@ -1286,13 +1286,13 @@ static s16 script_instance_start(const u8* script, s16 start_pc, s16 parent_inde
     record->work_head = 0;
     record->work_count = 0;
     record->frame_counter = -1;
-    child_timeline_reset(record, 0);
-    parent_timeline_reset(record);
+    reset_child_timeline(record, 0);
+    reset_parent_timeline(record);
     return index;
 }
 
 /* Handler for opcodes 2e-77: calls the empty stub reporter and returns no defined value. In retail
- * $v0 still holds this handler's address, which script_block_run treats as 'continue'
+ * $v0 still holds this handler's address, which run_script_block treats as 'continue'
  * without the pc moving, so an invalid opcode hangs the script loop. */
 effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record) {
     system_report_stub(1, 0x22);
@@ -1323,7 +1323,7 @@ effect_script_result_e effect_script_opcode_02_spawn_child(effect_record_t* reco
 
     parameters = instruction->header.parameters;
     slot = parameters.child.slot;
-    child = script_instance_start(record->script, instruction->immediate.value, g_effect_current_record_index);
+    child = start_script_instance(record->script, instruction->immediate.value, g_effect_current_record_index);
     if (slot < EFFECT_SCRIPT_CHILD_SLOT_COUNT) {
         record->child_indices[slot] = child;
     }
@@ -1338,12 +1338,12 @@ effect_script_result_e effect_script_opcode_03_free_child(effect_record_t* recor
     effect_script_parameters_t parameters = instruction->header.parameters;
     s16 child = record->child_indices[parameters.free_child.slot];
     if (child != 0)
-        script_instance_free(child);
+        free_script_instance(child);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-/* Opcode 04: end the script; script_block_run's caller then frees the
+/* Opcode 04: end the script; run_script_block's caller then frees the
  * record. */
 effect_script_result_e effect_script_opcode_04_end(effect_record_t* unused_record) {
     return EFFECT_SCRIPT_RESULT_ABORT;
@@ -1367,7 +1367,7 @@ effect_script_result_e effect_script_opcode_06_register_native_callback(effect_r
     const effect_script_instruction_t* command = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
-    g_effect_callback_slots[slot] = native_callback_get(command->immediate.value);
+    g_effect_callback_slots[slot] = get_native_callback(command->immediate.value);
     record->pc += 4;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1379,7 +1379,7 @@ effect_script_result_e effect_script_opcode_07_call_native_callback(effect_recor
     const effect_script_instruction_t* command = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
-    effect_callback_t handler = native_callback_get(command->immediate.value);
+    effect_callback_t handler = get_native_callback(command->immediate.value);
     record->last_native_callback = handler;
     handler(record->record_index, slot, 0, 0);
     record->pc += 4;
@@ -1394,21 +1394,21 @@ effect_script_result_e effect_script_opcode_08_set_camera_position(effect_record
     setVector(&coords, effect_get_current_script_instruction(record)->vector.x * ONE,
         effect_get_current_script_instruction(record)->vector.y * ONE,
         effect_get_current_script_instruction(record)->vector.z * ONE);
-    camera_real_coords_set(&coords);
+    camera_set_real_coords(&coords);
     record->pc += 8;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 09: save the camera position (opcode 0a restores it). */
 effect_script_result_e effect_script_opcode_09_save_camera_position(effect_record_t* record) {
-    camera_real_coords_save();
+    camera_save_real_coords();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0a: restore the camera position opcode 09 saved. */
 effect_script_result_e effect_script_opcode_0a_restore_camera_position(effect_record_t* record) {
-    camera_real_coords_restore();
+    camera_restore_real_coords();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1420,21 +1420,21 @@ effect_script_result_e effect_script_opcode_0b_set_camera_rotation(effect_record
     setVector(&rotation, effect_get_current_script_instruction(record)->vector.x,
         effect_get_current_script_instruction(record)->vector.y,
         effect_get_current_script_instruction(record)->vector.z);
-    camera_rotation_set(&rotation);
+    camera_set_rotation(&rotation);
     record->pc += 8;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0c: save the camera rotation (opcode 0d restores it). */
 effect_script_result_e effect_script_opcode_0c_save_camera_rotation(effect_record_t* record) {
-    camera_rotation_save();
+    camera_save_rotation();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0d: restore the camera rotation opcode 0c saved. */
 effect_script_result_e effect_script_opcode_0d_restore_camera_rotation(effect_record_t* record) {
-    camera_rotation_restore();
+    camera_restore_rotation();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1447,14 +1447,14 @@ effect_script_result_e effect_script_opcode_0e_set_camera_zoom(effect_record_t* 
     setVector(&zoom, effect_get_current_script_instruction(record)->vector.x,
         effect_get_current_script_instruction(record)->vector.y,
         effect_get_current_script_instruction(record)->vector.z);
-    camera_zoom_set(&zoom);
+    camera_set_zoom(&zoom);
     record->pc += 8;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 0f: save the camera zoom (opcode 24 restores it). */
 effect_script_result_e effect_script_opcode_0f_save_camera_zoom(effect_record_t* record) {
-    camera_zoom_save();
+    camera_save_zoom();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1746,7 +1746,7 @@ effect_script_result_e effect_script_opcode_23_subtract_immediate_from_selected_
 
 /* Opcode 24: restore the camera zoom opcode 0f saved. */
 effect_script_result_e effect_script_opcode_24_restore_camera_zoom(effect_record_t* record) {
-    camera_zoom_restore();
+    camera_restore_zoom();
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1802,7 +1802,7 @@ effect_script_result_e effect_script_opcode_25_update_all_particles(effect_recor
 
         if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) == EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_1
             || (node->flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) == EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_2) {
-            effect_emitter_particles_spawn(
+            effect_emitter_spawn_particles(
                 record->record_index, record->frame_counter, node->child_emitter_mid_life, node);
         }
 
@@ -1820,14 +1820,14 @@ effect_script_result_e effect_script_opcode_25_update_all_particles(effect_recor
         }
 
         if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) == EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MODE_1) {
-            effect_emitter_particles_spawn(
+            effect_emitter_spawn_particles(
                 record->record_index, record->frame_counter, node->child_emitter_on_death, node);
         } else if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK)
             == EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MODE_2) {
-            effect_emitter_particles_spawn(
+            effect_emitter_spawn_particles(
                 record->record_index, record->frame_counter, node->child_emitter_on_death, node);
         }
-        effect_particle_record_free(record->record_index, node);
+        effect_particle_free_record(record->record_index, node);
     }
 
     record->pc += 2;
@@ -1842,7 +1842,7 @@ effect_script_result_e effect_script_opcode_26_spawn_emitter_particles(effect_re
 
     header = effect_get_current_script_header(record);
 
-    effect_emitter_particles_spawn(record->record_index, record->frame_counter, (header >> 10) & 0xf, 0);
+    effect_emitter_spawn_particles(record->record_index, record->frame_counter, (header >> 10) & 0xf, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1850,8 +1850,8 @@ effect_script_result_e effect_script_opcode_26_spawn_emitter_particles(effect_re
 /* Opcode 27: take the gravity vector and the inertia threshold from the
  * effect file's particle-system section. */
 effect_script_result_e effect_script_opcode_27_init_particle_physics(effect_record_t* record) {
-    effect_gravity_set(&g_effect_geometry_table->gravity);
-    effect_inertia_threshold_set(g_effect_geometry_table->inertia_threshold);
+    effect_set_gravity(&g_effect_geometry_table->gravity);
+    effect_set_inertia_threshold(g_effect_geometry_table->inertia_threshold);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1861,34 +1861,34 @@ effect_script_result_e effect_script_opcode_27_init_particle_physics(effect_reco
  * and 8-15 trigger unit reactions (bit 3 selects the caster entry), bits 0-2
  * register a callback slot.
  */
-static void keyframe_actions_run(u16 flags, u8 target, effect_record_t* state) {
-    s32 runtime_id;
+static void run_keyframe_actions(u16 flags, u8 target, effect_record_t* state) {
+    s32 map_unit_id;
     u32 animation;
     u16 slot;
 
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
-        runtime_id = -1;
+        map_unit_id = -1;
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
+            map_unit_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id;
         }
     } else {
-        runtime_id = -1;
+        map_unit_id = -1;
         if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_effect_context.targets[target].data.unit.runtime_id;
+            map_unit_id = g_effect_context.targets[target].data.unit.map_unit_id;
         }
     }
-    if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) && runtime_id != -1) {
-        result_runtime_display_prepare(runtime_id);
+    if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) && map_unit_id != -1) {
+        result_map_unit_prepare_display(map_unit_id);
     }
-    if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_UPDATE_DISPLAY) && runtime_id != -1) {
-        unit_runtime_display_update(runtime_id);
+    if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_UPDATE_DISPLAY) && map_unit_id != -1) {
+        map_unit_update_display(map_unit_id);
     }
-    if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) && runtime_id != -1) {
-        action_start_target_response_by_runtime_id(runtime_id);
+    if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) && map_unit_id != -1) {
+        action_map_unit_start_target_response(map_unit_id);
     }
     animation = (flags & EFFECT_KEYFRAME_ACTION_ANIMATION_MASK) >> EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT;
-    if (animation != 0 && runtime_id != -1) {
-        animation_runtime_sequence_set(runtime_id, animation);
+    if (animation != 0 && map_unit_id != -1) {
+        animation_map_unit_set_sequence(map_unit_id, animation);
     }
     if (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) {
         slot = (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) - 1;
@@ -1900,7 +1900,7 @@ static void keyframe_actions_run(u16 flags, u8 target, effect_record_t* state) {
 /* Pick the sound id effect sound channel channel plays next, by the channel's mode and how many
  * times it has been used; each call counts one use. A mode above 4 has no case: retail then
  * returns whatever the caller left in $a2. */
-static s32 sound_id_select(s32 channel) {
+static s32 select_sound_id(s32 channel) {
     s32 count = g_effect_sound_call_counts[channel]++;
     s32 sound;
 
@@ -1938,7 +1938,7 @@ static s32 sound_id_select(s32 channel) {
  * reflected hit instead starts the Reflect animation on a unit target and jumps to the child
  * timeline's end. */
 effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record_t* record) {
-    battle_map_background_gradient_colors_t colors;
+    map_background_gradient_colors_t colors;
     effect_context_t init;
     effect_record_timeline_t* timeline;
     effect_keyframe_table_t* table;
@@ -1978,7 +1978,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     timeline->state.child.remaining.tracks.particle[i] = table->frame_start[1] - table->frame_start[0];
                     timeline->state.child.step[i] = 0;
                     timeline->state.child.keyframe.tracks.particle[i]++;
-                    keyframe_actions_run(table->action[1], target, record);
+                    run_keyframe_actions(table->action[1], target, record);
                 }
                 /* Pass through keyframes of zero length, running each one's actions. */
                 while (timeline->state.child.remaining.tracks.particle[i] == 0) {
@@ -1987,7 +1987,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     timeline->state.child.remaining.tracks.particle[i]
                         = table->frame_start[k + 1] - table->frame_start[k];
                     timeline->state.child.step[i] = 0;
-                    keyframe_actions_run(table->action[k + 1], target, record);
+                    run_keyframe_actions(table->action[k + 1], target, record);
                 }
             }
 
@@ -2005,7 +2005,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     }
                     record->callbacks[slot](record->record_index, slot, index - 1, step);
                 } else {
-                    effect_emitter_particles_spawn(record->record_index, step, index - 1, 0);
+                    effect_emitter_spawn_particles(record->record_index, step, index - 1, 0);
                 }
             }
 
@@ -2031,16 +2031,16 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     red = track->color[index].r;
                     green = track->color[index].g;
                     blue = track->color[index].b;
-                    battle_map_color_field(
+                    map_palette_color_field(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
                     for (i = 0; i < g_effect_context.spectator_count; i++) {
                         sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                             track->duration[index], g_effect_context.spectator_ids[i], red, green, blue);
                     }
                     /* The darkness color has 8-bit channels; the offsets are 5-bit palette steps. */
-                    if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                        battle_map_darkness_start_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], red * 8, green * 8, blue * 8);
+                    if (!(g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                        map_light_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index],
+                            red * 8, green * 8, blue * 8);
                     }
                 }
             }
@@ -2067,7 +2067,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     blue = track->color[index].b;
                     if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
                         sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id,
+                            track->duration[index], g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id,
                             red, green, blue);
                     }
                 }
@@ -2095,7 +2095,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     blue = track->color[index].b;
                     if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
                         sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_context.targets[target].data.unit.runtime_id, red, green,
+                            track->duration[index], g_effect_context.targets[target].data.unit.map_unit_id, red, green,
                             blue);
                     }
                 }
@@ -2122,22 +2122,21 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     red = screen->color[index].r * 2;
                     green = screen->color[index].g * 2;
                     blue = screen->color[index].b * 2;
-                    battle_map_background_modify(mode, screen->duration[index], red, green, blue);
+                    map_light_modify_background(mode, screen->duration[index], red, green, blue);
                     /* Unlike the surroundings track, this one moves the darkness only when weather is ignored. */
-                    if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                        battle_map_darkness_start_blend(mode, screen->duration[index], red, green, blue);
+                    if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                        map_light_start_darkness_blend(mode, screen->duration[index], red, green, blue);
                     }
                 } else {
-                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].r = screen->color[index].r;
-                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].g = screen->color[index].g;
-                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].b = screen->color[index].b;
-                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].r = screen->second_color[index].r;
-                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
-                    colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
-                    battle_map_background_set(screen->duration[index], &colors);
-                    if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                        battle_map_darkness_set(
-                            screen->duration[index], &colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP]);
+                    colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = screen->color[index].r;
+                    colors.colors[MAP_BACKGROUND_GRADIENT_TOP].g = screen->color[index].g;
+                    colors.colors[MAP_BACKGROUND_GRADIENT_TOP].b = screen->color[index].b;
+                    colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = screen->second_color[index].r;
+                    colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
+                    colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
+                    map_light_set_background(screen->duration[index], &colors);
+                    if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                        map_light_set_darkness(screen->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                     }
                 }
             }
@@ -2155,7 +2154,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
                     kind = sound->channel[index];
                     /* Channel values 0 and 1 play nothing; 2 and up pick effect sound channel kind - 2. */
                     if (kind >= 2) {
-                        sound_index = sound_id_select(kind - 2);
+                        sound_index = select_sound_id(kind - 2);
                         if (sound_index != 0) {
                             suzuki_sound_play_sfx(sound_index + g_effect_sound_data_base);
                         }
@@ -2169,7 +2168,7 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
             effect_camera_start_child_keyframe_moves(timeline->frame);
         }
         if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
-            system_min_vsync_interval_set(child_timing_curve_evaluate(record));
+            system_set_min_vsync_interval(evaluate_child_timing_curve(record));
         }
         timeline->frame++;
     } else {
@@ -2192,53 +2191,53 @@ effect_script_result_e effect_script_opcode_28_step_child_timeline(effect_record
  * caster entry instead of the whole target list; bits 0-2 register a callback
  * slot.
  */
-static void keyframe_actions_all_targets_run(u16 flags, effect_record_t* state) {
-    s32 runtime_id;
+static void run_keyframe_actions_for_all_targets(u16 flags, effect_record_t* state) {
+    s32 map_unit_id;
     u16 animation;
     u16 slot;
     s32 i;
 
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
-        runtime_id = -1;
+        map_unit_id = -1;
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
+            map_unit_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id;
         }
     }
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
-            if (runtime_id != -1) {
-                result_runtime_display_prepare(runtime_id);
+            if (map_unit_id != -1) {
+                result_map_unit_prepare_display(map_unit_id);
             }
         } else {
             for (i = 0; i < g_effect_context.target_count; i++) {
                 if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    result_runtime_display_prepare(g_effect_context.targets[i].data.unit.runtime_id);
+                    result_map_unit_prepare_display(g_effect_context.targets[i].data.unit.map_unit_id);
                 }
             }
         }
     }
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_UPDATE_DISPLAY) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
-            if (runtime_id != -1) {
-                unit_runtime_display_update(runtime_id);
+            if (map_unit_id != -1) {
+                map_unit_update_display(map_unit_id);
             }
         } else {
             for (i = 0; i < g_effect_context.target_count; i++) {
                 if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    unit_runtime_display_update(g_effect_context.targets[i].data.unit.runtime_id);
+                    map_unit_update_display(g_effect_context.targets[i].data.unit.map_unit_id);
                 }
             }
         }
     }
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_TARGET_ANIMATION) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
-            if (runtime_id != -1) {
-                action_start_target_response_by_runtime_id(runtime_id);
+            if (map_unit_id != -1) {
+                action_map_unit_start_target_response(map_unit_id);
             }
         } else {
             for (i = 0; i < g_effect_context.target_count; i++) {
                 if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    action_start_target_response_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
+                    action_map_unit_start_target_response(g_effect_context.targets[i].data.unit.map_unit_id);
                 }
             }
         }
@@ -2246,13 +2245,13 @@ static void keyframe_actions_all_targets_run(u16 flags, effect_record_t* state) 
     animation = (flags & EFFECT_KEYFRAME_ACTION_ANIMATION_MASK) >> EFFECT_KEYFRAME_ACTION_ANIMATION_SHIFT;
     if (animation != 0) {
         if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
-            if (runtime_id != -1) {
-                animation_runtime_sequence_set(runtime_id, animation);
+            if (map_unit_id != -1) {
+                animation_map_unit_set_sequence(map_unit_id, animation);
             }
         } else {
             for (i = 0; i < g_effect_context.target_count; i++) {
                 if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    animation_runtime_sequence_set(g_effect_context.targets[i].data.unit.runtime_id, animation);
+                    animation_map_unit_set_sequence(g_effect_context.targets[i].data.unit.map_unit_id, animation);
                 }
             }
         }
@@ -2271,7 +2270,7 @@ static void keyframe_actions_all_targets_run(u16 flags, effect_record_t* state) 
  * told to destroy its work on the call made with two frames of the keyframe
  * left. index, remaining and step are the channel's keyframe, the frames left
  * in it and the frames it has run. */
-static void emitter_step(
+static void step_emitter(
     effect_record_t* state, effect_keyframe_table_t* table, s16* index, s16* remaining, s16* step) {
     s16 k;
     s32 sel;
@@ -2284,7 +2283,7 @@ static void emitter_step(
             k = *index;
             *index = k + 1;
             /* Integer-first pointer addition preserves the native shared-address operands. */
-            keyframe_actions_all_targets_run(*(k + 1 + table->action), state);
+            run_keyframe_actions_for_all_targets(*(k + 1 + table->action), state);
             *remaining = table->frame_start[k + 1] - table->frame_start[k];
             *step = 0;
             if (table->last_index < *index) {
@@ -2303,7 +2302,7 @@ static void emitter_step(
                     }
                     state->callbacks[slot](state->record_index, slot, emitter - 1, *step);
                 } else {
-                    effect_emitter_particles_spawn(state->record_index, *step, emitter - 1, 0);
+                    effect_emitter_spawn_particles(state->record_index, *step, emitter - 1, 0);
                 }
                 *step = *step + 1;
             }
@@ -2320,7 +2319,7 @@ static void emitter_step(
  * scaled to 8-bit channels). The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in
  * the target. */
-static void surroundings_palette_track_advance(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
+static void advance_surroundings_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
     s32 i;
@@ -2346,14 +2345,14 @@ static void surroundings_palette_track_advance(effect_palette_track_t* track, s1
                 red = track->color[index].r;
                 green = track->color[index].g;
                 blue = track->color[index].b;
-                battle_map_color_field(
+                map_palette_color_field(
                     preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
                 for (i = 0; i < g_effect_context.spectator_count; i++) {
                     sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                         track->duration[index], g_effect_context.spectator_ids[i], red, green, blue);
                 }
-                if (!(g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                    battle_map_darkness_start_blend(
+                if (!(g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                    map_light_start_darkness_blend(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red * 8, green * 8, blue * 8);
                 }
             }
@@ -2364,8 +2363,8 @@ static void surroundings_palette_track_advance(effect_palette_track_t* track, s1
 
 /* Advance the caster color track one frame: an APPLY keyframe recolors the
  * caster. */
-static void caster_palette_track_advance(
-    effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_runtime_id) {
+static void advance_caster_palette_track(
+    effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_map_unit_id) {
     s16 current;
     s32 index;
     s32 timer;
@@ -2392,7 +2391,7 @@ static void caster_palette_track_advance(
                 green = track->color[index].g;
                 blue = track->color[index].b;
                 sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                    track->duration[index], caster_runtime_id, red, green, blue);
+                    track->duration[index], caster_map_unit_id, red, green, blue);
             }
         }
         *remaining_frames = *remaining_frames - 1;
@@ -2404,7 +2403,7 @@ static void caster_palette_track_advance(
  *
  * The frame timer and the loop counter are separate locals here: the target
  * keeps the timer in $v0 and the counter in $s1. */
-static void target_palette_track_advance(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
+static void advance_target_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
     s32 i;
@@ -2434,7 +2433,8 @@ static void target_palette_track_advance(effect_palette_track_t* track, s16* key
                 for (i = 0; i < g_effect_context.target_count; i++) {
                     if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
                         sprite_palette_apply_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_context.targets[i].data.unit.runtime_id, red, green, blue);
+                            track->duration[index], g_effect_context.targets[i].data.unit.map_unit_id, red, green,
+                            blue);
                     }
                 }
             }
@@ -2449,8 +2449,8 @@ static void target_palette_track_advance(effect_palette_track_t* track, s16* key
  * color (and the darkness color when the map ignores weather); otherwise both
  * colors become the new gradient stops, with the first also driving the
  * darkness color when the map ignores weather. */
-static void map_background_track_advance(effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
-    battle_map_background_gradient_colors_t colors;
+static void advance_map_background_track(effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
+    map_background_gradient_colors_t colors;
     s16 current;
     s32 index;
     s16 duration;
@@ -2478,20 +2478,20 @@ static void map_background_track_advance(effect_background_track_t* track, s16* 
                 red = track->color[index].r * 2;
                 green = track->color[index].g * 2;
                 blue = track->color[index].b * 2;
-                battle_map_background_modify(mode, track->duration[index], red, green, blue);
-                if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                    battle_map_darkness_start_blend(mode, track->duration[index], red, green, blue);
+                map_light_modify_background(mode, track->duration[index], red, green, blue);
+                if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    map_light_start_darkness_blend(mode, track->duration[index], red, green, blue);
                 }
             } else {
-                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].r = track->color[index].r;
-                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].g = track->color[index].g;
-                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP].b = track->color[index].b;
-                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].r = track->second_color[index].r;
-                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
-                colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
-                battle_map_background_set(track->duration[index], &colors);
-                if (g_weather_flags & BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                    battle_map_darkness_set(track->duration[index], &colors.colors[BATTLE_MAP_BACKGROUND_GRADIENT_TOP]);
+                colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = track->color[index].r;
+                colors.colors[MAP_BACKGROUND_GRADIENT_TOP].g = track->color[index].g;
+                colors.colors[MAP_BACKGROUND_GRADIENT_TOP].b = track->color[index].b;
+                colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = track->second_color[index].r;
+                colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
+                colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
+                map_light_set_background(track->duration[index], &colors);
+                if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    map_light_set_darkness(track->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                 }
             }
         }
@@ -2505,9 +2505,9 @@ static void map_background_track_advance(effect_background_track_t* track, s16* 
  * (0 and 1 none, otherwise a sound channel of the flags section + 2) and its
  * entry count at 0x1c; entering an entry plays the channel's next sound.
  * Sound ids are relative to g_effect_sound_data_base, the effect sound
- * section's id set by sound_section_load.
+ * section's id set by load_sound_section.
  */
-static void parent_sound_track_advance(
+static void advance_parent_sound_track(
     effect_sound_track_t* schedule, s16* entry_index, s16* countdown, u8* unused_sound_state) {
     s16 index = *entry_index;
     s32 effect_kind;
@@ -2520,7 +2520,7 @@ static void parent_sound_track_advance(
             effect_kind = schedule->channels[index];
 
             if (effect_kind >= 2) {
-                sound_index = sound_id_select(effect_kind - 2);
+                sound_index = select_sound_id(effect_kind - 2);
 
                 if (sound_index != 0) {
                     suzuki_sound_play_sfx(g_effect_sound_data_base + sound_index);
@@ -2552,7 +2552,7 @@ effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_recor
             && timeline->state.parent.spawned_count < g_effect_context.target_count) {
             const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-            child = script_instance_start(record->script, instruction->immediate.value, record->record_index);
+            child = start_script_instance(record->script, instruction->immediate.value, record->record_index);
             g_effect_state_records[child].timeline.target_index = timeline->state.parent.spawned_count;
             timeline->state.parent.spawned_count++;
             timeline->state.parent.spawn_countdown += g_effect_timeline->spawn_delay;
@@ -2560,64 +2560,64 @@ effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_recor
         timeline->state.parent.spawn_countdown--;
     } else {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            emitter_step(record, &g_effect_timeline->particle_channels[0][i],
+            step_emitter(record, &g_effect_timeline->particle_channels[0][i],
                 &timeline->state.parent.keyframe.tracks.particle[0][i],
                 &timeline->state.parent.remaining.tracks.particle[0][i],
                 &timeline->state.parent.step.tracks.particle[0][i]);
         }
-        surroundings_palette_track_advance(&g_effect_timeline->color_tracks[0].surroundings,
+        advance_surroundings_palette_track(&g_effect_timeline->color_tracks[0].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[0],
             &timeline->state.parent.remaining.tracks.surroundings[0]);
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            caster_palette_track_advance(&g_effect_timeline->color_tracks[0].caster,
+            advance_caster_palette_track(&g_effect_timeline->color_tracks[0].caster,
                 &timeline->state.parent.keyframe.tracks.caster[0], &timeline->state.parent.remaining.tracks.caster[0],
-                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id);
         }
-        target_palette_track_advance(&g_effect_timeline->color_tracks[0].target,
+        advance_target_palette_track(&g_effect_timeline->color_tracks[0].target,
             &timeline->state.parent.keyframe.tracks.target[0], &timeline->state.parent.remaining.tracks.target[0]);
-        map_background_track_advance(&g_effect_timeline->color_tracks[0].screen,
+        advance_map_background_track(&g_effect_timeline->color_tracks[0].screen,
             &timeline->state.parent.keyframe.tracks.screen[0], &timeline->state.parent.remaining.tracks.screen[0]);
-        parent_sound_track_advance(&g_effect_timeline->sound_tracks[0][0],
+        advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][0],
             &timeline->state.parent.keyframe.tracks.sound[0][0], &timeline->state.parent.remaining.tracks.sound[0][0],
             &timeline->state.parent.step.tracks.sound[0][0][1]);
-        parent_sound_track_advance(&g_effect_timeline->sound_tracks[0][1],
+        advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][1],
             &timeline->state.parent.keyframe.tracks.sound[1][0], &timeline->state.parent.remaining.tracks.sound[1][0],
             &timeline->state.parent.step.tracks.sound[1][0][1]);
-        parent_sound_track_advance(&g_effect_timeline->sound_tracks[0][2],
+        advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][2],
             &timeline->state.parent.keyframe.tracks.sound[2][0], &timeline->state.parent.remaining.tracks.sound[2][0],
             &timeline->state.parent.step.tracks.sound[2][0][1]);
         if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
-            system_min_vsync_interval_set(parent_timing_curve_evaluate(record));
+            system_set_min_vsync_interval(evaluate_parent_timing_curve(record));
         }
     }
     i = g_effect_timeline->phase1_duration + (g_effect_context.target_count - 1) * g_effect_timeline->spawn_delay
         + g_effect_timeline->child.duration;
     if (timeline->frame >= i) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            emitter_step(record, &g_effect_timeline->particle_channels[1][i],
+            step_emitter(record, &g_effect_timeline->particle_channels[1][i],
                 &timeline->state.parent.keyframe.tracks.particle[1][i],
                 &timeline->state.parent.remaining.tracks.particle[1][i],
                 &timeline->state.parent.step.tracks.particle[1][i]);
         }
-        surroundings_palette_track_advance(&g_effect_timeline->color_tracks[1].surroundings,
+        advance_surroundings_palette_track(&g_effect_timeline->color_tracks[1].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[1],
             &timeline->state.parent.remaining.tracks.surroundings[1]);
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            caster_palette_track_advance(&g_effect_timeline->color_tracks[1].caster,
+            advance_caster_palette_track(&g_effect_timeline->color_tracks[1].caster,
                 &timeline->state.parent.keyframe.tracks.caster[1], &timeline->state.parent.remaining.tracks.caster[1],
-                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id);
         }
-        target_palette_track_advance(&g_effect_timeline->color_tracks[1].target,
+        advance_target_palette_track(&g_effect_timeline->color_tracks[1].target,
             &timeline->state.parent.keyframe.tracks.target[1], &timeline->state.parent.remaining.tracks.target[1]);
-        map_background_track_advance(&g_effect_timeline->color_tracks[1].screen,
+        advance_map_background_track(&g_effect_timeline->color_tracks[1].screen,
             &timeline->state.parent.keyframe.tracks.screen[1], &timeline->state.parent.remaining.tracks.screen[1]);
-        parent_sound_track_advance(&g_effect_timeline->sound_tracks[1][0],
+        advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][0],
             &timeline->state.parent.keyframe.tracks.sound[0][1], &timeline->state.parent.remaining.tracks.sound[0][1],
             &timeline->state.parent.step.tracks.sound[0][1][1]);
-        parent_sound_track_advance(&g_effect_timeline->sound_tracks[1][1],
+        advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][1],
             &timeline->state.parent.keyframe.tracks.sound[1][1], &timeline->state.parent.remaining.tracks.sound[1][1],
             &timeline->state.parent.step.tracks.sound[1][1][1]);
-        parent_sound_track_advance(&g_effect_timeline->sound_tracks[1][2],
+        advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][2],
             &timeline->state.parent.keyframe.tracks.sound[2][1], &timeline->state.parent.remaining.tracks.sound[2][1],
             &timeline->state.parent.step.tracks.sound[2][1][1]);
     }
@@ -2629,7 +2629,7 @@ effect_script_result_e effect_script_opcode_29_step_parent_timeline(effect_recor
 
 /* Opcode 2a: clear the child-timeline state that opcode 28 steps and select effect target 0. */
 effect_script_result_e effect_script_opcode_2a_reset_child_timeline(effect_record_t* record) {
-    child_timeline_reset(record, 0);
+    reset_child_timeline(record, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -2637,7 +2637,7 @@ effect_script_result_e effect_script_opcode_2a_reset_child_timeline(effect_recor
 /* Opcode 2b: clear the parent-timeline state (frame, spawn counters and
  * keyframe tracks) that opcode 29 steps. */
 effect_script_result_e effect_script_opcode_2b_reset_parent_timeline(effect_record_t* record) {
-    parent_timeline_reset(record);
+    reset_parent_timeline(record);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -2657,7 +2657,7 @@ effect_script_result_e effect_script_opcode_2d_nop(effect_record_t* record) {
 /* Run record `index`'s script from its pc, one opcode handler after another,
  * until a handler returns YIELD or ABORT. This runner returns 1 on YIELD
  * (resume next frame) and 0 on ABORT (the caller frees the record). */
-static s32 script_block_run(s16 index) {
+static s32 run_script_block(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */
     s16 result;

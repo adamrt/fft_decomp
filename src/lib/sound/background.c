@@ -11,9 +11,9 @@
  * when find_channel is set and as the remembered background sound otherwise, and
  * set its volume (0 becomes 1).
  *
- * It then continues in sound_background_fade_thread_run, which reads the same
+ * It then continues in sound_background_fade_thread, which reads the same
  * parameter record to fade from volume_from to volume_to over frames yields. */
-void sound_background_thread_run(void) {
+void sound_background_thread(void) {
     event_background_sound_parameters_t* request;
     s32 sound_id;
     s32 sound;
@@ -21,25 +21,25 @@ void sound_background_thread_run(void) {
     s32 find_channel;
     s32 resource = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, 0);
 
-    thread_current_task_set(THREAD_TASK_BG_SOUND);
-    request = (event_background_sound_parameters_t*)thread_current_parameter_1_get();
+    thread_current_set_task(THREAD_TASK_BG_SOUND);
+    request = (event_background_sound_parameters_t*)thread_current_get_parameter_1();
     find_channel = request->find_channel;
     sound_id = request->sound_id;
     if (find_channel != 0) {
         sound = sound_id + resource;
-        sound_sfx_stop(sound);
-        sound_free_channel_sfx_play(sound);
+        sound_stop_sfx(sound);
+        sound_play_sfx_on_free_channel(sound);
     } else {
         sound = sound_id + resource;
-        sound_sfx_stop(sound);
-        sound_background_play(sound);
+        sound_stop_sfx(sound);
+        sound_play_background(sound);
     }
     volume = request->volume_from;
     if (volume == 0) {
         volume = 1;
     }
-    sound_sfx_volume_set(sound_id | resource, volume);
-    sound_background_fade_thread_run();
+    sound_set_sfx_volume(sound_id | resource, volume);
+    sound_background_fade_thread();
 }
 
 /* Thread task 0x35: ramp the volume of an environment sound from volume_from to
@@ -48,8 +48,8 @@ void sound_background_thread_run(void) {
  *
  * A step's volume is never 0, which would stop the sound: a negative level is
  * negated and 0 becomes 1. The event script's edit-background-sound instruction
- * starts it as a thread, and sound_background_thread_run continues in it. */
-void sound_background_fade_thread_run(void) {
+ * starts it as a thread, and sound_background_thread continues in it. */
+void sound_background_fade_thread(void) {
     event_background_sound_parameters_t* request;
     s32 sound_id;
     s32 volume_from;
@@ -64,9 +64,9 @@ void sound_background_fade_thread_run(void) {
      * accounts for; the pad reproduces the 0x40-byte frame. */
     s32 stack_pad[2];
 
-    thread_current_task_set(THREAD_TASK_BG_SOUND);
+    thread_current_set_task(THREAD_TASK_BG_SOUND);
     step = 0;
-    request = (event_background_sound_parameters_t*)thread_current_parameter_1_get();
+    request = (event_background_sound_parameters_t*)thread_current_get_parameter_1();
     sound_id = request->sound_id;
     volume_from = request->volume_from;
     steps = request->frames;
@@ -85,10 +85,10 @@ void sound_background_fade_thread_run(void) {
                 volume = 1;
             }
             scaled += delta;
-            sound_sfx_volume_set(sound_id + resource, volume);
+            sound_set_sfx_volume(sound_id + resource, volume);
             step++;
         } while (step < steps);
     }
-    sound_sfx_volume_set(sound_id | resource, volume_to);
+    sound_set_sfx_volume(sound_id | resource, volume_to);
     thread_current_exit();
 }

@@ -1,6 +1,7 @@
 /* The item shop runs the shared shop screen and its buying and selling menus. */
 
 #include "fft/screen.h"
+#include "fft/ability.h"
 #include "fft/equipment.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
@@ -27,6 +28,7 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
+#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -37,8 +39,8 @@ extern u8 g_screen_text_shop_menu_labels_data[];
 extern menu_entry_t g_shop_main_menu_thread_data;
 extern u8 g_shop_background_visible;
 
-/* Refusals of buy_quantity_update and
- * purchase_quantity_update; otherwise they return whether the
+/* Refusals of update_buy_quantity and
+ * update_purchase_quantity; otherwise they return whether the
  * quantity prompt is still open. */
 enum {
     SHOP_QUANTITY_HOLDING_MAX = -2, /* the party already holds 99 */
@@ -69,7 +71,7 @@ extern u8 g_shop_sell_confirm_shown; /* confirmation prompt shown */
 extern u8 g_shop_fitting_cost_visible;
 extern menu_entry_t g_fur_shop_menu_thread_data;
 
-/* The cursor doubles as the soldier-office mode (hire_fee_get). */
+/* The cursor doubles as the soldier-office mode (get_hire_fee). */
 extern menu_entry_t g_soldier_office_hire_menu_thread_data;
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
@@ -80,44 +82,44 @@ extern u8 g_shop_sell_list_menu_script[235];
 /* The quantity menu passes this range to screen_labeled_number_entry_thread. */
 extern screen_number_range_t g_shop_quantity_range;
 
-static void shop_menu_update(void);
-static void shop_exit_update(void);
-static void buy_list_update(void);
-static void buy_confirm_update(void);
-static s32 buy_quantity_update(void);
+static void update_shop_menu(void);
+static void update_exit_fade(void);
+static void update_buy_list(void);
+static void update_buy_confirm(void);
+static s32 update_buy_quantity(void);
 
-static s32 sell_quantity_update(void);
+static s32 update_sell_quantity(void);
 
 /* shop_step_e indexes the original 28-entry screen dispatcher. */
 static void (*s_shop_step_handlers[])(void) = {
-    shop_menu_update,
-    buy_list_update,
-    buy_confirm_update,
-    shop_buy_unit_preview_update,
-    shop_sell_list_update,
-    shop_sell_confirm_update,
-    shop_fitting_menu_update,
-    shop_fitting_equipment_update,
-    shop_fitting_best_fit_update,
-    shop_fitting_remove_update,
-    shop_fitting_equipped_sale_update,
-    shop_fitting_inventory_sale_update,
-    shop_fitting_checkout_update,
-    shop_exit_update,
-    fur_shop_menu_update,
-    fur_shop_buy_list_update,
-    fur_shop_buy_confirm_update,
-    fur_shop_buy_unit_preview_update,
-    fur_shop_sell_list_update,
-    fur_shop_sell_confirm_update,
-    soldier_office_menu_update,
-    soldier_office_hire_preview_update,
-    soldier_office_hire_confirm_update,
-    soldier_office_hire_name_update,
-    soldier_office_hire_fee_update,
-    soldier_office_menu_reopen,
-    soldier_office_rename_unit_update,
-    soldier_office_rename_name_update,
+    update_shop_menu,
+    update_buy_list,
+    update_buy_confirm,
+    shop_buy_update_unit_preview,
+    shop_sell_update_list,
+    shop_sell_update_confirm,
+    shop_fitting_update_menu,
+    shop_fitting_update_equipment_menu,
+    shop_fitting_update_best_fit,
+    shop_fitting_update_remove_menu,
+    shop_fitting_update_equipped_sale,
+    shop_fitting_update_inventory_sale,
+    shop_fitting_update_checkout,
+    update_exit_fade,
+    fur_shop_update_menu,
+    fur_shop_buy_update_list,
+    fur_shop_buy_update_confirm,
+    fur_shop_buy_update_unit_preview,
+    fur_shop_sell_update_list,
+    fur_shop_sell_update_confirm,
+    soldier_office_update_menu,
+    soldier_office_hire_update_preview,
+    soldier_office_hire_update_confirm,
+    soldier_office_hire_update_name,
+    soldier_office_hire_update_fee,
+    soldier_office_reopen_menu,
+    soldier_office_rename_update_unit,
+    soldier_office_rename_update_name,
 };
 
 /* Backdrop and VRAM rectangles, followed by the main menu and exit gates. */
@@ -140,7 +142,7 @@ static u8 s_shop_exit_step_initialized = 0;
 /* Run a shop screen (item shop, Fur Shop or Soldier Office): set the primitive budgets,
  * load the town's backdrop and the shop music, then run frames through the step handlers
  * until the exit step, saving the party records and restoring VRAM on the way out. */
-void shop_screen_run(s32 shop_type) {
+void shop_run_screen(s32 shop_type) {
     POLY_FT4 textured_quads[2 * 500];
     POLY_G4 gradient_quads[2 * 90];
     POLY_GT4 textured_gradient_quads[2 * 60];
@@ -211,39 +213,39 @@ void shop_screen_run(s32 shop_type) {
     SetDispMask(0);
     while (DrawSync(1) != 0) { }
     gfx_move_image_and_wait(&s_shop_background_vram_rect, 0, 0);
-    tim = shop_background_load(tim_index + buttons);
+    tim = shop_load_background(tim_index + buttons);
     gfx_load_image_and_wait(&s_shop_background_vram_rect, tim + 5);
     gfx_store_image_and_wait(&s_shop_vram_backup_rect, tim);
 
-    screen_packet_buffers_init(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads, textured_gradient_quads,
+    menu_gfx_init_contexts(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads, textured_gradient_quads,
         flat_lines, 0, 0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
     last_step = -1;
-    formation_menu_state_init();
+    formation_init_menu_state();
     g_shop_main_menu_thread_data.selected_index = 0;
     g_fur_shop_menu_thread_data.selected_index = 0;
     g_soldier_office_hire_menu_thread_data.selected_index = 0;
 
-    screen_text_section_bind(SCREEN_TEXT_DATA_SHOP_DIALOGUE);
+    screen_text_bind_section(SCREEN_TEXT_DATA_SHOP_DIALOGUE);
     g_text_section_pointers[SCREEN_TEXT_SECTION_SHOP_MENU_LABELS] = g_screen_text_shop_menu_labels_data;
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, disabled, 0);
-    g_screen_music_slot = music_free_slot_load(ot_index);
-    music_track_switch(g_screen_music_slot, 0x7F, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, disabled, 0);
+    g_screen_music_slot = music_load_into_free_slot(ot_index);
+    music_switch_track(g_screen_music_slot, 0x7F, 0);
     g_shop_background_visible = 1;
     g_formation_unit_banner_enabled = 0;
 
     while (g_shop_menu_step != SHOP_STEP_EXIT) {
-        screen_frame_present(0, 0);
-        menu_input_message_state_update();
-        screen_input_lockout_update();
-        screen_fade_in_update();
+        menu_gfx_present_frame(0, 0);
+        menu_input_update_message_state();
+        screen_update_input_lockout();
+        screen_update_fade_in();
         if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-            screen_help_text_start(DIALOG_POSITION_CENTER);
+            menu_start_help_text(DIALOG_POSITION_CENTER);
         }
         if (g_screen_grid_id != MENU_GRID_HELP_NONE) {
-            screen_grid_cursor_update(g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
+            screen_update_grid_cursor(g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
         }
-        screen_palette_mode_set(g_menu_input_lock_mode);
+        menu_palette_set_mode(g_menu_input_lock_mode);
 
         if (g_shop_background_visible != 0) {
             menu_gfx_enqueue_textured_quad(&s_shop_background_rect, 0, 0, 0, 0, 0x14C, 0, 1);
@@ -275,16 +277,16 @@ void shop_screen_run(s32 shop_type) {
             } else {
                 buttons = 0;
             }
-            menu_pressable_button_draw(
+            menu_draw_pressable_button(
                 MENU_PRESSABLE_BUTTON_L1, 0xC, 0xC, buttons & PSX_PAD_L1, disabled, SOUND_SFX_PAGE_SWITCH);
-            menu_pressable_button_draw(
+            menu_draw_pressable_button(
                 MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xC, buttons & PSX_PAD_R1, disabled, SOUND_SFX_PAGE_SWITCH);
         }
 
         s_shop_step_handlers[g_shop_menu_step]();
         if (g_shop_menu_step != SHOP_STEP_RENAME_NAME_ENTRY && g_shop_menu_step != SHOP_STEP_HIRE_NAME_ENTRY
             && g_shop_menu_step != SHOP_STEP_FITTING_ROOM_REMOVE) {
-            formation_selection_stage_update();
+            formation_update_selection_stage();
         }
 
         /* The event layer goes to OT 0x3C over the confirm prompts, the cost window and the Soldier Office. */
@@ -298,24 +300,24 @@ void shop_screen_run(s32 shop_type) {
         } else {
             ot_index = 9;
         }
-        menu_input_event_state_update(
-            g_menu_gfx_context->otag + ot_index, screen_buttons_filter(), g_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+        menu_input_update_event_state(
+            g_menu_gfx_context->otag + ot_index, screen_filter_buttons(), g_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
 
         /* Entering a new step resets the per-step menu state. */
         if (g_shop_menu_step != last_step) {
             g_formation_unit_cycle_mode = 0;
-            menu_set_vsync_mode_and_event_speed(0);
+            menu_set_event_speed(0);
             g_help_message_text_id = 0;
-            screen_selection_results_reset();
+            screen_reset_selection_results();
             last_step = g_shop_menu_step;
         }
-        screen_sound_dispatch_effect();
+        screen_update_sound_effect();
     }
 
-    music_scenario_slot_unload(g_screen_music_slot);
+    music_unload_scenario_slot(g_screen_music_slot);
     formation_save_records();
-    menu_set_vsync_mode_and_event_speed(0);
-    screen_context_reset();
+    menu_set_event_speed(0);
+    screen_reset_context();
     gfx_load_image_and_wait(&s_shop_background_vram_rect, tim);
     heap_free(tim);
 }
@@ -327,7 +329,7 @@ void shop_noop_callback(void) {
 /* Shop main menu step: runs the Buy / Sell / Fitting Room menu and, when it
  * closes, moves to the chosen step (rows 0..2; the fitting room also sets its
  * message), or to the exit fade with its message for anything else. */
-static void shop_menu_update(void) {
+static void update_shop_menu(void) {
     u8 running;
 
     if (s_shop_main_menu_running == 0) {
@@ -337,70 +339,70 @@ static void shop_menu_update(void) {
     running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_main_menu_thread_data);
     s_shop_main_menu_running = running;
     if (running == 0) {
-        menu_selection_records_clear();
+        menu_selection_clear_records();
         if (g_screen_selection_results[0] == 0) {
             g_shop_menu_step = SHOP_STEP_BUY_LIST;
-            g_shop_item_category = screen_cursor_position_init(SCREEN_CURSOR_SHOP_ITEM_TAB, 0);
+            g_shop_item_category = menu_selection_set_value(SCREEN_CURSOR_SHOP_ITEM_TAB, 0);
         } else if (g_screen_selection_results[0] == 1) {
             g_shop_menu_step = SHOP_STEP_SELL_LIST;
         } else if (g_screen_selection_results[0] == 2) {
             g_shop_menu_step = SHOP_STEP_FITTING_ROOM;
             g_unit_selected_index = 0;
-            formation_stage_selected_unit();
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF818, 0);
+            stage_selected_unit();
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF818, 0);
         } else {
             g_shop_menu_step = SHOP_STEP_EXIT_FADE;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF803, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF803, 0);
         }
     }
-    shop_gil_draw();
+    shop_draw_gil();
 }
 
 /* Menu screen step: on the first frame reset the fade flag; once any of the
  * face buttons (0xf0) is pressed start the fade-out with a music fade, then
  * wait for the fade to complete before releasing the screen (g_shop_menu_step = -1). */
-static void shop_exit_update(void) {
+static void update_exit_fade(void) {
     if (s_shop_exit_step_initialized == 0) {
         s_shop_exit_fade_started = 0;
         s_shop_exit_step_initialized = 1;
     }
     if (s_shop_exit_fade_started != 0) {
-        if (screen_fade_out_update() == 0) {
+        if (screen_update_fade_out() == 0) {
             g_shop_menu_step = SHOP_STEP_EXIT;
             s_shop_exit_step_initialized = 0;
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
-        screen_fade_out_start();
-        music_volume_target_set(0, 0xF0);
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        screen_start_fade_out();
+        music_set_target_volume(0, 0xF0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         s_shop_exit_fade_started = 1;
     }
-    shop_gil_draw();
+    shop_draw_gil();
     if (g_screen_context_id == SCREEN_CONTEXT_SOLDIER_OFFICE) {
-        soldier_office_fee_draw();
-        soldier_office_unit_count_draw();
+        soldier_office_draw_fee();
+        soldier_office_draw_unit_count();
     }
 }
 
-/* Run the shop's war-funds menu script with shop_gil_adjust installed as the
+/* Run the shop's war-funds menu script with shop_adjust_gil installed as the
  * script callback, then put the previous callback back. The step handlers call it. */
-void shop_gil_draw(void) {
+void shop_draw_gil(void) {
     menu_callback_t* callback_slot;
     s32 (*previous_callback)(s32);
 
     callback_slot = g_menu_row_callbacks;
     previous_callback = callback_slot->value;
-    callback_slot->value = shop_gil_adjust;
-    menu_run_script_with_palette_mode(g_shop_war_funds_script, 0, 0);
+    callback_slot->value = shop_adjust_gil;
+    menu_script_run_with_palette_mode(g_shop_war_funds_script, 0, 0);
     callback_slot->value = previous_callback;
 }
 
 /* Returns the owned-and-equipped count for the selected item. */
-s32 shop_buy_owned_count_get(s32 unused_row) {
+s32 shop_buy_get_owned_count(s32 unused_row) {
     s32 result;
 
     if (g_menu_list_entry_count != 0) {
-        result = item_total_count_get(g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK);
+        result = item_get_total_count(g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK);
     } else {
         result = 0;
     }
@@ -408,21 +410,21 @@ s32 shop_buy_owned_count_get(s32 unused_row) {
 }
 
 /* Returns the party-equipped count for the selected item. */
-s32 shop_buy_equipped_count_get(s32 unused_row) {
+s32 shop_buy_get_equipped_count(s32 unused_row) {
     s32 result;
 
     if (g_menu_list_entry_count != 0) {
-        result = item_equipped_count_get(g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK);
+        result = item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK);
     } else {
         result = 0;
     }
     return result;
 }
 
-/* Full-price twin of poached_price_get: the menu
+/* Full-price twin of get_poached_price: the menu
  * item's price with bit 30 copied from its 0x4000 entry flag. */
-s32 shop_buy_price_get(s32 entry_index) {
-    s32 display_value = shop_item_price_get(g_item_list_entries[entry_index]);
+s32 shop_buy_get_price(s32 entry_index) {
+    s32 display_value = shop_get_item_price(g_item_list_entries[entry_index]);
 
     if ((g_item_list_entries[entry_index] & ITEM_ENTRY_UNEQUIPPABLE) != 0)
         display_value |= MENU_NUMBER_VALUE_DISABLED;
@@ -438,32 +440,32 @@ void shop_switch_item_tab(s32 input) {
     s16 item;
     s32 description;
 
-    category = menu_selection_horizontal_sound_step(5, SCREEN_CURSOR_SHOP_ITEM_TAB, input, SOUND_SFX_PAGE_SWITCH);
+    category = menu_selection_step_horizontal_with_sound(5, SCREEN_CURSOR_SHOP_ITEM_TAB, input, SOUND_SFX_PAGE_SWITCH);
     cursor_slot = g_shop_item_category;
     if (cursor_slot != category) {
         if (g_shop_menu_step != SHOP_STEP_BUY_LIST && g_shop_menu_step != SHOP_STEP_FUR_BUY_LIST) {
             cursor_slot += 5;
         }
-        menu_selection_record_set(
+        menu_selection_set_record(
             cursor_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
         g_shop_item_category = category;
         if (g_shop_menu_step == SHOP_STEP_BUY_LIST || g_shop_menu_step == SHOP_STEP_FUR_BUY_LIST) {
-            shop_stock_list_build(-1, g_screen_context_id,
+            shop_build_stock_list(-1, g_screen_context_id,
                 category != ITEM_MENU_TAB_OTHER ? (category + 1) : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
                 ITEM_LIST_MODE_ALL);
             cursor_slot = g_shop_item_category;
         } else {
-            formation_item_list_build(-1, g_shop_item_category + 1,
+            equipment_build_item_list(-1, g_shop_item_category + 1,
                 category != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
                 ITEM_LIST_MODE_ALL);
             cursor_slot = g_shop_item_category + 5;
         }
-        menu_selection_record_restore(cursor_slot, &selected_index, &scroll_base_index, g_item_list_entries);
-        menu_init_scrollable_list(
+        menu_selection_restore_record(cursor_slot, &selected_index, &scroll_base_index, g_item_list_entries);
+        menu_scrollable_list_init(
             g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        menu_set_window_scale_step(10);
+        menu_window_set_scale_step(10);
     }
-    screen_item_tabs_draw(1, g_shop_item_category, g_menu_input_lock_mode);
+    item_list_draw_tabs(1, g_shop_item_category, g_menu_input_lock_mode);
     item = g_item_list_entries[g_menu_list_selected_index];
     if (item != -1) {
         description = (item & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE;
@@ -477,7 +479,7 @@ void shop_switch_item_tab(s32 input) {
  * Triangle (except on the other-items tab, 4) opens the "who can equip" view of the highlighted
  * item once the message box has closed, and Circle starts buying it.
  */
-static void buy_list_update(void) {
+static void update_buy_list(void) {
     s16 selected_index;
     s16 scroll_base_index;
     s32 input;
@@ -488,31 +490,31 @@ static void buy_list_update(void) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
         }
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF804, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF804, 0);
         g_shop_buy_list_initialized = 1;
-        shop_stock_list_build(-1, g_screen_context_id,
+        shop_build_stock_list(-1, g_screen_context_id,
             g_shop_item_category != ITEM_MENU_TAB_OTHER ? g_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        menu_selection_record_restore(g_shop_item_category, &selected_index, &scroll_base_index, g_item_list_entries);
-        menu_init_scrollable_list(
+        menu_selection_restore_record(g_shop_item_category, &selected_index, &scroll_base_index, g_item_list_entries);
+        menu_scrollable_list_init(
             g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
-        g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+        g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
+        g_menu_row_callbacks[1].value = equipment_row_get_item_count;
         g_menu_row_callbacks[2].icon = item_build_type_icon_source;
-        g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
-        g_menu_row_callbacks[4].value = shop_buy_price_get;
-        g_menu_row_callbacks[5].value = shop_buy_equipped_count_get;
-        g_menu_row_callbacks[6].value = shop_buy_owned_count_get;
+        g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
+        g_menu_row_callbacks[4].value = shop_buy_get_price;
+        g_menu_row_callbacks[5].value = shop_buy_get_equipped_count;
+        g_menu_row_callbacks[6].value = shop_buy_get_owned_count;
         s_shop_buy_equip_check_pending = 0;
     }
-    menu_set_vsync_mode_and_event_speed(2);
+    menu_set_event_speed(2);
     if (s_shop_buy_equip_check_pending != 0) {
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         result = thread_is_running(THREAD_SCREEN_SLOT_MESSAGE);
         s_shop_buy_equip_check_pending = result;
         if (result == 0) {
             g_shop_buy_list_initialized = 0;
-            menu_selection_record_set(
+            menu_selection_set_record(
                 g_shop_item_category, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
             g_shop_menu_step = SHOP_STEP_BUY_EQUIP;
         }
@@ -523,7 +525,7 @@ static void buy_list_update(void) {
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_shop_buy_list_initialized = 0;
             g_shop_menu_step = SHOP_STEP_MAIN_MENU;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
         } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0
             && g_shop_item_category != ITEM_MENU_TAB_OTHER) {
             s_shop_buy_equip_check_pending = 1;
@@ -539,13 +541,13 @@ static void buy_list_update(void) {
     }
     disabled = 0;
     shop_switch_item_tab(g_menu_input_secondary_repeat);
-    menu_run_script_with_palette_mode(g_shop_buy_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    if (screen_busy_check() != 0 || g_menu_list_entry_count == 0 || g_shop_item_category == ITEM_MENU_TAB_OTHER) {
+    menu_script_run_with_palette_mode(g_shop_buy_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    if (screen_check_busy() != 0 || g_menu_list_entry_count == 0 || g_shop_item_category == ITEM_MENU_TAB_OTHER) {
         disabled = 1;
     }
-    menu_pressable_button_draw(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
+    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, SOUND_SFX_CONFIRM);
-    shop_gil_draw();
+    shop_draw_gil();
 }
 
 /*
@@ -558,39 +560,39 @@ static void buy_list_update(void) {
  * until any face button or d-pad press, which returns to the buy list. The
  * list, the Triangle button and the gil display are drawn every frame.
  */
-static void buy_confirm_update(void) {
+static void update_buy_confirm(void) {
     s32 result = 1;
 
     if (g_shop_buy_message_wait != 0) {
         if (g_menu_input_primary_repeat
             & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_DPAD_MASK)) {
             g_shop_buy_message_wait = 0;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF805, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF805, 0);
             g_screen_prompt_active = 0;
             g_shop_menu_step = SHOP_STEP_BUY_LIST;
         }
     } else {
-        result = buy_quantity_update();
+        result = update_buy_quantity();
     }
     if (result == 0) {
         if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 0) {
-            shop_gil_adjust(-shop_item_price_get(g_item_list_entries[g_menu_list_selected_index])
+            shop_adjust_gil(-shop_get_item_price(g_item_list_entries[g_menu_list_selected_index])
                 * g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY]);
-            item_inventory_count_adjust(g_item_list_entries[g_menu_list_selected_index],
+            item_adjust_inventory_count(g_item_list_entries[g_menu_list_selected_index],
                 g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY]);
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
             item_rebuild_category_list(g_shop_item_category);
         } else {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80A, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80A, 0);
         }
     }
     if (result <= 0) {
         g_shop_buy_message_wait = 1;
     }
     shop_switch_item_tab(0);
-    menu_run_script_with_palette_mode(g_shop_buy_menu_script, 0, g_menu_input_lock_mode);
-    menu_pressable_button_draw(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, SOUND_SFX_CONFIRM);
-    shop_gil_draw();
+    menu_script_run_with_palette_mode(g_shop_buy_menu_script, 0, g_menu_input_lock_mode);
+    menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, SOUND_SFX_CONFIRM);
+    shop_draw_gil();
 }
 
 /* Runs the shop purchase-quantity menu for the highlighted item.
@@ -599,7 +601,7 @@ static void buy_confirm_update(void) {
  * returns -2 when the stack is already full or -1 when no unit is
  * affordable. Afterwards it returns the quantity menu thread state, updating
  * the total-price prompt while the confirmation sub-thread is running. */
-static s32 buy_quantity_update(void) {
+static s32 update_buy_quantity(void) {
     s32 owned;
     s32 count;
     s32 limit;
@@ -608,23 +610,23 @@ static s32 buy_quantity_update(void) {
         g_shop_buy_total_shown = 0;
         g_screen_prompt_active = 1;
         g_shop_buy_item = g_item_list_entries[g_menu_list_selected_index];
-        owned = item_total_count_get(g_shop_buy_item);
+        owned = item_get_total_count(g_shop_buy_item);
         if (owned >= 99) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF807, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF807, 0);
             return SHOP_QUANTITY_HOLDING_MAX;
         }
-        count = shop_gil_adjust(0);
-        g_shop_buy_unit_price = shop_item_price_get(g_shop_buy_item);
+        count = shop_adjust_gil(0);
+        g_shop_buy_unit_price = shop_get_item_price(g_shop_buy_item);
         count /= g_shop_buy_unit_price;
         limit = 99 - owned;
         if (limit < count) {
             count = limit;
         }
         if (count == 0) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF806, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF806, 0);
             return SHOP_QUANTITY_CANNOT_AFFORD;
         }
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF808, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF808, 0);
         g_shop_quantity_range.bounds.max = count;
         g_shop_buy_total_shown = 0;
         g_sound_suppressed = 1;
@@ -633,13 +635,13 @@ static s32 buy_quantity_update(void) {
     if (thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD) != 0 && g_shop_buy_total_shown == 0) {
         g_text_substitution_values[0]
             = g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY] * g_shop_buy_unit_price;
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF809, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF809, 0);
         g_shop_buy_total_shown = 1;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD) == 0 && g_shop_buy_total_shown != 0) {
         g_shop_buy_total_shown = 0;
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF808, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF808, 0);
     }
     if (g_shop_quantity_menu_running == 0) {
         if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 0) {
@@ -655,7 +657,7 @@ static s32 buy_quantity_update(void) {
 
 /* Equip-menu marker for the selected item: 8 when the unit already wears it
  * or cannot equip it, -1 when it is a fresh equippable choice. */
-static s32 equip_marker_get(s32 unit_index) {
+static s32 get_equip_marker(s32 unit_index) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_index];
     s32 i;
 
@@ -664,7 +666,7 @@ static s32 equip_marker_get(s32 unit_index) {
             return MENU_UNIT_READOUT_EQUIP_LABEL;
         }
     }
-    if (equipment_item_compatibility_check(unit_index, g_shop_buy_equip_item) != 1) {
+    if (equipment_check_item_compatibility(unit_index, g_shop_buy_equip_item) != 1) {
         return MENU_UNIT_READOUT_EQUIP_LABEL;
     }
     return -1;
@@ -672,8 +674,8 @@ static s32 equip_marker_get(s32 unit_index) {
 
 /* Menu callback: sprite brightness for a unit on the shop's "who can equip"
  * view: 0x80 when the unit can equip the candidate item, 0x40 when not. */
-static s32 equip_brightness_get(s32 unit_index) {
-    return equipment_item_compatibility_check(unit_index, g_shop_buy_equip_item) == 1 ? 0x80 : 0x40;
+static s32 get_equip_brightness(s32 unit_index) {
+    return equipment_check_item_compatibility(unit_index, g_shop_buy_equip_item) == 1 ? 0x80 : 0x40;
 }
 
 /*
@@ -685,7 +687,7 @@ static s32 equip_brightness_get(s32 unit_index) {
  * already holding the item are flagged in g_formation_selected_unit_stat_detail.state.equipment. Cancel returns to the
  * buy list.
  */
-void shop_buy_unit_preview_update(void) {
+void shop_buy_update_unit_preview(void) {
     s32 unused[16];
     s32 input;
     u8 equipped;
@@ -695,17 +697,17 @@ void shop_buy_unit_preview_update(void) {
 
     input = g_menu_input_secondary_repeat;
     if (g_shop_buy_equip_initialized == 0) {
-        menu_set_vsync_mode_and_event_speed(0);
+        menu_set_event_speed(0);
         g_formation_unit_browse_enabled = 0;
         g_shop_background_visible = 0;
         g_shop_buy_equip_item = g_item_list_entries[g_menu_list_selected_index];
-        formation_grid_cursor_init(0);
+        formation_grid_init_cursor(0);
         g_shop_buy_equip_preview_visible = 0;
         g_shop_buy_equip_initialized = 1;
     }
     g_shop_buy_equip_saved_browse = g_formation_unit_browse_enabled;
-    formation_grid_update(0, g_formation_unit_browse_enabled == 0, 1, input, g_menu_input_lock_mode, equip_marker_get,
-        equip_brightness_get);
+    formation_grid_update(0, g_formation_unit_browse_enabled == 0, 1, input, g_menu_input_lock_mode, get_equip_marker,
+        get_equip_brightness);
     if (g_shop_buy_equip_saved_browse == 0) {
         if (g_formation_unit_browse_enabled != 0) {
             g_shop_buy_equip_last_unit = -1;
@@ -725,7 +727,7 @@ void shop_buy_unit_preview_update(void) {
     }
     if (g_formation_unit_browse_enabled != 0) {
         if (g_unit_selected_index != g_shop_buy_equip_last_unit) {
-            formation_stage_selected_unit();
+            stage_selected_unit();
             i = 0;
             equipped = 0;
             g_shop_buy_equip_last_unit = g_unit_selected_index;
@@ -737,18 +739,18 @@ void shop_buy_unit_preview_update(void) {
                 }
             }
             if (equipped != 0
-                || equipment_item_compatibility_check(g_unit_selected_index, g_shop_buy_equip_item) != 1) {
+                || equipment_check_item_compatibility(g_unit_selected_index, g_shop_buy_equip_item) != 1) {
                 g_shop_buy_equip_preview_visible = 0;
             } else {
                 slot = formation_item_select_slot(FORMATION_PREVIEW_UNIT_INDEX, g_shop_buy_equip_item);
-                formation_item_equip(FORMATION_PREVIEW_UNIT_INDEX, slot, g_shop_buy_equip_item);
+                equipment_set_slot_item(FORMATION_PREVIEW_UNIT_INDEX, slot, g_shop_buy_equip_item);
                 bcopy(g_formation_unit_pointers[FORMATION_PREVIEW_UNIT_INDEX]->detail.equipment,
                     g_item_preview_stat_detail.state.equipment, sizeof(g_item_preview_stat_detail.state.equipment));
-                equipment_loadout_delta_calculate(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
+                equipment_calculate_loadout_delta(&g_item_preview_stat_detail, &g_unit_panel_selected_unit_stat_summary,
                     g_formation_unit_pointers[g_unit_selected_index]->detail.equipment,
                     g_formation_unit_pointers[FORMATION_PREVIEW_UNIT_INDEX]->detail.equipment);
-                g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
-                    g_item_preview_stat_detail.state.equipment, formation_ability_has_two_hands(g_unit_selected_index));
+                g_item_preview_stat_detail.state.two_hands = equipment_is_two_handing_weapon(
+                    g_item_preview_stat_detail.state.equipment, ability_has_two_hands(g_unit_selected_index));
                 g_shop_buy_equip_preview_visible = 1;
                 g_item_preview_stat_detail.state.equipment[slot] = g_shop_buy_equip_item | FORMATION_HIGHLIGHT;
             }
@@ -759,24 +761,24 @@ void shop_buy_unit_preview_update(void) {
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_formation_unit_banner_enabled = 0;
             g_shop_menu_step = SHOP_STEP_BUY_LIST;
-            menu_set_vsync_mode_and_event_speed(2);
+            menu_set_event_speed(2);
             g_shop_background_visible = 1;
             g_shop_buy_equip_initialized = 0;
         }
     }
-    formation_toggle_preview_stats_window(g_shop_buy_equip_preview_visible);
+    unit_panel_toggle_preview_stats_thread(g_shop_buy_equip_preview_visible);
     formation_toggle_preview_equipment_panel(g_shop_buy_equip_preview_visible);
 }
 
 /* Menu callback: half price of the highlighted item, or 0 for an empty list.
  * The row argument is not read. */
-s32 shop_sell_price_get(s32 unused_row) {
+s32 shop_sell_get_price(s32 unused_row) {
     s32 result;
 
     if (g_menu_list_entry_count == 0) {
         result = 0;
     } else {
-        result = shop_item_half_price_get(g_item_list_entries[g_menu_list_selected_index]);
+        result = shop_get_item_half_price(g_item_list_entries[g_menu_list_selected_index]);
     }
     return result;
 }
@@ -786,29 +788,29 @@ s32 shop_sell_price_get(s32 unused_row) {
  * column callbacks, then handles Cross (back to the main menu) and Circle
  * (sell the highlighted item).
  */
-void shop_sell_list_update(void) {
+void shop_sell_update_list(void) {
     if (g_shop_sell_list_initialized == 0) {
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, formation_inventory_check(0) != 0 ? 0xF80C : 0xF80B, 0);
-        g_shop_item_category = screen_cursor_position_init(SCREEN_CURSOR_SHOP_ITEM_TAB, 0);
-        formation_item_list_build(-1, g_shop_item_category + 1,
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, formation_check_inventory(0) != 0 ? 0xF80C : 0xF80B, 0);
+        g_shop_item_category = menu_selection_set_value(SCREEN_CURSOR_SHOP_ITEM_TAB, 0);
+        equipment_build_item_list(-1, g_shop_item_category + 1,
             g_shop_item_category != ITEM_MENU_TAB_OTHER ? g_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        menu_scrollable_list_core_init(
+        menu_scrollable_list_init_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
-        g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+        g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
+        g_menu_row_callbacks[1].value = equipment_row_get_item_count;
         g_menu_row_callbacks[2].icon = item_build_type_icon_source;
-        g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
-        g_menu_row_callbacks[4].value = shop_sell_price_get;
-        g_menu_row_callbacks[5].value = equipment_get_row_equipped_count;
-        g_menu_row_callbacks[6].value = equipment_get_row_item_count;
+        g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
+        g_menu_row_callbacks[4].value = shop_sell_get_price;
+        g_menu_row_callbacks[5].value = equipment_row_get_equipped_count;
+        g_menu_row_callbacks[6].value = equipment_row_get_item_count;
         g_shop_sell_list_initialized = 1;
     }
-    menu_set_vsync_mode_and_event_speed(2);
+    menu_set_event_speed(2);
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_shop_sell_list_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
         g_shop_menu_step = SHOP_STEP_MAIN_MENU;
     } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_menu_list_entry_count == 0) {
@@ -820,52 +822,52 @@ void shop_sell_list_update(void) {
         }
     }
     shop_switch_item_tab(g_menu_input_secondary_repeat);
-    menu_run_script_with_palette_mode(
+    menu_script_run_with_palette_mode(
         g_shop_sell_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    shop_gil_draw();
+    shop_draw_gil();
 }
 
 /* Item sell confirmation step: pays half price times the quantity, removes the
  * items, prompts 0xF811 and rebuilds the list (0xF80A when nothing to sell).
  */
-void shop_sell_confirm_update(void) {
+void shop_sell_update_confirm(void) {
     s32 result = 1;
 
     if (g_shop_sell_message_wait != 0) {
         if (g_menu_input_primary_repeat
             & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_DPAD_MASK)) {
             g_shop_sell_message_wait = 0;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80D, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80D, 0);
             g_shop_menu_step = SHOP_STEP_SELL_LIST;
             g_screen_prompt_active = 0;
         }
     } else {
-        result = sell_quantity_update();
+        result = update_sell_quantity();
     }
     if (result == 0) {
         if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 0) {
-            shop_gil_adjust(shop_item_half_price_get(g_item_list_entries[g_menu_list_selected_index])
+            shop_adjust_gil(shop_get_item_half_price(g_item_list_entries[g_menu_list_selected_index])
                 * g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY]);
-            item_inventory_count_adjust(g_item_list_entries[g_menu_list_selected_index],
+            item_adjust_inventory_count(g_item_list_entries[g_menu_list_selected_index],
                 -g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY]);
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
             item_rebuild_category_list(g_shop_item_category);
-            formation_item_list_build(0, g_shop_item_category + 1,
+            equipment_build_item_list(0, g_shop_item_category + 1,
                 g_shop_item_category != ITEM_MENU_TAB_OTHER ? g_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
                 g_item_list_entries, ITEM_LIST_MODE_ALL);
-            screen_list_init(g_item_list_entries, g_menu_list_selected_index,
+            menu_scrollable_list_open(g_item_list_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], (menu_instruction_t*)g_shop_sell_list_menu_script);
-            menu_set_window_scale_step(10);
+            menu_window_set_scale_step(10);
         } else {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80A, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80A, 0);
         }
     }
     if (result <= 0) {
         g_shop_sell_message_wait = 1;
     }
     shop_switch_item_tab(0);
-    menu_run_script_with_palette_mode(g_shop_sell_list_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
-    shop_gil_draw();
+    menu_script_run_with_palette_mode(g_shop_sell_list_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
+    shop_draw_gil();
 }
 
 /* Shop: the quantity prompt of a sale, capped by the inventory count.
@@ -876,19 +878,19 @@ void shop_sell_confirm_update(void) {
  * the confirmation child runs and the plain prompt (0xF80F) otherwise. The
  * final frame queues the transaction sound for "yes" and the confirm sound
  * for "no". */
-static s32 sell_quantity_update(void) {
+static s32 update_sell_quantity(void) {
     s32 count;
 
     if (g_shop_sell_result == 0) {
         g_shop_sell_confirm_shown = 0;
         g_shop_sell_item = g_item_list_entries[g_menu_list_selected_index];
         g_screen_prompt_active = 1;
-        count = item_inventory_count_adjust(g_shop_sell_item, 0);
+        count = item_adjust_inventory_count(g_shop_sell_item, 0);
         if (count == 0) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80E, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80E, 0);
             return -1;
         }
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80F, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80F, 0);
         g_shop_quantity_range.bounds.max = count;
         g_shop_sell_confirm_shown = 0;
         g_sound_suppressed = 1;
@@ -896,14 +898,14 @@ static s32 sell_quantity_update(void) {
     g_shop_sell_result = menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_quantity_menu_data);
     if (thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD) != 0 && g_shop_sell_confirm_shown == 0) {
         g_text_substitution_values[0]
-            = shop_item_half_price_get(g_shop_sell_item) * g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY];
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF810, 0);
+            = shop_get_item_half_price(g_shop_sell_item) * g_screen_selection_results[SCREEN_SELECTION_SHOP_QUANTITY];
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF810, 0);
         g_shop_sell_confirm_shown = 1;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD) == 0 && g_shop_sell_confirm_shown != 0) {
         g_shop_sell_confirm_shown = 0;
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80F, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80F, 0);
     }
     if (g_shop_sell_result == 0) {
         if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 0) {

@@ -15,17 +15,17 @@
 static s32 s_file_descriptor = -1;
 #endif
 
-static void bios_events_clear(void);
-static void hardware_events_clear(void);
+static void clear_bios_events(void);
+static void clear_hardware_events(void);
 
 /* Choose the memory card slot (0 or 1) that later card operations use. */
-void memcard_slot_set(s32 slot) {
+void memcard_set_slot(s32 slot) {
     g_memcard_slot = slot;
 }
 
 #if defined(FFT_WORLD) || defined(FFT_EVENT_CARD)
 /* The selected memory card slot, which picks the bu00: or bu10: device. */
-static s32 slot_get(void) {
+static s32 get_slot(void) {
     return g_memcard_slot;
 }
 #endif
@@ -37,15 +37,15 @@ void save_close_stub(void) {
 #endif
 
 /* Clear every pending BIOS and hardware card event before a card session starts. */
-void memcard_events_clear(void) {
-    bios_events_clear();
-    hardware_events_clear();
+void memcard_clear_events(void) {
+    clear_bios_events();
+    clear_hardware_events();
 }
 
 /* Test the four BIOS card events (done, error, timeout, new card) and return
  * the matching MEMCARD_RESULT_*, or MEMCARD_RESULT_PENDING when none has
  * fired. A result clears all four events. */
-memcard_result_e memcard_bios_event_poll(void) {
+memcard_result_e memcard_poll_bios_event(void) {
     memcard_result_e result = MEMCARD_RESULT_PENDING;
     if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE]) == 1)
         result = MEMCARD_RESULT_COMPLETE;
@@ -56,20 +56,20 @@ memcard_result_e memcard_bios_event_poll(void) {
     else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_NEW_CARD]) == 1)
         result = MEMCARD_RESULT_NEW_CARD;
     if (result != MEMCARD_RESULT_PENDING)
-        bios_events_clear();
+        clear_bios_events();
     return result;
 }
 
 /* Poll the BIOS card event until it reports a result. A poll that finds
  * nothing while bit 0 of _card_status is set ends the wait with
  * MEMCARD_RESULT_TIMEOUT. */
-memcard_result_e memcard_bios_event_wait(void) {
+memcard_result_e memcard_wait_bios_event(void) {
     memcard_result_e result;
     s32 ready;
 
     while (1) {
         ready = _card_status(g_memcard_slot) & 1;
-        result = memcard_bios_event_poll();
+        result = memcard_poll_bios_event();
         if (result >= MEMCARD_RESULT_COMPLETE)
             return result;
         if (ready != 0)
@@ -78,7 +78,7 @@ memcard_result_e memcard_bios_event_wait(void) {
 }
 
 /* Clear the four BIOS card events (done, error, timeout, new card) by testing each. */
-static void bios_events_clear(void) {
+static void clear_bios_events(void) {
     TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE]);
     TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_ERROR]);
     TestEvent(g_memcard_bios_events[MEMCARD_EVENT_BIOS_TIMEOUT]);
@@ -88,7 +88,7 @@ static void bios_events_clear(void) {
 /* Test the four hardware card events (done, error, timeout, new card) and return
  * the matching MEMCARD_RESULT_*, or MEMCARD_RESULT_PENDING when none has
  * fired. A result clears all four events. */
-static memcard_result_e hardware_event_poll(void) {
+static memcard_result_e poll_hardware_event(void) {
     memcard_result_e result = MEMCARD_RESULT_PENDING;
     if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_DONE]) == 1)
         result = MEMCARD_RESULT_COMPLETE;
@@ -99,20 +99,20 @@ static memcard_result_e hardware_event_poll(void) {
     else if (TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_NEW_CARD]) == 1)
         result = MEMCARD_RESULT_NEW_CARD;
     if (result != MEMCARD_RESULT_PENDING)
-        hardware_events_clear();
+        clear_hardware_events();
     return result;
 }
 
 /* Poll the hardware card event until it reports a result. A poll that finds
  * nothing while bit 0 of _card_status is set ends the wait with
  * MEMCARD_RESULT_TIMEOUT. Nothing in OPEN.BIN calls it. */
-static memcard_result_e hardware_event_wait(void) {
+static memcard_result_e wait_hardware_event(void) {
     memcard_result_e result;
     s32 ready;
 
     while (1) {
         ready = _card_status(g_memcard_slot) & 1;
-        result = hardware_event_poll();
+        result = poll_hardware_event();
         if (result >= MEMCARD_RESULT_COMPLETE)
             return result;
         if (ready != 0)
@@ -121,7 +121,7 @@ static memcard_result_e hardware_event_wait(void) {
 }
 
 /* Consume the four hardware-card event notifications in handle order. */
-static void hardware_events_clear(void) {
+static void clear_hardware_events(void) {
     TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_DONE]);
     TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_ERROR]);
     TestEvent(g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_TIMEOUT]);
@@ -138,7 +138,7 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
-            result = memcard_bios_event_wait();
+            result = memcard_wait_bios_event();
             if (result == MEMCARD_RESULT_COMPLETE)
                 break;
         } else {
@@ -151,13 +151,13 @@ memcard_result_e memcard_info_retry(s32 port, s32 retry_limit) {
 /* Run _card_load on `port` until the BIOS event reports completion, trying
  * up to `retry_limit` times two frames apart. Returns the last result (a
  * rejected call counts as a timeout). */
-static memcard_result_e card_load_retry(s32 port, s32 retry_limit) {
+static memcard_result_e load_card_retry(s32 port, s32 retry_limit) {
     s32 i;
     memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_load(port) == 1) {
-            result = memcard_bios_event_wait();
+            result = memcard_wait_bios_event();
             if (result == MEMCARD_RESULT_COMPLETE)
                 break;
         } else {
@@ -172,18 +172,18 @@ static memcard_result_e card_load_retry(s32 port, s32 retry_limit) {
  * `retry_limit` times. Returns MEMCARD_RESULT_COMPLETE once the hardware
  * event or a follow-up info request reports completion, otherwise the last
  * failure (a rejected call counts as a timeout). */
-static memcard_result_e new_card_clear_retry(s32 port, s32 retry_limit) {
+static memcard_result_e clear_new_card_retry(s32 port, s32 retry_limit) {
     s32 i;
     memcard_result_e result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_clear(port) == 1) {
-            result = hardware_event_wait();
+            result = wait_hardware_event();
             if (result >= MEMCARD_RESULT_NEW_CARD)
                 result = MEMCARD_RESULT_ERROR;
             if (result == MEMCARD_RESULT_COMPLETE)
                 break;
-            if (memcard_operation_wait(1) == MEMCARD_RESULT_COMPLETE) {
+            if (memcard_wait_operation(1) == MEMCARD_RESULT_COMPLETE) {
                 result = MEMCARD_RESULT_COMPLETE;
                 break;
             }
@@ -200,7 +200,7 @@ static memcard_result_e new_card_clear_retry(s32 port, s32 retry_limit) {
  * other than "complete" is checked again with a retried info request, and an
  * error is reported as a timeout. The opening's own body reissues the request
  * instead of timing out. */
-memcard_result_e memcard_operation_poll(void) {
+memcard_result_e memcard_poll_operation(void) {
     s32 status;
     memcard_result_e result;
 
@@ -210,7 +210,7 @@ memcard_result_e memcard_operation_poll(void) {
     }
 
     status = _card_status(g_memcard_slot) & 1;
-    result = memcard_bios_event_poll();
+    result = memcard_poll_bios_event();
     if (status != 0 && result == MEMCARD_RESULT_PENDING) {
         result = MEMCARD_RESULT_TIMEOUT;
     }
@@ -228,13 +228,13 @@ memcard_result_e memcard_operation_poll(void) {
 
 /* Run the card status poll to a result, repeating it up to `retry_limit`
  * times until it reports completion. Returns the last result. */
-memcard_result_e memcard_operation_wait(s32 retry_limit) {
+memcard_result_e memcard_wait_operation(s32 retry_limit) {
     memcard_result_e result;
     s32 i = 0;
 
     while (i < retry_limit) {
         do {
-            result = memcard_operation_poll();
+            result = memcard_poll_operation();
         } while (result == MEMCARD_RESULT_PENDING);
         if (result == MEMCARD_RESULT_COMPLETE)
             break;
@@ -245,7 +245,7 @@ memcard_result_e memcard_operation_wait(s32 retry_limit) {
 
 /* Count the files of the selected slot into `entries`: the game's saves, or
  * every file when `all_files` is set. */
-s32 memcard_saves_enumerate(DIRENTRY* entries, s32 all_files) {
+s32 memcard_enumerate_saves(DIRENTRY* entries, s32 all_files) {
     s32 count;
     char path[128];
 
@@ -273,7 +273,7 @@ s32 memcard_saves_enumerate(DIRENTRY* entries, s32 all_files) {
 
 /* Free blocks on a 15-block card given its directory: each file takes its
  * size rounded up to 8192-byte blocks. */
-s32 memcard_free_blocks_count(const DIRENTRY* entries, s32 entry_count) {
+s32 memcard_count_free_blocks(const DIRENTRY* entries, s32 entry_count) {
     s32 i;
     s32 used_blocks = 0;
 
@@ -293,16 +293,16 @@ s32 memcard_free_blocks_count(const DIRENTRY* entries, s32 entry_count) {
  * Returns MEMCARD_RESULT_COMPLETE,
  * MEMCARD_RESULT_NEW_CARD (the load still reports a new, unformatted card)
  * or MEMCARD_RESULT_TIMEOUT for any failure. */
-memcard_result_e memcard_slot_open(void) {
-    memcard_result_e result = memcard_operation_wait(10);
+memcard_result_e memcard_open_slot(void) {
+    memcard_result_e result = memcard_wait_operation(10);
 
     if (result == MEMCARD_RESULT_NEW_CARD) {
-        result = new_card_clear_retry(g_memcard_slot << 4, 10);
+        result = clear_new_card_retry(g_memcard_slot << 4, 10);
         if (result != MEMCARD_RESULT_COMPLETE)
             return MEMCARD_RESULT_TIMEOUT;
     }
     if (result == MEMCARD_RESULT_COMPLETE)
-        result = card_load_retry(g_memcard_slot << 4, 30);
+        result = load_card_retry(g_memcard_slot << 4, 30);
     if (result == MEMCARD_RESULT_NEW_CARD)
         return MEMCARD_RESULT_NEW_CARD;
     if (result != MEMCARD_RESULT_COMPLETE)
@@ -312,11 +312,11 @@ memcard_result_e memcard_slot_open(void) {
 
 /* Format the selected memory card, calling format() three times, and return
  * the last call's result; 0 when the card is not ready. */
-s32 memcard_slot_format(void) {
+s32 memcard_format_slot(void) {
     s32 result;
     char path[8];
 
-    result = memcard_operation_wait(10);
+    result = memcard_wait_operation(10);
     if (result > MEMCARD_RESULT_COMPLETE)
         return 0;
     if (g_memcard_slot == 0)
@@ -347,7 +347,7 @@ s32 memcard_file_open_retry(const char* filename, s32 mode) {
         }
     }
 
-    if (slot_get() == 0) {
+    if (get_slot() == 0) {
         strcpy(path, "bu00:");
     } else {
         strcpy(path, "bu10:");
@@ -355,7 +355,7 @@ s32 memcard_file_open_retry(const char* filename, s32 mode) {
     strcat(path, filename);
 
     while (i < 40) {
-        result = memcard_operation_wait(10);
+        result = memcard_wait_operation(10);
         if (result != MEMCARD_RESULT_COMPLETE) {
             return -2;
         }
@@ -377,7 +377,7 @@ s32 memcard_file_close_retry(s32 descriptor) {
     s32 close_result;
 
     for (i = 0; i < 10; i++) {
-        wait_success = memcard_operation_wait(10) == MEMCARD_RESULT_COMPLETE;
+        wait_success = memcard_wait_operation(10) == MEMCARD_RESULT_COMPLETE;
         close_result = close(descriptor);
         if (close_result == descriptor) {
             break;
@@ -398,7 +398,7 @@ s32 memcard_file_seek_retry(s32 descriptor, s32 offset, s32 origin) {
     s32 result;
 
     for (i = 0; i < 10; i++) {
-        if (memcard_operation_wait(10) != MEMCARD_RESULT_COMPLETE)
+        if (memcard_wait_operation(10) != MEMCARD_RESULT_COMPLETE)
             return -1;
         result = lseek(descriptor, offset, origin);
         if (result != -1)
@@ -415,7 +415,7 @@ s32 memcard_file_seek_retry(s32 descriptor, s32 offset, s32 origin) {
  * mode 2 opens for writing. Each attempt seeks by the bytes written so far from the current
  * position (origin 1) rather than to them, so after a short write the next attempt would skip
  * ahead (retail; a whole save normally goes in one write). */
-s32 save_file_write(const char* filename, const save_image_t* source, u32 size, s32 create_file) {
+s32 save_write_file(const char* filename, const save_image_t* source, u32 size, s32 create_file) {
     s32 error;
     s32 result;
     s32 retries;
@@ -495,7 +495,7 @@ s32 memcard_file_delete_retry(const char* filename) {
     strcat(path, filename);
 
     for (i = 0; i < 10; i++) {
-        if (memcard_operation_wait(10) != MEMCARD_RESULT_COMPLETE) {
+        if (memcard_wait_operation(10) != MEMCARD_RESULT_COMPLETE) {
             return 0;
         }
         result = erase(path);
@@ -510,8 +510,8 @@ s32 memcard_file_delete_retry(const char* filename) {
 /* Read a card file in up to 40 attempts. A failed seek stops the read;
  * partial reads and -1 results allow another attempt. A successful close
  * returns the bytes read. The seek has the same relative-offset quirk as
- * save_file_write. */
-s32 save_file_read(const char* filename, u8* destination, u32 size) {
+ * save_write_file. */
+s32 save_read_file(const char* filename, u8* destination, u32 size) {
     u32 total;
     s32 result = memcard_file_open_retry(filename, 1);
     s32 i;

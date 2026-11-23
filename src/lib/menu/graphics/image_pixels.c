@@ -34,7 +34,7 @@ static
 #ifdef FFT_WORLD
     inline
 #endif
-    s32 gfx_read_packed_nibble(const u8* pixels, s32 x, s32 y, s32 stride) {
+    s32 packed_nibble_read(const u8* pixels, s32 x, s32 y, s32 stride) {
     s32 mask;
     s32 value;
 
@@ -58,7 +58,7 @@ static
 #ifdef FFT_WORLD
     inline
 #endif
-    void gfx_write_packed_nibble(u8* pixels, s32 x, s32 y, s32 stride, s32 value) {
+    void packed_nibble_write(u8* pixels, s32 x, s32 y, s32 stride, s32 value) {
     s32 mask;
     u8* byte;
 
@@ -100,12 +100,12 @@ void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect) {
 
     for (row = 0; row < rect->rect.h; row++) {
         for (col = 0; col < rect->rect.w / 2; col++) {
-            left_value = gfx_read_packed_nibble(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride);
+            left_value = packed_nibble_read(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride);
             offset = 1;
-            right_value = gfx_read_packed_nibble(
+            right_value = packed_nibble_read(
                 pixels, rect->rect.x + rect->rect.w - (col + offset), rect->rect.y + row, rect->stride);
-            gfx_write_packed_nibble(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride, right_value);
-            gfx_write_packed_nibble(
+            packed_nibble_write(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride, right_value);
+            packed_nibble_write(
                 pixels, rect->rect.x + rect->rect.w - (col + offset), rect->rect.y + row, rect->stride, left_value);
         }
     }
@@ -125,11 +125,11 @@ void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect) {
         if (col < rect->rect.w / 2) {
             right = 1;
             do {
-                left_value = gfx_read_packed_nibble(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride);
-                right_value = gfx_read_packed_nibble(
-                    pixels, rect->rect.x + rect->rect.w - right, rect->rect.y + row, rect->stride);
-                gfx_write_packed_nibble(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride, right_value);
-                gfx_write_packed_nibble(
+                left_value = packed_nibble_read(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride);
+                right_value
+                    = packed_nibble_read(pixels, rect->rect.x + rect->rect.w - right, rect->rect.y + row, rect->stride);
+                packed_nibble_write(pixels, rect->rect.x + col, rect->rect.y + row, rect->stride, right_value);
+                packed_nibble_write(
                     pixels, rect->rect.x + rect->rect.w - right, rect->rect.y + row, rect->stride, left_value);
                 right++;
                 col++;

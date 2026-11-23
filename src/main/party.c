@@ -25,9 +25,9 @@ typedef char unit_generation_base_data_size_must_be_12[(sizeof(unit_generation_b
 
 extern unit_generation_base_data_t g_unit_generation_base_data[UNIT_TYPE_COUNT];
 extern u8 g_unit_generation_raw_stat_variance[UNIT_TYPE_COUNT][UNIT_RAW_STAT_COUNT];
-static void base_stats_generate(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type);
-static void party_record_generate(party_unit_t* party, unit_generation_type_e unit_type);
-static void party_base_stats_generate(party_unit_t* party, unit_generation_type_e unit_type);
+static void generate_base_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type);
+static void generate_record(party_unit_t* party, unit_generation_type_e unit_type);
+static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type);
 
 /* Uncalled empty routine (jr ra; nop in the original) preceding party_clear. */
 void party_noop_1(void) {
@@ -52,7 +52,7 @@ party_unit_t* party_unit_get(s32 party_index) {
 /* Build a battle unit from one ENTD unit slot on the stack and save it into the
  * party roster. Returns -2 for an empty ENTD slot, otherwise
  * party_unit_save's result (0, or -1 when the roster is full). */
-s32 party_encounter_unit_save(const entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text) {
+s32 party_save_encounter_unit(const entd_encounter_t* entd, s32 unit_id, s32 allow_guest, s32 use_world_text) {
     const entd_unit_t* entd_unit = &entd->units[unit_id];
 
     g_encounter_current_unit = entd_unit;
@@ -60,15 +60,15 @@ s32 party_encounter_unit_save(const entd_encounter_t* entd, s32 unit_id, s32 all
         return -2;
     }
     {
-        unit_stats_t unit;
-        unit_stats_t* unit_data = &unit;
+        battle_unit_t unit;
+        battle_unit_t* unit_data = &unit;
 
-        unit_data->battle_id = 0xff;
+        unit_data->battle_unit_id = 0xff;
         /* Placeholder for this temporary roster-conversion record. */
-        unit_data->active_battle_id = 0x20;
+        unit_data->active_battle_unit_id = 0x20;
         unit_data->existence = UNIT_EXISTENCE_ACTIVE;
         unit_data->formation_index = UNIT_FORMATION_INDEX_NONE;
-        unit_encounter_init(unit_data, entd_unit, use_world_text, UNIT_ENTD_INIT_NEW);
+        battle_unit_init_from_encounter(unit_data, entd_unit, use_world_text, UNIT_ENTD_INIT_NEW);
         return party_unit_save(unit_data, allow_guest);
     }
 }
@@ -82,7 +82,7 @@ s32 party_encounter_unit_save(const entd_encounter_t* entd, s32 unit_id, s32 all
  * UNIT_FLAG_SAVE_FORMATION. A guest record keeps the unit's palette; an
  * ordinary one gets palette 0 and drops the save-formation flag.
  */
-s32 party_unit_save(const unit_stats_t* unit, s32 allow_guest) {
+s32 party_unit_save(const battle_unit_t* unit, s32 allow_guest) {
     party_unit_t* party;
     s32 slot;
     s32 index;
@@ -101,20 +101,20 @@ s32 party_unit_save(const unit_stats_t* unit, s32 allow_guest) {
     if (kind == 0 && index >= PARTY_GUEST_SLOT_FIRST && index < PARTY_ROSTER_SLOT_COUNT) {
         /* A non-guest save of a unit that currently sits in a guest slot. */
         party_unit_remove(index);
-        index = party_free_slot_find(0, &palette);
+        index = party_find_free_slot(0, &palette);
         if (index == -1) {
             return -1;
         }
         slot = index;
-    } else if (unit_slot >= UNIT_SLOT_COUNT) {
+    } else if (unit_slot >= BATTLE_UNIT_SLOT_COUNT) {
         /* GCC cross-jumps this search into the identical one above. */
-        index = party_free_slot_find(kind, &palette);
+        index = party_find_free_slot(kind, &palette);
         if (index == -1) {
             return -1;
         }
         slot = index;
     } else {
-        party_free_slot_find(0, &palette);
+        party_find_free_slot(0, &palette);
         slot = unit_slot;
     }
 
@@ -153,7 +153,7 @@ s32 party_unit_save(const unit_stats_t* unit, s32 allow_guest) {
  *
  * A nonzero save_formation searches the four guest slots (16..19), zero the
  * sixteen ordinary slots. *palette is always set to 0. */
-s32 party_free_slot_find(s32 save_formation, u8* palette) {
+s32 party_find_free_slot(s32 save_formation, u8* palette) {
     party_unit_t* party_units[PARTY_ROSTER_SLOT_COUNT];
     s32 party_index;
     s32 start_index;
@@ -188,7 +188,7 @@ s32 party_free_slot_find(s32 save_formation, u8* palette) {
  * egg_modifier is stored as the unit's birthday (values from 0x16e up become 1)
  * and the zodiac sign is derived from it; the breeding code passes the same value
  * in both nibbles. */
-s32 party_monster_egg_create(s32 monster_job, s32 egg_modifier, s32 egg_color) {
+s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
     s32 party_index = party_unit_generate(UNIT_TYPE_MONSTER);
     party_unit_t* party;
     u16 birthday;
@@ -205,7 +205,7 @@ s32 party_monster_egg_create(s32 monster_job, s32 egg_modifier, s32 egg_color) {
     if (birthday >= 0x16e) {
         birthday = 1;
     }
-    zodiac = zodiac_sign_calculate(birthday);
+    zodiac = zodiac_calculate_sign(birthday);
     party->birthday_day = birthday;
     party->zodiac = ((birthday & 0x100) >> 8) + (zodiac << 4);
     return party_index;
@@ -227,7 +227,7 @@ s32 party_unit_generate(unit_generation_type_e unit_type) {
         if (party_units[party_index]->party_id == PARTY_ID_NONE) {
             party_units[party_index]->party_id = party_index;
             party_units[party_index]->palette = palette;
-            party_record_generate(party_units[party_index], unit_type);
+            generate_record(party_units[party_index], unit_type);
             return party_index;
         }
     }
@@ -236,7 +236,7 @@ s32 party_unit_generate(unit_generation_type_e unit_type) {
 }
 
 /* Return the first occupied roster slot whose sprite set matches, or -1. */
-s32 party_sprite_slot_find(s32 sprite_set) {
+s32 party_find_slot_by_sprite_set(s32 sprite_set) {
     s32 party_index = 0;
     s32 empty_party_id = PARTY_ID_NONE;
     party_unit_t* party = g_party_units;
@@ -264,7 +264,7 @@ void party_unit_remove(u32 index) {
  * cannot take (Bard, Dancer). The name is drawn until no party member of the
  * same kind has it; the roll rand() * 255 / 0x8000 gives 0..254, so name
  * index 255 is never drawn. */
-static void party_record_generate(party_unit_t* party, unit_generation_type_e unit_type) {
+static void generate_record(party_unit_t* party, unit_generation_type_e unit_type) {
     s32 name_flags;
     unit_name_id_t name_base;
     unit_name_id_t name_id;
@@ -312,7 +312,7 @@ static void party_record_generate(party_unit_t* party, unit_generation_type_e un
     }
 
     birthday = (rand() * 365) / 0x8000 + 1;
-    zodiac = zodiac_sign_calculate(birthday) << PARTY_ZODIAC_SHIFT;
+    zodiac = zodiac_calculate_sign(birthday) << PARTY_ZODIAC_SHIFT;
     party->birthday_day = birthday;
     party->zodiac = ((birthday & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) + zodiac;
 
@@ -325,7 +325,7 @@ static void party_record_generate(party_unit_t* party, unit_generation_type_e un
     }
 
     mem_zero(&party->secondary_skillset, 7);
-    party_base_stats_generate(party, unit_type);
+    generate_record_raw_stats(party, unit_type);
     party->level = 1;
     party->experience = 0;
     mem_zero(&party->career, sizeof(party->career));
@@ -397,13 +397,13 @@ static void party_record_generate(party_unit_t* party, unit_generation_type_e un
 }
 
 /* The target leaves a1 intact while advancing a0 to the raw-stat field. */
-static void party_base_stats_generate(party_unit_t* party, unit_generation_type_e unit_type) {
-    base_stats_generate(party->raw_stats, unit_type);
+static void generate_record_raw_stats(party_unit_t* party, unit_generation_type_e unit_type) {
+    generate_base_stats(party->raw_stats, unit_type);
 }
 
 /* Roll the unit's raw stats by its sex flags; a unit with neither flag is rolled
  * as a monster. */
-void unit_raw_stats_generate(unit_stats_t* unit) {
+void battle_unit_generate_raw_stats(battle_unit_t* unit) {
     unit_generation_type_e unit_type;
 
     if ((unit->unit_flags & UNIT_FLAG_MALE) != 0) {
@@ -413,11 +413,11 @@ void unit_raw_stats_generate(unit_stats_t* unit) {
     } else {
         unit_type = UNIT_TYPE_MONSTER;
     }
-    base_stats_generate(unit->raw_stats, unit_type);
+    generate_base_stats(unit->raw_stats, unit_type);
 }
 
 /* Roll the five little-endian 24-bit raw stats for the selected unit type. */
-static void base_stats_generate(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type) {
+static void generate_base_stats(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], unit_generation_type_e unit_type) {
     /* Without the pin, type_index, index and base rotate among $s2/$s3/$s4. */
     register s32 type_index __asm__("$20") = unit_type;
     s32 index = 0;
@@ -439,7 +439,7 @@ static void base_stats_generate(unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], 
 }
 
 /* Copy the current job's growth and multiplier pairs for HP, MP, Speed, PA and MA into the unit. */
-void unit_job_growths_copy(unit_stats_t* unit) {
+void battle_unit_copy_job_growths(battle_unit_t* unit) {
     mem_copy_byte_data_source_first(
         g_job_data_pointer[unit->job_id].stat_growths, unit->stat_growths, sizeof(unit->stat_growths));
 }

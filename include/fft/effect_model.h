@@ -75,9 +75,9 @@ typedef struct effect_reflect_buffer {
     POLY_GT3 prims[2][24];
 } effect_reflect_buffer_t;
 
-s32 effect_model_sections_init(const psyq_tmd_header_t* resource, s32 unused_1);
-void effect_model_command_decode(effect_decoded_model_command_t* out);
+s32 effect_model_init_sections(const psyq_tmd_header_t* resource, s32 unused_1);
+void effect_model_decode_command(effect_decoded_model_command_t* out);
 void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter);
-void effect_thrown_item_sprite_draw(VECTOR* origin, s32 item_id, s32 angle);
+void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle);
 
 #endif

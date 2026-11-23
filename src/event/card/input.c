@@ -25,7 +25,7 @@ extern u16 g_save_input_previous;
  * periods are divided by the event speed. Counter slots 4..11 are skipped;
  * those buttons use only the newly pressed mask.
  */
-static void save_input_update_controller(void) {
+static void update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -114,8 +114,8 @@ static void save_input_update_controller(void) {
 /* Read the controller, then drop this frame's presses and repeats while a screen fade is in
  * progress. */
 void save_update_input(void) {
-    save_input_update_controller();
-    if (gfx_get_fade_state() != 0) {
+    update_controller();
+    if (screen_get_fade_state() != 0) {
         g_menu_input_newly_pressed = 0;
         g_menu_input_primary_repeat = 0;
         g_menu_input_secondary_repeat = 0;

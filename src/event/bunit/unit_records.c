@@ -4,13 +4,13 @@
 #include "fft/at_list.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/menu_sort.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/unit.h"
 #include "fft/unit_list.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -25,7 +25,7 @@ static unit_list_record_t s_unit_list_records[21] = { 0 };
 /* Returns 1 while the unit list is scrolling, or when the selected unit lies
  * outside the three rows of four shown at the current page offset, so that
  * the list has to scroll. */
-s32 unit_list_is_scroll_needed(void) {
+s32 unit_grid_check_scroll(void) {
     s32 ret = 0;
 
     if (g_unit_list_scroll_step == 0) {
@@ -58,7 +58,7 @@ s32 unit_list_is_scroll_needed(void) {
  * the two hand slots is occupied, its item is below the throwable range, and
  * the weapon either forces two hands or allows them while `two_hands_support`
  * (the Two Hands support ability) is set. */
-s32 unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
+s32 equipment_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
     s32 result = 0;
     s32 item_id = 0;
 
@@ -95,14 +95,14 @@ s32 job_is_special_monster(s32 job_id) {
 
 /* Build a Unit List record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
- * only when skillset_monster_count_supporters passes) or the equipment and
+ * only when skillset_count_monster_supporters passes) or the equipment and
  * ability slots, and copies the job and ability tables with JP capped at 9999.
  *
  * `count` indexes the output
  * slot so loop.c strength-reduces it into the record pointer; with an explicit
  * pointer walk the smaller loop lets loop.c hoist the constant 3 into $s6. The
  * caller also passes its shown-list slot, which is not read. */
-static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t* record, s32 unused_slot) {
+static void build_record(const battle_unit_t* unit, unit_list_record_t* record, s32 unused_slot) {
     s16* abilities;
     s32 count;
     s32 i;
@@ -135,7 +135,7 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     record->list_index = list_index;
 
     record->experience = unit->experience < UNIT_LEVEL_UP_EXPERIENCE ? unit->experience : UNIT_LEVEL_EXPERIENCE_MAX;
-    record->active_battle_id = unit->active_battle_id;
+    record->active_battle_unit_id = unit->active_battle_unit_id;
     record->gauges[MENU_UNIT_STATUS_GAUGE_HP].value = unit->hp <= UNIT_HP_MP_MAX ? unit->hp : UNIT_HP_MP_MAX;
     record->gauges[MENU_UNIT_STATUS_GAUGE_HP].max = unit->max_hp <= UNIT_HP_MP_MAX ? unit->max_hp : UNIT_HP_MP_MAX;
     record->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->mp <= UNIT_HP_MP_MAX ? unit->mp : UNIT_HP_MP_MAX;
@@ -153,13 +153,13 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     record->gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
 
     record->formation_index = unit->formation_index;
-    /* The active battle slot also serves as the record's name index and battle id. */
-    record->name_index = unit->active_battle_id;
+    /* The active battle slot also serves as the record's name index and battle unit id. */
+    record->name_index = unit->active_battle_unit_id;
     record->job_id = unit->job_id;
     record->brave = unit->brave;
     record->faith = unit->faith;
     record->zodiac = unit->birthday.zodiac;
-    record->battle_id = unit->active_battle_id;
+    record->battle_unit_id = unit->active_battle_unit_id;
 
     record->move = unit->move;
     record->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -192,13 +192,13 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
     record->magical_accessory_evade = unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
     if (record->uses_monster_skillset != 0) {
-        abilities = (s16*)ability_skillset_list_build(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
+        abilities = (s16*)ability_build_skillset_list(unit->primary_skillset, SKILLSET_ABILITY_FILTER_ACTION);
         count = 0;
         for (i = 0; i < 4; i++) {
             found = 0;
             if (i == 3) {
                 if (abilities[3] != 0) {
-                    found = skillset_monster_count_supporters(unit) != 0;
+                    found = skillset_count_monster_supporters(unit) != 0;
                 }
             } else if (abilities[i] != 0) {
                 found = 1;
@@ -231,18 +231,18 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
         record->abilities[4] = unit->abilities.movement;
     }
 
-    record->runtime_id = unit_battle_runtime_id_get(unit->active_battle_id);
+    record->map_unit_id = map_unit_get_id_by_battle_unit_id(unit->active_battle_unit_id);
     record->initial_team_flags = unit->initial_team_flags;
     record->mount_info = unit->mount_info;
-    record->two_handed
-        = unit_is_two_handing_weapon(record->equipment, unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
+    record->two_handed = equipment_is_two_handing_weapon(
+        record->equipment, unit->ability_flags.support[2] & UNIT_SUPPORT_SET_3_TWO_HANDS);
     record->gender_flags = unit->unit_flags;
     record->character_identity = unit->character_identity;
 
     if (job_is_special_monster(unit->job_id) != 0 || record->uses_monster_skillset != 0 || record->team_kind == 1) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
-        i = job_unlocks_calculate(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
+        i = job_calculate_unlocks(unit->career.job_levels, unit->unit_flags & UNIT_FLAG_MALE);
         /* The 24-bit unlocked-job mask is stored high byte first. */
         record->unlocked_jobs[0] = i >> 16;
         record->unlocked_jobs[1] = i >> 8;
@@ -271,15 +271,15 @@ static void unit_list_build_record(const unit_stats_t* unit, unit_list_record_t*
  * argument slots, which this body never reads. The third argument is forwarded
  * to unit_list_sort, which also ignores it; retain the original call sequence. */
 s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32 sort_mode) {
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 i;
     s32 shown = 0;
     s32 total = 0;
 
     /* Keep status-byte reads separate; GCC otherwise merges the two tests into one 16-bit load. */
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = unit_stats_get(i);
-        if ((unit != 0) && (unit->active_battle_id != UNIT_ACTIVE_BATTLE_ID_NONE)) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = battle_unit_get(i);
+        if ((unit != 0) && (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)) {
             if (unit->unit_flags & UNIT_FLAG_EGG) {
                 total++;
             } else if (!(*&unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
@@ -287,7 +287,7 @@ s32 unit_list_build_records(s32 unused, unit_list_record_t** unused_records, s32
                 && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                     & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
                 total++;
-                unit_list_build_record(unit, &s_unit_list_records[shown], shown);
+                build_record(unit, &s_unit_list_records[shown], shown);
                 s_unit_list_shown_unit_indices[shown] = shown;
                 shown++;
             }
@@ -369,10 +369,10 @@ void unit_list_store_sort_order(s32 unused, const s16* entries) {
     }
 }
 
-/* Find the Unit List record with a battle id, or return the active record count.
+/* Find the Unit List record with a battle unit id, or return the active record count.
  *
  * The not-found result doubles as the next/end index for both known callers. */
-s32 unit_list_find_by_battle_id(s16 battle_id) {
+s32 unit_list_find_by_battle_unit_id(s16 battle_unit_id) {
     s32 stack_scratch[2]; /* Unused; the target keeps an 8-byte leaf frame. */
     s32 count;
     s32 i;
@@ -382,10 +382,10 @@ s32 unit_list_find_by_battle_id(s16 battle_id) {
     count = s_unit_list_count;
     i = 0;
     if (count > 0) {
-        search_value = battle_id;
+        search_value = battle_unit_id;
         units = g_unit_list_pointers;
         do {
-            if ((*units)->battle_id == search_value) {
+            if ((*units)->battle_unit_id == search_value) {
                 return i;
             }
             i++;

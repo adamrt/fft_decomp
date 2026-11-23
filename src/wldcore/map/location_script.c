@@ -46,9 +46,9 @@ static void location_script_opcode_28_check_ramza_faith_at_most(void);
  * with the args/data accesses instead of the target's absolute addresses. */
 static s32 s_location_script_flags;
 
-static void operand_pair_read(s32* out1, s32* out2);
-static void operand_dates_read(s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
-static s32 ramza_slot_find(void);
+static void read_operand_pair(s32* out1, s32* out2);
+static void read_operand_dates(s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
+static s32 find_ramza_slot(void);
 
 /* Opcode-indexed dispatch, defined after its handlers below. */
 static void (*s_location_script_opcodes[41])(void);
@@ -112,14 +112,14 @@ static void location_script_opcode_01_check_var_equal(void) {
     s32 variable_id;
     s32 value;
 
-    operand_pair_read(&variable_id, &value);
+    read_operand_pair(&variable_id, &value);
     if (script_variable_get(variable_id) != value) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
 
 /* Read the next two 16-bit map script operands and step past them. */
-static void operand_pair_read(s32* out1, s32* out2) {
+static void read_operand_pair(s32* out1, s32* out2) {
     u16* ip = &g_location_script_state.ip;
     u16 next_ip;
 
@@ -135,7 +135,7 @@ static void location_script_opcode_02_check_var_at_least(void) {
     s32 variable_id;
     s32 value;
 
-    operand_pair_read(&variable_id, &value);
+    read_operand_pair(&variable_id, &value);
     if (script_variable_get(variable_id) < value) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
@@ -146,7 +146,7 @@ static void location_script_opcode_03_check_var_at_most(void) {
     s32 variable_id;
     s32 value;
 
-    operand_pair_read(&variable_id, &value);
+    read_operand_pair(&variable_id, &value);
     if (script_variable_get(variable_id) > value) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
@@ -166,7 +166,7 @@ static void location_script_opcode_04_check_roster_has_character(void) {
     character_identity = g_location_script_state.data[ip];
     *ipp = ip + 1;
     for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-        unit = party_roster_unit_get(i);
+        unit = party_get_roster_unit(i);
         if (unit->party_id != PARTY_ID_NONE) {
             if (unit->sprite_set == character_identity) {
                 break;
@@ -216,15 +216,15 @@ static void location_script_opcode_0f_check_war_funds_at_most(void) {
 static void location_script_opcode_10_check_date_on_or_after(void) {
     s32 month, day, current_month, current_day;
 
-    operand_dates_read(&month, &day, &current_month, &current_day);
+    read_operand_dates(&month, &day, &current_month, &current_day);
     if ((current_month < month) || ((current_month == month) && (current_day < day))) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
 }
 
 /* Read a month and day operand pair from the map script, as
- * operand_pair_read does, along with the current month and day. */
-static void operand_dates_read(s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day) {
+ * read_operand_pair does, along with the current month and day. */
+static void read_operand_dates(s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day) {
     u16* ipp;
     u16 ip;
 
@@ -242,7 +242,7 @@ static void operand_dates_read(s32* out_month, s32* out_day, s32* out_current_mo
 static void location_script_opcode_11_check_date_on_or_before(void) {
     s32 month, day, current_month, current_day;
 
-    operand_dates_read(&month, &day, &current_month, &current_day);
+    read_operand_dates(&month, &day, &current_month, &current_day);
     if ((current_month > month) || ((current_month == month) && (current_day > day))) {
         g_location_script_state.flags |= LOCATION_SCRIPT_RESULT_CONDITION_FAILED;
     }
@@ -298,7 +298,7 @@ static void location_script_opcode_1c_set_var(void) {
     s32 variable_id;
     s32 value;
 
-    operand_pair_read(&variable_id, &value);
+    read_operand_pair(&variable_id, &value);
     script_variable_set(variable_id, value);
 }
 
@@ -398,7 +398,7 @@ static void location_script_opcode_24_focus_location(void) {
 
 /* Reject the MCBrave>= condition when Ramza's Brave is below the operand. */
 static void location_script_opcode_25_check_ramza_brave_at_least(void) {
-    party_unit_t* party = party_roster_unit_get(ramza_slot_find());
+    party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
     s32 val;
 
@@ -414,10 +414,10 @@ static void location_script_opcode_25_check_ramza_brave_at_least(void) {
  * PARTY_MEMBER_SLOT_COUNT when none does. Callers use the result unchecked, so
  * without Ramza the MCBrave and MCFaith checks read roster slot 16, the first
  * guest slot, instead of failing (retail quirk). */
-static s32 ramza_slot_find(void) {
+static s32 find_ramza_slot(void) {
     s32 i;
     for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
-        party_unit_t* party = party_roster_unit_get(i);
+        party_unit_t* party = party_get_roster_unit(i);
         if (party->party_id != PARTY_ID_NONE && party->sprite_set != CHARACTER_IDENTITY_ENTD_NONE
             && party->sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
             return i;
@@ -428,7 +428,7 @@ static s32 ramza_slot_find(void) {
 
 /* Reject the MCBrave<= condition when Ramza's Brave is above the operand. */
 static void location_script_opcode_26_check_ramza_brave_at_most(void) {
-    party_unit_t* party = party_roster_unit_get(ramza_slot_find());
+    party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
     s32 val;
 
@@ -442,7 +442,7 @@ static void location_script_opcode_26_check_ramza_brave_at_most(void) {
 
 /* Reject the MCFaith>= condition when Ramza's Faith is below the operand. */
 static void location_script_opcode_27_check_ramza_faith_at_least(void) {
-    party_unit_t* party = party_roster_unit_get(ramza_slot_find());
+    party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
     s32 val;
 
@@ -456,7 +456,7 @@ static void location_script_opcode_27_check_ramza_faith_at_least(void) {
 
 /* Reject the MCFaith<= condition when Ramza's Faith is above the operand. */
 static void location_script_opcode_28_check_ramza_faith_at_most(void) {
-    party_unit_t* party = party_roster_unit_get(ramza_slot_find());
+    party_unit_t* party = party_get_roster_unit(find_ramza_slot());
     u16 ip;
     s32 val;
 

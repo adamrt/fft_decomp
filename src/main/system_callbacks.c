@@ -36,17 +36,17 @@ void system_vsync_callback(void) {
     g_system_wait_frames++;
 }
 
-/* Empty DrawSync callback, installed by boot_startup_run. */
+/* Empty DrawSync callback, installed by boot_run_startup. */
 void system_draw_sync_callback(void) {
 }
 
-/* Empty CdReadyCallback handler, installed by boot_startup_run; the CdInit
- * that cd_memory_init runs right after replaces it, so it never
+/* Empty CdReadyCallback handler, installed by boot_run_startup; the CdInit
+ * that init_memory_and_cd runs right after replaces it, so it never
  * runs. */
 void file_cd_ready_callback(u8 event, u8* result) {
 }
 
-/* Empty CdReadCallback handler, installed by boot_startup_run and replaced
+/* Empty CdReadCallback handler, installed by boot_run_startup and replaced
  * by CdInit right after, like the ready callback. */
 void file_cd_read_callback(u8 event, u8* result) {
 }

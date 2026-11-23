@@ -5,6 +5,7 @@
 #include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
+#include "fft/input.h"
 #include "fft/location.h"
 #include "fft/menu_input.h"
 #include "fft/menu_selection.h"
@@ -32,40 +33,40 @@
 extern u8 g_bar_row_help_text_ids[];
 extern s32* g_rumor_location_masks;
 
-static void rumor_open_list(void);
+static void open_rumor_list(void);
 
-static void rumor_push_detail_level(s32 value);
+static void open_rumor_detail(s32 value);
 
 /* Opens the bar (MENU_STACK_LEVEL_BAR): hides the map, loads the bar
  * background (set 0x16 or 0x17 by EVENT_SCRIPT_VAR_TOWN_BACKGROUND, else 0),
  * starts the message box on TEXT_ID_BAR_WELCOME, and allocates two
  * window records and one render record for the level before
- * bar_rows_build fills it. */
-void bar_menu_open(void) {
+ * bar_build_rows fills it. */
+void bar_open_menu(void) {
     s32 value;
     s32 set;
     s32 record_index;
 
-    world_map_clear_screen_and_set_clip_rect(1);
-    display_object_queues_set_enabled(0);
-    world_map_fade_start(0, 0x10);
+    world_map_clear_screen(1);
+    display_object_set_queues_enabled(0);
+    world_map_start_fade(0, 0x10);
     value = script_variable_get(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
     set = value == 1 ? 0x16 : 0;
     if (value == 2) {
         set = 0x17;
     }
     picture_load_background_set(set);
-    file_pending_wait();
+    file_wait_pending();
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
     g_menu_stack_records[g_menu_stack_depth].bar.cursor_window
-        = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+        = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].bar.label_window
-        = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+        = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].bar.rows_image
-        = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
-    bar_rows_build(&g_menu_stack_records[g_menu_stack_depth].bar);
+        = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
+    bar_build_rows(&g_menu_stack_records[g_menu_stack_depth].bar);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].bar.restore_welcome = 0;
     g_menu_stack_types[record_index] = MENU_STACK_LEVEL_BAR;
@@ -75,7 +76,7 @@ void bar_menu_open(void) {
 /* Fill the bar menu: Rumors always, Propositions once EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED is
  * set, the job report while jobs have returned to this town, the in-progress list while some
  * accepted job has not returned, then Leave; draw the rows into the frame window. */
-void bar_rows_build(bar_menu_level_t* level) {
+void bar_build_rows(bar_menu_level_t* level) {
     s32 index;
     point32_t point;
     RECT bounds;
@@ -151,7 +152,7 @@ void bar_rows_build(bar_menu_level_t* level) {
 }
 
 /* Restore the bar list's palettes and cursor animation, then show its welcome text. */
-void bar_menu_resume(menu_stack_record_t* level) {
+void bar_resume_menu(menu_stack_record_t* level) {
     s32 main_window;
     s32 side_window;
     s32 slot;
@@ -168,18 +169,18 @@ void bar_menu_resume(menu_stack_record_t* level) {
     slot = level->bar.cursor_window;
     g_display_object_animated_pool[slot].anim_counter = 0;
     g_display_object_animated_pool[slot].frame_index = 0;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
 }
 
 /* Gray out the bar menu while a sub-level opens over it: palette 10 on the
  * cursor, 6 on the side window and 2 on the frame, and restart the cursor's
  * press animation.
  *
- * Sibling of sound_novel_quit_suspend, differing only in the sequence
+ * Sibling of sound_novel_suspend_quit_menu, differing only in the sequence
  * stored. The record stores may alias `level`, so they invalidate the cached
  * parameter loads and reproduce the target's reloads; `index` shares one
  * address computation between the last two. */
-void bar_menu_suspend(menu_stack_record_t* level) {
+void bar_suspend_menu(menu_stack_record_t* level) {
     s32 index;
 
     g_display_object_animated_pool[level->bar.cursor_window].palette = 10;
@@ -193,18 +194,18 @@ void bar_menu_suspend(menu_stack_record_t* level) {
 
 /* Leave the bar: pop its level, show the date and location label again, rebuild and push the
  * location menu for the current location, fade the map back in and clear the scratch buffer. */
-static void bar_leave(bar_menu_level_t* unused_level) {
+static void leave_menu(bar_menu_level_t* unused_level) {
     s32 i;
 
-    display_object_queues_set_enabled(1);
+    display_object_set_queues_enabled(1);
     g_menu_stack_depth = g_menu_stack_depth - 1;
     g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL);
     menu_stack_dispatch_suspend();
-    g_menu_stack_records[g_menu_stack_depth].panel.entry_count = location_menu_entries_build(
+    g_menu_stack_records[g_menu_stack_depth].panel.entry_count = location_build_menu_entries(
         g_world_map_marker_state.marker.location_id, g_menu_stack_records[g_menu_stack_depth].panel.entries);
-    location_menu_open(g_world_map_marker_state.marker.location_id);
-    world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
-    world_map_clear_screen_and_set_clip_rect(0);
+    location_open_menu(g_world_map_marker_state.marker.location_id);
+    world_map_start_fade(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
+    world_map_clear_screen(0);
     /* Blank the backdrop image until the map is captured again. */
     for (i = WORLD_MAP_BACKDROP_WORDS - 1; i >= 0; i--) {
         g_world_map_scratch_buffer[i] = 0;
@@ -214,7 +215,7 @@ static void bar_leave(bar_menu_level_t* unused_level) {
 /* Input step of the bar menu: Circle opens Rumors, Propositions, the job report or the in-progress
  * list (or leaves); Cross or Leave shows the goodbye line and, after a button, fades back to the
  * map; Select shows the row's help; Up and Down wrap. */
-void bar_menu_update(menu_stack_record_t* level) {
+void bar_update_menu(menu_stack_record_t* level) {
     s32 flags;
     u32 buttons;
 
@@ -229,7 +230,7 @@ void bar_menu_update(menu_stack_record_t* level) {
 
     if ((flags & WORLD_MAP_FLAG_INPUT_BLOCKED) && thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
-        bar_leave(&level->bar);
+        leave_menu(&level->bar);
         return;
     }
 
@@ -238,10 +239,10 @@ void bar_menu_update(menu_stack_record_t* level) {
             return;
         }
         level->bar.mode = MENU_STACK_WINDOW_MODE_BROWSE;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
-        world_map_fade_start(WORLD_MAP_FADE_OUT, 0x10);
-        music_queue_track_start(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
+        world_map_start_fade(WORLD_MAP_FADE_OUT, 0x10);
+        music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
         return;
     }
 
@@ -250,7 +251,7 @@ void bar_menu_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         /* Same exit as the Leave row below; GCC cross-jumps the two copies. */
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = 0;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
         level->bar.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
         g_display_object_animated_count -= 2;
         g_display_object_image_count -= 1;
@@ -259,8 +260,8 @@ void bar_menu_update(menu_stack_record_t* level) {
     }
 
     if (buttons & PSX_PAD_SELECT) {
-        bar_menu_suspend(level);
-        menu_stack_message_open(g_bar_row_help_text_ids[level->bar.entries[level->bar.selected_entry]] | 0x1000, 1);
+        bar_suspend_menu(level);
+        menu_stack_open_message(g_bar_row_help_text_ids[level->bar.entries[level->bar.selected_entry]] | 0x1000, 1);
         return;
     }
 
@@ -272,26 +273,26 @@ void bar_menu_update(menu_stack_record_t* level) {
         }
         switch (level->bar.entries[level->bar.selected_entry]) {
         case BAR_ROW_RUMORS:
-            message_block_load_if_changed(MESSAGE_BLOCK_RUMORS);
-            bar_menu_suspend(level);
-            rumor_open_list();
+            message_load_block_if_changed(MESSAGE_BLOCK_RUMORS);
+            bar_suspend_menu(level);
+            open_rumor_list();
             return;
         case BAR_ROW_AVAILABLE_PROPOSITIONS:
-            message_block_load_if_changed(MESSAGE_BLOCK_PROPOSITIONS);
-            bar_menu_suspend(level);
-            proposition_available_list_open();
+            message_load_block_if_changed(MESSAGE_BLOCK_PROPOSITIONS);
+            bar_suspend_menu(level);
+            proposition_open_available_list();
             return;
         case BAR_ROW_RETURNED:
-            bar_menu_suspend(level);
-            proposition_returned_list_open();
+            bar_suspend_menu(level);
+            proposition_open_returned_list();
             return;
         case BAR_ROW_ACTIVE_PROPOSITIONS:
-            bar_menu_suspend(level);
-            proposition_active_list_open();
+            bar_suspend_menu(level);
+            proposition_open_active_list();
             return;
         case BAR_ROW_LEAVE:
             g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BAR].selected_index = 0;
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_GOODBYE, 0);
             level->bar.mode = MENU_STACK_WINDOW_MODE_LEAVE_MESSAGE;
             g_display_object_animated_count -= 2;
             g_display_object_image_count -= 1;
@@ -301,7 +302,7 @@ void bar_menu_update(menu_stack_record_t* level) {
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0) {
         if (level->bar.selected_entry != 0) {
             g_display_object_animated_pool[level->bar.cursor_window].position.y -= 0x10;
             level->bar.selected_entry--;
@@ -309,7 +310,7 @@ void bar_menu_update(menu_stack_record_t* level) {
             g_display_object_animated_pool[level->bar.cursor_window].position.y += (level->bar.entry_count - 1) * 0x10;
             level->bar.selected_entry = level->bar.entry_count - 1;
         }
-    } else if (world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    } else if (input_update_repeat(PSX_PAD_DOWN) != 0) {
         if (level->bar.selected_entry < level->bar.entry_count - 1) {
             g_display_object_animated_pool[level->bar.cursor_window].position.y += 0x10;
             level->bar.selected_entry++;
@@ -323,7 +324,7 @@ void bar_menu_update(menu_stack_record_t* level) {
 
     sound_play_effect(SOUND_SFX_CURSOR_MOVE);
     if (level->bar.restore_welcome != 0) {
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BAR_WELCOME, 0);
         level->bar.restore_welcome = 0;
     }
 }
@@ -335,7 +336,7 @@ void bar_menu_update(menu_stack_record_t* level) {
  * (0x4c, 0x50), 0x96 wide, and the MENU_STACK_LEVEL_RUMOR_LIST level is pushed.
  * With no rumors the bar menu's windows are reset instead and
  * TEXT_ID_NO_RUMORS is shown. */
-static void rumor_open_list(void) {
+static void open_rumor_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -367,7 +368,7 @@ static void rumor_open_list(void) {
 
     if (count != 0) {
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMORS_INTRO, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMORS_INTRO, 0);
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count = count;
         if (count < 8) {
             i = count;
@@ -378,8 +379,8 @@ static void rumor_open_list(void) {
         origin.x = 0x4C;
         layout.visible_rows = i;
         origin.y = 0x50;
-        menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_RUMORS, count, i);
-        window_panel_thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
+        menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_RUMORS, count, i);
+        window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
     } else {
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].palette
@@ -390,7 +391,7 @@ static void rumor_open_list(void) {
         g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window].frame_index
             = g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window]
                   .anim_counter = 0;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_RUMORS, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_RUMORS, 0);
         g_menu_stack_records[g_menu_stack_depth - 1].bar.restore_welcome = 1;
         return;
     }
@@ -404,21 +405,21 @@ static void rumor_open_list(void) {
 
 /* Resume handler of the rumors list: block Circle, Cross and Select for the
  * levels underneath and show TEXT_ID_RUMORS_INTRO again. */
-void rumor_list_prompt_restore(menu_stack_record_t* unused_level) {
+void rumor_resume_list(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMORS_INTRO, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMORS_INTRO, 0);
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void rumor_block_list_buttons(menu_stack_record_t* unused_level) {
+void rumor_suspend_list(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Pop the rumors list level: toggle the input-blocked system flag and
  * unblock the menu buttons. The caller hands in its menu level; the target
  * reads no argument. */
-static void rumor_close_list(menu_stack_panel_level_t* level) {
+static void close_rumor_list(menu_stack_panel_level_t* level) {
     g_menu_stack_ot_offset = 1;
     g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
     --g_menu_stack_depth;
@@ -429,22 +430,22 @@ static void rumor_close_list(menu_stack_panel_level_t* level) {
  * closes the panel thread and records the choice in result; Select on a
  * non-empty list opens help message 0x105e. Once the panel thread has ended,
  * the level closes and a chosen rumor's entry value (TEXT_ID_ENTRY_MASK of
- * g_menu_stack_entry_values) goes to rumor_push_detail_level;
+ * g_menu_stack_entry_values) goes to open_rumor_detail;
  * otherwise the bar menu resumes.
  *
- * The target passes the level to rumor_close_list and
- * rumor_block_list_buttons even though neither reads the argument. */
-void rumor_list_input_update(menu_stack_record_t* level) {
+ * The target passes the level to close_rumor_list and
+ * rumor_suspend_list even though neither reads the argument. */
+void rumor_update_list_input(menu_stack_record_t* level) {
     if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
         && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        rumor_close_list(&level->panel);
+        close_rumor_list(&level->panel);
         if (level->panel.result != 0) {
-            menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_RUMORS);
-            rumor_push_detail_level(
+            menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_RUMORS);
+            open_rumor_detail(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
-        menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_RUMORS);
+        menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_RUMORS);
         g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
         menu_stack_dispatch_resume();
         return;
@@ -452,17 +453,17 @@ void rumor_list_input_update(menu_stack_record_t* level) {
     if ((g_world_map_input_new_button_presses & PSX_PAD_CROSS) && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
-        rumor_block_list_buttons(level);
-        menu_stack_message_open(0x105E, 1);
+        rumor_suspend_list(level);
+        menu_stack_open_message(0x105E, 1);
         return;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
         && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     }
 }
@@ -471,13 +472,13 @@ void rumor_list_input_update(menu_stack_record_t* level) {
  * hide the bar menu's windows and push the rumor detail level, which keeps
  * their indices to show them again. coordinate_mode is always 0, so the
  * switch's mode-1 image row is never used. */
-static void rumor_push_detail_level(s32 value) {
+static void open_rumor_detail(s32 value) {
     s32 coordinate_mode = 0;
     s32 depth;
     u8 unused[8];
 
     g_text_substitution_values[0] = value + TEXT_ID_RUMOR_NAME_BASE;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMOR_ABOUT, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RUMOR_ABOUT, 0);
     g_menu_stack_records[g_menu_stack_depth].rumor_detail.rumor_index = value;
     g_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;
     switch (coordinate_mode) {
@@ -513,10 +514,10 @@ static void rumor_push_detail_level(s32 value) {
 
 /* Close the rumor detail level once its text window is finished.
  *
- * Same wait as text_level_update; then shows the bar
+ * Same wait as update_text_level; then shows the bar
  * menu's two windows and frame again, pops the stack and replays the frame's
- * pop-in while rumor_open_list rebuilds the list. */
-void rumor_wait_detail_then_pop(menu_stack_record_t* level) {
+ * pop-in while open_rumor_list rebuilds the list. */
+void rumor_update_detail(menu_stack_record_t* level) {
     if (g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
@@ -528,13 +529,13 @@ void rumor_wait_detail_then_pop(menu_stack_record_t* level) {
     g_display_object_gs_image_pool[level->rumor_detail.render_index].flags ^= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_depth--;
     g_display_object_gs_image_pool[level->rumor_detail.render_index].flags |= DISPLAY_OBJECT_POP_IN;
-    rumor_open_list();
+    open_rumor_list();
 }
 
 /* Open the bar's list of propositions on offer (the Propositions row of
- * bar_menu_update). If the bar menu is hidden (returning from a
+ * bar_update_menu). If the bar menu is hidden (returning from a
  * proposition's levels) it is first shown again, its rows rebuilt with
- * bar_rows_build and grayed out.
+ * bar_build_rows and grayed out.
  *
  * The list holds every proposition neither in progress nor completed, not
  * waiting out a failure (its g_proposition_states days are 0) and
@@ -544,7 +545,7 @@ void rumor_wait_detail_then_pop(menu_stack_record_t* level) {
  * wide, and pushes MENU_STACK_LEVEL_PROPOSITION_AVAILABLE_LIST; otherwise it
  * resumes the bar menu with TEXT_ID_NO_PROPOSITIONS, flagging its
  * content_render so the next cursor move restores the welcome line. */
-void proposition_available_list_open(void) {
+void proposition_open_available_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
     s32 count;
@@ -561,8 +562,8 @@ void proposition_available_list_open(void) {
             &= ~DISPLAY_OBJECT_HIDDEN;
         g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
             &= ~DISPLAY_OBJECT_HIDDEN;
-        bar_rows_build(&g_menu_stack_records[g_menu_stack_depth - 1].bar);
-        bar_menu_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
+        bar_build_rows(&g_menu_stack_records[g_menu_stack_depth - 1].bar);
+        bar_suspend_menu(&g_menu_stack_records[g_menu_stack_depth - 1]);
         index = g_menu_stack_records[g_menu_stack_depth - 1].bar.cursor_window;
         record = &g_display_object_animated_pool[index];
         record->anim_counter = 0;
@@ -585,7 +586,7 @@ void proposition_available_list_open(void) {
     }
 
     if (count != 0) {
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITIONS_INTRO, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITIONS_INTRO, 0);
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count = count;
         if (count < 6) {
             i = count;
@@ -596,12 +597,12 @@ void proposition_available_list_open(void) {
         origin.x = 0x4C;
         layout.visible_rows = i;
         origin.y = 0x50;
-        menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS, count, i);
-        window_panel_thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
+        menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS, count, i);
+        window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
             g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
     } else {
         menu_stack_dispatch_resume();
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_PROPOSITIONS, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_PROPOSITIONS, 0);
         g_menu_stack_records[g_menu_stack_depth - 1].bar.restore_welcome = 1;
         return;
     }
@@ -616,21 +617,21 @@ void proposition_available_list_open(void) {
 
 /* Resume handler of the available propositions list: block Circle, Cross and Select for the
  * levels underneath and show TEXT_ID_PROPOSITIONS_INTRO again. */
-void proposition_available_list_prompt_restore(menu_stack_record_t* unused_level) {
+void proposition_resume_available_list(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITIONS_INTRO, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITIONS_INTRO, 0);
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void proposition_block_available_list_buttons(menu_stack_record_t* unused_level) {
+void proposition_suspend_available_list(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Pop the available propositions list level: toggle the input-blocked system flag and
  * unblock the menu buttons. The caller hands in its menu level; the target
  * reads no argument. */
-static void proposition_close_available_list(menu_stack_panel_level_t* level) {
+static void close_available_list(menu_stack_panel_level_t* level) {
     g_menu_stack_ot_offset = 1;
     g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
     --g_menu_stack_depth;
@@ -639,24 +640,24 @@ static void proposition_close_available_list(menu_stack_panel_level_t* level) {
 
 /* List level input step for the available propositions (cursor slot 3, Select
  * help 0x105f). Circle hands the chosen entry to
- * proposition_detail_level_open, but is refused with "I can't give
+ * proposition_open_detail, but is refused with "I can't give
  * anymore jobs" once g_proposition_count has reached 8. For a
  * proposition already attempted (PROPOSITION_VARIABLE_ATTEMPTED) it
  * first hides the parent level's windows and render record, says "Think I
  * told you before but..." and waits in result 2 for Circle or Cross. */
-void proposition_available_list_input_update(menu_stack_record_t* level) {
+void proposition_update_available_list_input(menu_stack_record_t* level) {
     s32 depth;
 
     if ((g_world_map_flags & WORLD_MAP_FLAG_INPUT_BLOCKED)
         && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        proposition_close_available_list(&level->panel);
+        close_available_list(&level->panel);
         if (level->panel.result != 0) {
-            menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
-            proposition_detail_level_open(
+            menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
+            proposition_open_detail(
                 g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
             return;
         }
-        menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
+        menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_AVAILABLE_PROPOSITIONS);
         menu_stack_dispatch_resume();
         return;
     }
@@ -670,20 +671,20 @@ void proposition_available_list_input_update(menu_stack_record_t* level) {
         && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CANCEL);
         level->panel.result = 0;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_SELECT) && level->panel.entry_count != 0) {
-        proposition_block_available_list_buttons(level);
-        menu_stack_message_open(0x105F, 1);
+        proposition_suspend_available_list(level);
+        menu_stack_open_message(0x105F, 1);
     } else if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) && level->panel.entry_count != 0
         && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         if (g_proposition_count >= 8) {
             sound_play_effect(SOUND_SFX_INVALID);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_MORE_JOBS, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NO_MORE_JOBS, 0);
             return;
         }
         sound_play_effect(SOUND_SFX_CONFIRM);
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         if (script_variable_get(
                 (g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK)
                 + EVENT_SCRIPT_VAR_PROPOSITION_FIRST)
@@ -695,7 +696,7 @@ void proposition_available_list_input_update(menu_stack_record_t* level) {
                 |= DISPLAY_OBJECT_HIDDEN;
             g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].bar.rows_image].flags
                 |= DISPLAY_OBJECT_HIDDEN;
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TOLD_BEFORE, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TOLD_BEFORE, 0);
             level->panel.result = 2;
             return;
         }
@@ -707,7 +708,7 @@ void proposition_available_list_input_update(menu_stack_record_t* level) {
 /* Push the proposition detail level and show its description; the bar owner first gives his advice
  * on it with a 10% chance (20% after a failure, 40% after a bad failure), otherwise says 'This's
  * what I know about ...'. */
-void proposition_detail_level_open(s32 value) {
+void proposition_open_detail(s32 value) {
     s32 chance;
     s32 index;
     s32 depth;
@@ -723,19 +724,19 @@ void proposition_detail_level_open(s32 value) {
         chance = 0xA;
     }
     if ((rand() * 100 >> 15) < chance) {
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, value + TEXT_ID_PROPOSITION_HINT_FIRST, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, value + TEXT_ID_PROPOSITION_HINT_FIRST, 0);
     } else {
         g_text_substitution_values[0] = value + TEXT_ID_PROPOSITION_NAME_BASE;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITION_ABOUT, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_PROPOSITION_ABOUT, 0);
     }
     proposition_unpack_row(&g_proposition_selected_row, value);
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_detail.render_index = index;
     bounds.y = 0x60;
     bounds.w = 0xF4;
     bounds.h = 0x80;
     bounds.x = 0;
-    window_text_record_init(index, bounds, 0, value + TEXT_ID_WORLD_MESSAGE_BASE, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, value + TEXT_ID_WORLD_MESSAGE_BASE, g_window_image_buffer);
     base = &g_display_object_gs_image_pool[index].position;
     g_display_object_gs_image_pool[index].priority = 9;
     depth = g_menu_stack_depth;
@@ -749,22 +750,22 @@ void proposition_detail_level_open(s32 value) {
 }
 
 /* Restore the proposition detail renderer's palette. */
-void proposition_detail_level_resume(menu_stack_record_t* level) {
+void proposition_resume_detail(menu_stack_record_t* level) {
     g_display_object_gs_image_pool[level->proposition_detail.render_index].palette = 0;
 }
 
 /* Select palette 2 for the window's render record. */
-void proposition_detail_level_suspend(menu_stack_record_t* pair) {
+void proposition_suspend_detail(menu_stack_record_t* pair) {
     g_display_object_gs_image_pool[pair->proposition_detail.render_index].palette = 2;
 }
 
 /* Input step of the proposition detail level. Cross closes it and reopens the
- * list (proposition_available_list_open). Circle stores the job's
+ * list (proposition_open_available_list). Circle stores the job's
  * total fee (fee_a + fee_b of the selected row) as the gil to pay, asks
  * TEXT_ID_JOB_FEE_PROMPT with the fee substituted (or
  * TEXT_ID_ACCEPT_JOB_PROMPT when it is free), opens the OK/NO panel
  * at (0x48, 0x20) and pushes MENU_STACK_LEVEL_PROPOSITION_ACCEPT. */
-void proposition_detail_update(menu_stack_record_t* owner) {
+void proposition_update_detail(menu_stack_record_t* owner) {
     s32 total;
     point32_t origin;
 
@@ -776,21 +777,21 @@ void proposition_detail_update(menu_stack_record_t* owner) {
         g_display_object_image_count--;
         g_display_object_queue_count--;
         g_menu_stack_depth--;
-        proposition_available_list_open();
+        proposition_open_available_list();
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         total = g_proposition_selected_row.fee_a + g_proposition_selected_row.fee_b;
         g_proposition_gil_amount = total;
         if (total != 0) {
             g_text_substitution_values[0] = total;
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOB_FEE_PROMPT, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOB_FEE_PROMPT, 0);
         } else {
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_ACCEPT_JOB_PROMPT, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_ACCEPT_JOB_PROMPT, 0);
         }
-        proposition_detail_level_suspend(owner);
+        proposition_suspend_detail(owner);
         origin.x = 0x48;
         origin.y = 0x20;
-        window_yes_no_panel_build(origin);
+        window_build_yes_no_panel(origin);
         g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_ACCEPT;
         g_menu_stack_depth++;
     }
@@ -798,33 +799,33 @@ void proposition_detail_update(menu_stack_record_t* owner) {
 
 /* Append an OK/NO choice panel at `origin` to the level being pushed: cursor and header windows
  * plus the OK/NO text record, with the cursor on OK. */
-void window_yes_no_panel_build(point32_t origin) {
+void window_build_yes_no_panel(point32_t origin) {
     RECT bounds;
     s32 dead_locals[10];
     s32 index;
     s32 depth;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].accept_confirm.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].accept_confirm.header_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CHOICE_PANEL_HEADER;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].accept_confirm.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
-    window_text_record_init(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
     g_display_object_gs_image_pool[index].priority = 8;
     g_display_object_gs_image_pool[index].position = origin;
 
@@ -846,20 +847,20 @@ void window_yes_no_panel_build(point32_t origin) {
  *
  * Up/down toggle the highlighted row and move the cursor window by one
  * 16-pixel row. Cross and NO both tear the panel down and return through
- * proposition_available_list_open. OK first checks that at least one
+ * proposition_open_available_list. OK first checks that at least one
  * generic, non-monster party member is free (the same filter as
- * candidates_build) and that the war funds cover
+ * build_candidates) and that the war funds cover
  * g_proposition_gil_amount. With no unit it says
  * TEXT_ID_CHOOSE_MORE_UNITS, then TEXT_ID_CHOOSE_HUMAN_UNIT
  * after a button (NO_UNIT_MESSAGE mode); short of gil it says
  * TEXT_ID_NOT_ENOUGH_GIL; either way the next button closes the panel
  * (CLOSE_MESSAGE mode). A successful confirmation continues into
- * proposition_participants_open.
+ * proposition_open_participants.
  *
  * The gotos are the target's shared tails: the mode 3 close, the "no"
  * dismissal and the no-unit failure jump into the cancel and gil-failure
  * blocks; duplicated tails do not cross-jump back into that shape. */
-void proposition_accept_update(menu_stack_record_t* level) {
+void proposition_update_accept_panel(menu_stack_record_t* level) {
     s32 available;
     s32 i;
     s32 row;
@@ -878,7 +879,7 @@ void proposition_accept_update(menu_stack_record_t* level) {
 
     if (level->accept_confirm.mode == PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE) {
         if (g_world_map_input_new_button_presses & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_HUMAN_UNIT, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_HUMAN_UNIT, 0);
             level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
         }
         return;
@@ -894,11 +895,11 @@ void proposition_accept_update(menu_stack_record_t* level) {
         g_display_object_image_count--;
         g_display_object_queue_count--;
         g_menu_stack_depth -= 2;
-        proposition_available_list_open();
+        proposition_open_available_list();
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
         row = level->accept_confirm.row ^ 1;
         level->accept_confirm.row = row;
         g_display_object_animated_pool[level->accept_confirm.cursor_window].position.y
@@ -917,7 +918,7 @@ void proposition_accept_update(menu_stack_record_t* level) {
 
     available = 0;
     for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
-        unit = party_roster_unit_get(i);
+        unit = party_get_roster_unit(i);
         if (unit->proposition_status == 0 && unit->party_id != PARTY_ID_NONE
             && !(unit->gender_flags & UNIT_FLAG_MONSTER) && unit->sprite_set >= CHARACTER_IDENTITY_BOY) {
             available++;
@@ -925,13 +926,13 @@ void proposition_accept_update(menu_stack_record_t* level) {
     }
 
     if (available == 0) {
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_MORE_UNITS, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_MORE_UNITS, 0);
         level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_NO_UNIT_MESSAGE;
         goto fail;
     }
 
     if (script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) < g_proposition_gil_amount) {
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NOT_ENOUGH_GIL, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_NOT_ENOUGH_GIL, 0);
         level->accept_confirm.mode = PROPOSITION_ACCEPT_MODE_CLOSE_MESSAGE;
     fail:
         sound_play_effect(SOUND_SFX_INVALID);
@@ -948,7 +949,7 @@ void proposition_accept_update(menu_stack_record_t* level) {
     g_display_object_image_count--;
     g_display_object_queue_count--;
     g_menu_stack_depth -= 2;
-    proposition_participants_open();
+    proposition_open_participants();
 }
 
 /* Pushes the "how many days" number panel of a proposition: shows
@@ -956,7 +957,7 @@ void proposition_accept_update(menu_stack_record_t* level) {
  * starts the number panel thread on that range at the minimum, and withholds
  * Circle and Cross from the WORLD menu threads (the level's own step handles
  * them). */
-void proposition_days_open(void) {
+void proposition_open_days_panel(void) {
     point32_t origin;
     s32 record_index;
     s32 min_days = g_proposition_selected_row.min_days;
@@ -964,13 +965,13 @@ void proposition_days_open(void) {
 
     g_text_substitution_values[0] = min_days;
     g_text_substitution_values[1] = max_days;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_DAYS, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_DAYS, 0);
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
     g_menu_stack_ot_offset = 8;
     origin.x = 0x38;
     origin.y = 0x20;
     g_window_panel_value = min_days;
-    window_number_panel_thread_start(
+    window_start_number_panel_thread(
         WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, min_days | (max_days << 16), TEXT_ID_DAYS_LABEL, &origin);
     record_index = g_menu_stack_depth;
     g_menu_stack_records[record_index].panel.result = 0;
@@ -983,7 +984,7 @@ void proposition_days_open(void) {
  * g_proposition_dispatch_days; either tells the thread to close. Once
  * it has, two levels are popped and result 1 goes on to the dispatch
  * confirmation, -1 back to the propositions list. */
-void proposition_days_update(menu_stack_record_t* level) {
+void proposition_update_days_panel(menu_stack_record_t* level) {
     if (level->panel.result != 0 && thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_menu_blocked_buttons = 0;
         g_menu_stack_ot_offset = 1;
@@ -991,9 +992,9 @@ void proposition_days_update(menu_stack_record_t* level) {
         g_display_object_queue_count--;
         g_menu_stack_depth -= 2;
         if (level->panel.result == 1) {
-            proposition_dispatch_confirm_open();
+            proposition_open_dispatch_confirm();
         } else {
-            proposition_available_list_open();
+            proposition_open_available_list();
         }
         return;
     }
@@ -1001,11 +1002,11 @@ void proposition_days_update(menu_stack_record_t* level) {
         sound_play_effect(SOUND_SFX_CANCEL);
         g_hud_value_mode = HUD_VALUE_FUNDS;
         level->panel.result = -1;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         level->panel.result = 1;
         g_proposition_dispatch_days = g_window_panel_value;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     }
 }

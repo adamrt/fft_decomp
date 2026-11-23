@@ -20,7 +20,7 @@ calendar_date_t* g_brave_story_birthdays = g_brave_story_birthday_table;
  * within the remaining days gains a year, and ages are capped at 99. Entry 0
  * is the player character, whose birthday lives in the
  * EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH and _DAY variables, as in
- * birthdays_advance.
+ * advance_birthdays.
  *
  * Every active proposition not yet returned returns when its elapsed days plus
  * the advanced days reach its assigned days (elapsed becomes the assigned
@@ -34,7 +34,7 @@ calendar_date_t* g_brave_story_birthdays = g_brave_story_birthday_table;
  * at function entry, for the first call's `li a0,0x67` to precede the
  * reciprocal-division `mult`.
  */
-void calendar_days_advance(s32 days) {
+void calendar_advance_days(s32 days) {
     s32 i;
     s32 years;
     calendar_date_t* birthdays;

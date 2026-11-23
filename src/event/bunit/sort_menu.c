@@ -2,6 +2,7 @@
  * their ordering while preserving grouped monster entries. */
 
 #include "fft/menu.h"
+#include "fft/menu_list.h"
 #include "fft/text.h"
 #include "fft/unit.h"
 #include "fft/unit_list.h"
@@ -15,7 +16,7 @@ extern s16 g_unit_list_reorder_list_redraw_request;
 
 /* Map each listed unit to a grid cell: an ordinary unit takes the next cell in list
  * order; a mount (UNIT_MOUNT_INFO_FLAG_MOUNT) gets the list index of its rider, found
- * through the partner battle id in its mount info. The rider's list index equals its
+ * through the partner battle unit id in its mount info. The rider's list index equals its
  * cell only while no mount precedes it in the list.
  */
 void unit_list_build_index_map(void) {
@@ -30,7 +31,7 @@ void unit_list_build_index_map(void) {
             reorderable_index++;
         } else {
             g_unit_list_index_map[unit_index]
-                = unit_list_find_by_battle_id((unit->mount_info - UNIT_MOUNT_INFO_FLAG_MOUNT));
+                = unit_list_find_by_battle_unit_id((unit->mount_info - UNIT_MOUNT_INFO_FLAG_MOUNT));
         }
     }
 }
@@ -59,7 +60,7 @@ s32 unit_list_build_grid_cells(void) {
  * then stores the order back and re-sorts and rebuilds the unit list. The
  * handler returns to the unit list when the menu thread ends.
  */
-void unit_list_sort_menu_update(void) {
+void unit_list_update_sort_menu(void) {
     s16 opts[16];
     s16* src;
     s16* dst;
@@ -86,7 +87,7 @@ void unit_list_sort_menu_update(void) {
         s_unit_list_reorder_list_initialized = 1;
     }
 
-    if (unit_list_update_menu_thread(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
+    if (menu_managed_thread_start(UNIT_LIST_THREAD_SLOT_REORDER_MENU, &g_unit_list_reorder_list_desc) == 0) {
         s_unit_list_reorder_list_initialized = 0;
         g_unit_list_current_menu = UNIT_LIST_MENU_UNIT_LIST;
     }

@@ -12,7 +12,7 @@ extern u16 g_equipment_gfx_poly_f4_count;
 extern u16 g_equipment_gfx_poly_g4_count;
 
 /* Reset primitive counts, swap packet buffers, and clear the active OT tail. */
-void equipment_gfx_swap_context(s32 first_otag, s32 unused) {
+void menu_gfx_swap_context(s32 first_otag, s32 unused) {
     DRAWENV environment;
     menu_gfx_context_t* buffer;
 
@@ -53,7 +53,7 @@ void equipment_gfx_swap_context(s32 first_otag, s32 unused) {
 /* Initialize the LINE_F2, POLY_F4, POLY_FT4, TILE and DR_MOVE primitive
  * headers of one graphics context, up to each pool's capacity; the quads
  * also get texture shading enabled. */
-static void equipment_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
+static void init_primitive_buffers(menu_gfx_context_t* context) {
     s32 i;
 
     for (i = 0; i < g_gfx_line_f2_capacity; i++) {
@@ -80,11 +80,11 @@ static void equipment_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
 /* Partition each primitive pool across the two graphics contexts.
  *
  * Each pointer uses its pool's 16-bit capacity and the context index. */
-void equipment_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
-    POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
-    POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
-    LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
-    SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes) {
+void menu_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3, POLY_F4* poly_f4,
+    POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4, POLY_GT4* poly_gt4,
+    LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3, LINE_G4* line_g4,
+    TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites, SPRT_8* sprites_8,
+    SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes) {
     s32 index;
     menu_gfx_context_t* context;
 
@@ -120,9 +120,9 @@ void equipment_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* p
         context->draw_areas = draw_areas + g_equipment_gfx_draw_area_capacity * index;
         context->draw_modes = draw_modes + g_gfx_draw_mode_capacity * index;
 
-        equipment_gfx_init_primitive_buffers(context);
+        init_primitive_buffers(context);
     }
 
-    equipment_gfx_swap_context(0, -1);
-    equipment_gfx_swap_context(0, -1);
+    menu_gfx_swap_context(0, -1);
+    menu_gfx_swap_context(0, -1);
 }

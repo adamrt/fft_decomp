@@ -27,13 +27,13 @@ static display_object_cel_header_t** s_display_object_cels = g_display_object_ce
 extern sprite_packet_t g_display_object_gpu_sprite_packets[2][32];
 static s32 s_display_object_gpu_sprite_count;
 
-static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
-static void gpu_animated_draw(display_object_animated_t* actor, u32* ot);
-static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot);
+static void calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
+static void draw_animated(display_object_animated_t* actor, u32* ot);
+static void draw_image(display_object_gpu_image_t* record, u32* ot);
 
 /* Empty both render record pools and the pointer list. Every record gets its
  * layout flag, ordering-table entry 8 and the neutral color 0x80. */
-void display_object_pools_init(void) {
+void display_object_init_pools(void) {
     s32 i;
     CVECTOR* color;
 
@@ -68,7 +68,7 @@ void gfx_clear_current_otag(void) {
 }
 
 /* Draw visible animated and image records into the GPU ordering table. */
-void display_object_gpu_list_draw(u32* otag, void** list, s32 count) {
+void display_object_draw_gpu_list(u32* otag, void** list, s32 count) {
     void* object;
     u32* flags;
     s32 i;
@@ -85,10 +85,10 @@ void display_object_gpu_list_draw(u32* otag, void** list, s32 count) {
         }
         if (*flags & DISPLAY_OBJECT_ANIMATED) {
             display_object_animated_t* animated = object;
-            gpu_animated_draw(animated, otag);
+            draw_animated(animated, otag);
         } else if (*flags & DISPLAY_OBJECT_IMAGE) {
             display_object_gpu_image_t* image = object;
-            gpu_image_draw(image, otag);
+            draw_image(image, otag);
         }
     }
 }
@@ -116,7 +116,7 @@ void display_object_gpu_list_draw(u32* otag, void** list, s32 count) {
  * own locals within the assignments keeps the target's x + byte operand order
  * and v0/v1 allocation. Separate assignments change those registers.
  */
-static void gpu_animated_draw(display_object_animated_t* actor, u32* ot) {
+static void draw_animated(display_object_animated_t* actor, u32* ot) {
     display_object_cel_header_t** sprites = s_display_object_cels;
     display_object_sequence_header_t* anim = s_display_object_sequences[actor->sequence];
     display_object_cel_header_t* cel;
@@ -210,7 +210,7 @@ loop:
  *
  * 8BIT_CLUT and BLEND_RATE_MASK select the texture page mode, SEMI_TRANSPARENT
  * enables semi-transparency, and POP_IN runs the pop-in scale: pop_in_step counts the
- * animation, scaled_rectangle_calculate turns half of it into a
+ * animation, calculate_scaled_rectangle turns half of it into a
  * shrunken source rectangle, and the flag clears once the record is at full
  * size. A nonzero palette picks the CLUT (palette - 1) * 16 pixels right of clut.
  *
@@ -220,7 +220,7 @@ loop:
  * Sharing the position locals across the pop-in and full-size arms changes
  * load scheduling and register allocation.
  */
-static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
+static void draw_image(display_object_gpu_image_t* record, u32* ot) {
     point32_t clut;
     RECT scaled;
     s32 step;
@@ -265,7 +265,7 @@ static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
     }
 
     if (record->flags & DISPLAY_OBJECT_POP_IN) {
-        scaled_rectangle_calculate(record->pop_in_step / 2, &record->bounds, &scaled);
+        calculate_scaled_rectangle(record->pop_in_step / 2, &record->bounds, &scaled);
         px = record->position.x;
         g_display_object_gpu_sprite_packets[g_gfx_active_buffer_index][s_display_object_gpu_sprite_count].sprt.x0
             = scaled.x + px;
@@ -311,7 +311,7 @@ static void gpu_image_draw(display_object_gpu_image_t* record, u32* ot) {
 
 /* Appends the next free 36-byte render record to `list`, resets it and
  * returns its pool index. */
-s32 display_object_animated_append(void** list, s32* count) {
+s32 display_object_append_animated(void** list, s32* count) {
     list[*count] = &g_display_object_animated_pool[g_display_object_animated_count];
     g_display_object_animated_pool[g_display_object_animated_count].flags
         &= ~(DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
@@ -326,7 +326,7 @@ s32 display_object_animated_append(void** list, s32* count) {
 
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
-s32 display_object_image_append(void** list, s32* count) {
+s32 display_object_append_image(void** list, s32* count) {
     list[*count] = &g_display_object_gpu_image_pool[g_display_object_image_count];
     g_display_object_gpu_image_pool[g_display_object_image_count].flags
         &= ~(DISPLAY_OBJECT_8BIT_CLUT | DISPLAY_OBJECT_BLANK | DISPLAY_OBJECT_HIDDEN | DISPLAY_OBJECT_SEMI_TRANSPARENT);
@@ -342,7 +342,7 @@ s32 display_object_image_append(void** list, s32* count) {
 
 /* Build the centered sub-rectangle of the source area for a scale mode
  * (20%, 50%, 80%, 90% or 100%), aligned to 4 pixels. */
-static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle) {
+static void calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
     s32 scale;
     s32 source_width;
     s32 source_height;

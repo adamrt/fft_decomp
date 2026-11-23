@@ -26,7 +26,7 @@ static TILE s_equipment_gfx_tile_buffer[20] = { 0 };
 /* Upload the menu glyph sheet and palette image, copy two window-frame palettes into VRAM row 254
  * (each also as a 12-color copy from color 4, with color 4 cleared), then reset the screen's
  * selections and rebuild the inventory totals and item category lists. */
-static void equipment_load_images(void) {
+static void init_images_and_item_lists(void) {
     RECT rect;
     palette_t palette;
 
@@ -72,20 +72,20 @@ static void equipment_load_images(void) {
     rect.w = 0xC;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
-    menu_selection_values_clear();
+    menu_selection_clear_values();
     g_help_message_text_id = 0;
-    equipment_reset_selection();
+    equipment_reset_selection_results();
     item_build_inventory_totals();
     item_rebuild_category_list(0);
     item_rebuild_category_list(1);
     item_rebuild_category_list(2);
     item_rebuild_category_list(3);
     item_rebuild_category_list(4);
-    menu_selection_records_clear();
+    menu_selection_clear_records();
 }
 
-/* Size the primitive pools, load the unit `battle_id` and start the equipment screen threads. */
-void equipment_init(s32 battle_id) {
+/* Size the primitive pools, load the unit `battle_unit_id` and start the equipment screen threads. */
+void equipment_init(s32 battle_unit_id) {
     g_gfx_otag_length = 0x40;
     g_gfx_poly_ft4_capacity = 0x190;
     g_gfx_line_f2_capacity = 0xA;
@@ -111,14 +111,14 @@ void equipment_init(s32 battle_id) {
     g_gfx_sprite_capacity = 0;
     g_gfx_sprite_8_capacity = 0;
     g_gfx_sprite_16_capacity = 0;
-    equipment_gfx_init_contexts(s_equipment_gfx_contexts, g_gfx_otag_buffer, 0, 0, 0, g_gfx_poly_ft4_buffer, 0, 0, 0, 0,
+    menu_gfx_init_contexts(s_equipment_gfx_contexts, g_gfx_otag_buffer, 0, 0, 0, g_gfx_poly_ft4_buffer, 0, 0, 0, 0,
         s_equipment_gfx_line_f2_buffer, 0, 0, 0, 0, 0, s_equipment_gfx_tile_buffer, 0, 0, 0, 0, 0, 0,
         g_gfx_draw_move_buffer, g_gfx_draw_area_buffer, s_equipment_gfx_draw_mode_buffer);
-    equipment_load_unit(battle_id);
-    equipment_load_images();
-    g_unit_panel_unit_status_panel_params.flags = battle_id;
+    equipment_load_unit(battle_unit_id);
+    init_images_and_item_lists();
+    g_unit_panel_unit_status_panel_params.flags = battle_unit_id;
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_text_data;
-    equipment_load_selected_unit();
+    equipment_refresh_selected_unit();
     unit_panel_toggle_banner_thread(1);
     unit_panel_toggle_equipment_threads(1);
     unit_panel_toggle_numbers_thread(1);
@@ -131,10 +131,10 @@ void unit_panel_toggle_banner_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_UNIT_STATUS) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-            thread_parameters_set(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)&g_unit_panel_unit_status_panel_params, 0, 0);
+            thread_set_parameters(EQUIPMENT_THREAD_SLOT_UNIT_STATUS, (s32)&g_unit_panel_unit_status_panel_params, 0, 0);
         }
     } else {
-        menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
+        menu_thread_request_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
     }
 }
 
@@ -144,11 +144,11 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, unit_panel_equipment_thread);
-            thread_parameters_set(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)&g_equipment_panel_params, 0, 0);
+            thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)&g_equipment_panel_params, 0, 0);
         }
         unit_panel_toggle_numbers_thread(enable);
         return;
     }
-    menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);
-    menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+    menu_thread_request_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);
+    menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
 }

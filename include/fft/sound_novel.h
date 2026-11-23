@@ -20,8 +20,8 @@ typedef enum sound_novel_sound_mode {
 struct sound_novel_script_file;
 
 /* A saved sound-novel reading state (g_sound_novel_saved_readings, 0x38 bytes each).
- * sound_novel_selected_reading_reset establishes the stride and
- * reading_reset resets fields selectively; meanings beyond
+ * sound_novel_reset_selected_reading establishes the stride and
+ * reset_reading resets fields selectively; meanings beyond
  * those stores remain provisional. */
 typedef struct sound_novel_reading {
     /* 0x00: loaded sound-novel script, including its section-offset table. */
@@ -31,7 +31,7 @@ typedef struct sound_novel_reading {
     u16 state_flags;          /* 0x0c; sound_novel_state_flag_e */
     s16 section;              /* 0x0e */
     s16 word_index;           /* 0x10; index of the 32-bit instruction in the section; cleared by
-                               * sound_novel_reading_restore
+                               * sound_novel_restore_reading
                                */
     s16 counter_delta;        /* 0x12 */
     s16 text_id;              /* 0x14 */
@@ -60,8 +60,8 @@ extern u32 g_sound_novel_saved_flags[2];
  * g_sound_novel_saved_readings. */
 extern s16 g_sound_novel_selected;
 
-void sound_novel_selected_reading_reset(s32 unused);
-void sound_novel_reading_restore(s32 render_index);
+void sound_novel_reset_selected_reading(s32 unused);
+void sound_novel_restore_reading(s32 render_index);
 
 /* script files */
 /* Section byte offsets at the start of a loaded sound-novel script. */
@@ -70,14 +70,14 @@ typedef struct sound_novel_script_file {
     u32 offsets[0]; /* 0x04; variable-length section byte-offset table */
 } sound_novel_script_file_t;
 
-/* The loaded sound-novel script (sound_novel_files_load). */
+/* The loaded sound-novel script (sound_novel_load_files). */
 extern struct sound_novel_script_file g_sound_novel_script;
 
-void sound_novel_files_load(s32 chapter);
+void sound_novel_load_files(s32 chapter);
 
 /* interpreter */
 /* Interpreter state of the sound-novel script (sound_novel_reading_t.state_flags),
- * stepped by sound_novel_script_run. */
+ * stepped by sound_novel_run_script. */
 typedef enum sound_novel_state_flag {
     SOUND_NOVEL_STATE_BRANCH = 0x002,  /* a branch was taken: mark its saved-data bit and enter the next section */
     SOUND_NOVEL_STATE_FETCH = 0x004,   /* the handler is done: load the next 32-bit instruction */
@@ -89,8 +89,8 @@ typedef enum sound_novel_state_flag {
     SOUND_NOVEL_STATE_WHITE_OVERLAY = 0x100  /* the white full-screen overlay is up */
 } sound_novel_state_flag_e;
 
-s32 sound_novel_script_run(void);
-u32 sound_novel_section_instruction_find(s32 section, s32 opcode);
+s32 sound_novel_run_script(void);
+u32 sound_novel_find_section_instruction(s32 section, s32 opcode);
 
 /* text history */
 /* Unsigned scalar view of text_history[1] used by both history shifters.
@@ -109,8 +109,8 @@ typedef enum sound_novel_phase {
     SOUND_NOVEL_PHASE_END = 3           /* the script ended: waits for thread 14, then leaves */
 } sound_novel_phase_e;
 
-/* The SOUND_NOVEL level pushed by sound_novel_reader_open and stepped by
- * sound_novel_reader_update while the script runs: the Start and Square button prompts, and the
+/* The SOUND_NOVEL level pushed by sound_novel_open_reader and stepped by
+ * sound_novel_update_reader while the script runs: the Start and Square button prompts, and the
  * brightness bar with its overlay, shown for a while after L1 or R1 changes the brightness. */
 typedef struct sound_novel_level {
     s32 quit_prompt_window;        /* 0x00; the Start button prompt (the Quit/Continue menu) */
@@ -126,7 +126,7 @@ typedef struct sound_novel_level {
 } sound_novel_level_t;
 
 /* The SOUND_NOVEL_QUIT level, the sound novel's Quit/Continue menu; pushed by
- * quit_menu_open and stepped by sound_novel_quit_update. */
+ * open_quit_menu and stepped by sound_novel_update_quit_menu. */
 typedef struct sound_novel_quit_level {
     s32 cursor_window; /* 0x00 */
     s32 second_window; /* 0x04 */
@@ -145,7 +145,7 @@ typedef enum sound_novel_history_phase {
     SOUND_NOVEL_HISTORY_PHASE_RESTORE = 2 /* the reverse ramp, then the level pops */
 } sound_novel_history_phase_e;
 
-/* Provisional: the SOUND_NOVEL_HISTORY level pushed by history_open, which stores
+/* Provisional: the SOUND_NOVEL_HISTORY level pushed by open_history, which stores
  * the newest history text, the three older ones, phase DIM and step 0. The draw helper reads the same record. */
 typedef struct sound_novel_history_level {
     s32 upper_window;   /* 0x00 */
@@ -158,8 +158,8 @@ typedef struct sound_novel_history_level {
     s32 step;           /* 0x24; 0..4 fade step */
 } sound_novel_history_level_t;
 
-/* The SOUND_NOVEL_RESTART level pushed by reading_choice_open and stepped by
- * sound_novel_reading_choice_update: a cursor window over the saved-picture render record and two text
+/* The SOUND_NOVEL_RESTART level pushed by open_reading_choice and stepped by
+ * sound_novel_update_reading_choice: a cursor window over the saved-picture render record and two text
  * render records. Only mode shares its meaning with the EVENT_TRANSITION level at the same offset. */
 typedef struct sound_novel_restart_level {
     s32 cursor_window;  /* 0x00; moved between the two option rows */
@@ -172,14 +172,14 @@ typedef struct sound_novel_restart_level {
     s32 mode; /* 0x20; argument of the push */
 } sound_novel_restart_level_t;
 
-void sound_novel_reader_open(s32 argument);
-void sound_novel_reader_resume(menu_stack_record_t* level);
-void sound_novel_reader_update(menu_stack_record_t* level);
-void sound_novel_reader_suspend(menu_stack_record_t* level);
-void sound_novel_quit_resume(menu_stack_record_t* level);
-void sound_novel_quit_suspend(menu_stack_record_t* level);
-void sound_novel_quit_update(menu_stack_record_t* level);
-void sound_novel_history_update(menu_stack_record_t* level);
-void sound_novel_reading_choice_update(menu_stack_record_t* level);
+void sound_novel_open_reader(s32 argument);
+void sound_novel_resume_reader(menu_stack_record_t* level);
+void sound_novel_update_reader(menu_stack_record_t* level);
+void sound_novel_suspend_reader(menu_stack_record_t* level);
+void sound_novel_resume_quit_menu(menu_stack_record_t* level);
+void sound_novel_suspend_quit_menu(menu_stack_record_t* level);
+void sound_novel_update_quit_menu(menu_stack_record_t* level);
+void sound_novel_update_history(menu_stack_record_t* level);
+void sound_novel_update_reading_choice(menu_stack_record_t* level);
 
 #endif

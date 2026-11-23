@@ -31,7 +31,7 @@ static s8 s_sort_field_indices[12] = { offsetof(formation_unit_t, identity.roste
  * evade, 5 owned plus equipped count; keys other than 0 sort descending.
  * The magic-evade key reads 0 for the left weapon but the weapon's evade for
  * the right one; the target has this asymmetry. */
-void item_id_list_sort(s32 mode, s16* list) {
+void item_sort_id_list(s32 mode, s16* list) {
     s8 counts[0x100];
     s32 count;
     s32 i;
@@ -91,7 +91,7 @@ void item_id_list_sort(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
                     key_a = g_item_primary_data[item_a].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
-                    key_a = item_ranking_value_get(item_a);
+                    key_a = item_get_ranking_value(item_a);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_a < ITEM_ID_THROWABLE_FIRST) {
                         key_a = g_item_weapon_data[g_item_primary_data[item_a].secondary_data_id].evade;
@@ -113,7 +113,7 @@ void item_id_list_sort(s32 mode, s16* list) {
                         key_a = 0;
                     }
                 } else if (criterion == ITEM_SORT_KEY_HELD_COUNT) {
-                    key_a = item_inventory_count_adjust(item_a, 0) + counts[item_a];
+                    key_a = item_adjust_inventory_count(item_a, 0) + counts[item_a];
                 }
 
                 if (criterion == ITEM_SORT_KEY_TYPE) {
@@ -124,7 +124,7 @@ void item_id_list_sort(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
                     key_b = g_item_primary_data[item_b].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
-                    key_b = item_ranking_value_get(item_b);
+                    key_b = item_get_ranking_value(item_b);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_b < ITEM_ID_THROWABLE_FIRST) {
                         key_b = g_item_weapon_data[g_item_primary_data[item_b].secondary_data_id].evade;
@@ -147,7 +147,7 @@ void item_id_list_sort(s32 mode, s16* list) {
                         key_b = 0;
                     }
                 } else {
-                    key_b = item_inventory_count_adjust(item_b, 0) + counts[item_b];
+                    key_b = item_adjust_inventory_count(item_b, 0) + counts[item_b];
                 }
 
                 k++;

@@ -65,7 +65,7 @@ s32 heap_smd_free(void* ptr) {
 }
 
 /* Mark every page of the music (SMD) heap free. */
-void heap_smd_table_clear(void) {
+void heap_smd_clear_table(void) {
     int index = HEAP_SMD_PAGE_COUNT - 1;
     u8* entry = &s_heap_smd_allocator_table[HEAP_SMD_PAGE_COUNT - 1];
 
@@ -187,7 +187,7 @@ s32 heap_free(void* pointer) {
 }
 
 /* Mark every page of the game heap free; startup and each later game reset call it. */
-void heap_game_table_clear(void) {
+void heap_clear_game_table(void) {
     int index = HEAP_GAME_PAGE_COUNT - 1;
     u8* entry = &s_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT - 1];
 

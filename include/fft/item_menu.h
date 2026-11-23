@@ -12,8 +12,8 @@ struct unit_panel_summary;
 
 /* item entry encoding */
 /* formation_unit_t.equipment 16-bit values carry the item id in the low ten bits and flags above (bit 14 is tested
- * by fitting_purchase_commit and the job wheel); the WORLD item tables are indexed by the masked id
- * (shop_item_price_get, item_type_get). */
+ * by commit_fitting_purchase and the job wheel); the WORLD item tables are indexed by the masked id
+ * (shop_get_item_price, item_get_type). */
 enum {
     ITEM_ENTRY_ID_MASK = 0x3ff,
     ITEM_ENTRY_UNEQUIPPABLE = 0x4000, /* item list entries: listed, but the unit cannot equip the item */
@@ -38,8 +38,8 @@ typedef enum item_menu_category {
     ITEM_MENU_CATEGORY_OTHER = 5
 } item_menu_category_e;
 
-/* The category argument of formation_item_list_build,
- * shop_stock_list_build and equipment_build_item_list. 0 to 4
+/* The category argument of equipment_build_item_list,
+ * shop_build_stock_list and equipment_build_item_list. 0 to 4
  * select what fits that equipment slot. The item menus pass their tab + 1 for
  * the first four tabs and OTHER for the fifth; the best-fit builders pass
  * WEAPON or SHIELD for the left hand. */
@@ -63,7 +63,7 @@ typedef enum item_list_mode {
     ITEM_LIST_MODE_MARK_UNEQUIPPABLE = 1,      /* 0x4000 on entries the unit cannot equip; taken as
                                                   EQUIPPABLE unless Show Unequippable Items is on */
     ITEM_LIST_MODE_EQUIPPABLE = 2,             /* entries the unit cannot equip are left out */
-    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3 /* formation_item_list_build only: as
+    ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY = 3 /* equipment_build_item_list only: as
                                                    EQUIPPABLE, counting no equipped copies */
 } item_list_mode_e;
 
@@ -90,7 +90,7 @@ extern u8 g_item_page_order[0x15];
 extern u8 g_menu_selected_slot;
 
 /* Throwable weapons and consumables share the fallback category. */
-item_menu_category_e item_menu_category_get(s16 item_id);
+item_menu_category_e item_get_menu_category(s16 item_id);
 
 /* Reconciles a category list with what the party owns: newly owned items go first. */
 void item_rebuild_category_list(s32 category);
@@ -100,12 +100,12 @@ s32 item_sort_list_by_category_order(s32 category_index, s16* list);
 void item_store_category_list(s32 category_index, const s16* source);
 
 /* sort orders */
-/* A key in the list that item_id_list_sort (EQUIP and WORLD each build their own body) sorts by
+/* A key in the list that item_sort_id_list (EQUIP and WORLD each build their own body) sorts by
  * (g_item_type_order_lists); -1 ends the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
     ITEM_SORT_KEY_TYPE = 0,
     ITEM_SORT_KEY_PRICE = 1,
-    ITEM_SORT_KEY_RANKING = 2, /* item_ranking_value_get */
+    ITEM_SORT_KEY_RANKING = 2, /* item_get_ranking_value */
     ITEM_SORT_KEY_PHYSICAL_EVADE = 3,
     ITEM_SORT_KEY_MAGIC_EVADE = 4,
     ITEM_SORT_KEY_HELD_COUNT = 5 /* inventory plus equipped copies */
@@ -131,8 +131,8 @@ typedef enum item_sort_order {
  * is fixed; item_store_type_order edits the lists it selects. */
 extern s8* const g_item_type_order_lists[];
 
-s32 item_ranking_value_get(s32 item_id);
-void item_id_list_sort(s32 mode, s16* list);
+s32 item_get_ranking_value(s32 item_id);
+void item_sort_id_list(s32 mode, s16* list);
 
 /* Store and load a category's sort key order as -1 terminated halfwords. */
 void item_store_type_order(s32 list_index, const s16* source);
@@ -142,14 +142,14 @@ void item_load_type_order(s32 list_index, s16* destination);
 extern struct unit_panel_record g_item_preview_stat_detail;
 
 /* EQUIP and WORLD each build their own body. */
-void item_stat_preview_build(
+void item_build_stat_preview(
     s16 raw_item, struct unit_panel_summary* summary, struct unit_panel_record* detail, s32 alternate);
 
 /* icons and the item panel */
-/* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_type_icon_build gives the
+/* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_build_type_icon gives the
  * texture cell of an item type's 12x12 icon. */
-void item_type_icon_build(s32 item_type, struct menu_icon_source* output);
-void item_icon_source_build(struct menu_icon_source* output, u32 item_id);
+void item_build_type_icon(s32 item_type, struct menu_icon_source* output);
+void item_build_icon_source(struct menu_icon_source* output, u32 item_id);
 struct menu_icon_source* item_build_type_icon_source(s32 index);
 
 /* A weapon's hand marks on the item panel: two-handed, or the Two Hands and Two Swords marks it allows. */
@@ -161,10 +161,15 @@ void item_draw_status_list(s16 item_id);
 /* item action menu */
 extern struct menu_entry g_item_action_menu;
 
+/* The item list's action menu and its sort-order sub-menu (WORLD's Formation items, EQUIP); each returns the list's
+ * next state. */
+s8 item_list_update_action_menu(void);
+s8 item_list_update_sort_menu(void);
+
 /* rearranging */
 /* The item screens' rearrange mode: pick an item up and move it within its category list. */
 extern s8 g_item_rearrange_initialized;
 
-s32 item_rearrange_update(void);
+s32 item_list_update_rearrange_mode(void);
 
 #endif

@@ -55,12 +55,12 @@ s32 ability_list_is_learned(s32 index) {
 /* Per-frame handler of the unit list's job page: runs the job list and,
  * once a job is chosen, its ability list, and returns to the unit list when
  * either step reports MENU_JOB_LIST_STEP_CLOSE. */
-void unit_list_update_job_page(void) {
+void job_page_update(void) {
     if (g_job_list_menu_active == 0) {
         g_job_list_menu_active = 1;
         g_job_list_menu_phase = MENU_JOB_LIST_STEP_JOBS;
-        menu_selection_value_set(0, 0);
-        menu_selection_records_clear();
+        menu_selection_set_value(0, 0);
+        menu_selection_clear_records();
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
     if (g_job_list_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
@@ -109,21 +109,21 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_disabled;
         s_ability_list_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
-        menu_selection_record_clear(10);
-        menu_selection_record_clear(11);
-        menu_selection_record_clear(12);
-        menu_selection_record_clear(13);
+        menu_selection_clear_record(10);
+        menu_selection_clear_record(11);
+        menu_selection_clear_record(12);
+        menu_selection_clear_record(13);
         rect.x = 0x100;
         rect.y = 0xC8;
         rect.w = 0x14;
         rect.h = 0x10;
         s_ability_list_job_name_ids[0] = g_job_list_selected_id;
-        text_id_rows_to_vram_render(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], s_ability_list_job_name_ids, &rect, 0);
-        g_ability_list_ability_category = menu_selection_horizontal_step(4, 0, 0);
+        g_ability_list_ability_category = menu_selection_step_horizontal(4, 0, 0);
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_scrollable_list_core_init(
+        menu_scrollable_list_init_core(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_ability_list_ready = 1;
     }
@@ -145,20 +145,20 @@ s32 ability_list_update(void) {
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
-    category = menu_selection_horizontal_sound_step(4, 0, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
+    category = menu_selection_step_horizontal_with_sound(4, 0, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (category != g_ability_list_ability_category) {
-        menu_selection_record_set(g_ability_list_ability_category + 10, g_menu_list_selected_index,
+        menu_selection_set_record(g_ability_list_ability_category + 10, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_ability_list_ability_entries);
         g_ability_list_ability_category = category;
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
-        menu_selection_record_restore(
+        menu_selection_restore_record(
             g_ability_list_ability_category + 10, &selected, &scroll, g_ability_list_ability_entries);
-        menu_init_scrollable_list(
+        menu_scrollable_list_init(
             g_ability_list_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        menu_set_window_scale_step(10);
+        menu_window_set_scale_step(10);
     }
-    menu_run_script_with_palette_mode(g_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_script_run_with_palette_mode(g_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x2D;

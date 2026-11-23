@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 /* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */
-s32 job_generic_index_get(s32 job_id) {
+s32 job_get_generic_index(s32 job_id) {
     u16 id = job_id;
     s16 result;
 
@@ -27,11 +27,11 @@ s32 job_generic_index_get(s32 job_id) {
 }
 
 /* Return the lowest job ID with this skillset, or -1. */
-s32 job_first_for_skillset_find(s32 skillset) {
+s32 job_find_first_for_skillset(s32 skillset) {
     s32 i;
 
     for (i = 0; i < JOB_ID_COUNT; i++) {
-        if (job_data_get(i)->skillset == skillset) {
+        if (job_get_data(i)->skillset == skillset) {
             return i;
         }
     }
@@ -41,7 +41,7 @@ s32 job_first_for_skillset_find(s32 skillset) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-s32 job_list_base_get(s16 unit_id) {
+s32 job_list_get_base(s16 unit_id) {
     unit_list_record_t* unit = g_unit_list_pointers[unit_id];
     u32 job_id = unit->character_identity;
 
@@ -56,7 +56,7 @@ s32 job_list_base_get(s16 unit_id) {
 /* Store generic-job unlocks in the party record's big-endian byte order. */
 void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]) {
     s32 jobs
-        = job_unlocks_calculate(party->career.job_levels, party->gender_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
+        = job_calculate_unlocks(party->career.job_levels, party->gender_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
     unlocked_jobs[0] = jobs >> 16;
     unlocked_jobs[1] = jobs >> 8;
     unlocked_jobs[2] = jobs;
@@ -86,8 +86,8 @@ s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
     slot = &unit_table[unit_index];
     unit = *slot;
     job_ids_output = job_ids;
-    bits_init_reader(unit->unlocked_jobs);
-    job_ids_output[0] = job_list_base_get(saved_unit_id & 0xff);
+    bits_primary_init_reader(unit->unlocked_jobs);
+    job_ids_output[0] = job_list_get_base(saved_unit_id & 0xff);
     job_count = 1;
     if (job_is_special_monster((*slot)->job_id) || (*slot)->uses_monster_skillset != 0) {
         job_ids_output[1] = -1;
@@ -95,14 +95,14 @@ s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
     }
 
     /* Skip Squire's bit: the base job above takes Squire's place. */
-    bits_read(1);
+    bits_primary_read(1);
     generic_job_index = 1;
     unit_data_cursor = slot;
     out = job_ids_output + 1;
     for (; generic_job_index < JOB_ID_GENERIC_COUNT; generic_job_index++) {
         s32 job_is_unlocked;
 
-        job_is_unlocked = bits_read(1);
+        job_is_unlocked = bits_primary_read(1);
         /* saved_unit_id now holds the job id; a separate local changes the allocation. */
         saved_unit_id = generic_job_index + JOB_ID_SQUIRE;
         if (saved_unit_id == JOB_ID_BARD && ((*unit_data_cursor)->gender_flags & UNIT_FLAG_FEMALE) != 0) {
@@ -122,8 +122,8 @@ s32 unit_list_build_job_list(s32 unit_id, s16* job_ids, s32 unused_2) {
 }
 
 /* Return the skillset of a job from the job data table. */
-s32 job_skillset_get(s32 job_id) {
-    return job_data_get(job_id)->skillset;
+s32 job_get_skillset(s32 job_id) {
+    return job_get_data(job_id)->skillset;
 }
 
 /*
@@ -137,8 +137,8 @@ s32 job_skillset_get(s32 job_id) {
  * only the first three, all learned.
  */
 s32 ability_list_build(s16 unit_index, s16 job_id, menu_ability_category_e ability_category, s16* list, s32 mode) {
-    s32 skillset = job_skillset_get(job_id);
-    s16 generic_index = job_generic_index_get(job_id);
+    s32 skillset = job_get_skillset(job_id);
+    s16 generic_index = job_get_generic_index(job_id);
     s16* abilities;
     s32 i;
     s32 count;
@@ -150,10 +150,10 @@ s32 ability_list_build(s16 unit_index, s16 job_id, menu_ability_category_e abili
     s32 byte_offset;
     unit_list_record_t* unit;
 
-    if (job_first_for_skillset_find(skillset) == -1) {
+    if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_unit_list_pointers[unit_index]->abilities[0];
     }
-    abilities = (s16*)ability_skillset_list_build(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
 
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
@@ -184,7 +184,7 @@ s32 ability_list_build(s16 unit_index, s16 job_id, menu_ability_category_e abili
     /* The job's learned-ability bits, one per skillset slot. Integer address arithmetic
      * preserves the final ADDU operand order. */
     byte_offset = generic_index * UNIT_LEARNED_ABILITY_BYTES_PER_JOB + offsetof(unit_list_record_t, learned_abilities);
-    bits_init_reader((const u8*)(byte_offset + (s32)unit));
+    bits_primary_init_reader((const u8*)(byte_offset + (s32)unit));
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_unit_list_pointers[unit_index]->job_id)) {
             learned = 1;
@@ -194,7 +194,7 @@ s32 ability_list_build(s16 unit_index, s16 job_id, menu_ability_category_e abili
             }
             learned = 1;
         } else {
-            learned = bits_read(1);
+            learned = bits_primary_read(1);
         }
 
         ability_id = abilities[i];

@@ -8,7 +8,7 @@
 
 static u32 s_loading_otags[2][2] = { 0 };
 
-/* Called by file_load_poll on every poll of an unfinished read. Unless the
+/* Called by file_poll_load on every poll of an unfinished read. Unless the
  * counter is -1 (message off), the 64th call unmasks the display and from then on
  * every call draws the blinking message on its own, alternating the two display
  * buffers; the counter stays at 0x40 or 0x41. */
@@ -25,7 +25,7 @@ void loading_message_draw(void) {
             PutDispEnv(&g_gfx_display_envs[frame]);
             otag = s_loading_otags[frame];
             ClearOTag(otag, 2);
-            loading_otag_append(otag);
+            loading_message_append_to_otag(otag);
             DrawOTag(otag);
             SetDispMask(1);
             g_loading_display_frame_counter &= 0x41;

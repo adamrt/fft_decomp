@@ -1,7 +1,6 @@
 /* Event-frame scheduling, tutorial input and pending script requests. */
 
 #include "fft/ai.h"
-#include "fft/battle_map.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/encounter.h"
@@ -10,6 +9,7 @@
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/input.h"
+#include "fft/map.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
@@ -42,13 +42,13 @@ extern u8 g_event_thread_status_snapshot[THREAD_ID_COUNT];
 
 /* Five rain and five snow commands; the dispatcher consumes each halfword's low byte.
  * WORLD retains this table even though it has no weather-request consumer. */
-static u16 s_event_weather_commands[10] = { BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR,
-    BATTLE_MAP_WEATHER_COMMAND_LIGHT_RAIN, BATTLE_MAP_WEATHER_COMMAND_RAIN, BATTLE_MAP_WEATHER_COMMAND_HEAVY_RAIN,
-    BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_CLEAR, BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW,
-    BATTLE_MAP_WEATHER_COMMAND_SNOW, BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW };
+static u16 s_event_weather_commands[10]
+    = { MAP_WEATHER_COMMAND_CLEAR, MAP_WEATHER_COMMAND_CLEAR, MAP_WEATHER_COMMAND_LIGHT_RAIN, MAP_WEATHER_COMMAND_RAIN,
+          MAP_WEATHER_COMMAND_HEAVY_RAIN, MAP_WEATHER_COMMAND_CLEAR, MAP_WEATHER_COMMAND_CLEAR,
+          MAP_WEATHER_COMMAND_LIGHT_SNOW, MAP_WEATHER_COMMAND_SNOW, MAP_WEATHER_COMMAND_HEAVY_SNOW };
 
-static void camera_from_script_variables_load(void);
-static void pending_requests_process(void);
+static void load_camera_from_script_variables(void);
+static void process_pending_requests(void);
 
 /* While a tutorial scripts the input, hold wait_value in the tutorial wait
  * variable for one thread yield with every controller input disabled. */
@@ -62,11 +62,11 @@ void tutorial_pulse_wait_value(s32 wait_value) {
 }
 
 /* Apply disabled and forced input variables while retaining the high input bits. */
-static void input_overrides_apply(u32* state) {
+static void apply_input_overrides(u32* state) {
     u32 high;
 
     if (*state == INPUT_RESET_BUTTONS) {
-        system_game_reset();
+        system_reset_game();
     }
 
     high = *state & 0xFFFF0000;
@@ -87,7 +87,7 @@ void script_route_event_input(void) {
     if (g_thread_current_id != SCREEN_THREAD_SLOT_TUTORIAL_TEXT) {
         return;
     }
-    input = tutorial_buttons_get();
+    input = tutorial_get_buttons();
     if (input == 0) {
         s_script_initial_repeat_counter = 0;
         s_script_repeat_counter = 0;
@@ -142,11 +142,11 @@ void script_route_event_input(void) {
  * apply the script's disabled and forced inputs to it in place. */
 void script_filter_controller_input(u32* input) {
     g_script_unfiltered_controller_input = *input;
-    input_overrides_apply(input);
+    apply_input_overrides(input);
 }
 
 /* Run one event frame around the thread scheduler, returning a script_event_frame_result_e. */
-s32 script_event_frame_run(u32* ot, u32 buttons) {
+s32 script_update_event_frame(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
     s32 finish_op;
@@ -168,7 +168,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
     }
     g_gfx_current_otag_entry = ot;
     gfx_submit_screen_fade_overlay(&g_fade_overlays[g_menu_packet_buffer_index], g_gfx_screen_fade);
-    camera_state_to_script_variables_store();
+    camera_store_state_to_script_variables();
     menu_draw_active_window_frames();
 
     if (g_script_threads_idle != 0) {
@@ -178,7 +178,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
             }
         }
         if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
-            finish_op = scenario_finish_operation_get();
+            finish_op = scenario_get_finish_operation();
             if (finish_op != 0) {
                 if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
                     g_script_threads_idle = 0;
@@ -217,10 +217,10 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
         g_script_threads_idle = 0;
     }
 
-    script_event_input_update(buttons);
+    script_update_event_input(buttons);
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         g_script_unfiltered_controller_input = g_script_event_input;
-        input_overrides_apply(&g_script_event_input);
+        apply_input_overrides(&g_script_event_input);
         g_event_saved_input = g_script_event_input;
         script_variable_set(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
     }
@@ -229,7 +229,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
     }
     if (g_event_map_append_state >= 3) {
         g_event_map_append_state = 0;
-        g_battle_map_destruction_wait_state = 1;
+        g_map_destruction_wait_state = 1;
     }
 
     /* Clear last frame's requests; script commands raise them again while the threads run. */
@@ -249,7 +249,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
     g_event_field_object_use_request = 0;
 
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
-        ordering_table = jobstts_entrypoint(g_unit_panel_selected_unit.battle_id, 0);
+        ordering_table = jobstts_entrypoint(g_unit_panel_selected_unit.battle_unit_id, 0);
         g_overlay_companion_overlay_primitives = (s32)ordering_table;
         if (ordering_table != 0) {
             AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
@@ -258,7 +258,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
         }
     }
     if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
-        prims = equip_entrypoint(g_unit_panel_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
+        prims = equip_entrypoint(g_unit_panel_selected_unit.battle_unit_id, g_gfx_current_otag_entry + 1);
         g_overlay_companion_overlay_primitives = prims;
         if (prims >= 2) {
             AddPrims(g_gfx_current_otag_entry, (void*)prims, (void*)(prims + 0xFC));
@@ -286,7 +286,7 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
         g_script_input_suppression_frames--;
     }
 
-    camera_from_script_variables_load();
+    load_camera_from_script_variables();
     g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {
@@ -301,13 +301,13 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
         overlay_companion_stub();
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
-        script_event_speed_set(1);
+        script_set_event_speed(1);
         i = bunit_entrypoint(0, 0);
-        cursor_unit_tile_move(i);
-        g_unit_panel_selected_unit.battle_id = i;
+        cursor_move_to_battle_unit(i);
+        g_unit_panel_selected_unit.battle_unit_id = i;
         g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_overlay_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
-        script_event_speed_set(1);
+        script_set_event_speed(1);
         /* The save menu runs frames of its own and changes the screen polarity; keep the event's. */
         polarity = g_gfx_screen_polarity;
         script_variable_set(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
@@ -317,8 +317,8 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
     }
 
     overlay_companion_poll();
-    overlay_companion_file_poll();
-    pending_requests_process();
+    overlay_companion_poll_file();
+    process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
         return SCRIPT_EVENT_FRAME_RUNNING;
@@ -342,33 +342,33 @@ s32 script_event_frame_run(u32* ot, u32 buttons) {
 /* Feed `input` to the event input state, make `entry` the current ordering-table entry
  * and draw the active menu windows. No retail code calls it. */
 void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
-    script_event_input_update(input);
+    script_update_event_input(input);
     g_gfx_current_otag_entry = entry;
     menu_draw_active_window_frames();
 }
 
 /* Advance the retained map-destruction wait state from 1 to 2.
  * This program's empty request hook does not advance it further. */
-void script_map_destruction_signal(void) {
-    if (g_battle_map_destruction_wait_state == 1) {
-        g_battle_map_destruction_wait_state = g_battle_map_destruction_wait_state + 1;
+void script_signal_map_destruction(void) {
+    if (g_map_destruction_wait_state == 1) {
+        g_map_destruction_wait_state = g_map_destruction_wait_state + 1;
     }
 }
 
 /* This program retains the event request hook as an empty function. */
-static void pending_requests_process(void) {
+static void process_pending_requests(void) {
 }
 
 /* This program retains the camera-load hook as an empty function. */
-static void camera_from_script_variables_load(void) {
+static void load_camera_from_script_variables(void) {
 }
 
 /* This program retains the camera-store hook as an empty function. */
-void camera_state_to_script_variables_store(void) {
+void camera_store_state_to_script_variables(void) {
 }
 
 /* The raw weather script variable. weather_get_effective applies the
  * map's indoor and snow flags to it. */
-s32 battle_map_weather_get(void) {
+s32 map_get_weather(void) {
     return g_script_variables[EVENT_SCRIPT_VAR_WEATHER];
 }

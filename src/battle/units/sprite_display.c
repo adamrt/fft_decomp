@@ -1,11 +1,11 @@
 /* Manage unit sprite displays and submit their parts as textured polygons. */
 
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "psx/gte_inline.h"
 #include "psx/gte_inline_split.h"
 #include "psx/libc.h"
@@ -32,7 +32,7 @@ static SVECTOR s_gte_rtps_vxy0 = { 0 };
 /* Reset the unit sprite renderer at battle start: the identity third row and column of
  * the sprite display matrix, depth 0x200 in the GTE projection inputs, the frame
  * counters, and the sprite primitive pool, which begins just past the unit slots. */
-void sprite_render_state_init(void) {
+void sprite_init_render_state(void) {
     s_sprite_display_matrix.m[2][2] = ONE;
     s_gte_rtps_vxy0.vz = 0x200;
     s_gte_rtpt_vxy2.vz = 0x200;
@@ -48,16 +48,16 @@ void sprite_render_state_init(void) {
     g_sprite_unread_2 = 0;
     g_sprite_unread_1 = 0;
     /* The primitive pool begins immediately after the allocation slots. */
-    g_sprite_prim_pool = (POLY_FT4*)(g_unit_slot_states + UNIT_RUNTIME_SLOT_COUNT);
+    g_sprite_prim_pool = (POLY_FT4*)(g_map_unit_slots + MAP_UNIT_SLOT_COUNT);
 }
 
 /* Reset a unit's own sprite display: neutral color, no flags on its eight
  * parts and none of them in use. The display initializers derive addresses from
  * slot bases because direct nested member addresses add instructions. */
-sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
+sprite_display_t* sprite_display_init_unit(s32 map_unit_id) {
     s32 body_part;
-    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[runtime_id]
-        + offsetof(unit_slot_state_t, unit.unit_sprite_display.header));
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_map_unit_slots[map_unit_id]
+        + offsetof(map_unit_slot_t, unit.unit_sprite_display.header));
 
     display->color.b = 0x80;
     display->color.g = 0x80;
@@ -71,10 +71,10 @@ sprite_display_t* sprite_display_init_unit(s32 runtime_id) {
 
 /* Reset the display of one of a unit's three sprite blocks: neutral color,
  * no flags on its three parts and none of them in use. */
-sprite_display_t* sprite_display_init_weapon(s32 runtime_id, s32 display_type) {
+sprite_display_t* sprite_display_init_weapon(s32 map_unit_id, s32 display_type) {
     s32 weapon_part;
-    sprite_weapon_display_t* weapons = (sprite_weapon_display_t*)((u8*)&g_unit_slot_states[runtime_id]
-        + offsetof(unit_slot_state_t, unit.weapon_sprite_displays));
+    sprite_weapon_display_t* weapons = (sprite_weapon_display_t*)((u8*)&g_map_unit_slots[map_unit_id]
+        + offsetof(map_unit_slot_t, unit.weapon_sprite_displays));
     sprite_display_t* display = &weapons[display_type].header;
 
     display->color.b = 0x80;
@@ -90,19 +90,19 @@ sprite_display_t* sprite_display_init_weapon(s32 runtime_id, s32 display_type) {
 /* Resets one of a unit's three numeric sprite displays to neutral color and no
  * parts. A display_section outside 0..2 leaves `display` unset; the only caller
  * passes 0, 1 and 2. */
-sprite_display_t* sprite_display_init_numeric(s32 runtime_id, s32 display_section) {
+sprite_display_t* sprite_display_init_numeric(s32 map_unit_id, s32 display_section) {
     sprite_display_t* display;
     s32 i;
 
     switch (display_section) {
     case 0:
-        display = &g_unit_slot_states[runtime_id].unit.numeric_sprite_displays[0].header;
+        display = &g_map_unit_slots[map_unit_id].unit.numeric_sprite_displays[0].header;
         break;
     case 1:
-        display = &g_unit_slot_states[runtime_id].unit.numeric_sprite_displays[1].header;
+        display = &g_map_unit_slots[map_unit_id].unit.numeric_sprite_displays[1].header;
         break;
     case 2:
-        display = &g_unit_slot_states[runtime_id].unit.numeric_sprite_displays[2].header;
+        display = &g_map_unit_slots[map_unit_id].unit.numeric_sprite_displays[2].header;
         break;
     }
 
@@ -117,9 +117,9 @@ sprite_display_t* sprite_display_init_numeric(s32 runtime_id, s32 display_sectio
 
 /* Resets a unit's status bubble display to one 14 x 12 part at (0, 0xb0) of the
  * FRAME.BIN page with CLUT 7 of the sprite row, neutral color and scale ONE. */
-sprite_display_t* sprite_display_init_status_bubble(s32 runtime_id) {
-    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[runtime_id]
-        + offsetof(unit_slot_state_t, unit.status_bubble_sprite_display.header));
+sprite_display_t* sprite_display_init_status_bubble(s32 map_unit_id) {
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_map_unit_slots[map_unit_id]
+        + offsetof(map_unit_slot_t, unit.status_bubble_sprite_display.header));
     s32 i;
 
     display->color.b = 0x80;
@@ -128,7 +128,7 @@ sprite_display_t* sprite_display_init_status_bubble(s32 runtime_id) {
     display->scale_y = ONE;
     display->scale_x = ONE;
     display->tpage = SPRITE_TPAGE_FRAME;
-    display->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_SPRITES, 7);
+    display->clut = MAP_CLUT(MAP_CLUT_ROW_SPRITES, 7);
     display->rotation = 0;
     display->part_count = 1;
     for (i = 0; i < 1; i++) {
@@ -145,9 +145,9 @@ sprite_display_t* sprite_display_init_status_bubble(s32 runtime_id) {
 
 /* Resets a unit's item sprite display to one 16 x 16 part of the ITEM.BIN page
  * with CLUT 7 of the sprite row, neutral color and scale ONE. */
-sprite_display_t* sprite_display_init_item(s32 runtime_id) {
-    sprite_display_t* display = (sprite_display_t*)((u8*)&g_unit_slot_states[runtime_id]
-        + offsetof(unit_slot_state_t, unit.item_sprite_display.header));
+sprite_display_t* sprite_display_init_item(s32 map_unit_id) {
+    sprite_display_t* display = (sprite_display_t*)((u8*)&g_map_unit_slots[map_unit_id]
+        + offsetof(map_unit_slot_t, unit.item_sprite_display.header));
     s32 i;
 
     display->color.b = 0x80;
@@ -156,7 +156,7 @@ sprite_display_t* sprite_display_init_item(s32 runtime_id) {
     display->scale_y = ONE;
     display->scale_x = ONE;
     display->tpage = SPRITE_TPAGE_ITEM;
-    display->clut = BATTLE_MAP_CLUT(BATTLE_MAP_CLUT_ROW_SPRITES, 7);
+    display->clut = MAP_CLUT(MAP_CLUT_ROW_SPRITES, 7);
     display->rotation = 0;
     display->part_count = 1;
     for (i = 0; i < 1; i++) {
@@ -169,14 +169,14 @@ sprite_display_t* sprite_display_init_item(s32 runtime_id) {
     return display;
 }
 
-/* Empty. unit_remove passes the removed unit's sprite display, a member of its
+/* Empty. map_unit_remove passes the removed unit's sprite display, a member of its
  * unit payload that sprite_display_init_unit handed out. */
 void sprite_display_release_unit_stub(sprite_display_t* unused_display) {
 }
 
 /* Starts a frame of sprite drawing: the GTE offset is reset to (0, 0) and the
  * primitive ring index reached last frame is recorded. */
-void sprite_render_frame_init(void) {
+void sprite_init_render_frame(void) {
     SetGeomOffset(0, 0);
     /* The target loads the counter unsigned (lhu). */
     g_sprite_prim_frame_start_index = g_sprite_prim_index;
@@ -184,7 +184,7 @@ void sprite_render_frame_init(void) {
 
 /* Takes the next of the 256 primitives of g_sprite_prim_pool, used as
  * a ring, and returns its index. */
-s16 sprite_primitive_take(void) {
+s16 sprite_take_primitive(void) {
     g_sprite_prim_index = (g_sprite_prim_index + 1) % 0x100;
     return g_sprite_prim_index;
 }
@@ -204,7 +204,7 @@ s16 sprite_primitive_take(void) {
  * test with its duplicated `addPrim(ot, prim)` arm is the original shape: jump
  * optimization merges the arms, but the references counted before that merge
  * give `ot` the allocation priority that places it in $s5 ahead of `display`. */
-void sprite_display_construct_polygon_data(
+void sprite_display_draw_parts(
     sprite_display_t* display, s32 end, s32 start, SVECTOR* position, s16 angle, s16 mode, SVECTOR* scale, u32* ot) {
     VECTOR unused;
     sprite_display_part_t* part;
@@ -230,7 +230,7 @@ void sprite_display_construct_polygon_data(
     for (i = start; i < end; i++) {
         part = &display->parts[i];
         flags = part->flags;
-        index = sprite_primitive_take();
+        index = sprite_take_primitive();
         flags ^= mode;
         prim = g_sprite_prim_pool + index;
         setlen(prim, 9);
@@ -293,7 +293,7 @@ void sprite_display_construct_polygon_data(
 
 /* Fill in part `index` of a sprite display: its offset from the sprite origin, its texture
  * rectangle and its flags. */
-void sprite_display_store_data(
+void sprite_display_set_part(
     sprite_display_t* display, s32 index, s16 x_shift, s16 y_shift, s16 u, s16 v, s16 width, s16 height, s16 flags) {
     sprite_display_part_t* part;
 

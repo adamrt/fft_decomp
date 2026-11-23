@@ -91,11 +91,11 @@ extern u16 g_menu_gfx_drawenv_y;
 /* Half of each double-buffered packet pair this frame fills; the menu frame update toggles it. */
 extern s32 g_menu_packet_buffer_index;
 
-/* Shade color of the menu's text and textured quads (menu_gfx_get_draw_color), set by the palette mode and
+/* Shade color of the menu's text and textured quads (gfx_get_draw_color), set by the palette mode and
  * gfx_set_draw_color. */
 extern rgb24_t g_menu_text_color;
 
-rgb24_t* menu_gfx_get_draw_color(void);
+rgb24_t* gfx_get_draw_color(void);
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 idx);
 void menu_gfx_enqueue_draw_mode(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
 void menu_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index);
@@ -133,7 +133,7 @@ extern u16 g_menu_gfx_texture_page;
 extern u16 g_menu_gfx_clut_id;
 
 /* palettes */
-/* menu_set_palette_mode picks the normal (0) or alternate (1) palette: it copies the matching _mode0 or _mode1
+/* menu_palette_set_mode picks the normal (0) or alternate (1) palette: it copies the matching _mode0 or _mode1
  * text and cursor CLUTs into the active CLUT selections below and sets g_menu_text_color. While the input is
  * locked or the previous thread still runs, the sprite CLUT selectors pick the dimmed colors. */
 
@@ -156,8 +156,8 @@ extern u16 g_menu_text_clut_2_mode0;
 extern u16 g_menu_alternate_number_clut;
 extern u16 g_menu_disabled_number_clut;
 
-void menu_palette_colors_set(const menu_palette_pair_t* source);
-void menu_set_palette_mode(s32 mode);
+void menu_palette_set_colors(const menu_palette_pair_t* source);
+void menu_palette_set_mode(s32 mode);
 void menu_select_sprite_clut(void* packet);
 void menu_select_icon_sprite_clut(SPRT* slot);
 
@@ -176,11 +176,23 @@ extern menu_glyph_sheet_t g_menu_glyph_image_data;
 
 /* sprite pages */
 /* One double-buffered sprite page (0xa0 bytes): five DR_MODE texture-window packets followed by the five SPRTs
- * they apply to. sprite_page_build builds two of them in g_menu_scratch_buffer for the unit stats panels. */
+ * they apply to. build_sprite_page builds two of them in g_menu_scratch_buffer for the unit stats panels. */
 typedef struct menu_sprite_page {
     DR_MODE modes[5]; /* 0x00 */
     SPRT sprites[5];  /* 0x3c */
 } menu_sprite_page_t;
 typedef char menu_sprite_page_size_must_be_160[(sizeof(menu_sprite_page_t) == 160) ? 1 : -1];
+
+/* frames */
+/* Each screen program's own copy. menu_gfx_init_contexts binds the primitive pools to both double-buffered contexts
+ * (WORLD, BUNIT and EQUIP; JOBSTTS and CARD keep their own initializers for their 244-byte contexts); the frame
+ * functions draw one ordering table and swap the contexts. */
+void menu_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3, POLY_F4* poly_f4,
+    POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4, POLY_GT4* poly_gt4,
+    LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3, LINE_G4* line_g4,
+    TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites, SPRT_8* sprites_8,
+    SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
+void menu_gfx_present_frame(s32 first_otag, s32 draw_otag);
+void menu_gfx_swap_context(s32 first_otag, s32 unused);
 
 #endif

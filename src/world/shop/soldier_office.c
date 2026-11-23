@@ -16,6 +16,7 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"
+#include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_party.h"
 #include "psx/pad.h"
@@ -56,7 +57,7 @@ static u32 s_soldier_office_fee;
 extern unit_count_script_t g_soldier_office_unit_count_script;
 extern u8 g_soldier_office_unit_count;
 
-/* The cursor doubles as the soldier-office mode (hire_fee_get). */
+/* The cursor doubles as the soldier-office mode (get_hire_fee). */
 extern menu_entry_t g_soldier_office_hire_menu_thread_data;
 extern u8 g_soldier_office_fee_script[34];
 
@@ -64,8 +65,8 @@ extern u8 g_soldier_office_fee_script[34];
  * kind, whose fee is 1000 gil plus its starting equipment's price (when the party cannot pay,
  * the recruit is removed again); row 2 renames a monster; row 3 or a cancel leaves, after
  * cashing out inventory beyond 99 of an item. */
-void soldier_office_menu_update(void) {
-    unit_stats_t unit;
+void soldier_office_update_menu(void) {
+    battle_unit_t unit;
     s32 i;
     s32 result;
     s32 slot;
@@ -81,7 +82,7 @@ void soldier_office_menu_update(void) {
         g_formation_unit_banner_enabled = 0;
         g_soldier_office_unit_count = 0;
         for (i = 0; i < PARTY_ROSTER_SLOT_COUNT; i++) {
-            result = unit_party_slot_init(&unit, i, 1);
+            result = battle_unit_init_from_party_slot(&unit, i, 1);
             if (result == 0 && unit.formation_index < PARTY_GUEST_SLOT_FIRST) {
                 g_soldier_office_unit_count++;
             }
@@ -97,11 +98,11 @@ void soldier_office_menu_update(void) {
             if (g_screen_selection_results[0] == 3 || g_screen_selection_results[0] == -1) {
                 g_soldier_office_hire_menu_initialized = 0;
                 g_shop_menu_step = SHOP_STEP_EXIT_FADE;
-                thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF825, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF825, 0);
                 shop_cash_out_excess_items();
             } else if (g_screen_selection_results[0] == 2) {
                 g_formation_unit_count
-                    = formation_record_list_build(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_MONSTERS);
+                    = formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_MONSTERS);
                 if (g_formation_unit_count != 0) {
                     g_shop_menu_step = SHOP_STEP_RENAME_SELECT_UNIT;
                     i = 0xF847;
@@ -109,38 +110,38 @@ void soldier_office_menu_update(void) {
                     i = 0xF846;
                     g_soldier_office_hire_result_shown = 1;
                 }
-                thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, i, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, i, 0);
             } else {
-                slot = formation_generate_unit(g_screen_selection_results[0]);
+                slot = formation_unit_generate(g_screen_selection_results[0]);
                 if (slot >= 0) {
                     s_soldier_office_fee = 1000;
                     /* `i` is still 0, the menu thread's result. */
                     for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                         s_soldier_office_fee
-                            += shop_item_price_get(g_formation_unit_pointers[slot]->detail.equipment[i]);
+                            += shop_get_item_price(g_formation_unit_pointers[slot]->detail.equipment[i]);
                     }
-                    if (shop_gil_adjust(0) < s_soldier_office_fee) {
-                        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF823, 0);
+                    if (shop_adjust_gil(0) < s_soldier_office_fee) {
+                        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF823, 0);
                         party_unit_remove(g_formation_unit_pointers[slot]->identity.roster_slot);
                         g_soldier_office_hire_result_shown = 1;
                     } else {
                         g_unit_selected_index = slot;
-                        formation_stage_selected_unit();
+                        stage_selected_unit();
                         g_formation_unit_banner_at_bottom = 0;
                         g_formation_unit_banner_at_bottom_latch = 0;
-                        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF824, 0);
+                        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF824, 0);
                         g_shop_menu_step = SHOP_STEP_HIRE_PREVIEW;
                     }
                 } else {
-                    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF822, 0);
+                    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF822, 0);
                     g_soldier_office_hire_result_shown = 1;
                 }
             }
         }
     }
-    shop_gil_draw();
-    soldier_office_fee_draw();
-    soldier_office_unit_count_draw();
+    shop_draw_gil();
+    soldier_office_draw_fee();
+    soldier_office_draw_unit_count();
 }
 
 /*
@@ -151,10 +152,10 @@ void soldier_office_menu_update(void) {
  * face button closes the panels and moves on to the hire confirmation
  * (message 0xF826).
  */
-void soldier_office_hire_preview_update(void) {
+void soldier_office_hire_update_preview(void) {
     if (g_soldier_office_hire_preview_initialized == 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             g_formation_unit_browse_enabled = 1;
@@ -164,17 +165,17 @@ void soldier_office_hire_preview_update(void) {
             g_help_message_text_id = MENU_GRID_HELP_RECRUIT_PREVIEW;
             g_soldier_office_hire_preview_initialized = 1;
         }
-        shop_gil_draw();
-        soldier_office_fee_draw();
-        soldier_office_unit_count_draw();
+        shop_draw_gil();
+        soldier_office_draw_fee();
+        soldier_office_draw_unit_count();
     } else if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
         g_shop_menu_step = SHOP_STEP_HIRE_CONFIRM;
         g_formation_unit_browse_enabled = 0;
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_numbers_thread(0);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF826, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF826, 0);
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         g_soldier_office_hire_preview_initialized = 0;
     }
@@ -187,12 +188,12 @@ void soldier_office_hire_preview_update(void) {
  * selection 2 returns to the preview. Any other result shows a message and
  * waits for its thread before going on to the name entry.
  */
-void soldier_office_hire_confirm_update(void) {
+void soldier_office_hire_update_confirm(void) {
     s16 selection;
 
     if (g_soldier_office_hire_confirm_message_wait != 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             g_soldier_office_hire_confirm_message_wait = 0;
@@ -201,37 +202,37 @@ void soldier_office_hire_confirm_update(void) {
     } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_confirm_menu) == 0) {
         selection = g_screen_selection_results[2];
         if (selection == 1 || selection == -1) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF827, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF827, 0);
             g_soldier_office_hire_menu_initialized = 0;
             party_unit_remove(g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot);
             g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_MENU;
         } else if (selection == 2) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
             g_shop_menu_step = SHOP_STEP_HIRE_PREVIEW;
         } else {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF829, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF829, 0);
             g_soldier_office_hire_confirm_message_wait = 1;
         }
     }
-    shop_gil_draw();
-    soldier_office_fee_draw();
-    soldier_office_unit_count_draw();
+    shop_draw_gil();
+    soldier_office_draw_fee();
+    soldier_office_draw_unit_count();
 }
 
 /* Soldier office: the name entry keyboard for the recruit, then the fee prompt. */
-void soldier_office_hire_name_update(void) {
+void soldier_office_hire_update_name(void) {
     if (g_soldier_office_hire_name_entry_initialized == 0) {
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_banner_thread(0);
         g_soldier_office_hire_name_entry_initialized = 1;
     }
     s_soldier_office_entered_name
-        = name_entry_keyboard_update(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
+        = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
     if (s_soldier_office_entered_name != 0) {
         g_soldier_office_hire_name_entry_initialized = 0;
         g_text_substitution_values[0] = s_soldier_office_fee;
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF82A, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF82A, 0);
         g_shop_menu_step = SHOP_STEP_HIRE_FEE_CONFIRM;
     }
 }
@@ -242,7 +243,7 @@ void soldier_office_hire_name_update(void) {
  * Choice 0 pays the fee and stores the recruit's name; 1 or -1 removes the
  * recruit from the roster. Other choices return to the name entry.
  */
-void soldier_office_hire_fee_update(void) {
+void soldier_office_hire_update_fee(void) {
     s16 choice;
 
     g_help_message_text_id = 0;
@@ -254,39 +255,39 @@ void soldier_office_hire_fee_update(void) {
     } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_fee_confirm_menu) == 0) {
         choice = g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT];
         if (choice == 0) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf82b, 0);
-            shop_gil_adjust(-s_soldier_office_fee);
-            formation_unit_name_set(g_unit_selected_index, s_soldier_office_entered_name);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf82b, 0);
+            shop_adjust_gil(-s_soldier_office_fee);
+            formation_unit_set_name(g_unit_selected_index, s_soldier_office_entered_name);
             g_soldier_office_hire_fee_message_wait = 1;
         } else if (choice == 1 || choice == -1) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf827, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf827, 0);
             g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_MENU;
             party_unit_remove(g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot);
             g_soldier_office_hire_menu_initialized = 0;
         } else {
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
             g_soldier_office_hire_fee_confirm_menu.selected_index = 0;
             g_shop_menu_step = SHOP_STEP_HIRE_NAME_ENTRY;
         }
     }
-    shop_gil_draw();
-    soldier_office_fee_draw();
-    soldier_office_unit_count_draw();
+    shop_draw_gil();
+    soldier_office_draw_fee();
+    soldier_office_draw_unit_count();
 }
 
 /* Return to the soldier office menu with message 0xf821, redrawing the gil,
  * fee and roster-count displays for this frame. */
-void soldier_office_menu_reopen(void) {
-    thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf821, 0);
+void soldier_office_reopen_menu(void) {
+    thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf821, 0);
     g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_MENU;
     g_soldier_office_hire_menu_initialized = 0;
-    shop_gil_draw();
-    soldier_office_fee_draw();
-    soldier_office_unit_count_draw();
+    shop_draw_gil();
+    soldier_office_draw_fee();
+    soldier_office_draw_unit_count();
 }
 
 /* Menu callback: no marker (-1) for any unit. */
-static s32 rename_unit_marker_get(s32 unused_unit_index) {
+static s32 get_rename_unit_marker(s32 unused_unit_index) {
     return -1;
 }
 
@@ -297,22 +298,22 @@ static s32 rename_unit_marker_get(s32 unused_unit_index) {
  * a box placed away from the unit banner); Cross returns to the Soldier
  * Office menu.
  */
-void soldier_office_rename_unit_update(void) {
+void soldier_office_rename_update_unit(void) {
     s32 mode;
     s32 input;
     s32 text_id;
 
     if (g_soldier_office_rename_prompt_initialized == 0) {
         if (!(g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE))) {
-            shop_gil_draw();
-            soldier_office_fee_draw();
-            soldier_office_unit_count_draw();
+            shop_draw_gil();
+            soldier_office_draw_fee();
+            soldier_office_draw_unit_count();
             return;
         }
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_soldier_office_rename_error_shown = 0;
         g_soldier_office_rename_prompt_initialized = 1;
-        formation_grid_cursor_init(0);
+        formation_grid_init_cursor(0);
         g_shop_background_visible = 0;
     }
     if (g_formation_unit_banner_enabled != 0) {
@@ -324,15 +325,15 @@ void soldier_office_rename_unit_update(void) {
     } else {
         g_help_message_text_id = 0;
     }
-    formation_grid_update(1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, rename_unit_marker_get, 0);
+    formation_grid_update(1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, get_rename_unit_marker, 0);
     if (g_soldier_office_rename_error_shown != 0) {
         g_help_message_text_id = -1;
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_soldier_office_rename_error_shown = 0;
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
     }
-    if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0 && formation_grid_scroll_check() == 0) {
+    if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0 && unit_grid_check_scroll() == 0) {
         input = g_menu_input_primary_repeat;
         if (input & PSX_PAD_CIRCLE) {
             if (g_formation_unit_pointers[g_unit_selected_index]->sprite_set == CHARACTER_IDENTITY_REIS_DRAGON) {
@@ -342,7 +343,7 @@ void soldier_office_rename_unit_update(void) {
                     mode = 2;
                 }
                 thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-                thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, mode | 0x18, 0xF848, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, mode | 0x18, 0xF848, 0);
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
                 g_soldier_office_rename_error_shown = 1;
             } else {
@@ -356,7 +357,7 @@ void soldier_office_rename_unit_update(void) {
             g_soldier_office_rename_prompt_initialized = 0;
             g_formation_unit_banner_enabled = 0;
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-            thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF821, 0);
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF821, 0);
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
             g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_REOPEN;
         }
@@ -364,21 +365,21 @@ void soldier_office_rename_unit_update(void) {
 }
 
 /* Soldier office: the name entry keyboard of the Rename service; sibling of
- * soldier_office_hire_name_update, which goes on to the fee prompt (0xF82A). */
-void soldier_office_rename_name_update(void) {
+ * soldier_office_hire_update_name, which goes on to the fee prompt (0xF82A). */
+void soldier_office_rename_update_name(void) {
     if (g_soldier_office_rename_name_entry_initialized == 0) {
         g_formation_unit_banner_enabled = 0;
         unit_panel_toggle_banner_thread(0);
         g_soldier_office_rename_name_entry_initialized = 1;
     }
-    formation_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, rename_unit_marker_get, 0);
+    formation_grid_update(1, 0, 0, 0, g_menu_input_lock_mode, get_rename_unit_marker, 0);
     s_soldier_office_entered_name
-        = name_entry_keyboard_update(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
+        = name_entry_update_keyboard(g_formation_unit_pointers[g_unit_selected_index]->name, 0);
     if (s_soldier_office_entered_name != 0) {
         g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_REOPEN;
-        formation_unit_name_set(g_unit_selected_index, s_soldier_office_entered_name);
+        formation_unit_set_name(g_unit_selected_index, s_soldier_office_entered_name);
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
-        thread_parameters_set(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF821, 0);
+        thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF821, 0);
         g_shop_background_visible = 1;
         g_soldier_office_rename_name_entry_initialized = 0;
     }
@@ -386,8 +387,8 @@ void soldier_office_rename_name_update(void) {
 
 /* Menu callback: the hiring fee shown for the highlighted row of the hire menu,
  * 1500 for row 0, 1400 for row 1 and 0 otherwise. The fee actually charged is
- * computed when the recruit is generated (soldier_office_menu_update). */
-static s32 hire_fee_get(s32 unused_row) {
+ * computed when the recruit is generated (soldier_office_update_menu). */
+static s32 get_hire_fee(s32 unused_row) {
     s16 mode = g_soldier_office_hire_menu_thread_data.selected_index;
 
     if (mode == 0) {
@@ -397,26 +398,26 @@ static s32 hire_fee_get(s32 unused_row) {
 }
 
 /* Run the soldier office's fee display script with
- * hire_fee_get installed as menu value callback 0,
+ * get_hire_fee installed as menu value callback 0,
  * then restore the previous callback. */
-void soldier_office_fee_draw(void) {
+void soldier_office_draw_fee(void) {
     menu_callback_t* callback_slot;
     s32 (*previous_callback)(s32);
 
     callback_slot = g_menu_row_callbacks;
     previous_callback = callback_slot->value;
-    callback_slot->value = hire_fee_get;
-    menu_run_script_with_palette_mode(g_soldier_office_fee_script, 0, 0);
+    callback_slot->value = get_hire_fee;
+    menu_script_run_with_palette_mode(g_soldier_office_fee_script, 0, 0);
     callback_slot->value = previous_callback;
 }
 
 /* Display the party unit count directly while value callback 0 is disabled. */
-void soldier_office_unit_count_draw(void) {
+void soldier_office_draw_unit_count(void) {
     s32 (*previous_callback)(s32);
 
     previous_callback = g_menu_row_callbacks[0].value;
     g_menu_row_callbacks[0].value = 0;
     g_soldier_office_unit_count_script.unit_count.value = g_soldier_office_unit_count;
-    menu_run_script_with_palette_mode(&g_soldier_office_unit_count_script, 0, 0);
+    menu_script_run_with_palette_mode(&g_soldier_office_unit_count_script, 0, 0);
     g_menu_row_callbacks[0].value = previous_callback;
 }

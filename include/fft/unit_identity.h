@@ -5,7 +5,7 @@
 
 /*
  * ENTD/party sprite_set and battle character_identity share this byte domain.
- * sprite_identity_resolve returns values below 0x80 directly, but
+ * resolve_sprite_identity returns values below 0x80 directly, but
  * resolves 0x80/0x81 by job and 0x82 from the monster's job.
  * Thus these selectors are NOT resolved SPR IDs: SPR 0x80 is male Calculator,
  * whereas character identity 0x80 is generic male.

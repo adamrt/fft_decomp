@@ -4,14 +4,15 @@
 
 #include "fft/ability.h"
 #include "fft/action.h"
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/command.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/item.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
@@ -32,14 +33,13 @@
 #include "fft/unit.h"
 #include "fft/unit_event.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* The four vertex colors unit_view_build_height_pieces applies (g_unit_view_quad_colors); the leading 32-bit value is
+/* The four vertex colors build_height_pieces applies (g_unit_view_quad_colors); the leading 32-bit value is
  * untyped. Provisional. */
 typedef struct menu_quad_colors {
     u32 _unused_00;
@@ -74,7 +74,7 @@ extern RECT g_unit_view_tile_info_image_location;
 extern image_layout_t g_unit_view_tile_info_image_params[2];
 extern u16 g_unit_view_depth_display_suppressed;
 
-static s32 unit_view_build_height_pieces(s32 group, POLY_GT4* poly);
+static s32 build_height_pieces(s32 group, POLY_GT4* poly);
 
 extern const u8 g_status_display_image_ids[STATUS_COUNT];
 
@@ -88,20 +88,20 @@ typedef struct menu_numeric_frame_slot {
 } menu_numeric_frame_slot_t;
 typedef char menu_numeric_frame_slot_size_must_be_256[(sizeof(menu_numeric_frame_slot_t) == 256) ? 1 : -1];
 
-/* A stats panel's two draw offsets (unit_view_stats_panel_thread). */
+/* A stats panel's two draw offsets (stats_panel_thread). */
 typedef struct menu_unit_status_offsets {
     menu_status_panel_draw_offset_t a; /* 0x00 */
     menu_status_panel_draw_offset_t b; /* 0x10 */
 } menu_unit_status_offsets_t;
 
-/* The mode argument of unit_view_stats_panel_thread, the one thread body of the four unit stats panels: which panel
+/* The mode argument of stats_panel_thread, the one thread body of the four unit stats panels: which panel
  * the thread draws; each value has one caller. The panel slides in, redraws each frame and slides out on the stop
  * request. */
 typedef enum unit_stats_panel {
-    UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_refresh_hovered_stats */
-    UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_preview_caster_stats */
-    UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_preview_target_stats; shows the reaction ability name */
-    UNIT_STATS_PANEL_RIGHT_UNIT = 3     /* unit_view_refresh_right_stats */
+    UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_hovered_stats_thread */
+    UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_attack_caster_stats_thread */
+    UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_attack_target_stats_thread; shows the reaction ability name */
+    UNIT_STATS_PANEL_RIGHT_UNIT = 3     /* unit_view_right_stats_thread */
 } unit_stats_panel_e;
 
 /* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
@@ -165,7 +165,7 @@ extern menu_numeric_frame_slot_t g_unit_view_summary_numeric_frames[];
 extern image_layout_t g_unit_view_summary_sprite_image_params[];
 extern image_layout_t g_unit_view_summary_portrait_image_params;
 
-static s32 unit_view_display_action_preview(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
+static s32 display_action_preview(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_layout_t* unused_parameters);
 
 extern point16_t g_gfx_item_icon_image_location;
@@ -369,26 +369,26 @@ void unit_view_tile_info_thread(void) {
     for (frame = 0;; frame++) {
         page = &g_unit_view_height_display_pages[frame & 1];
         /* The target loads the display height signed (lh). */
-        i = unit_view_build_height_pieces(g_battle_map_selected_tile_data.display_height, page->quads) - 1;
+        i = build_height_pieces(g_map_selected_tile_data.display_height, page->quads) - 1;
         thread_yield();
-        if (thread_task_find(THREAD_TASK_DARK_SCREEN) != 0) {
+        if (thread_find_task(THREAD_TASK_DARK_SCREEN) != 0) {
             continue;
         }
-        if (thread_task_find(THREAD_TASK_DARK_SCREEN_HOLD) != 0) {
+        if (thread_find_task(THREAD_TASK_DARK_SCREEN_HOLD) != 0) {
             continue;
         }
         g_unit_panel_hide_numeric_values = 0;
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
         for (j = i; j >= 0; j--) {
             gfx_draw_or_append_gpu_primitive(&page->quads[j]);
         }
-        if (g_battle_map_selected_tile_data.depth != 0) {
+        if (g_map_selected_tile_data.depth != 0) {
             menu_clear_render_buffer(buffer, 0x100);
             g_menu_window_text_pen.stride = 0x18;
-            menu_set_text_origin(0x10, 0);
-            menu_draw_large_number_glyphs(g_battle_map_selected_tile_data.depth, 1, buffer, &g_menu_window_text_pen);
+            menu_text_set_origin(0x10, 0);
+            menu_draw_large_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_window_text_pen);
             if (g_unit_view_depth_display_suppressed == 0) {
                 LoadImage(&rect, buffer);
                 page->sprites[0].clut = 0x7CBC;
@@ -407,7 +407,7 @@ void unit_view_tile_info_thread(void) {
 /* Lay out the textured pieces of piece group `group` (the tile height readout for one
  * display_height value) as gradient quads at g_unit_view_quad_origin. Returns the number of quads
  * written. */
-static s32 unit_view_build_height_pieces(s32 group, POLY_GT4* poly) {
+static s32 build_height_pieces(s32 group, POLY_GT4* poly) {
     image_layout_t* piece;
     s32 count;
     s32 i;
@@ -441,7 +441,7 @@ static s32 unit_view_build_height_pieces(s32 group, POLY_GT4* poly) {
  * packets (texture window per sprite) followed by five sprites placed from
  * the parameter table, then submit them all in reverse order.
  */
-static void sprite_page_build(s32 page_index, RECT* base_screen) {
+static void build_sprite_page(s32 page_index, RECT* base_screen) {
     s32 i;
     menu_sprite_page_t* page = &g_menu_scratch_buffer.sprite_pages[page_index & 1];
     SPRT* sprite;
@@ -459,8 +459,8 @@ static void sprite_page_build(s32 page_index, RECT* base_screen) {
     }
 }
 
-/* Empty in BATTLE and WORLD; in BATTLE it sits between sprite_page_build
- * and unit_view_display_action_preview. Nothing on the disc calls it or
+/* Empty in BATTLE and WORLD; in BATTLE it sits between build_sprite_page
+ * and display_action_preview. Nothing on the disc calls it or
  * points at it; the name is a neutral placeholder until a reference turns up. */
 void menu_noop_2(void) {
 }
@@ -476,7 +476,7 @@ void menu_noop_2(void) {
  * constant load, so they use a bare `return;`. The caller discards the result.
  * WORLD has no action previews: its copy is empty and leaves $v0 unset.
  */
-static s32 unit_view_display_action_preview(
+static s32 display_action_preview(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_layout_t* params) {
 #ifdef FFT_BATTLE
     menu_number_entry_t* panel;
@@ -515,7 +515,7 @@ static s32 unit_view_display_action_preview(
      * (from kernel RAM) before the null test. */
     action = s_unit_view_preview_target_action;
     g_unit_panel_selected_unit_status.projected_hit_percent = action->attack_accuracy;
-    target_id = g_unit_panel_comparison_unit_data.battle_id;
+    target_id = g_unit_panel_comparison_unit_data.battle_unit_id;
     if (target_id == 0xff || action == 0) {
         panel[0].kind = 2;
         panel[1].kind = 2;
@@ -603,7 +603,7 @@ static s32 unit_view_display_action_preview(
         panel[0].kind = 2;
         *label_x = *label_x - g_result_image_rects[ACTION_DISPLAY_IMAGE_BROKEN].width + 8;
     } else if (s_unit_view_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE) {
-        g_thread_call_target = (void (*)(void))status_action_priority_find;
+        g_thread_call_target = (void (*)(void))status_find_action_priority;
         image = thread_call_on_main_stack(s_unit_view_preview_target_action);
         if (image > 0) {
             if (image & STATUS_ACTION_RESULT_REMOVAL) {
@@ -720,7 +720,7 @@ static s32 unit_view_display_action_preview(
         && s_unit_view_preview_target_action->attack_type != ACTION_TYPE_STATUS_CHANGE) {
         prim++;
         params++;
-        g_thread_call_target = (void (*)(void))status_action_priority_find;
+        g_thread_call_target = (void (*)(void))status_find_action_priority;
         image = thread_call_on_main_stack(s_unit_view_preview_target_action);
         if (image > 0) {
             if (image & STATUS_ACTION_RESULT_REMOVAL) {
@@ -760,7 +760,7 @@ static s32 unit_view_display_action_preview(
  * caster or target of an attack preview. The panel slides in, redraws each frame and slides out on
  * the stop request; CT shows at most 100, an egg's numbers are hidden and the target panel also
  * names its reaction ability. */
-static void unit_view_stats_panel_thread(
+static void stats_panel_thread(
     RECT* frame_rect, s32 mode, struct menu_number_entry* entries, unit_panel_summary_t* status) {
     RECT rects[4];
     menu_unit_status_offsets_t offsets[2];
@@ -774,7 +774,7 @@ static void unit_view_stats_panel_thread(
     s32 slide;
     s32 speed;
     s32 text_id;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     unit_view_stats_page_t* page;
     image_layout_t* params;
     menu_unit_status_offsets_t* offs;
@@ -792,10 +792,10 @@ static void unit_view_stats_panel_thread(
 
     unit_id = status->unit_index;
     speed = 0x16;
-    unit = unit_stats_get(unit_id);
+    unit = battle_unit_get(unit_id);
     slide = 0x84;
     g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
-    if (thread_current_task_get() == THREAD_TASK_HOVERED_UNIT_STATS) {
+    if (thread_current_get_task() == THREAD_TASK_HOVERED_UNIT_STATS) {
         g_unit_view_hovered_stats_frame_count++;
     }
     if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
@@ -804,8 +804,8 @@ static void unit_view_stats_panel_thread(
             text_id = 0;
         }
         if (text_id != 0) {
-            text = text_entry_find(text_id + TEXT_ID_ABILITY_NAME_BASE);
-            g_thread_call_target = (void (*)(void))text_pixels_measure;
+            text = text_find_entry(text_id + TEXT_ID_ABILITY_NAME_BASE);
+            g_thread_call_target = (void (*)(void))text_measure_pixels;
             thread_call_on_main_stack(&extent_w, &extent_h, text);
             if (extent_w & 3) {
                 extent_w = (extent_w & 0xFFFC) + 4;
@@ -846,7 +846,7 @@ static void unit_view_stats_panel_thread(
             gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
             page->quads[frame].clut = 0x7CBC;
         }
-        unit_view_display_action_preview(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+        display_action_preview(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
     } else if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         for (frame = 0; frame < 2; frame++, params++) {
             gfx_set_image_primitive_layout(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
@@ -872,7 +872,7 @@ static void unit_view_stats_panel_thread(
             text_loaded = 0;
         }
         for (i = 0; i < g_script_event_speed; i++) {
-            if (thread_current_parameter_3_get() != 0) {
+            if (thread_current_get_parameter_3() != 0) {
                 if (mode == UNIT_STATS_PANEL_HOVERED_UNIT
                     && g_thread_contexts[THREAD_SLOT_RIGHT_UNIT_STATS].task_id == THREAD_TASK_ATTACK_CASTER_STATS) {
                     /* Both exits leave the step loop and the frame loop. */
@@ -894,7 +894,7 @@ static void unit_view_stats_panel_thread(
                 }
             }
         }
-        running = thread_task_find(THREAD_TASK_STATUS_SCREEN);
+        running = thread_find_task(THREAD_TASK_STATUS_SCREEN);
         if (running != 0 && thread_is_running_asm(running - 1) == 0) {
             running = 0;
         }
@@ -1012,7 +1012,7 @@ static void unit_view_stats_panel_thread(
                 menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
                 g_unit_panel_hide_numeric_values = i;
             } else if (text_id != 0) {
-                menu_set_text_origin(2, 0);
+                menu_text_set_origin(2, 0);
                 menu_display_text_string(buffer + 0x400, origin, text);
             }
             LoadImage(&rects[1], (u32*)(buffer + 0x400));
@@ -1051,7 +1051,7 @@ static void unit_view_stats_panel_thread(
         if (mode != UNIT_STATS_PANEL_ATTACK_TARGET) {
             gfx_draw_or_append_gpu_primitive(&page->quads[3]);
         } else if (text_id != 0) {
-            sprite_page_build(frame, frame_rect);
+            build_sprite_page(frame, frame_rect);
         }
         for (i = 0; i < 7; i++) {
             page->sprites[i].clut = g_unit_view_stats_sprite_clut_pairs[i][running & 1];
@@ -1060,21 +1060,21 @@ static void unit_view_stats_panel_thread(
         gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
         gfx_draw_or_append_gpu_primitive(&page->portrait);
         if (running != 0) {
-            menu_init_primitive_colors_dimmed(&page->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(&page->numeric_frame);
         } else {
-            menu_init_primitive_colors_normal(&page->numeric_frame);
+            menu_numeric_frame_set_normal_colors(&page->numeric_frame);
         }
         menu_numeric_frame_submit(&page->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&offs->a);
         thread_yield();
         g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
-        if (thread_current_task_get() == THREAD_TASK_HOVERED_UNIT_STATS) {
+        if (thread_current_get_task() == THREAD_TASK_HOVERED_UNIT_STATS) {
             g_unit_view_hovered_stats_frame_count++;
         }
     }
 exit:
     thread_yield();
-    if (thread_current_task_get() == THREAD_TASK_HOVERED_UNIT_STATS) {
+    if (thread_current_get_task() == THREAD_TASK_HOVERED_UNIT_STATS) {
         g_unit_view_hovered_stats_frame_count = 0;
     }
     gfx_free_texture_rect(&rects[0]);
@@ -1089,8 +1089,8 @@ void unit_view_hovered_stats_thread(void) {
     if (g_unit_panel_selected_unit_status.list_index < 0) {
         g_unit_view_hovered_stats_setup[6].format = 0x0c00;
     }
-    unit_view_stats_panel_thread(&g_unit_view_hovered_stats_rect, UNIT_STATS_PANEL_HOVERED_UNIT,
-        g_unit_view_hovered_stats_setup, &g_unit_panel_selected_unit_status);
+    stats_panel_thread(&g_unit_view_hovered_stats_rect, UNIT_STATS_PANEL_HOVERED_UNIT, g_unit_view_hovered_stats_setup,
+        &g_unit_panel_selected_unit_status);
 }
 
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
@@ -1100,25 +1100,25 @@ void unit_view_right_stats_thread(void) {
     if (g_unit_panel_comparison_unit_status.list_index < 0) {
         g_unit_view_right_stats_setup[6].format = 0x0c00;
     }
-    unit_view_stats_panel_thread(&g_unit_view_right_stats_rect, UNIT_STATS_PANEL_RIGHT_UNIT,
-        g_unit_view_right_stats_setup, &g_unit_panel_comparison_unit_status);
+    stats_panel_thread(&g_unit_view_right_stats_rect, UNIT_STATS_PANEL_RIGHT_UNIT, g_unit_view_right_stats_setup,
+        &g_unit_panel_comparison_unit_status);
 }
 
 /* Preview the pending action, then display its caster panel. */
-void unit_view_preview_caster_stats(void) {
-    unit_stats_t* attacker = menu_selected_unit_stats_get();
-    unit_stats_t* target = unit_stats_get(g_unit_panel_comparison_unit_data.battle_id);
+void unit_view_attack_caster_stats_thread(void) {
+    battle_unit_t* attacker = menu_get_selected_battle_unit();
+    battle_unit_t* target = battle_unit_get(g_unit_panel_comparison_unit_data.battle_unit_id);
     action_command_t* action;
     const ability_data_t* ability_data;
     ability_secondary_pointer_t secondary;
     s16* selected;
 
     /* One address register serves both reads, as in the target. */
-    selected = &g_unit_panel_selected_unit.battle_id;
-    action = unit_battle_action_command_get(*selected);
+    selected = &g_unit_panel_selected_unit.battle_unit_id;
+    action = map_unit_get_action_command_by_battle_unit_id(*selected);
     action->actor_id = *selected;
     if (action->ability_id < ABILITY_ID_ITEM_FIRST) {
-        ability_records_get(action->ability_id & ABILITY_ID_MASK, &ability_data, &secondary);
+        ability_get_records(action->ability_id & ABILITY_ID_MASK, &ability_data, &secondary);
     }
     /* Item IDs leave secondary unset before this range-flags read. */
     if (((secondary.range->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE) && action->ability_id < ABILITY_ID_ITEM_FIRST)
@@ -1132,28 +1132,28 @@ void unit_view_preview_caster_stats(void) {
     thread_yield();
     thread_yield();
     unit_panel_load_selected();
-    unit_view_stats_panel_thread(&g_unit_view_attack_caster_stats_rect, UNIT_STATS_PANEL_ATTACK_CASTER,
+    stats_panel_thread(&g_unit_view_attack_caster_stats_rect, UNIT_STATS_PANEL_ATTACK_CASTER,
         g_unit_view_attack_caster_stats_setup, &g_unit_panel_selected_unit_status);
 }
 
 /* Load the preview target, restore the active unit, then display its panel. */
-void unit_view_preview_target_stats(void) {
+void unit_view_attack_target_stats_thread(void) {
     s32 saved;
 
     if (g_thread_contexts[THREAD_SLOT_RIGHT_UNIT_STATS].task_id != THREAD_TASK_ATTACK_CASTER_STATS) {
-        thread_inactive_wait(THREAD_SLOT_RIGHT_UNIT_STATS);
+        thread_wait_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
     }
     thread_yield();
     thread_yield();
-    saved = g_unit_panel_selected_unit.battle_id;
+    saved = g_unit_panel_selected_unit.battle_unit_id;
     /* The target loads the preview unit id unsigned (lhu). */
-    g_unit_panel_selected_unit.battle_id = g_unit_panel_comparison_unit_data.battle_id;
+    g_unit_panel_selected_unit.battle_unit_id = g_unit_panel_comparison_unit_data.battle_unit_id;
     unit_panel_load_selected();
-    g_unit_panel_selected_unit.battle_id = saved;
+    g_unit_panel_selected_unit.battle_unit_id = saved;
     g_unit_panel_comparison_unit_fields.state.generic_monster = g_unit_panel_selected_unit_fields.state.generic_monster;
     g_unit_panel_comparison_unit_fields.state.ability_ids[2] = g_unit_panel_selected_unit_fields.state.ability_ids[2];
     unit_panel_load_selected();
-    unit_view_stats_panel_thread(&g_unit_view_attack_target_stats_rect, UNIT_STATS_PANEL_ATTACK_TARGET,
+    stats_panel_thread(&g_unit_view_attack_target_stats_rect, UNIT_STATS_PANEL_ATTACK_TARGET,
         g_unit_view_attack_target_stats_setup, &g_unit_panel_comparison_unit_status);
 }
 
@@ -1162,7 +1162,7 @@ void unit_view_summary_thread(void) {
     RECT rects[4];
     unit_view_summary_frame_t frames[2];
     unit_view_summary_frame_t* frame_record;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     u8* buffer;
     menu_unit_number_images_t* digits;
     glyph_blit_t* origin;
@@ -1181,7 +1181,7 @@ void unit_view_summary_thread(void) {
     slide = 0x84;
     digits = &g_unit_view_summary_digit_images;
     unit_panel_load_selected();
-    unit = menu_selected_unit_stats_get();
+    unit = menu_get_selected_battle_unit();
     g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
 
     sprite = frames[0].sprites;
@@ -1212,31 +1212,31 @@ void unit_view_summary_thread(void) {
     stride = &g_menu_window_text_pen.stride;
     origin = &g_menu_window_text_pen;
     *stride = 0x58;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     menu_display_text_string(buffer, origin, g_unit_panel_billboard_unit_name);
-    menu_set_text_origin(0, 0x10);
+    menu_text_set_origin(0, 0x10);
     menu_display_text_string(buffer, origin, g_unit_panel_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
 
     menu_clear_render_buffer(digits, sizeof(*digits));
     *stride = 0x10;
-    menu_set_text_origin(0, 0);
-    text_small_number_glyphs_draw(
+    menu_text_set_origin(0, 0);
+    text_draw_small_number_glyphs(
         g_unit_panel_selected_unit.brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, digits->brave, origin);
     LoadImage(&rects[1], (u32*)digits->brave);
-    menu_set_text_origin(0, 0);
-    text_small_number_glyphs_draw(
+    menu_text_set_origin(0, 0);
+    text_draw_small_number_glyphs(
         g_unit_panel_selected_unit.faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, digits->faith, origin);
     LoadImage(&rects[2], (u32*)digits->faith);
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     if (g_debug_display_enabled != 0) {
-        text_small_number_glyphs_draw(g_unit_panel_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
-    } else if (g_unit_panel_selected_unit.battle_id >= 0x10) {
+        text_draw_small_number_glyphs(g_unit_panel_selected_unit.battle_unit_id, 0x4002, digits->roster_slot, origin);
+    } else if (g_unit_panel_selected_unit.battle_unit_id >= 0x10) {
         value = unit->formation_index;
         if (value == 0xFF) {
             value = 0;
         }
-        text_small_number_glyphs_draw(value + 1, 0x4002, digits->roster_slot, origin);
+        text_draw_small_number_glyphs(value + 1, 0x4002, digits->roster_slot, origin);
     }
     LoadImage(&rects[3], (u32*)digits->roster_slot);
 
@@ -1256,7 +1256,7 @@ void unit_view_summary_thread(void) {
 
     for (frame = 0;; frame++) {
         thread_yield();
-        g_unit_panel_hide_numeric_values = menu_selected_unit_stats_get()->unit_flags & UNIT_FLAG_EGG;
+        g_unit_panel_hide_numeric_values = menu_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG;
         frame_record = &frames[frame & 1];
         if (frame == 0) {
             /* The name and job upload has had a frame to finish. */
@@ -1267,7 +1267,7 @@ void unit_view_summary_thread(void) {
         value = (g_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
         /* One slide step per event-speed step, so fast-forward speeds the slide. */
         for (i = 0; i < g_script_event_speed; i++) {
-            if (thread_current_parameter_3_get() != 0) {
+            if (thread_current_get_parameter_3() != 0) {
                 slide += 0x1E;
                 if (slide > 0x80) {
                     /* Leaves both the step loop and the frame loop. */
@@ -1320,7 +1320,7 @@ void unit_view_summary_thread(void) {
         /* `value` becomes the dim flag: set while the Status screen's status list runs in the
          * slot before the screen. */
 
-        value = thread_task_find(THREAD_TASK_STATUS_SCREEN);
+        value = thread_find_task(THREAD_TASK_STATUS_SCREEN);
         if (value != 0 && thread_is_running_asm(value - 1) == 0) {
             value = 0;
         }
@@ -1351,9 +1351,9 @@ void unit_view_summary_thread(void) {
 
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
-            menu_init_primitive_colors_dimmed(frame_record->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(frame_record->numeric_frame);
         } else {
-            menu_init_primitive_colors_normal(frame_record->numeric_frame);
+            menu_numeric_frame_set_normal_colors(frame_record->numeric_frame);
         }
         menu_numeric_frame_submit(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_a);
@@ -1371,7 +1371,7 @@ exit:
  * row from v = 0x20 of the item icon page, and the item's palette picks one of 8 CLUTs per
  * CLUT row from the item icon CLUT base. */
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
-    const item_data_t* item = item_data_get(item_id);
+    const item_data_t* item = item_get_data(item_id);
     s32 sprite_id;
     s32 palette;
     s32 column;
@@ -1393,20 +1393,20 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
  *
  * The unit whose ID equals g_portrait_special_unit_id uses the fixed 0x380/0x100 page; others
  * select a 32-line band of the spritesheet VRAM slot's page and the CLUT of
- * BATTLE_MAP_CLUT_ROW_UNITS_SECOND indexed by the low nibble of the unit runtime record ID.
+ * MAP_CLUT_ROW_UNITS_SECOND indexed by the low nibble of the map unit record ID.
  */
-void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_id) {
+void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_unit_id) {
     s32 vram_slot;
-    s32 runtime_id;
+    s32 map_unit_id;
     u8 v;
 
-    if (unit_stats_get(battle_id)->unit_id == g_portrait_special_unit_id) {
+    if (battle_unit_get(battle_unit_id)->unit_id == g_portrait_special_unit_id) {
         setUV4(poly, 0xe0, 0xcf, 0xff, 0xcf, 0xe0, 0xff, 0xff, 0xff);
         poly->tpage = GetTPage(0, 0, 0x380, 0x100);
         poly->clut = GetClut(0x40, 0x1fe);
     } else {
-        vram_slot = sprite_sheet_get_slot_by_battle_id(battle_id);
-        runtime_id = unit_battle_runtime_id_get(battle_id);
+        vram_slot = map_unit_get_sprite_sheet_slot_by_battle_unit_id(battle_unit_id);
+        map_unit_id = map_unit_get_id_by_battle_unit_id(battle_unit_id);
         v = vram_slot << 5;
         if (vram_slot >= 8) {
             poly->tpage = GetTPage(0, 0, 0x380, 0x120);
@@ -1417,7 +1417,7 @@ void portrait_build_unit_poly(POLY_FT4* poly, s32 battle_id) {
         setUV4(poly, 0x80, v, 0x80, v + 0x20, 0x50, v, 0x50, v + 0x20);
         poly->v1--;
         poly->v3--;
-        poly->clut = GetClut((runtime_id & 0xf) * 16, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_UNITS_SECOND);
+        poly->clut = GetClut((map_unit_id & 0xf) * 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_UNITS_SECOND);
     }
 }
 #endif
@@ -1480,28 +1480,28 @@ void status_screen_numbers_thread(void) {
     s32 frame;
 
     records = record;
-    thread_current_task_set(THREAD_TASK_NUMERIC_DISPLAY_PANEL);
+    thread_current_set_task(THREAD_TASK_NUMERIC_DISPLAY_PANEL);
     gfx_set_draw_mode_for_texture_page(&record->mode0, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&record->mode1, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     menu_init_scaled_draw_area_packets(&record->draw_areas);
     number_images = menu_alloc_memory(sizeof(*number_images));
     menu_clear_render_buffer(number_images, sizeof(*number_images));
     g_menu_window_text_pen.stride = 0x14;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     menu_draw_numeric_display_entries(
         number_images->mobility, s_status_screen_numbers_entries, &g_menu_window_text_pen, 3);
     g_menu_window_text_pen.stride = 0x40;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     menu_draw_numeric_display_entries(
         number_images->weapons, &s_status_screen_numbers_entries[3], &g_menu_window_text_pen, 4);
     g_menu_window_text_pen.stride = 0x64;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     menu_draw_numeric_display_entries(
         number_images->combat, &s_status_screen_numbers_entries[7], &g_menu_window_text_pen, 8);
     LoadImage(&g_status_screen_numbers_text_rect_a, (u32*)number_images->mobility);
     LoadImage(&g_status_screen_numbers_text_rect_b, (u32*)number_images->weapons);
     LoadImage(&g_status_screen_numbers_text_rect_c, (u32*)number_images->combat);
-    thread_frames_wait(1);
+    thread_wait_frames(1);
     menu_free_memory(number_images);
     for (i = 0; i < 18; i++) {
         menu_init_sprt(&record->sprites[i]);
@@ -1518,7 +1518,7 @@ void status_screen_numbers_thread(void) {
         record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &record->draw_areas, &g_status_screen_numbers_panel_texture_window, frame, g_gfx_screen_polarity);
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
         if (thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
@@ -1526,7 +1526,7 @@ void status_screen_numbers_thread(void) {
                 record->sprites[i].clut = MENU_CLUT_DIMMED;
             }
             record->sprites[10].clut = 0x7EBC;
-            menu_init_primitive_colors_dimmed(record->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(record->numeric_frame);
         } else {
             for (i = 17; i >= 0; i--) {
                 record->sprites[i].clut = MENU_CLUT_NORMAL;
@@ -1535,7 +1535,7 @@ void status_screen_numbers_thread(void) {
             record->sprites[14].clut = 0x7FFC;
             record->sprites[15].clut = 0x7FFC;
             record->sprites[16].clut = 0x7FFC;
-            menu_init_primitive_colors_normal(record->numeric_frame);
+            menu_numeric_frame_set_normal_colors(record->numeric_frame);
         }
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[1]);
         for (i = 0; i < 14; i++) {
@@ -1574,20 +1574,20 @@ void status_screen_thread(void) {
     s32 frame;
     s32 i;
 
-    status_screen_mounted_unit_open();
-    thread_current_task_set(THREAD_TASK_STATUS_SCREEN);
-    menu_enter_status_screen_selection();
+    status_screen_open_mounted_unit();
+    thread_current_set_task(THREAD_TASK_STATUS_SCREEN);
+    status_screen_enter_selection();
     g_menu_overlay_state = 1;
     g_menu_panel_fade_mode = MENU_PANEL_FADE_OUT;
-    thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
-    thread_parameters_set(THREAD_SLOT_MENU, 0, 0, 1);
+    thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
+    thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     command_record_unit_selection();
-    menu_modal_open();
+    menu_open_modal();
     /* The hovered-unit stats thread counts its frames; wait until it has drawn two. */
     do {
         thread_yield();
     } while (g_unit_view_hovered_stats_frame_count < 2);
-    menu_modal_close();
+    menu_close_modal();
 
     frame_record = g_status_screen_frames;
     records = frame_record;
@@ -1673,7 +1673,7 @@ void status_screen_thread(void) {
     buffer = menu_alloc_buffer(0xC80);
     menu_clear_render_buffer(buffer, 0xC80);
     g_menu_window_text_pen.stride = 0x50;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     for (i = 0; i < 5; i++) {
         value = g_unit_panel_selected_unit_fields.state.equipment[i] + TEXT_ID_ITEM_NAME_BASE;
         if ((u16)g_unit_panel_selected_unit_fields.state.equipment[i] == 0xFFFF) {
@@ -1689,7 +1689,7 @@ void status_screen_thread(void) {
 
     menu_clear_render_buffer(buffer, 0xC80);
     g_menu_window_text_pen.stride = 0x50;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     for (i = 0; i < 2; i++) {
         value = g_unit_panel_selected_unit_fields.state.ability_ids[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
         if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
@@ -1732,7 +1732,7 @@ void status_screen_thread(void) {
     menu_numeric_frame_init(&s_status_screen_panel_rect, records[1].numeric_frame);
 
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, status_screen_numbers_thread);
-    thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
+    thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
     thread_yield();
 
     frame = 0;
@@ -1741,7 +1741,7 @@ void status_screen_thread(void) {
         frame_record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &frame_record->draw_areas, &s_status_screen_draw_area_rect, frame, g_gfx_screen_polarity);
-        if (g_menu_input_lock_mode == 0 && g_help_open == 0 && thread_current_parameter_3_get() != 0) {
+        if (g_menu_input_lock_mode == 0 && g_help_open == 0 && thread_current_get_parameter_3() != 0) {
             break;
         }
 
@@ -1764,22 +1764,22 @@ void status_screen_thread(void) {
             }
         }
         if (value == 0) {
-            menu_init_primitive_colors_normal(frame_record->numeric_frame);
+            menu_numeric_frame_set_normal_colors(frame_record->numeric_frame);
         } else {
-            menu_init_primitive_colors_dimmed(frame_record->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(frame_record->numeric_frame);
         }
 
         if (menu_can_accept_input() != 0) {
             if (g_script_event_input & PSX_PAD_CROSS) {
-                thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
+                thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
                 break;
             }
             if ((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
-                && (unit_has_any_current_status(g_unit_panel_selected_unit.battle_id) != 0
+                && (battle_unit_has_any_current_status(g_unit_panel_selected_unit.battle_unit_id) != 0
                     || (g_unit_panel_selected_unit_fields.state.generic_monster == 0
                         && g_unit_panel_selected_unit_status.team_kind != 1))) {
-                thread_start(g_thread_current_id - 1, status_screen_build_status_list);
-                thread_parameters_set(
+                thread_start(g_thread_current_id - 1, status_screen_status_list_thread);
+                thread_set_parameters(
                     g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST], 0, 0);
             }
         }
@@ -1817,17 +1817,17 @@ void status_screen_thread(void) {
     g_unit_view_summary_panel_rect.y = 0xAA;
     g_menu_panel_fade_mode = MENU_PANEL_FADE_IN;
     g_unit_view_stats_bounce_step = 6;
-    sound_cancel_queue();
+    sound_queue_cancel();
     do {
         thread_yield();
     } while (g_unit_view_stats_bounce_step != 0);
 
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, unit_view_tile_info_thread);
-    thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
+    thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
     g_thread_contexts[THREAD_SLOT_TILE_INFO_PANEL].task_id = THREAD_TASK_TILE_INFO_PANEL;
     g_menu_overlay_state = 0;
-    menu_leave_status_screen_selection();
-    command_menu_open(g_command_current_id);
+    status_screen_leave_selection();
+    command_open_menu(g_command_current_id);
     thread_current_exit();
 }
 

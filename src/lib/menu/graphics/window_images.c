@@ -120,7 +120,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
         return (u8*)buf;
     }
     LoadImage(rect, (u32*)buf);
-    thread_frames_wait(1);
+    thread_wait_frames(1);
     menu_free_memory(buf);
 }
 
@@ -176,7 +176,7 @@ u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, 
                 upload.h = 0x60;
             } else {
                 LoadImage(&upload, (u32*)buffer);
-                thread_frames_wait(1);
+                thread_wait_frames(1);
                 upload.y += 0x60;
                 if (i - height >= 0x60) {
                     upload.h = 0x60;
@@ -211,7 +211,7 @@ u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, 
     }
     if (mode == MENU_WINDOW_FRAME_UPLOAD || mode == MENU_WINDOW_FRAME_ALTERNATE_UPLOAD) {
         LoadImage(&upload, (u32*)buffer);
-        thread_frames_wait(1);
+        thread_wait_frames(1);
         menu_free_memory(buffer);
     }
     return buffer;

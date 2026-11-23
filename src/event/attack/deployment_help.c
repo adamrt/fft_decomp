@@ -39,7 +39,7 @@ typedef char deploy_text_header_size_must_be_128[(sizeof(deploy_text_header_t) =
 /* Run the deployment screen's field-help cursor: the D-pad moves a bobbing hand between the status
  * panel's fields, Circle opens the help text for the field under it in the parent thread's slot,
  * and Cross closes it. Input waits while that help text is open. */
-void deploy_run_help_cursor(void) {
+void deploy_help_cursor_thread(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shade[2];
     s32 i;
@@ -79,7 +79,7 @@ void deploy_run_help_cursor(void) {
 
     /* Parameter 1 (Select on the roster view) makes nodes 5, 9 and 10 their own down neighbors; from
      * the unit detail view (0) they lead down to nodes 12 and 17. */
-    if (thread_current_parameter_1_get() != 0) {
+    if (thread_current_get_parameter_1() != 0) {
         g_deploy_help_cursor_nodes[5].destination[1] = 5;
         g_deploy_help_cursor_nodes[9].destination[1] = 9;
         g_deploy_help_cursor_nodes[10].destination[1] = 10;
@@ -108,7 +108,7 @@ void deploy_run_help_cursor(void) {
     while (1) {
         if (parent->is_running == 0) {
             /* Retail stores the same lock mode whether or not the help menu is running. */
-            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
             g_menu_input_lock_mode = 0;
@@ -120,10 +120,10 @@ void deploy_run_help_cursor(void) {
             node = &nodes[selected];
             y = node->y;
             x = node->x;
-            if (thread_task_find(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
+            if (thread_find_task(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
                 y += 8;
             }
-            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
             buttons = *input;
@@ -149,7 +149,7 @@ void deploy_run_help_cursor(void) {
                         } else {
                             g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                             thread_start(parent_id, message_dialog_thread);
-                            thread_parameters_set(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
+                            thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                         }
                     } else if (node->help_base == HELP_TEXT_ID_ABILITY_BASE && (u16)*node->value - 1 >= 0x301U) {
                         *input = 0;
@@ -160,16 +160,16 @@ void deploy_run_help_cursor(void) {
                     } else {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                         thread_start(parent_id, message_dialog_thread);
-                        thread_parameters_set(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
+                        thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
                 } else {
                     /* An entry starting with 0xfe or 0xff is empty. */
                     text_id = node->help_base;
-                    g_thread_call_target = (void (*)(void))text_entry_find;
+                    g_thread_call_target = (void (*)(void))text_find_entry;
                     if ((*(u8*)thread_call_on_main_stack(text_id) & 0xfe) != 0xfe) {
                         g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
                         thread_start(parent_id, message_dialog_thread);
-                        thread_parameters_set(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
+                        thread_set_parameters(parent_id, HELP_DIALOG_TYPE_CENTERED, text_id, 0);
                     }
                 }
             } else if (buttons & PSX_PAD_DPAD_MASK) {
@@ -193,7 +193,7 @@ void deploy_run_help_cursor(void) {
         } else {
             /* While a thread (the help text) runs in the parent's slot, input is locked and the cursor bobs on
              * the active curve. */
-            if (thread_task_find(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
             g_menu_input_lock_mode = 1;
@@ -295,7 +295,7 @@ void deploy_run_help_cursor(void) {
 
         gfx_draw_or_append_gpu_primitive(&cursor[buffer]);
         gfx_draw_or_append_gpu_primitive(&shade[buffer]);
-        thread_frames_wait(1);
+        thread_wait_frames(1);
         i++;
     }
 
@@ -307,7 +307,7 @@ void deploy_run_help_cursor(void) {
 /* Point the battle text sections at an overlay text file: 32 offsets
  * followed by the section data they are relative to. The event-message
  * section is left as it is. */
-static void text_init_battle_pointers_from_file(deploy_text_header_t* file) {
+static void init_section_pointers(deploy_text_header_t* file) {
     s32* offsets = file->section_offsets;
     s32 i = 0;
     u8* data;
@@ -329,7 +329,7 @@ static void text_init_battle_pointers_from_file(deploy_text_header_t* file) {
 /* Appends one 0xfe/0xff-terminated string. Overflowing the arena jumps
  * straight to the cleanup and skips the help-text copy. */
 #define APPEND_TEXT(text_id)                                                                                           \
-    src = text_entry_find(text_id);                                                                                    \
+    src = text_find_entry(text_id);                                                                                    \
     *dst++ = *src++;                                                                                                   \
     while ((dst[-1] & 0xfe) != 0xfe) {                                                                                 \
         if (dst >= g_scenario_table + 0x4000) {                                                                        \
@@ -359,7 +359,7 @@ static void text_init_battle_pointers_from_file(deploy_text_header_t* file) {
  * APPEND_TEXT jumps past both of those steps, leaving the deployment help
  * broken; 16 units' strings stay far below that size.
  */
-void deploy_build_strings(void) {
+void deploy_build_help_strings(void) {
     u8* dst = g_scenario_table;
     deploy_text_header_t* file = heap_alloc(0x18000);
     s32 i;
@@ -368,10 +368,10 @@ void deploy_build_strings(void) {
     s32 k;
     party_unit_t* unit;
 
-    g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+    g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_ATCHELP_LZW, 0x16800, file);
-    text_section_pointers_save();
-    text_init_battle_pointers_from_file(file);
+    text_save_section_pointers();
+    init_section_pointers(file);
     for (i = 0; i < 16; i++) {
         unit = party_unit_get(i);
         if (unit->party_id == PARTY_ID_NONE || i >= 0x10 || unit->proposition_status != 0) {
@@ -400,12 +400,12 @@ void deploy_build_strings(void) {
     }
     g_deploy_unit_text_section = g_scenario_table;
     g_deploy_help_text_section = g_scenario_event_condition_blocks;
-    src = text_entry_find(0x5800);
+    src = text_find_entry(0x5800);
     dst = g_scenario_event_condition_blocks;
     for (i = 0; i < 0x1400; i++) {
         *dst++ = *src++;
     }
 end:
-    text_section_pointers_restore();
-    heap_block_release(file);
+    text_restore_section_pointers();
+    heap_release_block(file);
 }

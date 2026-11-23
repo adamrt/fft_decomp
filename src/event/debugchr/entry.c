@@ -7,6 +7,7 @@
 #include "fft/help.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -19,7 +20,6 @@
 #include "fft/unit_editor.h"
 #include "fft/unit_event.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -110,13 +110,13 @@ static const unit_editor_field_range_t s_unit_editor_monster_field_ranges[UNIT_E
     { 1, 100 },                                                  /* CT */
 };
 
-/* The status browser stores battle IDs here; the editor reuses the slots as availability flags. */
-extern u8 g_unit_editor_unit_slots[UNIT_SLOT_COUNT];
+/* The status browser stores battle unit IDs here; the editor reuses the slots as availability flags. */
+extern u8 g_unit_editor_unit_slots[BATTLE_UNIT_SLOT_COUNT];
 extern help_navigation_record_t g_unit_editor_fields[UNIT_EDITOR_FIELD_COUNT];
 static unit_panel_thread_t s_unit_editor_status_display_thread_params;
 
 /* Views of g_unit_panel_selected_unit_status.gauges[i].value (values[3 * i])
- * and gauges[i].max (the *_max 16-bit values): debug_unit_editor_apply_values
+ * and gauges[i].max (the *_max 16-bit values): apply_values
  * reaches the values from their own base register and the limits by absolute
  * address, which the member spelling does not reproduce. */
 extern s16 g_unit_editor_values[];
@@ -136,8 +136,8 @@ static s32 s_unit_editor_field_edit_active = 0;
  * (each first capped at its maximum), level, experience, Brave, Faith, the
  * zodiac sign (the top nibble of the birthday 16-bit value), move, speed and
  * jump. */
-static void debug_unit_editor_apply_values(s32 unit_id) {
-    unit_stats_t* unit = unit_stats_get(unit_id);
+static void apply_values(s32 unit_id) {
+    battle_unit_t* unit = battle_unit_get(unit_id);
     s32 zodiac;
     u32 unit_flags;
 
@@ -193,7 +193,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     u8* animation_third;
     s32 sound_latched;
     s32 event_mode;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 input;
     /* Shared by the R1 and L1 blocks: set twice in the loop, the address is
      * not a loop invariant candidate and is rebuilt in each block. */
@@ -203,12 +203,12 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
      * loads. */
     volatile u8* unit_ids;
 
-    thread_current_task_set(THREAD_TASK_MOUNTED_STATUS_SCREEN);
+    thread_current_set_task(THREAD_TASK_MOUNTED_STATUS_SCREEN);
     g_debug_unit_editor_active = 0;
     g_unit_panel_button_prompt_count = 2;
 
     /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. */
-    unit = unit_stats_get(unit_id);
+    unit = battle_unit_get(unit_id);
     unit_ids = g_unit_editor_unit_slots;
     unit_ids[0] = unit_id;
     {
@@ -222,7 +222,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         comparison_id = unit_ids[0];
         type_id = unit_ids[0];
         unit_ids[1] = partner_id & UNIT_MOUNT_INFO_PARTNER_ID_MASK;
-        g_unit_panel_selected_unit.battle_id = selected_id;
+        g_unit_panel_selected_unit.battle_unit_id = selected_id;
         g_unit_panel_selected_unit.name_id = comparison_id;
         g_unit_panel_selected_unit_status.unit_index = type_id;
     }
@@ -255,13 +255,13 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         *refresh_b = 0;
         *refresh_c = 0;
         thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-        thread_parameters_set(
+        thread_set_parameters(
             THREAD_SCREEN_SLOT_UNIT_STATUS, (u8*)refresh_a - offsetof(unit_panel_thread_t, style), 0, 0);
         thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-        thread_parameters_set(
+        thread_set_parameters(
             THREAD_SCREEN_SLOT_NUMERIC_PANEL, (u8*)refresh_b - offsetof(unit_panel_thread_t, style), 0, 0);
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-        thread_parameters_set(
+        thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (u8*)refresh_c - offsetof(unit_panel_thread_t, style), 0, 0);
     }
 
@@ -271,7 +271,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     animation = g_unit_panel_button_prompt_animation;
     animation_second = animation + 1;
     animation_third = animation + 2;
-    selected_unit = &g_unit_panel_selected_unit.battle_id;
+    selected_unit = &g_unit_panel_selected_unit.battle_unit_id;
     g_menu_modal_open = 0;
 
     for (;; frame++) {
@@ -290,7 +290,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
                 g_sound_pending_sfx_id = one;
                 sound_latched = 1;
             }
-            if (thread_task_find(THREAD_TASK_RESUME) != 0) {
+            if (thread_find_task(THREAD_TASK_RESUME) != 0) {
                 s_unit_editor_status_display_thread_params.style = one;
                 g_unit_panel_numbers_thread_params.style = one;
                 g_unit_panel_character_status_frame_config.style = one;
@@ -314,21 +314,21 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         if (event_mode == 0 && g_help_open == 0 && thread_is_previous_running() == 0) {
             input = *g_menu_input_controller;
             if ((input & PSX_PAD_CROSS) != 0) {
-                thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-                thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
-                thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
+                thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
                 g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
                 break;
             }
 
             if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
-                && (unit_has_any_current_status(g_unit_panel_selected_unit.battle_id) != 0
+                && (battle_unit_has_any_current_status(g_unit_panel_selected_unit.battle_unit_id) != 0
                     || g_unit_panel_selected_unit_fields.state.generic_monster == 0)) {
                 s_unit_editor_status_display_thread_params.style = one;
                 g_unit_panel_numbers_thread_params.style = one;
                 g_unit_panel_character_status_frame_config.style = one;
-                thread_start(g_thread_current_id - 1, status_screen_build_status_list);
-                thread_parameters_set(
+                thread_start(g_thread_current_id - 1, status_screen_status_list_thread);
+                thread_set_parameters(
                     g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST], 0, 0);
                 animation[0] = one;
                 animation_second[0] = one;
@@ -371,7 +371,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
             chosen_unit = &g_unit_editor_unit_slots[slot];
             *selected_unit = *chosen_unit;
-            unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_id));
+            unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_unit_id));
             unit_data->name_id = *chosen_unit;
             unit_type_ptr = &g_unit_panel_selected_unit_status.unit_index;
             *unit_type_ptr = *chosen_unit;
@@ -398,7 +398,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
             chosen_unit = &g_unit_editor_unit_slots[slot];
             *selected_unit = *chosen_unit;
-            unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_id));
+            unit_data = (unit_panel_unit_t*)((u8*)selected_unit - offsetof(unit_panel_unit_t, battle_unit_id));
             unit_data->name_id = *chosen_unit;
             unit_type_ptr = &g_unit_panel_selected_unit_status.unit_index;
             *unit_type_ptr = *chosen_unit;
@@ -419,13 +419,13 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
         s16* comparison_ptr;
         s16* unit_type_id_ptr;
 
-        selected_unit_ptr = &g_unit_panel_selected_unit.battle_id;
+        selected_unit_ptr = &g_unit_panel_selected_unit.battle_unit_id;
         unit_type_id_ptr = &g_unit_panel_selected_unit_status.unit_index;
         selected_unit_ptr[0] = g_unit_editor_unit_slots[0];
         /* A register address keeps cse from folding this store to a direct
          * global address. */
         comparison_ptr = selected_unit_ptr
-            - (offsetof(unit_panel_unit_t, battle_id) - offsetof(unit_panel_unit_t, name_id))
+            - (offsetof(unit_panel_unit_t, battle_unit_id) - offsetof(unit_panel_unit_t, name_id))
                 / sizeof(*selected_unit_ptr);
         *comparison_ptr = g_unit_editor_unit_slots[0];
         *unit_type_id_ptr = g_unit_editor_unit_slots[0];
@@ -448,7 +448,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
  * (by 10 while L1 is held) within the field's range, TRIANGLE clears equipment slots, and every change is written back
  * to the battle unit. Each level step also applies one level's stat growth or its reversal. */
 void debugchr_editor_entrypoint(void) {
-    s32 battle_id;
+    s32 battle_unit_id;
     help_navigation_record_t* field;
     u32* input;
     POLY_FT4* cursor_v;
@@ -479,7 +479,7 @@ void debugchr_editor_entrypoint(void) {
     u8 uv_s_far;
     u8 uv_s_mid;
     u8 primary_skillset_field;
-    s16* selected_battle_id;
+    s16* selected_battle_unit_id;
     u16 unit_index;
     s32 clearable;
     s32 span;
@@ -506,18 +506,18 @@ void debugchr_editor_entrypoint(void) {
 
     /* A slot is selectable when the lookup of its ENTD unit id returns that same slot: a present unit,
      * the first one with that id. */
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit_entd_find_stats(unit_stats_get(i)->unit_id, &battle_id);
-        if ((battle_id >= 0) && (i == battle_id)) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        battle_unit_find_by_unit_id(battle_unit_get(i)->unit_id, &battle_unit_id);
+        if ((battle_unit_id >= 0) && (i == battle_unit_id)) {
             g_unit_editor_unit_slots[i] = 1;
         } else {
             g_unit_editor_unit_slots[i] = 0;
         }
     }
 
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (g_unit_editor_unit_slots[i] != 0) {
-            g_unit_panel_selected_unit.battle_id = i;
+            g_unit_panel_selected_unit.battle_unit_id = i;
             g_unit_panel_selected_unit.name_id = i;
             g_unit_panel_selected_unit_status.unit_index = i;
             unit_panel_load_selected();
@@ -544,19 +544,19 @@ void debugchr_editor_entrypoint(void) {
     g_unit_panel_numbers_thread_params.style = 0;
     g_unit_panel_character_status_frame_config.style = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&s_unit_editor_status_display_thread_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&s_unit_editor_status_display_thread_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_numbers_thread_params, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&g_unit_panel_numbers_thread_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
-    thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_character_status_frame_config, 0, 0);
+    thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_unit_panel_character_status_frame_config, 0, 0);
 
     row = UNIT_EDITOR_FIELD_LEVEL;
     /* The unit menu and the field editor re-enter each other by label: an
        enclosing loop's notes reweight the allocation of the whole body. */
 loop_outer:
     i = 0;
-    /* name_id is five 16-bit values before battle_id; record access changes the store displacements. */
-    selected_battle_id = &g_unit_panel_selected_unit.battle_id;
+    /* name_id is five 16-bit values before battle_unit_id; record access changes the store displacements. */
+    selected_battle_unit_id = &g_unit_panel_selected_unit.battle_unit_id;
     for (;;) {
         primary_skillset_field = UNIT_EDITOR_FIELD_PRIMARY_SKILLSET;
         /* Removing the tied use changes the marker and menu-pointer allocation. */
@@ -571,9 +571,9 @@ loop_outer:
             goto editor;
         }
         if (buttons & PSX_PAD_CROSS) {
-            thread_parameters_set(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
-            thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
-            thread_parameters_set(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_PANEL, 0, 0, 1);
+            thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
             return;
         }
 
@@ -590,8 +590,8 @@ loop_outer:
             }
 
             unit_index = s_unit_editor_selected_unit_slot;
-            selected_battle_id[0] = unit_index;
-            selected_battle_id[-5] = unit_index;
+            selected_battle_unit_id[0] = unit_index;
+            selected_battle_unit_id[-5] = unit_index;
             g_unit_panel_selected_unit_status.unit_index = unit_index;
             unit_panel_load_selected();
             if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
@@ -621,8 +621,8 @@ loop_outer:
             }
 
             unit_index = s_unit_editor_selected_unit_slot;
-            selected_battle_id[0] = unit_index;
-            selected_battle_id[-5] = unit_index;
+            selected_battle_unit_id[0] = unit_index;
+            selected_battle_unit_id[-5] = unit_index;
             g_unit_panel_selected_unit_status.unit_index = unit_index;
             unit_panel_load_selected();
             if (g_unit_panel_selected_unit_fields.state.generic_monster != 0) {
@@ -674,12 +674,12 @@ editor:
                 goto loop_outer;
             }
             s_unit_editor_field_edit_active = 0;
-            debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
+            apply_values(s_unit_editor_selected_unit_slot);
             unit_panel_load_selected();
         } else if (keys & PSX_PAD_CIRCLE) {
             if (s_unit_editor_field_edit_active == 1) {
                 s_unit_editor_field_edit_active = 0;
-                debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
+                apply_values(s_unit_editor_selected_unit_slot);
                 unit_panel_load_selected();
             } else {
                 s_unit_editor_field_edit_active = 1;
@@ -690,7 +690,7 @@ editor:
         if ((s_unit_editor_field_edit_active != 0) && ((row - UNIT_EDITOR_FIELD_RIGHT_HAND) < 5U)
             && (*g_menu_input_controller & PSX_PAD_TRIANGLE)) {
             *s_unit_editor_current_field->value = 0;
-            debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
+            apply_values(s_unit_editor_selected_unit_slot);
             unit_panel_load_selected();
             s_unit_editor_status_display_thread_params.redraw_request = 1;
             g_unit_panel_numbers_thread_params.redraw_request = 1;
@@ -757,11 +757,11 @@ editor:
                              * level written back before the new value is restored. */
                             if (row == UNIT_EDITOR_FIELD_LEVEL) {
                                 *s_unit_editor_current_field->value -= 1;
-                                debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
-                                unit_level_growth_apply(unit_stats_get(s_unit_editor_selected_unit_slot), 0);
+                                apply_values(s_unit_editor_selected_unit_slot);
+                                battle_unit_apply_level_growth(battle_unit_get(s_unit_editor_selected_unit_slot), 0);
                                 *s_unit_editor_current_field->value += 1;
                             }
-                            debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
+                            apply_values(s_unit_editor_selected_unit_slot);
                             unit_panel_load_selected();
                         }
                     }
@@ -797,11 +797,11 @@ editor:
                             *value = cur_d - 1;
                             if (row == UNIT_EDITOR_FIELD_LEVEL) {
                                 *s_unit_editor_current_field->value += 1;
-                                debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
-                                unit_level_growth_apply(unit_stats_get(s_unit_editor_selected_unit_slot), 1);
+                                apply_values(s_unit_editor_selected_unit_slot);
+                                battle_unit_apply_level_growth(battle_unit_get(s_unit_editor_selected_unit_slot), 1);
                                 *s_unit_editor_current_field->value -= 1;
                             }
-                            debug_unit_editor_apply_values(s_unit_editor_selected_unit_slot);
+                            apply_values(s_unit_editor_selected_unit_slot);
                             unit_panel_load_selected();
                         }
                     }
@@ -924,7 +924,7 @@ editor:
 
         gfx_draw_or_append_gpu_primitive(PRIM_AT(cursor_prims, buffer));
         gfx_draw_or_append_gpu_primitive(&s_unit_editor_cursor_shade_polys[buffer]);
-        thread_frames_wait(1);
+        thread_wait_frames(1);
         i++;
     }
 }

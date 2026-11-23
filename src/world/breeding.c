@@ -96,7 +96,7 @@ static const offspring_rule_t s_breeding_table[BREEDING_ENTRY_COUNT] = {
  * No date validation is performed; exhausting the 13 limits reads 31 from
  * the following month-length data, not a valid extra zodiac entry.
  */
-static s32 birthday_zodiac_get(s32 month, s32 day) {
+static s32 get_birthday_zodiac(s32 month, s32 day) {
     s32 i;
 
     for (i = 0; i < ZODIAC_DATE_LIMIT_COUNT; i++) {
@@ -157,13 +157,13 @@ void breeding_update(s32 unused) {
                         value += s_breeding_month_lengths[n];
                     }
                     value += day;
-                    value |= birthday_zodiac_get(month, day) << 12;
+                    value |= get_birthday_zodiac(month, day) << 12;
                     unit->birthday_day = value;
                     unit->zodiac = value >> 8;
                 }
             } else {
                 levels[unit_count++] = unit->level;
-                value = job_skillset_get(unit->job_id);
+                value = job_get_skillset(unit->job_id);
                 if (value >= SKILLSET_ID_MONSTER_FIRST && value < SKILLSET_ID_END) {
                     monsters[monster_count++] = i;
                 }
@@ -196,14 +196,14 @@ void breeding_update(s32 unused) {
     }
     /* The egg's hatch count goes in both nibbles; the low one counts down. Name generation
      * reads the unit-name table through the roster-name pointer, swapped for the call as
-     * formation_generate_unit does. */
+     * formation_unit_generate does. */
     name_buffer = &g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     value = (s32)*name_buffer;
     *name_buffer = g_text_section_pointers[TEXT_SECTION_UNIT_NAMES];
-    n = party_monster_egg_create(n, i + i * 0x10, rand() % 4);
+    n = party_create_monster_egg(n, i + i * 0x10, rand() % 4);
     *name_buffer = (u8*)value;
     if (n != -1) {
         unit = party_unit_get(n);
-        party_levels_gain(unit, levels[rand() % unit_count] - 1);
+        party_unit_gain_levels(unit, levels[rand() % unit_count] - 1);
     }
 }

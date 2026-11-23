@@ -1,12 +1,12 @@
 /* Activate deployment, native mini menus and the supervised unit-view panels. */
 
 #include "fft/at_list.h"
-#include "fft/battle_map.h"
 #include "fft/command.h"
 #include "fft/deploy.h"
 #include "fft/file.h"
 #include "fft/formation.h"
 #include "fft/gfx_primitive.h"
+#include "fft/map.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
@@ -26,7 +26,7 @@
 #include "fft/unit_view.h"
 #include "psx/types.h"
 
-extern u16 g_unit_view_cached_battle_id;
+extern u16 g_unit_view_cached_battle_unit_id;
 extern u16 g_unit_view_cached_comparison_id;
 extern u8 g_menu_panel_fade_modes[];
 
@@ -61,8 +61,8 @@ static view_threads_t s_view_threads[7] = {
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, -1, THREAD_TASK_RIGHT_UNIT_STATS, -1 } },
-    { { unit_view_tile_info_thread, UNIT_VIEW_NO_THREAD, unit_view_preview_caster_stats,
-          unit_view_preview_target_stats },
+    { { unit_view_tile_info_thread, UNIT_VIEW_NO_THREAD, unit_view_attack_caster_stats_thread,
+          unit_view_attack_target_stats_thread },
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, -1, THREAD_TASK_ATTACK_CASTER_STATS, THREAD_TASK_ATTACK_TARGET_STATS } },
@@ -71,7 +71,7 @@ static view_threads_t s_view_threads[7] = {
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_NUMERIC_DISPLAY_PANEL, 36, -1, 37 } },
 };
-static void views_supervise(void);
+static void view_supervisor_thread(void);
 
 /* Load ATTACK.OUT (unless preloaded) with its scenario conditions and graphics, reset menu
  * and unit state and, for a tutorial, fix the game options. Then start the deployment
@@ -83,18 +83,18 @@ s32 deploy_open(void) {
     game_options_fields_t* options;
     g_unit_panel_hide_numeric_values = 0;
     menu_subsystems_init();
-    unit_animation_states_reset();
+    map_unit_reset_animation_states();
     command_reset_unit_records();
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOAD_USED;
     } else {
-        g_thread_call_target = file_buffer_load_checked;
+        g_thread_call_target = file_load_into_buffer_checked;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_ATTACK_OUT, 0x20000, g_heap_companion_overlay_load_address);
     }
-    result = scenario_load_conditionals();
+    result = scenario_load_setup();
     if (g_script_attack_entry_mode != SCRIPT_ATTACK_ENTRY_PRELOAD_USED) {
-        formation_build_sprites();
-        portrait_load_party();
+        deploy_build_sprites();
+        portrait_party_load();
     }
     g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
     g_menu_panel_fade_intensity = 0;
@@ -118,9 +118,9 @@ s32 deploy_open(void) {
     } else {
         g_sound_music_track_1_id = 0;
         g_sound_music_track_2_id = 0;
-        music_tracks_play(MUSIC_DEPLOYMENT, MUSIC_NONE);
-        deploy_build_strings();
-        battle_map_title_load_graphic();
+        music_play_tracks(MUSIC_DEPLOYMENT, MUSIC_NONE);
+        deploy_build_help_strings();
+        map_load_title_graphic();
         thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, attack_deployment_entrypoint);
         return_value = 0;
     }
@@ -140,8 +140,8 @@ void mini_menu_start(void) {
     }
     g_command_current_id = MENU_COMMAND_ID_MINI_MENU;
     g_menu_thread_menu_data = g_command_idle_action_entries;
-    thread_start(THREAD_SLOT_MENU, mini_menu_select);
-    thread_parameters_set(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_MINI_MENU], 0, 0);
+    thread_start(THREAD_SLOT_MENU, mini_menu_thread);
+    thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_MINI_MENU], 0, 0);
     g_thread_contexts[THREAD_SLOT_MENU].task_id = THREAD_TASK_MINI_MENU;
 }
 
@@ -152,7 +152,7 @@ void mini_menu_start(void) {
  * list fade-out), 2 while the menu-building thread runs or while menu input is
  * blocked, 4 when one of threads 4-9 is running, and 0 when all are idle. The `i
  * != 3` test inside the scan of threads 4-9 always passes. */
-s32 menu_thread_activity_get(void) {
+s32 menu_thread_get_activity(void) {
     s32 i;
     s32 result;
 
@@ -182,7 +182,7 @@ s32 menu_thread_activity_get(void) {
 #ifdef FFT_WORLD
 /* Menu activity summary: 2 while the menu-building thread runs, else 4 when
  * any of thread slots 4..8 runs, else 0. */
-s32 menu_thread_activity_get(void) {
+s32 menu_thread_get_activity(void) {
     s32 i;
 
     if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
@@ -199,12 +199,12 @@ s32 menu_thread_activity_get(void) {
 
 /* Raise the flag that releases at_list_select_unit_thread once a unit picked
  * from the AT list has been viewed. */
-void at_list_selection_finish(void) {
+void at_list_finish_selection(void) {
     g_at_list_selection_finished = 1;
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * at_list_selection_finish and menu_noop_6. Nothing on the disc calls it
+ * at_list_finish_selection and menu_noop_6. Nothing on the disc calls it
  * or points at it; the name is a neutral placeholder until a reference turns
  * up. */
 void menu_noop_5(void) {
@@ -230,24 +230,24 @@ void unit_view_start(s32 mode, s32 unit_a, s32 unit_b) {
     text_build_unit_name_list();
     g_menu_panel_fade_mode = g_menu_panel_fade_modes[mode];
     if (unit_a != 0xff) {
-        g_unit_panel_selected_unit.battle_id = unit_a;
+        g_unit_panel_selected_unit.battle_unit_id = unit_a;
         g_unit_panel_selected_unit_status.unit_index = unit_a;
     }
     if (unit_b != 0xff) {
-        g_unit_panel_comparison_unit_data.battle_id = unit_b;
+        g_unit_panel_comparison_unit_data.battle_unit_id = unit_b;
         g_unit_panel_comparison_unit_status.unit_index = unit_b;
     }
     if (thread_is_running_asm(THREAD_SLOT_UNIT_VIEW) == 0) {
-        thread_start(THREAD_SLOT_UNIT_VIEW, views_supervise);
+        thread_start(THREAD_SLOT_UNIT_VIEW, view_supervisor_thread);
     }
-    thread_parameters_set(THREAD_SLOT_UNIT_VIEW, mode, 0, 0);
+    thread_set_parameters(THREAD_SLOT_UNIT_VIEW, mode, 0, 0);
 }
 
 enum { MENU_UNIT_VIEW_SLOT_IDLE = 0, MENU_UNIT_VIEW_SLOT_RESTART = 1, MENU_UNIT_VIEW_SLOT_STARTED = 2 };
 
 /* Starts the requested unit-view panel threads, stops stale panels, and restarts
  * them after they exit. A new parameter replaces the pending view request. */
-static void views_supervise(void) {
+static void view_supervisor_thread(void) {
     s32 states[16];
     view_threads_t* set;
     s32 mode;
@@ -256,7 +256,7 @@ static void views_supervise(void) {
     thread_t* thread;
 
     for (;;) {
-        mode = thread_current_parameter_1_get();
+        mode = thread_current_get_parameter_1();
         set = &s_view_threads[mode];
         g_unit_view_mode = mode;
         g_thread_contexts[g_thread_current_id].function_parameter_1 = 0xff;
@@ -269,24 +269,24 @@ static void views_supervise(void) {
                 task = thread->task_id;
                 if (task == set->task_ids[i]
                     && (task != THREAD_TASK_HOVERED_UNIT_STATS
-                        || g_unit_view_cached_battle_id == g_unit_panel_selected_unit.battle_id)
+                        || g_unit_view_cached_battle_unit_id == g_unit_panel_selected_unit.battle_unit_id)
                     && (task != THREAD_TASK_RIGHT_UNIT_STATS
-                        || g_unit_view_cached_comparison_id == g_unit_panel_comparison_unit_data.battle_id)
+                        || g_unit_view_cached_comparison_id == g_unit_panel_comparison_unit_data.battle_unit_id)
                     && (task != THREAD_TASK_UNIT_SUMMARY_PANEL
-                        || g_unit_view_cached_battle_id == g_unit_panel_selected_unit.battle_id)) {
+                        || g_unit_view_cached_battle_unit_id == g_unit_panel_selected_unit.battle_unit_id)) {
                     continue;
                 }
                 states[set->thread_ids[i]] = MENU_UNIT_VIEW_SLOT_RESTART;
-                thread_parameters_set(set->thread_ids[i], 0, 0, 1);
+                thread_set_parameters(set->thread_ids[i], 0, 0, 1);
             } else if (set->entries[i] != UNIT_VIEW_NO_THREAD) {
                 thread_start(set->thread_ids[i], set->entries[i]);
-                thread_parameters_set(set->thread_ids[i], 0, 0, 0);
+                thread_set_parameters(set->thread_ids[i], 0, 0, 0);
                 thread->task_id = set->task_ids[i];
                 states[set->thread_ids[i]] = MENU_UNIT_VIEW_SLOT_STARTED;
             }
         }
-        g_unit_view_cached_battle_id = g_unit_panel_selected_unit.battle_id;
-        g_unit_view_cached_comparison_id = g_unit_panel_comparison_unit_data.battle_id;
+        g_unit_view_cached_battle_unit_id = g_unit_panel_selected_unit.battle_unit_id;
+        g_unit_view_cached_comparison_id = g_unit_panel_comparison_unit_data.battle_unit_id;
         for (;;) {
             for (i = 0; i < 4; i++) {
                 if (states[set->thread_ids[i]] == MENU_UNIT_VIEW_SLOT_RESTART
@@ -297,16 +297,16 @@ static void views_supervise(void) {
             if (i == 4) {
                 break;
             }
-            thread_frames_wait(1);
+            thread_wait_frames(1);
         }
         for (i = 0; i < 4; i++) {
             if (states[set->thread_ids[i]] == MENU_UNIT_VIEW_SLOT_RESTART && set->entries[i] != UNIT_VIEW_NO_THREAD) {
                 thread_start(set->thread_ids[i], set->entries[i]);
-                thread_parameters_set(set->thread_ids[i], 0, 0, 0);
+                thread_set_parameters(set->thread_ids[i], 0, 0, 0);
                 g_thread_contexts[set->thread_ids[i]].task_id = set->task_ids[i];
             }
         }
-        if (thread_current_parameter_1_get() == 0xff) {
+        if (thread_current_get_parameter_1() == 0xff) {
             thread_current_exit();
         }
     }
@@ -314,24 +314,24 @@ static void views_supervise(void) {
 
 /* Set the event speed, which also divides the input repeat delays; BATTLE
  * sets the vsync interval with it. */
-void script_event_speed_set(s32 speed) {
+void script_set_event_speed(s32 speed) {
     g_script_event_speed = speed;
 #ifdef FFT_BATTLE
-    system_vsync_interval_set(speed);
+    system_set_vsync_interval(speed);
 #endif
 }
 
 /* Yield until the four unit view panel threads (hovered and right unit stats, unit summary, tile
  * info) have stopped. */
-void unit_view_panels_wait(void) {
-    thread_inactive_wait(THREAD_SLOT_HOVERED_UNIT_STATS);
-    thread_inactive_wait(THREAD_SLOT_RIGHT_UNIT_STATS);
-    thread_inactive_wait(THREAD_SLOT_UNIT_SUMMARY_PANEL);
-    thread_inactive_wait(THREAD_SLOT_TILE_INFO_PANEL);
+void unit_view_wait_panels(void) {
+    thread_wait_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
+    thread_wait_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
+    thread_wait_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);
+    thread_wait_inactive(THREAD_SLOT_TILE_INFO_PANEL);
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * unit_view_panels_wait and script_noop_5. Nothing on the disc
+ * unit_view_wait_panels and script_noop_5. Nothing on the disc
  * calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 void script_noop_4(void) {
@@ -354,7 +354,7 @@ void script_noop_6(void) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between script_noop_6 and
- * flag_assign. Nothing on the disc calls it or points at it; the
+ * assign_flag. Nothing on the disc calls it or points at it; the
  * name is a neutral placeholder until a reference turns up. */
 void script_noop_7(void) {
 }

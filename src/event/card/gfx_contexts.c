@@ -19,7 +19,7 @@ extern save_gfx_context_t* g_save_gfx_context_base;
  * the finished ordering table from entry draw_otag (-1 skips the draw) and
  * clears the new one from first_otag onward.
  */
-void save_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
+void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     u32* previous_otag = g_save_gfx_context->otag;
     save_gfx_context_t* context;
 
@@ -43,7 +43,7 @@ void save_gfx_submit_frame(s32 first_otag, s32 draw_otag) {
 }
 
 /* Initialize the POLY_FT4 and TILE primitive headers of one graphics context. */
-static void save_gfx_init_primitive_lists(save_gfx_context_t* lists) {
+static void init_primitive_buffers(save_gfx_context_t* lists) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_ft4_capacity; i++) {
@@ -60,7 +60,7 @@ static void save_gfx_init_primitive_lists(save_gfx_context_t* lists) {
  * environments (context 0 draws at y 0 and displays y 0xf0, context 1 the
  * reverse).
  *
- * CARD copy of screen_packet_buffers_init reduced to the POLY_FT4
+ * CARD copy of WORLD's menu_gfx_init_contexts reduced to the POLY_FT4
  * and TILE pools; the pools this overlay does not use are arguments nobody
  * reads. */
 void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
@@ -75,13 +75,13 @@ void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused
         g_save_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
         g_save_gfx_context_base[i].textured_quads = polygons + g_gfx_poly_ft4_capacity * i;
         g_save_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
-        save_gfx_init_primitive_lists(&g_save_gfx_context_base[i]);
+        init_primitive_buffers(&g_save_gfx_context_base[i]);
         SetDefDrawEnv(&g_save_gfx_context_base[i].draw_environment, 0, i * 0xf0, 0x100, 0xf0);
         SetDefDispEnv(&g_save_gfx_context_base[i].display_environment, 0, i == 0 ? 0xf0 : 0, 0x100, 0xf0);
         g_save_gfx_context_base[i].draw_environment.isbg = 0;
         setRGB0(&g_save_gfx_context_base[i].draw_environment, 0, 0, 0);
         g_save_gfx_context_base[i].draw_environment.ofs[0] = -0x80;
     }
-    save_gfx_submit_frame(0, -1);
-    save_gfx_submit_frame(0, -1);
+    menu_gfx_present_frame(0, -1);
+    menu_gfx_present_frame(0, -1);
 }

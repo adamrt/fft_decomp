@@ -25,67 +25,64 @@ typedef enum weather {
 enum { WEATHER_SNOW_OFFSET = 3 };
 
 /* Bits of g_weather_flags ("weather palette mods"). */
-typedef enum weather_flags {
-    BATTLE_MAP_WEATHER_FLAG_SNOW = 0x01,
-    BATTLE_MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02
-} weather_flags_e;
+typedef enum weather_flags { MAP_WEATHER_FLAG_SNOW = 0x01, MAP_WEATHER_FLAG_IGNORE_WEATHER = 0x02 } weather_flags_e;
 
-/* Commands of weather_command_dispatch and weather_particles_init. */
+/* Commands of weather_dispatch_command and init_weather_particles. */
 typedef enum weather_command {
-    BATTLE_MAP_WEATHER_COMMAND_SNOW = 0x53,
-    BATTLE_MAP_WEATHER_COMMAND_CLEAR = 0x54,
-    BATTLE_MAP_WEATHER_COMMAND_RAIN = 0x55,
-    BATTLE_MAP_WEATHER_COMMAND_LIGHT_RAIN = 0x7c,
-    BATTLE_MAP_WEATHER_COMMAND_HEAVY_RAIN = 0x7d,
-    BATTLE_MAP_WEATHER_COMMAND_LIGHT_SNOW = 0x7e,
-    BATTLE_MAP_WEATHER_COMMAND_HEAVY_SNOW = 0x7f,
-    BATTLE_MAP_WEATHER_COMMAND_THUNDER = 0x89,              /* one lightning flash with its sound */
-    BATTLE_MAP_WEATHER_COMMAND_LIGHTNING = 0x8a,            /* random lightning from now on */
-    BATTLE_MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
-    BATTLE_MAP_WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
-    BATTLE_MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* weather_particles_init */
-    BATTLE_MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90
+    MAP_WEATHER_COMMAND_SNOW = 0x53,
+    MAP_WEATHER_COMMAND_CLEAR = 0x54,
+    MAP_WEATHER_COMMAND_RAIN = 0x55,
+    MAP_WEATHER_COMMAND_LIGHT_RAIN = 0x7c,
+    MAP_WEATHER_COMMAND_HEAVY_RAIN = 0x7d,
+    MAP_WEATHER_COMMAND_LIGHT_SNOW = 0x7e,
+    MAP_WEATHER_COMMAND_HEAVY_SNOW = 0x7f,
+    MAP_WEATHER_COMMAND_THUNDER = 0x89,              /* one lightning flash with its sound */
+    MAP_WEATHER_COMMAND_LIGHTNING = 0x8a,            /* random lightning from now on */
+    MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER = 0x8b, /* issue the commands for the weather script variable */
+    MAP_WEATHER_COMMAND_RESTORE_LIGHTING = 0x8c,
+    MAP_WEATHER_COMMAND_INIT_SNOW_PARTICLES = 0x8f, /* init_weather_particles */
+    MAP_WEATHER_COMMAND_INIT_RAIN_PARTICLES = 0x90
 } weather_command_e;
 
 /* Stored renderer selector at g_weather_effect_mode. The ordinary
  * modes reuse command IDs; 0x96 runs E458's timed particle transform. */
 typedef enum weather_effect_mode {
-    BATTLE_MAP_WEATHER_EFFECT_SNOW = BATTLE_MAP_WEATHER_COMMAND_SNOW,
-    BATTLE_MAP_WEATHER_EFFECT_CLEAR = BATTLE_MAP_WEATHER_COMMAND_CLEAR,
-    BATTLE_MAP_WEATHER_EFFECT_RAIN = BATTLE_MAP_WEATHER_COMMAND_RAIN,
-    BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96
+    MAP_WEATHER_EFFECT_SNOW = MAP_WEATHER_COMMAND_SNOW,
+    MAP_WEATHER_EFFECT_CLEAR = MAP_WEATHER_COMMAND_CLEAR,
+    MAP_WEATHER_EFFECT_RAIN = MAP_WEATHER_COMMAND_RAIN,
+    MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM = 0x96
 } weather_effect_mode_e;
 
-/* weather_flags_e bits, with the signed palette modifier above BATTLE_MAP_WEATHER_MODIFIER_SHIFT. */
+/* weather_flags_e bits, with the signed palette modifier above MAP_WEATHER_MODIFIER_SHIFT. */
 extern s32 g_weather_flags;
 extern s16 g_weather_effect_mode; /* weather_effect_mode_e */
 
 s32 weather_get_effective(void);
 
 /* A byte-valued weather_command_e, also read from the event command table. */
-void weather_command_dispatch(u8 command);
+void weather_dispatch_command(u8 command);
 
 /* timed particle transform */
 /* Frame, duration and rotation of E458's timed particle transform
- * (BATTLE_MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
+ * (MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM). */
 extern s32 g_weather_timed_transform_frame;
 extern s32 g_weather_timed_transform_duration;
 
-void weather_transform_duration_set(s32 id, s32 value);
+void weather_set_transform_duration(s32 id, s32 value);
 
 /* sound */
-/* Sound IDs remembered for weather_sfx_stop; zero means no ID is stored.
+/* Sound IDs remembered for weather_stop_sfx; zero means no ID is stored.
  * The rain ID is also retained while weather sounds are disabled. */
 extern s32 g_weather_rain_sfx_id;
 extern s32 g_weather_thunder_a_sfx_id;
 extern s32 g_weather_thunder_b_sfx_id;
 extern u8 g_weather_sfx_enabled;
 
-void weather_sfx_start(void);
-s32 weather_sfx_stop(void); /* the result is indeterminate; no caller reads it */
+void weather_start_sfx(void);
+s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
 
 /* palette modifier encoding */
 /* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
-enum { BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7, BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f };
+enum { MAP_WEATHER_MODIFIER_SHIFT = 7, MAP_WEATHER_LOW_FLAGS_MASK = 0x7f };
 
 #endif

@@ -18,7 +18,7 @@ extern RECT g_portrait_palette_rect;
 
 /* Uploads the 20 party portraits (sprite and palette cells) from EVENT/WLDFACE.BIN to
  * VRAM; with no entry mode set the sheets are read back from VRAM instead. The loop is
- * ATTACK's (portrait_prepare_party_textures) with its slot 20, the special
+ * ATTACK's (portrait_party_prepare_textures) with its slot 20, the special
  * portrait, cut off by a `break`; the dead i == 20 tests remain.
  *
  * Register allocation and scheduling depend on the variable shapes: `value`
@@ -26,7 +26,7 @@ extern RECT g_portrait_palette_rect;
  * the job arms reread `unit->job_id`, `offset` is built in three statements
  * (multi-set temps keep the i / 7 mult after the row * 0x3000 terms), and the
  * palette offset has its own variable. */
-void portrait_prepare_party_textures(void) {
+void portrait_party_prepare_textures(void) {
     portrait_sheet_t* file;
     s32 offset;
     s32 pal_offset;
@@ -45,7 +45,7 @@ void portrait_prepare_party_textures(void) {
 
     file = heap_alloc(WLDFACE_FILE_SIZE);
     if (g_script_attack_entry_mode != 0) {
-        g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+        g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE, file);
     } else {
         StoreImage(&g_portrait_sheet_rect_0, (u32*)file[0].pixels);
@@ -78,7 +78,7 @@ void portrait_prepare_party_textures(void) {
                     value = base + 0x5f;
                 }
             } else {
-                g_portrait_job_data = job_data_get(unit->job_id);
+                g_portrait_job_data = job_get_data(unit->job_id);
                 value = g_portrait_job_data->spritesheet_id;
             }
             job_id = unit->job_id;
@@ -151,5 +151,5 @@ void portrait_prepare_party_textures(void) {
         }
         DrawSync(0);
     }
-    heap_block_release(file);
+    heap_release_block(file);
 }

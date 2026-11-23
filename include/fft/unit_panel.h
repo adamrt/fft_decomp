@@ -11,20 +11,20 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-struct battle_map_selected_tile;
-struct unit_stats;
+struct map_selected_tile;
+struct battle_unit;
 union menu_stack_record;
 
 /* status values */
 /* Name, job and identity values copied into WORLD and EQUIP status panels.
- * The last displayed value is the roster slot, distinct from a battle id. */
+ * The last displayed value is the roster slot, distinct from a battle unit id. */
 typedef struct menu_unit_status_identity {
     s16 unit_index;  /* 0x00: name text 0x4000 + value (unit_panel_banner_thread) */
     s16 job_id;      /* 0x02: job name text 0x3000 + value */
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
     s16 zodiac;      /* 0x08 */
-    s16 roster_slot; /* 0x0a: party slot (formation_selected_unit_name_id_get); shown as value + 1 */
+    s16 roster_slot; /* 0x0a: party slot (formation_get_selected_unit_name_id); shown as value + 1 */
     u8 _unused_0c[2];
 } menu_unit_status_identity_t;
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
@@ -81,19 +81,19 @@ typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gaug
 
 /* selected and comparison units */
 /* The unit a status panel shows, saved and restored whole by unit_panel_copy_billboard_out and
- * unit_panel_copy_billboard_in. unit_panel_load_selected fills job_id..zodiac for the unit named by battle_id; the
+ * unit_panel_copy_billboard_in. unit_panel_load_selected fills job_id..zodiac for the unit named by battle_unit_id; the
  * overlays' status panels keep a second record for the comparison unit (g_unit_panel_comparison_unit_data).
  * Provisional. */
 typedef struct unit_panel_unit {
     /* 0x00: unit name text id less TEXT_ID_UNIT_NAME_BASE (DEBUGCHR, REQUIRE);
      * in ATTACK the roster index, a row of the names it builds at text 0x5800 */
     s16 name_id;
-    s16 job_id;     /* 0x02 */
-    s16 brave;      /* 0x04 */
-    s16 faith;      /* 0x06 */
-    s16 zodiac;     /* 0x08 */
-    s16 battle_id;  /* 0x0a: selected unit */
-    s16 _unused_0c; /* 0x0c */
+    s16 job_id;         /* 0x02 */
+    s16 brave;          /* 0x04 */
+    s16 faith;          /* 0x06 */
+    s16 zodiac;         /* 0x08 */
+    s16 battle_unit_id; /* 0x0a: selected unit */
+    s16 _unused_0c;     /* 0x0c */
 } unit_panel_unit_t;
 typedef char unit_panel_unit_size_must_be_14[(sizeof(unit_panel_unit_t) == 14) ? 1 : -1];
 
@@ -107,19 +107,19 @@ typedef char unit_panel_record_size_must_be_64[(sizeof(unit_panel_record_t) == 6
 /* A unit's status summary: g_unit_panel_selected_unit_status (BATTLE's AT banner) and
  * g_unit_panel_comparison_unit_status (its status billboard), WORLD's formation records
  * g_unit_panel_selected_unit_stat_summary and g_formation_comparison_unit_stat_summary, and each overlay's pair of
- * panel billboards, each pair 0x24 apart. unit_panel_fill_billboard and unit_panel_party_unit_prepare fill the first
- * 0x1e bytes, unit_view_stats_panel_thread and the overlays' unit_panel_banner_thread draw it, and
+ * panel billboards, each pair 0x24 apart. fill_billboard and unit_panel_prepare_party_unit fill the first
+ * 0x1e bytes, stats_panel_thread and the overlays' unit_panel_banner_thread draw it, and
  * unit_panel_copy_billboard_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
 typedef struct unit_panel_summary {
-    s16 level;      /* 0x00; debug_unit_editor_apply_values writes it back */
+    s16 level;      /* 0x00; apply_values writes it back */
     s16 team_kind;  /* 0x02: 0 ally, 1 enemy, 2 neutral, 3 auto-battle; selects the status icon,
                        the panel's 0xc-byte geometry row and its CLUT */
     s16 list_index; /* 0x04: AT-list position + 1, negative when the unit is not listed
                        (drawn as dashes, format 0xc00) */
     s16 unit_count; /* 0x06 */
     s16 experience; /* 0x08; written back with level */
-    s16 unit_index; /* 0x0a; the battle id in battle, the party index in the WORLD and WLDCORE panels */
+    s16 unit_index; /* 0x0a; the battle unit id in battle, the party index in the WORLD and WLDCORE panels */
     menu_unit_status_gauge_t gauges[3]; /* 0x0c: MENU_UNIT_STATUS_GAUGE_*; CT max is always 100 */
     s16 projected_display_value;        /* 0x1e */
     u16 projected_hit_percent;          /* 0x20 */
@@ -154,7 +154,7 @@ void unit_panel_load_selected(void);
 /* Copies the selected unit's records and the cursor tile into the caller's buffers; _in restores them without
  * the tile. */
 void unit_panel_copy_billboard_out(unit_panel_summary_t* banner, unit_panel_unit_t* unit,
-    unit_panel_record_t* billboard, struct battle_map_selected_tile* cursor_tile);
+    unit_panel_record_t* billboard, struct map_selected_tile* cursor_tile);
 void unit_panel_copy_billboard_in(
     const unit_panel_summary_t* banner, const unit_panel_unit_t* unit, const unit_panel_record_t* billboard);
 
@@ -164,10 +164,10 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index);
 
 /* WLDCORE's: loads party member party_index into g_unit_panel_unit and fills the status-panel records the
  * participant detail level draws. */
-void unit_panel_party_unit_prepare(s32 party_index);
+void unit_panel_prepare_party_unit(s32 party_index);
 
 /* The battle unit stats of g_unit_panel_selected_unit. */
-struct unit_stats* menu_selected_unit_stats_get(void);
+struct battle_unit* menu_get_selected_battle_unit(void);
 
 /* panel threads */
 /* Flags of the unit status panel parameter records. */
@@ -213,6 +213,10 @@ extern unit_panel_thread_t g_unit_panel_panel_params;
 void unit_panel_toggle_banner_thread(s32 enable);
 void unit_panel_toggle_comparison_thread(s32 enable);
 void unit_panel_toggle_numbers_thread(s32 enable);
+void unit_panel_toggle_preview_stats_thread(s32 flag);
+void unit_panel_toggle_equipment_threads(s32 enable);
+void redraw_unit_panels(void);
+void unit_panels_stop(void);
 
 /* The unit status panel thread; each program that shows the panel links its own body. */
 void unit_panel_banner_thread(void);
@@ -231,9 +235,9 @@ typedef struct menu_status_panel_draw_offset {
 } menu_status_panel_draw_offset_t;
 typedef char menu_status_panel_draw_offset_size_must_be_16[(sizeof(menu_status_panel_draw_offset_t) == 16) ? 1 : -1];
 
-/* The numeric display frame, built by status_screen_init_numbers_frame: two DR_MODE
+/* The numeric display frame, built by menu_numeric_frame_init: two DR_MODE
  * packets, twelve LINE_F2 packets and one covering SPRT whose CLUT
- * menu_init_primitive_colors_normal and _dimmed set. */
+ * menu_numeric_frame_set_normal_colors and _dimmed set. */
 typedef struct menu_numeric_frame {
     DR_MODE draw_mode;      /* 0x00: texture window g_gfx_texture_window */
     DR_MODE draw_mode_menu; /* 0x0c: texture window g_status_screen_numbers_texture_window */
@@ -258,7 +262,7 @@ typedef char menu_status_panel_packet_size_must_be_472[(sizeof(menu_status_panel
 
 /* Character-editor packet block (0x30c bytes) built by the overlays' unit_panel_banner_thread. Two copies
  * sit back to back and `frame & 1` selects one, so the copy stride proves the size. The head is the numeric
- * display frame that status_screen_init_numbers_frame builds, the SPRT/POLY
+ * display frame that menu_numeric_frame_init builds, the SPRT/POLY
  * strides come from the walks that configure and submit them, and the
  * draw-offset packets from the SetDrawOffset pairs. */
 typedef struct menu_status_panel_editor_packet {
@@ -303,7 +307,7 @@ typedef char unit_panel_frame_size_must_be_676[sizeof(unit_panel_frame_t) == 676
  *  - the two draw-offset packets follow from the SetDrawOffset(packet,
  *    position) calls at +0x2a4/+0x2b0 and +0x2b4/+0x2c0;
  *  - +0x2c4 and +0x3b0 are the arguments of
- *    status_screen_init_numbers_frame and the
+ *    menu_numeric_frame_init and the
  *    menu_init_scaled_draw_area_packets / menu_build_scaled_draw_area_packets
  *    pair. */
 typedef struct unit_panel_buffer {
@@ -319,8 +323,8 @@ void menu_numeric_frame_init(RECT* bounds, menu_numeric_frame_t* menu);
 void menu_numeric_frame_submit(menu_numeric_frame_t* display);
 
 /* The frame lines in the normal or dimmed menu colors and the covering sprite in the matching CLUT. */
-void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu);
-void menu_init_primitive_colors_dimmed(menu_numeric_frame_t* menu);
+void menu_numeric_frame_set_normal_colors(menu_numeric_frame_t* menu);
+void menu_numeric_frame_set_dimmed_colors(menu_numeric_frame_t* menu);
 
 void unit_panel_init_primitives(unit_panel_frame_t* menu);
 
@@ -440,7 +444,7 @@ typedef struct menu_status_panel_numeric_geometry {
 
 /* Numeric panel buffer (0x2c0 bytes), double buffered by unit_panel_numbers_thread, which copies it with sizeof. The
  * draw modes are set up with gfx_set_draw_mode_for_texture_page / SetDrawMode, the 18 SPRTs by the
- * gfx_set_image_primitive_layout walk, +0x18c and +0x298 are the arguments of status_screen_init_numbers_frame and
+ * gfx_set_image_primitive_layout walk, +0x18c and +0x298 are the arguments of menu_numeric_frame_init and
  * menu_init_scaled_draw_area_packets, and the draw offsets follow from the SetDrawOffset(packet, position) pairs. */
 typedef struct menu_status_panel_numeric_buffer {
     DR_MODE frame_draw_mode;                         /* 0x000; MENU_TEXTURE_PAGE_FRAME */
@@ -467,7 +471,7 @@ extern RECT g_unit_panel_editor_numeric_entries_e;
 extern RECT g_unit_panel_editor_numeric_entries_f;
 extern menu_unit_stat_number_images_t g_unit_panel_editor_numeric_text_a;
 extern menu_unit_stat_number_images_t g_unit_panel_editor_numeric_text_b;
-extern struct unit_stats g_unit_panel_editor_party_unit_stats;
+extern struct battle_unit g_unit_panel_editor_battle_unit;
 
 /* Numeric panel thread: ATTACK/REQUIRE and BUNIT/WORLD share bodies; DEBUGCHR and EQUIP each define their own. */
 void unit_panel_numbers_thread(void);
@@ -492,15 +496,12 @@ void unit_panel_toggle_equipment_and_numbers(s32 enable);
 /* panel state (EQUIP) */
 extern unit_panel_thread_t g_unit_panel_unit_status_panel_params;
 
-void unit_panel_toggle_equipment_threads(s32 enable);
-void unit_panel_toggle_item_numbers_thread(s32 enable);
-
 /* panel state (REQUIRE) */
 void unit_panel_set_dimmed(s32 value);
 void unit_panel_transition_thread(void);
 
 /* help levels (WLDCORE) */
-/* The window-layout request that opens a MENU_STACK_LEVEL_UNIT_PANEL_HELP level. help_cursor_move reads the
+/* The window-layout request that opens a MENU_STACK_LEVEL_UNIT_PANEL_HELP level. move_help_cursor reads the
  * first three fields. */
 typedef struct unit_panel_help_level {
     s32 window_index;
@@ -509,6 +510,6 @@ typedef struct unit_panel_help_level {
     s32 saved_state; /* 0x0c; previous g_menu_stack_ot_offset, saved by the push */
 } unit_panel_help_level_t;
 
-void unit_panel_help_open(void);
+void unit_panel_open_help(void);
 
 #endif

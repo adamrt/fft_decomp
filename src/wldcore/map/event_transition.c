@@ -13,7 +13,7 @@
 #include "psx/types.h"
 
 /* The event transition's spinning screen-capture sprite, sorted with GsSortSprite by
- * event_transition_sprite_draw. */
+ * event_transition_draw_sprite. */
 static GsSPRITE s_event_transition_sprite = { 0 };
 
 /* The byte color triple of the screen-wide fade overlay. It
@@ -36,7 +36,7 @@ void event_transition_open(s32 mode) {
     event_transition_seek_battle_bin();
     if (mode == EVENT_TRANSITION_MODE_FADE) {
         g_world_map_flags |= WORLD_MAP_FLAG_FREEZE_ANIMATION;
-        world_map_fade_start(WORLD_MAP_FADE_OUT, 0x20);
+        world_map_start_fade(WORLD_MAP_FADE_OUT, 0x20);
     } else {
         rect.x = 0x100;
         rect.y = 0;
@@ -88,7 +88,7 @@ void event_transition_open(s32 mode) {
 
 /* Draws the event transition's spinning sprite while that level is on top of
  * the menu stack, unless it is a plain fade. */
-void event_transition_sprite_draw(GsOT* ordering_table) {
+void event_transition_draw_sprite(GsOT* ordering_table) {
     s32 current = g_menu_stack_depth;
 
     if (g_menu_stack_types[current - 1] == MENU_STACK_LEVEL_EVENT_TRANSITION

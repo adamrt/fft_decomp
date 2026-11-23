@@ -42,7 +42,7 @@ extern u8 g_equipment_armor_bonus_render_commands[88];
  * the panels, resumes the command menu and returns 0. Otherwise the menu, slot
  * marker and selected-item panels are drawn and 1 is returned.
  */
-s32 formation_items_update(void) {
+s32 item_list_update(void) {
     s32 input;
     s32 override;
     s16 item_id;
@@ -50,12 +50,12 @@ s32 formation_items_update(void) {
 
     if (g_equipment_ready == 0) {
         g_equipment_ready = 1;
-        g_menu_selected_slot = menu_selection_value_init(2, 0);
+        g_menu_selected_slot = menu_selection_init_value(2, 0);
         thread_suspend(EQUIPMENT_THREAD_SLOT_COMMAND_MENU);
-        menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-        menu_request_thread_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);
-        menu_scrollable_list_core_init(0, 0, 0);
+        menu_thread_request_stop(EQUIPMENT_THREAD_SLOT_UNIT_STATUS);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST);
+        menu_scrollable_list_init_core(0, 0, 0);
         g_equipment_substate = MENU_ITEM_LIST_STATE_BROWSE;
         g_equipment_unit_banner_enabled = 0;
         g_unit_panel_preview_stats_thread_params.position.x = 0;
@@ -63,7 +63,7 @@ s32 formation_items_update(void) {
         gfx_load_image_and_wait(&g_equipment_status_label_image_rect, g_equipment_status_label_image);
     }
     if (g_equipment_substate == MENU_ITEM_LIST_STATE_CLOSE) {
-        unit_panel_toggle_item_numbers_thread(0);
+        unit_panel_toggle_preview_stats_thread(0);
         unit_panel_toggle_equipment_threads(1);
         unit_panel_toggle_numbers_thread(1);
         unit_panel_toggle_banner_thread(1);
@@ -76,13 +76,13 @@ s32 formation_items_update(void) {
         return 0;
     }
     if (g_equipment_substate == MENU_ITEM_LIST_STATE_BROWSE) {
-        g_equipment_substate = formation_items_browse_update();
+        g_equipment_substate = item_list_update_browse_state();
     } else if (g_equipment_substate == MENU_ITEM_LIST_STATE_REARRANGE) {
-        g_equipment_substate = item_rearrange_update();
+        g_equipment_substate = item_list_update_rearrange_mode();
     } else if (g_equipment_substate == MENU_ITEM_LIST_STATE_ACTION) {
-        g_equipment_substate = equipment_update_item_actions();
+        g_equipment_substate = item_list_update_action_menu();
     } else if (g_equipment_substate == MENU_ITEM_LIST_STATE_SORT_ORDER) {
-        g_equipment_substate = equipment_type_order_update();
+        g_equipment_substate = item_list_update_sort_menu();
     }
 
     /* Only browsing and rearranging take list input and page scrolling. */
@@ -97,8 +97,8 @@ s32 formation_items_update(void) {
     if (g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
         override = 1;
     }
-    menu_run_script_with_palette_mode(g_equipment_render_commands, input, override);
-    equipment_draw_slot_marker(0, g_menu_selected_slot, g_menu_input_lock_mode);
+    menu_script_run_with_palette_mode(g_equipment_render_commands, input, override);
+    item_list_draw_tabs(0, g_menu_selected_slot, g_menu_input_lock_mode);
     /* Details of the highlighted item: hand icons for a weapon, the HP/MP bonus for armor
      * and headgear, and its status list. */
     if (g_menu_list_entry_count != 0) {
@@ -108,7 +108,7 @@ s32 formation_items_update(void) {
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
-            menu_run_script_with_palette_mode(g_equipment_armor_bonus_render_commands, 0, 0);
+            menu_script_run_with_palette_mode(g_equipment_armor_bonus_render_commands, 0, 0);
         }
         item_draw_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
@@ -123,7 +123,7 @@ s32 formation_items_update(void) {
  * changes. `category` is u16 so its load is a zero_extend:HI that CSE cannot
  * replace with the value just stored to g_menu_selected_slot: the target
  * reloads the slot after the store. */
-s32 formation_items_browse_update(void) {
+s32 item_list_update_browse_state(void) {
     s16 selected;
     s16 scroll;
     u16 category;
@@ -137,32 +137,32 @@ s32 formation_items_browse_update(void) {
         equipment_build_item_list(g_equipment_unit_selected_index, category + 1,
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
-        menu_selection_record_restore(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
-        menu_init_scrollable_list(
+        menu_selection_restore_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
+        menu_scrollable_list_init(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        g_menu_row_callbacks[0].value = equipment_get_row_equipped_count;
-        g_menu_row_callbacks[1].value = equipment_get_row_item_count;
+        g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
+        g_menu_row_callbacks[1].value = equipment_row_get_item_count;
         g_menu_row_callbacks[2].icon = item_build_type_icon_source;
-        g_menu_row_callbacks[3].icon = equipment_get_row_icon_source;
-        g_menu_row_callbacks[4].value = equipment_get_preview_hp_bonus_display;
-        g_menu_row_callbacks[5].value = equipment_get_preview_mp_bonus_display;
+        g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
+        g_menu_row_callbacks[4].value = equipment_preview_get_hp_bonus_display;
+        g_menu_row_callbacks[5].value = equipment_preview_get_mp_bonus_display;
         g_menu_row_callbacks[6].value = equipment_get_preview_hp_bonus;
         g_menu_row_callbacks[7].value = equipment_get_preview_mp_bonus;
     }
-    unit_panel_toggle_item_numbers_thread(1);
+    unit_panel_toggle_preview_stats_thread(1);
     /* The help text is the item's entry in HELP_TEXT_SECTION_ITEMS. */
     g_help_message_text_id
         = g_menu_list_entry_count != 0 ? g_item_list_entries[g_menu_list_selected_index] + HELP_TEXT_ID_ITEM_BASE : -1;
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CROSS) {
-        menu_selection_record_set(
+        menu_selection_set_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
         s_equipment_slot_item_browser_initialized = 0;
         return MENU_ITEM_LIST_STATE_CLOSE;
     }
-    slot = menu_selection_horizontal_sound_step(5, 2, input, SOUND_SFX_PAGE_SWITCH);
+    slot = menu_selection_step_horizontal_with_sound(5, 2, input, SOUND_SFX_PAGE_SWITCH);
     if (slot != g_menu_selected_slot) {
-        menu_selection_record_set(
+        menu_selection_set_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
         g_menu_selected_slot = slot;
         category = g_menu_selected_slot;
@@ -170,14 +170,14 @@ s32 formation_items_browse_update(void) {
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
         g_equipment_slot_item_browser_previewed_index = -1;
-        menu_selection_record_restore(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
-        menu_init_scrollable_list(
+        menu_selection_restore_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
+        menu_scrollable_list_init(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        menu_set_window_scale_step(10);
+        menu_window_set_scale_step(10);
     } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_menu_list_entry_count != 0) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
-            menu_selection_record_set(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
+            menu_selection_set_record(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
             return MENU_ITEM_LIST_STATE_REARRANGE;
         }
         g_sound_queued_effect_id = SOUND_SFX_INVALID;
@@ -190,7 +190,7 @@ s32 formation_items_browse_update(void) {
             slot = 0;
         }
         g_equipment_slot_item_browser_previewed_index = g_menu_list_selected_index;
-        item_stat_preview_build(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_build_stat_preview(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_unit_status_panel_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }

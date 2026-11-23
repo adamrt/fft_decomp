@@ -10,7 +10,7 @@
 
 /* Enable or blank both display-object queues while preserving each object's HIDDEN flag.
  * Both record types start with the same signed 32-bit flags field. */
-void display_object_queues_set_enabled(s32 enabled) {
+void display_object_set_queues_enabled(s32 enabled) {
     s32 i;
 
     if (enabled) {
@@ -33,7 +33,7 @@ void display_object_queues_set_enabled(s32 enabled) {
 /* Start a screen fade of `duration` frames unless the current fade already has the same direction
  * (WORLD_MAP_FADE_OUT bit); START_MUSIC also queues the world map theme with a fade-in,
  * STOP_MUSIC fades the music out and unloads it. */
-void world_map_fade_start(s32 flags, s32 duration) {
+void world_map_start_fade(s32 flags, s32 duration) {
     if ((g_world_map_fade.flags[0] & WORLD_MAP_FADE_OUT) != (flags & WORLD_MAP_FADE_OUT)) {
         g_world_map_fade.flags[0] = flags | WORLD_MAP_FADE_RUNNING;
         g_world_map_fade.elapsed = 0;
@@ -52,7 +52,7 @@ void world_map_fade_start(s32 flags, s32 duration) {
 
 /* Steps the world screen fade: ramps the menu brightness and the first fill box
  * color toward the target until the elapsed counter reaches the duration. */
-s32 world_map_fade_update(void) {
+s32 world_map_update_fade(void) {
     u32 flags;
     s32 elapsed;
     s32 brightness;
@@ -98,7 +98,7 @@ s32 world_map_fade_update(void) {
                 }
             }
             g_world_map_fade.elapsed++;
-            screen_brightness_set(brightness, brightness, brightness);
+            screen_set_brightness(brightness, brightness, brightness);
             g_world_map_brightness_rgb.r = brightness;
             g_world_map_brightness_rgb.g = brightness;
             g_world_map_brightness_rgb.b = brightness;
@@ -122,7 +122,7 @@ s32 world_map_fade_update(void) {
  * is the identity. When the bit is clear the triple is copied verbatim,
  * which the 4-byte alignment-1 struct assignment emits as the unaligned
  * lwl/lwr + swl/swr quartet. */
-void world_map_fade_tint_color(CVECTOR* source, CVECTOR* out) {
+void world_map_tint_fade_color(CVECTOR* source, CVECTOR* out) {
     s32 red;
     s32 green;
     s32 blue;
@@ -151,7 +151,7 @@ void world_map_fade_tint_color(CVECTOR* source, CVECTOR* out) {
 /* Sort the two screen-fade boxes into the active ordering table at their
  * priorities. A box is drawn while its fade runs or it is flagged visible,
  * and only when its color is not black. */
-void world_map_fade_boxes_draw(void) {
+void world_map_draw_fade_boxes(void) {
     u32* flags;
     GsBOXF* boxes;
     s32* priorities;

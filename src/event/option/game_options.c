@@ -158,7 +158,7 @@ void option_game_options_thread(void) {
     ring = 0;
     image_rect.w = g_menu_window_text_pen.stride >> 2;
     LoadImage(&image_rect, (u32*)image);
-    thread_frames_wait(1);
+    thread_wait_frames(1);
 
     menu_init_scaled_draw_area_packets(&page->list_area);
     menu_init_scaled_draw_area_packets(&page->setting_area);
@@ -169,10 +169,10 @@ void option_game_options_thread(void) {
     base->setting_panel.x0 = entry->window.x;
     base->setting_panel.y0 = entry->window.y + entry->window.h + 1;
     g_menu_window_text_pen.stride = entry->inner_width;
-    menu_set_text_origin(0x18, 0xE);
+    menu_text_set_origin(0x18, 0xE);
     menu_display_text_entry(0x502B, image, &g_menu_window_text_pen);
     LoadImage(&g_option_title_image_rect, (u32*)image);
-    thread_frames_wait(1);
+    thread_wait_frames(1);
     menu_free_memory(image);
 
     value_rect.x = base->setting_panel.x0;
@@ -183,7 +183,7 @@ void option_game_options_thread(void) {
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     g_option_entry_panel_rect.h += 0xC;
     g_option_entry_panel_rect.y -= 2;
-    thread_parameters_set(g_thread_current_id + 1, (s32)&g_option_entry_panel_rect, 0, 0);
+    thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_entry_panel_rect, 0, 0);
     thread_yield();
 
     menu_init_sprt(&base->setting_value);
@@ -192,7 +192,7 @@ void option_game_options_thread(void) {
     base->setting_value.y0 = entry->window.y + entry->window.h + 0xF;
     menu_clear_render_buffer(buffer, 0x1E0);
     g_menu_window_text_pen.stride = 0x3C;
-    menu_set_text_origin(0, 0);
+    menu_text_set_origin(0, 0);
     menu_display_text_entry(0x5021, buffer, &g_menu_window_text_pen);
     LoadImage(&g_option_value_image_rect, (u32*)buffer);
 
@@ -201,7 +201,7 @@ void option_game_options_thread(void) {
     for (;;) {
         page = &g_option_pages[i & 1];
         if (delta == 0 && menu_can_accept_input() != 0) {
-            /* Square with up or down pages through the list instead (menu_redraw_text_page_on_scroll). */
+            /* Square with up or down pages through the list instead (menu_text_update_page_scroll). */
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
                     cursor--;
@@ -244,7 +244,7 @@ void option_game_options_thread(void) {
                 for (column = 0; column < 2; column++) {
                     if (layout->text_ids[column] != (s16*)-1) {
                         index = cursor + row_offset + delta;
-                        menu_set_text_origin(layout->x[column], 0);
+                        menu_text_set_origin(layout->x[column], 0);
                         g_menu_text_palette_offset = layout->text_colors[column][index];
                         if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
                             menu_display_text_entry(layout->text_ids[column][index], image, &g_menu_window_text_pen);
@@ -263,7 +263,7 @@ void option_game_options_thread(void) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
                     thread_start(g_thread_current_id - 1, option_choice_thread);
-                    thread_parameters_set(g_thread_current_id - 1, index, 0, 0);
+                    thread_set_parameters(g_thread_current_id - 1, index, 0, 0);
                 }
             }
             if (*input0 & PSX_PAD_CROSS) {
@@ -275,7 +275,7 @@ void option_game_options_thread(void) {
             index = cursor + row_offset + delta;
             menu_clear_render_buffer(buffer, 0x1E0);
             g_menu_window_text_pen.stride = 0x3C;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             value_text_id = g_option_value_text_id_bases[index] + g_option_values[index];
             menu_display_text_entry(value_text_id, buffer, &g_menu_window_text_pen);
             LoadImage(&g_option_value_image_rect, (u32*)buffer);
@@ -287,7 +287,7 @@ void option_game_options_thread(void) {
         }
 
         if (delta == 0 && menu_can_accept_input() != 0) {
-            menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
+            menu_text_update_page_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
 
@@ -297,7 +297,7 @@ void option_game_options_thread(void) {
         page->icons.base.sprites[2].y0 += 2;
         entry->selected_index = row_offset + cursor;
 
-        if ((g_script_event_speed == 1 && !(script_event_initial_repeat_counter_get() & 1))
+        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_menu_scroll_accel_delay) {
                 step = g_menu_scroll_slow_step * 2;
@@ -314,7 +314,7 @@ void option_game_options_thread(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = script_event_initial_repeat_counter_get();
+            repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
             if (repeat >= g_input_repeat_initial_delay / g_script_event_speed) {
@@ -353,9 +353,9 @@ void option_game_options_thread(void) {
 
         /* The frame thread dims its border while the value picker (the thread before this one) runs. */
         if ((thread - 1)->is_running == 0) {
-            thread_parameters_set(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
+            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 0, 0);
         } else {
-            thread_parameters_set(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
+            thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window, 1, 0);
         }
 
         gfx_build_scaled_draw_area_pair_swapped(&page->list_area, &entry->window, i, g_gfx_screen_polarity);
@@ -403,8 +403,8 @@ void option_game_options_thread(void) {
     menu_free_memory(buffer);
     gfx_free_texture_rect(&g_option_title_image_rect);
     gfx_free_texture_rect(&g_option_value_image_rect);
-    thread_frames_wait(1);
+    thread_wait_frames(1);
     /* A nonzero third parameter ends the frame thread. */
-    thread_parameters_set(g_thread_current_id + 1, 0, 0, 1);
+    thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
     thread_current_exit();
 }

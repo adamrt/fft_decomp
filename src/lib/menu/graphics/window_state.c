@@ -26,7 +26,7 @@ menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t*
 /* WORLD keeps its draw-area commands in its own unit. */
 #ifndef FFT_WORLD
 /* Queue the instruction draw area unless the zoom transition already queued one. */
-menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* data) {
+menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* data) {
     RECT area;
 
     if (g_gfx_otag_index_locked == 0) {
@@ -50,12 +50,12 @@ menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruc
 #endif
 
 /* Set the current frame of the window open/close scaling transition. */
-void menu_set_window_scale_step(s32 value) {
+void menu_window_set_scale_step(s32 value) {
     g_gfx_transition_frame = value;
 }
 
 /* Return the current frame of the window open/close scaling transition. */
-s32 menu_get_window_scale_step(void) {
+s32 menu_window_get_scale_step(void) {
     return g_gfx_transition_frame;
 }
 

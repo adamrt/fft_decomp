@@ -16,7 +16,7 @@
 /* Page a text window on Square+Up/Down (or on the running thread's redraw request): redraw its
  * three columns into g_menu_render_buffer and upload the image at the entry's VRAM origin.
  * Returns the buffer when the page was redrawn, else 0. */
-u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor) {
+u8* menu_text_update_page_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor) {
     RECT source;
     RECT clear_strip;
     menu_text_layout_t* layout = menu->context;

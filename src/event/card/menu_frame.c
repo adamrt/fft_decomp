@@ -24,7 +24,7 @@
  * Left/Right and adds Up/Down to the slow one. Any input other than Select, or a thread starting or stopping across
  * the yield, sets five frames of event input suppression.
  */
-void menu_input_event_state_update(u32* otag, u32 input, s32 drawenv_y) {
+void menu_input_update_event_state(u32* otag, u32 input, s32 drawenv_y) {
     u32 filtered_input;
     s32 initial_delay;
     s32 repeat_delay;

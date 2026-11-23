@@ -19,9 +19,9 @@ struct menu_gfx_context;
 typedef enum equipment_state {
     EQUIPMENT_STATE_INIT = 0, /* equip_entrypoint builds the screen */
     EQUIPMENT_STATE_COMMAND_MENU = 1,
-    EQUIPMENT_STATE_EQUIP = 2,     /* equip_update */
-    EQUIPMENT_STATE_REMOVE = 4,    /* remove_update */
-    EQUIPMENT_STATE_ITEM_LIST = 5, /* formation_items_update */
+    EQUIPMENT_STATE_EQUIP = 2,     /* update_equip_menu */
+    EQUIPMENT_STATE_REMOVE = 4,    /* update_remove_menu */
+    EQUIPMENT_STATE_ITEM_LIST = 5, /* item_list_update */
     EQUIPMENT_STATE_CLOSED = 0xff  /* equip_entrypoint returns its result */
 } equipment_state_e;
 
@@ -33,11 +33,11 @@ void equipment_thread(void);
 
 /* Advance EQUIP one frame; return its ordering table while open, then the equipment-change result. */
 s32 equip_entrypoint(s32 unit, u32* otag);
-void equipment_init(s32 battle_id);
-void equipment_reset_selection(void);
+void equipment_init(s32 battle_unit_id);
+void equipment_reset_selection_results(void);
 
 /* unit preview */
-/* What equipment_validate_slot_item finds for an item in an equipment slot. */
+/* What check_equipment_slot_item finds for an item in an equipment slot. */
 typedef enum equipment_slot_result {
     EQUIPMENT_SLOT_ITEM_CURRENT_LOCKED = -2,
     EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP = -1,
@@ -45,8 +45,8 @@ typedef enum equipment_slot_result {
     EQUIPMENT_SLOT_ITEM_ALLOWED = 1
 } equipment_slot_result_e;
 
-/* EQUIP.OUT's 0x7A-byte unit preview, built from unit_stats_t by
- * equipment_build_unit_preview. Field names follow the unit_stats_t
+/* EQUIP.OUT's 0x7A-byte unit preview, built from battle_unit_t by
+ * build_unit_preview. Field names follow the battle_unit_t
  * source; the first 0x1E bytes share the unit-status-billboard layout. */
 typedef struct equipment_unit_preview {
     s16 level;                            /* 0x00; capped at 99 */
@@ -54,9 +54,9 @@ typedef struct equipment_unit_preview {
     s16 list_index;                       /* 0x04; AT-list lookup + 1, or -1 */
     s16 unit_count;                       /* 0x06; units still present, set by equipment_load_unit */
     s16 experience;                       /* 0x08; capped at 99 */
-    s16 unit_index;                       /* 0x0a; unit_stats_t.active_battle_id */
+    s16 unit_index;                       /* 0x0a; battle_unit_t.active_battle_unit_id */
     menu_unit_status_gauge_t gauges[3];   /* 0x0c; HP, MP and CT */
-    s16 battle_id;                        /* 0x1e */
+    s16 battle_unit_id;                   /* 0x1e */
     s16 _unused_20;                       /* 0x20 */
     menu_unit_status_identity_t identity; /* 0x22 */
     s16 move;                             /* 0x30 */
@@ -67,7 +67,7 @@ typedef struct equipment_unit_preview {
     s16 right_weapon_evade;               /* 0x3a */
     s16 left_weapon_evade;                /* 0x3c */
     s16 _unused_3e;                       /* 0x3e; monster-skillset flag slot */
-    s16 two_handing;                      /* 0x40; unit_is_two_handing_weapon result */
+    s16 two_handing;                      /* 0x40; equipment_is_two_handing_weapon result */
     s16 physical_attack;                  /* 0x42 */
     s16 physical_class_evade;             /* 0x44 */
     s16 physical_shield_evade;            /* 0x46 */
@@ -80,8 +80,8 @@ typedef struct equipment_unit_preview {
     u16 equipment[5];                     /* 0x54; menu_equipment_slot_e order */
     u8 _unused_5e[0x12];                  /* 0x5e; ability ids and the spare tail of the stat-detail block, left zero */
     u8 equipment_categories[4];           /* 0x70 */
-    u8 support_abilities[4];              /* 0x74; copy of unit_stats_t.ability_flags.support */
-    u8 party_index;                       /* 0x78; unit_stats_t.formation_index */
+    u8 support_abilities[4];              /* 0x74; copy of battle_unit_t.ability_flags.support */
+    u8 party_index;                       /* 0x78; battle_unit_t.formation_index */
     u8 _padding_79;                       /* tail padding to 2-byte alignment */
 } equipment_unit_preview_t;
 typedef char equipment_unit_preview_size_must_be_122[(sizeof(equipment_unit_preview_t) == 122) ? 1 : -1];
@@ -92,14 +92,14 @@ extern u8 g_equipment_unit_selected_index;
  * and its compare slot (index 1); several callers view one as raw bytes. */
 extern equipment_unit_preview_t* g_equipment_unit_data[2];
 
-void equipment_load_unit(s32 battle_id);
-void equipment_load_selected_unit(void);
+void equipment_load_unit(s32 battle_unit_id);
+void equipment_refresh_selected_unit(void);
 void equipment_copy_unit_to_comparison(s32 unused_selected_index, s32 unused_1);
-s32 equipment_set_slot_item(s16 unit_index, s16 slot, s32 item_id);
+s32 equipment_set_slot_item(s16 unit_index, s16 slot, s16 item_id);
 void equipment_commit_loadout(void);
 
 /* EQUIP and WORLD each build their own body. */
-s32 equipment_item_compatibility_check(s16 unit_index, s16 item_id);
+s32 equipment_check_item_compatibility(s16 unit_index, s16 item_id);
 
 /* equipment slots */
 extern u16 g_equipment_remove_all_equipment_ids[5]; /* weapon, shield, head, body, accessory */
@@ -107,29 +107,29 @@ extern s8 g_equipment_remove_all_equipment_prompt_active;
 extern s16 g_equipment_remove_item_equipment[5];
 extern s8 g_equipment_remove_item_previewed_slot;
 
-void equipment_draw_slot_marker(s32 unused, s32 slot, s32 override);
+void item_list_draw_tabs(s32 unused, s32 slot, s32 override);
 
 /* stat previews */
 s32 equipment_get_preview_hp_bonus(s32 unused_row);
 s32 equipment_get_preview_mp_bonus(s32 unused_row);
 
 /* Row callbacks: the previewed HP or MP bonus, or MENU_NUMBER_VALUE_DASHES when it is 0. */
-s32 equipment_get_preview_hp_bonus_display(s32 unused_row);
-s32 equipment_get_preview_mp_bonus_display(s32 unused_row);
+s32 equipment_preview_get_hp_bonus_display(s32 unused_row);
+s32 equipment_preview_get_mp_bonus_display(s32 unused_row);
 
 /* Clears the HP and MP preview bonuses and the equipment-detail stats. */
-void equipment_stat_preview_clear(unit_panel_summary_t* summary, unit_panel_record_t* detail);
+void equipment_clear_stat_preview(unit_panel_summary_t* summary, unit_panel_record_t* detail);
 
 /* Sums weapon power and equipment evade from five items; other detail fields are unchanged. */
-void equipment_weapon_evade_totals_build(unit_panel_record_t* total, const u16* equipment);
+void equipment_build_weapon_evade_totals(unit_panel_record_t* total, const u16* equipment);
 
 /* The stat changes of swapping item_before for item_after in a slot: the HP and MP bonus differences into delta
  * and the equipment-detail differences into output. */
-void equipment_swap_delta_calculate(
+void equipment_calculate_swap_delta(
     unit_panel_record_t* output, unit_panel_summary_t* delta, s16 item_before, s16 item_after, s32 slot);
 
 /* Sums the stat changes of swapping each of the five slots from from_items to to_items. */
-void equipment_loadout_delta_calculate(
+void equipment_calculate_loadout_delta(
     unit_panel_record_t* detail_total, unit_panel_summary_t* summary_total, const u16* from_items, const u16* to_items);
 
 /* item lists */
@@ -138,19 +138,13 @@ extern u8 g_equipment_item_inventory_totals[];
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 
 /* EQUIP and WORLD each build their own bodies of these two. */
-s32 formation_items_update(void);
-s32 formation_items_browse_update(void);
+s32 item_list_update(void);
+s32 item_list_update_browse_state(void);
 
 /* Row callbacks of the item lists. */
-menu_icon_source_t* equipment_get_row_icon_source(s32 row);
-s32 equipment_get_row_item_count(s32 row);
-s32 equipment_get_row_equipped_count(s32 row);
-
-/* item actions */
-s32 equipment_update_item_actions(void);
-
-/* item type order */
-s32 equipment_type_order_update(void);
+menu_icon_source_t* equipment_row_get_icon_source(s32 row);
+s32 equipment_row_get_item_count(s32 row);
+s32 equipment_row_get_equipped_count(s32 row);
 
 /* unit panels */
 extern menu_unit_status_identity_t g_equipment_selected_unit_data;
@@ -161,19 +155,11 @@ extern u32* g_equipment_gfx_current_ot;
 extern u16 g_equipment_gfx_draw_area_capacity;
 extern u16 g_equipment_gfx_draw_move_capacity;
 
-/* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in equipment_gfx_init_contexts. */
+/* LINE_G2 and LINE_G3 capacities; volatile keeps their load order in menu_gfx_init_contexts. */
 extern volatile u16 g_equipment_gfx_line_g2_capacity;
 extern volatile u16 g_equipment_gfx_line_g3_capacity;
 
-void equipment_gfx_init_contexts(struct menu_gfx_context* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
-    POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
-    POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
-    LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
-    SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
-void equipment_gfx_swap_context(s32 first_otag, s32 unused);
-
 /* input */
-s32 equipment_input_read_page_scroll_direction(void);
 
 /* menu commands */
 /* The opcode that ends an EQUIP menu display stream. */
@@ -181,8 +167,6 @@ enum { EQUIPMENT_SCRIPT_END = 0x19 };
 
 /* messages and sound */
 extern u8 g_equipment_sound_suppress_queued;
-
-void equipment_show_message(s32 message_id, s32 sound_id);
 
 /* threads */
 /* Slots of the equip screen's own threads. The WORLD formation screen runs

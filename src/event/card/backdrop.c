@@ -16,7 +16,7 @@ static POLY_FT4 s_save_gfx_scaled_sprite_primitive_buffers[2][30] = { 0 };
 static u32* s_save_gfx_render_otag = 0;
 
 /* Set the ordering-table entry the card screen's graphic thread draws into. */
-void save_gfx_set_render_otag(u32* otag) {
+void zodiac_backdrop_set_otag(u32* otag) {
     s_save_gfx_render_otag = otag;
 }
 
@@ -30,7 +30,7 @@ void save_gfx_set_render_otag(u32* otag) {
  * With the first parameter zero it starts at twice its size and shrinks by
  * 1/16 (0x100) per event-speed step to full size.
  */
-void save_backdrop_thread(void) {
+void zodiac_backdrop_thread(void) {
     s32 frame;
 
     if (g_formation_screen_active != 0) {
@@ -41,7 +41,7 @@ void save_backdrop_thread(void) {
         g_save_backdrop_draw_context.offset.position.y = 0x80;
     }
 
-    if (thread_current_parameter_1_get() != 0) {
+    if (thread_current_get_parameter_1() != 0) {
         g_save_backdrop_draw_context.scale_x = ONE;
         g_save_backdrop_draw_context.scale_y = ONE;
     } else {
@@ -60,7 +60,7 @@ void save_backdrop_thread(void) {
         g_save_backdrop_draw_context.brightness = 0x80;
         zodiac_build_primitives(&g_save_backdrop_draw_context, s_save_gfx_scaled_sprite_primitive_buffers[frame & 1]);
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             thread_current_exit();
         }
     }

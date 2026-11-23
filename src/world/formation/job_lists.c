@@ -17,7 +17,7 @@
 #include "psx/types.h"
 
 /* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */
-s32 job_generic_index_get(s32 job_id) {
+s32 job_get_generic_index(s32 job_id) {
     u16 id = job_id;
     s16 result;
 
@@ -31,11 +31,11 @@ s32 job_generic_index_get(s32 job_id) {
 }
 
 /* Return the lowest job ID with this skillset, or -1. */
-s32 job_first_for_skillset_find(s32 skillset) {
+s32 job_find_first_for_skillset(s32 skillset) {
     s32 i;
 
     for (i = 0; i < JOB_ID_COUNT; i++) {
-        if (job_data_get(i)->skillset == skillset) {
+        if (job_get_data(i)->skillset == skillset) {
             return i;
         }
     }
@@ -45,7 +45,7 @@ s32 job_first_for_skillset_find(s32 skillset) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-s32 job_list_base_get(s16 unit_id) {
+s32 job_list_get_base(s16 unit_id) {
     formation_unit_t* unit = g_formation_unit_pointers[unit_id];
     u32 job = unit->sprite_set;
 
@@ -59,13 +59,13 @@ s32 job_list_base_get(s16 unit_id) {
 
 /* Returns 1 when no formation unit (special monsters aside) has generic job
  * `job_id` unlocked. */
-static s32 job_unlocks_check(s16 job_id) {
+static s32 no_unit_has_unlocked(s16 job_id) {
     s32 i;
 
     for (i = 0; i < g_formation_unit_count; i++) {
         if (job_is_special_monster(g_formation_unit_pointers[i]->identity.job_id) == 0) {
             /* One bit per generic job, Squire first: skip to this job's bit. */
-            bits_secondary_reader_init(g_formation_unit_pointers[i]->unlocked_jobs);
+            bits_secondary_init_reader(g_formation_unit_pointers[i]->unlocked_jobs);
             bits_secondary_read(job_id - JOB_ID_SQUIRE);
             if (bits_secondary_read(1) != 0) {
                 return 0;
@@ -78,7 +78,7 @@ static s32 job_unlocks_check(s16 job_id) {
 /* Store generic-job unlocks in the party record's big-endian byte order. */
 void job_calculate_and_store_unlocks(party_unit_t* party, u8 unlocked_jobs[UNIT_UNLOCKED_JOB_BYTE_COUNT]) {
     s32 jobs
-        = job_unlocks_calculate(party->career.job_levels, party->gender_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
+        = job_calculate_unlocks(party->career.job_levels, party->gender_flags & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE));
     unlocked_jobs[0] = jobs >> 16;
     unlocked_jobs[1] = jobs >> 8;
     unlocked_jobs[2] = jobs;
@@ -100,10 +100,10 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
     s32 i;
     s32 unlocked;
 
-    bits_primary_reader_init(g_formation_unit_pointers[unit_index]->unlocked_jobs);
-    /* job_list_base_get is declared s32: the target uses its result without the
+    bits_primary_init_reader(g_formation_unit_pointers[unit_index]->unlocked_jobs);
+    /* job_list_get_base is declared s32: the target uses its result without the
      * re-extension an s16 return would make GCC emit (the callee already extends). */
-    job = job_list_base_get(unit_index);
+    job = job_list_get_base(unit_index);
     if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
         && job == g_formation_unit_pointers[unit_index]->identity.job_id) {
         job |= FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
@@ -127,7 +127,7 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
                 jobs[count++] = job | FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
             } else if (unlocked != 0) {
                 jobs[count++] = job;
-            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS && job_unlocks_check(job) == 0) {
+            } else if (mode == FORMATION_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS && no_unit_has_unlocked(job) == 0) {
                 jobs[count++] = job + FORMATION_JOB_LIST_ENTRY_UNAVAILABLE;
             }
         }
@@ -137,13 +137,13 @@ s32 job_list_build(u8 unit_index, s16* jobs, s32 mode) {
 }
 
 /* Return the skillset of a job from the job data table. */
-s32 job_skillset_get(s32 job_id) {
-    return job_data_get(job_id)->skillset;
+s32 job_get_skillset(s32 job_id) {
+    return job_get_data(job_id)->skillset;
 }
 
 /* List the skillsets a formation unit can set as its secondary: those of its unlocked jobs other
  * than its own job and Mime. The list ends with -1; return the count. */
-static s32 secondary_skillsets_list(s16 unit_id, s16* skillsets) {
+static s32 list_secondary_skillsets(s16 unit_id, s16* skillsets) {
     s16 jobs[24];
     s32 count;
     s32 i;
@@ -156,7 +156,7 @@ static s32 secondary_skillsets_list(s16 unit_id, s16* skillsets) {
     for (i = 0; jobs[i] != -1; i++) {
         job = jobs[i];
         if (own_job != job && job != JOB_ID_MIME) {
-            skillsets[count++] = job_skillset_get(job);
+            skillsets[count++] = job_get_skillset(job);
         }
     }
     skillsets[count] = -1;
@@ -169,7 +169,7 @@ s32 ability_has_two_swords(s16 unit_id) {
 }
 
 /* Return nonzero when the formation unit has the Two Hands support ability set. */
-s32 formation_ability_has_two_hands(s16 unit_id) {
+s32 ability_has_two_hands(s16 unit_id) {
     return g_formation_unit_pointers[unit_id]->support_abilities[2] & UNIT_SUPPORT_SET_3_TWO_HANDS;
 }
 
@@ -212,15 +212,15 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     s16 id;
 
     if (mode == ABILITY_LIST_MODE_LEARNED_ONLY && ability_category == MENU_ABILITY_CATEGORY_ACTION) {
-        return secondary_skillsets_list(unit_index, list);
+        return list_secondary_skillsets(unit_index, list);
     }
-    skillset = job_skillset_get(job);
-    generic = job_generic_index_get(job);
+    skillset = job_get_skillset(job);
+    generic = job_get_generic_index(job);
     /* A skillset no job owns (a special character's) falls back to the unit's primary skillset. */
-    if (job_first_for_skillset_find(skillset) == -1) {
+    if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_formation_unit_pointers[unit_index]->detail.abilities[FORMATION_ABILITY_SLOT_PRIMARY_SKILLSET];
     }
-    abilities = (s16*)ability_skillset_list_build(skillset, SKILLSET_ABILITY_FILTER_ALL);
+    abilities = (s16*)ability_build_skillset_list(skillset, SKILLSET_ABILITY_FILTER_ALL);
     if (ability_category == MENU_ABILITY_CATEGORY_ACTION) {
         lo = 1;
         hi = ABILITY_ID_REACTION_FIRST - 1;
@@ -244,7 +244,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
     }
     count = 0;
     jp = g_formation_unit_pointers[unit_index]->job_points.current.values[generic];
-    bits_primary_reader_init(g_formation_unit_pointers[unit_index]->learned_abilities[generic]);
+    bits_primary_init_reader(g_formation_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_formation_unit_pointers[unit_index]->identity.job_id) != 0) {
             learned = 1;
@@ -313,7 +313,7 @@ s32 ability_list_build(s16 unit_index, s16 job, menu_ability_category_e ability_
  * `n` is the bubble-sort bound and then the ability being filtered; the two
  * uses share one register.
  */
-s32 formation_ability_rsm_list_build(s16 unit_index, s32 slot, s16* out) {
+s32 formation_ability_build_rsm_list(s16 unit_index, s32 slot, s16* out) {
     s16 abilities[204];
     s32 count;
     s32 i;
@@ -323,7 +323,7 @@ s32 formation_ability_rsm_list_build(s16 unit_index, s32 slot, s16* out) {
     s16 job_id = g_formation_unit_pointers[unit_index]->identity.job_id;
 
     count = ability_list_build(
-        unit_index, job_list_base_get(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
+        unit_index, job_list_get_base(unit_index), slot, abilities, ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
         count += ability_list_build(
             unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], ABILITY_LIST_MODE_LEARNED_ONLY);

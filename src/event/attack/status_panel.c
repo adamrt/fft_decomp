@@ -21,7 +21,7 @@
 
 /* Thread task THREAD_TASK_UNIT_STATUS_BANNER: the character editor and status panels. ATTACK draws
  * full-width gauge bars and two entries in the second number image. The third small-number cell
- * shows the party slot + 1 (stored in battle_id), or stays blank during post-battle unit changes. */
+ * shows the party slot + 1 (stored in battle_unit_id), or stays blank during post-battle unit changes. */
 void unit_panel_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
@@ -67,7 +67,7 @@ void unit_panel_banner_thread(void) {
     POLY_FT4* panel_portrait;
 
     suppress = 0;
-    thread_current_task_set(THREAD_TASK_UNIT_STATUS_BANNER);
+    thread_current_set_task(THREAD_TASK_UNIT_STATUS_BANNER);
     g_input_controller = script_get_controller_input_pointer(0) + 1;
     thread_id = g_thread_current_id;
     thread = (unit_panel_thread_t*)g_threads[thread_id].function_parameter_1;
@@ -190,7 +190,7 @@ void unit_panel_banner_thread(void) {
 
         /* Dim while a THREAD_TASK_STATUS_PANEL thread runs under an input lock, or on the thread's request. */
         dimmed = 0;
-        if (thread_task_find(THREAD_TASK_STATUS_PANEL) != 0) {
+        if (thread_find_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
         }
         if (thread->style != 0) {
@@ -214,8 +214,8 @@ void unit_panel_banner_thread(void) {
         } while (i < 7);
 
         if (dimmed != 0) {
-            menu_init_primitive_colors_dimmed(&editor->numeric_frame);
-            menu_init_primitive_colors_dimmed(&panel->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(&editor->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(&panel->numeric_frame);
             /* Unsigned test for transition steps 4-9: during the wipe quad 0 takes the shade of the other three. */
             if ((anim_state - 4) < 6U) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
@@ -227,8 +227,8 @@ void unit_panel_banner_thread(void) {
             setRGB0(&editor->portrait[3], 0x20, 0x28, 0x38);
         } else {
             s32 shade;
-            menu_init_primitive_colors_normal(&editor->numeric_frame);
-            menu_init_primitive_colors_normal(&panel->numeric_frame);
+            menu_numeric_frame_set_normal_colors(&editor->numeric_frame);
+            menu_numeric_frame_set_normal_colors(&panel->numeric_frame);
             if ((anim_state - 4) >= 6U) {
                 setRGB0(&editor->portrait[0], 0x80, 0x80, 0x80);
             } else {
@@ -410,29 +410,29 @@ void unit_panel_banner_thread(void) {
 
             menu_clear_render_buffer(name_image, 0x580);
             *pen_stride = 0x58;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             /* ATTACK's unit names are the party name list deploy_find_fieldable_units writes to
              * TEXT_SECTION_PARTY_UNIT_NAMES (section 11, text id 0x5800). */
             menu_display_text_entry(unit_info->name_id + 0x5800, name_image, text_pen);
-            menu_set_text_origin(0, 0x10);
+            menu_text_set_origin(0, 0x10);
             menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
             LoadImage(&rects[2], name_image);
 
             menu_clear_render_buffer(value_pixels, 0xF0);
             *pen_stride = 0x10;
-            menu_set_text_origin(0, 0);
-            text_small_number_glyphs_draw(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
+            menu_text_set_origin(0, 0);
+            text_draw_small_number_glyphs(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
             LoadImage(&rects[3], value_pixels);
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_small_number_glyphs_draw(unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
+            text_draw_small_number_glyphs(unit_info->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels_b, text_pen);
             LoadImage(&rects[4], value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
-                menu_set_text_origin(0, 0);
+                menu_text_set_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
-                text_small_number_glyphs_draw(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_pen);
+                text_draw_small_number_glyphs(unit_info->battle_unit_id + 1, 0x4002, value_pixels_c, text_pen);
                 LoadImage(&rects[5], value_pixels_c);
             } else {
                 LoadImage(&rects[5], value_pixels + 0xA0);
@@ -484,7 +484,7 @@ void unit_panel_banner_thread(void) {
         }
 
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
     }

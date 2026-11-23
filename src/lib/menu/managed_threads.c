@@ -8,7 +8,7 @@
 
 /* Request stop, then clear this screen's managed-thread state. */
 void menu_managed_thread_stop(s32 thread_id) {
-    menu_request_thread_stop(thread_id);
+    menu_thread_request_stop(thread_id);
     g_menu_managed_thread_state = 0;
 }
 
@@ -20,8 +20,8 @@ void menu_thread_stop_and_wait(s32 id) {
     u32 otag;
 
     while (thread_is_running(id) != 0) {
-        menu_request_thread_stop(id);
-        menu_input_event_state_update(&otag, 0, 0);
+        menu_thread_request_stop(id);
+        menu_input_update_event_state(&otag, 0, 0);
     }
     g_menu_managed_thread_state = 0;
 }
@@ -38,7 +38,7 @@ s32 menu_managed_thread_start(s32 thread_id, menu_entry_t* descriptor) {
         }
         g_menu_thread_menu_data = descriptor;
         thread_start(thread_id, descriptor->thread_entry);
-        thread_parameters_set(thread_id, (s32)g_menu_thread_menu_data, 0, 0);
+        thread_set_parameters(thread_id, (s32)g_menu_thread_menu_data, 0, 0);
         g_menu_managed_thread_state = 1;
         return 1;
     }
@@ -62,7 +62,7 @@ s32 menu_managed_thread_start_at_selection(s32 thread_id, menu_entry_t* arg, s16
 /* CARD and WORLD also pump menu frames while waiting or restarting. */
 /* Restart the menu thread with the given data, running 20 input-update
  * frames, or poll the running thread's status into g_menu_managed_thread_state. */
-void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor) {
+void menu_thread_start_or_poll(s32 thread_id, menu_entry_t* descriptor) {
     u32 otag_storage[2];
     s32 i;
 
@@ -70,9 +70,9 @@ void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor) {
         menu_thread_stop_and_wait(thread_id);
         g_menu_thread_menu_data = descriptor;
         thread_start(thread_id, descriptor->thread_entry);
-        thread_parameters_set(thread_id, (s32)g_menu_thread_menu_data, 0, 0);
+        thread_set_parameters(thread_id, (s32)g_menu_thread_menu_data, 0, 0);
         for (i = 0; i < 20; i++) {
-            menu_input_event_state_update(otag_storage, 0, 0);
+            menu_input_update_event_state(otag_storage, 0, 0);
         }
         g_menu_managed_thread_state = 1;
     } else {

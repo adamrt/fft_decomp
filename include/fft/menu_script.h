@@ -34,7 +34,7 @@ typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_NUMBER = 0x0d,
     MENU_SCRIPT_OP_SEMI_TRANS = 0x0e,
     MENU_SCRIPT_OP_DRAW_PRIORITY = 0x0f,
-    MENU_SCRIPT_OP_SCROLLABLE_LIST = 0x10, /* the list geometry menu_draw_scrollable_list reads */
+    MENU_SCRIPT_OP_SCROLLABLE_LIST = 0x10, /* the list geometry menu_scrollable_list_refresh reads */
     MENU_SCRIPT_OP_TILED_RECTANGLE = 0x11,
     MENU_SCRIPT_OP_OPENING_WINDOW_FRAME = 0x12,
     MENU_SCRIPT_OP_CLEAR_DRAW_AREA = 0x13,
@@ -86,8 +86,8 @@ typedef struct menu_draw_number_command {
     u8 value;
 } menu_draw_number_command_t;
 
-/* Variable-length list command (0x10) in the menu display stream: the layout screen_list_layout_load reads and the
- * placement each program's menu_opcode_10_draw_scrollable_list draws with. */
+/* Variable-length list command (0x10) in the menu display stream: the layout menu_scrollable_list_load_layout reads and
+ * the placement each program's menu_opcode_10_draw_scrollable_list draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
     u8 length;          /* 0x01: byte length of this record */
@@ -270,7 +270,7 @@ extern u32 g_menu_script_input;
 /* Scripts contain variable-length encoded commands; each runner creates its instruction cursor.
  * JOBSTTS builds its own body. */
 void menu_script_run(void* script, s32 flags);
-void menu_run_script_with_palette_mode(void* script, s32 flags, s32 event_mode);
+void menu_script_run_with_palette_mode(void* script, s32 flags, s32 event_mode);
 menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
 static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);
@@ -281,8 +281,7 @@ static inline const menu_instruction_t* menu_next_const_instruction(const menu_i
 }
 
 /* instruction drawing */
-menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command);
-menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command);
+menu_draw_number_command_t* menu_opcode_0d_draw_decimal_number(menu_draw_number_command_t* command);
 
 /* opcode handlers */
 extern s16 g_menu_window_right_x;
@@ -290,7 +289,7 @@ extern s16 g_menu_window_right_x;
 /* The JOBSTTS and CARD window-frame handlers' copy of g_menu_window_interior_command. */
 extern menu_window_command_t g_cmd_window_interior_command;
 
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* command);
+menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction);
@@ -307,17 +306,15 @@ menu_instruction_t* menu_opcode_0f_set_draw_priority(menu_instruction_t* instruc
 menu_instruction_t* menu_opcode_0f_set_draw_priority_if_unlocked(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_11_draw_tiled_rectangle(menu_instruction_t* command);
 menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t* instruction);
 
 /* JOBSTTS builds its own body. */
 menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
 
 /* scrollable lists */
 /* A scrollable list shows the rows of a -1 terminated entry list by name from a text table, under the geometry of a
@@ -353,17 +350,17 @@ extern s32 g_menu_list_row_index;
 extern s16 g_menu_list_row_mode;
 extern s16 g_menu_list_scroll_offset;
 
-void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+void menu_scrollable_list_init(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 
 /* BUNIT, EQUIP and JOBSTTS share the core; WORLD uses its screen state. */
-void menu_scrollable_list_core_init(const s16* entries, s32 selected_index, u8* text_table);
-void menu_draw_scrollable_list(const menu_instruction_t* script);
-void menu_init_and_draw_scrollable_list(
+void menu_scrollable_list_init_core(const s16* entries, s32 selected_index, u8* text_table);
+void menu_scrollable_list_refresh(const menu_instruction_t* script);
+void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
-menu_vertical_scroll_direction_e menu_input_page_scroll_direction_read(void);
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
 
 /* number rendering */
 /* BUNIT, EQUIP, JOBSTTS and CARD each define this decimal-number format. */

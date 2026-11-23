@@ -4,7 +4,7 @@
 #include "psx/types.h"
 
 /* Capture $gp for a new native thread's saved context. */
-void* thread_current_global_pointer_get(void) {
+void* thread_current_get_global_pointer(void) {
     void* global_pointer;
 
     __asm__("move %0, $gp" : "=r"(global_pointer));
@@ -22,7 +22,7 @@ __asm__(".set noat");
 #endif
 
 /* Return parameter 1 of the current thread's record. */
-s32 thread_current_parameter_1_get(void) {
+s32 thread_current_get_parameter_1(void) {
     register s32 thread_offset __asm__("$8");
     register thread_t* threads __asm__("$9");
     register thread_t* thread __asm__("$8");
@@ -35,7 +35,7 @@ s32 thread_current_parameter_1_get(void) {
 }
 
 /* Return parameter 2 of the current thread's record. */
-s32 thread_current_parameter_2_get(void) {
+s32 thread_current_get_parameter_2(void) {
     register s32 thread_offset __asm__("$8");
     register thread_t* threads __asm__("$9");
     register thread_t* thread __asm__("$8");
@@ -48,7 +48,7 @@ s32 thread_current_parameter_2_get(void) {
 }
 
 /* Return parameter 3 of the current thread's record. */
-s32 thread_current_parameter_3_get(void) {
+s32 thread_current_get_parameter_3(void) {
     register s32 thread_offset __asm__("$8");
     register thread_t* threads __asm__("$9");
     register thread_t* thread __asm__("$8");

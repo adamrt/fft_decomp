@@ -4,7 +4,7 @@
 #include "psx/types.h"
 
 /* Set (nonzero `set`) or clear bit `index` of a 32-bit word array. */
-void bits_value_set(u32* bits, s32 index, s32 set) {
+void bits_set_value(u32* bits, s32 index, s32 set) {
     u32* base = bits;
     u32 mask;
     s32 word_index = index / 32;

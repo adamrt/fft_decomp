@@ -92,7 +92,7 @@ extern s32 g_screen_default_entry_1_text_values[2]; /* value, 0 */
 
 /* menu image upload rectangles */
 /* Frame-buffer rectangles for the four WLDFACE pages; four separate objects,
- * since as RECT[4] portraits_load shares one base. */
+ * since as RECT[4] load_portraits shares one base. */
 extern RECT g_screen_wldface_vram_rects;
 extern RECT g_screen_wldface_vram_rect_1;
 extern RECT g_screen_wldface_vram_rect_2;
@@ -135,26 +135,26 @@ extern u32 g_screen_allowed_buttons; /* pad mask applied to the new presses of e
 
 /* The six 32-bit input masks are g_screen_input_state,
  * but a struct global makes GCC keep a base register for the field accesses
- * (see menu_input_event_state_update), so they are separate scalars here. */
+ * (see menu_input_update_event_state), so they are separate scalars here. */
 extern u32 g_screen_current_input, g_screen_previous_input, g_screen_initial_repeat_counter, g_screen_repeat_counter,
     g_screen_secondary_repeat_counter;
 
-static void portraits_load(void);
-static void graphics_load(s32 load_extra_pages);
-static void idle_run(void);
-static void options_thread_run(void);
-static void map_layers_hide(void);
-static void map_layers_restore(void);
-static void formation_request_update(void);
-static void tutorial_request_update(void);
-static void variable_list_request_update(void);
-static void party_number_request_update(void);
-static void save_request_update(void);
-static void brave_story_request_update(void);
-static void window_group_start(s32 parameter, s32 location_id, s32 window_x, s32 window_y);
-static void window_group_run(void);
-static void entry_text_sprite_init(RECT* out, const menu_entry_t* record, SPRT* primitive);
-static void entry_frame_sprites_build(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
+static void load_portraits(void);
+static void load_graphics(s32 load_extra_pages);
+static void run_idle(void);
+static void options_thread(void);
+static void hide_map_layers(void);
+static void restore_map_layers(void);
+static void update_formation_request(void);
+static void update_tutorial_request(void);
+static void update_variable_list_request(void);
+static void update_party_number_request(void);
+static void update_save_request(void);
+static void update_brave_story_request(void);
+static void start_window_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y);
+static void window_group_thread(void);
+static void init_entry_text_sprite(RECT* out, const menu_entry_t* record, SPRT* primitive);
+static void build_entry_frame_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 
 static u8 s_menu_thread_snapshot[16] = { 0 };
 
@@ -228,8 +228,8 @@ void world_map_confirm_destination(void) {
         pending[1] = value;
         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, value);
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DESTINATION;
-        thread_parameters_set(g_thread_current_id + 1, 0, 0, 1);
-        thread_parameters_set(g_thread_current_id + 2, 0, 0, 1);
+        thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
+        thread_set_parameters(g_thread_current_id + 2, 0, 0, 1);
     } else {
         g_sound_pending_sfx_id = SOUND_SFX_INVALID;
     }
@@ -239,7 +239,7 @@ void world_map_confirm_destination(void) {
 
 /* Build the text-id rows of the submenu page picked in menu entry 9 (seven rows shown, the rest
  * scroll) and run the scrolling list. */
-void screen_submenu_page_build(void) {
+void screen_submenu_page_thread(void) {
     s32 selection = g_menu_thread_menu_data[9].selected_index;
     s32 count = g_screen_submenu_page_counts[selection];
     s32 i;
@@ -259,7 +259,7 @@ void screen_submenu_page_build(void) {
 }
 
 /* Preset the selected row of default menu entry 4. */
-void screen_entry_4_cursor_set(s32 index) {
+void screen_set_entry_4_cursor(s32 index) {
     g_screen_default_entries[4].selected_index = index;
 }
 
@@ -269,17 +269,17 @@ void screen_noop(void) {
 
 /* Read WLDFACE.BIN into a heap buffer, upload its four portrait sheets to their VRAM
  * rectangles and free the buffer once the transfers finish. */
-static void portraits_load(void) {
+static void load_portraits(void) {
     portrait_sheet_t* sheets;
 
-    g_thread_call_target = file_heap_load_checked;
+    g_thread_call_target = file_load_into_heap_checked;
     sheets = (portrait_sheet_t*)thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, WLDFACE_FILE_SIZE);
     LoadImage(&g_screen_wldface_vram_rects, (u32*)sheets[0].pixels);
     LoadImage(&g_screen_wldface_vram_rect_1, (u32*)sheets[1].pixels);
     LoadImage(&g_screen_wldface_vram_rect_2, (u32*)sheets[2].pixels);
     LoadImage(&g_screen_wldface_vram_rect_3, (u32*)sheets[3].pixels);
     DrawSync(0);
-    heap_block_release(sheets);
+    heap_release_block(sheets);
 }
 
 /*
@@ -288,66 +288,66 @@ static void portraits_load(void) {
  * The first resource is cached across calls. Each temporary allocation stays
  * alive until its queued VRAM transfers finish.
  */
-static void graphics_load(s32 load_extra_pages) {
+static void load_graphics(s32 load_extra_pages) {
     void* resource;
     item_graphics_t* item;
     unit_graphics_t* units;
     gfx_frame_bin_t* frame;
 
     if (g_menu_common_graphics_loaded == 0) {
-        g_thread_call_target = file_heap_load_checked;
+        g_thread_call_target = file_load_into_heap_checked;
         resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_ITEM_BIN, 0x8800);
         item = resource;
         LoadImage(&g_screen_item_image_rect, item->image);
         LoadImage(&g_screen_item_palette_rect, (u32*)item->palettes);
         DrawSync(0);
-        heap_block_release(resource);
+        heap_release_block(resource);
         g_menu_common_graphics_loaded++;
     }
     /* LoadImage transfers pairs of 16-bit colors through 32-bit buffer elements. */
     LoadImage(&g_screen_common_clut_rect, (u32*)&g_screen_common_clut_data);
     DrawSync(0);
-    g_thread_call_target = file_heap_load_checked;
+    g_thread_call_target = file_load_into_heap_checked;
     resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_FRAME_BIN, sizeof(gfx_frame_bin_t));
     frame = resource;
     LoadImage(&g_screen_frame_image_rect, (u32*)frame->pixels[32]);
     LoadImage(&g_screen_frame_palette_rect, (u32*)frame->clut);
     LoadImage(&g_screen_frame_palette_tail_rect, (u32*)frame->palette_tail);
-    menu_palette_colors_set(&g_menu_glyph_sheet->palette);
+    menu_palette_set_colors(&g_menu_glyph_sheet->palette);
     DrawSync(0);
-    heap_block_release(resource);
+    heap_release_block(resource);
     if (load_extra_pages != 0) {
-        g_thread_call_target = file_heap_load_checked;
+        g_thread_call_target = file_load_into_heap_checked;
         resource = (void*)thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000);
         units = resource;
         LoadImage(&g_screen_unit_image_rect_a, units->pages[0]);
         LoadImage(&g_screen_unit_image_rect_b, units->pages[1]);
         DrawSync(0);
-        heap_block_release(resource);
+        heap_release_block(resource);
     }
 }
 
 /* Set the two substitution values of default menu entry 0: text id
  * 0xA000 + text_index and `value`. */
-void screen_default_entry_0_text_set(u32 text_index, u32 value) {
+void screen_set_default_entry_0_text(u32 text_index, u32 value) {
     g_screen_default_entry_0_text_values[0] = text_index + 0xA000;
     g_screen_default_entry_0_text_values[1] = value;
 }
 
 /* Set the value shown in default menu entry 1's text and clear the second value. */
-void screen_default_entry_1_text_set(s32 value) {
+void screen_set_default_entry_1_text(s32 value) {
     g_screen_default_entry_1_text_values[0] = value;
     g_screen_default_entry_1_text_values[1] = 0;
 }
 
-/* Variant of screen_world_text_init that loads no graphics and reads the
+/* Variant of screen_init_world_text that loads no graphics and reads the
  * 0x5800-byte OPEN.LZW text file (sector 0x1C18); all 0x20 section pointers
  * come from the file, relative to the end of its offset table. */
-void screen_open_text_init(void) {
+void screen_init_open_text(void) {
     s32 i;
 
-    menu_subsystem_pointers_init();
-    g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+    menu_init_subsystem_pointers();
+    g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_OPEN_LZW, 0x5800, s_menu_text_file_buffer);
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
@@ -362,21 +362,21 @@ void screen_open_text_init(void) {
 }
 
 /*
- * Variant of screen_world_text_init for a caller that is not the main
+ * Variant of screen_init_world_text for a caller that is not the main
  * thread: it leaves g_thread_current_id alone, loads the common
  * graphics in mode 1 and also uploads the WLDFACE portraits.
  */
-void screen_world_resources_init(void) {
+void screen_init_world_resources(void) {
     s32 i;
     s32 value;
     u8* base;
     u32* src;
     u8** dst;
 
-    menu_subsystem_pointers_init();
-    graphics_load(1);
-    portraits_load();
-    g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+    menu_init_subsystem_pointers();
+    load_graphics(1);
+    load_portraits();
+    g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
@@ -407,7 +407,7 @@ void screen_world_resources_init(void) {
  * become g_text_section_pointers, with the location names taken from
  * the resident copy. The deployment script variables are reset to one squad.
  */
-void screen_world_text_init(void) {
+void screen_init_world_text(void) {
     s32 i;
     s32 value;
     u8* base;
@@ -415,9 +415,9 @@ void screen_world_text_init(void) {
     u8** dst;
 
     g_thread_current_id = THREAD_SLOT_MAIN;
-    menu_subsystem_pointers_init();
-    graphics_load(0);
-    g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+    menu_init_subsystem_pointers();
+    load_graphics(0);
+    g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xe800, s_menu_text_file_buffer);
     menu_subsystems_reset();
     script_variable_set(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 0);
@@ -442,17 +442,17 @@ void screen_world_text_init(void) {
 /* Return from WLDCORE to the formation screen: unload the scenario music, reload the face text,
  * restore the input repeat timings from the cursor-speed option, run the formation screen, then
  * resume the event saved for the return and clear the pending scenario. */
-void formation_world_map_return_run(void) {
+void formation_run_world_map_return(void) {
     s32 profile;
 
-    music_all_unload();
+    music_unload_all();
     ClearImage(&g_screen_clear_rect, 0, 0, 0);
     DrawSync(0);
     VSync(0);
-    screen_world_resources_init();
+    screen_init_world_resources();
     DrawSync(0);
     VSync(0);
-    screen_context_reset();
+    screen_reset_context();
     DrawSync(0);
     VSync(0);
     profile = g_game_options.fields.finger_cursor_repeat_speed;
@@ -462,9 +462,9 @@ void formation_world_map_return_run(void) {
     g_menu_scroll_accel_delay = g_screen_input_timing_profiles[profile].scroll_accel_delay;
     g_menu_scroll_slow_step = g_screen_input_timing_profiles[profile].scroll_slow_step;
     g_menu_scroll_fast_step = g_screen_input_timing_profiles[profile].scroll_fast_step;
-    screen_brightness_set(0x80, 0x80, 0x80);
-    formation_screen_run(0, 0);
-    screen_context_reset();
+    screen_set_brightness(0x80, 0x80, 0x80);
+    formation_run_screen(0, 0);
+    screen_reset_context();
     ClearImage(&g_screen_clear_rect, 0, 0, 0);
     DrawSync(0);
     script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, script_variable_get(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT));
@@ -475,7 +475,7 @@ void formation_world_map_return_run(void) {
 }
 
 /* Return the menu thread result and clear it. */
-s32 screen_take_thread_result(void) {
+s32 screen_thread_take_result(void) {
     s32 result = g_screen_thread_result;
 
     g_screen_thread_result = 0;
@@ -496,7 +496,7 @@ void screen_thread_request_stop(s32 thread_id) {
 
 /* Let a dialog thread that is waiting for more text continue: switch its task to resume and set
  * its parameter 2 to 0xFFFF. */
-void screen_text_printing_resume(s32 thread_id) {
+void screen_text_resume_printing(s32 thread_id) {
     thread_t* thread = &g_threads[thread_id];
 
     if (thread->task_id == THREAD_TASK_DIALOG_AWAIT_TEXT) {
@@ -506,24 +506,24 @@ void screen_text_printing_resume(s32 thread_id) {
 }
 
 /* Returns 1 while the text thread's task id is RESUME. */
-s32 screen_text_printing_check(s32 thread_id) {
+s32 screen_text_check_printing(s32 thread_id) {
     return g_threads[thread_id].task_id == THREAD_TASK_RESUME;
 }
 
 /* Idle thread body: yield to the next WORLD thread, forever. */
-static void idle_run(void) {
+static void run_idle(void) {
     for (;;) {
         thread_yield();
     }
 }
 
-/* Park every idle thread slot from 5 to 8 on idle_run. */
+/* Park every idle thread slot from 5 to 8 on run_idle. */
 void screen_thread_park_slots_5_to_8(void) {
     s32 thread_id;
 
     for (thread_id = 8; thread_id >= 5; thread_id--) {
         if (g_threads[thread_id].is_running == 0) {
-            thread_start(thread_id, idle_run);
+            thread_start(thread_id, run_idle);
         }
     }
 }
@@ -551,12 +551,12 @@ void world_map_menu_undim(void) {
 
 /* Resets shared context before framebuffer setup and after formation or
  * memory-card sessions. */
-void screen_context_reset(void) {
+void screen_reset_context(void) {
     DrawSync(0);
-    menu_subsystem_pointers_init();
+    menu_init_subsystem_pointers();
     menu_subsystems_reset();
-    text_pointer_table_relocate(s_menu_text_file_buffer);
-    formation_roster_names_build();
+    text_relocate_pointer_table(s_menu_text_file_buffer);
+    formation_roster_build_names();
     DrawSync(0);
     g_menu_thread_menu_data = g_screen_default_entries;
     g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES] = g_world_map_location_names;
@@ -564,13 +564,13 @@ void screen_context_reset(void) {
 }
 
 /* Set the scroll direction and distance that decide where the main menu's second window slides. */
-void world_map_menu_scroll_set(s32 direction, s32 threshold) {
+void world_map_menu_set_scroll(s32 direction, s32 threshold) {
     g_world_map_menu_scroll_direction = direction;
     g_world_map_menu_scroll_threshold = threshold;
 }
 
 /* Set the color the WORLD menus tint their sprites with (0x80 each is neutral). */
-void screen_brightness_set(s32 red, s32 green, s32 blue) {
+void screen_set_brightness(s32 red, s32 green, s32 blue) {
     g_screen_color_red = red;
     g_screen_color_green = green;
     g_screen_color_blue = blue;
@@ -597,17 +597,17 @@ void world_map_menu_text_window_thread(void) {
     s16 target;
     s32 x;
 
-    entry = (menu_entry_t*)thread_current_parameter_1_get();
+    entry = (menu_entry_t*)thread_current_get_parameter_1();
     record = records;
     gfx_set_draw_mode_from_origin(&record->text_draw_mode, &entry->vram_origin);
     gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
-    entry_frame_sprites_build(entry, record->frame_sprites, 0);
+    build_entry_frame_sprites(entry, record->frame_sprites, 0);
     mem_copy_bytes_nonempty(s_saved_text_values, g_text_substitution_values, sizeof(s_saved_text_values));
     text_values = entry->value;
     g_text_substitution_values[0] = text_values[0];
     text_values = entry->value;
     g_text_substitution_values[1] = text_values[1];
-    text_measure(&width, &height, text_entry_find(entry->text_id));
+    text_measure(&width, &height, text_find_entry(entry->text_id));
     mem_copy_bytes_nonempty(g_text_substitution_values, s_saved_text_values, sizeof(g_text_substitution_values));
     /* 10-pixel columns plus a 0x18 border, rounded up past the next multiple of four. */
     x = width * 10;
@@ -632,7 +632,7 @@ void world_map_menu_text_window_thread(void) {
     } else if (entry->window.y < -0x78) {
         entry->window.y = -0x68;
     }
-    entry_text_sprite_init(&rect, entry, &record->text_sprite);
+    init_entry_text_sprite(&rect, entry, &record->text_sprite);
     SetSemiTrans(&record->text_sprite, 1);
     SetShadeTex(&record->text_sprite, 0);
     SetSemiTrans(&record->frame_sprites[0], 1);
@@ -646,7 +646,7 @@ void world_map_menu_text_window_thread(void) {
             buffer = menu_build_and_upload_window_frame_image(
                 entry->inner_width, entry->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_window_text_pen.stride = entry->inner_width;
-            menu_set_text_origin(10, 8);
+            menu_text_set_origin(10, 8);
             g_menu_text_palette_offset = 0;
             mem_copy_bytes_nonempty(s_saved_text_values, g_text_substitution_values, sizeof(s_saved_text_values));
             text_values = entry->value;
@@ -662,7 +662,7 @@ void world_map_menu_text_window_thread(void) {
         if (phase == 0) {
             menu_free_memory(buffer);
         }
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
         if (g_world_map_menu_dimmed != 0) {
@@ -711,25 +711,25 @@ void world_map_menu_text_window_thread(void) {
 }
 
 /* Thread body that opens the game options screen through option_entrypoint. */
-static void options_thread_run(void) {
+static void options_thread(void) {
     option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Runs the game options thread in the slot below the current thread,
  * handing it this thread's first parameter, then waits for it and stops. */
-void option_game_options_in_previous_thread_open(void) {
+void option_open_game_options_in_previous_thread(void) {
     s32 thread_id;
 
-    thread_start(g_thread_current_id - 1, options_thread_run);
+    thread_start(g_thread_current_id - 1, options_thread);
     thread_id = g_thread_current_id;
-    thread_parameters_set(thread_id - 1, g_threads[thread_id].function_parameter_1, 0, 0);
-    thread_inactive_wait(g_thread_current_id - 1);
+    thread_set_parameters(thread_id - 1, g_threads[thread_id].function_parameter_1, 0, 0);
+    thread_wait_inactive(g_thread_current_id - 1);
     thread_current_exit();
 }
 
 /* Menu action: request the save/load screen from the world map, hand the
  * formation input state to the event input and exit the thread. */
-void world_map_save_request(void) {
+void world_map_request_save(void) {
     g_save_menu_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
@@ -738,7 +738,7 @@ void world_map_save_request(void) {
 
 /* Menu action: request the tutorial categories from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_map_tutorial_request(void) {
+void world_map_request_tutorial(void) {
     g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
@@ -747,7 +747,7 @@ void world_map_tutorial_request(void) {
 
 /* Request the debug Party number panel, which replaces the roster from
  * an ENTD encounter, then hand input back to the event state and exit. */
-void world_map_debug_party_request(void) {
+void world_map_request_debug_party(void) {
     g_world_map_debug_party_number_request_state = 1;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
@@ -756,7 +756,7 @@ void world_map_debug_party_request(void) {
 
 /* Menu action: request the debug variable list from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_map_debug_variables_request(void) {
+void world_map_request_debug_variables(void) {
     g_world_map_debug_variable_list_request_state = 1;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
@@ -765,7 +765,7 @@ void world_map_debug_variables_request(void) {
 
 /* Menu action: request the formation screen from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_map_formation_request(void) {
+void world_map_request_formation(void) {
     s_formation_open_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
@@ -774,7 +774,7 @@ void world_map_formation_request(void) {
 
 /* Menu action: request the Brave Story from the world map, hand the formation input
  * state to the event input and exit the thread. */
-void world_map_brave_story_request(void) {
+void world_map_request_brave_story(void) {
     g_world_map_brave_story_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_screen_new_buttons = 0;
     script_load_event_input_state(&g_screen_input_state);
@@ -784,7 +784,7 @@ void world_map_brave_story_request(void) {
 /* Save the system flags and hide the world map's layers (dots, routes,
  * background, display objects, context value, date and location label)
  * with the display off, for a full-screen menu. */
-static void map_layers_hide(void) {
+static void hide_map_layers(void) {
     s_saved_world_map_flags = g_world_map_flags;
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_MAP_DOTS | WORLD_MAP_FLAG_HIDE_MAP_ROUTES | WORLD_MAP_FLAG_DISPLAY_OFF
         | WORLD_MAP_FLAG_NO_BACKGROUND_IMAGE | WORLD_MAP_FLAG_HIDE_DISPLAY_OBJECTS | WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE
@@ -792,7 +792,7 @@ static void map_layers_hide(void) {
 }
 
 /* Restore the world-map flags saved around Formation or Save. */
-static void map_layers_restore(void) {
+static void restore_map_layers(void) {
     g_world_map_flags = s_saved_world_map_flags;
 }
 
@@ -814,8 +814,8 @@ void debug_battle_setup_thread(void) {
 /* Steps a pending request to open the formation screen from the world map: fade out, wait for
  * the fade, run the screen, then rebuild the world map's menu threads and window, clear the
  * scratch buffer and the screen, hold a few dark frames, and fade back in. Sibling of
- * save_request_update. */
-static void formation_request_update(void) {
+ * update_save_request. */
+static void update_formation_request(void) {
     s16 state = s_formation_open_request_state;
     s32 i;
 
@@ -824,7 +824,7 @@ static void formation_request_update(void) {
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
-        world_map_fade_start(0x12, 0x10);
+        world_map_start_fade(0x12, 0x10);
         s_formation_open_request_state++;
         return;
     }
@@ -835,22 +835,22 @@ static void formation_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_RUN) {
-        screen_context_reset();
-        screen_brightness_set(0x80, 0x80, 0x80);
-        formation_screen_run(0, 0);
-        screen_context_reset();
+        screen_reset_context();
+        screen_set_brightness(0x80, 0x80, 0x80);
+        formation_run_screen(0, 0);
+        screen_reset_context();
         g_world_map_screen_request = 0;
-        window_group_start(g_world_map_menu_group_parameter, g_world_map_destination_id,
+        start_window_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
             g_world_map_destination_position.x, g_world_map_destination_position.y);
-        screen_entry_window_open(g_screen_open_entry_index, -0x30, -0x38);
+        screen_open_entry_window(g_screen_open_entry_index, -0x30, -0x38);
         g_menu_thread_menu_data = g_screen_default_entries;
-        map_layers_hide();
-        world_map_clear_screen_and_set_clip_rect(0);
+        hide_map_layers();
+        world_map_clear_screen(0);
         for (i = 0x77FF; i >= 0; i--) {
             g_world_map_scratch_buffer[i] = 0;
         }
         s_formation_open_request_state++;
-        screen_brightness_set(0, 0, 0);
+        screen_set_brightness(0, 0, 0);
         return;
     }
     if (state < 8) {
@@ -858,8 +858,8 @@ static void formation_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_IN) {
-        map_layers_restore();
-        world_map_fade_start(0x24, 0x10);
+        restore_map_layers();
+        world_map_start_fade(0x24, 0x10);
         s_formation_open_request_state++;
         return;
     }
@@ -872,10 +872,10 @@ static void formation_request_update(void) {
 
 /* Run formation tutorial index + 1, resetting the menu context before and after,
  * then restore the default menu entries and clear the screen request. */
-void formation_tutorial_run(s32 tutorial_index) {
-    screen_context_reset();
-    formation_screen_run(tutorial_index + 1, 0);
-    screen_context_reset();
+void formation_run_tutorial(s32 tutorial_index) {
+    screen_reset_context();
+    formation_run_screen(tutorial_index + 1, 0);
+    screen_reset_context();
     g_world_map_screen_request = 0;
     g_menu_thread_menu_data = g_screen_default_entries;
 }
@@ -883,7 +883,7 @@ void formation_tutorial_run(s32 tutorial_index) {
 /* Steps a pending request to open the tutorial categories from the world
  * map: start the screen fade-out, wait for it, then reset the menu context
  * and raise WORLD_MAP_FLAG_REQUEST_TUTORIAL. */
-static void tutorial_request_update(void) {
+static void update_tutorial_request(void) {
     s16 state = g_world_map_tutorial_request_state;
 
     if (state == WORLD_MAP_REQUEST_IDLE) {
@@ -891,7 +891,7 @@ static void tutorial_request_update(void) {
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
-        world_map_fade_start(0x12, 0x10);
+        world_map_start_fade(0x12, 0x10);
         g_world_map_tutorial_request_state++;
         return;
     }
@@ -901,8 +901,8 @@ static void tutorial_request_update(void) {
         }
         return;
     }
-    screen_context_reset();
-    screen_brightness_set(0x80, 0x80, 0x80);
+    screen_reset_context();
+    screen_set_brightness(0x80, 0x80, 0x80);
     g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_TUTORIAL;
     g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_IDLE;
 }
@@ -910,13 +910,13 @@ static void tutorial_request_update(void) {
 /* Serve a pending request to open the debug variable list from the world
  * map: reset the menu context and raise
  * WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST. */
-static void variable_list_request_update(void) {
+static void update_variable_list_request(void) {
     s32 state = g_world_map_debug_variable_list_request_state;
 
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
-        screen_context_reset();
-        screen_brightness_set(0x80, 0x80, 0x80);
+        screen_reset_context();
+        screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_debug_variable_list_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST;
     }
@@ -924,16 +924,16 @@ static void variable_list_request_update(void) {
 
 /* Reload the WORLD menu text and hand the debug Party number request to
  * WLDCORE, which opens the encounter-number editor. */
-static void party_number_request_update(void) {
+static void update_party_number_request(void) {
     s32 state = g_world_map_debug_party_number_request_state;
 
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
-        screen_context_reset();
-        g_thread_call_target = (void (*)(void))file_buffer_load_checked;
+        screen_reset_context();
+        g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
-        text_pointer_table_relocate(s_menu_text_file_buffer);
-        screen_brightness_set(0x80, 0x80, 0x80);
+        text_relocate_pointer_table(s_menu_text_file_buffer);
+        screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_debug_party_number_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
     }
@@ -941,7 +941,7 @@ static void party_number_request_update(void) {
 
 /* Run Save and restore the world map through the same dark-frame and fade-in
  * sequence as Formation, unless Save requests a restart. */
-static void save_request_update(void) {
+static void update_save_request(void) {
     s16 state = g_save_menu_request_state;
     s32 result;
     s32 i;
@@ -951,7 +951,7 @@ static void save_request_update(void) {
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
-        world_map_fade_start(0x12, 0x10);
+        world_map_start_fade(0x12, 0x10);
         g_save_menu_request_state++;
         return;
     }
@@ -962,27 +962,27 @@ static void save_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_RUN) {
-        screen_context_reset();
-        screen_brightness_set(0x80, 0x80, 0x80);
-        result = save_screen_run(1);
-        screen_context_reset();
+        screen_reset_context();
+        screen_set_brightness(0x80, 0x80, 0x80);
+        result = save_run_screen(1);
+        screen_reset_context();
         g_world_map_screen_request = 0;
         g_menu_thread_menu_data = g_screen_default_entries;
-        map_layers_hide();
+        hide_map_layers();
         if (result == 1) {
             g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
             g_world_map_flags |= WORLD_MAP_FLAG_RESTART;
             return;
         }
-        window_group_start(g_world_map_menu_group_parameter, g_world_map_destination_id,
+        start_window_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
             g_world_map_destination_position.x, g_world_map_destination_position.y);
-        screen_entry_window_open(g_screen_open_entry_index, -0x30, -0x38);
-        world_map_clear_screen_and_set_clip_rect(0);
+        screen_open_entry_window(g_screen_open_entry_index, -0x30, -0x38);
+        world_map_clear_screen(0);
         for (i = 0x77FF; i >= 0; i--) {
             g_world_map_scratch_buffer[i] = 0;
         }
         g_save_menu_request_state++;
-        screen_brightness_set(0, 0, 0);
+        screen_set_brightness(0, 0, 0);
         return;
     }
     if (state < 8) {
@@ -990,8 +990,8 @@ static void save_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_IN) {
-        map_layers_restore();
-        world_map_fade_start(0x24, 0x10);
+        restore_map_layers();
+        world_map_start_fade(0x24, 0x10);
         g_save_menu_request_state++;
         return;
     }
@@ -1002,8 +1002,8 @@ static void save_request_update(void) {
     }
 }
 
-/* Sibling of tutorial_request_update driven by g_world_map_brave_story_request_state. */
-static void brave_story_request_update(void) {
+/* Sibling of update_tutorial_request driven by g_world_map_brave_story_request_state. */
+static void update_brave_story_request(void) {
     s16 state = g_world_map_brave_story_request_state;
 
     if (state == WORLD_MAP_REQUEST_IDLE) {
@@ -1011,7 +1011,7 @@ static void brave_story_request_update(void) {
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
-        world_map_fade_start(0x12, 0x10);
+        world_map_start_fade(0x12, 0x10);
         g_world_map_brave_story_request_state++;
         return;
     }
@@ -1022,7 +1022,7 @@ static void brave_story_request_update(void) {
         return;
     }
     if (state == WORLD_MAP_REQUEST_RUN) {
-        screen_context_reset();
+        screen_reset_context();
         g_world_map_brave_story_request_state = WORLD_MAP_REQUEST_IDLE;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_BRAVE_STORY;
     }
@@ -1030,7 +1030,7 @@ static void brave_story_request_update(void) {
 
 /* Records the location window request and starts the menu thread-group supervisor on thread 2, unless a
  * menu screen is already opening. */
-static void window_group_start(s32 parameter, s32 location_id, s32 window_x, s32 window_y) {
+static void start_window_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y) {
     if (g_world_map_screen_request == 0) {
         if (g_world_map_destination_id != location_id) {
             g_threads[12].task_id = THREAD_TASK_NONE;
@@ -1043,8 +1043,8 @@ static void window_group_start(s32 parameter, s32 location_id, s32 window_x, s32
         g_screen_default_entries[2].text_id = location_id + TEXT_ID_LOCATION_NAME_BASE;
         g_screen_default_entries[2].window.x = window_x;
         g_screen_default_entries[2].window.y = window_y;
-        thread_start(SCREEN_THREAD_SLOT_MENU_GROUP, window_group_run);
-        thread_parameters_set(SCREEN_THREAD_SLOT_MENU_GROUP, parameter, 0, 0);
+        thread_start(SCREEN_THREAD_SLOT_MENU_GROUP, window_group_thread);
+        thread_set_parameters(SCREEN_THREAD_SLOT_MENU_GROUP, parameter, 0, 0);
     }
 }
 
@@ -1053,7 +1053,7 @@ static void window_group_start(s32 parameter, s32 location_id, s32 window_x, s32
  * others are signaled to finish (state 1) and awaited. Finished or idle members
  * with callbacks are started with the matching menu entry and task id; a -1
  * callback starts no replacement. The thread exits once no request is pending. */
-static void window_group_run(void) {
+static void window_group_thread(void) {
     s32 state[16];
     menu_group_t* group;
     s32 index;
@@ -1076,9 +1076,9 @@ static void window_group_run(void) {
                 if (g_threads[thread_id].is_running != 0) {
                     if (g_threads[thread_id].task_id != group->task_ids[i]) {
                         state[thread_id] = 1;
-                        thread_parameters_set(group->thread_ids[i], 0, 0, 1);
+                        thread_set_parameters(group->thread_ids[i], 0, 0, 1);
                     } else {
-                        thread_parameters_set(thread_id, 0, 1, 0);
+                        thread_set_parameters(thread_id, 0, 1, 0);
                     }
                 } else {
                     state[thread_id] = 2;
@@ -1094,12 +1094,12 @@ static void window_group_run(void) {
             if (i == 3) {
                 break;
             }
-            thread_frames_wait(1);
+            thread_wait_frames(1);
         }
         for (i = 0; i < 3; i++) {
             if (state[group->thread_ids[i]] != 0 && group->entries[i] != (void (*)(void))-1) {
                 thread_start(group->thread_ids[i], group->entries[i]);
-                thread_parameters_set(group->thread_ids[i], (s32)&g_menu_thread_menu_data[i], 0, 0);
+                thread_set_parameters(group->thread_ids[i], (s32)&g_menu_thread_menu_data[i], 0, 0);
                 g_threads[group->thread_ids[i]].task_id = group->task_ids[i];
             }
         }
@@ -1110,7 +1110,7 @@ static void window_group_run(void) {
 }
 
 /* Set the text image's upload rectangle and initialize its sprite. */
-static void entry_text_sprite_init(RECT* out, const menu_entry_t* record, SPRT* primitive) {
+static void init_entry_text_sprite(RECT* out, const menu_entry_t* record, SPRT* primitive) {
     out->x = record->vram_origin.x;
     out->y = record->vram_origin.y;
     out->w = record->inner_width >> 2;
@@ -1126,7 +1126,7 @@ static void entry_text_sprite_init(RECT* out, const menu_entry_t* record, SPRT* 
  *
  * `mode` is reused to carry the y coordinate once the mode test is done; that
  * reuse is what puts the y value in the target's v1. */
-static void entry_frame_sprites_build(menu_entry_t* entry, SPRT sprite[2], s32 unused_2) {
+static void build_entry_frame_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2) {
     u16 x;
     s32 mode;
 
@@ -1164,7 +1164,7 @@ static void entry_frame_sprites_build(menu_entry_t* entry, SPRT sprite[2], s32 u
 }
 
 /* Set which buttons the WORLD menus accept. */
-void screen_allowed_buttons_set(u32 mask) {
+void screen_set_allowed_buttons(u32 mask) {
     g_screen_allowed_buttons = mask;
 }
 
@@ -1174,8 +1174,8 @@ void screen_allowed_buttons_set(u32 mask) {
  * screen-request flags is set), advances the pending world-map screen
  * requests, publishes the input, yields once while tracking thread status
  * changes and returns the menu result slot g_command_pending_selection[0] (-2 while pending).
- * WORLD's sibling of menu_input_event_state_update. */
-s16 screen_menu_frame_update(u32* otag, u32 input) {
+ * WORLD's sibling of menu_input_update_event_state. */
+s16 screen_update_menu_frame(u32* otag, u32 input) {
     s32 profile = g_game_options.fields.finger_cursor_repeat_speed;
     u32 previous_input;
     u32 filtered_input;
@@ -1260,12 +1260,12 @@ s16 screen_menu_frame_update(u32* otag, u32 input) {
         g_screen_new_buttons = 0;
     }
     g_formation_screen_active = 1;
-    formation_request_update();
-    brave_story_request_update();
-    save_request_update();
-    tutorial_request_update();
-    variable_list_request_update();
-    party_number_request_update();
+    update_formation_request();
+    update_brave_story_request();
+    update_save_request();
+    update_tutorial_request();
+    update_variable_list_request();
+    update_party_number_request();
     g_command_pending_selection[0] = -2;
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;
@@ -1295,7 +1295,7 @@ s16 screen_menu_frame_update(u32* otag, u32 input) {
     g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_sound_pending_sfx_id != -1) {
-        sound_free_channel_sfx_play(g_sound_pending_sfx_id);
+        sound_play_sfx_on_free_channel(g_sound_pending_sfx_id);
     }
     if (g_command_pending_selection[0] == 0) {
         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_MAP, g_command_pending_selection[1]);
@@ -1310,7 +1310,7 @@ s16 screen_menu_frame_update(u32* otag, u32 input) {
 /* Opens menu entry `index` in THREAD_SLOT_MENU, first placing its window at the default
  * origin (-0x70, -0x50; the x and y arguments are ignored) and clamping that origin so the
  * window stays on screen. Does nothing while that slot runs. */
-void screen_entry_window_open(s32 index, s32 unused_x, s32 unused_y) {
+void screen_open_entry_window(s32 index, s32 unused_x, s32 unused_y) {
     menu_entry_t* entry;
     s32 x;
     s32 y;
@@ -1336,7 +1336,7 @@ void screen_entry_window_open(s32 index, s32 unused_x, s32 unused_y) {
             entry->window.y = -0x70;
         }
         thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[index].thread_entry);
-        thread_parameters_set(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[index], 0, 0);
+        thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[index], 0, 0);
     }
 }
 
@@ -1347,7 +1347,7 @@ void screen_entry_window_open(s32 index, s32 unused_x, s32 unused_y) {
  * leaves the failed loop test's 0 there, or the partial 16-bit-element flag when `h` is
  * not positive.
  */
-s32 screen_window_frame_image_build(s32 w, s32 h, u16* dst) {
+s32 screen_build_window_frame_image(s32 w, s32 h, u16* dst) {
     u16* src = (u16*)g_menu_glyph_sheet->pixels;
     s32 words;
     s32 i;

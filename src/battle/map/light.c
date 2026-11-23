@@ -1,49 +1,49 @@
 /* Save and adjust the battle map ambient light color. */
 
-#include "fft/battle_map_light.h"
 #include "fft/gfx.h"
+#include "fft/map_light.h"
 #include "psx/types.h"
 
-static rgb24_t s_battle_map_light_back_color_backup;
+static rgb24_t s_map_light_back_color_backup;
 
 static rgb24_t s_current_back_color = { 128, 128, 128 };
 
-/* Save the map's ambient (GTE back) color for battle_map_light_restore_back_color. */
-void battle_map_light_save_back_color(void) {
+/* Save the map's ambient (GTE back) color for map_light_restore_back_color. */
+void map_light_save_back_color(void) {
     /* Component copies retain the original byte loads and separate addresses. */
-    s_battle_map_light_back_color_backup.r = s_current_back_color.r;
-    s_battle_map_light_back_color_backup.g = s_current_back_color.g;
-    s_battle_map_light_back_color_backup.b = s_current_back_color.b;
+    s_map_light_back_color_backup.r = s_current_back_color.r;
+    s_map_light_back_color_backup.g = s_current_back_color.g;
+    s_map_light_back_color_backup.b = s_current_back_color.b;
 }
 
 /* Reload the saved ambient color and load it into the GTE back color. */
-void battle_map_light_restore_back_color(void) {
-    s_current_back_color.r = s_battle_map_light_back_color_backup.r;
-    s_current_back_color.g = s_battle_map_light_back_color_backup.g;
-    s_current_back_color.b = s_battle_map_light_back_color_backup.b;
-    battle_map_light_control_back_color(
-        BATTLE_MAP_LIGHT_BACK_COLOR_SET, s_current_back_color.r, s_current_back_color.g, s_current_back_color.b);
+void map_light_restore_back_color(void) {
+    s_current_back_color.r = s_map_light_back_color_backup.r;
+    s_current_back_color.g = s_map_light_back_color_backup.g;
+    s_current_back_color.b = s_map_light_back_color_backup.b;
+    map_light_dispatch_back_color_command(
+        MAP_LIGHT_BACK_COLOR_SET, s_current_back_color.r, s_current_back_color.g, s_current_back_color.b);
 }
 
-rgb24_t* battle_map_light_get_back_color(void) {
+rgb24_t* map_light_get_back_color(void) {
     return &s_current_back_color;
 }
 
 /* Set the map's ambient color and load it into the GTE back color; the GTE load is skipped while
  * the back color is disabled. */
-void battle_map_light_set_back_color(s32 red, s32 green, s32 blue) {
+void map_light_set_back_color(s32 red, s32 green, s32 blue) {
     s_current_back_color.r = red;
     s_current_back_color.g = green;
     s_current_back_color.b = blue;
-    battle_map_light_control_back_color(
-        BATTLE_MAP_LIGHT_BACK_COLOR_SET, s_current_back_color.r, s_current_back_color.g, s_current_back_color.b);
+    map_light_dispatch_back_color_command(
+        MAP_LIGHT_BACK_COLOR_SET, s_current_back_color.r, s_current_back_color.g, s_current_back_color.b);
 }
 
 /* Add per-component deltas to the map ambient color and apply it.
  *
  * A component whose tested delta is negative (`current + delta < current`)
  * becomes 0xff instead. The retail routine tests green with red_delta. */
-void battle_map_light_adjust_back_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
+void map_light_adjust_back_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
     if (s_current_back_color.r + red_delta < s_current_back_color.r) {
         s_current_back_color.r = 0xff;
     } else {
@@ -59,6 +59,6 @@ void battle_map_light_adjust_back_color(s16 red_delta, s16 green_delta, s16 blue
     } else {
         s_current_back_color.b += blue_delta;
     }
-    battle_map_light_control_back_color(
-        BATTLE_MAP_LIGHT_BACK_COLOR_SET, s_current_back_color.r, s_current_back_color.g, s_current_back_color.b);
+    map_light_dispatch_back_color_command(
+        MAP_LIGHT_BACK_COLOR_SET, s_current_back_color.r, s_current_back_color.g, s_current_back_color.b);
 }

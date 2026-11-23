@@ -1,9 +1,5 @@
 /* Load the battle and deployment screen, then run the battle state loop. */
 
-#include "fft/battle_map.h"
-#include "fft/battle_map_load.h"
-#include "fft/battle_map_mesh.h"
-#include "fft/battle_map_palette.h"
 #include "fft/battle_state.h"
 #include "fft/camera.h"
 #include "fft/command.h"
@@ -14,6 +10,11 @@
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
+#include "fft/map.h"
+#include "fft/map_load.h"
+#include "fft/map_mesh.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/menu.h"
 #include "fft/music.h"
 #include "fft/option.h"
@@ -22,7 +23,6 @@
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"
 #include "fft/system.h"
-#include "fft/unit_runtime.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -41,18 +41,18 @@ system_game_flow_e g_game_flow_state = SYSTEM_GAME_FLOW_BATTLE;
 /* Uploads the fixed CLUTs of the sprite row: 1 and 2 the cursor tile glow palettes,
  * 3 the wait-direction arrow, 4 the map selection cursor, 5 the shadow and 7 the
  * status bubble. */
-static void fixed_cluts_load(void) {
+static void load_fixed_cluts(void) {
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    battle_map_palette_load_data(&g_cursor_tile_glow_palettes[0], BATTLE_MAP_CLUT_ROW_SPRITES, 1, 0);
-    battle_map_palette_load_data(&g_cursor_tile_glow_palettes[1], BATTLE_MAP_CLUT_ROW_SPRITES, 2, 0);
-    battle_map_palette_load_data(&g_unit_facing_wait_arrow_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 3, 0);
-    battle_map_palette_load_data(&g_cursor_map_selection_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 4, 0);
-    battle_map_palette_load_data(&g_sprite_shadow_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 5, 0);
-    battle_map_palette_load_data(&g_status_bubble_palette, BATTLE_MAP_CLUT_ROW_SPRITES, 7, 0);
+    map_palette_load_data(&g_cursor_tile_glow_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
+    map_palette_load_data(&g_cursor_tile_glow_palettes[1], MAP_CLUT_ROW_SPRITES, 2, 0);
+    map_palette_load_data(&g_unit_facing_wait_arrow_palette, MAP_CLUT_ROW_SPRITES, 3, 0);
+    map_palette_load_data(&g_cursor_map_selection_palette, MAP_CLUT_ROW_SPRITES, 4, 0);
+    map_palette_load_data(&g_sprite_shadow_palette, MAP_CLUT_ROW_SPRITES, 5, 0);
+    map_palette_load_data(&g_status_bubble_palette, MAP_CLUT_ROW_SPRITES, 7, 0);
 }
 
-/* Empty. map_load_run calls it each frame while the map is still being set up. */
+/* Empty. run_map_load calls it each frame while the map is still being set up. */
 static void deployment_frame_stub(void) {
 }
 
@@ -70,7 +70,7 @@ static void deployment_frame_stub(void) {
  * register choice for the hoisted color. The dead fade = 0 before done keeps the
  * step-0xd exit inline ahead of the per-frame path, as in the target; with a
  * plain break GCC moves that block to the loop tail. */
-static void map_load_run(void) {
+static void run_map_load(void) {
     RECT window = { 0, 0, 0, 0 };
     POLY_FT4 banner[2];
     u8 show_banner;
@@ -78,15 +78,15 @@ static void map_load_run(void) {
     s16 fade;
     POLY_FT4* banner_p;
 
-    battle_display_init(0x100, 0xf0, 0x200, 0, 0, 0);
+    battle_init_display(0x100, 0xf0, 0x200, 0, 0, 0);
     show_banner = g_system_go_straight_to_battle;
     if (script_variable_get(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
         show_banner = 0;
     }
     g_deploy_skipped = deploy_open();
     loading_message_build_offset(g_deploy_skipped);
-    map_id = g_battle_map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
-    g_battle_map_init_step = 0;
+    map_id = g_map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    g_map_init_step = 0;
     g_deploy_finished = 0;
 
     SetPolyF4(&g_fade_polygons[0]);
@@ -117,33 +117,33 @@ static void map_load_run(void) {
     fade = 0xf8;
     if (show_banner != 0) {
         do {
-            gfx_battle_otag_swap();
+            gfx_swap_battle_otag();
             (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
             (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
             (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-            AddPrim(gfx_battle_otag_get(), &g_fade_polygons[g_gfx_screen_polarity]);
-            AddPrim(gfx_battle_otag_get(), &g_fade_draw_modes[g_gfx_screen_polarity]);
-            AddPrim(gfx_battle_otag_get(), &banner[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-            g_system_battle_frame_hsync_count = deploy_frame_submit(gfx_battle_otag_get() + 0x17f);
+            g_system_battle_frame_hsync_count = deploy_submit_frame(gfx_get_battle_otag() + 0x17f);
             fade -= 8;
         } while (fade >= 0);
     }
 
     banner_p = banner;
     fade = 0xff;
-    while (deploy_input_update() != -1) {
-        gfx_battle_otag_swap();
+    while (deploy_update_input() != -1) {
+        gfx_swap_battle_otag();
         if (show_banner != 0) {
-            AddPrim(gfx_battle_otag_get(), &banner_p[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &banner_p[g_gfx_screen_polarity]);
         } else {
-            loading_otag_append(gfx_battle_otag_get());
+            loading_message_append_to_otag(gfx_get_battle_otag());
         }
-        g_battle_map_init_step = battle_map_deployment_init_update(
-            map_id, g_battle_map_init_step, deploy_run_frame_and_check(gfx_battle_otag_get(), g_input_current_buttons));
-        if (g_battle_map_init_step == 0xd) {
-            fixed_cluts_load();
-            battle_state_enter_event_at_battle_start();
+        g_map_init_step = map_update_deployment_init_sequence(
+            map_id, g_map_init_step, deploy_update_frame(gfx_get_battle_otag(), g_input_current_buttons));
+        if (g_map_init_step == 0xd) {
+            load_fixed_cluts();
+            battle_state_battle_start_event_enter();
             g_fade_intensity = fade;
             /* Not `break`: jump optimization would move this exit block
              * past the loop end, which the target keeps inline. */
@@ -153,11 +153,11 @@ static void map_load_run(void) {
         (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
         (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
         (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-        AddPrim(gfx_battle_otag_get(), &g_fade_polygons[g_gfx_screen_polarity]);
-        AddPrim(gfx_battle_otag_get(), &g_fade_draw_modes[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
         g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-        g_system_battle_frame_hsync_count = deploy_frame_submit(gfx_battle_otag_get() + 0x17f);
-        file_load_poll(&g_file_cd_state);
+        g_system_battle_frame_hsync_count = deploy_submit_frame(gfx_get_battle_otag() + 0x17f);
+        file_poll_load(&g_file_cd_state);
         system_frame_stub();
     }
     fade = 0;
@@ -169,15 +169,15 @@ done:
             if (fade >= 0xf8) {
                 fade = 0xff;
             }
-            gfx_battle_otag_swap();
+            gfx_swap_battle_otag();
             (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
             (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
             (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-            AddPrim(gfx_battle_otag_get(), &g_fade_polygons[g_gfx_screen_polarity]);
-            AddPrim(gfx_battle_otag_get(), &g_fade_draw_modes[g_gfx_screen_polarity]);
-            AddPrim(gfx_battle_otag_get(), &banner[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
-            g_system_battle_frame_hsync_count = deploy_frame_submit(gfx_battle_otag_get() + 0x17f);
+            g_system_battle_frame_hsync_count = deploy_submit_frame(gfx_get_battle_otag() + 0x17f);
             fade += 8;
         } while (fade < 0x100);
     }
@@ -199,9 +199,9 @@ void battle_entrypoint(void) {
     s32 i;
     s32 timer_offset;
 
-    render_buffers_init();
-    sprite_render_state_init();
-    effect_system_init();
+    render_init_buffers();
+    sprite_init_render_state();
+    effect_init_system();
 
     /* Clear the spritesheet id of each slot, last first. The byte offset preserves
      * the original reset loop; typed pointer and reverse index walks change it. */
@@ -215,16 +215,16 @@ void battle_entrypoint(void) {
     camera_fixed = &g_camera_real_coords;
 
     do {
-        map_load_run();
+        run_map_load();
         g_menu_status_enabled = 0;
         g_cursor_input_mode = g_game_options.fields.cursor_movement;
 
         for (;;) {
-            battle_input_update();
-            sprite_render_frame_init();
+            battle_update_input();
+            sprite_init_render_frame();
             SetGeomScreen(0x200);
-            gfx_battle_otag_swap();
-            camera_scene_focus_update();
+            gfx_swap_battle_otag();
+            camera_update_scene_focus();
 
             /* Negate the Q12 camera position into whole units; the x conversion spells out the
              * round-toward-zero that / ONE does for y and z. */
@@ -237,8 +237,8 @@ void battle_entrypoint(void) {
             camera_integer->vy = camera_component / ONE;
             camera_integer->vz = -camera_fixed->vz / ONE;
 
-            camera_matrices_update(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
-            battle_map_mesh_weather_draw(&g_camera_matrix);
+            camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
+            map_mesh_draw_weather(&g_camera_matrix);
             /* The SEQ wait commands read this: 2 while an effect is updating, 0 otherwise. */
             if (effect_playback_update() != 0) {
                 g_battle_animation_wait_state = 2;
@@ -427,23 +427,23 @@ void battle_entrypoint(void) {
                 break;
             }
 
-            camera_pan_update();
-            camera_rotation_update();
-            camera_zoom_update();
-            camera_tilt_update();
-            battle_map_update_color_animations();
-            music_tunes_update();
+            camera_update_pan();
+            camera_update_rotation();
+            camera_update_zoom();
+            camera_update_tilt();
+            map_palette_update_color_animations();
+            music_update_tunes();
 
             /* A closing battle leaves before this frame is presented. */
             if (g_battle_state == BATTLE_STATE_CLOSE_BATTLE) {
                 break;
             }
 
-            file_load_poll(&g_file_cd_state);
+            file_poll_load(&g_file_cd_state);
             g_gfx_screen_polarity = !g_gfx_screen_polarity;
             g_frame_counter++;
-            battle_map_clut_upload_rows();
-            frame_measurement = battle_frame_submit(gfx_battle_otag_get() + 0x17f);
+            map_palette_upload_clut_rows();
+            frame_measurement = battle_submit_frame(gfx_get_battle_otag() + 0x17f);
             g_system_battle_frame_hsync_count = frame_measurement;
             i = 0;
             if (g_system_battle_frame_hsync_count_max < frame_measurement) {
@@ -466,7 +466,7 @@ void battle_entrypoint(void) {
                 sprite_slot++;
             } while (i < SPRITE_EVTCHR_SLOT_COUNT);
 
-            /* A frame that ran long during effects arms the pacing timer, which battle_frame_submit
+            /* A frame that ran long during effects arms the pacing timer, which battle_submit_frame
              * uses to lengthen the following waits. */
             if (g_battle_state == BATTLE_STATE_EFFECT || g_battle_state == BATTLE_STATE_ACTION_EXECUTE) {
                 if (g_system_vsync_interval == 1) {
@@ -484,8 +484,8 @@ void battle_entrypoint(void) {
             system_frame_stub();
         }
 
-        battle_map_animations_stop();
-        unit_all_clear();
+        map_stop_animations();
+        map_unit_clear_all();
     } while (g_game_flow_state == SYSTEM_GAME_FLOW_BATTLE);
 
     /* Let drawing and two vertical blanks finish before leaving. */

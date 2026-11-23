@@ -303,7 +303,7 @@ static shop_item_availability_t s_shop_item_availability[ITEM_ID_COUNT] = {
  *     computes `ori s0,s2,0x4000` with distinct source and destination; the
  *     compound form makes the destination self-referencing (`ori s0,s0`).
  */
-s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode) {
+s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, s32 mode) {
     s32 count;
     s32 item_id;
     register s32 entry __asm__("$16");
@@ -351,7 +351,7 @@ s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
         shop_mask = 0x8000 >> shop_id;
         for (; item_id < ITEM_ID_END; item_id++) {
             __asm__("" : "=r"(primary_category) : "0"(primary_category));
-            item_category = item_menu_category_get(item_id);
+            item_category = item_get_menu_category(item_id);
             entry = item_id;
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
@@ -364,7 +364,7 @@ s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
                 continue;
             }
             if (mode != ITEM_LIST_MODE_ALL) {
-                can_equip = equipment_item_compatibility_check(unit_id, item_id);
+                can_equip = equipment_check_item_compatibility(unit_id, item_id);
                 if (mode == ITEM_LIST_MODE_EQUIPPABLE && can_equip == -1) {
                     continue;
                 }
@@ -377,16 +377,16 @@ s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
         }
     } else {
         for (item_id = 0; item_id < ITEM_ID_END; item_id++) {
-            item_category = item_menu_category_get(item_id);
+            item_category = item_get_menu_category(item_id);
             entry = item_id;
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
             }
-            if (fur_shop_stock_adjust(item_id, 0) == 0) {
+            if (fur_shop_adjust_stock(item_id, 0) == 0) {
                 continue;
             }
             if (mode != ITEM_LIST_MODE_ALL) {
-                can_equip = equipment_item_compatibility_check(unit_id, item_id);
+                can_equip = equipment_check_item_compatibility(unit_id, item_id);
                 if (mode == ITEM_LIST_MODE_EQUIPPABLE && can_equip == -1) {
                     continue;
                 }
@@ -400,6 +400,6 @@ s32 shop_stock_list_build(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
     }
 
     entries[count] = -1;
-    item_id_list_sort(ITEM_SORT_ORDER_STOCK, entries);
+    item_sort_id_list(ITEM_SORT_ORDER_STOCK, entries);
     return count;
 }

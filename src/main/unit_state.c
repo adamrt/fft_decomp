@@ -6,6 +6,7 @@
 #include "fft/action.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/party.h"
 #include "fft/random.h"
@@ -16,17 +17,16 @@
 #include "fft/unit_entd.h"
 #include "fft/unit_identity.h"
 #include "fft/unit_party.h"
-#include "fft/unit_runtime.h"
 #include "fft/zodiac.h"
 #include "psx/types.h"
 
-static u8 sprite_identity_resolve(const unit_stats_t* unit, u8* palette);
+static u8 resolve_sprite_identity(const battle_unit_t* unit, u8* palette);
 
 extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
 
 /* Clear the per-battle unit state: manual auto-battle with no target, CT 0, no active turn or
  * ability outcome, no charging ability (0xff), not mounted and no KOs. */
-void unit_battle_state_reset(unit_stats_t* unit) {
+void battle_unit_reset_state(battle_unit_t* unit) {
     unit->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
     unit->auto_battle_target = 0;
     unit->ct = 0;
@@ -38,8 +38,8 @@ void unit_battle_state_reset(unit_stats_t* unit) {
 }
 
 /* Raise a Speed of 0 to 1, optionally clear the war trophy and bonus money, and
- * initialize the unit's status data (status_unit_init). */
-void unit_status_rewards_init(unit_stats_t* unit, s32 clear_rewards) {
+ * initialize the unit's status data (status_init_unit). */
+void battle_unit_init_status_and_rewards(battle_unit_t* unit, s32 clear_rewards) {
     if (unit->attributes[UNIT_ATTRIBUTE_SPEED] == 0) {
         unit->attributes[UNIT_ATTRIBUTE_SPEED] = 1;
     }
@@ -47,13 +47,13 @@ void unit_status_rewards_init(unit_stats_t* unit, s32 clear_rewards) {
         unit->war_trophy = ITEM_ID_NOTHING;
         unit->bonus_money_modifier = 0;
     }
-    status_unit_init(unit);
+    status_init_unit(unit);
 }
 
 /* The range byte of an ordinary ability's range record; 0 for an id from
  * ABILITY_ID_ITEM_FIRST up, which has no such record. Nothing in the tree
  * calls it. */
-u32 ability_range_get(u32 ability_id) {
+u32 ability_get_range(u32 ability_id) {
     u16 index = ability_id;
 
     return index < ABILITY_ID_ITEM_FIRST ? g_ability_range_data[index].range : 0;
@@ -62,16 +62,16 @@ u32 ability_range_get(u32 ability_id) {
 /* The area-of-effect byte of an ordinary ability's range record; 0 for an id from
  * ABILITY_ID_ITEM_FIRST up, which has no such record. Nothing in the tree calls
  * it. */
-u32 ability_aoe_get(u32 ability_id) {
+u32 ability_get_aoe(u32 ability_id) {
     u16 index = ability_id;
 
     return index < ABILITY_ID_ITEM_FIRST ? g_ability_range_data[index].aoe : 0;
 }
 
-/* Resolve the unit's spritesheet and palette (sprite_identity_resolve), store both in
+/* Resolve the unit's spritesheet and palette (resolve_sprite_identity), store both in
  * the unit and return the spritesheet id. */
-u8 unit_sprite_identity_set(unit_stats_t* unit, u8* palette) {
-    u8 spritesheet = sprite_identity_resolve(unit, palette);
+u8 battle_unit_set_sprite_identity(battle_unit_t* unit, u8* palette) {
+    u8 spritesheet = resolve_sprite_identity(unit, palette);
 
     unit->spritesheet_id = spritesheet;
     unit->job_portrait_palette = *palette;
@@ -95,7 +95,7 @@ s32 random_roll_pass_fail(s32 maximum, s32 threshold) {
  * female, with Dancer and Mime counted one job lower. The monster selector
  * returns the spritesheet and palette already in the unit (from its job record).
  * Any higher identity gives job_id + 0x28. */
-static u8 sprite_identity_resolve(const unit_stats_t* unit, u8* palette) {
+static u8 resolve_sprite_identity(const battle_unit_t* unit, u8* palette) {
     u8 job_id;
     u8 sprite_set;
 
@@ -125,7 +125,7 @@ static u8 sprite_identity_resolve(const unit_stats_t* unit, u8* palette) {
 }
 
 /* Return 1 when the unit currently has any status in one row of g_status_check_sets, else 0. */
-s32 status_unit_set_test(const unit_stats_t* unit, status_check_set_e status_set_index) {
+s32 status_has_any_in_check_set(const battle_unit_t* unit, status_check_set_e status_set_index) {
     const u8* status_set = g_status_check_sets[0];
     s32 index = 0;
 
@@ -141,7 +141,7 @@ s32 status_unit_set_test(const unit_stats_t* unit, status_check_set_e status_set
 
 /* Return the learned-ability bits of one job slot of career.learned_abilities
  * (0 = base job) as a 24-bit value, first byte most significant. */
-u32 ability_learned_get(const unit_stats_t* unit, u32 job_index) {
+u32 ability_get_learned(const battle_unit_t* unit, u32 job_index) {
     return (unit->career.learned_abilities[job_index][0] << 16) + (unit->career.learned_abilities[job_index][1] << 8)
         | unit->career.learned_abilities[job_index][2];
 }
@@ -173,12 +173,12 @@ void mem_copy_byte_data_source_first(const void* source, void* destination, int 
  * equipped copies. With include_battle set, roster humans deployed in the battle are counted from
  * their battle records instead, along with every other non-Mime human that started on the blue
  * team. */
-s32 item_total_quantity_get(u8 item_id, s32 include_battle) {
+s32 item_get_total_quantity(u8 item_id, s32 include_battle) {
     s32 total = g_item_quantities[item_id];
     s32 i;
     s32 j;
     party_unit_t* party;
-    unit_stats_t* unit;
+    battle_unit_t* unit;
     s32 deployed;
     s32 party_id;
 
@@ -193,8 +193,8 @@ s32 item_total_quantity_get(u8 item_id, s32 include_battle) {
         }
         if (include_battle != 0) {
             deployed = 0;
-            for (j = 0; j < UNIT_SLOT_COUNT; j++) {
-                unit = &g_unit_stats[j];
+            for (j = 0; j < BATTLE_UNIT_SLOT_COUNT; j++) {
+                unit = &g_battle_units[j];
                 if (unit->existence != UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
                     && unit->formation_index == party_id) {
                     deployed = 1;
@@ -216,8 +216,8 @@ s32 item_total_quantity_get(u8 item_id, s32 include_battle) {
         return total;
     }
 
-    for (i = 0; i < UNIT_SLOT_COUNT; i++) {
-        unit = &g_unit_stats[i];
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
+        unit = &g_battle_units[i];
         if (unit->existence != UNIT_EXISTENCE_NONE && !(unit->unit_flags & UNIT_FLAG_MONSTER)
             && !(unit->initial_team_flags & UNIT_TEAM_MASK) && unit->job_id != JOB_ID_MIME) {
             for (j = 0; j < UNIT_EQUIPMENT_SLOT_COUNT; j++) {
@@ -232,7 +232,7 @@ s32 item_total_quantity_get(u8 item_id, s32 include_battle) {
 
 /* Copy the ENTD unit's map X and Y, elevation, facing and spell-quote bits, war trophy and bonus
  * money into the battle unit. */
-void unit_position_rewards_init(unit_stats_t* unit, const entd_unit_t* entd) {
+void battle_unit_init_position_and_rewards(battle_unit_t* unit, const entd_unit_t* entd) {
     unit->x = entd->x;
     unit->position.y = entd->position.y;
     unit->position.higher_elevation = entd->position.higher_elevation;
@@ -247,7 +247,7 @@ void unit_position_rewards_init(unit_stats_t* unit, const entd_unit_t* entd) {
  * Return the highest-order status changed by an action. Bits 0-6 encode the
  * one-based status index, 0x80 marks removal, and 0x100 reflects flags_2 bit 3.
  */
-s32 status_action_priority_find(const action_data_t* action) {
+s32 status_find_action_priority(const action_data_t* action) {
     s32 highest_order = -1;
     s32 result = 0;
     s32 status_index;
@@ -287,7 +287,7 @@ s32 status_action_priority_find(const action_data_t* action) {
  *
  * Counts the sign boundaries at or before the day, then rotates the count
  * into zodiac order with (count + 9) % 12. */
-s32 zodiac_sign_calculate(u16 birthday) {
+s32 zodiac_calculate_sign(u16 birthday) {
     s32 zodiac = 0;
     s32 i;
 
@@ -311,7 +311,7 @@ void mem_zero(void* destination, s32 count) {
 
 /* Count a KO in the script variables: a unit that started on the blue team adds to
  * EVENT_SCRIPT_VAR_CASUALTIES, any other unit to EVENT_SCRIPT_VAR_INJURED; both stop at 9999. */
-void unit_casualties_count(const unit_stats_t* unit) {
+void battle_unit_count_casualties(const battle_unit_t* unit) {
     s32 id;
     s32 count;
 
@@ -325,7 +325,7 @@ void unit_casualties_count(const unit_stats_t* unit) {
 }
 
 /* Add, remove, or replace a status-set flag and refresh the unit's current status. */
-void status_unit_change(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type) {
+void status_change_unit_flag(battle_unit_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type) {
     u8 updated;
 
     /* An enum selector removes the native signed range test. */
@@ -346,7 +346,7 @@ void status_unit_change(unit_stats_t* unit, s32 status_byte_index, u8 status_fla
 }
 
 /* Recompute the current status set as innate | inflicted. */
-void status_current_update(unit_stats_t* unit) {
+void status_refresh_current(battle_unit_t* unit) {
     s32 status_set;
 
     for (status_set = 0; status_set < STATUS_BYTE_COUNT; status_set++) {
@@ -357,7 +357,7 @@ void status_current_update(unit_stats_t* unit) {
 
 /* Charge time of the unit's last ability: the low seven bits of the ability
  * record's CT byte. */
-void unit_ability_ct_set(unit_stats_t* unit) {
+void battle_unit_set_ability_ct(battle_unit_t* unit) {
     unit->ability_ct = g_ability_range_data[unit->action_command.ability_id].ct & 0x7f;
 }
 
@@ -365,9 +365,9 @@ void unit_ability_ct_set(unit_stats_t* unit) {
  * with STATUS_ACTION_STATE_NONE, and enable or disable the special flags of each status that
  * changed. NONE and DEFENDING also clear the charging ability CT; PERFORMING sets it from the last
  * ability's CT. KEEP_PERFORMING keeps Performing if the unit has it and otherwise acts as NONE. */
-void status_action_state_set(unit_stats_t* unit, u8 action_state) {
+void status_set_action_state(battle_unit_t* unit, u8 action_state) {
     u8 old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
-    s32 battle_id = unit->battle_id;
+    s32 battle_unit_id = unit->battle_unit_id;
     u8 status;
     u8 cleared;
     s32 status_id;
@@ -395,15 +395,15 @@ void status_action_state_set(unit_stats_t* unit, u8 action_state) {
         break;
     case STATUS_ACTION_STATE_PERFORMING:
         status = STATUS_BYTE_MASK(STATUS_ID_PERFORMING);
-        unit_ability_ct_set(unit);
+        battle_unit_set_ability_ct(unit);
         unit->charged_ability_ct = unit->ability_ct;
         break;
     }
     cleared = status
         ^ (STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
             | STATUS_BYTE_MASK(STATUS_ID_DEFENDING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
-    status_unit_change(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), status, STATUS_ADD);
-    status_unit_change(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), cleared, STATUS_REMOVE);
+    status_change_unit_flag(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), status, STATUS_ADD);
+    status_change_unit_flag(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), cleared, STATUS_REMOVE);
 
     changed = old_status ^ unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
     mask = STATUS_BYTE_MASK(STATUS_ID_CHARGING);
@@ -411,9 +411,9 @@ void status_action_state_set(unit_stats_t* unit, u8 action_state) {
         status_id++) {
         if (changed & mask) {
             if ((old_status & mask) != 0) {
-                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_REMOVE, battle_unit_id);
             } else {
-                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_id);
+                status_queue_display_flag_change_if_executing(status_id, STATUS_DISPLAY_CHANGE_ADD, battle_unit_id);
             }
         }
         mask >>= 1;
@@ -421,7 +421,7 @@ void status_action_state_set(unit_stats_t* unit, u8 action_state) {
 }
 
 /* Pass a BATTLE.BIN unit-setup error (system_battle_load_exception_e) to the empty
- * system_error_report hook as source 3. */
-void system_battle_load_exception_handle(s32 value) {
-    system_error_report(3, value);
+ * system_report_error hook as source 3. */
+void system_handle_battle_load_exception(s32 value) {
+    system_report_error(3, value);
 }

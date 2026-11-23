@@ -57,7 +57,7 @@ static dismiss_profile_t s_dismiss_profiles[] = { { CHARACTER_IDENTITY_AGRIAS_JO
  * open the unit banner, unit browsing and the two detail panels are off; the
  * handler returns to the unit grid when the menu thread ends.
  */
-void formation_order_menu_update(void) {
+void formation_update_order_menu(void) {
     s16 option_ids[12]; /* seven entries plus terminator; sized for the retail frame */
     s32 index;
     s32 selected_entry;
@@ -72,8 +72,8 @@ void formation_order_menu_update(void) {
         g_formation_unit_banner_enabled = 0;
         g_formation_order_saved_browse_enabled = g_formation_unit_browse_enabled;
         g_formation_unit_browse_enabled = 0;
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+        menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
         g_formation_order_menu.selected_index = 0;
         g_formation_order_open = 1;
     }
@@ -94,7 +94,7 @@ void formation_order_menu_update(void) {
             g_formation_order_entries[index + 1] = g_formation_order_entries[index];
         }
         g_formation_order_entries[0] = selected_entry;
-        screen_selection_results_reset();
+        screen_reset_selection_results();
         for (index = 0; index < FORMATION_SORT_KEY_COUNT; index++) {
             option_ids[index] = g_formation_order_entries[index] + 14;
         }
@@ -117,7 +117,7 @@ void formation_unit_message_thread(void) {
 
 /*
  * Per-frame step of the "dismiss unit" menu
- * (FORMATION_MENU_DISMISS_UNIT), called by formation_grid_menu_update.
+ * (FORMATION_MENU_DISMISS_UNIT), called by update_unit_grid_menu.
  * Three phases: first entry, which picks the prompt text and menu record;
  * the per-frame poll of the prompt or menu thread; and the dismissal timer.
  *
@@ -135,7 +135,7 @@ void formation_unit_message_thread(void) {
  * g_dismiss_profiles row matching the unit's sprite set has
  * its script variable set to 0xC and the unit is removed.
  */
-void formation_dismiss_menu_update(void) {
+void formation_update_dismiss_menu(void) {
     formation_unit_t* unit;
     menu_entry_t* menu;
     s32 i;
@@ -181,7 +181,7 @@ void formation_dismiss_menu_update(void) {
             g_formation_dismiss_prompt_running = 1;
         } else {
             g_formation_dismiss_step = formation_can_dismiss(sprite);
-            screen_text_section_bind(SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES);
+            screen_text_bind_section(SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES);
             if (g_formation_unit_browse_enabled != 0) {
                 g_formation_unit_cycle_mode = 1;
             }

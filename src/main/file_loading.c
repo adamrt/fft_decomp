@@ -13,13 +13,13 @@
  * Overlay callers pass a byte count; the lower-level builder takes sectors.
  * Discard any partial sector rather than rounding the request up.
  */
-s32 file_bytes_read_request(s32 sector, u32 size, void* destination) {
-    return file_read_request_quiet(&g_file_cd_state, sector, size >> 11, destination);
+s32 file_request_read_bytes(s32 sector, u32 size, void* destination) {
+    return file_request_read_quiet(&g_file_cd_state, sector, size >> 11, destination);
 }
 
 /* Return the shared CD descriptor's load state: nonzero while a read through g_file_cd_state
  * is in progress. */
-int file_load_state_get(void) {
+int file_get_load_state(void) {
     return g_file_cd_state.state;
 }
 
@@ -27,22 +27,22 @@ int file_load_state_get(void) {
  * bytes and only whole sectors are read. A full heap reports
  * SYSTEM_ERROR_SMD_LOAD and returns 0; the loader then only seeks, because
  * it skips the read for a null destination. */
-suzuki_smd_header_t* file_smd_load(int sector, u32 size) {
+suzuki_smd_header_t* file_load_smd(int sector, u32 size) {
     suzuki_smd_header_t* buffer = heap_smd_alloc(size);
 
     if (buffer == 0) {
-        system_error_handle(SYSTEM_ERROR_SMD_LOAD);
+        system_handle_error(SYSTEM_ERROR_SMD_LOAD);
     }
-    while (file_read_request_quiet(&g_file_cd_state, sector, size >> 11, buffer) != 0) {
+    while (file_request_read_quiet(&g_file_cd_state, sector, size >> 11, buffer) != 0) {
         VSync(0);
         system_frame_stub();
-        file_load_poll(&g_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
     if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         do {
             VSync(0);
             system_frame_stub();
-            file_load_poll(&g_file_cd_state);
+            file_poll_load(&g_file_cd_state);
         } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
     }
     return buffer;
@@ -50,24 +50,24 @@ suzuki_smd_header_t* file_smd_load(int sector, u32 size) {
 
 /* Allocate size bytes from the game heap and read size >> 11 whole sectors,
  * blocking until the read ends. The caller must include sector rounding in
- * size; a partial final sector is not read. file_smd_load uses the same read
+ * size; a partial final sector is not read. file_load_smd uses the same read
  * loop with the separate music heap. */
-static void* heap_file_load(s32 sector, u32 size) {
+static void* load_into_heap(s32 sector, u32 size) {
     void* destination = heap_alloc(size);
 
     if (destination == 0) {
-        system_error_handle(SYSTEM_ERROR_HEAP_ALLOC);
+        system_handle_error(SYSTEM_ERROR_HEAP_ALLOC);
     }
-    while (file_read_request_quiet(&g_file_cd_state, sector, (size >> 11), destination) != 0) {
+    while (file_request_read_quiet(&g_file_cd_state, sector, (size >> 11), destination) != 0) {
         VSync(0);
         system_frame_stub();
-        file_load_poll(&g_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
     if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         do {
             VSync(0);
             system_frame_stub();
-            file_load_poll(&g_file_cd_state);
+            file_poll_load(&g_file_cd_state);
         } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
     }
     return destination;
@@ -77,45 +77,45 @@ static void* heap_file_load(s32 sector, u32 size) {
  * message. size is in bytes and only whole sectors (size >> 11) are read. Waits
  * for the shared loader to be idle, then polls it once per frame until the read
  * ends. Always returns destination. */
-void* file_buffer_load(int sector, u32 size, void* destination) {
-    while (file_read_request_quiet(&g_file_cd_state, sector, size >> 11, destination) != 0) {
+void* file_load_into_buffer(int sector, u32 size, void* destination) {
+    while (file_request_read_quiet(&g_file_cd_state, sector, size >> 11, destination) != 0) {
         VSync(0);
         system_frame_stub();
-        file_load_poll(&g_file_cd_state);
+        file_poll_load(&g_file_cd_state);
     }
     if (g_file_cd_state.state != FILE_LOAD_STATE_IDLE) {
         do {
             VSync(0);
             system_frame_stub();
-            file_load_poll(&g_file_cd_state);
+            file_poll_load(&g_file_cd_state);
         } while (g_file_cd_state.state != FILE_LOAD_STATE_IDLE);
     }
     return destination;
 }
 
-/* Blocking file_buffer_load that reports SYSTEM_ERROR_FILE_LOAD on a null result;
+/* Blocking file_load_into_buffer that reports SYSTEM_ERROR_FILE_LOAD on a null result;
  * since that loader returns destination, only a null destination trips it. */
-void* file_buffer_load_checked(int sector, int size, void* destination) {
-    void* result = file_buffer_load(sector, size, destination);
+void* file_load_into_buffer_checked(int sector, int size, void* destination) {
+    void* result = file_load_into_buffer(sector, size, destination);
 
     if (result == 0) {
-        system_error_handle(SYSTEM_ERROR_FILE_LOAD);
+        system_handle_error(SYSTEM_ERROR_FILE_LOAD);
     }
     return result;
 }
 
 /* Blocking load into a new game-heap block that also reports SYSTEM_ERROR_FILE_LOAD when no
- * block was free (heap_file_load has already reported SYSTEM_ERROR_HEAP_ALLOC). */
-void* file_heap_load_checked(int sector, int size) {
-    void* result = heap_file_load(sector, size);
+ * block was free (load_into_heap has already reported SYSTEM_ERROR_HEAP_ALLOC). */
+void* file_load_into_heap_checked(int sector, int size) {
+    void* result = load_into_heap(sector, size);
 
     if (result == 0) {
-        system_error_handle(SYSTEM_ERROR_FILE_LOAD);
+        system_handle_error(SYSTEM_ERROR_FILE_LOAD);
     }
     return result;
 }
 
 /* Free a game-heap block through heap_free, dropping its result. */
-void heap_block_release(void* pointer) {
+void heap_release_block(void* pointer) {
     heap_free(pointer);
 }

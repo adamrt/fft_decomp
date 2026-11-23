@@ -28,14 +28,14 @@ void message_set_duration(u16 frames) {
  * same size goes to the window, the text image and the inner area. With pad_short, a
  * one-line text under 8 pixels wide is widened to 8 and *out_pad receives a left indent of
  * 5 per missing pixel; otherwise *out_pad is 0. */
-static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short) {
-    const u8* text = text_entry_find(entry->text_id);
+static void size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short) {
+    const u8* text = text_find_entry(entry->text_id);
     u16 padded;
     u16 w;
     u16 h;
 
     *out_pad = 0;
-    text_pixels_measure(width, height, text);
+    text_measure_pixels(width, height, text);
     if (pad_short != 0) {
         if (*width < 8 && *height == 1) {
             *out_pad = (8 - *width) * 5;
@@ -80,13 +80,13 @@ void menu_icon_timed_thread(void) {
         g_message_duration_frames &= 0xFF;
     }
     i = 0;
-    param = (menu_entry_t*)thread_current_parameter_1_get();
-    menu_size_entry_to_text(param, &width, &height, &pad, 1);
+    param = (menu_entry_t*)thread_current_get_parameter_1();
+    size_entry_to_text(param, &width, &height, &pad, 1);
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(menu_icon_record_t));
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = width;
-    menu_set_text_origin(pad + 8, 9);
+    menu_text_set_origin(pad + 8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (;; i++) {
@@ -124,7 +124,7 @@ void menu_icon_timed_thread(void) {
     g_menu_panel_fade_intensity = 0;
     g_sound_suppressed = 0;
     thread_yield();
-    if (thread_current_parameter_2_get() == 0) {
+    if (thread_current_get_parameter_2() == 0) {
         thread_current_exit();
     }
 }
@@ -145,8 +145,8 @@ void menu_icon_linked_entry_thread(void) {
     s16 height;
     s32 pad;
 
-    param = (menu_entry_t*)thread_current_parameter_1_get();
-    menu_size_entry_to_text(param, &width, &height, &pad, 0);
+    param = (menu_entry_t*)thread_current_get_parameter_1();
+    size_entry_to_text(param, &width, &height, &pad, 0);
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(menu_icon_record_t));
     linked_index = param->row_actions[0];
@@ -156,11 +156,11 @@ void menu_icon_linked_entry_thread(void) {
             = (u16)((width >> 1) - (g_menu_thread_menu_data[linked_index].inner_width - 0x102));
         g_menu_thread_menu_data[linked_index].window.y = param->window.y + param->window.h;
         thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[linked_index].thread_entry);
-        thread_parameters_set(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[linked_index], 0, 0);
+        thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[linked_index], 0, 0);
     }
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = width;
-    menu_set_text_origin(8, 9);
+    menu_text_set_origin(8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
@@ -186,7 +186,7 @@ void menu_icon_linked_entry_thread(void) {
     }
     g_sound_suppressed = 0;
     thread_yield();
-    if (thread_current_parameter_2_get() == 0) {
+    if (thread_current_get_parameter_2() == 0) {
         thread_current_exit();
     }
 }
@@ -194,7 +194,7 @@ void menu_icon_linked_entry_thread(void) {
 /* Menu thread with nothing to draw: with menu sounds muted, handle Circle on row 0 and cancel each
  * frame until the menu should close. */
 void menu_input_thread(void) {
-    menu_entry_t* menu = (menu_entry_t*)thread_current_parameter_1_get();
+    menu_entry_t* menu = (menu_entry_t*)thread_current_get_parameter_1();
 
     g_sound_suppressed = 1;
     while (1) {
@@ -207,7 +207,7 @@ void menu_input_thread(void) {
     }
     thread_yield();
     g_sound_suppressed = 0;
-    if (thread_current_parameter_2_get() == 0) {
+    if (thread_current_get_parameter_2() == 0) {
         thread_current_exit();
     }
 }

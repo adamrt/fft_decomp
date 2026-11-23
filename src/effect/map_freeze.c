@@ -1,12 +1,12 @@
 /* An effect callback that freezes the map when its keyframe starts. */
 
-#include "fft/battle_map_mesh.h"
 #include "fft/effect.h"
 #include "fft/effect_script.h"
+#include "fft/map_mesh.h"
 #include "psx/types.h"
 
 /* Callback handler: freezes the map when its keyframe starts. */
-s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame) {
+s32 effect_freeze_map(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame) {
     s16 state_index = record_index;
     effect_record_t* record = &g_effect_state_records[state_index];
 
@@ -14,7 +14,7 @@ s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_in
     case EFFECT_CALLBACK_PHASE_IDLE:
         break;
     case EFFECT_CALLBACK_PHASE_INIT:
-        battle_map_freeze();
+        map_freeze();
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
     case EFFECT_CALLBACK_PHASE_UPDATE:

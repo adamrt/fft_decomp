@@ -2,6 +2,7 @@
 
 #include "fft/display_object.h"
 #include "fft/gfx.h"
+#include "fft/input.h"
 #include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
@@ -43,8 +44,8 @@ typedef enum proposition_participant_message_phase {
 static u8 s_proposition_treasure_milestones[8] = { 1, 4, 8, 12, 16, 20, 24, 31 };
 static u8 s_proposition_unexplored_land_milestones[8] = { 1, 3, 6, 8, 10, 12, 14, 16 };
 
-static void milestone_message_advance(proposition_discovery_level_t* discovery);
-static void recall_open(s32 proposition);
+static void advance_milestone_message(proposition_discovery_level_t* discovery);
+static void open_recall(s32 proposition);
 
 /*
  * Run the proposition speaker-selection and message sequence.
@@ -55,7 +56,7 @@ static void recall_open(s32 proposition);
  * once the message has been acknowledged and the phase reset, 0 while running.
  * The phase switch's six-entry jump table is this unit's .rodata.
  */
-s32 proposition_participant_message_update(proposition_report_level_t* state, s32 message, s32 speaker) {
+s32 proposition_update_participant_message(proposition_report_level_t* state, s32 message, s32 speaker) {
     switch (state->phase) {
     case PROPOSITION_PARTICIPANT_MESSAGE_SELECT_SPEAKER:
         if (speaker == -1) {
@@ -79,7 +80,7 @@ s32 proposition_participant_message_update(proposition_report_level_t* state, s3
         } else {
             g_proposition_report.speaker_party_index = speaker;
         }
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         state->phase++;
         break;
     case PROPOSITION_PARTICIPANT_MESSAGE_WAIT_PREVIOUS:
@@ -91,9 +92,9 @@ s32 proposition_participant_message_update(proposition_report_level_t* state, s3
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         g_text_substitution_values[0] = g_proposition_report.speaker_party_index + TEXT_ID_UNIT_NAME_BASE;
         script_variable_set(
-            EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_party_unit_code_get(g_proposition_report.speaker_party_index));
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
-            proposition_message_adjust(message, g_proposition_report.speaker_party_index) + TEXT_ID_WORLD_MESSAGE_BASE,
+            EVENT_SCRIPT_VAR_DIALOG_PORTRAIT, portrait_get_party_unit_code(g_proposition_report.speaker_party_index));
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
+            proposition_adjust_message(message, g_proposition_report.speaker_party_index) + TEXT_ID_WORLD_MESSAGE_BASE,
             0);
         state->phase++;
         break;
@@ -105,7 +106,7 @@ s32 proposition_participant_message_update(proposition_report_level_t* state, s3
         state->phase++;
         break;
     case PROPOSITION_PARTICIPANT_MESSAGE_CLOSE:
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0, -1, 0);
         state->phase++;
         break;
     case PROPOSITION_PARTICIPANT_MESSAGE_WAIT_CLOSE:
@@ -120,7 +121,7 @@ s32 proposition_participant_message_update(proposition_report_level_t* state, s3
 
 /* Proposition job category of a job: 0..19 for Squire..Mime, 22 for the
  * special jobs below Squire and 21 for anything above Mime (monsters). */
-static s32 job_category_get(s32 job_id) {
+static s32 get_job_category(s32 job_id) {
     if (job_id < JOB_ID_SQUIRE) {
         return PROPOSITION_JOB_CATEGORY_SPECIAL;
     }
@@ -141,7 +142,7 @@ static s32 job_category_get(s32 job_id) {
  * roll to promote the result to success. The target builds the row walk pointers
  * from the proposition_index address, which needs the arrays and that 32-bit value to be
  * members of one object (g_proposition_report). */
-void proposition_success_determine(void) {
+void proposition_determine_success(void) {
     const u8* job_table_a;
     const u8* job_table_b;
     const u8* tier_table_a;
@@ -155,11 +156,11 @@ void proposition_success_determine(void) {
     s32 i;
 
     participant_count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
-    job_table_a = proposition_data_get(PROPOSITION_DATA_CATEGORY_JOB_SCORES);
-    job_table_b = proposition_data_get(PROPOSITION_DATA_JOB_LIST_JOB_SCORES);
-    tier_table_a = proposition_data_get(PROPOSITION_DATA_BRAVE_LEVEL_SCORES);
+    job_table_a = proposition_get_data(PROPOSITION_DATA_CATEGORY_JOB_SCORES);
+    job_table_b = proposition_get_data(PROPOSITION_DATA_JOB_LIST_JOB_SCORES);
+    tier_table_a = proposition_get_data(PROPOSITION_DATA_BRAVE_LEVEL_SCORES);
     total = 0;
-    tier_table_b = proposition_data_get(PROPOSITION_DATA_FAITH_SCORES);
+    tier_table_b = proposition_get_data(PROPOSITION_DATA_FAITH_SCORES);
 
     if (g_proposition_active[g_proposition_report.proposition_index].flags & PROPOSITION_PROGRESS_RECALLED) {
         for (i = 0; i < participant_count; i++) {
@@ -174,13 +175,13 @@ void proposition_success_determine(void) {
 
     g_proposition_report.recalled = 0;
     for (i = 0; i < participant_count; i++) {
-        unit = party_roster_unit_get(
+        unit = party_get_roster_unit(
             g_proposition_active[g_proposition_report.proposition_index].participant_indices[i]);
 
         g_proposition_report.participant_scores[i]
-            = job_table_a[(g_proposition_selected_row.category_index - 1) * 22 + job_category_get(unit->job_id)];
+            = job_table_a[(g_proposition_selected_row.category_index - 1) * 22 + get_job_category(unit->job_id)];
         g_proposition_report.participant_scores[i]
-            += job_table_b[(g_proposition_selected_row.job_list_index - 1) * 22 + job_category_get(unit->job_id)];
+            += job_table_b[(g_proposition_selected_row.job_list_index - 1) * 22 + get_job_category(unit->job_id)];
 
         value = unit->brave;
         if (value != 0) {
@@ -229,9 +230,9 @@ void proposition_success_determine(void) {
     /* Retail bug: the unit is fetched once, with the scoring loop's leftover
      * index (one past the last participant), so every pass tests that same
      * stale slot instead of each participant's job. */
-    unit = party_roster_unit_get(g_proposition_active[g_proposition_report.proposition_index].participant_indices[i]);
+    unit = party_get_roster_unit(g_proposition_active[g_proposition_report.proposition_index].participant_indices[i]);
     for (i = 0; i < participant_count; i++) {
-        if (g_proposition_selected_row.preferred_job - 1 == job_category_get(unit->job_id)) {
+        if (g_proposition_selected_row.preferred_job - 1 == get_job_category(unit->job_id)) {
             if (((rand() * 100) >> 15) < 0x3D) {
                 g_proposition_report.result = PROPOSITION_RESULT_SUCCESS;
                 return;
@@ -244,7 +245,7 @@ void proposition_success_determine(void) {
  * amounts, on a failure JP / 10 and gil / 5, on a bad failure both / 20; each
  * then gains the participant's score. No awards are calculated
  * when the proposition was recalled. */
-void proposition_jp_and_gil_calculate(void) {
+void proposition_calculate_jp_and_gil(void) {
     const u16* jp_rewards;
     const u16* gil_rewards;
     s32 count;
@@ -252,8 +253,8 @@ void proposition_jp_and_gil_calculate(void) {
     s32 value;
 
     if (g_proposition_report.recalled == 0) {
-        jp_rewards = proposition_data_get(PROPOSITION_DATA_JP_AMOUNTS);
-        gil_rewards = proposition_data_get(PROPOSITION_DATA_GIL_AMOUNTS);
+        jp_rewards = proposition_get_data(PROPOSITION_DATA_JP_AMOUNTS);
+        gil_rewards = proposition_get_data(PROPOSITION_DATA_GIL_AMOUNTS);
         count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
         for (i = 0; i < count; i++) {
             value = jp_rewards[g_proposition_selected_row.jp_reward - 1];
@@ -290,7 +291,7 @@ void proposition_jp_and_gil_calculate(void) {
  * random reward table then adds its JP bonus to every participant's award and
  * sets the reward's gil value. The target places
  * the random-reward branch last, hence the goto. */
-void proposition_bonus_reward_roll(void) {
+void proposition_roll_bonus_reward(void) {
     s32 candidates[32];
     u16* bonus_table;
     u16* value_table;
@@ -304,10 +305,10 @@ void proposition_bonus_reward_roll(void) {
     u16 discovery_kind;
     s32 bonus;
 
-    bonus_table = proposition_data_get(PROPOSITION_DATA_JP_AMOUNTS);
-    value_table = proposition_data_get(PROPOSITION_DATA_GIL_AMOUNTS);
-    location_pairs = proposition_data_get(PROPOSITION_DATA_DISCOVERY_REWARDS);
-    random_pairs = proposition_data_get(PROPOSITION_DATA_RANDOM_REWARDS);
+    bonus_table = proposition_get_data(PROPOSITION_DATA_JP_AMOUNTS);
+    value_table = proposition_get_data(PROPOSITION_DATA_GIL_AMOUNTS);
+    location_pairs = proposition_get_data(PROPOSITION_DATA_DISCOVERY_REWARDS);
+    random_pairs = proposition_get_data(PROPOSITION_DATA_RANDOM_REWARDS);
     g_proposition_report.reward_type = PROPOSITION_REWARD_NONE;
     g_proposition_report.reward_value = 0;
     if (g_proposition_report.result != PROPOSITION_RESULT_SUCCESS) {
@@ -387,7 +388,7 @@ random_reward:
 /* Scale each participant's JP and gil by the percentages the two EXTRA_DAY
  * tables give for the days spent beyond the job's minimum (at most 9 counted).
  * A recalled job, or one back early, is left alone. */
-void proposition_extra_days_apply(void) {
+void proposition_apply_extra_days(void) {
     s32 record;
     const u16* reward_scale;
     const u16* bonus_scale;
@@ -399,8 +400,8 @@ void proposition_extra_days_apply(void) {
     if (g_proposition_report.recalled != 0) {
         return;
     }
-    reward_scale = proposition_data_get(PROPOSITION_DATA_EXTRA_DAY_JP_SCALES);
-    bonus_scale = proposition_data_get(PROPOSITION_DATA_EXTRA_DAY_GIL_SCALES);
+    reward_scale = proposition_get_data(PROPOSITION_DATA_EXTRA_DAY_JP_SCALES);
+    bonus_scale = proposition_get_data(PROPOSITION_DATA_EXTRA_DAY_GIL_SCALES);
     record = g_proposition_report.proposition_index;
     day = g_proposition_active[record].elapsed_days - g_proposition_selected_row.min_days;
     count = g_proposition_active[record].participant_count;
@@ -436,7 +437,7 @@ void proposition_extra_days_apply(void) {
  * written `slots[0] > slots[1]`; the reversed spelling swaps the slots[] load
  * pair and costs instructions.
  */
-s32 proposition_preferred_job_unit_find(void) {
+s32 proposition_find_preferred_job_unit(void) {
     s32 candidates[4];
     s32 slots[4];
     s32 count;
@@ -449,14 +450,14 @@ s32 proposition_preferred_job_unit_find(void) {
     party_unit_t* unit;
 
     participant_count = g_proposition_active[g_proposition_report.proposition_index].participant_count;
-    jobs = proposition_data_get(PROPOSITION_DATA_JOB_LISTS);
+    jobs = proposition_get_data(PROPOSITION_DATA_JOB_LISTS);
     count = 0;
 
     if (g_proposition_selected_row.preferred_job != 0) {
         for (i = 0; i < participant_count; i++) {
             party_index = g_proposition_active[g_proposition_report.proposition_index].participant_indices[i];
-            unit = party_roster_unit_get(party_index);
-            if (g_proposition_selected_row.preferred_job - 1 == job_category_get(unit->job_id)) {
+            unit = party_get_roster_unit(party_index);
+            if (g_proposition_selected_row.preferred_job - 1 == get_job_category(unit->job_id)) {
                 candidates[count] = party_index;
                 count++;
             }
@@ -476,7 +477,7 @@ s32 proposition_preferred_job_unit_find(void) {
     for (i = 0; i < participant_count; i++) {
         party_index = g_proposition_active[g_proposition_report.proposition_index].participant_indices[i];
         if (party_index != g_proposition_report.reporter_party_index) {
-            unit = party_roster_unit_get(party_index);
+            unit = party_get_roster_unit(party_index);
             for (k = 0; k < 9; k++) {
                 if (jobs[base + k] == unit->job_id) {
                     candidates[count] = party_index;
@@ -503,8 +504,8 @@ s32 proposition_preferred_job_unit_find(void) {
 /* Push the discovery announcement for a treasure or unexplored-land milestone: the first milestone
  * shows four messages from the kind's first one, each later milestone a single message (first + 2
  * + rank). */
-void proposition_discovery_open(void) {
-    s32 count = proposition_milestone_rank_get();
+void proposition_open_discovery(void) {
+    s32 count = proposition_get_milestone_rank();
 
     if (g_proposition_report.reward_type == PROPOSITION_REWARD_TREASURE) {
         g_menu_stack_records[g_menu_stack_depth].discovery.current = TEXT_ID_TREASURE_FOUND_FIRST;
@@ -520,7 +521,7 @@ void proposition_discovery_open(void) {
     if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
     }
-    milestone_message_advance(&g_menu_stack_records[g_menu_stack_depth].discovery);
+    advance_milestone_message(&g_menu_stack_records[g_menu_stack_depth].discovery);
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_DISCOVERY;
     g_menu_stack_depth++;
 }
@@ -528,8 +529,8 @@ void proposition_discovery_open(void) {
 /* Show the discovery announcement's next message and count it off; the last one
  * also fades the music out and moves the announcement to
  * PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE with the timer cleared. */
-static void milestone_message_advance(proposition_discovery_level_t* discovery) {
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, discovery->current, 0);
+static void advance_milestone_message(proposition_discovery_level_t* discovery) {
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, discovery->current, 0);
     discovery->current++;
     discovery->remaining--;
     if (discovery->remaining == 0) {
@@ -543,7 +544,7 @@ static void milestone_message_advance(proposition_discovery_level_t* discovery) 
 
 /* Return the one-based treasure or unexplored-land collection milestone
  * reached by a successful proposition, or zero when the count is not a milestone. */
-s32 proposition_milestone_rank_get(void) {
+s32 proposition_get_milestone_rank(void) {
     s32 count;
     s32 i;
     s32 index;
@@ -599,15 +600,15 @@ s32 proposition_milestone_rank_get(void) {
 /* Step of a discovery announcement: Circle shows the next message; after the
  * last one (LAST_MESSAGE) it waits for the message box and plays the milestone
  * music, JINGLE waits at least 180 frames and switches back to the bar music,
- * and CLOSE pops the level into proposition_returned_list_open once
+ * and CLOSE pops the level into proposition_open_returned_list once
  * the music queue is idle. The 32-bit busy fields
  * are read as g_music_queue members, not scalars, which keeps the timer store
  * ahead of their loads as in the target. */
-void proposition_discovery_update(menu_stack_record_t* discovery) {
+void proposition_update_discovery(menu_stack_record_t* discovery) {
     if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_CLOSE) {
         if (g_music_queue.count == 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE) {
             g_menu_stack_depth--;
-            proposition_returned_list_open();
+            proposition_open_returned_list();
         }
     } else if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_JINGLE) {
         discovery->discovery.timer++;
@@ -626,13 +627,13 @@ void proposition_discovery_update(menu_stack_record_t* discovery) {
             discovery->discovery.phase = PROPOSITION_DISCOVERY_PHASE_JINGLE;
         }
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        milestone_message_advance(&discovery->discovery);
+        advance_milestone_message(&discovery->discovery);
     }
 }
 
 /* Open the bar's in-progress list: every accepted job that has not returned, recalled ones marked,
  * under 'These jobs're in progress.'; up to six rows. */
-void proposition_active_list_open(void) {
+void proposition_open_active_list(void) {
     point32_t origin;
     window_panel_layout_t layout;
     point32_t unused_point;
@@ -645,7 +646,7 @@ void proposition_active_list_open(void) {
     s16* row_colors;
     s32 recalled_color;
 
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_IN_PROGRESS, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_IN_PROGRESS, 0);
     count = 0;
     loaded_count = g_proposition_count;
     i = 0;
@@ -680,8 +681,8 @@ void proposition_active_list_open(void) {
     origin.x = 0x4C;
     layout.visible_rows = i;
     origin.y = 0x50;
-    menu_stack_clamp_cursor(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS, g_proposition_count, i);
-    window_panel_thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
+    menu_stack_restore_cursor(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS, g_proposition_count, i);
+    window_start_panel_thread(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL,
         g_menu_stack_records[g_menu_stack_depth].panel.entry_count, &layout, &origin);
     previous = g_menu_stack_depth - 1;
     g_menu_stack_ot_offset = 9;
@@ -703,27 +704,27 @@ void proposition_active_list_open(void) {
 /* Resume handler of the active propositions list: block Circle, Cross and
  * Select for the levels underneath and show TEXT_ID_JOBS_IN_PROGRESS
  * again. */
-void proposition_active_list_prompt_restore(menu_stack_record_t* unused_level) {
+void proposition_resume_active_list(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_IN_PROGRESS, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_JOBS_IN_PROGRESS, 0);
 }
 
 /* Withholds every button from the WORLD menu frame while the next menu level
  * runs. The caller hands in its menu level; the target reads no argument. */
-void proposition_block_active_list_buttons(menu_stack_record_t* unused_level) {
+void proposition_suspend_active_list(menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }
 
 /* Input step of the bar's in-progress list: Cross and Circle close the panel
  * and Select opens help message 0x1062; Circle on a job already recalled says
  * TEXT_ID_RETURN_TOMORROW instead. Once the panel has closed, a
- * chosen job goes to recall_open.
+ * chosen job goes to open_recall.
  *
  * The target keeps each `level->panel.result` store ahead of the `li $a0,5`
  * argument of the following cursor-state call, which lands in the jal delay
  * slot; without the empty barriers GCC schedules the li first.
  */
-void proposition_active_list_input_update(menu_stack_record_t* level) {
+void proposition_update_active_list_input(menu_stack_record_t* level) {
     u32 buttons;
     s32 unused[2]; /* 8-byte frame slot the target reserves */
 
@@ -734,7 +735,7 @@ void proposition_active_list_input_update(menu_stack_record_t* level) {
         g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED;
         g_menu_stack_depth--;
         if (level->panel.result != 0) {
-            recall_open(level->panel.entries[g_window_panel_render_state.selected_index]);
+            open_recall(level->panel.entries[g_window_panel_render_state.selected_index]);
         } else {
             menu_stack_dispatch_resume();
         }
@@ -747,24 +748,24 @@ void proposition_active_list_input_update(menu_stack_record_t* level) {
         level->panel.result = 0;
         /* Scheduling barrier: keeps the store ahead of the cursor argument. */
         __asm__("");
-        menu_stack_cursor_clear(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS);
+        menu_stack_clear_cursor(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
-        thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+        thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
     } else if (buttons & PSX_PAD_SELECT) {
-        proposition_block_active_list_buttons(level);
-        menu_stack_message_open(0x1062, 1);
+        proposition_suspend_active_list(level);
+        menu_stack_open_message(0x1062, 1);
     } else if (buttons & PSX_PAD_CIRCLE) {
         if (g_menu_stack_row_text_colors[g_window_panel_render_state.selected_index] != 0) {
             sound_play_effect(SOUND_SFX_INVALID);
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RETURN_TOMORROW, 0);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_RETURN_TOMORROW, 0);
         } else {
             sound_play_effect(SOUND_SFX_CONFIRM);
             level->panel.result = 1;
             /* Scheduling barrier: keeps the store ahead of the cursor argument. */
             __asm__("");
-            menu_stack_cursor_store(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS);
+            menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_ACTIVE_PROPOSITIONS);
             g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
-            thread_parameters_set(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
+            thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
         }
     }
 }
@@ -772,7 +773,7 @@ void proposition_active_list_input_update(menu_stack_record_t* level) {
 /* Ask whether to call back the party sent on active proposition `proposition`: hide the
  * list level's windows, show the call-back prompt, an OK/No choice with its cursor and
  * frame and the proposition's detail panel, then push the confirm level. */
-static void recall_open(s32 proposition) {
+static void open_recall(s32 proposition) {
     RECT bounds;
     u8 unused[0x30];
     s32 index;
@@ -787,29 +788,29 @@ static void recall_open(s32 proposition) {
         |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].bar.rows_image].flags
         |= DISPLAY_OBJECT_HIDDEN;
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_PROMPT, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_PROMPT, 0);
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_animated_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.frame_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CHOICE_PANEL_HEADER;
     g_display_object_animated_pool[index].priority = 8;
     g_display_object_animated_pool[index].anim_counter = 0;
     g_display_object_animated_pool[index].frame_index = 0;
 
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice_render = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
-    window_text_record_init(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
+    window_init_text_record(index, bounds, 0, TEXT_ID_OK_NO, g_window_image_buffer);
     base = &g_display_object_gs_image_pool[index].position;
     depth = g_menu_stack_depth;
     g_display_object_gs_image_pool[index].priority = 8;
@@ -823,7 +824,7 @@ static void recall_open(s32 proposition) {
         = g_display_object_gs_image_pool[index].position.x + 3;
     g_display_object_animated_pool[g_menu_stack_records[depth].proposition_cancel_confirm.frame_window].position.y
         = g_display_object_gs_image_pool[index].position.y - 2;
-    proposition_detail_panel_build(&g_menu_stack_records[depth].proposition_detail_panel, proposition, 0);
+    proposition_build_detail_panel(&g_menu_stack_records[depth].proposition_detail_panel, proposition, 0);
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.choice = 0;
     g_menu_stack_records[g_menu_stack_depth].proposition_cancel_confirm.confirmed = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_PROPOSITION_RECALL;
@@ -846,7 +847,7 @@ static void recall_open(s32 proposition) {
  * `panel_text` keeps the text-id source's address in a saved register across
  * both reads, as the target does. Assigning bounds.x before
  * position.y is what puts the two by-value halves in the target's registers. */
-void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode) {
+void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 proposition, s32 coordinate_mode) {
     RECT bounds;
     point32_t point;
     s16 text_width;
@@ -858,10 +859,10 @@ void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 propo
     point32_t* base;
 
     panel_text = &g_proposition_selected_row.name_text;
-    index = display_object_image_append(g_display_object_queue, &g_display_object_queue_count);
+    index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     panel->render_index = index;
-    text_pixels_measure(
-        &text_width, &text_rows, text_entry_find(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
+    text_measure_pixels(
+        &text_width, &text_rows, text_find_entry(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     rows = text_rows + 2;
     panel->panel_rows = rows;
     g_text_substitution_values[0] = g_proposition_active[proposition].elapsed_days;
@@ -904,7 +905,7 @@ void proposition_detail_panel_build(proposition_detail_panel_t* panel, s32 propo
  * row recalls the party (PROPOSITION_PROGRESS_RECALLED) and says "Ok,
  * I'll have them return by tomorrow."; Circle on the second row, or Cross,
  * closes the level and reopens the propositions list. */
-void proposition_recall_update(menu_stack_record_t* level) {
+void proposition_update_recall(menu_stack_record_t* level) {
     s32 choice;
 
     if (g_display_object_gs_image_pool[level->proposition_cancel_confirm.choice_render].flags & DISPLAY_OBJECT_POP_IN) {
@@ -928,11 +929,11 @@ void proposition_recall_update(menu_stack_record_t* level) {
         g_display_object_image_count -= 2;
         g_display_object_queue_count -= 4;
         g_menu_stack_depth--;
-        proposition_active_list_open();
+        proposition_open_active_list();
         return;
     }
 
-    if (world_map_input_repeat_update(PSX_PAD_UP) != 0 || world_map_input_repeat_update(PSX_PAD_DOWN) != 0) {
+    if (input_update_repeat(PSX_PAD_UP) != 0 || input_update_repeat(PSX_PAD_DOWN) != 0) {
         choice = level->proposition_cancel_confirm.choice ^ 1;
         level->proposition_cancel_confirm.choice = choice;
         g_display_object_animated_pool[level->proposition_cancel_confirm.cursor_window].position.y
@@ -954,7 +955,7 @@ void proposition_recall_update(menu_stack_record_t* level) {
         goto close;
     }
 
-    thread_parameters_set(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_ACCEPTED, 0);
+    thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CALL_BACK_ACCEPTED, 0);
     level->proposition_cancel_confirm.confirmed = 1;
     g_proposition_active[level->proposition_cancel_confirm.proposition].flags |= PROPOSITION_PROGRESS_RECALLED;
     g_display_object_animated_pool[level->proposition_cancel_confirm.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;

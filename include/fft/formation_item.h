@@ -21,22 +21,17 @@ extern s8 g_formation_item_action_menu_initialized;
 extern s8 g_formation_item_sort_order_initialized;
 extern s8 g_formation_item_equipping_units_initialized;
 
-void formation_item_menu_update(void);
-s32 formation_item_hp_bonus_get(s32 unused_row);
-s32 formation_item_mp_bonus_get(s32 unused_row);
+void update_item_menu(void);
 
 /* equipping */
 extern s8 g_formation_item_equip_menu_initialized;
 
-s32 formation_item_slot_check(s16 unit_index, s16 slot, s16 item_id);
-s32 formation_item_equip(s16 unit, s16 slot, s16 item_id);
+s32 check_equipment_slot_item(s16 unit_index, s16 slot, s16 item_id);
 menu_equipment_slot_e formation_item_select_slot(s16 unit_index, s32 item_id);
-void formation_item_best_fit_build(s16 unit_index, s16* equipment);
+void formation_item_build_best_fit(s16 unit_index, s16* equipment);
 
 /* item actions */
-s8 formation_items_action_update(void);
-s8 formation_items_sort_update(void);
-s32 formation_items_equipped_units_update(void);
+s32 formation_item_update_equipped_units(void);
 
 /* categories */
 extern s8 g_formation_item_category_menu_initialized;
@@ -44,7 +39,5 @@ extern u8 g_formation_item_category_input_lock;
 
 /* item list */
 extern u8 g_formation_item_list_window_script[194];
-
-s32 formation_item_list_build(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode);
 
 #endif

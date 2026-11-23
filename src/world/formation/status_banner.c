@@ -111,7 +111,7 @@ void unit_panel_banner_thread(void) {
     POLY_FT4* panel_portrait;
 
     suppress = 0;
-    thread_current_task_set(THREAD_TASK_UNIT_STATUS_BANNER);
+    thread_current_set_task(THREAD_TASK_UNIT_STATUS_BANNER);
     input = script_get_controller_input_pointer(0);
     thread_id = g_thread_current_id;
     g_menu_input_controller = input + 1;
@@ -233,7 +233,7 @@ void unit_panel_banner_thread(void) {
 
         /* Dim while a status panel thread runs under a menu input lock, or when the display asks. */
         dimmed = 0;
-        if (thread_task_find(THREAD_TASK_STATUS_PANEL) != 0) {
+        if (thread_find_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
         }
         if (thread->style != 0) {
@@ -255,8 +255,8 @@ void unit_panel_banner_thread(void) {
 
         /* During cross-fade steps 4-9 portrait quad 0 is drawn at half its usual brightness. */
         if (dimmed != 0) {
-            menu_init_primitive_colors_dimmed(&editor->numeric_frame);
-            menu_init_primitive_colors_dimmed(&panel->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(&editor->numeric_frame);
+            menu_numeric_frame_set_dimmed_colors(&panel->numeric_frame);
             if ((anim_state - 4) < 6U) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
             } else {
@@ -267,8 +267,8 @@ void unit_panel_banner_thread(void) {
             setRGB0(&editor->portrait[3], 0x20, 0x28, 0x38);
         } else {
             s32 shade;
-            menu_init_primitive_colors_normal(&editor->numeric_frame);
-            menu_init_primitive_colors_normal(&panel->numeric_frame);
+            menu_numeric_frame_set_normal_colors(&editor->numeric_frame);
+            menu_numeric_frame_set_normal_colors(&panel->numeric_frame);
             if ((anim_state - 4) >= 6U) {
                 setRGB0(&editor->portrait[0], 0x80, 0x80, 0x80);
             } else {
@@ -446,26 +446,26 @@ void unit_panel_banner_thread(void) {
             /* Name and job, then the large Brave, Faith and roster numbers. */
             menu_clear_render_buffer(name_image, 0x580);
             g_menu_window_text_pen.stride = 0x58;
-            menu_set_text_origin(0, 0);
+            menu_text_set_origin(0, 0);
             menu_display_text_entry(identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_window_text_pen);
-            menu_set_text_origin(0, 0x10);
+            menu_text_set_origin(0, 0x10);
             menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_window_text_pen);
             LoadImage(&rects[2], (u32*)name_image);
 
             menu_clear_render_buffer(number_images, sizeof(*number_images));
             g_menu_window_text_pen.stride = 0x10;
-            menu_set_text_origin(0, 0);
-            text_small_number_glyphs_draw(
+            menu_text_set_origin(0, 0);
+            text_draw_small_number_glyphs(
                 identity->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, number_images->brave, &g_menu_window_text_pen);
             LoadImage(&rects[3], (u32*)number_images->brave);
-            menu_set_text_origin(0, 0);
-            text_small_number_glyphs_draw(
+            menu_text_set_origin(0, 0);
+            text_draw_small_number_glyphs(
                 identity->faith, SMALL_NUMBER_WIDEN_FOR_100 | 2, number_images->faith, &g_menu_window_text_pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
             /* The unit-join screen uploads the roster number image cleared. */
             if (g_menu_post_battle_unit_changes_active == 0) {
-                menu_set_text_origin(0, 0);
-                text_small_number_glyphs_draw(
+                menu_text_set_origin(0, 0);
+                text_draw_small_number_glyphs(
                     identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_window_text_pen);
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
             } else {
@@ -516,7 +516,7 @@ void unit_panel_banner_thread(void) {
         }
 
         thread_yield();
-        if (thread_current_parameter_3_get() != 0) {
+        if (thread_current_get_parameter_3() != 0) {
             break;
         }
         frame += 1;

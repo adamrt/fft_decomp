@@ -11,7 +11,7 @@
 
 static glyph_blit_t s_menu_decimal_glyph = { { 0, 16, 6, 10 }, 256, 0 };
 
-static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
+static void render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
 
 /* Set the status panel's sprite CLUTs and the tint of its last five sprites: the dimmed
  * set with a blue tint for style 1 or while menu input lock mode 1 is on, otherwise the
@@ -59,9 +59,9 @@ void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thre
  * input lock mode 1 is on. The palette initializer receives `primitives` unchanged in $a0. */
 void unit_panel_select_palette(menu_numeric_frame_t* primitives, const unit_panel_thread_t* thread) {
     if (thread->style == 1 || g_menu_input_lock_mode == 1) {
-        menu_init_primitive_colors_dimmed(primitives);
+        menu_numeric_frame_set_dimmed_colors(primitives);
     } else {
-        menu_init_primitive_colors_normal(primitives);
+        menu_numeric_frame_set_normal_colors(primitives);
     }
 }
 
@@ -88,7 +88,7 @@ void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* en
             out->color = 0;
             entries->format |= MENU_DECIMAL_SIGN_MINUS;
         }
-        menu_text_render_decimal_value(amount, entries->format, pixels, out);
+        render_decimal_value(amount, entries->format, pixels, out);
         out->color = 0;
     }
 }
@@ -117,7 +117,7 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
             flags &= MENU_DECIMAL_FIELD_WIDTH_CLEAR_MASK;
             flags |= MENU_DECIMAL_ZERO_PLACEHOLDER_FLAGS;
         }
-        menu_text_render_decimal_value(amount, flags, pixels, out);
+        render_decimal_value(amount, flags, pixels, out);
     }
 }
 
@@ -128,7 +128,7 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
  * sign and leading zeros, and widen the field for the value 100. A zero with
  * the minus flag draws only the sign glyph. Digits are drawn right to left,
  * at most the low byte of `flags` of them. */
-static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position) {
+static void render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position) {
     s32 saved_color = position->color;
     s32 plus;
     s32 digits;

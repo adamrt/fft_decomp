@@ -18,11 +18,11 @@ extern display_object_cel_header_t* g_display_object_cel_table[];
 static display_object_sequence_header_t** s_display_object_sequences = g_display_object_sequence_table;
 static display_object_cel_header_t** s_display_object_cels = g_display_object_cel_table;
 
-static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle);
-static void gs_image_draw(display_object_gs_image_t* object, GsOT* ot);
+static void calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
+static void draw_image(display_object_gs_image_t* object, GsOT* ot);
 
 /* Reset both world-map window pools and their allocation counters. */
-void display_object_pools_init(void) {
+void display_object_init_pools(void) {
     /* Member pointers preserve the separate color and CLUT address walks. */
     CVECTOR* color;
     point32_t* clut;
@@ -51,7 +51,7 @@ void display_object_pools_init(void) {
 }
 
 /* Sort visible animated and image records through libgs. */
-void display_object_gs_list_draw(GsOT* otag, void** list, s32 count) {
+void display_object_draw_gs_list(GsOT* otag, void** list, s32 count) {
     void* object;
     u32* flags;
     s32 i;
@@ -67,10 +67,10 @@ void display_object_gs_list_draw(GsOT* otag, void** list, s32 count) {
         }
         if (*flags & DISPLAY_OBJECT_ANIMATED) {
             display_object_animated_t* animated = object;
-            display_object_gs_animated_draw(animated, otag);
+            display_object_draw_animated(animated, otag);
         } else if (*flags & DISPLAY_OBJECT_IMAGE) {
             display_object_gs_image_t* image = object;
-            gs_image_draw(image, otag);
+            draw_image(image, otag);
         }
     }
 }
@@ -105,7 +105,7 @@ void display_object_gs_list_draw(GsOT* otag, void** list, s32 count) {
  * as a USE-only pseudo. That pseudo and the part loop's folded entry test
  * (combine turns it into `blez part_count`, keeps `i = 0`, and leaves the slt
  * pseudo only a USE) get the unreferenced reload slots at 0x50 and 0x58. */
-void display_object_gs_animated_draw(display_object_animated_t* object, GsOT* ot) {
+void display_object_draw_animated(display_object_animated_t* object, GsOT* ot) {
     GsSPRITE sprite;
     CVECTOR color;
     display_object_sequence_header_t* sequence;
@@ -134,7 +134,7 @@ void display_object_gs_animated_draw(display_object_animated_t* object, GsOT* ot
     if (object->flags & DISPLAY_OBJECT_UNTINTED) {
         color = object->color;
     } else {
-        world_map_fade_tint_color(&object->color, &color);
+        world_map_tint_fade_color(&object->color, &color);
     }
 
     sprite.r = color.r;
@@ -212,13 +212,13 @@ step_frame:
 }
 
 /* Convert one display object into a libgs sprite primitive and sort it into the
- * ordering table handed down by display_object_gs_list_draw.
+ * ordering table handed down by display_object_draw_gs_list.
  *
  * 8BIT_CLUT selects the 8-bit texture mode (attribute 0x01000000). UNTINTED
- * uses the object's color as is, otherwise world_map_fade_tint_color
+ * uses the object's color as is, otherwise world_map_tint_fade_color
  * applies the global fade tint. A nonzero palette picks the CLUT
  * (palette - 1) * 16 pixels right of the record's. POP_IN draws the window
- * growing: scaled_rectangle_calculate gives the centered part shown at
+ * growing: calculate_scaled_rectangle gives the centered part shown at
  * step anim_counter / 2, and the flag clears itself after the full-size step.
  *
  * A field-to-field copy narrows the load to the store's mode at expand time;
@@ -237,7 +237,7 @@ step_frame:
  *   scheduler ready list ordered by source, and the other order transposes
  *   two of them.
  */
-static void gs_image_draw(display_object_gs_image_t* object, GsOT* ot) {
+static void draw_image(display_object_gs_image_t* object, GsOT* ot) {
     GsSPRITE sprite;
     RECT frame;
     CVECTOR color;
@@ -262,7 +262,7 @@ static void gs_image_draw(display_object_gs_image_t* object, GsOT* ot) {
     if (object->flags & DISPLAY_OBJECT_UNTINTED) {
         color = object->color;
     } else {
-        world_map_fade_tint_color(&object->color, &color);
+        world_map_tint_fade_color(&object->color, &color);
     }
     sprite.r = color.r;
     sprite.g = color.g;
@@ -275,7 +275,7 @@ static void gs_image_draw(display_object_gs_image_t* object, GsOT* ot) {
         s32 ox;
         s32 oy;
 
-        scaled_rectangle_calculate(object->pop_in_step / 2, &object->bounds, &frame);
+        calculate_scaled_rectangle(object->pop_in_step / 2, &object->bounds, &frame);
         ox = object->position.x;
         fx = frame.x;
         fy = frame.y;
@@ -313,7 +313,7 @@ static void gs_image_draw(display_object_gs_image_t* object, GsOT* ot) {
 }
 
 /* Attach the current window record to the caller's list and reset its color. */
-s32 display_object_animated_append(void** queue, s32* count) {
+s32 display_object_append_animated(void** queue, s32* count) {
     CVECTOR* color;
 
     queue[*count] = &g_display_object_animated_pool[g_display_object_animated_count];
@@ -331,9 +331,9 @@ s32 display_object_animated_append(void** queue, s32* count) {
 
 /* Attach the current render record to the caller's list and reset it.
  *
- * Sibling of display_object_animated_append, which performs the same append for the 36-byte
+ * Sibling of display_object_append_animated, which performs the same append for the 36-byte
  * window records. */
-s32 display_object_image_append(void** queue, s32* count) {
+s32 display_object_append_image(void** queue, s32* count) {
     CVECTOR* color;
 
     queue[*count] = &g_display_object_gs_image_pool[g_display_object_image_count];
@@ -352,7 +352,7 @@ s32 display_object_image_append(void** queue, s32* count) {
 
 /* Build the centered sub-rectangle of the source area for a scale mode
  * (20%, 50%, 80%, 90% or 100%), aligned to 4 pixels. */
-static void scaled_rectangle_calculate(s32 scale_mode, const RECT* source, RECT* rectangle) {
+static void calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
     s32 scale;
     s32 source_width;
     s32 source_height;

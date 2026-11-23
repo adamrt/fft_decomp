@@ -43,7 +43,7 @@ void gfx_set_otag_index(s32 value) {
 #ifndef FFT_WORLD
 /* Select the normal (0) or alternate menu palette: the sprite color and the six CLUT selections
  * the menu commands draw with. */
-void menu_set_palette_mode(s32 mode) {
+void menu_palette_set_mode(s32 mode) {
     g_menu_use_alternate_palette = mode;
     if (mode != 0) {
         g_menu_text_color.r = 0x60;

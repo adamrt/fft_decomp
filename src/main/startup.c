@@ -25,25 +25,25 @@ static s32 s_session_initialized = 0;
 
 /* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
  * mark the shared file descriptor idle. */
-static void cd_memory_init(void) {
+static void init_memory_and_cd(void) {
     SetMem(2);
     CdInit();
     CdSetDebug(0);
-    file_cd_pause_reset(&g_file_cd_state);
+    file_cd_reset_and_pause(&g_file_cd_state);
     g_file_cd_state.state = FILE_LOAD_STATE_IDLE;
 }
 
 /* BATTLE/ZODIAC.BIN is a headerless image, not an executable overlay.
  * Sector 0xec61 supplies 0x10000 bytes: 128 * 256 16-bit VRAM transfer
  * values at (640, 0), subsequently rendered as 8-bit indexed texture data. */
-void zodiac_frame_load(void) {
+void zodiac_load_frame(void) {
     RECT destination = { 640, 0, 128, 256 };
-    u32* image = file_heap_load_checked(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
+    u32* image = file_load_into_heap_checked(DISC_SECTOR_BATTLE_ZODIAC_BIN, 0x10000);
 
     LoadImage(&destination, image);
     DrawSync(0);
     heap_free(image);
-    gfx_frame_texture_load();
+    gfx_load_frame_texture();
 }
 
 /* Power-on initialization: install the VSync, DrawSync and CD callbacks, start
@@ -51,9 +51,9 @@ void zodiac_frame_load(void) {
  * load the shared sounds and the zodiac frame while the Squaresoft logo is up.
  *
  * rand is seeded with 1, and g_session_initialized is cleared so the first
- * boot_session_reset does not repeat the hardware restart. */
-void boot_startup_run(void) {
-    heap_game_table_clear();
+ * boot_reset_session does not repeat the hardware restart. */
+void boot_run_startup(void) {
+    heap_clear_game_table();
     ResetCallback();
 
     g_save_play_time_hours = 0;
@@ -70,15 +70,15 @@ void boot_startup_run(void) {
     SetGraphDebug(0);
     PadInit(0);
     SpuInit();
-    cd_memory_init();
-    gfx_display_reset(256, 240, 512, 0, 0, 0);
-    boot_sceap_logo_show();
-    boot_squaresoft_logo_fade_in();
-    memcard_events_init();
+    init_memory_and_cd();
+    gfx_reset_display(256, 240, 512, 0, 0, 0);
+    boot_show_sceap_logo();
+    boot_fade_in_squaresoft_logo();
+    memcard_init_events();
     sound_init();
-    zodiac_frame_load();
+    zodiac_load_frame();
     srand(1);
-    boot_squaresoft_logo_fade_out();
+    boot_fade_out_squaresoft_logo();
     s_session_initialized = 0;
 }
 
@@ -87,17 +87,17 @@ void boot_startup_run(void) {
  * tables.
  *
  * On the first pass after power-on only that is done, because
- * boot_startup_run has just shown the logos. On every later pass (a soft
+ * boot_run_startup has just shown the logos. On every later pass (a soft
  * reset or the end of the game) it first frees the game heap, unloads the
  * scenario music, zeroes the play time, restarts the GPU, SPU and CD, and shows
  * the Squaresoft logo again for at least 60 frames while the shared sounds and
  * the zodiac frame reload. */
-void boot_session_reset(void) {
+void boot_reset_session(void) {
     int frame;
 
     if (s_session_initialized != 0) {
-        heap_game_table_clear();
-        music_all_unload();
+        heap_clear_game_table();
+        music_unload_all();
         g_save_play_time_hours = 0;
         g_save_play_time_minutes = 0;
         g_save_play_time_seconds = 0;
@@ -105,23 +105,23 @@ void boot_session_reset(void) {
         ResetGraph(1);
         SetGraphDebug(0);
         SpuInitHot();
-        cd_memory_init();
-        gfx_display_reset(256, 240, 512, 0, 0, 0);
-        boot_squaresoft_logo_fade_in();
+        init_memory_and_cd();
+        gfx_reset_display(256, 240, 512, 0, 0, 0);
+        boot_fade_in_squaresoft_logo();
         sound_init();
-        zodiac_frame_load();
+        zodiac_load_frame();
     }
 
-    save_state_init();
-    status_check_data_init();
-    save_data_tables_init();
-    menu_sort_tables_init();
+    save_init_state();
+    status_init_check_data();
+    save_init_data_tables();
+    menu_init_sort_tables();
 
     if (s_session_initialized != 0) {
         for (frame = 0; frame < 60; frame++) {
             VSync(0);
         }
-        boot_squaresoft_logo_fade_out();
+        boot_fade_out_squaresoft_logo();
     }
 
     s_session_initialized = 1;

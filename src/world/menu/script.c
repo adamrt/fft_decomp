@@ -439,7 +439,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
         clip.h = instruction->window.height * scale / 100;
         clip.x = instruction->window.x + (instruction->window.width >> 1) - (clip.w >> 1);
         clip.y = instruction->window.y + (instruction->window.height >> 1) - (clip.h >> 1);
-        screen_draw_area_add(&clip, g_menu_gfx_otag_index - 1);
+        menu_gfx_enqueue_draw_area(&clip, g_menu_gfx_otag_index - 1);
         g_gfx_otag_index_locked = 1;
     } else {
         g_gfx_otag_index_locked = 0;
@@ -787,7 +787,7 @@ menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t*
  * Bit 15 selects the alternate animation. The `state_mode` copies are the
  * target's own `move v0,s2` before each test.
  */
-void screen_sliding_cursor_draw(point16_t* pos, u16* state, s32 mode) {
+void menu_draw_sliding_cursor(const point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     /* Pin required: unpinned, the roles held in $s2/$s3/$s4 rotate. */
     register s32 active __asm__("$20");
@@ -872,7 +872,7 @@ void screen_sliding_cursor_draw(point16_t* pos, u16* state, s32 mode) {
  * This variant offsets a shared textured quad vertically before submitting
  * two `POLY_FT4` layers. Bit 15 selects the alternate animation.
  */
-void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
+void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
     RECT rect; /* never used; retail reserves its 8 bytes */
     u32 state_mode = *state >> 15;
     s32 active = state_mode;
@@ -962,7 +962,7 @@ void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) 
 }
 
 /* Walks past the records that follow the header, returning the next one. */
-static menu_instruction_t* script_group_skip(menu_instruction_t* instruction) {
+static menu_instruction_t* skip_script_group(menu_instruction_t* instruction) {
     s32 count;
 
     if (instruction->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {
@@ -986,7 +986,7 @@ static menu_instruction_t* script_group_skip(menu_instruction_t* instruction) {
 /* Find the scrollable-list command in a menu script, load its row and column layout, clamp the
  * selection and scroll base to the list, and render the visible rows' text into the list image in
  * VRAM. */
-void screen_list_layout_load(const menu_instruction_t* script) {
+void menu_scrollable_list_load_layout(const menu_instruction_t* script) {
     RECT rect;
     s16 text_ids[20];
     const menu_list_record_t* record;
@@ -1037,7 +1037,7 @@ void screen_list_layout_load(const menu_instruction_t* script) {
         rect.y = 0x130;
         rect.w = g_screen_list_image_width;
         rect.h = g_screen_row_height;
-        text_id_rows_to_vram_render(g_screen_list_text_table, text_ids, &rect, 0);
+        text_render_id_rows_to_vram(g_screen_list_text_table, text_ids, &rect, 0);
     }
     g_screen_list_scroll_direction = 0;
     g_screen_list_layout_pending = 0;
@@ -1045,17 +1045,17 @@ void screen_list_layout_load(const menu_instruction_t* script) {
 
 /* Initialize the list state, then load its visible entries from the menu
  * definition. */
-void screen_list_init(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script) {
-    menu_scrollable_list_core_init(values, selected_index, text_table);
-    screen_list_layout_load(script);
+void menu_scrollable_list_open(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script) {
+    menu_scrollable_list_init_core(values, selected_index, text_table);
+    menu_scrollable_list_load_layout(script);
 }
 
 /* Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1 signature shared by the
  * neighboring menu-script handlers. */
-void screen_init_and_draw_list(
+void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
-    menu_init_scrollable_list(entries, selected_index, scroll_base_index, text_table);
-    screen_list_layout_load(script);
+    menu_scrollable_list_init(entries, selected_index, scroll_base_index, text_table);
+    menu_scrollable_list_load_layout(script);
 }
 
 /*
@@ -1064,7 +1064,7 @@ void screen_init_and_draw_list(
  *
  * Moves the cursor on Up/Down (the held-repeat flags of Up and Down, bits
  * 16 up of the script input, keep a scroll going without moving the cursor)
- * and pages through screen_scroll_list_page. Moving past the first or
+ * and pages through menu_scroll_list_by_page. Moving past the first or
  * last visible row starts a one-row scroll: the newly exposed row is
  * rendered into the list's VRAM strip at x 0x240, the pixel offset advances
  * by the slow step until the repeat timer reaches
@@ -1094,21 +1094,21 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     ot_index = g_menu_gfx_otag_index;
     if (g_menu_list_entry_count <= 0) {
         for (j = command->list.skip_count; j != -1; j--) {
-            command = script_group_skip(command);
+            command = skip_script_group(command);
         }
         return command;
     }
     speed = menu_get_event_speed();
     g_screen_use_scroll_position = 1;
     if (g_screen_list_layout_pending != 0) {
-        screen_list_layout_load(command);
+        menu_scrollable_list_load_layout(command);
     }
     old_cursor = g_menu_list_selected_index;
     if (g_screen_list_scroll_direction == 0) {
-        i = menu_input_page_scroll_direction_read();
+        i = menu_input_read_page_scroll_direction();
         if (i != 0) {
             if (i != 2) {
-                screen_scroll_list_page(i, command);
+                menu_scroll_list_by_page(i, command);
             }
         } else if ((g_menu_script_input & (PSX_PAD_UP << 16)) || (g_menu_script_input & PSX_PAD_UP)) {
             index = g_menu_scroll_base_index;
@@ -1121,7 +1121,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                         rect.y = 0x120;
                         rect.w = g_screen_list_image_width;
                         rect.h = g_screen_row_height;
-                        text_id_rows_to_vram_render(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
+                        text_render_id_rows_to_vram(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
                     }
                 }
             } else if (g_menu_script_input & PSX_PAD_UP) {
@@ -1138,7 +1138,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                         rect.y = g_screen_list_visible_rows * g_screen_row_height + 0x130;
                         rect.w = g_screen_list_image_width;
                         rect.h = g_screen_row_height;
-                        text_id_rows_to_vram_render(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
+                        text_render_id_rows_to_vram(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
                     }
                 }
             } else {
@@ -1241,7 +1241,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_screen_row_height;
-        screen_sliding_cursor_draw(&marker, &g_screen_list_cursor_anim, g_screen_use_alternate_palette);
+        menu_draw_sliding_cursor(&marker, &g_screen_list_cursor_anim, g_screen_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_screen_scroll_row_offset = 0;
@@ -1267,7 +1267,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
 }
 
 /* Set the WORLD menu sprite color from an RGB triple; a null color leaves it unchanged. */
-void screen_sprite_color_set(const rgb24_t* src) {
+void gfx_set_draw_color(const rgb24_t* src) {
     if (src != 0) {
         g_screen_sprite_color.r = src->r;
         g_screen_sprite_color.g = src->g;

@@ -26,7 +26,7 @@ extern status_screen_gfx_context_t g_status_screen_gfx_contexts[];
 /* Upload the menu glyph sheet and palette image, copy two window-frame palettes into VRAM row 254
  * (each also as a 12-color copy from color 4, with color 4 cleared), and clear the menu
  * selections. */
-static void status_screen_load_images(void) {
+static void init_graphics(void) {
     RECT rect;
     palette_t palette;
 
@@ -80,7 +80,7 @@ static void status_screen_load_images(void) {
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
 
-    menu_selection_values_clear();
+    menu_selection_clear_values();
     g_text_selection_id = 0;
 }
 
@@ -122,22 +122,22 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
         g_gfx_sprite_16_capacity = 0;
         status_screen_gfx_init_contexts(g_status_screen_gfx_contexts, g_gfx_otag_buffer, 0, 0, 0, g_gfx_poly_ft4_buffer,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, g_gfx_draw_move_buffer, g_gfx_draw_area_buffer);
-        status_screen_load_images();
+        init_graphics();
         status_screen_init_unit_jobs(unit);
-        menu_selection_records_clear();
+        menu_selection_clear_records();
         g_status_screen_initialized = 1;
     }
-    status_screen_gfx_swap_context(0, -1);
+    menu_gfx_swap_context(0, -1);
     result = g_menu_gfx_context->otag;
     g_status_screen_previous_event_mode = g_menu_input_lock_mode;
-    menu_input_message_state_update();
+    menu_input_update_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-        menu_text_start_help_thread(3);
+        menu_start_help_text(3);
     }
     if (g_status_screen_previous_event_mode != 0 && g_menu_input_lock_mode == 0) {
-        text_section_pointers_restore();
+        text_restore_section_pointers();
     }
-    menu_set_palette_mode(g_menu_input_lock_mode);
+    menu_palette_set_mode(g_menu_input_lock_mode);
     if (s_status_screen_active_page == MENU_JOB_LIST_STEP_JOBS) {
         s_status_screen_active_page = job_list_update();
         if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
@@ -153,7 +153,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
         g_status_screen_initialized = 0;
     }
     if (g_sound_queued_effect_id != SOUND_SFX_NONE) {
-        sound_sfx_play(g_sound_queued_effect_id);
+        sound_play_sfx(g_sound_queued_effect_id);
         g_sound_queued_effect_id = SOUND_SFX_NONE;
     }
     return result;

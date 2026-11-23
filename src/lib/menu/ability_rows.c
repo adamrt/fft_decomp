@@ -17,7 +17,7 @@ s32 ability_list_is_non_action_enabled(s32 index) {
     s32 result;
     u16 ability;
 
-    s_ability_list_ability_type = ability_records_get(*entry & ABILITY_LIST_ENTRY_ID_MASK,
+    s_ability_list_ability_type = ability_get_records(*entry & ABILITY_LIST_ENTRY_ID_MASK,
         &g_ability_list_selected_ability_data, &g_ability_list_selected_ability_secondary_data);
     result = 0;
     if (s_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {

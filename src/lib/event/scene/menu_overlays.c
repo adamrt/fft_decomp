@@ -8,6 +8,7 @@
 #include "fft/equipment.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
+#include "fft/map_unit.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
@@ -27,7 +28,6 @@
 #include "fft/unit_event.h"
 #include "fft/unit_list.h"
 #include "fft/unit_panel.h"
-#include "fft/unit_runtime.h"
 #include "fft/unit_view.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -44,7 +44,7 @@ enum { MENU_HIGH_OVERLAY_SIZE = 0x20000 };
 /* Reserve size bytes of the main heap at the high overlay load address, yielding until that block
  * is free (with a wait message when the debug font is on). Every caller reserves
  * MENU_HIGH_OVERLAY_SIZE. */
-static void high_overlay_reserve(u32 size) {
+static void reserve_high_overlay(u32 size) {
     while (1) {
         if (heap_reserve_at(g_heap_high_overlay_load_address, size) == g_heap_high_overlay_load_address) {
             break;
@@ -56,8 +56,8 @@ static void high_overlay_reserve(u32 size) {
     }
 }
 
-/* Free the block high_overlay_reserve reserved. */
-static void high_overlay_free(void) {
+/* Free the block reserve_high_overlay reserved. */
+static void free_high_overlay(void) {
     heap_free(g_heap_high_overlay_load_address);
 }
 
@@ -81,8 +81,8 @@ void overlay_companion_request(s32 request_index) {
 }
 
 /* The data-file counterpart of overlay_companion_request, driven by
- * overlay_companion_file_poll into g_overlay_companion_data_file_buffer. */
-static void companion_file_request(s32 request_index) {
+ * overlay_companion_poll_file into g_overlay_companion_data_file_buffer. */
+static void request_companion_file(s32 request_index) {
     while (g_overlay_companion_executable_request_index != 0 || g_overlay_companion_data_file_request_index != 0) {
         thread_yield();
     }
@@ -98,8 +98,8 @@ static void companion_file_request(s32 request_index) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * companion_file_request and
- * script_conditions_display. Nothing on the disc calls it
+ * request_companion_file and
+ * script_conditions_display_thread. Nothing on the disc calls it
  * or points at it; the name is a neutral placeholder until a reference turns
  * up. */
 void script_noop_1(void) {
@@ -108,7 +108,7 @@ void script_noop_1(void) {
 /* Thread body of DisplayConditions: draw numeric values again and run REQUIRE's
  * condition dispatcher, which takes the display id and its operand from the
  * thread parameters. */
-void script_conditions_display(void) {
+void script_conditions_display_thread(void) {
     g_unit_panel_hide_numeric_values = 0;
     require_conditions_entrypoint();
 }
@@ -117,7 +117,7 @@ void script_conditions_display(void) {
  * BATTLE loads REQUIRE.OUT and runs its bonus image burst (WORLD has no
  * REQUIRE.OUT to run). */
 void script_dark_screen_thread(void) {
-    thread_current_task_set(THREAD_TASK_DARK_SCREEN);
+    thread_current_set_task(THREAD_TASK_DARK_SCREEN);
 #ifdef FFT_BATTLE
     overlay_companion_request(COMPANION_OVERLAY_REQUIRE);
     require_dark_screen_entrypoint();
@@ -131,7 +131,7 @@ void script_dark_screen_thread(void) {
 void script_noop_2(void) {
 }
 
-/* Task 0x46: show message 0xa800 | parameter 2 about the unit whose battle id
+/* Task 0x46: show message 0xa800 | parameter 2 about the unit whose battle unit id
  * is parameter 1.
  *
  * The id also fills the three text substitution values. The text thread runs
@@ -141,74 +141,74 @@ void script_noop_2(void) {
 void announcement_spell_quote_thread(void) {
 #ifdef FFT_BATTLE
     SVECTOR screen_coords;
-    unit_stats_t* unit;
-    s32 id; /* Battle id, then the unit's unit_id: one variable in the target. */
+    battle_unit_t* unit;
+    s32 id; /* Battle unit id, then the unit's unit_id: one variable in the target. */
     s32 window_mode;
     s32 message_id;
 
     g_menu_request_busy = 1;
-    thread_current_task_set(THREAD_TASK_UNIT_MESSAGE);
-    script_event_speed_set(2);
-    thread_parameters_set(THREAD_SLOT_MENU, 0, 0, 1);
-    thread_inactive_wait(THREAD_SLOT_MENU);
-    thread_frames_wait(3);
+    thread_current_set_task(THREAD_TASK_UNIT_MESSAGE);
+    script_set_event_speed(2);
+    thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
+    thread_wait_inactive(THREAD_SLOT_MENU);
+    thread_wait_frames(3);
     window_mode = 0x11;
-    id = thread_current_parameter_1_get();
+    id = thread_current_get_parameter_1();
     g_text_substitution_values[0] = id;
     g_text_substitution_values[1] = id;
     g_text_substitution_values[2] = id;
-    unit = unit_stats_get(id);
-    unit_screen_position_project(unit_battle_runtime_id_get(id), &screen_coords);
+    unit = battle_unit_get(id);
+    map_unit_project_screen_position(map_unit_get_id_by_battle_unit_id(id), &screen_coords);
     id = unit->unit_id;
     if (screen_coords.vy < 0x80) {
         window_mode = 0x12;
     }
-    message_id = thread_current_parameter_2_get() | 0xA800;
+    message_id = thread_current_get_parameter_2() | 0xA800;
     g_overlay_companion_data_file_buffer = heap_alloc(0x4000);
-    companion_file_request(COMPANION_FILE_SPELL_MES);
+    request_companion_file(COMPANION_FILE_SPELL_MES);
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_overlay_companion_data_file_buffer;
     thread_start(THREAD_SLOT_MENU, message_dialog_thread);
-    thread_parameters_set(THREAD_SLOT_MENU, window_mode, message_id, id);
-    thread_inactive_wait(THREAD_SLOT_MENU);
+    thread_set_parameters(THREAD_SLOT_MENU, window_mode, message_id, id);
+    thread_wait_inactive(THREAD_SLOT_MENU);
     heap_free(g_overlay_companion_data_file_buffer);
     g_command_pending_selection[0] = 7;
-    script_event_speed_set(1);
+    script_set_event_speed(1);
     g_menu_request_busy = 0;
     thread_current_exit();
 #endif
 }
 
 /* Thread entry: load OPTION.OUT and open its game options menu. */
-void option_open(void) {
-    menu_modal_open();
+void option_menu_thread(void) {
+    menu_open_modal();
     overlay_companion_request(COMPANION_OVERLAY_OPTION);
     option_entrypoint(MENU_OPTION_TYPE_GAME_OPTIONS);
 }
 
 /* Thread entry of menu entry 0x1d: load OPTION.OUT and open its AT list. */
 void at_list_open(void) {
-    menu_modal_open();
+    menu_open_modal();
     overlay_companion_request(COMPANION_OVERLAY_OPTION);
     option_entrypoint(MENU_OPTION_TYPE_AT_LIST);
 }
 
 /* Thread started for system function 0x1f (crystal or treasure): load OPTION.OUT
  * and open its crystal pickup panel. */
-void crystal_pickup_panel_open(void) {
-    menu_modal_open();
+void crystal_pickup_panel_thread(void) {
+    menu_open_modal();
     overlay_companion_request(COMPANION_OVERLAY_OPTION);
     option_entrypoint(MENU_OPTION_TYPE_CRYSTAL_PICKUP);
 }
 
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */
-void mini_menu_select(void) {
-    thread_current_task_set(THREAD_TASK_MINI_MENU);
+void mini_menu_thread(void) {
+    thread_current_set_task(THREAD_TASK_MINI_MENU);
     while (camera_is_active() != 0 || g_menu_transition_state != 0) {
         thread_yield();
     }
     tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_MINI_MENU);
     g_unit_panel_hide_numeric_values = 0;
-    menu_run_icon_selection_loop();
+    menu_icon_selection_thread();
 }
 
 /* Run BUNIT, release its high-overlay memory, then restore the unit view. */
@@ -224,23 +224,23 @@ static void unit_list_return_thread(void) {
     g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_BUNIT;
     g_help_open = 0;
     do {
-        thread_frames_wait(1);
+        thread_wait_frames(1);
     } while (g_overlay_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
 
-    high_overlay_free();
+    free_high_overlay();
     /* Parameter 3 = 1 asks the threads in slots 2-14 to close; then fade the screen back in. */
     for (i = 2; i < 15; i++) {
-        thread_parameters_set(i, 0, 0, 1);
+        thread_set_parameters(i, 0, 0, 1);
     }
     for (i = 0; i < 0x100; i += 8) {
         g_gfx_screen_fade = 0xFF - i;
         thread_yield();
     }
-    menu_modal_close();
+    menu_close_modal();
     g_menu_overlay_state = 0;
     g_gfx_screen_fade = 0;
     g_menu_transition_state = 0;
-    unit_view_start(UNIT_VIEW_MODE_HOVERED_UNIT, g_unit_panel_selected_unit.battle_id, 0xFF);
+    unit_view_start(UNIT_VIEW_MODE_HOVERED_UNIT, g_unit_panel_selected_unit.battle_unit_id, 0xFF);
     thread_current_exit();
 }
 
@@ -255,35 +255,35 @@ static void unit_list_transition_thread(void) {
     }
     g_gfx_screen_fade = 0xFF;
     g_menu_overlay_state = 1;
-    thread_parameters_set(THREAD_SLOT_MENU, 0, 0, 1);
-    thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
-    thread_parameters_set(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
-    thread_parameters_set(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
-    thread_parameters_set(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
-    unit_view_panels_wait();
+    thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
+    thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
+    thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
+    thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
+    thread_set_parameters(THREAD_SLOT_HOVERED_UNIT_STATS, 0, 0, 1);
+    unit_view_wait_panels();
     overlay_companion_request(COMPANION_OVERLAY_BUNIT);
-    high_overlay_reserve(MENU_HIGH_OVERLAY_SIZE);
+    reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     overlay_companion_request(COMPANION_OVERLAY_BUNIT_SECOND_HALF);
-    thread_frames_wait(2);
+    thread_wait_frames(2);
     g_help_open = 1;
     thread_start(THREAD_BORROWED_SLOT_FADE_OUT, unit_list_return_thread);
     thread_current_exit();
 }
 
 /* Start the unit-list transition in a child slot and wait for it to finish. */
-void unit_list_open(void) {
-    menu_modal_open();
+void unit_list_thread(void) {
+    menu_open_modal();
     thread_start(g_thread_current_id - 1, unit_list_transition_thread);
-    thread_inactive_wait(g_thread_current_id - 1);
+    thread_wait_inactive(g_thread_current_id - 1);
     thread_current_exit();
 }
 
 /* Reserve and load the help overlay, then run its battle-help screen. */
 void help_menu_thread(void) {
-    if (thread_task_find(THREAD_TASK_STATUS_SCREEN) != 0 && thread_task_find(THREAD_TASK_MENU_WINDOW_BUILD) == 0) {
-        sound_confirm_queue();
+    if (thread_find_task(THREAD_TASK_STATUS_SCREEN) != 0 && thread_find_task(THREAD_TASK_MENU_WINDOW_BUILD) == 0) {
+        sound_queue_confirm();
     }
-    high_overlay_reserve(MENU_HIGH_OVERLAY_SIZE);
+    reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     overlay_companion_request(COMPANION_OVERLAY_HELPMENU);
     helpmenu_battle_entrypoint();
 }
@@ -296,20 +296,20 @@ void status_screen_jobs_thread(void) {
     if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
         thread_current_exit();
     }
-    menu_modal_open();
-    sound_confirm_queue();
-    high_overlay_reserve(MENU_HIGH_OVERLAY_SIZE);
+    menu_open_modal();
+    sound_queue_confirm();
+    reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     overlay_companion_request(COMPANION_OVERLAY_JOBSTTS);
-    thread_frames_wait(2);
+    thread_wait_frames(2);
     g_overlay_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
     do {
         g_script_event_input = 0;
         thread_yield();
     } while (g_overlay_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
     g_script_event_input = 0;
-    high_overlay_free();
-    thread_frames_wait(2);
-    menu_modal_close();
+    free_high_overlay();
+    thread_wait_frames(2);
+    menu_close_modal();
     thread_current_exit();
 }
 
@@ -322,13 +322,13 @@ void equipment_thread(void) {
     s32 i;
     s32 j;
 
-    menu_modal_open();
+    menu_open_modal();
     saved_view_mode = g_unit_view_mode;
     unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
     g_menu_overlay_state = 1;
-    unit_view_panels_wait();
+    unit_view_wait_panels();
     overlay_companion_request(COMPANION_OVERLAY_EQUIP);
-    high_overlay_reserve(MENU_HIGH_OVERLAY_SIZE);
+    reserve_high_overlay(MENU_HIGH_OVERLAY_SIZE);
     overlay_companion_request(COMPANION_OVERLAY_EQUIP_SECOND_HALF);
     thread_suspend(THREAD_SLOT_MENU);
     thread_suspend(THREAD_SLOT_MENU_CHILD);
@@ -346,66 +346,66 @@ void equipment_thread(void) {
         thread_resume(THREAD_SLOT_MENU_CHILD);
     }
     for (i = 9; i < 15; i++) {
-        thread_parameters_set(i, 0, 0, 1);
+        thread_set_parameters(i, 0, 0, 1);
     }
-    thread_frames_wait(4);
+    thread_wait_frames(4);
     if (g_overlay_companion_overlay_primitives != 0) {
         for (j = 0; j < 2; j++) {
             g_command_pending_selection[j]
                 = ((menu_entry_t*)g_thread_contexts[THREAD_SLOT_MENU - j].function_parameter_1)->selected_index;
         }
     }
-    high_overlay_free();
+    free_high_overlay();
     g_menu_overlay_state = 0;
     unit_view_start(saved_view_mode, 0xFF, 0xFF);
     g_sound_suppressed = 0;
     g_script_event_input = 0;
-    menu_modal_close();
+    menu_close_modal();
     thread_current_exit();
 }
 
 /* Show DEBUGCHR's read-only status screen for the selected unit when it is a rider or a mount, then rebuild
  * the idle action menu and the unit summary for it. */
-void status_screen_mounted_unit_open(void) {
-    s16* unit_index = &g_unit_panel_selected_unit.battle_id;
+void status_screen_open_mounted_unit(void) {
+    s16* unit_index = &g_unit_panel_selected_unit.battle_unit_id;
 
-    if (unit_stats_get(*unit_index)->mount_info != 0) {
+    if (battle_unit_get(*unit_index)->mount_info != 0) {
         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
-        menu_modal_open();
+        menu_open_modal();
         g_menu_overlay_state = 1;
         overlay_companion_request(COMPANION_OVERLAY_DEBUGCHR);
-        thread_parameters_set(THREAD_SLOT_MENU, 0, 0, 1);
-        thread_inactive_wait(THREAD_SLOT_MENU);
-        unit_view_panels_wait();
+        thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
+        thread_wait_inactive(THREAD_SLOT_MENU);
+        unit_view_wait_panels();
         command_record_unit_selection();
-        menu_enter_status_screen_selection();
+        status_screen_enter_selection();
         debugchr_mounted_unit_entrypoint(*unit_index);
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;
-        command_menu_open(g_command_current_id);
+        command_open_menu(g_command_current_id);
         unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, *unit_index, *unit_index);
-        menu_modal_close();
-        menu_leave_status_screen_selection();
+        menu_close_modal();
+        status_screen_leave_selection();
         thread_current_exit();
     }
 }
 
 /* Close the panels, run the requested debug session, then restore menu state. */
-void debug_unit_editor_open(void) {
+void debug_unit_editor_thread(void) {
     unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
-    menu_modal_open();
+    menu_open_modal();
     g_menu_overlay_state = 1;
     overlay_companion_request(COMPANION_OVERLAY_DEBUGCHR);
-    thread_parameters_set(THREAD_SLOT_MENU, 0, 0, 1);
-    thread_inactive_wait(THREAD_SLOT_MENU);
-    unit_view_panels_wait();
+    thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
+    thread_wait_inactive(THREAD_SLOT_MENU);
+    unit_view_wait_panels();
     thread_yield();
     thread_yield();
     debugchr_editor_entrypoint();
     g_menu_overlay_state = 0;
     g_sound_suppressed = 0;
     g_script_event_input = 0;
-    menu_modal_close();
+    menu_close_modal();
     thread_current_exit();
 }

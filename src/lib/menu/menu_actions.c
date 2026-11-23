@@ -29,7 +29,7 @@ s32 menu_can_accept_input(void) {
         return 0;
     }
 #endif
-    if (thread_is_previous_running() != 0 || thread_current_parameter_3_get() != 0 || g_menu_input_lock_mode != 0
+    if (thread_is_previous_running() != 0 || thread_current_get_parameter_3() != 0 || g_menu_input_lock_mode != 0
         || g_help_open != 0 || g_menu_input_block_frames != 0) {
         return 0;
     }
@@ -74,7 +74,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
         if (target >= 0) {
             if (target < 0x100) {
                 thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[target].thread_entry);
-                thread_parameters_set(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[target], 0, 0);
+                thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[target], 0, 0);
             } else if (target == MENU_ROW_ACTION_CLEAR_SELECTION) {
                 row_index = -1;
             }
@@ -106,14 +106,14 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
         result = entry->value;
         *result = row_index;
         if (g_sound_suppressed == 0 && silent == 0) {
-            sound_confirm_queue();
+            sound_queue_confirm();
         }
     }
 }
 
 /* While the menu may accept input, move a row cursor with Up and Down, wrapping
  * between row 0 and the entry's max_row_index, and play the cursor sound. */
-void menu_row_cursor_update(menu_entry_t* ctx, s32* sel) {
+void menu_update_row_cursor(menu_entry_t* ctx, s32* sel) {
     s32 selection;
     s32 max;
     s32 cur;
@@ -127,7 +127,7 @@ void menu_row_cursor_update(menu_entry_t* ctx, s32* sel) {
                 selection = selection - 1;
             }
             *sel = selection;
-            sound_cursor_queue();
+            sound_queue_cursor();
         }
         if (g_script_event_input & PSX_PAD_DOWN) {
             max = ctx->max_row_index;
@@ -137,7 +137,7 @@ void menu_row_cursor_update(menu_entry_t* ctx, s32* sel) {
             } else {
                 *sel = cur + 1;
             }
-            sound_cursor_queue();
+            sound_queue_cursor();
         }
     }
 }
@@ -179,7 +179,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     g_script_event_input = 0;
     result = context->value;
     *result = -1;
-    sound_cancel_queue();
+    sound_queue_cancel();
     g_script_input_suppression_frames = 5;
 }
 
@@ -196,11 +196,11 @@ s32 menu_should_close_thread(u32* input) {
 #ifdef FFT_WORLD
     if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input() != 0
         && (*input & PSX_PAD_SELECT)) {
-        parameter = (menu_entry_t*)thread_current_parameter_1_get();
+        parameter = (menu_entry_t*)thread_current_get_parameter_1();
         if (parameter->select_text_table != 0) {
             if (g_script_input_suppression_frames == 0) {
                 thread_start(THREAD_SCREEN_SLOT_TEXT, screen_help_text_thread);
-                thread_parameters_set(THREAD_SCREEN_SLOT_TEXT, (s32)parameter, 0, 0);
+                thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, (s32)parameter, 0, 0);
                 g_menu_input_lock_mode = 1;
             }
             *input = 0;
@@ -218,7 +218,7 @@ s32 menu_should_close_thread(u32* input) {
             break;
         }
     }
-    if (i == VARIANT_THREAD_TABLE_SLOT_COUNT && thread_current_parameter_3_get() != 0) {
+    if (i == VARIANT_THREAD_TABLE_SLOT_COUNT && thread_current_get_parameter_3() != 0) {
         return 1;
     }
     return 0;

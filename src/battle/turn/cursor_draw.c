@@ -1,13 +1,13 @@
 /* Cycle the tile-glow palettes and project the map cursor and Wait direction indicator. */
 
-#include "fft/battle_map.h"
-#include "fft/battle_map_palette.h"
 #include "fft/camera.h"
 #include "fft/cursor.h"
 #include "fft/gfx.h"
+#include "fft/map.h"
+#include "fft/map_palette.h"
+#include "fft/map_unit.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_runtime.h"
 #include "fft/vector.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -23,7 +23,7 @@ static s32 s_cursor_tile_glow_cycle_timer;
  * Every fourth animation tick the offset advances through 0..14 and the palettes
  * are uploaded again with colors 1..15 rotated down by that many places; color
  * 0 stays in place, and offset 0 uploads the palettes as stored. */
-void cursor_tile_glow_palettes_update(void) {
+void cursor_update_tile_glow_palettes(void) {
     s32 dst;
     s32 src;
     palette_t* palettes;
@@ -59,31 +59,30 @@ void cursor_tile_glow_palettes_update(void) {
         } else {
             palettes = g_cursor_tile_glow_palettes;
         }
-        battle_map_palette_load_data(palettes, BATTLE_MAP_CLUT_ROW_SPRITES, 1, 0);
-        battle_map_palette_load_data(palettes + 1, BATTLE_MAP_CLUT_ROW_SPRITES, 2, 0);
+        map_palette_load_data(palettes, MAP_CLUT_ROW_SPRITES, 1, 0);
+        map_palette_load_data(palettes + 1, MAP_CLUT_ROW_SPRITES, 2, 0);
     }
 }
 
 /* Project the center of the cursor tile, at its surface height less any water depth, to the screen
  * and store the cursor's screen x and y. `position` receives the tile point and `raised` its depth
  * point. It first cycles the tile glow palettes. */
-void cursor_tile_project(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
-    battle_map_tile_t* tile;
+void cursor_project_tile(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
+    map_tile_t* tile;
     s32 flag;
 
-    cursor_tile_glow_palettes_update();
+    cursor_update_tile_glow_palettes();
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
-    vector_short_set(position, g_cursor_x * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2), 0,
-        g_cursor_y * BATTLE_MAP_TILE_SIZE + (BATTLE_MAP_TILE_SIZE / 2));
-    position->vy = battle_map_slope_height_calculate(position, (u8)g_cursor_layer);
-    tile = battle_map_tile_get_pointer(
-        (position->vx / BATTLE_MAP_TILE_SIZE), (position->vz / BATTLE_MAP_TILE_SIZE), g_cursor_layer);
+    vector_set_short(position, g_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
+        g_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
+    position->vy = map_calculate_slope_height(position, (u8)g_cursor_layer);
+    tile = map_get_tile((position->vx / MAP_TILE_SIZE), (position->vz / MAP_TILE_SIZE), g_cursor_layer);
     position->vy -= tile->depth_half_height.depth * 12;
     if (tile->surface.depth_bias) {
-        camera_get_tile_depth_point_biased(position, raised);
+        camera_get_biased_tile_depth_point(position, raised);
     } else {
-        camera_get_tile_depth_point_unbiased(position, raised);
+        camera_get_unbiased_tile_depth_point(position, raised);
     }
     RotTrans(raised, projected, &flag);
     g_cursor_screen_x = projected->vx;
@@ -93,7 +92,7 @@ void cursor_tile_project(VECTOR* projected, SVECTOR* position, SVECTOR* raised) 
 /* Project the cursor tile and draw the map cursor over it with the glow quad on the tile surface;
  * cursor_update calls it while g_cursor_visible is set. The tile's
  * untargetable flag picks the glow's palette. */
-void cursor_tile_glow_draw(void) {
+void cursor_draw_tile_glow(void) {
     SVECTOR position;
     SVECTOR raised;
     SVECTOR corner0;
@@ -103,43 +102,42 @@ void cursor_tile_glow_draw(void) {
     VECTOR projected;
     s32 depth;
     s32 shape;
-    battle_map_tile_t* tile;
+    map_tile_t* tile;
 
-    cursor_tile_project(&projected, &position, &raised);
+    cursor_project_tile(&projected, &position, &raised);
     /* The projected z is the ordering-table depth for the cursor glow. */
     depth = projected.vz / 4;
-    cursor_map_selection_draw(&position, gfx_battle_otag_get());
+    cursor_draw_map_selection(&position, gfx_get_battle_otag());
     /* The polygon routine reads the same three 16-bit values in renderer x, z, y order. */
     shape = cursor_calculate_tile_polygon(&position, g_cursor_layer, &corner0);
-    tile = battle_map_tile_get_pointer(
-        position.vx / BATTLE_MAP_TILE_SIZE, position.vz / BATTLE_MAP_TILE_SIZE, g_cursor_layer);
-    cursor_tile_glow_build(
-        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, gfx_battle_otag_get() + depth);
+    tile = map_get_tile(position.vx / MAP_TILE_SIZE, position.vz / MAP_TILE_SIZE, g_cursor_layer);
+    cursor_build_tile_glow(
+        tile->flags.untargetable, shape, &corner0, &corner1, &corner2, &corner3, gfx_get_battle_otag() + depth);
 }
 
 /*
  * Queue the acting unit's wait-direction indicator into the ordering table at
  * the depth of a point 48 screen units above its feet.
  */
-void unit_facing_draw_wait_direction(void) {
+void map_unit_facing_draw_wait_direction(void) {
     SVECTOR base;
     SVECTOR raised;
     VECTOR transformed;
     s32 flag;
-    unit_runtime_t* unit;
+    map_unit_t* unit;
     s32 depth;
     u32* ot;
 
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
-    unit = unit_source_get();
-    vector_short_set(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
+    unit = map_unit_get_source();
+    vector_set_short(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     /* The second RotTrans overwrites this result unread. */
     RotTrans(&base, &transformed, &flag);
-    camera_get_tile_depth_point_unbiased(&unit->world_coords, &raised);
+    camera_get_unbiased_tile_depth_point(&unit->world_coords, &raised);
     raised.vy -= 48;
     RotTrans(&raised, &transformed, &flag);
     depth = transformed.vz / 4;
-    ot = gfx_battle_otag_get();
-    unit_facing_draw_wait_arrows(&base, &ot[depth]);
+    ot = gfx_get_battle_otag();
+    map_unit_facing_draw_wait_arrows(&base, &ot[depth]);
 }

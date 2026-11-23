@@ -34,7 +34,7 @@ typedef char party_ability_id_bytes_size_must_be_2[(sizeof(party_ability_id_byte
 /*
  * Persistent roster record. Its 0x100-byte stride is established by the
  * indexed SCUS lookup, while its named prefix is established by the target
- * party_unit_t-to-unit_stats_t initializer. It is distinct from entd_unit_t.
+ * party_unit_t-to-battle_unit_t initializer. It is distinct from entd_unit_t.
  */
 typedef struct party_unit {
     u8 sprite_set;                             /* 0x00 */
