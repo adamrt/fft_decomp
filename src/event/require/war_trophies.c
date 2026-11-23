@@ -48,10 +48,6 @@ extern u32 g_war_trophy_money_digit_positions_q8[6];
 extern u32 g_war_trophy_money_digit_speeds_q8[6];
 extern u32 g_war_trophy_money_digit_initial_speeds_q8[6];
 extern s32 g_war_trophy_money_digit_settling[6];
-extern POLY_FT4 g_war_trophy_money_digit_polys[2][6];
-extern POLY_FT4 g_war_trophy_money_next_digit_polys[2][6];
-extern POLY_FT4 g_war_trophy_money_comma_polys[2];
-extern POLY_FT4 g_war_trophy_money_sign_polys[2];
 extern RECT g_war_trophy_money_clip_rect_0;
 extern RECT g_war_trophy_money_clip_rect_1;
 
@@ -64,6 +60,10 @@ extern u8 g_war_trophy_item_count;
 
 /* The retail collector does not check these 16-entry capacities. */
 static s32 s_war_trophy_entry_count;
+static POLY_FT4 s_war_trophy_money_digit_polys[2][6];
+static POLY_FT4 s_war_trophy_money_next_digit_polys[2][6];
+static POLY_FT4 s_war_trophy_money_sign_polys[2];
+static POLY_FT4 s_war_trophy_money_comma_polys[2];
 static reward_war_result_t s_war_trophy_search_result = { 0 };
 static s32 s_war_trophy_entry_types[16] = { 0 };
 static s32 s_war_trophy_entry_values[16] = { 0 };
@@ -361,7 +361,7 @@ void war_trophy_list_thread(void) {
  * and fades out. The initial-speed table leaves the sixth strip stationary.
  *
  * The polygon pointers are formed as `(s32)array + offset` byte offsets, which
- * keeps the target's separate base and offset; `&g_war_trophy_money_digit_polys[buffer][j]` is reduced
+ * keeps the target's separate base and offset; `&s_war_trophy_money_digit_polys[buffer][j]` is reduced
  * to a single pointer induction variable. `pass` doubles as the fade level,
  * which the target's register allocation reflects.
  */
@@ -421,23 +421,23 @@ void war_trophy_gil_ticker_thread(void) {
             POLY_FT4* pd;
             POLY_FT4* pn;
 
-            menu_init_default_poly_ft4(&g_war_trophy_money_digit_polys[buffer][j]);
-            menu_init_default_poly_ft4(&g_war_trophy_money_next_digit_polys[buffer][j]);
-            g_war_trophy_money_digit_polys[buffer][j].tpage = getTPage(0, 0, 384, 0);
-            g_war_trophy_money_digit_polys[buffer][j].clut
+            menu_init_default_poly_ft4(&s_war_trophy_money_digit_polys[buffer][j]);
+            menu_init_default_poly_ft4(&s_war_trophy_money_next_digit_polys[buffer][j]);
+            s_war_trophy_money_digit_polys[buffer][j].tpage = getTPage(0, 0, 384, 0);
+            s_war_trophy_money_digit_polys[buffer][j].clut
                 = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
-            g_war_trophy_money_next_digit_polys[buffer][j].tpage = getTPage(0, 0, 384, 0);
-            g_war_trophy_money_next_digit_polys[buffer][j].clut
+            s_war_trophy_money_next_digit_polys[buffer][j].tpage = getTPage(0, 0, 384, 0);
+            s_war_trophy_money_next_digit_polys[buffer][j].clut
                 = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
-            pd = (POLY_FT4*)((s32)g_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
+            pd = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
             setXY4(pd, X0, 0x80, X0 + 13, 0x80, X0, 0x97, X0 + 13, 0x97);
-            pn = (POLY_FT4*)((s32)g_war_trophy_money_next_digit_polys + (j * 0x28 + buffer * 0xf0));
+            pn = (POLY_FT4*)((s32)s_war_trophy_money_next_digit_polys + (j * 0x28 + buffer * 0xf0));
             setXY4(pn, X0, 0x69, X0 + 13, 0x69, X0, 0x80, X0 + 13, 0x80);
             /* Digits from the thousands up move 8 pixels left to make room for the comma.
              * Only x0 moves here; the roll loop rebuilds the other vertices from it. */
             if (j >= 3) {
-                g_war_trophy_money_digit_polys[buffer][j].x0 -= 8;
-                g_war_trophy_money_next_digit_polys[buffer][j].x0 -= 8;
+                s_war_trophy_money_digit_polys[buffer][j].x0 -= 8;
+                s_war_trophy_money_next_digit_polys[buffer][j].x0 -= 8;
             }
         }
     }
@@ -448,23 +448,23 @@ void war_trophy_gil_ticker_thread(void) {
         POLY_FT4* comma_poly;
         POLY_FT4* sign_poly;
 
-        comma_poly = &g_war_trophy_money_comma_polys[i];
+        comma_poly = &s_war_trophy_money_comma_polys[i];
         menu_init_default_poly_ft4(comma_poly);
-        setXY4(comma_poly, g_war_trophy_money_digit_polys[0][2].x0 - 10, 0x8f,
-            g_war_trophy_money_digit_polys[0][2].x0 - 4, 0x8f, g_war_trophy_money_digit_polys[0][2].x0 - 10, 0x99,
-            g_war_trophy_money_digit_polys[0][2].x0 - 4, 0x99);
+        setXY4(comma_poly, s_war_trophy_money_digit_polys[0][2].x0 - 10, 0x8f,
+            s_war_trophy_money_digit_polys[0][2].x0 - 4, 0x8f, s_war_trophy_money_digit_polys[0][2].x0 - 10, 0x99,
+            s_war_trophy_money_digit_polys[0][2].x0 - 4, 0x99);
         setUV4(comma_poly, 0x82, 0x40, 0x88, 0x40, 0x82, 0x4a, 0x88, 0x4a);
-        g_war_trophy_money_comma_polys[i].tpage = getTPage(0, 0, 384, 0);
-        g_war_trophy_money_comma_polys[i].clut
+        s_war_trophy_money_comma_polys[i].tpage = getTPage(0, 0, 384, 0);
+        s_war_trophy_money_comma_polys[i].clut
             = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
-        sign_poly = &g_war_trophy_money_sign_polys[i];
+        sign_poly = &s_war_trophy_money_sign_polys[i];
         menu_init_default_poly_ft4(sign_poly);
-        setXY4(sign_poly, g_war_trophy_money_digit_polys[0][0].x0 + 0x11, 0x80,
-            g_war_trophy_money_digit_polys[0][0].x0 + 0x31, 0x80, g_war_trophy_money_digit_polys[0][0].x0 + 0x11, 0x97,
-            g_war_trophy_money_digit_polys[0][0].x0 + 0x31, 0x97);
+        setXY4(sign_poly, s_war_trophy_money_digit_polys[0][0].x0 + 0x11, 0x80,
+            s_war_trophy_money_digit_polys[0][0].x0 + 0x31, 0x80, s_war_trophy_money_digit_polys[0][0].x0 + 0x11, 0x97,
+            s_war_trophy_money_digit_polys[0][0].x0 + 0x31, 0x97);
         setUV4(sign_poly, 0x88, 0x32, 0xa8, 0x32, 0x88, 0x49, 0xa8, 0x49);
-        g_war_trophy_money_sign_polys[i].tpage = getTPage(0, 0, 384, 0);
-        g_war_trophy_money_sign_polys[i].clut
+        s_war_trophy_money_sign_polys[i].tpage = getTPage(0, 0, 384, 0);
+        s_war_trophy_money_sign_polys[i].clut
             = getClut(g_conditions_banner_palette_rect.x, g_conditions_banner_palette_rect.y);
     }
 
@@ -495,8 +495,8 @@ void war_trophy_gil_ticker_thread(void) {
 
                 g_war_trophy_money_digit_positions_q8[j] += g_war_trophy_money_digit_speeds_q8[j];
                 off = j * 0x28 + buffer * 0xf0;
-                x = g_war_trophy_money_digit_polys[buffer][j].x0;
-                pd = (POLY_FT4*)((s32)g_war_trophy_money_digit_polys + off);
+                x = s_war_trophy_money_digit_polys[buffer][j].x0;
+                pd = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + off);
                 setXY4(pd, x, ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x80, x + 13,
                     ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x80, x,
                     ((g_war_trophy_money_digit_positions_q8[j] >> 8) & 0x1f) + 0x97, x + 13,
@@ -505,13 +505,13 @@ void war_trophy_gil_ticker_thread(void) {
                     (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 0x32,
                     (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13, 0x49,
                     (g_war_trophy_money_digit_positions_q8[j] >> 13) % 10 * 13 + 13, 0x49);
-                x = g_war_trophy_money_next_digit_polys[buffer][j].x0;
+                x = s_war_trophy_money_next_digit_polys[buffer][j].x0;
                 off = j * 0x28 + buffer * 0xf0;
-                pn = (POLY_FT4*)((s32)g_war_trophy_money_next_digit_polys + off);
-                setXY4(pn, x, g_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x + 13,
-                    g_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x,
-                    g_war_trophy_money_digit_polys[buffer][j].y0 - 9, x + 13,
-                    g_war_trophy_money_digit_polys[buffer][j].y0 - 9);
+                pn = (POLY_FT4*)((s32)s_war_trophy_money_next_digit_polys + off);
+                setXY4(pn, x, s_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x + 13,
+                    s_war_trophy_money_digit_polys[buffer][j].y0 - 0x20, x,
+                    s_war_trophy_money_digit_polys[buffer][j].y0 - 9, x + 13,
+                    s_war_trophy_money_digit_polys[buffer][j].y0 - 9);
                 setUV4(pn, ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 0x32,
                     ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13 + 13, 0x32,
                     ((g_war_trophy_money_digit_positions_q8[j] >> 13) + 1) % 10 * 13, 0x49,
@@ -546,16 +546,16 @@ void war_trophy_gil_ticker_thread(void) {
         /* Digits appear one every 16 frames, ones digit first. */
         for (j = 0; j < digits; j++) {
             if (j * 16 < i) {
-                gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_digit_polys[buffer][j]);
-                gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_next_digit_polys[buffer][j]);
+                gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_digit_polys[buffer][j]);
+                gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_next_digit_polys[buffer][j]);
             }
         }
         gfx_draw_or_append_gpu_primitive(&areas[buffer]);
         /* The comma appears with the thousands digit. */
         if (digits >= 4 && i >= 0x31) {
-            gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_comma_polys[buffer]);
+            gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_comma_polys[buffer]);
         }
-        gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_sign_polys[buffer]);
+        gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_sign_polys[buffer]);
         if (*g_menu_input_controller & PSX_PAD_CIRCLE) {
             /* Confirm skips the settled-digit frame drawn at `finished`. */
             goto skipped;
@@ -565,14 +565,14 @@ void war_trophy_gil_ticker_thread(void) {
 
 finished:
     for (j = 0; j < digits; j++) {
-        gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_digit_polys[buffer][j]);
-        gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_next_digit_polys[buffer][j]);
+        gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_digit_polys[buffer][j]);
+        gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_next_digit_polys[buffer][j]);
     }
     gfx_draw_or_append_gpu_primitive(&areas[buffer]);
     if (digits >= 4) {
-        gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_comma_polys[buffer]);
+        gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_comma_polys[buffer]);
     }
-    gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_sign_polys[buffer]);
+    gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_sign_polys[buffer]);
 
 skipped:
     g_sound_pending_sfx_id = SOUND_SFX_NONE;
@@ -585,20 +585,20 @@ skipped:
         for (j = 0; j < digits; j++) {
             POLY_FT4* digit_quad;
 
-            x = g_war_trophy_money_digit_polys[buffer][j].x0;
-            digit_quad = (POLY_FT4*)((s32)g_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
+            x = s_war_trophy_money_digit_polys[buffer][j].x0;
+            digit_quad = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
             setXY4(digit_quad, x, 0x80, x + 13, 0x80, x, 0x97, x + 13, 0x97);
             setUV4(digit_quad, g_war_trophy_money_digit_targets[j] * 13, 0x32,
                 g_war_trophy_money_digit_targets[j] * 13 + 13, 0x32, g_war_trophy_money_digit_targets[j] * 13, 0x49,
                 g_war_trophy_money_digit_targets[j] * 13 + 13, 0x49);
-            gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_digit_polys[buffer][j]);
+            gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_digit_polys[buffer][j]);
         }
         gfx_draw_or_append_gpu_primitive(&areas[buffer]);
         tick++;
         if (digits >= 4) {
-            gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_comma_polys[buffer]);
+            gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_comma_polys[buffer]);
         }
-        gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_sign_polys[buffer]);
+        gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_sign_polys[buffer]);
         if (tick == 60 || (*g_menu_input_controller & PSX_PAD_CIRCLE)) {
             break;
         }
@@ -616,20 +616,20 @@ skipped:
         for (j = 0; j < digits; j++) {
             POLY_FT4* digit_quad;
 
-            x = g_war_trophy_money_digit_polys[buffer][j].x0;
-            digit_quad = (POLY_FT4*)((s32)g_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
+            x = s_war_trophy_money_digit_polys[buffer][j].x0;
+            digit_quad = (POLY_FT4*)((s32)s_war_trophy_money_digit_polys + (j * 0x28 + buffer * 0xf0));
             setXY4(digit_quad, x, 0x80, x + 13, 0x80, x, 0x97, x + 13, 0x97);
             setUV4(digit_quad, g_war_trophy_money_digit_targets[j] * 13, 0x32,
                 g_war_trophy_money_digit_targets[j] * 13 + 13, 0x32, g_war_trophy_money_digit_targets[j] * 13, 0x49,
                 g_war_trophy_money_digit_targets[j] * 13 + 13, 0x49);
             setRGB0(digit_quad, pass, pass, pass);
-            gfx_draw_or_append_gpu_primitive(&g_war_trophy_money_digit_polys[buffer][j]);
+            gfx_draw_or_append_gpu_primitive(&s_war_trophy_money_digit_polys[buffer][j]);
         }
         gfx_draw_or_append_gpu_primitive(&areas[buffer]);
-        /* Loading the base first keeps `la g_war_trophy_money_comma_polys` above buffer * 40. */
-        commas = g_war_trophy_money_comma_polys;
+        /* Loading the base first keeps `la s_war_trophy_money_comma_polys` above buffer * 40. */
+        commas = s_war_trophy_money_comma_polys;
         comma = commas + buffer;
-        sign = &g_war_trophy_money_sign_polys[buffer];
+        sign = &s_war_trophy_money_sign_polys[buffer];
         setRGB0(comma, pass, pass, pass);
         setRGB0(sign, pass, pass, pass);
         if (digits >= 4) {

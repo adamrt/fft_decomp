@@ -116,6 +116,7 @@ typedef struct menu_icon_record {
     s32 _unknown_74;          /* 0x74 */
     s32 _unknown_78;          /* 0x78 */
 } menu_icon_record_t;
+typedef char menu_icon_record_size_must_be_124[sizeof(menu_icon_record_t) == 124 ? 1 : -1];
 
 void menu_select_icon_cluts(menu_icon_sprites_t* frame);
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame);

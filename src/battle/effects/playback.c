@@ -607,11 +607,11 @@ static file_extent_t s_disc_extents[EFFECT_FILE_ID_COUNT] = {
     { 71128, 45056 },
     { 71150, 0 },
 };
+static s32 s_effect_playback_phase = 0; /* effect_playback_phase_e */
 
 extern effect_file_header_t* g_effect_file_data_ptrs[EFFECT_FILE_ID_COUNT];
 extern u8 g_effect_load_state; /* playback_load_state_e */
 extern s16 g_effect_load_countdown;
-extern s32 g_effect_playback_phase; /* effect_playback_phase_e */
 
 /* State-record selection and dispatch. */
 extern s16 g_effect_current_record_index;
@@ -962,7 +962,7 @@ void effect_playback_request(u32 packed, s32 ability, const effect_context_t* so
 
     if (g_effect_id >= 0) {
         g_effect_id &= EFFECT_ABILITY_FILE_MASK;
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
+        s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
         if (g_effect_secondary_by_charge_animation[packed & 0xffff] != 0) {
             g_effect_secondary_charge_id
                 = effect_secondary_init(g_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
@@ -1016,21 +1016,21 @@ s32 effect_is_item_ability(s32 ability_id) {
 /* Releases a requested effect: update_stage starts it on its
  * next frame. */
 void effect_playback_start(void) {
-    if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
+    if (s_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+        s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
     }
 }
 
 /* Drops a requested effect that has not been released. */
 void effect_playback_cancel_request(void) {
-    if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+    if (s_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+        s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
     }
 }
 
 /* The current effect playback phase (effect_playback_phase_e). */
 s32 effect_playback_get_phase(void) {
-    return g_effect_playback_phase;
+    return s_effect_playback_phase;
 }
 
 /* Runs the loaded effect file one frame and returns 1 while it plays.
@@ -1048,7 +1048,7 @@ static s32 update_stage(void) {
     s32 id = g_effect_allocated_record_head;
     s32 next;
 
-    switch (g_effect_playback_phase) {
+    switch (s_effect_playback_phase) {
     case EFFECT_PLAYBACK_PHASE_IDLE:
         result = 0;
         break;
@@ -1059,7 +1059,7 @@ static s32 update_stage(void) {
         map_freeze();
         unit_view_hide_tile_depth();
         init_palette(g_effect_id);
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
+        s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
         g_effect_script_opcode_05_value = 0;
         system_reset_frame_pacing();
         result = 1;
@@ -1087,7 +1087,7 @@ static s32 update_stage(void) {
             }
         }
         g_effect_root_record_index = start_script_instance(g_effect_script, 0, 0);
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
+        s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
         map_set_effect_data_state(MAP_EFFECT_DATA_BEGIN);
         result = 1;
         break;
@@ -1117,7 +1117,7 @@ static s32 update_stage(void) {
             map_unfreeze();
             unit_view_show_tile_depth();
             system_clear_min_vsync_interval();
-            g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+            s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;
         }
         break;
@@ -1128,7 +1128,7 @@ static s32 update_stage(void) {
         reset_frame_data_pointer();
         reset_animation_sequences_pointer();
         g_effect_root_record_index = start_script_instance(g_effect_script, 0, 0);
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
+        s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
         return 1;
     }
     return result;
@@ -1164,7 +1164,7 @@ void effect_script_init_instances(void) {
     g_effect_state_records[i].record_index = i;
     g_effect_allocated_record_head = 0;
     g_effect_current_record_index = 0;
-    g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+    s_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
 }
 
 /* Allocate one effect record and link it into the in-use list. */

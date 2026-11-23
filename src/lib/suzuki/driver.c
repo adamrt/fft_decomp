@@ -28,8 +28,8 @@ typedef char suzuki_spu_allocator_storage_size_must_be_56[sizeof(g_suzuki_sound_
 extern u32 g_suzuki_unknown_80032a34;
 extern s16 g_suzuki_unknown_80032a58;
 
+static CdlATV s_suzuki_sound_cd_mix; /* 0x80032a3c; written by Put Sound Type */
 /* Output mixing and transfer state. */
-extern CdlATV g_suzuki_sound_cd_mix;           /* 0x80032a3c; written by Put Sound Type */
 static s16 s_suzuki_sound_decoded_data_result; /* last decoded-data read result */
 extern s32 g_suzuki_sound_spu_event;           /* OpenEvent handle of suzuki_sound_spu_event_handler */
 
@@ -326,14 +326,14 @@ void suzuki_sound_put_type(s16 level) {
     if (g_suzuki_sound_driver_flags
         & (SUZUKI_SOUND_DRIVER_WIDE_OPPOSITE | SUZUKI_SOUND_DRIVER_WIDE | SUZUKI_SOUND_DRIVER_STEREO)) {
         cross = 0;
-        g_suzuki_sound_cd_mix.val0 = g_suzuki_sound_cd_mix.val2 = level;
+        s_suzuki_sound_cd_mix.val0 = s_suzuki_sound_cd_mix.val2 = level;
     } else {
         cross = level * 160 / 255;
-        g_suzuki_sound_cd_mix.val0 = g_suzuki_sound_cd_mix.val2 = cross;
+        s_suzuki_sound_cd_mix.val0 = s_suzuki_sound_cd_mix.val2 = cross;
     }
     /* Assign the mix pointer before the crossfeed stores to retain their separate address bases. */
-    mix = &g_suzuki_sound_cd_mix;
-    g_suzuki_sound_cd_mix.val1 = g_suzuki_sound_cd_mix.val3 = cross;
+    mix = &s_suzuki_sound_cd_mix;
+    s_suzuki_sound_cd_mix.val1 = s_suzuki_sound_cd_mix.val3 = cross;
     CdMix(mix);
 }
 

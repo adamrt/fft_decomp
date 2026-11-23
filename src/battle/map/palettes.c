@@ -18,13 +18,9 @@ extern u16 g_map_palette_modified_colors[][MAP_CLUT_ROW_COLOR_COUNT];
 
 /* [map_clut_row_e][color] */
 
-/* Base colors saved by the ambient and darkness animation commands. */
-static CVECTOR s_map_ambient_base_color;
-extern CVECTOR g_map_darkness_base_color;
-
 /* Runtime color fades stepped by map_palette_update_color_animations:
- * g_map_background_transition, g_map_ambient_transition and
- * g_map_darkness_transition. Channels are 16.16 fixed point;
+ * s_map_background_transition, s_map_ambient_transition and
+ * s_map_darkness_transition. Channels are 16.16 fixed point;
  * the byte fields follow the updater's use. */
 typedef struct color_transition_channels {
     s32 red;
@@ -61,16 +57,12 @@ typedef struct gradient_transition {
 } gradient_transition_t;
 typedef char gradient_transition_size_must_be_64[(sizeof(gradient_transition_t) == 64) ? 1 : -1];
 
-extern gradient_transition_t g_map_background_transition;
-extern color_transition_t g_map_ambient_transition;
-extern color_transition_t g_map_darkness_transition;
-
 /* Eight map unit slots rotate a range of colors of a CLUT row for map texture animations.
  * They are separate from the 32 serialized 0x14-byte animation instructions
  * a map's mesh file carries. */
 enum { MAP_CLUT_CYCLE_SLOT_COUNT = 8 };
 
-/* One slot of g_map_clut_cycle_states: the CLUT row and the range of its colors it
+/* One slot of s_map_clut_cycle_states: the CLUT row and the range of its colors it
  * rotates, and its frame timing. */
 typedef struct clut_cycle_state {
     u8 active;
@@ -83,7 +75,13 @@ typedef struct clut_cycle_state {
 } clut_cycle_state_t;
 typedef char clut_cycle_state_size_must_be_10[(sizeof(clut_cycle_state_t) == 10) ? 1 : -1];
 
-extern clut_cycle_state_t g_map_clut_cycle_states[MAP_CLUT_CYCLE_SLOT_COUNT];
+/* The color fades and CLUT cycles above, with the base colors the ambient and darkness animation commands save. */
+static gradient_transition_t s_map_background_transition;
+static color_transition_t s_map_ambient_transition;
+static CVECTOR s_map_ambient_base_color;
+static color_transition_t s_map_darkness_transition;
+static CVECTOR s_map_darkness_base_color;
+static clut_cycle_state_t s_map_clut_cycle_states[MAP_CLUT_CYCLE_SLOT_COUNT];
 
 /* A palette blend moves each five-bit channel by its change (-31..31) over 32 frames, or over 8
  * for the fast blend, adding one table entry per frame. PALETTE_BLEND_POSITION is how far the
@@ -644,7 +642,7 @@ static void transition_background(s32 frame_duration, const map_background_gradi
     s32 target_green;
     s32 target_blue;
 
-    base = g_map_background_transition.channels;
+    base = s_map_background_transition.channels;
     color = colors->colors;
     for (i = 0; i < 2; i++) {
         red = color[i].r << 16;
@@ -664,12 +662,12 @@ static void transition_background(s32 frame_duration, const map_background_gradi
         }
     }
     if (frame_duration != 0) {
-        g_map_background_transition.active = 1;
-        g_map_background_transition.phase = 0;
-        g_map_background_transition.tick = 0;
-        g_map_background_transition.period = frame_duration;
+        s_map_background_transition.active = 1;
+        s_map_background_transition.phase = 0;
+        s_map_background_transition.tick = 0;
+        s_map_background_transition.period = frame_duration;
     } else {
-        g_map_background_transition.active = 0;
+        s_map_background_transition.active = 0;
         current.colors[MAP_BACKGROUND_GRADIENT_TOP].r = base[0].red / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_TOP].g = base[0].green / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_TOP].b = base[0].blue / 0x10000;
@@ -684,8 +682,8 @@ static void transition_background(s32 frame_duration, const map_background_gradi
  * MAP_COLOR_MODE_BASE modes and RESTORE start from. */
 void map_light_transition_and_store_background(s32 frame_duration, const map_background_gradient_colors_t* colors) {
     transition_background(frame_duration, colors);
-    g_map_background_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
-    g_map_background_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
+    s_map_background_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
+    s_map_background_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
 }
 
 /* Fade both background gradient colors toward a target that mode (map_color_mode_e) builds from
@@ -703,7 +701,7 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
     s32 base_blue;
     s32 i;
 
-    channels = g_map_background_transition.channels;
+    channels = s_map_background_transition.channels;
     for (i = 0; i < 2; i++) {
         switch (mode) {
         case MAP_COLOR_MODE_CURRENT:
@@ -732,21 +730,21 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
         }
         case MAP_COLOR_MODE_BASE:
         case MAP_COLOR_MODE_BASE_REPEAT:
-            target_red = (g_map_background_transition.colors[i].r + red) << 16;
-            target_green = (g_map_background_transition.colors[i].g + green) << 16;
-            target_blue = (g_map_background_transition.colors[i].b + blue) << 16;
+            target_red = (s_map_background_transition.colors[i].r + red) << 16;
+            target_green = (s_map_background_transition.colors[i].g + green) << 16;
+            target_blue = (s_map_background_transition.colors[i].b + blue) << 16;
             break;
         case MAP_COLOR_MODE_BASE_HALF:
-            target_red = (g_map_background_transition.colors[i].r << 15) + (red << 16);
-            target_green = (g_map_background_transition.colors[i].g << 15) + (green << 16);
-            target_blue = (g_map_background_transition.colors[i].b << 15) + (blue << 16);
+            target_red = (s_map_background_transition.colors[i].r << 15) + (red << 16);
+            target_green = (s_map_background_transition.colors[i].g << 15) + (green << 16);
+            target_blue = (s_map_background_transition.colors[i].b << 15) + (blue << 16);
             break;
         case MAP_COLOR_MODE_BASE_GRAY: {
             s32 gray;
 
-            base_red = g_map_background_transition.colors[i].r << 16;
-            base_green = g_map_background_transition.colors[i].g << 16;
-            base_blue = g_map_background_transition.colors[i].b << 16;
+            base_red = s_map_background_transition.colors[i].r << 16;
+            base_green = s_map_background_transition.colors[i].g << 16;
+            base_blue = s_map_background_transition.colors[i].b << 16;
             gray = (base_red * 2 + base_green * 3 + base_blue) / 6;
             target_red = gray + (red << 16);
             target_green = gray + (green << 16);
@@ -756,9 +754,9 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
         case MAP_COLOR_MODE_BASE_GRAY_HALF: {
             s32 gray;
 
-            base_red = g_map_background_transition.colors[i].r << 16;
-            base_green = g_map_background_transition.colors[i].g << 16;
-            base_blue = g_map_background_transition.colors[i].b << 16;
+            base_red = s_map_background_transition.colors[i].r << 16;
+            base_green = s_map_background_transition.colors[i].g << 16;
+            base_blue = s_map_background_transition.colors[i].b << 16;
             gray = (base_red * 2 + base_green * 3 + base_blue) / 12;
             target_red = gray + (red << 16);
             target_green = gray + (green << 16);
@@ -766,12 +764,12 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
             break;
         }
         case MAP_COLOR_MODE_RESTORE:
-            target_red = g_map_background_transition.colors[i].r << 16;
-            target_green = g_map_background_transition.colors[i].g << 16;
-            target_blue = g_map_background_transition.colors[i].b << 16;
+            target_red = s_map_background_transition.colors[i].r << 16;
+            target_green = s_map_background_transition.colors[i].g << 16;
+            target_blue = s_map_background_transition.colors[i].b << 16;
             break;
         case MAP_COLOR_MODE_STOP_REPEAT:
-            g_map_background_transition.repeat = MAP_COLOR_REPEAT_OFF;
+            s_map_background_transition.repeat = MAP_COLOR_REPEAT_OFF;
             return;
         }
 
@@ -808,18 +806,18 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
         }
     }
     if (frame_duration != 0) {
-        g_map_background_transition.active = 1;
-        g_map_background_transition.phase = 0;
-        g_map_background_transition.tick = 0;
-        g_map_background_transition.period = frame_duration;
+        s_map_background_transition.active = 1;
+        s_map_background_transition.phase = 0;
+        s_map_background_transition.tick = 0;
+        s_map_background_transition.period = frame_duration;
         if (mode == MAP_COLOR_MODE_BASE_REPEAT) {
-            g_map_background_transition.repeat = MAP_COLOR_REPEAT_TINTED;
-            g_map_background_transition.repeat_color.r = red;
-            g_map_background_transition.repeat_color.g = green;
-            g_map_background_transition.repeat_color.b = blue;
+            s_map_background_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+            s_map_background_transition.repeat_color.r = red;
+            s_map_background_transition.repeat_color.g = green;
+            s_map_background_transition.repeat_color.b = blue;
         }
     } else {
-        g_map_background_transition.active = 0;
+        s_map_background_transition.active = 0;
         current.colors[MAP_BACKGROUND_GRADIENT_TOP].r = channels[0].red / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_TOP].g = channels[0].green / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_TOP].b = channels[0].blue / 0x10000;
@@ -842,7 +840,7 @@ static void transition_ambient(s32 frame_duration, const CVECTOR* color) {
     s32 target_green;
     s32 target_blue;
 
-    channels = &g_map_ambient_transition.channels;
+    channels = &s_map_ambient_transition.channels;
     /* The separate target copies reproduce the target's register copies that
      * feed the immediate-store path. */
     red = color->r << 16;
@@ -852,21 +850,21 @@ static void transition_ambient(s32 frame_duration, const CVECTOR* color) {
     blue = color->b << 16;
     target_blue = blue;
     if (frame_duration != 0) {
-        g_map_ambient_transition.channels.red_step = (red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
-        g_map_ambient_transition.channels.green_step = (green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
-        g_map_ambient_transition.channels.blue_step = (blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
+        s_map_ambient_transition.channels.red_step = (red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
+        s_map_ambient_transition.channels.green_step = (green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
+        s_map_ambient_transition.channels.blue_step = (blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
     } else {
         channels->red = target_red;
         channels->green = target_green;
         channels->blue = target_blue;
     }
     if (frame_duration != 0) {
-        g_map_ambient_transition.active = 1;
-        g_map_ambient_transition.phase = 0;
-        g_map_ambient_transition.tick = 0;
-        g_map_ambient_transition.period = frame_duration;
+        s_map_ambient_transition.active = 1;
+        s_map_ambient_transition.phase = 0;
+        s_map_ambient_transition.tick = 0;
+        s_map_ambient_transition.period = frame_duration;
     } else {
-        g_map_ambient_transition.active = 0;
+        s_map_ambient_transition.active = 0;
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
@@ -894,7 +892,7 @@ static void blend_ambient_color(s32 mode, s32 frame_duration, s32 red, s32 green
     s32 base_green;
     s32 base_blue;
 
-    channels = &g_map_ambient_transition.channels;
+    channels = &s_map_ambient_transition.channels;
     switch (mode) {
     case MAP_COLOR_MODE_CURRENT:
         target_red = (red << 16) + channels->red;
@@ -954,7 +952,7 @@ static void blend_ambient_color(s32 mode, s32 frame_duration, s32 red, s32 green
         target_blue = s_map_ambient_base_color.b << 16;
         break;
     case MAP_COLOR_MODE_STOP_REPEAT:
-        g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_OFF;
+        s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_OFF;
         return;
     }
 
@@ -990,18 +988,18 @@ static void blend_ambient_color(s32 mode, s32 frame_duration, s32 red, s32 green
         channels->blue = target_blue;
     }
     if (frame_duration != 0) {
-        g_map_ambient_transition.active = 1;
-        g_map_ambient_transition.phase = 0;
-        g_map_ambient_transition.tick = 0;
-        g_map_ambient_transition.period = frame_duration;
+        s_map_ambient_transition.active = 1;
+        s_map_ambient_transition.phase = 0;
+        s_map_ambient_transition.tick = 0;
+        s_map_ambient_transition.period = frame_duration;
         if (mode == MAP_COLOR_MODE_BASE_REPEAT) {
-            g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_TINTED;
-            g_map_ambient_transition.repeat_color.r = red;
-            g_map_ambient_transition.repeat_color.g = green;
-            g_map_ambient_transition.repeat_color.b = blue;
+            s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+            s_map_ambient_transition.repeat_color.r = red;
+            s_map_ambient_transition.repeat_color.g = green;
+            s_map_ambient_transition.repeat_color.b = blue;
         }
     } else {
-        g_map_ambient_transition.active = 0;
+        s_map_ambient_transition.active = 0;
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
@@ -1021,7 +1019,7 @@ static void transition_darkness(s32 frame_duration, const CVECTOR* color) {
     s32 target_green;
     s32 target_blue;
 
-    channels = &g_map_darkness_transition.channels;
+    channels = &s_map_darkness_transition.channels;
     /* The separate target copies reproduce the target's register copies that
      * feed the immediate-store path. */
     red = color->r << 16;
@@ -1031,21 +1029,21 @@ static void transition_darkness(s32 frame_duration, const CVECTOR* color) {
     blue = color->b << 16;
     target_blue = blue;
     if (frame_duration != 0) {
-        g_map_darkness_transition.channels.red_step = (red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
-        g_map_darkness_transition.channels.green_step = (green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
-        g_map_darkness_transition.channels.blue_step = (blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
+        s_map_darkness_transition.channels.red_step = (red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
+        s_map_darkness_transition.channels.green_step = (green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
+        s_map_darkness_transition.channels.blue_step = (blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
     } else {
         channels->red = target_red;
         channels->green = target_green;
         channels->blue = target_blue;
     }
     if (frame_duration != 0) {
-        g_map_darkness_transition.active = 1;
-        g_map_darkness_transition.phase = 0;
-        g_map_darkness_transition.tick = 0;
-        g_map_darkness_transition.period = frame_duration;
+        s_map_darkness_transition.active = 1;
+        s_map_darkness_transition.phase = 0;
+        s_map_darkness_transition.tick = 0;
+        s_map_darkness_transition.period = frame_duration;
     } else {
-        g_map_darkness_transition.active = 0;
+        s_map_darkness_transition.active = 0;
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
@@ -1057,7 +1055,7 @@ static void transition_darkness(s32 frame_duration, const CVECTOR* color) {
  * MAP_COLOR_MODE_BASE modes and RESTORE start from. */
 void map_light_transition_and_store_darkness(s32 frame_duration, const CVECTOR* color) {
     transition_darkness(frame_duration, color);
-    g_map_darkness_base_color = *color;
+    s_map_darkness_base_color = *color;
 }
 
 /* As blend_background_color, for the map darkness color
@@ -1073,7 +1071,7 @@ static void blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 gree
     s32 base_green;
     s32 base_blue;
 
-    channels = &g_map_darkness_transition.channels;
+    channels = &s_map_darkness_transition.channels;
     switch (mode) {
     case MAP_COLOR_MODE_CURRENT:
         target_red = (red << 16) + channels->red;
@@ -1099,41 +1097,41 @@ static void blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 gree
         break;
     case MAP_COLOR_MODE_BASE:
     case MAP_COLOR_MODE_BASE_REPEAT:
-        target_red = (g_map_darkness_base_color.r + red) << 16;
-        target_green = (g_map_darkness_base_color.g + green) << 16;
-        target_blue = (g_map_darkness_base_color.b + blue) << 16;
+        target_red = (s_map_darkness_base_color.r + red) << 16;
+        target_green = (s_map_darkness_base_color.g + green) << 16;
+        target_blue = (s_map_darkness_base_color.b + blue) << 16;
         break;
     case MAP_COLOR_MODE_BASE_HALF:
         /* The base color is unsigned, so the halved 16.16 value is a shift. */
-        target_red = (g_map_darkness_base_color.r << 15) + (red << 16);
-        target_green = (g_map_darkness_base_color.g << 15) + (green << 16);
-        target_blue = (g_map_darkness_base_color.b << 15) + (blue << 16);
+        target_red = (s_map_darkness_base_color.r << 15) + (red << 16);
+        target_green = (s_map_darkness_base_color.g << 15) + (green << 16);
+        target_blue = (s_map_darkness_base_color.b << 15) + (blue << 16);
         break;
     case MAP_COLOR_MODE_BASE_GRAY:
-        base_red = g_map_darkness_base_color.r << 16;
-        base_green = g_map_darkness_base_color.g << 16;
-        base_blue = g_map_darkness_base_color.b << 16;
+        base_red = s_map_darkness_base_color.r << 16;
+        base_green = s_map_darkness_base_color.g << 16;
+        base_blue = s_map_darkness_base_color.b << 16;
         gray = (base_red * 2 + base_green * 3 + base_blue) / 6;
         target_red = gray + (red << 16);
         target_green = gray + (green << 16);
         target_blue = gray + (blue << 16);
         break;
     case MAP_COLOR_MODE_BASE_GRAY_HALF:
-        base_red = g_map_darkness_base_color.r << 16;
-        base_green = g_map_darkness_base_color.g << 16;
-        base_blue = g_map_darkness_base_color.b << 16;
+        base_red = s_map_darkness_base_color.r << 16;
+        base_green = s_map_darkness_base_color.g << 16;
+        base_blue = s_map_darkness_base_color.b << 16;
         gray = (base_red * 2 + base_green * 3 + base_blue) / 12;
         target_red = gray + (red << 16);
         target_green = gray + (green << 16);
         target_blue = gray + (blue << 16);
         break;
     case MAP_COLOR_MODE_RESTORE:
-        target_red = g_map_darkness_base_color.r << 16;
-        target_green = g_map_darkness_base_color.g << 16;
-        target_blue = g_map_darkness_base_color.b << 16;
+        target_red = s_map_darkness_base_color.r << 16;
+        target_green = s_map_darkness_base_color.g << 16;
+        target_blue = s_map_darkness_base_color.b << 16;
         break;
     case MAP_COLOR_MODE_STOP_REPEAT:
-        g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_OFF;
+        s_map_darkness_transition.repeat = MAP_COLOR_REPEAT_OFF;
         return;
     }
 
@@ -1169,18 +1167,18 @@ static void blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 gree
         channels->blue = target_blue;
     }
     if (frame_duration != 0) {
-        g_map_darkness_transition.active = 1;
-        g_map_darkness_transition.phase = 0;
-        g_map_darkness_transition.tick = 0;
-        g_map_darkness_transition.period = frame_duration;
+        s_map_darkness_transition.active = 1;
+        s_map_darkness_transition.phase = 0;
+        s_map_darkness_transition.tick = 0;
+        s_map_darkness_transition.period = frame_duration;
         if (mode == MAP_COLOR_MODE_BASE_REPEAT) {
-            g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
-            g_map_darkness_transition.repeat_color.r = red;
-            g_map_darkness_transition.repeat_color.g = green;
-            g_map_darkness_transition.repeat_color.b = blue;
+            s_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+            s_map_darkness_transition.repeat_color.r = red;
+            s_map_darkness_transition.repeat_color.g = green;
+            s_map_darkness_transition.repeat_color.b = blue;
         }
     } else {
-        g_map_darkness_transition.active = 0;
+        s_map_darkness_transition.active = 0;
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
@@ -1196,7 +1194,7 @@ s32 map_palette_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_col
     clut_cycle_state_t* state;
 
     for (index = 0; index < MAP_CLUT_CYCLE_SLOT_COUNT; index++) {
-        state = &g_map_clut_cycle_states[index];
+        state = &s_map_clut_cycle_states[index];
         if (state->active == 0) {
             state->active = 1;
             state->clut_row = clut_row;
@@ -1217,7 +1215,7 @@ s32 map_palette_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_col
  * eight slots, the first of g_cursor_tile_glow_cycled_palettes. */
 s32 map_palette_stop_clut_cycle(s32 handle) {
     if (handle >= 1 && handle <= MAP_CLUT_CYCLE_SLOT_COUNT) {
-        g_map_clut_cycle_states[handle].active = 0;
+        s_map_clut_cycle_states[handle].active = 0;
         return 1;
     }
     return 0;
@@ -1231,7 +1229,7 @@ static void reset_clut_cycles(void) {
     s32 offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * sizeof(clut_cycle_state_t);
 
     do {
-        ((u8*)g_map_clut_cycle_states)[offset] = 0;
+        ((u8*)s_map_clut_cycle_states)[offset] = 0;
         offset -= sizeof(clut_cycle_state_t);
     } while (offset >= 0);
 }
@@ -1264,7 +1262,7 @@ void map_palette_update_color_animations(void) {
 
     /* Color rotations: every frame_duration frames, move each color one place and wrap the end one around. */
     for (i = 0; i < MAP_CLUT_CYCLE_SLOT_COUNT; i++) {
-        state = &g_map_clut_cycle_states[i];
+        state = &s_map_clut_cycle_states[i];
         if (state->active != 0) {
             state->elapsed_frames++;
             if (state->elapsed_frames >= state->frame_duration) {
@@ -1300,10 +1298,10 @@ void map_palette_update_color_animations(void) {
         }
     }
 
-    if (g_map_background_transition.active != 0) {
+    if (s_map_background_transition.active != 0) {
         color_transition_channels_t* channels;
 
-        channels = g_map_background_transition.channels;
+        channels = s_map_background_transition.channels;
         for (i = 0; i < 2; i++) {
             channels[i].red += channels[i].red_step;
             channels[i].green += channels[i].green_step;
@@ -1320,125 +1318,125 @@ void map_palette_update_color_animations(void) {
 
         /* A period of 4 or more advances 32 phases, one every period / 4 frames; a shorter one
          * counts period * 8 single frames. The ambient and darkness fades below work the same way. */
-        if (g_map_background_transition.period >= 4) {
-            if (++g_map_background_transition.tick >= g_map_background_transition.period >> 2) {
-                g_map_background_transition.tick = 0;
-                if (++g_map_background_transition.phase >= 0x20) {
+        if (s_map_background_transition.period >= 4) {
+            if (++s_map_background_transition.tick >= s_map_background_transition.period >> 2) {
+                s_map_background_transition.tick = 0;
+                if (++s_map_background_transition.phase >= 0x20) {
                     /* At the end a repeating blend swaps between its tint and the restored colors; others stop. */
-                    if (g_map_background_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                        blend_background_color(MAP_COLOR_MODE_RESTORE, g_map_background_transition.period, 0, 0, 0);
-                        g_map_background_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
-                    } else if (g_map_background_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        blend_background_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_background_transition.period,
-                            g_map_background_transition.repeat_color.r, g_map_background_transition.repeat_color.g,
-                            g_map_background_transition.repeat_color.b);
-                        g_map_background_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+                    if (s_map_background_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
+                        blend_background_color(MAP_COLOR_MODE_RESTORE, s_map_background_transition.period, 0, 0, 0);
+                        s_map_background_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
+                    } else if (s_map_background_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
+                        blend_background_color(MAP_COLOR_MODE_BASE_REPEAT, s_map_background_transition.period,
+                            s_map_background_transition.repeat_color.r, s_map_background_transition.repeat_color.g,
+                            s_map_background_transition.repeat_color.b);
+                        s_map_background_transition.repeat = MAP_COLOR_REPEAT_TINTED;
                     } else {
-                        g_map_background_transition.active = 0;
+                        s_map_background_transition.active = 0;
                     }
                 }
             }
-        } else if (++g_map_background_transition.phase >= g_map_background_transition.period * 8) {
-            if (g_map_background_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                blend_background_color(MAP_COLOR_MODE_RESTORE, g_map_background_transition.period, 0, 0, 0);
-                g_map_background_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
-            } else if (g_map_background_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                blend_background_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_background_transition.period,
-                    g_map_background_transition.repeat_color.r, g_map_background_transition.repeat_color.g,
-                    g_map_background_transition.repeat_color.b);
-                g_map_background_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+        } else if (++s_map_background_transition.phase >= s_map_background_transition.period * 8) {
+            if (s_map_background_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
+                blend_background_color(MAP_COLOR_MODE_RESTORE, s_map_background_transition.period, 0, 0, 0);
+                s_map_background_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
+            } else if (s_map_background_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
+                blend_background_color(MAP_COLOR_MODE_BASE_REPEAT, s_map_background_transition.period,
+                    s_map_background_transition.repeat_color.r, s_map_background_transition.repeat_color.g,
+                    s_map_background_transition.repeat_color.b);
+                s_map_background_transition.repeat = MAP_COLOR_REPEAT_TINTED;
             } else {
-                g_map_background_transition.active = 0;
+                s_map_background_transition.active = 0;
             }
         }
     }
 
-    transition = &g_map_ambient_transition;
+    transition = &s_map_ambient_transition;
     /* Barrier: hides the constant so active and the red channel are accessed through s0. */
     __asm__("" : "=r"(transition) : "0"(transition));
     if (transition->active != 0) {
         s32 red_level;
 
-        red_level = transition->channels.red += g_map_ambient_transition.channels.red_step;
-        g_map_ambient_transition.channels.green += g_map_ambient_transition.channels.green_step;
-        g_map_ambient_transition.channels.blue += g_map_ambient_transition.channels.blue_step;
+        red_level = transition->channels.red += s_map_ambient_transition.channels.red_step;
+        s_map_ambient_transition.channels.green += s_map_ambient_transition.channels.green_step;
+        s_map_ambient_transition.channels.blue += s_map_ambient_transition.channels.blue_step;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red_level / 0x10000;
-        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g_map_ambient_transition.channels.green / 0x10000;
-        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = g_map_ambient_transition.channels.blue / 0x10000;
+        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = s_map_ambient_transition.channels.green / 0x10000;
+        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = s_map_ambient_transition.channels.blue / 0x10000;
         map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &gradient);
 
-        if (g_map_ambient_transition.period >= 4) {
-            if (++g_map_ambient_transition.tick >= g_map_ambient_transition.period >> 2) {
-                g_map_ambient_transition.tick = 0;
-                if (++g_map_ambient_transition.phase >= 0x20) {
-                    if (g_map_ambient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                        blend_ambient_color(MAP_COLOR_MODE_RESTORE, g_map_ambient_transition.period, 0, 0, 0);
-                        g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
-                    } else if (g_map_ambient_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        blend_ambient_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_ambient_transition.period,
-                            g_map_ambient_transition.repeat_color.r, g_map_ambient_transition.repeat_color.g,
-                            g_map_ambient_transition.repeat_color.b);
-                        g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+        if (s_map_ambient_transition.period >= 4) {
+            if (++s_map_ambient_transition.tick >= s_map_ambient_transition.period >> 2) {
+                s_map_ambient_transition.tick = 0;
+                if (++s_map_ambient_transition.phase >= 0x20) {
+                    if (s_map_ambient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
+                        blend_ambient_color(MAP_COLOR_MODE_RESTORE, s_map_ambient_transition.period, 0, 0, 0);
+                        s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
+                    } else if (s_map_ambient_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
+                        blend_ambient_color(MAP_COLOR_MODE_BASE_REPEAT, s_map_ambient_transition.period,
+                            s_map_ambient_transition.repeat_color.r, s_map_ambient_transition.repeat_color.g,
+                            s_map_ambient_transition.repeat_color.b);
+                        s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_TINTED;
                     } else {
                         transition->active = 0;
                     }
                 }
             }
-        } else if (++g_map_ambient_transition.phase >= g_map_ambient_transition.period * 8) {
-            if (g_map_ambient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                blend_ambient_color(MAP_COLOR_MODE_RESTORE, g_map_ambient_transition.period, 0, 0, 0);
-                g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
-            } else if (g_map_ambient_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                blend_ambient_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_ambient_transition.period,
-                    g_map_ambient_transition.repeat_color.r, g_map_ambient_transition.repeat_color.g,
-                    g_map_ambient_transition.repeat_color.b);
-                g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+        } else if (++s_map_ambient_transition.phase >= s_map_ambient_transition.period * 8) {
+            if (s_map_ambient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
+                blend_ambient_color(MAP_COLOR_MODE_RESTORE, s_map_ambient_transition.period, 0, 0, 0);
+                s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
+            } else if (s_map_ambient_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
+                blend_ambient_color(MAP_COLOR_MODE_BASE_REPEAT, s_map_ambient_transition.period,
+                    s_map_ambient_transition.repeat_color.r, s_map_ambient_transition.repeat_color.g,
+                    s_map_ambient_transition.repeat_color.b);
+                s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_TINTED;
             } else {
                 transition->active = 0;
             }
         }
     }
 
-    transition = &g_map_darkness_transition;
+    transition = &s_map_darkness_transition;
     /* Barrier: hides the constant so active and the red channel are accessed through s0. */
     __asm__("" : "=r"(transition) : "0"(transition));
     if (transition->active != 0) {
         s32 red_level;
 
-        red_level = transition->channels.red += g_map_darkness_transition.channels.red_step;
-        g_map_darkness_transition.channels.green += g_map_darkness_transition.channels.green_step;
-        g_map_darkness_transition.channels.blue += g_map_darkness_transition.channels.blue_step;
+        red_level = transition->channels.red += s_map_darkness_transition.channels.red_step;
+        s_map_darkness_transition.channels.green += s_map_darkness_transition.channels.green_step;
+        s_map_darkness_transition.channels.blue += s_map_darkness_transition.channels.blue_step;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red_level / 0x10000;
-        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g_map_darkness_transition.channels.green / 0x10000;
-        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = g_map_darkness_transition.channels.blue / 0x10000;
+        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = s_map_darkness_transition.channels.green / 0x10000;
+        gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = s_map_darkness_transition.channels.blue / 0x10000;
         map_light_dispatch_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &gradient);
 
-        if (g_map_darkness_transition.period >= 4) {
-            if (++g_map_darkness_transition.tick >= g_map_darkness_transition.period >> 2) {
-                g_map_darkness_transition.tick = 0;
-                if (++g_map_darkness_transition.phase >= 0x20) {
-                    if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                        blend_darkness_color(MAP_COLOR_MODE_RESTORE, g_map_darkness_transition.period, 0, 0, 0);
-                        g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
-                    } else if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_darkness_transition.period,
-                            g_map_darkness_transition.repeat_color.r, g_map_darkness_transition.repeat_color.g,
-                            g_map_darkness_transition.repeat_color.b);
-                        g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+        if (s_map_darkness_transition.period >= 4) {
+            if (++s_map_darkness_transition.tick >= s_map_darkness_transition.period >> 2) {
+                s_map_darkness_transition.tick = 0;
+                if (++s_map_darkness_transition.phase >= 0x20) {
+                    if (s_map_darkness_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
+                        blend_darkness_color(MAP_COLOR_MODE_RESTORE, s_map_darkness_transition.period, 0, 0, 0);
+                        s_map_darkness_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
+                    } else if (s_map_darkness_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
+                        blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, s_map_darkness_transition.period,
+                            s_map_darkness_transition.repeat_color.r, s_map_darkness_transition.repeat_color.g,
+                            s_map_darkness_transition.repeat_color.b);
+                        s_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
                     } else {
                         transition->active = 0;
                     }
                 }
             }
-        } else if (++g_map_darkness_transition.phase >= g_map_darkness_transition.period * 8) {
-            if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                blend_darkness_color(MAP_COLOR_MODE_RESTORE, g_map_darkness_transition.period, 0, 0, 0);
-                g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
-            } else if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_darkness_transition.period,
-                    g_map_darkness_transition.repeat_color.r, g_map_darkness_transition.repeat_color.g,
-                    g_map_darkness_transition.repeat_color.b);
-                g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
+        } else if (++s_map_darkness_transition.phase >= s_map_darkness_transition.period * 8) {
+            if (s_map_darkness_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
+                blend_darkness_color(MAP_COLOR_MODE_RESTORE, s_map_darkness_transition.period, 0, 0, 0);
+                s_map_darkness_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
+            } else if (s_map_darkness_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
+                blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, s_map_darkness_transition.period,
+                    s_map_darkness_transition.repeat_color.r, s_map_darkness_transition.repeat_color.g,
+                    s_map_darkness_transition.repeat_color.b);
+                s_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
             } else {
                 transition->active = 0;
             }
@@ -1447,9 +1445,9 @@ void map_palette_update_color_animations(void) {
         /* On maps that ignore weather, color 0 of the first map CLUT follows the darkness color: 16.16
          * channels cut to five bits, with the STP bit set so the color is not transparent. */
         if (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-            red = g_map_darkness_transition.channels.red / 0x80000;
-            green = g_map_darkness_transition.channels.green / 0x80000;
-            blue = g_map_darkness_transition.channels.blue / 0x80000;
+            red = s_map_darkness_transition.channels.red / 0x80000;
+            green = s_map_darkness_transition.channels.green / 0x80000;
+            blue = s_map_darkness_transition.channels.blue / 0x80000;
             g_map_palette_modified_colors[0][0] = red + (green << 5) + (blue << 10) + 0x8000;
 
             g_map_palette_state.upload_pending = 1;
@@ -1635,9 +1633,9 @@ void map_palette_update_color_animations(void) {
 
             /* Put color 0 back on the darkness color after the blend rewrote it. */
             if (i == 0 && (g_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                red = g_map_darkness_transition.channels.red / 0x80000;
-                green = g_map_darkness_transition.channels.green / 0x80000;
-                blue = g_map_darkness_transition.channels.blue / 0x80000;
+                red = s_map_darkness_transition.channels.red / 0x80000;
+                green = s_map_darkness_transition.channels.green / 0x80000;
+                blue = s_map_darkness_transition.channels.blue / 0x80000;
                 g_map_palette_modified_colors[0][0] = red + (green << 5) + (blue << 10) + 0x8000;
             }
 
@@ -1929,14 +1927,14 @@ void map_light_init_background(void) {
     map_background_gradient_colors_t* colors;
 
     colors = map_light_dispatch_state_command(MAP_LIGHT_COMMAND_GET_BACKGROUND_GRADIENT, colors);
-    g_map_background_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
-    g_map_background_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
-    g_map_background_transition.channels[0].red = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].r << 16;
-    g_map_background_transition.channels[0].green = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].g << 16;
-    g_map_background_transition.channels[0].blue = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].b << 16;
-    g_map_background_transition.channels[1].red = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r << 16;
-    g_map_background_transition.channels[1].green = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g << 16;
-    g_map_background_transition.channels[1].blue = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b << 16;
+    s_map_background_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
+    s_map_background_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
+    s_map_background_transition.channels[0].red = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].r << 16;
+    s_map_background_transition.channels[0].green = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].g << 16;
+    s_map_background_transition.channels[0].blue = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].b << 16;
+    s_map_background_transition.channels[1].red = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r << 16;
+    s_map_background_transition.channels[1].green = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g << 16;
+    s_map_background_transition.channels[1].blue = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b << 16;
 }
 
 /* Seed the ambient light fade from the color the map loaded: the base color and
@@ -1949,9 +1947,9 @@ void map_light_init_ambient(void) {
 
     color = map_light_dispatch_state_command(MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR, color);
     s_map_ambient_base_color = *color;
-    g_map_ambient_transition.channels.red = color->r << 16;
-    g_map_ambient_transition.channels.green = color->g << 16;
-    g_map_ambient_transition.channels.blue = color->b << 16;
+    s_map_ambient_transition.channels.red = color->r << 16;
+    s_map_ambient_transition.channels.green = color->g << 16;
+    s_map_ambient_transition.channels.blue = color->b << 16;
 }
 
 /* Seed the darkness fade from the map's current darkness color: the base color
@@ -1963,10 +1961,10 @@ void map_light_init_darkness(void) {
     CVECTOR* color;
 
     color = map_light_dispatch_state_command(MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR, color);
-    g_map_darkness_base_color = *color;
-    g_map_darkness_transition.channels.red = color->r << 16;
-    g_map_darkness_transition.channels.green = color->g << 16;
-    g_map_darkness_transition.channels.blue = color->b << 16;
+    s_map_darkness_base_color = *color;
+    s_map_darkness_transition.channels.red = color->r << 16;
+    s_map_darkness_transition.channels.green = color->g << 16;
+    s_map_darkness_transition.channels.blue = color->b << 16;
 }
 
 /* Upload the pending CLUT rows as one image to the lines below the rows, and
@@ -2021,10 +2019,10 @@ void map_palette_init_state(void) {
         g_map_palette_state.clut_rows[clut_row].components[0].delta_biased.r = 0;
     }
 
-    g_map_background_transition.active = 0;
-    g_map_background_transition.repeat = MAP_COLOR_REPEAT_OFF;
-    g_map_ambient_transition.active = 0;
-    g_map_ambient_transition.repeat = MAP_COLOR_REPEAT_OFF;
+    s_map_background_transition.active = 0;
+    s_map_background_transition.repeat = MAP_COLOR_REPEAT_OFF;
+    s_map_ambient_transition.active = 0;
+    s_map_ambient_transition.repeat = MAP_COLOR_REPEAT_OFF;
     g_map_palette_state.clut_rows[MAP_CLUT_ROW_SPRITES].blend_as_row = 0;
     g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].blend_as_row = 0;
     g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNIT_SHADOWS].blend_as_row = 0;

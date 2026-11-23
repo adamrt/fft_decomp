@@ -21,6 +21,7 @@ typedef struct party_bio_variable_record {
     u16 character_identities[3];
     u16 variable;
 } party_bio_variable_record_t;
+typedef char party_bio_variable_record_size_must_be_8[sizeof(party_bio_variable_record_t) == 8 ? 1 : -1];
 
 extern party_bio_variable_record_t g_party_bio_update_records[11];
 

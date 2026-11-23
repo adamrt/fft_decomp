@@ -183,7 +183,7 @@ extern menu_window_rect_source_t g_save_slot_window;
 
 /* CARD graphics */
 /*
- * CARD.OUT's double-buffered graphics context. g_save_gfx_context_base points
+ * CARD.OUT's double-buffered graphics context. s_save_gfx_context_base points
  * at the two-element array and g_save_gfx_context at the active buffer.
  *
  * The 0xf4 stride is established twice by the matching code:

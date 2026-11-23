@@ -40,8 +40,8 @@ typedef struct fullscreen_graphic {
 typedef char fullscreen_graphic_size_must_be_32[sizeof(fullscreen_graphic_t) == 32 ? 1 : -1];
 
 extern fullscreen_graphic_t g_fullscreen_graphics[13];
-extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_a[2][4];
-extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_b[2][4];
+static POLY_GT4 s_fullscreen_graphic_chapter_primitives_a[2][4];
+static POLY_GT4 s_fullscreen_graphic_chapter_primitives_b[2][4];
 extern RECT g_fullscreen_graphic_game_over_palette_rect;
 
 /* Wait for the high overlay area, read graphic `graphic_id` into it and upload the image:
@@ -376,9 +376,9 @@ static void show_chapter_title(s32 graphic_id) {
     if (dimensions[2].source.w > 0) {
         do {
             build_chapter_title_polygons(
-                graphic_id, fade, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+                graphic_id, fade, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
             build_chapter_title_polygons(
-                graphic_id, fade, 0, 1, g_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
+                graphic_id, fade, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
             frame++;
             thread_yield();
             fade += g_script_event_speed;
@@ -388,9 +388,9 @@ static void show_chapter_title(s32 graphic_id) {
     fade = 0;
     do {
         build_chapter_title_polygons(
-            graphic_id, dimensions[2].source.w, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+            graphic_id, dimensions[2].source.w, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
         build_chapter_title_polygons(
-            graphic_id, dimensions[2].source.w, 0, 1, g_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
+            graphic_id, dimensions[2].source.w, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], 0x80);
         frame++;
         thread_yield();
         fade += g_script_event_speed;
@@ -400,9 +400,9 @@ static void show_chapter_title(s32 graphic_id) {
     fade = 0;
     do {
         build_chapter_title_polygons(
-            graphic_id, dimensions[2].source.w, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
+            graphic_id, dimensions[2].source.w, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
         build_chapter_title_polygons(
-            graphic_id, dimensions[2].source.w, 0, 1, g_fullscreen_graphic_chapter_primitives_b[frame & 1], color);
+            graphic_id, dimensions[2].source.w, 0, 1, s_fullscreen_graphic_chapter_primitives_b[frame & 1], color);
         color -= g_script_event_speed;
         thread_yield();
         fade += g_script_event_speed;
@@ -442,7 +442,7 @@ static void show_game_over(s32 graphic_id) {
     if (dimensions[2].source.h > 0) {
         do {
             build_game_over_polygons(
-                graphic_id, fade, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+                graphic_id, fade, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
             frame++;
             thread_yield();
             fade += g_script_event_speed;
@@ -452,7 +452,7 @@ static void show_game_over(s32 graphic_id) {
     fade = 0;
     do {
         build_game_over_polygons(
-            graphic_id, dimensions[2].source.h, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
+            graphic_id, dimensions[2].source.h, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], 0x80);
         frame++;
         thread_yield();
         fade += g_script_event_speed;
@@ -462,7 +462,7 @@ static void show_game_over(s32 graphic_id) {
     fade = 0;
     do {
         build_game_over_polygons(
-            graphic_id, dimensions[2].source.h, 2, 0, g_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
+            graphic_id, dimensions[2].source.h, 2, 0, s_fullscreen_graphic_chapter_primitives_a[frame & 1], color);
         color -= g_script_event_speed;
         thread_yield();
         fade += g_script_event_speed;

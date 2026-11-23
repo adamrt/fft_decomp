@@ -27,7 +27,9 @@ extern clut_t g_sprite_weapon_clut;
 
 /* Two animation_e for each set: the one that starts a charge and
  * the one held while the unit charges or performs; 0 for none. */
-extern u8 g_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT];
+static u8 s_animation_ability_charge_sets[ANIMATION_CHARGE_SET_COUNT][ANIMATION_CHARGE_VARIANT_COUNT]
+    = { 0x2a, 0x22, 0x2a, 0x2b, 0x2a, 0x2b, 0x2a, 0x2b, 0, 0x22, 0x2a, 0x2b, 0x2a, 0x2b, 0, 0x22, 0x2a, 0x22, 0, 0x2b,
+          0x2a, 0x22, 0x2a, 0x2b, 0x2a, 0x22, 0, 0x28, 0, 0x29, 0, 0x75, 0x2a, 0x2b, 0, 0x16, 0, 0x22, 0, 0 };
 
 /* Three animation_e variants per item_type_e; animation_select_weapon_attack chooses the column. */
 extern u8 g_animation_weapon_attacks[][3];
@@ -212,7 +214,7 @@ static void set_item_ability_animation(map_unit_t* unit, map_unit_t* target) {
 /* Start the first animation of the used ability's charge set, if it has one. */
 void animation_start_ability_charge(map_unit_t* unit) {
     u8 set_id = g_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
-    u8 animation = g_animation_ability_charge_sets[set_id][0];
+    u8 animation = s_animation_ability_charge_sets[set_id][0];
 
     if (animation != 0) {
         animation_store_with_facing(animation, unit->facing, unit);
@@ -223,7 +225,7 @@ void animation_start_ability_charge(map_unit_t* unit) {
  * while charging or performing; the submerged idle in water two or more deep. */
 void animation_start_ability_charge_hold(map_unit_t* unit) {
     u8 set_id = g_ability_animation_data[unit->used_ability_id].charge_animation_set_id;
-    u8 animation = g_animation_ability_charge_sets[set_id][1];
+    u8 animation = s_animation_ability_charge_sets[set_id][1];
     u8 water_depth;
     s32 selected_animation;
 

@@ -9,7 +9,7 @@
 #include "psx/types.h"
 
 /* Independent 15-row, 16-column grids for BATTLE and WORLD. */
-extern u8 g_gfx_texture_allocation_grid[15][16];
+static u8 s_gfx_texture_allocation_grid[15][16] = { 0 };
 
 static s32 s_gfx_free_rect_pixels[4];
 /* Texture allocator scratch rectangles, in pixels and allocation cells. */
@@ -22,7 +22,7 @@ void gfx_clear_texture_allocation_grid(void) {
 
     for (row = 0; row < 15; row++) {
         for (column = 15; column >= 0; column--) {
-            g_gfx_texture_allocation_grid[row][column] = 0;
+            s_gfx_texture_allocation_grid[row][column] = 0;
         }
     }
 }
@@ -52,19 +52,19 @@ void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
     }
     for (row = 0; row < 16 - height_cells; row++) {
         for (column = 0; column <= 16 - width_cells; column++) {
-            if (g_gfx_texture_allocation_grid[row][column] != 0) {
+            if (s_gfx_texture_allocation_grid[row][column] != 0) {
                 continue;
             }
             for (y = row; y < row + height_cells; y++) {
                 for (x = column; x < column + width_cells; x++) {
-                    if (g_gfx_texture_allocation_grid[y][x] == 0xFF) {
+                    if (s_gfx_texture_allocation_grid[y][x] == 0xFF) {
                         goto next;
                     }
                 }
             }
             for (y = row; y < row + height_cells; y++) {
                 for (x = column; x < column + width_cells; x++) {
-                    g_gfx_texture_allocation_grid[y][x] = 0xFF;
+                    s_gfx_texture_allocation_grid[y][x] = 0xFF;
                 }
             }
             x = column * 16;
@@ -129,7 +129,7 @@ void gfx_free_texture_rect(RECT* rect) {
                 if (x >= 16 || y >= 15) {
                     thread_current_exit();
                 }
-                g_gfx_texture_allocation_grid[y][x] = 0;
+                s_gfx_texture_allocation_grid[y][x] = 0;
             }
         }
     }

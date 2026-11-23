@@ -23,10 +23,8 @@
 #include "psx/types.h"
 
 /* tutorial playback state */
-extern tutorial_state_t g_tutorial_state;
-extern s16 g_tutorial_wait_time_remaining;
 static s16 s_tutorial_highlight_brightness;
-extern s16 g_tutorial_buttons;
+static s16 s_tutorial_buttons;
 
 /* The tutorial command stream. Commands below 0x10 are one-byte shifts; the rest are the id (1 byte) followed by
  * their parameters: 0x10 message id (2) and y (1), 0x11 message id (2), 0x13 x, y, size, width mod and height mod
@@ -73,6 +71,8 @@ typedef struct tutorial_wait_instruction {
 } tutorial_wait_instruction_t;
 typedef char tutorial_wait_instruction_size_must_be_2[sizeof(tutorial_wait_instruction_t) == 2 ? 1 : -1];
 
+static s16 s_tutorial_wait_time_remaining = 0;
+static tutorial_state_t s_tutorial_state = { 0 };
 static u8* s_tutorial_command_ptr = 0;
 static s32 s_tutorial_command_active = 0;
 static u32 s_tutorial_button_input = 0;
@@ -98,7 +98,7 @@ static s32 tutorial_opcode_17_end(void);
 /* The pad state tutorial_update read this frame; the tutorial text
  * thread takes its button input from it. */
 s32 tutorial_get_buttons(void) {
-    return g_tutorial_buttons;
+    return s_tutorial_buttons;
 }
 
 /*
@@ -106,7 +106,7 @@ s32 tutorial_get_buttons(void) {
  *
  * Loads the tutorial's files and binds its command stream and messages, then
  * swaps the game state for the tutorial's: the current game is serialized
- * into g_tutorial_state.saved_game, the 0x2000-byte tutorial save image
+ * into s_tutorial_state.saved_game, the 0x2000-byte tutorial save image
  * at sector 0x11A7F is loaded in its place (keeping the player's job-change
  * equip and sound options, with unequippable items shown) and unpacked into
  * the globals.
@@ -114,12 +114,12 @@ s32 tutorial_get_buttons(void) {
 void tutorial_start(s32 index) {
     g_tutorial_id = index;
     if (index != 0) {
-        tutorial_load_files(index, &g_tutorial_state);
-        s_tutorial_command_ptr = g_tutorial_state.script;
-        g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = g_tutorial_state.messages;
+        tutorial_load_files(index, &s_tutorial_state);
+        s_tutorial_command_ptr = s_tutorial_state.script;
+        g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = s_tutorial_state.messages;
         save_init_screen();
         save_image_build(-1);
-        bcopy(g_save_work_buffer, &g_tutorial_state.saved_game, sizeof(g_tutorial_state.saved_game));
+        bcopy(g_save_work_buffer, &s_tutorial_state.saved_game, sizeof(s_tutorial_state.saved_game));
         file_load_into_buffer_checked(DISC_SECTOR_MENU_FFTSAVE_DAT, 0x2000, g_save_work_buffer);
         g_save_work_buffer->options.show_unequippable_items = GAME_OPTION_ON;
         g_save_work_buffer->options.max_equip_at_job_change = g_game_options.fields.max_equip_at_job_change;
@@ -151,7 +151,7 @@ s32 tutorial_update(void) {
     if (s_tutorial_button_input == INPUT_RESET_BUTTONS) {
         menu_screen_reset_game();
     }
-    g_tutorial_buttons = s_tutorial_button_input;
+    s_tutorial_buttons = s_tutorial_button_input;
     if (s_tutorial_highlight_brightness != 0) {
         update_highlight();
     }
@@ -189,9 +189,9 @@ static s32 tutorial_opcode_17_end(void) {
     if (s_tutorial_command_active != 0) {
         if (fade_menu_update_out() == 0) {
             g_tutorial_id = 0;
-            heap_release_block(g_tutorial_state.messages);
-            heap_release_block(g_tutorial_state.script);
-            bcopy(&g_tutorial_state.saved_game, g_save_work_buffer, sizeof(g_tutorial_state.saved_game));
+            heap_release_block(s_tutorial_state.messages);
+            heap_release_block(s_tutorial_state.script);
+            bcopy(&s_tutorial_state.saved_game, g_save_work_buffer, sizeof(s_tutorial_state.saved_game));
             save_image_restore(1);
             formation_roster_build_names();
             heap_release_block(g_save_work_buffer);
@@ -396,14 +396,14 @@ static void draw_highlight(s32 brightness) {
  * address of the operand field preserves the -O0 byte-address steps. */
 static void tutorial_opcode_15_wait_time(void) {
     if (s_tutorial_command_active != 0) {
-        g_tutorial_wait_time_remaining -= menu_get_event_speed();
-        if (g_tutorial_wait_time_remaining < 0) {
+        s_tutorial_wait_time_remaining -= menu_get_event_speed();
+        if (s_tutorial_wait_time_remaining < 0) {
             s_tutorial_command_active = 0;
             s_tutorial_command_ptr += 2;
         }
     } else {
         s_tutorial_command_active = 1;
-        g_tutorial_wait_time_remaining = *(&((tutorial_wait_instruction_t*)s_tutorial_command_ptr)->frames);
+        s_tutorial_wait_time_remaining = *(&((tutorial_wait_instruction_t*)s_tutorial_command_ptr)->frames);
     }
 }
 

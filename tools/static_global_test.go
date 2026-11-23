@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestStaticTypeSize(t *testing.T) {
 	headers := "enum { UNIT_SLOT_COUNT = 21, ROWS = 0x4 };\ntypedef char thing_size_must_be_12[1];\n"
@@ -58,5 +61,66 @@ func TestStaticExternDeclarationKeepsTrailingComment(t *testing.T) {
 	}
 	if d := found[0]; d.typeText != "u8" || d.dimensions != "[4]" || d.trailing != " /* flags */" {
 		t.Fatalf("declaration = %+v", d)
+	}
+}
+
+func TestStaticCodeBlanksComments(t *testing.T) {
+	source := "u8 a; /* g_x is\n used */ u8 b; // g_y\nchar* s = \"/* g_z */\";\n"
+	got := string(staticCode([]byte(source)))
+	for _, name := range []string{"g_x", "g_y"} {
+		if strings.Contains(got, name) {
+			t.Errorf("comment mention %s survived: %q", name, got)
+		}
+	}
+	if !strings.Contains(got, "g_z") || strings.Count(got, "\n") != 3 {
+		t.Errorf("string literal or newlines changed: %q", got)
+	}
+}
+
+func TestStaticPlace(t *testing.T) {
+	data := []rodataSpec{{Addr: 0x1000, Size: 8}}
+	bss := []rodataSpec{{Addr: 0x2000, Size: 4}}
+	cases := []struct {
+		name               string
+		addr               uint32
+		size, element      int
+		zero               bool
+		data, bss          []rodataSpec
+		prevEnd            uint32
+		prevData, nextData bool
+		kind, anchor       string
+		refused            bool
+	}{
+		{"append data", 0x1008, 4, 4, false, data, bss, 0, false, false, "data", "after", false},
+		{"prepend data", 0x0ff8, 8, 4, true, data, bss, 0, false, true, "data", "before", false},
+		{"prepend byte before a byte row", 0x0ffc, 1, 1, true, []rodataSpec{{Addr: 0x1000, Size: 1}}, bss, 0, false, true, "", "", true},
+		{"prepend byte before a word row", 0x0ffc, 1, 1, true, data, bss, 0, false, true, "data", "before", false},
+		{"first data after another unit", 0x0ff8, 4, 4, false, nil, bss, 0x0ff6, true, false, "data", "", false},
+		{"first data, zero, data follows", 0x0ff8, 4, 4, true, nil, nil, 0x0ff8, true, true, "data", "", false},
+		{"append unaligned byte to bss", 0x2004 + 1, 1, 1, true, data, []rodataSpec{{Addr: 0x2000, Size: 5}}, 0, false, false, "bss", "after", false},
+		{"append halfword to bss", 0x2004, 2, 2, true, data, bss, 0, false, false, "bss", "after", false},
+		{"prepend bss aligned", 0x1ffc, 4, 4, true, data, bss, 0, false, false, "bss", "before", false},
+		{"prepend bss unaligned", 0x1ffe, 2, 2, true, data, bss, 0, false, false, "", "", true},
+		{"first bss unaligned", 0x3001, 1, 1, true, data, nil, 0, false, false, "", "", true},
+		{"first bss aligned", 0x3000, 1, 1, true, data, nil, 0, false, false, "bss", "", false},
+		{"misaligned halfword append", 0x2005, 2, 2, true, data, []rodataSpec{{Addr: 0x2000, Size: 5}}, 0, false, false, "", "", true},
+	}
+	for _, c := range cases {
+		got := staticPlace(c.addr, c.size, c.element, c.zero, c.data, c.bss, c.prevEnd, c.prevData, c.nextData)
+		if c.refused != (got.reason != "") || (!c.refused && (got.kind != c.kind || got.anchor != c.anchor)) {
+			t.Errorf("%s: got %+v", c.name, got)
+		}
+	}
+}
+
+func TestStaticDefinedBelow(t *testing.T) {
+	text := "static u8 s_first;\n\ntypedef struct thing {\n    u8 a;\n} thing_t;\nenum { THING_COUNT = 4 };\n\nextern thing_t g_things[THING_COUNT];\n"
+	start := strings.Index(text, "extern")
+	declaration := &staticDeclaration{text: text, start: start, end: len(text), typeText: "thing_t", dimensions: "[THING_COUNT]"}
+	if got := staticDefinedBelow(declaration, []string{"s_first"}, true); got != "thing_t" {
+		t.Errorf("next to s_first: got %q, want thing_t", got)
+	}
+	if got := staticDefinedBelow(declaration, nil, true); got != "" {
+		t.Errorf("in place of the extern: got %q, want none", got)
 	}
 }

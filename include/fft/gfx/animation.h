@@ -235,7 +235,7 @@ void animation_update_status_changes(struct map_unit* unit);
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation
  * set, its attack animation and the message shown when it hits. */
 typedef struct animation_ability_data {
-    u8 charge_animation_set_id; /* row of g_animation_ability_charge_sets */
+    u8 charge_animation_set_id; /* row of s_animation_ability_charge_sets */
     u8 attack_animation;        /* animation_e, or ANIMATION_ATTACK_USE_WEAPON or _USE_ITEM */
     u8 text_display; /* low byte of the message text id (0x1800 | this) shown when the ability hits; 0 none */
 } animation_ability_data_t;

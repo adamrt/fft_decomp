@@ -9,7 +9,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern save_gfx_context_t* g_save_gfx_context_base;
+static save_gfx_context_t* s_save_gfx_context_base;
 
 /*
  * Submit the finished CARD frame and swap to the other graphics context.
@@ -28,7 +28,7 @@ void menu_gfx_present_frame(s32 first_otag, s32 draw_otag) {
     g_gfx_tile_count = 0;
     while (DrawSync(1) != 0) { }
     VSync(g_menu_event_speed);
-    context = g_save_gfx_context_base;
+    context = s_save_gfx_context_base;
     if (g_save_gfx_context == context) {
         context = context + 1;
     }
@@ -69,18 +69,18 @@ void save_gfx_init_contexts(save_gfx_context_t* contexts, u32* otags, s32 unused
     s32 unused_19, s32 unused_20, s32 unused_21, s32 unused_22, s32 unused_23, s32 unused_24) {
     s32 i;
 
-    g_save_gfx_context_base = contexts;
+    s_save_gfx_context_base = contexts;
     g_save_gfx_context = contexts;
     for (i = 0; i < 2; i++) {
-        g_save_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
-        g_save_gfx_context_base[i].textured_quads = polygons + g_gfx_poly_ft4_capacity * i;
-        g_save_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
-        init_primitive_buffers(&g_save_gfx_context_base[i]);
-        SetDefDrawEnv(&g_save_gfx_context_base[i].draw_environment, 0, i * 0xf0, 0x100, 0xf0);
-        SetDefDispEnv(&g_save_gfx_context_base[i].display_environment, 0, i == 0 ? 0xf0 : 0, 0x100, 0xf0);
-        g_save_gfx_context_base[i].draw_environment.isbg = 0;
-        setRGB0(&g_save_gfx_context_base[i].draw_environment, 0, 0, 0);
-        g_save_gfx_context_base[i].draw_environment.ofs[0] = -0x80;
+        s_save_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
+        s_save_gfx_context_base[i].textured_quads = polygons + g_gfx_poly_ft4_capacity * i;
+        s_save_gfx_context_base[i].tiles = tiles + g_gfx_tile_capacity * i;
+        init_primitive_buffers(&s_save_gfx_context_base[i]);
+        SetDefDrawEnv(&s_save_gfx_context_base[i].draw_environment, 0, i * 0xf0, 0x100, 0xf0);
+        SetDefDispEnv(&s_save_gfx_context_base[i].display_environment, 0, i == 0 ? 0xf0 : 0, 0x100, 0xf0);
+        s_save_gfx_context_base[i].draw_environment.isbg = 0;
+        setRGB0(&s_save_gfx_context_base[i].draw_environment, 0, 0, 0);
+        s_save_gfx_context_base[i].draw_environment.ofs[0] = -0x80;
     }
     menu_gfx_present_frame(0, -1);
     menu_gfx_present_frame(0, -1);

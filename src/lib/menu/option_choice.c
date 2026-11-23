@@ -27,7 +27,7 @@
 #include "psx/types.h"
 
 extern menu_entry_t g_option_icon_thread_param;
-extern menu_icon_record_t g_option_picker_icon_records[2];
+static menu_icon_record_t s_option_picker_icon_records[2];
 /* Picker widths in pixels and choice counts, by option row including Initialize. */
 static s32 s_option_choice_widths[GAME_OPTION_MENU_ROW_COUNT]
     = { 50, 50, 50, 52, 50, 38, 38, 38, 38, 38, 38, 38, 52, 62 };
@@ -103,10 +103,10 @@ void option_choice_thread(void) {
     }
     param->text_image.source.w -= 4;
 
-    menu_build_window_sprites(&rect, param, &g_option_picker_icon_records[0]);
+    menu_build_window_sprites(&rect, param, &s_option_picker_icon_records[0]);
     /* The loop draws from the two icon records alternately. */
     mem_copy_bytes_nonempty(
-        &g_option_picker_icon_records[1], &g_option_picker_icon_records[0], sizeof(g_option_picker_icon_records[1]));
+        &s_option_picker_icon_records[1], &s_option_picker_icon_records[0], sizeof(s_option_picker_icon_records[1]));
 
     LoadImage(&rect, buffer);
     menu_free_memory(buffer);
@@ -116,7 +116,7 @@ void option_choice_thread(void) {
     /* `width` is reused as the frame counter. */
     for (width = 0;; width++) {
         menu_should_close_thread(input);
-        record = &g_option_picker_icon_records[width & 1].base;
+        record = &s_option_picker_icon_records[width & 1].base;
         if (menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = SOUND_SFX_CANCEL;

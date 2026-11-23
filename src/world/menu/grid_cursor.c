@@ -25,8 +25,8 @@ static s8 s_formation_banner_state;
 extern help_navigation_record_t g_menu_screen_grid_default_cells[];
 extern help_navigation_record_t g_menu_screen_grid_shop_cells[];
 extern help_navigation_record_t g_menu_screen_grid_shop_scrolled_cells[];
-extern help_navigation_record_t* g_menu_screen_grid_active_cells;
-extern u8 g_menu_screen_grid_selected_cell;
+static help_navigation_record_t* s_menu_screen_grid_active_cells = { 0 };
+static u8 s_menu_screen_grid_selected_cell = 0;
 extern u16 g_menu_screen_grid_cursor_anim;
 extern u8 g_menu_screen_grid_initialized;
 
@@ -75,19 +75,19 @@ void menu_screen_update_grid_cursor(s16 alternate) {
         }
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         g_menu_screen_grid_initialized = 1;
-        g_menu_screen_grid_selected_cell = 0;
+        s_menu_screen_grid_selected_cell = 0;
         if (g_menu_screen_grid_id == MENU_GRID_HELP_BANNER_TOP) {
-            g_menu_screen_grid_active_cells = g_menu_screen_grid_shop_cells;
+            s_menu_screen_grid_active_cells = g_menu_screen_grid_shop_cells;
         } else if (g_menu_screen_grid_id == MENU_GRID_HELP_BANNER_BOTTOM) {
-            g_menu_screen_grid_active_cells = g_menu_screen_grid_shop_scrolled_cells;
+            s_menu_screen_grid_active_cells = g_menu_screen_grid_shop_scrolled_cells;
         } else {
-            g_menu_screen_grid_active_cells = g_menu_screen_grid_default_cells;
+            s_menu_screen_grid_active_cells = g_menu_screen_grid_default_cells;
         }
     }
     busy = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
     if (busy == 0) {
         input = g_menu_screen_input_primary_repeat_latched;
-        cell = g_menu_screen_grid_selected_cell;
+        cell = s_menu_screen_grid_selected_cell;
         if (input & PSX_PAD_CROSS) {
             s32 menu_id = g_menu_screen_grid_id;
             g_menu_screen_grid_id = MENU_GRID_HELP_NONE;
@@ -96,40 +96,40 @@ void menu_screen_update_grid_cursor(s16 alternate) {
             g_help_message_text_id = menu_id;
         } else if (input & PSX_PAD_CIRCLE) {
             text_id
-                = g_menu_screen_grid_active_cells[cell].value != 0 ? *g_menu_screen_grid_active_cells[cell].value : 0;
-            if (g_menu_screen_grid_selected_cell < 0x12 || g_menu_screen_grid_selected_cell >= 0x1C || text_id != 0) {
+                = s_menu_screen_grid_active_cells[cell].value != 0 ? *s_menu_screen_grid_active_cells[cell].value : 0;
+            if (s_menu_screen_grid_selected_cell < 0x12 || s_menu_screen_grid_selected_cell >= 0x1C || text_id != 0) {
                 /* This grid adds the base as an unsigned 16-bit text ID. */
                 g_help_message_text_id
-                    = text_id + (u16)g_menu_screen_grid_active_cells[g_menu_screen_grid_selected_cell].help_base;
+                    = text_id + (u16)s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].help_base;
                 help_start_text(DIALOG_POSITION_CENTER);
             }
         } else if (input & PSX_PAD_UP) {
-            cell = g_menu_screen_grid_active_cells[cell].destination[0];
+            cell = s_menu_screen_grid_active_cells[cell].destination[0];
         } else if (input & PSX_PAD_DOWN) {
-            cell = g_menu_screen_grid_active_cells[cell].destination[1];
+            cell = s_menu_screen_grid_active_cells[cell].destination[1];
         } else if (input & PSX_PAD_RIGHT) {
-            cell = g_menu_screen_grid_active_cells[cell].destination[2];
+            cell = s_menu_screen_grid_active_cells[cell].destination[2];
         } else if (input & PSX_PAD_LEFT) {
-            cell = g_menu_screen_grid_active_cells[cell].destination[3];
+            cell = s_menu_screen_grid_active_cells[cell].destination[3];
         }
         /* The recruit preview grid steps over cell 7 between cells 6 and 8. */
         if (g_menu_screen_grid_id == MENU_GRID_HELP_RECRUIT_PREVIEW) {
-            if (g_menu_screen_grid_selected_cell == 6 && cell == 7) {
+            if (s_menu_screen_grid_selected_cell == 6 && cell == 7) {
                 cell = 8;
             }
-            if (g_menu_screen_grid_selected_cell == 8 && cell == 7) {
+            if (s_menu_screen_grid_selected_cell == 8 && cell == 7) {
                 cell = 6;
             }
         }
-        if (cell != g_menu_screen_grid_selected_cell) {
+        if (cell != s_menu_screen_grid_selected_cell) {
             g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
-            g_menu_screen_grid_selected_cell = cell;
+            s_menu_screen_grid_selected_cell = cell;
         }
     }
-    cursor.x = g_menu_screen_grid_active_cells[g_menu_screen_grid_selected_cell].x;
-    cursor.y = g_menu_screen_grid_active_cells[g_menu_screen_grid_selected_cell].y;
+    cursor.x = s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].x;
+    cursor.y = s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].y;
     gfx_set_otag_index(0x3C);
-    if (g_menu_screen_grid_active_cells[g_menu_screen_grid_selected_cell].vertical_cursor != 0) {
+    if (s_menu_screen_grid_active_cells[s_menu_screen_grid_selected_cell].vertical_cursor != 0) {
         cursor.y++;
         menu_draw_bouncing_cursor(&cursor, &g_menu_screen_grid_cursor_anim, busy);
     } else {

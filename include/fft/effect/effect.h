@@ -101,8 +101,8 @@ void effect_resolve_target_world_coords(
  * particle (effect_work_record_t +0x08), stepped once a frame by
  * step_slot_motion and effect_particle_integrate_motion:
  * position gains velocity; velocity keeps (inertia -
- * g_effect_inertia_threshold) / inertia of itself, gains
- * acceleration * ONE / inertia and gains g_effect_gravity scaled by
+ * s_effect_inertia_threshold) / inertia of itself, gains
+ * acceleration * ONE / inertia and gains s_effect_gravity scaled by
  * weight (4.12 fixed point); acceleration gains acceleration_step. */
 typedef struct effect_motion {
     s16 inertia;                 /* 0x00 */

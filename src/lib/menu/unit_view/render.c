@@ -102,7 +102,7 @@ typedef enum unit_stats_panel {
     UNIT_STATS_PANEL_RIGHT_UNIT = 3     /* unit_view_right_stats_thread */
 } unit_stats_panel_e;
 
-/* Double-buffered 0x2ec-byte page of a unit stats panel (g_unit_view_stats_panel_pages; each mode's first page
+/* Double-buffered 0x2ec-byte page of a unit stats panel (s_unit_view_stats_panel_pages; each mode's first page
  * comes from g_unit_view_stats_first_page_by_mode). Status-screen primitives reuse
  * portions of this storage while the attack-preview and right-unit views are inactive. */
 typedef struct unit_view_stats_page {
@@ -129,8 +129,6 @@ typedef struct unit_view_summary_frame {
     POLY_FT4 portrait;                         /* 0xc8 */
 } unit_view_summary_frame_t;
 
-extern unit_view_stats_page_t g_unit_view_stats_panel_pages[8];
-
 /* Default placement for all five reaction-name sprite pieces. */
 extern image_layout_t g_menu_sprite_page_image_param_bases[5];
 
@@ -145,6 +143,7 @@ extern menu_number_entry_t g_unit_view_right_stats_setup[10];
 extern menu_number_entry_t g_unit_view_attack_caster_stats_setup[8];
 extern menu_number_entry_t g_unit_view_attack_target_stats_setup[8];
 static struct action_data* s_unit_view_preview_target_action;
+static unit_view_stats_page_t s_unit_view_stats_panel_pages[8];
 extern u16 g_unit_view_hovered_stats_frame_count;
 extern u8 g_unit_view_stats_first_page_by_mode[4];
 extern u16 g_unit_view_stats_bounce_step;
@@ -826,7 +825,7 @@ static void stats_panel_thread(
                 = g_menu_sprite_page_image_param_bases[3].x_screen_offset + extent_w;
         }
     }
-    page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode]];
+    page = &s_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode]];
     unit_panel_init_numeric_frame(frame_rect, &page->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
@@ -896,7 +895,7 @@ static void stats_panel_thread(
         if (running != 0 && thread_is_running_asm(running - 1) == 0) {
             running = 0;
         }
-        page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode] + (frame & 1)];
+        page = &s_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode] + (frame & 1)];
 #ifdef FFT_BATTLE
         portrait_build_unit_poly(&page->portrait, unit_id);
 #else

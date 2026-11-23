@@ -161,7 +161,7 @@ void unit_panel_copy_billboard_in(
  * and editor records from it. */
 void unit_panel_load_party_unit(s32 unused, s32 party_index);
 
-/* WLDCORE's: loads party member party_index into g_unit_panel_unit and fills the status-panel records the
+/* WLDCORE's: loads party member party_index into s_unit_panel_unit and fills the status-panel records the
  * participant detail level draws. */
 void unit_panel_prepare_party_unit(s32 party_index);
 

@@ -34,7 +34,7 @@ extern u16* g_location_script_default_base;
 /* Sound resource the sound-novel menu passes to suzuki_sound_append_resource. */
 extern struct suzuki_sound_resource* g_novel_default_sound_resource;
 extern GsOT_TAG g_world_map_ot_tags[2][16];
-extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
+static GsOT_TAG s_world_map_aux_ot_tags[2][4];
 
 static void finish_map_loop(void);
 static void draw_map_frame(void);
@@ -309,8 +309,8 @@ static void init_map_graphics(void) {
 
     g_world_map_aux_ordering_tables[1].length = 2;
     g_world_map_aux_ordering_tables[0].length = 2;
-    g_world_map_aux_ordering_tables[0].org = g_world_map_aux_ot_tags[0];
-    g_world_map_aux_ordering_tables[1].org = g_world_map_aux_ot_tags[1];
+    g_world_map_aux_ordering_tables[0].org = s_world_map_aux_ot_tags[0];
+    g_world_map_aux_ordering_tables[1].org = s_world_map_aux_ot_tags[1];
 
     g_world_map_ordering_tables[1].length = 4;
     g_world_map_ordering_tables[0].length = 4;

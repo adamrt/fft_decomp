@@ -34,7 +34,7 @@
 extern s32 g_brave_story_advancing_saved_cursor[];
 
 /* The unit unit_panel_prepare_party_unit loads from a party slot for the status panels. */
-extern battle_unit_t g_unit_panel_unit;
+static battle_unit_t s_unit_panel_unit;
 
 static void open_advancing_list(void);
 static void open_participant_list(s32 proposition);
@@ -748,7 +748,7 @@ static void open_participant_detail(s32 proposition, s32 participant) {
     g_menu_stack_depth = depth + 1;
 }
 
-/* Loads party member party_index into g_unit_panel_unit and
+/* Loads party member party_index into s_unit_panel_unit and
  * fills the status-panel records the participant detail level draws.
  *
  * Empty hand slots fall back to the shield; empty equipment reads as -1 and
@@ -765,11 +765,11 @@ void unit_panel_prepare_party_unit(s32 party_index) {
     u16 maximum_hp;
     u16 maximum_mp;
 
-    if (battle_unit_init_from_party_slot(&g_unit_panel_unit, party_index, 1) == -1) {
+    if (battle_unit_init_from_party_slot(&s_unit_panel_unit, party_index, 1) == -1) {
         return;
     }
 
-    unit = &g_unit_panel_unit;
+    unit = &s_unit_panel_unit;
     gauges = &g_unit_panel_selected_unit_stat_summary;
     identity = &g_formation_selected_unit_identity;
     detail = &g_formation_selected_unit_stat_detail.state;

@@ -294,6 +294,7 @@ typedef struct world_map_scroll_axis {
     s32 decay;
     s32 output; /* 0x10; whole-pixel speed with direction-dependent rounding */
 } world_map_scroll_axis_t;
+typedef char world_map_scroll_axis_size_must_be_20[sizeof(world_map_scroll_axis_t) == 20 ? 1 : -1];
 
 void world_map_update_scroll_axis(world_map_scroll_axis_t* axis, s32 direction);
 void world_map_apply_scroll(point32_t* amount, VECTOR* position);

@@ -8,16 +8,16 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u8 g_gfx_increasing_fade_active;
 extern s16 g_gfx_fade_intensity;
 extern RECT g_gfx_fade_rect;
 extern rgb24_t g_gfx_fade_color;
 static u8 s_gfx_decreasing_fade_active;
+static u8 s_gfx_increasing_fade_active;
 
 /* Return the active screen fades as bits: 1 while fading in (decreasing), 2 while fading out
  * (increasing), 0 when neither runs. */
 s32 fade_menu_get_state(void) {
-    s32 second = g_gfx_increasing_fade_active;
+    s32 second = s_gfx_increasing_fade_active;
     s32 first = s_gfx_decreasing_fade_active;
 
     second *= 2;
@@ -32,7 +32,7 @@ void fade_menu_start_in(void) {
 
 /* Start the fade from intensity 0 up to full (the screen fades out). */
 void fade_menu_start_out(void) {
-    g_gfx_increasing_fade_active = 1;
+    s_gfx_increasing_fade_active = 1;
     g_gfx_fade_intensity = 0;
 }
 
@@ -70,11 +70,11 @@ s32 fade_menu_update_out(void) {
     s32 result = 1;
     s32 speed = menu_get_event_speed();
 
-    if (g_gfx_increasing_fade_active != 0) {
+    if (s_gfx_increasing_fade_active != 0) {
         g_gfx_fade_intensity += speed * 8;
         if (g_gfx_fade_intensity >= 0x100) {
             result = 0;
-            g_gfx_increasing_fade_active = 0;
+            s_gfx_increasing_fade_active = 0;
             g_gfx_fade_intensity = 0xff;
         }
         menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_gfx_otag_count - 2);

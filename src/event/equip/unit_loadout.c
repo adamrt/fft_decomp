@@ -12,8 +12,8 @@
 #include "psx/types.h"
 
 static s16 s_equipment_unit_saved_hp;
-extern s16 g_equipment_unit_saved_mp;
 
+static s16 s_equipment_unit_saved_mp = 0;
 /* Selected unit and its editable comparison copy; published through g_equipment_unit_data. */
 static equipment_unit_preview_t s_equipment_unit_records[2] = { 0 };
 
@@ -176,7 +176,7 @@ void equipment_load_unit(s32 battle_unit_id) {
     hp = battle_unit->hp;
     mp = battle_unit->mp;
     s_equipment_unit_saved_hp = hp;
-    g_equipment_unit_saved_mp = mp;
+    s_equipment_unit_saved_mp = mp;
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         battle_unit = battle_unit_get(i);
@@ -259,7 +259,7 @@ void equipment_commit_loadout(void) {
     battle_unit_refresh_stats(battle_unit);
     battle_unit = battle_unit_get(unit_id);
     hp = s_equipment_unit_saved_hp;
-    mp = g_equipment_unit_saved_mp;
+    mp = s_equipment_unit_saved_mp;
     max = battle_unit->max_hp;
     if (hp > max) {
         hp = max;

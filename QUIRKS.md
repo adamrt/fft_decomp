@@ -822,7 +822,7 @@ written that way.
 - `g_item_location_flags` (`0x80059414`): only the first 64 bytes (512
   Move-Find bits) are proven; the next 64-byte block is saved with it but has no
   known meaning.
-- `g_novel_sound_quads` (`0x8009ec18`) starts one row before
+- `s_novel_sound_quads` (`0x8009ec18`) starts one row before
   the sound rows, which begin at `0x8009ec1c` for sound id 1: its row 0 is the
   eighth 32-bit entry of `s_tutorial_battle_event_ids`, whose eight entries
   `tutorial_update_battle_list_input` indexes.
@@ -866,7 +866,7 @@ written that way.
   `g_menu_screen_grid_cell_23_text_offset` and `g_menu_screen_grid_cell_24_text_offset`
   are `g_menu_screen_grid_default_cells` + 372 and + 388 (WORLD);
   `g_status_screen_numbers_panel_records` and `g_status_screen_frames` are
-  `g_unit_view_stats_panel_pages` + 1496 and + 3740 (BATTLE and WORLD);
+  `s_unit_view_stats_panel_pages` + 1496 and + 3740 (BATTLE and WORLD);
   `g_sprite_sheet_ids_by_vram_slot` is byte 1 of `g_sprite_sheet_slots[0]`
   (BATTLE); `g_unit_list_help_node_23_help_base` is
   `g_unit_list_help_nodes_unit_browse` + 372 (BUNIT);

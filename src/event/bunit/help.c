@@ -26,7 +26,7 @@ extern help_navigation_record_t g_unit_list_help_nodes_banner_top[];
 extern help_navigation_record_t g_unit_list_help_nodes_banner_bottom[];
 extern u8 g_unit_list_help_node_index;
 static u16 s_unit_list_help_cursor_anim_state;
-extern u8 g_unit_list_help_cursor_initialized;
+static u8 s_unit_list_help_cursor_initialized;
 
 /* Aliases of g_unit_list_help_nodes/g_unit_list_help_node_index; the target reloads them at each use
  * instead of reusing the cached copies, which separate symbols reproduce. */
@@ -94,7 +94,7 @@ void unit_list_update_help_cursor(s16 mode) {
     s32 text_id;
     s32 node_index;
 
-    if (g_unit_list_help_cursor_initialized == 0) {
+    if (s_unit_list_help_cursor_initialized == 0) {
         /* Nodes 23 and 24 show skillset help (HELP_TEXT_ID_SKILLSET_BASE as a 16-bit id), or
          * ability help for a unit on a monster skillset. */
         if (mode == 0) {
@@ -105,7 +105,7 @@ void unit_list_update_help_cursor(s16 mode) {
             g_unit_list_help_node_24_help_base = HELP_TEXT_ID_ABILITY_BASE;
         }
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
-        g_unit_list_help_cursor_initialized = 1;
+        s_unit_list_help_cursor_initialized = 1;
         g_unit_list_help_node_index = 0;
         if (g_unit_list_help_screen_id == MENU_GRID_HELP_BANNER_TOP) {
             g_unit_list_help_nodes = g_unit_list_help_nodes_banner_top;
@@ -123,7 +123,7 @@ void unit_list_update_help_cursor(s16 mode) {
             g_text_selection_id = g_unit_list_help_screen_id;
             g_unit_list_help_screen_id = MENU_GRID_HELP_NONE;
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
-            g_unit_list_help_cursor_initialized = 0;
+            s_unit_list_help_cursor_initialized = 0;
         } else if (flags & PSX_PAD_CIRCLE) {
             text_id = 0;
             if (g_unit_list_help_nodes[node_index].value != 0) {

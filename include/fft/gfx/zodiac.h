@@ -32,6 +32,7 @@ typedef struct zodiac_draw_context {
     u8 _unused_10[8];
     sprite_draw_offset_t offset; /* 0x18 */
 } zodiac_draw_context_t;
+typedef char zodiac_draw_context_size_must_be_36[sizeof(zodiac_draw_context_t) == 36 ? 1 : -1];
 
 void zodiac_load_frame(void);
 

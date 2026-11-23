@@ -28,11 +28,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern POLY_FT4 g_unit_panel_transition_quads[2][30];
-
 static s32 s_party_affected_unit_message_args[50] = { 0 };
 static s32 s_party_affected_unit_message_ids[50] = { 0 };
 s32 g_party_affected_battle_unit_indices[50] = { 0 };
+static POLY_FT4 s_unit_panel_transition_quads[2][30] = { 0 };
 
 /*
  * Thread body of the "Congratulations!" battle-complete display.
@@ -689,7 +688,7 @@ void unit_panel_transition_thread(void) {
     while (1) {
         s32 buffer = frame & 1;
         gfx_build_gradient_grid_primitives(g_gfx_poly_gt4_buffers[buffer]);
-        unit_panel_build_button_prompts(g_unit_panel_transition_quads[buffer]);
+        unit_panel_build_button_prompts(s_unit_panel_transition_quads[buffer]);
         thread_yield();
         if (thread_current_get_parameter_3() != 0) {
             break;

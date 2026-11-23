@@ -32,6 +32,7 @@ typedef struct conditions_tpage {
     u8 page; /* Bits 5 and 6 encode the semi-transparency mode. */
     u8 _unused_03;
 } conditions_tpage_t;
+typedef char conditions_tpage_size_must_be_4[sizeof(conditions_tpage_t) == 4 ? 1 : -1];
 
 extern u8 g_conditions_general_quad_ranges[2];
 extern sprite_sheet_frame_t g_conditions_general_quads[6];

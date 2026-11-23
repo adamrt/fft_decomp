@@ -40,10 +40,6 @@ extern MATRIX g_effect_emitter_matrix;
 
 /* Particle gravity and inertia threshold, and their saved copies: the secondary handlers save both while their slots
  * run under a gravity of (0, ONE, 0) and EFFECT_SECONDARY_INERTIA_THRESHOLD. */
-extern vec3s32_t g_effect_gravity;
-extern vec3s32_t g_effect_saved_gravity;
-extern s32 g_effect_inertia_threshold;
-extern s32 g_effect_saved_inertia_threshold;
 
 /* Effect work pool: g_effect_work_records is the 256-record allocation, g_effect_free_work_record_head
  * the free-chain head, g_effect_work_record_count the in-use count and g_effect_work_record_peak its
@@ -84,6 +80,10 @@ static const SVECTOR* s_model_normals;
 static const u32* s_model_commands;
 
 static s32 s_model_command_word_offset;
+static vec3s32_t s_effect_gravity;
+static s32 s_effect_inertia_threshold;
+static vec3s32_t s_effect_saved_gravity;
+static s32 s_effect_saved_inertia_threshold;
 
 static s32 update_particle_sprite_state(effect_record_t* unused_record, effect_work_record_t* work);
 
@@ -1686,35 +1686,35 @@ void effect_vector_add_to_svector_rot_y_90(const VECTOR* left, const VECTOR* rig
 /* Set the gravity vector that every motion step adds to a particle's velocity, scaled by the
  * particle's weight. The effect script loads it from the particle-system header. */
 void effect_set_gravity(const vec3s32_t* src) {
-    g_effect_gravity = *src;
+    s_effect_gravity = *src;
 }
 
 /* Set the damping term of particle motion: each step keeps (inertia - threshold) / inertia of a
  * particle's velocity. */
 void effect_set_inertia_threshold(s32 threshold) {
-    g_effect_inertia_threshold = threshold;
+    s_effect_inertia_threshold = threshold;
 }
 
 /* Save the gravity for effect_restore_gravity: secondary-effect handlers set their own
  * gravity around their slot updates. */
 void effect_save_gravity(void) {
-    g_effect_saved_gravity = g_effect_gravity;
+    s_effect_saved_gravity = s_effect_gravity;
 }
 
 /* Restore the gravity kept by effect_save_gravity. */
 void effect_restore_gravity(void) {
-    g_effect_gravity = g_effect_saved_gravity;
+    s_effect_gravity = s_effect_saved_gravity;
 }
 
 /* Save the damping term for effect_restore_inertia_threshold; secondary-effect handlers set
  * their own around their slot updates. */
 void effect_save_inertia_threshold(void) {
-    g_effect_saved_inertia_threshold = g_effect_inertia_threshold;
+    s_effect_saved_inertia_threshold = s_effect_inertia_threshold;
 }
 
 /* Restore the damping term kept by effect_save_inertia_threshold. */
 void effect_restore_inertia_threshold(void) {
-    g_effect_inertia_threshold = g_effect_saved_inertia_threshold;
+    s_effect_inertia_threshold = s_effect_saved_inertia_threshold;
 }
 
 /* Advance an effect slot's motion state by one frame: move by the velocity,
@@ -1727,17 +1727,17 @@ static void step_slot_motion(effect_motion_t* motion) {
     motion->position.y += motion->velocity.y;
     motion->position.z += motion->velocity.z;
     motion->velocity.x
-        = ((motion->inertia - g_effect_inertia_threshold) * motion->velocity.x + (motion->acceleration.x * ONE))
+        = ((motion->inertia - s_effect_inertia_threshold) * motion->velocity.x + (motion->acceleration.x * ONE))
             / motion->inertia
-        + ((motion->weight * g_effect_gravity.x) >> 12);
+        + ((motion->weight * s_effect_gravity.x) >> 12);
     motion->velocity.y
-        = ((motion->inertia - g_effect_inertia_threshold) * motion->velocity.y + (motion->acceleration.y * ONE))
+        = ((motion->inertia - s_effect_inertia_threshold) * motion->velocity.y + (motion->acceleration.y * ONE))
             / motion->inertia
-        + ((motion->weight * g_effect_gravity.y) >> 12);
+        + ((motion->weight * s_effect_gravity.y) >> 12);
     motion->velocity.z
-        = ((motion->inertia - g_effect_inertia_threshold) * motion->velocity.z + (motion->acceleration.z * ONE))
+        = ((motion->inertia - s_effect_inertia_threshold) * motion->velocity.z + (motion->acceleration.z * ONE))
             / motion->inertia
-        + ((motion->weight * g_effect_gravity.z) >> 12);
+        + ((motion->weight * s_effect_gravity.z) >> 12);
     motion->acceleration.x += motion->acceleration_step.x;
     motion->acceleration.y += motion->acceleration_step.y;
     motion->acceleration.z += motion->acceleration_step.z;
@@ -1760,10 +1760,10 @@ void effect_particle_integrate_motion(effect_work_record_t* list) {
     s32 strength;
     s32 track;
     VECTOR delta;
-    s32 threshold = g_effect_inertia_threshold;
-    s32 gravity_x = g_effect_gravity.x;
-    s32 gravity_y = g_effect_gravity.y;
-    s32 gravity_z = g_effect_gravity.z;
+    s32 threshold = s_effect_inertia_threshold;
+    s32 gravity_x = s_effect_gravity.x;
+    s32 gravity_y = s_effect_gravity.y;
+    s32 gravity_z = s_effect_gravity.z;
 
     node = list;
     while (list != 0) {

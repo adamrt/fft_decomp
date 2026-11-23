@@ -93,6 +93,7 @@ typedef struct novel_state {
     s16 x; /* 0x26 */
     s16 y; /* 0x28 */
 } novel_state_t;
+typedef char novel_state_size_must_be_44[sizeof(novel_state_t) == 44 ? 1 : -1];
 extern novel_state_t g_novel_state;
 
 /* Scalar flag access retains the original bases in opcodes 2e and 33. */
@@ -107,7 +108,14 @@ static s32 s_novel_countdown_elapsed;
 static void (*s_novel_opcode_handlers[54])(void);
 
 /* Sound IDs 1 through 56 select four-byte rows in the WLDCORE sound bank. */
-extern u8 g_novel_sound_quads[56][4];
+static u8 s_novel_sound_quads[56][4] = { 1, 2, 0, 0, 3, 4, 0, 0, 5, 6, 0, 0, 7, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 0xa, 0,
+    0, 0, 0xb, 0xc, 0, 0, 0xd, 0xe, 0, 0, 0xf, 0x10, 0, 0, 0x11, 0x12, 0, 0, 0x13, 0x14, 0, 0, 0x15, 0x16, 0, 0, 0x17,
+    0, 0, 0, 0x18, 0x19, 0, 0, 0x1a, 0, 0, 0, 0x1b, 0x1c, 0, 0, 0x1d, 0x1e, 0, 0, 0x1f, 0x20, 0x21, 0, 0x22, 0x23, 0, 0,
+    0x24, 0x25, 0, 0, 0x26, 0, 0, 0, 0x27, 0, 0, 0, 0x28, 0, 0, 0, 0x29, 0, 0, 0, 0x2a, 0, 0, 0, 0x2b, 0, 0, 0, 0x2c, 0,
+    0, 0, 0x2d, 0, 0, 0, 0x2e, 0, 0, 0, 0x2f, 0, 0, 0, 0x30, 0, 0, 0, 0x31, 0, 0, 0, 0x32, 0, 0, 0, 0x33, 0, 0, 0, 0x34,
+    0, 0, 0, 0x35, 0x36, 0, 0, 0x37, 0x38, 0, 0, 0x39, 0, 0, 0, 0x3a, 0x3b, 0x3c, 0, 0x3d, 0x3e, 0x3f, 0, 0x40, 0, 0, 0,
+    0x41, 0, 0, 0, 0x42, 0, 0, 0, 0x43, 0, 0, 0, 0x44, 0, 0, 0, 0x45, 0, 0, 0, 0x46, 0x47, 0, 0, 0x46, 0x47, 0x48, 0x49,
+    0x48, 0x49, 0, 0, 0x4a, 0x4b, 0, 0, 0x4c, 0, 0, 0, 0x4d, 0, 0, 0, 0x4e, 0, 0, 0, 0x4f, 0, 0, 0, 0x50, 0, 0, 0 };
 
 static void branch_on_choice(s32 branch_if_equal);
 static void branch_on_local_flag(s32 expected);
@@ -404,7 +412,7 @@ static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
 enum { SOUND_QUAD_COMMAND_COUNT = 4, SOUND_QUAD_COMMAND_BASE = SUZUKI_SOUND_ID(SOUND_RESOURCE_SOUND_NOVEL, 0) };
 
 /* Stops all sound effects and plays the row for sound_id from
- * g_novel_sound_quads: four sounds of the sound novel's
+ * s_novel_sound_quads: four sounds of the sound novel's
  * resource, one on each SFX channel pair. A zero byte selects that
  * resource's empty sound 0, which only stops its channel pair. */
 static void play_sound_quad(s32 sound_id) {
@@ -413,7 +421,7 @@ static void play_sound_quad(s32 sound_id) {
 
     sound_stop_all_sfx();
     for (i = 0; i < SOUND_QUAD_COMMAND_COUNT; i++) {
-        values[i] = g_novel_sound_quads[sound_id - 1][i] + SOUND_QUAD_COMMAND_BASE;
+        values[i] = s_novel_sound_quads[sound_id - 1][i] + SOUND_QUAD_COMMAND_BASE;
     }
     suzuki_sound_play_4_sfx(values[0], values[1], values[2], values[3]);
 }

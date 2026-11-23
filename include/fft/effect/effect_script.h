@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* loading and playback */
-/* The stages of update_stage, kept in g_effect_playback_phase. */
+/* The stages of update_stage, kept in s_effect_playback_phase. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,
     EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_playback_start */

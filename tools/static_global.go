@@ -231,6 +231,12 @@ func (p project) staticAnalyze(config *projectConfig, name string, size int) (*s
 	if len(report.reasons) == 0 && len(plans) == 0 {
 		report.no("no program compiles it", "no program compiles %s as a unit", source)
 	}
+	if len(report.reasons) == 0 && len(plans) != 0 && declaration != nil {
+		if missing := staticDefinedBelow(declaration, plans[0].anchors, plans[0].after); missing != "" {
+			report.no(fmt.Sprintf("%s is defined below the variable it must sit next to; move the type up first", missing),
+				"its definition would come before %s", missing)
+		}
+	}
 	if len(report.reasons) == 0 {
 		for _, plan := range plans[1:] {
 			if plan.init != plans[0].init {
@@ -307,45 +313,35 @@ func (p project) staticPrograms(config *projectConfig, report *staticReport, nam
 			}
 		}
 		report.info("  original bytes: %s", staticHex(bytes))
-		dataEnd, haveData := staticEnd(unit.Data)
-		bssStart, bssEnd, haveBss := staticSpan(unit.Bss)
-		switch {
-		case haveData && addr == staticAlignUp(dataEnd, staticAlignment(element, size)):
+		prevEnd, prevIsData, _, nextIsData := staticNeighbors(m, addr, addr+uint32(size))
+		place := staticPlace(addr, size, element, zero, unit.Data, unit.Bss, prevEnd, prevIsData, nextIsData)
+		if place.reason != "" {
+			report.no(fmt.Sprintf(place.reason, m.ID), "  %s", place.detail)
+			continue
+		}
+		plan := staticPlan{module: m, unit: unit, addr: addr, kind: place.kind, hash: shortHash(bytes)}
+		if place.kind == "data" {
 			init, err := staticInitializer(bytes, declaration.typeText, declaration.dimensions, count, element)
 			if err != nil {
-				report.no("its original value needs a hand-written initializer", "  continues the data block, but %v", err)
+				report.no("its original value needs a hand-written initializer", "  %s, but %v", place.detail, err)
 				continue
 			}
-			report.ok("  continues the unit's data block (ends 0x%08x): data row, initializer `%s`", dataEnd, strings.TrimPrefix(init, " = "))
-			plans = append(plans, staticPlan{m, unit, addr, "data", init, shortHash(bytes), staticLabelsInRows(m, unit.Data, name, true), true})
-		// bss rows must touch exactly (the config check allows no padding), and
-		// this compiler starts every bss variable on a 4-byte boundary.
-		case zero && addr%4 == 0 && (!haveBss || addr == bssEnd || addr+uint32(size) == bssStart):
-			if haveBss {
-				report.ok("  zero, and continues the unit's bss block: bss row")
-			} else {
-				report.ok("  zero, and the unit has no bss yet: bss row")
-			}
-			plan := staticPlan{module: m, unit: unit, addr: addr, kind: "bss", hash: shortHash(bytes)}
-			if haveBss && addr+uint32(size) != bssStart {
-				plan.anchors, plan.after = staticLabelsInRows(m, unit.Bss, name, true), true
-			} else if haveBss {
-				plan.anchors = staticLabelsInRows(m, unit.Bss, name, false)
-			}
-			plans = append(plans, plan)
-		case zero && addr%4 != 0:
-			report.no(fmt.Sprintf("it is at 0x%08x in %s, not 4-aligned, and this compiler 4-aligns every bss variable", addr, m.ID),
-				"  zero, but 0x%08x is not 4-aligned, so it cannot be a bss row", addr)
-		case !zero && haveData && addr > dataEnd && addr-dataEnd < 8:
-			report.no(fmt.Sprintf("%d unknown byte(s) sit between unit %s's data and it in %s", addr-dataEnd, unit.Name, m.ID),
-				"  not zero, and %d byte(s) after the data block (ends 0x%08x) that its alignment does not explain", addr-dataEnd, dataEnd)
-		case !zero:
-			report.no(fmt.Sprintf("its original bytes in %s are not zero and do not follow unit %s's data", m.ID, unit.Name),
-				"  not zero, and not right after the unit's data block")
-		default:
-			report.no(fmt.Sprintf("it is not next to unit %s's other data in %s", unit.Name, m.ID),
-				"  zero, but continues neither the unit's data block nor its bss block")
+			plan.init = init
+			report.ok("  %s: data row, initializer `%s`", place.detail, strings.TrimPrefix(init, " = "))
+		} else {
+			report.ok("  %s: bss row", place.detail)
 		}
+		rows := unit.Bss
+		if place.kind == "data" {
+			rows = unit.Data
+		}
+		switch place.anchor {
+		case "after":
+			plan.anchors, plan.after = staticLabelsInRows(m, rows, name, true), true
+		case "before":
+			plan.anchors = staticLabelsInRows(m, rows, name, false)
+		}
+		plans = append(plans, plan)
 	}
 	if !compiled {
 		report.no(fmt.Sprintf("%s is not a unit in any program", source), "%s is not a unit in any program", source)
@@ -514,6 +510,116 @@ func staticUnitProfile(m *moduleSpec, unit *unitDef) string {
 // staticAlignment is the alignment GCC gives a variable: its element size
 // for numbers and pointers, and for a record the largest power of two up to
 // 4 that divides its size.
+// staticPlacement says where a new static's row goes in its unit: kind is
+// "data" or "bss", anchor is "after" (append), "before" (prepend) or "" (the
+// unit's first row of that kind). A non-empty reason explains a refusal and
+// takes the module id as its one %s.
+type staticPlacement struct {
+	kind, anchor, detail, reason string
+}
+
+// staticPlace decides the row for a variable at addr. A unit's rows of one
+// kind touch (the config check allows no padding between bss rows), the
+// compiler gives each static its natural alignment, and only the first row of
+// a unit's section starts on a 4-byte boundary, where the linker places the
+// section; a prepended row leaves only the padding the next row's own
+// alignment needs. A unit's first data row must directly follow another unit's data
+// (prevEnd, prevIsData: the nearest row of any unit below addr); a zero value
+// there counts as data only when data also follows it (nextIsData).
+func staticPlace(addr uint32, size, element int, zero bool, data, bss []rodataSpec, prevEnd uint32, prevIsData, nextIsData bool) staticPlacement {
+	alignment := staticAlignment(element, size)
+	end := addr + uint32(size)
+	dataStart, dataEnd, haveData := staticSpan(data)
+	bssStart, bssEnd, haveBss := staticSpan(bss)
+	switch {
+	case haveData && addr == staticAlignUp(dataEnd, alignment):
+		return staticPlacement{kind: "data", anchor: "after", detail: fmt.Sprintf("continues the unit's data block (ends 0x%08x)", dataEnd)}
+	case haveData && addr%4 == 0 && staticAlignUp(end, staticAlignment(0, staticFirstRow(data).Size)) == dataStart:
+		return staticPlacement{kind: "data", anchor: "before", detail: fmt.Sprintf("precedes the unit's data block (starts 0x%08x)", dataStart)}
+	case !haveData && (!zero || nextIsData) && addr%4 == 0 && prevIsData && staticAlignUp(prevEnd, 4) == addr:
+		return staticPlacement{kind: "data", detail: "follows another unit's data and the unit has no data yet"}
+	case zero && haveBss && addr == bssEnd && addr%uint32(alignment) == 0:
+		return staticPlacement{kind: "bss", anchor: "after", detail: "zero, and continues the unit's bss block"}
+	case zero && haveBss && end == bssStart && addr%4 == 0:
+		return staticPlacement{kind: "bss", anchor: "before", detail: "zero, and precedes the unit's bss block"}
+	case zero && !haveBss && addr%4 == 0:
+		return staticPlacement{kind: "bss", detail: "zero, and the unit has no bss yet"}
+	case zero && (!haveBss || end == bssStart) && addr%4 != 0:
+		return staticPlacement{reason: "it would start the unit's bss at 0x%08x in %s, which is not 4-aligned", detail: fmt.Sprintf("zero, but a unit's first bss row starts 4-aligned and 0x%08x is not", addr)}
+	case !zero && haveData && addr > dataEnd && addr-dataEnd < 8:
+		return staticPlacement{reason: fmt.Sprintf("%d unknown byte(s) sit between the unit's data and it in %%s", addr-dataEnd), detail: fmt.Sprintf("not zero, and %d byte(s) after the data block (ends 0x%08x) that its alignment does not explain", addr-dataEnd, dataEnd)}
+	case !zero:
+		return staticPlacement{reason: "its original bytes in %s are not zero and do not touch the unit's data", detail: "not zero, and neither next to the unit's data block nor right after another unit's data"}
+	default:
+		return staticPlacement{reason: "it is not next to the unit's other data in %s", detail: "zero, but touches neither the unit's data block nor its bss block"}
+	}
+}
+
+// staticFirstRow returns the lowest-addressed row.
+func staticFirstRow(rows []rodataSpec) rodataSpec {
+	first := rows[0]
+	for _, row := range rows[1:] {
+		if row.Addr < first.Addr {
+			first = row
+		}
+	}
+	return first
+}
+
+// staticNeighbors finds the nearest rows of any unit around [addr, end): the
+// end of the closest row at or below addr and the start of the closest row at
+// or above end, each with whether it is a data row (false: bss, or none).
+func staticNeighbors(m *moduleSpec, addr, end uint32) (prevEnd uint32, prevIsData bool, nextStart uint32, nextIsData bool) {
+	nextStart = ^uint32(0)
+	for index := range m.Units {
+		unit := &m.Units[index]
+		for kind, rows := range map[bool][]rodataSpec{true: unit.Data, false: unit.Bss} {
+			for _, row := range rows {
+				rowEnd := row.Addr + uint32(row.Size)
+				if rowEnd <= addr && rowEnd >= prevEnd {
+					prevEnd, prevIsData = rowEnd, kind
+				}
+				if row.Addr >= end && row.Addr <= nextStart {
+					nextStart, nextIsData = row.Addr, kind
+				}
+			}
+		}
+	}
+	return prevEnd, prevIsData, nextStart, nextIsData
+}
+
+// staticCode blanks C comments, keeping newlines, so a name a comment
+// mentions does not count as a use.
+func staticCode(data []byte) []byte {
+	out := append([]byte(nil), data...)
+	for i := 0; i < len(out); i++ {
+		switch {
+		case out[i] == '"' || out[i] == '\'':
+			quote := out[i]
+			for i++; i < len(out) && out[i] != quote && out[i] != '\n'; i++ {
+				if out[i] == '\\' {
+					i++
+				}
+			}
+		case out[i] == '/' && i+1 < len(out) && out[i+1] == '*':
+			for ; i < len(out) && !(out[i] == '*' && i+1 < len(out) && out[i+1] == '/'); i++ {
+				if out[i] != '\n' {
+					out[i] = ' '
+				}
+			}
+			if i+1 < len(out) {
+				out[i], out[i+1] = ' ', ' '
+				i++
+			}
+		case out[i] == '/' && i+1 < len(out) && out[i+1] == '/':
+			for ; i < len(out) && out[i] != '\n'; i++ {
+				out[i] = ' '
+			}
+		}
+	}
+	return out
+}
+
 func staticAlignment(element, size int) int {
 	unit := element
 	if unit <= 0 {
@@ -602,6 +708,32 @@ func staticDefinitionEdge(text, name string, after bool) (int, bool) {
 	return 0, false
 }
 
+// staticDefinedBelow names a type or constant the new definition needs that
+// its file defines only below the place the definition would go (next to its
+// nearest anchor), or returns "".
+func staticDefinedBelow(declaration *staticDeclaration, anchors []string, after bool) string {
+	text := declaration.text[:declaration.start] + declaration.text[declaration.end:]
+	at := declaration.start
+	for _, anchor := range anchors {
+		if position, ok := staticDefinitionEdge(text, anchor, after); ok {
+			at = position
+			break
+		}
+	}
+	words := regexp.MustCompile(`[A-Za-z_][A-Za-z0-9_]*`).FindAllString(declaration.typeText+" "+declaration.dimensions, -1)
+	for _, word := range words {
+		switch word {
+		case "const", "volatile", "struct", "union", "enum", "unsigned", "signed":
+			continue
+		}
+		definition := regexp.MustCompile(`(?m)(^\}\s*` + regexp.QuoteMeta(word) + `\s*;|^typedef\b[^;]*\b` + regexp.QuoteMeta(word) + `\s*;|\b` + regexp.QuoteMeta(word) + `\s*=[^=])`)
+		if location := definition.FindStringIndex(text); location != nil && location[0] >= at {
+			return word
+		}
+	}
+	return ""
+}
+
 func staticHeaderHint(files []string) string {
 	if len(files) > 1 {
 		return ", and declare it extern in a header for the other users"
@@ -623,6 +755,19 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 	return p.withTargetLock(func() error {
 		changed := map[string]bool{declaration.path: true}
 		var documents []string
+		if newName != name {
+			// Other files may still mention the name in comments.
+			mentions, err := staticFilesMentioning(p.root, name)
+			if err != nil {
+				return err
+			}
+			for _, path := range mentions {
+				if path != declaration.path {
+					changed[path] = true
+					documents = append(documents, path)
+				}
+			}
+		}
 		for _, document := range documentFiles {
 			if data, err := os.ReadFile(filepath.Join(p.root, document)); err == nil &&
 				!bytes.Equal(data, renameDocumentIdentifier(data, name, newName)) {
@@ -677,7 +822,11 @@ func (p project) staticApply(config *projectConfig, declaration *staticDeclarati
 			if err != nil {
 				return err
 			}
-			if err := transaction.addExistingSnapshot(full, original, renameDocumentIdentifier(original, name, newName), info.Mode()); err != nil {
+			renamed := renameDocumentIdentifier(original, name, newName)
+			if sourceExtensions[filepath.Ext(document)] {
+				renamed = regexp.MustCompile(`\b`+regexp.QuoteMeta(name)+`\b`).ReplaceAllLiteral(original, []byte(newName))
+			}
+			if err := transaction.addExistingSnapshot(full, original, renamed, info.Mode()); err != nil {
 				return err
 			}
 		}
@@ -828,6 +977,38 @@ func (p project) staticImage(m *moduleSpec) ([]byte, error) {
 	return image, err
 }
 
+// staticFilesMentioning lists the src/ and include/ files that spell name
+// anywhere, comments included.
+func staticFilesMentioning(root, name string) ([]string, error) {
+	pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(name) + `\b`)
+	var found []string
+	for _, directory := range []string{"src", "include"} {
+		err := filepath.WalkDir(filepath.Join(root, directory), func(path string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil || entry.IsDir() || !sourceExtensions[filepath.Ext(path)] {
+				return walkErr
+			}
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if pattern.Match(data) {
+				relative, err := filepath.Rel(root, path)
+				if err != nil {
+					return err
+				}
+				found = append(found, filepath.ToSlash(relative))
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	sort.Strings(found)
+	return found, nil
+}
+
+// staticFilesSpelling lists the files whose code (not comments) spells name.
 func staticFilesSpelling(root, name string) ([]string, error) {
 	if staticSpellingIndex != nil {
 		return staticSpellingIndex[name], nil
@@ -843,7 +1024,7 @@ func staticFilesSpelling(root, name string) ([]string, error) {
 			if err != nil {
 				return err
 			}
-			if pattern.Match(data) {
+			if pattern.Match(staticCode(data)) {
 				relative, err := filepath.Rel(root, path)
 				if err != nil {
 					return err
@@ -950,7 +1131,7 @@ func staticTypeSize(typeText, dimensions, headers, source string) (int, int) {
 		}
 		count *= value
 	}
-	return count, staticElementSize(typeText, headers)
+	return count, staticElementSize(typeText, headers+"\n"+source)
 }
 
 func staticElementSize(typeText, headers string) int {
@@ -974,6 +1155,13 @@ func staticElementSize(typeText, headers string) int {
 	}
 	stem := strings.TrimSuffix(base, "_t")
 	if match := regexp.MustCompile(`\b` + regexp.QuoteMeta(stem) + `_size_must_be_(\d+)\b`).FindStringSubmatch(headers); match != nil {
+		size, _ := strconv.Atoi(match[1])
+		return size
+	}
+	if regexp.MustCompile(`\(\s*\*\s*` + regexp.QuoteMeta(base) + `\s*\)\s*\(`).MatchString(headers) {
+		return 4 // a function pointer typedef
+	}
+	if match := regexp.MustCompile(`sizeof\(\s*` + regexp.QuoteMeta(base) + `\s*\)\s*==\s*(\d+)`).FindStringSubmatch(headers); match != nil {
 		size, _ := strconv.Atoi(match[1])
 		return size
 	}
@@ -1200,7 +1388,7 @@ func (p project) staticSurvey(apply bool) error {
 			}
 			relative = filepath.ToSlash(relative)
 			seen := make(map[string]bool)
-			for _, token := range identifier.FindAllString(string(data), -1) {
+			for _, token := range identifier.FindAllString(string(staticCode(data)), -1) {
 				if !seen[token] {
 					seen[token] = true
 					index[token] = append(index[token], relative)

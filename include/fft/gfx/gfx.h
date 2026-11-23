@@ -155,6 +155,7 @@ typedef struct textured_quad_source {
     u16 clut;   /* 0x20 */
     u16 tpage;  /* 0x22 */
 } textured_quad_source_t;
+typedef char textured_quad_source_size_must_be_36[sizeof(textured_quad_source_t) == 36 ? 1 : -1];
 
 /* Twelve-byte texture cell copied by the formation portrait producers and
  * embedded in oriented menu quads. */

@@ -74,7 +74,7 @@ typedef struct window_panel_layout {
 /* The panel renderer's entry (g_window_panel_render_state), filled by
  * window_init_panel_state and window_start_number_panel_thread and read by
  * menu_screen_text_list_thread. Its text binding is the label layout g_window_panel_label_state (column mode
- * 0 text, 2 hidden, 3 alternate number) or, for number panels, g_window_panel_number_state. */
+ * 0 text, 2 hidden, 3 alternate number) or, for number panels, s_window_panel_number_state. */
 extern menu_text_layout_t g_window_panel_label_state;
 extern menu_entry_t g_window_panel_render_state;
 extern s16 g_window_panel_value;

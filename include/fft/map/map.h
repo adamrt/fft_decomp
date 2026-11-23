@@ -401,6 +401,7 @@ typedef struct map_selected_tile {
     s16 display_height; /* 0x06: half height + height * 2 + depth * 2 */
     s16 depth;          /* 0x08 */
 } map_selected_tile_t;
+typedef char map_selected_tile_size_must_be_10[sizeof(map_selected_tile_t) == 10 ? 1 : -1];
 
 extern map_selected_tile_t g_map_selected_tile_data;
 

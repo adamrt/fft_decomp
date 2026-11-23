@@ -24,7 +24,7 @@ static u8 s_action_actor_elevation;
 
 /* Dismount destinations reserved since the last strike setup; turn-status
  * and trap results also append. */
-extern s32 g_unit_relocated_count;
+static s32 s_unit_relocated_count = 0;
 extern move_tile_coordinates_t g_unit_relocated_coords[];
 
 static s32 check_and_consume_mp(battle_unit_t* unit);
@@ -640,7 +640,7 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
     s32 location;
 
     g_target_sort_nearest_first = 0;
-    g_unit_relocated_count = 0;
+    s_unit_relocated_count = 0;
     g_action_work.random_fire_flag = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         targets[i] = 0xff;
@@ -1840,7 +1840,7 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
             }
         }
     }
-    for (i = 0; i < g_unit_relocated_count; i++) {
+    for (i = 0; i < s_unit_relocated_count; i++) {
         index = g_unit_relocated_coords[i].layer * 256 + g_unit_relocated_coords[i].y * g_map_terrain_width
             + g_unit_relocated_coords[i].x;
         panel = &g_target_panels[index];
@@ -1902,10 +1902,10 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
                                 }
                             }
                             destination->x = found_x;
-                            g_unit_relocated_coords[g_unit_relocated_count].x = found_x;
-                            g_unit_relocated_coords[g_unit_relocated_count].y = destination->y = found_y;
-                            g_unit_relocated_coords[g_unit_relocated_count].layer = destination->layer = level;
-                            g_unit_relocated_count++;
+                            g_unit_relocated_coords[s_unit_relocated_count].x = found_x;
+                            g_unit_relocated_coords[s_unit_relocated_count].y = destination->y = found_y;
+                            g_unit_relocated_coords[s_unit_relocated_count].layer = destination->layer = level;
+                            s_unit_relocated_count++;
                             return 0;
                         }
                     }

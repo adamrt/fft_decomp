@@ -6,7 +6,7 @@
 #include "psx/types.h"
 
 static u8* s_text_saved_section_pointers[TEXT_SECTION_COUNT];
-extern s32 g_text_section_backup_active;
+static s32 s_text_section_backup_active = 0;
 
 /* Bind writable sections of a text bank; Formation rebuilds the roster-name section in place.
  * The bank starts with TEXT_SECTION_COUNT offsets measured from the end of that table. */
@@ -22,15 +22,15 @@ void text_relocate_pointer_table(text_bank_t* bank) {
 
 /* Back up the text section pointer table once. */
 void text_save_section_pointers(void) {
-    if (g_text_section_backup_active == 0) {
+    if (s_text_section_backup_active == 0) {
         mem_copy_bytes_nonempty(
             s_text_saved_section_pointers, g_text_section_pointers, sizeof(s_text_saved_section_pointers));
-        g_text_section_backup_active++;
+        s_text_section_backup_active++;
     }
 }
 
 /* Restore the text section pointer table and clear the backup flag. */
 void text_restore_section_pointers(void) {
     mem_copy_bytes_nonempty(g_text_section_pointers, s_text_saved_section_pointers, sizeof(g_text_section_pointers));
-    g_text_section_backup_active = 0;
+    s_text_section_backup_active = 0;
 }

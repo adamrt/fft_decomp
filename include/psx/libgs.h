@@ -19,6 +19,7 @@ typedef struct {
     u32 p : 24;
     u8 num : 8;
 } GsOT_TAG;
+typedef char gs_ot_tag_size_must_be_4[(sizeof(GsOT_TAG) == 4) ? 1 : -1];
 
 /* libgs ordering-table handle. Five 32-bit fields, 0x14 bytes; the 0x14 stride is what
  * the per-display-buffer descriptor arrays are indexed with. `org` points at

@@ -33,8 +33,8 @@ extern u8 g_unit_list_saved_status_banner_enabled;
 extern u8 g_unit_list_saved_unit_browse_enabled;
 extern clut_t g_unit_list_clut;
 static u8 s_unit_list_initialized;
+static u8 s_unit_list_triangle_menu_open;
 extern menu_entry_t g_unit_list_triangle_menu;
-extern u8 g_unit_list_triangle_menu_open;
 
 static s32 update_unit_grid_menu(void);
 static void update_unit_grid_selection(void);
@@ -318,10 +318,10 @@ static s32 update_unit_grid_menu(void) {
             menu_thread_request_stop(UNIT_LIST_THREAD_SLOT_MENU);
             return 0;
         }
-        if (g_unit_list_triangle_menu_open != 0) {
+        if (s_unit_list_triangle_menu_open != 0) {
             /* Help for the highlighted row, from HELP_TEXT_SECTION_MENU_COMMANDS (0x1000). */
             g_text_selection_id = g_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
-            if ((g_unit_list_triangle_menu_open
+            if ((s_unit_list_triangle_menu_open
                     = menu_managed_thread_start(UNIT_LIST_THREAD_SLOT_MENU, &g_unit_list_triangle_menu))
                 == 0) {
                 if (g_unit_list_primary_result == 0) {
@@ -359,7 +359,7 @@ static s32 update_unit_grid_menu(void) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             g_unit_panel_character_status_frame_config.style = 1;
             g_unit_panel_numbers_thread_params.style = 1;
-            g_unit_list_triangle_menu_open = 1;
+            s_unit_list_triangle_menu_open = 1;
         } else if ((input & PSX_PAD_CIRCLE) && g_unit_list_browse_enabled != 0) {
             unit = g_unit_list_pointers[g_unit_selected_index];
             if (unit->uses_monster_skillset != 0 || (unit->initial_team_flags & UNIT_TEAM_MASK)) {

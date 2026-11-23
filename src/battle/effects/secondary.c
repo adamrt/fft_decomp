@@ -214,6 +214,7 @@ typedef union secondary_state {
     summon_ring_state_t summon_ring;
     zodiac_poof_state_t zodiac_poof;
 } secondary_state_t;
+typedef char secondary_state_size_must_be_4444[sizeof(secondary_state_t) == 4444 ? 1 : -1];
 
 extern secondary_state_t g_effect_secondary_state;
 extern death_poof_state_t g_effect_death_poof_states[EFFECT_SECONDARY_RECORD_COUNT];

@@ -29,6 +29,7 @@ typedef struct crystal_pickup_result {
     u8 treasure_item;           /* 0x52; the roster/item id the panels show */
     u8 learned_abilities[0x40]; /* 0x53 */
 } crystal_pickup_result_t;
+typedef char crystal_pickup_result_size_must_be_148[sizeof(crystal_pickup_result_t) == 148 ? 1 : -1];
 
 /* The choices crystal_pickup_apply_choice applies, as flags. */
 enum {

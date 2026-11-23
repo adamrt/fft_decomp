@@ -17,7 +17,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern struct menu_screen_number_range g_window_panel_number_state;
+static struct menu_screen_number_range s_window_panel_number_state;
 
 static s16 s_window_panel_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
@@ -251,11 +251,11 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
     s32 y;
     s32 label_width;
 
-    g_window_panel_number_state.bounds.min = min;
-    g_window_panel_number_state.bounds.max = max;
-    g_window_panel_number_state._unknown_04[0] = -1;
-    g_window_panel_number_state._unknown_04[1] = -1;
-    g_window_panel_number_state.on_confirm = number_confirm_noop;
+    s_window_panel_number_state.bounds.min = min;
+    s_window_panel_number_state.bounds.max = max;
+    s_window_panel_number_state._unknown_04[0] = -1;
+    s_window_panel_number_state._unknown_04[1] = -1;
+    s_window_panel_number_state.on_confirm = number_confirm_noop;
     g_menu_stack_entry_values[0] = g_menu_stack_entry_values[1] = MENU_ROW_ACTION_NONE;
     if (min < 10 && max < 10) {
         width = 1;
@@ -297,7 +297,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
     g_window_panel_render_state.thread_count = 0;
     g_window_panel_render_state.row_actions = g_menu_stack_entry_values;
     g_window_panel_render_state.header_id = 0;
-    g_window_panel_render_state.context = &g_window_panel_number_state; /* a value range */
+    g_window_panel_render_state.context = &s_window_panel_number_state; /* a value range */
     g_window_panel_render_state.value = &g_window_panel_value;
     g_window_panel_render_state.selected_index = 0;
     g_window_panel_render_state.select_text_table = 0;

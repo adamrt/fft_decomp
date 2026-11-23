@@ -62,6 +62,7 @@ typedef struct menu_window_command {
     u8 width;
     u8 height;
 } menu_window_command_t;
+typedef char menu_window_command_size_must_be_7[sizeof(menu_window_command_t) == 7 ? 1 : -1];
 
 /* Flags a menu-script number getter (a row callback) returns above its value, read by every program's NUMBER handler
  * (menu_opcode_0d_draw_formatted_number). */
@@ -86,6 +87,7 @@ typedef struct menu_draw_number_command {
     u8 y;
     u8 value;
 } menu_draw_number_command_t;
+typedef char menu_draw_number_command_size_must_be_10[sizeof(menu_draw_number_command_t) == 10 ? 1 : -1];
 
 /* Variable-length list command (0x10) in the menu display stream: the layout menu_scrollable_list_refresh reads and
  * the placement each program's menu_opcode_10_draw_scrollable_list draws with. */

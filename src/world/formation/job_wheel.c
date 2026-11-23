@@ -43,7 +43,6 @@ extern u8 g_formation_job_wheel_saved_browse_enabled;
 extern u8 g_formation_job_wheel_script[54];
 extern RECT g_formation_job_wheel_name_rect;
 extern point16_t g_formation_job_wheel_unit_sprite_position;
-extern u8 g_formation_job_wheel_center_x;
 extern u8 g_formation_job_wheel_center_y;
 extern u8 g_formation_job_wheel_animation_counter;
 extern s8 g_formation_job_wheel_spin_progress;
@@ -70,6 +69,7 @@ extern u8* g_formation_job_change_old_sprite_image;
 extern u8* g_formation_job_change_new_sprite_image;
 extern u8* g_formation_job_change_new_sprite_source;
 
+static u8 s_formation_job_wheel_center_x = 0x7c;
 static RECT s_formation_job_change_old_sprite_rect = { 576, 304, 6, 40 };
 static RECT s_formation_job_change_new_sprite_rect = { 582, 304, 6, 40 };
 static u8 s_formation_job_change_active = 0;
@@ -451,7 +451,7 @@ static void draw_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
         job = index;
         formation_job_build_sprite_source(g_formation_job_wheel_jobs[job] & FORMATION_JOB_LIST_ENTRY_ID_MASK,
             g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_FEMALE, &sprite.source);
-        sprite.position.x = g_formation_job_wheel_center_x + ((scaled_x * rcos(theta)) >> 12) - 8;
+        sprite.position.x = s_formation_job_wheel_center_x + ((scaled_x * rcos(theta)) >> 12) - 8;
         sprite.position.y = g_formation_job_wheel_center_y + ((scaled_y * rsin(theta)) >> 12) - 0x14;
         rgb = 0;
         if (g_formation_job_wheel_jobs[job] & FORMATION_JOB_LIST_ENTRY_UNAVAILABLE) {

@@ -114,20 +114,18 @@ extern s32 g_world_map_menu_dimmed;
 extern menu_input_timing_profile_t g_menu_screen_input_timing_profiles[];
 extern RECT g_menu_screen_clear_rect;
 extern menu_group_t g_world_map_menu_groups[4];
-extern s32 g_world_map_menu_group_parameter;
 extern s16 g_world_map_screen_request;
-extern s32 g_world_map_destination_id;
 extern s32 g_world_map_destination_text_id;
-extern point32_t g_world_map_destination_position;
-extern s16 g_world_map_brave_story_request_state; /* request_state_e */
 
-extern s16 g_world_map_tutorial_request_state; /* request_state_e */
-
-extern s16 g_world_map_debug_variable_list_request_state;
-extern s16 g_world_map_debug_party_number_request_state;
-static s16 s_formation_open_request_state; /* request_state_e */
-
-extern s16 g_save_menu_request_state; /* request_state_e */
+static s16 s_formation_open_request_state;        /* request_state_e */
+static s16 s_world_map_tutorial_request_state;    /* request_state_e */
+static s16 s_save_menu_request_state;             /* request_state_e */
+static s16 s_world_map_brave_story_request_state; /* request_state_e */
+static s16 s_world_map_debug_variable_list_request_state;
+static s16 s_world_map_debug_party_number_request_state;
+static s32 s_world_map_menu_group_parameter;
+static s32 s_world_map_destination_id;
+static point32_t s_world_map_destination_position;
 
 extern s16 g_menu_screen_open_entry_index;
 extern s32 g_menu_screen_number_entry_value;
@@ -734,7 +732,7 @@ void option_open_game_options_in_previous_thread(void) {
 /* Menu action: request the save/load screen from the world map, hand the
  * formation input state to the event input and exit the thread. */
 void world_map_request_save(void) {
-    g_save_menu_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
+    s_save_menu_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
     script_load_event_input_state(&g_menu_screen_input_state);
     thread_current_exit();
@@ -743,7 +741,7 @@ void world_map_request_save(void) {
 /* Menu action: request the tutorial categories from the world map, hand the formation input
  * state to the event input and exit the thread. */
 void world_map_request_tutorial(void) {
-    g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
+    s_world_map_tutorial_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
     script_load_event_input_state(&g_menu_screen_input_state);
     thread_current_exit();
@@ -752,7 +750,7 @@ void world_map_request_tutorial(void) {
 /* Request the debug Party number panel, which replaces the roster from
  * an ENTD encounter, then hand input back to the event state and exit. */
 void world_map_request_debug_party(void) {
-    g_world_map_debug_party_number_request_state = 1;
+    s_world_map_debug_party_number_request_state = 1;
     g_menu_screen_new_buttons = 0;
     script_load_event_input_state(&g_menu_screen_input_state);
     thread_current_exit();
@@ -761,7 +759,7 @@ void world_map_request_debug_party(void) {
 /* Menu action: request the debug variable list from the world map, hand the formation input
  * state to the event input and exit the thread. */
 void world_map_request_debug_variables(void) {
-    g_world_map_debug_variable_list_request_state = 1;
+    s_world_map_debug_variable_list_request_state = 1;
     g_menu_screen_new_buttons = 0;
     script_load_event_input_state(&g_menu_screen_input_state);
     thread_current_exit();
@@ -779,7 +777,7 @@ void world_map_request_formation(void) {
 /* Menu action: request the Brave Story from the world map, hand the formation input
  * state to the event input and exit the thread. */
 void world_map_request_brave_story(void) {
-    g_world_map_brave_story_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
+    s_world_map_brave_story_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
     script_load_event_input_state(&g_menu_screen_input_state);
     thread_current_exit();
@@ -844,8 +842,8 @@ static void update_formation_request(void) {
         formation_run_screen(0, 0);
         menu_screen_reset_context();
         g_world_map_screen_request = 0;
-        start_window_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
-            g_world_map_destination_position.x, g_world_map_destination_position.y);
+        start_window_group(s_world_map_menu_group_parameter, s_world_map_destination_id,
+            s_world_map_destination_position.x, s_world_map_destination_position.y);
         menu_screen_open_entry_window(g_menu_screen_open_entry_index, -0x30, -0x38);
         g_menu_thread_menu_data = g_menu_screen_default_entries;
         hide_map_layers();
@@ -888,7 +886,7 @@ void formation_run_tutorial(s32 tutorial_index) {
  * map: start the screen fade-out, wait for it, then reset the menu context
  * and raise WORLD_MAP_FLAG_REQUEST_TUTORIAL. */
 static void update_tutorial_request(void) {
-    s16 state = g_world_map_tutorial_request_state;
+    s16 state = s_world_map_tutorial_request_state;
 
     if (state == WORLD_MAP_REQUEST_IDLE) {
         return;
@@ -896,32 +894,32 @@ static void update_tutorial_request(void) {
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
         world_map_start_fade(0x12, 0x10);
-        g_world_map_tutorial_request_state++;
+        s_world_map_tutorial_request_state++;
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_world_map_tutorial_request_state = state + 1;
+            s_world_map_tutorial_request_state = state + 1;
         }
         return;
     }
     menu_screen_reset_context();
     menu_screen_set_brightness(0x80, 0x80, 0x80);
     g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_TUTORIAL;
-    g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_IDLE;
+    s_world_map_tutorial_request_state = WORLD_MAP_REQUEST_IDLE;
 }
 
 /* Serve a pending request to open the debug variable list from the world
  * map: reset the menu context and raise
  * WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST. */
 static void update_variable_list_request(void) {
-    s32 state = g_world_map_debug_variable_list_request_state;
+    s32 state = s_world_map_debug_variable_list_request_state;
 
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
         menu_screen_reset_context();
         menu_screen_set_brightness(0x80, 0x80, 0x80);
-        g_world_map_debug_variable_list_request_state = 0;
+        s_world_map_debug_variable_list_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST;
     }
 }
@@ -929,7 +927,7 @@ static void update_variable_list_request(void) {
 /* Reload the WORLD menu text and hand the debug Party number request to
  * WLDCORE, which opens the encounter-number editor. */
 static void update_party_number_request(void) {
-    s32 state = g_world_map_debug_party_number_request_state;
+    s32 state = s_world_map_debug_party_number_request_state;
 
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
@@ -938,7 +936,7 @@ static void update_party_number_request(void) {
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
         text_relocate_pointer_table((text_bank_t*)s_menu_text_file_buffer);
         menu_screen_set_brightness(0x80, 0x80, 0x80);
-        g_world_map_debug_party_number_request_state = 0;
+        s_world_map_debug_party_number_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
     }
 }
@@ -946,7 +944,7 @@ static void update_party_number_request(void) {
 /* Run Save and restore the world map through the same dark-frame and fade-in
  * sequence as Formation, unless Save requests a restart. */
 static void update_save_request(void) {
-    s16 state = g_save_menu_request_state;
+    s16 state = s_save_menu_request_state;
     s32 result;
     s32 i;
 
@@ -956,12 +954,12 @@ static void update_save_request(void) {
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
         world_map_start_fade(0x12, 0x10);
-        g_save_menu_request_state++;
+        s_save_menu_request_state++;
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_save_menu_request_state = state + 1;
+            s_save_menu_request_state = state + 1;
         }
         return;
     }
@@ -974,41 +972,41 @@ static void update_save_request(void) {
         g_menu_thread_menu_data = g_menu_screen_default_entries;
         hide_map_layers();
         if (result == 1) {
-            g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
+            s_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
             g_world_map_flags |= WORLD_MAP_FLAG_RESTART;
             return;
         }
-        start_window_group(g_world_map_menu_group_parameter, g_world_map_destination_id,
-            g_world_map_destination_position.x, g_world_map_destination_position.y);
+        start_window_group(s_world_map_menu_group_parameter, s_world_map_destination_id,
+            s_world_map_destination_position.x, s_world_map_destination_position.y);
         menu_screen_open_entry_window(g_menu_screen_open_entry_index, -0x30, -0x38);
         world_map_clear_screen(0);
         for (i = 0x77FF; i >= 0; i--) {
             g_world_map_scratch_buffer[i] = 0;
         }
-        g_save_menu_request_state++;
+        s_save_menu_request_state++;
         menu_screen_set_brightness(0, 0, 0);
         return;
     }
     if (state < 8) {
-        g_save_menu_request_state = state + 1;
+        s_save_menu_request_state = state + 1;
         return;
     }
     if (state == WORLD_MAP_REQUEST_START_FADE_IN) {
         restore_map_layers();
         world_map_start_fade(0x24, 0x10);
-        g_save_menu_request_state++;
+        s_save_menu_request_state++;
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_IN) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
+            s_save_menu_request_state = WORLD_MAP_REQUEST_IDLE;
         }
     }
 }
 
-/* Sibling of update_tutorial_request driven by g_world_map_brave_story_request_state. */
+/* Sibling of update_tutorial_request driven by s_world_map_brave_story_request_state. */
 static void update_brave_story_request(void) {
-    s16 state = g_world_map_brave_story_request_state;
+    s16 state = s_world_map_brave_story_request_state;
 
     if (state == WORLD_MAP_REQUEST_IDLE) {
         return;
@@ -1016,18 +1014,18 @@ static void update_brave_story_request(void) {
     if (state == WORLD_MAP_REQUEST_START_FADE_OUT) {
         g_world_map_screen_request = 1;
         world_map_start_fade(0x12, 0x10);
-        g_world_map_brave_story_request_state++;
+        s_world_map_brave_story_request_state++;
         return;
     }
     if (state == WORLD_MAP_REQUEST_WAIT_FADE_OUT) {
         if (!(g_world_map_flags & WORLD_MAP_FLAG_FADING)) {
-            g_world_map_brave_story_request_state = state + 1;
+            s_world_map_brave_story_request_state = state + 1;
         }
         return;
     }
     if (state == WORLD_MAP_REQUEST_RUN) {
         menu_screen_reset_context();
-        g_world_map_brave_story_request_state = WORLD_MAP_REQUEST_IDLE;
+        s_world_map_brave_story_request_state = WORLD_MAP_REQUEST_IDLE;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_BRAVE_STORY;
     }
 }
@@ -1036,14 +1034,14 @@ static void update_brave_story_request(void) {
  * menu screen is already opening. */
 static void start_window_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y) {
     if (g_world_map_screen_request == 0) {
-        if (g_world_map_destination_id != location_id) {
+        if (s_world_map_destination_id != location_id) {
             g_threads[12].task_id = THREAD_TASK_NONE;
         }
         g_world_map_destination_text_id = location_id + TEXT_ID_LOCATION_NAME_BASE;
-        g_world_map_menu_group_parameter = parameter;
-        g_world_map_destination_id = location_id;
-        g_world_map_destination_position.x = window_x;
-        g_world_map_destination_position.y = window_y;
+        s_world_map_menu_group_parameter = parameter;
+        s_world_map_destination_id = location_id;
+        s_world_map_destination_position.x = window_x;
+        s_world_map_destination_position.y = window_y;
         g_menu_screen_default_entries[2].text_id = location_id + TEXT_ID_LOCATION_NAME_BASE;
         g_menu_screen_default_entries[2].window.x = window_x;
         g_menu_screen_default_entries[2].window.y = window_y;
@@ -1248,19 +1246,19 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input) {
     if (s_formation_open_request_state != WORLD_MAP_REQUEST_IDLE) {
         g_menu_screen_new_buttons = 0;
     }
-    if (g_world_map_tutorial_request_state != WORLD_MAP_REQUEST_IDLE) {
+    if (s_world_map_tutorial_request_state != WORLD_MAP_REQUEST_IDLE) {
         g_menu_screen_new_buttons = 0;
     }
-    if (g_world_map_debug_variable_list_request_state != 0) {
+    if (s_world_map_debug_variable_list_request_state != 0) {
         g_menu_screen_new_buttons = 0;
     }
-    if (g_save_menu_request_state != WORLD_MAP_REQUEST_IDLE) {
+    if (s_save_menu_request_state != WORLD_MAP_REQUEST_IDLE) {
         g_menu_screen_new_buttons = 0;
     }
-    if (g_world_map_brave_story_request_state != WORLD_MAP_REQUEST_IDLE) {
+    if (s_world_map_brave_story_request_state != WORLD_MAP_REQUEST_IDLE) {
         g_menu_screen_new_buttons = 0;
     }
-    if (g_world_map_debug_party_number_request_state != 0) {
+    if (s_world_map_debug_party_number_request_state != 0) {
         g_menu_screen_new_buttons = 0;
     }
     g_formation_screen_active = 1;

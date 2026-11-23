@@ -14,11 +14,13 @@ typedef struct ability_human_skillset {
     u8 high_id_bits[3];
     u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
 } ability_human_skillset_t;
+typedef char ability_human_skillset_size_must_be_25[sizeof(ability_human_skillset_t) == 25 ? 1 : -1];
 
 typedef struct ability_monster_skillset {
     u8 high_id_bits;
     u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
 } ability_monster_skillset_t;
+typedef char ability_monster_skillset_size_must_be_5[sizeof(ability_monster_skillset_t) == 5 ? 1 : -1];
 
 extern ability_human_skillset_t g_ability_human_skillset_abilities[SKILLSET_ID_MONSTER_FIRST];
 extern ability_monster_skillset_t g_ability_monster_skillset_abilities[SKILLSET_ID_END - SKILLSET_ID_MONSTER_FIRST];

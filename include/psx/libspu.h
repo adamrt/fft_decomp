@@ -133,6 +133,7 @@ typedef struct {
     s32 delay;       /* 0x0c */
     s32 feedback;    /* 0x10 */
 } SpuReverbAttr;
+typedef char spu_reverb_attr_size_must_be_20[(sizeof(SpuReverbAttr) == 20) ? 1 : -1];
 
 /* Psy-Q SpuExtAttr: CD or external input settings of SpuCommonAttr. */
 typedef struct {
@@ -193,6 +194,7 @@ typedef struct psyq_spu_heap_record {
     u32 address;
     u32 size;
 } psyq_spu_heap_record_t;
+typedef char psyq_spu_heap_record_size_must_be_8[(sizeof(psyq_spu_heap_record_t) == 8) ? 1 : -1];
 
 typedef void (*SpuTransferCallbackProc)(void);
 

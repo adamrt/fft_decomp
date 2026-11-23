@@ -619,7 +619,7 @@ typedef char effect_geometry_record_size_must_be_196[sizeof(effect_geometry_reco
 typedef struct effect_geometry_table {
     u16 _unused_00;        /* 2, or 1 in seven shipped files */
     u16 entry_count;       /* 0x02 */
-    vec3s32_t gravity;     /* 0x04: copied to g_effect_gravity by effect script opcode 0x27 */
+    vec3s32_t gravity;     /* 0x04: copied to s_effect_gravity by effect script opcode 0x27 */
     s32 inertia_threshold; /* 0x10: passed to effect_set_inertia_threshold by opcode 0x27 */
     /* One 0xc4-byte record per emitter or mesh. The slots keep their curve
      * bindings, but each native EFFECT renderer gives them its own meanings,

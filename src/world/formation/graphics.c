@@ -15,7 +15,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern POLY_FT4 g_formation_view_quads[2][30];
+static POLY_FT4 s_formation_view_quads[2][30];
 
 static zodiac_draw_context_t s_zodiac_backdrop
     = { 0, 128, 1, 8192, 8192, { 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 1, 128, 0, 0, 1, 0, 1 }, { 0, 0 } } };
@@ -57,7 +57,7 @@ void zodiac_backdrop_thread(void) {
             s_zodiac_backdrop.scale_y -= step;
         }
         s_zodiac_backdrop.brightness = g_menu_screen_brightness_red;
-        zodiac_build_primitives(&s_zodiac_backdrop, g_formation_view_quads[frame & 1]);
+        zodiac_build_primitives(&s_zodiac_backdrop, s_formation_view_quads[frame & 1]);
         thread_yield();
         if (thread_current_get_parameter_3() != 0) {
             thread_current_exit();

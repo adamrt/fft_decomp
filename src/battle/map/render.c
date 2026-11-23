@@ -37,6 +37,7 @@ typedef struct weather_particle {
      * reuses it as splash state (0/1/2) and the splash set as a countdown. */
     s16 fall_speed;
 } weather_particle_t;
+typedef char weather_particle_size_must_be_8[sizeof(weather_particle_t) == 8 ? 1 : -1];
 
 /* Lightning flash state (g_weather_lightning_state).
  * set_light_matrices fills color_matrices[0] and [2]; the lightning weather commands

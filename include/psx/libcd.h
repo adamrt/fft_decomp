@@ -77,6 +77,7 @@ typedef struct {
     u8 val2;
     u8 val3;
 } CdlATV;
+typedef char cdl_atv_size_must_be_4[(sizeof(CdlATV) == 4) ? 1 : -1];
 
 /* CD streaming sector header. The linked driver reuses id for the StFREE/... ring state. */
 typedef struct {

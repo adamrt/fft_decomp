@@ -63,6 +63,7 @@ typedef struct menu_scroll_text_layout {
     menu_text_layout_t columns; /* 0x00 */
     s16 row_offset;             /* 0x28 */
 } menu_scroll_text_layout_t;
+typedef char menu_scroll_text_layout_size_must_be_44[sizeof(menu_scroll_text_layout_t) == 44 ? 1 : -1];
 
 /* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
  * helper redraws the page once and clears the request, which

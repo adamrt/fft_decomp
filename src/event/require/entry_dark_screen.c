@@ -34,9 +34,9 @@ typedef enum conditions_burst_mode {
     CONDITIONS_BURST_HORIZONTAL = 2   /* x only */
 } conditions_burst_mode_e;
 
-extern conditions_burst_tile_t g_conditions_burst_tiles[12][24];
-extern POLY_F4 g_conditions_burst_flash_polys[2];
 extern DR_MODE g_conditions_burst_draw_modes[2];
+static POLY_F4 s_conditions_burst_flash_polys[2];
+static conditions_burst_tile_t s_conditions_burst_tiles[12][24];
 static MATRIX s_conditions_burst_matrix;
 static SVECTOR s_conditions_burst_rotation;
 static VECTOR s_conditions_burst_offset;
@@ -108,7 +108,7 @@ void require_dark_screen_entrypoint(void) {
     /* Lay out the tiles; odd columns sit half a row higher. */
     for (row = 0; row < 12; row++) {
         for (col = 0; col < 24; col++) {
-            tile = &g_conditions_burst_tiles[row][col];
+            tile = &s_conditions_burst_tiles[row][col];
             tile->x = col * 12 - 12;
             tile->y = row * 24 - 12;
             if (col & 1) {
@@ -164,7 +164,7 @@ void require_dark_screen_entrypoint(void) {
             thread_yield();
             for (row = 0; row < 12; row++) {
                 for (col = 0; col < 24; col++) {
-                    tile = &g_conditions_burst_tiles[row][col];
+                    tile = &s_conditions_burst_tiles[row][col];
                     poly = &tile->poly[frame & 1];
                     /* A started tile is a square turned by its angle: corners on its radius at
                      * angle + 45 and + 135 degrees (0x200, 0x600) and their mirror images. */
@@ -257,23 +257,23 @@ void require_dark_screen_entrypoint(void) {
             break;
         }
 
-        SetPolyF4(&g_conditions_burst_flash_polys[0]);
-        setXY4(&g_conditions_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
-        g_conditions_burst_flash_polys[0].r0 = 0x30;
-        g_conditions_burst_flash_polys[0].g0 = 0x28;
-        g_conditions_burst_flash_polys[0].b0 = 0x10;
-        SetSemiTrans(&g_conditions_burst_flash_polys[0], 1);
+        SetPolyF4(&s_conditions_burst_flash_polys[0]);
+        setXY4(&s_conditions_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
+        s_conditions_burst_flash_polys[0].r0 = 0x30;
+        s_conditions_burst_flash_polys[0].g0 = 0x28;
+        s_conditions_burst_flash_polys[0].b0 = 0x10;
+        SetSemiTrans(&s_conditions_burst_flash_polys[0], 1);
         mem_copy_bytes_nonempty(
-            &g_conditions_burst_flash_polys[1], &g_conditions_burst_flash_polys[0], sizeof(POLY_F4));
+            &s_conditions_burst_flash_polys[1], &s_conditions_burst_flash_polys[0], sizeof(POLY_F4));
         frame++;
         /* The controlling thread ends the hold by switching this task to THREAD_TASK_DARK_SCREEN. */
         thread_current_set_task(THREAD_TASK_DARK_SCREEN_HOLD);
         for (;;) {
             thread_yield();
-            g_conditions_burst_flash_polys[frame & 1].r0 = g_after_battle_gfx_fade_rgb[0];
-            g_conditions_burst_flash_polys[frame & 1].g0 = g_after_battle_gfx_fade_rgb[1];
-            g_conditions_burst_flash_polys[frame & 1].b0 = g_after_battle_gfx_fade_rgb[2];
-            gfx_append_gpu_primitive_to_secondary_otag(&g_conditions_burst_flash_polys[frame & 1]);
+            s_conditions_burst_flash_polys[frame & 1].r0 = g_after_battle_gfx_fade_rgb[0];
+            s_conditions_burst_flash_polys[frame & 1].g0 = g_after_battle_gfx_fade_rgb[1];
+            s_conditions_burst_flash_polys[frame & 1].b0 = g_after_battle_gfx_fade_rgb[2];
+            gfx_append_gpu_primitive_to_secondary_otag(&s_conditions_burst_flash_polys[frame & 1]);
             gfx_append_gpu_primitive_to_secondary_otag(&g_conditions_burst_draw_modes[frame & 1]);
             if (g_threads[g_thread_current_id].task_id == THREAD_TASK_DARK_SCREEN) {
                 break;
@@ -285,7 +285,7 @@ void require_dark_screen_entrypoint(void) {
         /* Restart the delays so phase 1 collapses the tiles in the same order. */
         for (row = 0; row < 12; row++) {
             for (col = 0; col < 24; col++) {
-                tile = &g_conditions_burst_tiles[row][col];
+                tile = &s_conditions_burst_tiles[row][col];
                 tile->delay = tile->initial_delay;
             }
         }
