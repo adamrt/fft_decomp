@@ -1232,7 +1232,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   drawing area ends at x = 254; `PutDispEnv` still picks the 256-pixel mode.
 - Soldier Office: the hire menu shows 1500 gil for row 0 and 1400 for row 1
   (`get_hire_fee`), but
-  `office_update_menu` tests, prompts with (0xF82A)
+  `shop_soldier_update_menu` tests, prompts with (0xF82A)
   and charges 1000 plus the generated recruit's equipment prices.
 - `menu_screen_text_measure_width` adds the operand of 0xE7
   (`TEXT_SET_X_POSITION`) to the width as an advance, while

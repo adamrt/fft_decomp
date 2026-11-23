@@ -728,7 +728,7 @@ void formation_update_selection_stage(void) {
             }
         }
     }
-    if (g_shop_menu_step >= SHOP_STEP_SOLDIER_OFFICE_MENU) {
+    if (g_shop_menu_step >= SHOP_STEP_SOLDIER_MENU) {
         formation_open_equipment_panel(g_formation_unit_browse_enabled);
     } else {
         unit_panel_toggle_equipment_threads(g_formation_unit_browse_enabled);

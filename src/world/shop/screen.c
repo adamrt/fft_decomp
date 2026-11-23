@@ -20,7 +20,6 @@
 #include "fft/party/formation_ability.h"
 #include "fft/party/formation_item.h"
 #include "fft/party/item_list.h"
-#include "fft/party/office.h"
 #include "fft/party/shop.h"
 #include "fft/party/unit_panel.h"
 #include "fft/script/script_variable.h"
@@ -72,7 +71,7 @@ extern u8 g_shop_fitting_cost_visible;
 extern menu_entry_t g_shop_fur_menu_thread_data;
 
 /* The cursor doubles as the soldier-office mode (get_hire_fee). */
-extern menu_entry_t g_office_hire_menu_thread_data;
+extern menu_entry_t g_shop_soldier_hire_menu_thread_data;
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_shop_war_funds_script[34];
@@ -112,14 +111,14 @@ static void (*s_shop_step_handlers[])(void) = {
     shop_fur_buy_update_unit_preview,
     shop_fur_sell_update_list,
     shop_fur_sell_update_confirm,
-    office_update_menu,
-    office_hire_update_preview,
-    office_hire_update_confirm,
-    office_hire_update_name,
-    office_hire_update_fee,
-    office_reopen_menu,
-    office_rename_update_unit,
-    office_rename_update_name,
+    shop_soldier_update_menu,
+    shop_soldier_hire_update_preview,
+    shop_soldier_hire_update_confirm,
+    shop_soldier_hire_update_name,
+    shop_soldier_hire_update_fee,
+    shop_soldier_reopen_menu,
+    shop_soldier_rename_update_unit,
+    shop_soldier_rename_update_name,
 };
 
 /* Backdrop and VRAM rectangles, followed by the main menu and exit gates. */
@@ -198,7 +197,7 @@ void shop_run_screen(s32 shop_type) {
         tim_index = 3;
     } else if (shop_type == MENU_SCREEN_CONTEXT_SOLDIER_OFFICE) {
         ot_index = MUSIC_SOLDIER_OFFICE;
-        g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_MENU;
+        g_shop_menu_step = SHOP_STEP_SOLDIER_MENU;
         disabled = 0xF820;
         tim_index = 6;
     } else {
@@ -223,7 +222,7 @@ void shop_run_screen(s32 shop_type) {
     formation_init_menu_state();
     g_shop_main_menu_thread_data.selected_index = 0;
     g_shop_fur_menu_thread_data.selected_index = 0;
-    g_office_hire_menu_thread_data.selected_index = 0;
+    g_shop_soldier_hire_menu_thread_data.selected_index = 0;
 
     menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_SHOP_DIALOGUE);
     g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_SHOP_MENU_LABELS] = g_menu_screen_text_shop_menu_labels_data;
@@ -256,7 +255,7 @@ void shop_run_screen(s32 shop_type) {
 
         /* L1/R1 cycle units on the item and Fur Shop steps (those before the Soldier Office's). */
         if ((g_formation_unit_cycle_mode != 0 || g_formation_unit_browse_enabled != 0)
-            && g_shop_menu_step < SHOP_STEP_SOLDIER_OFFICE_MENU) {
+            && g_shop_menu_step < SHOP_STEP_SOLDIER_MENU) {
             disabled = 0;
             if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE
                 || g_formation_unit_cycle_mode == 1) {
@@ -285,7 +284,8 @@ void shop_run_screen(s32 shop_type) {
         }
 
         s_shop_step_handlers[g_shop_menu_step]();
-        if (g_shop_menu_step != SHOP_STEP_RENAME_NAME_ENTRY && g_shop_menu_step != SHOP_STEP_HIRE_NAME_ENTRY
+        if (g_shop_menu_step != SHOP_STEP_SOLDIER_RENAME_NAME_ENTRY
+            && g_shop_menu_step != SHOP_STEP_SOLDIER_HIRE_NAME_ENTRY
             && g_shop_menu_step != SHOP_STEP_FITTING_ROOM_REMOVE) {
             formation_update_selection_stage();
         }
@@ -380,8 +380,8 @@ static void update_exit_fade(void) {
     }
     shop_draw_gil();
     if (g_menu_screen_context_id == MENU_SCREEN_CONTEXT_SOLDIER_OFFICE) {
-        office_draw_fee();
-        office_draw_unit_count();
+        shop_soldier_draw_fee();
+        shop_soldier_draw_unit_count();
     }
 }
 

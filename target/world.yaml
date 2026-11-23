@@ -1132,18 +1132,18 @@ functions:
   - {addr: 0x80137d94, size: 572, name: shop_fur_buy_update_confirm, hash: 5ed06b07187c01ba, unit: fur_shop}
   - {addr: 0x80137fd0, size: 604, name: update_purchase_quantity, hash: e2b834949cb9e75b, unit: fur_shop}
   - {addr: 0x8013822c, size: 60, name: shop_fur_buy_update_unit_preview, hash: fd59dc58a1646c66, unit: fur_shop}
-  - {addr: 0x80138268, size: 828, name: office_update_menu, hash: 59c669df532e38a5, unit: office}
-  - {addr: 0x801385a4, size: 300, name: office_hire_update_preview, hash: b7926f9f68017e74, unit: office}
-  - {addr: 0x801386d0, size: 356, name: office_hire_update_confirm, hash: 430bd6cd1b7c3751, unit: office}
-  - {addr: 0x80138834, size: 192, name: office_hire_update_name, hash: 94a7e89b7eed87a2, unit: office}
-  - {addr: 0x801388f4, size: 384, name: office_hire_update_fee, hash: 9070786158e1fe48, unit: office}
-  - {addr: 0x80138a74, size: 88, name: office_reopen_menu, hash: db888e392b1c17b9, unit: office}
+  - {addr: 0x80138268, size: 828, name: shop_soldier_update_menu, hash: 59c669df532e38a5, unit: office}
+  - {addr: 0x801385a4, size: 300, name: shop_soldier_hire_update_preview, hash: b7926f9f68017e74, unit: office}
+  - {addr: 0x801386d0, size: 356, name: shop_soldier_hire_update_confirm, hash: 430bd6cd1b7c3751, unit: office}
+  - {addr: 0x80138834, size: 192, name: shop_soldier_hire_update_name, hash: 94a7e89b7eed87a2, unit: office}
+  - {addr: 0x801388f4, size: 384, name: shop_soldier_hire_update_fee, hash: 9070786158e1fe48, unit: office}
+  - {addr: 0x80138a74, size: 88, name: shop_soldier_reopen_menu, hash: db888e392b1c17b9, unit: office}
   - {addr: 0x80138acc, size: 8, name: get_rename_unit_marker, hash: d042b87232f554e5, unit: office}
-  - {addr: 0x80138ad4, size: 676, name: office_rename_update_unit, hash: fdb24ef50ba493d2, unit: office}
-  - {addr: 0x80138d78, size: 252, name: office_rename_update_name, hash: d7ec4424b05551b9, unit: office}
+  - {addr: 0x80138ad4, size: 676, name: shop_soldier_rename_update_unit, hash: fdb24ef50ba493d2, unit: office}
+  - {addr: 0x80138d78, size: 252, name: shop_soldier_rename_update_name, hash: d7ec4424b05551b9, unit: office}
   - {addr: 0x80138e74, size: 48, name: get_hire_fee, hash: 5dd62be68bf6fe37, unit: office}
-  - {addr: 0x80138ea4, size: 88, name: office_draw_fee, hash: 16f54220ab033331, unit: office}
-  - {addr: 0x80138efc, size: 96, name: office_draw_unit_count, hash: 7ef787e5aeb396d5, unit: office}
+  - {addr: 0x80138ea4, size: 88, name: shop_soldier_draw_fee, hash: 16f54220ab033331, unit: office}
+  - {addr: 0x80138efc, size: 96, name: shop_soldier_draw_unit_count, hash: 7ef787e5aeb396d5, unit: office}
   - {addr: 0x80138f5c, size: 552, name: name_entry_update_keyboard, hash: 2a80491df4406613, unit: name_entry}
   - {addr: 0x80139184, size: 1652, name: name_entry_run_screen, hash: 07948f925dd3889e, unit: name_entry}
   - {addr: 0x801397f8, size: 112, name: open_key_list, hash: da934ca0e9861fd7, unit: name_entry}
@@ -1890,7 +1890,7 @@ data:
   - {addr: 0x801950e4, name: g_shop_quantity_menu_data}
   - {addr: 0x8019515c, name: g_shop_main_menu_thread_data}
   - {addr: 0x80195198, name: g_shop_fur_menu_thread_data}
-  - {addr: 0x801951d4, name: g_office_hire_menu_thread_data}
+  - {addr: 0x801951d4, name: g_shop_soldier_hire_menu_thread_data}
   - {addr: 0x8019523c, name: s_shop_step_handlers}
   - {addr: 0x801952ac, name: s_shop_background_rect}
   - {addr: 0x801952b4, name: s_shop_backdrop_tile_rect}
@@ -1944,17 +1944,17 @@ data:
   - {addr: 0x801959df, name: g_shop_fur_equip_check_pending}
   - {addr: 0x801959e0, name: g_shop_fur_purchase_message_wait}
   - {addr: 0x801959e2, name: g_shop_fur_purchase_result}
-  - {addr: 0x801959e4, name: g_office_hire_menu_initialized}
-  - {addr: 0x801959e8, name: g_office_hire_confirm_menu}
-  - {addr: 0x80195a24, name: g_office_hire_fee_confirm_menu}
-  - {addr: 0x80195a60, name: g_office_hire_preview_initialized}
-  - {addr: 0x80195a61, name: g_office_hire_confirm_message_wait}
-  - {addr: 0x80195a62, name: g_office_hire_name_entry_initialized}
-  - {addr: 0x80195a63, name: g_office_hire_fee_message_wait}
-  - {addr: 0x80195a64, name: g_office_rename_prompt_initialized}
-  - {addr: 0x80195a65, name: g_office_rename_name_entry_initialized}
-  - {addr: 0x80195a68, name: g_office_fee_script}
-  - {addr: 0x80195a8c, name: g_office_unit_count_script}
+  - {addr: 0x801959e4, name: g_shop_soldier_hire_menu_initialized}
+  - {addr: 0x801959e8, name: g_shop_soldier_hire_confirm_menu}
+  - {addr: 0x80195a24, name: g_shop_soldier_hire_fee_confirm_menu}
+  - {addr: 0x80195a60, name: g_shop_soldier_hire_preview_initialized}
+  - {addr: 0x80195a61, name: g_shop_soldier_hire_confirm_message_wait}
+  - {addr: 0x80195a62, name: g_shop_soldier_hire_name_entry_initialized}
+  - {addr: 0x80195a63, name: g_shop_soldier_hire_fee_message_wait}
+  - {addr: 0x80195a64, name: g_shop_soldier_rename_prompt_initialized}
+  - {addr: 0x80195a65, name: g_shop_soldier_rename_name_entry_initialized}
+  - {addr: 0x80195a68, name: g_shop_soldier_fee_script}
+  - {addr: 0x80195a8c, name: g_shop_soldier_unit_count_script}
   - {addr: 0x80195ad0, name: g_menu_screen_text_name_entry_keys_data}
   - {addr: 0x80195ad8, name: g_name_entry_character_rows}
   - {addr: 0x80195b2c, name: g_name_entry_state_handlers}
@@ -2294,11 +2294,11 @@ data:
   - {addr: 0x801cd0dc, name: g_shop_fur_purchase_item}
   - {addr: 0x801cd0e0, name: g_shop_fur_purchase_confirm_shown}
   - {addr: 0x801cd0e4, name: s_fur_shop_access_granted}
-  - {addr: 0x801cd0ec, name: g_office_hire_unread_flag_1}
-  - {addr: 0x801cd0f0, name: g_office_hire_result_shown}
-  - {addr: 0x801cd0f4, name: g_office_hire_unread_flag_2}
-  - {addr: 0x801cd0f8, name: g_office_rename_error_shown}
-  - {addr: 0x801cd0fc, name: g_office_unit_count}
+  - {addr: 0x801cd0ec, name: g_shop_soldier_hire_unread_flag_1}
+  - {addr: 0x801cd0f0, name: g_shop_soldier_hire_result_shown}
+  - {addr: 0x801cd0f4, name: g_shop_soldier_hire_unread_flag_2}
+  - {addr: 0x801cd0f8, name: g_shop_soldier_rename_error_shown}
+  - {addr: 0x801cd0fc, name: g_shop_soldier_unit_count}
   - {addr: 0x801cd100, name: s_office_entered_name}
   - {addr: 0x801cd104, name: s_office_fee}
   - {addr: 0x801cd108, name: g_name_entry_keyboard_last_state}

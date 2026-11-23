@@ -148,8 +148,8 @@ instead of including the record's header.
   joins the owner only when it is a family of its own, with several
   operations and usually its own record (`menu_selection_clear_records`,
   `effect_slot_free`, `formation_roster_sort`), or when it is a mode the
-  player picks (`shop_buy_`, `shop_fitting_`, `office_hire_`) or a storefront
-  of a shared screen (`shop_fur_`). A
+  player picks (`shop_buy_`, `shop_fitting_`, `shop_soldier_hire_`) or a
+  storefront of a shared screen (`shop_fur_`, `shop_soldier_`). A
   parent subsystem leads only when the noun would be ambiguous without it
   (`map_unit_get_tile`, but `map_mesh_` and `map_palette_`). `map_` is the
   battle map as a level: terrain, mesh, tiles, files, color tables
@@ -182,7 +182,7 @@ instead of including the record's header.
   collisions. The concept is the game's own US term where the player
   sees one (bar, rumor, proposition, Brave Story, sound novel, formation,
   reaction, AT List), shortened when the short word is unambiguous
-  (`novel_`, `office_`); code with no player concept takes a mechanism topic
+  (`novel_`); code with no player concept takes a mechanism topic
   (`script_`, `thread_`, `text_`, `menu_`, `fade_`, `window_`, `gfx_`,
   `memcard_`, `bits_`, `system_`, `file_`, `heap_`, `overlay_`, `input_`,
   `math_`). `gfx_` is the shared GPU layer (display environments, ordering
