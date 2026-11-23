@@ -87,6 +87,7 @@ func (p project) staticCommand(args []string) error {
 	failed := flags.Bool("failed", false, "with --restore: also note that the static did not match")
 	survey := flags.Bool("survey", false, "check every file-scope extern in src/ (no NAME); change no files")
 	batch := flags.Bool("batch", false, "convert every name the survey finds, round by round (no NAME); no checks, no notes")
+	own := flags.String("own", "", "give NAME a C definition (it keeps its g_ name and extern) in this unit's file, src/x.c")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -109,6 +110,9 @@ func (p project) staticCommand(args []string) error {
 	config, err := p.loadProjectConfig()
 	if err != nil {
 		return err
+	}
+	if *own != "" {
+		return p.staticOwn(config, name, *own, *size, *dryRun)
 	}
 	fmt.Println("static: " + name)
 	analysis, err := p.staticAnalyze(config, name, *size)
@@ -139,7 +143,112 @@ func (p project) staticCommand(args []string) error {
 	if *dryRun {
 		return nil
 	}
-	return p.staticApply(config, declaration, name, newLine, plans, byteSize)
+	return p.staticApply(config, declaration, name, staticName(name), newLine, plans, byteSize)
+}
+
+// staticOwn gives an address-bound global a C definition in file, the unit
+// whose data or bss block it adjoins, so the unit's block reaches past it.
+// The name stays g_ and keeps its header extern; other files may still use it.
+// A file-scope extern in file itself is replaced by the definition.
+func (p project) staticOwn(config *projectConfig, name, file string, size int, dryRun bool) error {
+	fmt.Println("static: own " + name + " in " + file)
+	report := &staticReport{}
+	headers, err := staticHeaderText(p.root)
+	if err != nil {
+		return err
+	}
+	data, err := os.ReadFile(filepath.Join(p.root, filepath.FromSlash(file)))
+	if err != nil {
+		return err
+	}
+	text := string(data)
+	var declaration *staticDeclaration
+	if found, err := staticExternDeclarations(p.root, []string{file}, name); err != nil {
+		return err
+	} else if len(found) == 1 {
+		declaration = &found[0]
+	} else {
+		headerFiles, err := staticHeaderFiles(p.root)
+		if err != nil {
+			return err
+		}
+		found, err := staticExternDeclarations(p.root, headerFiles, name)
+		if err != nil {
+			return err
+		}
+		if len(found) != 1 {
+			return fmt.Errorf("%s: %d extern declarations in %s or headers", name, len(found), file)
+		}
+		at := staticAfterIncludes(text)
+		declaration = &staticDeclaration{path: file, text: text, start: at, end: at, typeText: found[0].typeText, dimensions: found[0].dimensions}
+	}
+	report.ok("declared as `%s %s%s`", declaration.typeText, name, strings.TrimSpace(declaration.dimensions))
+	count, element := staticTypeSize(declaration.typeText, declaration.dimensions, headers, text)
+	byteSize := size
+	if byteSize == 0 && count > 0 && element > 0 {
+		byteSize = count * element
+	}
+	if byteSize == 0 {
+		return fmt.Errorf("%s: size unknown (pass --size N)", name)
+	}
+	if count == 0 && element > 0 {
+		count = byteSize / element
+	}
+	plans, err := p.staticPrograms(config, report, name, file, declaration, byteSize, count, element)
+	if err != nil {
+		return err
+	}
+	if len(report.reasons) == 0 && len(plans) == 0 {
+		report.no("no program compiles it", "no program compiles %s as a unit", file)
+	}
+	if len(report.reasons) == 0 {
+		if missing := staticDefinedBelow(declaration, plans[0].anchors, plans[0].after); missing != "" {
+			report.no(missing+" is defined below the place the definition would go", "its definition would come before %s", missing)
+		}
+		for _, plan := range plans[1:] {
+			if plan.init != plans[0].init {
+				report.no("the programs that compile it need different initial values", "different initializers")
+				break
+			}
+		}
+	}
+	fmt.Println(strings.Join(report.lines, "\n"))
+	if len(report.reasons) != 0 {
+		fmt.Println("static: cannot own it: " + strings.Join(report.reasons, "; "))
+		return nil
+	}
+	newLine := fmt.Sprintf("%s %s%s%s;%s", declaration.typeText, name, strings.TrimRight(declaration.dimensions, " "), plans[0].init, declaration.trailing)
+	fmt.Println("static: can own it: " + strings.TrimSpace(newLine))
+	if dryRun {
+		return nil
+	}
+	return p.staticApply(config, declaration, name, name, newLine, plans, byteSize)
+}
+
+// staticHeaderFiles lists the game and PsyQ headers.
+func staticHeaderFiles(root string) ([]string, error) {
+	var found []string
+	err := filepath.WalkDir(filepath.Join(root, "include"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || !strings.HasSuffix(path, ".h") {
+			return err
+		}
+		relative, err := filepath.Rel(root, path)
+		if err == nil {
+			found = append(found, filepath.ToSlash(relative))
+		}
+		return err
+	})
+	return found, err
+}
+
+// staticAfterIncludes returns the offset of the line after a file's last
+// #include, where a definition with no neighbor to sit beside goes.
+func staticAfterIncludes(text string) int {
+	at := 0
+	for _, match := range regexp.MustCompile(`(?m)^#include[^\n]*\n`).FindAllStringIndex(text, -1) {
+		at = match[1]
+	}
+	return at
 }
 
 // staticAnalysis is the outcome of every check for one name.
@@ -750,8 +859,7 @@ func staticName(name string) string {
 	return name
 }
 
-func (p project) staticApply(config *projectConfig, declaration *staticDeclaration, name, newLine string, plans []staticPlan, size int) error {
-	newName := staticName(name)
+func (p project) staticApply(config *projectConfig, declaration *staticDeclaration, name, newName, newLine string, plans []staticPlan, size int) error {
 	return p.withTargetLock(func() error {
 		changed := map[string]bool{declaration.path: true}
 		var documents []string
@@ -1440,7 +1548,7 @@ func (p project) staticSurvey(apply bool) error {
 					newLine := fmt.Sprintf("static %s %s%s%s;%s", declaration.typeText, staticName(name), strings.TrimRight(declaration.dimensions, " "),
 						analysis.plans[0].init, declaration.trailing)
 					// staticApply records the row in the unit, so later rounds see it.
-					if err := p.staticApply(config, declaration, name, newLine, analysis.plans, analysis.size); err != nil {
+					if err := p.staticApply(config, declaration, name, staticName(name), newLine, analysis.plans, analysis.size); err != nil {
 						return fmt.Errorf("%s: %w", name, err)
 					}
 					continue

@@ -104,7 +104,7 @@ extern s16 g_save_list_scroll_anim_offset;
 extern s16 g_save_list_scroll_base_y;
 extern u16 g_save_slot_cursor_animation;
 extern point16_t g_save_slot_cursor_position;
-extern s16 g_save_slot_text_row_ids[];
+s16 g_save_slot_text_row_ids[] = { 0, 1, -1, 0 };
 static menu_draw_number_command_t g_save_slot_number_command = { 0x12, 10, 0, 0, 2, 5, 2, 47, 0, 0 };
 static menu_draw_number_command_t g_save_playtime_hours_command = { 0x12, 10, 0, 0, 2, 5, 2, 89, 0, 0 };
 static menu_draw_number_command_t g_save_playtime_minutes_command = { 0x12, 10, 0, 0, 2, 5, 2, 104, 0, 0 };
