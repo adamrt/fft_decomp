@@ -56,9 +56,9 @@ void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 
             }
         }
         if (count != 0) {
-            g_brave_story_saved_cursor[0] = 1;
+            g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index = 1;
         } else {
-            g_brave_story_saved_cursor[0] = 0;
+            g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index = 0;
         }
         brave_story_open_menu();
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;

@@ -34,6 +34,15 @@ typedef struct sprite_size {
 } sprite_size_t;
 typedef char sprite_size_must_be_2[sizeof(sprite_size_t) == 2 ? 1 : -1];
 
+/* Offsets of a stat gauge's top-left and bottom-left corners from its grid cell. */
+typedef struct gauge_offsets {
+    s8 top_x;
+    s8 top_y;
+    s8 bottom_x;
+    s8 bottom_y;
+} gauge_offsets_t;
+typedef char gauge_offsets_size_must_be_4[sizeof(gauge_offsets_t) == 4 ? 1 : -1];
+
 /* Byte-aligned display streams, including the terminating opcode. */
 extern u8 g_unit_list_grid_stat_bar_script_top[12];
 extern u8 g_unit_list_grid_stat_bar_script_bottom[12];
@@ -53,7 +62,7 @@ extern menu_draw_number_command_t g_unit_list_grid_faith_number;
 extern menu_draw_number_command_t g_unit_list_grid_faith_number_wide;
 extern menu_draw_number_command_t g_unit_list_grid_stat_number;
 extern menu_draw_number_command_t g_unit_list_grid_max_stat_number;
-extern s8 g_unit_list_grid_gauge_offsets[];
+extern gauge_offsets_t g_unit_list_grid_gauge_offsets;
 extern u16 g_unit_list_grid_hp_gauge_clut;
 extern rgb24_t g_unit_list_grid_hp_gauge_colors[4];
 extern u16 g_unit_list_grid_mp_gauge_clut;
@@ -618,8 +627,8 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                     rect.w = 0x25;
                     rect.h = 3;
                     menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, 7);
-                    bar_points[0].x = g_unit_list_grid_gauge_offsets[0] + cell.x;
-                    bar_points[0].y = g_unit_list_grid_gauge_offsets[1] + top + 8;
+                    bar_points[0].x = g_unit_list_grid_gauge_offsets.top_x + cell.x;
+                    bar_points[0].y = g_unit_list_grid_gauge_offsets.top_y + top + 8;
                     if (g_unit_list_max_stat_value != 0) {
                         width = (s_unit_list_current_stat_value << 5) / g_unit_list_max_stat_value;
                     } else {
@@ -627,11 +636,11 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                     }
                     bar_points[3].x = bar_points[1].x = width;
                     bar_points[1].x += bar_points[0].x;
-                    bar_points[1].y = g_unit_list_grid_gauge_offsets[1] + top + 8;
-                    bar_points[2].x = g_unit_list_grid_gauge_offsets[2] + cell.x;
-                    bar_points[2].y = g_unit_list_grid_gauge_offsets[3] + top + 8;
+                    bar_points[1].y = g_unit_list_grid_gauge_offsets.top_y + top + 8;
+                    bar_points[2].x = g_unit_list_grid_gauge_offsets.bottom_x + cell.x;
+                    bar_points[2].y = g_unit_list_grid_gauge_offsets.bottom_y + top + 8;
                     bar_points[3].x += bar_points[2].x;
-                    bar_points[3].y = g_unit_list_grid_gauge_offsets[3] + top + 8;
+                    bar_points[3].y = g_unit_list_grid_gauge_offsets.bottom_y + top + 8;
                     gfx_enqueue_gouraud_quad(bar_points, gradient, 0, 8);
                 } else if (g_unit_list_stat_mode == MENU_UNIT_READOUT_LEVEL_EXP) {
                     top = cell_y + 45;

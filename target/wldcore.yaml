@@ -592,9 +592,6 @@ data:
   - {addr: 0x800c87d8, name: g_window_image_buffer}
   - {addr: 0x800c8fd8, name: g_proposition_detail_image_buffer}
   - {addr: 0x800d07d8, name: g_menu_stack_cursor_states}
-  - {addr: 0x800d0820, name: g_brave_story_saved_cursor}
-  - {addr: 0x800d0840, name: g_brave_story_propositions_saved_cursor}
-  - {addr: 0x800d0848, name: g_brave_story_advancing_saved_cursor}
   - {addr: 0x800d0880, name: g_menu_stack_entry_values}
   - {addr: 0x800d0980, name: g_proposition_gil_amount}
   - {addr: 0x800d0984, name: g_hud_value_mode}

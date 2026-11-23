@@ -356,7 +356,8 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
         }
     } else {
         mode = g_command_action_type_modes
-            [g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]][0];
+                   [g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index]]
+                       .row_action;
         if (mode < 0) {
             g_command_action_slot_row_actions[0] = mode;
             confirm_action_silently(parameter);

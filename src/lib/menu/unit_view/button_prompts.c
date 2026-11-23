@@ -10,7 +10,7 @@
 extern u8 g_unit_panel_button_prompt_ids[];
 extern u8 g_unit_panel_button_prompt_cell_bounds[];
 extern sprite_draw_offset_t g_unit_panel_button_prompt_offsets[];
-extern const u16 g_unit_panel_button_prompt_y_offsets[];
+extern s32 g_unit_panel_button_prompt_y_offsets[5];
 
 /* Advance and draw a unit panel's button prompt icons, one scaled quad per cell.
  *
@@ -48,11 +48,11 @@ void unit_panel_build_button_prompts(POLY_FT4* poly) {
         for (cell = 0; cell < count; cell++) {
             menu_init_default_poly_ft4(poly);
             index = first + count - cell;
-            g_menu_draw_area_template.y += g_unit_panel_button_prompt_y_offsets[group * 2];
+            g_menu_draw_area_template.y += (u16)g_unit_panel_button_prompt_y_offsets[group];
             gfx_set_scaled_poly_ft4_4bpp(poly, &g_unit_panel_texture_origin, &g_menu_draw_area_template,
                 &g_unit_panel_button_prompt_frames[index - 1], &g_unit_panel_button_prompt_frame_scales[index - 1],
                 &g_unit_panel_button_prompt_offsets[group]);
-            g_menu_draw_area_template.y -= g_unit_panel_button_prompt_y_offsets[group * 2];
+            g_menu_draw_area_template.y -= (u16)g_unit_panel_button_prompt_y_offsets[group];
 
             if (g_unit_panel_button_prompt_animation[group] == 0x40) {
                 setRGB0(poly, 0x80, 0x80, 0x80);

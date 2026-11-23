@@ -1380,7 +1380,6 @@ data:
   - {addr: 0x80061054, name: g_ability_math_rsm_data}
   - {addr: 0x800610b8, name: g_job_data}
   - {addr: 0x80062eb8, name: g_item_primary_data}
-  - {addr: 0x80062ebc, name: g_item_secondary_data_ids}
   - {addr: 0x80063ab8, name: g_item_weapon_data}
   - {addr: 0x80063eb8, name: g_item_shield_data}
   - {addr: 0x80063ed8, name: g_item_helm_armor_secondary_data}

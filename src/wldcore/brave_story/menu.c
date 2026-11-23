@@ -110,8 +110,8 @@ static void open_person_detail(s32 value);
  * row per entry (TEXT_ID_BRAVE_STORY_ROW_FIRST + row) into a new render
  * record, draws the injured and casualty counts (each capped at 9999) into a
  * second record with TEXT_ID_INJURED_CASUALTIES, selects the
- * play-time display, clamps the saved cursor row in
- * g_brave_story_saved_cursor to the entry count and positions the windows relative to the list
+ * play-time display, clamps the saved cursor row of
+ * MENU_STACK_CURSOR_SLOT_BRAVE_STORY to the entry count and positions the windows relative to the list
  * record before committing the level at depth + 1.
  *
  * The unused 48-byte local reproduces the target's frame size. */
@@ -216,11 +216,13 @@ void brave_story_open_menu(void) {
     /* temp spans two blocks without crossing a call, so global allocation
      * gives the clamp flag and the land star's y sum the target's v1.
      * A saved cursor past the last entry restarts at row 0. */
-    temp = g_menu_stack_records[depth].brave_story.entry_count < g_brave_story_saved_cursor[0] + 1;
+    temp = g_menu_stack_records[depth].brave_story.entry_count
+        < g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index + 1;
     if (temp) {
-        g_brave_story_saved_cursor[0] = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index = 0;
     }
-    g_menu_stack_records[depth].brave_story.selected_entry = g_brave_story_saved_cursor[0];
+    g_menu_stack_records[depth].brave_story.selected_entry
+        = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index;
     g_menu_stack_records[depth].brave_story.mode = MENU_STACK_WINDOW_MODE_BROWSE;
 
     /* Place the windows on the list record: the cursor 16 pixels per saved row, and the two
@@ -229,7 +231,8 @@ void brave_story_open_menu(void) {
     g_display_object_animated_pool[g_menu_stack_records[depth].brave_story.cursor_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 6;
     g_display_object_animated_pool[g_menu_stack_records[depth].brave_story.cursor_window].position.y
-        = g_display_object_gs_image_pool[index].position.y - g_brave_story_saved_cursor[0] * -0x10 + 0xE;
+        = g_display_object_gs_image_pool[index].position.y
+        - g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index * -0x10 + 0xE;
     g_display_object_animated_pool[g_menu_stack_records[depth].brave_story.label_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 3;
     g_display_object_animated_pool[g_menu_stack_records[depth].brave_story.label_window].position.y
@@ -422,8 +425,8 @@ void brave_story_suspend_menu(menu_stack_record_t* state) {
  *
  * The cancel path and the Leave row each spell out the window-count release;
  * jump2 cross-jumps them after the two count loads. The target reloads the
- * cursor after storing it to g_brave_story_saved_cursor, which needs g_brave_story_saved_cursor
- * accessed as an array element (a scalar store does not alias the level field). The wrap-to-bottom step is written `y
+ * cursor after storing it to the saved cursor slot, which an array element store makes
+ * possible (a scalar store does not alias the level field). The wrap-to-bottom step is written `y
  * -= n * -16` to keep y as the first addu operand.
  */
 void brave_story_update_menu(menu_stack_record_t* level) {
@@ -487,7 +490,7 @@ void brave_story_update_menu(menu_stack_record_t* level) {
         } else {
             music_queue_start_track(MUSIC_QUEUE_TRACK(1, MUSIC_WORLD_MAP));
         }
-        g_brave_story_saved_cursor[0] = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index = 0;
         return;
     }
 
@@ -518,7 +521,8 @@ void brave_story_update_menu(menu_stack_record_t* level) {
 
     if (buttons & PSX_PAD_CIRCLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        g_brave_story_saved_cursor[0] = level->brave_story.selected_entry;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY].selected_index
+            = level->brave_story.selected_entry;
         switch (level->brave_story.entries[level->brave_story.selected_entry]) {
         case BRAVE_STORY_ROW_FACTS:
             message_load_block_if_changed(MESSAGE_BLOCK_FACTS);

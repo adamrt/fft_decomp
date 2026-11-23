@@ -425,6 +425,14 @@ typedef enum map_tile_mark_mode {
     MAP_TILE_MARK_TARGETS_SHOWN = 12
 } map_tile_mark_mode_e;
 
+/* Each tile mark layer's map_tile_mark_mode_e state. */
+typedef struct map_tile_mark_layers {
+    s16 move;    /* move destinations */
+    s16 range;   /* ability range */
+    s16 targets; /* targeted tiles */
+} map_tile_mark_layers_t;
+typedef char map_tile_mark_layers_size_must_be_6[(sizeof(map_tile_mark_layers_t) == 6) ? 1 : -1];
+
 void map_set_tile_mark_colors(s32 mode, s32 unused);
 
 /* map data commands */

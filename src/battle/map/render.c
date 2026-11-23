@@ -81,7 +81,7 @@ extern u8 g_map_tile_depth;
 extern u8 g_map_tile_width;
 extern u16 g_map_tile_mark_x;
 extern s16 g_map_tile_mark_y;
-extern s16 g_map_tile_mark_modes[3];
+extern map_tile_mark_layers_t g_map_tile_mark_modes;
 
 /* map_tile_mark_mode_e, one per tile mark */
 extern render_buffer_t* g_map_tile_mark_color_buffer;
@@ -197,7 +197,7 @@ static MATRIX s_map_camera_matrix = { 0 };
 static DR_MOVE s_texture_animation_moves[MAP_TEXTURE_ANIMATION_COUNT] = { 0 };
 
 /* Provisional: these two GNS work arrays are cleared but have no identified reader. */
-static u8 s_unread_gns_load_infos[150][14] = { 0 };
+static map_gns_load_info_t s_unread_gns_load_infos[150] = { 0 };
 
 static u8 s_unread_gns_record_flags[150] = { 0 };
 
@@ -1157,7 +1157,7 @@ void map_mesh_draw_weather(MATRIX* camera) {
     /* map_set_tile_mark_colors recolors one render buffer; a SHOW it leaves is
      * repeated here once on this frame's buffer, the other of the pair, then marked shown. */
     g_map_tile_data_ptr = g_map_tile_data;
-    if (g_map_tile_mark_modes[0] == MAP_TILE_MARK_SHOW_MOVE) {
+    if (g_map_tile_mark_modes.move == MAP_TILE_MARK_SHOW_MOVE) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
             if (g_map_textured_triangle_positions[i].terrain_tile != MAP_POLYGON_TILE_NONE) {
                 /* terrain_tile holds z in bits 1-7, x in bits 8-15 and the upper level in bit 0 (tiles 0x100 on). */
@@ -1209,10 +1209,10 @@ void map_mesh_draw_weather(MATRIX* camera) {
             }
         }
 
-        g_map_tile_mark_modes[0] = MAP_TILE_MARK_MOVE_SHOWN;
+        g_map_tile_mark_modes.move = MAP_TILE_MARK_MOVE_SHOWN;
     }
 
-    if (g_map_tile_mark_modes[1] == MAP_TILE_MARK_SHOW_RANGE) {
+    if (g_map_tile_mark_modes.range == MAP_TILE_MARK_SHOW_RANGE) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
             if (g_map_textured_triangle_positions[i].terrain_tile != MAP_POLYGON_TILE_NONE) {
                 g_map_tile_mark_y = (g_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7F;
@@ -1262,10 +1262,10 @@ void map_mesh_draw_weather(MATRIX* camera) {
             }
         }
 
-        g_map_tile_mark_modes[1] = MAP_TILE_MARK_RANGE_SHOWN;
+        g_map_tile_mark_modes.range = MAP_TILE_MARK_RANGE_SHOWN;
     }
 
-    if (g_map_tile_mark_modes[2] == MAP_TILE_MARK_SHOW_TARGETS) {
+    if (g_map_tile_mark_modes.targets == MAP_TILE_MARK_SHOW_TARGETS) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
             if (g_map_textured_triangle_positions[i].terrain_tile != MAP_POLYGON_TILE_NONE) {
                 g_map_tile_mark_y = (g_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7F;
@@ -1315,12 +1315,12 @@ void map_mesh_draw_weather(MATRIX* camera) {
             }
         }
 
-        g_map_tile_mark_modes[2] = MAP_TILE_MARK_TARGETS_SHOWN;
+        g_map_tile_mark_modes.targets = MAP_TILE_MARK_TARGETS_SHOWN;
     }
 
     /* A HIDE copies the CLUTs, and some colors, back from the buffer
      * map_set_tile_mark_colors restored. */
-    if (g_map_tile_mark_modes[0] == MAP_TILE_MARK_HIDE_MOVE) {
+    if (g_map_tile_mark_modes.move == MAP_TILE_MARK_HIDE_MOVE) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
             GT3(i).clut = SAVED_GT3(i).clut;
             if (!(g_map_textured_triangle_positions[i].polygon_flags & MAP_POLYGON_FLAG_LIT)) {
@@ -1340,15 +1340,15 @@ void map_mesh_draw_weather(MATRIX* camera) {
             }
         }
 
-        g_map_tile_mark_modes[0] = MAP_TILE_MARK_NONE;
+        g_map_tile_mark_modes.move = MAP_TILE_MARK_NONE;
         /* With no layer left, stop the marked-tiles palette pulse and restore its colors. */
-        if ((g_map_tile_mark_modes[1] | g_map_tile_mark_modes[2]) == 0) {
+        if ((g_map_tile_mark_modes.range | g_map_tile_mark_modes.targets) == 0) {
             map_palette_modify(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
             map_palette_modify(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
     }
 
-    if (g_map_tile_mark_modes[1] == MAP_TILE_MARK_HIDE_RANGE) {
+    if (g_map_tile_mark_modes.range == MAP_TILE_MARK_HIDE_RANGE) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
             GT3(i).clut = SAVED_GT3(i).clut;
         }
@@ -1356,14 +1356,14 @@ void map_mesh_draw_weather(MATRIX* camera) {
             GT4(i).clut = SAVED_GT4(i).clut;
         }
 
-        g_map_tile_mark_modes[1] = MAP_TILE_MARK_NONE;
-        if ((g_map_tile_mark_modes[0] | g_map_tile_mark_modes[2]) == 0) {
+        g_map_tile_mark_modes.range = MAP_TILE_MARK_NONE;
+        if ((g_map_tile_mark_modes.move | g_map_tile_mark_modes.targets) == 0) {
             map_palette_modify(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
             map_palette_modify(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
     }
 
-    if (g_map_tile_mark_modes[2] == MAP_TILE_MARK_HIDE_TARGETS) {
+    if (g_map_tile_mark_modes.targets == MAP_TILE_MARK_HIDE_TARGETS) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
             GT3(i).clut = SAVED_GT3(i).clut;
             GT3(i).r0 = SAVED_GT3(i).r0;
@@ -1393,8 +1393,8 @@ void map_mesh_draw_weather(MATRIX* camera) {
             GT4(i).b3 = SAVED_GT4(i).b3;
         }
 
-        g_map_tile_mark_modes[2] = MAP_TILE_MARK_NONE;
-        if ((g_map_tile_mark_modes[0] | g_map_tile_mark_modes[1]) == 0) {
+        g_map_tile_mark_modes.targets = MAP_TILE_MARK_NONE;
+        if ((g_map_tile_mark_modes.move | g_map_tile_mark_modes.range) == 0) {
             map_palette_modify(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
             map_palette_modify(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
@@ -1426,9 +1426,9 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
         }
 
         /* Leave every layer in HIDE so the next draw copies this buffer's colors into the other one. */
-        g_map_tile_mark_modes[0] = MAP_TILE_MARK_HIDE_MOVE;
-        g_map_tile_mark_modes[1] = MAP_TILE_MARK_HIDE_RANGE;
-        g_map_tile_mark_modes[2] = MAP_TILE_MARK_HIDE_TARGETS;
+        g_map_tile_mark_modes.move = MAP_TILE_MARK_HIDE_MOVE;
+        g_map_tile_mark_modes.range = MAP_TILE_MARK_HIDE_RANGE;
+        g_map_tile_mark_modes.targets = MAP_TILE_MARK_HIDE_TARGETS;
         dispatch_polygon_flags(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
         dispatch_polygon_flags(MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT);
         g_map_tile_mark_color_buffer = g_render_current_buffer;
@@ -1488,10 +1488,10 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
             }
         }
 
-        g_map_tile_mark_modes[0] = MAP_TILE_MARK_SHOW_MOVE;
+        g_map_tile_mark_modes.move = MAP_TILE_MARK_SHOW_MOVE;
         /* Start the marked-tiles palette pulse unless another layer is already shown. */
-        other_state_a = g_map_tile_mark_modes[1];
-        other_state_b = g_map_tile_mark_modes[2];
+        other_state_a = g_map_tile_mark_modes.range;
+        other_state_b = g_map_tile_mark_modes.targets;
         if ((other_state_a | other_state_b) == 0
             || (other_state_a == MAP_TILE_MARK_HIDE_RANGE && other_state_b == MAP_TILE_MARK_HIDE_TARGETS)) {
             map_palette_modify(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
@@ -1558,7 +1558,7 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
             }
         }
 
-        g_map_tile_mark_modes[0] = MAP_TILE_MARK_HIDE_MOVE;
+        g_map_tile_mark_modes.move = MAP_TILE_MARK_HIDE_MOVE;
         g_map_tile_mark_color_buffer = g_render_current_buffer;
         break;
     case MAP_TILE_MARK_SHOW_RANGE:
@@ -1615,9 +1615,9 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
             }
         }
 
-        g_map_tile_mark_modes[1] = MAP_TILE_MARK_SHOW_RANGE;
-        other_state_a = g_map_tile_mark_modes[0];
-        other_state_b = g_map_tile_mark_modes[2];
+        g_map_tile_mark_modes.range = MAP_TILE_MARK_SHOW_RANGE;
+        other_state_a = g_map_tile_mark_modes.move;
+        other_state_b = g_map_tile_mark_modes.targets;
         if ((other_state_a | other_state_b) == 0
             || (other_state_a == MAP_TILE_MARK_HIDE_MOVE && other_state_b == MAP_TILE_MARK_HIDE_TARGETS)) {
             map_palette_modify(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
@@ -1683,7 +1683,7 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
             }
         }
 
-        g_map_tile_mark_modes[1] = MAP_TILE_MARK_HIDE_RANGE;
+        g_map_tile_mark_modes.range = MAP_TILE_MARK_HIDE_RANGE;
         g_map_tile_mark_color_buffer = g_render_current_buffer;
         break;
     case MAP_TILE_MARK_SHOW_TARGETS:
@@ -1740,9 +1740,9 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
             }
         }
 
-        g_map_tile_mark_modes[2] = MAP_TILE_MARK_SHOW_TARGETS;
-        other_state_a = g_map_tile_mark_modes[0];
-        other_state_b = g_map_tile_mark_modes[1];
+        g_map_tile_mark_modes.targets = MAP_TILE_MARK_SHOW_TARGETS;
+        other_state_a = g_map_tile_mark_modes.move;
+        other_state_b = g_map_tile_mark_modes.range;
         if ((other_state_a | other_state_b) == 0
             || (other_state_a == MAP_TILE_MARK_HIDE_MOVE && other_state_b == MAP_TILE_MARK_HIDE_RANGE)) {
             map_palette_modify(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
@@ -1838,7 +1838,7 @@ void map_set_tile_mark_colors(s32 mode, s32 unused) {
             }
         }
 
-        g_map_tile_mark_modes[2] = MAP_TILE_MARK_HIDE_TARGETS;
+        g_map_tile_mark_modes.targets = MAP_TILE_MARK_HIDE_TARGETS;
         g_map_tile_mark_color_buffer = g_render_current_buffer;
         break;
     }
@@ -1935,7 +1935,7 @@ void map_mesh_reset_render_state(void) {
     g_map_gns_dispatch_held = 0;
     for (i = 0; i < 150; i++) {
         for (j = 0; j < 14; j++) {
-            s_unread_gns_load_infos[i][j] = 0;
+            s_unread_gns_load_infos[i].bytes[j] = 0;
         }
         s_unread_gns_record_flags[i] = 0;
     }

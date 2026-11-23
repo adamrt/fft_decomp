@@ -320,7 +320,7 @@ static void build_ability_list_rows(s32 mode) {
     g_ability_list_ability_layout.columns.x[1] = 0x6A;
     g_ability_list_ability_layout.columns.x[2] = 0x7E;
     g_ability_list_ability_layout.columns.mode[0] = MENU_TEXT_COLUMN_TEXT;
-    if (g_command_action_type_modes[type][1] == 1) { /* lists by id */
+    if (g_command_action_type_modes[type].list_kind == 1) { /* lists by id */
         /* Inventory loaders leave item ids in the byte column mp_costs; the value column
          * shows each item's quantity. */
         count = copy_u8_to_u16_terminated(g_event_work->ability_list.ids, g_event_work->ability_list.mp_costs);

@@ -23,8 +23,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Two 32-bit masks, one bit per tutorial-list entry, set when the entry is chosen. */
-extern u32 g_tutorial_progress_masks[];
+/* One bit per tutorial-list entry, set when the entry is chosen. */
+typedef struct tutorial_progress_masks {
+    u32 formation; /* the formation tutorials */
+    u32 battle;    /* the battle tutorials */
+} tutorial_progress_masks_t;
+
+extern tutorial_progress_masks_t g_tutorial_progress_masks;
 
 static s32 s_tutorial_battle_event_ids[TUTORIAL_BATTLE_COUNT] = { EVENT_ID_TUTORIAL_FIRST, EVENT_ID_TUTORIAL_FIRST + 2,
     EVENT_ID_TUTORIAL_FIRST + 4, EVENT_ID_TUTORIAL_FIRST + 6, EVENT_ID_TUTORIAL_FIRST + 8, EVENT_ID_TUTORIAL_FIRST + 10,
@@ -48,8 +53,8 @@ void tutorial_open_menu(s32 selected_entry, s32 reset) {
     s32 record_index;
 
     if (reset != 0) {
-        g_tutorial_progress_masks[1] = 0;
-        g_tutorial_progress_masks[0] = 0;
+        g_tutorial_progress_masks.battle = 0;
+        g_tutorial_progress_masks.formation = 0;
     }
 
     window_index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -300,7 +305,7 @@ void tutorial_update_menu(menu_stack_record_t* level) {
 
 /* Opens the list of the seven formation tutorials (TEXT_ID_TUTORIAL_NAME_BASE
  * + row), a row drawn in text color 8 once its bit of
- * g_tutorial_progress_masks[0] shows it was viewed, at (0x54, 0x50),
+ * g_tutorial_progress_masks.formation shows it was viewed, at (0x54, 0x50),
  * 0x8c wide, and pushes MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST.
  *
  * The viewed-entry palette lives in its own variable so the target keeps 8 in a saved
@@ -315,7 +320,7 @@ void tutorial_open_formation_list(void) {
 
     for (; i < TUTORIAL_FORMATION_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE;
-        if (bits_test(g_tutorial_progress_masks, i) != 0) {
+        if (bits_test(&g_tutorial_progress_masks.formation, i) != 0) {
             g_menu_stack_row_text_colors[i] = viewed_color;
         } else {
             g_menu_stack_row_text_colors[i] = 0;
@@ -359,7 +364,7 @@ void tutorial_suspend_formation_list(menu_stack_record_t* unused_level) {
  * fades the screen out and closes the panel; once it has closed the level
  * moves to result 2, turns the display off and closes the message box. When
  * that has ended, the tutorial is marked viewed in
- * g_tutorial_progress_masks[0], the menu brightness is restored, WORLD's
+ * g_tutorial_progress_masks.formation, the menu brightness is restored, WORLD's
  * formation screen runs the tutorial, and a screen transition brings the
  * list back. */
 void tutorial_update_formation_list_input(menu_stack_record_t* level) {
@@ -367,7 +372,7 @@ void tutorial_update_formation_list_input(menu_stack_record_t* level) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
             s16* selected = &g_window_panel_render_state.selected_index;
 
-            bits_set_value(g_tutorial_progress_masks, *selected, 1);
+            bits_set_value(&g_tutorial_progress_masks.formation, *selected, 1);
             menu_screen_set_brightness(0x80, 0x80, 0x80);
             formation_run_tutorial(*selected);
             g_menu_stack_ot_offset = 1;
@@ -420,7 +425,7 @@ void tutorial_update_formation_list_input(menu_stack_record_t* level) {
 
 /* Opens the list of the eight battle tutorials (TEXT_ID_TUTORIAL_NAME_BASE +
  * 16 + row), a row drawn in text color 8 once its bit of
- * g_tutorial_progress_masks[1] shows it was viewed, at (0x54, 0x50),
+ * g_tutorial_progress_masks.battle shows it was viewed, at (0x54, 0x50),
  * 0x8c wide, and pushes MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST. Sibling of
  * tutorial_open_formation_list. */
 void tutorial_open_battle_list(void) {
@@ -432,7 +437,7 @@ void tutorial_open_battle_list(void) {
 
     for (i = 0; i < TUTORIAL_BATTLE_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE + 16;
-        if (bits_test(&g_tutorial_progress_masks[1], i) != 0) {
+        if (bits_test(&g_tutorial_progress_masks.battle, i) != 0) {
             g_menu_stack_row_text_colors[i] = 8;
         } else {
             g_menu_stack_row_text_colors[i] = 0;
@@ -480,7 +485,7 @@ void tutorial_suspend_battle_list(menu_stack_record_t* unused_level) {
  * Once input is blocked and the fade is over, a cancel pops the level and a
  * choice turns the display off, closes the message box and moves to result 2.
  * When the message box has gone, the tutorial is marked viewed in
- * g_tutorial_progress_masks[1], its event is set as
+ * g_tutorial_progress_masks.battle, its event is set as
  * EVENT_SCRIPT_VAR_CURRENT_EVENT (with progress effects suppressed), the
  * list cursor and weather are saved, and the world loop ends with
  * WORLD_MAP_FLAG_TUTORIAL_EVENT. */
@@ -490,7 +495,7 @@ void tutorial_update_battle_list_input(menu_stack_record_t* level) {
     if (level->panel.result == 2) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) == 0) {
             selected = &g_window_panel_render_state.selected_index;
-            bits_set_value(&g_tutorial_progress_masks[1], *selected, 1);
+            bits_set_value(&g_tutorial_progress_masks.battle, *selected, 1);
             script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 1);
             script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, s_tutorial_battle_event_ids[*selected]);
             menu_stack_store_cursor(MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS);

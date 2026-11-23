@@ -30,7 +30,7 @@ typedef struct brave_story_menu_level {
     s32 casualty_image; /* 0x0c */
     u8 _unused_10[8];
     s32 mode;                     /* 0x18; menu_stack_window_mode_e */
-    s32 selected_entry;           /* 0x1c; initial row from g_brave_story_saved_cursor */
+    s32 selected_entry;           /* 0x1c; initial row from MENU_STACK_CURSOR_SLOT_BRAVE_STORY */
     s32 land_completion_star;     /* 0x20 */
     s32 treasure_completion_star; /* 0x24 */
     u8 _unused_28[8];
@@ -38,9 +38,6 @@ typedef struct brave_story_menu_level {
     s32 entries[BRAVE_STORY_ROW_COUNT]; /* 0x34; brave_story_row_e; text is TEXT_ID_BRAVE_STORY_ROW_FIRST + kind */
 } brave_story_menu_level_t;
 typedef char brave_story_menu_level_size_must_be_80[sizeof(brave_story_menu_level_t) == 80 ? 1 : -1];
-
-/* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY; retained for load ordering. */
-extern s32 g_brave_story_saved_cursor[];
 
 void brave_story_open_menu(void);
 void brave_story_update_menu(menu_stack_record_t* level);
@@ -156,7 +153,7 @@ typedef struct brave_story_advancing_level {
     s32 days_window;   /* 0x0c; DISPLAY_OBJECT_ANIM_PROPOSITION_DAYS_LABEL */
     s32 render_index;  /* 0x10 */
     u8 _unused_14[8];
-    s32 cursor; /* 0x1c; initial row from g_brave_story_advancing_saved_cursor */
+    s32 cursor; /* 0x1c; initial row from MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING */
     u8 _unused_20[0x10];
     s32 entry_count; /* 0x30 */
     s32 entries[10]; /* 0x34; indices into g_proposition_active */
@@ -188,10 +185,6 @@ typedef struct brave_story_participant_level {
     s32 proposition;  /* 0x10; index into g_proposition_active */
     s32 participant;  /* 0x14; slot in participant_indices */
 } brave_story_participant_level_t;
-
-/* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS; the array declaration
- * preserves the target's load order. */
-extern s32 g_brave_story_propositions_saved_cursor[];
 
 void brave_story_open_propositions_level(void);
 void brave_story_resume_propositions_level(menu_stack_record_t* level);

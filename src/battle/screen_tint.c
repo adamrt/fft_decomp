@@ -6,12 +6,20 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* A tint color in 8.8 fixed point, stepped once per frame. */
+typedef struct tint_q8 {
+    u16 r;
+    u16 g;
+    u16 b;
+} tint_q8_t;
+typedef char tint_q8_size_must_be_6[sizeof(tint_q8_t) == 6 ? 1 : -1];
+
 /* Color-tint fade state. */
 static rgb24_t s_fade_tint;
 extern rgb24_t g_fade_tint_backup;
 extern rgb24_t g_fade_tint_target;
-extern u16 g_fade_tint_value[3];
-extern u16 g_fade_tint_step[3];
+extern tint_q8_t g_fade_tint_value;
+extern tint_q8_t g_fade_tint_step;
 extern u16 g_fade_tint_fade_frames;
 extern RECT g_fade_tint_tex_window;
 
@@ -55,12 +63,12 @@ void fade_tint_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration)
         g_fade_tint_target.b = blue;
         g_fade_tint_fade_frames = frames;
         if (frames != 0) {
-            g_fade_tint_value[0] = s_fade_tint.r << 8;
-            g_fade_tint_value[1] = s_fade_tint.g << 8;
-            g_fade_tint_value[2] = s_fade_tint.b << 8;
-            g_fade_tint_step[0] = ((g_fade_tint_target.r - s_fade_tint.r) << 8) / frames;
-            g_fade_tint_step[1] = ((g_fade_tint_target.g - s_fade_tint.g) << 8) / frames;
-            g_fade_tint_step[2] = ((g_fade_tint_target.b - s_fade_tint.b) << 8) / frames;
+            g_fade_tint_value.r = s_fade_tint.r << 8;
+            g_fade_tint_value.g = s_fade_tint.g << 8;
+            g_fade_tint_value.b = s_fade_tint.b << 8;
+            g_fade_tint_step.r = ((g_fade_tint_target.r - s_fade_tint.r) << 8) / frames;
+            g_fade_tint_step.g = ((g_fade_tint_target.g - s_fade_tint.g) << 8) / frames;
+            g_fade_tint_step.b = ((g_fade_tint_target.b - s_fade_tint.b) << 8) / frames;
             SetDrawMode(&g_fade_tint_draw_modes[0], 0, 0, blend_mode << 5, &g_fade_tint_tex_window);
             g_fade_tint_draw_modes[1] = g_fade_tint_draw_modes[0];
         }
@@ -86,12 +94,12 @@ void fade_tint_update(void) {
     if (count != 0) {
         remaining = count - 1;
         g_fade_tint_fade_frames = remaining;
-        red = g_fade_tint_value[0] + g_fade_tint_step[0];
-        g_fade_tint_value[0] = red;
-        green = g_fade_tint_value[1] + g_fade_tint_step[1];
-        g_fade_tint_value[1] = green;
-        blue = g_fade_tint_value[2] + g_fade_tint_step[2];
-        g_fade_tint_value[2] = blue;
+        red = g_fade_tint_value.r + g_fade_tint_step.r;
+        g_fade_tint_value.r = red;
+        green = g_fade_tint_value.g + g_fade_tint_step.g;
+        g_fade_tint_value.g = green;
+        blue = g_fade_tint_value.b + g_fade_tint_step.b;
+        g_fade_tint_value.b = blue;
         s_fade_tint.r = red >> 8;
         s_fade_tint.g = green >> 8;
         s_fade_tint.b = blue >> 8;

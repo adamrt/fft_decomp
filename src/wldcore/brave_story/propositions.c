@@ -29,10 +29,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Selected-row alias of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING. A scalar declaration changes
- * the load order in brave_story_update_advancing_list_input. */
-extern s32 g_brave_story_advancing_saved_cursor[];
-
 /* The unit unit_panel_prepare_party_unit loads from a party slot for the status panels. */
 static battle_unit_t s_unit_panel_unit;
 
@@ -48,7 +44,7 @@ static void open_work_history_entry(s32 value);
  * completed-jobs row once any proposition is completed; each draws
  * TEXT_ID_PROPOSITION_CATEGORY_ROW_FIRST + row. The Brave Story menu
  * is hidden underneath. The cursor is restored from
- * g_brave_story_propositions_saved_cursor (reset when out of range).
+ * MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS (reset when out of range).
  *
  * `value` holds the cursor and then the reloaded main-window index: as one
  * multi-set variable it is left to global allocation, which gives the
@@ -127,17 +123,17 @@ void brave_story_open_propositions_level(void) {
     g_display_object_animated_pool[g_menu_stack_records[depth - 1].brave_story.treasure_completion_star].flags
         |= DISPLAY_OBJECT_HIDDEN;
     if (g_menu_stack_records[depth].brave_story_propositions.entry_count
-        < g_brave_story_propositions_saved_cursor[0] + 1) {
-        g_brave_story_propositions_saved_cursor[0] = 0;
+        < g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS].selected_index + 1) {
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS].selected_index = 0;
     }
-    value = g_brave_story_propositions_saved_cursor[0];
+    value = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS].selected_index;
     g_menu_stack_records[depth].brave_story_propositions.selected_entry = value;
     g_display_object_animated_pool[g_menu_stack_records[depth].brave_story_propositions.cursor_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 6;
     g_menu_stack_depth = depth + 1;
     value = g_menu_stack_records[depth].brave_story_propositions.cursor_window;
-    g_display_object_animated_pool[value].position.y
-        = g_display_object_gs_image_pool[index].position.y - -(g_brave_story_propositions_saved_cursor[0] * 0x10) + 0xE;
+    g_display_object_animated_pool[value].position.y = g_display_object_gs_image_pool[index].position.y
+        - -(g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS].selected_index * 0x10) + 0xE;
     g_menu_stack_types[depth] = MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS;
 }
 
@@ -222,7 +218,7 @@ void brave_story_update_propositions_input(menu_stack_record_t* level) {
 
     if ((buttons & PSX_PAD_CROSS) != 0 && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        g_brave_story_propositions_saved_cursor[0] = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS].selected_index = 0;
         g_display_object_animated_count -= 1;
         g_display_object_image_count -= 1;
         g_display_object_queue_count -= 2;
@@ -233,7 +229,8 @@ void brave_story_update_propositions_input(menu_stack_record_t* level) {
 
     if ((g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) != 0 && g_file_cd_state.state == FILE_LOAD_STATE_IDLE) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        g_brave_story_propositions_saved_cursor[0] = level->brave_story_propositions.selected_entry;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_PROPOSITIONS].selected_index
+            = level->brave_story_propositions.selected_entry;
         entry = level->brave_story_propositions.entries[level->brave_story_propositions.selected_entry];
         switch (entry) {
         case BRAVE_STORY_PROPOSITION_ROW_ADVANCING:
@@ -294,7 +291,7 @@ void brave_story_update_propositions_input(menu_stack_record_t* level) {
  * at x=0xb6 (TEXT_ID_TWO_DIGIT_VALUE, assigned_days - elapsed_days);
  * both numeric columns go through g_text_substitution_values[0]. Finally the
  * saved cursor row
- * in g_brave_story_advancing_saved_cursor is clamped, the four windows are positioned relative to the
+ * of MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING is clamped, the four windows are positioned relative to the
  * render record's origin, and the level is committed at depth + 1.
  *
  * `dead_locals` reserves 0x50 bytes to reproduce the target's 0xb8-byte frame;
@@ -422,18 +419,20 @@ static void open_advancing_list(void) {
     /* temp spans two blocks without crossing a call, so global allocation
      * gives the clamp flag and the cursor copy the target's v1.
      * A saved cursor past the last entry restarts at row 0. */
-    temp = g_menu_stack_records[depth].proposition_list.entry_count < g_brave_story_advancing_saved_cursor[0] + 1;
+    temp = g_menu_stack_records[depth].proposition_list.entry_count
+        < g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING].selected_index + 1;
     if (temp) {
-        g_brave_story_advancing_saved_cursor[0] = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING].selected_index = 0;
     }
-    temp = g_brave_story_advancing_saved_cursor[0];
+    temp = g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING].selected_index;
     g_menu_stack_records[depth].proposition_list.cursor = temp;
 
     /* Place the windows on the list record: the cursor 16 pixels per saved row, the labels above their columns. */
     g_display_object_animated_pool[g_menu_stack_records[depth].proposition_list.cursor_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 6;
     g_display_object_animated_pool[g_menu_stack_records[depth].proposition_list.cursor_window].position.y
-        = g_display_object_gs_image_pool[index].position.y - g_brave_story_advancing_saved_cursor[0] * -0x10 + 0xE;
+        = g_display_object_gs_image_pool[index].position.y
+        - g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING].selected_index * -0x10 + 0xE;
     g_display_object_animated_pool[g_menu_stack_records[depth].proposition_list.title_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 3;
     g_display_object_animated_pool[g_menu_stack_records[depth].proposition_list.title_window].position.y
@@ -500,7 +499,7 @@ void brave_story_update_advancing_list_input(menu_stack_record_t* level) {
 
     if ((buttons & PSX_PAD_CROSS) != 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
-        g_brave_story_advancing_saved_cursor[0] = 0;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING].selected_index = 0;
         g_display_object_animated_count -= 4;
         g_display_object_image_count -= 1;
         g_display_object_queue_count -= 5;
@@ -511,7 +510,8 @@ void brave_story_update_advancing_list_input(menu_stack_record_t* level) {
 
     if ((buttons & PSX_PAD_CIRCLE) != 0) {
         sound_play_effect(SOUND_SFX_CONFIRM);
-        g_brave_story_advancing_saved_cursor[0] = level->proposition_list.cursor;
+        g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BRAVE_STORY_ADVANCING].selected_index
+            = level->proposition_list.cursor;
         g_display_object_animated_count -= 4;
         g_display_object_image_count -= 1;
         g_display_object_queue_count -= 5;

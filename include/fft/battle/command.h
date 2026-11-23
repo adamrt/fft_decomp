@@ -129,11 +129,18 @@ typedef enum action_menu_type {
  * also an ordinary monster skillset when it comes from a monster unit. */
 typedef enum action_menu_pseudo_skillset { ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188 } action_menu_pseudo_skillset_e;
 
+/* How a skillset kind's command proceeds, indexed by g_menu_skillset_types. Provisional. */
+typedef struct command_action_type_mode {
+    s16 row_action; /* negative: confirm at once with this row action instead of opening a list */
+    s16 list_kind;  /* 1: the list shows inventory items by id */
+} command_action_type_mode_t;
+typedef char command_action_type_mode_size_must_be_4[(sizeof(command_action_type_mode_t) == 4) ? 1 : -1];
+
 extern u8 g_command_menu_types_by_skillset[0xe0];
 extern u8 g_command_skillsets[];   /* SKILLSET_ID_NONE terminates the rows. */
 extern u8 g_menu_skillset_types[]; /* per-row skillset kind; 13 keeps the row active */
 extern s32 g_command_selected_skill_ct;
-extern s16 g_command_action_type_modes[][2];
+extern command_action_type_mode_t g_command_action_type_modes[];
 
 /* -1: missing unit, 1: monster skillset, otherwise 0. */
 extern s32 g_command_skillset_build_result;

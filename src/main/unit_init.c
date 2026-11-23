@@ -18,12 +18,6 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* &g_item_primary_data[0].secondary_data_id viewed as a stride-12 byte
- * array. battle_unit_set_equipment_stats reads the secondary id through its own
- * %lo(g_item_primary_data+4) address while the type_flags test uses a
- * record pointer; reading both through item_data_t folds them onto one base
- * register and misses the byte-exact match. */
-extern u8 g_item_secondary_data_ids[];
 extern job_data_t g_job_data[JOB_ID_COUNT];
 static u8 s_party_highest_level;
 extern u16 g_calendar_month_start_day_offsets[13];
@@ -998,25 +992,27 @@ void battle_unit_set_equipment_stats(battle_unit_t* unit) {
         return;
     }
 
+    /* Each secondary id is read by indexing g_item_primary_data again: reading it through `item`
+     * folds both loads onto one base register. */
     item = &g_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]];
     if (item->type_flags & ITEM_TYPE_FLAG_ACCESSORY) {
         item_evade_t* accessory
-            = &g_item_accessory_data[g_item_secondary_data_ids[unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]
-                * sizeof(item_data_t)]];
+            = &g_item_accessory_data[g_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY]]
+                    .secondary_data_id];
         unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE] = accessory->physical_evade;
         unit->equipment_stats[UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE] = accessory->magic_evade;
     }
     item = &g_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]];
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
-        shield = &g_item_shield_data[g_item_secondary_data_ids[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]
-            * sizeof(item_data_t)]];
+        shield = &g_item_shield_data[g_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD]]
+                .secondary_data_id];
         unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE] = shield->physical_evade;
         unit->equipment_stats[UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE] = shield->magic_evade;
     }
     item = &g_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]];
     if (item->type_flags & ITEM_TYPE_FLAG_SHIELD) {
-        shield = &g_item_shield_data[g_item_secondary_data_ids[unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]
-            * sizeof(item_data_t)]];
+        shield = &g_item_shield_data[g_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD]]
+                .secondary_data_id];
         unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE] = shield->physical_evade;
         unit->equipment_stats[UNIT_EQUIPMENT_STAT_LEFT_SHIELD_MAGIC_EVADE] = shield->magic_evade;
     }
