@@ -22,7 +22,7 @@
 
 /* scrolling-list state */
 extern menu_list_page_t g_formation_ability_list_pages[][2];
-extern s32 g_screen_scrolling_list_depth;
+extern s32 g_menu_screen_scrolling_list_depth;
 
 /*
  * Scrolling three-column ability list thread (WORLD's body, reached from at_list_ability_preview_thread).
@@ -348,7 +348,7 @@ void ability_list_scrolling_thread(void) {
                 = top + span * entry->selected_index / (layout->columns.row_count + layout->columns.hidden_rows) - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
-        if (g_screen_scrolling_list_depth < 2 && scroll_delta == 0) {
+        if (g_menu_screen_scrolling_list_depth < 2 && scroll_delta == 0) {
             menu_handle_action(entry, cursor);
         }
         menu_handle_cancel_input(entry);
@@ -420,7 +420,7 @@ void ability_list_scrolling_thread(void) {
         menu_free_memory(buffer);
     }
     thread_yield();
-    g_screen_scrolling_list_depth--;
+    g_menu_screen_scrolling_list_depth--;
     if (thread_current_get_parameter_2() == 0) {
         thread_current_exit();
     }

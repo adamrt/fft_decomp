@@ -28,13 +28,13 @@ units:
   - {name: map_routes, source: src/wldcore/map/routes.c, data: [{addr: 0x80094df4, size: 524, hash: 4bda74adc3be0abe}, {addr: 0x80095000, size: 8, hash: 5c609baa7c039742}], bss: [{addr: 0x800d483c, size: 4, hash: df3f619804a92fdb}]}
   - {name: map_tiles, source: src/wldcore/map/tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}], bss: [{addr: 0x800d3c88, size: 4, hash: df3f619804a92fdb}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}], bss: [{addr: 0x800d4584, size: 32, hash: 66687aadf862bd77}]}
+  - {name: menu_screen_transition, source: src/wldcore/menu_screen_transition.c}
   - {name: music_queue, source: src/wldcore/music_queue.c, data: [{addr: 0x800d45a4, size: 160, hash: b393978842a0fa3d}]}
   - {name: proposition_data, source: src/wldcore/proposition/data.c}
   - {name: proposition_dispatch, source: src/wldcore/proposition/dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
   - {name: proposition_report, source: src/wldcore/proposition/report.c}
   - {name: proposition_results, source: src/wldcore/proposition/results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
   - {name: resource_loading, source: src/wldcore/resource_loading.c, data: [{addr: 0x8009e0ec, size: 1408, hash: 697848efa3c9d262}]}
-  - {name: screen_transition, source: src/wldcore/screen_transition.c}
   - {name: sound_novel, source: src/wldcore/sound_novel/script.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}], bss: [{addr: 0x800d099c, size: 4, hash: df3f619804a92fdb}]}
   - {name: sound_novel_menus, source: src/wldcore/sound_novel/menus.c, bss: [{addr: 0x800d4900, size: 8, hash: af5570f5a1810b7a}]}
   - {name: sound_novel_progress, source: src/wldcore/sound_novel/progress.c}
@@ -298,10 +298,10 @@ functions:
   - {addr: 0x80087da0, size: 516, name: brave_story_update_work_history_input, hash: d0220aeec018bc1e, unit: brave_story_propositions}
   - {addr: 0x80087fa4, size: 476, name: open_work_history_entry, hash: c9cc9c865ac2e396, unit: brave_story_propositions}
   - {addr: 0x80088180, size: 392, name: brave_story_update_work_history_entry, hash: b3f0c6a8cf2e5f9d, unit: brave_story_propositions}
-  - {addr: 0x80088308, size: 988, name: screen_transition_open, hash: a54f6808fc360853, unit: screen_transition, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
-  - {addr: 0x800886e4, size: 916, name: hide_parent_windows, hash: 70bf9f0c22a63d0e, unit: screen_transition}
-  - {addr: 0x80088a78, size: 536, name: hide_parent_tutorial_menu, hash: e3ce1fa1e0ef9392, unit: screen_transition}
-  - {addr: 0x80088c90, size: 1120, name: screen_transition_update, hash: 22416fb257542db2, unit: screen_transition, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
+  - {addr: 0x80088308, size: 988, name: menu_screen_transition_open, hash: a54f6808fc360853, unit: menu_screen_transition, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
+  - {addr: 0x800886e4, size: 916, name: hide_parent_windows, hash: 70bf9f0c22a63d0e, unit: menu_screen_transition}
+  - {addr: 0x80088a78, size: 536, name: hide_parent_tutorial_menu, hash: e3ce1fa1e0ef9392, unit: menu_screen_transition}
+  - {addr: 0x80088c90, size: 1120, name: menu_screen_transition_update, hash: 22416fb257542db2, unit: menu_screen_transition, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
   - {addr: 0x800890f0, size: 1100, name: tutorial_open_menu, hash: 61d22220966e7b4d, unit: tutorial_menus}
   - {addr: 0x8008953c, size: 392, name: tutorial_build_menu_panel, hash: 6e7e170a9de6189f, unit: tutorial_menus}
   - {addr: 0x800896c4, size: 236, name: tutorial_resume_menu, hash: 1fe1a6d4d29bc858, unit: tutorial_menus}

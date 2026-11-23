@@ -16,6 +16,7 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_sort.h"
 #include "fft/menu_window.h"
@@ -25,7 +26,6 @@
 #include "fft/party_unit.h"
 #include "fft/proposition.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
@@ -139,7 +139,7 @@ extern u8 g_headgear_sort_order[5];
 extern u8 g_body_armor_sort_order[5];
 extern u8 g_accessories_sort_order[7];
 extern u8 g_other_items_sort_order[5];
-extern u8 g_screen_input_blocked_state;
+extern u8 g_menu_screen_input_blocked_state;
 
 static void update_card_selection(void);
 static void update_mode_select(void);
@@ -184,27 +184,27 @@ static void update_input_message_state(void) {
         menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
-        if (running != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (running != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
             menu_input_clear_state();
             if (running != 0 && g_menu_input_lock_mode != 0) {
                 value = 1;
-                if (g_screen_input_blocked_state != 0) {
+                if (g_menu_screen_input_blocked_state != 0) {
                     value = 2;
                 }
-                g_screen_input_blocked_state = value;
+                g_menu_screen_input_blocked_state = value;
             } else {
-                g_screen_input_blocked_state = 0;
+                g_menu_screen_input_blocked_state = 0;
             }
-        } else if (g_screen_input_blocked_state != 0 || screen_get_fade_state() != SCREEN_FADE_STATE_NONE) {
-            g_screen_input_blocked_state = 0;
+        } else if (g_menu_screen_input_blocked_state != 0 || screen_get_fade_state() != SCREEN_FADE_STATE_NONE) {
+            g_menu_screen_input_blocked_state = 0;
             menu_input_clear_state();
         }
     }
     if (running == 0) {
         g_menu_input_lock_mode = 0;
-        g_screen_sound_release_held_loop = 0;
+        g_menu_screen_sound_release_held_loop = 0;
     }
-    if (g_screen_input_blocked_state == 1) {
+    if (g_menu_screen_input_blocked_state == 1) {
         g_sound_queued_effect_id = SOUND_SFX_WINDOW_OPEN;
     }
 }
@@ -227,20 +227,20 @@ s32 save_run_screen(s32 mode_select_enabled) {
     s32 buttons;
     s32 step;
 
-    g_screen_ot_length = 0x40;
-    g_screen_textured_quad_capacity = 0x258;
+    g_menu_screen_ot_length = 0x40;
+    g_menu_screen_textured_quad_capacity = 0x258;
     g_gfx_poly_f3_capacity = 0;
     g_gfx_poly_ft3_capacity = 0;
     g_gfx_poly_f4_capacity = 0;
     g_gfx_poly_g3_capacity = 0;
     g_gfx_poly_gt3_capacity = 0;
-    g_screen_gradient_quad_capacity = 0;
-    g_screen_textured_gradient_quad_capacity = 0;
-    g_screen_flat_line_capacity = 0;
+    g_menu_screen_gradient_quad_capacity = 0;
+    g_menu_screen_textured_gradient_quad_capacity = 0;
+    g_menu_screen_flat_line_capacity = 0;
     g_gfx_line_f3_capacity = 0;
     g_gfx_line_f4_capacity = 0;
-    g_screen_gradient_line_capacity = 0;
-    g_screen_line_g3_capacity = 0;
+    g_menu_screen_gradient_line_capacity = 0;
+    g_menu_screen_line_g3_capacity = 0;
     g_gfx_line_g4_capacity = 0;
     g_gfx_tile_capacity = 10;
     g_gfx_tile_1_capacity = 0;
@@ -249,15 +249,15 @@ s32 save_run_screen(s32 mode_select_enabled) {
     g_gfx_sprite_capacity = 0;
     g_gfx_sprite_8_capacity = 0;
     g_gfx_sprite_16_capacity = 0;
-    g_screen_draw_move_capacity = 30;
-    g_screen_draw_area_capacity = 10;
+    g_menu_screen_draw_move_capacity = 30;
+    g_menu_screen_draw_area_capacity = 10;
     g_gfx_draw_mode_capacity = 30;
     menu_gfx_init_contexts(buffers, otags, 0, 0, 0, textured_quads, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, tiles, 0, 0, 0, 0, 0,
         0, draw_moves, draw_areas, draw_modes);
     formation_init_display();
     g_formation_unit_count = formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_save_slot_text_table;
-    screen_text_bind_section(SCREEN_TEXT_DATA_FORMATION_MESSAGES);
+    menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_FORMATION_MESSAGES);
     g_save_menu_step = SAVE_STEP_SELECT_CARD;
     /* 1 from the world menu, 0 from the title screen's Continue (load only). */
     g_save_mode_select_enabled = mode_select_enabled;
@@ -274,7 +274,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
         menu_gfx_present_frame(0, 0);
         update_input_message_state();
         screen_update_fade_in();
-        gfx_enqueue_tile(&g_save_screen_background_tile, &g_screen_black_tile_color, 0, 0);
+        gfx_enqueue_tile(&g_save_screen_background_tile, &g_menu_screen_black_tile_color, 0, 0);
         if (g_save_menu_step == SAVE_STEP_SELECT_SAVE && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0) {
             input = g_menu_input_primary_repeat;
         } else {
@@ -306,24 +306,24 @@ s32 save_run_screen(s32 mode_select_enabled) {
         buttons = PadRead(0) & PSX_PAD_DPAD_MASK;
         buttons |= g_menu_input_newly_pressed & 0xfff;
         if (thread_is_running(THREAD_SCREEN_SLOT_TEXT) == 0 && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0
-            && thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU) == 0) {
+            && thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU) == 0) {
             buttons &= 0xff00;
         }
         menu_input_update_event_state(
-            g_menu_gfx_context->otag + 60, buttons, g_screen_draw_buffer_clip_y == 0 ? 0xf0 : 0);
-        screen_update_sound_effect();
+            g_menu_gfx_context->otag + 60, buttons, g_menu_screen_draw_buffer_clip_y == 0 ? 0xf0 : 0);
+        menu_screen_update_sound_effect();
     }
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, -1, 0);
     free_work_buffer();
     save_close_stub();
     music_unload_scenario_slot(music_handle);
-    screen_reset_context();
+    menu_screen_reset_context();
     formation_roster_build_names();
     return g_save_menu_result;
 }
 
 /* Memory card slot selection step: waits 0x28 frames, opens the card choice menu in the screen
- * menu slot, then applies the chosen card slot (g_screen_selection_results[5]) and starts
+ * menu slot, then applies the chosen card slot (g_menu_screen_selection_results[5]) and starts
  * scanning it, or leaves the screen on cancel. */
 static void update_card_selection(void) {
     s16* selected;
@@ -337,13 +337,13 @@ static void update_card_selection(void) {
         g_save_slot_select_running = 1;
         g_save_mode = 0xff;
         g_save_slot_cursor_row = 0;
-        g_screen_selection_results[5] = -1;
+        g_menu_screen_selection_results[5] = -1;
         g_save_slot_select_menu[1].selected_index = g_save_selected_slot;
         return;
     }
     g_save_slot_select_running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_slot_select_menu);
     if (g_save_slot_select_running == 0) {
-        selected = &g_screen_selection_results[5];
+        selected = &g_menu_screen_selection_results[5];
         slot = *selected;
         if (slot == -1) {
             g_save_menu_step = SAVE_STEP_LEAVE;
@@ -362,7 +362,7 @@ static void update_card_selection(void) {
 /*
  * Memory card menu state 1: choose between loading and saving.
  *
- * g_screen_selection_results[5] receives the menu choice (0 save, 1 load, -1 cancel); a zero
+ * g_menu_screen_selection_results[5] receives the menu choice (0 save, 1 load, -1 cancel); a zero
  * g_save_mode_select_enabled (the title's Continue passes 0) skips the menu and loads. WORLD
  * reads and writes that flag as 16 bits, while CARD.OUT stores it as a byte (`sb`) and reads it
  * with `lb`/`lbu`. Saving when every slot state is -1,
@@ -378,7 +378,7 @@ static void update_mode_select(void) {
     if (memcard_poll_operation() > MEMCARD_RESULT_COMPLETE) {
         g_save_pending_message = 0;
         g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
-        menu_thread_stop_and_wait(SCREEN_THREAD_SLOT_UPPER_MENU);
+        menu_thread_stop_and_wait(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU);
         g_save_mode_select_running = 0;
         g_save_menu_step = SAVE_STEP_SCANNING;
@@ -395,20 +395,21 @@ static void update_mode_select(void) {
         return;
     }
     if (g_save_mode_select_running == 0) {
-        g_screen_selection_results[5] = -1;
+        g_menu_screen_selection_results[5] = -1;
         g_save_mode_select_menu.selected_index = 0;
         g_save_mode_select_running = 1;
     }
     if (g_save_mode_select_enabled == 0) {
-        g_screen_selection_results[5] = 1;
+        g_menu_screen_selection_results[5] = 1;
         g_save_mode_select_running = 0;
     } else {
-        g_save_mode_select_running = menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_save_mode_select_menu);
+        g_save_mode_select_running
+            = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_save_mode_select_menu);
     }
     if (g_save_mode_select_running != 0) {
         return;
     }
-    slot = g_screen_selection_results[5];
+    slot = g_menu_screen_selection_results[5];
     if (slot == -1) {
         g_save_menu_step = SAVE_STEP_SELECT_CARD;
         return;
@@ -434,7 +435,7 @@ static void update_mode_select(void) {
     }
     if (g_save_pending_message == 0) {
         i = g_save_mode;
-        g_save_mode = g_screen_selection_results[5];
+        g_save_mode = g_menu_screen_selection_results[5];
         g_save_menu_step = SAVE_STEP_SELECT_SAVE;
         if (i != g_save_mode) {
             g_save_list_scroll_y = 0x18;
@@ -990,7 +991,7 @@ static void update_card_scan(void) {
         for (result = 0; result < 15; result++) {
             g_save_slot_file_states[result] = SAVE_SLOT_UNSCANNED;
         }
-        g_screen_selection_results[5] = -1;
+        g_menu_screen_selection_results[5] = -1;
         g_save_format_prompt[1].selected_index = 1;
         g_save_last_used_slot = SAVE_LAST_USED_SLOT_NONE;
         g_save_scan_prompt_active = 1;
@@ -1006,7 +1007,7 @@ static void update_card_scan(void) {
             menu_thread_stop_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
             g_save_slot_scan_active = 0;
         } else if (g_save_scan_prompt_active == 0) {
-            if (g_screen_selection_results[5] == 0) {
+            if (g_menu_screen_selection_results[5] == 0) {
                 g_save_format_delay_counter = 1;
             } else {
                 g_save_menu_step = SAVE_STEP_SELECT_CARD;
@@ -1014,7 +1015,7 @@ static void update_card_scan(void) {
             g_save_slot_scan_active = 0;
         } else {
             g_save_scan_prompt_active = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_format_prompt);
-            if (g_save_scan_prompt_active == 0 && g_screen_selection_results[5] == 0) {
+            if (g_save_scan_prompt_active == 0 && g_menu_screen_selection_results[5] == 0) {
                 menu_thread_start_or_poll(THREAD_SCREEN_SLOT_MENU, &g_save_formatting_message);
             }
         }
@@ -1125,7 +1126,7 @@ static void update_card_scan(void) {
  * through after writing the terminator, and no caller reads the result.
  * An explicit return at the tail introduces an extra constant load.
  *
- * `screen_text_bind_section` has no return statement; the job-name table
+ * `menu_screen_text_bind_section` has no return statement; the job-name table
  * passed on below is the address its store left in $v0. */
 static s32 build_slot_description(s32 mode, u8* destination) {
     s32 index;
@@ -1145,7 +1146,7 @@ static s32 build_slot_description(s32 mode, u8* destination) {
         *destination++ = TEXT_SET_X_POSITION;
         *destination++ = 0x58;
         source = menu_text_find_entry_by_index(
-            screen_text_bind_section(SCREEN_TEXT_DATA_JOB_NAMES), g_save_work_buffer->summary.job_id, 1);
+            menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_JOB_NAMES), g_save_work_buffer->summary.job_id, 1);
         while (*source != 0xFE) {
             *destination++ = *source++;
         }
@@ -1279,12 +1280,12 @@ static void update_slot_list(s32 input) {
         } else if (g_save_overwrite_prompt_running != 0) {
             g_save_overwrite_prompt_running
                 = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_overwrite_confirm_prompt);
-            if (g_save_overwrite_prompt_running == 0 && g_screen_selection_results[5] == 0) {
+            if (g_save_overwrite_prompt_running == 0 && g_menu_screen_selection_results[5] == 0) {
                 g_save_menu_step = SAVE_STEP_SAVING;
             }
         } else if (g_save_load_prompt_running != 0) {
             g_save_load_prompt_running = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_save_load_confirm_prompt);
-            if (g_save_load_prompt_running == 0 && g_screen_selection_results[5] == 0) {
+            if (g_save_load_prompt_running == 0 && g_menu_screen_selection_results[5] == 0) {
                 g_save_menu_step = SAVE_STEP_LOADING;
             }
         } else if ((input & PSX_PAD_CIRCLE) && g_save_list_scroll_velocity == 0) {
@@ -1462,7 +1463,7 @@ static void update_slot_list(s32 input) {
 
         /* Read the slot's text strip from where render_slot_text put it. */
         if (i < 6) {
-            texture_page = g_screen_window_tpage;
+            texture_page = g_menu_screen_window_tpage;
             source_v = i * 0x20 + 0x30;
         } else if (i < 11) {
             texture_page = GetTPage(0, 0, 0x1c0, 0);
@@ -1471,7 +1472,7 @@ static void update_slot_list(s32 input) {
             texture_page = GetTPage(0, 0, 0x180, 0);
             source_v = (i - 11) * 0x20 + 0x60;
         }
-        menu_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_screen_window_clut, 11);
+        menu_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_menu_screen_window_clut, 11);
     }
 
     gfx_set_otag_index(15);

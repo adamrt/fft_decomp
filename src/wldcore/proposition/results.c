@@ -6,6 +6,7 @@
 #include "fft/job.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message_box.h"
@@ -14,7 +15,6 @@
 #include "fft/party_unit.h"
 #include "fft/portrait.h"
 #include "fft/proposition.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -101,7 +101,7 @@ s32 proposition_update_participant_message(proposition_report_level_t* state, s3
     case PROPOSITION_PARTICIPANT_MESSAGE_WAIT_CONFIRM:
         if (!(g_world_map_input_new_button_presses & PSX_PAD_CIRCLE))
             return 0;
-        if (!screen_is_dialog_waiting())
+        if (!menu_screen_is_dialog_waiting())
             return 0;
         state->phase++;
         break;
@@ -620,7 +620,7 @@ void proposition_update_discovery(menu_stack_record_t* discovery) {
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);
         }
     } else if (discovery->discovery.phase == PROPOSITION_DISCOVERY_PHASE_LAST_MESSAGE) {
-        if (screen_is_dialog_waiting() != 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
+        if (menu_screen_is_dialog_waiting() != 0 && g_music_queue.current_command == MUSIC_QUEUE_COMMAND_NONE
             && g_music_queue.count == 0) {
             music_queue_add(MUSIC_QUEUE_COMMAND_PLAY_TRACK, MUSIC_QUEUE_TRACK(2, MUSIC_MILESTONE));
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_IN, 0x10);

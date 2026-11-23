@@ -2,8 +2,8 @@
 
 #include "fft/display_object.h"
 #include "fft/gfx.h"
+#include "fft/menu_screen.h"
 #include "fft/music.h"
-#include "fft/screen.h"
 #include "fft/world_map.h"
 #include "psx/libgs.h"
 #include "psx/types.h"

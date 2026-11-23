@@ -3,14 +3,14 @@
 #include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
 /* controller state */
 static u16 s_screen_input_previous;
-extern u8 g_screen_input_triangle_latch;
+extern u8 g_menu_screen_input_triangle_latch;
 
 /* Return the controller buttons from PadRead(0); the argument is ignored. */
 static s32 read_pad_buttons(s32 unused) {
@@ -46,20 +46,20 @@ void menu_input_update_controller(void) {
     secondary_repeat_period = g_input_secondary_repeat_period / speed;
     current_input = read_pad_buttons(0);
     if (current_input & PSX_PAD_TRIANGLE) {
-        if (g_screen_input_triangle_latch != 0) {
+        if (g_menu_screen_input_triangle_latch != 0) {
             menu_input_clear_state();
         } else {
-            g_screen_input_triangle_latch = 1;
+            g_menu_screen_input_triangle_latch = 1;
             g_menu_input_newly_pressed = PSX_PAD_TRIANGLE;
             g_menu_input_secondary_repeat = PSX_PAD_TRIANGLE;
             g_menu_input_primary_repeat = PSX_PAD_TRIANGLE;
         }
     } else {
-        g_screen_input_triangle_latch = 0;
-        if (current_input & g_screen_input_latched_button) {
-            current_input &= g_screen_input_latched_button;
+        g_menu_screen_input_triangle_latch = 0;
+        if (current_input & g_menu_screen_input_latched_button) {
+            current_input &= g_menu_screen_input_latched_button;
         } else if (current_input == 0) {
-            g_screen_input_latched_button = 0;
+            g_menu_screen_input_latched_button = 0;
             g_input_activation_timer += speed;
         } else {
             if (g_input_activation_timer < 4) {
@@ -74,12 +74,12 @@ void menu_input_update_controller(void) {
                     bit = 1U << index;
                     if (current_input & bit) {
                         current_input &= bit;
-                        g_screen_input_latched_button = bit;
+                        g_menu_screen_input_latched_button = bit;
                     }
                 }
             } else {
                 current_input = 0;
-                g_screen_input_latched_button = 0;
+                g_menu_screen_input_latched_button = 0;
             }
         }
         filtered_input = current_input;
@@ -129,6 +129,6 @@ void menu_input_update_controller(void) {
         g_menu_input_primary_repeat = current_input;
         g_menu_input_secondary_repeat = filtered_input;
     }
-    g_screen_input_primary_repeat_latched = g_menu_input_primary_repeat;
-    g_screen_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
+    g_menu_screen_input_primary_repeat_latched = g_menu_input_primary_repeat;
+    g_menu_screen_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }

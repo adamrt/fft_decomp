@@ -11,7 +11,7 @@
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/script.h"
 #include "fft/status_screen.h"
 #include "fft/text.h"
@@ -59,7 +59,7 @@ void unit_panel_equipment_thread(void) {
     thread_current_set_task(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    if (g_thread_current_id == SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
+    if (g_thread_current_id == MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
         text = g_unit_panel_text_image_a;
         screen = g_unit_panel_equipment_frames;
         state = &g_formation_selected_unit_stat_detail.state;
@@ -77,7 +77,7 @@ void unit_panel_equipment_thread(void) {
 
     menu_numeric_frame_init(&g_unit_panel_equipment_origins[0], &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
-    screen_panel_init_scaled_draw_area_packets(&screen->portrait);
+    menu_screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[0].x0 += g_unit_panel_equipment_origins[0].x;
     screen->frame.tiles[0].y0 += g_unit_panel_equipment_origins[0].y;
     for (i = 0; i < 4; i++) {
@@ -229,7 +229,7 @@ void unit_panel_ability_thread(void) {
     thread_current_set_task(THREAD_TASK_STATUS_PANEL);
     thread = (unit_panel_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    if (g_thread_current_id == SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
+    if (g_thread_current_id == MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
         text = g_unit_panel_text_image_a;
         screen = g_unit_panel_equipment_frames;
         state = &g_formation_selected_unit_stat_detail.state;
@@ -247,7 +247,7 @@ void unit_panel_ability_thread(void) {
 
     menu_numeric_frame_init(&g_formation_ability_panel_origin, &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
-    screen_panel_init_scaled_draw_area_packets(&screen->portrait);
+    menu_screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[1].x0 += g_unit_panel_equipment_origins[0].x;
     screen->frame.tiles[1].y0 += g_unit_panel_equipment_origins[0].y;
     for (i = 4; i < 8; i++) {

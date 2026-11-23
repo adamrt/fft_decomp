@@ -9,10 +9,10 @@
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/message_box.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -56,9 +56,9 @@ void formation_init_display(void) {
     RECT rect;
     palette_t palette;
 
-    screen_reset_context();
+    menu_screen_reset_context();
     menu_set_event_speed(0);
-    if (g_screen_context_id != SCREEN_CONTEXT_NAME_ENTRY) {
+    if (g_menu_screen_context_id != MENU_SCREEN_CONTEXT_NAME_ENTRY) {
         rect.x = 0;
         rect.y = 0;
         rect.w = 0x100;
@@ -122,11 +122,11 @@ void formation_init_display(void) {
     screen_start_fade_in();
     menu_selection_clear_values();
     g_formation_unit_cycle_mode = 0;
-    screen_reset_selection_results();
-    screen_text_bind_section(SCREEN_TEXT_DATA_SKILLSET_NAMES);
-    screen_text_bind_section(SCREEN_TEXT_DATA_JOB_NAMES);
-    screen_text_bind_section(SCREEN_TEXT_DATA_ABILITY_NAMES);
-    screen_text_bind_section(SCREEN_TEXT_DATA_FORMATION_MESSAGES);
+    menu_screen_reset_selection_results();
+    menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_SKILLSET_NAMES);
+    menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_JOB_NAMES);
+    menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_ABILITY_NAMES);
+    menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_FORMATION_MESSAGES);
     g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_formation_menu_text_buffer;
     g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = g_formation_menu_text_table;
     g_formation_cursor_ot_override = 0;
@@ -140,11 +140,11 @@ void formation_init_display(void) {
 void formation_rebuild_lists(void) {
     formation_record_list_mode_e mode;
 
-    if (g_screen_context_id == SCREEN_CONTEXT_FORMATION) {
+    if (g_menu_screen_context_id == MENU_SCREEN_CONTEXT_FORMATION) {
         mode = FORMATION_RECORD_LIST_ALL;
     } else {
         mode = FORMATION_RECORD_LIST_MONSTERS;
-        if (g_screen_context_id != SCREEN_CONTEXT_SOLDIER_OFFICE) {
+        if (g_menu_screen_context_id != MENU_SCREEN_CONTEXT_SOLDIER_OFFICE) {
             mode = FORMATION_RECORD_LIST_AVAILABLE_HUMANS;
         }
     }
@@ -158,11 +158,11 @@ void formation_rebuild_lists(void) {
     g_formation_screen_running = 1;
 }
 
-/* Reports whether the screen is busy: the grid help is up (g_screen_grid_id),
+/* Reports whether the screen is busy: the grid help is up (g_menu_screen_grid_id),
  * a menu runs in the upper menu or screen menu thread slot, or menu input is
  * locked (g_menu_input_lock_mode). */
-s32 screen_check_busy(void) {
-    return g_screen_grid_id != MENU_GRID_HELP_NONE || thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU) != 0
+s32 menu_screen_check_busy(void) {
+    return g_menu_screen_grid_id != MENU_GRID_HELP_NONE || thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU) != 0
         || g_menu_input_lock_mode != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0;
 }
 
@@ -170,7 +170,7 @@ s32 screen_check_busy(void) {
  * `sound_id` at once and lock menu input while the message is up. */
 void message_box_show_with_sound(s32 message_id, s32 sound_id) {
     menu_text_thread_start_if_idle(THREAD_SCREEN_SLOT_TEXT, 0x2B, message_id, 0);
-    g_screen_sound_release_held_loop = 1;
+    g_menu_screen_sound_release_held_loop = 1;
     sound_play_sfx_on_free_channel(sound_id);
     g_menu_input_lock_mode = 1;
 }

@@ -11,10 +11,10 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "fft/message_box.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/system.h"
 #include "fft/text.h"
@@ -24,7 +24,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern u8 g_screen_text_name_entry_keys_data[];
+extern u8 g_menu_screen_text_name_entry_keys_data[];
 
 /* screen */
 typedef enum name_entry_state {
@@ -105,7 +105,7 @@ u8* name_entry_update_keyboard(const u8* list, s32 unused_1) {
         return 0;
     }
     if (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
-        busy = screen_check_busy();
+        busy = menu_screen_check_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
@@ -165,20 +165,20 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     s32 busy;
     s32 value;
 
-    g_screen_ot_length = 0x40;
-    g_screen_textured_quad_capacity = 0xDC;
+    g_menu_screen_ot_length = 0x40;
+    g_menu_screen_textured_quad_capacity = 0xDC;
     g_gfx_poly_f3_capacity = 0;
     g_gfx_poly_ft3_capacity = 0;
     g_gfx_poly_f4_capacity = 0;
     g_gfx_poly_g3_capacity = 0;
     g_gfx_poly_gt3_capacity = 0;
-    g_screen_gradient_quad_capacity = 0;
-    g_screen_textured_gradient_quad_capacity = 0;
-    g_screen_flat_line_capacity = 4;
+    g_menu_screen_gradient_quad_capacity = 0;
+    g_menu_screen_textured_gradient_quad_capacity = 0;
+    g_menu_screen_flat_line_capacity = 4;
     g_gfx_line_f3_capacity = 0;
     g_gfx_line_f4_capacity = 0;
-    g_screen_gradient_line_capacity = 0;
-    g_screen_line_g3_capacity = 0;
+    g_menu_screen_gradient_line_capacity = 0;
+    g_menu_screen_line_g3_capacity = 0;
     g_gfx_line_g4_capacity = 0;
     g_gfx_tile_capacity = 4;
     g_gfx_tile_1_capacity = 0;
@@ -187,12 +187,12 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     g_gfx_sprite_capacity = 0;
     g_gfx_sprite_8_capacity = 0;
     g_gfx_sprite_16_capacity = 0;
-    g_screen_draw_move_capacity = 30;
+    g_menu_screen_draw_move_capacity = 30;
     g_gfx_draw_mode_capacity = 30;
-    g_screen_draw_area_capacity = 10;
+    g_menu_screen_draw_area_capacity = 10;
     menu_gfx_init_contexts(buffers, otags, 0, 0, 0, textured_quads, 0, 0, 0, 0, flat_lines, 0, 0, 0, 0, 0, tiles, 0, 0,
         0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
-    g_screen_context_id = SCREEN_CONTEXT_NAME_ENTRY;
+    g_menu_screen_context_id = MENU_SCREEN_CONTEXT_NAME_ENTRY;
     formation_init_display();
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_box_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
@@ -205,7 +205,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         system_frame_stub();
         g_gfx_poly_f3_count = 0;
         g_gfx_poly_ft3_count = 0;
-        g_screen_poly_f4_count = 0;
+        g_menu_screen_poly_f4_count = 0;
         g_menu_gfx_poly_ft4_count = 0;
         g_gfx_poly_g3_count = 0;
         g_gfx_poly_gt3_count = 0;
@@ -214,7 +214,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         g_gfx_line_f2_count = 0;
         g_gfx_line_f3_count = 0;
         g_gfx_line_f4_count = 0;
-        g_screen_gradient_line_count = 0;
+        g_menu_screen_gradient_line_count = 0;
         g_gfx_line_g3_count = 0;
         g_gfx_line_g4_count = 0;
         g_gfx_tile_count = 0;
@@ -225,14 +225,14 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         g_gfx_sprite_8_count = 0;
         g_gfx_sprite_16_count = 0;
         g_menu_gfx_draw_move_count = 0;
-        g_screen_draw_area_count = 0;
+        g_menu_screen_draw_area_count = 0;
         otag = g_menu_gfx_context->otag;
         GetDrawEnv(&env);
-        g_screen_draw_buffer_clip_y = env.clip.y;
+        g_menu_screen_draw_buffer_clip_y = env.clip.y;
         while (DrawSync(1) != 0) { }
         VSync(g_menu_event_speed);
         {
-            menu_gfx_context_t* context = g_screen_packet_buffers;
+            menu_gfx_context_t* context = g_menu_screen_packet_buffers;
 
             if (g_menu_gfx_context == context) {
                 context++;
@@ -241,12 +241,12 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
             PutDispEnv(&context->disp_env);
         }
         PutDrawEnv(&g_menu_gfx_context->draw_env);
-        g_name_entry_screen_image_rect.y = g_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0;
+        g_name_entry_screen_image_rect.y = g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0;
         gfx_load_image_and_wait(&g_name_entry_screen_image_rect, image);
         DrawOTag(otag);
-        ClearOTag(g_menu_gfx_context->otag, g_screen_ot_length);
+        ClearOTag(g_menu_gfx_context->otag, g_menu_screen_ot_length);
         menu_input_update_message_state();
-        busy = screen_check_busy();
+        busy = menu_screen_check_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
@@ -273,7 +273,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
         menu_input_update_event_state(
-            g_menu_gfx_context->otag + 63, PadRead(0), g_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+            g_menu_gfx_context->otag + 63, PadRead(0), g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         value = g_name_entry_state;
         if (value != g_name_entry_last_state) {
             g_name_entry_last_state = value;
@@ -297,7 +297,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
         g_sound_pending_sfx_id = SOUND_SFX_NONE;
     }
     menu_set_event_speed(2);
-    screen_reset_context();
+    menu_screen_reset_context();
     screen_set_fade_disabled(0);
     return s_name_entry_text;
 }
@@ -313,7 +313,7 @@ static void open_key_list(void) {
     }
     g_name_entry_key_ids[count] = -1;
     menu_scrollable_list_open(g_name_entry_key_ids, g_menu_list_selected_index,
-        screen_text_get_resident(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD),
+        menu_screen_text_get_resident(MENU_SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD),
         (menu_instruction_t*)g_name_entry_keyboard_script);
 }
 
@@ -361,7 +361,7 @@ void name_entry_update_keys(void) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             return;
         }
-        character = screen_text_get_char_at(
+        character = menu_screen_text_get_char_at(
             g_name_entry_character_rows, g_name_entry_key_ids[g_name_entry_list_cursor], g_name_entry_cursor_index);
         if (character == TEXT_END_WAIT_FOR_CONFIRM) {
             character = TEXT_SPACE;
@@ -498,7 +498,7 @@ static void apply_key(s16 key) {
     /* Empty input also reads the byte before the buffer; retain the native backward scan. */
     for (i--; s_name_entry_text[i] == TEXT_SPACE; i--) { }
     s_name_entry_text[i + 1] = TEXT_END_WAIT_FOR_CONFIRM;
-    screen_text_kern(s_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
+    menu_screen_text_kern(s_name_entry_text, g_name_entry_text_row_ids, &g_name_entry_text_vram_rect, 0);
 }
 
 /*
@@ -540,15 +540,15 @@ void name_entry_update_confirm(void) {
         g_name_entry_confirm_initialized = 1;
         s_name_entry_confirm_finished = 0;
         g_name_entry_confirm_result = -1;
-        g_screen_prompt_active = 1;
+        g_menu_screen_prompt_active = 1;
     }
     if (s_name_entry_confirm_finished != 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             g_name_entry_confirm_initialized = 0;
             g_name_entry_state = NAME_ENTRY_STATE_FINISHED;
-            g_screen_prompt_active = 0;
+            g_menu_screen_prompt_active = 0;
         }
-    } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
+    } else if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
         if (g_name_entry_confirm_result == 0) {
             s_name_entry_confirm_finished = 1;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, -1, 0);
@@ -573,8 +573,8 @@ static void init_keyboard(const u8* name) {
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
     menu_scrollable_list_init_core(0, 0, 0);
     g_menu_list_selected_index = 1;
-    screen_text_bind_section(SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD);
-    g_text_section_pointers[SCREEN_TEXT_SECTION_NAME_ENTRY_KEYS] = g_screen_text_name_entry_keys_data;
+    menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD);
+    g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_NAME_ENTRY_KEYS] = g_menu_screen_text_name_entry_keys_data;
     g_name_entry_cursor = 0;
     i = 0;
     while ((s_name_entry_text[i] = name[i]) != TEXT_END_WAIT_FOR_CONFIRM) {

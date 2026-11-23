@@ -4,8 +4,8 @@
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -16,7 +16,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern struct screen_number_range g_window_panel_number_state;
+extern struct menu_screen_number_range g_window_panel_number_state;
 
 static s16 s_window_panel_row_actions[16] = { MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
     MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE, MENU_ROW_ACTION_NONE,
@@ -54,7 +54,7 @@ void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mod
     color = &g_display_object_gs_image_pool[index].color;
     color->b = color->g = color->r = 0x80;
     g_display_object_gs_image_pool[index].pop_in_step = 0;
-    screen_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
+    menu_screen_build_window_frame_image(bounds.w, bounds.h, (u16*)image);
 }
 
 /* The VRAM position of a window image at `bounds` in coordinate mode `mode`.
@@ -155,7 +155,7 @@ void display_object_init_gs_image(s32 index, RECT bounds, point32_t clut, s32 fl
 /* Initialize panel state and start its WORLD rendering thread. */
 void window_start_panel_thread(s32 thread_id, s32 extent, window_panel_layout_t* layout, point32_t* origin) {
     window_init_panel_state(thread_id, extent, layout, origin);
-    thread_start(thread_id, screen_text_list_thread);
+    thread_start(thread_id, menu_screen_text_list_thread);
     thread_set_parameters(thread_id, &g_window_panel_render_state, 0, 0);
 }
 
@@ -300,7 +300,7 @@ void window_start_number_panel_thread(s32 thread_id, u32 packed_bounds, s32 text
     g_window_panel_render_state.value = &g_window_panel_value;
     g_window_panel_render_state.selected_index = 0;
     g_window_panel_render_state.select_text_table = 0;
-    thread_start(thread_id, screen_labeled_number_entry_thread);
+    thread_start(thread_id, menu_screen_labeled_number_entry_thread);
     thread_set_parameters(thread_id, (s32)&g_window_panel_render_state, 0, 0);
 }
 

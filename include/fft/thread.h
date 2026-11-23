@@ -64,7 +64,7 @@ extern u8 g_thread_status_snapshot[16];
  * threads in fixed slots, every menu screen runs its own in the same slots while it is up, and a menu thread starts
  * its child menu one slot below itself. Each enum here maps the slots of one of them, this one the battle and world
  * programs, which share the event library's threads; the screens' own headers map the slots they use
- * (screen_thread_slot_e, world_map_thread_slot_e, unit_list_thread_slot_e, equipment_thread_slot_e,
+ * (menu_screen_thread_slot_e, world_map_thread_slot_e, unit_list_thread_slot_e, equipment_thread_slot_e,
  * after_battle_thread_slot_e). */
 typedef enum thread_slot {
     THREAD_SLOT_MAIN = 0,
@@ -148,7 +148,7 @@ typedef enum thread_task {
     THREAD_TASK_MESSAGE_BOX = 38,
     THREAD_TASK_MENU_WINDOW_BUILD = 49,
     /* Text thread waiting for its next message; Change Dialog and
-     * screen_text_resume_printing swap in new text and store 1. */
+     * menu_screen_text_resume_printing swap in new text and store 1. */
     THREAD_TASK_DIALOG_AWAIT_TEXT = 51,
     THREAD_TASK_LOAD_EVTCHR = 52,
     THREAD_TASK_BG_SOUND = 53,

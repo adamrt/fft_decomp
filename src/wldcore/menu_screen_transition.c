@@ -4,12 +4,12 @@
 #include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/formation.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message.h"
 #include "fft/message_box.h"
 #include "fft/music.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/suzuki.h"
 #include "fft/thread.h"
@@ -26,7 +26,7 @@ static void hide_parent_tutorial_menu(void);
 /* Push a screen transition into `destination_level` (a menu level type): clear the map, hide date, location label and
  * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
  * and start the zoom thread; param_a and param_b are kept for the new screen. */
-void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s32 param_b) {
+void menu_screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s32 param_b) {
     u32* clear;
     s32 count;
     s32 i;
@@ -44,7 +44,7 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_EVENTS:
         display_object_set_queues_enabled(0);
-        screen_set_entry_4_cursor(2);
+        menu_screen_set_entry_4_cursor(2);
         count = 0;
         music_queue_wait_until_empty();
         music_queue_start_track(MUSIC_QUEUE_TRACK(2, MUSIC_BRAVE_STORY));
@@ -79,7 +79,7 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
         break;
     case MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST:
         display_object_set_queues_enabled(0);
-        screen_set_entry_4_cursor(3);
+        menu_screen_set_entry_4_cursor(3);
         world_map_suspend_cursor_level(&g_menu_stack_records[g_menu_stack_depth - 1]);
         tutorial_open_menu(1, 0);
         hide_parent_tutorial_menu();
@@ -101,9 +101,9 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
     i = WORLD_MAP_BACKDROP_WORDS - 1;
     clear = &g_world_map_scratch_buffer[WORLD_MAP_BACKDROP_WORDS - 1];
     depth = g_menu_stack_depth;
-    g_menu_stack_records[depth].screen_transition.destination_level = destination_level;
-    g_menu_stack_records[depth].screen_transition.param_a = param_a;
-    g_menu_stack_records[depth].screen_transition.param_b = param_b;
+    g_menu_stack_records[depth].menu_screen_transition.destination_level = destination_level;
+    g_menu_stack_records[depth].menu_screen_transition.param_a = param_a;
+    g_menu_stack_records[depth].menu_screen_transition.param_b = param_b;
     for (; i >= 0; i--) {
         *clear = 0;
         clear--;
@@ -112,9 +112,9 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
     screen_set_brightness(0, 0, 0);
     thread_start(WORLD_MAP_THREAD_SLOT_TRANSITION, zodiac_backdrop_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 0);
-    g_menu_stack_records[g_menu_stack_depth].screen_transition.delay = 0x14;
-    g_menu_stack_records[g_menu_stack_depth].screen_transition.phase = 0;
-    g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_SCREEN_TRANSITION;
+    g_menu_stack_records[g_menu_stack_depth].menu_screen_transition.delay = 0x14;
+    g_menu_stack_records[g_menu_stack_depth].menu_screen_transition.phase = 0;
+    g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION;
     g_menu_stack_depth++;
 }
 
@@ -182,11 +182,11 @@ static void hide_parent_tutorial_menu(void) {
  * treasure detail. The two tutorial entry lists first un-hide the parent
  * list's windows and frame.
  */
-void screen_transition_update(menu_stack_record_t* level) {
+void menu_screen_transition_update(menu_stack_record_t* level) {
     RECT rect;
 
-    if (level->screen_transition.delay == 0) {
-        if (level->screen_transition.phase == 0) {
+    if (level->menu_screen_transition.delay == 0) {
+        if (level->menu_screen_transition.phase == 0) {
             DrawSync(0);
             rect.x = 0;
             rect.y = 0;
@@ -197,14 +197,14 @@ void screen_transition_update(menu_stack_record_t* level) {
             VSync(0);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 1);
             g_picture_background_loaded_set = -1;
-            level->screen_transition.phase++;
+            level->menu_screen_transition.phase++;
             return;
         }
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_TRANSITION) != 0) {
             return;
         }
         g_menu_stack_depth--;
-        switch (level->screen_transition.destination_level) {
+        switch (level->menu_screen_transition.destination_level) {
         case MENU_STACK_LEVEL_BRAVE_STORY:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
@@ -218,7 +218,7 @@ void screen_transition_update(menu_stack_record_t* level) {
         case MENU_STACK_LEVEL_TUTORIAL:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_TUTORIAL_WELCOME, 0);
-            tutorial_open_menu(level->screen_transition.param_a, level->screen_transition.param_b);
+            tutorial_open_menu(level->menu_screen_transition.param_a, level->menu_screen_transition.param_b);
             break;
         case MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
@@ -245,10 +245,10 @@ void screen_transition_update(menu_stack_record_t* level) {
         case MENU_STACK_LEVEL_BRAVE_STORY_TREASURE:
             thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
-            brave_story_open_treasure_detail(level->screen_transition.param_a);
+            brave_story_open_treasure_detail(level->menu_screen_transition.param_a);
             break;
         }
     } else {
-        level->screen_transition.delay--;
+        level->menu_screen_transition.delay--;
     }
 }

@@ -14,9 +14,9 @@
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/overlay.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/status_screen.h"
@@ -84,7 +84,7 @@ void script_route_event_input(void) {
     u32 previous_input;
     u32 counter;
 
-    if (g_thread_current_id != SCREEN_THREAD_SLOT_TUTORIAL_TEXT) {
+    if (g_thread_current_id != MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) {
         return;
     }
     input = tutorial_get_buttons();

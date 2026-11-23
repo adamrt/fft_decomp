@@ -2,7 +2,7 @@
 
 #include "fft/formation.h"
 #include "fft/menu_list.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/thread.h"
 #include "fft/unit_panel.h"
 #include "psx/types.h"
@@ -14,15 +14,15 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
         enable = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
-            if (thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
-                thread_start(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_equipment_thread);
+            if (thread_is_running(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
+                thread_start(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_equipment_thread);
                 thread_set_parameters(
-                    SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_change_banner_thread_params, 0, 0);
+                    MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_change_banner_thread_params, 0, 0);
             }
             unit_panel_toggle_numbers_thread(enable);
         }
     } else {
-        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }

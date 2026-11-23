@@ -15,7 +15,7 @@
 #include "psx/types.h"
 
 /* frame input state */
-extern menu_input_state_t g_screen_input_frame_state;
+extern menu_input_state_t g_menu_screen_input_frame_state;
 static u32 s_screen_input_frame_new;
 static u32 s_screen_input_frame_current;
 static u32 s_screen_input_frame_previous;
@@ -30,7 +30,7 @@ static u32 s_screen_input_frame_secondary_repeat_counter;
  *
  * WORLD's body; publishes the state twice.
  * The six g_screen_input_frame_* values are laid out as a menu_input_state_t
- * (g_screen_input_frame_state), but a struct global makes GCC keep a base
+ * (g_menu_screen_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
 void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
@@ -100,8 +100,8 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
     }
 
     g_sound_pending_sfx_id = -1;
-    script_load_event_input_state(&g_screen_input_frame_state);
-    script_load_event_input_state(&g_screen_input_frame_state);
+    script_load_event_input_state(&g_menu_screen_input_frame_state);
+    script_load_event_input_state(&g_menu_screen_input_frame_state);
     if (s_screen_input_frame_new != PSX_PAD_SELECT && s_screen_input_frame_new != 0) {
         g_script_input_suppression_frames = 5;
     }

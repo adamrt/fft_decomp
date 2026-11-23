@@ -6,7 +6,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern u16 g_screen_draw_area_scale_percent[];
+extern u16 g_menu_screen_draw_area_scale_percent[];
 
 /*
  * WORLD's copy of menu_build_scaled_draw_area_packets, beside its copy of the OPTION.OUT list
@@ -35,7 +35,7 @@ void option_build_scaled_draw_area_packets(
     if (step >= 12) {
         step = 11;
     }
-    percent = g_screen_draw_area_scale_percent[step];
+    percent = g_menu_screen_draw_area_scale_percent[step];
     mem_copy_bytes_nonempty(&pair->rects[0], source, sizeof(pair->rects[0]));
     w = pair->rects[0].w;
     h = pair->rects[0].h;

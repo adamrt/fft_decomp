@@ -4,9 +4,9 @@
 #include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_screen.h"
 #include "fft/message.h"
 #include "fft/option.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_instruction.h"
 #include "fft/script_variable.h"
@@ -100,7 +100,7 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
  * the shared initial/repeat/secondary key-repeat delays. During a tutorial
  * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the
  * repeat counters restart. */
-void screen_update_dialog_input(void) {
+void menu_screen_update_dialog_input(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;

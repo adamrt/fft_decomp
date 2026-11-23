@@ -9,10 +9,10 @@
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -42,11 +42,11 @@ s32 item_list_update(void) {
 
     if (g_formation_item_submenu_initialized == 0) {
         g_formation_item_submenu_initialized = 1;
-        g_menu_selected_slot = menu_selection_set_value(SCREEN_CURSOR_ITEM_TAB, 0);
-        thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU);
+        g_menu_selected_slot = menu_selection_set_value(MENU_SCREEN_CURSOR_ITEM_TAB, 0);
+        thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         menu_thread_request_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
         menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_formation_item_menu_mode = MENU_ITEM_LIST_STATE_BROWSE;
         g_formation_unit_banner_enabled = 0;
         g_unit_panel_preview_stats_thread_params.position.x = 0;
@@ -58,7 +58,7 @@ s32 item_list_update(void) {
         menu_set_event_speed(0);
         g_formation_item_submenu_initialized = 0;
         g_formation_unit_banner_enabled = 1;
-        thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
+        thread_resume(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         g_unit_panel_preview_stats_thread_params.position.x = 2;
         g_unit_panel_preview_stats_thread_params.position.y = 2;
         g_formation_unit_cycle_mode = 2;
@@ -85,11 +85,11 @@ s32 item_list_update(void) {
     input = 0;
     if (g_formation_item_menu_mode < MENU_ITEM_LIST_STATE_ACTION) {
         input = g_menu_input_primary_repeat;
-        g_screen_prompt_active = 0;
+        g_menu_screen_prompt_active = 0;
     } else {
-        g_screen_prompt_active = 1;
+        g_menu_screen_prompt_active = 1;
     }
-    disabled = screen_check_busy() != 0 || g_formation_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
+    disabled = menu_screen_check_busy() != 0 || g_formation_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
         || item_get_equipped_count(g_item_list_entries[g_menu_list_selected_index]) == 0;
     menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 0xB8, 0x3C,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, SOUND_SFX_CONFIRM);
@@ -155,7 +155,7 @@ s32 item_list_update_browse_state(void) {
         g_formation_item_category_menu_initialized = 0;
         return MENU_ITEM_LIST_STATE_CLOSE;
     }
-    slot = menu_selection_step_horizontal_with_sound(5, SCREEN_CURSOR_ITEM_TAB, input, SOUND_SFX_PAGE_SWITCH);
+    slot = menu_selection_step_horizontal_with_sound(5, MENU_SCREEN_CURSOR_ITEM_TAB, input, SOUND_SFX_PAGE_SWITCH);
     if (slot != g_menu_selected_slot) {
         menu_selection_set_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);

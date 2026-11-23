@@ -4,7 +4,7 @@
  * bound without rebuilding or uploading them. */
 
 #include "fft/display_object.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/text.h"
 #include "fft/window.h"
 #include "psx/libgpu.h"
@@ -34,7 +34,7 @@ void window_build_render_record_image(s32 index, RECT quad, s32 image_page_offse
     color = &g_display_object_gpu_image_pool[index].color;
     color->b = color->g = color->r = 0x80;
     g_display_object_gpu_image_pool[index].pop_in_step = 0;
-    screen_build_window_frame_image(quad.w, quad.h, (u16*)image);
+    menu_screen_build_window_frame_image(quad.w, quad.h, (u16*)image);
 }
 
 /* Upload a window record's image to its place in VRAM.

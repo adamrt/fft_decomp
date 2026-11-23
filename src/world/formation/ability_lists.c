@@ -10,11 +10,11 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/menu_window.h"
 #include "fft/message_box.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -117,7 +117,7 @@ s32 formation_ability_update_learn_list(void) {
         menu_selection_clear_record(11);
         menu_selection_clear_record(12);
         menu_selection_clear_record(13);
-        g_formation_ability_category = menu_selection_step_horizontal(4, SCREEN_CURSOR_ABILITY_TAB, 0);
+        g_formation_ability_category = menu_selection_step_horizontal(4, MENU_SCREEN_CURSOR_ABILITY_TAB, 0);
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_LEARN_MENU);
         menu_scrollable_list_init_core(
@@ -161,7 +161,7 @@ s32 formation_ability_update_learn_list(void) {
             return MENU_JOB_LIST_STEP_JOBS;
         }
         category = menu_selection_step_horizontal_with_sound(
-            4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, SOUND_SFX_PAGE_SWITCH);
+            4, MENU_SCREEN_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, SOUND_SFX_PAGE_SWITCH);
         if (category != g_formation_ability_category) {
             menu_selection_set_record(g_formation_ability_category + 10, g_menu_list_selected_index,
                 g_menu_scroll_base_index, g_ability_list_ability_entries);
@@ -178,7 +178,7 @@ s32 formation_ability_update_learn_list(void) {
         s_formation_ability_learn_confirm_prompt_state
             = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_formation_ability_learn_confirm_menu);
         if (s_formation_ability_learn_confirm_prompt_state == 0) {
-            if (g_screen_selection_results[5] == 0) {
+            if (g_menu_screen_selection_results[5] == 0) {
                 formation_ability_learn(g_unit_selected_index, g_formation_ability_learn_selected_job,
                     g_ability_list_ability_entries[g_menu_list_selected_index]);
                 /* `category` doubles as the JP cost; a separate local changes the register allocation. */
@@ -186,7 +186,7 @@ s32 formation_ability_update_learn_list(void) {
                 g_formation_unit_pointers[g_unit_selected_index]
                     ->job_points.current.values[g_formation_ability_learn_selected_job_index] -= category;
                 sound_play_sfx_on_free_channel(SOUND_SFX_ABILITY_LEARNED);
-            } else if (g_screen_selection_results[5] == 1) {
+            } else if (g_menu_screen_selection_results[5] == 1) {
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
             }
             g_sound_suppressed = 0;
@@ -195,7 +195,7 @@ s32 formation_ability_update_learn_list(void) {
             menu_scrollable_list_init_core(g_ability_list_ability_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
             menu_window_set_scale_step(10);
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
         }
     }
     running = s_formation_ability_learn_confirm_prompt_state;
@@ -212,7 +212,7 @@ s32 formation_ability_update_learn_list(void) {
     rect.y = 0x2d;
     rect.w = 0x50;
     rect.h = 0x10;
-    menu_gfx_enqueue_textured_quad(&rect, 0, 0xc8, 0, 0, g_screen_window_tpage, g_screen_window_clut, 0xb);
+    menu_gfx_enqueue_textured_quad(&rect, 0, 0xc8, 0, 0, g_menu_screen_window_tpage, g_menu_screen_window_clut, 0xb);
     return MENU_JOB_LIST_STEP_ABILITIES;
 }
 
@@ -228,7 +228,7 @@ void job_page_update(void) {
         g_unit_panel_status_display_thread_params.style = 1;
         g_unit_panel_numeric_panel_params.style = 1;
         g_formation_equipment_panel_thread_params.style = 1;
-        menu_selection_set_value(SCREEN_CURSOR_ABILITY_TAB, 0);
+        menu_selection_set_value(MENU_SCREEN_CURSOR_ABILITY_TAB, 0);
         menu_selection_clear_records();
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
     }
@@ -243,7 +243,7 @@ void job_page_update(void) {
         g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
         g_formation_unit_cycle_mode = 2;
         menu_input_clear_state();
-        g_screen_input_secondary_repeat_latched = 0;
+        g_menu_screen_input_secondary_repeat_latched = 0;
         g_unit_panel_status_display_thread_params.style = 0;
         g_formation_ability_view_initialized = 0;
     }
@@ -295,7 +295,7 @@ static s32 ability_list_update(void) {
         g_formation_ability_view_job_names[0] = g_formation_ability_learn_selected_job;
         text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_formation_ability_view_job_names, &rect, 0);
-        g_formation_ability_category = menu_selection_step_horizontal(4, SCREEN_CURSOR_ABILITY_TAB, 0);
+        g_formation_ability_category = menu_selection_step_horizontal(4, MENU_SCREEN_CURSOR_ABILITY_TAB, 0);
         ability_list_build(g_unit_selected_index, g_formation_ability_learn_selected_job, g_formation_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
         menu_scrollable_list_init_core(
@@ -319,7 +319,7 @@ static s32 ability_list_update(void) {
         return MENU_JOB_LIST_STEP_CLOSE;
     }
     category = menu_selection_step_horizontal_with_sound(
-        4, SCREEN_CURSOR_ABILITY_TAB, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
+        4, MENU_SCREEN_CURSOR_ABILITY_TAB, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (category != g_formation_ability_category) {
         menu_selection_set_record(g_formation_ability_category + 10, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_ability_list_ability_entries);
@@ -338,6 +338,6 @@ static s32 ability_list_update(void) {
     rect.y = 0x2d;
     rect.w = 0x50;
     rect.h = 0x10;
-    menu_gfx_enqueue_textured_quad(&rect, 0, 0xc8, 0, 0, g_screen_window_tpage, g_screen_window_clut, 0xb);
+    menu_gfx_enqueue_textured_quad(&rect, 0, 0xc8, 0, 0, g_menu_screen_window_tpage, g_menu_screen_window_clut, 0xb);
     return MENU_JOB_LIST_STEP_ABILITIES;
 }

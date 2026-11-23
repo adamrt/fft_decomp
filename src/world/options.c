@@ -11,9 +11,9 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/suzuki.h"
@@ -127,7 +127,7 @@ void option_game_options_thread(void) {
     SPRT* list_text;
     u8* image;
 
-    g_screen_thread_result = 1;
+    g_menu_screen_thread_result = 1;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);
     do {
@@ -463,7 +463,7 @@ void option_game_options_thread(void) {
     gfx_free_texture_rect(&g_option_title_image_rect);
     gfx_free_texture_rect(&g_option_value_image_rect);
     thread_wait_frames(1);
-    g_screen_thread_result = 2;
+    g_menu_screen_thread_result = 2;
     /* A nonzero third parameter ends the frame thread. */
     thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
     thread_current_exit();

@@ -8,9 +8,9 @@
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/message.h"
 #include "fft/music.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/suzuki.h"
@@ -82,7 +82,7 @@ static void start_list_thread(s32 thread_id, s32 limit, point32_t* extent, point
     g_music_test_list_params.selected_index = 0;
     g_music_test_list_params.select_text_table = 0;
 
-    thread_start(thread_id, screen_text_list_thread);
+    thread_start(thread_id, menu_screen_text_list_thread);
     thread_set_parameters(thread_id, (s32)&g_music_test_list_params, 0, 0);
 }
 
@@ -236,7 +236,7 @@ static void start_text_message(s32 parameter, s32 use_world_text) {
     }
     if (use_world_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_screen_text_section_offsets);
+        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
     }
 
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);

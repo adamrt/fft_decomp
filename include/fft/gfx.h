@@ -228,7 +228,7 @@ typedef struct zodiac_draw_context {
 } zodiac_draw_context_t;
 
 /* The 0x10-byte glyph blit descriptor used by the window frame threads and filled
- * by screen_set_blit_source_rect, text_set_blit_source_rect and
+ * by menu_screen_set_blit_source_rect, text_set_blit_source_rect and
  * text_set_blit_destination. The stride is the surface width in pixels. */
 typedef struct glyph_blit {
     RECT rect;  /* 0x00 */

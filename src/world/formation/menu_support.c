@@ -7,10 +7,10 @@
 #include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/party.h"
 #include "fft/party_unit.h"
-#include "fft/screen.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
@@ -23,7 +23,7 @@ static s32 s_roster_names_revision = 0;
 /* WORLD's simple menu window thread: like menu_icon_list_thread, but it reads the formation
  * screen's input, ignores input while the previous thread runs and tints the window with the world
  * menu color. */
-void screen_icon_list_thread(void) {
+void menu_screen_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     s32 cursor;
@@ -64,7 +64,7 @@ void screen_icon_list_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (menu_should_close_thread(&g_screen_input_state.new_buttons) != 0) {
+        if (menu_should_close_thread(&g_menu_screen_input_state.new_buttons) != 0) {
             break;
         }
         if (thread_is_previous_running() == 0) {

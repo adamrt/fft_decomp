@@ -52,7 +52,7 @@ enum { STATUS_SCREEN_SCRIPT_END = 0x16 };
 
 enum { STATUS_SCREEN_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6 };
 
-/* Window right edge; WORLD's twin stores it to g_screen_window_right_x. */
+/* Window right edge; WORLD's twin stores it to g_menu_screen_window_right_x. */
 extern s16 g_status_screen_menu_window_right_x;
 
 s32 status_screen_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);

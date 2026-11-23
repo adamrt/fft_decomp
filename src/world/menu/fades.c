@@ -4,7 +4,7 @@
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -67,9 +67,9 @@ s32 screen_update_fade_in(void) {
             s_fade_in_active = 0;
             running = 0;
         }
-        menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_screen_ot_length - 2);
+        menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_menu_screen_ot_length - 2);
         g_screen_fade_tile_color.r = g_screen_fade_tile_color.g = g_screen_fade_tile_color.b = s_screen_fade_intensity;
-        gfx_enqueue_tile(&s_screen_fade_tile_rect, &g_screen_fade_tile_color, 1, g_screen_ot_length - 1);
+        gfx_enqueue_tile(&s_screen_fade_tile_rect, &g_screen_fade_tile_color, 1, g_menu_screen_ot_length - 1);
     }
     return running;
 }
@@ -92,9 +92,9 @@ s32 screen_update_fade_out(void) {
             s_fade_out_active = 0;
             s_screen_fade_intensity = 0xFF;
         }
-        menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_screen_ot_length - 2);
+        menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 2, 0x100, 0), 0, g_menu_screen_ot_length - 2);
         g_screen_fade_tile_color.r = g_screen_fade_tile_color.g = g_screen_fade_tile_color.b = s_screen_fade_intensity;
-        gfx_enqueue_tile(&s_screen_fade_tile_rect, &g_screen_fade_tile_color, 1, g_screen_ot_length - 1);
+        gfx_enqueue_tile(&s_screen_fade_tile_rect, &g_screen_fade_tile_color, 1, g_menu_screen_ot_length - 1);
     }
     return running;
 }

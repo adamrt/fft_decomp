@@ -10,8 +10,8 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -141,8 +141,8 @@ void at_list_run(void) {
     buffer = g_menu_render_buffer;
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
-    thread_start(SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_window_frame_thread);
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+    thread_start(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_window_frame_thread);
+    thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
     menu_draw_text_columns(entry, &row_offset, buffer);
@@ -178,9 +178,9 @@ void at_list_run(void) {
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
+            thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
         } else {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+            thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
@@ -355,7 +355,7 @@ void at_list_run(void) {
     }
 
     /* A nonzero third parameter ends the frame thread. */
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
+    thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     thread_yield();
     thread_current_exit();

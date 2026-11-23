@@ -10,9 +10,9 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/message.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -22,8 +22,8 @@
 #include "psx/types.h"
 
 /* numeric entry and list state */
-extern s16* g_screen_entry_text_id_tables[]; /* 16-bit tables selected by entry select_text_table */
-extern s32 g_screen_number_entry_digit_steps[];
+extern s16* g_menu_screen_entry_text_id_tables[]; /* 16-bit tables selected by entry select_text_table */
+extern s32 g_menu_screen_number_entry_digit_steps[];
 static u32* s_screen_list_controller_input;
 
 static void draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
@@ -31,7 +31,7 @@ static void draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* p
 /* Select's help-text thread: take the menu entry's selected row (for table kinds 2 and
  * -1, the next running menu thread's entry), look up its text id and show it in a dialog,
  * then unlock menu input and restore the saved input state. */
-void screen_help_text_thread(void) {
+void menu_screen_help_text_thread(void) {
     menu_entry_t* entry = (menu_entry_t*)thread_current_get_parameter_1();
     thread_t* thread;
     s32 kind = entry->select_text_table;
@@ -64,14 +64,14 @@ void screen_help_text_thread(void) {
         }
         value |= 0x8000;
     } else {
-        value = g_screen_entry_text_id_tables[kind][index];
+        value = g_menu_screen_entry_text_id_tables[kind][index];
     }
     g_sound_pending_sfx_id = SOUND_SFX_WINDOW_OPEN;
     thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
     message_dialog_thread();
-    g_screen_new_buttons = 0;
+    g_menu_screen_new_buttons = 0;
     g_menu_input_lock_mode = 0;
-    script_load_event_input_state(&g_screen_input_state);
+    script_load_event_input_state(&g_menu_screen_input_state);
     thread_current_exit();
 }
 
@@ -80,7 +80,7 @@ void screen_help_text_thread(void) {
  * icon sprites of the alternating record each frame. Up steps the cursor up,
  * but the Down test is inverted (a retail bug, QUIRKS.md): the cursor moves
  * down on every frame the Down bit is clear, until it reaches max_row_index. */
-void screen_clamped_icon_list_thread(void) {
+void menu_screen_clamped_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     menu_entry_t* param;
@@ -181,17 +181,17 @@ static void place_digit_cursor(menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* sh
 
 /* Numeric entry thread: edits the 16-bit value at param->value one decimal digit
  * at a time within the range bound at param->context. Left/right move the digit cursor, up/down
- * step the value by the g_screen_number_entry_digit_steps step of that digit (clamped to the range),
+ * step the value by the g_menu_screen_number_entry_digit_steps step of that digit (clamped to the range),
  * and a changed value is redrawn as a signed number in the window. When the
  * cancel/confirm handlers change the 32-bit input mask, a -1 left in the value
  * restores the original; otherwise the value is stored and the range's
  * on_confirm callback runs. */
-void screen_number_entry_thread(void) {
+void menu_screen_number_entry_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
-    screen_number_range_t* range;
+    menu_screen_number_range_t* range;
     u8* buffer;
     s16 original;
     s32 digits;
@@ -297,7 +297,7 @@ void screen_number_entry_thread(void) {
             if (*result == -1) {
                 *result = original;
             } else {
-                screen_number_range_t* current_range;
+                menu_screen_number_range_t* current_range;
 
                 *result = value;
                 current_range = param->context;
@@ -315,16 +315,16 @@ void screen_number_entry_thread(void) {
                 digit++;
             }
             if (*s_screen_list_controller_input & PSX_PAD_UP) {
-                if (value <= range->bounds.max - g_screen_number_entry_digit_steps[digit]) {
-                    value += g_screen_number_entry_digit_steps[digit];
+                if (value <= range->bounds.max - g_menu_screen_number_entry_digit_steps[digit]) {
+                    value += g_menu_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.max;
                 }
                 redraw = 1;
             }
             if (*s_screen_list_controller_input & PSX_PAD_DOWN) {
-                if (value >= range->bounds.min + g_screen_number_entry_digit_steps[digit]) {
-                    value -= g_screen_number_entry_digit_steps[digit];
+                if (value >= range->bounds.min + g_menu_screen_number_entry_digit_steps[digit]) {
+                    value -= g_menu_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.min;
                 }
@@ -368,7 +368,7 @@ void screen_number_entry_thread(void) {
 }
 
 /*
- * Labeled numeric entry thread: screen_number_entry_thread with a text label.
+ * Labeled numeric entry thread: menu_screen_number_entry_thread with a text label.
  *
  * Draws param->text_id left of the number and edits the 16-bit value at
  * param->value one decimal digit at a time within the range bound at param->context. The value is
@@ -376,13 +376,13 @@ void screen_number_entry_thread(void) {
  * measured in pixels and each redraw in character columns (times 6).
  * i is shared by the quad setup loop and the frame loop, as in the target.
  */
-void screen_labeled_number_entry_thread(void) {
+void menu_screen_labeled_number_entry_thread(void) {
     RECT rect;
     menu_icon_record_t record;
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
     text_dimensions_t label_size;
-    screen_number_range_t* range;
+    menu_screen_number_range_t* range;
     u8* buffer;
     s16 original;
     s32 digits;
@@ -484,7 +484,7 @@ void screen_labeled_number_entry_thread(void) {
             if (*result == -1) {
                 *result = original;
             } else {
-                screen_number_range_t* current_range;
+                menu_screen_number_range_t* current_range;
 
                 *result = value;
                 current_range = param->context;
@@ -502,16 +502,16 @@ void screen_labeled_number_entry_thread(void) {
                 digit++;
             }
             if (*s_screen_list_controller_input & PSX_PAD_UP) {
-                if (value <= range->bounds.max - g_screen_number_entry_digit_steps[digit]) {
-                    value += g_screen_number_entry_digit_steps[digit];
+                if (value <= range->bounds.max - g_menu_screen_number_entry_digit_steps[digit]) {
+                    value += g_menu_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.max;
                 }
                 redraw = 1;
             }
             if (*s_screen_list_controller_input & PSX_PAD_DOWN) {
-                if (value >= range->bounds.min + g_screen_number_entry_digit_steps[digit]) {
-                    value -= g_screen_number_entry_digit_steps[digit];
+                if (value >= range->bounds.min + g_menu_screen_number_entry_digit_steps[digit]) {
+                    value -= g_menu_screen_number_entry_digit_steps[digit];
                 } else {
                     value = range->bounds.min;
                 }
@@ -589,15 +589,15 @@ static void draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* p
 /* Reopen a chain of menu entries, each in the thread slot below the previous one, following each
  * entry's selected row action until a number-entry window is started or the action is not a menu
  * index. */
-void screen_start_entry_chain(u32 index, s32 thread) {
+void menu_screen_start_entry_chain(u32 index, s32 thread) {
     menu_entry_t* entry;
 
     do {
         entry = &g_menu_thread_menu_data[index];
         thread_start(thread, entry->thread_entry);
         thread_set_parameters(thread, (s32)entry, 0, 0);
-        if (entry->thread_entry == screen_labeled_number_entry_thread
-            || entry->thread_entry == screen_number_entry_thread) {
+        if (entry->thread_entry == menu_screen_labeled_number_entry_thread
+            || entry->thread_entry == menu_screen_number_entry_thread) {
             return;
         }
         index = entry->row_actions[entry->selected_index];
@@ -608,7 +608,7 @@ void screen_start_entry_chain(u32 index, s32 thread) {
 /* Menu thread body: runs the entry's text binding hook, starts the text
  * thread for it, then idles until input arrives or the previous thread's
  * third parameter is raised. */
-void screen_text_entry_thread(void) {
+void menu_screen_text_entry_thread(void) {
     thread_t* thread = &g_threads[g_thread_current_id];
     menu_entry_t* entry = (menu_entry_t*)thread->function_parameter_1;
     menu_text_binding_t* binding;
@@ -645,7 +645,7 @@ void screen_text_entry_thread(void) {
 
 /* Resize the current thread's menu entry's first parent entry to fit a
  * decimal number, keeping its right edge fixed. */
-void screen_fit_child_entry_to_digits(void) {
+void menu_screen_fit_child_entry_to_digits(void) {
     menu_entry_t* entry = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
     u32 index = entry->row_actions[0];
     s32 digits;

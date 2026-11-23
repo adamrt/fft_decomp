@@ -1417,7 +1417,7 @@ data:
   - {addr: 0x800d0bbc, name: g_sound_novel_script}
   - {addr: 0x800e6edc, name: world_text_find_entry}
   - {addr: 0x800fc55c, name: g_render_buffers}
-  - {addr: 0x8010656c, name: screen_init_world_text}
+  - {addr: 0x8010656c, name: menu_screen_init_world_text}
   - {addr: 0x8011a2d4, name: g_render_current_buffer}
   - {addr: 0x80132824, name: battle_text_find_entry}
   - {addr: 0x8013b590, name: script_variable_get}

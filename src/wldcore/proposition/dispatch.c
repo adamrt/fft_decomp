@@ -7,6 +7,7 @@
 #include "fft/input.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message_box.h"
@@ -14,7 +15,6 @@
 #include "fft/party_unit.h"
 #include "fft/portrait.h"
 #include "fft/proposition.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -305,7 +305,7 @@ void proposition_open_participants(void) {
     g_window_panel_render_state.header_id = 0x10;
     g_window_panel_render_state.selected_index = 0;
     g_window_panel_scroll_offset = 0;
-    thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
+    thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, menu_screen_text_list_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
 
     index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -511,7 +511,7 @@ static void draw_participant_names(proposition_send_unit_level_t* level) {
     s32 index = level->list_frame.render_index;
     s32 i;
 
-    screen_build_window_frame_image(g_display_object_gs_image_pool[index].bounds.w,
+    menu_screen_build_window_frame_image(g_display_object_gs_image_pool[index].bounds.w,
         g_display_object_gs_image_pool[index].bounds.h, (u16*)g_window_image_buffer);
     point.x = 8;
     point.y = 8;
@@ -589,7 +589,7 @@ static void update_participant_slots(proposition_send_unit_level_t* level) {
         s_proposition_send_units[level->slot] = unit;
         draw_participant_names(level);
         build_candidates(level);
-        screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
+        menu_screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
     close:
         g_display_object_animated_pool[level->frame_window_a].palette
             = g_display_object_animated_pool[level->frame_window_b].palette = 0;
@@ -749,7 +749,7 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
         g_world_map_flags &= ~(WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE | WORLD_MAP_FLAG_UNIT_PANEL_THREADS);
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_CHOOSE_UNITS, 0);
-        thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
+        thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, menu_screen_text_list_thread);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
         g_display_object_animated_pool[level->list_frame.window_index].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_display_object_gs_image_pool[level->list_frame.render_index].flags ^= DISPLAY_OBJECT_HIDDEN;
@@ -924,7 +924,7 @@ void proposition_update_participants(menu_stack_record_t* level) {
             s_proposition_send_unit_count--;
             draw_participant_names(&level->send_unit);
             build_candidates(&level->send_unit);
-            screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
+            menu_screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
             return;
         }
     }
@@ -953,5 +953,5 @@ void proposition_update_participants(menu_stack_record_t* level) {
 
     draw_participant_names(&level->send_unit);
     build_candidates(&level->send_unit);
-    screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
+    menu_screen_thread_request_redraw(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
 }

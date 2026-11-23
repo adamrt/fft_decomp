@@ -504,7 +504,7 @@ static void init_map_screen(void) {
  * restores the weather script variable saved before the event and reopens the
  * list it was chosen from (the tutorial with its two music tracks queued). The
  * title's tutorial and Brave Story requests open those screens. These all go
- * through screen_transition_open. */
+ * through menu_screen_transition_open. */
 static void restore_entry_level(void) {
     s32 flags = g_world_map_flags & ~WORLD_MAP_FLAG_RESTART;
 
@@ -526,18 +526,18 @@ static void restore_entry_level(void) {
     if (flags & WORLD_MAP_FLAG_STORY_EVENT_REPLAY) {
         g_world_map_flags = flags ^ WORLD_MAP_FLAG_STORY_EVENT_REPLAY;
         script_variable_set(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
-        screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY_EVENTS, 0, 0);
+        menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY_EVENTS, 0, 0);
     } else if (flags & WORLD_MAP_FLAG_TUTORIAL_EVENT) {
         g_world_map_flags = flags ^ WORLD_MAP_FLAG_TUTORIAL_EVENT;
         script_variable_set(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
         g_music_queue.music.tracks[0] = 0x1B;
         g_music_queue.music.tracks[1] = 0x1A;
         g_music_queue.current_slot = 2;
-        screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST, 1, 0);
+        menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST, 1, 0);
     } else if (flags & WORLD_MAP_FLAG_TITLE_TUTORIAL) {
-        screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
+        menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
     } else if (flags & WORLD_MAP_FLAG_TITLE_BRAVE_STORY) {
-        screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
+        menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
     }
 }
 

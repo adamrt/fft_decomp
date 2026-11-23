@@ -1,34 +1,34 @@
 /* Input lockout while the Formation status panels move or compare units. */
 
 #include "fft/menu_input.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/thread.h"
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 
-/* Countdown maintained by screen_update_input_lockout. */
-extern u8 g_screen_input_lockout_timer;
+/* Countdown maintained by menu_screen_update_input_lockout. */
+extern u8 g_menu_screen_input_lockout_timer;
 
-/* Count g_screen_input_lockout_timer down while thread 7 (the comparison status panel) is idle
+/* Count g_menu_screen_input_lockout_timer down while thread 7 (the comparison status panel) is idle
  * and no status panel slides, and reset it to 10 otherwise. While it is nonzero, the menu input
  * masks are cleared (menu_input_clear_state). Compiled at -O1 with the rest of the Formation
  * screen: the reloads of the timer are that level's code, not a volatile variable. */
-void screen_update_input_lockout(void) {
+void menu_screen_update_input_lockout(void) {
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
-        g_screen_input_lockout_timer = 10;
+        g_menu_screen_input_lockout_timer = 10;
     } else if (g_unit_panel_status_display_thread_params.flags
         & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
-        g_screen_input_lockout_timer = 10;
-    } else if (g_screen_input_lockout_timer != 0) {
-        g_screen_input_lockout_timer--;
+        g_menu_screen_input_lockout_timer = 10;
+    } else if (g_menu_screen_input_lockout_timer != 0) {
+        g_menu_screen_input_lockout_timer--;
     }
-    if (g_screen_input_lockout_timer != 0) {
+    if (g_menu_screen_input_lockout_timer != 0) {
         menu_input_clear_state();
     }
 }
 
-/* Countdown maintained by screen_update_input_lockout; while it is nonzero the formation
+/* Countdown maintained by menu_screen_update_input_lockout; while it is nonzero the formation
  * screen's per-frame handler returns before reading controller input. */
-s32 screen_get_input_lockout(void) {
-    return g_screen_input_lockout_timer;
+s32 menu_screen_get_input_lockout(void) {
+    return g_menu_screen_input_lockout_timer;
 }

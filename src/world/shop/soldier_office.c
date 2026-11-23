@@ -6,12 +6,12 @@
 #include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/message_box.h"
 #include "fft/name_entry.h"
 #include "fft/party.h"
 #include "fft/party_unit.h"
-#include "fft/screen.h"
 #include "fft/shop.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -34,7 +34,7 @@ typedef struct unit_count_script {
     menu_draw_number_command_t unit_limit;              /* 0x2a; direct value 16 */
     menu_texture_page_command_t separator_texture_page; /* 0x34 */
     menu_sprite_command_t separator;                    /* 0x39 */
-    u8 end;                                             /* 0x42; SCREEN_SCRIPT_END */
+    u8 end;                                             /* 0x42; MENU_SCREEN_SCRIPT_END */
 } unit_count_script_t;
 typedef char unit_count_script_size_must_be_67[(sizeof(unit_count_script_t) == 67) ? 1 : -1];
 extern u8 g_soldier_office_hire_menu_initialized;
@@ -93,14 +93,14 @@ void soldier_office_update_menu(void) {
             g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_REOPEN;
         }
     } else {
-        i = menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_menu_thread_data);
+        i = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_menu_thread_data);
         if (i == 0) {
-            if (g_screen_selection_results[0] == 3 || g_screen_selection_results[0] == -1) {
+            if (g_menu_screen_selection_results[0] == 3 || g_menu_screen_selection_results[0] == -1) {
                 g_soldier_office_hire_menu_initialized = 0;
                 g_shop_menu_step = SHOP_STEP_EXIT_FADE;
                 thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF825, 0);
                 shop_cash_out_excess_items();
-            } else if (g_screen_selection_results[0] == 2) {
+            } else if (g_menu_screen_selection_results[0] == 2) {
                 g_formation_unit_count
                     = formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_MONSTERS);
                 if (g_formation_unit_count != 0) {
@@ -112,7 +112,7 @@ void soldier_office_update_menu(void) {
                 }
                 thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, i, 0);
             } else {
-                slot = formation_unit_generate(g_screen_selection_results[0]);
+                slot = formation_unit_generate(g_menu_screen_selection_results[0]);
                 if (slot >= 0) {
                     s_soldier_office_fee = 1000;
                     /* `i` is still 0, the menu thread's result. */
@@ -199,8 +199,9 @@ void soldier_office_hire_update_confirm(void) {
             g_soldier_office_hire_confirm_message_wait = 0;
             g_shop_menu_step = SHOP_STEP_HIRE_NAME_ENTRY;
         }
-    } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_confirm_menu) == 0) {
-        selection = g_screen_selection_results[2];
+    } else if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_confirm_menu)
+        == 0) {
+        selection = g_menu_screen_selection_results[2];
         if (selection == 1 || selection == -1) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF827, 0);
             g_soldier_office_hire_menu_initialized = 0;
@@ -252,8 +253,9 @@ void soldier_office_hire_update_fee(void) {
             g_shop_menu_step = SHOP_STEP_SOLDIER_OFFICE_REOPEN;
             g_soldier_office_hire_fee_message_wait = 0;
         }
-    } else if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_fee_confirm_menu) == 0) {
-        choice = g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT];
+    } else if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_soldier_office_hire_fee_confirm_menu)
+        == 0) {
+        choice = g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT];
         if (choice == 0) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf82b, 0);
             shop_adjust_gil(-s_soldier_office_fee);

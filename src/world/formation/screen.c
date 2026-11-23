@@ -1,7 +1,6 @@
 /* The formation screen, including the menu input filter, unit selection slides, the screen run, sound dispatch, menu
  * state, frame processing and unit selection staging. */
 
-#include "fft/screen.h"
 #include "fft/equipment.h"
 #include "fft/formation.h"
 #include "fft/formation_ability.h"
@@ -16,6 +15,7 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/music.h"
 #include "fft/party.h"
@@ -47,17 +47,17 @@ extern u8 g_formation_unit_slide_frame;
  * item category change, the status banner or the lockout timer is busy, and
  * no Select or Start (mask 0xF0FF) while a help text is requested or
  * showing, or while the dismiss menu's message runs. */
-s32 screen_filter_buttons(void) {
-    s32 input = screen_read_buttons(0);
+s32 menu_screen_filter_buttons(void) {
+    s32 input = menu_screen_read_buttons(0);
 
     if (g_formation_item_category_input_lock != 0 || g_formation_banner_active != 0
-        || screen_get_input_lockout() != 0) {
+        || menu_screen_get_input_lockout() != 0) {
         input = 0;
     } else if (thread_is_running(THREAD_SCREEN_SLOT_TEXT) != 0) {
         if (g_formation_current_menu == FORMATION_MENU_DISMISS_UNIT) {
             input &= 0xF0FF;
         }
-    } else if (g_help_message_text_id != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE) {
+    } else if (g_help_message_text_id != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
         input &= 0xF0FF;
     }
     return input;
@@ -113,29 +113,29 @@ void formation_run_screen(s32 tutorial, s32 unused) {
     s32 i;
     u8 last_menu;
 
-    g_screen_ot_length = 0x40;
-    g_screen_textured_quad_capacity = 0x1F4;
-    g_screen_gradient_quad_capacity = 0x5A;
-    g_screen_textured_gradient_quad_capacity = 0x3C;
-    g_screen_flat_line_capacity = 0xA;
-    g_screen_gradient_line_capacity = 0x82;
+    g_menu_screen_ot_length = 0x40;
+    g_menu_screen_textured_quad_capacity = 0x1F4;
+    g_menu_screen_gradient_quad_capacity = 0x5A;
+    g_menu_screen_textured_gradient_quad_capacity = 0x3C;
+    g_menu_screen_flat_line_capacity = 0xA;
+    g_menu_screen_gradient_line_capacity = 0x82;
     g_gfx_tile_capacity = 0x1E;
-    g_screen_draw_move_capacity = 0x1E;
-    g_screen_draw_area_capacity = 0x1E;
+    g_menu_screen_draw_move_capacity = 0x1E;
+    g_menu_screen_draw_area_capacity = 0x1E;
     g_gfx_draw_mode_capacity = 0x1E;
 
     menu_gfx_init_contexts(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads, textured_gradient_quads,
         flat_lines, 0, 0, gradient_lines, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
-    g_screen_context_id = SCREEN_CONTEXT_FORMATION;
+    g_menu_screen_context_id = MENU_SCREEN_CONTEXT_FORMATION;
     formation_init_menu_state();
 
     /* Values above 10 are not tutorials and become 0, the plain screen. */
     tutorial = tutorial < 11 ? tutorial : 0;
     tutorial_start(tutorial);
     if (tutorial == 0) {
-        g_screen_music_slot = music_load_into_free_slot(MUSIC_FORMATION);
+        g_menu_screen_music_slot = music_load_into_free_slot(MUSIC_FORMATION);
         while (music_is_loading_stub() != 0) { }
-        music_switch_track(g_screen_music_slot, 0x7F, 0);
+        music_switch_track(g_menu_screen_music_slot, 0x7F, 0);
     }
 
     if (g_formation_screen_running != 0) {
@@ -149,13 +149,13 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 formation_banner_countdown(0, 0);
                 menu_input_clear_state();
             }
-            screen_update_input_lockout();
+            menu_screen_update_input_lockout();
             screen_update_fade_in();
             if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
                 menu_start_help_text(DIALOG_POSITION_CENTER);
             }
-            if (g_screen_grid_id != MENU_GRID_HELP_NONE) {
-                screen_update_grid_cursor(
+            if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
+                menu_screen_update_grid_cursor(
                     g_formation_unit_pointers[g_unit_selected_index]->detail.uses_monster_skillset);
             }
             menu_palette_set_mode(g_menu_input_lock_mode);
@@ -166,9 +166,10 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 || g_formation_current_menu == FORMATION_MENU_ORDER_UNIT) {
                 formation_grid_update(1, g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
                     g_formation_current_menu == FORMATION_MENU_UNIT_GRID,
-                    g_formation_triangle_menu_open + g_screen_grid_id != 0 ? 0
-                                                                           : g_screen_input_secondary_repeat_latched,
-                    screen_check_busy(), 0, 0);
+                    g_formation_triangle_menu_open + g_menu_screen_grid_id != 0
+                        ? 0
+                        : g_menu_screen_input_secondary_repeat_latched,
+                    menu_screen_check_busy(), 0, 0);
             } else {
                 formation_draw_background_tiles(g_formation_scroll_position + g_formation_scroll_velocity, 0);
             }
@@ -176,7 +177,7 @@ void formation_run_screen(s32 tutorial, s32 unused) {
             /* L1/R1 cycle units; i is the buttons' disabled flag here. */
             i = 0;
             if (g_formation_unit_cycle_mode != 0 || g_formation_unit_browse_enabled != 0) {
-                if (g_menu_input_lock_mode != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE
+                if (g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE
                     || g_formation_unit_cycle_mode == 1 || g_formation_triangle_menu_running != 0) {
                     i = 1;
                 }
@@ -211,14 +212,14 @@ void formation_run_screen(s32 tutorial, s32 unused) {
             } else {
                 i = 9;
             }
-            if (g_screen_grid_id != MENU_GRID_HELP_NONE) {
+            if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
                 i = 9;
             }
             if (g_formation_cursor_ot_override != 0) {
                 i = g_formation_cursor_ot_override;
             }
-            menu_input_update_event_state(
-                g_menu_gfx_context->otag + i, screen_filter_buttons(), g_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+            menu_input_update_event_state(g_menu_gfx_context->otag + i, menu_screen_filter_buttons(),
+                g_menu_screen_draw_buffer_clip_y == 0 ? 0xF0 : 0);
 
             /* Entering a new menu resets the per-menu state. */
             if (g_formation_current_menu != last_menu) {
@@ -226,10 +227,10 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 g_formation_unit_cycle_mode = 0;
                 menu_set_event_speed(0);
                 g_help_message_text_id = 0;
-                screen_reset_selection_results();
+                menu_screen_reset_selection_results();
                 last_menu = g_formation_current_menu;
             }
-            screen_update_sound_effect();
+            menu_screen_update_sound_effect();
             music_update_tunes();
         } while (g_formation_screen_running != 0);
     }
@@ -243,20 +244,20 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 menu_thread_request_stop(i);
             }
         }
-        if (thread_is_running(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 0) {
+        if (thread_is_running(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 0) {
             buttons = 1;
-            screen_text_resume_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
+            menu_screen_text_resume_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
         }
         menu_input_update_event_state(g_menu_gfx_context->otag, 0, 0);
     } while (buttons != 0);
 
     if (tutorial == 0) {
-        music_unload_scenario_slot(g_screen_music_slot);
+        music_unload_scenario_slot(g_menu_screen_music_slot);
     }
     formation_save_records();
     unit_panels_stop();
     menu_set_event_speed(0);
-    screen_reset_context();
+    menu_screen_reset_context();
 }
 
 /* Per-frame WORLD sound effect dispatch. A queued text glyph or page sound
@@ -266,10 +267,10 @@ void formation_run_screen(s32 tutorial, s32 unused) {
  * in g_sound_queued_effect_id, plays on the sound_play_sfx channels
  * and both queues are cleared. Cancel and Cursor Move are copied to the menu
  * queue before the mute test, so they still play while muted. */
-void screen_update_sound_effect(void) {
+void menu_screen_update_sound_effect(void) {
     s32 sound_id;
 
-    if (g_screen_sound_release_held_loop != 0) {
+    if (g_menu_screen_sound_release_held_loop != 0) {
         g_sound_queued_effect_id = SOUND_SFX_NONE;
     }
     if (g_sound_pending_sfx_id == SOUND_SFX_TEXT_GLYPH || g_sound_pending_sfx_id == SOUND_SFX_TEXT_PAGE) {
@@ -354,11 +355,11 @@ void formation_init_menu_state(void) {
  * Built at -O1: -O1 does no strength reduction, which is why the target
  * recomputes the index inside the loop. Same profile as the adjacent
  * formation_init_menu_state. */
-void screen_reset_selection_results(void) {
+void menu_screen_reset_selection_results(void) {
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        g_screen_selection_results[i] = -1;
+        g_menu_screen_selection_results[i] = -1;
     }
 }
 
@@ -384,7 +385,7 @@ void update_unit_grid_menu(void) {
             if (g_unit_selected_index > g_formation_unit_count - 1) {
                 g_formation_selected_unit_index_latch = g_unit_selected_index = g_formation_unit_count - 1;
             }
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
             g_formation_unit_cycle_mode = 0;
             formation_init_selection_cursor(g_unit_selected_index);
             if (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
@@ -413,13 +414,13 @@ void update_unit_grid_menu(void) {
                 if ((g_formation_triangle_menu_running
                         = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_formation_egg_triangle_menu))
                     == 0) {
-                    if (g_screen_selection_results[0] == 0) {
+                    if (g_menu_screen_selection_results[0] == 0) {
                         formation_dismiss(g_unit_selected_index);
                         s_formation_main_menu_initialized = 0;
                         g_sound_queued_effect_id = SOUND_SFX_DISMISS;
                     }
                     g_formation_egg_submenu.selected_index = 0;
-                    screen_reset_selection_results();
+                    menu_screen_reset_selection_results();
                     g_formation_equipment_panel_thread_params.style = 0;
                     g_unit_panel_numeric_panel_params.style = 0;
                     g_formation_triangle_menu_open = 0;
@@ -428,24 +429,24 @@ void update_unit_grid_menu(void) {
                 if ((g_formation_triangle_menu_running
                         = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_formation_triangle_menu))
                     == 0) {
-                    if (g_screen_selection_results[0] == 0) {
+                    if (g_menu_screen_selection_results[0] == 0) {
                         g_formation_current_menu = FORMATION_MENU_ITEM_ENTER;
                         update_item_menu();
-                    } else if (g_screen_selection_results[0] == 1) {
+                    } else if (g_menu_screen_selection_results[0] == 1) {
                         g_formation_current_menu = FORMATION_MENU_ABILITY_ENTER;
                         formation_ability_update_menu();
-                    } else if (g_screen_selection_results[0] == 2) {
+                    } else if (g_menu_screen_selection_results[0] == 2) {
                         g_formation_current_menu = FORMATION_MENU_JOB_WHEEL_ENTER;
                         formation_job_update_menu();
-                    } else if (g_screen_selection_results[0] == 3) {
+                    } else if (g_menu_screen_selection_results[0] == 3) {
                         g_formation_current_menu = FORMATION_MENU_DISMISS_UNIT;
-                    } else if (g_screen_selection_results[0] == 4) {
+                    } else if (g_menu_screen_selection_results[0] == 4) {
                         g_formation_current_menu = FORMATION_MENU_ORDER_UNIT;
                     }
                     g_formation_equipment_panel_thread_params.style = 0;
                     g_unit_panel_numeric_panel_params.style = 0;
 
-                    if (g_screen_selection_results[0] != -1) {
+                    if (g_menu_screen_selection_results[0] != -1) {
                         g_formation_saved_banner_enabled = g_formation_unit_banner_enabled;
                         if (g_formation_current_menu != FORMATION_MENU_DISMISS_UNIT) {
                             menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
@@ -474,7 +475,7 @@ void update_unit_grid_menu(void) {
                 }
             }
 
-            if (screen_get_input_lockout() == 0 && unit_grid_check_scroll() == 0) {
+            if (menu_screen_get_input_lockout() == 0 && unit_grid_check_scroll() == 0) {
                 if ((input & PSX_PAD_TRIANGLE) || (input & PSX_PAD_START) || g_formation_triangle_menu_open != 0) {
                     /* Keep the menu clear of the banner and of the cursor's half of the grid. */
                     if (g_formation_unit_banner_at_bottom != 0) {

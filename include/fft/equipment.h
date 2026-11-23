@@ -170,7 +170,7 @@ extern u8 g_equipment_sound_suppress_queued;
 
 /* threads */
 /* Slots of the equip screen's own threads. The WORLD formation screen runs
- * the same threads in other slots (screen_thread_slot_e and
+ * the same threads in other slots (menu_screen_thread_slot_e and
  * thread_screen_slot_e); here BATTLE's suspended menu threads stay in 7 and 8. */
 typedef enum equipment_thread_slot {
     EQUIPMENT_THREAD_SLOT_POPUP_MENU = 3,         /* the item action and type order menus */

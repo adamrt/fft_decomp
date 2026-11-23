@@ -7,9 +7,9 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
@@ -460,7 +460,7 @@ void message_box_thread(void) {
     thread_current_set_task(THREAD_TASK_MESSAGE_BOX);
     value_index = 0;
     script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
-    g_screen_dialog_waiting = 0;
+    g_menu_screen_dialog_waiting = 0;
     param = thread_current_get_parameter_1();
     rec.box_type = param & 0x70;
     rec.dialog_type = param;
@@ -596,7 +596,7 @@ void message_box_thread(void) {
             }
             message = thread_current_get_parameter_2();
             if ((message & no_value) == no_value) {
-                g_screen_dialog_waiting = 0;
+                g_menu_screen_dialog_waiting = 0;
                 break;
             }
             text = text_find_entry(message);
@@ -616,7 +616,7 @@ void message_box_thread(void) {
             rec.color = 0;
             rec.mark = -1;
             rec.line = 0;
-            g_screen_dialog_waiting = 0;
+            g_menu_screen_dialog_waiting = 0;
             width_override = no_value;
             rec.text = message;
             repeat = 0;
@@ -638,7 +638,7 @@ void message_box_thread(void) {
                 break;
             }
             if (code == TEXT_END_WAIT_FOR_CONFIRM) {
-                g_screen_dialog_waiting = 1;
+                g_menu_screen_dialog_waiting = 1;
                 /* The end of a substituted string returns to the text that named it. */
                 if (saved != (u8*)-1) {
                     text = saved;

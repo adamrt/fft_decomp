@@ -3,8 +3,8 @@
 #include "fft/equipment.h"
 #include "fft/item.h"
 #include "fft/item_menu.h"
+#include "fft/menu_screen.h"
 #include "fft/option.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/shop.h"
 #include "psx/types.h"
@@ -282,7 +282,7 @@ static shop_item_availability_t s_shop_item_availability[ITEM_ID_COUNT] = {
  * A normal shop selects items whose big-endian availability mask contains the
  * requested shop bit and whose required progression does not exceed the
  * shop item availability script variable. Shop ids from
- * SCREEN_CONTEXT_FUR_SHOP (100) up select the poached items in stock.
+ * MENU_SCREEN_CONTEXT_FUR_SHOP (100) up select the poached items in stock.
  * Entries the selected unit cannot equip are hidden or marked with 0x4000,
  * according to mode and the Show Unequippable Items option.
  *
@@ -342,7 +342,7 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
         }
     }
 
-    if (shop_id < SCREEN_CONTEXT_FUR_SHOP) {
+    if (shop_id < MENU_SCREEN_CONTEXT_FUR_SHOP) {
         s32 progression;
         s32 shop_mask;
 

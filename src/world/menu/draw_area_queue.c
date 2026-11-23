@@ -1,7 +1,7 @@
 /* Queuing a drawing area primitive, moved to the second frame buffer when needed. */
 
 #include "fft/menu_gfx.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -14,10 +14,10 @@
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 ot_index) {
     DR_AREA* area;
 
-    if (g_screen_draw_buffer_clip_y >= 0x65) {
+    if (g_menu_screen_draw_buffer_clip_y >= 0x65) {
         rect->y += 0xF0;
     }
-    area = &g_menu_gfx_context->draw_areas[g_screen_draw_area_count++];
+    area = &g_menu_gfx_context->draw_areas[g_menu_screen_draw_area_count++];
     SetDrawArea(area, rect);
     addPrim(&g_menu_gfx_context->otag[ot_index], area);
 }

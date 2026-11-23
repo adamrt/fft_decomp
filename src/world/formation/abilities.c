@@ -15,12 +15,12 @@
 #include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/menu_window.h"
 #include "fft/message_box.h"
 #include "fft/option.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -152,10 +152,10 @@ void formation_ability_update_menu(void) {
                 g_formation_ability_menu.text_id = FORMATION_ABILITY_MENU_TEXT_LOCKED;
             }
         }
-        g_screen_text_redraw_request = 1;
+        g_menu_screen_text_redraw_request = 1;
     }
     if (g_formation_current_menu == FORMATION_MENU_ABILITY) {
-        running = menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_ability_menu);
+        running = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_ability_menu);
         g_formation_ability_menu_initialized = running;
         g_formation_unit_cycle_mode = 2;
         if (running == 0) {
@@ -164,7 +164,7 @@ void formation_ability_update_menu(void) {
             g_formation_unit_browse_enabled = g_formation_ability_menu_saved_browse_enabled;
             g_formation_unit_banner_enabled = g_formation_saved_banner_enabled;
         }
-        selection = &g_screen_selection_results[8];
+        selection = &g_menu_screen_selection_results[8];
         if (*selection != -1) {
             value = formation_unit_get_lock(g_unit_selected_index);
             allowed = 0;
@@ -178,21 +178,21 @@ void formation_ability_update_menu(void) {
                 g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 g_formation_current_menu = *selection + FORMATION_MENU_ABILITY_SET;
                 if (g_formation_current_menu != FORMATION_MENU_ABILITY_LEARN) {
-                    thread_start(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, idle_thread);
-                    menu_selection_init_value(SCREEN_CURSOR_SET_ABILITY_SLOT, 0);
-                    menu_selection_init_value(SCREEN_CURSOR_REMOVE_ABILITY_SLOT, 0);
+                    thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, idle_thread);
+                    menu_selection_init_value(MENU_SCREEN_CURSOR_SET_ABILITY_SLOT, 0);
+                    menu_selection_init_value(MENU_SCREEN_CURSOR_REMOVE_ABILITY_SLOT, 0);
                 } else {
-                    menu_managed_thread_stop(SCREEN_THREAD_SLOT_UPPER_MENU);
+                    menu_managed_thread_stop(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
                 }
             } else {
                 g_sound_queued_effect_id = SOUND_SFX_INVALID;
             }
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
         }
     } else {
         if (g_formation_ability_submenu_running == 0) {
             g_formation_current_menu = FORMATION_MENU_ABILITY;
-            thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD);
+            thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD);
             value = g_formation_unit_pointers[g_unit_selected_index]->identity.roster_slot;
             formation_build_record_list(0, g_formation_unit_pointers, FORMATION_RECORD_LIST_ALL);
             g_unit_selected_index = formation_unit_find_by_roster_slot(value);
@@ -280,7 +280,7 @@ static s32 update_removal_menu(void) {
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
     slot = menu_selection_step_vertical_with_sound(
-               4, SCREEN_CURSOR_REMOVE_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
+               4, MENU_SCREEN_CURSOR_REMOVE_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
         + 1;
     cursor_y = &g_formation_ability_remove_cursor_point.y;
     slot_index = slot;
@@ -423,9 +423,9 @@ static s32 update_slot_menu(void) {
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         if (g_formation_ability_set_list_open == 0) {
-            thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
+            thread_resume(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
             g_formation_ability_set_initialized = 0;
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
             return 0;
         }
         g_formation_ability_set_list_close_pending = 1;
@@ -462,7 +462,7 @@ static s32 update_slot_menu(void) {
         }
 
         slot = menu_selection_step_vertical_with_sound(
-                   4, SCREEN_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
+                   4, MENU_SCREEN_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH)
             + 1;
         g_formation_ability_set_slot = slot;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
@@ -479,7 +479,7 @@ static s32 update_slot_menu(void) {
             menu_set_event_speed(2);
             g_formation_unit_cycle_mode = 1;
             g_formation_ability_set_list_open = 1;
-            thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU);
+            thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
             g_formation_ability_panel_thread_params.style = 1;
             g_formation_ability_set_cursor = 0xFF;
             menu_selection_restore_record(g_formation_ability_set_slot + 4, &x, &y, g_item_list_entries);
@@ -557,7 +557,7 @@ static s32 update_slot_menu(void) {
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         menu_selection_set_record(g_formation_ability_set_slot + 4, g_menu_list_selected_index,
             g_menu_scroll_base_index, g_item_list_entries);
-        thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
+        thread_resume(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         g_formation_ability_set_list_close_pending = 0;
     }
 
@@ -582,9 +582,9 @@ static s32 update_learn_menu(void) {
         s_formation_ability_learn_menu_step = MENU_JOB_LIST_STEP_JOBS;
         g_formation_unit_banner_enabled = 0;
         menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
-        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_formation_unit_cycle_mode = 0;
-        menu_selection_set_value(SCREEN_CURSOR_ABILITY_TAB, 0);
+        menu_selection_set_value(MENU_SCREEN_CURSOR_ABILITY_TAB, 0);
         menu_selection_clear_record(9);
         g_formation_ability_learn_menu_initialized = 1;
     }

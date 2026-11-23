@@ -13,9 +13,9 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
@@ -63,14 +63,14 @@ extern menu_draw_number_command_t g_formation_brave_number;
 extern menu_draw_number_command_t g_formation_faith_number;
 extern menu_draw_number_command_t g_formation_brave_number_wide;
 extern menu_draw_number_command_t g_formation_faith_number_wide;
-extern u16 g_screen_hp_gauge_clut;
-extern u16 g_screen_mp_gauge_clut;
-extern u16 g_screen_ct_gauge_clut;
-extern u16 g_screen_background_clut;
-extern menu_button_piece_t g_screen_button_pieces[];
+extern u16 g_menu_screen_hp_gauge_clut;
+extern u16 g_menu_screen_mp_gauge_clut;
+extern u16 g_menu_screen_ct_gauge_clut;
+extern u16 g_menu_screen_background_clut;
+extern menu_button_piece_t g_menu_screen_button_pieces[];
 
 /* Per-piece 4.12 fixed-point x/y scale; a negative factor flips that axis. */
-extern point16_t g_screen_button_piece_scales[];
+extern point16_t g_menu_screen_button_piece_scales[];
 
 /* Screen x and texture u of one background tile; two alternating rows of four. */
 typedef struct background_tile {
@@ -123,13 +123,13 @@ void unit_panel_toggle_preview_stats_thread(s32 flag) {
         flag = 1;
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
-            && thread_is_running(SCREEN_THREAD_SLOT_PREVIEW_STATS) == 0) {
-            thread_start(SCREEN_THREAD_SLOT_PREVIEW_STATS, unit_panel_numbers_thread);
+            && thread_is_running(MENU_SCREEN_THREAD_SLOT_PREVIEW_STATS) == 0) {
+            thread_start(MENU_SCREEN_THREAD_SLOT_PREVIEW_STATS, unit_panel_numbers_thread);
             thread_set_parameters(
-                SCREEN_THREAD_SLOT_PREVIEW_STATS, (s32)&g_unit_panel_preview_stats_thread_params, 0, 0);
+                MENU_SCREEN_THREAD_SLOT_PREVIEW_STATS, (s32)&g_unit_panel_preview_stats_thread_params, 0, 0);
         }
     } else {
-        menu_thread_request_stop(SCREEN_THREAD_SLOT_PREVIEW_STATS);
+        menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_PREVIEW_STATS);
     }
     g_unit_panel_numeric_panel_params.style = flag;
     g_formation_preview_stats_window_active = flag;
@@ -142,16 +142,16 @@ void unit_panel_toggle_preview_stats_thread(s32 flag) {
 void formation_toggle_ability_panel(s32 enable) {
     if (enable != 0) {
         enable = 1;
-        if (thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0
+        if (thread_is_running(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
-            thread_start(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_ability_thread);
+            thread_start(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, unit_panel_ability_thread);
             thread_set_parameters(
-                SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_ability_panel_thread_params, 0, 0);
+                MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_formation_ability_panel_thread_params, 0, 0);
         }
         g_formation_unit_banner_enabled = 1;
         unit_panel_toggle_numbers_thread(enable);
     } else {
-        menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     }
 }
@@ -167,7 +167,7 @@ void formation_open_equipment_panel(s32 enabled) {
         return;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
-        && thread_is_running(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
+        && thread_is_running(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0) {
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, unit_panel_equipment_ability_thread);
         thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_formation_equipment_panel_thread_params, 0, 0);
@@ -193,7 +193,7 @@ void redraw_unit_panels(void) {
 void unit_panels_stop(void) {
     menu_thread_request_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
     menu_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
-    menu_thread_request_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+    menu_thread_request_stop(MENU_SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
     menu_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     unit_panel_toggle_preview_stats_thread(0);
     formation_toggle_preview_equipment_panel(0);
@@ -407,24 +407,24 @@ void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabl
     sprite.source.clut = clut;
     sprite.source.tpage = g_menu_cursor_texture_page;
     for (i = 0; i < count; i++) {
-        piece = &g_screen_button_pieces[piece_index];
+        piece = &g_menu_screen_button_pieces[piece_index];
         sprite.position.x = x + piece->x_offset;
         sprite.position.y = y + piece->y_offset;
-        product = g_screen_button_piece_scales[piece_index].x * piece->w;
+        product = g_menu_screen_button_piece_scales[piece_index].x * piece->w;
         w = ((product < 0) ? -product : product) >> 12;
         sprite.w = w;
-        h = g_screen_button_piece_scales[piece_index].y * piece->h;
+        h = g_menu_screen_button_piece_scales[piece_index].y * piece->h;
         h = (h < 0) ? -h : h;
         sprite.h = h >> 12;
         sprite.source.u = piece->u;
         sprite.source.v = piece->v;
         sprite.source.w = piece->w;
         sprite.source.h = piece->h;
-        if (g_screen_button_piece_scales[piece_index].x >= 0x1005) {
+        if (g_menu_screen_button_piece_scales[piece_index].x >= 0x1005) {
             sprite.w = w + 2;
         }
-        flip = g_screen_button_piece_scales[piece_index].x < 0;
-        if (g_screen_button_piece_scales[piece_index].y < 0) {
+        flip = g_menu_screen_button_piece_scales[piece_index].x < 0;
+        if (g_menu_screen_button_piece_scales[piece_index].y < 0) {
             flip += 2;
         }
         menu_gfx_enqueue_oriented_textured_quad(&sprite, 0, flip, 0, i + 50);
@@ -539,7 +539,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     enabled = 1;
     if (g_formation_triangle_menu_open == 0 && g_formation_banner_slide_step == 0 && g_formation_scroll_velocity == 0
         && g_formation_triangle_menu_running == 0) {
-        if (allow_browse != 0 && screen_get_input_lockout() == 0 && unit_grid_check_scroll() == 0) {
+        if (allow_browse != 0 && menu_screen_get_input_lockout() == 0 && unit_grid_check_scroll() == 0) {
             if (input & PSX_PAD_CIRCLE) {
                 if (g_formation_unit_browse_enabled == 0) {
                     if (g_formation_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
@@ -569,7 +569,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     if (g_formation_unit_browse_enabled != 0) {
         input &= 0xff0;
     }
-    if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_screen_grid_id == MENU_GRID_HELP_NONE
+    if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_menu_screen_grid_id == MENU_GRID_HELP_NONE
         && screen_get_fade_state() == SCREEN_FADE_STATE_NONE) {
         g_unit_selected_index
             = menu_step_grid_selection(4, 5, g_formation_unit_count - 1, g_unit_selected_index, input);
@@ -577,7 +577,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     update_grid_scroll(&g_formation_scroll_velocity, &g_formation_scroll_position);
 
     /* The readout bar beside the banner: the L2/R2 buttons and the current readout's labels. */
-    if (g_formation_banner_slide_step == 0 && screen_get_input_lockout() == 0 && enabled != 0 && get_mode == NULL
+    if (g_formation_banner_slide_step == 0 && menu_screen_get_input_lockout() == 0 && enabled != 0 && get_mode == NULL
         && g_formation_unit_banner_enabled != 0 && g_formation_unit_browse_enabled == 0
         && g_formation_selection_cursor_ready != 0 && g_formation_current_menu != FORMATION_MENU_DISMISS_UNIT) {
         value = 0xf;
@@ -593,14 +593,14 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
         if (thread_is_running(THREAD_SCREEN_SLOT_MENU) != 0) {
             row = g_formation_current_menu == FORMATION_MENU_UNIT_GRID;
         }
-        row |= g_menu_input_lock_mode != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE;
+        row |= g_menu_input_lock_mode != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE;
         menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_L2, 0x26, value, input & PSX_PAD_L2, row, SOUND_SFX_PAGE_SWITCH);
         menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R2, 0xc2, value, input & PSX_PAD_R2, row, SOUND_SFX_PAGE_SWITCH);
         menu_script_run_with_palette_mode(window, 0, 0);
         menu_gfx_enqueue_textured_quad_list(
-            cells, 0, 0, g_menu_cursor_texture_page, g_screen_palette_clut_normal, 0xb, 8);
+            cells, 0, 0, g_menu_cursor_texture_page, g_menu_screen_palette_clut_normal, 0xb, 8);
         if (g_formation_stat_display_mode < 3) {
             row = g_formation_stat_display_mode;
             col = 1;
@@ -612,7 +612,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             col = 3;
         }
         menu_gfx_enqueue_textured_quad_list(
-            &cells[row], 0, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut_normal, 0xc, col);
+            &cells[row], 0, 0, g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut_normal, 0xc, col);
     }
     if (toggle_banner != 0) {
         g_formation_unit_banner_at_bottom = check_banner_at_bottom(g_formation_scroll_position);
@@ -778,7 +778,7 @@ void formation_draw_background_tiles(s32 y, s32 unused_1) {
         }
         y += 0x20;
     }
-    rect.clut = g_screen_background_clut;
+    rect.clut = g_menu_screen_background_clut;
     rect.tpage = g_menu_cursor_texture_page;
     for (; rect.y < 0xF0; draw_row++) {
         tiles = g_formation_background_tiles;
@@ -1281,7 +1281,7 @@ static void draw_unit_readout(
             rect.w = g_formation_label_tiles[mode].w;
             rect.h = g_formation_label_tiles[mode].h;
             menu_gfx_enqueue_textured_quad(&rect, g_formation_label_tiles[mode].u, g_formation_label_tiles[mode].v,
-                color, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                color, 0, g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             num_x = x + 40;
             num_y = y + 45;
             if (check_readout_position(num_x, num_y)) {
@@ -1303,15 +1303,15 @@ static void draw_unit_readout(
             rect.w = 6;
             rect.h = 11;
             menu_gfx_enqueue_textured_quad(
-                &rect, 0xB4, 0x10, color, 0, g_screen_window_tpage, g_screen_alternate_number_clut, priority);
+                &rect, 0xB4, 0x10, color, 0, g_menu_screen_window_tpage, g_menu_screen_alternate_number_clut, priority);
             if (mode == MENU_UNIT_READOUT_HP) {
-                clut = g_screen_hp_gauge_clut;
+                clut = g_menu_screen_hp_gauge_clut;
                 rgb = s_formation_hp_gauge_colors;
             } else if (mode == MENU_UNIT_READOUT_MP) {
-                clut = g_screen_mp_gauge_clut;
+                clut = g_menu_screen_mp_gauge_clut;
                 rgb = s_formation_mp_gauge_colors;
             } else {
-                clut = g_screen_ct_gauge_clut;
+                clut = g_menu_screen_ct_gauge_clut;
                 rgb = s_formation_ct_gauge_colors;
             }
             rect.x = x;
@@ -1340,13 +1340,13 @@ static void draw_unit_readout(
             rect.w = g_formation_label_tiles[3].w + 3;
             rect.h = g_formation_label_tiles[3].h + 1;
             menu_gfx_enqueue_textured_quad(&rect, g_formation_label_tiles[3].u, g_formation_label_tiles[3].v, color, 0,
-                g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             rect.x = x + 26;
             rect.y = label_y;
             rect.w = g_formation_label_tiles[4].w + 2;
             rect.h = g_formation_label_tiles[4].h;
             menu_gfx_enqueue_textured_quad(&rect, g_formation_label_tiles[4].u, g_formation_label_tiles[4].v, color, 0,
-                g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             num_x = x + 13;
             num_y = y40;
             if (check_readout_position(num_x, num_y)) {
@@ -1374,25 +1374,25 @@ static void draw_unit_readout(
             rect.w = g_formation_label_tiles[5].w;
             rect.h = g_formation_label_tiles[5].h;
             menu_gfx_enqueue_textured_quad(&rect, g_formation_label_tiles[5].u, g_formation_label_tiles[5].v, color, 0,
-                g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             rect.x += rect.w - 2;
             rect.y += 5;
             rect.w = 3;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(
-                &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             rect.x = x + 26;
             rect.y = label_y;
             rect.w = g_formation_label_tiles[7].w;
             rect.h = g_formation_label_tiles[7].h;
             menu_gfx_enqueue_textured_quad(&rect, g_formation_label_tiles[7].u, g_formation_label_tiles[7].v, color, 0,
-                g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             rect.x += rect.w;
             rect.y += 5;
             rect.w = 3;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(
-                &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_screen_alternate_number_clut, priority);
+                &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_menu_screen_alternate_number_clut, priority);
             num_x = x + 13;
             if (check_readout_position(num_x - 3, (s16)y40)) {
                 g_formation_brave_number.x = num_x;

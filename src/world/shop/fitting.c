@@ -14,10 +14,10 @@
 #include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/message_box.h"
-#include "fft/screen.h"
 #include "fft/shop.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -133,7 +133,7 @@ void shop_fitting_update_menu(void) {
         } else {
             g_help_message_text_id = 0;
         }
-        busy = screen_get_input_lockout();
+        busy = menu_screen_get_input_lockout();
         busy += unit_grid_check_scroll();
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) && busy == 0) {
             g_sound_queued_effect_id = SOUND_SFX_CANCEL;
@@ -157,14 +157,14 @@ void shop_fitting_update_menu(void) {
         g_shop_background_visible = 1;
         g_help_message_text_id = 0;
         if (menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, g_shop_fitting_menu_thread_data) == 0) {
-            if (g_screen_selection_results[1] == 0) {
+            if (g_menu_screen_selection_results[1] == 0) {
                 g_shop_menu_step = SHOP_STEP_FITTING_ROOM_EQUIP;
-            } else if (g_screen_selection_results[1] == 1) {
+            } else if (g_menu_screen_selection_results[1] == 1) {
                 g_shop_menu_step = SHOP_STEP_FITTING_ROOM_BEST_FIT;
-            } else if (g_screen_selection_results[1] == 2) {
+            } else if (g_menu_screen_selection_results[1] == 2) {
                 g_shop_menu_step = SHOP_STEP_FITTING_ROOM_REMOVE;
-            } else if (g_screen_selection_results[1] == 3) {
-                if (g_screen_selection_results[2] == 0) {
+            } else if (g_menu_screen_selection_results[1] == 3) {
+                if (g_menu_screen_selection_results[2] == 0) {
                     g_shop_menu_step = SHOP_STEP_FITTING_ROOM_SELL_EQUIPPED;
                 } else {
                     g_shop_menu_step = SHOP_STEP_FITTING_ROOM_SELL;
@@ -175,13 +175,13 @@ void shop_fitting_update_menu(void) {
                 g_formation_unit_cycle_mode = 0;
                 g_formation_unit_browse_enabled = 0;
                 g_shop_fitting_cost_visible = 0;
-                if (g_screen_selection_results[1] == 4) {
+                if (g_menu_screen_selection_results[1] == 4) {
                     g_formation_unit_banner_enabled = 0;
                     g_shop_menu_step = SHOP_STEP_FITTING_ROOM_CHECKOUT;
                 }
             }
-            menu_selection_init_value(SCREEN_CURSOR_REMOVE_SLOT, 0);
-            menu_selection_init_value(SCREEN_CURSOR_EQUIP_SLOT, 0);
+            menu_selection_init_value(MENU_SCREEN_CURSOR_REMOVE_SLOT, 0);
+            menu_selection_init_value(MENU_SCREEN_CURSOR_EQUIP_SLOT, 0);
         }
     }
     if (g_shop_fitting_cost_visible != 0) {
@@ -226,8 +226,8 @@ void shop_fitting_update_equipment_menu(void) {
         }
     } else if (g_shop_fitting_item_list_open == 0) {
         prev = g_shop_fitting_equip_slot;
-        g_shop_fitting_equip_slot = menu_selection_step_vertical_with_sound(
-            MENU_EQUIPMENT_SLOT_COUNT, SCREEN_CURSOR_EQUIP_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
+        g_shop_fitting_equip_slot = menu_selection_step_vertical_with_sound(MENU_EQUIPMENT_SLOT_COUNT,
+            MENU_SCREEN_CURSOR_EQUIP_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
         if (prev != g_shop_fitting_equip_slot) {
             g_menu_list_selected_index = 0;
         }
@@ -249,7 +249,7 @@ void shop_fitting_update_equipment_menu(void) {
             g_shop_fitting_previewed_cursor = -1;
             g_shop_fitting_cost_visible = 0;
             g_formation_change_banner_thread_params.style = 1;
-            shop_build_stock_list(g_unit_selected_index, g_screen_context_id, g_shop_fitting_equip_slot,
+            shop_build_stock_list(g_unit_selected_index, g_menu_screen_context_id, g_shop_fitting_equip_slot,
                 g_item_list_entries, ITEM_LIST_MODE_MARK_UNEQUIPPABLE);
 
             /* Both hand slots share selection record 0, so the record is the slot less one. */
@@ -313,7 +313,7 @@ void shop_fitting_update_equipment_menu(void) {
         }
 
         menu_script_run_with_palette_mode(
-            g_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, screen_check_busy());
+            g_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, menu_screen_check_busy());
         g_help_message_text_id = g_menu_list_entry_count != 0
             ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + HELP_TEXT_ID_ITEM_BASE
             : -1;
@@ -416,7 +416,7 @@ void shop_fitting_update_remove_menu(void) {
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
     }
     slot = menu_selection_step_vertical_with_sound(
-        MENU_EQUIPMENT_SLOT_COUNT, SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
+        MENU_EQUIPMENT_SLOT_COUNT, MENU_SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
     if (g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[(u8)slot] != ITEM_ID_NOTHING) {
         value = (g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[(u8)slot] & ITEM_ENTRY_ID_MASK)
             + HELP_TEXT_ID_ITEM_BASE;
@@ -533,11 +533,11 @@ static s32 update_checkout_prompt(void) {
     }
     if (g_shop_fitting_checkout_prompt_active != 0) {
         g_shop_fitting_checkout_prompt_active
-            = menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_fitting_checkout_prompt_menu);
+            = menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, g_shop_fitting_checkout_prompt_menu);
         if (g_shop_fitting_checkout_prompt_active != 0) {
             return SHOP_FITTING_CHECKOUT_PROMPT_OPEN;
         }
-        g_shop_fitting_checkout_prompt_result = g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT];
+        g_shop_fitting_checkout_prompt_result = g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT];
         if (g_shop_fitting_checkout_insufficient_gil == 0) {
             g_sound_suppressed = 0;
             if (g_shop_fitting_checkout_prompt_result == 0) {
@@ -570,11 +570,11 @@ static s32 update_checkout_prompt(void) {
         g_shop_fitting_checkout_prompt_initialized = 0;
         return SHOP_FITTING_CHECKOUT_CANCELED;
     }
-    if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_fitting_checkout_short_gil_menu) != 0) {
+    if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_shop_fitting_checkout_short_gil_menu) != 0) {
         return SHOP_FITTING_CHECKOUT_PROMPT_OPEN;
     }
     g_shop_fitting_checkout_prompt_initialized = 0;
-    if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] != 1) {
+    if (g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT] != 1) {
         if (g_shop_fitting_checkout_prompt_result != 0) {
             undo_fitting();
             return SHOP_FITTING_CHECKOUT_DONE;
@@ -661,7 +661,7 @@ static void undo_fitting(void) {
  * then `reserved = room_base + idx * 5;`) forces the `la` to be emitted at
  * that statement, ahead of the index arithmetic.
  *
- * The confirmation result g_screen_selection_results[5] is read directly
+ * The confirmation result g_menu_screen_selection_results[5] is read directly
  * each time. Its address stays in one register across the calls and the last
  * read is scheduled ahead of the two byte stores that precede it in source.
  */
@@ -691,7 +691,7 @@ void shop_fitting_update_best_fit(void) {
             }
         }
         shop_fitting_build_best_fit(
-            g_unit_selected_index, g_screen_context_id, g_item_preview_stat_detail.state.equipment);
+            g_unit_selected_index, g_menu_screen_context_id, g_item_preview_stat_detail.state.equipment);
         g_item_preview_stat_detail.state.equipment[MENU_EQUIPMENT_SLOT_ACCESSORY]
             = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[MENU_EQUIPMENT_SLOT_ACCESSORY];
         bcopy(staged, g_formation_unit_pointers[g_unit_selected_index]->detail.equipment, sizeof(staged));
@@ -710,10 +710,10 @@ void shop_fitting_update_best_fit(void) {
     }
     i = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_best_fit_menu);
     if (i == 0) {
-        if (g_screen_selection_results[5] == 0) {
+        if (g_menu_screen_selection_results[5] == 0) {
             g_sound_queued_effect_id = SOUND_SFX_EQUIP;
         }
-        if (g_screen_selection_results[5] == 1) {
+        if (g_menu_screen_selection_results[5] == 1) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         }
         formation_toggle_preview_equipment_panel(0);
@@ -721,7 +721,7 @@ void shop_fitting_update_best_fit(void) {
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         s_shop_fitting_best_fit_menu_open = 0;
         g_formation_unit_cycle_mode = 2;
-        if (g_screen_selection_results[5] == 0) {
+        if (g_menu_screen_selection_results[5] == 0) {
             for (; i < MENU_EQUIPMENT_SLOT_ACCESSORY; i++) {
                 u16 suggested;
                 s32 shifted;
@@ -789,7 +789,7 @@ void shop_fitting_update_equipped_sale(void) {
             }
         } else if (g_shop_fitting_sell_equipped_prompt_active == 0) {
             g_shop_fitting_sell_equipped_slot = menu_selection_step_vertical_with_sound(MENU_EQUIPMENT_SLOT_COUNT,
-                SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
+                MENU_SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
             if (g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[g_shop_fitting_sell_equipped_slot]
                 != ITEM_ID_NOTHING) {
                 text_id = (g_formation_unit_pointers[g_unit_selected_index]
@@ -821,7 +821,7 @@ void shop_fitting_update_equipped_sale(void) {
             g_sound_suppressed = g_shop_fitting_sell_equipped_prompt_active
                 = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_shop_fitting_sell_equipped_menu);
             if (g_shop_fitting_sell_equipped_prompt_active == 0) {
-                if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 0) {
+                if (g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT] == 0) {
                     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf811, 0);
                     shop_adjust_gil(g_text_substitution_values[0]);
                     g_formation_unit_pointers[g_unit_selected_index]
@@ -829,7 +829,7 @@ void shop_fitting_update_equipped_sale(void) {
                     formation_refresh_selected_stats();
                     g_sound_queued_effect_id = SOUND_SFX_SHOP_TRANSACTION;
                 } else {
-                    if (g_screen_selection_results[SCREEN_SELECTION_PROMPT_RESULT] == 1) {
+                    if (g_menu_screen_selection_results[MENU_SCREEN_SELECTION_PROMPT_RESULT] == 1) {
                         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                     }
                     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80a, 0);
@@ -883,7 +883,7 @@ void shop_fitting_update_inventory_sale(void) {
     if (g_shop_fitting_sell_step == SHOP_STEP_SELL_LIST) {
         shop_sell_update_list();
         if (g_shop_fitting_sell_step != g_shop_menu_step) {
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
         }
     } else if (g_shop_fitting_sell_step == SHOP_STEP_SELL_CONFIRM) {
         shop_sell_update_confirm();

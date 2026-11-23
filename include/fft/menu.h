@@ -28,7 +28,7 @@ void* menu_alloc_buffer(s32 bytes);
  * own record type through context. */
 
 /* Record reached through menu_entry_t::context by menu_text_entry_wait_thread and WORLD's
- * screen_text_entry_thread: they call prepare, then start text_thread_id with speaker_id as its third
+ * menu_screen_text_entry_thread: they call prepare, then start text_thread_id with speaker_id as its third
  * parameter. menu_text_entry_wait_thread also supplies speaker_id as the fourth parameter. */
 typedef struct menu_text_binding {
     void (*prepare)(void); /* 0x00 */
@@ -52,7 +52,7 @@ typedef enum menu_text_column_mode {
     MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3 /* two-digit numbers, drawn by menu_draw_large_number_glyphs */
 } menu_text_column_mode_e;
 
-/* Three-column text layout walked by menu_draw_text_columns and WORLD's screen_draw_text_columns,
+/* Three-column text layout walked by menu_draw_text_columns and WORLD's menu_screen_draw_text_columns,
  * reached through menu_entry_t::context when the entry draws a list. Column i draws mode[i] at x[i] from
  * text_ids[i] in text_colors[i], both indexed by row plus the row offset. */
 typedef struct menu_text_layout {
@@ -102,18 +102,18 @@ typedef struct menu_entry {
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24: each row's action, indexed by selected_index */
     void (*thread_entry)(void);  /* 0x28 */
-    s16 header_id;               /* 0x2c: text-thread parameter (screen_text_entry_thread);
+    s16 header_id;               /* 0x2c: text-thread parameter (menu_screen_text_entry_thread);
                                     icon threads use menu_icon_header_e */
     u8 _padding_2e[2];           /* aligns context */
     /* 0x30: context interpreted by the menu thread. Text threads use menu_text_binding_t
      * here, the list threads a menu_text_layout_t, the number threads a
-     * screen_number_range_t and the icon threads the s16 redraw flag they
+     * menu_screen_number_range_t and the icon threads the s16 redraw flag they
      * poll (set to 1 to rebuild the text image). */
     void* context;
     void* value;           /* 0x34: thread-specific value data: s16 result cell or main-window s32 substitution pair */
     s16 selected_index;    /* 0x38: selected row; indexes the scroll layout's 16-bit table
-                              (screen_help_text_thread) */
-    s16 select_text_table; /* 0x3a: "Index for select text": row of g_screen_entry_text_id_tables
+                              (menu_screen_help_text_thread) */
+    s16 select_text_table; /* 0x3a: "Index for select text": row of g_menu_screen_entry_text_id_tables
                               (0x11 = first text column of the scroll layout); 2 / -1 defer to the next running
                               thread's entry. The AT-list and option-list builders park their
                               scroll row offset here instead. */

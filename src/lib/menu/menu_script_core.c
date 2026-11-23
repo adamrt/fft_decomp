@@ -3,14 +3,14 @@
 #include "fft/equipment.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
-#include "fft/screen.h"
 #include "fft/unit_list.h"
 #include "psx/types.h"
 
 /* Each interpreter stops at its own dialect's first non-instruction value. */
 #if defined(FFT_WORLD)
-enum { MENU_SCRIPT_END = SCREEN_SCRIPT_END };
+enum { MENU_SCRIPT_END = MENU_SCREEN_SCRIPT_END };
 #elif defined(FFT_EVENT_BUNIT)
 enum { MENU_SCRIPT_END = UNIT_LIST_SCRIPT_END };
 #elif defined(FFT_EVENT_EQUIP)

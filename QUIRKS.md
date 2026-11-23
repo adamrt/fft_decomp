@@ -89,7 +89,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `step_real_coords_toward_target`: in the positive
   direction the Y (`vz`) step adds the vector component twice; X and Z add it
   once.
-- `screen_open_entry_window` receives requested x/y origins but always
+- `menu_screen_open_entry_window` receives requested x/y origins but always
   opens at its fixed default origin.
 - `result_build_next_display`: the CT-zero
   display case reads `y_shift` without setting it; only the HP/MP and
@@ -478,7 +478,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   weapons and then switches on single values, so a unit holding two kinds (an
   HP-absorbing weapon beside a damaging one) gives its Attack entry no target
   team.
-- `screen_clamped_icon_list_thread`: Up steps the cursor up, but the Down
+- `menu_screen_clamped_icon_list_thread`: Up steps the cursor up, but the Down
   test is inverted, so the cursor moves down on every frame Down is not held
   until it reaches `max_row_index`. Nothing refers to the thread.
 - `menu_build_and_upload_window_frame_image`: the banded upload (mode
@@ -683,7 +683,7 @@ written that way.
 - `StCdInterrupt`: emulated header/payload copies pass a fourth completion argument to the three-argument `mem2mem` helper, which ignores it.
 - `g_thread_call_target` is the main-stack dispatch slot for callees
   with different signatures; assignments erase their function types.
-- `screen_fit_child_entry_to_digits`: calls
+- `menu_screen_fit_child_entry_to_digits`: calls
   `text_count_decimal_digits` with no argument; the callee reads a stale
   `$a0`. Nothing calls the function itself.
 - `distortion_fall_to_target` passes a coordinate
@@ -745,7 +745,7 @@ written that way.
   one.
 - `menu_dispatch_request` returns `$v0` as the void
   `announcement_select` left it.
-- `screen_text_bind_section` has no return statement;
+- `menu_screen_text_bind_section` has no return statement;
   `build_slot_description` uses the address its last store
   left in `$v0`.
 - `effect_emitter_spawn_particles` has an `s32` result it never sets
@@ -791,7 +791,7 @@ written that way.
   to the event input loader; CARD's controller pointer at +4 is copied as held
   buttons, and the remaining 32-bit input values are shifted by one field.
 
-- `screen_update_dialog_input` and `script_update_event_frame` pass six 32-bit values
+- `menu_screen_update_dialog_input` and `script_update_event_frame` pass six 32-bit values
   starting at `g_script_event_input` to the event input loader. The
   next five 32-bit values include unrelated status-label data; the corresponding held,
   previous and repeat globals reside elsewhere.
@@ -833,8 +833,8 @@ written that way.
   silently stop sharing the storage. Same address, two names: `g_move_find_result_flags`
   over the static `s_tile_pickup_result` (`0x8018f8a8`, BATTLE),
   `g_action_work` and `s_action_work_view` (`0x801938c0`, BATTLE),
-  `g_screen_input_state` and `g_screen_new_buttons` (`0x801aed44`, WORLD),
-  `g_screen_input_frame_state` over the static `s_screen_input_frame_new`
+  `g_menu_screen_input_state` and `g_menu_screen_new_buttons` (`0x801aed44`, WORLD),
+  `g_menu_screen_input_frame_state` over the static `s_screen_input_frame_new`
   (`0x801c0528`, WORLD), `s_location_script_flags` and `g_location_script_state`
   (`0x800d4644`, WLDCORE), `g_sound_novel_countdown_frames` and
   `g_sound_novel_countdown_frames_reset` (`0x800bb4f8`, WLDCORE),
@@ -863,8 +863,8 @@ written that way.
   `g_window_panel_scroll_offset` is `g_window_panel_render_state` + 0x3a,
   `g_brave_story_saved_cursor` and `g_brave_story_propositions_saved_cursor`
   are slots 9 and 13 of `g_menu_stack_cursor_states` (WLDCORE);
-  `g_screen_grid_cell_23_text_offset` and `g_screen_grid_cell_24_text_offset`
-  are `g_screen_grid_default_cells` + 372 and + 388 (WORLD);
+  `g_menu_screen_grid_cell_23_text_offset` and `g_menu_screen_grid_cell_24_text_offset`
+  are `g_menu_screen_grid_default_cells` + 372 and + 388 (WORLD);
   `g_status_screen_numbers_panel_records` and `g_status_screen_frames` are
   `g_unit_view_stats_panel_pages` + 1496 and + 3740 (BATTLE and WORLD);
   `g_sprite_sheet_ids_by_vram_slot` is byte 1 of `g_sprite_sheet_slots[0]`
@@ -983,7 +983,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   three-entry location table; all 16 shipped emitters use group 0, so the
   out-of-range path is inactive.
 - `EFFECT/E223.BIN` through `E225.BIN` contain effect data but have zero resident load sizes; requesting those file IDs loads Cure instead. The ability-effect mapping does not reference them.
-- `load_portraits`: the WLDFACE rectangles (`g_screen_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
+- `load_portraits`: the WLDFACE rectangles (`g_menu_screen_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
 - `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initializer opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
 - `effect_script_opcode_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `run_script_block` then tests the undefined return value.
 - EFFECT scripts never run seven state handlers: E000's script calls only `effect_noop` (opcode 07) and E314's names no file function, so native function ids 1 and 90 are bound by nothing; E134/E242 `effect_ring_stack_mesh_update`, E454/E455 `effect_set_map_3d_objects_state_2` and E456 `effect_freeze_map` sit in callback slots (script opcode 06) that no keyframe selector fires. E457.BIN, which has no code, binds native function 88 (0x801c2578, E259's `effect_dome_mesh_update`; data in its own image) to slot 0, and none of its keyframes names a slot.
@@ -1153,7 +1153,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `battle_state_effect_enter` are the only code that enters
   `BATTLE_STATE_EFFECT`; neither has a caller, so
   `battle_state_effect_update` never runs.
-- WORLD's `screen_fit_child_entry_to_digits` and
+- WORLD's `menu_screen_fit_child_entry_to_digits` and
   `helpmenu_after_battle_entrypoint` have no callers; their quirks above do not
   execute in retail WORLD.
 - `wait_hardware_event` is OPEN's only caller of
@@ -1234,7 +1234,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   (`get_hire_fee`), but
   `soldier_office_update_menu` tests, prompts with (0xF82A)
   and charges 1000 plus the generated recruit's equipment prices.
-- `screen_text_measure_width` adds the operand of 0xE7
+- `menu_screen_text_measure_width` adds the operand of 0xE7
   (`TEXT_SET_X_POSITION`) to the width as an advance, while
   `menu_text_render_encoded_ids_to_image` moves the pen to that x. Its only
   caller centers the job wheel's job name.

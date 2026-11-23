@@ -17,7 +17,7 @@ struct menu_icon_source;
  * has no handler anywhere. BUNIT also leaves slots 3 and 7 empty; JOBSTTS leaves 3, 6, 7 and 0x0b empty.
  * EQUIP's dialect ends before 0x19, JOBSTTS's before 0x16. Each module ends a stream with its own opcode, the first
  * one past its table
- * (SCREEN_SCRIPT_END, UNIT_LIST_SCRIPT_END, EQUIPMENT_SCRIPT_END, STATUS_SCREEN_SCRIPT_END). */
+ * (MENU_SCREEN_SCRIPT_END, UNIT_LIST_SCRIPT_END, EQUIPMENT_SCRIPT_END, STATUS_SCREEN_SCRIPT_END). */
 typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_WINDOW_FRAME = 0x00,
     MENU_SCRIPT_OP_IF_GROUP = 0x01,      /* run the next group when a row callback returns nonzero */
@@ -93,7 +93,7 @@ typedef struct menu_list_record {
     u8 length;          /* 0x01: byte length of this record */
     u8 show_cursor;     /* 0x02 */
     u8 _unused_03;      /* 0x03 */
-    u8 skip_count;      /* 0x04: row records that follow (g_screen_list_row_record_count) */
+    u8 skip_count;      /* 0x04: row records that follow (g_menu_screen_list_row_record_count) */
     u8 row_height;      /* 0x05 */
     u8 visible_rows;    /* 0x06 */
     u8 x;               /* 0x07 */

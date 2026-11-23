@@ -2,7 +2,7 @@
  * character count. */
 
 #include "fft/gfx_image.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
@@ -45,7 +45,7 @@ void text_render_id_rows_to_vram(const u8* text_table, const s16* text_ids, cons
  * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
  * as the text table for text_render_id_rows_to_vram, with the
  * caller's text ids, destination and flags passed through unchanged. */
-void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags) {
+void menu_screen_text_kern(const u8* text, const s16* text_ids, const RECT* destination, s32 flags) {
     u8 buf[0x78];
     u8* out;
     s32 len;
@@ -116,7 +116,7 @@ void screen_text_kern(const u8* text, const s16* text_ids, const RECT* destinati
 /* Renders one encoded glyph (either a direct id or a 0xD?-prefixed
  * two-byte code) into a 0x78-byte 4bpp image and uploads it at (x, y).
  * Single-byte codes from 0xD0 up (prefixes and control codes) draw nothing. */
-void screen_upload_font_glyph(u16 code, s32 x, s32 y, s32 style) {
+void menu_screen_upload_font_glyph(u16 code, s32 x, s32 y, s32 style) {
     u8 image[0x78];
     RECT rect;
     u32 glyph;
@@ -145,7 +145,7 @@ void screen_upload_font_glyph(u16 code, s32 x, s32 y, s32 style) {
 
 /* Advance over count characters of a 0xFE-terminated text entry; bytes
  * TEXT_EXTENDED_GLYPH_PREFIX_FIRST..TEXT_EXTENDED_GLYPH_PREFIX_LAST carry a one-byte operand. */
-const u8* screen_text_advance_chars(const u8* text, s32 count) {
+const u8* menu_screen_text_advance_chars(const u8* text, s32 count) {
     s32 i;
     s32 offset = 0;
     const u8* cursor;

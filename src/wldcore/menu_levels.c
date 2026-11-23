@@ -15,6 +15,7 @@
 #include "fft/location.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/menu_window.h"
@@ -22,7 +23,6 @@
 #include "fft/music.h"
 #include "fft/proposition.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/shop.h"
 #include "fft/sound.h"
@@ -138,7 +138,7 @@ static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     brave_story_update_fact_list_input,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
     brave_story_update_fact_window,                /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
     update_variable_edit,                          /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    screen_transition_update,                      /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
+    menu_screen_transition_update,                 /* MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION */
     update_focus_level,                            /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
     update_scrollable_text_level,                  /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
     update_party_number,                           /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
@@ -199,7 +199,7 @@ static void (*s_level_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     brave_story_resume_fact_list,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
     0,                                       /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
     0,                                       /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    0,                                       /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
+    0,                                       /* MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION */
     0,                                       /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
     0,                                       /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
     0,                                       /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
@@ -260,7 +260,7 @@ static void (*s_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_recor
     brave_story_suspend_fact_list,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
     0,                                        /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
     0,                                        /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    0,                                        /* MENU_STACK_LEVEL_SCREEN_TRANSITION */
+    0,                                        /* MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION */
     0,                                        /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
     0,                                        /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
     0,                                        /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
@@ -275,7 +275,7 @@ static void (*s_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_recor
 void world_map_init_menu_state(void) {
     s32 value;
 
-    screen_init_world_resources();
+    menu_screen_init_world_resources();
     formation_roster_build_names();
     value = script_variable_get(EVENT_SCRIPT_VAR_DATE_ADVANCE);
     if (value != 0) {
@@ -302,7 +302,7 @@ void world_map_update_menus(GsOT* context) {
         return;
     }
     zodiac_backdrop_set_otag((u32*)(context->org + 15));
-    screen_set_allowed_buttons(~g_menu_blocked_buttons);
+    menu_screen_set_allowed_buttons(~g_menu_blocked_buttons);
     if (g_world_map_flags & WORLD_MAP_FLAG_UNIT_PANEL_THREADS) {
         otag_entries = (u32*)context->org;
         g_gfx_current_otag_entry = otag_entries + g_menu_stack_ot_offset;
@@ -315,7 +315,7 @@ void world_map_update_menus(GsOT* context) {
         }
     } else {
         menu_entries = (u32*)context->org;
-        screen_update_menu_frame(menu_entries + g_menu_stack_ot_offset, g_input_current_buttons);
+        menu_screen_update_menu_frame(menu_entries + g_menu_stack_ot_offset, g_input_current_buttons);
     }
 }
 
@@ -956,7 +956,7 @@ void world_map_open_menu_level(void) {
     s32* counter;
 
     g_menu_blocked_buttons = -1;
-    screen_open_entry_window(4, -0x30, -0x38);
+    menu_screen_open_entry_window(4, -0x30, -0x38);
     g_hud_value_mode = HUD_VALUE_FUNDS;
     g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
     depth = g_menu_stack_depth;
@@ -1021,7 +1021,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
     g_menu_stack_depth -= 1;
     if (flags & WORLD_MAP_FLAG_REQUEST_BRAVE_STORY) {
         g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
-        screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
+        menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
         return;
     }
 
@@ -1037,7 +1037,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
 
     if (flags & WORLD_MAP_FLAG_REQUEST_TUTORIAL) {
         g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
-        screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
+        menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
         return;
     }
 
@@ -1069,7 +1069,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
 /* Pushes the self-sizing message window (MENU_STACK_LEVEL_TEXT_WINDOW), the
  * windowed sibling of menu_stack_open_message. It stores the reload
  * flag and, when set, re-points the text formatter at
- * g_screen_text_section_offsets; appends the window's label record (priority
+ * g_menu_screen_text_section_offsets; appends the window's label record (priority
  * 1); measures the entry, clamped to three rows; fills the shared scrollable
  * window and centers it and the label on the measured box; then saves
  * g_menu_blocked_buttons in the level, blocks every button, plays
@@ -1099,7 +1099,7 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_screen_text_section_offsets);
+        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
     }
 
     index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
@@ -1182,7 +1182,7 @@ void menu_stack_open_message(s32 text, s32 reload_text) {
     g_menu_stack_records[g_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         text_save_section_pointers();
-        text_relocate_pointer_table(g_screen_text_section_offsets);
+        text_relocate_pointer_table(g_menu_screen_text_section_offsets);
     }
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, message_dialog_thread);
     if (g_world_map_flags & WORLD_MAP_FLAG_UNIT_PANEL_THREADS) {
@@ -1859,7 +1859,7 @@ static void update_location_menu(menu_stack_record_t* level) {
     /* Start the panel thread on the first delay frame, then ignore input until the delay ends. */
     if (level->location_menu.delay != 0) {
         if (level->location_menu.delay == 8) {
-            thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, screen_text_list_thread);
+            thread_start(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, menu_screen_text_list_thread);
             thread_set_parameters(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL, (s32)&g_window_panel_render_state, 0, 0);
         }
         level->location_menu.delay--;
@@ -1898,11 +1898,11 @@ static void update_location_menu(menu_stack_record_t* level) {
                     return;
                 case TEXT_ID_SOLDIER_OFFICE& TEXT_ID_ENTRY_MASK:
                     release_level_records(&level->location_menu.slots, 0);
-                    run_location_shop(SCREEN_CONTEXT_SOLDIER_OFFICE);
+                    run_location_shop(MENU_SCREEN_CONTEXT_SOLDIER_OFFICE);
                     return;
                 case TEXT_ID_FUR_SHOP& TEXT_ID_ENTRY_MASK:
                     release_level_records(&level->location_menu.slots, 0);
-                    run_location_shop(SCREEN_CONTEXT_FUR_SHOP);
+                    run_location_shop(MENU_SCREEN_CONTEXT_FUR_SHOP);
                     return;
                 default:
                     script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION,

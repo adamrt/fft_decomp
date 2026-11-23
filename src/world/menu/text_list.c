@@ -9,8 +9,8 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -71,7 +71,7 @@ static u8* update_text_page_scroll(menu_entry_t* entry, s32* row_offset, s32* ri
     }
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-    screen_draw_text_columns(entry, row_offset, buffer);
+    menu_screen_draw_text_columns(entry, row_offset, buffer);
     *ring = 0;
     LoadImage(&rect, buffer);
     mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
@@ -86,7 +86,7 @@ static u8* update_text_page_scroll(menu_entry_t* entry, s32* row_offset, s32* ri
 /*
  * Scrolling three-column text list thread (an older sibling of
  * ability_list_scrolling_thread with a fixed page pair, g_text_list_pages, and
- * screen_window_frame_thread in the frame thread slot). The menu-screen library's
+ * menu_screen_window_frame_thread in the frame thread slot). The menu-screen library's
  * variant of at_list_run: the formation screens, the world map menus and the title's music
  * test run it.
  *
@@ -98,7 +98,7 @@ static u8* update_text_page_scroll(menu_entry_t* entry, s32* row_offset, s32* ri
  * copied to `layout` before the loop: with one variable the allocator gives
  * the image buffer the last callee-saved register instead of the layout.
  */
-void screen_text_list_thread(void) {
+void menu_screen_text_list_thread(void) {
     image_layout_t image_parameters;
     RECT image_rect;
     RECT clear;
@@ -208,11 +208,11 @@ void screen_text_list_thread(void) {
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
-    thread_start(SCREEN_THREAD_SLOT_AT_LIST_FRAME, screen_window_frame_thread);
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+    thread_start(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_screen_window_frame_thread);
+    thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
-    screen_draw_text_columns(entry, &row_offset, buffer);
+    menu_screen_draw_text_columns(entry, &row_offset, buffer);
     ring = 0;
     image_rect.w = g_menu_window_text_pen.stride >> 2;
     LoadImage(&image_rect, (u32*)buffer);
@@ -246,9 +246,9 @@ void screen_text_list_thread(void) {
 
         /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
+            thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 1, 0);
         } else {
-            thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
+            thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
         }
 
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
@@ -423,7 +423,7 @@ void screen_text_list_thread(void) {
     }
 
     /* A nonzero third parameter ends the frame thread. */
-    thread_set_parameters(SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
+    thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     /* A row scroll still under way owns its row buffer. */
     if (accum & 0xF) {

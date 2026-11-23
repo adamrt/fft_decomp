@@ -6,8 +6,8 @@
 #include "fft/item_menu.h"
 #include "fft/menu.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/message_box.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -78,29 +78,29 @@ void formation_update_order_menu(void) {
         g_formation_order_open = 1;
     }
 
-    if (menu_managed_thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_order_menu) == 0) {
+    if (menu_managed_thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, &g_formation_order_menu) == 0) {
         g_formation_order_open = 0;
         g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
         g_formation_unit_browse_enabled = g_formation_order_saved_browse_enabled;
     }
 
     g_help_message_text_id = g_formation_order_entries[g_formation_order_menu.selected_index] + 0x103f;
-    if (g_screen_selection_results[9] != -1) {
+    if (g_menu_screen_selection_results[9] != -1) {
         /* Move the chosen entry to the front and redraw the options. */
-        index = g_screen_selection_results[9];
+        index = g_menu_screen_selection_results[9];
         selected_entry = g_formation_order_entries[index];
         index -= 1;
         for (; index >= 0; index--) {
             g_formation_order_entries[index + 1] = g_formation_order_entries[index];
         }
         g_formation_order_entries[0] = selected_entry;
-        screen_reset_selection_results();
+        menu_screen_reset_selection_results();
         for (index = 0; index < FORMATION_SORT_KEY_COUNT; index++) {
             option_ids[index] = g_formation_order_entries[index] + 14;
         }
         option_ids[FORMATION_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_formation_menu_text_table, g_formation_menu_text_buffer, option_ids, 1);
-        g_screen_text_redraw_request = 1;
+        g_menu_screen_text_redraw_request = 1;
         item_store_type_order(0, g_formation_order_entries);
         formation_roster_sort(0);
     }
@@ -181,7 +181,7 @@ void formation_update_dismiss_menu(void) {
             g_formation_dismiss_prompt_running = 1;
         } else {
             g_formation_dismiss_step = formation_can_dismiss(sprite);
-            screen_text_bind_section(SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES);
+            menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES);
             if (g_formation_unit_browse_enabled != 0) {
                 g_formation_unit_cycle_mode = 1;
             }
@@ -255,7 +255,7 @@ void formation_update_dismiss_menu(void) {
         if (thread_is_running(3) != 0) {
             step = g_formation_dismiss_step;
             if (step == FORMATION_DISMISS_CONFIRM) {
-                selection = g_screen_selection_results[10];
+                selection = g_menu_screen_selection_results[10];
                 g_sound_suppressed = step;
                 if (selection == 0) {
                     g_sound_queued_effect_id = SOUND_SFX_DISMISS;
@@ -279,7 +279,7 @@ void formation_update_dismiss_menu(void) {
         if (g_formation_dismiss_prompt_running != 0) {
             return;
         }
-        if (g_screen_selection_results[10] != 0) {
+        if (g_menu_screen_selection_results[10] != 0) {
             g_sound_suppressed = 0;
             g_formation_current_menu = FORMATION_MENU_UNIT_GRID;
             return;

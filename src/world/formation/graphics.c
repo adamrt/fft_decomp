@@ -6,10 +6,10 @@
 #include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/party.h"
 #include "fft/party_unit.h"
 #include "fft/portrait.h"
-#include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/zodiac.h"
@@ -181,6 +181,6 @@ s32 portrait_get_party_unit_code(s32 party_index) {
 }
 
 /* Ask the scrolling text list thread in thread_id to redraw its page. */
-void screen_thread_request_redraw(s32 thread_id) {
+void menu_screen_thread_request_redraw(s32 thread_id) {
     g_threads[thread_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 1;
 }

@@ -15,11 +15,11 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/message_box.h"
 #include "fft/music.h"
 #include "fft/option.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -159,7 +159,7 @@ void formation_job_update_menu(void) {
 
     if (g_formation_job_wheel_initialized == 0) {
         g_formation_job_wheel_spin_progress = 0;
-        screen_text_bind_section(SCREEN_TEXT_DATA_JOB_DESCRIPTIONS);
+        menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_JOB_DESCRIPTIONS);
         g_formation_job_wheel_saved_browse_enabled = g_formation_unit_browse_enabled;
         g_formation_unit_browse_enabled = 0;
         menu_thread_request_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
@@ -397,8 +397,8 @@ void formation_job_update_menu(void) {
         }
     }
 
-    menu_gfx_enqueue_textured_quad(
-        &g_formation_job_wheel_name_rect, 0x30, 0x30, 0, 0, g_screen_window_tpage, g_screen_window_clut, 0x33);
+    menu_gfx_enqueue_textured_quad(&g_formation_job_wheel_name_rect, 0x30, 0x30, 0, 0, g_menu_screen_window_tpage,
+        g_menu_screen_window_clut, 0x33);
     menu_script_run_with_palette_mode(g_formation_job_wheel_script, 0, g_menu_input_lock_mode);
 }
 
@@ -571,9 +571,9 @@ static s32 update_job_change(s32 job) {
         scratch.points[2].y = scratch.points[1].y = base = line_y;
         line_y -= 64;
         scratch.points[1].y = line_y - offset;
-        screen_add_gradient_line(&scratch.points[0], s_formation_job_change_wave_colors, 1, 0x38);
+        menu_screen_add_gradient_line(&scratch.points[0], s_formation_job_change_wave_colors, 1, 0x38);
         scratch.points[1].y++;
-        screen_add_gradient_line(&scratch.points[1], s_formation_job_change_wave_colors + 1, 1, 0x38);
+        menu_screen_add_gradient_line(&scratch.points[1], s_formation_job_change_wave_colors + 1, 1, 0x38);
     }
     menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
     s_formation_job_change_frame++;
@@ -765,7 +765,7 @@ static void build_wheel_name(void) {
     destination_rect.w = 0x14;
     destination_rect.h = 0x10;
     text_render_id_rows_to_vram(text_table, text_ids, &destination_rect, 0);
-    pixel_width = screen_text_measure_width(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
+    pixel_width = menu_screen_text_measure_width(menu_text_find_entry_by_index(text_table, *text_ids & 0x3FF, 2));
     g_formation_job_wheel_name_rect.x = ((0x50 - pixel_width) >> 1) + 0x58;
     g_formation_job_wheel_name_rect.y = 0xD7;
     g_formation_job_wheel_name_rect.w = pixel_width;

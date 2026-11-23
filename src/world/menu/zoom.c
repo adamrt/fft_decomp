@@ -6,7 +6,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-extern const u16 g_screen_zoom_percentages[12]; /* twelve crop percentages, indexed by step */
+extern const u16 g_menu_screen_zoom_percentages[12]; /* twelve crop percentages, indexed by step */
 
 /*
  * The menu-screen library's copy of option_build_scaled_draw_area_packets; nothing calls it.
@@ -21,7 +21,7 @@ extern const u16 g_screen_zoom_percentages[12]; /* twelve crop percentages, inde
  * own local makes the y subtraction a second allocno, which schedules three
  * instructions early and rotates every temporary.
  */
-void screen_build_scaled_draw_area_packets(
+void menu_screen_build_scaled_draw_area_packets(
     scaled_draw_area_pair_t* pair, const RECT* source, s32 step, s32 upper_half, const point32_t* position) {
     s32 percent;
     s32 w;
@@ -34,7 +34,7 @@ void screen_build_scaled_draw_area_packets(
     if (step >= 12) {
         step = 11;
     }
-    percent = g_screen_zoom_percentages[step];
+    percent = g_menu_screen_zoom_percentages[step];
     mem_copy_bytes_nonempty(&pair->rects[0], source, sizeof(pair->rects[0]));
     w = pair->rects[0].w;
     h = pair->rects[0].h;

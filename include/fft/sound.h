@@ -38,7 +38,7 @@ typedef enum sound_resource {
 } sound_resource_e;
 
 /* Sound-effect ids passed to sound_play_sfx and the module queues that
- * feed it (sound_play_effect, screen_update_sound_effect and the
+ * feed it (sound_play_effect, menu_screen_update_sound_effect and the
  * g_*_sound_*effect_id globals); every path reaches suzuki_sound_start_sfx with
  * SOUND_RESOURCE_SYSTEM in the high 16 bits, so this is one id space.
  * SYSTEM.SED holds SOUND_SFX_COUNT sounds; the ones named here are named

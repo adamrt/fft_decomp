@@ -2,15 +2,15 @@
 
 #include "fft/gfx.h"
 #include "fft/menu_gfx.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Takes the next POLY_F4 from the pool, sets semi-transparency, colors it,
  * copies the four x/y pairs (x shifted by 0x80) and links it into
  * ordering-table entry ot_index (libgpu addPrim). */
-void screen_append_poly_f4(point16_t* xy, rgb24_t* rgb, s32 semi_trans, s32 ot_index) {
-    POLY_F4* poly = &g_menu_gfx_context->flat_quads[g_screen_poly_f4_count++];
+void menu_screen_append_poly_f4(point16_t* xy, rgb24_t* rgb, s32 semi_trans, s32 ot_index) {
+    POLY_F4* poly = &g_menu_gfx_context->flat_quads[g_menu_screen_poly_f4_count++];
 
     SetSemiTrans(poly, semi_trans);
     setRGB0(poly, rgb->r, rgb->g, rgb->b);

@@ -9,6 +9,7 @@
 #include "fft/input.h"
 #include "fft/job.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message.h"
@@ -18,7 +19,6 @@
 #include "fft/party_unit.h"
 #include "fft/portrait.h"
 #include "fft/proposition.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/suzuki.h"
@@ -977,7 +977,7 @@ static s32 update_report_message(proposition_report_level_t* state, s32 message)
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19,
             proposition_adjust_message(message, *party_index) + TEXT_ID_WORLD_MESSAGE_BASE, 0);
     } else if (g_world_map_input_new_button_presses & PSX_PAD_CIRCLE) {
-        if (screen_is_dialog_waiting()) {
+        if (menu_screen_is_dialog_waiting()) {
             state->phase = 0;
             return 1;
         }

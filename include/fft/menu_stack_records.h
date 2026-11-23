@@ -43,7 +43,7 @@ union menu_stack_record {
     brave_story_detail_level_t detail;
     event_transition_level_t event_transition;
     sound_novel_restart_level_t sound_novel_resume;
-    screen_transition_level_t screen_transition;
+    menu_screen_transition_level_t menu_screen_transition;
     menu_stack_scrollable_text_level_t scrollable_text;
     sound_novel_quit_level_t sound_novel_quit;
     sound_novel_history_level_t sound_novel_history;

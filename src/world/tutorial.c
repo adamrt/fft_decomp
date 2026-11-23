@@ -9,10 +9,10 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_screen.h"
 #include "fft/message.h"
 #include "fft/option.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/libc.h"
@@ -115,7 +115,7 @@ void tutorial_start(s32 index) {
     if (index != 0) {
         tutorial_load_files(index, &g_tutorial_state);
         s_tutorial_command_ptr = g_tutorial_state.script;
-        g_text_section_pointers[SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = g_tutorial_state.messages;
+        g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_TUTORIAL_MESSAGES] = g_tutorial_state.messages;
         init_save_screen();
         save_image_build(-1);
         bcopy(g_save_work_buffer, &g_tutorial_state.saved_game, sizeof(g_tutorial_state.saved_game));
@@ -230,14 +230,14 @@ static void tutorial_opcode_00_press_button(void) {
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
 static void tutorial_opcode_10_display_message(void) {
-    thread_start(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
-    thread_set_parameters(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
+    thread_start(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, message_dialog_thread);
+    thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(*(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->text_id_le[1]) * 0x100)
             + (*(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
         0);
     /* Direct slot/member indexing splits this address at -O0. */
     *(s32*)((u8*)g_threads
-        + (u32)(&((thread_t*)0)[SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_words[DIALOG_THREAD_WORD_Y_OFFSET]))
+        + (u32)(&((thread_t*)0)[MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_words[DIALOG_THREAD_WORD_Y_OFFSET]))
         = *(&((tutorial_message_instruction_t*)s_tutorial_command_ptr)->y_offset);
     s_tutorial_command_ptr += 4;
 }
@@ -245,8 +245,8 @@ static void tutorial_opcode_10_display_message(void) {
 /* Tutorial command: let the tutorial text continue and move on once its
  * thread has ended. */
 static void tutorial_opcode_12_wait_for_message(void) {
-    screen_text_resume_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
-    if (thread_is_running(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) == 0) {
+    menu_screen_text_resume_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
+    if (thread_is_running(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) == 0) {
         s_tutorial_command_ptr++;
     }
 }
@@ -261,14 +261,15 @@ static void tutorial_opcode_12_wait_for_message(void) {
  * and the target adds the bias to the low byte first. Taking the address of
  * the operand fields preserves the -O0 byte-address steps. */
 static void tutorial_opcode_11_change_dialog(void) {
-    if (screen_text_check_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
-        thread_set_parameters(SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
+    if (menu_screen_text_check_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
+        thread_set_parameters(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
             (s32)((u8*)(*(&((tutorial_dialog_instruction_t*)s_tutorial_command_ptr)->text_id_le[1]) * 0x100)
                 + (*(&((tutorial_dialog_instruction_t*)s_tutorial_command_ptr)->text_id_le[0]) + 0xB800)),
             0);
         s_tutorial_command_ptr += 3;
         /* Direct slot/member indexing splits this address at -O0. */
-        *(s32*)((u8*)g_threads + (u32) & ((thread_t*)0)[SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_id) = THREAD_TASK_RESUME;
+        *(s32*)((u8*)g_threads + (u32) & ((thread_t*)0)[MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT].task_id)
+            = THREAD_TASK_RESUME;
     }
 }
 
@@ -408,13 +409,14 @@ static void tutorial_opcode_15_wait_time(void) {
 /* Tutorial command: advance on any button once the tutorial text thread has
  * ended or has stopped printing. */
 static void tutorial_opcode_16_wait_for_button(void) {
-    s32 running = thread_is_running(SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
+    s32 running = thread_is_running(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT);
 
     if (running == 0) {
         if (s_tutorial_button_input != 0) {
             s_tutorial_command_ptr++;
         }
-    } else if (screen_text_check_printing(SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1 && s_tutorial_button_input != 0) {
+    } else if (menu_screen_text_check_printing(MENU_SCREEN_THREAD_SLOT_TUTORIAL_TEXT) != 1
+        && s_tutorial_button_input != 0) {
         s_tutorial_command_ptr++;
     }
 }

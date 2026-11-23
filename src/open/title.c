@@ -9,6 +9,7 @@
 #include "fft/file.h"
 #include "fft/gfx.h"
 #include "fft/input.h"
+#include "fft/menu_screen.h"
 #include "fft/movie.h"
 #include "fft/music.h"
 #include "fft/name_entry.h"
@@ -17,7 +18,6 @@
 #include "fft/party_unit.h"
 #include "fft/prologue.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/suzuki.h"
@@ -672,7 +672,7 @@ static void update_new_game(controller_record_t* record) {
 
     if (state->step == 4) {
         new_game_init_party(PARTY_NEW_GAME_RAMZA, 0);
-        screen_init_open_text();
+        menu_screen_init_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
         if (g_gfx_active_buffer_index != 0) {

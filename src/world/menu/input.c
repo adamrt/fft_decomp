@@ -6,8 +6,8 @@
 #include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "psx/pad.h"
@@ -16,8 +16,8 @@
 /* tutorial input state */
 extern u16 g_tutorial_latched_button;
 static u8 s_tutorial_activation_timer;
-extern u8 g_screen_input_triangle_latched;
-extern u8 g_screen_text_task_phase;
+extern u8 g_menu_screen_input_triangle_latched;
+extern u8 g_menu_screen_text_task_phase;
 
 static u32 s_tutorial_repeat_counters[16] = { 0 };
 static u16 s_tutorial_previous_input = 0;
@@ -25,7 +25,7 @@ static u16 s_tutorial_previous_input = 0;
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
  *
- * Twin of menu_input_update_controller (screen/pad_input.c) with its own edge latch,
+ * Twin of menu_input_update_controller (pad_input.c) with its own edge latch,
  * single-button latch, activation timer, previous-state and counter arrays;
  * the secondary repeat period is two frames longer.
  *
@@ -50,18 +50,18 @@ static void update_tutorial_controller(void) {
     initial_delay = g_input_repeat_initial_delay / speed;
     repeat_period = g_input_repeat_period / speed;
     secondary_repeat_period = g_input_secondary_repeat_period / speed + 2;
-    current_input = screen_read_buttons(0);
+    current_input = menu_screen_read_buttons(0);
     if (current_input & PSX_PAD_TRIANGLE) {
-        if (g_screen_input_triangle_latched != 0) {
+        if (g_menu_screen_input_triangle_latched != 0) {
             menu_input_clear_state();
         } else {
-            g_screen_input_triangle_latched = 1;
+            g_menu_screen_input_triangle_latched = 1;
             g_menu_input_newly_pressed = PSX_PAD_TRIANGLE;
             g_menu_input_secondary_repeat = PSX_PAD_TRIANGLE;
             g_menu_input_primary_repeat = PSX_PAD_TRIANGLE;
         }
     } else {
-        g_screen_input_triangle_latched = 0;
+        g_menu_screen_input_triangle_latched = 0;
         {
             u16 previous_latch = g_tutorial_latched_button;
             u32 latched_input = current_input & previous_latch;
@@ -154,8 +154,8 @@ static void update_tutorial_controller(void) {
             g_menu_input_secondary_repeat = filtered_input;
         }
     }
-    g_screen_input_primary_repeat_latched = g_menu_input_primary_repeat;
-    g_screen_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
+    g_menu_screen_input_primary_repeat_latched = g_menu_input_primary_repeat;
+    g_menu_screen_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }
 
 /*
@@ -180,27 +180,27 @@ void menu_input_update_message_state(void) {
         menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
-        if (running != 0 || g_screen_grid_id != MENU_GRID_HELP_NONE) {
+        if (running != 0 || g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
             menu_input_clear_state();
             if (running != 0 && g_menu_input_lock_mode != 0) {
                 value = 1;
-                if (g_screen_text_task_phase != 0) {
+                if (g_menu_screen_text_task_phase != 0) {
                     value = 2;
                 }
-                g_screen_text_task_phase = value;
+                g_menu_screen_text_task_phase = value;
             } else {
-                g_screen_text_task_phase = 0;
+                g_menu_screen_text_task_phase = 0;
             }
-        } else if (g_screen_text_task_phase != 0 || screen_get_fade_state() != SCREEN_FADE_STATE_NONE) {
-            g_screen_text_task_phase = 0;
+        } else if (g_menu_screen_text_task_phase != 0 || screen_get_fade_state() != SCREEN_FADE_STATE_NONE) {
+            g_menu_screen_text_task_phase = 0;
             menu_input_clear_state();
         }
     }
     if (running == 0) {
         g_menu_input_lock_mode = 0;
-        g_screen_sound_release_held_loop = 0;
+        g_menu_screen_sound_release_held_loop = 0;
     }
-    if (g_screen_text_task_phase == 1) {
+    if (g_menu_screen_text_task_phase == 1) {
         g_sound_queued_effect_id = SOUND_SFX_WINDOW_OPEN;
     }
 }

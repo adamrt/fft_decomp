@@ -2,8 +2,8 @@
 
 #include "fft/encounter.h"
 #include "fft/item.h"
+#include "fft/menu_screen.h"
 #include "fft/party.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/unit.h"
 
@@ -40,7 +40,7 @@ enum { STARTING_ENCOUNTER_ID = 254, STARTING_WAR_FUNDS = 2000 };
  * party from ENTD encounter 254 (mode 2); any other mode leaves it empty. The
  * inventory is reset to the new-game stock and the war funds to 2000. */
 void party_init_new_game(int mode) {
-    screen_init_world_text();
+    menu_screen_init_world_text();
     party_clear();
 
     if (mode == PARTY_NEW_GAME_RAMZA) {

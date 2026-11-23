@@ -1,6 +1,6 @@
 /* Entry pixel width and the encoded character at a position. */
 
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/text.h"
 #include "psx/types.h"
 
@@ -8,7 +8,7 @@
  * introduce a two-byte glyph index; 0xFA advances a fixed four pixels and
  * 0xE7 (set pen x) has its operand counted as an advance. Other format
  * codes add nothing. */
-s32 screen_text_measure_width(const u8* text) {
+s32 menu_screen_text_measure_width(const u8* text) {
     s32 width = 0;
     s32 code;
 
@@ -35,8 +35,8 @@ s32 screen_text_measure_width(const u8* text) {
  *
  * A lead byte 0xD0..0xDF and its glyph byte come back together as one 16-bit code (lead
  * byte high); everything else is a single byte. */
-s16 screen_text_get_char_at(const u8* table, s16 index, s32 position) {
-    const u8* cursor = screen_text_advance_chars(menu_text_find_entry_by_index(table, index, 2), position);
+s16 menu_screen_text_get_char_at(const u8* table, s16 index, s32 position) {
+    const u8* cursor = menu_screen_text_advance_chars(menu_text_find_entry_by_index(table, index, 2), position);
     s32 code = *cursor++;
 
     if (code >= TEXT_EXTENDED_GLYPH_PREFIX_FIRST && code <= TEXT_EXTENDED_GLYPH_PREFIX_LAST) {

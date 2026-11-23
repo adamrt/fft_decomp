@@ -9,6 +9,7 @@
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message.h"
@@ -16,7 +17,6 @@
 #include "fft/portrait.h"
 #include "fft/proposition.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -1004,7 +1004,7 @@ void brave_story_update_person_detail(menu_stack_record_t* level) {
         }
         return;
     case BRAVE_STORY_DETAIL_PHASE_BUILD:
-        if (level->detail.timer < 8 || screen_is_dialog_waiting() == 0) {
+        if (level->detail.timer < 8 || menu_screen_is_dialog_waiting() == 0) {
             level->detail.timer = level->detail.timer + 1;
             return;
         }

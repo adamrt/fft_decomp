@@ -11,10 +11,10 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -25,7 +25,7 @@
 #include "psx/types.h"
 
 /* item-action menus and category graphics */
-extern screen_number_range_t g_formation_item_action_quantity_range;
+extern menu_screen_number_range_t g_formation_item_action_quantity_range;
 extern s16 g_formation_item_action_option_states[3];
 extern menu_entry_t g_formation_item_quantity_change_menu;
 extern menu_entry_t g_formation_item_unequip_all_menu;
@@ -72,7 +72,7 @@ s8 item_list_update_action_menu(void) {
     if (g_formation_item_action_menu_initialized == 0) {
         g_formation_item_category_input_lock = 0;
         g_help_message_text_id = 0;
-        screen_reset_selection_results();
+        menu_screen_reset_selection_results();
         g_unit_panel_preview_stats_thread_params.style = 0;
 
         /* Each option line starts with a palette code (0xE3) whose operand 4 grays the line out;
@@ -114,14 +114,14 @@ s8 item_list_update_action_menu(void) {
             g_formation_item_action_option_states[2] = 0x14D2;
         }
 
-        g_screen_text_redraw_request = 1;
+        g_menu_screen_text_redraw_request = 1;
         g_formation_item_action_menu_initialized = 1;
     }
 
     result = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_item_action_menu);
     if (result == 0) {
         g_formation_item_action_menu_initialized = 0;
-        if (g_screen_selection_results[3] == -1) {
+        if (g_menu_screen_selection_results[3] == -1) {
             return MENU_ITEM_LIST_STATE_BROWSE;
         }
     }
@@ -130,7 +130,7 @@ s8 item_list_update_action_menu(void) {
         g_sound_queued_effect_id = SOUND_SFX_INVALID;
     }
 
-    item = g_screen_selection_results[3];
+    item = g_menu_screen_selection_results[3];
     selected = item;
     if (selected != -1) {
         if (selected == 0) {
@@ -138,9 +138,9 @@ s8 item_list_update_action_menu(void) {
             if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
                 return MENU_ITEM_LIST_STATE_ACTION;
             }
-            if (g_screen_selection_results[5] == 0) {
+            if (g_menu_screen_selection_results[5] == 0) {
                 item_adjust_inventory_count(
-                    g_item_list_entries[g_menu_list_selected_index], -g_screen_selection_results[4]);
+                    g_item_list_entries[g_menu_list_selected_index], -g_menu_screen_selection_results[4]);
                 /* With none left anywhere, drop the entry from the list and rebuild around it. */
                 if (item_get_total_count(g_item_list_entries[g_menu_list_selected_index]) == 0) {
                     for (i = g_menu_list_selected_index; i < g_menu_list_entry_count; i++) {
@@ -157,7 +157,7 @@ s8 item_list_update_action_menu(void) {
                 }
             }
             g_formation_item_action_menu_initialized = 0;
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
             g_unit_panel_preview_stats_thread_params.style = 0;
             g_formation_item_quantity_change_menu.selected_index = 0;
             return MENU_ITEM_LIST_STATE_ACTION;
@@ -166,9 +166,9 @@ s8 item_list_update_action_menu(void) {
             item = g_item_list_entries[g_menu_list_selected_index];
             if (g_formation_item_action_menu_initialized == selected) {
                 g_sound_suppressed = 1;
-                if (g_screen_selection_results[5] == 0) {
+                if (g_menu_screen_selection_results[5] == 0) {
                     g_sound_queued_effect_id = SOUND_SFX_UNEQUIP;
-                } else if (g_screen_selection_results[5] == 1) {
+                } else if (g_menu_screen_selection_results[5] == 1) {
                     g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
                 }
                 /* Once a sound is queued, 100 keeps the menu initialized but stops this block running again. */
@@ -177,7 +177,7 @@ s8 item_list_update_action_menu(void) {
             if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
                 return MENU_ITEM_LIST_STATE_ACTION;
             }
-            if (g_screen_selection_results[5] == 0) {
+            if (g_menu_screen_selection_results[5] == 0) {
                 for (i = 0; i < g_formation_unit_count; i++) {
                     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_COUNT; slot++) {
                         if (item == g_formation_unit_pointers[i]->detail.equipment[slot]) {
@@ -187,7 +187,7 @@ s8 item_list_update_action_menu(void) {
                 }
             }
             g_sound_suppressed = 0;
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
             g_unit_panel_preview_stats_thread_params.style = 0;
             g_formation_item_unequip_all_menu.selected_index = 0;
         } else {
@@ -202,7 +202,7 @@ s8 item_list_update_action_menu(void) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
         result = menu_selection_step_horizontal_with_sound(
-            5, SCREEN_CURSOR_ITEM_TAB, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
+            5, MENU_SCREEN_CURSOR_ITEM_TAB, g_menu_input_primary_repeat, SOUND_SFX_PAGE_SWITCH);
         if (result == g_menu_selected_slot) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
@@ -275,14 +275,14 @@ s8 item_list_update_sort_menu(void) {
         i = 0x39;
     }
     g_help_message_text_id = i + HELP_TEXT_ID_MENU_COMMAND_BASE;
-    index = g_screen_selection_results[7];
+    index = g_menu_screen_selection_results[7];
     if (index != -1) {
         selected = g_formation_item_category_strip_text_ids[index];
         for (i = index - 1; i >= 0; i--) {
             g_formation_item_category_strip_text_ids[i + 1] = g_formation_item_category_strip_text_ids[i];
         }
         g_formation_item_category_strip_text_ids[0] = selected;
-        screen_reset_selection_results();
+        menu_screen_reset_selection_results();
         item_store_type_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
@@ -290,7 +290,7 @@ s8 item_list_update_sort_menu(void) {
             i++;
         }
         text_concatenate_entries(g_formation_menu_text_table, g_formation_menu_text_buffer, text_ids, 1);
-        g_screen_text_redraw_request = 1;
+        g_menu_screen_text_redraw_request = 1;
         /* Sort mode bit 0x80 makes the builder sort afresh by the new key list instead of
          * keeping the tab's stored order. */
         equipment_build_item_list(g_unit_selected_index, g_menu_selected_slot + 0x81,

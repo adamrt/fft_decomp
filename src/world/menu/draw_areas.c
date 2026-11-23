@@ -4,19 +4,19 @@
 #include "fft/gfx_primitive.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
-#include "fft/screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* palette selections */
-extern u16 g_screen_window_clut_normal;
-extern u16 g_screen_window_clut_alt;
-extern u16 g_screen_palette_clut_alt;
-extern u16 g_screen_alternate_number_clut_alt;
-extern u16 g_screen_disabled_number_clut_normal;
-extern u16 g_screen_disabled_number_clut_alt;
-extern u16 g_screen_active_clut_front;
+extern u16 g_menu_screen_window_clut_normal;
+extern u16 g_menu_screen_window_clut_alt;
+extern u16 g_menu_screen_palette_clut_alt;
+extern u16 g_menu_screen_alternate_number_clut_alt;
+extern u16 g_menu_screen_disabled_number_clut_normal;
+extern u16 g_menu_screen_disabled_number_clut_alt;
+extern u16 g_menu_screen_active_clut_front;
 static u16 s_screen_active_clut_back;
 
 /*
@@ -30,26 +30,26 @@ static u16 s_screen_active_clut_back;
 void menu_palette_set_mode(s32 mode) {
     u16 clut;
 
-    g_screen_use_alternate_palette = mode;
+    g_menu_screen_use_alternate_palette = mode;
     if (mode != 0) {
-        g_screen_sprite_color.r = 0x60;
-        g_screen_sprite_color.g = 0x60;
-        g_screen_sprite_color.b = 0x80;
-        g_screen_window_clut = g_screen_window_clut_alt;
-        g_screen_alternate_number_clut = g_screen_alternate_number_clut_alt;
-        g_menu_palette_clut = g_screen_palette_clut_alt;
-        g_screen_disabled_number_clut = g_screen_disabled_number_clut_alt;
-        g_screen_active_clut_front = g_menu_cursor_mode1_foreground_clut;
+        g_menu_screen_sprite_color.r = 0x60;
+        g_menu_screen_sprite_color.g = 0x60;
+        g_menu_screen_sprite_color.b = 0x80;
+        g_menu_screen_window_clut = g_menu_screen_window_clut_alt;
+        g_menu_screen_alternate_number_clut = g_menu_screen_alternate_number_clut_alt;
+        g_menu_palette_clut = g_menu_screen_palette_clut_alt;
+        g_menu_screen_disabled_number_clut = g_menu_screen_disabled_number_clut_alt;
+        g_menu_screen_active_clut_front = g_menu_cursor_mode1_foreground_clut;
         clut = g_menu_cursor_mode1_background_clut;
     } else {
-        g_screen_sprite_color.r = 0x80;
-        g_screen_sprite_color.g = 0x80;
-        g_screen_sprite_color.b = 0x80;
-        g_screen_window_clut = g_screen_window_clut_normal;
-        g_screen_alternate_number_clut = g_screen_alternate_number_clut_normal;
-        g_menu_palette_clut = g_screen_palette_clut_normal;
-        g_screen_disabled_number_clut = g_screen_disabled_number_clut_normal;
-        g_screen_active_clut_front = g_menu_cursor_mode0_foreground_clut;
+        g_menu_screen_sprite_color.r = 0x80;
+        g_menu_screen_sprite_color.g = 0x80;
+        g_menu_screen_sprite_color.b = 0x80;
+        g_menu_screen_window_clut = g_menu_screen_window_clut_normal;
+        g_menu_screen_alternate_number_clut = g_menu_screen_alternate_number_clut_normal;
+        g_menu_palette_clut = g_menu_screen_palette_clut_normal;
+        g_menu_screen_disabled_number_clut = g_menu_screen_disabled_number_clut_normal;
+        g_menu_screen_active_clut_front = g_menu_cursor_mode0_foreground_clut;
         clut = g_menu_cursor_mode0_background_clut;
     }
     s_screen_active_clut_back = clut;
@@ -57,12 +57,12 @@ void menu_palette_set_mode(s32 mode) {
 
 /* Menu-script opcode: when the ordering-table index is locked (a temporary
  * draw-area clip is active), end the clip by adding
- * g_screen_temporary_draw_area (y reset to 0) one entry after the current
+ * g_menu_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index, and unlock the index. Returns the next instruction. */
 menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked != 0) {
-        g_screen_temporary_draw_area.y = 0;
-        menu_gfx_enqueue_draw_area(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
+        g_menu_screen_temporary_draw_area.y = 0;
+        menu_gfx_enqueue_draw_area(&g_menu_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
         g_gfx_otag_index_locked = 0;
     }
     return menu_next_instruction(instruction);
@@ -85,12 +85,12 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
 }
 
 /* Menu-script opcode: unless the ordering-table index is locked, add
- * g_screen_temporary_draw_area (y reset to 0) one entry after the current
+ * g_menu_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index. Returns the next instruction. */
 menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
-        g_screen_temporary_draw_area.y = 0;
-        menu_gfx_enqueue_draw_area(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
+        g_menu_screen_temporary_draw_area.y = 0;
+        menu_gfx_enqueue_draw_area(&g_menu_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);
     }
     return menu_next_instruction(instruction);
 }

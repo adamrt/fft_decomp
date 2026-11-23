@@ -5,11 +5,11 @@
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/music.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
@@ -216,7 +216,7 @@ void sound_novel_update_reader(menu_stack_record_t* level) {
             suzuki_sound_remove_resource(g_sound_novel_sound_resource);
             sound_novel_reset_selected_reading(g_sound_novel_selected);
             g_sound_novel_countdown_frames = 0;
-            screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, level->sound_novel.treasure_id, 0);
+            menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, level->sound_novel.treasure_id, 0);
             return;
         }
     }
@@ -258,7 +258,7 @@ void sound_novel_update_reader(menu_stack_record_t* level) {
             g_display_object_animated_pool[level->sound_novel.brightness_overlay_window].flags |= DISPLAY_OBJECT_HIDDEN;
         }
 
-        if (screen_is_dialog_waiting() != 0) {
+        if (menu_screen_is_dialog_waiting() != 0) {
             buttons = g_world_map_input_new_button_presses;
             if (buttons & PSX_PAD_CIRCLE) {
                 return;
@@ -305,7 +305,7 @@ void sound_novel_update_reader(menu_stack_record_t* level) {
         }
     } else {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
-            screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
+            menu_screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
         }
         music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
         sound_stop_all_sfx();
@@ -520,7 +520,7 @@ void sound_novel_update_quit_menu(menu_stack_record_t* level) {
         g_display_object_queue_count -= 5;
         g_menu_stack_depth -= 2;
         suzuki_sound_remove_resource(g_sound_novel_sound_resource);
-        screen_transition_open(
+        menu_screen_transition_open(
             MENU_STACK_LEVEL_BRAVE_STORY_TREASURE, g_menu_stack_records[g_menu_stack_depth].sound_novel.treasure_id, 0);
         return;
     }
@@ -559,7 +559,7 @@ void sound_novel_update_quit_menu(menu_stack_record_t* level) {
             g_display_object_image_count--;
             g_display_object_queue_count -= 3;
             if (thread_is_running(WORLD_MAP_THREAD_SLOT_MESSAGE) != 0) {
-                screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
+                menu_screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
             }
             music_queue_add(MUSIC_QUEUE_COMMAND_FADE_OUT, 0x20);
             sound_stop_all_sfx();

@@ -8,9 +8,9 @@
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "psx/libc.h"
@@ -20,24 +20,24 @@
 
 /* display-script and scrolling state */
 static u16 s_screen_clut;
-extern RECT g_screen_window_rect;
-extern s16 g_screen_window_right_x;
-extern u16 g_screen_texture_page;
-extern s16 g_screen_row_height;
-extern s32 g_screen_scroll_row_offset;
-extern textured_quad_source_t g_screen_vertical_cursor_quad;
-extern s16 g_screen_list_row_text_ids[];
-extern s16 g_screen_list_visible_rows;
-extern s16 g_screen_list_row_record_count;
-extern u16 g_screen_list_image_width;
-extern u8 g_screen_list_glyph_width;
-extern u8 g_screen_list_text_columns;
-extern s8 g_screen_list_scroll_direction;
-extern u16 g_screen_list_cursor_anim;
-extern u16 g_screen_scroll_repeat_timer;
+extern RECT g_menu_screen_window_rect;
+extern s16 g_menu_screen_window_right_x;
+extern u16 g_menu_screen_texture_page;
+extern s16 g_menu_screen_row_height;
+extern s32 g_menu_screen_scroll_row_offset;
+extern textured_quad_source_t g_menu_screen_vertical_cursor_quad;
+extern s16 g_menu_screen_list_row_text_ids[];
+extern s16 g_menu_screen_list_visible_rows;
+extern s16 g_menu_screen_list_row_record_count;
+extern u16 g_menu_screen_list_image_width;
+extern u8 g_menu_screen_list_glyph_width;
+extern u8 g_menu_screen_list_text_columns;
+extern s8 g_menu_screen_list_scroll_direction;
+extern u16 g_menu_screen_list_cursor_anim;
+extern u16 g_menu_screen_scroll_repeat_timer;
 
 /* Dispatch slots before this program's end opcode; zero entries stay unhandled. */
-menu_opcode_handler_t g_menu_opcode_handlers[SCREEN_SCRIPT_END] = {
+menu_opcode_handler_t g_menu_opcode_handlers[MENU_SCREEN_SCRIPT_END] = {
     menu_opcode_00_draw_window_frame,         /* 0x00 */
     menu_opcode_01_if_group,                  /* 0x01 */
     menu_opcode_02_if_else_group,             /* 0x02 */
@@ -69,7 +69,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[SCREEN_SCRIPT_END] = {
 };
 
 s8 g_gfx_transition_frame = 0;
-RECT g_screen_temporary_draw_area = { 0, 0, 256, 240 };
+RECT g_menu_screen_temporary_draw_area = { 0, 0, 256, 240 };
 
 static menu_sprite_command_t s_screen_script_sprite_command = { 5, 9, 1, { 0, 0, 0, 0, 0, 0 } };
 static menu_window_command_t s_screen_window_interior_command = { 17, 7, 0, 0, 0, 0, 0 };
@@ -87,10 +87,10 @@ menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* script) {
     s32 count = instruction->conditional.count;
     s32 arg;
 
-    if (g_screen_use_scroll_position == 0) {
+    if (g_menu_screen_use_scroll_position == 0) {
         arg = instruction->conditional.value;
     } else {
-        arg = g_menu_scroll_base_index + g_screen_scroll_row_offset;
+        arg = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
         if (g_menu_list_scroll_offset < 0) {
             arg -= 1;
         }
@@ -120,10 +120,10 @@ menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction
     s32 count_false = instruction->if_else.count_false;
     s32 arg;
 
-    if (g_screen_use_scroll_position == 0) {
+    if (g_menu_screen_use_scroll_position == 0) {
         arg = instruction->if_else.value;
     } else {
-        arg = g_menu_scroll_base_index + g_screen_scroll_row_offset;
+        arg = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
         if (g_menu_list_scroll_offset < 0) {
             arg -= 1;
         }
@@ -163,11 +163,11 @@ menu_instruction_t* menu_opcode_03_draw_tile(menu_instruction_t* instruction) {
     s32 y;
     s16 step;
 
-    if (g_screen_use_scroll_position == 0) {
+    if (g_menu_screen_use_scroll_position == 0) {
         y = instruction->tile.y;
     } else {
-        step = g_screen_row_height;
-        y = step * g_screen_scroll_row_offset + instruction->tile.y + g_menu_list_scroll_offset;
+        step = g_menu_screen_row_height;
+        y = step * g_menu_screen_scroll_row_offset + instruction->tile.y + g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             y -= step;
         }
@@ -190,11 +190,11 @@ menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instru
     s16 step;
     rgb24_t* color;
 
-    if (g_screen_use_scroll_position == 0) {
+    if (g_menu_screen_use_scroll_position == 0) {
         y = instruction->sprite.sprite.y;
     } else {
-        step = g_screen_row_height;
-        y = step * g_screen_scroll_row_offset + instruction->sprite.sprite.y - g_menu_list_scroll_offset;
+        step = g_menu_screen_row_height;
+        y = step * g_menu_screen_scroll_row_offset + instruction->sprite.sprite.y - g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             y -= step;
         }
@@ -206,10 +206,10 @@ menu_instruction_t* menu_opcode_04_draw_textured_quad(menu_instruction_t* instru
     if (instruction->sprite.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
         color = 0;
     } else {
-        color = &g_screen_sprite_color;
+        color = &g_menu_screen_sprite_color;
     }
     menu_gfx_enqueue_textured_quad(&rect, instruction->sprite.sprite.u, instruction->sprite.sprite.v, color,
-        g_menu_gfx_semitransparency, g_screen_texture_page, s_screen_clut, g_menu_gfx_otag_index);
+        g_menu_gfx_semitransparency, g_menu_screen_texture_page, s_screen_clut, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }
 
@@ -233,10 +233,10 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
     s32 index;
 
     handler = g_menu_row_callbacks[instruction->callback_sprite.callback_index].icon;
-    if (g_screen_use_scroll_position == 0) {
+    if (g_menu_screen_use_scroll_position == 0) {
         index = instruction->callback_sprite.row;
     } else {
-        index = g_menu_scroll_base_index + g_screen_scroll_row_offset;
+        index = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
         if (g_menu_list_scroll_offset < 0) {
             index -= 1;
         }
@@ -251,7 +251,7 @@ menu_instruction_t* menu_opcode_06_draw_callback_quad(menu_instruction_t* instru
         s_screen_script_sprite_command.sprite.u = entry->u;
         s_screen_script_sprite_command.sprite.v = entry->v;
         s_screen_clut = entry->clut;
-        g_screen_texture_page = entry->tpage;
+        g_menu_screen_texture_page = entry->tpage;
         menu_opcode_04_draw_textured_quad((menu_instruction_t*)&s_screen_script_sprite_command);
     }
     return menu_next_instruction(instruction);
@@ -305,7 +305,7 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
         partial_height = height & 15;
     }
     s_screen_window_interior_command.rectangle_source = instruction->window.rectangle_source;
-    g_screen_window_right_x = instruction->window.width + left + 5;
+    g_menu_screen_window_right_x = instruction->window.width + left + 5;
     v_top = 2;
     if (instruction->window.rectangle_source == 1) {
         u_left = 0xDA;
@@ -326,60 +326,61 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
     rect.w = 5;
     rect.h = 9;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_left, v_top, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, u_left, v_top, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 9;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 9;
         menu_gfx_enqueue_textured_quad(
-            &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+            &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 9;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_right - 5, v_top, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, u_right - 5, v_top, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
 
     /* Side edges, partial piece first. */
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
-    menu_gfx_enqueue_textured_quad(&rect, 2, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+    menu_gfx_enqueue_textured_quad(
+        &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     rect.x = left + (5 + partial_width) + full_columns * 16;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
     menu_gfx_enqueue_textured_quad(
-        &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     for (row = 0; row < full_rows; row++) {
         rect.x = left;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
         menu_gfx_enqueue_textured_quad(
-            &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+            &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
         rect.x = left + (5 + partial_width) + full_columns * 16;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
         menu_gfx_enqueue_textured_quad(
-            &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+            &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     }
 
     if (instruction->window.rectangle_source == 2) {
-        g_screen_window_rect.x = g_menu_window_rect_source->rect.x;
-        g_screen_window_rect.y = g_menu_window_rect_source->rect.y;
-        g_screen_window_rect.w = g_menu_window_rect_source->rect.w;
-        g_screen_window_rect.h = g_menu_window_rect_source->rect.h;
+        g_menu_screen_window_rect.x = g_menu_window_rect_source->rect.x;
+        g_menu_screen_window_rect.y = g_menu_window_rect_source->rect.y;
+        g_menu_screen_window_rect.w = g_menu_window_rect_source->rect.w;
+        g_menu_screen_window_rect.h = g_menu_window_rect_source->rect.h;
     } else {
         s_screen_window_interior_command.x = instruction->window.x;
         s_screen_window_interior_command.y = instruction->window.y;
@@ -395,27 +396,27 @@ menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruc
     rect.w = 5;
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_left, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, u_left, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 7;
         menu_gfx_enqueue_textured_quad(
-            &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+            &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_right - 5, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+        &rect, u_right - 5, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     instruction = menu_next_instruction(instruction);
     return instruction;
 }
@@ -466,12 +467,12 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* ins
     s32 base_y;
 
     if (instruction->window.rectangle_source == 2) {
-        base_x = g_screen_window_rect.x;
-        base_y = g_screen_window_rect.y;
-        full_columns = g_screen_window_rect.w / 16;
-        partial_width = g_screen_window_rect.w % 16;
-        full_rows = g_screen_window_rect.h / 16;
-        partial_height = g_screen_window_rect.h % 16;
+        base_x = g_menu_screen_window_rect.x;
+        base_y = g_menu_screen_window_rect.y;
+        full_columns = g_menu_screen_window_rect.w / 16;
+        partial_width = g_menu_screen_window_rect.w % 16;
+        full_rows = g_menu_screen_window_rect.h / 16;
+        partial_height = g_menu_screen_window_rect.h % 16;
     } else {
         u8 width;
         u8 height;
@@ -490,14 +491,14 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* ins
         rect.w = partial_width;
         rect.h = 16;
         menu_gfx_enqueue_textured_quad(
-            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
         for (column = 0; column < full_columns; column++) {
             rect.x = base_x + partial_width + column * 16;
             rect.y = base_y + row * 16;
             rect.w = 16;
             rect.h = 16;
             menu_gfx_enqueue_textured_quad(
-                &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+                &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
         }
     }
     if (partial_height == 0) {
@@ -507,14 +508,15 @@ menu_instruction_t* menu_opcode_11_draw_background_tiles(menu_instruction_t* ins
     rect.y = base_y + row * 16;
     rect.w = partial_width;
     rect.h = partial_height;
-    menu_gfx_enqueue_textured_quad(&rect, 8, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+    menu_gfx_enqueue_textured_quad(
+        &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = base_x + partial_width + column * 16;
         rect.y = base_y + row * 16;
         rect.w = 16;
         rect.h = partial_height;
         menu_gfx_enqueue_textured_quad(
-            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_screen_window_tpage, clut, priority);
+            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, priority);
     }
     return menu_next_instruction(instruction);
 }
@@ -537,11 +539,11 @@ menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instructio
 }
 
 /* Menu-script opcode handler: pick the CLUT x/y operands from bytes 2..4 or,
- * when g_screen_use_alternate_palette selects the alternate palette, bytes 5..7, and record the
+ * when g_menu_screen_use_alternate_palette selects the alternate palette, bytes 5..7, and record the
  * resulting CLUT id. Advances by the instruction length (byte 1), like
  * menu_opcode_0c_set_texture_page. */
 menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
-    if (g_screen_use_alternate_palette != 0) {
+    if (g_menu_screen_use_alternate_palette != 0) {
         s_screen_clut = GetClut(instruction->clut.alternate_x_div_16 << 4,
             instruction->clut.alternate_y_low + (instruction->clut.alternate_y_high << 8));
     } else {
@@ -554,7 +556,7 @@ menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction) {
 /* Menu-script opcode handler: set the texture page from the operand bytes and
  * advance by the instruction length (byte 1), like menu_opcode_0e_set_semi_trans. */
 menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* instruction) {
-    g_screen_texture_page = GetTPage(instruction->texture_page.depth, instruction->texture_page.y_blend >> 4,
+    g_menu_screen_texture_page = GetTPage(instruction->texture_page.depth, instruction->texture_page.y_blend >> 4,
         instruction->texture_page.x_div_16 << 4, instruction->texture_page.y_blend << 8);
     return menu_next_instruction(instruction);
 }
@@ -578,14 +580,14 @@ menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instr
  *
  * The palette selector chooses bytes 5..7 instead of the normal bytes 2..4. */
 menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instruction) {
-    if (g_screen_use_alternate_palette != 0) {
-        g_screen_sprite_color.r = instruction->sprite_color.alternate.r,
-        g_screen_sprite_color.g = instruction->sprite_color.alternate.g,
-        g_screen_sprite_color.b = instruction->sprite_color.alternate.b;
+    if (g_menu_screen_use_alternate_palette != 0) {
+        g_menu_screen_sprite_color.r = instruction->sprite_color.alternate.r,
+        g_menu_screen_sprite_color.g = instruction->sprite_color.alternate.g,
+        g_menu_screen_sprite_color.b = instruction->sprite_color.alternate.b;
     } else {
-        g_screen_sprite_color.r = instruction->sprite_color.normal.r,
-        g_screen_sprite_color.g = instruction->sprite_color.normal.g,
-        g_screen_sprite_color.b = instruction->sprite_color.normal.b;
+        g_menu_screen_sprite_color.r = instruction->sprite_color.normal.r,
+        g_menu_screen_sprite_color.g = instruction->sprite_color.normal.g,
+        g_menu_screen_sprite_color.b = instruction->sprite_color.normal.b;
     }
     return menu_next_instruction(instruction);
 }
@@ -622,13 +624,13 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
     u16 clut;
 
     getter = g_menu_row_callbacks[command->number.getter].value;
-    if (g_screen_use_scroll_position == 0) {
+    if (g_menu_screen_use_scroll_position == 0) {
         row = command->number.value;
         y = command->number.y;
     } else {
-        row = g_menu_scroll_base_index + g_screen_scroll_row_offset;
-        step = g_screen_row_height;
-        y = step * g_screen_scroll_row_offset + command->number.y - g_menu_list_scroll_offset;
+        row = g_menu_scroll_base_index + g_menu_screen_scroll_row_offset;
+        step = g_menu_screen_row_height;
+        y = step * g_menu_screen_scroll_row_offset + command->number.y - g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             row--;
             y -= step;
@@ -646,17 +648,17 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
     }
     if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED
         || command->number.opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
-        color = &g_screen_sprite_color;
+        color = &g_menu_screen_sprite_color;
     } else {
         color = 0;
     }
     if (command->number.alternate_palette != 0) {
-        clut = g_screen_alternate_number_clut;
+        clut = g_menu_screen_alternate_number_clut;
     } else {
         clut = g_menu_palette_clut;
     }
     if (value & MENU_NUMBER_VALUE_DISABLED) {
-        clut = g_screen_disabled_number_clut;
+        clut = g_menu_screen_disabled_number_clut;
         value &= ~MENU_NUMBER_VALUE_DISABLED;
     }
     if (command->number.style == 1) {
@@ -681,8 +683,8 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
             rect.y = y + 5;
             rect.w = 6;
             rect.h = 3;
-            menu_gfx_enqueue_textured_quad(&rect, 0xBA, 0x13, color, g_menu_gfx_semitransparency, g_screen_window_tpage,
-                clut, g_menu_gfx_otag_index);
+            menu_gfx_enqueue_textured_quad(&rect, 0xBA, 0x13, color, g_menu_gfx_semitransparency,
+                g_menu_screen_window_tpage, clut, g_menu_gfx_otag_index);
         }
     } else {
         blanks = command->number.width - sprintf(text, "%d", value) - negative;
@@ -701,7 +703,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                     minus_rect.x = 0xAE;
                 }
                 menu_gfx_enqueue_textured_quad(&minus_rect, 0xBA, 0x10, color, g_menu_gfx_semitransparency,
-                    g_screen_window_tpage, clut, g_menu_gfx_otag_index);
+                    g_menu_screen_window_tpage, clut, g_menu_gfx_otag_index);
                 negative = 0;
             } else {
                 if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
@@ -715,7 +717,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                     }
                     if (command->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS
                         && i < command->number.width - 1) {
-                        clut = g_screen_disabled_number_clut;
+                        clut = g_menu_screen_disabled_number_clut;
                     }
                 } else {
                     digit = text[text_index] - '0';
@@ -723,7 +725,7 @@ menu_instruction_t* menu_opcode_0d_draw_formatted_number(menu_instruction_t* com
                 }
                 if (command->number.style < 2) {
                     menu_gfx_enqueue_textured_quad(&rect, glyph.x + glyph.w * digit, glyph.y, color,
-                        g_menu_gfx_semitransparency, g_screen_window_tpage, clut, g_menu_gfx_otag_index);
+                        g_menu_gfx_semitransparency, g_menu_screen_window_tpage, clut, g_menu_gfx_otag_index);
                 }
             }
         }
@@ -935,30 +937,30 @@ void menu_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode) {
         shadow_clut = g_menu_cursor_mode0_background_clut;
     }
 
-    g_screen_vertical_cursor_quad.x0 = pos->x;
-    g_screen_vertical_cursor_quad.y0 = y_offset + pos->y;
-    g_screen_vertical_cursor_quad.x1 = pos->x + 0x10;
-    g_screen_vertical_cursor_quad.y1 = y_offset + pos->y;
-    g_screen_vertical_cursor_quad.x2 = pos->x;
+    g_menu_screen_vertical_cursor_quad.x0 = pos->x;
+    g_menu_screen_vertical_cursor_quad.y0 = y_offset + pos->y;
+    g_menu_screen_vertical_cursor_quad.x1 = pos->x + 0x10;
+    g_menu_screen_vertical_cursor_quad.y1 = y_offset + pos->y;
+    g_menu_screen_vertical_cursor_quad.x2 = pos->x;
     bottom = y_offset + 0x10;
-    g_screen_vertical_cursor_quad.y2 = pos->y + bottom;
-    g_screen_vertical_cursor_quad.x3 = pos->x + 0x10;
-    g_screen_vertical_cursor_quad.y3 = pos->y + bottom;
-    g_screen_vertical_cursor_quad.clut = front_clut;
-    g_screen_vertical_cursor_quad.tpage = g_menu_cursor_texture_page;
-    gfx_enqueue_textured_quad_corners(&g_screen_vertical_cursor_quad, 0, 0, g_menu_gfx_otag_index);
+    g_menu_screen_vertical_cursor_quad.y2 = pos->y + bottom;
+    g_menu_screen_vertical_cursor_quad.x3 = pos->x + 0x10;
+    g_menu_screen_vertical_cursor_quad.y3 = pos->y + bottom;
+    g_menu_screen_vertical_cursor_quad.clut = front_clut;
+    g_menu_screen_vertical_cursor_quad.tpage = g_menu_cursor_texture_page;
+    gfx_enqueue_textured_quad_corners(&g_menu_screen_vertical_cursor_quad, 0, 0, g_menu_gfx_otag_index);
 
-    g_screen_vertical_cursor_quad.x0 = pos->x;
-    g_screen_vertical_cursor_quad.y0 = y_offset + pos->y + 2;
-    g_screen_vertical_cursor_quad.x1 = pos->x + 0x10;
-    g_screen_vertical_cursor_quad.y1 = y_offset + pos->y + 2;
-    g_screen_vertical_cursor_quad.x2 = pos->x;
-    g_screen_vertical_cursor_quad.y2 = pos->y + bottom + 2;
-    g_screen_vertical_cursor_quad.x3 = pos->x + 0x10;
-    g_screen_vertical_cursor_quad.y3 = pos->y + bottom + 2;
-    g_screen_vertical_cursor_quad.clut = shadow_clut;
-    g_screen_vertical_cursor_quad.tpage = 0x5F;
-    gfx_enqueue_textured_quad_corners(&g_screen_vertical_cursor_quad, 0, 1, g_menu_gfx_otag_index);
+    g_menu_screen_vertical_cursor_quad.x0 = pos->x;
+    g_menu_screen_vertical_cursor_quad.y0 = y_offset + pos->y + 2;
+    g_menu_screen_vertical_cursor_quad.x1 = pos->x + 0x10;
+    g_menu_screen_vertical_cursor_quad.y1 = y_offset + pos->y + 2;
+    g_menu_screen_vertical_cursor_quad.x2 = pos->x;
+    g_menu_screen_vertical_cursor_quad.y2 = pos->y + bottom + 2;
+    g_menu_screen_vertical_cursor_quad.x3 = pos->x + 0x10;
+    g_menu_screen_vertical_cursor_quad.y3 = pos->y + bottom + 2;
+    g_menu_screen_vertical_cursor_quad.clut = shadow_clut;
+    g_menu_screen_vertical_cursor_quad.tpage = 0x5F;
+    gfx_enqueue_textured_quad_corners(&g_menu_screen_vertical_cursor_quad, 0, 1, g_menu_gfx_otag_index);
 }
 
 /* Walks past the records that follow the header, returning the next one. */
@@ -994,53 +996,53 @@ void menu_scrollable_list_load_layout(const menu_instruction_t* script) {
     s32 i;
 
     while (instruction->header.opcode != MENU_SCRIPT_OP_SCROLLABLE_LIST) {
-        if (instruction->header.opcode == SCREEN_SCRIPT_END) {
+        if (instruction->header.opcode == MENU_SCREEN_SCRIPT_END) {
             return;
         }
         instruction = menu_next_const_instruction(instruction);
     }
     record = &instruction->list;
-    g_screen_list_row_record_count = record->skip_count;
-    g_screen_row_height = record->row_height;
-    g_screen_list_visible_rows = record->visible_rows;
-    g_screen_list_glyph_width = record->width_a;
-    g_screen_list_text_columns = record->width_b;
-    g_screen_list_image_width = (g_screen_list_glyph_width * g_screen_list_text_columns) >> 2;
+    g_menu_screen_list_row_record_count = record->skip_count;
+    g_menu_screen_row_height = record->row_height;
+    g_menu_screen_list_visible_rows = record->visible_rows;
+    g_menu_screen_list_glyph_width = record->width_a;
+    g_menu_screen_list_text_columns = record->width_b;
+    g_menu_screen_list_image_width = (g_menu_screen_list_glyph_width * g_menu_screen_list_text_columns) >> 2;
     if (g_menu_list_selected_index >= g_menu_list_entry_count) {
         g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
-    if (g_menu_list_selected_index - g_menu_scroll_base_index >= g_screen_list_visible_rows) {
+    if (g_menu_list_selected_index - g_menu_scroll_base_index >= g_menu_screen_list_visible_rows) {
         g_menu_scroll_base_index = g_menu_list_selected_index;
     }
     if (g_menu_list_selected_index < g_menu_scroll_base_index) {
         g_menu_scroll_base_index = g_menu_list_selected_index;
     }
-    if (g_menu_list_entry_count < g_screen_list_visible_rows) {
+    if (g_menu_list_entry_count < g_menu_screen_list_visible_rows) {
         g_menu_scroll_base_index = 0;
-    } else if (g_menu_list_entry_count - g_menu_scroll_base_index < g_screen_list_visible_rows) {
-        g_menu_scroll_base_index = g_menu_list_entry_count - g_screen_list_visible_rows;
+    } else if (g_menu_list_entry_count - g_menu_scroll_base_index < g_menu_screen_list_visible_rows) {
+        g_menu_scroll_base_index = g_menu_list_entry_count - g_menu_screen_list_visible_rows;
     }
     if (g_menu_list_selected_index >= g_menu_list_entry_count) {
         g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
-    if (g_screen_list_text_table != 0) {
+    if (g_menu_screen_list_text_table != 0) {
         rect.x = 0x240;
         rect.y = 0x130;
-        rect.w = g_screen_list_image_width;
-        rect.h = g_screen_list_visible_rows * 16;
+        rect.w = g_menu_screen_list_image_width;
+        rect.h = g_menu_screen_list_visible_rows * 16;
         ClearImage(&rect, 0, 0, 0);
-        for (i = 0; i < g_screen_list_visible_rows; i++) {
-            text_ids[i] = g_screen_list_entry_ids[i + g_menu_scroll_base_index];
+        for (i = 0; i < g_menu_screen_list_visible_rows; i++) {
+            text_ids[i] = g_menu_screen_list_entry_ids[i + g_menu_scroll_base_index];
         }
         text_ids[i] = -1;
         rect.x = 0x240;
         rect.y = 0x130;
-        rect.w = g_screen_list_image_width;
-        rect.h = g_screen_row_height;
-        text_render_id_rows_to_vram(g_screen_list_text_table, text_ids, &rect, 0);
+        rect.w = g_menu_screen_list_image_width;
+        rect.h = g_menu_screen_row_height;
+        text_render_id_rows_to_vram(g_menu_screen_list_text_table, text_ids, &rect, 0);
     }
-    g_screen_list_scroll_direction = 0;
-    g_screen_list_layout_pending = 0;
+    g_menu_screen_list_scroll_direction = 0;
+    g_menu_screen_list_layout_pending = 0;
 }
 
 /* Initialize the list state, then load its visible entries from the menu
@@ -1099,12 +1101,12 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
         return command;
     }
     speed = menu_get_event_speed();
-    g_screen_use_scroll_position = 1;
-    if (g_screen_list_layout_pending != 0) {
+    g_menu_screen_use_scroll_position = 1;
+    if (g_menu_screen_list_layout_pending != 0) {
         menu_scrollable_list_load_layout(command);
     }
     old_cursor = g_menu_list_selected_index;
-    if (g_screen_list_scroll_direction == 0) {
+    if (g_menu_screen_list_scroll_direction == 0) {
         i = menu_input_read_page_scroll_direction();
         if (i != 0) {
             if (i != 2) {
@@ -1114,31 +1116,33 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
             index = g_menu_scroll_base_index;
             if (index == g_menu_list_selected_index) {
                 if (index > 0) {
-                    g_screen_list_scroll_direction = -1;
-                    if (g_screen_list_text_table != 0) {
-                        g_screen_list_row_text_ids[0] = g_screen_list_entry_ids[index - 1];
+                    g_menu_screen_list_scroll_direction = -1;
+                    if (g_menu_screen_list_text_table != 0) {
+                        g_menu_screen_list_row_text_ids[0] = g_menu_screen_list_entry_ids[index - 1];
                         rect.x = 0x240;
                         rect.y = 0x120;
-                        rect.w = g_screen_list_image_width;
-                        rect.h = g_screen_row_height;
-                        text_render_id_rows_to_vram(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
+                        rect.w = g_menu_screen_list_image_width;
+                        rect.h = g_menu_screen_row_height;
+                        text_render_id_rows_to_vram(
+                            g_menu_screen_list_text_table, g_menu_screen_list_row_text_ids, &rect, 0);
                     }
                 }
             } else if (g_menu_script_input & PSX_PAD_UP) {
                 g_menu_list_selected_index--;
             }
         } else if ((g_menu_script_input & (PSX_PAD_DOWN << 16)) || (g_menu_script_input & PSX_PAD_DOWN)) {
-            if (g_menu_scroll_base_index + g_screen_list_visible_rows - 1 == g_menu_list_selected_index) {
-                if (g_menu_scroll_base_index + g_screen_list_visible_rows - 1 < g_menu_list_entry_count - 1) {
-                    g_screen_list_scroll_direction = 1;
-                    if (g_screen_list_text_table != 0) {
-                        index = g_menu_scroll_base_index + g_screen_list_visible_rows - 1;
-                        g_screen_list_row_text_ids[0] = g_screen_list_entry_ids[index + 1];
+            if (g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1 == g_menu_list_selected_index) {
+                if (g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1 < g_menu_list_entry_count - 1) {
+                    g_menu_screen_list_scroll_direction = 1;
+                    if (g_menu_screen_list_text_table != 0) {
+                        index = g_menu_scroll_base_index + g_menu_screen_list_visible_rows - 1;
+                        g_menu_screen_list_row_text_ids[0] = g_menu_screen_list_entry_ids[index + 1];
                         rect.x = 0x240;
-                        rect.y = g_screen_list_visible_rows * g_screen_row_height + 0x130;
-                        rect.w = g_screen_list_image_width;
-                        rect.h = g_screen_row_height;
-                        text_render_id_rows_to_vram(g_screen_list_text_table, g_screen_list_row_text_ids, &rect, 0);
+                        rect.y = g_menu_screen_list_visible_rows * g_menu_screen_row_height + 0x130;
+                        rect.w = g_menu_screen_list_image_width;
+                        rect.h = g_menu_screen_row_height;
+                        text_render_id_rows_to_vram(
+                            g_menu_screen_list_text_table, g_menu_screen_list_row_text_ids, &rect, 0);
                     }
                 }
             } else {
@@ -1147,90 +1151,90 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                 }
             }
         } else {
-            g_screen_scroll_repeat_timer = 0;
+            g_menu_screen_scroll_repeat_timer = 0;
         }
     }
-    if (g_screen_list_scroll_direction < 0) {
-        if (g_screen_scroll_repeat_timer >= g_menu_scroll_accel_delay) {
+    if (g_menu_screen_list_scroll_direction < 0) {
+        if (g_menu_screen_scroll_repeat_timer >= g_menu_scroll_accel_delay) {
             g_menu_list_scroll_offset -= g_menu_scroll_fast_step * speed;
         } else {
-            g_screen_scroll_repeat_timer += speed;
+            g_menu_screen_scroll_repeat_timer += speed;
             g_menu_list_scroll_offset -= g_menu_scroll_slow_step * speed;
         }
-        if (g_menu_list_scroll_offset <= -g_screen_row_height) {
+        if (g_menu_list_scroll_offset <= -g_menu_screen_row_height) {
             g_menu_list_scroll_offset = 0;
-            g_screen_list_scroll_direction = 0;
+            g_menu_screen_list_scroll_direction = 0;
             g_menu_scroll_base_index = --g_menu_list_selected_index;
-            if (g_screen_list_text_table != 0) {
-                for (i = 0; i < g_screen_list_visible_rows; i++) {
+            if (g_menu_screen_list_text_table != 0) {
+                for (i = 0; i < g_menu_screen_list_visible_rows; i++) {
                     rect.x = 0x240;
-                    rect.y = (i - 1) * g_screen_row_height + 0x130;
-                    rect.w = g_screen_list_image_width;
-                    rect.h = g_screen_row_height;
-                    menu_gfx_enqueue_draw_move(&rect, 0x240, g_screen_row_height * i + 0x130, ot_index - 1);
+                    rect.y = (i - 1) * g_menu_screen_row_height + 0x130;
+                    rect.w = g_menu_screen_list_image_width;
+                    rect.h = g_menu_screen_row_height;
+                    menu_gfx_enqueue_draw_move(&rect, 0x240, g_menu_screen_row_height * i + 0x130, ot_index - 1);
                 }
             }
         }
-    } else if (g_screen_list_scroll_direction > 0) {
-        if (g_screen_scroll_repeat_timer >= g_menu_scroll_accel_delay) {
+    } else if (g_menu_screen_list_scroll_direction > 0) {
+        if (g_menu_screen_scroll_repeat_timer >= g_menu_scroll_accel_delay) {
             g_menu_list_scroll_offset += g_menu_scroll_fast_step * speed;
         } else {
-            g_screen_scroll_repeat_timer += speed;
+            g_menu_screen_scroll_repeat_timer += speed;
             g_menu_list_scroll_offset += g_menu_scroll_slow_step * speed;
         }
-        if (g_menu_list_scroll_offset >= g_screen_row_height) {
+        if (g_menu_list_scroll_offset >= g_menu_screen_row_height) {
             g_menu_list_scroll_offset = 0;
-            g_screen_list_scroll_direction = 0;
+            g_menu_screen_list_scroll_direction = 0;
             g_menu_scroll_base_index++;
             g_menu_list_selected_index++;
-            if (g_screen_list_text_table != 0) {
+            if (g_menu_screen_list_text_table != 0) {
                 rect.x = 0x240;
-                rect.y = g_screen_row_height + 0x130;
-                rect.w = g_screen_list_image_width;
-                rect.h = g_screen_row_height * g_screen_list_visible_rows;
+                rect.y = g_menu_screen_row_height + 0x130;
+                rect.w = g_menu_screen_list_image_width;
+                rect.h = g_menu_screen_row_height * g_menu_screen_list_visible_rows;
                 menu_gfx_enqueue_draw_move(&rect, 0x240, 0x130, ot_index - 1);
             }
         }
     }
-    if (g_screen_list_text_table != 0) {
+    if (g_menu_screen_list_text_table != 0) {
         if (g_menu_list_scroll_offset != 0) {
             rect.x = command->list.x;
             rect.y = command->list.y - 5;
-            rect.w = g_screen_list_image_width * 4;
-            rect.h = g_screen_row_height * g_screen_list_visible_rows + 10;
+            rect.w = g_menu_screen_list_image_width * 4;
+            rect.h = g_menu_screen_row_height * g_menu_screen_list_visible_rows + 10;
             menu_gfx_enqueue_textured_quad(&rect, 0, g_menu_list_scroll_offset + 0x2B, 0, g_menu_gfx_semitransparency,
-                g_screen_window_tpage, g_screen_window_clut, g_menu_gfx_otag_index);
+                g_menu_screen_window_tpage, g_menu_screen_window_clut, g_menu_gfx_otag_index);
         } else {
             rect.x = command->list.x;
             rect.y = command->list.y;
-            rect.w = g_screen_list_image_width * 4;
-            rect.h = g_screen_row_height * g_screen_list_visible_rows;
-            menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_menu_gfx_semitransparency, g_screen_window_tpage,
-                g_screen_window_clut, g_menu_gfx_otag_index);
+            rect.w = g_menu_screen_list_image_width * 4;
+            rect.h = g_menu_screen_row_height * g_menu_screen_list_visible_rows;
+            menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_menu_gfx_semitransparency, g_menu_screen_window_tpage,
+                g_menu_screen_window_clut, g_menu_gfx_otag_index);
         }
     }
-    if (g_screen_use_alternate_palette == 0) {
+    if (g_menu_screen_use_alternate_palette == 0) {
         if (g_menu_scroll_base_index != 0) {
-            rect.x = g_screen_window_right_x;
+            rect.x = g_menu_screen_window_right_x;
             rect.y = command->list.arrow_up_y;
             rect.w = 8;
             rect.h = 0x10;
             menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
-        if (g_menu_scroll_base_index < g_menu_list_entry_count - g_screen_list_visible_rows) {
-            rect.x = g_screen_window_right_x;
+        if (g_menu_scroll_base_index < g_menu_list_entry_count - g_menu_screen_list_visible_rows) {
+            rect.x = g_menu_screen_window_right_x;
             rect.y = command->list.arrow_down_y;
             rect.w = 8;
             rect.h = 0x10;
             menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
-        if (g_menu_list_entry_count > g_screen_list_visible_rows) {
+        if (g_menu_list_entry_count > g_menu_screen_list_visible_rows) {
             i = command->list.arrow_up_y + 0xF;
             j = command->list.arrow_down_y - (s16)(i + 5);
             i += j * g_menu_list_selected_index / (g_menu_list_entry_count - 1);
-            rect.x = g_screen_window_right_x;
+            rect.x = g_menu_screen_window_right_x;
             rect.y = i;
             rect.w = 8;
             rect.h = 8;
@@ -1240,26 +1244,26 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     }
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
-        marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_screen_row_height;
-        menu_draw_sliding_cursor(&marker, &g_screen_list_cursor_anim, g_screen_use_alternate_palette);
+        marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_screen_row_height;
+        menu_draw_sliding_cursor(&marker, &g_menu_screen_list_cursor_anim, g_menu_screen_use_alternate_palette);
     }
     command = menu_next_instruction(command);
-    g_screen_scroll_row_offset = 0;
-    rows = g_screen_list_visible_rows + 1;
+    g_menu_screen_scroll_row_offset = 0;
+    rows = g_menu_screen_list_visible_rows + 1;
     if (g_menu_list_scroll_offset == 0) {
         rows--;
     }
     row_commands = command;
-    for (i = 0; i < rows; i++, g_screen_scroll_row_offset++) {
+    for (i = 0; i < rows; i++, g_menu_screen_scroll_row_offset++) {
         if (g_menu_scroll_base_index + i > g_menu_list_entry_count - 1 && g_menu_list_scroll_offset == 0) {
             break;
         }
         command = row_commands;
-        for (j = 0; j < g_screen_list_row_record_count; j++) {
+        for (j = 0; j < g_menu_screen_list_row_record_count; j++) {
             command = g_menu_opcode_handlers[command->header.opcode](command);
         }
     }
-    g_screen_use_scroll_position = 0;
+    g_menu_screen_use_scroll_position = 0;
     if (old_cursor != g_menu_list_selected_index) {
         g_sound_queued_effect_id = SOUND_SFX_CURSOR_MOVE;
     }
@@ -1269,8 +1273,8 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
 /* Set the WORLD menu sprite color from an RGB triple; a null color leaves it unchanged. */
 void gfx_set_draw_color(const rgb24_t* src) {
     if (src != 0) {
-        g_screen_sprite_color.r = src->r;
-        g_screen_sprite_color.g = src->g;
-        g_screen_sprite_color.b = src->b;
+        g_menu_screen_sprite_color.r = src->r;
+        g_menu_screen_sprite_color.g = src->g;
+        g_menu_screen_sprite_color.b = src->b;
     }
 }

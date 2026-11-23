@@ -7,11 +7,11 @@
 #include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/menu_input.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message.h"
 #include "fft/music.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
@@ -374,7 +374,7 @@ void tutorial_update_formation_list_input(menu_stack_record_t* level) {
             g_menu_blocked_buttons = 0;
             g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED | WORLD_MAP_FLAG_DISPLAY_OFF;
             g_menu_stack_depth--;
-            screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST, 0, 0);
+            menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST, 0, 0);
         }
         return;
     }

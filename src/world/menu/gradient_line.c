@@ -2,15 +2,15 @@
 
 #include "fft/gfx.h"
 #include "fft/menu_gfx.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Takes the next LINE_G2 from the pool, sets semi-transparency, copies the two
- * endpoints (x shifted by 0x80, as screen_append_poly_f4 does) and
+ * endpoints (x shifted by 0x80, as menu_screen_append_poly_f4 does) and
  * their colors, and links it into ordering-table entry ot_index. */
-void screen_add_gradient_line(point16_t* endpoints, rgb24_t* colors, s32 semi_trans, s32 ot_index) {
-    LINE_G2* line = &g_menu_gfx_context->gouraud_lines[g_screen_gradient_line_count++];
+void menu_screen_add_gradient_line(point16_t* endpoints, rgb24_t* colors, s32 semi_trans, s32 ot_index) {
+    LINE_G2* line = &g_menu_gfx_context->gouraud_lines[g_menu_screen_gradient_line_count++];
 
     SetSemiTrans(line, semi_trans);
     line->x0 = endpoints[0].x + 0x80;

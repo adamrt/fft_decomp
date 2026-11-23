@@ -1,15 +1,15 @@
 /* Reading the tutorial's scripted buttons or the controller, soft resetting on the reset combination. */
 
 #include "fft/input.h"
+#include "fft/menu_screen.h"
 #include "fft/save.h"
-#include "fft/screen.h"
 #include "fft/tutorial.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 
 /* Return the tutorial's scripted 16-bit button mask while a tutorial runs, pad 0
  * otherwise. The soft-reset combination resets the game. */
-s32 screen_read_buttons(s32 unused_0) {
+s32 menu_screen_read_buttons(s32 unused_0) {
     u32 input;
 
     if (g_tutorial_id != 0) {

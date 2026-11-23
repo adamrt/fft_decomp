@@ -4,11 +4,11 @@
 #include "fft/display_object.h"
 #include "fft/file.h"
 #include "fft/gfx.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_stack.h"
 #include "fft/menu_stack_records.h"
 #include "fft/message.h"
 #include "fft/music.h"
-#include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/sound_novel.h"
@@ -472,7 +472,7 @@ static s32 update_choice_timer(void) {
             g_hud_value = hours % 24;
         }
         if (g_sound_novel_countdown_frames == elapsed) {
-            screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
+            menu_screen_thread_request_stop(WORLD_MAP_THREAD_SLOT_MESSAGE);
             g_sound_novel_countdown_frames = -1;
         }
     }

@@ -3,7 +3,7 @@
  * Office. Each Formation tutorial pairs a message file with its command stream. */
 
 #include "fft/file.h"
-#include "fft/screen.h"
+#include "fft/menu_screen.h"
 #include "fft/shop.h"
 #include "fft/text.h"
 #include "fft/tutorial.h"
@@ -869,37 +869,37 @@ u32* shop_load_background(s32 index) {
  *
  * No path returns a value; build_slot_description uses the
  * bound address the store leaves in $v0. */
-u8* screen_text_bind_section(u32 index) {
+u8* menu_screen_text_bind_section(u32 index) {
     switch (index) {
-    case SCREEN_TEXT_DATA_SKILLSET_NAMES:
+    case MENU_SCREEN_TEXT_DATA_SKILLSET_NAMES:
         g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES] = s_screen_text_skillset_names_data;
         break;
-    case SCREEN_TEXT_DATA_JOB_NAMES:
+    case MENU_SCREEN_TEXT_DATA_JOB_NAMES:
         g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = s_screen_text_job_names_data;
         break;
-    case SCREEN_TEXT_DATA_ABILITY_NAMES:
+    case MENU_SCREEN_TEXT_DATA_ABILITY_NAMES:
         g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES] = s_screen_text_ability_names_data;
         break;
-    case SCREEN_TEXT_DATA_FORMATION_MESSAGES:
+    case MENU_SCREEN_TEXT_DATA_FORMATION_MESSAGES:
         g_text_section_pointers[TEXT_SECTION_FORMATION_MESSAGES] = s_screen_text_formation_messages_data;
         break;
-    case SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES:
-        g_text_section_pointers[SCREEN_TEXT_SECTION_FORMATION_TEXT] = s_screen_text_dismiss_unit_replies_data;
+    case MENU_SCREEN_TEXT_DATA_DISMISS_UNIT_REPLIES:
+        g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_FORMATION_TEXT] = s_screen_text_dismiss_unit_replies_data;
         break;
-    case SCREEN_TEXT_DATA_JOB_DESCRIPTIONS:
-        g_text_section_pointers[SCREEN_TEXT_SECTION_FORMATION_TEXT] = s_screen_text_job_descriptions_data;
+    case MENU_SCREEN_TEXT_DATA_JOB_DESCRIPTIONS:
+        g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_FORMATION_TEXT] = s_screen_text_job_descriptions_data;
         break;
-    case SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD:
+    case MENU_SCREEN_TEXT_DATA_NAME_ENTRY_KEYBOARD:
         g_text_section_pointers[TEXT_SECTION_OVERLAY_SCREEN] = s_screen_text_name_entry_keyboard_data;
         break;
-    case SCREEN_TEXT_DATA_SHOP_DIALOGUE:
-        g_text_section_pointers[SCREEN_TEXT_SECTION_SHOP_DIALOGUE] = s_screen_text_shop_dialogue_data;
+    case MENU_SCREEN_TEXT_DATA_SHOP_DIALOGUE:
+        g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_SHOP_DIALOGUE] = s_screen_text_shop_dialogue_data;
         break;
     }
 }
 
 /* Return the resident text resource; index 6 has no data. */
-u8* screen_text_get_resident(screen_text_data_e index) {
+u8* menu_screen_text_get_resident(menu_screen_text_data_e index) {
     return s_screen_text_resident_data[index];
 }
 

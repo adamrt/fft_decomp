@@ -15,10 +15,10 @@
 #include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
+#include "fft/menu_screen.h"
 #include "fft/menu_script.h"
 #include "fft/menu_selection.h"
 #include "fft/message_box.h"
-#include "fft/screen.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -100,11 +100,11 @@ void update_item_menu(void) {
         }
         return;
     }
-    if (g_formation_item_menu_initialized == 0 && thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU) == 0) {
+    if (g_formation_item_menu_initialized == 0 && thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU) == 0) {
         g_formation_item_icon_menu.selected_index = 0;
         g_menu_thread_menu_data = &g_formation_item_icon_menu;
-        thread_start(SCREEN_THREAD_SLOT_UPPER_MENU, menu_icon_list_thread);
-        thread_set_parameters(SCREEN_THREAD_SLOT_UPPER_MENU, (s32)g_menu_thread_menu_data, 0, 0);
+        thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, menu_icon_list_thread);
+        thread_set_parameters(MENU_SCREEN_THREAD_SLOT_UPPER_MENU, (s32)g_menu_thread_menu_data, 0, 0);
         g_formation_item_menu_unit_index = 0xFF;
         menu_selection_clear_records();
         g_formation_unit_banner_enabled = 1;
@@ -121,31 +121,31 @@ void update_item_menu(void) {
         } else {
             g_formation_item_icon_menu.text_id = FORMATION_ITEM_MENU_TEXT_UNLOCKED;
         }
-        g_screen_text_redraw_request = 1;
+        g_menu_screen_text_redraw_request = 1;
     }
     if (g_formation_item_submenu_exit_pending != 0) {
-        thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD);
+        thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD);
         g_formation_item_submenu_exit_pending = 0;
     }
     if (g_formation_current_menu == FORMATION_MENU_ITEM) {
         g_formation_unit_cycle_mode = 2;
         /* Equip, Best Fit and Remove (rows 0-2) are refused for a locked unit; the item list is not. */
-        if (g_screen_selection_results[1] >= 0 && g_screen_selection_results[1] < 3
+        if (g_menu_screen_selection_results[1] >= 0 && g_menu_screen_selection_results[1] < 3
             && formation_unit_get_lock(g_unit_selected_index) < 0) {
             g_sound_queued_effect_id = SOUND_SFX_INVALID;
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
             return;
         }
-        selection = &g_screen_selection_results[1];
+        selection = &g_menu_screen_selection_results[1];
         if (*selection != -1) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
-            thread_start(SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, thread_wait_forever_by_frames);
+            thread_start(MENU_SCREEN_THREAD_SLOT_UPPER_MENU_CHILD, thread_wait_forever_by_frames);
             g_formation_current_menu = *selection + FORMATION_MENU_ITEM_EQUIP;
-            menu_selection_init_value(SCREEN_CURSOR_EQUIP_SLOT, 0);
-            menu_selection_init_value(SCREEN_CURSOR_REMOVE_SLOT, 0);
-            menu_selection_init_value(SCREEN_CURSOR_ITEM_TAB, 0);
+            menu_selection_init_value(MENU_SCREEN_CURSOR_EQUIP_SLOT, 0);
+            menu_selection_init_value(MENU_SCREEN_CURSOR_REMOVE_SLOT, 0);
+            menu_selection_init_value(MENU_SCREEN_CURSOR_ITEM_TAB, 0);
         }
-        running = thread_is_running(SCREEN_THREAD_SLOT_UPPER_MENU);
+        running = thread_is_running(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         g_formation_item_menu_initialized = running;
         if (running == 0) {
             unit_panel_toggle_equipment_threads(0);
@@ -212,7 +212,7 @@ static s32 update_equip_menu(void) {
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         if (g_formation_item_list_open == 0) {
             g_formation_item_equip_menu_initialized = 0;
-            screen_reset_selection_results();
+            menu_screen_reset_selection_results();
             return 0;
         }
         g_formation_item_list_refresh = 1;
@@ -233,8 +233,8 @@ static s32 update_equip_menu(void) {
     }
 
     if (g_formation_item_list_open == 0) {
-        g_formation_item_slot = menu_selection_step_vertical_with_sound(
-            MENU_EQUIPMENT_SLOT_COUNT, SCREEN_CURSOR_EQUIP_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
+        g_formation_item_slot = menu_selection_step_vertical_with_sound(MENU_EQUIPMENT_SLOT_COUNT,
+            MENU_SCREEN_CURSOR_EQUIP_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             equipment_build_item_list(g_unit_selected_index, g_formation_item_slot + 1, g_formation_item_slot,
                 g_item_list_entries, ITEM_LIST_MODE_MARK_UNEQUIPPABLE);
@@ -243,7 +243,7 @@ static s32 update_equip_menu(void) {
             g_formation_unit_cycle_mode = 1;
             g_formation_item_list_open = 1;
             g_formation_change_banner_thread_params.style = 1;
-            thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU);
+            thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
             /* Both hand slots share selection record 0, so the record is the slot less one. */
             slot = 0;
             if (g_formation_item_slot != 0) {
@@ -317,7 +317,7 @@ static s32 update_equip_menu(void) {
         menu_set_event_speed(0);
         g_formation_item_preview_active = 0;
         g_unit_panel_status_display_thread_params.redraw_request = 1;
-        thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
+        thread_resume(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         slot = 0;
         if (g_formation_item_slot != 0) {
             slot = g_formation_item_slot - 1;
@@ -360,7 +360,7 @@ static s32 update_best_fit_menu(void) {
         formation_toggle_preview_equipment_panel(1);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         g_unit_panel_status_display_thread_params.redraw_request = 1;
-        thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU);
+        thread_suspend(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         g_formation_unit_cycle_mode = 1;
         g_formation_item_best_remove_initialized = 1;
         g_sound_suppressed = 1;
@@ -368,7 +368,7 @@ static s32 update_best_fit_menu(void) {
     g_formation_item_best_remove_initialized
         = menu_managed_thread_start(THREAD_SCREEN_SLOT_MENU, &g_formation_item_best_fit_confirm_menu);
     if (g_formation_item_best_remove_initialized == 0) {
-        choice = &g_screen_selection_results[11];
+        choice = &g_menu_screen_selection_results[11];
         if (*choice == 0) {
             g_sound_queued_effect_id = SOUND_SFX_EQUIP;
         }
@@ -391,7 +391,7 @@ static s32 update_best_fit_menu(void) {
             formation_save_records();
             stage_selected_unit();
         }
-        thread_resume(SCREEN_THREAD_SLOT_UPPER_MENU);
+        thread_resume(MENU_SCREEN_THREAD_SLOT_UPPER_MENU);
         g_sound_suppressed = 0;
         return 0;
     }
@@ -474,8 +474,8 @@ static s32 update_remove_menu(void) {
         unit_panel_toggle_preview_stats_thread(1);
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
-    slot = menu_selection_step_vertical_with_sound(
-        MENU_EQUIPMENT_SLOT_COUNT, SCREEN_CURSOR_REMOVE_SLOT, g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
+    slot = menu_selection_step_vertical_with_sound(MENU_EQUIPMENT_SLOT_COUNT, MENU_SCREEN_CURSOR_REMOVE_SLOT,
+        g_menu_input_secondary_repeat, SOUND_SFX_PAGE_SWITCH);
     cursor_y = &g_formation_item_remove_cursor_point.y;
     index = slot;
     *cursor_y = index * 16 + 0x90;
@@ -576,9 +576,9 @@ void formation_noop_callback(void) {
 }
 
 /* Thread entry of the quantity row of g_item_action_menu: a plain call to
- * screen_number_entry_thread. */
+ * menu_screen_number_entry_thread. */
 void formation_item_discard_quantity_thread(void) {
-    screen_number_entry_thread();
+    menu_screen_number_entry_thread();
 }
 
 /* Menu script callback 6 of the item category menu: the selected unit's previewed HP change. */
