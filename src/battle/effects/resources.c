@@ -319,7 +319,7 @@ s32 effect_secondary_fall_dust_init(const effect_context_t* source, const VECTOR
  * record and return its id. Its null handler only steps through the phases, so
  * the record lasts two more frames. The arrow handler starts it when the arrow
  * lands without a hit. */
-s32 effect_secondary_end_on_current_unit(void) {
+s32 effect_secondary_ending_init(void) {
     s32 secondary_id = secondary_record_alloc();
     s32 record_offset = secondary_id * sizeof(effect_secondary_data_t);
     u8 function_id;

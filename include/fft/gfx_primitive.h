@@ -99,7 +99,7 @@ void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page,
 void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
 void gfx_quad_negative_uv_flip(POLY_FT4* primitive, s32 direction);
-void gfx_set_formation_icon_uv(POLY_FT4* poly, s32 index);
+void portrait_build_party_poly(POLY_FT4* poly, s32 index);
 void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 
 /* screen fades */

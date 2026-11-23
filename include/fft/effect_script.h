@@ -36,7 +36,7 @@ void effect_system_init(void);
 void effect_subsystems_reset(void);
 u32 effect_ability_has_no_file(s32 ability_id);
 s32 effect_is_item_ability(s32 ability_id);
-void effect_ability_animation_set(u32 packed, s32 ability, const effect_context_t* source);
+void effect_playback_request(u32 packed, s32 ability, const effect_context_t* source);
 void effect_request_start(s32 ability_id, s32 target_mode, effect_start_target_data_t target);
 s32 effect_file_load_update(void);
 s32 effect_request_load_poll(void);

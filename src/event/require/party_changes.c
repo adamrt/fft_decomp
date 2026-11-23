@@ -227,12 +227,12 @@ static s32 party_update_brave_faith(void) {
 }
 
 /* Set the three panel dim flags and both status animation flags to `value`. */
-void unit_panel_set_transition(s32 value) {
+void unit_panel_set_dimmed(s32 value) {
     g_unit_panel_status_display_thread_params.style = value;
     g_unit_panel_numbers_thread_params.style = value;
     g_unit_panel_character_status_frame_config.style = value;
-    g_unit_panel_status_animation[0] = value;
-    g_unit_panel_status_animation[1] = value;
+    g_unit_panel_button_prompt_animation[0] = value;
+    g_unit_panel_button_prompt_animation[1] = value;
 }
 
 /* Empty. Called for each unit that leaves over a Brave below 6, with its battle index, unit id and
@@ -581,7 +581,7 @@ void party_departures_thread(void) {
 void conditions_show_ready_bugged(void) {
     s32 thread_id = thread_slot_resolve(THREAD_SLOT_FIRST_IDLE);
 
-    thread_start(thread_id, unit_view_refresh_hovered_stats);
+    thread_start(thread_id, unit_view_hovered_stats_thread);
     thread_parameters_set(thread_id, 0, 0, 0);
     input_wait_frames_or_skip(0x3c);
     thread_parameters_set(thread_id, 0, 0, 1);
@@ -672,7 +672,7 @@ void status_screen_open_after_battle_thread(void) {
 
 /*
  * Thread body: suspend thread g_after_battle_thread_suspended_id and draw the
- * gradient grid and status group primitives every frame in its place until
+ * gradient grid and button prompt primitives every frame in its place until
  * the third thread parameter is set.
  *
  * The suspended thread's record is copied aside first and copied back before
@@ -685,11 +685,11 @@ void unit_panel_transition_thread(void) {
     thread_suspend(g_after_battle_thread_suspended_id);
     saved = menu_alloc_memory(sizeof(*saved));
     mem_copy_bytes_nonempty(saved, &g_threads[g_after_battle_thread_suspended_id], sizeof(*saved));
-    g_unit_panel_status_group_count = 2;
+    g_unit_panel_button_prompt_count = 2;
     while (1) {
         s32 buffer = frame & 1;
         gfx_build_gradient_grid_primitives(g_gfx_poly_gt4_buffers[buffer]);
-        unit_panel_build_status_groups(g_unit_panel_transition_quads[buffer]);
+        unit_panel_build_button_prompts(g_unit_panel_transition_quads[buffer]);
         thread_yield();
         if (thread_current_parameter_3_get() != 0) {
             break;

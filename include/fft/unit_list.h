@@ -146,7 +146,7 @@ extern u8 g_unit_list_reorderable_count;
 extern u8 g_unit_list_reorderable_indices[];
 
 void unit_list_sort_menu_update(void);
-s32 unit_list_build_sortable(void);
+s32 unit_list_build_grid_cells(void);
 void unit_list_load_sort_order(s32 unused, s16* entries);
 void unit_list_store_sort_order(s32 unused, const s16* entries);
 

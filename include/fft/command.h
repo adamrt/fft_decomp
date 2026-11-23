@@ -247,7 +247,7 @@ void mini_menu_start(void);
 void mini_menu_select(void);
 
 /* Posts the close command after two frames under the mini-menu task id. */
-void mini_menu_cancel_delay_thread(void);
+void menu_request_close_thread(void);
 
 /* Queues the confirm sound and holds the mini-menu task id for 16 frames. */
 void mini_menu_confirm_delay_thread(void);

@@ -100,7 +100,7 @@ s32 formation_ability_learn_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = formation_ability_chosen_job_total_jp_get;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = formation_ability_chosen_job_next_jp_get;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = formation_ability_chosen_job_jp_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_learned;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_enabled;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = formation_ability_is_chosen_job_mastered;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = learned_flag_get;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_MP_COST].value = ability_list_get_mp_cost;
@@ -110,7 +110,7 @@ s32 formation_ability_learn_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = support_tab_check;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = reaction_tab_check;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = action_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_disabled;
         s_formation_ability_learn_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
         menu_selection_record_clear(10);
@@ -271,7 +271,7 @@ static s32 view_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = formation_ability_chosen_job_total_jp_get;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = formation_ability_chosen_job_next_jp_get;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = formation_ability_chosen_job_jp_get;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_learned;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_enabled;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = formation_ability_is_chosen_job_mastered;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = learned_flag_get;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_MP_COST].value = ability_list_get_mp_cost;
@@ -281,7 +281,7 @@ static s32 view_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = support_tab_check;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = reaction_tab_check;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = action_tab_check;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_disabled;
         g_formation_ability_view_confirm_prompt_state = 0;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
         menu_selection_record_clear(10);

@@ -341,10 +341,10 @@ void attack_deployment_entrypoint(void) {
     s_deploy_menu_state = DEPLOY_MENU_EMPTY_TILE;
     s_deploy_active_cursor = 0;
     s_deploy_status_display_thread_params.position.y = -0x9c;
-    /* Prompt icon states (see unit_panel_build_status_groups): 0xff hidden,
+    /* Prompt icon states (see unit_panel_build_button_prompts): 0xff hidden,
      * 0 lit, 1 dimmed; 7 shows a press then lights, 0x11 a press then dims, 0xc0 fades in. */
     for (i = 0; i < 5; i++) {
-        g_unit_panel_status_animation[i] = 0xff;
+        g_unit_panel_button_prompt_animation[i] = 0xff;
     }
 
     mem_copy_bytes_nonempty(g_deploy_cursor_palette_cycle, g_deploy_cursor_palette_source, 0x40);
@@ -448,8 +448,8 @@ ramza_placed:
             thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
             s_deploy_grid_slide_x = 0x100;
             for (i = 0; i < 5; i++) {
-                if (g_unit_panel_status_animation[i] < 2) {
-                    g_unit_panel_status_animation[i] = 1;
+                if (g_unit_panel_button_prompt_animation[i] < 2) {
+                    g_unit_panel_button_prompt_animation[i] = 1;
                 }
             }
             for (i = 0; i < 0x100; i += 8) {
@@ -460,8 +460,8 @@ ramza_placed:
             thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
             s_deploy_grid_slide_x = -0x100;
             for (i = 0; i < 5; i++) {
-                if (g_unit_panel_status_animation[i] < 2) {
-                    g_unit_panel_status_animation[i] = 1;
+                if (g_unit_panel_button_prompt_animation[i] < 2) {
+                    g_unit_panel_button_prompt_animation[i] = 1;
                 }
             }
             for (i = 0; i < 0x100; i += 8) {
@@ -486,7 +486,7 @@ ramza_placed:
                 /* Start the icon fade-in as the panel slide nears its end. */
                 if (s_deploy_status_display_thread_params.position.y == -8) {
                     for (i = 0; i < 5; i++) {
-                        g_unit_panel_status_animation[i] = 0xc0;
+                        g_unit_panel_button_prompt_animation[i] = 0xc0;
                     }
                 }
                 if (s_deploy_grid_slide_y != 0) {
@@ -500,9 +500,9 @@ ramza_placed:
             }
             first_pass = 0;
         } else {
-            g_unit_panel_status_animation[0] = 0;
-            g_unit_panel_status_animation[1] = 0;
-            g_unit_panel_status_animation[3] = 0;
+            g_unit_panel_button_prompt_animation[0] = 0;
+            g_unit_panel_button_prompt_animation[1] = 0;
+            g_unit_panel_button_prompt_animation[3] = 0;
         }
 
         thread_start(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, labels_draw_thread_run);
@@ -521,24 +521,24 @@ ramza_placed:
             }
 
             /* Update the idle icons (state below 2) for the cursor tile and the unit count. */
-            if (g_unit_panel_status_animation[2] < 2) {
+            if (g_unit_panel_button_prompt_animation[2] < 2) {
                 cursor_unit = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
                                                         [s_deploy_cursor_column[s_deploy_active_cursor]];
                 if (cursor_unit != DEPLOY_ROSTER_ID_NONE) {
-                    g_unit_panel_status_animation[2] = 0;
+                    g_unit_panel_button_prompt_animation[2] = 0;
                 } else {
-                    g_unit_panel_status_animation[2] = 1;
+                    g_unit_panel_button_prompt_animation[2] = 1;
                 }
             }
             if (thread_is_running(DEPLOY_PROMPT_THREAD_SLOT_DETAIL_MARKER) == 0
-                && g_unit_panel_status_animation[3] < 2) {
-                g_unit_panel_status_animation[3] = 0;
+                && g_unit_panel_button_prompt_animation[3] < 2) {
+                g_unit_panel_button_prompt_animation[3] = 0;
             }
-            if (g_unit_panel_status_animation[4] < 2) {
+            if (g_unit_panel_button_prompt_animation[4] < 2) {
                 if (g_deploy_deployed_unit_count == 0) {
-                    g_unit_panel_status_animation[4] = 1;
+                    g_unit_panel_button_prompt_animation[4] = 1;
                 } else {
-                    g_unit_panel_status_animation[4] = 0;
+                    g_unit_panel_button_prompt_animation[4] = 0;
                 }
             }
 
@@ -619,15 +619,15 @@ ramza_placed:
                     thread_inactive_wait(DEPLOY_THREAD_SLOT_NOTICE);
                 } else {
                     g_sound_pending_sfx_id = SOUND_SFX_COMPLETE;
-                    g_unit_panel_status_animation[4] = 7;
+                    g_unit_panel_button_prompt_animation[4] = 7;
                     /* With another squad to fill and units left over, slide on to it; otherwise
                      * confirm the whole deployment. */
                     if (script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT) - 1 != g_deploy_current_squad
                         && g_deploy_fieldable_unit_count > g_deploy_deployed_unit_count) {
                         s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
                         for (i = 0; i < 5; i++) {
-                            if (g_unit_panel_status_animation[i] < 2) {
-                                g_unit_panel_status_animation[i] = 1;
+                            if (g_unit_panel_button_prompt_animation[i] < 2) {
+                                g_unit_panel_button_prompt_animation[i] = 1;
                             }
                         }
                         thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
@@ -672,8 +672,8 @@ ramza_placed:
                 g_sound_pending_sfx_id = SOUND_SFX_CANCEL;
                 s_deploy_menu_state = DEPLOY_MENU_HIDDEN;
                 for (i = 0; i < 5; i++) {
-                    if (g_unit_panel_status_animation[i] < 2) {
-                        g_unit_panel_status_animation[i] = 1;
+                    if (g_unit_panel_button_prompt_animation[i] < 2) {
+                        g_unit_panel_button_prompt_animation[i] = 1;
                     }
                 }
                 thread_parameters_set(DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
@@ -793,14 +793,14 @@ ramza_placed:
             if (*input & PSX_PAD_SQUARE) {
                 g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                 script_event_speed_set(2);
-                if (g_unit_panel_status_animation[2] < 2) {
-                    g_unit_panel_status_animation[2] = 1;
+                if (g_unit_panel_button_prompt_animation[2] < 2) {
+                    g_unit_panel_button_prompt_animation[2] = 1;
                 }
-                if (g_unit_panel_status_animation[3] < 2) {
-                    g_unit_panel_status_animation[3] = 0x11;
+                if (g_unit_panel_button_prompt_animation[3] < 2) {
+                    g_unit_panel_button_prompt_animation[3] = 0x11;
                 }
-                if (g_unit_panel_status_animation[4] < 2) {
-                    g_unit_panel_status_animation[4] = 1;
+                if (g_unit_panel_button_prompt_animation[4] < 2) {
+                    g_unit_panel_button_prompt_animation[4] = 1;
                 }
                 thread_start(THREAD_SCREEN_SLOT_NUMERIC_PANEL, unit_panel_numbers_thread);
                 thread_parameters_set(THREAD_SCREEN_SLOT_NUMERIC_PANEL, (s32)&s_deploy_numbers_thread_params, 0, 0);
@@ -830,7 +830,7 @@ ramza_placed:
                 cursor_unit = g_deploy_roster_id_by_tile[s_deploy_cursor_row[s_deploy_active_cursor]]
                                                         [s_deploy_cursor_column[s_deploy_active_cursor]];
                 if (cursor_unit != DEPLOY_ROSTER_ID_NONE) {
-                    g_unit_panel_status_animation[2] = 7;
+                    g_unit_panel_button_prompt_animation[2] = 7;
                     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
                     if (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0) {
                         g_deploy_pending_roster_index
@@ -1024,12 +1024,12 @@ static void roster_input_update(void) {
     u32* flags = script_get_controller_input_pointer(0);
 
     if ((*flags & PSX_PAD_L1) && (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0)) {
-        g_unit_panel_status_animation[0] = 7;
+        g_unit_panel_button_prompt_animation[0] = 7;
         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
         thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_previous_thread_run);
     }
     if ((*flags & PSX_PAD_R1) && (thread_is_running(DEPLOY_THREAD_SLOT_ROSTER_STEP) == 0)) {
-        g_unit_panel_status_animation[1] = 7;
+        g_unit_panel_button_prompt_animation[1] = 7;
         g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
         thread_start(DEPLOY_THREAD_SLOT_ROSTER_STEP, roster_next_thread_run);
     }
@@ -1524,7 +1524,7 @@ static void screen_draw_thread_run(void) {
         /* Each primitive is prepended to the current ordering-table entry, so the GPU draws
          * them in reverse: offset and draw-mode packets follow the primitives they govern. */
         if (g_deploy_tiles_only_mode == 0) {
-            unit_panel_build_status_groups(g_deploy_render_buffers[frame & 1].status);
+            unit_panel_build_button_prompts(g_deploy_render_buffers[frame & 1].status);
         }
         gfx_draw_or_append_gpu_primitive(&g_deploy_render_buffers[frame & 1].screen_offset);
         cursors_update(frame, &g_deploy_render_buffers[frame & 1]);

@@ -33,7 +33,7 @@ void effect_basic_ability_start(s32 ability_id) {
     effect_data.targets[0].data.unit.runtime_id = 1;
     effect_data.targets[0].data.unit.result_animation = EFFECT_HIT_NORMAL;
     effect_data.spectator_count = 0;
-    effect_ability_animation_set(0, ability_id, &effect_data);
+    effect_playback_request(0, ability_id, &effect_data);
 }
 
 /* Starts an ability's effect outside an action, on a unit, on a tile or
@@ -62,7 +62,7 @@ void effect_request_start(s32 ability_id, s32 target_mode, effect_start_target_d
     }
 
     effect_data.spectator_count = 0;
-    effect_ability_animation_set(0, ability_id, &effect_data);
+    effect_playback_request(0, ability_id, &effect_data);
 }
 
 /* effect_file_load_update as a 0 or 1 result: the event script's EffectStart
@@ -248,7 +248,7 @@ s32 cursor_unit_tile_move(u32 battle_id) {
 /* Aim a projectile from one unit at another: set up the direct trajectory to the
  * target's tile and make the target the attacker's only target. Returns 1 when
  * both units exist. Nothing in the game calls it. */
-s32 effect_projectile_single_target_init(u32 attacker_id, u32 target_id) {
+s32 projectile_direct_single_target_init(u32 attacker_id, u32 target_id) {
     unit_runtime_t* attacker = unit_battle_get(attacker_id);
     unit_runtime_t* target = unit_battle_get(target_id);
     SVECTOR target_position;
@@ -307,7 +307,7 @@ void system_min_vsync_interval_clear(void) {
 /* Apply a GNS camera command: aim the camera at the negated integer position (in 20.12) with the
  * rotation masked to 13 bits, put the cursor on the tile below at level 0, and set the camera
  * height from that tile. */
-void camera_cursor_focus_set(const SVECTOR* coords, const SVECTOR* rotation) {
+void camera_position_and_cursor_set(const SVECTOR* coords, const SVECTOR* rotation) {
     s32 tile_x;
     s32 tile_y;
 

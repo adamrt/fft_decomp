@@ -49,15 +49,15 @@ static view_threads_t s_view_threads[7] = {
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, -1, -1, -1 } },
-    { { unit_view_tile_info_thread, UNIT_VIEW_NO_THREAD, UNIT_VIEW_NO_THREAD, unit_view_refresh_hovered_stats },
+    { { unit_view_tile_info_thread, UNIT_VIEW_NO_THREAD, UNIT_VIEW_NO_THREAD, unit_view_hovered_stats_thread },
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, -1, -1, THREAD_TASK_HOVERED_UNIT_STATS } },
-    { { unit_view_tile_info_thread, unit_view_summary_thread, UNIT_VIEW_NO_THREAD, unit_view_refresh_hovered_stats },
+    { { unit_view_tile_info_thread, unit_view_summary_thread, UNIT_VIEW_NO_THREAD, unit_view_hovered_stats_thread },
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, THREAD_TASK_UNIT_SUMMARY_PANEL, -1, THREAD_TASK_HOVERED_UNIT_STATS } },
-    { { unit_view_tile_info_thread, UNIT_VIEW_NO_THREAD, unit_view_refresh_right_stats, UNIT_VIEW_NO_THREAD },
+    { { unit_view_tile_info_thread, UNIT_VIEW_NO_THREAD, unit_view_right_stats_thread, UNIT_VIEW_NO_THREAD },
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, -1, THREAD_TASK_RIGHT_UNIT_STATS, -1 } },
@@ -66,7 +66,7 @@ static view_threads_t s_view_threads[7] = {
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_TILE_INFO_PANEL, -1, THREAD_TASK_ATTACK_CASTER_STATS, THREAD_TASK_ATTACK_TARGET_STATS } },
-    { { status_screen_numbers_thread, unit_view_summary_thread, UNIT_VIEW_NO_THREAD, unit_view_refresh_hovered_stats },
+    { { status_screen_numbers_thread, unit_view_summary_thread, UNIT_VIEW_NO_THREAD, unit_view_hovered_stats_thread },
         { THREAD_SLOT_TILE_INFO_PANEL, THREAD_SLOT_UNIT_SUMMARY_PANEL, THREAD_SLOT_RIGHT_UNIT_STATS,
             THREAD_SLOT_HOVERED_UNIT_STATS },
         { THREAD_TASK_NUMERIC_DISPLAY_PANEL, 36, -1, 37 } },
@@ -113,7 +113,7 @@ s32 deploy_open(void) {
     }
     deploy_find_fieldable_units();
     if (result != 0) {
-        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, battle_map_skip_deployment_thread);
+        thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, deploy_skip_thread);
         return_value = 1;
     } else {
         g_sound_music_track_1_id = 0;

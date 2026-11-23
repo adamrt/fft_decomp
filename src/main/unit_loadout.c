@@ -165,7 +165,7 @@ void unit_job_abilities_learn(unit_stats_t* unit, s32 job_id, const entd_unit_t*
     }
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         learned = 0;
-        ability_id = ability_skillset_id_get(skillset, i);
+        ability_id = skillset_ability_id_get(skillset, i);
         if (ability_id != 0) {
             ability = &g_ability_data[ability_id];
             scratch = ability->learn_rate;
@@ -267,7 +267,7 @@ u16 unit_rsm_select(const unit_stats_t* unit, u16 ability_id, s32 flags, const e
                 }
             }
             keep = 0;
-            id = ability_skillset_id_get(skillset, j);
+            id = skillset_ability_id_get(skillset, j);
             checked_id = id;
             if (checked_id == ABILITY_ID_REACTION_SUNKEN_STATE)
                 continue;
@@ -309,7 +309,7 @@ u16 unit_rsm_select(const unit_stats_t* unit, u16 ability_id, s32 flags, const e
 /* Return the first job id below JOB_ID_COUNT - 1 whose job record has this
  * skillset. The result is 0 when none has, which is also job 0's id. Nothing
  * in the tree calls it. */
-s32 job_skillset_find(u8 skillset_id) {
+s32 job_find_by_skillset(u8 skillset_id) {
     u8 job_id = 0;
     s32 result;
 

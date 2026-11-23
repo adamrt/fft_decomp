@@ -534,7 +534,7 @@ void world_map_menu_dim(void) {
 }
 
 /* For each idle thread slot from 8 down to 5, suspend the slot after it. */
-void screen_thread_slots_5_to_8_stop(void) {
+void screen_thread_suspend_slots_after_idle(void) {
     s32 thread_id;
 
     for (thread_id = 8; thread_id >= 5; thread_id--) {

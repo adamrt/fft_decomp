@@ -31,7 +31,7 @@ void formation_toggle_change_panel(s32 enable) {
  * slot, with g_formation_stat_preview_panel_thread_params. Like the change banner, an open request
  * does nothing while the status panel slides. The normalized enable state (0 or 1) is stored in
  * g_formation_change_banner_thread_params.style either way. */
-void formation_toggle_stat_preview_panel(s32 enable) {
+void formation_toggle_preview_equipment_panel(s32 enable) {
     if (enable != 0) {
         if (!(g_unit_panel_status_display_thread_params.flags
                 & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))

@@ -227,7 +227,7 @@ void camera_yaw_normalize(void) {
 /* Step the camera tilt by 0x10 per frame to the nearer of the two resting tilts, 0x12e
  * (low) or 0x1c0 (high), split at 0x177; then point the map's tilt target at the same
  * resting tilt, zoom the map in and restore the zoom variable to ONE. */
-void camera_tilt_zoom_init(void) {
+void camera_tilt_zoom_settle(void) {
     s32 current_tilt = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT];
     s32 target_tilt;
     s32 tilt_step;

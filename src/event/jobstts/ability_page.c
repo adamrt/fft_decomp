@@ -68,7 +68,7 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_TOTAL_JP].value = job_list_get_total_jp;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_NEXT_LEVEL_JP].value = job_list_get_next_level_jp;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_CURRENT_JP].value = job_list_get_jp;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_learned;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_ENABLED].value = ability_list_is_non_action_enabled;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_JOB_MASTERED].value = job_list_is_mastered;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_LEARNED].value = ability_list_is_learned;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_MP_COST].value = ability_list_get_mp_cost;
@@ -78,7 +78,7 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[ABILITY_PAGE_ROW_SUPPORT_TAB].value = ability_list_is_support_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_REACTION_TAB].value = ability_list_is_reaction_tab;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_TAB].value = ability_list_is_action_tab;
-        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_unlearned;
+        g_menu_row_callbacks[ABILITY_PAGE_ROW_NON_ACTION_DISABLED].value = ability_list_is_non_action_disabled;
         g_menu_row_callbacks[ABILITY_PAGE_ROW_ACTION_ABILITY].value = ability_list_is_action;
         menu_selection_record_clear(MENU_ABILITY_CATEGORY_ACTION);
         menu_selection_record_clear(MENU_ABILITY_CATEGORY_REACTION);

@@ -180,7 +180,7 @@ turn_command_t* command_get_selected(void) {
 }
 
 /* Post the close command after two frames under the mini-menu task id. */
-void mini_menu_cancel_delay_thread(void) {
+void menu_request_close_thread(void) {
     thread_current_task_set(THREAD_TASK_MINI_MENU);
     thread_frames_wait(2);
     g_command_pending_selection[0] = 7;

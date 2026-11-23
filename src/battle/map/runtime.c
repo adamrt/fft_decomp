@@ -3643,13 +3643,13 @@ s32 battle_map_gns_resource_dispatch(u8 resource_type, battle_map_resource_t* da
         vector = data->command_halfwords;
         vector += 6;
         setVector(&g_camera_integer_coords, -vector[0], vector[1], -vector[2]);
-        camera_cursor_focus_set(&g_camera_integer_coords, &g_battle_map_camera_rotation);
+        camera_position_and_cursor_set(&g_camera_integer_coords, &g_battle_map_camera_rotation);
         break;
     case GNS_COMMAND_SET_CAMERA_ROTATION:
         vector = data->command_halfwords;
         vector += 6;
         setVector(&g_battle_map_camera_rotation, vector[0], vector[1], vector[2]);
-        camera_cursor_focus_set(&g_camera_integer_coords, &g_battle_map_camera_rotation);
+        camera_position_and_cursor_set(&g_camera_integer_coords, &g_battle_map_camera_rotation);
         break;
     /* Case-local pointers preserve the native address lifetimes. */
     case GNS_COMMAND_SET_INDOOR: {

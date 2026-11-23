@@ -702,7 +702,7 @@ functions:
   - {addr: 0x80040a00, size: 392, name: system_game_loop_run, hash: a21b6246c7cbd252, unit: game_loop}
   - {addr: 0x80040b88, size: 80, name: main, hash: 5c256ef1eae8d688, unit: game_loop}
   - {addr: 0x80040bd8, size: 1964, name: loading_message_build, hash: 15501d7711e0aeea, unit: loading_message}
-  - {addr: 0x80041384, size: 36, name: loading_centered_message_build, hash: c119ee540bd1e857, unit: loading_message}
+  - {addr: 0x80041384, size: 36, name: loading_message_build_offset, hash: c119ee540bd1e857, unit: loading_message}
   - {addr: 0x800413a8, size: 196, name: loading_otag_append, hash: 5438e0eb0e7a80c7, unit: loading_message}
   - {addr: 0x8004146c, size: 300, name: debug_font_load, hash: 02911c7008f10711, unit: display}
   - {addr: 0x80041598, size: 476, name: gfx_display_setup, hash: 8715c0b670c3f523, unit: display, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
@@ -815,7 +815,7 @@ functions:
   - {addr: 0x8005a400, size: 72, name: unit_raw_stats_generate, hash: 3a24de7ee784f8fb, unit: party}
   - {addr: 0x8005a448, size: 216, name: base_stats_generate, hash: 756a8d1bcbfc1980, unit: party}
   - {addr: 0x8005a520, size: 72, name: unit_job_growths_copy, hash: 364c7c7d0237a485, unit: party}
-  - {addr: 0x8005a568, size: 208, name: ability_skillset_id_get, hash: d3a8257d5b2a02d2, unit: unit_data}
+  - {addr: 0x8005a568, size: 208, name: skillset_ability_id_get, hash: d3a8257d5b2a02d2, unit: unit_data}
   - {addr: 0x8005a638, size: 244, name: ability_skillset_list_build, hash: c19fcfb3e8de3d11, unit: unit_data}
   - {addr: 0x8005a72c, size: 344, name: ability_records_get, hash: efb4851817eeef88, unit: unit_data}
   - {addr: 0x8005a884, size: 32, name: item_data_get, hash: bf988aefe1ea3d13, unit: unit_data}
@@ -846,7 +846,7 @@ functions:
   - {addr: 0x8005cc98, size: 476, name: unit_random_equipment_generate, hash: 57273afe761c2134, unit: unit_generation}
   - {addr: 0x8005ce74, size: 584, name: unit_job_abilities_learn, hash: 64efa860cd5766d5, unit: unit_generation}
   - {addr: 0x8005d0bc, size: 776, name: unit_rsm_select, hash: 89c806b79390dc83, unit: unit_generation}
-  - {addr: 0x8005d3c4, size: 80, name: job_skillset_find, hash: 244d4a19cf67d067, unit: unit_generation}
+  - {addr: 0x8005d3c4, size: 80, name: job_find_by_skillset, hash: 244d4a19cf67d067, unit: unit_generation}
   - {addr: 0x8005d414, size: 92, name: status_unit_init, hash: f0c85edbe52a2b1f, unit: unit_stats}
   - {addr: 0x8005d470, size: 96, name: status_timers_init, hash: 0e4864df799dfd4d, unit: unit_stats}
   - {addr: 0x8005d4d0, size: 236, name: statuses_reconcile, hash: 5679f7c36927d2aa, unit: unit_stats}

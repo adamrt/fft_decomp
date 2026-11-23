@@ -83,7 +83,7 @@ s32 effect_secondary_init(s32 animation_id, s32 parameter, const struct effect_c
 s32 effect_secondary_update(void);
 effect_secondary_phase_e effect_secondary_phase_get(u8 secondary_id);
 void effect_secondary_finalize(u8 secondary_id);
-s32 effect_secondary_end_on_current_unit(void);
+s32 effect_secondary_ending_init(void);
 void effect_secondary_remove(u8 id);
 
 /* animations */

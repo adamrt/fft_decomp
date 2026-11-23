@@ -205,7 +205,7 @@ void battle_state_close_battle_enter(s32 transition_step, system_game_flow_e clo
 
 /* event outcomes and scenarios */
 
-s32 event_check_battle_outcome(void);
+s32 battle_outcome_check(void);
 s32 event_try_enter_scenario(unit_runtime_t* unit);
 
 #endif

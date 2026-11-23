@@ -765,7 +765,7 @@ void shop_buy_unit_preview_update(void) {
         }
     }
     formation_toggle_preview_stats_window(g_shop_buy_equip_preview_visible);
-    formation_toggle_stat_preview_panel(g_shop_buy_equip_preview_visible);
+    formation_toggle_preview_equipment_panel(g_shop_buy_equip_preview_visible);
 }
 
 /* Menu callback: half price of the highlighted item, or 0 for an empty list.

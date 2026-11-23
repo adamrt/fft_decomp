@@ -232,7 +232,7 @@ s32 battle_map_load_start(void);
 s32 battle_map_load_poll(void);
 void* battle_map_file_load_start(const char* unused_directory_path, const battle_map_gns_load_info_t* load_info,
     void* destination, s32 unused_resource_type);
-s32 battle_map_load_alternate_mesh(s32 palette_mode);
+s32 battle_map_mesh_palette_load(s32 palette_mode);
 battle_map_gns_record_t* battle_map_gns_move_find_load(s32 map_id);
 s32 battle_map_init_update(s32 map_id, s32 step);
 s32 battle_map_deployment_init_update(s32 map_id, s32 step, s32 deployment_running);

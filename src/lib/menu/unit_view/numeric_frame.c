@@ -36,7 +36,7 @@ static s8 s_status_screen_numbers_frame_layout[12 * MENU_LINE_LAYOUT_SIZE]
 /* Build the numeric display frame around box: twelve lines placed by
  * g_status_screen_numbers_frame_layout relative to the box's corners and colored from
  * the normal menu palette, the two draw modes and a sprite covering the box. */
-void status_screen_init_numbers_frame(RECT* box, menu_numeric_frame_t* menu) {
+void menu_numeric_frame_init(RECT* box, menu_numeric_frame_t* menu) {
     LINE_F2* line = menu->lines;
     s32 i;
     s32 offset;
@@ -78,7 +78,7 @@ void status_screen_init_numbers_frame(RECT* box, menu_numeric_frame_t* menu) {
 }
 
 /* Submit the frame's twelve lines, sprite and draw modes. */
-void status_screen_submit_numbers_frame(menu_numeric_frame_t* display) {
+void menu_numeric_frame_submit(menu_numeric_frame_t* display) {
     s32 index;
 
     for (index = 0; index < 12; index++) {

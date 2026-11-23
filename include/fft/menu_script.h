@@ -313,7 +313,7 @@ menu_instruction_t* menu_opcode_12_draw_opening_window_frame(menu_instruction_t*
 /* JOBSTTS builds its own body. */
 menu_instruction_t* menu_opcode_13_clear_temporary_draw_area(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction);
+menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);

@@ -30,7 +30,7 @@ menu_opcode_handler_t g_menu_opcode_handlers[STATUS_SCREEN_SCRIPT_END] = {
     menu_opcode_12_draw_opening_window_frame,     /* 0x12 */
     menu_opcode_13_clear_temporary_draw_area,     /* 0x13 */
     menu_opcode_14_set_draw_area_if_unlocked,     /* 0x14 */
-    menu_opcode_15_repeat_draw_area,              /* 0x15 */
+    menu_opcode_15_restore_draw_area,             /* 0x15 */
 };
 
 /* Dispatch every command of a command stream through the handler table until

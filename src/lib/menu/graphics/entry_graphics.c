@@ -246,7 +246,7 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
         frame *= 2;
     }
     menu_copy_sprite_position_uv_and_size(param, &record->sprites[0], frame);
-    menu_zoom_cursor_frame(param, &record->sprites[0], frame);
+    menu_sprite_zoom(param, &record->sprites[0], frame);
 }
 
 /* Copy a menu entry's window position and text-image UV and size to its sprite. */
@@ -261,7 +261,7 @@ static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPR
 
 /* Scale the sprite about its center by the percentage of zoom step `step` (0-11; later steps
  * leave it alone), keeping position, texture coordinates and size even. */
-void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step) {
+void menu_sprite_zoom(const void* unused_source, SPRT* sprite, s32 step) {
     s32 scale;
     s32 offset;
     if (step < 12) {

@@ -385,7 +385,7 @@ void ability_list_scrolling_thread(void) {
         /* The frame zooms open over the first 12 ticks. */
         if (i * g_script_event_speed < 12) {
             gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
-            menu_zoom_cursor_frame(entry, frame, i * g_script_event_speed);
+            menu_sprite_zoom(entry, frame, i * g_script_event_speed);
         }
         if (layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT && toggle == 1) {
             menu_text_layout_t* columns = entry->context;

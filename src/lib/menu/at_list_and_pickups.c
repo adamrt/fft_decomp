@@ -60,7 +60,7 @@ void thread_stop_after_yield(void) {
  * (action 4). A crystal offers its learned-ability list (LEARNED, action 1 when one is taken),
  * the confirm menu (CRYSTAL, action 2) or a choice between the two (CRYSTAL | LEARNED). The
  * previous menu table is restored at the end. */
-void crystal_start_pickup_threads(void) {
+void crystal_pickup_menus_run(void) {
     crystal_pickup_result_t* context = g_crystal_pickup_context;
     menu_entry_t* previous_menu_descriptor = g_menu_thread_menu_data;
     menu_entry_t* menu;

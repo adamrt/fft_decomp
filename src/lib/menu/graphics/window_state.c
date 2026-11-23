@@ -40,7 +40,7 @@ menu_instruction_t* menu_opcode_14_set_draw_area_if_unlocked(menu_instruction_t*
 }
 
 /* Queue the full draw area at the next ordering-table slot when unlocked. */
-menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         g_gfx_draw_area.y = 0;
         menu_gfx_enqueue_draw_area(&g_gfx_draw_area, g_menu_gfx_otag_index + 1);

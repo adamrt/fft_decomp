@@ -829,7 +829,7 @@ static void unit_view_stats_panel_thread(
         }
     }
     page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode]];
-    status_screen_init_numbers_frame(frame_rect, &page->numeric_frame);
+    menu_numeric_frame_init(frame_rect, &page->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(page->sprites, 7, 0x7CBC);
@@ -1064,7 +1064,7 @@ static void unit_view_stats_panel_thread(
         } else {
             menu_init_primitive_colors_normal(&page->numeric_frame);
         }
-        status_screen_submit_numbers_frame(&page->numeric_frame);
+        menu_numeric_frame_submit(&page->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&offs->a);
         thread_yield();
         g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
@@ -1083,7 +1083,7 @@ exit:
 }
 
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
-void unit_view_refresh_hovered_stats(void) {
+void unit_view_hovered_stats_thread(void) {
     unit_panel_load_selected();
     g_unit_view_hovered_stats_setup[6].format = 2;
     if (g_unit_panel_selected_unit_status.list_index < 0) {
@@ -1094,7 +1094,7 @@ void unit_view_refresh_hovered_stats(void) {
 }
 
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
-void unit_view_refresh_right_stats(void) {
+void unit_view_right_stats_thread(void) {
     unit_panel_load_selected();
     g_unit_view_right_stats_setup[6].format = 2;
     if (g_unit_panel_comparison_unit_status.list_index < 0) {
@@ -1251,8 +1251,8 @@ void unit_view_summary_thread(void) {
     mem_copy_bytes_nonempty(&frames[1], &frames[0], sizeof(unit_view_summary_frame_t));
     frames[0].numeric_frame = &g_unit_view_summary_numeric_frames[0].primitives;
     frames[1].numeric_frame = &g_unit_view_summary_numeric_frames[1].primitives;
-    status_screen_init_numbers_frame(&g_unit_view_summary_panel_rect, frames[0].numeric_frame);
-    status_screen_init_numbers_frame(&g_unit_view_summary_panel_rect, frames[1].numeric_frame);
+    menu_numeric_frame_init(&g_unit_view_summary_panel_rect, frames[0].numeric_frame);
+    menu_numeric_frame_init(&g_unit_view_summary_panel_rect, frames[1].numeric_frame);
 
     for (frame = 0;; frame++) {
         thread_yield();
@@ -1355,7 +1355,7 @@ void unit_view_summary_thread(void) {
         } else {
             menu_init_primitive_colors_normal(frame_record->numeric_frame);
         }
-        status_screen_submit_numbers_frame(frame_record->numeric_frame);
+        menu_numeric_frame_submit(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_a);
     }
 exit:
@@ -1511,8 +1511,8 @@ void status_screen_numbers_thread(void) {
     mem_copy_bytes_nonempty(&record[1], record, sizeof(*record));
     record[0].numeric_frame = &g_status_screen_numbers_frames[0].primitives;
     record[1].numeric_frame = &g_status_screen_numbers_frames[1].primitives;
-    status_screen_init_numbers_frame(&g_status_screen_numbers_frame_rect, record[0].numeric_frame);
-    status_screen_init_numbers_frame(&g_status_screen_numbers_frame_rect, record[1].numeric_frame);
+    menu_numeric_frame_init(&g_status_screen_numbers_frame_rect, record[0].numeric_frame);
+    menu_numeric_frame_init(&g_status_screen_numbers_frame_rect, record[1].numeric_frame);
     for (frame = 0;; frame++) {
         thread_yield();
         record = &records[frame & 1];
@@ -1547,7 +1547,7 @@ void status_screen_numbers_thread(void) {
             gfx_draw_or_append_gpu_primitive(&record->sprites[i]);
         }
         gfx_draw_or_append_gpu_primitive(&record->mode1);
-        status_screen_submit_numbers_frame(record->numeric_frame);
+        menu_numeric_frame_submit(record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[0]);
     }
     thread_yield();
@@ -1728,8 +1728,8 @@ void status_screen_thread(void) {
     mem_copy_bytes_nonempty(&records[1], frame_record, sizeof(status_screen_frame_t));
     records[0].numeric_frame = &numeric_frame.primitives;
     records[1].numeric_frame = &g_status_screen_numeric_frame;
-    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[0].numeric_frame);
-    status_screen_init_numbers_frame(&s_status_screen_panel_rect, records[1].numeric_frame);
+    menu_numeric_frame_init(&s_status_screen_panel_rect, records[0].numeric_frame);
+    menu_numeric_frame_init(&s_status_screen_panel_rect, records[1].numeric_frame);
 
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, status_screen_numbers_thread);
     thread_parameters_set(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
@@ -1807,7 +1807,7 @@ void status_screen_thread(void) {
             gfx_draw_or_append_gpu_primitive(&frame_record->frame.lines[i]);
         }
         frame++;
-        status_screen_submit_numbers_frame(frame_record->numeric_frame);
+        menu_numeric_frame_submit(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_areas.areas[0]);
     }
 

@@ -868,7 +868,7 @@ static void birthday_menu_restore(birthday_date_state_t* menu) {
  *
  * The target reserves a 24-byte frame it never touches (the stack adjustment
  * is even scheduled into the last load-delay slot), retained here as an unused local. */
-static void birthday_confirmation_build(birthday_date_state_t* state) {
+static void birthday_menu_dim(birthday_date_state_t* state) {
     s32 unused_scratch[6];
 
     g_display_object_animated_pool[state->cursor_record].sequence = 10;
@@ -908,7 +908,7 @@ static void birthday_menu_update(controller_record_t* record) {
 
     if (g_input_new_button_presses & (PSX_PAD_START | PSX_PAD_CIRCLE)) {
         sound_sfx_play(SOUND_SFX_CONFIRM);
-        birthday_confirmation_build(menu);
+        birthday_menu_dim(menu);
         birthday_confirmation_push();
         return;
     }

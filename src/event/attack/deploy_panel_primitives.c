@@ -8,13 +8,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* ATTACK's status groups, drawn by its own unit_panel_build_status_groups: per-sprite first/end cell indices
+/* ATTACK's button prompts, drawn by its own unit_panel_build_button_prompts: per-sprite first/end cell indices
  * (interleaved pairs), the visible-entry count, each entry's sprite id and fade/blink state, and a 4-byte record per
  * entry whose first 16-bit value biases the draw point's y. */
-extern u8 g_unit_panel_status_group_bounds[];
-extern u8 g_unit_panel_status_group_count;
-extern u8 g_unit_panel_status_group_ids[];
-extern sprite_draw_offset_t g_unit_panel_status_offsets[];
+extern u8 g_unit_panel_button_prompt_cell_bounds[];
+extern u8 g_unit_panel_button_prompt_count;
+extern u8 g_unit_panel_button_prompt_ids[];
+extern sprite_draw_offset_t g_unit_panel_button_prompt_offsets[];
 
 /* Rebuild and submit the deployment panel's prompt icon groups, one scaled quad per
  * cell, after advancing each group's animation byte by one frame:
@@ -28,7 +28,7 @@ extern sprite_draw_offset_t g_unit_panel_status_offsets[];
  *
  * The panel narrows each signed word offset to its unsigned low half before the GPU
  * coordinate arithmetic. */
-void unit_panel_build_status_groups(POLY_FT4* poly) {
+void unit_panel_build_button_prompts(POLY_FT4* poly) {
     s32 group;
     s32 cell;
     s32 first;
@@ -37,22 +37,22 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
     s32 sprite;
     s32 level;
 
-    for (group = 0; group < g_unit_panel_status_group_count; group++) {
-        sprite = g_unit_panel_status_group_ids[group];
-        count = g_unit_panel_status_group_bounds[sprite + 1] - g_unit_panel_status_group_bounds[sprite];
-        first = g_unit_panel_status_group_bounds[sprite];
-        if (g_unit_panel_status_animation[group] != 0xff) {
-            if (g_unit_panel_status_animation[group] > 0x40) {
-                g_unit_panel_status_animation[group] -= 2;
-            } else if (g_unit_panel_status_animation[group] > 10) {
-                g_unit_panel_status_animation[group]--;
-                if (g_unit_panel_status_animation[group] == 11) {
-                    g_unit_panel_status_animation[group] = 1;
+    for (group = 0; group < g_unit_panel_button_prompt_count; group++) {
+        sprite = g_unit_panel_button_prompt_ids[group];
+        count = g_unit_panel_button_prompt_cell_bounds[sprite + 1] - g_unit_panel_button_prompt_cell_bounds[sprite];
+        first = g_unit_panel_button_prompt_cell_bounds[sprite];
+        if (g_unit_panel_button_prompt_animation[group] != 0xff) {
+            if (g_unit_panel_button_prompt_animation[group] > 0x40) {
+                g_unit_panel_button_prompt_animation[group] -= 2;
+            } else if (g_unit_panel_button_prompt_animation[group] > 10) {
+                g_unit_panel_button_prompt_animation[group]--;
+                if (g_unit_panel_button_prompt_animation[group] == 11) {
+                    g_unit_panel_button_prompt_animation[group] = 1;
                 }
-            } else if (g_unit_panel_status_animation[group] > 1) {
-                g_unit_panel_status_animation[group]--;
-                if (g_unit_panel_status_animation[group] == 1) {
-                    g_unit_panel_status_animation[group] = 0;
+            } else if (g_unit_panel_button_prompt_animation[group] > 1) {
+                g_unit_panel_button_prompt_animation[group]--;
+                if (g_unit_panel_button_prompt_animation[group] == 1) {
+                    g_unit_panel_button_prompt_animation[group] = 0;
                 }
             }
         }
@@ -61,18 +61,19 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
             index = first + count - cell;
             g_menu_draw_area_template.y += (u16)g_deploy_slot_offsets[group];
             gfx_set_scaled_poly_ft4_4bpp(poly, &g_unit_panel_texture_origin, &g_menu_draw_area_template,
-                &g_unit_panel_status_frames[index - 1], &g_unit_panel_status_frame_scales[index - 1],
-                &g_unit_panel_status_offsets[group]);
+                &g_unit_panel_button_prompt_frames[index - 1], &g_unit_panel_button_prompt_frame_scales[index - 1],
+                &g_unit_panel_button_prompt_offsets[group]);
             g_menu_draw_area_template.y -= (u16)g_deploy_slot_offsets[group];
-            if (g_unit_panel_status_animation[group] == 0x40) {
+            if (g_unit_panel_button_prompt_animation[group] == 0x40) {
                 setRGB0(poly, 0x80, 0x80, 0x80);
-                g_unit_panel_status_animation[group] = 0;
+                g_unit_panel_button_prompt_animation[group] = 0;
             }
-            if (g_unit_panel_status_animation[group] == 0 || g_unit_panel_status_animation[group] >= 0x40) {
+            if (g_unit_panel_button_prompt_animation[group] == 0
+                || g_unit_panel_button_prompt_animation[group] >= 0x40) {
                 poly->clut = 0x7d7c;
-            } else if (g_unit_panel_status_animation[group] == 1) {
+            } else if (g_unit_panel_button_prompt_animation[group] == 1) {
                 poly->clut = 0x7dfc;
-            } else if (g_unit_panel_status_animation[group] < 0x40) {
+            } else if (g_unit_panel_button_prompt_animation[group] < 0x40) {
                 poly->clut = 0x7e7c;
                 poly->y0++;
                 poly->y1++;
@@ -81,9 +82,9 @@ void unit_panel_build_status_groups(POLY_FT4* poly) {
             }
             SetSemiTrans(poly, 1);
             SetShadeTex(poly, 0);
-            if (g_unit_panel_status_animation[group] != 0xff) {
-                if (g_unit_panel_status_animation[group] > 0x40) {
-                    level = 0xc0 - g_unit_panel_status_animation[group];
+            if (g_unit_panel_button_prompt_animation[group] != 0xff) {
+                if (g_unit_panel_button_prompt_animation[group] > 0x40) {
+                    level = 0xc0 - g_unit_panel_button_prompt_animation[group];
                     setRGB0(poly, level, level, level);
                 }
                 gfx_draw_or_append_gpu_primitive(poly);

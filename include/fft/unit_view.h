@@ -37,8 +37,8 @@ extern RECT g_unit_view_attack_caster_stats_rect;
 extern RECT g_unit_view_attack_target_stats_rect;
 
 /* Each reloads its unit and redraws its panel; a negative list index draws dashes. */
-void unit_view_refresh_hovered_stats(void);
-void unit_view_refresh_right_stats(void);
+void unit_view_hovered_stats_thread(void);
+void unit_view_right_stats_thread(void);
 void unit_view_preview_caster_stats(void);
 void unit_view_preview_target_stats(void);
 

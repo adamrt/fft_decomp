@@ -254,7 +254,7 @@ typedef struct screen_number_range {
 void screen_number_entry_thread(void);
 void screen_labeled_number_entry_thread(void);
 void screen_help_text_thread(void);
-void screen_fit_parent_entry_to_digits(void);
+void screen_fit_child_entry_to_digits(void);
 
 /* text sections */
 /* Resident text resource indices, used by screen_text_resident_get and

@@ -101,7 +101,7 @@ static void ending_update_opntex_sequence(void);
 static void movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame);
 static u8* ending_add_pointer_offset(u8* base, s32 byte_offset);
 static void ending_start_script(void);
-static void ending_update_screen_fade(void);
+static void ending_update_opntex_fade(void);
 static void ending_scroll_text(void);
 static void ending_update_xa_audio(void);
 static s32 ending_decode_hex_digit(s32 character);
@@ -209,7 +209,7 @@ static s32 ending_run_script_frame(void) {
     ending_scroll_text();
     ending_update_xa_audio();
     ending_update_opntex_sequence();
-    ending_update_screen_fade();
+    ending_update_opntex_fade();
 
     state = &g_ending_script_state.dispatch;
     result = state->flags | ENDING_SCRIPT_DISPATCH_CONTINUE;
@@ -643,7 +643,7 @@ static s32 ending_decode_hex_digit(s32 character) {
  * Advance the script-controlled screen fade and tint the active fade quad.
  * Block-local control pointers retain the original materialized flag addresses.
  */
-static void ending_update_screen_fade(void) {
+static void ending_update_opntex_fade(void) {
     s32 intensity;
 
     {

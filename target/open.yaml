@@ -45,7 +45,7 @@ functions:
   - {addr: 0x800679a0, size: 408, name: movie_acquire_next_frame, hash: 7fc290a0401086a3, unit: runtime}
   - {addr: 0x80067b38, size: 152, name: movie_wait_for_mdec_output, hash: 6ff3dc5f70e0bfa1, unit: runtime}
   - {addr: 0x80067bd0, size: 76, name: movie_start_cd_read, hash: c64a5247a99178b8, unit: runtime}
-  - {addr: 0x80067c1c, size: 360, name: movie_present_frame, hash: 78623003303c6f16, unit: runtime}
+  - {addr: 0x80067c1c, size: 360, name: frame_present, hash: 78623003303c6f16, unit: runtime}
   - {addr: 0x80067d84, size: 228, name: input_update_with_soft_reset, hash: f473a15292edf5e0, unit: runtime}
   - {addr: 0x80067e68, size: 40, name: gfx_start_overlay_fade_out, hash: a5ea42b5526a77a5, unit: overlay_fade}
   - {addr: 0x80067e90, size: 40, name: gfx_start_overlay_fade_in, hash: b9b1c837a334afc9, unit: overlay_fade}
@@ -62,7 +62,7 @@ functions:
   - {addr: 0x80068760, size: 76, name: gfx_restore_frame_bin_page, hash: 74303d09981cd6c2, unit: init}
   - {addr: 0x800687ac, size: 832, name: gfx_init_screen_environments, hash: 00685f629e5f306d, unit: init}
   - {addr: 0x80068aec, size: 136, name: system_init_runtime_state, hash: 1795eb2597584b2e, unit: init}
-  - {addr: 0x80068b74, size: 60, name: gfx_clear_and_draw_current_frame, hash: 22d70e319b6161e8, unit: init}
+  - {addr: 0x80068b74, size: 60, name: gfx_frame_begin, hash: 22d70e319b6161e8, unit: init}
   - {addr: 0x80068bb0, size: 224, name: display_object_pools_init, hash: 39decc2065a64d27, unit: window_records}
   - {addr: 0x80068c90, size: 64, name: gfx_clear_current_otag, hash: 7dbb971d4cb43ee9, unit: window_records}
   - {addr: 0x80068cd0, size: 176, name: display_object_gpu_list_draw, hash: a3a591bbfb26047c, unit: window_records}
@@ -96,7 +96,7 @@ functions:
   - {addr: 0x8006b63c, size: 852, name: birthday_menu_push, hash: 0e45678d3fb3cbd5, unit: title}
   - {addr: 0x8006b990, size: 484, name: birthday_text_build, hash: acb5e3a1a8e68d6e, unit: title}
   - {addr: 0x8006bb74, size: 296, name: birthday_menu_restore, hash: 620158889f7f74a3, unit: title}
-  - {addr: 0x8006bc9c, size: 324, name: birthday_confirmation_build, hash: bb0bedfc73251381, unit: title}
+  - {addr: 0x8006bc9c, size: 324, name: birthday_menu_dim, hash: bb0bedfc73251381, unit: title}
   - {addr: 0x8006bde0, size: 752, name: birthday_menu_update, hash: 4fcabd119932ad53, unit: title}
   - {addr: 0x8006c0d0, size: 916, name: birthday_confirmation_push, hash: 16fd129a48959bf2, unit: title}
   - {addr: 0x8006c464, size: 748, name: birthday_confirmation_update, hash: f574d10bdce9561d, unit: title}
@@ -129,7 +129,7 @@ functions:
   - {addr: 0x8006f134, size: 244, name: ending_scroll_text, hash: 096ef43fc404123c, unit: ending}
   - {addr: 0x8006f228, size: 880, name: ending_update_xa_audio, hash: 599e7ab9df95ebf3, unit: ending, rodata: [{addr: 0x80067000, size: 68, hash: 91f5360ae3d8597d}]}
   - {addr: 0x8006f598, size: 60, name: ending_decode_hex_digit, hash: f70eb008c32149d3, unit: ending}
-  - {addr: 0x8006f5d4, size: 456, name: ending_update_screen_fade, hash: 727ec04746704c86, unit: ending}
+  - {addr: 0x8006f5d4, size: 456, name: ending_update_opntex_fade, hash: 727ec04746704c86, unit: ending}
   - {addr: 0x8006f79c, size: 324, name: ending_update_opntex_sequence, hash: 8019a32e358ad507, unit: ending}
   - {addr: 0x8006f8e0, size: 60, name: movie_ending_start, hash: 56b496abe3a69a19, unit: ending}
   - {addr: 0x8006f91c, size: 108, name: movie_stream_fftend, hash: 4d67e3d1325ae88c, unit: ending}

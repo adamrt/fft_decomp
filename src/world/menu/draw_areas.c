@@ -87,7 +87,7 @@ menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction
 /* Menu-script opcode: unless the ordering-table index is locked, add
  * g_screen_temporary_draw_area (y reset to 0) one entry after the current
  * ordering-table index. Returns the next instruction. */
-menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruction) {
+menu_instruction_t* menu_opcode_15_restore_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         g_screen_temporary_draw_area.y = 0;
         screen_draw_area_add(&g_screen_temporary_draw_area, g_menu_gfx_otag_index + 1);

@@ -645,7 +645,7 @@ void screen_text_entry_thread(void) {
 
 /* Resize the current thread's menu entry's first parent entry to fit a
  * decimal number, keeping its right edge fixed. */
-void screen_fit_parent_entry_to_digits(void) {
+void screen_fit_child_entry_to_digits(void) {
     menu_entry_t* entry = (menu_entry_t*)g_threads[g_thread_current_id].function_parameter_1;
     u32 index = entry->row_actions[0];
     s32 digits;

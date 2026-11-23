@@ -272,13 +272,13 @@ extern palette_t g_sprite_shadow_palette;
 
 void sprite_runtime_palette_reset(u32 runtime_id);
 void sprite_palette_restore_all(void);
-void sprite_palette_check_tile_status_mod(struct unit_runtime* unit, s32 tile_effect_level, s32 update_current_colors);
+void sprite_palette_update(struct unit_runtime* unit, s32 tile_effect_level, s32 update_current_colors);
 void sprite_palette_tint_unit(struct unit_runtime* unit, s32 level, s32 update_current_colors);
 void sprite_palette_tint_by_team(struct unit_runtime* unit, s32 amount);
 void sprite_palette_tint_all_by_team(void);
 void sprite_palette_apply_modulation_to_units(s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue);
-void sprite_thrown_item_palette_set(s32 item_id, struct unit_runtime* unit);
-void sprite_runtime_thrown_item_palette_set(u32 item_id, u32 runtime_id);
+void sprite_weapon_graphic_set(s32 item_id, struct unit_runtime* unit);
+void sprite_runtime_weapon_graphic_set(u32 item_id, u32 runtime_id);
 void sprite_evtchr_set_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32 clut_index);
 
 #endif

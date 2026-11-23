@@ -11,7 +11,7 @@ extern ability_secondary_pointer_t g_ability_list_selected_ability_secondary_dat
 
 /* Row callback for ability lists: look up the listed ability (caching its data for the panel) and
  * return 1 when it is not an action ability and its entry carries no disabled bits. */
-s32 ability_list_is_non_action_learned(s32 index) {
+s32 ability_list_is_non_action_enabled(s32 index) {
     s16* entries = g_ability_list_ability_entries;
     s16* entry = &entries[index];
     s32 result;
@@ -30,7 +30,7 @@ s32 ability_list_is_non_action_learned(s32 index) {
 /* Returns 1 for an ability of any type other than ABILITY_TYPE_DEFAULT (by
  * the type the "learned" callback cached) whose entry has bit 14 or 15 set;
  * 0 otherwise. */
-s32 ability_list_is_non_action_unlearned(s32 index) {
+s32 ability_list_is_non_action_disabled(s32 index) {
     s32 result = 0;
 
     if (s_ability_list_ability_type != ABILITY_TYPE_DEFAULT) {

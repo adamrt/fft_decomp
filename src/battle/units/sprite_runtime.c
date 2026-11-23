@@ -2197,7 +2197,7 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
     vram_sheet_load(data, slot, runtime_id, unit, palette);
     tile = battle_map_tile_get_pointer(map_x, map_y, map_level);
     /* The tint runs before mount_state is reset below (QUIRKS.md). */
-    sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
+    sprite_palette_update(unit, tile->flags.shading, 1);
     battle_map_palette_load_data(&g_sprite_shadow_palette, BATTLE_MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0);
     unit->clut = GetClut(runtime_id << 4, BATTLE_MAP_CLUT_ROWS_Y + BATTLE_MAP_CLUT_ROW_UNITS);
     unit->tpage = slot + SPRITE_TPAGE_SPRITESHEET_SLOT_0;
@@ -2344,7 +2344,7 @@ static unit_runtime_t* runtime_unit_init(s32 map_x, s32 map_y, s32 map_level, s1
     head = &g_unit_list_head;
     unit->previous = *head;
     *head = unit;
-    sprite_thrown_item_palette_set(unit->stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], unit);
+    sprite_weapon_graphic_set(unit->stats->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], unit);
     status_init_display_flags(unit->stats->battle_id);
     /* Settle the new unit's display and pose without landing sounds or effects. */
     unit->movement.suppress_sfx_and_landing_effects = 1;

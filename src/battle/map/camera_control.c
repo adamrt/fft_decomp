@@ -475,7 +475,7 @@ static void acting_unit_vector_normal_calculate(void) {
 
 /* The acting-unit camera step vector at double length, used when the unit is
  * outside the wider screen window. */
-static void acting_unit_vector_shift(void) {
+static void acting_unit_vector_scale(void) {
     acting_unit_vector_normal_calculate();
     g_camera_step_vector.vx *= 2;
     g_camera_step_vector.vy *= 2;
@@ -670,7 +670,7 @@ void camera_scene_focus_update(void) {
             && unit->camera_relative_y - height >= 0x41 && unit->camera_relative_y < 0xB0) {
             acting_unit_vector_normal_calculate();
         } else {
-            acting_unit_vector_shift();
+            acting_unit_vector_scale();
         }
         real_coords_toward_target_step(unit);
         return;

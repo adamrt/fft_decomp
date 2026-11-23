@@ -56,7 +56,7 @@ void unit_panel_equipment_ability_thread(void) {
     screen = g_unit_panel_equipment_frames;
     base = g_unit_panel_equipment_frames;
     state = &g_unit_panel_selected_unit_fields.state;
-    status_screen_init_numbers_frame(&g_unit_panel_equipment_frame_rects[0], &screen->numeric_frame);
+    menu_numeric_frame_init(&g_unit_panel_equipment_frame_rects[0], &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     menu_init_scaled_draw_area_packets(&screen->portrait);
 
@@ -221,7 +221,7 @@ void unit_panel_equipment_ability_thread(void) {
         for (i = 0; i < 8; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        status_screen_submit_numbers_frame(&screen->numeric_frame);
+        menu_numeric_frame_submit(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         /* During the opening zoom the panel draws clipped to the scaled area; portrait.areas[1],
          * drawn last, restores the full area. */

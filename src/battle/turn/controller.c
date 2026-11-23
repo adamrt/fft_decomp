@@ -1774,7 +1774,7 @@ static void action_effect_start(s32 ability_id, unit_runtime_t* unit) {
             packed |= g_ability_range_data[ability_id].element << 16;
         }
     }
-    effect_ability_animation_set(packed, ability_id, &context);
+    effect_playback_request(packed, ability_id, &context);
 }
 
 /* Announce the next action that comes due: a Hamedo, the acting unit's own action or a reaction.
@@ -1958,7 +1958,7 @@ void action_start_next_strike(void) {
     reaction = unit->strike.reaction_id;
     ability = attack_id;
     unit->used_ability_id = attack_id;
-    sprite_thrown_item_palette_set(unit->strike.used_weapon_id, unit);
+    sprite_weapon_graphic_set(unit->strike.used_weapon_id, unit);
     if (((reaction != 0) && (ability != reaction)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)
         || (effect_ability_has_no_file(ability) != 0)) {
         action_apply_strike_results();
@@ -3884,7 +3884,7 @@ void battle_state_resume_attack_phase_update(void) {
             action_post_action_facing_stub(stats, facing & 0xff);
         }
         action_store_actor_data(unit->stats);
-        animation_status_set_on_main_stack(unit);
+        animation_status_set_after_action(unit);
         unit_target_displays_update(unit);
         unit_source_get(); /* result unused */
         if (g_action_phase != ACTION_PHASE_PRE_ACTION) {
@@ -3956,7 +3956,7 @@ void battle_state_post_action_reports_update(void) {
             }
             if (display_active == 0) {
                 casting_unit = unit_source_get();
-                animation_status_set_on_main_stack(casting_unit);
+                animation_status_set_after_action(casting_unit);
                 action_end_command(casting_unit);
             }
         }

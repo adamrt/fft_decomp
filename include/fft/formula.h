@@ -265,7 +265,7 @@ void formula_store_xa_plus_ya(void);
 /* equipment and abilities */
 void formula_apply_maintenance(void);
 s32 formula_select_targeted_equipment(void);
-void formula_calculate_katana_break_chance(void);
+void formula_roll_katana_break(void);
 void formula_store_jump_xa_ya(void);
 void formula_select_magic_gun_ability(void);
 void formula_store_pa_and_weapon_power(void);

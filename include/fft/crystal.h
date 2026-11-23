@@ -54,6 +54,6 @@ extern s32 g_crystal_pickup_item;
 void crystal_pickup_panel_open(void);
 
 /* Runs the crystal/treasure result panel and its list and choice threads. */
-void crystal_start_pickup_threads(void);
+void crystal_pickup_menus_run(void);
 
 #endif

@@ -245,7 +245,7 @@ s32 formation_selected_unit_name_id_get(void);
 void formation_redraw_panels(void);
 void formation_panels_stop(void);
 void formation_toggle_preview_stats_window(s32 flag);
-void formation_toggle_stat_preview_panel(s32 enable);
+void formation_toggle_preview_equipment_panel(s32 enable);
 void formation_toggle_change_panel(s32 enable);
 void formation_toggle_ability_panel(s32 enable);
 void formation_equipment_panel_open(s32 enabled);

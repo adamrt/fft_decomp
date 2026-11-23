@@ -388,7 +388,7 @@ static void box_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* un
         sprite.y0 = rect->y;
         sprite.w = rect->w;
         sprite.h = rect->h;
-        menu_zoom_cursor_frame(source, &sprite, level);
+        menu_sprite_zoom(source, &sprite, level);
         setXY4(&buffers[g_menu_packet_buffer_index].quads[0], sprite.x0, sprite.y0, sprite.x0 + sprite.w, sprite.y0,
             sprite.x0, sprite.y0 + sprite.h, sprite.x0 + sprite.w, sprite.y0 + sprite.h);
         setUV4(&buffers[g_menu_packet_buffer_index].quads[0], sprite.u0, sprite.v0, sprite.u0 + sprite.w, sprite.v0,

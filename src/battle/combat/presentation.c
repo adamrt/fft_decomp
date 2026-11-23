@@ -262,15 +262,15 @@ static void display_update(unit_runtime_t* unit) {
         sprite_transparency_update(unit);
         sprite_status_bubble_active_update(unit);
         if (g_battle_animation_wait_state != 0) {
-            sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 0);
+            sprite_palette_update(unit, tile->flags.shading, 0);
         } else {
-            sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
+            sprite_palette_update(unit, tile->flags.shading, 1);
         }
         unit_apply_poach_morbol_transformation(unit);
         animation_status_set(unit);
         animation_status_changes_update(unit);
         sprite_sheet_apply_status_change(unit, tile->flags.shading);
-        unit_float_jump_height_update(unit);
+        unit_float_height_update(unit);
         unit->statuses_to_remove_5_6 = 0;
         unit->statuses_to_remove_1_4 = 0;
         unit->statuses_to_add_5_6 = 0;
@@ -381,7 +381,7 @@ s32 status_queue_display_flag_change(s32 handler_index, s32 change_type, s32 bat
 /* sprite_thrown_item_palette_set for the unit in slot battle_id. No
  * retail code calls it. */
 void sprite_battle_thrown_item_palette_set(s32 item_id, u16 battle_id) {
-    sprite_thrown_item_palette_set(item_id, unit_battle_get(battle_id));
+    sprite_weapon_graphic_set(item_id, unit_battle_get(battle_id));
 }
 
 /* Seat the rider on the mount: link both records, copy the mount's facing,

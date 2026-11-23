@@ -75,7 +75,7 @@ void unit_panel_equipment_thread(void) {
         u = 0x50;
     }
 
-    status_screen_init_numbers_frame(&g_unit_panel_equipment_origins[0], &screen->numeric_frame);
+    menu_numeric_frame_init(&g_unit_panel_equipment_origins[0], &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[0].x0 += g_unit_panel_equipment_origins[0].x;
@@ -187,7 +187,7 @@ void unit_panel_equipment_thread(void) {
         for (i = 0; i < 4; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        status_screen_submit_numbers_frame(&screen->numeric_frame);
+        menu_numeric_frame_submit(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
@@ -245,7 +245,7 @@ void unit_panel_ability_thread(void) {
         u = 0x50;
     }
 
-    status_screen_init_numbers_frame(&g_formation_ability_panel_origin, &screen->numeric_frame);
+    menu_numeric_frame_init(&g_formation_ability_panel_origin, &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[1].x0 += g_unit_panel_equipment_origins[0].x;
@@ -350,7 +350,7 @@ void unit_panel_ability_thread(void) {
         for (i = 4; i < 8; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        status_screen_submit_numbers_frame(&screen->numeric_frame);
+        menu_numeric_frame_submit(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 

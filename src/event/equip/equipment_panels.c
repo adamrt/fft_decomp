@@ -66,7 +66,7 @@ void unit_panel_equipment_thread(void) {
     }
 
     area = g_unit_panel_equipment_origins;
-    status_screen_init_numbers_frame(area, &screen->numeric_frame);
+    menu_numeric_frame_init(area, &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     menu_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[0].x0 += area->x;
@@ -180,7 +180,7 @@ void unit_panel_equipment_thread(void) {
         for (i = 0; i < 4; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        status_screen_submit_numbers_frame(&screen->numeric_frame);
+        menu_numeric_frame_submit(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
@@ -232,7 +232,7 @@ void unit_panel_ability_thread(void) {
         u = 0x50;
     }
 
-    status_screen_init_numbers_frame(&g_equipment_right_panel_frame_rect, &screen->numeric_frame);
+    menu_numeric_frame_init(&g_equipment_right_panel_frame_rect, &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     menu_init_scaled_draw_area_packets(&screen->portrait);
     /* The tile/line fixups must read g_unit_panel_equipment_origins as an array
@@ -338,7 +338,7 @@ void unit_panel_ability_thread(void) {
         for (i = 4; i < 8; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        status_screen_submit_numbers_frame(&screen->numeric_frame);
+        menu_numeric_frame_submit(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 

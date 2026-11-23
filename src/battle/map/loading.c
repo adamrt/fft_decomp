@@ -510,7 +510,7 @@ s32 battle_map_load_data(s32 map_id, battle_map_load_command_e command) {
  * Retail bug: the second step applies the palette and frees the buffer while
  * the read is still in progress, and waits forever once it has finished. The
  * only caller runs while g_battle_map_refresh_pending is set, which nothing sets. */
-s32 battle_map_load_alternate_mesh(s32 palette_mode) {
+s32 battle_map_mesh_palette_load(s32 palette_mode) {
     s32 i;
     s16 state;
 

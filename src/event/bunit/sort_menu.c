@@ -38,7 +38,7 @@ void unit_list_build_index_map(void) {
 /* List the units that get a grid cell of their own, in list order, and return their
  * count: every listed unit except a mount, which is drawn in its rider's cell.
  */
-s32 unit_list_build_sortable(void) {
+s32 unit_list_build_grid_cells(void) {
     s32 count = 0;
     s32 i;
 
@@ -116,7 +116,7 @@ void unit_list_sort_menu_update(void) {
         g_unit_list_reorder_list_redraw_request = 1;
         unit_list_store_sort_order(1, g_unit_list_reorder_list_entries);
         unit_list_sort(1);
-        unit_list_build_sortable();
+        unit_list_build_grid_cells();
         unit_list_build_index_map();
     }
 }

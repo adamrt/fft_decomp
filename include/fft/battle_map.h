@@ -500,7 +500,7 @@ s32 battle_map_return_zero_1(void); /* unreferenced stub */
 s32 battle_map_weather_get(void);
 
 /* Thread body: marks the deployment finished, for a battle that skips the deployment screen. */
-void battle_map_skip_deployment_thread(void);
+void deploy_skip_thread(void);
 
 /* script lighting */
 /* Interpolates the script light transform (g_script_light_* in script.h) each frame. */

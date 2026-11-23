@@ -431,7 +431,7 @@ static void palette_unit_status_update(unit_runtime_t* unit, s32 tile_effect_lev
 }
 
 /* Refresh the status palette of a unit and of its mount partner, unless suppressed. */
-void sprite_palette_check_tile_status_mod(unit_runtime_t* unit, s32 tile_effect_level, s32 update_current_colors) {
+void sprite_palette_update(unit_runtime_t* unit, s32 tile_effect_level, s32 update_current_colors) {
     unit_runtime_t* partner;
 
     if (!(unit->movement.suppress_palette_update)) {
@@ -471,7 +471,7 @@ void sprite_transparency_update(unit_runtime_t* unit) {
 /* Mirror the Float status into movement.floating and, unless the unit is in the air for Jump
  * (Jump, its height flag, or a Jump being removed), set it to its standing height and refresh its
  * real position. */
-void unit_float_jump_height_update(unit_runtime_t* unit) {
+void unit_float_height_update(unit_runtime_t* unit) {
     if (unit->status_flags_5_6 & UNIT_STATUS_FLOAT) {
         unit->movement.floating = 1;
     } else {

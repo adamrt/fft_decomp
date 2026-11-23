@@ -800,7 +800,7 @@ static effect_callback_t native_callback_get(s16 callback_id) {
 
 /* Read effect file effect_id's disc sector and byte length from g_disc_extents; a
  * length of 0 means the file is missing. */
-static void disc_extent_load(s32 effect_id, s32* lba, s32* byte_length) {
+static void disc_extent_get(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
     *lba = s_disc_extents[effect_id].sector;
@@ -834,10 +834,10 @@ void effect_file_seek_request(void) {
     s32 lba;
     s32 byte_length;
 
-    disc_extent_load(g_effect_id, &lba, &byte_length);
+    disc_extent_get(g_effect_id, &lba, &byte_length);
     if (byte_length == 0) {
         g_effect_id = EFFECT_FILE_CURE;
-        disc_extent_load(EFFECT_FILE_CURE, &lba, &byte_length);
+        disc_extent_get(EFFECT_FILE_CURE, &lba, &byte_length);
     }
     file_bytes_read_request(lba, byte_length, 0);
 }
@@ -866,10 +866,10 @@ s32 effect_file_load_update(void) {
             } else {
                 g_effect_load_countdown = 0;
             }
-            disc_extent_load(g_effect_id, &lba, &byte_length);
+            disc_extent_get(g_effect_id, &lba, &byte_length);
             if (byte_length == 0) {
                 g_effect_id = EFFECT_FILE_CURE;
-                disc_extent_load(EFFECT_FILE_CURE, &lba, &byte_length);
+                disc_extent_get(EFFECT_FILE_CURE, &lba, &byte_length);
             }
             result = file_bytes_read_request(lba, byte_length, destination);
             if (result == 0) {
@@ -925,7 +925,7 @@ s32 effect_file_load_update(void) {
  * animations for the equipment-break and Charge ability ranges are started,
  * and nothing is retained.
  */
-void effect_ability_animation_set(u32 packed, s32 ability, const effect_context_t* source) {
+void effect_playback_request(u32 packed, s32 ability, const effect_context_t* source) {
     g_effect_load_state = EFFECT_LOAD_START;
     if (ability < ABILITY_ID_COUNT) {
         if (ability == ABILITY_ID_THROW_BALL) {

@@ -20,7 +20,7 @@
 #include "psx/types.h"
 
 static void parent_windows_hide(void);
-static void parent_frame_hide(void);
+static void parent_tutorial_menu_hide(void);
 
 /* Push a screen transition into `destination_level` (a menu level type): clear the map, hide date, location label and
  * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
@@ -74,14 +74,14 @@ void screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s
         break;
     case MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST:
         tutorial_menu_panel_build(&g_menu_stack_records[g_menu_stack_depth - 1].tutorial_menu);
-        parent_frame_hide();
+        parent_tutorial_menu_hide();
         break;
     case MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST:
         display_object_queues_set_enabled(0);
         screen_entry_4_cursor_set(3);
         world_map_cursor_level_suspend(&g_menu_stack_records[g_menu_stack_depth - 1]);
         tutorial_menu_open(1, 0);
-        parent_frame_hide();
+        parent_tutorial_menu_hide();
         g_menu_stack_cursor_states[MENU_STACK_CURSOR_SLOT_BATTLE_TUTORIALS] = g_brave_story_saved_list_cursor_state;
         break;
     case MENU_STACK_LEVEL_BRAVE_STORY_TREASURE:
@@ -150,7 +150,7 @@ static void parent_windows_hide(void) {
  * window goes to palette 10 (sequence, frame_index and anim_counter cleared),
  * the side window to palette 6 and the frame render record to palette 2, each
  * hidden. */
-static void parent_frame_hide(void) {
+static void parent_tutorial_menu_hide(void) {
     s32 index = g_menu_stack_depth - 1;
 
     g_display_object_animated_pool[g_menu_stack_records[index].tutorial_menu.cursor_window].palette = 10;

@@ -195,7 +195,7 @@ void formation_panels_stop(void) {
     menu_request_thread_stop(SCREEN_THREAD_SLOT_EQUIP_ABILITY_PANEL);
     menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     formation_toggle_preview_stats_window(0);
-    formation_toggle_stat_preview_panel(0);
+    formation_toggle_preview_equipment_panel(0);
     g_unit_panel_preview_stats_thread_params.style = 0;
     g_formation_stat_preview_panel_thread_params.style = 0;
     g_formation_equipment_panel_thread_params.style = 0;

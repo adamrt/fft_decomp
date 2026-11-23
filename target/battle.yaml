@@ -172,7 +172,7 @@ functions:
   - {addr: 0x8006af7c, size: 2532, name: move_step_apply_velocity, hash: 25e0ccefd06d1157, unit: move_steps, rodata: [{addr: 0x80067148, size: 292, hash: e5e4bfdb7c85adf4}]}
   - {addr: 0x8006b960, size: 52, name: unit_sfx_play, hash: aba80650a5bb7c0f, unit: move_steps}
   - {addr: 0x8006b994, size: 164, name: landing_sfx_play, hash: 63a09bb88a61eaed, unit: move_steps, rodata: [{addr: 0x80067270, size: 172, hash: fcee78d9d8cf2d00}]}
-  - {addr: 0x8006ba38, size: 160, name: landing_secondary_set, hash: b5f6477734577c9e, unit: move_steps, rodata: [{addr: 0x80067320, size: 184, hash: f62472191a2042df}]}
+  - {addr: 0x8006ba38, size: 160, name: landing_effect_start, hash: b5f6477734577c9e, unit: move_steps, rodata: [{addr: 0x80067320, size: 184, hash: f62472191a2042df}]}
   - {addr: 0x8006bad8, size: 292, name: move_step_get_current_and_destination_tiles, hash: bdd81a2ce3662435, unit: move_steps}
   - {addr: 0x8006bbfc, size: 232, name: move_settle_on_tile, hash: 5642785623cc3c2a, unit: move_steps}
   - {addr: 0x8006bce4, size: 196, name: unit_mount_onto_pending, hash: 2c98bea1c61b9d11, unit: move_steps}
@@ -229,7 +229,7 @@ functions:
   - {addr: 0x8006f968, size: 68, name: camera_tilt_handle_input, hash: a4e4288874860cf7, unit: camera_control}
   - {addr: 0x8006f9ac, size: 420, name: camera_tilt_update, hash: a17e240ae09c3b45, unit: camera_control}
   - {addr: 0x8006fb50, size: 184, name: acting_unit_vector_normal_calculate, hash: e17d953174a4cf09, unit: camera_control}
-  - {addr: 0x8006fc08, size: 96, name: acting_unit_vector_shift, hash: 23617fbe9386cf22, unit: camera_control}
+  - {addr: 0x8006fc08, size: 96, name: acting_unit_vector_scale, hash: 23617fbe9386cf22, unit: camera_control}
   - {addr: 0x8006fc68, size: 400, name: cursor_tile_vector_normal_calculate, hash: f27048ed83f110e5, unit: camera_control}
   - {addr: 0x8006fdf8, size: 96, name: cursor_tile_vector_scale, hash: 08f07316edb3ce5d, unit: camera_control}
   - {addr: 0x8006fe58, size: 612, name: cursor_focus_step, hash: ccbb0ecb51c46c51, unit: camera_control}
@@ -474,10 +474,10 @@ functions:
   - {addr: 0x80081d54, size: 956, name: sprite_palette_tint_unit, hash: ddcee335cd1f0c8c, unit: unit_render, rodata: [{addr: 0x80067e00, size: 92, hash: ed149fdad13bd852}]}
   - {addr: 0x80082110, size: 428, name: palette_unit_modify, hash: 66ad0e1e4663f614, unit: unit_render}
   - {addr: 0x800822bc, size: 428, name: palette_unit_status_update, hash: ce9969f0807cf7f3, unit: unit_render}
-  - {addr: 0x80082468, size: 160, name: sprite_palette_check_tile_status_mod, hash: b280713ab1d453da, unit: unit_render}
+  - {addr: 0x80082468, size: 160, name: sprite_palette_update, hash: b280713ab1d453da, unit: unit_render}
   - {addr: 0x80082508, size: 72, name: sprite_status_bubble_active_update, hash: 1c11a4663f86f576, unit: unit_render}
   - {addr: 0x80082550, size: 60, name: sprite_transparency_update, hash: a8f89982a732364e, unit: unit_render}
-  - {addr: 0x8008258c, size: 148, name: unit_float_jump_height_update, hash: f05be917e6b96262, unit: unit_render}
+  - {addr: 0x8008258c, size: 148, name: unit_float_height_update, hash: f05be917e6b96262, unit: unit_render}
   - {addr: 0x80082620, size: 364, name: action_play_weapon_sfx, hash: cf66671c0bc307f1, unit: unit_animations, rodata: [{addr: 0x80067e60, size: 52, hash: d3464a1da9a6f832}]}
   - {addr: 0x8008278c, size: 256, name: water_mode_get, hash: 709c9eb1dc6a2866, unit: unit_animations}
   - {addr: 0x8008288c, size: 440, name: animation_weapon_attack_select, hash: 1029a6d78051fa69, unit: unit_animations}
@@ -492,8 +492,8 @@ functions:
   - {addr: 0x800831b8, size: 692, name: animation_status_changes_update, hash: bd35a7a465dae3b3, unit: unit_animations}
   - {addr: 0x8008346c, size: 260, name: unit_apply_poach_morbol_transformation, hash: 1e3d5271e5907d0e, unit: unit_animations}
   - {addr: 0x80083570, size: 488, name: sprite_sheet_apply_status_change, hash: eb857c9283e35c4a, unit: unit_animations}
-  - {addr: 0x80083758, size: 252, name: sprite_thrown_item_palette_set, hash: 9c90d2e4e18dcbc8, unit: unit_animations}
-  - {addr: 0x80083854, size: 32, name: animation_status_set_on_main_stack, hash: 1eb3694d95d08d19, unit: unit_animations}
+  - {addr: 0x80083758, size: 252, name: sprite_weapon_graphic_set, hash: 9c90d2e4e18dcbc8, unit: unit_animations}
+  - {addr: 0x80083854, size: 32, name: animation_status_set_after_action, hash: 1eb3694d95d08d19, unit: unit_animations}
   - {addr: 0x80083874, size: 260, name: animation_shield_block_attacker_set, hash: 4a335d65ec7617af, unit: unit_animations, rodata: [{addr: 0x80067e98, size: 76, hash: be9dac48aa5af82c}]}
   - {addr: 0x80083978, size: 736, name: action_start_target_response, hash: d06dd19b5bd4cf5d, unit: unit_animations, rodata: [{addr: 0x80067ee8, size: 52, hash: c0e3692a8e07af58}]}
   - {addr: 0x80083c58, size: 124, name: unit_target_displays_update, hash: 211c887e36c9bbce, unit: unit_animations}
@@ -562,7 +562,7 @@ functions:
   - {addr: 0x8008a700, size: 128, name: teleport_departure_start, hash: 8ed9b6b54379371d, unit: unit_motion}
   - {addr: 0x8008a780, size: 128, name: teleport_arrival_start, hash: 7e471afe5dac3872, unit: unit_motion}
   - {addr: 0x8008a800, size: 132, name: teleport_white_flash_start, hash: 7f3c5bfb3a67eac6, unit: unit_motion}
-  - {addr: 0x8008a884, size: 160, name: teleport_fade_out_start, hash: 6716120dbf337fd0, unit: unit_motion}
+  - {addr: 0x8008a884, size: 160, name: teleport_arrival_dark_start, hash: 6716120dbf337fd0, unit: unit_motion}
   - {addr: 0x8008a924, size: 528, name: distortion_teleport, hash: a09a8cf66624f944, unit: unit_motion, rodata: [{addr: 0x80068208, size: 32, hash: aa8ca34facf06f33}]}
   - {addr: 0x8008ab34, size: 708, name: distortion_back_away, hash: 768a25feb9e467f8, unit: unit_motion}
   - {addr: 0x8008adf8, size: 720, name: distortion_jump_to_own_tile_faded, hash: 68cb8b1bcb33f553, unit: unit_motion}
@@ -651,7 +651,7 @@ functions:
   - {addr: 0x8008ce78, size: 88, name: sprite_sheet_get_slot_by_battle_id, hash: 2f471fd71e4e7c65, unit: unit_commands}
   - {addr: 0x8008ced0, size: 44, name: unit_battle_action_command_get, hash: 9933c25c8ea3a0e5, unit: unit_commands}
   - {addr: 0x8008cefc, size: 64, name: move_is_unit_moving_by_runtime_id, hash: 730cfc06ddfa1b67, unit: unit_commands}
-  - {addr: 0x8008cf3c, size: 60, name: sprite_runtime_thrown_item_palette_set, hash: e8eb803a892bcb87, unit: unit_commands}
+  - {addr: 0x8008cf3c, size: 60, name: sprite_runtime_weapon_graphic_set, hash: e8eb803a892bcb87, unit: unit_commands}
   - {addr: 0x8008cf78, size: 228, name: script_opcode_47_add_ghost_unit, hash: 742dc31f4e52bd45, unit: unit_commands}
   - {addr: 0x8008d05c, size: 168, name: sprite_unit_graphics_load_start, hash: dcb30d626aa5871c, unit: unit_commands}
   - {addr: 0x8008d104, size: 52, name: sprite_unit_graphics_load_poll, hash: ef06036bcd08dc52, unit: unit_commands}
@@ -698,13 +698,13 @@ functions:
   - {addr: 0x8008e150, size: 44, name: battle_map_texture_animation_is_active, hash: 1bc5d9a49e9941b9, unit: scene_commands}
   - {addr: 0x8008e17c, size: 124, name: camera_is_active, hash: c12429f34da0186e, unit: scene_commands}
   - {addr: 0x8008e1f8, size: 60, name: cursor_unit_tile_move, hash: 7cce6d6e7e7829b6, unit: scene_commands}
-  - {addr: 0x8008e234, size: 148, name: effect_projectile_single_target_init, hash: 1a211337679f715e, unit: scene_commands}
+  - {addr: 0x8008e234, size: 148, name: projectile_direct_single_target_init, hash: 1a211337679f715e, unit: scene_commands}
   - {addr: 0x8008e2c8, size: 60, name: effect_secondary_unit_teleport_start, hash: c7123af1fb409fd1, unit: scene_commands}
   - {addr: 0x8008e304, size: 20, name: deploy_mark_finished, hash: bc8617c70c276fe9, unit: scene_commands}
   - {addr: 0x8008e318, size: 16, name: system_frame_measurement_get, hash: 6b0292f4774a9c77, unit: scene_commands}
   - {addr: 0x8008e328, size: 32, name: system_min_vsync_interval_set, hash: 8791e46386a76d81, unit: scene_commands}
   - {addr: 0x8008e348, size: 16, name: system_min_vsync_interval_clear, hash: 1a147918033f9163, unit: scene_commands}
-  - {addr: 0x8008e358, size: 272, name: camera_cursor_focus_set, hash: 4d4f8bdde1c680dd, unit: scene_commands}
+  - {addr: 0x8008e358, size: 272, name: camera_position_and_cursor_set, hash: 4d4f8bdde1c680dd, unit: scene_commands}
   - {addr: 0x8008e468, size: 216, name: camera_defaults_init, hash: 72a72c4be2ea9b49, unit: map_init}
   - {addr: 0x8008e540, size: 400, name: sprite_unit_graphics_load_queue, hash: 88fcbf815d20c90a, unit: map_init}
   - {addr: 0x8008e6d0, size: 8, name: unit_return_zero_1, hash: 207819bf4ebe3078, unit: map_init}
@@ -788,7 +788,7 @@ functions:
   - {addr: 0x800f3638, size: 140, name: battle_map_gns_move_find_load, hash: b558d851e0fec1a4, unit: map_gns}
   - {addr: 0x800f36c4, size: 84, name: battle_map_file_load_start, hash: 49d3e511ae62ee25, unit: map_gns}
   - {addr: 0x800f3718, size: 5044, name: battle_map_load_data, hash: 80e0c81db01af2f3, unit: map_loading, rodata: [{addr: 0x800e7178, size: 296, hash: 9789505d5f40b59f}]}
-  - {addr: 0x800f4acc, size: 776, name: battle_map_load_alternate_mesh, hash: 73bbc7bcf87038c6, unit: map_loading}
+  - {addr: 0x800f4acc, size: 776, name: battle_map_mesh_palette_load, hash: 73bbc7bcf87038c6, unit: map_loading}
   - {addr: 0x800f4dd4, size: 1956, name: battle_map_mesh_append_geometry, hash: c311b7b2a36f1385, unit: map_loading}
   - {addr: 0x800f5578, size: 1036, name: mesh_render_records_init, hash: b542a7ce19b82664, unit: map_loading}
   - {addr: 0x800f5984, size: 108, name: battle_map_stop_clut_cycles_and_weather_sfx, hash: bc7d2dc040adf637, unit: map_loading}
@@ -812,7 +812,7 @@ functions:
   - {addr: 0x8012dd6c, size: 40, name: menu_invalid_choice_thread_run, hash: ee6f22f6b5675647, unit: script_helpers}
   - {addr: 0x8012dd94, size: 48, name: camera_idle_wait, hash: c9beddd4e8635e8d, unit: script_helpers}
   - {addr: 0x8012ddc4, size: 36, name: camera_yaw_normalize, hash: d8594f5ae28d378e, unit: script_helpers}
-  - {addr: 0x8012dde8, size: 292, name: camera_tilt_zoom_init, hash: 2bfaf1895687be29, unit: script_helpers}
+  - {addr: 0x8012dde8, size: 292, name: camera_tilt_zoom_settle, hash: 2bfaf1895687be29, unit: script_helpers}
   - {addr: 0x8012df0c, size: 52, name: camera_yaw_wrap, hash: 40b97089558b718b, unit: script_helpers}
   - {addr: 0x8012df40, size: 40, name: menu_selected_unit_stats_get, hash: 34ff5c65d4712d47, unit: script_helpers}
   - {addr: 0x8012df68, size: 48, name: script_value_clamp, hash: 5dad512952649360, unit: script_helpers}
@@ -834,8 +834,8 @@ functions:
   - {addr: 0x8012eeb0, size: 380, name: menu_alloc_memory, hash: a333c97bf7b7ceb0, unit: buffer_allocator}
   - {addr: 0x8012f02c, size: 32, name: menu_alloc_buffer, hash: 8dfe96e6bed1af08, unit: buffer_allocator}
   - {addr: 0x8012f04c, size: 192, name: menu_free_memory, hash: bf843d0680a0ad61, unit: buffer_allocator}
-  - {addr: 0x8012f10c, size: 596, name: status_screen_init_numbers_frame, hash: 793d75bdfee884f4, unit: numbers_frame}
-  - {addr: 0x8012f360, size: 108, name: status_screen_submit_numbers_frame, hash: f20c4498d66b3270, unit: numbers_frame}
+  - {addr: 0x8012f10c, size: 596, name: menu_numeric_frame_init, hash: 793d75bdfee884f4, unit: numbers_frame}
+  - {addr: 0x8012f360, size: 108, name: menu_numeric_frame_submit, hash: f20c4498d66b3270, unit: numbers_frame}
   - {addr: 0x8012f3cc, size: 136, name: menu_init_primitive_colors_normal, hash: 5a93f338b69dc23b, unit: numbers_frame}
   - {addr: 0x8012f454, size: 140, name: menu_init_primitive_colors_dimmed, hash: a34bc154bfcc9d66, unit: numbers_frame}
   - {addr: 0x8012f4e0, size: 380, name: message_window_width_measure, hash: eedb1f6dcfecd6a0, unit: dialog_messages}
@@ -858,7 +858,7 @@ functions:
   - {addr: 0x80132e50, size: 36, name: value_q12_lerp, hash: c8c076c648585d00, unit: dialog_helpers}
   - {addr: 0x80132e74, size: 296, name: rectangle_quad_lerp, hash: 9ae491a067b74ea5, unit: dialog_helpers}
   - {addr: 0x80132f9c, size: 84, name: script_opcode_16_pause, hash: 87298c6e69d92c6c, unit: dialog_helpers}
-  - {addr: 0x80132ff0, size: 88, name: unit_scratch_coords_copy, hash: 0a61ba2db8f7e33b, unit: dialog_helpers}
+  - {addr: 0x80132ff0, size: 88, name: unit_world_coords_static_copy, hash: 0a61ba2db8f7e33b, unit: dialog_helpers}
   - {addr: 0x80133048, size: 64, name: unit_screen_position_project, hash: f71d84cad0b16447, unit: dialog_helpers}
   - {addr: 0x80133088, size: 92, name: unit_world_coords_copy, hash: 804df09b5303cc41, unit: dialog_helpers}
   - {addr: 0x801330e4, size: 76, name: unit_world_vector_copy, hash: 0db0657e68cb43ea, source: src/lib/event/scene/unit_coordinates.c}
@@ -892,8 +892,8 @@ functions:
   - {addr: 0x80134a6c, size: 8, name: menu_noop_2, hash: 6d64edf91449c1b1, unit: unit_view_render}
   - {addr: 0x80134a74, size: 2120, name: unit_view_display_action_preview, hash: 6cb0f635f91d292a, unit: unit_view_render}
   - {addr: 0x801352bc, size: 3692, name: unit_view_stats_panel_thread, hash: a6325c0ce9b93247, unit: unit_view_render}
-  - {addr: 0x80136128, size: 96, name: unit_view_refresh_hovered_stats, hash: 44c12a5386f8c71d, unit: unit_view_render}
-  - {addr: 0x80136188, size: 96, name: unit_view_refresh_right_stats, hash: f443baa5b3aaef86, unit: unit_view_render}
+  - {addr: 0x80136128, size: 96, name: unit_view_hovered_stats_thread, hash: 44c12a5386f8c71d, unit: unit_view_render}
+  - {addr: 0x80136188, size: 96, name: unit_view_right_stats_thread, hash: f443baa5b3aaef86, unit: unit_view_render}
   - {addr: 0x801361e8, size: 316, name: unit_view_preview_caster_stats, hash: 907067bbf7af5d66, unit: unit_view_render}
   - {addr: 0x80136324, size: 184, name: unit_view_preview_target_stats, hash: 046102c8ecda5727, unit: unit_view_render}
   - {addr: 0x801363dc, size: 1844, name: unit_view_summary_thread, hash: f50298ccb84f275a, unit: unit_view_render}
@@ -914,7 +914,7 @@ functions:
   - {addr: 0x801384e0, size: 144, name: menu_get_cursor_bob_offset, hash: f47602e9b85539b1, unit: menu_entry_graphics}
   - {addr: 0x80138570, size: 428, name: menu_update_icon_cursor_sprites, hash: 32608173304e34f5, unit: menu_entry_graphics}
   - {addr: 0x8013871c, size: 80, name: menu_copy_sprite_position_uv_and_size, hash: 568fb2d3912cb994, unit: menu_entry_graphics}
-  - {addr: 0x8013876c, size: 416, name: menu_zoom_cursor_frame, hash: 509e692236432dd6, unit: menu_entry_graphics}
+  - {addr: 0x8013876c, size: 416, name: menu_sprite_zoom, hash: 509e692236432dd6, unit: menu_entry_graphics}
   - {addr: 0x8013890c, size: 464, name: gfx_build_scaled_draw_area_pair_swapped, hash: 43ec57d8623a1604, unit: menu_entry_graphics}
   - {addr: 0x80138adc, size: 52, name: menu_init_scaled_draw_area_packets, hash: fd9d7a1158be224d, source: src/lib/menu/graphics/draw_area_init.c}
   - {addr: 0x80138b10, size: 84, name: menu_submit_icon_primitives, hash: 3abc0aee8fb45d44, unit: icon_selection}
@@ -976,7 +976,7 @@ functions:
   - {addr: 0x8013d188, size: 20, name: overlay_small_request, hash: 2304312a1a158a04, unit: overlay_dispatch}
   - {addr: 0x8013d19c, size: 84, name: overlay_small_poll, hash: 4db3a15d03401224, unit: overlay_dispatch}
   - {addr: 0x8013d1f0, size: 8, name: battle_map_return_zero_1, hash: 207819bf4ebe3078, unit: overlay_dispatch}
-  - {addr: 0x8013d1f8, size: 56, name: battle_map_skip_deployment_thread, hash: f5d13c78756c2b83, unit: overlay_dispatch}
+  - {addr: 0x8013d1f8, size: 56, name: deploy_skip_thread, hash: f5d13c78756c2b83, unit: overlay_dispatch}
   - {addr: 0x8013d230, size: 72, name: music_load_wait, hash: 5cf0df43ec1c1bac, unit: music_tracks}
   - {addr: 0x8013d278, size: 168, name: music_tracks_play, hash: 5321f20b1e27a914, unit: music_tracks}
   - {addr: 0x8013d320, size: 444, name: deploy_open, hash: 289c47ca11bfc49a, unit: scene_menus}
@@ -1028,7 +1028,7 @@ functions:
   - {addr: 0x8013f8b4, size: 76, name: command_reset_unit_records, hash: e2c9146172c12401, unit: command_selection}
   - {addr: 0x8013f900, size: 120, name: command_reset_unit_record, hash: 01a91c530dee054f, unit: command_selection}
   - {addr: 0x8013f978, size: 16, name: command_get_selected, hash: c365dc2ee8cef471, unit: command_selection}
-  - {addr: 0x8013f988, size: 60, name: mini_menu_cancel_delay_thread, hash: a19b498310498fbb, unit: command_selection}
+  - {addr: 0x8013f988, size: 60, name: menu_request_close_thread, hash: a19b498310498fbb, unit: command_selection}
   - {addr: 0x8013f9c4, size: 60, name: mini_menu_confirm_delay_thread, hash: 9b356d5b71614e62, unit: command_selection}
   - {addr: 0x8013fa00, size: 56, name: menu_copy_u8_to_u16_terminated, hash: 95c73ad7819ea27c, unit: command_selection}
   - {addr: 0x8013fa38, size: 52, name: menu_copy_u8_to_u16, hash: 13d704f494f4f2e9, unit: command_selection}
@@ -1330,7 +1330,7 @@ functions:
   - {addr: 0x801811f8, size: 276, name: menu_action_unit_menu_id_get, hash: 34b72967c7d1fbbe, unit: skillset_menus}
   - {addr: 0x8018130c, size: 180, name: unit_get_action_restriction, hash: 7415096654c7109d, unit: skillset_menus}
   - {addr: 0x801813c0, size: 452, name: skillset_build_menu_list, hash: bc322084cf70da64, unit: skillset_menus}
-  - {addr: 0x80181584, size: 412, name: ability_table_load, hash: 9b1afa0da3dd945e, unit: skillset_menus, rodata: [{addr: 0x80174144, size: 44, hash: 2aa44194e1919be4}]}
+  - {addr: 0x80181584, size: 412, name: abilities_probe, hash: 9b1afa0da3dd945e, unit: skillset_menus, rodata: [{addr: 0x80174144, size: 44, hash: 2aa44194e1919be4}]}
   - {addr: 0x80181720, size: 160, name: at_list_count_turns_to_resolve, hash: 2a5b1849a8fd06d9, unit: skillset_menus}
   - {addr: 0x801817c0, size: 944, name: skillset_get_unit_ability_data, hash: 7cf68b74f9456eed, unit: skillset_menus}
   - {addr: 0x80181b70, size: 36, name: skillset_load_item_abilities, hash: 33142a722980274c, unit: skillset_menus}
@@ -1352,7 +1352,7 @@ functions:
   - {addr: 0x801827f0, size: 2184, name: turn_clock_run, hash: eca1e8e1a1be2442, unit: turn_order, rodata: [{addr: 0x80174174, size: 80, hash: 5ec441ab22224a82}]}
   - {addr: 0x80183078, size: 596, name: upkeep_action_build, hash: 2b39ea72993f160c, unit: turn_order}
   - {addr: 0x801832cc, size: 168, name: turn_status_flags_calculate, hash: 698a9630926bf0a1, unit: turn_order}
-  - {addr: 0x80183374, size: 328, name: event_check_battle_outcome, hash: e089ef307f2b5b2c, unit: turn_order}
+  - {addr: 0x80183374, size: 328, name: battle_outcome_check, hash: e089ef307f2b5b2c, unit: turn_order}
   - {addr: 0x801834bc, size: 136, name: at_list_find_unit, hash: 458cc1f77decbd50, unit: turn_order}
   - {addr: 0x80183544, size: 100, name: at_list_get_entry_unit_id, hash: 1c8bc8bcda750bbc, unit: turn_order}
   - {addr: 0x801835a8, size: 80, name: unit_is_excluded_from_at_list, hash: 7f9bf09700201ba6, unit: turn_order}
@@ -1458,7 +1458,7 @@ functions:
   - {addr: 0x80187730, size: 268, name: formula_select_magic_gun_ability, hash: d28f46ca3dc63488, unit: formula_effects}
   - {addr: 0x8018783c, size: 36, name: formula_apply_quick_effect, hash: d44e57f5a3edf580, unit: formula_effects}
   - {addr: 0x80187860, size: 176, name: formula_determine_reduced_stat, hash: 206b4a18443e690b, unit: formula_effects}
-  - {addr: 0x80187910, size: 184, name: formula_calculate_katana_break_chance, hash: a5e0f5599c12f8d8, unit: formula_effects}
+  - {addr: 0x80187910, size: 184, name: formula_roll_katana_break, hash: a5e0f5599c12f8d8, unit: formula_effects}
   - {addr: 0x801879c8, size: 728, name: formula_select_targeted_equipment, hash: 455287e6df9bfdfe, unit: formula_effects}
   - {addr: 0x80187ca0, size: 532, name: formula_apply_poach_and_train, hash: c76a5a1a24eca582, unit: formula_effects}
   - {addr: 0x80187eb4, size: 112, name: formula_apply_status, hash: 7b84444a4587202b, unit: formula_effects}
@@ -1777,13 +1777,13 @@ functions:
   - {addr: 0x801a1200, size: 68, name: parent_timing_curve_evaluate, hash: 593c1814534b2238, unit: effect_playback}
   - {addr: 0x801a1244, size: 68, name: child_timing_curve_evaluate, hash: eb504d572534c851, unit: effect_playback}
   - {addr: 0x801a1288, size: 28, name: native_callback_get, hash: 8dc94b536cc6f119, unit: effect_playback}
-  - {addr: 0x801a12a4, size: 56, name: disc_extent_load, hash: 5d4f02505ab0b9a7, unit: effect_playback}
+  - {addr: 0x801a12a4, size: 56, name: disc_extent_get, hash: 5d4f02505ab0b9a7, unit: effect_playback}
   - {addr: 0x801a12dc, size: 40, name: effect_report_0x320_return_zero, hash: 155dc8be5b11cf02, unit: effect_playback}
   - {addr: 0x801a1304, size: 36, name: effect_report_0x320_1, hash: 64066c40b8e49544, unit: effect_playback}
   - {addr: 0x801a1328, size: 36, name: effect_report_0x320_2, hash: ce21b17e4c70afea, unit: effect_playback}
   - {addr: 0x801a134c, size: 112, name: effect_file_seek_request, hash: 23752bb8f5907c16, unit: effect_playback}
   - {addr: 0x801a13bc, size: 504, name: effect_file_load_update, hash: 516c2b8423f5a618, unit: effect_playback}
-  - {addr: 0x801a15b4, size: 608, name: effect_ability_animation_set, hash: cca6d1ac2c1bd30d, unit: effect_playback}
+  - {addr: 0x801a15b4, size: 608, name: effect_playback_request, hash: cca6d1ac2c1bd30d, unit: effect_playback}
   - {addr: 0x801a1814, size: 64, name: effect_ability_has_no_file, hash: 2bdaff51f5a994c3, unit: effect_playback}
   - {addr: 0x801a1854, size: 44, name: effect_is_item_ability, hash: 2a81a9ea4b02932f, unit: effect_playback}
   - {addr: 0x801a1880, size: 36, name: effect_playback_start, hash: 3df6c329f5a06bd1, unit: effect_playback}
@@ -1967,7 +1967,7 @@ functions:
   - {addr: 0x801adfac, size: 64, name: effect_element_index_get, hash: 155aa8fa483b6b96, unit: effect_system}
   - {addr: 0x801adfec, size: 444, name: effect_secondary_weapon_hit_init, hash: cc6580faec91e3af, unit: effect_system, rodata: [{addr: 0x801a0e60, size: 32, hash: 9c3b3543911ab26c}]}
   - {addr: 0x801ae1a8, size: 288, name: effect_secondary_fall_dust_init, hash: 114a15e567004ef5, unit: effect_system}
-  - {addr: 0x801ae2c8, size: 120, name: effect_secondary_end_on_current_unit, hash: 0dedbedd0bc4e8f6, unit: effect_system}
+  - {addr: 0x801ae2c8, size: 120, name: effect_secondary_ending_init, hash: 0dedbedd0bc4e8f6, unit: effect_system}
   - {addr: 0x801ae340, size: 3528, name: effect_model_draw, hash: f7978e0ecda14db0, unit: effect_model_draw}
   - {addr: 0x801af108, size: 668, name: effect_thrown_item_sprite_draw, hash: edf5e494239a5b7a, unit: effect_model_draw}
   - {addr: 0x801af3a4, size: 56, name: arc_height_term_calculate, hash: 8d9ccdb11876e1b0, unit: projectile}

@@ -503,7 +503,7 @@ void formula_un_truth(void) {
 /* Formula 0x20: Draw Out damage (MA * Y) with element; no evade; 19% status;
  * katana break roll. */
 void formula_draw_out_damage(void) {
-    formula_calculate_katana_break_chance();
+    formula_roll_katana_break();
     formula_store_ma_and_y();
     formula_calculate_magical_damage_without_faith();
 }
@@ -513,7 +513,7 @@ void formula_bizen_boat(void) {
     s16 damage;
     action_data_t* action;
 
-    formula_calculate_katana_break_chance();
+    formula_roll_katana_break();
     formula_store_ma_and_y();
     formula_apply_magical_modifiers();
     damage = g_action_work.xa * g_action_work.ya;
@@ -524,14 +524,14 @@ void formula_bizen_boat(void) {
 
 /* Formula 0x22: Draw Out status, 100%; katana break roll. */
 void formula_draw_out_status(void) {
-    formula_calculate_katana_break_chance();
+    formula_roll_katana_break();
     formula_apply_status_to_action();
 }
 
 /* Formula 0x23 (Murasame): Draw Out heal (MA * Y) HP with no modifiers (damage to
  * undead); katana break roll. */
 void formula_murasame(void) {
-    formula_calculate_katana_break_chance();
+    formula_roll_katana_break();
     formula_store_ma_and_y();
     formula_store_xa_times_ya_damage();
     formula_apply_undead_reversal();

@@ -368,7 +368,7 @@ static s32 dismissal_selection_run(void) {
 
     portrait_prepare_party_textures();
     text = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
-    unit_panel_set_transition(1);
+    unit_panel_set_dimmed(1);
     {
         s32 name_character_index;
 
@@ -450,7 +450,7 @@ static s32 dismissal_selection_run(void) {
         thread_inactive_wait(6);
         /* should_restore still holds 1: an answer of 1, or a cancel, keeps the party. */
         if (g_party_removal_result == should_restore || g_party_removal_result == -1) {
-            unit_panel_set_transition(0);
+            unit_panel_set_dimmed(0);
             should_restore = 0;
             result = 1;
             break;
@@ -472,7 +472,7 @@ static s32 dismissal_selection_run(void) {
         thread_parameters_set(AFTER_BATTLE_THREAD_SLOT_MENU,
             (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_DISMISS_UNIT_PROMPT], 0, 0);
         thread_inactive_wait(AFTER_BATTLE_THREAD_SLOT_MENU);
-        unit_panel_set_transition(0);
+        unit_panel_set_dimmed(0);
         for (;;) {
             s32 helpmenu_thread;
 
@@ -487,7 +487,7 @@ static s32 dismissal_selection_run(void) {
             /* R1 and L1 step to the next or previous removable unit. The status redraw
              * request doubles as the portrait slide direction: 1 (should_restore) for R1, 2 for L1. */
             if (*g_menu_input_controller & PSX_PAD_R1) {
-                g_unit_panel_status_animation[1] = 7;
+                g_unit_panel_button_prompt_animation[1] = 7;
                 for (;;) {
                     selected_party_index++;
                     if (selected_party_index == PARTY_ROSTER_SLOT_COUNT)
@@ -506,7 +506,7 @@ static s32 dismissal_selection_run(void) {
                     }
                 }
             } else if (*g_menu_input_controller & PSX_PAD_L1) {
-                g_unit_panel_status_animation[0] = 7;
+                g_unit_panel_button_prompt_animation[0] = 7;
                 do {
                     selected_party_index--;
                     if (selected_party_index == -1)
@@ -575,7 +575,7 @@ static s32 dismissal_selection_run(void) {
             }
         }
 
-        unit_panel_set_transition(1);
+        unit_panel_set_dimmed(1);
         g_text_substitution_values[0] = selected_party_index;
         /* Ramza only gets his message and the prompt repeats: he cannot be dismissed. */
         if (party_unit->sprite_set < CHARACTER_IDENTITY_RAMZA_END)
@@ -627,7 +627,7 @@ static s32 dismissal_selection_run(void) {
         thread_inactive_wait(AFTER_BATTLE_THREAD_SLOT_MENU);
     }
 
-    unit_panel_set_transition(0);
+    unit_panel_set_dimmed(0);
     g_gfx_screen_fade = 0;
     do {
         thread_yield();
@@ -715,7 +715,7 @@ void party_apply_post_battle_changes(void) {
         __asm__("" : "=r"(menu_fields) : "0"(menu_fields));
         unit_index_ptr = g_party_affected_battle_unit_indices;
         do {
-            unit_panel_set_transition(0);
+            unit_panel_set_dimmed(0);
             g_unit_panel_status_display_origin_x = -0x100;
             g_unit_panel_numbers_origin_x = -0x100;
             *transition_c_ptr = -0x100;
@@ -786,7 +786,7 @@ void party_apply_post_battle_changes(void) {
             do {
             retry_selection:
                 while (1) {
-                    unit_panel_set_transition(0);
+                    unit_panel_set_dimmed(0);
                     do {
                         thread_yield();
                         g_menu_input_controller = script_get_controller_input_pointer(0);
@@ -801,7 +801,7 @@ void party_apply_post_battle_changes(void) {
                         }
                     } while (1);
 
-                    unit_panel_set_transition(1);
+                    unit_panel_set_dimmed(1);
                     /* Fit the join prompt window to text 0x5006 (with this unit's name) and center it at x 0x100. */
                     g_text_substitution_values[0] = *selected_unit_index_ptr;
                     text_pixels_measure(&text_width_px, &text_height_px, text_entry_find(0x5006));
@@ -850,7 +850,7 @@ void party_apply_post_battle_changes(void) {
                     if (g_after_battle_menu_selection_result != -1) {
                         break;
                     }
-                    unit_panel_set_transition(0);
+                    unit_panel_set_dimmed(0);
                 }
                 /* 0 joins; a full roster (status 0) first asks for a member to dismiss. */
                 if (g_after_battle_menu_selection_result != 0) {
@@ -897,7 +897,7 @@ void party_apply_post_battle_changes(void) {
                     g_unit_panel_character_status_redraw_request = one;
                     g_unit_panel_selected_unit_status.unit_index = index_value;
                     if (g_party_removal_result == 0) {
-                        unit_panel_set_transition(1);
+                        unit_panel_set_dimmed(1);
                     }
                     unit_panel_copy_billboard_in(
                         &g_unit_panel_selected_unit_status, unit_display_data, &g_unit_panel_selected_unit_fields);
@@ -925,7 +925,7 @@ void party_apply_post_battle_changes(void) {
             input_wait_frames_or_skip(60);
             thread_parameters_set(AFTER_BATTLE_THREAD_SLOT_MENU, 0, 0, 2);
             thread_inactive_wait(AFTER_BATTLE_THREAD_SLOT_MENU);
-            unit_panel_set_transition(0);
+            unit_panel_set_dimmed(0);
 
             unit = unit_stats_get(*selected_unit_index_ptr);
             unit_index_ptr++;
@@ -938,7 +938,7 @@ void party_apply_post_battle_changes(void) {
                 selected_unit_index_ptr = unit_index_ptr;
                 goto retry_selection;
             }
-            unit_panel_set_transition(0);
+            unit_panel_set_dimmed(0);
             thread_frames_wait(10);
             unit = unit_stats_get(*selected_unit_index_ptr);
             unit_index_ptr++;

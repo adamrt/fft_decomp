@@ -15,8 +15,6 @@
 void status_screen_thread(void);
 
 /* numbers panel */
-void status_screen_init_numbers_frame(RECT* bounds, menu_numeric_frame_t* menu);
-void status_screen_submit_numbers_frame(menu_numeric_frame_t* display);
 void status_screen_numbers_thread(void);
 
 /* status list */
@@ -104,7 +102,7 @@ void status_screen_gfx_init_contexts(status_screen_gfx_context_t* base, u32* ota
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas);
 void status_screen_gfx_swap_context(s32 first_otag, s32 unused);
-void status_screen_gfx_enqueue_oriented_textured_quad(
+void menu_gfx_enqueue_oriented_textured_quad_rect(
     RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index);
 
 #endif

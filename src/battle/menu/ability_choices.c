@@ -23,7 +23,7 @@ static s32 skillset_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_ite
 
 static command_menu_e menu_action_unit_menu_id_get(const unit_stats_t* unit);
 
-static s32 ability_table_load(s32 unit_id, u8 skillset, u8 menu);
+static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu);
 
 static s32 math_flagged_abilities_collect(s32 unit_id, u8 skillset, s16* out, u8 mask);
 
@@ -218,7 +218,7 @@ s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types
         }
         menu_type = g_command_menu_types_by_skillset[id] & 0xf;
         menu_types[i] = menu_type;
-        if (ability_table_load(unit_id, id, menu_type) == 0) {
+        if (abilities_probe(unit_id, id, menu_type) == 0) {
             empty[i] = 1;
         } else {
             empty[i] = 0;
@@ -232,7 +232,7 @@ s32 skillset_build_menu_list(s32 unit_id, u8* entries, u8* empty, u8* menu_types
  * A frog only keeps the default, blank, monster and attack menus. Returns the
  * menu loader's result, or whether the menu type is below 15 for menus without
  * a loader. */
-static s32 ability_table_load(s32 unit_id, u8 skillset, u8 menu) {
+static s32 abilities_probe(s32 unit_id, u8 skillset, u8 menu) {
     u8 items[0x58];
     s16 abilities[0x44];
     u8 mp_costs[0x18];
@@ -394,7 +394,7 @@ s32 skillset_get_unit_ability_data(
         if (!(known & (0x800000 >> i))) {
             continue;
         }
-        ability = ability_skillset_id_get(skillset, i);
+        ability = skillset_ability_id_get(skillset, i);
         if (frog && ability != ABILITY_ID_BLACK_MAGIC_FROG) {
             continue;
         }
@@ -766,7 +766,7 @@ s32 skillset_monster_collect_abilities(s32 unit_id, u8 skillset, s16* out, s32 u
         count = MONSTER_SKILLSET_ABILITY_COUNT;
     }
     for (i = 0; i < count; i++) {
-        id = ability_skillset_id_get(skillset, i);
+        id = skillset_ability_id_get(skillset, i);
         ability = id;
         if ((frog == 0 || id == ABILITY_ID_BLACK_MAGIC_FROG) && id != 0 && id >= 1 && id < ABILITY_ID_ITEM_FIRST) {
             flags = g_ability_range_data[id].flags_3;

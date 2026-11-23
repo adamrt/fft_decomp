@@ -497,7 +497,7 @@ void formula_determine_reduced_stat(void) {
 /* Draw Out: the used katana breaks when a roll of 0..99 is below its weapon
  * power. The roll is made only when executing; any other state records it as
  * broken. A Mime's katana is not touched. */
-void formula_calculate_katana_break_chance(void) {
+void formula_roll_katana_break(void) {
     if (g_action_attacker->job_id == JOB_ID_MIME) {
         return;
     }

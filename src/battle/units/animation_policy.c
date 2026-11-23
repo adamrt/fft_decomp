@@ -634,7 +634,7 @@ void unit_apply_poach_morbol_transformation(unit_runtime_t* unit) {
     unit->stored_palette = 0;
     unit->tpage = unit->spritesheet_vram_slot + SPRITE_TPAGE_SPRITESHEET_SLOT_0;
     tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
-    sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
+    sprite_palette_update(unit, tile->flags.shading, 1);
     animation_facing_force(ANIMATION_IDLE, unit->facing, unit);
     unit_transform_into_morbol(unit->stats);
     ai_unit_abilities_init(unit->stats->battle_id);
@@ -686,7 +686,7 @@ void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_leve
         unit->animation.shp = unit->animation.saved_shp;
         unit->animation.seq = unit->animation.saved_seq;
         unit->spritesheet_id = original_id;
-        sprite_palette_check_tile_status_mod(unit, tile_effect_level, 1);
+        sprite_palette_update(unit, tile_effect_level, 1);
         animation_status_set(unit);
         sprite_unit_frame_load(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
@@ -698,7 +698,7 @@ void sprite_sheet_apply_status_change(unit_runtime_t* unit, s32 tile_effect_leve
  * CLUTs of the ITEM_A and ITEM_B rows, and its type selects the frame set of
  * the weapon SHP; a thrown weapon, any Throw ability and Throw Stone use
  * set 0x15. */
-void sprite_thrown_item_palette_set(s32 item_id, unit_runtime_t* unit) {
+void sprite_weapon_graphic_set(s32 item_id, unit_runtime_t* unit) {
     const item_data_t* item;
     u32 weapon_type;
     s32 clut_index;
@@ -723,9 +723,9 @@ void sprite_thrown_item_palette_set(s32 item_id, unit_runtime_t* unit) {
     unit->equipped_weapon_type = weapon_type;
 }
 
-/* A plain call through to animation_status_set, used by the
- * battle state handlers. */
-void animation_status_set_on_main_stack(unit_runtime_t* unit) {
+/* A plain call through to animation_status_set. Provisional: named for its
+ * two callers, the battle states that resume after an action. */
+void animation_status_set_after_action(unit_runtime_t* unit) {
     animation_status_set(unit);
 }
 
@@ -826,7 +826,7 @@ void action_start_target_response(unit_runtime_t* attacker, unit_runtime_t* targ
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
                 unit_facing_turn_to_target(target, attacker);
-                sprite_thrown_item_palette_set(action->item_lost, target);
+                sprite_weapon_graphic_set(action->item_lost, target);
                 attacker_center = sprite_runtime_sheet_height_get(attacker->runtime_id) / 2 - attacker->world_coords.vy;
                 target_center = sprite_runtime_sheet_height_get(target->runtime_id) / 2 - target->world_coords.vy;
                 difference = attacker_center - target_center;

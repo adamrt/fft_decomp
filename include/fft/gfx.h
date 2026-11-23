@@ -283,7 +283,7 @@ extern u32 g_gfx_otags[2][16];
 
 void gfx_init_screen_environments(s32 clear_first);
 void gfx_clear_current_otag(void);
-void gfx_clear_and_draw_current_frame(void);
+void gfx_frame_begin(void);
 
 /* FRAME.BIN */
 /* EVENT/FRAME.BIN: 256x288 pixels at 4bpp and 22 palettes, sector rounded.

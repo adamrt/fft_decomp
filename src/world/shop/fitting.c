@@ -85,7 +85,7 @@ extern u8 g_shop_fitting_cost_menu_script[103];
 static void fitting_cost_draw(void);
 static s32 checkout_prompt_update(void);
 static void fitting_undo(void);
-static void trial_item_return(s16 unit_index, s16 equipment_index);
+static void equipped_item_return(s16 unit_index, s16 equipment_index);
 static void trial_item_remove(s16 formation_index, s16 equipment_index);
 static void fitting_purchase_commit(void);
 
@@ -276,13 +276,13 @@ void shop_fitting_equipment_update(void) {
                 if (result < 0) {
                     g_sound_queued_effect_id = SOUND_SFX_INVALID;
                 } else {
-                    trial_item_return(g_unit_selected_index, g_shop_fitting_equip_slot);
+                    equipped_item_return(g_unit_selected_index, g_shop_fitting_equip_slot);
                     g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[g_shop_fitting_equip_slot]
                         = item | SHOP_FITTING_ITEM;
                     fitting_cost_add(shop_item_price_get(equip));
                     /* 0: the item clashes with the other hand, which goes back to the fitting room too. */
                     if (result != 1) {
-                        trial_item_return(g_unit_selected_index, g_shop_fitting_equip_slot == 0);
+                        equipped_item_return(g_unit_selected_index, g_shop_fitting_equip_slot == 0);
                     }
                     g_shop_fitting_item_list_close = 1;
                     g_sound_queued_effect_id = SOUND_SFX_EQUIP;
@@ -697,7 +697,7 @@ void shop_fitting_best_fit_update(void) {
             (u16*)g_item_preview_stat_detail.state.equipment);
         g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
             g_item_preview_stat_detail.state.equipment, formation_ability_has_two_hands(g_unit_selected_index));
-        formation_toggle_stat_preview_panel(1);
+        formation_toggle_preview_equipment_panel(1);
         formation_toggle_preview_stats_window(1);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
@@ -713,7 +713,7 @@ void shop_fitting_best_fit_update(void) {
         if (g_screen_selection_results[5] == 1) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         }
-        formation_toggle_stat_preview_panel(0);
+        formation_toggle_preview_equipment_panel(0);
         formation_toggle_preview_stats_window(0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         s_shop_fitting_best_fit_menu_open = 0;
@@ -735,7 +735,7 @@ void shop_fitting_best_fit_update(void) {
                 item = shifted >> 16;
                 current = g_formation_unit_pointers[g_unit_selected_index]->detail.equipment[i];
                 if (item == 0 || shifted < 0) {
-                    trial_item_return(g_unit_selected_index, i);
+                    equipped_item_return(g_unit_selected_index, i);
                     fitting_cost_add(shop_item_price_get(item));
                 } else if ((current >> 15) != 0) {
                     fitting_cost_add(-shop_item_price_get(current));
@@ -901,7 +901,7 @@ void shop_fitting_inventory_sale_update(void) {
 /* Clears one equipment slot of a formation unit.  An item the unit owned goes
  * back to the fitting room reserve; an item taken from the shop (bit 15 set)
  * is refunded from the fitting room cost instead. */
-static void trial_item_return(s16 unit_index, s16 equipment_index) {
+static void equipped_item_return(s16 unit_index, s16 equipment_index) {
     s32 equipped_item = g_formation_unit_pointers[unit_index]->detail.equipment[equipment_index];
 
     if (equipped_item != ITEM_ID_NOTHING) {

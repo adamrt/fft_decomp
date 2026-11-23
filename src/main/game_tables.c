@@ -32,7 +32,7 @@ static u16 s_skillset_abilities[SKILLSET_ABILITY_LIST_COUNT] = { 0 };
  * A human skillset (below SKILLSET_ID_MONSTER_FIRST) has 22 slots, a monster
  * skillset 4. Each record stores the low byte of every id; bit 8 of slot n comes
  * from the high_id_bits bytes, most significant bit first. */
-s32 ability_skillset_id_get(s32 skillset_id, s32 ability_index) {
+s32 skillset_ability_id_get(s32 skillset_id, s32 ability_index) {
     if (skillset_id < SKILLSET_ID_MONSTER_FIRST) {
         ability_human_skillset_t* table_base;
         ability_human_skillset_t* skillset;
@@ -86,7 +86,7 @@ u16* ability_skillset_list_build(s32 skillset_id, s32 filters) {
     }
     output_count = 0;
     for (ability_index = 0; ability_index < SKILLSET_ABILITY_LIST_COUNT; ability_index++) {
-        ability_id = ability_skillset_id_get(skillset_id, ability_index);
+        ability_id = skillset_ability_id_get(skillset_id, ability_index);
         if (ability_id < ABILITY_ID_REACTION_FIRST) {
             keep = filters & SKILLSET_ABILITY_FILTER_ACTION;
         } else if (ability_id < ABILITY_ID_SUPPORT_FIRST) {

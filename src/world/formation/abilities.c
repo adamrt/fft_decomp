@@ -734,7 +734,7 @@ s32 formation_ability_job_list_update(void) {
 }
 
 /* Store the selected ability-name text ID, then build the prompt. */
-void formation_ability_learn_prompt_build(void) {
+void formation_ability_learn_prompt_thread(void) {
     g_text_substitution_values[0]
         = g_ability_list_ability_entries[g_menu_list_selected_index] + TEXT_ID_ABILITY_NAME_BASE;
     menu_icon_linked_entry_thread();

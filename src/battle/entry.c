@@ -84,7 +84,7 @@ static void map_load_run(void) {
         show_banner = 0;
     }
     g_deploy_skipped = deploy_open();
-    loading_centered_message_build(g_deploy_skipped);
+    loading_message_build_offset(g_deploy_skipped);
     map_id = g_battle_map_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP);
     g_battle_map_init_step = 0;
     g_deploy_finished = 0;

@@ -38,7 +38,7 @@ void unit_panel_toggle_item_numbers_thread(s32 enable) {
 
 /* Prime the four "menu section dirty" flags before the
  * next redraw pass. */
-static void equipment_reset_dirty_flags(void) {
+static void redraw_panels(void) {
     g_unit_panel_unit_status_panel_params.redraw_request = 1;
     g_unit_panel_numeric_panel_params.redraw_request = 1;
     g_unit_panel_preview_stats_thread_params.redraw_request = 1;
@@ -83,7 +83,7 @@ void equipment_load_selected_unit(void) {
     equipment_weapon_evade_totals_build(
         &g_unit_panel_selected_unit_fields, g_equipment_unit_data[g_equipment_unit_selected_index]->equipment);
     equipment_copy_unit_to_comparison(g_equipment_unit_selected_index, 1);
-    equipment_reset_dirty_flags();
+    redraw_panels();
 }
 
 /* Fill the 4 s16 selection-index slots ending at

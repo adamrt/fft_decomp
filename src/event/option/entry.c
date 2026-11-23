@@ -74,6 +74,6 @@ void option_entrypoint(s32 menu_type) {
         at_list_start_thread();
     }
     if (menu_type == MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
-        crystal_start_pickup_threads();
+        crystal_pickup_menus_run();
     }
 }

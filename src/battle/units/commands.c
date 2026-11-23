@@ -649,11 +649,11 @@ s32 move_is_unit_moving_by_runtime_id(u32 runtime_id) {
 
 /* TempWeapon event instruction: sprite_thrown_item_palette_set for a
  * runtime id. An absent unit is skipped. */
-void sprite_runtime_thrown_item_palette_set(u32 item_id, u32 runtime_id) {
+void sprite_runtime_weapon_graphic_set(u32 item_id, u32 runtime_id) {
     unit_runtime_t* unit = unit_runtime_get(runtime_id);
 
     if (unit != 0) {
-        sprite_thrown_item_palette_set(item_id, unit);
+        sprite_weapon_graphic_set(item_id, unit);
     }
 }
 

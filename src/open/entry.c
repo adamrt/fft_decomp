@@ -58,7 +58,7 @@ static s32 movie_decode_next_frame(movie_mdec_state_t* state);
 static void movie_handle_mdec_slice(void);
 static void movie_init_mdec_state(movie_mdec_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1);
 static void movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback);
-static void movie_present_frame(void);
+static void frame_present(void);
 static void movie_start_cd_read(const CdlLOC* location);
 static void movie_update_stream_frame(void);
 static void movie_wait_for_mdec_output(movie_mdec_state_t* state, s32 unused);
@@ -89,7 +89,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
             u32* current_otag;
 
             file_load_poll(&g_file_cd_state);
-            gfx_clear_and_draw_current_frame();
+            gfx_frame_begin();
             movie_update_stream_frame();
             music_test_menu_frame_run();
             controller_dispatch_current();
@@ -105,7 +105,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
             DrawSync(0);
             input_update_with_soft_reset();
             VSync(0);
-            movie_present_frame();
+            frame_present();
             system_frame_stub();
         } while ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
     }
@@ -138,7 +138,7 @@ void open_ending_entrypoint(void) {
             u32* current_otag;
 
             file_load_poll(&g_file_cd_state);
-            gfx_clear_and_draw_current_frame();
+            gfx_frame_begin();
             movie_update_stream_frame();
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
@@ -148,7 +148,7 @@ void open_ending_entrypoint(void) {
             DrawSync(0);
             input_update_with_soft_reset();
             VSync(g_system_vsync_mode);
-            movie_present_frame();
+            frame_present();
             current_otag = (u32*)((g_gfx_active_buffer_index ^ 1) * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_1);
             DrawOTag(current_otag - 1);
             system_frame_stub();
@@ -443,7 +443,7 @@ static void movie_start_cd_read(const CdlLOC* location) {
  * enabled unless SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED is set.
  *
  * Nothing in OPEN.BIN sets SYSTEM_RUNTIME_FLAG_CLEAR_FRAME. */
-static void movie_present_frame(void) {
+static void frame_present(void) {
     RECT image_rect;
     RECT move_rect;
     s32 display_index = g_gfx_active_buffer_index ^ 1;

@@ -140,7 +140,7 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                         if (scratch[byte_index] & bit) {
                             continue;
                         }
-                        if ((ability_skillset_id_get(skillset, j) & 0xffff) != g_action_actor_used_ability_id) {
+                        if ((skillset_ability_id_get(skillset, j) & 0xffff) != g_action_actor_used_ability_id) {
                             continue;
                         }
                         if (random_roll_pass_fail(ABILITY_LEARN_ON_HIT_ROLL_MAXIMUM, ability->learn_rate) == 0) {
@@ -196,7 +196,7 @@ void ability_learn_used(unit_stats_t* unit) {
         byte_index = i / 8;
         mask = 0x80 >> (i - (byte_index * 8));
         if (!(learned[byte_index] & mask)) {
-            if ((u16)ability_skillset_id_get(skillset, i) == g_action_actor_used_ability_id) {
+            if ((u16)skillset_ability_id_get(skillset, i) == g_action_actor_used_ability_id) {
                 /* `base[byte_index] |= mask` emits different code. */
                 learned_byte = base + byte_index;
                 *learned_byte = mask | *learned_byte;

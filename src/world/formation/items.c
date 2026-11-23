@@ -354,7 +354,7 @@ static s32 best_fit_menu_update(void) {
         g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
             g_item_preview_stat_detail.state.equipment, formation_ability_has_two_hands(g_unit_selected_index));
         formation_toggle_preview_stats_window(1);
-        formation_toggle_stat_preview_panel(1);
+        formation_toggle_preview_equipment_panel(1);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         thread_suspend(SCREEN_THREAD_SLOT_UPPER_MENU);
@@ -372,7 +372,7 @@ static s32 best_fit_menu_update(void) {
         if (*choice == 1) {
             g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         }
-        formation_toggle_stat_preview_panel(0);
+        formation_toggle_preview_equipment_panel(0);
         formation_toggle_preview_stats_window(0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_formation_unit_cycle_mode = 2;

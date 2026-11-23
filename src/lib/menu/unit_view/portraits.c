@@ -29,7 +29,7 @@ void portrait_poly_build(s32 portrait_id, POLY_FT4* poly) {
     }
 #    if defined(FFT_EVENT_ATTACK) || defined(FFT_EVENT_REQUIRE)
     if ((portrait_id & PORTRAIT_FORMATION_ICON) != 0) {
-        gfx_set_formation_icon_uv(poly, portrait_id & 0xff);
+        portrait_build_party_poly(poly, portrait_id & 0xff);
     }
 #    endif
 }

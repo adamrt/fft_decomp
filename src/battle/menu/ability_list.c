@@ -475,7 +475,7 @@ void ability_list_scrolling_thread(void) {
         /* The window zooms open over its first 12 frames. */
         if (i * g_script_event_speed < 12) {
             gfx_set_image_primitive_layout(&page->frame, &entry->vram_origin, &entry->window, &window);
-            menu_zoom_cursor_frame(entry, frame, i * g_script_event_speed);
+            menu_sprite_zoom(entry, frame, i * g_script_event_speed);
         }
 
         /* The cursor sprites move to column 1 while the toggle selects it. */

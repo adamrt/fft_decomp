@@ -204,7 +204,7 @@ static void system_init_runtime_state(void) {
 }
 
 /* Start a frame: clear the active ordering table and queue the overlay fade. */
-void gfx_clear_and_draw_current_frame(void) {
+void gfx_frame_begin(void) {
     gfx_clear_current_otag();
     gfx_update_overlay_fade(g_gfx_otags[g_gfx_active_buffer_index]);
 }

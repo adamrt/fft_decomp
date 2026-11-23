@@ -56,7 +56,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `battle_map_gns_resource_dispatch` passes the packed lighting colors as a
   `MATRIX` to `light_matrices_set`, which also copies its 32-bit translation
   values from the following 16-bit direction components.
-- `battle_map_load_alternate_mesh`: scales the mesh header's color palette byte
+- `battle_map_mesh_palette_load`: scales the mesh header's color palette byte
   offset by four, placing the palette read past most mesh files. Its wait step
   tests `file_load_state_get() != 0`, the reverse of the other loaders:
   it applies the palette and frees the buffer while the read runs, then never
@@ -649,7 +649,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Delita's Chapter 2/3 identity (`sprite_set` 5) selects portrait 120 and
   reads remap byte 57 in the following window data. Their normal-game
   reachability in Formation is unverified.
-- `sound_novel_opcode_31_stop_pending_music` clears `tracks[slot]`,
+- `sound_novel_opcode_31_unload_music` clears `tracks[slot]`,
   but `reading_music_change` and the audio queue keep slot n's
   track in `tracks[n - 1]`. The novel always uses slot 2, so the store hits
   `current_slot` (zeroed next) and `tracks[1]` keeps the unloaded id: a later
@@ -683,7 +683,7 @@ written that way.
 - `StCdInterrupt`: emulated header/payload copies pass a fourth completion argument to the three-argument `mem2mem` helper, which ignores it.
 - `g_thread_call_target` is the main-stack dispatch slot for callees
   with different signatures; assignments erase their function types.
-- `screen_fit_parent_entry_to_digits`: calls
+- `screen_fit_child_entry_to_digits`: calls
   `text_decimal_digits_count` with no argument; the callee reads a stale
   `$a0`. Nothing calls the function itself.
 - `distortion_fall_to_target` passes a coordinate
@@ -698,7 +698,7 @@ written that way.
   even when no scenario music is loaded; the null record reads the status
   16-bit value at address `0x10`.
 - `menu_window_crop_animate` passes an uninitialized
-  source (a stale `$s5`) to `menu_zoom_cursor_frame`, which never reads it.
+  source (a stale `$s5`) to `menu_sprite_zoom`, which never reads it.
 - `battle_map_deployment_init_update` and
   `battle_map_init_update` call `sound_sfx_stop` without its sound
   id: step 0 passes `map_id`, still in `$a0`; step 11 passes whatever
@@ -779,7 +779,7 @@ written that way.
   set no result, although `effect_secondary_update`
   ends an effect on a handler result of 0. No record of
   `g_effect_secondary_animations` names them.
-- JOBSTTS's `ability_list_is_non_action_learned` passes one 32-bit pointer slot (0x801f0050, named
+- JOBSTTS's `ability_list_is_non_action_enabled` passes one 32-bit pointer slot (0x801f0050, named
   both `g_ability_list_selected_ability_data` and
   `g_ability_list_selected_ability_secondary_data`) for both outputs of
   `ability_records_get`, so the ability data pointer is
@@ -1153,7 +1153,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `battle_state_effect_enter` are the only code that enters
   `BATTLE_STATE_EFFECT`; neither has a caller, so
   `battle_state_effect_update` never runs.
-- WORLD's `screen_fit_parent_entry_to_digits` and
+- WORLD's `screen_fit_child_entry_to_digits` and
   `helpmenu_after_battle_entrypoint` have no callers; their quirks above do not
   execute in retail WORLD.
 - `hardware_event_wait` is OPEN's only caller of

@@ -699,10 +699,10 @@ static s32 teleport_departure_start(unit_runtime_t* unit) {
     teleport_effect_data_init(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case SPRITE_SHEET_ID_ALTIMA_FIRST_FORM:
-        effect_ability_animation_set(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
+        effect_playback_request(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
         return 1;
     case SPRITE_SHEET_ID_ALTIMA_SECOND_FORM:
-        effect_ability_animation_set(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
+        effect_playback_request(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
         return 1;
     }
     effect_secondary_teleport_start(unit);
@@ -719,10 +719,10 @@ static s32 teleport_arrival_start(unit_runtime_t* unit) {
     teleport_effect_data_init(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case SPRITE_SHEET_ID_ALTIMA_FIRST_FORM:
-        effect_ability_animation_set(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
+        effect_playback_request(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
         return 1;
     case SPRITE_SHEET_ID_ALTIMA_SECOND_FORM:
-        effect_ability_animation_set(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
+        effect_playback_request(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
         return 1;
     }
     effect_secondary_teleport_start(unit);
@@ -752,7 +752,7 @@ static void teleport_white_flash_start(unit_runtime_t* unit) {
  * palette is refreshed for the shadow mode of the tile it stands on and a palette
  * modulation of -31 on each color component starts. The distortion moves to its
  * next phase with the timer at 0. */
-static void teleport_fade_out_start(unit_runtime_t* unit) {
+static void teleport_arrival_dark_start(unit_runtime_t* unit) {
     battle_map_tile_t* tile;
 
     if (unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_FIRST_FORM
@@ -760,7 +760,7 @@ static void teleport_fade_out_start(unit_runtime_t* unit) {
         effect_playback_start();
     }
     tile = battle_map_tile_get_pointer(unit->map_x, unit->map_y, unit->map_layer);
-    sprite_palette_check_tile_status_mod(unit, tile->flags.shading, 1);
+    sprite_palette_update(unit, tile->flags.shading, 1);
     sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, 0, unit->runtime_id, -31, -31, -31);
     unit->distortion_phase++;
     unit->distortion_timer = 0;
@@ -803,14 +803,14 @@ static s32 distortion_teleport(unit_runtime_t* unit) {
             real_coords_from_map_coords_set(unit);
             unit_set_world_coords_from_real_coords(unit);
             if (teleport_arrival_start(unit) == 0) {
-                teleport_fade_out_start(unit);
+                teleport_arrival_dark_start(unit);
             }
             unit->distortion_phase++;
         }
         break;
     case ANIMATION_TELEPORT_PHASE_WAIT_ARRIVAL_LOAD:
         if (effect_file_load_update() == 0 && camera_is_active() == 0) {
-            teleport_fade_out_start(unit);
+            teleport_arrival_dark_start(unit);
         }
         break;
     case ANIMATION_TELEPORT_PHASE_HOLD_ARRIVAL_DARK:

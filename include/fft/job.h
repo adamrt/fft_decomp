@@ -43,7 +43,7 @@ typedef char job_data_size_must_be_48[(sizeof(job_data_t) == 48) ? 1 : -1];
 extern job_data_t* g_job_data_pointer;
 
 const job_data_t* job_data_get(s32 job_id);
-s32 job_skillset_find(u8 skillset_id);
+s32 job_find_by_skillset(u8 skillset_id);
 
 /* job ids */
 /* Job ids index the 160 records of g_job_data. A name is the job's name

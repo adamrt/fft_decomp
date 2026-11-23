@@ -381,7 +381,7 @@ static void pending_requests_process(void) {
     }
 
     if (g_battle_map_refresh_pending != 0) {
-        g_battle_map_refresh_pending = battle_map_load_alternate_mesh(3);
+        g_battle_map_refresh_pending = battle_map_mesh_palette_load(3);
     }
     /* Map reload and append step through states: 1 starts the load, 2 polls it, and 3 (done)
      * is cleared at the start of the next frame. */

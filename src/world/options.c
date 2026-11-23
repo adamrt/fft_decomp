@@ -76,7 +76,7 @@ void option_entrypoint(s32 mode) {
         at_list_start_thread();
     }
     if (mode == last_mode) {
-        crystal_start_pickup_threads();
+        crystal_pickup_menus_run();
     }
 }
 

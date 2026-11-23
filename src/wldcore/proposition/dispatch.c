@@ -506,7 +506,7 @@ static s32 candidates_build(proposition_send_unit_level_t* level) {
 }
 
 /* Redraw the send-unit list window: the empty frame, then one name row per unit chosen so far. */
-static void candidate_names_draw(proposition_send_unit_level_t* level) {
+static void participant_names_draw(proposition_send_unit_level_t* level) {
     point32_t point;
     s32 index = level->list_frame.render_index;
     s32 i;
@@ -587,7 +587,7 @@ static void participant_slots_update(proposition_send_unit_level_t* level) {
         sound_play_effect(SOUND_SFX_CONFIRM);
         unit = g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK;
         s_proposition_send_units[level->slot] = unit;
-        candidate_names_draw(level);
+        participant_names_draw(level);
         candidates_build(level);
         screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
     close:
@@ -922,7 +922,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
                 s_proposition_send_units[value - 1] = s_proposition_send_units[value];
             }
             s_proposition_send_unit_count--;
-            candidate_names_draw(&level->send_unit);
+            participant_names_draw(&level->send_unit);
             candidates_build(&level->send_unit);
             screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
             return;
@@ -951,7 +951,7 @@ void proposition_participants_update(menu_stack_record_t* level) {
     s_proposition_send_units[s_proposition_send_unit_count] = value;
     s_proposition_send_unit_count++;
 
-    candidate_names_draw(&level->send_unit);
+    participant_names_draw(&level->send_unit);
     candidates_build(&level->send_unit);
     screen_thread_redraw_request(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL);
 }

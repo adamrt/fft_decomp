@@ -129,7 +129,7 @@ void system_zero_padding(void);
 extern s32 g_loading_display_frame_counter;
 
 void loading_message_build(u32 visible, s32 x, s32 y);
-void loading_centered_message_build(u32 visible);
+void loading_message_build_offset(u32 visible);
 void loading_otag_append(u32* otag);
 void loading_message_draw(void);
 

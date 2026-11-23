@@ -96,7 +96,7 @@ void menu_window_crop_animate(menu_window_buffer_t* buffers, RECT* rect, RECT* u
         sprite.y0 = rect->y;
         sprite.w = rect->w;
         sprite.h = rect->h;
-        menu_zoom_cursor_frame(source, &sprite, level);
+        menu_sprite_zoom(source, &sprite, level);
         setXY4(&buffers[g_menu_packet_buffer_index].quads[0], sprite.x0, sprite.y0, sprite.x0 + (sprite.w - 2),
             sprite.y0, sprite.x0, sprite.y0 + sprite.h, sprite.x0 + (sprite.w - 2), sprite.y0 + sprite.h);
         setUV4(&buffers[g_menu_packet_buffer_index].quads[0], sprite.u0, sprite.v0, sprite.u0 + (sprite.w - 2),
@@ -183,10 +183,10 @@ void script_opcode_16_pause(void) {
     } while ((g_script_event_input & (PSX_PAD_SELECT | PSX_PAD_CROSS | PSX_PAD_CIRCLE)) == 0);
 }
 
-/* Copy a unit's integer world position into the shared g_unit_runtime_coords and return it. Like
+/* Copy a unit's integer world position into the file's s_unit_runtime_coords and return it. Like
  * unit_world_coords_copy it tests for -1, but a missing unit returns 0, so the copy then reads
  * address 0. */
-SVECTOR* unit_scratch_coords_copy(u32 runtime_id) {
+SVECTOR* unit_world_coords_static_copy(u32 runtime_id) {
     SVECTOR* source = unit_runtime_world_coords_get(runtime_id);
     SVECTOR* dest;
 

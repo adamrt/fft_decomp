@@ -175,7 +175,7 @@ static void debug_unit_editor_apply_values(s32 unit_id) {
  * opens the status-effect list as the previous thread slot and waits for it
  * (refused for a generic monster with no status), and Cross closes the
  * panels and ends the loop, after which the first unit is loaded again. The
- * menu-building thread holds the status groups' animation bytes at 1 while
+ * menu-building thread holds the button prompts' animation bytes at 1 while
  * it runs, and the panels are dimmed only while a THREAD_TASK_RESUME
  * thread is running as well.
  *
@@ -205,7 +205,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
     thread_current_task_set(THREAD_TASK_MOUNTED_STATUS_SCREEN);
     g_debug_unit_editor_active = 0;
-    g_unit_panel_status_group_count = 2;
+    g_unit_panel_button_prompt_count = 2;
 
     /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. */
     unit = unit_stats_get(unit_id);
@@ -268,7 +268,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
     frame = 0;
     render_buffers = s_unit_editor_gfx_render_buffers[0];
     one = 1;
-    animation = g_unit_panel_status_animation;
+    animation = g_unit_panel_button_prompt_animation;
     animation_second = animation + 1;
     animation_third = animation + 2;
     selected_unit = &g_unit_panel_selected_unit.battle_id;
@@ -281,7 +281,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
             s32 render_offset;
             render_offset = (frame & 1) * sizeof(s_unit_editor_gfx_render_buffers[0]);
             /* Typed polygon indexing reverses the ADDU operands. */
-            unit_panel_build_status_groups((POLY_FT4*)(render_offset + (s32)render_buffers));
+            unit_panel_build_button_prompts((POLY_FT4*)(render_offset + (s32)render_buffers));
         }
 
         if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
@@ -334,14 +334,14 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
                 animation_second[0] = one;
                 animation_third[0] = one;
 
-                /* Keep the status groups drawn until the status list thread in the previous slot exits. */
+                /* Keep the button prompts drawn until the status list thread in the previous slot exits. */
                 for (;;) {
                     thread_yield();
                     {
                         s32 render_offset;
                         render_offset = (frame & 1) * sizeof(s_unit_editor_gfx_render_buffers[0]);
                         /* Typed polygon indexing reverses the ADDU operands. */
-                        unit_panel_build_status_groups((POLY_FT4*)(render_offset + (s32)render_buffers));
+                        unit_panel_build_button_prompts((POLY_FT4*)(render_offset + (s32)render_buffers));
                     }
                     if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
                         break;
@@ -365,7 +365,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
             slot = s_unit_editor_selected_unit_slot;
             g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-            g_unit_panel_status_animation[1] = 7;
+            g_unit_panel_button_prompt_animation[1] = 7;
             slot ^= 1;
             s_unit_editor_selected_unit_slot = slot;
 
@@ -392,7 +392,7 @@ void debugchr_mounted_unit_entrypoint(s32 unit_id) {
 
             slot = s_unit_editor_selected_unit_slot;
             g_sound_pending_sfx_id = SOUND_SFX_PAGE_SWITCH;
-            g_unit_panel_status_animation[0] = 7;
+            g_unit_panel_button_prompt_animation[0] = 7;
             slot ^= 1;
             s_unit_editor_selected_unit_slot = slot;
 
@@ -502,7 +502,7 @@ void debugchr_editor_entrypoint(void) {
     s32 cursor_x;
 
     g_debug_unit_editor_active = 1;
-    g_unit_panel_status_group_count = 2;
+    g_unit_panel_button_prompt_count = 2;
 
     /* A slot is selectable when the lookup of its ENTD unit id returns that same slot: a present unit,
      * the first one with that id. */
@@ -562,7 +562,7 @@ loop_outer:
         /* Removing the tied use changes the marker and menu-pointer allocation. */
         __asm__("" : "=r"(primary_skillset_field) : "0"(primary_skillset_field));
         thread_yield();
-        unit_panel_build_status_groups(s_unit_editor_gfx_render_buffers[i & 1]);
+        unit_panel_build_button_prompts(s_unit_editor_gfx_render_buffers[i & 1]);
 
         input = script_get_controller_input_pointer(0);
         g_menu_input_controller = input;
@@ -578,7 +578,7 @@ loop_outer:
         }
 
         if (buttons & PSX_PAD_R1) {
-            g_unit_panel_status_animation[1] = 7;
+            g_unit_panel_button_prompt_animation[1] = 7;
             /* Label loops: a do-while's loop notes change the allocation. */
         next_unit:
             s_unit_editor_selected_unit_slot += 1;
@@ -610,7 +610,7 @@ loop_outer:
         }
 
         if (*g_menu_input_controller & PSX_PAD_L1) {
-            g_unit_panel_status_animation[0] = 7;
+            g_unit_panel_button_prompt_animation[0] = 7;
         prev_unit:
             s_unit_editor_selected_unit_slot -= 1;
             if (s_unit_editor_selected_unit_slot == -1) {

@@ -114,7 +114,7 @@ void unit_panel_banner_thread(void) {
     shake = 0;
 
     /* Build the editor packets once; the second buffer gets a copy of them below. */
-    status_screen_init_numbers_frame(&g_menu_portrait_origin, &editor->numeric_frame);
+    menu_numeric_frame_init(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -147,7 +147,7 @@ void unit_panel_banner_thread(void) {
     /* The status panel packets, built and copied the same way. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    status_screen_init_numbers_frame(&g_unit_panel_frame_rect, &panel->numeric_frame);
+    menu_numeric_frame_init(&g_unit_panel_frame_rect, &panel->numeric_frame);
     panel_sprites = &panel->sprites[0];
     menu_init_sprite_array(panel_sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
@@ -500,7 +500,7 @@ void unit_panel_banner_thread(void) {
                 }
                 gfx_draw_or_append_gpu_primitive(&editor->portrait[0]);
             }
-            status_screen_submit_numbers_frame(&editor->numeric_frame);
+            menu_numeric_frame_submit(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
 
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
@@ -515,7 +515,7 @@ void unit_panel_banner_thread(void) {
                 gfx_draw_or_append_gpu_primitive(&panel->sprites[i]);
             }
             gfx_draw_or_append_gpu_primitive(&panel->draw_mode_a);
-            status_screen_submit_numbers_frame(&panel->numeric_frame);
+            menu_numeric_frame_submit(&panel->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
 

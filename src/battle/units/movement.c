@@ -1314,7 +1314,7 @@ static void landing_sfx_play(unit_runtime_t* unit) {
  * and open water. Other surfaces (grassland, thicket, snow, lava, rugs, furniture
  * and the like) get none. Nothing starts for a unit whose motion flags suppress
  * landing effects, or when the destination tile does not exist. */
-static void landing_secondary_set(unit_runtime_t* unit) {
+static void landing_effect_start(unit_runtime_t* unit) {
     battle_map_tile_t* tile;
     s32 surface;
 
@@ -1794,7 +1794,7 @@ static void move_step_update_jump_flight(unit_runtime_t* unit) {
                 return;
             }
             landing_sfx_play(unit);
-            landing_secondary_set(unit);
+            landing_effect_start(unit);
             return;
         }
         unit->velocity.vy = 0;
@@ -1808,7 +1808,7 @@ static void move_step_update_jump_flight(unit_runtime_t* unit) {
             return;
         }
         landing_sfx_play(unit);
-        landing_secondary_set(unit);
+        landing_effect_start(unit);
         return;
     }
     unit->velocity.vy = 0;
@@ -1822,7 +1822,7 @@ static void move_step_update_jump_flight(unit_runtime_t* unit) {
         return;
     }
     landing_sfx_play(unit);
-    landing_secondary_set(unit);
+    landing_effect_start(unit);
 }
 
 /* Step handler of the JUMP_ASCENT phases. Once the unit's vertical velocity is
@@ -2251,7 +2251,7 @@ static void fly_to_center_update(unit_runtime_t* unit) {
  * and the unit's palette follows the destination tile's shading. */
 static void slope_scales_set(unit_runtime_t* unit) {
     move_step_get_current_and_destination_tiles(unit, &g_move_step_current_tile, &g_move_step_destination_tile);
-    sprite_palette_check_tile_status_mod(unit, g_move_step_destination_tile->flags.shading, 1);
+    sprite_palette_update(unit, g_move_step_destination_tile->flags.shading, 1);
     switch (g_move_step_value.direction) {
     case MOVE_STEP_DIRECTION_EAST:
         unit->destination_edge_scale = g_move_step_destination_edge_height

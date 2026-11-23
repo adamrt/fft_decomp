@@ -194,7 +194,7 @@ static event_scenario_condition_result_e condition_check(
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES))
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && event_check_battle_outcome() == 0)
+    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_outcome_check() == 0)
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_UNIT_AT_TILE) {
         unit = scenario_unit_stats_get(id);

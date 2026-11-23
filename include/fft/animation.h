@@ -228,7 +228,7 @@ void animation_level_up_set(struct unit_runtime* unit);
 void animation_stand_set(struct unit_runtime* unit);
 void animation_runtime_stand_set(u32 runtime_id);
 void animation_status_set(struct unit_runtime* unit);
-void animation_status_set_on_main_stack(struct unit_runtime* unit);
+void animation_status_set_after_action(struct unit_runtime* unit);
 void animation_runtime_status_set(u32 runtime_id);
 void animation_status_changes_update(struct unit_runtime* unit);
 

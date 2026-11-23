@@ -281,7 +281,7 @@ s32 battle_map_return_zero_1(void) {
 
 /* Release the map initializer's deployment gate after one yield, then exit after another.
  * Map loading proceeds independently in the battle loop. */
-void battle_map_skip_deployment_thread(void) {
+void deploy_skip_thread(void) {
     thread_yield();
     deploy_mark_finished();
     thread_yield();

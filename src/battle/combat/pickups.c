@@ -246,7 +246,7 @@ crystal_pickup_result_t* crystal_pickup_result_build(unit_stats_t* mover) {
                     byte_index = j / 8;
                     mask = 0x80 >> (j - byte_index * 8);
                     if (!(known[byte_index] & mask) && (offered[byte_index] & mask)) {
-                        ability = ability_skillset_id_get(skillset, j);
+                        ability = skillset_ability_id_get(skillset, j);
                         ability_id = ability;
                         if (ability_id != 0 && random_roll_pass_fail(100, g_ability_data[ability_id].learn_rate) == 0) {
                             gained[byte_index] = mask | gained[byte_index];

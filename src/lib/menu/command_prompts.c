@@ -91,15 +91,15 @@ static request_entry_t s_request_entries[51] = {
         menu_run_icon_selection_loop, 2, { 0, 0 } }, /* 2 */
     { MENU_COMMAND_ID_PANEL_EXECUTE, 0x5058, MENU_COMMAND_ID_PANEL_EXECUTE, 0xffff, 1, { 0, 0 },
         menu_run_icon_selection_loop, 3, { 0, 0 } }, /* 3 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 4 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 5 */
     { MENU_COMMAND_ID_MESSAGE, 0x800b, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 6 */
     { MENU_COMMAND_ID_MESSAGE, 0x8003, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 7 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 8 */
     { MENU_COMMAND_ID_EXECUTE, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_run_icon_selection_loop, 9,
         { 0, 0 } }, /* 9 */
@@ -111,7 +111,7 @@ static request_entry_t s_request_entries[51] = {
         menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 12 */
     { 102, 0x8011, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         9, { 0, 0 } }, /* 13 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, mini_menu_cancel_delay_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } },                                                                         /* 14 */
     { 99, 0x1004, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } }, /* 15 */
     { 99, 0x8006, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
@@ -142,8 +142,8 @@ static request_entry_t s_request_entries[51] = {
         MENU_PROMPT_EFFECT_MESSAGE, { 0, 0 } }, /* 29 */
     { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x1017, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 30 */
-    { MENU_COMMAND_ID_CRYSTAL_PICKUP, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 },
-        mini_menu_cancel_delay_thread, MENU_PROMPT_CRYSTAL_OR_TREASURE, { 0, 0 } },                            /* 31 */
+    { MENU_COMMAND_ID_CRYSTAL_PICKUP, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
+        MENU_PROMPT_CRYSTAL_OR_TREASURE, { 0, 0 } },                                                           /* 31 */
     { 99, 0x1013, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } }, /* 32 */
     { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8006, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 33 */
@@ -767,7 +767,7 @@ static s32 request_dispatch(
                         count++;
                     }
                 }
-                if ((event_check_battle_outcome() < 0 || count != 0)
+                if ((battle_outcome_check() < 0 || count != 0)
                     && script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
@@ -810,7 +810,7 @@ static s32 request_dispatch(
                         g_script_next_event_id = EVENT_ID_BATTLE_START;
                     }
                     return MENU_REQUEST_RESULT_EVENT;
-                } else if (event_check_battle_outcome() == 0) {
+                } else if (battle_outcome_check() == 0) {
                     if (option != MENU_SCENARIO_CHECK_TEST) {
                         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;

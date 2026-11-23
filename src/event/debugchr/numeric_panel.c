@@ -61,7 +61,7 @@ void unit_panel_numbers_thread(void) {
     gfx_set_draw_mode_for_texture_page(&buffer->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&buffer->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     gfx_set_draw_mode_for_texture_page(&buffer->image_draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    status_screen_init_numbers_frame(&g_unit_panel_editor_numeric_table.texture_rect, &buffer->numeric_frame);
+    menu_numeric_frame_init(&g_unit_panel_editor_numeric_table.texture_rect, &buffer->numeric_frame);
     menu_init_scaled_draw_area_packets(&buffer->portrait);
 
     i = 0;
@@ -173,7 +173,7 @@ void unit_panel_numbers_thread(void) {
         } else {
             gfx_draw_or_append_gpu_primitive(&buffer->image_draw_mode);
         }
-        status_screen_submit_numbers_frame(&buffer->numeric_frame);
+        menu_numeric_frame_submit(&buffer->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[0]);
         /* During the opening zoom the panel draws clipped to the scaled area; portrait.areas[1],
          * drawn last, restores the full area. */

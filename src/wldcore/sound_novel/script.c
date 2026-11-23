@@ -52,11 +52,11 @@ static void sound_novel_opcode_18_clear_local_flag(void);
 static void sound_novel_opcode_19_set_counter(void);
 static void sound_novel_opcode_1a_add_counter_delta(void);
 static void sound_novel_opcode_1b_subtract_counter_delta(void);
-static void sound_novel_opcode_1c_start_pending_value_transition(void);
+static void sound_novel_opcode_1c_show_value_display(void);
 static void sound_novel_opcode_1d_hide_value_display(void);
 static void sound_novel_opcode_1e_apply_counter_delta(void);
 static void sound_novel_opcode_1f_play_sound(void);
-static void sound_novel_opcode_20_play_music(void);
+static void sound_novel_opcode_20_load_music(void);
 static void sound_novel_opcode_21_set_sound_mode(void);
 static void sound_novel_opcode_22_branch_if_equal(void);
 static void sound_novel_opcode_23_branch_if_not_equal(void);
@@ -73,7 +73,7 @@ static void sound_novel_opcode_2d_stop_sound_effects(void);
 static void sound_novel_opcode_2e_start_countdown_timer(void);
 static void sound_novel_opcode_2f_play_background_sound(void);
 static void sound_novel_opcode_30_set_master_volume(void);
-static void sound_novel_opcode_31_stop_pending_music(void);
+static void sound_novel_opcode_31_unload_music(void);
 static void sound_novel_opcode_32_set_menu_brightness(void);
 static void sound_novel_opcode_33_add_counter_delta_if_choice(void);
 static void sound_novel_opcode_34_wait_for_fade(void);
@@ -199,7 +199,7 @@ void sound_novel_reading_restore(s32 render_record) {
 
     if (*state_flags & SOUND_NOVEL_STATE_VALUE_DISPLAY) {
         g_sound_novel_reading.instruction = g_sound_novel_reading.value_display_mode << 8;
-        sound_novel_opcode_1c_start_pending_value_transition();
+        sound_novel_opcode_1c_show_value_display();
     }
 
     tint = g_sound_novel_reading.brightness;
@@ -822,7 +822,7 @@ static void sound_novel_opcode_1b_subtract_counter_delta(void) {
 
 /* Sound-novel opcode: show the context value display in the mode of operand
  * 0 at (-0x20, 0x54). Any mode but the play time shows the record's counter. */
-static void sound_novel_opcode_1c_start_pending_value_transition(void) {
+static void sound_novel_opcode_1c_show_value_display(void) {
     s32 mode;
 
     g_world_map_flags &= ~WORLD_MAP_FLAG_HIDE_CONTEXT_VALUE;
@@ -872,7 +872,7 @@ static void sound_novel_opcode_1f_play_sound(void) {
 }
 
 /* Sound-novel opcode 0x20: switch the novel's music to track byte 1. */
-static void sound_novel_opcode_20_play_music(void) {
+static void sound_novel_opcode_20_load_music(void) {
     reading_music_change((u8)(g_sound_novel_reading.instruction >> 8));
     g_sound_novel_reading.state_flags |= SOUND_NOVEL_STATE_FETCH;
 }
@@ -1179,7 +1179,7 @@ static void sound_novel_opcode_30_set_master_volume(void) {
 
 /* Script opcode: stop the pending music track, clear its state slot, and mark
  * the opcode complete. */
-static void sound_novel_opcode_31_stop_pending_music(void) {
+static void sound_novel_opcode_31_unload_music(void) {
     s16* music = &g_sound_novel_reading.music_selection;
     music_queue_slots_t* state;
     s32* tracks;
@@ -1280,11 +1280,11 @@ static void (*s_sound_novel_opcode_handlers[54])(void) = {
     sound_novel_opcode_19_set_counter,
     sound_novel_opcode_1a_add_counter_delta,
     sound_novel_opcode_1b_subtract_counter_delta,
-    sound_novel_opcode_1c_start_pending_value_transition,
+    sound_novel_opcode_1c_show_value_display,
     sound_novel_opcode_1d_hide_value_display,
     sound_novel_opcode_1e_apply_counter_delta,
     sound_novel_opcode_1f_play_sound,
-    sound_novel_opcode_20_play_music,
+    sound_novel_opcode_20_load_music,
     sound_novel_opcode_21_set_sound_mode,
     sound_novel_opcode_22_branch_if_equal,
     sound_novel_opcode_23_branch_if_not_equal,
@@ -1301,7 +1301,7 @@ static void (*s_sound_novel_opcode_handlers[54])(void) = {
     sound_novel_opcode_2e_start_countdown_timer,
     sound_novel_opcode_2f_play_background_sound,
     sound_novel_opcode_30_set_master_volume,
-    sound_novel_opcode_31_stop_pending_music,
+    sound_novel_opcode_31_unload_music,
     sound_novel_opcode_32_set_menu_brightness,
     sound_novel_opcode_33_add_counter_delta_if_choice,
     sound_novel_opcode_34_wait_for_fade,

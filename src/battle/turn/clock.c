@@ -528,7 +528,7 @@ turn_status_flags_e turn_status_flags_calculate(const unit_stats_t* unit) {
  * loss decides the battle) that is disabled or lost decides it at once:
  * defeat for a player-team unit, victory for any other. Otherwise the side
  * left with no unit free of the KO status set loses, the player side first. */
-s32 event_check_battle_outcome(void) {
+s32 battle_outcome_check(void) {
     s32 player_unit_count = 0;
     s32 enemy_unit_count = 0;
     s32 unit_index;

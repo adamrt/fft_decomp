@@ -427,7 +427,7 @@ void unit_animations_update(void);
 void unit_target_displays_update(unit_runtime_t* unit);
 void unit_runtime_display_update(s32 runtime_id);
 void unit_runtime_graphics_update(u32 runtime_id);
-void unit_float_jump_height_update(unit_runtime_t* unit);
+void unit_float_height_update(unit_runtime_t* unit);
 
 /* Set and clear the unit_motion_flags_e that suppress a unit's facing, movement-effect and
  * palette updates. */

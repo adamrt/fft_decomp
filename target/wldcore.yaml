@@ -185,7 +185,7 @@ functions:
   - {addr: 0x80074c40, size: 144, name: proposition_count_returned, hash: df8dd28acf91d0b1, unit: proposition_dispatch}
   - {addr: 0x80074cd0, size: 2792, name: proposition_participants_open, hash: ae9b7ca2cbe27dc7, unit: proposition_dispatch}
   - {addr: 0x800757b8, size: 408, name: candidates_build, hash: 367e06355e25ae5b, unit: proposition_dispatch}
-  - {addr: 0x80075950, size: 248, name: candidate_names_draw, hash: f0645630c918641c, unit: proposition_dispatch}
+  - {addr: 0x80075950, size: 248, name: participant_names_draw, hash: f0645630c918641c, unit: proposition_dispatch}
   - {addr: 0x80075a48, size: 400, name: candidate_portrait_show, hash: bfa0efbfc4651b1f, unit: proposition_dispatch}
   - {addr: 0x80075bd8, size: 888, name: participant_slots_update, hash: b3fe4404c27224e7, unit: proposition_dispatch}
   - {addr: 0x80075f50, size: 228, name: participant_panels_start, hash: f2e421b177035135, unit: proposition_dispatch}
@@ -300,7 +300,7 @@ functions:
   - {addr: 0x80088180, size: 392, name: brave_story_wait_work_history_then_pop, hash: b3f0c6a8cf2e5f9d, unit: brave_story_propositions}
   - {addr: 0x80088308, size: 988, name: screen_transition_open, hash: a54f6808fc360853, unit: screen_transition, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
   - {addr: 0x800886e4, size: 916, name: parent_windows_hide, hash: 70bf9f0c22a63d0e, unit: screen_transition}
-  - {addr: 0x80088a78, size: 536, name: parent_frame_hide, hash: e3ce1fa1e0ef9392, unit: screen_transition}
+  - {addr: 0x80088a78, size: 536, name: parent_tutorial_menu_hide, hash: e3ce1fa1e0ef9392, unit: screen_transition}
   - {addr: 0x80088c90, size: 1120, name: screen_transition_update, hash: 22416fb257542db2, unit: screen_transition, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
   - {addr: 0x800890f0, size: 1100, name: tutorial_menu_open, hash: 61d22220966e7b4d, unit: tutorial_menus}
   - {addr: 0x8008953c, size: 392, name: tutorial_menu_panel_build, hash: 6e7e170a9de6189f, unit: tutorial_menus}
@@ -357,11 +357,11 @@ functions:
   - {addr: 0x8008bee8, size: 52, name: sound_novel_opcode_19_set_counter, hash: eaea61c280df0c4a, unit: sound_novel}
   - {addr: 0x8008bf1c, size: 64, name: sound_novel_opcode_1a_add_counter_delta, hash: 5a83c06ac2b2c98e, unit: sound_novel}
   - {addr: 0x8008bf5c, size: 64, name: sound_novel_opcode_1b_subtract_counter_delta, hash: 47accf9b5276e028, unit: sound_novel}
-  - {addr: 0x8008bf9c, size: 144, name: sound_novel_opcode_1c_start_pending_value_transition, hash: 0e8c7d16fb25a71d, unit: sound_novel}
+  - {addr: 0x8008bf9c, size: 144, name: sound_novel_opcode_1c_show_value_display, hash: 0e8c7d16fb25a71d, unit: sound_novel}
   - {addr: 0x8008c02c, size: 48, name: sound_novel_opcode_1d_hide_value_display, hash: 33df93c6e87c5be3, unit: sound_novel}
   - {addr: 0x8008c05c, size: 116, name: sound_novel_opcode_1e_apply_counter_delta, hash: f60cd93b941df914, unit: sound_novel}
   - {addr: 0x8008c0d0, size: 64, name: sound_novel_opcode_1f_play_sound, hash: 324ef0f32cc12574, unit: sound_novel}
-  - {addr: 0x8008c110, size: 64, name: sound_novel_opcode_20_play_music, hash: 147e3922b16a7121, unit: sound_novel}
+  - {addr: 0x8008c110, size: 64, name: sound_novel_opcode_20_load_music, hash: 147e3922b16a7121, unit: sound_novel}
   - {addr: 0x8008c150, size: 196, name: reading_music_change, hash: cd3f39c2cb15f5ef, unit: sound_novel}
   - {addr: 0x8008c214, size: 44, name: sound_novel_opcode_21_set_sound_mode, hash: a28316d3c46a377f, unit: sound_novel}
   - {addr: 0x8008c240, size: 140, name: sound_novel_opcode_22_branch_if_equal, hash: cbf6358c095f87a5, unit: sound_novel}
@@ -379,7 +379,7 @@ functions:
   - {addr: 0x8008c844, size: 84, name: sound_novel_opcode_2e_start_countdown_timer, hash: 1301853f97b18d7f, unit: sound_novel}
   - {addr: 0x8008c898, size: 96, name: sound_novel_opcode_2f_play_background_sound, hash: 5a43066da8004887, unit: sound_novel}
   - {addr: 0x8008c8f8, size: 112, name: sound_novel_opcode_30_set_master_volume, hash: f09c779a64e008de, unit: sound_novel}
-  - {addr: 0x8008c968, size: 176, name: sound_novel_opcode_31_stop_pending_music, hash: 9448637d40e4e6f5, unit: sound_novel}
+  - {addr: 0x8008c968, size: 176, name: sound_novel_opcode_31_unload_music, hash: 9448637d40e4e6f5, unit: sound_novel}
   - {addr: 0x8008ca18, size: 80, name: sound_novel_opcode_32_set_menu_brightness, hash: 366d11aaf33000b4, unit: sound_novel}
   - {addr: 0x8008ca68, size: 128, name: sound_novel_opcode_33_add_counter_delta_if_choice, hash: b71a1a8e28da8919, unit: sound_novel}
   - {addr: 0x8008cae8, size: 72, name: sound_novel_opcode_34_wait_for_fade, hash: 99b838a0e8a4a63b, unit: sound_novel}

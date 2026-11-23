@@ -82,8 +82,8 @@ extern s16 g_ability_list_ability_entries[]; /* Packed ability IDs/flags; -1 ter
 
 s32 ability_list_is_learned(s32 index); /* 1 unless the entry's disabled bit (0x4000) is set */
 s32 ability_list_is_action(s32 unused_row);
-s32 ability_list_is_non_action_learned(s32 index);
-s32 ability_list_is_non_action_unlearned(s32 index);
+s32 ability_list_is_non_action_enabled(s32 index);
+s32 ability_list_is_non_action_disabled(s32 index);
 s32 ability_list_is_action_tab(s32 unused_row);
 s32 ability_list_is_reaction_tab(s32 unused_row);
 s32 ability_list_is_support_tab(s32 unused_row);

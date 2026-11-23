@@ -415,7 +415,7 @@ restart_script:
             }
 
             camera_yaw_normalize();
-            camera_tilt_zoom_init();
+            camera_tilt_zoom_settle();
             thread_current_exit();
         }
         /* ---- Flow control: forward and backward jumps ---- */
@@ -1012,7 +1012,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_TEMP_WEAPON) {
             thrown_item_runtime_id = script_runtime_id_resolve(first_operand);
             if (thrown_item_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                sprite_runtime_thrown_item_palette_set(operand_3, thrown_item_runtime_id);
+                sprite_runtime_weapon_graphic_set(operand_3, thrown_item_runtime_id);
             }
         } else if (opcode == EVENT_OPCODE_ARROW) {
             arrow_target_runtime_id = script_runtime_id_resolve(first_operand);

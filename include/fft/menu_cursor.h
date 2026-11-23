@@ -46,7 +46,7 @@ void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
 
 /* cursor zoom */
 /* Scales the sprite about its center, keeping its position and texture coordinates even. */
-void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step);
+void menu_sprite_zoom(const void* unused_source, SPRT* sprite, s32 step);
 void menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 
 #endif

@@ -62,8 +62,8 @@ void deploy_run_help_cursor(void) {
     s32 value_id;
 
     u_mid = 0xb8;
-    g_unit_panel_status_animation[0] = 1;
-    g_unit_panel_status_animation[1] = 1;
+    g_unit_panel_button_prompt_animation[0] = 1;
+    g_unit_panel_button_prompt_animation[1] = 1;
     g_sound_pending_sfx_id = SOUND_SFX_CONFIRM;
 
     for (i = 0; i < 2; i++) {
@@ -299,8 +299,8 @@ void deploy_run_help_cursor(void) {
         i++;
     }
 
-    g_unit_panel_status_animation[0] = 0;
-    g_unit_panel_status_animation[1] = 0;
+    g_unit_panel_button_prompt_animation[0] = 0;
+    g_unit_panel_button_prompt_animation[1] = 0;
     thread_current_exit();
 }
 

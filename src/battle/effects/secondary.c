@@ -433,7 +433,7 @@ s32 effect_secondary_arrow_arc_handler(void) {
             flags = g_effect_secondary_current->target.record.data.unit.result_animation;
             if (flags == EFFECT_HIT_MISSED || flags - 4 < 2U || g_projectile_hit_unit_id == -1) {
                 g_effect_arrow_miss_marker = 0x80000000;
-                effect_secondary_end_on_current_unit();
+                effect_secondary_ending_init();
             }
         }
         result = 1;

@@ -95,7 +95,7 @@ s32 unit_is_moving(s32 runtime_id);
 extern SVECTOR g_unit_scratch_coords; /* a unit's map coordinates or projected screen position */
 
 s32 unit_event_battle_id_get(s32 event_unit_id);
-SVECTOR* unit_scratch_coords_copy(u32 runtime_id);
+SVECTOR* unit_world_coords_static_copy(u32 runtime_id);
 void unit_world_coords_copy(u32 runtime_id, SVECTOR* world_coords);
 void unit_world_vector_copy(u32 runtime_id, VECTOR* destination);
 void unit_screen_position_project(u32 runtime_id, SVECTOR* screen_coordinates);

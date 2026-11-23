@@ -314,6 +314,10 @@ typedef struct unit_panel_buffer {
 } unit_panel_buffer_t;
 typedef char unit_panel_buffer_size_must_be_984[(sizeof(unit_panel_buffer_t) == 984) ? 1 : -1];
 
+/* The frame every unit panel draws around its box: twelve lines, two draw modes and one sprite. */
+void menu_numeric_frame_init(RECT* bounds, menu_numeric_frame_t* menu);
+void menu_numeric_frame_submit(menu_numeric_frame_t* display);
+
 /* The frame lines in the normal or dimmed menu colors and the covering sprite in the matching CLUT. */
 void menu_init_primitive_colors_normal(menu_numeric_frame_t* menu);
 void menu_init_primitive_colors_dimmed(menu_numeric_frame_t* menu);
@@ -327,18 +331,18 @@ void unit_panel_select_palette(menu_numeric_frame_t* primitives, const unit_pane
  * lock mode is 1, otherwise normal. */
 void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thread_t* state);
 
-/* status icons */
-/* ATTACK, DEBUGCHR and REQUIRE each define 76 status cells.
- * Group boundaries select spans drawn in reverse order. */
-extern sprite_sheet_frame_t g_unit_panel_status_frames[76];
-extern point16_t g_unit_panel_status_frame_scales[76];
+/* button prompts */
+/* ATTACK, DEBUGCHR and REQUIRE each define 76 prompt icon cells.
+ * Each prompt's cell bounds select a span drawn in reverse order. */
+extern sprite_sheet_frame_t g_unit_panel_button_prompt_frames[76];
+extern point16_t g_unit_panel_button_prompt_frame_scales[76];
 
-/* ATTACK, DEBUGCHR and REQUIRE each define the animated status groups.
- * Each group has a countdown byte; 0xff marks an inactive group. */
-extern u8 g_unit_panel_status_animation[];
-extern u8 g_unit_panel_status_group_count;
+/* ATTACK, DEBUGCHR and REQUIRE each define the animated button prompts.
+ * Each prompt has a countdown byte; 0xff hides it. */
+extern u8 g_unit_panel_button_prompt_animation[];
+extern u8 g_unit_panel_button_prompt_count;
 
-void unit_panel_build_status_groups(POLY_FT4* poly);
+void unit_panel_build_button_prompts(POLY_FT4* poly);
 
 /* portraits */
 extern RECT g_menu_portrait_origin;
@@ -492,7 +496,7 @@ void unit_panel_toggle_equipment_threads(s32 enable);
 void unit_panel_toggle_item_numbers_thread(s32 enable);
 
 /* panel state (REQUIRE) */
-void unit_panel_set_transition(s32 value);
+void unit_panel_set_dimmed(s32 value);
 void unit_panel_transition_thread(void);
 
 /* help levels (WLDCORE) */

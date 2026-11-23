@@ -22,7 +22,7 @@ extern SVECTOR g_camera_render_state;
 void camera_matrices_update(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom);
 s32 camera_is_active(void);
 void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
-void camera_cursor_focus_set(const SVECTOR* coords, const SVECTOR* rotation);
+void camera_position_and_cursor_set(const SVECTOR* coords, const SVECTOR* rotation);
 void camera_get_unit_depth_point_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void camera_get_tile_depth_point_unbiased(const SVECTOR* world, SVECTOR* destination);
 void camera_get_tile_depth_point_biased(const SVECTOR* world, SVECTOR* destination);
@@ -132,7 +132,7 @@ extern s32 g_camera_speed_curve;
 
 void camera_thread(void);
 void camera_idle_wait(void);
-void camera_tilt_zoom_init(void);
+void camera_tilt_zoom_settle(void);
 void camera_zoom_flag_clear(void);
 void camera_yaw_normalize(void);
 void camera_yaw_band_store(s32 value);
