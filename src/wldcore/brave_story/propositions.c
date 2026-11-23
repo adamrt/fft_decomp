@@ -1,30 +1,30 @@
 /* Brave Story presents dispatched propositions, their participants and completed work histories. */
 
-#include "fft/ability.h"
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/item.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message_box.h"
-#include "fft/proposition.h"
-#include "fft/save.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/skillset.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/party/formation.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/proposition.h"
+#include "fft/world/save.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -1153,7 +1153,7 @@ static void open_work_history_entry(s32 value) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[0] = date.month + TEXT_ID_MONTH_NAME_BASE;
     g_text_window.text_substitutions[1] = date.day;
-    text_window_open(&g_text_window);
+    window_open_paged_text(&g_text_window);
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.cursor_window]
         .flags |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_gs_image_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story_propositions.rows_image]
@@ -1165,7 +1165,7 @@ static void open_work_history_entry(s32 value) {
 }
 
 /* Close a completed job's text level once its window has popped in and
- * text_window_update reports it closed: show the category
+ * window_update_paged_text reports it closed: show the category
  * menu's window and frame again (replaying the frame's pop-in), pop the
  * stack and reopen the completed jobs list. Mirrors
  * update_text_level. */
@@ -1176,7 +1176,7 @@ void brave_story_update_work_history_entry(menu_stack_record_t* unused_level) {
     if (g_display_object_gs_image_pool[*index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
-    if (text_window_update(&g_text_window) != 0) {
+    if (window_update_paged_text(&g_text_window) != 0) {
         return;
     }
     depth = g_menu_stack_depth;

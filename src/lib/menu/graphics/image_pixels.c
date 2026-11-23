@@ -1,8 +1,8 @@
 /* Copy nonempty image data and mirror packed 4bpp rectangles through nibble accessors. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/memory.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/sys/memory.h"
 #include "psx/types.h"
 
 /* Copy a nonempty byte sequence from source to destination.

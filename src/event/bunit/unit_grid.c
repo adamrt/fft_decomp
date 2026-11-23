@@ -1,24 +1,26 @@
 /* Browse the Unit List’s battle-unit grid and draw its readouts, shaded
  * rows, trailing cursor and animated unit sprites from the same grid state. */
 
-#include "fft/fade.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/map_unit.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/sound.h"
-#include "fft/sprite.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
+#include "fft/party/unit_grid.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/sprite.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -481,7 +483,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
         g_unit_list_status_banner_enabled = g_unit_list_status_banner_enabled == 0;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_unit_list_help_screen_id == MENU_GRID_HELP_NONE
-        && screen_get_fade_state() == 0) {
+        && fade_menu_get_state() == 0) {
         g_unit_list_grid_selected_cell = menu_step_grid_selection(
             4, 5, g_unit_list_reorderable_count - 1, g_unit_list_grid_selected_cell, buttons);
         g_unit_selected_index = g_unit_list_reorderable_indices[g_unit_list_grid_selected_cell];
@@ -544,7 +546,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     cell.h = 0x30;
     gfx_set_otag_index(8);
     unit = 0;
-    color = gfx_get_draw_color();
+    color = menu_gfx_get_draw_color();
     saved_color.r = color->r;
     saved_color.g = color->g;
     saved_color.b = color->b;
@@ -557,7 +559,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
                 top = 1;
             }
         }
-        gfx_set_draw_color(top ? &g_unit_list_grid_dimmed_color : &g_unit_list_grid_normal_color);
+        menu_gfx_set_draw_color(top ? &g_unit_list_grid_dimmed_color : &g_unit_list_grid_normal_color);
         for (col = 0; col < 4; col++, unit++) {
             if (unit >= g_unit_list_reorderable_count)
                 break;
@@ -717,7 +719,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
         }
     }
     /* The cursor trail and the background's light ease toward the selected cell. */
-    gfx_set_draw_color(&saved_color);
+    menu_gfx_set_draw_color(&saved_color);
     update_cursor_trail(&g_unit_list_grid_cursor_target);
     focus = &g_unit_list_gfx_falloff_focus_x;
     cursor_x = g_unit_list_grid_cursor_target.x;

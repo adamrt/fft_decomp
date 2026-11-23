@@ -1,8 +1,8 @@
 /* An effect callback that unfreezes the map when its keyframe starts. */
 
-#include "fft/effect.h"
-#include "fft/effect_script.h"
-#include "fft/map_mesh.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_script.h"
+#include "fft/map/map_mesh.h"
 #include "psx/types.h"
 
 /* Callback handler: unfreezes the map when its keyframe starts. */

@@ -1,23 +1,23 @@
 /* The Formation Items screen: its per-frame update and its browse state. */
 
-#include "fft/equipment.h"
-#include "fft/formation.h"
-#include "fft/formation_item.h"
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/party/item_list.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/equipment.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_item.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -98,13 +98,13 @@ s32 item_list_update(void) {
     item_list_draw_tabs(0, g_menu_selected_slot, busy);
     if (g_menu_list_entry_count != 0) {
         if (g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_THROWABLE_FIRST) {
-            item_draw_weapon_hand_icons(g_item_list_entries[g_menu_list_selected_index]);
+            item_list_draw_weapon_hand_icons(g_item_list_entries[g_menu_list_selected_index]);
         }
         if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_ACCESSORY_FIRST) {
             menu_script_run_with_palette_mode(g_formation_item_hp_mp_bonus_window_script, 0, 0);
         }
-        item_draw_status_list(g_item_list_entries[g_menu_list_selected_index]);
+        item_list_draw_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
     return 1;
 }
@@ -134,7 +134,7 @@ s32 item_list_update_browse_state(void) {
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
         g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-        g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+        g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
         g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
         g_menu_row_callbacks[4].value = equipment_preview_get_hp_bonus_display;
         g_menu_row_callbacks[5].value = equipment_preview_get_mp_bonus_display;
@@ -193,7 +193,7 @@ s32 item_list_update_browse_state(void) {
             slot = 0;
         }
         s_formation_item_category_previewed_cursor = g_menu_list_selected_index;
-        item_build_stat_preview(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_list_build_stat_preview(slot, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }

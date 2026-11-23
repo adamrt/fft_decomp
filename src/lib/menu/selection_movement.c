@@ -1,7 +1,7 @@
 /* Move a remembered menu cursor with directional wrapping and queue its change sound. */
 
-#include "fft/menu_selection.h"
-#include "fft/sound.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/sys/sound.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

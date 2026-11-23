@@ -1,25 +1,25 @@
 /* Remembered command selections, Act and ability lists, and the turn-menu threads. */
 
-#include "fft/ability_list.h"
-#include "fft/command.h"
-#include "fft/equipment.h"
-#include "fft/item.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_list.h"
-#include "fft/menu_selection.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/status.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/turn_command.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/command.h"
+#include "fft/battle/turn.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/equipment.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/types.h"
 
 /* The mode argument of build_ability_list_rows: which list an Math Skill
@@ -180,7 +180,7 @@ turn_command_t* command_get_selected(void) {
 }
 
 /* Post the close command after two frames under the mini-menu task id. */
-void menu_request_close_thread(void) {
+void command_request_close_thread(void) {
     thread_current_set_task(THREAD_TASK_MINI_MENU);
     thread_wait_frames(2);
     g_command_pending_selection[0] = 7;
@@ -251,7 +251,7 @@ static void build_ability_list_rows(s32 mode) {
     g_ability_list_ability_layout.columns.text_ids[2] = (s16*)g_event_work->ability_list.extras;
 
     unit_index = g_unit_panel_selected_unit.battle_unit_id;
-    unit = menu_get_selected_battle_unit();
+    unit = unit_panel_get_selected_battle_unit();
     type = g_menu_skillset_types[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
     skillset = g_command_skillsets[g_menu_thread_menu_data[MENU_COMMAND_ID_SKILLSET_LIST].selected_index];
     g_command_selected_command.data.action.skillset_id = skillset;
@@ -547,7 +547,8 @@ static void build_act_menu(void) {
     g_command_skillset_build_result = skillset_build_menu_list(g_unit_panel_selected_unit.battle_unit_id,
         g_command_skillsets, g_command_skillset_disabled_flags, g_menu_skillset_types);
     rows = (menu_text_row_t*)text_find_entry(0x5010);
-    if (battle_unit_get_action_restriction(menu_get_selected_battle_unit()) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
+    if (battle_unit_get_action_restriction(unit_panel_get_selected_battle_unit())
+        == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
         for (i = 0; i < 6; i++) {
             g_command_skillset_disabled_flags[i] = 1;
             if (g_menu_skillset_types[i] == ACTION_MENU_TYPE_UNKNOWN_0D) {

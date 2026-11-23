@@ -88,18 +88,28 @@ preserving every original byte.
   Functions that keep one order in every program can share a file under
   program conditionals; functions that change order between programs were
   copied and stay in separate files (`make order` reports both).
-- `include/fft/`: one flat folder of game headers named by concept
-  (`unit.h`, `shop.h`, `proposition.h`, `map_load.h`, `menu_stack.h`),
-  each declaring one part of the game for every program that uses it. A
-  large concept splits by sub-topic (`unit.h` and `map_unit.h`,
-  `effect.h` and `effect_emitter_data.h`); add folders only when size calls for
-  them. Suzuki's interface belongs here too, separate from game sound and
-  music services. `include/psx/`: PsyQ and PS1 hardware interfaces. Platform
+- `include/fft/<folder>/`: game headers in layer folders, each header
+  declaring one part of the game for every program that uses it. From the
+  bottom: `sys/` (system loop, threads, memory, files, overlays, input, sound,
+  music, math), then `gfx/`, `text/` and `menu/` (drawing, text and the menu
+  libraries), then `game/` (records every mode shares: battle and party units,
+  items, abilities, jobs, statuses), then the modes: `battle/`, `map/` (the
+  battle map), `effect/`, `script/` (the event interpreter), `world/`
+  (WLDCORE's world map), `party/` (WORLD's roster screens: Formation, shops,
+  office, equipment, item lists, unit screens) and `front/` (title, prologue,
+  ending). A header includes only its own layer or lower. Suzuki's interface
+  is `sys/suzuki.h`, separate from game sound and music services. `include/psx/`: PsyQ and PS1 hardware interfaces. Platform
   library code never includes game headers.
 - `tools/`: Go build/check tooling. `tools/target.go` owns the original disc size
   and hash. `QUIRKS.md` records unusual behavior worth preserving.
 
-Put declarations in the header of their concept. Sources include the headers
+Put declarations in the header of their concept. A header is named for the
+owner prefix it declares, in full (`map/map_mesh.h` declares `map_mesh_`,
+`game/battle_unit.h` declares `battle_unit_`); a large library (`menu_`,
+`gfx_`, `effect_`, `sprite_`, `map_`, `script_`) splits by sub-topic across
+headers in its folder, and a small owner that belongs to a larger concept
+shares its header (`rumor_` in `bar.h`, `heap_` and `mem_` in `memory.h`,
+`boot_` in `system.h`). Sources include the headers
 of the concepts they use; a source several programs compile includes what any
 of them needs. A header starts with its guard, then a one-line description,
 then its includes. Group declarations by sub-topic under short lowercase
@@ -138,7 +148,8 @@ instead of including the record's header.
   joins the owner only when it is a family of its own, with several
   operations and usually its own record (`menu_selection_clear_records`,
   `effect_slot_free`, `formation_roster_sort`), or when it is a mode the
-  player picks (`shop_buy_`, `shop_fitting_`, `soldier_office_hire_`). A
+  player picks (`shop_buy_`, `shop_fitting_`, `office_hire_`) or a storefront
+  of a shared screen (`shop_fur_`). A
   parent subsystem leads only when the noun would be ambiguous without it
   (`map_unit_get_tile`, but `map_mesh_` and `map_palette_`). `map_` is the
   battle map as a level: terrain, mesh, tiles, files, color tables
@@ -170,10 +181,14 @@ instead of including the record's header.
   Retain enough qualification to distinguish roles and avoid target-symbol
   collisions. The concept is the game's own US term where the player
   sees one (bar, rumor, proposition, Brave Story, sound novel, formation,
-  reaction, AT List); code with no player concept takes a mechanism topic
-  (`script_`, `thread_`, `text_`, `menu_`, `screen_`, `window_`, `gfx_`,
+  reaction, AT List), shortened when the short word is unambiguous
+  (`novel_`, `office_`); code with no player concept takes a mechanism topic
+  (`script_`, `thread_`, `text_`, `menu_`, `fade_`, `window_`, `gfx_`,
   `memcard_`, `bits_`, `system_`, `file_`, `heap_`, `overlay_`, `input_`,
-  `render_`, `controller_`). A sub-topic leads when the player picks it as a
+  `math_`). `gfx_` is the shared GPU layer (display environments, ordering
+  tables, VRAM transfers, primitive helpers); `<owner>_gfx_` is an owner's own
+  primitive pools or draw contexts built on it (`menu_gfx_`, `save_gfx_`), and
+  an owner that only draws through others' pools uses `<owner>_draw_`. A sub-topic leads when the player picks it as a
   mode (`shop_buy_`, `formation_job_`). Except for program entrypoints below,
   names carry no program token; the folder says which program a body belongs
   to. One role takes one name in every program, so bodies that differ by
@@ -198,7 +213,7 @@ instead of including the record's header.
   ordinary exported helpers and effect callbacks keep behavior names.
 - A bytecode machine's handler for one opcode is named
   `<machine>_opcode_<nn>_<instruction>` with the opcode in two hex digits:
-  `script_opcode_28_walk_to` (event scripts), `sound_novel_opcode_*`,
+  `script_opcode_28_walk_to` (event scripts), `novel_opcode_*`,
   `location_script_opcode_*` (world map scripts), `ending_opcode_*`,
   `menu_opcode_*` (menu display scripts), `tutorial_opcode_*`,
   `effect_script_opcode_*`. A

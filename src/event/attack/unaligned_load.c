@@ -1,6 +1,6 @@
 /* Reading a little-endian 16-bit value from an unaligned address. */
 
-#include "fft/memory.h"
+#include "fft/sys/memory.h"
 #include "psx/types.h"
 
 /* Read a little-endian 16-bit value from an unaligned address. */

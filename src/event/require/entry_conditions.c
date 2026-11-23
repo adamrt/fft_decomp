@@ -1,18 +1,19 @@
 /* REQUIRE dispatches the requested battle-condition display or party change.
  * Recruitment also uses this unit's HELPMENU bridge and battle-unit name text. */
 
-#include "fft/after_battle.h"
-#include "fft/help.h"
-#include "fft/input.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/overlay.h"
-#include "fft/script_instruction.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/after_battle.h"
+#include "fft/battle/conditions.h"
+#include "fft/battle/war_trophy.h"
+#include "fft/game/battle_unit.h"
+#include "fft/menu/help.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script_instruction.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /*
@@ -49,7 +50,7 @@ void require_conditions_entrypoint(void) {
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_BATTLE_CONGRATULATIONS) {
-        thread_start(thread, victory_congratulations_thread);
+        thread_start(thread, conditions_congratulations_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_GIL_REWARD) {
@@ -61,15 +62,15 @@ void require_conditions_entrypoint(void) {
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_APPLY_PERMANENT_BRAVE_FAITH_CHANGES) {
-        thread_start(thread, party_brave_faith_report_thread);
+        thread_start(thread, after_battle_brave_faith_report_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_REMOVE_LOW_BRAVE_HIGH_FAITH_UNITS) {
-        thread_start(thread, party_departures_thread);
+        thread_start(thread, after_battle_departures_thread);
         thread_set_parameters(thread, 0, 0, 0);
         thread_wait_inactive(thread);
     } else if (condition == EVENT_DISPLAY_CONDITION_APPLY_POST_BATTLE_UNIT_CHANGES) {
-        party_apply_post_battle_changes();
+        after_battle_apply_unit_changes();
     }
     thread_current_exit();
 }
@@ -78,7 +79,7 @@ void require_conditions_entrypoint(void) {
  * until 0x10000 bytes can be reserved at the high overlay address, loads the
  * overlay and runs helpmenu_after_battle_entrypoint in the first idle slot,
  * with the panel's two animation flags set while it runs. */
-void help_after_battle_thread(void) {
+void help_menu_after_battle_thread(void) {
     s32 thread_id;
 
     thread_current_set_task(THREAD_TASK_HELP_MENU);

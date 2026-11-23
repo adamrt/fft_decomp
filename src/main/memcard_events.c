@@ -1,6 +1,6 @@
 /* Resident BIOS event setup shared by OPEN, WORLD and CARD. */
 
-#include "fft/memcard.h"
+#include "fft/sys/memcard.h"
 #include "psx/kernel.h"
 #include "psx/libapi.h"
 

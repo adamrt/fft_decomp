@@ -3,25 +3,26 @@
  * or departure labels. This also coordinates the selected-unit panels while browsing
  * or comparing units. */
 
-#include "fft/fade.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/unit_grid.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -571,7 +572,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
         input &= 0xff0;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_menu_screen_grid_id == MENU_GRID_HELP_NONE
-        && screen_get_fade_state() == SCREEN_FADE_STATE_NONE) {
+        && fade_menu_get_state() == FADE_MENU_STATE_NONE) {
         g_unit_selected_index
             = menu_step_grid_selection(4, 5, g_formation_unit_count - 1, g_unit_selected_index, input);
     }
@@ -623,7 +624,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
     y = 0x24 + g_formation_scroll_position + g_formation_scroll_velocity;
     gfx_set_otag_index(8);
     i = 0;
-    color = gfx_get_draw_color();
+    color = menu_gfx_get_draw_color();
     g_formation_saved_sprite_color.r = color->r;
     g_formation_saved_sprite_color.g = color->g;
     g_formation_saved_sprite_color.b = color->b;
@@ -637,7 +638,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
                 value = 1;
             }
         }
-        gfx_set_draw_color(value ? &g_formation_dimmed_sprite_color : &g_formation_normal_sprite_color);
+        menu_gfx_set_draw_color(value ? &g_formation_dimmed_sprite_color : &g_formation_normal_sprite_color);
         for (col = 0; col < 4; col++, i++) {
             if (i >= g_formation_unit_count) {
                 break;
@@ -706,7 +707,7 @@ s32 formation_grid_update(s16 background_y, s16 toggle_banner, s16 allow_browse,
             menu_gfx_enqueue_oriented_textured_quad(&g_formation_unit_dot_sprite, &rgb, TEXTURE_UV_FLIP_NONE, 1, 8);
         }
     }
-    gfx_set_draw_color(&g_formation_saved_sprite_color);
+    menu_gfx_set_draw_color(&g_formation_saved_sprite_color);
     update_cursor_trail(&s_formation_cursor_target);
 
     /* Ease the cursor a quarter of the way to its target, snapping once within 2 pixels. */
@@ -1173,7 +1174,7 @@ void formation_unit_draw_sprite(s16 unit_index, point16_t* pos, rgb24_t* rgb, s3
         if (unit_index == g_unit_selected_index) {
             backdrop_rgb = &g_formation_normal_sprite_color;
         } else {
-            backdrop_rgb = gfx_get_draw_color();
+            backdrop_rgb = menu_gfx_get_draw_color();
         }
         draw_unit_readout(unit_index,
             g_formation_unit_pointers[unit_index]->proposition_status == FORMATION_UNIT_PROPOSITION_LEAVING
@@ -1266,7 +1267,7 @@ static void draw_unit_readout(
     do {
         gfx_set_otag_index(priority);
     } while (0);
-    gfx_set_draw_color(color);
+    menu_gfx_set_draw_color(color);
     if (mode < 7) {
         do {
             top = y + 40;

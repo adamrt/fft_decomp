@@ -1,11 +1,11 @@
 /* Load OPEN's title, prologue and ending images from OPNTEX.BIN and OPNBK.BIN.
  * OPNBK images share one asynchronous CD request and a cached image index. */
 
-#include "fft/ending.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/prologue.h"
-#include "fft/title.h"
+#include "fft/front/ending.h"
+#include "fft/front/prologue.h"
+#include "fft/front/title.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
 #include "psx/libcd.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -1,32 +1,33 @@
 /* The formation screen, including the menu input filter, unit selection slides, the screen run, sound dispatch, menu
  * state, frame processing and unit selection staging. */
 
-#include "fft/equipment.h"
-#include "fft/fade.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/formation_item.h"
-#include "fft/formation_job.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/music.h"
-#include "fft/party.h"
-#include "fft/shop.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/equipment.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/formation_item.h"
+#include "fft/party/formation_job.h"
+#include "fft/party/item_list.h"
+#include "fft/party/shop.h"
+#include "fft/party/unit_grid.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -150,9 +151,9 @@ void formation_run_screen(s32 tutorial, s32 unused) {
                 menu_input_clear_state();
             }
             menu_screen_update_input_lockout();
-            screen_update_fade_in();
+            fade_menu_update_in();
             if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-                menu_start_help_text(DIALOG_POSITION_CENTER);
+                help_start_text(DIALOG_POSITION_CENTER);
             }
             if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
                 menu_screen_update_grid_cursor(
@@ -400,7 +401,7 @@ void update_unit_grid_menu(void) {
         }
 
         /* Leave once the fade-out that Cross starts below completes. */
-        if (g_tutorial_id == 0 && screen_update_fade_out() == 0) {
+        if (g_tutorial_id == 0 && fade_menu_update_out() == 0) {
             s_formation_main_menu_initialized = 0;
             thread_suspend(THREAD_SCREEN_SLOT_MENU);
             g_formation_screen_running = 0;
@@ -504,7 +505,7 @@ void update_unit_grid_menu(void) {
                 }
 
                 if (g_formation_unit_browse_enabled == 0 && (input & PSX_PAD_CROSS) && g_tutorial_id == 0) {
-                    screen_start_fade_out();
+                    fade_menu_start_out();
                     music_set_target_volume(0, 0xF0);
                     g_sound_queued_effect_id = SOUND_SFX_CANCEL;
                 }

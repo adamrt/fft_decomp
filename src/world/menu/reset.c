@@ -1,7 +1,7 @@
 /* The soft reset of the game. */
 
-#include "fft/menu_screen.h"
-#include "fft/system.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/sys/system.h"
 
 /* Reset the game (soft reset). */
 void menu_screen_reset_game(void) {

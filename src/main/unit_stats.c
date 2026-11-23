@@ -1,13 +1,13 @@
 /* Resident stat rebuilding and level growth. Equipment and job changes preserve
  * inflicted statuses, reconcile their timers and publish the battle display changes. */
 
-#include "fft/ability.h"
-#include "fft/job.h"
-#include "fft/memory.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/status.h"
-#include "fft/unit.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/status.h"
+#include "fft/sys/memory.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

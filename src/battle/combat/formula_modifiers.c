@@ -1,18 +1,18 @@
 /* Direct ability formulas and shared result modifiers: Brave and Speed changes, elemental and weather bonuses,
  * Faith, absorption, undead reversal, status procs, equipment changes, poach, catch and hit calculations. */
 
-#include "fft/ability.h"
-#include "fft/action.h"
-#include "fft/formula.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/memory.h"
-#include "fft/move.h"
-#include "fft/random.h"
-#include "fft/reaction.h"
-#include "fft/status.h"
-#include "fft/unit.h"
-#include "fft/weather.h"
+#include "fft/battle/action.h"
+#include "fft/battle/formula.h"
+#include "fft/battle/move.h"
+#include "fft/battle/reaction.h"
+#include "fft/battle/weather.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/status.h"
+#include "fft/sys/math.h"
+#include "fft/sys/memory.h"
 #include "psx/types.h"
 
 /* Effect of each talk skill: Negotiate takes gil, Persuade zeroes CT, Praise

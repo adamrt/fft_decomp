@@ -1,11 +1,11 @@
 /* Manage unit sprite displays and submit their parts as textured polygons. */
 
-#include "fft/camera.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/unit.h"
+#include "fft/battle/camera.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
 #include "psx/gte_inline.h"
 #include "psx/gte_inline_split.h"
 #include "psx/libc.h"

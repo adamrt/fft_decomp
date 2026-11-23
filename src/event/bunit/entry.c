@@ -1,24 +1,25 @@
 /* BUNIT entry, including VRAM init and fade, the input lock timer, pad reading, menu results and the unit browser
  * frame. */
 
-#include "fft/fade.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/input.h"
-#include "fft/job_list.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/unit_grid.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -105,7 +106,7 @@ static void init_graphics(void) {
     gfx_load_image_and_wait(&rect, block);
     g_text_selection_id = 0;
     g_unit_list_help_screen_id = MENU_GRID_HELP_NONE;
-    screen_start_fade_in();
+    fade_menu_start_in();
 }
 
 /* Hold the menu input masks at zero while the comparison banner thread runs,
@@ -211,9 +212,9 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         previous_mode = g_menu_input_lock_mode;
         menu_input_update_message_state();
         update_input_lock();
-        screen_update_fade_in();
+        fade_menu_update_in();
         if (g_menu_input_newly_pressed & PSX_PAD_SELECT) {
-            menu_start_help_text(3);
+            help_start_text(3);
         }
         if (g_unit_list_help_screen_id != MENU_GRID_HELP_NONE) {
             unit_list_update_help_cursor(g_unit_list_pointers[g_unit_selected_index]->uses_monster_skillset);
@@ -312,7 +313,7 @@ static s32 update_unit_grid_menu(void) {
             unit_list_reset_results();
             s_unit_list_initialized = 1;
         }
-        if (screen_update_fade_out() == 0) {
+        if (fade_menu_update_out() == 0) {
             s_unit_list_initialized = 0;
             menu_thread_request_stop(UNIT_LIST_THREAD_SLOT_MENU);
             return 0;
@@ -334,7 +335,7 @@ static s32 update_unit_grid_menu(void) {
                     unit_list_reset_results();
                     s_unit_list_initialized = 0;
                 } else if (g_unit_list_primary_result == 1) {
-                    screen_start_fade_out();
+                    fade_menu_start_out();
                     g_unit_list_selected_battle_unit_id = g_unit_list_pointers[g_unit_selected_index]->battle_unit_id;
                 }
                 g_unit_panel_character_status_frame_config.style = 0;
@@ -373,7 +374,7 @@ static s32 update_unit_grid_menu(void) {
                 g_unit_list_saved_status_banner_enabled = g_unit_list_status_banner_enabled;
             }
         } else if (g_unit_list_browse_enabled == 0 && (input & PSX_PAD_CROSS)) {
-            screen_start_fade_out();
+            fade_menu_start_out();
         }
     } else if (g_unit_list_current_menu == UNIT_LIST_MENU_REORDER_LIST) {
         unit_list_update_sort_menu();

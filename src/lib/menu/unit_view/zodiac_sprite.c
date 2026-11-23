@@ -1,7 +1,7 @@
 /* A centered, scaled 8bpp sprite quad for the zodiac graphic. */
 
-#include "fft/gfx.h"
-#include "fft/zodiac.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/zodiac.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

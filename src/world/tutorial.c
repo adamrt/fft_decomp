@@ -1,21 +1,21 @@
 /* Tutorial buttons, tutorial start and the tutorial command handlers with highlight rings and quads. */
 
-#include "fft/tutorial.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_screen.h"
-#include "fft/message.h"
-#include "fft/option.h"
-#include "fft/save.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/world/tutorial.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/option.h"
+#include "fft/party/formation.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/save.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -187,7 +187,7 @@ s32 tutorial_update(void) {
  * tutorial_update passes 1 on. */
 static s32 tutorial_opcode_17_end(void) {
     if (s_tutorial_command_active != 0) {
-        if (screen_update_fade_out() == 0) {
+        if (fade_menu_update_out() == 0) {
             g_tutorial_id = 0;
             heap_release_block(g_tutorial_state.messages);
             heap_release_block(g_tutorial_state.script);
@@ -199,7 +199,7 @@ static s32 tutorial_opcode_17_end(void) {
             return 0;
         }
     } else {
-        screen_start_fade_out();
+        fade_menu_start_out();
         s_tutorial_command_active = 1;
     }
 }

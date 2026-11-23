@@ -1,32 +1,31 @@
 /* Returned propositions play their participant reports, apply results and select the appropriate report messages. */
 
-#include "fft/bar.h"
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/job.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message.h"
-#include "fft/message_box.h"
-#include "fft/music.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/portrait.h"
-#include "fft/proposition.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/portrait.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/bar.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/proposition.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
@@ -321,10 +320,10 @@ void proposition_update_report(menu_stack_record_t* level) {
         }
         kind = &g_proposition_report.reward_type;
         if (*kind == PROPOSITION_REWARD_TREASURE) {
-            picture_load_set(g_treasure_picture_sets[g_proposition_report.reward_index]);
+            world_map_load_picture_set(g_treasure_picture_sets[g_proposition_report.reward_index]);
         }
         if (*kind == PROPOSITION_REWARD_UNEXPLORED_LAND) {
-            picture_load_set(g_unexplored_land_picture_sets[g_proposition_report.reward_index]);
+            world_map_load_picture_set(g_unexplored_land_picture_sets[g_proposition_report.reward_index]);
         }
         level->proposition_report.load_phase = PROPOSITION_REPORT_LOAD_DONE;
         break;

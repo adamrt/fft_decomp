@@ -1,8 +1,8 @@
 /* Packed proposition records and the conditions that make a job available at a bar. */
 
-#include "fft/calendar.h"
-#include "fft/proposition.h"
-#include "fft/script_variable.h"
+#include "fft/script/script_variable.h"
+#include "fft/world/calendar.h"
+#include "fft/world/proposition.h"
 #include "psx/types.h"
 
 extern s32* g_proposition_data; /* byte-offset directory of the embedded proposition data */

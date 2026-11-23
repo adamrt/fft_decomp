@@ -1,15 +1,16 @@
 /* Text-bank setup, input snapshots and drawing support for script-driven displays.
  * Numeric entries use the same glyph-image destinations as the event menus. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/text.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -198,10 +199,9 @@ void gfx_set_image_primitive_layout(
 }
 
 /* Draw count positioned number entries into an image buffer: kind 0 in the small glyphs
- * (text_draw_small_number_glyphs), kind 1 in the large ones (menu_draw_large_number_glyphs); other kinds
+ * (text_draw_small_number_glyphs), kind 1 in the large ones (text_draw_large_number_glyphs); other kinds
  * draw nothing. */
-void menu_draw_numeric_display_entries(
-    u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
+void text_draw_number_entries(u8* buffer, const menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -210,7 +210,7 @@ void menu_draw_numeric_display_entries(
         if (entries->kind == 0) {
             text_draw_small_number_glyphs(*entries->value, entries->format, buffer, position);
         } else if (entries->kind == 1) {
-            menu_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
+            text_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
         }
         entries++;
     }
@@ -219,7 +219,7 @@ void menu_draw_numeric_display_entries(
 /* Draw value in decimal text glyphs, right-aligned in a field of digit_count 6-pixel cells at
  * origin, without zero padding (a longer number runs on to the left). Moves origin and
  * clears the text palette offset afterward. */
-void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin) {
+void text_draw_number(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin) {
     s16 cell;
 
     origin->rect.x += (digit_count - 1) * 6;
@@ -238,7 +238,7 @@ void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_
  * (0x400) or MENU_DECIMAL_SIGN_MINUS (0x800) a sign glyph before the digits, and 0xc00 two
  * dashes in place of the number. Hidden numeric values draw
  * a placeholder per digit; the pen ends after the last digit. */
-void menu_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
+void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src;

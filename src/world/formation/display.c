@@ -1,22 +1,23 @@
 /* Formation menu display init, unit list rebuilds, the menu busy check and unit messages with sound. */
 
-#include "fft/fade.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/help.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/message_box.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/formation.h"
+#include "fft/party/item_list.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -119,7 +120,7 @@ void formation_init_display(void) {
     gfx_load_image_and_wait(&s_status_label_rect, s_status_label_image);
     g_help_message_text_id = 0;
     menu_scrollable_list_init_core(0, 0, 0);
-    screen_start_fade_in();
+    fade_menu_start_in();
     menu_selection_clear_values();
     g_formation_unit_cycle_mode = 0;
     menu_screen_reset_selection_results();
@@ -149,11 +150,11 @@ void formation_rebuild_lists(void) {
         }
     }
     g_formation_unit_count = formation_build_record_list(0, g_formation_unit_pointers, mode);
-    item_rebuild_category_list(0);
-    item_rebuild_category_list(1);
-    item_rebuild_category_list(2);
-    item_rebuild_category_list(3);
-    item_rebuild_category_list(4);
+    item_list_rebuild_category(0);
+    item_list_rebuild_category(1);
+    item_list_rebuild_category(2);
+    item_list_rebuild_category(3);
+    item_list_rebuild_category(4);
     formation_grid_init_cursor(0);
     g_formation_screen_running = 1;
 }

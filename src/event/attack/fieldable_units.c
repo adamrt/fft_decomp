@@ -1,13 +1,13 @@
 /* Bind ATTACK's name sections and build the roster available for deployment. */
 
-#include "fft/deploy.h"
-#include "fft/encounter.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/text.h"
-#include "fft/unit.h"
+#include "fft/battle/deploy.h"
+#include "fft/battle/encounter.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Indices in this name file's directory, distinct from the runtime text section slots. */

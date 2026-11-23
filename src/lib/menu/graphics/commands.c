@@ -1,11 +1,12 @@
 /* Menu textured-primitive and window-frame drawing commands. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_script.h"
-#include "fft/menu_window.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

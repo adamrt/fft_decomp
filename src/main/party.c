@@ -1,16 +1,16 @@
 /* The resident party roster and new-recruit generation. Roster records retain the packed
  * stats, names and job history that survive battles and program loads. */
 
-#include "fft/party.h"
-#include "fft/character_identity.h"
-#include "fft/encounter.h"
-#include "fft/entd.h"
-#include "fft/job.h"
-#include "fft/memory.h"
-#include "fft/party_unit.h"
-#include "fft/text.h"
-#include "fft/unit.h"
-#include "fft/zodiac.h"
+#include "fft/game/party.h"
+#include "fft/battle/encounter.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/entd.h"
+#include "fft/game/job.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/sys/memory.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -387,7 +387,7 @@ static void generate_record(party_unit_t* party, unit_generation_type_e unit_typ
     party->name_id.index = name_id.fields.index;
     party->name_id.name_class = name_id.fields.name_class;
     name_flags += name_id.fields.index;
-    mem_copy_bytes_source_first(world_text_find_entry(name_flags), party->name, sizeof(party->name));
+    mem_copy_bytes_source_first(text_find_world_entry(name_flags), party->name, sizeof(party->name));
     party->proposition_status = 0;
     party->egg_color = 0;
     if (unit_type == UNIT_TYPE_RAMZA) {

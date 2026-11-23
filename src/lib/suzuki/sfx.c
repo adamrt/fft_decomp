@@ -1,6 +1,6 @@
 /* Sound-effect channel selection, playback and volume control. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/types.h"
 

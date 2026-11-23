@@ -1,18 +1,18 @@
 /* Expose scene and live-unit commands to event scripts: map transitions, placement, movement, animation, facing and
  * visibility. */
 
-#include "fft/animation.h"
-#include "fft/battle_state.h"
-#include "fft/camera.h"
-#include "fft/fade.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/move.h"
-#include "fft/script.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/system.h"
-#include "fft/unit.h"
+#include "fft/battle/battle_state.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/move.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/animation.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map.h"
+#include "fft/map/map_unit.h"
+#include "fft/script/script.h"
+#include "fft/sys/system.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -211,7 +211,7 @@ void battle_state_map_jumping_out_start(s32 map_id, s32 duration) {
     g_map_id = map_id;
     g_battle_state_previous = g_battle_state;
     g_battle_state = BATTLE_STATE_MAP_JUMPING_OUT;
-    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_fade_battle_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Start an event's change to map_id (MapJumpingOut2), saving the current game
@@ -222,7 +222,7 @@ void battle_state_change_map_jumping_out_start(s32 map_id, s32 duration) {
     g_map_id = map_id;
     g_battle_state_previous = g_battle_state;
     g_battle_state = BATTLE_STATE_MAP_JUMPING_OUT_2;
-    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_fade_battle_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Start the fade-in that ends an event's map change (MapJumpingIn2), saving the
@@ -231,7 +231,7 @@ void battle_state_change_map_jumping_out_start(s32 map_id, s32 duration) {
 void battle_state_change_map_jumping_in_start(s32 duration) {
     g_battle_state_previous = g_battle_state;
     g_battle_state = BATTLE_STATE_MAP_JUMPING_IN_2;
-    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_fade_battle_step = duration != 0 ? 0x100 / duration : 0x100;
 }
 
 /* Leave the battle for the world map: enter CloseBattle at two vertical blanks
@@ -239,7 +239,7 @@ void battle_state_change_map_jumping_in_start(s32 duration) {
 void battle_state_close_battle_to_world_enter(s32 duration) {
     g_system_vsync_interval = 2;
     g_battle_state = BATTLE_STATE_CLOSE_BATTLE;
-    g_fade_step = duration != 0 ? 0x100 / duration : 0x100;
+    g_fade_battle_step = duration != 0 ? 0x100 / duration : 0x100;
     g_game_flow_state = SYSTEM_GAME_FLOW_WORLD;
 }
 

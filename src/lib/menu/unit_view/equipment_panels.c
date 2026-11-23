@@ -1,18 +1,19 @@
 /* The combined equipment and ability panel, and yield-and-exit entries for overlays without separate panels. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/item.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -56,7 +57,7 @@ void unit_panel_equipment_ability_thread(void) {
     screen = g_unit_panel_equipment_frames;
     base = g_unit_panel_equipment_frames;
     state = &g_unit_panel_selected_unit_fields.state;
-    menu_numeric_frame_init(&g_unit_panel_equipment_frame_rects[0], &screen->numeric_frame);
+    unit_panel_init_numeric_frame(&g_unit_panel_equipment_frame_rects[0], &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     menu_init_scaled_draw_area_packets(&screen->portrait);
 
@@ -119,19 +120,19 @@ void unit_panel_equipment_ability_thread(void) {
 
         /* Redraw and upload the equipment and ability names on the first frame or on request. */
         if (frame == 0 || thread->redraw_request == 1) {
-            menu_clear_render_buffer(g_unit_panel_text_image_a, 0xc80);
+            mem_zero_words(g_unit_panel_text_image_a, 0xc80);
             g_menu_window_text_pen.stride = 0x50;
             menu_text_set_origin(0, 0);
             for (i = 0; i < 5; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                    menu_display_text_entry(state->equipment[i] + TEXT_ID_ITEM_NAME_BASE, g_unit_panel_text_image_a,
+                    text_render_entry_to_image(state->equipment[i] + TEXT_ID_ITEM_NAME_BASE, g_unit_panel_text_image_a,
                         &g_menu_window_text_pen);
                 }
                 g_menu_window_text_pen.rect.y += 0x10;
             }
             LoadImage(&g_unit_panel_text_upload_rect_a, (u32*)g_unit_panel_text_image_a);
 
-            menu_clear_render_buffer(g_unit_panel_text_image_b, 0xc80);
+            mem_zero_words(g_unit_panel_text_image_b, 0xc80);
             g_menu_window_text_pen.stride = 0x50;
             menu_text_set_origin(0, 0);
             for (i = 0; i < 2; i++) {
@@ -144,13 +145,13 @@ void unit_panel_equipment_ability_thread(void) {
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_window_text_pen.rect.y += 0x10;
                 } else {
-                    menu_display_text_entry(mode, g_unit_panel_text_image_b, &g_menu_window_text_pen);
+                    text_render_entry_to_image(mode, g_unit_panel_text_image_b, &g_menu_window_text_pen);
                     g_menu_window_text_pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if (state->ability_ids[i] != -1) {
-                    menu_display_text_entry(state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE,
+                    text_render_entry_to_image(state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE,
                         g_unit_panel_text_image_b, &g_menu_window_text_pen);
                 }
                 g_menu_window_text_pen.rect.y += 0x10;
@@ -163,7 +164,7 @@ void unit_panel_equipment_ability_thread(void) {
             gfx_set_image_primitive_layout(&screen->frame.sprites[19 + i], &g_unit_panel_item_icon_texture_origin,
                 &g_unit_panel_equipment_frame_rects[0], &g_unit_panel_item_icon_layouts[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                gfx_set_item_icon_sprite(&screen->frame.sprites[19 + i], state->equipment[i]);
+                item_set_icon_sprite(&screen->frame.sprites[19 + i], state->equipment[i]);
             } else {
                 /* The target indexes the five icon sprites from their own base (i * 0x14 + 0x1a8), as a
                  * separate array after the 19 label sprites would. */
@@ -221,7 +222,7 @@ void unit_panel_equipment_ability_thread(void) {
         for (i = 0; i < 8; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        menu_numeric_frame_submit(&screen->numeric_frame);
+        unit_panel_submit_numeric_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         /* During the opening zoom the panel draws clipped to the scaled area; portrait.areas[1],
          * drawn last, restores the full area. */

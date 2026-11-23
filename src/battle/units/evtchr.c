@@ -1,10 +1,10 @@
 /* Manage attack-image slots and query the unit frame and spritesheet dimensions. */
 
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

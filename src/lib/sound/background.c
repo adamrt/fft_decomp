@@ -1,9 +1,9 @@
 /* Event-script threads for starting an environment sound and stepping its volume fade. */
 
-#include "fft/script_instruction.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/thread.h"
+#include "fft/script/script_instruction.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Thread task 0x35, started by the event script's background-sound instruction:

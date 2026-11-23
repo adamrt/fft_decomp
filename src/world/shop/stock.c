@@ -1,12 +1,12 @@
 /* The item list a normal shop or the Fur Shop offers, hiding or marking what the selected unit cannot equip. */
 
-#include "fft/equipment.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu_screen.h"
-#include "fft/option.h"
-#include "fft/script_variable.h"
-#include "fft/shop.h"
+#include "fft/game/item.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/option.h"
+#include "fft/party/equipment.h"
+#include "fft/party/item_list.h"
+#include "fft/party/shop.h"
+#include "fft/script/script_variable.h"
 #include "psx/types.h"
 
 /* Two-byte shop availability mask, stored most significant byte first: bit
@@ -351,7 +351,7 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
         shop_mask = 0x8000 >> shop_id;
         for (; item_id < ITEM_ID_END; item_id++) {
             __asm__("" : "=r"(primary_category) : "0"(primary_category));
-            item_category = item_get_menu_category(item_id);
+            item_category = item_list_get_category(item_id);
             entry = item_id;
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
@@ -377,12 +377,12 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
         }
     } else {
         for (item_id = 0; item_id < ITEM_ID_END; item_id++) {
-            item_category = item_get_menu_category(item_id);
+            item_category = item_list_get_category(item_id);
             entry = item_id;
             if (primary_category != item_category && secondary_category != item_category) {
                 continue;
             }
-            if (fur_shop_adjust_stock(item_id, 0) == 0) {
+            if (shop_fur_adjust_stock(item_id, 0) == 0) {
                 continue;
             }
             if (mode != ITEM_LIST_MODE_ALL) {
@@ -400,6 +400,6 @@ s32 shop_build_stock_list(s16 unit_id, s16 shop_id, s16 category, s16* entries, 
     }
 
     entries[count] = -1;
-    item_sort_id_list(ITEM_SORT_ORDER_STOCK, entries);
+    item_list_sort(ITEM_SORT_ORDER_STOCK, entries);
     return count;
 }

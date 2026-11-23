@@ -2,15 +2,16 @@
  * biography updates. Banner loading borrows the main stack; waits and RGB fades
  * yield the screen thread. */
 
-#include "fft/after_battle.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/thread.h"
+#include "fft/battle/after_battle.h"
+#include "fft/battle/conditions.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -40,7 +41,7 @@ void thread_stop_after_16_frames(void) {
 }
 
 /* Update the character's Brave Story biography state through its script variable. */
-void party_set_biography_state(s32 character_identity, s32 bio_state) {
+void after_battle_set_biography_state(s32 character_identity, s32 bio_state) {
     s32 i;
     s32 j;
 
@@ -115,7 +116,7 @@ void input_wait_frames_or_skip(s32 frames) {
 
 /* Fade g_after_battle_gfx_fade_rgb linearly from its current value to eight times
  * each target over 31 frames, yielding once per frame. */
-void gfx_fade_rgb_31_frames(s32 target_red, s32 target_green, s32 target_blue) {
+void conditions_fade_dark_screen_color(s32 target_red, s32 target_green, s32 target_blue) {
     s32 current[3];
     s32 interpolated[3];
     s32 target[3];

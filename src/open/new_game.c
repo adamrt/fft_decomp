@@ -1,17 +1,17 @@
 /* Prepare the new-game roster after loading WORLD and convert the chosen
  * birthday into Ramza's zodiac sign and day within that sign. */
 
-#include "fft/calendar.h"
-#include "fft/formation.h"
-#include "fft/overlay.h"
-#include "fft/party.h"
-#include "fft/system.h"
-#include "fft/title.h"
+#include "fft/front/title.h"
+#include "fft/game/party.h"
+#include "fft/party/formation.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/system.h"
+#include "fft/world/calendar.h"
 #include "psx/types.h"
 
 /* Load WORLD if needed, then prepare Ramza's roster or the empty Continue
  * roster. Remember the party mode so repeated calls do not rebuild it. */
-void new_game_init_party(s32 party_mode, s32 world_load_mode) {
+void title_prepare_new_game(s32 party_mode, s32 world_load_mode) {
     u32 flags;
     u32 party_mode_flag;
 

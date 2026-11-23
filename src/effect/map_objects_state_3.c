@@ -1,8 +1,8 @@
 /* An effect callback that splits the map's mesh parts and sets 3D objects 1-8 to state 3. */
 
-#include "fft/effect.h"
-#include "fft/effect_script.h"
-#include "fft/map.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_script.h"
+#include "fft/map/map.h"
 #include "psx/types.h"
 
 /* Callback handler: when its keyframe starts, splits the map's mesh parts and

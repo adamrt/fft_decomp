@@ -1,14 +1,14 @@
 /* Build and upload menu window and frame images from their sprite-sheet tiles. */
 
-#include "fft/command.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_window.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/battle/command.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -49,7 +49,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
     words = (width >> 2) + partial;
     byte_count = (width * (kind == DIALOG_OPTIONS_NO_TAIL ? height : height + 0x10)) >> 1;
     buf = menu_alloc_memory(byte_count);
-    menu_clear_render_buffer(buf, byte_count);
+    mem_zero_words(buf, byte_count);
     body_offset = 0;
     src = (u16*)g_menu_glyph_sheet->pixels;
     if (kind != DIALOG_OPTIONS_NO_TAIL) {

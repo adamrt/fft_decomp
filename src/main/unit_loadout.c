@@ -1,15 +1,15 @@
 /* Generate equipment and learned abilities for an ENTD unit. The rolls use its level,
  * unlocked jobs and permitted skillsets before final stats are built. */
 
-#include "fft/ability.h"
-#include "fft/character_identity.h"
-#include "fft/entd.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/memory.h"
-#include "fft/random.h"
-#include "fft/skillset.h"
-#include "fft/unit.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/entd.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
+#include "fft/sys/math.h"
+#include "fft/sys/memory.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

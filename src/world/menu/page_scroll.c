@@ -1,21 +1,21 @@
 /* The draw color and page scroll input. */
 
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/sound.h"
-#include "fft/tutorial.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/world/tutorial.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
 extern u16 g_menu_screen_scroll_hold_counter;
 
 /* Return the sprite modulation color menus draw with (set by menu_palette_set_mode). */
-rgb24_t* gfx_get_draw_color(void) {
+rgb24_t* menu_gfx_get_draw_color(void) {
     return &g_menu_screen_sprite_color;
 }
 
@@ -42,7 +42,7 @@ void menu_scroll_list_by_page(menu_vertical_scroll_direction_e dir, const menu_i
         }
     }
     g_menu_list_selected_index = g_menu_scroll_base_index;
-    menu_scrollable_list_load_layout(menu);
+    menu_scrollable_list_refresh(menu);
     g_menu_list_selected_index = delta + g_menu_scroll_base_index;
     if (g_menu_list_selected_index >= g_menu_list_entry_count) {
         g_menu_list_selected_index = g_menu_list_entry_count - 1;

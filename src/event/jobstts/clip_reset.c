@@ -1,8 +1,8 @@
 /* The menu command that restores the full draw area after a zoomed window and clears the lock. */
 
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_script.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_script.h"
 #include "psx/types.h"
 
 /* Stream command closing a zoomed window: when the zoom transition queued a

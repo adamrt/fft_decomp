@@ -1,10 +1,10 @@
 /* The save screen's zodiac backdrop thread and the ordering-table entry it draws into. */
 
-#include "fft/formation.h"
-#include "fft/save.h"
-#include "fft/script.h"
-#include "fft/thread.h"
-#include "fft/zodiac.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/party/formation.h"
+#include "fft/script/script.h"
+#include "fft/sys/thread.h"
+#include "fft/world/save.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

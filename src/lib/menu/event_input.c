@@ -1,6 +1,6 @@
 /* An empty menu input event state update. */
 
-#include "fft/menu_input.h"
+#include "fft/menu/menu_input.h"
 #include "psx/types.h"
 
 /* Empty in ATTACK, DEBUGCHR, EQUIP and REQUIRE; BUNIT, CARD and WORLD carry a body under this name. */

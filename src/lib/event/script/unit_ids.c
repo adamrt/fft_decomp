@@ -1,13 +1,13 @@
 /* Resolve event-script unit ids to map unit ids, and copy a map unit's tile coordinates. */
 
-#include "fft/character_identity.h"
-#include "fft/entd.h"
-#include "fft/map_unit.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_variable.h"
-#include "fft/status.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/entd.h"
+#include "fft/game/status.h"
+#include "fft/map/map_unit.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

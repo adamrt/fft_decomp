@@ -1,10 +1,10 @@
 /* Formation and shops count inventory and equipped items, read prices and update poached stock. */
 
-#include "fft/formation.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/shop.h"
+#include "fft/game/item.h"
+#include "fft/menu/menu.h"
+#include "fft/party/formation.h"
+#include "fft/party/item_list.h"
+#include "fft/party/shop.h"
 #include "psx/types.h"
 
 /* Report whether the party has any items: mode 0 asks for inventory or equipped items, mode 1
@@ -87,7 +87,7 @@ s32 item_get_total_count(s16 item_id) {
 
 /* Add delta to the count of a poached item held for the Fur Shop, keeping it within 0..255, and
  * return the new count; callers pass 0 to read it. */
-s32 fur_shop_adjust_stock(s16 item_id, s32 delta) {
+s32 shop_fur_adjust_stock(s16 item_id, s32 delta) {
     s32 slot = item_id & ITEM_ENTRY_ID_MASK;
     s32 value = g_item_poached_quantities[slot] + delta;
 

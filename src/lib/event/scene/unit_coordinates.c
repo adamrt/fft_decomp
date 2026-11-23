@@ -1,6 +1,6 @@
 /* Copying a unit's world position into a vector. */
 
-#include "fft/map_unit.h"
+#include "fft/map/map_unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

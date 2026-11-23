@@ -1,17 +1,17 @@
 /* Build a menu entry's icon strip and animated cursor sprites, select their palettes
  * and crop their window geometry during opening and closing. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_window.h"
-#include "fft/script.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

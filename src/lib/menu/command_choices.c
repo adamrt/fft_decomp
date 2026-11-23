@@ -1,23 +1,23 @@
 /* Icon primitives, the auto battle setting, icon selection and ability preview AT lists. */
 
-#include "fft/ability_list.h"
-#include "fft/at_list.h"
-#include "fft/command.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_window.h"
-#include "fft/script.h"
-#include "fft/target.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/command.h"
+#include "fft/battle/target.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -85,7 +85,7 @@ void auto_battle_settings_thread(void) {
 
     param = (menu_entry_t*)thread_current_get_parameter_1();
     cursor = param->selected_index;
-    stats = menu_get_selected_battle_unit();
+    stats = unit_panel_get_selected_battle_unit();
     if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
         cursor = 0;
     } else if (stats->auto_battle_setting == AI_AUTOBATTLE_FIGHT_FOR_LIFE) {
@@ -111,7 +111,7 @@ void auto_battle_settings_thread(void) {
             if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running() == 0) || i == 0) {
                 selected = cursor;
                 if (selected == 0) {
-                    before = menu_get_action_menu_id(g_unit_panel_selected_unit.battle_unit_id);
+                    before = command_get_menu_id_by_battle_unit_id(g_unit_panel_selected_unit.battle_unit_id);
                     stats->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
                     g_command_pending_selection[0] = 0x12;
                     color[0] = 8;
@@ -119,7 +119,7 @@ void auto_battle_settings_thread(void) {
                     color[2] = 4;
                     color[3] = 4;
                     color[4] = 4;
-                    after = menu_get_action_menu_id(g_unit_panel_selected_unit.battle_unit_id);
+                    after = command_get_menu_id_by_battle_unit_id(g_unit_panel_selected_unit.battle_unit_id);
                     if (before != after) {
                         thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
                         command_open_menu(after);
@@ -148,7 +148,7 @@ void auto_battle_settings_thread(void) {
                 g_menu_text_palette_offset = color[j];
                 g_menu_window_text_pen.stride = param->inner_width;
                 menu_text_set_origin(8, j * 16 + 9);
-                menu_display_text_entry(j + 0x5009, buffer, &g_menu_window_text_pen);
+                text_render_entry_to_image(j + 0x5009, buffer, &g_menu_window_text_pen);
             }
             LoadImage(&rect, (u32*)buffer);
             image_pending_free = 1;
@@ -195,7 +195,7 @@ void menu_icon_selection_thread(void) {
     g_menu_window_text_pen.stride = param->inner_width;
     menu_text_set_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
+    text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
         thread_yield();
@@ -265,7 +265,7 @@ static void build_ability_preview(void) {
 
     action = &g_command_selected_command.data.action;
     action->actor_id = g_unit_panel_selected_unit.battle_unit_id;
-    stats = menu_get_selected_battle_unit();
+    stats = unit_panel_get_selected_battle_unit();
     g_thread_call_target = (void (*)(void))at_list_preview;
     turn = thread_call_on_main_stack(stats, action, work->entries);
     /* An item preview marks the first entry as the item action; the loop below names it

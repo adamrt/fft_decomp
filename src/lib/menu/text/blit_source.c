@@ -1,6 +1,6 @@
 /* Setting the glyph sheet rectangle the next glyph blit copies from. */
 
-#include "fft/text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Set the glyph-sheet rectangle the next glyph blit copies from. */

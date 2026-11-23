@@ -1,11 +1,11 @@
 /* Count the party's copies of each item, including both inventory and the
  * equipment held by roster members, for the equipment menu's availability. */
 
-#include "fft/equipment.h"
-#include "fft/item.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/party/equipment.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

@@ -1,19 +1,18 @@
 /* Render the battle terrain and weather, apply map resource records and advance mesh and texture animations. */
 
-#include "fft/render.h"
-#include "fft/camera.h"
-#include "fft/effect.h"
-#include "fft/gfx.h"
-#include "fft/map.h"
-#include "fft/map_light.h"
-#include "fft/map_load.h"
-#include "fft/map_mesh.h"
-#include "fft/map_palette.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
-#include "fft/weather.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/weather.h"
+#include "fft/effect/effect.h"
+#include "fft/gfx/gfx.h"
+#include "fft/map/map.h"
+#include "fft/map/map_light.h"
+#include "fft/map/map_load.h"
+#include "fft/map/map_mesh.h"
+#include "fft/map/map_palette.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -1854,7 +1853,7 @@ static const VECTOR s_unit_scale_vector = { ONE, ONE, ONE, 0 };
  *
  * The function-scope counters are intentionally reused by each pool loop:
  * their lifetime reproduces the target register allocation. */
-void render_init_buffers(void) {
+void gfx_init_render_buffers(void) {
     POLY_F3 prototype;
     s32 primitive_index;
     s32 buffer_index;

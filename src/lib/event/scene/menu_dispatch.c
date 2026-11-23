@@ -1,26 +1,25 @@
 /* Poll companion overlay requests and dispatch command-menu and help threads. */
 
-#include "fft/camera.h"
-#include "fft/command.h"
-#include "fft/deploy.h"
-#include "fft/file.h"
-#include "fft/help.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_selection.h"
-#include "fft/overlay.h"
-#include "fft/script.h"
-#include "fft/script_unit.h"
-#include "fft/script_variable.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/command.h"
+#include "fft/battle/deploy.h"
+#include "fft/game/battle_unit.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -125,7 +124,7 @@ static void menu_building_thread(void) {
     }
     tutorial_pulse_wait_value(SCRIPT_TUTORIAL_WAIT_MENU_ENTRY);
     if (menu_id == MENU_COMMAND_ID_OTHER_UNIT || menu_id == MENU_COMMAND_ID_OTHER_UNIT_INSPECT) {
-        if (menu_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG) {
+        if (unit_panel_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG) {
             menu_id = MENU_COMMAND_ID_EGG;
         }
     }

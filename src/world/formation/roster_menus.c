@@ -1,18 +1,19 @@
 /* Formation lets the player reorder units and dismiss a unit after its farewell prompt. */
 
-#include "fft/character_identity.h"
-#include "fft/formation.h"
-#include "fft/help.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/message_box.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/formation.h"
+#include "fft/party/item_list.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -63,7 +64,7 @@ void formation_update_order_menu(void) {
     s32 selected_entry;
 
     if (g_formation_order_open == 0) {
-        item_load_type_order(0, g_formation_order_entries);
+        item_list_load_sort_order(0, g_formation_order_entries);
         for (index = 0; index < FORMATION_SORT_KEY_COUNT; index++) {
             option_ids[index] = g_formation_order_entries[index] + 14;
         }
@@ -101,7 +102,7 @@ void formation_update_order_menu(void) {
         option_ids[FORMATION_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_formation_menu_text_table, g_formation_menu_text_buffer, option_ids, 1);
         g_menu_screen_text_redraw_request = 1;
-        item_store_type_order(0, g_formation_order_entries);
+        item_list_store_sort_order(0, g_formation_order_entries);
         formation_roster_sort(0);
     }
 }

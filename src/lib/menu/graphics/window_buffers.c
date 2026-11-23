@@ -1,15 +1,15 @@
 /* Allocate the three double-buffered menu window pairs to cooperative threads,
  * release them when their owner closes and draw their active frames. */
 
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/portrait.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/portrait.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -159,7 +159,7 @@ static void set_primitive_brightness(P_TAG* primitive, s32 brightness) {
  * scroll_position / scroll_range. The portrait quad takes its texture from
  * portrait_code, or in BATTLE from the unit's portrait when that is -1. */
 #ifdef FFT_WORLD
-#    define WINDOW_BRIGHTNESS g_screen_color_red
+#    define WINDOW_BRIGHTNESS g_menu_screen_brightness_red
 #else
 #    define WINDOW_BRIGHTNESS window->color.r
 #endif

@@ -1,6 +1,6 @@
 /* Effect heap allocation, owner lists and usage diagnostics. */
 
-#include "fft/effect_heap.h"
+#include "fft/effect/effect_heap.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

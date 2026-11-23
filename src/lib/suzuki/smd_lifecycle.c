@@ -1,6 +1,6 @@
 /* Create, stop, pause, resume and unload SMD music records. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/types.h"
 

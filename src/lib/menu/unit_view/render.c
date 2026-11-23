@@ -2,37 +2,37 @@
  * pages, numeric frames and sliding previews stay with the rendering threads
  * that build and refresh them. */
 
-#include "fft/ability.h"
-#include "fft/action.h"
-#include "fft/command.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_window.h"
-#include "fft/portrait.h"
-#include "fft/result.h"
-#include "fft/script.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/sprite_sheet.h"
-#include "fft/status.h"
-#include "fft/status_screen.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
-#include "fft/unit_view.h"
+#include "fft/battle/action.h"
+#include "fft/battle/command.h"
+#include "fft/battle/result.h"
+#include "fft/battle/unit_view.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/portrait.h"
+#include "fft/map/map.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
@@ -81,8 +81,8 @@ extern unit_panel_record_t g_unit_panel_comparison_unit_fields;
 
 /* One 0x100-byte slot holding a panel's numeric frame. */
 typedef struct menu_numeric_frame_slot {
-    menu_numeric_frame_t primitives; /* 0x00 */
-    u8 _padding_ec[0x14];            /* preserves the 0x100-byte allocation stride */
+    unit_panel_numeric_frame_t primitives; /* 0x00 */
+    u8 _padding_ec[0x14];                  /* preserves the 0x100-byte allocation stride */
 } menu_numeric_frame_slot_t;
 typedef char menu_numeric_frame_slot_size_must_be_256[(sizeof(menu_numeric_frame_slot_t) == 256) ? 1 : -1];
 
@@ -106,27 +106,27 @@ typedef enum unit_stats_panel {
  * comes from g_unit_view_stats_first_page_by_mode). Status-screen primitives reuse
  * portions of this storage while the attack-preview and right-unit views are inactive. */
 typedef struct unit_view_stats_page {
-    POLY_G4 bars[3];                    /* 0x000: HP/MP/CT gauges */
-    DR_MODE draw_mode_1;                /* 0x06c */
-    DR_MODE draw_mode_0;                /* 0x078 */
-    menu_numeric_frame_t numeric_frame; /* 0x084 */
-    POLY_FT4 quads[5];                  /* 0x170 */
-    SPRT sprites[7];                    /* 0x238 */
-    POLY_FT4 portrait;                  /* 0x2c4 */
+    POLY_G4 bars[3];                          /* 0x000: HP/MP/CT gauges */
+    DR_MODE draw_mode_1;                      /* 0x06c */
+    DR_MODE draw_mode_0;                      /* 0x078 */
+    unit_panel_numeric_frame_t numeric_frame; /* 0x084 */
+    POLY_FT4 quads[5];                        /* 0x170 */
+    SPRT sprites[7];                          /* 0x238 */
+    POLY_FT4 portrait;                        /* 0x2c4 */
 } unit_view_stats_page_t;
 typedef char unit_view_stats_page_size_must_be_748[sizeof(unit_view_stats_page_t) == 748 ? 1 : -1];
 
 /* Double-buffered 0xf0-byte frame of the unit summary panel. Provisional. */
 typedef struct unit_view_summary_frame {
-    SPRT sprites[7];                     /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
-    DR_MODE draw_mode_0;                 /* 0x8c */
-    DR_MODE draw_mode_1;                 /* 0x98 */
-    menu_numeric_frame_t* numeric_frame; /* 0xa4 */
-    DR_OFFSET draw_offset_a;             /* 0xa8 */
-    DR_OFFSET draw_offset_b;             /* 0xb4 */
-    point16_t offset_a;                  /* 0xc0 */
-    point16_t offset_b;                  /* 0xc4 */
-    POLY_FT4 portrait;                   /* 0xc8 */
+    SPRT sprites[7];                           /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
+    DR_MODE draw_mode_0;                       /* 0x8c */
+    DR_MODE draw_mode_1;                       /* 0x98 */
+    unit_panel_numeric_frame_t* numeric_frame; /* 0xa4 */
+    DR_OFFSET draw_offset_a;                   /* 0xa8 */
+    DR_OFFSET draw_offset_b;                   /* 0xb4 */
+    point16_t offset_a;                        /* 0xc0 */
+    point16_t offset_b;                        /* 0xc4 */
+    POLY_FT4 portrait;                         /* 0xc8 */
 } unit_view_summary_frame_t;
 
 extern unit_view_stats_page_t g_unit_view_stats_panel_pages[8];
@@ -174,9 +174,9 @@ extern s16 g_gfx_item_icon_clut_base_y;
  * bytes hold the common unit_panel_frame_t (draw modes, sprites, tiles and lines),
  * and the trailing draw-area pair follows menu_panel_frame_t. */
 typedef struct status_screen_frame {
-    unit_panel_frame_t frame;            /* 0x000 */
-    menu_numeric_frame_t* numeric_frame; /* 0x2a4 */
-    scaled_draw_area_pair_t draw_areas;  /* 0x2a8 */
+    unit_panel_frame_t frame;                  /* 0x000 */
+    unit_panel_numeric_frame_t* numeric_frame; /* 0x2a4 */
+    scaled_draw_area_pair_t draw_areas;        /* 0x2a8 */
 } status_screen_frame_t;
 typedef char status_screen_frame_size_must_be_720[sizeof(status_screen_frame_t) == 720 ? 1 : -1];
 
@@ -188,15 +188,15 @@ typedef struct status_screen_numbers_record {
     DR_MODE mode1; /* 0x00c */
     /* 0x018; menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
-    SPRT sprites[18];                    /* 0x040 */
-    menu_numeric_frame_t* numeric_frame; /* 0x1a8 */
+    SPRT sprites[18];                          /* 0x040 */
+    unit_panel_numeric_frame_t* numeric_frame; /* 0x1a8 */
 } status_screen_numbers_record_t;
 typedef char status_screen_numbers_record_size_must_be_428[sizeof(status_screen_numbers_record_t) == 428 ? 1 : -1];
 
 /* Status uses two alternate views of the stats-page storage: its numeric
  * records begin at page 2, and its frame records begin at page 5. */
 extern status_screen_frame_t g_status_screen_frames[2];
-extern menu_numeric_frame_t g_status_screen_numeric_frame;
+extern unit_panel_numeric_frame_t g_status_screen_numeric_frame;
 extern status_screen_numbers_record_t g_status_screen_numbers_panel_records[2];
 extern RECT g_status_screen_numbers_frame_rect;
 extern menu_numeric_frame_slot_t g_status_screen_numbers_frames[];
@@ -383,10 +383,10 @@ void unit_view_tile_info_thread(void) {
             gfx_draw_or_append_gpu_primitive(&page->quads[j]);
         }
         if (g_map_selected_tile_data.depth != 0) {
-            menu_clear_render_buffer(buffer, 0x100);
+            mem_zero_words(buffer, 0x100);
             g_menu_window_text_pen.stride = 0x18;
             menu_text_set_origin(0x10, 0);
-            menu_draw_large_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_window_text_pen);
+            text_draw_large_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_window_text_pen);
             if (g_unit_view_depth_display_suppressed == 0) {
                 LoadImage(&rect, buffer);
                 page->sprites[0].clut = 0x7CBC;
@@ -827,7 +827,7 @@ static void stats_panel_thread(
         }
     }
     page = &g_unit_view_stats_panel_pages[g_unit_view_stats_first_page_by_mode[mode]];
-    menu_numeric_frame_init(frame_rect, &page->numeric_frame);
+    unit_panel_init_numeric_frame(frame_rect, &page->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(page->sprites, 7, 0x7CBC);
@@ -993,25 +993,25 @@ static void stats_panel_thread(
         }
         if (frame == 0) {
             buffer = menu_alloc_buffer(0x700);
-            menu_clear_render_buffer(buffer, 0x700);
+            mem_zero_words(buffer, 0x700);
             stride = &g_menu_window_text_pen.stride;
             origin = &g_menu_window_text_pen;
             *stride = 0x28;
-            menu_draw_numeric_display_entries(buffer, entries, origin, 6);
+            text_draw_number_entries(buffer, entries, origin, 6);
             LoadImage(&rects[0], (u32*)buffer);
             i = g_unit_panel_hide_numeric_values;
             *stride = 0x60;
             g_unit_panel_hide_numeric_values = 0;
             if (mode == UNIT_STATS_PANEL_HOVERED_UNIT || mode == UNIT_STATS_PANEL_RIGHT_UNIT) {
-                menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
+                text_draw_number_entries(buffer + 0x400, entries + 6, origin, 2);
                 g_unit_panel_hide_numeric_values = i;
-                menu_draw_numeric_display_entries(buffer + 0x400, entries + 8, origin, 2);
+                text_draw_number_entries(buffer + 0x400, entries + 8, origin, 2);
             } else if (mode == UNIT_STATS_PANEL_ATTACK_CASTER) {
-                menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
+                text_draw_number_entries(buffer + 0x400, entries + 6, origin, 2);
                 g_unit_panel_hide_numeric_values = i;
             } else if (text_id != 0) {
                 menu_text_set_origin(2, 0);
-                menu_display_text_string(buffer + 0x400, origin, text);
+                text_render_string_to_image(buffer + 0x400, origin, text);
             }
             LoadImage(&rects[1], (u32*)(buffer + 0x400));
             text_loaded = 1;
@@ -1058,11 +1058,11 @@ static void stats_panel_thread(
         gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
         gfx_draw_or_append_gpu_primitive(&page->portrait);
         if (running != 0) {
-            menu_numeric_frame_set_dimmed_colors(&page->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(&page->numeric_frame);
         } else {
-            menu_numeric_frame_set_normal_colors(&page->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(&page->numeric_frame);
         }
-        menu_numeric_frame_submit(&page->numeric_frame);
+        unit_panel_submit_numeric_frame(&page->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&offs->a);
         thread_yield();
         g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
@@ -1104,7 +1104,7 @@ void unit_view_right_stats_thread(void) {
 
 /* Preview the pending action, then display its caster panel. */
 void unit_view_attack_caster_stats_thread(void) {
-    battle_unit_t* attacker = menu_get_selected_battle_unit();
+    battle_unit_t* attacker = unit_panel_get_selected_battle_unit();
     battle_unit_t* target = battle_unit_get(g_unit_panel_comparison_unit_data.battle_unit_id);
     action_command_t* action;
     const ability_data_t* ability_data;
@@ -1179,7 +1179,7 @@ void unit_view_summary_thread(void) {
     slide = 0x84;
     digits = &g_unit_view_summary_digit_images;
     unit_panel_load_selected();
-    unit = menu_get_selected_battle_unit();
+    unit = unit_panel_get_selected_battle_unit();
     g_unit_panel_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
 
     sprite = frames[0].sprites;
@@ -1206,17 +1206,17 @@ void unit_view_summary_thread(void) {
     SetSemiTrans(&frames[0].portrait, 1);
 
     buffer = menu_alloc_buffer(0x580);
-    menu_clear_render_buffer(buffer, 0x580);
+    mem_zero_words(buffer, 0x580);
     stride = &g_menu_window_text_pen.stride;
     origin = &g_menu_window_text_pen;
     *stride = 0x58;
     menu_text_set_origin(0, 0);
-    menu_display_text_string(buffer, origin, g_unit_panel_billboard_unit_name);
+    text_render_string_to_image(buffer, origin, g_unit_panel_billboard_unit_name);
     menu_text_set_origin(0, 0x10);
-    menu_display_text_string(buffer, origin, g_unit_panel_billboard_job_name);
+    text_render_string_to_image(buffer, origin, g_unit_panel_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
 
-    menu_clear_render_buffer(digits, sizeof(*digits));
+    mem_zero_words(digits, sizeof(*digits));
     *stride = 0x10;
     menu_text_set_origin(0, 0);
     text_draw_small_number_glyphs(
@@ -1249,12 +1249,12 @@ void unit_view_summary_thread(void) {
     mem_copy_bytes_nonempty(&frames[1], &frames[0], sizeof(unit_view_summary_frame_t));
     frames[0].numeric_frame = &g_unit_view_summary_numeric_frames[0].primitives;
     frames[1].numeric_frame = &g_unit_view_summary_numeric_frames[1].primitives;
-    menu_numeric_frame_init(&g_unit_view_summary_panel_rect, frames[0].numeric_frame);
-    menu_numeric_frame_init(&g_unit_view_summary_panel_rect, frames[1].numeric_frame);
+    unit_panel_init_numeric_frame(&g_unit_view_summary_panel_rect, frames[0].numeric_frame);
+    unit_panel_init_numeric_frame(&g_unit_view_summary_panel_rect, frames[1].numeric_frame);
 
     for (frame = 0;; frame++) {
         thread_yield();
-        g_unit_panel_hide_numeric_values = menu_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG;
+        g_unit_panel_hide_numeric_values = unit_panel_get_selected_battle_unit()->unit_flags & UNIT_FLAG_EGG;
         frame_record = &frames[frame & 1];
         if (frame == 0) {
             /* The name and job upload has had a frame to finish. */
@@ -1349,11 +1349,11 @@ void unit_view_summary_thread(void) {
 
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
-            menu_numeric_frame_set_dimmed_colors(frame_record->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(frame_record->numeric_frame);
         } else {
-            menu_numeric_frame_set_normal_colors(frame_record->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(frame_record->numeric_frame);
         }
-        menu_numeric_frame_submit(frame_record->numeric_frame);
+        unit_panel_submit_numeric_frame(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_a);
     }
 exit:
@@ -1368,7 +1368,7 @@ exit:
 /* Fill the texture coordinates, CLUT and size of a 16x16 item icon sprite. Icons sit 15 to a
  * row from v = 0x20 of the item icon page, and the item's palette picks one of 8 CLUTs per
  * CLUT row from the item icon CLUT base. */
-void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
+void item_set_icon_sprite(SPRT* sprite, s32 item_id) {
     const item_data_t* item = item_get_data(item_id);
     s32 sprite_id;
     s32 palette;
@@ -1483,19 +1483,16 @@ void status_screen_numbers_thread(void) {
     gfx_set_draw_mode_for_texture_page(&record->mode1, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     menu_init_scaled_draw_area_packets(&record->draw_areas);
     number_images = menu_alloc_memory(sizeof(*number_images));
-    menu_clear_render_buffer(number_images, sizeof(*number_images));
+    mem_zero_words(number_images, sizeof(*number_images));
     g_menu_window_text_pen.stride = 0x14;
     menu_text_set_origin(0, 0);
-    menu_draw_numeric_display_entries(
-        number_images->mobility, s_status_screen_numbers_entries, &g_menu_window_text_pen, 3);
+    text_draw_number_entries(number_images->mobility, s_status_screen_numbers_entries, &g_menu_window_text_pen, 3);
     g_menu_window_text_pen.stride = 0x40;
     menu_text_set_origin(0, 0);
-    menu_draw_numeric_display_entries(
-        number_images->weapons, &s_status_screen_numbers_entries[3], &g_menu_window_text_pen, 4);
+    text_draw_number_entries(number_images->weapons, &s_status_screen_numbers_entries[3], &g_menu_window_text_pen, 4);
     g_menu_window_text_pen.stride = 0x64;
     menu_text_set_origin(0, 0);
-    menu_draw_numeric_display_entries(
-        number_images->combat, &s_status_screen_numbers_entries[7], &g_menu_window_text_pen, 8);
+    text_draw_number_entries(number_images->combat, &s_status_screen_numbers_entries[7], &g_menu_window_text_pen, 8);
     LoadImage(&g_status_screen_numbers_text_rect_a, (u32*)number_images->mobility);
     LoadImage(&g_status_screen_numbers_text_rect_b, (u32*)number_images->weapons);
     LoadImage(&g_status_screen_numbers_text_rect_c, (u32*)number_images->combat);
@@ -1509,8 +1506,8 @@ void status_screen_numbers_thread(void) {
     mem_copy_bytes_nonempty(&record[1], record, sizeof(*record));
     record[0].numeric_frame = &g_status_screen_numbers_frames[0].primitives;
     record[1].numeric_frame = &g_status_screen_numbers_frames[1].primitives;
-    menu_numeric_frame_init(&g_status_screen_numbers_frame_rect, record[0].numeric_frame);
-    menu_numeric_frame_init(&g_status_screen_numbers_frame_rect, record[1].numeric_frame);
+    unit_panel_init_numeric_frame(&g_status_screen_numbers_frame_rect, record[0].numeric_frame);
+    unit_panel_init_numeric_frame(&g_status_screen_numbers_frame_rect, record[1].numeric_frame);
     for (frame = 0;; frame++) {
         thread_yield();
         record = &records[frame & 1];
@@ -1524,7 +1521,7 @@ void status_screen_numbers_thread(void) {
                 record->sprites[i].clut = MENU_CLUT_DIMMED;
             }
             record->sprites[10].clut = 0x7EBC;
-            menu_numeric_frame_set_dimmed_colors(record->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(record->numeric_frame);
         } else {
             for (i = 17; i >= 0; i--) {
                 record->sprites[i].clut = MENU_CLUT_NORMAL;
@@ -1533,7 +1530,7 @@ void status_screen_numbers_thread(void) {
             record->sprites[14].clut = 0x7FFC;
             record->sprites[15].clut = 0x7FFC;
             record->sprites[16].clut = 0x7FFC;
-            menu_numeric_frame_set_normal_colors(record->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(record->numeric_frame);
         }
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[1]);
         for (i = 0; i < 14; i++) {
@@ -1545,7 +1542,7 @@ void status_screen_numbers_thread(void) {
             gfx_draw_or_append_gpu_primitive(&record->sprites[i]);
         }
         gfx_draw_or_append_gpu_primitive(&record->mode1);
-        menu_numeric_frame_submit(record->numeric_frame);
+        unit_panel_submit_numeric_frame(record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[0]);
     }
     thread_yield();
@@ -1664,12 +1661,12 @@ void status_screen_thread(void) {
     for (i = 0; i < 5; i++) {
         gfx_set_image_primitive_layout(&frame_record->frame.sprites[19 + i], &g_gfx_item_icon_image_location,
             &s_status_screen_panel_rect, &s_status_screen_item_icon_layouts[i]);
-        gfx_set_item_icon_sprite(
+        item_set_icon_sprite(
             &frame_record->frame.sprites[19 + i], g_unit_panel_selected_unit_fields.state.equipment[i]);
     }
 
     buffer = menu_alloc_buffer(0xC80);
-    menu_clear_render_buffer(buffer, 0xC80);
+    mem_zero_words(buffer, 0xC80);
     g_menu_window_text_pen.stride = 0x50;
     menu_text_set_origin(0, 0);
     for (i = 0; i < 5; i++) {
@@ -1677,7 +1674,7 @@ void status_screen_thread(void) {
         if ((u16)g_unit_panel_selected_unit_fields.state.equipment[i] == 0xFFFF) {
             g_menu_window_text_pen.rect.y += 0x10;
         } else {
-            menu_display_text_entry(value, buffer, &g_menu_window_text_pen);
+            text_render_entry_to_image(value, buffer, &g_menu_window_text_pen);
             g_menu_window_text_pen.rect.y += 0x10;
         }
     }
@@ -1685,7 +1682,7 @@ void status_screen_thread(void) {
     /* Give the upload a frame before the buffer is cleared for the ability names. */
     thread_yield();
 
-    menu_clear_render_buffer(buffer, 0xC80);
+    mem_zero_words(buffer, 0xC80);
     g_menu_window_text_pen.stride = 0x50;
     menu_text_set_origin(0, 0);
     for (i = 0; i < 2; i++) {
@@ -1696,7 +1693,7 @@ void status_screen_thread(void) {
         if ((u16)g_unit_panel_selected_unit_fields.state.ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
             g_menu_window_text_pen.rect.y += 0x10;
         } else {
-            menu_display_text_entry(value, buffer, &g_menu_window_text_pen);
+            text_render_entry_to_image(value, buffer, &g_menu_window_text_pen);
             g_menu_window_text_pen.rect.y += 0x10;
         }
     }
@@ -1705,7 +1702,7 @@ void status_screen_thread(void) {
         if ((u16)g_unit_panel_selected_unit_fields.state.ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
             g_menu_window_text_pen.rect.y += 0x10;
         } else {
-            menu_display_text_entry(value, buffer, &g_menu_window_text_pen);
+            text_render_entry_to_image(value, buffer, &g_menu_window_text_pen);
             g_menu_window_text_pen.rect.y += 0x10;
         }
     }
@@ -1726,8 +1723,8 @@ void status_screen_thread(void) {
     mem_copy_bytes_nonempty(&records[1], frame_record, sizeof(status_screen_frame_t));
     records[0].numeric_frame = &numeric_frame.primitives;
     records[1].numeric_frame = &g_status_screen_numeric_frame;
-    menu_numeric_frame_init(&s_status_screen_panel_rect, records[0].numeric_frame);
-    menu_numeric_frame_init(&s_status_screen_panel_rect, records[1].numeric_frame);
+    unit_panel_init_numeric_frame(&s_status_screen_panel_rect, records[0].numeric_frame);
+    unit_panel_init_numeric_frame(&s_status_screen_panel_rect, records[1].numeric_frame);
 
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, status_screen_numbers_thread);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
@@ -1762,9 +1759,9 @@ void status_screen_thread(void) {
             }
         }
         if (value == 0) {
-            menu_numeric_frame_set_normal_colors(frame_record->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(frame_record->numeric_frame);
         } else {
-            menu_numeric_frame_set_dimmed_colors(frame_record->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(frame_record->numeric_frame);
         }
 
         if (menu_can_accept_input() != 0) {
@@ -1805,7 +1802,7 @@ void status_screen_thread(void) {
             gfx_draw_or_append_gpu_primitive(&frame_record->frame.lines[i]);
         }
         frame++;
-        menu_numeric_frame_submit(frame_record->numeric_frame);
+        unit_panel_submit_numeric_frame(frame_record->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_areas.areas[0]);
     }
 

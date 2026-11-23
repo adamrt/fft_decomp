@@ -1,6 +1,6 @@
 /* SPU transfer polling and the active transfer status. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/types.h"
 
 /* The transfer controller indexes these records in 16-byte steps. */

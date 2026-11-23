@@ -1,11 +1,11 @@
 /* Scenario music loading, playback and parameters, resident tunes and sound effects. */
 
-#include "fft/file.h"
-#include "fft/memory.h"
-#include "fft/music.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

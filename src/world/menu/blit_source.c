@@ -1,6 +1,6 @@
 /* Setting the source rectangle of the image blitter. */
 
-#include "fft/menu_screen.h"
+#include "fft/menu/menu_screen.h"
 #include "psx/types.h"
 
 extern glyph_blit_t g_menu_screen_image_blit_source;

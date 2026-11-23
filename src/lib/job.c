@@ -1,6 +1,6 @@
 /* Whether a job id is in one of the special monster ranges. */
 
-#include "fft/job.h"
+#include "fft/game/job.h"
 #include "psx/types.h"
 
 /* Returns 1 for a job id in either special-monster range: from

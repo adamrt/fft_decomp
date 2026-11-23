@@ -1,8 +1,8 @@
 /* An uncalled builder of a double-buffered draw area pair cropped about its center. */
 
-#include "fft/gfx.h"
-#include "fft/memory.h"
-#include "fft/script.h"
+#include "fft/gfx/gfx.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

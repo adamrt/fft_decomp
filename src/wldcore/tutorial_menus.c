@@ -1,24 +1,24 @@
 /* The tutorial menu opens the Formation and Battle topic lists and records which entries have been visited. */
 
-#include "fft/bits.h"
-#include "fft/brave_story.h"
-#include "fft/display_object.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message.h"
-#include "fft/music.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/party/formation.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/bits.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/tutorial.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -368,13 +368,13 @@ void tutorial_update_formation_list_input(menu_stack_record_t* level) {
             s16* selected = &g_window_panel_render_state.selected_index;
 
             bits_set_value(g_tutorial_progress_masks, *selected, 1);
-            screen_set_brightness(0x80, 0x80, 0x80);
+            menu_screen_set_brightness(0x80, 0x80, 0x80);
             formation_run_tutorial(*selected);
             g_menu_stack_ot_offset = 1;
             g_menu_blocked_buttons = 0;
             g_world_map_flags ^= WORLD_MAP_FLAG_INPUT_BLOCKED | WORLD_MAP_FLAG_DISPLAY_OFF;
             g_menu_stack_depth--;
-            menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST, 0, 0);
+            world_map_open_screen_transition(MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST, 0, 0);
         }
         return;
     }

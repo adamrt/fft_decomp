@@ -1,15 +1,15 @@
 /* Fullscreen graphics for the chapter title and game over screens. */
 
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/fullscreen_graphic.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/music.h"
-#include "fft/script.h"
-#include "fft/system.h"
-#include "fft/thread.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/fullscreen_graphic.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/script/script.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -18,7 +18,7 @@
  * END1.BIN to END5.BIN. Only the ones open_fullscreen_graphic treats specially are
  * named. */
 typedef enum fullscreen_graphic_id {
-    FULLSCREEN_GRAPHIC_END1 = 8, /* g_gfx_screen_fade rises from -0xff; for the others it falls from 0xff */
+    FULLSCREEN_GRAPHIC_END1 = 8, /* g_fade_event_level rises from -0xff; for the others it falls from 0xff */
     FULLSCREEN_GRAPHIC_END3 = 10,
     FULLSCREEN_GRAPHIC_END4 = 11,
     FULLSCREEN_GRAPHIC_END5 = 12
@@ -84,19 +84,19 @@ static void open_fullscreen_graphic(s32 graphic_id) {
     } else {
         g_gfx_draw_primitives_immediately = 1;
         if (graphic_id == FULLSCREEN_GRAPHIC_END1) {
-            g_gfx_screen_fade = -0xff;
+            g_fade_event_level = -0xff;
             do {
                 thread_yield();
-                g_gfx_screen_fade += 8;
-            } while (g_gfx_screen_fade <= 0);
+                g_fade_event_level += 8;
+            } while (g_fade_event_level <= 0);
         } else {
-            g_gfx_screen_fade = 0xff;
+            g_fade_event_level = 0xff;
             do {
                 thread_yield();
-                g_gfx_screen_fade -= 8;
-            } while (g_gfx_screen_fade > 0);
+                g_fade_event_level -= 8;
+            } while (g_fade_event_level > 0);
         }
-        g_gfx_screen_fade = 0;
+        g_fade_event_level = 0;
 
         /* Hold: 1260 frames for END1, 1440 for END3, 2220 for END4, 600 for END5 and 6120 for END2. */
         if (graphic_id == FULLSCREEN_GRAPHIC_END1) {
@@ -138,16 +138,16 @@ static void open_fullscreen_graphic(s32 graphic_id) {
         }
 
         /* Fade out at half the fade-in speed. */
-        g_gfx_screen_fade = 0;
+        g_fade_event_level = 0;
         do {
             thread_yield();
             thread_yield();
-            g_gfx_screen_fade += 8;
-        } while (g_gfx_screen_fade < 0x100);
-        g_gfx_screen_fade = 0xff;
+            g_fade_event_level += 8;
+        } while (g_fade_event_level < 0x100);
+        g_fade_event_level = 0xff;
         g_gfx_draw_primitives_immediately = 0;
         if (graphic_id == FULLSCREEN_GRAPHIC_END3) {
-            g_gfx_screen_fade = 0;
+            g_fade_event_level = 0;
         }
     }
 

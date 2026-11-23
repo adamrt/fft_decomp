@@ -1,11 +1,11 @@
 /* Map listed units into grid cells and run the unit-order menu that changes
  * their ordering while preserving grouped monster entries. */
 
-#include "fft/menu.h"
-#include "fft/menu_list.h"
-#include "fft/text.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
+#include "fft/game/battle_unit.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_list.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* reorder list */

@@ -1,8 +1,8 @@
 /* Resetting a window zoom's draw area pair. */
 
-#include "fft/gfx.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/sys/memory.h"
 #include "psx/libgpu.h"
 
 /* Clear the first draw area's width and install the default second draw area. */

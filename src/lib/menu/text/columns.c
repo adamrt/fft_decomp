@@ -1,8 +1,9 @@
 /* Drawing the visible text and number entries of a page's three columns. */
 
-#include "fft/menu.h"
-#include "fft/menu_list.h"
-#include "fft/text.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Draw the visible text or number entries in a page's three columns. */
@@ -33,11 +34,11 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
                 g_menu_window_text_pen.color = 0x44444444;
             }
             if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
+                text_render_entry_to_image(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
+                text_draw_number(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
+                text_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
             }
             g_menu_text_palette_offset = 0;
             g_menu_window_text_pen.color = 0;

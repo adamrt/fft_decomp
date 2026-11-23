@@ -2,13 +2,13 @@
  * cache picture sets, backgrounds, message blocks and sound-novel chapters.
  * Frame-buffer rectangles support the screens that display those resources. */
 
-#include "fft/file.h"
-#include "fft/location.h"
-#include "fft/message.h"
-#include "fft/sound_novel.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/world_map.h"
+#include "fft/sys/file.h"
+#include "fft/sys/system.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/location.h"
+#include "fft/world/novel.h"
+#include "fft/world/world_map.h"
 #include "psx/libcd.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -364,7 +364,7 @@ static s32 s_message_block_sector_offsets[113] = {
     112 * 22,
 };
 
-static s32 s_sound_novel_script_sector_offsets[7] = {
+static s32 s_novel_script_sector_offsets[7] = {
     0 * 6,
     1 * 6,
     2 * 6,
@@ -374,7 +374,7 @@ static s32 s_sound_novel_script_sector_offsets[7] = {
     6 * 6,
 };
 
-static s32 s_sound_novel_text_sector_offsets[7] = {
+static s32 s_novel_text_sector_offsets[7] = {
     0 * 20,
     1 * 20,
     2 * 20,
@@ -499,13 +499,13 @@ s32 location_load_picture(s32 index) {
     s32 value = g_location_records[index].picture;
 
     if (value != 0)
-        picture_load_set(value - 1);
+        world_map_load_picture_set(value - 1);
     return value;
 }
 
 /* Load picture set `set` into its image buffer, skipping the transfer when it
  * is already resident. */
-void picture_load_set(s32 set) {
+void world_map_load_picture_set(s32 set) {
     if (set != g_picture_loaded_set) {
         file_wait_pending();
         g_picture_loaded_set = set;
@@ -520,7 +520,7 @@ void picture_load_set(s32 set) {
  * Entry i of g_picture_background_sector_offsets is the start sector of set i
  * in the file, so entry i+1 minus entry i is that set's sector count; the
  * other sector-offset tables in this file have the same shape. */
-void picture_load_background_set(s32 set) {
+void world_map_load_background_picture_set(s32 set) {
     if (set != g_picture_background_loaded_set) {
         file_wait_pending();
         g_picture_background_loaded_set = set;
@@ -533,7 +533,7 @@ void picture_load_background_set(s32 set) {
 
 /* Loads message block `block` (message_block_e) unless it is the one already loaded.
  * g_message_block_sector_offsets has the same shape as the pair used by
- * sound_novel_load_files: entry i is the start sector of block i relative to the disc
+ * novel_load_files: entry i is the start sector of block i relative to the disc
  * LBA below, so entry i+1 minus entry i is that block's length. */
 void message_load_block_if_changed(s32 block) {
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_message_block_buffer;
@@ -552,24 +552,20 @@ void message_load_block_if_changed(s32 block) {
  * Each file comes from a seven-entry sector-offset table. An entry is the
  * start sector of one chapter's data relative to the disc LBA added to it,
  * so entry i+1 minus entry i is that chapter's sector count. */
-void sound_novel_load_files(s32 chapter) {
+void novel_load_files(s32 chapter) {
     file_wait_pending();
-    file_request_pending_read(&g_file_cd_state,
-        s_sound_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
-        s_sound_novel_script_sector_offsets[chapter + 1] - s_sound_novel_script_sector_offsets[chapter],
-        &g_sound_novel_script);
+    file_request_pending_read(&g_file_cd_state, s_novel_script_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLBIN_BIN,
+        s_novel_script_sector_offsets[chapter + 1] - s_novel_script_sector_offsets[chapter], &g_novel_script);
     file_wait_pending();
-    file_request_pending_read(&g_file_cd_state,
-        s_sound_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
-        s_sound_novel_text_sector_offsets[chapter + 1] - s_sound_novel_text_sector_offsets[chapter],
-        g_message_block_buffer);
+    file_request_pending_read(&g_file_cd_state, s_novel_text_sector_offsets[chapter] + DISC_SECTOR_WORLD_SNPLMES_BIN,
+        s_novel_text_sector_offsets[chapter + 1] - s_novel_text_sector_offsets[chapter], g_message_block_buffer);
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_message_block_buffer;
     g_message_block_loaded = -1;
 }
 
 /* Queue a one-sector read of BATTLE.BIN's first sector with no destination,
  * which seeks the drive there while the event transition plays. */
-void event_transition_seek_battle_bin(void) {
+void world_map_seek_event_battle_bin(void) {
     file_request_pending_read(&g_file_cd_state, g_file_battle_sector, 1, 0);
 }
 

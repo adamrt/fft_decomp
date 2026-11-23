@@ -1,18 +1,17 @@
 /* Current-status lists and the panel record transfers used when a menu overlay publishes
  * a selected unit back to the resident event display. */
 
-#include "fft/ability_list.h"
-#include "fft/command.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/sound.h"
-#include "fft/status.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/command.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/status.h"
+#include "fft/map/map.h"
+#include "fft/menu/menu.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* current-status list */

@@ -1,34 +1,33 @@
 /* Load companion overlays and launch their native menus, unit views and spell quotes. */
 
-#include "fft/after_battle.h"
-#include "fft/at_list.h"
-#include "fft/camera.h"
-#include "fft/command.h"
-#include "fft/crystal.h"
-#include "fft/equipment.h"
-#include "fft/fade.h"
-#include "fft/help.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/message.h"
-#include "fft/option.h"
-#include "fft/overlay.h"
-#include "fft/script.h"
-#include "fft/script_unit.h"
-#include "fft/sound.h"
-#include "fft/status_screen.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_editor.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
-#include "fft/unit_view.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/command.h"
+#include "fft/battle/conditions.h"
+#include "fft/battle/crystal.h"
+#include "fft/battle/unit_view.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/fade.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/option.h"
+#include "fft/party/equipment.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_editor.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
@@ -201,7 +200,7 @@ void crystal_pickup_panel_thread(void) {
 }
 
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */
-void mini_menu_thread(void) {
+void command_mini_menu_thread(void) {
     thread_current_set_task(THREAD_TASK_MINI_MENU);
     while (camera_is_active() != 0 || g_menu_transition_state != 0) {
         thread_yield();
@@ -233,12 +232,12 @@ static void unit_list_return_thread(void) {
         thread_set_parameters(i, 0, 0, 1);
     }
     for (i = 0; i < 0x100; i += 8) {
-        g_gfx_screen_fade = 0xFF - i;
+        g_fade_event_level = 0xFF - i;
         thread_yield();
     }
     menu_close_modal();
     g_menu_overlay_state = 0;
-    g_gfx_screen_fade = 0;
+    g_fade_event_level = 0;
     g_menu_transition_state = 0;
     unit_view_start(UNIT_VIEW_MODE_HOVERED_UNIT, g_unit_panel_selected_unit.battle_unit_id, 0xFF);
     thread_current_exit();
@@ -250,10 +249,10 @@ static void unit_list_transition_thread(void) {
     s32 level;
 
     for (level = 0; level < 0x100; level += 0x10) {
-        g_gfx_screen_fade = level;
+        g_fade_event_level = level;
         thread_yield();
     }
-    g_gfx_screen_fade = 0xFF;
+    g_fade_event_level = 0xFF;
     g_menu_overlay_state = 1;
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);

@@ -1,14 +1,15 @@
 /* Timed and linked text-message menus and their input thread. */
 
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_window.h"
-#include "fft/message.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -87,7 +88,7 @@ void menu_icon_timed_thread(void) {
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = width;
     menu_text_set_origin(pad + 8, 9);
-    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
+    text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (;; i++) {
         thread_yield();
@@ -161,7 +162,7 @@ void menu_icon_linked_entry_thread(void) {
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_window_text_pen.stride = width;
     menu_text_set_origin(8, 9);
-    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
+    text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
         thread_yield();

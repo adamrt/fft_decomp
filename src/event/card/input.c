@@ -1,10 +1,10 @@
 /* Controller input, suppressed during fades. */
 
-#include "fft/input.h"
-#include "fft/fade.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/save.h"
+#include "fft/sys/input.h"
+#include "fft/gfx/fade.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/world/save.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -115,7 +115,7 @@ static void update_controller(void) {
  * progress. */
 void save_update_input(void) {
     update_controller();
-    if (screen_get_fade_state() != 0) {
+    if (fade_menu_get_state() != 0) {
         g_menu_input_newly_pressed = 0;
         g_menu_input_primary_repeat = 0;
         g_menu_input_secondary_repeat = 0;

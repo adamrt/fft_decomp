@@ -1,34 +1,35 @@
 /* The item shop runs the shared shop screen and its buying and selling menus. */
 
-#include "fft/ability.h"
-#include "fft/equipment.h"
-#include "fft/fade.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/formation_item.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/menu_window.h"
-#include "fft/message_box.h"
-#include "fft/music.h"
-#include "fft/script_variable.h"
-#include "fft/shop.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/equipment.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/formation_item.h"
+#include "fft/party/item_list.h"
+#include "fft/party/office.h"
+#include "fft/party/shop.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -68,10 +69,10 @@ extern u16 g_shop_sell_item; /* item being sold */
 extern u8 g_shop_sell_confirm_shown; /* confirmation prompt shown */
 
 extern u8 g_shop_fitting_cost_visible;
-extern menu_entry_t g_fur_shop_menu_thread_data;
+extern menu_entry_t g_shop_fur_menu_thread_data;
 
 /* The cursor doubles as the soldier-office mode (get_hire_fee). */
-extern menu_entry_t g_soldier_office_hire_menu_thread_data;
+extern menu_entry_t g_office_hire_menu_thread_data;
 
 /* Byte-aligned display streams; each extent includes the terminating opcode. */
 extern u8 g_shop_war_funds_script[34];
@@ -105,20 +106,20 @@ static void (*s_shop_step_handlers[])(void) = {
     shop_fitting_update_inventory_sale,
     shop_fitting_update_checkout,
     update_exit_fade,
-    fur_shop_update_menu,
-    fur_shop_buy_update_list,
-    fur_shop_buy_update_confirm,
-    fur_shop_buy_update_unit_preview,
-    fur_shop_sell_update_list,
-    fur_shop_sell_update_confirm,
-    soldier_office_update_menu,
-    soldier_office_hire_update_preview,
-    soldier_office_hire_update_confirm,
-    soldier_office_hire_update_name,
-    soldier_office_hire_update_fee,
-    soldier_office_reopen_menu,
-    soldier_office_rename_update_unit,
-    soldier_office_rename_update_name,
+    shop_fur_update_menu,
+    shop_fur_buy_update_list,
+    shop_fur_buy_update_confirm,
+    shop_fur_buy_update_unit_preview,
+    shop_fur_sell_update_list,
+    shop_fur_sell_update_confirm,
+    office_update_menu,
+    office_hire_update_preview,
+    office_hire_update_confirm,
+    office_hire_update_name,
+    office_hire_update_fee,
+    office_reopen_menu,
+    office_rename_update_unit,
+    office_rename_update_name,
 };
 
 /* Backdrop and VRAM rectangles, followed by the main menu and exit gates. */
@@ -221,8 +222,8 @@ void shop_run_screen(s32 shop_type) {
     last_step = -1;
     formation_init_menu_state();
     g_shop_main_menu_thread_data.selected_index = 0;
-    g_fur_shop_menu_thread_data.selected_index = 0;
-    g_soldier_office_hire_menu_thread_data.selected_index = 0;
+    g_shop_fur_menu_thread_data.selected_index = 0;
+    g_office_hire_menu_thread_data.selected_index = 0;
 
     menu_screen_text_bind_section(MENU_SCREEN_TEXT_DATA_SHOP_DIALOGUE);
     g_text_section_pointers[MENU_SCREEN_TEXT_SECTION_SHOP_MENU_LABELS] = g_menu_screen_text_shop_menu_labels_data;
@@ -237,9 +238,9 @@ void shop_run_screen(s32 shop_type) {
         menu_gfx_present_frame(0, 0);
         menu_input_update_message_state();
         menu_screen_update_input_lockout();
-        screen_update_fade_in();
+        fade_menu_update_in();
         if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-            menu_start_help_text(DIALOG_POSITION_CENTER);
+            help_start_text(DIALOG_POSITION_CENTER);
         }
         if (g_menu_screen_grid_id != MENU_GRID_HELP_NONE) {
             menu_screen_update_grid_cursor(
@@ -367,20 +368,20 @@ static void update_exit_fade(void) {
         s_shop_exit_step_initialized = 1;
     }
     if (s_shop_exit_fade_started != 0) {
-        if (screen_update_fade_out() == 0) {
+        if (fade_menu_update_out() == 0) {
             g_shop_menu_step = SHOP_STEP_EXIT;
             s_shop_exit_step_initialized = 0;
         }
     } else if (g_menu_input_newly_pressed & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
-        screen_start_fade_out();
+        fade_menu_start_out();
         music_set_target_volume(0, 0xF0);
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         s_shop_exit_fade_started = 1;
     }
     shop_draw_gil();
     if (g_menu_screen_context_id == MENU_SCREEN_CONTEXT_SOLDIER_OFFICE) {
-        soldier_office_draw_fee();
-        soldier_office_draw_unit_count();
+        office_draw_fee();
+        office_draw_unit_count();
     }
 }
 
@@ -501,7 +502,7 @@ static void update_buy_list(void) {
             g_item_list_entries, selected_index, scroll_base_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
         g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-        g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+        g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
         g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
         g_menu_row_callbacks[4].value = shop_buy_get_price;
         g_menu_row_callbacks[5].value = shop_buy_get_equipped_count;
@@ -582,7 +583,7 @@ static void update_buy_confirm(void) {
             item_adjust_inventory_count(g_item_list_entries[g_menu_list_selected_index],
                 g_menu_screen_selection_results[MENU_SCREEN_SELECTION_SHOP_QUANTITY]);
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
-            item_rebuild_category_list(g_shop_item_category);
+            item_list_rebuild_category(g_shop_item_category);
         } else {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80A, 0);
         }
@@ -801,7 +802,7 @@ void shop_sell_update_list(void) {
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
         g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-        g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+        g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
         g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
         g_menu_row_callbacks[4].value = shop_sell_get_price;
         g_menu_row_callbacks[5].value = equipment_row_get_equipped_count;
@@ -853,7 +854,7 @@ void shop_sell_update_confirm(void) {
             item_adjust_inventory_count(g_item_list_entries[g_menu_list_selected_index],
                 -g_menu_screen_selection_results[MENU_SCREEN_SELECTION_SHOP_QUANTITY]);
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
-            item_rebuild_category_list(g_shop_item_category);
+            item_list_rebuild_category(g_shop_item_category);
             equipment_build_item_list(0, g_shop_item_category + 1,
                 g_shop_item_category != ITEM_MENU_TAB_OTHER ? g_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
                 g_item_list_entries, ITEM_LIST_MODE_ALL);

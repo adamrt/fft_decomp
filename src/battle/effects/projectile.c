@@ -1,12 +1,11 @@
 /* Calculate and trace curved and direct projectile trajectories against units and terrain. */
 
-#include "fft/projectile.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/sprite_sheet.h"
-#include "fft/status.h"
-#include "fft/system.h"
-#include "fft/unit.h"
+#include "fft/battle/projectile.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/status.h"
+#include "fft/map/map.h"
+#include "fft/map/map_unit.h"
+#include "fft/sys/system.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

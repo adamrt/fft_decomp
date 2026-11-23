@@ -1,12 +1,12 @@
 /* Load the selected map title and animate its shaded strips after deployment
  * while the battle map finishes loading. */
 
-#include "fft/file.h"
-#include "fft/gfx_primitive.h"
-#include "fft/map.h"
-#include "fft/menu.h"
-#include "fft/script_variable.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/map/map.h"
+#include "fft/menu/menu.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

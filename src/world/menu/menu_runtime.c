@@ -1,34 +1,35 @@
 /* WORLD loads the menu resources and runs the windows, input frame and screen requests used by the world map.
  * Formation, Save and the WLDCORE menus return through the same context and thread-group lifecycle. */
 
-#include "fft/ability_list.h"
-#include "fft/command.h"
-#include "fft/file.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/location.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/music.h"
-#include "fft/option.h"
-#include "fft/overlay.h"
-#include "fft/portrait.h"
-#include "fft/save.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/world_map.h"
+#include "fft/battle/command.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/portrait.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/formation.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/location.h"
+#include "fft/world/save.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -463,7 +464,7 @@ void formation_run_world_map_return(void) {
     g_menu_scroll_accel_delay = g_menu_screen_input_timing_profiles[profile].scroll_accel_delay;
     g_menu_scroll_slow_step = g_menu_screen_input_timing_profiles[profile].scroll_slow_step;
     g_menu_scroll_fast_step = g_menu_screen_input_timing_profiles[profile].scroll_fast_step;
-    screen_set_brightness(0x80, 0x80, 0x80);
+    menu_screen_set_brightness(0x80, 0x80, 0x80);
     formation_run_screen(0, 0);
     menu_screen_reset_context();
     ClearImage(&g_menu_screen_clear_rect, 0, 0, 0);
@@ -571,10 +572,10 @@ void world_map_menu_set_scroll(s32 direction, s32 threshold) {
 }
 
 /* Set the color the WORLD menus tint their sprites with (0x80 each is neutral). */
-void screen_set_brightness(s32 red, s32 green, s32 blue) {
-    g_screen_color_red = red;
-    g_screen_color_green = green;
-    g_screen_color_blue = blue;
+void menu_screen_set_brightness(s32 red, s32 green, s32 blue) {
+    g_menu_screen_brightness_red = red;
+    g_menu_screen_brightness_green = green;
+    g_menu_screen_brightness_blue = blue;
 }
 
 /* Main menu text window thread:
@@ -654,7 +655,7 @@ void world_map_menu_text_window_thread(void) {
             g_text_substitution_values[0] = text_values[0];
             text_values = entry->value;
             g_text_substitution_values[1] = text_values[1];
-            menu_display_text_entry(entry->text_id, buffer, &g_menu_window_text_pen);
+            text_render_entry_to_image(entry->text_id, buffer, &g_menu_window_text_pen);
             mem_copy_bytes_nonempty(
                 g_text_substitution_values, s_saved_text_values, sizeof(g_text_substitution_values));
             LoadImage(&rect, buffer);
@@ -700,10 +701,12 @@ void world_map_menu_text_window_thread(void) {
             }
             record->text_sprite.x0 = entry->window.x;
         }
-        setRGB0(&record->frame_sprites[0], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
+        setRGB0(&record->frame_sprites[0], g_menu_screen_brightness_red, g_menu_screen_brightness_green,
+            g_menu_screen_brightness_blue);
         gfx_draw_or_append_gpu_primitive(&record->frame_sprites[0]);
         gfx_draw_or_append_gpu_primitive(&record->frame_draw_mode);
-        setRGB0(&record->text_sprite, g_screen_color_red, g_screen_color_green, g_screen_color_blue);
+        setRGB0(&record->text_sprite, g_menu_screen_brightness_red, g_menu_screen_brightness_green,
+            g_menu_screen_brightness_blue);
         gfx_draw_or_append_gpu_primitive(&record->text_sprite);
         gfx_draw_or_append_gpu_primitive(&record->text_draw_mode);
     }
@@ -837,7 +840,7 @@ static void update_formation_request(void) {
     }
     if (state == WORLD_MAP_REQUEST_RUN) {
         menu_screen_reset_context();
-        screen_set_brightness(0x80, 0x80, 0x80);
+        menu_screen_set_brightness(0x80, 0x80, 0x80);
         formation_run_screen(0, 0);
         menu_screen_reset_context();
         g_world_map_screen_request = 0;
@@ -851,7 +854,7 @@ static void update_formation_request(void) {
             g_world_map_scratch_buffer[i] = 0;
         }
         s_formation_open_request_state++;
-        screen_set_brightness(0, 0, 0);
+        menu_screen_set_brightness(0, 0, 0);
         return;
     }
     if (state < 8) {
@@ -903,7 +906,7 @@ static void update_tutorial_request(void) {
         return;
     }
     menu_screen_reset_context();
-    screen_set_brightness(0x80, 0x80, 0x80);
+    menu_screen_set_brightness(0x80, 0x80, 0x80);
     g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_TUTORIAL;
     g_world_map_tutorial_request_state = WORLD_MAP_REQUEST_IDLE;
 }
@@ -917,7 +920,7 @@ static void update_variable_list_request(void) {
     if (state != 0 && state == 1) {
         g_world_map_screen_request = 1;
         menu_screen_reset_context();
-        screen_set_brightness(0x80, 0x80, 0x80);
+        menu_screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_debug_variable_list_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_VARIABLE_LIST;
     }
@@ -934,7 +937,7 @@ static void update_party_number_request(void) {
         g_thread_call_target = (void (*)(void))file_load_into_buffer_checked;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WORLD_LZW, 0xE800, s_menu_text_file_buffer);
         text_relocate_pointer_table(s_menu_text_file_buffer);
-        screen_set_brightness(0x80, 0x80, 0x80);
+        menu_screen_set_brightness(0x80, 0x80, 0x80);
         g_world_map_debug_party_number_request_state = 0;
         g_world_map_flags |= WORLD_MAP_FLAG_REQUEST_DEBUG_PARTY_NUMBER;
     }
@@ -964,7 +967,7 @@ static void update_save_request(void) {
     }
     if (state == WORLD_MAP_REQUEST_RUN) {
         menu_screen_reset_context();
-        screen_set_brightness(0x80, 0x80, 0x80);
+        menu_screen_set_brightness(0x80, 0x80, 0x80);
         result = save_run_screen(1);
         menu_screen_reset_context();
         g_world_map_screen_request = 0;
@@ -983,7 +986,7 @@ static void update_save_request(void) {
             g_world_map_scratch_buffer[i] = 0;
         }
         g_save_menu_request_state++;
-        screen_set_brightness(0, 0, 0);
+        menu_screen_set_brightness(0, 0, 0);
         return;
     }
     if (state < 8) {

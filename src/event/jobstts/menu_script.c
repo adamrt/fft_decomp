@@ -1,10 +1,10 @@
 /* Command stream dispatch and the palette-mode script run. */
 
-#include "fft/menu_script.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_window.h"
-#include "fft/status_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/status_screen.h"
 #include "psx/types.h"
 
 /* Dispatch slots before this program's end opcode; zero entries stay unhandled. */

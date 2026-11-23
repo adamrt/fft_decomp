@@ -1,10 +1,10 @@
 /* The world-map HUD draws funds, time, the calendar date and the current location label. */
 
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/location.h"
-#include "fft/script_variable.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/script/script_variable.h"
+#include "fft/world/calendar.h"
+#include "fft/world/location.h"
+#include "fft/world/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"
@@ -27,7 +27,7 @@ static void draw_filled_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot
  * `separator` precede those into `sprite`. The position read back at the end
  * of case 4 is a plain 32-bit load narrowed by the store, where the chained
  * assignment before the switch reads only the low 16 bits. */
-void hud_draw_value(GsOT* ot) {
+void world_map_draw_hud_value(GsOT* ot) {
     GsSPRITE sprite;
     GsSPRITE separator;
     GsLINE line;

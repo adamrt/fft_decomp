@@ -1,17 +1,17 @@
 /* Map dots, location menus, routes and path animation, travel, scrolling, random encounters and the player marker. */
 
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/location.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/music.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/text/text.h"
+#include "fft/world/calendar.h"
+#include "fft/world/location.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/world_map.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -908,7 +908,7 @@ s32 travel_start(s32 from_location, s32 to_location) {
             |= DISPLAY_OBJECT_HIDDEN;
         g_travel_next_map_id = 0;
         script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
-        event_transition_open(g_location_script_state.args[1]);
+        world_map_open_event_transition(g_location_script_state.args[1]);
         g_world_map_flags |= WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
         return 0;
     }
@@ -986,7 +986,7 @@ void travel_update(void) {
                 != 0) {
                 g_travel_next_map_id = 0;
                 script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_location_script_state.args[0]);
-                event_transition_open(g_location_script_state.args[1]);
+                world_map_open_event_transition(g_location_script_state.args[1]);
                 g_world_map_marker_state.angle = 0;
                 g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
                 g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);
@@ -1007,7 +1007,7 @@ void travel_update(void) {
                 script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, 1);
                 script_variable_set(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID, g_random_battle_squad_id);
                 script_variable_set(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
-                event_transition_open(EVENT_TRANSITION_MODE_SPIN);
+                world_map_open_event_transition(EVENT_TRANSITION_MODE_SPIN);
                 g_world_map_marker_state.angle = 0;
                 g_world_map_marker_state.flags &= ~WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET;
                 g_travel.flags &= ~(TRAVEL_ACTIVE | TRAVEL_REVERSED);

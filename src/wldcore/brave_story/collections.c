@@ -1,23 +1,23 @@
 /* Brave Story displays discovered lands and treasures. A treasure can open its sound novel, asking whether to resume a
  * saved reading while the treasure picture dissolves into view. */
 
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu_input.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message_box.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/sound_novel.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/novel.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/pad.h"
@@ -156,7 +156,7 @@ static void open_land_detail(s32 value) {
     calendar_date_t date;
 
     g_menu_stack_records[g_menu_stack_depth].detail.value = value;
-    picture_load_set(g_unexplored_land_picture_sets[value]);
+    world_map_load_picture_set(g_unexplored_land_picture_sets[value]);
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].detail.render_index = index;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -185,7 +185,7 @@ static void open_land_detail(s32 value) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[0] = date.month + TEXT_ID_MONTH_NAME_BASE;
     g_text_window.text_substitutions[1] = date.day;
-    text_window_open(&g_text_window);
+    window_open_paged_text(&g_text_window);
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.label_window].flags
@@ -268,7 +268,7 @@ void brave_story_update_unexplored_land_detail(menu_stack_record_t* level) {
         if (g_display_object_gs_image_pool[*index].flags & DISPLAY_OBJECT_POP_IN) {
             break;
         }
-        if (text_window_update(&g_text_window) != 0) {
+        if (window_update_paged_text(&g_text_window) != 0) {
             break;
         }
         depth = g_menu_stack_depth;
@@ -416,7 +416,7 @@ void brave_story_open_treasure_detail(s32 value) {
     calendar_date_t date;
 
     g_menu_stack_records[g_menu_stack_depth].detail.value = value;
-    picture_load_set(g_treasure_picture_sets[value]);
+    world_map_load_picture_set(g_treasure_picture_sets[value]);
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     g_menu_stack_records[g_menu_stack_depth].detail.render_index = index;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_HIDDEN;
@@ -442,7 +442,7 @@ void brave_story_open_treasure_detail(s32 value) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[0] = date.month + TEXT_ID_MONTH_NAME_BASE;
     g_text_window.text_substitutions[1] = date.day;
-    text_window_open(&g_text_window);
+    window_open_paged_text(&g_text_window);
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.label_window].flags
@@ -475,7 +475,7 @@ void brave_story_open_treasure_detail(s32 value) {
  * picks it, blocks input and closes the message box, fading the screen out
  * unless a saved reading exists; once that is done the level is released
  * and the novel opens (open_reading_choice for a saved
- * reading, else sound_novel_open_reader). When the text window
+ * reading, else novel_open_reader). When the text window
  * finishes instead, the Brave Story menu comes back and the treasure list
  * reopens.
  *
@@ -542,15 +542,15 @@ void brave_story_update_treasure_detail(menu_stack_record_t* level) {
             g_display_object_queue_count -= 6;
             saved = level->detail.saved_record_index;
             g_menu_stack_depth--;
-            g_sound_novel_selected = saved;
-            if (slot < 5 && g_sound_novel_saved_readings[slot].section != 0) {
+            g_novel_selected = saved;
+            if (slot < 5 && g_novel_saved_readings[slot].section != 0) {
                 open_reading_choice(level->detail.value);
                 break;
             }
-            sound_novel_open_reader(level->detail.value);
+            novel_open_reader(level->detail.value);
             break;
         }
-        if (text_window_update(&g_text_window) == 0) {
+        if (window_update_paged_text(&g_text_window) == 0) {
             depth = g_menu_stack_depth;
             g_display_object_animated_pool[g_menu_stack_records[depth - 2].brave_story.cursor_window].flags
                 ^= DISPLAY_OBJECT_HIDDEN;
@@ -574,7 +574,7 @@ void brave_story_update_treasure_detail(menu_stack_record_t* level) {
             entry = g_treasure_sound_novel_ids[level->detail.value];
             if (entry != 0) {
                 level->detail.saved_record_index = entry - 1;
-                if (entry - 1 >= 5 || g_sound_novel_saved_readings[entry - 1].section == 0) {
+                if (entry - 1 >= 5 || g_novel_saved_readings[entry - 1].section == 0) {
                     world_map_start_fade(WORLD_MAP_FADE_OUT, 0x10);
                 }
                 g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
@@ -663,7 +663,7 @@ static s32 update_picture_dissolve(GsIMAGE* image, s32 step) {
 }
 
 /* Pushes MENU_STACK_LEVEL_SOUND_NOVEL_RESTART (stepped by
- * sound_novel_update_reading_choice) for treasure `mode`, whose sound
+ * novel_update_reading_choice) for treasure `mode`, whose sound
  * novel has a saved reading: appends the cursor window, a VRAM render record
  * for the TIM at g_picture_buffer (uploaded progressively through
  * update_picture_dissolve, starting at step 0), and two text
@@ -691,9 +691,9 @@ static void open_reading_choice(s32 mode) {
     point32_t* base3;
     point32_t* base4;
 
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.mode = mode;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.mode = mode;
     index = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_window = index;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.cursor_window = index;
     g_display_object_animated_pool[index].sequence = DISPLAY_OBJECT_ANIM_CURSOR_IDLE;
     g_display_object_animated_pool[index].priority = 0xA;
     g_display_object_animated_pool[index].anim_counter = 0;
@@ -701,7 +701,7 @@ static void open_reading_choice(s32 mode) {
     GsGetTimInfo(g_picture_buffer + 1, &image);
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.picture_render = index;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.picture_render = index;
     bounds.x = image.px;
     bounds.y = image.py;
     bounds.w = image.pw;
@@ -713,7 +713,7 @@ static void open_reading_choice(s32 mode) {
     update_picture_dissolve(&image, 0);
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.message_render = index;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.message_render = index;
     bounds.x = 0;
     bounds.y = 0x70;
     bounds.w = 0x7C;
@@ -726,15 +726,15 @@ static void open_reading_choice(s32 mode) {
     base1->y = -0x38;
     DrawSync(0);
     depth = g_menu_stack_depth;
-    base2 = &g_display_object_gs_image_pool[g_menu_stack_records[depth].sound_novel_resume.picture_render].position;
+    base2 = &g_display_object_gs_image_pool[g_menu_stack_records[depth].novel_resume.picture_render].position;
     offset_x = image.pw - 0x3E;
     base2->x = g_display_object_gs_image_pool[index].position.x - offset_x;
-    base3 = &g_display_object_gs_image_pool[g_menu_stack_records[depth].sound_novel_resume.picture_render].position;
+    base3 = &g_display_object_gs_image_pool[g_menu_stack_records[depth].novel_resume.picture_render].position;
     offset_y = (image.ph >> 1) - 0x4C;
     base3->y = g_display_object_gs_image_pool[index].position.y - offset_y;
 
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.option_render = index;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.option_render = index;
     bounds.x = 0x80;
     bounds.y = 0x70;
     bounds.w = 0x70;
@@ -744,12 +744,12 @@ static void open_reading_choice(s32 mode) {
     base4 = &g_display_object_gs_image_pool[index].position;
     base4->x = 8;
     base4->y = -0x38;
-    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_window].position.x
+    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].novel_resume.cursor_window].position.x
         = g_display_object_gs_image_pool[index].position.x + 0x18;
-    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_window].position.y
+    g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth].novel_resume.cursor_window].position.y
         = g_display_object_gs_image_pool[index].position.y + 0x3C;
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.dissolve_step = 1;
-    g_menu_stack_records[g_menu_stack_depth].sound_novel_resume.cursor_row = 0;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.dissolve_step = 1;
+    g_menu_stack_records[g_menu_stack_depth].novel_resume.cursor_row = 0;
     g_menu_stack_types[g_menu_stack_depth] = MENU_STACK_LEVEL_SOUND_NOVEL_RESTART;
     g_menu_stack_depth++;
 }
@@ -763,23 +763,23 @@ static void open_reading_choice(s32 mode) {
  * released and the novel opens, its saved reading discarded when the second
  * row was chosen. Up and down toggle cursor_row, moving the cursor by 16.
  *
- * sound_novel_reset_selected_reading ignores its argument; retail still
- * passes g_sound_novel_selected. */
-void sound_novel_update_reading_choice(menu_stack_record_t* level) {
+ * novel_reset_selected_reading ignores its argument; retail still
+ * passes g_novel_selected. */
+void novel_update_reading_choice(menu_stack_record_t* level) {
     GsIMAGE image;
     s32 buttons;
 
-    if (g_display_object_gs_image_pool[level->sound_novel_resume.message_render].flags & DISPLAY_OBJECT_POP_IN) {
+    if (g_display_object_gs_image_pool[level->novel_resume.message_render].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
 
-    if (level->sound_novel_resume.dissolve_step != 0) {
+    if (level->novel_resume.dissolve_step != 0) {
         GsGetTimInfo(g_picture_buffer + 1, &image);
-        if (update_picture_dissolve(&image, level->sound_novel_resume.dissolve_step) == 0) {
-            level->sound_novel_resume.dissolve_step = 0;
+        if (update_picture_dissolve(&image, level->novel_resume.dissolve_step) == 0) {
+            level->novel_resume.dissolve_step = 0;
             return;
         }
-        level->sound_novel_resume.dissolve_step++;
+        level->novel_resume.dissolve_step++;
         return;
     }
 
@@ -789,10 +789,10 @@ void sound_novel_update_reading_choice(menu_stack_record_t* level) {
         g_display_object_image_count -= 3;
         g_display_object_queue_count -= 4;
         g_menu_stack_depth--;
-        if (level->sound_novel_resume.cursor_row != 0) {
-            sound_novel_reset_selected_reading(g_sound_novel_selected);
+        if (level->novel_resume.cursor_row != 0) {
+            novel_reset_selected_reading(g_novel_selected);
         }
-        sound_novel_open_reader(level->sound_novel_resume.mode);
+        novel_open_reader(level->novel_resume.mode);
         return;
     }
 
@@ -805,15 +805,14 @@ void sound_novel_update_reading_choice(menu_stack_record_t* level) {
         thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
         thread_set_parameters(WORLD_MAP_THREAD_SLOT_MESSAGE, 0x19, TEXT_ID_BRAVE_STORY_INTRO, 0);
         sound_play_effect(SOUND_SFX_CANCEL);
-        brave_story_open_treasure_detail(level->sound_novel_resume.mode);
+        brave_story_open_treasure_detail(level->novel_resume.mode);
         return;
     }
 
     if (buttons & PSX_PAD_CIRCLE) {
-        g_display_object_animated_pool[level->sound_novel_resume.cursor_window].sequence
-            = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
-        g_display_object_animated_pool[level->sound_novel_resume.cursor_window].frame_index
-            = g_display_object_animated_pool[level->sound_novel_resume.cursor_window].anim_counter = 0;
+        g_display_object_animated_pool[level->novel_resume.cursor_window].sequence = DISPLAY_OBJECT_ANIM_CURSOR_PRESS;
+        g_display_object_animated_pool[level->novel_resume.cursor_window].frame_index
+            = g_display_object_animated_pool[level->novel_resume.cursor_window].anim_counter = 0;
         world_map_start_fade(WORLD_MAP_FADE_OUT, 0x10);
         g_world_map_flags |= WORLD_MAP_FLAG_INPUT_BLOCKED;
         sound_play_effect(SOUND_SFX_CONFIRM);
@@ -824,9 +823,9 @@ void sound_novel_update_reading_choice(menu_stack_record_t* level) {
         return;
     }
 
-    level->sound_novel_resume.cursor_row ^= 1;
-    g_display_object_animated_pool[level->sound_novel_resume.cursor_window].position.y
-        = g_display_object_gs_image_pool[level->sound_novel_resume.option_render].position.y + 0x3c
-        + level->sound_novel_resume.cursor_row * 0x10;
+    level->novel_resume.cursor_row ^= 1;
+    g_display_object_animated_pool[level->novel_resume.cursor_window].position.y
+        = g_display_object_gs_image_pool[level->novel_resume.option_render].position.y + 0x3c
+        + level->novel_resume.cursor_row * 0x10;
     sound_play_effect(SOUND_SFX_CURSOR_MOVE);
 }

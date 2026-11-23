@@ -1,8 +1,8 @@
 /* Ability-list row callbacks: cached ability type, learned tests and MP/CT/JP display values. */
 
-#include "fft/ability.h"
-#include "fft/ability_list.h"
-#include "fft/menu_script.h"
+#include "fft/game/ability.h"
+#include "fft/menu/menu_script.h"
+#include "fft/party/ability_list.h"
 #include "psx/types.h"
 
 static ability_type_e s_ability_list_ability_type;

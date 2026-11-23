@@ -1,7 +1,7 @@
 /* Cooperative thread lifecycle and parameter passing for BATTLE and WORLD.
  * Each scene's frame loop supplies its own context-switch and frame hooks. */
 
-#include "fft/thread.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* WORLD has a seventeenth slot for tutorial text; reset clears only sixteen.

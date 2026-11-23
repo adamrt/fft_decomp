@@ -1,9 +1,9 @@
 /* Wait for pending disc reads in OPEN and WLDCORE. WLDCORE also streams the
  * world-map texture into its scratch buffer through this unit. */
 
-#include "fft/file.h"
-#include "fft/music.h"
-#include "fft/world_map.h"
+#include "fft/sys/file.h"
+#include "fft/sys/music.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

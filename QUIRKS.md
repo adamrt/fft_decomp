@@ -18,11 +18,11 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - EFFECT native renderers: `step_emitter` sets phase 3 when a callback's keyframe window has two frames left, even if init never ran; the destroy path then reads its latch through the null work slot (kernel RAM).
 - `camera_store_state_to_script_variables`: all three zoom
   components are stored to 32-bit script variable `0x20`, so the first two are lost.
-- `mul_div_s64` increments the dividend's low word when negating a negative
+- `math_mul_div_s64` increments the dividend's low word when negating a negative
   divisor; a carry while negating a negative product increments the division
   remainder instead of the product's high word. For `(6264, -400920, -2359)`
   it returns 1065039 rather than signed division's 1064587. Its range flag
-  only checks negative-result high words; `fixed_cross_product_q12` checks
+  only checks negative-result high words; `math_cross_product_q12` checks
   `high >> 12` for 0 or -1. Neither test covers every signed 32-bit overflow.
 - `script_focus_speed` accumulates into an uninitialized `$s6`: the event
   dispatcher leaves `operand_3` there, while camera fusion leaves its key count.
@@ -158,7 +158,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `selected` when no entry matches the current item; both copies of
   `helpmenu_battle_entrypoint` read `node`, `x` and `y` in the cursor loop when the
   text thread is already running on the first frame, and `navigation` when the
-  unit view mode is not 1-4; `menu_dispatch_request` passes `ptr` on unset
+  unit view mode is not 1-4; `command_dispatch_request` passes `ptr` on unset
   for SCENARIO_CHECK and CLOSE; `sprite_display_init_numeric`
   leaves `display` unset for a section outside 0-2 (its caller passes 0-2);
   `update_mesh_animations` indexes the instructions with
@@ -272,9 +272,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   threads reject Move for 0x21 and 0x33.
 - `equipment_build_item_list` and `shop_build_stock_list` treat
   filters 0 and 1 (the two hand slots) identically.
-- The fur shop's "sell" list (`fur_shop_sell_update_list`) sells
+- The fur shop's "sell" list (`shop_fur_sell_update_list`) sells
   ordinary inventory at half price; its "buy" list
-  (`fur_shop_buy_update_list`) is the poached stock.
+  (`shop_fur_buy_update_list`) is the poached stock.
 - `battle_unit_learn_job_abilities` sets the learned bit twice when the JP
   purchase succeeds: once in the purchase branch and again under
   `if (learned)`.
@@ -284,7 +284,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `g_sprite_evtchr_slots[0..1]` for a free load marker and decompresses into
   that slot's image data, but writes the owner, marker and state of the
   caller's slot.
-- `party_update_after_battle` searches the formation sprite groups
+- `after_battle_update_party` searches the formation sprite groups
   for the unit's row, remaps 0x49 to 0 and 0x47 to 0x48, and never uses the
   result.
 - Both copies of `helpmenu_battle_entrypoint`: the
@@ -342,7 +342,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   0xb30-byte header of WAVESET.WD (176 instruments), and most music channels
   end with Instrument 0xFF before End Bar, so entry 255 is read 0x4f0 bytes
   past the copy.
-- WORLD and EQUIP's copies of `item_sort_id_list`: the evade
+- WORLD and EQUIP's copies of `item_list_sort`: the evade
   keys read `g_item_shield_data` for ids 0x7a-0x8f and
   `g_item_accessory_data` for 0x90-0xef by `secondary_data_id`, so thrown
   weapons (122-127) read far past the 16 shield records, and headgear and body
@@ -505,8 +505,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   back only HP, MP, CT, level, EXP, Brave, Faith, zodiac sign, Move, Speed and
   Jump, and `unit_panel_load_selected` reloads the unit after every
   change, so the other edits are lost at once.
-- `sound_novel_calculate_read_percent` (no caller) counts
-  0x1000 bits from `g_sound_novel_read_section_bits`, which holds 1,280 (40 words), so it
+- `novel_calculate_read_percent` (no caller) counts
+  0x1000 bits from `g_novel_read_section_bits`, which holds 1,280 (40 words), so it
   also counts `g_item_location_flags` and the first 224 bytes of
   `g_item_poached_quantities`.
 - `update_stream_frame` restarts a stream whose ring has fewer than
@@ -616,8 +616,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   bytes transferred so far from the current position (origin 1), not from the
   start: after a short first transfer of n bytes, the next attempt works at
   file offset 2n with the data from offset n.
-- `item_get_ranking_value` (EQUIP and WORLD): item 0 is a weapon to
-  `item_get_menu_category`, but the weapon branch excludes it, so it falls
+- `item_list_get_ranking_value` (EQUIP and WORLD): item 0 is a weapon to
+  `item_list_get_category`, but the weapon branch excludes it, so it falls
   into the armor branch with index -144 and reads the range byte of weapon
   record 96 as its HP bonus. Both sort callers drop item 0 first.
 - Every copy of `zodiac_build_primitives` (MAIN, WORLD, ATTACK, CARD,
@@ -637,8 +637,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   down to -1 in an `s16` with no lower bound: a value with more digits than
   the field starts below -1 and queues a blank quad about 65,535 times.
   Whether any retail field is too narrow is unknown.
-- `screen_update_fade_in` does not clamp its level when the fade-in
-  ends, unlike `screen_update_fade_out`: at a frame step of 2 the
+- `fade_menu_update_in` does not clamp its level when the fade-in
+  ends, unlike `fade_menu_update_out`: at a frame step of 2 the
   level goes from 16 to -16, and the last subtractive tile takes the low byte,
   240, darkening the screen for one frame. Whether a fade-in runs at step 2
   is unknown.
@@ -649,7 +649,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Delita's Chapter 2/3 identity (`sprite_set` 5) selects portrait 120 and
   reads remap byte 57 in the following window data. Their normal-game
   reachability in Formation is unverified.
-- `sound_novel_opcode_31_unload_music` clears `tracks[slot]`,
+- `novel_opcode_31_unload_music` clears `tracks[slot]`,
   but `change_reading_music` and the audio queue keep slot n's
   track in `tracks[n - 1]`. The novel always uses slot 2, so the store hits
   `current_slot` (zeroed next) and `tracks[1]` keeps the unloaded id: a later
@@ -720,7 +720,7 @@ written that way.
   speaker who is not on the field; the portrait test then reads kernel RAM.
   `fill_billboard` (BATTLE and DEBUGCHR) does the same while
   counting units, for a map unit record with no battle unit (the final battle).
-- WORLD and EQUIP's copies of `item_sort_id_list` each count a unit's five equipment ids into a
+- WORLD and EQUIP's copies of `item_list_sort` each count a unit's five equipment ids into a
   256-byte local array, but the ids are 16-bit values and an item tried on in the
   shop's fitting room carries flag bits above the low byte, so sorting the
   list then increments a byte far past the array.
@@ -743,7 +743,7 @@ written that way.
 - `bunit_entrypoint` passes a second argument, 0, to the
   one-parameter `unit_list_draw_shaded_rows`; its other caller passes
   one.
-- `menu_dispatch_request` returns `$v0` as the void
+- `command_dispatch_request` returns `$v0` as the void
   `announcement_select` left it.
 - `menu_screen_text_bind_section` has no return statement;
   `build_slot_description` uses the address its last store
@@ -822,7 +822,7 @@ written that way.
 - `g_item_location_flags` (`0x80059414`): only the first 64 bytes (512
   Move-Find bits) are proven; the next 64-byte block is saved with it but has no
   known meaning.
-- `g_sound_novel_sound_quads` (`0x8009ec18`) starts one row before
+- `g_novel_sound_quads` (`0x8009ec18`) starts one row before
   the sound rows, which begin at `0x8009ec1c` for sound id 1: its row 0 is the
   eighth 32-bit entry of `s_tutorial_battle_event_ids`, whose eight entries
   `tutorial_update_battle_list_input` indexes.
@@ -836,8 +836,8 @@ written that way.
   `g_menu_screen_input_state` and `g_menu_screen_new_buttons` (`0x801aed44`, WORLD),
   `g_menu_screen_input_frame_state` over the static `s_screen_input_frame_new`
   (`0x801c0528`, WORLD), `s_location_script_flags` and `g_location_script_state`
-  (`0x800d4644`, WLDCORE), `g_sound_novel_countdown_frames` and
-  `g_sound_novel_countdown_frames_reset` (`0x800bb4f8`, WLDCORE),
+  (`0x800d4644`, WLDCORE), `g_novel_countdown_frames` and
+  `g_novel_countdown_frames_reset` (`0x800bb4f8`, WLDCORE),
   `g_input_event` and `g_unit_list_input_event_state` (`0x801e3c44`, BUNIT),
   `g_unit_list_help_nodes` and `g_unit_list_help_nodes_reload` (`0x801ec900`,
   BUNIT), `g_unit_list_help_node_index` with its `_reload` and `_reload_2`
@@ -857,9 +857,9 @@ written that way.
   member of `g_menu_sort_orders` (+12, MAIN); `s_world_map_fade_color` is
   `g_world_map_fade` + 36, `g_world_map_pan_progress` and
   `g_world_map_pan_target_x` are `g_world_map_pan` + 8 and + 28,
-  `g_sound_novel_state`, `g_sound_novel_state_flags`,
-  `g_sound_novel_counter_delta` and `g_sound_novel_history_0`, `_1`, `_2` are
-  `g_sound_novel_reading` + 8, + 12, + 18, + 32, + 34 and + 36,
+  `g_novel_state`, `g_novel_state_flags`,
+  `g_novel_counter_delta` and `g_novel_history_0`, `_1`, `_2` are
+  `g_novel_reading` + 8, + 12, + 18, + 32, + 34 and + 36,
   `g_window_panel_scroll_offset` is `g_window_panel_render_state` + 0x3a,
   `g_brave_story_saved_cursor` and `g_brave_story_propositions_saved_cursor`
   are slots 9 and 13 of `g_menu_stack_cursor_states` (WLDCORE);
@@ -948,7 +948,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   middle of WLDCORE's map-dot routines or WORLD's menu data.
   `map_unit_set_event_animation` likewise reaches three BATTLE-only animation setters,
   behind script-variable tests WORLD scenes would have to pass first.
-  `camera_wait_idle`, `mini_menu_thread` and
+  `camera_wait_idle`, `command_mini_menu_thread` and
   `help_menu_start_thread` call `camera_is_active` (`0x8008e17c`,
   0x1e4 bytes into WLDCORE's `find_path`), and
   `menu_update_event_frame` calls `system_get_vsync_interval`
@@ -990,8 +990,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `map_mesh_draw_weather`: when map command 0x96 (E458) ends, `weather_dispatch_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.
 - `save_run_screen`: its 0xCCD8-byte stack frame, containing packet pools and directory entries, reaches below 0x801ff000 into the top cells of MAIN's game heap (0x801df000-0x801ff000); it is safe only while those cells are free.
 - `tutorial_opcode_17_end`: two paths fall off the end of the s32 handler and return a stale nonzero `$v0` (the fade's result, or the 1 just stored), so the formation loop keeps running.
-- `menu_draw_status_panel_backdrops` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
-  copies, and EQUIP's `menu_draw_status_panel_backdrops`, have no caller): while a unit-status banner thread (8 or 7) is being
+- `unit_panel_draw_backdrops` in WORLD and BUNIT (the ATTACK, DEBUGCHR and REQUIRE
+  copies, and EQUIP's `unit_panel_draw_backdrops`, have no caller): while a unit-status banner thread (8 or 7) is being
   stopped its first parameter is 0, and the panel check reads that display
   record at RAM address 0.
 - `ending_draw_text_records`: passes OT entries by value (`otag[15]`, `otag[8]`) to `AddPrim`; after `ClearOTagR` each holds the physical address of the entry below it, so the credits fade, bands and glyphs link into layers 14 and 7 through the KUSEG mirror.
@@ -999,7 +999,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - `menu_build_window_sprites`: for the Bar's send-unit list (header 0x10) the arrow x reads the "height" of the record at the panel's value pointer, `&g_window_panel_value` + 6, which is the upper half of `g_proposition_dispatch_days` (0).
 - `generate_treasure_item`: outside action execution (AI simulation, preview) it returns with no value, so `$v0` still holds `g_action_state` and the crystal pickup result names item 1 or 2 as the treasure.
 - `update_new_game`: no retail code sets step 5, which pops New Game and opens the Music Test (`music_test_open_menu`, controller slots 7 and 8); only a poke of the 32-bit step value reaches it.
-- WORLD's copy of the battle menus is dead code: nothing in any module calls or names `menu_dispatch_request` (0x800f5230) or `mini_menu_start` (0x800f0e48), so modes 1 (AT list) and 2 (dead-unit panel) of `option_entrypoint` never run; the world map's Options row runs mode 0. With them goes WORLD's event interpreter: `script_start_current_event_thread`, the only starter of the event thread, is called by `menu_dispatch_request` and by the menu-building thread that only BATTLE's `command_open_menu` starts (WORLD's copy is empty), so WORLD's `script_execute_event` never runs.
+- WORLD's copy of the battle menus is dead code: nothing in any module calls or names `command_dispatch_request` (0x800f5230) or `command_start_mini_menu` (0x800f0e48), so modes 1 (AT list) and 2 (dead-unit panel) of `option_entrypoint` never run; the world map's Options row runs mode 0. With them goes WORLD's event interpreter: `script_start_current_event_thread`, the only starter of the event thread, is called by `command_dispatch_request` and by the menu-building thread that only BATTLE's `command_open_menu` starts (WORLD's copy is empty), so WORLD's `script_execute_event` never runs.
 - Abilities no skillset lists: 0x16f (Attack), Reflect (0x1b8), Non-charge,
   Teleport 2, Move Underwater and Silent Walk. Four ids with no name text are
   played as Altima's teleport effects (0x28, 0xb8, 0xdb, 0xdc), and 0x200 is
@@ -1015,7 +1015,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   (`UNIT_SUPPORT_SET_1_EQUIP_KATANA`): the unit can equip katanas, not
   knives.
 - Selling in the fur shop adds the sold copies to the poached stock
-  (`fur_shop_sell_update_confirm`), so they can be bought back there.
+  (`shop_fur_sell_update_confirm`), so they can be bought back there.
 - `update_purchase_quantity` divides the gil on hand by
   `price >> 1` with no lower bound, while the sell side
   (`shop_get_item_half_price`) keeps half price at 1 or more.
@@ -1232,7 +1232,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   drawing area ends at x = 254; `PutDispEnv` still picks the 256-pixel mode.
 - Soldier Office: the hire menu shows 1500 gil for row 0 and 1400 for row 1
   (`get_hire_fee`), but
-  `soldier_office_update_menu` tests, prompts with (0xF82A)
+  `office_update_menu` tests, prompts with (0xF82A)
   and charges 1000 plus the generated recruit's equipment prices.
 - `menu_screen_text_measure_width` adds the operand of 0xE7
   (`TEXT_SET_X_POSITION`) to the width as an advance, while

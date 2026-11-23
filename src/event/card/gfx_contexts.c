@@ -1,10 +1,10 @@
 /* Frame submission, primitive lists and graphics context init. */
 
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/save.h"
-#include "fft/system.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/sys/system.h"
+#include "fft/world/save.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

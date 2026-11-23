@@ -1,18 +1,18 @@
 /* Item action state, the type order mode and the equipment slot marker. */
 
-#include "fft/equipment.h"
-#include "fft/gfx.h"
-#include "fft/help.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_script.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/equipment.h"
+#include "fft/party/item_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -100,7 +100,7 @@ s8 item_list_update_sort_menu(void) {
         g_text_section_pointers[TEXT_SECTION_COMPOSED_TEXT] = g_equipment_item_type_order_names;
         g_equipment_type_order_menu_hand_body.selected_index = 0;
         g_equipment_type_order_menu_other_slots.selected_index = 0;
-        item_load_type_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
+        item_list_load_sort_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
         for (i = 0; (names[i] = g_equipment_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
@@ -134,7 +134,7 @@ s8 item_list_update_sort_menu(void) {
         }
         g_equipment_item_type_order[0] = first;
         equipment_reset_selection_results();
-        item_store_type_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
+        item_list_store_sort_order(g_menu_selected_slot + 1, g_equipment_item_type_order);
         for (i = 0; (names[i] = g_equipment_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
@@ -144,11 +144,11 @@ s8 item_list_update_sort_menu(void) {
         equipment_build_item_list(g_equipment_unit_selected_index, category + 0x81,
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
-        item_store_category_list(g_menu_selected_slot, g_item_list_entries);
+        item_list_store_category(g_menu_selected_slot, g_item_list_entries);
         menu_scrollable_list_init_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_window_set_scale_step(10);
-        item_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
+        item_list_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
             &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
@@ -188,7 +188,7 @@ void item_list_draw_tabs(s32 unused, s32 slot, s32 override) {
     marker->position.x = x;
     marker->position.y = base_y - (slot == 0);
     menu_gfx_enqueue_oriented_textured_quad(
-        marker, gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, EQUIPMENT_SLOT_MARKER_FIRST_OTAG);
+        marker, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, EQUIPMENT_SLOT_MARKER_FIRST_OTAG);
     secondary = &g_equipment_secondary_slot_marker;
     secondary_x = x + 9;
     if (slot == 3) {

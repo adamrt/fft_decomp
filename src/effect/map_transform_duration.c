@@ -1,9 +1,9 @@
 /* An effect callback that starts the timed map transform for the rest of the child timeline. */
 
-#include "fft/effect.h"
-#include "fft/effect_script.h"
-#include "fft/effect_timeline.h"
-#include "fft/weather.h"
+#include "fft/battle/weather.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_script.h"
+#include "fft/effect/effect_timeline.h"
 #include "psx/types.h"
 
 /* Callback handler: when its keyframe starts, run map weather mode 0x96 (the

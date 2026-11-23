@@ -2,9 +2,9 @@
  * and direct GPU sprite packets; clearing the current ordering table also resets the packet
  * count for that frame. */
 
-#include "fft/display_object.h"
-#include "fft/gfx.h"
-#include "fft/system.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

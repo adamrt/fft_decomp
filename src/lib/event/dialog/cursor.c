@@ -1,6 +1,6 @@
 /* The dialog text cursor: advancing it with separate backreference state and printing FNT values. */
 
-#include "fft/text.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

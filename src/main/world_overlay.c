@@ -1,10 +1,10 @@
 /* Load WORLD and WLDCORE into their separate overlay regions, then enter the world map.
  * Their blocking reads preserve or initialize the resident loading display. */
 
-#include "fft/file.h"
-#include "fft/memory.h"
-#include "fft/overlay.h"
-#include "fft/world_map.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/overlay.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

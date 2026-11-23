@@ -1,8 +1,8 @@
 /* Status masks and item-location flags prepared before a fresh session. */
 
-#include "fft/item.h"
-#include "fft/memory.h"
-#include "fft/status.h"
+#include "fft/game/item.h"
+#include "fft/game/status.h"
+#include "fft/sys/memory.h"
 
 /* At boot, clear the item location flags and build g_status_check_sets: rows 0 to 9
  * from each status's effect flags, and the unmountable row from a fixed status list. */

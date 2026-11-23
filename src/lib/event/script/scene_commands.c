@@ -2,29 +2,29 @@
  * access, movement tasks and staged status changes coordinate with the program's
  * event interpreter; this unit does not run the main opcode loop. */
 
-#include "fft/animation.h"
-#include "fft/camera.h"
-#include "fft/character_identity.h"
-#include "fft/effect_secondary.h"
-#include "fft/fade.h"
-#include "fft/job.h"
-#include "fft/map.h"
-#include "fft/map_light.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu_input.h"
-#include "fft/move.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_unit.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/sprite.h"
-#include "fft/status.h"
-#include "fft/system.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/move.h"
+#include "fft/effect/effect_secondary.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/gfx/animation.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/sprite.h"
+#include "fft/map/map.h"
+#include "fft/map/map_light.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/menu_input.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/math.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
 #include "psx/libc.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -280,7 +280,7 @@ void camera_thread(void) {
             /* Mode 0 and the group the curve leaves linear (0: rotations, 1: positions) move linearly. */
             if (mode == 0 || (group == 0 && j >= EVENT_CAMERA_COMPONENT_TILT)
                 || (group == 1 && j < EVENT_CAMERA_POSITION_COMPONENT_COUNT)) {
-                value = mul_div_s64(delta, i, duration) + base;
+                value = math_mul_div_s64(delta, i, duration) + base;
                 if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
@@ -288,8 +288,8 @@ void camera_thread(void) {
                 decel = delta * weight;
                 accel = delta * ease * 2;
                 /* accel + 2 * decel is 32 * delta, so `first` is the linear term; the ramp term bows it. */
-                first = mul_div_s64(accel + decel + decel, i, duration * 32);
-                value = mul_div_s64(accel, ramp, duration * duration * 32) + first + base;
+                first = math_mul_div_s64(accel + decel + decel, i, duration * 32);
+                value = math_mul_div_s64(accel, ramp, duration * duration * 32) + first + base;
                 if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
@@ -301,8 +301,8 @@ void camera_thread(void) {
 
                 if (half < duration) {
                     decel = delta * weight;
-                    value = mul_div_s64(
-                        mul_div_s64(delta * ease * 2, half, duration) + decel + decel, half, duration * 32);
+                    value = math_mul_div_s64(
+                        math_mul_div_s64(delta * ease * 2, half, duration) + decel + decel, half, duration * 32);
                     if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += base * 4;
                     } else {
@@ -312,8 +312,8 @@ void camera_thread(void) {
                     decel = delta * weight;
                     accel = delta * ease * 2;
                     elapsed = half - duration;
-                    remaining = mul_div_s64(accel, duration - elapsed, duration);
-                    value = mul_div_s64(accel + remaining + decel + decel, elapsed, duration * 32);
+                    remaining = math_mul_div_s64(accel, duration - elapsed, duration);
+                    value = math_mul_div_s64(accel + remaining + decel + decel, elapsed, duration * 32);
                     if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += delta;
                         value += base * 4;
@@ -437,12 +437,12 @@ void script_opcode_3e_color_screen_thread(void) {
             s32 start = color.start_and_end[j];
             color.current[j] = (end - start) * i / duration + start;
         }
-        fade_tint_start_fade(mode, color.current[0], color.current[1], color.current[2], 2);
+        fade_tint_start(mode, color.current[0], color.current[1], color.current[2], 2);
     }
     for (j = 0; j < 3; j++) {
         color.current[j] = color.start_and_end[j + 3];
     }
-    fade_tint_start_fade(mode, color.current[0], color.current[1], color.current[2], 2);
+    fade_tint_start(mode, color.current[0], color.current[1], color.current[2], 2);
     thread_yield();
     thread_yield();
     thread_current_exit();
@@ -523,17 +523,17 @@ static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_s
         for (j = 0; j < 3; j++) {
             delta = pos[1][j] - pos[0][j];
             if (curve == 0) {
-                pos[2][j] = mul_div_s64(delta, i, total) + pos[0][j];
+                pos[2][j] = math_mul_div_s64(delta, i, total) + pos[0][j];
             } else if (curve == 1) {
                 weighted = delta * (16 - weight);
                 scaled = (delta * weight) * 2;
-                step = mul_div_s64(scaled + weighted + weighted, i, total * 32);
-                step += mul_div_s64(scaled, (total - i) * i, (total * 32) * total);
+                step = math_mul_div_s64(scaled + weighted + weighted, i, total * 32);
+                step += math_mul_div_s64(scaled, (total - i) * i, (total * 32) * total);
                 pos[2][j] = step + pos[0][j];
             } else if (curve == 3) {
                 weighted = delta * (16 - weight);
-                step = mul_div_s64((delta * weight) * 2, i, total);
-                step = mul_div_s64(step + weighted + weighted, i, total * 32);
+                step = math_mul_div_s64((delta * weight) * 2, i, total);
+                step = math_mul_div_s64(step + weighted + weighted, i, total * 32);
                 pos[2][j] = step + pos[0][j];
             } else if (curve == 2) {
                 mid = total / 2;
@@ -543,15 +543,15 @@ static void run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_s
                 }
                 if (i * 2 < total) {
                     weighted = delta * (16 - weight);
-                    step = mul_div_s64((delta * weight) * 2, i, mid);
-                    step = mul_div_s64(step + weighted + weighted, i, mid * 64);
+                    step = math_mul_div_s64((delta * weight) * 2, i, mid);
+                    step = math_mul_div_s64(step + weighted + weighted, i, mid * 64);
                     pos[2][j] = step + pos[0][j];
                 } else {
                     weighted = delta * (16 - weight);
                     scaled = (delta * weight) * 2;
                     elapsed = i - mid;
-                    step = mul_div_s64(scaled, mid - elapsed, mid);
-                    step = mul_div_s64(scaled + step + weighted + weighted, elapsed, mid * 64);
+                    step = math_mul_div_s64(scaled, mid - elapsed, mid);
+                    step = math_mul_div_s64(scaled + step + weighted + weighted, elapsed, mid * 64);
                     /* Use: one extra reference lifts half above j and total for the target's s6/s7/fp. */
                     __asm__("" : : "r"(half));
                     pos[2][j] = step + pos[0][j] + (half >> 1);

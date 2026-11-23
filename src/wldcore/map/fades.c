@@ -1,10 +1,10 @@
 /* World-map fades hide render queues, tint colors and cover the display while menus change. */
 
-#include "fft/display_object.h"
-#include "fft/gfx.h"
-#include "fft/menu_screen.h"
-#include "fft/music.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/sys/music.h"
+#include "fft/world/world_map.h"
 #include "psx/libgs.h"
 #include "psx/types.h"
 
@@ -98,7 +98,7 @@ s32 world_map_update_fade(void) {
                 }
             }
             g_world_map_fade.elapsed++;
-            screen_set_brightness(brightness, brightness, brightness);
+            menu_screen_set_brightness(brightness, brightness, brightness);
             g_world_map_brightness_rgb.r = brightness;
             g_world_map_brightness_rgb.g = brightness;
             g_world_map_brightness_rgb.b = brightness;

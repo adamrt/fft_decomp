@@ -1,20 +1,21 @@
 /* The formation icon list thread, roster name strings, the menu cursor bob hold and the zodiac backdrop's ordering
  * table. */
 
-#include "fft/formation.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/zodiac.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/formation.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -49,7 +50,7 @@ void menu_screen_icon_list_thread(void) {
     g_menu_window_text_pen.stride = param->inner_width;
     menu_text_set_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    menu_display_text_entry(param->text_id, buffer, &g_menu_window_text_pen);
+    text_render_entry_to_image(param->text_id, buffer, &g_menu_window_text_pen);
     LoadImage(&rect, buffer);
 
     /* The sprite records alternate by frame, since the GPU may still be
@@ -72,10 +73,14 @@ void menu_screen_icon_list_thread(void) {
             menu_handle_action(param, cursor);
             menu_handle_cancel_input(param);
         }
-        setRGB0(&record->sprites[0], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
-        setRGB0(&record->sprites[1], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
-        setRGB0(&record->sprites[2], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
-        setRGB0(&record->sprites[3], g_screen_color_red, g_screen_color_green, g_screen_color_blue);
+        setRGB0(&record->sprites[0], g_menu_screen_brightness_red, g_menu_screen_brightness_green,
+            g_menu_screen_brightness_blue);
+        setRGB0(&record->sprites[1], g_menu_screen_brightness_red, g_menu_screen_brightness_green,
+            g_menu_screen_brightness_blue);
+        setRGB0(&record->sprites[2], g_menu_screen_brightness_red, g_menu_screen_brightness_green,
+            g_menu_screen_brightness_blue);
+        setRGB0(&record->sprites[3], g_menu_screen_brightness_red, g_menu_screen_brightness_green,
+            g_menu_screen_brightness_blue);
         menu_submit_icon_primitives(record);
     }
     thread_yield();

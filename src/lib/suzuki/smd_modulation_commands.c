@@ -1,6 +1,6 @@
 /* SMD pitch, volume, balance and modulator commands, sound-font selection and track release. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libspu.h"
 #include "psx/types.h"
 

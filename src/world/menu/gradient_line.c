@@ -1,8 +1,8 @@
 /* Appending a two-color line to the menu ordering table. */
 
-#include "fft/gfx.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_screen.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

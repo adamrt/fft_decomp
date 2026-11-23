@@ -1,6 +1,6 @@
 /* The empty effect callback. */
 
-#include "fft/effect.h"
+#include "fft/effect/effect.h"
 #include "psx/types.h"
 
 /* Native no-op callback at 0x801c44a0 in E000 (catalog ids 0, 24, 73, 92, 121); leaves the result unspecified. */

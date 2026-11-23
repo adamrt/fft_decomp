@@ -1,15 +1,15 @@
 /* Resolve loaded spritesheets and update unit palettes, transparency and height. */
 
-#include "fft/animation.h"
-#include "fft/map.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/script_variable.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/system.h"
-#include "fft/unit.h"
-#include "fft/weather.h"
+#include "fft/battle/weather.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/animation.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/system.h"
 #include "psx/types.h"
 
 /* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;

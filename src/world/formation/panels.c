@@ -1,22 +1,23 @@
 /* Formation status panels list a unit's equipment or abilities in paired windows. The two threads share the panel
  * layout while keeping separate draw-area packets. */
 
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/script.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/formation.h"
+#include "fft/party/item_list.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -75,7 +76,7 @@ void unit_panel_equipment_thread(void) {
         u = 0x50;
     }
 
-    menu_numeric_frame_init(&g_unit_panel_equipment_origins[0], &screen->numeric_frame);
+    unit_panel_init_numeric_frame(&g_unit_panel_equipment_origins[0], &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     menu_screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[0].x0 += g_unit_panel_equipment_origins[0].x;
@@ -121,14 +122,14 @@ void unit_panel_equipment_thread(void) {
         }
 
         if (frame == 0 || thread->redraw_request == 1) {
-            menu_clear_render_buffer(text, 0xc80);
+            mem_zero_words(text, 0xc80);
             g_menu_window_text_pen.stride = 0x50;
             menu_text_set_origin(0, 0);
             for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                     color_bits = state->equipment[i] & FORMATION_PALETTE_MASK;
                     g_menu_text_palette_offset = color_bits >> 12;
-                    menu_display_text_entry(
+                    text_render_entry_to_image(
                         (state->equipment[i] & ITEM_ID_MASK) | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_window_text_pen);
                 }
                 g_menu_window_text_pen.rect.y += 0x10;
@@ -145,7 +146,7 @@ void unit_panel_equipment_thread(void) {
                 &g_unit_panel_equipment_origins[0], &g_unit_panel_item_icon_layouts[i]);
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                gfx_set_item_icon_sprite(&screen->frame.sprites[19 + i], id);
+                item_set_icon_sprite(&screen->frame.sprites[19 + i], id);
             } else {
                 (&screen->frame.sprites[i])[19].x0 = 0;
             }
@@ -187,7 +188,7 @@ void unit_panel_equipment_thread(void) {
         for (i = 0; i < 4; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        menu_numeric_frame_submit(&screen->numeric_frame);
+        unit_panel_submit_numeric_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 
@@ -245,7 +246,7 @@ void unit_panel_ability_thread(void) {
         u = 0x50;
     }
 
-    menu_numeric_frame_init(&g_formation_ability_panel_origin, &screen->numeric_frame);
+    unit_panel_init_numeric_frame(&g_formation_ability_panel_origin, &screen->numeric_frame);
     unit_panel_init_primitives(&screen->frame);
     menu_screen_panel_init_scaled_draw_area_packets(&screen->portrait);
     screen->frame.tiles[1].x0 += g_unit_panel_equipment_origins[0].x;
@@ -293,7 +294,7 @@ void unit_panel_ability_thread(void) {
          * hoisting the loop's own initialization into a delay slot, and an
          * explicit one lengthens i's live range enough to lose it $s1. */
         if (frame == 0 || thread->redraw_request == 1) {
-            menu_clear_render_buffer(text, 0xc80);
+            mem_zero_words(text, 0xc80);
             g_menu_window_text_pen.stride = 0x50;
             menu_text_set_origin(0, 0);
             /* Rows 0-1 name skillsets (abilities for a generic monster); rows 2-4 name abilities. */
@@ -305,13 +306,13 @@ void unit_panel_ability_thread(void) {
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_window_text_pen.rect.y += 0x10;
                 } else {
-                    menu_display_text_entry(id, text, &g_menu_window_text_pen);
+                    text_render_entry_to_image(id, text, &g_menu_window_text_pen);
                     g_menu_window_text_pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if ((u16)state->ability_ids[i] != MENU_STATUS_PANEL_LABEL_NONE) {
-                    menu_display_text_entry(
+                    text_render_entry_to_image(
                         state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE, text, &g_menu_window_text_pen);
                 }
                 g_menu_window_text_pen.rect.y += 0x10;
@@ -350,7 +351,7 @@ void unit_panel_ability_thread(void) {
         for (i = 4; i < 8; i++) {
             gfx_draw_or_append_gpu_primitive(&screen->frame.lines[i]);
         }
-        menu_numeric_frame_submit(&screen->numeric_frame);
+        unit_panel_submit_numeric_frame(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
 

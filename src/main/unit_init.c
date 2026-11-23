@@ -1,20 +1,20 @@
 /* Build a battle unit record, for a battle or Formation, from a party slot or ENTD unit. Equipment,
  * abilities, job data and the selected name provider are applied to that record. */
 
-#include "fft/ability.h"
-#include "fft/character_identity.h"
-#include "fft/encounter.h"
-#include "fft/entd.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/memory.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/skillset.h"
-#include "fft/status.h"
-#include "fft/text.h"
-#include "fft/unit.h"
-#include "fft/zodiac.h"
+#include "fft/battle/encounter.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/entd.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/sys/memory.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -1218,9 +1218,9 @@ static void store_names(battle_unit_t* unit) {
     battle_unit_t* other;
     const unit_name_id_fields_t* name_id_record;
 
-    prepare_text = battle_text_find_entry;
+    prepare_text = text_find_battle_entry;
     if (s_names_use_world_text != 0) {
-        prepare_text = world_text_find_entry;
+        prepare_text = text_find_world_entry;
     }
     if (unit->formation_index == PARTY_ID_NONE) {
         text_id = TEXT_ID_UNIT_NAME_SPECIAL_BASE;

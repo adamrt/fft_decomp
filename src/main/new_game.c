@@ -1,11 +1,11 @@
 /* Initial inventory and roster used before the title name and birthday screens. */
 
-#include "fft/encounter.h"
-#include "fft/item.h"
-#include "fft/menu_screen.h"
-#include "fft/party.h"
-#include "fft/script_variable.h"
-#include "fft/unit.h"
+#include "fft/battle/encounter.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/script/script_variable.h"
 
 /* Empty the inventory, then stock the new-game consumables: five Potions, two each of Hi-Potion,
  * Eye Drop and Phoenix Down, and one of each other basic restorative. */

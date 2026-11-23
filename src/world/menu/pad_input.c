@@ -1,9 +1,9 @@
 /* The memory-card screen reads pad 0 and derives its menu button edges and repeat masks without tutorial input. */
 
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/sys/input.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"

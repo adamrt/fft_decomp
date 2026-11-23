@@ -1,10 +1,10 @@
 /* Allocate and release menu texture rectangles in the 16-by-15 VRAM cell grid. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

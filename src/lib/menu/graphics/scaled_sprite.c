@@ -1,7 +1,7 @@
 /* A scaled 4bpp sprite quad built from a sprite sheet frame. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

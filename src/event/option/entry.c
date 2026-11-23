@@ -1,14 +1,14 @@
 /* The options overlay entry, loading the saved options and starting the game options, AT list or crystal pickup menus.
  */
 
-#include "fft/at_list.h"
-#include "fft/crystal.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/option.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/crystal.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/option.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/thread.h"
+#include "fft/world/tutorial.h"
 #include "psx/types.h"
 
 /* OPTION.OUT entry, run on the battle menu thread whose first parameter is the menu

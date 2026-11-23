@@ -1,12 +1,12 @@
 /* Idle title-menu movies return to the logo sequence when playback finishes
  * or the player presses Start. */
 
-#include "fft/controller_stack.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/movie.h"
-#include "fft/system.h"
+#include "fft/front/controller_stack.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/movie.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

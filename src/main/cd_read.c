@@ -1,7 +1,7 @@
 /* Advancing an asynchronous CD read and keeping the loading indicator current. */
 
-#include "fft/file.h"
-#include "fft/system.h"
+#include "fft/sys/file.h"
+#include "fft/sys/system.h"
 #include "psx/libcd.h"
 #include "psx/types.h"
 

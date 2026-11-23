@@ -1,30 +1,30 @@
 /* The fitting room previews equipment, tracks the bill and commits or undoes the chosen loadout. */
 
-#include "fft/ability.h"
-#include "fft/equipment.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/formation_item.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/message_box.h"
-#include "fft/shop.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/party/equipment.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/item_list.h"
+#include "fft/party/shop.h"
+#include "fft/party/unit_grid.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -262,7 +262,7 @@ void shop_fitting_update_equipment_menu(void) {
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_menu_row_callbacks[0].value = equipment_row_get_equipped_count;
             g_menu_row_callbacks[1].value = equipment_row_get_item_count;
-            g_menu_row_callbacks[2].icon = item_build_type_icon_source;
+            g_menu_row_callbacks[2].icon = item_list_build_type_icon_source;
             g_menu_row_callbacks[3].icon = equipment_row_get_icon_source;
             g_menu_row_callbacks[4].value = shop_buy_get_price;
             menu_set_event_speed(2);
@@ -547,11 +547,11 @@ static s32 update_checkout_prompt(void) {
                 commit_fitting_purchase();
                 formation_save_records();
                 g_sound_queued_effect_id = SOUND_SFX_SHOP_TRANSACTION;
-                item_rebuild_category_list(0);
-                item_rebuild_category_list(1);
-                item_rebuild_category_list(2);
-                item_rebuild_category_list(3);
-                item_rebuild_category_list(4);
+                item_list_rebuild_category(0);
+                item_list_rebuild_category(1);
+                item_list_rebuild_category(2);
+                item_list_rebuild_category(3);
+                item_list_rebuild_category(4);
                 g_shop_fitting_checkout_prompt_initialized = 0;
                 return SHOP_FITTING_CHECKOUT_DONE;
             }

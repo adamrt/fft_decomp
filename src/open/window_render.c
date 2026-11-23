@@ -3,10 +3,10 @@
  * its screen position, palette and pop-in state. Existing VRAM images can be
  * bound without rebuilding or uploading them. */
 
-#include "fft/display_object.h"
-#include "fft/menu_screen.h"
-#include "fft/text.h"
-#include "fft/window.h"
+#include "fft/gfx/display_object.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/text/text.h"
+#include "fft/world/window.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -67,7 +67,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
     origin.rect.x = point.x;
     origin.rect.y = point.y;
     origin.stride = g_display_object_gpu_image_pool[record_index].bounds.w;
-    menu_display_text_entry(text_id, (u8*)buffer, &origin);
+    text_render_entry_to_image(text_id, (u8*)buffer, &origin);
 }
 
 /* Padded image size, reserving ten pixels per character column. No retail caller. */

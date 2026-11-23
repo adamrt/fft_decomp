@@ -1,7 +1,7 @@
 /* Read and write the event variable bank through its native variable commands. */
 
-#include "fft/script_instruction.h"
-#include "fft/script_variable.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
 #include "psx/types.h"
 
 /* Each scene binds its interpreter to MAIN's resident save-variable bank. */

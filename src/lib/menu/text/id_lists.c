@@ -1,6 +1,7 @@
 /* Text entry seek and -1 terminated text-id list image rendering. */
 
-#include "fft/text.h"
+#include "fft/menu/menu_text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Skip count text entries and return the start of the next one: each entry ends with a 0xFE or

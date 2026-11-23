@@ -1,11 +1,11 @@
 /* Square with Up or Down pages the equipment list while the menu input
  * lock and page-scroll gate allow it. Held frames follow the menu repeat timing. */
 
-#include "fft/equipment.h"
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_script.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_script.h"
+#include "fft/party/equipment.h"
+#include "fft/sys/input.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"

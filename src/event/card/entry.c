@@ -1,37 +1,38 @@
 /* CARD scans the selected memory card and runs the save-slot browser,
  * prompts and write operation against one shared save image and menu state. */
 
-#include "fft/bits.h"
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/character_identity.h"
-#include "fft/fade.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/memcard.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_script.h"
-#include "fft/menu_sort.h"
-#include "fft/menu_window.h"
-#include "fft/music.h"
-#include "fft/option.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/proposition.h"
-#include "fft/save.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/sound_novel.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/zodiac.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_sort.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
+#include "fft/party/item_list.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/bits.h"
+#include "fft/sys/memcard.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/novel.h"
+#include "fft/world/proposition.h"
+#include "fft/world/save.h"
 #include "psx/kernel.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
@@ -222,7 +223,7 @@ static void init_graphics(void) {
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &image_data[4]);
 
-    screen_start_fade_in();
+    fade_menu_start_in();
     g_save_menu_state = SAVE_MENU_INITIAL_PROMPT;
     thread_suspend(15);
 }
@@ -272,10 +273,10 @@ void card_entrypoint(s32 unused) {
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, 0, 0);
     g_save_initial_prompt_timer = 0;
 
-    while (screen_update_fade_out() != 0) {
+    while (fade_menu_update_out() != 0) {
         menu_gfx_present_frame(0, 0);
         save_update_input();
-        screen_update_fade_in();
+        fade_menu_update_in();
         gfx_enqueue_tile(&g_save_gfx_fullscreen_fade_rect, &g_save_gfx_fade_overlay_color, 0, 0);
 
         menu_input = g_save_menu_state == SAVE_MENU_SELECT_SAVE && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0
@@ -298,7 +299,7 @@ void card_entrypoint(s32 unused) {
         } else if (g_save_menu_state == SAVE_MENU_LEAVE || g_save_menu_state == SAVE_MENU_LEAVE_ALT) {
             music_set_target_volume(0, 0xf0);
             while (memcard_poll_operation() == MEMCARD_RESULT_PENDING) { }
-            screen_start_fade_out();
+            fade_menu_start_out();
             g_save_menu_state = SAVE_MENU_CLOSING;
         }
 
@@ -612,12 +613,11 @@ void save_image_build(s32 slot) {
     bcopy(g_proposition_last_attempt_date_bits, g_save_buffer_pointer->proposition_last_attempt_date_bits, 0x6c);
     bcopy(g_proposition_states, g_save_buffer_pointer->proposition_states,
         sizeof(g_save_buffer_pointer->proposition_states));
-    bcopy(g_sound_novel_saved_readings, g_save_buffer_pointer->sound_novel_saved_records,
-        sizeof(g_save_buffer_pointer->sound_novel_saved_records));
-    bcopy(g_sound_novel_read_section_bits, g_save_buffer_pointer->sound_novel_read_section_bits,
-        sizeof(g_sound_novel_read_section_bits));
-    bcopy(g_sound_novel_saved_flags, g_save_buffer_pointer->sound_novel_saved_flags,
-        sizeof(g_save_buffer_pointer->sound_novel_saved_flags));
+    bcopy(g_novel_saved_readings, g_save_buffer_pointer->novel_saved_records,
+        sizeof(g_save_buffer_pointer->novel_saved_records));
+    bcopy(g_novel_read_section_bits, g_save_buffer_pointer->novel_read_section_bits, sizeof(g_novel_read_section_bits));
+    bcopy(g_novel_saved_flags, g_save_buffer_pointer->novel_saved_flags,
+        sizeof(g_save_buffer_pointer->novel_saved_flags));
     bcopy(g_brave_story_character_ages, g_save_buffer_pointer->brave_story_character_ages,
         sizeof(g_brave_story_character_ages));
     g_save_buffer_pointer->proposition_count = g_proposition_count;
@@ -1190,13 +1190,13 @@ static void update_slot_list(u16 input) {
         g_save_slot_quads[1].position.y++;
         if (g_save_slot_quads[0].position.y >= 0 && g_save_slot_quads[0].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_save_slot_quads[0], gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_save_slot_quads[0], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_save_slot_quads[1], gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_save_slot_quads[1], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_save_slot_quads[3], gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_save_slot_quads[3], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_save_slot_quads[4], gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_save_slot_quads[4], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             gfx_set_otag_index(11);
             g_save_slot_number_command.y = g_save_slot_quads[0].position.y;
             g_save_slot_number_command.value = index + 1;
@@ -1206,7 +1206,7 @@ static void update_slot_list(u16 input) {
         g_save_slot_quads[2].position.y = g_save_slot_quads[0].position.y;
         if (g_save_slot_quads[2].position.y >= 0 && g_save_slot_quads[2].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_save_slot_quads[2], gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_save_slot_quads[2], menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_save_playtime_seconds_command.y = g_save_playtime_minutes_command.y = g_save_playtime_hours_command.y
                 = g_save_slot_quads[0].position.y;
             g_save_playtime_seconds_command.value = g_save_slot_playtimes[index].seconds;

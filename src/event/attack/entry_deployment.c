@@ -1,30 +1,30 @@
 /* Place the party on each squad’s deployment tiles, run its status and help
  * panels, and return the completed coordinates to the battle loader. */
 
-#include "fft/ability.h"
-#include "fft/deploy.h"
-#include "fft/fade.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_list.h"
-#include "fft/music.h"
-#include "fft/party_unit.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
-#include "fft/zodiac.h"
+#include "fft/battle/deploy.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/skillset.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/portrait.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/map/map.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
@@ -156,7 +156,7 @@ typedef enum placement_thread_slot {
     DEPLOY_THREAD_SLOT_ROSTER_STEP = 4,      /* roster_next_thread and _previous_roster_unit */
     DEPLOY_THREAD_SLOT_NOTICE = 13,          /* the notice shown for an invalid deployment input */
     DEPLOY_THREAD_SLOT_SCREEN_GRAPHICS = 14, /* labels_draw_thread, then the map title */
-    DEPLOY_THREAD_SLOT_DEPLOY_RENDER = 15    /* screen_draw_thread */
+    DEPLOY_THREAD_SLOT_DEPLOY_RENDER = 15    /* render_thread */
 } placement_thread_slot_e;
 
 /* The same slots while the confirm prompt or the unit detail view is up. */
@@ -203,7 +203,7 @@ static void build_unit_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
 static void update_roster_input(void);
 static void init_cursors(void);
 static void build_valid_tiles(SPRT* sprites);
-static void screen_draw_thread(void);
+static void render_thread(void);
 static void roster_next_thread(void);
 static void roster_previous_thread(void);
 static void select_first_deployable(void);
@@ -330,7 +330,7 @@ void attack_deployment_entrypoint(void) {
     g_deploy_current_squad_id = script_variable_get(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_deploy_current_squad_data = &g_deploy_squad_data[g_deploy_current_squad_id];
     script_set_event_speed(1);
-    g_gfx_screen_fade = 0xff;
+    g_fade_event_level = 0xff;
     thread_yield();
 
     /* The grid and the status panel start 0x9c pixels off screen; the first squad slides them in. */
@@ -364,7 +364,7 @@ void attack_deployment_entrypoint(void) {
     }
 
 ramza_placed:
-    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread);
+    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, render_thread);
     thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
     select_first_deployable();
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, unit_panel_banner_thread);
@@ -472,15 +472,15 @@ ramza_placed:
 
         /* The first squad fades the screen in and slides the panel and grid into place. */
         if (first_pass != 0) {
-            g_gfx_screen_fade = 0xff;
+            g_fade_event_level = 0xff;
             while (1) {
                 if (s_deploy_status_display_thread_params.position.y != 0) {
                     s_deploy_status_display_thread_params.position.y += 4;
                 }
-                if (g_gfx_screen_fade != 0) {
-                    g_gfx_screen_fade -= 0x10;
-                    if (g_gfx_screen_fade < 0) {
-                        g_gfx_screen_fade = 0;
+                if (g_fade_event_level != 0) {
+                    g_fade_event_level -= 0x10;
+                    if (g_fade_event_level < 0) {
+                        g_fade_event_level = 0;
                     }
                 }
                 /* Start the icon fade-in as the panel slide nears its end. */
@@ -492,7 +492,7 @@ ramza_placed:
                 if (s_deploy_grid_slide_y != 0) {
                     s_deploy_grid_slide_y -= 4;
                 }
-                if (g_gfx_screen_fade == 0 && s_deploy_status_display_thread_params.position.y == 0
+                if (g_fade_event_level == 0 && s_deploy_status_display_thread_params.position.y == 0
                     && s_deploy_grid_slide_y == 0) {
                     break;
                 }
@@ -981,18 +981,18 @@ ramza_placed:
     /* Fade the music to volume 0 (low half) over fade time 0x1e (high half). */
     g_sound_music_volume_transition_request = 0x1e0000;
     thread_wait_frames(0x20);
-    g_gfx_screen_fade = 0;
+    g_fade_event_level = 0;
     do {
         thread_yield();
-        g_gfx_screen_fade += 4;
-    } while (g_gfx_screen_fade < 0x100);
+        g_fade_event_level += 4;
+    } while (g_fade_event_level < 0x100);
 
     /* A third parameter of 1 asks each display thread to finish. */
     thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
     thread_wait_frames(3);
-    g_gfx_screen_fade = 0;
+    g_fade_event_level = 0;
     script_set_event_speed(1);
     music_unload_all();
     thread_current_exit();
@@ -1409,7 +1409,7 @@ void deploy_start_tiles_view(void) {
     s_deploy_grid_slide_y = 0;
     s_deploy_arrow_position_mode = 0;
     build_valid_tiles(g_deploy_render_buffers[0].tiles[0]);
-    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, screen_draw_thread);
+    thread_start(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, render_thread);
     thread_set_parameters(DEPLOY_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
 }
 
@@ -1421,7 +1421,7 @@ void deploy_start_tiles_view(void) {
  * computation; cross-jumping merges them, which keeps the polarity offset
  * chain at the top of the joined block as in the target. The offset has its
  * own variable rather than reusing `x`. */
-static void screen_draw_thread(void) {
+static void render_thread(void) {
     s32 frame;
     s32 i;
     s32 x;

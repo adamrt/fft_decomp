@@ -2,11 +2,11 @@
  * grouped by shop type, three entries each for the item shop, Fur Shop and Soldier
  * Office. Each Formation tutorial pairs a message file with its command stream. */
 
-#include "fft/file.h"
-#include "fft/menu_screen.h"
-#include "fft/shop.h"
-#include "fft/text.h"
-#include "fft/tutorial.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/party/shop.h"
+#include "fft/sys/file.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/types.h"
 
 static s32 s_shop_background_tim_files[9 * 2] = { 72000, 67584, 72033, 67584, 72066, 67584, 72099, 67584, 72132, 67584,

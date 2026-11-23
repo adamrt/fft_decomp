@@ -1,6 +1,6 @@
 /* Sound-driver setup, wave resources, output controls and SPU transfers. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/libcd.h"
 #include "psx/libspu.h"

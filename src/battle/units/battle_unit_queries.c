@@ -1,15 +1,14 @@
 /* Find battle unit records and manage unit availability, status display, enemy levels and war trophies. */
 
-#include "fft/character_identity.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/reward.h"
-#include "fft/status.h"
-#include "fft/unit.h"
+#include "fft/battle/reward.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/status.h"
+#include "fft/map/map.h"
+#include "fft/sys/memory.h"
 #include "psx/types.h"
 
 /* The battle stats in a unit slot, occupied or not; 0 for a battle_unit_id past the last

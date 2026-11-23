@@ -2,10 +2,10 @@
  * resets use the same display buffers for the logos and shared resource loads;
  * BATTLE can replace the debug print font with EFC_FNT.TIM. */
 
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/memory.h"
-#include "fft/system.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/system.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

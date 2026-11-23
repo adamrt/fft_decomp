@@ -1,8 +1,8 @@
 /* Previewed HP and MP bonus display callbacks. */
 
-#include "fft/equipment.h"
-#include "fft/menu_script.h"
-#include "fft/unit_panel.h"
+#include "fft/menu/menu_script.h"
+#include "fft/party/equipment.h"
+#include "fft/party/unit_panel.h"
 #include "psx/types.h"
 
 /* Row callback: return the previewed HP bonus, or MENU_NUMBER_VALUE_DASHES to draw dashes when it

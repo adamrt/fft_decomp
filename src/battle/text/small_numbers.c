@@ -1,9 +1,9 @@
 /* Drawing a number right to left in the small 6x10 number glyphs, with sign and marker glyphs. */
 
-#include "fft/gfx.h"
-#include "fft/menu_gfx.h"
-#include "fft/text.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/unit_panel.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

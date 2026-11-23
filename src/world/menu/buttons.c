@@ -1,9 +1,9 @@
 /* Reading the tutorial's scripted buttons or the controller, soft resetting on the reset combination. */
 
-#include "fft/input.h"
-#include "fft/menu_screen.h"
-#include "fft/save.h"
-#include "fft/tutorial.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/sys/input.h"
+#include "fft/world/save.h"
+#include "fft/world/tutorial.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

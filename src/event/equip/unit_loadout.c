@@ -1,14 +1,13 @@
 /* Two-handed weapon checks and unit data built from, loaded from and committed to the battle unit record. */
 
-#include "fft/at_list.h"
-#include "fft/equipment.h"
-#include "fft/item.h"
-#include "fft/map_unit.h"
-#include "fft/menu.h"
-#include "fft/party.h"
-#include "fft/status.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/at_list.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/status.h"
+#include "fft/menu/menu.h"
+#include "fft/party/equipment.h"
+#include "fft/party/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

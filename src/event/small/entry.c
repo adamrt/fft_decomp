@@ -1,7 +1,7 @@
 /* SMALL.OUT: binding the battle name text sections and an unreferenced return-zero stub. */
 
-#include "fft/script_variable.h"
-#include "fft/text.h"
+#include "fft/script/script_variable.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Indices in this name file's directory, distinct from the runtime text section slots. */

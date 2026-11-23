@@ -2,18 +2,18 @@
  * JP-learning lists and the Reaction, Support and Movement abilities a unit
  * can equip. The support-ability checks also serve equipment and shop menus. */
 
-#include "fft/ability.h"
-#include "fft/ability_list.h"
-#include "fft/bits.h"
-#include "fft/character_identity.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/formation_job.h"
-#include "fft/job.h"
-#include "fft/job_list.h"
-#include "fft/party_unit.h"
-#include "fft/skillset.h"
-#include "fft/unit.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/job.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/skillset.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/formation_job.h"
+#include "fft/party/job_list.h"
+#include "fft/sys/bits.h"
 #include "psx/types.h"
 
 /* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */

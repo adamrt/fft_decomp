@@ -1,7 +1,8 @@
 /* Whether a unit holds a single weapon in two hands. */
 
-#include "fft/item.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/party/equipment.h"
 #include "psx/types.h"
 
 /* Returns 1 when the unit holds a single weapon in two hands: exactly one of

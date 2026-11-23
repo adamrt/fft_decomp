@@ -1,14 +1,14 @@
 /* Battle-condition banners use shaded BONUS.BIN quads for the general
  * wipe animation and for the named battle-result and party-change messages. */
 
-#include "fft/after_battle.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/thread.h"
+#include "fft/battle/conditions.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_input.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"

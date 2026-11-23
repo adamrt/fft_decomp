@@ -2,13 +2,13 @@
  * lengths support scanners as well as the interpreter, while task IDs coordinate
  * the cooperative threads started by event instructions. */
 
-#include "fft/map_unit.h"
-#include "fft/menu_window.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_variable.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

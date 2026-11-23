@@ -1,19 +1,20 @@
 /* The status banner thread, drawing the unit status panels. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/portrait.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -95,7 +96,7 @@ void unit_panel_banner_thread(void) {
     }
 
     /* Build the editor packets once; the second buffer gets a copy of them below. */
-    menu_numeric_frame_init(&g_menu_portrait_origin, &editor->numeric_frame);
+    unit_panel_init_numeric_frame(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -128,7 +129,7 @@ void unit_panel_banner_thread(void) {
     /* The status panel packets, built and copied the same way. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_numeric_frame_init(&g_unit_panel_frame_rect, &panel->numeric_frame);
+    unit_panel_init_numeric_frame(&g_unit_panel_frame_rect, &panel->numeric_frame);
     panel_sprites = &panel->sprites[0];
     menu_init_sprite_array(panel_sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
@@ -207,8 +208,8 @@ void unit_panel_banner_thread(void) {
         } while (i < 7);
 
         if (dimmed != 0) {
-            menu_numeric_frame_set_dimmed_colors(&editor->numeric_frame);
-            menu_numeric_frame_set_dimmed_colors(&panel->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(&editor->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(&panel->numeric_frame);
             /* Unsigned test for transition steps 4-9: during the wipe quad 0 takes the shade of the other three. */
             if ((anim_state - 4) < 6U) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
@@ -220,8 +221,8 @@ void unit_panel_banner_thread(void) {
             setRGB0(&editor->portrait[3], 0x20, 0x28, 0x38);
         } else {
             s32 shade;
-            menu_numeric_frame_set_normal_colors(&editor->numeric_frame);
-            menu_numeric_frame_set_normal_colors(&panel->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(&editor->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(&panel->numeric_frame);
             if ((anim_state - 4) >= 6U) {
                 setRGB0(&editor->portrait[0], 0x80, 0x80, 0x80);
             } else {
@@ -352,28 +353,28 @@ void unit_panel_banner_thread(void) {
             } else {
                 number_entries[6].format = 2;
             }
-            menu_clear_render_buffer(number_pixels, 0x700);
+            mem_zero_words(number_pixels, 0x700);
             pen_stride = &g_menu_window_text_pen.stride;
             text_pen = &g_menu_window_text_pen;
             *pen_stride = 0x38;
-            menu_draw_numeric_display_entries(number_pixels, number_entries, text_pen, 6);
+            text_draw_number_entries(number_pixels, number_entries, text_pen, 6);
             LoadImage(&rects[0], (u32*)number_pixels);
 
             number_pixels_b = number_pixels + 0x400;
             *pen_stride = 0x60;
-            menu_draw_numeric_display_entries(number_pixels_b, &number_entries[8], text_pen, 2);
+            text_draw_number_entries(number_pixels_b, &number_entries[8], text_pen, 2);
             LoadImage(&rects[1], (u32*)number_pixels_b);
             thread->redraw_request = 0;
 
-            menu_clear_render_buffer(name_image, 0x580);
+            mem_zero_words(name_image, 0x580);
             *pen_stride = 0x58;
             menu_text_set_origin(0, 0);
-            menu_display_text_entry(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
+            text_render_entry_to_image(unit_info->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_pen);
             menu_text_set_origin(0, 0x10);
-            menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
+            text_render_entry_to_image(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_pen);
             LoadImage(&rects[2], (u32*)name_image);
 
-            menu_clear_render_buffer(value_pixels, 0xF0);
+            mem_zero_words(value_pixels, 0xF0);
             *pen_stride = 0x10;
             menu_text_set_origin(0, 0);
             text_draw_small_number_glyphs(unit_info->brave, SMALL_NUMBER_WIDEN_FOR_100 | 2, value_pixels, text_pen);
@@ -419,7 +420,7 @@ void unit_panel_banner_thread(void) {
                 }
                 gfx_draw_or_append_gpu_primitive(&editor->portrait[0]);
             }
-            menu_numeric_frame_submit(&editor->numeric_frame);
+            unit_panel_submit_numeric_frame(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
 
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
@@ -434,7 +435,7 @@ void unit_panel_banner_thread(void) {
                 gfx_draw_or_append_gpu_primitive(&panel->sprites[i]);
             }
             gfx_draw_or_append_gpu_primitive(&panel->draw_mode_a);
-            menu_numeric_frame_submit(&panel->numeric_frame);
+            unit_panel_submit_numeric_frame(&panel->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
 

@@ -1,19 +1,20 @@
 /* ATTACK and REQUIRE's numeric panel thread: its draw offset follows the screen polarity and both
  * slots share one set of primitive buffers. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -66,7 +67,7 @@ void unit_panel_numbers_thread(void) {
     gfx_set_draw_mode_for_texture_page(&buffer->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&buffer->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     gfx_set_draw_mode_for_texture_page(&buffer->image_draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_numeric_frame_init(&g_unit_panel_editor_numeric_table.texture_rect, &buffer->numeric_frame);
+    unit_panel_init_numeric_frame(&g_unit_panel_editor_numeric_table.texture_rect, &buffer->numeric_frame);
     menu_init_scaled_draw_area_packets(&buffer->portrait);
 
     i = 0;
@@ -94,14 +95,14 @@ void unit_panel_numbers_thread(void) {
         /* Redraw and upload the number images on the first frame or on request; the preview
          * panel draws its values signed. */
         if (frame == 0 || thread->redraw_request != 0) {
-            menu_clear_render_buffer(number_images, sizeof(*number_images));
+            mem_zero_words(number_images, sizeof(*number_images));
             /* Each pen stride is its image's width in 4-bit pixels (four per 16-bit VRAM unit). */
             g_menu_window_text_pen.stride = 0x14;
             menu_text_set_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_window_text_pen, 3);
             } else {
-                menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_window_text_pen, 3);
+                text_draw_number_entries(number_images->mobility, entries, &g_menu_window_text_pen, 3);
             }
 
             g_menu_window_text_pen.stride = 0x40;
@@ -110,7 +111,7 @@ void unit_panel_numbers_thread(void) {
                 menu_text_render_signed_decimal_entries(
                     number_images->weapons, entries + 3, &g_menu_window_text_pen, 4);
             } else {
-                menu_draw_numeric_display_entries(number_images->weapons, entries + 3, &g_menu_window_text_pen, 4);
+                text_draw_number_entries(number_images->weapons, entries + 3, &g_menu_window_text_pen, 4);
             }
 
             g_menu_window_text_pen.stride = 0x64;
@@ -118,7 +119,7 @@ void unit_panel_numbers_thread(void) {
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_PANEL) {
                 menu_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_window_text_pen, 8);
             } else {
-                menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_window_text_pen, 8);
+                text_draw_number_entries(number_images->combat, entries + 7, &g_menu_window_text_pen, 8);
             }
 
             LoadImage(upload_a, (u32*)number_images->mobility);
@@ -178,7 +179,7 @@ void unit_panel_numbers_thread(void) {
         } else {
             gfx_draw_or_append_gpu_primitive(&buffer->image_draw_mode);
         }
-        menu_numeric_frame_submit(&buffer->numeric_frame);
+        unit_panel_submit_numeric_frame(&buffer->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[0]);
         /* During the opening zoom the panel draws clipped to the scaled area; portrait.areas[1],
          * drawn last, restores the full area. */

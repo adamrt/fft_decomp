@@ -1,16 +1,17 @@
 /* Rendering a text entry's glyphs into a menu image, with its substitution, variable, palette and width codes. */
 
-#include "fft/gfx.h"
-#include "fft/party.h"
-#include "fft/script_variable.h"
-#include "fft/text.h"
+#include "fft/game/party.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_text.h"
+#include "fft/script/script_variable.h"
+#include "fft/text/text.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Renders a text entry's glyphs into a menu image at the pen position.
  *
- * The thread target installed by menu_display_text_entry. A `text` of 0 or 1
+ * The thread target installed by text_render_entry_to_image. A `text` of 0 or 1
  * selects text_id's entry; any other value is the text itself.
  * Handles the substitution, script-variable, palette, width and numeric
  * control codes. Only lines g_menu_text_first_line up to, not including,
@@ -22,7 +23,7 @@
  * Reading each control operand through the byte local and the u8
  * variable_base keep the outer loop large enough that loop.c does not hoist
  * the 0xFFFF pending-width constant, as in the target. */
-void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text) {
+void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text) {
     text_reader_state_t* state;
     const u8* cursor;
     u8 operand;

@@ -1,10 +1,10 @@
 /* Deployment panel status icons and shaded background primitives. */
 
-#include "fft/deploy.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/deploy.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

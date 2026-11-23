@@ -1,18 +1,18 @@
 /* Brave Story lists the unlocked Facts and opens each fact in a text window. */
 
-#include "fft/brave_story.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -151,7 +151,7 @@ static void open_fact_detail(s32 value) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[1] = -1;
     g_text_window.text_substitutions[0] = -1;
-    text_window_open(&g_text_window);
+    window_open_paged_text(&g_text_window);
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
     g_display_object_animated_pool[g_menu_stack_records[g_menu_stack_depth - 1].brave_story.label_window].flags
@@ -168,14 +168,14 @@ static void open_fact_detail(s32 value) {
     g_menu_stack_depth = g_menu_stack_depth + 1;
 }
 
-/* Steps a fact's text window until text_window_update reports it
+/* Steps a fact's text window until window_update_paged_text reports it
  * closed, then pops the level, shows the Brave Story menu's windows and
  * frame again and reopens the Facts list (brave_story_open_fact_list). */
 void brave_story_update_fact_window(menu_stack_record_t* unused_level) {
     s32 depth;
 
     if (!(g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)
-        && text_window_update(&g_text_window) == 0) {
+        && window_update_paged_text(&g_text_window) == 0) {
         depth = g_menu_stack_depth;
         g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].brave_story.rows_image].flags
             |= DISPLAY_OBJECT_POP_IN;

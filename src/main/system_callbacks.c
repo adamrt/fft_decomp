@@ -1,8 +1,8 @@
 /* VSync play-time accounting and the installed drawing and CD callback hooks. */
 
-#include "fft/file.h"
-#include "fft/save.h"
-#include "fft/system.h"
+#include "fft/sys/file.h"
+#include "fft/sys/system.h"
+#include "fft/world/save.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

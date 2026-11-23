@@ -1,15 +1,15 @@
 /* The item panel's marks for the hands a weapon needs or allows. */
 
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu_gfx.h"
+#include "fft/game/item.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/item_list.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* Draw a weapon's hand marks on the item panel: a weapon that needs both hands shows only that
  * mark; otherwise the Two Hands and Two Swords marks it allows, or the one-hand mark when it
  * allows neither. Throwables and no weapon draw nothing. */
-void item_draw_weapon_hand_icons(s16 weapon_id) {
+void item_list_draw_weapon_hand_icons(s16 weapon_id) {
     RECT rect;
     s16 x;
     s16 y;

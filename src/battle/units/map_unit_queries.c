@@ -1,8 +1,8 @@
 /* Find map unit records by id or occupied tile and maintain their iteration order. */
 
-#include "fft/map_unit.h"
-#include "fft/sprite_sheet.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map_unit.h"
 #include "psx/types.h"
 
 /* The map unit record of the casting unit (g_unit_casting_map_unit_id), or 0. It is the source

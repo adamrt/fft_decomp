@@ -1,6 +1,6 @@
 /* Resident game and music heap allocation. */
 
-#include "fft/memory.h"
+#include "fft/sys/memory.h"
 #include "psx/types.h"
 
 static u8 s_heap_game_allocator_table[HEAP_GAME_PAGE_COUNT] = { 0 };

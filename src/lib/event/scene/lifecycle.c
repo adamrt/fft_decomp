@@ -1,28 +1,27 @@
 /* Initialize and reset scene menu and unit state, then advance native menu and event frames. */
 
-#include "fft/ai.h"
-#include "fft/camera.h"
-#include "fft/command.h"
-#include "fft/deploy.h"
-#include "fft/fade.h"
-#include "fft/gfx_image.h"
-#include "fft/help.h"
-#include "fft/map.h"
-#include "fft/map_light.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_window.h"
-#include "fft/move.h"
-#include "fft/script.h"
-#include "fft/script_unit.h"
-#include "fft/script_variable.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
+#include "fft/battle/ai.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/command.h"
+#include "fft/battle/deploy.h"
+#include "fft/battle/move.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/map/map.h"
+#include "fft/map/map_light.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -194,7 +193,7 @@ void script_start_current_event_thread(void) {
     if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != 0) {
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
-        fade_tint_start_fade(2, 0, 0, 0, 2);
+        fade_tint_start(2, 0, 0, 0, 2);
         thread_start(THREAD_SLOT_EVENT, script_event_thread);
     }
 }

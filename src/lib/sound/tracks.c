@@ -1,7 +1,7 @@
 /* Waiting for music loads and playing scenario tracks. */
 
-#include "fft/music.h"
-#include "fft/thread.h"
+#include "fft/sys/music.h"
+#include "fft/sys/thread.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

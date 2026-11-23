@@ -1,8 +1,8 @@
 /* Shop transactions adjust party funds and cash out inventory above the retail holding limit. */
 
-#include "fft/item.h"
-#include "fft/script_variable.h"
-#include "fft/shop.h"
+#include "fft/game/item.h"
+#include "fft/party/shop.h"
+#include "fft/script/script_variable.h"
 #include "psx/types.h"
 
 /* Add `delta` to the war funds, clamped to 0..99,999,999, and return the new

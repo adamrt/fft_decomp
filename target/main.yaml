@@ -1355,15 +1355,15 @@ data:
   - {addr: 0x80057eec, name: g_proposition_active}
   - {addr: 0x80057f34, name: g_brave_story_character_ages}
   - {addr: 0x80057f74, name: g_party_units}
-  - {addr: 0x80059374, name: g_sound_novel_read_section_bits}
+  - {addr: 0x80059374, name: g_novel_read_section_bits}
   - {addr: 0x80059414, name: g_item_location_flags}
   - {addr: 0x80059494, name: g_item_poached_quantities}
-  - {addr: 0x80059594, name: g_sound_novel_saved_readings}
+  - {addr: 0x80059594, name: g_novel_saved_readings}
   - {addr: 0x800596ac, name: g_brave_story_land_discovery_date_bits}
   - {addr: 0x800596c0, name: g_memcard_bios_events}
   - {addr: 0x800596e0, name: g_item_quantities}
   - {addr: 0x800597e0, name: g_save_slot_playtimes}
-  - {addr: 0x80059810, name: g_sound_novel_saved_flags}
+  - {addr: 0x80059810, name: g_novel_saved_flags}
   - {addr: 0x8005e90c, name: g_unit_generation_base_data}
   - {addr: 0x8005e93c, name: g_unit_generation_raw_stat_variance}
   - {addr: 0x8005e950, name: g_terrain_tile_info_pairs}
@@ -1414,12 +1414,12 @@ data:
   - {addr: 0x80079a98, name: battle_entrypoint}
   - {addr: 0x80093170, name: map_palette_color_field}
   - {addr: 0x800a778c, name: g_game_flow_state}
-  - {addr: 0x800d0bbc, name: g_sound_novel_script}
-  - {addr: 0x800e6edc, name: world_text_find_entry}
+  - {addr: 0x800d0bbc, name: g_novel_script}
+  - {addr: 0x800e6edc, name: text_find_world_entry}
   - {addr: 0x800fc55c, name: g_render_buffers}
   - {addr: 0x8010656c, name: menu_screen_init_world_text}
   - {addr: 0x8011a2d4, name: g_render_current_buffer}
-  - {addr: 0x80132824, name: battle_text_find_entry}
+  - {addr: 0x80132824, name: text_find_battle_entry}
   - {addr: 0x8013b590, name: script_variable_get}
   - {addr: 0x8013b644, name: script_variable_set}
   - {addr: 0x8014a81c, name: script_return_zero_1}

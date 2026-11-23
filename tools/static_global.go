@@ -866,19 +866,27 @@ func staticHeaderText(root string) (string, error) {
 	}
 	var builder strings.Builder
 	for _, directory := range []string{"include/fft", "include/psx"} {
-		entries, err := os.ReadDir(filepath.Join(root, directory))
+		var paths []string
+		err := filepath.WalkDir(filepath.Join(root, directory), func(path string, entry os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".h") {
+				paths = append(paths, path)
+			}
+			return nil
+		})
 		if err != nil {
 			continue
 		}
-		for _, entry := range entries {
-			if strings.HasSuffix(entry.Name(), ".h") {
-				data, err := os.ReadFile(filepath.Join(root, directory, entry.Name()))
-				if err != nil {
-					return "", err
-				}
-				builder.Write(data)
-				builder.WriteByte('\n')
+		sort.Strings(paths)
+		for _, path := range paths {
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return "", err
 			}
+			builder.Write(data)
+			builder.WriteByte('\n')
 		}
 	}
 	text := builder.String()

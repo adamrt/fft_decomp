@@ -1,6 +1,6 @@
 /* Two independent bit streams used by menu and save records. */
 
-#include "fft/bits.h"
+#include "fft/sys/bits.h"
 #include "psx/types.h"
 
 extern s32 g_bits_primary_read_index;

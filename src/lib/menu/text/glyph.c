@@ -1,7 +1,8 @@
 /* Drawing one font glyph into a 4bpp image in a text style's palette entries. */
 
-#include "fft/bits.h"
-#include "fft/text.h"
+#include "fft/menu/menu_text.h"
+#include "fft/sys/bits.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Draw one 10x14 font glyph into a 4bpp image at `position` and return the

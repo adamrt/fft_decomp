@@ -84,6 +84,7 @@ units:
   - {name: music_tracks, source: src/lib/sound/tracks.c}
   - {name: name_entry, source: src/world/name_entry.c, data: [{addr: 0x801cd144, size: 17, hash: 0a88111852095cae}], bss: [{addr: 0x801cd114, size: 1, hash: 6e340b9cffb37a98}]}
   - {name: numbers_frame, source: src/lib/menu/unit_view/numeric_frame.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
+  - {name: office, source: src/world/shop/office.c, bss: [{addr: 0x801cd100, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd104, size: 4, hash: df3f619804a92fdb}]}
   - {name: option_choice, source: src/lib/menu/option_choice.c, data: [{addr: 0x801571a4, size: 56, hash: 363145519a4b87be}, {addr: 0x801571dc, size: 56, hash: 968d38035e40a07d}]}
   - {name: options, source: src/world/options.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: overlay_dispatch, source: src/lib/event/scene/menu_dispatch.c, bss: [{addr: 0x801564c8, size: 4, hash: df3f619804a92fdb}, {addr: 0x801564cc, size: 4, hash: df3f619804a92fdb}]}
@@ -114,7 +115,6 @@ units:
   - {name: shop_balance, source: src/world/shop/funds.c}
   - {name: shop_build_stock_list, source: src/world/shop/stock.c, data: [{addr: 0x8018d844, size: 512, hash: 523503ae3bbd2005}]}
   - {name: shop_fitting, source: src/world/shop/fitting.c, bss: [{addr: 0x801957a8, size: 1, hash: 6e340b9cffb37a98}]}
-  - {name: soldier_office, source: src/world/shop/soldier_office.c, bss: [{addr: 0x801cd100, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cd104, size: 4, hash: df3f619804a92fdb}]}
   - {name: status_billboard, source: src/lib/menu/unit_view/billboard.c}
   - {name: text_bank_sections, source: src/lib/event/dialog/banks.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, bss: [{addr: 0x801a2574, size: 128, hash: 38723a2e5e8a17aa}]}
   - {name: text_entries, source: src/lib/menu/text/entries.c, data: [{addr: 0x80156c20, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x80156c30, size: 16, hash: 6ff8555916aa10e6}]}
@@ -174,8 +174,8 @@ functions:
   - {addr: 0x800e1bc0, size: 244, name: map_unit_set_event_animation, hash: 98ede871ccc9462e, unit: script_helpers}
   - {addr: 0x800e1cb4, size: 144, name: map_unit_set_event_facing, hash: ac3faadc8be008fd, unit: script_helpers}
   - {addr: 0x800e1d44, size: 76, name: script_scale_music_volume, hash: 5d48df7d66aa367f, unit: script_helpers}
-  - {addr: 0x800e1d90, size: 84, name: gfx_fade_in_screen_overlay, hash: d0ba1ed84f50d428, unit: script_helpers}
-  - {addr: 0x800e1de4, size: 84, name: gfx_fade_out_screen_overlay, hash: 12f588f0776e2346, unit: script_helpers}
+  - {addr: 0x800e1d90, size: 84, name: fade_event_run_in, hash: d0ba1ed84f50d428, unit: script_helpers}
+  - {addr: 0x800e1de4, size: 84, name: fade_event_run_out, hash: 12f588f0776e2346, unit: script_helpers}
   - {addr: 0x800e1e38, size: 8, name: tutorial_is_current_event, hash: 207819bf4ebe3078, unit: script_helpers}
   - {addr: 0x800e1e40, size: 76, name: battle_unit_get_id_by_event_unit_id, hash: 6bd874927737de2e, unit: script_helpers}
   - {addr: 0x800e1e8c, size: 20, name: menu_open_modal, hash: edfede6075ee1f04, unit: script_helpers}
@@ -189,7 +189,7 @@ functions:
   - {addr: 0x800e1f58, size: 36, name: camera_normalize_yaw, hash: 4b9b57139167c4c5, unit: script_helpers}
   - {addr: 0x800e1f7c, size: 292, name: camera_settle_tilt_zoom, hash: b488293686882dcf, unit: script_helpers}
   - {addr: 0x800e20a0, size: 52, name: camera_wrap_yaw, hash: 2f0e82c3ed1fb39e, unit: script_helpers}
-  - {addr: 0x800e20d4, size: 40, name: menu_get_selected_battle_unit, hash: d8b03fa45f1ad5c5, unit: script_helpers}
+  - {addr: 0x800e20d4, size: 40, name: unit_panel_get_selected_battle_unit, hash: d8b03fa45f1ad5c5, unit: script_helpers}
   - {addr: 0x800e20fc, size: 48, name: script_clamp_value, hash: a979e7abbcee5781, unit: script_helpers}
   - {addr: 0x800e212c, size: 612, name: script_update_event_input, hash: ec1118bb42efe382, unit: script_helpers}
   - {addr: 0x800e2390, size: 8, name: menu_init_stub, hash: 6d64edf91449c1b1, unit: menu_primitives}
@@ -209,10 +209,10 @@ functions:
   - {addr: 0x800e30fc, size: 380, name: menu_alloc_memory, hash: ab779363522e02a2, unit: buffer_allocator}
   - {addr: 0x800e3278, size: 32, name: menu_alloc_buffer, hash: c0b0162a45670bc4, unit: buffer_allocator}
   - {addr: 0x800e3298, size: 192, name: menu_free_memory, hash: 38f2c6070f4c7dc3, unit: buffer_allocator}
-  - {addr: 0x800e3358, size: 596, name: menu_numeric_frame_init, hash: 6931206a75791ec9, unit: numbers_frame}
-  - {addr: 0x800e35ac, size: 108, name: menu_numeric_frame_submit, hash: 052f8a7955660a7e, unit: numbers_frame}
-  - {addr: 0x800e3618, size: 136, name: menu_numeric_frame_set_normal_colors, hash: 0eafa6c1e9a53c86, unit: numbers_frame}
-  - {addr: 0x800e36a0, size: 140, name: menu_numeric_frame_set_dimmed_colors, hash: ed7ffbf13272f8dc, unit: numbers_frame}
+  - {addr: 0x800e3358, size: 596, name: unit_panel_init_numeric_frame, hash: 6931206a75791ec9, unit: numbers_frame}
+  - {addr: 0x800e35ac, size: 108, name: unit_panel_submit_numeric_frame, hash: 052f8a7955660a7e, unit: numbers_frame}
+  - {addr: 0x800e3618, size: 136, name: unit_panel_set_numeric_frame_normal_colors, hash: 0eafa6c1e9a53c86, unit: numbers_frame}
+  - {addr: 0x800e36a0, size: 140, name: unit_panel_set_numeric_frame_dimmed_colors, hash: ed7ffbf13272f8dc, unit: numbers_frame}
   - {addr: 0x800e372c, size: 380, name: message_measure_window_width, hash: 340aa3e43d90fd1d, unit: dialog_messages}
   - {addr: 0x800e38a8, size: 656, name: menu_screen_update_dialog_input, hash: 13af0965fdb71ad6, unit: dialog_messages}
   - {addr: 0x800e3b38, size: 84, name: message_release_typewriter_slot, hash: 83ddde4c1bebdfdd, unit: dialog_messages}
@@ -274,7 +274,7 @@ functions:
   - {addr: 0x800ea068, size: 316, name: unit_view_attack_caster_stats_thread, hash: 64cc01be28054271, unit: unit_view_render}
   - {addr: 0x800ea1a4, size: 184, name: unit_view_attack_target_stats_thread, hash: da40410ec79137a7, unit: unit_view_render}
   - {addr: 0x800ea25c, size: 1844, name: unit_view_summary_thread, hash: d5f5a0ffa8af680f, unit: unit_view_render}
-  - {addr: 0x800ea990, size: 192, name: gfx_set_item_icon_sprite, hash: a86b16621ce2b2a6, unit: unit_view_render}
+  - {addr: 0x800ea990, size: 192, name: item_set_icon_sprite, hash: a86b16621ce2b2a6, unit: unit_view_render}
   - {addr: 0x800eaa50, size: 380, name: portrait_build_wldface_poly, hash: 4d55644e1fbf1fa9, unit: unit_view_render}
   - {addr: 0x800eabcc, size: 880, name: status_screen_numbers_thread, hash: 6dd4808fb23cfe5d, unit: unit_view_render}
   - {addr: 0x800eaf3c, size: 2796, name: status_screen_thread, hash: 7b16dd310ca9b69b, unit: unit_view_render}
@@ -312,7 +312,7 @@ functions:
   - {addr: 0x800ef25c, size: 160, name: script_variable_set, hash: 7777ac9926486c9f, unit: script_variables}
   - {addr: 0x800ef2fc, size: 436, name: menu_init_panel_fade_tiles, hash: 3be1a31046d8fb32, unit: fade_primitives}
   - {addr: 0x800ef4b0, size: 464, name: menu_update_panel_fade, hash: 9fb1cf73a7d85714, unit: fade_primitives}
-  - {addr: 0x800ef680, size: 264, name: gfx_submit_screen_fade_overlay, hash: 0f3b3682c42fcae8, unit: fade_primitives}
+  - {addr: 0x800ef680, size: 264, name: fade_event_submit_tile, hash: 0f3b3682c42fcae8, unit: fade_primitives}
   - {addr: 0x800ef788, size: 124, name: reserve_high_overlay, hash: 7a02095f5d205a32, unit: menu_overlays}
   - {addr: 0x800ef804, size: 40, name: free_high_overlay, hash: e8db9a4dc85accdd, unit: menu_overlays}
   - {addr: 0x800ef82c, size: 168, name: overlay_companion_request, hash: faf65fc74edd17d7, unit: menu_overlays}
@@ -325,7 +325,7 @@ functions:
   - {addr: 0x800ef9dc, size: 48, name: option_menu_thread, hash: e3dd995d2b018a16, unit: menu_overlays}
   - {addr: 0x800efa0c, size: 48, name: at_list_open, hash: 43fc42c9790bdf43, unit: menu_overlays}
   - {addr: 0x800efa3c, size: 48, name: crystal_pickup_panel_thread, hash: e76892b74fd58b3a, unit: menu_overlays}
-  - {addr: 0x800efa6c, size: 108, name: mini_menu_thread, hash: 11df91715534e82a, unit: menu_overlays}
+  - {addr: 0x800efa6c, size: 108, name: command_mini_menu_thread, hash: 11df91715534e82a, unit: menu_overlays}
   - {addr: 0x800efad8, size: 264, name: unit_list_return_thread, hash: 9a5b4e6efe2ee31f, unit: menu_overlays}
   - {addr: 0x800efbe0, size: 260, name: unit_list_transition_thread, hash: eb985a136265b699, unit: menu_overlays}
   - {addr: 0x800efce4, size: 80, name: unit_list_thread, hash: 4bc30b101fd07457, unit: menu_overlays}
@@ -337,7 +337,7 @@ functions:
   - {addr: 0x800f01c0, size: 48, name: script_graphic_show_thread, hash: 594b55ee98b22733, unit: event_resources}
   - {addr: 0x800f01f0, size: 8, name: script_noop_3, hash: 6d64edf91449c1b1, unit: event_resources}
   - {addr: 0x800f01f8, size: 124, name: portrait_load_image, hash: 497cde13cf361473, unit: event_resources}
-  - {addr: 0x800f0274, size: 228, name: gfx_load_evtchr_thread, hash: 8962aec23b32ebaf, unit: event_resources}
+  - {addr: 0x800f0274, size: 228, name: sprite_sheet_load_evtchr_thread, hash: 8962aec23b32ebaf, unit: event_resources}
   - {addr: 0x800f0358, size: 280, name: script_opcode_50_portrait_col, hash: f2bff445b230c13b, unit: event_resources}
   - {addr: 0x800f0470, size: 176, name: script_load_event, hash: a023de0e6c5d3603, unit: event_resources}
   - {addr: 0x800f0520, size: 84, name: menu_palette_set_colors, hash: bc139dff59caa293, unit: event_resources}
@@ -357,7 +357,7 @@ functions:
   - {addr: 0x800f0b9c, size: 72, name: music_wait_load, hash: ae5d718d414b6204, unit: music_tracks}
   - {addr: 0x800f0be4, size: 168, name: music_play_tracks, hash: 99f338e7d1920b8b, unit: music_tracks}
   - {addr: 0x800f0c8c, size: 444, name: deploy_open, hash: 1ae51b2896ef360b, unit: scene_menus}
-  - {addr: 0x800f0e48, size: 156, name: mini_menu_start, hash: fbc523628be16282, unit: scene_menus}
+  - {addr: 0x800f0e48, size: 156, name: command_start_mini_menu, hash: fbc523628be16282, unit: scene_menus}
   - {addr: 0x800f0ee4, size: 92, name: menu_thread_get_activity, hash: fb4093ac614ce6a0, unit: scene_menus}
   - {addr: 0x800f0f40, size: 20, name: at_list_finish_selection, hash: 2f7b7cb2197c6cfb, unit: scene_menus}
   - {addr: 0x800f0f54, size: 8, name: menu_noop_5, hash: 6d64edf91449c1b1, unit: scene_menus}
@@ -405,7 +405,7 @@ functions:
   - {addr: 0x800f312c, size: 76, name: command_reset_unit_records, hash: 91497616f5362267, unit: command_selection}
   - {addr: 0x800f3178, size: 120, name: command_reset_unit_record, hash: 320fd7dcc963f1c3, unit: command_selection}
   - {addr: 0x800f31f0, size: 16, name: command_get_selected, hash: f87818707628ad97, unit: command_selection}
-  - {addr: 0x800f3200, size: 60, name: menu_request_close_thread, hash: 1126457f8432f56a, unit: command_selection}
+  - {addr: 0x800f3200, size: 60, name: command_request_close_thread, hash: 1126457f8432f56a, unit: command_selection}
   - {addr: 0x800f323c, size: 60, name: mini_menu_confirm_delay_thread, hash: f840d996f9d12147, unit: command_selection}
   - {addr: 0x800f3278, size: 56, name: copy_u8_to_u16_terminated, hash: 28e77c325ea414b4, unit: command_selection}
   - {addr: 0x800f32b0, size: 52, name: copy_u8_to_u16, hash: 13d704f494f4f2e9, unit: command_selection}
@@ -429,7 +429,7 @@ functions:
   - {addr: 0x800f4f18, size: 124, name: auto_battle_confirm_thread, hash: 3b06a121f16b15f4, unit: command_prompts}
   - {addr: 0x800f4f94, size: 64, name: auto_battle_store_target, hash: eba4aacd9409368b, unit: command_prompts}
   - {addr: 0x800f4fd4, size: 604, name: announcement_select, hash: 6c48e87881d46ff1, unit: command_prompts}
-  - {addr: 0x800f5230, size: 212, name: menu_dispatch_request, hash: c537ae196a1827bb, unit: command_prompts}
+  - {addr: 0x800f5230, size: 212, name: command_dispatch_request, hash: c537ae196a1827bb, unit: command_prompts}
   - {addr: 0x800f5304, size: 128, name: crystal_pickup_resolve, hash: 2cbfb3b781403e89, unit: command_prompts}
   - {addr: 0x800f5384, size: 2556, name: dispatch_request, hash: d8c0ee3dbff2b5b4, unit: command_prompts}
   - {addr: 0x800f5d80, size: 168, name: get_condition_battle_unit, hash: 7009f26291692b1c, unit: scenario_conditions}
@@ -532,15 +532,15 @@ functions:
   - {addr: 0x800fdce0, size: 8, name: script_noop_10, hash: 6d64edf91449c1b1, unit: script_display}
   - {addr: 0x800fdce8, size: 8, name: script_frame_after_requests_stub, hash: 6d64edf91449c1b1, unit: script_display}
   - {addr: 0x800fdcf0, size: 584, name: gfx_set_image_primitive_layout, hash: 56e863033028a2cf, unit: script_display}
-  - {addr: 0x800fdf38, size: 220, name: menu_draw_numeric_display_entries, hash: 461d47a099c3c386, unit: script_display}
-  - {addr: 0x800fe014, size: 216, name: menu_display_number_entry, hash: e179fd188c407888, unit: script_display}
-  - {addr: 0x800fe0ec, size: 656, name: menu_draw_large_number_glyphs, hash: 26c59663a62488f1, unit: script_display}
+  - {addr: 0x800fdf38, size: 220, name: text_draw_number_entries, hash: 461d47a099c3c386, unit: script_display}
+  - {addr: 0x800fe014, size: 216, name: text_draw_number, hash: e179fd188c407888, unit: script_display}
+  - {addr: 0x800fe0ec, size: 656, name: text_draw_large_number_glyphs, hash: 26c59663a62488f1, unit: script_display}
   - {addr: 0x800fe37c, size: 876, name: text_draw_small_number_glyphs, hash: 74bc0e5728cbaac8, source: src/world/text/small_numbers.c}
-  - {addr: 0x800fe6e8, size: 140, name: menu_draw_charge_time_now, hash: 6e915a75c99aeb13, unit: text_entries}
-  - {addr: 0x800fe774, size: 48, name: menu_display_text_entry, hash: 510cb1258e639e13, unit: text_entries}
-  - {addr: 0x800fe7a4, size: 48, name: menu_display_text_entry_past_choice_marks, hash: 99e2ba5c27fe29f3, unit: text_entries}
-  - {addr: 0x800fe7d4, size: 68, name: menu_display_text_string, hash: 546bc309ac1221e3, unit: text_entries}
-  - {addr: 0x800fe818, size: 1820, name: menu_display_text, hash: d9988a33ac0cc206, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/world/text/menu_image.c}
+  - {addr: 0x800fe6e8, size: 140, name: text_draw_charge_time_now, hash: 6e915a75c99aeb13, unit: text_entries}
+  - {addr: 0x800fe774, size: 48, name: text_render_entry_to_image, hash: 510cb1258e639e13, unit: text_entries}
+  - {addr: 0x800fe7a4, size: 48, name: text_render_entry_past_choice_marks, hash: 99e2ba5c27fe29f3, unit: text_entries}
+  - {addr: 0x800fe7d4, size: 68, name: text_render_string_to_image, hash: 546bc309ac1221e3, unit: text_entries}
+  - {addr: 0x800fe818, size: 1820, name: text_render_to_image, hash: d9988a33ac0cc206, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/world/text/menu_image.c}
   - {addr: 0x800fef34, size: 188, name: menu_text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/lib/event/dialog/backreferences.c, source_symbol: text_advance_cursor_with_backreferences}
   - {addr: 0x800ff450, size: 40, name: mem_copy_bytes_nonempty, hash: 73eb033d6e800062, unit: image_pixels}
   - {addr: 0x800ff478, size: 496, name: gfx_mirror_4bpp_rect, hash: 29198ac37701ca7e, unit: image_pixels}
@@ -612,7 +612,7 @@ functions:
   - {addr: 0x80106988, size: 16, name: world_map_menu_undim, hash: f6cec9f0ffcc89d5, unit: menu_runtime}
   - {addr: 0x80106998, size: 120, name: menu_screen_reset_context, hash: 6f5b572b12858b34, unit: menu_runtime}
   - {addr: 0x80106a10, size: 24, name: world_map_menu_set_scroll, hash: edb65111c63d7a3a, unit: menu_runtime}
-  - {addr: 0x80106a28, size: 32, name: screen_set_brightness, hash: 0013037fba6a033f, unit: menu_runtime}
+  - {addr: 0x80106a28, size: 32, name: menu_screen_set_brightness, hash: 0013037fba6a033f, unit: menu_runtime}
   - {addr: 0x80106a48, size: 1276, name: world_map_menu_text_window_thread, hash: ba81ad88431084a5, unit: menu_runtime}
   - {addr: 0x80106f44, size: 32, name: options_thread, hash: 358779ef0221aa95, unit: menu_runtime}
   - {addr: 0x80106f64, size: 116, name: option_open_game_options_in_previous_thread, hash: a0a70cdda35087d4, unit: menu_runtime}
@@ -700,10 +700,10 @@ functions:
   - {addr: 0x8011241c, size: 496, name: menu_icon_list_thread, hash: 33caada358d27009, unit: menu_window_threads}
   - {addr: 0x8011260c, size: 248, name: menu_text_entry_wait_thread, hash: 9d318a9f2e6d6d43, unit: menu_window_threads}
   - {addr: 0x80112704, size: 372, name: menu_icon_strip_thread, hash: 03519690175a4d3a, unit: menu_window_threads}
-  - {addr: 0x80112878, size: 104, name: item_build_icon_source, hash: 17be9f26676bdbf8, source: src/lib/menu/item_icon.c}
+  - {addr: 0x80112878, size: 104, name: item_list_build_icon_source, hash: 17be9f26676bdbf8, source: src/lib/menu/item_icon.c}
   - {addr: 0x801128e0, size: 908, name: menu_input_update_event_state, hash: af5af8099faa9908, unit: thread_state}
   - {addr: 0x80112c6c, size: 28, name: menu_thread_is_running, hash: 22d1fa2a224de3cd, unit: thread_state}
-  - {addr: 0x80112c88, size: 1236, name: menu_draw_status_panel_backdrops, hash: 98480b1c862dca4f, unit: menu_panel_backdrops}
+  - {addr: 0x80112c88, size: 1236, name: unit_panel_draw_backdrops, hash: 98480b1c862dca4f, unit: menu_panel_backdrops}
   - {addr: 0x8011315c, size: 648, name: formation_init_display, hash: 03e723ed2bcd8184, unit: formation_init_display}
   - {addr: 0x801133e4, size: 148, name: formation_rebuild_lists, hash: 97da11e8f7fbbc2b, unit: formation_init_display}
   - {addr: 0x80113478, size: 112, name: menu_screen_check_busy, hash: 09c2bf94c7f79101, unit: formation_init_display}
@@ -782,7 +782,7 @@ functions:
   - {addr: 0x8011a954, size: 40, name: thread_wait_forever_by_frames, hash: 38437c674ba18e54, unit: equipment_rows}
   - {addr: 0x8011a97c, size: 92, name: equipment_row_get_item_count, hash: af8f5961adbfba37, unit: equipment_rows}
   - {addr: 0x8011a9d8, size: 92, name: equipment_row_get_equipped_count, hash: 49c6e60b38d5b05d, unit: equipment_rows}
-  - {addr: 0x8011aa34, size: 112, name: item_build_type_icon_source, hash: fc1261165929b61f, unit: equipment_rows}
+  - {addr: 0x8011aa34, size: 112, name: item_list_build_type_icon_source, hash: fc1261165929b61f, unit: equipment_rows}
   - {addr: 0x8011aaa4, size: 68, name: equipment_row_get_icon_source, hash: 61705fb5a73d961f, unit: equipment_rows}
   - {addr: 0x8011aae8, size: 1124, name: formation_item_update_menu, hash: 48444ba79d6a947a, unit: formation_item_menu}
   - {addr: 0x8011af4c, size: 1544, name: update_equip_menu, hash: c1af2f118c836d72, unit: formation_item_menu}
@@ -802,8 +802,8 @@ functions:
   - {addr: 0x8011cfa8, size: 848, name: item_list_update_sort_menu, hash: c326cc985165527c, unit: item_actions}
   - {addr: 0x8011d2f8, size: 380, name: formation_item_update_equipped_units, hash: 470964449b528d46, unit: item_actions}
   - {addr: 0x8011d474, size: 272, name: item_list_draw_tabs, hash: c05f7673385e70c0, unit: item_actions}
-  - {addr: 0x8011d584, size: 808, name: item_draw_weapon_hand_icons, hash: b1695814fb8f8b0c, source: src/lib/menu/weapon_hand_icons.c}
-  - {addr: 0x8011d8ac, size: 964, name: item_draw_status_list, hash: e8bbf3d284edf928, source: src/lib/menu/item_status_list.c}
+  - {addr: 0x8011d584, size: 808, name: item_list_draw_weapon_hand_icons, hash: b1695814fb8f8b0c, source: src/lib/menu/weapon_hand_icons.c}
+  - {addr: 0x8011d8ac, size: 964, name: item_list_draw_status_list, hash: e8bbf3d284edf928, source: src/lib/menu/item_status_list.c}
   - {addr: 0x8011dc70, size: 40, name: idle_thread, hash: 2e6b9f18bb464322, unit: formation_abilities}
   - {addr: 0x8011dc98, size: 1052, name: formation_ability_update_menu, hash: b8ee4cb9c8bd92e9, unit: formation_abilities}
   - {addr: 0x8011e0b4, size: 1024, name: update_removal_menu, hash: 07bc891af7ce9b00, unit: formation_abilities}
@@ -853,14 +853,14 @@ functions:
   - {addr: 0x80120bb0, size: 1336, name: formation_unit_build_record, hash: e6808d20c381f45c, unit: formation_records}
   - {addr: 0x801210e8, size: 464, name: formation_build_record_list, hash: 93fb6fa91f4fa5c9, unit: formation_records}
   - {addr: 0x801212b8, size: 688, name: formation_save_records, hash: c0932d02a682df31, unit: formation_records}
-  - {addr: 0x80121568, size: 236, name: item_get_ranking_value, hash: c162face50932c06, source: src/lib/menu/item_ranking.c}
-  - {addr: 0x80121654, size: 1548, name: item_sort_id_list, hash: cadb2570fbcc2eab, unit: roster_sorting}
+  - {addr: 0x80121568, size: 236, name: item_list_get_ranking_value, hash: c162face50932c06, source: src/lib/menu/item_ranking.c}
+  - {addr: 0x80121654, size: 1548, name: item_list_sort, hash: cadb2570fbcc2eab, unit: roster_sorting}
   - {addr: 0x80121c60, size: 872, name: formation_roster_sort, hash: 81bb011ed79bb2fb, unit: roster_sorting}
-  - {addr: 0x80121fc8, size: 88, name: item_load_type_order, hash: e9c6e09b68b8a95e, unit: item_order}
-  - {addr: 0x80122020, size: 96, name: item_store_type_order, hash: baa6b7f2ddd835f6, unit: item_order}
-  - {addr: 0x80122080, size: 88, name: item_store_category_list, hash: 7e29c4bdf54ddbc0, unit: item_order}
-  - {addr: 0x801220d8, size: 256, name: item_sort_list_by_category_order, hash: 60fe16b10affd01f, unit: item_order}
-  - {addr: 0x801221d8, size: 164, name: item_rebuild_category_list, hash: e7115832aed677ed, unit: item_order}
+  - {addr: 0x80121fc8, size: 88, name: item_list_load_sort_order, hash: e9c6e09b68b8a95e, unit: item_order}
+  - {addr: 0x80122020, size: 96, name: item_list_store_sort_order, hash: baa6b7f2ddd835f6, unit: item_order}
+  - {addr: 0x80122080, size: 88, name: item_list_store_category, hash: 7e29c4bdf54ddbc0, unit: item_order}
+  - {addr: 0x801220d8, size: 256, name: item_list_sort_by_category_order, hash: 60fe16b10affd01f, unit: item_order}
+  - {addr: 0x801221d8, size: 164, name: item_list_rebuild_category, hash: e7115832aed677ed, unit: item_order}
   - {addr: 0x8012227c, size: 84, name: is_in_category_list, hash: dff56971e7ed3167, unit: item_order}
   - {addr: 0x801222d0, size: 104, name: prepend_to_category_list, hash: 64a6e8e35edbd02f, unit: item_order}
   - {addr: 0x80122338, size: 128, name: remove_from_category_list, hash: cf7b4cbe138b1209, unit: item_order}
@@ -879,8 +879,8 @@ functions:
   - {addr: 0x80122c20, size: 544, name: formation_ability_build_rsm_list, hash: e568d793cd50e453, unit: job_abilities}
   - {addr: 0x80122e40, size: 72, name: equipment_clear_stat_preview, hash: 740a9e32a9c766bb, unit: equipment_stats}
   - {addr: 0x80122e88, size: 132, name: build_movement_bonus, hash: 15a592818d5c12ca, unit: equipment_stats}
-  - {addr: 0x80122f0c, size: 144, name: formation_calculate_ability_movement_delta, hash: 1f6bb186e388a569, unit: equipment_stats}
-  - {addr: 0x80122f9c, size: 560, name: item_build_stat_preview, hash: 610e237773cc8653, unit: equipment_stats}
+  - {addr: 0x80122f0c, size: 144, name: formation_ability_calculate_movement_delta, hash: 1f6bb186e388a569, unit: equipment_stats}
+  - {addr: 0x80122f9c, size: 560, name: item_list_build_stat_preview, hash: 610e237773cc8653, unit: equipment_stats}
   - {addr: 0x801231cc, size: 188, name: equipment_calculate_swap_delta, hash: 9c961874f326897c, unit: equipment_stats}
   - {addr: 0x80123288, size: 424, name: subtract_scaled_stat_preview, hash: 7621477fabb93d49, unit: equipment_stats}
   - {addr: 0x80123430, size: 216, name: equipment_calculate_loadout_delta, hash: 8ea97edaf0f06225, unit: equipment_stats}
@@ -890,7 +890,7 @@ functions:
   - {addr: 0x8012372c, size: 56, name: shop_get_item_half_price, hash: fa0710de572b7403, unit: equipment_stock}
   - {addr: 0x80123764, size: 128, name: item_get_equipped_count, hash: 3dc17ef4795fca72, unit: equipment_stock}
   - {addr: 0x801237e4, size: 64, name: item_get_total_count, hash: c587ad836e51c4cb, unit: equipment_stock}
-  - {addr: 0x80123824, size: 72, name: fur_shop_adjust_stock, hash: ad67c1fdb2054c42, unit: equipment_stock}
+  - {addr: 0x80123824, size: 72, name: shop_fur_adjust_stock, hash: ad67c1fdb2054c42, unit: equipment_stock}
   - {addr: 0x8012386c, size: 1388, name: formation_item_build_best_fit, hash: 49551b4fa2d144f8, unit: equipment_slots}
   - {addr: 0x80123dd8, size: 1616, name: shop_fitting_build_best_fit, hash: 698d425d171ded90, unit: equipment_slots}
   - {addr: 0x80124428, size: 340, name: equipment_set_slot_item, hash: 376284c7903fa575, unit: equipment_slots}
@@ -901,9 +901,9 @@ functions:
   - {addr: 0x80124c54, size: 704, name: equipment_build_item_list, hash: 4b7869eaf2c81375, unit: equipment_slots}
   - {addr: 0x80124f14, size: 188, name: formation_item_select_slot, hash: 6b569c10e8467857, unit: equipment_slots}
   - {addr: 0x80124fd0, size: 36, name: item_get_type, hash: 0d110fc92f07954c, unit: item_types}
-  - {addr: 0x80124ff4, size: 56, name: item_build_type_icon, hash: 9ef0f46a205c2a75, unit: item_types}
+  - {addr: 0x80124ff4, size: 56, name: item_list_build_type_icon, hash: 9ef0f46a205c2a75, unit: item_types}
   - {addr: 0x8012502c, size: 840, name: shop_build_stock_list, hash: 3c7eed74a2651422, unit: shop_build_stock_list}
-  - {addr: 0x80125374, size: 96, name: item_get_menu_category, hash: 391fa191bda064e6, source: src/lib/menu/item_menu_category.c}
+  - {addr: 0x80125374, size: 96, name: item_list_get_category, hash: 391fa191bda064e6, source: src/lib/menu/item_menu_category.c}
   - {addr: 0x801253d4, size: 364, name: formation_ability_set_slot, hash: fc8aca691a77add1, unit: formation_units}
   - {addr: 0x80125540, size: 164, name: formation_unit_get_lock, hash: e3d4764d538820cd, unit: formation_units}
   - {addr: 0x801255e4, size: 228, name: formation_ability_learn, hash: aa1a32a0af924d02, unit: formation_units}
@@ -943,11 +943,11 @@ functions:
   - {addr: 0x801282dc, size: 704, name: menu_draw_sliding_cursor, hash: aeed72995bce48d4, unit: menu_script_opcodes}
   - {addr: 0x8012859c, size: 852, name: menu_draw_bouncing_cursor, hash: 6230546a73c5da6f, unit: menu_script_opcodes}
   - {addr: 0x801288f0, size: 108, name: skip_script_group, hash: 08c0e2d5768b4709, unit: menu_script_opcodes}
-  - {addr: 0x8012895c, size: 800, name: menu_scrollable_list_load_layout, hash: 32f66838c38db246, unit: menu_script_opcodes}
+  - {addr: 0x8012895c, size: 800, name: menu_scrollable_list_refresh, hash: 32f66838c38db246, unit: menu_script_opcodes}
   - {addr: 0x80128c7c, size: 48, name: menu_scrollable_list_open, hash: 8ca660cbdd814a3b, unit: menu_script_opcodes}
   - {addr: 0x80128cac, size: 52, name: menu_scrollable_list_open_at_scroll_base, hash: 63e8f995fd661aee, unit: menu_script_opcodes}
   - {addr: 0x80128ce0, size: 2964, name: menu_opcode_10_draw_scrollable_list, hash: a229f784b447bedd, unit: menu_script_opcodes}
-  - {addr: 0x80129874, size: 60, name: gfx_set_draw_color, hash: 15640358a165ed2d, unit: menu_script_opcodes}
+  - {addr: 0x80129874, size: 60, name: menu_gfx_set_draw_color, hash: 15640358a165ed2d, unit: menu_script_opcodes}
   - {addr: 0x801298b0, size: 16, name: gfx_set_otag_index, hash: b01b36934974a06a, unit: draw_state}
   - {addr: 0x801298c0, size: 264, name: menu_palette_set_mode, hash: 2d8a4bce38b1e631, unit: draw_areas}
   - {addr: 0x801299c8, size: 104, name: menu_opcode_13_clear_temporary_draw_area, hash: dbf624436af6a957, unit: draw_areas}
@@ -956,7 +956,7 @@ functions:
   - {addr: 0x80129b14, size: 16, name: menu_window_set_scale_step, hash: 7b9f925f5e6d3828, unit: window_state}
   - {addr: 0x80129b24, size: 16, name: menu_window_get_scale_step, hash: c135caf12190d2f9, unit: window_state}
   - {addr: 0x80129b34, size: 56, name: menu_opcode_16_advance_window_scale_step, hash: 1258601e93a9f653, unit: window_state}
-  - {addr: 0x80129b6c, size: 16, name: gfx_get_draw_color, hash: 3e15f7d69ea12f45, unit: menu_page_scroll_input}
+  - {addr: 0x80129b6c, size: 16, name: menu_gfx_get_draw_color, hash: 3e15f7d69ea12f45, unit: menu_page_scroll_input}
   - {addr: 0x80129b7c, size: 368, name: menu_scroll_list_by_page, hash: 6d4d2dd3c505b695, unit: menu_page_scroll_input}
   - {addr: 0x80129cec, size: 352, name: menu_input_read_page_scroll_direction, hash: c4407d3709b24d54, unit: menu_page_scroll_input}
   - {addr: 0x80129e4c, size: 576, name: menu_text_render_glyph_to_4bpp_image, hash: e04d67bb6ba765e7, source: src/world/text/glyph.c}
@@ -978,7 +978,7 @@ functions:
   - {addr: 0x8012ab78, size: 156, name: menu_managed_thread_start, hash: 173e583ff788d1fa, unit: managed_threads}
   - {addr: 0x8012ac14, size: 48, name: menu_managed_thread_start_at_selection, hash: 724f03b923a685b2, unit: managed_threads}
   - {addr: 0x8012ac44, size: 176, name: menu_thread_start_or_poll, hash: 6fe55bab499db1e1, unit: managed_threads}
-  - {addr: 0x8012acf4, size: 136, name: menu_start_help_text, hash: 81320b38525f9e10, unit: grid_cursor}
+  - {addr: 0x8012acf4, size: 136, name: help_start_text, hash: 81320b38525f9e10, unit: grid_cursor}
   - {addr: 0x8012ad7c, size: 876, name: menu_screen_update_grid_cursor, hash: ff5df891fe412867, unit: grid_cursor}
   - {addr: 0x8012b0e8, size: 204, name: formation_banner_countdown, hash: a4f6e9078373ee6e, unit: grid_cursor}
   - {addr: 0x8012b1b4, size: 28, name: bits_primary_init_reader, hash: 47c41004c3c859b3, unit: bit_streams}
@@ -1012,12 +1012,12 @@ functions:
   - {addr: 0x8012cfd4, size: 648, name: gfx_enqueue_gouraud_textured_quad, hash: 8cd3a294e9e6a1ef, source: src/lib/menu/graphics/gouraud_textured_quads.c}
   - {addr: 0x8012d25c, size: 228, name: menu_gfx_enqueue_draw_area, hash: e7bfa939d7f5fdf9, source: src/world/menu/draw_area_queue.c}
   - {addr: 0x8012d340, size: 216, name: menu_gfx_enqueue_draw_mode, hash: b3527d193a2cd310, source: src/lib/menu/graphics/draw_mode.c}
-  - {addr: 0x8012d418, size: 60, name: screen_get_fade_state, hash: d7f4e2f99b4809ad, unit: fades}
-  - {addr: 0x8012d454, size: 56, name: screen_start_fade_in, hash: 037c6ba8ccc70ed9, unit: fades}
-  - {addr: 0x8012d48c, size: 52, name: screen_start_fade_out, hash: 61d9a6f4f5d1e06f, unit: fades}
-  - {addr: 0x8012d4c0, size: 252, name: screen_update_fade_in, hash: 7d8455e9bcfd1afd, unit: fades}
-  - {addr: 0x8012d5bc, size: 272, name: screen_update_fade_out, hash: 753f272aebcc4ac0, unit: fades}
-  - {addr: 0x8012d6cc, size: 16, name: screen_set_fade_disabled, hash: 2813bcbe9b7eee93, unit: fades}
+  - {addr: 0x8012d418, size: 60, name: fade_menu_get_state, hash: d7f4e2f99b4809ad, unit: fades}
+  - {addr: 0x8012d454, size: 56, name: fade_menu_start_in, hash: 037c6ba8ccc70ed9, unit: fades}
+  - {addr: 0x8012d48c, size: 52, name: fade_menu_start_out, hash: 61d9a6f4f5d1e06f, unit: fades}
+  - {addr: 0x8012d4c0, size: 252, name: fade_menu_update_in, hash: 7d8455e9bcfd1afd, unit: fades}
+  - {addr: 0x8012d5bc, size: 272, name: fade_menu_update_out, hash: 753f272aebcc4ac0, unit: fades}
+  - {addr: 0x8012d6cc, size: 16, name: fade_menu_set_disabled, hash: 2813bcbe9b7eee93, unit: fades}
   - {addr: 0x8012d6dc, size: 48, name: gfx_load_image_and_wait, hash: be3db739ba4a6ec6, unit: gfx_image_transfer_wait}
   - {addr: 0x8012d70c, size: 48, name: gfx_store_image_and_wait, hash: 42b445a1713fca16, unit: gfx_image_transfer_wait}
   - {addr: 0x8012d73c, size: 60, name: gfx_move_image_and_wait, hash: 2dee44c691484772, source: src/lib/menu/graphics/image_move.c}
@@ -1122,28 +1122,28 @@ functions:
   - {addr: 0x80136df4, size: 188, name: return_equipped_item, hash: f5b6d25866fa6472, unit: shop_fitting}
   - {addr: 0x80136eb0, size: 380, name: remove_trial_item, hash: 6fcbea08f09b460d, unit: shop_fitting}
   - {addr: 0x8013702c, size: 208, name: commit_fitting_purchase, hash: 55f25e1a3ba9af3a, unit: shop_fitting}
-  - {addr: 0x801370fc, size: 636, name: fur_shop_update_menu, hash: 825ee82e8fe74737, unit: fur_shop}
+  - {addr: 0x801370fc, size: 636, name: shop_fur_update_menu, hash: 825ee82e8fe74737, unit: fur_shop}
   - {addr: 0x80137378, size: 80, name: get_poached_stock, hash: ba51994016fdf9d4, unit: fur_shop}
-  - {addr: 0x801373c8, size: 504, name: fur_shop_sell_update_list, hash: 201e5617bd991763, unit: fur_shop}
-  - {addr: 0x801375c0, size: 552, name: fur_shop_sell_update_confirm, hash: 1675a9a4a4b078f8, unit: fur_shop}
+  - {addr: 0x801373c8, size: 504, name: shop_fur_sell_update_list, hash: 201e5617bd991763, unit: fur_shop}
+  - {addr: 0x801375c0, size: 552, name: shop_fur_sell_update_confirm, hash: 1675a9a4a4b078f8, unit: fur_shop}
   - {addr: 0x801377e8, size: 484, name: update_sale_quantity, hash: 47b4894a88c1450f, unit: fur_shop}
   - {addr: 0x801379cc, size: 92, name: get_poached_price, hash: baee7df00299b04c, unit: fur_shop}
-  - {addr: 0x80137a28, size: 876, name: fur_shop_buy_update_list, hash: c941e19e101c6364, unit: fur_shop}
-  - {addr: 0x80137d94, size: 572, name: fur_shop_buy_update_confirm, hash: 5ed06b07187c01ba, unit: fur_shop}
+  - {addr: 0x80137a28, size: 876, name: shop_fur_buy_update_list, hash: c941e19e101c6364, unit: fur_shop}
+  - {addr: 0x80137d94, size: 572, name: shop_fur_buy_update_confirm, hash: 5ed06b07187c01ba, unit: fur_shop}
   - {addr: 0x80137fd0, size: 604, name: update_purchase_quantity, hash: e2b834949cb9e75b, unit: fur_shop}
-  - {addr: 0x8013822c, size: 60, name: fur_shop_buy_update_unit_preview, hash: fd59dc58a1646c66, unit: fur_shop}
-  - {addr: 0x80138268, size: 828, name: soldier_office_update_menu, hash: 59c669df532e38a5, unit: soldier_office}
-  - {addr: 0x801385a4, size: 300, name: soldier_office_hire_update_preview, hash: b7926f9f68017e74, unit: soldier_office}
-  - {addr: 0x801386d0, size: 356, name: soldier_office_hire_update_confirm, hash: 430bd6cd1b7c3751, unit: soldier_office}
-  - {addr: 0x80138834, size: 192, name: soldier_office_hire_update_name, hash: 94a7e89b7eed87a2, unit: soldier_office}
-  - {addr: 0x801388f4, size: 384, name: soldier_office_hire_update_fee, hash: 9070786158e1fe48, unit: soldier_office}
-  - {addr: 0x80138a74, size: 88, name: soldier_office_reopen_menu, hash: db888e392b1c17b9, unit: soldier_office}
-  - {addr: 0x80138acc, size: 8, name: get_rename_unit_marker, hash: d042b87232f554e5, unit: soldier_office}
-  - {addr: 0x80138ad4, size: 676, name: soldier_office_rename_update_unit, hash: fdb24ef50ba493d2, unit: soldier_office}
-  - {addr: 0x80138d78, size: 252, name: soldier_office_rename_update_name, hash: d7ec4424b05551b9, unit: soldier_office}
-  - {addr: 0x80138e74, size: 48, name: get_hire_fee, hash: 5dd62be68bf6fe37, unit: soldier_office}
-  - {addr: 0x80138ea4, size: 88, name: soldier_office_draw_fee, hash: 16f54220ab033331, unit: soldier_office}
-  - {addr: 0x80138efc, size: 96, name: soldier_office_draw_unit_count, hash: 7ef787e5aeb396d5, unit: soldier_office}
+  - {addr: 0x8013822c, size: 60, name: shop_fur_buy_update_unit_preview, hash: fd59dc58a1646c66, unit: fur_shop}
+  - {addr: 0x80138268, size: 828, name: office_update_menu, hash: 59c669df532e38a5, unit: office}
+  - {addr: 0x801385a4, size: 300, name: office_hire_update_preview, hash: b7926f9f68017e74, unit: office}
+  - {addr: 0x801386d0, size: 356, name: office_hire_update_confirm, hash: 430bd6cd1b7c3751, unit: office}
+  - {addr: 0x80138834, size: 192, name: office_hire_update_name, hash: 94a7e89b7eed87a2, unit: office}
+  - {addr: 0x801388f4, size: 384, name: office_hire_update_fee, hash: 9070786158e1fe48, unit: office}
+  - {addr: 0x80138a74, size: 88, name: office_reopen_menu, hash: db888e392b1c17b9, unit: office}
+  - {addr: 0x80138acc, size: 8, name: get_rename_unit_marker, hash: d042b87232f554e5, unit: office}
+  - {addr: 0x80138ad4, size: 676, name: office_rename_update_unit, hash: fdb24ef50ba493d2, unit: office}
+  - {addr: 0x80138d78, size: 252, name: office_rename_update_name, hash: d7ec4424b05551b9, unit: office}
+  - {addr: 0x80138e74, size: 48, name: get_hire_fee, hash: 5dd62be68bf6fe37, unit: office}
+  - {addr: 0x80138ea4, size: 88, name: office_draw_fee, hash: 16f54220ab033331, unit: office}
+  - {addr: 0x80138efc, size: 96, name: office_draw_unit_count, hash: 7ef787e5aeb396d5, unit: office}
   - {addr: 0x80138f5c, size: 552, name: name_entry_update_keyboard, hash: 2a80491df4406613, unit: name_entry}
   - {addr: 0x80139184, size: 1652, name: name_entry_run_screen, hash: 07948f925dd3889e, unit: name_entry}
   - {addr: 0x801397f8, size: 112, name: open_key_list, hash: da934ca0e9861fd7, unit: name_entry}
@@ -1164,10 +1164,10 @@ data:
   - {addr: 0x800eda00, name: g_system_work_buffer_1}
   - {addr: 0x800feff0, name: text_blit_glyph}
   - {addr: 0x800ff284, name: text_render_glyph_to_4bpp_image}
-  - {addr: 0x800ff3d4, name: menu_clear_render_buffer}
+  - {addr: 0x800ff3d4, name: mem_zero_words}
   - {addr: 0x800fff50, name: thread_yield}
-  - {addr: 0x80100188, name: mul_div_s64}
-  - {addr: 0x801002d8, name: fixed_cross_product_q12}
+  - {addr: 0x80100188, name: math_mul_div_s64}
+  - {addr: 0x801002d8, name: math_cross_product_q12}
   - {addr: 0x80100384, name: thread_call_on_main_stack}
   - {addr: 0x80115a00, name: g_movie_cd_stream_ring_buffer}
   - {addr: 0x8013a310, name: g_map_selected_tile_data}
@@ -1261,7 +1261,7 @@ data:
   - {addr: 0x80153314, name: g_formation_screen_active}
   - {addr: 0x80153318, name: g_menu_cursor_bob_hold}
   - {addr: 0x8015331c, name: g_menu_screen_dialog_waiting}
-  - {addr: 0x80153320, name: g_gfx_screen_fade}
+  - {addr: 0x80153320, name: g_fade_event_level}
   - {addr: 0x80153328, name: g_unit_panel_hide_numeric_values}
   - {addr: 0x8015332c, name: g_menu_overlay_state}
   - {addr: 0x8015332e, name: g_menu_transition_state}
@@ -1481,9 +1481,9 @@ data:
   - {addr: 0x80189eac, name: g_menu_screen_clear_rect}
   - {addr: 0x80189eb4, name: g_world_map_menu_scroll_direction}
   - {addr: 0x80189eb8, name: g_world_map_menu_scroll_threshold}
-  - {addr: 0x80189ec0, name: g_screen_color_red}
-  - {addr: 0x80189ec4, name: g_screen_color_green}
-  - {addr: 0x80189ec8, name: g_screen_color_blue}
+  - {addr: 0x80189ec0, name: g_menu_screen_brightness_red}
+  - {addr: 0x80189ec4, name: g_menu_screen_brightness_green}
+  - {addr: 0x80189ec8, name: g_menu_screen_brightness_blue}
   - {addr: 0x80189ecc, name: g_world_map_menu_groups}
   - {addr: 0x80189f60, name: g_menu_screen_allowed_buttons}
   - {addr: 0x80189f6c, name: s_roster_names_revision}
@@ -1889,8 +1889,8 @@ data:
   - {addr: 0x801950d8, name: g_shop_quantity_range}
   - {addr: 0x801950e4, name: g_shop_quantity_menu_data}
   - {addr: 0x8019515c, name: g_shop_main_menu_thread_data}
-  - {addr: 0x80195198, name: g_fur_shop_menu_thread_data}
-  - {addr: 0x801951d4, name: g_soldier_office_hire_menu_thread_data}
+  - {addr: 0x80195198, name: g_shop_fur_menu_thread_data}
+  - {addr: 0x801951d4, name: g_office_hire_menu_thread_data}
   - {addr: 0x8019523c, name: s_shop_step_handlers}
   - {addr: 0x801952ac, name: s_shop_background_rect}
   - {addr: 0x801952b4, name: s_shop_backdrop_tile_rect}
@@ -1934,27 +1934,27 @@ data:
   - {addr: 0x801957ea, name: g_shop_fitting_sell_equipped_cursor_anim}
   - {addr: 0x801957ec, name: g_shop_fitting_sell_equipped_cursor_point}
   - {addr: 0x801957f0, name: g_shop_fitting_sell_initialized}
-  - {addr: 0x801957f4, name: g_fur_shop_opened}
+  - {addr: 0x801957f4, name: g_shop_fur_opened}
   - {addr: 0x801957f8, name: g_shop_sell_confirm_script}
-  - {addr: 0x801958e3, name: g_fur_shop_sell_list_initialized}
-  - {addr: 0x801958e4, name: g_fur_shop_sale_message_wait}
-  - {addr: 0x801958e6, name: g_fur_shop_quantity_menu_running}
-  - {addr: 0x801958e8, name: g_fur_shop_purchase_menu_script}
-  - {addr: 0x801959de, name: g_fur_shop_purchase_list_initialized}
-  - {addr: 0x801959df, name: g_fur_shop_equip_check_pending}
-  - {addr: 0x801959e0, name: g_fur_shop_purchase_message_wait}
-  - {addr: 0x801959e2, name: g_fur_shop_purchase_result}
-  - {addr: 0x801959e4, name: g_soldier_office_hire_menu_initialized}
-  - {addr: 0x801959e8, name: g_soldier_office_hire_confirm_menu}
-  - {addr: 0x80195a24, name: g_soldier_office_hire_fee_confirm_menu}
-  - {addr: 0x80195a60, name: g_soldier_office_hire_preview_initialized}
-  - {addr: 0x80195a61, name: g_soldier_office_hire_confirm_message_wait}
-  - {addr: 0x80195a62, name: g_soldier_office_hire_name_entry_initialized}
-  - {addr: 0x80195a63, name: g_soldier_office_hire_fee_message_wait}
-  - {addr: 0x80195a64, name: g_soldier_office_rename_prompt_initialized}
-  - {addr: 0x80195a65, name: g_soldier_office_rename_name_entry_initialized}
-  - {addr: 0x80195a68, name: g_soldier_office_fee_script}
-  - {addr: 0x80195a8c, name: g_soldier_office_unit_count_script}
+  - {addr: 0x801958e3, name: g_shop_fur_sell_list_initialized}
+  - {addr: 0x801958e4, name: g_shop_fur_sale_message_wait}
+  - {addr: 0x801958e6, name: g_shop_fur_quantity_menu_running}
+  - {addr: 0x801958e8, name: g_shop_fur_purchase_menu_script}
+  - {addr: 0x801959de, name: g_shop_fur_purchase_list_initialized}
+  - {addr: 0x801959df, name: g_shop_fur_equip_check_pending}
+  - {addr: 0x801959e0, name: g_shop_fur_purchase_message_wait}
+  - {addr: 0x801959e2, name: g_shop_fur_purchase_result}
+  - {addr: 0x801959e4, name: g_office_hire_menu_initialized}
+  - {addr: 0x801959e8, name: g_office_hire_confirm_menu}
+  - {addr: 0x80195a24, name: g_office_hire_fee_confirm_menu}
+  - {addr: 0x80195a60, name: g_office_hire_preview_initialized}
+  - {addr: 0x80195a61, name: g_office_hire_confirm_message_wait}
+  - {addr: 0x80195a62, name: g_office_hire_name_entry_initialized}
+  - {addr: 0x80195a63, name: g_office_hire_fee_message_wait}
+  - {addr: 0x80195a64, name: g_office_rename_prompt_initialized}
+  - {addr: 0x80195a65, name: g_office_rename_name_entry_initialized}
+  - {addr: 0x80195a68, name: g_office_fee_script}
+  - {addr: 0x80195a8c, name: g_office_unit_count_script}
   - {addr: 0x80195ad0, name: g_menu_screen_text_name_entry_keys_data}
   - {addr: 0x80195ad8, name: g_name_entry_character_rows}
   - {addr: 0x80195b2c, name: g_name_entry_state_handlers}
@@ -2034,7 +2034,7 @@ data:
   - {addr: 0x801a3494, name: g_status_screen_frames}
   - {addr: 0x801a3d58, name: g_formation_ability_list_pages}
   - {addr: 0x801a63d8, name: g_menu_panel_fade_frames}
-  - {addr: 0x801a6650, name: g_fade_overlays}
+  - {addr: 0x801a6650, name: g_fade_event_tiles}
   - {addr: 0x801a6688, name: g_menu_active_menu}
   - {addr: 0x801a668c, name: g_crystal_pickup_panel_parameter}
   - {addr: 0x801a6690, name: g_script_next_event_id}
@@ -2224,7 +2224,7 @@ data:
   - {addr: 0x801ca6f8, name: s_tutorial_repeat_counters}
   - {addr: 0x801ca738, name: s_tutorial_previous_input}
   - {addr: 0x801ca73c, name: g_menu_selection_values}
-  - {addr: 0x801ca75c, name: g_screen_fade_tile_color}
+  - {addr: 0x801ca75c, name: g_fade_menu_tile_color}
   - {addr: 0x801ca760, name: s_screen_fade_intensity}
   - {addr: 0x801ca764, name: g_tutorial_wait_time_remaining}
   - {addr: 0x801ca768, name: g_tutorial_state}
@@ -2285,22 +2285,22 @@ data:
   - {addr: 0x801cd0b4, name: g_shop_fitting_sell_equipped_slot}
   - {addr: 0x801cd0b8, name: g_shop_fitting_sell_equipped_result_shown}
   - {addr: 0x801cd0bc, name: g_shop_fitting_sell_step}
-  - {addr: 0x801cd0c0, name: g_fur_shop_waiting_message}
-  - {addr: 0x801cd0c4, name: g_fur_shop_has_secret_hunt}
-  - {addr: 0x801cd0c8, name: g_fur_shop_has_poached_stock}
+  - {addr: 0x801cd0c0, name: g_shop_fur_waiting_message}
+  - {addr: 0x801cd0c4, name: g_shop_fur_has_secret_hunt}
+  - {addr: 0x801cd0c8, name: g_shop_fur_has_poached_stock}
   - {addr: 0x801cd0cc, name: g_shop_sell_quantity_item}
   - {addr: 0x801cd0d0, name: g_shop_sell_total_shown}
-  - {addr: 0x801cd0d8, name: g_fur_shop_purchase_price}
-  - {addr: 0x801cd0dc, name: g_fur_shop_purchase_item}
-  - {addr: 0x801cd0e0, name: g_fur_shop_purchase_confirm_shown}
+  - {addr: 0x801cd0d8, name: g_shop_fur_purchase_price}
+  - {addr: 0x801cd0dc, name: g_shop_fur_purchase_item}
+  - {addr: 0x801cd0e0, name: g_shop_fur_purchase_confirm_shown}
   - {addr: 0x801cd0e4, name: s_fur_shop_access_granted}
-  - {addr: 0x801cd0ec, name: g_soldier_office_hire_unread_flag_1}
-  - {addr: 0x801cd0f0, name: g_soldier_office_hire_result_shown}
-  - {addr: 0x801cd0f4, name: g_soldier_office_hire_unread_flag_2}
-  - {addr: 0x801cd0f8, name: g_soldier_office_rename_error_shown}
-  - {addr: 0x801cd0fc, name: g_soldier_office_unit_count}
-  - {addr: 0x801cd100, name: s_soldier_office_entered_name}
-  - {addr: 0x801cd104, name: s_soldier_office_fee}
+  - {addr: 0x801cd0ec, name: g_office_hire_unread_flag_1}
+  - {addr: 0x801cd0f0, name: g_office_hire_result_shown}
+  - {addr: 0x801cd0f4, name: g_office_hire_unread_flag_2}
+  - {addr: 0x801cd0f8, name: g_office_rename_error_shown}
+  - {addr: 0x801cd0fc, name: g_office_unit_count}
+  - {addr: 0x801cd100, name: s_office_entered_name}
+  - {addr: 0x801cd104, name: s_office_fee}
   - {addr: 0x801cd108, name: g_name_entry_keyboard_last_state}
   - {addr: 0x801cd10c, name: g_name_entry_last_state}
   - {addr: 0x801cd110, name: g_name_entry_input_delay}

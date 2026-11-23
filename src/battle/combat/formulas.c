@@ -1,15 +1,15 @@
 /* Implement the ability-formula catalog: weapon and magic attacks, recovery, stat and status changes, equipment skills
  * and transformations. */
 
-#include "fft/ability.h"
-#include "fft/action.h"
-#include "fft/character_identity.h"
-#include "fft/formula.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/reaction.h"
-#include "fft/status.h"
-#include "fft/unit.h"
+#include "fft/battle/action.h"
+#include "fft/battle/formula.h"
+#include "fft/battle/reaction.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/status.h"
 #include "psx/types.h"
 
 /* Hit chance F(XA+YA)% for magic on allies: Magic Attack Up and zodiac

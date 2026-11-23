@@ -2,8 +2,8 @@
  * implementation with different optimization profiles; OPEN uses the event
  * helpers and supplies its own card-status polling bodies. */
 
-#include "fft/memcard.h"
-#include "fft/save.h"
+#include "fft/sys/memcard.h"
+#include "fft/world/save.h"
 #include "psx/kernel.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"

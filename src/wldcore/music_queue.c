@@ -3,9 +3,9 @@
  * enqueue slot changes; frame polling advances them until the selected track
  * is ready. The leading sound-effect wrapper plays immediately. */
 
-#include "fft/file.h"
-#include "fft/music.h"
-#include "fft/sound.h"
+#include "fft/sys/file.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

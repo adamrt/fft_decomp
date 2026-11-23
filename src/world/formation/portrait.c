@@ -1,10 +1,10 @@
 /* Resolve a roster unit's sprite sheet to a WLDFACE portrait and texture its quad. */
 
-#include "fft/portrait.h"
-#include "fft/character_identity.h"
-#include "fft/job.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
+#include "fft/gfx/portrait.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

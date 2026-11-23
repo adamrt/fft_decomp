@@ -1,6 +1,6 @@
 /* SMD commands for tempo, channel articulation, SPU modes and envelopes. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libspu.h"
 #include "psx/types.h"
 

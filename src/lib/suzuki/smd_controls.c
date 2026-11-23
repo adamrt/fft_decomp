@@ -1,6 +1,6 @@
 /* Music playback controls, queries and snapshot requests. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/types.h"
 

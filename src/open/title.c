@@ -1,31 +1,31 @@
 /* The title controller stack carries the logo movies, title and sound
  * menus, and the new-game flow through Ramza’s name and birthday confirmation. */
 
-#include "fft/title.h"
-#include "fft/calendar.h"
-#include "fft/controller_stack.h"
-#include "fft/display_object.h"
-#include "fft/ending.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu_screen.h"
-#include "fft/movie.h"
-#include "fft/music.h"
-#include "fft/name_entry.h"
-#include "fft/option.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/prologue.h"
-#include "fft/save.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/front/title.h"
+#include "fft/front/controller_stack.h"
+#include "fft/front/ending.h"
+#include "fft/front/prologue.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/option.h"
+#include "fft/party/name_entry.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/movie.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
+#include "fft/text/text.h"
+#include "fft/world/calendar.h"
+#include "fft/world/save.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libc.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
@@ -58,7 +58,7 @@ static controller_handler_t s_controller_handlers[13] = {
     update_birthday_menu,
     update_birthday_confirmation,
     music_test_update_menu,
-    controller_update_text_message,
+    controller_stack_update_text_message,
     movie_update_fftend,
     ending_update_script,
     movie_update_title_demo,
@@ -91,7 +91,7 @@ void title_start_sequence(s32 use_alternate) {
 /* Run the current controller c: handler
  * g_controller_handlers[g_controller_handler_indices[c - 1]] on record
  * g_controller_records[c - 1]. */
-void controller_dispatch_current(void) {
+void controller_stack_dispatch_current(void) {
     s32 controller = g_controller_depth;
 
     s_controller_handlers[g_controller_handler_indices[controller - 1]](&g_controller_records[controller - 1]);
@@ -240,7 +240,7 @@ void title_push_menu(s32 argument) {
     position->y = 0x58;
 
     if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED) {
-        gfx_start_overlay_fade_out(0x20);
+        fade_tile_start_out(0x20);
     }
 
     controller = g_controller_depth;
@@ -295,7 +295,7 @@ static void update_main_menu(controller_record_t* record) {
     s32 end_frame;
     s32 cd_mix_level;
 
-    if (g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) {
+    if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
         return;
     }
 
@@ -341,7 +341,7 @@ static void update_main_menu(controller_record_t* record) {
     }
 
     if (state->state == TITLE_STATE_DEMO_MOVIE) {
-        if (g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) {
+        if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
             return;
         }
         /* Drop the menu's six render records and this controller, then play the next of three demos. */
@@ -392,7 +392,7 @@ static void update_main_menu(controller_record_t* record) {
     if (flags & SYSTEM_RUNTIME_FLAG_INPUT_DISABLED) {
         s32 cursor;
 
-        if (g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) {
+        if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
             return;
         }
 
@@ -413,7 +413,7 @@ static void update_main_menu(controller_record_t* record) {
 
         case TITLE_MENU_CONTINUE:
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
-            new_game_init_party(PARTY_NEW_GAME_EMPTY, 1);
+            title_prepare_new_game(PARTY_NEW_GAME_EMPTY, 1);
             DrawSync(0);
             VSync(0);
             SetDispMask(1);
@@ -444,7 +444,7 @@ static void update_main_menu(controller_record_t* record) {
             return;
 
         case TITLE_MENU_TUTORIAL:
-            new_game_init_party(PARTY_NEW_GAME_RAMZA, 1);
+            title_prepare_new_game(PARTY_NEW_GAME_RAMZA, 1);
             g_title_result = TITLE_RESULT_TUTORIAL;
             g_display_object_animated_count -= 6;
             g_display_object_queue_count -= 6;
@@ -460,8 +460,8 @@ static void update_main_menu(controller_record_t* record) {
     state->idle_timer++;
     if (!(flags & SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) && state->idle_timer >= 0x259) {
         state->state = TITLE_STATE_DEMO_MOVIE;
-        g_gfx_overlay_fade.ot_index = 2;
-        gfx_start_overlay_fade_in(0x20);
+        g_fade_tile.ot_index = 2;
+        fade_tile_start_in(0x20);
         g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         return;
     }
@@ -477,8 +477,8 @@ static void update_main_menu(controller_record_t* record) {
         case TITLE_MENU_NEW_GAME:
         case TITLE_MENU_CONTINUE:
         case TITLE_MENU_TUTORIAL:
-            g_gfx_overlay_fade.ot_index = 2;
-            gfx_start_overlay_fade_in(0x20);
+            g_fade_tile.ot_index = 2;
+            fade_tile_start_in(0x20);
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;
         case TITLE_MENU_SOUND:
@@ -636,7 +636,7 @@ void prologue_start(void) {
     file_request_opnbk_image(1, g_file_destination);
     file_wait_pending();
     prologue_init_sequence(12, 3, g_prologue_entries);
-    gfx_start_overlay_fade_out(0x20);
+    fade_tile_start_out(0x20);
 
     controller = g_controller_depth;
     g_controller_records[controller].new_game.step = 0;
@@ -662,7 +662,7 @@ static void update_new_game(controller_record_t* record) {
     party_unit_t* party;
 
     if (state->step == 5) {
-        if (g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) {
+        if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
             return;
         }
         music_unload_current_scenario();
@@ -672,7 +672,7 @@ static void update_new_game(controller_record_t* record) {
     }
 
     if (state->step == 4) {
-        new_game_init_party(PARTY_NEW_GAME_RAMZA, 0);
+        title_prepare_new_game(PARTY_NEW_GAME_RAMZA, 0);
         menu_screen_init_open_text();
 
         /* Copy the displayed buffer into the frame image, then into the draw buffer. */
@@ -713,7 +713,7 @@ static void update_new_game(controller_record_t* record) {
         return;
     }
 
-    if (g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) {
+    if (g_fade_tile.flags & FADE_TILE_ACTIVE) {
         return;
     }
     if (prologue_update() != 0) {
@@ -1049,8 +1049,7 @@ static void update_birthday_confirmation(controller_record_t* record) {
     party_unit_t* member;
     u32 buttons;
 
-    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_INPUT_DISABLED)
-        && !(g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE)) {
+    if ((g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_INPUT_DISABLED) && !(g_fade_tile.flags & FADE_TILE_ACTIVE)) {
         /* Release both birthday controllers and their six render records. */
         g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         music_unload_current_scenario();
@@ -1079,7 +1078,7 @@ static void update_birthday_confirmation(controller_record_t* record) {
             member->zodiac
                 = ((value & (PARTY_BIRTHDAY_DAY_HIGH_BIT_MASK << 8)) >> 8) | ((month - 1) << PARTY_ZODIAC_SHIFT);
             music_set_target_volume(0, 0x60);
-            gfx_start_overlay_fade_in(0x20);
+            fade_tile_start_in(0x20);
             g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
             return;
         }

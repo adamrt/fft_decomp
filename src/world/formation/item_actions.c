@@ -1,25 +1,26 @@
 /* The item action and sort order menus, units equipping the selected item, and the row window and cursor. */
 
-#include "fft/equipment.h"
-#include "fft/formation.h"
-#include "fft/formation_item.h"
-#include "fft/gfx.h"
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/equipment.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_item.h"
+#include "fft/party/item_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -149,8 +150,8 @@ s8 item_list_update_action_menu(void) {
                         g_text_section_pointers[TEXT_SECTION_ITEM_NAMES],
                         (menu_instruction_t*)g_formation_item_list_window_script);
                     menu_window_set_scale_step(10);
-                    item_rebuild_category_list(g_menu_selected_slot);
-                    item_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
+                    item_list_rebuild_category(g_menu_selected_slot);
+                    item_list_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
                         &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
                     g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 }
@@ -222,7 +223,7 @@ s8 item_list_update_action_menu(void) {
         } else {
             result = 0;
         }
-        item_build_stat_preview(result, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_list_build_stat_preview(result, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_status_display_thread_params.redraw_request = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
@@ -249,7 +250,7 @@ s8 item_list_update_sort_menu(void) {
     if (g_formation_item_sort_order_initialized == 0) {
         g_formation_item_category_icon_strip_a.selected_index = 0;
         g_formation_item_category_icon_strip_b.selected_index = 0;
-        item_load_type_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
+        item_list_load_sort_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
@@ -282,7 +283,7 @@ s8 item_list_update_sort_menu(void) {
         }
         g_formation_item_category_strip_text_ids[0] = selected;
         menu_screen_reset_selection_results();
-        item_store_type_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
+        item_list_store_sort_order(g_menu_selected_slot + 1, g_formation_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_formation_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
@@ -295,11 +296,11 @@ s8 item_list_update_sort_menu(void) {
         equipment_build_item_list(g_unit_selected_index, g_menu_selected_slot + 0x81,
             g_menu_selected_slot != ITEM_MENU_TAB_OTHER ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        item_store_category_list(g_menu_selected_slot, g_item_list_entries);
+        item_list_store_category(g_menu_selected_slot, g_item_list_entries);
         menu_scrollable_list_init_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_window_set_scale_step(10);
-        item_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
+        item_list_build_stat_preview(g_item_list_entries[g_menu_list_selected_index],
             &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
@@ -383,7 +384,7 @@ void item_list_draw_tabs(s32 wide, s32 row, s32 mode) {
     drawing = &g_formation_item_category_tab_sprites[row];
     ((oriented_quad_t*)drawing)->position.x = x;
     ((oriented_quad_t*)drawing)->position.y = y - (row == 0);
-    menu_gfx_enqueue_oriented_textured_quad(drawing, gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
+    menu_gfx_enqueue_oriented_textured_quad(drawing, menu_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
     cursor = &g_formation_item_category_tab_cursor_sprite;
     cursor_x = x + 9;
     if (row == 3) {

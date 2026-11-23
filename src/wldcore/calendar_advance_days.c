@@ -1,9 +1,9 @@
 /* Advancing the calendar by days, with years, birthdays and ages, and proposition progress. */
 
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/proposition.h"
-#include "fft/script_variable.h"
+#include "fft/script/script_variable.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/proposition.h"
 #include "psx/types.h"
 
 extern calendar_date_t g_brave_story_birthday_table[];

@@ -2,7 +2,7 @@
  * note pitch and key-on/off masks. The waveform routines drive vibrato, tremolo
  * and pan modulation for both music and sound effects. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/types.h"
 
 /* Ordinary driver-status view; the transfer wait keeps its measured volatile view. */

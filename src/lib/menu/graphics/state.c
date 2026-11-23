@@ -1,9 +1,10 @@
 /* Menu drawing color, ordering-table index and palette selection. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_text.h"
 #include "psx/types.h"
 
 extern u16 g_menu_active_clut_back;
@@ -18,7 +19,7 @@ extern u16 g_menu_text_clut_3_mode1;
 /* WORLD owns its drawing-color setter; JOBSTTS does not link this accessor. */
 #if defined(FFT_EVENT_BUNIT) || defined(FFT_EVENT_EQUIP) || defined(FFT_EVENT_CARD)
 /* Set the menu text color. BUNIT accepts a null pointer; CARD and EQUIP do not check it. */
-void gfx_set_draw_color(const rgb24_t* color) {
+void menu_gfx_set_draw_color(const rgb24_t* color) {
 #    ifdef FFT_EVENT_BUNIT
     /* CARD and EQUIP dereference the color without this guard. */
     if (color == 0) {

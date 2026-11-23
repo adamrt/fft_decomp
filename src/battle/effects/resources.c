@@ -1,14 +1,14 @@
 /* Initialize the resident effect pools and allocate secondary-effect records and slots. */
 
-#include "fft/effect.h"
-#include "fft/effect_file.h"
-#include "fft/effect_model.h"
-#include "fft/effect_particle.h"
-#include "fft/effect_script.h"
-#include "fft/effect_secondary.h"
-#include "fft/effect_timeline.h"
-#include "fft/memory.h"
-#include "fft/system.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_file.h"
+#include "fft/effect/effect_model.h"
+#include "fft/effect/effect_particle.h"
+#include "fft/effect/effect_script.h"
+#include "fft/effect/effect_secondary.h"
+#include "fft/effect/effect_timeline.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/system.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

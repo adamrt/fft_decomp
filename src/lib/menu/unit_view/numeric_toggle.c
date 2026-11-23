@@ -1,8 +1,8 @@
 /* Starting or stopping the numeric panel thread. */
 
-#include "fft/menu_list.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Starts thread 12 on unit_panel_numbers_thread (parameter

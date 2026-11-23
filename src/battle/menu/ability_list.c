@@ -1,23 +1,24 @@
 /* The scrolling three-column ability list thread, with nested lists, blinking CLUTs and AT list previews. */
 
-#include "fft/ability_list.h"
-#include "fft/at_list.h"
-#include "fft/command.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_window.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/party/ability_list.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/command.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -179,7 +180,7 @@ void ability_list_scrolling_thread(void) {
         buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     }
 
-    menu_clear_render_buffer(buffer, window.source.w * window.source.h / 2);
+    mem_zero_words(buffer, window.source.w * window.source.h / 2);
     /* Clamp the saved scroll position; a cursor beyond the visible rows restarts at the top. */
     row_offset = layout->row_offset;
     if (layout->columns.hidden_rows < row_offset) {
@@ -298,7 +299,7 @@ void ability_list_scrolling_thread(void) {
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
                 buffer = menu_alloc_memory(window.source.w * 8);
-                menu_clear_render_buffer(buffer, window.source.w * 8);
+                mem_zero_words(buffer, window.source.w * 8);
                 g_menu_window_text_pen.stride = window.source.w;
 
                 for (column = 0; column < 3; column++) {
@@ -312,18 +313,17 @@ void ability_list_scrolling_thread(void) {
                         g_menu_window_text_pen.color = 0x44444444;
                     }
                     if (layout->columns.mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                        menu_display_text_entry(
+                        text_render_entry_to_image(
                             layout->columns.text_ids[column][index], buffer, &g_menu_window_text_pen);
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
                         if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
                             && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                             menu_text_set_origin(layout->columns.x[column] + 0x50, 0);
-                            menu_display_text_entry(
+                            text_render_entry_to_image(
                                 TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                         }
                     } else if (layout->columns.mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                        menu_display_number_entry(
-                            layout->columns.text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
+                        text_draw_number(layout->columns.text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     } else if (layout->columns.mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
                         if ((column == 2 || (column == 1 && layout->columns.mode[2] == MENU_TEXT_COLUMN_HIDDEN))
                             && layout->columns.text_ids[column][index] >= 0
@@ -331,16 +331,16 @@ void ability_list_scrolling_thread(void) {
                             && (g_event_work->ability_list.skill_ct[index] == 0xFF
                                 || g_event_work->ability_list.skill_ct[index] == 0)) {
                             g_menu_window_text_pen.rect.y += 2;
-                            menu_draw_charge_time_now(buffer, &g_menu_window_text_pen);
+                            text_draw_charge_time_now(buffer, &g_menu_window_text_pen);
                         } else {
                             value = layout->columns.text_ids[column][index];
                             if (value & 0x7FF) {
                                 if ((value & 0x7FF) >= 100) {
                                     g_menu_text_palette_offset = 0;
                                     g_menu_window_text_pen.rect.x += 3;
-                                    menu_display_text_entry(TEXT_ID_INFINITY, buffer, &g_menu_window_text_pen);
+                                    text_render_entry_to_image(TEXT_ID_INFINITY, buffer, &g_menu_window_text_pen);
                                 } else {
-                                    menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
+                                    text_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
                                 }
                             }
                         }

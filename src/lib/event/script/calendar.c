@@ -1,6 +1,6 @@
 /* Store the packed month and day flags written by the event UnlockDate instruction. */
 
-#include "fft/script.h"
+#include "fft/script/script.h"
 #include "psx/types.h"
 
 /* Set or clear one flag in a 32-bit-word bitmap. */

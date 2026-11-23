@@ -1,6 +1,6 @@
 /* World-map save records address flags as bits in arrays of 32-bit words. */
 
-#include "fft/bits.h"
+#include "fft/sys/bits.h"
 #include "psx/types.h"
 
 /* Set (nonzero `set`) or clear bit `index` of a 32-bit word array. */

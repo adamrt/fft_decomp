@@ -1,13 +1,13 @@
 /* Item lists and the Formation roster apply the player's ordered sort keys while preserving the original item and
  * roster tie rules. */
 
-#include "fft/formation.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/party_unit.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/party_unit.h"
+#include "fft/menu/menu.h"
+#include "fft/party/formation.h"
+#include "fft/party/item_list.h"
+#include "fft/party/unit_panel.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -31,7 +31,7 @@ static s8 s_sort_field_indices[12] = { offsetof(formation_unit_t, identity.roste
  * evade, 5 owned plus equipped count; keys other than 0 sort descending.
  * The magic-evade key reads 0 for the left weapon but the weapon's evade for
  * the right one; the target has this asymmetry. */
-void item_sort_id_list(s32 mode, s16* list) {
+void item_list_sort(s32 mode, s16* list) {
     s8 counts[0x100];
     s32 count;
     s32 i;
@@ -91,7 +91,7 @@ void item_sort_id_list(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
                     key_a = g_item_primary_data[item_a].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
-                    key_a = item_get_ranking_value(item_a);
+                    key_a = item_list_get_ranking_value(item_a);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_a < ITEM_ID_THROWABLE_FIRST) {
                         key_a = g_item_weapon_data[g_item_primary_data[item_a].secondary_data_id].evade;
@@ -124,7 +124,7 @@ void item_sort_id_list(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
                     key_b = g_item_primary_data[item_b].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
-                    key_b = item_get_ranking_value(item_b);
+                    key_b = item_list_get_ranking_value(item_b);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_b < ITEM_ID_THROWABLE_FIRST) {
                         key_b = g_item_weapon_data[g_item_primary_data[item_b].secondary_data_id].evade;

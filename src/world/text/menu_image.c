@@ -1,11 +1,12 @@
 /* Rendering a text entry glyph by glyph into a menu window image, with its commands and numbers. */
 
-#include "fft/gfx.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/script_variable.h"
-#include "fft/text.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_text.h"
+#include "fft/script/script_variable.h"
+#include "fft/text/text.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -19,7 +20,7 @@
  * Numbers (0xE4/0xE6) are drawn one digit per 6-pixel column. Indexing the
  * divisor table inside the digit loop, rather than walking a pointer, is
  * what gives the target's strength-reduced pointer and register choice. */
-void menu_display_text(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text) {
+void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8* text) {
     party_unit_t* party;
     const u8* cursor;
     s32 i;

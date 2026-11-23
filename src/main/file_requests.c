@@ -1,8 +1,8 @@
 /* Starting an asynchronous CD read on a load descriptor, pausing the drive and resetting the CD library. */
 
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/system.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/system.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

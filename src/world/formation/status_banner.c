@@ -1,20 +1,21 @@
 /* The Formation status banner: portraits, identity text, gauges and animated status panels. */
 
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/portrait.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/formation.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -147,7 +148,7 @@ void unit_panel_banner_thread(void) {
     shake = 0;
 
     /* Build the summary packets once, then copy them for the second frame buffer. */
-    menu_numeric_frame_init(&g_menu_portrait_origin, &editor->numeric_frame);
+    unit_panel_init_numeric_frame(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -182,7 +183,7 @@ void unit_panel_banner_thread(void) {
     /* The same for the status panel packets. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_numeric_frame_init(&g_formation_status_panel_origin, &panel->numeric_frame);
+    unit_panel_init_numeric_frame(&g_formation_status_panel_origin, &panel->numeric_frame);
     menu_init_sprite_array(panel->sprites, 7, MENU_CLUT_NORMAL);
     menu_init_default_poly_ft4(&panel->portrait);
     text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel->sprites, 0);
@@ -255,8 +256,8 @@ void unit_panel_banner_thread(void) {
 
         /* During cross-fade steps 4-9 portrait quad 0 is drawn at half its usual brightness. */
         if (dimmed != 0) {
-            menu_numeric_frame_set_dimmed_colors(&editor->numeric_frame);
-            menu_numeric_frame_set_dimmed_colors(&panel->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(&editor->numeric_frame);
+            unit_panel_set_numeric_frame_dimmed_colors(&panel->numeric_frame);
             if ((anim_state - 4) < 6U) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
             } else {
@@ -267,8 +268,8 @@ void unit_panel_banner_thread(void) {
             setRGB0(&editor->portrait[3], 0x20, 0x28, 0x38);
         } else {
             s32 shade;
-            menu_numeric_frame_set_normal_colors(&editor->numeric_frame);
-            menu_numeric_frame_set_normal_colors(&panel->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(&editor->numeric_frame);
+            unit_panel_set_numeric_frame_normal_colors(&panel->numeric_frame);
             if ((anim_state - 4) >= 6U) {
                 setRGB0(&editor->portrait[0], 0x80, 0x80, 0x80);
             } else {
@@ -423,36 +424,37 @@ void unit_panel_banner_thread(void) {
             } else {
                 number_entries[6].format = 2;
             }
-            menu_clear_render_buffer(number_pixels, 0x700);
+            mem_zero_words(number_pixels, 0x700);
             {
                 g_menu_window_text_pen.stride = 0x38;
                 if (g_formation_preview_stats_window_active == 0) {
-                    menu_draw_numeric_display_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
+                    text_draw_number_entries(number_pixels, number_entries, &g_menu_window_text_pen, 6);
                 } else {
                     menu_text_render_decimal_entry_list(number_pixels, &number_entries[10], &g_menu_window_text_pen, 1);
                     menu_text_render_decimal_entry_list(number_pixels, &number_entries[12], &g_menu_window_text_pen, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[11], &g_menu_window_text_pen, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[13], &g_menu_window_text_pen, 1);
-                    menu_draw_numeric_display_entries(number_pixels, &number_entries[4], &g_menu_window_text_pen, 2);
+                    text_draw_number_entries(number_pixels, &number_entries[11], &g_menu_window_text_pen, 1);
+                    text_draw_number_entries(number_pixels, &number_entries[13], &g_menu_window_text_pen, 1);
+                    text_draw_number_entries(number_pixels, &number_entries[4], &g_menu_window_text_pen, 2);
                 }
             }
             LoadImage(&rects[0], (u32*)number_pixels);
             stat_image_upper = number_pixels + 0x400;
             g_menu_window_text_pen.stride = 0x60;
-            menu_draw_numeric_display_entries(stat_image_upper, &number_entries[8], &g_menu_window_text_pen, 2);
+            text_draw_number_entries(stat_image_upper, &number_entries[8], &g_menu_window_text_pen, 2);
             LoadImage(&rects[1], (u32*)stat_image_upper);
             thread->redraw_request = 0;
 
             /* Name and job, then the large Brave, Faith and roster numbers. */
-            menu_clear_render_buffer(name_image, 0x580);
+            mem_zero_words(name_image, 0x580);
             g_menu_window_text_pen.stride = 0x58;
             menu_text_set_origin(0, 0);
-            menu_display_text_entry(identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_window_text_pen);
+            text_render_entry_to_image(
+                identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_window_text_pen);
             menu_text_set_origin(0, 0x10);
-            menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_window_text_pen);
+            text_render_entry_to_image(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_window_text_pen);
             LoadImage(&rects[2], (u32*)name_image);
 
-            menu_clear_render_buffer(number_images, sizeof(*number_images));
+            mem_zero_words(number_images, sizeof(*number_images));
             g_menu_window_text_pen.stride = 0x10;
             menu_text_set_origin(0, 0);
             text_draw_small_number_glyphs(
@@ -497,7 +499,7 @@ void unit_panel_banner_thread(void) {
                 }
                 gfx_draw_or_append_gpu_primitive(&editor->portrait[0]);
             }
-            menu_numeric_frame_submit(&editor->numeric_frame);
+            unit_panel_submit_numeric_frame(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
             panel_portrait = &panel->portrait;
@@ -511,7 +513,7 @@ void unit_panel_banner_thread(void) {
                 gfx_draw_or_append_gpu_primitive(&panel->sprites[i]);
             }
             gfx_draw_or_append_gpu_primitive(&panel->draw_mode_a);
-            menu_numeric_frame_submit(&panel->numeric_frame);
+            unit_panel_submit_numeric_frame(&panel->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
 

@@ -1,27 +1,27 @@
 /* Run the resident weapon-hit, projectile, charge and other secondary animations. */
 
-#include "fft/camera.h"
-#include "fft/effect.h"
-#include "fft/effect_emitter_data.h"
-#include "fft/effect_math.h"
-#include "fft/effect_model.h"
-#include "fft/effect_particle.h"
-#include "fft/effect_script.h"
-#include "fft/effect_secondary.h"
-#include "fft/effect_timeline.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/projectile.h"
-#include "fft/sound.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/projectile.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_emitter_data.h"
+#include "fft/effect/effect_math.h"
+#include "fft/effect/effect_model.h"
+#include "fft/effect/effect_particle.h"
+#include "fft/effect/effect_script.h"
+#include "fft/effect/effect_secondary.h"
+#include "fft/effect/effect_timeline.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -1778,7 +1778,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
                     }
                 }
             } else {
-                gfx_set_item_icon_sprite(&sprite, item);
+                item_set_icon_sprite(&sprite, item);
                 g_effect_secondary_current->slot_ids[0] = effect_slot_alloc();
                 slot = &g_effect_slots[g_effect_secondary_current->slot_ids[0]];
                 dst = &slot->quads[1];

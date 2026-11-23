@@ -1,26 +1,27 @@
 /* Draw the indicators around live units, including shadows, status bubbles, afterimages, held items and animated
  * action-result text. */
 
-#include "fft/action.h"
-#include "fft/animation.h"
-#include "fft/battle_state.h"
-#include "fft/camera.h"
-#include "fft/command.h"
-#include "fft/cursor.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/map.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/move_step.h"
-#include "fft/option.h"
-#include "fft/result.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/status.h"
-#include "fft/system.h"
-#include "fft/unit.h"
-#include "fft/vector.h"
+#include "fft/battle/action.h"
+#include "fft/battle/battle_state.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/command.h"
+#include "fft/battle/cursor.h"
+#include "fft/battle/move.h"
+#include "fft/battle/result.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/status.h"
+#include "fft/gfx/animation.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/option.h"
+#include "fft/sys/math.h"
+#include "fft/sys/system.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -915,7 +916,7 @@ void sprite_afterimage_shift_and_fill(map_unit_t* unit) {
 void sprite_item_display_set(map_unit_t* unit, u32 item_id) {
     SPRT data;
 
-    gfx_set_item_icon_sprite(&data, item_id);
+    item_set_icon_sprite(&data, item_id);
     unit->item_display->clut = data.clut;
     sprite_display_set_part(
         unit->item_display, 0, (16 - data.w) / 2 - 8, (16 - data.h) / 2 - 8, data.u0, data.v0, data.w, data.h, 0);

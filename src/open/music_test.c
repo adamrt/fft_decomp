@@ -1,24 +1,25 @@
 /* The hidden Music Test runs a WORLD list menu from OPEN and can open a text
  * description for the selected track while the title controller waits. */
 
-#include "fft/controller_stack.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/message.h"
-#include "fft/music.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/title.h"
+#include "fft/front/controller_stack.h"
+#include "fft/front/title.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/script/script.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -114,7 +115,7 @@ void music_test_open_menu(void) {
     four = 4;
     g_music_test_menu_otag_index = four;
     g_system_runtime_flags |= SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
-    gfx_start_overlay_fade_out(0x20);
+    fade_tile_start_out(0x20);
 
     controller = g_controller_depth;
     g_controller_records[controller].music_test.music_id = 0;
@@ -150,7 +151,7 @@ void music_test_update_menu(controller_record_t* record) {
     }
 
     if (state->step == MUSIC_TEST_STEP_OPEN) {
-        if (!(g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE)) {
+        if (!(g_fade_tile.flags & FADE_TILE_ACTIVE)) {
             extent.x = 0x15;
             extent.y = 0xB;
             origin.x = 0x8C;
@@ -164,7 +165,7 @@ void music_test_update_menu(controller_record_t* record) {
             state->step = MUSIC_TEST_STEP_IDLE;
         }
     } else if (state->step == MUSIC_TEST_STEP_FADE_OUT) {
-        if (!(g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE)) {
+        if (!(g_fade_tile.flags & FADE_TILE_ACTIVE)) {
             g_system_runtime_flags ^= SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
             file_request_opnbk_image(0, g_file_destination);
             file_wait_pending();
@@ -174,7 +175,7 @@ void music_test_update_menu(controller_record_t* record) {
     } else if (state->step == MUSIC_TEST_STEP_CLOSE) {
         if (thread_is_running(MUSIC_TEST_THREAD_SLOT_LIST) == 0) {
             state->step = MUSIC_TEST_STEP_FADE_OUT;
-            gfx_start_overlay_fade_in(0x20);
+            fade_tile_start_in(0x20);
         }
     } else if (state->delay != 0) {
         /* A queued change: once the old track has faded, release its slot and
@@ -263,7 +264,7 @@ static void start_text_message(s32 parameter, s32 use_world_text) {
 /* Handler 8: once the message thread has ended, give back the blocked buttons,
  * pop the controller and, with use_world_text, restore the text section pointers
  * start_text_message replaced. */
-void controller_update_text_message(controller_record_t* record) {
+void controller_stack_update_text_message(controller_record_t* record) {
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) != 0) {
         return;
     }

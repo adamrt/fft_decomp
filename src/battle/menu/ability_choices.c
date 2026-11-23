@@ -1,16 +1,15 @@
 /* Choose unit action menus and build their usable ability lists with MP costs and charge timing. */
 
-#include "fft/ability.h"
-#include "fft/at_list.h"
-#include "fft/command.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/reaction.h"
-#include "fft/skillset.h"
-#include "fft/status.h"
-#include "fft/turn.h"
-#include "fft/unit.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/command.h"
+#include "fft/battle/reaction.h"
+#include "fft/battle/turn.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/map/map.h"
 #include "psx/types.h"
 
 static s32 collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
@@ -32,7 +31,7 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
 /* The idle action menu for a unit id: get_unit_menu_id, with
  * the four TURN menus replaced by their RIDER_TURN variants for a rider. Returns
  * MENU_COMMAND_ID_NONE for an empty slot. */
-command_menu_e menu_get_action_menu_id(s32 battle_unit_id) {
+command_menu_e command_get_menu_id_by_battle_unit_id(s32 battle_unit_id) {
     battle_unit_t* unit = battle_unit_get_if_present(battle_unit_id);
     s32 menu;
 

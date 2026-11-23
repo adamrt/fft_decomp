@@ -1,8 +1,8 @@
 /* Save and animate the tint overlay drawn over the battle scene. */
 
-#include "fft/fade.h"
-#include "fft/gfx.h"
-#include "fft/system.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -45,7 +45,7 @@ void fade_tint_restore(void) {
  * overlay draw mode is rebuilt with the given semi-transparency mode for both
  * screen polarities.
  */
-void fade_tint_start_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration) {
+void fade_tint_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration) {
     s16 frames;
 
     if (duration != 0) {
@@ -76,7 +76,7 @@ void fade_tint_start_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 dura
  * left. The three-element array shape is what makes GCC hold the base
  * addresses of the current-color and accumulator arrays in registers for
  * element 0. */
-void fade_tint_update_fade(void) {
+void fade_tint_update(void) {
     u16 count = g_fade_tint_fade_frames;
     u16 remaining;
     u16 red;
@@ -106,7 +106,7 @@ void fade_tint_update_fade(void) {
 /* Queues the screen color-modulation overlay for this frame, the polygon and its
  * draw mode of the current screen polarity, unless all three components are 0.
  * `unused` reproduces the frame size. */
-void fade_tint_draw_overlay(void) {
+void fade_tint_draw(void) {
     char unused[24];
 
     if ((s_fade_tint.r | s_fade_tint.g | s_fade_tint.b) != 0) {

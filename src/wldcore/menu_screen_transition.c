@@ -1,21 +1,20 @@
 /* World-map menu transitions hide the parent list, prepare the destination screen and restore its presentation. */
 
-#include "fft/brave_story.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/formation.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message.h"
-#include "fft/message_box.h"
-#include "fft/music.h"
-#include "fft/script_variable.h"
-#include "fft/suzuki.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/world_map.h"
-#include "fft/zodiac.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/party/formation.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/music.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/tutorial.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -26,7 +25,7 @@ static void hide_parent_tutorial_menu(void);
 /* Push a screen transition into `destination_level` (a menu level type): clear the map, hide date, location label and
  * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
  * and start the zoom thread; param_a and param_b are kept for the new screen. */
-void menu_screen_transition_open(menu_stack_level_e destination_level, s32 param_a, s32 param_b) {
+void world_map_open_screen_transition(menu_stack_level_e destination_level, s32 param_a, s32 param_b) {
     u32* clear;
     s32 count;
     s32 i;
@@ -109,7 +108,7 @@ void menu_screen_transition_open(menu_stack_level_e destination_level, s32 param
         clear--;
     }
 
-    screen_set_brightness(0, 0, 0);
+    menu_screen_set_brightness(0, 0, 0);
     thread_start(WORLD_MAP_THREAD_SLOT_TRANSITION, zodiac_backdrop_thread);
     thread_set_parameters(WORLD_MAP_THREAD_SLOT_TRANSITION, 0, 0, 0);
     g_menu_stack_records[g_menu_stack_depth].menu_screen_transition.delay = 0x14;
@@ -182,7 +181,7 @@ static void hide_parent_tutorial_menu(void) {
  * treasure detail. The two tutorial entry lists first un-hide the parent
  * list's windows and frame.
  */
-void menu_screen_transition_update(menu_stack_record_t* level) {
+void world_map_update_screen_transition(menu_stack_record_t* level) {
     RECT rect;
 
     if (level->menu_screen_transition.delay == 0) {

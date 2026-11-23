@@ -1,13 +1,13 @@
 /* Frame-wait idle and the equipment menu row item counts and icon sources. */
 
-#include "fft/equipment.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_script.h"
-#include "fft/thread.h"
+#include "fft/game/item.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_script.h"
+#include "fft/party/equipment.h"
+#include "fft/party/item_list.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 static menu_icon_source_t s_menu_item_type_icon_source = { 0 };
@@ -48,9 +48,9 @@ s32 equipment_row_get_equipped_count(s32 row) {
 }
 
 /* Build the item-type icon source for one menu row. */
-menu_icon_source_t* item_build_type_icon_source(s32 index) {
+menu_icon_source_t* item_list_build_type_icon_source(s32 index) {
     menu_icon_source_t* out = &s_menu_item_type_icon_source;
-    item_build_type_icon(item_get_type(g_item_list_entries[index]), out);
+    item_list_build_type_icon(item_get_type(g_item_list_entries[index]), out);
     out->clut = g_menu_palette_clut;
     out->tpage = g_menu_cursor_texture_page;
     return out;
@@ -59,6 +59,6 @@ menu_icon_source_t* item_build_type_icon_source(s32 index) {
 /* Menu callback: the icon descriptor of the item in list row `row`, built in the shared
  * g_item_graphic_descriptor. The row's 16-bit entry holds the item id in its low byte. */
 menu_icon_source_t* equipment_row_get_icon_source(s32 row) {
-    item_build_icon_source(&s_item_graphic_descriptor, g_item_list_entries[row] & 0xff);
+    item_list_build_icon_source(&s_item_graphic_descriptor, g_item_list_entries[row] & 0xff);
     return &s_item_graphic_descriptor;
 }

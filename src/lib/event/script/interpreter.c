@@ -1,45 +1,44 @@
 /* The event script interpreter that runs as the event thread. */
 
-#include "fft/battle_state.h"
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/camera.h"
-#include "fft/character_identity.h"
-#include "fft/cursor.h"
-#include "fft/effect_script.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx_image.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/map_light.h"
-#include "fft/map_mesh.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu_input.h"
-#include "fft/menu_window.h"
-#include "fft/message.h"
-#include "fft/music.h"
-#include "fft/option.h"
-#include "fft/overlay.h"
-#include "fft/party.h"
-#include "fft/projectile.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_unit.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/status.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
-#include "fft/unit_view.h"
+#include "fft/battle/battle_state.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/cursor.h"
+#include "fft/battle/projectile.h"
+#include "fft/battle/unit_view.h"
+#include "fft/effect/effect_script.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/status.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map.h"
+#include "fft/map/map_light.h"
+#include "fft/map/map_mesh.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/tutorial.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -127,7 +126,7 @@ void script_execute_event(void) {
 
     thread_current_set_task(THREAD_TASK_EXECUTE_EVENT);
     if (tutorial_is_current_event() != 0) {
-        gfx_fade_in_screen_overlay();
+        fade_event_run_in();
     }
 
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
@@ -368,7 +367,7 @@ restart_script:
             thread_yield();
 
             if (tutorial_is_current_event() != 0) {
-                gfx_fade_out_screen_overlay();
+                fade_event_run_out();
                 g_game_options = g_game_options_saved;
                 script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                 battle_state_close_battle_to_world_enter(0x20);
@@ -812,7 +811,7 @@ restart_script:
         /* ---- EVTCHR and reserved VRAM slots ---- */
         else if (opcode == EVENT_OPCODE_LOAD_EVTCHR) {
             operand_2 = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_2, gfx_load_evtchr_thread);
+            thread_start(operand_2, sprite_sheet_load_evtchr_thread);
             thread_set_parameters(
                 operand_2, operand_1, script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 2), 0);
             thread_yield();

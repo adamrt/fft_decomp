@@ -1,18 +1,18 @@
 /* Show one battle unit's jobs and abilities until the player closes the
  * screen, withholding menu input while its transition or help text is active. */
 
-#include "fft/ability_list.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/job_list.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_selection.h"
-#include "fft/sound.h"
-#include "fft/status_screen.h"
-#include "fft/text.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/job_list.h"
+#include "fft/party/status_screen.h"
+#include "fft/sys/sound.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -132,7 +132,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     g_status_screen_previous_event_mode = g_menu_input_lock_mode;
     menu_input_update_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-        menu_start_help_text(3);
+        help_start_text(3);
     }
     if (g_status_screen_previous_event_mode != 0 && g_menu_input_lock_mode == 0) {
         text_restore_section_pointers();

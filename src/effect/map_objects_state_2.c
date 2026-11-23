@@ -1,8 +1,8 @@
 /* An effect callback that sets the map's 3D objects 1-6 to state 2 when its keyframe starts. */
 
-#include "fft/effect.h"
-#include "fft/effect_script.h"
-#include "fft/map.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_script.h"
+#include "fft/map/map.h"
 #include "psx/types.h"
 
 /* Callback handler: when its keyframe starts, sets the map's 3D objects 1-6 to

@@ -1,16 +1,16 @@
 /* The thread drawing a text screen's window frame until asked to stop. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -50,7 +50,7 @@ void menu_screen_window_frame_thread(void) {
     menu = (urect16_t*)thread_current_get_parameter_1();
     pixels = menu_alloc_memory(0x400);
 
-    menu_clear_render_buffer(pixels, 0x400);
+    mem_zero_words(pixels, 0x400);
     texture.w = 0x80;
     texture.h = 0x10;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);

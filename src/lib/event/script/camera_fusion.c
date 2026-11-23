@@ -1,16 +1,18 @@
 /* Interpolate the CameraFusion instruction tracks through their neighboring camera keys. */
 
-#include "fft/camera.h"
-#include "fft/menu.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_variable.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/battle/camera.h"
+#include "fft/menu/menu.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/math.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Set by the retail range tests in mul_div_s64 and fixed_cross_product_q12. */
+/* Set by the retail range tests in math_mul_div_s64 and math_cross_product_q12. */
 static s32 s_camera_arithmetic_overflow;
 
 /* CameraFusion key: cumulative Camera duration and component value. */
@@ -60,7 +62,7 @@ void camera_fusion_thread(void) {
     thread_current_set_task(THREAD_TASK_CAMERA);
     tracks = menu_alloc_memory(sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
     script = (u8*)thread_current_get_parameter_1();
-    menu_clear_render_buffer(tracks, sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
+    mem_zero_words(tracks, sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
 
     /* One key per CAMERA instruction up to the end marker, plus the starting key. */
     cursor = script;
@@ -277,14 +279,14 @@ static s32 step_track(camera_track_t* track, s32 component) {
         value_delta1 = value3 - value2;
         time_delta0 = time1 - time0;
 
-        divisor = fixed_cross_product_q12(value_delta0, time_delta1, time_delta0, value_delta1);
-        result = fixed_cross_product_q12(time_delta1, value2 - value0, value_delta1, time2 - time0);
+        divisor = math_cross_product_q12(value_delta0, time_delta1, time_delta0, value_delta1);
+        result = math_cross_product_q12(time_delta1, value2 - value0, value_delta1, time2 - time0);
         if (divisor != 0) {
-            span = mul_div_s64(time_delta0, result, divisor) + time0;   /* crossing time */
-            lead = mul_div_s64(value_delta0, result, divisor) + value0; /* crossing value */
+            span = math_mul_div_s64(time_delta0, result, divisor) + time0;   /* crossing time */
+            lead = math_mul_div_s64(value_delta0, result, divisor) + value0; /* crossing value */
             divisor = span - track->prev_time;
             if (divisor != 0) {
-                result = mul_div_s64(lead - track->prev_value, (track->frame * ONE) - track->prev_time, divisor)
+                result = math_mul_div_s64(lead - track->prev_value, (track->frame * ONE) - track->prev_time, divisor)
                     + track->prev_value;
                 track->prev_time = span;
                 track->prev_value = lead;
@@ -327,5 +329,5 @@ static s32 step_track(camera_track_t* track, s32 component) {
 
 /* Interpolate from start to end at frame / duration, returning a Q12 value. */
 static s32 interpolate_range_q12(s32 start, s32 end, s32 frame, s32 duration) {
-    return mul_div_s64(end - start, frame * ONE, duration) + (start * ONE);
+    return math_mul_div_s64(end - start, frame * ONE, duration) + (start * ONE);
 }

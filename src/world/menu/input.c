@@ -1,15 +1,15 @@
 /* Formation, shops and name entry share controller input with tutorial button injection. Edge and repeat masks are
  * withheld while text, Help or a screen transition owns the input. */
 
-#include "fft/input.h"
-#include "fft/fade.h"
-#include "fft/help.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
+#include "fft/sys/input.h"
+#include "fft/gfx/fade.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -191,7 +191,7 @@ void menu_input_update_message_state(void) {
             } else {
                 g_menu_screen_text_task_phase = 0;
             }
-        } else if (g_menu_screen_text_task_phase != 0 || screen_get_fade_state() != SCREEN_FADE_STATE_NONE) {
+        } else if (g_menu_screen_text_task_phase != 0 || fade_menu_get_state() != FADE_MENU_STATE_NONE) {
             g_menu_screen_text_task_phase = 0;
             menu_input_clear_state();
         }

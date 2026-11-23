@@ -1,6 +1,6 @@
 /* Storing a menu selection value to put a tab cursor on its first entry. */
 
-#include "fft/menu_selection.h"
+#include "fft/menu/menu_selection.h"
 #include "psx/types.h"
 
 /* WORLD's copy of BUNIT's and EQUIP's setter, beside the library's menu_selection_init_value. The list steps call it as

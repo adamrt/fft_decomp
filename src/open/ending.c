@@ -1,14 +1,14 @@
 /* Ending movie and scrolling credits: script dispatch, text records, XA audio and picture sequences. */
 
-#include "fft/ending.h"
-#include "fft/controller_stack.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/movie.h"
-#include "fft/sound.h"
-#include "fft/system.h"
+#include "fft/front/ending.h"
+#include "fft/front/controller_stack.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/movie.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
 #include "psx/libcd.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -129,10 +129,10 @@ static void init_script(void) {
     g_gfx_screen_environments[1].draw.ofs[0] = 0x100;
     g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
     g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
-    g_gfx_overlay_fade.rect.x = -0x100;
-    g_gfx_overlay_fade.rect.y = -0x78;
-    g_gfx_overlay_fade.rect.w = 0x200;
-    g_gfx_overlay_fade.rect.h = 0xf0;
+    g_fade_tile.rect.x = -0x100;
+    g_fade_tile.rect.y = -0x78;
+    g_fade_tile.rect.w = 0x200;
+    g_fade_tile.rect.h = 0xf0;
     g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 0;
     rect.x = 0;
     rect.y = 0;
@@ -887,8 +887,8 @@ static void ending_opcode_02_set_scroll_speed(s16* command) {
  * ordering-table entry 2. Four bytes. */
 static void ending_opcode_03_start_overlay_fade_out(s16* command) {
     command++;
-    g_gfx_overlay_fade.ot_index = 2;
-    gfx_start_overlay_fade_out(*command);
+    g_fade_tile.ot_index = 2;
+    fade_tile_start_out(*command);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
@@ -896,8 +896,8 @@ static void ending_opcode_03_start_overlay_fade_out(s16* command) {
  * ordering-table entry 2. Four bytes. */
 static void ending_opcode_04_start_overlay_fade_in(s16* command) {
     command++;
-    g_gfx_overlay_fade.ot_index = 2;
-    gfx_start_overlay_fade_in(*command);
+    g_fade_tile.ot_index = 2;
+    fade_tile_start_in(*command);
     g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 

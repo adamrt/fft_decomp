@@ -1,25 +1,25 @@
 /* The name entry keyboard, including frames, the key list, confirmed keys, the cursor, key application and the
  * confirmation menu. */
 
-#include "fft/name_entry.h"
-#include "fft/fade.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_window.h"
-#include "fft/message_box.h"
-#include "fft/sound.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/party/name_entry.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/formation.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -199,10 +199,10 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
     init_keyboard(list);
     g_name_entry_last_state = -1;
-    screen_set_fade_disabled(1);
+    fade_menu_set_disabled(1);
     menu_input_update_message_state();
     while (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
-        screen_update_fade_in();
+        fade_menu_update_in();
         system_frame_stub();
         g_gfx_poly_f3_count = 0;
         g_gfx_poly_ft3_count = 0;
@@ -299,7 +299,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     }
     menu_set_event_speed(2);
     menu_screen_reset_context();
-    screen_set_fade_disabled(0);
+    fade_menu_set_disabled(0);
     return s_name_entry_text;
 }
 

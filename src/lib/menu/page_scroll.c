@@ -1,7 +1,7 @@
 /* Scrolling a list by one visible page. */
 
-#include "fft/menu_script.h"
-#include "fft/sound.h"
+#include "fft/menu/menu_script.h"
+#include "fft/sys/sound.h"
 #include "psx/types.h"
 
 /* Move the list viewport by one visible page.

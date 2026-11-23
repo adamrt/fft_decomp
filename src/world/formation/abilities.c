@@ -1,31 +1,31 @@
 /* Formation sets, removes and learns abilities. Its job list supplies the selected job, JP and mastery values to the
  * separate ability-category list. */
 
-#include "fft/ability.h"
-#include "fft/ability_list.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/item_menu.h"
-#include "fft/job.h"
-#include "fft/job_list.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_selection.h"
-#include "fft/menu_window.h"
-#include "fft/message_box.h"
-#include "fft/option.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/item_list.h"
+#include "fft/party/job_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -274,7 +274,7 @@ static s32 update_removal_menu(void) {
         return 1;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_LEFT) {
-        formation_calculate_ability_movement_delta(&g_item_preview_stat_detail, s_formation_ability_remove_slots[4], 0);
+        formation_ability_calculate_movement_delta(&g_item_preview_stat_detail, s_formation_ability_remove_slots[4], 0);
         unit_panel_toggle_preview_stats_thread(1);
         g_formation_ability_remove_all_prompt_active = 1;
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
@@ -324,7 +324,7 @@ static s32 update_removal_menu(void) {
             movement_ability = s_formation_ability_remove_slots[4];
             if (movement_ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                 && movement_ability <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3) {
-                formation_calculate_ability_movement_delta(&g_item_preview_stat_detail, movement_ability, 0);
+                formation_ability_calculate_movement_delta(&g_item_preview_stat_detail, movement_ability, 0);
                 g_unit_panel_preview_stats_thread_params.redraw_request = 1;
                 preview = 1;
             }
@@ -535,7 +535,7 @@ static s32 update_slot_menu(void) {
                              ->detail.abilities[g_formation_ability_set_slot]
                        - ABILITY_ID_MOVEMENT_MOVE_PLUS_1)
                     < 6) {
-                formation_calculate_ability_movement_delta(&g_item_preview_stat_detail,
+                formation_ability_calculate_movement_delta(&g_item_preview_stat_detail,
                     g_formation_unit_pointers[g_unit_selected_index]->detail.abilities[g_formation_ability_set_slot],
                     g_item_list_entries[g_menu_list_selected_index]);
                 g_unit_panel_preview_stats_thread_params.redraw_request = 1;

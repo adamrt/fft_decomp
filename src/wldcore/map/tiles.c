@@ -1,10 +1,10 @@
 /* The captured world-map frame and the tile atlas, projection, culling and clamped map scrolling. */
 
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/gfx.h"
-#include "fft/location.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/world/calendar.h"
+#include "fft/world/location.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
@@ -81,7 +81,7 @@ void world_map_set_backdrop_mode(s32 capture) {
     world_map_draw_routes(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     world_map_project_dots();
     world_map_update_marker();
-    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,

@@ -1,28 +1,28 @@
 /* Activate deployment, native mini menus and the supervised unit-view panels. */
 
-#include "fft/at_list.h"
-#include "fft/command.h"
-#include "fft/deploy.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/map.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/music.h"
-#include "fft/option.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/script_unit.h"
-#include "fft/sound.h"
-#include "fft/status_screen.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit_panel.h"
-#include "fft/unit_view.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/command.h"
+#include "fft/battle/deploy.h"
+#include "fft/battle/unit_view.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/portrait.h"
+#include "fft/map/map.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/option.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/types.h"
 
 extern u16 g_unit_view_cached_battle_unit_id;
@@ -98,7 +98,7 @@ s32 deploy_open(void) {
     g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
     g_menu_panel_fade_intensity = 0;
     if (tutorial_is_current_event() != 0) {
-        g_gfx_screen_fade = 0xff;
+        g_fade_event_level = 0xff;
         g_game_options_saved = g_game_options;
         options = &g_game_options.fields;
         options->cursor_movement = GAME_CURSOR_MOVEMENT_TYPE_A;
@@ -108,7 +108,7 @@ s32 deploy_open(void) {
         options->target_flashing = GAME_OPTION_ON;
         options->show_unequippable_items = GAME_OPTION_ON;
     } else {
-        g_gfx_screen_fade = 0;
+        g_fade_event_level = 0;
     }
     deploy_find_fieldable_units();
     if (result != 0) {
@@ -127,7 +127,7 @@ s32 deploy_open(void) {
 }
 
 /* Start the mini menu when its slots are idle and menus are active. */
-void mini_menu_start(void) {
+void command_start_mini_menu(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0) {
         return;
     }
@@ -139,7 +139,7 @@ void mini_menu_start(void) {
     }
     g_command_current_id = MENU_COMMAND_ID_MINI_MENU;
     g_menu_thread_menu_data = g_command_idle_action_entries;
-    thread_start(THREAD_SLOT_MENU, mini_menu_thread);
+    thread_start(THREAD_SLOT_MENU, command_mini_menu_thread);
     thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[MENU_COMMAND_ID_MINI_MENU], 0, 0);
     g_thread_contexts[THREAD_SLOT_MENU].task_id = THREAD_TASK_MINI_MENU;
 }

@@ -1,11 +1,11 @@
 /* Pointing the scrollable list menu at a new entry list and resetting its render state. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_window.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_window.h"
 #include "psx/types.h"
 
 /* Point the scrollable list at a -1 terminated array of entry ids and their

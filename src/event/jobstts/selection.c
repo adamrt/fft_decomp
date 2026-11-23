@@ -1,6 +1,6 @@
 /* Remember and wrap JOBSTTS's horizontal menu selection. */
 
-#include "fft/status_screen.h"
+#include "fft/party/status_screen.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

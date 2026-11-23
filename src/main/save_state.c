@@ -1,12 +1,12 @@
 /* Resident script/save variables and their initial calendar, options and input timings. */
 
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/option.h"
-#include "fft/save.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/option.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/input.h"
+#include "fft/world/save.h"
 
 /* Resident event variables survive overlay loads and are preserved in save images. */
 s32 g_script_variable_storage[0x100];

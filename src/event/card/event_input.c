@@ -1,13 +1,13 @@
 /* The per-frame event input update, with edge and auto-repeat input and a yield. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

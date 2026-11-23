@@ -1,23 +1,25 @@
 /* Collect the battle's War Trophies and bonus money, show the paged item
  * list, and animate the gil reward after adding it to war funds. */
 
-#include "fft/after_battle.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/item.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_window.h"
-#include "fft/reward.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/battle/conditions.h"
+#include "fft/battle/reward.h"
+#include "fft/battle/war_trophy.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -258,16 +260,16 @@ void war_trophy_list_thread(void) {
 
                 image = menu_build_and_upload_window_frame_image(
                     0x50, 0x10, &g_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
-                menu_clear_render_buffer(image, 0x280);
+                mem_zero_words(image, 0x280);
                 g_menu_window_text_pen.stride = 0x50;
                 timer = 0;
                 if (s_war_trophy_entry_types[last] == WAR_TROPHY_ENTRY_ITEM) {
                     menu_text_set_origin(0, 0);
-                    menu_display_text_entry(
+                    text_render_entry_to_image(
                         s_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image, &g_menu_window_text_pen);
                 } else {
                     menu_text_set_origin(0, 0);
-                    menu_draw_large_number_glyphs(s_war_trophy_entry_values[last],
+                    text_draw_large_number_glyphs(s_war_trophy_entry_values[last],
                         text_count_decimal_digits(s_war_trophy_entry_values[last]), image, &g_menu_window_text_pen);
                 }
 
@@ -307,7 +309,7 @@ void war_trophy_list_thread(void) {
                     quad->y2 = get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
                     quad->x3 = get_column_x(i, s_war_trophy_entry_count) + 0x10;
                     quad->y3 = get_row_y(i - start, s_war_trophy_entry_count) + 0x10;
-                    gfx_set_item_icon_sprite(&sprite, s_war_trophy_entry_values[i]);
+                    item_set_icon_sprite(&sprite, s_war_trophy_entry_values[i]);
                     setUV4(quad, sprite.u0, sprite.v0, sprite.u0 + 0x10, sprite.v0, sprite.u0, sprite.v0 + 0x10,
                         sprite.u0 + 0x10, sprite.v0 + 0x10);
                     quad->clut = sprite.clut;

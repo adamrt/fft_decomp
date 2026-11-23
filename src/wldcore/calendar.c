@@ -1,14 +1,14 @@
 /* World-map calendar changes advance birthdays and pack dates into saved proposition records. */
 
-#include "fft/calendar.h"
-#include "fft/bits.h"
-#include "fft/brave_story.h"
-#include "fft/formation.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/proposition.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
+#include "fft/world/calendar.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/party/formation.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/bits.h"
+#include "fft/sys/sound.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/proposition.h"
 #include "psx/types.h"
 
 /* Twelve {month, day} pairs, Aries first. */

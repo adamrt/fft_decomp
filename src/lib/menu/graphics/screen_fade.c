@@ -1,10 +1,10 @@
 /* Overlay screen fade state and steps. */
 
-#include "fft/fade.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -16,7 +16,7 @@ static u8 s_gfx_decreasing_fade_active;
 
 /* Return the active screen fades as bits: 1 while fading in (decreasing), 2 while fading out
  * (increasing), 0 when neither runs. */
-s32 screen_get_fade_state(void) {
+s32 fade_menu_get_state(void) {
     s32 second = g_gfx_increasing_fade_active;
     s32 first = s_gfx_decreasing_fade_active;
 
@@ -25,13 +25,13 @@ s32 screen_get_fade_state(void) {
 }
 
 /* Start the fade from intensity 0xf0 down to zero (the screen fades in). */
-void screen_start_fade_in(void) {
+void fade_menu_start_in(void) {
     s_gfx_decreasing_fade_active = 1;
     g_gfx_fade_intensity = 0xf0;
 }
 
 /* Start the fade from intensity 0 up to full (the screen fades out). */
-void screen_start_fade_out(void) {
+void fade_menu_start_out(void) {
     g_gfx_increasing_fade_active = 1;
     g_gfx_fade_intensity = 0;
 }
@@ -39,7 +39,7 @@ void screen_start_fade_out(void) {
 /* Step the fade toward zero intensity by 8 per event-speed step and draw the
  * fade tile over the screen. Returns 0 on the call that reaches zero and
  * ends the fade, 1 otherwise (also when no fade is active). */
-s32 screen_update_fade_in(void) {
+s32 fade_menu_update_in(void) {
     s32 result = 1;
     s32 speed = menu_get_event_speed();
 
@@ -65,7 +65,7 @@ s32 screen_update_fade_in(void) {
 /* Step the fade to full intensity by 8 per event-speed step and draw the fade
  * tile over the screen. Returns 0 on the call that reaches 0xff and ends the
  * fade, 1 otherwise (also when no fade is active). */
-s32 screen_update_fade_out(void) {
+s32 fade_menu_update_out(void) {
     u32 stack_padding[4];
     s32 result = 1;
     s32 speed = menu_get_event_speed();

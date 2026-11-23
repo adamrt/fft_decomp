@@ -1,11 +1,11 @@
 /* Evaluate effect camera keyframes and start their angle, position and zoom moves. */
 
-#include "fft/camera.h"
-#include "fft/effect.h"
-#include "fft/effect_math.h"
-#include "fft/effect_timeline.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
+#include "fft/battle/camera.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_math.h"
+#include "fft/effect/effect_timeline.h"
+#include "fft/map/map.h"
+#include "fft/map/map_unit.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

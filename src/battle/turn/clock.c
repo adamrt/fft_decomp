@@ -2,15 +2,14 @@
  * and Mimes. The AT List predicts the same units and charged actions without
  * advancing the live clock; turn completion tracks movement and actions. */
 
-#include "fft/action.h"
-#include "fft/ai_decision.h"
-#include "fft/at_list.h"
-#include "fft/job.h"
-#include "fft/map_unit.h"
-#include "fft/skillset.h"
-#include "fft/status.h"
-#include "fft/turn.h"
-#include "fft/unit.h"
+#include "fft/battle/action.h"
+#include "fft/battle/ai.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/turn.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

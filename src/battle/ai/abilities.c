@@ -1,15 +1,14 @@
 /* Build each unit's usable AI ability list and derive its weapon and targeting properties. */
 
-#include "fft/ability.h"
-#include "fft/ai.h"
-#include "fft/ai_decision.h"
-#include "fft/command.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/map.h"
-#include "fft/skillset.h"
-#include "fft/status.h"
-#include "fft/unit.h"
+#include "fft/battle/ai.h"
+#include "fft/battle/command.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/map/map.h"
 #include "psx/types.h"
 
 static s32 add_usable_abilities_from_skillset(s32 unit_id, s32 skillset, s32 count);

@@ -1,9 +1,9 @@
 /* Swap EQUIP's drawing contexts and partition and initialize their
  * primitive pools for the equipment screen frame. */
 
-#include "fft/equipment.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/equipment.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

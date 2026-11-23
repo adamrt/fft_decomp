@@ -1,7 +1,7 @@
 /* A disc read through the main stack that yields every frame until the load has finished. */
 
-#include "fft/file.h"
-#include "fft/thread.h"
+#include "fft/sys/file.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Read `size` bytes from sector `lba` to `destination` through the main

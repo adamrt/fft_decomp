@@ -1,20 +1,21 @@
 /* The menu library's scrolling three-column text list thread and its page scrolling. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -70,7 +71,7 @@ static u8* update_text_page_scroll(menu_entry_t* entry, s32* row_offset, s32* ri
         return 0;
     }
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
-    menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
+    mem_zero_words(buffer, entry->inner_width * entry->inner_height / 2);
     menu_screen_draw_text_columns(entry, row_offset, buffer);
     *ring = 0;
     LoadImage(&rect, buffer);
@@ -206,7 +207,7 @@ void menu_screen_text_list_thread(void) {
 
     /* The first page's buffer is freed after the first yield, once its upload has run. */
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
-    menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
+    mem_zero_words(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_screen_window_frame_thread);
     thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
@@ -294,7 +295,7 @@ void menu_screen_text_list_thread(void) {
                 }
                 image_rect.h = 0x10;
                 buffer = menu_alloc_memory(0x800);
-                menu_clear_render_buffer(buffer, 0x800);
+                mem_zero_words(buffer, 0x800);
                 g_menu_window_text_pen.stride = entry->inner_width;
 
                 for (column = 0; column < 3; column++) {
@@ -307,11 +308,11 @@ void menu_screen_text_list_thread(void) {
                         g_menu_window_text_pen.color = 0x44444444;
                     }
                     if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                        menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
+                        text_render_entry_to_image(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
                     } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                        menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
+                        text_draw_number(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                        menu_draw_large_number_glyphs(
+                        text_draw_large_number_glyphs(
                             layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     }
                 }

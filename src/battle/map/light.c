@@ -1,7 +1,7 @@
 /* Save and adjust the battle map ambient light color. */
 
-#include "fft/gfx.h"
-#include "fft/map_light.h"
+#include "fft/gfx/gfx.h"
+#include "fft/map/map_light.h"
 #include "psx/types.h"
 
 static rgb24_t s_map_light_back_color_backup;

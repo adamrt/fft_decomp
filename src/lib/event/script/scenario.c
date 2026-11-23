@@ -1,13 +1,13 @@
 /* Evaluate scenario victory and defeat conditions against units, teams and the party.
  * Matching blocks choose the operation that finishes the current event. */
 
-#include "fft/battle_state.h"
-#include "fft/character_identity.h"
-#include "fft/map_unit.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_variable.h"
-#include "fft/unit.h"
+#include "fft/battle/battle_state.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/map/map_unit.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
 #include "psx/types.h"
 
 /* Spell announcements and scenario handoff. */

@@ -1,17 +1,17 @@
 /* The item list's rearrange mode, swapping a picked entry with the entry under the cursor. */
 
-#include "fft/help.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_script.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/unit_panel.h"
+#include "fft/game/item.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/item_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -63,11 +63,11 @@ s32 item_list_update_rearrange_mode(void) {
         item = g_item_list_entries[picked];
         g_item_list_entries[picked] = g_item_list_entries[cursor];
         g_item_list_entries[cursor] = item;
-        item_store_category_list(g_menu_selected_slot, g_item_list_entries);
+        item_list_store_category(g_menu_selected_slot, g_item_list_entries);
         menu_scrollable_list_init_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_window_set_scale_step(10);
-        item_build_stat_preview(item, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_list_build_stat_preview(item, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
         g_item_rearrange_initialized = 0;
         return MENU_ITEM_LIST_STATE_BROWSE;
@@ -101,7 +101,7 @@ s32 item_list_update_rearrange_mode(void) {
             __asm__("" : "=r"(item) : "0"(item));
         }
         g_item_rearrange_preview_cursor = g_menu_list_selected_index;
-        item_build_stat_preview(item, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        item_list_build_stat_preview(item, &g_unit_panel_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
         g_unit_panel_preview_stats_thread_params.redraw_request = 1;
     }
     return MENU_ITEM_LIST_STATE_REARRANGE;

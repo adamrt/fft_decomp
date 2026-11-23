@@ -30,14 +30,14 @@ units:
   - {name: menu_levels, source: src/wldcore/menu_levels.c, data: [{addr: 0x8009e690, size: 228, hash: 27c8987b677b000d}, {addr: 0x8009e774, size: 228, hash: 17ce379e6bacf734}, {addr: 0x8009e858, size: 228, hash: 7a22627279b735fa}], bss: [{addr: 0x800d4584, size: 32, hash: 66687aadf862bd77}]}
   - {name: menu_screen_transition, source: src/wldcore/menu_screen_transition.c}
   - {name: music_queue, source: src/wldcore/music_queue.c, data: [{addr: 0x800d45a4, size: 160, hash: b393978842a0fa3d}]}
+  - {name: novel, source: src/wldcore/novel/script.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}], bss: [{addr: 0x800d099c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: novel_menus, source: src/wldcore/novel/menus.c, bss: [{addr: 0x800d4900, size: 8, hash: af5570f5a1810b7a}]}
+  - {name: novel_progress, source: src/wldcore/novel/progress.c}
   - {name: proposition_data, source: src/wldcore/proposition/data.c}
   - {name: proposition_dispatch, source: src/wldcore/proposition/dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}], bss: [{addr: 0x800d457c, size: 4, hash: df3f619804a92fdb}]}
   - {name: proposition_report, source: src/wldcore/proposition/report.c}
   - {name: proposition_results, source: src/wldcore/proposition/results.c, data: [{addr: 0x8009eb34, size: 8, hash: 8fa5f1b1c1b875fa}, {addr: 0x8009eb3c, size: 8, hash: 9785aa74f03e66b7}]}
   - {name: resource_loading, source: src/wldcore/resource_loading.c, data: [{addr: 0x8009e0ec, size: 1408, hash: 697848efa3c9d262}]}
-  - {name: sound_novel, source: src/wldcore/sound_novel/script.c, data: [{addr: 0x8009ecfc, size: 216, hash: 300c3cf483875ffa}], bss: [{addr: 0x800d099c, size: 4, hash: df3f619804a92fdb}]}
-  - {name: sound_novel_menus, source: src/wldcore/sound_novel/menus.c, bss: [{addr: 0x800d4900, size: 8, hash: af5570f5a1810b7a}]}
-  - {name: sound_novel_progress, source: src/wldcore/sound_novel/progress.c}
   - {name: startup, source: src/wldcore/entry.c}
   - {name: tutorial_menus, source: src/wldcore/tutorial_menus.c, data: [{addr: 0x8009ebfc, size: 32, hash: 493af45bc1a8a1a1}]}
   - {name: tutorial_topics, source: src/wldcore/tutorial_topics.c}
@@ -63,11 +63,11 @@ functions:
   - {addr: 0x800686c8, size: 100, name: file_wait_pending, hash: 2cb1c83c2614745a, unit: file_wait}
   - {addr: 0x8006872c, size: 828, name: world_map_update_texture_stream, hash: 26a8e79c258efc1c, unit: resource_loading, rodata: [{addr: 0x80067000, size: 32, hash: afd8c59574a140ff}]}
   - {addr: 0x80068a68, size: 76, name: location_load_picture, hash: 43c1d216b7baabcd, unit: resource_loading}
-  - {addr: 0x80068ab4, size: 136, name: picture_load_set, hash: aad04349279159e2, unit: resource_loading}
-  - {addr: 0x80068b3c, size: 136, name: picture_load_background_set, hash: 68a43c0bacc24d2c, unit: resource_loading}
+  - {addr: 0x80068ab4, size: 136, name: world_map_load_picture_set, hash: aad04349279159e2, unit: resource_loading}
+  - {addr: 0x80068b3c, size: 136, name: world_map_load_background_picture_set, hash: 68a43c0bacc24d2c, unit: resource_loading}
   - {addr: 0x80068bc4, size: 160, name: message_load_block_if_changed, hash: 6d52ff3612d01b49, unit: resource_loading}
-  - {addr: 0x80068c64, size: 220, name: sound_novel_load_files, hash: 070cab2d292b95f8, unit: resource_loading}
-  - {addr: 0x80068d40, size: 52, name: event_transition_seek_battle_bin, hash: e96aed18062103de, unit: resource_loading}
+  - {addr: 0x80068c64, size: 220, name: novel_load_files, hash: 070cab2d292b95f8, unit: resource_loading}
+  - {addr: 0x80068d40, size: 52, name: world_map_seek_event_battle_bin, hash: e96aed18062103de, unit: resource_loading}
   - {addr: 0x80068d74, size: 48, name: world_map_set_display_rect, hash: 318e2bd701eb87fa, unit: resource_loading}
   - {addr: 0x80068da4, size: 204, name: world_map_read_pad, hash: 6121aaec16ecf650, unit: input}
   - {addr: 0x80068e70, size: 312, name: world_map_update_scroll_axis, hash: 847c2250f4204453, unit: input}
@@ -104,7 +104,7 @@ functions:
   - {addr: 0x8006b460, size: 232, name: display_object_append_animated, hash: 9d472c712e7475fd, unit: window_records}
   - {addr: 0x8006b548, size: 304, name: display_object_append_image, hash: 8b95487b55821e0b, unit: window_records}
   - {addr: 0x8006b678, size: 276, name: calculate_scaled_rectangle, hash: 63903852735eac70, unit: window_records}
-  - {addr: 0x8006b78c, size: 840, name: hud_draw_value, hash: a64c4fe093eb72d2, unit: hud, rodata: [{addr: 0x80067020, size: 20, hash: ec1dbbcbf2752505}]}
+  - {addr: 0x8006b78c, size: 840, name: world_map_draw_hud_value, hash: a64c4fe093eb72d2, unit: hud, rodata: [{addr: 0x80067020, size: 20, hash: ec1dbbcbf2752505}]}
   - {addr: 0x8006bad4, size: 244, name: draw_funds, hash: 477515410b583ab3, unit: hud}
   - {addr: 0x8006bbc8, size: 444, name: draw_digits, hash: 4f4c1a14ea91b92e, unit: hud}
   - {addr: 0x8006bd84, size: 536, name: draw_filled_digits, hash: a418021d05820d27, unit: hud}
@@ -224,18 +224,18 @@ functions:
   - {addr: 0x8007af9c, size: 1348, name: open_recall, hash: c9b62e341b9e42a3, unit: proposition_results}
   - {addr: 0x8007b4e0, size: 756, name: proposition_build_detail_panel, hash: 71b14415a1da4b72, unit: proposition_results}
   - {addr: 0x8007b7d4, size: 740, name: proposition_update_recall, hash: ecedf486c1c63c54, unit: proposition_results}
-  - {addr: 0x8007bab8, size: 1360, name: sound_novel_open_reader, hash: a9b47b074e27ea14, unit: sound_novel_menus}
-  - {addr: 0x8007c008, size: 292, name: sound_novel_resume_reader, hash: 60796fceb233cfcb, unit: sound_novel_menus}
-  - {addr: 0x8007c12c, size: 8, name: sound_novel_suspend_reader, hash: 6d64edf91449c1b1, unit: sound_novel_menus}
-  - {addr: 0x8007c134, size: 1880, name: sound_novel_update_reader, hash: 38e6aa4b211d76d0, unit: sound_novel_menus}
-  - {addr: 0x8007c88c, size: 1052, name: open_quit_menu, hash: 85d07d42edfefb9c, unit: sound_novel_menus}
-  - {addr: 0x8007cca8, size: 208, name: sound_novel_resume_quit_menu, hash: b5918d30a7aa2ca2, unit: sound_novel_menus}
-  - {addr: 0x8007cd78, size: 224, name: sound_novel_suspend_quit_menu, hash: 7b292ddd6e01673f, unit: sound_novel_menus}
-  - {addr: 0x8007ce58, size: 1332, name: sound_novel_update_quit_menu, hash: fd7f34ad68cc922f, unit: sound_novel_menus}
-  - {addr: 0x8007d38c, size: 132, name: restore_hud, hash: 133f43f6ea4a69d0, unit: sound_novel_menus}
-  - {addr: 0x8007d410, size: 1336, name: open_history, hash: e6d72d860bf58c21, unit: sound_novel_menus}
-  - {addr: 0x8007d948, size: 1596, name: sound_novel_update_history, hash: 67c60f0dcfe436af, unit: sound_novel_menus}
-  - {addr: 0x8007df84, size: 72, name: draw_history_entry, hash: 4045135c6ffd37ae, unit: sound_novel_menus}
+  - {addr: 0x8007bab8, size: 1360, name: novel_open_reader, hash: a9b47b074e27ea14, unit: novel_menus}
+  - {addr: 0x8007c008, size: 292, name: novel_resume_reader, hash: 60796fceb233cfcb, unit: novel_menus}
+  - {addr: 0x8007c12c, size: 8, name: novel_suspend_reader, hash: 6d64edf91449c1b1, unit: novel_menus}
+  - {addr: 0x8007c134, size: 1880, name: novel_update_reader, hash: 38e6aa4b211d76d0, unit: novel_menus}
+  - {addr: 0x8007c88c, size: 1052, name: open_quit_menu, hash: 85d07d42edfefb9c, unit: novel_menus}
+  - {addr: 0x8007cca8, size: 208, name: novel_resume_quit_menu, hash: b5918d30a7aa2ca2, unit: novel_menus}
+  - {addr: 0x8007cd78, size: 224, name: novel_suspend_quit_menu, hash: 7b292ddd6e01673f, unit: novel_menus}
+  - {addr: 0x8007ce58, size: 1332, name: novel_update_quit_menu, hash: fd7f34ad68cc922f, unit: novel_menus}
+  - {addr: 0x8007d38c, size: 132, name: restore_hud, hash: 133f43f6ea4a69d0, unit: novel_menus}
+  - {addr: 0x8007d410, size: 1336, name: open_history, hash: e6d72d860bf58c21, unit: novel_menus}
+  - {addr: 0x8007d948, size: 1596, name: novel_update_history, hash: 67c60f0dcfe436af, unit: novel_menus}
+  - {addr: 0x8007df84, size: 72, name: draw_history_entry, hash: 4045135c6ffd37ae, unit: novel_menus}
   - {addr: 0x8007dfcc, size: 372, name: brave_story_open_unexplored_land_list, hash: 189cdddb19bf616a, unit: brave_story_collections}
   - {addr: 0x8007e140, size: 56, name: brave_story_resume_unexplored_land_list, hash: ebfa76d520ec41f0, unit: brave_story_collections}
   - {addr: 0x8007e178, size: 20, name: brave_story_suspend_unexplored_land_list, hash: 11034aa27eaa3095, unit: brave_story_collections}
@@ -250,10 +250,10 @@ functions:
   - {addr: 0x8007f32c, size: 1644, name: brave_story_update_treasure_detail, hash: 58c1101f8880101f, unit: brave_story_collections}
   - {addr: 0x8007f998, size: 600, name: update_picture_dissolve, hash: 96cd26d84c2c77e2, unit: brave_story_collections}
   - {addr: 0x8007fbf0, size: 1396, name: open_reading_choice, hash: f616e5abec5df5d4, unit: brave_story_collections}
-  - {addr: 0x80080164, size: 792, name: sound_novel_update_reading_choice, hash: 6773d16d8df13897, unit: brave_story_collections}
-  - {addr: 0x8008047c, size: 732, name: event_transition_open, hash: a00914902b5a7a1d, unit: event_transition}
-  - {addr: 0x80080758, size: 132, name: event_transition_draw_sprite, hash: f8623b007ab10664, unit: event_transition}
-  - {addr: 0x800807dc, size: 1656, name: event_transition_update, hash: 1cd46cc6d961f5e1, unit: event_transition}
+  - {addr: 0x80080164, size: 792, name: novel_update_reading_choice, hash: 6773d16d8df13897, unit: brave_story_collections}
+  - {addr: 0x8008047c, size: 732, name: world_map_open_event_transition, hash: a00914902b5a7a1d, unit: event_transition}
+  - {addr: 0x80080758, size: 132, name: world_map_draw_event_transition_sprite, hash: f8623b007ab10664, unit: event_transition}
+  - {addr: 0x800807dc, size: 1656, name: world_map_update_event_transition, hash: 1cd46cc6d961f5e1, unit: event_transition}
   - {addr: 0x80080e54, size: 2288, name: brave_story_open_menu, hash: 4050bf601980cdcc, unit: brave_story}
   - {addr: 0x80081744, size: 1572, name: build_story_rows, hash: cefca88b09384215, unit: brave_story}
   - {addr: 0x80081d68, size: 948, name: brave_story_resume_menu, hash: f18117aca5ca9e1b, unit: brave_story}
@@ -298,10 +298,10 @@ functions:
   - {addr: 0x80087da0, size: 516, name: brave_story_update_work_history_input, hash: d0220aeec018bc1e, unit: brave_story_propositions}
   - {addr: 0x80087fa4, size: 476, name: open_work_history_entry, hash: c9cc9c865ac2e396, unit: brave_story_propositions}
   - {addr: 0x80088180, size: 392, name: brave_story_update_work_history_entry, hash: b3f0c6a8cf2e5f9d, unit: brave_story_propositions}
-  - {addr: 0x80088308, size: 988, name: menu_screen_transition_open, hash: a54f6808fc360853, unit: menu_screen_transition, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
+  - {addr: 0x80088308, size: 988, name: world_map_open_screen_transition, hash: a54f6808fc360853, unit: menu_screen_transition, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
   - {addr: 0x800886e4, size: 916, name: hide_parent_windows, hash: 70bf9f0c22a63d0e, unit: menu_screen_transition}
   - {addr: 0x80088a78, size: 536, name: hide_parent_tutorial_menu, hash: e3ce1fa1e0ef9392, unit: menu_screen_transition}
-  - {addr: 0x80088c90, size: 1120, name: menu_screen_transition_update, hash: 22416fb257542db2, unit: menu_screen_transition, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
+  - {addr: 0x80088c90, size: 1120, name: world_map_update_screen_transition, hash: 22416fb257542db2, unit: menu_screen_transition, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
   - {addr: 0x800890f0, size: 1100, name: tutorial_open_menu, hash: 61d22220966e7b4d, unit: tutorial_menus}
   - {addr: 0x8008953c, size: 392, name: tutorial_build_menu_panel, hash: 6e7e170a9de6189f, unit: tutorial_menus}
   - {addr: 0x800896c4, size: 236, name: tutorial_resume_menu, hash: 1fe1a6d4d29bc858, unit: tutorial_menus}
@@ -315,75 +315,75 @@ functions:
   - {addr: 0x8008a440, size: 20, name: tutorial_resume_battle_list, hash: 7e9ed99f23ab0769, unit: tutorial_menus}
   - {addr: 0x8008a454, size: 20, name: tutorial_suspend_battle_list, hash: 11034aa27eaa3095, unit: tutorial_menus}
   - {addr: 0x8008a468, size: 656, name: tutorial_update_battle_list_input, hash: 132f4218798f9469, unit: tutorial_menus}
-  - {addr: 0x8008a6f8, size: 1200, name: sound_novel_restore_reading, hash: 86252cb2803b332b, unit: sound_novel}
-  - {addr: 0x8008aba8, size: 60, name: sound_novel_reset_selected_reading, hash: 23177777d1486fca, unit: sound_novel}
-  - {addr: 0x8008abe4, size: 76, name: reset_reading, hash: 8362564a9498299c, unit: sound_novel}
-  - {addr: 0x8008ac30, size: 520, name: sound_novel_run_script, hash: d58db67b16b103f2, unit: sound_novel}
-  - {addr: 0x8008ae38, size: 104, name: sound_novel_find_section_instruction, hash: 7f2dbc1cc0cfb332, unit: sound_novel}
-  - {addr: 0x8008aea0, size: 336, name: window_draw_centered_text, hash: fc163dab7b9ad241, unit: sound_novel}
-  - {addr: 0x8008aff0, size: 304, name: play_pending_sounds, hash: 02e5ec28fdf0e91a, unit: sound_novel}
-  - {addr: 0x8008b120, size: 124, name: play_sound_quad, hash: 2853875af4bd3a7f, unit: sound_novel}
-  - {addr: 0x8008b19c, size: 52, name: play_background_sound, hash: eab8c318dcb97af7, unit: sound_novel}
-  - {addr: 0x8008b1d0, size: 388, name: update_choice_timer, hash: 2806e72d89a0f5b7, unit: sound_novel}
-  - {addr: 0x8008b354, size: 28, name: sound_novel_opcode_00_end_script, hash: ca0140139864f127, unit: sound_novel}
-  - {addr: 0x8008b370, size: 28, name: sound_novel_opcode_01_end_section, hash: ddd34af47a51ab35, unit: sound_novel}
-  - {addr: 0x8008b38c, size: 28, name: sound_novel_opcode_02_nop, hash: 2e9e6c67608367f6, unit: sound_novel}
-  - {addr: 0x8008b3a8, size: 160, name: sound_novel_opcode_03_start_text_thread_and_push_history, hash: c6a0b18e43f7c4e5, unit: sound_novel}
-  - {addr: 0x8008b448, size: 80, name: sound_novel_opcode_04_wait_for_text_thread, hash: fb295fc8597bac76, unit: sound_novel}
-  - {addr: 0x8008b498, size: 112, name: sound_novel_opcode_05_load_background_set, hash: 6aea7d6a157eb0ab, unit: sound_novel}
-  - {addr: 0x8008b508, size: 44, name: sound_novel_opcode_06_branch_to_section, hash: 3bdd938f03fc230c, unit: sound_novel}
-  - {addr: 0x8008b534, size: 32, name: sound_novel_opcode_07_branch_if_dialog_option_equal, hash: bdd9afdd40f157e7, unit: sound_novel}
-  - {addr: 0x8008b554, size: 160, name: branch_on_choice, hash: 337af6acb9885c83, unit: sound_novel}
-  - {addr: 0x8008b5f4, size: 32, name: sound_novel_opcode_08_branch_if_dialog_option_not_equal, hash: 4778737a6b2c139a, unit: sound_novel}
-  - {addr: 0x8008b614, size: 120, name: sound_novel_opcode_09_wait_frames, hash: f7452d0c8c937492, unit: sound_novel}
-  - {addr: 0x8008b68c, size: 480, name: sound_novel_opcode_0a_load_picture, hash: 8f67f7f04e550104, unit: sound_novel}
-  - {addr: 0x8008b86c, size: 112, name: sound_novel_opcode_0b_hide_picture, hash: 04446b785db81892, unit: sound_novel}
-  - {addr: 0x8008b8dc, size: 424, name: sound_novel_opcode_0c_set_parent_windows_visible, hash: 530738ec1f9d7d14, unit: sound_novel}
-  - {addr: 0x8008ba84, size: 104, name: sound_novel_opcode_0d_start_text_thread, hash: b7de359c87c9901d, unit: sound_novel}
-  - {addr: 0x8008baec, size: 124, name: sound_novel_opcode_0e_branch_to_random_section, hash: d80f61d1700bf0b2, unit: sound_novel}
-  - {addr: 0x8008bb68, size: 32, name: sound_novel_opcode_0f_branch_if_section_read, hash: d7724dc3d9cca1ee, unit: sound_novel}
-  - {addr: 0x8008bb88, size: 144, name: branch_on_section_read, hash: 1a382c9ecf10cf96, unit: sound_novel}
-  - {addr: 0x8008bc18, size: 32, name: sound_novel_opcode_10_branch_if_section_unread, hash: 117b87c884107bfe, unit: sound_novel}
-  - {addr: 0x8008bc38, size: 32, name: sound_novel_opcode_11_branch_if_saved_flag_set, hash: 76a0153ab059fbda, unit: sound_novel}
-  - {addr: 0x8008bc58, size: 136, name: branch_on_saved_flag, hash: fc90cc4a95a63c13, unit: sound_novel}
-  - {addr: 0x8008bce0, size: 32, name: sound_novel_opcode_12_branch_if_saved_flag_clear, hash: a49094bbc0b1cd61, unit: sound_novel}
-  - {addr: 0x8008bd00, size: 32, name: sound_novel_opcode_13_branch_if_local_flag_set, hash: bb540802f30b0452, unit: sound_novel}
-  - {addr: 0x8008bd20, size: 136, name: branch_on_local_flag, hash: a9507678f888d3f3, unit: sound_novel}
-  - {addr: 0x8008bda8, size: 32, name: sound_novel_opcode_14_branch_if_local_flag_clear, hash: 21224fc6466bdf42, unit: sound_novel}
-  - {addr: 0x8008bdc8, size: 72, name: sound_novel_opcode_15_set_saved_flag, hash: 75e4311d658eb2d6, unit: sound_novel}
-  - {addr: 0x8008be10, size: 72, name: sound_novel_opcode_16_clear_saved_flag, hash: 798b94e98436c042, unit: sound_novel}
-  - {addr: 0x8008be58, size: 72, name: sound_novel_opcode_17_set_local_flag, hash: 4c361ee7799ba5df, unit: sound_novel}
-  - {addr: 0x8008bea0, size: 72, name: sound_novel_opcode_18_clear_local_flag, hash: a2e0128657578171, unit: sound_novel}
-  - {addr: 0x8008bee8, size: 52, name: sound_novel_opcode_19_set_counter, hash: eaea61c280df0c4a, unit: sound_novel}
-  - {addr: 0x8008bf1c, size: 64, name: sound_novel_opcode_1a_add_counter_delta, hash: 5a83c06ac2b2c98e, unit: sound_novel}
-  - {addr: 0x8008bf5c, size: 64, name: sound_novel_opcode_1b_subtract_counter_delta, hash: 47accf9b5276e028, unit: sound_novel}
-  - {addr: 0x8008bf9c, size: 144, name: sound_novel_opcode_1c_show_value_display, hash: 0e8c7d16fb25a71d, unit: sound_novel}
-  - {addr: 0x8008c02c, size: 48, name: sound_novel_opcode_1d_hide_value_display, hash: 33df93c6e87c5be3, unit: sound_novel}
-  - {addr: 0x8008c05c, size: 116, name: sound_novel_opcode_1e_apply_counter_delta, hash: f60cd93b941df914, unit: sound_novel}
-  - {addr: 0x8008c0d0, size: 64, name: sound_novel_opcode_1f_play_sound, hash: 324ef0f32cc12574, unit: sound_novel}
-  - {addr: 0x8008c110, size: 64, name: sound_novel_opcode_20_load_music, hash: 147e3922b16a7121, unit: sound_novel}
-  - {addr: 0x8008c150, size: 196, name: change_reading_music, hash: cd3f39c2cb15f5ef, unit: sound_novel}
-  - {addr: 0x8008c214, size: 44, name: sound_novel_opcode_21_set_sound_mode, hash: a28316d3c46a377f, unit: sound_novel}
-  - {addr: 0x8008c240, size: 140, name: sound_novel_opcode_22_branch_if_equal, hash: cbf6358c095f87a5, unit: sound_novel}
-  - {addr: 0x8008c2cc, size: 140, name: sound_novel_opcode_23_branch_if_not_equal, hash: 8e8e8be364171edb, unit: sound_novel}
-  - {addr: 0x8008c358, size: 144, name: sound_novel_opcode_24_branch_if_less, hash: 8505bb222cacf729, unit: sound_novel}
-  - {addr: 0x8008c3e8, size: 144, name: sound_novel_opcode_25_branch_if_greater, hash: 074c2c00f4b7a411, unit: sound_novel}
-  - {addr: 0x8008c478, size: 112, name: sound_novel_opcode_26_fade_out_music, hash: cec7c0c1dc129d5f, unit: sound_novel}
-  - {addr: 0x8008c4e8, size: 140, name: sound_novel_opcode_27_switch_music_track, hash: 10603990f24ad021, unit: sound_novel}
-  - {addr: 0x8008c574, size: 92, name: sound_novel_opcode_28_fade_screen_out, hash: 425ff88428391dbc, unit: sound_novel}
-  - {addr: 0x8008c5d0, size: 104, name: sound_novel_opcode_29_fade_screen_in, hash: 485fa8c311d12120, unit: sound_novel}
-  - {addr: 0x8008c638, size: 296, name: sound_novel_opcode_2a_set_white_screen_overlay, hash: 17b4c8d72f648c79, unit: sound_novel}
-  - {addr: 0x8008c760, size: 76, name: sound_novel_opcode_2b_wait_for_circle_press, hash: dca9f61e27799116, unit: sound_novel}
-  - {addr: 0x8008c7ac, size: 92, name: sound_novel_opcode_2c_play_sound_effect_quad, hash: 4ea403ff52255127, unit: sound_novel}
-  - {addr: 0x8008c808, size: 60, name: sound_novel_opcode_2d_stop_sound_effects, hash: e8da89e16ef4faf7, unit: sound_novel}
-  - {addr: 0x8008c844, size: 84, name: sound_novel_opcode_2e_start_countdown_timer, hash: 1301853f97b18d7f, unit: sound_novel}
-  - {addr: 0x8008c898, size: 96, name: sound_novel_opcode_2f_play_background_sound, hash: 5a43066da8004887, unit: sound_novel}
-  - {addr: 0x8008c8f8, size: 112, name: sound_novel_opcode_30_set_master_volume, hash: f09c779a64e008de, unit: sound_novel}
-  - {addr: 0x8008c968, size: 176, name: sound_novel_opcode_31_unload_music, hash: 9448637d40e4e6f5, unit: sound_novel}
-  - {addr: 0x8008ca18, size: 80, name: sound_novel_opcode_32_set_menu_brightness, hash: 366d11aaf33000b4, unit: sound_novel}
-  - {addr: 0x8008ca68, size: 128, name: sound_novel_opcode_33_add_counter_delta_if_choice, hash: b71a1a8e28da8919, unit: sound_novel}
-  - {addr: 0x8008cae8, size: 72, name: sound_novel_opcode_34_wait_for_fade, hash: 99b838a0e8a4a63b, unit: sound_novel}
-  - {addr: 0x8008cb30, size: 92, name: sound_novel_opcode_35_push_operand_history, hash: 8c308396e688df64, unit: sound_novel}
+  - {addr: 0x8008a6f8, size: 1200, name: novel_restore_reading, hash: 86252cb2803b332b, unit: novel}
+  - {addr: 0x8008aba8, size: 60, name: novel_reset_selected_reading, hash: 23177777d1486fca, unit: novel}
+  - {addr: 0x8008abe4, size: 76, name: reset_reading, hash: 8362564a9498299c, unit: novel}
+  - {addr: 0x8008ac30, size: 520, name: novel_run_script, hash: d58db67b16b103f2, unit: novel}
+  - {addr: 0x8008ae38, size: 104, name: novel_find_section_instruction, hash: 7f2dbc1cc0cfb332, unit: novel}
+  - {addr: 0x8008aea0, size: 336, name: window_draw_centered_text, hash: fc163dab7b9ad241, unit: novel}
+  - {addr: 0x8008aff0, size: 304, name: play_pending_sounds, hash: 02e5ec28fdf0e91a, unit: novel}
+  - {addr: 0x8008b120, size: 124, name: play_sound_quad, hash: 2853875af4bd3a7f, unit: novel}
+  - {addr: 0x8008b19c, size: 52, name: play_background_sound, hash: eab8c318dcb97af7, unit: novel}
+  - {addr: 0x8008b1d0, size: 388, name: update_choice_timer, hash: 2806e72d89a0f5b7, unit: novel}
+  - {addr: 0x8008b354, size: 28, name: novel_opcode_00_end_script, hash: ca0140139864f127, unit: novel}
+  - {addr: 0x8008b370, size: 28, name: novel_opcode_01_end_section, hash: ddd34af47a51ab35, unit: novel}
+  - {addr: 0x8008b38c, size: 28, name: novel_opcode_02_nop, hash: 2e9e6c67608367f6, unit: novel}
+  - {addr: 0x8008b3a8, size: 160, name: novel_opcode_03_start_text_thread_and_push_history, hash: c6a0b18e43f7c4e5, unit: novel}
+  - {addr: 0x8008b448, size: 80, name: novel_opcode_04_wait_for_text_thread, hash: fb295fc8597bac76, unit: novel}
+  - {addr: 0x8008b498, size: 112, name: novel_opcode_05_load_background_set, hash: 6aea7d6a157eb0ab, unit: novel}
+  - {addr: 0x8008b508, size: 44, name: novel_opcode_06_branch_to_section, hash: 3bdd938f03fc230c, unit: novel}
+  - {addr: 0x8008b534, size: 32, name: novel_opcode_07_branch_if_dialog_option_equal, hash: bdd9afdd40f157e7, unit: novel}
+  - {addr: 0x8008b554, size: 160, name: branch_on_choice, hash: 337af6acb9885c83, unit: novel}
+  - {addr: 0x8008b5f4, size: 32, name: novel_opcode_08_branch_if_dialog_option_not_equal, hash: 4778737a6b2c139a, unit: novel}
+  - {addr: 0x8008b614, size: 120, name: novel_opcode_09_wait_frames, hash: f7452d0c8c937492, unit: novel}
+  - {addr: 0x8008b68c, size: 480, name: novel_opcode_0a_load_picture, hash: 8f67f7f04e550104, unit: novel}
+  - {addr: 0x8008b86c, size: 112, name: novel_opcode_0b_hide_picture, hash: 04446b785db81892, unit: novel}
+  - {addr: 0x8008b8dc, size: 424, name: novel_opcode_0c_set_parent_windows_visible, hash: 530738ec1f9d7d14, unit: novel}
+  - {addr: 0x8008ba84, size: 104, name: novel_opcode_0d_start_text_thread, hash: b7de359c87c9901d, unit: novel}
+  - {addr: 0x8008baec, size: 124, name: novel_opcode_0e_branch_to_random_section, hash: d80f61d1700bf0b2, unit: novel}
+  - {addr: 0x8008bb68, size: 32, name: novel_opcode_0f_branch_if_section_read, hash: d7724dc3d9cca1ee, unit: novel}
+  - {addr: 0x8008bb88, size: 144, name: branch_on_section_read, hash: 1a382c9ecf10cf96, unit: novel}
+  - {addr: 0x8008bc18, size: 32, name: novel_opcode_10_branch_if_section_unread, hash: 117b87c884107bfe, unit: novel}
+  - {addr: 0x8008bc38, size: 32, name: novel_opcode_11_branch_if_saved_flag_set, hash: 76a0153ab059fbda, unit: novel}
+  - {addr: 0x8008bc58, size: 136, name: branch_on_saved_flag, hash: fc90cc4a95a63c13, unit: novel}
+  - {addr: 0x8008bce0, size: 32, name: novel_opcode_12_branch_if_saved_flag_clear, hash: a49094bbc0b1cd61, unit: novel}
+  - {addr: 0x8008bd00, size: 32, name: novel_opcode_13_branch_if_local_flag_set, hash: bb540802f30b0452, unit: novel}
+  - {addr: 0x8008bd20, size: 136, name: branch_on_local_flag, hash: a9507678f888d3f3, unit: novel}
+  - {addr: 0x8008bda8, size: 32, name: novel_opcode_14_branch_if_local_flag_clear, hash: 21224fc6466bdf42, unit: novel}
+  - {addr: 0x8008bdc8, size: 72, name: novel_opcode_15_set_saved_flag, hash: 75e4311d658eb2d6, unit: novel}
+  - {addr: 0x8008be10, size: 72, name: novel_opcode_16_clear_saved_flag, hash: 798b94e98436c042, unit: novel}
+  - {addr: 0x8008be58, size: 72, name: novel_opcode_17_set_local_flag, hash: 4c361ee7799ba5df, unit: novel}
+  - {addr: 0x8008bea0, size: 72, name: novel_opcode_18_clear_local_flag, hash: a2e0128657578171, unit: novel}
+  - {addr: 0x8008bee8, size: 52, name: novel_opcode_19_set_counter, hash: eaea61c280df0c4a, unit: novel}
+  - {addr: 0x8008bf1c, size: 64, name: novel_opcode_1a_add_counter_delta, hash: 5a83c06ac2b2c98e, unit: novel}
+  - {addr: 0x8008bf5c, size: 64, name: novel_opcode_1b_subtract_counter_delta, hash: 47accf9b5276e028, unit: novel}
+  - {addr: 0x8008bf9c, size: 144, name: novel_opcode_1c_show_value_display, hash: 0e8c7d16fb25a71d, unit: novel}
+  - {addr: 0x8008c02c, size: 48, name: novel_opcode_1d_hide_value_display, hash: 33df93c6e87c5be3, unit: novel}
+  - {addr: 0x8008c05c, size: 116, name: novel_opcode_1e_apply_counter_delta, hash: f60cd93b941df914, unit: novel}
+  - {addr: 0x8008c0d0, size: 64, name: novel_opcode_1f_play_sound, hash: 324ef0f32cc12574, unit: novel}
+  - {addr: 0x8008c110, size: 64, name: novel_opcode_20_load_music, hash: 147e3922b16a7121, unit: novel}
+  - {addr: 0x8008c150, size: 196, name: change_reading_music, hash: cd3f39c2cb15f5ef, unit: novel}
+  - {addr: 0x8008c214, size: 44, name: novel_opcode_21_set_sound_mode, hash: a28316d3c46a377f, unit: novel}
+  - {addr: 0x8008c240, size: 140, name: novel_opcode_22_branch_if_equal, hash: cbf6358c095f87a5, unit: novel}
+  - {addr: 0x8008c2cc, size: 140, name: novel_opcode_23_branch_if_not_equal, hash: 8e8e8be364171edb, unit: novel}
+  - {addr: 0x8008c358, size: 144, name: novel_opcode_24_branch_if_less, hash: 8505bb222cacf729, unit: novel}
+  - {addr: 0x8008c3e8, size: 144, name: novel_opcode_25_branch_if_greater, hash: 074c2c00f4b7a411, unit: novel}
+  - {addr: 0x8008c478, size: 112, name: novel_opcode_26_fade_out_music, hash: cec7c0c1dc129d5f, unit: novel}
+  - {addr: 0x8008c4e8, size: 140, name: novel_opcode_27_switch_music_track, hash: 10603990f24ad021, unit: novel}
+  - {addr: 0x8008c574, size: 92, name: novel_opcode_28_fade_screen_out, hash: 425ff88428391dbc, unit: novel}
+  - {addr: 0x8008c5d0, size: 104, name: novel_opcode_29_fade_screen_in, hash: 485fa8c311d12120, unit: novel}
+  - {addr: 0x8008c638, size: 296, name: novel_opcode_2a_set_white_screen_overlay, hash: 17b4c8d72f648c79, unit: novel}
+  - {addr: 0x8008c760, size: 76, name: novel_opcode_2b_wait_for_circle_press, hash: dca9f61e27799116, unit: novel}
+  - {addr: 0x8008c7ac, size: 92, name: novel_opcode_2c_play_sound_effect_quad, hash: 4ea403ff52255127, unit: novel}
+  - {addr: 0x8008c808, size: 60, name: novel_opcode_2d_stop_sound_effects, hash: e8da89e16ef4faf7, unit: novel}
+  - {addr: 0x8008c844, size: 84, name: novel_opcode_2e_start_countdown_timer, hash: 1301853f97b18d7f, unit: novel}
+  - {addr: 0x8008c898, size: 96, name: novel_opcode_2f_play_background_sound, hash: 5a43066da8004887, unit: novel}
+  - {addr: 0x8008c8f8, size: 112, name: novel_opcode_30_set_master_volume, hash: f09c779a64e008de, unit: novel}
+  - {addr: 0x8008c968, size: 176, name: novel_opcode_31_unload_music, hash: 9448637d40e4e6f5, unit: novel}
+  - {addr: 0x8008ca18, size: 80, name: novel_opcode_32_set_menu_brightness, hash: 366d11aaf33000b4, unit: novel}
+  - {addr: 0x8008ca68, size: 128, name: novel_opcode_33_add_counter_delta_if_choice, hash: b71a1a8e28da8919, unit: novel}
+  - {addr: 0x8008cae8, size: 72, name: novel_opcode_34_wait_for_fade, hash: 99b838a0e8a4a63b, unit: novel}
+  - {addr: 0x8008cb30, size: 92, name: novel_opcode_35_push_operand_history, hash: 8c308396e688df64, unit: novel}
   - {addr: 0x8008cb8c, size: 612, name: world_map_init_dots, hash: 2a8587cca2243032, unit: map_routes}
   - {addr: 0x8008cdf0, size: 292, name: world_map_project_dots, hash: dfad85550257e0ac, unit: map_routes}
   - {addr: 0x8008cf14, size: 332, name: world_map_pulse_dots, hash: f98bdd99186282ca, unit: map_routes}
@@ -421,9 +421,9 @@ functions:
   - {addr: 0x8008fd88, size: 44, name: menu_stack_clear_cursor, hash: a7a3eb5e83910bea, unit: window_render}
   - {addr: 0x8008fdb4, size: 548, name: window_start_number_panel_thread, hash: f1523edab18f34e8, unit: window_render}
   - {addr: 0x8008ffd8, size: 8, name: number_confirm_noop, hash: 6d64edf91449c1b1, unit: window_render}
-  - {addr: 0x8008ffe0, size: 908, name: text_window_open, hash: 7080a27f95ba794c, unit: window_render}
+  - {addr: 0x8008ffe0, size: 908, name: window_open_paged_text, hash: 7080a27f95ba794c, unit: window_render}
   - {addr: 0x8009036c, size: 120, name: init_animated_record, hash: c2ddfb60e7100f16, unit: window_render}
-  - {addr: 0x800903e4, size: 732, name: text_window_update, hash: b51b825f77122c7e, unit: window_render}
+  - {addr: 0x800903e4, size: 732, name: window_update_paged_text, hash: b51b825f77122c7e, unit: window_render}
   - {addr: 0x800906c0, size: 872, name: render_page, hash: 0a6626b97c286fca, unit: window_render}
   - {addr: 0x80090a28, size: 140, name: update_page_prompt, hash: 65507cce57e00cfe, unit: window_render}
   - {addr: 0x80090ab4, size: 636, name: update_scroll_indicators, hash: 8edf02f6f19c040c, unit: window_render}
@@ -470,7 +470,7 @@ functions:
   - {addr: 0x8009206c, size: 124, name: location_script_opcode_28_check_ramza_faith_at_most, hash: ad3113bd42ed67db, unit: location_script}
   - {addr: 0x800920e8, size: 96, name: bits_set_value, hash: 56450a38fe0bff9f, unit: bit_arrays}
   - {addr: 0x80092148, size: 56, name: bits_test, hash: 822830daaa9c0843, unit: bit_arrays}
-  - {addr: 0x80092180, size: 136, name: sound_novel_calculate_read_percent, hash: 0ecc0e3f3f1d9117, unit: sound_novel_progress}
+  - {addr: 0x80092180, size: 136, name: novel_calculate_read_percent, hash: 0ecc0e3f3f1d9117, unit: novel_progress}
   - {addr: 0x80092208, size: 516, name: brave_story_open_fact_list, hash: 53ae90c287d3c5a4, unit: brave_story_facts}
   - {addr: 0x8009240c, size: 20, name: brave_story_resume_fact_list, hash: 7e9ed99f23ab0769, unit: brave_story_facts}
   - {addr: 0x80092420, size: 20, name: brave_story_suspend_fact_list, hash: 11034aa27eaa3095, unit: brave_story_facts}
@@ -500,7 +500,7 @@ data:
   - {addr: 0x80096a4c, name: g_rumor_location_masks}
   - {addr: 0x80096a50, name: g_brave_story_event_ids}
   - {addr: 0x80096a54, name: g_location_script_default_base}
-  - {addr: 0x80096a58, name: g_sound_novel_default_sound_resource}
+  - {addr: 0x80096a58, name: g_novel_default_sound_resource}
   - {addr: 0x80096a5c, name: g_world_map_tile_descriptors}
   - {addr: 0x80096a60, name: g_picture_dissolve_band_order}
   - {addr: 0x80097028, name: g_brave_story_birthday_table}
@@ -509,8 +509,8 @@ data:
   - {addr: 0x8009e0ec, name: s_picture_sector_offsets}
   - {addr: 0x8009e260, name: s_picture_background_sector_offsets}
   - {addr: 0x8009e470, name: s_message_block_sector_offsets}
-  - {addr: 0x8009e634, name: s_sound_novel_script_sector_offsets}
-  - {addr: 0x8009e650, name: s_sound_novel_text_sector_offsets}
+  - {addr: 0x8009e634, name: s_novel_script_sector_offsets}
+  - {addr: 0x8009e650, name: s_novel_text_sector_offsets}
   - {addr: 0x8009e66c, name: g_calendar_month_lengths}
   - {addr: 0x8009e678, name: g_calendar_zodiac_start_dates}
   - {addr: 0x8009e690, name: s_level_update_handlers}
@@ -520,7 +520,7 @@ data:
   - {addr: 0x8009eb2c, name: g_bar_row_help_text_ids}
   - {addr: 0x8009eb34, name: s_proposition_treasure_milestones}
   - {addr: 0x8009eb3c, name: s_proposition_unexplored_land_milestones}
-  - {addr: 0x8009eb44, name: g_sound_novel_quit_help_text_ids}
+  - {addr: 0x8009eb44, name: g_novel_quit_help_text_ids}
   - {addr: 0x8009eb48, name: g_unexplored_land_picture_sets}
   - {addr: 0x8009eb58, name: g_treasure_picture_sets}
   - {addr: 0x8009eb88, name: g_treasure_sound_novel_ids}
@@ -529,8 +529,8 @@ data:
   - {addr: 0x8009ebd4, name: g_unit_panel_panel_params}
   - {addr: 0x8009ebe8, name: g_unit_panel_numbers_params}
   - {addr: 0x8009ebfc, name: s_tutorial_battle_event_ids}
-  - {addr: 0x8009ec1c, name: g_sound_novel_sound_quads}
-  - {addr: 0x8009ecfc, name: s_sound_novel_opcode_handlers}
+  - {addr: 0x8009ec1c, name: g_novel_sound_quads}
+  - {addr: 0x8009ecfc, name: s_novel_opcode_handlers}
   - {addr: 0x8009edd4, name: g_location_choice_hidden_offsets}
   - {addr: 0x8009ee30, name: s_window_panel_row_actions}
   - {addr: 0x8009ee50, name: s_location_script_opcodes}
@@ -543,7 +543,7 @@ data:
   - {addr: 0x8009f198, name: g_display_object_queue_count}
   - {addr: 0x8009f19c, name: g_world_map_brightness_rgb}
   - {addr: 0x8009f1a0, name: g_display_object_aux_queue}
-  - {addr: 0x8009f1e0, name: g_sound_novel_sound_resource}
+  - {addr: 0x8009f1e0, name: g_novel_sound_resource}
   - {addr: 0x8009f1e4, name: g_world_map_previous_flags}
   - {addr: 0x8009f1e8, name: g_display_object_aux_queue_count}
   - {addr: 0x8009f1ec, name: g_proposition_report}
@@ -573,9 +573,9 @@ data:
   - {addr: 0x800bb3f0, name: g_menu_stack_row_text_colors}
   - {addr: 0x800bb4f0, name: g_menu_stack_depth}
   - {addr: 0x800bb4f4, name: g_hud_ot_priority}
-  - {addr: 0x800bb4f8, name: g_sound_novel_countdown_frames}
-  - {addr: 0x800bb4f8, name: g_sound_novel_countdown_frames_reset}
-  - {addr: 0x800bb4fc, name: g_sound_novel_selected}
+  - {addr: 0x800bb4f8, name: g_novel_countdown_frames}
+  - {addr: 0x800bb4f8, name: g_novel_countdown_frames_reset}
+  - {addr: 0x800bb4fc, name: g_novel_selected}
   - {addr: 0x800bb500, name: g_picture_background_loaded_set}
   - {addr: 0x800bb504, name: g_display_object_animated_pool}
   - {addr: 0x800bb984, name: g_input_previous_buttons}
@@ -598,9 +598,9 @@ data:
   - {addr: 0x800d0880, name: g_menu_stack_entry_values}
   - {addr: 0x800d0980, name: g_proposition_gil_amount}
   - {addr: 0x800d0984, name: g_hud_value_mode}
-  - {addr: 0x800d0988, name: g_sound_novel_countdown_section}
+  - {addr: 0x800d0988, name: g_novel_countdown_section}
   - {addr: 0x800d098c, name: s_dissolve_progress}
-  - {addr: 0x800d099c, name: s_sound_novel_countdown_elapsed}
+  - {addr: 0x800d099c, name: s_novel_countdown_elapsed}
   - {addr: 0x800d09a0, name: s_proposition_send_units}
   - {addr: 0x800d09ac, name: g_hud_value}
   - {addr: 0x800d09b0, name: g_hud_value_secondary}
@@ -616,16 +616,16 @@ data:
   - {addr: 0x800d0b24, name: g_travel}
   - {addr: 0x800d0bb4, name: g_location_selected}
   - {addr: 0x800d0bb8, name: g_travel_search_depth}
-  - {addr: 0x800d0bbc, name: g_sound_novel_script}
+  - {addr: 0x800d0bbc, name: g_novel_script}
   - {addr: 0x800d3bbc, name: g_world_map_path_animation}
   - {addr: 0x800d3c48, name: g_travel_search_path}
   - {addr: 0x800d3c88, name: s_world_map_saved_system_flags}
   - {addr: 0x800d3c8c, name: g_world_map_zoom}
   - {addr: 0x800d3ca8, name: g_world_map_dots}
-  - {addr: 0x800d4564, name: g_sound_novel_local_flags}
+  - {addr: 0x800d4564, name: g_novel_local_flags}
   - {addr: 0x800d4568, name: g_world_map_dot_count}
   - {addr: 0x800d456c, name: g_random_battle_entd_id}
-  - {addr: 0x800d4570, name: g_sound_novel_wait_counter}
+  - {addr: 0x800d4570, name: g_novel_wait_counter}
   - {addr: 0x800d4574, name: g_window_panel_value}
   - {addr: 0x800d4578, name: g_proposition_dispatch_days}
   - {addr: 0x800d457c, name: s_proposition_send_unit_count}
@@ -638,16 +638,16 @@ data:
   - {addr: 0x800d4678, name: g_travel_search_cost}
   - {addr: 0x800d467c, name: g_unit_panel_unit}
   - {addr: 0x800d483c, name: s_random_battle_map_id}
-  - {addr: 0x800d4840, name: g_sound_novel_reading}
-  - {addr: 0x800d4848, name: g_sound_novel_state}
-  - {addr: 0x800d484c, name: g_sound_novel_state_flags}
-  - {addr: 0x800d4852, name: g_sound_novel_counter_delta}
-  - {addr: 0x800d4860, name: g_sound_novel_history_0}
-  - {addr: 0x800d4862, name: g_sound_novel_history_1}
-  - {addr: 0x800d4864, name: g_sound_novel_history_2}
+  - {addr: 0x800d4840, name: g_novel_reading}
+  - {addr: 0x800d4848, name: g_novel_state}
+  - {addr: 0x800d484c, name: g_novel_state_flags}
+  - {addr: 0x800d4852, name: g_novel_counter_delta}
+  - {addr: 0x800d4860, name: g_novel_history_0}
+  - {addr: 0x800d4862, name: g_novel_history_1}
+  - {addr: 0x800d4864, name: g_novel_history_2}
   - {addr: 0x800d4878, name: g_world_map_window_index}
   - {addr: 0x800d487c, name: g_world_map_ot_tags}
-  - {addr: 0x800d48fc, name: g_sound_novel_wait_frames}
+  - {addr: 0x800d48fc, name: g_novel_wait_frames}
   - {addr: 0x800d4900, name: s_hud_saved_value_position}
   - {addr: 0x800d4908, name: g_world_map_aux_ot_tags}
 

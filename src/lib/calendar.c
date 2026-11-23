@@ -1,7 +1,7 @@
 /* Convert a month and day to a zero-based day-of-year index and back. WLDCORE's calendar and saved
  * birthdays (party_unit_t.birthday_day) use these indexes; OPEN only converts birthdays. */
 
-#include "fft/calendar.h"
+#include "fft/world/calendar.h"
 #include "psx/types.h"
 
 /* Zero-based day of the year of a 1-based month and day (1 January is 0), with

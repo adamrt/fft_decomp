@@ -1,7 +1,7 @@
 /* Resident coordinate setters used by battle movement and rendering. Retail
  * calls these out-of-line functions even though PsyQ provides the same stores. */
 
-#include "fft/vector.h"
+#include "fft/sys/math.h"
 #include "psx/libgpu.h"
 
 /* Store x, y and z in an SVECTOR, truncated to 16 bits. */

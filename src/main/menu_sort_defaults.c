@@ -1,10 +1,10 @@
 /* Default sort keys and empty item-page orders used by the shared menus. */
 
-#include "fft/formation.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu_sort.h"
-#include "fft/unit_list.h"
+#include "fft/game/item.h"
+#include "fft/menu/menu_sort.h"
+#include "fft/party/formation.h"
+#include "fft/party/item_list.h"
+#include "fft/party/unit_list.h"
 #include "psx/libc.h"
 
 /* Reset the Unit List, Formation and five item sort orders to their default -1-terminated

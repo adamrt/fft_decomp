@@ -1,11 +1,11 @@
 /* Location scripts test story conditions and request world-map events, choices and visible routes. */
 
-#include "fft/character_identity.h"
-#include "fft/location.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/script_variable.h"
-#include "fft/world_map.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/script/script_variable.h"
+#include "fft/world/location.h"
+#include "fft/world/world_map.h"
 #include "psx/types.h"
 
 static void location_script_opcode_00_nop(void);
@@ -271,7 +271,7 @@ static void location_script_opcode_13_check_casualties_at_most(void) {
 }
 
 /* Stage a deferred LoadEvent request: the event to play and its transition
- * mode (event_transition_open). */
+ * mode (world_map_open_event_transition). */
 static void location_script_opcode_19_request_load_event(void) {
     g_location_script_state.args[0] = g_location_script_state.data[g_location_script_state.ip];
     g_location_script_state.ip++;

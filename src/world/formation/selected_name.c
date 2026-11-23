@@ -1,8 +1,8 @@
 /* The selected party unit's name id, combined with its name class. */
 
-#include "fft/formation.h"
-#include "fft/party.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/party.h"
+#include "fft/party/formation.h"
 #include "psx/types.h"
 
 /* Return the name id of the party unit in g_formation_selected_unit_identity's

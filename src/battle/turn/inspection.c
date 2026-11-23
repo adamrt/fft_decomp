@@ -1,14 +1,14 @@
 /* Map cursor visibility and placement, team highlights and AT List inspection. */
 
-#include "fft/at_list.h"
-#include "fft/command.h"
-#include "fft/cursor.h"
-#include "fft/map.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/sprite.h"
-#include "fft/target.h"
-#include "fft/unit.h"
+#include "fft/battle/at_list.h"
+#include "fft/battle/command.h"
+#include "fft/battle/cursor.h"
+#include "fft/battle/target.h"
+#include "fft/game/battle_unit.h"
+#include "fft/gfx/sprite.h"
+#include "fft/map/map.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
 #include "psx/types.h"
 
 static s32 s_at_list_cursor;
@@ -139,7 +139,7 @@ void at_list_show_next_entry(void) {
 
 /* Open the status menu once: mark it open and restart the AT list cursor at entry
  * 0. */
-void menu_status_open(void) {
+void command_open_status_menu(void) {
     if (g_menu_status_open == 0) {
         g_menu_status_open = 1;
         s_at_list_cursor = 0;
@@ -154,7 +154,7 @@ void at_list_reset_cursor(void) {
 
 /* Drop a pending status-menu request (Triangle during a unit's turn the player does not control)
  * and mark the status menu closed. */
-void menu_status_clear(void) {
+void command_clear_status_menu(void) {
     g_menu_status_requested = 0;
     g_menu_status_open = 0;
 }

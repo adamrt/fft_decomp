@@ -2,9 +2,9 @@
  * and pictures. The libgs renderer advances their animations and applies the map's pause and
  * fade rules. */
 
-#include "fft/display_object.h"
-#include "fft/gfx.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/world/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"

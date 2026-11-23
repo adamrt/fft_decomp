@@ -1,6 +1,6 @@
 /* Music and channel initialization, snapshot copies and active music lists. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libapi.h"
 #include "psx/libspu.h"
 #include "psx/types.h"

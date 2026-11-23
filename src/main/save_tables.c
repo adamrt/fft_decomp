@@ -1,14 +1,14 @@
 /* Resetting the save record fields and the new game data tables. */
 
-#include "fft/brave_story.h"
-#include "fft/proposition.h"
-#include "fft/save.h"
-#include "fft/sound_novel.h"
-#include "fft/world_map.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/novel.h"
+#include "fft/world/proposition.h"
+#include "fft/world/save.h"
+#include "fft/world/world_map.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
-sound_novel_reading_t g_sound_novel_saved_readings[5] = { 0 };
+novel_reading_t g_novel_saved_readings[5] = { 0 };
 
 extern u8* g_brave_story_ages_source;
 
@@ -23,37 +23,37 @@ extern u8* g_brave_story_ages_source;
  * carries the per-function gcc-2.6.3_O2_aspsx-2.21 profile. */
 void save_init_data_tables(void) {
     s32 i;
-    sound_novel_reading_t* record;
+    novel_reading_t* record;
 
     for (i = 0; i < 5; i++) {
-        record = &g_sound_novel_saved_readings[i];
+        record = &g_novel_saved_readings[i];
         record->text_history[3] = -1;
         record->text_history[2] = -1;
         record->text_history[1] = -1;
         record->text_history[0] = -1;
         record->picture_id = -1;
-        g_sound_novel_saved_readings[i].background_set = -1;
-        record->sound_mode = SOUND_NOVEL_SOUND_MODE_EFFECTS_ONLY;
+        g_novel_saved_readings[i].background_set = -1;
+        record->sound_mode = NOVEL_SOUND_MODE_EFFECTS_ONLY;
         record->music_selection = 0;
         record->state_flags = 0;
-        g_sound_novel_saved_readings[i].section = 0;
-        g_sound_novel_saved_readings[i].counter = 0;
+        g_novel_saved_readings[i].section = 0;
+        g_novel_saved_readings[i].counter = 0;
         record->_unknown_18 = 0;
         record->text_id = 0;
-        g_sound_novel_saved_readings[i].counter_delta = 0;
-        g_sound_novel_saved_readings[i].buffer = &g_sound_novel_script;
+        g_novel_saved_readings[i].counter_delta = 0;
+        g_novel_saved_readings[i].buffer = &g_novel_script;
     }
-    g_sound_novel_saved_readings[0].brightness = 0x10;
-    g_sound_novel_saved_readings[1].brightness = 0x10;
-    g_sound_novel_saved_readings[2].brightness = 0;
-    g_sound_novel_saved_readings[3].brightness = 0;
-    g_sound_novel_saved_readings[4].brightness = 0x10;
+    g_novel_saved_readings[0].brightness = 0x10;
+    g_novel_saved_readings[1].brightness = 0x10;
+    g_novel_saved_readings[2].brightness = 0;
+    g_novel_saved_readings[3].brightness = 0;
+    g_novel_saved_readings[4].brightness = 0x10;
     memcpy(g_brave_story_character_ages, g_brave_story_ages_source, sizeof(g_brave_story_character_ages));
     for (i = 0; i < 40; i++) {
-        g_sound_novel_read_section_bits[i] = 0;
+        g_novel_read_section_bits[i] = 0;
     }
     for (i = 0; i < 2; i++) {
-        g_sound_novel_saved_flags[i] = 0;
+        g_novel_saved_flags[i] = 0;
     }
     for (i = 0; i < 96; i++) {
         g_proposition_states[i] = 0;

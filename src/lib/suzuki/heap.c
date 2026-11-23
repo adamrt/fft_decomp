@@ -1,6 +1,6 @@
 /* Sound-engine CPU heap allocation and block list. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 
 /* Suzuki heap block header (0x10 bytes; payload follows). The $gp-relative
  * allocator (0x8001423c-0x8001442c) rounds requests to 16 bytes and chains

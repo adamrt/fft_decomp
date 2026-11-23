@@ -1,27 +1,27 @@
 /* The world-map loop initializes its subsystems, advances the menu stack and draws each map or
  * captured-backdrop frame until control returns to MAIN. */
 
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/location.h"
-#include "fft/menu_input.h"
-#include "fft/menu_selection.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message.h"
-#include "fft/music.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/script_variable.h"
-#include "fft/sound_novel.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/world_map.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/party/formation.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/system.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/location.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/novel.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
@@ -32,7 +32,7 @@
 extern u16* g_location_script_default_base;
 
 /* Sound resource the sound-novel menu passes to suzuki_sound_append_resource. */
-extern struct suzuki_sound_resource* g_sound_novel_default_sound_resource;
+extern struct suzuki_sound_resource* g_novel_default_sound_resource;
 extern GsOT_TAG g_world_map_ot_tags[2][16];
 extern GsOT_TAG g_world_map_aux_ot_tags[2][4];
 
@@ -144,7 +144,7 @@ void world_map_capture_backdrop(void) {
     g_gfx_active_buffer_index = buffer_index;
     GsSetWorkBase(g_world_map_primitive_buffers + buffer_index * 0xE000);
     GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
-    event_transition_draw_sprite(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_event_transition_sprite(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     /* The map passes run with the stack moved into the 1 KB scratchpad, starting
      * at its last word. */
     world_map_switch_to_stack(getScratchAddr(255));
@@ -164,7 +164,7 @@ void world_map_capture_backdrop(void) {
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_update_marker();
     world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     display_object_draw_gs_list(
@@ -182,7 +182,7 @@ void world_map_capture_backdrop(void) {
 static void draw_map_frame(void) {
     GsClearOt(0, 0, &g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
-    event_transition_draw_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_event_transition_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
     world_map_project_tiles();
     world_map_draw_tiles(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index]);
@@ -196,7 +196,7 @@ static void draw_map_frame(void) {
     world_map_restore_previous_stack();
     world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
-    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     display_object_draw_gs_list(&g_world_map_aux_ordering_tables[g_gfx_active_buffer_index], g_display_object_aux_queue,
@@ -224,10 +224,10 @@ void world_map_draw_frame(void) {
 
     GsClearOt(0, 0, &g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     DrawSync(0);
-    event_transition_draw_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_event_transition_sprite(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_update_menus(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     world_map_switch_to_stack(getScratchAddr(255));
-    hud_draw_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
+    world_map_draw_hud_value(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     calendar_draw_date(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     location_draw_label(&g_world_map_ordering_tables[g_gfx_active_buffer_index]);
     display_object_draw_gs_list(
@@ -353,7 +353,7 @@ static void init_map_state(void) {
                   | WORLD_MAP_FLAG_TUTORIAL_EVENT | WORLD_MAP_FLAG_UNLOCK_ALL | WORLD_MAP_FLAG_TITLE_BRAVE_STORY))
         | WORLD_MAP_FLAG_RUNNING;
     g_location_script_base = g_location_script_default_base;
-    g_sound_novel_sound_resource = g_sound_novel_default_sound_resource;
+    g_novel_sound_resource = g_novel_default_sound_resource;
     /* Tile descriptors share the buffer later used for picture TIMs. */
     g_picture_buffer = (u32*)g_world_map_tile_descriptors;
 
@@ -400,7 +400,7 @@ static void init_map_state(void) {
     g_music_queue.music.tracks[1] = 0;
     g_music_queue.music.tracks[0] = 0;
     g_music_queue.current_command = MUSIC_QUEUE_COMMAND_NONE;
-    g_sound_novel_countdown_frames = 0;
+    g_novel_countdown_frames = 0;
     g_travel.flags = 0;
 
     /* Debug unlock (nothing sets WORLD_MAP_FLAG_UNLOCK_ALL): every profile,
@@ -504,7 +504,7 @@ static void init_map_screen(void) {
  * restores the weather script variable saved before the event and reopens the
  * list it was chosen from (the tutorial with its two music tracks queued). The
  * title's tutorial and Brave Story requests open those screens. These all go
- * through menu_screen_transition_open. */
+ * through world_map_open_screen_transition. */
 static void restore_entry_level(void) {
     s32 flags = g_world_map_flags & ~WORLD_MAP_FLAG_RESTART;
 
@@ -526,18 +526,18 @@ static void restore_entry_level(void) {
     if (flags & WORLD_MAP_FLAG_STORY_EVENT_REPLAY) {
         g_world_map_flags = flags ^ WORLD_MAP_FLAG_STORY_EVENT_REPLAY;
         script_variable_set(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
-        menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY_EVENTS, 0, 0);
+        world_map_open_screen_transition(MENU_STACK_LEVEL_BRAVE_STORY_EVENTS, 0, 0);
     } else if (flags & WORLD_MAP_FLAG_TUTORIAL_EVENT) {
         g_world_map_flags = flags ^ WORLD_MAP_FLAG_TUTORIAL_EVENT;
         script_variable_set(EVENT_SCRIPT_VAR_WEATHER, g_brave_story_saved_weather_variable);
         g_music_queue.music.tracks[0] = 0x1B;
         g_music_queue.music.tracks[1] = 0x1A;
         g_music_queue.current_slot = 2;
-        menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST, 1, 0);
+        world_map_open_screen_transition(MENU_STACK_LEVEL_TUTORIAL_BATTLE_LIST, 1, 0);
     } else if (flags & WORLD_MAP_FLAG_TITLE_TUTORIAL) {
-        menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
+        world_map_open_screen_transition(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
     } else if (flags & WORLD_MAP_FLAG_TITLE_BRAVE_STORY) {
-        menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
+        world_map_open_screen_transition(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
     }
 }
 

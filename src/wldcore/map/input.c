@@ -2,10 +2,10 @@
  * The frame poll publishes held/new buttons; menu handlers advance the private
  * direction and shoulder-button repeat counters using MAIN's timing settings. */
 
-#include "fft/input.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
-#include "fft/world_map.h"
+#include "fft/sys/input.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
+#include "fft/world/world_map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

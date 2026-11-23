@@ -1,17 +1,18 @@
 /* Run one frame of the battle Equip screen. Selected-unit and message state
  * coordinate its command, equipment and numeric-panel threads through closing. */
 
-#include "fft/equipment.h"
-#include "fft/help.h"
-#include "fft/map_unit.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/battle_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/equipment.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -135,7 +136,7 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
     s_equipment_text_restore_pending = restore_text;
     menu_input_update_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-        menu_start_help_text(3);
+        help_start_text(3);
     }
     if (s_equipment_text_restore_pending != 0) {
         if (g_menu_input_lock_mode == 0) {

@@ -1,19 +1,19 @@
 /* Prepare OPEN's shared screen and working state for either session,
  * switching movie display modes and restoring FRAME.BIN after the ending. */
 
-#include "fft/display_object.h"
-#include "fft/ending.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu_input.h"
-#include "fft/movie.h"
-#include "fft/music.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
-#include "fft/title.h"
+#include "fft/front/ending.h"
+#include "fft/front/title.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/movie.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -119,12 +119,12 @@ void gfx_init_screen_environments(s32 clear_first) {
         g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
         g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
         g_gfx_screen_environments[0].draw.dfe = g_gfx_screen_environments[1].draw.dfe = 1;
-        g_gfx_overlay_fade.rect.x = -0xa0;
-        g_gfx_overlay_fade.rect.y = -0x78;
+        g_fade_tile.rect.x = -0xa0;
+        g_fade_tile.rect.y = -0x78;
         g_gfx_screen_environments[0].draw.ofs[0] = center_x;
         g_gfx_screen_environments[1].draw.ofs[0] = center_x;
-        g_gfx_overlay_fade.rect.w = 0x140;
-        g_gfx_overlay_fade.rect.h = 0xf0;
+        g_fade_tile.rect.w = 0x140;
+        g_fade_tile.rect.h = 0xf0;
         if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RGB24) {
             g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 1;
             rect.x = 0;
@@ -147,12 +147,12 @@ void gfx_init_screen_environments(s32 clear_first) {
         g_gfx_screen_environments[0].draw.ofs[1] = 0x78;
         g_gfx_screen_environments[1].draw.ofs[1] = 0x168;
         g_gfx_screen_environments[0].draw.isbg = g_gfx_screen_environments[1].draw.isbg = 0;
-        g_gfx_overlay_fade.rect.x = -0x80;
-        g_gfx_overlay_fade.rect.y = -0x78;
+        g_fade_tile.rect.x = -0x80;
+        g_fade_tile.rect.y = -0x78;
         g_gfx_screen_environments[0].draw.ofs[0] = center_x;
         g_gfx_screen_environments[1].draw.ofs[0] = center_x;
-        g_gfx_overlay_fade.rect.w = 0x100;
-        g_gfx_overlay_fade.rect.h = 0xf0;
+        g_fade_tile.rect.w = 0x100;
+        g_fade_tile.rect.h = 0xf0;
         if (g_system_runtime_flags & SYSTEM_RUNTIME_FLAG_RGB24) {
             g_gfx_screen_environments[0].disp.isrgb24 = g_gfx_screen_environments[1].disp.isrgb24 = 1;
             rect.x = 0;
@@ -193,8 +193,8 @@ static void init_runtime_state(void) {
     g_file_destination = (u8*)0x801d0000;
     g_file_current_openbk_image_id = -1;
     g_gfx_opntex_data = (u32*)0x80140000;
-    g_gfx_overlay_fade.abr = 2;
-    g_gfx_overlay_fade.ot_index = 2;
+    g_fade_tile.abr = 2;
+    g_fade_tile.ot_index = 2;
     g_input_previous_buttons = 0;
     g_input_new_button_presses = 0;
     g_input_current_buttons = 0;
@@ -207,5 +207,5 @@ static void init_runtime_state(void) {
 /* Start a frame: clear the active ordering table and queue the overlay fade. */
 void gfx_begin_frame(void) {
     gfx_clear_current_otag();
-    gfx_update_overlay_fade(g_gfx_otags[g_gfx_active_buffer_index]);
+    fade_tile_update(g_gfx_otags[g_gfx_active_buffer_index]);
 }

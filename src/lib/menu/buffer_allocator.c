@@ -1,10 +1,10 @@
 /* First-fit allocation of menu image buffers from the program's page arena. */
 
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu/menu.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

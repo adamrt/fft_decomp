@@ -1,12 +1,12 @@
 /* The new-game prologue steps encoded text and picture commands, fades its
  * text strips and crossfades the 210-by-180 illustrations in the frame image. */
 
-#include "fft/prologue.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/sound.h"
-#include "fft/system.h"
+#include "fft/front/prologue.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

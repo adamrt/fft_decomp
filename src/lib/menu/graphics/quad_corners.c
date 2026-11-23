@@ -1,9 +1,9 @@
 /* Appending a textured menu quad, given by its four corners, to an ordering-table entry. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/status_screen.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/status_screen.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

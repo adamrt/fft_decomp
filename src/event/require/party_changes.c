@@ -1,29 +1,29 @@
 /* Post-battle party changes, including congratulations text, Brave and Faith updates, low Brave and high Faith
  * departures, join candidates, the bugged ready condition, selection waits and the JOBSTTS overlay open. */
 
-#include "fft/after_battle.h"
-#include "fft/character_identity.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/message.h"
-#include "fft/music.h"
-#include "fft/overlay.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/status.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
-#include "fft/unit_view.h"
+#include "fft/battle/after_battle.h"
+#include "fft/battle/conditions.h"
+#include "fft/battle/unit_view.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/status.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/music.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -42,7 +42,7 @@ s32 g_party_affected_battle_unit_indices[50] = { 0 };
  * their threads. During event 0x145 a different track plays, the waits
  * cannot be skipped and the hold is 300 frames in place of 180.
  */
-void victory_congratulations_thread(void) {
+void conditions_congratulations_thread(void) {
     s32 thread_a;
     s32 thread_b;
 
@@ -299,7 +299,7 @@ static s32 find_departures(void) {
                 s_party_affected_unit_message_ids[count] = group + 0x1018;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
-                party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_LOW_BRAVE);
+                after_battle_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_LOW_BRAVE);
             } else {
                 s32 count;
 
@@ -338,7 +338,7 @@ static s32 find_departures(void) {
                 s_party_affected_unit_message_ids[count] = group + 0x1062;
                 g_party_affected_battle_unit_indices[count] = battle_index;
                 g_party_affected_unit_count = count + 1;
-                party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_HIGH_FAITH);
+                after_battle_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LEFT_HIGH_FAITH);
             } else {
                 s32 count;
 
@@ -372,7 +372,7 @@ static s32 find_departures(void) {
  * for the prompt with message 0x1800 + (identity - 0x80) * 8 + a variant from
  * the random script variable.
  */
-s32 party_update_after_battle(void) {
+s32 after_battle_update_party(void) {
     s32 prompt_count = 0;
     s32 party_index;
     s32 found_index;
@@ -401,9 +401,9 @@ s32 party_update_after_battle(void) {
                     if (unit->unit_id == 0 || unit->unit_id >= 4) {
                         if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                                 & STATUS_BYTE_MASK(STATUS_ID_TREASURE)))
-                            party_store_or_sell_equipment(i);
+                            after_battle_store_or_sell_equipment(i);
                         party_unit_remove(party_index);
-                        party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LOST_IN_BATTLE);
+                        after_battle_set_biography_state(unit->character_identity, PARTY_BIO_STATE_LOST_IN_BATTLE);
                     }
                 } else if (unit->character_identity != CHARACTER_IDENTITY_ENTD_NONE
                     && unit->character_identity < CHARACTER_IDENTITY_RAMZA_END) {
@@ -454,7 +454,7 @@ s32 party_update_after_battle(void) {
                     if (i == 71) {
                         i = 72;
                     }
-                    party_sell_equipment_over_limit(party_index);
+                    after_battle_sell_equipment_over_limit(party_index);
                     party_unit_save(unit, unit->unit_flags & UNIT_FLAG_SAVE_FORMATION);
                 } else {
                     s32 count;
@@ -485,7 +485,7 @@ s32 party_update_after_battle(void) {
  * and plays each affected unit's warning line in turn before fading the
  * banner out.
  */
-void party_brave_faith_report_thread(void) {
+void after_battle_brave_faith_report_thread(void) {
     s32 i;
     s32 main_thread;
 
@@ -504,7 +504,7 @@ void party_brave_faith_report_thread(void) {
     main_thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, conditions_special_thread);
     thread_set_parameters(main_thread, CONDITIONS_BANNER_WARNING, 0, 0);
-    gfx_fade_rgb_31_frames(0xd, 0xd, 2);
+    conditions_fade_dark_screen_color(0xd, 0xd, 2);
     for (i = 0; i < g_party_affected_unit_count; i++) {
         s32 unit_thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
         g_text_substitution_values[0] = g_party_affected_battle_unit_indices[i];
@@ -515,7 +515,7 @@ void party_brave_faith_report_thread(void) {
     }
     thread_set_parameters(main_thread, 0, 0, 2);
     thread_wait_inactive(main_thread);
-    gfx_fade_rgb_31_frames(6, 5, 2);
+    conditions_fade_dark_screen_color(6, 5, 2);
     thread_current_exit();
 }
 
@@ -528,7 +528,7 @@ void party_brave_faith_report_thread(void) {
  * the "left the party" banner for its gender, waits half a second and
  * removes the unit from the roster.
  */
-void party_departures_thread(void) {
+void after_battle_departures_thread(void) {
     s32 i;
     s32 main_thread;
 
@@ -546,7 +546,7 @@ void party_departures_thread(void) {
     main_thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, conditions_special_thread);
     thread_set_parameters(main_thread, CONDITIONS_BANNER_PARTING_SHOT, 0, 0);
-    gfx_fade_rgb_31_frames(0xd, 5, 2);
+    conditions_fade_dark_screen_color(0xd, 5, 2);
     thread_yield();
     for (i = 0; i < g_party_affected_unit_count; i++) {
         battle_unit_t* unit;
@@ -572,7 +572,7 @@ void party_departures_thread(void) {
     }
     thread_set_parameters(main_thread, CONDITIONS_BANNER_PARTING_SHOT, 0, 2);
     thread_wait_inactive(main_thread);
-    gfx_fade_rgb_31_frames(6, 5, 2);
+    conditions_fade_dark_screen_color(6, 5, 2);
     thread_current_exit();
 }
 
@@ -591,7 +591,7 @@ void conditions_ready_bugged_thread(void) {
 
 /* Wait until the menu thread ends or a selection result (-1, 0 or 1) is in,
  * then ask the message thread to close and wait for both threads. */
-void menu_wait_selection_threads(void) {
+void after_battle_wait_menu_selection(void) {
     while (g_threads[AFTER_BATTLE_THREAD_SLOT_MENU].is_running != 0) {
         s32 selection = g_after_battle_menu_selection_result;
 

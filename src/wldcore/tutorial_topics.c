@@ -3,17 +3,17 @@
  * topic list at the saved cursor. Scripted Formation and battle lessons use the
  * separate Tutorial lists and player. */
 
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/menu_input.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/menu/menu_input.h"
+#include "fft/sys/file.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/tutorial.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/pad.h"
 
 static void open_topic(s32 topic);
@@ -148,7 +148,7 @@ static void open_topic(s32 topic) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[1] = -1;
     g_text_window.text_substitutions[0] = -1;
-    text_window_open(&g_text_window);
+    window_open_paged_text(&g_text_window);
     depth = g_menu_stack_depth;
     g_display_object_animated_pool[g_menu_stack_records[depth - 1].tutorial_menu.cursor_window].flags
         |= DISPLAY_OBJECT_HIDDEN;
@@ -162,13 +162,13 @@ static void open_topic(s32 topic) {
 
 /* Step of the tutorial topic text level pushed by
  * open_topic: once the text window has
- * closed (text_window_update), pop the level, show the
+ * closed (window_update_paged_text), pop the level, show the
  * tutorial menu's windows and frame again and reopen the topic list. */
 void tutorial_update_topic(menu_stack_record_t* unused_level) {
     s32 depth;
 
     if (!(g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN)
-        && text_window_update(&g_text_window) == 0) {
+        && window_update_paged_text(&g_text_window) == 0) {
         sound_play_effect(SOUND_SFX_CANCEL);
         depth = g_menu_stack_depth;
         g_display_object_gs_image_pool[g_menu_stack_records[depth - 2].tutorial_menu.rows_image].flags

@@ -1,27 +1,26 @@
 /* Load the battle and deployment screen, then run the battle state loop. */
 
-#include "fft/battle_state.h"
-#include "fft/camera.h"
-#include "fft/command.h"
-#include "fft/cursor.h"
-#include "fft/deploy.h"
-#include "fft/effect_script.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/map.h"
-#include "fft/map_load.h"
-#include "fft/map_mesh.h"
-#include "fft/map_palette.h"
-#include "fft/map_unit.h"
-#include "fft/music.h"
-#include "fft/option.h"
-#include "fft/render.h"
-#include "fft/script_variable.h"
-#include "fft/sprite.h"
-#include "fft/sprite_sheet.h"
-#include "fft/system.h"
+#include "fft/battle/battle_state.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/command.h"
+#include "fft/battle/cursor.h"
+#include "fft/battle/deploy.h"
+#include "fft/effect/effect_script.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/sprite.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/map/map.h"
+#include "fft/map/map_load.h"
+#include "fft/map/map_mesh.h"
+#include "fft/map/map_palette.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/option.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/system.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -63,7 +62,7 @@ static void deployment_frame_stub(void) {
  * (done), then fades back out to black. Otherwise the NOW LOADING display is
  * drawn instead. The fade polygons subtract their gray level from the screen, so
  * 0xff is black and 0 leaves the picture as drawn. The battle starts from a black
- * screen (g_fade_intensity 0xff).
+ * screen (g_fade_battle_level 0xff).
  *
  * banner_p and the loop's fade = 0xff reproduce the target's preheader order and
  * register choice for the hoisted color. The dead fade = 0 before done keeps the
@@ -88,17 +87,17 @@ static void run_map_load(void) {
     g_map_init_step = 0;
     g_deploy_finished = 0;
 
-    SetPolyF4(&g_fade_polygons[0]);
-    setRGB0(&g_fade_polygons[0], 0, 0, 0);
-    setXY4(&g_fade_polygons[0], 0x80, 0, 0x180, 0, 0, 0x100, 0x180, 0x100);
-    SetSemiTrans(&g_fade_polygons[0], 1);
-    g_fade_polygons[1] = g_fade_polygons[0];
-    g_fade_tint_polygons[0] = g_fade_polygons[0];
-    g_fade_tint_polygons[1] = g_fade_polygons[0];
-    SetDrawMode(&g_fade_draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &window);
-    g_fade_draw_modes[1] = g_fade_draw_modes[0];
-    g_fade_tint_draw_modes[0] = g_fade_draw_modes[0];
-    g_fade_tint_draw_modes[1] = g_fade_draw_modes[0];
+    SetPolyF4(&g_fade_battle_polygons[0]);
+    setRGB0(&g_fade_battle_polygons[0], 0, 0, 0);
+    setXY4(&g_fade_battle_polygons[0], 0x80, 0, 0x180, 0, 0, 0x100, 0x180, 0x100);
+    SetSemiTrans(&g_fade_battle_polygons[0], 1);
+    g_fade_battle_polygons[1] = g_fade_battle_polygons[0];
+    g_fade_tint_polygons[0] = g_fade_battle_polygons[0];
+    g_fade_tint_polygons[1] = g_fade_battle_polygons[0];
+    SetDrawMode(&g_fade_battle_draw_modes[0], 0, 0, PSYQ_GPU_TPAGE_ABR_SUBTRACT, &window);
+    g_fade_battle_draw_modes[1] = g_fade_battle_draw_modes[0];
+    g_fade_tint_draw_modes[0] = g_fade_battle_draw_modes[0];
+    g_fade_tint_draw_modes[1] = g_fade_battle_draw_modes[0];
 
     ((P_TAG*)&banner[0])->len = 9;
     banner[0].code = 0x2c;
@@ -117,11 +116,11 @@ static void run_map_load(void) {
     if (show_banner != 0) {
         do {
             gfx_swap_battle_otag();
-            (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
-            (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
-            (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-            AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
-            AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
+            (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
+            (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
+            (g_fade_battle_polygons + g_gfx_screen_polarity)->b0 = fade;
+            AddPrim(gfx_get_battle_otag(), &g_fade_battle_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_battle_draw_modes[g_gfx_screen_polarity]);
             AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
             g_system_battle_frame_hsync_count = deploy_submit_frame(gfx_get_battle_otag() + 0x17f);
@@ -143,17 +142,17 @@ static void run_map_load(void) {
         if (g_map_init_step == 0xd) {
             load_fixed_cluts();
             battle_state_battle_start_event_enter();
-            g_fade_intensity = fade;
+            g_fade_battle_level = fade;
             /* Not `break`: jump optimization would move this exit block
              * past the loop end, which the target keeps inline. */
             goto done;
         }
         deployment_frame_stub();
-        (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
-        (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
-        (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-        AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
-        AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
+        (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
+        (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
+        (g_fade_battle_polygons + g_gfx_screen_polarity)->b0 = fade;
+        AddPrim(gfx_get_battle_otag(), &g_fade_battle_polygons[g_gfx_screen_polarity]);
+        AddPrim(gfx_get_battle_otag(), &g_fade_battle_draw_modes[g_gfx_screen_polarity]);
         g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
         g_system_battle_frame_hsync_count = deploy_submit_frame(gfx_get_battle_otag() + 0x17f);
         file_poll_load(&g_file_cd_state);
@@ -169,11 +168,11 @@ done:
                 fade = 0xff;
             }
             gfx_swap_battle_otag();
-            (g_fade_polygons + g_gfx_screen_polarity)->r0 = fade;
-            (g_fade_polygons + g_gfx_screen_polarity)->g0 = fade;
-            (g_fade_polygons + g_gfx_screen_polarity)->b0 = fade;
-            AddPrim(gfx_get_battle_otag(), &g_fade_polygons[g_gfx_screen_polarity]);
-            AddPrim(gfx_get_battle_otag(), &g_fade_draw_modes[g_gfx_screen_polarity]);
+            (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
+            (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
+            (g_fade_battle_polygons + g_gfx_screen_polarity)->b0 = fade;
+            AddPrim(gfx_get_battle_otag(), &g_fade_battle_polygons[g_gfx_screen_polarity]);
+            AddPrim(gfx_get_battle_otag(), &g_fade_battle_draw_modes[g_gfx_screen_polarity]);
             AddPrim(gfx_get_battle_otag(), &banner[g_gfx_screen_polarity]);
             g_gfx_screen_polarity = g_gfx_screen_polarity == 0;
             g_system_battle_frame_hsync_count = deploy_submit_frame(gfx_get_battle_otag() + 0x17f);
@@ -198,7 +197,7 @@ void battle_entrypoint(void) {
     s32 i;
     s32 timer_offset;
 
-    render_init_buffers();
+    gfx_init_render_buffers();
     sprite_init_render_state();
     effect_init_system();
 

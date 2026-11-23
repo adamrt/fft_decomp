@@ -1,21 +1,22 @@
 /* Message box slots and typewriter glyphs, quad flips, fixed-point lerps and window quad animations. */
 
-#include "fft/message_box.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/option.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
+#include "fft/party/formation.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
@@ -53,7 +54,7 @@ static void render_box_text_image(text_dialog_record_t* record) {
         g_menu_window_text_pen.rect.y = 8;
         g_menu_text_first_line = record->first_line;
         g_menu_text_line_limit = record->last_line;
-        menu_display_text_entry(record->text, record->buffer, &g_menu_window_text_pen);
+        text_render_entry_to_image(record->text, record->buffer, &g_menu_window_text_pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();
         menu_free_memory(record->buffer);

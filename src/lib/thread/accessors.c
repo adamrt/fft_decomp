@@ -1,6 +1,6 @@
 /* Thread accessors for the current global pointer, parameters 1 to 3 and running checks. */
 
-#include "fft/thread.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Capture $gp for a new native thread's saved context. */

@@ -1,7 +1,7 @@
 /* Title menus repeat Up and Down after the resident input delays; Left and
  * Right have counters but never repeat in OPEN. */
 
-#include "fft/input.h"
+#include "fft/sys/input.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

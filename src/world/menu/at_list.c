@@ -1,21 +1,22 @@
 /* The AT list window thread, with its scroll arrows and paged text columns. */
 
-#include "fft/at_list.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_window.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/battle/at_list.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -139,7 +140,7 @@ void at_list_run(void) {
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
 
     buffer = g_menu_render_buffer;
-    menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
+    mem_zero_words(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, menu_window_frame_thread);
     thread_set_parameters(MENU_SCREEN_THREAD_SLOT_AT_LIST_FRAME, (s32)&entry->window, 0, 0);
@@ -231,7 +232,7 @@ void at_list_run(void) {
                 }
                 image_rect.h = 0x10;
                 buffer = g_menu_render_buffer;
-                menu_clear_render_buffer(buffer, 0x800);
+                mem_zero_words(buffer, 0x800);
                 g_menu_window_text_pen.stride = entry->inner_width;
 
                 for (column = 0; column < 3; column++) {
@@ -244,11 +245,11 @@ void at_list_run(void) {
                         g_menu_window_text_pen.color = 0x44444444;
                     }
                     if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                        menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
+                        text_render_entry_to_image(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
                     } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                        menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
+                        text_draw_number(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                        menu_draw_large_number_glyphs(
+                        text_draw_large_number_glyphs(
                             layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
                     }
                 }

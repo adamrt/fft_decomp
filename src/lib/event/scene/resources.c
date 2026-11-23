@@ -1,19 +1,19 @@
 /* Load event scripts, portraits and EVTCHR images and initialize menu text and palettes. */
 
-#include "fft/file.h"
-#include "fft/fullscreen_graphic.h"
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/overlay.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/sprite_sheet.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/fullscreen_graphic.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/portrait.h"
+#include "fft/gfx/sprite_sheet.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/overlay.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -71,7 +71,7 @@ void portrait_load_image(s32 portrait_id) {
  * which BATTLE's per-frame event update unpacks it into the slot, and then freed.
  * WORLD retains this loader, but its per-frame request hook is empty.
  */
-void gfx_load_evtchr_thread(void) {
+void sprite_sheet_load_evtchr_thread(void) {
     s32 slot = thread_current_get_parameter_1();
     s32 block = thread_current_get_parameter_2();
     evtchr_file_record_t* buffer;

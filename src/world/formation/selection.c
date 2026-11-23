@@ -1,8 +1,8 @@
 /* Cycle the formation roster selection with L1 and R1, skipping egg units. */
 
-#include "fft/formation.h"
-#include "fft/sound.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/party/formation.h"
+#include "fft/sys/sound.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

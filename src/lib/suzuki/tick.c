@@ -1,6 +1,6 @@
 /* Sequencer timer updates, SPU voice attributes, key transitions and channel ramps. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libspu.h"
 #include "psx/types.h"
 

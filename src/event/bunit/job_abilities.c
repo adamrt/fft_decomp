@@ -1,15 +1,15 @@
 /* Unit List job availability and ability-list construction. */
 
-#include "fft/ability.h"
-#include "fft/ability_list.h"
-#include "fft/bits.h"
-#include "fft/character_identity.h"
-#include "fft/job.h"
-#include "fft/job_list.h"
-#include "fft/party_unit.h"
-#include "fft/skillset.h"
-#include "fft/unit.h"
-#include "fft/unit_list.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/job.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/skillset.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/job_list.h"
+#include "fft/party/unit_list.h"
+#include "fft/sys/bits.h"
 #include "psx/types.h"
 
 /* Map Squire through Mime to zero-based indexes; unique jobs map to zero. */

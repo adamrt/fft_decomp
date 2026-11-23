@@ -1,10 +1,10 @@
 /* POLY_FT4 quad enqueue, single and list. */
 
-#include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/save.h"
-#include "fft/status_screen.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/status_screen.h"
+#include "fft/world/save.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

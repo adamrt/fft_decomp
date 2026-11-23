@@ -1,6 +1,6 @@
 /* Saved menu selections and row/scroll restoration. */
 
-#include "fft/menu_selection.h"
+#include "fft/menu/menu_selection.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

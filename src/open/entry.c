@@ -2,17 +2,18 @@
  * pipeline that supplies their movies. The loops also present the background
  * image and poll the pad, including the retail soft-reset chord. */
 
-#include "fft/controller_stack.h"
-#include "fft/display_object.h"
-#include "fft/ending.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/movie.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
-#include "fft/title.h"
+#include "fft/front/controller_stack.h"
+#include "fft/front/ending.h"
+#include "fft/front/title.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/movie.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -92,7 +93,7 @@ title_result_e open_title_entrypoint(s32 skip_movie) {
             gfx_begin_frame();
             update_stream_frame();
             music_test_update_menu_frame();
-            controller_dispatch_current();
+            controller_stack_dispatch_current();
 
             graphics_buffer_index = g_gfx_active_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
@@ -144,7 +145,7 @@ void open_ending_entrypoint(void) {
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * CONTROLLER_OTAG_BUFFER_BYTES + (u32)otag_0);
             ending_draw_text_records(current_otag, graphics_buffer_index);
-            controller_dispatch_current();
+            controller_stack_dispatch_current();
             DrawSync(0);
             update_input_with_soft_reset();
             VSync(g_system_vsync_mode);

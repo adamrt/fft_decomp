@@ -1,6 +1,6 @@
 /* Resident error hooks called by the file loader, heap and battle services. */
 
-#include "fft/system.h"
+#include "fft/sys/system.h"
 
 /* Cleared by the error hooks; its original purpose and any reader are unknown. */
 static s32 s_system_error_hook_word = 0;

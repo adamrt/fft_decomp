@@ -1,10 +1,10 @@
 /* Derive job levels and unlock masks from earned JP. Proposition awards feed the same
  * progression data that formation and battle unit construction use. */
 
-#include "fft/job.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
 #include "psx/types.h"
 
 /* Compute a unit's unlocked-job bitset (Squire in bit 23, always set) from its packed job levels:

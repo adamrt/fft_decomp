@@ -1,8 +1,8 @@
 /* Bind text-bank section offsets and preserve the current section pointers while an
  * overlay temporarily supplies another bank. */
 
-#include "fft/memory.h"
-#include "fft/text.h"
+#include "fft/sys/memory.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 static u8* s_text_saved_section_pointers[TEXT_SECTION_COUNT];

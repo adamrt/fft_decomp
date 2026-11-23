@@ -1,6 +1,7 @@
 /* Whether a menu thread is running. */
 
-#include "fft/thread.h"
+#include "fft/menu/menu_list.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Return the scene scheduler's running flag for a menu thread. */

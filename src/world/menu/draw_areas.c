@@ -1,11 +1,11 @@
 /* The palette mode and the temporary and next ordering table draw areas. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

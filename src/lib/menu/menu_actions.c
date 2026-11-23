@@ -1,16 +1,16 @@
 /* Menu-row actions, cancellation and input gating for the event menus.
  * Restoring a remembered choice uses the same row-action flags as player input. */
 
-#include "fft/command.h"
-#include "fft/help.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
+#include "fft/battle/command.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

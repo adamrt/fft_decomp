@@ -1,9 +1,9 @@
 /* An effect callback that releases the GNS dispatch hold and advances the map destruction. */
 
-#include "fft/effect.h"
-#include "fft/effect_script.h"
-#include "fft/map.h"
-#include "fft/script.h"
+#include "fft/effect/effect.h"
+#include "fft/effect/effect_script.h"
+#include "fft/map/map.h"
+#include "fft/script/script.h"
 #include "psx/types.h"
 
 /* Callback handler for the map-destruction effect. Its first call releases the

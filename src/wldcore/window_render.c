@@ -1,16 +1,17 @@
 /* Window images and text, panel render threads, saved list cursors and scrollable text windows. */
 
-#include "fft/display_object.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_stack.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
@@ -102,7 +103,7 @@ void window_display_text_entry(s32 record_index, s32 text_id, point32_t point, u
     origin.rect.x = point.x;
     origin.rect.y = point.y;
     origin.stride = g_display_object_gs_image_pool[record_index].bounds.w;
-    menu_display_text_entry(text_id, (u8*)buffer, &origin);
+    text_render_entry_to_image(text_id, (u8*)buffer, &origin);
 }
 
 /* Padded image size using proportional pixel widths. No retail caller. */
@@ -311,7 +312,7 @@ static void number_confirm_noop(void) {
 /* Open the scrollable text window for state->text_id: add the page-prompt, scroll-arrow
  * and scroll-thumb indicators and a popping-in image record, place the indicators at
  * the text's right edge, measure the text and render its first page. */
-void text_window_open(text_window_t* state) {
+void window_open_paged_text(text_window_t* state) {
     s16 text_metrics[0x20];
     s32 index;
     s32 render_index;
@@ -399,7 +400,7 @@ static void init_animated_record(s32 index, s32 priority, s32 sequence) {
  * so only the other paths load $a0 (in their jump delay slots), as in the
  * target.
  */
-s32 text_window_update(text_window_t* state) {
+s32 window_update_paged_text(text_window_t* state) {
     if (state->scroll_state == TEXT_WINDOW_SCROLL_RETURN) {
         if (state->scroll_row == state->page_start_row) {
             state->scroll_state = TEXT_WINDOW_SCROLL_PAGING;

@@ -1,9 +1,9 @@
 /* Scaled window draw-area packet construction and initialization. */
 
-#include "fft/gfx.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/script.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

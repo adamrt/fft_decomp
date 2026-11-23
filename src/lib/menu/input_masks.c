@@ -1,6 +1,6 @@
 /* Clearing the menu input's pressed and repeat masks. */
 
-#include "fft/menu_input.h"
+#include "fft/menu/menu_input.h"
 
 /* Reset the three masks the menu input processor publishes: newly pressed, primary repeat and
  * secondary repeat. */

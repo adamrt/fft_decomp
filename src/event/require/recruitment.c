@@ -1,29 +1,31 @@
 /* Show recruited survivors in the party panels, offer room by dismissing
  * a roster member, and return equipment to inventory or sell its overflow. */
 
-#include "fft/ability.h"
-#include "fft/after_battle.h"
-#include "fft/character_identity.h"
-#include "fft/fade.h"
-#include "fft/input.h"
-#include "fft/item.h"
-#include "fft/map_unit.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/message.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/after_battle.h"
+#include "fft/battle/conditions.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/skillset.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/portrait.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -64,7 +66,7 @@ extern menu_entry_t g_after_battle_menu_entries[AFTER_BATTLE_MENU_ENTRY_COUNT];
 /* The join prompt's unused message result. */
 static s16 s_after_battle_message_menu_result;
 
-/* Member access reschedules a summary-field store in party_apply_post_battle_changes. */
+/* Member access reschedules a summary-field store in after_battle_apply_unit_changes. */
 extern s32 g_unit_panel_character_status_redraw_request;
 static thread_t s_after_battle_saved_thread = { 0 };
 /* REQUIRE's own copy of the party unit loader: rebuild party slot `party_index` into a
@@ -245,7 +247,7 @@ static s32 return_equipment(s32 party_index) {
 /* Sell each of a battle unit's seven equipped items of which 100 or more are
  * already held or equipped, for a quarter of its price, and remove it from
  * the unit. Returns 1 when it sold anything. */
-s32 party_sell_equipment_over_limit(s32 battle_index) {
+s32 after_battle_sell_equipment_over_limit(s32 battle_index) {
     battle_unit_t* unit;
     s32 sold_equipment = 0;
     s32 equipment_slot;
@@ -273,7 +275,7 @@ s32 party_sell_equipment_over_limit(s32 battle_index) {
  * An item of which 100 or more are already held or equipped is sold for a
  * quarter of its price instead and removed from the unit. Returns 1 when
  * it sold anything. */
-s32 party_store_or_sell_equipment(s32 battle_index) {
+s32 after_battle_store_or_sell_equipment(s32 battle_index) {
     battle_unit_t* unit;
     s32 sold_equipment = 0;
     s32 equipment_slot;
@@ -415,12 +417,12 @@ static s32 run_dismissal_selection(void) {
 
     thread_start(AFTER_BATTLE_THREAD_SLOT_TRANSITION, unit_panel_transition_thread);
     thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_TRANSITION, 0, 0, 0);
-    g_gfx_screen_fade = 0xff;
+    g_fade_event_level = 0xff;
     do {
         thread_yield();
-        g_gfx_screen_fade -= 0x10;
-    } while (g_gfx_screen_fade > 0);
-    g_gfx_screen_fade = 0;
+        g_fade_event_level -= 0x10;
+    } while (g_fade_event_level > 0);
+    g_fade_event_level = 0;
 
     /* Show the selected unit's portrait: copy its cell and palette from the party
      * sheets in VRAM into the panel's slots. */
@@ -480,7 +482,7 @@ static s32 run_dismissal_selection(void) {
             g_menu_input_controller = script_get_controller_input_pointer(0);
             if (*g_menu_input_controller & PSX_PAD_SELECT) {
                 helpmenu_thread = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
-                thread_start(helpmenu_thread, help_after_battle_thread);
+                thread_start(helpmenu_thread, help_menu_after_battle_thread);
                 thread_wait_inactive(helpmenu_thread);
                 continue;
             }
@@ -589,14 +591,14 @@ static s32 run_dismissal_selection(void) {
         thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_icon_selection_thread);
         thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
             (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_DISMISS_CONFIRMATION], 0, 0);
-        menu_wait_selection_threads();
+        after_battle_wait_menu_selection();
         if (g_after_battle_menu_selection_result != 0)
             continue;
 
         should_restore = return_equipment(selected_party_index);
         result = 0;
         party_unit_remove(selected_party_index);
-        party_set_biography_state(party_unit->sprite_set, PARTY_BIO_STATE_DISMISSED);
+        after_battle_set_biography_state(party_unit->sprite_set, PARTY_BIO_STATE_DISMISSED);
         break;
     }
 
@@ -629,12 +631,12 @@ static s32 run_dismissal_selection(void) {
     }
 
     unit_panel_set_dimmed(0);
-    g_gfx_screen_fade = 0;
+    g_fade_event_level = 0;
     do {
         thread_yield();
-        g_gfx_screen_fade += 0x10;
-    } while (g_gfx_screen_fade < 0x100);
-    g_gfx_screen_fade = 0xff;
+        g_fade_event_level += 0x10;
+    } while (g_fade_event_level < 0x100);
+    g_fade_event_level = 0xff;
     thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_TRANSITION, 0, 0, 1);
     return result;
 }
@@ -646,7 +648,7 @@ static s32 run_dismissal_selection(void) {
  * to the party or updates its bio variable. Restores the saved thread block
  * and menu descriptor on exit.
  */
-void party_apply_post_battle_changes(void) {
+void after_battle_apply_unit_changes(void) {
     s16 text_width_px;
     s16 text_height_px;
     menu_entry_t* saved_menu_descriptor;
@@ -670,7 +672,7 @@ void party_apply_post_battle_changes(void) {
     s32* transition_c_ptr;
     s32 screen_fade_max;
 
-    if (party_update_after_battle() == 0) {
+    if (after_battle_update_party() == 0) {
         thread_current_exit();
     }
 
@@ -797,7 +799,7 @@ void party_apply_post_battle_changes(void) {
                         }
                         if (input & PSX_PAD_SELECT) {
                             thread_id = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
-                            thread_start(thread_id, help_after_battle_thread);
+                            thread_start(thread_id, help_menu_after_battle_thread);
                             thread_wait_inactive(thread_id);
                         }
                     } while (1);
@@ -847,7 +849,7 @@ void party_apply_post_battle_changes(void) {
                         }
                     }
 
-                    menu_wait_selection_threads();
+                    after_battle_wait_menu_selection();
                     if (g_after_battle_menu_selection_result != -1) {
                         break;
                     }
@@ -866,13 +868,13 @@ void party_apply_post_battle_changes(void) {
                     s32 removal_result;
                     s32 removal_unit_index;
 
-                    g_gfx_screen_fade = 0;
+                    g_fade_event_level = 0;
                     do {
                         thread_yield();
-                        g_gfx_screen_fade += 0x10;
-                    } while (g_gfx_screen_fade < 0x100);
+                        g_fade_event_level += 0x10;
+                    } while (g_fade_event_level < 0x100);
                     screen_fade_max = 0xff;
-                    g_gfx_screen_fade = screen_fade_max;
+                    g_fade_event_level = screen_fade_max;
                     /* The status thread picks its panel cell from this flag; clear it while the removal screen runs. */
                     g_menu_post_battle_unit_changes_active = 0;
                     removal_result = run_dismissal_selection();
@@ -902,17 +904,17 @@ void party_apply_post_battle_changes(void) {
                     }
                     unit_panel_copy_billboard_in(
                         &g_unit_panel_selected_unit_status, unit_display_data, &g_unit_panel_selected_unit_fields);
-                    g_gfx_screen_fade = screen_fade_max;
+                    g_fade_event_level = screen_fade_max;
                     do {
                         thread_yield();
-                        g_gfx_screen_fade -= 0x10;
-                    } while (g_gfx_screen_fade > 0);
-                    g_gfx_screen_fade = 0;
+                        g_fade_event_level -= 0x10;
+                    } while (g_fade_event_level > 0);
+                    g_fade_event_level = 0;
                 }
             } while (g_party_removal_result != 0);
 
             /* Equipment the inventory cannot hold is sold; explain the sale before the unit joins. */
-            if (party_sell_equipment_over_limit(*selected_unit_index_ptr) != 0) {
+            if (after_battle_sell_equipment_over_limit(*selected_unit_index_ptr) != 0) {
                 thread_start(AFTER_BATTLE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
                 thread_set_parameters(AFTER_BATTLE_THREAD_SLOT_MENU,
                     (s32)&g_after_battle_menu_entries[AFTER_BATTLE_MENU_EQUIPMENT_SOLD_MESSAGE], 0, 0);
@@ -943,7 +945,7 @@ void party_apply_post_battle_changes(void) {
             thread_wait_frames(10);
             unit = battle_unit_get(*selected_unit_index_ptr);
             unit_index_ptr++;
-            party_set_biography_state(unit->character_identity, PARTY_BIO_STATE_DISMISSED);
+            after_battle_set_biography_state(unit->character_identity, PARTY_BIO_STATE_DISMISSED);
         next_unit:
             affected_index++;
         } while (affected_index < g_party_affected_unit_count);

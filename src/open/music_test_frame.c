@@ -1,11 +1,11 @@
 /* Run WORLD's menu frame inside OPEN's title loop while the Music Test is open. */
 
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/system.h"
-#include "fft/title.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/system.h"
 #include "psx/types.h"
 
 /* While SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME is set (the music test), run

@@ -1,9 +1,9 @@
 /* EQUIP draws some item-menu quads into the current ordering-table entry
  * instead of taking a priority index like the other menu primitive emitters. */
 
-#include "fft/equipment.h"
-#include "fft/gfx.h"
-#include "fft/menu_gfx.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/equipment.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

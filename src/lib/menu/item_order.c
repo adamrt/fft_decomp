@@ -1,7 +1,7 @@
 /* Menu sort-key orders and stored item category lists. */
 
-#include "fft/item.h"
-#include "fft/item_menu.h"
+#include "fft/game/item.h"
+#include "fft/party/item_list.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -15,7 +15,7 @@ static void remove_from_category_list(s32 item_id, s32 category_index);
 
 /* Copy a sort-key order into destination as halfwords, including its -1
  * terminator. WORLD slot 0 holds Formation keys; slots 1..5 hold item keys. */
-void item_load_type_order(s32 list_index, s16* destination) {
+void item_list_load_sort_order(s32 list_index, s16* destination) {
     s8* source = g_item_type_order_lists[list_index];
     s32 i = 0;
 
@@ -32,7 +32,7 @@ void item_load_type_order(s32 list_index, s16* destination) {
  *
  * The source uses s16 entries terminated by -1; only each entry's low byte is
  * written. */
-void item_store_type_order(s32 list_index, const s16* source) {
+void item_list_store_sort_order(s32 list_index, const s16* source) {
     s8* destination = g_item_type_order_lists[list_index];
     s32 i = 0;
 
@@ -42,7 +42,7 @@ void item_store_type_order(s32 list_index, const s16* source) {
 }
 
 /* Compact a -1-terminated s16 item list and append its byte terminator. */
-void item_store_category_list(s32 category_index, const s16* source) {
+void item_list_store_category(s32 category_index, const s16* source) {
     u8* base = g_item_category_lists[category_index];
     s32 count = 0;
 
@@ -54,7 +54,7 @@ void item_store_category_list(s32 category_index, const s16* source) {
 }
 
 /* Reorder the selected items according to their category's display order. */
-s32 item_sort_list_by_category_order(s32 category_index, s16* list) {
+s32 item_list_sort_by_category_order(s32 category_index, s16* list) {
     s16 sorted_items[144];
     u8* category_order;
     s32 category_item_count;
@@ -90,7 +90,7 @@ s32 item_sort_list_by_category_order(s32 category_index, s16* list) {
  * headgear, body armor, accessories and other: the menu category minus one)
  * with what the party owns: a newly owned item is put first, an item neither
  * owned nor equipped is removed, and the others keep their order. */
-void item_rebuild_category_list(s32 category) {
+void item_list_rebuild_category(s32 category) {
     s32 i;
     s16 item;
     s32 type;
@@ -98,7 +98,7 @@ void item_rebuild_category_list(s32 category) {
 
     for (i = 1; i < ITEM_ID_END; i++) {
         item = i;
-        type = item_get_menu_category(item);
+        type = item_list_get_category(item);
         cat = 0;
         if (type != ITEM_MENU_CATEGORY_WEAPON) {
             cat = type - 1;

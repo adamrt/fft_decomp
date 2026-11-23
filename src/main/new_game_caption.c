@@ -1,6 +1,6 @@
 /* Orbonne caption display setup, frame presentation and fades. */
 
-#include "fft/gfx.h"
+#include "fft/gfx/gfx.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"

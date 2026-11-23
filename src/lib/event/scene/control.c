@@ -1,22 +1,22 @@
 /* Event unit commands, screen and camera transitions, menu sounds and event input. */
 
-#include "fft/animation.h"
-#include "fft/camera.h"
-#include "fft/fade.h"
-#include "fft/input.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/status.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/battle/camera.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/status.h"
+#include "fft/gfx/animation.h"
+#include "fft/gfx/fade.h"
+#include "fft/map/map.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/world/tutorial.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -125,26 +125,26 @@ s32 script_scale_music_volume(s32 volume) {
     return volume;
 }
 
-/* Fade the screen in: lower g_gfx_screen_fade from 255 by 4 per frame, yielding once per step, and
+/* Fade the screen in: lower g_fade_event_level from 255 by 4 per frame, yielding once per step, and
  * end on 0. */
-void gfx_fade_in_screen_overlay(void) {
-    g_gfx_screen_fade = 0xFF;
+void fade_event_run_in(void) {
+    g_fade_event_level = 0xFF;
     do {
         thread_yield();
-        g_gfx_screen_fade -= 4;
-    } while (g_gfx_screen_fade > 0);
-    g_gfx_screen_fade = 0;
+        g_fade_event_level -= 4;
+    } while (g_fade_event_level > 0);
+    g_fade_event_level = 0;
 }
 
-/* Fade the screen out: raise g_gfx_screen_fade from 0 by 4 per frame,
+/* Fade the screen out: raise g_fade_event_level from 0 by 4 per frame,
  * yielding once per step, and end on 255. */
-void gfx_fade_out_screen_overlay(void) {
-    g_gfx_screen_fade = 0;
+void fade_event_run_out(void) {
+    g_fade_event_level = 0;
     do {
         thread_yield();
-        g_gfx_screen_fade += 4;
-    } while (g_gfx_screen_fade < 0x100);
-    g_gfx_screen_fade = 0xff;
+        g_fade_event_level += 4;
+    } while (g_fade_event_level < 0x100);
+    g_fade_event_level = 0xff;
 }
 
 /* 1 while the current event id is one of the sixteen tutorial events,
@@ -282,7 +282,7 @@ s32 camera_wrap_yaw(void) {
 }
 
 /* Return the stats for the menu's selected battle slot. */
-battle_unit_t* menu_get_selected_battle_unit(void) {
+battle_unit_t* unit_panel_get_selected_battle_unit(void) {
     return battle_unit_get(g_unit_panel_selected_unit.battle_unit_id);
 }
 

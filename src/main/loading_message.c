@@ -2,8 +2,8 @@
  * buffer. File loads and battle scene transitions link it into their ordering
  * tables, blinking it while they wait. */
 
-#include "fft/gfx.h"
-#include "fft/system.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

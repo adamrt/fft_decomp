@@ -1,0 +1,181 @@
+#ifndef NOVEL_H
+#define NOVEL_H
+
+/* The Sound Novels: reading, the history, quit and restart, and the sound novel script machine. */
+
+#include "fft/world/menu_stack.h"
+#include "psx/types.h"
+
+struct suzuki_sound_resource;
+
+/* script files */
+/* Section byte offsets at the start of a loaded sound-novel script. */
+typedef struct novel_script_file {
+    u32 _unused_00;
+    u32 offsets[0]; /* 0x04; variable-length section byte-offset table */
+} novel_script_file_t;
+
+/* The loaded sound-novel script (novel_load_files). */
+extern novel_script_file_t g_novel_script;
+
+void novel_load_files(s32 chapter);
+
+/* readings */
+/* Opcode 0x21 selects which pending script sounds a reading consumes.
+ * Other byte values play nothing; the pending variables are still cleared. */
+typedef enum novel_sound_mode {
+    NOVEL_SOUND_MODE_EFFECTS_ONLY = 0,
+    NOVEL_SOUND_MODE_EFFECTS_AND_MUSIC = 1
+} novel_sound_mode_e;
+
+/* A saved sound-novel reading state (g_novel_saved_readings, 0x38 bytes each).
+ * novel_reset_selected_reading establishes the stride and
+ * reset_reading resets fields selectively; meanings beyond
+ * those stores remain provisional. */
+typedef struct novel_reading {
+    /* 0x00: loaded sound-novel script, including its section-offset table. */
+    novel_script_file_t* buffer;
+    u32* script_words;        /* 0x04 */
+    u32 instruction;          /* 0x08 */
+    u16 state_flags;          /* 0x0c; novel_state_flag_e */
+    s16 section;              /* 0x0e */
+    s16 word_index;           /* 0x10; index of the 32-bit instruction in the section; cleared by
+                               * novel_restore_reading
+                               */
+    s16 counter_delta;        /* 0x12 */
+    s16 text_id;              /* 0x14 */
+    s16 brightness;           /* 0x16 */
+    s16 _unknown_18;          /* 0x18 */
+    s16 background_set;       /* 0x1a */
+    s16 picture_render_index; /* 0x1c */
+    s16 picture_id;           /* 0x1e */
+    s16 text_history[4];      /* 0x20; oldest to newest */
+    s16 value_display_mode;   /* 0x28 */
+    s16 music_selection;      /* 0x2a */
+    s16 sound_mode;           /* 0x2c; novel_sound_mode_e */
+    s16 picture_x;            /* 0x2e */
+    s16 picture_y;            /* 0x30 */
+    s16 sound_id;             /* 0x32 */
+    s32 counter;              /* 0x34 */
+} novel_reading_t;
+typedef char novel_reading_size_must_be_56[sizeof(novel_reading_t) == 56 ? 1 : -1];
+
+extern novel_reading_t g_novel_reading;
+extern novel_reading_t g_novel_saved_readings[5];
+extern u32 g_novel_read_section_bits[40];
+extern u32 g_novel_saved_flags[2];
+
+/* The sound novel being read: it selects the script files, and below 5 its saved reading in
+ * g_novel_saved_readings. */
+extern s16 g_novel_selected;
+
+void novel_reset_selected_reading(s32 unused);
+void novel_restore_reading(s32 render_index);
+
+/* interpreter */
+/* Interpreter state of the sound-novel script (novel_reading_t.state_flags),
+ * stepped by novel_run_script. */
+typedef enum novel_state_flag {
+    NOVEL_STATE_BRANCH = 0x002,  /* a branch was taken: mark its saved-data bit and enter the next section */
+    NOVEL_STATE_FETCH = 0x004,   /* the handler is done: load the next 32-bit instruction */
+    NOVEL_STATE_YIELD = 0x008,   /* leave the interpreter until the next frame */
+    NOVEL_STATE_FETCHED = 0x010, /* the 32-bit instruction was loaded this turn: the handler's first call */
+    NOVEL_STATE_END = 0x020,     /* the script ended */
+    NOVEL_STATE_PARENT_WINDOWS_VISIBLE = 0x040,
+    NOVEL_STATE_VALUE_DISPLAY = 0x080, /* the numeric value display is up */
+    NOVEL_STATE_WHITE_OVERLAY = 0x100  /* the white full-screen overlay is up */
+} novel_state_flag_e;
+
+s32 novel_run_script(void);
+
+/* text history */
+/* Unsigned scalar view of text_history[1] used by both history shifters.
+ * Direct member access changes their original instruction scheduling. */
+extern u16 g_novel_history_1;
+
+/* sounds, waits and the countdown */
+extern struct suzuki_sound_resource* g_novel_sound_resource;
+extern s32 g_novel_countdown_frames;
+
+/* menu levels */
+/* Values of novel_level_t.phase. */
+typedef enum novel_phase {
+    NOVEL_PHASE_RUN = 0,          /* the script runs */
+    NOVEL_PHASE_OPEN_HISTORY = 2, /* square: counts down, then pushes the history level */
+    NOVEL_PHASE_END = 3           /* the script ended: waits for thread 14, then leaves */
+} novel_phase_e;
+
+/* The NOVEL level pushed by novel_open_reader and stepped by
+ * novel_update_reader while the script runs: the Start and Square button prompts, and the
+ * brightness bar with its overlay, shown for a while after L1 or R1 changes the brightness. */
+typedef struct novel_level {
+    s32 quit_prompt_window;        /* 0x00; the Start button prompt (the Quit/Continue menu) */
+    s32 history_prompt_window;     /* 0x04; the Square button prompt (the text history) */
+    s32 brightness_image;          /* 0x08; the brightness bar, a VRAM strip render record */
+    s32 brightness_overlay_window; /* 0x0c; the brightness bar's overlay */
+    u8 _unused_10[0xc];
+    s32 treasure_id; /* 0x1c; the treasure detail reopened when the novel ends */
+    s32 _unknown_20; /* 0x20; set to 1 at push */
+    s32 countdown;   /* 0x24; frames before the text history opens (9999 at push) */
+    s32 phase;       /* 0x28; novel_phase_e */
+    s32 fade_timer;  /* 0x2c; frames the brightness bar stays up (60 after L1 or R1) */
+} novel_level_t;
+
+/* The NOVEL_QUIT level, the sound novel's Quit/Continue menu; pushed by
+ * open_quit_menu and stepped by novel_update_quit_menu. */
+typedef struct novel_quit_level {
+    s32 cursor_window; /* 0x00 */
+    s32 second_window; /* 0x04 */
+    s32 render_index;  /* 0x08 */
+    s32 _unused_0c;
+    s32 fade_out;    /* 0x10 */
+    s32 fade_in;     /* 0x14 */
+    s32 _unknown_18; /* 0x18; cleared at push */
+    s32 choice;      /* 0x1c */
+} novel_quit_level_t;
+
+/* Values of novel_history_level_t.phase. */
+typedef enum novel_history_phase {
+    NOVEL_HISTORY_PHASE_BROWSE = 0,
+    NOVEL_HISTORY_PHASE_DIM = 1,    /* five steps: the picture darkens under the fill box */
+    NOVEL_HISTORY_PHASE_RESTORE = 2 /* the reverse ramp, then the level pops */
+} novel_history_phase_e;
+
+/* Provisional: the NOVEL_HISTORY level pushed by open_history, which stores
+ * the newest history text, the three older ones, phase DIM and step 0. The draw helper reads the same record. */
+typedef struct novel_history_level {
+    s32 upper_window;   /* 0x00 */
+    s32 lower_window;   /* 0x04 */
+    s32 render_index;   /* 0x08 */
+    s32 newest_text_id; /* 0x0c; newest history text */
+    s32 text_ids[3];    /* 0x10 */
+    s32 scroll;         /* 0x1c */
+    s32 phase;          /* 0x20; novel_history_phase_e */
+    s32 step;           /* 0x24; 0..4 fade step */
+} novel_history_level_t;
+
+/* The NOVEL_RESTART level pushed by open_reading_choice and stepped by
+ * novel_update_reading_choice: a cursor window over the saved-picture render record and two text
+ * render records. Only mode shares its meaning with the EVENT_TRANSITION level at the same offset. */
+typedef struct novel_restart_level {
+    s32 cursor_window;  /* 0x00; moved between the two option rows */
+    s32 picture_render; /* 0x04; VRAM render record of the TIM at g_picture_buffer */
+    s32 message_render; /* 0x08; TEXT_ID_SUBSTITUTED_TEXT */
+    s32 option_render;  /* 0x0c; TEXT_ID_SOUND_NOVEL_RESUME_CHOICES; the cursor rows are relative to its base */
+    s32 dissolve_step;  /* 0x10; step of the progressive picture upload, 0 once it finishes */
+    s32 cursor_row;     /* 0x14; 0 or 1, toggled by up/down; 1 resets the selected saved record */
+    u8 _unused_18[8];
+    s32 mode; /* 0x20; argument of the push */
+} novel_restart_level_t;
+
+void novel_open_reader(s32 argument);
+void novel_resume_reader(menu_stack_record_t* level);
+void novel_update_reader(menu_stack_record_t* level);
+void novel_suspend_reader(menu_stack_record_t* level);
+void novel_resume_quit_menu(menu_stack_record_t* level);
+void novel_suspend_quit_menu(menu_stack_record_t* level);
+void novel_update_quit_menu(menu_stack_record_t* level);
+void novel_update_history(menu_stack_record_t* level);
+void novel_update_reading_choice(menu_stack_record_t* level);
+
+#endif

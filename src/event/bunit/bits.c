@@ -1,6 +1,6 @@
 /* BUNIT reads the packed job and ability bitfields most-significant bit first. */
 
-#include "fft/bits.h"
+#include "fft/sys/bits.h"
 #include "psx/types.h"
 
 /* bit reader */

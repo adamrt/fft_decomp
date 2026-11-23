@@ -1,9 +1,9 @@
 /* Resident blocking disc reads and heap-backed load helpers. */
 
-#include "fft/file.h"
-#include "fft/memory.h"
-#include "fft/suzuki.h"
-#include "fft/system.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/system.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

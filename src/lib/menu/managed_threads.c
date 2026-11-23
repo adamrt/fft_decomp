@@ -1,9 +1,9 @@
 /* Start, poll and stop menu threads through each screen's shared managed-thread state. */
 
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/thread.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Whether the thread a screen manages is still running, as menu_thread_start_or_poll last saw it. */

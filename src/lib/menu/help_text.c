@@ -1,16 +1,16 @@
 /* Starting the help text thread for the current help message. */
 
-#include "fft/help.h"
-#include "fft/menu_input.h"
-#include "fft/message.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu_input.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Start the help text thread for the current help message, if one is set:
  * save the text section pointers, bind the help text table and lock the menu
  * input. The dialog type is HELP_DIALOG_TYPE at the position `thread_data` gives. */
-void menu_start_help_text(s32 thread_data) {
+void help_start_text(s32 thread_data) {
     if (g_help_message_text_id > 0) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_help_text_table);

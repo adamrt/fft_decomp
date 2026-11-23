@@ -1,13 +1,14 @@
 /* Resolve text substitutions, measure formatted lines and render dialog record images. */
 
-#include "fft/menu.h"
-#include "fft/menu_window.h"
-#include "fft/message.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -288,7 +289,7 @@ void message_render_record_image(text_dialog_record_t* record) {
         g_menu_window_text_pen.stride = record->rect.w * 4;
         g_menu_text_first_line = record->first_line;
         g_menu_text_line_limit = record->last_line;
-        menu_display_text_entry(record->text, record->buffer, &g_menu_window_text_pen);
+        text_render_entry_to_image(record->text, record->buffer, &g_menu_window_text_pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();
         menu_free_memory(record->buffer);

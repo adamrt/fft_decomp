@@ -1,6 +1,6 @@
 /* Remember menu cursor values and initialize or replace them when a list opens. */
 
-#include "fft/menu_selection.h"
+#include "fft/menu/menu_selection.h"
 #include "psx/types.h"
 
 /* Clear every saved menu selection value. The table has

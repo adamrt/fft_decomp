@@ -1,11 +1,11 @@
 /* The JOBSTTS screen's per-frame input update, withholding input during transitions and help text. */
 
-#include "fft/menu_input.h"
-#include "fft/input.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

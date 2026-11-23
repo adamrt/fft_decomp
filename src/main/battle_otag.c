@@ -1,7 +1,6 @@
 /* Resident access to the active BATTLE ordering tables. */
 
-#include "fft/gfx.h"
-#include "fft/render.h"
+#include "fft/gfx/gfx.h"
 #include "psx/libgpu.h"
 
 /* Return the ordering table of BATTLE's current render buffer; the pointer is a BATTLE.BIN global,

@@ -1,9 +1,10 @@
 /* Text id list rendering to image rows, kerning into the command buffer, glyph image upload and entry advance by
  * character count. */
 
-#include "fft/gfx_image.h"
-#include "fft/menu_screen.h"
-#include "fft/text.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

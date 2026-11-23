@@ -1,14 +1,14 @@
 /* BUNIT's pad latch and repeat masks feed its per-frame help and fade input lock. */
 
-#include "fft/input.h"
-#include "fft/fade.h"
-#include "fft/help.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/sound.h"
-#include "fft/system.h"
-#include "fft/thread.h"
-#include "fft/unit_list.h"
+#include "fft/sys/input.h"
+#include "fft/gfx/fade.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/party/unit_list.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -138,7 +138,7 @@ void menu_input_update_message_state(void) {
         } else {
             g_unit_list_help_text_state = 0;
         }
-    } else if (g_unit_list_help_text_state != 0 || screen_get_fade_state() != 0) {
+    } else if (g_unit_list_help_text_state != 0 || fade_menu_get_state() != 0) {
         g_unit_list_help_text_state = 0;
         menu_input_clear_state();
     }

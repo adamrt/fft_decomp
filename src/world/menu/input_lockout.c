@@ -1,9 +1,9 @@
 /* Input lockout while the Formation status panels move or compare units. */
 
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Countdown maintained by menu_screen_update_input_lockout. */

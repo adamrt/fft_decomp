@@ -3,7 +3,7 @@
  * sections or trigger other sounds. Look-ahead follows repeats without changing
  * playback state so the current note can be tied to the next one. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/types.h"
 
 /* Opcodes 0x80 through 0xff. */

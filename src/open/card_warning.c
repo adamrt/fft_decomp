@@ -1,16 +1,16 @@
 /* Starting a new game without a memory card saves the title background while
  * asking whether to continue, then restores the menu or starts the prologue. */
 
-#include "fft/controller_stack.h"
-#include "fft/display_object.h"
-#include "fft/fade.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/prologue.h"
-#include "fft/sound.h"
-#include "fft/system.h"
-#include "fft/title.h"
+#include "fft/front/controller_stack.h"
+#include "fft/front/prologue.h"
+#include "fft/front/title.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -49,7 +49,7 @@ void title_start_new_game(void) {
         destination++;
     }
 
-    gfx_start_overlay_fade_out(0x10);
+    fade_tile_start_out(0x10);
     record = display_object_append_animated(g_display_object_queue, &g_display_object_queue_count);
     g_display_object_animated_pool[record].sequence = 0x12;
     g_display_object_animated_pool[record].anim_counter = 0;
@@ -74,7 +74,7 @@ void title_update_card_warning(controller_record_t* record) {
     s32 state;
     u32 buttons;
 
-    if ((g_gfx_overlay_fade.flags & GFX_OVERLAY_FADE_ACTIVE) != 0) {
+    if ((g_fade_tile.flags & FADE_TILE_ACTIVE) != 0) {
         return;
     }
 
@@ -105,11 +105,11 @@ void title_update_card_warning(controller_record_t* record) {
     buttons = g_input_new_button_presses;
     if ((buttons & PSX_PAD_CROSS) != 0) {
         sound_play_sfx(SOUND_SFX_CANCEL);
-        gfx_start_overlay_fade_in(0x20);
+        fade_tile_start_in(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CANCEL;
     } else if ((buttons & (PSX_PAD_CIRCLE | PSX_PAD_START)) != 0) {
         sound_play_sfx(SOUND_SFX_CONFIRM);
-        gfx_start_overlay_fade_in(0x20);
+        fade_tile_start_in(0x20);
         record->card_warning.state = TITLE_CARD_WARNING_CONFIRM;
     }
 }

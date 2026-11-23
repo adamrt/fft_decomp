@@ -1,12 +1,12 @@
 /* Graded menu-panel fades and the full-screen additive or subtractive fade overlay. */
 
-#include "fft/fade.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/script.h"
+#include "fft/gfx/fade.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -99,7 +99,7 @@ void menu_update_panel_fade(void) {
  * and after it when both are linked into the ordering table. A non-zero level
  * also clears g_script_event_input, so menus see no button while the
  * screen is faded. */
-void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level) {
+void fade_event_submit_tile(fade_event_tile_t* overlay, s32 level) {
     s32 blend;
 
     if (level != 0) {

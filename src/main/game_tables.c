@@ -1,10 +1,10 @@
 /* Resident access to packed skillset, ability, item and job tables. Skillset decoding
  * expands the high ability-id bits into the scratch list used by unit generation and menus. */
 
-#include "fft/ability.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/skillset.h"
+#include "fft/game/ability.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
 #include "psx/types.h"
 
 extern job_data_t g_job_data[JOB_ID_COUNT];

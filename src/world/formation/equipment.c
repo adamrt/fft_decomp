@@ -1,20 +1,20 @@
 /* Formation and the fitting room choose equipment by slot, apply best fits and remove loadouts invalidated by job
  * changes. */
 
-#include "fft/equipment.h"
-#include "fft/ability.h"
-#include "fft/bits.h"
-#include "fft/formation.h"
-#include "fft/formation_ability.h"
-#include "fft/formation_item.h"
-#include "fft/formation_job.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/job.h"
-#include "fft/menu.h"
-#include "fft/option.h"
-#include "fft/shop.h"
-#include "fft/unit.h"
+#include "fft/party/equipment.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/option.h"
+#include "fft/party/formation.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/formation_item.h"
+#include "fft/party/formation_job.h"
+#include "fft/party/item_list.h"
+#include "fft/party/shop.h"
+#include "fft/sys/bits.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 
@@ -87,7 +87,7 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
             if (held_off_hand < ITEM_ID_THROWABLE_FIRST)
                 list[length++] = held_off_hand;
             list[length] = -1;
-            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+            item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             if (ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -138,12 +138,12 @@ void formation_item_build_best_fit(s16 unit_index, s16* equipment) {
                 if (held_off_hand >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = held_off_hand;
                 list[length] = -1;
-                item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+                item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
             list[length++] = g_formation_unit_pointers[unit_index]->detail.equipment[slot];
             list[length] = -1;
-            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+            item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
         }
         if (list[0] <= ITEM_ID_NOTHING)
             equipment[slot] = ITEM_ID_NOTHING;
@@ -258,7 +258,7 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                 list[length++] = (second < ITEM_ID_THROWABLE_FIRST) ? second : ITEM_ID_NOTHING;
             }
             list[length] = -1;
-            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+            item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             if (ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -297,12 +297,12 @@ void shop_fitting_build_best_fit(s16 unit_index, s16 shop_id, s16* out) {
                 if (second >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = second;
                 list[length] = -1;
-                item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+                item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
             }
         } else {
             list[length++] = g_formation_unit_pointers[unit_index]->detail.equipment[slot] & ITEM_ENTRY_ID_MASK;
             list[length] = -1;
-            item_sort_id_list(ITEM_SORT_ORDER_BEST_FIT, list);
+            item_list_sort(ITEM_SORT_ORDER_BEST_FIT, list);
         }
 
         if (list[0] <= ITEM_ID_NOTHING)
@@ -391,7 +391,7 @@ s32 equipment_check_item_compatibility(s16 unit_index, s16 item_id) {
     if (id == ITEM_ID_NOTHING) {
         return 1;
     }
-    if (item_get_menu_category(id) == ITEM_MENU_CATEGORY_OTHER) {
+    if (item_list_get_category(id) == ITEM_MENU_CATEGORY_OTHER) {
         return -1;
     }
     bits_primary_init_reader(g_formation_unit_pointers[unit_index]->equippable_item_types);
@@ -599,9 +599,9 @@ void formation_remove_invalid_loadout(s16 unit_id) {
  * include equipped copies) and their type fits the category. Mode 1 flags
  * items the unit cannot equip with 0x4000, or hides them like mode 2 when Show
  * Unequippable is not On. Categories 0-4 and 7 with sort modes 1-5 keep the
- * tab's stored order (item_sort_list_by_category_order, which returns the new
+ * tab's stored order (item_list_sort_by_category_order, which returns the new
  * count); otherwise (another category, or a sort mode such as one with bit
- * 0x80 set) the list is sorted by item_sort_id_list key list
+ * 0x80 set) the list is sorted by item_list_sort key list
  * `sort_mode & 0xF`.
  */
 s32 equipment_build_item_list(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode) {
@@ -627,7 +627,7 @@ s32 equipment_build_item_list(s16 unit_id, s16 sort_mode, s8 category, s16* entr
         if (result == 0) {
             continue;
         }
-        type = item_get_menu_category(entry);
+        type = item_list_get_category(entry);
         result = 0;
         if (category < 2) {
             result = type < 2;
@@ -681,9 +681,9 @@ s32 equipment_build_item_list(s16 unit_id, s16 sort_mode, s8 category, s16* entr
         list_index = 4;
     }
     if (list_index < 5 && sort_mode >= 1 && sort_mode < 6) {
-        count = item_sort_list_by_category_order(list_index, entries);
+        count = item_list_sort_by_category_order(list_index, entries);
     } else {
-        item_sort_id_list(sort_mode & 0xF, entries);
+        item_list_sort(sort_mode & 0xF, entries);
     }
     return count;
 }

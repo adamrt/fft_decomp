@@ -1,11 +1,11 @@
 /* Portrait quads, clipping and transition construction. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/memory.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/portrait.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

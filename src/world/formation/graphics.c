@@ -1,17 +1,17 @@
 /* Formation draws its zodiac backdrop and resolves the party sprites and portraits used by menu panels. The scrolling
  * text thread also exposes its redraw request here. */
 
-#include "fft/character_identity.h"
-#include "fft/formation.h"
-#include "fft/job.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/portrait.h"
-#include "fft/script.h"
-#include "fft/thread.h"
-#include "fft/zodiac.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/portrait.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/party/formation.h"
+#include "fft/script/script.h"
+#include "fft/sys/thread.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -56,7 +56,7 @@ void zodiac_backdrop_thread(void) {
             s_zodiac_backdrop.scale_x -= step;
             s_zodiac_backdrop.scale_y -= step;
         }
-        s_zodiac_backdrop.brightness = g_screen_color_red;
+        s_zodiac_backdrop.brightness = g_menu_screen_brightness_red;
         zodiac_build_primitives(&s_zodiac_backdrop, g_formation_view_quads[frame & 1]);
         thread_yield();
         if (thread_current_get_parameter_3() != 0) {

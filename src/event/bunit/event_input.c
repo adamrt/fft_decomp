@@ -1,14 +1,14 @@
 /* The per-frame event input update, with edge and auto-repeat input, a yield and the status-panel backdrops. */
 
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -111,7 +111,7 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 framebuffer_y) {
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    menu_draw_status_panel_backdrops();
+    unit_panel_draw_backdrops();
     g_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {

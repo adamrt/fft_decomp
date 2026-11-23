@@ -2,17 +2,17 @@
  * semi-transparency, colors and draw priority, formatted and right-aligned numbers, the sliding and bouncing cursors,
  * instruction groups, scrollable list layouts and bodies, and sprite color. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/menu_window.h"
-#include "fft/sound.h"
-#include "fft/text.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_window.h"
+#include "fft/sys/sound.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -988,7 +988,7 @@ static menu_instruction_t* skip_script_group(menu_instruction_t* instruction) {
 /* Find the scrollable-list command in a menu script, load its row and column layout, clamp the
  * selection and scroll base to the list, and render the visible rows' text into the list image in
  * VRAM. */
-void menu_scrollable_list_load_layout(const menu_instruction_t* script) {
+void menu_scrollable_list_refresh(const menu_instruction_t* script) {
     RECT rect;
     s16 text_ids[20];
     const menu_list_record_t* record;
@@ -1049,7 +1049,7 @@ void menu_scrollable_list_load_layout(const menu_instruction_t* script) {
  * definition. */
 void menu_scrollable_list_open(const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script) {
     menu_scrollable_list_init_core(values, selected_index, text_table);
-    menu_scrollable_list_load_layout(script);
+    menu_scrollable_list_refresh(script);
 }
 
 /* Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1 signature shared by the
@@ -1057,7 +1057,7 @@ void menu_scrollable_list_open(const s16* values, s32 selected_index, u8* text_t
 void menu_scrollable_list_open_at_scroll_base(
     const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script) {
     menu_scrollable_list_init(entries, selected_index, scroll_base_index, text_table);
-    menu_scrollable_list_load_layout(script);
+    menu_scrollable_list_refresh(script);
 }
 
 /*
@@ -1103,7 +1103,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     speed = menu_get_event_speed();
     g_menu_screen_use_scroll_position = 1;
     if (g_menu_screen_list_layout_pending != 0) {
-        menu_scrollable_list_load_layout(command);
+        menu_scrollable_list_refresh(command);
     }
     old_cursor = g_menu_list_selected_index;
     if (g_menu_screen_list_scroll_direction == 0) {
@@ -1271,7 +1271,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
 }
 
 /* Set the WORLD menu sprite color from an RGB triple; a null color leaves it unchanged. */
-void gfx_set_draw_color(const rgb24_t* src) {
+void menu_gfx_set_draw_color(const rgb24_t* src) {
     if (src != 0) {
         g_menu_screen_sprite_color.r = src->r;
         g_menu_screen_sprite_color.g = src->g;

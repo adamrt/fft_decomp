@@ -1,8 +1,9 @@
 /* Menu background tiles, texture-page and palette commands, blend mode, color and draw priority. */
 
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_script.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_script.h"
+#include "fft/menu/menu_text.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

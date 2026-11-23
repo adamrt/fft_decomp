@@ -1,11 +1,11 @@
 /* Numeric-panel frame geometry, palette selection and primitive submission. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/status_screen.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/status_screen.h"
+#include "fft/party/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -36,7 +36,7 @@ static s8 s_status_screen_numbers_frame_layout[12 * MENU_LINE_LAYOUT_SIZE]
 /* Build the numeric display frame around box: twelve lines placed by
  * g_status_screen_numbers_frame_layout relative to the box's corners and colored from
  * the normal menu palette, the two draw modes and a sprite covering the box. */
-void menu_numeric_frame_init(RECT* box, menu_numeric_frame_t* menu) {
+void unit_panel_init_numeric_frame(RECT* box, unit_panel_numeric_frame_t* menu) {
     LINE_F2* line = menu->lines;
     s32 i;
     s32 offset;
@@ -45,7 +45,7 @@ void menu_numeric_frame_init(RECT* box, menu_numeric_frame_t* menu) {
         SetLineF2(line);
         line++;
     }
-    menu_numeric_frame_set_normal_colors(menu);
+    unit_panel_set_numeric_frame_normal_colors(menu);
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
@@ -78,7 +78,7 @@ void menu_numeric_frame_init(RECT* box, menu_numeric_frame_t* menu) {
 }
 
 /* Submit the frame's twelve lines, sprite and draw modes. */
-void menu_numeric_frame_submit(menu_numeric_frame_t* display) {
+void unit_panel_submit_numeric_frame(unit_panel_numeric_frame_t* display) {
     s32 index;
 
     for (index = 0; index < 12; index++) {
@@ -91,7 +91,7 @@ void menu_numeric_frame_submit(menu_numeric_frame_t* display) {
 
 /* Give the twelve frame lines the colors of the normal menu palette (the first
  * sixteen of the menu palette colors) and the sprite the normal menu CLUT, GetClut(0x3c0, 0x1f0). */
-void menu_numeric_frame_set_normal_colors(menu_numeric_frame_t* menu) {
+void unit_panel_set_numeric_frame_normal_colors(unit_panel_numeric_frame_t* menu) {
     s32 index;
     s32 palette_index;
     LINE_F2* line;
@@ -107,7 +107,7 @@ void menu_numeric_frame_set_normal_colors(menu_numeric_frame_t* menu) {
 
 /* Give the twelve frame lines the colors of the dimmed menu palette (the second
  * sixteen of the menu palette colors) and the sprite the dimmed menu CLUT, GetClut(0x3c0, 0x1f4). */
-void menu_numeric_frame_set_dimmed_colors(menu_numeric_frame_t* menu) {
+void unit_panel_set_numeric_frame_dimmed_colors(unit_panel_numeric_frame_t* menu) {
     s32 index;
     s32 palette_index;
     LINE_F2* line;

@@ -1,9 +1,10 @@
 /* The two fading translucent letterbox panels of the event dialog overlay. */
 
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -23,7 +24,7 @@ static s32 s_menu_panel_backdrop_state[2] = { 0 };
  * between two primitive buffers so the previous frame stays queued. The
  * EQUIP twin watches threads 13 and 14.
  */
-void menu_draw_status_panel_backdrops(void) {
+void unit_panel_draw_backdrops(void) {
     menu_gradient_panel_prims_t* prims;
     unit_panel_thread_t* display;
     unit_panel_thread_t* descriptor;

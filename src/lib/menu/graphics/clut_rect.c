@@ -1,7 +1,7 @@
 /* The VRAM rectangle a CLUT id names. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

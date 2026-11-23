@@ -1,7 +1,8 @@
 /* Rendering a list of text ids as 16-pixel rows and uploading them to VRAM. */
 
-#include "fft/gfx_image.h"
-#include "fft/text.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/menu/menu_text.h"
+#include "fft/text/text.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

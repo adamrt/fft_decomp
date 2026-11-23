@@ -1,7 +1,7 @@
 /* Moving a grid cursor with row wrapping, clamped on a partial last row. */
 
-#include "fft/menu_selection.h"
-#include "fft/sound.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/sys/sound.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

@@ -1,17 +1,17 @@
 /* The item detail panel's status column of immunity and innate or starting status icons. */
 
-#include "fft/bits.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_gfx.h"
-#include "fft/status.h"
+#include "fft/game/item.h"
+#include "fft/game/status.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/party/item_list.h"
+#include "fft/sys/bits.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Status image rectangles, indexed by status id, that item_draw_status_list draws in the item detail panel's status
- * column. */
+/* Status image rectangles, indexed by status id, that item_list_draw_status_list draws in the item detail panel's
+ * status column. */
 extern RECT g_unit_panel_status_display_image_rects[];
 
 /* Draw the item detail panel's status column: immunity icons, then the
@@ -20,7 +20,7 @@ extern RECT g_unit_panel_status_display_image_rects[];
  * The first two passes count the set bits (clamped to 12 rows) so the column
  * can be bottom-aligned; the last two emit one backing quad plus one status
  * image quad per status. */
-void item_draw_status_list(s16 item_id) {
+void item_list_draw_status_list(s16 item_id) {
     RECT rect;
     u16 icon_tpage;
     u16 tpage;

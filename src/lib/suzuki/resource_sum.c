@@ -1,6 +1,6 @@
 /* The word sum of a sound resource. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 
 /* Sums every 32-bit value from the size field to the end of the resource. */
 s32 suzuki_sound_sum_resource_words(suzuki_resource_prefix_t* resource) {

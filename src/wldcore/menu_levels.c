@@ -1,40 +1,40 @@
 /* The world map runs one stack of menu levels. Its root handles travel and map requests; message windows, location
  * services, status Help and debug editors suspend and resume that same stack. */
 
-#include "fft/bar.h"
-#include "fft/brave_story.h"
-#include "fft/calendar.h"
-#include "fft/display_object.h"
-#include "fft/encounter.h"
-#include "fft/file.h"
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/input.h"
-#include "fft/location.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/menu_window.h"
-#include "fft/message.h"
-#include "fft/music.h"
-#include "fft/proposition.h"
-#include "fft/save.h"
-#include "fft/script_variable.h"
-#include "fft/shop.h"
-#include "fft/sound.h"
-#include "fft/sound_novel.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit_panel.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
-#include "fft/zodiac.h"
+#include "fft/battle/encounter.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_window.h"
+#include "fft/party/formation.h"
+#include "fft/party/shop.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/bar.h"
+#include "fft/world/brave_story.h"
+#include "fft/world/calendar.h"
+#include "fft/world/location.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/novel.h"
+#include "fft/world/proposition.h"
+#include "fft/world/save.h"
+#include "fft/world/tutorial.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
@@ -109,10 +109,10 @@ static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     proposition_update_result,                     /* MENU_STACK_LEVEL_PROPOSITION_RESULT */
     proposition_update_active_list_input,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
     proposition_update_recall,                     /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
-    sound_novel_update_reading_choice,             /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
-    sound_novel_update_reader,                     /* MENU_STACK_LEVEL_SOUND_NOVEL */
-    sound_novel_update_quit_menu,                  /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
-    sound_novel_update_history,                    /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
+    novel_update_reading_choice,                   /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
+    novel_update_reader,                           /* MENU_STACK_LEVEL_SOUND_NOVEL */
+    novel_update_quit_menu,                        /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
+    novel_update_history,                          /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
     brave_story_update_unexplored_land_list_input, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
     brave_story_update_unexplored_land_detail,     /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
     brave_story_update_treasure_list_input,        /* MENU_STACK_LEVEL_BRAVE_STORY_TREASURES */
@@ -124,7 +124,7 @@ static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     brave_story_update_person_detail,              /* MENU_STACK_LEVEL_BRAVE_STORY_PERSON */
     tutorial_update_topic_list_input,              /* MENU_STACK_LEVEL_TUTORIAL_TOPICS */
     tutorial_update_topic,                         /* MENU_STACK_LEVEL_TUTORIAL_TOPIC */
-    event_transition_update,                       /* MENU_STACK_LEVEL_EVENT_TRANSITION */
+    world_map_update_event_transition,             /* MENU_STACK_LEVEL_EVENT_TRANSITION */
     proposition_update_participants,               /* MENU_STACK_LEVEL_PROPOSITION_SEND_UNIT */
     brave_story_update_propositions_input,         /* MENU_STACK_LEVEL_BRAVE_STORY_PROPOSITIONS */
     brave_story_update_advancing_list_input,       /* MENU_STACK_LEVEL_BRAVE_STORY_ADVANCING */
@@ -138,7 +138,7 @@ static void (*s_level_update_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     brave_story_update_fact_list_input,            /* MENU_STACK_LEVEL_BRAVE_STORY_FACTS */
     brave_story_update_fact_window,                /* MENU_STACK_LEVEL_BRAVE_STORY_FACT */
     update_variable_edit,                          /* MENU_STACK_LEVEL_DEBUG_VARIABLE_EDIT */
-    menu_screen_transition_update,                 /* MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION */
+    world_map_update_screen_transition,            /* MENU_STACK_LEVEL_MENU_SCREEN_TRANSITION */
     update_focus_level,                            /* MENU_STACK_LEVEL_WORLD_MAP_FOCUS */
     update_scrollable_text_level,                  /* MENU_STACK_LEVEL_SCROLLABLE_TEXT */
     update_party_number,                           /* MENU_STACK_LEVEL_DEBUG_PARTY_NUMBER */
@@ -171,8 +171,8 @@ static void (*s_level_resume_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_record
     proposition_resume_active_list,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
     0,                                       /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
     0,                                       /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
-    sound_novel_resume_reader,               /* MENU_STACK_LEVEL_SOUND_NOVEL */
-    sound_novel_resume_quit_menu,            /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
+    novel_resume_reader,                     /* MENU_STACK_LEVEL_SOUND_NOVEL */
+    novel_resume_quit_menu,                  /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
     0,                                       /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
     brave_story_resume_unexplored_land_list, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
     0,                                       /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
@@ -232,8 +232,8 @@ static void (*s_level_suspend_handlers[MENU_STACK_LEVEL_COUNT])(menu_stack_recor
     proposition_suspend_active_list,          /* MENU_STACK_LEVEL_PROPOSITION_ACTIVE_LIST */
     0,                                        /* MENU_STACK_LEVEL_PROPOSITION_RECALL */
     0,                                        /* MENU_STACK_LEVEL_SOUND_NOVEL_RESTART */
-    sound_novel_suspend_reader,               /* MENU_STACK_LEVEL_SOUND_NOVEL */
-    sound_novel_suspend_quit_menu,            /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
+    novel_suspend_reader,                     /* MENU_STACK_LEVEL_SOUND_NOVEL */
+    novel_suspend_quit_menu,                  /* MENU_STACK_LEVEL_SOUND_NOVEL_QUIT */
     0,                                        /* MENU_STACK_LEVEL_SOUND_NOVEL_HISTORY */
     brave_story_suspend_unexplored_land_list, /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LANDS */
     0,                                        /* MENU_STACK_LEVEL_BRAVE_STORY_UNEXPLORED_LAND */
@@ -1021,7 +1021,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
     g_menu_stack_depth -= 1;
     if (flags & WORLD_MAP_FLAG_REQUEST_BRAVE_STORY) {
         g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
-        menu_screen_transition_open(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
+        world_map_open_screen_transition(MENU_STACK_LEVEL_BRAVE_STORY, 0, 0);
         return;
     }
 
@@ -1037,7 +1037,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
 
     if (flags & WORLD_MAP_FLAG_REQUEST_TUTORIAL) {
         g_world_map_flags = cleared ^ WORLD_MAP_FLAG_DRAW_MAP;
-        menu_screen_transition_open(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
+        world_map_open_screen_transition(MENU_STACK_LEVEL_TUTORIAL, 0, 1);
         return;
     }
 
@@ -1080,7 +1080,7 @@ static void update_map_menu_return(menu_stack_record_t* level) {
  * priority over `text` in global allocation (s1/s2 as in the target). The
  * combined-away address pseudo of that store keeps a reload stack slot, part
  * of the target's 40-byte locals area. `box` is an aggregate so its 32-bit values stay
- * in memory across text_window_open; `dims` is an aggregate so
+ * in memory across window_open_paged_text; `dims` is an aggregate so
  * it is laid out in declaration order at 32(sp). `unused_point` and `unused`
  * are sized from the target frame only; their original types are unknown. */
 void menu_stack_open_text_window(s32 text, s32 reload_text) {
@@ -1133,7 +1133,7 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[1] = -1;
     g_text_window.text_substitutions[0] = -1;
-    text_window_open(window);
+    window_open_paged_text(window);
 
     index = g_menu_stack_records[g_menu_stack_depth].message.window_index;
     positions = &records[0].position;
@@ -1150,14 +1150,14 @@ void menu_stack_open_text_window(s32 text, s32 reload_text) {
 }
 
 /* Steps a message level: once the text window has popped in and
- * text_window_update reports it closed, pops the level, restores the
+ * window_update_paged_text reports it closed, pops the level, restores the
  * blocked-button mask it saved and (when asked) the text section pointers,
  * and resumes the level underneath. */
 static void update_text_level(menu_stack_record_t* level) {
     if (g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
-    if (text_window_update(&g_text_window) != 0) {
+    if (window_update_paged_text(&g_text_window) != 0) {
         return;
     }
     g_input_current_buttons = 0;
@@ -2025,7 +2025,7 @@ static void run_location_shop(s32 shop_id) {
     u32* clear;
     s32 i;
 
-    screen_set_brightness(0x80, 0x80, 0x80);
+    menu_screen_set_brightness(0x80, 0x80, 0x80);
     music_queue_wait_until_empty();
     shop_run_screen(shop_id);
     g_hud_value = script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS);
@@ -2088,7 +2088,7 @@ void menu_stack_open_scrollable_text(s32 text) {
         g_text_window.extra_render_index = -1;
         g_text_window.text_substitutions[1] = -1;
         g_text_window.text_substitutions[0] = -1;
-        text_window_open(&g_text_window);
+        window_open_paged_text(&g_text_window);
 
         g_display_object_gs_image_pool[g_text_window.render_record_index].flags |= DISPLAY_OBJECT_HIDDEN;
         depth = g_menu_stack_depth;
@@ -2105,7 +2105,7 @@ void menu_stack_open_scrollable_text(s32 text) {
 /* Menu-level step for the scrollable text window g_text_window.
  * While its render record is hidden, the first frame without a screen fade
  * plays SOUND_SFX_WINDOW_OPEN and shows the header window and the text.
- * Otherwise, once text_window_update reports the window
+ * Otherwise, once window_update_paged_text reports the window
  * closed, it releases the header window, pops the level, shows the location label
  * and unfreezes the map, shows the parent level's window and resumes the
  * parent level. */
@@ -2120,7 +2120,7 @@ static void update_scrollable_text_level(menu_stack_record_t* level) {
             g_display_object_gs_image_pool[*index].flags &= ~DISPLAY_OBJECT_HIDDEN;
         }
     } else if (!(g_display_object_gs_image_pool[*index].flags & DISPLAY_OBJECT_POP_IN)
-        && text_window_update(&g_text_window) == 0) {
+        && window_update_paged_text(&g_text_window) == 0) {
         g_display_object_animated_count--;
         g_display_object_queue_count--;
         depth = g_menu_stack_depth;

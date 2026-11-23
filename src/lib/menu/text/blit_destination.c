@@ -1,6 +1,6 @@
 /* Setting where the next glyph blit lands in the text image. */
 
-#include "fft/text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Set where the next glyph blit lands in the text image. */

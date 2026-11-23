@@ -1,10 +1,10 @@
 /* Load terrain and Move-Find records and access the packed fields of battle tiles.
  * The original unit also contains the unused helper that restores a unit's move and action. */
 
-#include "fft/map.h"
-#include "fft/move.h"
-#include "fft/system.h"
-#include "fft/unit.h"
+#include "fft/battle/move.h"
+#include "fft/game/battle_unit.h"
+#include "fft/map/map.h"
+#include "fft/sys/system.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

@@ -1,7 +1,7 @@
 /* Menu frame timing and its link to the resident event-script speed. */
 
-#include "fft/menu.h"
-#include "fft/script.h"
+#include "fft/menu/menu.h"
+#include "fft/script/script.h"
 #include "psx/types.h"
 
 #if defined(FFT_WORLD) || defined(FFT_EVENT_CARD) || defined(FFT_EVENT_BUNIT)

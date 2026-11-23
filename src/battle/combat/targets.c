@@ -1,17 +1,16 @@
 /* Ability and weapon target ranges, affected panels and target eligibility. */
 
-#include "fft/ability.h"
-#include "fft/action.h"
-#include "fft/command.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/projectile.h"
-#include "fft/skillset.h"
-#include "fft/status.h"
-#include "fft/target.h"
-#include "fft/unit.h"
+#include "fft/battle/action.h"
+#include "fft/battle/command.h"
+#include "fft/battle/projectile.h"
+#include "fft/battle/target.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/map/map.h"
 #include "psx/types.h"
 
 extern u8 g_ability_calculator_primes[CALCULATOR_PRIME_COUNT];

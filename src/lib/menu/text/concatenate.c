@@ -1,6 +1,7 @@
 /* Concatenating the text of a list of entry ids. */
 
-#include "fft/text.h"
+#include "fft/menu/menu_text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Concatenate the text for each entry of a -1 terminated id list into `out`,

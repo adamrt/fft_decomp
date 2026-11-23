@@ -1,19 +1,18 @@
 /* Event commands that change the party roster, Brave, calendar or a unit display.
  * The paired-unit warp and tile-depth switches support scripted scene changes. */
 
-#include "fft/calendar.h"
-#include "fft/character_identity.h"
-#include "fft/item.h"
-#include "fft/map.h"
-#include "fft/map_unit.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/script.h"
-#include "fft/script_instruction.h"
-#include "fft/script_unit.h"
-#include "fft/script_variable.h"
-#include "fft/unit.h"
-#include "fft/unit_view.h"
+#include "fft/battle/unit_view.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/item.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/map/map.h"
+#include "fft/map/map_unit.h"
+#include "fft/script/script.h"
+#include "fft/script/script_instruction.h"
+#include "fft/script/script_variable.h"
+#include "fft/world/calendar.h"
 #include "psx/types.h"
 
 static map_tile_coordinates_t s_script_warp_coords;

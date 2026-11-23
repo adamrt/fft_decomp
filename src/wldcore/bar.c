@@ -1,30 +1,29 @@
 /* The bar offers rumors and propositions, preserving its menu windows while the player opens details or accepts work.
  */
 
-#include "fft/bar.h"
-#include "fft/character_identity.h"
-#include "fft/display_object.h"
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/input.h"
-#include "fft/location.h"
-#include "fft/menu_input.h"
-#include "fft/menu_selection.h"
-#include "fft/menu_stack.h"
-#include "fft/menu_stack_records.h"
-#include "fft/message.h"
-#include "fft/message_box.h"
-#include "fft/music.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/proposition.h"
-#include "fft/script_variable.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit.h"
-#include "fft/window.h"
-#include "fft/world_map.h"
+#include "fft/world/bar.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/character_identity.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/gfx/display_object.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/file.h"
+#include "fft/sys/input.h"
+#include "fft/sys/music.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/location.h"
+#include "fft/world/menu_stack.h"
+#include "fft/world/menu_stack_records.h"
+#include "fft/world/proposition.h"
+#include "fft/world/window.h"
+#include "fft/world/world_map.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -55,7 +54,7 @@ void bar_open_menu(void) {
     if (value == 2) {
         set = 0x17;
     }
-    picture_load_background_set(set);
+    world_map_load_background_picture_set(set);
     file_wait_pending();
     g_world_map_flags |= WORLD_MAP_FLAG_HIDE_CALENDAR_DATE | WORLD_MAP_FLAG_HIDE_LOCATION_LABEL;
     thread_start(WORLD_MAP_THREAD_SLOT_MESSAGE, message_box_thread);
@@ -176,7 +175,7 @@ void bar_resume_menu(menu_stack_record_t* level) {
  * cursor, 6 on the side window and 2 on the frame, and restart the cursor's
  * press animation.
  *
- * Sibling of sound_novel_suspend_quit_menu, differing only in the sequence
+ * Sibling of novel_suspend_quit_menu, differing only in the sequence
  * stored. The record stores may alias `level`, so they invalidate the cached
  * parameter loads and reproduce the target's reloads; `index` shares one
  * address computation between the last two. */
@@ -500,7 +499,7 @@ static void open_rumor_detail(s32 value) {
     g_text_window.extra_render_index = -1;
     g_text_window.text_substitutions[1] = -1;
     g_text_window.text_substitutions[0] = -1;
-    text_window_open(&g_text_window);
+    window_open_paged_text(&g_text_window);
     depth = g_menu_stack_depth;
     g_display_object_animated_pool[g_menu_stack_records[depth - 1].bar.cursor_window].flags |= DISPLAY_OBJECT_HIDDEN;
     g_menu_stack_records[depth].rumor_detail.first_window = g_menu_stack_records[depth - 1].bar.cursor_window;
@@ -521,7 +520,7 @@ void rumor_update_detail(menu_stack_record_t* level) {
     if (g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
         return;
     }
-    if (text_window_update(&g_text_window) != 0) {
+    if (window_update_paged_text(&g_text_window) != 0) {
         return;
     }
     g_display_object_animated_pool[level->rumor_detail.first_window].flags ^= DISPLAY_OBJECT_HIDDEN;

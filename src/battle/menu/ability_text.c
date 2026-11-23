@@ -1,14 +1,15 @@
 /* Three-column ability-list text, page redraws and repeat timing. */
 
-#include "fft/ability_list.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/ability_list.h"
+#include "fft/script/script.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -40,32 +41,32 @@ void ability_list_draw_text(menu_entry_t* entry, s32* row_offset, u8* buffer) {
                 g_menu_window_text_pen.color = 0x44444444;
             }
             if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
+                text_render_entry_to_image(layout->text_ids[column][index], buffer, &g_menu_window_text_pen);
                 if (g_threads[g_thread_current_id].function_parameter_4 != 0
                     && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                     g_menu_text_palette_offset = layout->text_colors[column][index];
                     /* 32-bit x and y, as above. */
                     menu_text_set_origin(layout->x[column] + 0x50, row * 0x10);
-                    menu_display_text_entry(TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
+                    text_render_entry_to_image(TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                 }
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
+                text_draw_number(layout->text_ids[column][index], 2, buffer, &g_menu_window_text_pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
                 if ((column == 2 || (column == 1 && layout->mode[2] == MENU_TEXT_COLUMN_HIDDEN))
                     && layout->text_ids[column][index] >= 0 && layout->text_ids[column][index] < 2
                     && (g_event_work->ability_list.skill_ct[index] == 0xFF
                         || g_event_work->ability_list.skill_ct[index] == 0)) {
                     g_menu_window_text_pen.rect.y += 2;
-                    menu_draw_charge_time_now(buffer, &g_menu_window_text_pen);
+                    text_draw_charge_time_now(buffer, &g_menu_window_text_pen);
                 } else {
                     value = layout->text_ids[column][index];
                     if (value & 0x7FF) {
                         if ((value & 0x7FF) >= 100) {
                             g_menu_text_palette_offset = 0;
                             g_menu_window_text_pen.rect.x += 3;
-                            menu_display_text_entry(TEXT_ID_INFINITY, buffer, &g_menu_window_text_pen);
+                            text_render_entry_to_image(TEXT_ID_INFINITY, buffer, &g_menu_window_text_pen);
                         } else {
-                            menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
+                            text_draw_large_number_glyphs(value, 2, buffer, &g_menu_window_text_pen);
                         }
                     }
                 }
@@ -124,7 +125,7 @@ u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* r
             } else {
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
-            menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
+            mem_zero_words(buffer, entry->inner_width * entry->inner_height / 2);
             ability_list_draw_text(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);

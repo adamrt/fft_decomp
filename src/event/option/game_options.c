@@ -1,21 +1,22 @@
 /* The game options menu thread: the option list with current values, the value picker and saving the options. */
 
-#include "fft/gfx.h"
-#include "fft/gfx_image.h"
-#include "fft/gfx_primitive.h"
-#include "fft/input.h"
-#include "fft/memory.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_window.h"
-#include "fft/option.h"
-#include "fft/script.h"
-#include "fft/sound.h"
-#include "fft/suzuki.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_image.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_text.h"
+#include "fft/menu/menu_window.h"
+#include "fft/menu/option.h"
+#include "fft/script/script.h"
+#include "fft/sys/input.h"
+#include "fft/sys/memory.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/suzuki.h"
+#include "fft/sys/thread.h"
+#include "fft/text/text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -153,7 +154,7 @@ void option_game_options_thread(void) {
     i = 0;
     accum = 0;
     timer = 0;
-    menu_clear_render_buffer(image, entry->inner_width * entry->inner_height / 2);
+    mem_zero_words(image, entry->inner_width * entry->inner_height / 2);
     menu_draw_text_columns(entry, &row_offset, image);
     ring = 0;
     image_rect.w = g_menu_window_text_pen.stride >> 2;
@@ -170,7 +171,7 @@ void option_game_options_thread(void) {
     base->setting_panel.y0 = entry->window.y + entry->window.h + 1;
     g_menu_window_text_pen.stride = entry->inner_width;
     menu_text_set_origin(0x18, 0xE);
-    menu_display_text_entry(0x502B, image, &g_menu_window_text_pen);
+    text_render_entry_to_image(0x502B, image, &g_menu_window_text_pen);
     LoadImage(&g_option_title_image_rect, (u32*)image);
     thread_wait_frames(1);
     menu_free_memory(image);
@@ -190,10 +191,10 @@ void option_game_options_thread(void) {
     text_configure_sprite_vram(&g_option_value_image_rect, 0x3C, 0x10, &base->setting_value, 0);
     base->setting_value.x0 = entry->window.x + 0x5C;
     base->setting_value.y0 = entry->window.y + entry->window.h + 0xF;
-    menu_clear_render_buffer(buffer, 0x1E0);
+    mem_zero_words(buffer, 0x1E0);
     g_menu_window_text_pen.stride = 0x3C;
     menu_text_set_origin(0, 0);
-    menu_display_text_entry(0x5021, buffer, &g_menu_window_text_pen);
+    text_render_entry_to_image(0x5021, buffer, &g_menu_window_text_pen);
     LoadImage(&g_option_value_image_rect, (u32*)buffer);
 
     /* The loop draws from the two pages alternately. */
@@ -239,7 +240,7 @@ void option_game_options_thread(void) {
                 }
                 image = g_menu_render_buffer;
                 image_rect.h = 0x10;
-                menu_clear_render_buffer(image, entry->inner_width * 8);
+                mem_zero_words(image, entry->inner_width * 8);
                 g_menu_window_text_pen.stride = entry->inner_width;
                 for (column = 0; column < 2; column++) {
                     if (layout->text_ids[column] != (s16*)-1) {
@@ -247,10 +248,9 @@ void option_game_options_thread(void) {
                         menu_text_set_origin(layout->x[column], 0);
                         g_menu_text_palette_offset = layout->text_colors[column][index];
                         if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                            menu_display_text_entry(layout->text_ids[column][index], image, &g_menu_window_text_pen);
+                            text_render_entry_to_image(layout->text_ids[column][index], image, &g_menu_window_text_pen);
                         } else {
-                            menu_display_number_entry(
-                                layout->text_ids[column][index], 2, image, &g_menu_window_text_pen);
+                            text_draw_number(layout->text_ids[column][index], 2, image, &g_menu_window_text_pen);
                         }
                     }
                 }
@@ -273,11 +273,11 @@ void option_game_options_thread(void) {
 
         if (g_menu_input_lock_mode == 0) {
             index = cursor + row_offset + delta;
-            menu_clear_render_buffer(buffer, 0x1E0);
+            mem_zero_words(buffer, 0x1E0);
             g_menu_window_text_pen.stride = 0x3C;
             menu_text_set_origin(0, 0);
             value_text_id = g_option_value_text_id_bases[index] + g_option_values[index];
-            menu_display_text_entry(value_text_id, buffer, &g_menu_window_text_pen);
+            text_render_entry_to_image(value_text_id, buffer, &g_menu_window_text_pen);
             LoadImage(&g_option_value_image_rect, (u32*)buffer);
         }
 

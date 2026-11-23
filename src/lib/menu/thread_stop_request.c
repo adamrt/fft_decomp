@@ -1,7 +1,7 @@
 /* Requesting a menu thread to stop. */
 
-#include "fft/menu_list.h"
-#include "fft/thread.h"
+#include "fft/menu/menu_list.h"
+#include "fft/sys/thread.h"
 #include "psx/types.h"
 
 /* Clear the first two menu parameters and request stop in the third. */

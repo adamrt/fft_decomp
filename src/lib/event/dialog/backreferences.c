@@ -1,6 +1,6 @@
 /* Advancing a text cursor one byte, following back-reference runs. */
 
-#include "fft/text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Advance a text cursor by one byte, leaving a finished back-reference run and

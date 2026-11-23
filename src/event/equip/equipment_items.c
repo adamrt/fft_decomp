@@ -1,12 +1,12 @@
 /* Equipment slot changes, item eligibility and available item counts. */
 
-#include "fft/ability.h"
-#include "fft/bits.h"
-#include "fft/equipment.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/menu.h"
-#include "fft/option.h"
+#include "fft/game/ability.h"
+#include "fft/game/item.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/option.h"
+#include "fft/party/equipment.h"
+#include "fft/party/item_list.h"
+#include "fft/sys/bits.h"
 #include "psx/types.h"
 
 static equipment_slot_result_e check_equipment_slot_item(s16 unit, s16 slot, s16 item_id);
@@ -66,7 +66,7 @@ s32 equipment_check_item_compatibility(s16 unit_index, s16 item_entry) {
     if (item_id == 0) {
         return EQUIPMENT_SLOT_ITEM_ALLOWED;
     }
-    if (item_get_menu_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
+    if (item_list_get_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
         return EQUIPMENT_SLOT_ITEM_CANNOT_EQUIP;
     }
     /* Skip to the item type's bit in the unit's bitfield, first byte's bit 7 first. */
@@ -155,7 +155,7 @@ static equipment_slot_result_e check_equipment_slot_item(s16 unit, s16 slot, s16
  * with ITEM_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
  * promoted to 2 when Show Unequippable is not On. `sort_mode` 1-5 with a
  * category list index below 5 uses that category order list; anything else falls back to
- * item_sort_id_list. Returns the number of listed items.
+ * item_list_sort. Returns the number of listed items.
  */
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter) {
     s32 count;
@@ -176,7 +176,7 @@ s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* l
         if (item_get_total_count(item_id) == 0) {
             continue;
         }
-        item_category = item_get_menu_category(item_id);
+        item_category = item_list_get_category(item_id);
         matches = 0;
         if (category < ITEM_LIST_FILTER_HEADGEAR) {
             /* Either hand lists weapons and shields. */
@@ -232,9 +232,9 @@ s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* l
         category_index = 4;
     }
     if (category_index < 5 && sort_mode >= 1 && sort_mode < 6) {
-        count = item_sort_list_by_category_order(category_index, list);
+        count = item_list_sort_by_category_order(category_index, list);
     } else {
-        item_sort_id_list(sort_mode & 0xF, list);
+        item_list_sort(sort_mode & 0xF, list);
     }
     return count;
 }

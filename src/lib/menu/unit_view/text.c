@@ -1,11 +1,12 @@
 /* Status panel primitive colors and signed decimal value rendering. */
 
-#include "fft/text.h"
-#include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_input.h"
-#include "fft/unit_panel.h"
+#include "fft/text/text.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_text.h"
+#include "fft/party/unit_panel.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -57,11 +58,11 @@ void unit_panel_set_colors(unit_panel_frame_t* primitives, const unit_panel_thre
 
 /* Select the menu primitives' normal or dimmed colors: dimmed for panel style 1 or while menu
  * input lock mode 1 is on. The palette initializer receives `primitives` unchanged in $a0. */
-void unit_panel_select_palette(menu_numeric_frame_t* primitives, const unit_panel_thread_t* thread) {
+void unit_panel_select_palette(unit_panel_numeric_frame_t* primitives, const unit_panel_thread_t* thread) {
     if (thread->style == 1 || g_menu_input_lock_mode == 1) {
-        menu_numeric_frame_set_dimmed_colors(primitives);
+        unit_panel_set_numeric_frame_dimmed_colors(primitives);
     } else {
-        menu_numeric_frame_set_normal_colors(primitives);
+        unit_panel_set_numeric_frame_normal_colors(primitives);
     }
 }
 

@@ -2,35 +2,35 @@
  * Selection restoration, announcements, auto-battle choices and crystal pickup
  * share the request table and its command-dialog state. */
 
-#include "fft/ability.h"
-#include "fft/ability_list.h"
-#include "fft/action.h"
-#include "fft/battle_state.h"
-#include "fft/camera.h"
-#include "fft/command.h"
-#include "fft/crystal.h"
-#include "fft/item.h"
-#include "fft/job.h"
-#include "fft/map_unit.h"
-#include "fft/menu.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_selection.h"
-#include "fft/message.h"
-#include "fft/option.h"
-#include "fft/result.h"
-#include "fft/script.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/sound.h"
-#include "fft/status.h"
-#include "fft/system.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/tutorial.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
-#include "fft/unit_view.h"
+#include "fft/battle/action.h"
+#include "fft/battle/battle_state.h"
+#include "fft/battle/camera.h"
+#include "fft/battle/command.h"
+#include "fft/battle/crystal.h"
+#include "fft/battle/result.h"
+#include "fft/battle/unit_view.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/game/job.h"
+#include "fft/game/skillset.h"
+#include "fft/game/status.h"
+#include "fft/map/map_unit.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_selection.h"
+#include "fft/menu/option.h"
+#include "fft/party/ability_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/script/script.h"
+#include "fft/script/script_variable.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/system.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
+#include "fft/world/tutorial.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -91,15 +91,15 @@ static request_entry_t s_request_entries[51] = {
         2, { 0, 0 } }, /* 2 */
     { MENU_COMMAND_ID_PANEL_EXECUTE, 0x5058, MENU_COMMAND_ID_PANEL_EXECUTE, 0xffff, 1, { 0, 0 },
         menu_icon_selection_thread, 3, { 0, 0 } }, /* 3 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 4 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 5 */
     { MENU_COMMAND_ID_MESSAGE, 0x800b, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 6 */
     { MENU_COMMAND_ID_MESSAGE, 0x8003, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 7 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } }, /* 8 */
     { MENU_COMMAND_ID_EXECUTE, 0x5061, MENU_COMMAND_ID_EXECUTE, 0xffff, 1, { 0, 0 }, menu_icon_selection_thread, 9,
         { 0, 0 } }, /* 9 */
@@ -111,7 +111,7 @@ static request_entry_t s_request_entries[51] = {
         menu_icon_linked_entry_thread, 3, { 0, 0 } }, /* 12 */
     { 102, 0x8011, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_EXECUTE, 1, { 0, 0 }, menu_icon_linked_entry_thread,
         9, { 0, 0 } }, /* 13 */
-    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
+    { MENU_COMMAND_ID_NONE, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, command_request_close_thread,
         MENU_PROMPT_CLOSE, { 0, 0 } },                                                                         /* 14 */
     { 99, 0x1004, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 15, { 0, 0 } }, /* 15 */
     { 99, 0x8006, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE,
@@ -142,8 +142,8 @@ static request_entry_t s_request_entries[51] = {
         MENU_PROMPT_EFFECT_MESSAGE, { 0, 0 } }, /* 29 */
     { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x1017, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 30 */
-    { MENU_COMMAND_ID_CRYSTAL_PICKUP, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 }, menu_request_close_thread,
-        MENU_PROMPT_CRYSTAL_OR_TREASURE, { 0, 0 } },                                                           /* 31 */
+    { MENU_COMMAND_ID_CRYSTAL_PICKUP, 0x505a, MENU_COMMAND_ID_MESSAGE, 0xffff, 0, { 0, 0 },
+        command_request_close_thread, MENU_PROMPT_CRYSTAL_OR_TREASURE, { 0, 0 } },                             /* 31 */
     { 99, 0x1013, MENU_COMMAND_ID_MESSAGE, 0xffff, 1, { 0, 0 }, menu_icon_linked_entry_thread, 32, { 0, 0 } }, /* 32 */
     { MENU_COMMAND_ID_MESSAGE_YES_NO, 0x8006, MENU_COMMAND_ID_MESSAGE, MENU_COMMAND_ID_MESSAGE_YES_NO, 1, { 0, 0 },
         menu_icon_linked_entry_thread, MENU_PROMPT_CLOSE, { 0, 0 } }, /* 33 */
@@ -222,7 +222,7 @@ void command_move_thread(void) {
 
     stored_actions = &g_command_confirm_stored_unit_row_actions;
     *stored_actions = -2;
-    if (menu_get_selected_battle_unit()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
+    if (unit_panel_get_selected_battle_unit()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
         & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE)) {
         *stored_actions = -1;
         sound_queue_invalid();
@@ -256,7 +256,7 @@ void command_check_restrictions(void) {
     s32 result;
     s32 mode;
 
-    unit = menu_get_selected_battle_unit();
+    unit = unit_panel_get_selected_battle_unit();
     menu = g_command_current_id;
     if (menu == MENU_COMMAND_ID_TURN_ACTED || menu == MENU_COMMAND_ID_TURN_MOVED_ACTED
         || menu == MENU_COMMAND_ID_RIDER_TURN_ACTED || menu == MENU_COMMAND_ID_RIDER_TURN_MOVED_ACTED) {
@@ -321,7 +321,7 @@ void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit) {
     parameter = (menu_entry_t*)thread_current_get_parameter_1();
     mode = 0;
     message = 0;
-    unit = menu_get_selected_battle_unit();
+    unit = unit_panel_get_selected_battle_unit();
     if (check_unit != 0) {
         if (battle_unit_get_action_restriction(unit) == UNIT_ACTION_RESTRICTION_DEEP_WATER) {
             message = 0x1003;
@@ -388,7 +388,7 @@ void command_validate_ability_thread(void) {
     }
     message = 0;
     blocked = skill_tables->flags[skill] & MENU_ABILITY_FLAG_AFFECTED_BY_SILENCE;
-    unit = menu_get_selected_battle_unit();
+    unit = unit_panel_get_selected_battle_unit();
     if (g_menu_active_menu == ACTION_MENU_TYPE_DEFAULT && unit->mp - mp_cost < 0) {
         message = 0x800A;
         if (ct == 0) {
@@ -601,7 +601,7 @@ void auto_battle_confirm_thread(void) {
     s32 menu;
     menu_entry_t* parameter = (menu_entry_t*)thread_current_get_parameter_1();
 
-    attacker = menu_get_selected_battle_unit();
+    attacker = unit_panel_get_selected_battle_unit();
     menu = g_menu_thread_menu_data[MENU_COMMAND_ID_AUTO_BATTLE].selected_index;
     if (menu == 3) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_FADING_LIFE;
@@ -684,7 +684,7 @@ void announcement_select(action_command_t* action, s32 unit_id, s32 enabled) {
  * leftover v0 is returned. ABILITY_ANNOUNCEMENT drops option, parameter and
  * enabled. Everything else returns dispatch_request's result;
  * for SCENARIO_CHECK and CLOSE the action pointer passed on is unset. */
-s32 menu_dispatch_request(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled) {
+s32 command_dispatch_request(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled) {
     action_command_t* action;
 
     if (type != MENU_REQUEST_SCENARIO_CHECK && type != MENU_REQUEST_CLOSE) {

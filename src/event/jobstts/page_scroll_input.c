@@ -1,9 +1,9 @@
 /* Holding Square with Up or Down pages through JOBSTTS menus at the
  * scaled input repeat delay and period. */
 
-#include "fft/input.h"
-#include "fft/menu.h"
-#include "fft/menu_script.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_script.h"
+#include "fft/sys/input.h"
 #include "psx/libetc.h"
 #include "psx/pad.h"
 #include "psx/types.h"

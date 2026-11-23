@@ -1,16 +1,16 @@
 /* Calendar advances hatch eggs and roll monster offspring. Newborn monsters receive a birthday and zodiac sign before
  * their roster record is generated. */
 
-#include "fft/calendar.h"
-#include "fft/formation.h"
-#include "fft/job.h"
-#include "fft/party.h"
-#include "fft/party_unit.h"
-#include "fft/save.h"
-#include "fft/script_variable.h"
-#include "fft/skillset.h"
-#include "fft/text.h"
-#include "fft/unit.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/job.h"
+#include "fft/game/party.h"
+#include "fft/game/party_unit.h"
+#include "fft/game/skillset.h"
+#include "fft/party/formation.h"
+#include "fft/script/script_variable.h"
+#include "fft/text/text.h"
+#include "fft/world/calendar.h"
+#include "fft/world/save.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

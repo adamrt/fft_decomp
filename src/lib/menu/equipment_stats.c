@@ -1,13 +1,13 @@
 /* Build the equipment preview’s item contributions, compare old and new
  * loadouts, and total weapon power and equipment evade for the unit panels. */
 
-#include "fft/ability.h"
-#include "fft/equipment.h"
-#include "fft/formation_ability.h"
-#include "fft/item.h"
-#include "fft/item_menu.h"
-#include "fft/unit.h"
-#include "fft/unit_panel.h"
+#include "fft/game/ability.h"
+#include "fft/game/battle_unit.h"
+#include "fft/game/item.h"
+#include "fft/party/equipment.h"
+#include "fft/party/formation_ability.h"
+#include "fft/party/item_list.h"
+#include "fft/party/unit_panel.h"
 #include "psx/types.h"
 
 /* Clear the HP/MP preview bonuses and equipment-detail stats. */
@@ -58,7 +58,7 @@ static void build_movement_bonus(s16 ability, unit_panel_record_t* out) {
 /* Stat preview for swapping one movement ability for another: clears
  * `stat_diff` and stores the difference in the Move and Jump bonuses the two
  * abilities give. */
-void formation_calculate_ability_movement_delta(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability) {
+void formation_ability_calculate_movement_delta(unit_panel_record_t* stat_diff, s32 old_ability, s32 new_ability) {
     unit_panel_summary_t summary;
     unit_panel_record_t old_stats;
     unit_panel_record_t new_stats;
@@ -81,7 +81,8 @@ void formation_calculate_ability_movement_delta(unit_panel_record_t* stat_diff, 
  * attribute set's Move, Jump, Speed, PA and MA bonuses. WORLD requires an
  * item ID in the item table; EQUIP accepts every positive low-ten-bit ID.
  */
-void item_build_stat_preview(s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
+void item_list_build_stat_preview(
+    s16 raw_item, unit_panel_summary_t* summary, unit_panel_record_t* detail, s32 alternate) {
     s32 item_id;
     s32 attribute;
     s32 secondary;
@@ -144,8 +145,8 @@ void equipment_calculate_swap_delta(
     unit_panel_record_t detail_before;
     unit_panel_record_t detail_after;
 
-    item_build_stat_preview(item_before, &summary_before, &detail_before, slot);
-    item_build_stat_preview(item_after, &summary_after, &detail_after, slot);
+    item_list_build_stat_preview(item_before, &summary_before, &detail_before, slot);
+    item_list_build_stat_preview(item_after, &summary_after, &detail_after, slot);
     delta->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
     delta->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus
@@ -211,7 +212,7 @@ void equipment_build_weapon_evade_totals(unit_panel_record_t* total, const u16* 
     total->state.magical_shield_evade = 0;
     total->state.magical_accessory_evade = 0;
     for (i = 0; i < 5; i++) {
-        item_build_stat_preview(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
+        item_list_build_stat_preview(equipment[i] & ITEM_ENTRY_ID_MASK, &summary, &detail, i);
         total->state.right_weapon_power += detail.state.right_weapon_power;
         total->state.left_weapon_power += detail.state.left_weapon_power;
         total->state.right_weapon_evade += detail.state.right_weapon_evade;

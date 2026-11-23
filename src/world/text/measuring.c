@@ -1,7 +1,8 @@
 /* Entry pixel width and the encoded character at a position. */
 
-#include "fft/menu_screen.h"
-#include "fft/text.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_text.h"
+#include "fft/text/text.h"
 #include "psx/types.h"
 
 /* Sum the pixel widths of a 0xFE-terminated text entry. Bytes 0xD0..0xDF

@@ -1,6 +1,6 @@
 /* Memory copy and clear helpers, and Suzuki SPU allocation. */
 
-#include "fft/suzuki.h"
+#include "fft/sys/suzuki.h"
 #include "psx/libspu.h"
 
 /* Copies size bytes: 16-byte blocks, then 32-bit values, then bytes. */

@@ -1,10 +1,11 @@
 /* The two fading translucent letterbox panels behind the unit status banner. */
 
-#include "fft/equipment.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
-#include "fft/unit_panel.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/equipment.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -27,7 +28,7 @@ extern menu_gradient_panel_prims_t g_equipment_thread_indicator_packets[2][2];
  * further toward the outside, alternating between two primitive buffers so the
  * previous frame stays queued. Nothing in EQUIP calls it.
  */
-void menu_draw_status_panel_backdrops(void) {
+void unit_panel_draw_backdrops(void) {
     menu_gradient_panel_prims_t* prims;
     unit_panel_thread_t* display;
     unit_panel_thread_t* descriptor;

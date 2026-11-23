@@ -1,10 +1,11 @@
 /* Render the resident projectile models and thrown item sprite. */
 
-#include "fft/camera.h"
-#include "fft/effect_model.h"
-#include "fft/effect_particle.h"
-#include "fft/effect_secondary.h"
-#include "fft/gfx_image.h"
+#include "fft/battle/camera.h"
+#include "fft/effect/effect_model.h"
+#include "fft/effect/effect_particle.h"
+#include "fft/effect/effect_secondary.h"
+#include "fft/game/item.h"
+#include "fft/gfx/gfx_image.h"
 #include "psx/gte_inline.h"
 #include "psx/libc.h"
 #include "psx/libetc.h"
@@ -277,7 +278,7 @@ void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     s16 right;
     s16 bottom;
 
-    gfx_set_item_icon_sprite(&sprite, item_id);
+    item_set_icon_sprite(&sprite, item_id);
     prim = &slot->quads[g_effect_buffer_index];
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);

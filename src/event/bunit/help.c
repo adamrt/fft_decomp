@@ -1,18 +1,18 @@
 /* BUNIT's menu thread and field-help cursor open text for the selected unit
  * while its normal menu input waits. */
 
-#include "fft/help.h"
-#include "fft/gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/message.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/unit_list.h"
-#include "fft/unit_panel.h"
+#include "fft/menu/help.h"
+#include "fft/gfx/gfx.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/party/unit_list.h"
+#include "fft/party/unit_panel.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -59,8 +59,8 @@ s32 menu_managed_thread_start(s32 id, menu_entry_t* desc) {
 
 /* Start the text thread for g_text_selection_id (ids above 0x1FFFF are
  * stashed in g_unit_list_help_screen_id instead); thread_data + 0x38 is the text
- * thread's dialog type, as in menu_start_help_text. */
-void menu_start_help_text(s32 thread_data) {
+ * thread's dialog type, as in help_start_text. */
+void help_start_text(s32 thread_data) {
     if (g_text_selection_id > 0x1FFFF) {
         g_unit_list_help_screen_id = g_text_selection_id;
         return;
@@ -133,7 +133,7 @@ void unit_list_update_help_cursor(s16 mode) {
                 /* The target zero-extends help_base here (lhu): a -0x6800 base adds HELP_TEXT_ID_SKILLSET_BASE. */
                 g_text_selection_id
                     = text_id + (u16)g_unit_list_help_nodes_reload[g_unit_list_help_node_index_reload_2].help_base;
-                menu_start_help_text(3);
+                help_start_text(3);
             }
         } else if (flags & PSX_PAD_UP) {
             node_index = g_unit_list_help_nodes[node_index].destination[0];

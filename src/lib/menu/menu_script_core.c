@@ -1,11 +1,11 @@
 /* Menu script execution and conditional command groups. */
 
-#include "fft/equipment.h"
-#include "fft/gfx_primitive.h"
-#include "fft/menu_gfx.h"
-#include "fft/menu_screen.h"
-#include "fft/menu_script.h"
-#include "fft/unit_list.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/menu_gfx.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/menu/menu_script.h"
+#include "fft/party/equipment.h"
+#include "fft/party/unit_list.h"
 #include "psx/types.h"
 
 /* Each interpreter stops at its own dialect's first non-instruction value. */

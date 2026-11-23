@@ -1,10 +1,10 @@
 /* The resident zodiac drawing entrance and FRAME.BIN texture upload used by deployment
  * and menu screens. */
 
-#include "fft/file.h"
-#include "fft/gfx.h"
-#include "fft/memory.h"
-#include "fft/zodiac.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/zodiac.h"
+#include "fft/sys/file.h"
+#include "fft/sys/memory.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

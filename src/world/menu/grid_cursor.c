@@ -1,18 +1,18 @@
 /* Help dialogs and the Formation banner use a directional grid cursor. */
 
-#include "fft/formation.h"
-#include "fft/gfx.h"
-#include "fft/gfx_primitive.h"
-#include "fft/help.h"
-#include "fft/menu.h"
-#include "fft/menu_cursor.h"
-#include "fft/menu_input.h"
-#include "fft/menu_list.h"
-#include "fft/menu_screen.h"
-#include "fft/message.h"
-#include "fft/sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/gfx/gfx.h"
+#include "fft/gfx/gfx_primitive.h"
+#include "fft/menu/help.h"
+#include "fft/menu/menu.h"
+#include "fft/menu/menu_cursor.h"
+#include "fft/menu/menu_input.h"
+#include "fft/menu/menu_list.h"
+#include "fft/menu/menu_screen.h"
+#include "fft/party/formation.h"
+#include "fft/sys/sound.h"
+#include "fft/sys/thread.h"
+#include "fft/text/message.h"
+#include "fft/text/text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
@@ -37,7 +37,7 @@ extern s16 g_menu_screen_grid_cell_24_text_offset;
 
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
-void menu_start_help_text(s32 position) {
+void help_start_text(s32 position) {
     if (g_help_message_text_id > 0x1ffff) {
         g_menu_screen_grid_id = g_help_message_text_id;
         return;
@@ -101,7 +101,7 @@ void menu_screen_update_grid_cursor(s16 alternate) {
                 /* This grid adds the base as an unsigned 16-bit text ID. */
                 g_help_message_text_id
                     = text_id + (u16)g_menu_screen_grid_active_cells[g_menu_screen_grid_selected_cell].help_base;
-                menu_start_help_text(DIALOG_POSITION_CENTER);
+                help_start_text(DIALOG_POSITION_CENTER);
             }
         } else if (input & PSX_PAD_UP) {
             cell = g_menu_screen_grid_active_cells[cell].destination[0];
