@@ -50,12 +50,10 @@ s32 equipment_row_get_equipped_count(s32 row) {
 
 /* Build the item-type icon source for one menu row. */
 menu_icon_source_t* item_list_build_type_icon_source(s32 index) {
-    menu_icon_source_t* out = &s_menu_item_type_icon_source;
-
-    item_list_build_type_icon(item_get_type(g_item_list_entries[index]), out);
-    out->clut = g_menu_palette_clut;
-    out->tpage = g_menu_cursor_texture_page;
-    return out;
+    item_list_build_type_icon(item_get_type(g_item_list_entries[index]), &s_menu_item_type_icon_source);
+    s_menu_item_type_icon_source.clut = g_menu_palette_clut;
+    s_menu_item_type_icon_source.tpage = g_menu_cursor_texture_page;
+    return &s_menu_item_type_icon_source;
 }
 
 /* Menu callback: the icon descriptor of the item in list row `row`, built in the shared

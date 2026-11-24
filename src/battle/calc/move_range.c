@@ -677,7 +677,6 @@ static void set_spread_frontier_flags(s32 mode) {
     map_tile_flags_t tile_flags;
     u8 flags;
     u8 depth;
-    u8 value;
 
     for (i = 0, frontier_cell = frontier; i < MOVE_PANEL_COUNT; frontier_cell++, i++) {
         panel = &g_target_panels[i];

@@ -218,6 +218,7 @@ void at_list_run(void) {
 
             /* Draw the row scrolling into view into the ring slot below the visible rows, or above them. */
             if (delta != 0) {
+                /* The one-trip loop's note is needed: a plain block changes the allocation. */
                 do {
                     if (delta > 0) {
                         image_rect.y = (((ring + layout->row_count) * 16) & 0xFF) + entry->vram_origin.y;

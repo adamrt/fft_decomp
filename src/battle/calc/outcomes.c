@@ -88,7 +88,6 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     s32 row;
     s32 byte_index;
     s32 bit;
-    u8* src;
     s32 k;
     u8 skillset;
 
@@ -118,14 +117,8 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                     } else {
                         row = row - JOB_ID_SQUIRE;
                     }
-                    /* Typed field access reassociates the 0x99 field offset
-                     * with the row and demonstrably breaks the byte-exact
-                     * address calculation. Preserve the target's row-offset,
-                     * unit-base, then field-offset order. */
-                    src = (u8*)((row * ABILITY_LEARN_ON_HIT_ROW_BYTES) + (u32)unit
-                        + offsetof(battle_unit_t, career.learned_abilities));
                     for (k = 0; k < ABILITY_LEARN_ON_HIT_ROW_BYTES; k++) {
-                        known[k] = src[k];
+                        known[k] = unit->career.learned_abilities[row][k];
                     }
 
                     /* Ability j of the skillset is learned when bit 7 - j % 8 of
@@ -165,8 +158,6 @@ void ability_learn_used(battle_unit_t* unit) {
     s32 i;
     s32 byte_index;
     s32 mask;
-    u8* src;
-    u8* dst;
     u8* base;
     u8* learned_byte;
 
@@ -178,14 +169,11 @@ void ability_learn_used(battle_unit_t* unit) {
         job -= JOB_ID_SQUIRE;
     }
     /* Three learned-ability bytes per job, from learned_abilities (0x99). */
-    dst = learned;
-    src = (u8*)(((job * 3) + (s32)unit) + offsetof(battle_unit_t, career.learned_abilities));
-    do {
-        *dst = *src;
-        dst += 1;
-        src += 1;
-    } while ((s32)dst < (s32)&learned[3]);
+    for (i = 0; i < ABILITY_LEARN_ON_HIT_ROW_BYTES; i++) {
+        learned[i] = unit->career.learned_abilities[job][i];
+    }
     i = 0;
+    /* Row, unit, then field offset: `learned_abilities[job]` reorders the address sum. */
     base = (u8*)(((job * 3) + (s32)unit) + offsetof(battle_unit_t, career.learned_abilities));
     do {
         byte_index = i / 8;

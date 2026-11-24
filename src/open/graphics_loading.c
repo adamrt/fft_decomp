@@ -16,17 +16,15 @@ static const s32 s_opnbk_sector_offsets[8] = { 0, 75, 135, 172, 209, 246, 283, 4
 /* Load the title screen's graphics: upload the three TIMs at sectors 0, 0x11 and
  * 0x22 of OPNTEX.BIN, then read OPNBK image 0 as the frame image. */
 void title_load_graphics(void) {
-    file_load_descriptor_t* header = &g_file_cd_state;
-
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN, 0x11, g_file_destination);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN, 0x11, g_file_destination);
     file_wait_pending();
     gfx_load_opntex(g_file_destination);
 
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x11, 0x11, g_file_destination);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x11, 0x11, g_file_destination);
     file_wait_pending();
     gfx_load_opntex(g_file_destination);
 
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x22, 0x21, g_file_destination);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x22, 0x21, g_file_destination);
     file_wait_pending();
     gfx_load_opntex(g_file_destination);
 
@@ -39,10 +37,9 @@ void title_load_graphics(void) {
  * the 512x240 picture at VRAM (512, 256)) and the 16 OPNTEX frames from sector
  * 0x76, which stay at g_gfx_opntex_data for the script to upload. */
 void ending_load_graphics(void) {
-    file_load_descriptor_t* header = &g_file_cd_state;
     RECT frame;
 
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x65, 0x11, g_file_destination);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x65, 0x11, g_file_destination);
     file_wait_pending();
     gfx_load_opntex(g_file_destination);
 
@@ -56,7 +53,7 @@ void ending_load_graphics(void) {
     LoadImage(&frame, g_gfx_opntex_data);
     DrawSync(0);
 
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x76, 0x170, g_gfx_opntex_data);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x76, 0x170, g_gfx_opntex_data);
     file_wait_pending();
 }
 
@@ -64,13 +61,11 @@ void ending_load_graphics(void) {
  * VRAM (256, 256) and (320, 256) that the new-game prologue draws its lines from.
  * The only caller is prologue_start. */
 void prologue_load_text_pages(void) {
-    file_load_descriptor_t* header = &g_file_cd_state;
-
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x43, 0x11, g_file_destination);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x43, 0x11, g_file_destination);
     file_wait_pending();
     gfx_load_opntex(g_file_destination);
 
-    file_request_pending_read(header, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x54, 0x11, g_file_destination);
+    file_request_pending_read(&g_file_cd_state, DISC_SECTOR_OPEN_OPNTEX_BIN + 0x54, 0x11, g_file_destination);
     file_wait_pending();
     gfx_load_opntex(g_file_destination);
 }

@@ -668,7 +668,6 @@ void formula_apply_status_to_action(void) {
     s32 byte;
     s32 mask;
     u8 any;
-    action_data_t* action;
 
     type = g_action_work.status_infliction.type;
     if (type & STATUS_INFLICTION_TYPE_SEPARATE) {
@@ -717,14 +716,11 @@ void formula_apply_status_to_action(void) {
         }
     }
 
-    /* A for loop here does not match the bytes. */
     any = 0;
-    status = 0;
-    action = g_action_target_data;
-    do {
-        any |= action->status_changes.infliction[status] | action->status_changes.removal[status];
-        status++;
-    } while (status < STATUS_BYTE_COUNT);
+    for (status = 0; status < STATUS_BYTE_COUNT; status++) {
+        any |= g_action_target_data->status_changes.infliction[status]
+            | g_action_target_data->status_changes.removal[status];
+    }
 
     if (any == 0 || status_modify_inflictions(0) == 0) {
         formula_force_attack_miss();

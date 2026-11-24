@@ -874,24 +874,20 @@ static s32 dispatch_request(
             start_request_thread(MENU_PROMPT_WAIT_MENU);
         }
     } else if (command == MENU_REQUEST_ACTION_CONFIRM) {
-        value = 0x2F;
-        if (option != 5) {
+        if (option == 5) {
+            value = 0x2F;
+        } else if (option == 1) {
             value = 0xB;
-            if (option != 1) {
-                if (option == 2 || option == 4) {
-                    if (g_command_used_item_id == MENU_SELECTION_NONE || g_command_selected_skill_ct == 0) {
-                        value = 0x2D;
-                    } else {
-                        value = 0xC;
-                    }
-                } else {
-                    if (g_command_used_item_id != MENU_SELECTION_NONE || g_command_selected_skill_ct == 0) {
-                        value = 0x2E;
-                    } else {
-                        value = 0xD;
-                    }
-                }
+        } else if (option == 2 || option == 4) {
+            if (g_command_used_item_id == MENU_SELECTION_NONE || g_command_selected_skill_ct == 0) {
+                value = 0x2D;
+            } else {
+                value = 0xC;
             }
+        } else if (g_command_used_item_id != MENU_SELECTION_NONE || g_command_selected_skill_ct == 0) {
+            value = 0x2E;
+        } else {
+            value = 0xD;
         }
         g_menu_restore_pending = 1;
         start_request_thread(value);

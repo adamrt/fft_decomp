@@ -778,40 +778,35 @@ static void build_wheel_name(void) {
  */
 static void draw_mastered_star(s32 x, s32 y, s32 otag_index, s32 value) {
     s32 level;
-    oriented_quad_t* sprite;
 
     if (value < 0x50) {
-        level = 0;
-        if (value >= 0x3C) {
+        if (value < 0x3C) {
+            level = 0;
+        } else if (value < 0x42) {
             level = 1;
-            if (value >= 0x42) {
-                level = 2;
-                if (value >= 0x48) {
-                    level = 4;
-                    if (value < 0x4C) {
-                        level = 3;
-                    }
-                }
-            }
+        } else if (value < 0x48) {
+            level = 2;
+        } else if (value < 0x4C) {
+            level = 3;
+        } else {
+            level = 4;
         }
     } else {
-        level = 0;
-        if (value >= 0x5E) {
+        if (value < 0x5E) {
+            level = 0;
+        } else if (value < 0x60) {
             level = 1;
-            if (value >= 0x60) {
-                level = 2;
-                if (value >= 0x62) {
-                    level = 4;
-                    if (value < 0x64) {
-                        level = 3;
-                    }
-                }
-            }
+        } else if (value < 0x62) {
+            level = 2;
+        } else if (value < 0x64) {
+            level = 3;
+        } else {
+            level = 4;
         }
     }
-    sprite = &s_formation_job_wheel_mastered_icon_sprite;
-    sprite->position.x = x + 7;
-    sprite->position.y = y - 12;
-    sprite->source.u = level * 10 + 0x24;
-    menu_gfx_enqueue_oriented_textured_quad(sprite, 0, TEXTURE_UV_FLIP_NONE, 0, otag_index);
+    s_formation_job_wheel_mastered_icon_sprite.position.x = x + 7;
+    s_formation_job_wheel_mastered_icon_sprite.position.y = y - 12;
+    s_formation_job_wheel_mastered_icon_sprite.source.u = level * 10 + 0x24;
+    menu_gfx_enqueue_oriented_textured_quad(
+        &s_formation_job_wheel_mastered_icon_sprite, 0, TEXTURE_UV_FLIP_NONE, 0, otag_index);
 }

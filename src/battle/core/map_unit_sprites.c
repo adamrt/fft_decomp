@@ -1911,15 +1911,13 @@ static void resolve_packed_offset_table(u8** entries, const packed_seq_file_t* r
 
     header = record;
     entry = record->entry;
-    index = 0;
-    do {
+    for (index = 0; index < 0x100; index++) {
         offset = entry[index][0] + (entry[index][1] << 8) + (entry[index][2] << 16) + (entry[index][3] << 24);
         if (offset == -1) {
             offset = 0;
         }
         entries[index] = g_sprite_seq_data_cursor + offset;
-        index += 1;
-    } while (index < 0x100);
+    }
 
     payload_size = header->payload_size[0] + (header->payload_size[1] << 8);
     index = 0;

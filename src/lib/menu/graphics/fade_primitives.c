@@ -78,10 +78,7 @@ void menu_update_panel_fade(void) {
             if (intensity != 0) {
                 intensity -= 8;
             }
-            /* The pointer walk preserves the target's operand order for the biased index. */
-            (frame->top + (8 - i))->r0 = intensity;
-            (frame->top + (8 - i))->g0 = intensity;
-            (frame->top + (8 - i))->b0 = intensity;
+            setRGB0(&frame->top[8 - i], intensity, intensity, intensity);
             setRGB0(&frame->bottom[i], intensity, intensity, intensity);
             gfx_draw_or_append_gpu_primitive(&frame->top[8 - i]);
             gfx_draw_or_append_gpu_primitive(&frame->bottom[i]);

@@ -186,13 +186,10 @@ s32 prologue_update(void) {
             draw_text_lines(g_prologue.intensity);
             return 1;
         }
-        /* Byte indexing preserves the retail address-add order and entry reloads. */
         if (g_prologue.step == 0) {
             for (i = 0; i < g_prologue.step_count; i++) {
-                g_prologue.line_widths[i]
-                    = g_prologue.entry->line_data[i * sizeof(prologue_line_t) + offsetof(prologue_line_t, width)];
-                g_prologue.line_texture_rows[i]
-                    = g_prologue.entry->line_data[i * sizeof(prologue_line_t) + offsetof(prologue_line_t, texture_row)];
+                g_prologue.line_widths[i] = ((prologue_line_t*)g_prologue.entry->line_data)[i].width;
+                g_prologue.line_texture_rows[i] = ((prologue_line_t*)g_prologue.entry->line_data)[i].texture_row;
             }
         }
         /* Incrementing through a pointer keeps the retail store order. */

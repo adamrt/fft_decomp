@@ -221,7 +221,6 @@ void brave_story_update_unexplored_land_detail(menu_stack_record_t* level) {
     RECT bounds;
     point32_t clut_position;
     point32_t* base;
-    s32* index;
     s32 render;
     s32 depth;
 
@@ -263,8 +262,7 @@ void brave_story_update_unexplored_land_detail(menu_stack_record_t* level) {
         }
         break;
     default:
-        index = &g_text_window.render_record_index;
-        if (g_display_object_gs_image_pool[*index].flags & DISPLAY_OBJECT_POP_IN) {
+        if (g_display_object_gs_image_pool[g_text_window.render_record_index].flags & DISPLAY_OBJECT_POP_IN) {
             break;
         }
         if (window_update_paged_text(&g_text_window) != 0) {

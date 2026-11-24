@@ -1325,25 +1325,24 @@ void world_map_init_marker_and_camera(void) {
  * marker's position is projected with RotTrans into its render position. */
 void world_map_update_marker(void) {
     VECTOR output;
-    world_map_marker_state_t* state = &g_world_map_marker_state;
     s32 transform_flag;
     s32 angle_direction;
     s32 direction;
     s32 flags;
 
-    flags = state->flags;
+    flags = g_world_map_marker_state.flags;
     if (flags & WORLD_MAP_MARKER_UPDATE_DIRECTION) {
-        angle_direction = ((state->angle + 0x100) >> 9) & 7;
+        angle_direction = ((g_world_map_marker_state.angle + 0x100) >> 9) & 7;
         direction = angle_direction + DISPLAY_OBJECT_ANIM_MARKER_FIRST;
         if (flags & WORLD_MAP_MARKER_ALTERNATE_DIRECTION_SET) {
             direction = angle_direction + DISPLAY_OBJECT_ANIM_MARKER_ALTERNATE_FIRST;
         }
-        if (state->marker.render.sequence != direction) {
-            state->marker.render.sequence = direction;
-            state->marker.render.anim_counter = 0;
-            state->marker.render.frame_index = 0;
+        if (g_world_map_marker_state.marker.render.sequence != direction) {
+            g_world_map_marker_state.marker.render.sequence = direction;
+            g_world_map_marker_state.marker.render.anim_counter = 0;
+            g_world_map_marker_state.marker.render.frame_index = 0;
         }
-        state->flags = flags ^ WORLD_MAP_MARKER_UPDATE_DIRECTION;
+        g_world_map_marker_state.flags = flags ^ WORLD_MAP_MARKER_UPDATE_DIRECTION;
     }
 
     if (g_world_map_marker_state.flags & WORLD_MAP_MARKER_UPDATE_POSITION) {

@@ -195,15 +195,8 @@ void map_palette_set_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_a
     s32 index;
 
     if (update_all == 1) {
-        const palette_t* current_colors;
-
-        /* The bytes require this while loop; a for loop does not match. */
-        index = 0;
-        current_colors = colors;
-        while (index < MAP_CLUTS_PER_ROW) {
-            set_palette_components(mode, clut_row, index, *current_colors);
-            index++;
-            current_colors++;
+        for (index = 0; index < MAP_CLUTS_PER_ROW; index++) {
+            set_palette_components(mode, clut_row, index, colors[index]);
         }
         g_map_palette_state.upload_pending = 1;
     } else {

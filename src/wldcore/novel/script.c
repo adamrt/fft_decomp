@@ -372,8 +372,6 @@ void window_draw_centered_text(s32 window_index, s32 text_id) {
  * sound mode, then clear them. The interpreter calls this before dispatching
  * each instruction, including repeated calls to a yielding handler. */
 static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
-    s32* music_flags;
-
     if ((sound_id | weather_sound_id | track) == 0) {
         return;
     }
@@ -396,8 +394,7 @@ static void play_pending_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
         if (track != 0) {
             if ((g_novel_reading.music_selection & 0xFF) != track) {
                 change_reading_music(track);
-                music_flags = &g_music_queue.music.flags;
-                *music_flags |= MUSIC_QUEUE_PLAYING;
+                g_music_queue.music.flags |= MUSIC_QUEUE_PLAYING;
                 music_switch_track(g_novel_reading.music_selection >> 8, 0, 0);
                 music_set_target_volume(g_music_queue.volume, 0x28);
             }
@@ -1019,12 +1016,10 @@ static void novel_opcode_26_fade_out_music(void) {
  * at volume 0 and fade to the queue's volume over operand 0 * 3 steps. */
 static void novel_opcode_27_switch_music_track(void) {
     s16 track = g_novel_reading.music_selection;
-    s32* state;
     s32 operand;
 
     if (track != 0) {
-        state = &g_music_queue.music.flags;
-        *state |= MUSIC_QUEUE_PLAYING;
+        g_music_queue.music.flags |= MUSIC_QUEUE_PLAYING;
         operand = (u8)(g_novel_reading.instruction >> 8);
         music_switch_track(track >> 8, 0, 0);
         music_set_target_volume(g_music_queue.volume, operand * 3);
@@ -1182,21 +1177,15 @@ static void novel_opcode_30_set_master_volume(void) {
  * change_reading_music loaded it into and clear the selection; then mark the
  * opcode complete. */
 static void novel_opcode_31_unload_music(void) {
-    s16* music = &g_novel_reading.music_selection;
-    music_queue_slots_t* state;
-    s32* tracks;
-
-    if (*music != 0) {
-        state = &g_music_queue.music;
-        state->flags &= ~MUSIC_QUEUE_PLAYING;
+    if (g_novel_reading.music_selection != 0) {
+        g_music_queue.music.flags &= ~MUSIC_QUEUE_PLAYING;
         music_stop();
-        music_unload_scenario_slot(*music >> 8);
+        music_unload_scenario_slot(g_novel_reading.music_selection >> 8);
         /* Retail bug: change_reading_music records the track at
          * tracks[slot - 1], but this clears tracks[slot], one entry past it. */
-        tracks = state->tracks;
-        tracks[*music >> 8] = 0;
+        g_music_queue.music.tracks[g_novel_reading.music_selection >> 8] = 0;
         g_music_queue.current_slot = 0;
-        *music = 0;
+        g_novel_reading.music_selection = 0;
     }
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }

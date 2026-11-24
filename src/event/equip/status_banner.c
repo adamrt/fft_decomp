@@ -217,15 +217,13 @@ void unit_panel_banner_thread(void) {
         for (i = 0; i < 7; i++) {
             editor->label_sprites[i].clut = g_unit_panel_editor_label_cluts[i][dimmed];
         }
-        i = 0;
-        do {
+        for (i = 0; i < 7; i++) {
             if (dimmed != 0) {
                 panel->sprites[i].clut = MENU_CLUT_DIMMED;
             } else {
                 panel->sprites[i].clut = MENU_CLUT_NORMAL;
             }
-            i += 1;
-        } while (i < 7);
+        }
 
         if (dimmed != 0) {
             unit_panel_set_numeric_frame_dimmed_colors(&editor->numeric_frame);

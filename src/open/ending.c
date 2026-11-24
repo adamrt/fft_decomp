@@ -201,7 +201,6 @@ static void init_script(void) {
  * wait clears ENDING_SCRIPT_DISPATCH_CONTINUE to end the frame and is entered again
  * on the next, and opcode 0 clears ENDING_SCRIPT_DISPATCH_RUNNING. */
 static s32 update_script_frame(void) {
-    ending_script_dispatch_state_t* state;
     ending_script_cursor_t* cursor;
     s32 result;
     s16* entry;
@@ -212,15 +211,15 @@ static s32 update_script_frame(void) {
     update_opntex_sequence();
     update_opntex_fade();
 
-    state = &g_ending_script_state.dispatch;
-    result = state->flags | ENDING_SCRIPT_DISPATCH_CONTINUE;
-    state->flags = result;
+    result = g_ending_script_state.dispatch.flags | ENDING_SCRIPT_DISPATCH_CONTINUE;
+    g_ending_script_state.dispatch.flags = result;
     if (result & ENDING_SCRIPT_DISPATCH_CONTINUE) {
-        cursor = &state->cursor;
+        cursor = &g_ending_script_state.dispatch.cursor;
         do {
             entry = (s16*)add_pointer_offset(cursor->data_base, cursor->byte_offset);
             s_ending_opcode_handlers[*entry](entry);
-            /* Keeping the cursor base live matches retail; the direct state view is four bytes shorter. */
+            /* Keeping the cursor base live matches retail; reading the dispatch flags directly is four bytes shorter.
+             */
             flags = ((ending_script_dispatch_state_t*)((u8*)cursor - offsetof(ending_script_dispatch_state_t, cursor)))
                         ->flags;
             if (!(flags & ENDING_SCRIPT_DISPATCH_RUNNING)) {

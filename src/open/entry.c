@@ -312,18 +312,18 @@ static void init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
  * sign extension, product and halving then share the second argument register.
  */
 static void upload_mdec_slice(void) {
-    RECT* rect;
     s32 size;
 
     if (g_psyq_cd_stream_interrupt_pending != 0) {
         StCdInterrupt();
         g_psyq_cd_stream_interrupt_pending = 0;
     }
-    rect = &g_movie_mdec_stream_state.output_rect;
-    LoadImage(rect, g_movie_mdec_stream_state.output_buffers[g_movie_mdec_stream_state.output_buffer_index]);
+    LoadImage(&g_movie_mdec_stream_state.output_rect,
+        g_movie_mdec_stream_state.output_buffers[g_movie_mdec_stream_state.output_buffer_index]);
     g_movie_mdec_stream_state.output_buffer_index = !g_movie_mdec_stream_state.output_buffer_index;
-    rect->x += g_movie_mdec_stream_state.output_rect.w;
-    if (rect->x < g_movie_mdec_stream_state.frame_rects[g_movie_mdec_stream_state.frame_rect_index].x
+    g_movie_mdec_stream_state.output_rect.x += g_movie_mdec_stream_state.output_rect.w;
+    if (g_movie_mdec_stream_state.output_rect.x
+        < g_movie_mdec_stream_state.frame_rects[g_movie_mdec_stream_state.frame_rect_index].x
             + g_movie_mdec_stream_state.frame_rects[g_movie_mdec_stream_state.frame_rect_index].w) {
         size = g_movie_mdec_stream_state.output_rect.w;
         size *= g_movie_mdec_stream_state.output_rect.h;
@@ -334,7 +334,8 @@ static void upload_mdec_slice(void) {
          * the other frame buffer. */
         g_movie_mdec_stream_state.output_ready = 1;
         g_movie_mdec_stream_state.frame_rect_index = !g_movie_mdec_stream_state.frame_rect_index;
-        rect->x = g_movie_mdec_stream_state.frame_rects[g_movie_mdec_stream_state.frame_rect_index].x;
+        g_movie_mdec_stream_state.output_rect.x
+            = g_movie_mdec_stream_state.frame_rects[g_movie_mdec_stream_state.frame_rect_index].x;
         g_movie_mdec_stream_state.output_rect.y
             = g_movie_mdec_stream_state.frame_rects[g_movie_mdec_stream_state.frame_rect_index].y;
     }

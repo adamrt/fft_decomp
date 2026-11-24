@@ -304,23 +304,18 @@ void tutorial_update_menu(menu_stack_record_t* level) {
 /* Opens the list of the seven formation tutorials (TEXT_ID_TUTORIAL_NAME_BASE
  * + row), a row drawn in text color 8 once its bit of
  * g_tutorial_progress_masks.formation shows it was viewed, at (0x54, 0x50),
- * 0x8c wide, and pushes MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST.
- *
- * The viewed-entry palette lives in its own variable so the target keeps 8 in a saved
- * register across the loop. */
+ * 0x8c wide, and pushes MENU_STACK_LEVEL_TUTORIAL_FORMATION_LIST. */
 void tutorial_open_formation_list(void) {
     window_panel_layout_t layout;
     point32_t origin;
-    s32 i = 0;
+    s32 i;
     s32 count;
     s32 record_index;
-    s32 viewed_color = 8;
 
-    /* `i` starts at its declaration; starting it in the for changes the schedule. */
-    for (; i < TUTORIAL_FORMATION_COUNT; i++) {
+    for (i = 0; i < TUTORIAL_FORMATION_COUNT; i++) {
         g_menu_stack_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE;
         if (bits_test(&g_tutorial_progress_masks.formation, i) != 0) {
-            g_menu_stack_row_text_colors[i] = viewed_color;
+            g_menu_stack_row_text_colors[i] = 8;
         } else {
             g_menu_stack_row_text_colors[i] = 0;
         }

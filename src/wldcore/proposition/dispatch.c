@@ -58,7 +58,6 @@ void proposition_open_dispatch_confirm(void) {
     s32 unused[8];
     point32_t* position;
     point32_t* base;
-    u16* location;
     s32 index;
     s32 depth;
     s32 i;
@@ -96,9 +95,8 @@ void proposition_open_dispatch_confirm(void) {
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_menu_stack_records[g_menu_stack_depth].dispatch_confirm.row = index;
-    location = &g_proposition_selected_row.name_text;
-    text_measure_pixels(
-        &size.width, &size.rows, text_find_entry(*location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
+    text_measure_pixels(&size.width, &size.rows,
+        text_find_entry(g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     bounds.y = 96;
     bounds.w = 244;
     bounds.x = 0;
@@ -116,8 +114,8 @@ void proposition_open_dispatch_confirm(void) {
     window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
     point.x = 68;
     point.y = 8;
-    window_display_text_entry(
-        index, *location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, &g_window_image_buffer[0x200]);
+    window_display_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
+        point, &g_window_image_buffer[0x200]);
     for (i = 0; i < s_proposition_send_unit_count; i++) {
         point.x = 60;
         line = i + 2;
@@ -222,7 +220,6 @@ void proposition_update_dispatch_confirm(menu_stack_record_t* level) {
  */
 void proposition_advance_day(void) {
     s32 i;
-    u8* counter;
 
     for (i = 0; i < g_proposition_count; i++) {
         if (!(g_proposition_active[i].flags & PROPOSITION_PROGRESS_RETURNED)) {
@@ -233,19 +230,17 @@ void proposition_advance_day(void) {
             }
         }
     }
-    counter = g_proposition_states;
-    do {
-        u32 value = *counter;
+    for (i = 0; i < EVENT_SCRIPT_VAR_PROPOSITION_COUNT; i++) {
+        u32 value = g_proposition_states[i];
         s32 days = value & PROPOSITION_STATE_DAYS_MASK;
         if (days != 0) {
             if (days > 32) {
                 days = 32;
             }
             days--;
-            *counter = (value & (PROPOSITION_STATE_FAILURE | PROPOSITION_STATE_BAD_FAILURE)) | days;
+            g_proposition_states[i] = (value & (PROPOSITION_STATE_FAILURE | PROPOSITION_STATE_BAD_FAILURE)) | days;
         }
-        counter++;
-    } while ((s32)counter < (s32)(g_proposition_states + EVENT_SCRIPT_VAR_PROPOSITION_COUNT)); /* signed slt */
+    }
 }
 
 /*
@@ -653,7 +648,6 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
     u32 buttons;
     s32 selected;
     s32 direction;
-    s16* menu_selected_index;
 
     if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS_OPEN) {
         if (thread_is_running(WORLD_MAP_THREAD_SLOT_WINDOW_PANEL)) {
@@ -665,9 +659,9 @@ static void update_participant_status(proposition_send_unit_level_t* level) {
         g_display_object_animated_pool[level->left_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
         g_display_object_animated_pool[level->right_arrow].flags ^= DISPLAY_OBJECT_HIDDEN;
         level->mode = PROPOSITION_SEND_UNIT_MODE_STATUS;
-        menu_selected_index = &g_window_panel_render_state.selected_index;
-        start_participant_panels(g_menu_stack_entry_values[*menu_selected_index] & TEXT_ID_ENTRY_MASK);
-        level->slot = *menu_selected_index;
+        start_participant_panels(
+            g_menu_stack_entry_values[g_window_panel_render_state.selected_index] & TEXT_ID_ENTRY_MASK);
+        level->slot = g_window_panel_render_state.selected_index;
     } else if (level->mode == PROPOSITION_SEND_UNIT_MODE_STATUS) {
         buttons = g_world_map_input_new_button_presses;
         if (buttons & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {

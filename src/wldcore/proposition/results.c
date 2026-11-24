@@ -853,14 +853,12 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
     s32 index;
     s32 rows;
     s32 i;
-    u16* panel_text;
     point32_t* base;
 
-    panel_text = &g_proposition_selected_row.name_text;
     index = display_object_append_image(g_display_object_queue, &g_display_object_queue_count);
     panel->render_index = index;
-    text_measure_pixels(
-        &text_width, &text_rows, text_find_entry(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
+    text_measure_pixels(&text_width, &text_rows,
+        text_find_entry(g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
     rows = text_rows + 2;
     panel->panel_rows = rows;
     g_text_substitution_values[0] = g_proposition_active[proposition].elapsed_days;
@@ -879,8 +877,8 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
     window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, g_proposition_detail_image_buffer);
     point.x = 68;
     point.y = 8;
-    window_display_text_entry(
-        index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, g_proposition_detail_image_buffer);
+    window_display_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
+        point, g_proposition_detail_image_buffer);
     for (i = 0; i < g_proposition_active[proposition].participant_count; i++) {
         s32 row = i + 2;
 

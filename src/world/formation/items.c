@@ -195,7 +195,6 @@ static s32 update_equip_menu(void) {
     s16 equip;
     u16 equipped;
     s32 value;
-    s16* cursor_y;
 
     if (g_formation_item_equip_menu_initialized == 0) {
         g_formation_item_equip_menu_initialized = 1;
@@ -327,11 +326,10 @@ static s32 update_equip_menu(void) {
     }
 
     unit_panel_toggle_preview_stats_thread(g_formation_item_preview_active);
-    cursor_y = &s_formation_item_equip_item_cursor_point.y;
-    *cursor_y = g_formation_item_slot * 16 + 0x90;
+    s_formation_item_equip_item_cursor_point.y = g_formation_item_slot * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    /* The mode is an argument expression so &g_formation_item_equip_item_cursor_point is formed before its
-     * branches and derived from cursor_y (addiu a0,s0,-2), as in the target. */
+    /* The mode is an argument expression so the cursor point's address is formed before its branches
+     * and derived from the address of its y (addiu a0,s0,-2), as in the target. */
     menu_draw_sliding_cursor(&s_formation_item_equip_item_cursor_point, &g_formation_item_equip_item_cursor_anim,
         g_formation_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;

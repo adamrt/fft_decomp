@@ -2636,8 +2636,8 @@ movement:
     ai->movement_scenario = 0;
     if (!s_protect_allies_status_retry
         && !((ai->unit_decisions[target].targeting_flags_2 >> 6) & (AI_TARGET_DEAD_WITH_RERAISE >> 6))) {
-        s_protect_allies_status_index = 0;
-        do {
+        for (s_protect_allies_status_index = 0; s_protect_allies_status_index < AI_PROTECT_ALLIES_STATUS_COUNT;
+            s_protect_allies_status_index++) {
             u32 status_flags
                 = g_battle_units[target].status_sets.current[(status = statuses[s_protect_allies_status_index]) >> 3];
             if (status_flags & (0x80 >> (status & 7))) {
@@ -2657,8 +2657,7 @@ movement:
                     goto retarget;
                 }
             }
-            s_protect_allies_status_index++;
-        } while (s_protect_allies_status_index < AI_PROTECT_ALLIES_STATUS_COUNT);
+        }
     }
     ai->movement_scenario = 1;
 charging:

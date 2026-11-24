@@ -318,7 +318,8 @@ action_preparation_e action_prepare(const action_command_t* source, action_comma
         }
         action_command_copy(&action, dest);
         ct = g_ability_charge_data[ability - ABILITY_ID_CHARGE_FIRST].ct;
-        /* Charge has its own CT, so the generic CT step and Short Charge are skipped. */
+        /* Charge has its own CT, so the generic CT step and Short Charge are skipped.
+         * The one-trip loop's note is needed: a plain store changes the allocation. */
         do {
             skip = 1;
         } while (0);
