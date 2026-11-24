@@ -253,7 +253,7 @@ void gfx_reset_display(int width, int height, int projection, u8 red, u8 green, 
 void gfx_load_debug_font(void);
 
 /* render buffers */
-/* Primitive pool sizes of a render buffer. The map mesh's position records (map_mesh.h)
+/* Primitive pool sizes of a render buffer. The battle map's polygon position records
  * parallel the four map polygon pools; the weather sprites are the flat-textured triangles. */
 enum {
     RENDER_TEXTURED_TRIANGLE_COUNT = 360,

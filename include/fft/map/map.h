@@ -2,7 +2,7 @@
 #define MAP_H
 
 /* The battle map: map ids, the terrain tiles and their lookups, the terrain tables, the selected tile, tile marks,
- * the map data commands, the loader, the title card and the event library's map routines. */
+ * the map data commands, drawing, the loader, the title card and the event library's map routines. */
 
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -455,6 +455,19 @@ s32 map_get_object_state(s32 part_index);
 s32 map_set_object_state(s32 part_index, s32 state_row);
 s32 map_texture_animation_is_active(s32 animation_index);
 s32 map_start_texture_animation(s32 animation_index, s32 object_state);
+
+/* drawing */
+/* Commands of map_set_untextured_ot_mode: the ordering-table
+ * handling of untextured map polygons while an effect draws. */
+typedef enum map_effect_data_command {
+    MAP_EFFECT_DATA_END = 0x87,
+    MAP_EFFECT_DATA_BEGIN = 0x88
+} map_effect_data_command_e;
+
+void map_draw(MATRIX* camera_matrix);
+s32 map_set_untextured_ot_mode(map_effect_data_command_e command);
+void map_freeze(void);
+void map_unfreeze(void);
 
 /* loading */
 /* Commands of map_update_load, read only while the GNS phase is idle. */

@@ -73,7 +73,7 @@ preserving every original byte.
 ## Headers
 
 - Put declarations in the header of their concept. A header is named for the
-  owner prefix it declares, in full (`map/map_mesh.h` declares `map_mesh_`).
+  owner prefix it declares, in full (`map/map_light.h` declares `map_light_`).
   A large library (`menu_`, `gfx_`, `effect_`, `sprite_`, `map_`, `script_`)
   splits by sub-topic across headers in its folder; a small owner that belongs
   to a larger concept shares its header (`rumor_` in `bar.h`). The header tree

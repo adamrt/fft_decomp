@@ -17,7 +17,6 @@
 #include "fft/gfx/sprite_sheet.h"
 #include "fft/map/map.h"
 #include "fft/map/map_light.h"
-#include "fft/map/map_mesh.h"
 #include "fft/map/map_palette.h"
 #include "fft/map/map_unit.h"
 #include "fft/menu/menu_input.h"

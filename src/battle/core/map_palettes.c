@@ -7,7 +7,6 @@
 #include "fft/gfx/sprite.h"
 #include "fft/map/map.h"
 #include "fft/map/map_light.h"
-#include "fft/map/map_mesh.h"
 #include "fft/map/map_palette.h"
 #include "fft/map/map_unit.h"
 #include "psx/libgpu.h"
