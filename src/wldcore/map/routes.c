@@ -1126,7 +1126,6 @@ static void clamp_coordinates(const SVECTOR* input, VECTOR* output) {
 
 /* Separate addresses for two fields of g_world_map_pan: using the record's
  * progress reschedules loads, and using target.vx shortens this body. */
-extern s32 g_world_map_pan_progress;
 extern s32 g_world_map_pan_target_x;
 
 /* Advance one frame of the camera pan started by
@@ -1147,7 +1146,7 @@ s32 world_map_update_pan(void) {
     s32 delta_x;
     s32 origin_y;
 
-    progress = g_world_map_pan_progress;
+    progress = g_world_map_pan.progress;
     distance = g_world_map_pan.distance;
     target_x = (target_x - origin_x) * progress;
     delta_x = target_x / distance;

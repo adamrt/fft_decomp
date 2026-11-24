@@ -133,9 +133,8 @@ extern s32 g_menu_screen_number_entry_value;
 /* menu input and entries */
 extern u32 g_menu_screen_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
 
-/* The six 32-bit input masks are g_menu_screen_input_state,
- * but a struct global makes GCC keep a base register for the field accesses
- * (see menu_input_update_event_state), so they are separate scalars here. */
+/* The six 32-bit input masks are separate variables laid out like a menu_input_state_t, which
+ * script_load_event_input_state reads from the first; no function reaches them from one base. */
 extern u32 g_menu_screen_current_input, g_menu_screen_previous_input, g_menu_screen_initial_repeat_counter,
     g_menu_screen_repeat_counter, g_menu_screen_secondary_repeat_counter;
 
@@ -712,7 +711,7 @@ void option_open_game_options_in_previous_thread(void) {
 void world_map_request_save(void) {
     s_save_menu_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 
@@ -721,7 +720,7 @@ void world_map_request_save(void) {
 void world_map_request_tutorial(void) {
     s_world_map_tutorial_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 
@@ -730,7 +729,7 @@ void world_map_request_tutorial(void) {
 void world_map_request_debug_party(void) {
     s_world_map_debug_party_number_request_state = 1;
     g_menu_screen_new_buttons = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 
@@ -739,7 +738,7 @@ void world_map_request_debug_party(void) {
 void world_map_request_debug_variables(void) {
     s_world_map_debug_variable_list_request_state = 1;
     g_menu_screen_new_buttons = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 
@@ -748,7 +747,7 @@ void world_map_request_debug_variables(void) {
 void world_map_request_formation(void) {
     s_formation_open_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 
@@ -757,7 +756,7 @@ void world_map_request_formation(void) {
 void world_map_request_brave_story(void) {
     s_world_map_brave_story_request_state = WORLD_MAP_REQUEST_START_FADE_OUT;
     g_menu_screen_new_buttons = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 
@@ -1250,7 +1249,7 @@ s16 menu_screen_update_menu_frame(u32* otag, u32 input) {
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;
     menu_draw_active_window_frames();
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     if (g_menu_screen_new_buttons != PSX_PAD_SELECT && g_menu_screen_new_buttons != 0) {
         g_script_input_suppression_frames = 5;
     }

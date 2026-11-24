@@ -96,8 +96,7 @@ typedef struct novel_state {
 typedef char novel_state_size_must_be_44[sizeof(novel_state_t) == 44 ? 1 : -1];
 extern novel_state_t g_novel_state;
 
-/* Scalar flag access retains the original bases in opcodes 2e and 33. */
-extern u16 g_novel_state_flags;
+/* The section's local branch flags, a bit array for bits_test and bits_set_value. */
 extern u32 g_novel_local_flags[1];
 extern s32 g_novel_wait_counter;
 extern s32 g_novel_wait_frames;
@@ -1138,7 +1137,7 @@ static void novel_opcode_2e_start_countdown_timer(void) {
     s_novel_countdown_elapsed = 0;
     g_novel_countdown_frames = ((instruction << 8) >> 16) * 60;
     g_novel_countdown_section = instruction >> 24;
-    g_novel_state_flags |= NOVEL_STATE_FETCH;
+    g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: stop all sound effects and play environment sound
@@ -1213,7 +1212,7 @@ static void novel_opcode_33_add_counter_delta_if_choice(void) {
     if (script_variable_get(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) == expected) {
         g_novel_counter_delta += (s32)((*instruction << 8) >> 16) - 0x8000;
     }
-    g_novel_state_flags |= NOVEL_STATE_FETCH;
+    g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }
 
 /* Sound-novel opcode: yield while a screen fade is running. */
@@ -1229,14 +1228,11 @@ static void novel_opcode_34_wait_for_fade(void) {
  * g_novel_reading.text_history down one slot and push byte 1 at
  * the end (same shape as novel_opcode_03_start_text_thread_and_push_history). */
 static void novel_opcode_35_push_operand_history(void) {
-    u16 history_1 = g_novel_history_1;
     u8 new_entry = (g_novel_reading.instruction & 0xff00) >> 8;
-    u16 history_2 = (u16)g_novel_reading.text_history[2];
-    u16 history_3 = (u16)g_novel_reading.text_history[3];
 
-    g_novel_reading.text_history[0] = history_1;
-    g_novel_history_1 = history_2;
-    g_novel_reading.text_history[2] = history_3;
+    g_novel_reading.text_history[0] = g_novel_reading.text_history[1];
+    g_novel_reading.text_history[1] = g_novel_reading.text_history[2];
+    g_novel_reading.text_history[2] = g_novel_reading.text_history[3];
     g_novel_reading.text_history[3] = new_entry;
     g_novel_reading.state_flags |= NOVEL_STATE_FETCH;
 }

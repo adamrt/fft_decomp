@@ -65,7 +65,7 @@ void menu_screen_icon_list_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (menu_should_close_thread(&g_menu_screen_input_state.new_buttons)) {
+        if (menu_should_close_thread((u32*)&g_menu_screen_new_buttons)) {
             break;
         }
         if (!thread_is_previous_running()) {

@@ -34,11 +34,6 @@ extern help_navigation_record_t* g_unit_list_help_nodes_reload;
 extern u8 g_unit_list_help_node_index_reload;
 extern u8 g_unit_list_help_node_index_reload_2;
 
-/* g_unit_list_help_nodes_unit_browse[23].help_base and [24].help_base as their own symbols: as element
- * accesses GCC derives the second store and the later table address from one base register. */
-extern s16 g_unit_list_help_node_23_help_base;
-extern s16 g_unit_list_help_node_24_help_base;
-
 /* Run menu `desc` on thread slot `id`: on the first call (while
  * g_unit_list_thread_running is clear) publish it as g_menu_thread_menu_data and start
  * its thread there, unless the slot is busy. Returns 1 while that thread runs and 0 once
@@ -98,11 +93,11 @@ void unit_list_update_help_cursor(s16 mode) {
         /* Nodes 23 and 24 show skillset help (HELP_TEXT_ID_SKILLSET_BASE as a 16-bit id), or
          * ability help for a unit on a monster skillset. */
         if (mode == 0) {
-            g_unit_list_help_node_23_help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
-            g_unit_list_help_node_24_help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
+            g_unit_list_help_nodes_unit_browse[23].help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
+            g_unit_list_help_nodes_unit_browse[24].help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
         } else {
-            g_unit_list_help_node_23_help_base = HELP_TEXT_ID_ABILITY_BASE;
-            g_unit_list_help_node_24_help_base = HELP_TEXT_ID_ABILITY_BASE;
+            g_unit_list_help_nodes_unit_browse[23].help_base = HELP_TEXT_ID_ABILITY_BASE;
+            g_unit_list_help_nodes_unit_browse[24].help_base = HELP_TEXT_ID_ABILITY_BASE;
         }
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         s_unit_list_help_cursor_initialized = 1;

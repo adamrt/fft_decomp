@@ -41,11 +41,6 @@ static void location_script_opcode_26_check_ramza_brave_at_most(void);
 static void location_script_opcode_27_check_ramza_faith_at_least(void);
 static void location_script_opcode_28_check_ramza_faith_at_most(void);
 
-/* Scalar view of g_location_script_state.flags for the opcode handlers that
- * read-modify-write it: the member spelling there shares one base register
- * with the args/data accesses instead of the target's absolute addresses. */
-static s32 s_location_script_flags;
-
 static void read_operand_pair(s32* out1, s32* out2);
 static void read_operand_dates(s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
 static s32 find_ramza_slot(void);
@@ -359,15 +354,15 @@ static void location_script_opcode_21_request_erase_path(void) {
  * request. Unlike other opcodes it leaves ip on its operand, which is
  * harmless because staging the request ends the block. */
 static void location_script_opcode_22_request_draw_location(void) {
-    s_location_script_flags |= LOCATION_SCRIPT_REQUEST_DRAW_LOCATION;
     g_location_script_state.args[0] = g_location_script_state.data[g_location_script_state.ip];
+    g_location_script_state.flags |= LOCATION_SCRIPT_REQUEST_DRAW_LOCATION;
 }
 
 /* Map script opcode 0x23: stage the location ID for a deferred EraseLocation
  * request, leaving ip on its operand like DrawLocation. */
 static void location_script_opcode_23_request_erase_location(void) {
-    s_location_script_flags |= LOCATION_SCRIPT_REQUEST_ERASE_LOCATION;
     g_location_script_state.args[0] = g_location_script_state.data[g_location_script_state.ip];
+    g_location_script_state.flags |= LOCATION_SCRIPT_REQUEST_ERASE_LOCATION;
 }
 
 /* Map script opcode 0x24 (FocusLocation): select the operand's location (0xff

@@ -1792,8 +1792,6 @@ data:
   - {addr: 0x8018e0b0, name: g_menu_screen_text_redraw_request}
   - {addr: 0x8018e0b2, name: g_formation_banner_active}
   - {addr: 0x8018e0bc, name: g_menu_screen_grid_default_cells}
-  - {addr: 0x8018e230, name: g_menu_screen_grid_cell_23_text_offset}
-  - {addr: 0x8018e240, name: g_menu_screen_grid_cell_24_text_offset}
   - {addr: 0x8018e2ac, name: g_menu_screen_grid_shop_cells}
   - {addr: 0x8018e36c, name: g_menu_screen_grid_shop_scrolled_cells}
   - {addr: 0x8018e430, name: s_menu_managed_thread_state}

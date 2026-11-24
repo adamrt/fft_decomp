@@ -72,7 +72,7 @@ void menu_screen_help_text_thread(void) {
     message_dialog_thread();
     g_menu_screen_new_buttons = 0;
     g_menu_input_lock_mode = 0;
-    script_load_event_input_state(&g_menu_screen_input_state);
+    script_load_event_input_state((menu_input_state_t*)&g_menu_screen_new_buttons);
     thread_current_exit();
 }
 

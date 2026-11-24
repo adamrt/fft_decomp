@@ -26,8 +26,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern u32 g_proposition_detail_image_buffer[];
-
 /* Ordinary jobs use their zero-based Squire-through-Mime index. */
 enum { PROPOSITION_JOB_CATEGORY_MONSTER = 21, PROPOSITION_JOB_CATEGORY_SPECIAL = 22 };
 
@@ -868,17 +866,17 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
     bounds.y = 96;
     bounds.w = 244;
     bounds.h = (g_proposition_active[proposition].participant_count + rows) * 0x10 + 0x10;
-    window_build_render_record_image(index, bounds, coordinate_mode, g_proposition_detail_image_buffer);
+    window_build_render_record_image(index, bounds, coordinate_mode, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = text_rows * 0x10 + 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, g_proposition_detail_image_buffer);
+    window_display_text_entry(index, TEXT_ID_JOB_CONDITION_LABELS, point, &g_window_image_buffer[0x200]);
     point.x = 8;
     point.y = 8;
-    window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, g_proposition_detail_image_buffer);
+    window_display_text_entry(index, TEXT_ID_JOB_CONTENTS_LABEL, point, &g_window_image_buffer[0x200]);
     point.x = 68;
     point.y = 8;
     window_display_text_entry(index, g_proposition_selected_row.name_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1),
-        point, g_proposition_detail_image_buffer);
+        point, &g_window_image_buffer[0x200]);
     for (i = 0; i < g_proposition_active[proposition].participant_count; i++) {
         s32 row = i + 2;
 
@@ -886,9 +884,9 @@ void proposition_build_detail_panel(proposition_detail_panel_t* panel, s32 propo
         point.y = (text_rows + row) * 0x10 + 8;
         window_display_text_entry(index,
             g_proposition_active[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
-            g_proposition_detail_image_buffer);
+            &g_window_image_buffer[0x200]);
     }
-    window_load_render_record_image(index, g_proposition_detail_image_buffer);
+    window_load_render_record_image(index, &g_window_image_buffer[0x200]);
     g_display_object_gs_image_pool[index].priority = 8;
     g_display_object_gs_image_pool[index].flags |= DISPLAY_OBJECT_POP_IN;
     base = &g_display_object_gs_image_pool[index].position;

@@ -73,10 +73,6 @@ extern POLY_FT4 g_ending_credit_band_primitives[2];
 extern POLY_FT4 g_ending_fade_primitives[2];
 extern u8* g_ending_script_initial_data_base;
 
-/* Scalar view of dispatch.cursor.byte_offset: using the member in
- * ending_opcode_02_set_scroll_speed shortens the body by four bytes. */
-static s32 s_ending_script_byte_offset;
-
 /* Ending bytecode opcodes 0x00 through 0x0f. */
 typedef void (*ending_opcode_handler_t)(s16* entry);
 static ending_opcode_handler_t s_ending_opcode_handlers[16] = {
@@ -853,12 +849,11 @@ static void ending_opcode_01_create_positioned_text_record(s16* command) {
  * Four bytes. */
 static void ending_opcode_02_set_scroll_speed(s16* command) {
     s32 value = command[1];
-    s32 next = s_ending_script_byte_offset + 4;
 
     g_ending_script_state.dispatch.scrolled_distance = 0;
     g_ending_script_state.dispatch.scroll_fraction = 0;
     g_ending_script_state.dispatch.scroll_speed = value;
-    s_ending_script_byte_offset = next;
+    g_ending_script_state.dispatch.cursor.byte_offset += 4;
 }
 
 /* Opcode 3: reveal the screen over command[1] frames, with the overlay in

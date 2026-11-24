@@ -32,8 +32,6 @@ extern u8 g_menu_screen_grid_initialized;
 
 /* g_menu_screen_grid_default_cells[23]/[24].help_base, bound separately: as
  * members GCC addresses the second store from the first's base. */
-extern s16 g_menu_screen_grid_cell_23_text_offset;
-extern s16 g_menu_screen_grid_cell_24_text_offset;
 
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1FFFF are latched without opening a text thread. */
@@ -67,11 +65,11 @@ void menu_screen_update_grid_cursor(s16 alternate) {
 
     if (!g_menu_screen_grid_initialized) {
         if (!alternate) {
-            g_menu_screen_grid_cell_23_text_offset = (s16)HELP_TEXT_ID_SKILLSET_BASE;
-            g_menu_screen_grid_cell_24_text_offset = (s16)HELP_TEXT_ID_SKILLSET_BASE;
+            g_menu_screen_grid_default_cells[23].help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
+            g_menu_screen_grid_default_cells[24].help_base = (s16)HELP_TEXT_ID_SKILLSET_BASE;
         } else {
-            g_menu_screen_grid_cell_23_text_offset = HELP_TEXT_ID_ABILITY_BASE;
-            g_menu_screen_grid_cell_24_text_offset = HELP_TEXT_ID_ABILITY_BASE;
+            g_menu_screen_grid_default_cells[23].help_base = HELP_TEXT_ID_ABILITY_BASE;
+            g_menu_screen_grid_default_cells[24].help_base = HELP_TEXT_ID_ABILITY_BASE;
         }
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         g_menu_screen_grid_initialized = 1;
