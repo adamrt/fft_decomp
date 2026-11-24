@@ -176,12 +176,9 @@ extern s32 g_random_battle_squad_id;
 /* location_script_state_t.flags. The interpreter clears them before each block. Comparisons set CONDITION_FAILED
  * when their predicate rejects the block; action opcodes set ACTION_REACHED to end the block and an action bit when
  * they stage a request. */
-typedef enum location_script_result_flags {
+typedef enum location_script_flag {
     LOCATION_SCRIPT_RESULT_ACTION_REACHED = 0x001,
-    LOCATION_SCRIPT_RESULT_CONDITION_FAILED = 0x002
-} location_script_result_flags_e;
-
-typedef enum location_script_action_flags {
+    LOCATION_SCRIPT_RESULT_CONDITION_FAILED = 0x002,
     LOCATION_SCRIPT_ACTION_CHOICE = 0x004,
     LOCATION_SCRIPT_ACTION_LOAD_EVENT = 0x008,
     LOCATION_SCRIPT_ACTION_TEXT = 0x010,
@@ -197,7 +194,7 @@ typedef enum location_script_action_flags {
     = LOCATION_SCRIPT_ACTION_DRAW_LOCATION | LOCATION_SCRIPT_ACTION_ERASE_LOCATION,
     LOCATION_SCRIPT_ACTION_MAP_MENU_MASK = LOCATION_SCRIPT_ACTION_PATH_MASK | LOCATION_SCRIPT_ACTION_FOCUS_LOCATION
         | LOCATION_SCRIPT_ACTION_LOCATION_VISIBILITY_MASK
-} location_script_action_flags_e;
+} location_script_flag_e;
 
 /* What an action opcode stores: ACTION_REACHED with its action bit. */
 typedef enum location_script_request_flags {
@@ -221,7 +218,7 @@ typedef enum location_script_request_flags {
  * argument values: location_opcode_request_choice reaches ip at -4 and the arguments at +0x10 from its
  * &choice_map_ids base. */
 typedef struct location_script_state {
-    s32 flags;             /* 0x00; location_script_result_flags_e | location_script_action_flags_e */
+    s32 flags;             /* 0x00; location_script_flag_e */
     u16* list;             /* 0x04; script list for the current location */
     u16* data;             /* 0x08 */
     u16 ip;                /* 0x0c */

@@ -20,13 +20,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Refusals of update_buy_quantity and
- * update_purchase_quantity; otherwise they return whether the
- * quantity prompt is still open. */
-enum {
-    SHOP_QUANTITY_HOLDING_MAX = -2, /* the party already holds 99 */
-    SHOP_QUANTITY_CANNOT_AFFORD = -1
-};
 extern u8 g_shop_item_category;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u16 g_shop_sell_quantity_item; /* item being sold */

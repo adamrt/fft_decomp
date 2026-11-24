@@ -381,7 +381,7 @@ void map_unit_update_float_height(map_unit_t* unit);
 void map_unit_update_float_height_and_status_bubble(map_unit_t* unit);
 void map_unit_play_sfx(struct map_unit* unit, s32 sound_id);
 
-/* Set and clear the unit_motion_flags_e that suppress a unit's facing, movement-effect and
+/* Set and clear the move_destination_t bits that suppress a unit's facing, movement-effect and
  * palette updates. */
 void map_unit_set_facing_update_suppression(u32 map_unit_id);
 void map_unit_clear_facing_update_suppression(u32 map_unit_id);

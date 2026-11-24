@@ -28,17 +28,6 @@ typedef struct move_destination {
 } move_destination_t;
 typedef char move_destination_size_must_be_4[sizeof(move_destination_t) == 4 ? 1 : -1];
 
-/* Masks of the motion flags in the 32-bit view of map_unit_t.movement (move_destination_t),
- * whose high byte is map unit +0x83. */
-typedef enum unit_motion_flags {
-    UNIT_MOTION_FLAG_SUPPRESS_FACING_UPDATE = 0x01000000,
-    UNIT_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS = 0x02000000,
-    UNIT_MOTION_FLAG_SUPPRESS_PALETTE_UPDATE = 0x04000000,
-    UNIT_MOTION_FLAG_ALTERNATE_SHORT_HOP = 0x08000000,
-    UNIT_MOTION_FLAG_FLOAT = 0x10000000,
-    UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000 /* set with each stored animation request */
-} unit_motion_flags_e;
-
 /* Three-byte tile coordinates for paths, relocation and action targets. */
 typedef struct move_tile_coordinates {
     u8 x;

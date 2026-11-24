@@ -46,6 +46,13 @@ typedef enum shop_step {
 
 extern s16 g_shop_menu_step; /* shop_step_e */
 
+/* Refusals of the buy and purchase quantity prompts (update_buy_quantity, update_purchase_quantity); otherwise they
+ * return whether the prompt is still open. */
+typedef enum shop_quantity_refusal {
+    SHOP_QUANTITY_HOLDING_MAX = -2, /* the party already holds 99 */
+    SHOP_QUANTITY_CANNOT_AFFORD = -1
+} shop_quantity_refusal_e;
+
 void shop_run_screen(s32 shop_type);
 u32* shop_load_background(s32 index);
 void shop_draw_gil(void);

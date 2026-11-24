@@ -39,13 +39,6 @@ extern u8 g_menu_screen_text_shop_menu_labels_data[240];
 extern menu_entry_t g_shop_main_menu_thread_data;
 extern u8 g_shop_background_visible;
 
-/* Refusals of update_buy_quantity and
- * update_purchase_quantity; otherwise they return whether the
- * quantity prompt is still open. */
-enum {
-    SHOP_QUANTITY_HOLDING_MAX = -2, /* the party already holds 99 */
-    SHOP_QUANTITY_CANNOT_AFFORD = -1
-};
 extern u8 g_shop_item_category;
 extern menu_entry_t g_shop_quantity_menu_data[2];
 extern u8 g_shop_quantity_menu_running;

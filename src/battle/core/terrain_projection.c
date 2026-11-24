@@ -49,13 +49,13 @@ static void get_step_depth_point(const SVECTOR* input, SVECTOR* output, s32 offs
 }
 
 /* get_step_depth_point with offset 1: the depth point of a stepping unit on a
- * tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+ * tile without the depth_bias bit. */
 void camera_get_unbiased_step_depth_point(const SVECTOR* input, SVECTOR* output) {
     get_step_depth_point(input, output, 1);
 }
 
 /* get_step_depth_point with offset 5: the depth point of a stepping unit on a
- * tile with MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+ * tile with the depth_bias bit. */
 void camera_get_biased_step_depth_point(const SVECTOR* input, SVECTOR* output) {
     get_step_depth_point(input, output, 5);
 }
@@ -109,13 +109,13 @@ static void get_tile_depth_point(const SVECTOR* input, SVECTOR* output, s32 offs
 }
 
 /* get_tile_depth_point with offset 1: the depth point of a standing unit,
- * a cursor or a bubble on a tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+ * a cursor or a bubble on a tile without the depth_bias bit. */
 void camera_get_unbiased_tile_depth_point(const SVECTOR* world, SVECTOR* destination) {
     get_tile_depth_point(world, destination, 1);
 }
 
 /* get_tile_depth_point with offset 5: the depth point on a tile with
- * MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
+ * the depth_bias bit. */
 void camera_get_biased_tile_depth_point(const SVECTOR* world, SVECTOR* destination) {
     get_tile_depth_point(world, destination, 5);
 }

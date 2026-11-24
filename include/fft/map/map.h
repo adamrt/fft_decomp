@@ -214,11 +214,6 @@ typedef enum map_surface_type {
     MAP_SURFACE_CROSS_SECTION = 0x3f
 } map_surface_type_e;
 
-enum { MAP_SURFACE_MASK = 0x3f };
-
-/* Depth-bias flag in terrain tile byte0; the low six bits use MAP_SURFACE_MASK. */
-enum { MAP_TILE_SURFACE_FLAG_DEPTH_BIAS = 0x40 };
-
 typedef struct map_tile_surface {
     u8 type : 6;       /* map_surface_type_e */
     u8 depth_bias : 1; /* camera depth offset 5 instead of 1 for the cursor, units and shadows on this tile */
@@ -241,7 +236,7 @@ typedef struct map_tile_marks {
 enum {
     MAP_TILE_FLAG_BLOCKED = 0x01,
     MAP_TILE_FLAG_UNTARGETABLE = 0x02,
-    MAP_TILE_COLLISION_MASK = 0x03,
+    MAP_TILE_COLLISION_MASK = MAP_TILE_FLAG_BLOCKED | MAP_TILE_FLAG_UNTARGETABLE,
     MAP_TILE_FLAG_CANNOT_STOP = 0x80
 };
 

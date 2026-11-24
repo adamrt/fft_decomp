@@ -150,8 +150,9 @@ typedef enum system_runtime_flag {
     SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME = 0x00400, /* the WORLD menu frame runs every loop */
     SYSTEM_RUNTIME_FLAG_WIDE_SCREEN = 0x01000,
     SYSTEM_RUNTIME_FLAG_RGB24 = 0x02000,
-    NEW_GAME_PARTY_MODE_FLAG_BASE = 0x04000, /* shifted left by the party mode: which new-game party was built */
-    NEW_GAME_PARTY_MODE_FLAG_MASK = 0x1c000,
+    SYSTEM_RUNTIME_FLAG_PARTY_MODE_BASE
+    = 0x04000, /* shifted left by party_new_game_mode_e: which new-game party was built */
+    SYSTEM_RUNTIME_FLAG_PARTY_MODE_MASK = 0x1c000,
     /* present_frame: clears the frame, or copies it from VRAM (512, 256), instead of
      * uploading the file image. */
     SYSTEM_RUNTIME_FLAG_CLEAR_FRAME = 0x20000,
