@@ -233,8 +233,7 @@ void sprite_display_draw_parts(
         index = sprite_take_primitive();
         flags ^= mode;
         prim = g_sprite_prim_pool + index;
-        setlen(prim, 9);
-        prim->code = 0x2c;
+        setPolyFT4(prim);
         if (mode & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
             x = -part->x_shift - part->width;
         } else {
@@ -261,11 +260,7 @@ void sprite_display_draw_parts(
         }
         gte_ldv3_split(&s_gte_rtpt_vxy0, &s_gte_rtpt_vxy1, &s_gte_rtpt_vxy2);
         gte_rtpt();
-        if ((flags | mode) & SPRITE_DISPLAY_SEMI_TRANSPARENT) {
-            prim->code |= 2;
-        } else {
-            prim->code &= ~2;
-        }
+        setSemiTrans(prim, (flags | mode) & SPRITE_DISPLAY_SEMI_TRANSPARENT);
         prim->tpage = display->tpage | (mode & SPRITE_DISPLAY_BLEND_MASK);
         prim->clut = display->clut;
         gte_stsxy3_split(&prim->x0, &prim->x1, &prim->x2);
@@ -316,7 +311,7 @@ void sprite_display_set_part_flip(sprite_display_t* display, s32 part_index, u32
 
 /* Set or clear bit 0 of a sprite part's flags: the part is drawn semi-transparent while it is set. */
 void sprite_display_set_part_semi_transparent(sprite_display_t* display, s32 part_index, s32 enabled) {
-    if (enabled != 0) {
+    if (enabled) {
         display->parts[part_index].flags |= SPRITE_DISPLAY_SEMI_TRANSPARENT;
     } else {
         display->parts[part_index].flags &= ~SPRITE_DISPLAY_SEMI_TRANSPARENT;

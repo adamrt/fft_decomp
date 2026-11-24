@@ -38,6 +38,7 @@ typedef struct camera_track {
     s32 finished;         /* 0xa0 */
 } camera_track_t;
 typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
+
 static s32 step_track(camera_track_t* track, s32 component);
 static s32 interpolate_range_q12(s32 start, s32 end, s32 frame, s32 duration);
 
@@ -298,7 +299,6 @@ static s32 step_track(camera_track_t* track, s32 component) {
         }
 
         /* A zero divisor or a helper range flag selects the track's stored value. */
-
         if (s_camera_arithmetic_overflow != 0 || flag != 0) {
             result = track->prev_value;
         }

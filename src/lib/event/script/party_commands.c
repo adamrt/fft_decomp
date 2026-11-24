@@ -27,6 +27,8 @@ void script_opcode_7a_dismiss_unit(s32 sprite_set) {
     s32 slot;
     u8 item;
 
+    /* Each counter is set apart from its loop, before the comparison value, for the
+     * original instruction order. */
     for (; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
         party = party_unit_get(party_index);
         if (party->party_id != empty_party_id && party->sprite_set == sprite_set) {

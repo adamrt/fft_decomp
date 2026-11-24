@@ -281,7 +281,7 @@ static void toggle_zoom(void) {
 /* Toggles the zoom when L2 is newly pressed and no zoom is running. */
 void camera_handle_zoom_input(void) {
     if (g_camera_zoom_action == CAMERA_STEP_NONE) {
-        if ((g_input_pressed_buttons & PSX_PAD_L2) != 0) {
+        if (g_input_pressed_buttons & PSX_PAD_L2) {
             toggle_zoom();
         }
     }
@@ -406,7 +406,7 @@ static void toggle_tilt(void) {
 /* Toggles the tilt when R2 is newly pressed and no tilt is running. */
 void camera_handle_tilt_input(void) {
     if (g_camera_tilt_action == CAMERA_STEP_NONE) {
-        if ((g_input_pressed_buttons & PSX_PAD_R2) != 0) {
+        if (g_input_pressed_buttons & PSX_PAD_R2) {
             toggle_tilt();
         }
     }

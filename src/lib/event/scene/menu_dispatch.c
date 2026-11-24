@@ -43,11 +43,12 @@ extern u8 g_command_restore_unit_id;
  * issue the read for the pending request, then poll until it completes and
  * clear the request. */
 void overlay_companion_poll_file(void) {
-    if ((g_overlay_companion_data_file_request_index != 0) && (s_overlay_companion_data_file_loading == 0)) {
+    s32 request = g_overlay_companion_data_file_request_index;
+
+    if ((request != 0) && (s_overlay_companion_data_file_loading == 0)) {
         g_thread_call_target = (void (*)(void))file_request_read_bytes;
-        if (thread_call_on_main_stack(g_overlay_companion_data_file_lbas[g_overlay_companion_data_file_request_index],
-                g_overlay_companion_data_file_sizes[g_overlay_companion_data_file_request_index],
-                g_overlay_companion_data_file_buffer)
+        if (thread_call_on_main_stack(g_overlay_companion_data_file_lbas[request],
+                g_overlay_companion_data_file_sizes[request], g_overlay_companion_data_file_buffer)
             == 0) {
             s_overlay_companion_data_file_loading = 1;
         }
@@ -114,7 +115,7 @@ static void build_menu_thread(void) {
             script_variable_set(
                 EVENT_SCRIPT_VAR_CURRENT_EVENT, script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) + 1);
             script_start_current_event_thread();
-            thread_wait_frames(0x1E);
+            thread_wait_frames(30);
         }
         if (g_menu_input_mode != MENU_INPUT_PLAYER) {
             thread_wait_frames(2);
@@ -178,7 +179,6 @@ void command_open_menu(s32 menu_id) {
     s32 column;
     u8* window_x_table;
     menu_entry_t* entry;
-    s16* selected_index;
 
     if (g_menu_input_mode != MENU_INPUT_BLOCKED) {
         if ((g_menu_overlay_state == 0) && (g_help_open == 0) && (g_menu_building_thread_started == 0)
@@ -200,12 +200,11 @@ void command_open_menu(s32 menu_id) {
                 if (*window_x != 0) {
                     entry->window.x = *window_x + 0x80;
                 }
-                i += 1;
-                entry += 1;
+                i++;
+                entry++;
             } while (i < IDLE_ACTION_MENU_ENTRY_COUNT);
             command_restore_unit_selection(menu_id);
-            selected_index = &g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST].selected_index;
-            *selected_index = 0;
+            g_menu_thread_menu_data[MENU_COMMAND_ID_STATUS_LIST].selected_index = 0;
             g_status_screen_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();
             thread_start(THREAD_SLOT_MENU_BUILDING, build_menu_thread);

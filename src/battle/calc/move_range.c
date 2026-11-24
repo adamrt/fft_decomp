@@ -274,12 +274,15 @@ static s32 get_weather_terrain_cost(void) {
  * any other job or a chocobo with a status of the unmountable set, PAIRED when
  * its mount_info is set, else FREE. */
 unit_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const battle_unit_t* unit) {
-    if (unit->job_id < JOB_ID_CHOCOBO || unit->job_id > JOB_ID_RED_CHOCOBO)
+    if (unit->job_id < JOB_ID_CHOCOBO || unit->job_id > JOB_ID_RED_CHOCOBO) {
         return UNIT_CHOCOBO_MOUNT_NONE;
-    if (status_has_any_in_check_set(unit, STATUS_CHECK_SET_UNMOUNTABLE) != 0)
+    }
+    if (status_has_any_in_check_set(unit, STATUS_CHECK_SET_UNMOUNTABLE)) {
         return UNIT_CHOCOBO_MOUNT_NONE;
-    if (unit->mount_info != 0)
+    }
+    if (unit->mount_info) {
         return UNIT_CHOCOBO_MOUNT_PAIRED;
+    }
     return UNIT_CHOCOBO_MOUNT_FREE;
 }
 
@@ -542,8 +545,9 @@ static void store_spread_unit_to_scratchpad(s32 unit_id) {
          * water depth by movement type. */
         movement_3 = other->ability_flags.movement[2];
         tile = &g_map_tile_data[battle_unit_get_tile_index(other)];
+        /* The bytes require one byte read of tile byte 3 per field, not the bitfields. */
         base = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK);
-        depth = (*(u8*)&tile->depth_half_height) >> 5;
+        depth = (*(u8*)&tile->depth_half_height) >> MAP_TILE_DEPTH_SHIFT;
         byte = base;
         if (depth != 0) {
             if (other->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)] & STATUS_BYTE_MASK(STATUS_ID_FLOAT)) {
@@ -636,10 +640,9 @@ static void clear_occupied_enterable_flags(void) {
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
         battle_unit_t* unit = &g_battle_units[unit_id];
 
-        if ((unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
-            && ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
-                    & (STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_JUMP)))
-                != 0)) {
+        if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
+            && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
+                & (STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_JUMP)))) {
             s_frontier_flags[battle_unit_get_tile_index(unit)] &= ~FRONTIER_FLAG_ENTERABLE;
         }
     }
@@ -702,7 +705,7 @@ static void set_spread_frontier_flags(s32 mode) {
                     *frontier_cell |= FRONTIER_FLAG_STEEP;
                 }
             }
-            if ((tile->flags.blocked | tile->flags.untargetable) == 0) {
+            if (!(tile->flags.blocked | tile->flags.untargetable)) {
                 depth = tile->depth_half_height.depth;
                 if ((depth == 0 || !config->cannot_enter_water) && (depth < 4 || !config->will_sink)) {
                     *frontier_cell |= FRONTIER_FLAG_ENTERABLE;
@@ -711,8 +714,8 @@ static void set_spread_frontier_flags(s32 mode) {
             tile_flags = tile->flags;
             if (tile_flags.blocked) {
                 *frontier_cell |= FRONTIER_FLAG_BLOCKED;
-            } else if (!config->move_type && (tile_flags.untargetable)
-                && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+            } else if (!config->move_type && tile_flags.untargetable
+                && tile->surface.type != MAP_SURFACE_CROSS_SECTION) {
                 *frontier_cell |= FRONTIER_FLAG_ENTERABLE;
             }
         }
@@ -806,10 +809,10 @@ static void set_range_tile_flags(void) {
         if (i == self) {
             continue;
         }
-        if (!((config->move_type == MOVE_CLASS_TELEPORT) && (flags[i] & FRONTIER_FLAG_MOUNTABLE_UNIT))
-            && !((panel->ride_remaining_range != 0) && (config->can_ride != 0))) {
+        if (!(config->move_type == MOVE_CLASS_TELEPORT && (flags[i] & FRONTIER_FLAG_MOUNTABLE_UNIT))
+            && !(panel->ride_remaining_range && config->can_ride)) {
             half_height = tile->depth_half_height.half_height;
-            if ((half_height >= 3) && (flags[i] & FRONTIER_FLAG_CORNER)) {
+            if (half_height >= 3 && (flags[i] & FRONTIER_FLAG_CORNER)) {
                 continue;
             }
             if (panel->remaining_range == 0) {
@@ -827,16 +830,16 @@ static void set_range_tile_flags(void) {
                 continue;
             }
             water_depth = tile->depth_half_height;
-            if ((water_depth.depth != 0) && (config->cannot_stay_on_water != 0)) {
+            if (water_depth.depth && config->cannot_stay_on_water) {
                 continue;
             }
-            if ((water_depth.depth == 3) && (config->will_drown != 0)) {
+            if (water_depth.depth == 3 && config->will_drown) {
                 continue;
             }
-            if ((tile->depth_half_height.depth >= 4) && (config->will_sink != 0)) {
+            if (tile->depth_half_height.depth >= 4 && config->will_sink) {
                 continue;
             }
-            if ((surface == MAP_SURFACE_LAVA) && (config->can_pass_lava == 0)) {
+            if (surface == MAP_SURFACE_LAVA && !config->can_pass_lava) {
                 continue;
             }
             if (tile_flags.untargetable) {
@@ -847,7 +850,7 @@ static void set_range_tile_flags(void) {
                 continue;
             }
             if (frontier & FRONTIER_FLAG_UNIT_ON_TILE) {
-                if (!(frontier & FRONTIER_FLAG_MOUNTABLE_UNIT) || (config->can_ride == 0)) {
+                if (!(frontier & FRONTIER_FLAG_MOUNTABLE_UNIT) || !config->can_ride) {
                     continue;
                 }
             }
@@ -937,12 +940,15 @@ static s32 check_spread_tile_coordinates(void) {
     s32 y;
     if (x >= 0) {
         y = state->work_y;
-        if (y < 0)
+        if (y < 0) {
             return 1;
-        if (x >= config->terrain_width)
+        }
+        if (x >= config->terrain_width) {
             return 1;
-        if (y < config->terrain_depth)
+        }
+        if (y < config->terrain_depth) {
             return 0;
+        }
     }
     return 1;
 }
@@ -964,7 +970,7 @@ static s32 init_spread_source_panel(s32 direction) {
     spread_work_t* state = s_spread_work;
     path_record_t* records = s_path_records;
 
-    if (direction >= 8 || state->source_unit_record_flag != 0) {
+    if (direction >= 8 || state->source_unit_record_flag) {
         s32 panel_index;
         state->source_unit_record_index = state->current_panel->unit_record_index;
         if (direction >= 8) {
@@ -973,17 +979,19 @@ static s32 init_spread_source_panel(s32 direction) {
             state->source_exit_height = record->standing_height + direction / 4 - 2;
             state->work_height = state->source_base_height_times_two
                 + state->source_half_height * ((state->source_slope >> state->source_side_shift) & 3);
-            if (state->source_exit_height < state->work_height)
+            if (state->source_exit_height < state->work_height) {
                 return 1;
+            }
         } else {
-            if (!(frontier[state->tile_index] & FRONTIER_FLAG_STAND_ON_UNIT))
+            if (!(frontier[state->tile_index] & FRONTIER_FLAG_STAND_ON_UNIT)) {
                 return 2;
+            }
             state->source_exit_height = records[state->source_unit_record_index].top_height;
         }
         state->source_side_height_delta = 0;
         state->source_opposite_height = state->source_exit_height;
         state->source_ceiling_height = calculate_spread_tile_ceiling(
-            state->tile_x, state->tile_y, state->source_side_shift, (state->source_exit_height - 1));
+            state->tile_x, state->tile_y, state->source_side_shift, state->source_exit_height - 1);
         panel_index = state->source_unit_record_index + MAP_TILE_COUNT;
         state->source_panel_index = panel_index;
         state->source_panel = &g_target_panels[panel_index];
@@ -995,13 +1003,15 @@ static s32 init_spread_source_panel(s32 direction) {
         state->source_side_height_delta = state->source_exit_height - state->source_opposite_height;
         state->source_ceiling_height = calculate_spread_tile_ceiling(
             state->tile_x, state->tile_y, state->source_side_shift, state->source_exit_height);
-        if (state->source_side_height_delta >= 0 && (frontier[state->tile_index] & FRONTIER_FLAG_STEEP))
+        if (state->source_side_height_delta >= 0 && (frontier[state->tile_index] & FRONTIER_FLAG_STEEP)) {
             return 3;
+        }
         if (state->current_tile->depth_half_height.depth
             && (config->movement_set_3 & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER))) {
             state->source_exit_height += state->current_tile->depth_half_height.depth * 2;
-            if (config->movement_set_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER)
+            if (config->movement_set_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
                 state->source_exit_height -= 2;
+            }
         }
         state->source_panel = &g_target_panels[state->source_panel_index = state->tile_index];
     }
@@ -1031,20 +1041,24 @@ static s32 propagate_spread_destination(s32 candidate, s32 extra_span) {
     state->destination_half_height = state->destination_tile->depth_half_height.half_height;
     state->destination_slope = state->destination_tile->slope_type;
     destination_flags = &flags[state->destination_index];
-    if (state->destination_unit_record_flag != 0) {
-        if (!(*destination_flags & (FRONTIER_FLAG_MOUNTABLE_UNIT | FRONTIER_FLAG_STAND_ON_UNIT)))
+    if (state->destination_unit_record_flag) {
+        if (!(*destination_flags & (FRONTIER_FLAG_MOUNTABLE_UNIT | FRONTIER_FLAG_STAND_ON_UNIT))) {
             return 1; /* no unit there to mount or stand on */
+        }
         state->destination_unit_record_index = state->destination_panel->unit_record_index;
         state->destination_entry_height = records[state->destination_unit_record_index].top_height;
         state->destination_ceiling_height = calculate_spread_tile_ceiling(
-            state->work_x, state->work_y, state->destination_side_shift, (state->destination_entry_height - 1));
-        if (*destination_flags & FRONTIER_FLAG_MOUNTABLE_UNIT)
+            state->work_x, state->work_y, state->destination_side_shift, state->destination_entry_height - 1);
+        if (*destination_flags & FRONTIER_FLAG_MOUNTABLE_UNIT) {
             check_spread_occupied_tile_standing_height(state->destination_unit_record_index, extra_span);
-        if (!(*destination_flags & FRONTIER_FLAG_STAND_ON_UNIT))
+        }
+        if (!(*destination_flags & FRONTIER_FLAG_STAND_ON_UNIT)) {
             return 17; /* the unit cannot be stood on (a mount was handled by the helper) */
+        }
     } else {
-        if (!(*destination_flags & FRONTIER_FLAG_ENTERABLE))
+        if (!(*destination_flags & FRONTIER_FLAG_ENTERABLE)) {
             return 2; /* the tile is not enterable */
+        }
         state->destination_entry_height = state->destination_base_height_times_two
             + state->destination_half_height * ((state->destination_slope >> state->destination_side_shift) & 3);
         state->destination_opposite_height = state->destination_base_height_times_two
@@ -1052,63 +1066,78 @@ static s32 propagate_spread_destination(s32 candidate, s32 extra_span) {
         state->destination_side_height_delta = state->destination_opposite_height - state->destination_entry_height;
         state->destination_ceiling_height = calculate_spread_tile_ceiling(
             state->work_x, state->work_y, state->destination_side_shift, state->destination_entry_height);
-        if (state->destination_side_height_delta > 0 && (*destination_flags & FRONTIER_FLAG_STEEP))
+        if (state->destination_side_height_delta > 0 && (*destination_flags & FRONTIER_FLAG_STEEP)) {
             return 3; /* a steep slope entered from its low side */
+        }
     }
-    if (state->destination_ceiling_height < state->source_exit_height + config->unit_size)
+    if (state->destination_ceiling_height < state->source_exit_height + config->unit_size) {
         return 4; /* too low a ceiling over the destination for the mover's exit height */
-    if (state->source_ceiling_height < state->destination_entry_height + config->unit_size)
+    }
+    if (state->source_ceiling_height < state->destination_entry_height + config->unit_size) {
         return 5; /* too low a ceiling over the source for the destination's entry height */
-    if (state->destination_ceiling_height < state->destination_entry_height + config->unit_size)
+    }
+    if (state->destination_ceiling_height < state->destination_entry_height + config->unit_size) {
         return 6; /* no headroom on the destination itself */
-    if (state->destination_unit_record_flag == 0)
+    }
+    if (!state->destination_unit_record_flag) {
         state->destination_entry_height += state->destination_tile->depth_half_height.depth * 2;
+    }
     if (state->destination_entry_height > state->source_exit_height) {
-        if (extra_span != 0)
+        if (extra_span) {
             return 8; /* a step that spans tiles cannot climb */
+        }
         state->height_delta = state->destination_entry_height - state->source_exit_height;
     } else {
         state->height_delta = state->source_exit_height - state->destination_entry_height;
     }
-    if (state->height_delta > config->jump_times_two)
+    if (state->height_delta > config->jump_times_two) {
         return 9; /* beyond the jump limit */
+    }
     state->work_height = state->source_panel->max_height_delta;
     state->height_delta = state->work_height < state->height_delta ? state->height_delta : state->work_height;
-    if (config->move_type == MOVE_CLASS_FLY)
+    if (config->move_type == MOVE_CLASS_FLY) {
         state->height_delta = 0;
-    if (state->destination_unit_record_flag != 0) {
+    }
+    if (state->destination_unit_record_flag) {
         /* The record panel's address is recomputed for every access, as retail does. */
         state->candidate_remaining_range = state->source_panel->remaining_range - 1 - extra_span;
-        if (state->candidate_remaining_range <= 0)
+        if (state->candidate_remaining_range <= 0) {
             return 11; /* no range left to step onto the unit */
+        }
         if ((u8)state->candidate_remaining_range
-            < g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range)
+            < g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range) {
             return 12; /* the unit top is already reached with more range left */
+        }
         if ((u8)state->candidate_remaining_range
                 == g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range
             && state->height_delta
-                >= g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta)
+                >= g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta) {
             return 13; /* same range left, and no smaller height difference */
+        }
         g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range
             = state->candidate_remaining_range;
         g_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta = state->height_delta;
     } else {
         state->candidate_remaining_range
             = state->source_panel->remaining_range - extra_span - terrain_costs[state->destination_tile->surface.type];
-        if (state->candidate_remaining_range <= 0)
+        if (state->candidate_remaining_range <= 0) {
             return 14; /* no range left after the terrain cost */
-        if ((u8)state->candidate_remaining_range < state->destination_panel->remaining_range)
+        }
+        if ((u8)state->candidate_remaining_range < state->destination_panel->remaining_range) {
             return 15; /* the tile is already reached with more range left */
+        }
         if ((u8)state->candidate_remaining_range == state->destination_panel->remaining_range
-            && state->height_delta >= state->destination_panel->max_height_delta)
+            && state->height_delta >= state->destination_panel->max_height_delta) {
             return 16; /* same range left, and no smaller height difference */
+        }
         state->destination_panel->remaining_range = state->candidate_remaining_range;
         state->destination_panel->max_height_delta = state->height_delta;
     }
     if (state->candidate_remaining_range >= 2) {
         s_frontier_flags[state->destination_index] |= FRONTIER_FLAG_QUEUED;
-        if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range)
+        if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range) {
             state->frontier_max_remaining_range = state->candidate_remaining_range;
+        }
     }
     return 0;
 }
@@ -1128,7 +1157,7 @@ static void check_spread_one_tile_around(void) {
         state->source_unit_record_flag = i >= 4;
         g_move_spread_preset_table[i % 4]();
         set_spread_tile_coordinates();
-        if ((check_spread_tile_coordinates() == 0) && (init_spread_source_panel(i) == 0)) {
+        if (check_spread_tile_coordinates() == 0 && init_spread_source_panel(i) == 0) {
             for (j = 0; j < state->inner_count; j++) {
                 propagate_spread_destination(j, 0);
             }
@@ -1192,7 +1221,7 @@ static void check_spread_occupied_tile_standing_height(s32 record_index, s32 ext
             return;
         }
         if (state->source_exit_height < height) {
-            if (extra_span != 0) {
+            if (extra_span) {
                 return;
             }
             if (config->jump_times_two < (u8)(height - state->source_exit_height)) {
@@ -1225,10 +1254,10 @@ static u8 calculate_spread_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 e
 
     for (elevation = 0; elevation < MAP_TERRAIN_LAYER_COUNT; elevation++) {
         tile = &g_map_tile_data[elevation * MAP_TILES_PER_LAYER + y * s_pathfind_work->terrain_width + x];
-        if ((tile->flags.blocked) == 0) {
+        if (!tile->flags.blocked) {
             depth = tile->depth_half_height;
-            tile_ceiling = (tile->height << 1) + (depth.half_height) * ((tile->slope_type >> exit_slope_shift) & 3)
-                - ((tile->ceiling_depth_and_marks.ceiling_depth) << 1);
+            tile_ceiling = (tile->height << 1) + depth.half_height * ((tile->slope_type >> exit_slope_shift) & 3)
+                - (tile->ceiling_depth_and_marks.ceiling_depth << 1);
             if (tile_ceiling > exit_height) {
                 if (ceiling < tile_ceiling) {
                     tile_ceiling = ceiling;
@@ -1303,15 +1332,15 @@ static s32 check_spread_horizontal_jump(s32 tile_index, u8 shift_a, u8 shift_b, 
             height_a = state->work_height + state->jump_half_height * ((state->jump_slope >> shift_a) & 3);
             height_b = state->work_height + state->jump_half_height * ((state->jump_slope >> shift_b) & 3);
             if ((u8)height_a > (u8)height_b) {
-                high = height_b - (tile->ceiling_depth_and_marks.ceiling_depth) * 2;
-                depth = (tile->depth_half_height.depth) * 2;
+                high = height_b - tile->ceiling_depth_and_marks.ceiling_depth * 2;
+                depth = tile->depth_half_height.depth * 2;
                 state->work_height = high;
                 low = state->work_height;
                 high = height_a + depth;
             } else {
-                high = height_b + (tile->depth_half_height.depth) * 2;
+                high = height_b + tile->depth_half_height.depth * 2;
                 low = height_a;
-                low -= (tile->ceiling_depth_and_marks.ceiling_depth) * 2;
+                low -= tile->ceiling_depth_and_marks.ceiling_depth * 2;
             }
         }
         if ((u8)low < (u8)lowest) {
@@ -1362,8 +1391,7 @@ static void spread_horizontal_jump(void) {
                     break;
                 }
                 if (check_spread_horizontal_jump(state->work_y * config->terrain_width + state->work_x,
-                        state->source_side_shift, state->destination_side_shift, state->source_exit_height)
-                    != 0) {
+                        state->source_side_shift, state->destination_side_shift, state->source_exit_height)) {
                     break;
                 }
                 state->work_x = state->tile_x + state->x_step * (pass_index + 1);
@@ -1416,7 +1444,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
     if (!g_map_tile_data[index].ceiling_depth_and_marks.move_destination) {
         return 0;
     }
-    if (g_move_range_valid == 0) {
+    if (!g_move_range_valid) {
         return 0;
     }
     if (unit_id != g_move_range_unit_id) {
@@ -1466,7 +1494,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
             move_flags = &g_move_path.flags;
             *move_flags |= MOVE_EFFECTIVE_SILENT_WALK;
         }
-        if (roll_teleport() != 0) {
+        if (roll_teleport()) {
             g_move_path.count = MOVE_PATH_TELEPORT;
             g_move_path.data.teleport.x = x;
             g_move_path.data.teleport.y = y;
@@ -1485,7 +1513,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
      * (a mount at the target through its record's ride range, when riding it leaves
      * more range). A tile with no predecessor means no path, unless the mover starts
      * on a mount and a retry against the mount's seven standing heights finds one. */
-    while (state->candidate_remaining_range != 0) {
+    while (state->candidate_remaining_range) {
         state->previous_source_side_shift = state->selected_source_side_shift;
         pass = state->path_length + 1;
         state->tile_index
@@ -1504,7 +1532,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
                 state->outer_count = 4;
                 state->current_panel->mark = state->path_length;
             }
-        } else if (state->source_unit_record_flag != 0) {
+        } else if (state->source_unit_record_flag) {
             value = g_target_panels[state->source_unit_record_index + MAP_TILE_COUNT].remaining_range;
             g_target_panels[state->source_unit_record_index + MAP_TILE_COUNT].mark = pass;
         } else {
@@ -1527,7 +1555,7 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
             state->outer_count = 4;
             continue;
         }
-        if (config->source_tile_occupied != 0) {
+        if (config->source_tile_occupied) {
             state->inner_count = 7;
             spread_path_neighbors();
             previous = state->candidate_remaining_range;
@@ -1548,19 +1576,22 @@ move_path_t* move_path_build_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
 /* 1 when the teleport succeeds: always with Teleport 2, otherwise it fails
  * with a 10 in 100 chance per tile of distance beyond Move. */
 static s32 roll_teleport(void) {
-    pathfind_work_t* ctx = s_pathfind_work;
-    s32 dy, dx;
+    pathfind_work_t* config = s_pathfind_work;
+    s32 dy;
+    s32 dx;
 
-    if (ctx->movement_set_2 & UNIT_MOVEMENT_SET_2_TELEPORT_2) {
+    if (config->movement_set_2 & UNIT_MOVEMENT_SET_2_TELEPORT_2) {
         return 1;
     }
-    dx = ctx->target_x - ctx->x;
-    dy = ctx->target_y - ctx->y;
-    if (dx < 0)
+    dx = config->target_x - config->x;
+    dy = config->target_y - config->y;
+    if (dx < 0) {
         dx = -dx;
-    if (dy < 0)
+    }
+    if (dy < 0) {
         dy = -dy;
-    return random_roll_pass_fail(100, ((dx + dy) - ctx->move) * 10);
+    }
+    return random_roll_pass_fail(100, (dx + dy - config->move) * 10);
 }
 
 /* padding */
@@ -1579,13 +1610,13 @@ static void encode_path_steps(void) {
     map_tile_t* tile;
     s32 step;
     s32 path_index;
-    u8 level;
+    u8 level_bit;
     s32 i;
     u8 target;
-    s32 rem;
+    s32 cell;
     u8 ride;
-    u8 dir;
-    s32 flag;
+    u8 direction;
+    s32 mount_bit;
     u8 source_bit;
     u8 destination_bit;
 
@@ -1606,10 +1637,11 @@ static void encode_path_steps(void) {
                 ride = 0;
                 if (i < MAP_TILE_COUNT) {
                     state->destination_unit_record_index = 0;
+                    /* The bytes require the u8 truncations. */
                     state->work_level = (u8)(i / MAP_TILES_PER_LAYER);
-                    rem = i - (i / MAP_TILES_PER_LAYER) * MAP_TILES_PER_LAYER;
-                    state->work_y = (u8)(rem / config->terrain_width);
-                    state->work_x = (u8)(rem % config->terrain_width);
+                    cell = i % MAP_TILES_PER_LAYER;
+                    state->work_y = (u8)(cell / config->terrain_width);
+                    state->work_x = (u8)(cell % config->terrain_width);
                 } else {
                     state->destination_unit_record_index = 1;
                     record = &records[i - MAP_TILE_COUNT];
@@ -1622,27 +1654,27 @@ static void encode_path_steps(void) {
                 state->work_y = record->y;
                 state->work_level = record->higher_elevation;
             }
-            /* dir is the step direction already in bits 6-7 of the step byte. */
+            /* direction is the step direction already in bits 6-7 of the step byte. */
             if (state->work_x == state->tile_x) {
-                dir = MOVE_STEP_DIRECTION_NORTH << 6;
+                direction = MOVE_STEP_DIRECTION_NORTH << 6;
                 if (state->work_y > state->tile_y) {
                     state->source_side_shift = 6;
                     state->destination_side_shift = 4;
                     state->step_distance = state->work_y - state->tile_y;
                 } else {
-                    dir = MOVE_STEP_DIRECTION_SOUTH << 6;
+                    direction = MOVE_STEP_DIRECTION_SOUTH << 6;
                     state->source_side_shift = 4;
                     state->destination_side_shift = 6;
                     state->step_distance = state->tile_y - state->work_y;
                 }
             } else {
-                dir = MOVE_STEP_DIRECTION_EAST << 6;
+                direction = MOVE_STEP_DIRECTION_EAST << 6;
                 if (state->tile_x < state->work_x) {
                     state->source_side_shift = 0;
                     state->destination_side_shift = 2;
                     state->step_distance = state->work_x - state->tile_x;
                 } else {
-                    dir = MOVE_STEP_DIRECTION_WEST << 6;
+                    direction = MOVE_STEP_DIRECTION_WEST << 6;
                     state->source_side_shift = 2;
                     state->destination_side_shift = 0;
                     state->step_distance = state->tile_x - state->work_x;
@@ -1680,11 +1712,11 @@ static void encode_path_steps(void) {
                     state->source_climb = 1;
                 }
             }
-            level = state->work_level * 32;
+            level_bit = state->work_level * 32;
             state->source_unit_record_index = state->destination_unit_record_index;
-            flag = state->destination_unit_record_index << 4;
+            mount_bit = state->destination_unit_record_index << 4;
             if (step == state->path_length - 2 && g_move_path.height_offsets.source_present) {
-                flag = 0x10;
+                mount_bit = 0x10;
             }
             source_bit = state->source_climb << 2;
             destination_bit = state->destination_climb << 3;
@@ -1693,7 +1725,7 @@ static void encode_path_steps(void) {
              * truncation and change scheduling. The final step also sets the mount bit when
              * the back-trace began on a mount at the target (source height offset present). */
             *(u8*)&g_move_path.data.steps[step]
-                = (state->step_distance - 1) | (source_bit | (destination_bit | (flag | (dir | level))));
+                = (state->step_distance - 1) | (source_bit | (destination_bit | (mount_bit | (direction | level_bit))));
             state->tile_x = state->work_x;
             state->tile_y = state->work_y;
             state->tile_level = state->work_level;
@@ -1727,18 +1759,20 @@ static s32 init_path_source_geometry(s32 direction) {
         state->source_exit_height = record->standing_height + s_height_offsets[6 - direction / 4];
         state->work_height = state->source_base_height_times_two
             + state->source_half_height * ((state->source_slope >> state->source_side_shift) & 3);
-        if (state->source_exit_height < state->work_height)
+        if (state->source_exit_height < state->work_height) {
             return 1;
+        }
         state->source_ceiling_height = calculate_spread_tile_ceiling(state->tile_x, state->tile_y,
-            state->source_side_shift, (records[state->source_unit_record_index].standing_height + 5));
+            state->source_side_shift, records[state->source_unit_record_index].standing_height + 5);
         state->source_side_height_delta = 0;
-    } else if (state->source_unit_record_flag != 0) {
-        if (!(frontier[state->tile_index] & FRONTIER_FLAG_STAND_ON_UNIT))
+    } else if (state->source_unit_record_flag) {
+        if (!(frontier[state->tile_index] & FRONTIER_FLAG_STAND_ON_UNIT)) {
             return 1;
+        }
         state->source_exit_height = records[state->source_unit_record_index].top_height;
         state->source_opposite_height = state->source_exit_height;
         state->source_ceiling_height = calculate_spread_tile_ceiling(
-            state->tile_x, state->tile_y, state->source_side_shift, (state->source_exit_height - 1));
+            state->tile_x, state->tile_y, state->source_side_shift, state->source_exit_height - 1);
         state->source_side_height_delta = 0;
     } else {
         state->source_exit_height = state->source_base_height_times_two
@@ -1749,8 +1783,9 @@ static s32 init_path_source_geometry(s32 direction) {
             state->tile_x, state->tile_y, state->source_side_shift, state->source_exit_height);
         difference = state->source_opposite_height - state->source_exit_height;
         state->source_side_height_delta = difference;
-        if (difference > 0 && (frontier[state->tile_index] & FRONTIER_FLAG_STEEP))
+        if (difference > 0 && (frontier[state->tile_index] & FRONTIER_FLAG_STEEP)) {
             return 1;
+        }
         state->source_exit_height += state->current_tile->depth_half_height.depth * 2;
     }
     return 0;
@@ -1772,8 +1807,9 @@ static s32 init_path_destination_geometry(s32 candidate) {
 
     state->destination_unit_record_flag = candidate >= 2;
     state->work_level = candidate & 1;
-    if (state->inner_count >= 5)
+    if (state->inner_count >= 5) {
         state->work_level = config->high_elevation;
+    }
     state->destination_index
         = state->work_level * MAP_TILES_PER_LAYER + state->work_y * config->terrain_width + state->work_x;
     state->destination_tile = &g_map_tile_data[state->destination_index];
@@ -1781,32 +1817,36 @@ static s32 init_path_destination_geometry(s32 candidate) {
     state->destination_base_height_times_two = state->destination_tile->height * 2;
     state->destination_half_height = state->destination_tile->depth_half_height.half_height;
     state->destination_slope = state->destination_tile->slope_type;
-    if (state->inner_count >= 5 || state->destination_unit_record_flag != 0) {
+    if (state->inner_count >= 5 || state->destination_unit_record_flag) {
         state->destination_unit_record_index = state->destination_panel->unit_record_index;
         if (state->inner_count >= 5) {
             state->destination_unit_record_flag = 1;
-            if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_MOUNTABLE_UNIT))
+            if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_MOUNTABLE_UNIT)) {
                 return 1;
+            }
             state->destination_entry_height
                 = records[state->destination_unit_record_index].standing_height + s_height_offsets[candidate];
             state->work_height = state->destination_base_height_times_two
                 + state->destination_half_height * ((state->destination_slope >> state->destination_side_shift) & 3);
-            if (state->destination_entry_height < state->work_height)
+            if (state->destination_entry_height < state->work_height) {
                 return 2;
+            }
         } else {
-            if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_STAND_ON_UNIT))
+            if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_STAND_ON_UNIT)) {
                 return 3;
+            }
             state->destination_entry_height = records[state->destination_unit_record_index].top_height;
         }
         state->destination_side_height_delta = 0;
         state->destination_opposite_height = state->destination_entry_height;
         state->destination_ceiling_height = calculate_spread_tile_ceiling(
-            state->work_x, state->work_y, state->destination_side_shift, (state->destination_entry_height - 1));
+            state->work_x, state->work_y, state->destination_side_shift, state->destination_entry_height - 1);
         state->destination_panel_index = state->destination_unit_record_index + MAP_TILE_COUNT;
         state->effective_destination_panel = &g_target_panels[state->destination_panel_index];
     } else {
-        if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_ENTERABLE))
+        if (!(tile_flags[state->destination_index] & FRONTIER_FLAG_ENTERABLE)) {
             return 4;
+        }
         state->destination_entry_height = state->destination_base_height_times_two
             + state->destination_half_height * ((state->destination_slope >> state->destination_side_shift) & 3);
         state->destination_opposite_height = state->destination_base_height_times_two
@@ -1814,14 +1854,16 @@ static s32 init_path_destination_geometry(s32 candidate) {
         state->destination_side_height_delta = state->destination_entry_height - state->destination_opposite_height;
         state->destination_ceiling_height = calculate_spread_tile_ceiling(
             state->work_x, state->work_y, state->destination_side_shift, state->destination_entry_height);
-        if (state->destination_side_height_delta >= 0 && (tile_flags[state->destination_index] & FRONTIER_FLAG_STEEP))
+        if (state->destination_side_height_delta >= 0 && (tile_flags[state->destination_index] & FRONTIER_FLAG_STEEP)) {
             return 5;
+        }
         state->clearance_height = state->source_exit_height;
         if (state->destination_tile->depth_half_height.depth
             && (config->movement_set_3 & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER))) {
             state->destination_entry_height += state->destination_tile->depth_half_height.depth * 2;
-            if (config->movement_set_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER)
+            if (config->movement_set_3 & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
                 state->destination_entry_height -= 2;
+            }
         }
         state->destination_panel_index = state->destination_index;
         state->effective_destination_panel = &g_target_panels[state->destination_panel_index];
@@ -1841,50 +1883,61 @@ static s32 update_path_candidate(s32 extra_span) {
     u8* terrain_costs = s_terrain_costs;
     s32 step_cost;
 
-    if (state->source_ceiling_height < state->destination_entry_height + config->unit_size)
+    if (state->source_ceiling_height < state->destination_entry_height + config->unit_size) {
         return 1;
-    if (state->destination_ceiling_height < state->clearance_height + config->unit_size)
+    }
+    if (state->destination_ceiling_height < state->clearance_height + config->unit_size) {
         return 2;
-    if (state->source_ceiling_height < state->clearance_height + config->unit_size)
+    }
+    if (state->source_ceiling_height < state->clearance_height + config->unit_size) {
         return 3;
+    }
     if (state->destination_entry_height < state->source_exit_height) {
-        if (extra_span != 0)
+        if (extra_span) {
             return 4;
+        }
         state->height_delta = state->source_exit_height - state->destination_entry_height;
     } else {
         state->height_delta = state->destination_entry_height - state->source_exit_height;
     }
-    if (state->height_delta > config->jump_times_two)
+    if (state->height_delta > config->jump_times_two) {
         return 7;
+    }
 
-    if (config->ai_propagation_mode != 0) {
+    if (config->ai_propagation_mode) {
         state->candidate_remaining_range
             = state->current_panel->remaining_range - extra_span - terrain_costs[state->current_tile->surface.type];
-        if (state->candidate_remaining_range <= 0)
+        if (state->candidate_remaining_range <= 0) {
             return 8;
-        if ((u8)state->candidate_remaining_range < state->destination_panel->remaining_range)
+        }
+        if ((u8)state->candidate_remaining_range < state->destination_panel->remaining_range) {
             return 9;
+        }
         if ((u8)state->candidate_remaining_range == state->destination_panel->remaining_range
-            && state->height_delta >= state->destination_panel->max_height_delta)
+            && state->height_delta >= state->destination_panel->max_height_delta) {
             return 10;
+        }
         state->destination_panel->remaining_range = state->candidate_remaining_range;
         state->destination_panel->max_height_delta = state->height_delta;
         if (state->candidate_remaining_range >= 2) {
             s_frontier_flags[state->destination_index] |= FRONTIER_FLAG_QUEUED;
-            if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range)
+            if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range) {
                 state->frontier_max_remaining_range = state->candidate_remaining_range;
+            }
         }
         return 11;
     }
     step_cost = extra_span + 1;
-    if (state->outer_count >= 5 || state->source_unit_record_flag != 0) {
-        if (state->candidate_remaining_range == state->effective_destination_panel->remaining_range - step_cost)
+    if (state->outer_count >= 5 || state->source_unit_record_flag) {
+        if (state->candidate_remaining_range == state->effective_destination_panel->remaining_range - step_cost) {
             state->budget_matches = 1;
+        }
     } else {
         if (state->candidate_remaining_range
             == state->effective_destination_panel->remaining_range - s_terrain_costs[state->current_tile->surface.type]
-                - extra_span)
+                - extra_span) {
             state->budget_matches = 1;
+        }
     }
     return 0;
 }
@@ -1901,25 +1954,28 @@ static void spread_path_neighbors(void) {
     spread_work_t* state = s_spread_work;
     s32 direction;
     s32 candidate;
-    s32 callback;
+    s32 preset;
 
     init_path_spread_scratch();
     for (direction = 0; direction < state->outer_count; direction++) {
-        callback = direction % 4;
-        g_move_spread_preset_table[callback]();
+        preset = direction % 4;
+        g_move_spread_preset_table[preset]();
         set_spread_tile_coordinates();
         if (check_spread_tile_coordinates() == 0 && init_path_source_geometry(direction) == 0) {
-            if (state->inner_count > 4 && (config->x != state->work_x || config->y != state->work_y))
+            if (state->inner_count > 4 && (config->x != state->work_x || config->y != state->work_y)) {
                 continue;
+            }
             for (candidate = 0; candidate < state->inner_count; candidate++) {
                 if (init_path_destination_geometry(candidate) == 0 && update_path_candidate(0) == 0
-                    && state->budget_matches != 0)
+                    && state->budget_matches) {
                     save_selected_path_candidate(direction, candidate, 0);
+                }
             }
         }
     }
-    if (config->ai_propagation_mode == 0 && state->candidate_saved != 0)
+    if (!config->ai_propagation_mode && state->candidate_saved) {
         apply_selected_path_candidate(state);
+    }
 }
 
 /*
@@ -1966,53 +2022,46 @@ static void spread_path_horizontal_jumps(void) {
     s32 inner_index;
     s32 pass_index;
     s32 path_index;
-    s32 callback_index;
+    s32 preset;
 
     init_path_spread_scratch();
     for (outer_index = 0; outer_index < state->outer_count; outer_index++) {
-        callback_index = outer_index % 4;
-        g_move_spread_preset_table[callback_index]();
+        preset = outer_index % 4;
+        g_move_spread_preset_table[preset]();
         if (init_path_source_geometry(outer_index) == 0) {
-            pass_index = 1;
             set_spread_tile_coordinates();
-            if (config->jump_half != 0) {
-                do {
-                    if (check_spread_tile_coordinates() == 0) {
-                        state->work_x = state->tile_x + state->x_step * (pass_index + 1);
-                        state->work_y = state->tile_y + state->y_step * (pass_index + 1);
-                        if (check_spread_tile_coordinates() == 0) {
-                            for (inner_index = 0; inner_index < state->inner_count; inner_index++) {
-                                if (init_path_destination_geometry(inner_index) == 0) {
-                                    state->placement_failed = 0;
-                                    for (path_index = 1; path_index <= pass_index; path_index++) {
-                                        if (check_spread_horizontal_jump(
-                                                (state->work_y - state->y_step * path_index) * config->terrain_width
-                                                    + (state->work_x - state->x_step * path_index),
-                                                state->source_side_shift, state->destination_side_shift,
-                                                state->destination_entry_height)
-                                            != 0) {
-                                            state->placement_failed = 1;
-                                            break;
-                                        }
-                                    }
-                                    if (state->placement_failed == 0 && update_path_candidate(pass_index) == 0
-                                        && state->budget_matches != 0) {
-                                        save_selected_path_candidate(outer_index, inner_index, pass_index);
-                                    }
-                                }
-                            }
-                        } else {
+            for (pass_index = 1; pass_index <= config->jump_half; pass_index++) {
+                if (check_spread_tile_coordinates() != 0) {
+                    break;
+                }
+                state->work_x = state->tile_x + state->x_step * (pass_index + 1);
+                state->work_y = state->tile_y + state->y_step * (pass_index + 1);
+                if (check_spread_tile_coordinates() != 0) {
+                    break;
+                }
+                for (inner_index = 0; inner_index < state->inner_count; inner_index++) {
+                    if (init_path_destination_geometry(inner_index) != 0) {
+                        continue;
+                    }
+                    state->placement_failed = 0;
+                    for (path_index = 1; path_index <= pass_index; path_index++) {
+                        if (check_spread_horizontal_jump(
+                                (state->work_y - state->y_step * path_index) * config->terrain_width
+                                    + (state->work_x - state->x_step * path_index),
+                                state->source_side_shift, state->destination_side_shift,
+                                state->destination_entry_height)) {
+                            state->placement_failed = 1;
                             break;
                         }
-                    } else {
-                        break;
                     }
-                    pass_index++;
-                } while (pass_index <= config->jump_half);
+                    if (!state->placement_failed && update_path_candidate(pass_index) == 0 && state->budget_matches) {
+                        save_selected_path_candidate(outer_index, inner_index, pass_index);
+                    }
+                }
             }
         }
     }
-    if (config->ai_propagation_mode == 0 && state->candidate_saved != 0) {
+    if (!config->ai_propagation_mode && state->candidate_saved) {
         apply_selected_path_candidate(state);
     }
 }
@@ -2034,28 +2083,34 @@ static void save_selected_path_candidate(s32 direction, s32 candidate, s32 extra
         if (s_pathfind_work->move_type == MOVE_CLASS_FLY) {
             if (state->best_fly_height_delta != 0xff) {
                 if (state->selected_source_side_shift == state->previous_source_side_shift
-                    && state->source_side_shift != state->previous_source_side_shift)
+                    && state->source_side_shift != state->previous_source_side_shift) {
                     return;
+                }
                 if ((state->selected_source_side_shift == state->previous_source_side_shift
                         || state->source_side_shift != state->previous_source_side_shift)
-                    && state->best_fly_height_delta <= state->height_delta)
+                    && state->best_fly_height_delta <= state->height_delta) {
                     return;
+                }
             }
             height_delta = state->height_delta;
             state->height_delta = 0;
             state->best_fly_height_delta = height_delta;
         } else {
-            if (state->best_extra_span < extra_span)
+            if (state->best_extra_span < extra_span) {
                 return;
-            if (state->best_extra_span == extra_span) {
-                if (state->best_height_delta < state->work_height)
-                    return;
-                if (state->best_height_delta == state->work_height
-                    && state->previous_source_side_shift != state->source_side_shift)
-                    return;
             }
-            if (state->work_height > state->height_delta)
+            if (state->best_extra_span == extra_span) {
+                if (state->best_height_delta < state->work_height) {
+                    return;
+                }
+                if (state->best_height_delta == state->work_height
+                    && state->previous_source_side_shift != state->source_side_shift) {
+                    return;
+                }
+            }
+            if (state->work_height > state->height_delta) {
                 state->height_delta = state->work_height;
+            }
             state->best_extra_span = extra_span;
         }
         state->best_height_delta = state->height_delta;
@@ -2075,7 +2130,7 @@ static void save_selected_path_candidate(s32 direction, s32 candidate, s32 extra
         state->saved_height_offset_flags |= MOVE_SAVED_DESTINATION_HEIGHT;
         state->saved_destination_height_offset = s_height_offsets[candidate];
     }
-    if (state->destination_unit_record_flag != 0) {
+    if (state->destination_unit_record_flag) {
         state->saved_unit_record_flag = 1;
         state->saved_unit_record_index = state->destination_unit_record_index;
     } else {
@@ -2256,9 +2311,9 @@ static move_path_t* calculate_path(s32 flags, s32 jump, s32 x, s32 y, u32 level,
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_map_tile_data[i];
         tile->ceiling_depth_and_marks.move_destination = 0;
-        if (g_target_panels[i].ride_remaining_range != 0
+        if (g_target_panels[i].ride_remaining_range
             || ((g_map_tile_data[i].depth_half_height.half_height < 3 || !(frontier[i] & FRONTIER_FLAG_CORNER))
-                && g_target_panels[i].remaining_range != 0 && tile->depth_half_height.half_height < 4
+                && g_target_panels[i].remaining_range && tile->depth_half_height.half_height < 4
                 && g_map_tile_data[i].surface.type != MAP_SURFACE_OBSTACLE
                 && (tile->depth_half_height.depth == 0 || !config->cannot_stay_on_water)
                 && (tile->depth_half_height.depth != 3 || !config->will_drown)
@@ -2276,7 +2331,7 @@ static move_path_t* calculate_path(s32 flags, s32 jump, s32 x, s32 y, u32 level,
     state->tile_level = config->target_level;
     state->selected_source_side_shift = 0;
     g_move_path_tile_index = (config->target_level << 8) + config->target_y * config->terrain_width + config->target_x;
-    if (!(g_map_tile_data[g_move_path_tile_index].ceiling_depth_and_marks.move_destination)) {
+    if (!g_map_tile_data[g_move_path_tile_index].ceiling_depth_and_marks.move_destination) {
         return 0;
     }
     g_move_path_frontier = frontier;
@@ -2294,7 +2349,7 @@ static move_path_t* calculate_path(s32 flags, s32 jump, s32 x, s32 y, u32 level,
 
     /* Trace back from the target, numbering each panel with its distance from the end,
      * until the start tile is reached; a tile with no predecessor means no path. */
-    while (state->candidate_remaining_range != 0) {
+    while (state->candidate_remaining_range) {
         state->previous_source_side_shift = state->selected_source_side_shift;
         state->tile_index
             = state->tile_level * MAP_TILES_PER_LAYER + state->tile_y * config->terrain_width + state->tile_x;
@@ -2340,14 +2395,16 @@ s32 ai_propagate_move_from_target(
 
     *suspended = 0;
     if (initialize) {
-        if (g_battle_units[unit_id].active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+        if (g_battle_units[unit_id].active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
             return -1;
+        }
         store_spread_unit_to_scratchpad(unit_id);
         config->move = MOVE_PATHFIND_RANGE;
-        for (pass = MOVE_RECORD_COUNT - 1; pass >= 0; pass--)
+        for (pass = MOVE_RECORD_COUNT - 1; pass >= 0; pass--) {
             records[pass].unit_id_flags = MOVE_RECORD_NONE;
+        }
         set_spread_frontier_flags(MOVE_TILE_FLAGS_MODE_START_SPREAD);
-        index = (config->high_elevation * MAP_TILES_PER_LAYER) + config->y * config->terrain_width + config->x;
+        index = config->high_elevation * MAP_TILES_PER_LAYER + config->y * config->terrain_width + config->x;
         panel = &g_target_panels[index];
         panel->ride_remaining_range = 0;
         panel->remaining_range = 0;
@@ -2356,7 +2413,8 @@ s32 ai_propagate_move_from_target(
         state->inner_count = 4;
         panel->remaining_range = 0;
         panel->max_height_delta = 0xff;
-        index = (target_elevation * MAP_TILES_PER_LAYER) + target_y * config->terrain_width + target_x;
+        index = target_elevation * MAP_TILES_PER_LAYER + target_y * config->terrain_width + target_x;
+
         panel = &g_target_panels[index];
         panel->remaining_range = MOVE_PATHFIND_RANGE + 1;
         frontier[index] |= FRONTIER_FLAG_QUEUED;
@@ -2371,8 +2429,9 @@ s32 ai_propagate_move_from_target(
         /* Teleport and Teleport 2 bypass propagation, not destination filtering. */
         u8 remaining_range = 1;
         target_panel_t* fill_panels = g_target_panels;
-        for (pass = MAP_TILE_COUNT - 1; pass >= 0; pass--)
+        for (pass = MAP_TILE_COUNT - 1; pass >= 0; pass--) {
             fill_panels[pass].remaining_range = remaining_range;
+        }
     } else {
         for (pass = s_ai_move_propagation_resume_pass; pass < config->move; pass++) {
             if (check_budget && ai_pathfinding_budget_is_exhausted() && completed_pass) {
@@ -2382,8 +2441,9 @@ s32 ai_propagate_move_from_target(
                     getScratchAddr(0), g_ai_unit_snapshot_storage, PSX_SCRATCHPAD_BYTE_COUNT);
                 return 0;
             }
-            if (!state->frontier_max_remaining_range)
+            if (!state->frontier_max_remaining_range) {
                 break;
+            }
             for (state->tile_level = 0; state->tile_level < MAP_TERRAIN_LAYER_COUNT; state->tile_level++) {
                 state->level_offset = state->tile_level * MAP_TILES_PER_LAYER;
                 for (state->tile_y = 0; state->tile_y < config->terrain_depth; state->tile_y++) {

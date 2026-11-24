@@ -78,7 +78,7 @@ static void run_map_load(void) {
 
     battle_init_display(0x100, 0xf0, 0x200, 0, 0, 0);
     show_banner = g_system_go_straight_to_battle;
-    if (script_variable_get(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
+    if (script_variable_get(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS)) {
         show_banner = 0;
     }
     g_deploy_skipped = deploy_open();
@@ -99,8 +99,7 @@ static void run_map_load(void) {
     g_fade_tint_draw_modes[0] = g_fade_battle_draw_modes[0];
     g_fade_tint_draw_modes[1] = g_fade_battle_draw_modes[0];
 
-    ((P_TAG*)&banner[0])->len = 9;
-    banner[0].code = 0x2c;
+    setPolyFT4(&banner[0]);
     setRGB0(&banner[0], 0x80, 0x80, 0x80);
     setXY4(&banner[0], 0x80, 0x74, 0x17f, 0x74, 0x80, 0x8c, 0x17f, 0x8c);
     setUV4(&banner[0], 0, 0, 0xff, 0, 0, 0x18, 0xff, 0x18);
@@ -113,9 +112,10 @@ static void run_map_load(void) {
     /* Fade the banner in. Primitives added later to an ordering-table entry are
      * drawn first, so the fade polygon covers the banner. */
     fade = 0xf8;
-    if (show_banner != 0) {
+    if (show_banner) {
         do {
             gfx_swap_battle_otag();
+            /* Pointer arithmetic, not indexing, in all three loops: indexing compiles larger. */
             (g_fade_battle_polygons + g_gfx_screen_polarity)->r0 = fade;
             (g_fade_battle_polygons + g_gfx_screen_polarity)->g0 = fade;
             (g_fade_battle_polygons + g_gfx_screen_polarity)->b0 = fade;
@@ -132,7 +132,7 @@ static void run_map_load(void) {
     fade = 0xff;
     while (deploy_update_input() != -1) {
         gfx_swap_battle_otag();
-        if (show_banner != 0) {
+        if (show_banner) {
             AddPrim(gfx_get_battle_otag(), &banner_p[g_gfx_screen_polarity]);
         } else {
             loading_message_append_to_otag(gfx_get_battle_otag());
@@ -161,7 +161,7 @@ static void run_map_load(void) {
     fade = 0;
 done:
     /* Fade the banner out to black. */
-    if (show_banner != 0) {
+    if (show_banner) {
         fade = 0;
         do {
             if (fade >= 0xf8) {
@@ -238,7 +238,7 @@ void battle_entrypoint(void) {
             camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_screen_offset, &g_camera_zoom);
             map_mesh_draw_weather(&g_camera_matrix);
             /* The SEQ wait commands read this: 2 while an effect is updating, 0 otherwise. */
-            if (effect_playback_update() != 0) {
+            if (effect_playback_update()) {
                 g_battle_animation_wait_state = 2;
             } else {
                 g_battle_animation_wait_state = 0;

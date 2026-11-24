@@ -457,7 +457,7 @@ void sprite_status_bubble_update_active(map_unit_t* unit) {
 /* Draws a unit with the Transparent status semi-transparent with averaging blend
  * (the blend bits cleared), and any other unit opaque. */
 void sprite_update_transparency(map_unit_t* unit) {
-    if ((unit->status_flags_5_6 & UNIT_STATUS_TRANSPARENT) != 0) {
+    if (unit->status_flags_5_6 & UNIT_STATUS_TRANSPARENT) {
         unit->sprite_display_flags
             = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK) | SPRITE_DISPLAY_SEMI_TRANSPARENT;
     } else {

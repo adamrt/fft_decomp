@@ -118,12 +118,12 @@ void script_opcode_50_portrait_col(s32 portrait_id) {
     i = 0;
     pixels = buffer->pixels;
     rect.w = 8;
-    rect.h = 0x30;
+    rect.h = 48;
     do {
         LoadImage(&rect, pixels[0][0]);
         rect.x += 8;
-        pixels += 1;
-        i += 1;
+        pixels++;
+        i++;
     } while (i < 8);
     LoadImage(&s_menu_portrait_palette_rect, (u32*)palette);
     menu_free_memory(buffer);

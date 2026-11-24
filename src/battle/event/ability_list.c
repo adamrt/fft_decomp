@@ -86,7 +86,7 @@ void ability_list_scrolling_thread(void) {
     row_buffer_live = 0;
     hold_time = 0;
 
-    if (g_menu_scrolling_list_depth != 0) {
+    if (g_menu_scrolling_list_depth) {
         /* Nested list: page pair in the event overlay area, 0x1000 bytes in. */
         page = (menu_list_page_t*)(g_heap_companion_overlay_load_address + 0x1000);
         base = page;
@@ -222,7 +222,7 @@ void ability_list_scrolling_thread(void) {
          * stack and the frame sprite stays opaque (see QUIRKS.md). */
         SetSemiTrans(&frame, 1);
 
-        if (scroll_delta == 0 && menu_can_accept_input() != 0 && i != 0) {
+        if (scroll_delta == 0 && menu_can_accept_input() && i != 0) {
             /* With two text columns Left and Right switch the cursor between them; column 2's
              * text pointer carries the choice to the help overlay. Otherwise they open the
              * AT list preview of the selected ability. */
@@ -242,8 +242,8 @@ void ability_list_scrolling_thread(void) {
                 /* Blink CLUTs 1 and 2 (24 and 6 frames of every 30) until the preview thread ends,
                  * then restore CLUT 3. `column` serves as the frame counter. */
                 column = 0;
-                while (1) {
-                    if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
+                for (;;) {
+                    if (!thread_is_running_asm(g_thread_current_id - 1)) {
                         LoadImage(&g_menu_ability_list_clut_rect, (u32*)(saved_clut + 48));
                         break;
                     }
@@ -316,7 +316,7 @@ void ability_list_scrolling_thread(void) {
                         text_render_entry_to_image(
                             layout->columns.text_ids[column][index], buffer, &g_menu_window_text_pen);
                         g_menu_text_palette_offset = layout->columns.text_colors[column][index];
-                        if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0
+                        if (g_thread_contexts[g_thread_current_id].function_parameter_4
                             && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                             menu_text_set_origin(layout->columns.x[column] + 0x50, 0);
                             text_render_entry_to_image(
@@ -388,12 +388,12 @@ void ability_list_scrolling_thread(void) {
             }
         }
 
-        if (redraw_pending != 0) {
+        if (redraw_pending) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
 
-        if (scroll_delta == 0 && menu_can_accept_input() != 0) {
+        if (scroll_delta == 0 && menu_can_accept_input()) {
             buffer = ability_list_update_page_scroll(entry, &row_offset, &ring, &cursor, &window.source);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
@@ -402,7 +402,7 @@ void ability_list_scrolling_thread(void) {
         entry->selected_index = cursor + row_offset;
         layout->row_offset = row_offset;
 
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input)) {
             break;
         }
 
@@ -410,14 +410,14 @@ void ability_list_scrolling_thread(void) {
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         menu_select_icon_sprite_clut(page->icons.icons[1]);
         menu_select_icon_sprite_clut(page->icons.icons[2]);
-        if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+        if (thread_is_previous_running() || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;
         }
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
 
-        if (layout->columns.hidden_rows != 0 && thread_is_previous_running() == 0) {
+        if (layout->columns.hidden_rows != 0 && !thread_is_previous_running()) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
@@ -480,13 +480,12 @@ void ability_list_scrolling_thread(void) {
 
         /* The cursor sprites move to column 1 while the toggle selects it. */
         if (layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT && toggle == 1) {
-            {
-                menu_text_layout_t* columns = entry->context;
+            /* The bytes require entry->context reloaded for each sprite. */
+            menu_text_layout_t* columns = entry->context;
 
-                page->icons.base.sprites[1].x0 += columns->x[1];
-                columns = entry->context;
-                page->icons.base.sprites[2].x0 += columns->x[1];
-            }
+            page->icons.base.sprites[1].x0 += columns->x[1];
+            columns = entry->context;
+            page->icons.base.sprites[2].x0 += columns->x[1];
         }
 
         page->icons.base.sprites[1].y0 += 4;
@@ -495,7 +494,7 @@ void ability_list_scrolling_thread(void) {
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);
             gfx_draw_or_append_gpu_primitive(page->icons.icons[1]);
-            if (g_thread_contexts[g_thread_current_id].function_parameter_4 != 0) {
+            if (g_thread_contexts[g_thread_current_id].function_parameter_4) {
                 gfx_draw_or_append_gpu_primitive(page->icons.icons[2]);
             }
         }
@@ -515,7 +514,7 @@ void ability_list_scrolling_thread(void) {
     if (g_menu_scrolling_list_depth != 2) {
         LoadImage(&g_menu_ability_list_clut_rect, (u32*)saved_clut);
     }
-    if (row_buffer_live != 0) {
+    if (row_buffer_live) {
         menu_free_memory(buffer);
     }
 
@@ -523,7 +522,8 @@ void ability_list_scrolling_thread(void) {
     g_menu_scrolling_list_depth--;
     /* Callers run the list as a function; a nonzero parameter 2 returns to them
      * instead of exiting the thread. */
-    if (thread_current_get_parameter_2() == 0) {
+    if (!thread_current_get_parameter_2()) {
+
         thread_current_exit();
     }
 }

@@ -22,7 +22,7 @@ void text_relocate_pointer_table(text_bank_t* bank) {
 
 /* Back up the text section pointer table once. */
 void text_save_section_pointers(void) {
-    if (s_text_section_backup_active == 0) {
+    if (!s_text_section_backup_active) {
         mem_copy_bytes_nonempty(
             s_text_saved_section_pointers, g_text_section_pointers, sizeof(s_text_saved_section_pointers));
         s_text_section_backup_active++;

@@ -122,7 +122,7 @@ void at_list_show_next_entry(void) {
         id = at_list_get_entry_unit_id(s_at_list_cursor);
         if (id >= 0) {
             unit = map_unit_get_by_battle_unit_id(id & AT_LIST_ENTRY_BATTLE_UNIT_ID_MASK);
-            if ((id & AT_LIST_ENTRY_CHARGED_ACTION) != 0) {
+            if (id & AT_LIST_ENTRY_CHARGED_ACTION) {
                 cursor_move_to_action_target(unit);
                 target_set_area_for_action(&unit->battle_unit->action_command);
                 map_set_tile_mark_colors(MAP_TILE_MARK_SHOW_TARGETS, 3);

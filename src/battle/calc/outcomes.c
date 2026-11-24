@@ -88,7 +88,6 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     s32 row;
     s32 byte_index;
     s32 bit;
-    u8* scratch;
     u8* src;
     s32 k;
     u8 skillset;
@@ -101,13 +100,11 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     }
 
     ability = &g_ability_data[g_action_actor_used_ability_id];
-    i = 0;
     if (!(ability->type_flags & ABILITY_TYPE_FLAG_LEARN_ON_HIT)) {
         return -1;
     }
 
-    scratch = known;
-    do {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (attacker_id != i) {
             unit = &g_battle_units[i];
             if (unit->ability_outcome & UNIT_ABILITY_OUTCOME_AFFECTED) {
@@ -128,7 +125,7 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                     src = (u8*)((row * ABILITY_LEARN_ON_HIT_ROW_BYTES) + (u32)unit
                         + offsetof(battle_unit_t, career.learned_abilities));
                     for (k = 0; k < ABILITY_LEARN_ON_HIT_ROW_BYTES; k++) {
-                        scratch[k] = src[k];
+                        known[k] = src[k];
                     }
 
                     /* Ability j of the skillset is learned when bit 7 - j % 8 of
@@ -136,7 +133,7 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                     for (j = 0; j < ABILITY_LEARN_ON_HIT_ABILITY_COUNT; j++) {
                         byte_index = j / 8;
                         bit = 0x80 >> (j - byte_index * 8);
-                        if (scratch[byte_index] & bit) {
+                        if (known[byte_index] & bit) {
                             continue;
                         }
                         if ((skillset_get_ability_id(skillset, j) & 0xffff) != g_action_actor_used_ability_id) {
@@ -150,8 +147,7 @@ s32 ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
                 }
             }
         }
-        i++;
-    } while (i < BATTLE_UNIT_SLOT_COUNT);
+    }
     return -1;
 }
 
@@ -276,7 +272,7 @@ void reward_apply_exp_change(battle_unit_t* unit, u8 amount) {
     if (g_action_state != ACTION_STATE_EXECUTE) {
         return;
     }
-    if ((amount & ACTION_EXP_CHANGE_LOSS) == 0) {
+    if (!(amount & ACTION_EXP_CHANGE_LOSS)) {
         total = unit->experience + amount;
         capped = total;
         if (total >= 0x100) {
@@ -600,7 +596,7 @@ s32 target_resolve_rotated_offset_layer(
     upper = &g_map_tile_data[upper_index];
     lower = &g_map_tile_data[index];
     upper_value = upper->flags.blocked;
-    if ((lower->flags.blocked) != 0) {
+    if (lower->flags.blocked) {
         if (upper_value != 0) {
             return -1;
         }
@@ -614,7 +610,7 @@ s32 target_resolve_rotated_offset_layer(
     upper_value = upper->height;
     current_height = current->height;
     lower_height = lower->height;
-    if ((flags & 0x100) != 0) {
+    if (flags & 0x100) {
         if (upper_value < lower_height) {
             *out_layer = 0;
             return 0;

@@ -123,7 +123,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
     g_event_work = (event_work_t*)g_ai_workspace;
     /* While an END graphic is up (immediate drawing), reload its image from the high
      * overlay area into the frame buffer every frame. */
-    if (g_gfx_draw_primitives_immediately != 0) {
+    if (g_gfx_draw_primitives_immediately) {
         DrawSync(0);
         rect.w = 0x100;
         rect.x = 0;
@@ -136,16 +136,16 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
     camera_store_state_to_script_variables();
     menu_draw_active_window_frames();
 
-    if (g_script_threads_idle != 0) {
+    if (g_script_threads_idle) {
         for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
-            if (thread_is_running_asm(i) != 0) {
+            if (thread_is_running_asm(i)) {
                 break;
             }
         }
         if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
             finish_op = scenario_get_finish_operation();
             if (finish_op != 0) {
-                if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
+                if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
                     g_script_threads_idle = 0;
                     script_variable_set(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                     return SCRIPT_EVENT_FRAME_TO_WORLD;
@@ -239,7 +239,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
 
     /* A press other than Select alone, or a thread starting or stopping while the threads
      * run (thread_yield), restarts the five-frame input suppression. */
-    if (tutorial_is_current_event() == 0 && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
+    if (!tutorial_is_current_event() && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
         g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < THREAD_ID_COUNT; i++) {
@@ -262,7 +262,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
         g_menu_input_block_frames--;
     }
     script_frame_after_threads_stub();
-    if (g_script_frame_result_override != 0) {
+    if (g_script_frame_result_override) {
         return g_script_frame_result_override;
     }
 
@@ -298,7 +298,7 @@ s32 script_update_event_frame(u32* ot, u32 buttons) {
 
     /* Once every thread has stopped, the next frame reports the scenario finish. */
     for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
-        if (thread_is_running_asm(i) != 0) {
+        if (thread_is_running_asm(i)) {
             break;
         }
     }
@@ -322,7 +322,7 @@ void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
  * Any other state is left alone. */
 void script_signal_map_destruction(void) {
     if (g_map_destruction_wait_state == 1) {
-        g_map_destruction_wait_state = g_map_destruction_wait_state + 1;
+        g_map_destruction_wait_state++;
     }
 }
 
@@ -365,22 +365,22 @@ static void process_pending_requests(void) {
         battle_state_change_map_jumping_in_start(jump_in_duration);
     }
 
-    if (g_event_3d_object_use_request != 0) {
+    if (g_event_3d_object_use_request) {
         map_set_object_state(g_event_3d_object_id, g_event_3d_object_state);
         g_3d_object_wait_status = 1;
     }
-    if (g_event_field_object_use_request != 0) {
+    if (g_event_field_object_use_request) {
         map_start_texture_animation(g_event_map_command_83_arg1, g_event_map_command_83_arg2);
         g_field_object_wait_status = 1;
     }
-    if (g_3d_object_wait_status != 0) {
+    if (g_3d_object_wait_status) {
         g_3d_object_wait_status = map_get_object_state(g_event_3d_object_id);
     }
-    if (g_field_object_wait_status != 0) {
+    if (g_field_object_wait_status) {
         g_field_object_wait_status = map_texture_animation_is_active(g_event_map_command_83_arg1);
     }
 
-    if (g_map_refresh_pending != 0) {
+    if (g_map_refresh_pending) {
         g_map_refresh_pending = map_mesh_load_palette(3);
     }
     /* Map reload and append step through states: 1 starts the load, 2 polls it, and 3 (done)
@@ -388,21 +388,21 @@ static void process_pending_requests(void) {
     reload_state = g_event_map_reload_state;
     if (reload_state == 1) {
         if (map_start_load() == 0) {
-            g_event_map_reload_state = g_event_map_reload_state + 1;
+            g_event_map_reload_state++;
         }
     } else if (reload_state == 2) {
         if (map_poll_load() == 0) {
-            g_event_map_reload_state = g_event_map_reload_state + 1;
+            g_event_map_reload_state++;
         }
     }
     append_state = g_event_map_append_state;
-    if ((append_state == 1) && (g_map_destruction_wait_state == 0)) {
+    if (append_state == 1 && g_map_destruction_wait_state == 0) {
         map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_START_HELD);
-        g_event_map_append_state = g_event_map_append_state + 1;
-    } else if ((append_state == 2)
-        && (map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
-            == MAP_LOAD_RESULT_HELD)) {
-        g_event_map_append_state = g_event_map_append_state + 1;
+        g_event_map_append_state++;
+    } else if (append_state == 2
+        && map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
+            == MAP_LOAD_RESULT_HELD) {
+        g_event_map_append_state++;
     }
     /* State 2 (set once a script or effect reports the map destroyed) releases the held map data;
      * 3 polls the load until it ends. */
@@ -410,8 +410,8 @@ static void process_pending_requests(void) {
     if (destruction_state == 2) {
         g_map_destruction_wait_state = destruction_state + 1;
         map_dispatch_data_command(MAP_DATA_COMMAND_RELEASE_GNS_HOLD, 1, 1, 1);
-    } else if ((destruction_state == 3)
-        && (map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL) == 0)) {
+    } else if (destruction_state == 3
+        && map_update_load(script_variable_get(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL) == 0) {
         g_map_destruction_wait_state = 0;
     }
 
@@ -448,7 +448,7 @@ static void process_pending_requests(void) {
         }
     }
 
-    if (g_unit_graphics_load_pending != 0) {
+    if (g_unit_graphics_load_pending) {
         g_unit_graphics_load_pending = sprite_poll_unit_graphics_load();
     }
 
@@ -487,7 +487,7 @@ static void process_pending_requests(void) {
         /* Alternate between the two track slots; nothing new starts when that slot is empty. */
         if (g_sound_music_switch_request >= 0) {
             music_stop();
-            g_sound_current_music_track_index = g_sound_current_music_track_index ^ 1;
+            g_sound_current_music_track_index ^= 1;
             if (g_sound_current_music_track_index == 0) {
                 music_track_id = g_sound_music_track_1_id;
             } else {
@@ -525,7 +525,7 @@ static void load_camera_from_script_variables(void) {
     camera_set_zoom(&s_camera_script_vector);
 
     s_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
-    s_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
+    s_camera_script_vector.vy = g_camera_shake_z_offset * ONE + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
     s_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
     camera_set_real_coords(&s_camera_script_vector);
 }
@@ -551,7 +551,7 @@ void camera_store_state_to_script_variables(void) {
 
     coords = camera_get_real_coords();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X] = coords->vx;
-    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z] = coords->vy - (g_camera_shake_z_offset * ONE);
+    g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z] = coords->vy - g_camera_shake_z_offset * ONE;
     s_camera_published_coords_ptr = coords;
     g_camera_shake_z_offset = 0;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y] = coords->vz;

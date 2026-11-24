@@ -159,10 +159,8 @@ static void write_operand_s16(u8* destination, s16 value) {
 
 /* Yield until this scene's pending map refresh clears. */
 void map_wait_refresh(void) {
-    if (g_map_refresh_pending != 0) {
-        do {
-            thread_yield();
-        } while (g_map_refresh_pending != 0);
+    while (g_map_refresh_pending != 0) {
+        thread_yield();
     }
 }
 
@@ -662,23 +660,20 @@ void map_light_thread(void) {
     const u8* script;
 
     thread_current_set_task(THREAD_TASK_MAP_LIGHT);
-    step = 0;
     script = (const u8*)thread_current_get_parameter_1();
-    do {
+    for (step = 0; step < LIGHT_COMPONENT_COUNT; step++) {
         target[step] = script_read_s16(script);
         script += 2;
-        step++;
-    } while (step < LIGHT_COMPONENT_COUNT);
+    }
     /* The six-target scan leaves the cursor at duration_le. */
     frames = script_read_s16(script);
-    step = 0;
     start[LIGHT_ROTATION_X] = g_script_light_angles.vx;
     start[LIGHT_ROTATION_Y] = g_script_light_angles.vy;
     start[LIGHT_ROTATION_Z] = g_script_light_angles.vz;
     start[LIGHT_COLOR_R] = g_script_light_scale.vx;
     start[LIGHT_COLOR_G] = g_script_light_scale.vy;
     start[LIGHT_COLOR_B] = g_script_light_scale.vz;
-    for (; step <= frames; step++) {
+    for (step = 0; step <= frames; step++) {
         angles.vx = (target[LIGHT_ROTATION_X] - start[LIGHT_ROTATION_X]) * step / frames + start[LIGHT_ROTATION_X];
         angles.vy = (target[LIGHT_ROTATION_Y] - start[LIGHT_ROTATION_Y]) * step / frames + start[LIGHT_ROTATION_Y];
         angles.vz = (target[LIGHT_ROTATION_Z] - start[LIGHT_ROTATION_Z]) * step / frames + start[LIGHT_ROTATION_Z];
@@ -946,7 +941,7 @@ static s32 prepare_unit_filter(u16* unit_id, s32* filter_mode) {
             return 0;
         }
     } else {
-        *filter_mode = id != 0 ? id - 0xfe : SCRIPT_UNIT_FILTER_EXISTING;
+        *filter_mode = id != 0 ? id - EVENT_UNIT_GROUP_FIRST + SCRIPT_UNIT_FILTER_BLUE : SCRIPT_UNIT_FILTER_EXISTING;
     }
     return 1;
 }
@@ -1050,9 +1045,9 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
     battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
     map_unit_set_event_animation(map_unit_id, ANIMATION_RAISE_HANDS);
     map_unit_start_event_fade_out(map_unit_id, 2, 0x1F, 0x1F, 0x1F);
-    thread_wait_frames(0x3C);
+    thread_wait_frames(60);
     map_unit_start_event_fade_out(map_unit_id, 2, -0x1F, -0x1F, -0x1F);
-    thread_wait_frames(0x3C);
+    thread_wait_frames(60);
     if (remove != 0) {
         battle_unit_take_off_field(battle_unit_id);
     }
@@ -1062,6 +1057,7 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
  * as its second argument; this entry forwards only the unit ID. */
 void script_opcode_98_teleport_in(s32 unit_id, s32 unused) {
     s32 map_unit_id = script_resolve_map_unit_id(unit_id);
+
     if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
         g_thread_call_target = (void (*)(void))effect_secondary_map_unit_start_teleport;
         thread_call_on_main_stack(map_unit_id);
@@ -1149,11 +1145,10 @@ void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction)
     unit_id = script_read_s16(cursor.instruction->unit_id_le);
     cursor.placement = &cursor.instruction->placement;
     unit = battle_unit_find_by_unit_id(unit_id, &result);
-    battle_unit_id = 0;
     if (result != -2 && result < 0) {
         return;
     }
-    for (; battle_unit_id < BATTLE_UNIT_SLOT_COUNT; battle_unit_id++) {
+    for (battle_unit_id = 0; battle_unit_id < BATTLE_UNIT_SLOT_COUNT; battle_unit_id++) {
         if (battle_unit_get(battle_unit_id) == unit) {
             break;
         }
@@ -1293,6 +1288,7 @@ void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* paramete
             if (filter_unit_id(&unit_id, &s_script_unit_face_slot_order[i], &filter_mode) != 0) {
                 facing = parameters->facing;
                 if (facing >= EVENT_ROTATE_UNIT_FACING_RELATIVE_FIRST && facing < EVENT_ROTATE_UNIT_FACING_RESTORE) {
+                    /* Stepwise: the one-expression form costs an instruction. */
                     facing = facing & 0xF;
                     facing = map_unit_get_facing_sixteenth(unit_id) + facing * 4;
                     facing = facing & 0xF;
@@ -1351,6 +1347,7 @@ void status_queue_current_graphics(s32 battle_unit_id, s32 change_type) {
 /* Resets every unit slot's status staging state and inflict-status mode to none. */
 void battle_unit_status_staging_clear(void) {
     s32 i;
+
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         g_unit_status_staging_data->state[i] = UNIT_STATUS_STAGING_NONE;
         g_unit_status_staging_data->inflict_status_mode[i] = UNIT_INFLICT_STATUS_MODE_NONE;
@@ -1455,6 +1452,7 @@ static void apply_staged_status(s32 battle_unit_id, s32 map_unit_id) {
     s32 byte_index;
     s32 mask;
     u8 inflict_status_mode;
+
     if (!(scenario_get_finish_operation() & 0x8000)
         && g_unit_status_staging_data->state[battle_unit_id] == UNIT_STATUS_STAGING_SAVED) {
         unit = battle_unit_get(battle_unit_id);
@@ -1546,9 +1544,8 @@ void battle_unit_status_staging_run(u16 unit_id, u16 restore) {
 
     g_unit_status_staging_data = &g_event_work->status_staging;
     if (g_menu_input_mode == MENU_INPUT_PLAYER && prepare_unit_filter(&unit_id, &filter_mode) != 0) {
-        unit_index = 0;
         g_unit_status_staging_data->jump_float_flags = 0;
-        for (; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             if (filter_unit_id(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
                 battle_unit_index = map_unit_get_battle_unit_id(unit_id);
                 if (battle_unit_index != -1) {
@@ -1888,8 +1885,7 @@ s32 map_unit_check_camera_facing_by_event_unit_id(s32 event_unit_id) {
     camera_facing >>= 8;
     camera_facing += map_unit_get_facing_sixteenth(map_unit_id);
     camera_facing &= 0xf;
-    camera_facing -= 7;
-    return camera_facing < 6U;
+    return camera_facing >= 7 && camera_facing <= 12;
 }
 
 /*

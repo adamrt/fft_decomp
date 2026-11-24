@@ -44,10 +44,7 @@ enum { MENU_HIGH_OVERLAY_SIZE = 0x20000 };
  * is free (with a wait message when the debug font is on). Every caller reserves
  * MENU_HIGH_OVERLAY_SIZE. */
 static void reserve_high_overlay(u32 size) {
-    while (1) {
-        if (heap_reserve_at(g_heap_high_overlay_load_address, size) == g_heap_high_overlay_load_address) {
-            break;
-        }
+    while (heap_reserve_at(g_heap_high_overlay_load_address, size) != g_heap_high_overlay_load_address) {
         thread_yield();
         if (g_debug_font_print_enabled != 0) {
             FntPrint("WAIT FOR FILEALLOCATION\n");
@@ -69,10 +66,8 @@ void overlay_companion_request(s32 request_index) {
         thread_yield();
     }
     g_overlay_companion_executable_request_index = request_index;
-    if (request_index != 0) {
-        do {
-            thread_yield();
-        } while (g_overlay_companion_executable_request_index != 0);
+    while (g_overlay_companion_executable_request_index != 0) {
+        thread_yield();
     }
     if (g_script_frame_result_override == 1) {
         thread_current_exit();
@@ -86,10 +81,8 @@ static void request_companion_file(s32 request_index) {
         thread_yield();
     }
     g_overlay_companion_data_file_request_index = request_index;
-    if (request_index != 0) {
-        do {
-            thread_yield();
-        } while (g_overlay_companion_data_file_request_index != 0);
+    while (g_overlay_companion_data_file_request_index != 0) {
+        thread_yield();
     }
     if (g_script_frame_result_override == 1) {
         thread_current_exit();
@@ -366,9 +359,7 @@ void equipment_thread(void) {
 /* Show DEBUGCHR's read-only status screen for the selected unit when it is a rider or a mount, then rebuild
  * the idle action menu and the unit summary for it. */
 void status_screen_open_mounted_unit(void) {
-    s16* unit_index = &g_unit_panel_selected_unit.battle_unit_id;
-
-    if (battle_unit_get(*unit_index)->mount_info != 0) {
+    if (battle_unit_get(g_unit_panel_selected_unit.battle_unit_id)->mount_info != 0) {
         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
         menu_open_modal();
         g_menu_overlay_state = 1;
@@ -378,12 +369,13 @@ void status_screen_open_mounted_unit(void) {
         unit_view_wait_panels();
         command_record_unit_selection();
         status_screen_enter_selection();
-        debugchr_mounted_unit_entrypoint(*unit_index);
+        debugchr_mounted_unit_entrypoint(g_unit_panel_selected_unit.battle_unit_id);
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;
         command_open_menu(g_command_current_id);
-        unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, *unit_index, *unit_index);
+        unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, g_unit_panel_selected_unit.battle_unit_id,
+            g_unit_panel_selected_unit.battle_unit_id);
         menu_close_modal();
         status_screen_leave_selection();
         thread_current_exit();

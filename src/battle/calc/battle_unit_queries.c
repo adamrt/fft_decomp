@@ -227,6 +227,7 @@ s32 battle_unit_get_tile_index(const battle_unit_t* unit) {
     u8 y = unit->position.y;
     u16 elevation = unit->position.higher_elevation;
     u8 x = unit->x;
+
     return (elevation << 8) + (y * g_map_terrain_width) + x;
 }
 
@@ -245,8 +246,10 @@ battle_unit_t* battle_unit_get_if_present(u32 battle_unit_id) {
 
 /* The first unit whose has_turn is set (the unit taking its turn), or 0. */
 battle_unit_t* battle_unit_find_with_turn(void) {
+    /* The counter is set before the pointer, as the bytes require. */
     s32 i = 0;
     battle_unit_t* unit = g_battle_units;
+
     for (; i < BATTLE_UNIT_SLOT_COUNT; i++, unit++) {
         if (unit->has_turn != 0) {
             return unit;

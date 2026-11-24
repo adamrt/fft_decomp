@@ -131,11 +131,12 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
         if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
             state->return_cursor = cursor + 3;
             backref = (const text_backref_t*)cursor;
+            /* Each partial sum goes through the scratch field; combined expressions compile differently. */
             state->scratch = backref->length_high * 8;
             state->remaining_bytes = backref->length_low;
             state->remaining_bytes = state->remaining_bytes + state->scratch + 4;
             state->scratch = backref->offset_high * 0xFE;
-            state->scratch = backref->offset_low + state->scratch;
+            state->scratch += backref->offset_low;
             cursor -= state->scratch;
             continue;
         }
@@ -249,7 +250,7 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
             state->remaining_bytes = backref->length_low;
             state->remaining_bytes = state->remaining_bytes + state->scratch + 4;
             state->scratch = backref->offset_high * 0xFE;
-            state->scratch = backref->offset_low + state->scratch;
+            state->scratch += backref->offset_low;
             cursor -= state->scratch;
             continue;
         }

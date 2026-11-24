@@ -748,7 +748,7 @@ void map_unit_hide_jumping(void) {
     map_unit_t* unit = g_map_unit_list_head;
 
     while (unit != 0) {
-        if ((unit->status_flags_5_6 & UNIT_STATUS_JUMP) != 0) {
+        if (unit->status_flags_5_6 & UNIT_STATUS_JUMP) {
             map_unit_hide(unit->map_unit_id);
         }
         unit = unit->previous;

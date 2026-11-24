@@ -81,7 +81,7 @@ static void store_map_center_coordinates(VECTOR* destination) {
 
     map_store_dimensions(&map_max);
     destination->vx = map_max.vx * (MAP_TILE_SIZE / 2);
-    max_y = map_max.vz;
+    max_y = map_max.vz; /* read before the vy store, as in the bytes */
     destination->vy = 0;
     destination->vz = max_y * (MAP_TILE_SIZE / 2);
 }
@@ -736,21 +736,15 @@ void effect_camera_update_tracks(void) {
  * the child duration, or when none is left. The single-table form of
  * find_parent_keyframe, with no target in the end frame's high half. */
 static s32 find_child_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
-    effect_timeline_t* data = g_effect_timeline;
     s32 i;
 
-    if (frame < data->child.duration) {
-        i = 0;
-        if (data->last_keyframe_index >= 0) {
-            do {
-                if (frame < data->end_frame[i] && (mask & data->command[i]) != 0) {
-                    *out_index = i;
-                    *out_frame = g_effect_timeline->end_frame[i];
-                    return 1;
-                }
-                i++;
-                data = g_effect_timeline;
-            } while (i <= data->last_keyframe_index);
+    if (frame < g_effect_timeline->child.duration) {
+        for (i = 0; i <= g_effect_timeline->last_keyframe_index; i++) {
+            if (frame < g_effect_timeline->end_frame[i] && (mask & g_effect_timeline->command[i]) != 0) {
+                *out_index = i;
+                *out_frame = g_effect_timeline->end_frame[i];
+                return 1;
+            }
         }
     }
     return 0;
@@ -870,100 +864,100 @@ void effect_camera_start_child_keyframe_moves(s16 frame) {
     SVECTOR rotation;
     VECTOR vector;
     s32 index;
-    s32 keyframe;
+    s32 end_frame;
 
     if (g_effect_camera_rotation_mode == EFFECT_CAMERA_MODE_IDLE
-        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &keyframe) != 0) {
+        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &end_frame) != 0) {
         effect_vector_load_svector(&g_effect_timeline->rotation[index], &rotation);
         execute_rotation_command(
-            g_effect_timeline->command[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &rotation);
+            g_effect_timeline->command[index], end_frame / 0x10000, (end_frame & 0xFFFF) - frame, &rotation);
     }
     if (g_effect_camera_position_mode == EFFECT_CAMERA_MODE_IDLE
-        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &keyframe) != 0) {
+        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &end_frame) != 0) {
         effect_vector_load(&g_effect_timeline->position[index], &vector);
         effect_camera_execute_position_command(
-            g_effect_timeline->command[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &vector);
+            g_effect_timeline->command[index], end_frame / 0x10000, (end_frame & 0xFFFF) - frame, &vector);
     }
     if (g_effect_camera_zoom_mode == EFFECT_CAMERA_MODE_IDLE
-        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &keyframe) != 0) {
+        && find_child_keyframe(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &end_frame) != 0) {
         effect_vector_load(&g_effect_timeline->zoom[index], &vector);
         effect_camera_execute_zoom_command(
-            g_effect_timeline->command[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &vector);
+            g_effect_timeline->command[index], end_frame / 0x10000, (end_frame & 0xFFFF) - frame, &vector);
     }
 }
 
 /* Starts the parent timeline's camera moves for this frame: each of the
- * rotation, position and zoom tracks that is idle takes its next keyframe
+ * rotation, position and zoom tracks that is idle takes its next end_frame
  * from the table find_parent_keyframe reports (phase 1, child
  * or phase 2). The three-table form of
  * effect_camera_start_child_keyframe_moves. */
 void effect_camera_start_parent_keyframe_moves(s16 frame) {
     SVECTOR rotation;
     VECTOR vector;
-    s32 index;
-    s32 keyframe;
-    s32 k;
+    s32 index;     /* table << 16 | keyframe */
+    s32 end_frame; /* target << 16 | end frame */
+    s32 entry;
 
     if (g_effect_camera_rotation_mode == EFFECT_CAMERA_MODE_IDLE
-        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &keyframe) != 0) {
-        k = index & 0xffff;
+        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_ROTATION, &index, &end_frame) != 0) {
+        entry = index & 0xffff;
         switch (index / 0x10000) {
         case EFFECT_CAMERA_TABLE_PHASE1:
-            effect_vector_load_svector(&g_effect_timeline->phase1_camera.rotation[k], &rotation);
-            execute_rotation_command(g_effect_timeline->phase1_camera.command[k], keyframe / 0x10000,
-                (keyframe & 0xffff) - frame, &rotation);
+            effect_vector_load_svector(&g_effect_timeline->phase1_camera.rotation[entry], &rotation);
+            execute_rotation_command(g_effect_timeline->phase1_camera.command[entry], end_frame / 0x10000,
+                (end_frame & 0xffff) - frame, &rotation);
             break;
         case EFFECT_CAMERA_TABLE_CHILD:
-            effect_vector_load_svector(&g_effect_timeline->rotation[k], &rotation);
+            effect_vector_load_svector(&g_effect_timeline->rotation[entry], &rotation);
             execute_rotation_command(
-                g_effect_timeline->command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &rotation);
+                g_effect_timeline->command[entry], end_frame / 0x10000, (end_frame & 0xffff) - frame, &rotation);
             break;
         case EFFECT_CAMERA_TABLE_PHASE2:
-            effect_vector_load_svector(&g_effect_timeline->phase2_camera.rotation[k], &rotation);
-            execute_rotation_command(g_effect_timeline->phase2_camera.command[k], keyframe / 0x10000,
-                (keyframe & 0xffff) - frame, &rotation);
+            effect_vector_load_svector(&g_effect_timeline->phase2_camera.rotation[entry], &rotation);
+            execute_rotation_command(g_effect_timeline->phase2_camera.command[entry], end_frame / 0x10000,
+                (end_frame & 0xffff) - frame, &rotation);
             break;
         }
     }
     if (g_effect_camera_position_mode == EFFECT_CAMERA_MODE_IDLE
-        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &keyframe) != 0) {
-        k = index & 0xffff;
+        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_POSITION, &index, &end_frame) != 0) {
+        entry = index & 0xffff;
         switch (index / 0x10000) {
         case EFFECT_CAMERA_TABLE_PHASE1:
-            effect_vector_load(&g_effect_timeline->phase1_camera.position[k], &vector);
-            effect_camera_execute_position_command(
-                g_effect_timeline->phase1_camera.command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
+            effect_vector_load(&g_effect_timeline->phase1_camera.position[entry], &vector);
+            effect_camera_execute_position_command(g_effect_timeline->phase1_camera.command[entry], end_frame / 0x10000,
+                (end_frame & 0xffff) - frame, &vector);
             break;
         case EFFECT_CAMERA_TABLE_CHILD:
-            effect_vector_load(&g_effect_timeline->position[k], &vector);
+            effect_vector_load(&g_effect_timeline->position[entry], &vector);
             effect_camera_execute_position_command(
-                g_effect_timeline->command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
+                g_effect_timeline->command[entry], end_frame / 0x10000, (end_frame & 0xffff) - frame, &vector);
             break;
         case EFFECT_CAMERA_TABLE_PHASE2:
-            effect_vector_load(&g_effect_timeline->phase2_camera.position[k], &vector);
-            effect_camera_execute_position_command(
-                g_effect_timeline->phase2_camera.command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
+            effect_vector_load(&g_effect_timeline->phase2_camera.position[entry], &vector);
+            effect_camera_execute_position_command(g_effect_timeline->phase2_camera.command[entry], end_frame / 0x10000,
+                (end_frame & 0xffff) - frame, &vector);
             break;
         }
     }
     if (g_effect_camera_zoom_mode == EFFECT_CAMERA_MODE_IDLE
-        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &keyframe) != 0) {
-        k = index & 0xffff;
+        && find_parent_keyframe(frame, EFFECT_CAMERA_TRACK_ZOOM, &index, &end_frame) != 0) {
+        entry = index & 0xffff;
         switch (index / 0x10000) {
         case EFFECT_CAMERA_TABLE_PHASE1:
-            effect_vector_load(&g_effect_timeline->phase1_camera.zoom[k], &vector);
-            effect_camera_execute_zoom_command(
-                g_effect_timeline->phase1_camera.command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
+            effect_vector_load(&g_effect_timeline->phase1_camera.zoom[entry], &vector);
+            effect_camera_execute_zoom_command(g_effect_timeline->phase1_camera.command[entry], end_frame / 0x10000,
+                (end_frame & 0xffff) - frame, &vector);
             break;
         case EFFECT_CAMERA_TABLE_CHILD:
-            effect_vector_load(&g_effect_timeline->zoom[k], &vector);
+            effect_vector_load(&g_effect_timeline->zoom[entry], &vector);
             effect_camera_execute_zoom_command(
-                g_effect_timeline->command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
+                g_effect_timeline->command[entry], end_frame / 0x10000, (end_frame & 0xffff) - frame, &vector);
             break;
         case EFFECT_CAMERA_TABLE_PHASE2:
-            effect_vector_load(&g_effect_timeline->phase2_camera.zoom[k], &vector);
-            effect_camera_execute_zoom_command(
-                g_effect_timeline->phase2_camera.command[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
+            effect_vector_load(&g_effect_timeline->phase2_camera.zoom[entry], &vector);
+            effect_camera_execute_zoom_command(g_effect_timeline->phase2_camera.command[entry], end_frame / 0x10000,
+                (end_frame & 0xffff) - frame, &vector);
             break;
         }
     }

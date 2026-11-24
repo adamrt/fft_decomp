@@ -399,7 +399,7 @@ void animation_set_status(map_unit_t* unit) {
             animation = ANIMATION_SUBMERGED_IDLE;
         } else if (unit->status_flags_5_6 & UNIT_STATUS_TREASURE) {
             animation = ANIMATION_TREASURE;
-        } else if ((unit->status_flags_1_4 & UNIT_STATUS_ANIMATION_SELECTION_MASK) == 0) {
+        } else if (!(unit->status_flags_1_4 & UNIT_STATUS_ANIMATION_SELECTION_MASK)) {
             animation = ANIMATION_IDLE_FLYING;
             if (sprite_sheet_get_flying_flag(unit->spritesheet_id) == 0) {
                 animation = ANIMATION_IDLE;
@@ -494,13 +494,13 @@ void animation_set_status(map_unit_t* unit) {
         break;
     case 2:
     default:
-        if ((unit->status_flags_5_6 & UNIT_STATUS_TRANSFORMATION_MASK) != 0) {
+        if (unit->status_flags_5_6 & UNIT_STATUS_TRANSFORMATION_MASK) {
             if (unit->status_flags_5_6 & UNIT_STATUS_CRYSTAL) {
                 animation = ANIMATION_SUBMERGED_IDLE;
             } else if (unit->status_flags_5_6 & UNIT_STATUS_TREASURE) {
                 animation = ANIMATION_TREASURE;
             }
-        } else if ((unit->status_flags_1_4 & UNIT_STATUS_ANIMATION_SELECTION_MASK) != 0) {
+        } else if (unit->status_flags_1_4 & UNIT_STATUS_ANIMATION_SELECTION_MASK) {
             if (unit->status_flags_1_4 & UNIT_STATUS_DEAD) {
                 animation = ANIMATION_DEAD;
             } else if (unit->status_flags_1_4 & UNIT_STATUS_MOUNTED) {
@@ -617,7 +617,7 @@ void map_unit_apply_poach_or_morbol(map_unit_t* unit) {
     u32 flags = unit->status_flags_5_6;
     map_tile_t* tile;
 
-    if ((flags & (UNIT_STATUS_POACHED | UNIT_STATUS_MORBOL)) == 0) {
+    if (!(flags & (UNIT_STATUS_POACHED | UNIT_STATUS_MORBOL))) {
         return;
     }
     if (flags & UNIT_STATUS_POACHED) {
@@ -625,7 +625,7 @@ void map_unit_apply_poach_or_morbol(map_unit_t* unit) {
         map_unit_start_red_fade_out(unit->map_unit_id);
         return;
     }
-    if ((flags & UNIT_STATUS_MORBOL) == 0) {
+    if (!(flags & UNIT_STATUS_MORBOL)) {
         return;
     }
     unit->status_flags_5_6 = flags & ~UNIT_STATUS_MORBOL;

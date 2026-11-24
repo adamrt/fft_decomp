@@ -22,7 +22,7 @@
 #include "psx/types.h"
 
 enum {
-    ANIMATION_DISTORTION_COUNT = 18 /* the handlers of g_distortion_handlers */
+    ANIMATION_DISTORTION_COUNT = 18 /* the handlers of s_distortion_handlers */
 };
 
 /* Phases of the teleport distortion; other distortions reuse the phase field separately. */
@@ -155,7 +155,7 @@ static void set_real_coords_from_map_coords(map_unit_t* unit) {
     unit->real.vy = map_unit_calculate_height_from_tile(unit) * ONE;
 }
 
-/* Entry 0 of g_distortion_handlers. Never called: id 0 means no distortion
+/* Entry 0 of s_distortion_handlers. Never called: id 0 means no distortion
  * animation and animation_dispatch_distortion skips it. */
 static s32 distortion_none(map_unit_t* unused_unit) {
 }
@@ -181,10 +181,10 @@ static s32 distortion_scale_pulse_update(map_unit_t* unit) {
         stretch = rsin(angle);
         unit->animation.display->scale_y = stretch + stretch / 2 + ONE;
         if ((unit->distortion_timer & 0xfff) != 0x800) {
-            unit->distortion_timer = unit->distortion_timer + 32;
-            unit->distortion_target = unit->distortion_target + 51;
+            unit->distortion_timer += 32;
+            unit->distortion_target += 51;
         } else {
-            unit->distortion_phase = unit->distortion_phase + 1;
+            unit->distortion_phase++;
         }
         break;
     case 2:
@@ -204,22 +204,20 @@ static s32 distortion_scale_pulse_update(map_unit_t* unit) {
 static s32 distortion_rise(map_unit_t* unit) {
     s32 step = unit->distortion_timer;
     s32 target = unit->distortion_target;
-    s32 height;
 
     switch (unit->distortion_phase) {
     case 0:
         step = -0x24000 / step;
-        target = unit->real.vy + -0x24000;
+        target = unit->real.vy - 0x24000;
         unit->distortion_phase = 1;
     case 1:
         if (target < unit->real.vy) {
-            unit->real.vy = step + unit->real.vy;
+            unit->real.vy += step;
         } else {
             unit->real.vy = target;
             unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
         }
-        height = unit->real.vy;
-        unit->world_coords.vy = height / ONE;
+        unit->world_coords.vy = unit->real.vy / ONE;
         break;
     }
     unit->distortion_timer = step;
@@ -236,22 +234,20 @@ static s32 distortion_rise(map_unit_t* unit) {
 static s32 distortion_settle(map_unit_t* unit) {
     s32 step = unit->distortion_timer;
     s32 ground = unit->distortion_target;
-    s32 height;
 
     switch (unit->distortion_phase) {
     case 0:
         ground = map_unit_calculate_height_from_world_coords(unit) * ONE;
         step = (ground - (unit->world_coords.vy * ONE)) / step;
-        unit->distortion_phase = unit->distortion_phase + 1;
+        unit->distortion_phase++;
     case 1:
         if (unit->real.vy < ground) {
-            unit->real.vy = step + unit->real.vy;
+            unit->real.vy += step;
         } else {
             unit->real.vy = ground;
             unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
         }
-        height = unit->real.vy;
-        unit->world_coords.vy = height / ONE;
+        unit->world_coords.vy = unit->real.vy / ONE;
         break;
     }
     unit->distortion_timer = step;
@@ -410,6 +406,7 @@ static s32 calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, V
     speed = SquareRoot12(height * 2);
     frames = speed / g_move_jump_gravity;
     out->vy = -speed;
+    /* The second leg reloads height through 24 first; folding the constant compiles shorter. */
     height = 24;
     height = g_move_jump_gravity * height;
     speed = SquareRoot12(height * 2);
@@ -532,7 +529,7 @@ static s32 distortion_jump_to_own_tile(map_unit_t* unit) {
     unit->distortion_timer = timer;
 }
 
-/* Distortion animation 10 of g_distortion_handlers: ends at once. Animation 11
+/* Distortion animation 10 of s_distortion_handlers: ends at once. Animation 11
  * is a second copy of this routine. */
 static s32 distortion_clear(map_unit_t* unit) {
     unit->distortion_animation_id = ANIMATION_DISTORTION_NONE;
@@ -675,17 +672,12 @@ static s32 distortion_fall_to_target(map_unit_t* unit) {
  * target, and there are no spectators. Both teleport starters use it for every
  * unit, not only for Altima. */
 static void init_teleport_effect_data(map_unit_t* unit, effect_context_t* teleport_data) {
-    u8 map_unit_id;
-    u8 repeated_map_unit_id;
-
     teleport_data->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
-    map_unit_id = unit->map_unit_id;
+    teleport_data->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = unit->map_unit_id;
     teleport_data->target_count = 1;
     teleport_data->targets[0].target_type = EFFECT_TARGET_TYPE_UNIT;
-    teleport_data->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = map_unit_id;
-    repeated_map_unit_id = unit->map_unit_id;
+    teleport_data->targets[0].data.unit.map_unit_id = unit->map_unit_id;
     teleport_data->spectator_count = 0;
-    teleport_data->targets[0].data.unit.map_unit_id = repeated_map_unit_id;
 }
 
 /* Start the departure effect of a teleport. Altima's two forms request their own
@@ -1026,7 +1018,7 @@ static s32 distortion_jump_rise(map_unit_t* unit) {
 }
 
 /* Run one frame of the unit's distortion animation from
- * g_distortion_handlers. An id past the table reports
+ * s_distortion_handlers. An id past the table reports
  * SYSTEM_ERROR_DISTORTION_ANIMATION. */
 void animation_dispatch_distortion(map_unit_t* unit) {
     u32 distortion_id = unit->distortion_animation_id;

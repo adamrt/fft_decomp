@@ -127,14 +127,14 @@ static s32 calculate_arc_trajectory(arc_query_t* query, s32* arc_a, s32* arc_b) 
 
 /*
  * Evaluate the arcing-weapon trajectory term a * b - (1 + a^2) * b^2 /
- * (2 * g_gravity_modifier) in 20.12 fixed point.
+ * (2 * s_gravity_modifier) in 20.12 fixed point.
  *
  * This is the height of a ballistic arc after a horizontal distance b
  * (`progress`), where a (`launch_slope_q12`) is the tangent of the launch pitch:
  * the callers take the pitch itself as ratan2(launch_slope_q12, ONE).
  *
  * Both operands are pre-shifted by range so the squares stay within 32 bits.
- * g_gravity_modifier is the trajectory gravity modifier
+ * s_gravity_modifier is the trajectory gravity modifier
  * (0xa8000).
  */
 s32 projectile_arc_calculate_trajectory_term(s32 launch_slope_q12, s32 progress) {
@@ -180,8 +180,8 @@ void projectile_calculate_trajectory_position(const VECTOR* src, s32 total, s32 
     dst->vz = (progress * src->vz) >> 12;
 }
 
-/* Launch speed of every arcing projectile: SquareRoot12 of g_gravity_modifier times
- * g_gravity_scale. With the retail values (0xa8000 and 0x53a) it is a constant,
+/* Launch speed of every arcing projectile: SquareRoot12 of s_gravity_modifier times
+ * s_gravity_scale. With the retail values (0xa8000 and 0x53a) it is a constant,
  * about 7.4 in Q12. */
 s32 projectile_arc_calculate_launch_velocity(void) {
     return SquareRoot12((s_gravity_modifier * s_gravity_scale) >> 12);
@@ -276,7 +276,7 @@ static s32 test_position_for_obstacle(
 /*
  * Step a lobbed projectile along a ballistic arc. The launch pitch comes from
  * ratan2(launch_slope_q12, ONE) and is published in both the arc descriptor and
- * g_projectile_arctan_angle_mod; the per-step advance is the horizontal
+ * s_projectile_arctan_angle_mod; the per-step advance is the horizontal
  * component of the gravity impulse. Each step rotates the local (progress,
  * -trajectory term) offset into world space through the yaw matrix and tests
  * the result against the obstacle list, exactly as
@@ -321,13 +321,12 @@ static s32 trace_arc_path(const SVECTOR* origin, const s32* launch_slope_q12, co
     rotation.vy = arc->vy;
     RotMatrix(&rotation, &matrix);
     position.vx = matrix.t[0] = origin->vx;
-    i = 0;
     position.vy = matrix.t[1] = origin->vy;
     position.vz = matrix.t[2] = origin->vz;
     SetRotMatrix(&matrix);
     SetTransMatrix(&matrix);
     step.vz = 0;
-    for (; i < steps; i++) {
+    for (i = 0; i < steps; i++) {
         previous = position;
         progress += advance;
         term = projectile_arc_calculate_trajectory_term(*launch_slope_q12, progress);
@@ -522,27 +521,20 @@ s32 projectile_arc_set_and_validate(s32 source_id, const SVECTOR* tile_position,
 }
 
 /* Choose the bow animation column from the last trajectory test's angle.
- * Wrap g_projectile_arctan_angle_mod into [-0x800, 0x800]: return column 0
+ * Wrap s_projectile_arctan_angle_mod into [-0x800, 0x800]: return column 0
  * below -0x2aa, column 1 through 0x2aa, or column 2 above it. Arc selection
  * can restore an earlier path without restoring this angle. */
 s32 projectile_get_bow_animation_column(void) {
-    s16 angle = s_projectile_arctan_angle_mod;
-    if (angle >= 0x801) {
-        s_projectile_arctan_angle_mod = angle - ONE;
+    if (s_projectile_arctan_angle_mod > 0x800) {
+        s_projectile_arctan_angle_mod -= ONE;
     }
-    {
-        s16 angle_after_hi = s_projectile_arctan_angle_mod;
-        if (angle_after_hi < -0x800) {
-            s_projectile_arctan_angle_mod = angle_after_hi + ONE;
-        }
+    if (s_projectile_arctan_angle_mod < -0x800) {
+        s_projectile_arctan_angle_mod += ONE;
     }
-    {
-        s16 wrapped = s_projectile_arctan_angle_mod;
-        if (wrapped < 0x2AB) {
-            return wrapped >= -0x2AA;
-        }
-        return 2;
+    if (s_projectile_arctan_angle_mod <= 0x2AA) {
+        return s_projectile_arctan_angle_mod >= -0x2AA;
     }
+    return 2;
 }
 
 /*
@@ -567,11 +559,10 @@ static s32 trace_direct_path(
     steps = *distance / step;
     progress = 0;
     position.vx = origin->vx;
-    hit = 0;
     position.vy = origin->vy;
-    i = 0;
     position.vz = origin->vz;
-    for (; i < steps; i++) {
+    hit = 0;
+    for (i = 0; i < steps; i++) {
         previous = position;
         progress += step;
         projectile_calculate_trajectory_position(delta, *distance, progress, &position);
@@ -636,7 +627,7 @@ s32 projectile_direct_check_between_units(u8 source_id, u8 target_id) {
  * sits on its surface, as in projectile_set_arrow_trajectory.  The extra
  * work over those two is the launch angle: ratan2 of the vertical delta
  * against the horizontal distance, biased by 0x400 (a quarter turn) into
- * g_projectile_arctan_angle_mod.  Returns target_id when the path is clear
+ * s_projectile_arctan_angle_mod.  Returns target_id when the path is clear
  * and the blocking unit from g_projectile_hit_unit_id when it is not.
  */
 s32 projectile_direct_check_to_target(s32 source_id, const SVECTOR* tile_position, s32 target_id) {

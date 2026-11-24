@@ -1496,10 +1496,10 @@ static void displace_unit_in_direction(map_unit_t* unit, s32 x, s32 y, s32 delta
     s16 axis;
     s16 standing_world_y;
 
-    if ((unit->status_flags_1_4 & UNIT_STATUS_DEAD) != 0) {
+    if (unit->status_flags_1_4 & UNIT_STATUS_DEAD) {
         return;
     }
-    if ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) != 0) {
+    if (unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) {
         return;
     }
     switch (s_move_displacement_direction) {

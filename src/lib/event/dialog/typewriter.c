@@ -53,8 +53,6 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
     s16 width;
     s16 height;
     s32 max_width;
-    s32 next;
-    s32 size;
 
     if (flags & DIALOG_TYPE_KEEP_OPEN) {
         flags &= DIALOG_TYPE_POSITION_MASK;
@@ -63,9 +61,7 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
                                 + DISPLAY_MESSAGE_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0])
                 - 1));
         max_width = width;
-        next = offset + 1;
-        size = g_script_event_instruction_sizes[EVENT_OPCODE_DISPLAY_MESSAGE];
-        offset = next + size;
+        offset += 1 + g_script_event_instruction_sizes[EVENT_OPCODE_DISPLAY_MESSAGE];
         while ((offset = script_find_instruction_offset(offset, EVENT_OPCODE_CHANGE_DIALOG)) != 0) {
             if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->opcode == EVENT_OPCODE_CHANGE_DIALOG) {
                 if (CHANGE_DIALOG_INSTRUCTION_AT((u8*)g_script_event_block, offset)->text_id_le[0] == 0xFF
@@ -86,9 +82,7 @@ void message_measure_window_width(s32 offset, s32 flags, s32* out_width) {
                     }
                 }
             }
-            next = offset + 1;
-            size = g_script_event_instruction_sizes[EVENT_OPCODE_CHANGE_DIALOG];
-            offset = next + size;
+            offset += 1 + g_script_event_instruction_sizes[EVENT_OPCODE_CHANGE_DIALOG];
         }
         *out_width = max_width;
     }
@@ -167,22 +161,12 @@ void menu_screen_update_dialog_input(void) {
 /* Free the typewriter slot (one of three) the current thread owns, if any, and reset its
  * glyph count; a closing dialog thread calls it. */
 void message_release_typewriter_slot(void) {
-    s32 index = 0;
-    s32 current_thread_id = g_thread_current_id;
-    s32* owner_thread_id;
-    s32* slot_state = g_text_slot_glyph_counts;
+    s32 i;
 
-    owner_thread_id = g_text_slot_owner_thread_ids;
-    for (;;) {
-        if (current_thread_id == *owner_thread_id) {
-            *owner_thread_id = 0;
-            *slot_state = 0;
-            return;
-        }
-        slot_state++;
-        index++;
-        owner_thread_id++;
-        if (index >= 3) {
+    for (i = 0; i < 3; i++) {
+        if (g_thread_current_id == g_text_slot_owner_thread_ids[i]) {
+            g_text_slot_owner_thread_ids[i] = 0;
+            g_text_slot_glyph_counts[i] = 0;
             return;
         }
     }
@@ -306,7 +290,8 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
         g_text_slot_row_pitches[slot] = pitch;
 
         /* Prefill with the box background: zero in mode 0, else the repeating 16-pixel tile in
-         * the glyph sheet, aligned to the pen x. */
+         * the glyph sheet, aligned to the pen x. The (pointer + i)[offset] spellings keep
+         * retail's address arithmetic; plain indexes reorder it. */
         for (row = 0; row < 14; row++) {
             offset = row * pitch;
             for (i = phase >> 1; i < pitch / 2; i++) {
@@ -334,7 +319,7 @@ void message_draw_glyph_timed(s32 pen_x, s32 pen_y, s32 delay) {
             LoadImage(&s_message_typewriter_vram_rect, (u32*)image);
         }
 
-        g_text_slot_glyph_counts[slot] = g_text_slot_glyph_counts[slot] + 1;
+        g_text_slot_glyph_counts[slot]++;
         /* Keep the 14 rows of 12 pixels for the next glyph's shared column. */
         mem_copy_bytes_nonempty(previous, image, 0x54);
 

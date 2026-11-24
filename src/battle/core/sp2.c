@@ -54,18 +54,14 @@ s32 sprite_open_sp2_file(map_unit_t* unit, u32* destination) {
 
 /* Free the EVTCHR slots whose page holds the unit's SP2 image. */
 void sprite_evtchr_invalidate_sp2(map_unit_t* unit) {
-    u32 invalid; /* loaded before the loop, as in the target */
-    sprite_evtchr_slot_t* slot;
-    s32 count = 0;
+    s32 i;
+    u32 descriptor;
 
-    invalid = SPRITE_EVTCHR_SLOT_OWNER_NONE;
-    slot = g_sprite_evtchr_slots;
-    for (; count < SPRITE_EVTCHR_SLOT_COUNT; count++, slot++) {
-        u32 descriptor = slot->owner;
-
-        if (((descriptor & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->map_unit_id)
-            && ((descriptor & SPRITE_EVTCHR_SLOT_OWNER_SP2) != 0)) {
-            slot->owner = invalid;
+    for (i = 0; i < SPRITE_EVTCHR_SLOT_COUNT; i++) {
+        descriptor = g_sprite_evtchr_slots[i].owner;
+        if ((descriptor & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->map_unit_id
+            && (descriptor & SPRITE_EVTCHR_SLOT_OWNER_SP2)) {
+            g_sprite_evtchr_slots[i].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
         }
     }
 }

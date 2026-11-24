@@ -83,8 +83,9 @@ unit_height_data_t* battle_unit_calculate_action_height(unit_height_data_t* out,
         && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
         flags = unit_id;
         id = unit->job_id;
-        if (id < JOB_ID_CHOCOBO || id > JOB_ID_RED_CHOCOBO)
+        if (id < JOB_ID_CHOCOBO || id > JOB_ID_RED_CHOCOBO) {
             flags = unit_id | UNIT_HEIGHT_NON_CHOCOBO;
+        }
         x = unit->x;
         height.x = x;
         y = unit->position.y;
@@ -95,8 +96,9 @@ unit_height_data_t* battle_unit_calculate_action_height(unit_height_data_t* out,
             candidate = &g_battle_units[i];
             if (i != unit_id && candidate->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE && candidate->x == x
                 && candidate->position.y == y && candidate->position.higher_elevation == level) {
-                if (flags & UNIT_HEIGHT_NON_CHOCOBO)
+                if (flags & UNIT_HEIGHT_NON_CHOCOBO) {
                     unit = candidate;
+                }
                 offset = 2;
                 flags |= UNIT_HEIGHT_SHARED_TILE;
                 break;
@@ -104,10 +106,11 @@ unit_height_data_t* battle_unit_calculate_action_height(unit_height_data_t* out,
         }
         height.unit_flags = flags;
         flags = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHICKEN)];
-        if (flags & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG)))
+        if (flags & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG))) {
             height.unit_height = offset + 4;
-        else
+        } else {
             height.unit_height = offset + 6;
+        }
         flags = unit->ability_flags.movement[2];
         tile = &g_map_tile_data[battle_unit_get_tile_index(unit)];
         /* Byte access retains the original packed load and field-extraction order. */
@@ -129,8 +132,9 @@ unit_height_data_t* battle_unit_calculate_action_height(unit_height_data_t* out,
         }
         height.walking_height = level;
         height.total_height = level + height.unit_height;
-        if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD))
+        if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD)) {
             height.unit_flags = UNIT_HEIGHT_UNAVAILABLE;
+        }
     } else {
         height.unit_flags = UNIT_HEIGHT_UNAVAILABLE;
     }
@@ -169,6 +173,8 @@ action_preparation_e action_commit_preparation(const action_command_t* command) 
  * commits the action (spends the item, marks the unit as acted, starts Charging,
  * Performing or Jumping). Returns a action_preparation_e code: an
  * ordinary ability returns IMMEDIATE with a CT of 0 and CHARGE otherwise.
+ *
+ * The bytes require the redundant `phase != 0` before each `phase & 1` test.
  *
  * The one-trip loop around `skip = 1` counts that set one loop level deeper,
  * so global-alloc ranks `skip` above `persevere` and gives them s6/s7 as in
@@ -437,7 +443,7 @@ s32 action_init_current_data(s32 id) {
     if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return -1;
     }
-    if (g_reaction_hamedo_flag != 0) {
+    if (g_reaction_hamedo_flag) {
         action_store_actor_data(unit);
         return ACTION_REJECTION_HAMEDO;
     }
@@ -687,7 +693,7 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
         /* A pending weapon proc or knockback narrows the panels to its post-action
          * target's tile; the list itself is rebuilt from the panels below. */
         if (g_action_work.post_action_target_id < BATTLE_UNIT_SLOT_COUNT
-            && (g_action_work.weapon_proc_pending != 0 || (g_action_work.knockback_flags & MOVE_KNOCKBACK_PENDING))) {
+            && (g_action_work.weapon_proc_pending || (g_action_work.knockback_flags & MOVE_KNOCKBACK_PENDING))) {
             target_clear_area_flags();
             count = 1;
             targets[0] = g_action_work.post_action_target_id;
@@ -746,10 +752,10 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
     work->post_action_message = g_action_work.post_action_message;
     work->skip_empty_tile_effect = 0;
     reaction_id = g_action_work.reaction_id;
-    if (reaction_id != 0 && g_action_work.weapon_proc_pending == 0) {
+    if (reaction_id != 0 && !g_action_work.weapon_proc_pending) {
         work->last_attack_id = reaction_id;
         work->reaction_occurred = 1;
-    } else if (g_action_work.defaulted_to_attack != 0) {
+    } else if (g_action_work.defaulted_to_attack) {
         work->last_attack_id = 0;
     } else {
         work->last_attack_id = attacker->action_command.ability_id;
@@ -763,7 +769,7 @@ s32 action_resolve_strike(s32 battle_unit_id, action_strike_work_t* work) {
     }
 
     /* A pending weapon proc or knockback continues the attack without counting a strike. */
-    if (g_action_work.weapon_proc_pending != 0 || (g_action_work.knockback_flags & MOVE_KNOCKBACK_PENDING)) {
+    if (g_action_work.weapon_proc_pending || (g_action_work.knockback_flags & MOVE_KNOCKBACK_PENDING)) {
         work->continue_attack = 1;
     } else {
         if (g_action_work.knockback_flags != 0) {
@@ -788,7 +794,7 @@ static void set_strike_coordinates(const battle_unit_t* acting, action_strike_wo
     battle_unit_t* target;
 
     out->skip_empty_tile_effect = 0;
-    if (g_action_work.random_fire_flag != 0) {
+    if (g_action_work.random_fire_flag) {
         out->target_tile.x = g_action_work.target_tile.x;
         out->target_tile.y = g_action_work.target_tile.y;
         out->target_tile.layer = g_action_work.target_tile.layer;
@@ -815,13 +821,15 @@ static void set_strike_coordinates(const battle_unit_t* acting, action_strike_wo
 static void finalize_draw_out_katana(battle_unit_t* attacker, action_strike_work_t* work, u8 hit_count) {
     u16 flags;
 
-    if (g_command_menu_types_by_skillset[attacker->action_command.skillset_id] != ACTION_MENU_TYPE_KATANA_INVENTORY)
+    if (g_command_menu_types_by_skillset[attacker->action_command.skillset_id] != ACTION_MENU_TYPE_KATANA_INVENTORY) {
         return;
-    if (attacker->job_id == JOB_ID_MIME)
+    }
+    if (attacker->job_id == JOB_ID_MIME) {
         return;
+    }
     if (hit_count == 0
-        || ((flags = g_action_attacker_action_data.special_effect) & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN)
-            != 0) {
+        || ((flags = g_action_attacker_action_data.special_effect)
+            & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN)) {
         g_action_attacker_action_data.special_effect = ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN;
         g_action_attacker_action_data.attack_type = ACTION_TYPE_PSEUDO_STATUS;
         g_action_attacker_action_data.hit = 1;
@@ -912,7 +920,7 @@ static void init_strike_data(battle_unit_t* unit) {
         return;
     }
     if (menu_type != ACTION_MENU_TYPE_ATTACK && menu_type != ACTION_MENU_TYPE_CHARGE) {
-        if ((g_action_loaded_ability_flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE) == 0) {
+        if (!(g_action_loaded_ability_flags_1 & ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE)) {
             return;
         }
     }
@@ -1008,7 +1016,8 @@ static s32 list_units_on_panels(u8* list, const battle_unit_t* origin) {
         if (unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE
             && target_is_unit_untargetable_and_store_tile(i, &tile) == 0
             && ((*(u8*)&g_map_tile_data[tile].ceiling_depth_and_marks) & MAP_TILE_FLAG_TARGETED)) {
-            if (g_target_sort_nearest_first != 0) {
+            if (g_target_sort_nearest_first) {
+
                 dx = x - unit->x;
                 if (dx < 0) {
                     dx = -dx;
@@ -1063,37 +1072,47 @@ static s32 check_and_consume_mp(battle_unit_t* unit) {
     ability_id = unit->action_command.ability_id;
     menu = g_command_menu_types_by_skillset[unit->action_command.skillset_id];
     g_action_work.mp_cost = 0;
-    if (g_action_context == ACTION_CONTEXT_PRIMARY)
+    if (g_action_context == ACTION_CONTEXT_PRIMARY) {
         status_set_action_state(unit, STATUS_ACTION_STATE_KEEP_PERFORMING);
+    }
     result = battle_unit_get_action_restriction(unit);
-    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
+    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)) {
         result = UNIT_ACTION_RESTRICTION_CANNOT_ACT;
-    if (result)
+    }
+    if (result) {
         return result + ACTION_REJECTION_RESTRICTION_OFFSET;
+    }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
-        if (ability_id != 0 && ability_id != ABILITY_ID_FROG_ATTACK && ability_id != ABILITY_ID_BLACK_MAGIC_FROG)
+        if (ability_id != 0 && ability_id != ABILITY_ID_FROG_ATTACK && ability_id != ABILITY_ID_BLACK_MAGIC_FROG) {
             return ACTION_REJECTION_FROG;
-        if (menu == ACTION_MENU_TYPE_CHARGE)
+        }
+        if (menu == ACTION_MENU_TYPE_CHARGE) {
             return ACTION_REJECTION_FROG;
+        }
     }
     if (ability_id >= 0 && ability_id < ABILITY_ID_ITEM_FIRST) {
         ability = &g_ability_range_data[ability_id];
         if ((menu == ACTION_MENU_TYPE_DEFAULT || menu == ACTION_MENU_TYPE_MONSTER)
             && (ability->flags_3 & ABILITY_SECONDARY_FLAG_3_AFFECTED_BY_SILENCE)
-            && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)] & STATUS_BYTE_MASK(STATUS_ID_SILENCE)))
+            && (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SILENCE)]
+                & STATUS_BYTE_MASK(STATUS_ID_SILENCE))) {
             return ACTION_REJECTION_SILENCED;
+        }
         if (menu == ACTION_MENU_TYPE_DEFAULT && unit->job_id != JOB_ID_MIME) {
             cost = ability->mp_cost;
-            if (unit->ability_flags.support[1] & UNIT_SUPPORT_SET_2_HALF_MP)
+            if (unit->ability_flags.support[1] & UNIT_SUPPORT_SET_2_HALF_MP) {
                 cost >>= 1;
+            }
             g_action_work.mp_cost = cost;
             /* A signed member view retains the target store-before-load order;
              * casting the unsigned value hoists the MP load and loses a nop. */
             mp = unit->mp;
-            if (mp < cost)
+            if (mp < cost) {
                 return ACTION_REJECTION_NOT_ENOUGH_MP;
-            if (g_action_state != ACTION_STATE_PREVIEW)
+            }
+            if (g_action_state != ACTION_STATE_PREVIEW) {
                 unit->mp = mp - cost;
+            }
         }
     }
     return 0;
@@ -1204,6 +1223,7 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
 
 /* Clear the range and the mark of all 512 targeting panels. */
 void target_clear_panels(void) {
+    /* The bytes require the counter set at its declaration. */
     s32 i = 0;
     target_panel_t* panel = g_target_panels;
 
@@ -1361,135 +1381,136 @@ s32 reaction_prepare_next(s16* out_ability) {
         return -1;
     }
 
-    i = 0;
-    do {
+    for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         g_action_context = ACTION_CONTEXT_PRIMARY;
-        if (i != g_action_actor_id) {
-            unit = &g_battle_units[i];
-            action = &unit->action_command;
-            if (battle_unit_get_action_restriction(unit) == UNIT_ACTION_RESTRICTION_NONE
-                && unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
-                reaction_prevented = reaction_is_prevented(unit);
-                ability = unit->action.reaction_id;
-                /* Reflect fires even when reactions are prevented and during AI simulation. */
-                if (((reaction_prevented == 0 && g_action_state != ACTION_STATE_AI_SIMULATION)
-                        || ability == ABILITY_ID_REACTION_REFLECT)
-                    && ability != 0) {
-                    g_action_context = ACTION_CONTEXT_SECONDARY;
-                    action_command_copy(action, &g_action_saved_command);
-                    g_reaction_ability_id = ability;
-                    action->actor_id = i;
-                    action->skillset_id = 0;
-                    reaction_id = g_reaction_ability_id;
-                    outcome = REACTION_OUTCOME_ATTACK;
-                    action->ability_id = reaction_id;
-                    last_attack = unit->action.last_received_attack;
-                    unit->action.reaction_id = 0;
-
-                    switch (reaction_id) {
-                    case ABILITY_ID_REACTION_REFLECT:
-                        outcome = apply_reflect(unit) == 0 ? REACTION_OUTCOME_REFLECT : REACTION_OUTCOME_NONE;
-                        break;
-                    case ABILITY_ID_REACTION_MEATBONE_SLASH:
-                        if (store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
-                            outcome = REACTION_OUTCOME_NONE;
-                        } else {
-                            action->skillset_id = SKILLSET_ID_ATTACK;
-                            action->targeting_type = TARGET_TYPE_TILE;
-                        }
-                        break;
-                    case ABILITY_ID_REACTION_COUNTER_MAGIC:
-                        outcome = store_counter_ability(unit, SKILLSET_ID_BLACK_MAGIC, last_attack, 0) == 0
-                            ? REACTION_OUTCOME_COUNTER
-                            : REACTION_OUTCOME_NONE;
-                        break;
-                    case ABILITY_ID_REACTION_COUNTER_TACKLE:
-                        if (store_counter_ability(unit, SKILLSET_ID_BLACK_MAGIC, ABILITY_ID_BASIC_SKILL_DASH, 1) != 0) {
-                            outcome = REACTION_OUTCOME_NONE;
-                        }
-                        break;
-                    case ABILITY_ID_REACTION_COUNTER_FLOOD:
-                        surface = g_map_tile_data[battle_unit_get_tile_index(unit)].surface.type;
-                        outcome = store_counter_ability(
-                                      unit, SKILLSET_ID_ELEMENTAL, g_terrain_geomancy_abilities[surface], 0)
-                                == 0
-                            ? REACTION_OUTCOME_COUNTER
-                            : REACTION_OUTCOME_NONE;
-                        break;
-                    case ABILITY_ID_REACTION_AUTO_POTION:
-                        result = select_auto_potion_item(unit);
-                        if (result == -1) {
-                            outcome = REACTION_OUTCOME_NONE;
-                            break;
-                        }
-                        action->skillset_id = SKILLSET_ID_ITEM;
-                        action->item_id = result;
-                        action->targeting_type = TARGET_TYPE_TILE;
-                        action->target_id = i;
-                        action->target_position.vx = unit->x;
-                        action->target_position.vz = unit->position.y;
-                        action->target_position.vy = unit->position.higher_elevation;
-                        result = action_commit_preparation(action);
-                        outcome = REACTION_OUTCOME_COUNTER;
-                        unit->action_command.ability_id = ABILITY_ID_REACTION_AUTO_POTION;
-                        if (result == ACTION_PREPARATION_INVALID || result == ACTION_PREPARATION_CHANGE_EQUIPMENT
-                            || result == ACTION_PREPARATION_JUMP) {
-                            outcome = REACTION_OUTCOME_NONE;
-                        }
-                        break;
-                    case ABILITY_ID_REACTION_COUNTER:
-                        if (store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
-                            outcome = REACTION_OUTCOME_NONE;
-                        }
-                        break;
-                    default:
-                        outcome = (g_ability_reaction_behavior_flags[g_reaction_ability_id - ABILITY_ID_REACTION_FIRST]
-                                      & (REACTION_BEHAVIOR_FLAG_PASSIVE | REACTION_BEHAVIOR_FLAG_ACTIVE))
-                                == 0
-                            ? REACTION_OUTCOME_SELF_TILE
-                            : REACTION_OUTCOME_NONE;
-                        break;
-                    }
-
-                    if ((outcome == REACTION_OUTCOME_ATTACK || outcome == REACTION_OUTCOME_COUNTER)
-                        && check_and_consume_mp(unit) != 0) {
-                        outcome = REACTION_OUTCOME_NONE;
-                    }
-                    if (outcome == REACTION_OUTCOME_NONE) {
-                        action_command_copy(&g_action_saved_command, action);
-                        i++;
-                        continue;
-                    }
-
-                    if (outcome >= REACTION_OUTCOME_ATTACK && outcome <= REACTION_OUTCOME_REFLECT) {
-                        init_strike_data(unit);
-                    } else {
-                        g_action_work.strike_count = 1;
-                        g_action_work.strike_counter = 0;
-                        g_action_work.weapon_proc_pending = 0;
-                        g_action_work.knockback_flags = 0;
-                        g_action_work.primary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
-                        g_action_work.secondary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
-                        action->skillset_id = 0;
-                        action->targeting_type = TARGET_TYPE_TILE;
-                        action->target_id = i;
-                        if (g_reaction_ability_id == ABILITY_ID_REACTION_DAMAGE_SPLIT) {
-                            action->target_id = g_action_actor_id;
-                            unit = &g_battle_units[g_action_actor_id];
-                        }
-                        action->target_position.vx = unit->x;
-                        action->target_position.vz = unit->position.y;
-                        action->target_position.vy = unit->position.higher_elevation;
-                    }
-
-                    *out_ability = g_reaction_ability_id;
-                    action->actor_id = i;
-                    return i;
-                }
-            }
+        if (i == g_action_actor_id) {
+            continue;
         }
-        i++;
-    } while (i < BATTLE_UNIT_SLOT_COUNT);
+        unit = &g_battle_units[i];
+        action = &unit->action_command;
+        if (battle_unit_get_action_restriction(unit) != UNIT_ACTION_RESTRICTION_NONE
+            || unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
+            continue;
+        }
+        reaction_prevented = reaction_is_prevented(unit);
+        ability = unit->action.reaction_id;
+        /* Reflect fires even when reactions are prevented and during AI simulation. */
+        if ((reaction_prevented || g_action_state == ACTION_STATE_AI_SIMULATION)
+            && ability != ABILITY_ID_REACTION_REFLECT) {
+            continue;
+        }
+        if (ability == 0) {
+            continue;
+        }
+
+        g_action_context = ACTION_CONTEXT_SECONDARY;
+        action_command_copy(action, &g_action_saved_command);
+        g_reaction_ability_id = ability;
+        action->actor_id = i;
+        action->skillset_id = 0;
+        reaction_id = g_reaction_ability_id;
+        outcome = REACTION_OUTCOME_ATTACK;
+        action->ability_id = reaction_id;
+        last_attack = unit->action.last_received_attack;
+        unit->action.reaction_id = 0;
+
+        switch (reaction_id) {
+        case ABILITY_ID_REACTION_REFLECT:
+            outcome = apply_reflect(unit) == 0 ? REACTION_OUTCOME_REFLECT : REACTION_OUTCOME_NONE;
+            break;
+        case ABILITY_ID_REACTION_MEATBONE_SLASH:
+            if (store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
+                outcome = REACTION_OUTCOME_NONE;
+            } else {
+                action->skillset_id = SKILLSET_ID_ATTACK;
+                action->targeting_type = TARGET_TYPE_TILE;
+            }
+            break;
+        case ABILITY_ID_REACTION_COUNTER_MAGIC:
+            outcome = store_counter_ability(unit, SKILLSET_ID_BLACK_MAGIC, last_attack, 0) == 0
+                ? REACTION_OUTCOME_COUNTER
+                : REACTION_OUTCOME_NONE;
+            break;
+        case ABILITY_ID_REACTION_COUNTER_TACKLE:
+            if (store_counter_ability(unit, SKILLSET_ID_BLACK_MAGIC, ABILITY_ID_BASIC_SKILL_DASH, 1) != 0) {
+                outcome = REACTION_OUTCOME_NONE;
+            }
+            break;
+        case ABILITY_ID_REACTION_COUNTER_FLOOD:
+            surface = g_map_tile_data[battle_unit_get_tile_index(unit)].surface.type;
+            outcome = store_counter_ability(unit, SKILLSET_ID_ELEMENTAL, g_terrain_geomancy_abilities[surface], 0) == 0
+                ? REACTION_OUTCOME_COUNTER
+                : REACTION_OUTCOME_NONE;
+            break;
+        case ABILITY_ID_REACTION_AUTO_POTION:
+            result = select_auto_potion_item(unit);
+            if (result == -1) {
+                outcome = REACTION_OUTCOME_NONE;
+                break;
+            }
+            action->skillset_id = SKILLSET_ID_ITEM;
+            action->item_id = result;
+            action->targeting_type = TARGET_TYPE_TILE;
+            action->target_id = i;
+            action->target_position.vx = unit->x;
+            action->target_position.vz = unit->position.y;
+            action->target_position.vy = unit->position.higher_elevation;
+            result = action_commit_preparation(action);
+            outcome = REACTION_OUTCOME_COUNTER;
+            unit->action_command.ability_id = ABILITY_ID_REACTION_AUTO_POTION;
+            if (result == ACTION_PREPARATION_INVALID || result == ACTION_PREPARATION_CHANGE_EQUIPMENT
+                || result == ACTION_PREPARATION_JUMP) {
+                outcome = REACTION_OUTCOME_NONE;
+            }
+            break;
+        case ABILITY_ID_REACTION_COUNTER:
+            if (store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
+                outcome = REACTION_OUTCOME_NONE;
+            }
+            break;
+        default:
+            outcome = (g_ability_reaction_behavior_flags[g_reaction_ability_id - ABILITY_ID_REACTION_FIRST]
+                          & (REACTION_BEHAVIOR_FLAG_PASSIVE | REACTION_BEHAVIOR_FLAG_ACTIVE))
+                    == 0
+                ? REACTION_OUTCOME_SELF_TILE
+                : REACTION_OUTCOME_NONE;
+            break;
+        }
+
+        if ((outcome == REACTION_OUTCOME_ATTACK || outcome == REACTION_OUTCOME_COUNTER)
+            && check_and_consume_mp(unit) != 0) {
+            outcome = REACTION_OUTCOME_NONE;
+        }
+        if (outcome == REACTION_OUTCOME_NONE) {
+            action_command_copy(&g_action_saved_command, action);
+            continue;
+        }
+
+        if (outcome >= REACTION_OUTCOME_ATTACK && outcome <= REACTION_OUTCOME_REFLECT) {
+            init_strike_data(unit);
+        } else {
+            g_action_work.strike_count = 1;
+            g_action_work.strike_counter = 0;
+            g_action_work.weapon_proc_pending = 0;
+            g_action_work.knockback_flags = 0;
+            g_action_work.primary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
+            g_action_work.secondary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
+            action->skillset_id = 0;
+            action->targeting_type = TARGET_TYPE_TILE;
+            action->target_id = i;
+            if (g_reaction_ability_id == ABILITY_ID_REACTION_DAMAGE_SPLIT) {
+                action->target_id = g_action_actor_id;
+                unit = &g_battle_units[g_action_actor_id];
+            }
+            action->target_position.vx = unit->x;
+            action->target_position.vz = unit->position.y;
+            action->target_position.vy = unit->position.higher_elevation;
+        }
+
+        *out_ability = g_reaction_ability_id;
+        action->actor_id = i;
+        return i;
+    }
 
     g_action_context = ACTION_CONTEXT_PRIMARY;
     *out_ability = 0;
@@ -1548,15 +1569,14 @@ static s32 store_counter_ability(battle_unit_t* unit, s8 skillset_id, s16 abilit
     unit->action_command.skillset_id = skillset_id;
     unit->action_command.ability_id = ability_id;
     acting_unit = &g_battle_units[acting_unit_id];
-    if (validate_target != 0) {
+    if (validate_target) {
         result = target_set_range_for_action(action);
         if (result == TARGET_PANELS_INVALID || result == TARGET_PANELS_NO_TARGETING || result == TARGET_PANELS_NONE) {
             return -1;
         }
         /* A byte flag test retains the original compound-condition scheduling. */
-        if (((*(u8*)&g_map_tile_data[battle_unit_get_tile_index(acting_unit)].ceiling_depth_and_marks)
-                & MAP_TILE_FLAG_ABILITY_RANGE)
-            == 0) {
+        if (!((*(u8*)&g_map_tile_data[battle_unit_get_tile_index(acting_unit)].ceiling_depth_and_marks)
+                & MAP_TILE_FLAG_ABILITY_RANGE)) {
             return -2;
         }
     }
@@ -1568,6 +1588,7 @@ static s32 store_counter_ability(battle_unit_t* unit, s8 skillset_id, s16 abilit
     saved_charged_ability_ct = unit->charged_ability_ct;
     result = action_commit_preparation(action);
     unit->charged_ability_ct = saved_charged_ability_ct;
+    /* The bytes require the comma form: the equipment and Jump test is stored as the result. */
     if (result == ACTION_PREPARATION_INVALID
         || (preview_result = (result == ACTION_PREPARATION_CHANGE_EQUIPMENT || result == ACTION_PREPARATION_JUMP),
             preview_result != 0)) {
@@ -1620,10 +1641,10 @@ s32 reward_apply_action(s32 unit_index, action_reward_display_t* display) {
     display->level_for_display = 0;
     display->job_level_for_display = 0;
 
-    if (g_reaction_hamedo_flag != 0) {
+    if (g_reaction_hamedo_flag) {
         return -1;
     }
-    if (g_action_work.can_earn_exp_jp == 0) {
+    if (!g_action_work.can_earn_exp_jp) {
         return 0;
     }
 
@@ -1646,7 +1667,7 @@ s32 reward_apply_action(s32 unit_index, action_reward_display_t* display) {
         experience = 0xff;
     }
     unit->experience = experience;
-    if (battle_unit_check_level_up(unit) != 0 || g_action_work.level_gained_flag != 0) {
+    if (battle_unit_check_level_up(unit) || g_action_work.level_gained_flag) {
         display->level_for_display = unit->level;
     }
     display->earned_experience = g_action_work.earned_experience;
@@ -1850,7 +1871,7 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
      * tiles above and below it. */
     for (pass = 0; pass < 2; pass++) {
         limit = 4;
-        if (pass != 0) {
+        if (pass) {
             limit = 17;
         }
         for (i = 1; i < limit; i++) {

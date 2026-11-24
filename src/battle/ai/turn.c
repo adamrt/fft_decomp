@@ -1594,7 +1594,7 @@ static s32 select_destination(s32 max_distance, destination_order_e order) {
                             score = *(u16*)(tile_index * sizeof(ai->tile_priority[0][0][0]) + (u32)ai
                                 + offsetof(ai_workspace_t, tile_priority));
                             /* Compare the packed priority and proximity as a signed score. */
-                            score = score << 16;
+                            score <<= 16;
                             score += proximity;
                         }
                         if (order != AI_DESTINATION_PRIORITY_FIRST) {

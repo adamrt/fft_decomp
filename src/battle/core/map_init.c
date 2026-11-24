@@ -95,6 +95,7 @@ s32 unit_return_zero_1(void) {
  * g_encounter_selection_mode overrides it: 250, a random id 75..79, a random id
  * 1..59, or the map id when that is not 0. Returns encounter_start_file_load's result. */
 static s32 start_entd_open(void) {
+    /* The bytes require volatile: it keeps the script id's store ahead of every override. */
     volatile s32* current_encounter_id;
     s32 encounter_id;
     s32 selection_mode;
@@ -110,7 +111,7 @@ static s32 start_entd_open(void) {
         *current_encounter_id = (rand() * 5) / 0x8000 + 75;
     } else if (selection_mode == ENCOUNTER_SELECTION_RANDOM_1_TO_59) {
         *current_encounter_id = (rand() * 59) / 0x8000 + 1;
-    } else if ((selection_mode == ENCOUNTER_SELECTION_MAP_ID) && (g_map_id != 0)) {
+    } else if (selection_mode == ENCOUNTER_SELECTION_MAP_ID && g_map_id != 0) {
         *current_encounter_id = g_map_id;
     }
 
@@ -164,15 +165,13 @@ static void randomize_weather_from_calendar(void) {
     day = script_variable_get(EVENT_SCRIPT_VAR_DAY);
     weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);
 
-    period = 0;
-    while (period < WEATHER_CALENDAR_PERIOD_COUNT) {
+    for (period = 0; period < WEATHER_CALENDAR_PERIOD_COUNT; period++) {
         if (month < period_end_month[period]) {
             break;
         }
         if (month == period_end_month[period] && day < period_end_day[period]) {
             break;
         }
-        period++;
     }
 
     selected_weather_period = weather_period[period];
@@ -337,7 +336,7 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
         if (poll_entd_units_load() != 0) {
             break;
         }
-        if (s_sprite_unit_graphics_load_complete != 0) {
+        if (s_sprite_unit_graphics_load_complete) {
             sprite_clear_load_state(map_id);
             step = 7;
         } else {
@@ -365,7 +364,7 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
         }
         break;
     case 8:
-        if (g_deploy_finished != 0) {
+        if (g_deploy_finished) {
             step++;
             deploy_init_sprite_load();
             g_deploy_skipped = 0;
@@ -380,7 +379,8 @@ s32 map_update_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_run
         }
         break;
     case 10:
-        if (deployment_running == 0) {
+        if (!deployment_running) {
+
             step++;
             scenario_restore_music_and_darkness();
         }

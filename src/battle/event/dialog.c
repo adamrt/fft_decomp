@@ -875,7 +875,7 @@ void message_dialog_thread(void) {
                 repeat = value + (text[1] >> 5) + 4;
                 value = text[1] & 0xF;
                 value *= 0xFE;
-                value = value + text[2];
+                value += text[2];
                 text -= value;
             } else {
                 if (character < TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
@@ -890,7 +890,7 @@ void message_dialog_thread(void) {
                         repeat = value + (text[1] >> 5) + 4;
                         value = text[1] & 0xF;
                         value *= 0xFE;
-                        value = value + text[2];
+                        value += text[2];
                         text -= value;
                     }
                     character += *text;

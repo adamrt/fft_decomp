@@ -68,6 +68,7 @@ void script_opcode_68_mirror_sprite(const event_mirror_sprite_parameters_t* para
  * palette modulation without tile effects, unless the unit is missing. */
 void script_opcode_97_reset_palette(const event_unit_parameters_t* parameters) {
     s32 map_unit_id = script_resolve_map_unit_id(script_read_s16(parameters->unit_id_le));
+
     if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
         sprite_map_unit_reset_palette(map_unit_id);
     }

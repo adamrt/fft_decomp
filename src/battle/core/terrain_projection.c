@@ -161,7 +161,7 @@ void sprite_build_shadow_quad(map_unit_t* unit) {
     s32 rise;
 
     map_unit_copy_draw_coords(&coords, unit);
-    tile = map_get_tile((coords.vx / MAP_TILE_SIZE), (coords.vz / MAP_TILE_SIZE), layer);
+    tile = map_get_tile(coords.vx / MAP_TILE_SIZE, coords.vz / MAP_TILE_SIZE, layer);
     depth = tile->depth_half_height;
     height = tile->height + depth.depth;
     slope_type = tile->slope_type;
@@ -340,7 +340,7 @@ s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad
     u8 slope;
 
     split = 0;
-    tile = map_get_tile((coords->vx / MAP_TILE_SIZE), (coords->vz / MAP_TILE_SIZE), layer);
+    tile = map_get_tile(coords->vx / MAP_TILE_SIZE, coords->vz / MAP_TILE_SIZE, layer);
     height = tile->height;
     /* Byte access retains the original packed load and field-extraction order. */
     depth = (*(u8*)&tile->depth_half_height);
@@ -354,7 +354,7 @@ s32 cursor_calculate_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad
     quad[3].vx = coords->vx + 14;
     quad[3].vz = coords->vz - 14;
     quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -((height + (depth >> MAP_TILE_DEPTH_SHIFT)) * MAP_HEIGHT_STEP);
-    if ((depth & MAP_TILE_HALF_HEIGHT_MASK) != 0) {
+    if (depth & MAP_TILE_HALF_HEIGHT_MASK) {
         /* The slope spans half_height levels: raise the quad to its middle, then
          * move the high corners up and the low corners down by half the span. */
         rise = (depth & MAP_TILE_HALF_HEIGHT_MASK) * (MAP_HEIGHT_STEP / 2);

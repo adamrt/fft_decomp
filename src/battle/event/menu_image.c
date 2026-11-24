@@ -97,6 +97,7 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
                     operand = *cursor;
                     g_menu_text_palette_offset = operand;
                 } else if (state->command == TEXT_CHOICE_MARK) {
+                    /* draws nothing */
                 } else if (state->command == TEXT_SPACE) {
                     pen->rect.x += 4;
                 } else if (state->command == TEXT_NEWLINE) {
@@ -174,11 +175,12 @@ void text_render_to_image(s32 text_id, u8* image, glyph_blit_t* origin, const u8
                  * the code once the copy is used up. */
                 if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
                     state->return_cursor = cursor + 3;
+                    /* Each partial sum goes through the scratch field; combined expressions compile differently. */
                     state->scratch = (cursor[0] & 3) * 8;
                     state->remaining_bytes = cursor[1] >> 5;
                     state->remaining_bytes = state->remaining_bytes + state->scratch + 4;
                     state->scratch = (cursor[1] & 0xF) * 0xFE;
-                    state->scratch = cursor[2] + state->scratch;
+                    state->scratch += cursor[2];
                     cursor -= state->scratch;
                     continue;
                 }

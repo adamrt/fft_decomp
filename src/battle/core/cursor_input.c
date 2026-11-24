@@ -470,7 +470,8 @@ void cursor_move_to_selection(const map_unit_t* unit, const map_unit_t* selected
         g_cursor_layer = unit->command_state.cursor.target_panel.vy;
         g_cursor_y = unit->command_state.cursor.target_panel.vz;
     }
-    if (((g_cursor_x != old_x) | (g_cursor_layer != old_layer) | (g_cursor_y != old_y)) != 0) {
+    /* The target ORs the three comparisons into one test; || branches per coordinate. */
+    if ((g_cursor_x != old_x) | (g_cursor_layer != old_layer) | (g_cursor_y != old_y)) {
         switch (g_battle_state) {
         case BATTLE_STATE_FREE_CURSOR:
         case BATTLE_STATE_SELECT_MOVE_TILE:
@@ -590,7 +591,7 @@ s32 cursor_move_by_input(void) {
             g_cursor_x = 0;
         }
         if (g_cursor_y == g_map_terrain_depth) {
-            g_cursor_y = g_map_terrain_depth - 1;
+            g_cursor_y--;
         }
         if ((u32)g_cursor_y > g_map_terrain_depth) {
             g_cursor_y = 0;
@@ -649,9 +650,8 @@ s32 cursor_move_by_input(void) {
         }
     }
 
-    if (((g_cursor_x != s_cursor_previous_tile.x) | (g_cursor_layer != s_cursor_previous_tile.layer)
-            | (g_cursor_y != s_cursor_previous_tile.y))
-        != 0) {
+    if ((g_cursor_x != s_cursor_previous_tile.x) | (g_cursor_layer != s_cursor_previous_tile.layer)
+        | (g_cursor_y != s_cursor_previous_tile.y)) {
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
         s_cursor_repeat_counter = 0;
         switch (g_battle_state) {

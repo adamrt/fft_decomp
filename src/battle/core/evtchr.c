@@ -157,7 +157,7 @@ s32 sprite_evtchr_map_unit_load_attack_image(s32 map_unit_id, s32 slot) {
 /* Free a slot's page if it holds a unit's attack image. The EVTCHR (0xfe) and free (0xff)
  * markers carry the same 0x80 bit, so a saved EVTCHR page is freed too (QUIRKS.md). */
 s32 sprite_evtchr_release_reserved_slot(s32 slot_index) {
-    if ((g_sprite_evtchr_slots[slot_index].owner & SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE) != 0) {
+    if (g_sprite_evtchr_slots[slot_index].owner & SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE) {
         g_sprite_evtchr_slots[slot_index].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
         g_sprite_evtchr_slots[slot_index].evtchr_load_state = 0;
         return 1;
@@ -260,10 +260,10 @@ static u32 get_spritesheet_height(map_unit_t* unit) {
     if (unit == 0) {
         return 0;
     }
-    if ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) != 0) {
+    if (unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) {
         return 0;
     }
-    if ((unit->status_flags_1_4 & UNIT_STATUS_DEAD) != 0) {
+    if (unit->status_flags_1_4 & UNIT_STATUS_DEAD) {
         return 0;
     }
     return g_sprite_sheet_data[unit->spritesheet_id].graphic_height;

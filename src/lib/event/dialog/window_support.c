@@ -56,23 +56,23 @@ s32 text_count_decimal_digits(s32 value) {
 /* For a negative direction, mirror the quad's texture: swap u0/u1 and u2/u3, or the matching v
  * values when the texture runs vertically (u0 == u1). */
 void gfx_flip_quad_negative_uv(POLY_FT4* primitive, s32 direction) {
-    u8 temp;
+    u8 swap;
 
     if (direction < 0) {
         if (primitive->u0 != primitive->u1) {
-            temp = primitive->u0;
+            swap = primitive->u0;
             primitive->u0 = primitive->u1;
-            primitive->u1 = temp;
-            temp = primitive->u2;
+            primitive->u1 = swap;
+            swap = primitive->u2;
             primitive->u2 = primitive->u3;
-            primitive->u3 = temp;
+            primitive->u3 = swap;
         } else {
-            temp = primitive->v0;
+            swap = primitive->v0;
             primitive->v0 = primitive->v1;
-            primitive->v1 = temp;
-            temp = primitive->v2;
+            primitive->v1 = swap;
+            swap = primitive->v2;
             primitive->v2 = primitive->v3;
-            primitive->v3 = temp;
+            primitive->v3 = swap;
         }
     }
 }
@@ -187,14 +187,12 @@ void script_opcode_16_pause(void) {
  * address 0. */
 SVECTOR* map_unit_copy_world_coords_static(u32 map_unit_id) {
     SVECTOR* source = map_unit_get_world_coords(map_unit_id);
-    SVECTOR* dest;
 
     if (source != (SVECTOR*)-1) {
-        dest = &s_map_unit_coords;
-        dest->vx = source->vx;
+        s_map_unit_coords.vx = source->vx;
         s_map_unit_coords.vy = source->vy;
         s_map_unit_coords.vz = source->vz;
-        return dest;
+        return &s_map_unit_coords;
     }
     return (SVECTOR*)-1;
 }

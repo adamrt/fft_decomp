@@ -151,7 +151,9 @@ void fade_event_run_out(void) {
  * 0x19a..0x1a9; WORLD has no tutorial events and always returns 0. */
 s32 tutorial_is_current_event(void) {
 #ifdef FFT_BATTLE
-    return (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) - EVENT_ID_TUTORIAL_FIRST) < 0x10U;
+    s32 event_id = script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+
+    return event_id >= EVENT_ID_TUTORIAL_FIRST && event_id < EVENT_ID_TUTORIAL_FIRST + 16;
 #else
     return 0;
 #endif
@@ -161,8 +163,10 @@ s32 tutorial_is_current_event(void) {
  * resolves to no map unit or one without battle stats. */
 s32 battle_unit_get_id_by_event_unit_id(s32 event_unit_id) {
     s32 map_unit_id = script_resolve_map_unit_id(event_unit_id);
+
     if (map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
         s32 battle_unit_id = map_unit_get_battle_unit_id(map_unit_id);
+
         if (battle_unit_id != -1) {
             return battle_unit_id;
         }
@@ -222,7 +226,7 @@ void camera_wait_idle(void) {
  * yaws down to -10 turns positive before the mask. */
 void camera_normalize_yaw(void) {
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]
-        = (g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] + 0xa000) & 0x0fff;
+        = (g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] + 10 * ONE) & (ONE - 1);
 }
 
 /* Step the camera tilt by 0x10 per frame to the nearer of the two resting tilts, 0x12e

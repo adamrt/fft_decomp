@@ -101,8 +101,7 @@ void sprite_draw_shadow(map_unit_t* unit, u32* ot) {
     SetTransMatrix(&g_camera_matrix);
     prim = g_sprite_prim_pool + sprite_take_primitive();
     corners = unit->shadow_quad;
-    ((P_TAG*)prim)->len = 9;
-    prim->code = 0x2c;
+    setPolyFT4(prim);
     RotTrans(&corners[0], &transformed, &flag);
     prim->x0 = transformed.vx;
     prim->y0 = transformed.vy;
@@ -115,9 +114,8 @@ void sprite_draw_shadow(map_unit_t* unit, u32* ot) {
     RotTrans(&corners[3], &transformed, &flag);
     prim->x3 = transformed.vx;
     prim->y3 = transformed.vy;
-    prim->code |= 2;
-    tile = map_get_tile(
-        (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_layer);
+    setSemiTrans(prim, 1);
+    tile = map_get_tile(unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_layer);
     if (tile->depth_half_height.depth
         && -(tile->height + tile->depth_half_height.depth) * MAP_HEIGHT_STEP < unit->world_coords.vy) {
         unit->shadow_counter += g_system_vsync_interval;
@@ -166,7 +164,7 @@ void sprite_draw_shadow(map_unit_t* unit, u32* ot) {
     if (unit->world_coords.vy >= position.vy) {
         packet = ot;
     } else {
-        tile = map_get_tile((position.vx / MAP_TILE_SIZE), (position.vz / MAP_TILE_SIZE), unit->map_layer);
+        tile = map_get_tile(position.vx / MAP_TILE_SIZE, position.vz / MAP_TILE_SIZE, unit->map_layer);
         position.vy -= tile->depth_half_height.depth * MAP_HEIGHT_STEP;
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if (tile->surface.depth_bias) {
@@ -217,8 +215,7 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
     case 0:
         quad = g_sprite_prim_pool + sprite_take_primitive();
         quad_glow = g_sprite_prim_pool + sprite_take_primitive();
-        ((P_TAG*)quad)->len = 9;
-        quad->code = 0x2c;
+        setPolyFT4(quad);
         RotTrans(v0, &screen, &flag);
         quad->x0 = screen.vx;
         quad->y0 = screen.vy;
@@ -231,7 +228,7 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         RotTrans(v3, &screen, &flag);
         quad->x3 = screen.vx;
         quad->y3 = screen.vy;
-        quad->code |= 2;
+        setSemiTrans(quad, 1);
         quad->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         quad->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         quad->r0 = quad->g0 = quad->b0 = 0x80;
@@ -264,10 +261,8 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         tri_b = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
         tri_a_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
         tri_b_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
-        ((P_TAG*)tri_a)->len = 7;
-        tri_a->code = 0x24;
-        ((P_TAG*)tri_b)->len = 7;
-        tri_b->code = 0x24;
+        setPolyFT3(tri_a);
+        setPolyFT3(tri_b);
         RotTrans(v0, &screen, &flag);
         tri_a->x0 = screen.vx;
         tri_a->y0 = screen.vy;
@@ -280,8 +275,8 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         RotTrans(v3, &screen, &flag);
         tri_b->x1 = screen.vx;
         tri_b->y1 = screen.vy;
-        tri_a->code |= 2;
-        tri_b->code |= 2;
+        setSemiTrans(tri_a, 1);
+        setSemiTrans(tri_b, 1);
         tri_a->tpage = tri_b->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b->r0 = tri_b->g0 = tri_b->b0 = 0x80;
@@ -330,10 +325,8 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         tri_b = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
         tri_a_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
         tri_b_glow = (POLY_FT3*)(g_sprite_prim_pool + sprite_take_primitive());
-        ((P_TAG*)tri_a)->len = 7;
-        tri_a->code = 0x24;
-        ((P_TAG*)tri_b)->len = 7;
-        tri_b->code = 0x24;
+        setPolyFT3(tri_a);
+        setPolyFT3(tri_b);
         RotTrans(v0, &screen, &flag);
         tri_a->x0 = tri_b->x0 = screen.vx;
         tri_a->y0 = tri_b->y0 = screen.vy;
@@ -346,8 +339,8 @@ void cursor_build_tile_glow(s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SV
         RotTrans(v3, &screen, &flag);
         tri_a->x2 = tri_b->x1 = screen.vx;
         tri_a->y2 = tri_b->y1 = screen.vy;
-        tri_a->code |= 2;
-        tri_b->code |= 2;
+        setSemiTrans(tri_a, 1);
+        setSemiTrans(tri_b, 1);
         tri_a->tpage = tri_b->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         tri_a->clut = tri_b->clut = GetClut(palette * 16 + 16, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
         tri_b->r0 = tri_b->g0 = tri_b->b0 = 0x80;
@@ -419,12 +412,11 @@ void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
     s32 half_height;
 
     prim = g_sprite_prim_pool + sprite_take_primitive();
-    ((P_TAG*)prim)->len = 9;
-    prim->code = 0x2c;
+    setPolyFT4(prim);
     if (g_menu_status_screen_selected != 1) {
         s_cursor_selection_bob_timer += g_system_vsync_interval;
         if (s_cursor_selection_bob_timer >= duration[s_cursor_selection_bob_frame]) {
-            s_cursor_selection_bob_frame += 1;
+            s_cursor_selection_bob_frame++;
             s_cursor_selection_bob_timer = 0;
             if (s_cursor_selection_bob_frame >= 8) {
                 s_cursor_selection_bob_frame = 0;
@@ -454,7 +446,7 @@ void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
         prim->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_SUBTRACT;
         prim->y3 = screen_y + half_height;
     }
-    prim->code |= 2;
+    setSemiTrans(prim, 1);
     prim->clut = GetClut(0x40, MAP_CLUT_ROWS_Y + MAP_CLUT_ROW_SPRITES);
     prim->r0 = prim->g0 = prim->b0 = 0x80;
     prim->u2 = 0x40;
@@ -467,7 +459,7 @@ void cursor_draw_map_selection(SVECTOR* base, u32* ot) {
     prim->v2 = 0x98;
     camera_get_unbiased_tile_depth_point(base, &screen);
     RotTrans(&screen, &transformed, &flag);
-    AddPrim(ot + (transformed.vz / 4), prim);
+    AddPrim(ot + transformed.vz / 4, prim);
 }
 
 /*
@@ -501,7 +493,7 @@ void map_unit_facing_draw_wait_arrows(SVECTOR* base, u32* ot) {
     g_unit_facing_wait_arrow_blink_timer += g_system_vsync_interval;
     for (i = 0; i < 4; i++) {
         prim = g_sprite_prim_pool + sprite_take_primitive();
-        ((P_TAG*)prim)->len = 9;
+        setlen(prim, 9);
         prim->code = 0x2e;
         prim->tpage = SPRITE_TPAGE_FRAME | PSYQ_GPU_TPAGE_ABR_ADD;
         vector_set_short(&position, base->vx + dx[i], base->vy - 48, base->vz + dz[i]);
@@ -626,9 +618,9 @@ static void update_bubble_cycle(map_unit_t* unit) {
             unit->status_bubble_alternate_row = (unit->status_bubble_timer & 0x10) >> 4;
         }
 
-        if ((unit->status_bubble_timer & 0xF) == 0) {
+        if (!(unit->status_bubble_timer & 0xF)) {
             status_flags = unit->status_flags_1_4;
-            if (((status_flags & UNIT_STATUS_BUBBLE_MASK) == 0) && (unit->map_unit_id != g_unit_source_map_unit_id)) {
+            if (!(status_flags & UNIT_STATUS_BUBBLE_MASK) && unit->map_unit_id != g_unit_source_map_unit_id) {
                 unit->status_bubble_active = 0;
                 return;
             }
@@ -778,7 +770,7 @@ void sprite_status_bubble_draw(map_unit_t* unit, const DVECTOR* unused_screen_co
     if (bubble_id == STATUS_BUBBLE_SOURCE_UNIT) {
         display->parts[0].u = 0x72;
         display->parts[0].v = 0xB0;
-        if (unit->status_bubble_alternate_row != 0) {
+        if (unit->status_bubble_alternate_row) {
             display->parts[0].v = 0xBC;
         }
     } else if (bubble_id == STATUS_BUBBLE_DEAD) {
@@ -787,7 +779,7 @@ void sprite_status_bubble_draw(map_unit_t* unit, const DVECTOR* unused_screen_co
             display->parts[0].u = s_bubble_u[STATUS_BUBBLE_RERAISE];
             flag_row = s_bubble_v[STATUS_BUBBLE_RERAISE];
             display->parts[0].v = flag_row;
-            if (unit->status_bubble_alternate_row != 0) {
+            if (unit->status_bubble_alternate_row) {
                 display->parts[0].v = flag_row + 12;
             }
         } else if (table_index != 0xFF) {
@@ -797,7 +789,7 @@ void sprite_status_bubble_draw(map_unit_t* unit, const DVECTOR* unused_screen_co
             display->parts[0].u = s_bubble_u[STATUS_BUBBLE_DEAD];
             default_row = s_bubble_v[STATUS_BUBBLE_DEAD];
             display->parts[0].v = default_row;
-            if (unit->status_bubble_alternate_row != 0) {
+            if (unit->status_bubble_alternate_row) {
                 display->parts[0].v = default_row + 12;
             }
         }
@@ -810,7 +802,7 @@ void sprite_status_bubble_draw(map_unit_t* unit, const DVECTOR* unused_screen_co
         row = s_bubble_v[bubble_id];
         display->parts[0].v = row;
         if (bubble_id == STATUS_BUBBLE_CHARGING || bubble_id == STATUS_BUBBLE_RERAISE) {
-            if (unit->status_bubble_alternate_row != 0) {
+            if (unit->status_bubble_alternate_row) {
                 display->parts[0].v = row + 12;
             }
         }
@@ -847,7 +839,7 @@ void map_unit_update_float_and_status_bubble(map_unit_t* unit) {
         && phase != MOVE_STEP_PHASE_FLOAT_JUMP_WEST && phase != MOVE_STEP_PHASE_FLOAT_JUMP_NORTH) {
         update_float_height(unit);
     }
-    if (unit->status_bubble_active != 0) {
+    if (unit->status_bubble_active) {
         update_bubble_cycle(unit);
     }
 }
@@ -930,7 +922,7 @@ void sprite_item_display_draw(map_unit_t* unit) {
     SVECTOR zoom;
     u32* otag;
 
-    if ((unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) != 0) {
+    if (unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
         position.vx = unit->item_display_x_offset;
     } else {
         position.vx = -unit->item_display_x_offset;
@@ -972,7 +964,7 @@ static s32 build_next_result_display(map_unit_t* unit) {
     battle_unit = unit->battle_unit;
     display = &unit->numeric_display;
 
-    if ((flags & ACTION_DISPLAY_NUMERIC_FLAGS_MASK) != 0) {
+    if (flags & ACTION_DISPLAY_NUMERIC_FLAGS_MASK) {
         g_result_display_values[RESULT_DISPLAY_HP_DAMAGE] = battle_unit->action.hp_damage;
         g_result_display_values[RESULT_DISPLAY_HP_HEALING] = battle_unit->action.hp_healing;
         g_result_display_values[RESULT_DISPLAY_MP_DAMAGE] = battle_unit->action.mp_damage;
@@ -990,78 +982,56 @@ static s32 build_next_result_display(map_unit_t* unit) {
         change = battle_unit->action.faith_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_FAITH_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_FAITH_DAMAGE] = change;
-        flag = 1;
         change = battle_unit->action.pa_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_PA_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_PA_DAMAGE] = change;
-        index = 0;
         change = battle_unit->action.ma_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_result_display_values[RESULT_DISPLAY_MA_GAIN] = change;
         g_result_display_values[RESULT_DISPLAY_MA_DAMAGE] = change;
 
         /* Show the lowest pending numeric result and clear its flag. */
         scan_flags = unit->action_display_flags;
-        while (index < ACTION_DISPLAY_VALUE_COUNT) {
-            if ((flag & scan_flags) != 0) {
-                flags = index;
-                display->value = g_result_display_values[flags];
-                display->selector = g_result_numeric_selectors[flags];
-                index = unit->action_display_flags;
-                unit->action_display_flags = ~flag & index;
+        flag = 1;
+        for (index = 0; index < ACTION_DISPLAY_VALUE_COUNT; index++) {
+            if (flag & scan_flags) {
+                display->value = g_result_display_values[index];
+                display->selector = g_result_numeric_selectors[index];
+                unit->action_display_flags &= ~flag;
                 break;
             }
-            index++;
             flag <<= 1;
         }
-    } else if ((flags & ACTION_DISPLAY_FLAG_LEVEL_DOWN) != 0) {
-        u32 branch_flags;
+    } else if (flags & ACTION_DISPLAY_FLAG_LEVEL_DOWN) {
         unit->numeric_display.selector = RESULT_DISPLAY_LEVEL_DOWN;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_LEVEL_DOWN;
-    } else if ((flags & ACTION_DISPLAY_FLAG_LEVEL_UP) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_LEVEL_DOWN;
+    } else if (flags & ACTION_DISPLAY_FLAG_LEVEL_UP) {
         unit->numeric_display.selector = RESULT_DISPLAY_LEVEL_UP;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_LEVEL_UP;
-    } else if ((flags & ACTION_DISPLAY_FLAG_STOLEN) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_LEVEL_UP;
+    } else if (flags & ACTION_DISPLAY_FLAG_STOLEN) {
         unit->numeric_display.selector = RESULT_DISPLAY_STOLEN;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_STOLEN;
-    } else if ((flags & ACTION_DISPLAY_FLAG_BROKEN) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_STOLEN;
+    } else if (flags & ACTION_DISPLAY_FLAG_BROKEN) {
         unit->numeric_display.selector = RESULT_DISPLAY_BROKEN;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_BROKEN;
-    } else if ((flags & ACTION_DISPLAY_FLAG_QUICK) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_BROKEN;
+    } else if (flags & ACTION_DISPLAY_FLAG_QUICK) {
         unit->numeric_display.selector = RESULT_DISPLAY_QUICK;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_QUICK;
-    } else if ((flags & ACTION_DISPLAY_FLAG_CT_ZERO) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_QUICK;
+    } else if (flags & ACTION_DISPLAY_FLAG_CT_ZERO) {
         unit->numeric_display.selector = RESULT_DISPLAY_CT_ZERO;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_CT_ZERO;
-    } else if ((flags & ACTION_DISPLAY_FLAG_MISSED) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_CT_ZERO;
+    } else if (flags & ACTION_DISPLAY_FLAG_MISSED) {
         unit->numeric_display.selector = RESULT_DISPLAY_MISSED;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_MISSED;
-    } else if ((flags & ACTION_DISPLAY_FLAG_GUARDED) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_MISSED;
+    } else if (flags & ACTION_DISPLAY_FLAG_GUARDED) {
         unit->numeric_display.selector = RESULT_DISPLAY_GUARDED;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_GUARDED;
-    } else if ((flags & ACTION_DISPLAY_FLAG_CAUGHT) != 0) {
-        u32 branch_flags;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_GUARDED;
+    } else if (flags & ACTION_DISPLAY_FLAG_CAUGHT) {
         unit->numeric_display.selector = RESULT_DISPLAY_CAUGHT;
-        branch_flags = unit->action_display_flags;
-        unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_CAUGHT;
+        unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_CAUGHT;
     } else if (unit->status_display_image_count != 0) {
         unit->status_display_image_count--;
         status = unit->status_display_image_list[unit->status_display_image_count];
-        if ((status & ACTION_STATUS_DISPLAY_REMOVAL) != 0) {
+        if (status & ACTION_STATUS_DISPLAY_REMOVAL) {
             display->selector = RESULT_DISPLAY_STATUS_REMOVED;
         } else {
             display->selector = RESULT_DISPLAY_STATUS_INFLICTED;
@@ -1071,7 +1041,7 @@ static s32 build_next_result_display(map_unit_t* unit) {
         return 0;
     }
 
-    if (unit->battle_unit->action.critical != 0) {
+    if (unit->battle_unit->action.critical) {
         display->selector |= RESULT_DISPLAY_MODIFIER_CRITICAL;
     } else {
         display->selector &= ~RESULT_DISPLAY_MODIFIER_CRITICAL;
@@ -1163,7 +1133,7 @@ static s32 build_next_result_display(map_unit_t* unit) {
     case RESULT_DISPLAY_MP_HEALING:
         /* Damage (even selectors) shows at y 16, gains and healing at y -32. */
         y_shift = -32;
-        if ((display->selector & 1) == 0) {
+        if (!(display->selector & 1)) {
             y_shift = 16;
         }
         sprite_display_set_part(display_1, 0, -14, y_shift, 0, 0, 0, 0, 0);
@@ -1193,7 +1163,7 @@ static s32 build_next_result_display(map_unit_t* unit) {
     case RESULT_DISPLAY_MA_DAMAGE:
     case RESULT_DISPLAY_MA_GAIN:
         y_shift = -32;
-        if ((display->selector & 1) == 0) {
+        if (!(display->selector & 1)) {
             y_shift = 16;
         }
         if (digits[1] == 0) {
@@ -1294,7 +1264,7 @@ void result_prepare_display(map_unit_t* unit) {
         = unit->numeric_display.displays[2]->tpage = SPRITE_TPAGE_FRAME;
     battle_unit = unit->battle_unit;
     action = &battle_unit->action;
-    if (action->hit != 0) {
+    if (action->hit) {
         if (action->attack_type & ACTION_TYPE_HP_DAMAGE) {
             unit->action_display_flags |= ACTION_DISPLAY_FLAG_HP_DAMAGE;
         }
@@ -1401,7 +1371,7 @@ void result_prepare_display(map_unit_t* unit) {
          * CAUGHT, a canceled or reflected action nothing, any other miss MISSED. */
         miss = action->miss_type;
         if (miss != ACTION_MISS_TYPE_HIT) {
-            /* types 1 and 2: accessory and right-hand evade */
+            /* Types 1 and 2, accessory and right-hand evade, as the original range test. */
             if ((u32)(action->miss_type - 1) < 2 || miss == ACTION_MISS_TYPE_LEFT_HAND_EVADE
                 || miss == ACTION_MISS_TYPE_FORCED_FAILURE || miss == ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD) {
                 if ((action->miss_display_flags & ACTION_MISS_DISPLAY_TEAM_MASK) == ACTION_MISS_DISPLAY_ALLIES_ONLY) {
@@ -1417,7 +1387,7 @@ void result_prepare_display(map_unit_t* unit) {
             }
         }
     }
-    if (unit->numeric_display.active == 0) {
+    if (!unit->numeric_display.active) {
         unit->numeric_display.progress = 0;
         build_next_result_display(unit);
     }
@@ -1443,7 +1413,7 @@ static s32 build_next_special_result_display(map_unit_t* unit) {
 
     flags = unit->action_display_flags;
     display = &unit->numeric_display;
-    if ((flags & ACTION_DISPLAY_FLAG_GAINED_EXP) != 0) {
+    if (flags & ACTION_DISPLAY_FLAG_GAINED_EXP) {
         unit->numeric_display.selector = RESULT_DISPLAY_GAINED_EXP;
         unit->numeric_display.active = 1;
         unit->numeric_display.value = unit->strike.action_rewards.earned_experience;
@@ -1451,7 +1421,7 @@ static s32 build_next_special_result_display(map_unit_t* unit) {
         if (unit->numeric_display.progress >= 22) {
             unit->numeric_display.progress = 21;
         }
-    } else if ((flags & ACTION_DISPLAY_FLAG_GAINED_JP) != 0) {
+    } else if (flags & ACTION_DISPLAY_FLAG_GAINED_JP) {
         unit->numeric_display.selector = RESULT_DISPLAY_GAINED_JP;
         unit->numeric_display.active = 1;
         unit->numeric_display.value = unit->strike.action_rewards.earned_jp;
@@ -1460,13 +1430,13 @@ static s32 build_next_special_result_display(map_unit_t* unit) {
             unit->numeric_display.progress = 21;
         }
     } else {
-        if ((flags & ACTION_DISPLAY_FLAG_NO_TARGET) != 0) {
+        if (flags & ACTION_DISPLAY_FLAG_NO_TARGET) {
             clear = ~ACTION_DISPLAY_FLAG_NO_TARGET;
             selector = RESULT_DISPLAY_NO_TARGET;
-        } else if ((flags & ACTION_DISPLAY_FLAG_SILENCED) != 0) {
+        } else if (flags & ACTION_DISPLAY_FLAG_SILENCED) {
             clear = ~ACTION_DISPLAY_FLAG_SILENCED;
             selector = RESULT_DISPLAY_SILENCED;
-        } else if ((flags & ACTION_DISPLAY_FLAG_NO_MP) != 0) {
+        } else if (flags & ACTION_DISPLAY_FLAG_NO_MP) {
             clear = ~ACTION_DISPLAY_FLAG_NO_MP;
             selector = RESULT_DISPLAY_NO_MP;
         } else {
@@ -1566,7 +1536,7 @@ void result_queue_exp_jp_display(map_unit_t* unit) {
         if (unit->strike.action_rewards.earned_jp != 0) {
             unit->action_display_flags |= ACTION_DISPLAY_FLAG_GAINED_JP;
         }
-        if (unit->numeric_display.active == 0) {
+        if (!unit->numeric_display.active) {
             unit->numeric_display.progress = 0;
             build_next_special_result_display(unit);
         }
@@ -1598,7 +1568,7 @@ void result_queue_charge_failure(map_unit_t* unit, s32 reason) {
         unit->action_display_flags |= ACTION_DISPLAY_FLAG_NO_MP;
         break;
     }
-    if (unit->numeric_display.active == 0) {
+    if (!unit->numeric_display.active) {
         unit->numeric_display.progress = 0;
         build_next_special_result_display(unit);
     }
@@ -1666,10 +1636,10 @@ void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
             }
         }
     } else if (progress >= 50 && unit->numeric_display.progress < 50) {
-        if (build_next_result_display(unit) != 0) {
+        if (build_next_result_display(unit)) {
             return;
         }
-        if (build_next_special_result_display(unit) != 0) {
+        if (build_next_special_result_display(unit)) {
             return;
         }
         unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
@@ -1679,10 +1649,10 @@ void result_animate_text(map_unit_t* unit, const SVECTOR* screen_coords) {
         sprite_display_set_part_semi_transparent(display_1, 0, 1);
         sprite_display_set_part_semi_transparent(display_2, 0, 1);
     } else if (progress >= 61) {
-        if (build_next_result_display(unit) != 0) {
+        if (build_next_result_display(unit)) {
             return;
         }
-        if (build_next_special_result_display(unit) != 0) {
+        if (build_next_special_result_display(unit)) {
             return;
         }
         unit->numeric_display.active = 0;

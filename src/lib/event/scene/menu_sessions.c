@@ -80,6 +80,7 @@ s32 deploy_open(void) {
     s32 result;
     s32 return_value;
     game_options_fields_t* options;
+
     g_unit_panel_hide_numeric_values = 0;
     menu_subsystems_init();
     map_unit_reset_animation_states();
@@ -161,17 +162,14 @@ s32 menu_thread_get_activity(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         return 2;
     }
-    i = 4;
-    do {
-        if (i != 3) {
-            if (thread_is_running_asm(i) != 0) {
-                break;
-            }
+    for (i = 4; i < 10; i++) {
+        if (i != 3 && thread_is_running_asm(i) != 0) {
+            break;
         }
-        i += 1;
-    } while (i < 0xA);
+    }
     if (g_menu_input_mode != MENU_INPUT_BLOCKED) {
-        result = i != 0xA;
+        /* Through a local: returning the product directly compiles differently. */
+        result = i != 10;
         return result * 4;
     }
     return 2;

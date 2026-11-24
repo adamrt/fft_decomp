@@ -215,7 +215,8 @@ static map_state_record_t* load_animation_record(map_state_record_t* record);
 
 /* Apply a map_polygon_flag_command_e to the textured map polygons: reset or clear
  * their per-frame lit flag, or repaint the unlit ones in the ambient color in the
- * current render buffer. */
+ * current render buffer. The repaint's pointer-plus form, not gt3[i] indexing,
+ * is what the bytes require (as in map_mesh_draw_weather). */
 static void dispatch_polygon_flags(s32 command) {
     s32 i;
 
@@ -533,11 +534,6 @@ void* map_light_dispatch_state_command(map_light_command_e command, void* data) 
     return result;
 }
 
-#define GT3(i)       (g_render_current_buffer->gt3[i])
-#define GT4(i)       (g_render_current_buffer->gt4[i])
-#define SAVED_GT3(i) (g_map_tile_mark_color_buffer->gt3[i])
-#define SAVED_GT4(i) g_map_tile_mark_color_buffer->gt4[i]
-
 /* Queue the map mesh parts and weather particles for one frame, then apply or
  * restore the targeting and movement tile colors.
  *
@@ -587,7 +583,7 @@ void map_mesh_draw_weather(MATRIX* camera) {
     update_mesh_animations();
 
     /* Lightning strikes at random, about once every 480 frames, with one of two thunder sounds. */
-    if (g_weather_lightning_mode != MAP_LIGHTNING_OFF && g_weather_sfx_enabled != 0) {
+    if (g_weather_lightning_mode != MAP_LIGHTNING_OFF && g_weather_sfx_enabled) {
         if (rand() % 480 == 0) {
             g_weather_lightning_state.timer = 60;
             if (rand() & 1) {
@@ -637,7 +633,7 @@ void map_mesh_draw_weather(MATRIX* camera) {
         }
     }
 
-    if (g_map_light_transition_command != 0) {
+    if (g_map_light_transition_command) {
         map_light_dispatch_matrix_command(
             g_map_light_transition_command, &g_map_light_color_matrix, &g_map_light_matrix, 0);
     }
@@ -753,7 +749,7 @@ void map_mesh_draw_weather(MATRIX* camera) {
 
             /* While an ability effect runs on these three maps, keyframes 0x61 onward give four points per part;
              * transform them by the part's pose into g_effect_map_vertices. */
-            if (g_map_untextured_otz_mask != 0 && g_effect_map_vertices != 0
+            if (g_map_untextured_otz_mask && g_effect_map_vertices
                 && (g_map_loaded_id == MAP_ID_ENTRANCE_TO_DEATH_CITY || g_map_loaded_id == MAP_ID_GRAVEYARD_OF_AIRSHIPS
                     || g_map_loaded_id == MAP_ID_ZIREKILE_FALLS)) {
                 RotMatrix(&g_map_mesh_parts[part].rotation, &effect_matrix);
@@ -832,18 +828,18 @@ void map_mesh_draw_weather(MATRIX* camera) {
             }
 
             /* Drift one unit in x or z, each about once every 32 frames. */
-            if ((rand() & 0x1F) == 0) {
+            if (!(rand() & 0x1F)) {
                 if (rand() & 1) {
-                    g_weather_particles[i].x = g_weather_particles[i].x + 1;
+                    g_weather_particles[i].x++;
                 } else {
-                    g_weather_particles[i].x = g_weather_particles[i].x - 1;
+                    g_weather_particles[i].x--;
                 }
             }
-            if ((rand() & 0x1F) == 0) {
+            if (!(rand() & 0x1F)) {
                 if (rand() & 1) {
-                    g_weather_particles[i].z = g_weather_particles[i].z + 1;
+                    g_weather_particles[i].z++;
                 } else {
-                    g_weather_particles[i].z = g_weather_particles[i].z - 1;
+                    g_weather_particles[i].z--;
                 }
             }
 
@@ -942,18 +938,18 @@ void map_mesh_draw_weather(MATRIX* camera) {
                 }
             }
 
-            if ((rand() & 0x1F) == 0) {
+            if (!(rand() & 0x1F)) {
                 if (rand() & 1) {
-                    g_weather_particles[i].x = g_weather_particles[i].x + 1;
+                    g_weather_particles[i].x++;
                 } else {
-                    g_weather_particles[i].x = g_weather_particles[i].x - 1;
+                    g_weather_particles[i].x--;
                 }
             }
-            if ((rand() & 0x1F) == 0) {
+            if (!(rand() & 0x1F)) {
                 if (rand() & 1) {
-                    g_weather_particles[i].z = g_weather_particles[i].z + 1;
+                    g_weather_particles[i].z++;
                 } else {
-                    g_weather_particles[i].z = g_weather_particles[i].z - 1;
+                    g_weather_particles[i].z--;
                 }
             }
 
@@ -1093,7 +1089,7 @@ void map_mesh_draw_weather(MATRIX* camera) {
 
                 g_weather_rain_splash_particles[i].fall_speed--;
                 frame = g_weather_rain_splash_particles[i].fall_speed;
-                if ((frame & 3) == 0) {
+                if (!(frame & 3)) {
                     g_render_buffers[0].ft3[i + 32].u0 = splash_uv[(frame >> 2) & 3].x;
                     g_render_buffers[1].ft3[i + 32].u0 = splash_uv[(frame >> 2) & 3].x;
                     g_render_buffers[0].ft3[i + 32].u1 = splash_uv[(frame >> 2) & 3].x + splash_uv[(frame >> 2) & 3].w;
@@ -1116,9 +1112,9 @@ void map_mesh_draw_weather(MATRIX* camera) {
     }
 
     /* The ambient color restores use pointer arithmetic on the decayed arrays
-     * rather than GT3(i)/GT4(i) indexing: that keeps the target's
+     * rather than g_render_current_buffer->gt3[i]/g_render_current_buffer->gt4[i] indexing: that keeps the target's
      * `addu offset, base` operand order (as in target_set_tile_background_color). */
-    if (g_map_ambient_restored_buffer != 0) {
+    if (g_map_ambient_restored_buffer) {
         /* Ambient colors repainted in one render buffer are repeated once in the other. */
         if (g_map_ambient_restored_buffer != g_render_current_buffer) {
             for (i = 0; i < g_map_textured_triangle_count; i++) {
@@ -1169,16 +1165,17 @@ void map_mesh_draw_weather(MATRIX* camera) {
                 }
                 if (g_map_tile_data_ptr[tile].ceiling_depth_and_marks.move_destination) {
                     /* Keep the CLUT's x and switch it to the marked-tiles palette row. */
-                    GT3(i).clut = (GT3(i).clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
-                    GT3(i).r0 = 0x20;
-                    GT3(i).r1 = 0x20;
-                    GT3(i).r2 = 0x20;
-                    GT3(i).g0 = 0x28;
-                    GT3(i).g1 = 0x28;
-                    GT3(i).g2 = 0x28;
-                    GT3(i).b0 = 0x60;
-                    GT3(i).b1 = 0x60;
-                    GT3(i).b2 = 0x60;
+                    g_render_current_buffer->gt3[i].clut
+                        = (g_render_current_buffer->gt3[i].clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
+                    g_render_current_buffer->gt3[i].r0 = 0x20;
+                    g_render_current_buffer->gt3[i].r1 = 0x20;
+                    g_render_current_buffer->gt3[i].r2 = 0x20;
+                    g_render_current_buffer->gt3[i].g0 = 0x28;
+                    g_render_current_buffer->gt3[i].g1 = 0x28;
+                    g_render_current_buffer->gt3[i].g2 = 0x28;
+                    g_render_current_buffer->gt3[i].b0 = 0x60;
+                    g_render_current_buffer->gt3[i].b1 = 0x60;
+                    g_render_current_buffer->gt3[i].b2 = 0x60;
                 }
             }
         }
@@ -1192,19 +1189,20 @@ void map_mesh_draw_weather(MATRIX* camera) {
                     tile += 0x100;
                 }
                 if (g_map_tile_data_ptr[tile].ceiling_depth_and_marks.move_destination) {
-                    GT4(i).clut = (GT4(i).clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
-                    GT4(i).r0 = 0x20;
-                    GT4(i).r1 = 0x20;
-                    GT4(i).r2 = 0x20;
-                    GT4(i).r3 = 0x20;
-                    GT4(i).g0 = 0x28;
-                    GT4(i).g1 = 0x28;
-                    GT4(i).g2 = 0x28;
-                    GT4(i).g3 = 0x28;
-                    GT4(i).b0 = 0x60;
-                    GT4(i).b1 = 0x60;
-                    GT4(i).b2 = 0x60;
-                    GT4(i).b3 = 0x60;
+                    g_render_current_buffer->gt4[i].clut
+                        = (g_render_current_buffer->gt4[i].clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
+                    g_render_current_buffer->gt4[i].r0 = 0x20;
+                    g_render_current_buffer->gt4[i].r1 = 0x20;
+                    g_render_current_buffer->gt4[i].r2 = 0x20;
+                    g_render_current_buffer->gt4[i].r3 = 0x20;
+                    g_render_current_buffer->gt4[i].g0 = 0x28;
+                    g_render_current_buffer->gt4[i].g1 = 0x28;
+                    g_render_current_buffer->gt4[i].g2 = 0x28;
+                    g_render_current_buffer->gt4[i].g3 = 0x28;
+                    g_render_current_buffer->gt4[i].b0 = 0x60;
+                    g_render_current_buffer->gt4[i].b1 = 0x60;
+                    g_render_current_buffer->gt4[i].b2 = 0x60;
+                    g_render_current_buffer->gt4[i].b3 = 0x60;
                 }
             }
         }
@@ -1222,16 +1220,17 @@ void map_mesh_draw_weather(MATRIX* camera) {
                     tile += 0x100;
                 }
                 if (g_map_tile_data_ptr[tile].ceiling_depth_and_marks.ability_range) {
-                    GT3(i).clut = (GT3(i).clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
-                    GT3(i).r0 = 0x60;
-                    GT3(i).r1 = 0x60;
-                    GT3(i).r2 = 0x60;
-                    GT3(i).g0 = 0x18;
-                    GT3(i).g1 = 0x18;
-                    GT3(i).g2 = 0x18;
-                    GT3(i).b0 = 0x20;
-                    GT3(i).b1 = 0x20;
-                    GT3(i).b2 = 0x20;
+                    g_render_current_buffer->gt3[i].clut
+                        = (g_render_current_buffer->gt3[i].clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
+                    g_render_current_buffer->gt3[i].r0 = 0x60;
+                    g_render_current_buffer->gt3[i].r1 = 0x60;
+                    g_render_current_buffer->gt3[i].r2 = 0x60;
+                    g_render_current_buffer->gt3[i].g0 = 0x18;
+                    g_render_current_buffer->gt3[i].g1 = 0x18;
+                    g_render_current_buffer->gt3[i].g2 = 0x18;
+                    g_render_current_buffer->gt3[i].b0 = 0x20;
+                    g_render_current_buffer->gt3[i].b1 = 0x20;
+                    g_render_current_buffer->gt3[i].b2 = 0x20;
                 }
             }
         }
@@ -1245,19 +1244,20 @@ void map_mesh_draw_weather(MATRIX* camera) {
                     tile += 0x100;
                 }
                 if (g_map_tile_data_ptr[tile].ceiling_depth_and_marks.ability_range) {
-                    GT4(i).clut = (GT4(i).clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
-                    GT4(i).r0 = 0x60;
-                    GT4(i).r1 = 0x60;
-                    GT4(i).r2 = 0x60;
-                    GT4(i).r3 = 0x60;
-                    GT4(i).g0 = 0x18;
-                    GT4(i).g1 = 0x18;
-                    GT4(i).g2 = 0x18;
-                    GT4(i).g3 = 0x18;
-                    GT4(i).b0 = 0x20;
-                    GT4(i).b1 = 0x20;
-                    GT4(i).b2 = 0x20;
-                    GT4(i).b3 = 0x20;
+                    g_render_current_buffer->gt4[i].clut
+                        = (g_render_current_buffer->gt4[i].clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
+                    g_render_current_buffer->gt4[i].r0 = 0x60;
+                    g_render_current_buffer->gt4[i].r1 = 0x60;
+                    g_render_current_buffer->gt4[i].r2 = 0x60;
+                    g_render_current_buffer->gt4[i].r3 = 0x60;
+                    g_render_current_buffer->gt4[i].g0 = 0x18;
+                    g_render_current_buffer->gt4[i].g1 = 0x18;
+                    g_render_current_buffer->gt4[i].g2 = 0x18;
+                    g_render_current_buffer->gt4[i].g3 = 0x18;
+                    g_render_current_buffer->gt4[i].b0 = 0x20;
+                    g_render_current_buffer->gt4[i].b1 = 0x20;
+                    g_render_current_buffer->gt4[i].b2 = 0x20;
+                    g_render_current_buffer->gt4[i].b3 = 0x20;
                 }
             }
         }
@@ -1275,16 +1275,17 @@ void map_mesh_draw_weather(MATRIX* camera) {
                     tile += 0x100;
                 }
                 if (g_map_tile_data_ptr[tile].ceiling_depth_and_marks.targeted) {
-                    GT3(i).clut = (GT3(i).clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
-                    GT3(i).r0 = 0x50;
-                    GT3(i).r1 = 0x50;
-                    GT3(i).r2 = 0x50;
-                    GT3(i).g0 = 0x60;
-                    GT3(i).g1 = 0x60;
-                    GT3(i).g2 = 0x60;
-                    GT3(i).b0 = 0x10;
-                    GT3(i).b1 = 0x10;
-                    GT3(i).b2 = 0x10;
+                    g_render_current_buffer->gt3[i].clut
+                        = (g_render_current_buffer->gt3[i].clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
+                    g_render_current_buffer->gt3[i].r0 = 0x50;
+                    g_render_current_buffer->gt3[i].r1 = 0x50;
+                    g_render_current_buffer->gt3[i].r2 = 0x50;
+                    g_render_current_buffer->gt3[i].g0 = 0x60;
+                    g_render_current_buffer->gt3[i].g1 = 0x60;
+                    g_render_current_buffer->gt3[i].g2 = 0x60;
+                    g_render_current_buffer->gt3[i].b0 = 0x10;
+                    g_render_current_buffer->gt3[i].b1 = 0x10;
+                    g_render_current_buffer->gt3[i].b2 = 0x10;
                 }
             }
         }
@@ -1298,19 +1299,20 @@ void map_mesh_draw_weather(MATRIX* camera) {
                     tile += 0x100;
                 }
                 if (g_map_tile_data_ptr[tile].ceiling_depth_and_marks.targeted) {
-                    GT4(i).clut = (GT4(i).clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
-                    GT4(i).r0 = 0x50;
-                    GT4(i).r1 = 0x50;
-                    GT4(i).r2 = 0x50;
-                    GT4(i).r3 = 0x50;
-                    GT4(i).g0 = 0x60;
-                    GT4(i).g1 = 0x60;
-                    GT4(i).g2 = 0x60;
-                    GT4(i).g3 = 0x60;
-                    GT4(i).b0 = 0x10;
-                    GT4(i).b1 = 0x10;
-                    GT4(i).b2 = 0x10;
-                    GT4(i).b3 = 0x10;
+                    g_render_current_buffer->gt4[i].clut
+                        = (g_render_current_buffer->gt4[i].clut & 0x803F) | MAP_CLUT(MAP_CLUT_ROW_MARKED_TILES, 0);
+                    g_render_current_buffer->gt4[i].r0 = 0x50;
+                    g_render_current_buffer->gt4[i].r1 = 0x50;
+                    g_render_current_buffer->gt4[i].r2 = 0x50;
+                    g_render_current_buffer->gt4[i].r3 = 0x50;
+                    g_render_current_buffer->gt4[i].g0 = 0x60;
+                    g_render_current_buffer->gt4[i].g1 = 0x60;
+                    g_render_current_buffer->gt4[i].g2 = 0x60;
+                    g_render_current_buffer->gt4[i].g3 = 0x60;
+                    g_render_current_buffer->gt4[i].b0 = 0x10;
+                    g_render_current_buffer->gt4[i].b1 = 0x10;
+                    g_render_current_buffer->gt4[i].b2 = 0x10;
+                    g_render_current_buffer->gt4[i].b3 = 0x10;
                 }
             }
         }
@@ -1322,27 +1324,27 @@ void map_mesh_draw_weather(MATRIX* camera) {
      * map_set_tile_mark_colors restored. */
     if (g_map_tile_mark_modes.move == MAP_TILE_MARK_HIDE_MOVE) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
-            GT3(i).clut = SAVED_GT3(i).clut;
+            g_render_current_buffer->gt3[i].clut = g_map_tile_mark_color_buffer->gt3[i].clut;
             if (!(g_map_textured_triangle_positions[i].polygon_flags & MAP_POLYGON_FLAG_LIT)) {
-                GT3(i).r0 = SAVED_GT3(i).r0;
-                GT3(i).r1 = SAVED_GT3(i).r1;
-                GT3(i).r2 = SAVED_GT3(i).r2;
+                g_render_current_buffer->gt3[i].r0 = g_map_tile_mark_color_buffer->gt3[i].r0;
+                g_render_current_buffer->gt3[i].r1 = g_map_tile_mark_color_buffer->gt3[i].r1;
+                g_render_current_buffer->gt3[i].r2 = g_map_tile_mark_color_buffer->gt3[i].r2;
             }
         }
 
         for (i = 0; i < g_map_mesh_parts[0].textured_quad_count; i++) {
-            GT4(i).clut = SAVED_GT4(i).clut;
+            g_render_current_buffer->gt4[i].clut = g_map_tile_mark_color_buffer->gt4[i].clut;
             if (!(g_map_textured_quad_positions[i].polygon_flags & MAP_POLYGON_FLAG_LIT)) {
-                GT4(i).r0 = SAVED_GT4(i).r0;
-                GT4(i).r1 = SAVED_GT4(i).r1;
-                GT4(i).r2 = SAVED_GT4(i).r2;
-                GT4(i).r3 = SAVED_GT4(i).r3;
+                g_render_current_buffer->gt4[i].r0 = g_map_tile_mark_color_buffer->gt4[i].r0;
+                g_render_current_buffer->gt4[i].r1 = g_map_tile_mark_color_buffer->gt4[i].r1;
+                g_render_current_buffer->gt4[i].r2 = g_map_tile_mark_color_buffer->gt4[i].r2;
+                g_render_current_buffer->gt4[i].r3 = g_map_tile_mark_color_buffer->gt4[i].r3;
             }
         }
 
         g_map_tile_mark_modes.move = MAP_TILE_MARK_NONE;
         /* With no layer left, stop the marked-tiles palette pulse and restore its colors. */
-        if ((g_map_tile_mark_modes.range | g_map_tile_mark_modes.targets) == 0) {
+        if (!(g_map_tile_mark_modes.range | g_map_tile_mark_modes.targets)) {
             map_palette_modify(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
             map_palette_modify(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
@@ -1350,14 +1352,14 @@ void map_mesh_draw_weather(MATRIX* camera) {
 
     if (g_map_tile_mark_modes.range == MAP_TILE_MARK_HIDE_RANGE) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
-            GT3(i).clut = SAVED_GT3(i).clut;
+            g_render_current_buffer->gt3[i].clut = g_map_tile_mark_color_buffer->gt3[i].clut;
         }
         for (i = 0; i < g_map_mesh_parts[0].textured_quad_count; i++) {
-            GT4(i).clut = SAVED_GT4(i).clut;
+            g_render_current_buffer->gt4[i].clut = g_map_tile_mark_color_buffer->gt4[i].clut;
         }
 
         g_map_tile_mark_modes.range = MAP_TILE_MARK_NONE;
-        if ((g_map_tile_mark_modes.move | g_map_tile_mark_modes.targets) == 0) {
+        if (!(g_map_tile_mark_modes.move | g_map_tile_mark_modes.targets)) {
             map_palette_modify(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
             map_palette_modify(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
@@ -1365,36 +1367,36 @@ void map_mesh_draw_weather(MATRIX* camera) {
 
     if (g_map_tile_mark_modes.targets == MAP_TILE_MARK_HIDE_TARGETS) {
         for (i = 0; i < g_map_mesh_parts[0].textured_triangle_count; i++) {
-            GT3(i).clut = SAVED_GT3(i).clut;
-            GT3(i).r0 = SAVED_GT3(i).r0;
-            GT3(i).r1 = SAVED_GT3(i).r1;
-            GT3(i).r2 = SAVED_GT3(i).r2;
-            GT3(i).g0 = SAVED_GT3(i).g0;
-            GT3(i).g1 = SAVED_GT3(i).g1;
-            GT3(i).g2 = SAVED_GT3(i).g2;
-            GT3(i).b0 = SAVED_GT3(i).b0;
-            GT3(i).b1 = SAVED_GT3(i).b1;
-            GT3(i).b2 = SAVED_GT3(i).b2;
+            g_render_current_buffer->gt3[i].clut = g_map_tile_mark_color_buffer->gt3[i].clut;
+            g_render_current_buffer->gt3[i].r0 = g_map_tile_mark_color_buffer->gt3[i].r0;
+            g_render_current_buffer->gt3[i].r1 = g_map_tile_mark_color_buffer->gt3[i].r1;
+            g_render_current_buffer->gt3[i].r2 = g_map_tile_mark_color_buffer->gt3[i].r2;
+            g_render_current_buffer->gt3[i].g0 = g_map_tile_mark_color_buffer->gt3[i].g0;
+            g_render_current_buffer->gt3[i].g1 = g_map_tile_mark_color_buffer->gt3[i].g1;
+            g_render_current_buffer->gt3[i].g2 = g_map_tile_mark_color_buffer->gt3[i].g2;
+            g_render_current_buffer->gt3[i].b0 = g_map_tile_mark_color_buffer->gt3[i].b0;
+            g_render_current_buffer->gt3[i].b1 = g_map_tile_mark_color_buffer->gt3[i].b1;
+            g_render_current_buffer->gt3[i].b2 = g_map_tile_mark_color_buffer->gt3[i].b2;
         }
 
         for (i = 0; i < g_map_mesh_parts[0].textured_quad_count; i++) {
-            GT4(i).clut = SAVED_GT4(i).clut;
-            GT4(i).r0 = SAVED_GT4(i).r0;
-            GT4(i).r1 = SAVED_GT4(i).r1;
-            GT4(i).r2 = SAVED_GT4(i).r2;
-            GT4(i).r3 = SAVED_GT4(i).r3;
-            GT4(i).g0 = SAVED_GT4(i).g0;
-            GT4(i).g1 = SAVED_GT4(i).g1;
-            GT4(i).g2 = SAVED_GT4(i).g2;
-            GT4(i).g3 = SAVED_GT4(i).g3;
-            GT4(i).b0 = SAVED_GT4(i).b0;
-            GT4(i).b1 = SAVED_GT4(i).b1;
-            GT4(i).b2 = SAVED_GT4(i).b2;
-            GT4(i).b3 = SAVED_GT4(i).b3;
+            g_render_current_buffer->gt4[i].clut = g_map_tile_mark_color_buffer->gt4[i].clut;
+            g_render_current_buffer->gt4[i].r0 = g_map_tile_mark_color_buffer->gt4[i].r0;
+            g_render_current_buffer->gt4[i].r1 = g_map_tile_mark_color_buffer->gt4[i].r1;
+            g_render_current_buffer->gt4[i].r2 = g_map_tile_mark_color_buffer->gt4[i].r2;
+            g_render_current_buffer->gt4[i].r3 = g_map_tile_mark_color_buffer->gt4[i].r3;
+            g_render_current_buffer->gt4[i].g0 = g_map_tile_mark_color_buffer->gt4[i].g0;
+            g_render_current_buffer->gt4[i].g1 = g_map_tile_mark_color_buffer->gt4[i].g1;
+            g_render_current_buffer->gt4[i].g2 = g_map_tile_mark_color_buffer->gt4[i].g2;
+            g_render_current_buffer->gt4[i].g3 = g_map_tile_mark_color_buffer->gt4[i].g3;
+            g_render_current_buffer->gt4[i].b0 = g_map_tile_mark_color_buffer->gt4[i].b0;
+            g_render_current_buffer->gt4[i].b1 = g_map_tile_mark_color_buffer->gt4[i].b1;
+            g_render_current_buffer->gt4[i].b2 = g_map_tile_mark_color_buffer->gt4[i].b2;
+            g_render_current_buffer->gt4[i].b3 = g_map_tile_mark_color_buffer->gt4[i].b3;
         }
 
         g_map_tile_mark_modes.targets = MAP_TILE_MARK_NONE;
-        if ((g_map_tile_mark_modes.move | g_map_tile_mark_modes.range) == 0) {
+        if (!(g_map_tile_mark_modes.move | g_map_tile_mark_modes.range)) {
             map_palette_modify(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
             map_palette_modify(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
@@ -1862,11 +1864,9 @@ void gfx_init_render_buffers(void) {
     g_render_current_buffer = &g_render_buffers[0];
     g_render_buffers[0].otag = g_gfx_battle_otags[0];
     g_render_buffers[1].otag = g_gfx_battle_otags[1];
-    {
-        for (buffer_index = 0; buffer_index < 2; buffer_index++) {
-            for (primitive_index = 0; primitive_index < RENDER_WEATHER_SPRITE_COUNT; primitive_index++) {
-                SetPolyFT3(&g_render_buffers[buffer_index].ft3[primitive_index]);
-            }
+    for (buffer_index = 0; buffer_index < 2; buffer_index++) {
+        for (primitive_index = 0; primitive_index < RENDER_WEATHER_SPRITE_COUNT; primitive_index++) {
+            SetPolyFT3(&g_render_buffers[buffer_index].ft3[primitive_index]);
         }
     }
     SetPolyF3(&prototype);
@@ -1882,32 +1882,24 @@ void gfx_init_render_buffers(void) {
     SetDrawMode(&g_render_buffers[1].overlay_modes[1], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[0].overlay_modes[0], 0, 1, 0, 0);
     SetDrawMode(&g_render_buffers[1].overlay_modes[0], 0, 1, 0, 0);
-    {
-        for (primitive_index = 0; primitive_index < RENDER_TEXTURED_TRIANGLE_COUNT; primitive_index++) {
-            for (buffer_index = 0; buffer_index < 2; buffer_index++) {
-                SetPolyGT3(&g_render_buffers[buffer_index].gt3[primitive_index]);
-            }
+    for (primitive_index = 0; primitive_index < RENDER_TEXTURED_TRIANGLE_COUNT; primitive_index++) {
+        for (buffer_index = 0; buffer_index < 2; buffer_index++) {
+            SetPolyGT3(&g_render_buffers[buffer_index].gt3[primitive_index]);
         }
     }
-    {
-        for (primitive_index = 0; primitive_index < RENDER_TEXTURED_QUAD_COUNT; primitive_index++) {
-            for (buffer_index = 0; buffer_index < 2; buffer_index++) {
-                SetPolyGT4(&g_render_buffers[buffer_index].gt4[primitive_index]);
-            }
+    for (primitive_index = 0; primitive_index < RENDER_TEXTURED_QUAD_COUNT; primitive_index++) {
+        for (buffer_index = 0; buffer_index < 2; buffer_index++) {
+            SetPolyGT4(&g_render_buffers[buffer_index].gt4[primitive_index]);
         }
     }
-    {
-        for (primitive_index = 0; primitive_index < RENDER_UNTEXTURED_TRIANGLE_COUNT; primitive_index++) {
-            for (buffer_index = 0; buffer_index < 2; buffer_index++) {
-                SetPolyF3(&g_render_buffers[buffer_index].f3[primitive_index]);
-            }
+    for (primitive_index = 0; primitive_index < RENDER_UNTEXTURED_TRIANGLE_COUNT; primitive_index++) {
+        for (buffer_index = 0; buffer_index < 2; buffer_index++) {
+            SetPolyF3(&g_render_buffers[buffer_index].f3[primitive_index]);
         }
     }
-    {
-        for (primitive_index = 0; primitive_index < RENDER_UNTEXTURED_QUAD_COUNT; primitive_index++) {
-            for (buffer_index = 0; buffer_index < 2; buffer_index++) {
-                SetPolyF4(&g_render_buffers[buffer_index].f4[primitive_index]);
-            }
+    for (primitive_index = 0; primitive_index < RENDER_UNTEXTURED_QUAD_COUNT; primitive_index++) {
+        for (buffer_index = 0; buffer_index < 2; buffer_index++) {
+            SetPolyF4(&g_render_buffers[buffer_index].f4[primitive_index]);
         }
     }
     g_weather_rain_sfx_id = 0;
@@ -2080,7 +2072,7 @@ void weather_dispatch_command(u8 command) {
                 weather_dispatch_command(MAP_WEATHER_COMMAND_SNOW);
             } else {
                 g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
-                if (g_weather_sfx_enabled != 0) {
+                if (g_weather_sfx_enabled) {
                     sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
                 }
                 weather_dispatch_command(MAP_WEATHER_COMMAND_RAIN);
@@ -2097,7 +2089,7 @@ void weather_dispatch_command(u8 command) {
                 weather_dispatch_command(MAP_WEATHER_COMMAND_HEAVY_RAIN);
                 weather_dispatch_command(MAP_WEATHER_COMMAND_LIGHTNING);
                 g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
-                if (g_weather_sfx_enabled != 0) {
+                if (g_weather_sfx_enabled) {
                     sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
                 }
             }
@@ -2109,7 +2101,7 @@ void weather_dispatch_command(u8 command) {
         g_weather_lightning_mode = MAP_LIGHTNING_ONCE;
         g_weather_lightning_state.timer = 0x3c;
         g_weather_rain_sfx_id = SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN);
-        if (g_weather_sfx_enabled != 0) {
+        if (g_weather_sfx_enabled) {
             sound_play_background(SUZUKI_SOUND_ID(SOUND_RESOURCE_ENV, SOUND_ENV_SFX_RAIN));
         }
         g_weather_lightning_state.color_matrices[1].m[0][0] = 0;
@@ -2795,7 +2787,7 @@ static void update_texture_animations(void) {
     s32 i;
 
     for (i = 0; i < MAP_TEXTURE_ANIMATION_COUNT; i++) {
-        if (g_map_texture_animations[i].active == 0) {
+        if (!g_map_texture_animations[i].active) {
             continue;
         }
         switch (g_map_texture_animations[i].mode) {
@@ -3139,24 +3131,21 @@ s16 map_gns_record_matches_state(s32 comparison, s16 record_state, s16 requested
     comparison &= 0xff;
     matches = 0;
     switch (comparison) {
-    case GNS_MAP_STATE_EQUAL: {
+    case GNS_MAP_STATE_EQUAL:
         if (requested_state == record_state) {
             matches = 1;
         }
         break;
-    }
-    case GNS_MAP_STATE_REQUESTED_LESS_THAN_RECORD: {
+    case GNS_MAP_STATE_REQUESTED_LESS_THAN_RECORD:
         if (requested_state < record_state) {
             matches = 1;
         }
         break;
-    }
-    case GNS_MAP_STATE_REQUESTED_GREATER_THAN_RECORD: {
+    case GNS_MAP_STATE_REQUESTED_GREATER_THAN_RECORD:
         if (requested_state > record_state) {
             matches = 1;
         }
         break;
-    }
     }
     return matches;
 }
@@ -3187,7 +3176,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
     unit_scale = s_unit_scale_vector;
 
     /* Let queued drawing finish before a resource replaces data the GPU may still be reading. */
-    while (DrawSync(1) != 0) { }
+    while (DrawSync(1)) { }
     switch (resource_type) {
     case MAP_RESOURCE_GEOMETRY_PRIMARY:
         g_map_textured_triangle_count = 0;
@@ -3350,7 +3339,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         g_map_vram_load_rect.y = 0;
         g_map_vram_load_rect.h = 0x100;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
-        while (DrawSync(1) != 0) { }
+        while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_1:
         g_map_vram_load_rect.x = 0x340;
@@ -3358,7 +3347,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         g_map_vram_load_rect.y = 0;
         g_map_vram_load_rect.h = 0x100;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
-        while (DrawSync(1) != 0) { }
+        while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_2:
         g_map_vram_load_rect.x = 0x380;
@@ -3366,7 +3355,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         g_map_vram_load_rect.y = 0;
         g_map_vram_load_rect.h = 0x100;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
-        while (DrawSync(1) != 0) { }
+        while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE_QUARTER_3:
         g_map_vram_load_rect.x = 0x3c0;
@@ -3374,20 +3363,20 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
         g_map_vram_load_rect.y = 0;
         g_map_vram_load_rect.h = 0x100;
         LoadImage(&g_map_vram_load_rect, data->texture_words);
-        while (DrawSync(1) != 0) { }
+        while (DrawSync(1)) { }
         break;
     case MAP_RESOURCE_TEXTURE:
         /* A full texture is four 0x8000-byte quarters, uploaded side by side from VRAM x 0x300. */
-        if (g_map_texture_quarter_0_pending != 0) {
+        if (g_map_texture_quarter_0_pending) {
             map_gns_dispatch_resource(MAP_RESOURCE_TEXTURE_QUARTER_0, data);
         }
-        if (g_map_texture_quarter_1_pending != 0) {
+        if (g_map_texture_quarter_1_pending) {
             map_gns_dispatch_resource(MAP_RESOURCE_TEXTURE_QUARTER_1, (map_resource_t*)(data->bytes + 0x8000));
         }
-        if (g_map_texture_quarter_2_pending != 0) {
+        if (g_map_texture_quarter_2_pending) {
             map_gns_dispatch_resource(MAP_RESOURCE_TEXTURE_QUARTER_2, (map_resource_t*)(data->bytes + 0x10000));
         }
-        if (g_map_texture_quarter_3_pending != 0) {
+        if (g_map_texture_quarter_3_pending) {
             map_gns_dispatch_resource(MAP_RESOURCE_TEXTURE_QUARTER_3, (map_resource_t*)(data->bytes + 0x18000));
         }
 
@@ -3401,7 +3390,7 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
     case MAP_RESOURCE_MESH_OVERRIDE:
     case MAP_RESOURCE_MESH_ALTERNATE:
         for (i = MAP_RESOURCE_GEOMETRY_PRIMARY; i < GNS_RESOURCE_TABLE_COUNT; i++) {
-            if (data->mesh_file[i] != 0) {
+            if (data->mesh_file[i]) {
                 map_gns_dispatch_resource(i, (map_resource_t*)(data->bytes + data->mesh_file[i]));
             }
         }
@@ -3491,11 +3480,10 @@ s32 map_gns_dispatch_resource(u8 resource_type, map_resource_t* data) {
     }
     case MAP_RESOURCE_STATE_RECORDS:
         cursor = &data->state_record;
-        if (cursor->type != MAP_MESH_ANIMATION_RECORD_END) {
-            do {
-                cursor = load_animation_record(cursor);
-            } while (cursor->type != MAP_MESH_ANIMATION_RECORD_END);
+        while (cursor->type != MAP_MESH_ANIMATION_RECORD_END) {
+            cursor = load_animation_record(cursor);
         }
+
         break;
     case GNS_COMMAND_SET_CAMERA_POSITION:
         /* Halfword 6 is the payload vector at +0x0c. */

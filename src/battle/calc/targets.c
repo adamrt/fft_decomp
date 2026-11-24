@@ -57,8 +57,10 @@ static void check_moldball_virus_depth(s16 ability_id) {
     target_panel_t* panel;
     s32 i;
 
-    if (ability_id != ABILITY_ID_MONSTER_GREAT_MORBOL_MOLDBALL_VIRUS)
+    if (ability_id != ABILITY_ID_MONSTER_GREAT_MORBOL_MOLDBALL_VIRUS) {
         return;
+    }
+    /* The bytes require this do-while with the counter set before the pointers. */
     i = 0;
     panel = g_target_panels;
     tile = g_map_tile_data;
@@ -67,7 +69,7 @@ static void check_moldball_virus_depth(s16 ability_id) {
             panel->remaining_range = 0;
         }
         tile++;
-        i += 1;
+        i++;
         panel++;
     } while (i < MAP_TILE_COUNT);
 }
@@ -75,6 +77,7 @@ static void check_moldball_virus_depth(s16 ability_id) {
 /* Clear the range and the mark of each panel whose tile is flagged untargetable.
  * Only the 256 lower-level panels are visited. */
 static void clear_untargetable_panels(void) {
+    /* The bytes require the counter set at its declaration. */
     s32 i = 0;
     map_tile_t* src;
     target_panel_t* dst = g_target_panels;
@@ -134,7 +137,7 @@ static void apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 single_lay
             upper_panel->remaining_range = 0;
             upper_panel->mark = 0;
         }
-        if (single_layer != 0) {
+        if (single_layer) {
             if (lower >= upper) {
                 upper = -0xFF;
             } else {
@@ -189,13 +192,13 @@ static void remove_close_range(s32 x, s32 y, s32 range) {
     s32 k;
 
     for (i = 0; i < g_map_terrain_depth; i++) {
-        dy = (y < i) ? (i - y) : (y - i);
+        dy = y < i ? i - y : y - i;
         for (j = 0; j < g_map_terrain_width; j++) {
-            dx = (x < j) ? (j - x) : (x - j);
-            if (range >= (dy + dx)) {
-                g_target_panels[(i * g_map_terrain_width) + j].remaining_range = 0;
+            dx = x < j ? j - x : x - j;
+            if (range >= dy + dx) {
+                g_target_panels[i * g_map_terrain_width + j].remaining_range = 0;
                 k = j + MAP_TILES_PER_LAYER;
-                g_target_panels[(i * g_map_terrain_width) + k].remaining_range = 0;
+                g_target_panels[i * g_map_terrain_width + k].remaining_range = 0;
             }
         }
     }
@@ -220,14 +223,14 @@ static void spread_panels(u8 passes, s32 unused) {
     }
     changed = 1;
     for (pass = 0; pass < passes; pass++) {
-        if (changed == 0) {
+        if (!changed) {
             break;
         }
         changed = 0;
         for (y = 0; y < g_map_terrain_depth; y++) {
             for (x = 0; x < g_map_terrain_width; x++) {
                 panel = &g_target_panels[y * g_map_terrain_width + x];
-                if (panel->mark != 0) {
+                if (panel->mark) {
                     panel->mark = 0;
                     changed += spread_panel_to_neighbors(y, x);
                 }
@@ -275,7 +278,7 @@ static s32 spread_panel_to_neighbors(s32 y, s32 x) {
         }
         next_x = x + dx;
         next_y = y + dy;
-        if ((next_x >= 0) && (next_y >= 0) && (next_x < g_map_terrain_width) && (next_y < g_map_terrain_depth)) {
+        if (next_x >= 0 && next_y >= 0 && next_x < g_map_terrain_width && next_y < g_map_terrain_depth) {
             index = next_y * g_map_terrain_width + next_x;
             panel = &g_target_panels[index];
             if (panel->remaining_range < range) {
@@ -309,7 +312,7 @@ static u8 get_effective_height(const battle_unit_t* unit) {
     tile = &g_map_tile_data[battle_unit_get_tile_index(unit)];
     terrain_depth = tile->depth_half_height;
     flags = unit->mount_info;
-    height = tile->height * 2 + (terrain_depth.half_height);
+    height = tile->height * 2 + terrain_depth.half_height;
     water_depth = tile->depth_half_height.depth * 2;
     effective_height = height;
     if (flags & UNIT_MOUNT_INFO_FLAG_RIDER) {
@@ -323,7 +326,7 @@ static u8 get_effective_height(const battle_unit_t* unit) {
         effective_height += 2;
         ignores_water = 1;
     }
-    if (water_depth != 0) {
+    if (water_depth) {
         if (ignores_water || (flags & UNIT_MOVEMENT_SET_3_MOVE_IN_WATER)) {
             effective_height += water_depth;
         } else if (flags & UNIT_MOVEMENT_SET_3_WALK_ON_WATER) {
@@ -479,36 +482,38 @@ static void mark_tile_in_height_band(s32 x, s32 y, s32 lo, s32 hi) {
     s32 height;
     map_tile_t* tile;
     target_panel_t* panel;
-    map_tile_depth_t flags;
+    map_tile_depth_t depth;
 
-    if ((x >= 0) && (x < g_map_terrain_width) && (y >= 0) && (y < g_map_terrain_depth)) {
-        level = 0;
+    if (x >= 0 && x < g_map_terrain_width && y >= 0 && y < g_map_terrain_depth) {
         if (lo < 0) {
             lo = 0;
         }
-        do {
-            idx = (level << 8) + (y * g_map_terrain_width) + x;
+        for (level = 0; level < 2; level++) {
+            idx = (level << 8) + y * g_map_terrain_width + x;
             tile = &g_map_tile_data[idx];
             panel = &g_target_panels[idx];
-            flags = tile->depth_half_height;
-            height = (tile->height * 2) + (flags.half_height) + ((flags.depth) * 2);
-            level++;
-            if ((height >= lo) && (hi >= height)) {
+            depth = tile->depth_half_height;
+            height = tile->height * 2 + depth.half_height + depth.depth * 2;
+            if (height >= lo && hi >= height) {
                 panel->remaining_range = 1;
             }
-        } while (level < 2);
+        }
     }
 }
 
 /* Remove the range from every panel, on both levels, whose tile is flagged
  * untargetable. */
 static void clear_untargetable_tiles(void) {
+    /* The bytes require the counter set at its declaration. */
     s32 i = 0;
     target_panel_t* dst = g_target_panels;
     map_tile_t* src = g_map_tile_data;
+
     for (; i < MAP_TILE_COUNT; i++) {
-        if (src->flags.untargetable)
+
+        if (src->flags.untargetable) {
             dst->remaining_range = 0;
+        }
         src++;
         dst++;
     }
@@ -613,7 +618,7 @@ static s32 set_jump_range(const action_command_t* source) {
     panel->remaining_range = 0;
     other_panel->remaining_range = 0;
     other_height = tile->depth_half_height.half_height + tile->height * 2;
-    if ((tile->flags.blocked) == 0 && height < other_height) {
+    if (!tile->flags.blocked && height < other_height) {
         return 0;
     }
     marked = 0;
@@ -624,12 +629,12 @@ static s32 set_jump_range(const action_command_t* source) {
         panel = &panels[i];
         lower = &g_map_tile_data[i];
         upper = &g_map_tile_data[i + MAP_TILES_PER_LAYER];
-        if (panel->remaining_range == 0 || (lower->flags.blocked)) {
+        if (panel->remaining_range == 0 || lower->flags.blocked) {
             lower_height = -1;
         } else {
             lower_height = lower->depth_half_height.half_height + lower->height * 2;
         }
-        if (other_panel->remaining_range == 0 || (upper->flags.blocked)) {
+        if (other_panel->remaining_range == 0 || upper->flags.blocked) {
             upper_height = -1;
         } else {
             upper_height = upper->depth_half_height.half_height + upper->height * 2;
@@ -640,7 +645,7 @@ static s32 set_jump_range(const action_command_t* source) {
             lower = upper;
             upper = tile;
         }
-        if (lower_height >= min_height && max_height >= lower_height && (lower->flags.untargetable) == 0) {
+        if (lower_height >= min_height && max_height >= lower_height && !lower->flags.untargetable) {
             marked++;
             lower->ceiling_depth_and_marks.ability_range = 1;
         } else {
@@ -683,7 +688,8 @@ static s32 spread_range_from_unit(const battle_unit_t* unit, u8 range) {
     tile = g_map_tile_data;
     for (i = 0, panels = g_target_panels; i < MAP_TILE_COUNT; i++) {
         /* A byte collision test retains the original single-mask branch. */
-        if (panels->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
+        if (panels->remaining_range != 0 && !((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK)) {
+
             tile[i].ceiling_depth_and_marks.ability_range = 1;
             count++;
         } else {
@@ -740,7 +746,7 @@ static s32 set_ability_range(const action_command_t* source) {
     location = battle_unit_get_tile_index(unit);
     tile = &g_map_tile_data[location];
     terrain_depth = tile->depth_half_height;
-    elevation = tile->height * 2 + (terrain_depth.half_height) + tile->depth_half_height.depth * 2;
+    elevation = tile->height * 2 + terrain_depth.half_height + tile->depth_half_height.depth * 2;
     panels = g_target_panels;
     origin_offset = location * sizeof(target_panel_t);
     origin = (target_panel_t*)((s32)panels + origin_offset);
@@ -798,21 +804,19 @@ static s32 set_weapon_range(const action_command_t* source) {
     action_command_t action;
     battle_unit_t* unit;
     s32 idx;
+    target_panel_t* panel;
+    target_panel_t* upper_panel;
 
     action_command_copy(source, &action);
     unit = &g_battle_units[action.actor_id];
     idx = unit->position.y * g_map_terrain_width + unit->x;
     target_clear_panels();
     calculate_weapon_range(unit);
-    {
-        target_panel_t* panel;
-        target_panel_t* upper_panel;
-        panel = &g_target_panels[idx];
-        upper_panel = &g_target_panels[idx + MAP_TILES_PER_LAYER];
-        panel->remaining_range = 0;
-        upper_panel->remaining_range = 0;
-        return set_range_flags();
-    }
+    panel = &g_target_panels[idx];
+    upper_panel = &g_target_panels[idx + MAP_TILES_PER_LAYER];
+    panel->remaining_range = 0;
+    upper_panel->remaining_range = 0;
+    return set_range_flags();
 }
 
 /* Publish the panels in range to the map: a tile whose panel has range left gets
@@ -827,8 +831,7 @@ static s32 set_range_flags(void) {
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_map_tile_data[i];
         panel = &g_target_panels[i];
-        if (panel->remaining_range != 0 && !(tile->flags.blocked)
-            && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+        if (panel->remaining_range != 0 && !tile->flags.blocked && tile->surface.type != MAP_SURFACE_CROSS_SECTION) {
             count++;
             tile->ceiling_depth_and_marks.ability_range = 1;
         } else {
@@ -855,7 +858,7 @@ static s32 set_range_flags_from_marks(void) {
     for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_map_tile_data[i];
         panel = &g_target_panels[i];
-        if (panel->mark != 0 && !(tile->flags.blocked) && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
+        if (panel->mark && !tile->flags.blocked && tile->surface.type != MAP_SURFACE_CROSS_SECTION) {
             count++;
             tile->ceiling_depth_and_marks.ability_range = 1;
         } else {
@@ -885,10 +888,10 @@ static void mark_unit_panels(const battle_unit_t* unit, s32 flags) {
             team_diff = team ^ unit->initial_team_flags;
             team_diff_copy = team_diff;
             panel = &g_target_panels[battle_unit_get_tile_index(unit)];
-            if (mark_allies != 0 && (team_diff & UNIT_TEAM_MASK) == 0) {
+            if (mark_allies && !(team_diff & UNIT_TEAM_MASK)) {
                 panel->mark = 1;
             }
-            if (mark_enemies != 0 && (team_diff_copy & UNIT_TEAM_MASK) != 0) {
+            if (mark_enemies && (team_diff_copy & UNIT_TEAM_MASK)) {
                 panel->mark = 1;
             }
         }
@@ -911,34 +914,32 @@ static void mark_cardinal_lines(s32 x, s32 y) {
 
     x &= 0xFF;
     y &= 0xFF;
-    {
-        vertical = y;
-        for (i = -0x1F; i < 0x20; i++) {
-            s32 mx;
-            target_panel_t* base = g_target_panels;
-            target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
-            shared = x + i;
-            mx = g_map_terrain_width;
-            tile_index = (vertical * mx) + shared;
-            panel = &base[tile_index];
-            if ((shared >= 0) && (shared < mx) && (panel->remaining_range != 0)) {
-                panel->mark = 1;
-                upper_panels[tile_index].mark = 1;
-            }
+    vertical = y;
+    for (i = -0x1F; i < 0x20; i++) {
+        s32 width;
+        target_panel_t* base = g_target_panels;
+        target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
+
+        shared = x + i;
+        width = g_map_terrain_width;
+        tile_index = vertical * width + shared;
+        panel = &base[tile_index];
+        if (shared >= 0 && shared < width && panel->remaining_range != 0) {
+            panel->mark = 1;
+            upper_panels[tile_index].mark = 1;
         }
     }
-    {
-        shared = x;
-        for (i = -0x1F; i < 0x20; i++) {
-            target_panel_t* base = g_target_panels;
-            target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
-            vertical = y + i;
-            tile_index = (vertical * g_map_terrain_width) + shared;
-            panel = &base[tile_index];
-            if ((vertical >= 0) && (vertical < g_map_terrain_depth) && (panel->remaining_range != 0)) {
-                panel->mark = 1;
-                upper_panels[tile_index].mark = 1;
-            }
+    shared = x;
+    for (i = -0x1F; i < 0x20; i++) {
+        target_panel_t* base = g_target_panels;
+        target_panel_t* upper_panels = base + MAP_TILES_PER_LAYER;
+
+        vertical = y + i;
+        tile_index = vertical * g_map_terrain_width + shared;
+        panel = &base[tile_index];
+        if (vertical >= 0 && vertical < g_map_terrain_depth && panel->remaining_range != 0) {
+            panel->mark = 1;
+            upper_panels[tile_index].mark = 1;
         }
     }
 }
@@ -1440,13 +1441,13 @@ static s32 validate_height_overlap(
     u32 attacker_walking_height;
 
     battle_unit_calculate_action_height(&height_data, target_id);
-    if ((height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) != 0) {
+    if (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
     target_walking_height = height_data.walking_height;
     target_total_height = height_data.total_height;
     battle_unit_calculate_action_height(&height_data, attacker_id);
-    if ((height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) != 0) {
+    if (height_data.unit_flags & UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
     attacker_total_height = height_data.total_height;
@@ -1559,12 +1560,12 @@ static s32 run_calculator(const action_command_t* source) {
             }
         } else if ((multiplier_flags & CALCULATOR_MULTIPLE_FIVE) && value % 5 == 0) {
             hit = 1;
-        } else if ((multiplier_flags & CALCULATOR_MULTIPLE_FOUR) && (value & 3) == 0) {
+        } else if ((multiplier_flags & CALCULATOR_MULTIPLE_FOUR) && !(value & 3)) {
             hit = 1;
         } else if ((multiplier_flags & CALCULATOR_MULTIPLE_THREE) && value % 3 == 0) {
             hit = 1;
         }
-        if (hit != 0) {
+        if (hit) {
             tile = &g_map_tile_data[battle_unit_get_tile_index(unit)];
             count++;
             tile->ceiling_depth_and_marks.targeted = 1;
@@ -1589,7 +1590,7 @@ static s32 keep_target_tile(const action_command_t* action) {
     level = action_copy.target_position.vy;
     if (x < g_map_terrain_width && y < g_map_terrain_depth && level < 2) {
         tile = &g_map_tile_data[(level << 8) + y * g_map_terrain_width + x];
-        if ((tile->flags.blocked) == 0) {
+        if (!tile->flags.blocked) {
             target_clear_area_flags();
             tile->ceiling_depth_and_marks.targeted = 1;
             return 1;
@@ -1681,7 +1682,7 @@ static s32 set_ability_area(const action_command_t* action) {
     /* Center height in half steps, including the water depth. Byte access retains the
      * original packed load and field-extraction order. */
     height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK)
-        + ((*(u8*)&tile->depth_half_height) >> 5) * 2;
+        + ((*(u8*)&tile->depth_half_height) >> MAP_TILE_DEPTH_SHIFT) * 2;
 
     if (aoe == ABILITY_RANGE_WHOLE_MAP) {
         cursor = g_target_panels;
@@ -1737,7 +1738,7 @@ static s32 set_ability_area(const action_command_t* action) {
     if (!(flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES))) {
         tile = g_map_tile_data;
         for (i = 0, marked = g_target_panels; i < MAP_TILE_COUNT; i++) {
-            if (marked->remaining_range != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
+            if (marked->remaining_range != 0 && !((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK)) {
                 count++;
                 tile[i].ceiling_depth_and_marks.targeted = 1;
             } else {
@@ -1749,7 +1750,7 @@ static s32 set_ability_area(const action_command_t* action) {
     }
     tile = g_map_tile_data;
     for (i = 0, marked = g_target_panels; i < MAP_TILE_COUNT; i++) {
-        if (marked->mark != 0 && !(((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK))) {
+        if (marked->mark && !((*(u8*)&tile[i].flags) & MAP_TILE_COLLISION_MASK)) {
             count++;
             tile[i].ceiling_depth_and_marks.targeted = 1;
         } else {
@@ -1786,12 +1787,12 @@ static void apply_unit_team_eligibility(s32 raw_unit_id, u8 allow_allies, u8 all
             panel = &g_target_panels[panel_index];
             if (panel->remaining_range != 0) {
                 if (relation & UNIT_TEAM_MASK) {
-                    if (allow_enemies == 0) {
+                    if (!allow_enemies) {
                         panel->remaining_range = 0;
                     } else {
                         panel->mark = 1;
                     }
-                } else if (allow_allies != 0) {
+                } else if (allow_allies) {
                     panel->mark = 1;
                 } else {
                     panel->remaining_range = 0;
@@ -1927,8 +1928,7 @@ static void calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
         return;
     }
 
-    i = 0;
-    do {
+    for (i = 0; i < 0x20; i++, x += dx) {
         if (x < 0) {
             return;
         }
@@ -1953,7 +1953,5 @@ static void calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
         if (panel->remaining_range != 0) {
             panel->mark = 1;
         }
-        i += 1;
-        x += dx;
-    } while (i < 0x20);
+    }
 }

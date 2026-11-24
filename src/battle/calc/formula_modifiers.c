@@ -109,11 +109,8 @@ void formula_difference(void) {
 
 /* Formula 0x45: damage equal to the target's missing HP (max HP - HP). */
 void formula_climhazzard(void) {
-    battle_unit_t* unit = g_action_target;
-    action_data_t* action = g_action_target_data;
-
-    action->hp_damage = unit->max_hp - unit->hp;
-    action->attack_type = ACTION_TYPE_HP_DAMAGE;
+    g_action_target_data->hp_damage = g_action_target->max_hp - g_action_target->hp;
+    g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
 }
 
 /* Brave loss of Y: the amount is stored without
@@ -159,7 +156,6 @@ void formula_element_modify_weapon_damage(void) {
  * to the ability's elements. */
 void formula_element_apply(void) {
     u8 element;
-    action_data_t* action;
     battle_unit_t* unit;
     s32 mount_info;
 
@@ -168,10 +164,10 @@ void formula_element_apply(void) {
      * HP damage and nothing reads XA afterwards, so the damage does not change. */
     if ((g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_OIL)] & STATUS_BYTE_MASK(STATUS_ID_OIL))
         && (element & ELEMENT_FIRE)) {
-        action = g_action_target_data;
         g_action_work.xa = g_action_work.xa * 2;
-        action->status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_OIL)] |= STATUS_BYTE_MASK(STATUS_ID_OIL);
-        if (status_modify_inflictions(0) != 0) {
+        g_action_target_data->status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_OIL)]
+            |= STATUS_BYTE_MASK(STATUS_ID_OIL);
+        if (status_modify_inflictions(0)) {
             g_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
         }
     }
@@ -210,7 +206,6 @@ void formula_element_apply_absorption(void) {
  * The two Faith values come from attacker_faith and target_faith, which the
  * action setup loaded. */
 void formula_calculate_faith(void) {
-    action_data_t* action;
 
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)]
         & STATUS_BYTE_MASK(STATUS_ID_FAITH)) {
@@ -228,45 +223,45 @@ void formula_calculate_faith(void) {
         g_action_work.target_faith = 0;
     }
 
-    action = g_action_target_data;
-    action->hp_damage = action->hp_damage * g_action_work.target_faith * g_action_work.attacker_faith / 10000;
+    g_action_target_data->hp_damage
+        = g_action_target_data->hp_damage * g_action_work.target_faith * g_action_work.attacker_faith / 10000;
 }
 
 /* Drain step: once the target's result is final, a hit heals the attacker by
  * the HP damage. Against an undead target it is reversed: the attacker takes
- * the damage and the target is healed by it. The several pointer locals are
- * the retail code's separate loads of the same globals. */
+ * the damage and the target is healed by it. Each load of the two pointers
+ * keeps its own local, as the bytes require. */
 void formula_apply_hp_absorption(void) {
-    action_data_t* action;
-    action_data_t* attacker;
-    action_data_t* action2;
-    action_data_t* action3;
-    action_data_t* attacker2;
+    action_data_t* undead;
+    action_data_t* hurt_attacker;
+    action_data_t* healed_undead;
+    action_data_t* drained;
+    action_data_t* healed_attacker;
     u16 amount;
 
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
         & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
         action_finalize_target_result();
-        action = g_action_target_data;
-        if (action->hit != 0) {
-            attacker = g_action_attacker_data;
-            attacker->hp_damage = action->hp_damage;
-            attacker->attack_type = ACTION_TYPE_HP_DAMAGE;
+        undead = g_action_target_data;
+        if (undead->hit) {
+            hurt_attacker = g_action_attacker_data;
+            hurt_attacker->hp_damage = undead->hp_damage;
+            hurt_attacker->attack_type = ACTION_TYPE_HP_DAMAGE;
             g_action_attacker_data->hit = 1;
-            action2 = g_action_target_data;
-            amount = action2->hp_damage;
-            action2->hp_damage = 0;
-            action2->attack_type = ACTION_TYPE_HP_HEALING;
-            action2->hp_healing = amount;
+            healed_undead = g_action_target_data;
+            amount = healed_undead->hp_damage;
+            healed_undead->hp_damage = 0;
+            healed_undead->attack_type = ACTION_TYPE_HP_HEALING;
+            healed_undead->hp_healing = amount;
         }
         return;
     }
     action_finalize_target_result();
-    action3 = g_action_target_data;
-    if (action3->hit != 0) {
-        attacker2 = g_action_attacker_data;
-        attacker2->hp_healing = action3->hp_damage;
-        attacker2->attack_type = ACTION_TYPE_HP_HEALING;
+    drained = g_action_target_data;
+    if (drained->hit) {
+        healed_attacker = g_action_attacker_data;
+        healed_attacker->hp_healing = drained->hp_damage;
+        healed_attacker->attack_type = ACTION_TYPE_HP_HEALING;
         g_action_attacker_data->hit = 1;
         g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
     }
@@ -322,20 +317,17 @@ void formula_apply_undead_absorb_attack(void) {
 /* MP drain step: the stored HP damage becomes MP damage on the target; when it
  * lands, the attacker recovers the same amount of MP. */
 void formula_apply_mp_absorption(void) {
-    u16 mp_amount;
     action_data_t* action = g_action_target_data;
-    action_data_t* action_after;
+    u16 amount;
 
-    mp_amount = action->hp_damage;
+    amount = action->hp_damage;
     action->hp_damage = 0;
     action->attack_type = ACTION_TYPE_MP_DAMAGE;
-    action->mp_damage = mp_amount;
+    action->mp_damage = amount;
     action_finalize_target_result();
-    action_after = g_action_target_data;
-    if (action_after->hit != 0) {
-        action_data_t* reaction = g_action_attacker_data;
-        reaction->mp_healing = action_after->mp_damage;
-        reaction->attack_type = ACTION_TYPE_MP_HEALING;
+    if (g_action_target_data->hit) {
+        g_action_attacker_data->mp_healing = g_action_target_data->mp_damage;
+        g_action_attacker_data->attack_type = ACTION_TYPE_MP_HEALING;
         g_action_attacker_data->hit = 1;
     }
 }
@@ -391,8 +383,7 @@ void formula_check_dragon(void) {
 
 /* Force a miss when the target is asleep. Talk skills, songs and dances run this first. */
 void formula_force_sleeping_target_miss(void) {
-    if ((g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SLEEP)] & STATUS_BYTE_MASK(STATUS_ID_SLEEP))
-        != 0) {
+    if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SLEEP)] & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) {
         formula_force_attack_miss();
     }
 }
@@ -410,9 +401,7 @@ void formula_apply_maintenance(void) {
  * sets ACTION_SPECIAL_EFFECT_ADDED_EFFECT. */
 static void roll_conditional_status_proc_inner(void) {
     if (g_action_state == ACTION_STATE_EXECUTE && random_roll_pass_fail(100, FORMULA_ADDED_EFFECT_CHANCE) == 0) {
-        action_data_t* action = g_action_target_data;
-        /* The 16-bit read-modify-write sets the added-effect flag. */
-        action->special_effect = action->special_effect | ACTION_SPECIAL_EFFECT_ADDED_EFFECT;
+        g_action_target_data->special_effect |= ACTION_SPECIAL_EFFECT_ADDED_EFFECT;
     }
 }
 
@@ -648,11 +637,11 @@ void formula_apply_poach_and_train(void) {
 /* Add the ability's status as a side effect of a hit: the hit flag, accuracy
  * and miss type are kept when the status does not apply. */
 void formula_apply_status(void) {
-    u8 hit, miss_type;
+    u8 hit;
+    u8 miss_type;
     u16 accuracy;
 
     miss_type = g_action_target_data->miss_type;
-    /* The accuracy field is read and written as a 16-bit value (lhu/sh). */
     accuracy = g_action_target_data->attack_accuracy;
     hit = g_action_target_data->hit;
     formula_apply_status_to_action();
@@ -692,28 +681,24 @@ void formula_apply_status_to_action(void) {
     }
 
     if (type & STATUS_INFLICTION_TYPE_ALL_OR_NOTHING) {
-        status = 0;
-        do {
+        for (status = 0; status < STATUS_BYTE_COUNT; status++) {
             g_action_target_data->status_changes.infliction[status] |= g_action_work.status_infliction.statuses[status];
-            status++;
-        } while (status < STATUS_BYTE_COUNT);
+        }
     } else if (type & STATUS_INFLICTION_TYPE_RANDOM_ONE) {
         count = 0;
-        status = 0;
-        do {
+        for (status = 0; status < STATUS_COUNT; status++) {
             if (g_action_work.status_infliction.statuses[status / 8] & (0x80 >> (status & 7))) {
                 status_ids[count] = status;
                 count++;
             }
-            status++;
-        } while (status < STATUS_COUNT);
+        }
 
         selected_status = status_ids[(formula_get_random() * count) / 32768];
         g_action_target_data->status_changes.infliction[selected_status / 8] |= 0x80 >> (selected_status & 7);
     } else if (type & STATUS_INFLICTION_TYPE_SEPARATE) {
-        status = 0;
-        do {
+        for (status = 0; status < STATUS_COUNT; status++) {
             byte = status / 8;
+            /* The mask is computed inside the test, as the bytes require. */
             if (g_action_work.status_infliction.statuses[byte] & (mask = 0x80 >> (status & 7))) {
                 /* Drop the status from the set unless a 24 in 100 roll keeps
                  * it; the preview test cannot pass, as only EXECUTE gets here. */
@@ -721,22 +706,18 @@ void formula_apply_status_to_action(void) {
                     g_action_work.status_infliction.statuses[byte] ^= mask;
                 }
             }
-            status++;
-        } while (status < STATUS_COUNT);
+        }
 
-        status = 0;
-        do {
+        for (status = 0; status < STATUS_BYTE_COUNT; status++) {
             g_action_target_data->status_changes.infliction[status] |= g_action_work.status_infliction.statuses[status];
-            status++;
-        } while (status < STATUS_BYTE_COUNT);
+        }
     } else if (type & STATUS_INFLICTION_TYPE_CANCEL) {
-        status = 0;
-        do {
+        for (status = 0; status < STATUS_BYTE_COUNT; status++) {
             g_action_target_data->status_changes.removal[status] |= g_action_work.status_infliction.statuses[status];
-            status++;
-        } while (status < STATUS_BYTE_COUNT);
+        }
     }
 
+    /* A for loop here does not match the bytes. */
     any = 0;
     status = 0;
     action = g_action_target_data;
@@ -759,11 +740,9 @@ void formula_apply_status_to_action(void) {
 
 /* Formula 0x49 (Ether): heal (Z * 10) MP, Z from the used item's data. */
 void formula_ether(void) {
-    s32 index = g_action_work.used_item_id;
-    s32 amount;
+    s32 amount = g_item_secondary_data[g_action_work.used_item_id].z;
     action_data_t* action = g_action_target_data;
 
-    amount = g_item_secondary_data[index].z;
     action->attack_type = ACTION_TYPE_MP_HEALING;
     action->mp_healing = amount * 10;
 }
@@ -787,19 +766,22 @@ void reaction_try_finger_guard(void) {
     battle_unit_t* unit;
     s32 chance;
 
-    if (reaction_is_blocked(g_action_target) != 0)
+    if (reaction_is_blocked(g_action_target)) {
         return;
+    }
     unit = g_action_target;
-    if ((unit->ability_flags.reaction[3] & UNIT_REACTION_SET_4_FINGER_GUARD) == 0)
+    if (!(unit->ability_flags.reaction[3] & UNIT_REACTION_SET_4_FINGER_GUARD)) {
         return;
+    }
     chance = 100 - unit->brave;
-    /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     g_action_target_data->attack_accuracy = chance;
     if (chance != 0) {
-        if (reaction_fails_brave_roll(unit) != 0)
+        if (reaction_fails_brave_roll(unit)) {
             return;
-        if (g_action_state != ACTION_STATE_EXECUTE)
+        }
+        if (g_action_state != ACTION_STATE_EXECUTE) {
             return;
+        }
     }
     g_action_target_data->hit = 0;
     g_action_target_data->reaction_id = ABILITY_ID_REACTION_FINGER_GUARD;
@@ -818,21 +800,25 @@ void reaction_try_catch(void) {
     s32 weapon_id;
     s32 chance;
 
-    if (reaction_is_blocked(g_action_target) != 0)
+    if (reaction_is_blocked(g_action_target)) {
         return;
-    if (g_action_attacker->job_id == JOB_ID_MIME)
+    }
+    if (g_action_attacker->job_id == JOB_ID_MIME) {
         return;
+    }
     unit = g_action_target;
-    if ((unit->ability_flags.reaction[3] & UNIT_REACTION_SET_4_CATCH) == 0)
+    if (!(unit->ability_flags.reaction[3] & UNIT_REACTION_SET_4_CATCH)) {
         return;
+    }
     chance = 100 - unit->brave;
-    /* The target stores the accuracy as a 16-bit value (0x2a..0x2b). */
     g_action_target_data->attack_accuracy = chance;
     if (chance != 0) {
-        if (reaction_fails_brave_roll(unit) != 0)
+        if (reaction_fails_brave_roll(unit)) {
             return;
-        if (g_action_state != ACTION_STATE_EXECUTE)
+        }
+        if (g_action_state != ACTION_STATE_EXECUTE) {
             return;
+        }
     }
     g_action_target_data->hit = 0;
     action = g_action_target_data;
@@ -922,8 +908,9 @@ s32 formula_calculate_weapon_damage(void) {
     formula_element_apply_weapon_strengthen();
     formula_calculate_physical_damage();
     formula_element_modify_weapon_damage();
-    if (g_action_target_data->hit == 0)
+    if (g_action_target_data->hit == 0) {
         return 1;
+    }
     formula_element_apply_absorption();
     return formula_roll_conditional_status_proc();
 }

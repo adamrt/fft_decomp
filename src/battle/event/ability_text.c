@@ -31,6 +31,7 @@ void ability_list_draw_text(menu_entry_t* entry, s32* row_offset, u8* buffer) {
                 continue;
             }
             menu_text_set_origin(layout->x[column], row * 0x10);
+            /* Retail tests the hidden mode again here; the bytes keep the repeat. */
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }
@@ -45,7 +46,6 @@ void ability_list_draw_text(menu_entry_t* entry, s32* row_offset, u8* buffer) {
                 if (g_threads[g_thread_current_id].function_parameter_4 != 0
                     && (g_event_work->ability_list.flags[index] & MENU_ABILITY_FLAG_REFLECTABLE)) {
                     g_menu_text_palette_offset = layout->text_colors[column][index];
-                    /* 32-bit x and y, as above. */
                     menu_text_set_origin(layout->x[column] + 0x50, row * 0x10);
                     text_render_entry_to_image(TEXT_ID_ABILITY_REFLECTABLE_MARKER, buffer, &g_menu_window_text_pen);
                 }
@@ -85,7 +85,6 @@ u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* r
     RECT rect;
     RECT clear;
     s32 changed;
-    s32 offset;
     void* buffer;
 
     pressed = script_get_controller_input_pointer(0);
@@ -100,17 +99,15 @@ u8* ability_list_update_page_scroll(menu_entry_t* entry, s32* row_offset, s32* r
             || g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0)) {
         /* Page up or down by one screen of rows, clamped to the list. */
         if ((*pressed & PSX_PAD_UP) && *row_offset != 0) {
-            offset = *row_offset - layout->row_count;
-            *row_offset = offset;
-            if (offset < 0) {
+            *row_offset -= layout->row_count;
+            if (*row_offset < 0) {
                 *row_offset = 0;
             }
             g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;
             changed = 1;
         } else if ((*pressed & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
-            offset = layout->row_count + *row_offset;
-            *row_offset = offset;
-            if (layout->hidden_rows < offset) {
+            *row_offset += layout->row_count;
+            if (*row_offset > layout->hidden_rows) {
                 *row_offset = layout->hidden_rows;
             }
             g_sound_pending_sfx_id = SOUND_SFX_CURSOR_MOVE;

@@ -39,7 +39,7 @@ command_menu_e command_get_menu_id_by_battle_unit_id(s32 battle_unit_id) {
         return MENU_COMMAND_ID_NONE;
     }
     menu = get_unit_menu_id(unit);
-    if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) != 0) {
+    if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) {
         switch (menu) {
         case MENU_COMMAND_ID_TURN:
             menu = MENU_COMMAND_ID_RIDER_TURN;
@@ -124,26 +124,23 @@ static command_menu_e get_unit_menu_id(const battle_unit_t* unit) {
 unit_action_restriction_e battle_unit_get_action_restriction(const battle_unit_t* unit) {
     s32 depth;
 
-    if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
-        != 0) {
+    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT)) {
         return UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
-    if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
+    if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
         return UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
     depth = g_map_tile_data[battle_unit_get_tile_index(unit)].depth_half_height.depth;
     if (depth < 2) {
         return UNIT_ACTION_RESTRICTION_NONE;
     }
-    if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
-            & (STATUS_BYTE_MASK(STATUS_ID_FLOAT) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN)
-                | STATUS_BYTE_MASK(STATUS_ID_FROG)))
-        != 0) {
+    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
+        & (STATUS_BYTE_MASK(STATUS_ID_FLOAT) | STATUS_BYTE_MASK(STATUS_ID_CHICKEN)
+            | STATUS_BYTE_MASK(STATUS_ID_FROG))) {
         return UNIT_ACTION_RESTRICTION_NONE;
     }
-    if ((unit->ability_flags.movement[2]
-            & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER | UNIT_MOVEMENT_SET_3_FLOAT))
-        != 0) {
+    if (unit->ability_flags.movement[2]
+        & (UNIT_MOVEMENT_SET_3_MOVE_IN_WATER | UNIT_MOVEMENT_SET_3_WALK_ON_WATER | UNIT_MOVEMENT_SET_3_FLOAT)) {
         return UNIT_ACTION_RESTRICTION_NONE;
     }
     return (unit->mount_info & UNIT_MOUNT_INFO_FLAG_RIDER) == 0 ? UNIT_ACTION_RESTRICTION_DEEP_WATER
@@ -293,18 +290,23 @@ u8 at_list_count_turns_to_resolve(s32 battle_unit_id, s32 ct, const at_entry_t* 
         s32 is_action = entry_unit & AT_ACTION_ENTRY;
         s32 entry_ct;
         entry_unit &= AT_UNIT_ID_MASK;
-        if (entry_unit == AT_END_OF_LIST)
+        if (entry_unit == AT_END_OF_LIST) {
             return 0xFF;
+        }
         entry_ct = entries->sort_key;
         if (entry_ct >= ct) {
-            if (ct != entry_ct)
+            if (ct != entry_ct) {
                 return count;
-            if (battle_unit_id == entry_unit && is_action != 0)
+            }
+            if (battle_unit_id == entry_unit && is_action != 0) {
                 return count;
-            if (entry_unit >= battle_unit_id)
+            }
+            if (entry_unit >= battle_unit_id) {
                 return count;
-            if (is_action == 0)
+            }
+            if (is_action == 0) {
                 return count;
+            }
         }
     }
     return 0xFF;
@@ -356,7 +358,7 @@ s32 skillset_get_unit_ability_data(
     if (unit == 0) {
         return 0;
     }
-    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) { /* Frog */
+    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
         frog = 1;
     }
     if (unit->ability_flags.support[1] & UNIT_SUPPORT_SET_2_HALF_MP) {
@@ -817,14 +819,12 @@ static s32 monster_has_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total
             return 0;
         }
 
-        unit_index = 0;
         reference_height = total_height;
-        for (; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
+        for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             battle_unit_t* unit = &g_battle_units[unit_index];
 
             if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE || unit->x != x || unit->position.y != y
-                || reaction_is_prevented(unit) != 0
-                || !(unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_MONSTER_SKILL)
+                || reaction_is_prevented(unit) || !(unit->ability_flags.support[3] & UNIT_SUPPORT_SET_4_MONSTER_SKILL)
                 || ((unit->team_flags ^ unit_team_flags) & UNIT_TEAM_MASK)) {
                 continue;
             }

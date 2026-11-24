@@ -65,7 +65,7 @@ void* effect_heap_alloc_block(u32 size, s32 owner) {
             if (node->size == blocks) {
                 prev->next = node->next;
             } else {
-                node->size = node->size - blocks;
+                node->size -= blocks;
                 node += node->size;
                 node->size = blocks;
             }
@@ -126,7 +126,7 @@ void effect_heap_free_block(void* ptr) {
  * ring, the low-water mark of the largest block, a "DP" value, and the bytes
  * held by owners 0 through 15. The original diagnostic omits owner 16.
  *
- * The ring-end test rereads g_rover; GCC hoists that load, which
+ * The ring-end test rereads s_rover; GCC hoists that load, which
  * produces the target copy of the rover into a separate register.
  */
 void effect_heap_print_stats(void) {

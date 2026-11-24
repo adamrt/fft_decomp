@@ -27,8 +27,7 @@ void script_opcode_85_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
     }
     mask = 1;
     for (i = 0; i < 4; i++) {
-        s32 bit = i + 5;
-        assign_flag(bits, base + bit, month & mask);
+        assign_flag(bits, base + 5 + i, month & mask);
         mask <<= 1;
     }
 }

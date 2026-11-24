@@ -35,23 +35,18 @@ static void calculate_magical_xa_times_ya(void) {
  * Faith status counting as 100 and Innocent as 0. No zodiac compatibility and
  * no target Faith. Returns 1 on a miss. */
 static s32 calculate_golem_accuracy(void) {
-    action_data_t* action;
-
     formula_store_ma_and_x();
     formula_apply_magic_attack_up();
     formula_store_xa_plus_ya();
-    if ((g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)] & STATUS_BYTE_MASK(STATUS_ID_FAITH))
-        != 0) {
+    if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)]
+        & STATUS_BYTE_MASK(STATUS_ID_FAITH)) {
         g_action_work.attacker_faith = 100;
     }
-    if ((g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_INNOCENT)]
-            & STATUS_BYTE_MASK(STATUS_ID_INNOCENT))
-        != 0) {
+    if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_INNOCENT)]
+        & STATUS_BYTE_MASK(STATUS_ID_INNOCENT)) {
         g_action_work.attacker_faith = 0;
     }
-    action = g_action_target_data;
-    /* The target reads hp_damage signed (lh). */
-    action->hp_damage = action->hp_damage * g_action_work.attacker_faith / 100;
+    g_action_target_data->hp_damage = g_action_target_data->hp_damage * g_action_work.attacker_faith / 100;
     formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
@@ -155,14 +150,9 @@ void formula_gun_damage(void) {
  * element (60/30/10%); damage F(WP * that spell's Y) with its element; no
  * evade. */
 void formula_magic_gun(void) {
-    u16 weapon_power;
-    u16 ability_y;
-
     formula_select_magic_gun_ability();
-    weapon_power = g_action_work.weapon_data.power;
-    ability_y = g_action_work.range_data.y;
-    g_action_work.xa = weapon_power;
-    g_action_work.ya = ability_y;
+    g_action_work.xa = g_action_work.weapon_data.power;
+    g_action_work.ya = g_action_work.range_data.y;
     formula_apply_charge();
     formula_element_apply_weapon_strengthen();
     formula_apply_magical_modifiers();
@@ -466,7 +456,6 @@ void formula_multihit_truth_magic(void) {
  * factor and Innocent zeroes the damage; magic evade; 19% status. Strikes
  * rnd(1..X) times (init_strike_data). */
 void formula_un_truth(void) {
-    action_data_t* action;
 
     if (formula_evade_calculate_magical() != 0) {
         return;
@@ -492,9 +481,8 @@ void formula_un_truth(void) {
         & STATUS_BYTE_MASK(STATUS_ID_INNOCENT)) {
         g_action_work.target_faith = 100;
     }
-    action = g_action_target_data;
-    action->hp_damage
-        = action->hp_damage * (100 - g_action_work.target_faith) * (100 - g_action_work.attacker_faith) / 10000;
+    g_action_target_data->hp_damage = g_action_target_data->hp_damage * (100 - g_action_work.target_faith)
+        * (100 - g_action_work.attacker_faith) / 10000;
     if (formula_element_apply_absorption_and_status_proc() == 0) {
         formula_apply_status();
     }
@@ -550,7 +538,6 @@ void formula_elemental(void) {
  * physical evade; Maintenance blocks it. With nothing in that slot the action
  * becomes a plain attack. */
 void formula_battle_skill_equipment_break(void) {
-    action_data_t* action;
 
     if (formula_select_targeted_equipment() != 0) {
         g_action_work.defaulted_to_attack = 1;
@@ -563,14 +550,12 @@ void formula_battle_skill_equipment_break(void) {
     }
     formula_store_pa_and_weapon_power_plus_y();
     if (formula_accuracy_calculate_physical() != 0) {
-        /* The target writes the combined special-effect field as one 16-bit value. */
         g_action_target_data->special_effect = 0;
         return;
     }
     formula_apply_maintenance();
-    action = g_action_target_data;
-    if (action->hit != 0) {
-        action->special_effect = ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT;
+    if (g_action_target_data->hit) {
+        g_action_target_data->special_effect = ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT;
     }
 }
 
@@ -578,7 +563,6 @@ void formula_battle_skill_equipment_break(void) {
  * evade; Maintenance blocks it. An empty slot or a monster target is a forced
  * failure. */
 void formula_steal_equipment(void) {
-    action_data_t* action;
 
     if (formula_select_targeted_equipment() != 0) {
         formula_nullify_action();
@@ -593,10 +577,8 @@ void formula_steal_equipment(void) {
         return;
     }
     formula_apply_maintenance();
-    action = g_action_target_data;
-    if (action->hit != 0) {
-        /* The 16-bit store clears all other special-effect flags. */
-        action->special_effect = ACTION_SPECIAL_EFFECT_STEAL_ITEM;
+    if (g_action_target_data->hit) {
+        g_action_target_data->special_effect = ACTION_SPECIAL_EFFECT_STEAL_ITEM;
     }
 }
 
@@ -712,7 +694,6 @@ void formula_holy_sword(void) {
  * with the weapon's element; physical evade. Fails with nothing in that slot
  * or against Maintenance. */
 void formula_mighty_sword(void) {
-    action_data_t* action;
 
     if (formula_evade_calculate_physical() != 0) {
         return;
@@ -723,12 +704,10 @@ void formula_mighty_sword(void) {
         return;
     }
     formula_apply_maintenance();
-    action = g_action_target_data;
-    if (action->hit == 0) {
+    if (g_action_target_data->hit == 0) {
         return;
     }
-    /* The target writes the combined special-effect field as one 16-bit value. */
-    action->special_effect = ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT;
+    g_action_target_data->special_effect = ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT;
     formula_store_pa_and_weapon_power();
     formula_element_apply_weapon_strengthen();
     formula_calculate_physical_damage();
@@ -783,24 +762,17 @@ void formula_damage_pa_plus_y_half_times_pa(void) {
  * scales only its (PA + Y) / 2 part. The random factor is kept in
  * random_damage_factor. */
 void formula_repeating_fist(void) {
-    action_data_t* action;
-    u8* factor;
-    s32 rnd;
-
-    if (formula_evade_calculate_physical() != 0)
+    if (formula_evade_calculate_physical() != 0) {
         return;
+    }
     formula_store_pa_and_pa_plus_y_divided_by_two();
     formula_apply_attack_up_and_martial_arts();
     apply_physical_modifiers_without_supports();
     formula_calculate_critical_hit();
     formula_store_xa_plus_ya();
-    rnd = formula_get_random();
-    factor = &g_action_work.random_damage_factor;
-    *factor = (rnd * g_action_work.range_data.x) / 32768 + 1;
-    action = g_action_target_data;
-    /* The target loads hp_damage signed (lh) here. */
-    action->hp_damage = action->hp_damage * *factor;
-    action->attack_type = ACTION_TYPE_HP_DAMAGE;
+    g_action_work.random_damage_factor = formula_get_random() * g_action_work.range_data.x / 32768 + 1;
+    g_action_target_data->hp_damage = g_action_target_data->hp_damage * g_action_work.random_damage_factor;
+    g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
 }
 
 /* Formula 0x33: hit (PA+X)%. */
@@ -888,9 +860,8 @@ void formula_seal_evil(void) {
     formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
-        if ((g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
-                & STATUS_BYTE_MASK(STATUS_ID_UNDEAD))
-            == 0) {
+        if (!(g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
+                & STATUS_BYTE_MASK(STATUS_ID_UNDEAD))) {
             formula_force_attack_miss();
         } else {
             formula_apply_status_to_action();
@@ -965,14 +936,15 @@ void formula_elixir(void) {
 void formula_phoenix_down(void) {
     battle_unit_t* unit;
 
-    if (formula_apply_status_and_check_undead() == 0)
+    if (formula_apply_status_and_check_undead() == 0) {
         return;
+    }
     unit = g_action_target;
-    if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)] & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) != 0) {
+    if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)] & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
         g_action_target_data->hp_damage = unit->hp;
     } else {
         g_action_target_data->hp_damage
-            = (formula_get_random() * g_item_secondary_data[g_action_work.used_item_id].z) / 32768 + 1;
+            = formula_get_random() * g_item_secondary_data[g_action_work.used_item_id].z / 32768 + 1;
     }
     formula_apply_undead_reversal();
 }
@@ -1044,16 +1016,11 @@ void formula_hit_ma_x_percent_no_evade(void) {
  * current HP as damage and no status. */
 void formula_self_destruct(void) {
     if (g_action_target != g_action_attacker) {
-        battle_unit_t* caster = g_action_attacker;
-        action_data_t* action = g_action_target_data;
-
-        action->hp_damage = caster->max_hp - caster->hp;
-        action->attack_type = ACTION_TYPE_HP_DAMAGE;
+        g_action_target_data->hp_damage = g_action_attacker->max_hp - g_action_attacker->hp;
+        g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
     } else {
-        action_data_t* action = g_action_target_data;
-
-        action->hp_damage = g_action_target->hp;
-        action->attack_type = ACTION_TYPE_HP_DAMAGE;
+        g_action_target_data->hp_damage = g_action_target->hp;
+        g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
     }
     if (g_action_target != g_action_attacker) {
         formula_apply_status();
@@ -1152,8 +1119,9 @@ void formula_moldball_virus(void) {
     formula_store_xa_plus_ya();
     formula_use_hp_damage_as_action_hit_percent();
     action = g_action_target_data;
-    if (action->hit == 0)
+    if (action->hit == 0) {
         return;
+    }
     target = g_action_target;
     if (!(target->team_flags & UNIT_TEAM_FLAG_IMMORTAL) && target->mount_info == 0
         && target->character_identity >= CHARACTER_IDENTITY_GENERIC_MALE
@@ -1170,16 +1138,12 @@ void formula_moldball_virus(void) {
 /* Formula 0x59: -Level (1), hit (MA+X)%; magic evade. A level-1 target is a
  * forced miss that still carries the level-down effect. */
 void formula_level_blast(void) {
-    action_data_t* action;
-
     if (formula_evade_calculate_magical() == 0 && calculate_magic_accuracy_without_faith() == 0) {
         if (g_action_target->level < 2) {
             formula_force_attack_miss();
         }
-        action = g_action_target_data;
-        /* The target writes the combined special-effect field as one 16-bit value. */
-        action->special_effect = ACTION_SPECIAL_EFFECT_LEVEL_DOWN;
-        action->attack_type = ACTION_TYPE_PSEUDO_STATUS;
+        g_action_target_data->special_effect = ACTION_SPECIAL_EFFECT_LEVEL_DOWN;
+        g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
     }
 }
 

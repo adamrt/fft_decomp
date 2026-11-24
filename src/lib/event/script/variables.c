@@ -22,6 +22,7 @@ s32 script_variable_get(s32 variable_id) {
         s32 time_of_day;
         s32 weather;
 
+        /* Masked and shifted in separate steps for the original instruction order. */
         time_of_day = script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY);
         time_of_day &= 1;
         weather = script_variable_get(EVENT_SCRIPT_VAR_WEATHER);

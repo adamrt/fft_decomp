@@ -15,6 +15,7 @@
 
 extern const psyq_tmd_header_t* g_effect_model_files[EFFECT_MODEL_COUNT];
 
+/* Transformed vertex k of the decoded command. Indexing scratch[] adds the operands the other way round. */
 #define PT(k) (*(VECTOR*)((u8*)scratch + (command.vertices.indices[k] << 4)))
 
 /* Draw one of the models resident in BATTLE.BIN for the current
@@ -38,7 +39,7 @@ extern const psyq_tmd_header_t* g_effect_model_files[EFFECT_MODEL_COUNT];
  * not drawn. */
 void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter) {
     effect_decoded_model_command_t command;
-    s32 unused[2];
+    s32 unused[2]; /* the original frame has 8 more bytes */
     MATRIX matrix;
     SVECTOR point;
     const psyq_tmd_header_t* model;
@@ -52,7 +53,6 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
     s32 g3_index;
     s32 j;
     s32 z;
-    u32* ot;
 
     RotMatrix(spin, &matrix);
     matrix.t[2] = 0;
@@ -212,8 +212,7 @@ void effect_model_draw(SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR*
                 z /= 12;
                 gt3_index++;
                 if (z > 0 && z < EFFECT_OT_DEPTH_MAX) {
-                    ot = g_effect_polygon_depth_data;
-                    addPrim(ot, tri);
+                    addPrim(g_effect_polygon_depth_data, tri);
                 }
             }
         }
@@ -271,10 +270,10 @@ void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     s32 depth;
     s32 sine;
     s32 cosine;
-    s32 zoom;
+    s32 scale_x;
     s32 scale_y;
-    s32 half_w;
-    s32 half_h;
+    s32 left;
+    s32 top;
     s16 right;
     s16 bottom;
 
@@ -295,24 +294,24 @@ void effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     g_effect_matrix.t[1] = position.vy;
     cosine = rcos(angle);
     sine = rsin(angle);
-    zoom = g_camera_zoom.vx;
+    scale_x = g_camera_zoom.vx;
     scale_y = g_camera_zoom.vy;
-    g_effect_matrix.m[0][0] = (cosine * zoom) >> 12;
+    g_effect_matrix.m[0][0] = (cosine * scale_x) >> 12;
     g_effect_matrix.m[1][1] = (cosine * scale_y) >> 12;
     g_effect_matrix.m[0][1] = (-sine * scale_y) >> 12;
-    g_effect_matrix.m[1][0] = (sine * zoom) >> 12;
+    g_effect_matrix.m[1][0] = (sine * scale_x) >> 12;
     SetRotMatrix(&g_effect_matrix);
     SetTransMatrix(&g_effect_matrix);
-    half_w = -sprite.w / 2;
-    right = half_w + sprite.w;
-    half_h = -sprite.h / 2;
-    bottom = half_h + sprite.h;
-    g_effect_corner_bottom_left.vx = half_w;
-    g_effect_corner_top_left.vx = half_w;
+    left = -sprite.w / 2;
+    right = left + sprite.w;
+    top = -sprite.h / 2;
+    bottom = top + sprite.h;
+    g_effect_corner_bottom_left.vx = left;
+    g_effect_corner_top_left.vx = left;
     g_effect_corner_bottom_right.vx = right;
     g_effect_corner_top_right.vx = right;
-    g_effect_corner_top_right.vy = half_h;
-    g_effect_corner_top_left.vy = half_h;
+    g_effect_corner_top_right.vy = top;
+    g_effect_corner_top_left.vy = top;
     g_effect_corner_bottom_right.vy = bottom;
     g_effect_corner_bottom_left.vy = bottom;
     RotTransPers3(&g_effect_corner_top_left, &g_effect_corner_top_right, &g_effect_corner_bottom_left, (s32*)&prim->x0,

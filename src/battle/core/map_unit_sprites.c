@@ -280,8 +280,7 @@ static void select_unit_shp_frame(map_unit_t* unit, animation_state_t* state, u1
     s32 water_height;
     s32 unit_height;
 
-    tile = map_get_tile(
-        (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_layer);
+    tile = map_get_tile(unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_layer);
     if (frame < SPRITE_SHP_FRAME_EVTCHR_FIRST) {
         table = state->shp;
         if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
@@ -1677,12 +1676,12 @@ void sprite_project_units(void) {
         map_unit_copy_draw_coords(&screen, unit);
         RotTrans(&screen, &transformed, &unit->gte_flag);
 
-        if ((unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) != 0) {
+        if (unit->sprite_display_flags & SPRITE_DISPLAY_HORIZONTAL_FLIP) {
             unit->camera_relative_x = transformed.vx - unit->screen_offset.vx;
         } else {
             unit->camera_relative_x = transformed.vx + unit->screen_offset.vx;
         }
-        if ((unit->sprite_display_flags & SPRITE_DISPLAY_VERTICAL_FLIP) != 0) {
+        if (unit->sprite_display_flags & SPRITE_DISPLAY_VERTICAL_FLIP) {
             unit->camera_relative_y = transformed.vy - unit->screen_offset.vy;
         } else {
             unit->camera_relative_y = transformed.vy + unit->screen_offset.vy;
@@ -1704,12 +1703,12 @@ void sprite_project_units(void) {
 
         if (unit->battle_unit != 0) {
             movement_flags = move_get_effective_flags(unit->battle_unit);
-            if ((movement_flags & MOVE_EFFECTIVE_IN_WATER) != 0) {
+            if (movement_flags & MOVE_EFFECTIVE_IN_WATER) {
                 if (tile->depth_half_height.depth != 0) {
                     adjusted.vy -= 12;
                 }
-            } else if ((movement_flags & MOVE_EFFECTIVE_FLOAT) == 0) {
-                if ((movement_flags & MOVE_EFFECTIVE_ON_WATER) == 0) {
+            } else if (!(movement_flags & MOVE_EFFECTIVE_FLOAT)) {
+                if (!(movement_flags & MOVE_EFFECTIVE_ON_WATER)) {
                     adjusted.vy -= tile->depth_half_height.depth * 12;
                 }
             }

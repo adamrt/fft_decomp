@@ -17,6 +17,7 @@ extern s32 g_script_next_event_id;
  * following weather table; the original declared extent is unknown. */
 static u8 s_scenario_condition_param_lengths[38] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 3, 3, 2, 2, 2, 2,
     0, 3, 4, 2, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 };
+
 static event_scenario_condition_result_e check_condition(
     event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation);
 
@@ -128,31 +129,41 @@ static event_scenario_condition_result_e check_condition(
     s32 i;
     s32 j; /* equipment slot, then battle index: one variable (a0 in both loops) */
 
-    if (type == EVENT_SCENARIO_CONDITION_VARIABLE_EQUAL && script_variable_get(id) == value)
+    if (type == EVENT_SCENARIO_CONDITION_VARIABLE_EQUAL && script_variable_get(id) == value) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_VARIABLE_AT_LEAST && script_variable_get(id) >= value)
+    }
+    if (type == EVENT_SCENARIO_CONDITION_VARIABLE_AT_LEAST && script_variable_get(id) >= value) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_VARIABLE_AT_MOST && value >= script_variable_get(id))
+    }
+    if (type == EVENT_SCENARIO_CONDITION_VARIABLE_AT_MOST && value >= script_variable_get(id)) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+    }
     if (type >= EVENT_SCENARIO_CONDITION_UNIT_PRESENT && type <= EVENT_SCENARIO_CONDITION_UNIT_MP_AT_MOST) {
         unit = get_condition_battle_unit(id);
         if (unit != (battle_unit_t*)-1) {
-            if (type == EVENT_SCENARIO_CONDITION_UNIT_PRESENT)
+            if (type == EVENT_SCENARIO_CONDITION_UNIT_PRESENT) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-            if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_AT_LEAST && unit->hp >= value)
+            }
+            if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_AT_LEAST && unit->hp >= value) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-            if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_AT_MOST && value >= unit->hp)
+            }
+            if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_AT_MOST && value >= unit->hp) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+            }
             if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_PERCENT_AT_LEAST
-                && unit->hp * 100 / (unit->max_hp + 1) >= value)
+                && unit->hp * 100 / (unit->max_hp + 1) >= value) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+            }
             if (type == EVENT_SCENARIO_CONDITION_UNIT_HP_PERCENT_AT_MOST
-                && value >= unit->hp * 100 / (unit->max_hp + 1))
+                && value >= unit->hp * 100 / (unit->max_hp + 1)) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-            if (type == EVENT_SCENARIO_CONDITION_UNIT_MP_AT_LEAST && unit->mp >= value)
+            }
+            if (type == EVENT_SCENARIO_CONDITION_UNIT_MP_AT_LEAST && unit->mp >= value) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-            if (type == EVENT_SCENARIO_CONDITION_UNIT_MP_AT_MOST && value >= unit->mp)
+            }
+            if (type == EVENT_SCENARIO_CONDITION_UNIT_MP_AT_MOST && value >= unit->mp) {
                 return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+            }
         }
     }
     if (type == EVENT_SCENARIO_CONDITION_ACTING_UNIT && g_scenario_condition_battle_unit_id != 0xff) {
@@ -160,8 +171,9 @@ static event_scenario_condition_result_e check_condition(
         if (unit->unit_id == id
             || (unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END
                 && unit->character_identity == id && id >= 0 && id < CHARACTER_IDENTITY_GENERIC_FIRST
-                && id != CHARACTER_IDENTITY_ENTD_NONE))
+                && id != CHARACTER_IDENTITY_ENTD_NONE)) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+        }
         return EVENT_SCENARIO_CONDITION_RESULT_FAIL;
     }
     if (type == EVENT_SCENARIO_CONDITION_ITEM_EQUIPPED) {
@@ -169,39 +181,53 @@ static event_scenario_condition_result_e check_condition(
             unit = get_condition_battle_unit(i);
             if (unit != (battle_unit_t*)-1) {
                 for (j = 0; j < 7; j++) {
-                    if (unit->equipment[j] == id)
+                    if (unit->equipment[j] == id) {
                         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+                    }
                 }
             }
         }
     }
-    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_LEAST && script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) >= value)
+    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_LEAST
+        && script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS) >= value) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_MOST && value >= script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS))
+    }
+    if (type == EVENT_SCENARIO_CONDITION_WAR_FUNDS_AT_MOST
+        && value >= script_variable_get(EVENT_SCRIPT_VAR_WAR_FUNDS)) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+    }
     if (type == EVENT_SCENARIO_CONDITION_DATE_ON_OR_BEFORE) {
-        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) < id)
+        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) < id) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) == id && value >= script_variable_get(EVENT_SCRIPT_VAR_DAY))
+        }
+        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) == id && value >= script_variable_get(EVENT_SCRIPT_VAR_DAY)) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+        }
     }
     if (type == EVENT_SCENARIO_CONDITION_DATE_ON_OR_AFTER) {
-        if (id < script_variable_get(EVENT_SCRIPT_VAR_MONTH))
+        if (id < script_variable_get(EVENT_SCRIPT_VAR_MONTH)) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) == id && script_variable_get(EVENT_SCRIPT_VAR_DAY) >= value)
+        }
+        if (script_variable_get(EVENT_SCRIPT_VAR_MONTH) == id && script_variable_get(EVENT_SCRIPT_VAR_DAY) >= value) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+        }
     }
-    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST && script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES) >= id)
+    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_LEAST
+        && script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES) >= id) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES))
+    }
+    if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_variable_get(EVENT_SCRIPT_VAR_CASUALTIES)) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_check_outcome() == 0)
+    }
+    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_check_outcome() == 0) {
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+    }
     if (type == EVENT_SCENARIO_CONDITION_UNIT_AT_TILE) {
         unit = get_condition_battle_unit(id);
         if (unit != (battle_unit_t*)-1 && unit->x == value && unit->position.y == tile_y
-            && unit->position.higher_elevation == elevation)
+            && unit->position.higher_elevation == elevation) {
             return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+        }
     }
     if (type == EVENT_SCENARIO_CONDITION_PALETTE_UNIT_AT_TILE) {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
@@ -210,8 +236,9 @@ static event_scenario_condition_result_e check_condition(
                 if (j != -1) {
                     unit = battle_unit_get(j);
                     if (unit->x == value && unit->position.y == tile_y && unit->position.higher_elevation == elevation
-                        && unit->sprite_palette == id)
+                        && unit->sprite_palette == id) {
                         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
+                    }
                 }
             }
         }

@@ -124,7 +124,7 @@ void system_reset_frame_pacing(void) {
  * exactly 1 the battle state handlers stop animating the units and the camera;
  * status_screen_leave_selection resets it. */
 void status_screen_enter_selection(void) {
-    if (g_menu_status_screen_selected != 0) {
+    if (g_menu_status_screen_selected) {
         g_menu_status_screen_selected++;
     } else {
         g_menu_status_screen_selected = 1;
@@ -237,7 +237,7 @@ s32 camera_is_active(void) {
 s32 cursor_move_to_battle_unit(u32 battle_unit_id) {
     map_unit_t* unit = map_unit_get_by_battle_unit_id(battle_unit_id & 0xFFFF);
 
-    if (unit != 0) {
+    if (unit) {
         cursor_move_to_unit(unit);
         return 1;
     }
@@ -252,10 +252,10 @@ s32 projectile_direct_init_single_target(u32 attacker_id, u32 target_id) {
     map_unit_t* target = map_unit_get_by_battle_unit_id(target_id);
     SVECTOR target_position;
 
-    if (target != 0) {
+    if (target) {
         vector_set_short(&target_position, target->map_x, target->map_y, target->map_layer);
         projectile_direct_check_to_target(attacker_id, &target_position, target_id);
-        if (attacker != 0) {
+        if (attacker) {
             attacker->strike.target_count = 1;
             attacker->strike.target_list[0] = target_id;
             return 1;
@@ -269,7 +269,7 @@ s32 projectile_direct_init_single_target(u32 attacker_id, u32 target_id) {
 s32 effect_secondary_map_unit_start_teleport(u32 map_unit_id) {
     map_unit_t* unit = map_unit_get(map_unit_id);
 
-    if (unit != 0) {
+    if (unit) {
         effect_secondary_start_teleport(unit);
         return 1;
     }

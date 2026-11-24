@@ -400,7 +400,7 @@ s32 effect_secondary_arrow_arc_handler(void) {
         if (g_effect_secondary_current->allocation != 0) {
             heap_free(g_effect_secondary_current->allocation);
         }
-        work = heap_alloc(0xc88);
+        work = heap_alloc(sizeof(*work));
         g_effect_secondary_current->allocation = work;
         for (i = 0; i < 2; i++) {
             for (j = 0; j < 4; j++) {
@@ -699,7 +699,7 @@ s32 effect_secondary_golem_handler(void) {
         current = g_effect_secondary_current;
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
-        current->timer = current->timer + 1;
+        current->timer++;
         if (current->active_count == 0
             && current->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_GOLEM].spawn_start_frame) {
             current->finish_timer = finish_timer + 1;
@@ -1061,7 +1061,7 @@ s32 effect_secondary_red_orbs_handler(void) {
         effect = g_effect_secondary_current;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
-        effect->timer = effect->timer + 1;
+        effect->timer++;
         if (effect->active_count == 0
             && effect->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_RED_ORBS].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
@@ -1117,7 +1117,7 @@ s32 effect_secondary_fall_dust_handler(void) {
         effect = g_effect_secondary_current;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
-        effect->timer = effect->timer + 1;
+        effect->timer++;
         if (effect->active_count == 0
             && effect->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_FALL_DUST].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
@@ -1172,7 +1172,7 @@ s32 effect_secondary_splash_handler(void) {
         effect = g_effect_secondary_current;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
-        effect->timer = effect->timer + 1;
+        effect->timer++;
         if (effect->active_count == 0
             && effect->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
@@ -1238,7 +1238,7 @@ s32 effect_secondary_trap_handler(void) {
         effect = g_effect_secondary_current;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
-        effect->timer = effect->timer + 1;
+        effect->timer++;
         if (effect->active_count == 0
             && effect->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_TRAP].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
@@ -1295,7 +1295,7 @@ s32 effect_secondary_level_up_handler(void) {
         current = g_effect_secondary_current;
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
-        current->timer = current->timer + 1;
+        current->timer++;
         if (current->active_count == 0
             && current->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].spawn_start_frame) {
             current->finish_timer = finish_timer + 1;
@@ -1400,11 +1400,11 @@ s32 effect_secondary_death_poof_handler(void) {
         effect_restore_inertia_threshold();
         effect_restore_gravity();
         current = g_effect_secondary_current;
-        current->timer = current->timer + 1;
+        current->timer++;
         result = state->finish_timer != 1;
         if (state->count == 0
             && current->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF].spawn_start_frame) {
-            state->finish_timer = state->finish_timer + 1;
+            state->finish_timer++;
         }
         break;
     }
@@ -1565,7 +1565,7 @@ s32 effect_secondary_reflect_handler(void) {
         if (g_effect_secondary_current->allocation != 0) {
             heap_free(g_effect_secondary_current->allocation);
         }
-        work = heap_alloc(0x798);
+        work = heap_alloc(sizeof(*work));
         g_effect_secondary_current->allocation = work;
         for (i = 0; i < 2; i++) {
             for (j = 0; j < 24; j++) {
@@ -1677,7 +1677,7 @@ s32 effect_secondary_teleport_handler(void) {
         effect = g_effect_secondary_current;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
-        effect->timer = effect->timer + 1;
+        effect->timer++;
         if (effect->active_count == 0
             && effect->timer > s_secondary_particle_configs[EFFECT_PARTICLE_GROUP_TELEPORT].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
@@ -1751,7 +1751,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
         /* Allocate the drawn model's primitives, one set per display buffer. */
         parameter = g_effect_secondary_animations[g_effect_secondary_current->animation_id].parameter;
         if ((parameter & 0xff) == EFFECT_MODEL_ARROW) {
-            arrow = heap_alloc(0xc88);
+            arrow = heap_alloc(sizeof(*arrow));
             g_effect_secondary_current->allocation = arrow;
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < 4; j++) {
@@ -1764,7 +1764,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
         }
 
         if ((parameter & 0xff) == EFFECT_MODEL_STONE) {
-            stone = heap_alloc(0x2a0);
+            stone = heap_alloc(sizeof(*stone));
             g_effect_secondary_current->allocation = stone;
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < 12; j++) {
@@ -1776,7 +1776,7 @@ s32 effect_secondary_linear_projectile_handler(void) {
         if (parameter == EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC) {
             item = g_effect_secondary_current->used_weapon_id;
             if (item >= ITEM_ID_SHURIKEN && item <= ITEM_ID_YAGYU_DARKNESS) {
-                shuriken = heap_alloc(0x380);
+                shuriken = heap_alloc(sizeof(*shuriken));
                 g_effect_secondary_current->allocation = shuriken;
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 16; j++) {
@@ -1934,7 +1934,7 @@ s32 effect_secondary_equip_break_handler(void) {
         current = g_effect_secondary_current;
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
-        current->timer = current->timer + 1;
+        current->timer++;
         if (current->active_count == 0 && current->timer > s_secondary_particle_configs[group].spawn_start_frame) {
             current->finish_timer = finish_timer + 1;
         }
@@ -2017,6 +2017,7 @@ s32 effect_secondary_summon_charge_handler(void) {
                 state->radius++;
             }
             state->angle_step++;
+            /* Retail repeats the finish test twice more; the bytes keep both. */
             if (effect->finish_timer < 61) {
                 state->brightness = (60 - effect->finish_timer) * 4;
                 if (effect->finish_timer < 61) {

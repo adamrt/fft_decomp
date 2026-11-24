@@ -99,7 +99,7 @@ void map_unit_reset_animation_states(void) {
     for (; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
         state->rotating = 0;
         state->delay = 0;
-        if (map_unit_exists(i) != 0) {
+        if (map_unit_exists(i)) {
             state->initial_facing = map_unit_get_facing_sixteenth(i);
         } else {
             state->initial_facing = 0xff;
@@ -124,17 +124,17 @@ void map_unit_update_pending_animations(void) {
     unit_animation_state_t* state = g_unit_animation_states;
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
-        if (map_unit_exists(i) != 0) {
+        if (map_unit_exists(i)) {
             if (g_unit_pending_animation_ids[i] != 0) {
                 moving = move_map_unit_is_moving(i);
-                if (moving == 0 && g_unit_was_moving_latch[i] != 0) {
+                if (!moving && g_unit_was_moving_latch[i]) {
                     map_unit_set_event_animation(i, g_unit_pending_animation_ids[i]);
                     g_unit_pending_animation_ids[i] = 0;
                 }
                 g_unit_was_moving_latch[i] = moving;
             }
             current = map_unit_get_facing_sixteenth(i);
-            if (state->rotating == 0) {
+            if (!state->rotating) {
                 continue;
             }
             if (current == state->target_facing) {
@@ -184,13 +184,13 @@ void map_unit_update_pending_animations(void) {
 void script_start_current_event_thread(void) {
     map_unit_reset_animation_states();
     g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
-    if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
+    if (script_variable_get(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED)) {
         camera_store_state_to_script_variables();
         map_light_reset_script_light();
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
     }
-    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != 0) {
+    if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT)) {
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
         fade_tint_start(2, 0, 0, 0, 2);
@@ -209,7 +209,7 @@ void script_noop_8(void) {
  * camera/light reset hooks and clear camera interpolation and position lock. */
 void script_reset_event_state(void) {
     map_unit_reset_animation_states();
-    if (thread_is_running_asm(THREAD_SLOT_EVENT) == 0) {
+    if (!thread_is_running_asm(THREAD_SLOT_EVENT)) {
         camera_store_state_to_script_variables();
         map_light_reset_script_light();
         g_camera_speed_curve = 0;
@@ -245,11 +245,11 @@ s32 menu_update_event_frame(u32* otag, s32 controller_input) {
     script_update_event_frame(otag, controller_input);
     menu_update_panel_fade();
     result = command_resolve_selection();
-    if ((thread_is_running_asm(THREAD_SLOT_MENU) != 0
+    if ((thread_is_running_asm(THREAD_SLOT_MENU)
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
-        || thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0
-        || thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
-        if (g_menu_vsync_interval_forced == 0) {
+        || thread_is_running_asm(THREAD_SLOT_MENU_CHILD) || thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD)) {
+        if (!g_menu_vsync_interval_forced) {
+
             g_menu_vsync_interval_forced = 1;
             g_menu_saved_vsync_interval = system_get_vsync_interval();
             script_set_event_speed(2);

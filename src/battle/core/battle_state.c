@@ -209,7 +209,7 @@ static void enter_open_action_menus(void) {
     unit = map_unit_get_source();
     cursor_show();
     store_team_flags(casting_unit);
-    if (try_enter_event(unit) == 0) {
+    if (!try_enter_event(unit)) {
         g_battle_state = BATTLE_STATE_OPEN_ACTION_MENUS;
         g_battle_window_closed = 0;
         camera_rotate_for_unit_visibility(casting_unit);
@@ -254,7 +254,7 @@ static s32 check_deep_dungeon_crystal_count(void) {
     s32 previous_count;
 
     if (g_system_frontend_world_result == WORLD_MAP_RESULT_DEEP_DUNGEON_BATTLE) {
-        if (g_map_deep_dungeon_load_in_progress == 0) {
+        if (!g_map_deep_dungeon_load_in_progress) {
             crystal_count = map_unit_count_crystals();
             if (crystal_count >= 5) {
                 crystal_count = 4;
@@ -262,7 +262,7 @@ static s32 check_deep_dungeon_crystal_count(void) {
             previous_count = script_variable_get(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT);
             if (crystal_count != previous_count) {
                 script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, crystal_count);
-                if (map_start_load() != 0) {
+                if (map_start_load()) {
                     g_map_deep_dungeon_load_in_progress = 1;
                 } else {
                     script_variable_set(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, previous_count);
@@ -278,7 +278,7 @@ static s32 check_deep_dungeon_crystal_count(void) {
  * (check_deep_dungeon_crystal_count), enter the Deep Dungeon
  * mesh-load state at vsync interval 1. Returns 1 when the state changed. */
 static s32 try_enter_deep_dungeon_mesh_load(void) {
-    if (check_deep_dungeon_crystal_count() != 0) {
+    if (check_deep_dungeon_crystal_count()) {
         g_battle_state = BATTLE_STATE_DEEP_DUNGEON_MESH_LOAD;
         g_system_vsync_interval = 1;
         return 1;
@@ -374,7 +374,7 @@ static void take_next_turn_event(void) {
 static void start_next_turn_event(void) {
     map_unit_t* unit;
 
-    if (try_enter_deep_dungeon_mesh_load() != 0) {
+    if (try_enter_deep_dungeon_mesh_load()) {
         return;
     }
     at_list_reset_cursor();
@@ -389,7 +389,7 @@ static void start_next_turn_event(void) {
     if (unit->battle_unit != 0) {
         command_reset_unit_record(unit->battle_unit->battle_unit_id);
         store_team_flags(unit); /* again, as retail does */
-        if (g_menu_status_requested != 0 && !(unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
+        if (g_menu_status_requested && !(unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)
             && g_turn_event_type == TURN_EVENT_UNIT_READY) {
             map_unit_update_display(unit->map_unit_id);
             sound_play_sfx(SOUND_SFX_STATUS_MENU_REQUEST);
@@ -402,7 +402,7 @@ static void start_next_turn_event(void) {
         if (g_turn_event_type == TURN_EVENT_UNIT_READY || g_turn_event_type == TURN_EVENT_NONE) {
             map_unit_update_display(unit->map_unit_id);
         }
-        if (try_enter_event(unit) == 0) {
+        if (!try_enter_event(unit)) {
             unit_view_start(UNIT_VIEW_MODE_TILE_INFO, 0xff, 0xff);
             g_battle_state = BATTLE_STATE_CHANGE_TURN;
             ai_reset_selected_action();
@@ -512,7 +512,7 @@ static void open_non_active_unit_menu(void) {
     g_battle_state = BATTLE_STATE_IDLING_ACTION_MENUS;
     unit_view_start(UNIT_VIEW_MODE_UNIT_SUMMARY, battle_unit->battle_unit_id, 0);
     menu_id = command_get_menu_id_by_battle_unit_id(unit->battle_unit->battle_unit_id);
-    if (g_menu_status_open != 0) {
+    if (g_menu_status_open) {
         if (menu_id == MENU_COMMAND_ID_PLAYER_UNIT) {
             menu_id = MENU_COMMAND_ID_PLAYER_UNIT_INSPECT;
         } else if (menu_id == MENU_COMMAND_ID_OTHER_UNIT) {
@@ -535,8 +535,8 @@ static void select_cursor_unit(void) {
         return;
     }
     g_unit_casting_map_unit_id = unit->map_unit_id;
-    if (g_menu_status_open == 0 && unit->map_unit_id == g_unit_source_map_unit_id) {
-        if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if (!g_menu_status_open && unit->map_unit_id == g_unit_source_map_unit_id) {
+        if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
             open_active_unit_menu();
         } else {
             enter_ai_command();
@@ -611,7 +611,7 @@ static void show_at_list_entry(s32 at_index) {
     id = at_list_get_entry_unit_id(at_index);
     if (id >= 0) {
         unit = map_unit_get_by_battle_unit_id(id & AT_LIST_ENTRY_BATTLE_UNIT_ID_MASK);
-        if ((id & AT_LIST_ENTRY_CHARGED_ACTION) != 0) {
+        if (id & AT_LIST_ENTRY_CHARGED_ACTION) {
             cursor_move_to_action_target(unit);
             target_set_area_for_action(&unit->battle_unit->action_command);
             map_set_tile_mark_colors(MAP_TILE_MARK_SHOW_TARGETS, 3);
@@ -659,7 +659,7 @@ static void enter_select_move_tile(void) {
     camera_disable_pan();
     unit = map_unit_get_source();
     casting = map_unit_get_casting();
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         cursor_show();
     } else {
         cursor_hide();
@@ -799,6 +799,7 @@ static void enter_move_confirm_menu(void) {
         }
         caster->last_path_count = 0;
     } else {
+        /* Each branch tints the unit itself; hoisting the call changes the code. */
         if (g_game_options.fields.navigation_messages != GAME_OPTION_ON) {
             sprite_palette_tint_by_team(source, 2);
             command_dispatch_request(MENU_REQUEST_MOVE_CONFIRM_SILENT, 0, source->battle_unit->battle_unit_id, 0,
@@ -1003,7 +1004,9 @@ static s32 start_next_post_move_event(void) {
     }
     if (g_move_post_events & MOVE_POST_EVENT_TRAP_TRIGGERED) {
         trap = move_find_prepare_trap_result(casting->battle_unit);
-        if ((source->pending_attack_result = action_apply_target_result(source->battle_unit->battle_unit_id)) == -1) {
+        source->pending_attack_result = action_apply_target_result(source->battle_unit->battle_unit_id);
+        if (source->pending_attack_result == -1) {
+
             battle_unit_find_relocation_tile(source->battle_unit->battle_unit_id, &source->dismount);
             map_unit_dismount_dead_rider(source);
         }
@@ -1038,7 +1041,7 @@ static s32 start_next_post_move_event(void) {
     }
     map_unit_update_display(source->map_unit_id);
     map_unit_update_display(casting->map_unit_id);
-    if (try_enter_deep_dungeon_mesh_finish() == 0) {
+    if (!try_enter_deep_dungeon_mesh_finish()) {
         enter_after_command();
     }
     return 0;
@@ -1088,11 +1091,11 @@ static void enter_wait_direction(void) {
             set_cardinal_facing(unit, mounted_unit->facing);
             if (unit->battle_unit != 0) {
                 battle_unit_set_tile_position(unit->battle_unit->battle_unit_id, unit->map_x, unit->map_y,
-                    unit->map_layer, (mounted_unit->facing / UNIT_FACING_QUARTER_TURN));
+                    unit->map_layer, mounted_unit->facing / UNIT_FACING_QUARTER_TURN);
             }
         }
     }
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0) {
+    if (!(unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)) {
         unit->command_state.cursor.facing_hint = ai_choose_wait_facing();
     }
 }
@@ -1167,17 +1170,12 @@ static void turn_to_cursor(map_unit_t* unit) {
 
 /* If the unit has no saved facing yet (-1), save its current facing in
  * attack_facing so restore_facing_after_attack can turn it back
- * once the action is over. The retail code reads attack_facing with a signed
- * `lh`, hence the s16 access. */
+ * once the action is over. */
 static void save_facing_before_attack(map_unit_t* unit) {
-    s16 facing;
     char unused[16]; /* the retail stack frame has 16 unused bytes */
 
-    if (unit != 0) {
-        if (unit->attack_facing == -1) {
-            facing = unit->facing;
-            unit->attack_facing = facing;
-        }
+    if (unit != 0 && unit->attack_facing == -1) {
+        unit->attack_facing = unit->facing;
     }
 }
 
@@ -1248,7 +1246,7 @@ static void restore_facing_after_attack(map_unit_t* unit) {
     s32 unused[4]; /* the retail stack frame has 16 unused bytes */
 
     if (unit != 0) {
-        if ((unit->status_flags_1_4 & UNIT_STATUS_DEAD) == 0) {
+        if (!(unit->status_flags_1_4 & UNIT_STATUS_DEAD)) {
             /* The facing 16-bit values are read signed (lh) here. */
             facing = unit->attack_facing;
             if (facing != -1) {
@@ -1276,6 +1274,7 @@ void map_unit_facing_restore_targets_after_attack(map_unit_t* unit) {
     s32 i;
     map_unit_t* target;
 
+    /* The redundant count test is in the original code. */
     if (unit->strike.target_count != 0) {
         for (i = 0; i < unit->strike.target_count; i++) {
             target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
@@ -1364,19 +1363,20 @@ static void enter_action_execute(void) {
     unit->state_frame_counter = 0;
     cursor_move_to_action_target(unit);
 
-    if ((ability == 0) || (ability == ABILITY_ID_KNOCKBACK)) {
+    /* Each exit spells out its own tail; merging the tests changes the code. */
+    if (ability == 0 || ability == ABILITY_ID_KNOCKBACK) {
         g_system_vsync_interval = 1;
         cursor_hide();
         return;
     }
-    if (effect_ability_has_no_file(ability) != 0) {
+    if (effect_ability_has_no_file(ability)) {
         g_system_vsync_interval = 1;
         cursor_hide();
         return;
     }
-    if ((ability == ABILITY_ID_BASIC_SKILL_ACCUMULATE)
+    if (ability == ABILITY_ID_BASIC_SKILL_ACCUMULATE
         || (ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST)) {
-        if (effect_is_item_ability(ability) != 0) {
+        if (effect_is_item_ability(ability)) {
             g_system_vsync_interval = 1;
             cursor_hide();
             return;
@@ -1386,7 +1386,7 @@ static void enter_action_execute(void) {
         cursor_hide();
         return;
     }
-    if ((effect_is_item_ability(ability) == 0) || ((unit->animation.sequence_id >> 1) == ANIMATION_HOLD_ITEM)) {
+    if (!effect_is_item_ability(ability) || (unit->animation.sequence_id >> 1) == ANIMATION_HOLD_ITEM) {
         effect_playback_start();
     }
     sound_stop_background();
@@ -1424,7 +1424,7 @@ static s32 show_next_message(void) {
  * Brave, Faith, PA and MA changes, gil, an EXP loss, a level change, a broken
  * item and a stolen item) and appends one record per outcome: the
  * action_display_image_id_e of the popup, the unit's battle unit id and the value.
- * g_post_effect_message_count is the record count, drained newest
+ * s_post_effect_message_count is the record count, drained newest
  * first by show_next_message.
  *
  * The queue holds 16 records, but the capacity is tested once before the walk,
@@ -1449,7 +1449,7 @@ static void queue_messages_for_unit(map_unit_t* unit) {
         return;
     }
     action = &unit->battle_unit->action;
-    if (action->hit == 0) {
+    if (!action->hit) {
         return;
     }
 
@@ -1540,9 +1540,9 @@ static void queue_messages_for_unit(map_unit_t* unit) {
             }
             break;
         }
-        if (queued != 0) {
+        if (queued) {
             s_post_effect_messages[s_post_effect_message_count].unit = unit->battle_unit->battle_unit_id;
-            s_post_effect_message_count += 1;
+            s_post_effect_message_count++;
         }
     }
 }
@@ -1570,7 +1570,7 @@ static void show_caster_message(void) {
     if (g_game_options.fields.effect_messages != GAME_OPTION_ON) {
         s_post_effect_message_count = 0;
     }
-    if (show_next_message() == 0) {
+    if (!show_next_message()) {
         command_dispatch_request(MENU_REQUEST_EFFECT_MESSAGE, 0, unit->battle_unit->battle_unit_id, 0, 0);
     }
 }
@@ -1760,7 +1760,7 @@ static void start_action_effect(s32 ability_id, map_unit_t* unit) {
             target_stats = target->battle_unit;
             if (target_stats == 0) {
                 context.targets[i].data.unit.result_animation = EFFECT_HIT_NORMAL;
-            } else if (target_stats->action.critical != 0) {
+            } else if (target_stats->action.critical) {
                 context.targets[i].data.unit.result_animation = EFFECT_HIT_CRITICAL;
             } else if (target_stats->action.miss_type == ACTION_MISS_TYPE_REFLECTED) {
                 context.targets[i].data.unit.result_animation = EFFECT_HIT_REFLECTED;
@@ -1803,7 +1803,7 @@ static void start_action_effect(s32 ability_id, map_unit_t* unit) {
 
     /* The subtraction tests for Blaze Gun or Glacier Gun; the three elemental guns pass no
      * charge set or element. */
-    if (strike->last_attack_id == 0 || strike->reaction_occurred != 0 || g_action_phase != ACTION_PHASE_ACTING_UNIT
+    if (strike->last_attack_id == 0 || strike->reaction_occurred || g_action_phase != ACTION_PHASE_ACTING_UNIT
         || (unit->used_item_or_weapon_id - ITEM_ID_BLAZE_GUN) < 2U
         || (item = unit->used_item_or_weapon_id) == ITEM_ID_BLAST_GUN) {
         packed = 0;
@@ -1864,6 +1864,7 @@ static s32 announce_next_action(void) {
                 unit->sp2_ability_id = ability_id;
                 unit->used_ability_id = ability_id;
             } else {
+                /* Nested: with && GCC folds the range test into one unsigned compare. */
                 if (result >= 0) {
                     if (result < 4) {
                         result_queue_charge_failure(unit, result);
@@ -1895,7 +1896,7 @@ static s32 announce_next_action(void) {
         if (result != -1) {
             return 1;
         }
-        g_action_phase = g_action_phase + 1;
+        g_action_phase++;
     } while (g_action_phase < ACTION_PHASE_COUNT);
     return 0;
 }
@@ -1929,7 +1930,7 @@ static void apply_strike_results(void) {
         map_unit_facing_turn_to_target(unit, 0);
     }
     action = &unit->strike;
-    if (action->target_count != 0) {
+    if (action->target_count != 0) { /* redundant, as in the original code */
         for (i = 0; i < action->target_count; i++) {
             target = map_unit_get_by_battle_unit_id(action->target_list[i]);
             if (target != 0) {
@@ -1943,7 +1944,7 @@ static void apply_strike_results(void) {
 
     if (g_action_phase == ACTION_PHASE_ACTING_UNIT) {
         if (unit->used_ability_id != 0 && !IS_ELEMENTAL_GUN(unit->used_item_or_weapon_id)
-            && action->reaction_occurred == 0) {
+            && !action->reaction_occurred) {
             animation_select_ability_attack(unit, map_unit_get_by_battle_unit_id(action->target_list[0]));
         } else if (unit->used_ability_id == 0 || IS_ELEMENTAL_GUN(unit->used_item_or_weapon_id)) {
             if (action->target_count != 0) {
@@ -1967,7 +1968,7 @@ static void apply_strike_results(void) {
     } else if (action->reaction_ability_id != ABILITY_ID_REACTION_REFLECT) {
         if (unit->used_ability_id != 0 && !IS_ELEMENTAL_GUN(unit->used_item_or_weapon_id)
             && unit->continue_attack_count == 0) {
-            if (action->reaction_occurred == 0) {
+            if (!action->reaction_occurred) {
                 animation_select_ability_attack(unit, map_unit_get_by_battle_unit_id(action->target_list[0]));
             }
         } else if (unit->used_ability_id == 0 || IS_ELEMENTAL_GUN(unit->used_item_or_weapon_id)) {
@@ -2001,8 +2002,8 @@ static void start_next_strike(void) {
     ability = attack_id;
     unit->used_ability_id = attack_id;
     sprite_set_weapon_graphic(unit->strike.used_weapon_id, unit);
-    if (((reaction != 0) && (ability != reaction)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)
-        || (effect_ability_has_no_file(ability) != 0)) {
+    if ((reaction != 0 && ability != reaction) || ability == ABILITY_ID_KNOCKBACK || ability == 0
+        || effect_ability_has_no_file(ability)) {
         apply_strike_results();
         return;
     }
@@ -2048,7 +2049,7 @@ static void enter_action_cast(void) {
     g_battle_state = BATTLE_STATE_ACTION_CAST;
     g_battle_window_closed = 0;
     unit = map_unit_get_source();
-    if (try_enter_event(unit) == 0) {
+    if (!try_enter_event(unit)) {
         g_battle_state = BATTLE_STATE_ACTION_CAST;
         camera_rotate_for_unit_visibility(unit);
     }
@@ -2208,7 +2209,7 @@ static target_panels_e start_target_tile_selection(void) {
         g_battle_state = BATTLE_STATE_TARGETING_RANGE;
         map_set_tile_mark_colors(MAP_TILE_MARK_SHOW_RANGE, 2);
         cursor_show_right_unit_panel();
-        if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+        if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
             cursor_show();
         } else {
             cursor_hide();
@@ -2298,13 +2299,13 @@ static void highlight_blue_or_red_palettes(s32 mode) {
                 != (caster->battle_unit->team_flags & UNIT_TEAM_MASK)) {
                 map_palette_modify(MAP_COLOR_MODE_BASE_REPEAT, 4, MAP_CLUT_ROW_UNITS, i, 0, 0x10, 0, 0);
             }
-            continue;
+            break;
         case TURN_COMMAND_AUTOBATTLE_PROTECT_ALLIES_SELECT:
             if ((unit->battle_unit->team_flags & UNIT_TEAM_MASK)
                 == (caster->battle_unit->team_flags & UNIT_TEAM_MASK)) {
                 map_palette_modify(MAP_COLOR_MODE_BASE_REPEAT, 4, MAP_CLUT_ROW_UNITS, i, 0, 0, 0, 0x18);
             }
-            continue;
+            break;
         }
     }
 }
@@ -2461,7 +2462,7 @@ static void update_cursor(void) {
     SVECTOR raised;
     VECTOR projected;
 
-    if (g_cursor_visible != 0) {
+    if (g_cursor_visible) {
         cursor_draw_tile_glow();
         return;
     }
@@ -2573,7 +2574,7 @@ void battle_state_open_action_menus_update(void) {
         g_battle_window_closed = 1;
     }
     if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed != 0) {
+        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed) {
         select_cursor_unit();
     }
 }
@@ -2960,8 +2961,7 @@ void battle_state_select_move_tile_update(void) {
         }
         return;
     }
-    frame = source->state_frame_counter;
-    source->state_frame_counter = frame + 1;
+    frame = source->state_frame_counter++;
     if (frame < 0x1f) {
         return;
     }
@@ -3011,15 +3011,15 @@ void battle_state_illegal_move_menu_update(void) {
 /* UnitMovingSetup game-state handler: YES starts the move; NO or UNRESOLVED_FF discards the path
  * and returns to choosing a destination. */
 void battle_state_unit_moving_setup_update(void) {
-    turn_command_t* selected_command_address;
+    turn_command_t* selected;
     s32 selected_command;
     map_unit_t* casting_unit;
 
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    selected_command_address = command_get_selected();
+    selected = command_get_selected();
     casting_unit = map_unit_get_casting();
-    selected_command = selected_command_address->kind;
+    selected_command = selected->kind;
     switch (selected_command) {
     case TURN_COMMAND_PROMPT_YES:
         enter_unit_moving();
@@ -3044,7 +3044,7 @@ void battle_state_unit_moving_update(void) {
     casting_unit = map_unit_get_casting();
     move_update_step(casting_unit);
     if (casting_unit->step_phase == MOVE_STEP_PHASE_NONE
-        && casting_unit->movement_path_offset >= casting_unit->path.count && g_battle_animation_wait_state == 0) {
+        && casting_unit->movement_path_offset >= casting_unit->path.count && !g_battle_animation_wait_state) {
         map_unit_update_display(casting_unit->map_unit_id);
         enter_move_confirm_menu();
     }
@@ -3065,7 +3065,7 @@ static void restore_previous_state(map_unit_t* unit) {
     unit->standing_on_battle_unit_id_plus_one = unit->previous_standing_on_battle_unit_id_plus_one;
     map_unit_set_move_and_world_coords(unit);
     battle_unit_set_tile_position(unit->battle_unit->battle_unit_id, unit->map_x, unit->map_y, unit->map_layer,
-        (unit->facing / UNIT_FACING_QUARTER_TURN));
+        unit->facing / UNIT_FACING_QUARTER_TURN);
     animation_force_with_facing(unit->animation.sequence_id >> 1, unit->facing, unit);
 }
 
@@ -3113,7 +3113,7 @@ static void confirm_move(map_unit_t* unit, map_unit_t* moved) {
 
     if (moved->battle_unit != 0) {
         battle_unit_set_tile_position(moved->battle_unit->battle_unit_id, moved->map_x, moved->map_y, moved->map_layer,
-            (moved->facing / UNIT_FACING_QUARTER_TURN));
+            moved->facing / UNIT_FACING_QUARTER_TURN);
         if (moved->mount_state == UNIT_MOUNT_STATE_MOUNT) {
             rider = map_unit_get(moved->mount_partner_map_unit_id);
             if (rider != 0) {
@@ -3125,7 +3125,7 @@ static void confirm_move(map_unit_t* unit, map_unit_t* moved) {
                 rider->world_coords.vy -= 10;
                 rider->real.vy -= 0xa000;
                 battle_unit_set_tile_position(rider->battle_unit->battle_unit_id, moved->map_x, moved->map_y,
-                    moved->map_layer, (moved->facing / UNIT_FACING_QUARTER_TURN));
+                    moved->map_layer, moved->facing / UNIT_FACING_QUARTER_TURN);
             }
         }
     }
@@ -3142,17 +3142,17 @@ static void confirm_move(map_unit_t* unit, map_unit_t* moved) {
  * undoes it and returns to choosing a destination, except after a teleport, which is kept as with
  * YES. */
 void battle_state_move_confirm_menu_update(void) {
-    turn_command_t* selected_command_address;
+    turn_command_t* selected;
     s32 selected_command;
     map_unit_t* source_unit;
     map_unit_t* casting_unit;
 
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    selected_command_address = command_get_selected();
+    selected = command_get_selected();
     source_unit = map_unit_get_source();
     casting_unit = map_unit_get_casting();
-    selected_command = selected_command_address->kind;
+    selected_command = selected->kind;
     switch (selected_command) {
     case TURN_COMMAND_PROMPT_NO:
     case TURN_COMMAND_UNRESOLVED_FF:
@@ -3172,15 +3172,15 @@ void battle_state_move_confirm_menu_update(void) {
  * after-command state, unless the unit's turn is over (turn_is_over returns
  * 1): then it chooses a facing too. */
 void battle_state_wait_menu_update(void) {
-    turn_command_t* selected_command_address;
+    turn_command_t* selected;
     s32 selected_command;
     map_unit_t* source_unit;
 
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    selected_command_address = command_get_selected();
+    selected = command_get_selected();
     source_unit = map_unit_get_source();
-    selected_command = selected_command_address->kind;
+    selected_command = selected->kind;
     switch (selected_command) {
     case TURN_COMMAND_PROMPT_NO:
     case TURN_COMMAND_UNRESOLVED_FF:
@@ -3200,7 +3200,7 @@ static void set_tile_position_with_partner(map_unit_t* unit) {
     map_unit_t* mounted_unit;
 
     battle_unit_set_tile_position(unit->battle_unit->battle_unit_id, unit->map_x, unit->map_y, unit->map_layer,
-        (unit->facing / UNIT_FACING_QUARTER_TURN));
+        unit->facing / UNIT_FACING_QUARTER_TURN);
 
     if (unit->mount_state != UNIT_MOUNT_STATE_NONE) {
         mounted_unit = map_unit_get(unit->mount_partner_map_unit_id);
@@ -3210,7 +3210,7 @@ static void set_tile_position_with_partner(map_unit_t* unit) {
             mounted_unit->camera_facing_sixteenth = unit->camera_facing_sixteenth;
 
             battle_unit_set_tile_position(mounted_unit->battle_unit->battle_unit_id, unit->map_x, unit->map_y,
-                unit->map_layer, (unit->facing / UNIT_FACING_QUARTER_TURN));
+                unit->map_layer, unit->facing / UNIT_FACING_QUARTER_TURN);
         }
     }
 }
@@ -3237,23 +3237,23 @@ void battle_state_wait_direction_update(void) {
     if (g_menu_status_screen_selected != 1) {
         map_unit_update_animations();
     }
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         map_unit_facing_draw_wait_direction();
     }
     sprite_update_units_display();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         camera_handle_rotation_input();
         camera_handle_zoom_input();
         camera_handle_tilt_input();
-        if ((g_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
+        if (g_input_pressed_buttons & PSX_PAD_CIRCLE) {
             if (unit->battle_unit != 0) {
                 turn_end(unit->battle_unit->battle_unit_id);
                 set_tile_position_with_partner(unit);
             }
             sound_play_sfx(SOUND_SFX_CONFIRM);
             start_next_turn_event();
-        } else if ((g_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
+        } else if (g_input_pressed_buttons & PSX_PAD_CROSS) {
             enter_after_command();
         }
         facing = cursor_get_input_direction(CAMERA_INPUT_PRESSED);
@@ -3332,21 +3332,20 @@ void battle_state_post_move_events_update(void) {
         break;
     }
 
-    if (g_battle_window_closed == 0) {
+    if (!g_battle_window_closed) {
         return;
     }
-    if (g_battle_animation_wait_state != 0) {
+    if (g_battle_animation_wait_state) {
         return;
     }
-    counter = casting->state_frame_counter;
-    casting->state_frame_counter = counter + 1;
+    counter = casting->state_frame_counter++;
     if (counter < 0x1f) {
         return;
     }
-    if (source->numeric_display.active != 0) {
+    if (source->numeric_display.active) {
         return;
     }
-    if (casting->numeric_display.active != 0) {
+    if (casting->numeric_display.active) {
         return;
     }
 
@@ -3357,13 +3356,13 @@ void battle_state_post_move_events_update(void) {
         g_move_post_events &= ~MOVE_POST_EVENT_CRYSTAL_OR_TREASURE;
         ai_reset_selected_action();
     } else if (g_move_post_events & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
-        g_reward_report_phase += 1;
+        g_reward_report_phase++;
         if (g_reward_report_phase >= 2) {
             g_move_post_events &= ~MOVE_POST_EVENT_MOVEMENT_BENEFIT;
         }
     } else if (g_move_post_events & MOVE_POST_EVENT_ITEM_FOUND) {
         /* Wait out a non-idle animation still playing (the find reaction). */
-        if ((source->animation.wait != 0) && ((source->animation.sequence_id >> 1) >= ANIMATION_WALK)) {
+        if (source->animation.wait != 0 && (source->animation.sequence_id >> 1) >= ANIMATION_WALK) {
             return;
         }
         source->item_display_active = 0;
@@ -3415,18 +3414,18 @@ void battle_state_targeting_range_update(void) {
 
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         cursor_move_by_input();
         camera_handle_rotation_input();
         camera_handle_zoom_input();
         camera_handle_tilt_input();
-        if ((g_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
+        if (g_input_pressed_buttons & PSX_PAD_CROSS) {
             map_set_tile_mark_colors(MAP_TILE_MARK_NONE, 2);
             open_active_unit_menu();
             return;
         }
-        if ((g_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
-            if ((map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer)->ceiling_depth_and_marks.ability_range) != 0) {
+        if (g_input_pressed_buttons & PSX_PAD_CIRCLE) {
+            if (map_get_tile(g_cursor_x, g_cursor_y, g_cursor_layer)->ceiling_depth_and_marks.ability_range) {
                 select_target_tile();
                 return;
             }
@@ -3500,15 +3499,15 @@ void battle_state_ability_preview_update(void) {
     u16 frame;
     map_unit_t* unit = map_unit_get_source();
 
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
         camera_handle_rotation_input();
         camera_handle_zoom_input();
         camera_handle_tilt_input();
-        if ((g_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
+        if (g_input_pressed_buttons & PSX_PAD_CIRCLE) {
             g_cursor_input_mode = g_cursor_input_mode_saved;
             sprite_palette_restore_all();
             enter_confirm_action();
-        } else if ((g_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
+        } else if (g_input_pressed_buttons & PSX_PAD_CROSS) {
             g_cursor_input_mode = g_cursor_input_mode_saved;
             map_set_tile_mark_colors(MAP_TILE_MARK_HIDE_TARGETS, 3);
             if (unit->ability_preview_phase == TARGET_PANELS_NO_TARGETING) {
@@ -3522,8 +3521,7 @@ void battle_state_ability_preview_update(void) {
             }
         }
     } else {
-        frame = unit->state_frame_counter;
-        unit->state_frame_counter = frame + 1;
+        frame = unit->state_frame_counter++;
         if (frame >= 0x1f) {
             g_cursor_input_mode = g_cursor_input_mode_saved;
             sprite_palette_restore_all();
@@ -3542,19 +3540,19 @@ void battle_state_ability_preview_update(void) {
  * animation on TILE, UNIT or YES. */
 void battle_state_confirm_action_update(void) {
     map_unit_t* unit;
-    turn_command_t* selected_command_address;
+    turn_command_t* selected;
     map_unit_t* target;
     s32 selected_command;
 
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    selected_command_address = command_get_selected();
+    selected = command_get_selected();
     unit = map_unit_get_source();
-    if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
-        selected_command = selected_command_address->kind;
+    if (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) {
+        selected_command = selected->kind;
         switch (selected_command) {
         case TARGET_TYPE_TILE:
-            unit->command_state.command.data.action.targeting_type = selected_command_address->kind;
+            unit->command_state.command.data.action.targeting_type = selected->kind;
             vector_set_short(&unit->command_state.cursor.target_panel, g_cursor_x, g_cursor_layer, g_cursor_y);
             enter_pre_attack_animation();
             return;
@@ -3562,7 +3560,7 @@ void battle_state_confirm_action_update(void) {
         case TURN_COMMAND_PROMPT_YES:
             target = map_unit_find_selectable_at_tile(g_cursor_x, g_cursor_y, g_cursor_layer);
             if (target != 0) {
-                unit->command_state.command.data.action.targeting_type = selected_command_address->kind;
+                unit->command_state.command.data.action.targeting_type = selected->kind;
                 unit->command_state.command.data.action.target_id = target->battle_unit->battle_unit_id;
             } else {
                 unit->command_state.command.data.action.targeting_type = TARGET_TYPE_TILE;
@@ -3579,7 +3577,7 @@ void battle_state_confirm_action_update(void) {
             break;
         }
     } else {
-        selected_command = selected_command_address->kind;
+        selected_command = selected->kind;
         switch (selected_command) {
         case TARGET_TYPE_TILE:
         case TARGET_TYPE_UNIT:
@@ -3629,7 +3627,7 @@ void battle_state_action_cast_update(void) {
     }
     /* Wait for the camera to settle before handing the action data over. */
     if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed != 0) {
+        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed) {
         enter_commence_attack_phase();
     }
 }
@@ -3687,9 +3685,6 @@ void battle_state_open_sp2_files_update(void) {
     map_unit_t* unit = map_unit_get_casting();
     s32 open_result;
     s32 slot;
-    s32 free_owner;
-    s32 offset;
-    u32* sp2_data;
 
     if (g_sprite_sp2_data == 0) {
         g_sprite_sp2_data = heap_alloc(0x8000);
@@ -3703,26 +3698,18 @@ void battle_state_open_sp2_files_update(void) {
             g_sprite_sp2_data = 0;
         }
     } else if (file_get_load_state() == 0) {
-        slot = 0;
-        free_owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
-        /* Keep the target's byte-offset induction; advancing a slot pointer changes the exact code. */
-        offset = 0;
-        do {
-            if (((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->owner == free_owner) {
-                sp2_data = g_sprite_sp2_data;
-                ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->owner
-                    = unit->map_unit_id | SPRITE_EVTCHR_SLOT_OWNER_SP2;
-                image_rect.x = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->image_rect.x;
-                image_rect.y = ((sprite_evtchr_slot_t*)((u8*)g_sprite_evtchr_slots + offset))->image_rect.y;
+        for (slot = 0; slot < SPRITE_EVTCHR_SLOT_COUNT; slot++) {
+            if (g_sprite_evtchr_slots[slot].owner == SPRITE_EVTCHR_SLOT_OWNER_NONE) {
+                g_sprite_evtchr_slots[slot].owner = unit->map_unit_id | SPRITE_EVTCHR_SLOT_OWNER_SP2;
+                image_rect.x = g_sprite_evtchr_slots[slot].image_rect.x;
+                image_rect.y = g_sprite_evtchr_slots[slot].image_rect.y;
                 image_rect.w = 0x40;
                 image_rect.h = 0x100;
-                LoadImage(&image_rect, sp2_data);
+                LoadImage(&image_rect, g_sprite_sp2_data);
                 start_next_strike();
                 break;
             }
-            slot++;
-            offset += sizeof(sprite_evtchr_slot_t);
-        } while (slot < SPRITE_EVTCHR_SLOT_COUNT);
+        }
     }
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
@@ -3732,12 +3719,12 @@ void battle_state_open_sp2_files_update(void) {
  * (effect_update_file_load); when no work remains, resolve the strike and pick
  * the attacker's animation. */
 void battle_state_start_effect_file_open_update(void) {
-    if (effect_update_file_load() != 0) {
+    if (effect_update_file_load()) {
         g_battle_animation_wait_state = 1;
     } else {
         g_battle_animation_wait_state = 0;
     }
-    if (g_battle_animation_wait_state == 0) {
+    if (!g_battle_animation_wait_state) {
         apply_strike_results();
     }
     update_scene();
@@ -3801,6 +3788,7 @@ void battle_state_action_execute_update(void) {
     unit = map_unit_get_casting();
     /* The target reads the 16-bit value of g_system_vsync_interval. */
     unit->state_frame_counter += g_system_vsync_interval;
+    /* The count tests around these loops are redundant but in the original code. */
     if (unit->strike.target_count != 0) {
         for (i = 0; i < unit->strike.target_count; i++) {
             target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
@@ -3813,11 +3801,11 @@ void battle_state_action_execute_update(void) {
 
     if (unit->used_ability_id != 0 && unit->used_ability_id != ABILITY_ID_KNOCKBACK
         && unit->used_ability_id != ABILITY_ID_BASIC_SKILL_THROW_STONE) {
-        if (effect_ability_has_no_file(unit->used_ability_id) != 0
+        if (effect_ability_has_no_file(unit->used_ability_id)
             || (unit->used_ability_id >= ABILITY_ID_CHARGE_FIRST && unit->used_ability_id < ABILITY_ID_MATH_FIRST)) {
             camera_update_cursor_focus();
         }
-        if (g_battle_animation_wait_state == 0 && unit->numeric_display.active == 0
+        if (!g_battle_animation_wait_state && !unit->numeric_display.active
             && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < ANIMATION_ATTACK_FIRST)) {
             sound_replay_background();
             if (unit->strike.target_count != 0) {
@@ -3826,7 +3814,7 @@ void battle_state_action_execute_update(void) {
                     if (target != 0) {
                         if (unit->used_ability_id >= ABILITY_ID_REACTION_FIRST
                             && unit->used_ability_id < ABILITY_ID_SUPPORT_FIRST) {
-                            if (effect_ability_has_no_file(unit->used_ability_id) != 0
+                            if (effect_ability_has_no_file(unit->used_ability_id)
                                 && g_ability_animation_data[unit->used_ability_id].attack_animation
                                     != ANIMATION_ATTACK_USE_WEAPON) {
                                 start_target_animation_display(unit, target);
@@ -3842,7 +3830,7 @@ void battle_state_action_execute_update(void) {
     } else {
         camera_update_cursor_focus();
         menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-        if (g_battle_animation_wait_state == 0 && unit->numeric_display.active == 0
+        if (!g_battle_animation_wait_state && !unit->numeric_display.active
             && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < ANIMATION_ATTACK_FIRST)) {
             if (unit->strike.target_count != 0) {
                 for (i = 0; i < unit->strike.target_count; i++) {
@@ -3872,7 +3860,7 @@ void battle_state_battle_message_display_update(void) {
         && (selected_command <= TURN_COMMAND_PROMPT_NO || selected_command == TURN_COMMAND_UNRESOLVED_FF)) {
         g_battle_window_closed = 1;
     }
-    if (g_battle_window_closed != 0) {
+    if (g_battle_window_closed) {
         show_caster_message();
     }
 }
@@ -3903,9 +3891,9 @@ void battle_state_resume_attack_phase_update(void) {
         g_battle_window_closed = 1;
     }
     unit = map_unit_get_casting();
-    if (g_battle_window_closed != 0 && show_next_message() == 0 && unit->numeric_display.active == 0) {
-        if (unit->strike.continue_attack != 0) {
-            unit->continue_attack_count += 1;
+    if (g_battle_window_closed && !show_next_message() && !unit->numeric_display.active) {
+        if (unit->strike.continue_attack) {
+            unit->continue_attack_count++;
             start_next_strike();
             return;
         }
@@ -3931,9 +3919,9 @@ void battle_state_resume_attack_phase_update(void) {
         map_unit_get_source(); /* result unused */
         if (g_action_phase != ACTION_PHASE_PRE_ACTION) {
             if (g_action_phase != ACTION_PHASE_REACTING_UNIT) {
-                g_action_phase += 1;
+                g_action_phase++;
             }
-            if (announce_next_action() != 0) {
+            if (announce_next_action()) {
                 return;
             }
         }
@@ -3950,20 +3938,18 @@ void battle_state_resume_attack_phase_update(void) {
  * numeric display, the source unit returns to its status animation and the after-command state
  * begins. */
 void battle_state_post_action_reports_update(void) {
-    turn_command_t* selected_command_address;
+    turn_command_t* selected;
     s32 selected_command;
     s32 i;
     s32 display_active;
-    s32 target_count;
     map_unit_t* casting_unit;
     map_unit_t* target_unit;
-    u8 compiler_stack_pad[8];
 
     update_scene();
     menu_update_event_frame(gfx_get_battle_otag(), g_input_current_buttons);
-    selected_command_address = command_get_selected();
+    selected = command_get_selected();
     casting_unit = map_unit_get_casting();
-    selected_command = selected_command_address->kind;
+    selected_command = selected->kind;
     switch (selected_command) {
     case TURN_COMMAND_PROMPT_YES:
         if (g_reward_report_phase == REWARD_REPORT_LEARN_ON_HIT) {
@@ -3972,7 +3958,7 @@ void battle_state_post_action_reports_update(void) {
         }
     case TURN_COMMAND_PROMPT_NO:
     case TURN_COMMAND_UNRESOLVED_FF:
-        g_reward_report_phase += 1;
+        g_reward_report_phase++;
         if (g_reward_report_phase >= 3) {
             g_battle_window_closed = 1;
         } else {
@@ -3980,23 +3966,17 @@ void battle_state_post_action_reports_update(void) {
         }
         break;
     }
-    if (g_battle_window_closed != 0 && g_battle_animation_wait_state == 0) {
-        i = 0;
-        if (casting_unit->numeric_display.active == 0) {
-            target_count = casting_unit->strike.target_count;
+    if (g_battle_window_closed && !g_battle_animation_wait_state) {
+        if (!casting_unit->numeric_display.active) {
             display_active = 0;
-            if (target_count > 0) {
-                do {
-                    target_unit = map_unit_get_by_battle_unit_id(casting_unit->strike.target_list[i]);
-                    if (target_unit != 0 && target_unit->numeric_display.active != 0) {
-                        display_active = 1;
-                        break;
-                    }
-                    target_count = casting_unit->strike.target_count;
-                    i += 1;
-                } while (i < target_count);
+            for (i = 0; i < casting_unit->strike.target_count; i++) {
+                target_unit = map_unit_get_by_battle_unit_id(casting_unit->strike.target_list[i]);
+                if (target_unit != 0 && target_unit->numeric_display.active) {
+                    display_active = 1;
+                    break;
+                }
             }
-            if (display_active == 0) {
+            if (!display_active) {
                 casting_unit = map_unit_get_source();
                 animation_set_status_after_action(casting_unit);
                 end_command(casting_unit);
@@ -4029,7 +4009,7 @@ static s32 update_deep_dungeon_mesh_load(void) {
 /* DeepDungeonMeshLoad game-state handler: when the Deep Dungeon map has loaded,
  * run the between-turn events. */
 void battle_state_deep_dungeon_mesh_load_update(void) {
-    if (update_deep_dungeon_mesh_load() != 0) {
+    if (update_deep_dungeon_mesh_load()) {
         start_next_turn_event();
     }
 }
@@ -4037,7 +4017,7 @@ void battle_state_deep_dungeon_mesh_load_update(void) {
 /* DeepDungeonMeshFinish game-state handler: when the Deep Dungeon map has loaded,
  * enter the after-command state. */
 void battle_state_deep_dungeon_mesh_finish_update(void) {
-    if (update_deep_dungeon_mesh_load() != 0) {
+    if (update_deep_dungeon_mesh_load()) {
         enter_after_command();
     }
 }
@@ -4153,7 +4133,7 @@ void battle_state_target_display_start_update(void) {
         g_battle_window_closed = 1;
     }
     if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed != 0) {
+        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_window_closed) {
         enter_target_display();
     }
 }
@@ -4188,7 +4168,7 @@ void battle_state_after_command_update(void) {
         && (command <= TURN_COMMAND_PROMPT_NO || command == TURN_COMMAND_UNRESOLVED_FF)) {
         g_battle_window_closed = 1;
     }
-    if ((g_battle_window_closed != 0) && (unit->numeric_display.active == 0)) {
+    if (g_battle_window_closed && !unit->numeric_display.active) {
         enter_continue_turn();
     }
 }
@@ -4263,22 +4243,19 @@ void battle_state_change_turn_update(void) {
             g_battle_window_closed = 1;
         }
     }
-    if (g_battle_window_closed != 0) {
-        if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0) {
-            if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
-                map_unit_get_source(); /* result unused */
-                type = g_turn_event_type;
-                if (type == TURN_EVENT_ABILITY_READY) {
-                    enter_action_cast();
-                    return;
-                }
-                if ((type == TURN_EVENT_ACTION_RESULT) || (type == TURN_EVENT_MIME)) {
-                    enter_status_execute();
-                    return;
-                }
-                enter_open_action_menus();
-            }
+    if (g_battle_window_closed && (g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
+        && g_camera_rotation_action == CAMERA_ROTATION_NONE) {
+        map_unit_get_source(); /* result unused */
+        type = g_turn_event_type;
+        if (type == TURN_EVENT_ABILITY_READY) {
+            enter_action_cast();
+            return;
         }
+        if (type == TURN_EVENT_ACTION_RESULT || type == TURN_EVENT_MIME) {
+            enter_status_execute();
+            return;
+        }
+        enter_open_action_menus();
     }
 }
 
@@ -4296,13 +4273,11 @@ void battle_state_status_execute_update(void) {
         && (selected_command <= TURN_COMMAND_PROMPT_NO || selected_command == TURN_COMMAND_UNRESOLVED_FF)) {
         g_battle_window_closed = 1;
     }
-    if (g_battle_window_closed != 0) {
-        if (g_battle_animation_wait_state == 0) {
-            unit = map_unit_get_source();
-            if (unit->numeric_display.active == 0) {
-                map_unit_update_display(unit->map_unit_id);
-                start_next_turn_event();
-            }
+    if (g_battle_window_closed && !g_battle_animation_wait_state) {
+        unit = map_unit_get_source();
+        if (!unit->numeric_display.active) {
+            map_unit_update_display(unit->map_unit_id);
+            start_next_turn_event();
         }
     }
 }
@@ -4324,7 +4299,7 @@ void battle_state_effect_update(void) {
     }
     sprite_update_units_display();
     fade_tint_draw();
-    if (g_battle_animation_wait_state == 0) {
+    if (!g_battle_animation_wait_state) {
         g_battle_state = g_battle_state_previous;
         g_system_vsync_interval = g_system_saved_vsync_interval;
     }

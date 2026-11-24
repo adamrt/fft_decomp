@@ -199,7 +199,7 @@ crystal_pickup_result_t* crystal_pickup_build_result(battle_unit_t* mover) {
         g_crystal_pickup_result.result = CRYSTAL_PICKUP_TREASURE;
         g_crystal_pickup_result.treasure_item = generate_treasure_item(crystal);
     } else {
-        /* The empty loops are measured residue: without them the code differs. */
+        /* The empty loops are measured residue: without them s1 and s2 swap. */
         do {
             do {
                 g_crystal_pickup_result.result = CRYSTAL_PICKUP_CRYSTAL;
@@ -280,11 +280,7 @@ crystal_pickup_result_t* crystal_pickup_build_result(battle_unit_t* mover) {
  * return 0. */
 s32 crystal_pickup_apply_choice(battle_unit_t* unit, s32 flags) {
     s32 i;
-    u8* dst;
-    u8* src;
-    u8* learned;
-    u8* crystal_bits;
-    u8* end;
+    s32 j;
 
     action_clear_current_data(&unit->action);
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
@@ -300,25 +296,11 @@ s32 crystal_pickup_apply_choice(battle_unit_t* unit, s32 flags) {
         unit->action.mp_healing = unit->max_mp - unit->mp;
     }
     if (flags & CRYSTAL_LEARN_ABILITIES) {
-        /* OR the crystal's ability bits into learned_abilities, three bytes
-         * per job for 19 jobs; walked as raw bytes to keep the biased pointers. */
-        i = 0;
-        src = g_crystal_pickup_result.learned[0];
-        dst = (u8*)unit;
-        do {
-            learned = dst + offsetof(battle_unit_t, career.learned_abilities);
-            crystal_bits = src;
-            end = dst + offsetof(battle_unit_t, career.learned_abilities) + UNIT_LEARNED_ABILITY_BYTES_PER_JOB;
-            do {
-                *learned |= *crystal_bits;
-                learned++;
-                crystal_bits++;
-                /* The signed compare is byte-required (slt, not sltu). */
-            } while ((s32)learned < (s32)end);
-            src += 3;
-            i++;
-            dst += 3;
-        } while (i < UNIT_LEARNED_ABILITY_JOB_COUNT);
+        for (i = 0; i < UNIT_LEARNED_ABILITY_JOB_COUNT; i++) {
+            for (j = 0; j < UNIT_LEARNED_ABILITY_BYTES_PER_JOB; j++) {
+                unit->career.learned_abilities[i][j] |= g_crystal_pickup_result.learned[i][j];
+            }
+        }
     }
     return 0;
 }
@@ -355,7 +337,7 @@ static u8 generate_treasure_item(battle_unit_t* unit) {
          * skipping Elixir reaches the thirteenth. */
         candidates[0] = ((rand() * 13) / 0x8000) - (ITEM_ID_COUNT - ITEM_ID_CONSUMABLE_FIRST);
         if (candidates[0] >= ITEM_ID_ELIXIR) {
-            candidates[0] = candidates[0] + 1;
+            candidates[0]++;
         }
         count = 1;
     }

@@ -14,9 +14,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-extern u16 g_map_palette_modified_colors[MAP_CLUT_ROW_COUNT][MAP_CLUT_ROW_COLOR_COUNT];
-
-/* [map_clut_row_e][color] */
+extern u16 g_map_palette_modified_colors[MAP_CLUT_ROW_COUNT][MAP_CLUT_ROW_COLOR_COUNT]; /* [map_clut_row_e][color] */
 
 /* Runtime color fades stepped by map_palette_update_color_animations:
  * s_map_background_transition, s_map_ambient_transition and
@@ -199,6 +197,7 @@ void map_palette_set_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_a
     if (update_all == 1) {
         const palette_t* current_colors;
 
+        /* The bytes require this while loop; a for loop does not match. */
         index = 0;
         current_colors = colors;
         while (index < MAP_CLUTS_PER_ROW) {
@@ -228,18 +227,17 @@ void map_palette_set_and_store_colors(s32 mode, s32 clut_row, s32 clut_index, s3
         u16* destination;
         const u16* source;
 
-        index = 0;
         destination = g_map_palette_state.clut_rows[clut_row].packed_colors;
         source = (const u16*)colors_reg;
-        while (index < MAP_CLUT_ROW_COLOR_COUNT) {
+        for (index = 0; index < MAP_CLUT_ROW_COLOR_COUNT; index++) {
             *destination++ = *source++;
-            index++;
         }
     } else {
         const u16* source;
         u16* palette_colors;
         s32 palette_offset;
 
+        /* The bytes require this while loop; a for loop does not match. */
         index = 0;
         palette_offset = clut_index * MAP_CLUT_COLOR_COUNT;
         palette_colors = g_map_palette_state.clut_rows[clut_row].packed_colors;
@@ -259,17 +257,16 @@ void map_palette_store_modified_colors(s32 clut_row, s32 clut_index, s32 store_a
         u16* destination;
         u16* source;
 
-        store_all = 0;
         destination = g_map_palette_state.clut_rows[clut_row].packed_colors;
         source = g_map_palette_modified_colors[0];
         source += clut_row * MAP_CLUT_ROW_COLOR_COUNT;
-        while (store_all < MAP_CLUT_ROW_COLOR_COUNT) {
+        for (store_all = 0; store_all < MAP_CLUT_ROW_COLOR_COUNT; store_all++) {
             *destination++ = *source++;
-            store_all++;
         }
     } else {
         u16* packed_row;
 
+        /* The bytes require this while loop; a for loop does not match. */
         store_all = 0;
         clut_index *= MAP_CLUT_COLOR_COUNT;
         packed_row = g_map_palette_state.clut_rows[clut_row].packed_colors;
@@ -410,7 +407,8 @@ void map_palette_modify(
                 if (out_blue <= 0) {
                     out_blue = 0;
                 }
-                if ((out_red | out_green | out_blue) == 0) {
+                if (!(out_red | out_green | out_blue)) {
+
                     out_blue = 1;
                 }
                 if (amount != 0) {
@@ -586,7 +584,8 @@ void map_palette_modify(
                 if (out_blue <= 0) {
                     out_blue = 0;
                 }
-                if ((out_red | out_green | out_blue) == 0) {
+                if (!(out_red | out_green | out_blue)) {
+
                     out_blue = 1;
                 }
                 if (amount != 0) {
@@ -651,7 +650,7 @@ static void transition_background(s32 frame_duration, const map_background_gradi
         target_green = green;
         blue = color[i].b << 16;
         target_blue = blue;
-        if (frame_duration != 0) {
+        if (frame_duration) {
             base[i].red_step = (red - (base[i].red & ~0xFFFF)) / (frame_duration * 8);
             base[i].green_step = (green - (base[i].green & ~0xFFFF)) / (frame_duration * 8);
             base[i].blue_step = (blue - (base[i].blue & ~0xFFFF)) / (frame_duration * 8);
@@ -661,7 +660,7 @@ static void transition_background(s32 frame_duration, const map_background_gradi
             base[i].blue = target_blue;
         }
     }
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_background_transition.active = 1;
         s_map_background_transition.phase = 0;
         s_map_background_transition.tick = 0;
@@ -795,7 +794,7 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
             target_blue = 0;
         }
 
-        if (frame_duration != 0) {
+        if (frame_duration) {
             channels[i].red_step = (target_red - (channels[i].red & ~0xFFFF)) / (frame_duration * 8);
             channels[i].green_step = (target_green - (channels[i].green & ~0xFFFF)) / (frame_duration * 8);
             channels[i].blue_step = (target_blue - (channels[i].blue & ~0xFFFF)) / (frame_duration * 8);
@@ -805,7 +804,7 @@ static void blend_background_color(s32 mode, s32 frame_duration, s32 red, s32 gr
             channels[i].blue = target_blue;
         }
     }
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_background_transition.active = 1;
         s_map_background_transition.phase = 0;
         s_map_background_transition.tick = 0;
@@ -849,7 +848,7 @@ static void transition_ambient(s32 frame_duration, const CVECTOR* color) {
     target_green = green;
     blue = color->b << 16;
     target_blue = blue;
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_ambient_transition.channels.red_step = (red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
         s_map_ambient_transition.channels.green_step = (green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
         s_map_ambient_transition.channels.blue_step = (blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
@@ -858,7 +857,7 @@ static void transition_ambient(s32 frame_duration, const CVECTOR* color) {
         channels->green = target_green;
         channels->blue = target_blue;
     }
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_ambient_transition.active = 1;
         s_map_ambient_transition.phase = 0;
         s_map_ambient_transition.tick = 0;
@@ -978,7 +977,7 @@ static void blend_ambient_color(s32 mode, s32 frame_duration, s32 red, s32 green
         target_blue = 0;
     }
 
-    if (frame_duration != 0) {
+    if (frame_duration) {
         channels->red_step = (target_red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
         channels->green_step = (target_green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
         channels->blue_step = (target_blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
@@ -987,7 +986,7 @@ static void blend_ambient_color(s32 mode, s32 frame_duration, s32 red, s32 green
         channels->green = target_green;
         channels->blue = target_blue;
     }
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_ambient_transition.active = 1;
         s_map_ambient_transition.phase = 0;
         s_map_ambient_transition.tick = 0;
@@ -1028,7 +1027,7 @@ static void transition_darkness(s32 frame_duration, const CVECTOR* color) {
     target_green = green;
     blue = color->b << 16;
     target_blue = blue;
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_darkness_transition.channels.red_step = (red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
         s_map_darkness_transition.channels.green_step = (green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
         s_map_darkness_transition.channels.blue_step = (blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
@@ -1037,7 +1036,7 @@ static void transition_darkness(s32 frame_duration, const CVECTOR* color) {
         channels->green = target_green;
         channels->blue = target_blue;
     }
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_darkness_transition.active = 1;
         s_map_darkness_transition.phase = 0;
         s_map_darkness_transition.tick = 0;
@@ -1157,7 +1156,7 @@ static void blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 gree
         target_blue = 0;
     }
 
-    if (frame_duration != 0) {
+    if (frame_duration) {
         channels->red_step = (target_red - (channels->red & ~0xFFFF)) / (frame_duration * 8);
         channels->green_step = (target_green - (channels->green & ~0xFFFF)) / (frame_duration * 8);
         channels->blue_step = (target_blue - (channels->blue & ~0xFFFF)) / (frame_duration * 8);
@@ -1166,7 +1165,7 @@ static void blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 gree
         channels->green = target_green;
         channels->blue = target_blue;
     }
-    if (frame_duration != 0) {
+    if (frame_duration) {
         s_map_darkness_transition.active = 1;
         s_map_darkness_transition.phase = 0;
         s_map_darkness_transition.tick = 0;
@@ -1195,7 +1194,7 @@ s32 map_palette_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_col
 
     for (index = 0; index < MAP_CLUT_CYCLE_SLOT_COUNT; index++) {
         state = &s_map_clut_cycle_states[index];
-        if (state->active == 0) {
+        if (!state->active) {
             state->active = 1;
             state->clut_row = clut_row;
             state->first_color = first_color;
@@ -1263,7 +1262,7 @@ void map_palette_update_color_animations(void) {
     /* Color rotations: every frame_duration frames, move each color one place and wrap the end one around. */
     for (i = 0; i < MAP_CLUT_CYCLE_SLOT_COUNT; i++) {
         state = &s_map_clut_cycle_states[i];
-        if (state->active != 0) {
+        if (state->active) {
             state->elapsed_frames++;
             if (state->elapsed_frames >= state->frame_duration) {
                 state->elapsed_frames = 0;
@@ -1298,7 +1297,7 @@ void map_palette_update_color_animations(void) {
         }
     }
 
-    if (s_map_background_transition.active != 0) {
+    if (s_map_background_transition.active) {
         color_transition_channels_t* channels;
 
         channels = s_map_background_transition.channels;
@@ -1354,7 +1353,7 @@ void map_palette_update_color_animations(void) {
     transition = &s_map_ambient_transition;
     /* Barrier: hides the constant so active and the red channel are accessed through s0. */
     __asm__("" : "=r"(transition) : "0"(transition));
-    if (transition->active != 0) {
+    if (transition->active) {
         s32 red_level;
 
         red_level = transition->channels.red += s_map_ambient_transition.channels.red_step;
@@ -1400,7 +1399,7 @@ void map_palette_update_color_animations(void) {
     transition = &s_map_darkness_transition;
     /* Barrier: hides the constant so active and the red channel are accessed through s0. */
     __asm__("" : "=r"(transition) : "0"(transition));
-    if (transition->active != 0) {
+    if (transition->active) {
         s32 red_level;
 
         red_level = transition->channels.red += s_map_darkness_transition.channels.red_step;
@@ -1457,9 +1456,9 @@ void map_palette_update_color_animations(void) {
     /* Rows with `blend_as_row` clear (sprites, units, shadows, action results) blend each of their 16 CLUTs
      * on its own; the other rows blend all 256 colors under animation 0. */
     for (i = 0; i < MAP_CLUT_ROW_COUNT; i++) {
-        if (g_map_palette_state.clut_rows[i].blend_as_row == 0) {
+        if (!g_map_palette_state.clut_rows[i].blend_as_row) {
             for (k = 0; k < MAP_CLUTS_PER_ROW; k++) {
-                if (g_map_palette_state.clut_rows[i].animations[k].active == 0) {
+                if (!g_map_palette_state.clut_rows[i].animations[k].active) {
                     continue;
                 }
 
@@ -1481,7 +1480,7 @@ void map_palette_update_color_animations(void) {
                                     + s_palette_blend_steps_32[component[j].delta_biased.g][step];
                                 blue = component[j].color.b
                                     + s_palette_blend_steps_32[component[j].delta_biased.b][step];
-                                if ((red | green | blue) == 0) {
+                                if (!(red | green | blue)) {
                                     blue = 1;
                                 }
                                 component[j].color.b = blue;
@@ -1519,7 +1518,7 @@ void map_palette_update_color_animations(void) {
                             red = component[j].color.r + s_palette_blend_steps_8[component[j].delta_biased.r][step];
                             green = component[j].color.g + s_palette_blend_steps_8[component[j].delta_biased.g][step];
                             blue = component[j].color.b + s_palette_blend_steps_8[component[j].delta_biased.b][step];
-                            if ((red | green | blue) == 0) {
+                            if (!(red | green | blue)) {
                                 blue = 1;
                             }
                             component[j].color.b = blue;
@@ -1550,7 +1549,7 @@ void map_palette_update_color_animations(void) {
                 }
                 g_map_palette_state.upload_pending = 1;
             }
-        } else if (g_map_palette_state.clut_rows[i].animations[0].active != 0) {
+        } else if (g_map_palette_state.clut_rows[i].animations[0].active) {
             if (g_map_palette_state.clut_rows[i].animations[0].mode >= 4) {
                 if (++g_map_palette_state.clut_rows[i].animations[0].delay_counter
                     >= g_map_palette_state.clut_rows[i].animations[0].mode >> 2) {
@@ -1562,7 +1561,7 @@ void map_palette_update_color_animations(void) {
                             red = component[j].color.r + s_palette_blend_steps_32[component[j].delta_biased.r][step];
                             green = component[j].color.g + s_palette_blend_steps_32[component[j].delta_biased.g][step];
                             blue = component[j].color.b + s_palette_blend_steps_32[component[j].delta_biased.b][step];
-                            if ((red | green | blue) == 0) {
+                            if (!(red | green | blue)) {
                                 blue = 1;
                             }
                             component[j].color.r = red;
@@ -1600,7 +1599,7 @@ void map_palette_update_color_animations(void) {
                         red = component[j].color.r + s_palette_blend_steps_8[component[j].delta_biased.r][step];
                         green = component[j].color.g + s_palette_blend_steps_8[component[j].delta_biased.g][step];
                         blue = component[j].color.b + s_palette_blend_steps_8[component[j].delta_biased.b][step];
-                        if ((red | green | blue) == 0) {
+                        if (!(red | green | blue)) {
                             blue = 1;
                         }
                         component[j].color.r = red;
@@ -1704,7 +1703,7 @@ void map_palette_load_data(const palette_t* palettes, s32 clut_row, s32 clut_ind
     s32 clear_index;
     s32 i;
 
-    if (g_map_palette_state.clut_rows[clut_row].load_disabled != 0) {
+    if (g_map_palette_state.clut_rows[clut_row].load_disabled) {
         return;
     }
 
@@ -1810,10 +1809,10 @@ void map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_
             if ((out_red | out_green | out_blue) == 0 && (color & 0x7fff)) {
                 out_blue = 1;
             }
-            if (update_current_colors != 0) {
+            if (update_current_colors) {
                 g_map_palette_modified_colors[clut_row][i]
                     = out_red + (out_green << 5) + (out_blue << 10) + (semi_transparent << 15);
-                if (g_map_palette_state.clut_rows[clut_row].animations[i / MAP_CLUT_COLOR_COUNT].active == 0) {
+                if (!g_map_palette_state.clut_rows[clut_row].animations[i / MAP_CLUT_COLOR_COUNT].active) {
                     component = &g_map_palette_state.clut_rows[clut_row].components[i];
                     component->color.r = out_red;
                     component->color.g = out_green;
@@ -1891,11 +1890,11 @@ void map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_
             if ((out_red | out_green | out_blue) == 0 && (color & 0x7fff)) {
                 out_blue = 1;
             }
-            if (update_current_colors != 0) {
+            if (update_current_colors) {
                 index = clut_index * MAP_CLUT_COLOR_COUNT + i;
                 g_map_palette_modified_colors[clut_row][index]
                     = out_red + (out_green << 5) + (out_blue << 10) + (semi_transparent << 15);
-                if (g_map_palette_state.clut_rows[clut_row].animations[clut_index].active == 0) {
+                if (!g_map_palette_state.clut_rows[clut_row].animations[clut_index].active) {
                     component = &g_map_palette_state.clut_rows[clut_row].components[index];
                     component->color.r = out_red;
                     component->color.g = out_green;

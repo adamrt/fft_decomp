@@ -82,13 +82,11 @@ s32 thread_resolve_slot(s32 requested_thread_id) {
     if (requested_thread_id < THREAD_ID_COUNT) {
         return requested_thread_id;
     }
-    i = 1;
-    do {
+    for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
         if (thread_is_running_asm(i) == 0) {
             return i;
         }
-        i++;
-    } while (i < VARIANT_THREAD_TABLE_SLOT_COUNT);
+    }
     thread_current_exit();
 }
 
@@ -101,19 +99,12 @@ s32 thread_resolve_next_slot(s32 thread_id) {
         return thread_id;
     }
 
-    index = g_thread_current_id + 1;
-    if (index >= VARIANT_THREAD_TABLE_SLOT_COUNT) {
-        thread_current_exit();
-    } else {
-        do {
-            if (thread_is_running_asm(index) == 0) {
-                return index;
-            }
-            index++;
-        } while (index < VARIANT_THREAD_TABLE_SLOT_COUNT);
-
-        thread_current_exit();
+    for (index = g_thread_current_id + 1; index < VARIANT_THREAD_TABLE_SLOT_COUNT; index++) {
+        if (thread_is_running_asm(index) == 0) {
+            return index;
+        }
     }
+    thread_current_exit();
 }
 
 /* Return the id of another running thread whose 32-bit current task value equals
@@ -180,16 +171,17 @@ s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 
 s32 script_find_instruction_offset(s32 offset, s32 opcode) {
     /* Bytecode offsets are relative to the complete file block. */
     u8* base = (u8*)g_script_event_block;
-    s32 operands_offset;
     u8 op;
+
     for (;;) {
         op = base[offset];
-        if (op == EVENT_OPCODE_END)
+        if (op == EVENT_OPCODE_END) {
             return 0;
-        if (op == opcode)
+        }
+        if (op == opcode) {
             return offset;
-        operands_offset = offset + 1;
-        offset = operands_offset + g_script_event_instruction_sizes[op];
+        }
+        offset += 1 + g_script_event_instruction_sizes[op];
     }
 }
 
@@ -323,12 +315,17 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
             g_script_variable_write_guard = 1;
             replay_mode = script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS);
             g_script_variable_write_guard = 0;
-            if (replay_mode != 0 && (destination_id - EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST) >= 0x20U
-                && (destination_id - EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) >= 4U
+            if (replay_mode != 0
+                && (destination_id < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST
+                    || destination_id >= EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST + 32)
+                && (destination_id < EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS
+                    || destination_id >= EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS + 4)
                 && destination_id != EVENT_SCRIPT_VAR_TEXT_STORE_INDEX
-                && (destination_id - EVENT_SCRIPT_VAR_CURRENT_ENTD) >= 8U
+                && (destination_id < EVENT_SCRIPT_VAR_CURRENT_ENTD
+                    || destination_id >= EVENT_SCRIPT_VAR_CURRENT_ENTD + 8)
                 && destination_id >= EVENT_SCRIPT_VAR_WAR_FUNDS && destination_id != EVENT_SCRIPT_VAR_MAP_ARRANGEMENT
-                && (destination_id - EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE) >= 5U
+                && (destination_id < EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE
+                    || destination_id >= EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE + 5)
                 && destination_id != EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) {
                 return;
             }
@@ -407,7 +404,7 @@ void script_seed_random(void) {
  * bits, and return the new state. script_run_variable_command calls it
  * when a variable opcode reads EVENT_SCRIPT_VAR_RANDOM_VALUE. */
 static s32 random16_next(void) {
-    return s_script_rand16_state = (s_script_rand16_state * 0x6255U + 0x3619U) & 0xffffU;
+    return s_script_rand16_state = (s_script_rand16_state * 0x6255 + 0x3619) & 0xffff;
 }
 
 /* Yield while the unit-ready test returns zero. */

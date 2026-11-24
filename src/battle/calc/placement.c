@@ -94,7 +94,7 @@ static s32 init_units(unit_deployment_coordinates_t* formation, s32 is_red_team_
             } else {
                 sprite = battle_unit_set_sprite_identity(unit, &palette);
                 identity = unit->character_identity;
-                if ((identity & 0xff) == 0 || (identity & 0xff) >= 4) {
+                if (!(identity & 0xff) || (identity & 0xff) >= 4) {
                     identity = next_generated_unit_id;
                     next_generated_unit_id += unit_id_step;
                 }
@@ -180,7 +180,7 @@ static s32 validate_placement(s32 battle_unit_id) {
     }
     tile = &g_map_tile_data[battle_unit_get_tile_index(unit)];
     /* A byte collision test retains the original single-mask branch. */
-    if (((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK)) {
+    if ((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK) {
         return -1;
     }
     if (tile->depth_half_height.half_height >= 3) {
@@ -385,10 +385,12 @@ s32 battle_unit_disable(s32 battle_unit_id) {
 s32 battle_unit_put_on_field(u32 battle_unit_id) {
     battle_unit_t* battle_unit = &g_battle_units[battle_unit_id];
 
-    if (battle_unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+    if (battle_unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return 0;
-    if (battle_unit->existence != UNIT_EXISTENCE_OFF_FIELD)
+    }
+    if (battle_unit->existence != UNIT_EXISTENCE_OFF_FIELD) {
         return -1;
+    }
     battle_unit->active_battle_unit_id = battle_unit_id;
     battle_unit->existence = UNIT_EXISTENCE_ACTIVE;
     if (battle_unit->team_flags & UNIT_TEAM_MASK) {
@@ -527,13 +529,19 @@ u32 move_get_post_events(battle_unit_t* unit) {
  * Move-Get EXP and Move-Get JP, each with the common benefit bit. */
 s32 move_get_ability_events(const battle_unit_t* unit) {
     u8 flags = unit->ability_flags.movement[1];
-    s32 post_event_flags = (0 - (unit->ability_flags.movement[0] & UNIT_MOVEMENT_SET_1_MOVE_HP_UP))
-        & (MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_HP_UP);
-    if (flags & UNIT_MOVEMENT_SET_2_MOVE_MP_UP)
+    s32 post_event_flags = 0;
+
+    if (unit->ability_flags.movement[0] & UNIT_MOVEMENT_SET_1_MOVE_HP_UP) {
+        post_event_flags = MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_HP_UP;
+    }
+    if (flags & UNIT_MOVEMENT_SET_2_MOVE_MP_UP) {
         post_event_flags |= MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_MP_UP;
-    if (flags & UNIT_MOVEMENT_SET_2_MOVE_GET_EXP)
+    }
+    if (flags & UNIT_MOVEMENT_SET_2_MOVE_GET_EXP) {
         post_event_flags |= MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_GET_EXP;
-    if (flags & UNIT_MOVEMENT_SET_2_MOVE_GET_JP)
+    }
+    if (flags & UNIT_MOVEMENT_SET_2_MOVE_GET_JP) {
         post_event_flags |= MOVE_POST_EVENT_MOVEMENT_BENEFIT | MOVE_POST_EVENT_MOVE_GET_JP;
+    }
     return post_event_flags;
 }

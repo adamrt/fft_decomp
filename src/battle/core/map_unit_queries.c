@@ -67,7 +67,7 @@ map_unit_t* map_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 layer) {
     while (unit != 0) {
         if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_layer == layer) && (unit->battle_unit != 0)
             && (unit->battle_unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
-            && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP)) == 0)) {
+            && !(unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE | UNIT_STATUS_JUMP))) {
             matches[count++] = unit;
         }
         unit = unit->previous;
@@ -104,7 +104,7 @@ map_unit_t* map_unit_find_pickup_at_tile(s32 map_x, s32 map_y, s32 layer) {
     while (unit != 0) {
         if ((unit->map_x == map_x) && (unit->map_y == map_y) && (unit->map_layer == layer) && (unit->battle_unit != 0)
             && (unit->battle_unit->active_battle_unit_id != UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
-            && ((unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE)) != 0)) {
+            && (unit->status_flags_5_6 & (UNIT_STATUS_CRYSTAL | UNIT_STATUS_TREASURE))) {
             matches[count++] = unit;
         }
         unit = unit->previous;

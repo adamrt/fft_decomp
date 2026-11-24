@@ -35,7 +35,7 @@ s32 battle_update_input(void) {
     map_unit_t* unit;
 
     g_input_current_buttons = PadRead(1);
-    if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
+    if (script_variable_get(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS)) {
         script_filter_controller_input(&g_input_current_buttons);
     }
 
@@ -61,10 +61,10 @@ s32 battle_update_input(void) {
     }
 
     g_input_previous_buttons = g_input_current_buttons;
-    if ((g_input_pressed_buttons & PSX_PAD_TRIANGLE) != 0 && g_battle_state != BATTLE_STATE_EVENT) {
+    if ((g_input_pressed_buttons & PSX_PAD_TRIANGLE) && g_battle_state != BATTLE_STATE_EVENT) {
         unit = map_unit_get_source();
-        if (g_menu_status_enabled != 0 && g_menu_status_requested == 0
-            && (unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) == 0) {
+        if (g_menu_status_enabled && !g_menu_status_requested
+            && !(unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED)) {
             sound_play_sfx(SOUND_SFX_STATUS_MENU_REQUEST);
             g_menu_status_requested = 1;
         }
@@ -125,7 +125,7 @@ void battle_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green
 
     ClearImage(&clear_rect, 0, 0, 0);
     DrawSync(0);
-    if (g_debug_font_print_enabled != 0) {
+    if (g_debug_font_print_enabled) {
         gfx_load_debug_font();
     }
     PutDispEnv(&g_gfx_display_envs[g_gfx_screen_polarity]);
@@ -158,7 +158,7 @@ s32 battle_submit_frame(u32* ordering_table) {
             if (timer >= 0x10) {
                 wait = 4;
                 g_system_frame_pacing_timer = timer - 1;
-            } else if (timer != 0) {
+            } else if (timer) {
                 wait = 3;
                 g_system_frame_pacing_timer = timer - 1;
             } else {

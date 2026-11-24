@@ -25,7 +25,7 @@ static void store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* fl
  * Average maximum HP includes all present slots and is capped at 255.
  */
 void ai_init_workspace(void) {
-    s32 i = 0;
+    s32 i = 0; /* the bytes need this initializer, though the loop sets i */
     s32 present_count = 0;
     s32 total_max_hp = 0;
     ai_workspace_t* ai = &g_ai_workspace_storage;
@@ -61,6 +61,7 @@ void ai_init_workspace(void) {
             ai->present_unit_average_max_hp = average;
         }
     }
+    /* Assigning a plain 0xff here compiles differently. */
     {
         s32 empty = 0xff;
         for (i = AI_KNOWN_TRAP_COUNT - 1; i >= 0; i--) {
@@ -470,14 +471,15 @@ s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit) {
     s32 byte;
     u8* row;
 
-    if ((unit->unit_flags & UNIT_FLAG_MONSTER) != 0) {
+    if (unit->unit_flags & UNIT_FLAG_MONSTER) {
         return 1;
     }
     if (skillset_id >= SKILLSET_ID_BASIC_SKILL && skillset_id < SKILLSET_ID_MIMIC) {
-        skillset_id = skillset_id - SKILLSET_ID_BASIC_SKILL;
+        skillset_id -= SKILLSET_ID_BASIC_SKILL;
     } else {
-        if (skillset_id != unit->primary_skillset && skillset_id != unit->base_job_skillset)
+        if (skillset_id != unit->primary_skillset && skillset_id != unit->base_job_skillset) {
             return 1;
+        }
         skillset_id = 0;
     }
     /* Typed indexing moves the field offset ahead of the unit-base addition.
@@ -485,5 +487,5 @@ s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit) {
     row = (u8*)(skillset_id * UNIT_LEARNED_ABILITY_BYTES_PER_JOB + (u32)unit
         + ((u32)unit->career.learned_abilities - (u32)unit));
     byte = bit / 8;
-    return (row[byte] & (0x80 >> (bit - (byte * 8)))) != 0;
+    return (row[byte] & (0x80 >> (bit - byte * 8))) != 0;
 }

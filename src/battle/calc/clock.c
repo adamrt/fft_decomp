@@ -495,26 +495,26 @@ turn_status_flags_e turn_calculate_status_flags(const battle_unit_t* unit) {
     if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return TURN_STATUS_CT_FROZEN;
     }
-    if (status_has_any_in_check_set(unit, STATUS_CHECK_SET_FREEZE_CT) != 0) {
+    if (status_has_any_in_check_set(unit, STATUS_CHECK_SET_FREEZE_CT)) {
         return TURN_STATUS_CT_FROZEN;
     }
-    if ((unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) != 0) {
+    if (unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) {
         return TURN_STATUS_CT_FROZEN;
     }
     status1 = unit->status_sets.current[0];
     status4 = unit->status_sets.current[3];
     status5 = unit->status_sets.current[4];
-    if ((status1 & STATUS_BYTE_MASK(STATUS_ID_DEAD)) != 0) {
+    if (status1 & STATUS_BYTE_MASK(STATUS_ID_DEAD)) {
         return TURN_STATUS_INCAPACITATED | TURN_STATUS_DEAD;
     }
     flags = 0;
-    if ((status5 & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) != 0) {
+    if (status5 & STATUS_BYTE_MASK(STATUS_ID_SLEEP)) {
         flags = TURN_STATUS_INCAPACITATED | TURN_STATUS_SLEEP;
     }
-    if ((status4 & STATUS_BYTE_MASK(STATUS_ID_HASTE)) != 0) {
+    if (status4 & STATUS_BYTE_MASK(STATUS_ID_HASTE)) {
         flags |= TURN_STATUS_HASTE;
     }
-    if ((status4 & STATUS_BYTE_MASK(STATUS_ID_SLOW)) != 0) {
+    if (status4 & STATUS_BYTE_MASK(STATUS_ID_SLOW)) {
         flags |= TURN_STATUS_SLOW;
     }
     return flags;
@@ -589,10 +589,12 @@ s32 at_list_find_unit(const battle_unit_t* unit) {
     at_entry_t* entry;
     u8 battle_unit_id;
 
-    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return -1;
-    if (is_excluded_from_at_list(unit) != 0)
+    }
+    if (is_excluded_from_at_list(unit)) {
         return -3;
+    }
     battle_unit_id = unit->battle_unit_id;
     at_list_build(at_list, AT_LIST_MODE_TURNS_ONLY);
     for (i = 0; i < AT_LIST_CAPACITY; i++) {
@@ -735,7 +737,7 @@ s32 at_list_build(at_entry_t* list, at_list_mode_e mode) {
 
     for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
         unit = &g_battle_units[slot];
-        if (is_excluded_from_at_list(unit) != 0) {
+        if (is_excluded_from_at_list(unit)) {
             continue;
         }
 
@@ -923,8 +925,9 @@ static s32 set_move_act_taken(s32 unit_id, s32 move_flag, s32 act_flag) {
     battle_unit_t* unit = &g_battle_units[unit_id];
     s32 ret;
 
-    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return -1;
+    }
     if (move_flag != 0) {
         unit->movement_taken = 1;
     }
@@ -950,10 +953,12 @@ s32 turn_end(s32 unit_id) {
     u8 movement_check;
     u8 action_check;
 
-    if (g_battle_units[unit_id].active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+    if (g_battle_units[unit_id].active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return 1;
-    if (unit->has_turn == 0)
+    }
+    if (unit->has_turn == 0) {
         return 1;
+    }
     ct = unit->ct;
     status5 = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)];
     movement_check = unit->movement_taken | (status5 & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE));
@@ -965,8 +970,9 @@ s32 turn_end(s32 unit_id) {
     if (action_check == 0) {
         ct += TURN_UNUSED_CT_REFUND;
     }
-    if (ct > TURN_END_CT_MAX)
+    if (ct > TURN_END_CT_MAX) {
         ct = TURN_END_CT_MAX;
+    }
     unit->ct = ct;
     unit->has_turn = 0;
     return 1;
@@ -1024,10 +1030,12 @@ s32 status_inflict_defending(s32 unit_id) {
 s32 battle_unit_mark_pending_removal(s32 unit_id) {
     battle_unit_t* unit = &g_battle_units[unit_id];
 
-    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE)
+    if (unit->active_battle_unit_id == UNIT_ACTIVE_BATTLE_UNIT_ID_NONE) {
         return -1;
-    if (unit->formation_index == UNIT_FORMATION_INDEX_NONE)
+    }
+    if (unit->formation_index == UNIT_FORMATION_INDEX_NONE) {
         return -1;
+    }
     unit->active_battle_unit_id = UNIT_ACTIVE_BATTLE_UNIT_ID_NONE;
     unit->existence = UNIT_EXISTENCE_PENDING_REMOVAL;
     return 0;

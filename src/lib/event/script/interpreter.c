@@ -130,15 +130,15 @@ void script_execute_event(void) {
     }
 
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-        for (work_index = 2; work_index < 0xE; work_index++) {
+        for (work_index = 2; work_index < 14; work_index++) {
             thread_wait_inactive(work_index);
         }
         camera_wait_idle();
     } else {
-        g_unit_view_hovered_stats_rect.y = 0xAA;
-        g_unit_view_attack_caster_stats_rect.y = 0xAA;
-        g_unit_view_attack_target_stats_rect.y = 0xAA;
-        g_unit_view_right_stats_rect.y = 0xAA;
+        g_unit_view_hovered_stats_rect.y = 170;
+        g_unit_view_attack_caster_stats_rect.y = 170;
+        g_unit_view_attack_target_stats_rect.y = 170;
+        g_unit_view_right_stats_rect.y = 170;
     }
 
     battle_unit_status_staging_clear();
@@ -153,7 +153,7 @@ void script_execute_event(void) {
     script_variable_set(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
 
 restart_script:
-    script_set_event_speed(1U);
+    script_set_event_speed(1);
     instruction_offset = 0;
     camera_normalize_yaw();
     {
@@ -178,12 +178,12 @@ restart_script:
         /* ---- Control: NOPs, conditions, and script variable arithmetic ---- */
         if (opcode == EVENT_OPCODE_CAMERA_DISABLED) {
         } else if (opcode == EVENT_OPCODE_NOP) {
-        } else if ((opcode - EVENT_OPCODE_COMPARE_LESS_EQUAL) < 6U) {
+        } else if (opcode >= EVENT_OPCODE_COMPARE_LESS_EQUAL && opcode <= EVENT_OPCODE_COMPARE_GREATER) {
             script_run_condition(opcode);
-        } else if ((opcode - EVENT_OPCODE_ADD_IMMEDIATE) < 0xFU) {
+        } else if (opcode >= EVENT_OPCODE_ADD_IMMEDIATE && opcode <= EVENT_OPCODE_ZERO_VARIABLE) {
             operand_1 = (u16)first_operand;
             script_run_variable_command(
-                opcode, operand_1, script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3) & 0xFFFF, 0);
+                opcode, operand_1, script_read_s16((u8*)g_script_event_block + instruction_offset + 3) & 0xFFFF, 0);
         } else if (opcode == EVENT_OPCODE_REQUEST_MAP_JUMP_IN) {
             g_event_map_jump_in_request = operand_1;
             thread_wait_frames(2);
@@ -210,13 +210,11 @@ restart_script:
                 /* Stop thread slots 2..14 around the save menu, which runs in the CARD
                  * companion overlay. */
                 if (operand_1 == EVENT_CALL_FUNCTION_OPEN_SAVE_MENU) {
-                    operand_1 = 2;
-                    do {
-                        thread_set_parameters(operand_1, 0U, 0, 1);
+                    for (operand_1 = 2; operand_1 < 15; operand_1++) {
+                        thread_set_parameters(operand_1, 0, 0, 1);
                         g_thread_contexts[operand_1].task_id = THREAD_TASK_STOP_REQUEST;
                         thread_wait_inactive(operand_1);
-                        operand_1 += 1;
-                    } while (operand_1 < 0xF);
+                    }
 
                     if (script_variable_get(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_EPILOGUE) {
                         script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
@@ -229,13 +227,11 @@ restart_script:
                     } while (g_overlay_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
 
                     script_variable_set(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
-                    operand_1 = 2;
-                    do {
-                        thread_set_parameters(operand_1, 0U, 0, 1);
+                    for (operand_1 = 2; operand_1 < 15; operand_1++) {
+                        thread_set_parameters(operand_1, 0, 0, 1);
                         g_thread_contexts[operand_1].task_id = THREAD_TASK_STOP_REQUEST;
                         thread_wait_inactive(operand_1);
-                        operand_1 += 1;
-                    } while (operand_1 < 0xF);
+                    }
                 }
             }
 
@@ -250,7 +246,7 @@ restart_script:
 
             if (operand_1 == EVENT_CALL_FUNCTION_REMOVE_ALL_ENEMY_UNITS) {
                 script_blue_remove_all_enemy_units();
-                thread_wait_frames(0x78);
+                thread_wait_frames(120);
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_REQUEST_CAMERA_YAW_WRAP) {
@@ -272,10 +268,8 @@ restart_script:
 
             if (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT) {
                 script_signal_map_destruction();
-                if (g_map_destruction_wait_state != 0) {
-                    do {
-                        thread_yield();
-                    } while (g_map_destruction_wait_state != 0);
+                while (g_map_destruction_wait_state != 0) {
+                    thread_yield();
                 }
             }
 
@@ -305,22 +299,20 @@ restart_script:
              * x 4..6, y 2..7. operand_1 is left holding the last unit's battle unit id, which the
              * selector tests below then see. */
             if (operand_1 == EVENT_CALL_FUNCTION_HIDE_BETHLA_REGION_UNITS) {
-                region_map_unit_id = 0;
-                do {
+                for (region_map_unit_id = 0; region_map_unit_id < BATTLE_UNIT_SLOT_COUNT; region_map_unit_id++) {
                     if (map_unit_exists(region_map_unit_id) != 0) {
                         operand_1 = map_unit_get_battle_unit_id(region_map_unit_id);
-                        if (operand_1 != -1U) {
+                        if (operand_1 != -1) {
                             unit = battle_unit_get(operand_1);
-                            if ((unit->x < 4U) && (unit->position.y < 0xBU)) {
+                            if (unit->x < 4 && unit->position.y < 11) {
                                 map_unit_hide(region_map_unit_id);
                             }
-                            if (((unit->x - 4) < 3U) && ((unit->position.y - 2) < 6U)) {
+                            if (unit->x >= 4 && unit->x <= 6 && unit->position.y >= 2 && unit->position.y <= 7) {
                                 map_unit_hide(region_map_unit_id);
                             }
                         }
                     }
-                    region_map_unit_id += 1;
-                } while (region_map_unit_id < BATTLE_UNIT_SLOT_COUNT);
+                }
             }
 
             if (operand_1 == EVENT_CALL_FUNCTION_COPY_UNIT_2_POSITION_AND_FACING_TO_UNIT_8_AND_RELOAD_GRAPHICS) {
@@ -331,7 +323,7 @@ restart_script:
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
                 copy_destination->position.facing = unit->position.facing;
                 sprite_start_unit_graphics_load(7, 1U);
-                g_unit_graphics_load_pending = 1U;
+                g_unit_graphics_load_pending = 1;
                 do {
                     thread_yield();
                 } while (g_unit_graphics_load_pending != 0);
@@ -341,7 +333,8 @@ restart_script:
 
             /* OpenSaveMenu's stop loops leave operand_1 at 0x0f, so an unsuppressed 0x06
              * also runs this warp. */
-            if ((operand_1 - EVENT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING) < 2U) {
+            if (operand_1 == EVENT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING
+                || operand_1 == EVENT_CALL_FUNCTION_WARP_UNIT_5_DISPLAY_TO_UNIT_3_POSITION_AND_FACING) {
                 script_warp_unit_display_to_paired_unit(operand_1);
             }
 
@@ -374,7 +367,7 @@ restart_script:
             }
 
             if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-                for (work_index = 2; work_index < 0xE; work_index++) {
+                for (work_index = 2; work_index < 14; work_index++) {
                     thread_wait_inactive(work_index);
                 }
             }
@@ -390,7 +383,7 @@ restart_script:
              * the event they select. */
             finish_operation = (g_scenario_event_finish_operations[operand_1] & ~0x0CFF) >> 8;
             if (g_menu_input_mode == MENU_INPUT_PLAYER && finish_operation == 0
-                && (operand_1 - EVENT_ID_COMMON_FIRST) >= 0x1AU && operand_1 != 0) {
+                && (operand_1 < EVENT_ID_COMMON_FIRST || operand_1 >= EVENT_ID_COMMON_FIRST + 26) && operand_1 != 0) {
                 g_scenario_condition_battle_unit_id = 0xFF;
                 scenario_run_conditions();
                 if (script_load_next_event() != 0) {
@@ -439,7 +432,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_UNKNOWN_D8) {
         } else if (opcode == EVENT_OPCODE_BACK_TARGET_BARRIER) {
         } else if (opcode == EVENT_OPCODE_UNKNOWN_DC) {
-            g_script_opcode_dc_value = 0xD;
+            g_script_opcode_dc_value = 13;
         }
         /* ---- Dialogue and portraits ---- */
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
@@ -461,9 +454,9 @@ restart_script:
             g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_X_OFFSET]
                 = script_read_s16(message_instruction->x_offset_le);
             g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = script_read_s16(
-                ((event_display_message_instruction_t*)(instruction_offset + (u8*)g_script_event_block))->y_offset_le);
+                ((event_display_message_instruction_t*)((u8*)g_script_event_block + instruction_offset))->y_offset_le);
             g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_ARROW_OFFSET] = script_read_s16(
-                ((event_display_message_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
+                ((event_display_message_instruction_t*)((u8*)g_script_event_block + instruction_offset))
                     ->arrow_offset_le);
             message_cursor = (u8*)g_script_event_block;
             message_cursor += instruction_offset;
@@ -477,7 +470,7 @@ restart_script:
                     && (thread_is_running_asm(operand_2) == 1)
                     && (g_thread_contexts[operand_2].task_id == THREAD_TASK_DIALOG_AWAIT_TEXT)) {
                     operand_1 = script_read_s16(
-                        ((event_change_dialog_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
+                        ((event_change_dialog_instruction_t*)((u8*)g_script_event_block + instruction_offset))
                             ->text_id_le);
                     /* Script text ids count from 1; 0xFFFF, which closes the dialog, is kept. */
                     if ((u16)operand_1 != 0xFFFF) {
@@ -485,7 +478,7 @@ restart_script:
                     }
                     g_thread_contexts[operand_2].function_parameter_2 = operand_1;
                     g_thread_contexts[operand_2].function_parameter_4 = script_read_s16(
-                        ((event_change_dialog_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
+                        ((event_change_dialog_instruction_t*)((u8*)g_script_event_block + instruction_offset))
                             ->portrait_selector_le);
                     g_thread_contexts[operand_2].task_id = THREAD_TASK_RESUME;
                     break;
@@ -645,7 +638,7 @@ restart_script:
             operand_1 = script_resolve_map_unit_id(first_operand);
             if (operand_1 != EVENT_MAP_UNIT_ID_NONE) {
                 g_unit_pending_animation_ids[operand_1]
-                    = script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3);
+                    = script_read_s16((u8*)g_script_event_block + instruction_offset + 3);
                 g_unit_was_moving_latch[operand_1] = 0;
             }
         } else if (opcode == EVENT_OPCODE_WAIT_ALL_UNIT_MOVEMENT) {
@@ -683,7 +676,7 @@ restart_script:
             thread_suspend(thread_find_task(THREAD_TASK_EARTHQUAKE));
         } else if (opcode == EVENT_OPCODE_SET_SPEAKER_PAIR) {
             g_message_speaker_swap_unit_a = first_operand;
-            g_message_speaker_swap_unit_b = script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3);
+            g_message_speaker_swap_unit_b = script_read_s16((u8*)g_script_event_block + instruction_offset + 3);
         } else if (opcode == EVENT_OPCODE_MAP_DARKNESS) {
             operand_1 = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
             thread_start(operand_1, &script_opcode_1a_map_darkness_thread);
@@ -728,9 +721,9 @@ restart_script:
                 map_light_set_background(background->duration, &g_event_background_colors);
             }
         } else if (opcode == EVENT_OPCODE_COLOR_BG_BETA) {
-            map_light_modify_background(((event_unit_color_t*)parameters)->mode,
-                ((event_unit_color_t*)parameters)->duration, ((event_unit_color_t*)parameters)->rgb.r,
-                ((event_unit_color_t*)parameters)->rgb.g, ((event_unit_color_t*)parameters)->rgb.b);
+            event_unit_color_t* color = (event_unit_color_t*)parameters;
+
+            map_light_modify_background(color->mode, color->duration, color->rgb.r, color->rgb.g, color->rgb.b);
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_opcode_32_color_unit((const event_color_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_RESUME_UNIT_PALETTE_UPDATES) {
@@ -738,9 +731,9 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_SUPPRESS_UNIT_PALETTE_UPDATES) {
             script_suppress_unit_palette_updates((u16)first_operand, 1);
         } else if (opcode == EVENT_OPCODE_COLOR_FIELD) {
-            map_palette_color_field(((event_unit_color_t*)parameters)->mode,
-                ((event_unit_color_t*)parameters)->duration, ((event_unit_color_t*)parameters)->rgb.r,
-                ((event_unit_color_t*)parameters)->rgb.g, ((event_unit_color_t*)parameters)->rgb.b);
+            event_unit_color_t* color = (event_unit_color_t*)parameters;
+
+            map_palette_color_field(color->mode, color->duration, color->rgb.r, color->rgb.g, color->rgb.b);
         } else if (opcode == EVENT_OPCODE_STORE_MODIFIED_MAP_PALETTE) {
             map_palette_store_modified_colors(0, 0, 1);
         } else if (opcode == EVENT_OPCODE_SET_TILE_CAMERA_BLOCK) {
@@ -751,6 +744,8 @@ restart_script:
             event_tile_height_parameters_t* change = (event_tile_height_parameters_t*)parameters;
 
             tile = map_get_tile(change->x, change->y, change->layer);
+            /* Grassland and thicket keep their surface. The surface type is a bit-field,
+             * so the two equality tests do not fold into this range test. */
             if ((tile->surface.type - MAP_SURFACE_GRASSLAND) >= 2U) {
                 tile->surface.type = MAP_SURFACE_STONE_FLOOR;
             }
@@ -821,7 +816,7 @@ restart_script:
             operand_2 = thread_resolve_slot(THREAD_SLOT_FIRST_IDLE);
             thread_start(operand_2, sprite_sheet_load_evtchr_thread);
             thread_set_parameters(
-                operand_2, operand_1, script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 2), 0);
+                operand_2, operand_1, script_read_s16((u8*)g_script_event_block + instruction_offset + 2), 0);
             thread_yield();
         } else if (opcode == EVENT_OPCODE_LOAD_EVTCHR_CLEAR) {
             g_event_pending_loaded_evtchr_clear_slot = operand_1;
@@ -876,10 +871,8 @@ restart_script:
             ghost = (event_add_ghost_unit_parameters_t*)(instruction_offset + ((u8*)g_script_event_block) + 3);
             /* The search scans IDs 0..20 although map unit slots are 0..15.
              * With all slots occupied it queues ID 16, whose later allocation fails. */
-            ghost_map_unit_id = 3;
-            do {
-                ghost_map_unit_id -= 1;
-            } while (ghost_map_unit_id >= 0);
+            /* Retail keeps this empty countdown, the shape of the unit-slot clear at restart_script. */
+            for (ghost_map_unit_id = 3; ghost_map_unit_id >= 0; ghost_map_unit_id--) { }
             for (ghost_map_unit_id = 0; ghost_map_unit_id < BATTLE_UNIT_SLOT_COUNT; ghost_map_unit_id++) {
                 if (map_unit_exists(ghost_map_unit_id) == 0) {
                     g_script_unit_slots[ghost->slot] = ghost_map_unit_id;
@@ -889,7 +882,7 @@ restart_script:
             if (ghost_map_unit_id != BATTLE_UNIT_SLOT_COUNT) {
                 script_opcode_47_add_ghost_unit(ghost->x, ghost->y, ghost->level, ghost->facing, first_operand,
                     g_script_unit_slots[ghost->slot], ghost->flags);
-                g_unit_graphics_load_pending = 1U;
+                g_unit_graphics_load_pending = 1;
             } else {
                 /* All 21 IDs found: retry without yielding. Ordinary allocation
                  * cannot populate IDs 16..20, so slot exhaustion takes the queue path. */
@@ -903,14 +896,15 @@ restart_script:
              * disabled and removed units are skipped. */
             if ((added_unit_state == -2) || (added_unit_state >= 0)) {
                 for (added_battle_unit_id = 0; added_battle_unit_id < BATTLE_UNIT_SLOT_COUNT; added_battle_unit_id++) {
-                    if (battle_unit_get(added_battle_unit_id) == added_unit)
+                    if (battle_unit_get(added_battle_unit_id) == added_unit) {
                         break;
+                    }
                 }
                 operand_1 = map_unit_get_id_by_battle_unit_id(added_battle_unit_id);
                 if (operand_1 == -1) {
                     battle_unit_status_staging_save(added_battle_unit_id);
                     sprite_start_unit_graphics_load(added_battle_unit_id, operand_3);
-                    g_unit_graphics_load_pending = 1U;
+                    g_unit_graphics_load_pending = 1;
                 } else {
                     if (operand_3 == 0) {
                         map_unit_show(operand_1);
@@ -930,7 +924,7 @@ restart_script:
              * nor synchronizes the renderer's position here. */
             unit = battle_unit_get(operand_1);
             position_instruction
-                = (event_set_battle_unit_position_instruction_t*)(instruction_offset + (u8*)g_script_event_block);
+                = (event_set_battle_unit_position_instruction_t*)((u8*)g_script_event_block + instruction_offset);
             unit->x = position_instruction->placement.x;
             unit->position.y = position_instruction->placement.y;
             unit->position.higher_elevation = position_instruction->placement.elevation;
@@ -1025,7 +1019,7 @@ restart_script:
             if (arrow_target_map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
                 operand_1 = map_unit_get_battle_unit_id(arrow_target_map_unit_id);
                 arrow_shooter_map_unit_id
-                    = script_resolve_map_unit_id(script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3));
+                    = script_resolve_map_unit_id(script_read_s16((u8*)g_script_event_block + instruction_offset + 3));
                 if (arrow_shooter_map_unit_id != EVENT_MAP_UNIT_ID_NONE) {
                     arrow_shooter_battle_unit_id = map_unit_get_battle_unit_id(arrow_shooter_map_unit_id);
 #ifdef FFT_BATTLE

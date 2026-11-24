@@ -77,7 +77,7 @@ void cursor_project_tile(VECTOR* projected, SVECTOR* position, SVECTOR* raised) 
     vector_set_short(position, g_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
         g_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
     position->vy = map_calculate_slope_height(position, (u8)g_cursor_layer);
-    tile = map_get_tile((position->vx / MAP_TILE_SIZE), (position->vz / MAP_TILE_SIZE), g_cursor_layer);
+    tile = map_get_tile(position->vx / MAP_TILE_SIZE, position->vz / MAP_TILE_SIZE, g_cursor_layer);
     position->vy -= tile->depth_half_height.depth * 12;
     if (tile->surface.depth_bias) {
         camera_get_biased_tile_depth_point(position, raised);

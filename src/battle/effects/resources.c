@@ -247,7 +247,7 @@ s32 effect_get_element_index(s32 elements) {
 
     if (elements != 0) {
         for (i = 0; i < EFFECT_ELEMENT_INDEX_COUNT; i++) {
-            if ((elements & g_effect_element_masks[i]) != 0) {
+            if (elements & g_effect_element_masks[i]) {
                 break;
             }
         }
@@ -322,13 +322,10 @@ s32 effect_secondary_init_fall_dust(const effect_context_t* source, const VECTOR
  * lands without a hit. */
 s32 effect_secondary_init_ending(void) {
     s32 secondary_id = alloc_secondary_record();
-    s32 record_offset = secondary_id * sizeof(effect_secondary_data_t);
     u8 function_id;
 
-    /* One byte offset serves both stores; indexing the record twice changes the code. */
-    *(s16*)((u8*)&g_effect_secondary_data + record_offset + offsetof(effect_secondary_data_t, timer)) = 0;
-    *(u16*)((u8*)&g_effect_secondary_data + record_offset + offsetof(effect_secondary_data_t, animation_id))
-        = EFFECT_SECONDARY_ANIMATION_ENDING;
+    g_effect_secondary_data[secondary_id].timer = 0;
+    g_effect_secondary_data[secondary_id].animation_id = EFFECT_SECONDARY_ANIMATION_ENDING;
     function_id = g_effect_secondary_animations[EFFECT_SECONDARY_ANIMATION_ENDING].function_id;
     g_effect_secondary_data[secondary_id].phase = EFFECT_SECONDARY_PHASE_INITIALIZING;
     g_effect_secondary_data[secondary_id].function_id = function_id;

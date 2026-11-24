@@ -111,6 +111,7 @@ void ai_mem_copy_u16_values(void* destination, const void* source, s32 byte_coun
     const u16* src = source;
     s32 count = byte_count / 2;
     s32 i;
+
     for (i = 0; i < count; i++) {
         *dst++ = *src++;
     }
@@ -121,12 +122,12 @@ void ai_mem_copy_bytes(void* destination, const void* source, s32 len) {
     u8* dst = destination;
     const u8* src = source;
     s32 end;
+
+    /* The end test compares the addresses as signed integers. */
     if (len > 0) {
         end = len + (s32)dst;
         do {
-            *dst = *src;
-            dst = dst + 1;
-            src = src + 1;
+            *dst++ = *src++;
         } while ((s32)dst < end);
     }
 }

@@ -657,9 +657,10 @@ static void init_palette(s16 index) {
     /* The image size is a 24-bit little-endian byte count; the rows follow from the width. */
     raw_size = data->image_size[0] + (data->image_size[1] << 8);
     raw_size = (data->image_size[2] << 16) + raw_size;
+    /* The byte count passes through height before size: the bytes need both copies. */
     height = raw_size;
     size = height;
-    if (data->wide_image != 0) {
+    if (data->wide_image) {
         height = size / 0x100;
         rect.x = 0x180;
         rect.y = 0;
@@ -667,8 +668,7 @@ static void init_palette(s16 index) {
         rect.h = height;
         LoadImage(&rect, data->pixels);
     } else {
-        height = size;
-        height = height / 0x80;
+        height = size / 0x80;
         rect.x = 0x180;
         rect.y = 0;
         rect.w = 0x40;
@@ -785,10 +785,9 @@ static void set_timing_curves_pointer(s16 effect_id) {
  * nibble first. */
 static s32 evaluate_parent_timing_curve(effect_record_t* record) {
     s16 packed_index = record->timeline.frame;
-    s32 packed_value;
     s32 offset = packed_index / 2;
+    s32 packed_value = g_effect_timing_curves->parent_timeline[offset];
 
-    packed_value = g_effect_timing_curves->parent_timeline[offset];
     if (packed_index & 1) {
         packed_value >>= 4;
     }
@@ -817,7 +816,7 @@ static effect_callback_t get_native_callback(s16 callback_id) {
 /* Read effect file effect_id's disc sector and byte length from s_disc_extents; a
  * length of 0 means the file is missing. */
 static void get_disc_extent(s32 effect_id, s32* lba, s32* byte_length) {
-    u32 stack_padding[2];
+    u32 stack_padding[2]; /* retail reserves an 8-byte frame it never uses */
 
     *lba = s_disc_extents[effect_id].sector;
     *byte_length = s_disc_extents[effect_id].size;
@@ -1407,6 +1406,7 @@ effect_script_result_e effect_script_opcode_07_call_native_callback(effect_recor
 effect_script_result_e effect_script_opcode_08_set_camera_position(effect_record_t* record) {
     VECTOR coords;
 
+    /* Opcodes 08, 0b and 0e find the instruction again for each component: the bytes reload it. */
     setVector(&coords, get_current_script_instruction(record)->vector.x * ONE,
         get_current_script_instruction(record)->vector.y * ONE, get_current_script_instruction(record)->vector.z * ONE);
     camera_set_real_coords(&coords);
@@ -1625,7 +1625,7 @@ effect_script_result_e effect_script_opcode_1a_jump_if_child_active(effect_recor
     if (record->child_indices[parameters.child.slot] != 0) {
         record->pc = instruction->immediate.value;
     } else {
-        record->pc = record->pc + 4;
+        record->pc += 4;
     }
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1641,7 +1641,7 @@ effect_script_result_e effect_script_opcode_1b_jump_if_child_inactive(effect_rec
     if (record->child_indices[parameters.child.slot] == 0) {
         record->pc = instruction->immediate.value;
     } else {
-        record->pc = record->pc + 4;
+        record->pc += 4;
     }
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1671,7 +1671,7 @@ effect_script_result_e effect_script_opcode_1d_jump_after_child_timeline_duratio
 
         record->pc = instruction->immediate.value;
     } else {
-        record->pc = record->pc + 4;
+        record->pc += 4;
     }
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1713,7 +1713,7 @@ effect_script_result_e effect_script_opcode_20_increment_selected_counter(effect
     effect_script_parameters_t parameters;
 
     parameters = get_current_script_instruction(record)->header.parameters;
-    record->counters[parameters.counter.slot] += 1;
+    record->counters[parameters.counter.slot]++;
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1724,7 +1724,7 @@ effect_script_result_e effect_script_opcode_21_decrement_selected_counter(effect
     effect_script_parameters_t parameters;
 
     parameters = get_current_script_instruction(record)->header.parameters;
-    record->counters[parameters.counter.slot] -= 1;
+    record->counters[parameters.counter.slot]--;
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }

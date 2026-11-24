@@ -14,9 +14,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* weather_set_transform_duration stores 0x95; nothing reads it. */
 extern s32 g_weather_timed_transform_unread;
-
-/* weather_set_transform_duration stores 0x95; nothing reads it */
 
 /* g_map_resource_load_state; these are not the loader's normal return values. */
 typedef enum resource_load_state {
@@ -104,6 +103,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
     s32 i;
     s32 r;
     s32 j;
+    s32 k;
     s16 state;
     u8 diff;
 
@@ -172,12 +172,8 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
             if (s_map_gns_load_phase == MAP_GNS_LOAD_PHASE_START) {
                 g_map_gns_record_cursor = 0;
                 s_map_gns_load_phase = MAP_GNS_LOAD_PHASE_RESOURCES;
-                {
-                    s32 k;
-
-                    for (k = 0; k < GNS_RESOURCE_TABLE_COUNT; k++) {
-                        g_map_pending_gns_records[k].resource_type = GNS_RECORD_NONE;
-                    }
+                for (k = 0; k < GNS_RESOURCE_TABLE_COUNT; k++) {
+                    g_map_pending_gns_records[k].resource_type = GNS_RECORD_NONE;
                 }
 
                 /* Pass 1: primary meshes. A row whose comparison holds forgets
@@ -197,14 +193,10 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                             while (++j < 14);
                         }
 
-                        {
-                            s32 k;
-
-                            diff = 0;
-                            for (k = 0; k < 14; k++) {
-                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
-                                    ^ g_map_gns_records[r].load_info.bytes[k];
-                            }
+                        diff = 0;
+                        for (k = 0; k < 14; k++) {
+                            diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                ^ g_map_gns_records[r].load_info.bytes[k];
                         }
                         if (diff) {
                             g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
@@ -226,14 +218,10 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                             while (++j < 14);
                         }
 
-                        {
-                            s32 k;
-
-                            diff = 0;
-                            for (k = 0; k < 14; k++) {
-                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
-                                    ^ g_map_gns_records[r].load_info.bytes[k];
-                            }
+                        diff = 0;
+                        for (k = 0; k < 14; k++) {
+                            diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                ^ g_map_gns_records[r].load_info.bytes[k];
                         }
                         if (diff) {
                             g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
@@ -247,14 +235,10 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                         && (g_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_WEATHER_AND_TIME
                             || g_map_gns_records[r].script_variable_id == EVENT_SCRIPT_VAR_MAP_ARRANGEMENT)
                         && g_map_gns_records[r].map_state == 0) {
-                        {
-                            s32 k;
-
-                            diff = 0;
-                            for (k = 0; k < 14; k++) {
-                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
-                                    ^ g_map_gns_records[r].load_info.bytes[k];
-                            }
+                        diff = 0;
+                        for (k = 0; k < 14; k++) {
+                            diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                ^ g_map_gns_records[r].load_info.bytes[k];
                         }
                         if (diff) {
                             g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
@@ -275,15 +259,10 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                         state |= (script_variable_get(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15;
                         if (map_gns_record_matches_state(
                                 g_map_gns_records[r].map_state_comparison, g_map_gns_records[r].map_state, state)) {
-                            {
-                                s32 k;
-
-                                diff = 0;
-                                for (k = 0; k < 14; k++) {
-                                    diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type]
-                                                .load_info.bytes[k]
-                                        ^ g_map_gns_records[r].load_info.bytes[k];
-                                }
+                            diff = 0;
+                            for (k = 0; k < 14; k++) {
+                                diff |= g_map_loaded_gns_records[g_map_gns_records[r].resource_type].load_info.bytes[k]
+                                    ^ g_map_gns_records[r].load_info.bytes[k];
                             }
                             if (diff) {
                                 g_map_pending_gns_records[g_map_gns_records[r].resource_type] = g_map_gns_records[r];
@@ -385,6 +364,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 map_gns_record_t* source;
                 map_gns_record_t* destination;
 
+                /* The bytes require this do-while with the counter set first. */
                 i = 0;
                 source = g_map_data_load_buffer->gns_records;
                 destination = g_map_gns_records;
@@ -399,7 +379,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
             break;
         case MAP_LOAD_STATE_RESOURCE_FILE:
             if (file_get_load_state() == 0) {
-                if (g_map_gns_dispatch_held != 0) {
+                if (g_map_gns_dispatch_held) {
                     return MAP_LOAD_RESULT_HELD;
                 }
                 s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
@@ -411,7 +391,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
             break;
         case MAP_LOAD_STATE_APPLY_LIGHTING:
             if (file_get_load_state() == 0) {
-                if (g_map_lighting_pending != 0) {
+                if (g_map_lighting_pending) {
                     map_gns_dispatch_resource(
                         MAP_RESOURCE_APPLY_LIGHTING, (map_resource_t*)g_map_pending_lighting_data);
                 }
@@ -420,10 +400,10 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
             }
             break;
         case MAP_LOAD_STATE_APPLY_TEXTURE:
-            if (g_map_texture_pending != 0) {
+            if (g_map_texture_pending) {
                 map_gns_dispatch_resource(MAP_RESOURCE_TEXTURE, g_map_data_load_buffer);
             }
-            if (g_map_palette_pending != 0) {
+            if (g_map_palette_pending) {
                 map_gns_dispatch_resource(MAP_RESOURCE_APPLY_PALETTES, (map_resource_t*)g_map_pending_palette_data);
             }
             s_map_resource_load_state = MAP_LOAD_STATE_IDLE;
@@ -438,7 +418,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 s_untextured_quad_count = 0;
 
                 for (i = 0; i < 9; i++) {
-                    if (g_map_mesh_part_geometry[i] != 0) {
+                    if (g_map_mesh_part_geometry[i]) {
                         init_mesh_render_records(g_map_mesh_part_geometry[i]);
                     }
                     s_textured_triangle_count += g_map_mesh_parts[i].textured_triangle_count;
@@ -457,7 +437,7 @@ s32 map_update_load(s32 map_id, map_load_command_e command) {
                 s_untextured_quad_count = 0;
 
                 for (i = 0; i < 9; i++) {
-                    if (g_map_mesh_part_geometry[i] != 0) {
+                    if (g_map_mesh_part_geometry[i]) {
                         init_mesh_render_records(g_map_mesh_part_geometry[i]);
                     }
                     g_map_mesh_part_geometry[i] = 0;
@@ -796,7 +776,7 @@ s32 map_stop_clut_cycles_and_weather_sfx(void) {
     weather_stop_sfx();
 
     for (index = 0; index < MAP_TEXTURE_ANIMATION_COUNT; index++) {
-        if (g_map_texture_animation_cycle_handles[index] != 0) {
+        if (g_map_texture_animation_cycle_handles[index]) {
             map_palette_stop_clut_cycle(g_map_texture_animation_cycle_handles[index]);
             g_map_texture_animation_cycle_handles[index] = 0;
         }

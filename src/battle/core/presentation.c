@@ -56,7 +56,7 @@ static void build_action_secondary_init(map_unit_t* unit, effect_context_t* init
     init->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
     init->targets[EFFECT_CASTER_ENTRY].data.unit.map_unit_id = unit->map_unit_id;
     init->used_weapon_id = unit->strike.used_weapon_id;
-    if (init->target_count != 0) {
+    if (init->target_count) {
         for (i = 0; i < init->target_count; i++) {
             target = map_unit_get_by_battle_unit_id(unit->strike.target_list[i]);
             init->targets[i].target_type = EFFECT_TARGET_TYPE_UNIT;
@@ -125,9 +125,8 @@ void effect_secondary_start_projectile(map_unit_t* unit) {
         animation_id = EFFECT_SECONDARY_ANIMATION_THROWN_STONE;
     } else {
         animation_id = EFFECT_SECONDARY_ANIMATION_THROWN_ITEM;
-        if ((ability_id != ABILITY_ID_THROW_SHURIKEN)
-            && ((u32)(unit->used_ability_id - ABILITY_ID_ITEM_FIRST)
-                >= (ABILITY_ID_JUMP_FIRST - ABILITY_ID_ITEM_FIRST))) {
+        if (ability_id != ABILITY_ID_THROW_SHURIKEN
+            && (u32)(unit->used_ability_id - ABILITY_ID_ITEM_FIRST) >= ABILITY_ID_JUMP_FIRST - ABILITY_ID_ITEM_FIRST) {
             animation_id = s_weapon_projectile_animations[unit->equipped_weapon_type];
         }
     }
@@ -222,7 +221,7 @@ s32 result_map_unit_prepare_display(s32 map_unit_id) {
  * reaction animation, its post-action display and the evade and weapon-element
  * effect data. Does nothing when either unit is missing. */
 static void start_projectile_hit_response(map_unit_t* attacker, map_unit_t* target) {
-    if ((attacker != 0) && (target != 0)) {
+    if (attacker != 0 && target != 0) {
         action_play_weapon_sfx(attacker, 1);
         action_start_target_response(attacker, target);
         result_map_unit_prepare_display(target->map_unit_id);
@@ -417,6 +416,7 @@ void map_unit_rider_seat(map_unit_t* rider, map_unit_t* mount) {
  * rider. */
 void map_unit_rider_dismount(map_unit_t* unit) {
     map_unit_t* mount;
+
     if (unit->mount_state == UNIT_MOUNT_STATE_RIDER) {
         mount = map_unit_get(unit->mount_partner_map_unit_id);
         unit->standing_on_battle_unit_id_plus_one = 0;

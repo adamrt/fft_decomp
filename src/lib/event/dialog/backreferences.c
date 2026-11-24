@@ -30,11 +30,12 @@ const u8* text_advance_cursor_with_backreferences(text_reader_state_t* state, co
     if (((command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST) && ((command & 0xF) < 4)) {
         state->return_cursor = cursor + 3;
         backref = (const text_backref_t*)cursor;
+        /* Each partial sum goes through the scratch field; combined expressions compile differently. */
         state->scratch = backref->length_high * 8;
         state->remaining_bytes = backref->length_low;
         state->remaining_bytes = state->remaining_bytes + state->scratch + 4;
         state->scratch = backref->offset_high * 0xFE;
-        state->scratch = backref->offset_low + state->scratch;
+        state->scratch += backref->offset_low;
         cursor -= state->scratch;
     }
     return cursor;

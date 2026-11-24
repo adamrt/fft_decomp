@@ -56,13 +56,13 @@ void fade_tint_restore(void) {
 void fade_tint_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration) {
     s16 frames;
 
-    if (duration != 0) {
+    if (duration) {
         frames = duration / g_system_vsync_interval;
         g_fade_tint_target.r = red;
         g_fade_tint_target.g = green;
         g_fade_tint_target.b = blue;
         g_fade_tint_fade_frames = frames;
-        if (frames != 0) {
+        if (frames) {
             g_fade_tint_value.r = s_fade_tint.r << 8;
             g_fade_tint_value.g = s_fade_tint.g << 8;
             g_fade_tint_value.b = s_fade_tint.b << 8;
@@ -81,9 +81,8 @@ void fade_tint_start(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration)
  *
  * The fade state (0x800961c4..0x800961e1) holds the target color, the color in
  * effect, the Q8 accumulator and per-frame Q8 step per channel, and the frames
- * left. The three-element array shape is what makes GCC hold the base
- * addresses of the current-color and accumulator arrays in registers for
- * element 0. */
+ * left. The bytes require the frame count and each channel's sum staged in
+ * locals. */
 void fade_tint_update(void) {
     u16 count = g_fade_tint_fade_frames;
     u16 remaining;
@@ -91,7 +90,7 @@ void fade_tint_update(void) {
     u16 green;
     u16 blue;
 
-    if (count != 0) {
+    if (count) {
         remaining = count - 1;
         g_fade_tint_fade_frames = remaining;
         red = g_fade_tint_value.r + g_fade_tint_step.r;
@@ -117,7 +116,7 @@ void fade_tint_update(void) {
 void fade_tint_draw(void) {
     char unused[24];
 
-    if ((s_fade_tint.r | s_fade_tint.g | s_fade_tint.b) != 0) {
+    if (s_fade_tint.r | s_fade_tint.g | s_fade_tint.b) {
         g_fade_tint_polygons[g_gfx_screen_polarity].r0 = s_fade_tint.r;
         g_fade_tint_polygons[g_gfx_screen_polarity].g0 = s_fade_tint.g;
         g_fade_tint_polygons[g_gfx_screen_polarity].b0 = s_fade_tint.b;

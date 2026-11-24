@@ -46,8 +46,9 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
         battle_unit_id = battle_unit_find_id_by_character_identity(unit_id);
         if (battle_unit_id >= 0) {
             unit = battle_unit_get(battle_unit_id);
-            if (unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END)
+            if (unit->unit_id >= EVENT_UNIT_ID_DEPLOYED_FIRST && unit->unit_id < EVENT_UNIT_ID_DEPLOYED_END) {
                 unit_id = unit->unit_id;
+            }
         }
     }
     original_unit_id = unit_id;
@@ -55,8 +56,9 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
     if (unit_id == EVENT_UNIT_SELECTOR_IMPORTANT_UNIT) {
         for (battle_unit_id = 0; battle_unit_id < ENTD_UNITS_PER_ENCOUNTER; battle_unit_id++) {
             unit = battle_unit_get(battle_unit_id);
-            if (unit->team_flags & UNIT_TEAM_IMPORTANCE_MASK)
+            if (unit->team_flags & UNIT_TEAM_IMPORTANCE_MASK) {
                 break;
+            }
         }
         if (battle_unit_id == ENTD_UNITS_PER_ENCOUNTER) {
             report_missing_unit_stub(original_unit_id);
@@ -71,12 +73,13 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
                 unit_id = active_battle_unit_id;
                 if (active_battle_unit_id != -1) {
                     unit = battle_unit_get(active_battle_unit_id);
-                    if (unit->has_turn)
+                    if (unit->has_turn) {
                         break;
+                    }
                 }
             }
         }
-        if (battle_unit_id != UNIT_ID_NONE) {
+        if (battle_unit_id != BATTLE_UNIT_SLOT_COUNT) {
             unit_id = unit->unit_id;
             battle_unit_find_by_unit_id(unit_id, &battle_unit_id);
         } else {
@@ -86,8 +89,9 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
         if (battle_unit_id < 0) {
             for (unit_id = 1; unit_id < 3; unit_id++) {
                 unit = battle_unit_find_by_unit_id(unit_id, &battle_unit_id);
-                if (battle_unit_id >= 0)
+                if (battle_unit_id >= 0) {
                     break;
+                }
             }
             /* Retail compares the lookup result rather than the loop counter with 3, so
              * finding neither unit is not caught here. */
@@ -103,11 +107,13 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
         for (battle_unit_id = 0; battle_unit_id < BATTLE_UNIT_SLOT_COUNT; battle_unit_id++) {
             unit = battle_unit_get(battle_unit_id);
             if (unit->character_identity != CHARACTER_IDENTITY_ENTD_NONE
-                && unit->character_identity < CHARACTER_IDENTITY_RAMZA_END)
+                && unit->character_identity < CHARACTER_IDENTITY_RAMZA_END) {
                 break;
+            }
         }
-        if (battle_unit_id == UNIT_ID_NONE)
+        if (battle_unit_id == BATTLE_UNIT_SLOT_COUNT) {
             return -1;
+        }
         unit_id = unit->unit_id;
     }
 
@@ -128,8 +134,9 @@ s32 script_resolve_map_unit_id(s32 unit_id) {
         return EVENT_MAP_UNIT_ID_NONE;
     }
     for (battle_unit_id = 0; battle_unit_id < BATTLE_UNIT_SLOT_COUNT; battle_unit_id++) {
-        if (battle_unit_get(battle_unit_id) == unit)
+        if (battle_unit_get(battle_unit_id) == unit) {
             break;
+        }
     }
     unit_id = map_unit_get_id_by_battle_unit_id(battle_unit_id);
     if (unit_id == -1
